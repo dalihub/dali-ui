@@ -211,6 +211,8 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
 {
   EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
 
+  mImpl->mFittingModeRequired = true;
+
   if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;

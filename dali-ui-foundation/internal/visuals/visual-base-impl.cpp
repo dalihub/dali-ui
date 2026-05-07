@@ -998,9 +998,9 @@ Ui::Visual::ResourceStatus Visual::Base::GetResourceStatus() const
   return mImpl->mResourceStatus;
 }
 
-bool Visual::Base::IsIgnoreFittingMode() const
+bool Visual::Base::IsFittingModeRequired() const
 {
-  return mImpl->mIgnoreFittingMode;
+  return mImpl->mFittingModeRequired;
 }
 
 bool Visual::Base::IsPixelAreaSetForFittingMode() const

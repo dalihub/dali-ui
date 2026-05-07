@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visuals-container.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visuals-container-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
@@ -254,7 +255,7 @@ void VisualBaseImpl::SetProperty(Dali::Property::Index index, Dali::Property::Va
     }
   }
 
-  RegisterProcessorOnce();
+  RegisterUpdateProperty();
 }
 
 Dali::Property::Value VisualBaseImpl::GetProperty(Dali::Property::Index index) const
@@ -357,7 +358,7 @@ void VisualBaseImpl::SetOffsetX(float x)
       GetOrCreateTransform().mOffset.x = x;
       mTransformChanged                = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -376,7 +377,7 @@ void VisualBaseImpl::SetOffsetY(float y)
       GetOrCreateTransform().mOffset.y = y;
       mTransformChanged                = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -395,7 +396,7 @@ void VisualBaseImpl::SetWidth(float width)
       GetOrCreateTransform().mSize.width = width;
       mTransformChanged                  = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -414,7 +415,7 @@ void VisualBaseImpl::SetHeight(float height)
       GetOrCreateTransform().mSize.height = height;
       mTransformChanged                   = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -434,7 +435,7 @@ void VisualBaseImpl::SetProportionFlags(Dali::Ui::Visual::Transform::ProportionF
       GetOrCreateTransform().mOffsetSizeMode = offsetSizeMode;
       mTransformChanged                      = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -453,7 +454,7 @@ void VisualBaseImpl::SetExtraWidth(float extraWidth)
       GetOrCreateTransform().mExtraSize.width = extraWidth;
       mTransformChanged                       = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -472,7 +473,7 @@ void VisualBaseImpl::SetExtraHeight(float extraHeight)
       GetOrCreateTransform().mExtraSize.height = extraHeight;
       mTransformChanged                        = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -491,7 +492,7 @@ void VisualBaseImpl::SetOrigin(Align::Type origin)
       GetOrCreateTransform().mOrigin = origin;
       mTransformChanged              = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -510,7 +511,7 @@ void VisualBaseImpl::SetPivot(Align::Type pivot)
       GetOrCreateTransform().mPivot = pivot;
       mTransformChanged             = true;
 
-      RegisterProcessorOnce();
+      RegisterUpdateProperty();
     }
   }
 }
@@ -677,7 +678,11 @@ void VisualBaseImpl::AttachToContainerInternal(Dali::Ui::VisualsContainer contai
   // Request to create visuals if we never create visuals before.
   if(DALI_UNLIKELY(!mVisual))
   {
-    RegisterProcessorOnce();
+    RegisterUpdateProperty();
+  }
+  else
+  {
+    RegisterApplyFittingMode();
   }
 }
 
@@ -791,17 +796,46 @@ void VisualBaseImpl::ApplyTransfromToPropertyMap()
 
 void VisualBaseImpl::Process(bool postProcessor)
 {
-  mProcessorRegistered = false;
-  UpdatePropertyInternal();
+  if(!postProcessor)
+  {
+    // Processor for UpdateProperty
+    mUpdatePropertyRegistered = false;
+    UpdatePropertyInternal();
+  }
+  else
+  {
+    // Processor for ApplyFittingMode
+    mApplyFittingModeRegistered = false;
+
+    Dali::Ui::View owner = GetOwner();
+    if(owner)
+    {
+      // TODO : Can we believe this values?
+      // TODO : Need to consider RTL case.
+      ApplyFittingModeInternal(owner.GetProperty<Dali::Vector2>(Actor::Property::SIZE), owner.GetPadding());
+    }
+  }
 }
 
-void VisualBaseImpl::RegisterProcessorOnce()
+void VisualBaseImpl::RegisterUpdateProperty()
 {
-  if(!mProcessorRegistered)
+  if(!mApplyFittingModeRegistered)
   {
-    DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RegisterProcessorOnce. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
+    DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RegisterUpdateProperty. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
     Adaptor::Get().RegisterProcessorOnce(*this, false);
-    mProcessorRegistered = true;
+    mApplyFittingModeRegistered = true;
+  }
+}
+void VisualBaseImpl::RegisterApplyFittingMode()
+{
+  if(mVisual && GetImplementation(mVisual).IsFittingModeRequired())
+  {
+    if(!mApplyFittingModeRegistered)
+    {
+      DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RegisterApplyFittingMode. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
+      Adaptor::Get().RegisterProcessorOnce(*this, true);
+      mApplyFittingModeRegistered = true;
+    }
   }
 }
 
@@ -846,10 +880,37 @@ void VisualBaseImpl::UpdatePropertyInternal()
       CreateVisual(mCachedVisualPropertyMap);
 
       RetrieveVisualPropertyMap(mCachedVisualPropertyMap);
+
+      RegisterApplyFittingMode();
       break;
     }
   }
   DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) UpdatePropertyInternal() Status(%d) done (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(previousUpdatedStatus), mVisual.GetObjectPtr());
+}
+
+void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const Extents& viewPadding)
+{
+#if defined(DEBUG_ENABLED)
+  {
+    std::ostringstream oss;
+    oss << controlSize << ", " << viewPadding;
+    DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) ApplyFittingModeInternal(%s) Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), oss.str().c_str(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
+  }
+#endif
+
+  if(mVisual)
+  {
+    auto& visualImpl = GetImplementation(mVisual);
+    if(visualImpl.IsFittingModeRequired())
+    {
+      // Make to use mTransform->GetVisualSize(controlSize) instead in future.
+      // For now, mTransform is same with visual's transform. So we cannot use it.
+      // We need to seperate this variables.
+      visualImpl.ApplyFittingMode(controlSize, viewPadding);
+    }
+  }
+
+  DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) ApplyFittingModeInternal() Status(%d) done (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
 }
 
 VisualBaseImpl::VisualBaseImpl(Dali::Ui::Visual::Type type)
@@ -864,7 +925,8 @@ VisualBaseImpl::VisualBaseImpl(Dali::Ui::Visual::Type type)
   mVisualPropertyId(VisualBaseImpl::INVALID_VISUAL_PROPERTY_ID),
   mPropertyUpdatedStatus(PropertyUpdatedStatus::IMMUTABLE_PROPERTY_CHANGED), ///< To make ensure to create visual at least once.
   mTransformChanged(false),
-  mProcessorRegistered(false)
+  mUpdatePropertyRegistered(false),
+  mApplyFittingModeRegistered(false)
 {
 }
 
@@ -873,10 +935,15 @@ VisualBaseImpl::~VisualBaseImpl()
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
   {
     DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
-    if(mProcessorRegistered)
+    if(mUpdatePropertyRegistered)
     {
       // Unregister the processor from the adaptor
       Adaptor::Get().UnregisterProcessorOnce(*this, false);
+    }
+    if(mApplyFittingModeRegistered)
+    {
+      // Unregister the processor from the adaptor
+      Adaptor::Get().UnregisterProcessorOnce(*this, true);
     }
 
     DetachFromContainerInternal();

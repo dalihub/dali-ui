@@ -401,6 +401,8 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   // Default PRE_MULTIPLIED_ALPHA is false.
   EnablePreMultipliedAlpha(false);
 
+  mImpl->mFittingModeRequired = true;
+
   if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;

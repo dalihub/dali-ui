@@ -1467,7 +1467,7 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
 
     Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
 
-    if(visualImpl.IsIgnoreFittingMode())
+    if(!visualImpl.IsFittingModeRequired())
     {
       continue;
     }

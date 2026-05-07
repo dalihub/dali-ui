@@ -268,17 +268,17 @@ public:
    * the fitting algorithm using their stored mFittingMode.
    *
    * @param[in] controlSize The size of the parent control.
-   * @param[in] viewPadding     The padding of the parent control (start, end, top, bottom).
+   * @param[in] viewPadding The padding of the parent control (start, end, top, bottom).
    *                        For RTL layouts, start/end should already be swapped by the caller.
    */
   virtual void ApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding);
 
   /**
-   * @brief Query whether the fittingMode is ignored.
+   * @brief Query whether the fittingMode is required.
    *
-   * @return Returns true if the fittingMode is ignored, false otherwise.
+   * @return Returns true if the fittingMode is required, false otherwise.
    */
-  bool IsIgnoreFittingMode() const;
+  bool IsFittingModeRequired() const;
 
   /**
    * @brief Query whether the pixel area is set by fitting mode.

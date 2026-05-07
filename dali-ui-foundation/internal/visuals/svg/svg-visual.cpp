@@ -129,6 +129,8 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
   // the rasterized image is with pre-multiplied alpha format
   mImpl->mFlags |= Visual::Base::Impl::IS_PRE_MULTIPLIED_ALPHA;
 
+  mImpl->mFittingModeRequired = true;
+
   if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;

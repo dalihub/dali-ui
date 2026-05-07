@@ -514,7 +514,7 @@ public:
   bool mAlwaysUsingBorderline : 1;         ///< Whether we need the borderline in shader always.
   bool mAlwaysUsingCornerRadius : 1;       ///< Whether we need the corner radius in shader always.
   bool mAlwaysUsingCornerSquareness : 1;   ///< Whether we need the corner squareness in shader always.
-  bool mIgnoreFittingMode : 1;             ///< Whether we need to ignore fitting mode.
+  bool mFittingModeRequired : 1;           ///< Whether we need to ignore fitting mode.
   bool mPixelAreaSetByFittingMode : 1;     ///< Whether the pixel area is set for fitting mode.
   bool mTransformMapSetForFittingMode : 1; ///< Whether the transformMap is set for fitting mode.
   bool mTransformMapUsingDefault : 1;      ///< Whether we are using the default transformMap not. We'll be false after

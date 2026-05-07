@@ -461,14 +461,28 @@ private:
   void ApplyTransfromToPropertyMap();
 
   /**
-   * @brief Register processor
+   * @brief Register processor for update property
    */
-  void RegisterProcessorOnce();
+  void RegisterUpdateProperty();
+
+  /**
+   * @brief Register processor for apply fitting mode
+   */
+  void RegisterApplyFittingMode();
 
   /**
    * @brief Update properties for visual
    */
   void UpdatePropertyInternal();
+
+  /**
+   * @brief Apply fitting mode for visual
+   *
+   * @param[in] controlSize The size of the parent control.
+   * @param[in] viewPadding The padding of the parent control (start, end, top, bottom).
+   *                        For RTL layouts, start/end should already be swapped by the caller.
+   */
+  void ApplyFittingModeInternal(const Vector2& controlSize, const Extents& viewPadding);
 
 protected:
   /**
@@ -540,8 +554,9 @@ private:
 
   PropertyUpdatedStatus mPropertyUpdatedStatus : 3;
 
-  bool mTransformChanged : 1;    ///< Whether transform properties changed.
-  bool mProcessorRegistered : 1; ///< Whether the processor is registered.
+  bool mTransformChanged : 1;           ///< Whether transform properties changed.
+  bool mUpdatePropertyRegistered : 1;   ///< Whether the processor for update property is registered.
+  bool mApplyFittingModeRegistered : 1; ///< Whether the processor for apply fitting mode is registered.
 };
 } // namespace Internal
 

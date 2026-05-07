@@ -89,7 +89,7 @@ Internal::Visual::Base::Impl::Impl(Ui::Visual::Type type)
   mAlwaysUsingBorderline(false),
   mAlwaysUsingCornerRadius(false),
   mAlwaysUsingCornerSquareness(false),
-  mIgnoreFittingMode(false),
+  mFittingModeRequired(false),
   mPixelAreaSetByFittingMode(false),
   mTransformMapSetForFittingMode(false),
   mTransformMapUsingDefault(true),

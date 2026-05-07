@@ -147,6 +147,9 @@ int UtcDaliLottieAnimationVisualSetGetProperties01(void)
   visual.SetSynchronousSizing(true);
   DALI_TEST_EQUALS(visual.IsSynchronousSizing(), true, TEST_LOCATION);
 
+  application.SendNotification();
+  application.Render();
+
   END_TEST;
 }
 
