@@ -463,12 +463,12 @@ private:
   /**
    * @brief Register processor for update property
    */
-  void RegisterUpdateProperty();
+  void RequestUpdateProperty();
 
   /**
    * @brief Register processor for apply fitting mode
    */
-  void RegisterApplyFittingMode();
+  void RequestApplyFittingMode();
 
   /**
    * @brief Update properties for visual

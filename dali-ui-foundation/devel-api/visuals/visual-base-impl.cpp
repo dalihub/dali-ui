@@ -255,7 +255,7 @@ void VisualBaseImpl::SetProperty(Dali::Property::Index index, Dali::Property::Va
     }
   }
 
-  RegisterUpdateProperty();
+  RequestUpdateProperty();
 }
 
 Dali::Property::Value VisualBaseImpl::GetProperty(Dali::Property::Index index) const
@@ -358,7 +358,7 @@ void VisualBaseImpl::SetOffsetX(float x)
       GetOrCreateTransform().mOffset.x = x;
       mTransformChanged                = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -377,7 +377,7 @@ void VisualBaseImpl::SetOffsetY(float y)
       GetOrCreateTransform().mOffset.y = y;
       mTransformChanged                = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -396,7 +396,7 @@ void VisualBaseImpl::SetWidth(float width)
       GetOrCreateTransform().mSize.width = width;
       mTransformChanged                  = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -415,7 +415,7 @@ void VisualBaseImpl::SetHeight(float height)
       GetOrCreateTransform().mSize.height = height;
       mTransformChanged                   = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -435,7 +435,7 @@ void VisualBaseImpl::SetProportionFlags(Dali::Ui::Visual::Transform::ProportionF
       GetOrCreateTransform().mOffsetSizeMode = offsetSizeMode;
       mTransformChanged                      = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -454,7 +454,7 @@ void VisualBaseImpl::SetExtraWidth(float extraWidth)
       GetOrCreateTransform().mExtraSize.width = extraWidth;
       mTransformChanged                       = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -473,7 +473,7 @@ void VisualBaseImpl::SetExtraHeight(float extraHeight)
       GetOrCreateTransform().mExtraSize.height = extraHeight;
       mTransformChanged                        = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -492,7 +492,7 @@ void VisualBaseImpl::SetOrigin(Align::Type origin)
       GetOrCreateTransform().mOrigin = origin;
       mTransformChanged              = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -511,7 +511,7 @@ void VisualBaseImpl::SetPivot(Align::Type pivot)
       GetOrCreateTransform().mPivot = pivot;
       mTransformChanged             = true;
 
-      RegisterUpdateProperty();
+      RequestUpdateProperty();
     }
   }
 }
@@ -678,11 +678,11 @@ void VisualBaseImpl::AttachToContainerInternal(Dali::Ui::VisualsContainer contai
   // Request to create visuals if we never create visuals before.
   if(DALI_UNLIKELY(!mVisual))
   {
-    RegisterUpdateProperty();
+    RequestUpdateProperty();
   }
   else
   {
-    RegisterApplyFittingMode();
+    RequestApplyFittingMode();
   }
 }
 
@@ -800,6 +800,7 @@ void VisualBaseImpl::Process(bool postProcessor)
   {
     // Processor for UpdateProperty
     mUpdatePropertyRegistered = false;
+
     UpdatePropertyInternal();
   }
   else
@@ -817,22 +818,22 @@ void VisualBaseImpl::Process(bool postProcessor)
   }
 }
 
-void VisualBaseImpl::RegisterUpdateProperty()
+void VisualBaseImpl::RequestUpdateProperty()
 {
-  if(!mApplyFittingModeRegistered)
+  if(!mUpdatePropertyRegistered)
   {
-    DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RegisterUpdateProperty. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
+    DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RequestUpdateProperty. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
     Adaptor::Get().RegisterProcessorOnce(*this, false);
-    mApplyFittingModeRegistered = true;
+    mUpdatePropertyRegistered = true;
   }
 }
-void VisualBaseImpl::RegisterApplyFittingMode()
+void VisualBaseImpl::RequestApplyFittingMode()
 {
   if(mVisual && GetImplementation(mVisual).IsFittingModeRequired())
   {
     if(!mApplyFittingModeRegistered)
     {
-      DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RegisterApplyFittingMode. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
+      DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) RequestApplyFittingMode. Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
       Adaptor::Get().RegisterProcessorOnce(*this, true);
       mApplyFittingModeRegistered = true;
     }
@@ -881,7 +882,7 @@ void VisualBaseImpl::UpdatePropertyInternal()
 
       RetrieveVisualPropertyMap(mCachedVisualPropertyMap);
 
-      RegisterApplyFittingMode();
+      RequestApplyFittingMode();
       break;
     }
   }
@@ -905,7 +906,7 @@ void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const 
     {
       // Make to use mTransform->GetVisualSize(controlSize) instead in future.
       // For now, mTransform is same with visual's transform. So we cannot use it.
-      // We need to seperate this variables.
+      // We need to separate this variables.
       visualImpl.ApplyFittingMode(controlSize, viewPadding);
     }
   }
