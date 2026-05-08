@@ -1096,6 +1096,21 @@ void InputFieldImpl::ApplyInitialConfig()
   SetTextColor(config.GetDefaultTextColor());
   SetPlaceholderColor(config.GetDefaultPlaceholderTextColor());
   SetShowPlaceholderOnFocus(config.IsPlaceholderTextShownOnFocus());
+  // TODO: Set the initial text UI scale when the UI scale feature is applied.
+}
+
+// =============================================================================
+// UiScale
+// =============================================================================
+bool InputFieldImpl::SetTextUiScale(float scale)
+{
+  mDecorator->SetUiScale(scale);
+  return mController->SetUiScale(scale);
+}
+
+float InputFieldImpl::GetTextUiScale() const
+{
+  return mController->GetUiScale();
 }
 
 // =============================================================================
@@ -1458,6 +1473,11 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint, heightConstraint);
 
   mMeasureInvalidated = false;
+  // TODO: Enable this when the UI scale feature is applied.
+  // if(SetTextUiScale(GetEffectiveScale()))
+  // {
+  //   mController->InvalidateFontData();
+  // }
 
   const float requestedWidth  = GetRequestedWidth();
   const float requestedHeight = GetRequestedHeight();

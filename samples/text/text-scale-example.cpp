@@ -307,7 +307,7 @@ private:
     return true;
   }
 
-  void OnKeyEvent(const KeyEvent& event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {

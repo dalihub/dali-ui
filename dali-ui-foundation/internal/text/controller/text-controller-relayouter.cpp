@@ -300,8 +300,9 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
     // Decide whether to use binary search.
     // If lineHeight is not sorted in ascending order,
     // binary search cannot guarantee that it will always find the best value.
-    bool  binarySearch   = true;
-    float prevLineHeight = 0.0f;
+    bool  binarySearch       = true;
+    float prevLineHeight     = 0.0f;
+    float effectiveTextScale = impl.GetEffectiveTextScale();
 
     for(auto it = fitCandidates.Begin(); it != fitCandidates.End(); ++it)
     {
@@ -318,7 +319,7 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
     // If the search does not find an optimal value, the minimum point size will be used.
     const Ui::Text::FitCandidate& firstCandidate        = fitCandidates[0];
     bool                          bestSizeUpdatedLatest = false;
-    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize()) * impl.GetAdjustedFontSizeScale();
+    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize()) * effectiveTextScale;
     float                         bestLineHeight        = firstCandidate.GetLineHeight();
 
     if(binarySearch)
@@ -330,7 +331,7 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
       {
         const int                     mid            = left + (right - left) / 2;
         const Ui::Text::FitCandidate& candidate      = fitCandidates[mid];
-        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize()) * impl.GetAdjustedFontSizeScale();
+        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize()) * effectiveTextScale;
         const float                   testLineHeight = candidate.GetLineHeight();
         impl.SetDefaultLineSize(testLineHeight);
 
@@ -355,7 +356,7 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
       {
         --it;
 
-        const float testPointSize  = ConvertPixelToPoint(it->GetFontSize()) * impl.GetAdjustedFontSizeScale();
+        const float testPointSize  = ConvertPixelToPoint(it->GetFontSize()) * effectiveTextScale;
         const float testLineHeight = it->GetLineHeight();
         impl.SetDefaultLineSize(testLineHeight);
 
@@ -398,9 +399,10 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
     ModelPtr& model = impl.mModel;
 
     bool  actualellipsis      = model->mElideEnabled;
-    float minPointSize        = impl.mTextFitMinSize * impl.GetAdjustedFontSizeScale();
-    float maxPointSize        = impl.mTextFitMaxSize * impl.GetAdjustedFontSizeScale();
-    float pointInterval       = impl.mTextFitStepSize * impl.GetAdjustedFontSizeScale();
+    float effectiveTextScale  = impl.GetEffectiveTextScale();
+    float minPointSize        = impl.mTextFitMinSize * effectiveTextScale;
+    float maxPointSize        = impl.mTextFitMaxSize * effectiveTextScale;
+    float pointInterval       = impl.mTextFitStepSize * effectiveTextScale;
     float currentFitPointSize = impl.mFontDefaults->mFitPointSize;
     bool  isMultiLine         = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
 
@@ -908,7 +910,7 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
     float fontPointSize =
       (impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
         ? (impl.mFontDefaults ? impl.mFontDefaults->mFitPointSize : 0.f)
-        : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetAdjustedFontSizeScale();
+        : (impl.mFontDefaults ? impl.mFontDefaults->mDefaultPointSize : 0.f) * impl.GetEffectiveTextScale();
     impl.mLayoutEngine.SetFontPixelSize(ConvertPointToPixel(fontPointSize));
 
     // Update the ellipsis

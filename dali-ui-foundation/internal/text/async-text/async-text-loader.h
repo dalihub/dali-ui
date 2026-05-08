@@ -81,7 +81,7 @@ struct AsyncTextParameters
     minLineSize{0.f},
     relativeLineSize{1.f},
     characterSpacing{0.f},
-    fontSizeScale{1.f},
+    effectiveTextScale{1.f},
     textWidth{0.f},
     textHeight{0.f},
     originWidth{0.f},
@@ -161,13 +161,13 @@ struct AsyncTextParameters
   Property::Map                    variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
   Dali::Vector<Text::FitCandidate> textFitCandidates;
 
-  float fontSize;         ///< The font's size (in pixels).
-  float minLineSize;      ///< The line's minimum size (in pixels).
-  float relativeLineSize; ///< The relative height of the line (a factor that will be multiplied by text height).
-  float characterSpacing; ///< The space between characters.
-  float fontSizeScale;    ///< The font's size scale.
-  float textWidth;        ///< The width in pixels of the boundaries where the text is going to be laid-out.
-  float textHeight;       ///< The height in pixels of the boundaries where the text is going to be laid-out.
+  float fontSize;           ///< The font's size (in pixels).
+  float minLineSize;        ///< The line's minimum size (in pixels).
+  float relativeLineSize;   ///< The relative height of the line (a factor that will be multiplied by text height).
+  float characterSpacing;   ///< The space between characters.
+  float effectiveTextScale; ///< The effective text scale including font size scale and UI scale.
+  float textWidth;          ///< The width in pixels of the boundaries where the text is going to be laid-out.
+  float textHeight;         ///< The height in pixels of the boundaries where the text is going to be laid-out.
   float originWidth;
   float originHeight;
   float underlineHeight;

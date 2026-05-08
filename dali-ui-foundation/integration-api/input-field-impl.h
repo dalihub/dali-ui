@@ -691,6 +691,24 @@ public: // Config
    */
   void ApplyInitialConfig();
 
+public: // UiScale
+  /**
+   * @brief Sets the UI scale used for text-specific metrics.
+   *
+   * This scale is used for text-specific size calculation, such as font size.
+   *
+   * @param[in] scale The text UI scale.
+   * @return True if the scale was changed, false otherwise.
+   */
+  bool SetTextUiScale(float scale);
+
+  /**
+   * @brief Gets the UI scale used for text-specific metrics.
+   *
+   * @return The text UI scale.
+   */
+  float GetTextUiScale() const;
+
 public: // From ViewImpl
   /**
    * @copydoc ViewImpl::OnInitialize

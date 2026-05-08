@@ -330,6 +330,25 @@ public:
   int GetCursorWidth() const;
 
   /**
+   * @brief Sets the UI scale used to calculate effective decoration metrics.
+   *
+   * The UI scale is applied to pixel-based decoration values such as cursor
+   * width and handle metrics. Values stored in the decorator remain unscaled,
+   * and the scale is applied only when effective metrics are requested or used
+   * for layout/rendering.
+   *
+   * @param[in] scale The UI scale.
+   */
+  void SetUiScale(float scale);
+
+  /**
+   * @brief Retrieves the UI scale used to calculate effective decoration metrics.
+   *
+   * @return The current UI scale.
+   */
+  float GetUiScale() const;
+
+  /**
    * @brief Sets whether a handle is active.
    *
    * @param[in] handleType One of the handles.

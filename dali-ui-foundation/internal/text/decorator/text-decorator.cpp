@@ -227,6 +227,7 @@ struct Decorator::Impl : public ConnectionTracker
     mActiveCursor(ACTIVE_CURSOR_NONE),
     mCursorBlinkInterval(CURSOR_BLINK_INTERVAL),
     mCursorWidth(CURSOR_WIDTH),
+    mUiScale(1.0f),
     mHandleScrolling(HANDLE_TYPE_COUNT),
     mHandleReleased(HANDLE_TYPE_COUNT),
     mScrollDirection(SCROLL_NONE),
@@ -275,25 +276,26 @@ struct Decorator::Impl : public ConnectionTracker
 
     // Show or hide the cursors
     CreateCursors();
+    const float cursorWidth = GetEffectiveCursorWidth();
 
     if(mPrimaryCursor)
     {
       const CursorImpl& cursor = mCursor[PRIMARY_CURSOR];
       mPrimaryCursorVisible =
         (!mHidePrimaryCursorAndGrabHandle) &&
-        ((mControlSize.width - (cursor.position.x + mCursorWidth) > -Math::MACHINE_EPSILON_1000) &&
+        ((mControlSize.width - (cursor.position.x + cursorWidth) > -Math::MACHINE_EPSILON_1000) &&
          (cursor.position.x > -Math::MACHINE_EPSILON_1000) &&
          (mControlSize.height - cursor.position.y > -Math::MACHINE_EPSILON_1000) &&
          (cursor.position.y + cursor.cursorHeight > -Math::MACHINE_EPSILON_1000));
       if(mPrimaryCursorVisible)
       {
-        mPrimaryCursor.SetRequestedWidth(mCursorWidth);
+        mPrimaryCursor.SetRequestedWidth(cursorWidth);
         mPrimaryCursor.SetRequestedHeight(cursor.cursorHeight);
         mPrimaryCursor.SetRequestedPositionX(cursor.position.x);
         mPrimaryCursor.SetRequestedPositionY(cursor.position.y);
         mPrimaryCursor.SetProperty(Actor::Property::POSITION, Vector2(cursor.position.x, cursor.position.y));
 
-        container.Add(mPrimaryCursor, Size(mCursorWidth, cursor.cursorHeight));
+        container.Add(mPrimaryCursor, Size(cursorWidth, cursor.cursorHeight));
       }
       mPrimaryCursor.SetProperty(Actor::Property::VISIBLE, mPrimaryCursorVisible && mCursorBlinkStatus);
     }
@@ -301,19 +303,19 @@ struct Decorator::Impl : public ConnectionTracker
     {
       const CursorImpl& cursor = mCursor[SECONDARY_CURSOR];
       mSecondaryCursorVisible =
-        ((mControlSize.width - (cursor.position.x + mCursorWidth) > -Math::MACHINE_EPSILON_1000) &&
+        ((mControlSize.width - (cursor.position.x + cursorWidth) > -Math::MACHINE_EPSILON_1000) &&
          (cursor.position.x > -Math::MACHINE_EPSILON_1000) &&
          (mControlSize.height - cursor.position.y > -Math::MACHINE_EPSILON_1000) &&
          (cursor.position.y + cursor.cursorHeight > -Math::MACHINE_EPSILON_1000));
       if(mSecondaryCursorVisible)
       {
-        mSecondaryCursor.SetRequestedWidth(mCursorWidth);
+        mSecondaryCursor.SetRequestedWidth(cursorWidth);
         mSecondaryCursor.SetRequestedHeight(cursor.cursorHeight);
         mSecondaryCursor.SetRequestedPositionX(cursor.position.x);
         mSecondaryCursor.SetRequestedPositionY(cursor.position.y);
         mSecondaryCursor.SetProperty(Actor::Property::POSITION, Vector2(cursor.position.x, cursor.position.y));
 
-        container.Add(mSecondaryCursor, Size(mCursorWidth, cursor.cursorHeight));
+        container.Add(mSecondaryCursor, Size(cursorWidth, cursor.cursorHeight));
       }
       mSecondaryCursor.SetProperty(Actor::Property::VISIBLE, mSecondaryCursorVisible && mCursorBlinkStatus);
     }
@@ -326,7 +328,7 @@ struct Decorator::Impl : public ConnectionTracker
     if(grabHandle.active)
     {
       grabHandle.horizontallyVisible =
-        ((mControlSize.width - (grabHandle.position.x + floor(0.5f * mCursorWidth)) > -Math::MACHINE_EPSILON_1000) &&
+        ((mControlSize.width - (grabHandle.position.x + floor(0.5f * cursorWidth)) > -Math::MACHINE_EPSILON_1000) &&
          (grabHandle.position.x > -Math::MACHINE_EPSILON_1000));
       grabHandle.verticallyVisible =
         ((fabsf(mControlSize.height - grabHandle.lineHeight) - grabHandle.position.y > -Math::MACHINE_EPSILON_1000) &&
@@ -671,6 +673,19 @@ struct Decorator::Impl : public ConnectionTracker
 
     mCopyPastePopup.actor.SetProperty(Actor::Property::POSITION, mCopyPastePopup.position);
     mPopupSetNewPosition = false;
+  }
+
+  /**
+   * @brief Retrieves the effective width of the cursors.
+   *
+   * The effective cursor width is calculated from the cursor width and the
+   * current UI scale. This value is used for cursor layout and rendering.
+   *
+   * @return The effective width of the cursors in pixels.
+   */
+  float GetEffectiveCursorWidth() const
+  {
+    return mCursorWidth * mUiScale;
   }
 
   void CreateCursor(View& cursor, const Vector4& color)
@@ -1056,7 +1071,7 @@ struct Decorator::Impl : public ConnectionTracker
     const float yLocalPosition =
       grabHandle.verticallyFlipped ? grabHandle.position.y : grabHandle.position.y + grabHandle.lineHeight;
 
-    ApplyDisplacement(grabHandle, yLocalPosition);
+    ApplyDisplacement(grabHandle, GRAB_HANDLE, yLocalPosition);
   }
 
   void SetSelectionHandlePosition(HandleType type)
@@ -1149,27 +1164,33 @@ struct Decorator::Impl : public ConnectionTracker
     // The SetHandleImage() method will change the orientation.
     const float yLocalPosition = handle.verticallyFlipped ? handle.position.y : handle.position.y + handle.lineHeight;
 
-    ApplyDisplacement(handle, yLocalPosition);
+    ApplyDisplacement(handle, type, yLocalPosition);
   }
 
-  void ApplyDisplacement(HandleImpl& handle, float yLocalPosition)
+  void ApplyDisplacement(HandleImpl& handle, HandleType type, float yLocalPosition)
   {
     if(handle.actor)
     {
       float adjustedDisplacementX = 0.0f;
       float adjustedDisplacementY = 0.0f;
+
       if(mSmoothHandlePanEnabled)
       {
         adjustedDisplacementX =
           CalculateAdjustedDisplacement(handle.position.x, handle.grabDisplacementX, mControlSize.x);
-        adjustedDisplacementY = CalculateAdjustedDisplacement(handle.position.y, handle.grabDisplacementY,
-                                                              (mControlSize.y - handle.lineHeight));
+        adjustedDisplacementY =
+          CalculateAdjustedDisplacement(handle.position.y, handle.grabDisplacementY, mControlSize.y - handle.lineHeight);
       }
-      handle.actor.SetRequestedPositionX(handle.position.x + floor(0.5f * mCursorWidth) + adjustedDisplacementX);
-      handle.actor.SetRequestedPositionY(yLocalPosition + adjustedDisplacementY);
-      handle.actor.SetProperty(Actor::Property::POSITION,
-                               Vector2(handle.position.x + floor(0.5f * mCursorWidth) + adjustedDisplacementX,
-                                       yLocalPosition + adjustedDisplacementY));
+
+      const float cursorOffset =
+        (type == GRAB_HANDLE) ? floorf(0.5f * GetEffectiveCursorWidth()) : 0.0f;
+
+      const float x = handle.position.x + cursorOffset + adjustedDisplacementX;
+      const float y = yLocalPosition + adjustedDisplacementY;
+
+      handle.actor.SetRequestedPositionX(x);
+      handle.actor.SetRequestedPositionY(y);
+      handle.actor.SetProperty(Actor::Property::POSITION, Vector2(x, y));
     }
   }
 
@@ -2039,6 +2060,7 @@ struct Decorator::Impl : public ConnectionTracker
   unsigned int    mActiveCursor;
   unsigned int    mCursorBlinkInterval;
   float           mCursorWidth;     ///< The width of the cursors in pixels.
+  float           mUiScale;         ///< The UI scale used to calculate effective decoration metrics.
   HandleType      mHandleScrolling; ///< The handle which is scrolling.
   HandleType      mHandleReleased;  ///< The last handle released.
   ScrollDirection mScrollDirection; ///< The direction of the scroll.
@@ -2226,16 +2248,17 @@ float Decorator::GetCursorBlinkInterval() const
 
 void Decorator::SetCursorWidth(int width)
 {
-  mImpl->mCursorWidth = static_cast<float>(width);
+  mImpl->mCursorWidth     = static_cast<float>(width);
+  const float cursorWidth = mImpl->GetEffectiveCursorWidth();
 
   if(mImpl->mPrimaryCursorVisible && mImpl->mPrimaryCursor)
   {
-    mImpl->mPrimaryCursor.SetRequestedWidth(mImpl->mCursorWidth);
+    mImpl->mPrimaryCursor.SetRequestedWidth(cursorWidth);
     mImpl->mPrimaryCursor.SetRequestedHeight(mImpl->mCursor[PRIMARY_CURSOR].cursorHeight);
   }
   if(mImpl->mSecondaryCursorVisible && mImpl->mSecondaryCursor)
   {
-    mImpl->mSecondaryCursor.SetRequestedWidth(mImpl->mCursorWidth);
+    mImpl->mSecondaryCursor.SetRequestedWidth(cursorWidth);
     mImpl->mSecondaryCursor.SetRequestedHeight(mImpl->mCursor[SECONDARY_CURSOR].cursorHeight);
   }
 }
@@ -2243,6 +2266,26 @@ void Decorator::SetCursorWidth(int width)
 int Decorator::GetCursorWidth() const
 {
   return static_cast<int>(mImpl->mCursorWidth);
+}
+
+void Decorator::SetUiScale(float scale)
+{
+  if(scale <= 0.0f)
+  {
+    return;
+  }
+
+  if(Dali::Equals(mImpl->mUiScale, scale, Math::MACHINE_EPSILON_1000))
+  {
+    return;
+  }
+
+  mImpl->mUiScale = scale;
+}
+
+float Decorator::GetUiScale() const
+{
+  return mImpl->mUiScale;
 }
 
 void Decorator::SetEditable(bool editable)

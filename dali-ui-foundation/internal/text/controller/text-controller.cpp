@@ -955,6 +955,21 @@ FontSlantType Controller::GetPlaceholderTextFontSlant() const
   return PlaceholderHandler::GetPlaceholderTextFontSlant(*this);
 }
 
+float Controller::GetEffectiveTextScale() const
+{
+  return mImpl->GetEffectiveTextScale();
+}
+
+bool Controller::SetUiScale(float scale)
+{
+  return mImpl->SetUiScale(scale);
+}
+
+float Controller::GetUiScale() const
+{
+  return mImpl->GetUiScale();
+}
+
 void Controller::SetFontSizeScale(float scale)
 {
   mImpl->SetFontSizeScale(scale);

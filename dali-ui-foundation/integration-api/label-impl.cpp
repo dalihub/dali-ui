@@ -1150,6 +1150,20 @@ void LabelImpl::ApplyInitialConfig()
   SetFontSize(config.GetDefaultFontSize());
   SetTextColor(config.GetDefaultTextColor());
   SetAsyncRendering(config.IsLabelAsyncRendering());
+  // TODO: Set the initial text UI scale when the UI scale feature is applied.
+}
+
+// =============================================================================
+// UiScale
+// =============================================================================
+bool LabelImpl::SetTextUiScale(float scale)
+{
+  return mController->SetUiScale(scale);
+}
+
+float LabelImpl::GetTextUiScale() const
+{
+  return mController->GetUiScale();
 }
 
 // =============================================================================
@@ -1381,6 +1395,11 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
                         heightConstraint);
 
   mMeasureInvalidated = false;
+  // TODO: Enable this when the UI scale feature is applied.
+  // if(SetTextUiScale(GetEffectiveScale()))
+  // {
+  //   mController->InvalidateFontData();
+  // }
 
   const float requestedWidth  = GetRequestedWidth();
   const float requestedHeight = GetRequestedHeight();
@@ -1813,9 +1832,10 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   Size  verifiedSize   = Size::ZERO;
   bool  actualellipsis = mController->IsTextElideEnabled();
 
-  bool       isHorizontal   = GetTextScroller()->GetOrientation() == Text::MarqueeOrientation::HORIZONTAL;
-  const Size controlSize    = isHorizontal ? mController->GetView().GetControlSize() : contentSize;
-  const int  maxTextureSize = Dali::GetMaxTextureSize();
+  bool       isHorizontal     = GetTextScroller()->GetOrientation() == Text::MarqueeOrientation::HORIZONTAL;
+  const Size controlSize      = isHorizontal ? mController->GetView().GetControlSize() : contentSize;
+  const int  maxTextureSize   = Dali::GetMaxTextureSize();
+  const int  scaledMarqueeGap = static_cast<int>(mTextScroller->GetGap() * GetTextUiScale());
 
   if(isHorizontal)
   {
@@ -1824,7 +1844,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
     // Calculate the actual gap before scrolling wraps.
     int textPadding     = std::max(controlSize.x - textNaturalSize.x, 0.0f);
-    wrapGap             = std::max(mTextScroller->GetGap(), textPadding);
+    wrapGap             = std::max(scaledMarqueeGap, textPadding);
     Vector2 textureSize = textNaturalSize + Vector2(wrapGap, 0.0f); // Add the gap as a part of the texture
 
     // Create a texture of the text for scrolling
@@ -1839,7 +1859,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
         mController->SetTextElideEnabled(true);
         mController->SetMarqueeMaxTextureExceeded(true);
       }
-      float gap = static_cast<float>(mTextScroller->GetGap());
+      float gap = static_cast<float>(scaledMarqueeGap);
       mController->CalculateLayoutSize(verifiedSize.width - gap, controlSize.height, true);
       wrapGap = std::max(maxTextureSize - textNaturalSize.width, gap);
     }
@@ -1850,7 +1870,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
     // Calculate the actual gap before scrolling wraps.
     int textPadding = std::max(controlSize.height - textHeight, 0.0f);
-    wrapGap         = std::max(mTextScroller->GetGap(), textPadding);
+    wrapGap         = std::max(scaledMarqueeGap, textPadding);
     Vector2 textureSize(controlSize.width, textHeight + wrapGap); // Add the gap as a part of the texture
 
     // Create a texture of the text for scrolling
@@ -2279,7 +2299,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.minLineSize                = mController->GetDefaultLineSize();
   parameters.relativeLineSize           = mController->GetRelativeLineSize();
   parameters.characterSpacing           = mController->GetCharacterSpacing();
-  parameters.fontSizeScale              = mController->GetAdjustedFontSizeScale();
+  parameters.effectiveTextScale         = mController->GetEffectiveTextScale();
   parameters.horizontalAlignment        = mController->GetHorizontalAlignment();
   parameters.verticalAlignment          = mController->GetVerticalAlignment();
   parameters.verticalLineAlignment      = mController->GetVerticalLineAlignment();
@@ -2319,7 +2339,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
     parameters.marqueeSpeed       = GetTextScroller()->GetSpeed();
     parameters.marqueeLoopCount   = GetTextScroller()->GetLoopCount();
     parameters.marqueeLoopDelay   = GetTextScroller()->GetLoopDelay();
-    parameters.marqueeGap         = GetTextScroller()->GetGap();
+    parameters.marqueeGap         = static_cast<int>(GetTextScroller()->GetGap() * GetTextUiScale());
     parameters.marqueeOrientation = GetTextScroller()->GetOrientation();
   }
   parameters.isCutoutEnabled               = mController->IsTextCutout();

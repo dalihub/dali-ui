@@ -799,11 +799,11 @@ float Controller::Impl::GetDefaultFontLineHeight()
   {
     TextAbstraction::FontDescription fontDescription;
     defaultFontId = GetFontClient().GetFontId(fontDescription,
-                                              TextAbstraction::FontClient::DEFAULT_POINT_SIZE * GetAdjustedFontSizeScale());
+                                              TextAbstraction::FontClient::DEFAULT_POINT_SIZE * GetEffectiveTextScale());
   }
   else
   {
-    defaultFontId = mFontDefaults->GetFontId(GetFontClient(), mFontDefaults->mDefaultPointSize * GetAdjustedFontSizeScale());
+    defaultFontId = mFontDefaults->GetFontId(GetFontClient(), mFontDefaults->mDefaultPointSize * GetEffectiveTextScale());
   }
 
   Text::FontMetrics fontMetrics;
@@ -2067,6 +2067,33 @@ void Controller::Impl::SetUserInteractionEnabled(bool enabled)
   }
 }
 
+float Controller::Impl::GetEffectiveTextScale() const
+{
+  return mAdjustedFontSizeScale * mUiScale;
+}
+
+bool Controller::Impl::SetUiScale(float scale)
+{
+  if(scale <= 0.0f)
+  {
+    return false;
+  }
+
+  if(Dali::Equals(mUiScale, scale, Math::MACHINE_EPSILON_1000))
+  {
+    return false;
+  }
+
+  mUiScale = scale;
+  mLayoutEngine.SetFontSizeScale(GetEffectiveTextScale());
+  return true;
+}
+
+float Controller::Impl::GetUiScale() const
+{
+  return mUiScale;
+}
+
 void Controller::Impl::SetFontSizeScale(float scale)
 {
   if(Dali::Equals(mFontSizeScale, scale) && !mSystemFontSizeScaleEnabled)
@@ -2187,7 +2214,7 @@ bool Controller::Impl::ApplyAdjustedFontSizeScale()
   }
 
   mAdjustedFontSizeScale = adjustedScale;
-  mLayoutEngine.SetFontSizeScale(mAdjustedFontSizeScale);
+  mLayoutEngine.SetFontSizeScale(GetEffectiveTextScale());
 
   if(mEventData && EventData::IsEditingState(mEventData->mState))
   {

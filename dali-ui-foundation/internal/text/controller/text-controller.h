@@ -1070,6 +1070,32 @@ public: // Default style & Input style
   float GetDefaultFontSize(FontSizeType type) const;
 
   /**
+   * @brief Gets the effective scale used for text-specific metrics.
+   *
+   * The effective text scale combines the adjusted font size scale and UI scale.
+   *
+   * @return The effective text scale.
+   */
+  float GetEffectiveTextScale() const;
+
+  /**
+   * @brief Sets the UI scale used for text-specific metrics.
+   *
+   * This scale is used for text-specific size calculation, such as font size.
+   *
+   * @param[in] scale The UI scale.
+   * @return True if the scale was changed, false otherwise.
+   */
+  bool SetUiScale(float scale);
+
+  /**
+   * @brief Gets the UI scale used for text-specific metrics.
+   *
+   * @return The UI scale.
+   */
+  float GetUiScale() const;
+
+  /**
    * @brief Set the font size scale.
    *
    * @param[in] scale The font size scale

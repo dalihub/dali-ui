@@ -40,6 +40,7 @@ namespace Text
 const float DEFAULT_TEXTFIT_MIN            = 10.f;
 const float DEFAULT_TEXTFIT_MAX            = 100.f;
 const float DEFAULT_TEXTFIT_STEP           = 1.f;
+const float DEFAULT_UI_SCALE               = 1.f;
 const float DEFAULT_FONT_SIZE_SCALE        = 1.f;
 const float DEFAULT_MIN_FONT_SIZE_SCALE    = 0.01f;
 const float DEFAULT_MAX_FONT_SIZE_SCALE    = 10.f;
@@ -401,6 +402,7 @@ public:
     mTextFitMinSize(DEFAULT_TEXTFIT_MIN),
     mTextFitMaxSize(DEFAULT_TEXTFIT_MAX),
     mTextFitStepSize(DEFAULT_TEXTFIT_STEP),
+    mUiScale(DEFAULT_UI_SCALE),
     mFontSizeScale(DEFAULT_FONT_SIZE_SCALE),
     mMinFontSizeScale(DEFAULT_MIN_FONT_SIZE_SCALE),
     mMaxFontSizeScale(DEFAULT_MAX_FONT_SIZE_SCALE),
@@ -1019,6 +1021,21 @@ public:
   void ClearFontData();
 
   /**
+   * @copydoc Controller::GetEffectiveTextScale()
+   */
+  float GetEffectiveTextScale() const;
+
+  /**
+   * @copydoc Controller::SetUiScale()
+   */
+  bool SetUiScale(float scale);
+
+  /**
+   * @copydoc Controller::GetUiScale()
+   */
+  float GetUiScale() const;
+
+  /**
    * @copydoc Controller::SetFontSizeScale()
    */
   void SetFontSizeScale(float scale);
@@ -1226,6 +1243,7 @@ public:
   float mTextFitMinSize;        ///< Minimum Font Size for text fit. Default 10
   float mTextFitMaxSize;        ///< Maximum Font Size for text fit. Default 100
   float mTextFitStepSize;       ///< Step Size for font intervalse. Default 1
+  float mUiScale;               ///< Scale value for text-specific UI metrics. Default 1.0
   float mFontSizeScale;         ///< Scale value for Font Size. Default 1.0
   float mMinFontSizeScale;      ///< Minimum scale value for Font Size. Default 0.01
   float mMaxFontSizeScale;      ///< Maximum scale value for Font Size. Default 10.0
