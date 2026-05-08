@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
@@ -77,6 +78,9 @@ LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingUp",       BOOLEAN, 
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("enableFrameCache",        BOOLEAN, ENABLE_FRAME_CACHE)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("notifyAfterRasterization",BOOLEAN, NOTIFY_AFTER_RASTERIZATION)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("renderScale",              FLOAT,   RENDER_SCALE)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("placeholderImage",         STRING,  PLACEHOLDER_IMAGE)
+
+DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui::Integration, LottieAnimationViewImpl, "pixelArea", VECTOR4, PIXEL_AREA)
 
 DALI_TYPE_REGISTRATION_END()
 #undef LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION
@@ -90,6 +94,7 @@ LottieAnimationViewImpl::LottieAnimationViewImpl()
   mMinFrameMarker(),
   mMaxFrameMarker(),
   mPlaceholderUrl(),
+  mPixelArea(0.0f, 0.0f, 1.0f, 1.0f),
   mImageColor(Color::WHITE),
   mStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME),
   mLoopingMode(Ui::LottieAnimation::LoopingMode::RESTART),
@@ -282,6 +287,15 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         }
         break;
       }
+      case LottieAnimationViewImpl::Property::PIXEL_AREA:
+      {
+        Dali::Vector4 pixelArea;
+        if(value.Get(pixelArea))
+        {
+          impl.SetPixelArea(pixelArea);
+        }
+        break;
+      }
     }
   }
 }
@@ -345,6 +359,9 @@ Dali::Property::Value LottieAnimationViewImpl::GetProperty(Dali::BaseObject* obj
         break;
       case LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE:
         value = impl.GetPlaceholderUrl();
+        break;
+      case LottieAnimationViewImpl::Property::PIXEL_AREA:
+        value = impl.GetPixelArea();
         break;
     }
   }
@@ -431,31 +448,7 @@ void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
     return;
   }
 
-  Extents padding = GetPadding();
-
-  // Only apply a transform when there is actual padding; otherwise the visual
-  // already fills the full actor area by default (equivalent to FILL mode).
-  if(padding == Extents())
-  {
-    mVisual.SetTransformAndSize(Dali::Property::Map(), size);
-    return;
-  }
-
-  const Vector2 finalSize(size.width - (padding.start + padding.end),
-                          size.height - (padding.top + padding.bottom));
-  const Vector2 finalOffset(padding.start, padding.top);
-
-  Dali::Property::Map transformMap;
-  transformMap.Add(Visual::Transform::Property::OFFSET, finalOffset)
-    .Add(Visual::Transform::Property::SIZE, finalSize)
-    .Add(Visual::Transform::Property::OFFSET_POLICY,
-         Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE))
-    .Add(Visual::Transform::Property::SIZE_POLICY,
-         Vector2(Visual::Transform::Policy::ABSOLUTE, Visual::Transform::Policy::ABSOLUTE))
-    .Add(Visual::Transform::Property::ORIGIN, Align::TOP_BEGIN)
-    .Add(Visual::Transform::Property::PIVOT, Align::TOP_BEGIN);
-
-  mVisual.SetTransformAndSize(transformMap, size);
+  Ui::GetImplementation(mVisual).ApplyFittingMode(size, GetPadding());
 }
 
 void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)
@@ -787,6 +780,10 @@ void LottieAnimationViewImpl::SetDynamicProperty(const Ui::LottieAnimation::Dyna
                                Ui::DevelAnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY,
                                Dali::Any(dynamicInfo));
   }
+  else
+  {
+    DALI_LOG_WARNING("LottieAnimationView: SetDynamicProperty ignored — no visual (set ResourceUrl first)\n");
+  }
 }
 
 Dali::Signal<void(Dali::Ui::View)>& LottieAnimationViewImpl::AnimationFinishedSignal()
@@ -857,8 +854,6 @@ void LottieAnimationViewImpl::UpdateVisual()
   map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
   map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
   map.Insert(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
-  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, static_cast<int>(Ui::Image::FittingMode::FILL)); ///< TODO : Support it if possible.
-
   if(mDesiredWidth > 0)
   {
     map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredWidth);
@@ -871,6 +866,7 @@ void LottieAnimationViewImpl::UpdateVisual()
 
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, mSynchronousLoading);
+  map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, mPixelArea);
   map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
 
   auto visualFactory = Ui::VisualFactory::Get();
@@ -1011,6 +1007,22 @@ void LottieAnimationViewImpl::SetPlaceholderUrl(const Dali::String& url)
 Dali::String LottieAnimationViewImpl::GetPlaceholderUrl() const
 {
   return mPlaceholderUrl;
+}
+
+void LottieAnimationViewImpl::SetPixelArea(const Dali::Vector4& pixelArea)
+{
+  mPixelArea = pixelArea;
+  if(mVisual)
+  {
+    Dali::Property::Map map;
+    map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, pixelArea);
+    mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
+  }
+}
+
+Dali::Vector4 LottieAnimationViewImpl::GetPixelArea() const
+{
+  return mPixelArea;
 }
 
 void LottieAnimationViewImpl::UpdatePlaceholderVisual()

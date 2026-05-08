@@ -78,14 +78,6 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(RELEASE_POLICY)
   DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::ReleasePolicy, NEVER)
 DALI_ENUM_TO_STRING_TABLE_END(RELEASE_POLICY)
 
-// fitting mode
-DALI_ENUM_TO_STRING_TABLE_BEGIN(FITTING_MODE)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FIT_KEEP_ASPECT_RATIO)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, FILL)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, OVER_FIT_KEEP_ASPECT_RATIO)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Dali::Ui::Image::FittingMode, CENTER)
-DALI_ENUM_TO_STRING_TABLE_END(FITTING_MODE)
-
 constexpr float MINIMUM_FRAME_SPEED_FACTOR(0.01f);
 constexpr float MAXIMUM_FRAME_SPEED_FACTOR(100.0f);
 
@@ -166,11 +158,12 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&        
   mDesiredSize(size),
   mPlacementActor(),
   mEventCallback(nullptr),
+  mPixelArea(0.f, 0.f, 1.f, 1.f),
+  mPixelAreaIndex(Property::INVALID_INDEX),
   mFrameSpeedFactor(1.0f),
   mRenderScale(1.0f),
   mPlayState(Ui::AnimatedImage::PlayState::STOPPED),
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
-  mFittingMode(Ui::Image::FittingMode::FILL),
   mLastSentPlayStateId(0u),
   mRasterizeCompleted(false),
   mLoadFailed(false),
@@ -224,10 +217,6 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
     naturalSize.x = mDesiredSize.GetWidth();
     naturalSize.y = mDesiredSize.GetHeight();
   }
-  else if(mVisualSize != Vector2::ZERO)
-  {
-    naturalSize = mVisualSize;
-  }
   else
   {
     if(mLoadFailed && mImpl->mRenderer)
@@ -249,8 +238,16 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
     {
       uint32_t width, height;
       mVectorAnimationTask->GetDefaultSize(width, height);
-      naturalSize.x = width;
-      naturalSize.y = height;
+      if(width > 0u && height > 0u)
+      {
+        naturalSize.x = width;
+        naturalSize.y = height;
+      }
+      else if(mVisualSize != Vector2::ZERO)
+      {
+        // Animation not yet loaded: fall back to last rendered size
+        naturalSize = mVisualSize;
+      }
     }
   }
 
@@ -300,7 +297,6 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredSize.GetWidth());
   map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredSize.GetHeight());
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
-  map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
 
   map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
   map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
@@ -459,16 +455,6 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       break;
     }
 
-    case Ui::ImageVisualPropertyIndex::FITTING_MODE:
-    {
-      int32_t fittingMode = static_cast<int32_t>(mFittingMode);
-      if(DALI_LIKELY(Scripting::GetEnumerationProperty(value, FITTING_MODE_TABLE, FITTING_MODE_TABLE_COUNT, fittingMode)))
-      {
-        mFittingMode = static_cast<Ui::Image::FittingMode>(fittingMode);
-      }
-      break;
-    }
-
     case Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE:
     {
       bool enableFrameCache = false;
@@ -528,7 +514,44 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       }
       break;
     }
+    case Ui::ImageVisualPropertyIndex::PIXEL_AREA:
+    {
+      value.Get(mPixelArea);
+      if(mImpl->mRenderer)
+      {
+        if(mPixelAreaIndex != Property::INVALID_INDEX)
+        {
+          mImpl->mRenderer.SetProperty(mPixelAreaIndex, mPixelArea);
+        }
+        else
+        {
+          mPixelAreaIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::ImageVisualPropertyIndex::PIXEL_AREA,
+                                                                    PIXEL_AREA_UNIFORM_NAME, mPixelArea);
+        }
+      }
+      break;
+    }
   }
+}
+
+Dali::Property AnimatedVectorImageVisual::OnGetPropertyObject(Dali::Property::Key key, bool changeProperties)
+{
+  if((key.type == Property::Key::INDEX && key.indexKey == Ui::ImageVisualPropertyIndex::PIXEL_AREA) ||
+     (key.type == Property::Key::STRING && key.stringKey == PIXEL_AREA_UNIFORM_NAME))
+  {
+    if(DALI_LIKELY(mImpl->mRenderer))
+    {
+      if(mPixelAreaIndex == Property::INVALID_INDEX)
+      {
+        mPixelAreaIndex = mImpl->mRenderer.RegisterProperty(Ui::ImageVisualPropertyIndex::PIXEL_AREA,
+                                                            PIXEL_AREA_UNIFORM_NAME, mPixelArea);
+      }
+      return Dali::Property(mImpl->mRenderer, mPixelAreaIndex);
+    }
+  }
+
+  Handle handle;
+  return Dali::Property(handle, Property::INVALID_INDEX);
 }
 
 void AnimatedVectorImageVisual::OnInitialize(void)
@@ -564,6 +587,12 @@ void AnimatedVectorImageVisual::OnInitialize(void)
 
   // Register transform properties
   mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+
+  if(mPixelArea != FULL_TEXTURE_RECT)
+  {
+    mPixelAreaIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::ImageVisualPropertyIndex::PIXEL_AREA,
+                                                              PIXEL_AREA_UNIFORM_NAME, mPixelArea);
+  }
 
   mVectorAnimationTask->SetRenderer(mImpl->mRenderer);
 }
@@ -658,14 +687,9 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
   DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose, "AnimatedVectorImageVisual::DoSetOffScene [%p]\n", this);
 }
 
-void AnimatedVectorImageVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
-{
-  mFittingMode = fittingMode;
-}
-
 void AnimatedVectorImageVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
 {
-  DoApplyFittingMode(controlSize, padding, mFittingMode);
+  DoApplyFittingMode(controlSize, padding, Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 }
 
 void AnimatedVectorImageVisual::OnSetTransform()
@@ -1028,12 +1052,17 @@ void AnimatedVectorImageVisual::OnSizeNotification(PropertyNotification source)
   Actor actor = mPlacementActor.GetHandle();
   if(actor)
   {
-    Vector3 size = actor.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
-
-    if(!Dali::Equals(mVisualSize.width, size.width) || !Dali::Equals(mVisualSize.height, size.height))
+    Vector3 size    = actor.GetCurrentProperty<Vector3>(Actor::Property::SIZE);
+    Vector2 newSize = mImpl->GetTransformVisualSize(Vector2(size));
+    if(Dali::EqualsZero(newSize.width) || Dali::EqualsZero(newSize.height))
     {
-      mVisualSize.width  = size.width;
-      mVisualSize.height = size.height;
+      newSize = Vector2(size);
+    }
+
+    if(!Dali::Equals(mVisualSize.width, newSize.width) || !Dali::Equals(mVisualSize.height, newSize.height))
+    {
+      mVisualSize.width  = newSize.width;
+      mVisualSize.height = newSize.height;
 
       DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
                     "AnimatedVectorImageVisual::OnSizeNotification: size = %f, %f [%p]\n", mVisualSize.width,

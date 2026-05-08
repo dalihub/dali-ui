@@ -16,6 +16,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/animated-image-view.h>
+#include <dali-ui-foundation/public-api/lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
@@ -39,12 +40,19 @@ const char* const GIF_IMAGES[] = {
   RESOURCES_DIR "animatedLoading.gif",
 };
 constexpr int GIF_IMAGE_COUNT = 2;
+
+const char* const LOTTIE_IMAGES[] = {
+  RESOURCES_DIR "jolly_walker.json",
+  RESOURCES_DIR "insta_camera.json",
+  RESOURCES_DIR "confetti.json",
+};
+constexpr int LOTTIE_IMAGE_COUNT = 3;
 } // namespace
 
 /**
  * ImageView FittingMode sample:
  * - Shows images with the current FittingMode applied
- * - Tests: ImageView (JPG), ImageView (GIF), AnimatedImageView (GIF)
+ * - Tests: ImageView (JPG), ImageView (GIF), AnimatedImageView (GIF), LottieAnimationView (JSON)
  * - 4 buttons at the bottom to select a FittingMode
  * - 1 button to cycle through images
  * - Active fitting mode button is highlighted
@@ -72,7 +80,8 @@ public:
   : mApplication(application),
     mActiveIndex(0),
     mImageIndex(0),
-    mGifIndex(0)
+    mGifIndex(0),
+    mLottieIndex(0)
   {
     mApplication.InitSignal().Connect(this, &ImageFittingModeController::OnInit);
   }
@@ -117,6 +126,16 @@ private:
 
     mAnimatedImageView.Play();
 
+    // LottieAnimationView (JSON)
+    LottieAnimationView::New(LOTTIE_IMAGES[mLottieIndex])
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetLoopCount(-1)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .As(mLottieView);
+
+    mLottieView.Play();
+
     return StackLayout::New(StackOrientation::VERTICAL)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(MATCH_PARENT)
@@ -131,12 +150,12 @@ private:
     return StackLayout::New(StackOrientation::HORIZONTAL)
       .SetSpacing(4.0f)
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+      .SetRequestedHeight(300.0f)
       .Children({
         CreateImageContainer("ImageView\n(JPG)", mImageView),
         CreateImageContainer("ImageView\n(GIF)", mGifImageView),
         CreateImageContainer("AnimatedImageView\n(GIF)", mAnimatedImageView),
+        CreateImageContainer("LottieAnimationView\n(always AspectRatio)", mLottieView),
       });
   }
 
@@ -245,14 +264,17 @@ private:
 
   void OnSwapButtonClicked(View /*clickedView*/, InputEvent /*event*/)
   {
-    mImageIndex = (mImageIndex + 1) % IMAGE_COUNT;
-    mGifIndex = (mGifIndex + 1) % GIF_IMAGE_COUNT;
+    mImageIndex  = (mImageIndex + 1) % IMAGE_COUNT;
+    mGifIndex    = (mGifIndex + 1) % GIF_IMAGE_COUNT;
+    mLottieIndex = (mLottieIndex + 1) % LOTTIE_IMAGE_COUNT;
 
     mImageView.SetResourceUrl(IMAGES[mImageIndex]);
     mGifImageView.SetResourceUrl(GIF_IMAGES[mGifIndex]);
     mAnimatedImageView.SetResourceUrl(GIF_IMAGES[mGifIndex]);
+    mLottieView.SetResourceUrl(LOTTIE_IMAGES[mLottieIndex]);
+    mLottieView.Play();
 
-    DALI_LOG_RELEASE_INFO("Images changed to: %s, %s\n", IMAGES[mImageIndex], GIF_IMAGES[mGifIndex]);
+    DALI_LOG_RELEASE_INFO("Images changed to: %s, %s, %s\n", IMAGES[mImageIndex], GIF_IMAGES[mGifIndex], LOTTIE_IMAGES[mLottieIndex]);
   }
 
   void SelectMode(int index)
@@ -281,15 +303,17 @@ private:
   }
 
 private:
-  Application&      mApplication;
-  Ui::ImageView     mImageView;
-  Ui::ImageView     mGifImageView;
-  AnimatedImageView mAnimatedImageView;
-  View              mButtons[MODE_COUNT];
-  View              mSwapButton;
-  int               mActiveIndex;
-  int               mImageIndex;
-  int               mGifIndex;
+  Application&        mApplication;
+  Ui::ImageView       mImageView;
+  Ui::ImageView       mGifImageView;
+  AnimatedImageView   mAnimatedImageView;
+  LottieAnimationView mLottieView;
+  View                mButtons[MODE_COUNT];
+  View                mSwapButton;
+  int                 mActiveIndex;
+  int                 mImageIndex;
+  int                 mGifIndex;
+  int                 mLottieIndex;
 };
 
 constexpr ImageFittingModeController::ModeEntry ImageFittingModeController::MODES[ImageFittingModeController::MODE_COUNT];

@@ -384,7 +384,7 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mFrameSpeedFactor(1.0f),
   mFrameCount(0),
   mImageSize(),
-  mActionStatus(DevelAnimatedImageVisual::Action::PLAY),
+  mActionStatus(DevelAnimatedImageVisual::Action::STOP),
   mWrapModeU(WrapMode::DEFAULT),
   mWrapModeV(WrapMode::DEFAULT),
   mStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME),
@@ -1327,7 +1327,10 @@ void AnimatedImageVisual::StartFirstFrame(TextureSet& textureSet, uint32_t first
     {
       mFrameDelayTimer = Timer::New(CalculateInterval(firstInterval, mFrameSpeedFactor));
       mFrameDelayTimer.TickSignal().Connect(this, &AnimatedImageVisual::DisplayNextFrame);
-      mFrameDelayTimer.Start();
+      if(mActionStatus == DevelAnimatedImageVisual::Action::PLAY)
+      {
+        mFrameDelayTimer.Start();
+      }
     }
 
     DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "ResourceReady(ResourceStatus::READY)\n");

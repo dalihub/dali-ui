@@ -91,7 +91,7 @@ private:
   {
     mImageContainer = StackLayout::New(StackOrientation::VERTICAL)
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
       .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 
     mImage = ImageView::New(JPG_URL)

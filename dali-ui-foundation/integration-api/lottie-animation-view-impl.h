@@ -72,6 +72,7 @@ public: // Properties
       NOTIFY_AFTER_RASTERIZATION = Ui::LottieAnimationViewPropertyIndex::NOTIFY_AFTER_RASTERIZATION,
       RENDER_SCALE               = Ui::LottieAnimationViewPropertyIndex::RENDER_SCALE,
       PLACEHOLDER_IMAGE          = Ui::LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
+      PIXEL_AREA                 = Ui::LottieAnimationViewPropertyIndex::PIXEL_AREA,
     };
   };
 
@@ -347,6 +348,16 @@ public: // API
   Dali::String GetPlaceholderUrl() const;
 
   /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetPixelArea
+   */
+  void SetPixelArea(const Dali::Vector4& pixelArea);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::GetPixelArea
+   */
+  Dali::Vector4 GetPixelArea() const;
+
+  /**
    * @copydoc Dali::Ui::LottieAnimationView::AnimationFinishedSignal
    */
   Dali::Signal<void(Dali::Ui::View)>& AnimationFinishedSignal();
@@ -379,11 +390,7 @@ private: // Internal methods
   void UpdateVisual();
 
   /**
-   * @brief Applies padding-aware transform to the visual for the given size.
-   *
-   * When padding is set, the visual is confined to the inner content area.
-   * This is the Lottie equivalent of ImageViewImpl::ApplyFittingMode, but
-   * without FittingMode support (always FILL within the padded area).
+   * @brief Applies the fitting mode transform to the visual for the given size.
    *
    * @param[in] size The allocated size of the view
    */
@@ -414,10 +421,11 @@ private:
 private:                    // Data
   Ui::Visual::Base mVisual; ///< The registered Lottie visual; null when no URL is set
 
-  Dali::String mUrl;
-  Dali::String mMinFrameMarker;
-  Dali::String mMaxFrameMarker;
-  Dali::String mPlaceholderUrl;
+  Dali::String  mUrl;
+  Dali::String  mMinFrameMarker;
+  Dali::String  mMaxFrameMarker;
+  Dali::String  mPlaceholderUrl;
+  Dali::Vector4 mPixelArea;
 
   UiColor mImageColor;
 

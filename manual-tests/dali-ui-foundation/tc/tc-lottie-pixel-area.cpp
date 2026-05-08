@@ -1,0 +1,322 @@
+/* Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#include "manual-test-case.h"
+
+#include <dali-ui-foundation/public-api/lottie-animation-view.h>
+#include <dali/integration-api/debug.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/animation/key-frames.h>
+
+using namespace Dali;
+using namespace Dali::Ui;
+
+namespace
+{
+const char* const LOTTIE_WALKER = TEST_RESOURCE_DIR "/jolly_walker.json";
+
+constexpr float    PREVIEW_W     = 240.0f;
+constexpr float    PREVIEW_H     = 240.0f;
+constexpr float    BTN_H         = 48.0f;
+constexpr float    STATUS_H      = 28.0f;
+constexpr uint32_t C_BTN_BG      = 0x555555;
+constexpr uint32_t C_BTN_ACTIVE  = 0x1565C0;
+constexpr uint32_t C_BTN_ANIM    = 0x7B1FA2;
+constexpr uint32_t C_BTN_TEXT    = 0xEEEEEE;
+constexpr uint32_t C_STATUS_BG   = 0x222222;
+constexpr uint32_t C_STATUS_TEXT = 0xCCCCCC;
+constexpr uint32_t C_BG          = 0x1A1A1A;
+constexpr uint32_t C_FRAME_BG    = 0x2A2A2A;
+
+struct AreaEntry
+{
+  const char* name;
+  Vector4     area;
+};
+
+const AreaEntry AREAS[] = {
+  {"FULL",   Vector4(0.0f,  0.0f,  1.0f,  1.0f)},
+  {"TOP-L",  Vector4(0.0f,  0.0f,  0.5f,  0.5f)},
+  {"TOP-R",  Vector4(0.5f,  0.0f,  0.5f,  0.5f)},
+  {"BOT-L",  Vector4(0.0f,  0.5f,  0.5f,  0.5f)},
+  {"BOT-R",  Vector4(0.5f,  0.5f,  0.5f,  0.5f)},
+  {"CENTER", Vector4(0.25f, 0.25f, 0.5f,  0.5f)},
+};
+const int AREA_COUNT = static_cast<int>(sizeof(AREAS) / sizeof(AREAS[0]));
+} // namespace
+
+/**
+ * @brief Verifies LottieAnimationView PixelArea:
+ *
+ * [PixelArea verification]:
+ *   - FULL / TOP-L / TOP-R / BOT-L / BOT-R / CENTER buttons set a preset sub-region
+ *   - ANIMATE button runs a looping AnimateBetween across the pixel area (pan + zoom)
+ *   - Status label shows the active area coordinates
+ *
+ * Expected result:
+ *   Each preset button shows only the corresponding quadrant of the animation.
+ *   ANIMATE smoothly pans and zooms across the animation content.
+ *   GetPixelArea() returns the last-set value.
+ */
+class TcLottiePixelArea : public ManualTest::TestCase, public ConnectionTracker
+{
+public:
+  Dali::String GetName() const override
+  {
+    return "Lottie: PixelArea";
+  }
+
+  Dali::String GetDescription() const override
+  {
+    return "Verify SetPixelArea() preset regions and AnimateBetween animation";
+  }
+
+  void OnEnter(View contentArea) override
+  {
+    mActiveIndex = 0;
+    mAnimating   = false;
+
+    mView = LottieAnimationView::New(LOTTIE_WALKER)
+              .SetRequestedWidth(PREVIEW_W)
+              .SetRequestedHeight(PREVIEW_H)
+              .SetLoopCount(-1);
+    mView.Play();
+
+    mStatusLabel = MakeStatusLabel(MakeStatusText());
+
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
+                            .SetRequestedWidth(MATCH_PARENT)
+                            .SetRequestedHeight(WRAP_CONTENT)
+                            .SetBackgroundColor(UiColor(C_BG))
+                            .SetPadding(Extents(8, 8, 8, 8));
+
+    // Preview frame
+    StackLayout frame = StackLayout::New(StackOrientation::VERTICAL)
+                          .SetRequestedWidth(MATCH_PARENT)
+                          .SetRequestedHeight(PREVIEW_H + 16)
+                          .SetBackgroundColor(UiColor(C_FRAME_BG))
+                          .SetPadding(Extents(0, 0, 8, 8));
+
+    StackLayout centreRow = StackLayout::New(StackOrientation::HORIZONTAL)
+                              .SetRequestedWidth(MATCH_PARENT)
+                              .SetRequestedHeight(PREVIEW_H);
+    centreRow.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+    centreRow.Add(mView);
+    centreRow.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+
+    frame.Add(centreRow);
+    content.Add(frame);
+    content.Add(mStatusLabel);
+
+    // Area preset buttons
+    StackLayout areaRow = StackLayout::New(StackOrientation::HORIZONTAL)
+                            .SetRequestedWidth(MATCH_PARENT)
+                            .SetRequestedHeight(BTN_H)
+                            .SetPadding(Extents(0, 0, 2, 2));
+    for(int i = 0; i < AREA_COUNT; ++i)
+    {
+      areaRow.Add(MakeAreaButton(i));
+    }
+    content.Add(areaRow);
+
+    // Animate button
+    mAnimateButton = MakeButton("ANIMATE\nPIXEL AREA", C_BTN_ANIM, [this] { OnAnimateClicked(); });
+    content.Add(MakeButtonRow({mAnimateButton}));
+
+    contentArea.Add(content);
+
+    UpdateAreaButtonColors();
+  }
+
+  void OnExit() override
+  {
+    StopAnimation();
+  }
+
+private:
+  void OnAreaClicked(int index)
+  {
+    StopAnimation();
+    mActiveIndex = index;
+    mView.SetPixelArea(AREAS[index].area);
+    UpdateAreaButtonColors();
+    UpdateStatusLabel();
+  }
+
+  void OnAnimateClicked()
+  {
+    if(mAnimating)
+    {
+      StopAnimation();
+    }
+    else
+    {
+      StartAnimation();
+    }
+  }
+
+  void StartAnimation()
+  {
+    mAnimating = true;
+    mAnimateButton.SetBackgroundColor(UiColor(0xE91E63));
+
+    KeyFrames kf = KeyFrames::New();
+    kf.Add(0.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
+    kf.Add(0.25f, Property::Value(Vector4(0.0f,  0.0f,  0.5f,  0.5f)));
+    kf.Add(0.50f, Property::Value(Vector4(0.25f, 0.25f, 0.5f,  0.5f)));
+    kf.Add(0.75f, Property::Value(Vector4(0.5f,  0.5f,  0.5f,  0.5f)));
+    kf.Add(1.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
+
+    mAnimation = Animation::New(3.0f);
+    mAnimation.SetLooping(true);
+    mAnimation.AnimateBetween(
+      Property(mView, LottieAnimationView::Property::PIXEL_AREA),
+      kf,
+      AlphaFunction::EASE_IN_OUT);
+    mAnimation.Play();
+
+    UpdateStatusLabel();
+  }
+
+  void StopAnimation()
+  {
+    if(mAnimation)
+    {
+      mAnimation.Stop();
+      mAnimation.Reset();
+    }
+    if(mAnimating)
+    {
+      mAnimating = false;
+      mAnimateButton.SetBackgroundColor(UiColor(C_BTN_ANIM));
+      mView.SetPixelArea(AREAS[mActiveIndex].area);
+      UpdateStatusLabel();
+    }
+  }
+
+  void UpdateAreaButtonColors()
+  {
+    for(int i = 0; i < AREA_COUNT; ++i)
+    {
+      mAreaButtons[i].SetBackgroundColor(UiColor(i == mActiveIndex ? C_BTN_ACTIVE : C_BTN_BG));
+    }
+  }
+
+  void UpdateStatusLabel()
+  {
+    mStatusLabel.SetText(MakeStatusText());
+  }
+
+  Dali::String MakeStatusText() const
+  {
+    if(mAnimating)
+    {
+      return "PixelArea: animating...";
+    }
+    const Vector4& a = AREAS[mActiveIndex].area;
+    char buf[128];
+    snprintf(buf, sizeof(buf),
+             "PixelArea: x=%.2f y=%.2f w=%.2f h=%.2f  [%s]",
+             a.x, a.y, a.z, a.w, AREAS[mActiveIndex].name);
+    return Dali::String(buf);
+  }
+
+  // ── Helpers ──────────────────────────────────────────────────────────────
+
+  Label MakeStatusLabel(const Dali::String& text)
+  {
+    return Label::New(text)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(STATUS_H)
+      .SetFontSize(11.0f)
+      .SetTextColor(UiColor(C_STATUS_TEXT))
+      .SetBackgroundColor(UiColor(C_STATUS_BG))
+      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  }
+
+  View MakeAreaButton(int index)
+  {
+    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL)
+                        .SetRequestedHeight(BTN_H)
+                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+                        .SetBackgroundColor(UiColor(C_BTN_BG))
+                        .Children({
+                          Label::New(AREAS[index].name)
+                            .SetRequestedWidth(MATCH_PARENT)
+                            .SetRequestedHeight(MATCH_PARENT)
+                            .SetFontSize(11.0f)
+                            .SetTextColor(UiColor(C_BTN_TEXT))
+                            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+                            .SetVerticalTextAlignment(Text::Alignment::CENTER),
+                        });
+    btn.SetFocusable(true).AsInteractive([this, index](InteractiveTrait& trait) {
+      trait.ClickedSignal().Connect(this, [this, index](View, const InputEvent&) -> bool {
+        OnAreaClicked(index);
+        return true;
+      });
+    });
+    mAreaButtons[index] = btn;
+    return btn;
+  }
+
+  View MakeButton(const Dali::String& label, uint32_t bgColor, std::function<void()> onClick)
+  {
+    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL)
+                        .SetRequestedHeight(BTN_H)
+                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
+                        .SetBackgroundColor(UiColor(bgColor))
+                        .Children({
+                          Label::New(label)
+                            .SetRequestedWidth(MATCH_PARENT)
+                            .SetRequestedHeight(MATCH_PARENT)
+                            .SetFontSize(11.0f)
+                            .SetMultiLine(true)
+                            .SetTextColor(UiColor(C_BTN_TEXT))
+                            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
+                            .SetVerticalTextAlignment(Text::Alignment::CENTER),
+                        });
+    btn.SetFocusable(true).AsInteractive([this, onClick = std::move(onClick)](InteractiveTrait& trait) {
+      trait.ClickedSignal().Connect(this, [onClick](View, const InputEvent&) -> bool {
+        onClick();
+        return true;
+      });
+    });
+    return btn;
+  }
+
+  StackLayout MakeButtonRow(std::initializer_list<View> buttons)
+  {
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
+                        .SetRequestedWidth(MATCH_PARENT)
+                        .SetRequestedHeight(BTN_H)
+                        .SetPadding(Extents(0, 0, 2, 2));
+    for(auto& b : buttons)
+    {
+      row.Add(b);
+    }
+    return row;
+  }
+
+  LottieAnimationView mView;
+  Label               mStatusLabel;
+  View                mAreaButtons[AREA_COUNT];
+  View                mAnimateButton;
+  Animation           mAnimation;
+  int                 mActiveIndex;
+  bool                mAnimating;
+};
+
+REGISTER_MANUAL_TEST(TcLottiePixelArea)

@@ -321,6 +321,17 @@ Dali::String LottieAnimationView::GetPlaceholderUrl() const
   return Ui::GetImpl(*this).GetPlaceholderUrl();
 }
 
+LottieAnimationView& LottieAnimationView::SetPixelArea(const Dali::Vector4& pixelArea)
+{
+  Ui::GetImpl(*this).SetPixelArea(pixelArea);
+  return *this;
+}
+
+Dali::Vector4 LottieAnimationView::GetPixelArea() const
+{
+  return Ui::GetImpl(*this).GetPixelArea();
+}
+
 View::ResourceReadySignalType& LottieAnimationView::ResourceReadySignal()
 {
   return View::ResourceReadySignal();

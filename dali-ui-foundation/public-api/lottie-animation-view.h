@@ -79,6 +79,7 @@ public:
       NOTIFY_AFTER_RASTERIZATION = LottieAnimationViewPropertyIndex::NOTIFY_AFTER_RASTERIZATION,
       RENDER_SCALE               = LottieAnimationViewPropertyIndex::RENDER_SCALE,
       PLACEHOLDER_IMAGE          = LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
+      PIXEL_AREA                 = LottieAnimationViewPropertyIndex::PIXEL_AREA,
     };
   };
 
@@ -535,6 +536,24 @@ public: // Placeholder
    * @return The URL of the placeholder image, or empty string if not set
    */
   Dali::String GetPlaceholderUrl() const;
+
+  /**
+   * @brief Sets the pixel area used to display a sub-region of the animation.
+   *
+   * The area is specified as normalized coordinates: (x, y, width, height)
+   * where each component is in the range [0, 1].
+   *
+   * @param[in] pixelArea The normalized sub-region of the animation to display
+   * @return Reference to this for fluent chaining
+   */
+  LottieAnimationView& SetPixelArea(const Dali::Vector4& pixelArea);
+
+  /**
+   * @brief Gets the pixel area.
+   *
+   * @return The current pixel area as normalized coordinates
+   */
+  Dali::Vector4 GetPixelArea() const;
 
 public: // Loading Status & Signals
   /**

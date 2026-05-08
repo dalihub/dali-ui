@@ -161,17 +161,6 @@ LottieAnimationVisual& LottieAnimationVisual::SetReleasePolicy(Image::ReleasePol
   return *this;
 }
 
-Image::FittingMode LottieAnimationVisual::GetFittingMode() const
-{
-  return VisualBase::GetProperty<Image::FittingMode>(LottieAnimationVisual::Property::FITTING_MODE);
-}
-
-LottieAnimationVisual& LottieAnimationVisual::SetFittingMode(Image::FittingMode fittingMode)
-{
-  VisualBase::SetProperty(LottieAnimationVisual::Property::FITTING_MODE, fittingMode);
-  return *this;
-}
-
 bool LottieAnimationVisual::IsOrientationCorrection() const
 {
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ORIENTATION_CORRECTION);

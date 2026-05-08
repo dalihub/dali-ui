@@ -90,6 +90,11 @@ public: // from Visual
   void GetNaturalSize(Vector2& naturalSize) override;
 
   /**
+   * @copydoc Visual::Base::ApplyFittingMode
+   */
+  void ApplyFittingMode(const Vector2& controlSize, const Extents& padding) override;
+
+  /**
    * @copydoc Visual::Base::CreatePropertyMap
    */
   void DoCreatePropertyMap(Property::Map& map) const override;
@@ -153,14 +158,9 @@ protected:
   Shader GenerateShader() const override;
 
   /**
-   * @copydoc Visual::Base::SetFittingMode
+   * @copydoc Visual::Base::OnGetPropertyObject
    */
-  void SetFittingMode(Ui::Image::FittingMode fittingMode) override;
-
-  /**
-   * @copydoc Visual::Base::ApplyFittingMode
-   */
-  void ApplyFittingMode(const Vector2& controlSize, const Extents& padding) override;
+  Dali::Property OnGetPropertyObject(Dali::Property::Key key, bool changeProperties) override;
 
   /**
    * @copydoc Visual::Base::OnDoAction
@@ -251,14 +251,14 @@ private:
   Dali::ImageDimensions              mDesiredSize{};
   WeakHandle<Actor>                  mPlacementActor;
   CallbackBase*                      mEventCallback; // Not owned
+  Vector4                            mPixelArea;
+  Property::Index                    mPixelAreaIndex;
   float                              mFrameSpeedFactor;
   float                              mRenderScale;
 
   Dali::Ui::AnimatedImage::PlayState mPlayState;
   Dali::Ui::Image::ReleasePolicy     mReleasePolicy;
-  Dali::Ui::Image::FittingMode       mFittingMode; ///< How the contents should fit the view
-
-  uint32_t mLastSentPlayStateId;
+  uint32_t                           mLastSentPlayStateId;
 
   bool mRasterizeCompleted : 1;
   bool mLoadFailed : 1;

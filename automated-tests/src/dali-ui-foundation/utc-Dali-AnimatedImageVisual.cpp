@@ -243,7 +243,7 @@ int UtcDaliAnimatedImageVisualPlayState(void)
   application.SendNotification();
   application.Render();
 
-  DALI_TEST_EQUALS(visual.GetPlayState(), AnimatedImage::PlayState::PLAYING, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetPlayState(), AnimatedImage::PlayState::STOPPED, TEST_LOCATION);
 
   visual.Pause();
   DALI_TEST_EQUALS(visual.GetPlayState(), AnimatedImage::PlayState::PAUSED, TEST_LOCATION);

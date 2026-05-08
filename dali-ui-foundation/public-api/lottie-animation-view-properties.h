@@ -194,6 +194,18 @@ struct LottieAnimationViewPropertyIndex
      * @note See also: LottieAnimationView::SetPlaceholderUrl(), LottieAnimationView::GetPlaceholderUrl().
      */
     PLACEHOLDER_IMAGE,
+
+    ///////////////////////////////////////////////////////////////////////////////
+    // Animatable
+    ///////////////////////////////////////////////////////////////////////////////
+
+    /**
+     * @brief The UV sub-region of the texture to display, as (x, y, width, height) in [0,1] normalized coordinates.
+     * @details Name "pixelArea", type Property::VECTOR4 (animatable). Default is (0, 0, 1, 1) — full texture.
+     * @note See also: LottieAnimationView::SetPixelArea(), LottieAnimationView::GetPixelArea().
+     */
+    PIXEL_AREA = ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX,
+
   };
 };
 

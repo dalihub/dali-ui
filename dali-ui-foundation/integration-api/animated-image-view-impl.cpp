@@ -628,6 +628,11 @@ float AnimatedImageViewImpl::GetFrameSpeedFactor() const
 
 void AnimatedImageViewImpl::SetBatchSize(int size)
 {
+  if(size < 1)
+  {
+    DALI_LOG_WARNING("AnimatedImageView: BatchSize must be >= 1 (got %d), clamped to 1\n", size);
+    size = 1;
+  }
   if(mBatchSize != size)
   {
     mBatchSize   = size;
@@ -643,6 +648,11 @@ int AnimatedImageViewImpl::GetBatchSize() const
 
 void AnimatedImageViewImpl::SetCacheSize(int size)
 {
+  if(size < 1)
+  {
+    DALI_LOG_WARNING("AnimatedImageView: CacheSize must be >= 1 (got %d), clamped to 1\n", size);
+    size = 1;
+  }
   if(mCacheSize != size)
   {
     mCacheSize   = size;

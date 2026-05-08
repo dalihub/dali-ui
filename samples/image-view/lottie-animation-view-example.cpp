@@ -33,12 +33,13 @@ using namespace Dali::Ui;
  *   - StopBehavior  (CURRENT / FIRST / LAST)
  *   - SetMinMaxFrame  (full / first-half / second-half)
  *   - RenderScale  (0.5× / 1.0× / 2.0×)
+ *   - PlaceholderUrl  (show placeholder while new URL loads)
  *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)
  *   - AnimationFinishedSignal
  *
- * Resources (from dali-demo):
- *   - done.json        (short check-mark completion animation)
- *   - jolly_walker.json  (looping character walk cycle)
+ * Resources:
+ *   - jolly_walker.json     (looping character walk cycle)
+ *   - placeholder_image.png (placeholder shown while Lottie loads)
  *
  * Press Escape or Back to quit.
  */
@@ -84,6 +85,7 @@ private:
           CreateStopBehaviorRow(),
           CreateFrameRangeRow(),
           CreateRenderScaleRow(),
+          CreatePlaceholderRow(),
         }));
 
     window.KeyEventSignal().Connect(this, &LottieAnimationViewSampleController::OnKeyEvent);
@@ -96,8 +98,8 @@ private:
   View CreateAnimationArea()
   {
     LottieAnimationView::New(RESOURCES_DIR "jolly_walker.json")
-      .SetRequestedWidth(300.0f)
-      .SetRequestedHeight(300.0f)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
       .SetLoopCount(-1)
       .As(mLottieView);
 
@@ -233,6 +235,24 @@ private:
           .SetTextColor(UiColor(0xAAAAAA))
           .SetVerticalTextAlignment(Text::Alignment::CENTER),
         CreateToggleButton(RENDER_SCALE_LABELS[mRenderScaleIndex], [this](View, InputEvent) { OnRenderScaleToggle(); }, mRenderScaleButton),
+      });
+  }
+
+  View CreatePlaceholderRow()
+  {
+    return StackLayout::New(StackOrientation::HORIZONTAL)
+      .SetSpacing(4.0f)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(44.0f)
+      .Children({
+        Label::New("Holder:")
+          .SetRequestedWidth(80.0f)
+          .SetRequestedHeight(MATCH_PARENT)
+          .SetFontSize(12.0f)
+          .SetTextColor(UiColor(0xAAAAAA))
+          .SetVerticalTextAlignment(Text::Alignment::CENTER),
+        CreateButton("Set Placeholder", [this](View, const InputEvent&) { OnSetPlaceholder(); }),
+        CreateButton("Clear URL",       [this](View, const InputEvent&) { OnClearUrl(); }),
       });
   }
 
@@ -396,6 +416,21 @@ private:
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetRenderScale(%.1f)\n", RENDER_SCALES[mRenderScaleIndex]);
   }
 
+  void OnSetPlaceholder()
+  {
+    mLottieView.SetPlaceholderUrl(RESOURCES_DIR "placeholder_image.png");
+    mLottieView.SetResourceUrl(RESOURCES_DIR "jolly_walker.json");
+    UpdateStatus("Placeholder set — reloading");
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetPlaceholderUrl + reload\n");
+  }
+
+  void OnClearUrl()
+  {
+    mLottieView.SetResourceUrl("");
+    UpdateStatus("URL cleared");
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] URL cleared\n");
+  }
+
   void OnResourceReady(View view)
   {
     int total = mLottieView.GetTotalFrame();
@@ -455,7 +490,7 @@ private:
   static const char*     FRAME_RANGE_LABELS[3];
   static const char*     RENDER_SCALE_LABELS[3];
   static const Ui::LottieAnimation::LoopingMode  LOOPING_MODES[2];
-  static const Ui::AnimatedImage::StopBehavior STOP_BEHAVIORS[3];
+  static const Ui::AnimatedImage::StopBehavior   STOP_BEHAVIORS[3];
 
   Application&        mApplication;
   LottieAnimationView mLottieView;

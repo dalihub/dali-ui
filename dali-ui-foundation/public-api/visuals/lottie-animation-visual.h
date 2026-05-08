@@ -74,7 +74,6 @@ public:
       ENABLE_BROKEN_IMAGE    = ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE,
       LOAD_POLICY            = ImageVisualPropertyIndex::LOAD_POLICY,
       RELEASE_POLICY         = ImageVisualPropertyIndex::RELEASE_POLICY,
-      FITTING_MODE           = ImageVisualPropertyIndex::FITTING_MODE,
       ORIENTATION_CORRECTION = ImageVisualPropertyIndex::ORIENTATION_CORRECTION,
       SYNCHRONOUS_SIZING     = ImageVisualPropertyIndex::SYNCHRONOUS_SIZING,
 
@@ -274,21 +273,6 @@ public: // Setters for chaining
    * @return Reference to this for fluent chaining
    */
   LottieAnimationVisual& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
-
-  /**
-   * @brief Gets the fitting mode of the LottieAnimationVisual.
-   *
-   * @return The fitting mode of the LottieAnimationVisual
-   */
-  Image::FittingMode GetFittingMode() const;
-
-  /**
-   * @brief Sets the fitting mode of the LottieAnimationVisual.
-   *
-   * @param[in] fittingMode The fitting mode to set
-   * @return Reference to this for fluent chaining
-   */
-  LottieAnimationVisual& SetFittingMode(Image::FittingMode fittingMode);
 
   /**
    * @brief Gets whether orientation correction is enabled.

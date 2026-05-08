@@ -80,13 +80,6 @@
   */ \
   ChildClass& SetReleasePolicy(Image::ReleasePolicy releasePolicy) { LottieAnimationVisual::SetReleasePolicy(releasePolicy); return *this; } \
   /** \
-  * @brief Sets the fitting mode of the LottieAnimationVisual. \
-  * \
-  * @param[in] fittingMode The fitting mode to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetFittingMode(Image::FittingMode fittingMode) { LottieAnimationVisual::SetFittingMode(fittingMode); return *this; } \
-  /** \
   * @brief Sets whether to correct the image orientation. \
   * \
   * @param[in] orientationCorrection True to correct the image orientation \
