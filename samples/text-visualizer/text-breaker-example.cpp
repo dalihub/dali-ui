@@ -1081,7 +1081,7 @@ private:
     mStatusText.SetText(builder.str().c_str());
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {

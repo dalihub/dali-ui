@@ -78,7 +78,7 @@ public:
     window.KeyEventSignal().Connect(this, &StackLayoutStandaloneController::OnKeyEvent);
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if (event.GetState() == KeyEvent::DOWN)
     {

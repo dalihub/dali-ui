@@ -101,9 +101,10 @@ private:
 
   /**
    * Callback for the key event when no actor in the stage has gained the key input focus
+   * @param[in] sceneHolder The scene holder
    * @param[in] event The KeyEvent event.
    */
-  bool OnKeyEvent(KeyEvent event);
+  bool OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEvent event);
 
   /**
    * Signal handler called when a focused View is removed from Scene.

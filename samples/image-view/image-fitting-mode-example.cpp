@@ -269,7 +269,7 @@ private:
     DALI_LOG_RELEASE_INFO("FittingMode changed to: %s\n", MODES[mActiveIndex].name);
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

@@ -115,7 +115,7 @@ public:
     window.KeyEventSignal().Connect(this, &ViewLayoutDirectionController::OnKeyEvent);
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

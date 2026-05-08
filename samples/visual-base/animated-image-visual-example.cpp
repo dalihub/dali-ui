@@ -289,7 +289,7 @@ private:
     mVisualState.SetText((std::string("Left : ") + leftVisualState + " Right : " + rightVisualState).c_str());
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {

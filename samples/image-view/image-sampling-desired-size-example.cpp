@@ -517,7 +517,7 @@ private:
     return Dali::String(buf);
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

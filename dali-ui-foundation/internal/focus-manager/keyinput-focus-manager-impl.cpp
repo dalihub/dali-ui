@@ -135,7 +135,7 @@ KeyInputFocusManager::KeyInputFocusChangedSignalType& KeyInputFocusManagerImpl::
   return mKeyInputFocusChangedSignal;
 }
 
-bool KeyInputFocusManagerImpl::OnKeyEvent(KeyEvent event)
+bool KeyInputFocusManagerImpl::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEvent event)
 {
   bool consumed = false;
 

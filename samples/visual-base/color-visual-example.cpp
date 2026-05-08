@@ -282,7 +282,7 @@ private:
     mVisualCounter.SetText((std::string("Visuals Count : #") + numberOfVisuals).c_str());
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {

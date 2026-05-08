@@ -242,7 +242,7 @@ private:
     DALI_LOG_RELEASE_INFO("[ScrollInteractiveSample] %s\n", msg.str().c_str());
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

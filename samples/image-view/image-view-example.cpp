@@ -64,7 +64,7 @@ private:
                           static_cast<int>(imageView.GetLoadingStatus()));
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

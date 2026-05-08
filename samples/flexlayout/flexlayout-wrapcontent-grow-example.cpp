@@ -91,7 +91,7 @@ public:
     window.KeyEventSignal().Connect(this, &FlexLayoutWrapContentGrowController::OnKeyEvent);
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

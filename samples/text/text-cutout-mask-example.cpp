@@ -159,7 +159,7 @@ private:
     return maskTarget;
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() != KeyEvent::UP)
     {

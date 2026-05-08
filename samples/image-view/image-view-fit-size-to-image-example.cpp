@@ -154,7 +154,7 @@ private:
                                         : "FitSizeToImage: OFF — view height stays 0 (gray area visible)");
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

@@ -310,7 +310,7 @@ private:
      DALI_LOG_ERROR("[%s] ResourceReady. Status=%d\n", section, status);
   }
 
-  void OnKeyEvent(KeyEvent event) { if(event.GetState() == KeyEvent::DOWN && (IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))) mApplication.Quit(); }
+  void OnKeyEvent(Window window, KeyEvent event) { if(event.GetState() == KeyEvent::DOWN && (IsKey(event, DALI_KEY_ESCAPE) || IsKey(event, DALI_KEY_BACK))) mApplication.Quit(); }
 
   Application&  mApplication;
   View          mSyncLoadingImage, mFastTrackImage, mReleasePolicyImage, mLoadPolicyImage;

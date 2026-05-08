@@ -92,7 +92,7 @@ public:
     window.KeyEventSignal().Connect(this, &AbsoluteLayoutPerAxisProportionalController::OnKeyEvent);
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if(event.GetState() == KeyEvent::DOWN)
     {

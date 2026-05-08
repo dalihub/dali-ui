@@ -112,7 +112,7 @@ public:
     window.KeyEventSignal().Connect(this, &AbsoluteLayoutMarginPaddingController::OnKeyEvent);
   }
 
-  void OnKeyEvent(KeyEvent event)
+  void OnKeyEvent(Window window, KeyEvent event)
   {
     if (event.GetState() == KeyEvent::DOWN)
     {
