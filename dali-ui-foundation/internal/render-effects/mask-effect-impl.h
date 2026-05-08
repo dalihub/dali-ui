@@ -198,9 +198,6 @@ private:
   MaskEffectImpl& operator=(const MaskEffectImpl&) = delete; // no copy()
 
 private:
-  // Camera actors
-  CameraActor mCamera;
-
   WeakHandle<Ui::View> mMaskView;
 
   // Resource

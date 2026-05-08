@@ -89,17 +89,6 @@ void OffScreenRenderingImpl::OnActivate()
   Ui::View ownerView = GetOwnerView();
   DALI_ASSERT_ALWAYS(ownerView && "Set the owner of RenderEffect before you activate.");
 
-  if(!mCamera)
-  {
-    mCamera = CameraActor::New();
-    mCamera.SetInvertYAxis(true);
-    mCamera.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
-    mCamera.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);
-    mCamera.SetType(Dali::Camera::FREE_LOOK);
-  }
-  mCamera.SetPerspectiveProjection(GetTargetSize());
-  IntegrationView::AddActorChild(ownerView, mCamera);
-
   CreateFrameBuffer();
   CreateRenderTask();
   SetType(mType);
@@ -126,8 +115,6 @@ void OffScreenRenderingImpl::OnDeactivate()
   {
     view.RemoveCacheRenderer(renderer);
     view.GetImplementation().UnregisterOffScreenRenderableType(GetOffScreenRenderableType());
-
-    mCamera.Unparent();
   }
 
   DestroyFrameBuffer();
@@ -138,7 +125,7 @@ void OffScreenRenderingImpl::OnRefresh()
 {
   DestroyFrameBuffer();
 
-  mCamera.SetPerspectiveProjection(GetTargetSize());
+  mRenderTask.SetBuiltinCameraActor(Dali::RenderTask::BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR, GetTargetSize(), Property::Map().Add(Dali::Actor::Property::NAME, "OffScreenAutoCamera").Add(Dali::CameraActor::Property::INVERT_Y_AXIS, true));
 
   CreateFrameBuffer();
   SetRendererTexture(GetTargetRenderer(), mFrameBuffer);
@@ -167,7 +154,7 @@ void OffScreenRenderingImpl::CreateRenderTask()
 
   mRenderTask = taskList.CreateTask();
   mRenderTask.SetSourceActor(view);
-  mRenderTask.SetCameraActor(mCamera);
+  mRenderTask.SetBuiltinCameraActor(Dali::RenderTask::BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR, GetTargetSize(), Property::Map().Add(Dali::Actor::Property::NAME, "OffScreenAutoCamera").Add(Dali::CameraActor::Property::INVERT_Y_AXIS, true));
   mRenderTask.SetExclusive(true);
   mRenderTask.SetInputEnabled(true);
   mRenderTask.SetFrameBuffer(mFrameBuffer);
