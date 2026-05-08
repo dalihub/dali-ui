@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
+#include <dali-ui-foundation/public-api/attachment-id.h>
 #include <dali-ui-foundation/public-api/input-field.h>
 #include <dali-ui-foundation/public-api/interactive-view.h>
 #include <dali-ui-foundation/public-api/label.h>
@@ -35,6 +36,7 @@
 #include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/ui-scale-policy.h>
+#include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/unit.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view-types.h>
