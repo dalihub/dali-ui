@@ -63,13 +63,16 @@
   * The interpretation of this value depends on the current LineHeightMode. \
   * \
   * - If the mode is LineHeightMode::RELATIVE, the line height is calculated \
-  *   as a multiplier of the font pixel size: \
+  *   as a multiplier of the effective scaled font pixel size: \
   *   @code \
-  *   CalculatedLineHeight(px) = FontSize(px) * lineHeight \
+  *   CalculatedLineHeight(px) = fontSize(px) * lineHeight * fontSizeScale \
   *   @endcode \
   * \
   * - If the mode is LineHeightMode::ABSOLUTE, the value is treated as \
   *   an absolute line height in pixels. \
+  *   @code \
+  *   CalculatedLineHeight(px) = lineHeight(px) * fontSizeScale \
+  *   @endcode \
   * \
   * Setting lineHeight to LINE_HEIGHT_AUTO uses the natural line height \
   * derived from the font metrics, regardless of the current LineHeightMode. \
@@ -245,6 +248,8 @@
   * Text fit selects the largest font size within the configured range \
   * that fits into the available layout space. \
   * \
+  * Font size scale is applied when measuring and laying out text fit. \
+  * \
   * @note Text fit is designed for bounded layout sizes. It is recommended to \
   * explicitly specify width and height when using this feature. \
   * When width or height is WRAP_CONTENT, measurement is performed using the \
@@ -258,6 +263,9 @@
   * \
   * Text fit selects the largest candidate that fits into the available \
   * layout space. Each candidate defines a font size and line height. \
+  * \
+  * Font size scale is applied to both font size and line height when measuring \
+  * and laying out text fit candidates. \
   * \
   * @note Text fit is designed for bounded layout sizes. It is recommended to \
   * explicitly specify width and height when using this feature. \

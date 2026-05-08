@@ -318,7 +318,7 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
     // If the search does not find an optimal value, the minimum point size will be used.
     const Ui::Text::FitCandidate& firstCandidate        = fitCandidates[0];
     bool                          bestSizeUpdatedLatest = false;
-    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize());
+    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize()) * impl.GetAdjustedFontSizeScale();
     float                         bestLineHeight        = firstCandidate.GetLineHeight();
 
     if(binarySearch)
@@ -330,7 +330,7 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
       {
         const int                     mid            = left + (right - left) / 2;
         const Ui::Text::FitCandidate& candidate      = fitCandidates[mid];
-        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize());
+        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize()) * impl.GetAdjustedFontSizeScale();
         const float                   testLineHeight = candidate.GetLineHeight();
         impl.SetDefaultLineSize(testLineHeight);
 
@@ -355,7 +355,7 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
       {
         --it;
 
-        const float testPointSize  = ConvertPixelToPoint(it->GetFontSize());
+        const float testPointSize  = ConvertPixelToPoint(it->GetFontSize()) * impl.GetAdjustedFontSizeScale();
         const float testLineHeight = it->GetLineHeight();
         impl.SetDefaultLineSize(testLineHeight);
 
@@ -397,16 +397,12 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_LAYOUT", "[%p]", static_cast<void*>(&controller));
     ModelPtr& model = impl.mModel;
 
-    bool  actualellipsis         = model->mElideEnabled;
-    float minPointSize           = impl.mTextFitMinSize;
-    float maxPointSize           = impl.mTextFitMaxSize;
-    float pointInterval          = impl.mTextFitStepSize;
-    float currentFitPointSize    = impl.mFontDefaults->mFitPointSize;
-    float currentDefaultLineSize = impl.mLayoutEngine.GetDefaultLineSize();
-    bool  isMultiLine            = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
-    // Instead of using the LineSize of the current TextLabel, the LineSize set in TextFit is used.
-
-    impl.SetDefaultLineSize(impl.mTextFitLineSize);
+    bool  actualellipsis      = model->mElideEnabled;
+    float minPointSize        = impl.mTextFitMinSize * impl.GetAdjustedFontSizeScale();
+    float maxPointSize        = impl.mTextFitMaxSize * impl.GetAdjustedFontSizeScale();
+    float pointInterval       = impl.mTextFitStepSize * impl.GetAdjustedFontSizeScale();
+    float currentFitPointSize = impl.mFontDefaults->mFitPointSize;
+    bool  isMultiLine         = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
 
     model->mElideEnabled = false;
     float bestPointSize  = minPointSize;
@@ -414,7 +410,7 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
     // check zero value
     if(pointInterval < 1.f)
     {
-      impl.mTextFitStepSize = pointInterval = 1.0f;
+      pointInterval = 1.0f;
     }
 
     uint32_t pointSizeRange = static_cast<uint32_t>(ceil((maxPointSize - minPointSize) / pointInterval));
@@ -542,8 +538,7 @@ void Controller::Relayouter::FitPointSizeforLayout(Controller& controller, const
     {
       impl.mTextFitChanged = true;
     }
-    // Revert back to the original TextLabel LineSize.
-    impl.SetDefaultLineSize(currentDefaultLineSize);
+
     impl.mFontDefaults->mFitPointSize = bestPointSize;
     impl.mFontDefaults->sizeDefined   = true;
     impl.ClearFontData();

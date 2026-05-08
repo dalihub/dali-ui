@@ -449,7 +449,11 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Validate Fonts.
   ////////////////////////////////////////////////////////////////////////////////
 
-  float                            scale            = parameters.fontSizeScale * parameters.renderScale;
+  // Text fit and fit candidates are already converted to effective scaled font sizes
+  // before CheckForTextFit(). Avoid applying fontSizeScale again here.
+  float fontSizeScale = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled) ? 1.0f : parameters.fontSizeScale;
+  float scale         = fontSizeScale * parameters.renderScale;
+
   TextAbstraction::PointSize26Dot6 defaultPointSize = TextAbstraction::FontClient::DEFAULT_POINT_SIZE * scale;
 
   // Get the number of points per one unit of point-size
@@ -732,10 +736,13 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   mLayoutEngine.SetLayout(layoutType);
 
   // Set minimun line size, line spacing, relative line size.
+  mLayoutEngine.SetFontSizeScale(parameters.fontSizeScale);
   mLayoutEngine.SetDefaultLineSize(parameters.minLineSize);
   mLayoutEngine.SetDefaultLineSpacing(0.0f);
   mLayoutEngine.SetRelativeLineSize(parameters.relativeLineSize);
 
+  // Text fit and fit candidates are already converted to effective scaled font sizes
+  // before CheckForTextFit(). Avoid applying fontSizeScale again here.
   float fontPointSize = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled)
                           ? parameters.fontSize
                           : parameters.fontSize * parameters.fontSizeScale;
@@ -1575,7 +1582,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     // If the search does not find an optimal value, the minimum point size will be used to text fit.
     const Ui::Text::FitCandidate& firstCandidate        = fitCandidates[0];
     bool                          bestSizeUpdatedLatest = false;
-    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient());
+    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient()) * parameters.fontSizeScale;
     float                         bestLineHeight        = firstCandidate.GetLineHeight();
 
     if(binarySearch)
@@ -1587,7 +1594,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
       {
         const int                     mid            = left + (right - left) / 2;
         const Ui::Text::FitCandidate& candidate      = fitCandidates[mid];
-        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize(), mModule.GetFontClient());
+        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize(), mModule.GetFontClient()) * parameters.fontSizeScale;
         const float                   testLineHeight = candidate.GetLineHeight();
         parameters.minLineSize                       = testLineHeight;
 
@@ -1612,7 +1619,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
       {
         --it;
 
-        const float testPointSize  = ConvertPixelToPoint(it->GetFontSize(), mModule.GetFontClient());
+        const float testPointSize  = ConvertPixelToPoint(it->GetFontSize(), mModule.GetFontClient()) * parameters.fontSizeScale;
         const float testLineHeight = it->GetLineHeight();
         parameters.minLineSize     = testLineHeight;
 
@@ -1649,9 +1656,9 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     }
 #endif
 
-    float minPointSize  = parameters.textFitMinSize;
-    float maxPointSize  = parameters.textFitMaxSize;
-    float pointInterval = parameters.textFitStepSize;
+    float minPointSize  = parameters.textFitMinSize * parameters.fontSizeScale;
+    float maxPointSize  = parameters.textFitMaxSize * parameters.fontSizeScale;
+    float pointInterval = parameters.textFitStepSize * parameters.fontSizeScale;
 
     mFitActualEllipsis  = parameters.ellipsis;
     parameters.ellipsis = false;
@@ -1662,7 +1669,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     // check zero value
     if(pointInterval < 1.f)
     {
-      parameters.textFitStepSize = pointInterval = 1.0f;
+      pointInterval = 1.0f;
     }
 
     uint32_t pointSizeRange = static_cast<uint32_t>(ceil((maxPointSize - minPointSize) / pointInterval));

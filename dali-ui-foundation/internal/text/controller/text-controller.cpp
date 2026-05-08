@@ -603,11 +603,6 @@ void Controller::SetTextFitPointSize(float pointSize)
   mImpl->ClearFontData();
 }
 
-void Controller::SetTextFitLineSize(float lineSize)
-{
-  mImpl->mTextFitLineSize = lineSize;
-}
-
 void Controller::SetTextFitCandidatesEnabled(bool enabled)
 {
   mImpl->mTextFitCandidatesEnabled = enabled;

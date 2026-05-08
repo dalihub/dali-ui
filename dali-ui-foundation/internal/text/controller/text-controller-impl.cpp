@@ -2187,6 +2187,7 @@ bool Controller::Impl::ApplyAdjustedFontSizeScale()
   }
 
   mAdjustedFontSizeScale = adjustedScale;
+  mLayoutEngine.SetFontSizeScale(mAdjustedFontSizeScale);
 
   if(mEventData && EventData::IsEditingState(mEventData->mState))
   {

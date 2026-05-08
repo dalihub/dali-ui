@@ -711,8 +711,6 @@ void LabelImpl::SetTextFit(const Text::FitRange& range)
     mController->ClearTextFitCandidates();
   }
   mController->SetTextFitEnabled(true);
-  // Use the current line size as the baseline for text fit.
-  mController->SetTextFitLineSize(mController->GetDefaultLineSize());
   mController->SetTextFitMinSize(range.GetMinimumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitMaxSize(range.GetMaximumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitStepSize(range.GetFontSizeStep(), Text::Controller::FontSizeType::PIXEL_SIZE);

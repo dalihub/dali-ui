@@ -28,6 +28,21 @@ constexpr float TARGET_INPUT_HEIGHT = 80.0f;
 
 const char* TEST_TEXT = "The quick brown fox jumps over the lazy dog. 1234567890";
 
+const Dali::Vector<Text::FitCandidate>& GetFitCandidates()
+{
+  static Dali::Vector<Text::FitCandidate> candidates = [] {
+    Dali::Vector<Text::FitCandidate> values;
+    values.PushBack(Text::FitCandidate(10.0f, 20.0f));
+    values.PushBack(Text::FitCandidate(12.0f, 24.0f));
+    values.PushBack(Text::FitCandidate(14.0f, 28.0f));
+    values.PushBack(Text::FitCandidate(16.0f, 32.0f));
+    values.PushBack(Text::FitCandidate(18.0f, 36.0f));
+    values.PushBack(Text::FitCandidate(20.0f, 40.0f));
+    return values;
+  }();
+  return candidates;
+}
+
 Label CreateButton(const char* text, float fontSize = 14.0f)
 {
   return Label::New(text)
@@ -55,6 +70,7 @@ private:
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xF5F5F5));
+    window.KeyEventSignal().Connect(this, &TextScaleController::OnKeyEvent);
 
     // Target Label for visual testing
     mTargetLabel = Label::New(TEST_TEXT)
@@ -74,7 +90,27 @@ private:
                           .SetBackgroundColor(UiColor(0xFFFFFF))
                           .SetPadding(Extents(16, 16, 16, 16));
 
-    mStatusLabel = Label::New()
+    mFitLabel = Label::New(TEST_TEXT)
+                     .SetRequestedWidth(MATCH_PARENT)
+                     .SetRequestedHeight(WRAP_CONTENT)
+                     .SetMaximumHeight(120)
+                     .SetMultiLine(true)
+                     .SetBackgroundColor(UiColor(0xFFFFFF))
+                     .SetTextFit(Text::FitRange(10, 20, 2))
+                     .SetLineHeight(40.0f)
+                     .SetLineHeightMode(Text::LineHeightMode::ABSOLUTE)
+                     .SetPadding(Extents(16, 16, 0, 0));
+
+   mFitCandidateLabel = Label::New(TEST_TEXT)
+                     .SetRequestedWidth(MATCH_PARENT)
+                     .SetRequestedHeight(WRAP_CONTENT)
+                     .SetMaximumHeight(120)
+                     .SetMultiLine(true)
+                     .SetBackgroundColor(UiColor(0xFFFFFF))
+                     .SetTextFit(GetFitCandidates())
+                     .SetPadding(Extents(16, 16, 0, 0));
+
+   mStatusLabel = Label::New()
                      .SetRequestedWidth(MATCH_PARENT)
                      .SetRequestedHeight(WRAP_CONTENT)
                      .SetFontSize(12.0f)
@@ -120,6 +156,9 @@ private:
           mTargetLabel,
           Label::New("Target InputField:").SetFontSize(14.0f),
           mTargetInputField,
+          Label::New("Fit & FitCandidate:").SetFontSize(14.0f),
+          mFitLabel,
+          mFitCandidateLabel,
           Label::New("Current Status:").SetFontSize(14.0f),
           mStatusLabel,
           Label::New("Test Scenarios:").SetFontSize(14.0f),
@@ -192,6 +231,16 @@ private:
                      .SetMaximumFontSizeScale(maxScale)
                      .SetSystemFontSizeScaleEnabled(systemEnabled);
 
+    mFitLabel.SetFontSizeScale(scale)
+                .SetMinimumFontSizeScale(minScale)
+                .SetMaximumFontSizeScale(maxScale)
+                .SetSystemFontSizeScaleEnabled(systemEnabled);
+
+    mFitCandidateLabel.SetFontSizeScale(scale)
+                .SetMinimumFontSizeScale(minScale)
+                .SetMaximumFontSizeScale(maxScale)
+                .SetSystemFontSizeScaleEnabled(systemEnabled);
+
     UpdateStatus();
   }
 
@@ -258,10 +307,67 @@ private:
     return true;
   }
 
+  void OnKeyEvent(const KeyEvent& event)
+  {
+    if(event.GetState() != KeyEvent::UP)
+    {
+      return;
+    }
+
+    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+    {
+      mApplication.Quit();
+      return;
+    }
+
+    if(event.GetKeyName() == "1")
+    {
+      ApplyScaleToBoth(1.0f, 0.5f, 2.0f, false);
+    }
+    else if(event.GetKeyName() == "2")
+    {
+      ApplyScaleToBoth(1.5f, 0.5f, 2.0f, false);
+    }
+    else if(event.GetKeyName() == "3")
+    {
+      ApplyScaleToBoth(0.8f, 1.2f, 2.0f, false);
+    }
+    else if(event.GetKeyName() == "4")
+    {
+      ApplyScaleToBoth(1.8f, 0.5f, 1.3f, false);
+    }
+    else if(event.GetKeyName() == "5")
+    {
+      ApplyScaleToBoth(0.7f, 1.4f, 1.0f, false);
+    }
+    else if(event.GetKeyName() == "6")
+    {
+      ApplyScaleToBoth(1.8f, 0.8f, 1.3f, true);
+    }
+    else if(event.GetKeyName() == "7")
+    {
+      ApplyScaleToBoth(1.6f, 0.5f, 2.0f, false);
+    }
+    else if(event.GetKeyName() == "q")
+    {
+      mTargetLabel.SetAsyncRendering(false);
+      mFitLabel.SetAsyncRendering(false);
+      mFitCandidateLabel.SetAsyncRendering(false);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      mTargetLabel.SetAsyncRendering(true);
+      mFitLabel.SetAsyncRendering(true);
+      mFitCandidateLabel.SetAsyncRendering(true);
+    }
+  }
+
 private:
   Application& mApplication;
   Label        mTargetLabel;
   InputField   mTargetInputField;
+  Label        mFitLabel;
+  Label        mFitCandidateLabel;
   Label        mStatusLabel;
 };
 

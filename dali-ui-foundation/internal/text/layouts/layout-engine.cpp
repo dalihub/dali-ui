@@ -180,6 +180,7 @@ struct Engine::Impl
     mDefaultLineSize{MIN_LINE_SIZE},
     mRelativeLineSize{GetDefaultRelativeLineSize()},
     mPixelSize{DEFAULT_FONT_PIXEL_SIZE},
+    mFontSizeScale{1.0f},
     mIsCursorInsetEnabled{false}
   {
   }
@@ -198,8 +199,9 @@ struct Engine::Impl
       // For readability and maintainability, completely separate the code.
       float lineSpacing;
       float relTextSize;
+      float defaultLineSize = mDefaultLineSize * mFontSizeScale;
 
-      lineSpacing = mDefaultLineSize - textSize;
+      lineSpacing = defaultLineSize - textSize;
       lineSpacing = lineSpacing < 0.f ? 0.f : lineSpacing;
 
       lineSpacing += mDefaultLineSpacing;
@@ -207,7 +209,7 @@ struct Engine::Impl
       // If relativeLineSize is less than 0, it will attempt to set LineHeight to NaturalSize.
       // Or, if there is a minLineSize set, it will attempt to apply minLineSize.
       relTextSize = relativeLineSize < 0 ? textSize : std::floor(mPixelSize * relativeLineSize);
-      if(relTextSize >= mDefaultLineSize)
+      if(relTextSize >= defaultLineSize)
       {
         if(relTextSize <= textSize)
         {
@@ -215,9 +217,9 @@ struct Engine::Impl
         }
         else
         {
-          if(mDefaultLineSize > textSize)
+          if(defaultLineSize > textSize)
           {
-            lineSpacing -= mDefaultLineSize - textSize;
+            lineSpacing -= defaultLineSize - textSize;
           }
 
           lineSpacing += relTextSize - textSize;
@@ -230,9 +232,10 @@ struct Engine::Impl
     {
       float lineSpacing;
       float relTextSize;
+      float defaultLineSize = mDefaultLineSize * mFontSizeScale;
 
       // Sets the line size
-      lineSpacing = mDefaultLineSize - textSize;
+      lineSpacing = defaultLineSize - textSize;
       lineSpacing = lineSpacing < 0.f ? 0.f : lineSpacing;
 
       // Add the line spacing
@@ -240,7 +243,7 @@ struct Engine::Impl
 
       // subtract line spcaing if relativeLineSize < 1 & larger than min height
       relTextSize = textSize * relativeLineSize;
-      if(relTextSize > mDefaultLineSize)
+      if(relTextSize > defaultLineSize)
       {
         if(relativeLineSize < 1)
         {
@@ -250,9 +253,9 @@ struct Engine::Impl
         else
         {
           // reverse the addition in the top.
-          if(mDefaultLineSize > textSize)
+          if(defaultLineSize > textSize)
           {
-            lineSpacing -= mDefaultLineSize - textSize;
+            lineSpacing -= defaultLineSize - textSize;
           }
 
           // add difference instead
@@ -2214,6 +2217,7 @@ struct Engine::Impl
   IntrusivePtr<Metrics> mMetrics;
   float                 mRelativeLineSize;
   float                 mPixelSize;
+  float                 mFontSizeScale;
   bool                  mIsCursorInsetEnabled : 1;
 };
 
@@ -2308,6 +2312,11 @@ float Engine::GetRelativeLineSize() const
 void Engine::SetFontPixelSize(float pixelSize)
 {
   mImpl->mPixelSize = pixelSize;
+}
+
+void Engine::SetFontSizeScale(float scale)
+{
+  mImpl->mFontSizeScale = scale;
 }
 
 } // namespace Layout

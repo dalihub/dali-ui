@@ -531,13 +531,6 @@ public: // Configure the text controller.
   bool IsTextFitChanged() const;
 
   /**
-   * @brief Sets line size valid for text fit.
-   *
-   * @param[in] lineSize line size value
-   */
-  void SetTextFitLineSize(float lineSize);
-
-  /**
    * @brief Enable or disable the text fit candidates.
    *
    * @param[in] enabled Whether to enable the text fit candidates.

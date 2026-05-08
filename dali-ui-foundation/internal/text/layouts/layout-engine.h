@@ -190,6 +190,16 @@ public:
    */
   void SetFontPixelSize(float pixelSize);
 
+  /**
+   * @brief Sets the font size scale used by the layout engine.
+   *
+   * This scale is applied when calculating font-size-dependent layout metrics,
+   * such as line height.
+   *
+   * @param[in] scale The font size scale.
+   */
+  void SetFontSizeScale(float scale);
+
 private:
   // Undefined
   Engine(const Engine& handle);
