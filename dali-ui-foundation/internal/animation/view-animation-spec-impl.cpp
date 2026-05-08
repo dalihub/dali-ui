@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/animation/time-period.h>
 #include <dali/public-api/object/property.h>
@@ -34,6 +35,11 @@ namespace Ui
 {
 namespace Internal
 {
+namespace
+{
+Dali::TypeRegistration VIEW_ANIMATION_SPEC_TYPE("ViewAnimationSpec", typeid(Dali::BaseHandle), nullptr);
+Dali::TypeRegistration VIEW_ANIMATION_SPEC_IMPL_TYPE(typeid(Dali::Ui::Internal::ViewAnimationSpecImpl), typeid(Dali::Ui::ViewAnimationSpec), nullptr);
+} // namespace
 
 ViewAnimationSpecImpl::ViewAnimationSpecImpl() = default;
 

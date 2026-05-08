@@ -54,6 +54,7 @@ class DALI_UI_API {{SPEC_CLASS}} : public BaseHandle
 public:
   {{SPEC_CLASS}}();
   static {{SPEC_CLASS}} New();
+  static {{SPEC_CLASS}} DownCast(BaseHandle handle); // LCOV_EXCL_LINE
 
   {{SPEC_CLASS}}(const {{SPEC_CLASS}}& other);
   {{SPEC_CLASS}}({{SPEC_CLASS}}&& rhs) noexcept;

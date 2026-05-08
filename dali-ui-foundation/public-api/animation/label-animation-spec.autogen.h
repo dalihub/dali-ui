@@ -50,6 +50,7 @@ class DALI_UI_API LabelAnimationSpec : public ViewAnimationSpec
 public:
   LabelAnimationSpec();
   static LabelAnimationSpec New();
+  static LabelAnimationSpec DownCast(BaseHandle handle); // LCOV_EXCL_LINE
 
   ////////////////////////////////////////////////////////////////////////////
   // Parent property overrides

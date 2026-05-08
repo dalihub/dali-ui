@@ -15,13 +15,13 @@
  *
  */
 
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali.h>
+#include <dali/integration-api/string-utils.h>
 #include <stdlib.h>
 #include <iostream>
 #include <limits>
-#include <dali.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali/integration-api/string-utils.h>
-#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -82,7 +82,7 @@ void utc_dali_label_cleanup(void)
 int UtcDaliLabelConstructorP(void)
 {
   UiTestApplication application;
-  Label label;
+  Label             label;
   DALI_TEST_CHECK(!label);
   END_TEST;
 }
@@ -90,7 +90,7 @@ int UtcDaliLabelConstructorP(void)
 int UtcDaliLabelNewP(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
   END_TEST;
 }
@@ -98,7 +98,7 @@ int UtcDaliLabelNewP(void)
 int UtcDaliLabelNewWithTextP(void)
 {
   UiTestApplication application;
-  Label label = Label::New("Hello world");
+  Label             label = Label::New("Hello world");
   DALI_TEST_CHECK(label);
   END_TEST;
 }
@@ -106,8 +106,8 @@ int UtcDaliLabelNewWithTextP(void)
 int UtcDaliLabelCopyConstructorP(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
-  Label copy(label);
+  Label             label = Label::New();
+  Label             copy(label);
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(label == copy);
   END_TEST;
@@ -116,7 +116,7 @@ int UtcDaliLabelCopyConstructorP(void)
 int UtcDaliLabelMoveConstructor(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_EQUALS(1, label.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
   Label moved = std::move(label);
@@ -129,8 +129,8 @@ int UtcDaliLabelMoveConstructor(void)
 int UtcDaliLabelAssignmentOperatorP(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
-  Label copy;
+  Label             label = Label::New();
+  Label             copy;
   copy = label;
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(label == copy);
@@ -140,7 +140,7 @@ int UtcDaliLabelAssignmentOperatorP(void)
 int UtcDaliLabelMoveAssignment(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_EQUALS(1, label.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
   Label moved;
@@ -154,10 +154,10 @@ int UtcDaliLabelMoveAssignment(void)
 int UtcDaliLabelDownCastP(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
-  BaseHandle object(label);
-  Label label2 = Label::DownCast(object);
-  Label label3 = DownCast<Label>(object);
+  Label             label = Label::New();
+  BaseHandle        object(label);
+  Label             label2 = Label::DownCast(object);
+  Label             label3 = DownCast<Label>(object);
   DALI_TEST_CHECK(label2);
   DALI_TEST_CHECK(label3);
   END_TEST;
@@ -166,11 +166,63 @@ int UtcDaliLabelDownCastP(void)
 int UtcDaliLabelDownCastN(void)
 {
   UiTestApplication application;
-  BaseHandle unInitializedObject;
-  Label label1 = Label::DownCast(unInitializedObject);
-  Label label2 = DownCast<Label>(unInitializedObject);
+  BaseHandle        unInitializedObject;
+  Label             label1 = Label::DownCast(unInitializedObject);
+  Label             label2 = DownCast<Label>(unInitializedObject);
   DALI_TEST_CHECK(!label1);
   DALI_TEST_CHECK(!label2);
+  END_TEST;
+}
+
+int UtcDaliLabelInvokeMethod(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+
+  InvokeArguments textArguments;
+  textArguments.PushBack(Any(String("Invoked label")));
+
+  InvokeResult result;
+  DALI_TEST_CHECK(label.InvokeMethod("SetText", textArguments, result));
+  DALI_TEST_CHECK(label.InvokeMethod("GetText", InvokeArguments(), result));
+
+  const String* text = AnyCast<String>(&result);
+  DALI_TEST_CHECK(text);
+  DALI_TEST_EQUALS(*text, String("Invoked label"), TEST_LOCATION);
+
+  InvokeArguments fontSizeArguments;
+  fontSizeArguments.PushBack(Any(1.2f));
+  DALI_TEST_CHECK(label.InvokeMethod("SetFontSizeScale", fontSizeArguments, result));
+  DALI_TEST_CHECK(label.InvokeMethod("GetFontSizeScale", InvokeArguments(), result));
+
+  const float* fontSize = AnyCast<float>(&result);
+  DALI_TEST_CHECK(fontSize);
+  DALI_TEST_EQUALS(*fontSize, 1.2f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  InvokeArguments wrongTypeArguments;
+  wrongTypeArguments.PushBack(Any(22));
+  DALI_TEST_CHECK(!label.InvokeMethod("SetFontSizeScale", wrongTypeArguments, result));
+
+  END_TEST;
+}
+
+int UtcDaliAnimationSpecDownCastP(void)
+{
+  UiTestApplication application;
+
+  ViewAnimationSpec viewSpec = View::NewAnimationSpec();
+  BaseHandle        viewHandle(viewSpec);
+  ViewAnimationSpec viewDownCast = ViewAnimationSpec::DownCast(viewHandle);
+  DALI_TEST_CHECK(viewDownCast);
+
+  LabelAnimationSpec labelSpec = Label::NewAnimationSpec();
+  BaseHandle         labelHandle(labelSpec);
+  LabelAnimationSpec labelDownCast = LabelAnimationSpec::DownCast(labelHandle);
+  DALI_TEST_CHECK(labelDownCast);
+
+  LabelAnimationSpec invalidLabelDownCast = LabelAnimationSpec::DownCast(viewHandle);
+  DALI_TEST_CHECK(!invalidLabelDownCast);
+
   END_TEST;
 }
 
@@ -179,7 +231,7 @@ int UtcDaliLabelDownCastN(void)
 int UtcDaliLabelText(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetText("Hello world");
@@ -194,7 +246,7 @@ int UtcDaliLabelText(void)
 int UtcDaliLabelFontFamily(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetFontFamily("Arial");
@@ -209,7 +261,7 @@ int UtcDaliLabelFontFamily(void)
 int UtcDaliLabelFontSize(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetFontSize(20.0f);
@@ -226,7 +278,7 @@ int UtcDaliLabelFontSize(void)
 int UtcDaliLabelMultiLine(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMultiLine(true);
@@ -241,7 +293,7 @@ int UtcDaliLabelMultiLine(void)
 int UtcDaliLabelLineWrapMode(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetLineWrapMode(Text::LineWrapMode::WORD);
@@ -256,7 +308,7 @@ int UtcDaliLabelLineWrapMode(void)
 int UtcDaliLabelHorizontalTextAlignment(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
@@ -271,7 +323,7 @@ int UtcDaliLabelHorizontalTextAlignment(void)
 int UtcDaliLabelVerticalTextAlignment(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -286,7 +338,7 @@ int UtcDaliLabelVerticalTextAlignment(void)
 int UtcDaliLabelOverflowMode(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetOverflowMode(Text::OverflowMode::CLIP);
@@ -301,7 +353,7 @@ int UtcDaliLabelOverflowMode(void)
 int UtcDaliLabelLineHeight(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetLineHeight(1.5f);
@@ -316,7 +368,7 @@ int UtcDaliLabelLineHeight(void)
 int UtcDaliLabelLineHeightMode(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
@@ -331,7 +383,7 @@ int UtcDaliLabelLineHeightMode(void)
 int UtcDaliLabelLayoutDirectionMode(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetLayoutDirectionMode(Text::LayoutDirectionMode::LOCALE);
@@ -346,7 +398,7 @@ int UtcDaliLabelLayoutDirectionMode(void)
 int UtcDaliLabelMarkupEnabled(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMarkupEnabled(true);
@@ -361,7 +413,7 @@ int UtcDaliLabelMarkupEnabled(void)
 int UtcDaliLabelAnchorColor(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   UiColor color(Color::BLUE);
@@ -378,7 +430,7 @@ int UtcDaliLabelAnchorColor(void)
 int UtcDaliLabelAnchorClickedColor(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   UiColor color(Color::GREEN);
@@ -395,7 +447,7 @@ int UtcDaliLabelAnchorClickedColor(void)
 int UtcDaliLabelMarqueeTriggerPolicy(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
@@ -410,7 +462,7 @@ int UtcDaliLabelMarqueeTriggerPolicy(void)
 int UtcDaliLabelMarqueeSpeed(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMarqueeSpeed(100);
@@ -425,7 +477,7 @@ int UtcDaliLabelMarqueeSpeed(void)
 int UtcDaliLabelMarqueeLoopCount(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMarqueeLoopCount(3);
@@ -440,7 +492,7 @@ int UtcDaliLabelMarqueeLoopCount(void)
 int UtcDaliLabelMarqueeLoopDelay(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMarqueeLoopDelay(1.5f);
@@ -455,7 +507,7 @@ int UtcDaliLabelMarqueeLoopDelay(void)
 int UtcDaliLabelMarqueeGap(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMarqueeGap(50);
@@ -470,7 +522,7 @@ int UtcDaliLabelMarqueeGap(void)
 int UtcDaliLabelMarqueeStopMode(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
@@ -485,7 +537,7 @@ int UtcDaliLabelMarqueeStopMode(void)
 int UtcDaliLabelMarqueeOrientation(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMarqueeOrientation(Text::MarqueeOrientation::VERTICAL);
@@ -500,7 +552,7 @@ int UtcDaliLabelMarqueeOrientation(void)
 int UtcDaliLabelTextColor(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   UiColor color(Color::BLUE);
@@ -517,7 +569,7 @@ int UtcDaliLabelTextColor(void)
 int UtcDaliLabelFontWeight(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetFontWeight(Text::FontWeight::BOLD);
@@ -532,7 +584,7 @@ int UtcDaliLabelFontWeight(void)
 int UtcDaliLabelFontWidth(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetFontWidth(Text::FontWidth::EXPANDED);
@@ -547,7 +599,7 @@ int UtcDaliLabelFontWidth(void)
 int UtcDaliLabelFontSlant(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetFontSlant(Text::FontSlant::ITALIC);
@@ -562,7 +614,7 @@ int UtcDaliLabelFontSlant(void)
 int UtcDaliLabelTextBackgroundColor(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   UiColor color(Color::YELLOW);
@@ -587,7 +639,7 @@ int UtcDaliLabelTextBackgroundColor(void)
 int UtcDaliLabelFontSizeScale(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetFontSizeScale(1.5f);
@@ -602,7 +654,7 @@ int UtcDaliLabelFontSizeScale(void)
 int UtcDaliLabelMinimumFontSizeScale(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMinimumFontSizeScale(0.5f);
@@ -617,7 +669,7 @@ int UtcDaliLabelMinimumFontSizeScale(void)
 int UtcDaliLabelMaximumFontSizeScale(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetMaximumFontSizeScale(2.0f);
@@ -632,7 +684,7 @@ int UtcDaliLabelMaximumFontSizeScale(void)
 int UtcDaliLabelSystemFontSizeScaleEnabled(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetSystemFontSizeScaleEnabled(true);
@@ -647,7 +699,7 @@ int UtcDaliLabelSystemFontSizeScaleEnabled(void)
 int UtcDaliLabelAdjustedFontSizeScale(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   // Test clamping to minimum
@@ -671,7 +723,7 @@ int UtcDaliLabelAdjustedFontSizeScale(void)
 int UtcDaliLabelCutoutEnabled(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetCutoutEnabled(true);
@@ -686,7 +738,7 @@ int UtcDaliLabelCutoutEnabled(void)
 int UtcDaliLabelFontVariation(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   // Set via axis API
@@ -727,7 +779,7 @@ int UtcDaliLabelFontVariation(void)
 int UtcDaliLabelAsyncRendering(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetAsyncRendering(true);
@@ -742,7 +794,7 @@ int UtcDaliLabelAsyncRendering(void)
 int UtcDaliLabelRenderScale(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetRenderScale(2.0f);
@@ -758,7 +810,7 @@ int UtcDaliLabelRenderScale(void)
 int UtcDaliLabelGetProperty(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   // Check Property Indices are correct
@@ -805,7 +857,7 @@ int UtcDaliLabelGetProperty(void)
 int UtcDaliLabelSetProperty(void)
 {
   UiTestApplication application;
-  Label label = Label::New();
+  Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   // TEXT

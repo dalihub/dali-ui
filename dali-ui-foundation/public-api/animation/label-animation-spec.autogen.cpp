@@ -35,6 +35,11 @@ LabelAnimationSpec LabelAnimationSpec::New()
   return LabelAnimationSpec(p.Get());
 }
 
+LabelAnimationSpec LabelAnimationSpec::DownCast(BaseHandle handle)
+{
+  return LabelAnimationSpec(dynamic_cast<Internal::LabelAnimationSpecImpl*>(handle.GetObjectPtr()));
+}
+
 LabelAnimationSpec::LabelAnimationSpec(Internal::LabelAnimationSpecImpl* impl)
 : ViewAnimationSpec(impl)
 {

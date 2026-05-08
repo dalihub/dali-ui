@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/animation/label-animation-spec-impl.autogen.h>
 
+// EXTERNAL INCLUDES
+#include <dali/devel-api/object/type-registry.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/label.h>
 
@@ -27,6 +30,11 @@ namespace Ui
 {
 namespace Internal
 {
+namespace
+{
+Dali::TypeRegistration LABEL_ANIMATION_SPEC_TYPE("LabelAnimationSpec", typeid(Dali::Ui::ViewAnimationSpec), nullptr);
+Dali::TypeRegistration LABEL_ANIMATION_SPEC_IMPL_TYPE(typeid(Dali::Ui::Internal::LabelAnimationSpecImpl), typeid(Dali::Ui::LabelAnimationSpec), nullptr);
+} // namespace
 
 LabelAnimationSpecImpl::LabelAnimationSpecImpl() = default;
 

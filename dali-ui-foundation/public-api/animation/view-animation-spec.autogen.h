@@ -54,6 +54,7 @@ class DALI_UI_API ViewAnimationSpec : public BaseHandle
 public:
   ViewAnimationSpec();
   static ViewAnimationSpec New();
+  static ViewAnimationSpec DownCast(BaseHandle handle); // LCOV_EXCL_LINE
 
   ViewAnimationSpec(const ViewAnimationSpec& other);
   ViewAnimationSpec(ViewAnimationSpec&& rhs) noexcept;

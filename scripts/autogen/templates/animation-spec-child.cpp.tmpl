@@ -35,6 +35,11 @@ namespace Ui
   return {{SPEC_CLASS}}(p.Get());
 }
 
+{{SPEC_CLASS}} {{SPEC_CLASS}}::DownCast(BaseHandle handle)
+{
+  return {{SPEC_CLASS}}(dynamic_cast<Internal::{{IMPL_CLASS}}*>(handle.GetObjectPtr()));
+}
+
 {{SPEC_CLASS}}::{{SPEC_CLASS}}(Internal::{{IMPL_CLASS}}* impl)
 : {{PARENT_SPEC}}(impl)
 {

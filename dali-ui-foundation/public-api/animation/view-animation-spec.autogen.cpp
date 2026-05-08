@@ -48,6 +48,11 @@ ViewAnimationSpec ViewAnimationSpec::New()
   return ViewAnimationSpec(p.Get());
 }
 
+ViewAnimationSpec ViewAnimationSpec::DownCast(BaseHandle handle)
+{
+  return ViewAnimationSpec(dynamic_cast<Internal::ViewAnimationSpecImpl*>(handle.GetObjectPtr()));
+}
+
 ViewAnimationSpec::ViewAnimationSpec(Internal::ViewAnimationSpecImpl* impl)
 : BaseHandle(impl)
 {
