@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/public-api/scroll-view.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
+#include <dali/public-api/events/wheel-event.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/object/property-notification.h>
 // #include <dali/public-api/signals/signal.h>
@@ -327,6 +328,11 @@ private:
    * Feeds each event to the PanGestureDetector via HandleEvent.
    */
   bool OnTouch(Actor actor, TouchEvent touch);
+
+  /**
+   * @brief Handles mouse wheel events for scrolling.
+   */
+  bool OnWheelEvent(Actor actor, WheelEvent event);
 
   /**
    * @brief Callback for pan gesture detection.

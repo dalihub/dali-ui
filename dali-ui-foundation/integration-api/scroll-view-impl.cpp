@@ -25,6 +25,7 @@
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/touch-event.h>
+#include <dali/public-api/events/wheel-event.h>
 #include <dali/public-api/math/vector2.h>
 
 #include <dali/devel-api/object/type-registry.h>
@@ -50,6 +51,9 @@ namespace
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_SCROLLVIEW");
 #endif
+
+constexpr float WHEEL_SCROLL_STEP = 120.0f; ///< Pixels scrolled per wheel notch
+constexpr float WHEEL_ANIM_SEC    = 0.2f;   ///< Duration of wheel scroll animation (seconds)
 
 BaseHandle Create()
 {
@@ -151,6 +155,9 @@ void ScrollViewImpl::OnInitialize()
 
   // After interception begins, subsequent events arrive here instead of children.
   Self().TouchedSignal().Connect(this, &ScrollViewImpl::OnTouch);
+
+  // Handle mouse wheel events for desktop / emulator scrolling.
+  Self().WheelEventSignal().Connect(this, &ScrollViewImpl::OnWheelEvent);
 }
 
 void ScrollViewImpl::SetContent(View content)
@@ -683,6 +690,77 @@ Vector2 ScrollViewImpl::ContentPositionToScrollPosition(const Vector2& content) 
 Vector2 ScrollViewImpl::DeltaFromScrollPosition(const Vector2& scrollPosition) const
 {
   return Vector2(mScrollPosition.x - scrollPosition.x, mScrollPosition.y - scrollPosition.y);
+}
+
+bool ScrollViewImpl::OnWheelEvent(Actor /*actor*/, WheelEvent event)
+{
+  if(!mContent || !mHasScrollableArea)
+  {
+    return false;
+  }
+
+  // GetDelta(): positive = roll down / clockwise, negative = roll up / counter-clockwise.
+  const int32_t delta       = event.GetDelta();
+  const int32_t hwDirection = event.GetDirection(); // 0 = vertical wheel, 1 = horizontal wheel
+
+  const bool canV = CanScrollVertically(mScrollDirection);
+  const bool canH = CanScrollHorizontally(mScrollDirection);
+
+  float stepX = 0.0f;
+  float stepY = 0.0f;
+
+  if(hwDirection == 0)
+  {
+    if(canV)
+    {
+      stepY = delta * WHEEL_SCROLL_STEP;
+    }
+    else if(canH)
+    {
+      // Redirect vertical wheel to horizontal axis when only horizontal scroll is available.
+      stepX = delta * WHEEL_SCROLL_STEP;
+    }
+  }
+  else // hwDirection == 1
+  {
+    if(canH)
+    {
+      stepX = delta * WHEEL_SCROLL_STEP;
+    }
+  }
+
+  if(stepX == 0.0f && stepY == 0.0f)
+  {
+    return false;
+  }
+
+  // Cancel any ongoing fling/animation and pick up the live content position.
+  CancelScrollAnimation();
+
+  Vector2 newPosition = AdjustScrollPosition(Vector2(mScrollPosition.x + stepX, mScrollPosition.y + stepY));
+
+  const float targetPosX  = mMaximumStartX - newPosition.x;
+  const float targetPosY  = mMaximumStartY - newPosition.y;
+  const float currentPosX = mContent.GetCurrentProperty<float>(Actor::Property::POSITION_X);
+  const float currentPosY = mContent.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float distX       = targetPosX - currentPosX;
+  const float distY       = targetPosY - currentPosY;
+
+  if(std::sqrt(distX * distX + distY * distY) < 0.5f)
+  {
+    return true; // Already at target; consume but do nothing.
+  }
+
+  SendScrollStarted();
+
+  mScrollAnimation = Animation::New(WHEEL_ANIM_SEC);
+  mScrollAnimation.AnimateTo(Property(mContent, Actor::Property::POSITION_X), targetPosX, AlphaFunction::EASE_OUT);
+  mScrollAnimation.AnimateTo(Property(mContent, Actor::Property::POSITION_Y), targetPosY, AlphaFunction::EASE_OUT);
+  mScrollAnimation.FinishedSignal().Connect(this, &ScrollViewImpl::OnScrollAnimationFinished);
+  mScrollAnimation.Play();
+
+  mScrollPosition = newPosition;
+  return true;
 }
 
 bool ScrollViewImpl::OnInterceptTouch(Actor actor, TouchEvent touch)
