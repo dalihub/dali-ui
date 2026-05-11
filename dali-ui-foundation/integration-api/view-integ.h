@@ -89,7 +89,7 @@ DALI_UI_API void AllowToAddActorToChildBegin(Ui::View view);
 /**
  * @brief Stop allowing to Adds some raw (non-View) Actor as a child of the given View for a whiles.
  *
- * @post AllowToAddActorToChildBegin() MUST be called before.
+ * @pre AllowToAddActorToChildBegin() MUST be called before.
  * @param[in] view  The parent View to allow end.
  */
 DALI_UI_API void AllowToAddActorToChildEnd(Ui::View view);
