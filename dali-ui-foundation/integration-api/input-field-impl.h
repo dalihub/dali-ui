@@ -709,6 +709,15 @@ public: // UiScale
    */
   float GetTextUiScale() const;
 
+  /**
+   * @brief Gets the effective padding used for text layout.
+   *
+   * The view padding is adjusted by the current text UI scale.
+   *
+   * @return The effective text padding.
+   */
+  Extents GetEffectiveTextPadding() const;
+
 public: // From ViewImpl
   /**
    * @copydoc ViewImpl::OnInitialize

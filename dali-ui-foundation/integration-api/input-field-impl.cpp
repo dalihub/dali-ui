@@ -1113,6 +1113,17 @@ float InputFieldImpl::GetTextUiScale() const
   return mController->GetUiScale();
 }
 
+Extents InputFieldImpl::GetEffectiveTextPadding() const
+{
+  Extents     padding     = GetPadding();
+  const float textUiScale = GetTextUiScale();
+  padding.start           = static_cast<uint16_t>(static_cast<float>(padding.start) * textUiScale);
+  padding.end             = static_cast<uint16_t>(static_cast<float>(padding.end) * textUiScale);
+  padding.top             = static_cast<uint16_t>(static_cast<float>(padding.top) * textUiScale);
+  padding.bottom          = static_cast<uint16_t>(static_cast<float>(padding.bottom) * textUiScale);
+  return padding;
+}
+
 // =============================================================================
 // ViewImpl
 // =============================================================================
@@ -1218,9 +1229,9 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
 {
   Actor self = Self();
 
-  Extents padding = GetPadding();
-  float   width   = std::max(size.x - (padding.start + padding.end), 0.0f);
-  float   height  = std::max(size.y - (padding.top + padding.bottom), 0.0f);
+  Extents padding = GetEffectiveTextPadding();
+  float   width   = std::max(size.x - static_cast<float>(padding.start + padding.end), 0.0f);
+  float   height  = std::max(size.y - static_cast<float>(padding.top + padding.bottom), 0.0f);
   Vector2 contentSize(width, height);
   DALI_LOG_RELEASE_INFO("[%p] size:%f,%f, contentSize:%f,%f\n", mController.Get(), size.x, size.y, contentSize.x,
                         contentSize.y);
@@ -1313,18 +1324,18 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
 
 Vector3 InputFieldImpl::GetNaturalSize()
 {
-  Extents padding     = GetPadding();
+  Extents padding     = GetEffectiveTextPadding();
   Vector3 naturalSize = mController->GetNaturalSize();
-  naturalSize.width += (padding.start + padding.end);
-  naturalSize.height += (padding.top + padding.bottom);
-
+  naturalSize.width += static_cast<float>(padding.start + padding.end);
+  naturalSize.height += static_cast<float>(padding.top + padding.bottom);
   return naturalSize;
 }
 
 float InputFieldImpl::GetHeightForWidth(float width)
 {
-  Extents padding = GetPadding();
-  return mController->GetHeightForWidth(width - (padding.start + padding.end)) + padding.top + padding.bottom;
+  Extents padding      = GetEffectiveTextPadding();
+  float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  return mController->GetHeightForWidth(contentWidth) + static_cast<float>(padding.top + padding.bottom);
 }
 
 void InputFieldImpl::OnFocusChanged(bool focused)
@@ -1429,10 +1440,10 @@ void InputFieldImpl::OnTapDetected(Actor actor, TapGesture gesture)
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
 
   // Deliver the tap before the focus event to controller; this allows us to detect when focus is gained due to tap-gestures
-  Extents        padding    = GetPadding();
+  Extents        padding    = GetEffectiveTextPadding();
   const Vector2& localPoint = gesture.GetLocalPoint();
-  mController->TapEvent(gesture.GetNumberOfTaps(), localPoint.x - padding.start, localPoint.y - padding.top);
-  mController->AnchorEvent(localPoint.x - padding.start, localPoint.y - padding.top);
+  mController->TapEvent(gesture.GetNumberOfTaps(), localPoint.x - static_cast<float>(padding.start), localPoint.y - static_cast<float>(padding.top));
+  mController->AnchorEvent(localPoint.x - static_cast<float>(padding.start), localPoint.y - static_cast<float>(padding.top));
 
   Dali::Ui::FocusManager keyboardFocusManager = Dali::Ui::FocusManager::Get();
   if(keyboardFocusManager)
@@ -1461,10 +1472,9 @@ void InputFieldImpl::OnLongPressDetected(Actor actor, LongPressGesture gesture)
   {
     mInputMethodContext.Activate();
   }
-  Extents        padding    = GetPadding();
+  Extents        padding    = GetEffectiveTextPadding();
   const Vector2& localPoint = gesture.GetLocalPoint();
-  mController->LongPressEvent(gesture.GetState(), localPoint.x - padding.start, localPoint.y - padding.top);
-
+  mController->LongPressEvent(gesture.GetState(), localPoint.x - static_cast<float>(padding.start), localPoint.y - static_cast<float>(padding.top));
   SetKeyInputFocus(*this);
 }
 
@@ -1497,7 +1507,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
     // GetNaturalSize() includes view padding, but GetDefaultFontLineHeight() does not.
     // Therefore, when text is empty, padding must be added explicitly to keep
     // measurement consistent with the normal natural size path.
-    Extents padding = GetPadding();
+    Extents padding = GetEffectiveTextPadding();
     naturalHeight   = mController->GetDefaultFontLineHeight() + (padding.top + padding.bottom);
   }
 
