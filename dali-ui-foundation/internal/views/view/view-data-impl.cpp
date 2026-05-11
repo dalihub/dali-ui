@@ -49,6 +49,7 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
@@ -509,6 +510,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mInteractiveTrait(nullptr),
   mAccessibilityData(nullptr),
   mVisualData(nullptr),
+  mAttachments(nullptr),
   mFocusNavigationData(nullptr),
   mBackgroundColor(Color::TRANSPARENT),
   mMargin(),
@@ -650,6 +652,35 @@ bool ViewDataImpl::RemoveTrait(TraitId id)
     }
   }
   return false;
+}
+
+void ViewDataImpl::SetAttachment(AttachmentId id, UniqueAny attachment)
+{
+  if(!mAttachments)
+  {
+    mAttachments = std::make_unique<AttachmentContainer>();
+  }
+  mAttachments->SetAttachment(id, Dali::Move(attachment));
+}
+
+bool ViewDataImpl::RemoveAttachment(AttachmentId id)
+{
+  return mAttachments ? mAttachments->RemoveAttachment(id) : false;
+}
+
+UniqueAny ViewDataImpl::DetachAttachment(AttachmentId id)
+{
+  return mAttachments ? mAttachments->DetachAttachment(id) : UniqueAny();
+}
+
+UniqueAny* ViewDataImpl::GetAttachment(AttachmentId id)
+{
+  return mAttachments ? mAttachments->GetAttachment(id) : nullptr;
+}
+
+const UniqueAny* ViewDataImpl::GetAttachment(AttachmentId id) const
+{
+  return mAttachments ? mAttachments->GetAttachment(id) : nullptr;
 }
 
 void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)

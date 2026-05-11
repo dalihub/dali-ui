@@ -439,4 +439,27 @@
   * @param[in] containerRangeType The range of visuals to be added. \
   * @param[in] visuals The initializer list containing VisualBase handles to be added. \
   */ \
-  ChildClass& Visuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals) { View::Visuals(containerRangeType, visuals); return *this; }
+  ChildClass& Visuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals) { View::Visuals(containerRangeType, visuals); return *this; } \
+  /** \
+  * @brief Sets an attachment from uniquely owned data. \
+  * \
+  * The data ownership is moved into this View. If another \
+  * attachment already exists for @p id, it is destroyed and replaced. The \
+  * stored attachment is destroyed when it is removed, replaced, or when the \
+  * View implementation is destroyed. \
+  * \
+  * @note This typed attachment API stores Dali::UniquePtr<T> with its default \
+  * deleter. UniquePtr types with custom deleters are not supported by this \
+  * overload. \
+  * \
+  * @param[in] id The key to identify the attachment \
+  * @param[in] data The data whose ownership is transferred to this View \
+  * @return Reference to this View \
+  */ \
+  template<typename T> \
+  ChildClass& SetAttachment(AttachmentId id, Dali::UniquePtr<T> data) \
+  { \
+  DALI_ASSERT_ALWAYS(data && "SetAttachment requires non-null data"); \
+  View::SetAttachment(id, UniqueAny(Dali::Move(data))); \
+  return *this; \
+  }

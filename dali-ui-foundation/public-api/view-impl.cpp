@@ -443,6 +443,31 @@ bool ViewImpl::IsInteractive() const
   return !!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
 }
 
+void ViewImpl::SetAttachment(AttachmentId id, UniqueAny attachment)
+{
+  mImpl->SetAttachment(id, Dali::Move(attachment));
+}
+
+bool ViewImpl::RemoveAttachment(AttachmentId id)
+{
+  return mImpl->RemoveAttachment(id);
+}
+
+UniqueAny ViewImpl::DetachAttachment(AttachmentId id)
+{
+  return mImpl->DetachAttachment(id);
+}
+
+UniqueAny* ViewImpl::GetAttachment(AttachmentId id)
+{
+  return mImpl->GetAttachment(id);
+}
+
+const UniqueAny* ViewImpl::GetAttachment(AttachmentId id) const
+{
+  return mImpl->GetAttachment(id);
+}
+
 Ui::SelectableTrait ViewImpl::EnsureSelectableTrait()
 {
   Ui::SelectableTrait existing = IntegrationView::GetTrait<Ui::SelectableTrait>(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);

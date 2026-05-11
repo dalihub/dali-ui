@@ -848,6 +848,31 @@ ViewAnimationSpec View::NewAnimationSpec()
   return ViewAnimationSpec::New();
 }
 
+void View::SetAttachment(AttachmentId id, UniqueAny attachment)
+{
+  GetImpl(*this).SetAttachment(id, Dali::Move(attachment));
+}
+
+bool View::RemoveAttachment(AttachmentId id)
+{
+  return GetImpl(*this).RemoveAttachment(id);
+}
+
+UniqueAny View::DetachAttachmentInternal(AttachmentId id)
+{
+  return GetImpl(*this).DetachAttachment(id);
+}
+
+UniqueAny* View::GetAttachmentInternal(AttachmentId id)
+{
+  return GetImpl(*this).GetAttachment(id);
+}
+
+const UniqueAny* View::GetAttachmentInternal(AttachmentId id) const
+{
+  return GetImpl(*this).GetAttachment(id);
+}
+
 } // namespace Ui
 
 } // namespace Dali

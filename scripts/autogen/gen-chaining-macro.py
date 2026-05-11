@@ -154,7 +154,7 @@ def process_header(file_path):
         target_method = None
         manual_methods = []  # for MANUAL: list of (template_or_none, name, args, line_idx, doc)
 
-        # 1. MANUAL_SELF 태그: 리턴 타입과 동일한 파라미터/body 타입을 ChildClass로 치환
+        # 1. MANUAL_SELF 태그: 리턴 타입과 동일한 파라미터 타입을 ChildClass로 치환
         if '@CHAIN_MANUAL_SELF' in line:
             k = _skip_comment_blank(lines, i + 1, min(len(lines), i + MANUAL_SEARCH_LIMIT))
             inner_limit = 0
@@ -192,12 +192,7 @@ def process_header(file_path):
                 body_lines = []
                 if body_start < len(lines):
                     end_idx = _find_function_end(lines, body_start)
-                    raw_body = _extract_body_lines(lines, body_start, end_idx)
-                    # body에서도 BaseClass 타입을 ChildClass로 치환
-                    body_lines = [
-                        re.sub(rf'\b{re.escape(base_class)}\b', 'ChildClass', bl)
-                        for bl in raw_body
-                    ]
+                    body_lines = _extract_body_lines(lines, body_start, end_idx)
                     i = end_idx + 1
                 else:
                     i = decl_idx + 1

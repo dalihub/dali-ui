@@ -33,6 +33,7 @@
 #include <memory>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/attachment-id.h>
 #include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -43,6 +44,7 @@
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/ui-scale-policy.h>
+#include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -516,6 +518,40 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::SetInteractionEffect()
    */
   void SetInteractionEffect(Trait effect);
+
+  /**
+   * @copydoc Ui::View::SetAttachment()
+   */
+  DALI_INTERNAL void SetAttachment(AttachmentId id, UniqueAny attachment);
+
+  /**
+   * @copydoc Ui::View::RemoveAttachment()
+   */
+  bool RemoveAttachment(AttachmentId id);
+
+  /**
+   * @brief Gets a raw attachment.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return Pointer to the attachment, or nullptr if missing
+   */
+  DALI_INTERNAL UniqueAny* GetAttachment(AttachmentId id);
+
+  /**
+   * @brief Gets a const raw attachment.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return Pointer to the attachment, or nullptr if missing
+   */
+  DALI_INTERNAL const UniqueAny* GetAttachment(AttachmentId id) const;
+
+  /**
+   * @brief Detaches a raw attachment.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return The stored attachment, or an empty UniqueAny if missing
+   */
+  DALI_INTERNAL UniqueAny DetachAttachment(AttachmentId id);
 
   // VisualBase
 

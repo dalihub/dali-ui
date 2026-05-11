@@ -35,7 +35,9 @@
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/public-api/attachment-id.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali/integration-api/debug.h>
@@ -49,6 +51,8 @@ namespace Ui
 {
 namespace Internal
 {
+class AttachmentContainer;
+
 namespace Visual
 {
 class Base;
@@ -137,6 +141,41 @@ public:
    * @brief Removes a trait from the owning View.
    */
   bool RemoveTrait(TraitId id);
+
+  /**
+   * @brief Sets an attachment to the owning View.
+   *
+   * Replaces the existing attachment when @p id is already present.
+   */
+  void SetAttachment(AttachmentId id, UniqueAny attachment);
+
+  /**
+   * @brief Removes an attachment from the owning View.
+   *
+   * @return True if an attachment was removed
+   */
+  bool RemoveAttachment(AttachmentId id);
+
+  /**
+   * @brief Detaches an attachment from the owning View.
+   *
+   * @return The stored attachment, or an empty UniqueAny if missing
+   */
+  UniqueAny DetachAttachment(AttachmentId id);
+
+  /**
+   * @brief Gets a raw attachment from the owning View.
+   *
+   * @return Pointer to the attachment, or nullptr if missing
+   */
+  UniqueAny* GetAttachment(AttachmentId id);
+
+  /**
+   * @brief Gets a const raw attachment from the owning View.
+   *
+   * @return Pointer to the attachment, or nullptr if missing
+   */
+  const UniqueAny* GetAttachment(AttachmentId id) const;
 
   // State management
 
@@ -544,8 +583,9 @@ public:
   std::vector<std::pair<TraitId, Dali::BaseHandle>> mTraits;
   Ui::InteractiveTraitInterface*                    mInteractiveTrait;
 
-  std::unique_ptr<AccessibilityData> mAccessibilityData;
-  std::unique_ptr<VisualData>        mVisualData;
+  std::unique_ptr<AccessibilityData>   mAccessibilityData;
+  std::unique_ptr<VisualData>          mVisualData;
+  std::unique_ptr<AttachmentContainer> mAttachments;
 
   struct FocusNavigationData
   {

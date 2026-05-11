@@ -25,6 +25,7 @@
 #include <initializer_list>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/attachment-id.h>
 #include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
@@ -34,6 +35,7 @@
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
 #include <dali-ui-foundation/public-api/ui-scale-policy.h>
+#include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view-types.h>
@@ -1173,7 +1175,114 @@ public: // Properties
     return *this;
   }
 
+  // @CHAIN_MANUAL_SELF
+  /**
+   * @brief Sets an attachment from uniquely owned data.
+   *
+   * The data ownership is moved into this View. If another
+   * attachment already exists for @p id, it is destroyed and replaced. The
+   * stored attachment is destroyed when it is removed, replaced, or when the
+   * View implementation is destroyed.
+   *
+   * @note This typed attachment API stores Dali::UniquePtr<T> with its default
+   * deleter. UniquePtr types with custom deleters are not supported by this
+   * overload.
+   *
+   * @param[in] id The key to identify the attachment
+   * @param[in] data The data whose ownership is transferred to this View
+   * @return Reference to this View
+   */
+  template<typename T>
+  View& SetAttachment(AttachmentId id, Dali::UniquePtr<T> data)
+  {
+    DALI_ASSERT_ALWAYS(data && "SetAttachment requires non-null data");
+    View::SetAttachment(id, UniqueAny(Dali::Move(data)));
+    return *this;
+  }
+
   // @CHAIN_END
+
+  /**
+   * @brief Removes an attachment.
+   *
+   * Removing an attachment destroys the stored UniqueAny and its owned value.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return True if an attachment was removed
+   */
+  bool RemoveAttachment(AttachmentId id);
+
+  /**
+   * @brief Gets an attachment value.
+   *
+   * The returned pointer is owned by this View. The caller must not delete it
+   * and must not use it after the attachment is removed, replaced, or the View
+   * implementation is destroyed.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return Pointer to the stored value, or nullptr if missing or type mismatched
+   */
+  template<typename T>
+  T* GetAttachment(AttachmentId id)
+  {
+    using StoredType = Dali::UniquePtr<T>;
+
+    UniqueAny*  attachment = GetAttachmentInternal(id);
+    StoredType* data       = attachment ? attachment->Get<StoredType>() : nullptr;
+    return data ? data->Get() : nullptr;
+  }
+
+  /**
+   * @brief Gets a const attachment value.
+   *
+   * The returned pointer is owned by this View. The caller must not delete it
+   * and must not use it after the attachment is removed, replaced, or the View
+   * implementation is destroyed.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return Pointer to the stored value, or nullptr if missing or type mismatched
+   */
+  template<typename T>
+  const T* GetAttachment(AttachmentId id) const
+  {
+    using StoredType = Dali::UniquePtr<T>;
+
+    const UniqueAny*  attachment = GetAttachmentInternal(id);
+    const StoredType* data       = attachment ? attachment->Get<StoredType>() : nullptr;
+    return data ? data->Get() : nullptr;
+  }
+
+  /**
+   * @brief Detaches an attachment value.
+   *
+   * If the stored value type matches @p T, the attachment is removed from this
+   * View and ownership of the value is transferred to the returned UniquePtr.
+   * If the attachment is missing or the type does not match, this View is left
+   * unchanged and nullptr is returned.
+   *
+   * @note This typed attachment API detaches Dali::UniquePtr<T> with its
+   * default deleter. UniquePtr types with custom deleters are not supported by
+   * this overload.
+   *
+   * @param[in] id The key to identify the attachment
+   * @return The detached value, or nullptr if missing or type mismatched
+   */
+  template<typename T>
+  Dali::UniquePtr<T> DetachAttachment(AttachmentId id)
+  {
+    using StoredType = Dali::UniquePtr<T>;
+
+    UniqueAny*  storedAttachment = GetAttachmentInternal(id);
+    StoredType* storedData       = storedAttachment ? storedAttachment->Get<StoredType>() : nullptr;
+    if(!storedData)
+    {
+      return Dali::UniquePtr<T>();
+    }
+
+    UniqueAny                   attachment = DetachAttachmentInternal(id);
+    Dali::UniquePtr<StoredType> data       = attachment.Detach<StoredType>();
+    return data.Get() ? Dali::Move(*data) : Dali::UniquePtr<T>();
+  }
 
   /**
    * @brief Inserts a child at the specified index.
@@ -1974,6 +2083,15 @@ public: // Animation
    */
   static ViewAnimationSpec NewAnimationSpec();
 
+public:
+  /**
+   * @brief Sets an attachment internally.
+   *
+   * @param[in] id The key to identify the attachment
+   * @param[in] attachment The attachment whose ownership is transferred to this View
+   */
+  void SetAttachment(AttachmentId id, UniqueAny attachment);
+
 public: // Templates for Deriving Classes
   /**
    * @brief Template to allow deriving Views to DownCast handles to deriving handle classes.
@@ -2022,6 +2140,11 @@ public: // Templates for Deriving Classes
       DALI_ASSERT_DEBUG(dynamic_cast<I*>(&CustomActor(internal).GetImplementation()));
     }
   }
+
+private:
+  UniqueAny*       GetAttachmentInternal(AttachmentId id);
+  const UniqueAny* GetAttachmentInternal(AttachmentId id) const;
+  UniqueAny        DetachAttachmentInternal(AttachmentId id);
 };
 
 } // namespace Ui
