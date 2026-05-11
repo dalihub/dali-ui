@@ -36,6 +36,7 @@
 #include <cstring>
 #include <limits>
 #include <stack>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
@@ -101,6 +102,29 @@ thread_local bool gAllowNonViewChild = false;
 // Dali::Equals returns false for any NaN comparison (IEEE 754), so
 // the guard naturally bypasses it without a special-case check.
 constexpr float MEASURE_CACHE_DIRTY = -1.0f;
+
+// RAII guard: restores the previous flag value on any exit path (including
+// exceptions from view.Add()), and stays correct under nesting.
+struct AllowNonViewChildScope
+{
+  const bool previous;
+  AllowNonViewChildScope()
+  : previous(gAllowNonViewChild)
+  {
+    gAllowNonViewChild = true;
+  }
+  ~AllowNonViewChildScope()
+  {
+    gAllowNonViewChild = previous;
+  }
+
+  AllowNonViewChildScope(const AllowNonViewChildScope&)                = delete;
+  AllowNonViewChildScope& operator=(const AllowNonViewChildScope&)     = delete;
+  AllowNonViewChildScope(AllowNonViewChildScope&&) noexcept            = default;
+  AllowNonViewChildScope& operator=(AllowNonViewChildScope&&) noexcept = default;
+};
+
+thread_local std::vector<AllowNonViewChildScope> gAllowScopeList;
 
 } // namespace
 
@@ -2219,26 +2243,19 @@ void AddActorChild(Ui::View view, Dali::Actor actor)
     return;
   }
 
-  // RAII guard: restores the previous flag value on any exit path (including
-  // exceptions from view.Add()), and stays correct under nesting.
-  struct AllowNonViewChildScope
-  {
-    const bool previous;
-    AllowNonViewChildScope()
-    : previous(gAllowNonViewChild)
-    {
-      gAllowNonViewChild = true;
-    }
-    ~AllowNonViewChildScope()
-    {
-      gAllowNonViewChild = previous;
-    }
-
-    AllowNonViewChildScope(const AllowNonViewChildScope&)            = delete;
-    AllowNonViewChildScope& operator=(const AllowNonViewChildScope&) = delete;
-  } scope;
-
+  AllowToAddActorToChildBegin(view);
   view.Add(actor);
+  AllowToAddActorToChildEnd(view);
+}
+
+void AllowToAddActorToChildBegin(Ui::View view)
+{
+  gAllowScopeList.emplace_back();
+}
+
+void AllowToAddActorToChildEnd(Ui::View view)
+{
+  gAllowScopeList.pop_back();
 }
 
 } // namespace IntegrationView

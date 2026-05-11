@@ -125,7 +125,16 @@ void OffScreenRenderingImpl::OnRefresh()
 {
   DestroyFrameBuffer();
 
+  Ui::View view = GetOwnerView();
+  if(DALI_LIKELY(view))
+  {
+    IntegrationView::AllowToAddActorToChildBegin(view);
+  }
   mRenderTask.SetBuiltinCameraActor(Dali::RenderTask::BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR, GetTargetSize(), Property::Map().Add(Dali::Actor::Property::NAME, "OffScreenAutoCamera").Add(Dali::CameraActor::Property::INVERT_Y_AXIS, true));
+  if(DALI_LIKELY(view))
+  {
+    IntegrationView::AllowToAddActorToChildEnd(view);
+  }
 
   CreateFrameBuffer();
   SetRendererTexture(GetTargetRenderer(), mFrameBuffer);
@@ -152,6 +161,8 @@ void OffScreenRenderingImpl::CreateRenderTask()
   Dali::Integration::SceneHolder sceneHolder = GetSceneHolder();
   RenderTaskList                 taskList    = sceneHolder.GetRenderTaskList();
 
+  IntegrationView::AllowToAddActorToChildBegin(view);
+
   mRenderTask = taskList.CreateTask();
   mRenderTask.SetSourceActor(view);
   mRenderTask.SetBuiltinCameraActor(Dali::RenderTask::BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR, GetTargetSize(), Property::Map().Add(Dali::Actor::Property::NAME, "OffScreenAutoCamera").Add(Dali::CameraActor::Property::INVERT_Y_AXIS, true));
@@ -162,6 +173,8 @@ void OffScreenRenderingImpl::CreateRenderTask()
   mRenderTask.SetClearColor(Color::TRANSPARENT);
   mRenderTask.SetRenderPassTag(GetRenderPassTag());
   mRenderTask.FinishedSignal().Connect(this, &OffScreenRenderingImpl::OnRenderFinished);
+
+  IntegrationView::AllowToAddActorToChildEnd(view);
 }
 
 void OffScreenRenderingImpl::DestroyRenderTask()

@@ -316,6 +316,8 @@ void MaskEffectImpl::CreateRenderTasks(Ui::View ownerView)
 {
   RenderTaskList taskList = GetSceneHolder().GetRenderTaskList();
 
+  IntegrationView::AllowToAddActorToChildBegin(ownerView);
+
   mMaskTargetRenderTask = taskList.CreateTask();
   mMaskTargetRenderTask.SetBuiltinCameraActor(Dali::RenderTask::BuiltinCameraType::ATTACHED_TO_SOURCE_ACTOR, GetTargetSize(), Property::Map().Add(Dali::Actor::Property::NAME, "MaskEffectAutoCamera").Add(Dali::CameraActor::Property::INVERT_Y_AXIS, true));
   mMaskTargetRenderTask.SetExclusive(true);
@@ -361,6 +363,8 @@ void MaskEffectImpl::CreateRenderTasks(Ui::View ownerView)
   {
     mMaskSourceRenderTask.SetRefreshRate(RenderTask::RefreshRate::REFRESH_ALWAYS);
   }
+
+  IntegrationView::AllowToAddActorToChildEnd(ownerView);
 }
 
 void MaskEffectImpl::ResetMaskData()

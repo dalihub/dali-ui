@@ -70,6 +70,31 @@ using ChildContainer = Dali::Vector<Ui::View>;
 DALI_UI_API void AddActorChild(Ui::View view, Dali::Actor actor);
 
 /**
+ * @brief Allow to Adds some raw (non-View) Actor as a child of the given View for a whiles.
+ *
+ * View::OnChildAdd normally asserts when the added child cannot be DownCast to
+ * Ui::View. This Integration helper bypasses that check so internal modules can
+ * attach supporting Actors (clipping stencils, render-effect roots, decoration
+ * layers, etc.) without violating the View-only invariant for application code.
+ *
+ * The added Actor is NOT tracked in the View's child container and therefore is
+ * excluded from the View's measure/arrange layout pass. The caller is fully
+ * responsible for the Actor's size, position, and lifecycle.
+ *
+ * @post AllowToAddActorToChildEnd() MUST be called at final.
+ * @param[in] view  The parent View to allow begin.
+ */
+DALI_UI_API void AllowToAddActorToChildBegin(Ui::View view);
+
+/**
+ * @brief Stop allowing to Adds some raw (non-View) Actor as a child of the given View for a whiles.
+ *
+ * @post AllowToAddActorToChildBegin() MUST be called before.
+ * @param[in] view  The parent View to allow end.
+ */
+DALI_UI_API void AllowToAddActorToChildEnd(Ui::View view);
+
+/**
  * @brief Sets trait data on a View.
  *
  * If the stored object implements TraitInterface, lifecycle callbacks
