@@ -276,6 +276,7 @@ private:
     content.Add(BuildZoneA());
     content.Add(BuildZoneB());
     content.Add(BuildZoneC());
+    content.Add(BuildZoneD());
 
     // ScrollView fills remaining height in the root StackLayout
     ScrollView scrollView = ScrollView::New();
@@ -446,6 +447,145 @@ private:
       "Purple=INHERIT (fixed at 1.0), Orange-red=ENABLED (scales despite DISABLED parent)."));
 
     return zone;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Zone D: Corner radius (ABSOLUTE & RELATIVE) + Borderline width
+  //
+  // Verifies that pixel-unit decoration properties are scaled correctly:
+  //   - ABSOLUTE corner radius: visual radius = natural × effectiveScale
+  //     → the rounded corner stays physically the same size
+  //   - RELATIVE corner radius: fraction of view size → unaffected by scale
+  //     (visual radius already grows because the view itself grows)
+  //   - Borderline width: visual width = natural × effectiveScale
+  //     → the border stays physically the same thickness
+  //
+  // To confirm correctness: increase scale and observe that:
+  //   - ABSOLUTE radius boxes keep the same proportional rounding
+  //   - RELATIVE radius box keeps the same fraction of each side
+  //   - Borderline box keeps the same physical border thickness
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  View BuildZoneD()
+  {
+    constexpr uint32_t C_ZONE_D_BG   = 0xFCE4EC; // light pink
+    constexpr float    DECO_BOX_SIZE = 80.0f;     // natural box size
+    constexpr float    ABS_RADIUS    = 20.0f;     // natural corner radius (ABSOLUTE)
+    constexpr float    REL_RADIUS    = 0.3f;      // corner radius fraction (RELATIVE)
+    constexpr float    BORDER_WIDTH  = 5.0f;      // natural borderline width (px)
+
+    StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_D_BG));
+
+    zone.Add(MakeZoneTitle("[Zone D] Corner Radius & Borderline vs. UiScale"));
+    zone.Add(MakeDesc(
+      "Decoration properties (corner radius, borderline) are stored in natural pixels. "
+      "The renderer uses naturalValue × effectiveScale so the decoration stays "
+      "proportionally consistent as the view grows."));
+
+    // ── Row 1: Corner radius comparison ──────────────────────────────────────
+    zone.Add(MakeDesc("Corner radius: ABSOLUTE (20 px) vs. RELATIVE (0.3):"));
+
+    StackLayout rowRadius = MakeHStack();
+
+    // Box A: ABSOLUTE corner radius 20 px
+    {
+      View box = MakeDecoBox(UiColor(C_BLUE), DECO_BOX_SIZE);
+      box.SetCornerRadius(ABS_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      rowRadius.Add(MakeLabeled(box, "ABSOLUTE\n20 px"));
+    }
+
+    // Box B: RELATIVE corner radius 0.3
+    {
+      View box = MakeDecoBox(UiColor(C_GREEN), DECO_BOX_SIZE);
+      box.SetCornerRadius(REL_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      rowRadius.Add(MakeLabeled(box, "RELATIVE\n0.30"));
+    }
+
+    // Box C: individual ABSOLUTE radii (top-left only = large)
+    {
+      View box = MakeDecoBox(UiColor(C_ORANGE), DECO_BOX_SIZE);
+      box.SetCornerRadius(30.0f, 5.0f, 30.0f, 5.0f);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      rowRadius.Add(MakeLabeled(box, "ABSOLUTE\nTL/BR=30\nTR/BL=5"));
+    }
+
+    zone.Add(rowRadius);
+
+    // ── Row 2: Borderline width ───────────────────────────────────────────────
+    zone.Add(MakeDesc("Borderline (5 px natural) with and without corner radius:"));
+
+    StackLayout rowBorder = MakeHStack();
+
+    // Box D: borderline only
+    {
+      View box = MakeDecoBox(UiColor(C_RED), DECO_BOX_SIZE);
+      box.SetBorderlineWidth(BORDER_WIDTH);
+      box.SetBorderlineColor(UiColor(C_DARK_TEXT));
+      rowBorder.Add(MakeLabeled(box, "Border\n5 px\nno radius"));
+    }
+
+    // Box E: borderline + ABSOLUTE corner radius
+    {
+      View box = MakeDecoBox(UiColor(C_PURPLE), DECO_BOX_SIZE);
+      box.SetCornerRadius(16.0f);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      box.SetBorderlineWidth(BORDER_WIDTH);
+      box.SetBorderlineColor(UiColor(C_DARK_TEXT));
+      rowBorder.Add(MakeLabeled(box, "Border 5 px\n+ABSOLUTE\nradius 16"));
+    }
+
+    // Box F: borderline + RELATIVE corner radius
+    {
+      View box = MakeDecoBox(UiColor(C_DEEP_ORG), DECO_BOX_SIZE);
+      box.SetCornerRadius(0.25f);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      box.SetBorderlineWidth(BORDER_WIDTH);
+      box.SetBorderlineColor(UiColor(C_DARK_TEXT));
+      rowBorder.Add(MakeLabeled(box, "Border 5 px\n+RELATIVE\nradius 0.25"));
+    }
+
+    zone.Add(rowBorder);
+
+    zone.Add(MakeDesc(
+      "Change scale and verify: boxes grow/shrink, but corner roundness and "
+      "border thickness remain visually proportional (not double-scaled)."));
+
+    return zone;
+  }
+
+  // ─── Decoration demo helpers ──────────────────────────────────────────────
+
+  // Plain colored box, no decorations set
+  View MakeDecoBox(const UiColor& color, float size)
+  {
+    View box = View::New();
+    box.SetRequestedWidth(size);
+    box.SetRequestedHeight(size);
+    box.SetBackgroundColor(color);
+    return box;
+  }
+
+  // Wraps a box with a small centered label below it in a vertical stack
+  View MakeLabeled(View box, const char* text)
+  {
+    Label lbl = Label::New(text);
+    lbl.SetRequestedWidth(MATCH_PARENT);
+    lbl.SetRequestedHeight(WRAP_CONTENT);
+    lbl.SetFontSize(11.0f);
+    lbl.SetTextColor(UiColor(C_DARK_TEXT));
+    lbl.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    lbl.SetMultiLine(true);
+    lbl.SetLineWrapMode(Text::LineWrapMode::WORD);
+
+    StackLayout col = StackLayout::New(StackOrientation::VERTICAL);
+    col.SetRequestedWidth(WRAP_CONTENT);
+    col.SetRequestedHeight(WRAP_CONTENT);
+    col.SetSpacing(4.0f);
+    col.Add(box);
+    col.Add(lbl);
+    return col;
   }
 
   // ═══════════════════════════════════════════════════════════════════════════

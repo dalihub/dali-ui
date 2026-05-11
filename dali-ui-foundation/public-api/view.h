@@ -1889,7 +1889,8 @@ public:
        * @see Dali::Ui::DevelVisual::Property::Type::BORDERLINE_OFFSET
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
-      BORDERLINE_OFFSET
+      BORDERLINE_OFFSET,
+
     };
   };
 

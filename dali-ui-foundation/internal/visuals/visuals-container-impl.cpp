@@ -33,6 +33,7 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h> ///< To get viewDataImpl by Internal::ViewDataImpl::Get()
+#include <dali-ui-foundation/internal/views/view/visual-constraint-functions.h>
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -50,55 +51,6 @@ constexpr std::string_view VISUAL_OBJECT_PROPERTY_NAME_PREFIX("VisualBase");
 constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::DepthIndex::Ranges::CONTENT - Dali::Ui::DepthIndex::Ranges::BACKGROUND) / 2;
 
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
-
-/**
- * @brief Constraint function for InnerShadow's CornerRadius
- * inputs[0] : View CornerRadius, [1] : View CornerRadiusPolicy, [2] : View size, [3] : ExtraSize, [4] : Borderline Width
- * @param[out] current InnerShadow's corner radius value.
- * @param[in] inputs Input properties.
- */
-void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs)
-{
-  // We just assume below state are applied.
-  // - Transform::ORIGIN is CENTER
-  // - Transform::PIVOT is CENTER
-  // - Transform::OFFSET_POLICY are ABSOLUTE
-  // - Transform::SIZE_POLICY are RELATIVE
-  // - Transform::SIZE is Vector2::ONE
-  // - Visual::BORDERLINE_OFFSET is 1.0f
-
-  Vector4 viewCornerRadius = inputs[0]->GetVector4();
-
-  const int     viewCornerRadiusPolicy = inputs[1]->GetInteger();
-  const Vector3 visualSize             = inputs[2]->GetVector3(); // We use VisualSize as ViewSize.
-
-  Vector2 extraSize = inputs[3]->GetVector2();
-
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
-  {
-    const float minViewSize = std::min(visualSize.x, visualSize.y);
-    viewCornerRadius *= minViewSize;
-  }
-
-  float borderlineWidth = inputs[4]->GetFloat();
-
-  // Corner Radius for Innershadow is expand about borderlineWidth.
-
-  // Calculate on pixel scale.
-  current.x = viewCornerRadius.x + borderlineWidth;
-  current.y = viewCornerRadius.y + borderlineWidth;
-  current.z = viewCornerRadius.z + borderlineWidth;
-  current.w = viewCornerRadius.w + borderlineWidth;
-
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
-  {
-    const float minInnerShadowSize = std::min(visualSize.x + extraSize.x, visualSize.y + extraSize.y);
-    if(DALI_LIKELY(minInnerShadowSize > Math::MACHINE_EPSILON_100))
-    {
-      current /= minInnerShadowSize;
-    }
-  }
-}
 
 Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Internal::VisualBaseImpl& visualObjectImpl)
 {
@@ -118,13 +70,16 @@ Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Int
       constraint.AddSource(Source(view, Dali::Actor::Property::SIZE));
       constraint.AddSource(LocalSource(Dali::VisualRenderer::Property::EXTRA_SIZE));
       constraint.AddSource(LocalSource(Dali::DecoratedVisualRenderer::Property::BORDERLINE_WIDTH));
+      constraint.AddSource(Source(view, Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
       Dali::Integration::ConstraintSetInternalTag(constraint, INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG);
     }
   }
   else if(visualObjectImpl.GetShadowType() == Dali::Ui::VisualsContainer::ShadowType::BOX_SHADOW)
   {
-    constraint = Constraint::New<Vector4>(visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, EqualToConstraint());
+    constraint = Constraint::New<Vector4>(visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, BoxShadowCornerRadiusConstraint);
     constraint.AddSource(Source(view, Dali::Ui::View::Property::CORNER_RADIUS));
+    constraint.AddSource(Source(view, Dali::Ui::View::Property::CORNER_RADIUS_POLICY));
+    constraint.AddSource(Source(view, Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
   }
   return constraint;
 }

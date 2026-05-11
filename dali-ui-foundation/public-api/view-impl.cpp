@@ -873,7 +873,20 @@ void ViewImpl::SetTouchFocusable(bool touchFocusable)
 
 MeasuredSize ViewImpl::Measure(float visualW, float visualH)
 {
-  float s    = GetEffectiveScale();
+  float s = GetEffectiveScale();
+
+  // Push effective scale to the actor animatable property so that decoration
+  // constraints (corner radius, borderline width) can read it as a scale input.
+  // Read back the current actor property value to skip redundant scene-graph writes.
+  // This also naturally corrects any value set externally on EFFECTIVE_SCALE.
+  if(!Dali::Equals(s, Self().GetProperty<float>(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX)))
+  {
+    // SetProperty triggers ViewDataImpl::SetProperty(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), which:
+    //   - updates the actor animatable so decoration constraints re-evaluate, and
+    //   - calls UpdateCornerRadius() for active RenderEffect / OffScreenRendering.
+    Self().SetProperty(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, s);
+  }
+
   float natW = (visualW > 0.f) ? visualW / s : visualW;
   float natH = (visualH > 0.f) ? visualH / s : visualH;
 

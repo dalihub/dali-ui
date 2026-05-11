@@ -19,6 +19,7 @@
 #include "view-data-impl.h"
 #include "view-accessibility-data.h"
 #include "view-visual-data.h"
+#include "visual-constraint-functions.h"
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/trait-interface.h>
@@ -68,6 +69,7 @@ namespace Ui
 {
 namespace Internal
 {
+
 namespace
 {
 #if defined(DEBUG_ENABLED)
@@ -111,106 +113,6 @@ static constexpr uint32_t BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG(
 static constexpr uint32_t BORDERLINE_WIDTH_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 12);
 static constexpr uint32_t BORDERLINE_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 13);
 static constexpr uint32_t BORDERLINE_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 14);
-
-/**
- * @brief Constraint function for Borderline's CornerRadius
- * inputs[0] : View CornerRadius, [1] : View CornerRadiusPolicy, [2] : View size, [3] : Borderline Width, [4] :
- * Borderline Offset
- * @param[out] current InnerShadow's corner radius value.
- * @param[in] inputs Input properties.
- */
-static void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs)
-{
-  // We just assume below state are applied.
-  // - Transform::ORIGIN is CENTER
-  // - Transform::ANCHOR_POINT is CENTER
-  // - Transform::OFFSET_POLICY are ABSOLUTE
-  // - Transform::SIZE_POLICY are RELATIVE
-  // - Transform::SIZE is Vector2::ONE
-  // - Transform::EXTRA_SIZE is Vector2::ZERO
-
-  Vector4 viewCornerRadius = inputs[0]->GetVector4();
-
-  const int     viewCornerRadiusPolicy = inputs[1]->GetInteger();
-  const Vector3 visualSize             = inputs[2]->GetVector3(); // We use VisualSize as ViewSize.
-
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
-  {
-    const float minViewSize = std::min(visualSize.x, visualSize.y);
-    viewCornerRadius *= minViewSize;
-  }
-
-  const float borderlineWidth  = inputs[3]->GetFloat();
-  const float borderlineOffset = inputs[4]->GetFloat();
-  const float expendedRadius   = borderlineWidth * (1.0f + borderlineOffset) * 0.5f;
-
-  // Corner Radius for Borderline is expand about borderlineWidth.
-
-  // Calculate on pixel scale.
-  current.x = viewCornerRadius.x < Dali::Math::MACHINE_EPSILON_100 ? 0.0f : viewCornerRadius.x + expendedRadius;
-  current.y = viewCornerRadius.y < Dali::Math::MACHINE_EPSILON_100 ? 0.0f : viewCornerRadius.y + expendedRadius;
-  current.z = viewCornerRadius.z < Dali::Math::MACHINE_EPSILON_100 ? 0.0f : viewCornerRadius.z + expendedRadius;
-  current.w = viewCornerRadius.w < Dali::Math::MACHINE_EPSILON_100 ? 0.0f : viewCornerRadius.w + expendedRadius;
-
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
-  {
-    const float minVisualSize = std::min(visualSize.x + expendedRadius, visualSize.y + expendedRadius);
-    if(DALI_LIKELY(minVisualSize > Math::MACHINE_EPSILON_100))
-    {
-      current /= minVisualSize;
-    }
-  }
-}
-
-/**
- * @brief Constraint function for InnerShadow's CornerRadius
- * inputs[0] : View CornerRadius, [1] : View CornerRadiusPolicy, [2] : View size, [3] : ExtraSize, [4] : Borderline
- * Width
- * @param[out] current InnerShadow's corner radius value.
- * @param[in] inputs Input properties.
- */
-static void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs)
-{
-  // We just assume below state are applied.
-  // - Transform::ORIGIN is CENTER
-  // - Transform::ANCHOR_POINT is CENTER
-  // - Transform::OFFSET_POLICY are ABSOLUTE
-  // - Transform::SIZE_POLICY are RELATIVE
-  // - Transform::SIZE is Vector2::ONE
-  // - Visual::BORDERLINE_OFFSET is 1.0f
-
-  Vector4 viewCornerRadius = inputs[0]->GetVector4();
-
-  const int     viewCornerRadiusPolicy = inputs[1]->GetInteger();
-  const Vector3 visualSize             = inputs[2]->GetVector3(); // We use VisualSize as ViewSize.
-
-  Vector2 extraSize = inputs[3]->GetVector2();
-
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
-  {
-    const float minViewSize = std::min(visualSize.x, visualSize.y);
-    viewCornerRadius *= minViewSize;
-  }
-
-  const float borderlineWidth = inputs[4]->GetFloat();
-
-  // Corner Radius for Innershadow is expand about borderlineWidth.
-
-  // Calculate on pixel scale.
-  current.x = viewCornerRadius.x + borderlineWidth;
-  current.y = viewCornerRadius.y + borderlineWidth;
-  current.z = viewCornerRadius.z + borderlineWidth;
-  current.w = viewCornerRadius.w + borderlineWidth;
-
-  if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
-  {
-    const float minVisualSize = std::min(visualSize.x + extraSize.x, visualSize.y + extraSize.y);
-    if(DALI_LIKELY(minVisualSize > Math::MACHINE_EPSILON_100))
-    {
-      current /= minVisualSize;
-    }
-  }
-}
 
 bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName, const Property::Map& attributes)
 {
@@ -493,6 +395,7 @@ const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_3(typeReg
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_4(typeRegistration, "viewBorderlineWidth",    Ui::View::Property::BORDERLINE_WIDTH,     Property::FLOAT,   &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_5(typeRegistration, "viewBorderlineColor",    Ui::View::Property::BORDERLINE_COLOR,     Property::Value(Color::BLACK), &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_6(typeRegistration, "viewBorderlineOffset",   Ui::View::Property::BORDERLINE_OFFSET,    Property::FLOAT,   &ViewDataImpl::SetProperty, nullptr);
+const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_7(typeRegistration, "viewEffectiveScale",     VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX,      Property::Value(1.0f), &ViewDataImpl::SetProperty, nullptr);
 
 // clang-format on
 
@@ -1456,6 +1359,19 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
+      case VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX:
+      {
+        // Notify all visual constraints that depend on effective scale to re-evaluate.
+        if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
+        {
+          viewImpl.GetViewDataImpl().mVisualData->NotifyConstraintPropertyChanged(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX,
+                                                                                  false);
+        }
+        // RenderEffect / OffScreenRendering use an imperative path (no constraint), so nudge explicitly.
+        viewImpl.GetViewDataImpl().UpdateCornerRadius();
+        break;
+      }
+
       case Ui::View::Property::REQUESTED_WIDTH:
       {
         float width;
@@ -1890,6 +1806,7 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::BORDERLINE_WIDTH:
       case Ui::View::Property::BORDERLINE_COLOR:
       case Ui::View::Property::BORDERLINE_OFFSET:
+      case VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX:
       {
         // Do not return property for animatable custom properties.
         // Actual variables of each property will be registered at custom area.
@@ -2098,6 +2015,7 @@ void ViewDataImpl::SetInnerShadow(const Property::Map& map)
         innerShadowCornerRadiusConstraint.AddSource(LocalSource(Dali::VisualRenderer::Property::EXTRA_SIZE));
         innerShadowCornerRadiusConstraint.AddSource(
           LocalSource(Dali::DecoratedVisualRenderer::Property::BORDERLINE_WIDTH));
+        innerShadowCornerRadiusConstraint.AddSource(Source(handle, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
 
         Dali::Integration::ConstraintSetInternalTag(innerShadowCornerRadiusConstraint,
                                                     INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG);
@@ -2170,6 +2088,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Dali::Actor::Property::SIZE));
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_WIDTH));
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_OFFSET));
+          borderlineCornerRadiusConstraint.AddSource(Source(handle, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
 
           Dali::Integration::ConstraintSetInternalTag(borderlineCornerRadiusConstraint,
                                                       BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG);
@@ -2183,8 +2102,9 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
                          visualBorderlineOffsetProperty.object))
           {
             auto borderlineWidthConstraint = Constraint::New<float>(
-              visualBorderlineWidthProperty.object, visualBorderlineWidthProperty.propertyIndex, EqualToConstraint());
+              visualBorderlineWidthProperty.object, visualBorderlineWidthProperty.propertyIndex, ScaledBorderlineWidthConstraint);
             borderlineWidthConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_WIDTH));
+            borderlineWidthConstraint.AddSource(Source(handle, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
             auto borderlineColorConstraint = Constraint::New<Vector4>(
               visualBorderlineColorProperty.object, visualBorderlineColorProperty.propertyIndex, EqualToConstraint());
             borderlineColorConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_COLOR));
@@ -2201,7 +2121,8 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
             borderlineColorConstraint.Apply();
             borderlineOffsetConstraint.Apply();
 
-            visualImpl.AddConstraintFeature(borderlineWidthConstraint, {Ui::View::Property::BORDERLINE_WIDTH});
+            visualImpl.AddConstraintFeature(borderlineWidthConstraint,
+                                            {Ui::View::Property::BORDERLINE_WIDTH, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX});
             visualImpl.AddConstraintFeature(borderlineColorConstraint, {Ui::View::Property::BORDERLINE_COLOR});
             visualImpl.AddConstraintFeature(borderlineOffsetConstraint, {Ui::View::Property::BORDERLINE_OFFSET});
           }
@@ -2386,16 +2307,22 @@ void ViewDataImpl::SetOffScreenRendering(int32_t offScreenRenderingType)
 
 void ViewDataImpl::UpdateCornerRadius()
 {
-  // TODO : Need to make constriant for RenderEffect corner radius update
   if(mRenderEffect || mOffScreenRenderingImpl)
   {
-    Actor self = mViewImpl.Self();
+    Actor       self   = mViewImpl.Self();
+    const float scale  = mViewImpl.GetEffectiveScale();
+    const int   policy = self.GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY);
+
+    Vector4 cornerRadius = self.GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS);
+    if(policy == static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE))
+    {
+      // Natural-pixel value → visual pixels for the RenderEffect renderer.
+      cornerRadius *= scale;
+    }
 
     Property::Map map;
-    map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS,
-               self.GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS));
-    map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
-               self.GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY));
+    map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius);
+    map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY, policy);
     map.Insert(Ui::DevelVisual::Property::CORNER_SQUARENESS,
                self.GetProperty<Vector4>(Ui::View::Property::CORNER_SQUARENESS));
 
@@ -2413,13 +2340,16 @@ void ViewDataImpl::UpdateCornerRadius()
 
 void ViewDataImpl::UpdateBorderline()
 {
-  Actor self = mViewImpl.Self();
+  Actor       self  = mViewImpl.Self();
+  const float scale = mViewImpl.GetEffectiveScale();
 
   Property::Map map;
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::Type::COLOR);
   map.Insert(Ui::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
+  // Scale natural-pixel width to visual pixels for the initial visual creation.
+  // The ScaledBorderlineWidthConstraint keeps it up to date thereafter.
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_WIDTH,
-             self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH));
+             self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH) * scale);
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_COLOR,
              self.GetProperty<Vector4>(Ui::View::Property::BORDERLINE_COLOR));
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_OFFSET,

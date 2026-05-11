@@ -51,6 +51,13 @@ namespace Ui
 {
 namespace Internal
 {
+/// @brief Type-level animatable property index for effective UI scale.
+/// Defined here (not in the public View::Property enum) to keep it internal.
+/// Value matches ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX + 6,
+/// immediately after BORDERLINE_OFFSET in the sequential enum.
+inline constexpr Property::Index VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX =
+  ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX + 6;
+
 class AttachmentContainer;
 
 namespace Visual
@@ -704,6 +711,7 @@ public:
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_4;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_5;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_6;
+  static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_7;
 };
 
 } // namespace Internal

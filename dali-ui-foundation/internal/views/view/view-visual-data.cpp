@@ -39,6 +39,8 @@
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include "view-data-impl.h"
+#include "visual-constraint-functions.h"
 
 using Dali::Integration::ToStdString;
 
@@ -843,13 +845,18 @@ void ViewDataImpl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Base
         {
           DALI_LOG_INFO(
             gLogFilter, Debug::Verbose,
-            "View::EnableCornerPropertiesOverridden Visual %s(%p) use default equal corner radius constraint\n",
+            "View::EnableCornerPropertiesOverridden Visual %s(%p) use default scaled corner radius constraint\n",
             (*iter)->visual.GetName().c_str(), &visual);
           cornerRadiusConstraint = Constraint::New<Vector4>(
-            visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, EqualToConstraint());
-          cornerRadiusConstraint.AddSource(Source(self, Ui::View::Property::CORNER_RADIUS));
+            visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, ScaledCornerRadiusConstraint);
+          cornerRadiusConstraint.AddSource(Source(self, Ui::View::Property::CORNER_RADIUS));        // [0]
+          cornerRadiusConstraint.AddSource(Source(self, Ui::View::Property::CORNER_RADIUS_POLICY)); // [1]
+          cornerRadiusConstraint.AddSource(Source(self, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));      // [2]
           Dali::Integration::ConstraintSetInternalTag(cornerRadiusConstraint, DEFAULT_CORNER_RADIUS_CONSTRAINT_TAG);
-          visualImpl.AddConstraintFeature(cornerRadiusConstraint, {Ui::View::Property::CORNER_RADIUS});
+          visualImpl.AddConstraintFeature(cornerRadiusConstraint,
+                                          {Ui::View::Property::CORNER_RADIUS,
+                                           Ui::View::Property::CORNER_RADIUS_POLICY,
+                                           VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX});
         }
         if(mCornerRadiusValueAdded &&
            !(mOffscreenRenderingEnabled && visualImpl.IsCornerRadiusIgnoredAtOffscreenRendering()))
@@ -1311,6 +1318,20 @@ void ViewDataImpl::VisualData::NotifyConstraintPropertyChanged(Property::Index i
       {
         // First time corner squareness animated, or setted. Need to apply corner squareness constraint to visuals
         mCornerSquarenessValueAdded = true;
+      }
+      break;
+    }
+    case VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX:
+    {
+      // Re-trigger all constraints that list effective scale as a reactive property,
+      // so they re-evaluate with the new scale value.
+      for(auto registeredVisual : mVisuals)
+      {
+        if(registeredVisual->visual && registeredVisual->enabled)
+        {
+          Ui::Internal::Visual::Base& visualImpl = Ui::GetImplementation(registeredVisual->visual);
+          visualImpl.StartConstraintFeature(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX);
+        }
       }
       break;
     }
