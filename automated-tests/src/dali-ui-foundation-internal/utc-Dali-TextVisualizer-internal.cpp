@@ -153,7 +153,7 @@ uint32_t FindFirstAllowedLineBreakGlyphEndForTest(const Dali::Ui::Internal::Text
 }
 
 void CheckGlyphPlacementsOutsideExclusion(const Dali::Ui::Internal::TextVisualizer::LayoutResult& result,
-                                          const Rect<float>&                                      exclusionRegion)
+                                          const Bounds&                                      exclusionRegion)
 {
   const float regionLeft   = exclusionRegion.x;
   const float regionRight  = exclusionRegion.x + exclusionRegion.width;
@@ -172,7 +172,7 @@ void CheckGlyphPlacementsOutsideExclusion(const Dali::Ui::Internal::TextVisualiz
 }
 
 void CheckGlyphPositionsOutsideExclusion(const Dali::Vector<Vector2>& positions,
-                                         const Rect<float>&          exclusionRegion)
+                                         const Bounds&          exclusionRegion)
 {
   const float regionLeft   = exclusionRegion.x;
   const float regionRight  = exclusionRegion.x + exclusionRegion.width;
@@ -401,15 +401,15 @@ int UtcDaliTextVisualizerExclusionRegions(void)
 {
   UiTestApplication         application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> regions;
+  Dali::Vector<Bounds> regions;
   DALI_TEST_CHECK(textVisualizer);
 
-  regions.PushBack(Rect<float>(0.0f, 0.0f, 100.0f, 30.0f));
-  regions.PushBack(Rect<float>(50.0f, 40.0f, 80.0f, 20.0f));
+  regions.PushBack(Bounds(0.0f, 0.0f, 100.0f, 30.0f));
+  regions.PushBack(Bounds(50.0f, 40.0f, 80.0f, 20.0f));
 
   textVisualizer.SetExclusionRegions(regions);
 
-  const Dali::Vector<Rect<float>> storedRegions = textVisualizer.GetExclusionRegions();
+  const Dali::Vector<Bounds> storedRegions = textVisualizer.GetExclusionRegions();
   DALI_TEST_EQUALS(storedRegions.Count(), regions.Count(), TEST_LOCATION);
   DALI_TEST_CHECK(storedRegions[0] == regions[0]);
   DALI_TEST_CHECK(storedRegions[1] == regions[1]);
@@ -421,10 +421,10 @@ int UtcDaliTextVisualizerClearExclusionRegions(void)
 {
   UiTestApplication         application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> regions;
+  Dali::Vector<Bounds> regions;
   DALI_TEST_CHECK(textVisualizer);
 
-  regions.PushBack(Rect<float>(10.0f, 20.0f, 30.0f, 40.0f));
+  regions.PushBack(Bounds(10.0f, 20.0f, 30.0f, 40.0f));
   textVisualizer.SetExclusionRegions(regions);
   DALI_TEST_EQUALS(textVisualizer.GetExclusionRegions().Count(), 1u, TEST_LOCATION);
 
@@ -438,19 +438,19 @@ int UtcDaliTextVisualizerExclusionRegionsSameCountUpdateP(void)
 {
   UiTestApplication         application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> regionsA;
-  Dali::Vector<Rect<float>> regionsB;
+  Dali::Vector<Bounds> regionsA;
+  Dali::Vector<Bounds> regionsB;
   DALI_TEST_CHECK(textVisualizer);
 
-  regionsA.PushBack(Rect<float>(0.0f, 0.0f, 100.0f, 30.0f));
-  regionsA.PushBack(Rect<float>(50.0f, 40.0f, 80.0f, 20.0f));
-  regionsB.PushBack(Rect<float>(10.0f, 20.0f, 90.0f, 35.0f));
-  regionsB.PushBack(Rect<float>(70.0f, 45.0f, 60.0f, 25.0f));
+  regionsA.PushBack(Bounds(0.0f, 0.0f, 100.0f, 30.0f));
+  regionsA.PushBack(Bounds(50.0f, 40.0f, 80.0f, 20.0f));
+  regionsB.PushBack(Bounds(10.0f, 20.0f, 90.0f, 35.0f));
+  regionsB.PushBack(Bounds(70.0f, 45.0f, 60.0f, 25.0f));
 
   textVisualizer.SetExclusionRegions(regionsA);
   textVisualizer.SetExclusionRegions(regionsB);
 
-  const Dali::Vector<Rect<float>> storedRegions = textVisualizer.GetExclusionRegions();
+  const Dali::Vector<Bounds> storedRegions = textVisualizer.GetExclusionRegions();
   DALI_TEST_EQUALS(storedRegions.Count(), regionsB.Count(), TEST_LOCATION);
   DALI_TEST_CHECK(storedRegions[0] == regionsB[0]);
   DALI_TEST_CHECK(storedRegions[1] == regionsB[1]);
@@ -462,19 +462,19 @@ int UtcDaliTextVisualizerExclusionRegionsDifferentCountUpdateP(void)
 {
   UiTestApplication         application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> regionsA;
-  Dali::Vector<Rect<float>> regionsB;
+  Dali::Vector<Bounds> regionsA;
+  Dali::Vector<Bounds> regionsB;
   DALI_TEST_CHECK(textVisualizer);
 
-  regionsA.PushBack(Rect<float>(0.0f, 0.0f, 100.0f, 30.0f));
-  regionsB.PushBack(Rect<float>(10.0f, 20.0f, 90.0f, 35.0f));
-  regionsB.PushBack(Rect<float>(70.0f, 45.0f, 60.0f, 25.0f));
-  regionsB.PushBack(Rect<float>(140.0f, 80.0f, 40.0f, 30.0f));
+  regionsA.PushBack(Bounds(0.0f, 0.0f, 100.0f, 30.0f));
+  regionsB.PushBack(Bounds(10.0f, 20.0f, 90.0f, 35.0f));
+  regionsB.PushBack(Bounds(70.0f, 45.0f, 60.0f, 25.0f));
+  regionsB.PushBack(Bounds(140.0f, 80.0f, 40.0f, 30.0f));
 
   textVisualizer.SetExclusionRegions(regionsA);
   textVisualizer.SetExclusionRegions(regionsB);
 
-  const Dali::Vector<Rect<float>> storedRegions = textVisualizer.GetExclusionRegions();
+  const Dali::Vector<Bounds> storedRegions = textVisualizer.GetExclusionRegions();
   DALI_TEST_EQUALS(storedRegions.Count(), regionsB.Count(), TEST_LOCATION);
   DALI_TEST_CHECK(storedRegions[0] == regionsB[0]);
   DALI_TEST_CHECK(storedRegions[1] == regionsB[1]);
@@ -487,16 +487,16 @@ int UtcDaliTextVisualizerExclusionRegionsSameValuesNoOpP(void)
 {
   UiTestApplication         application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> regions;
+  Dali::Vector<Bounds> regions;
   DALI_TEST_CHECK(textVisualizer);
 
-  regions.PushBack(Rect<float>(0.0f, 0.0f, 100.0f, 30.0f));
-  regions.PushBack(Rect<float>(50.0f, 40.0f, 80.0f, 20.0f));
+  regions.PushBack(Bounds(0.0f, 0.0f, 100.0f, 30.0f));
+  regions.PushBack(Bounds(50.0f, 40.0f, 80.0f, 20.0f));
 
   textVisualizer.SetExclusionRegions(regions);
   textVisualizer.SetExclusionRegions(regions);
 
-  const Dali::Vector<Rect<float>> storedRegions = textVisualizer.GetExclusionRegions();
+  const Dali::Vector<Bounds> storedRegions = textVisualizer.GetExclusionRegions();
   DALI_TEST_EQUALS(storedRegions.Count(), regions.Count(), TEST_LOCATION);
   DALI_TEST_CHECK(storedRegions[0] == regions[0]);
   DALI_TEST_CHECK(storedRegions[1] == regions[1]);
@@ -526,10 +526,10 @@ int UtcDaliTextVisualizerExclusionRegionsWithoutPrepareP(void)
 {
   UiTestApplication         application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> regions;
+  Dali::Vector<Bounds> regions;
   DALI_TEST_CHECK(textVisualizer);
 
-  regions.PushBack(Rect<float>(5.0f, 5.0f, 25.0f, 15.0f));
+  regions.PushBack(Bounds(5.0f, 5.0f, 25.0f, 15.0f));
   textVisualizer.SetExclusionRegions(regions);
   textVisualizer.SetExclusionRegions(regions);
   textVisualizer.ClearExclusionRegions();
@@ -622,7 +622,7 @@ int UtcDaliTextVisualizerPreparedEmptyTextP(void)
   input.text = "";
 
   const auto preparedText = Dali::Ui::Internal::TextVisualizer::TextPreparer::Prepare(input);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   DALI_TEST_CHECK(preparedText.IsPrepared());
@@ -789,7 +789,7 @@ int UtcDaliTextVisualizerLayoutGlyphsUsesLineMetricsHeightP(void)
 {
   UiTestApplication                                application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("abc", 20.0f);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 300.0f, 0.0f, exclusionRegions, layoutResult);
@@ -807,7 +807,7 @@ int UtcDaliTextVisualizerLayoutGlyphsFillsTextLineMetricsP(void)
 {
   UiTestApplication                                application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("abc", 20.0f);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 300.0f, 0.0f, exclusionRegions, layoutResult);
@@ -827,7 +827,7 @@ int UtcDaliTextVisualizerLayoutGlyphsExplicitLineHeightOverrideP(void)
 {
   UiTestApplication                                application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("abc", 20.0f);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   constexpr float                                  explicitLineHeight = 50.0f;
 
@@ -848,7 +848,7 @@ int UtcDaliTextVisualizerLayoutGlyphsRelativeLineHeightFormulaP(void)
 {
   UiTestApplication                                application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("abc", 20.0f);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   constexpr float                                  fontSize              = 20.0f;
   constexpr float                                  relativeLineHeight    = 1.5f;
@@ -903,7 +903,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterRendererGlyphPositionUsesMetricsBaselin
 {
   UiTestApplication                                application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("abc", 20.0f);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter adapter;
   Vector2                                          position;
@@ -927,7 +927,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterRendererGlyphPositionFallbackWithoutMet
   UiTestApplication                                application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("abc", 20.0f);
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedTextWithoutMetrics(preparedText);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter adapter;
   Vector2                                          position;
@@ -951,7 +951,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterLineMetricsCacheBuildsP(void)
 {
   UiTestApplication                                application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("line metrics cache smoke", 20.0f);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter adapter;
   Vector2                                          position;
@@ -975,7 +975,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterLineMetricsCacheClearP(void)
 {
   UiTestApplication                                application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("line metrics clear", 20.0f);
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter adapter;
 
@@ -1015,7 +1015,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterRendererGlyphPositionCacheBuildsP(void)
 {
   UiTestApplication                                     application;
   const auto                                            preparedText = CreatePreparedText("position cache", 20.0f);
-  Dali::Vector<Rect<float>>                             exclusionRegions;
+  Dali::Vector<Bounds>                             exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult      layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter  adapter;
   Vector2                                               position;
@@ -1039,7 +1039,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterRendererGlyphPositionCacheClearP(void)
 {
   UiTestApplication                                     application;
   const auto                                            preparedText = CreatePreparedText("position cache clear", 20.0f);
-  Dali::Vector<Rect<float>>                             exclusionRegions;
+  Dali::Vector<Bounds>                             exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult      layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter  adapter;
 
@@ -1343,7 +1343,7 @@ int UtcDaliTextVisualizerGlyphLayoutBasicAsciiP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
@@ -1362,7 +1362,7 @@ int UtcDaliTextVisualizerGlyphLayoutUsesPreparedGlyphLayoutDataSmokeP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("hello world", 18.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   DALI_TEST_CHECK(preparedText.HasGlyphLayoutData());
@@ -1381,7 +1381,7 @@ int UtcDaliTextVisualizerGlyphLayoutFallbackWithoutPreparedGlyphLayoutDataP(void
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("hello world", 18.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   preparedText.ClearGlyphLayoutData();
@@ -1401,7 +1401,7 @@ int UtcDaliTextVisualizerGlyphLayoutWrapsByWidthP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdefghij", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult narrowLayoutResult;
   Dali::Ui::Internal::TextVisualizer::LayoutResult wideLayoutResult;
 
@@ -1422,8 +1422,8 @@ int UtcDaliTextVisualizerGlyphLayoutWithExclusionP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdefghij", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(10.0f, 0.0f, 25.0f, 20.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(10.0f, 0.0f, 25.0f, 20.0f));
 
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 120.0f, 0.0f, exclusionRegions, layoutResult);
@@ -1441,7 +1441,7 @@ int UtcDaliTextVisualizerGlyphLayoutWordWrapSpacesP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("hello world", 18.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   const uint32_t firstBreakGlyphEnd = FindFirstAllowedLineBreakGlyphEndForTest(preparedText);
@@ -1467,7 +1467,7 @@ int UtcDaliTextVisualizerGlyphLayoutLongWordFallbackP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("supercalifragilistic", 18.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 8.0f, 0.0f, exclusionRegions, layoutResult);
@@ -1485,7 +1485,7 @@ int UtcDaliTextVisualizerGlyphLayoutWordWrapWideWidthP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("one two", 18.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
@@ -1503,8 +1503,8 @@ int UtcDaliTextVisualizerGlyphLayoutWordWrapWithExclusionSmokeP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("hello world dynamic text", 16.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(55.0f, 0.0f, 45.0f, 24.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(55.0f, 0.0f, 45.0f, 24.0f));
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 180.0f, 0.0f, exclusionRegions, layoutResult);
@@ -1523,7 +1523,7 @@ int UtcDaliTextVisualizerGlyphLayoutWordWrapMixedTextSmokeP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("가나다 abc 😀 test", 16.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 90.0f, 0.0f, exclusionRegions, layoutResult);
@@ -1541,11 +1541,11 @@ int UtcDaliTextVisualizerGlyphLayoutWordWrapSameResultP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("hello world dynamic text", 16.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult firstLayoutResult;
   Dali::Ui::Internal::TextVisualizer::LayoutResult secondLayoutResult;
 
-  exclusionRegions.PushBack(Rect<float>(55.0f, 0.0f, 45.0f, 24.0f));
+  exclusionRegions.PushBack(Bounds(55.0f, 0.0f, 45.0f, 24.0f));
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 180.0f, 0.0f, exclusionRegions, firstLayoutResult);
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 180.0f, 0.0f, exclusionRegions, secondLayoutResult);
@@ -1563,8 +1563,8 @@ int UtcDaliTextVisualizerLayoutResultSignatureSameForSameLayoutP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdefghij", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(10.0f, 0.0f, 25.0f, 20.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(10.0f, 0.0f, 25.0f, 20.0f));
 
   Dali::Ui::Internal::TextVisualizer::LayoutResult firstLayoutResult;
   Dali::Ui::Internal::TextVisualizer::LayoutResult secondLayoutResult;
@@ -1584,13 +1584,13 @@ int UtcDaliTextVisualizerLayoutResultSignatureChangesForMovedExclusionP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdefghijabcdefghij", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegionsA;
-  Dali::Vector<Rect<float>> exclusionRegionsB;
+  Dali::Vector<Bounds> exclusionRegionsA;
+  Dali::Vector<Bounds> exclusionRegionsB;
   Dali::Ui::Internal::TextVisualizer::LayoutResult firstLayoutResult;
   Dali::Ui::Internal::TextVisualizer::LayoutResult secondLayoutResult;
 
-  exclusionRegionsA.PushBack(Rect<float>(0.0f, 0.0f, 55.0f, 24.0f));
-  exclusionRegionsB.PushBack(Rect<float>(70.0f, 0.0f, 55.0f, 24.0f));
+  exclusionRegionsA.PushBack(Bounds(0.0f, 0.0f, 55.0f, 24.0f));
+  exclusionRegionsB.PushBack(Bounds(70.0f, 0.0f, 55.0f, 24.0f));
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 140.0f, 0.0f, exclusionRegionsA, firstLayoutResult);
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 140.0f, 0.0f, exclusionRegionsB, secondLayoutResult);
@@ -1607,7 +1607,7 @@ int UtcDaliTextVisualizerGlyphLayoutEmptyTextP(void)
 {
   UiTestApplication application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText;
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 100.0f, 0.0f, exclusionRegions, layoutResult);
@@ -1621,7 +1621,7 @@ int UtcDaliTextVisualizerGlyphLayoutFallbackToPlaceholderP(void)
 {
   UiTestApplication application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText;
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   preparedText.SetPrepared(true);
@@ -1659,7 +1659,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterWithGlyphLayoutP(void)
 {
   UiTestApplication                                     application;
   const auto                                            preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                             exclusionRegions;
+  Dali::Vector<Bounds>                             exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult      layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter  adapter;
 
@@ -1690,7 +1690,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterClearP(void)
 {
   UiTestApplication                                     application;
   const auto                                            preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                             exclusionRegions;
+  Dali::Vector<Bounds>                             exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult      layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter  adapter;
 
@@ -1988,7 +1988,7 @@ int UtcDaliTextVisualizerGlyphRendererRenderWithoutCachedGlyphsFailsSafelyP(void
 {
   UiTestApplication                                               application;
   const auto                                                      preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                       exclusionRegions;
+  Dali::Vector<Bounds>                                       exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter            adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerGlyphRenderer renderer;
@@ -2046,7 +2046,7 @@ int UtcDaliTextVisualizerGlyphRendererSkipsNonRenderableGlyphCacheMissP(void)
 {
   UiTestApplication                                               application;
   const auto                                                      preparedText = CreatePreparedText("a b", 10.0f);
-  Dali::Vector<Rect<float>>                                       exclusionRegions;
+  Dali::Vector<Bounds>                                       exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter            adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerGlyphRenderer renderer;
@@ -2081,7 +2081,7 @@ int UtcDaliTextVisualizerGlyphRendererRenderAfterAtlasRendererWarmupSmokeP(void)
 {
   UiTestApplication                                               application;
   const auto                                                      preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                       exclusionRegions;
+  Dali::Vector<Bounds>                                       exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter            adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge         bridge;
@@ -2139,7 +2139,7 @@ int UtcDaliTextVisualizerGlyphRendererUsesLayoutSizeForOutputActorP(void)
 {
   UiTestApplication                                               application;
   const auto                                                      preparedText = CreatePreparedText("bounds", 10.0f);
-  Dali::Vector<Rect<float>>                                       exclusionRegions;
+  Dali::Vector<Bounds>                                       exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter            adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge         bridge;
@@ -2180,7 +2180,7 @@ int UtcDaliTextVisualizerGlyphRendererClearAfterRenderSmokeP(void)
 {
   UiTestApplication                                               application;
   const auto                                                      preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                       exclusionRegions;
+  Dali::Vector<Bounds>                                       exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter            adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerGlyphRenderer renderer;
@@ -2217,7 +2217,7 @@ int UtcDaliTextVisualizerGlyphRendererRepeatedRenderSameGlyphSequenceSmokeP(void
 {
   UiTestApplication                                               application;
   const auto                                                      preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                       exclusionRegions;
+  Dali::Vector<Bounds>                                       exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter            adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerGlyphRenderer renderer;
@@ -2269,7 +2269,7 @@ int UtcDaliTextVisualizerGlyphRendererRepeatedRenderAfterWarmupGeometryOnlySmoke
 {
   UiTestApplication                                               application;
   const auto                                                      preparedText = CreatePreparedText("geometry", 10.0f);
-  Dali::Vector<Rect<float>>                                       exclusionRegions;
+  Dali::Vector<Bounds>                                       exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter            adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge         bridge;
@@ -2398,7 +2398,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeWithRenderableAdapterP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2425,7 +2425,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeClearP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2460,7 +2460,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeEnsureRendererP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2488,7 +2488,7 @@ int UtcDaliTextVisualizerAtlasViewAdapterRenderableHelpersP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Text::GlyphInfo                                        glyphInfo;
@@ -2546,7 +2546,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeUpdateRenderDataWithRenderableAdapte
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2608,7 +2608,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeClearAfterUpdateP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2674,7 +2674,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeAttachWithoutHostP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2701,7 +2701,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeAttachWithHostP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2756,7 +2756,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeOutputParentedToHostP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2793,7 +2793,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeOutputDiagnosticsP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2837,7 +2837,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeRenderDiagnosticsAfterAttachP(void)
 {
   UiTestApplication                                       application;
   const auto                                              preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                               exclusionRegions;
+  Dali::Vector<Bounds>                               exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult        layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter    adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge bridge;
@@ -2885,7 +2885,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeAttachDuplicateP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2929,7 +2929,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeDetachClearP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -2961,7 +2961,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeClearAfterRenderCallP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -3001,7 +3001,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeRenderReadyAfterRenderCallP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -3038,7 +3038,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeRenderSuccessConditionP(void)
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -3076,7 +3076,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeSetRenderHostEmptyClearsReadinessP(v
 {
   UiTestApplication                                                application;
   const auto                                                       preparedText = CreatePreparedText("abc", 10.0f);
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge          bridge;
@@ -3142,7 +3142,7 @@ int UtcDaliTextVisualizerViewInterfaceWithRenderableAdapterP(void)
   Dali::Ui::Internal::TextVisualizer::LayoutResult       layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter   adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerViewInterface viewInterface;
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
 
@@ -3183,7 +3183,7 @@ int UtcDaliTextVisualizerViewInterfaceGlyphPositionConsistencyP(void)
   Dali::Ui::Internal::TextVisualizer::LayoutResult             layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter         adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerViewInterface viewInterface;
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
 
@@ -3218,7 +3218,7 @@ int UtcDaliTextVisualizerViewInterfaceGlyphDiagnosticsP(void)
   Dali::Ui::Internal::TextVisualizer::LayoutResult                 layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter             adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerViewInterface  viewInterface;
-  Dali::Vector<Rect<float>>                                        exclusionRegions;
+  Dali::Vector<Bounds>                                        exclusionRegions;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
 
@@ -3260,8 +3260,8 @@ int UtcDaliTextVisualizerViewInterfaceGlyphPositionWithExclusionP(void)
   Dali::Ui::Internal::TextVisualizer::LayoutResult             layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter         adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerViewInterface viewInterface;
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(10.0f, 0.0f, 25.0f, 20.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(10.0f, 0.0f, 25.0f, 20.0f));
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 120.0f, 0.0f, exclusionRegions, layoutResult);
 
@@ -3294,7 +3294,7 @@ int UtcDaliTextVisualizerViewInterfaceTextColorPassThroughP(void)
   Dali::Ui::Internal::TextVisualizer::LayoutResult             layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter         adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerViewInterface viewInterface;
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
 
@@ -3315,7 +3315,7 @@ int UtcDaliTextVisualizerViewInterfaceTextColorImmediateAdapterUpdateP(void)
   Dali::Ui::Internal::TextVisualizer::LayoutResult              layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter          adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerViewInterface viewInterface;
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
 
@@ -3339,7 +3339,7 @@ int UtcDaliTextVisualizerViewInterfaceClearP(void)
   Dali::Ui::Internal::TextVisualizer::LayoutResult       layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter   adapter;
   Dali::Ui::Internal::TextVisualizer::TextVisualizerViewInterface viewInterface;
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
 
@@ -3362,7 +3362,7 @@ int UtcDaliTextVisualizerAtlasRendererBridgeOwnsViewInterfaceSmokeP(void)
   Dali::Ui::Internal::TextVisualizer::LayoutResult       layoutResult;
   Dali::Ui::Internal::TextVisualizer::AtlasViewAdapter   adapter;
   Dali::Ui::Internal::TextVisualizer::AtlasRendererBridge bridge;
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
 
@@ -3456,10 +3456,10 @@ int UtcDaliTextVisualizerMeasureThenRelayoutWithExclusionSmokeP(void)
 {
   UiTestApplication          application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   DALI_TEST_CHECK(textVisualizer);
 
-  exclusionRegions.PushBack(Rect<float>(40.0f, 0.0f, 80.0f, 60.0f));
+  exclusionRegions.PushBack(Bounds(40.0f, 0.0f, 80.0f, 60.0f));
 
   textVisualizer.SetText("TextVisualizer measure result should stay valid for the following relayout with matching width and exclusions.");
   textVisualizer.SetFontSize(18.0f);
@@ -3486,7 +3486,7 @@ int UtcDaliTextVisualizerMeasuredLayoutCacheInvalidationSmokeP(void)
 {
   UiTestApplication          application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   DALI_TEST_CHECK(textVisualizer);
 
   textVisualizer.SetText("Changing exclusion and line height after measure should relayout safely.");
@@ -3497,7 +3497,7 @@ int UtcDaliTextVisualizerMeasuredLayoutCacheInvalidationSmokeP(void)
   const float initialHeight = textVisualizer.Measure(180.0f, 0.0f).GetHeight();
   DALI_TEST_CHECK(initialHeight > 0.0f);
 
-  exclusionRegions.PushBack(Rect<float>(0.0f, 0.0f, 90.0f, 80.0f));
+  exclusionRegions.PushBack(Bounds(0.0f, 0.0f, 90.0f, 80.0f));
   textVisualizer.SetExclusionRegions(exclusionRegions);
   textVisualizer.SetLineHeight(1.6f);
 
@@ -3613,10 +3613,10 @@ int UtcDaliTextVisualizerRenderHostStencilLikeSmokeP(void)
 {
   UiTestApplication          application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   DALI_TEST_CHECK(textVisualizer);
 
-  exclusionRegions.PushBack(Rect<float>(40.0f, 10.0f, 80.0f, 40.0f));
+  exclusionRegions.PushBack(Bounds(40.0f, 10.0f, 80.0f, 40.0f));
 
   textVisualizer.SetText("TextVisualizer render host clipping smoke with exclusion region.");
   textVisualizer.SetFontSize(14.0f);
@@ -3683,12 +3683,12 @@ int UtcDaliTextVisualizerLayoutUnchangedRenderSkipSmokeP(void)
 {
   UiTestApplication application;
   TextVisualizer    textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> exclusionRegionsA;
-  Dali::Vector<Rect<float>> exclusionRegionsB;
+  Dali::Vector<Bounds> exclusionRegionsA;
+  Dali::Vector<Bounds> exclusionRegionsB;
   DALI_TEST_CHECK(textVisualizer);
 
-  exclusionRegionsA.PushBack(Rect<float>(0.0f, 220.0f, 20.0f, 20.0f));
-  exclusionRegionsB.PushBack(Rect<float>(40.0f, 220.0f, 20.0f, 20.0f));
+  exclusionRegionsA.PushBack(Bounds(0.0f, 220.0f, 20.0f, 20.0f));
+  exclusionRegionsB.PushBack(Bounds(40.0f, 220.0f, 20.0f, 20.0f));
 
   textVisualizer.SetText("TextVisualizer unchanged layout render skip smoke.");
   textVisualizer.SetFontSize(12.0f);
@@ -3804,12 +3804,12 @@ int UtcDaliTextVisualizerExclusionRelayoutTriggersRenderUpdateSmokeP(void)
 {
   UiTestApplication         application;
   TextVisualizer            textVisualizer = TextVisualizer::New();
-  Dali::Vector<Rect<float>> exclusionRegionsA;
-  Dali::Vector<Rect<float>> exclusionRegionsB;
+  Dali::Vector<Bounds> exclusionRegionsA;
+  Dali::Vector<Bounds> exclusionRegionsB;
   DALI_TEST_CHECK(textVisualizer);
 
-  exclusionRegionsA.PushBack(Rect<float>(20.0f, 20.0f, 80.0f, 40.0f));
-  exclusionRegionsB.PushBack(Rect<float>(120.0f, 90.0f, 60.0f, 60.0f));
+  exclusionRegionsA.PushBack(Bounds(20.0f, 20.0f, 80.0f, 40.0f));
+  exclusionRegionsB.PushBack(Bounds(120.0f, 90.0f, 60.0f, 60.0f));
 
   textVisualizer.SetText("TextVisualizer exclusion relayout render update smoke.");
   textVisualizer.SetFontSize(14.0f);
@@ -3900,10 +3900,10 @@ int UtcDaliTextVisualizerExclusionLayoutCacheEmptyP(void)
 int UtcDaliTextVisualizerExclusionLayoutCacheSetRegionsSortedP(void)
 {
   UiTestApplication application;
-  Dali::Vector<Rect<float>> regions;
-  regions.PushBack(Rect<float>(0.0f, 30.0f, 10.0f, -20.0f));
-  regions.PushBack(Rect<float>(0.0f, 0.0f, 10.0f, 5.0f));
-  regions.PushBack(Rect<float>(0.0f, 20.0f, 10.0f, 5.0f));
+  Dali::Vector<Bounds> regions;
+  regions.PushBack(Bounds(0.0f, 30.0f, 10.0f, -20.0f));
+  regions.PushBack(Bounds(0.0f, 0.0f, 10.0f, 5.0f));
+  regions.PushBack(Bounds(0.0f, 20.0f, 10.0f, 5.0f));
 
   Dali::Ui::Internal::TextVisualizer::ExclusionLayoutCache cache;
   const uint64_t                                           initialVersion = cache.GetVersion();
@@ -3926,8 +3926,8 @@ int UtcDaliTextVisualizerExclusionLayoutCacheSetRegionsSortedP(void)
 int UtcDaliTextVisualizerExclusionLayoutCacheClearP(void)
 {
   UiTestApplication application;
-  Dali::Vector<Rect<float>> regions;
-  regions.PushBack(Rect<float>(0.0f, 0.0f, 10.0f, 10.0f));
+  Dali::Vector<Bounds> regions;
+  regions.PushBack(Bounds(0.0f, 0.0f, 10.0f, 10.0f));
 
   Dali::Ui::Internal::TextVisualizer::ExclusionLayoutCache cache;
   cache.SetRegions(regions);
@@ -3945,9 +3945,9 @@ int UtcDaliTextVisualizerExclusionLayoutCacheClearP(void)
 int UtcDaliTextVisualizerLayoutIntervalsSortedCacheSameAsVectorPathP(void)
 {
   UiTestApplication application;
-  Dali::Vector<Rect<float>> regions;
-  regions.PushBack(Rect<float>(45.0f, 0.0f, 20.0f, 20.0f));
-  regions.PushBack(Rect<float>(10.0f, 0.0f, 15.0f, 20.0f));
+  Dali::Vector<Bounds> regions;
+  regions.PushBack(Bounds(45.0f, 0.0f, 20.0f, 20.0f));
+  regions.PushBack(Bounds(10.0f, 0.0f, 15.0f, 20.0f));
 
   Dali::Ui::Internal::TextVisualizer::ExclusionLayoutCache cache;
   cache.SetRegions(regions);
@@ -3971,9 +3971,9 @@ int UtcDaliTextVisualizerLayoutGlyphsSortedCacheSameAsVectorPathP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("hello world dynamic text", 16.0f);
-  Dali::Vector<Rect<float>> regions;
-  regions.PushBack(Rect<float>(55.0f, 0.0f, 45.0f, 24.0f));
-  regions.PushBack(Rect<float>(0.0f, 32.0f, 35.0f, 24.0f));
+  Dali::Vector<Bounds> regions;
+  regions.PushBack(Bounds(55.0f, 0.0f, 45.0f, 24.0f));
+  regions.PushBack(Bounds(0.0f, 32.0f, 35.0f, 24.0f));
 
   Dali::Ui::Internal::TextVisualizer::ExclusionLayoutCache cache;
   cache.SetRegions(regions);
@@ -3997,9 +3997,9 @@ int UtcDaliTextVisualizerLayoutPlaceholderSortedCacheSameAsVectorPathP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdefghij", 10.0f);
-  Dali::Vector<Rect<float>> regions;
-  regions.PushBack(Rect<float>(20.0f, 0.0f, 20.0f, 12.0f));
-  regions.PushBack(Rect<float>(0.0f, 12.0f, 15.0f, 12.0f));
+  Dali::Vector<Bounds> regions;
+  regions.PushBack(Bounds(20.0f, 0.0f, 20.0f, 12.0f));
+  regions.PushBack(Bounds(0.0f, 12.0f, 15.0f, 12.0f));
 
   Dali::Ui::Internal::TextVisualizer::ExclusionLayoutCache cache;
   cache.SetRegions(regions);
@@ -4019,7 +4019,7 @@ int UtcDaliTextVisualizerLayoutPlaceholderSortedCacheSameAsVectorPathP(void)
 int UtcDaliTextVisualizerLayoutIntervalsWithoutExclusionP(void)
 {
   UiTestApplication         application;
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
 
   const auto availableIntervals = Dali::Ui::Internal::TextVisualizer::LayoutEngine::BuildAvailableIntervals(100.0f, 0.0f, 20.0f, exclusionRegions);
 
@@ -4033,8 +4033,8 @@ int UtcDaliTextVisualizerLayoutIntervalsWithoutExclusionP(void)
 int UtcDaliTextVisualizerLayoutIntervalsSingleExclusionP(void)
 {
   UiTestApplication         application;
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(20.0f, 0.0f, 20.0f, 20.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(20.0f, 0.0f, 20.0f, 20.0f));
 
   const auto availableIntervals = Dali::Ui::Internal::TextVisualizer::LayoutEngine::BuildAvailableIntervals(100.0f, 0.0f, 20.0f, exclusionRegions);
 
@@ -4050,8 +4050,8 @@ int UtcDaliTextVisualizerLayoutIntervalsSingleExclusionP(void)
 int UtcDaliTextVisualizerLayoutIntervalsWithoutVerticalOverlapP(void)
 {
   UiTestApplication         application;
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(20.0f, 30.0f, 20.0f, 10.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(20.0f, 30.0f, 20.0f, 10.0f));
 
   const auto availableIntervals = Dali::Ui::Internal::TextVisualizer::LayoutEngine::BuildAvailableIntervals(100.0f, 0.0f, 20.0f, exclusionRegions);
 
@@ -4065,9 +4065,9 @@ int UtcDaliTextVisualizerLayoutIntervalsWithoutVerticalOverlapP(void)
 int UtcDaliTextVisualizerLayoutIntervalsMergeBlockedRangesP(void)
 {
   UiTestApplication         application;
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(20.0f, 0.0f, 20.0f, 20.0f));
-  exclusionRegions.PushBack(Rect<float>(30.0f, 0.0f, 30.0f, 20.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(20.0f, 0.0f, 20.0f, 20.0f));
+  exclusionRegions.PushBack(Bounds(30.0f, 0.0f, 30.0f, 20.0f));
 
   const auto availableIntervals = Dali::Ui::Internal::TextVisualizer::LayoutEngine::BuildAvailableIntervals(100.0f, 0.0f, 20.0f, exclusionRegions);
 
@@ -4083,9 +4083,9 @@ int UtcDaliTextVisualizerLayoutIntervalsMergeBlockedRangesP(void)
 int UtcDaliTextVisualizerLayoutIntervalsClampOutsideWidthP(void)
 {
   UiTestApplication         application;
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(-10.0f, 0.0f, 30.0f, 20.0f));
-  exclusionRegions.PushBack(Rect<float>(80.0f, 0.0f, 60.0f, 20.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(-10.0f, 0.0f, 30.0f, 20.0f));
+  exclusionRegions.PushBack(Bounds(80.0f, 0.0f, 60.0f, 20.0f));
 
   const auto availableIntervals = Dali::Ui::Internal::TextVisualizer::LayoutEngine::BuildAvailableIntervals(100.0f, 0.0f, 20.0f, exclusionRegions);
 
@@ -4099,8 +4099,8 @@ int UtcDaliTextVisualizerLayoutIntervalsClampOutsideWidthP(void)
 int UtcDaliTextVisualizerLayoutIntervalsFullyBlockedP(void)
 {
   UiTestApplication         application;
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(0.0f, 0.0f, 100.0f, 20.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(0.0f, 0.0f, 100.0f, 20.0f));
 
   const auto availableIntervals = Dali::Ui::Internal::TextVisualizer::LayoutEngine::BuildAvailableIntervals(100.0f, 0.0f, 20.0f, exclusionRegions);
 
@@ -4113,7 +4113,7 @@ int UtcDaliTextVisualizerPlaceholderLayoutBasicP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdefghij", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutPlaceholder(preparedText, 20.0f, 12.0f, exclusionRegions, layoutResult);
@@ -4132,8 +4132,8 @@ int UtcDaliTextVisualizerPlaceholderLayoutWithExclusionP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdefghij", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(20.0f, 0.0f, 20.0f, 12.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(20.0f, 0.0f, 20.0f, 12.0f));
 
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutPlaceholder(preparedText, 100.0f, 12.0f, exclusionRegions, layoutResult);
@@ -4152,7 +4152,7 @@ int UtcDaliTextVisualizerPlaceholderLayoutEmptyTextP(void)
 {
   UiTestApplication application;
   Dali::Ui::Internal::TextVisualizer::PreparedText preparedText;
-  Dali::Vector<Rect<float>>                        exclusionRegions;
+  Dali::Vector<Bounds>                        exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
 
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutPlaceholder(preparedText, 100.0f, 12.0f, exclusionRegions, layoutResult);
@@ -4166,7 +4166,7 @@ int UtcDaliTextVisualizerPlaceholderLayoutWidthChangeP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdefghij", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
+  Dali::Vector<Bounds> exclusionRegions;
   Dali::Ui::Internal::TextVisualizer::LayoutResult narrowLayoutResult;
   Dali::Ui::Internal::TextVisualizer::LayoutResult wideLayoutResult;
 
@@ -4182,8 +4182,8 @@ int UtcDaliTextVisualizerPlaceholderLayoutFullBlockedLineP(void)
 {
   UiTestApplication application;
   auto              preparedText = CreatePreparedText("abcdef", 10.0f);
-  Dali::Vector<Rect<float>> exclusionRegions;
-  exclusionRegions.PushBack(Rect<float>(0.0f, 0.0f, 30.0f, 12.0f));
+  Dali::Vector<Bounds> exclusionRegions;
+  exclusionRegions.PushBack(Bounds(0.0f, 0.0f, 30.0f, 12.0f));
 
   Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
   Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutPlaceholder(preparedText, 30.0f, 12.0f, exclusionRegions, layoutResult);

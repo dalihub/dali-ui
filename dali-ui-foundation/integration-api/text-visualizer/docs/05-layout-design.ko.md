@@ -213,7 +213,7 @@ enum LineBreakFlag : uint8_t
 ```cpp
 struct TextExclusionRegion
 {
-  Rect<float> bounds;
+  Bounds bounds;
 };
 
 struct AvailableInterval
@@ -245,7 +245,7 @@ line 계산 입력:
 
 ### 입력
 
-- `Rect<float> contentBounds`
+- `Bounds contentBounds`
 - `float lineTop`
 - `float lineBottom`
 - `Vector<TextExclusionRegion> exclusions`
@@ -267,7 +267,7 @@ line 계산 입력:
 
 ```cpp
 Vector<AvailableInterval> BuildAvailableIntervals(
-  const Rect<float>& contentBounds,
+  const Bounds& contentBounds,
   float lineTop,
   float lineBottom,
   const Vector<TextExclusionRegion>& exclusions)

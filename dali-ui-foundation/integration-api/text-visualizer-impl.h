@@ -128,12 +128,12 @@ public:
   /**
    * @copydoc Dali::Ui::TextVisualizer::SetExclusionRegions
    */
-  void SetExclusionRegions(const Dali::Vector<Rect<float>>& regions);
+  void SetExclusionRegions(const Dali::Vector<Bounds>& regions);
 
   /**
    * @copydoc Dali::Ui::TextVisualizer::GetExclusionRegions
    */
-  Dali::Vector<Rect<float>> GetExclusionRegions() const;
+  Dali::Vector<Bounds> GetExclusionRegions() const;
 
   /**
    * @copydoc Dali::Ui::TextVisualizer::ClearExclusionRegions
@@ -198,8 +198,8 @@ private:
   bool  IsRenderUpdateSuccessful(bool updateRenderDataResult, bool attachResult) const;
   void  ResetLastRenderedLayoutSignature();
   void  StoreLastRenderedLayoutSignature(uint64_t layoutSignature);
-  void  UpdateStoredExclusionRegions(const Dali::Vector<Rect<float>>& regions);
-  bool  AreExclusionRegionsEqual(const Dali::Vector<Rect<float>>& regions) const;
+  void  UpdateStoredExclusionRegions(const Dali::Vector<Bounds>& regions);
+  bool  AreExclusionRegionsEqual(const Dali::Vector<Bounds>& regions) const;
   void  ClearMeasuredLayoutCache();
   void  StoreMeasuredLayoutCache(float layoutWidth, const Internal::TextVisualizer::LayoutResult& result);
   bool  TryUseMeasuredLayoutCache(float layoutWidth, Internal::TextVisualizer::LayoutResult& result);
@@ -214,7 +214,7 @@ private:
   float                                          mFontSize;
   float                                          mLineHeight;
   UiColor                                        mTextColor;
-  Dali::Vector<Rect<float>>                      mExclusionRegions;
+  Dali::Vector<Bounds>                           mExclusionRegions;
   Internal::TextVisualizer::ExclusionLayoutCache mExclusionLayoutCache;
   Internal::TextVisualizer::PreparedText         mPreparedText;
   Internal::TextVisualizer::LayoutResult         mLayoutResult;

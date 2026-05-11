@@ -96,7 +96,7 @@
 
 ### 2.4 exclusion region을 property가 아닌 method로 처리
 
-`SetExclusionRegions(const Dali::Vector<Rect<float>>& regions)`와 `ClearExclusionRegions()`를 method로 둔 점은 설계 문서와 일치한다.
+`SetExclusionRegions(const Dali::Vector<Bounds>& regions)`와 `ClearExclusionRegions()`를 method로 둔 점은 설계 문서와 일치한다.
 
 ### 2.5 dirty flag를 단계별로 분리
 
@@ -118,8 +118,8 @@
 
 `06-api-design.ko.md`의 초안 코드 블록 일부에서는 `GetExclusionRegionCount()`가 보였지만, 현재 구현은 다음으로 정리되었다.
 
-- `SetExclusionRegions(const Dali::Vector<Rect<float>>& regions)`
-- `Dali::Vector<Rect<float>> GetExclusionRegions() const`
+- `SetExclusionRegions(const Dali::Vector<Bounds>& regions)`
+- `Dali::Vector<Bounds> GetExclusionRegions() const`
 - `void ClearExclusionRegions()`
 
 이 차이는 큰 문제는 아니다. 현재 구현은 “설정한 컬렉션을 그대로 되돌려 받는다”는 점에서 test 작성과 debugging에는 더 편하다.
@@ -189,7 +189,7 @@
 
 다만 검토 포인트:
 
-- `Dali::Vector<Rect<float>>`를 값으로 반환하므로 copy cost가 있다.
+- `Dali::Vector<Bounds>`를 값으로 반환하므로 copy cost가 있다.
 - 현재 단계에서는 region 수가 작고 API 단순성이 더 중요하므로 허용 가능하다.
 
 ### 4.4 `GetTextColor()`

@@ -105,9 +105,9 @@ private:
    * actor.
    * @param sceneView The SceneView for which the screen overlay extents will be calculated.
    * @param highlight The previously used highlight actor.
-   * @return A Rect<float> representing the extents of the screen overlay.
+   * @return A Bounds representing the extents of the screen overlay.
    */
-  Rect<float> GetOverlayExtents(Dali::Actor& sceneView, Dali::Actor& highlight);
+  Bounds GetOverlayExtents(Dali::Actor& sceneView, Dali::Actor& highlight);
 
 private:
   bool                          mHasOverlayActor;

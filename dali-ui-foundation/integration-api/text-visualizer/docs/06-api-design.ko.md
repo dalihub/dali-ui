@@ -136,7 +136,7 @@ public: // Setters for chaining
 public: // Commands
   void Prepare();
 
-  void SetExclusionRegions(const Dali::Vector<Rect<float>>& regions);
+  void SetExclusionRegions(const Dali::Vector<Bounds>& regions);
   void ClearExclusionRegions();
   uint32_t GetExclusionRegionCount() const;
 
@@ -220,7 +220,7 @@ public: // API
 
   void Prepare();
 
-  void     SetExclusionRegions(const Dali::Vector<Rect<float>>& regions);
+  void     SetExclusionRegions(const Dali::Vector<Bounds>& regions);
   void     ClearExclusionRegions();
   uint32_t GetExclusionRegionCount() const;
 
@@ -245,7 +245,7 @@ private:
   Dali::String               mFontFamily;
   float                      mFontSize;
   UiColor                    mTextColor;
-  Dali::Vector<Rect<float>>  mExclusionRegions;
+  Dali::Vector<Bounds>  mExclusionRegions;
   Text::RendererPtr          mRenderer;
 };
 
@@ -418,10 +418,10 @@ private:
 단, ABI 안정성을 위해 public parameter type은 별도 public struct보다 아래처럼 단순하게 두는 것이 좋다.
 
 ```cpp
-void SetExclusionRegions(const Dali::Vector<Rect<float>>& regions);
+void SetExclusionRegions(const Dali::Vector<Bounds>& regions);
 ```
 
-즉, naming은 `Regions`, type은 `Rect<float>` 집합으로 가는 것이 1차 구현에 가장 안정적이다.
+즉, naming은 `Regions`, type은 `Bounds` 집합으로 가는 것이 1차 구현에 가장 안정적이다.
 
 ## ClearExclusionRegions 필요성
 
@@ -489,7 +489,7 @@ public `struct TextExclusionRegion`을 노출하면 향후 필드 추가가 ABI 
 따라서 1차 구현에서는 새 public struct보다 다음이 더 안전하다.
 
 ```cpp
-Dali::Vector<Rect<float>>
+Dali::Vector<Bounds>
 ```
 
 ### 3. property enum은 초기에 작게 유지한다

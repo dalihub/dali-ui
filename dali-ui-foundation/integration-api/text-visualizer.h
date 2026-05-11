@@ -226,14 +226,14 @@ public: // Setters for chaining
    *
    * @param[in] regions Regions where text should not be placed.
    */
-  void SetExclusionRegions(const Dali::Vector<Rect<float>>& regions);
+  void SetExclusionRegions(const Dali::Vector<Bounds>& regions);
 
   /**
    * @brief Gets the currently stored exclusion regions.
    *
    * @return The current exclusion regions.
    */
-  Dali::Vector<Rect<float>> GetExclusionRegions() const;
+  Dali::Vector<Bounds> GetExclusionRegions() const;
 
   /**
    * @brief Clears all exclusion regions.

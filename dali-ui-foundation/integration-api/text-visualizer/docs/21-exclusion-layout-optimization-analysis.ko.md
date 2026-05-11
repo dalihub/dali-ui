@@ -48,7 +48,7 @@ flowchart TD
 
 `LayoutGlyphs()` / `LayoutPlaceholder()`는 layout pass마다 `BuildSortedExclusionRegions()`를 호출한다.
 
-이 정렬은 exclusion set이 바뀌지 않는 동안 재사용할 수 있지만, 현재 `LayoutEngine`은 plain `Dali::Vector<Rect<float>>`를 입력으로 받아 내부 local sorted cache를 만든다.
+이 정렬은 exclusion set이 바뀌지 않는 동안 재사용할 수 있지만, 현재 `LayoutEngine`은 plain `Dali::Vector<Bounds>`를 입력으로 받아 내부 local sorted cache를 만든다.
 
 core에서 sorted cache를 유지하려면 다음 중 하나가 필요하다.
 

@@ -18,15 +18,15 @@ moving bounds 상황에서는 exclusion이 자주 바뀌지만, 같은 exclusion
 
 | 항목 | 현재 위치 | 공개 범위 | 역할 |
 |---|---|---|---|
-| `SortedExclusionRegion` | `layout-engine.cpp` anonymous namespace | cpp-local | `Rect<float>`와 `top` / `bottom` cache |
+| `SortedExclusionRegion` | `layout-engine.cpp` anonymous namespace | cpp-local | `Bounds`와 `top` / `bottom` cache |
 | `SortedExclusionRegions` | `layout-engine.cpp` anonymous namespace | cpp-local | `std::vector<SortedExclusionRegion>` alias |
-| `BuildSortedExclusionRegions()` | `layout-engine.cpp` anonymous namespace | cpp-local | `Dali::Vector<Rect<float>>`를 y-sort cache로 변환 |
+| `BuildSortedExclusionRegions()` | `layout-engine.cpp` anonymous namespace | cpp-local | `Dali::Vector<Bounds>`를 y-sort cache로 변환 |
 | `BuildAvailableIntervalsFromSorted()` | `layout-engine.cpp` anonymous namespace | cpp-local | sorted regions를 line y band로 scan |
 | `LayoutGlyphs()` | `LayoutEngine` public static internal API | header exposed | glyph placement layout |
 | `LayoutPlaceholder()` | `LayoutEngine` public static internal API | header exposed | placeholder cluster layout |
 | `BuildAvailableIntervals()` | `LayoutEngine` public static internal API | header exposed | test/helper용 vector 기반 interval build |
 
-현재 `TextVisualizerImpl`이 볼 수 있는 것은 `Dali::Vector<Rect<float>> mExclusionRegions`뿐이다. sorted representation은 `LayoutEngine` 안에서 layout pass마다 생성되고 사라진다.
+현재 `TextVisualizerImpl`이 볼 수 있는 것은 `Dali::Vector<Bounds> mExclusionRegions`뿐이다. sorted representation은 `LayoutEngine` 안에서 layout pass마다 생성되고 사라진다.
 
 ## 3. 현재 비용
 
@@ -74,7 +74,7 @@ dali-ui-foundation/internal/text/text-visualizer/exclusion-types.h
 ```cpp
 struct SortedExclusionRegion
 {
-  Rect<float> rect;
+  Bounds rect;
   float top{0.0f};
   float bottom{0.0f};
 };
@@ -115,7 +115,7 @@ class ExclusionLayoutCache
 {
 public:
   void Clear();
-  void SetRegions(const Dali::Vector<Rect<float>>& regions);
+  void SetRegions(const Dali::Vector<Bounds>& regions);
   const SortedExclusionRegions& GetSortedRegions() const;
   uint64_t GetVersion() const;
   bool Empty() const;
@@ -286,7 +286,7 @@ Add TextVisualizer ExclusionLayoutCache
 - `SortedExclusionRegions`
 - `ExclusionLayoutCache`
 
-`ExclusionLayoutCache::SetRegions()`는 raw `Dali::Vector<Rect<float>>`를 받아 `top` / `bottom` 값을 미리 계산하고 y 기준으로 정렬한다. `Clear()`와 `SetRegions()`는 version을 증가시켜 cache 변경 추적이 가능하게 했다.
+`ExclusionLayoutCache::SetRegions()`는 raw `Dali::Vector<Bounds>`를 받아 `top` / `bottom` 값을 미리 계산하고 y 기준으로 정렬한다. `Clear()`와 `SetRegions()`는 version을 증가시켜 cache 변경 추적이 가능하게 했다.
 
 `LayoutEngine`에는 다음 sorted cache overload를 추가했다.
 

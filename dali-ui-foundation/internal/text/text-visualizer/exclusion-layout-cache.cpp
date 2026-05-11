@@ -35,15 +35,15 @@ void ExclusionLayoutCache::Clear()
   ++mVersion;
 }
 
-void ExclusionLayoutCache::SetRegions(const Dali::Vector<Rect<float>>& regions)
+void ExclusionLayoutCache::SetRegions(const Dali::Vector<Bounds>& regions)
 {
   mSortedRegions.clear();
   mSortedRegions.reserve(regions.Count());
 
   for(uint32_t index = 0u; index < regions.Count(); ++index)
   {
-    const Rect<float>& region = regions[index];
-    const float        bottom = region.y + region.height;
+    const Bounds& region = regions[index];
+    const float   bottom = region.y + region.height;
 
     SortedExclusionRegion sortedRegion;
     sortedRegion.rect   = region;

@@ -231,7 +231,7 @@ private:
     else if(event.GetKeyName() == "S" || event.GetKeyName() == "s")
     {
       DALI_LOG_RELEASE_INFO("[WebViewSample] GetScreenshotAsynchronously\n");
-      Dali::Rect<int32_t> viewArea(0, 0,
+      Dali::BoundsInteger viewArea(0, 0,
                                    static_cast<int32_t>(mWebView.GetProperty<float>(Actor::Property::SIZE_WIDTH)),
                                    static_cast<int32_t>(mWebView.GetProperty<float>(Actor::Property::SIZE_HEIGHT)));
       mWebView.GetScreenshotAsynchronously(

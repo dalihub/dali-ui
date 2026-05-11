@@ -164,12 +164,12 @@ void TextVisualizer::Prepare()
   GetImpl(*this).Prepare();
 }
 
-void TextVisualizer::SetExclusionRegions(const Dali::Vector<Rect<float>>& regions)
+void TextVisualizer::SetExclusionRegions(const Dali::Vector<Bounds>& regions)
 {
   GetImpl(*this).SetExclusionRegions(regions);
 }
 
-Dali::Vector<Rect<float>> TextVisualizer::GetExclusionRegions() const
+Dali::Vector<Bounds> TextVisualizer::GetExclusionRegions() const
 {
   return GetImpl(*this).GetExclusionRegions();
 }

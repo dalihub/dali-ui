@@ -546,7 +546,7 @@ public: // Screenshot & Page Info
    * @param[in] scaleFactor The scale factor
    * @return An ImageView containing the screenshot
    */
-  Dali::Ui::ImageView GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor);
+  Dali::Ui::ImageView GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor);
 
   /**
    * @brief Gets a screenshot asynchronously.
@@ -556,7 +556,7 @@ public: // Screenshot & Page Info
    * @param[in] callback The callback to receive the screenshot
    * @return True if the operation started successfully
    */
-  bool GetScreenshotAsynchronously(Dali::Rect<int32_t> viewArea, float scaleFactor, ScreenshotCapturedCallback callback);
+  bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, ScreenshotCapturedCallback callback);
 
   /**
    * @brief Gets the favicon.

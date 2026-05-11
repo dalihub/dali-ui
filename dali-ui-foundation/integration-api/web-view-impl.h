@@ -346,12 +346,12 @@ public: // API — Screenshot
   /**
    * @copydoc Dali::Ui::WebView::GetScreenshot
    */
-  Dali::Ui::ImageView GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor);
+  Dali::Ui::ImageView GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor);
 
   /**
    * @copydoc Dali::Ui::WebView::GetScreenshotAsynchronously
    */
-  bool GetScreenshotAsynchronously(Dali::Rect<int32_t> viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback);
+  bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback);
 
 public: // API — Page Info
   /**
@@ -544,7 +544,7 @@ private: // Internal rendering callbacks
    *
    * @param[in] displayArea The new display rectangle in screen coordinates
    */
-  void SetDisplayArea(const Dali::Rect<int32_t>& displayArea);
+  void SetDisplayArea(const Dali::BoundsInteger& displayArea);
 
   /**
    * @brief Enables or disables alpha blending on the web content actor.
@@ -603,7 +603,7 @@ private:
 private:                                              // Data — Rendering
   Ui::Visual::Base    mVisual;                        ///< Current image visual showing the web content
   Dali::Size          mWebViewSize;                   ///< Current web view size (width, height)
-  Dali::Rect<int32_t> mWebViewArea;                   ///< Last known display area in screen coordinates
+  Dali::BoundsInteger mWebViewArea;                   ///< Last known display area in screen coordinates
   uint32_t            mLastRenderedNativeImageWidth;  ///< Width of the last uploaded NativeImage texture
   uint32_t            mLastRenderedNativeImageHeight; ///< Height of the last uploaded NativeImage texture
   bool                mVisualChangeRequired;          ///< True when the visual must be re-created on next frame

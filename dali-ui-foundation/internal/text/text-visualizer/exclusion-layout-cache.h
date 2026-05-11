@@ -30,9 +30,9 @@ namespace Dali::Ui::Internal::TextVisualizer
 {
 struct SortedExclusionRegion
 {
-  Rect<float> rect;
-  float       top{0.0f};
-  float       bottom{0.0f};
+  Bounds rect;
+  float  top{0.0f};
+  float  bottom{0.0f};
 };
 
 using SortedExclusionRegions = std::vector<SortedExclusionRegion>;
@@ -49,7 +49,7 @@ public:
   ExclusionLayoutCache();
 
   void Clear();
-  void SetRegions(const Dali::Vector<Rect<float>>& regions);
+  void SetRegions(const Dali::Vector<Bounds>& regions);
 
   bool     Empty() const;
   uint32_t Count() const;

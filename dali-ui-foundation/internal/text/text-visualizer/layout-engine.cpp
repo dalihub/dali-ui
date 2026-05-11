@@ -41,7 +41,7 @@ struct GlyphFitResult
   bool     forceLineBreak{false};
 };
 
-bool HasVerticalOverlap(float lineTop, float lineBottom, const Rect<float>& region)
+bool HasVerticalOverlap(float lineTop, float lineBottom, const Bounds& region)
 {
   return (region.y < lineBottom) && ((region.y + region.height) > lineTop);
 }
@@ -298,7 +298,7 @@ Dali::Vector<AvailableInterval> BuildAvailableIntervalsFromSorted(float         
       break;
     }
 
-    const Rect<float>& region = it->rect;
+    const Bounds& region = it->rect;
     if(!HasVerticalOverlap(lineTop, lineBottom, region))
     {
       continue;
@@ -371,10 +371,10 @@ Dali::Vector<AvailableInterval> BuildAvailableIntervalsFromSorted(float         
 }
 } // namespace
 
-Dali::Vector<AvailableInterval> LayoutEngine::BuildAvailableIntervals(float                            layoutWidth,
-                                                                      float                            lineY,
-                                                                      float                            lineHeight,
-                                                                      const Dali::Vector<Rect<float>>& exclusionRegions)
+Dali::Vector<AvailableInterval> LayoutEngine::BuildAvailableIntervals(float                       layoutWidth,
+                                                                      float                       lineY,
+                                                                      float                       lineHeight,
+                                                                      const Dali::Vector<Bounds>& exclusionRegions)
 {
   ExclusionLayoutCache exclusionCache;
   exclusionCache.SetRegions(exclusionRegions);
@@ -401,11 +401,11 @@ float LayoutEngine::GetPlaceholderLineHeight(const PreparedText& preparedText)
   return fontSize > 0.0f ? fontSize * 1.2f : 20.0f;
 }
 
-void LayoutEngine::LayoutPlaceholder(const PreparedText&              preparedText,
-                                     float                            layoutWidth,
-                                     float                            lineHeight,
-                                     const Dali::Vector<Rect<float>>& exclusionRegions,
-                                     LayoutResult&                    result)
+void LayoutEngine::LayoutPlaceholder(const PreparedText&         preparedText,
+                                     float                       layoutWidth,
+                                     float                       lineHeight,
+                                     const Dali::Vector<Bounds>& exclusionRegions,
+                                     LayoutResult&               result)
 {
   ExclusionLayoutCache exclusionCache;
   exclusionCache.SetRegions(exclusionRegions);
@@ -500,11 +500,11 @@ void LayoutEngine::LayoutPlaceholder(const PreparedText&         preparedText,
   }
 }
 
-void LayoutEngine::LayoutGlyphs(const PreparedText&              preparedText,
-                                float                            layoutWidth,
-                                float                            lineHeight,
-                                const Dali::Vector<Rect<float>>& exclusionRegions,
-                                LayoutResult&                    result)
+void LayoutEngine::LayoutGlyphs(const PreparedText&         preparedText,
+                                float                       layoutWidth,
+                                float                       lineHeight,
+                                const Dali::Vector<Bounds>& exclusionRegions,
+                                LayoutResult&               result)
 {
   ExclusionLayoutCache exclusionCache;
   exclusionCache.SetRegions(exclusionRegions);

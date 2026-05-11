@@ -526,7 +526,7 @@ int UtcDaliWebViewGetScreenshotP(void)
 {
   UiTestApplication application;
   WebView view = WebView::New();
-  Dali::Rect<int32_t> area(0, 0, 100, 100);
+  Dali::BoundsInteger area(0, 0, 100, 100);
   Dali::Ui::ImageView screenshot = view.GetScreenshot(area, 1.0f);
   DALI_TEST_CHECK(view);
   END_TEST;
@@ -537,7 +537,7 @@ int UtcDaliWebViewGetScreenshotAsynchronouslyP(void)
   UiTestApplication application;
   WebView view = WebView::New();
   auto callback = WebView::ScreenshotCapturedCallback::New(OnScreenshotCallback);
-  Dali::Rect<int32_t> area(0, 0, 100, 100);
+  Dali::BoundsInteger area(0, 0, 100, 100);
   view.GetScreenshotAsynchronously(area, 1.0f, std::move(callback));
   DALI_TEST_CHECK(view);
   END_TEST;

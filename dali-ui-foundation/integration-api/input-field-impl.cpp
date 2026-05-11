@@ -1184,13 +1184,13 @@ void InputFieldImpl::OnInitialize()
   self.TouchedSignal().Connect(this, &InputFieldImpl::OnTouched);
 
   // Set BoundingBox to stage size if not already set.
-  Rect<int> boundingBox;
+  BoundsInteger boundingBox;
   mDecorator->GetBoundingBox(boundingBox);
 
   if(boundingBox.IsEmpty())
   {
     Vector2 stageSize = Dali::Stage::GetCurrent().GetSize();
-    mDecorator->SetBoundingBox(Rect<int>(0.0f, 0.0f, stageSize.width, stageSize.height));
+    mDecorator->SetBoundingBox(BoundsInteger(0.0f, 0.0f, stageSize.width, stageSize.height));
   }
 
   // Flip vertically the 'left' selection handle

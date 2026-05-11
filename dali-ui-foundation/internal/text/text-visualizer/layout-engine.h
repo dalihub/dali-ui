@@ -33,21 +33,21 @@ public:
 
   static float GetPlaceholderLineHeight(const PreparedText& preparedText);
 
-  static Dali::Vector<AvailableInterval> BuildAvailableIntervals(float                            layoutWidth,
-                                                                 float                            lineY,
-                                                                 float                            lineHeight,
-                                                                 const Dali::Vector<Rect<float>>& exclusionRegions);
+  static Dali::Vector<AvailableInterval> BuildAvailableIntervals(float                       layoutWidth,
+                                                                 float                       lineY,
+                                                                 float                       lineHeight,
+                                                                 const Dali::Vector<Bounds>& exclusionRegions);
 
   static Dali::Vector<AvailableInterval> BuildAvailableIntervals(float                       layoutWidth,
                                                                  float                       lineY,
                                                                  float                       lineHeight,
                                                                  const ExclusionLayoutCache& exclusionCache);
 
-  static void LayoutPlaceholder(const PreparedText&              preparedText,
-                                float                            layoutWidth,
-                                float                            lineHeight,
-                                const Dali::Vector<Rect<float>>& exclusionRegions,
-                                LayoutResult&                    result);
+  static void LayoutPlaceholder(const PreparedText&         preparedText,
+                                float                       layoutWidth,
+                                float                       lineHeight,
+                                const Dali::Vector<Bounds>& exclusionRegions,
+                                LayoutResult&               result);
 
   static void LayoutPlaceholder(const PreparedText&         preparedText,
                                 float                       layoutWidth,
@@ -55,11 +55,11 @@ public:
                                 const ExclusionLayoutCache& exclusionCache,
                                 LayoutResult&               result);
 
-  static void LayoutGlyphs(const PreparedText&              preparedText,
-                           float                            layoutWidth,
-                           float                            lineHeight,
-                           const Dali::Vector<Rect<float>>& exclusionRegions,
-                           LayoutResult&                    result);
+  static void LayoutGlyphs(const PreparedText&         preparedText,
+                           float                       layoutWidth,
+                           float                       lineHeight,
+                           const Dali::Vector<Bounds>& exclusionRegions,
+                           LayoutResult&               result);
 
   static void LayoutGlyphs(const PreparedText&         preparedText,
                            float                       layoutWidth,

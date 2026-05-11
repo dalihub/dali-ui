@@ -263,7 +263,7 @@ const char* GetBrickRenderModeName(BrickRenderMode mode)
   return (mode == BrickRenderMode::LABEL) ? "LABEL" : "TEXT_VISUALIZER";
 }
 
-bool RectsOverlap(const Rect<float>& a, const Rect<float>& b)
+bool RectsOverlap(const Bounds& a, const Bounds& b)
 {
   return a.x < b.x + b.width &&
          a.x + a.width > b.x &&
@@ -276,17 +276,17 @@ float ClampFloat(float value, float minimum, float maximum)
   return std::max(minimum, std::min(value, maximum));
 }
 
-Rect<float> InflateRect(const Rect<float>& rect, float amount)
+Bounds InflateRect(const Bounds& rect, float amount)
 {
-  return Rect<float>(rect.x - amount,
+  return Bounds(rect.x - amount,
                      rect.y - amount,
                      rect.width + (amount * 2.0f),
                      rect.height + (amount * 2.0f));
 }
 
-Rect<float> BallBounds(const Vector2& center)
+Bounds BallBounds(const Vector2& center)
 {
-  return Rect<float>(center.x - BALL_RADIUS,
+  return Bounds(center.x - BALL_RADIUS,
                      center.y - BALL_RADIUS,
                      BALL_RADIUS * 2.0f,
                      BALL_RADIUS * 2.0f);
@@ -308,8 +308,8 @@ private:
   struct Brick
   {
     View        text;
-    Rect<float> textBounds;
-    Rect<float> exclusionBounds;
+    Bounds textBounds;
+    Bounds exclusionBounds;
     std::string word;
     bool        alive{true};
     UiColor     color;
@@ -330,12 +330,12 @@ private:
 
   struct Pulse
   {
-    Rect<float> bounds;
+    Bounds bounds;
     float       age{0.0f};
     float       life{BRICK_PULSE_DURATION};
   };
 
-  Rect<float> GetBrickExclusionBounds(const Brick& brick) const
+  Bounds GetBrickExclusionBounds(const Brick& brick) const
   {
     return brick.exclusionBounds;
   }
@@ -414,11 +414,11 @@ private:
         const float textWidth      = GetBrickTextWidth(word);
         const float exclusionWidth = GetBrickExclusionWidth(word);
 
-        const Rect<float> textBounds(brickX,
+        const Bounds textBounds(brickX,
                                      brickY,
                                      textWidth,
                                      BRICK_HEIGHT);
-        const Rect<float> exclusionBounds(textBounds.x + ((textBounds.width - exclusionWidth) * 0.5f),
+        const Bounds exclusionBounds(textBounds.x + ((textBounds.width - exclusionWidth) * 0.5f),
                                           brickY,
                                           exclusionWidth,
                                           BRICK_HEIGHT);
@@ -464,7 +464,7 @@ private:
     mBricks.clear();
   }
 
-  void ConfigureBrickCommon(View actor, const Rect<float>& textBounds)
+  void ConfigureBrickCommon(View actor, const Bounds& textBounds)
   {
     actor.SetLayoutMode(LayoutMode::STANDALONE);
     actor.SetRequestedPositionX(textBounds.x);
@@ -474,7 +474,7 @@ private:
     actor.SetBackgroundColor(UiColor(Color::TRANSPARENT));
   }
 
-  void ConfigureBrickLabel(Label& label, const char* word, const Rect<float>& textBounds, const UiColor& color)
+  void ConfigureBrickLabel(Label& label, const char* word, const Bounds& textBounds, const UiColor& color)
   {
     ConfigureBrickCommon(label, textBounds);
     label.SetText(BuildBrickText(word));
@@ -487,7 +487,7 @@ private:
     label.SetAsyncRendering(true);
   }
 
-  void ConfigureBrickTextVisualizer(TextVisualizer& textVisualizer, const char* word, const Rect<float>& textBounds, const UiColor& color)
+  void ConfigureBrickTextVisualizer(TextVisualizer& textVisualizer, const char* word, const Bounds& textBounds, const UiColor& color)
   {
     ConfigureBrickCommon(textVisualizer, textBounds);
     textVisualizer.SetText(BuildBrickText(word));
@@ -665,8 +665,8 @@ private:
 
   void HandlePaddleCollision()
   {
-    const Rect<float> ballBounds = BallBounds(mBallCenter);
-    const Rect<float> paddleBounds = GetPaddleBounds();
+    const Bounds ballBounds = BallBounds(mBallCenter);
+    const Bounds paddleBounds = GetPaddleBounds();
 
     if(mBallVelocity.y > 0.0f && RectsOverlap(ballBounds, paddleBounds))
     {
@@ -706,7 +706,7 @@ private:
 
   void HandleBrickCollision()
   {
-    const Rect<float> ballBounds = BallBounds(mBallCenter);
+    const Bounds ballBounds = BallBounds(mBallCenter);
 
     for(Brick& brick : mBricks)
     {
@@ -721,7 +721,7 @@ private:
     }
   }
 
-  void ReflectBallFromBrick(const Rect<float>& brickBounds)
+  void ReflectBallFromBrick(const Bounds& brickBounds)
   {
     const float brickCenterX = brickBounds.x + (brickBounds.width * 0.5f);
     const float brickCenterY = brickBounds.y + (brickBounds.height * 0.5f);
@@ -946,14 +946,14 @@ private:
     mPaddleText.SetRequestedPositionY(PADDLE_Y);
   }
 
-  Rect<float> GetPaddleBounds() const
+  Bounds GetPaddleBounds() const
   {
-    return Rect<float>(mPaddleX, PADDLE_Y, PADDLE_WIDTH, PADDLE_HEIGHT);
+    return Bounds(mPaddleX, PADDLE_Y, PADDLE_WIDTH, PADDLE_HEIGHT);
   }
 
-  Rect<float> ToBackgroundLocalRect(const Rect<float>& windowRect) const
+  Bounds ToBackgroundLocalRect(const Bounds& windowRect) const
   {
-    return Rect<float>(windowRect.x - BACKGROUND_TEXT_LEFT,
+    return Bounds(windowRect.x - BACKGROUND_TEXT_LEFT,
                        windowRect.y - BACKGROUND_TEXT_TOP,
                        windowRect.width,
                        windowRect.height);
@@ -995,7 +995,7 @@ private:
     mBackgroundText.SetExclusionRegions(mExclusionRegions);
   }
 
-  void AppendFragmentExclusionRegions(Dali::Vector<Rect<float>>& regions) const
+  void AppendFragmentExclusionRegions(Dali::Vector<Bounds>& regions) const
   {
     for(const TextFragment& fragment : mFragments)
     {
@@ -1008,16 +1008,16 @@ private:
                            fragment.position.y + (fragment.height * 0.5f));
       const float width  = fragment.width * fragment.exclusionScale;
       const float height = fragment.height * fragment.exclusionScale;
-      regions.PushBack(ToBackgroundLocalRect(Rect<float>(center.x - (width * 0.5f),
+      regions.PushBack(ToBackgroundLocalRect(Bounds(center.x - (width * 0.5f),
                                                          center.y - (height * 0.5f),
                                                          width,
                                                          height)));
     }
   }
 
-  void AppendCircularExclusionRegions(Dali::Vector<Rect<float>>& regions, const Vector2& center, float radius) const
+  void AppendCircularExclusionRegions(Dali::Vector<Bounds>& regions, const Vector2& center, float radius) const
   {
-    const Rect<float> bounds(center.x - radius,
+    const Bounds bounds(center.x - radius,
                              center.y - radius,
                              radius * 2.0f,
                              radius * 2.0f);
@@ -1036,7 +1036,7 @@ private:
       const float bandWidth   = bounds.width * xScale;
       const float bandLeft    = centerX - (bandWidth * 0.5f);
 
-      regions.PushBack(ToBackgroundLocalRect(Rect<float>(bandLeft - EXCLUSION_PADDING,
+      regions.PushBack(ToBackgroundLocalRect(Bounds(bandLeft - EXCLUSION_PADDING,
                                                          bandTop - EXCLUSION_PADDING,
                                                          bandWidth + (EXCLUSION_PADDING * 2.0f),
                                                          bandHeight + (EXCLUSION_PADDING * 2.0f))));
@@ -1156,7 +1156,7 @@ private:
   std::vector<Brick>                    mBricks;
   std::vector<TextFragment>             mFragments;
   std::vector<Pulse>                    mPulses;
-  Dali::Vector<Rect<float>>             mExclusionRegions;
+  Dali::Vector<Bounds>             mExclusionRegions;
   Timer                                 mTimer;
   std::mt19937                          mRandomEngine;
   Vector2                               mBallCenter{Vector2::ZERO};

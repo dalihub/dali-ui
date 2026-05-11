@@ -35,7 +35,7 @@ namespace Adaptor
 class SceneHolder : public Dali::BaseObject
 {
 public:
-  SceneHolder(const Dali::Rect<int>& positionSize);
+  SceneHolder(const Dali::BoundsInteger& positionSize);
 
   virtual ~SceneHolder();
 

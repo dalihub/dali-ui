@@ -181,7 +181,7 @@ public:
    *
    * @param[in] boundingBox Vector( x coordinate, y coordinate, width, height )
    */
-  void SetBoundingBox(const Rect<int>& boundingBox);
+  void SetBoundingBox(const BoundsInteger& boundingBox);
 
   /**
    * @brief Retrieve the bounding box origin and dimensions.
@@ -189,7 +189,7 @@ public:
    * default is set once control is added to stage, before this the return vector will be Vector4:ZERO
    * @param[out] boundingBox The bounding box origin, width and height.
    */
-  void GetBoundingBox(Rect<int>& boundingBox) const;
+  void GetBoundingBox(BoundsInteger& boundingBox) const;
 
   /**
    * @brief The decorator waits until a relayout before creating actors etc.

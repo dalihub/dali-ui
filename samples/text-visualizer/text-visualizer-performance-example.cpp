@@ -188,17 +188,17 @@ Vector2 GetBodySurfaceOrigin()
   return Vector2(BODY_SURFACE_LEFT, BODY_SURFACE_TOP);
 }
 
-void AppendTitleLineExclusion(Dali::Vector<Rect<float>>& regions, float lineWidth, uint32_t lineIndex)
+void AppendTitleLineExclusion(Dali::Vector<Bounds>& regions, float lineWidth, uint32_t lineIndex)
 {
   const float lineY     = TITLE_EXCLUSION_TOP_OFFSET + (static_cast<float>(lineIndex) * TITLE_EXCLUSION_LINE_PITCH);
 
-  regions.PushBack(Rect<float>(-TITLE_EXCLUSION_PADDING,
+  regions.PushBack(Bounds(-TITLE_EXCLUSION_PADDING,
                                lineY - TITLE_EXCLUSION_PADDING,
                                lineWidth + (TITLE_EXCLUSION_PADDING * 2.0f),
                                TITLE_EXCLUSION_LINE_HEIGHT + (TITLE_EXCLUSION_PADDING * 2.0f)));
 }
 
-void AppendTitleLineRangeExclusion(Dali::Vector<Rect<float>>& regions, float lineWidth, uint32_t firstLineIndex, uint32_t lineCount)
+void AppendTitleLineRangeExclusion(Dali::Vector<Bounds>& regions, float lineWidth, uint32_t firstLineIndex, uint32_t lineCount)
 {
   if(lineCount == 0u)
   {
@@ -208,7 +208,7 @@ void AppendTitleLineRangeExclusion(Dali::Vector<Rect<float>>& regions, float lin
   const float lineY       = TITLE_EXCLUSION_TOP_OFFSET + (static_cast<float>(firstLineIndex) * TITLE_EXCLUSION_LINE_PITCH);
   const float rangeHeight = TITLE_EXCLUSION_LINE_HEIGHT + (static_cast<float>(lineCount - 1u) * TITLE_EXCLUSION_LINE_PITCH);
 
-  regions.PushBack(Rect<float>(-TITLE_EXCLUSION_PADDING,
+  regions.PushBack(Bounds(-TITLE_EXCLUSION_PADDING,
                                lineY - TITLE_EXCLUSION_PADDING,
                                lineWidth + (TITLE_EXCLUSION_PADDING * 2.0f),
                                rangeHeight + (TITLE_EXCLUSION_PADDING * 2.0f)));
@@ -226,8 +226,8 @@ struct MovingOrb
 struct OverlayTextBlock
 {
   TextVisualizer text;
-  Rect<float>    baseBounds;
-  Rect<float>    bounds;
+  Bounds    baseBounds;
+  Bounds    bounds;
   float          travelX{0.0f};
   float          phase{0.0f};
 };
@@ -328,8 +328,8 @@ private:
 
     const float bodyColumnWidth = (BODY_SURFACE_WIDTH - (COLUMN_GAP * 2.0f)) / 3.0f;
     mFixedColumnBounds.Clear();
-    mFixedColumnBounds.PushBack(Rect<float>(bodyColumnWidth, 0.0f, COLUMN_SPLIT_WIDTH, BODY_SURFACE_HEIGHT));
-    mFixedColumnBounds.PushBack(Rect<float>((bodyColumnWidth * 2.0f) + COLUMN_GAP, 0.0f, COLUMN_SPLIT_WIDTH, BODY_SURFACE_HEIGHT));
+    mFixedColumnBounds.PushBack(Bounds(bodyColumnWidth, 0.0f, COLUMN_SPLIT_WIDTH, BODY_SURFACE_HEIGHT));
+    mFixedColumnBounds.PushBack(Bounds((bodyColumnWidth * 2.0f) + COLUMN_GAP, 0.0f, COLUMN_SPLIT_WIDTH, BODY_SURFACE_HEIGHT));
 
     mContentArea.Add(mTextVisualizer);
 
@@ -353,7 +353,7 @@ private:
     mOverlayTextBlocks.clear();
     mOverlayTextBlocks.reserve(2u);
 
-    auto addTextBlock = [&](const Dali::String& text, const Rect<float>& bounds, float travelX, float phase, float fontSize, const UiColor& textColor)
+    auto addTextBlock = [&](const Dali::String& text, const Bounds& bounds, float travelX, float phase, float fontSize, const UiColor& textColor)
     {
       OverlayTextBlock block;
       block.baseBounds = bounds;
@@ -378,14 +378,14 @@ private:
     };
 
     addTextBlock("TIZEN DALI UI",
-                 Rect<float>(TIZEN_LABEL_X, TIZEN_LABEL_Y, TIZEN_LABEL_WIDTH, TIZEN_LABEL_HEIGHT),
+                 Bounds(TIZEN_LABEL_X, TIZEN_LABEL_Y, TIZEN_LABEL_WIDTH, TIZEN_LABEL_HEIGHT),
                  TIZEN_LABEL_TRAVEL,
                  OVERLAY_TEXT_OPPOSITE_PHASE,
                  65.0f,
                  TIZEN_TEXT_COLOR);
 
     addTextBlock("TEXT VISUALIZER",
-                 Rect<float>(TEXT_VISUALIZER_LABEL_X, TEXT_VISUALIZER_LABEL_Y, TEXT_VISUALIZER_LABEL_WIDTH, TEXT_VISUALIZER_LABEL_HEIGHT),
+                 Bounds(TEXT_VISUALIZER_LABEL_X, TEXT_VISUALIZER_LABEL_Y, TEXT_VISUALIZER_LABEL_WIDTH, TEXT_VISUALIZER_LABEL_HEIGHT),
                  TEXT_VISUALIZER_LABEL_TRAVEL,
                  0.0f,
                  80.0f,
@@ -558,17 +558,17 @@ private:
     }
   }
 
-  Rect<float> GetOverlayTextExclusionRect(const OverlayTextBlock& block) const
+  Bounds GetOverlayTextExclusionRect(const OverlayTextBlock& block) const
   {
     return block.bounds;
   }
 
-  Rect<float> GetDropCapExclusionRect() const
+  Bounds GetDropCapExclusionRect() const
   {
-    return Rect<float>(DROP_CAP_TEXT_X, DROP_CAP_TEXT_Y, DROP_CAP_TEXT_WIDTH, DROP_CAP_TEXT_HEIGHT);
+    return Bounds(DROP_CAP_TEXT_X, DROP_CAP_TEXT_Y, DROP_CAP_TEXT_WIDTH, DROP_CAP_TEXT_HEIGHT);
   }
 
-  void AppendOrbExclusionRegions(Dali::Vector<Rect<float>>& regions, const MovingOrb& orb) const
+  void AppendOrbExclusionRegions(Dali::Vector<Bounds>& regions, const MovingOrb& orb) const
   {
     constexpr float ORB_BOUND_PADDING = 8.0f;
     const Vector2   bodyLocalPosition = orb.position - GetBodySurfaceOrigin();
@@ -587,14 +587,14 @@ private:
       const float bandWidth   = std::max(0.0f, orb.size.x * xScale);
       const float bandLeft    = centerX - (bandWidth * 0.5f);
 
-      regions.PushBack(Rect<float>(bandLeft - ORB_BOUND_PADDING,
+      regions.PushBack(Bounds(bandLeft - ORB_BOUND_PADDING,
                                    bandTop - ORB_BOUND_PADDING,
                                    bandWidth + (ORB_BOUND_PADDING * 2.0f),
                                    bandHeight + (ORB_BOUND_PADDING * 2.0f)));
     }
   }
 
-  void AppendTitleExclusionRegions(Dali::Vector<Rect<float>>& regions) const
+  void AppendTitleExclusionRegions(Dali::Vector<Bounds>& regions) const
   {
     AppendTitleLineRangeExclusion(regions, TITLE_EXCLUSION_LINE_0_WIDTH, 0u, 2u);
     AppendTitleLineExclusion(regions, TITLE_EXCLUSION_LINE_2_WIDTH, 2u);
@@ -860,10 +860,10 @@ private:
   View                                  mContentArea;
   TextVisualizer                        mTextVisualizer;
   TextVisualizer                        mDropCapText;
-  Dali::Vector<Rect<float>>             mFixedColumnBounds;
-  Dali::Vector<Rect<float>>             mStaticExclusionRegions;
-  Dali::Vector<Rect<float>>             mDynamicExclusionRegions;
-  Dali::Vector<Rect<float>>             mCombinedExclusionRegions;
+  Dali::Vector<Bounds>             mFixedColumnBounds;
+  Dali::Vector<Bounds>             mStaticExclusionRegions;
+  Dali::Vector<Bounds>             mDynamicExclusionRegions;
+  Dali::Vector<Bounds>             mCombinedExclusionRegions;
   std::vector<OverlayTextBlock>         mOverlayTextBlocks;
   std::vector<MovingOrb>                mOrbs;
   Timer                                 mTimer;

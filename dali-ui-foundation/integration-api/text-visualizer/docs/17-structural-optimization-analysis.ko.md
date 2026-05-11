@@ -55,7 +55,7 @@ flowchart TD
 
 ### A. exclusion region vector build
 
-sample의 `ApplyExclusionRegions()`는 매 tick 새 `Dali::Vector<Rect<float>> regions`를 만든다.
+sample의 `ApplyExclusionRegions()`는 매 tick 새 `Dali::Vector<Bounds> regions`를 만든다.
 
 현재 포함되는 region은 다음과 같다.
 
@@ -120,7 +120,7 @@ sample의 `ApplyExclusionRegions()`는 매 tick 새 `Dali::Vector<Rect<float>> r
 
 주의:
 
-- `LayoutEngine`은 현재 `Dali::Vector<Rect<float>>`를 받아 내부 anonymous namespace의 sorted vector를 만든다.
+- `LayoutEngine`은 현재 `Dali::Vector<Bounds>`를 받아 내부 anonymous namespace의 sorted vector를 만든다.
 - sorted cache를 core에 유지하려면 `TextVisualizerImpl`과 `LayoutEngine` 사이의 internal signature 조정이 필요하다.
 - public API는 건드리지 않아도 가능하지만, internal ownership과 invalidation 설계를 해야 한다.
 
@@ -608,7 +608,7 @@ cache invalidation:
 
 이전 구조:
 
-- `ApplyExclusionRegions()`가 매 tick local `Dali::Vector<Rect<float>>`를 새로 만들었다.
+- `ApplyExclusionRegions()`가 매 tick local `Dali::Vector<Bounds>`를 새로 만들었다.
 - title exclusion, drop cap exclusion, fixed column bounds, moving orb bands, overlay text bounds를 모두 매번 append했다.
 - 이 중 title / drop cap / fixed columns는 runtime key 입력으로 바뀌지 않는 static exclusion이다.
 

@@ -24,7 +24,7 @@
 
 namespace Dali
 {
-using PositionSize = Dali::Rect<int>;
+using PositionSize = Dali::BoundsInteger;
 using SurfaceSize = Int32Pair;
 
 class ThreadSynchronizationInterface;
@@ -53,7 +53,7 @@ public:
   virtual void         MoveResize(Dali::PositionSize positionSize)                                                         = 0;
   virtual void         Resize(Dali::SurfaceSize size)                                                                       = 0;
   virtual void         StartRender()                                                                                       = 0;
-  virtual bool         PreRender(bool resizingSurface, const std::vector<Rect<int>>& damageRects, Rect<int>& clippingRect) = 0;
+  virtual bool         PreRender(bool resizingSurface, const std::vector<BoundsInteger>& damageRects, BoundsInteger& clippingRect) = 0;
   virtual void         PostRender()                                                                                        = 0;
   virtual void         StopRender()                                                                                        = 0;
   virtual void         ReleaseLock()                                                                                       = 0;

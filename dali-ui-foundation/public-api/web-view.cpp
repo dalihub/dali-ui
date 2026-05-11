@@ -336,12 +336,12 @@ float WebView::GetScaleFactor() const
 // Screenshot & Page Info
 // ---------------------------------------------------------------------------
 
-Dali::Ui::ImageView WebView::GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor)
+Dali::Ui::ImageView WebView::GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)
 {
   return GetImpl(*this).GetScreenshot(viewArea, scaleFactor);
 }
 
-bool WebView::GetScreenshotAsynchronously(Dali::Rect<int32_t> viewArea, float scaleFactor, ScreenshotCapturedCallback callback)
+bool WebView::GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, ScreenshotCapturedCallback callback)
 {
   return GetImpl(*this).GetScreenshotAsynchronously(viewArea, scaleFactor, std::move(callback));
 }

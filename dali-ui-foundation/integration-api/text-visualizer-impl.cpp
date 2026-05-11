@@ -208,7 +208,7 @@ void TextVisualizerImpl::Prepare()
   MarkRenderDirty();
 }
 
-void TextVisualizerImpl::SetExclusionRegions(const Dali::Vector<Rect<float>>& regions)
+void TextVisualizerImpl::SetExclusionRegions(const Dali::Vector<Bounds>& regions)
 {
   if(!AreExclusionRegionsEqual(regions))
   {
@@ -222,7 +222,7 @@ void TextVisualizerImpl::SetExclusionRegions(const Dali::Vector<Rect<float>>& re
   }
 }
 
-Dali::Vector<Rect<float>> TextVisualizerImpl::GetExclusionRegions() const
+Dali::Vector<Bounds> TextVisualizerImpl::GetExclusionRegions() const
 {
   return mExclusionRegions;
 }
@@ -664,7 +664,7 @@ float TextVisualizerImpl::CalculateEffectiveLineHeight() const
   return 0.0f;
 }
 
-void TextVisualizerImpl::UpdateStoredExclusionRegions(const Dali::Vector<Rect<float>>& regions)
+void TextVisualizerImpl::UpdateStoredExclusionRegions(const Dali::Vector<Bounds>& regions)
 {
   const uint32_t count = regions.Count();
   if(mExclusionRegions.Count() == count)
@@ -684,7 +684,7 @@ void TextVisualizerImpl::UpdateStoredExclusionRegions(const Dali::Vector<Rect<fl
   }
 }
 
-bool TextVisualizerImpl::AreExclusionRegionsEqual(const Dali::Vector<Rect<float>>& regions) const
+bool TextVisualizerImpl::AreExclusionRegionsEqual(const Dali::Vector<Bounds>& regions) const
 {
   if(mExclusionRegions.Count() != regions.Count())
   {

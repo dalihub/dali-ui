@@ -43,7 +43,7 @@ namespace
 {
 static constexpr float FULLY_TRANSPARENT(0.01f); ///< Alpha values must rise above this, before an object is considered to be visible.
 
-static int MajorAxisDistanceRaw(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
+static int MajorAxisDistanceRaw(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
 {
   switch(direction)
   {
@@ -75,12 +75,12 @@ static int MajorAxisDistanceRaw(Dali::Ui::FocusDirection direction, Dali::Rect<f
  *   of source to the edge nearest in the given direction of dest.
  *   If the dest is not in the direction from source, return 0.
  */
-static int MajorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
+static int MajorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
 {
   return std::max(0, MajorAxisDistanceRaw(direction, source, dest));
 }
 
-static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
+static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
 {
   switch(direction)
   {
@@ -112,7 +112,7 @@ static int MajorAxisDistanceToFarEdgeRaw(Dali::Ui::FocusDirection direction, Dal
  *   edge of source to the far edge of dest.
  *   If the dest is not in the direction from source, return 1
  */
-static int MajorAxisDistanceToFarEdge(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
+static int MajorAxisDistanceToFarEdge(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
 {
   return std::max(1, MajorAxisDistanceToFarEdgeRaw(direction, source, dest));
 }
@@ -125,7 +125,7 @@ static int MajorAxisDistanceToFarEdge(Dali::Ui::FocusDirection direction, Dali::
  * @param dest The destination rect.
  * @return The distance.
  */
-static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> dest)
+static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds dest)
 {
   switch(direction)
   {
@@ -168,7 +168,7 @@ static uint64_t GetWeightedDistanceFor(int majorAxisDistance, int minorAxisDista
  * @param direction The direction (up, down, left, right)
  * @return Whether destRect is a candidate.
  */
-static bool IsCandidate(Dali::Rect<float> srcRect, Dali::Rect<float> destRect, Dali::Ui::FocusDirection direction)
+static bool IsCandidate(Dali::Bounds srcRect, Dali::Bounds destRect, Dali::Ui::FocusDirection direction)
 {
   switch(direction)
   {
@@ -202,7 +202,7 @@ static bool IsCandidate(Dali::Rect<float> srcRect, Dali::Rect<float> destRect, D
  * @param src The source rect
  * @param dest The dest rect
  */
-static bool IsToDirectionOf(Dali::Ui::FocusDirection direction, Dali::Rect<float> src, Dali::Rect<float> dest)
+static bool IsToDirectionOf(Dali::Ui::FocusDirection direction, Dali::Bounds src, Dali::Bounds dest)
 {
   switch(direction)
   {
@@ -236,7 +236,7 @@ static bool IsToDirectionOf(Dali::Ui::FocusDirection direction, Dali::Rect<float
  * @param rect2 The second rect
  * @return whether the beams overlap
  */
-static bool BeamsOverlap(Dali::Ui::FocusDirection direction, Dali::Rect<float> rect1, Dali::Rect<float> rect2)
+static bool BeamsOverlap(Dali::Ui::FocusDirection direction, Dali::Bounds rect1, Dali::Bounds rect2)
 {
   switch(direction)
   {
@@ -265,7 +265,7 @@ static bool BeamsOverlap(Dali::Ui::FocusDirection direction, Dali::Rect<float> r
  * @param rect2 The second rect
  * @return Whether rect1 is a better candidate than rect2 by virtue of it being in src's beam
  */
-static bool BeamBeats(Dali::Ui::FocusDirection direction, Dali::Rect<float> source, Dali::Rect<float> rect1, Dali::Rect<float> rect2)
+static bool BeamBeats(Dali::Ui::FocusDirection direction, Dali::Bounds source, Dali::Bounds rect1, Dali::Bounds rect2)
 {
   const bool rect1InSrcBeam = BeamsOverlap(direction, source, rect1);
   const bool rect2InSrcBeam = BeamsOverlap(direction, source, rect2);
@@ -295,7 +295,7 @@ static bool BeamBeats(Dali::Ui::FocusDirection direction, Dali::Rect<float> sour
   return (MajorAxisDistance(direction, source, rect1) < MajorAxisDistanceToFarEdge(direction, source, rect2));
 }
 
-bool IsBetterCandidate(Ui::FocusDirection direction, Rect<float>& focusedRect, Rect<float>& candidateRect, Rect<float>& bestCandidateRect)
+bool IsBetterCandidate(Ui::FocusDirection direction, Bounds& focusedRect, Bounds& candidateRect, Bounds& bestCandidateRect)
 {
   // to be a better candidate, need to at least be a candidate in the first place
   if(!IsCandidate(focusedRect, candidateRect, direction))
@@ -342,7 +342,7 @@ bool CanTraverseFocus(Actor& actor)
           !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED));
 }
 
-Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect, Rect<float>& bestCandidateRect, Ui::FocusDirection direction)
+Actor FindNextFocus(Actor& actor, Actor& focusedActor, Bounds& focusedRect, Bounds& bestCandidateRect, Ui::FocusDirection direction)
 {
   Actor nearestActor;
   if(CanTraverseFocus(actor) &&
@@ -355,7 +355,7 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect,
       Dali::Actor child = actor.GetChildAt(i - 1);
       if(child && child != focusedActor && IsFocusable(child))
       {
-        Rect<float> candidateRect = DevelActor::CalculateCurrentScreenExtents(child);
+        Bounds candidateRect = DevelActor::CalculateCurrentScreenExtents(child);
 
         if(IsBetterCandidate(direction, focusedRect, candidateRect, bestCandidateRect))
         {
@@ -375,17 +375,17 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Rect<float>& focusedRect,
 
 struct TraversalNode
 {
-  Actor       actor;
-  Rect<float> rect;
-  bool        includeSelf{false};
-  bool        focusable{false};
+  Actor  actor;
+  Bounds rect;
+  bool   includeSelf{false};
+  bool   focusable{false};
 };
 
 struct FocusableEntry
 {
-  Actor       actor;
-  Rect<float> rect;
-  bool        focusable{false};
+  Actor  actor;
+  Bounds rect;
+  bool   focusable{false};
 };
 
 struct FocusFinderWorkspace
@@ -425,7 +425,7 @@ void AddFocusables(Actor rootActor, Actor& focusedActor, FocusFinderWorkspace& w
   }
 
   workspace.traversalStack.clear();
-  workspace.traversalStack.push_back({rootActor, Rect<float>(), false, false});
+  workspace.traversalStack.push_back({rootActor, Bounds(), false, false});
 
   while(!workspace.traversalStack.empty())
   {
@@ -552,12 +552,12 @@ View GetNearestFocusableView(Actor rootActor, View focusedView, Ui::FocusDirecti
     return View();
   }
 
-  Rect<float> focusedRect;
+  Bounds focusedRect;
   if(!focusedActor)
   {
     // If there is no currently focused view, it is searched based on the upper left corner of the current window.
-    Rect<float> rootRect = DevelActor::CalculateCurrentScreenExtents(rootActor);
-    focusedRect          = Rect<float>(rootRect.x, rootRect.y, 0.f, 0.f);
+    Bounds rootRect = DevelActor::CalculateCurrentScreenExtents(rootActor);
+    focusedRect     = Bounds(rootRect.x, rootRect.y, 0.f, 0.f);
   }
   else
   {
@@ -566,7 +566,7 @@ View GetNearestFocusableView(Actor rootActor, View focusedView, Ui::FocusDirecti
 
   // initialize the best candidate to something impossible
   // (so the first plausible view will become the best choice)
-  Rect<float> bestCandidateRect = focusedRect;
+  Bounds bestCandidateRect = focusedRect;
   switch(direction)
   {
     case Ui::FocusDirection::LEFT:

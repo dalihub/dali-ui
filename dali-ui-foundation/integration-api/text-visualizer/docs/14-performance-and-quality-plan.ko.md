@@ -94,7 +94,7 @@ flowchart LR
 ### C. redundant `SetExclusionRegions()` 회피
 
 - bounds 값이 실질적으로 거의 같다면 `SetExclusionRegions()` 자체를 skip할 수 있다.
-- core `TextVisualizer`는 여전히 `Rect<float>` exact compare만 사용한다.
+- core `TextVisualizer`는 여전히 `Bounds` exact compare만 사용한다.
 - performance sample은 sample-local threshold를 사용해 움직임이 아주 작을 때 `SetExclusionRegions()` 호출 자체를 skip한다.
 
 검토 포인트:

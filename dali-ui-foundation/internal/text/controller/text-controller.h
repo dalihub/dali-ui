@@ -2276,7 +2276,7 @@ public: // Queries & retrieves.
    * @param[in] lineIndex line index to which we want to calculate the geometry for.
    * @return bounding rectangle.
    */
-  Rect<float> GetLineBoundingRectangle(const uint32_t lineIndex);
+  Bounds GetLineBoundingRectangle(const uint32_t lineIndex);
 
   /**
    * @brief Get the char bounding rectangle.
@@ -2285,7 +2285,7 @@ public: // Queries & retrieves.
    * @param[in] charIndex character index to which we want to calculate the geometry for.
    * @return bounding rectangle.
    */
-  Rect<float> GetCharacterBoundingRectangle(const uint32_t charIndex);
+  Bounds GetCharacterBoundingRectangle(const uint32_t charIndex);
 
   /**
    * @brief Get the character index.
@@ -2304,7 +2304,7 @@ public: // Queries & retrieves.
    * @param[in] endIndex end index(included) of the text requested to get bounding box to.
    * @return bounding box of the requested text.
    */
-  Rect<float> GetTextBoundingRectangle(CharacterIndex startIndex, CharacterIndex endIndex);
+  Bounds GetTextBoundingRectangle(CharacterIndex startIndex, CharacterIndex endIndex);
 
   /**
    * @brief Sets the layout direction changed.

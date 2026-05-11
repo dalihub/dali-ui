@@ -119,14 +119,14 @@ Vector2 CalculateTextureRatio(const Size& viewSize, uint32_t textureWidth, uint3
 // ---------------------------------------------------------------------------
 // Helper: calculate screen display area from actor properties
 // ---------------------------------------------------------------------------
-Rect<int32_t> CalculateDisplayArea(Dali::Actor self)
+BoundsInteger CalculateDisplayArea(Dali::Actor self)
 {
   bool    positionUsesAnchorPoint = self.GetProperty<bool>(Actor::Property::POSITION_USES_PIVOT);
   Vector3 actorSize               = self.GetCurrentProperty<Vector3>(Actor::Property::SIZE) * self.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
   Vector3 anchorOff               = actorSize * (positionUsesAnchorPoint ? self.GetCurrentProperty<Vector3>(Actor::Property::PIVOT) : Pivot::TOP_LEFT);
   Vector2 screenPos               = self.GetProperty<Vector2>(Actor::Property::SCREEN_POSITION);
 
-  Dali::Rect<int32_t> area;
+  Dali::BoundsInteger area;
   area.x      = static_cast<int32_t>(screenPos.x - anchorOff.x);
   area.y      = static_cast<int32_t>(screenPos.y - anchorOff.y);
   area.width  = static_cast<int32_t>(actorSize.x);
@@ -508,7 +508,7 @@ void WebViewImpl::OnDisplayAreaUpdated(Dali::PropertyNotification /*source*/)
   SetDisplayArea(displayArea);
 }
 
-void WebViewImpl::SetDisplayArea(const Dali::Rect<int32_t>& displayArea)
+void WebViewImpl::SetDisplayArea(const Dali::BoundsInteger& displayArea)
 {
   Size displaySize(static_cast<float>(displayArea.width), static_cast<float>(displayArea.height));
 
@@ -1018,7 +1018,7 @@ void WebViewImpl::SetTextZoomFactor(float zoomFactor)
 // Screenshot
 // ===========================================================================
 
-Dali::Ui::ImageView WebViewImpl::GetScreenshot(Dali::Rect<int32_t> viewArea, float scaleFactor)
+Dali::Ui::ImageView WebViewImpl::GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)
 {
   if(!mWebEngine)
   {
@@ -1028,7 +1028,7 @@ Dali::Ui::ImageView WebViewImpl::GetScreenshot(Dali::Rect<int32_t> viewArea, flo
   return CreateImageViewFromPixelData(pixelData);
 }
 
-bool WebViewImpl::GetScreenshotAsynchronously(Dali::Rect<int32_t> viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback)
+bool WebViewImpl::GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback)
 {
   if(!mWebEngine)
   {

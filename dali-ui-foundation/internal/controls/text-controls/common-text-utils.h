@@ -75,8 +75,8 @@ public:
    * @param[in] endIndex end index(included) of the text requested to get bounding box to.
    * @return bounding box of the requested text.
    */
-  static Rect<float> GetTextBoundingRectangle(Text::ModelPtr model, TextAbstraction::CharacterIndex startIndex,
-                                              TextAbstraction::CharacterIndex endIndex);
+  static Bounds GetTextBoundingRectangle(Text::ModelPtr model, TextAbstraction::CharacterIndex startIndex,
+                                         TextAbstraction::CharacterIndex endIndex);
 };
 
 class TextControlAccessible : public ViewAccessible,
@@ -101,8 +101,8 @@ public:
   /**
    * @copydoc Dali::Accessibility::Text::GetRangeExtents()
    */
-  Rect<float> GetRangeExtents(std::size_t startOffset, std::size_t endOffset,
-                              Accessibility::CoordinateType type) override;
+  Bounds GetRangeExtents(std::size_t startOffset, std::size_t endOffset,
+                         Accessibility::CoordinateType type) override;
 
   /**
    * @copydoc Dali::Accessibility::Text::GetRangeOfSelection()
