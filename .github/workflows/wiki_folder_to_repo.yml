@@ -1,4 +1,4 @@
-name: Sync wiki folder to wiki branch
+name: Sync wiki folder to wiki Git
 
 on:
   push:
