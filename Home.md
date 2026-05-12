@@ -30,6 +30,7 @@ and **framework library developers** who extend or integrate the toolkit itself.
 * [Fluent API](https://github.sec.samsung.net/NUI/dali-ui/wiki/Fluent-API)
 * [Configuration](https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration)
 * [Unit & Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-&-Scale)
+* [Ui Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale)
 * [Color & Theme](https://github.sec.samsung.net/NUI/dali-ui/wiki/Color-&-Theme)
 * [Layout](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout)
 * [Focus & Key](https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-&-Key)
