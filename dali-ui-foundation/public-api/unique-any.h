@@ -34,6 +34,11 @@ namespace Ui
  *
  * UniqueAny is move-only. It owns one stored value and can hold copyable
  * and move-only value types.
+ *
+ * @note Use a stable namespace-scope type as the stored value type. Local types
+ * and anonymous-namespace types should not be used when the value may be
+ * retrieved from another translation unit, because they may not have a stable
+ * cross-translation-unit type identity.
  */
 class DALI_UI_API UniqueAny
 {

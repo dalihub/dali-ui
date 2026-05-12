@@ -1188,6 +1188,11 @@ public: // Properties
    * deleter. UniquePtr types with custom deleters are not supported by this
    * overload.
    *
+   * @note Use a stable namespace-scope type for attachment data. Local types and
+   * anonymous-namespace types should not be used when the attachment may be
+   * retrieved from another translation unit, because they may not have a stable
+   * cross-translation-unit type identity.
+   *
    * @param[in] id The key to identify the attachment
    * @param[in] data The data whose ownership is transferred to this View
    * @return Reference to this View
