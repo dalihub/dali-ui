@@ -1168,7 +1168,6 @@ void LabelImpl::ApplyInitialConfig()
   SetFontSize(config.GetDefaultFontSize());
   SetTextColor(config.GetDefaultTextColor());
   SetAsyncRendering(config.IsLabelAsyncRendering());
-  // TODO: Set the initial text UI scale when the UI scale feature is applied.
 }
 
 // =============================================================================
