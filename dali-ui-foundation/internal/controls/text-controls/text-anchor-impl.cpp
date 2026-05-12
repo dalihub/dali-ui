@@ -175,7 +175,7 @@ ViewAccessible* TextAnchorImpl::CreateAccessibleObject()
 void TextAnchorImpl::TextAnchorAccessible::InitDefaultFeatures()
 {
   ViewAccessible::InitDefaultFeatures();
-  AddFeature<Dali::Accessibility::Hyperlink>(shared_from_this());
+  AddFeature<Dali::Accessibility::Hyperlink>(SharedFromThis());
 }
 
 int32_t TextAnchorImpl::TextAnchorAccessible::GetEndIndex() const

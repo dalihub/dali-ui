@@ -2268,7 +2268,7 @@ bool ViewDataImpl::OnIdleCallback()
   return mIdleCallbackRegistered;
 }
 
-std::shared_ptr<Ui::ViewAccessible> ViewDataImpl::GetAccessibleObject()
+SharedPtr<Ui::ViewAccessible> ViewDataImpl::GetAccessibleObject()
 {
   return GetOrCreateAccessibilityData().GetAccessibleObject();
 }

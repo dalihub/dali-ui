@@ -241,8 +241,8 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 void TextControlAccessible::InitDefaultFeatures()
 {
   ViewAccessible::InitDefaultFeatures();
-  AddFeature<Dali::Accessibility::Text>(shared_from_this());
-  AddFeature<Dali::Accessibility::Hypertext>(shared_from_this());
+  AddFeature<Dali::Accessibility::Text>(SharedFromThis());
+  AddFeature<Dali::Accessibility::Hypertext>(SharedFromThis());
 }
 
 std::size_t TextControlAccessible::GetCharacterCount() const
@@ -505,7 +505,7 @@ bool TextControlAccessible::IsHiddenInput() const
 void EditableTextControlAccessible::InitDefaultFeatures()
 {
   TextControlAccessible::InitDefaultFeatures();
-  AddFeature<Dali::Accessibility::EditableText>(shared_from_this());
+  AddFeature<Dali::Accessibility::EditableText>(SharedFromThis());
 }
 
 Accessibility::States EditableTextControlAccessible::CalculateStates()

@@ -431,7 +431,7 @@ public:
   /**
    * @copydoc Dali::Ui::ViewImpl::GetAccessibleObject()
    */
-  std::shared_ptr<Ui::ViewAccessible> GetAccessibleObject();
+  SharedPtr<Ui::ViewAccessible> GetAccessibleObject();
 
   /**
    * @copydoc Dali::Ui::ViewImpl::GetAccessibilityRelations()

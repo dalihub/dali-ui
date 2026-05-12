@@ -449,7 +449,7 @@ Dali::Accessibility::Attributes ViewAccessible::GetAttributes() const
 void ViewAccessible::InitDefaultFeatures()
 {
   Dali::Accessibility::ActorAccessible::InitDefaultFeatures();
-  AddFeature<Dali::Accessibility::Action>(shared_from_this());
+  AddFeature<Dali::Accessibility::Action>(SharedFromThis());
 }
 
 bool ViewAccessible::IsHidden() const

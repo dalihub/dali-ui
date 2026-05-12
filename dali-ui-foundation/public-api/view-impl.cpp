@@ -197,20 +197,20 @@ void RegisterViewAccessibleGetter()
   {
     onceFlag = true;
     Accessibility::Accessible::RegisterExternalAccessibleGetter(
-      [](Dali::Actor actor) -> std::pair<std::shared_ptr<Accessibility::Accessible>, bool>
+      [](Dali::Actor actor) -> std::pair<SharedPtr<Accessibility::Accessible>, bool>
     {
       auto view = Ui::View::DownCast(actor);
       if(!view)
       {
-        return {nullptr, true};
+        return {SharedPtr<ViewAccessible>(), true};
       }
 
       auto& viewImpl = GetImpl(view);
       if(Dali::Ui::Internal::ViewDataImpl::Get(viewImpl).IsCreateAccessibleEnabled())
       {
-        return {std::shared_ptr<ViewAccessible>(viewImpl.CreateAccessibleObject()), true};
+        return {SharedPtr<ViewAccessible>(viewImpl.CreateAccessibleObject()), true};
       }
-      return {nullptr, false};
+      return {SharedPtr<ViewAccessible>(), false};
     });
   }
 }
@@ -1912,7 +1912,7 @@ void ViewImpl::EmitFocusChangedSignal(bool focusGained)
       auto parent = dynamic_cast<Dali::Accessibility::ActorAccessible*>(accessible->GetParent());
       if(parent && !accessible->GetStates()[Dali::Accessibility::State::MANAGES_DESCENDANTS])
       {
-        parent->EmitActiveDescendantChanged(accessible.get());
+        parent->EmitActiveDescendantChanged(accessible.Get());
       }
     }
   }

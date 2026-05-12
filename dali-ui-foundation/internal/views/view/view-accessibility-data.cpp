@@ -128,7 +128,7 @@ void ViewDataImpl::AccessibilityData::CheckHighlightedObjectGeometry()
   {
     auto lastPosition   = accessible->GetLastPosition();
     auto accessibleRect = accessible->GetExtents(Dali::Accessibility::CoordinateType::WINDOW);
-    auto rect           = GetShowingGeometry(accessibleRect, accessible.get());
+    auto rect           = GetShowingGeometry(accessibleRect, accessible.Get());
 
     switch(mAccessibilityLastScreenRelativeMoveType)
     {
@@ -359,10 +359,9 @@ void ViewDataImpl::AccessibilityData::SetAccessibilityReadingInfoType(
   AppendAccessibilityAttribute(READING_INFO_TYPE_ATTRIBUTE_NAME, ToDaliString(value));
 }
 
-std::shared_ptr<Ui::ViewAccessible> ViewDataImpl::AccessibilityData::GetAccessibleObject()
+SharedPtr<Ui::ViewAccessible> ViewDataImpl::AccessibilityData::GetAccessibleObject()
 {
-  return std::dynamic_pointer_cast<ViewAccessible>(
-    Accessibility::Accessible::GetOwningPtr(mViewImpl.Self()));
+  return DynamicPointerCast<ViewAccessible>(Accessibility::Accessible::GetOwningPtr(mViewImpl.Self()));
 }
 
 Dali::Accessibility::ReadingInfoTypes ViewDataImpl::AccessibilityData::GetDefaultReadingInfoTypes()
