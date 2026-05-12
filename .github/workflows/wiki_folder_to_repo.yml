@@ -53,5 +53,6 @@ jobs:
           git commit -F /tmp/wiki-commit-message
           git push origin wiki
 
-          gh workflow run wiki_sync.yml --ref wiki
+          git remote add wiki https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.sec.samsung.net/NUI/dali-ui.wiki.git
+          git push wiki wiki:master --force
 
