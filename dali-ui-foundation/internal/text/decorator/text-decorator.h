@@ -330,6 +330,17 @@ public:
   int GetCursorWidth() const;
 
   /**
+   * @brief Retrieves the effective width of the cursors.
+   *
+   * The effective width is calculated from the configured cursor width and
+   * the current UI scale. This value is used for cursor layout and visibility
+   * calculations.
+   *
+   * @return The effective width of the cursors in pixels.
+   */
+  float GetEffectiveCursorWidth() const;
+
+  /**
    * @brief Sets the UI scale used to calculate effective decoration metrics.
    *
    * The UI scale is applied to pixel-based decoration values such as cursor

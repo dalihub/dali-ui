@@ -148,6 +148,24 @@ void DiscardLabelVisual(Dali::Ui::Visual::Base& visual)
   visual.Reset();
 }
 
+/**
+ * @brief Applies scale only to fixed size values.
+ * Special size values such as WRAP_CONTENT and MATCH_PARENT are kept unchanged.
+ */
+float ScaleIfFixedSize(float value, float scale)
+{
+  return value >= 0.0f ? value * scale : value;
+}
+
+/**
+ * @brief Restricts a value by applying the maximum bound first, then the minimum bound.
+ * This keeps the minimum bound dominant when minValue is greater than maxValue.
+ */
+float ClampWithMinPriority(float value, float minValue, float maxValue)
+{
+  return std::max(std::min(value, maxValue), minValue);
+}
+
 } // namespace
 
 LabelImplPtr LabelImpl::New()
@@ -1406,19 +1424,20 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
                         heightConstraint);
 
   mMeasureInvalidated = false;
-  // Enable this when the UI scale feature is applied.
-  if(SetTextUiScale(GetEffectiveScale()))
+
+  const float effectiveScale = GetEffectiveScale();
+  if(SetTextUiScale(effectiveScale))
   {
     mController->InvalidateFontData();
   }
 
-  const float requestedWidth  = GetRequestedWidth();
-  const float requestedHeight = GetRequestedHeight();
+  const float requestedWidth  = ScaleIfFixedSize(GetRequestedWidth(), effectiveScale);
+  const float requestedHeight = ScaleIfFixedSize(GetRequestedHeight(), effectiveScale);
 
-  const float minWidth  = GetMinimumWidth();
-  const float maxWidth  = GetMaximumWidth();
-  const float minHeight = GetMinimumHeight();
-  const float maxHeight = GetMaximumHeight();
+  const float minWidth  = GetMinimumWidth() * effectiveScale;
+  const float maxWidth  = GetMaximumWidth() * effectiveScale;
+  const float minHeight = GetMinimumHeight() * effectiveScale;
+  const float maxHeight = GetMaximumHeight() * effectiveScale;
   const float fontSize  = GetFontSize();
 
   const bool useTextFitRange    = mController->IsTextFitEnabled();
@@ -1453,7 +1472,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   // Width
   if(requestedWidth >= 0.0f)
   {
-    measuredWidth = std::max(std::min(requestedWidth, maxWidth), minWidth);
+    measuredWidth = ClampWithMinPriority(requestedWidth, minWidth, maxWidth);
   }
   else if(requestedWidth == MATCH_PARENT)
   {
@@ -1466,13 +1485,13 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     const Vector3 naturalSize     = GetNaturalSize();
     const float   width           = std::max(0.0f, naturalSize.width);
     const float   allowedMaxWidth = (widthConstraint >= 0.0f) ? std::min(maxWidth, widthConstraint) : maxWidth;
-    measuredWidth                 = std::max(std::min(width, allowedMaxWidth), minWidth);
+    measuredWidth                 = ClampWithMinPriority(width, minWidth, allowedMaxWidth);
   }
 
   // Height
   if(requestedHeight >= 0.0f)
   {
-    measuredHeight = std::max(std::min(requestedHeight, maxHeight), minHeight);
+    measuredHeight = ClampWithMinPriority(requestedHeight, minHeight, maxHeight);
   }
   else if(requestedHeight == MATCH_PARENT)
   {
@@ -1486,7 +1505,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     // actual available width the label will receive in Arrange.
     const float widthForHeight = (requestedWidth == MATCH_PARENT) ? std::max(0.0f, widthConstraint) : measuredWidth;
     const float height         = (widthForHeight > 0.0f) ? std::max(0.0f, GetHeightForWidth(widthForHeight)) : 0.0f;
-    measuredHeight             = std::max(std::min(height, allowedMaxHeight), minHeight);
+    measuredHeight             = ClampWithMinPriority(height, minHeight, allowedMaxHeight);
   }
 
   if(useTextFitRange && wrapContentMeasure)

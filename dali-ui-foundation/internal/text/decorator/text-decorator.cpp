@@ -2268,6 +2268,11 @@ int Decorator::GetCursorWidth() const
   return static_cast<int>(mImpl->mCursorWidth);
 }
 
+float Decorator::GetEffectiveCursorWidth() const
+{
+  return mImpl->GetEffectiveCursorWidth();
+}
+
 void Decorator::SetUiScale(float scale)
 {
   if(scale <= 0.0f)

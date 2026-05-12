@@ -233,6 +233,24 @@ bool HasKeyInputFocus(ViewImpl& impl)
   return result;
 }
 
+/**
+ * @brief Applies scale only to fixed size values.
+ * Special size values such as WRAP_CONTENT and MATCH_PARENT are kept unchanged.
+ */
+float ScaleIfFixedSize(float value, float scale)
+{
+  return value >= 0.0f ? value * scale : value;
+}
+
+/**
+ * @brief Restricts a value by applying the maximum bound first, then the minimum bound.
+ * This keeps the minimum bound dominant when minValue is greater than maxValue.
+ */
+float ClampWithMinPriority(float value, float minValue, float maxValue)
+{
+  return std::max(std::min(value, maxValue), minValue);
+}
+
 } // namespace
 
 InputFieldImplPtr InputFieldImpl::New()
@@ -1483,32 +1501,43 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint, heightConstraint);
 
   mMeasureInvalidated = false;
-  // Enable this when the UI scale feature is applied.
-  if(SetTextUiScale(GetEffectiveScale()))
+
+  const float effectiveScale = GetEffectiveScale();
+  if(SetTextUiScale(effectiveScale))
   {
     mController->InvalidateFontData();
   }
 
-  const float requestedWidth  = GetRequestedWidth();
-  const float requestedHeight = GetRequestedHeight();
+  const float requestedWidth  = ScaleIfFixedSize(GetRequestedWidth(), effectiveScale);
+  const float requestedHeight = ScaleIfFixedSize(GetRequestedHeight(), effectiveScale);
 
-  const float minWidth  = GetMinimumWidth();
-  const float maxWidth  = GetMaximumWidth();
-  const float minHeight = GetMinimumHeight();
-  const float maxHeight = GetMaximumHeight();
+  const float minWidth  = GetMinimumWidth() * effectiveScale;
+  const float maxWidth  = GetMaximumWidth() * effectiveScale;
+  const float minHeight = GetMinimumHeight() * effectiveScale;
+  const float maxHeight = GetMaximumHeight() * effectiveScale;
 
-  Vector3 naturalSize = GetNaturalSize();
+  const bool wrapContentWidth  = requestedWidth == WRAP_CONTENT;
+  const bool wrapContentHeight = requestedHeight == WRAP_CONTENT;
+  const bool needsNaturalSize  = wrapContentWidth || wrapContentHeight;
 
-  float naturalWidth  = std::max(0.0f, naturalSize.width);
-  float naturalHeight = std::max(0.0f, naturalSize.height);
+  float naturalWidth  = 0.0f;
+  float naturalHeight = 0.0f;
 
-  if(GetText().Empty())
+  if(needsNaturalSize)
   {
-    // GetNaturalSize() includes view padding, but GetDefaultFontLineHeight() does not.
-    // Therefore, when text is empty, padding must be added explicitly to keep
-    // measurement consistent with the normal natural size path.
-    Extents padding = GetEffectiveTextPadding();
-    naturalHeight   = mController->GetDefaultFontLineHeight() + (padding.top + padding.bottom);
+    const Vector3 naturalSize = GetNaturalSize();
+
+    naturalWidth  = std::max(0.0f, naturalSize.width);
+    naturalHeight = std::max(0.0f, naturalSize.height);
+
+    if(wrapContentHeight && GetText().Empty())
+    {
+      // GetNaturalSize() includes view padding, but GetDefaultFontLineHeight() does not.
+      // Therefore, when text is empty, padding must be added explicitly to keep
+      // measurement consistent with the normal natural size path.
+      const Extents padding = GetEffectiveTextPadding();
+      naturalHeight         = mController->GetDefaultFontLineHeight() + padding.top + padding.bottom;
+    }
   }
 
   float measuredWidth  = 0.0f;
@@ -1517,7 +1546,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   // Width
   if(requestedWidth >= 0.0f)
   {
-    measuredWidth = std::max(std::min(requestedWidth, maxWidth), minWidth);
+    measuredWidth = ClampWithMinPriority(requestedWidth, minWidth, maxWidth);
   }
   else if(requestedWidth == MATCH_PARENT)
   {
@@ -1528,13 +1557,13 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   else // WRAP_CONTENT
   {
     const float allowedMaxWidth = (widthConstraint >= 0.0f) ? std::min(maxWidth, widthConstraint) : maxWidth;
-    measuredWidth               = std::max(std::min(naturalWidth, allowedMaxWidth), minWidth);
+    measuredWidth               = ClampWithMinPriority(naturalWidth, minWidth, allowedMaxWidth);
   }
 
   // Height
   if(requestedHeight >= 0.0f)
   {
-    measuredHeight = std::max(std::min(requestedHeight, maxHeight), minHeight);
+    measuredHeight = ClampWithMinPriority(requestedHeight, minHeight, maxHeight);
   }
   else if(requestedHeight == MATCH_PARENT)
   {
@@ -1543,7 +1572,7 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
   else // WRAP_CONTENT
   {
     const float allowedMaxHeight = (heightConstraint >= 0.0f) ? std::min(maxHeight, heightConstraint) : maxHeight;
-    measuredHeight               = std::max(std::min(naturalHeight, allowedMaxHeight), minHeight);
+    measuredHeight               = ClampWithMinPriority(naturalHeight, minHeight, allowedMaxHeight);
   }
 
   DALI_LOG_RELEASE_INFO("[%p] measured:%f,%f\n", mController.Get(), measuredWidth, measuredHeight);

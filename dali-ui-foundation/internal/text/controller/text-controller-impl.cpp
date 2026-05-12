@@ -1250,8 +1250,7 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
       {
         if(isRTL)
         {
-          cursorInfo.primaryPosition.x =
-            mModel->mVisualModel->mControlSize.width - mEventData->mDecorator->GetCursorWidth();
+          cursorInfo.primaryPosition.x = mModel->mVisualModel->mControlSize.width - mEventData->mDecorator->GetEffectiveCursorWidth();
         }
         else
         {
@@ -1272,8 +1271,7 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
         }
         else
         {
-          cursorInfo.primaryPosition.x =
-            mModel->mVisualModel->mControlSize.width - mEventData->mDecorator->GetCursorWidth();
+          cursorInfo.primaryPosition.x = mModel->mVisualModel->mControlSize.width - mEventData->mDecorator->GetEffectiveCursorWidth();
         }
         break;
       }
@@ -1315,8 +1313,7 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
       cursorInfo.primaryPosition.x = 0.f;
     }
 
-    const float edgeWidth =
-      mModel->mVisualModel->mControlSize.width - static_cast<float>(mEventData->mDecorator->GetCursorWidth());
+    const float edgeWidth = mModel->mVisualModel->mControlSize.width - mEventData->mDecorator->GetEffectiveCursorWidth();
     if(cursorInfo.primaryPosition.x > edgeWidth)
     {
       cursorInfo.primaryPosition.x = edgeWidth;
@@ -1497,7 +1494,7 @@ void Controller::Impl::ClampVerticalScroll(const Vector2& layoutSize)
 
 void Controller::Impl::ScrollToMakePositionVisible(const Vector2& position, float lineHeight)
 {
-  const float cursorWidth = mEventData->mDecorator ? static_cast<float>(mEventData->mDecorator->GetCursorWidth()) : 0.f;
+  const float cursorWidth = mEventData->mDecorator ? mEventData->mDecorator->GetEffectiveCursorWidth() : 0.0f;
 
   // position is in actor's coords.
   const float positionEndX = position.x + cursorWidth;
