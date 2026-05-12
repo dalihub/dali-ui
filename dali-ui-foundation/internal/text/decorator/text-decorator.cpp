@@ -691,6 +691,7 @@ struct Decorator::Impl : public ConnectionTracker
   void CreateCursor(View& cursor, const Vector4& color)
   {
     cursor = View::New();
+    cursor.SetUiScalePolicy(UiScalePolicy::DISABLED);
     cursor.SetBackgroundColor(color);
     cursor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     cursor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -843,6 +844,7 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         grabHandle.actor = ImageView::New(ToDaliString(mHandleImages[GRAB_HANDLE][HANDLE_IMAGE_RELEASED]));
+        grabHandle.actor.SetUiScalePolicy(UiScalePolicy::DISABLED);
         grabHandle.actor.SetSynchronousLoading(true);
         grabHandle.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
         grabHandle.actor.SetDepthIndex(DepthIndex::DECORATION);
@@ -888,6 +890,7 @@ struct Decorator::Impl : public ConnectionTracker
     if(image.size())
     {
       handle.markerActor = ImageView::New(ToDaliString(image));
+      handle.markerActor.SetUiScalePolicy(UiScalePolicy::DISABLED);
       handle.markerActor.SetSynchronousLoading(true);
       handle.markerActor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
       handle.markerActor.SetProperty(Actor::Property::COLOR, mHandleColor);
@@ -916,6 +919,7 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         primary.actor = ImageView::New(ToDaliString(mHandleImages[LEFT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
+        primary.actor.SetUiScalePolicy(UiScalePolicy::DISABLED);
         primary.actor.SetSynchronousLoading(true);
         primary.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
 #ifdef DECORATOR_DEBUG
@@ -967,6 +971,7 @@ struct Decorator::Impl : public ConnectionTracker
       if(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED].size())
       {
         secondary.actor = ImageView::New(ToDaliString(mHandleImages[RIGHT_SELECTION_HANDLE][HANDLE_IMAGE_RELEASED]));
+        secondary.actor.SetUiScalePolicy(UiScalePolicy::DISABLED);
         secondary.actor.SetSynchronousLoading(true);
         secondary.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
 #ifdef DECORATOR_DEBUG
