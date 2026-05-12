@@ -58,7 +58,7 @@ public:
    * @brief Creates a Normal state (no bits set).
    */
   constexpr ViewState()
-  : mBits(0ULL)
+  : mBits(0u)
   {
   }
 
@@ -86,7 +86,7 @@ public:
    *
    * @param[in] name The unique name for the state
    * @return The ViewState with the assigned bitmask
-   * @throws DaliException if no more bits are available (max 62 custom states)
+   * @throws DaliException if no more bits are available (max 32 custom states)
    */
   static ViewState Create(StringView name);
 
@@ -111,7 +111,7 @@ public:
    */
   bool HasIntersectionWith(const ViewState& other) const
   {
-    return (mBits & other.mBits) != 0ULL;
+    return (mBits & other.mBits) != 0u;
   }
 
   /**
@@ -121,7 +121,7 @@ public:
    */
   bool IsNormal() const
   {
-    return mBits == 0ULL;
+    return mBits == 0u;
   }
 
   /**
@@ -176,7 +176,7 @@ public:
    */
   bool AnyChanged(const ViewState& prev, const ViewState& cur) const
   {
-    return ((prev ^ cur) & *this).mBits != 0ULL;
+    return ((prev ^ cur) & *this).mBits != 0u;
   }
 
   // --- Operators ---
@@ -223,19 +223,19 @@ public:
 
   explicit operator bool() const
   {
-    return mBits != 0ULL;
+    return mBits != 0u;
   }
 
 private:
-  explicit constexpr ViewState(uint64_t bits)
+  explicit constexpr ViewState(uint32_t bits)
   : mBits(bits)
   {
   }
 
-  static constexpr int MAX_BITS = 62;
-  static uint64_t      Register(StringView name);
+  static constexpr int MAX_BITS = 32;
+  static uint32_t      Register(StringView name);
 
-  uint64_t mBits;
+  uint32_t mBits;
 };
 
 } // namespace Ui

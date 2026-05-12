@@ -36,7 +36,7 @@ namespace
 
 struct StateRegistry
 {
-  std::unordered_map<std::string, uint64_t> states;
+  std::unordered_map<std::string, uint32_t> states;
   int                                       nextBit = 0;
 };
 
@@ -48,19 +48,19 @@ StateRegistry& GetRegistry()
 
 } // unnamed namespace
 
-uint64_t ViewState::Register(StringView name)
+uint32_t ViewState::Register(StringView name)
 {
   auto&       reg = GetRegistry();
   std::string key(name.Data(), name.Size());
 
   if(key == "All")
   {
-    return (1ULL << MAX_BITS) - 1ULL;
+    return UINT32_MAX;
   }
 
   if(key == "Normal")
   {
-    return 0ULL;
+    return 0u;
   }
 
   auto it = reg.states.find(key);
@@ -71,7 +71,7 @@ uint64_t ViewState::Register(StringView name)
 
   DALI_ASSERT_ALWAYS(reg.nextBit < MAX_BITS && "No more room to register a new ViewState");
 
-  uint64_t bit = 1ULL << reg.nextBit;
+  uint32_t bit = 1u << reg.nextBit;
   reg.states.emplace(std::move(key), bit);
   reg.nextBit++;
   return bit;
@@ -84,12 +84,12 @@ ViewState ViewState::Create(StringView name)
 
 String ViewState::ToString() const
 {
-  if(mBits == 0ULL)
+  if(mBits == 0u)
   {
     return "Normal";
   }
 
-  constexpr uint64_t fullMask = (1ULL << MAX_BITS) - 1ULL;
+  constexpr uint32_t fullMask = UINT32_MAX;
   if(mBits == fullMask)
   {
     return "All";
@@ -100,7 +100,7 @@ String ViewState::ToString() const
 
   for(const auto& [name, bitMask] : reg.states)
   {
-    if((mBits & bitMask) != 0ULL)
+    if((mBits & bitMask) != 0u)
     {
       if(!result.empty())
       {
@@ -116,7 +116,7 @@ String ViewState::ToString() const
 // --- Predefined States ---
 
 const ViewState ViewState::NORMAL{};
-const ViewState ViewState::ALL{(1ULL << MAX_BITS) - 1ULL};
+const ViewState ViewState::ALL{UINT32_MAX};
 const ViewState ViewState::FOCUSED         = ViewState::Create("Focused");
 const ViewState ViewState::PRESSED         = ViewState::Create("Pressed");
 const ViewState ViewState::DISABLED        = ViewState::Create("Disabled");
