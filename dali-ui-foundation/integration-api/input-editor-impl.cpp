@@ -86,6 +86,7 @@ INPUT_EDITOR_PROPERTY_REGISTRATION("text",                             STRING,  
 INPUT_EDITOR_PROPERTY_REGISTRATION("fontFamily",                       STRING,  FONT_FAMILY                         )
 INPUT_EDITOR_PROPERTY_REGISTRATION("fontSize",                         FLOAT,   FONT_SIZE                           )
 INPUT_EDITOR_PROPERTY_REGISTRATION("textColor",                        VECTOR4, TEXT_COLOR                          )
+INPUT_EDITOR_PROPERTY_REGISTRATION("lineWrapMode",                     INTEGER, LINE_WRAP_MODE                      )
 INPUT_EDITOR_PROPERTY_REGISTRATION("horizontalAlignment",              INTEGER, HORIZONTAL_ALIGNMENT                )
 INPUT_EDITOR_PROPERTY_REGISTRATION("verticalAlignment",                INTEGER, VERTICAL_ALIGNMENT                  )
 INPUT_EDITOR_PROPERTY_REGISTRATION("overflowMode",                     INTEGER, OVERFLOW_MODE                       )
@@ -328,6 +329,17 @@ UiColor InputEditorImpl::GetTextColor()
     return outColor;
   }
   return mController->GetDefaultColor();
+}
+
+void InputEditorImpl::SetLineWrapMode(Text::LineWrapMode mode)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
+  mController->SetLineWrapMode(mode);
+}
+
+Text::LineWrapMode InputEditorImpl::GetLineWrapMode() const
+{
+  return mController->GetLineWrapMode();
 }
 
 void InputEditorImpl::SetHorizontalTextAlignment(Text::Alignment alignment)

@@ -118,6 +118,16 @@ public:
   UiColor GetTextColor();
 
   /**
+   * @copydoc Dali::Ui::InputEditor::SetLineWrapMode
+   */
+  void SetLineWrapMode(Text::LineWrapMode mode);
+
+  /**
+   * @copydoc Dali::Ui::InputEditor::GetLineWrapMode
+   */
+  Text::LineWrapMode GetLineWrapMode() const;
+
+  /**
    * @copydoc Dali::Ui::InputEditor::SetHorizontalTextAlignment
    */
   void SetHorizontalTextAlignment(Text::Alignment alignment);

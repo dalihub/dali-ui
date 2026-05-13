@@ -28,6 +28,12 @@
   */ \
   ChildClass& SetTextColor(const UiColor& color) { InputEditor::SetTextColor(color); return *this; } \
   /** \
+  * @brief Sets the line wrap mode. \
+  * \
+  * @param[in] mode The line wrap mode to apply. \
+  */ \
+  ChildClass& SetLineWrapMode(Text::LineWrapMode mode) { InputEditor::SetLineWrapMode(mode); return *this; } \
+  /** \
   * @brief Sets the horizontal alignment of the text within the inputEditor. \
   * \
   * @param[in] alignment The horizontal text alignment. \
@@ -107,7 +113,7 @@
   /** \
   * @brief Sets the highlight color of the selected text region. \
   * \
-  * @param[in] color The selection highlight color as a UiColor). \
+  * @param[in] color The selection highlight color as a UiColor. \
   */ \
   ChildClass& SetSelectionColor(const UiColor& color) { InputEditor::SetSelectionColor(color); return *this; } \
   /** \

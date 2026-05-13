@@ -32,6 +32,7 @@ const char* const PROPERTY_NAME_TEXT                                 = "text";
 const char* const PROPERTY_NAME_FONT_FAMILY                          = "fontFamily";
 const char* const PROPERTY_NAME_FONT_SIZE                            = "fontSize";
 const char* const PROPERTY_NAME_TEXT_COLOR                           = "textColor";
+const char* const PROPERTY_NAME_LINE_WRAP_MODE                       = "lineWrapMode";
 const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT                 = "horizontalAlignment";
 const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT                   = "verticalAlignment";
 const char* const PROPERTY_NAME_OVERFLOW_MODE                        = "overflowMode";
@@ -236,6 +237,21 @@ int UtcDaliInputEditorTextColor(void)
   UiColor color2(Color::RED);
   inputEditor.SetTextColor(color2);
   DALI_TEST_EQUALS(inputEditor.GetTextColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputEditorLineWrapMode(void)
+{
+  UiTestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  DALI_TEST_CHECK(inputEditor);
+
+  inputEditor.SetLineWrapMode(Text::LineWrapMode::WORD);
+  DALI_TEST_EQUALS(inputEditor.GetLineWrapMode(), Text::LineWrapMode::WORD, TEST_LOCATION);
+
+  inputEditor.SetLineWrapMode(Text::LineWrapMode::CHARACTER);
+  DALI_TEST_EQUALS(inputEditor.GetLineWrapMode(), Text::LineWrapMode::CHARACTER, TEST_LOCATION);
 
   END_TEST;
 }
@@ -944,6 +960,7 @@ int UtcDaliInputEditorGetProperty(void)
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_FONT_FAMILY) == InputEditor::Property::FONT_FAMILY);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_FONT_SIZE) == InputEditor::Property::FONT_SIZE);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_TEXT_COLOR) == InputEditor::Property::TEXT_COLOR);
+  DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_LINE_WRAP_MODE) == InputEditor::Property::LINE_WRAP_MODE);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_HORIZONTAL_ALIGNMENT) == InputEditor::Property::HORIZONTAL_ALIGNMENT);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_VERTICAL_ALIGNMENT) == InputEditor::Property::VERTICAL_ALIGNMENT);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_OVERFLOW_MODE) == InputEditor::Property::OVERFLOW_MODE);
@@ -1012,6 +1029,13 @@ int UtcDaliInputEditorSetProperty(void)
   // TEXT_COLOR
   inputEditor.SetProperty(InputEditor::Property::TEXT_COLOR, Color::BLUE);
   DALI_TEST_EQUALS(inputEditor.GetProperty<Vector4>(InputEditor::Property::TEXT_COLOR), Color::BLUE, TEST_LOCATION);
+
+  // LINE_WRAP_MODE
+  inputEditor.SetProperty(InputEditor::Property::LINE_WRAP_MODE, Text::LineWrapMode::WORD);
+  DALI_TEST_EQUALS(inputEditor.GetProperty<Text::LineWrapMode>(InputEditor::Property::LINE_WRAP_MODE), Text::LineWrapMode::WORD, TEST_LOCATION);
+
+  inputEditor.SetProperty(InputEditor::Property::LINE_WRAP_MODE, "CHARACTER");
+  DALI_TEST_EQUALS(inputEditor.GetProperty<Text::LineWrapMode>(InputEditor::Property::LINE_WRAP_MODE), Text::LineWrapMode::CHARACTER, TEST_LOCATION);
 
   // HORIZONTAL_ALIGNMENT
   inputEditor.SetProperty(InputEditor::Property::HORIZONTAL_ALIGNMENT, Text::Alignment::CENTER);

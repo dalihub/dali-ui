@@ -70,6 +70,7 @@ public:
       FONT_FAMILY                          = Text::InputEditorPropertyIndex::FONT_FAMILY,
       FONT_SIZE                            = Text::InputEditorPropertyIndex::FONT_SIZE,
       TEXT_COLOR                           = Text::InputEditorPropertyIndex::TEXT_COLOR,
+      LINE_WRAP_MODE                       = Text::InputEditorPropertyIndex::LINE_WRAP_MODE,
       HORIZONTAL_ALIGNMENT                 = Text::InputEditorPropertyIndex::HORIZONTAL_ALIGNMENT,
       VERTICAL_ALIGNMENT                   = Text::InputEditorPropertyIndex::VERTICAL_ALIGNMENT,
       OVERFLOW_MODE                        = Text::InputEditorPropertyIndex::OVERFLOW_MODE,
@@ -240,6 +241,20 @@ public: // Setters for chaining
    * @return The text color currently set on the inputEditor.
    */
   UiColor GetTextColor();
+
+  /**
+   * @brief Sets the line wrap mode.
+   *
+   * @param[in] mode The line wrap mode to apply.
+   */
+  InputEditor& SetLineWrapMode(Text::LineWrapMode mode);
+
+  /**
+   * @brief Gets the line wrap mode.
+   *
+   * @return The current line wrap mode.
+   */
+  Text::LineWrapMode GetLineWrapMode() const;
 
   /**
    * @brief Sets the horizontal alignment of the text within the inputEditor.

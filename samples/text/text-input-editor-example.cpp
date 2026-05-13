@@ -172,6 +172,10 @@ private:
     Label btnClearTextBg = CreateButton("Clear Text Bg", 0x7F8C8D);
     View textBgRow = CreateButtonRow({btnTextBgColor, btnClearTextBg});
 
+    // Line wrap mode button
+    Label btnLineWrapMode = CreateButton("Line Wrap Mode", 0x2980B9);
+    View lineWrapRow = CreateButtonRow({btnLineWrapMode});
+
     // Info button
     Label btnInfo = CreateButton("Print Info (log)", 0x34495E);
     View infoRow = CreateButtonRow({btnInfo});
@@ -207,6 +211,8 @@ private:
         otherRow,
         // Text background controls
         textBgRow,
+        // Line wrap mode
+        lineWrapRow,
         infoRow,
       });
 
@@ -255,6 +261,9 @@ private:
     // Connect button touch signals - Text background
     btnTextBgColor.TouchedSignal().Connect(this, &InputEditorController::OnButtonTextBgColorTouched);
     btnClearTextBg.TouchedSignal().Connect(this, &InputEditorController::OnButtonClearTextBgTouched);
+
+    // Connect button touch signals - Line wrap mode
+    btnLineWrapMode.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineWrapModeTouched);
 
     btnInfo.TouchedSignal().Connect(this, &InputEditorController::OnButtonInfoTouched);
 
@@ -588,6 +597,26 @@ private:
     if(touch.GetState(0) == PointState::UP)
     {
       mInputEditor.ClearTextBackgroundColor();
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonLineWrapModeTouched(Actor, TouchEvent touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      Text::LineWrapMode mode = mInputEditor.GetLineWrapMode();
+      Text::LineWrapMode newMode;
+      if(mode == Text::LineWrapMode::WORD)
+      {
+        newMode = Text::LineWrapMode::CHARACTER;
+      }
+      else
+      {
+        newMode = Text::LineWrapMode::WORD;
+      }
+      mInputEditor.SetLineWrapMode(newMode);
       UpdateStatus();
     }
     return true;

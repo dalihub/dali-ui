@@ -154,6 +154,17 @@ UiColor InputEditor::GetTextColor()
   return GetImpl(*this).GetTextColor();
 }
 
+InputEditor& InputEditor::SetLineWrapMode(Text::LineWrapMode mode)
+{
+  GetImpl(*this).SetLineWrapMode(mode);
+  return *this;
+}
+
+Text::LineWrapMode InputEditor::GetLineWrapMode() const
+{
+  return GetImpl(*this).GetLineWrapMode();
+}
+
 InputEditor& InputEditor::SetHorizontalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetHorizontalTextAlignment(alignment);

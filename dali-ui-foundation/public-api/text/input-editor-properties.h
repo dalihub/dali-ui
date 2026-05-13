@@ -75,6 +75,14 @@ struct InputEditorPropertyIndex
     TEXT_COLOR,
 
     /**
+     * @brief Line wrap mode when text lines are greater than the layout width.
+     * @details Name "lineWrapMode", type Text::LineWrapMode (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::LineWrapMode (Property::INTEGER).
+     * @see InputEditor::SetLineWrapMode(), InputEditor::GetLineWrapMode().
+     */
+    LINE_WRAP_MODE,
+
+    /**
      * @brief The horizontal alignment.
      * @details Name "horizontalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::Alignment (Property::INTEGER).

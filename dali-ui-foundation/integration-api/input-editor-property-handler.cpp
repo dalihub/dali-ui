@@ -55,6 +55,15 @@ void InputEditorImpl::PropertyHandler::SetProperty(Ui::View view, Property::Inde
       impl.SetTextColor(UiColor(value.Get<Vector4>()));
       break;
     }
+    case Text::InputEditorPropertyIndex::LINE_WRAP_MODE:
+    {
+      Text::LineWrapMode mode(static_cast<Text::LineWrapMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetLineWrapModeEnumeration(value, mode))
+      {
+        impl.SetLineWrapMode(mode);
+      }
+      break;
+    }
     case Text::InputEditorPropertyIndex::HORIZONTAL_ALIGNMENT:
     {
       Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
@@ -320,6 +329,11 @@ Property::Value InputEditorImpl::PropertyHandler::GetProperty(Ui::View view, Pro
     case Text::InputEditorPropertyIndex::TEXT_COLOR:
     {
       value = impl.GetTextColor().GetRgba();
+      break;
+    }
+    case Text::InputEditorPropertyIndex::LINE_WRAP_MODE:
+    {
+      value = impl.GetLineWrapMode();
       break;
     }
     case Text::InputEditorPropertyIndex::HORIZONTAL_ALIGNMENT:

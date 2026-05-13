@@ -107,7 +107,7 @@
   /** \
   * @brief Sets the highlight color of the selected text region. \
   * \
-  * @param[in] color The selection highlight color as a UiColor). \
+  * @param[in] color The selection highlight color as a UiColor. \
   */ \
   ChildClass& SetSelectionColor(const UiColor& color) { InputField::SetSelectionColor(color); return *this; } \
   /** \
