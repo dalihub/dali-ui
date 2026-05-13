@@ -479,6 +479,8 @@ private:
   bool    mIntercepting;     ///< True while this ScrollView owns the touch sequence
   bool    mJustIntercepted;  ///< True for one cycle when interception first begins (prevents double HandleEvent feed)
   bool    mPanRecognized;    ///< True once PanGestureDetector fires STARTED; waiting for post-recognition threshold
+  bool    mIsDragging;       ///< True between SendDragStarted() and SendDragFinished(); guards FINISHED handler against mIntercepting timing race
+  bool    mDisambiguating;   ///< True from touch DOWN until disambiguation resolves; guards DisambiguationEnded against double-emit
   Vector2 mPanStartPosition; ///< Screen position at Pan STARTED, used to measure post-recognition displacement
 
   // Scroll bar

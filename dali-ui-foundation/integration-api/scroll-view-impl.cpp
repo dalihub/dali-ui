@@ -35,6 +35,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
+#include <dali-ui-foundation/internal/scroll-state-observer.h>
 //#include <dali-ui-elements/public-api/scroll-view.h>
 
 namespace Dali
@@ -101,6 +102,8 @@ ScrollViewImpl::ScrollViewImpl()
   mIntercepting(false),
   mJustIntercepted(false),
   mPanRecognized(false),
+  mIsDragging(false),
+  mDisambiguating(false),
   mPanStartPosition(0.0f, 0.0f),
   mScrollBar(ScrollBar::New())
 {
@@ -773,6 +776,10 @@ bool ScrollViewImpl::OnInterceptTouch(Actor actor, TouchEvent touch)
     mIntercepting    = false;
     mJustIntercepted = false;
     mPanRecognized   = false;
+    // Disambiguation begins immediately on touch: we don't yet know if this
+    // will be a tap or a scroll.
+    mDisambiguating = true;
+    Ui::Internal::ScrollStateObserver::Get().NotifyGestureDisambiguationBegan();
   }
 
   // Always feed to the gesture detector so it can build velocity/displacement
@@ -783,6 +790,14 @@ bool ScrollViewImpl::OnInterceptTouch(Actor actor, TouchEvent touch)
   // and the touch sequence is stolen from children.
   TouchEvent& nonConstTouch = touch;
   mPanGestureDetector.HandleEvent(actor, nonConstTouch);
+
+  if((state == PointState::UP || state == PointState::INTERRUPTED) && mDisambiguating)
+  {
+    // Touch ended without the gesture detector resolving disambiguation
+    // (pure tap: pan was never recognized, so OnPanGesture never fired).
+    mDisambiguating = false;
+    Ui::Internal::ScrollStateObserver::Get().NotifyGestureDisambiguationEnded();
+  }
 
   return mIntercepting;
 }
@@ -824,6 +839,7 @@ void ScrollViewImpl::OnPanGesture(Actor actor, PanGesture gesture)
       // measure additional displacement before committing to scroll.
       mPanRecognized    = true;
       mPanStartPosition = gesture.GetScreenPosition();
+      // Disambiguation was already signalled in OnInterceptTouch(DOWN).
       break;
     }
     case GestureState::CONTINUING:
@@ -855,6 +871,9 @@ void ScrollViewImpl::OnPanGesture(Actor actor, PanGesture gesture)
 
         // Threshold met: steal the touch sequence and start scrolling.
         DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnPanGesture] post-recognition threshold met – intercepting\n");
+        // Disambiguation resolved: this is a scroll, not a tap.
+        mDisambiguating = false;
+        Ui::Internal::ScrollStateObserver::Get().NotifyGestureDisambiguationEnded();
         CancelScrollAnimation();
         mIntercepting    = true;
         mJustIntercepted = true;
@@ -871,7 +890,15 @@ void ScrollViewImpl::OnPanGesture(Actor actor, PanGesture gesture)
       // Fall through
     case GestureState::CANCELLED:
     {
-      if(mIntercepting)
+      if(mDisambiguating && !mIntercepting)
+      {
+        // Pan was recognized but threshold was never met: resolved as a tap.
+        mDisambiguating = false;
+        Ui::Internal::ScrollStateObserver::Get().NotifyGestureDisambiguationEnded();
+      }
+      // Use mIsDragging as a fallback: mIntercepting may have been cleared by
+      // OnTouch(UP) before gesture FINISHED fires asynchronously.
+      if(mIntercepting || mIsDragging)
       {
         CancelScrollAnimation();
         OnDragFinished(gesture);
@@ -988,7 +1015,8 @@ void ScrollViewImpl::SendScrollStarted()
 {
   if(!mIsScrolling)
   {
-    mIsScrolling              = true;
+    mIsScrolling = true;
+    Ui::Internal::ScrollStateObserver::Get().NotifyScrollStarted();
     Ui::ScrollView scrollView = Ui::ScrollView::DownCast(Self());
     mScrollStartedSignal.Emit(scrollView);
   }
@@ -1007,7 +1035,8 @@ void ScrollViewImpl::SendScrollFinished()
 {
   if(mIsScrolling)
   {
-    mIsScrolling              = false;
+    mIsScrolling = false;
+    Ui::Internal::ScrollStateObserver::Get().NotifyScrollFinished();
     Ui::ScrollView scrollView = Ui::ScrollView::DownCast(Self());
     mScrollFinishedSignal.Emit(scrollView);
     // Auto-visibility bars fade out 2 seconds after the last scroll position
@@ -1017,6 +1046,8 @@ void ScrollViewImpl::SendScrollFinished()
 
 void ScrollViewImpl::SendDragStarted()
 {
+  mIsDragging = true;
+  Ui::Internal::ScrollStateObserver::Get().NotifyDragStarted();
   Ui::ScrollView scrollView = Ui::ScrollView::DownCast(Self());
   mDragStartedSignal.Emit(scrollView);
 }
@@ -1029,6 +1060,8 @@ void ScrollViewImpl::SendDragging(float deltaX, float deltaY)
 
 void ScrollViewImpl::SendDragFinished()
 {
+  mIsDragging = false;
+  Ui::Internal::ScrollStateObserver::Get().NotifyDragFinished();
   Ui::ScrollView scrollView = Ui::ScrollView::DownCast(Self());
   mDragFinishedSignal.Emit(scrollView);
 }

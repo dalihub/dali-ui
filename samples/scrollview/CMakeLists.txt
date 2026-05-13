@@ -45,6 +45,8 @@ FOREACH(TARGET_EXE ${EXE_NAME} ${EXE_INTERACTIVE} ${EXE_SCROLLBAR})
     ${DALIADAPTOR_INCLUDE_DIRS}
     ${DALI_UI_FOUNDATION_INCLUDE_DIRS}
     ${DALI_UI_COMPONENTS_INCLUDE_DIRS}
+    # Allow access to internal headers (e.g. scroll-state-observer.h) from source tree
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../
   )
 
   TARGET_COMPILE_OPTIONS(${TARGET_EXE} PRIVATE
