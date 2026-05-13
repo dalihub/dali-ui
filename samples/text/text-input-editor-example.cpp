@@ -29,6 +29,91 @@ constexpr float BUTTON_HEIGHT   = 36.0f;
 constexpr float EDITOR_HEIGHT   = 120.0f;
 constexpr float BUTTON_SPACING  = 4.0f;
 
+const char* GetLineHeightModeName(Text::LineHeightMode mode)
+{
+  switch(mode)
+  {
+    case Text::LineHeightMode::RELATIVE:
+      return "RELATIVE";
+    case Text::LineHeightMode::ABSOLUTE:
+      return "ABSOLUTE";
+    default:
+      return "UNKNOWN";
+  }
+}
+
+Dali::String GetLineHeightText(float lineHeight)
+{
+  if(Dali::Equals(lineHeight, Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
+  {
+    return "AUTO";
+  }
+  return std::to_string(lineHeight).substr(0, 5).c_str();
+}
+
+const char* GetLineWrapModeName(Text::LineWrapMode mode)
+{
+  switch(mode)
+  {
+    case Text::LineWrapMode::WORD:
+      return "WORD";
+    case Text::LineWrapMode::CHARACTER:
+      return "CHARACTER";
+    case Text::LineWrapMode::HYPHENATION:
+      return "HYPHENATION";
+    case Text::LineWrapMode::MIXED:
+      return "MIXED";
+    default:
+      return "UNKNOWN";
+  }
+}
+
+enum class LineHeightStep
+{
+  AUTO,
+  ONE,
+  ONE_AND_HALF,
+  TWO
+};
+
+LineHeightStep GetLineHeightStep(float lineHeight, float fontSize, Text::LineHeightMode mode)
+{
+  if(Dali::Equals(lineHeight, Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
+  {
+    return LineHeightStep::AUTO;
+  }
+
+  float target1, target1_5, target2;
+  if(mode == Text::LineHeightMode::RELATIVE)
+  {
+    target1 = 1.0f;
+    target1_5 = 1.5f;
+    target2 = 2.0f;
+  }
+  else // ABSOLUTE
+  {
+    target1 = fontSize * 1.0f;
+    target1_5 = fontSize * 1.5f;
+    target2 = fontSize * 2.0f;
+  }
+
+  if(Dali::Equals(lineHeight, target1, Math::MACHINE_EPSILON_1000))
+  {
+    return LineHeightStep::ONE;
+  }
+  if(Dali::Equals(lineHeight, target1_5, Math::MACHINE_EPSILON_1000))
+  {
+    return LineHeightStep::ONE_AND_HALF;
+  }
+  if(Dali::Equals(lineHeight, target2, Math::MACHINE_EPSILON_1000))
+  {
+    return LineHeightStep::TWO;
+  }
+
+  // Default to AUTO for unrecognized values
+  return LineHeightStep::AUTO;
+}
+
 constexpr uint32_t COLOR_DARK_TEXT    = 0x222222;
 constexpr uint32_t COLOR_DARK_GRAY    = 0x404040;
 constexpr uint32_t COLOR_LIGHT_BLUE   = 0xADD8E6;
@@ -95,8 +180,6 @@ private:
       .SetBackgroundColor(UiColor(0xFFFFFF))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetPadding(Extents(12, 12, 12, 12))
-      .SetLineHeight(50)
-      .SetLineHeightMode(Text::LineHeightMode::ABSOLUTE)
       .SetFocusable(true);
 
     // Set text handle images
@@ -316,6 +399,12 @@ private:
     status += "-";
     status += std::to_string(selEnd).c_str();
     status += "]";
+    status += "\nWrap:";
+    status += GetLineWrapModeName(mInputEditor.GetLineWrapMode());
+    status += " LineHeight:";
+    status += GetLineHeightText(mInputEditor.GetLineHeight());
+    status += " Mode:";
+    status += GetLineHeightModeName(mInputEditor.GetLineHeightMode());
 
     mStatusLabel.SetText(status);
   }
@@ -399,6 +488,13 @@ private:
       status += selectedText.CStr();
       status += "\"";
     }
+
+    status += "\nWrap:";
+    status += GetLineWrapModeName(mInputEditor.GetLineWrapMode());
+    status += " LineHeight:";
+    status += GetLineHeightText(mInputEditor.GetLineHeight());
+    status += " Mode:";
+    status += GetLineHeightModeName(mInputEditor.GetLineHeightMode());
 
     mStatusLabel.SetText(status);
   }
@@ -621,9 +717,18 @@ private:
     {
       Text::LineWrapMode mode = mInputEditor.GetLineWrapMode();
       Text::LineWrapMode newMode;
+      // Cycle through: WORD -> CHARACTER -> HYPHENATION -> MIXED -> WORD
       if(mode == Text::LineWrapMode::WORD)
       {
         newMode = Text::LineWrapMode::CHARACTER;
+      }
+      else if(mode == Text::LineWrapMode::CHARACTER)
+      {
+        newMode = Text::LineWrapMode::HYPHENATION;
+      }
+      else if(mode == Text::LineWrapMode::HYPHENATION)
+      {
+        newMode = Text::LineWrapMode::MIXED;
       }
       else
       {
@@ -639,25 +744,72 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      float lineHeight = mInputEditor.GetLineHeight();
+      float lineHeight      = mInputEditor.GetLineHeight();
+      float fontSize        = mInputEditor.GetFontSize();
+      Text::LineHeightMode mode = mInputEditor.GetLineHeightMode();
+
+      LineHeightStep step = GetLineHeightStep(lineHeight, fontSize, mode);
+      LineHeightStep newStep;
+      // Cycle through: AUTO -> ONE -> ONE_AND_HALF -> TWO -> AUTO
+      switch(step)
+      {
+        case LineHeightStep::AUTO:
+          newStep = LineHeightStep::ONE;
+          break;
+        case LineHeightStep::ONE:
+          newStep = LineHeightStep::ONE_AND_HALF;
+          break;
+        case LineHeightStep::ONE_AND_HALF:
+          newStep = LineHeightStep::TWO;
+          break;
+        case LineHeightStep::TWO:
+        default:
+          newStep = LineHeightStep::AUTO;
+          break;
+      }
+
       float newLineHeight;
-      // Cycle through: 1.0 -> 1.5 -> 2.0 -> -1.0 (auto) -> 1.0
-      if(lineHeight < 1.2f)
+      if(newStep == LineHeightStep::AUTO)
       {
-        newLineHeight = 1.5f;
+        newLineHeight = Text::LINE_HEIGHT_AUTO;
       }
-      else if(lineHeight < 1.7f)
+      else if(mode == Text::LineHeightMode::RELATIVE)
       {
-        newLineHeight = 2.0f;
+        switch(newStep)
+        {
+          case LineHeightStep::ONE:
+            newLineHeight = 1.0f;
+            break;
+          case LineHeightStep::ONE_AND_HALF:
+            newLineHeight = 1.5f;
+            break;
+          case LineHeightStep::TWO:
+            newLineHeight = 2.0f;
+            break;
+          default:
+            newLineHeight = Text::LINE_HEIGHT_AUTO;
+            break;
+        }
       }
-      else if(lineHeight < 0.0f)
+      else // ABSOLUTE
       {
-        newLineHeight = 1.0f;
+        switch(newStep)
+        {
+          case LineHeightStep::ONE:
+            newLineHeight = fontSize * 1.0f;
+            break;
+          case LineHeightStep::ONE_AND_HALF:
+            newLineHeight = fontSize * 1.5f;
+            break;
+          case LineHeightStep::TWO:
+            newLineHeight = fontSize * 2.0f;
+            break;
+          default:
+            newLineHeight = Text::LINE_HEIGHT_AUTO;
+            break;
+        }
       }
-      else
-      {
-        newLineHeight = -1.0f; // auto
-      }
+
       mInputEditor.SetLineHeight(newLineHeight);
       UpdateStatus();
     }
@@ -668,17 +820,46 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
+      float lineHeight      = mInputEditor.GetLineHeight();
+      float fontSize        = mInputEditor.GetFontSize();
       Text::LineHeightMode mode = mInputEditor.GetLineHeightMode();
+
       Text::LineHeightMode newMode;
+      float newLineHeight;
+
       if(mode == Text::LineHeightMode::RELATIVE)
       {
+        // RELATIVE -> ABSOLUTE
         newMode = Text::LineHeightMode::ABSOLUTE;
+        if(Dali::Equals(lineHeight, Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
+        {
+          newLineHeight = Text::LINE_HEIGHT_AUTO;
+        }
+        else
+        {
+          newLineHeight = lineHeight * fontSize;
+        }
       }
       else
       {
+        // ABSOLUTE -> RELATIVE
         newMode = Text::LineHeightMode::RELATIVE;
+        if(Dali::Equals(lineHeight, Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
+        {
+          newLineHeight = Text::LINE_HEIGHT_AUTO;
+        }
+        else if(fontSize > Math::MACHINE_EPSILON_1000)
+        {
+          newLineHeight = lineHeight / fontSize;
+        }
+        else
+        {
+          newLineHeight = 1.0f;
+        }
       }
+
       mInputEditor.SetLineHeightMode(newMode);
+      mInputEditor.SetLineHeight(newLineHeight);
       UpdateStatus();
     }
     return true;

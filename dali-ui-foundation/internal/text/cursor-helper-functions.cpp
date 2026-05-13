@@ -523,9 +523,9 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
     // Set the line offset and height.
     cursorInfo.lineOffset = CalculateLineOffset(parameters.visualModel->mLines, newLineIndex);
 
-    // The line height is the addition of the line ascender and the line descender.
-    // However, the line descender has a negative value, hence the subtraction also line spacing should not be included
-    // in cursor height.
+    // Cursor and handle interaction use the natural text line height.
+    // Explicit LineHeight affects line layout, but handles should remain
+    // anchored near the visible cursor/glyph area.
     cursorInfo.lineHeight = newLine.ascender - newLine.descender;
 
     index                                = 0u;
@@ -590,9 +590,9 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
     // Set the line offset and height.
     cursorInfo.lineOffset = CalculateLineOffset(parameters.visualModel->mLines, lineIndex);
 
-    // The line height is the addition of the line ascender and the line descender.
-    // However, the line descender has a negative value, hence the subtraction also line spacing should not be included
-    // in cursor height.
+    // Cursor and handle interaction use the natural text line height.
+    // Explicit LineHeight affects line layout, but handles should remain
+    // anchored near the visible cursor/glyph area.
     cursorInfo.lineHeight = line.ascender - line.descender;
 
     // Calculate the primary cursor.

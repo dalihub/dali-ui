@@ -154,9 +154,9 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
 
   lineRun += firstLineIndex;
 
-  // The line height is the addition of the line ascender and the line descender.
-  // However, the line descender has a negative value, hence the subtraction also line spacing should not be included in
-  // selection height.
+  // Selection highlight uses the natural text line height.
+  // Explicit LineHeight affects line placement, but the highlight should not
+  // fill the extra line spacing area.
   selectionBoxInfo->lineHeight = lineRun->ascender - lineRun->descender;
 
   GlyphIndex lastGlyphOfLine = lineRun->glyphRun.glyphIndex + lineRun->glyphRun.numberOfGlyphs - 1u;
@@ -282,17 +282,11 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
       ++lineIndex;
       if(lineIndex < firstLineIndex + numberOfLines)
       {
-        float currentLineSpacing = lineRun->lineSpacing;
-
         // Retrieve the next line.
         ++lineRun;
 
         // Get the last glyph of the new line.
         lastGlyphOfLine = lineRun->glyphRun.glyphIndex + lineRun->glyphRun.numberOfGlyphs - 1u;
-
-        // Keep the offset and height of the current selection box.
-        const float currentLineOffset = selectionBoxInfo->lineOffset;
-        const float currentLineHeight = selectionBoxInfo->lineHeight;
 
         // Get the selection box info for the next line.
         ++selectionBoxInfo;
@@ -300,18 +294,14 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
         selectionBoxInfo->minX = MAX_FLOAT;
         selectionBoxInfo->maxX = MIN_FLOAT;
 
-        // Update the line's vertical offset.
-        selectionBoxInfo->lineOffset = currentLineOffset + currentLineHeight + currentLineSpacing;
+        // Use CalculateLineOffset for consistent line offset calculation.
+        // This avoids cumulative errors when explicit LineHeight is set.
+        selectionBoxInfo->lineOffset = CalculateLineOffset(visualModel->mLines, lineIndex) + model->mScrollPosition.y;
 
-        // The line height is the addition of the line ascender and the line descender.
-        // However, the line descender has a negative value, hence the subtraction also line spacing should not be
-        // included in selection height.
+        // Selection highlight uses the natural text line height.
+        // Explicit LineHeight affects line placement, but the highlight should not
+        // fill the extra line spacing area.
         selectionBoxInfo->lineHeight = lineRun->ascender - lineRun->descender;
-
-        if(lineRun->lineSpacing > 0)
-        {
-          selectionBoxInfo->lineHeight += lineRun->lineSpacing;
-        }
       }
     }
   }

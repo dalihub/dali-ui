@@ -403,7 +403,6 @@ void InputEditorImpl::SetLineHeight(float lineHeight)
   {
     mLineHeight = lineHeight;
     UpdateLineHeight();
-    InvalidateTextMeasure();
   }
 }
 
@@ -419,7 +418,6 @@ void InputEditorImpl::SetLineHeightMode(Text::LineHeightMode mode)
   {
     mLineHeightMode = mode;
     UpdateLineHeight();
-    InvalidateTextMeasure();
   }
 }
 
@@ -1864,7 +1862,7 @@ void InputEditorImpl::UpdateLineHeight()
 
   if(rendererUpdateNeeded)
   {
-    RequestTextRelayout();
+    mController->InvalidateFontData();
   }
 }
 
