@@ -384,6 +384,10 @@ void WebViewImpl::OnInitialize()
   self.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
   self.SetProperty(DevelActor::Property::TOUCH_FOCUSABLE, true);
 
+  // Key events are now handled via OnKeyEvent() virtual override.
+  // Touch events are handled via signal connection.
+  self.TouchedSignal().Connect(this, &WebViewImpl::OnTouchEvent);
+
   // --- Property notifications for display-area tracking ---
   // Fire when world position, size, or scale change by at least 1 unit / 0.1 scale step.
   mPositionUpdateNotification = self.AddPropertyNotification(Actor::Property::WORLD_POSITION, StepCondition(1.0f, 1.0f));
@@ -1165,6 +1169,42 @@ void WebViewImpl::FeedMouseWheel(bool yDirection, int step, int x, int y)
   {
     mWebEngine.FeedMouseWheel(yDirection, step, x, y);
   }
+}
+
+bool WebViewImpl::FeedKeyEvent(const KeyEvent& keyEvent)
+{
+  if(mWebEngine)
+  {
+    return mWebEngine.SendKeyEvent(keyEvent);
+  }
+  return false;
+}
+
+bool WebViewImpl::FeedTouchEvent(const TouchEvent& touchEvent)
+{
+  if(mWebEngine)
+  {
+    return mWebEngine.SendTouchEvent(touchEvent);
+  }
+  return false;
+}
+
+bool WebViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
+{
+  if(mKeyEventsEnabled && mWebEngine)
+  {
+    return mWebEngine.SendKeyEvent(event);
+  }
+  return false;
+}
+
+bool WebViewImpl::OnTouchEvent(Dali::Actor /*actor*/, Dali::TouchEvent touch)
+{
+  if(mMouseEventsEnabled && mWebEngine)
+  {
+    return mWebEngine.SendTouchEvent(touch);
+  }
+  return false;
 }
 
 void WebViewImpl::SetVideoHole(bool enabled, bool isWaylandWindow)

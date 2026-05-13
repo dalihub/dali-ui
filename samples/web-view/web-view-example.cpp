@@ -40,7 +40,7 @@ using namespace Dali::Ui;
 namespace
 {
 // URL loaded on startup (change to any reachable URL for live testing)
-const char* DEFAULT_URL = "https://www.samsung.com";
+const char* DEFAULT_URL = "https://www.naver.com";
 
 // Local HTML file path (relative to application resource directory)
 const char* LOCAL_HTML_PATH = "test.html";

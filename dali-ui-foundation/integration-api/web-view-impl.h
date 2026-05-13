@@ -22,6 +22,8 @@
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/events/key-event.h>
+#include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
@@ -422,6 +424,16 @@ public: // API — Input & Video
   void FeedMouseWheel(bool yDirection, int step, int x, int y);
 
   /**
+   * @copydoc Dali::Ui::WebView::FeedKeyEvent
+   */
+  bool FeedKeyEvent(const KeyEvent& keyEvent);
+
+  /**
+   * @copydoc Dali::Ui::WebView::FeedTouchEvent
+   */
+  bool FeedTouchEvent(const TouchEvent& touchEvent);
+
+  /**
    * @copydoc Dali::Ui::WebView::SetVideoHole
    */
   void SetVideoHole(bool enabled, bool isWaylandWindow);
@@ -523,6 +535,18 @@ private: // From ViewImpl
    * @copydoc ViewImpl::OnArrange
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
+
+  /**
+   * @copydoc ViewImpl::OnKeyEvent
+   */
+  bool OnKeyEvent(const Dali::KeyEvent& event) override;
+
+  /**
+   * @brief Handles touch events from Actor::TouchedSignal.
+   *
+   * Forwards the touch to the web engine via SendTouchEvent.
+   */
+  bool OnTouchEvent(Dali::Actor actor, Dali::TouchEvent touch);
 
 private: // Internal rendering callbacks
   /**

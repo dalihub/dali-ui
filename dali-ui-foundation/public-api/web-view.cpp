@@ -444,6 +444,16 @@ void WebView::FeedMouseWheel(bool yDirection, int step, int x, int y)
   GetImpl(*this).FeedMouseWheel(yDirection, step, x, y);
 }
 
+bool WebView::FeedKeyEvent(const KeyEvent& keyEvent)
+{
+  return GetImpl(*this).FeedKeyEvent(keyEvent);
+}
+
+bool WebView::FeedTouchEvent(const TouchEvent& touchEvent)
+{
+  return GetImpl(*this).FeedTouchEvent(touchEvent);
+}
+
 bool WebView::CheckVideoPlayingAsynchronously(VideoPlayingCallback callback)
 {
   return GetImpl(*this).CheckVideoPlayingAsynchronously(std::move(callback));

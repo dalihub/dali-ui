@@ -105,8 +105,7 @@ exit 0
 %manifest %{app_root_dir}/%{name}.manifest
 %defattr(-,root,root,-)
 %{app_exe_dir}/web-view.example
-%{app_exe_dir}/web-view-js-bridge.example
-%{app_exe_dir}/web-view-scroll.example
+%{app_exe_dir}/web-browser.example
 %{app_res_dir}/*
 %{xml_file_dir}/%{name}.xml
 #%license LICENSE

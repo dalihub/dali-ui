@@ -33,7 +33,6 @@ void utc_dali_webview_cleanup(void)
   test_return_value = TET_PASS;
 }
 
-// Helper functions for callbacks (no capture lambdas required for Callback::New)
 namespace
 {
 void OnJavaScriptCallback(const Dali::String& result) {}
@@ -43,6 +42,7 @@ bool OnJavaScriptPromptCallback(const Dali::String& message, const Dali::String&
 void OnScreenshotCallback(Dali::Ui::ImageView screenshot) {}
 void OnVideoPlayingCallback(bool isPlaying) {}
 void OnPlainTextCallback(const Dali::String& text) {}
+
 } // namespace
 
 // ===========================================================================
@@ -861,3 +861,4 @@ int UtcDaliWebViewFindOptionEnumP(void)
   DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::WRAP_AROUND), 1u << 4, TEST_LOCATION);
   END_TEST;
 }
+

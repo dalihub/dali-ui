@@ -19,6 +19,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/events/key-event.h>
+#include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
@@ -537,6 +539,28 @@ public: // Actions (non-chainable, void or special return)
    * @param[in] y The Y coordinate
    */
   void FeedMouseWheel(bool yDirection, int step, int x, int y);
+
+  /**
+   * @brief Feeds a key event directly to the web engine.
+   *
+   * Use this to forward key events to the web engine when automatic key event
+   * forwarding is disabled (SetKeyEventsEnabled(false)).
+   *
+   * @param[in] keyEvent The key event to feed
+   * @return True if the event was consumed by the web engine
+   */
+  bool FeedKeyEvent(const KeyEvent& keyEvent);
+
+  /**
+   * @brief Feeds a touch event directly to the web engine.
+   *
+   * Use this to forward touch events to the web engine when automatic touch
+   * forwarding is disabled (SetMouseEventsEnabled(false)).
+   *
+   * @param[in] touchEvent The touch event to feed
+   * @return True if the event was consumed by the web engine
+   */
+  bool FeedTouchEvent(const TouchEvent& touchEvent);
 
 public: // Screenshot & Page Info
   /**

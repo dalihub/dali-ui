@@ -62,3 +62,6 @@ ENDMACRO()
 
 # Basic: loads a URL, shows load events, supports navigation keys
 ADD_WEBVIEW_SAMPLE(web-view.example web-view-example.cpp)
+
+# Browser: simple web browser with toolbar (back/forward/reload, URL bar, go button)
+ADD_WEBVIEW_SAMPLE(web-browser.example web-browser-example.cpp)
