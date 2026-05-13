@@ -90,6 +90,8 @@ INPUT_EDITOR_PROPERTY_REGISTRATION("lineWrapMode",                     INTEGER, 
 INPUT_EDITOR_PROPERTY_REGISTRATION("horizontalAlignment",              INTEGER, HORIZONTAL_ALIGNMENT                )
 INPUT_EDITOR_PROPERTY_REGISTRATION("verticalAlignment",                INTEGER, VERTICAL_ALIGNMENT                  )
 INPUT_EDITOR_PROPERTY_REGISTRATION("overflowMode",                     INTEGER, OVERFLOW_MODE                       )
+INPUT_EDITOR_PROPERTY_REGISTRATION("lineHeight",                       FLOAT,   LINE_HEIGHT                         )
+INPUT_EDITOR_PROPERTY_REGISTRATION("lineHeightMode",                   INTEGER, LINE_HEIGHT_MODE                    )
 INPUT_EDITOR_PROPERTY_REGISTRATION("placeholder",                      STRING,  PLACEHOLDER                         )
 INPUT_EDITOR_PROPERTY_REGISTRATION("placeholderColor",                 VECTOR4, PLACEHOLDER_COLOR                   )
 INPUT_EDITOR_PROPERTY_REGISTRATION("showPlaceholderOnFocus",           BOOLEAN, SHOW_PLACEHOLDER_ON_FOCUS           )
@@ -255,6 +257,8 @@ InputEditorImplPtr InputEditorImpl::New()
 
 InputEditorImpl::InputEditorImpl()
 : ViewImpl(),
+  mLineHeight(Text::LINE_HEIGHT_AUTO),
+  mLineHeightMode(Text::LineHeightMode::RELATIVE),
   mOverflowMode(Text::OverflowMode::CLIP),
   mAlignmentOffset(0.f),
   mMeasureInvalidated(false),
@@ -390,6 +394,38 @@ void InputEditorImpl::SetOverflowMode(Text::OverflowMode mode)
 Text::OverflowMode InputEditorImpl::GetOverflowMode() const
 {
   return mOverflowMode;
+}
+
+void InputEditorImpl::SetLineHeight(float lineHeight)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), lineHeight);
+  if(mLineHeight != lineHeight)
+  {
+    mLineHeight = lineHeight;
+    UpdateLineHeight();
+    InvalidateTextMeasure();
+  }
+}
+
+float InputEditorImpl::GetLineHeight() const
+{
+  return mLineHeight;
+}
+
+void InputEditorImpl::SetLineHeightMode(Text::LineHeightMode mode)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
+  if(mLineHeightMode != mode)
+  {
+    mLineHeightMode = mode;
+    UpdateLineHeight();
+    InvalidateTextMeasure();
+  }
+}
+
+Text::LineHeightMode InputEditorImpl::GetLineHeightMode() const
+{
+  return mLineHeightMode;
 }
 
 void InputEditorImpl::SetPlaceholder(const Dali::String& text)
@@ -1806,6 +1842,32 @@ void InputEditorImpl::EmitAnchorClicked(const std::string& href)
 // =============================================================================
 // Implementation
 // =============================================================================
+void InputEditorImpl::UpdateLineHeight()
+{
+  bool rendererUpdateNeeded = false;
+  if(Equals(mLineHeight, Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
+  {
+    // clear explicit line height and use the natural line height.
+    rendererUpdateNeeded |= mController->SetRelativeLineSize(-1.0f);
+    rendererUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
+  }
+  else if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
+  {
+    rendererUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
+    rendererUpdateNeeded |= mController->SetRelativeLineSize(mLineHeight);
+  }
+  else // LineHeightMode::ABSOLUTE
+  {
+    rendererUpdateNeeded |= mController->SetRelativeLineSize(-1.0f);
+    rendererUpdateNeeded |= mController->SetDefaultLineSize(mLineHeight);
+  }
+
+  if(rendererUpdateNeeded)
+  {
+    RequestTextRelayout();
+  }
+}
+
 InputMethodContext::CallbackData InputEditorImpl::OnInputMethodContextEvent(Dali::InputMethodContext inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
 {
   return mController->OnInputMethodContextEvent(inputMethodContext, inputMethodContextEvent);

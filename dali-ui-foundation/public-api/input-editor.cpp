@@ -198,6 +198,28 @@ Text::OverflowMode InputEditor::GetOverflowMode() const
   return GetImpl(*this).GetOverflowMode();
 }
 
+InputEditor& InputEditor::SetLineHeight(float lineHeight)
+{
+  GetImpl(*this).SetLineHeight(lineHeight);
+  return *this;
+}
+
+float InputEditor::GetLineHeight() const
+{
+  return GetImpl(*this).GetLineHeight();
+}
+
+InputEditor& InputEditor::SetLineHeightMode(Text::LineHeightMode mode)
+{
+  GetImpl(*this).SetLineHeightMode(mode);
+  return *this;
+}
+
+Text::LineHeightMode InputEditor::GetLineHeightMode() const
+{
+  return GetImpl(*this).GetLineHeightMode();
+}
+
 InputEditor& InputEditor::SetPlaceholder(const Dali::String& text)
 {
   GetImpl(*this).SetPlaceholder(text);

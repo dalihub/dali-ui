@@ -74,6 +74,8 @@ public:
       HORIZONTAL_ALIGNMENT                 = Text::InputEditorPropertyIndex::HORIZONTAL_ALIGNMENT,
       VERTICAL_ALIGNMENT                   = Text::InputEditorPropertyIndex::VERTICAL_ALIGNMENT,
       OVERFLOW_MODE                        = Text::InputEditorPropertyIndex::OVERFLOW_MODE,
+      LINE_HEIGHT                          = Text::InputEditorPropertyIndex::LINE_HEIGHT,
+      LINE_HEIGHT_MODE                     = Text::InputEditorPropertyIndex::LINE_HEIGHT_MODE,
       PLACEHOLDER                          = Text::InputEditorPropertyIndex::PLACEHOLDER,
       PLACEHOLDER_COLOR                    = Text::InputEditorPropertyIndex::PLACEHOLDER_COLOR,
       SHOW_PLACEHOLDER_ON_FOCUS            = Text::InputEditorPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS,
@@ -297,6 +299,70 @@ public: // Setters for chaining
    * @return The current overflow mode.
    */
   Text::OverflowMode GetOverflowMode() const;
+
+  /**
+   * @brief Sets the line height of the text.
+   *
+   * The interpretation of this value depends on the current LineHeightMode.
+   *
+   * - If the mode is LineHeightMode::RELATIVE, the line height is calculated
+   *   as a multiplier of the effective scaled font pixel size:
+   *   @code
+   *   CalculatedLineHeight(px) = fontSize(px) * lineHeight * fontSizeScale
+   *   @endcode
+   *
+   * - If the mode is LineHeightMode::ABSOLUTE, the value is treated as
+   *   an absolute line height in pixels.
+   *   @code
+   *   CalculatedLineHeight(px) = lineHeight(px) * fontSizeScale
+   *   @endcode
+   *
+   * Setting lineHeight to LINE_HEIGHT_AUTO uses the natural line height
+   * derived from the font metrics, regardless of the current LineHeightMode.
+   * This behavior is similar to the "Auto" line height option in design tools
+   * such as Figma.
+   *
+   * @note The final line height is clamped to be no smaller than
+   *       the natural line height derived from the font metrics.
+   *
+   * @param[in] lineHeight The line height value.
+   */
+  InputEditor& SetLineHeight(float lineHeight);
+
+  /**
+   * @brief Gets the current line height value.
+   *
+   * The returned value is interpreted according to the current
+   * LineHeightMode.
+   *
+   * A value of -1.0f indicates that the natural line height
+   * (based on font metrics) is used.
+   *
+   * @return The line height value.
+   */
+  float GetLineHeight() const;
+
+  /**
+   * @brief Sets how the line height value is interpreted.
+   *
+   * - LineHeightMode::RELATIVE:
+   *   The line height is calculated as a multiplier of the font size.
+   *
+   * - LineHeightMode::ABSOLUTE:
+   *   The line height is treated as an absolute pixel value.
+   *
+   * The default mode is LineHeightMode::RELATIVE.
+   *
+   * @param[in] mode The line height mode.
+   */
+  InputEditor& SetLineHeightMode(Text::LineHeightMode mode);
+
+  /**
+   * @brief Gets the current line height mode.
+   *
+   * @return The current LineHeightMode.
+   */
+  Text::LineHeightMode GetLineHeightMode() const;
 
   /**
    * @brief Sets the placeholder text displayed when the input editor is empty.

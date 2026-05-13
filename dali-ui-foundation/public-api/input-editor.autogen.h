@@ -52,6 +52,48 @@
   */ \
   ChildClass& SetOverflowMode(Text::OverflowMode mode) { InputEditor::SetOverflowMode(mode); return *this; } \
   /** \
+  * @brief Sets the line height of the text. \
+  * \
+  * The interpretation of this value depends on the current LineHeightMode. \
+  * \
+  * - If the mode is LineHeightMode::RELATIVE, the line height is calculated \
+  *   as a multiplier of the effective scaled font pixel size: \
+  *   @code \
+  *   CalculatedLineHeight(px) = fontSize(px) * lineHeight * fontSizeScale \
+  *   @endcode \
+  * \
+  * - If the mode is LineHeightMode::ABSOLUTE, the value is treated as \
+  *   an absolute line height in pixels. \
+  *   @code \
+  *   CalculatedLineHeight(px) = lineHeight(px) * fontSizeScale \
+  *   @endcode \
+  * \
+  * Setting lineHeight to LINE_HEIGHT_AUTO uses the natural line height \
+  * derived from the font metrics, regardless of the current LineHeightMode. \
+  * This behavior is similar to the "Auto" line height option in design tools \
+  * such as Figma. \
+  * \
+  * @note The final line height is clamped to be no smaller than \
+  *       the natural line height derived from the font metrics. \
+  * \
+  * @param[in] lineHeight The line height value. \
+  */ \
+  ChildClass& SetLineHeight(float lineHeight) { InputEditor::SetLineHeight(lineHeight); return *this; } \
+  /** \
+  * @brief Sets how the line height value is interpreted. \
+  * \
+  * - LineHeightMode::RELATIVE: \
+  *   The line height is calculated as a multiplier of the font size. \
+  * \
+  * - LineHeightMode::ABSOLUTE: \
+  *   The line height is treated as an absolute pixel value. \
+  * \
+  * The default mode is LineHeightMode::RELATIVE. \
+  * \
+  * @param[in] mode The line height mode. \
+  */ \
+  ChildClass& SetLineHeightMode(Text::LineHeightMode mode) { InputEditor::SetLineHeightMode(mode); return *this; } \
+  /** \
   * @brief Sets the placeholder text displayed when the input editor is empty. \
   * \
   * @param[in] text The placeholder text in UTF-8 encoding. \

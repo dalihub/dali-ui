@@ -158,6 +158,26 @@ public:
   Text::OverflowMode GetOverflowMode() const;
 
   /**
+   * @copydoc Dali::Ui::InputEditor::SetLineHeight
+   */
+  void SetLineHeight(float lineHeight);
+
+  /**
+   * @copydoc Dali::Ui::InputEditor::GetLineHeight
+   */
+  float GetLineHeight() const;
+
+  /**
+   * @copydoc Dali::Ui::InputEditor::SetLineHeightMode
+   */
+  void SetLineHeightMode(Text::LineHeightMode mode);
+
+  /**
+   * @copydoc Dali::Ui::InputEditor::GetLineHeightMode
+   */
+  Text::LineHeightMode GetLineHeightMode() const;
+
+  /**
    * @copydoc Dali::Ui::InputEditor::SetPlaceholder
    */
   void SetPlaceholder(const Dali::String& text);
@@ -895,6 +915,11 @@ private: // Implementation
   void OnFocusLost();
 
   /**
+   * @brief Updates the effective line height based on the current LineHeightMode.
+   */
+  void UpdateLineHeight();
+
+  /**
    * @copydoc Dali::Ui::Text::Controller::(InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
    */
   InputMethodContext::CallbackData OnInputMethodContextEvent(InputMethodContext inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
@@ -1084,15 +1109,17 @@ private:
   Actor mCursorLayer;
   Actor mBackgroundActor;
 
-  Text::OverflowMode mOverflowMode;
-  float              mAlignmentOffset;
-  bool               mMeasureInvalidated : 1;
-  bool               mHasBeenStaged : 1;
-  bool               mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
-  bool               mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
-  bool               mSelectionStarted : 1;      ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
-  bool               mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
-  bool               mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
+  float                mLineHeight;
+  Text::LineHeightMode mLineHeightMode;
+  Text::OverflowMode   mOverflowMode;
+  float                mAlignmentOffset;
+  bool                 mMeasureInvalidated : 1;
+  bool                 mHasBeenStaged : 1;
+  bool                 mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
+  bool                 mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
+  bool                 mSelectionStarted : 1;      ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
+  bool                 mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
+  bool                 mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
 
 protected:
   struct PropertyHandler;

@@ -107,6 +107,21 @@ struct InputEditorPropertyIndex
     OVERFLOW_MODE,
 
     /**
+     * @brief The line height.
+     * @details Name "lineHeight", type Property::FLOAT.
+     * @see InputEditor::SetLineHeight(), InputEditor::GetLineHeight().
+     */
+    LINE_HEIGHT,
+
+    /**
+     * @brief The line height mode.
+     * @details Name "lineHeightMode", type Text::LineHeightMode (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::LineHeightMode (Property::INTEGER).
+     * @see InputEditor::SetLineHeightMode(), InputEditor::GetLineHeightMode().
+     */
+    LINE_HEIGHT_MODE,
+
+    /**
      * @brief The placeholder text displayed when the input editor is empty.
      * @details Name "placeholder", type Property::STRING.
      * @see InputEditor::SetPlaceholder(), InputEditor::GetPlaceholder().

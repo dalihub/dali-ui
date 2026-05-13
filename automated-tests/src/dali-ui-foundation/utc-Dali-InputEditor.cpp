@@ -36,6 +36,8 @@ const char* const PROPERTY_NAME_LINE_WRAP_MODE                       = "lineWrap
 const char* const PROPERTY_NAME_HORIZONTAL_ALIGNMENT                 = "horizontalAlignment";
 const char* const PROPERTY_NAME_VERTICAL_ALIGNMENT                   = "verticalAlignment";
 const char* const PROPERTY_NAME_OVERFLOW_MODE                        = "overflowMode";
+const char* const PROPERTY_NAME_LINE_HEIGHT                          = "lineHeight";
+const char* const PROPERTY_NAME_LINE_HEIGHT_MODE                     = "lineHeightMode";
 const char* const PROPERTY_NAME_PLACEHOLDER                          = "placeholder";
 const char* const PROPERTY_NAME_PLACEHOLDER_COLOR                    = "placeholderColor";
 const char* const PROPERTY_NAME_SHOW_PLACEHOLDER_ON_FOCUS            = "showPlaceholderOnFocus";
@@ -297,6 +299,36 @@ int UtcDaliInputEditorOverflowMode(void)
 
   inputEditor.SetOverflowMode(Text::OverflowMode::CLIP);
   DALI_TEST_EQUALS(inputEditor.GetOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputEditorLineHeight(void)
+{
+  UiTestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  DALI_TEST_CHECK(inputEditor);
+
+  inputEditor.SetLineHeight(1.5f);
+  DALI_TEST_EQUALS(inputEditor.GetLineHeight(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  inputEditor.SetLineHeight(24.0f);
+  DALI_TEST_EQUALS(inputEditor.GetLineHeight(), 24.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliInputEditorLineHeightMode(void)
+{
+  UiTestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  DALI_TEST_CHECK(inputEditor);
+
+  inputEditor.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+  DALI_TEST_EQUALS(inputEditor.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+
+  inputEditor.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
+  DALI_TEST_EQUALS(inputEditor.GetLineHeightMode(), Text::LineHeightMode::ABSOLUTE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -964,6 +996,8 @@ int UtcDaliInputEditorGetProperty(void)
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_HORIZONTAL_ALIGNMENT) == InputEditor::Property::HORIZONTAL_ALIGNMENT);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_VERTICAL_ALIGNMENT) == InputEditor::Property::VERTICAL_ALIGNMENT);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_OVERFLOW_MODE) == InputEditor::Property::OVERFLOW_MODE);
+  DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_LINE_HEIGHT) == InputEditor::Property::LINE_HEIGHT);
+  DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_LINE_HEIGHT_MODE) == InputEditor::Property::LINE_HEIGHT_MODE);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_PLACEHOLDER) == InputEditor::Property::PLACEHOLDER);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_PLACEHOLDER_COLOR) == InputEditor::Property::PLACEHOLDER_COLOR);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_SHOW_PLACEHOLDER_ON_FOCUS) == InputEditor::Property::SHOW_PLACEHOLDER_ON_FOCUS);
@@ -1057,6 +1091,17 @@ int UtcDaliInputEditorSetProperty(void)
 
   inputEditor.SetProperty(InputEditor::Property::OVERFLOW_MODE, "CLIP");
   DALI_TEST_EQUALS(inputEditor.GetProperty<Text::OverflowMode>(InputEditor::Property::OVERFLOW_MODE), Text::OverflowMode::CLIP, TEST_LOCATION);
+
+  // LINE_HEIGHT
+  inputEditor.SetProperty(InputEditor::Property::LINE_HEIGHT, 1.5f);
+  DALI_TEST_EQUALS(inputEditor.GetProperty<float>(InputEditor::Property::LINE_HEIGHT), 1.5f, TEST_LOCATION);
+
+  // LINE_HEIGHT_MODE
+  inputEditor.SetProperty(InputEditor::Property::LINE_HEIGHT_MODE, Text::LineHeightMode::ABSOLUTE);
+  DALI_TEST_EQUALS(inputEditor.GetProperty<Text::LineHeightMode>(InputEditor::Property::LINE_HEIGHT_MODE), Text::LineHeightMode::ABSOLUTE, TEST_LOCATION);
+
+  inputEditor.SetProperty(InputEditor::Property::LINE_HEIGHT_MODE, "RELATIVE");
+  DALI_TEST_EQUALS(inputEditor.GetProperty<Text::LineHeightMode>(InputEditor::Property::LINE_HEIGHT_MODE), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
 
   // PLACEHOLDER
   inputEditor.SetProperty(InputEditor::Property::PLACEHOLDER, "Enter text");

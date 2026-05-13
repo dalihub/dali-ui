@@ -91,6 +91,20 @@ void InputEditorImpl::PropertyHandler::SetProperty(Ui::View view, Property::Inde
       }
       break;
     }
+    case Text::InputEditorPropertyIndex::LINE_HEIGHT:
+    {
+      impl.SetLineHeight(value.Get<float>());
+      break;
+    }
+    case Text::InputEditorPropertyIndex::LINE_HEIGHT_MODE:
+    {
+      Text::LineHeightMode mode(static_cast<Text::LineHeightMode>(-1));
+      if(Text::GetLineHeightModeEnumeration(value, mode))
+      {
+        impl.SetLineHeightMode(mode);
+      }
+      break;
+    }
     case Text::InputEditorPropertyIndex::PLACEHOLDER:
     {
       impl.SetPlaceholder(value.Get<Dali::String>());
@@ -349,6 +363,16 @@ Property::Value InputEditorImpl::PropertyHandler::GetProperty(Ui::View view, Pro
     case Text::InputEditorPropertyIndex::OVERFLOW_MODE:
     {
       value = impl.GetOverflowMode();
+      break;
+    }
+    case Text::InputEditorPropertyIndex::LINE_HEIGHT:
+    {
+      value = impl.GetLineHeight();
+      break;
+    }
+    case Text::InputEditorPropertyIndex::LINE_HEIGHT_MODE:
+    {
+      value = impl.GetLineHeightMode();
       break;
     }
     case Text::InputEditorPropertyIndex::PLACEHOLDER:

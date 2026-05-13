@@ -95,6 +95,8 @@ private:
       .SetBackgroundColor(UiColor(0xFFFFFF))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetPadding(Extents(12, 12, 12, 12))
+      .SetLineHeight(50)
+      .SetLineHeightMode(Text::LineHeightMode::ABSOLUTE)
       .SetFocusable(true);
 
     // Set text handle images
@@ -176,6 +178,11 @@ private:
     Label btnLineWrapMode = CreateButton("Line Wrap Mode", 0x2980B9);
     View lineWrapRow = CreateButtonRow({btnLineWrapMode});
 
+    // Line height buttons
+    Label btnLineHeight = CreateButton("Line Height", 0x8E44AD);
+    Label btnLineHeightMode = CreateButton("LineHeightMode", 0x16A085);
+    View lineHeightRow = CreateButtonRow({btnLineHeight, btnLineHeightMode});
+
     // Info button
     Label btnInfo = CreateButton("Print Info (log)", 0x34495E);
     View infoRow = CreateButtonRow({btnInfo});
@@ -213,6 +220,8 @@ private:
         textBgRow,
         // Line wrap mode
         lineWrapRow,
+        // Line height
+        lineHeightRow,
         infoRow,
       });
 
@@ -264,6 +273,10 @@ private:
 
     // Connect button touch signals - Line wrap mode
     btnLineWrapMode.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineWrapModeTouched);
+
+    // Connect button touch signals - Line height
+    btnLineHeight.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineHeightTouched);
+    btnLineHeightMode.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineHeightModeTouched);
 
     btnInfo.TouchedSignal().Connect(this, &InputEditorController::OnButtonInfoTouched);
 
@@ -617,6 +630,55 @@ private:
         newMode = Text::LineWrapMode::WORD;
       }
       mInputEditor.SetLineWrapMode(newMode);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonLineHeightTouched(Actor, TouchEvent touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      float lineHeight = mInputEditor.GetLineHeight();
+      float newLineHeight;
+      // Cycle through: 1.0 -> 1.5 -> 2.0 -> -1.0 (auto) -> 1.0
+      if(lineHeight < 1.2f)
+      {
+        newLineHeight = 1.5f;
+      }
+      else if(lineHeight < 1.7f)
+      {
+        newLineHeight = 2.0f;
+      }
+      else if(lineHeight < 0.0f)
+      {
+        newLineHeight = 1.0f;
+      }
+      else
+      {
+        newLineHeight = -1.0f; // auto
+      }
+      mInputEditor.SetLineHeight(newLineHeight);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonLineHeightModeTouched(Actor, TouchEvent touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      Text::LineHeightMode mode = mInputEditor.GetLineHeightMode();
+      Text::LineHeightMode newMode;
+      if(mode == Text::LineHeightMode::RELATIVE)
+      {
+        newMode = Text::LineHeightMode::ABSOLUTE;
+      }
+      else
+      {
+        newMode = Text::LineHeightMode::RELATIVE;
+      }
+      mInputEditor.SetLineHeightMode(newMode);
       UpdateStatus();
     }
     return true;
