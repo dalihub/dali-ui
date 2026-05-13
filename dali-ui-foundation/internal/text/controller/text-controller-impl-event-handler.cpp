@@ -981,6 +981,14 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
   EventData&    eventData = *impl.mEventData;
   DecoratorPtr& decorator = eventData.mDecorator;
 
+  // Update decorator positions with the scroll delta.
+  // This ensures cursor, handles, and highlight move with the scrolled content.
+  const Vector2 scrollDelta = scrollPosition - currentScrollPosition;
+  if(Vector2::ZERO != scrollDelta)
+  {
+    decorator->UpdatePositions(scrollDelta);
+  }
+
   bool endOfScroll = false;
   if(Vector2::ZERO == (currentScrollPosition - scrollPosition))
   {
