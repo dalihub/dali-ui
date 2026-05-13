@@ -46,12 +46,12 @@ const Internal::ViewDataImpl& GetViewImplData(const ViewImpl& viewImpl)
 namespace IntegrationView
 {
 
-void SetTrait(ViewImpl& viewImpl, TraitId id, Dali::BaseHandle handle)
+void SetTrait(ViewImpl& viewImpl, TraitId id, IntrusivePtr<TraitObject> object)
 {
-  GetViewImplData(viewImpl).SetTrait(id, handle);
+  GetViewImplData(viewImpl).SetTrait(id, std::move(object));
 }
 
-Dali::BaseHandle GetTrait(const ViewImpl& viewImpl, TraitId id)
+IntrusivePtr<TraitObject> GetTrait(const ViewImpl& viewImpl, TraitId id)
 {
   return GetViewImplData(viewImpl).GetTrait(id);
 }

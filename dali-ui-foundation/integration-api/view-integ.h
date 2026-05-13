@@ -20,7 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/common/dali-vector.h>
-#include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -97,38 +98,23 @@ DALI_UI_API void AllowToAddActorToChildEnd(Ui::View view);
 /**
  * @brief Sets trait data on a View.
  *
- * If the stored object implements TraitInterface, lifecycle callbacks
- * (OnBeforeAttached, OnAttached, OnDetached, OnViewDestroying) are invoked.
- * Otherwise the object is stored without callbacks.
+ * Lifecycle callbacks are invoked automatically as the object is attached to
+ * or detached from the View.
  *
  * @param[in] viewImpl The view implementation to attach to
  * @param[in] id The key to identify the trait
- * @param[in] handle The object to store
+ * @param[in] object The object to store
  */
-DALI_UI_API void SetTrait(ViewImpl& viewImpl, TraitId id, Dali::BaseHandle handle);
+DALI_UI_API void SetTrait(ViewImpl& viewImpl, TraitId id, IntrusivePtr<TraitObject> object);
 
 /**
  * @brief Gets trait data from a View.
  *
  * @param[in] viewImpl The view implementation to query
  * @param[in] id The key to identify the trait
- * @return The stored handle, or an empty handle if not found
+ * @return The stored object, or nullptr if not found
  */
-DALI_UI_API Dali::BaseHandle GetTrait(const ViewImpl& viewImpl, TraitId id);
-
-/**
- * @brief Gets trait data from a View and DownCasts to the specified handle type.
- *
- * @tparam HandleType A handle class that provides a static DownCast(BaseHandle) method
- * @param[in] viewImpl The view implementation to query
- * @param[in] id The key to identify the trait
- * @return The DownCast handle, or an empty handle if not found or cast fails
- */
-template<typename HandleType>
-HandleType GetTrait(const ViewImpl& viewImpl, TraitId id)
-{
-  return HandleType::DownCast(GetTrait(viewImpl, id));
-}
+DALI_UI_API IntrusivePtr<TraitObject> GetTrait(const ViewImpl& viewImpl, TraitId id);
 
 /**
  * @brief Removes trait data from a View.

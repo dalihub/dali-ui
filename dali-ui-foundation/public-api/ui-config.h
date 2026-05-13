@@ -27,7 +27,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/key-click-policy.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
-#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
 {
@@ -543,22 +543,6 @@ public: // Properties
    * @return True if asynchronous rendering is enabled for Label by default
    */
   bool IsLabelAsyncRendering() const;
-
-  /**
-   * @brief Sets the default interaction effect applied to views when AsInteractive() is called.
-   *
-   * @pre The config must not be frozen.
-   * @param[in] effect A Trait implementing InteractionEffectInterface, or Trait{} to disable the default
-   * @return Reference to this for method chaining
-   */
-  UiConfig& SetDefaultInteractionEffect(Trait effect);
-
-  /**
-   * @brief Returns the default interaction effect.
-   *
-   * @return The default interaction effect handle, or an uninitialized Trait if none is set
-   */
-  Trait GetDefaultInteractionEffect() const;
 
   // @CHAIN_END
 

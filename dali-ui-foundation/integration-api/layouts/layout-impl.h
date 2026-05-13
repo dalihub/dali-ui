@@ -30,7 +30,7 @@ class LayoutManager;
 
 namespace Internal
 {
-class LayoutManagerTraitImpl;
+class LayoutManagerObject;
 } // namespace Internal
 
 namespace Integration
@@ -43,7 +43,7 @@ using LayoutImplPtr = IntrusivePtr<LayoutImpl>;
  * @brief This is the internal implementation class for Layout.
  *
  * Layout extends View with a LayoutManager that defines the layout algorithm.
- * The LayoutManager is stored as a Trait (ReservedTraitId::LAYOUT_MANAGER),
+ * The LayoutManager is stored in a trait slot (ReservedTraitId::LAYOUT_MANAGER),
  * so there is no per-instance member variable overhead.
  *
  * @see LayoutManager for the layout algorithm interface
@@ -60,7 +60,7 @@ public:
 
 public: // LayoutManager API
   /**
-   * @brief Gets the layout manager from the LayoutManager trait.
+   * @brief Gets the layout manager from the LayoutManager object.
    *
    * @return Pointer to the layout manager, or nullptr if not set
    */
@@ -105,7 +105,7 @@ protected:
   LayoutImpl();
 
   /**
-   * @brief Attaches a LayoutManager as a trait to this Layout.
+   * @brief Stores a LayoutManager object on this Layout.
    *
    * Must be called in OnInitialize() of derived classes, not in constructors
    * (Self() is not available during construction).
@@ -115,8 +115,6 @@ protected:
   void SetLayoutManager(LayoutManager* layoutManager);
 
 private:
-  Internal::LayoutManagerTraitImpl* GetLayoutManagerTrait() const;
-
   // Not copyable or movable
   LayoutImpl(const LayoutImpl&)            = delete;
   LayoutImpl(LayoutImpl&&)                 = delete;

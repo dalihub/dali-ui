@@ -103,10 +103,88 @@
   */ \
   ChildClass& EnableFocusClearOnEscape(bool enable) { UiConfig::EnableFocusClearOnEscape(enable); return *this; } \
   /** \
-  * @brief Sets the default interaction effect applied to views when AsInteractive() is called. \
+  * @brief Sets whether to always show the keyboard focus indicator. \
   * \
   * @pre The config must not be frozen. \
-  * @param[in] effect A Trait implementing InteractionEffectInterface, or Trait{} to disable the default \
+  * @param[in] alwaysShow True to always show focus indicator \
   * @return Reference to this for method chaining \
   */ \
-  ChildClass& SetDefaultInteractionEffect(Trait effect) { UiConfig::SetDefaultInteractionEffect(effect); return *this; }
+  ChildClass& SetAlwaysShowFocus(bool alwaysShow) { UiConfig::SetAlwaysShowFocus(alwaysShow); return *this; } \
+  /** \
+  * @brief Sets the default font point-size for text elements. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] fontSize The default font size in points \
+  */ \
+  ChildClass& SetDefaultFontSize(float fontSize) { UiConfig::SetDefaultFontSize(fontSize); return *this; } \
+  /** \
+  * @brief Sets the default text color for text elements. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] color The default text color \
+  */ \
+  ChildClass& SetDefaultTextColor(const Vector4& color) { UiConfig::SetDefaultTextColor(color); return *this; } \
+  /** \
+  * @brief Sets the default placeholder text color. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] color The default placeholder text color. \
+  */ \
+  ChildClass& SetDefaultPlaceholderTextColor(const Vector4& color) { UiConfig::SetDefaultPlaceholderTextColor(color); return *this; } \
+  /** \
+  * @brief Sets whether the placeholder text is shown when the control has focus. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] enabled True to show the placeholder text when focused, false otherwise. \
+  */ \
+  ChildClass& SetShowPlaceholderTextOnFocus(bool enabled) { UiConfig::SetShowPlaceholderTextOnFocus(enabled); return *this; } \
+  /** \
+  * @brief Sets the marquee speed in pixels per second. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] speed The marquee speed in pixels per second \
+  */ \
+  ChildClass& SetMarqueeSpeed(int speed) { UiConfig::SetMarqueeSpeed(speed); return *this; } \
+  /** \
+  * @brief Sets the number of complete loops for marquee. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] loopCount The number of loops \
+  */ \
+  ChildClass& SetMarqueeLoopCount(int loopCount) { UiConfig::SetMarqueeLoopCount(loopCount); return *this; } \
+  /** \
+  * @brief Sets the amount of time to delay the start of marquee and further loops. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] delay The delay time in seconds \
+  */ \
+  ChildClass& SetMarqueeLoopDelay(float delay) { UiConfig::SetMarqueeLoopDelay(delay); return *this; } \
+  /** \
+  * @brief Sets the gap before marquee wraps. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] gap The gap in pixels \
+  */ \
+  ChildClass& SetMarqueeGap(float gap) { UiConfig::SetMarqueeGap(gap); return *this; } \
+  /** \
+  * @brief Sets the marquee stop behaviour. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] stopMode The marquee stop mode \
+  */ \
+  ChildClass& SetMarqueeStopMode(Text::MarqueeStopMode stopMode) { UiConfig::SetMarqueeStopMode(stopMode); return *this; } \
+  /** \
+  * @brief Sets the marquee orientation. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] orientation The marquee orientation \
+  */ \
+  ChildClass& SetMarqueeOrientation(Text::MarqueeOrientation orientation) { UiConfig::SetMarqueeOrientation(orientation); return *this; } \
+  /** \
+  * @brief Sets whether Label uses asynchronous text rendering by default. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] asyncRendering True to enable asynchronous rendering for Label by default, \
+  * false to use synchronous rendering. \
+  */ \
+  ChildClass& SetLabelAsyncRendering(bool asyncRendering) { UiConfig::SetLabelAsyncRendering(asyncRendering); return *this; }

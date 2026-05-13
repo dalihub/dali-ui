@@ -32,8 +32,7 @@ namespace Dali::Ui::Integration
 {
 
 InteractiveTraitImpl::InteractiveTraitImpl()
-: TraitImpl(),
-  mTapGestureDetector(TapGestureDetector::New()),
+: mTapGestureDetector(TapGestureDetector::New()),
   mPressedChangedSignal(),
   mPseudoDisabledChangedSignal(),
   mKeyClickPolicy(UiConfigManager::Get().GetConfig().GetKeyClickPolicy()),
@@ -250,14 +249,11 @@ View InteractiveTraitImpl::GetOwner() const
   return mOwner.GetHandle();
 }
 
-void InteractiveTraitImpl::OnBeforeAttached(TraitId id, View& view)
+void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "The trait can not be attached multiple target views");
   mOwner = view;
-}
 
-void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
-{
   view.TouchedSignal().Connect(this, &InteractiveTraitImpl::OnTouchInternal);
   mTapGestureDetector.Attach(view);
   view.SetFocusable(true);
@@ -269,7 +265,7 @@ void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
   }
 }
 
-void InteractiveTraitImpl::OnDetached(TraitId id, View& view)
+void InteractiveTraitImpl::OnDetaching(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(false && "The trait can not be detached once it attached to a view");
 }

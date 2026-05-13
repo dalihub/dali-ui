@@ -680,12 +680,6 @@ bool View::IsSelectable() const
   return GetImpl(*this).IsSelectable();
 }
 
-View& View::SetInteractionEffect(Trait effect)
-{
-  GetImpl(*this).SetInteractionEffect(effect);
-  return *this;
-}
-
 BaseHandle View::GetLayoutParamsInternal(LayoutParamsType type) const
 {
   return GetImpl(*this).GetLayoutParams(type);

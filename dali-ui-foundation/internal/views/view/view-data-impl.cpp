@@ -22,8 +22,8 @@
 #include "visual-constraint-functions.h"
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-interface.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/devel-api/actors/actor-devel.h>
@@ -49,6 +49,7 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
@@ -341,11 +342,9 @@ TypeAction registerAction9(typeRegistration, ACTION_ACCESSIBILITY_READING_RESUME
 
 DALI_TYPE_REGISTRATION_END()
 
-// === Trait lifecycle helpers ===
-
-Integration::TraitInterface* GetTraitInterface(Dali::BaseHandle& handle)
+Integration::InteractiveTraitImpl* AsInteractiveTraitImpl(TraitObject* object)
 {
-  return handle ? dynamic_cast<Integration::TraitInterface*>(&handle.GetBaseObject()) : nullptr;
+  return object ? dynamic_cast<Integration::InteractiveTraitImpl*>(object) : nullptr;
 }
 
 } // unnamed namespace
@@ -481,15 +480,16 @@ void ViewDataImpl::NotifyTraitsViewDestroying()
 {
   for(auto& iter : mTraits)
   {
-    auto* iface = GetTraitInterface(iter.second);
-    if(iface) iface->OnViewDestroying(&mViewImpl);
+    if(iter.second)
+    {
+      iter.second->OnViewDestroying(&mViewImpl);
+    }
   }
 }
 
-void ViewDataImpl::SetTrait(TraitId id, Dali::BaseHandle handle)
+void ViewDataImpl::SetTrait(TraitId id, IntrusivePtr<TraitObject> object)
 {
-  auto*    iface = GetTraitInterface(handle);
-  Ui::View self  = Ui::View::DownCast(mViewImpl.Self());
+  Ui::View self = Ui::View::DownCast(mViewImpl.Self());
 
   if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
   {
@@ -498,9 +498,9 @@ void ViewDataImpl::SetTrait(TraitId id, Dali::BaseHandle handle)
       DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be replaced once set");
       return;
     }
-    auto* interactive = dynamic_cast<Ui::InteractiveTraitInterface*>(&handle.GetBaseObject());
+    auto* interactive = AsInteractiveTraitImpl(object.Get());
     DALI_ASSERT_ALWAYS(interactive &&
-                       "Trait for ReservedTraitId::INTERACTION_TRAIT must implement InteractiveTraitInterface");
+                       "Trait for ReservedTraitId::INTERACTION_TRAIT must be an InteractiveTraitImpl");
     mInteractiveTrait = interactive;
   }
 
@@ -508,25 +508,31 @@ void ViewDataImpl::SetTrait(TraitId id, Dali::BaseHandle handle)
   {
     if(entry.first == id)
     {
-      if(entry.second == handle)
+      if(entry.second == object)
       {
         return;
       }
-      auto* oldIface = GetTraitInterface(entry.second);
-      if(oldIface) oldIface->OnDetached(id, self);
-      if(iface) iface->OnBeforeAttached(id, self);
-      entry.second = handle;
-      if(iface) iface->OnAttached(id, self);
+      if(entry.second)
+      {
+        entry.second->OnDetaching(id, self);
+      }
+      entry.second = object;
+      if(entry.second)
+      {
+        entry.second->OnAttached(id, self);
+      }
       return;
     }
   }
 
-  if(iface) iface->OnBeforeAttached(id, self);
-  mTraits.emplace_back(id, handle);
-  if(iface) iface->OnAttached(id, self);
+  mTraits.emplace_back(id, object);
+  if(mTraits.back().second)
+  {
+    mTraits.back().second->OnAttached(id, self);
+  }
 }
 
-Dali::BaseHandle ViewDataImpl::GetTrait(TraitId id) const
+IntrusivePtr<TraitObject> ViewDataImpl::GetTrait(TraitId id) const
 {
   for(auto& entry : mTraits)
   {
@@ -535,7 +541,7 @@ Dali::BaseHandle ViewDataImpl::GetTrait(TraitId id) const
       return entry.second;
     }
   }
-  return Dali::BaseHandle();
+  return IntrusivePtr<TraitObject>();
 }
 
 bool ViewDataImpl::RemoveTrait(TraitId id)
@@ -550,9 +556,11 @@ bool ViewDataImpl::RemoveTrait(TraitId id)
   {
     if(it->first == id)
     {
-      Ui::View self  = Ui::View::DownCast(mViewImpl.Self());
-      auto*    iface = GetTraitInterface(it->second);
-      if(iface) iface->OnDetached(id, self);
+      Ui::View self = Ui::View::DownCast(mViewImpl.Self());
+      if(it->second)
+      {
+        it->second->OnDetaching(id, self);
+      }
       mTraits.erase(it);
       return true;
     }
@@ -636,41 +644,41 @@ void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
 
 void ViewDataImpl::SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
 {
-  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+  auto* existing = dynamic_cast<StateHandlerTrait*>(GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT).Get());
 
   if(!existing)
   {
-    StateHandlerTrait stateHandlerTrait = StateHandlerTrait::New();
+    IntrusivePtr<TraitObject> stateHandlerTrait(new StateHandlerTrait());
+    existing = static_cast<StateHandlerTrait*>(stateHandlerTrait.Get());
     SetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT, stateHandlerTrait);
-    existing = stateHandlerTrait;
   }
 
-  static_cast<StateHandlerTrait&>(existing).GetImpl().Set(id.CStr(), tracker, callback);
+  existing->Set(id.CStr(), tracker, callback);
 }
 
 bool ViewDataImpl::UnsetStateHandler(const Dali::String& id)
 {
-  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+  auto* existing = dynamic_cast<StateHandlerTrait*>(GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT).Get());
   if(!existing)
   {
     return false;
   }
 
-  return static_cast<StateHandlerTrait&>(existing).GetImpl().Unset(id.CStr());
+  return existing->Unset(id.CStr());
 }
 
 bool ViewDataImpl::UnsetStateHandlerWhenNotProcessing(const Dali::String& id)
 {
-  Dali::BaseHandle existing = GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT);
+  auto* existing = dynamic_cast<StateHandlerTrait*>(GetTrait(Integration::ReservedTraitId::STATE_HANDLER_TRAIT).Get());
   if(!existing)
   {
     return false;
   }
 
-  return static_cast<StateHandlerTrait&>(existing).GetImpl().UnsetWhenNotProcessing(id.CStr());
+  return existing->UnsetWhenNotProcessing(id.CStr());
 }
 
-Ui::InteractiveTraitInterface* ViewDataImpl::GetInteractiveTrait() const
+Integration::InteractiveTraitImpl* ViewDataImpl::GetInteractiveTrait() const
 {
   return mInteractiveTrait;
 }

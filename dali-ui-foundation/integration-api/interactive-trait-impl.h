@@ -28,9 +28,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-event-receiver-interface.h>
-#include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
-#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
 {
@@ -45,7 +44,7 @@ namespace Integration
 /**
  * @brief Internal implementation of Interaction trait.
  */
-class DALI_UI_API InteractiveTraitImpl : public TraitImpl, public ConnectionTracker, public InteractiveTraitInterface
+class DALI_UI_API InteractiveTraitImpl : public TraitObject, public ConnectionTracker
 {
 public:
   /**
@@ -121,29 +120,31 @@ public: // API
 
 public: // InteractiveTrait
   /**
-   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnFocusedChanged
+   * @brief Called when the view gains or loses key input focus.
    */
-  void OnFocusedChanged(View view, bool focused) override;
+  virtual void OnFocusedChanged(View view, bool focused);
 
   /**
-   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnKeyEvent
+   * @brief Called after a key-event is received by the actor that has had its focus set.
+   *
+   * @return True if the event should be consumed
    */
-  bool OnKeyEvent(View view, const KeyEvent& event) override;
+  virtual bool OnKeyEvent(View view, const KeyEvent& event);
 
   /**
-   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnEnabledChanged
+   * @brief Called when the view becomes enabled or disabled.
    */
-  void OnEnabledChanged(View view, bool enabled) override;
+  virtual void OnEnabledChanged(View view, bool enabled);
 
   /**
-   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnSceneConnection
+   * @brief Called when the view is connected to a scene.
    */
-  void OnSceneConnection(View view) override;
+  virtual void OnSceneConnection(View view);
 
   /**
-   * @copydoc Dali::Ui::Integration::InteractiveTraitInterface::OnSceneDisconnection
+   * @brief Called when the view is disconnected from a scene.
    */
-  void OnSceneDisconnection(View view) override;
+  virtual void OnSceneDisconnection(View view);
 
 protected:
   /**
@@ -157,22 +158,17 @@ protected:
   View GetOwner() const;
 
   /**
-   * @copydoc Dali::Ui::TraitImpl::OnBeforeAttached
-   */
-  void OnBeforeAttached(TraitId id, View& view) override;
-
-  /**
-   * @copydoc Dali::Ui::TraitImpl::OnAttached
+   * @copydoc Dali::Ui::TraitObject::OnAttached
    */
   void OnAttached(TraitId id, View& view) override;
 
   /**
-   * @copydoc Dali::Ui::TraitImpl::OnDetached
+   * @copydoc Dali::Ui::TraitObject::OnDetaching
    */
-  void OnDetached(TraitId id, View& view) override;
+  void OnDetaching(TraitId id, View& view) override;
 
   /**
-   * @copydoc Dali::Ui::TraitImpl::OnViewDestroying
+   * @copydoc Dali::Ui::TraitObject::OnViewDestroying
    */
   void OnViewDestroying(ViewImpl* viewImpl) override;
 
@@ -242,14 +238,12 @@ private:
 
 inline DALI_UI_API Integration::InteractiveTraitImpl& GetImpl(InteractiveTrait& obj)
 {
-  BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::InteractiveTraitImpl&>(handle);
+  return static_cast<Integration::InteractiveTraitImpl&>(obj.GetBaseObject());
 }
 
 inline DALI_UI_API const Integration::InteractiveTraitImpl& GetImpl(const InteractiveTrait& obj)
 {
-  const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::InteractiveTraitImpl&>(handle);
+  return static_cast<const Integration::InteractiveTraitImpl&>(obj.GetBaseObject());
 }
 
 } // namespace Ui

@@ -145,8 +145,9 @@ public:
    */
   static FlexLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
-    FlexLayoutParams params = IntegrationView::GetTrait<FlexLayoutParams>(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS);
-    return params ? static_cast<FlexLayoutParamsImpl*>(&params.GetBaseObject()) : nullptr;
+    IntrusivePtr<TraitObject> object = IntegrationView::GetTrait(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS);
+    DALI_ASSERT_DEBUG(!object || (dynamic_cast<FlexLayoutParamsImpl*>(object.Get()) && "FLEX_LAYOUT_PARAMS trait must be a FlexLayoutParamsImpl"));
+    return object ? static_cast<FlexLayoutParamsImpl*>(object.Get()) : nullptr;
   }
 
   /**
@@ -162,7 +163,7 @@ public:
       return *existing;
     }
     FlexLayoutParams params = FlexLayoutParams::New();
-    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, params);
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, IntrusivePtr<TraitObject>(&static_cast<TraitObject&>(params.GetBaseObject())));
     return static_cast<FlexLayoutParamsImpl&>(params.GetBaseObject());
   }
 

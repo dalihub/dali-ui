@@ -28,10 +28,20 @@
 
 namespace Dali::Ui::Integration
 {
+namespace
+{
+
+InteractiveTrait GetInteractiveTrait(ViewImpl& viewImpl)
+{
+  IntrusivePtr<TraitObject> object     = IntegrationView::GetTrait(viewImpl, ReservedTraitId::INTERACTION_TRAIT);
+  auto*                     baseObject = dynamic_cast<BaseObject*>(object.Get());
+  return baseObject ? InteractiveTrait::DownCast(BaseHandle(baseObject)) : InteractiveTrait();
+}
+
+} // unnamed namespace
 
 SelectableTraitImpl::SelectableTraitImpl()
-: TraitImpl(),
-  mSelectionChangedSignal(),
+: mSelectionChangedSignal(),
   mSelected(false),
   mToggleByClickEnabled(true),
   mAttached(false)
@@ -114,14 +124,11 @@ View SelectableTraitImpl::GetOwner() const
   return mOwner.GetHandle();
 }
 
-void SelectableTraitImpl::OnBeforeAttached(TraitId id, View& view)
+void SelectableTraitImpl::OnAttached(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "The trait can not be attached multiple target views");
   mOwner = view;
-}
 
-void SelectableTraitImpl::OnAttached(TraitId id, View& view)
-{
   mAttached = true;
 
   if(mToggleByClickEnabled)
@@ -130,7 +137,7 @@ void SelectableTraitImpl::OnAttached(TraitId id, View& view)
   }
 }
 
-void SelectableTraitImpl::OnDetached(TraitId id, View& view)
+void SelectableTraitImpl::OnDetaching(TraitId id, View& view)
 {
   DisconnectClickable();
   mAttached = false;
@@ -170,7 +177,7 @@ void SelectableTraitImpl::DisconnectClickable()
     return;
   }
 
-  InteractiveTrait clickable = IntegrationView::GetTrait<InteractiveTrait>(GetImpl(owner), ReservedTraitId::INTERACTION_TRAIT);
+  InteractiveTrait clickable = GetInteractiveTrait(GetImpl(owner));
   if(clickable)
   {
     clickable.ClickedSignal().Disconnect(this, &SelectableTraitImpl::OnClickedForToggle);

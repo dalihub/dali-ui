@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/key-click-policy.h>
-#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
 {
@@ -49,19 +49,19 @@ class InteractiveTraitImpl;
  * functionality. It can be attached to any View to make it interactive.
  *
  */
-class DALI_UI_API InteractiveTrait : public Trait
+class DALI_UI_API InteractiveTrait : public BaseHandle
 {
 public:
   // Typedefs
 
 public: // Creation & Destruction
   /**
-   * @brief Creates an uninitialized Trait handle.
+   * @brief Creates an uninitialized InteractiveTrait handle.
    */
   InteractiveTrait();
 
   /**
-   * @brief Creates an initialized Trait.
+   * @brief Creates an initialized InteractiveTrait.
    *
    * @return A handle to a newly allocated Dali resource
    */
@@ -73,7 +73,7 @@ public: // Creation & Destruction
    * If the handle refers to a InteractiveTrait (e.g. a trait from GetTrait),
    * the downcast produces a valid handle. Otherwise the returned handle is uninitialized.
    *
-   * @param[in] handle Handle to an object (e.g. Trait from View's interaction trait)
+   * @param[in] handle Handle to an object stored in View's interaction trait slot
    * @return A handle to InteractiveTrait or an uninitialized handle
    */
   static InteractiveTrait DownCast(BaseHandle handle);

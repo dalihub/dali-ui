@@ -17,16 +17,14 @@
  *
  */
 
-// EXTERNAL INCLUDES
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/connection-tracker.h>
 #include <dali/public-api/signals/signal-slot-observers.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/state-event.h>
-#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 
 #include <algorithm>
@@ -42,58 +40,21 @@ namespace Ui
 namespace Internal
 {
 
-class StateHandlerTraitImpl;
-
-// ============================================================================
-// StateHandlerTrait — handle
+// StateHandlerTrait
 // ============================================================================
 
 /**
- * @brief Internal handle for the named state-change handler trait.
- *
- * This is an internal-only handle used to wrap StateHandlerTraitImpl
- * as a Trait so it can be stored in ViewImpl's trait slot.
- */
-class StateHandlerTrait : public Trait
-{
-public:
-  /**
-   * @brief Creates an uninitialized handle.
-   */
-  StateHandlerTrait() = default;
-
-  /**
-   * @brief Creates a new StateHandlerTrait.
-   *
-   * @return A newly allocated StateHandlerTrait
-   */
-  static StateHandlerTrait New();
-
-  /**
-   * @brief Returns the underlying implementation.
-   */
-  StateHandlerTraitImpl& GetImpl();
-
-private:
-  explicit StateHandlerTrait(StateHandlerTraitImpl* impl);
-};
-
-// ============================================================================
-// StateHandlerTraitImpl — implementation
-// ============================================================================
-
-/**
- * @brief Internal implementation of the named state-change handler trait.
+ * @brief Internal lifecycle trait for named state-change handlers.
  *
  * Manages a set of named callbacks (identified by string keys) that are
  * invoked when the owner View's ViewState changes. Participates in the DALi
  * connection tracking protocol via SlotObserver so handlers are automatically
  * removed when their associated ConnectionTrackerInterface is destroyed.
  */
-class StateHandlerTraitImpl : public Integration::TraitImpl, public SlotObserver, public ConnectionTracker
+class StateHandlerTrait : public TraitObject, public SlotObserver, public ConnectionTracker
 {
 public:
-  StateHandlerTraitImpl();
+  StateHandlerTrait();
 
   /**
    * @brief Registers a named state-change handler.
@@ -141,11 +102,10 @@ public: // SlotObserver
   void SlotDisconnected(CallbackBase* callback) override;
 
 protected:
-  ~StateHandlerTraitImpl() override;
+  ~StateHandlerTrait() override;
 
-  void OnBeforeAttached(TraitId id, View& view) override;
   void OnAttached(TraitId id, View& view) override;
-  void OnDetached(TraitId id, View& view) override;
+  void OnDetaching(TraitId id, View& view) override;
   void OnViewDestroying(ViewImpl* viewImpl) override;
 
 private:

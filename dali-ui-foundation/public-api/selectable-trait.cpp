@@ -39,7 +39,7 @@ SelectableTrait SelectableTrait::New()
 }
 
 SelectableTrait::SelectableTrait(const SelectableTrait& trait)
-: Trait(trait)
+: BaseHandle(trait)
 {
 }
 
@@ -48,7 +48,7 @@ SelectableTrait::~SelectableTrait()
 }
 
 SelectableTrait::SelectableTrait(Integration::SelectableTraitImpl* implementation)
-: Trait(implementation)
+: BaseHandle(implementation)
 {
 }
 

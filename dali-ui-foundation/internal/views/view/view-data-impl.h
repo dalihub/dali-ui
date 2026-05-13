@@ -29,7 +29,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
-#include <dali-ui-foundation/integration-api/interactive-trait-interface.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
@@ -50,6 +49,10 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Integration
+{
+class InteractiveTraitImpl;
+}
 namespace Internal
 {
 /// @brief Type-level animatable property index for effective UI scale.
@@ -123,26 +126,25 @@ public:
   /**
    * @brief Sets a trait data to the owning View.
    *
-   * If the stored object implements TraitInterface, lifecycle callbacks
-   * (OnBeforeAttached, OnAttached, OnDetached, OnViewDestroying) are invoked
-   * automatically. Otherwise the object is stored without callbacks.
+   * Lifecycle callbacks (OnAttached, OnDetaching, OnViewDestroying) are invoked
+   * automatically.
    *
    * @warning Do not store Actor-derived objects as trait data. Actors are owned by
    * the scene graph and have their own parent-child lifecycle. Storing them here
    * causes ownership conflicts and potential dangling references.
    *
    * @param[in] id The key to identify the trait
-   * @param[in] handle The object to store
+   * @param[in] object The object to store
    */
-  void SetTrait(TraitId id, Dali::BaseHandle handle);
+  void SetTrait(TraitId id, IntrusivePtr<TraitObject> object);
 
   /**
    * @brief Gets a trait data from the owning View.
    *
    * @param[in] id The key to identify the trait
-   * @return The stored handle, or an empty handle if not found
+   * @return The stored object, or nullptr if not found
    */
-  Dali::BaseHandle GetTrait(TraitId id) const;
+  IntrusivePtr<TraitObject> GetTrait(TraitId id) const;
 
   /**
    * @brief Removes a trait from the owning View.
@@ -219,7 +221,7 @@ public:
   /**
    * @brief Returns the interactive trait pointer (may be null).
    */
-  Ui::InteractiveTraitInterface* GetInteractiveTrait() const;
+  Integration::InteractiveTraitImpl* GetInteractiveTrait() const;
 
   /**
    * @brief Called when resources of view are ready.
@@ -587,8 +589,8 @@ public:
   bool                            mSkipChildrenUpdate;
 
   // Trait storage
-  std::vector<std::pair<TraitId, Dali::BaseHandle>> mTraits;
-  Ui::InteractiveTraitInterface*                    mInteractiveTrait;
+  std::vector<std::pair<TraitId, IntrusivePtr<TraitObject>>> mTraits;
+  Integration::InteractiveTraitImpl*                         mInteractiveTrait;
 
   std::unique_ptr<AccessibilityData>   mAccessibilityData;
   std::unique_ptr<VisualData>          mVisualData;

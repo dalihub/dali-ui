@@ -16,11 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/exclusive-trait-impl.h>
-
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-integ.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
 {
@@ -28,32 +24,21 @@ namespace Dali
 namespace Ui
 {
 
-namespace Integration
-{
+TraitObject::TraitObject() = default;
 
-ExclusiveTraitImpl::ExclusiveTraitImpl()
-: TraitImpl()
-{
-}
+TraitObject::~TraitObject() = default;
 
-ExclusiveTraitImpl::~ExclusiveTraitImpl()
+void TraitObject::OnAttached(TraitId /*id*/, View& /*view*/)
 {
 }
 
-void ExclusiveTraitImpl::OnBeforeAttached(TraitId id, View& view)
+void TraitObject::OnDetaching(TraitId /*id*/, View& /*view*/)
 {
-  auto oldOwner = mOwner.GetHandle();
-  DALI_ASSERT_DEBUG(oldOwner != view);
-
-  if(oldOwner)
-  {
-    IntegrationView::RemoveTrait(GetImpl(oldOwner), id);
-  }
-  mOwner = view;
 }
 
-} // namespace Integration
+void TraitObject::OnViewDestroying(ViewImpl* /*viewImpl*/)
+{
+}
 
 } // namespace Ui
-
 } // namespace Dali

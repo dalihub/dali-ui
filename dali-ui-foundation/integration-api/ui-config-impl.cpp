@@ -52,8 +52,7 @@ namespace Integration
 {
 
 UiConfigImpl::UiConfigImpl()
-: mDefaultInteractionEffect(Trait()),
-  mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
+: mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
   mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)),
   mDefaultPlaceholderTextColor(Vector4(0.8f, 0.8f, 0.8f, 0.8f)),
   mScalingFactor(1.0f),
@@ -357,17 +356,6 @@ void UiConfigImpl::SetLabelAsyncRendering(bool asyncRendering)
 bool UiConfigImpl::IsLabelAsyncRendering() const
 {
   return mLabelAsyncRendering;
-}
-
-void UiConfigImpl::SetDefaultInteractionEffect(Trait effect)
-{
-  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
-  mDefaultInteractionEffect = effect;
-}
-
-Trait UiConfigImpl::GetDefaultInteractionEffect() const
-{
-  return mDefaultInteractionEffect;
 }
 
 void UiConfigImpl::OnApplied()

@@ -169,8 +169,9 @@ public:
    */
   static GridLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
-    GridLayoutParams params = IntegrationView::GetTrait<GridLayoutParams>(viewImpl, Integration::ReservedTraitId::GRID_LAYOUT_PARAMS);
-    return params ? static_cast<GridLayoutParamsImpl*>(&params.GetBaseObject()) : nullptr;
+    IntrusivePtr<TraitObject> object = IntegrationView::GetTrait(viewImpl, Integration::ReservedTraitId::GRID_LAYOUT_PARAMS);
+    DALI_ASSERT_DEBUG(!object || (dynamic_cast<GridLayoutParamsImpl*>(object.Get()) && "GRID_LAYOUT_PARAMS trait must be a GridLayoutParamsImpl"));
+    return object ? static_cast<GridLayoutParamsImpl*>(object.Get()) : nullptr;
   }
 
   /**
@@ -186,7 +187,7 @@ public:
       return *existing;
     }
     GridLayoutParams params = GridLayoutParams::New();
-    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, params);
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, IntrusivePtr<TraitObject>(&static_cast<TraitObject&>(params.GetBaseObject())));
     return static_cast<GridLayoutParamsImpl&>(params.GetBaseObject());
   }
 

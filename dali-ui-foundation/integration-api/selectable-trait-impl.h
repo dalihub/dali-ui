@@ -23,9 +23,9 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
 {
@@ -42,10 +42,10 @@ namespace Integration
  *
  * SelectableTraitImpl manages the selected state of a View and optionally
  * toggles selection on click by listening to the owner View's InteractiveTrait.
- * Unlike InteractiveTraitImpl, this does not implement InteractiveTraitInterface and
- * uses a separate reserved trait slot (SELECTABLE_TRAIT).
+ * Unlike InteractiveTraitImpl, this uses a separate reserved trait slot
+ * (SELECTABLE_TRAIT).
  */
-class DALI_UI_API SelectableTraitImpl : public TraitImpl, public ConnectionTracker
+class DALI_UI_API SelectableTraitImpl : public TraitObject, public ConnectionTracker
 {
 public:
   /**
@@ -92,22 +92,17 @@ protected:
   View GetOwner() const;
 
   /**
-   * @copydoc Dali::Ui::TraitImpl::OnBeforeAttached
-   */
-  void OnBeforeAttached(TraitId id, View& view) override;
-
-  /**
-   * @copydoc Dali::Ui::TraitImpl::OnAttached
+   * @copydoc Dali::Ui::TraitObject::OnAttached
    */
   void OnAttached(TraitId id, View& view) override;
 
   /**
-   * @copydoc Dali::Ui::TraitImpl::OnDetached
+   * @copydoc Dali::Ui::TraitObject::OnDetaching
    */
-  void OnDetached(TraitId id, View& view) override;
+  void OnDetaching(TraitId id, View& view) override;
 
   /**
-   * @copydoc Dali::Ui::TraitImpl::OnViewDestroying
+   * @copydoc Dali::Ui::TraitObject::OnViewDestroying
    */
   void OnViewDestroying(ViewImpl* viewImpl) override;
 
@@ -141,14 +136,12 @@ private:
 
 inline DALI_UI_API Integration::SelectableTraitImpl& GetImpl(SelectableTrait& obj)
 {
-  BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::SelectableTraitImpl&>(handle);
+  return static_cast<Integration::SelectableTraitImpl&>(obj.GetBaseObject());
 }
 
 inline DALI_UI_API const Integration::SelectableTraitImpl& GetImpl(const SelectableTrait& obj)
 {
-  const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::SelectableTraitImpl&>(handle);
+  return static_cast<const Integration::SelectableTraitImpl&>(obj.GetBaseObject());
 }
 
 } // namespace Ui

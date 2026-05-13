@@ -97,8 +97,9 @@ public:
    */
   static StackLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
-    StackLayoutParams params = IntegrationView::GetTrait<StackLayoutParams>(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS);
-    return params ? static_cast<StackLayoutParamsImpl*>(&params.GetBaseObject()) : nullptr;
+    IntrusivePtr<TraitObject> object = IntegrationView::GetTrait(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS);
+    DALI_ASSERT_DEBUG(!object || (dynamic_cast<StackLayoutParamsImpl*>(object.Get()) && "STACK_LAYOUT_PARAMS trait must be a StackLayoutParamsImpl"));
+    return object ? static_cast<StackLayoutParamsImpl*>(object.Get()) : nullptr;
   }
 
   /**
@@ -114,7 +115,7 @@ public:
       return *existing;
     }
     StackLayoutParams params = StackLayoutParams::New();
-    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, params);
+    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, IntrusivePtr<TraitObject>(&static_cast<TraitObject&>(params.GetBaseObject())));
     return static_cast<StackLayoutParamsImpl&>(params.GetBaseObject());
   }
 

@@ -18,10 +18,8 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
-#include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
@@ -30,28 +28,31 @@ namespace Ui
 namespace Internal
 {
 
+// LayoutCallbacksObject
+// ============================================================================
+
 /**
- * @brief Base implementation class for all layout parameter traits.
+ * @brief Internal object that stores layout callback payloads.
  *
- * LayoutParamsImpl is a pure data container with no View dependency.
- * Concrete subclasses must implement GetTraitId().
- *
- * Use View::SetLayoutParams() to attach params to a View
- * (which also invalidates the View's measure cache).
+ * Stores measure/arrange callbacks as typed Callback objects.
  */
-class LayoutParamsImpl : public TraitObject
+class LayoutCallbacksObject : public TraitObject
 {
 public:
-  /**
-   * @brief Returns the ReservedTraitId for this layout params type.
-   *
-   * @return The TraitId for this layout params type
-   */
-  virtual TraitId GetTraitId() const = 0;
+  LayoutCallbacksObject();
+
+  void SetMeasureCallback(MeasureCallback callback);
+  void SetArrangeCallback(ArrangeCallback callback);
+
+  MeasureCallback* GetMeasureCallback();
+  ArrangeCallback* GetArrangeCallback();
 
 protected:
-  LayoutParamsImpl()           = default;
-  ~LayoutParamsImpl() override = default;
+  ~LayoutCallbacksObject() override;
+
+private:
+  MeasureCallback mOnMeasure;
+  ArrangeCallback mOnArrange;
 };
 
 } // namespace Internal

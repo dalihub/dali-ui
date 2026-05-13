@@ -30,7 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
-#include <dali-ui-foundation/internal/layouts/layout-manager-trait-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
 
 namespace Dali
 {
@@ -99,20 +99,17 @@ View LayoutImpl::OnFocusRequested()
 void LayoutImpl::SetLayoutManager(LayoutManager* layoutManager)
 {
   DALI_ASSERT_ALWAYS(!HasLayoutManager() && "LayoutManager already set. Cannot replace an existing LayoutManager.");
-  Internal::LayoutManagerTrait trait = Internal::LayoutManagerTrait::New(layoutManager);
-  IntegrationView::SetTrait(*this, ReservedTraitId::LAYOUT_MANAGER, trait);
-}
-
-Internal::LayoutManagerTraitImpl* LayoutImpl::GetLayoutManagerTrait() const
-{
-  Internal::LayoutManagerTrait trait = IntegrationView::GetTrait<Internal::LayoutManagerTrait>(const_cast<LayoutImpl&>(*this), ReservedTraitId::LAYOUT_MANAGER);
-  return trait ? &trait.GetImpl() : nullptr;
+  IntrusivePtr<TraitObject> object(new Internal::LayoutManagerObject(layoutManager));
+  IntegrationView::SetTrait(*this, ReservedTraitId::LAYOUT_MANAGER, object);
 }
 
 LayoutManager* LayoutImpl::GetLayoutManager() const
 {
-  Internal::LayoutManagerTraitImpl* managerTrait = GetLayoutManagerTrait();
-  return managerTrait ? managerTrait->GetLayoutManager() : nullptr;
+  IntrusivePtr<TraitObject> object = IntegrationView::GetTrait(*this, ReservedTraitId::LAYOUT_MANAGER);
+  DALI_ASSERT_DEBUG(!object || (dynamic_cast<Internal::LayoutManagerObject*>(object.Get()) && "LAYOUT_MANAGER trait must be a LayoutManagerObject"));
+
+  auto* managerObject = object ? static_cast<Internal::LayoutManagerObject*>(object.Get()) : nullptr;
+  return managerObject ? managerObject->GetLayoutManager() : nullptr;
 }
 
 bool LayoutImpl::HasLayoutManager() const

@@ -16,27 +16,43 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 
 namespace Dali
 {
-
 namespace Ui
 {
-
-namespace Integration
+namespace Internal
 {
 
-TraitImpl::TraitImpl()
-{
-}
-
-TraitImpl::~TraitImpl()
+LayoutCallbacksObject::LayoutCallbacksObject()
 {
 }
 
-} // namespace Integration
+LayoutCallbacksObject::~LayoutCallbacksObject()
+{
+}
 
+void LayoutCallbacksObject::SetMeasureCallback(MeasureCallback callback)
+{
+  mOnMeasure = std::move(callback);
+}
+
+void LayoutCallbacksObject::SetArrangeCallback(ArrangeCallback callback)
+{
+  mOnArrange = std::move(callback);
+}
+
+MeasureCallback* LayoutCallbacksObject::GetMeasureCallback()
+{
+  return mOnMeasure ? &mOnMeasure : nullptr;
+}
+
+ArrangeCallback* LayoutCallbacksObject::GetArrangeCallback()
+{
+  return mOnArrange ? &mOnArrange : nullptr;
+}
+
+} // namespace Internal
 } // namespace Ui
-
 } // namespace Dali

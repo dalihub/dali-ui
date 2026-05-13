@@ -39,7 +39,7 @@ InteractiveTrait InteractiveTrait::New()
 }
 
 InteractiveTrait::InteractiveTrait(const InteractiveTrait& trait)
-: Trait(trait)
+: BaseHandle(trait)
 {
 }
 
@@ -48,7 +48,7 @@ InteractiveTrait::~InteractiveTrait()
 }
 
 InteractiveTrait::InteractiveTrait(Integration::InteractiveTraitImpl* implementation)
-: Trait(implementation)
+: BaseHandle(implementation)
 {
 }
 

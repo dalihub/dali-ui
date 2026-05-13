@@ -23,7 +23,6 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 // Impl
-#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 
 // Layouts

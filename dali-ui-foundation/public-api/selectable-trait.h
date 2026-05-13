@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
 {
@@ -55,14 +55,14 @@ class SelectableTraitImpl;
  * @note When toggle-by-click is enabled and the owner View does not have a
  * InteractiveTrait, one is automatically created and attached.
  */
-class DALI_UI_API SelectableTrait : public Trait
+class DALI_UI_API SelectableTrait : public BaseHandle
 {
 public:
   // Typedefs
 
 public: // Creation & Destruction
   /**
-   * @brief Creates an uninitialized Trait handle.
+   * @brief Creates an uninitialized SelectableTrait handle.
    */
   SelectableTrait();
 
@@ -79,7 +79,7 @@ public: // Creation & Destruction
    * If the handle refers to a SelectableTrait (e.g. a trait from GetTrait),
    * the downcast produces a valid handle. Otherwise the returned handle is uninitialized.
    *
-   * @param[in] handle Handle to an object (e.g. Trait from View's selectable trait)
+   * @param[in] handle Handle to an object stored in View's selectable trait slot
    * @return A handle to SelectableTrait or an uninitialized handle
    */
   static SelectableTrait DownCast(BaseHandle handle);

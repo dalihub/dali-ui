@@ -40,14 +40,14 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
-#include <dali-ui-foundation/integration-api/trait-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
-#include <dali-ui-foundation/internal/layouts/layout-callbacks-trait.h>
+#include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
@@ -65,6 +65,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-scale-manager.h>
@@ -90,6 +91,18 @@ namespace
 /// Used by IntegrationView::AddActorChild. Thread-local because Actor::Add invokes
 /// OnChildAdd synchronously on the same (event) thread.
 thread_local bool gAllowNonViewChild = false;
+
+IntrusivePtr<TraitObject> ToTraitObject(BaseHandle handle)
+{
+  if(!handle)
+  {
+    return nullptr;
+  }
+
+  auto* traitObject = dynamic_cast<TraitObject*>(handle.GetObjectPtr());
+  DALI_ASSERT_ALWAYS(traitObject && "Handle used as a View trait must wrap a TraitObject");
+  return traitObject ? IntrusivePtr<TraitObject>(traitObject) : nullptr;
+}
 
 // mLastMeasuredConstraint encodes three states:
 //   NaN                        : initial state before any measure
@@ -216,26 +229,30 @@ void RegisterViewAccessibleGetter()
   }
 }
 
-Internal::LayoutCallbacksTraitImpl* GetLayoutCallbacksTrait(ViewImpl* self)
+Internal::LayoutCallbacksObject* GetLayoutCallbacksObject(ViewImpl* self)
 {
-  Dali::BaseHandle handle = Internal::ViewDataImpl::Get(*self).GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
-  if(handle)
-  {
-    return static_cast<Internal::LayoutCallbacksTraitImpl*>(&handle.GetBaseObject());
-  }
-  return nullptr;
+  IntrusivePtr<TraitObject> object = Internal::ViewDataImpl::Get(*self).GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
+  return dynamic_cast<Internal::LayoutCallbacksObject*>(object.Get());
 }
 
-Internal::LayoutCallbacksTraitImpl* EnsureLayoutCallbacksTrait(ViewImpl* self)
+Internal::LayoutCallbacksObject* EnsureLayoutCallbacksObject(ViewImpl* self)
 {
-  auto* impl = GetLayoutCallbacksTrait(self);
-  if(!impl)
+  auto* object = GetLayoutCallbacksObject(self);
+  if(!object)
   {
-    impl                                  = new Internal::LayoutCallbacksTraitImpl();
-    Internal::LayoutCallbacksTrait handle = Internal::LayoutCallbacksTrait::New(impl);
-    Internal::ViewDataImpl::Get(*self).SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, handle);
+    IntrusivePtr<TraitObject> newObject(new Internal::LayoutCallbacksObject());
+    object = static_cast<Internal::LayoutCallbacksObject*>(newObject.Get());
+    Internal::ViewDataImpl::Get(*self).SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, newObject);
   }
-  return impl;
+  return object;
+}
+
+template<typename HandleType>
+HandleType GetTraitHandle(const ViewImpl& viewImpl, TraitId id)
+{
+  IntrusivePtr<TraitObject> object   = IntegrationView::GetTrait(viewImpl, id);
+  auto*                   baseObject = dynamic_cast<BaseObject*>(object.Get());
+  return baseObject ? HandleType::DownCast(BaseHandle(baseObject)) : HandleType();
 }
 
 // Arranges a standalone MATCH_PARENT child within its parent.
@@ -403,39 +420,16 @@ ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
 
 Ui::InteractiveTrait ViewImpl::EnsureInteractiveTrait()
 {
-  Ui::InteractiveTrait existing = IntegrationView::GetTrait<Ui::InteractiveTrait>(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
+  Ui::InteractiveTrait existing = GetTraitHandle<Ui::InteractiveTrait>(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
 
   if(!existing)
   {
     Ui::InteractiveTrait interaction = Ui::InteractiveTrait::New();
-    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT, interaction);
-
-    // Apply interaction effect only if the user has not already set one explicitly.
-    if(!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT))
-    {
-      Trait defaultEffect = Integration::UiConfigManager::Get().GetConfig().GetDefaultInteractionEffect();
-      if(defaultEffect)
-      {
-        IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT, defaultEffect);
-      }
-    }
-
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT, ToTraitObject(interaction));
     return interaction;
   }
 
   return existing;
-}
-
-void ViewImpl::SetInteractionEffect(Trait effect)
-{
-  if(effect)
-  {
-    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT, effect);
-  }
-  else
-  {
-    IntegrationView::RemoveTrait(*this, Integration::ReservedTraitId::INTERACTION_EFFECT);
-  }
 }
 
 bool ViewImpl::IsInteractive() const
@@ -470,12 +464,12 @@ const UniqueAny* ViewImpl::GetAttachment(AttachmentId id) const
 
 Ui::SelectableTrait ViewImpl::EnsureSelectableTrait()
 {
-  Ui::SelectableTrait existing = IntegrationView::GetTrait<Ui::SelectableTrait>(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
+  Ui::SelectableTrait existing = GetTraitHandle<Ui::SelectableTrait>(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
 
   if(!existing)
   {
     Ui::SelectableTrait selectable = Ui::SelectableTrait::New();
-    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT, selectable);
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT, ToTraitObject(selectable));
     return selectable;
   }
 
@@ -1500,24 +1494,24 @@ Ui::View ViewImpl::GetParentView() const
 
 void ViewImpl::SetMeasureCallback(MeasureCallback callback)
 {
-  EnsureLayoutCallbacksTrait(this)->SetMeasureCallback(std::move(callback));
+  EnsureLayoutCallbacksObject(this)->SetMeasureCallback(std::move(callback));
 }
 
 void ViewImpl::SetArrangeCallback(ArrangeCallback callback)
 {
-  EnsureLayoutCallbacksTrait(this)->SetArrangeCallback(std::move(callback));
+  EnsureLayoutCallbacksObject(this)->SetArrangeCallback(std::move(callback));
 }
 
 MeasureCallback* ViewImpl::GetMeasureCallback()
 {
-  auto* impl = GetLayoutCallbacksTrait(this);
-  return impl ? impl->GetMeasureCallback() : nullptr;
+  auto* object = GetLayoutCallbacksObject(this);
+  return object ? object->GetMeasureCallback() : nullptr;
 }
 
 ArrangeCallback* ViewImpl::GetArrangeCallback()
 {
-  auto* impl = GetLayoutCallbacksTrait(this);
-  return impl ? impl->GetArrangeCallback() : nullptr;
+  auto* object = GetLayoutCallbacksObject(this);
+  return object ? object->GetArrangeCallback() : nullptr;
 }
 
 // =============================================================================
@@ -1755,13 +1749,15 @@ TraitId ToTraitId(LayoutParamsType type)
 
 BaseHandle ViewImpl::GetLayoutParams(LayoutParamsType type) const
 {
-  return mImpl->GetTrait(ToTraitId(type));
+  IntrusivePtr<TraitObject> object   = mImpl->GetTrait(ToTraitId(type));
+  auto*                   baseObject = dynamic_cast<BaseObject*>(object.Get());
+  return baseObject ? BaseHandle(baseObject) : BaseHandle();
 }
 
 void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 {
   auto& paramsImpl = static_cast<Internal::LayoutParamsImpl&>(params.GetBaseObject());
-  mImpl->SetTrait(paramsImpl.GetTraitId(), params);
+  mImpl->SetTrait(paramsImpl.GetTraitId(), ToTraitObject(params));
   InvalidateMeasure();
 }
 

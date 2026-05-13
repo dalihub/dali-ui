@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -15,8 +17,8 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/integration-api/trait-impl.h>
+#include <dali-ui-foundation/public-api/trait-object.h>
+#include <memory>
 
 namespace Dali
 {
@@ -24,15 +26,34 @@ namespace Dali
 namespace Ui
 {
 
-Trait::Trait(Integration::TraitImpl* impl)
-: BaseHandle(impl)
-{
-}
+class LayoutManager;
 
-Trait Trait::DownCast(BaseHandle handle)
+namespace Internal
 {
-  return Trait(dynamic_cast<Integration::TraitImpl*>(handle.GetObjectPtr()));
-}
 
+// LayoutManagerObject
+// ============================================================================
+
+/**
+ * @brief Internal object that holds a LayoutManager.
+ *
+ * This object is stored in a Layout view trait slot to avoid per-instance
+ * storage overhead on View.
+ */
+class LayoutManagerObject : public TraitObject
+{
+public:
+  explicit LayoutManagerObject(LayoutManager* layoutManager);
+
+  LayoutManager* GetLayoutManager() const;
+
+protected:
+  ~LayoutManagerObject() override;
+
+private:
+  std::unique_ptr<LayoutManager> mLayoutManager;
+};
+
+} // namespace Internal
 } // namespace Ui
 } // namespace Dali
