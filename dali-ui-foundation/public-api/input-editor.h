@@ -49,10 +49,10 @@ class InputEditorImpl;
 
 #include "input-editor.autogen.h"
 /**
- * @brief InputEditor is a single-line editable text view.
+ * @brief InputEditor is a multi-line editable text view.
  *
  * It supports user interaction for text input and editing,
- * and handles text layout and rendering.
+ * and handles multi-line text layout, scrolling, and rendering.
  */
 class DALI_UI_API InputEditor : public View
 {
@@ -175,11 +175,11 @@ public: // Static Methods
   /**
    * @brief Downcasts a handle to InputEditor handle.
    *
-   * If handle points to a InputEditor, the downcast produces valid handle.
+   * If handle points to an InputEditor, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
    * @param[in] handle Handle to an object
-   * @return A handle to a InputEditor or an uninitialized handle
+   * @return A handle to an InputEditor or an uninitialized handle
    */
   static InputEditor DownCast(BaseHandle handle);
 
@@ -419,7 +419,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the highlight color of the selected text region.
    *
-   * @param[in] color The selection highlight color as a UiColor).
+   * @param[in] color The selection highlight color as a UiColor.
    */
   InputEditor& SetSelectionColor(const UiColor& color);
 

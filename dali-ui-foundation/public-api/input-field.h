@@ -178,11 +178,11 @@ public: // Static Methods
   /**
    * @brief Downcasts a handle to InputField handle.
    *
-   * If handle points to a InputField, the downcast produces valid handle.
+   * If handle points to an InputField, the downcast produces a valid handle.
    * If not, the returned handle is left uninitialized.
    *
    * @param[in] handle Handle to an object
-   * @return A handle to a InputField or an uninitialized handle
+   * @return A handle to an InputField or an uninitialized handle
    */
   static InputField DownCast(BaseHandle handle);
 
@@ -422,7 +422,7 @@ public: // Setters for chaining
   /**
    * @brief Sets the highlight color of the selected text region.
    *
-   * @param[in] color The selection highlight color as a UiColor).
+   * @param[in] color The selection highlight color as a UiColor.
    */
   InputField& SetSelectionColor(const UiColor& color);
 
