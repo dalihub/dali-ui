@@ -667,6 +667,17 @@ public:
    */
   bool IsSmoothHandlePanEnabled() const;
 
+  /**
+   * @brief Retrieves the scrolling anchor position.
+   *
+   * The scrolling anchor is the hit-test position saved when auto-scroll starts.
+   * It's used by the controller to calculate cursor/selection endpoint during HANDLE_SCROLLING.
+   *
+   * @param[out] x The x anchor position.
+   * @param[out] y The y anchor position.
+   */
+  void GetScrollingAnchor(float& x, float& y) const;
+
 protected:
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().

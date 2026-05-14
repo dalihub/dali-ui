@@ -75,6 +75,8 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
     return;
   }
 
+  // Re-activate highlight in case it was deactivated when selection was empty.
+  decorator->SetHighlightActive(true);
   decorator->ClearHighlights();
 
   ModelPtr&        model        = impl.mModel;

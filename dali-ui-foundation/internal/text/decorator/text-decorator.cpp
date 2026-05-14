@@ -248,6 +248,8 @@ struct Decorator::Impl : public ConnectionTracker
     mIsHandleCurrentlyCrossed(false),
     mIsHandlePreviouslyCrossed(false),
     mNotifyEndOfScroll(false),
+    mScrollingAnchorX(0.f),
+    mScrollingAnchorY(0.f),
     mHorizontalScrollingEnabled(false),
     mVerticalScrollingEnabled(false),
     mSmoothHandlePanEnabled(false),
@@ -1412,27 +1414,35 @@ struct Decorator::Impl : public ConnectionTracker
 
       if(mHorizontalScrollingEnabled && (x < mScrollThreshold))
       {
-        mScrollDirection = SCROLL_RIGHT;
-        mHandleScrolling = type;
+        mScrollDirection  = SCROLL_RIGHT;
+        mHandleScrolling  = type;
+        mScrollingAnchorX = x;
+        mScrollingAnchorY = yVerticallyFlippedCorrected;
         StartScrollTimer();
       }
       else if(mHorizontalScrollingEnabled && (x > targetSize.width - mScrollThreshold))
       {
-        mScrollDirection = SCROLL_LEFT;
-        mHandleScrolling = type;
+        mScrollDirection  = SCROLL_LEFT;
+        mHandleScrolling  = type;
+        mScrollingAnchorX = x;
+        mScrollingAnchorY = yVerticallyFlippedCorrected;
         StartScrollTimer();
       }
       else if(mVerticalScrollingEnabled && (yVerticallyFlippedCorrected < mScrollThreshold))
       {
-        mScrollDirection = SCROLL_TOP;
-        mHandleScrolling = type;
+        mScrollDirection  = SCROLL_TOP;
+        mHandleScrolling  = type;
+        mScrollingAnchorX = x;
+        mScrollingAnchorY = yVerticallyFlippedCorrected;
         StartScrollTimer();
       }
       else if(mVerticalScrollingEnabled &&
               (yVerticallyFlippedCorrected + handle.lineHeight > targetSize.height - mScrollThreshold))
       {
-        mScrollDirection = SCROLL_BOTTOM;
-        mHandleScrolling = type;
+        mScrollDirection  = SCROLL_BOTTOM;
+        mHandleScrolling  = type;
+        mScrollingAnchorX = x;
+        mScrollingAnchorY = yVerticallyFlippedCorrected;
         StartScrollTimer();
       }
       else
@@ -2086,15 +2096,17 @@ struct Decorator::Impl : public ConnectionTracker
                                                ///< character's direction.
   bool mFlipRightSelectionHandleDirection : 1; ///< Whether to flip the right selection handle image because of the
                                                ///< character's direction.
-  bool mIsHandlePanning : 1;                   ///< Whether any of the handles is moving.
-  bool mIsHandleCurrentlyCrossed : 1;          ///< Whether the handles are crossed.
-  bool mIsHandlePreviouslyCrossed : 1;         ///< Whether the handles where crossed at the last handle touch up.
-  bool mNotifyEndOfScroll : 1;                 ///< Whether to notify the end of the scroll.
-  bool mHorizontalScrollingEnabled : 1;        ///< Whether the horizontal scrolling is enabled.
-  bool mVerticalScrollingEnabled : 1;          ///< Whether the vertical scrolling is enabled.
-  bool mSmoothHandlePanEnabled : 1;            ///< Whether to pan smoothly the handles.
-  bool mIsHighlightBoxActive : 1;              ///< Whether the highlight box is active.
-  bool mHidePrimaryCursorAndGrabHandle : 1;    ///< Whether the primary cursor and grab are hidden always.
+  bool  mIsHandlePanning : 1;                  ///< Whether any of the handles is moving.
+  bool  mIsHandleCurrentlyCrossed : 1;         ///< Whether the handles are crossed.
+  bool  mIsHandlePreviouslyCrossed : 1;        ///< Whether the handles where crossed at the last handle touch up.
+  bool  mNotifyEndOfScroll : 1;                ///< Whether to notify the end of the scroll.
+  float mScrollingAnchorX;                     ///< Hit-test anchor X saved when auto-scroll starts.
+  float mScrollingAnchorY;                     ///< Hit-test anchor Y saved when auto-scroll starts.
+  bool  mHorizontalScrollingEnabled : 1;       ///< Whether the horizontal scrolling is enabled.
+  bool  mVerticalScrollingEnabled : 1;         ///< Whether the vertical scrolling is enabled.
+  bool  mSmoothHandlePanEnabled : 1;           ///< Whether to pan smoothly the handles.
+  bool  mIsHighlightBoxActive : 1;             ///< Whether the highlight box is active.
+  bool  mHidePrimaryCursorAndGrabHandle : 1;   ///< Whether the primary cursor and grab are hidden always.
 };
 
 DecoratorPtr Decorator::New(ControllerInterface& controller, TextSelectionPopupCallbackInterface& callbackInterface)
@@ -2592,6 +2604,12 @@ void Decorator::SetSmoothHandlePanEnabled(bool enable)
 bool Decorator::IsSmoothHandlePanEnabled() const
 {
   return mImpl->mSmoothHandlePanEnabled;
+}
+
+void Decorator::GetScrollingAnchor(float& x, float& y) const
+{
+  x = mImpl->mScrollingAnchorX;
+  y = mImpl->mScrollingAnchorY;
 }
 
 Decorator::~Decorator()

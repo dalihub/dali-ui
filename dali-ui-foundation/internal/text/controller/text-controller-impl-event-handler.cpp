@@ -1009,29 +1009,22 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
   {
     impl.ChangeState(EventData::GRAB_HANDLE_PANNING);
 
-    // Get the grab handle position in decorator coords.
-    Vector2 position = decorator->GetPosition(GRAB_HANDLE);
+    // Get the scrolling anchor from decorator.
+    // The anchor is the hit-test position saved when auto-scroll started.
+    float anchorX = 0.f;
+    float anchorY = 0.f;
+    decorator->GetScrollingAnchor(anchorX, anchorY);
 
-    if(decorator->IsHorizontalScrollEnabled())
-    {
-      // Position the grag handle close to either the left or right edge.
-      position.x = scrollRightDirection ? 0.f : visualModel->mControlSize.width;
-    }
-
-    if(decorator->IsVerticalScrollEnabled())
-    {
-      position.x = eventData.mCursorHookPositionX;
-
-      // Position the grag handle close to either the top or bottom edge.
-      position.y = scrollBottomDirection ? 0.f : visualModel->mControlSize.height;
-    }
+    // Calculate hit-test position from anchor and current scroll position.
+    const float hitTestX = anchorX - scrollPosition.x;
+    const float hitTestY = anchorY - scrollPosition.y;
 
     // Get the new handle position.
-    // The grab handle's position is in decorator's coords. Need to transforms to text's coords.
+    // The hit-test position is in text's coords.
     bool                 matchedCharacter = false;
     const CharacterIndex handlePosition   = Text::GetClosestCursorIndex(
-      visualModel, impl.mModel->mLogicalModel, impl.mMetrics, position.x - scrollPosition.x,
-      position.y - scrollPosition.y, CharacterHitTest::SCROLL, matchedCharacter);
+      visualModel, impl.mModel->mLogicalModel, impl.mMetrics, hitTestX, hitTestY,
+      CharacterHitTest::SCROLL, matchedCharacter);
 
     if(eventData.mPrimaryCursorPosition != handlePosition)
     {
@@ -1049,30 +1042,22 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
   {
     impl.ChangeState(EventData::SELECTION_HANDLE_PANNING);
 
-    // Get the selection handle position in decorator coords.
-    Vector2 position =
-      decorator->GetPosition(leftSelectionHandleEvent ? Text::LEFT_SELECTION_HANDLE : Text::RIGHT_SELECTION_HANDLE);
+    // Get the scrolling anchor from decorator.
+    // The anchor is the hit-test position saved when auto-scroll started.
+    float anchorX = 0.f;
+    float anchorY = 0.f;
+    decorator->GetScrollingAnchor(anchorX, anchorY);
 
-    if(decorator->IsHorizontalScrollEnabled())
-    {
-      // Position the selection handle close to either the left or right edge.
-      position.x = scrollRightDirection ? 0.f : visualModel->mControlSize.width;
-    }
-
-    if(decorator->IsVerticalScrollEnabled())
-    {
-      position.x = eventData.mCursorHookPositionX;
-
-      // Position the grag handle close to either the top or bottom edge.
-      position.y = scrollBottomDirection ? 0.f : visualModel->mControlSize.height;
-    }
+    // Calculate hit-test position from anchor and current scroll position.
+    const float hitTestX = anchorX - scrollPosition.x;
+    const float hitTestY = anchorY - scrollPosition.y;
 
     // Get the new handle position.
-    // The selection handle's position is in decorator's coords. Need to transform to text's coords.
+    // The hit-test position is in text's coords.
     bool                 matchedCharacter = false;
     const CharacterIndex handlePosition   = Text::GetClosestCursorIndex(
-      visualModel, impl.mModel->mLogicalModel, impl.mMetrics, position.x - scrollPosition.x,
-      position.y - scrollPosition.y, CharacterHitTest::SCROLL, matchedCharacter);
+      visualModel, impl.mModel->mLogicalModel, impl.mMetrics, hitTestX, hitTestY,
+      CharacterHitTest::SCROLL, matchedCharacter);
     uint32_t oldStart = eventData.mLeftSelectionPosition;
     uint32_t oldEnd   = eventData.mRightSelectionPosition;
 
