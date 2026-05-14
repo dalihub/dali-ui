@@ -336,8 +336,12 @@ struct Decorator::Impl : public ConnectionTracker
         ((fabsf(mControlSize.height - grabHandle.lineHeight) - grabHandle.position.y > -Math::MACHINE_EPSILON_1000) &&
          (grabHandle.position.y + grabHandle.lineHeight > -Math::MACHINE_EPSILON_1000));
 
+      // Keep handle visible while dragging/scrolling, even if position is slightly outside bounds.
+      // The user is actively interacting with this handle, so it should remain visible.
+      const bool isDraggingHandle = grabHandle.pressed || (mHandleScrolling == GRAB_HANDLE);
+
       const bool isVisible =
-        grabHandle.horizontallyVisible && grabHandle.verticallyVisible && (!mHidePrimaryCursorAndGrabHandle);
+        (isDraggingHandle || (grabHandle.horizontallyVisible && grabHandle.verticallyVisible)) && (!mHidePrimaryCursorAndGrabHandle);
       if(isVisible)
       {
         CreateGrabHandle();
@@ -380,8 +384,13 @@ struct Decorator::Impl : public ConnectionTracker
        (secondary.position.y + (secondary.verticallyFlipped ? 0.f : secondary.lineHeight) >
         -Math::MACHINE_EPSILON_1000));
 
-    const bool primaryVisible   = primary.horizontallyVisible && primary.verticallyVisible;
-    const bool secondaryVisible = secondary.horizontallyVisible && secondary.verticallyVisible;
+    // Keep handles visible while dragging/scrolling, even if position is slightly outside bounds.
+    // The user is actively interacting with these handles, so they should remain visible.
+    const bool isDraggingPrimary   = primary.pressed || (mHandleScrolling == LEFT_SELECTION_HANDLE);
+    const bool isDraggingSecondary = secondary.pressed || (mHandleScrolling == RIGHT_SELECTION_HANDLE);
+
+    const bool primaryVisible   = isDraggingPrimary || (primary.horizontallyVisible && primary.verticallyVisible);
+    const bool secondaryVisible = isDraggingSecondary || (secondary.horizontallyVisible && secondary.verticallyVisible);
 
     if(primary.active || secondary.active)
     {
@@ -1192,8 +1201,18 @@ struct Decorator::Impl : public ConnectionTracker
       const float cursorOffset =
         (type == GRAB_HANDLE) ? floorf(0.5f * GetEffectiveCursorWidth()) : 0.0f;
 
-      const float x = handle.position.x + cursorOffset + adjustedDisplacementX;
-      const float y = yLocalPosition + adjustedDisplacementY;
+      float x = handle.position.x + cursorOffset + adjustedDisplacementX;
+      float y = yLocalPosition + adjustedDisplacementY;
+
+      // Clamp visual position of dragging/scrolling handle to control bounds.
+      // This prevents the handle actor from appearing outside the editor bounds
+      // while still allowing the hit-test anchor to extend beyond for proper scrolling.
+      const bool isDraggingHandle = handle.pressed || (mHandleScrolling == type);
+      if(isDraggingHandle)
+      {
+        x = std::max(0.0f, std::min(x, mControlSize.width));
+        y = std::max(0.0f, std::min(y, mControlSize.height));
+      }
 
       handle.actor.SetRequestedPositionX(x);
       handle.actor.SetRequestedPositionY(y);
