@@ -31,6 +31,8 @@
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
+#include <utility>
+
 namespace Dali
 {
 namespace Ui
@@ -924,6 +926,14 @@ public:
    * or moving the selection handles.
    */
   void ScrollToMakePositionVisible(const Vector2& position, float lineHeight);
+
+  /**
+   * @brief Calculates the scroll target range from cursor info, including first/last line box edges.
+   *
+   * @param[in] info The cursor information.
+   * @return The visible top and bottom range for scroll-to-visible.
+   */
+  std::pair<float, float> CalculateScrollTarget(const CursorInfo& info) const;
 
   /**
    * @brief Scrolls the text to make the cursor visible.

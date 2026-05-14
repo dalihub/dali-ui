@@ -25,6 +25,7 @@
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/rendering/renderer.h>
 #include <cmath>
+#include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
@@ -37,6 +38,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
+#include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
@@ -1524,7 +1526,9 @@ void Controller::Impl::ClampVerticalScroll(const Vector2& layoutSize)
   }
   else
   {
-    mModel->mScrollPosition.y = 0.f;
+    // Content is smaller than or equal to control size.
+    // Recalculate vertical offset to preserve VerticalAlignment (CENTER/END).
+    Relayouter::CalculateVerticalOffset(*this, mModel->mVisualModel->mControlSize);
   }
 }
 
@@ -1572,12 +1576,70 @@ void Controller::Impl::ScrollToMakePositionVisible(const Vector2& position, floa
   }
 }
 
+std::pair<float, float> Controller::Impl::CalculateScrollTarget(const CursorInfo& info) const
+{
+  float visibleTop    = info.primaryPosition.y - info.glyphOffset;
+  float visibleBottom = visibleTop + info.lineHeight;
+
+  const Length lineCount = mModel->mVisualModel->mLines.Count();
+  if(lineCount > 0u)
+  {
+    // Find the line index by comparing line offsets with cursor's lineOffset.
+    // This is more accurate than using cursorPosition, especially when cursor is at line boundary
+    // or on a new empty line (e.g., after Enter key).
+    LineIndex lineIndex   = 0u;
+    float     minDistance = std::numeric_limits<float>::max();
+
+    for(LineIndex index = 0u; index < lineCount; ++index)
+    {
+      const float lineOffset = CalculateLineOffset(mModel->mVisualModel->mLines, index);
+      const float distance   = std::fabs(lineOffset - info.lineOffset);
+
+      if(distance < minDistance)
+      {
+        minDistance = distance;
+        lineIndex   = index;
+      }
+    }
+
+    const bool isFirstLine = (lineIndex == 0u);
+    const bool isLastLine  = (lineIndex + 1u >= lineCount);
+
+    if(isFirstLine || isLastLine)
+    {
+      const LineRun&  line              = *(mModel->mVisualModel->mLines.Begin() + lineIndex);
+      const float     naturalLineHeight = line.ascender - line.descender;
+      const Alignment verticalLineAlign = mModel->GetVerticalLineAlignment();
+      const float     lineBoxHeight =
+        GetPreOffsetVerticalLineAlignment(line, verticalLineAlign) +
+        naturalLineHeight +
+        GetPostOffsetVerticalLineAlignment(line, verticalLineAlign);
+
+      const float lineBoxTop    = info.lineOffset;
+      const float lineBoxBottom = lineBoxTop + lineBoxHeight;
+
+      if(isFirstLine)
+      {
+        visibleTop = lineBoxTop;
+      }
+      if(isLastLine)
+      {
+        visibleBottom = std::max(visibleBottom, lineBoxBottom);
+      }
+    }
+  }
+
+  return {visibleTop, visibleBottom};
+}
+
 void Controller::Impl::ScrollTextToMatchCursor(const CursorInfo& cursorInfo)
 {
   // Get the current cursor position in decorator coords.
   const Vector2& currentCursorPosition = mEventData->mDecorator->GetPosition(PRIMARY_CURSOR);
 
-  const LineIndex lineIndex = mModel->mVisualModel->GetLineOfCharacter(mEventData->mPrimaryCursorPosition);
+  const CharacterIndex characterIndex =
+    (mEventData->mPrimaryCursorPosition > 0u) ? mEventData->mPrimaryCursorPosition - 1u : 0u;
+  const LineIndex lineIndex = mModel->mVisualModel->GetLineOfCharacter(characterIndex);
 
   // Calculate the offset to match the cursor position before the character was deleted.
   mModel->mScrollPosition.x = currentCursorPosition.x - cursorInfo.primaryPosition.x;
@@ -1592,8 +1654,10 @@ void Controller::Impl::ScrollTextToMatchCursor(const CursorInfo& cursorInfo)
   ClampHorizontalScroll(mModel->mVisualModel->GetLayoutSize());
   ClampVerticalScroll(mModel->mVisualModel->GetLayoutSize());
 
-  // Makes the new cursor position visible if needed.
-  ScrollToMakePositionVisible(cursorInfo.primaryPosition, cursorInfo.lineHeight);
+  // Makes the new cursor position visible if needed, using LineHeight-aware scroll target.
+  auto [visibleTop, visibleBottom] = CalculateScrollTarget(cursorInfo);
+  const Vector2 scrollTargetPosition(cursorInfo.primaryPosition.x, visibleTop);
+  ScrollToMakePositionVisible(scrollTargetPosition, visibleBottom - visibleTop);
 }
 
 void Controller::Impl::ScrollTextToMatchCursor()
