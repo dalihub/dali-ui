@@ -150,7 +150,9 @@ bool ControllerImplEventHandler::ProcessInputEvents(Controller::Impl& impl)
     // ... then, text can be scrolled to make the cursor visible.
     if(eventData->mScrollAfterUpdatePosition)
     {
-      const Vector2 currentCursorPosition(cursorInfo.primaryPosition.x, cursorInfo.lineOffset);
+      // Use the visible text area top, not the line box top.
+      const float   visibleLineTop = cursorInfo.primaryPosition.y - cursorInfo.glyphOffset;
+      const Vector2 currentCursorPosition(cursorInfo.primaryPosition.x, visibleLineTop);
       impl.ScrollToMakePositionVisible(currentCursorPosition, cursorInfo.lineHeight);
     }
     eventData->mScrollAfterUpdatePosition = false;
@@ -183,19 +185,25 @@ bool ControllerImplEventHandler::ProcessInputEvents(Controller::Impl& impl)
         {
           CursorInfo& infoLeft = leftHandleInfo;
 
-          const Vector2 currentCursorPositionLeft(infoLeft.primaryPosition.x, infoLeft.lineOffset);
+          // Use the visible text area top, not the line box top.
+          const float   visibleLineTopLeft = infoLeft.primaryPosition.y - infoLeft.glyphOffset;
+          const Vector2 currentCursorPositionLeft(infoLeft.primaryPosition.x, visibleLineTopLeft);
           impl.ScrollToMakePositionVisible(currentCursorPositionLeft, infoLeft.lineHeight);
 
           CursorInfo& infoRight = rightHandleInfo;
 
-          const Vector2 currentCursorPositionRight(infoRight.primaryPosition.x, infoRight.lineOffset);
+          // Use the visible text area top, not the line box top.
+          const float   visibleLineTopRight = infoRight.primaryPosition.y - infoRight.glyphOffset;
+          const Vector2 currentCursorPositionRight(infoRight.primaryPosition.x, visibleLineTopRight);
           impl.ScrollToMakePositionVisible(currentCursorPositionRight, infoRight.lineHeight);
         }
         else
         {
           CursorInfo& info = eventData->mIsLeftHandleSelected ? leftHandleInfo : rightHandleInfo;
 
-          const Vector2 currentCursorPosition(info.primaryPosition.x, info.lineOffset);
+          // Use the visible text area top, not the line box top.
+          const float   visibleLineTop = info.primaryPosition.y - info.glyphOffset;
+          const Vector2 currentCursorPosition(info.primaryPosition.x, visibleLineTop);
           impl.ScrollToMakePositionVisible(currentCursorPosition, info.lineHeight);
         }
       }

@@ -1411,9 +1411,11 @@ void Controller::Impl::UpdateCursorPosition(const CursorInfo& cursorInfo)
 
   if(mEventData->mUpdateGrabHandlePosition)
   {
+    // Use the visible text area top, not the line box top.
+    const float visibleLineTop = cursorInfo.primaryPosition.y - cursorInfo.glyphOffset;
     // Sets the grab handle position.
     mEventData->mDecorator->SetPosition(GRAB_HANDLE, cursorPosition.x,
-                                        cursorInfo.lineOffset + mModel->mScrollPosition.y, cursorInfo.lineHeight);
+                                        visibleLineTop + mModel->mScrollPosition.y, cursorInfo.lineHeight);
   }
 
   if(cursorInfo.isSecondaryCursor)

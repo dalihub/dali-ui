@@ -474,16 +474,20 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
 
     const Vector2 primaryPosition = primaryCursorInfo.primaryPosition + model->mScrollPosition;
 
+    // Use the visible text area top, not the line box top.
+    const float primaryVisibleLineTop = primaryCursorInfo.primaryPosition.y - primaryCursorInfo.glyphOffset;
     decorator->SetPosition(LEFT_SELECTION_HANDLE, primaryPosition.x,
-                           primaryCursorInfo.lineOffset + model->mScrollPosition.y, primaryCursorInfo.lineHeight);
+                           primaryVisibleLineTop + model->mScrollPosition.y, primaryCursorInfo.lineHeight);
 
     CursorInfo secondaryCursorInfo;
     impl.GetCursorPosition(eventData->mRightSelectionPosition, secondaryCursorInfo);
 
     const Vector2 secondaryPosition = secondaryCursorInfo.primaryPosition + model->mScrollPosition;
 
+    // Use the visible text area top, not the line box top.
+    const float secondaryVisibleLineTop = secondaryCursorInfo.primaryPosition.y - secondaryCursorInfo.glyphOffset;
     decorator->SetPosition(RIGHT_SELECTION_HANDLE, secondaryPosition.x,
-                           secondaryCursorInfo.lineOffset + model->mScrollPosition.y, secondaryCursorInfo.lineHeight);
+                           secondaryVisibleLineTop + model->mScrollPosition.y, secondaryCursorInfo.lineHeight);
   }
 
   // Set the flag to update the decorator.
@@ -591,9 +595,12 @@ void SelectionHandleController::Update(Controller::Impl& impl, HandleType handle
   ModelPtr&     model          = impl.mModel;
   const Vector2 cursorPosition = cursorInfo.primaryPosition + model->mScrollPosition;
 
+  // Use the visible text area top, not the line box top.
+  const float visibleLineTop = cursorInfo.primaryPosition.y - cursorInfo.glyphOffset;
+
   // Sets the handle's position.
   EventData*& eventData = impl.mEventData;
-  eventData->mDecorator->SetPosition(handleType, cursorPosition.x, cursorInfo.lineOffset + model->mScrollPosition.y,
+  eventData->mDecorator->SetPosition(handleType, cursorPosition.x, visibleLineTop + model->mScrollPosition.y,
                                      cursorInfo.lineHeight);
 
   // If selection handle at start of the text and other at end of the text then all text is selected.
