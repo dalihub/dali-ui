@@ -11,6 +11,7 @@ UNIFORM_BLOCK VertBlock
 {
   UNIFORM highp mat4 uMvpMatrix;
   UNIFORM highp vec3 uSize;
+  UNIFORM highp float viewEffectiveScale;
   UNIFORM highp vec3 uScale;
   UNIFORM highp float pixelSnapFactor;
 };
@@ -28,6 +29,9 @@ UNIFORM_BLOCK VisualVertBlock
 
 vec4 ComputeVertexPosition()
 {
+  // Note : Let we ignore `viewEffectiveScale` value for text-visual case.
+  // Becaues all variables already applied `viewEffectiveScale` during layout.
+  // TODO : We need to consider this information when we implement Dali::Ui::TextVisual
   vec2 visualSize = mix(size * uSize.xy, size, offsetSizeMode.zw ) + extraSize;
   vec2 visualOffset = mix(offset * uSize.xy, offset, offsetSizeMode.xy);
   vec4 result = vec4( (aPosition + pivot) * visualSize + visualOffset + origin * uSize.xy, 0.0, 1.0 );

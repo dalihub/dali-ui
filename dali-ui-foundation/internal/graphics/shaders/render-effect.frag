@@ -17,6 +17,7 @@ UNIFORM_BLOCK FragBlock
 UNIFORM_BLOCK SharedBlock
 {
   UNIFORM highp vec3 uSize;
+  UNIFORM highp float viewEffectiveScale;
 };
 
 UNIFORM sampler2D sTexture;

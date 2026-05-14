@@ -401,6 +401,9 @@ void PrimitiveVisual::CreateShader()
   mShader = Shader::New(ToDaliStringView(SHADER_PRIMITIVE_VISUAL_SHADER_VERT), ToDaliStringView(SHADER_PRIMITIVE_VISUAL_SHADER_FRAG),
                         static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                         "PRIMITIVE_VISUAL");
+
+  mShader.ReserveCustomProperties(1);
+  mShader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   UpdateShaderUniforms();
 }
 

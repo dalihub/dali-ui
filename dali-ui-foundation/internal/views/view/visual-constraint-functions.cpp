@@ -28,41 +28,6 @@
 namespace Dali::Ui::Internal
 {
 
-void BoxShadowCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs)
-{
-  const Vector4 viewCornerRadius       = inputs[0]->GetVector4();
-  const int     viewCornerRadiusPolicy = inputs[1]->GetInteger();
-  const float   scale                  = inputs[2]->GetFloat();
-
-  if(viewCornerRadiusPolicy != Ui::Visual::Transform::Policy::RELATIVE)
-  {
-    // ABSOLUTE: natural pixels → visual pixels.
-    current = viewCornerRadius * scale;
-  }
-  else
-  {
-    current = viewCornerRadius;
-  }
-}
-
-void ScaledCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs)
-{
-  const Vector4 cornerRadius = inputs[0]->GetVector4();
-  const int     policy       = inputs[1]->GetInteger();
-  const float   scale        = inputs[2]->GetFloat();
-
-  if(policy == static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE))
-  {
-    // Natural pixels → visual pixels.
-    current = cornerRadius * scale;
-  }
-  else
-  {
-    // RELATIVE: value is already a fraction of the view size; pass through unchanged.
-    current = cornerRadius;
-  }
-}
-
 void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs)
 {
   // We just assume below state are applied.
@@ -77,20 +42,14 @@ void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputConta
 
   const int     viewCornerRadiusPolicy = inputs[1]->GetInteger();
   const Vector3 visualSize             = inputs[2]->GetVector3(); // We use VisualSize as ViewSize.
-  // inputs[3] is the user-set (natural) borderline width; scale it to visual pixels.
-  const float scale            = inputs[5]->GetFloat();
-  const float borderlineWidth  = inputs[3]->GetFloat() * scale;
+
+  const float borderlineWidth  = inputs[3]->GetFloat();
   const float borderlineOffset = inputs[4]->GetFloat();
 
   if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
   {
     const float minViewSize = std::min(visualSize.x, visualSize.y);
     viewCornerRadius *= minViewSize;
-  }
-  else
-  {
-    // ABSOLUTE: natural pixels → visual pixels.
-    viewCornerRadius *= scale;
   }
 
   // Corner Radius for Borderline is expand about borderlineWidth.
@@ -112,11 +71,6 @@ void BorderlineCornerRadiusConstraint(Vector4& current, const PropertyInputConta
   }
 }
 
-void ScaledBorderlineWidthConstraint(float& current, const PropertyInputContainer& inputs)
-{
-  current = inputs[0]->GetFloat() * inputs[1]->GetFloat();
-}
-
 void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputContainer& inputs)
 {
   // We just assume below state are applied.
@@ -134,17 +88,11 @@ void InnerShadowCornerRadiusConstraint(Vector4& current, const PropertyInputCont
 
   Vector2     extraSize       = inputs[3]->GetVector2();
   const float borderlineWidth = inputs[4]->GetFloat(); // inner shadow's own borderline
-  const float scale           = inputs[5]->GetFloat();
 
   if(viewCornerRadiusPolicy == Ui::Visual::Transform::Policy::RELATIVE)
   {
     const float minViewSize = std::min(visualSize.x, visualSize.y);
     viewCornerRadius *= minViewSize;
-  }
-  else
-  {
-    // ABSOLUTE: natural pixels → visual pixels.
-    viewCornerRadius *= scale;
   }
 
   // Corner Radius for InnerShadow is expanded about the inner shadow's own borderline width.

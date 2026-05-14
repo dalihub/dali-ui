@@ -30,6 +30,11 @@ UNIFORM_BLOCK VertBlock
   UNIFORM highp vec4    cornerRadius;
   UNIFORM mediump float cornerRadiusPolicy;
 #endif
+
+#ifdef IS_REQUIRED_BORDERLINE
+#else
+  UNIFORM highp float viewEffectiveScale;
+#endif
 };
 
 UNIFORM_BLOCK VisualVertBlock
@@ -48,14 +53,15 @@ UNIFORM_BLOCK Borderline
 {
   UNIFORM highp float borderlineWidth;
   UNIFORM highp float borderlineOffset;
+  UNIFORM highp float viewEffectiveScale;
 };
 #endif
 
 
 vec4 ComputeVertexPosition()
 {
-  highp vec2 visualSize = mix(size * uSize.xy, size, offsetSizeMode.zw ) + extraSize;
-  highp vec2 visualOffset = mix(offset * uSize.xy, offset, offsetSizeMode.xy);
+  highp vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw ) + extraSize * viewEffectiveScale;
+  highp vec2 visualOffset = mix(offset * uSize.xy, offset * viewEffectiveScale, offsetSizeMode.xy);
 
 #if defined(IS_REQUIRED_ROUNDED_CORNER) || defined(IS_REQUIRED_BORDERLINE)
   vRectSize = visualSize * 0.5;
@@ -71,13 +77,13 @@ vec4 ComputeVertexPosition()
 
 #ifdef IS_REQUIRED_ROUNDED_CORNER
 #ifdef IS_REQUIRED_BORDERLINE
-  highp float maxSize = max(visualSize.x, visualSize.y) + (1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth;
-  highp float minSize = min(visualSize.x, visualSize.y) + (1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth;
+  highp float maxSize = max(visualSize.x, visualSize.y) + (1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth * viewEffectiveScale;
+  highp float minSize = min(visualSize.x, visualSize.y) + (1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth * viewEffectiveScale;
 #else
   highp float maxSize = max(visualSize.x, visualSize.y);
   highp float minSize = min(visualSize.x, visualSize.y);
 #endif
-  vCornerRadius = mix(cornerRadius * minSize, cornerRadius, cornerRadiusPolicy);
+  vCornerRadius = mix(cornerRadius * minSize, cornerRadius * viewEffectiveScale, cornerRadiusPolicy);
   vCornerRadius = min(vCornerRadius, minSize * 0.5);
   // Optimize fragment shader. 0.2929 ~= 1.0 - sqrt(0.5)
   highp float maxRadius = max(max(vCornerRadius.x, vCornerRadius.y), max(vCornerRadius.z, vCornerRadius.w));
@@ -92,9 +98,9 @@ vec4 ComputeVertexPosition()
 
   highp vec4 vertexPosition = vec4(aPosition, 0.0, 1.0);
 #ifdef IS_REQUIRED_BORDERLINE
-  vPosition = aPosition * (visualSize + (1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth + vertexMargin);
-  vertexPosition.xy *= (1.0 + ((1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth + vertexMargin) / visualSize);
-  vOptRectSize -= (1.0 - clamp(borderlineOffset, -1.0, 1.0)) * 0.5 * borderlineWidth + 1.0;
+  vPosition = aPosition * (visualSize + (1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth * viewEffectiveScale + vertexMargin);
+  vertexPosition.xy *= (1.0 + ((1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth * viewEffectiveScale + vertexMargin) / visualSize);
+  vOptRectSize -= (1.0 - clamp(borderlineOffset, -1.0, 1.0)) * 0.5 * borderlineWidth * viewEffectiveScale + 1.0;
 #elif defined(IS_REQUIRED_ROUNDED_CORNER)
   vPosition = aPosition * (visualSize + vertexMargin);
 #else

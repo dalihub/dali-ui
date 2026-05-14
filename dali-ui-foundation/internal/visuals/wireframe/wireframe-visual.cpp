@@ -145,6 +145,9 @@ void WireframeVisual::OnInitialize()
   {
     shader = mFactoryCache.GenerateAndSaveShader(
       VisualFactoryCache::WIREFRAME_SHADER, SHADER_WIREFRAME_VISUAL_SHADER_VERT, SHADER_WIREFRAME_VISUAL_SHADER_FRAG);
+
+    shader.ReserveCustomProperties(1);
+    shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   }
 
   Geometry geometry = mFactoryCache.GetGeometry(VisualFactoryCache::WIREFRAME_GEOMETRY);

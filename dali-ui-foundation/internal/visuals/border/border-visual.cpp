@@ -198,6 +198,9 @@ Shader BorderVisual::GetBorderShader()
       shader = mFactoryCache.GenerateAndSaveShader(VisualFactoryCache::BORDER_SHADER_ANTI_ALIASING,
                                                    SHADER_BORDER_VISUAL_ANTI_ALIASING_SHADER_VERT.data(),
                                                    SHADER_BORDER_VISUAL_ANTI_ALIASING_SHADER_FRAG.data());
+
+      shader.ReserveCustomProperties(1);
+      shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
     }
   }
   else
@@ -208,6 +211,9 @@ Shader BorderVisual::GetBorderShader()
       shader = mFactoryCache.GenerateAndSaveShader(VisualFactoryCache::BORDER_SHADER,
                                                    SHADER_BORDER_VISUAL_SHADER_VERT.data(),
                                                    SHADER_BORDER_VISUAL_SHADER_FRAG.data());
+
+      shader.ReserveCustomProperties(1);
+      shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
     }
   }
 

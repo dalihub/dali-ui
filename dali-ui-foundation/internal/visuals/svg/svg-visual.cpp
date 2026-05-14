@@ -617,6 +617,8 @@ Shader SvgVisual::GenerateShader() const
                                             : mImpl->GetCustomShaderAt(0)->mFragmentShader),
                          mImpl->GetCustomShaderAt(0)->mHints);
 
+    shader.ReserveCustomProperties(3);
+    shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
     shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);
 
     // Most of image visual shader user (like svg, animated vector image visual) use pre-multiplied alpha.

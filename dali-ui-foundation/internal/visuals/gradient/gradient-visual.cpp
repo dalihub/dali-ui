@@ -524,6 +524,9 @@ Shader GradientVisual::GenerateShader() const
     shader = mFactoryCache.GenerateAndSaveShader(shaderType,
                                                  vertexShaderPrefixList + SHADER_GRADIENT_VISUAL_SHADER_VERT.data(),
                                                  fragmentShaderPrefixList + SHADER_GRADIENT_VISUAL_SHADER_FRAG.data());
+
+    shader.ReserveCustomProperties(1);
+    shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   }
 
   return shader;

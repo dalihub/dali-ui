@@ -42,6 +42,11 @@ UNIFORM_BLOCK VertBlock
   UNIFORM lowp  float cropToMask;
   UNIFORM highp vec2  maskTextureRatio;
 #endif
+
+#ifdef IS_REQUIRED_BORDERLINE
+#else
+  UNIFORM highp float viewEffectiveScale;
+#endif
 };
 
 #if defined(IS_REQUIRED_DEBUG_VISUAL_SHADER) || defined(IS_REQUIRED_ROUNDED_CORNER) || defined(IS_REQUIRED_BORDERLINE)
@@ -68,13 +73,14 @@ UNIFORM_BLOCK Borderline
 {
   UNIFORM highp float borderlineWidth;
   UNIFORM highp float borderlineOffset;
+  UNIFORM highp float viewEffectiveScale;
 };
 #endif
 
 vec4 ComputeVertexPosition()
 {
-  highp vec2 visualSize = mix(size * uSize.xy, size, offsetSizeMode.zw) + extraSize;
-  highp vec2 visualOffset = mix(offset * uSize.xy, offset, offsetSizeMode.xy);
+  highp vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw) + extraSize * viewEffectiveScale;
+  highp vec2 visualOffset = mix(offset * uSize.xy, offset * viewEffectiveScale, offsetSizeMode.xy);
 
 #if defined(IS_REQUIRED_DEBUG_VISUAL_SHADER) || defined(IS_REQUIRED_ROUNDED_CORNER) || defined(IS_REQUIRED_BORDERLINE)
   vRectSize = visualSize * 0.5;
@@ -90,7 +96,7 @@ vec4 ComputeVertexPosition()
 
 #ifdef IS_REQUIRED_BORDERLINE
   // Extend size of visual by borderline.
-  highp float outerBorderlineSize = (1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth;
+  highp float outerBorderlineSize = (1.0 + clamp(borderlineOffset, -1.0, 1.0)) * borderlineWidth * viewEffectiveScale;
 #endif
 
 #ifdef IS_REQUIRED_ROUNDED_CORNER
@@ -116,7 +122,7 @@ vec4 ComputeVertexPosition()
 
 #ifdef IS_REQUIRED_BORDERLINE
   vPosition = aPosition * (visualSize + outerBorderlineSize + vertexMargin);
-  vOptRectSize -= (borderlineWidth - outerBorderlineSize * 0.5) + 1.0;
+  vOptRectSize -= (borderlineWidth * viewEffectiveScale - outerBorderlineSize * 0.5) + 1.0;
 #elif defined(IS_REQUIRED_DEBUG_VISUAL_SHADER) || defined(IS_REQUIRED_ROUNDED_CORNER)
   vPosition = aPosition * (visualSize + vertexMargin);
 #else

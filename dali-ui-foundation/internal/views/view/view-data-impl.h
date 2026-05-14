@@ -53,10 +53,10 @@ namespace Internal
 {
 /// @brief Type-level animatable property index for effective UI scale.
 /// Defined here (not in the public View::Property enum) to keep it internal.
-/// Value matches ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX + 6,
-/// immediately after BORDERLINE_OFFSET in the sequential enum.
+/// Value matches ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX,
+/// @warning Please change this value if view.h add new enum as ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX
 inline constexpr Property::Index VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX =
-  ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX + 6;
+  ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX;
 
 class AttachmentContainer;
 

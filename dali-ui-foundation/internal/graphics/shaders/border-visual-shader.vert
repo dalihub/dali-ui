@@ -12,6 +12,7 @@ UNIFORM_BLOCK VertBlock
   UNIFORM highp mat4 uMvpMatrix;
   UNIFORM highp vec3 uSize;
   UNIFORM highp float borderSize;
+  UNIFORM highp float viewEffectiveScale;
 };
 
 UNIFORM_BLOCK VisualVertBlock
@@ -27,13 +28,13 @@ UNIFORM_BLOCK VisualVertBlock
 
 vec2 ComputeVertexPosition()
 {
-  vec2 visualSize = mix(size * uSize.xy, size, offsetSizeMode.zw ) + extraSize;
-  vec2 visualOffset = mix(offset * uSize.xy, offset, offsetSizeMode.xy);
-  return (aPosition + pivot)*visualSize + visualOffset + origin * uSize.xy;
+  vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw ) + extraSize * viewEffectiveScale;
+  vec2 visualOffset = mix(offset * uSize.xy, offset * viewEffectiveScale, offsetSizeMode.xy);
+  return (aPosition + pivot) * visualSize + visualOffset + origin * uSize.xy;
 }
 
 void main()
 {
-  vec2 position = ComputeVertexPosition() + aDrift*borderSize;
+  vec2 position = ComputeVertexPosition() + aDrift * borderSize * viewEffectiveScale;
   gl_Position = uMvpMatrix * vec4(position, 0.0, 1.0);
 }

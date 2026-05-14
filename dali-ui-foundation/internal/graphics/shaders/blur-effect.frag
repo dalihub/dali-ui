@@ -14,6 +14,12 @@ UNIFORM_BLOCK FragBlock
   UNIFORM highp vec2  uOffsetDirection;
 };
 
+UNIFORM_BLOCK SharedBlock
+{
+  UNIFORM highp vec3 uSize;
+  UNIFORM highp float viewEffectiveScale;
+};
+
 UNIFORM_BLOCK GaussianBlurSampleBlock
 {
   UNIFORM highp float uSampleOffsets[NUM_SAMPLES];
@@ -26,7 +32,7 @@ void main()
 
   for (int i=0; i<NUM_SAMPLES; ++i)
   {
-    col += (TEXTURE(sTexture, vTexCoord + uSampleOffsets[i] * uOffsetDirection * uAnimationRatio) + TEXTURE(sTexture, vTexCoord - uSampleOffsets[i] * uOffsetDirection * uAnimationRatio)) * uSampleWeights[i];
+    col += (TEXTURE(sTexture, vTexCoord + uSampleOffsets[i] * uOffsetDirection * uAnimationRatio * viewEffectiveScale) + TEXTURE(sTexture, vTexCoord - uSampleOffsets[i] * uOffsetDirection * uAnimationRatio * viewEffectiveScale)) * uSampleWeights[i];
   }
   col *= uOpacity;
   gl_FragColor = col;

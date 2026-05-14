@@ -9,7 +9,11 @@ OUTPUT highp vec2 vTexCoord;
 UNIFORM_BLOCK VertBlock
 {
   UNIFORM highp mat4 uMvpMatrix;
+};
+UNIFORM_BLOCK SharedBlock
+{
   UNIFORM highp vec3 uSize;
+  UNIFORM highp float viewEffectiveScale;
 };
 void main()
 {

@@ -9,6 +9,7 @@ UNIFORM_BLOCK VertBlock
 {
   UNIFORM   highp   mat4  uMvpMatrix;
   UNIFORM   highp   vec3  uSize;
+  UNIFORM highp float viewEffectiveScale;
 };
 
 UNIFORM_BLOCK VisualVertBlock
@@ -24,9 +25,9 @@ UNIFORM_BLOCK VisualVertBlock
 
 vec4 ComputeVertexPosition()
 {
-  vec2 visualSize = mix(size * uSize.xy, size, offsetSizeMode.zw ) + extraSize;
-  vec2 visualOffset = mix(offset * uSize.xy, offset, offsetSizeMode.xy);
-  return vec4( (aPosition + pivot)*visualSize + visualOffset + origin * uSize.xy, 0.0, 1.0 );
+  vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw ) + extraSize * viewEffectiveScale;
+  vec2 visualOffset = mix(offset * uSize.xy, offset * viewEffectiveScale, offsetSizeMode.xy);
+  return vec4( (aPosition + pivot) * visualSize + visualOffset + origin * uSize.xy, 0.0, 1.0 );
 }
 
 void main()

@@ -210,6 +210,9 @@ void ArcVisual::OnInitialize()
       shader = mFactoryCache.GenerateAndSaveShader(VisualFactoryCache::ARC_BUTT_CAP_SHADER,
                                                    SHADER_ARC_VISUAL_SHADER_VERT.data(),
                                                    SHADER_ARC_VISUAL_BUTT_CAP_SHADER_FRAG.data());
+
+      shader.ReserveCustomProperties(1);
+      shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
     }
   }
   else
@@ -220,6 +223,9 @@ void ArcVisual::OnInitialize()
       shader = mFactoryCache.GenerateAndSaveShader(VisualFactoryCache::ARC_ROUND_CAP_SHADER,
                                                    SHADER_ARC_VISUAL_SHADER_VERT.data(),
                                                    SHADER_ARC_VISUAL_ROUND_CAP_SHADER_FRAG.data());
+
+      shader.ReserveCustomProperties(1);
+      shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
     }
   }
 

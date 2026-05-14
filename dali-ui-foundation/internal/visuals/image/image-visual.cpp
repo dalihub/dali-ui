@@ -1446,6 +1446,8 @@ Shader ImageVisual::GenerateShader() const
                            ToDaliStringView(mImpl->GetCustomShaderAt(0)->mName));
     }
 
+    shader.ReserveCustomProperties(2 + (usesWholeTexture));
+    shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
     if(usesWholeTexture)
     {
       shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);

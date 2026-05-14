@@ -12,6 +12,7 @@ UNIFORM_BLOCK VertBlock
 {
   UNIFORM highp mat4 uMvpMatrix;
   UNIFORM highp vec3 uSize;
+  UNIFORM highp float viewEffectiveScale;
   UNIFORM highp vec2 uNinePatchFactorsX[FACTOR_SIZE_X];
   UNIFORM highp vec2 uNinePatchFactorsY[FACTOR_SIZE_Y];
 };
@@ -35,8 +36,8 @@ void main()
   highp vec2 fixedTotal = vec2(uNinePatchFactorsX[FACTOR_SIZE_X - 1].x, uNinePatchFactorsY[FACTOR_SIZE_Y - 1].x);
   highp vec2 stretchTotal = vec2(uNinePatchFactorsX[FACTOR_SIZE_X - 1].y, uNinePatchFactorsY[FACTOR_SIZE_Y - 1].y);
 
-  highp vec2 visualSize = mix(size * uSize.xy, size, offsetSizeMode.zw) + extraSize;
-  highp vec2 visualOffset = mix(offset * uSize.xy, offset, offsetSizeMode.xy);
+  highp vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw) + extraSize * viewEffectiveScale;
+  highp vec2 visualOffset = mix(offset * uSize.xy, offset * viewEffectiveScale, offsetSizeMode.xy);
 
   // Scale down if fixedTotal is bigger than visualSize
   highp float fixedScaleDownRate = min(1.0, min(visualSize.x / fixedTotal.x, visualSize.y / fixedTotal.y));

@@ -277,6 +277,8 @@ private:
     content.Add(BuildZoneB());
     content.Add(BuildZoneC());
     content.Add(BuildZoneD());
+    content.Add(BuildZoneE());
+    content.Add(BuildZoneF());
 
     // ScrollView fills remaining height in the root StackLayout
     ScrollView scrollView = ScrollView::New();
@@ -551,6 +553,711 @@ private:
     zone.Add(MakeDesc(
       "Change scale and verify: boxes grow/shrink, but corner roundness and "
       "border thickness remain visually proportional (not double-scaled)."));
+
+    return zone;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Zone E: VisualBase properties (Offset / Size / ExtraSize / CornerRadius / BordrlineWidth / BlurRadius)
+  //
+  // VisualBase transform properties which are not proportions are scaled correctly:
+  //   - Offset / Size with Visual::Transform::ProportionFlags off : result = natural × effectiveScale
+  //   - Offset / Size with Visual::Transform::ProportionFlags on → unaffected by scale
+  //     (visual transform already grows because the view itself grows)
+  //   - ExtraSize : extra size = natural × effectiveScale
+  //   - ColorVisual::BlurRadius : blur radius = natural × effectiveScale
+  //
+  // Verifies that pixel-unit decoration properties are scaled correctly:
+  //   - ABSOLUTE corner radius: visual radius = natural × effectiveScale
+  //     → the rounded corner stays physically the same size
+  //   - RELATIVE corner radius: fraction of view size → unaffected by scale
+  //     (visual radius already grows because the view itself grows)
+  //   - Borderline width: visual width = natural × effectiveScale
+  //     → the border stays physically the same thickness
+  //
+  // To confirm correctness: increase scale and observe that:
+  //   - Visual::Transform::ProportionFlags off Offset / Size keep the same proportional variables
+  //   - Visual::Transform::ProportionFlags on Offset / Size keep the same fraction of each variables
+  //   - ExtraSize keep the same fraction of each variables
+  //   - For special, ColorVisual with BlurRadius used keep the same fraction of each variables
+  //   - ABSOLUTE radius boxes keep the same proportional rounding
+  //   - RELATIVE radius box keeps the same fraction of each side
+  //   - Borderline box keeps the same physical border thickness
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  View BuildZoneE()
+  {
+    constexpr uint32_t C_ZONE_E_BG     = 0xDCD4FC; // light purple
+    constexpr float    VISUAL_BOX_SIZE = 80.0f;    // natural box size for visuals
+    constexpr float    ABS_OFFSET      = 10.0f;    // natural offset (ABSOLUTE)
+    constexpr float    ABS_SIZE        = 60.0f;    // natural size (ABSOLUTE)
+    constexpr float    REL_SIZE        = 0.5f;     // size proportion (RELATIVE)
+    constexpr float    EXTRA_SIZE      = 10.0f;    // extra size
+    constexpr float    BLUR_RADIUS     = 15.0f;    // blur radius for ColorVisual
+    constexpr float    CORNER_RADIUS   = 12.0f;    // corner radius
+    constexpr float    BORDER_WIDTH    = 4.0f;     // borderline width
+
+    constexpr float CONTAINER_CORNER_RADIUS   = 20.0f;    // corner radius
+
+    StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_E_BG));
+
+    zone.Add(MakeZoneTitle("[Zone E] VisualBase Transform & Decoration Properties"));
+    zone.Add(MakeDesc(
+      "VisualBase properties (Offset, Size, ExtraSize, CornerRadius, BorderlineWidth, BlurRadius) "
+      "are stored in natural pixels and scaled by effectiveScale at render time."));
+
+    // ── Row 1: Offset & Size with ProportionFlags ───────────────────────────────
+    zone.Add(MakeDesc("Offset/Size with ProportionFlags (NONE vs ALL):"));
+
+    StackLayout row1 = MakeHStack();
+
+    // Box A: ProportionFlags::NONE - all values are absolute pixels
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE + 20.0f);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE + 20.0f);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_BLUE));
+      visual.SetOffsetX(ABS_OFFSET);
+      visual.SetOffsetY(ABS_OFFSET);
+      visual.SetWidth(ABS_SIZE);
+      visual.SetHeight(ABS_SIZE);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::NONE);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row1.Add(MakeLabeled(container, "NONE\nOffset:10px\nSize:60px"));
+    }
+
+    // Box B: ProportionFlags::ALL - all values are proportions
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE + 20.0f);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE + 20.0f);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_GREEN));
+      visual.SetOffsetX(0.1f);
+      visual.SetOffsetY(0.1f);
+      visual.SetWidth(REL_SIZE);
+      visual.SetHeight(REL_SIZE);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::ALL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row1.Add(MakeLabeled(container, "ALL\nOffset:0.1\nSize:0.5"));
+    }
+
+    // Box C: Mixed - X/Y proportional, Width/Height absolute
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE + 20.0f);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE + 20.0f);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_ORANGE));
+      visual.SetOffsetX(0.1f);
+      visual.SetOffsetY(0.1f);
+      visual.SetWidth(ABS_SIZE);
+      visual.SetHeight(ABS_SIZE);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::OFFSET_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row1.Add(MakeLabeled(container, "OFFSET\nOffset:0.1\nSize:60px"));
+    }
+
+    zone.Add(row1);
+
+    // ── Row 2: ExtraSize ────────────────────────────────────────────────────────
+    zone.Add(MakeDesc("ExtraSize (adds absolute pixels to size):"));
+
+    StackLayout row2 = MakeHStack();
+
+    // Box D: No extra size
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_PURPLE));
+      visual.SetWidth(0.8f);
+      visual.SetHeight(0.8f);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row2.Add(MakeLabeled(container, "No Extra\nSize:0.8"));
+    }
+
+    // Box E: With extra size
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_DEEP_ORG));
+      visual.SetWidth(0.6f);
+      visual.SetHeight(0.6f);
+      visual.SetExtraWidth(EXTRA_SIZE);
+      visual.SetExtraHeight(EXTRA_SIZE);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row2.Add(MakeLabeled(container, "Extra +10\nSize:0.6+10"));
+    }
+
+    zone.Add(row2);
+
+    // ── Row 3: ColorVisual BlurRadius ────────────────────────────────────────────
+    zone.Add(MakeDesc("ColorVisual BlurRadius (scaled by effectiveScale):"));
+
+    StackLayout row3 = MakeHStack();
+
+    // Box F: BlurRadius with ABSOLUTE corner radius
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_RED));
+      visual.SetBlurRadius(BLUR_RADIUS);
+      visual.SetCornerRadius(CORNER_RADIUS);
+      visual.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      visual.SetWidth(0.7f);
+      visual.SetHeight(0.7f);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row3.Add(MakeLabeled(container, "Blur 15px\nABS radius"));
+    }
+
+    // Box G: BlurRadius with RELATIVE corner radius
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_GREEN));
+      visual.SetBlurRadius(BLUR_RADIUS);
+      visual.SetCornerRadius(0.2f);
+      visual.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      visual.SetWidth(0.7f);
+      visual.SetHeight(0.7f);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row3.Add(MakeLabeled(container, "Blur 15px\nREL radius"));
+    }
+
+    // Box H: BorderlineWidth
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_BLUE));
+      visual.SetBorderlineWidth(BORDER_WIDTH);
+      visual.SetBorderlineColor(UiColor(C_DARK_TEXT));
+      visual.SetCornerRadius(CORNER_RADIUS);
+      visual.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      visual.SetWidth(0.7f);
+      visual.SetHeight(0.7f);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row3.Add(MakeLabeled(container, "Border 4px\nABS radius"));
+    }
+
+    zone.Add(row3);
+
+    // ── Row 4: ColorVisual BlurRadius with CutoutPolicy ────────────────────────────────────────────
+    zone.Add(MakeDesc("ColorVisual BlurRadius with CutoutPolicy (scaled by effectiveScale):"));
+
+    StackLayout row4 = MakeHStack();
+
+    // Box I: ABSOLUTE corner radius container + BlurRadius with ABSOLUTE corner radius
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+      container.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_RED));
+      visual.SetBlurRadius(BLUR_RADIUS);
+      visual.SetCornerRadius(CORNER_RADIUS);
+      visual.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      visual.SetCutoutPolicy(Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+      visual.SetWidth(1.2f);
+      visual.SetHeight(1.2f);
+      visual.SetOrigin(Ui::Align::CENTER);
+      visual.SetPivot(Ui::Align::CENTER);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row4.Add(MakeLabeled(container, "Blur 15px\nABS contaier\nABS radius"));
+    }
+
+    // Box J: ABSOLUTE corner radius container + BlurRadius with RELATIVE corner radius
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS);
+      container.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_GREEN));
+      visual.SetBlurRadius(BLUR_RADIUS);
+      visual.SetCornerRadius(CORNER_RADIUS / (1.2f * VISUAL_BOX_SIZE));
+      visual.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      visual.SetCutoutPolicy(Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+      visual.SetWidth(1.2f);
+      visual.SetHeight(1.2f);
+      visual.SetOrigin(Ui::Align::CENTER);
+      visual.SetPivot(Ui::Align::CENTER);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row4.Add(MakeLabeled(container, "Blur 15px\nABS contaier\nABS relative"));
+    }
+
+    // Box K: RELATIVE corner radius container + BlurRadius with ABSOLUTE corner radius
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS / VISUAL_BOX_SIZE);
+      container.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_BLUE));
+      visual.SetBlurRadius(BLUR_RADIUS);
+      visual.SetCornerRadius(CORNER_RADIUS);
+      visual.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      visual.SetCutoutPolicy(Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+      visual.SetWidth(1.2f);
+      visual.SetHeight(1.2f);
+      visual.SetOrigin(Ui::Align::CENTER);
+      visual.SetPivot(Ui::Align::CENTER);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row4.Add(MakeLabeled(container, "Blur 15px\nREL contaier\nABS radius"));
+    }
+
+    // Box L: RELATIVE corner radius container + BlurRadius with RELATIVE corner radius
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetCornerRadius(CONTAINER_CORNER_RADIUS / VISUAL_BOX_SIZE);
+      container.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+
+      ColorVisual visual = ColorVisual::New();
+      visual.SetColor(UiColor(C_PURPLE));
+      visual.SetBlurRadius(BLUR_RADIUS);
+      visual.SetCornerRadius(CORNER_RADIUS / (1.2f * VISUAL_BOX_SIZE));
+      visual.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      visual.SetCutoutPolicy(Ui::CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+      visual.SetWidth(1.2f);
+      visual.SetHeight(1.2f);
+      visual.SetOrigin(Ui::Align::CENTER);
+      visual.SetPivot(Ui::Align::CENTER);
+      visual.SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row4.Add(MakeLabeled(container, "Blur 15px\nREL contaier\nABS relative"));
+    }
+
+    zone.Add(row4);
+
+    zone.Add(MakeDesc(
+      "Change scale and verify: ABSOLUTE values scale proportionally, "
+      "RELATIVE values stay as fractions. ExtraSize and BlurRadius scale with effectiveScale."));
+
+    return zone;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Zone F: RenderEffect (GaussianBlurEffect / BackgroundBlurEffect / MaskEffect / OffscreenRendering)
+  //
+  // Test for the render effect result follow the applied view's corner radius with ui scale.
+  //
+  // Make 2x4 layout, upside has ABSOLUTE corner radius, downside has RELATIVE corner radius.
+  // Each column has the render effects.
+  // Check whether upside result is same as downside result.
+  //
+  // To check background blur effect works well, root layout should have ImageVisual.
+  //
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  View BuildZoneF()
+  {
+    constexpr uint32_t C_ZONE_F_BG       = 0xDCF4DC; // light green
+    constexpr float    EFFECT_BOX_SIZE   = 80.0f;    // box size for effect tests
+    constexpr float    ABS_CORNER_RADIUS = 20.0f;    // ABSOLUTE corner radius
+    constexpr float    REL_CORNER_RADIUS = 0.25f;     // RELATIVE corner radius
+    constexpr uint32_t BLUR_RADIUS       = 60u;      // blur radius for effects
+
+    StackLayout zone = BuildZoneContainer(UiColor(C_ZONE_F_BG));
+
+    zone.Add(MakeZoneTitle("[Zone F] RenderEffect with Corner Radius & UiScale"));
+    zone.Add(MakeDesc(
+      "RenderEffect results should follow the applied view's corner radius with ui scale. "
+      "Top row: ABSOLUTE corner radius. Bottom row: RELATIVE corner radius. "
+      "Each column shows different render effects. Results should match visually."));
+
+    // ── Row 1: ABSOLUTE corner radius ──────────────────────────────────────────
+    zone.Add(MakeDesc("ABSOLUTE corner radius (20 px):"));
+
+    StackLayout rowAbs = MakeHStack();
+
+    // Box 1: GaussianBlurEffect with ABSOLUTE corner radius
+    {
+      View box = View::New();
+      box.SetRequestedWidth(EFFECT_BOX_SIZE);
+      box.SetRequestedHeight(EFFECT_BOX_SIZE);
+      box.SetBackgroundColor(UiColor(C_BLUE));
+      box.SetCornerRadius(ABS_CORNER_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      box.Children({
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_RED)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_GREEN)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_BLUE)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_ORANGE)),
+      });
+
+      GaussianBlurEffect blurEffect = GaussianBlurEffect::New(BLUR_RADIUS);
+      box.SetRenderEffect(blurEffect);
+
+      rowAbs.Add(MakeLabeled(box, "GaussianBlur\nABS radius"));
+    }
+
+    // Box 2: BackgroundBlurEffect with ABSOLUTE corner radius
+    {
+      View bgBlurBox;
+      View box = View::New();
+      box.SetRequestedWidth(EFFECT_BOX_SIZE);
+      box.SetRequestedHeight(EFFECT_BOX_SIZE);
+      box.Children({
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_RED)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_GREEN)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_BLUE)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_ORANGE)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE)
+          .SetRequestedHeight(EFFECT_BOX_SIZE)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(0.0f)
+          .SetCornerRadius(ABS_CORNER_RADIUS)
+          .SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE)
+          .SetBackgroundColor(UiColor(C_WHITE).WithAlpha(0.3f)) // semi-transparent for background blur
+          .As(bgBlurBox),
+      });
+
+      BackgroundBlurEffect bgBlurEffect = BackgroundBlurEffect::New(BLUR_RADIUS);
+      bgBlurBox.SetRenderEffect(bgBlurEffect);
+
+      rowAbs.Add(MakeLabeled(box, "BackgroundBlur\nABS radius"));
+    }
+
+    // Box 3: MaskEffect with ABSOLUTE corner radius
+    {
+      // Create mask source view (a simple colored shape)
+      View maskSource = View::New();
+      maskSource.SetRequestedWidth(EFFECT_BOX_SIZE);
+      maskSource.SetRequestedHeight(EFFECT_BOX_SIZE);
+      maskSource.SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f);
+      maskSource.SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f);
+      maskSource.SetBackgroundColor(UiColor(C_WHITE));
+      maskSource.SetCornerRadius(ABS_CORNER_RADIUS);
+      maskSource.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+
+      View box = View::New();
+      box.SetRequestedWidth(EFFECT_BOX_SIZE);
+      box.SetRequestedHeight(EFFECT_BOX_SIZE);
+      box.SetBackgroundColor(UiColor(C_ORANGE));
+      box.SetCornerRadius(ABS_CORNER_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+
+      MaskEffect maskEffect = MaskEffect::New(maskSource);
+      box.SetRenderEffect(maskEffect);
+      box.Add(maskSource); // MaskEffect needs the source as child
+
+      rowAbs.Add(MakeLabeled(box, "MaskEffect\nABS radius"));
+    }
+
+    // Box 4: OffscreenRendering with ABSOLUTE corner radius
+    {
+      View box = View::New();
+      box.SetRequestedWidth(EFFECT_BOX_SIZE);
+      box.SetRequestedHeight(EFFECT_BOX_SIZE);
+      box.SetBackgroundColor(UiColor(C_PURPLE));
+      box.SetCornerRadius(ABS_CORNER_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      box.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING, Ui::View::OffScreenRenderingType::REFRESH_ALWAYS);
+      box.Children({
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_RED)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_GREEN)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_BLUE)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_ORANGE)),
+      });
+
+      rowAbs.Add(MakeLabeled(box, "OffscreenRendering\nABS radius"));
+    }
+
+    zone.Add(rowAbs);
+
+    // ── Row 2: RELATIVE corner radius ──────────────────────────────────────────
+    zone.Add(MakeDesc("RELATIVE corner radius (0.25):"));
+
+    StackLayout rowRel = MakeHStack();
+
+    // Box 5: GaussianBlurEffect with RELATIVE corner radius
+    {
+      View box = View::New();
+      box.SetRequestedWidth(EFFECT_BOX_SIZE);
+      box.SetRequestedHeight(EFFECT_BOX_SIZE);
+      box.SetBackgroundColor(UiColor(C_BLUE));
+      box.SetCornerRadius(REL_CORNER_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      box.Children({
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_RED)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_GREEN)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_BLUE)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_ORANGE)),
+      });
+
+      GaussianBlurEffect blurEffect = GaussianBlurEffect::New(BLUR_RADIUS);
+      box.SetRenderEffect(blurEffect);
+
+      rowRel.Add(MakeLabeled(box, "GaussianBlur\nREL radius"));
+    }
+
+    // Box 6: BackgroundBlurEffect with RELATIVE corner radius
+    {
+      View bgBlurBox;
+      View box = View::New();
+      box.SetRequestedWidth(EFFECT_BOX_SIZE);
+      box.SetRequestedHeight(EFFECT_BOX_SIZE);
+      box.Children({
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_RED)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_GREEN)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_BLUE)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_ORANGE)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE)
+          .SetRequestedHeight(EFFECT_BOX_SIZE)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(0.0f)
+          .SetCornerRadius(REL_CORNER_RADIUS)
+          .SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE)
+          .SetBackgroundColor(UiColor(C_WHITE).WithAlpha(0.3f)) // semi-transparent for background blur
+          .As(bgBlurBox),
+      });
+
+      BackgroundBlurEffect bgBlurEffect = BackgroundBlurEffect::New(BLUR_RADIUS);
+      bgBlurBox.SetRenderEffect(bgBlurEffect);
+
+      rowRel.Add(MakeLabeled(box, "BackgroundBlur\nREL radius"));
+    }
+
+    // Box 7: MaskEffect with RELATIVE corner radius
+    {
+      // Create mask source view (a simple colored shape)
+      View maskSource = View::New();
+      maskSource.SetRequestedWidth(EFFECT_BOX_SIZE);
+      maskSource.SetRequestedHeight(EFFECT_BOX_SIZE);
+      maskSource.SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f);
+      maskSource.SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f);
+      maskSource.SetBackgroundColor(UiColor(C_WHITE));
+      maskSource.SetCornerRadius(ABS_CORNER_RADIUS);
+      maskSource.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+
+      View box = View::New();
+      box.SetRequestedWidth(EFFECT_BOX_SIZE);
+      box.SetRequestedHeight(EFFECT_BOX_SIZE);
+      box.SetBackgroundColor(UiColor(C_ORANGE));
+      box.SetCornerRadius(REL_CORNER_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+
+      MaskEffect maskEffect = MaskEffect::New(maskSource);
+      box.SetRenderEffect(maskEffect);
+      box.Add(maskSource); // MaskEffect needs the source as child
+
+      rowRel.Add(MakeLabeled(box, "MaskEffect\nREL radius"));
+    }
+
+    // Box 8: OffscreenRendering with RELATIVE corner radius
+    {
+      View box = View::New();
+      box.SetRequestedWidth(EFFECT_BOX_SIZE);
+      box.SetRequestedHeight(EFFECT_BOX_SIZE);
+      box.SetBackgroundColor(UiColor(C_PURPLE));
+      box.SetCornerRadius(REL_CORNER_RADIUS);
+      box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      box.Children({
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_RED)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(0.0f)
+          .SetBackgroundColor(UiColor(C_GREEN)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(0.0f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_BLUE)),
+        View::New()
+          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
+          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
+          .SetBackgroundColor(UiColor(C_ORANGE)),
+      });
+
+      box.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING, Ui::View::OffScreenRenderingType::REFRESH_ALWAYS);
+
+      rowRel.Add(MakeLabeled(box, "OffscreenRendering\nREL radius"));
+    }
+
+    zone.Add(rowRel);
+
+    zone.Add(MakeDesc(
+      "Change scale and verify: ABSOLUTE and RELATIVE corner radius results should match proportionally. "
+      "RenderEffect output should respect the view's corner radius at any scale."));
 
     return zone;
   }

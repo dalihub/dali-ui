@@ -518,6 +518,9 @@ Shader NPatchVisual::CreateShader()
       if(DALI_UNLIKELY(!shader))
       {
         shader = mFactoryCache.GenerateAndSaveShader(shaderType, SHADER_NPATCH_VISUAL_3X3_SHADER_VERT, fragmentShader);
+
+        shader.ReserveCustomProperties(1);
+        shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
       }
     }
     else if(xStretchCount > 0 || yStretchCount > 0)
@@ -531,6 +534,9 @@ Shader NPatchVisual::CreateShader()
                    << SHADER_NPATCH_VISUAL_SHADER_VERT;
 
       shader = Shader::New(ToDaliStringView(vertexShader.str()), ToDaliStringView(fragmentShader), Dali::Shader::Hint::NONE, ToDaliStringView(shaderName.str()));
+
+      shader.ReserveCustomProperties(1);
+      shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
     }
   }
   else
@@ -566,6 +572,9 @@ Shader NPatchVisual::CreateShader()
 
       shader = Shader::New(ToDaliStringView(vertexShader.str()), ToDaliStringView(fragmentShader), hints, ToDaliStringView(shaderName.str()));
     }
+
+    shader.ReserveCustomProperties(1);
+    shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   }
 
   return shader;

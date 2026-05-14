@@ -318,9 +318,11 @@ void MeshVisual::OnInitialize()
 
 void MeshVisual::SupplyEmptyGeometry()
 {
-  mGeometry        = Geometry::New();
-  mShader          = Shader::New(ToDaliStringView(SHADER_MESH_VISUAL_SIMPLE_SHADER_VERT), ToDaliStringView(SHADER_MESH_VISUAL_SIMPLE_SHADER_FRAG),
-                                 Shader::Hint::NONE, "MESH_VISUAL_SIMPLE");
+  mGeometry = Geometry::New();
+  mShader   = Shader::New(ToDaliStringView(SHADER_MESH_VISUAL_SIMPLE_SHADER_VERT), ToDaliStringView(SHADER_MESH_VISUAL_SIMPLE_SHADER_FRAG),
+                          Shader::Hint::NONE, "MESH_VISUAL_SIMPLE");
+  mShader.ReserveCustomProperties(1);
+  mShader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   mImpl->mRenderer = VisualRenderer::New(mGeometry, mShader);
 
   DALI_LOG_ERROR("Initialisation error in mesh visual.\n");
@@ -360,6 +362,8 @@ void MeshVisual::CreateShader()
                           static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                           "MESH_VISUAL_SIMPLE");
   }
+  mShader.ReserveCustomProperties(1);
+  mShader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
 
   UpdateShaderUniforms();
 }

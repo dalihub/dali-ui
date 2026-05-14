@@ -64,6 +64,7 @@ UNIFORM_BLOCK Borderline
 {
   UNIFORM highp float borderlineWidth;
   UNIFORM highp float borderlineOffset;
+  UNIFORM highp float viewEffectiveScale;
 };
 #endif
 
@@ -123,7 +124,7 @@ void calculatePosition()
 {
   gCenterPosition = -gRadius;
 #ifdef IS_REQUIRED_BORDERLINE
-  gCenterPosition += borderlineWidth * (clamp(borderlineOffset, -1.0, 1.0) + 1.0) * 0.5;
+  gCenterPosition += borderlineWidth * viewEffectiveScale * (clamp(borderlineOffset, -1.0, 1.0) + 1.0) * 0.5;
 #endif
   gDiff = gFragmentPosition - gCenterPosition;
 }
@@ -170,8 +171,8 @@ void setupMinMaxPotential()
   gMinOutlinePotential = gRadius - gPotentialRange;
 
 #ifdef IS_REQUIRED_BORDERLINE
-  gMaxInlinePotential = gMaxOutlinePotential - borderlineWidth;
-  gMinInlinePotential = gMinOutlinePotential - borderlineWidth;
+  gMaxInlinePotential = gMaxOutlinePotential - borderlineWidth * viewEffectiveScale;
+  gMinInlinePotential = gMinOutlinePotential - borderlineWidth * viewEffectiveScale;
 #endif
 
   // reduce defect near edge of rounded corner.
@@ -205,7 +206,7 @@ lowp vec4 convertBorderlineColor(lowp vec4 textureColor)
     borderlineOpacity = smoothstep(gMinInlinePotential, gMaxInlinePotential, potential);
 
     // Muliply borderlineWidth to resolve very thin borderline
-    borderlineOpacity *= min(1.0, borderlineWidth / gPotentialRange);
+    borderlineOpacity *= min(1.0, borderlineWidth * viewEffectiveScale/ gPotentialRange);
   }
 
   highp vec3  borderlineColorRGB   = borderlineColor.rgb * uActorColor.rgb;

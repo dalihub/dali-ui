@@ -494,6 +494,9 @@ Shader VisualFactoryCache::GetNPatchShader(int index)
                  << SHADER_NPATCH_VISUAL_SHADER_VERT;
     shader =
       Shader::New(ToDaliStringView(vertexShader.str()), ToDaliStringView(SHADER_NPATCH_VISUAL_SHADER_FRAG), Dali::Shader::Hint::NONE, ToDaliStringView(shaderName.str()));
+
+    shader.ReserveCustomProperties(1);
+    shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   }
   return shader;
 }

@@ -271,6 +271,9 @@ Dali::Shader& GaussianBlurAlgorithm::GetGaussianBlurShader(const uint32_t blurRa
     cachedShader = Dali::Integration::ShaderNewWithUniformBlock(ToDaliStringView(BASIC_VERTEX_SOURCE), ToDaliStringView(fragmentSource),
                                                                 Dali::Shader::Hint::FILE_CACHE_SUPPORT,
                                                                 ToDaliStringView(shaderNameBuilder.str()), {cachedUniformBlock});
+
+    cachedShader.ReserveCustomProperties(1);
+    cachedShader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   }
   return cachedShader;
 }

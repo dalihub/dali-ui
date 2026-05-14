@@ -389,13 +389,16 @@ const PropertyRegistration ViewDataImpl::PROPERTY_42(typeRegistration, "focusGro
 const PropertyRegistration ViewDataImpl::PROPERTY_43(typeRegistration, "forwardFocusableViewId",  Ui::View::Property::FORWARD_FOCUSABLE_VIEW_ID,  Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_44(typeRegistration, "backwardFocusableViewId", Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 
+// Animatable without uniform
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_1(typeRegistration, "viewCornerRadius",       Ui::View::Property::CORNER_RADIUS,        Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_2(typeRegistration, "viewCornerRadiusPolicy", Ui::View::Property::CORNER_RADIUS_POLICY, Property::Value(static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE)), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for constarint-input
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_3(typeRegistration, "viewCornerSquareness",   Ui::View::Property::CORNER_SQUARENESS,    Property::VECTOR4, &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_4(typeRegistration, "viewBorderlineWidth",    Ui::View::Property::BORDERLINE_WIDTH,     Property::FLOAT,   &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_5(typeRegistration, "viewBorderlineColor",    Ui::View::Property::BORDERLINE_COLOR,     Property::Value(Color::BLACK), &ViewDataImpl::SetProperty, nullptr);
 const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_6(typeRegistration, "viewBorderlineOffset",   Ui::View::Property::BORDERLINE_OFFSET,    Property::FLOAT,   &ViewDataImpl::SetProperty, nullptr);
-const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_7(typeRegistration, "viewEffectiveScale",     VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX,      Property::Value(1.0f), &ViewDataImpl::SetProperty, nullptr);
+
+// Animatable with uniform
+const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_7(typeRegistration, "viewEffectiveScale", VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, Property::Value(1.0f), &ViewDataImpl::SetProperty, nullptr); ///< Make animatable, for use it as uniform
 
 // clang-format on
 
@@ -1361,14 +1364,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
       case VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX:
       {
-        // Notify all visual constraints that depend on effective scale to re-evaluate.
-        if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
-        {
-          viewImpl.GetViewDataImpl().mVisualData->NotifyConstraintPropertyChanged(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX,
-                                                                                  false);
-        }
-        // RenderEffect / OffScreenRendering use an imperative path (no constraint), so nudge explicitly.
-        viewImpl.GetViewDataImpl().UpdateCornerRadius();
+        // TODO : Do something if you need!
         break;
       }
 
@@ -1806,7 +1802,6 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::BORDERLINE_WIDTH:
       case Ui::View::Property::BORDERLINE_COLOR:
       case Ui::View::Property::BORDERLINE_OFFSET:
-      case VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX:
       {
         // Do not return property for animatable custom properties.
         // Actual variables of each property will be registered at custom area.
@@ -2015,7 +2010,6 @@ void ViewDataImpl::SetInnerShadow(const Property::Map& map)
         innerShadowCornerRadiusConstraint.AddSource(LocalSource(Dali::VisualRenderer::Property::EXTRA_SIZE));
         innerShadowCornerRadiusConstraint.AddSource(
           LocalSource(Dali::DecoratedVisualRenderer::Property::BORDERLINE_WIDTH));
-        innerShadowCornerRadiusConstraint.AddSource(Source(handle, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
 
         Dali::Integration::ConstraintSetInternalTag(innerShadowCornerRadiusConstraint,
                                                     INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG);
@@ -2088,7 +2082,6 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Dali::Actor::Property::SIZE));
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_WIDTH));
           borderlineCornerRadiusConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_OFFSET));
-          borderlineCornerRadiusConstraint.AddSource(Source(handle, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
 
           Dali::Integration::ConstraintSetInternalTag(borderlineCornerRadiusConstraint,
                                                       BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG);
@@ -2102,15 +2095,14 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
                          visualBorderlineOffsetProperty.object))
           {
             auto borderlineWidthConstraint = Constraint::New<float>(
-              visualBorderlineWidthProperty.object, visualBorderlineWidthProperty.propertyIndex, ScaledBorderlineWidthConstraint);
+              visualBorderlineWidthProperty.object, visualBorderlineWidthProperty.propertyIndex, Dali::EqualToConstraint());
             borderlineWidthConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_WIDTH));
-            borderlineWidthConstraint.AddSource(Source(handle, VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
             auto borderlineColorConstraint = Constraint::New<Vector4>(
-              visualBorderlineColorProperty.object, visualBorderlineColorProperty.propertyIndex, EqualToConstraint());
+              visualBorderlineColorProperty.object, visualBorderlineColorProperty.propertyIndex, Dali::EqualToConstraint());
             borderlineColorConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_COLOR));
             auto borderlineOffsetConstraint =
               Constraint::New<float>(visualBorderlineOffsetProperty.object,
-                                     visualBorderlineOffsetProperty.propertyIndex, EqualToConstraint());
+                                     visualBorderlineOffsetProperty.propertyIndex, Dali::EqualToConstraint());
             borderlineOffsetConstraint.AddSource(Source(handle, Ui::View::Property::BORDERLINE_OFFSET));
 
             Dali::Integration::ConstraintSetInternalTag(borderlineWidthConstraint, BORDERLINE_WIDTH_CONSTRAINT_TAG);
@@ -2309,16 +2301,10 @@ void ViewDataImpl::UpdateCornerRadius()
 {
   if(mRenderEffect || mOffScreenRenderingImpl)
   {
-    Actor       self   = mViewImpl.Self();
-    const float scale  = mViewImpl.GetEffectiveScale();
-    const int   policy = self.GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY);
+    Actor     self   = mViewImpl.Self();
+    const int policy = self.GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY);
 
     Vector4 cornerRadius = self.GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS);
-    if(policy == static_cast<int>(Ui::Visual::Transform::Policy::ABSOLUTE))
-    {
-      // Natural-pixel value → visual pixels for the RenderEffect renderer.
-      cornerRadius *= scale;
-    }
 
     Property::Map map;
     map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius);
@@ -2340,16 +2326,14 @@ void ViewDataImpl::UpdateCornerRadius()
 
 void ViewDataImpl::UpdateBorderline()
 {
-  Actor       self  = mViewImpl.Self();
-  const float scale = mViewImpl.GetEffectiveScale();
+  Actor self = mViewImpl.Self();
 
   Property::Map map;
   map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::Type::COLOR);
   map.Insert(Ui::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
   // Scale natural-pixel width to visual pixels for the initial visual creation.
-  // The ScaledBorderlineWidthConstraint keeps it up to date thereafter.
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_WIDTH,
-             self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH) * scale);
+             self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH));
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_COLOR,
              self.GetProperty<Vector4>(Ui::View::Property::BORDERLINE_COLOR));
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_OFFSET,

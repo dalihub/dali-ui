@@ -19,7 +19,8 @@ UNIFORM_BLOCK VertBlock
 
 UNIFORM_BLOCK SharedBlock
 {
-UNIFORM highp vec3 uSize;
+  UNIFORM highp vec3 uSize;
+  UNIFORM highp float viewEffectiveScale;
 };
 
 void main()
@@ -29,7 +30,7 @@ void main()
   gl_Position = uMvpMatrix * vertexPosition;
 
   highp float minSize = min(uSize.x, uSize.y);
-  vCornerRadius = mix(uCornerRadius * minSize, uCornerRadius, uCornerRadiusPolicy);
+  vCornerRadius = mix(uCornerRadius * minSize, uCornerRadius * viewEffectiveScale, uCornerRadiusPolicy);
   vCornerRadius = min(vCornerRadius, minSize * 0.5);
 
   vOptRectSize = uSize.xy * 0.5;

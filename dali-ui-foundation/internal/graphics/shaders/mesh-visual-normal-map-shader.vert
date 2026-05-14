@@ -15,6 +15,7 @@ OUTPUT highp vec3 vHalfVector;
 UNIFORM_BLOCK VertBlock
 {
   UNIFORM highp vec3 uSize;
+  UNIFORM highp float viewEffectiveScale;
   UNIFORM highp mat4 uMvpMatrix;
   UNIFORM highp mat4 uModelView;
   UNIFORM highp mat4 uViewMatrix;
@@ -37,12 +38,12 @@ UNIFORM_BLOCK VisualVertBlock
 
 vec4 ComputeVertexPosition()
 {
-  vec2 visualSize = mix(size * uSize.xy, size, offsetSizeMode.zw ) + extraSize;
+  vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw ) + extraSize * viewEffectiveScale;
   float scaleFactor = min( visualSize.x, visualSize.y );
   vec3 originFlipY =vec3(origin.x, -origin.y, 0.0);
   vec3 pivotFlipY = vec3( pivot.x, -pivot.y, 0.0);
-  vec3 visualOffset = vec3( offset * offsetSizeMode.xy + offset * uSize.xy * (1.0 - offsetSizeMode.xy), 0.0) * vec3(1.0,-1.0,1.0);
-  return vec4( (aPosition + pivotFlipY)*scaleFactor + visualOffset + originFlipY * uSize, 1.0 );
+  vec3 visualOffset = vec3( offset * viewEffectiveScale * offsetSizeMode.xy + offset * uSize.xy * (1.0 - offsetSizeMode.xy), 0.0) * vec3(1.0,-1.0,1.0);
+  return vec4( (aPosition + pivotFlipY) * scaleFactor + visualOffset + originFlipY * uSize, 1.0 );
 }
 
 void main()

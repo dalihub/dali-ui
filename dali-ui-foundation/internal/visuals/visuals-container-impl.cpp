@@ -70,16 +70,13 @@ Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Int
       constraint.AddSource(Source(view, Dali::Actor::Property::SIZE));
       constraint.AddSource(LocalSource(Dali::VisualRenderer::Property::EXTRA_SIZE));
       constraint.AddSource(LocalSource(Dali::DecoratedVisualRenderer::Property::BORDERLINE_WIDTH));
-      constraint.AddSource(Source(view, Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
       Dali::Integration::ConstraintSetInternalTag(constraint, INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG);
     }
   }
   else if(visualObjectImpl.GetShadowType() == Dali::Ui::VisualsContainer::ShadowType::BOX_SHADOW)
   {
-    constraint = Constraint::New<Vector4>(visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, BoxShadowCornerRadiusConstraint);
+    constraint = Constraint::New<Vector4>(visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, Dali::EqualToConstraint());
     constraint.AddSource(Source(view, Dali::Ui::View::Property::CORNER_RADIUS));
-    constraint.AddSource(Source(view, Dali::Ui::View::Property::CORNER_RADIUS_POLICY));
-    constraint.AddSource(Source(view, Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX));
   }
   return constraint;
 }
