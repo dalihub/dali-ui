@@ -55,7 +55,7 @@ namespace Ui
 {
 namespace Text
 {
-void Controller::EventHandler::KeyboardFocusGainEvent(Controller& controller)
+void Controller::EventHandler::KeyboardFocusGainEvent(Controller& controller, bool scrollToCursor)
 {
   DALI_ASSERT_DEBUG(controller.mImpl->mEventData && "Unexpected KeyboardFocusGainEvent");
 
@@ -68,7 +68,7 @@ void Controller::EventHandler::KeyboardFocusGainEvent(Controller& controller)
       controller.mImpl->mEventData->mUpdateCursorPosition =
         true; // If editing started without tap event, cursor update must be triggered.
       controller.mImpl->mEventData->mUpdateInputStyle          = true;
-      controller.mImpl->mEventData->mScrollAfterUpdatePosition = true;
+      controller.mImpl->mEventData->mScrollAfterUpdatePosition = scrollToCursor;
     }
     controller.mImpl->NotifyInputMethodContextMultiLineStatus();
     if(controller.mImpl->IsShowingPlaceholderText())

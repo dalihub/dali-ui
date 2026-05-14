@@ -38,7 +38,8 @@ struct Controller::EventHandler
 {
   /// @copydoc Text::Controller::KeyboardFocusGainEvent
   /// @param[in] controller A reference to the controller class
-  static void KeyboardFocusGainEvent(Controller& controller);
+  /// @param[in] scrollToCursor Whether to scroll the current cursor position into view.
+  static void KeyboardFocusGainEvent(Controller& controller, bool scrollToCursor);
 
   /// @copydoc Text::Controller::KeyboardFocusLostEvent
   /// @param[in] controller A reference to the controller class

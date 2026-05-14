@@ -2398,8 +2398,12 @@ private:
 public: // Text-input Event Queuing.
   /**
    * @brief Called by editable UI controls when keyboard focus is gained.
+   *
+   * @param[in] scrollToCursor Whether to scroll the current cursor position into view.
+   *                           Should be false when focus is gained by touch/tap to prevent
+   *                           scroll before tap hit-test is processed.
    */
-  void KeyboardFocusGainEvent();
+  void KeyboardFocusGainEvent(bool scrollToCursor = true);
 
   /**
    * @brief Called by editable UI controls when focus is lost.

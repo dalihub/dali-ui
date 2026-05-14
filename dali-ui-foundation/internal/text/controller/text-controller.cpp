@@ -2050,9 +2050,9 @@ void Controller::OnIdleSignal()
   }
 }
 
-void Controller::KeyboardFocusGainEvent()
+void Controller::KeyboardFocusGainEvent(bool scrollToCursor)
 {
-  EventHandler::KeyboardFocusGainEvent(*this);
+  EventHandler::KeyboardFocusGainEvent(*this, scrollToCursor);
 }
 
 void Controller::KeyboardFocusLostEvent()
@@ -2104,7 +2104,7 @@ void Controller::SetTextSelectionRange(const uint32_t* start, const uint32_t* en
     mImpl->mEventData->mIsRightHandleSelected = true;
     mImpl->SetTextSelectionRange(start, end);
     RequestRelayout();
-    EventHandler::KeyboardFocusGainEvent(*this);
+    EventHandler::KeyboardFocusGainEvent(*this, true);
   }
 }
 
@@ -2128,7 +2128,7 @@ bool Controller::SetPrimaryCursorPosition(CharacterIndex index, bool focused)
     mImpl->mEventData->mCheckScrollAmount     = true;
     if(mImpl->SetPrimaryCursorPosition(index, focused) && focused)
     {
-      EventHandler::KeyboardFocusGainEvent(*this);
+      EventHandler::KeyboardFocusGainEvent(*this, true);
       return true;
     }
   }

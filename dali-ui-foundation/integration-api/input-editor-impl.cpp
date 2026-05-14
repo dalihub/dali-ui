@@ -267,7 +267,8 @@ InputEditorImpl::InputEditorImpl()
   mCursorPositionChanged(false),
   mSelectionStarted(false),
   mSelectionChanged(false),
-  mSelectionCleared(false)
+  mSelectionCleared(false),
+  mFocusGainedByTouch(false)
 {
 }
 
@@ -1397,7 +1398,9 @@ void InputEditorImpl::OnFocusGained()
 
   if(IsEditable() && mController->IsUserInteractionEnabled())
   {
-    mController->KeyboardFocusGainEvent(); // Called in the case of no virtual keyboard to trigger this event
+    const bool scrollToCursor = !mFocusGainedByTouch;
+    mController->KeyboardFocusGainEvent(scrollToCursor);
+    mFocusGainedByTouch = false;
   }
 }
 
@@ -1417,6 +1420,7 @@ void InputEditorImpl::OnFocusLost()
   }
 
   mController->KeyboardFocusLostEvent();
+  mFocusGainedByTouch = false;
 }
 
 void InputEditorImpl::OnSceneConnection(int depth)
@@ -1886,6 +1890,26 @@ void InputEditorImpl::OnSceneConnect(Dali::Actor actor)
 
 bool InputEditorImpl::OnTouched(Actor actor, TouchEvent touch)
 {
+  if(touch.GetPointCount() == 0u)
+  {
+    return false;
+  }
+
+  const PointState::Type state = touch.GetState(0);
+
+  if(PointState::DOWN == state)
+  {
+    if(!HasKeyInputFocus(*this))
+    {
+      // Touch focus should not scroll to the old cursor position before tap is handled.
+      mFocusGainedByTouch = true;
+    }
+  }
+  else if(PointState::UP == state || PointState::INTERRUPTED == state)
+  {
+    mFocusGainedByTouch = false;
+  }
+
   return false;
 }
 
