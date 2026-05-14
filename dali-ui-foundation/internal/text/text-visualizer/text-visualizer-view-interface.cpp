@@ -366,4 +366,9 @@ bool TextVisualizerViewInterface::IsCutoutEnabled() const
   return false;
 }
 
+Text::Alignment TextVisualizerViewInterface::GetVerticalLineAlignment() const
+{
+  return Text::Alignment::CENTER;
+}
+
 } // namespace Dali::Ui::Internal::TextVisualizer

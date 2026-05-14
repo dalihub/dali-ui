@@ -1283,11 +1283,12 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
 
   const bool                  isMultiLine = (Layout::Engine::MULTI_LINE_BOX == mLayoutEngine.GetLayout());
   GetCursorPositionParameters parameters;
-  parameters.visualModel  = mModel->mVisualModel;
-  parameters.logicalModel = mModel->mLogicalModel;
-  parameters.metrics      = mMetrics;
-  parameters.logical      = logical;
-  parameters.isMultiline  = isMultiLine;
+  parameters.visualModel           = mModel->mVisualModel;
+  parameters.logicalModel          = mModel->mLogicalModel;
+  parameters.metrics               = mMetrics;
+  parameters.logical               = logical;
+  parameters.verticalLineAlignment = mModel->GetVerticalLineAlignment();
+  parameters.isMultiline           = isMultiLine;
 
   float defaultFontLineHeight = GetDefaultFontLineHeight();
 

@@ -98,6 +98,11 @@ private:
       .SetVerticalTextAlignment(Text::Alignment::CENTER)
       .SetFocusable(true);
 
+    // RTL test
+    // mInputField.SetText("ABC العربية DEF עברית GHI 12345 JKL שלום MNO مرحبا PQR 67890 STU");
+    // mInputField.SetLayoutDirection(Dali::LayoutDirection::RIGHT_TO_LEFT);
+    // mInputField.SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT);
+
     // Set text handle images
     mInputField.SetCursorHandleImage(RESOURCES_DIR "cursor_handle.png");
     mInputField.SetCursorHandlePressedImage(RESOURCES_DIR "cursor_handle_pressed.png");

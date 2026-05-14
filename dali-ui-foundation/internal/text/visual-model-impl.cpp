@@ -487,6 +487,16 @@ void VisualModel::SetCharacterSpacing(float characterSpacing)
   mCharacterSpacing = characterSpacing;
 }
 
+void VisualModel::SetVerticalLineAlignment(Alignment alignment)
+{
+  mVerticalLineAlignment = alignment;
+}
+
+Alignment VisualModel::GetVerticalLineAlignment() const
+{
+  return mVerticalLineAlignment;
+}
+
 const Vector4& VisualModel::GetTextColor() const
 {
   return mTextColor;
@@ -774,6 +784,7 @@ VisualModel::VisualModel()
   mCachedLayoutSize(),
   mHeightForWidth(0.0f, 0.0f),
   mCachedLineIndex(0u),
+  mVerticalLineAlignment(Alignment::CENTER),
   mEllipsisPosition(EllipsisPosition::END),
   mStartIndexOfElidedGlyphs(0u),
   mEndIndexOfElidedGlyphs(0u),

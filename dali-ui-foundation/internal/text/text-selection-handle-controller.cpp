@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-event-handler.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
+#include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 
 using namespace Dali;
@@ -153,13 +154,18 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
 
   // Retrieve the first line and get the line's vertical offset, the line's height and the index to the last glyph.
 
+  lineRun += firstLineIndex;
+
+  // Get vertical line alignment for selection highlight positioning
+  const Alignment verticalLineAlignment = model->GetVerticalLineAlignment();
+  const float     verticalLineOffset    = GetPreOffsetVerticalLineAlignment(*lineRun, verticalLineAlignment);
+
   // The line's vertical offset of all the lines before the line where the first glyph is laid-out.
-  selectionBoxInfo->lineOffset = CalculateLineOffset(visualModel->mLines, firstLineIndex);
+  // Add verticalLineOffset to position highlight at visible text area within LineHeight.
+  selectionBoxInfo->lineOffset = CalculateLineOffset(visualModel->mLines, firstLineIndex) + verticalLineOffset;
 
   // Transform to decorator's (control) coords.
   selectionBoxInfo->lineOffset += model->mScrollPosition.y;
-
-  lineRun += firstLineIndex;
 
   // Selection highlight uses the natural text line height.
   // Explicit LineHeight affects line placement, but the highlight should not
@@ -301,9 +307,15 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
         selectionBoxInfo->minX = MAX_FLOAT;
         selectionBoxInfo->maxX = MIN_FLOAT;
 
+        // Calculate vertical line offset for the next line
+        const float nextLineVerticalOffset = GetPreOffsetVerticalLineAlignment(*lineRun, verticalLineAlignment);
+
         // Use CalculateLineOffset for consistent line offset calculation.
         // This avoids cumulative errors when explicit LineHeight is set.
-        selectionBoxInfo->lineOffset = CalculateLineOffset(visualModel->mLines, lineIndex) + model->mScrollPosition.y;
+        // Add verticalLineOffset to position highlight at visible text area within LineHeight.
+        selectionBoxInfo->lineOffset = CalculateLineOffset(visualModel->mLines, lineIndex) +
+                                       nextLineVerticalOffset +
+                                       model->mScrollPosition.y;
 
         // Selection highlight uses the natural text line height.
         // Explicit LineHeight affects line placement, but the highlight should not

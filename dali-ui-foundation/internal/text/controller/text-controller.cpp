@@ -1878,6 +1878,10 @@ Alignment Controller::GetVerticalLineAlignment() const
 void Controller::SetVerticalLineAlignment(Alignment alignment)
 {
   mImpl->mModel->mVerticalLineAlignment = alignment;
+  if(mImpl->mModel->mVisualModel)
+  {
+    mImpl->mModel->mVisualModel->SetVerticalLineAlignment(alignment);
+  }
 }
 
 Text::EllipsisPosition::Type Controller::GetEllipsisPosition() const

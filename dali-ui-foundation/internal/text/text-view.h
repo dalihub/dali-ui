@@ -290,6 +290,11 @@ public:
    */
   bool IsCutoutEnabled() const override;
 
+  /**
+   * @copydoc Dali::Ui::Text::ViewInterface::GetVerticalLineAlignment()
+   */
+  Alignment GetVerticalLineAlignment() const override;
+
 private:
   // Undefined
   View(const View& handle);

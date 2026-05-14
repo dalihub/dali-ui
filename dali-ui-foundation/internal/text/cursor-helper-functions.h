@@ -76,12 +76,13 @@ struct CursorInfo
  */
 struct GetCursorPositionParameters
 {
-  VisualModelPtr  visualModel;  ///< The visual model.
-  LogicalModelPtr logicalModel; ///< The logical model.
-  MetricsPtr      metrics;      ///< A wrapper around FontClient used to get metrics.
-  CharacterIndex  logical;      ///< The logical cursor position (in characters). 0 is just before the first character, a
-                                ///< value equal to the number of characters is just after the last character.
-  bool isMultiline;             ///< Whether the text control is multi-line.
+  VisualModelPtr  visualModel;     ///< The visual model.
+  LogicalModelPtr logicalModel;    ///< The logical model.
+  MetricsPtr      metrics;         ///< A wrapper around FontClient used to get metrics.
+  CharacterIndex  logical;         ///< The logical cursor position (in characters). 0 is just before the first character, a
+                                   ///< value equal to the number of characters is just after the last character.
+  Alignment verticalLineAlignment; ///< The vertical line alignment.
+  bool      isMultiline;           ///< Whether the text control is multi-line.
 };
 
 /**

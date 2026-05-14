@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/internal/text/characters-helper-functions.h>
 #include <dali-ui-foundation/internal/text/emoji-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
+#include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 
 namespace
@@ -546,11 +547,14 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
         ? (cursorInfo.isSecondaryCursor ? 0.5f * glyphMetrics.fontHeight : glyphMetrics.fontHeight)
         : defaultFontLineHeight;
 
+    // Calculate vertical line alignment offset for the new line
+    const float verticalLineOffset = GetPreOffsetVerticalLineAlignment(newLine, parameters.verticalLineAlignment);
+
     // Set the primary cursor's position.
     cursorInfo.primaryPosition.x = (LTR == line.direction)
                                      ? newLine.alignmentOffset
                                      : parameters.visualModel->mControlSize.width - newLine.alignmentOffset;
-    cursorInfo.primaryPosition.y = cursorInfo.lineOffset;
+    cursorInfo.primaryPosition.y = cursorInfo.lineOffset + verticalLineOffset;
   }
   else
   {
@@ -712,10 +716,13 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
     cursorInfo.primaryCursorHeight =
       cursorInfo.isSecondaryCursor ? 0.5f * glyphMetrics.fontHeight : glyphMetrics.fontHeight;
 
+    // Calculate vertical line alignment offset for the current line
+    const float verticalLineOffset = GetPreOffsetVerticalLineAlignment(line, parameters.verticalLineAlignment);
+
     cursorInfo.glyphOffset = line.ascender - glyphMetrics.ascender;
     // Set the primary cursor's position.
     cursorInfo.primaryPosition.x = -glyphMetrics.xBearing + primaryPosition.x + glyphAdvance;
-    cursorInfo.primaryPosition.y = cursorInfo.lineOffset + cursorInfo.glyphOffset;
+    cursorInfo.primaryPosition.y = cursorInfo.lineOffset + verticalLineOffset + cursorInfo.glyphOffset;
 
     // Transform the cursor info from line's coords to text's coords.
     cursorInfo.primaryPosition.x += line.alignmentOffset;
@@ -763,7 +770,7 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
         GetGlyphCharacterSpacing(secondaryGlyphIndex, characterSpacingGlyphRuns, modelCharacterSpacing);
       cursorInfo.secondaryPosition.x = -glyphMetrics.xBearing + secondaryPosition.x +
                                        (addGlyphAdvance ? (glyphMetrics.advance + characterSpacing) : 0.f);
-      cursorInfo.secondaryPosition.y = cursorInfo.lineOffset + cursorInfo.lineHeight - cursorInfo.secondaryCursorHeight;
+      cursorInfo.secondaryPosition.y = cursorInfo.lineOffset + verticalLineOffset + cursorInfo.lineHeight - cursorInfo.secondaryCursorHeight;
 
       // Transform the cursor info from line's coords to text's coords.
       cursorInfo.secondaryPosition.x += line.alignmentOffset;

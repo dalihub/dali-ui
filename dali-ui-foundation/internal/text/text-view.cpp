@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
+#include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 
 namespace Dali::Ui::Text
@@ -546,7 +547,7 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
         mImpl->mVisualModel->GetLinesOfGlyphRange(lineBuffer, glyphIndex, numberOfLaidOutGlyphs);
 
         // Get the first line for the given glyph range.
-        LineIndex lineIndex = firstLineIndex;
+        LineIndex lineIndex = 0u;
         LineRun*  line      = lineBuffer + lineIndex;
 
         // Index of the last glyph of the line.
@@ -555,17 +556,22 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
                                     : line->glyphRun.glyphIndex + line->glyphRun.numberOfGlyphs) -
           1u;
 
+        // Get vertical line alignment for glyph positioning
+        const Alignment verticalLineAlignment = GetVerticalLineAlignment();
+
         // Add the alignment offset to the glyph's position.
 
-        minLineOffset = line->alignmentOffset;
-        float penY    = line->ascender;
+        minLineOffset            = line->alignmentOffset;
+        float penY               = line->ascender;
+        float verticalLineOffset = GetPreOffsetVerticalLineAlignment(*line, verticalLineAlignment);
         for(Length index = 0u; index < numberOfLaidOutGlyphs; ++index)
         {
           Vector2& position = *(glyphPositions + index);
           position.x += line->alignmentOffset;
-          position.y += penY;
+          position.y += penY + verticalLineOffset;
 
-          if(lastGlyphIndexOfLine == index)
+          const GlyphIndex currentGlyphIndex = glyphIndex + index;
+          if(lastGlyphIndexOfLine == currentGlyphIndex)
           {
             penY += -line->descender + line->lineSpacing;
 
@@ -584,6 +590,7 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
                 1u;
 
               penY += line->ascender;
+              verticalLineOffset = GetPreOffsetVerticalLineAlignment(*line, verticalLineAlignment);
             }
           }
         }
@@ -1058,6 +1065,15 @@ bool View::IsCutoutEnabled() const
     return mImpl->mVisualModel->IsCutoutEnabled();
   }
   return false;
+}
+
+Alignment View::GetVerticalLineAlignment() const
+{
+  if(mImpl->mVisualModel)
+  {
+    return mImpl->mVisualModel->GetVerticalLineAlignment();
+  }
+  return Alignment::CENTER;
 }
 
 } // namespace Dali::Ui::Text

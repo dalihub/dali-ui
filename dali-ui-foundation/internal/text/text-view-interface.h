@@ -396,6 +396,13 @@ public:
    * @return The cutout state.
    */
   virtual bool IsCutoutEnabled() const = 0;
+
+  /**
+   * @brief Retrieves the vertical line alignment.
+   *
+   * @return The vertical line alignment.
+   */
+  virtual Alignment GetVerticalLineAlignment() const = 0;
 };
 
 } // namespace Text

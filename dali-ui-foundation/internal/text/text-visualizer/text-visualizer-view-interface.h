@@ -101,6 +101,7 @@ public:
   const Text::Character*                   GetTextBuffer() const override;
   const Vector<Text::CharacterIndex>&      GetGlyphsToCharacters() const override;
   bool                                     IsCutoutEnabled() const override;
+  Text::Alignment                          GetVerticalLineAlignment() const override;
 
 private:
   const AtlasViewAdapter* mAdapter;

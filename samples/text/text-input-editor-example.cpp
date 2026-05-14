@@ -68,6 +68,36 @@ const char* GetLineWrapModeName(Text::LineWrapMode mode)
   }
 }
 
+const char* GetHorizontalAlignmentName(Text::Alignment alignment)
+{
+  switch(alignment)
+  {
+    case Text::Alignment::START:
+      return "START";
+    case Text::Alignment::CENTER:
+      return "CENTER";
+    case Text::Alignment::END:
+      return "END";
+    default:
+      return "UNKNOWN";
+  }
+}
+
+const char* GetVerticalAlignmentName(Text::Alignment alignment)
+{
+  switch(alignment)
+  {
+    case Text::Alignment::START:
+      return "START";
+    case Text::Alignment::CENTER:
+      return "CENTER";
+    case Text::Alignment::END:
+      return "END";
+    default:
+      return "UNKNOWN";
+  }
+}
+
 enum class LineHeightStep
 {
   AUTO,
@@ -193,6 +223,14 @@ private:
     // Set initial multi-line text
     mInputEditor.SetText("This is line 1.\nThis is line 2.\nThis is line 3.");
 
+    // RTL test
+    // mInputEditor.SetText("Line 1: English starts here, then العربية 12345 مع النص العربي, and back to English.\n"
+    //                      "Line 2: Another LTR part before עברית עם מספרים 67890 ואז English continues.\n"
+    //                      "Line 3: Mix brackets (العربية inside parentheses) and [עברית inside brackets] with 2026.");
+
+    // mInputEditor.SetLayoutDirection(Dali::LayoutDirection::RIGHT_TO_LEFT);
+    // mInputEditor.SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT);
+
     // Connect signals
     mInputEditor.TextChangedSignal().Connect(this, &InputEditorController::OnTextChanged);
     mInputEditor.MaximumLengthReachedSignal().Connect(this, &InputEditorController::OnMaximumLengthReached);
@@ -266,6 +304,11 @@ private:
     Label btnLineHeightMode = CreateButton("LineHeightMode", 0x16A085);
     View lineHeightRow = CreateButtonRow({btnLineHeight, btnLineHeightMode});
 
+    // Alignment buttons
+    Label btnHorizontalAlignment = CreateButton("H Align", 0xE74C3C);
+    Label btnVerticalAlignment = CreateButton("V Align", 0x3498DB);
+    View alignmentRow = CreateButtonRow({btnHorizontalAlignment, btnVerticalAlignment});
+
     // Info button
     Label btnInfo = CreateButton("Print Info (log)", 0x34495E);
     View infoRow = CreateButtonRow({btnInfo});
@@ -305,6 +348,8 @@ private:
         lineWrapRow,
         // Line height
         lineHeightRow,
+        // Alignment
+        alignmentRow,
         infoRow,
       });
 
@@ -361,6 +406,10 @@ private:
     btnLineHeight.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineHeightTouched);
     btnLineHeightMode.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineHeightModeTouched);
 
+    // Connect button touch signals - Alignment
+    btnHorizontalAlignment.TouchedSignal().Connect(this, &InputEditorController::OnButtonHorizontalAlignmentTouched);
+    btnVerticalAlignment.TouchedSignal().Connect(this, &InputEditorController::OnButtonVerticalAlignmentTouched);
+
     btnInfo.TouchedSignal().Connect(this, &InputEditorController::OnButtonInfoTouched);
 
     // Also support key events
@@ -405,6 +454,10 @@ private:
     status += GetLineHeightText(mInputEditor.GetLineHeight());
     status += " Mode:";
     status += GetLineHeightModeName(mInputEditor.GetLineHeightMode());
+    status += "\nHAlign:";
+    status += GetHorizontalAlignmentName(mInputEditor.GetHorizontalTextAlignment());
+    status += " VAlign:";
+    status += GetVerticalAlignmentName(mInputEditor.GetVerticalTextAlignment());
 
     mStatusLabel.SetText(status);
   }
@@ -495,6 +548,10 @@ private:
     status += GetLineHeightText(mInputEditor.GetLineHeight());
     status += " Mode:";
     status += GetLineHeightModeName(mInputEditor.GetLineHeightMode());
+    status += "\nHAlign:";
+    status += GetHorizontalAlignmentName(mInputEditor.GetHorizontalTextAlignment());
+    status += " VAlign:";
+    status += GetVerticalAlignmentName(mInputEditor.GetVerticalTextAlignment());
 
     mStatusLabel.SetText(status);
   }
@@ -860,6 +917,56 @@ private:
 
       mInputEditor.SetLineHeightMode(newMode);
       mInputEditor.SetLineHeight(newLineHeight);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonHorizontalAlignmentTouched(Actor, TouchEvent touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      Text::Alignment alignment = mInputEditor.GetHorizontalTextAlignment();
+      Text::Alignment newAlignment;
+      // Cycle through: START -> CENTER -> END -> START
+      if(alignment == Text::Alignment::START)
+      {
+        newAlignment = Text::Alignment::CENTER;
+      }
+      else if(alignment == Text::Alignment::CENTER)
+      {
+        newAlignment = Text::Alignment::END;
+      }
+      else
+      {
+        newAlignment = Text::Alignment::START;
+      }
+      mInputEditor.SetHorizontalTextAlignment(newAlignment);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonVerticalAlignmentTouched(Actor, TouchEvent touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      Text::Alignment alignment = mInputEditor.GetVerticalTextAlignment();
+      Text::Alignment newAlignment;
+      // Cycle through: START -> CENTER -> END -> START
+      if(alignment == Text::Alignment::START)
+      {
+        newAlignment = Text::Alignment::CENTER;
+      }
+      else if(alignment == Text::Alignment::CENTER)
+      {
+        newAlignment = Text::Alignment::END;
+      }
+      else
+      {
+        newAlignment = Text::Alignment::START;
+      }
+      mInputEditor.SetVerticalTextAlignment(newAlignment);
       UpdateStatus();
     }
     return true;

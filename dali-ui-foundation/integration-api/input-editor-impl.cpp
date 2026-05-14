@@ -1244,6 +1244,7 @@ void InputEditorImpl::OnInitialize()
   // TODO: Re-enable when grab handle and popup support are fully implemented.
   mController->SetGrabHandleEnabled(false);
   mController->SetGrabHandlePopupEnabled(false);
+  mController->SetVerticalLineAlignment(Text::Alignment::CENTER);
 
   ApplyInitialConfig();
 }
