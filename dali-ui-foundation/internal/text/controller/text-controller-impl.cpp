@@ -1533,6 +1533,9 @@ void Controller::Impl::ScrollToMakePositionVisible(const Vector2& position, floa
     {
       Relayouter::CalculateVerticalOffset(*this, mModel->mVisualModel->mControlSize);
     }
+
+    // Clamp the scroll position to valid bounds after adjustment.
+    ClampVerticalScroll(mModel->mVisualModel->GetLayoutSize());
   }
 }
 

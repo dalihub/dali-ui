@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
+#include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 
 using namespace Dali;
@@ -119,6 +120,54 @@ bool ControllerImplEventHandler::ProcessInputEvents(Controller::Impl& impl)
     impl.NotifyInputMethodContext();
   }
 
+  // Lambda to calculate scroll target range, including line box edges for first/last lines.
+  ModelPtr&       model             = impl.mModel;
+  VisualModelPtr& visualModel       = model->mVisualModel;
+  const Length    lineCount         = visualModel->mLines.Count();
+  const Alignment verticalLineAlign = model->GetVerticalLineAlignment();
+
+  auto calculateScrollTarget = [&visualModel, lineCount, verticalLineAlign](
+                                 const CursorInfo& info,
+                                 CharacterIndex    cursorPosition) -> std::pair<float, float>
+  {
+    float visibleTop    = info.primaryPosition.y - info.glyphOffset;
+    float visibleBottom = visibleTop + info.lineHeight;
+
+    if(lineCount > 0u)
+    {
+      const CharacterIndex characterIndex =
+        (cursorPosition > 0u) ? cursorPosition - 1u : 0u;
+
+      const LineIndex lineIndex   = visualModel->GetLineOfCharacter(characterIndex);
+      const bool      isFirstLine = (lineIndex == 0u);
+      const bool      isLastLine  = (lineIndex + 1u >= lineCount);
+
+      if(isFirstLine || isLastLine)
+      {
+        const LineRun& line              = *(visualModel->mLines.Begin() + lineIndex);
+        const float    naturalLineHeight = line.ascender - line.descender;
+        const float    lineBoxHeight =
+          GetPreOffsetVerticalLineAlignment(line, verticalLineAlign) +
+          naturalLineHeight +
+          GetPostOffsetVerticalLineAlignment(line, verticalLineAlign);
+
+        const float lineBoxTop    = info.lineOffset;
+        const float lineBoxBottom = lineBoxTop + lineBoxHeight;
+
+        if(isFirstLine)
+        {
+          visibleTop = lineBoxTop;
+        }
+        if(isLastLine)
+        {
+          visibleBottom = std::max(visibleBottom, lineBoxBottom);
+        }
+      }
+    }
+
+    return {visibleTop, visibleBottom};
+  };
+
   // The cursor must also be repositioned after inserts into the model
   if(eventData->mUpdateCursorPosition)
   {
@@ -150,10 +199,11 @@ bool ControllerImplEventHandler::ProcessInputEvents(Controller::Impl& impl)
     // ... then, text can be scrolled to make the cursor visible.
     if(eventData->mScrollAfterUpdatePosition)
     {
-      // Use the visible text area top, not the line box top.
-      const float   visibleLineTop = cursorInfo.primaryPosition.y - cursorInfo.glyphOffset;
-      const Vector2 currentCursorPosition(cursorInfo.primaryPosition.x, visibleLineTop);
-      impl.ScrollToMakePositionVisible(currentCursorPosition, cursorInfo.lineHeight);
+      auto [visibleTop, visibleBottom] =
+        calculateScrollTarget(cursorInfo, eventData->mPrimaryCursorPosition);
+
+      const Vector2 currentCursorPosition(cursorInfo.primaryPosition.x, visibleTop);
+      impl.ScrollToMakePositionVisible(currentCursorPosition, visibleBottom - visibleTop);
     }
     eventData->mScrollAfterUpdatePosition = false;
     eventData->mScrollAfterDelete         = false;
@@ -184,27 +234,30 @@ bool ControllerImplEventHandler::ProcessInputEvents(Controller::Impl& impl)
         if(eventData->mIsLeftHandleSelected && eventData->mIsRightHandleSelected)
         {
           CursorInfo& infoLeft = leftHandleInfo;
+          auto [visibleTopLeft, visibleBottomLeft] =
+            calculateScrollTarget(infoLeft, eventData->mLeftSelectionPosition);
 
-          // Use the visible text area top, not the line box top.
-          const float   visibleLineTopLeft = infoLeft.primaryPosition.y - infoLeft.glyphOffset;
-          const Vector2 currentCursorPositionLeft(infoLeft.primaryPosition.x, visibleLineTopLeft);
-          impl.ScrollToMakePositionVisible(currentCursorPositionLeft, infoLeft.lineHeight);
+          const Vector2 currentCursorPositionLeft(infoLeft.primaryPosition.x, visibleTopLeft);
+          impl.ScrollToMakePositionVisible(currentCursorPositionLeft, visibleBottomLeft - visibleTopLeft);
 
           CursorInfo& infoRight = rightHandleInfo;
+          auto [visibleTopRight, visibleBottomRight] =
+            calculateScrollTarget(infoRight, eventData->mRightSelectionPosition);
 
-          // Use the visible text area top, not the line box top.
-          const float   visibleLineTopRight = infoRight.primaryPosition.y - infoRight.glyphOffset;
-          const Vector2 currentCursorPositionRight(infoRight.primaryPosition.x, visibleLineTopRight);
-          impl.ScrollToMakePositionVisible(currentCursorPositionRight, infoRight.lineHeight);
+          const Vector2 currentCursorPositionRight(infoRight.primaryPosition.x, visibleTopRight);
+          impl.ScrollToMakePositionVisible(currentCursorPositionRight, visibleBottomRight - visibleTopRight);
         }
         else
         {
           CursorInfo& info = eventData->mIsLeftHandleSelected ? leftHandleInfo : rightHandleInfo;
 
-          // Use the visible text area top, not the line box top.
-          const float   visibleLineTop = info.primaryPosition.y - info.glyphOffset;
-          const Vector2 currentCursorPosition(info.primaryPosition.x, visibleLineTop);
-          impl.ScrollToMakePositionVisible(currentCursorPosition, info.lineHeight);
+          CharacterIndex selectionPosition =
+            eventData->mIsLeftHandleSelected ? eventData->mLeftSelectionPosition : eventData->mRightSelectionPosition;
+
+          auto [visibleTop, visibleBottom] = calculateScrollTarget(info, selectionPosition);
+
+          const Vector2 currentCursorPosition(info.primaryPosition.x, visibleTop);
+          impl.ScrollToMakePositionVisible(currentCursorPosition, visibleBottom - visibleTop);
         }
       }
     }
