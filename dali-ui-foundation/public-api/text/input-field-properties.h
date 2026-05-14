@@ -20,6 +20,9 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/property-index-ranges.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
+
 namespace Dali
 {
 namespace Ui
@@ -33,8 +36,11 @@ struct InputFieldPropertyIndex
    */
   enum PropertyRange
   {
-    PROPERTY_START_INDEX = Ui::View::VIEW_PROPERTY_END_INDEX + 1,
-    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000 ///< Reserve property indices.
+    PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_END_INDEX + 1,
+    PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+
+    ANIMATABLE_PROPERTY_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_END_INDEX + 1,
+    ANIMATABLE_PROPERTY_END_INDEX   = ANIMATABLE_PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
   };
 
   /**

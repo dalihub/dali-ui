@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
@@ -1576,17 +1577,6 @@ private:
 
 public:
   /**
-   * @brief Enumeration for the start and end property ranges for View.
-   */
-  enum PropertyRange
-  {
-    PROPERTY_START_INDEX =
-      PROPERTY_REGISTRATION_START_INDEX,                         ///< Start index is used by the property registration macro.
-    VIEW_PROPERTY_START_INDEX = PROPERTY_START_INDEX,            ///< Start index of View properties.
-    VIEW_PROPERTY_END_INDEX   = VIEW_PROPERTY_START_INDEX + 1000 ///< Reserving 1000 property indices.
-  };
-
-  /**
    * @brief OffScreenRenderingType enumeration.
    */
   enum OffScreenRenderingType
@@ -1595,6 +1585,22 @@ public:
     REFRESH_ONCE,
     REFRESH_ALWAYS
   };
+
+  /**
+   * @brief Enumeration for the start and end property ranges for this control.
+   */
+  enum PropertyRange
+  {
+    PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_START_INDEX,
+    PROPERTY_END_INDEX   = Ui::VIEW_PROPERTY_END_INDEX,
+
+    ANIMATABLE_PROPERTY_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_START_INDEX,
+    ANIMATABLE_PROPERTY_END_INDEX   = Ui::VIEW_ANIMATABLE_PROPERTY_END_INDEX,
+
+    ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
+    ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX   = Ui::VIEW_ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_END_INDEX,
+  };
+
   /**
    * @brief Enumeration for the instance of properties belonging to the View class.
    */
@@ -1610,7 +1616,7 @@ public:
        *
        * @details Name "background", type Property::MAP or Dali::String for URL or Property::VECTOR4 for Color.
        */
-      BACKGROUND = PROPERTY_START_INDEX + 1,
+      BACKGROUND = PROPERTY_START_INDEX,
 
       /**
        * @brief The outer space around the View.
@@ -1844,7 +1850,7 @@ public:
        * @see Dali::Ui::DevelVisual::Property::Type::CORNER_RADIUS
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
-      CORNER_RADIUS = ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_REGISTRATION_START_INDEX,
+      CORNER_RADIUS = ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
 
       /**
        * @brief Whether the corner radius value is relative (percentage [0.0f to 0.5f] of the visual size) or absolute

@@ -276,9 +276,8 @@ int UtcDaliAnimatedImageViewPropertyImageP(void)
   UiTestApplication application;
   AnimatedImageView view = AnimatedImageView::New();
 
-  view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX), // IMAGE
-                   Dali::String("animation.gif"));
-  Dali::Property::Value value = view.GetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX));
+  view.SetProperty(Dali::Ui::AnimatedImageView::Property::IMAGE, Dali::String("animation.gif"));
+  Dali::Property::Value value = view.GetProperty(Dali::Ui::AnimatedImageView::Property::IMAGE);
   Dali::String url;
   DALI_TEST_CHECK(value.Get(url));
   DALI_TEST_EQUALS(url, Dali::String("animation.gif"), TEST_LOCATION);

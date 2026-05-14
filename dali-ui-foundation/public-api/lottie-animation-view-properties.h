@@ -20,6 +20,9 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/property-index-ranges.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
+
 namespace Dali
 {
 namespace Ui
@@ -40,8 +43,11 @@ struct LottieAnimationViewPropertyIndex
    */
   enum PropertyRange
   {
-    PROPERTY_START_INDEX = PROPERTY_REGISTRATION_START_INDEX,
+    PROPERTY_START_INDEX = Ui::VIEW_PROPERTY_END_INDEX + 1,
     PROPERTY_END_INDEX   = PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
+
+    ANIMATABLE_PROPERTY_START_INDEX = Ui::VIEW_ANIMATABLE_PROPERTY_END_INDEX + 1,
+    ANIMATABLE_PROPERTY_END_INDEX   = ANIMATABLE_PROPERTY_START_INDEX + 1000, ///< Reserve property indices.
   };
 
   /**
@@ -213,7 +219,7 @@ struct LottieAnimationViewPropertyIndex
      * @details Name "pixelArea", type Property::VECTOR4 (animatable). Default is (0, 0, 1, 1) — full texture.
      * @note See also: LottieAnimationView::SetPixelArea(), LottieAnimationView::GetPixelArea().
      */
-    PIXEL_AREA = ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX,
+    PIXEL_AREA = ANIMATABLE_PROPERTY_START_INDEX,
 
   };
 };

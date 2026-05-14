@@ -167,9 +167,8 @@ int UtcDaliLottieAnimationViewPropertyImageP(void)
   UiTestApplication application;
   LottieAnimationView view = LottieAnimationView::New();
 
-  view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX), // IMAGE
-                   Dali::String("animation.json"));
-  Dali::Property::Value value = view.GetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX));
+  view.SetProperty(Dali::Ui::LottieAnimationView::Property::IMAGE, Dali::String("animation.json"));
+  Dali::Property::Value value = view.GetProperty(Dali::Ui::LottieAnimationView::Property::IMAGE);
   Dali::String url;
   DALI_TEST_CHECK(value.Get(url));
   DALI_TEST_EQUALS(url, Dali::String("animation.json"), TEST_LOCATION);

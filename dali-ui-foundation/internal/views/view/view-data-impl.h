@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/attachment-id.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
@@ -53,10 +54,9 @@ namespace Internal
 {
 /// @brief Type-level animatable property index for effective UI scale.
 /// Defined here (not in the public View::Property enum) to keep it internal.
-/// Value matches ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX,
-/// @warning Please change this value if view.h add new enum as ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX
-inline constexpr Property::Index VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX =
-  ANIMATABLE_PROPERTY_REGISTRATION_START_INDEX;
+/// Value matches Dali::Ui::View::ANIMATABLE_PROPERTY_START_INDEX + 500,
+/// @warning Please change this value if view.h add new enum as Dali::Ui::View::ANIMATABLE_PROPERTY_START_INDEX + 500
+inline constexpr Property::Index VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX = Ui::View::ANIMATABLE_PROPERTY_START_INDEX + 500;
 
 class AttachmentContainer;
 

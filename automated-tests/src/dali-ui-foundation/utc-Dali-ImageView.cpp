@@ -333,9 +333,8 @@ int UtcDaliImageViewPropertySamplingModeP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
 
-  view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 2), // SAMPLING_MODE
-                   static_cast<int>(Ui::Image::SamplingMode::NO_FILTER));
-  Dali::Property::Value value = view.GetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 2));
+  view.SetProperty(Dali::Ui::ImageView::Property::SAMPLING_MODE, static_cast<int>(Ui::Image::SamplingMode::NO_FILTER));
+  Dali::Property::Value value = view.GetProperty(Dali::Ui::ImageView::Property::SAMPLING_MODE);
   int mode = 0;
   DALI_TEST_CHECK(value.Get(mode));
   DALI_TEST_EQUALS(static_cast<Ui::Image::SamplingMode>(mode), Ui::Image::SamplingMode::NO_FILTER, TEST_LOCATION);
@@ -347,9 +346,8 @@ int UtcDaliImageViewPropertyReleasePolicyP(void)
   UiTestApplication application;
   ImageView view = ImageView::New();
 
-  view.SetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 12), // RELEASE_POLICY
-                   static_cast<int>(Ui::Image::ReleasePolicy::NEVER));
-  Dali::Property::Value value = view.GetProperty(Dali::Property::Index(Dali::PROPERTY_REGISTRATION_START_INDEX + 12));
+  view.SetProperty(Dali::Ui::ImageView::Property::RELEASE_POLICY, static_cast<int>(Ui::Image::ReleasePolicy::NEVER));
+  Dali::Property::Value value = view.GetProperty(Dali::Ui::ImageView::Property::RELEASE_POLICY);
   int policy = 0;
   DALI_TEST_CHECK(value.Get(policy));
   DALI_TEST_EQUALS(static_cast<Ui::Image::ReleasePolicy>(policy), Ui::Image::ReleasePolicy::NEVER, TEST_LOCATION);
