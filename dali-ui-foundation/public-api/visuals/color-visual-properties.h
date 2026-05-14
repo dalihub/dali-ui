@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
 {
@@ -33,34 +34,49 @@ namespace Ui
 /**
  * @brief ColorVisual Property.
  */
-namespace ColorVisualPropertyIndex
-{
-/**
- * @brief Enumeration for the instance of properties belonging to the ColorVisual.
- */
-enum
+struct ColorVisualPropertyIndex
 {
   /**
-   * @brief The blur radius of the visual.
-   * @details Name "blurRadius", type Property::FLOAT, animatable.
-   *          If the value is 0, the edge is sharp. Otherwise, the larger the value, the more the edge is blurred.
-   * @note Optional.
-   * @note The default is 0.
-   * @note The visual size increases by the blur radius.
-   * @note If squareness is not zero, the width of blur radius might not equal with it's real value.
+   * @brief Enumeration for the start and end property ranges for this visual.
    */
-  BLUR_RADIUS = MUTABLE_VISUAL_PROPERTY_START_INDEX,
+  enum PropertyRange
+  {
+    MUTABLE_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::MUTABLE_PROPERTY_END_INDEX + 1,
+    MUTABLE_PROPERTY_END_INDEX   = MUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+    IMMUTABLE_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::IMMUTABLE_PROPERTY_END_INDEX + 1,
+    IMMUTABLE_PROPERTY_END_INDEX   = IMMUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+    READ_ONLY_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::READ_ONLY_PROPERTY_END_INDEX + 1,
+    READ_ONLY_PROPERTY_END_INDEX   = READ_ONLY_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+  };
 
   /**
-   * @brief Policy of cutout the color render result.
-   * @details Name "cutoutPolicy", type Property::INTEGER.
-   * @note Optional.
-   * @note The default is CutoutPolicy::NONE.
+   * @brief Enumeration for the instance of properties belonging to the ColorVisual.
    */
-  CUTOUT_POLICY = IMMUTABLE_VISUAL_PROPERTY_START_INDEX,
-};
+  enum
+  {
+    /**
+     * @brief The blur radius of the visual.
+     * @details Name "blurRadius", type Property::FLOAT, animatable.
+     *          If the value is 0, the edge is sharp. Otherwise, the larger the value, the more the edge is blurred.
+     * @note Optional.
+     * @note The default is 0.
+     * @note The visual size increases by the blur radius.
+     * @note If squareness is not zero, the width of blur radius might not equal with it's real value.
+     */
+    BLUR_RADIUS = MUTABLE_PROPERTY_START_INDEX,
 
-} // namespace ColorVisualPropertyIndex
+    /**
+     * @brief Policy of cutout the color render result.
+     * @details Name "cutoutPolicy", type Property::INTEGER.
+     * @note Optional.
+     * @note The default is CutoutPolicy::NONE.
+     */
+    CUTOUT_POLICY = IMMUTABLE_PROPERTY_START_INDEX,
+  };
+
+}; // struct ColorVisualPropertyIndex
 
 /**
  * @brief Enumeration for cutout policy.

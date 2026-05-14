@@ -956,7 +956,7 @@ void ImageVisual::DoSetOffScene(Actor& actor)
 void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::IMAGE);
 
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
@@ -1010,7 +1010,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
 void ImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::IMAGE);
   if(mImageUrl.IsValid())
   {
     Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;

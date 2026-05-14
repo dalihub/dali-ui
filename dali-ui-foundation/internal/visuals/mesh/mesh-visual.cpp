@@ -257,7 +257,7 @@ void MeshVisual::DoSetOnScene(Actor& actor)
 void MeshVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::MESH);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::MESH);
   map.Insert(Ui::MeshVisual::Property::OBJECT_URL, ToPropertyValue(mObjectUrl));
   map.Insert(Ui::MeshVisual::Property::MATERIAL_URL, ToPropertyValue(mMaterialUrl));
   map.Insert(Ui::MeshVisual::Property::TEXTURES_PATH, ToPropertyValue(mTexturesPath));

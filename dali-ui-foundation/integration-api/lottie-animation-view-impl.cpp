@@ -857,7 +857,7 @@ void LottieAnimationViewImpl::UpdateVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Visual::Property::TYPE, static_cast<int>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE));
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE));
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
 
   map.Insert(Ui::ImageVisualPropertyIndex::LOOP_COUNT, mLoopCount);
@@ -902,7 +902,7 @@ void LottieAnimationViewImpl::UpdateVisual()
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, static_cast<int>(mReleasePolicy));
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, mSynchronousLoading);
   map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, mPixelArea);
-  map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
+  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
 
   auto visualFactory = Ui::VisualFactory::Get();
   if(visualFactory)
@@ -999,7 +999,7 @@ void LottieAnimationViewImpl::SetImageColor(const UiColor& color)
     {
       // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
-      map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
+      map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
       mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
     }
     else
@@ -1083,7 +1083,7 @@ void LottieAnimationViewImpl::UpdatePlaceholderVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Visual::Property::TYPE, Visual::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Visual::IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);

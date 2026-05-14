@@ -1206,7 +1206,7 @@ void LabelImpl::OnInitialize()
   Actor self = Self();
 
   Dali::Property::Map propertyMap;
-  propertyMap.Add(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
+  propertyMap.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::TEXT);
 
   mVisual   = Ui::VisualFactory::Get().CreateVisual(propertyMap);
   View view = Ui::View::DownCast(self);
@@ -2250,7 +2250,7 @@ bool LabelImpl::GetViewBackgroundColor(Vector4& backgroundColor) const
   if(backgroundValue.GetType() == Property::MAP)
   {
     const Property::Map& backgroundMap = backgroundValue.Get<Property::Map>();
-    Property::Value*     mixColorValue = backgroundMap.Find(Ui::Visual::Property::MIX_COLOR);
+    Property::Value*     mixColorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
     if(mixColorValue)
     {
       backgroundColor = mixColorValue->Get<Vector4>();

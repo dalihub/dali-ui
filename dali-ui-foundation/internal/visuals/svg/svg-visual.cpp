@@ -398,7 +398,7 @@ void SvgVisual::GetNaturalSize(Vector2& naturalSize)
 void SvgVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::SVG);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::SVG);
   if(mImageUrl.IsValid())
   {
     map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));

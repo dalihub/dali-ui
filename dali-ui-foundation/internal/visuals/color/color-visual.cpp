@@ -184,8 +184,8 @@ ColorVisual::~ColorVisual()
 void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // By virtue of DoSetProperties being called last, this will override
-  // anything set by Ui::Visual::Property::MIX_COLOR
-  Property::Value* colorValue = propertyMap.Find(Ui::Visual::Property::MIX_COLOR, MIX_COLOR);
+  // anything set by Ui::VisualBasePropertyIndex::MIX_COLOR
+  Property::Value* colorValue = propertyMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR, MIX_COLOR);
   if(colorValue)
   {
     Vector4 color;
@@ -295,8 +295,8 @@ void ColorVisual::DoSetOffScene(Actor& actor)
 void ColorVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::COLOR);
-  map.Insert(Ui::Visual::Property::MIX_COLOR, mImpl->mMixColor);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::COLOR);
+  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImpl->mMixColor);
   map.Insert(Ui::ColorVisualPropertyIndex::CUTOUT_POLICY, mCutoutPolicy);
 
   if(mImpl->mRenderer)

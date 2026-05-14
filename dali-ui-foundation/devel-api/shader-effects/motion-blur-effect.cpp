@@ -63,7 +63,7 @@ Property::Map CreateMotionBlurEffect()
 
   customShader[Visual::Shader::Property::HINTS] = Shader::Hint::OUTPUT_IS_TRANSPARENT;
 
-  map[Ui::Visual::Property::SHADER] = customShader;
+  map[Ui::VisualBasePropertyIndex::SHADER] = customShader;
   return map;
 }
 

@@ -37,7 +37,7 @@ Property::Map CreateAlphaDiscardEffect()
   Property::Map customShader;
   customShader[Visual::Shader::Property::FRAGMENT_SHADER] = ToPropertyValue(SHADER_ALPHA_DISCARD_EFFECT_FRAG.data());
 
-  map[Ui::Visual::Property::SHADER] = customShader;
+  map[Ui::VisualBasePropertyIndex::SHADER] = customShader;
   return map;
 }
 

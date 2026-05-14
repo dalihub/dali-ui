@@ -151,7 +151,7 @@ void BorderVisual::DoSetOnScene(Actor& actor)
 void BorderVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::BORDER);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::BORDER);
   map.Insert(Ui::BorderVisual::Property::COLOR, mBorderColor);
   map.Insert(Ui::BorderVisual::Property::SIZE, mBorderSize);
   map.Insert(Ui::BorderVisual::Property::ANTI_ALIASING, mAntiAliasing);

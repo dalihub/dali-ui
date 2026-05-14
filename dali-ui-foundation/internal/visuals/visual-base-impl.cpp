@@ -114,10 +114,10 @@ struct StringProperty
   Property::Index   index;
 };
 StringProperty PROPERTY_NAME_INDEX_TABLE[] = {
-  {CUSTOM_SHADER, Ui::Visual::Property::SHADER},
-  {TRANSFORM, Ui::Visual::Property::TRANSFORM},
-  {MIX_COLOR, Ui::Visual::Property::MIX_COLOR},
-  {OPACITY, Ui::Visual::Property::OPACITY},
+  {CUSTOM_SHADER, Ui::VisualBasePropertyIndex::SHADER},
+  {TRANSFORM, Ui::VisualBasePropertyIndex::TRANSFORM},
+  {MIX_COLOR, Ui::VisualBasePropertyIndex::MIX_COLOR},
+  {OPACITY, Ui::VisualBasePropertyIndex::OPACITY},
   {BORDERLINE_WIDTH, Ui::DevelVisual::Property::BORDERLINE_WIDTH},
   {BORDERLINE_COLOR, Ui::DevelVisual::Property::BORDERLINE_COLOR},
   {BORDERLINE_OFFSET, Ui::DevelVisual::Property::BORDERLINE_OFFSET},
@@ -235,7 +235,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
 
     switch(GetVisualPropertyIndex(key))
     {
-      case Ui::Visual::Property::SHADER:
+      case Ui::VisualBasePropertyIndex::SHADER:
       {
         if(value.GetType() == Property::MAP)
         {
@@ -256,7 +256,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         break;
       }
 
-      case Ui::Visual::Property::TRANSFORM:
+      case Ui::VisualBasePropertyIndex::TRANSFORM:
       {
         Property::Map map;
         if(value.Get(map))
@@ -296,7 +296,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         break;
       }
 
-      case Ui::Visual::Property::MIX_COLOR:
+      case Ui::VisualBasePropertyIndex::MIX_COLOR:
       {
         Vector4 mixColor;
         if(value.Get(mixColor))
@@ -313,7 +313,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         }
         break;
       }
-      case Ui::Visual::Property::OPACITY:
+      case Ui::VisualBasePropertyIndex::OPACITY:
       {
         float opacity;
         if(value.Get(opacity))
@@ -757,12 +757,12 @@ void Visual::Base::CreatePropertyMap(Property::Map& map) const
   {
     transform = Transform::GetDefaultTransformMap();
   }
-  map.Insert(Ui::Visual::Property::TRANSFORM, transform);
+  map.Insert(Ui::VisualBasePropertyIndex::TRANSFORM, transform);
 
   // Note, Color and Primitive will also insert their own mix color into the map
   // which is ok, because they have a different key value range, but uses same cached value anyway.
-  map.Insert(Ui::Visual::Property::MIX_COLOR, mImpl->mMixColor); // vec4
-  map.Insert(Ui::Visual::Property::OPACITY, mImpl->mMixColor.a);
+  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImpl->mMixColor); // vec4
+  map.Insert(Ui::VisualBasePropertyIndex::OPACITY, mImpl->mMixColor.a);
 
   if(IsTypeAvailableForBorderline(mImpl->mType))
   {
@@ -1179,19 +1179,19 @@ Property::Index Visual::Base::GetIntKey(Property::Key key)
 
   if(key.stringKey == MIX_COLOR)
   {
-    return Ui::Visual::Property::MIX_COLOR;
+    return Ui::VisualBasePropertyIndex::MIX_COLOR;
   }
   else if(key.stringKey == OPACITY)
   {
-    return Ui::Visual::Property::OPACITY;
+    return Ui::VisualBasePropertyIndex::OPACITY;
   }
   else if(key.stringKey == CUSTOM_SHADER)
   {
-    return Ui::Visual::Property::SHADER;
+    return Ui::VisualBasePropertyIndex::SHADER;
   }
   else if(key.stringKey == TRANSFORM)
   {
-    return Ui::Visual::Property::TRANSFORM;
+    return Ui::VisualBasePropertyIndex::TRANSFORM;
   }
   else if(key.stringKey == CORNER_RADIUS)
   {
@@ -1241,11 +1241,11 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     {
       return VisualRenderer::Property::TRANSFORM_PIVOT;
     }
-    case Dali::Ui::Visual::Property::MIX_COLOR:
+    case Dali::Ui::VisualBasePropertyIndex::MIX_COLOR:
     {
       return Renderer::Property::MIX_COLOR;
     }
-    case Dali::Ui::Visual::Property::OPACITY:
+    case Dali::Ui::VisualBasePropertyIndex::OPACITY:
     {
       return Renderer::Property::OPACITY;
     }
@@ -1341,11 +1341,11 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
   switch(GetIntKey(key))
   {
     // Default animatable properties from VisualRenderer
-    case Ui::Visual::Property::MIX_COLOR:
+    case Ui::VisualBasePropertyIndex::MIX_COLOR:
     {
       return Dali::Property(mImpl->mRenderer, Renderer::Property::MIX_COLOR);
     }
-    case Ui::Visual::Property::OPACITY:
+    case Ui::VisualBasePropertyIndex::OPACITY:
     {
       return Dali::Property(mImpl->mRenderer, Renderer::Property::OPACITY);
     }

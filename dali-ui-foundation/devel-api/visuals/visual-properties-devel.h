@@ -57,11 +57,11 @@ namespace Property
 {
 enum Type
 {
-  TYPE      = Dali::Ui::Visual::Property::TYPE,
-  SHADER    = Dali::Ui::Visual::Property::SHADER,
-  TRANSFORM = Dali::Ui::Visual::Property::TRANSFORM,
-  MIX_COLOR = Dali::Ui::Visual::Property::MIX_COLOR,
-  OPACITY   = Dali::Ui::Visual::Property::OPACITY,
+  TRANSFORM = Dali::Ui::VisualBasePropertyIndex::TRANSFORM,
+  SHADER    = Dali::Ui::VisualBasePropertyIndex::SHADER,
+  MIX_COLOR = Dali::Ui::VisualBasePropertyIndex::MIX_COLOR,
+  OPACITY   = Dali::Ui::VisualBasePropertyIndex::OPACITY,
+  TYPE      = Dali::Ui::VisualBasePropertyIndex::TYPE,
 
   /**
    * @brief The radius for the rounded corners of the visual.

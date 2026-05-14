@@ -37,7 +37,7 @@ Property::Map CreateImageRegionEffect()
   Property::Map customShader;
   customShader[Visual::Shader::Property::VERTEX_SHADER] = ToPropertyValue(SHADER_IMAGE_REGION_EFFECT_VERT.data());
 
-  map[Ui::Visual::Property::SHADER] = customShader;
+  map[Ui::VisualBasePropertyIndex::SHADER] = customShader;
   return map;
 }
 

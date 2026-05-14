@@ -47,13 +47,12 @@ Debug::Filter* gVisualBaseLogFilter = Debug::Filter::New(Debug::NoLogging, false
 
 inline bool IsMutableVisualPropertyIndex(Dali::Property::Index index)
 {
-  // For now, all VisualBase properties are mutable.
-  return (index >= Dali::Ui::PropertyRanges::VISUAL_PROPERTY_BASE_START_INDEX && index <= Dali::Ui::PropertyRanges::MUTABLE_VISUAL_PROPERTY_END_INDEX);
+  return (index >= Dali::Ui::PropertyRanges::VISUAL_MUTABLE_PROPERTY_START_INDEX && index <= Dali::Ui::PropertyRanges::VISUAL_MUTABLE_PROPERTY_END_INDEX);
 }
 
 inline bool IsReadOnlyVisualPropertyIndex(Dali::Property::Index index)
 {
-  return (index >= Dali::Ui::PropertyRanges::READ_ONLY_VISUAL_PROPERTY_START_INDEX && index <= Dali::Ui::PropertyRanges::READ_ONLY_VISUAL_PROPERTY_END_INDEX);
+  return (index >= Dali::Ui::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_START_INDEX && index <= Dali::Ui::PropertyRanges::VISUAL_READ_ONLY_PROPERTY_END_INDEX);
 }
 
 inline Vector4 ConvertProportionFlagsToOffsetSizeMode(Dali::Ui::Visual::Transform::ProportionFlags flags)
@@ -299,7 +298,7 @@ Dali::Property::Value VisualBaseImpl::GetProperty(Dali::Property::Index index) c
   // Some properties has non-empty default value.
   switch(index)
   {
-    case Ui::Visual::Property::MIX_COLOR:
+    case Ui::VisualBasePropertyIndex::MIX_COLOR:
     {
       return mCachedVisualPropertyMap[index] = Color::WHITE;
     }
@@ -335,7 +334,7 @@ UiColor VisualBaseImpl::GetColor() const
   {
     return outColor;
   }
-  return GetProperty(Dali::Ui::Visual::Property::MIX_COLOR).Get<Vector4>();
+  return GetProperty(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR).Get<Vector4>();
 }
 
 void VisualBaseImpl::SetColor(const UiColor& color)
@@ -773,7 +772,7 @@ int32_t VisualBaseImpl::GetDepthIndex() const
 
 void VisualBaseImpl::SetColorInternal(const Vector4& color)
 {
-  SetProperty(Dali::Ui::Visual::Property::MIX_COLOR, color);
+  SetProperty(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, color);
 }
 
 void VisualBaseImpl::SetBorderlineColorInternal(const Vector4& borderlineColor)
@@ -790,7 +789,7 @@ void VisualBaseImpl::ApplyTransfromToPropertyMap()
     Property::Map transformProperties;
     mTransform->GetPropertyMap(transformProperties);
 
-    SetProperty(Dali::Ui::Visual::Property::TRANSFORM, transformProperties);
+    SetProperty(Dali::Ui::VisualBasePropertyIndex::TRANSFORM, transformProperties);
   }
 }
 
@@ -918,7 +917,7 @@ VisualBaseImpl::VisualBaseImpl(Dali::Ui::Visual::Type type)
 : mContainer(),
   mVisualType(type),
   mName(),
-  mCachedVisualPropertyMap(Dali::CreatePropertyMap({{Dali::Ui::Visual::Property::TYPE, mVisualType}, {Dali::Ui::Visual::Property::MIX_COLOR, Color::WHITE}})),
+  mCachedVisualPropertyMap(Dali::CreatePropertyMap({{Dali::Ui::VisualBasePropertyIndex::TYPE, mVisualType}, {Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, Color::WHITE}})),
   mUpdatedMutableVisualProperties(),
   mTransform(nullptr),
   mVisual(),

@@ -50,7 +50,7 @@ Dali::Property::Map CreateDistanceFieldEffect()
   customShader[Visual::Shader::Property::FRAGMENT_SHADER] = ToPropertyValue(fragmentShaderString);
   customShader[Visual::Shader::Property::HINTS]           = Shader::Hint::OUTPUT_IS_TRANSPARENT;
 
-  map[Ui::Visual::Property::SHADER] = customShader;
+  map[Ui::VisualBasePropertyIndex::SHADER] = customShader;
   return map;
 }
 

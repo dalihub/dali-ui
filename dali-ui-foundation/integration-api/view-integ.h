@@ -268,7 +268,7 @@ DALI_UI_API bool UnsetStateHandlerWhenNotProcessing(Ui::View view, const Dali::S
  *
  * @param[in] view              The view to query.
  * @param[in] index             The property index that owns the visual (e.g. View::Property::BACKGROUND).
- * @param[in] visualPropertyKey The visual sub-property key (e.g. Visual::Property::MIX_COLOR).
+ * @param[in] visualPropertyKey The visual sub-property key (e.g. Ui::VisualBasePropertyIndex::MIX_COLOR).
  * @return A Property targeting the visual sub-property, or an invalid Property.
  */
 DALI_UI_API Dali::Property GetVisualProperty(Ui::View view, Dali::Property::Index index, Dali::Property::Key visualPropertyKey);

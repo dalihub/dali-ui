@@ -260,7 +260,7 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
 void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::DevelVisual::ANIMATED_VECTOR_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::DevelVisual::ANIMATED_VECTOR_IMAGE);
   if(mImageUrl.IsValid())
   {
     map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));

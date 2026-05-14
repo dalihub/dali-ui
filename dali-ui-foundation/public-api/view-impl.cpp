@@ -1818,8 +1818,8 @@ void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
   mImpl->mBackgroundColor = color;
 
   Property::Map map;
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::COLOR);
-  map.Insert(Ui::Visual::Property::MIX_COLOR, color);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::COLOR);
+  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, color);
 
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::View::Property::BACKGROUND);
   if(visualImplPtr && visualImplPtr->GetType() == Ui::Visual::COLOR)

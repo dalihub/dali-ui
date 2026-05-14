@@ -619,7 +619,7 @@ void ImageViewImpl::SetImageColor(const UiColor& color)
     if(mVisual)
     {
       Dali::Property::Map map;
-      map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
+      map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
       mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
     }
     else
@@ -800,7 +800,7 @@ void ImageViewImpl::UpdatePlaceholderVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Visual::Property::TYPE, Visual::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Visual::IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
@@ -920,10 +920,10 @@ void ImageViewImpl::UpdateVisual()
   if(visualFactory)
   {
     Dali::Property::Map map;
-    map.Insert(Visual::Property::TYPE, Visual::IMAGE);
+    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Visual::IMAGE);
     map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
     map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, static_cast<int>(mSamplingMode));
-    map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
+    map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
     map.Insert(Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
 
     if(mDesiredWidth > 0 || mDesiredHeight > 0)

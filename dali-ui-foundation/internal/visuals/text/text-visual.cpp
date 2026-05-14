@@ -96,7 +96,7 @@ Dali::Property::Index StringKeyToIndexKey(const Dali::String& stringKey)
 
   if(stringKey == VISUAL_TYPE)
   {
-    result = Ui::Visual::Property::TYPE;
+    result = Ui::VisualBasePropertyIndex::TYPE;
   }
   else if(stringKey == TEXT_PROPERTY)
   {
@@ -223,7 +223,7 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   Property::Value value;
 
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::TEXT);
 
   std::string text;
   mController->GetText(text);
@@ -265,7 +265,7 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::TEXT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::TEXT);
   std::string text;
   mController->GetText(text);
   map.Insert(Ui::TextVisual::Property::TEXT, ToPropertyValue(text));

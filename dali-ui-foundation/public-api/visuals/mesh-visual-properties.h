@@ -50,7 +50,7 @@ enum
    * @details Name "objectUrl", type Property::STRING.
    * @note Mandatory.
    */
-  OBJECT_URL = IMMUTABLE_VISUAL_PROPERTY_START_INDEX,
+  OBJECT_URL = VISUAL_IMMUTABLE_PROPERTY_START_INDEX,
 
   /**
    * @brief The location of the ".mtl" file.

@@ -323,7 +323,7 @@ struct Base::Impl
 
     if(mCustomShaders.size() == 1)
     {
-      map.Insert(Ui::Visual::Property::SHADER, mCustomShaders[0]->CreatePropertyMap());
+      map.Insert(Ui::VisualBasePropertyIndex::SHADER, mCustomShaders[0]->CreatePropertyMap());
     }
     else
     {
@@ -332,7 +332,7 @@ struct Base::Impl
       {
         shaderArray.PushBack(customShader->CreatePropertyMap());
       }
-      map.Insert(Ui::Visual::Property::SHADER, shaderArray);
+      map.Insert(Ui::VisualBasePropertyIndex::SHADER, shaderArray);
     }
   }
 

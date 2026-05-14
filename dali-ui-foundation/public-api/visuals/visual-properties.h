@@ -18,6 +18,9 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <cstdint> ///< uint8_t
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
@@ -29,6 +32,74 @@ namespace Ui
  * @addtogroup dali_ui_visuals
  * @{
  */
+
+/**
+ * @brief Visual Property.
+ */
+struct VisualBasePropertyIndex
+{
+  /**
+   * @brief Enumeration for the start and end property ranges for visual base.
+   */
+  enum PropertyRange
+  {
+    MUTABLE_PROPERTY_START_INDEX = Ui::VISUAL_MUTABLE_PROPERTY_START_INDEX,
+    MUTABLE_PROPERTY_END_INDEX   = MUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1, ///< Reserve property indices.
+
+    IMMUTABLE_PROPERTY_START_INDEX = Ui::VISUAL_IMMUTABLE_PROPERTY_START_INDEX,
+    IMMUTABLE_PROPERTY_END_INDEX   = IMMUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1, ///< Reserve property indices.
+
+    READ_ONLY_PROPERTY_START_INDEX = Ui::VISUAL_READ_ONLY_PROPERTY_START_INDEX,
+    READ_ONLY_PROPERTY_END_INDEX   = READ_ONLY_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1, ///< Reserve property indices.
+  };
+
+  /**
+   * @brief Enumeration for the instance of properties belonging to the Visual Property.
+   */
+  enum
+  {
+    /**
+     * @brief The transform used by the visual.
+     * @details Name "transform", type Property::MAP.
+     * @note Optional.
+     * @see Ui::Visual::Transform::Property
+     */
+    TRANSFORM = MUTABLE_PROPERTY_START_INDEX,
+
+    /**
+     * @brief The shader to use in the visual.
+     * @details Name "shader", type Property::MAP.
+     * @note Optional.
+     * @note Will override the existing shaders.
+     * @see Shader::Property
+     */
+    SHADER,
+
+    /**
+     * @brief Mix color is a blend color for any visual.
+     * @details Name "mixColor", type Property::VECTOR3 or Property::VECTOR4, animatable
+     * @note Optional
+     * @note Animate support for Property::VECTOR4, which OPACITY property included.
+     */
+    MIX_COLOR,
+
+    /**
+     * @brief Opacity is the alpha component of the mixColor, above.
+     * @details Name "opacity", type Property::FLOAT, animatable
+     * @note Optional
+     */
+    OPACITY,
+
+    /**
+     * @brief The index for the visual type.
+     * @details Name "visualType", type [Type](Dali::Ui::Visual::Type) (Property::INTEGER) or Property::STRING.
+     * @note Mandatory.
+     * @see Type
+     */
+    TYPE = READ_ONLY_PROPERTY_START_INDEX,
+  };
+
+}; // struct VisualBasePropertyIndex
 
 namespace Visual
 {
@@ -52,59 +123,6 @@ enum Type
   ANIMATED_IMAGE,        ///< Renders a animated image.
   ANIMATED_VECTOR_IMAGE, ///< Renders an animated vector image.
 };
-
-/**
- * @brief Visual Property.
- */
-namespace Property
-{
-/**
- * @brief Enumeration for the instance of properties belonging to the Visual Property.
- */
-enum
-{
-  /**
-   * @brief The index for the visual type.
-   * @details Name "visualType", type [Type](Dali::Ui::Visual::Type) (Property::INTEGER) or Property::STRING.
-   * @note Mandatory.
-   * @see Type
-   */
-  TYPE = VISUAL_PROPERTY_BASE_START_INDEX,
-
-  /**
-   * @brief The shader to use in the visual.
-   * @details Name "shader", type Property::MAP.
-   * @note Optional.
-   * @note Will override the existing shaders.
-   * @see Shader::Property
-   */
-  SHADER,
-
-  /**
-   * @brief The transform used by the visual.
-   * @details Name "transform", type Property::MAP.
-   * @note Optional.
-   * @see Ui::Visual::Transform::Property
-   */
-  TRANSFORM,
-
-  /**
-   * @brief Mix color is a blend color for any visual.
-   * @details Name "mixColor", type Property::VECTOR3 or Property::VECTOR4, animatable
-   * @note Optional
-   * @note Animate support for Property::VECTOR4, which OPACITY property included.
-   */
-  MIX_COLOR,
-
-  /**
-   * @brief Opacity is the alpha component of the mixColor, above.
-   * @details Name "opacity", type Property::FLOAT, animatable
-   * @note Optional
-   */
-  OPACITY,
-};
-
-} // namespace Property
 
 /**
  * @brief Visual Transform for the offset or size.
@@ -242,7 +260,7 @@ enum Type
    * @code
    * control.SetProperty( ..., // Some visual based property
    *                      Property::Map().Add( ... ) // Properties to set up visual
-   *                                     .Add( Visual::Property::TRANSFORM,
+   *                                     .Add( Ui::VisualBasePropertyIndex::TRANSFORM,
    *                                           Property::Array().Add(
    * Ui::Visual::Transform::Property::OFFSET_POLICY, Vector2( Policy::ABSOLUTE, Policy::RELATIVE ) ) ) .Add(
    * Ui::Visual::Transform::Property::OFFSET, Vector2( 10, 1.0f ) ) );

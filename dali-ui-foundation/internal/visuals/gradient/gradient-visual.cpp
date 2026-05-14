@@ -236,7 +236,7 @@ void GradientVisual::UpdateShader()
 void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::GRADIENT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::GRADIENT);
   map.Insert(Ui::GradientVisual::Property::UNITS, mGradient->GetGradientUnits());
   map.Insert(Ui::GradientVisual::Property::SPREAD_METHOD, mGradient->GetSpreadMethod());
 

@@ -2329,8 +2329,8 @@ void ViewDataImpl::UpdateBorderline()
   Actor self = mViewImpl.Self();
 
   Property::Map map;
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::Type::COLOR);
-  map.Insert(Ui::Visual::Property::MIX_COLOR, Color::TRANSPARENT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::Type::COLOR);
+  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, Color::TRANSPARENT);
   // Scale natural-pixel width to visual pixels for the initial visual creation.
   map.Insert(Ui::DevelVisual::Property::BORDERLINE_WIDTH,
              self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH));

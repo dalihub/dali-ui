@@ -767,7 +767,7 @@ void AnimatedImageViewImpl::SetImageColor(const UiColor& color)
     {
       // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
-      map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
+      map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
       mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
     }
     else
@@ -1076,7 +1076,7 @@ void AnimatedImageViewImpl::UpdateVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Visual::Property::TYPE, Visual::ANIMATED_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Visual::ANIMATED_IMAGE);
 
   if(hasUrlArray)
   {
@@ -1105,7 +1105,7 @@ void AnimatedImageViewImpl::UpdateVisual()
     map.Insert(Ui::ImageVisualPropertyIndex::FRAME_DELAY, mFrameDelay);
   }
 
-  map.Insert(Visual::Property::MIX_COLOR, mImageColor.GetRgba());
+  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
 
   if(mDesiredWidth > 0)
   {
@@ -1171,7 +1171,7 @@ void AnimatedImageViewImpl::UpdatePlaceholderVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Visual::Property::TYPE, Visual::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Visual::IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);

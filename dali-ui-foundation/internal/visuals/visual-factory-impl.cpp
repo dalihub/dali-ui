@@ -130,7 +130,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 {
   Visual::BasePtr visualPtr;
 
-  Property::Value*      typeValue  = propertyMap.Find(Ui::Visual::Property::TYPE, VISUAL_TYPE);
+  Property::Value*      typeValue  = propertyMap.Find(Ui::VisualBasePropertyIndex::TYPE, VISUAL_TYPE);
   Ui::DevelVisual::Type visualType = Ui::DevelVisual::IMAGE; // Default to IMAGE type.
   if(typeValue)
   {

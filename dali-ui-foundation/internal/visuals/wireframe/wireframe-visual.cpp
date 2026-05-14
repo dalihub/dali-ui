@@ -57,7 +57,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
   WireframeVisualPtr wireframeVisual(new WireframeVisual(factoryCache, actualVisual));
 
   // Instead of calling SetProperties, looking for the only valid property 'transform'
-  Property::Value* transformValue = properties.Find(Ui::Visual::Property::TRANSFORM, TRANSFORM);
+  Property::Value* transformValue = properties.Find(Ui::VisualBasePropertyIndex::TRANSFORM, TRANSFORM);
   Property::Map    transformMap;
   if(transformValue && transformValue->Get(transformMap))
   {
@@ -110,7 +110,7 @@ void WireframeVisual::DoCreatePropertyMap(Property::Map& map) const
   else
   {
     map.Clear();
-    map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::WIREFRAME);
+    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::WIREFRAME);
   }
 }
 
@@ -121,7 +121,7 @@ void WireframeVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 
 void WireframeVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  Property::Value* mixValue = propertyMap.Find(Ui::Visual::Property::MIX_COLOR, MIX_COLOR);
+  Property::Value* mixValue = propertyMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR, MIX_COLOR);
   if(mixValue)
   {
     Vector4 mixColor;

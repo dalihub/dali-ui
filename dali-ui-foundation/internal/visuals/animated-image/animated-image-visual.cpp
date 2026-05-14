@@ -532,7 +532,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
 
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::ANIMATED_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::ANIMATED_IMAGE);
 
   if(mImageUrl.IsValid())
   {
@@ -624,7 +624,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 void AnimatedImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::ANIMATED_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::ANIMATED_IMAGE);
 
   Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
 

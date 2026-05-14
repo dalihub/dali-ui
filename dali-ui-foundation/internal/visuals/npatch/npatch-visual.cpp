@@ -325,7 +325,7 @@ void NPatchVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Clear();
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
-  map.Insert(Ui::Visual::Property::TYPE, Ui::Visual::N_PATCH);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::N_PATCH);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
   map.Insert(Ui::ImageVisualPropertyIndex::BORDER_ONLY, mBorderOnly);
   map.Insert(Ui::ImageVisualPropertyIndex::BORDER, mBorder);

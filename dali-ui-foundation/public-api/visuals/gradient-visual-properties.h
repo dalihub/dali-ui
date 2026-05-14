@@ -54,7 +54,7 @@ enum
    * only the corresponding area is drawn.
    * @note Mandatory for Linear.
    */
-  START_POSITION = IMMUTABLE_VISUAL_PROPERTY_START_INDEX,
+  START_POSITION = VISUAL_IMMUTABLE_PROPERTY_START_INDEX,
 
   /**
    * @brief The end position of a linear gradient.
