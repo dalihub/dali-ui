@@ -957,6 +957,25 @@ void ControllerImplEventHandler::OnHandleReleased(Controller::Impl& impl, const 
                                                        eventData.mRightSelectionPosition);
   }
 
+  // If the selection collapsed while dragging a selection handle, return to
+  // editing mode and show the cursor at the collapsed position.
+  if((Event::LEFT_SELECTION_HANDLE_EVENT == event.type || Event::RIGHT_SELECTION_HANDLE_EVENT == event.type) &&
+     (eventData.mLeftSelectionPosition == eventData.mRightSelectionPosition))
+  {
+    impl.ChangeState(EventData::EDITING);
+
+    eventData.mPrimaryCursorPosition        = eventData.mLeftSelectionPosition;
+    eventData.mUpdateCursorPosition         = true;
+    eventData.mUpdateGrabHandlePosition     = true;
+    eventData.mUpdateLeftSelectionPosition  = false;
+    eventData.mUpdateRightSelectionPosition = false;
+    eventData.mUpdateHighlightBox           = false;
+    eventData.mUpdateInputStyle             = true;
+    eventData.mScrollAfterUpdatePosition    = true;
+
+    eventData.mDecorator->SetHighlightActive(false);
+  }
+
   eventData.mDecoratorUpdated = true;
 }
 
@@ -1000,8 +1019,6 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
   }
 
   // Set the position of the handle.
-  const bool scrollRightDirection      = xSpeed > 0.f;
-  const bool scrollBottomDirection     = ySpeed > 0.f;
   const bool leftSelectionHandleEvent  = Event::LEFT_SELECTION_HANDLE_EVENT == event.type;
   const bool rightSelectionHandleEvent = Event::RIGHT_SELECTION_HANDLE_EVENT == event.type;
 
