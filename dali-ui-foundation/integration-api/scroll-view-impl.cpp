@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 //#include <dali-ui-elements/public-api/scroll-view.h>
 
 namespace Dali
@@ -94,6 +95,9 @@ ScrollViewImpl::ScrollViewImpl()
   mMinimumStartY(0.0f),
   mMinimumStartX(0.0f),
   mHasScrollableArea(false),
+  mScrollOnFocus(true),
+  mFocusScrollToPosition(ScrollToPosition::MakeVisible),
+  mFocusScrollPeek(0.0f),
   mVerticalScrollBarVisibility(ScrollBarVisibility::Auto),
   mHorizontalScrollBarVisibility(ScrollBarVisibility::Auto),
   mPanGestureDetector(PanGestureDetector::New()),
@@ -161,6 +165,10 @@ void ScrollViewImpl::OnInitialize()
 
   // Handle mouse wheel events for desktop / emulator scrolling.
   Self().WheelEventSignal().Connect(this, &ScrollViewImpl::OnWheelEvent);
+
+  // Auto-scroll to focused child: subscribe to global focus changes.
+  // Disconnects automatically when this object is destroyed (ConnectionTracker).
+  FocusManager::Get().FocusChangedSignal().Connect(this, &ScrollViewImpl::OnFocusManagerChanged);
 }
 
 void ScrollViewImpl::SetContent(View content)
@@ -424,7 +432,8 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
     return;
   }
 
-  Vector2 childScrollPos = GetScrollPositionForChild(child, Vector2::ZERO);
+  Vector2    childScrollPos = GetScrollPositionForChild(child, Vector2::ZERO);
+  const bool wasMakeVisible = (scrollToPosition == ScrollToPosition::MakeVisible);
 
   if(scrollToPosition == ScrollToPosition::MakeVisible)
   {
@@ -470,6 +479,18 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
         {
           posY = scrollPos.y + (childBottom - scrollBottom);
         }
+        // Apply peek: scroll a little further past the item edge to hint more content
+        if(mFocusScrollPeek > 0.0f)
+        {
+          if(posX > scrollPos.x)
+            posX += mFocusScrollPeek;
+          else if(posX < scrollPos.x)
+            posX -= mFocusScrollPeek;
+          if(posY > scrollPos.y)
+            posY += mFocusScrollPeek;
+          else if(posY < scrollPos.y)
+            posY -= mFocusScrollPeek;
+        }
         ScrollTo(Vector2(posX, posY), animation);
         return;
       }
@@ -486,9 +507,21 @@ void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrol
     case ScrollToPosition::End:
       childScrollPos.y -= mViewportHeight - child.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       childScrollPos.x -= mViewportWidth - child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+      // Apply peek: scroll further past the bottom/right edge
+      if(wasMakeVisible && mFocusScrollPeek > 0.0f)
+      {
+        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y += mFocusScrollPeek;
+        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x += mFocusScrollPeek;
+      }
       break;
     case ScrollToPosition::Start:
     default:
+      // Apply peek: scroll further past the top/left edge
+      if(wasMakeVisible && mFocusScrollPeek > 0.0f)
+      {
+        if(mScrollDirection != ScrollDirection::Horizontal) childScrollPos.y -= mFocusScrollPeek;
+        if(mScrollDirection != ScrollDirection::Vertical) childScrollPos.x -= mFocusScrollPeek;
+      }
       break;
   }
 
@@ -503,6 +536,62 @@ void ScrollViewImpl::ScrollToX(float position, bool animation)
 void ScrollViewImpl::ScrollToY(float position, bool animation)
 {
   ScrollTo(Vector2(mScrollPosition.x, position), animation);
+}
+
+void ScrollViewImpl::SetScrollOnFocus(bool enable)
+{
+  mScrollOnFocus = enable;
+}
+
+bool ScrollViewImpl::GetScrollOnFocus() const
+{
+  return mScrollOnFocus;
+}
+
+void ScrollViewImpl::SetFocusScrollToPosition(ScrollToPosition position)
+{
+  mFocusScrollToPosition = position;
+}
+
+ScrollToPosition ScrollViewImpl::GetFocusScrollToPosition() const
+{
+  return mFocusScrollToPosition;
+}
+
+void ScrollViewImpl::SetFocusScrollPeek(float peek)
+{
+  mFocusScrollPeek = peek;
+}
+
+float ScrollViewImpl::GetFocusScrollPeek() const
+{
+  return mFocusScrollPeek;
+}
+
+void ScrollViewImpl::OnFocusManagerChanged(View /*from*/, View to)
+{
+  if(!mScrollOnFocus || !mContent || !to)
+  {
+    return;
+  }
+  if(IsDescendantOfContent(to))
+  {
+    ScrollTo(to, true, mFocusScrollToPosition);
+  }
+}
+
+bool ScrollViewImpl::IsDescendantOfContent(View view) const
+{
+  Actor current = view.GetParent();
+  while(current)
+  {
+    if(current == mContent)
+    {
+      return true;
+    }
+    current = current.GetParent();
+  }
+  return false;
 }
 
 ScrollBarVisibility ScrollViewImpl::GetVerticalScrollBarVisibility() const

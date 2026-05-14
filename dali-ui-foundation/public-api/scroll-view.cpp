@@ -213,6 +213,39 @@ ScrollView& ScrollView::SetOverScrollMode(OverScrollMode mode)
   return *this;
 }
 
+ScrollView& ScrollView::SetScrollOnFocus(bool enable)
+{
+  GetImpl(*this).SetScrollOnFocus(enable);
+  return *this;
+}
+
+bool ScrollView::GetScrollOnFocus() const
+{
+  return GetImpl(*this).GetScrollOnFocus();
+}
+
+ScrollView& ScrollView::SetFocusScrollToPosition(ScrollToPosition position)
+{
+  GetImpl(*this).SetFocusScrollToPosition(position);
+  return *this;
+}
+
+ScrollToPosition ScrollView::GetFocusScrollToPosition() const
+{
+  return GetImpl(*this).GetFocusScrollToPosition();
+}
+
+ScrollView& ScrollView::SetFocusScrollPeek(float peek)
+{
+  GetImpl(*this).SetFocusScrollPeek(peek);
+  return *this;
+}
+
+float ScrollView::GetFocusScrollPeek() const
+{
+  return GetImpl(*this).GetFocusScrollPeek();
+}
+
 void ScrollView::ScrollTo(const Vector2& position, bool animation)
 {
   GetImpl(*this).ScrollTo(position, animation);

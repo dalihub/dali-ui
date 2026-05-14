@@ -218,6 +218,36 @@ public: // API
   void ScrollToY(float position, bool animation);
 
   /**
+   * @brief Sets whether to automatically scroll to a child when it gains focus.
+   */
+  void SetScrollOnFocus(bool enable);
+
+  /**
+   * @brief Gets whether auto-scroll on focus is enabled.
+   */
+  bool GetScrollOnFocus() const;
+
+  /**
+   * @brief Sets the scroll target position used when auto-scrolling to a focused child.
+   */
+  void SetFocusScrollToPosition(ScrollToPosition position);
+
+  /**
+   * @brief Gets the scroll target position used when auto-scrolling to a focused child.
+   */
+  ScrollToPosition GetFocusScrollToPosition() const;
+
+  /**
+   * @brief Sets the peek distance applied when auto-scrolling to a focused child.
+   */
+  void SetFocusScrollPeek(float peek);
+
+  /**
+   * @brief Gets the peek distance applied when auto-scrolling to a focused child.
+   */
+  float GetFocusScrollPeek() const;
+
+  /**
    * @brief Gets the vertical scroll bar visibility.
    */
   ScrollBarVisibility GetVerticalScrollBarVisibility() const;
@@ -415,6 +445,19 @@ private:
   static bool CanScrollVertically(ScrollDirection direction);
 
   /**
+   * @brief Callback invoked when the focused view changes.
+   *
+   * Scrolls to the newly focused view if it is a descendant of mContent
+   * and mScrollOnFocus is enabled.
+   */
+  void OnFocusManagerChanged(View from, View to);
+
+  /**
+   * @brief Returns true if @p view is a descendant of mContent.
+   */
+  bool IsDescendantOfContent(View view) const;
+
+  /**
    * @brief Callback for content relayout.
    */
   void OnContentRelayout();
@@ -462,6 +505,11 @@ private:
   float           mMinimumStartY;        ///< Minimum start Y position
   float           mMinimumStartX;        ///< Minimum start X position
   bool            mHasScrollableArea;    ///< Has scrollable area
+
+  // Focus-scroll behaviour
+  bool             mScrollOnFocus;         ///< Auto-scroll to child when it gains focus
+  ScrollToPosition mFocusScrollToPosition; ///< Target position for focus-triggered scroll
+  float            mFocusScrollPeek;       ///< Extra scroll distance past the item edge on focus (MakeVisible only)
 
   // Scroll bar visibility
   ScrollBarVisibility mVerticalScrollBarVisibility;   ///< Vertical scroll bar visibility

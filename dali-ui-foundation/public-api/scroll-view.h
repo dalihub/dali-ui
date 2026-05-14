@@ -248,6 +248,60 @@ public: // Setters for chaining
    */
   OverScrollMode GetOverScrollMode() const;
 
+public: // Focus Scroll
+  /**
+   * @brief Sets whether to automatically scroll to a child view when it gains focus.
+   *
+   * When enabled, any descendant of the scroll content that gains keyboard focus
+   * will be scrolled into view according to the position set by SetFocusScrollToPosition().
+   *
+   * @param[in] enable True to enable auto-scroll on focus (default: true)
+   */
+  ScrollView& SetScrollOnFocus(bool enable);
+
+  /**
+   * @brief Gets whether auto-scroll on focus is enabled.
+   *
+   * @return True if auto-scroll on focus is enabled
+   */
+  bool GetScrollOnFocus() const;
+
+  /**
+   * @brief Sets the target scroll position used when auto-scrolling to a focused child.
+   *
+   * @param[in] position The target scroll position (default: ScrollToPosition::MakeVisible)
+   * @see ScrollToPosition
+   */
+  ScrollView& SetFocusScrollToPosition(ScrollToPosition position);
+
+  /**
+   * @brief Gets the target scroll position used when auto-scrolling to a focused child.
+   *
+   * @return The current focus scroll-to position
+   */
+  ScrollToPosition GetFocusScrollToPosition() const;
+
+  /**
+   * @brief Sets the peek distance applied when auto-scrolling to a focused child.
+   *
+   * When @p peek is greater than zero and the scroll mode is ScrollToPosition::MakeVisible,
+   * the view scrolls an additional @p peek pixels past the item edge in the direction of
+   * travel. This hints to the user that more content is available beyond the focused item.
+   *
+   * The final position is still clamped to the valid scroll range, so peek is silently
+   * reduced near the content boundaries.
+   *
+   * @param[in] peek Extra scroll distance in pixels (default: 0.0f, disabled)
+   */
+  ScrollView& SetFocusScrollPeek(float peek);
+
+  /**
+   * @brief Gets the peek distance applied when auto-scrolling to a focused child.
+   *
+   * @return The peek distance in pixels
+   */
+  float GetFocusScrollPeek() const;
+
 public: // Scroll Bar Visibility
   /**
    * @brief Sets the visibility of the vertical scroll bar.
