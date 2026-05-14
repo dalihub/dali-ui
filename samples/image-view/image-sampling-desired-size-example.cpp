@@ -70,8 +70,8 @@ public:
   explicit ImageSamplingController(Application& application)
   : mApplication(application),
     mSamplingIndex(0),
-    mSizeIndex(0),
     mImageTypeIndexSampling(0),
+    mSizeIndex(0),
     mImageTypeIndexDesired(0)
   {
     mApplication.InitSignal().Connect(this, &ImageSamplingController::OnInit);

@@ -11,6 +11,20 @@ PKG_CHECK_MODULES(DALICORE REQUIRED dali2-core)
 PKG_CHECK_MODULES(DALIADAPTOR REQUIRED dali2-adaptor)
 PKG_CHECK_MODULES(DALI_UI_FOUNDATION REQUIRED dali2-ui-foundation)
 
+# Build Options
+SET(DALI_UI_TEST_APP_CFLAGS -fvisibility=hidden -DHIDE_DALI_INTERNALS)
+
+if(CMAKE_BUILD_TYPE MATCHES Debug)
+  MESSAGE(STATUS "CMAKE_BUILD_TYPE: " Debug)
+  SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -g -O0 -DDEBUG_ENABLED)
+ELSE()
+  MESSAGE(STATUS "CMAKE_BUILD_TYPE: " Release)
+  SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Os)
+ENDIF()
+
+# Add -rdynamic to export main symbol, so dali-loader could run the main.
+SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Werror -Wall -fPIE -rdynamic)
+
 # Helper macro to add an image-view sample executable
 macro(add_image_view_sample EXE_NAME SOURCE_FILE)
   ADD_EXECUTABLE(${EXE_NAME} ${SOURCE_FILE})
@@ -44,6 +58,7 @@ macro(add_image_view_sample EXE_NAME SOURCE_FILE)
     ${DALICORE_CFLAGS_OTHER}
     ${DALIADAPTOR_CFLAGS_OTHER}
     ${DALI_UI_FOUNDATION_CFLAGS_OTHER}
+    ${DALI_UI_TEST_APP_CFLAGS}
   )
 endmacro()
 

@@ -391,7 +391,7 @@ private:
 
   void OnInputRejected(View view, Text::InputFilter::RejectReason reason)
   {
-    const char* reasonStr = (reason == Text::InputFilter::RejectReason::NOT_ALLOWED) ? "NOT_ALLOWED" : "DENIED";
+    [[maybe_unused]] const char* reasonStr = (reason == Text::InputFilter::RejectReason::NOT_ALLOWED) ? "NOT_ALLOWED" : "DENIED";
   }
 
   void UpdateStatusWithSelection()
