@@ -754,6 +754,11 @@ public:
   bool SetDefaultLineSpacing(float lineSpacing);
 
   /**
+   * @brief Requests cursor or selection decorator update after text geometry changes.
+   */
+  void RequestDecoratorUpdate();
+
+  /**
    * @copydoc Controller::SetDefaultLineSize
    */
   bool SetDefaultLineSize(float lineSize);

@@ -824,13 +824,45 @@ bool Controller::Impl::SetDefaultLineSpacing(float lineSpacing)
   return false;
 }
 
+void Controller::Impl::RequestDecoratorUpdate()
+{
+  if(!mEventData)
+  {
+    return;
+  }
+
+  // Only update cursor/decorator positions when in active editing/selecting state.
+  // In inactive states, avoid scrolling to the old cursor position.
+  if(mEventData->mState == EventData::INACTIVE || mEventData->mState == EventData::INTERRUPTED)
+  {
+    return;
+  }
+
+  if(EventData::SELECTING == mEventData->mState ||
+     mEventData->mLeftSelectionPosition != mEventData->mRightSelectionPosition)
+  {
+    mEventData->mUpdateHighlightBox           = true;
+    mEventData->mUpdateLeftSelectionPosition  = true;
+    mEventData->mUpdateRightSelectionPosition = true;
+  }
+  else
+  {
+    mEventData->mUpdateCursorPosition     = true;
+    mEventData->mUpdateGrabHandlePosition = true;
+  }
+
+  mEventData->mScrollAfterUpdatePosition = true;
+  mEventData->mDecoratorUpdated          = true;
+}
+
 bool Controller::Impl::SetDefaultLineSize(float lineSize)
 {
   if(std::fabs(lineSize - mLayoutEngine.GetDefaultLineSize()) > Math::MACHINE_EPSILON_1000)
   {
     mLayoutEngine.SetDefaultLineSize(lineSize);
-
     RelayoutAllCharacters();
+    RequestDecoratorUpdate();
+
     return true;
   }
   return false;
@@ -841,8 +873,9 @@ bool Controller::Impl::SetRelativeLineSize(float relativeLineSize)
   if(std::fabs(relativeLineSize - GetRelativeLineSize()) > Math::MACHINE_EPSILON_1000)
   {
     mLayoutEngine.SetRelativeLineSize(relativeLineSize);
-
     RelayoutAllCharacters();
+    RequestDecoratorUpdate();
+
     return true;
   }
   return false;
