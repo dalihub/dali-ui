@@ -922,6 +922,10 @@ void ControllerImplEventHandler::OnHandleReleased(Controller::Impl& impl, const 
     eventData.mUpdateLeftSelectionPosition  = true;
     eventData.mUpdateRightSelectionPosition = true;
 
+    // Set which handle was last operated for scroll target.
+    eventData.mIsLeftHandleSelected  = true;
+    eventData.mIsRightHandleSelected = false;
+
     if(handleStopScrolling || isSmoothHandlePanEnabled)
     {
       eventData.mScrollAfterUpdatePosition = true;
@@ -939,6 +943,10 @@ void ControllerImplEventHandler::OnHandleReleased(Controller::Impl& impl, const 
     eventData.mUpdateHighlightBox           = true;
     eventData.mUpdateRightSelectionPosition = true;
     eventData.mUpdateLeftSelectionPosition  = true;
+
+    // Set which handle was last operated for scroll target.
+    eventData.mIsLeftHandleSelected  = false;
+    eventData.mIsRightHandleSelected = true;
 
     if(handleStopScrolling || isSmoothHandlePanEnabled)
     {
