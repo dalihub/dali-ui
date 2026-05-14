@@ -141,8 +141,13 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   selectionBoxInfo->maxX             = MIN_FLOAT;
 
   // Keep the min and max 'x' position to calculate the size and position of the highlighed text.
-  float   minHighlightX = std::numeric_limits<float>::max();
-  float   maxHighlightX = std::numeric_limits<float>::min();
+  float minHighlightX = std::numeric_limits<float>::max();
+  float maxHighlightX = std::numeric_limits<float>::lowest();
+  // Keep the min and max 'y' position to calculate the height of the highlight actor.
+  // When LineHeight is large, lineOffset gaps are larger than natural text height.
+  // The highlight actor bounds must contain all quads, even if quad heights are natural text height.
+  float   minHighlightY = std::numeric_limits<float>::max();
+  float   maxHighlightY = std::numeric_limits<float>::lowest();
   Size    highLightSize;
   Vector2 highLightPosition; // The highlight position in decorator's coords.
 
@@ -308,17 +313,20 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
     }
   }
 
-  // Traverses all the lines and updates the min and max 'x' positions and the total height.
+  // Traverses all the lines and updates the min and max 'x' positions and the y extents.
   // The final width is calculated after 'boxifying' the selection.
+  // The height is calculated from the actual y extents of all quads, not by summing lineHeight.
+  // When LineHeight is large, lineOffset gaps are larger than natural text height,
+  // so we need to use min/max y to include all quads in the highlight actor bounds.
   for(Vector<SelectionBoxInfo>::ConstIterator it = selectionBoxLinesInfo.Begin(), endIt = selectionBoxLinesInfo.End();
       it != endIt; ++it)
   {
     const SelectionBoxInfo& info = *it;
 
-    // Update the size of the highlighted text.
-    highLightSize.height += info.lineHeight;
     minHighlightX = std::min(minHighlightX, info.minX);
     maxHighlightX = std::max(maxHighlightX, info.maxX);
+    minHighlightY = std::min(minHighlightY, info.lineOffset);
+    maxHighlightY = std::max(maxHighlightY, info.lineOffset + info.lineHeight);
   }
 
   // Add extra geometry to 'boxify' the selection.
@@ -435,12 +443,15 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   decorator->ResizeHighlightQuads(actualNumberOfQuads);
 
   // Sets the highlight's size and position. In decorator's coords.
-  // The highlight's height has been calculated above (before 'boxifying' the highlight).
-  highLightSize.width = maxHighlightX - minHighlightX;
+  // The highlight's width is calculated from min/max x positions.
+  // The highlight's height is calculated from min/max y extents of all quads.
+  // This ensures the highlight actor bounds contain all quads, even when LineHeight
+  // causes large gaps between lineOffset values.
+  highLightSize.width  = maxHighlightX - minHighlightX;
+  highLightSize.height = maxHighlightY - minHighlightY;
 
-  highLightPosition.x                               = minHighlightX;
-  const SelectionBoxInfo& firstSelectionBoxLineInfo = *(selectionBoxLinesInfo.Begin());
-  highLightPosition.y                               = firstSelectionBoxLineInfo.lineOffset;
+  highLightPosition.x = minHighlightX;
+  highLightPosition.y = minHighlightY;
 
   decorator->SetHighLightBox(highLightPosition, highLightSize, static_cast<float>(model->GetOutlineWidth()));
 
