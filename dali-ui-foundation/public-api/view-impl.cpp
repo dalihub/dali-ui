@@ -122,7 +122,7 @@ struct AllowNonViewChildScope
   AllowNonViewChildScope(const AllowNonViewChildScope&)                = delete;
   AllowNonViewChildScope& operator=(const AllowNonViewChildScope&)     = delete;
   AllowNonViewChildScope(AllowNonViewChildScope&&) noexcept            = default;
-  AllowNonViewChildScope& operator=(AllowNonViewChildScope&&) noexcept = default;
+  AllowNonViewChildScope& operator=(AllowNonViewChildScope&&) noexcept = delete;
 };
 
 thread_local std::vector<AllowNonViewChildScope> gAllowScopeList;

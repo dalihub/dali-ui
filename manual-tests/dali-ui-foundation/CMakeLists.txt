@@ -42,6 +42,23 @@ ENDIF()
 # Add -rdynamic to export main symbol, so dali-loader could run the main.
 SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Werror -Wall -fPIE -rdynamic)
 
+# Remove some warnings that are not useful for our test apps.
+IF( WIN32 )
+  # TODO: Add Windows-specific compiler flags if needed.
+ELSE()
+  INCLUDE(CheckCXXCompilerFlag)
+
+  CHECK_CXX_COMPILER_FLAG( -Wno-unused-const-variable HAVE_NO_UNUSED_CONST_VARIABLE )
+  IF( HAVE_NO_UNUSED_CONST_VARIABLE )
+    SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-const-variable)
+  ENDIF()
+
+  CHECK_CXX_COMPILER_FLAG( -Wno-unused-command-line-argument HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT )
+  IF( HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT )
+    SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-command-line-argument)
+  ENDIF()
+ENDIF()
+
 TARGET_LINK_LIBRARIES(${EXE_NAME}
   ${DALICORE_LIBRARIES}
   ${DALIADAPTOR_LIBRARIES}

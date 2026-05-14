@@ -106,7 +106,7 @@ private:
       .SetRequestedHeight(FIELD_HEIGHT)
       .SetBackgroundColor(UiColor(COLOR_FIELD_BG));
 
-    field.FocusChangedSignal().Connect(this, [this, name](View view, bool focused)
+    field.FocusChangedSignal().Connect(this, [](View view, bool focused)
     {
       if(focused)
       {
