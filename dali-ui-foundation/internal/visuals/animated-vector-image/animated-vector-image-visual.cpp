@@ -103,6 +103,7 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {NOTIFY_AFTER_RASTERIZATION, Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION},
   {FRAME_SPEED_FACTOR, Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR},
   {RENDER_SCALE_NAME, Ui::ImageVisualPropertyIndex::RENDER_SCALE},
+  {ENABLE_ASPECT_FIT_NAME, Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -302,6 +303,7 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
   map.Insert(Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
   map.Insert(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT, mVectorAnimationTask->IsEnableAspectFit());
 }
 
 void AnimatedVectorImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -511,6 +513,18 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
       {
         mRenderScale = renderScale;
         SetVectorImageSize();
+      }
+      break;
+    }
+    case Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT:
+    {
+      bool enableAspectFit = true;
+      if(value.Get(enableAspectFit))
+      {
+        if(mVectorAnimationTask)
+        {
+          mVectorAnimationTask->SetEnableAspectFit(enableAspectFit);
+        }
       }
       break;
     }

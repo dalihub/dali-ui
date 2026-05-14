@@ -80,6 +80,7 @@ public:
       RENDER_SCALE               = LottieAnimationViewPropertyIndex::RENDER_SCALE,
       PLACEHOLDER_IMAGE          = LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
       PIXEL_AREA                 = LottieAnimationViewPropertyIndex::PIXEL_AREA,
+      ENABLE_ASPECT_FIT          = LottieAnimationViewPropertyIndex::ENABLE_ASPECT_FIT,
     };
   };
 
@@ -386,6 +387,24 @@ public: // Performance Options
    * @return The render scale (default: 1.0)
    */
   float GetRenderScale() const;
+
+  /**
+   * @brief Sets whether to enable aspect fit scaling.
+   *
+   * When enabled (default), the animation is scaled to fit within the target size
+   * while preserving its aspect ratio. When disabled, the animation stretches to
+   * fill the entire target size.
+   *
+   * @param[in] enableAspectFit True to enable aspect fit, false to disable
+   */
+  LottieAnimationView& SetEnableAspectFit(bool enableAspectFit);
+
+  /**
+   * @brief Gets whether aspect fit scaling is enabled.
+   *
+   * @return True if aspect fit is enabled, false otherwise (default: true)
+   */
+  bool IsAspectFitEnabled() const;
 
 public: // Content Info
   /**

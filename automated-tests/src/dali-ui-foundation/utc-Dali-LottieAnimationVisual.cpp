@@ -200,6 +200,9 @@ int UtcDaliLottieAnimationVisualSetGetProperties02(void)
   visual.SetRenderScale(1.5f);
   DALI_TEST_EQUALS(visual.GetRenderScale(), 1.5f, TEST_LOCATION);
 
+  visual.SetEnableAspectFit(false);
+  DALI_TEST_EQUALS(visual.IsAspectFitEnabled(), false, TEST_LOCATION);
+
   END_TEST;
 }
 

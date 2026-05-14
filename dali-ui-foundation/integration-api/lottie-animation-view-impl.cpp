@@ -62,22 +62,23 @@ BaseHandle Create()
 
 DALI_TYPE_REGISTRATION_BEGIN(LottieAnimationViewImpl, ViewImpl, Create)
 
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("image",                   STRING,  IMAGE)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("loopCount",               INTEGER, LOOP_COUNT)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("loopingMode",             INTEGER, LOOPING_MODE)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("stopBehavior",            INTEGER, STOP_BEHAVIOR)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("frameSpeedFactor",        FLOAT,   FRAME_SPEED_FACTOR)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("imageColor",              VECTOR4, IMAGE_COLOR)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("desiredWidth",            INTEGER, DESIRED_WIDTH)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("desiredHeight",           INTEGER, DESIRED_HEIGHT)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("releasePolicy",           INTEGER, RELEASE_POLICY)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("synchronousLoading",      BOOLEAN, SYNCHRONOUS_LOADING)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("preMultipliedAlpha",      BOOLEAN, PRE_MULTIPLIED_ALPHA)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingDown",     BOOLEAN, REDRAW_IN_SCALING_DOWN)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingUp",       BOOLEAN, REDRAW_IN_SCALING_UP)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("enableFrameCache",        BOOLEAN, ENABLE_FRAME_CACHE)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("notifyAfterRasterization",BOOLEAN, NOTIFY_AFTER_RASTERIZATION)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("image",                    STRING,  IMAGE)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("loopCount",                INTEGER, LOOP_COUNT)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("loopingMode",              INTEGER, LOOPING_MODE)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("stopBehavior",             INTEGER, STOP_BEHAVIOR)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("frameSpeedFactor",         FLOAT,   FRAME_SPEED_FACTOR)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("imageColor",               VECTOR4, IMAGE_COLOR)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("desiredWidth",             INTEGER, DESIRED_WIDTH)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("desiredHeight",            INTEGER, DESIRED_HEIGHT)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("releasePolicy",            INTEGER, RELEASE_POLICY)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("synchronousLoading",       BOOLEAN, SYNCHRONOUS_LOADING)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("preMultipliedAlpha",       BOOLEAN, PRE_MULTIPLIED_ALPHA)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingDown",      BOOLEAN, REDRAW_IN_SCALING_DOWN)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingUp",        BOOLEAN, REDRAW_IN_SCALING_UP)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("enableFrameCache",         BOOLEAN, ENABLE_FRAME_CACHE)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("notifyAfterRasterization", BOOLEAN, NOTIFY_AFTER_RASTERIZATION)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("renderScale",              FLOAT,   RENDER_SCALE)
+LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("enableAspectFit",          BOOLEAN, ENABLE_ASPECT_FIT)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("placeholderImage",         STRING,  PLACEHOLDER_IMAGE)
 
 DALI_ANIMATABLE_PROPERTY_REGISTRATION(Ui::Integration, LottieAnimationViewImpl, "pixelArea", VECTOR4, PIXEL_AREA)
@@ -114,6 +115,7 @@ LottieAnimationViewImpl::LottieAnimationViewImpl()
   mNotifyAfterRasterization(false),
   mSynchronousLoading(false),
   mPreMultipliedAlpha(false),
+  mEnableAspectFit(true),
   mVisualDirty(false),
   mAnimationFinishedSignal()
 {
@@ -278,6 +280,15 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         }
         break;
       }
+      case LottieAnimationViewImpl::Property::ENABLE_ASPECT_FIT:
+      {
+        bool enableAspectFit;
+        if(value.Get(enableAspectFit))
+        {
+          impl.SetEnableAspectFit(enableAspectFit);
+        }
+        break;
+      }
       case LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE:
       {
         Dali::String url;
@@ -356,6 +367,9 @@ Dali::Property::Value LottieAnimationViewImpl::GetProperty(Dali::BaseObject* obj
         break;
       case LottieAnimationViewImpl::Property::RENDER_SCALE:
         value = impl.GetRenderScale();
+        break;
+      case LottieAnimationViewImpl::Property::ENABLE_ASPECT_FIT:
+        value = impl.IsAspectFitEnabled();
         break;
       case LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE:
         value = impl.GetPlaceholderUrl();
@@ -735,6 +749,21 @@ float LottieAnimationViewImpl::GetRenderScale() const
   return mRenderScale;
 }
 
+void LottieAnimationViewImpl::SetEnableAspectFit(bool enableAspectFit)
+{
+  if(mEnableAspectFit != enableAspectFit)
+  {
+    mEnableAspectFit = enableAspectFit;
+    mVisualDirty     = true;
+    InvalidateMeasure();
+  }
+}
+
+bool LottieAnimationViewImpl::IsAspectFitEnabled() const
+{
+  return mEnableAspectFit;
+}
+
 Dali::Property::Map LottieAnimationViewImpl::GetContentInfo()
 {
   Dali::Property::Map result;
@@ -859,6 +888,7 @@ void LottieAnimationViewImpl::UpdateVisual()
   map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
   map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
   map.Insert(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT, mEnableAspectFit);
   if(mDesiredWidth > 0)
   {
     map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredWidth);

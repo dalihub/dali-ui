@@ -554,6 +554,24 @@ int UtcDaliLottieAnimationViewSetGetRenderScaleP(void)
   END_TEST;
 }
 
+// EnableAspectFit
+
+int UtcDaliLottieAnimationViewSetGetEnableAspectFitP(void)
+{
+  UiTestApplication application;
+  LottieAnimationView view = LottieAnimationView::New();
+
+  // Default should be true
+  DALI_TEST_EQUALS(view.IsAspectFitEnabled(), true, TEST_LOCATION);
+
+  view.SetEnableAspectFit(false);
+  DALI_TEST_EQUALS(view.IsAspectFitEnabled(), false, TEST_LOCATION);
+
+  view.SetEnableAspectFit(true);
+  DALI_TEST_EQUALS(view.IsAspectFitEnabled(), true, TEST_LOCATION);
+  END_TEST;
+}
+
 // GetContentInfo / GetMarkerInfo
 
 int UtcDaliLottieAnimationViewGetContentInfoP(void)

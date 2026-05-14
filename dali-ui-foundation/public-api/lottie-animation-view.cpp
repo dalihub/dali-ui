@@ -222,6 +222,16 @@ float LottieAnimationView::GetRenderScale() const
   return Ui::GetImpl(*this).GetRenderScale();
 }
 
+LottieAnimationView& LottieAnimationView::SetEnableAspectFit(bool enableAspectFit)
+{
+  Ui::GetImpl(*this).SetEnableAspectFit(enableAspectFit);
+  return *this;
+}
+bool LottieAnimationView::IsAspectFitEnabled() const
+{
+  return Ui::GetImpl(*this).IsAspectFitEnabled();
+}
+
 Dali::Property::Map LottieAnimationView::GetContentInfo()
 {
   return Ui::GetImpl(*this).GetContentInfo();

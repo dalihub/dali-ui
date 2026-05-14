@@ -299,34 +299,45 @@ LottieAnimationVisual& LottieAnimationVisual::SetRenderScale(float renderScale)
   return *this;
 }
 
+bool LottieAnimationVisual::IsAspectFitEnabled() const
+{
+  return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT);
+}
+
+LottieAnimationVisual& LottieAnimationVisual::SetEnableAspectFit(bool enableAspectFit)
+{
+  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT, enableAspectFit);
+  return *this;
+}
+
 // =============================================================================
 // Read-only properties
 // =============================================================================
 
 AnimatedImage::PlayState LottieAnimationVisual::GetPlayState() const
 {
-  AnimatedImage::PlayState result = VisualBase::GetProperty<AnimatedImage::PlayState>(LottieAnimationVisual::Property::PLAY_STATE);
   // We should not cache this property. Remove cache now.
   // TODO : Maybe need to make API to get proeprty without cache as method.
   GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::PLAY_STATE);
+  AnimatedImage::PlayState result = VisualBase::GetProperty<AnimatedImage::PlayState>(LottieAnimationVisual::Property::PLAY_STATE);
   return result;
 }
 
 int LottieAnimationVisual::GetCurrentFrameNumber() const
 {
-  int result = VisualBase::GetProperty<int>(LottieAnimationVisual::Property::CURRENT_FRAME_NUMBER);
   // We should not cache this property. Remove cache now.
   // TODO : Maybe need to make API to get proeprty without cache as method.
   GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::CURRENT_FRAME_NUMBER);
+  int result = VisualBase::GetProperty<int>(LottieAnimationVisual::Property::CURRENT_FRAME_NUMBER);
   return result;
 }
 
 int LottieAnimationVisual::GetTotalFrameNumber() const
 {
   int result = VisualBase::GetProperty<int>(LottieAnimationVisual::Property::TOTAL_FRAME_NUMBER);
-  if(result == -1)
+  if(result <= 0)
   {
-    // We should not cache this property only if result is -1. Remove cache now.
+    // We should not cache this property only if result is less or equal than 0. Remove cache now.
     GetImplementation(*this).RemoveCache(LottieAnimationVisual::Property::TOTAL_FRAME_NUMBER);
   }
   return result;

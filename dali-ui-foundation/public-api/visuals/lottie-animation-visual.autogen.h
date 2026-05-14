@@ -164,6 +164,16 @@
   */ \
   ChildClass& SetRenderScale(float renderScale) { LottieAnimationVisual::SetRenderScale(renderScale); return *this; } \
   /** \
+  * @brief Sets whether to enable aspect fit scaling. \
+  * \
+  * When enabled (default), the animation is scaled to fit within the target size \
+  * while preserving its aspect ratio. When disabled, the animation stretches to \
+  * fill the entire target size. \
+  * \
+  * @param[in] enableAspectFit True to enable aspect fit, false to disable \
+  */ \
+  ChildClass& SetEnableAspectFit(bool enableAspectFit) { LottieAnimationVisual::SetEnableAspectFit(enableAspectFit); return *this; } \
+  /** \
   * @brief Sets a per-frame dynamic property callback on a specific layer/element. \
   * \
   * Ownership of DynamicPropertyInfo::callback is transferred to the visual. \

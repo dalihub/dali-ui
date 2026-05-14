@@ -90,6 +90,7 @@ public:
       ENABLE_FRAME_CACHE         = ImageVisualPropertyIndex::ENABLE_FRAME_CACHE,
       NOTIFY_AFTER_RASTERIZATION = ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION,
       RENDER_SCALE               = ImageVisualPropertyIndex::RENDER_SCALE,
+      ENABLE_ASPECT_FIT          = ImageVisualPropertyIndex::ENABLE_ASPECT_FIT,
 
       // Read-only
       PLAY_STATE           = ImageVisualPropertyIndex::PLAY_STATE,
@@ -453,6 +454,24 @@ public: // Setters for chaining
    * @return Reference to this for fluent chaining
    */
   LottieAnimationVisual& SetRenderScale(float renderScale);
+
+  /**
+   * @brief Gets whether aspect fit scaling is enabled.
+   *
+   * @return True if aspect fit is enabled, false otherwise (default: true)
+   */
+  bool IsAspectFitEnabled() const;
+
+  /**
+   * @brief Sets whether to enable aspect fit scaling.
+   *
+   * When enabled (default), the animation is scaled to fit within the target size
+   * while preserving its aspect ratio. When disabled, the animation stretches to
+   * fill the entire target size.
+   *
+   * @param[in] enableAspectFit True to enable aspect fit, false to disable
+   */
+  LottieAnimationVisual& SetEnableAspectFit(bool enableAspectFit);
 
   /**
    * @brief Gets the play state of the LottieAnimationVisual.

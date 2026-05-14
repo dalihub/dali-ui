@@ -73,6 +73,7 @@ public: // Properties
       RENDER_SCALE               = Ui::LottieAnimationViewPropertyIndex::RENDER_SCALE,
       PLACEHOLDER_IMAGE          = Ui::LottieAnimationViewPropertyIndex::PLACEHOLDER_IMAGE,
       PIXEL_AREA                 = Ui::LottieAnimationViewPropertyIndex::PIXEL_AREA,
+      ENABLE_ASPECT_FIT          = Ui::LottieAnimationViewPropertyIndex::ENABLE_ASPECT_FIT,
     };
   };
 
@@ -256,6 +257,16 @@ public: // API
    * @copydoc Dali::Ui::LottieAnimationView::GetRenderScale
    */
   float GetRenderScale() const;
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::SetEnableAspectFit
+   */
+  void SetEnableAspectFit(bool enableAspectFit);
+
+  /**
+   * @copydoc Dali::Ui::LottieAnimationView::IsAspectFitEnabled
+   */
+  bool IsAspectFitEnabled() const;
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::GetContentInfo
@@ -448,6 +459,7 @@ private:                    // Data
   bool mNotifyAfterRasterization;
   bool mSynchronousLoading;
   bool mPreMultipliedAlpha;
+  bool mEnableAspectFit;
   bool mVisualDirty; ///< True when a property changed and the visual needs rebuilding on the next measure pass
 
   Dali::Signal<void(Dali::Ui::View)> mAnimationFinishedSignal;

@@ -403,6 +403,15 @@ enum
    */
   RENDER_SCALE,
 
+  /**
+   * @brief Whether to enable aspect fit for AnimatedVectorImageVisual.
+   * @details Name "enableAspectFit", type Property::BOOLEAN.
+   * If this property is true, the vector image will be scaled to fit within the visual size
+   * while maintaining the aspect ratio. If false, the image will be stretched to fill the visual size.
+   * @note It is used in the AnimatedVectorImageVisual. The default is true.
+   */
+  ENABLE_ASPECT_FIT,
+
   //// Read-only properties.
 
   // For both AnimatedImage and LottieAnimation
