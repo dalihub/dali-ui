@@ -81,13 +81,13 @@ public:
    * @param[in] gradientUnits The the attributes are defined using the current user coordinate system or the bounding
    * box of the shape.
    */
-  void SetGradientUnits(Ui::GradientVisual::Units::Type gradientUnits);
+  void SetUnits(Ui::Gradient::Units gradientUnits);
 
   /**
    * Get the coordinate system used by the gradient attributes.
    * @return USER_SPACE_ON_USE or OBJECT_BOUNDING_BOX
    */
-  Ui::GradientVisual::Units::Type GetGradientUnits() const;
+  Ui::Gradient::Units GetUnits() const;
 
   /**
    * Indicates what happens if the gradient starts or ends inside the bounds of the target rectangle.
@@ -95,13 +95,13 @@ public:
    *
    * @param[in] spread The method to fill the remainder of target region which is outside the gradient bounds
    */
-  void SetSpreadMethod(Ui::GradientVisual::SpreadMethod::Type spread);
+  void SetSpreadMethod(Ui::Gradient::SpreadMethod spread);
 
   /**
    * Get the filling method for the the remainder of target region which is outside the gradient boun.
    * @return PAD, REFLECT or REPEAT
    */
-  Ui::GradientVisual::SpreadMethod::Type GetSpreadMethod() const;
+  Ui::Gradient::SpreadMethod GetSpreadMethod() const;
 
   /**
    * Get the transformation matrix to align the vertices with the gradient line/circle
@@ -156,11 +156,11 @@ protected:
   Gradient& operator=(const Gradient& handle);
 
 protected:
-  Vector<GradientStop>                   mGradientStops;
-  Matrix3                                mAlignmentTransform;
-  Ui::GradientVisual::Units::Type        mGradientUnits;
-  Ui::GradientVisual::SpreadMethod::Type mSpreadMethod;
-  float                                  mStartOffset;
+  Vector<GradientStop>       mGradientStops;
+  Matrix3                    mAlignmentTransform;
+  Ui::Gradient::Units        mUnits;
+  Ui::Gradient::SpreadMethod mSpreadMethod;
+  float                      mStartOffset;
 };
 
 } // namespace Internal

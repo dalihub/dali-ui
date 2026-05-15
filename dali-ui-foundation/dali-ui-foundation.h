@@ -48,6 +48,9 @@
 
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
+#include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-stop-node.h>
+
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
@@ -86,6 +89,7 @@
 
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
+#include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>

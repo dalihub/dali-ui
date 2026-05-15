@@ -54,14 +54,14 @@ namespace
 static constexpr int32_t CUSTOM_PROPERTY_COUNT(1); // alignment
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(UNITS)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::Units, OBJECT_BOUNDING_BOX)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::Units, USER_SPACE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Gradient::Units, OBJECT_BOUNDING_BOX)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Gradient::Units, USER_SPACE)
 DALI_ENUM_TO_STRING_TABLE_END(UNITS)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(SPREAD_METHOD)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, PAD)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, REFLECT)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::GradientVisual::SpreadMethod, REPEAT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Gradient::SpreadMethod, PAD)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Gradient::SpreadMethod, REFLECT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Gradient::SpreadMethod, REPEAT)
 DALI_ENUM_TO_STRING_TABLE_END(SPREAD_METHOD)
 
 // uniform names
@@ -129,19 +129,19 @@ enum GradientVisualRequireFlag
   CONIC      = (2 << 2) * 3
 };
 
-Dali::WrapMode::Type GetWrapMode(Ui::GradientVisual::SpreadMethod::Type spread)
+Dali::WrapMode::Type GetWrapMode(Ui::Gradient::SpreadMethod spread)
 {
   switch(spread)
   {
-    case Ui::GradientVisual::SpreadMethod::REPEAT:
+    case Ui::Gradient::SpreadMethod::REPEAT:
     {
       return Dali::WrapMode::REPEAT;
     }
-    case Ui::GradientVisual::SpreadMethod::REFLECT:
+    case Ui::Gradient::SpreadMethod::REFLECT:
     {
       return Dali::WrapMode::MIRRORED_REPEAT;
     }
-    case Ui::GradientVisual::SpreadMethod::PAD:
+    case Ui::Gradient::SpreadMethod::PAD:
     default:
     {
       return Dali::WrapMode::CLAMP_TO_EDGE;
@@ -178,32 +178,62 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   if(!mGradient)
   {
-    Ui::GradientVisual::Units::Type gradientUnits = Ui::GradientVisual::Units::OBJECT_BOUNDING_BOX;
+    Ui::Gradient::Units gradientUnits = Ui::Gradient::Units::OBJECT_BOUNDING_BOX;
 
-    Property::Value* unitsValue = propertyMap.Find(Ui::GradientVisual::Property::UNITS, UNITS_NAME);
+    Property::Value* unitsValue = propertyMap.Find(Ui::GradientVisualPropertyIndex::UNITS, UNITS_NAME);
     if(unitsValue)
     {
       Scripting::GetEnumerationProperty(*unitsValue, UNITS_TABLE, UNITS_TABLE_COUNT, gradientUnits);
     }
 
     mGradientType = Type::LINEAR;
-    if(propertyMap.Find(Ui::GradientVisual::Property::RADIUS, RADIUS_NAME))
+    if(propertyMap.Find(Ui::GradientVisualPropertyIndex::RADIUS, RADIUS_NAME))
     {
       mGradientType = Type::RADIAL;
     }
-    else if(propertyMap.Find(Ui::GradientVisual::Property::START_ANGLE, CONIC_START_ANGLE_NAME))
+    else if(propertyMap.Find(Ui::GradientVisualPropertyIndex::START_ANGLE, CONIC_START_ANGLE_NAME))
     {
       mGradientType = Type::CONIC;
     }
 
     if(NewGradient(mGradientType, propertyMap))
     {
-      mGradient->SetGradientUnits(gradientUnits);
+      mGradient->SetUnits(gradientUnits);
       mGradientTransform = mGradient->GetAlignmentTransform();
     }
     else
     {
       DALI_LOG_ERROR("Fail to provide valid properties to create a GradientVisual object\n");
+    }
+  }
+
+  {
+    // Mutable properties. Allow to call as UpdateProperty action
+    // For now, START_OFFSET and UNITS only support runtime change.
+    Property::Value* startOffsetValue = propertyMap.Find(Ui::GradientVisualPropertyIndex::START_OFFSET, START_OFFSET_NAME);
+    float            startOffset;
+    if(startOffsetValue && startOffsetValue->Get(startOffset))
+    {
+      if(DALI_LIKELY(mGradient))
+      {
+        mGradient->SetStartOffset(startOffset);
+      }
+      if(mImpl->mRenderer && mStartOffsetIndex != Property::INVALID_INDEX)
+      {
+        mImpl->mRenderer.SetProperty(mStartOffsetIndex, startOffset);
+      }
+    }
+
+    if(DALI_LIKELY(mGradient))
+    {
+      Property::Value*           spreadValue  = propertyMap.Find(Ui::GradientVisualPropertyIndex::SPREAD_METHOD, SPREAD_METHOD_NAME);
+      Ui::Gradient::SpreadMethod spreadMethod = mGradient->GetSpreadMethod();
+      if(spreadValue && Scripting::GetEnumerationProperty(*spreadValue, SPREAD_METHOD_TABLE, SPREAD_METHOD_TABLE_COUNT, spreadMethod))
+      {
+        mGradient->SetSpreadMethod(spreadMethod);
+
+        UpdateShader();
+      }
     }
   }
 }
@@ -237,8 +267,8 @@ void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
   map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::GRADIENT);
-  map.Insert(Ui::GradientVisual::Property::UNITS, mGradient->GetGradientUnits());
-  map.Insert(Ui::GradientVisual::Property::SPREAD_METHOD, mGradient->GetSpreadMethod());
+  map.Insert(Ui::GradientVisualPropertyIndex::UNITS, mGradient->GetUnits());
+  map.Insert(Ui::GradientVisualPropertyIndex::SPREAD_METHOD, mGradient->GetSpreadMethod());
 
   const Vector<Gradient::GradientStop>& stops(mGradient->GetStops());
   Property::Array                       offsets;
@@ -258,34 +288,36 @@ void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
     }
   }
 
-  map.Insert(Ui::GradientVisual::Property::STOP_OFFSET, offsets);
-  map.Insert(Ui::GradientVisual::Property::STOP_COLOR, colors);
-
-  if(mGradient)
+  map.Insert(Ui::GradientVisualPropertyIndex::STOP_OFFSET, offsets);
+  map.Insert(Ui::GradientVisualPropertyIndex::STOP_COLOR, colors);
+  if(mImpl->mRenderer && mStartOffsetIndex != Property::INVALID_INDEX)
   {
-    switch(mGradientType)
+    mGradient->SetStartOffset(mImpl->mRenderer.GetProperty<float>(mStartOffsetIndex));
+  }
+  map.Insert(Ui::GradientVisualPropertyIndex::START_OFFSET, mGradient->GetStartOffset());
+
+  switch(mGradientType)
+  {
+    case Type::LINEAR:
     {
-      case Type::LINEAR:
-      {
-        LinearGradient* gradient = static_cast<LinearGradient*>(mGradient.Get());
-        map.Insert(Ui::GradientVisual::Property::START_POSITION, gradient->GetStartPosition());
-        map.Insert(Ui::GradientVisual::Property::END_POSITION, gradient->GetEndPosition());
-        break;
-      }
-      case Type::RADIAL:
-      {
-        RadialGradient* gradient = static_cast<RadialGradient*>(mGradient.Get());
-        map.Insert(Ui::GradientVisual::Property::CENTER, gradient->GetCenter());
-        map.Insert(Ui::GradientVisual::Property::RADIUS, gradient->GetRadius());
-        break;
-      }
-      case Type::CONIC:
-      {
-        ConicGradient* gradient = static_cast<ConicGradient*>(mGradient.Get());
-        map.Insert(Ui::GradientVisual::Property::CENTER, gradient->GetCenter());
-        map.Insert(Ui::GradientVisual::Property::START_ANGLE, gradient->GetStartAngle().radian);
-        break;
-      }
+      LinearGradient* gradient = static_cast<LinearGradient*>(mGradient.Get());
+      map.Insert(Ui::GradientVisualPropertyIndex::START_POSITION, gradient->GetStartPosition());
+      map.Insert(Ui::GradientVisualPropertyIndex::END_POSITION, gradient->GetEndPosition());
+      break;
+    }
+    case Type::RADIAL:
+    {
+      RadialGradient* gradient = static_cast<RadialGradient*>(mGradient.Get());
+      map.Insert(Ui::GradientVisualPropertyIndex::CENTER, gradient->GetCenter());
+      map.Insert(Ui::GradientVisualPropertyIndex::RADIUS, gradient->GetRadius());
+      break;
+    }
+    case Type::CONIC:
+    {
+      ConicGradient* gradient = static_cast<ConicGradient*>(mGradient.Get());
+      map.Insert(Ui::GradientVisualPropertyIndex::CENTER, gradient->GetCenter());
+      map.Insert(Ui::GradientVisualPropertyIndex::START_ANGLE, gradient->GetStartAngle().radian);
+      break;
     }
   }
 }
@@ -313,7 +345,7 @@ void GradientVisual::OnInitialize()
   }
 
   mImpl->mRenderer = DecoratedVisualRenderer::New(geometry, shader);
-  mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT);
+  mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT + (mGradientType == Type::CONIC ? 1 : 0));
   mImpl->mRenderer.SetTextures(textureSet);
 
   // If opaque and then no need to have blending
@@ -334,7 +366,7 @@ void GradientVisual::OnInitialize()
                                           (textureSize - 1.0f) / textureSize);
 
   float startOffset = mGradient->GetStartOffset();
-  mStartOffsetIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::GradientVisual::Property::START_OFFSET,
+  mStartOffsetIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::GradientVisualPropertyIndex::START_OFFSET,
                                                               ToDaliStringView(UNIFORM_START_OFFSET_NAME), startOffset);
 
   // Register transform properties
@@ -346,8 +378,8 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
   if(gradientType == Type::LINEAR)
   {
     Property::Value* startPositionValue =
-      propertyMap.Find(Ui::GradientVisual::Property::START_POSITION, START_POSITION_NAME);
-    Property::Value* endPositionValue = propertyMap.Find(Ui::GradientVisual::Property::END_POSITION, END_POSITION_NAME);
+      propertyMap.Find(Ui::GradientVisualPropertyIndex::START_POSITION, START_POSITION_NAME);
+    Property::Value* endPositionValue = propertyMap.Find(Ui::GradientVisualPropertyIndex::END_POSITION, END_POSITION_NAME);
     Vector2          startPosition;
     Vector2          endPosition;
 
@@ -363,8 +395,8 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
   }
   else if(gradientType == Type::RADIAL)
   {
-    Property::Value* centerValue = propertyMap.Find(Ui::GradientVisual::Property::CENTER, CENTER_NAME);
-    Property::Value* radiusValue = propertyMap.Find(Ui::GradientVisual::Property::RADIUS, RADIUS_NAME);
+    Property::Value* centerValue = propertyMap.Find(Ui::GradientVisualPropertyIndex::CENTER, CENTER_NAME);
+    Property::Value* radiusValue = propertyMap.Find(Ui::GradientVisualPropertyIndex::RADIUS, RADIUS_NAME);
     Vector2          center;
     float            radius;
     if(centerValue && centerValue->Get(center) && radiusValue && radiusValue->Get(radius))
@@ -378,9 +410,9 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
   }
   else // if(gradientType == Type::CONIC)
   {
-    Property::Value* centerValue = propertyMap.Find(Ui::GradientVisual::Property::CENTER, CENTER_NAME);
+    Property::Value* centerValue = propertyMap.Find(Ui::GradientVisualPropertyIndex::CENTER, CENTER_NAME);
     Property::Value* startAngleValue =
-      propertyMap.Find(Ui::GradientVisual::Property::START_ANGLE, CONIC_START_ANGLE_NAME);
+      propertyMap.Find(Ui::GradientVisualPropertyIndex::START_ANGLE, CONIC_START_ANGLE_NAME);
     Vector2 center;
     float   startAngle;
     if(centerValue && centerValue->Get(center) && startAngleValue && startAngleValue->Get(startAngle))
@@ -394,8 +426,8 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
   }
 
   unsigned int     numValidStop    = 0u;
-  Property::Value* stopOffsetValue = propertyMap.Find(Ui::GradientVisual::Property::STOP_OFFSET, STOP_OFFSET_NAME);
-  Property::Value* stopColorValue  = propertyMap.Find(Ui::GradientVisual::Property::STOP_COLOR, STOP_COLOR_NAME);
+  Property::Value* stopOffsetValue = propertyMap.Find(Ui::GradientVisualPropertyIndex::STOP_OFFSET, STOP_OFFSET_NAME);
+  Property::Value* stopColorValue  = propertyMap.Find(Ui::GradientVisualPropertyIndex::STOP_COLOR, STOP_COLOR_NAME);
   if(stopColorValue)
   {
     Vector<float>    offsetArray;
@@ -425,30 +457,12 @@ bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propert
     return false;
   }
 
-  Property::Value* spread = propertyMap.Find(Ui::GradientVisual::Property::SPREAD_METHOD, SPREAD_METHOD_NAME);
-  // The default spread method is PAD. Only need to set new spread if it's anything else.
-  if(spread)
-  {
-    Ui::GradientVisual::SpreadMethod::Type spreadMethod = Ui::GradientVisual::SpreadMethod::PAD;
-    if(Scripting::GetEnumerationProperty(*spread, SPREAD_METHOD_TABLE, SPREAD_METHOD_TABLE_COUNT, spreadMethod))
-    {
-      mGradient->SetSpreadMethod(spreadMethod);
-    }
-  }
-
-  Property::Value* startOffset = propertyMap.Find(Ui::GradientVisual::Property::START_OFFSET, START_OFFSET_NAME);
-  float            startOffsetValue;
-  if(startOffset && startOffset->Get(startOffsetValue))
-  {
-    mGradient->SetStartOffset(startOffsetValue);
-  }
-
   return true;
 }
 
 Shader GradientVisual::GenerateShader() const
 {
-  bool userspaceUnit  = (mGradient->GetGradientUnits() == Ui::GradientVisual::Units::USER_SPACE);
+  bool userspaceUnit  = (mGradient->GetUnits() == Ui::Gradient::Units::USER_SPACE);
   bool roundedCorner  = IsRoundedCornerRequired();
   bool squircleCorner = IsSquircleCornerRequired();
   bool borderline     = IsBorderlineRequired();
