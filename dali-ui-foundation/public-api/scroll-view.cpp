@@ -271,6 +271,28 @@ ScrollBarVisibility ScrollView::GetVerticalScrollBarVisibility() const
   return GetImpl(*this).GetVerticalScrollBarVisibility();
 }
 
+ScrollView& ScrollView::SetKeyScrollEnabled(bool enable)
+{
+  GetImpl(*this).SetKeyScrollEnabled(enable);
+  return *this;
+}
+
+bool ScrollView::GetKeyScrollEnabled() const
+{
+  return GetImpl(*this).GetKeyScrollEnabled();
+}
+
+ScrollView& ScrollView::SetKeyScrollStep(float step)
+{
+  GetImpl(*this).SetKeyScrollStep(step);
+  return *this;
+}
+
+float ScrollView::GetKeyScrollStep() const
+{
+  return GetImpl(*this).GetKeyScrollStep();
+}
+
 ScrollView& ScrollView::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
 {
   GetImpl(*this).SetVerticalScrollBarVisibility(visibility);

@@ -18,19 +18,26 @@
  *
  * Three diagnostic panels + ScrollView:
  *
- *   [0,   0] 600x160  ScrollStateObserver — live gesture/scroll/drag/fling states
- *   [0, 160] 600x100  ScrollView Signals  — last fired signal + scroll position + delta
- *   [0, 260] 600x140  Focus Scroll        — ScrollOnFocus toggle, mode selector, focused item
- *   [0, 400] 600x1000 ScrollView          — 15 focusable items
+ *   [0,   0] 600x130  ScrollStateObserver — live gesture/scroll/drag/fling states
+ *   [0, 130] 600x90   ScrollView Signals  — last fired signal + scroll position + delta
+ *   [0, 220] 600x214  Focus Scroll        — ScrollOnFocus, mode, peek, key-scroll controls
+ *   [0, 434] 600x646  ScrollView          — 15 focusable items in 3 groups of 5,
+ *                                           separated by 320px non-focusable gaps.
+ *                                           Within a group: adjacent items are 140px
+ *                                           apart (< KEY_SCROLL_STEP=150) → focus moves.
+ *                                           Across a gap: distance is 320px (> 150)
+ *                                           → key-scroll fires until close enough.
  *
  * Keyboard:
- *   ↑ / ↓     — move focus between items
+ *   ↑ / ↓     — move focus between items (FocusManager navigation)
  *   S         — toggle ScrollOnFocus on / off
  *   1         — mode: MakeVisible
  *   2         — mode: Start
  *   3         — mode: Center
  *   4         — mode: End
  *   + / -     — increase / decrease FocusScrollPeek by 10 px
+ *   K         — toggle KeyScrollEnabled on / off
+ *   [ / ]     — decrease / increase KeyScrollStep by 20 px
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -47,16 +54,26 @@ static constexpr float WINDOW_W      = 600.0f;
 static constexpr float WINDOW_H      = 1080.0f;
 static constexpr float OBSERVER_H    = 130.0f;
 static constexpr float SIGNAL_LOG_H  = 90.0f;
-static constexpr float FOCUS_PANEL_H = 180.0f;
-static constexpr float SCROLL_Y      = OBSERVER_H + SIGNAL_LOG_H + FOCUS_PANEL_H; // 400
-static constexpr float SCROLL_VIEW_H = WINDOW_H - SCROLL_Y;                       // 680
+static constexpr float FOCUS_PANEL_H     = 214.0f;
+static constexpr float SCROLL_Y          = OBSERVER_H + SIGNAL_LOG_H + FOCUS_PANEL_H; // 434
+static constexpr float SCROLL_VIEW_H     = WINDOW_H - SCROLL_Y;                       // 646
 static constexpr float FOCUS_SCROLL_PEEK = 40.0f;
+static constexpr float KEY_SCROLL_STEP   = 150.0f; // ~1 item height
 static constexpr int   ITEM_COUNT    = 15;
+static constexpr int   ITEM_GROUP    = 5;    // items per group; gaps inserted between groups
 static constexpr float ITEM_H        = 130.0f;
 static constexpr float ITEM_SPACING  = 10.0f;
 static constexpr float CONTENT_PAD   = 16.0f;
-// total content height: 2*pad + N*item + (N-1)*spacing
-static constexpr float CONTENT_H     = CONTENT_PAD * 2 + ITEM_COUNT * ITEM_H + (ITEM_COUNT - 1) * ITEM_SPACING;
+// Large spacers are inserted between item groups so the distance between the
+// last item of one group and the first item of the next exceeds KEY_SCROLL_STEP.
+// This makes key-scroll-step actually trigger at group boundaries.
+static constexpr float GAP_H         = 320.0f; // >> KEY_SCROLL_STEP
+static constexpr int   GAP_COUNT     = ITEM_COUNT / ITEM_GROUP - 1; // 2
+// total content height: 2*pad + N*item + (N-1)*spacing + gaps
+static constexpr float CONTENT_H     = CONTENT_PAD * 2
+                                       + ITEM_COUNT * ITEM_H
+                                       + (ITEM_COUNT - 1) * ITEM_SPACING
+                                       + GAP_COUNT * GAP_H;
 
 // ─── colours ─────────────────────────────────────────────────────────────────
 static const Vector4 COLOR_PANEL_BG    (0.12f, 0.12f, 0.12f, 1.0f);
@@ -345,12 +362,37 @@ private:
       .SetRequestedPositionY(ROW3_Y)
       .SetTextColor(Color::WHITE));
 
+    // Row 4: KeyScroll enable chip + step label
+    static constexpr float ROW4_Y = ROW3_Y + CHIP_H + 8.0f;
+
+    mKeyScrollChip = View::New()
+      .SetBackgroundColor(COLOR_INACTIVE)
+      .SetRequestedWidth(CHIP_W)
+      .SetRequestedHeight(CHIP_H)
+      .SetRequestedPositionX(8.0f)
+      .SetRequestedPositionY(ROW4_Y);
+    mKeyScrollChip.SetProperty(View::Property::CORNER_RADIUS, Vector4(6, 6, 6, 6));
+    mKeyScrollChip.Add(Label::New("KeyScroll: OFF")
+      .SetRequestedWidth(CHIP_W)
+      .SetRequestedHeight(CHIP_H)
+      .SetTextColor(Color::WHITE));
+    mKeyScrollChip.TouchedSignal().Connect(this, &ScrollViewController::OnKeyScrollChipTouched);
+    panel.Add(mKeyScrollChip);
+
+    mKeyScrollStepLabel = Label::New("Step: 150 px")
+      .SetRequestedWidth(WINDOW_W - CHIP_W - 24.0f)
+      .SetRequestedHeight(CHIP_H)
+      .SetRequestedPositionX(CHIP_W + 16.0f)
+      .SetRequestedPositionY(ROW4_Y)
+      .SetTextColor(Color::WHITE);
+    panel.Add(mKeyScrollStepLabel);
+
     // Key hint row
-    panel.Add(Label::New("Keys:  ↑↓ focus   S toggle   1~4 mode   +/- peek")
+    panel.Add(Label::New("Keys: ↑↓ focus  S scroll-on-focus  1~4 mode  +/- peek  K key-scroll  [/] step")
       .SetRequestedWidth(WINDOW_W - 8.0f)
       .SetRequestedHeight(22.0f)
       .SetRequestedPositionX(8.0f)
-      .SetRequestedPositionY(ROW3_Y + CHIP_H + 2.0f)
+      .SetRequestedPositionY(ROW4_Y + CHIP_H + 2.0f)
       .SetTextColor(Color::WHITE));
 
     window.Add(panel);
@@ -382,6 +424,18 @@ private:
     std::ostringstream pk;
     pk << static_cast<int>(mScrollView.GetFocusScrollPeek()) << " px";
     mPeekLabel.SetText(pk.str().c_str());
+
+    // KeyScroll chip
+    bool ks = mScrollView.GetKeyScrollEnabled();
+    mKeyScrollChip.SetBackgroundColor(ks ? COLOR_ACTIVE : COLOR_INACTIVE);
+    std::ostringstream kl;
+    kl << "KeyScroll: " << (ks ? "ON" : "OFF");
+    Label::DownCast(mKeyScrollChip.GetChildAt(0)).SetText(kl.str().c_str());
+
+    // Key scroll step label
+    std::ostringstream sl;
+    sl << "Step: " << static_cast<int>(mScrollView.GetKeyScrollStep()) << " px";
+    mKeyScrollStepLabel.SetText(sl.str().c_str());
   }
 
   void SetLastSignal(const char* name)
@@ -467,6 +521,31 @@ private:
 
     for(int i = 0; i < ITEM_COUNT; ++i)
     {
+      // Insert a non-focusable gap view between item groups.
+      // The gap (GAP_H = 320px) is larger than KEY_SCROLL_STEP (150px), so
+      // pressing ↓ from the last item in a group triggers step-scroll instead
+      // of jumping focus directly to the first item of the next group.
+      if(i > 0 && i % ITEM_GROUP == 0)
+      {
+        // Determine which gap number this is (1-based) for the label
+        int gapNum = i / ITEM_GROUP;
+        std::ostringstream gapOss;
+        gapOss << "── gap " << gapNum << " (" << static_cast<int>(GAP_H) << "px) ──"
+               << "  Key-scroll steps across here  ──";
+        Label gapLabel = Label::New(gapOss.str().c_str())
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetRequestedHeight(GAP_H * 0.3f)
+          .SetRequestedPositionY(GAP_H * 0.35f);
+        View gap = View::New()
+          .SetBackgroundColor(Vector4(0.75f, 0.78f, 0.82f, 1.0f))
+          .SetRequestedWidth(MATCH_PARENT)
+          .SetRequestedHeight(GAP_H);
+        gap.SetProperty(View::Property::CORNER_RADIUS, Vector4(8, 8, 8, 8));
+        gap.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, false);
+        gap.Add(gapLabel);
+        content.Add(gap);
+      }
+
       View item = View::New()
         .SetBackgroundColor(i % 2 == 0 ? COLOR_ITEM_EVEN : COLOR_ITEM_ODD)
         .SetRequestedWidth(MATCH_PARENT)
@@ -477,6 +556,10 @@ private:
       // Item number label (large, centered vertically)
       std::ostringstream nameOss;
       nameOss << "Item " << (i + 1);
+      if(i == ITEM_GROUP - 1 || i == 2 * ITEM_GROUP - 1)
+        nameOss << "  ← last in group";
+      else if(i == ITEM_GROUP || i == 2 * ITEM_GROUP)
+        nameOss << "  ← first in group";
       Label nameLabel = Label::New(nameOss.str().c_str())
         .SetRequestedWidth(WINDOW_W - 2 * CONTENT_PAD)
         .SetRequestedHeight(ITEM_H * 0.6f)
@@ -486,7 +569,11 @@ private:
 
       // Hint label (small, bottom)
       std::ostringstream hintOss;
-      hintOss << "index " << i << "  (y ≈ " << static_cast<int>(CONTENT_PAD + i * (ITEM_H + ITEM_SPACING)) << "px)";
+      hintOss << "index " << i;
+      if(i % ITEM_GROUP == ITEM_GROUP - 1 && i != ITEM_COUNT - 1)
+        hintOss << "  [ ↓ triggers key-scroll across gap ]";
+      else if(i % ITEM_GROUP == 0 && i != 0)
+        hintOss << "  [ ↑ triggers key-scroll across gap ]";
       Label hintLabel = Label::New(hintOss.str().c_str())
         .SetRequestedWidth(WINDOW_W - 2 * CONTENT_PAD)
         .SetRequestedHeight(ITEM_H * 0.3f)
@@ -502,14 +589,16 @@ private:
     mScrollView = ScrollView::New()
       .SetScrollDirection(ScrollDirection::Vertical)
       .SetMaxFlingDistance(6000.0f)
-      .SetMinimumFlingDuration(1000)
-      .SetMaximumFlingDuration(2000)
+      .SetMinimumFlingDuration(200)
+      .SetMaximumFlingDuration(400)
       .SetFlingSensitivity(1.0f)
       .SetDecelerationRate(0.998f)
       .SetOverScrollMode(OverScrollMode::ContentScrolls)
       .SetScrollOnFocus(true)
       .SetFocusScrollToPosition(ScrollToPosition::MakeVisible)
       .SetFocusScrollPeek(FOCUS_SCROLL_PEEK)
+      .SetKeyScrollEnabled(true)
+      .SetKeyScrollStep(KEY_SCROLL_STEP)
       .SetRequestedWidth(WINDOW_W)
       .SetRequestedHeight(SCROLL_VIEW_H)
       .SetRequestedPositionX(0.0f)
@@ -518,6 +607,19 @@ private:
       .SetContent(content);
 
     window.Add(mScrollView);
+  }
+
+  // ── KeyScroll chip touch ───────────────────────────────────────────────────
+
+  bool OnKeyScrollChipTouched(Actor /*actor*/, TouchEvent touch)
+  {
+    if(touch.GetState(0) != PointState::UP)
+    {
+      return false;
+    }
+    mScrollView.SetKeyScrollEnabled(!mScrollView.GetKeyScrollEnabled());
+    RefreshFocusPanel();
+    return true;
   }
 
   // ── Mode chip touch ────────────────────────────────────────────────────────
@@ -550,6 +652,7 @@ private:
 
   void OnFocusChanged(View from, View to)
   {
+    if(from == to) return; // key-scroll returns same view to block FocusFinder
     // Restore previous item colour
     for(int i = 0; i < ITEM_COUNT; ++i)
     {
@@ -579,16 +682,6 @@ private:
     }
   }
 
-  void MoveFocusBy(int delta)
-  {
-    int next = mCurrentFocusIndex + delta;
-    if(next < 0 || next >= ITEM_COUNT)
-    {
-      return;
-    }
-    FocusManager::Get().SetCurrentFocusView(mFocusItems[next]);
-  }
-
   // ── Key ────────────────────────────────────────────────────────────────────
 
   void OnKeyEvent(Window /*window*/, KeyEvent event)
@@ -608,13 +701,21 @@ private:
 
     if(key == "Up")
     {
-      // Move focus to previous item; ScrollView auto-scrolls via OnFocusChanged
-      MoveFocusBy(-1);
+      // FocusManager handles MoveFocus(UP) internally via its own KeyEventSignal connection.
+      // Only handle the "no focus yet" case to seed focus to the last item.
+      if(mCurrentFocusIndex < 0)
+      {
+        FocusManager::Get().SetCurrentFocusView(mFocusItems[ITEM_COUNT - 1]);
+      }
     }
     else if(key == "Down")
     {
-      // Move focus to next item
-      MoveFocusBy(+1);
+      // FocusManager handles MoveFocus(DOWN) internally.
+      // Only seed focus to the first item if nothing is focused yet.
+      if(mCurrentFocusIndex < 0)
+      {
+        FocusManager::Get().SetCurrentFocusView(mFocusItems[0]);
+      }
     }
     else if(key == "s" || key == "S")
     {
@@ -655,6 +756,23 @@ private:
       mScrollView.SetFocusScrollPeek(peek);
       RefreshFocusPanel();
     }
+    else if(key == "k" || key == "K")
+    {
+      mScrollView.SetKeyScrollEnabled(!mScrollView.GetKeyScrollEnabled());
+      RefreshFocusPanel();
+    }
+    else if(key == "bracketleft")
+    {
+      float step = mScrollView.GetKeyScrollStep() - 20.0f;
+      if(step < 20.0f) step = 20.0f;
+      mScrollView.SetKeyScrollStep(step);
+      RefreshFocusPanel();
+    }
+    else if(key == "bracketright")
+    {
+      mScrollView.SetKeyScrollStep(mScrollView.GetKeyScrollStep() + 20.0f);
+      RefreshFocusPanel();
+    }
   }
 
   // ── Members ────────────────────────────────────────────────────────────────
@@ -677,6 +795,8 @@ private:
   View  mModeChips[4];
   Label mFocusedLabel;
   Label mPeekLabel;
+  View  mKeyScrollChip;
+  Label mKeyScrollStepLabel;
 
   // Focusable items
   View  mFocusItems[ITEM_COUNT];

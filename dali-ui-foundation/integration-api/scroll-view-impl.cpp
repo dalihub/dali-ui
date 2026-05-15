@@ -31,13 +31,13 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
 #include <cmath>
+#include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
-//#include <dali-ui-elements/public-api/scroll-view.h>
 
 namespace Dali
 {
@@ -54,8 +54,9 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_SCROLLVIEW");
 #endif
 
-constexpr float WHEEL_SCROLL_STEP = 120.0f; ///< Pixels scrolled per wheel notch
-constexpr float WHEEL_ANIM_SEC    = 0.2f;   ///< Duration of wheel scroll animation (seconds)
+constexpr float WHEEL_SCROLL_STEP   = 120.0f; ///< Pixels scrolled per wheel notch
+constexpr float WHEEL_ANIM_SEC      = 0.2f;   ///< Duration of wheel scroll animation (seconds)
+constexpr float KEY_SCROLL_ANIM_SEC = 0.25f;  ///< Duration of key step-scroll animation (seconds)
 
 BaseHandle Create()
 {
@@ -82,8 +83,8 @@ ScrollViewImpl::ScrollViewImpl()
   mScrollableHeight(0.0f),
   mScrollDirection(ScrollDirection::Vertical),
   mMaxFlingDistance(6000.0f),
-  mMinimumFlingDuration(1000),
-  mMaximumFlingDuration(2000),
+  mMinimumFlingDuration(200),
+  mMaximumFlingDuration(400),
   mFlingSensitivity(1.0f),
   mDecelerationRate(0.998f),
   mOverScrollMode(OverScrollMode::ContentScrolls),
@@ -98,6 +99,8 @@ ScrollViewImpl::ScrollViewImpl()
   mScrollOnFocus(true),
   mFocusScrollToPosition(ScrollToPosition::MakeVisible),
   mFocusScrollPeek(0.0f),
+  mKeyScrollEnabled(false),
+  mKeyScrollStep(200.0f),
   mVerticalScrollBarVisibility(ScrollBarVisibility::Auto),
   mHorizontalScrollBarVisibility(ScrollBarVisibility::Auto),
   mPanGestureDetector(PanGestureDetector::New()),
@@ -425,6 +428,36 @@ void ScrollViewImpl::ScrollTo(const Vector2& position, bool animation)
   }
 }
 
+void ScrollViewImpl::ScrollToWithDuration(const Vector2& position, float durationSec)
+{
+  CancelScrollAnimation();
+
+  if(!mContent)
+  {
+    return;
+  }
+
+  Vector2 adjustedPosition = AdjustScrollPosition(position);
+  float   targetPosX       = mMaximumStartX - adjustedPosition.x;
+  float   targetPosY       = mMaximumStartY - adjustedPosition.y;
+
+  float distX = std::abs(targetPosX - mCurrentPosition.x);
+  float distY = std::abs(targetPosY - mCurrentPosition.y);
+  if(std::sqrt(distX * distX + distY * distY) < 0.5f)
+  {
+    SendScrollFinished();
+    return;
+  }
+
+  SendScrollStarted();
+  mScrollAnimation = Animation::New(durationSec);
+  mScrollAnimation.AnimateTo(Property(mContent, Actor::Property::POSITION_X), targetPosX, AlphaFunction::EASE_OUT);
+  mScrollAnimation.AnimateTo(Property(mContent, Actor::Property::POSITION_Y), targetPosY, AlphaFunction::EASE_OUT);
+  mScrollAnimation.FinishedSignal().Connect(this, &ScrollViewImpl::OnScrollAnimationFinished);
+  mScrollAnimation.Play();
+  mScrollPosition = adjustedPosition;
+}
+
 void ScrollViewImpl::ScrollTo(View child, bool animation, ScrollToPosition scrollToPosition)
 {
   if(!mContent)
@@ -560,7 +593,7 @@ ScrollToPosition ScrollViewImpl::GetFocusScrollToPosition() const
 
 void ScrollViewImpl::SetFocusScrollPeek(float peek)
 {
-  mFocusScrollPeek = peek;
+  mFocusScrollPeek = std::max(0.0f, peek);
 }
 
 float ScrollViewImpl::GetFocusScrollPeek() const
@@ -568,9 +601,256 @@ float ScrollViewImpl::GetFocusScrollPeek() const
   return mFocusScrollPeek;
 }
 
-void ScrollViewImpl::OnFocusManagerChanged(View /*from*/, View to)
+void ScrollViewImpl::SetKeyScrollEnabled(bool enable)
+{
+  mKeyScrollEnabled = enable;
+}
+
+bool ScrollViewImpl::GetKeyScrollEnabled() const
+{
+  return mKeyScrollEnabled;
+}
+
+void ScrollViewImpl::SetKeyScrollStep(float step)
+{
+  // Clamp to a small positive minimum so the step value is always meaningful.
+  // step==0 would make distance<=0 always true (focus always jumps, ignoring key-scroll).
+  // step<0 is nonsensical and would prevent focus from ever moving.
+  mKeyScrollStep = std::max(1.0f, step);
+}
+
+float ScrollViewImpl::GetKeyScrollStep() const
+{
+  return mKeyScrollStep;
+}
+
+View ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction)
+{
+  // Only act when key-scroll is enabled and the focused view lives inside our content
+  if(!mKeyScrollEnabled || !mContent || !IsDescendantOfContent(currentFocusedView))
+  {
+    return View();
+  }
+
+  // Only handle directions that match our scroll axis
+  if(!IsDirectionCompatible(direction))
+  {
+    return View();
+  }
+
+  Vector2 currentPos = GetScrollPositionForChild(currentFocusedView, Vector2::ZERO);
+  View    next       = FindNextFocusableInContent(currentFocusedView, currentPos, direction);
+
+  if(!next)
+  {
+    // No more focusable items inside the content in this direction.
+    // Return an empty handle so FocusFinder can move focus to a view outside
+    // this ScrollView (e.g. a sibling widget below the scroll area).
+    return View();
+  }
+
+  // Measure how far the next item is from the current viewport edge in the
+  // direction of travel.  The viewport boundary moves with every scroll step,
+  // so this distance shrinks as the user keeps pressing the key.
+  Vector2 scrollPos = GetScrollPosition();
+  Vector2 nextPos   = GetScrollPositionForChild(next, Vector2::ZERO);
+  float   distance  = 0.0f;
+  switch(direction)
+  {
+    case FocusDirection::DOWN:
+    case FocusDirection::PAGE_DOWN:
+      distance = std::max(0.0f, nextPos.y - (scrollPos.y + mViewportHeight));
+      break;
+    case FocusDirection::UP:
+    case FocusDirection::PAGE_UP:
+      distance = std::max(0.0f, scrollPos.y - nextPos.y);
+      break;
+    case FocusDirection::RIGHT:
+      distance = std::max(0.0f, nextPos.x - (scrollPos.x + mViewportWidth));
+      break;
+    case FocusDirection::LEFT:
+      distance = std::max(0.0f, scrollPos.x - nextPos.x);
+      break;
+    default:
+      distance = std::numeric_limits<float>::max();
+      break;
+  }
+
+  if(distance < mKeyScrollStep)
+  {
+    return next;
+  }
+
+  // Next item exists but is far away.  Check whether the scroll can still move
+  // in this direction.  If we are already at the boundary, scrolling would be
+  // a no-op and the user would be permanently stuck; focus the next item directly
+  // instead so the key always makes progress.
+  if(IsAtScrollBoundary(direction))
+  {
+    return next;
+  }
+
+  // Step-scroll toward the next item and block FocusFinder (returning a non-null
+  // view prevents Steps 2/3 of the MoveFocus pipeline from jumping further).
+  ScrollByKeyDirection(direction);
+  return currentFocusedView;
+}
+
+bool ScrollViewImpl::IsDirectionCompatible(FocusDirection direction) const
+{
+  switch(direction)
+  {
+    case FocusDirection::UP:
+    case FocusDirection::DOWN:
+    case FocusDirection::PAGE_UP:
+    case FocusDirection::PAGE_DOWN:
+      return mScrollDirection == ScrollDirection::Vertical || mScrollDirection == ScrollDirection::Both;
+    case FocusDirection::LEFT:
+    case FocusDirection::RIGHT:
+      return mScrollDirection == ScrollDirection::Horizontal || mScrollDirection == ScrollDirection::Both;
+    default:
+      return false;
+  }
+}
+
+View ScrollViewImpl::FindNextFocusableInContent(View currentFocusedView, const Vector2& currentPos, FocusDirection direction) const
+{
+  View  best;
+  float bestDist = std::numeric_limits<float>::max();
+  CollectNextFocusCandidate(mContent, currentFocusedView, currentPos, direction, best, bestDist);
+  return best;
+}
+
+void ScrollViewImpl::CollectNextFocusCandidate(View container, View excludeView, const Vector2& currentPos,
+                                               FocusDirection direction, View& bestView, float& bestDist) const
+{
+  for(uint32_t i = 0; i < container.GetChildCount(); ++i)
+  {
+    View child = View::DownCast(container.GetChildAt(i));
+    if(!child)
+    {
+      continue;
+    }
+
+    if(child != excludeView &&
+       child.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
+       child.GetProperty<bool>(Actor::Property::VISIBLE))
+    {
+      Vector2 childPos = GetScrollPositionForChild(child, Vector2::ZERO);
+      if(IsAheadInDirection(currentPos, childPos, direction))
+      {
+        float dist = FocusAxisDistance(currentPos, childPos, direction);
+        if(dist < bestDist)
+        {
+          bestDist = dist;
+          bestView = child;
+        }
+      }
+    }
+
+    // Only recurse into a container if it permits keyboard focus on its children.
+    // This mirrors the FocusManager's own traversal rule, so we never propose a
+    // candidate that the FocusManager itself would skip.
+    const bool childrenFocusable = child.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN);
+    if(childrenFocusable)
+    {
+      CollectNextFocusCandidate(child, excludeView, currentPos, direction, bestView, bestDist);
+    }
+  }
+}
+
+bool ScrollViewImpl::IsAtScrollBoundary(FocusDirection direction) const
+{
+  // Use the same clamping logic as AdjustScrollPosition so the boundary
+  // detection is consistent with what ScrollTo / ScrollByKeyDirection enforce.
+  // mMaximumStartY / mMaximumStartX hold the content actor's resting position
+  // (= padding offset), NOT the maximum scroll amount, so they must not be
+  // used directly here.
+  constexpr float kEpsilon = 1.0f; // 1 px tolerance for floating-point drift
+
+  const float maxScrollY = std::max(0.0f, mScrollableHeight - mViewportHeight);
+  const float maxScrollX = std::max(0.0f, mScrollableWidth - mViewportWidth);
+
+  switch(direction)
+  {
+    case FocusDirection::DOWN:
+    case FocusDirection::PAGE_DOWN:
+      return mScrollPosition.y >= maxScrollY - kEpsilon;
+    case FocusDirection::UP:
+    case FocusDirection::PAGE_UP:
+      return mScrollPosition.y <= kEpsilon;
+    case FocusDirection::RIGHT:
+      return mScrollPosition.x >= maxScrollX - kEpsilon;
+    case FocusDirection::LEFT:
+      return mScrollPosition.x <= kEpsilon;
+    default:
+      return false;
+  }
+}
+
+void ScrollViewImpl::ScrollByKeyDirection(FocusDirection direction)
+{
+  Vector2 pos = GetScrollPosition();
+  switch(direction)
+  {
+    case FocusDirection::UP:
+      ScrollToWithDuration(Vector2(pos.x, pos.y - mKeyScrollStep), KEY_SCROLL_ANIM_SEC);
+      break;
+    case FocusDirection::DOWN:
+      ScrollToWithDuration(Vector2(pos.x, pos.y + mKeyScrollStep), KEY_SCROLL_ANIM_SEC);
+      break;
+    case FocusDirection::LEFT:
+      ScrollToWithDuration(Vector2(pos.x - mKeyScrollStep, pos.y), KEY_SCROLL_ANIM_SEC);
+      break;
+    case FocusDirection::RIGHT:
+      ScrollToWithDuration(Vector2(pos.x + mKeyScrollStep, pos.y), KEY_SCROLL_ANIM_SEC);
+      break;
+    case FocusDirection::PAGE_UP:
+      ScrollToWithDuration(Vector2(pos.x, pos.y - mViewportHeight), KEY_SCROLL_ANIM_SEC);
+      break;
+    case FocusDirection::PAGE_DOWN:
+      ScrollToWithDuration(Vector2(pos.x, pos.y + mViewportHeight), KEY_SCROLL_ANIM_SEC);
+      break;
+    default:
+      break;
+  }
+}
+
+float ScrollViewImpl::FocusAxisDistance(const Vector2& from, const Vector2& to, FocusDirection direction)
+{
+  switch(direction)
+  {
+    case FocusDirection::UP:
+    case FocusDirection::PAGE_UP:
+      return from.y - to.y;
+    case FocusDirection::DOWN:
+    case FocusDirection::PAGE_DOWN:
+      return to.y - from.y;
+    case FocusDirection::LEFT:
+      return from.x - to.x;
+    case FocusDirection::RIGHT:
+      return to.x - from.x;
+    default:
+      return std::numeric_limits<float>::max();
+  }
+}
+
+bool ScrollViewImpl::IsAheadInDirection(const Vector2& from, const Vector2& to, FocusDirection direction)
+{
+  return FocusAxisDistance(from, to, direction) > 0.0f;
+}
+
+void ScrollViewImpl::OnFocusManagerChanged(View from, View to)
 {
   if(!mScrollOnFocus || !mContent || !to)
+  {
+    return;
+  }
+  // When key-scroll fires it returns currentFocusedView from OnFocusNavigationRequested,
+  // which causes FocusManager to emit FocusChangedSignal(same, same).
+  // Scrolling to the same view here would undo the just-completed step scroll,
+  // especially when mFocusScrollToPosition is Start / End / Center (no early exit).
+  if(from == to)
   {
     return;
   }
@@ -655,7 +935,7 @@ Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
   // Updated formula based on OneUIComponents commit
   float movementX = -1.0f * mFlingSensitivity * velocity.x * screenSize.width / (mMaximumFlingDuration * decelerationFactor);
   float movementY = -1.0f * mFlingSensitivity * velocity.y * screenSize.height / (mMaximumFlingDuration * decelerationFactor);
-#ifdef DBUG_SCROLL
+#ifdef DEBUG_SCROLL
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::VelocityToMovement] velocity=[%.2f, %.2f], screenSize=[%.0f, %.0f], decelerationFactor=%.6f, maxFlingDuration=%d, raw movement=[%.2f, %.2f]\n",
                 velocity.x, velocity.y, screenSize.width, screenSize.height, decelerationFactor, mMaximumFlingDuration, movementX, movementY);
 #endif
@@ -667,7 +947,7 @@ Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
   {
     movementY = mMaxFlingDistance * (movementY > 0.0f ? 1.0f : -1.0f);
   }
-#ifdef DBUG_SCROLL
+#ifdef DEBUG_SCROLL
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::VelocityToMovement] clamped movement=[%.2f, %.2f], maxFlingDistance=%.0f\n",
                 movementX, movementY, mMaxFlingDistance);
 #endif
@@ -1190,7 +1470,12 @@ void ScrollViewImpl::UpdateScrollingProperties()
   // Clamp scroll position to valid bounds based on scroll direction and scrollable area
   mScrollPosition = AdjustScrollPosition(mScrollPosition);
 
-  ApplyScrollPosition(mScrollPosition);
+  // Do not call SetProperty while an animation is running — it would override
+  // the BAKE'd mid-animation position and cause a visible snap backward.
+  if(!mScrollAnimation)
+  {
+    ApplyScrollPosition(mScrollPosition);
+  }
 
 #ifdef DEBUG_SCROLL
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::UpdateScrollingProperties] Updating scroll bar: viewport=[%.0f, %.0f], scrollable=[%.0f, %.0f]\n",
@@ -1210,8 +1495,6 @@ void ScrollViewImpl::ApplyScrollPosition(const Vector2& position)
     float posX = mMaximumStartX - position.x;
     float posY = mMaximumStartY - position.y;
 
-    // See note in ApplyScrollPosition delta path: scroll offsets drive the
-    // rendered position directly without feeding back into layout.
     mContent.SetProperty(Actor::Property::POSITION_X, posX);
     mContent.SetProperty(Actor::Property::POSITION_Y, posY);
 
@@ -1224,18 +1507,17 @@ void ScrollViewImpl::CancelScrollAnimation()
 {
   if(mScrollAnimation)
   {
-    mScrollAnimation.Stop();
-    mScrollAnimation.Reset();
-  }
-  if(mIsScrolling)
-  {
-    // Update positions from actual content state
     if(mContent)
     {
       mCurrentPosition = Vector2(mContent.GetCurrentProperty<float>(Actor::Property::POSITION_X),
                                  mContent.GetCurrentProperty<float>(Actor::Property::POSITION_Y));
       mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
     }
+    mScrollAnimation.Stop();
+    mScrollAnimation.Reset();
+  }
+  if(mIsScrolling)
+  {
     SendScrollFinished();
   }
 }

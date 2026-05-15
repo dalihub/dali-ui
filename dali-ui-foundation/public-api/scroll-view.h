@@ -302,6 +302,49 @@ public: // Focus Scroll
    */
   float GetFocusScrollPeek() const;
 
+public: // Key Scroll
+  /**
+   * @brief Sets whether key-based step scrolling is enabled.
+   *
+   * When enabled, ScrollView intercepts focus navigation requests (UP/DOWN/LEFT/RIGHT/
+   * PAGE_UP/PAGE_DOWN) from its content children. If the next focusable view in that
+   * direction is within GetKeyScrollStep() pixels it receives focus as normal; otherwise
+   * the ScrollView scrolls by one step instead, keeping the focus where it is.
+   *
+   * This gives a "gradual reveal" UX on keyboard/remote-control navigation: the user
+   * scrolls through content one step at a time and focus only jumps to a new item when
+   * that item is close enough to be immediately visible.
+   *
+   * @param[in] enable True to enable (default: false)
+   */
+  ScrollView& SetKeyScrollEnabled(bool enable);
+
+  /**
+   * @brief Gets whether key-based step scrolling is enabled.
+   *
+   * @return True if key scroll is enabled
+   */
+  bool GetKeyScrollEnabled() const;
+
+  /**
+   * @brief Sets the step distance used for key-based step scrolling.
+   *
+   * Serves as both the proximity threshold and the scroll step size:
+   * - Next focusable is within @p step px  → focus moves there.
+   * - Next focusable is beyond @p step px, or none → scroll by @p step px.
+   * PAGE_UP / PAGE_DOWN always scrolls by the full viewport size regardless of this value.
+   *
+   * @param[in] step Step distance in pixels (default: 200.0f)
+   */
+  ScrollView& SetKeyScrollStep(float step);
+
+  /**
+   * @brief Gets the step distance used for key-based step scrolling.
+   *
+   * @return The step distance in pixels
+   */
+  float GetKeyScrollStep() const;
+
 public: // Scroll Bar Visibility
   /**
    * @brief Sets the visibility of the vertical scroll bar.

@@ -248,6 +248,34 @@ public: // API
   float GetFocusScrollPeek() const;
 
   /**
+   * @brief Sets whether key-based step scrolling is enabled.
+   *
+   * When enabled, ScrollView intercepts focus navigation requests from children.
+   * If the next focusable view is within mKeyScrollStep pixels it is focused normally;
+   * otherwise the ScrollView scrolls by mKeyScrollStep instead.
+   */
+  void SetKeyScrollEnabled(bool enable);
+
+  /**
+   * @brief Gets whether key-based step scrolling is enabled.
+   */
+  bool GetKeyScrollEnabled() const;
+
+  /**
+   * @brief Sets the step distance (px) used for key-based step scrolling.
+   *
+   * Acts as both the proximity threshold (focus jumps if next item is within this
+   * distance) and the scroll step size (scrolled by this amount when no nearby
+   * focusable is found).
+   */
+  void SetKeyScrollStep(float step);
+
+  /**
+   * @brief Gets the step distance used for key-based step scrolling.
+   */
+  float GetKeyScrollStep() const;
+
+  /**
    * @brief Gets the vertical scroll bar visibility.
    */
   ScrollBarVisibility GetVerticalScrollBarVisibility() const;
@@ -445,6 +473,17 @@ private:
   static bool CanScrollVertically(ScrollDirection direction);
 
   /**
+   * @brief Intercepts focus navigation for content children.
+   *
+   * Called by FocusManager (Step 1 of MoveFocus pipeline) when the current
+   * focused view is a descendant of this ScrollView. If key-scroll is enabled:
+   *  - next focusable within mKeyScrollStep  → return it (normal focus move)
+   *  - next focusable beyond mKeyScrollStep, or none → scroll by step, return
+   *    currentFocusedView to block FocusFinder (Step 3) from jumping further.
+   */
+  View OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction) override;
+
+  /**
    * @brief Callback invoked when the focused view changes.
    *
    * Scrolls to the newly focused view if it is a descendant of mContent
@@ -456,6 +495,53 @@ private:
    * @brief Returns true if @p view is a descendant of mContent.
    */
   bool IsDescendantOfContent(View view) const;
+
+  /**
+   * @brief Returns true if @p direction is along the ScrollView's scroll axis.
+   */
+  bool IsDirectionCompatible(FocusDirection direction) const;
+
+  /**
+   * @brief Finds the nearest focusable descendant of mContent in @p direction
+   * from @p currentFocusedView. Returns an empty handle if none found.
+   */
+  View FindNextFocusableInContent(View currentFocusedView, const Vector2& currentPos, FocusDirection direction) const;
+
+  /**
+   * @brief Recursively collects the nearest focusable candidate in @p direction.
+   */
+  void CollectNextFocusCandidate(View container, View excludeView, const Vector2& currentPos,
+                                 FocusDirection direction, View& bestView, float& bestDist) const;
+
+  /**
+   * @brief Returns true if the scroll position is already at the boundary in
+   * @p direction and scrolling further would be a no-op.
+   */
+  bool IsAtScrollBoundary(FocusDirection direction) const;
+
+  /**
+   * @brief Scrolls by mKeyScrollStep in the given focus direction.
+   * PAGE_UP / PAGE_DOWN scrolls by the full viewport size.
+   */
+  void ScrollByKeyDirection(FocusDirection direction);
+
+  /**
+   * @brief Internal ScrollTo with an explicit animation duration in seconds.
+   * Used by ScrollByKeyDirection to apply a short fixed duration independent
+   * of the distance-based fling duration calculation.
+   */
+  void ScrollToWithDuration(const Vector2& position, float durationSec);
+
+  /**
+   * @brief Returns the signed axis distance from @p from to @p to in @p direction.
+   * Positive means @p to is ahead in that direction.
+   */
+  static float FocusAxisDistance(const Vector2& from, const Vector2& to, FocusDirection direction);
+
+  /**
+   * @brief Returns true if @p to is strictly ahead of @p from in @p direction.
+   */
+  static bool IsAheadInDirection(const Vector2& from, const Vector2& to, FocusDirection direction);
 
   /**
    * @brief Callback for content relayout.
@@ -510,6 +596,10 @@ private:
   bool             mScrollOnFocus;         ///< Auto-scroll to child when it gains focus
   ScrollToPosition mFocusScrollToPosition; ///< Target position for focus-triggered scroll
   float            mFocusScrollPeek;       ///< Extra scroll distance past the item edge on focus (MakeVisible only)
+
+  // Key-scroll behaviour
+  bool  mKeyScrollEnabled; ///< Whether key-based step scrolling is active
+  float mKeyScrollStep;    ///< Proximity threshold and step size for key scrolling (px)
 
   // Scroll bar visibility
   ScrollBarVisibility mVerticalScrollBarVisibility;   ///< Vertical scroll bar visibility
