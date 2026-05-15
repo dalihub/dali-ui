@@ -36,6 +36,7 @@ SET(TC_SOURCES
         utc-Dali-StackLayout.cpp
         utc-Dali-FlexLayout.cpp
         utc-Dali-GridLayout.cpp
+        utc-Dali-GradientVisual.cpp
         utc-Dali-AbsoluteLayout.cpp
         utc-Dali-LayoutController.cpp
         utc-Dali-LayoutTypes.cpp

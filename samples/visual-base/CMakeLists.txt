@@ -84,5 +84,6 @@ ENDMACRO()
 
 # Add executables
 ADD_SAMPLES(color-visual)
+ADD_SAMPLES(gradient-visual)
 ADD_SAMPLES(image-visual)
 ADD_SAMPLES(animated-image-visual)
