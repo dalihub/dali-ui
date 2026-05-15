@@ -310,6 +310,20 @@ ViewImpl::ViewImpl()
 
 ViewImpl::~ViewImpl()
 {
+  delete mImpl;
+}
+
+void ViewImpl::OnInitialize()
+{
+  Self().SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  Self().SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  Self().SetProperty(Actor::Property::POSITION_USES_PIVOT, false);
+
+  DevelActor::ChildOrderChangedSignal(Self()).Connect(this, &ViewImpl::OnChildOrderChanged);
+}
+
+void ViewImpl::OnDestroy()
+{
   auto manager = UiColorManager::Get();
   if(manager)
   {
@@ -322,16 +336,7 @@ ViewImpl::~ViewImpl()
 
   ClearRenderEffect();
 
-  delete mImpl;
-}
-
-void ViewImpl::OnInitialize()
-{
-  Self().SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-  Self().SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-  Self().SetProperty(Actor::Property::POSITION_USES_PIVOT, false);
-
-  DevelActor::ChildOrderChangedSignal(Self()).Connect(this, &ViewImpl::OnChildOrderChanged);
+  RefObject::OnDestroy();
 }
 
 void ViewImpl::OnSceneConnection(int depth)

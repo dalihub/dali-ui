@@ -930,6 +930,11 @@ protected:
   // ============================================================
 
   /**
+   * @copydoc Dali::RefObject::OnDestroy()
+   */
+  void OnDestroy() override;
+
+  /**
    * @copydoc Dali::CustomActorImpl::OnSceneConnection()
    */
   void OnSceneConnection(int depth) override;
