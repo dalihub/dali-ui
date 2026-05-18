@@ -16,7 +16,11 @@
  */
 
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/color-visual.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -73,6 +77,28 @@ int UtcDaliGradientVisualGetVisualType(void)
   VisualBase visualBase = visual;
 
   DALI_TEST_EQUALS(visualBase.GetVisualType(), Visual::GRADIENT, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliGradientVisualDownCast(void)
+{
+  UiTestApplication application;
+
+  GradientVisual visual = GradientVisual::New();
+
+  // Upcast the handle
+  BaseHandle baseHandle = visual;
+
+  // Downcast check
+  DALI_TEST_CHECK(VisualBase::DownCast(baseHandle));
+  DALI_TEST_CHECK(GradientVisual::DownCast(baseHandle));
+
+  // Do not convert to other type of visual
+  DALI_TEST_CHECK(!AnimatedImageVisual::DownCast(baseHandle));
+  DALI_TEST_CHECK(!ColorVisual::DownCast(baseHandle));
+  DALI_TEST_CHECK(!ImageVisual::DownCast(baseHandle));
+  DALI_TEST_CHECK(!LottieAnimationVisual::DownCast(baseHandle));
 
   END_TEST;
 }

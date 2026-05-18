@@ -35,6 +35,16 @@ ImageVisual ImageVisual::New()
   return ImageVisual(internal.Get());
 }
 
+ImageVisual ImageVisual::DownCast(BaseHandle handle)
+{
+  Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::IMAGE)
+  {
+    return ImageVisual(visualBaseImpl);
+  }
+  return ImageVisual();
+}
+
 // =============================================================================
 // Properties
 // =============================================================================

@@ -35,6 +35,16 @@ AnimatedImageVisual AnimatedImageVisual::New()
   return AnimatedImageVisual(internal.Get());
 }
 
+AnimatedImageVisual AnimatedImageVisual::DownCast(BaseHandle handle)
+{
+  Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::ANIMATED_IMAGE)
+  {
+    return AnimatedImageVisual(visualBaseImpl);
+  }
+  return AnimatedImageVisual();
+}
+
 // =============================================================================
 // Properties
 // =============================================================================
@@ -74,6 +84,18 @@ Dali::Vector<Dali::String> AnimatedImageVisual::GetResourceUrlList() const
     return result;
   }
   return result;
+}
+
+AnimatedImageVisual& AnimatedImageVisual::SetResourceUrlList(const Dali::Vector<Dali::String>& resourceUrlList)
+{
+  Dali::Property::Array array;
+  array.Reserve(resourceUrlList.Count());
+  for(const auto& resourceUrl : resourceUrlList)
+  {
+    array.PushBack(resourceUrl);
+  }
+  VisualBase::SetProperty(AnimatedImageVisual::Property::URL, array);
+  return *this;
 }
 
 bool AnimatedImageVisual::IsSynchronousLoading() const

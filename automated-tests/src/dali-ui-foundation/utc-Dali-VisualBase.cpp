@@ -16,8 +16,11 @@
  */
 
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -451,7 +454,7 @@ int UtcDaliVisualBaseRecreateColorVisual01(void)
 {
   UiTestApplication application;
 
-  tet_infoline("Test that visual update without newly create Visual::Base\n");
+  tet_infoline("Test that visual update without newly create Visual::Base for ColorVisual\n");
 
   View       view    = View::New();
   VisualBase visual = ColorVisual::New();
@@ -522,7 +525,114 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
 {
   UiTestApplication application;
 
-  tet_infoline("Test that visual update without newly create Visual::Base (for GradientVosual\n");
+  tet_infoline("Test that visual update without newly create Visual::Base for GradientVisual\n");
+
+  View       view    = View::New();
+  VisualBase visual = GradientVisual::New()
+    .SetStartPosition(Vector2(-0.5f, -0.5f))
+    .SetEndPosition(Vector2(0.5f, 0.5f))
+    .SetStopNodes({
+      {0.0f, UiColor("#000000")},
+      {1.0f, UiColor("#FFFFFF")},
+    });
+
+  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+  application.GetScene().Add(view);
+
+  application.SendNotification();
+  application.Render();
+
+  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
+    // Hold original visual base
+    Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
+
+    static int testCount = 0;
+    tet_printf("TestCase #%d\n", ++testCount);
+
+    func(visual);
+
+    // Do not change visual if processor is not executed.
+    DALI_TEST_EQUALS(originalVisualBase, GetImplementation(visual).GetVisual(), TEST_LOCATION);
+
+    application.SendNotification();
+    application.Render();
+
+    bool changed = (originalVisualBase != GetImplementation(visual).GetVisual());
+    DALI_TEST_EQUALS(changed, expectChanged, TEST_LOCATION);
+  };
+
+  // Change the basic info didn't change visual base
+  TestVisualBaseChanged([](VisualBase visual){visual.SetName("Hello");}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetColor(UiColor("Primary"));}, false);
+
+  // Change the transform didn't change visual base
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetX(0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetY(0.2f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetWidth(0.3f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetHeight(0.4f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraWidth(0.5f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraHeight(0.6f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOrigin(Align::CENTER);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
+
+  // Change decoration didn't change visual base
+  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerRadius(0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerSquareness(0.2f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetCornerRadiusPolicyRelative();}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineWidth(0.3f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineColor(UiColor("Secondary"));}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetBorderlineOffset(0.4f);}, false);
+
+  // For GradientVisual.
+  // Change MutableProperty didn't change visual base
+  TestVisualBaseChanged([](VisualBase visual){ visual.SetProperty(Ui::GradientVisual::Property::START_OFFSET, 0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){
+    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
+    gradientVisual.SetStopNodes({
+      {0.0f, UiColor("#FF0000")},
+      {0.5f, UiColor("#00FF00")},
+      {1.0f, UiColor("#0000FF")},
+    });
+  }, false);
+  TestVisualBaseChanged([](VisualBase visual){
+    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
+    gradientVisual.SetUnits(Ui::Gradient::Units::USER_SPACE);
+  }, false);
+  TestVisualBaseChanged([](VisualBase visual){
+    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
+    gradientVisual.SetSpreadMethod(Ui::Gradient::SpreadMethod::REFLECT);
+  }, false);
+
+  // Change ImmutableProperty change visual base
+  // Note that current internal gradient visual type check logic order is Conic > Radial > Linear.
+  TestVisualBaseChanged([](VisualBase visual){
+    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
+    gradientVisual.SetStartPosition(Vector2::ZERO);
+    gradientVisual.SetEndPosition(Vector2::ONE);
+  }, true);
+  TestVisualBaseChanged([](VisualBase visual){
+    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
+    gradientVisual.SetCenter(Vector2::ZERO);
+    gradientVisual.SetRadius(5.0f);
+  }, true);
+  TestVisualBaseChanged([](VisualBase visual){
+    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
+    gradientVisual.SetStartAngle(Dali::Radian(2.0f));
+  }, true);
+  TestVisualBaseChanged([](VisualBase visual){
+    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
+    gradientVisual.SetCenter(Vector2::ONE);
+  }, true);
+
+  END_TEST;
+}
+
+int UtcDaliVisualBaseRecreateGradientVisual02(void)
+{
+  UiTestApplication application;
+
+  tet_infoline("Test that visual update without newly create Visual::Base for GradientVisual, with in-completed property case\n");
 
   View       view    = View::New();
   VisualBase visual = GradientVisual::New();

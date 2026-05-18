@@ -109,6 +109,17 @@ public:
    */
   static AnimatedImageVisual New();
 
+  /**
+   * @brief Downcasts a handle to AnimatedImageVisual handle.
+   *
+   * If handle points to a AnimatedImageVisual, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a AnimatedImageVisual or an uninitialized handle
+   */
+  static AnimatedImageVisual DownCast(BaseHandle handle);
+
 public: // Setters for chaining
   // @CHAIN_START(AnimatedImageVisual, VisualBase)
   /**
@@ -139,6 +150,13 @@ public: // Setters for chaining
    */
   Dali::Vector<Dali::String> GetResourceUrlList() const;
 
+  /**
+   * @brief Sets a list of resource URLs for an animated image sequence.
+   *
+   * @param[in] resourceUrlList The list of resource URLs to set
+   */
+  AnimatedImageVisual& SetResourceUrlList(const Dali::Vector<Dali::String>& resourceUrlList);
+
   // @CHAIN_MANUAL
   /**
    * @brief Sets a list of resource URLs for an animated image sequence.
@@ -150,15 +168,14 @@ public: // Setters for chaining
    */
   AnimatedImageVisual& SetResourceUrlList(std::initializer_list<Dali::String> resourceUrlList)
   {
-    Dali::Property::Array array;
-    array.Reserve(resourceUrlList.size());
+    Dali::Vector<Dali::String> list;
+    list.Reserve(resourceUrlList.size());
 
-    for(const auto& resourceUrl : resourceUrlList)
+    for(auto&& resourceUrl : resourceUrlList)
     {
-      array.PushBack(resourceUrl);
+      list.PushBack(std::move(resourceUrl));
     }
-    SetProperty(Property::URL, array);
-    return *this;
+    return SetResourceUrlList(list);
   }
 
   /**

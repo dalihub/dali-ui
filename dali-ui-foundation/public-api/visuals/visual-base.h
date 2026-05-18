@@ -132,6 +132,18 @@ class View;
  */
 class DALI_UI_API VisualBase : public Dali::BaseHandle
 {
+public:
+  /**
+   * @brief Downcasts a handle to VisualBase handle.
+   *
+   * If handle points to a VisualBase, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a VisualBase or an uninitialized handle
+   */
+  static VisualBase DownCast(BaseHandle handle);
+
 public: ///< Public API
   /**
    * @brief Get attached view. Empty handle if this visual is not be attached.

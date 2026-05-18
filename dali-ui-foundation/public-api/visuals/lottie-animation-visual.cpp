@@ -36,6 +36,16 @@ LottieAnimationVisual LottieAnimationVisual::New()
   return LottieAnimationVisual(internal.Get());
 }
 
+LottieAnimationVisual LottieAnimationVisual::DownCast(BaseHandle handle)
+{
+  Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::ANIMATED_VECTOR_IMAGE)
+  {
+    return LottieAnimationVisual(visualBaseImpl);
+  }
+  return LottieAnimationVisual();
+}
+
 // =============================================================================
 // Properties
 // =============================================================================

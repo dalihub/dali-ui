@@ -30,6 +30,16 @@ namespace Dali
 {
 namespace Ui
 {
+VisualBase VisualBase::DownCast(BaseHandle handle)
+{
+  Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
+  if(visualBaseImpl)
+  {
+    return VisualBase(visualBaseImpl);
+  }
+  return VisualBase();
+}
+
 // =============================================================================
 // Public API
 // =============================================================================

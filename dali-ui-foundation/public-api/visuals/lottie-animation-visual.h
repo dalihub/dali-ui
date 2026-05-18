@@ -109,6 +109,17 @@ public:
    */
   static LottieAnimationVisual New();
 
+  /**
+   * @brief Downcasts a handle to LottieAnimationVisual handle.
+   *
+   * If handle points to a LottieAnimationVisual, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a LottieAnimationVisual or an uninitialized handle
+   */
+  static LottieAnimationVisual DownCast(BaseHandle handle);
+
 public: // Setters for chaining
   // @CHAIN_START(LottieAnimationVisual, VisualBase)
   /**

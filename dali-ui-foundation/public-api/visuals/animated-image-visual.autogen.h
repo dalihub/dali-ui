@@ -15,6 +15,12 @@
   /** \
   * @brief Sets a list of resource URLs for an animated image sequence. \
   * \
+  * @param[in] resourceUrlList The list of resource URLs to set \
+  */ \
+  ChildClass& SetResourceUrlList(const Dali::Vector<Dali::String>& resourceUrlList) { AnimatedImageVisual::SetResourceUrlList(resourceUrlList); return *this; } \
+  /** \
+  * @brief Sets a list of resource URLs for an animated image sequence. \
+  * \
   * This method cannot be used together with SetResourceUrl; they are mutually exclusive. \
   * Provide multiple URLs to create an animation. \
   * \

@@ -34,6 +34,16 @@ ColorVisual ColorVisual::New()
   return ColorVisual(internal.Get());
 }
 
+ColorVisual ColorVisual::DownCast(BaseHandle handle)
+{
+  Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::COLOR)
+  {
+    return ColorVisual(visualBaseImpl);
+  }
+  return ColorVisual();
+}
+
 // =============================================================================
 // Properties
 // =============================================================================

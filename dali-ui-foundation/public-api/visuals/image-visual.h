@@ -101,6 +101,17 @@ public:
    */
   static ImageVisual New();
 
+  /**
+   * @brief Downcasts a handle to ImageVisual handle.
+   *
+   * If handle points to a ImageVisual, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a ImageVisual or an uninitialized handle
+   */
+  static ImageVisual DownCast(BaseHandle handle);
+
 public: // Setters for chaining
   // @CHAIN_START(ImageVisual, VisualBase)
   /**
