@@ -181,6 +181,11 @@ private:
                   .SetCornerSquareness(0.6f)
                   .Play()
                   .As(mLeftVisual),
+                BorderVisual::New()
+                  .SetWidth(0.5f)
+                  .SetColor(UiColor(0xCFCFFF).WithAlpha(0.8f))
+                  .SetBorderSize(20_spx)
+                  .As(mLeftBorder),
                 AnimatedImageVisual::New()
                   .SetResourceUrlList({
                     RESOURCES_DIR "gallery-large-1.jpg",
@@ -196,6 +201,12 @@ private:
                   .SetFrameDelay(1000.0f)
                   .Play()
                   .As(mRightVisual),
+                BorderVisual::New()
+                  .SetOffsetX(0.5f)
+                  .SetWidth(0.5f)
+                  .SetColor(UiColor(0xCFCFFF).WithAlpha(0.8f))
+                  .SetBorderSize(20_spx)
+                  .As(mRightBorder),
               })
             .As(mView),
           StackLayout::New(StackOrientation::HORIZONTAL)
@@ -260,10 +271,12 @@ private:
     if(mLeftVisual.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
     {
       mLeftVisual.Stop();
+      mLeftBorder.SetBorderSize(0_spx);
     }
     else
     {
       mLeftVisual.Play();
+      mLeftBorder.SetBorderSize(20_spx);
     }
     UpdateVisualState();
   }
@@ -272,10 +285,12 @@ private:
     if(mRightVisual.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
     {
       mRightVisual.Stop();
+      mRightBorder.SetBorderSize(0_spx);
     }
     else
     {
       mRightVisual.Play();
+      mRightBorder.SetBorderSize(20_spx);
     }
     UpdateVisualState();
   }
@@ -315,6 +330,9 @@ private:
   Application& mApplication;
   View  mView;
   Label mVisualState;
+
+  BorderVisual mLeftBorder;
+  BorderVisual mRightBorder;
 
   AnimatedImageVisual mLeftVisual;
   AnimatedImageVisual mRightVisual;

@@ -100,13 +100,17 @@ protected:
    */
   void OnSetTransform() override;
 
-private:
   /**
-   * Request the border shader from the factory cache. If fail, create tha shader and add it to cache.
-   * @return The border shader.
+   * @copydoc Visual::Base::UpdateShader
    */
-  Shader GetBorderShader();
+  void UpdateShader() override;
 
+  /**
+   * @copydoc Visual::Base::GenerateShader
+   */
+  Shader GenerateShader() const override;
+
+private:
   /**
    * Create the geometry which presents the border.
    * @return The border geometry
@@ -127,10 +131,7 @@ private:
   BorderVisual& operator=(const BorderVisual& borderRenderer);
 
 private:
-  Vector4 mBorderColor;
-  float   mBorderSize;
-
-  Property::Index mBorderColorIndex;
+  float           mBorderSize;
   Property::Index mBorderSizeIndex;
 
   bool mAntiAliasing;

@@ -17,7 +17,6 @@ UNIFORM_BLOCK VertBlock
 UNIFORM_BLOCK FragBlock
 {
   UNIFORM lowp vec4 uColor;
-  UNIFORM lowp vec4 borderColor;
   UNIFORM highp float borderSize;
   UNIFORM highp float viewEffectiveScale;
 };

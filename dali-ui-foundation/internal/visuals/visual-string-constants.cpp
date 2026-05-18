@@ -352,8 +352,7 @@ const char* const BORDER_ONLY("borderOnly");
 const char* const BORDER("border");
 
 // Border visual
-const char* const COLOR_NAME("borderColor");
-const char* const SIZE_NAME("borderSize");
+const char* const BORDER_SIZE_NAME("borderSize");
 const char* const ANTI_ALIASING("antiAliasing");
 
 // properties: radial gradient

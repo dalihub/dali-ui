@@ -29,22 +29,21 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
-void utc_dali_image_visual_startup(void)
+void utc_dali_border_visual_startup(void)
 {
   test_return_value = TET_UNDEF;
 }
 
-void utc_dali_image_visual_cleanup(void)
+void utc_dali_border_visual_cleanup(void)
 {
   test_return_value = TET_PASS;
 }
 
-/* Test creation, owner handling and attach/detach */
-int UtcDaliImageVisualCreateAndOwner(void)
+int UtcDaliBorderVisualCreateAndOwner(void)
 {
   UiTestApplication application;
 
-  ImageVisual visual = ImageVisual::New();
+  BorderVisual visual = BorderVisual::New();
 
   // Initially, the visual is not attached to any view.
   DALI_TEST_EQUALS(visual.GetOwner(), View(), TEST_LOCATION);
@@ -69,54 +68,108 @@ int UtcDaliImageVisualCreateAndOwner(void)
   END_TEST;
 }
 
-/* Test that the visual type is IMAGE */
-int UtcDaliImageVisualGetVisualType(void)
+int UtcDaliBorderVisualGetVisualType(void)
 {
   UiTestApplication application;
 
-  ImageVisual visual = ImageVisual::New();
+  BorderVisual visual = BorderVisual::New();
 
   // Upcast the handle
   VisualBase visualBase = visual;
 
-  DALI_TEST_EQUALS(visualBase.GetVisualType(), Visual::IMAGE, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualBase.GetVisualType(), Visual::BORDER, TEST_LOCATION);
 
   END_TEST;
 }
 
-int UtcDaliImageVisualDownCast(void)
+int UtcDaliBorderVisualDownCast(void)
 {
   UiTestApplication application;
 
-  ImageVisual visual = ImageVisual::New();
+  BorderVisual visual = BorderVisual::New();
 
   // Upcast the handle
   BaseHandle baseHandle = visual;
 
   // Downcast check
   DALI_TEST_CHECK(VisualBase::DownCast(baseHandle));
-  DALI_TEST_CHECK(ImageVisual::DownCast(baseHandle));
+  DALI_TEST_CHECK(BorderVisual::DownCast(baseHandle));
 
   // Do not convert to other type of visual
   DALI_TEST_CHECK(!AnimatedImageVisual::DownCast(baseHandle));
-  DALI_TEST_CHECK(!BorderVisual::DownCast(baseHandle));
   DALI_TEST_CHECK(!ColorVisual::DownCast(baseHandle));
   DALI_TEST_CHECK(!GradientVisual::DownCast(baseHandle));
+  DALI_TEST_CHECK(!ImageVisual::DownCast(baseHandle));
   DALI_TEST_CHECK(!LottieAnimationVisual::DownCast(baseHandle));
 
   END_TEST;
 }
 
-/* Test inherited setters from VisualBase */
-int UtcDaliImageVisualInheritedSetters(void)
+int UtcDaliBorderVisualBorderSize(void)
+{
+  UiTestApplication application;
+
+  BorderVisual visual = BorderVisual::New();
+
+  visual.SetBorderSize(5.5f);
+  DALI_TEST_EQUALS(visual.GetBorderSize(), 5.5f, TEST_LOCATION);
+
+  // Don't be confused with borderline width.
+  DALI_TEST_EQUALS(visual.GetBorderlineWidth(), 0.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliBorderVisualEnableAntiAliasing(void)
+{
+  UiTestApplication application;
+
+  BorderVisual visual = BorderVisual::New();
+  DALI_TEST_EQUALS(visual.IsAntiAliasingEnabled(), false, TEST_LOCATION);
+
+  visual.SetEnableAntiAliasing(true);
+  DALI_TEST_EQUALS(visual.IsAntiAliasingEnabled(), true, TEST_LOCATION);
+
+  END_TEST;
+}
+int UtcDaliBorderVisualSetGetPropertyValue(void)
+{
+  UiTestApplication application;
+
+  BorderVisual visual = BorderVisual::New();
+
+  visual.SetBorderSize(5.5f);
+  DALI_TEST_EQUALS(visual.GetBorderSize(), 5.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetProperty<float>(BorderVisual::Property::BORDER_SIZE), 5.5f, TEST_LOCATION);
+
+  visual.SetProperty(BorderVisual::Property::BORDER_SIZE, 3.3f);
+  DALI_TEST_EQUALS(visual.GetBorderSize(), 3.3f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetProperty<float>(BorderVisual::Property::BORDER_SIZE), 3.3f, TEST_LOCATION);
+
+
+  visual.SetEnableAntiAliasing(true);
+  DALI_TEST_EQUALS(visual.IsAntiAliasingEnabled(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetProperty<bool>(BorderVisual::Property::ANTI_ALIASING), true, TEST_LOCATION);
+
+  visual.SetProperty(BorderVisual::Property::ANTI_ALIASING, false);
+  DALI_TEST_EQUALS(visual.IsAntiAliasingEnabled(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetProperty<bool>(BorderVisual::Property::ANTI_ALIASING), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliBorderVisualInheritedSetters(void)
 {
   UiTestApplication application;
 
   // Test that inherited setters from VisualBase work.
-  ImageVisual visual = ImageVisual::New();
+  BorderVisual visual = BorderVisual::New();
 
-  visual.SetName("ImageVisual");
-  DALI_TEST_EQUALS(visual.GetName(), "ImageVisual", TEST_LOCATION);
+  visual.SetName("BorderVisual");
+  DALI_TEST_EQUALS(visual.GetName(), "BorderVisual", TEST_LOCATION);
+
+  visual.SetColor(UiColor(0.1f, 0.2f, 0.3f, 0.4f));
+  DALI_TEST_EQUALS(visual.GetColor().GetRgba(), UiColor(0.1f, 0.2f, 0.3f, 0.4f).GetRgba(), TEST_LOCATION);
 
   visual.SetOffsetX(12.0f);
   DALI_TEST_EQUALS(visual.GetOffsetX(), 12.0f, TEST_LOCATION);
@@ -127,106 +180,12 @@ int UtcDaliImageVisualInheritedSetters(void)
   END_TEST;
 }
 
-int UtcDaliImageVisualSetGetProperties01(void)
+int UtcDaliBorderVisualInvalidHandle(void)
 {
   UiTestApplication application;
 
-  ImageVisual visual = ImageVisual::New();
-
-  visual.SetResourceUrl("image.png");
-  DALI_TEST_EQUALS(visual.GetResourceUrl(), Dali::String("image.png"), TEST_LOCATION);
-
-  visual.SetSynchronousLoading(true);
-  DALI_TEST_EQUALS(visual.IsSynchronousLoading(), true, TEST_LOCATION);
-
-  visual.SetDesiredWidth(200);
-  DALI_TEST_EQUALS(visual.GetDesiredWidth(), 200, TEST_LOCATION);
-
-  visual.SetDesiredHeight(150);
-  DALI_TEST_EQUALS(visual.GetDesiredHeight(), 150, TEST_LOCATION);
-
-  visual.SetSamplingMode(Image::SamplingMode::BOX);
-  DALI_TEST_EQUALS(visual.GetSamplingMode(), Image::SamplingMode::BOX, TEST_LOCATION);
-
-  visual.SetPixelArea(Vector4(0.1f, 0.2f, 0.5f, 0.5f));
-  DALI_TEST_EQUALS(visual.GetPixelArea(), Vector4(0.1f, 0.2f, 0.5f, 0.5f), TEST_LOCATION);
-
-  visual.SetWrapModeU(Dali::WrapMode::REPEAT);
-  DALI_TEST_EQUALS(visual.GetWrapModeU(), Dali::WrapMode::REPEAT, TEST_LOCATION);
-
-  visual.SetWrapModeV(Dali::WrapMode::MIRRORED_REPEAT);
-  DALI_TEST_EQUALS(visual.GetWrapModeV(), Dali::WrapMode::MIRRORED_REPEAT, TEST_LOCATION);
-
-  visual.SetPreMultipliedAlpha(true);
-  DALI_TEST_EQUALS(visual.IsPreMultipliedAlpha(), true, TEST_LOCATION);
-
-  visual.SetAlphaMaskUrl("mask.png");
-  DALI_TEST_EQUALS(visual.GetAlphaMaskUrl(), Dali::String("mask.png"), TEST_LOCATION);
-
-  visual.SetMaskContentScale(2.0f);
-  DALI_TEST_EQUALS(visual.GetMaskContentScale(), 2.0f, TEST_LOCATION);
-
-  visual.SetCropToMask(false);
-  DALI_TEST_EQUALS(visual.IsCropToMask(), false, TEST_LOCATION);
-
-  visual.SetMaskingType(Image::MaskingType::MASKING_ON_RENDERING);
-  DALI_TEST_EQUALS(visual.GetMaskingType(), Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
-
-  visual.SetEnableBrokenImage(false);
-  DALI_TEST_EQUALS(visual.IsBrokenImageEnabled(), false, TEST_LOCATION);
-
-  visual.SetLoadPolicy(Image::LoadPolicy::ATTACHED);
-  DALI_TEST_EQUALS(visual.GetLoadPolicy(), Image::LoadPolicy::ATTACHED, TEST_LOCATION);
-
-  visual.SetReleasePolicy(Image::ReleasePolicy::DETACHED);
-  DALI_TEST_EQUALS(visual.GetReleasePolicy(), Image::ReleasePolicy::DETACHED, TEST_LOCATION);
-
-  visual.SetFittingMode(Image::FittingMode::CENTER);
-  DALI_TEST_EQUALS(visual.GetFittingMode(), Image::FittingMode::CENTER, TEST_LOCATION);
-
-  visual.SetOrientationCorrection(false);
-  DALI_TEST_EQUALS(visual.IsOrientationCorrection(), false, TEST_LOCATION);
-
-  visual.SetSynchronousSizing(true);
-  DALI_TEST_EQUALS(visual.IsSynchronousSizing(), true, TEST_LOCATION);
-
-  application.SendNotification();
-  application.Render();
-
-  END_TEST;
-}
-
-int UtcDaliImageVisualSetGetProperties02(void)
-{
-  UiTestApplication application;
-
-  ImageVisual visual = ImageVisual::New();
-
-  visual.SetFastTrackUploading(true);
-  DALI_TEST_EQUALS(visual.IsFastTrackUploading(), true, TEST_LOCATION);
-
-  visual.SetNPatchBorder(Extents(1,2,3,4));
-  DALI_TEST_EQUALS(visual.GetNPatchBorder(), Extents(1,2,3,4), TEST_LOCATION);
-
-  visual.SetNPatchBorderOnly(true);
-  DALI_TEST_EQUALS(visual.IsNPatchBorderOnly(), true, TEST_LOCATION);
-
-  visual.SetNPatchAuxiliaryImage("aux.png");
-  DALI_TEST_EQUALS(visual.GetNPatchAuxiliaryImage(), Dali::String("aux.png"), TEST_LOCATION);
-
-  visual.SetNPatchAuxiliaryImageAlpha(0.5f);
-  DALI_TEST_EQUALS(visual.GetNPatchAuxiliaryImageAlpha(), 0.5f, TEST_LOCATION);
-
-  END_TEST;
-}
-
-/* Test that an empty handle crashes on any operation */
-int UtcDaliImageVisualInvalidHandle(void)
-{
-  UiTestApplication application;
-
-  // Empty ImageVisual handle.
-  ImageVisual empty;
+  // Empty BorderVisual handle.
+  BorderVisual empty;
 
   auto TestAssertFunction = [&](std::function<void(void)> func){
     try
@@ -268,6 +227,13 @@ int UtcDaliImageVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.GetPivot();});
   TestAssertFunction([&](){empty.GetSiblingOrder();});
   TestAssertFunction([&](){empty.GetProperty(Property::INVALID_INDEX);});
+
+  // BorderVisual specific
+  TestAssertFunction([&](){empty.SetBorderSize(0.0f);});
+  TestAssertFunction([&](){empty.SetEnableAntiAliasing(false);});
+
+  TestAssertFunction([&](){empty.GetBorderSize();});
+  TestAssertFunction([&](){empty.IsAntiAliasingEnabled();});
 
   END_TEST;
 }

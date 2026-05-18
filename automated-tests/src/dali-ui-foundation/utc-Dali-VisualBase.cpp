@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/border-visual.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual.h>
@@ -446,6 +447,61 @@ int UtcDaliVisualBaseSiblingOrder(void)
   TestSiblingOder(1, 3, 2, 0);
   visual1.LowerBelow(visual2);
   TestSiblingOder(1, 3, 2, 0);
+
+  END_TEST;
+}
+int UtcDaliVisualBaseRecreateBorderVisual01(void)
+{
+  UiTestApplication application;
+
+  tet_infoline("Test that visual update without newly create Visual::Base for BorderVisual\n");
+
+  View       view    = View::New();
+  VisualBase visual = BorderVisual::New();
+
+  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+  application.GetScene().Add(view);
+
+  application.SendNotification();
+  application.Render();
+
+  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
+    // Hold original visual base
+    Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
+
+    static int testCount = 0;
+    tet_printf("TestCase #%d\n", ++testCount);
+
+    func(visual);
+
+    // Do not change visual if processor is not executed.
+    DALI_TEST_EQUALS(originalVisualBase, GetImplementation(visual).GetVisual(), TEST_LOCATION);
+
+    application.SendNotification();
+    application.Render();
+
+    bool changed = (originalVisualBase != GetImplementation(visual).GetVisual());
+    DALI_TEST_EQUALS(changed, expectChanged, TEST_LOCATION);
+  };
+
+  // Change the basic info didn't change visual base
+  TestVisualBaseChanged([](VisualBase visual){visual.SetName("Hello");}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetColor(UiColor("Primary"));}, false);
+
+  // Change the transform didn't change visual base
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetX(0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetY(0.2f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetWidth(0.3f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetHeight(0.4f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraWidth(0.5f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraHeight(0.6f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOrigin(Align::CENTER);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
+
+  // For BorderVisual.
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(BorderVisual::Property::BORDER_SIZE, 0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(BorderVisual::Property::ANTI_ALIASING, true);}, false);
 
   END_TEST;
 }

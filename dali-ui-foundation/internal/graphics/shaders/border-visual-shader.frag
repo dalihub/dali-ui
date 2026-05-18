@@ -7,10 +7,9 @@ precision highp float;
 UNIFORM_BLOCK FragBlock
 {
   UNIFORM lowp vec4 uColor;
-  UNIFORM lowp vec4 borderColor;
 };
 
 void main()
 {
-  gl_FragColor = borderColor * uColor;
+  gl_FragColor = uColor;
 }

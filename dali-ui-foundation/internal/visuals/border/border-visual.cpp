@@ -39,7 +39,7 @@ namespace Internal
 {
 namespace
 {
-const int CUSTOM_PROPERTY_COUNT(2); // color,size
+const int CUSTOM_PROPERTY_COUNT(1); // size
 
 const char* const POSITION_ATTRIBUTE_NAME("aPosition");
 const char* const DRIFT_ATTRIBUTE_NAME("aDrift");
@@ -55,12 +55,12 @@ BorderVisualPtr BorderVisual::New(VisualFactoryCache& factoryCache, const Proper
 
 BorderVisual::BorderVisual(VisualFactoryCache& factoryCache)
 : Visual::Base(factoryCache, Ui::Visual::BORDER),
-  mBorderColor(Color::TRANSPARENT),
   mBorderSize(0.f),
-  mBorderColorIndex(Property::INVALID_INDEX),
   mBorderSizeIndex(Property::INVALID_INDEX),
   mAntiAliasing(false)
 {
+  // Enable the pre-multiplied alpha
+  mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
 }
 
 BorderVisual::~BorderVisual()
@@ -78,17 +78,13 @@ void BorderVisual::DoSetProperties(const Property::Map& propertyMap)
     }
     else
     {
-      if(keyValue.first == COLOR_NAME)
+      if(keyValue.first == BORDER_SIZE_NAME)
       {
-        DoSetProperty(Ui::BorderVisual::Property::COLOR, keyValue.second);
-      }
-      else if(keyValue.first == SIZE_NAME)
-      {
-        DoSetProperty(Ui::BorderVisual::Property::SIZE, keyValue.second);
+        DoSetProperty(Ui::BorderVisualPropertyIndex::BORDER_SIZE, keyValue.second);
       }
       else if(keyValue.first == ANTI_ALIASING)
       {
-        DoSetProperty(Ui::BorderVisual::Property::ANTI_ALIASING, keyValue.second);
+        DoSetProperty(Ui::BorderVisualPropertyIndex::ANTI_ALIASING, keyValue.second);
       }
     }
   }
@@ -98,25 +94,31 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
 {
   switch(index)
   {
-    case Ui::BorderVisual::Property::COLOR:
+    case Ui::BorderVisualPropertyIndex::BORDER_SIZE:
     {
-      if(!value.Get(mBorderColor))
+      if(value.Get(mBorderSize))
       {
-        DALI_LOG_ERROR("BorderVisual: borderColor property has incorrect type\n");
+        if(mImpl->mRenderer && mBorderSizeIndex != Property::INVALID_INDEX)
+        {
+          mImpl->mRenderer.SetProperty(mBorderSizeIndex, mBorderSize);
+        }
       }
-      break;
-    }
-    case Ui::BorderVisual::Property::SIZE:
-    {
-      if(!value.Get(mBorderSize))
+      else
       {
         DALI_LOG_ERROR("BorderVisual: borderSize property has incorrect type\n");
       }
       break;
     }
-    case Ui::BorderVisual::Property::ANTI_ALIASING:
+    case Ui::BorderVisualPropertyIndex::ANTI_ALIASING:
     {
-      if(!value.Get(mAntiAliasing))
+      if(value.Get(mAntiAliasing))
+      {
+        if(mImpl->mRenderer)
+        {
+          UpdateShader();
+        }
+      }
+      else
       {
         DALI_LOG_ERROR("BorderVisual: antiAliasing property has incorrect type\n");
       }
@@ -127,19 +129,9 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
 
 void BorderVisual::DoSetOnScene(Actor& actor)
 {
-  if(mBorderColorIndex == Property::INVALID_INDEX)
-  {
-    mBorderColorIndex =
-      mImpl->mRenderer.RegisterUniqueProperty(Ui::BorderVisual::Property::COLOR, COLOR_NAME, mBorderColor);
-  }
-  if(mBorderColor.a < 1.f || mAntiAliasing)
+  if(mAntiAliasing)
   {
     mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
-  }
-  if(mBorderSizeIndex == Property::INVALID_INDEX)
-  {
-    mBorderSizeIndex =
-      mImpl->mRenderer.RegisterUniqueProperty(Ui::BorderVisual::Property::SIZE, SIZE_NAME, mBorderSize);
   }
 
   actor.AddRenderer(mImpl->mRenderer);
@@ -152,9 +144,8 @@ void BorderVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
   map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::BORDER);
-  map.Insert(Ui::BorderVisual::Property::COLOR, mBorderColor);
-  map.Insert(Ui::BorderVisual::Property::SIZE, mBorderSize);
-  map.Insert(Ui::BorderVisual::Property::ANTI_ALIASING, mAntiAliasing);
+  map.Insert(Ui::BorderVisualPropertyIndex::BORDER_SIZE, mBorderSize);
+  map.Insert(Ui::BorderVisualPropertyIndex::ANTI_ALIASING, mAntiAliasing);
 }
 
 void BorderVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -179,15 +170,26 @@ void BorderVisual::OnInitialize()
     mFactoryCache.SaveGeometry(VisualFactoryCache::BORDER_GEOMETRY, geometry);
   }
 
-  Shader shader    = GetBorderShader();
+  Shader shader    = GenerateShader();
   mImpl->mRenderer = VisualRenderer::New(geometry, shader);
   mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT);
+
+  mBorderSizeIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::BorderVisualPropertyIndex::BORDER_SIZE, BORDER_SIZE_NAME, mBorderSize);
 
   // Register transform properties
   mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
 }
 
-Shader BorderVisual::GetBorderShader()
+void BorderVisual::UpdateShader()
+{
+  if(mImpl->mRenderer)
+  {
+    Shader shader = GenerateShader();
+    mImpl->mRenderer.SetShader(shader);
+  }
+}
+
+Shader BorderVisual::GenerateShader() const
 {
   Shader shader;
   if(mAntiAliasing)

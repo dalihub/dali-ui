@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
 {
@@ -33,43 +34,43 @@ namespace Ui
 /**
  * @brief BorderVisual is to render a solid color as an internal border to the control's quad.
  */
-namespace BorderVisual
-{
-/**
- * @brief BorderVisual Property.
- */
-namespace Property
-{
-/**
- * @brief Enumeration for the instance of properties belonging to the BorderVisual.
- */
-enum
+struct BorderVisualPropertyIndex
 {
   /**
-   * @brief The color of the border.
-   * @details Name "borderColor", type Property::VECTOR4.
-   * @note Mandatory.
+   * @brief Enumeration for the start and end property ranges for this visual.
    */
-  COLOR = VISUAL_IMMUTABLE_PROPERTY_START_INDEX,
+  enum PropertyRange
+  {
+    MUTABLE_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::MUTABLE_PROPERTY_END_INDEX + 1,
+    MUTABLE_PROPERTY_END_INDEX   = MUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+    IMMUTABLE_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::IMMUTABLE_PROPERTY_END_INDEX + 1,
+    IMMUTABLE_PROPERTY_END_INDEX   = IMMUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+    READ_ONLY_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::READ_ONLY_PROPERTY_END_INDEX + 1,
+    READ_ONLY_PROPERTY_END_INDEX   = READ_ONLY_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+  };
 
   /**
-   * @brief The width of the border (in pixels).
-   * @details Name "borderSize", type Property::FLOAT.
-   * @note Mandatory.
+   * @brief Enumeration for the instance of properties belonging to the BorderVisual.
    */
-  SIZE,
+  enum
+  {
+    /**
+     * @brief The width of the border (in pixels).
+     * @details Name "borderSize", type Property::FLOAT.
+     * @note Mandatory.
+     */
+    BORDER_SIZE = MUTABLE_PROPERTY_START_INDEX,
 
-  /**
-   * @brief Whether anti-aliasing of the border is required.
-   * @details Name "antiAliasing", type Property::BOOLEAN.
-   * @note Optional. If not supplied, default is false.
-   */
-  ANTI_ALIASING,
-};
-
-} // namespace Property
-
-} // namespace BorderVisual
+    /**
+     * @brief Whether anti-aliasing of the border is required.
+     * @details Name "antiAliasing", type Property::BOOLEAN.
+     * @note Optional. If not supplied, default is false.
+     */
+    ANTI_ALIASING,
+  };
+}; // struct BorderVisualPropertyIndex
 
 /**
  * @}

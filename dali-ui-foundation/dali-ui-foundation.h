@@ -88,6 +88,7 @@
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/border-visual.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual.h>

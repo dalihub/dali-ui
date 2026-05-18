@@ -566,6 +566,7 @@ private:
   //     (visual transform already grows because the view itself grows)
   //   - ExtraSize : extra size = natural × effectiveScale
   //   - ColorVisual::BlurRadius : blur radius = natural × effectiveScale
+  //   - BorderVisual::BorderSize : border size = natural × effectiveScale
   //
   // Verifies that pixel-unit decoration properties are scaled correctly:
   //   - ABSOLUTE corner radius: visual radius = natural × effectiveScale
@@ -579,7 +580,7 @@ private:
   //   - Visual::Transform::ProportionFlags off Offset / Size keep the same proportional variables
   //   - Visual::Transform::ProportionFlags on Offset / Size keep the same fraction of each variables
   //   - ExtraSize keep the same fraction of each variables
-  //   - For special, ColorVisual with BlurRadius used keep the same fraction of each variables
+  //   - For special, ColorVisual with BlurRadius and BorderVisual with BorderSize used keep the same fraction of each variables
   //   - ABSOLUTE radius boxes keep the same proportional rounding
   //   - RELATIVE radius box keeps the same fraction of each side
   //   - Borderline box keeps the same physical border thickness
@@ -895,6 +896,41 @@ private:
     }
 
     zone.Add(row4);
+
+    // ── Row 5: BorderVisual BorderSize ────────────────────────────────────────────
+    zone.Add(MakeDesc("BorderVisual BorderSize (scaled by effectiveScale):"));
+
+    StackLayout row5 = MakeHStack();
+
+    // Box M: BorderlineWidth
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+      container.SetBorderlineWidth(BORDER_WIDTH);
+      container.SetBorderlineColor(UiColor(C_DARK_TEXT));
+      container.SetBorderlineOffset(-1.0f);
+
+      row5.Add(MakeLabeled(container, "BorderlineWidth 4px without BorderVisual\n"));
+    }
+
+    // Box M: Same result with BorderVisual
+    {
+      View container = View::New();
+      container.SetRequestedWidth(VISUAL_BOX_SIZE);
+      container.SetRequestedHeight(VISUAL_BOX_SIZE);
+      container.SetBackgroundColor(UiColor(0xF5F5F5));
+
+      BorderVisual visual = BorderVisual::New();
+      visual.SetColor(UiColor(C_DARK_TEXT));
+      visual.SetBorderSize(BORDER_WIDTH);
+      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      row5.Add(MakeLabeled(container, "BorderVisual 4px\n"));
+    }
+
+    zone.Add(row5);
 
     zone.Add(MakeDesc(
       "Change scale and verify: ABSOLUTE values scale proportionally, "

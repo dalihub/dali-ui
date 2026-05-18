@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
+#include <dali-ui-foundation/public-api/visuals/border-visual.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual.h>
@@ -96,6 +97,7 @@ int UtcDaliColorVisualDownCast(void)
 
   // Do not convert to other type of visual
   DALI_TEST_CHECK(!AnimatedImageVisual::DownCast(baseHandle));
+  DALI_TEST_CHECK(!BorderVisual::DownCast(baseHandle));
   DALI_TEST_CHECK(!GradientVisual::DownCast(baseHandle));
   DALI_TEST_CHECK(!ImageVisual::DownCast(baseHandle));
   DALI_TEST_CHECK(!LottieAnimationVisual::DownCast(baseHandle));
