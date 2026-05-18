@@ -267,20 +267,17 @@ private:
     {
       case 0: // Linear gradient
       {
-        gradientVisual.SetStartPosition(Vector2(-0.5f + GetRandomFloat(), -0.5f + GetRandomFloat() * 0.5f));
-        gradientVisual.SetEndPosition(Vector2(0.5f - GetRandomFloat() * 0.5f, 0.5f - GetRandomFloat()));
+        gradientVisual.SetLinearGradient(Vector2(-0.5f + GetRandomFloat(), -0.5f + GetRandomFloat() * 0.5f), Vector2(0.5f - GetRandomFloat() * 0.5f, 0.5f - GetRandomFloat()));
         break;
       }
       case 1: // Radial gradient
       {
-        gradientVisual.SetCenter(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f));
-        gradientVisual.SetRadius(GetRandomFloat() * 0.5f + 0.25f);
+        gradientVisual.SetRadialGradient(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), GetRandomFloat() * 0.5f + 0.25f);
         break;
       }
       case 2: // Conic gradient
       {
-        gradientVisual.SetCenter(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f));
-        gradientVisual.SetStartAngle(Dali::Radian(GetRandomFloat() * Math::PI * 2.0f));
+        gradientVisual.SetConicGradient(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), Dali::Radian(GetRandomFloat() * Math::PI * 2.0f));
         break;
       }
     }

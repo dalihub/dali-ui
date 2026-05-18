@@ -49,6 +49,45 @@ GradientVisual GradientVisual::DownCast(BaseHandle handle)
 // Properties
 // =============================================================================
 
+GradientVisual& GradientVisual::SetLinearGradient(const Dali::Vector2& startPosition, const Dali::Vector2& endPosition)
+{
+  // Remove other caches first if exist
+  auto& visualBaseImpl = GetImplementation(*this);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::CENTER);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::RADIUS);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::START_ANGLE);
+
+  VisualBase::SetProperty(GradientVisual::Property::START_POSITION, startPosition);
+  VisualBase::SetProperty(GradientVisual::Property::END_POSITION, endPosition);
+  return *this;
+}
+
+GradientVisual& GradientVisual::SetRadialGradient(const Dali::Vector2& center, float radius)
+{
+  // Remove other caches first if exist
+  auto& visualBaseImpl = GetImplementation(*this);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::START_POSITION);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::END_POSITION);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::START_ANGLE);
+
+  VisualBase::SetProperty(GradientVisual::Property::CENTER, center);
+  VisualBase::SetProperty(GradientVisual::Property::RADIUS, radius);
+  return *this;
+}
+
+GradientVisual& GradientVisual::SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle)
+{
+  // Remove other caches first if exist
+  auto& visualBaseImpl = GetImplementation(*this);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::START_POSITION);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::END_POSITION);
+  visualBaseImpl.RemoveCache(GradientVisual::Property::RADIUS);
+
+  VisualBase::SetProperty(GradientVisual::Property::CENTER, center);
+  VisualBase::SetProperty(GradientVisual::Property::START_ANGLE, startAngle.radian);
+  return *this;
+}
+
 float GradientVisual::GetStartOffset() const
 {
   return VisualBase::GetProperty<float>(GradientVisual::Property::START_OFFSET);

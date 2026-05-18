@@ -58,16 +58,17 @@ public:
   {
     enum
     {
-      START_OFFSET   = GradientVisualPropertyIndex::START_OFFSET,
+      START_OFFSET  = GradientVisualPropertyIndex::START_OFFSET,
+      STOP_OFFSET   = GradientVisualPropertyIndex::STOP_OFFSET,
+      STOP_COLOR    = GradientVisualPropertyIndex::STOP_COLOR,
+      UNITS         = GradientVisualPropertyIndex::UNITS,
+      SPREAD_METHOD = GradientVisualPropertyIndex::SPREAD_METHOD,
+
       START_POSITION = GradientVisualPropertyIndex::START_POSITION,
       END_POSITION   = GradientVisualPropertyIndex::END_POSITION,
       CENTER         = GradientVisualPropertyIndex::CENTER,
       RADIUS         = GradientVisualPropertyIndex::RADIUS,
       START_ANGLE    = GradientVisualPropertyIndex::START_ANGLE,
-      STOP_OFFSET    = GradientVisualPropertyIndex::STOP_OFFSET,
-      STOP_COLOR     = GradientVisualPropertyIndex::STOP_COLOR,
-      UNITS          = GradientVisualPropertyIndex::UNITS,
-      SPREAD_METHOD  = GradientVisualPropertyIndex::SPREAD_METHOD,
     };
   };
 
@@ -92,6 +93,36 @@ public:
 
 public: // Setters for chaining
   // @CHAIN_START(GradientVisual, VisualBase)
+  /**
+   * @brief Sets the start position and end position of the GradientVisual.
+   * It will make linear gradient
+   *
+   * @param[in] startPosition The start position to set
+   * @param[in] endPosition The end position to set
+   * @return Reference to this for fluent chaining
+   */
+  GradientVisual& SetLinearGradient(const Dali::Vector2& startPosition, const Dali::Vector2& endPosition);
+
+  /**
+   * @brief Sets the center position and radius of the GradientVisual.
+   * It will make radial gradient
+   *
+   * @param[in] center The center to set
+   * @param[in] radius The radius to set
+   * @return Reference to this for fluent chaining
+   */
+  GradientVisual& SetRadialGradient(const Dali::Vector2& center, float radius);
+
+  /**
+   * @brief Sets the center position and start angle of the GradientVisual.
+   * It will make conic gradient
+   *
+   * @param[in] center The center to set
+   * @param[in] startAngle The start angle to set
+   * @return Reference to this for fluent chaining
+   */
+  GradientVisual& SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle);
+
   /**
    * @brief Gets the start offset of the GradientVisual.
    *

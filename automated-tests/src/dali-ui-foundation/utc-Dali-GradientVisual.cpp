@@ -103,6 +103,51 @@ int UtcDaliGradientVisualDownCast(void)
   END_TEST;
 }
 
+int UtcDaliGradientVisualSetLinearGradient(void)
+{
+  UiTestApplication application;
+
+  GradientVisual visual = GradientVisual::New();
+
+  Vector2 startPosition(-0.5f, -0.5f);
+  Vector2 endPosition(0.5f, 0.5f);
+  visual.SetLinearGradient(startPosition, endPosition);
+  DALI_TEST_EQUALS(visual.GetStartPosition(), startPosition, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetEndPosition(), endPosition, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliGradientVisualSetRadialGradient(void)
+{
+  UiTestApplication application;
+
+  GradientVisual visual = GradientVisual::New();
+
+  Vector2 center(0.0f, 0.0f);
+  float radius(0.5f);
+  visual.SetRadialGradient(center, radius);
+  DALI_TEST_EQUALS(visual.GetCenter(), center, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetRadius(), radius, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliGradientVisualSetConicGradient(void)
+{
+  UiTestApplication application;
+
+  GradientVisual visual = GradientVisual::New();
+
+  Vector2 center(0.0f, 0.0f);
+  Dali::Radian startAngle(Math::PI_2);
+  visual.SetConicGradient(center, startAngle);
+  DALI_TEST_EQUALS(visual.GetCenter(), center, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetStartAngle(), startAngle, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliGradientVisualStartOffset(void)
 {
   UiTestApplication application;

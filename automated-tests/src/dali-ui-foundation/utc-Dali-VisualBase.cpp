@@ -605,24 +605,17 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
   }, false);
 
   // Change ImmutableProperty change visual base
-  // Note that current internal gradient visual type check logic order is Conic > Radial > Linear.
   TestVisualBaseChanged([](VisualBase visual){
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetStartPosition(Vector2::ZERO);
-    gradientVisual.SetEndPosition(Vector2::ONE);
+    gradientVisual.SetLinearGradient(Vector2::ZERO, Vector2::ONE);
   }, true);
   TestVisualBaseChanged([](VisualBase visual){
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetCenter(Vector2::ZERO);
-    gradientVisual.SetRadius(5.0f);
+    gradientVisual.SetRadialGradient(Vector2::ZERO, 5.0f);
   }, true);
   TestVisualBaseChanged([](VisualBase visual){
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetStartAngle(Dali::Radian(2.0f));
-  }, true);
-  TestVisualBaseChanged([](VisualBase visual){
-    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetCenter(Vector2::ONE);
+    gradientVisual.SetConicGradient(Vector2::ZERO, Dali::Radian(2.0f));
   }, true);
 
   END_TEST;
@@ -709,21 +702,15 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
   // Note that current internal gradient visual type check logic order is Conic > Radial > Linear.
   TestVisualBaseChanged([](VisualBase visual){
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetStartPosition(Vector2::ZERO);
-    gradientVisual.SetEndPosition(Vector2::ONE);
+    gradientVisual.SetLinearGradient(Vector2::ZERO, Vector2::ONE);
   }, true);
   TestVisualBaseChanged([](VisualBase visual){
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetCenter(Vector2::ZERO);
-    gradientVisual.SetRadius(5.0f);
+    gradientVisual.SetRadialGradient(Vector2::ZERO, 5.0f);
   }, true);
   TestVisualBaseChanged([](VisualBase visual){
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetStartAngle(Dali::Radian(2.0f));
-  }, true);
-  TestVisualBaseChanged([](VisualBase visual){
-    GradientVisual gradientVisual = GradientVisual::DownCast(visual);
-    gradientVisual.SetCenter(Vector2::ONE);
+    gradientVisual.SetConicGradient(Vector2::ZERO, Dali::Radian(2.0f));
   }, true);
 
   END_TEST;

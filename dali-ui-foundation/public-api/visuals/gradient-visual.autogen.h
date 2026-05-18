@@ -4,6 +4,33 @@
 #define DALI_UI_CHAIN_GRADIENTVISUAL_METHODS(ChildClass) \
   DALI_UI_CHAIN_VISUALBASE_METHODS(ChildClass) \
   /** \
+  * @brief Sets the start position and end position of the GradientVisual. \
+  * It will make linear gradient \
+  * \
+  * @param[in] startPosition The start position to set \
+  * @param[in] endPosition The end position to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetLinearGradient(const Dali::Vector2& startPosition, const Dali::Vector2& endPosition) { GradientVisual::SetLinearGradient(startPosition, endPosition); return *this; } \
+  /** \
+  * @brief Sets the center position and radius of the GradientVisual. \
+  * It will make radial gradient \
+  * \
+  * @param[in] center The center to set \
+  * @param[in] radius The radius to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetRadialGradient(const Dali::Vector2& center, float radius) { GradientVisual::SetRadialGradient(center, radius); return *this; } \
+  /** \
+  * @brief Sets the center position and start angle of the GradientVisual. \
+  * It will make conic gradient \
+  * \
+  * @param[in] center The center to set \
+  * @param[in] startAngle The start angle to set \
+  * @return Reference to this for fluent chaining \
+  */ \
+  ChildClass& SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle) { GradientVisual::SetConicGradient(center, startAngle); return *this; } \
+  /** \
   * @brief Sets the start offset of the GradientVisual. \
   * \
   * @param[in] startOffset The start offset to set \
