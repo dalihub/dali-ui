@@ -12,6 +12,7 @@ UNIFORM_BLOCK VertBlock
 {
   UNIFORM highp mat4 uMvpMatrix;
   UNIFORM highp vec3 uSize;
+  UNIFORM lowp  float visualTransformUseEffectiveScale;
 }
 
 UNIFORM_BLOCK FragBlock
@@ -34,8 +35,9 @@ UNIFORM_BLOCK VisualVertBlock
 
 vec2 ComputeVertexPosition()
 {
-  vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw ) + extraSize * viewEffectiveScale + vec2(0.75, 0.75);
-  vec2 visualOffset = mix(offset * uSize.xy, offset * viewEffectiveScale, offsetSizeMode.xy);
+  highp float effectiveScale = mix(1.0, viewEffectiveScale, visualTransformUseEffectiveScale);
+  vec2 visualSize = mix(size * uSize.xy, size * effectiveScale, offsetSizeMode.zw ) + extraSize * effectiveScale + vec2(0.75, 0.75);
+  vec2 visualOffset = mix(offset * uSize.xy, offset * effectiveScale, offsetSizeMode.xy);
   return (aPosition + pivot) * visualSize + visualOffset + origin * uSize.xy;
 }
 

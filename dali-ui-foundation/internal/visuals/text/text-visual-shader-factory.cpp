@@ -214,8 +214,9 @@ Shader TextVisualShaderFactory::GetShader(VisualFactoryCache&                   
     shader = factoryCache.GenerateAndSaveShader(shaderType, vertexShader, fragmentShader);
 
     // Register property which only textlabel used.
-    shader.ReserveCustomProperties(2);
+    shader.ReserveCustomProperties(3);
     shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+    shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
     shader.RegisterProperty(PIXEL_SNAP_FACTOR_UNIFORM_NAME.data(), PIXEL_SNAP_DISABLED_VALUE);
   }
   return shader;

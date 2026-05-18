@@ -183,6 +183,11 @@ void Visual::Base::Initialize()
     {
       mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
     }
+
+    if(mImpl->mTransformMapSetForFittingMode)
+    {
+      mImpl->mRenderer.RegisterUniqueProperty("visualTransformUseEffectiveScale", 0.0f);
+    }
   }
 }
 
@@ -1028,7 +1033,7 @@ void Visual::Base::SetTransformMapUsageForFittingMode(bool used)
 {
   mImpl->mTransformMapSetForFittingMode = used;
 
-  // TODO : Need to implement something to ignore viewEffectiveScale for transform at shader side.
+  mImpl->mRenderer.RegisterProperty("visualTransformUseEffectiveScale", mImpl->mTransformMapSetForFittingMode ? 0.0f : 1.0f);
 }
 
 void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)

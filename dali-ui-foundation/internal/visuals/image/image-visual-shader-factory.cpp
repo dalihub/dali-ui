@@ -157,7 +157,7 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache&                  
 
   shader = factoryCache.GenerateAndSaveShader(shaderType, vertexShader, fragmentShader);
 
-  shader.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT + ((featureBuilder.IsEnabledAlphaMaskingOnRendering() ? 1 : 0)) + 1);
+  shader.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT + ((featureBuilder.IsEnabledAlphaMaskingOnRendering() ? 1 : 0)) + 2);
 
   shader.RegisterProperty(PIXEL_AREA_UNIFORM_NAME, FULL_TEXTURE_RECT);
 
@@ -171,6 +171,7 @@ Shader ImageVisualShaderFactory::GetShader(VisualFactoryCache&                  
   }
 
   shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+  shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
 
   return shader;
 }

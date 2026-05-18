@@ -252,17 +252,18 @@ Shader ColorVisualShaderFactory::GetShader(VisualFactoryCache&                  
 
     if(featureBuilder.IsCutoutEnabled())
     {
-      shader.ReserveCustomProperties(CUSTOM_CUTOUT_CORNER_PROPERTY_COUNT + 1);
+      shader.ReserveCustomProperties(CUSTOM_CUTOUT_CORNER_PROPERTY_COUNT + 2);
       shader.RegisterUniqueProperty(CUTOUT_CORNER_RADIUS_UNIFORM_NAME, Vector4::ZERO);
       shader.RegisterUniqueProperty(CUTOUT_CORNER_RADIUS_POLICY_UNIFORM_NAME, Property::Value(static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE)));
       shader.RegisterUniqueProperty(CUTOUT_CORNER_SQUARENESS_UNIFORM_NAME, Vector4::ZERO);
     }
     else
     {
-      shader.ReserveCustomProperties(1);
+      shader.ReserveCustomProperties(2);
     }
 
     shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+    shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
   }
   return shader;
 }

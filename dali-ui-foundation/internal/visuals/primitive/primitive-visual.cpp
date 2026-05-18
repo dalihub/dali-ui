@@ -402,8 +402,9 @@ void PrimitiveVisual::CreateShader()
                         static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                         "PRIMITIVE_VISUAL");
 
-  mShader.ReserveCustomProperties(1);
+  mShader.ReserveCustomProperties(2);
   mShader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+  mShader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
   UpdateShaderUniforms();
 }
 

@@ -211,8 +211,9 @@ void ArcVisual::OnInitialize()
                                                    SHADER_ARC_VISUAL_SHADER_VERT.data(),
                                                    SHADER_ARC_VISUAL_BUTT_CAP_SHADER_FRAG.data());
 
-      shader.ReserveCustomProperties(1);
+      shader.ReserveCustomProperties(2);
       shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+      shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
     }
   }
   else
@@ -224,8 +225,9 @@ void ArcVisual::OnInitialize()
                                                    SHADER_ARC_VISUAL_SHADER_VERT.data(),
                                                    SHADER_ARC_VISUAL_ROUND_CAP_SHADER_FRAG.data());
 
-      shader.ReserveCustomProperties(1);
+      shader.ReserveCustomProperties(2);
       shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+      shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
     }
   }
 

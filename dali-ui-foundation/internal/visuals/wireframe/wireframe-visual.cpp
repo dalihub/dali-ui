@@ -61,6 +61,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
   Property::Map    transformMap;
   if(transformValue && transformValue->Get(transformMap))
   {
+    // TODO : It might not works well if effectiveScale is not 1.0f!
     wireframeVisual->SetTransformAndSize(transformMap, Vector2::ZERO, 1.0f);
   }
   wireframeVisual->Initialize();
@@ -146,8 +147,9 @@ void WireframeVisual::OnInitialize()
     shader = mFactoryCache.GenerateAndSaveShader(
       VisualFactoryCache::WIREFRAME_SHADER, SHADER_WIREFRAME_VISUAL_SHADER_VERT, SHADER_WIREFRAME_VISUAL_SHADER_FRAG);
 
-    shader.ReserveCustomProperties(1);
+    shader.ReserveCustomProperties(2);
     shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+    shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
   }
 
   Geometry geometry = mFactoryCache.GetGeometry(VisualFactoryCache::WIREFRAME_GEOMETRY);

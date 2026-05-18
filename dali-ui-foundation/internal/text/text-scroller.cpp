@@ -281,6 +281,8 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
                     static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
                     "TEXT_SCROLLER_VERTICAL");
 
+  shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+  shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
   mRenderer.SetShader(shader);
   mRenderer.SetTextures(textureSet);
 

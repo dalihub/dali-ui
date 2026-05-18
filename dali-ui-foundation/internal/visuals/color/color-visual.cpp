@@ -433,8 +433,9 @@ Shader ColorVisual::GenerateShader() const
     {
       shader = Shader::New(shaderArray);
     }
-    shader.ReserveCustomProperties(1);
+    shader.ReserveCustomProperties(2);
     shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+    shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
   }
   return shader;
 }

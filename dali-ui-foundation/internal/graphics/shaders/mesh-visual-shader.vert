@@ -21,6 +21,7 @@ UNIFORM_BLOCK VertBlock
   UNIFORM highp mat4 uObjectMatrix;
   UNIFORM highp vec3 lightPosition;
   UNIFORM highp vec2 uStageOffset;
+  UNIFORM lowp  float visualTransformUseEffectiveScale;
 };
 
 UNIFORM_BLOCK VisualVertBlock
@@ -36,11 +37,12 @@ UNIFORM_BLOCK VisualVertBlock
 
 vec4 ComputeVertexPosition()
 {
-  vec2 visualSize = mix(uSize.xy*size, size * viewEffectiveScale, offsetSizeMode.zw ) + extraSize * viewEffectiveScale;
+  highp float effectiveScale = mix(1.0, viewEffectiveScale, visualTransformUseEffectiveScale);
+  vec2 visualSize = mix(uSize.xy*size, size * effectiveScale, offsetSizeMode.zw ) + extraSize * effectiveScale;
   float scaleFactor = min( visualSize.x, visualSize.y );
   vec3 originFlipY =vec3(origin.x, -origin.y, 0.0);
   vec3 pivotFlipY = vec3( pivot.x, -pivot.y, 0.0);
-  vec3 visualOffset = vec3( offset * viewEffectiveScale * offsetSizeMode.xy + offset * uSize.xy * (1.0-offsetSizeMode.xy), 0.0) * vec3(1.0,-1.0,1.0);
+  vec3 visualOffset = vec3( offset * effectiveScale * offsetSizeMode.xy + offset * uSize.xy * (1.0-offsetSizeMode.xy), 0.0) * vec3(1.0,-1.0,1.0);
   return vec4( (aPosition + pivotFlipY) * scaleFactor + visualOffset + originFlipY * uSize, 1.0 );
 }
 

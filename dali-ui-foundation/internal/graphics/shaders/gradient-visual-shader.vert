@@ -35,6 +35,7 @@ UNIFORM_BLOCK VertBlock
 #else
   UNIFORM highp float viewEffectiveScale;
 #endif
+  UNIFORM lowp  float visualTransformUseEffectiveScale;
 };
 
 UNIFORM_BLOCK VisualVertBlock
@@ -60,8 +61,9 @@ UNIFORM_BLOCK Borderline
 
 vec4 ComputeVertexPosition()
 {
-  highp vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw ) + extraSize * viewEffectiveScale;
-  highp vec2 visualOffset = mix(offset * uSize.xy, offset * viewEffectiveScale, offsetSizeMode.xy);
+  highp float effectiveScale = mix(1.0, viewEffectiveScale, visualTransformUseEffectiveScale);
+  highp vec2 visualSize = mix(size * uSize.xy, size * effectiveScale, offsetSizeMode.zw ) + extraSize * effectiveScale;
+  highp vec2 visualOffset = mix(offset * uSize.xy, offset * effectiveScale, offsetSizeMode.xy);
 
 #if defined(IS_REQUIRED_ROUNDED_CORNER) || defined(IS_REQUIRED_BORDERLINE)
   vRectSize = visualSize * 0.5;

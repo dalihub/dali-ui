@@ -206,8 +206,9 @@ Shader BorderVisual::GenerateShader() const
                                                    SHADER_BORDER_VISUAL_ANTI_ALIASING_SHADER_VERT.data(),
                                                    SHADER_BORDER_VISUAL_ANTI_ALIASING_SHADER_FRAG.data());
 
-      shader.ReserveCustomProperties(1);
+      shader.ReserveCustomProperties(2);
       shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+      shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
     }
   }
   else
@@ -219,8 +220,9 @@ Shader BorderVisual::GenerateShader() const
                                                    SHADER_BORDER_VISUAL_SHADER_VERT.data(),
                                                    SHADER_BORDER_VISUAL_SHADER_FRAG.data());
 
-      shader.ReserveCustomProperties(1);
+      shader.ReserveCustomProperties(2);
       shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+      shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
     }
   }
 

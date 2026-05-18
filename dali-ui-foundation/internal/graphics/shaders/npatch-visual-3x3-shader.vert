@@ -15,6 +15,7 @@ UNIFORM_BLOCK VertBlock
   UNIFORM highp float viewEffectiveScale;
   UNIFORM highp vec2 uFixed[3];
   UNIFORM highp vec2 uStretchTotal;
+  UNIFORM lowp  float visualTransformUseEffectiveScale;
 };
 
 UNIFORM_BLOCK VisualVertBlock
@@ -30,8 +31,9 @@ UNIFORM_BLOCK VisualVertBlock
 
 void main()
 {
-  highp vec2 visualSize = mix(size * uSize.xy, size * viewEffectiveScale, offsetSizeMode.zw) + extraSize * viewEffectiveScale;
-  highp vec2 visualOffset = mix(offset * uSize.xy, offset * viewEffectiveScale, offsetSizeMode.xy);
+  highp float effectiveScale = mix(1.0, viewEffectiveScale, visualTransformUseEffectiveScale);
+  highp vec2 visualSize = mix(size * uSize.xy, size * effectiveScale, offsetSizeMode.zw) + extraSize * effectiveScale;
+  highp vec2 visualOffset = mix(offset * uSize.xy, offset * effectiveScale, offsetSizeMode.xy);
 
   highp vec2 fixedFactor = vec2(uFixed[int((aPosition.x + 1.0) * 0.5)].x, uFixed[int((aPosition.y  + 1.0) * 0.5)].y);
   highp vec2 stretch  = floor(aPosition * 0.5);

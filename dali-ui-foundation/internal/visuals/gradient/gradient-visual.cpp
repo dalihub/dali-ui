@@ -585,8 +585,9 @@ Shader GradientVisual::GenerateShader() const
                                                  vertexShaderPrefixList + SHADER_GRADIENT_VISUAL_SHADER_VERT.data(),
                                                  fragmentShaderPrefixList + SHADER_GRADIENT_VISUAL_SHADER_FRAG.data());
 
-    shader.ReserveCustomProperties(1);
+    shader.ReserveCustomProperties(2);
     shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
+    shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
   }
 
   return shader;
