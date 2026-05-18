@@ -1269,9 +1269,33 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
     // If there is no font's family set, use the default font.
     // Use the current alignment to place the cursor at the beginning, center or end of the box.
 
+    const float defaultFontLineHeight = GetDefaultFontLineHeight();
+
     cursorInfo.lineOffset          = 0.f;
-    cursorInfo.lineHeight          = GetDefaultFontLineHeight();
-    cursorInfo.primaryCursorHeight = cursorInfo.lineHeight;
+    cursorInfo.lineHeight          = defaultFontLineHeight;
+    cursorInfo.primaryCursorHeight = defaultFontLineHeight;
+    cursorInfo.glyphOffset         = 0.f;
+
+    if(mModel->mVisualModel->mLines.Count() > 0u)
+    {
+      const LineRun& line = *mModel->mVisualModel->mLines.Begin();
+
+      const float naturalLineHeight = line.ascender - line.descender;
+      if(naturalLineHeight > Math::MACHINE_EPSILON_1000)
+      {
+        cursorInfo.lineHeight          = naturalLineHeight;
+        cursorInfo.primaryCursorHeight = naturalLineHeight;
+      }
+
+      const float verticalLineOffset =
+        GetPreOffsetVerticalLineAlignment(line, mModel->GetVerticalLineAlignment());
+
+      cursorInfo.primaryPosition.y = cursorInfo.lineOffset + verticalLineOffset;
+    }
+    else
+    {
+      cursorInfo.primaryPosition.y = cursorInfo.lineOffset;
+    }
 
     bool isRTL = false;
     if(mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS)

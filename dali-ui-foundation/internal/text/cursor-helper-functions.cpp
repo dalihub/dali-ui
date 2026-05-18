@@ -487,7 +487,7 @@ CharacterIndex GetClosestCursorIndex(VisualModelPtr visualModel, LogicalModelPtr
 void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFontLineHeight, CursorInfo& cursorInfo)
 {
   const LineRun* const modelLines = parameters.visualModel->mLines.Begin();
-  if(NULL == modelLines)
+  if(NULL == modelLines || parameters.visualModel->mLines.Count() == 0u)
   {
     // Nothing to do.
     return;
