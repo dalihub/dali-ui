@@ -69,7 +69,8 @@ void Gradient::ApplyStops(const Vector<float>& offsets, const Vector<Vector4>& c
 
   for(uint32_t i = 0; i < offsets.Count(); ++i)
   {
-    mGradientStops[i].mOffset = offsets[i];
+    // the offset is clamped to the range [0.0, 1.0]
+    mGradientStops[i].mOffset = Clamp(offsets[i], 0.f, 1.f);
   }
   for(uint32_t i = 0; i < colors.Count(); ++i)
   {
@@ -120,11 +121,11 @@ Dali::Texture Gradient::GenerateLookupTexture()
   }
 
   // Fill -1 offsets automatically.
-  if(Dali::Equals(mGradientStops[0].mOffset, -1.0f))
+  if(mGradientStops[0].mOffset < 0.0f)
   {
     mGradientStops[0].mOffset = 0.0f;
   }
-  if(Dali::Equals(mGradientStops[numStops - 1].mOffset, -1.0f))
+  if(mGradientStops[numStops - 1].mOffset < 0.0f)
   {
     mGradientStops[numStops - 1].mOffset = 1.0f;
   }
@@ -133,7 +134,7 @@ Dali::Texture Gradient::GenerateLookupTexture()
     uint32_t j = i + 1;
     for(; j < numStops; ++j)
     {
-      if(!Dali::Equals(mGradientStops[j].mOffset, -1.0f))
+      if(mGradientStops[j].mOffset >= 0.0f)
       {
         break;
       }
@@ -229,7 +230,9 @@ Dali::Texture Gradient::GenerateLookupTexture()
   float length       = static_cast<float>(resolution);
   for(unsigned int i = 0; i < numStops - 1u; i++)
   {
-    segmentEnd = floorf(offsets[i + 1] * length + 0.5f);
+    const float offsetEnd = std::min(1.0f, std::max(0.0f, offsets[i + 1]));
+
+    segmentEnd = floorf(offsetEnd * length + 0.5f);
     if(segmentEnd == segmentStart)
     {
       continue;

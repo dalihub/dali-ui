@@ -328,7 +328,7 @@ void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
     for(unsigned int i = 0; i < stops.Count(); i++)
     {
       offsets.PushBack(stops[i].mOffset);
-      colors.PushBack(Vector4(stops[i].mStopColor.r, stops[i].mStopColor.g, stops[i].mStopColor.b, stops[i].mStopColor.a));
+      colors.PushBack(stops[i].mStopColor);
     }
 
     map.Insert(Ui::GradientVisualPropertyIndex::STOP_OFFSET, offsets);
