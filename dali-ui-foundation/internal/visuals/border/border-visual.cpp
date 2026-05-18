@@ -116,6 +116,11 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
         if(mImpl->mRenderer)
         {
           UpdateShader();
+
+          if(mAntiAliasing && mImpl->mRenderer.GetProperty<BlendMode::Type>(Renderer::Property::BLEND_MODE) == BlendMode::AUTO)
+          {
+            mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
+          }
         }
       }
       else
@@ -129,11 +134,6 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
 
 void BorderVisual::DoSetOnScene(Actor& actor)
 {
-  if(mAntiAliasing)
-  {
-    mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
-  }
-
   actor.AddRenderer(mImpl->mRenderer);
 
   // Border Visual Generated and ready to display
@@ -175,6 +175,11 @@ void BorderVisual::OnInitialize()
   mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT);
 
   mBorderSizeIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::BorderVisualPropertyIndex::BORDER_SIZE, BORDER_SIZE_NAME, mBorderSize);
+
+  if(mAntiAliasing)
+  {
+    mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
+  }
 
   // Register transform properties
   mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
