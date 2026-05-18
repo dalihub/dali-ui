@@ -746,9 +746,27 @@ public:
   void RetrieveDefaultInputStyle(InputStyle& inputStyle);
 
   /**
-   * @brief Retrieve the line height of the default font.
+   * @brief Retrieves the line height of the default font.
    */
   float GetDefaultFontLineHeight();
+
+  /**
+   * @brief Retrieves the default line box height after applying absolute or
+   * relative LineHeight settings.
+   *
+   * @return The default line box height.
+   */
+  float GetDefaultLineBoxHeight();
+
+  /**
+   * @brief Retrieves the default line box height using the given font line height.
+   *
+   * This overload avoids recalculating the font line height when it is already known.
+   *
+   * @param[in] defaultFontLineHeight The font line height.
+   * @return The default line box height.
+   */
+  float GetDefaultLineBoxHeight(float defaultFontLineHeight);
 
   /**
    * @copydoc Controller::SetDefaultLineSpacing

@@ -200,6 +200,19 @@ public:
    */
   void SetFontSizeScale(float scale);
 
+  /**
+   * @brief Retrieves the line spacing for the given text size and relative line size.
+   *
+   * This method exposes the internal line spacing calculation used by the layout engine.
+   * It accounts for default line spacing, absolute/relative line size, font pixel size,
+   * font size scale, and design compatibility mode.
+   *
+   * @param[in] textSize The text size (typically font line height).
+   * @param[in] relativeLineSize The relative line size multiplier.
+   * @return The calculated line spacing.
+   */
+  float GetLineSpacing(float textSize, float relativeLineSize) const;
+
 private:
   // Undefined
   Engine(const Engine& handle);

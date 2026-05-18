@@ -196,7 +196,7 @@ private:
 
     // Target InputEditor - multi-line text editor
     mInputEditor = InputEditor::New()
-      .SetPlaceholder("Type here...\nThis is a multi-line editor.")
+      .SetPlaceholder("Type here...This is a multi-line editor.")
       .SetPlaceholderColor(UiColor(COLOR_DARK_GRAY))
       .SetFontSize(18.0f)
       .SetCursorWidth(2)

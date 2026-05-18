@@ -2319,6 +2319,11 @@ void Engine::SetFontSizeScale(float scale)
   mImpl->mFontSizeScale = scale;
 }
 
+float Engine::GetLineSpacing(float textSize, float relativeLineSize) const
+{
+  return mImpl->GetLineSpacing(textSize, relativeLineSize);
+}
+
 } // namespace Layout
 
 } // namespace Text

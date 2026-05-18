@@ -814,6 +814,21 @@ float Controller::Impl::GetDefaultFontLineHeight()
   return (fontMetrics.ascender - fontMetrics.descender);
 }
 
+float Controller::Impl::GetDefaultLineBoxHeight()
+{
+  return GetDefaultLineBoxHeight(GetDefaultFontLineHeight());
+}
+
+float Controller::Impl::GetDefaultLineBoxHeight(float defaultFontLineHeight)
+{
+  // Calculate line box height using the layout engine's line spacing calculation.
+  // This ensures consistency with actual text layout.
+  const float lineSpacing =
+    mLayoutEngine.GetLineSpacing(defaultFontLineHeight, mLayoutEngine.GetRelativeLineSize());
+
+  return defaultFontLineHeight + lineSpacing;
+}
+
 bool Controller::Impl::SetDefaultLineSpacing(float lineSpacing)
 {
   if(std::fabs(lineSpacing - mLayoutEngine.GetDefaultLineSpacing()) > Math::MACHINE_EPSILON_1000)
@@ -840,19 +855,44 @@ void Controller::Impl::RequestDecoratorUpdate()
     return;
   }
 
-  if(EventData::SELECTING == mEventData->mState ||
-     mEventData->mLeftSelectionPosition != mEventData->mRightSelectionPosition)
+  // Check if there is an active selection.
+  const bool hasSelection =
+    EventData::SELECTING == mEventData->mState ||
+    mEventData->mLeftSelectionPosition != mEventData->mRightSelectionPosition;
+
+  if(hasSelection)
   {
-    mEventData->mUpdateHighlightBox           = true;
-    mEventData->mUpdateLeftSelectionPosition  = true;
-    mEventData->mUpdateRightSelectionPosition = true;
-  }
-  else
-  {
-    mEventData->mUpdateCursorPosition     = true;
-    mEventData->mUpdateGrabHandlePosition = true;
+    // Collapse selection to avoid state mismatch when text geometry changes.
+    const CharacterIndex textLength        = mModel->mLogicalModel->mText.Count();
+    const CharacterIndex collapsedPosition = std::min(mEventData->mPrimaryCursorPosition, textLength);
+    const uint32_t       oldStart          = mEventData->mLeftSelectionPosition;
+    const uint32_t       oldEnd            = mEventData->mRightSelectionPosition;
+
+    ChangeState(EventData::EDITING);
+
+    mEventData->mPrimaryCursorPosition  = collapsedPosition;
+    mEventData->mLeftSelectionPosition  = collapsedPosition;
+    mEventData->mRightSelectionPosition = collapsedPosition;
+
+    mEventData->mUpdateHighlightBox           = false;
+    mEventData->mUpdateLeftSelectionPosition  = false;
+    mEventData->mUpdateRightSelectionPosition = false;
+
+    if(mEventData->mDecorator)
+    {
+      mEventData->mDecorator->SetHighlightActive(false);
+    }
+
+    if(mSelectableControlInterface != nullptr &&
+       ((oldStart != collapsedPosition) || (oldEnd != collapsedPosition)))
+    {
+      mSelectableControlInterface->SelectionChanged(oldStart, oldEnd, collapsedPosition, collapsedPosition);
+    }
   }
 
+  mEventData->mUpdateCursorPosition      = true;
+  mEventData->mUpdateGrabHandlePosition  = true;
+  mEventData->mUpdateInputStyle          = true;
   mEventData->mScrollAfterUpdatePosition = true;
   mEventData->mDecoratorUpdated          = true;
 }
@@ -1264,38 +1304,32 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
   if(!IsShowingRealText())
   {
     // Do not want to use the place-holder text to set the cursor position.
-
-    // Use the line's height of the font's family set to set the cursor's size.
-    // If there is no font's family set, use the default font.
-    // Use the current alignment to place the cursor at the beginning, center or end of the box.
+    // Empty cursor should be calculated based on real input default font/LineHeight,
+    // not placeholder VisualModel's LineRun which might be placeholder layout.
 
     const float defaultFontLineHeight = GetDefaultFontLineHeight();
+    const float lineBoxHeight         = GetDefaultLineBoxHeight();
+    const float lineSpacing           = std::max(lineBoxHeight - defaultFontLineHeight, 0.0f);
 
-    cursorInfo.lineOffset          = 0.f;
+    cursorInfo.lineOffset          = 0.0f;
     cursorInfo.lineHeight          = defaultFontLineHeight;
     cursorInfo.primaryCursorHeight = defaultFontLineHeight;
-    cursorInfo.glyphOffset         = 0.f;
+    cursorInfo.glyphOffset         = 0.0f;
 
-    if(mModel->mVisualModel->mLines.Count() > 0u)
-    {
-      const LineRun& line = *mModel->mVisualModel->mLines.Begin();
+    // Create a synthetic line for vertical line alignment offset calculation.
+    // This ensures cursor height is not affected by placeholder layout.
+    LineRun syntheticLine{};
+    syntheticLine.ascender    = defaultFontLineHeight;
+    syntheticLine.descender   = 0.0f;
+    syntheticLine.lineSpacing = lineSpacing;
 
-      const float naturalLineHeight = line.ascender - line.descender;
-      if(naturalLineHeight > Math::MACHINE_EPSILON_1000)
-      {
-        cursorInfo.lineHeight          = naturalLineHeight;
-        cursorInfo.primaryCursorHeight = naturalLineHeight;
-      }
+    const float verticalLineOffset =
+      GetPreOffsetVerticalLineAlignment(syntheticLine, mModel->GetVerticalLineAlignment());
 
-      const float verticalLineOffset =
-        GetPreOffsetVerticalLineAlignment(line, mModel->GetVerticalLineAlignment());
-
-      cursorInfo.primaryPosition.y = cursorInfo.lineOffset + verticalLineOffset;
-    }
-    else
-    {
-      cursorInfo.primaryPosition.y = cursorInfo.lineOffset;
-    }
+    // cursorInfo.primaryPosition.y should only include the line-internal
+    // VerticalLineAlignment offset. The block-level VerticalAlignment offset is
+    // handled by mScrollPosition.y / CalculateVerticalOffset().
+    cursorInfo.primaryPosition.y = verticalLineOffset;
 
     bool isRTL = false;
     if(mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS)

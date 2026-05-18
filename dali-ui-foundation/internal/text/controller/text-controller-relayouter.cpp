@@ -81,6 +81,65 @@ namespace Ui
 {
 namespace Text
 {
+namespace
+{
+/**
+ * @brief Calculate the sum of line heights for all lines.
+ *
+ * @param lines The vector of lines.
+ * @return The sum of line heights.
+ */
+float CalculateLineHeightSum(const Vector<LineRun>& lines)
+{
+  float lineHeightSum = 0.0f;
+  for(LineIndex index = 0u, count = lines.Count(); index < count; ++index)
+  {
+    const bool isLastLine = (index + 1u == count);
+    lineHeightSum += GetLineHeight(lines[index], isLastLine);
+  }
+  return lineHeightSum;
+}
+
+/**
+ * @brief Get effective layout height for vertical alignment calculation.
+ *
+ * For editable multi-line text with a trailing empty line, this function returns
+ * the sum of line heights instead of the raw layout height to avoid treating
+ * the text as scrollable due to an overestimated layout height.
+ *
+ * @param impl Controller::Impl reference
+ * @param layoutHeight The original layout height from visualModel->GetLayoutSize().height
+ * @return Effective height for vertical alignment calculation
+ */
+float GetEffectiveLayoutHeightForVerticalAlignment(Controller::Impl& impl, float layoutHeight)
+{
+  const bool      isEditable  = NULL != impl.mEventData;
+  const bool      isMultiline = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
+  VisualModelPtr& visualModel = impl.mModel->mVisualModel;
+
+  if(!isEditable || !isMultiline || visualModel->mLines.Empty())
+  {
+    return layoutHeight;
+  }
+
+  const LineIndex lineCount = visualModel->mLines.Count();
+  const LineRun&  lastLine  = visualModel->mLines[lineCount - 1u];
+  const bool      hasTrailingEmptyLine =
+    lastLine.characterRun.numberOfCharacters == 0u &&
+    lastLine.glyphRun.numberOfGlyphs == 0u;
+
+  if(!hasTrailingEmptyLine)
+  {
+    return layoutHeight;
+  }
+
+  const float lineHeightSum = CalculateLineHeightSum(visualModel->mLines);
+
+  // Return the smaller value to prevent incorrect scrollable detection.
+  return (lineHeightSum < layoutHeight) ? lineHeightSum : layoutHeight;
+}
+} // anonymous namespace
+
 Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Controller&           controller,
                                                                          const Size&           requestedControllerSize,
                                                                          const OperationsMask& requestedOperationsMask)
@@ -759,7 +818,9 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
   else // TextEditor
   {
     // If layoutSize is bigger than size, vertical align has no meaning.
-    if(layoutSize.y < size.y)
+    // Use effective layout height that accounts for trailing empty lines.
+    const float effectiveLayoutHeight = GetEffectiveLayoutHeightForVerticalAlignment(impl, layoutSize.y);
+    if(effectiveLayoutHeight <= size.y + Math::MACHINE_EPSILON_1000)
     {
       CalculateVerticalOffset(impl, size);
       if(impl.mEventData)
@@ -1119,30 +1180,48 @@ void Controller::Relayouter::DoRelayoutHorizontalAlignment(Controller::Impl& imp
 
 void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, const Size& controlSize)
 {
-  ModelPtr&       model                 = impl.mModel;
-  VisualModelPtr& visualModel           = model->mVisualModel;
-  Size            layoutSize            = model->mVisualModel->GetLayoutSize();
-  Size            oldLayoutSize         = layoutSize;
-  float           offsetY               = 0.f;
-  bool            needRecalc            = false;
-  float           defaultFontLineHeight = impl.GetDefaultFontLineHeight();
+  ModelPtr&       model         = impl.mModel;
+  VisualModelPtr& visualModel   = model->mVisualModel;
+  Size            layoutSize    = model->mVisualModel->GetLayoutSize();
+  Size            oldLayoutSize = layoutSize;
+  float           offsetY       = 0.f;
+  bool            needRecalc    = false;
+
+  // Whether the text control is editable
+  const bool  isEditable            = NULL != impl.mEventData;
+  const float defaultFontLineHeight = impl.GetDefaultFontLineHeight();
+  const float defaultLineBoxHeight  = impl.GetDefaultLineBoxHeight(defaultFontLineHeight);
+  const bool  isShowingPlaceholder  = isEditable && impl.IsShowingPlaceholderText();
+
+  // For editable empty text without placeholder, use line box height as fallback.
+  // This ensures block-level VerticalAlignment is consistent with the cursor's internal offset.
+  const bool isEmptyEditableText =
+    isEditable && !isShowingPlaceholder && impl.mModel->mLogicalModel->mText.Count() == 0u;
 
   if(fabsf(layoutSize.height) < Math::MACHINE_EPSILON_1000)
   {
-    // Get the line height of the default font.
-    layoutSize.height = defaultFontLineHeight;
+    // Use line box height for editable empty text, otherwise use font line height.
+    layoutSize.height = isEmptyEditableText ? defaultLineBoxHeight : defaultFontLineHeight;
   }
 
-  // Whether the text control is editable
-  const bool isEditable = NULL != impl.mEventData;
-  if(isEditable && !Dali::Equals(layoutSize.height, defaultFontLineHeight) && impl.IsShowingPlaceholderText())
+  // Apply the legacy placeholder height adjustment only for single-line placeholders.
+  // Multiline placeholders should be aligned using their actual layout height.
+  const bool isMultilinePlaceholder = isShowingPlaceholder && visualModel->mLines.Count() > 1u;
+
+  // Avoid cumulative glyph-position adjustment when explicit LineHeight changes
+  // the default line box height.
+  const bool hasExplicitLineHeight = !Dali::Equals(defaultLineBoxHeight, defaultFontLineHeight);
+
+  if(isEditable && isShowingPlaceholder && !isMultilinePlaceholder &&
+     !Dali::Equals(layoutSize.height, defaultLineBoxHeight))
   {
-    // This code prevents the wrong positioning of cursor when the layout size is bigger/smaller than
-    // defaultFontLineHeight. This situation occurs when the size of placeholder text is different from the default
-    // text.
-    layoutSize.height = defaultFontLineHeight;
-    needRecalc        = true;
+    layoutSize.height = defaultLineBoxHeight;
+    needRecalc        = !hasExplicitLineHeight;
   }
+
+  // Use effective layout height that accounts for trailing empty lines.
+  // This handles delete-induced trailing empty lines.
+  layoutSize.height = GetEffectiveLayoutHeightForVerticalAlignment(impl, layoutSize.height);
 
   switch(model->mVerticalAlignment)
   {
