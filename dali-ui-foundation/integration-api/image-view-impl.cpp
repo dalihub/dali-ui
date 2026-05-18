@@ -501,7 +501,7 @@ void ImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
       float h    = self.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
       if(w > 0.0f && h > 0.0f)
       {
-        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding());
+        Ui::GetImplementation(mVisual).ApplyFittingMode(Vector2(w, h), GetPadding(), GetEffectiveScale());
       }
       else
       {

@@ -368,7 +368,7 @@ struct Base::Impl
   {
     if(!mTransformMapUsingDefault && mTransform)
     {
-      return mTransform->GetVisualSize(controlSize);
+      return mTransform->GetVisualSize(controlSize, mTransformMapSetForFittingMode ? 1.0f : mViewEffectiveScale);
     }
     return controlSize;
   }
@@ -508,6 +508,7 @@ public:
   DecorationData*                            mDecorationData;
   int                                        mDepthIndex;
   int                                        mFlags;
+  float                                      mViewEffectiveScale;
   Ui::Visual::ResourceStatus                 mResourceStatus;
   const Ui::Visual::Type                     mType;
 

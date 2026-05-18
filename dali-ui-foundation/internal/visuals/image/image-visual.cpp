@@ -1076,9 +1076,9 @@ void ImageVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
   mFittingMode = fittingMode;
 }
 
-void ImageVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
+void ImageVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
 {
-  DoApplyFittingMode(controlSize, padding, mFittingMode);
+  DoApplyFittingMode(controlSize, padding, effectiveScale, mFittingMode);
 }
 
 void ImageVisual::OnSetTransform()

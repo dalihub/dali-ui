@@ -61,7 +61,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
   Property::Map    transformMap;
   if(transformValue && transformValue->Get(transformMap))
   {
-    wireframeVisual->SetTransformAndSize(transformMap, Vector2::ZERO);
+    wireframeVisual->SetTransformAndSize(transformMap, Vector2::ZERO, 1.0f);
   }
   wireframeVisual->Initialize();
   return wireframeVisual;

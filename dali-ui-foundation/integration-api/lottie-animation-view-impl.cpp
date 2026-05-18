@@ -467,7 +467,7 @@ void LottieAnimationViewImpl::ApplyLayout(const Vector2& size)
     return;
   }
 
-  Ui::GetImplementation(mVisual).ApplyFittingMode(size, GetPadding());
+  Ui::GetImplementation(mVisual).ApplyFittingMode(size, GetPadding(), GetEffectiveScale());
 }
 
 void LottieAnimationViewImpl::SetResourceUrl(const Dali::String& url)

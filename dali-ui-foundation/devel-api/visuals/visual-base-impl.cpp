@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/devel-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visuals-container-impl.h>
+#include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -812,7 +813,11 @@ void VisualBaseImpl::Process(bool postProcessor)
     {
       // TODO : Can we believe this values?
       // TODO : Need to consider RTL case.
-      ApplyFittingModeInternal(owner.GetProperty<Dali::Vector2>(Actor::Property::SIZE), owner.GetPadding());
+      auto&   viewImpl       = GetImpl(owner);
+      Vector2 viewSize       = viewImpl.GetSize().ToVector2();
+      Extents viewPadding    = viewImpl.GetPadding();
+      float   effectiveScale = viewImpl.GetEffectiveScale();
+      ApplyFittingModeInternal(viewSize, viewPadding, effectiveScale);
     }
   }
 }
@@ -888,12 +893,12 @@ void VisualBaseImpl::UpdatePropertyInternal()
   DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) UpdatePropertyInternal() Status(%d) done (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(previousUpdatedStatus), mVisual.GetObjectPtr());
 }
 
-void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const Extents& viewPadding)
+void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale)
 {
 #if defined(DEBUG_ENABLED)
   {
     std::ostringstream oss;
-    oss << controlSize << ", " << viewPadding;
+    oss << controlSize << ", " << viewPadding << ", " << effectiveScale;
     DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) ApplyFittingModeInternal(%s) Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), oss.str().c_str(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
   }
 #endif
@@ -906,7 +911,7 @@ void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const 
       // Make to use mTransform->GetVisualSize(controlSize) instead in future.
       // For now, mTransform is same with visual's transform. So we cannot use it.
       // We need to separate this variables.
-      visualImpl.ApplyFittingMode(controlSize, viewPadding);
+      visualImpl.ApplyFittingMode(controlSize, viewPadding, effectiveScale);
     }
   }
 

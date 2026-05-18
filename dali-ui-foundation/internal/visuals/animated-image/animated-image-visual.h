@@ -147,7 +147,7 @@ public: // from Visual
   /**
    * @copydoc Visual::Base::ApplyFittingMode
    */
-  void ApplyFittingMode(const Vector2& controlSize, const Extents& padding) override;
+  void ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale) override;
 
 protected:
   /**

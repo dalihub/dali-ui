@@ -90,7 +90,7 @@ public:
   /**
    * @copydoc Ui::Visual::Base::SetSize
    */
-  void SetTransformAndSize(const Property::Map& transform, Size controlSize);
+  void SetTransformAndSize(const Property::Map& transform, Size controlSize, float effectiveScale);
 
   /**
    * @copydoc Ui::Visual::Base::GetHeightForWidth
@@ -270,8 +270,9 @@ public:
    * @param[in] controlSize The size of the parent control.
    * @param[in] viewPadding The padding of the parent control (start, end, top, bottom).
    *                        For RTL layouts, start/end should already be swapped by the caller.
+   * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
    */
-  virtual void ApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding);
+  virtual void ApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale);
 
   /**
    * @brief Query whether the fittingMode is required.
@@ -303,20 +304,13 @@ public:
   void SetTransformMapUsageForFittingMode(bool used);
 
   /**
-   * @brief Sets the control size
-   * It will call SetTransformAndSize with empty transform map.
-   *
-   * @param[in] controlSize The size of the parent control for visuals that need to scale internally.
-   */
-  void SetControlSize(Size controlSize);
-
-  /**
    * @brief Sets the view size
    * It will call SetTransformAndSize with empty transform map.
    *
    * @param[in] viewSize The size of the parent view for visuals that need to scale internally.
+   * @param[in] effectiveScale The effective scale for the owner.
    */
-  void SetViewSize(Size viewSize);
+  void SetViewSize(Size viewSize, float effectiveScale);
 
   /**
    * @brief Get the actual Visual Object.
@@ -536,9 +530,10 @@ protected:
    *
    * @param[in] controlSize The size of the parent control.
    * @param[in] viewPadding     The padding of the parent control. For RTL, start/end already swapped.
+   * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
    * @param[in] fittingMode The fitting mode to apply.
    */
-  void DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, Ui::Image::FittingMode fittingMode);
+  void DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale, Ui::Image::FittingMode fittingMode);
 
   /**
    * @brief Query whether the corners of the visual requires to be rounded.

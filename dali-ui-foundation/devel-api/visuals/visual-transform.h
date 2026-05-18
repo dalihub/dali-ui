@@ -56,7 +56,7 @@ struct Transform
    * Convert the control size and the transform attributes into the actual
    * size of the visual.
    */
-  Vector2 GetVisualSize(const Vector2& controlSize);
+  Vector2 GetVisualSize(const Vector2& controlSize, float viewEffectiveScale);
 
   /**
    * Get property index from given key, relative with visual transform.

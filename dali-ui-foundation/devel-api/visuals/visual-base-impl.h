@@ -481,8 +481,9 @@ private:
    * @param[in] controlSize The size of the parent control.
    * @param[in] viewPadding The padding of the parent control (start, end, top, bottom).
    *                        For RTL layouts, start/end should already be swapped by the caller.
+   * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
    */
-  void ApplyFittingModeInternal(const Vector2& controlSize, const Extents& viewPadding);
+  void ApplyFittingModeInternal(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale);
 
 protected:
   /**

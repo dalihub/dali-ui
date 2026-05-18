@@ -174,11 +174,11 @@ void Transform::GetPropertyMap(Property::Map& map) const
     .Add(Ui::DevelVisual::Transform::Property::EXTRA_SIZE, mExtraSize);
 }
 
-Vector2 Transform::GetVisualSize(const Vector2& controlSize)
+Vector2 Transform::GetVisualSize(const Vector2& controlSize, float viewEffectiveScale)
 {
-  return Vector2(Lerp(mOffsetSizeMode.z, mSize.x * controlSize.x, mSize.x),
-                 Lerp(mOffsetSizeMode.w, mSize.y * controlSize.y, mSize.y)) +
-         mExtraSize;
+  return Vector2(Lerp(mOffsetSizeMode.z, mSize.x * controlSize.x, mSize.x * viewEffectiveScale),
+                 Lerp(mOffsetSizeMode.w, mSize.y * controlSize.y, mSize.y * viewEffectiveScale)) +
+         mExtraSize * viewEffectiveScale;
 }
 
 Property::Index Transform::GetIntKey(const Property::Key& key)

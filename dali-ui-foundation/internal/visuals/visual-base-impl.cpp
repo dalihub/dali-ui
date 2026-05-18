@@ -556,9 +556,10 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
   }
 }
 
-void Visual::Base::SetTransformAndSize(const Property::Map& transform, Size controlSize)
+void Visual::Base::SetTransformAndSize(const Property::Map& transform, Size controlSize, float effectiveScale)
 {
-  mImpl->mControlSize = controlSize;
+  mImpl->mControlSize        = controlSize;
+  mImpl->mViewEffectiveScale = effectiveScale;
   mImpl->mTransformMapChanged |= !transform.Empty();
   if(mImpl->mTransformMapChanged && mImpl->mTransformMapUsingDefault)
   {
@@ -573,8 +574,8 @@ void Visual::Base::SetTransformAndSize(const Property::Map& transform, Size cont
   std::ostringstream oss;
   oss << transform;
   DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General,
-                "Visual::Base::SetTransformAndSize(%s) - [\e[1;32mtransform: %s  controlSize: (%3.1f, %3.1f)]\e[0m\n",
-                GetName().c_str(), oss.str().c_str(), controlSize.x, controlSize.y);
+                "Visual::Base::SetTransformAndSize(%s) - [\e[1;32mtransform: %s  controlSize: (%3.1f, %3.1f) effectiveScale: %3.1f]\e[0m\n",
+                GetName().c_str(), oss.str().c_str(), controlSize.x, controlSize.y, effectiveScale);
 #endif
 
   OnSetTransform();
@@ -1026,17 +1027,19 @@ bool Visual::Base::IsTransformMapSetForFittingMode() const
 void Visual::Base::SetTransformMapUsageForFittingMode(bool used)
 {
   mImpl->mTransformMapSetForFittingMode = used;
+
+  // TODO : Need to implement something to ignore viewEffectiveScale for transform at shader side.
 }
 
-void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& padding)
+void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
 {
   if(GetType() != Ui::Visual::Type::TEXT)
   {
-    SetViewSize(controlSize);
+    SetViewSize(controlSize, effectiveScale);
   }
 }
 
-void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, Ui::Image::FittingMode fittingMode)
+void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale, Ui::Image::FittingMode fittingMode)
 {
   if(IsPixelAreaSetForFittingMode())
   {
@@ -1045,14 +1048,16 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents&
 
   Extents padding = (mImpl->mFlags & Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING) ? Extents() : viewPadding;
 
-  Vector2 finalSize   = controlSize - Vector2(padding.start + padding.end, padding.top + padding.bottom);
-  Vector2 finalOffset = Vector2(padding.start, padding.top);
+  Vector2 finalSize   = controlSize - Vector2(padding.start + padding.end, padding.top + padding.bottom) * effectiveScale;
+  Vector2 finalOffset = Vector2(padding.start, padding.top) * effectiveScale;
   bool    zeroPadding = (padding == Extents());
 
   Property::Map transformMap;
 
   if((!zeroPadding) || (fittingMode != Ui::Image::FittingMode::FILL))
   {
+    // Mark that we don't use viewEffectiveScale at transform's size & offset for this visual.
+    // (Because visual transform size and polic already apply viewEffectiveScale).
     SetTransformMapUsageForFittingMode(true);
 
     Vector2 naturalSize;
@@ -1095,9 +1100,10 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents&
       case Ui::Image::FittingMode::CENTER:
       {
         auto availableVisualSize = finalSize;
-        if(availableVisualSize.width > naturalSize.width && availableVisualSize.height > naturalSize.height)
+        // Consider natural size with effective scale.
+        if(availableVisualSize.width > naturalSize.width * effectiveScale && availableVisualSize.height > naturalSize.height * effectiveScale)
         {
-          finalSize = naturalSize;
+          finalSize = naturalSize * effectiveScale;
         }
         else
         {
@@ -1137,20 +1143,16 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents&
            Vector2(Ui::Visual::Transform::Policy::RELATIVE, Ui::Visual::Transform::Policy::RELATIVE));
   }
 
-  SetTransformAndSize(transformMap, controlSize);
+  SetTransformAndSize(transformMap, controlSize, effectiveScale);
 }
 
-void Visual::Base::SetControlSize(Size controlSize)
-{
-}
-
-void Visual::Base::SetViewSize(Size viewSize)
+void Visual::Base::SetViewSize(Size viewSize, float effectiveScale)
 {
   // Notify to visual's constraint that view's size is changed.
   UpdateApplyRate(Actor::Property::SIZE);
 
   const static Property::Map emptyMap;
-  SetTransformAndSize(emptyMap, viewSize);
+  SetTransformAndSize(emptyMap, viewSize, effectiveScale);
 }
 
 Visual::Base& Visual::Base::GetVisualObject()

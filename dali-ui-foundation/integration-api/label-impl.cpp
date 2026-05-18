@@ -1187,10 +1187,10 @@ Extents LabelImpl::GetEffectiveTextPadding() const
 {
   Extents     padding     = GetPadding();
   const float textUiScale = GetTextUiScale();
-  padding.start           = static_cast<uint16_t>(static_cast<float>(padding.start) * textUiScale);
-  padding.end             = static_cast<uint16_t>(static_cast<float>(padding.end) * textUiScale);
-  padding.top             = static_cast<uint16_t>(static_cast<float>(padding.top) * textUiScale);
-  padding.bottom          = static_cast<uint16_t>(static_cast<float>(padding.bottom) * textUiScale);
+  padding.start           = static_cast<int16_t>(static_cast<float>(padding.start) * textUiScale);
+  padding.end             = static_cast<int16_t>(static_cast<float>(padding.end) * textUiScale);
+  padding.top             = static_cast<int16_t>(static_cast<float>(padding.top) * textUiScale);
+  padding.bottom          = static_cast<int16_t>(static_cast<float>(padding.bottom) * textUiScale);
   return padding;
 }
 
@@ -1374,6 +1374,11 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     Vector2 visualTransformSize = (marqueeOrientation == Text::MarqueeOrientation::VERTICAL) ? contentSize : layoutSize;
 
+    // Mark that we don't use viewEffectiveScale at transform's size & offset for this visual.
+    // (Because visual transform size and polic already apply viewEffectiveScale).
+    auto& visualImpl = GetImplementation(mVisual);
+    visualImpl.SetTransformMapUsageForFittingMode(true);
+
     Dali::Property::Map visualTransform;
     visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualTransformSize)
       .Add(Ui::Visual::Transform::Property::SIZE_POLICY,
@@ -1383,7 +1388,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
            Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
       .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
       .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
-    mVisual.SetTransformAndSize(visualTransform, size);
+    visualImpl.SetTransformAndSize(visualTransform, size, GetEffectiveScale());
 
     if(mController->IsMarqueeEnabled())
     {

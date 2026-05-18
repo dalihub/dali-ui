@@ -250,8 +250,8 @@ Internal::LayoutCallbacksObject* EnsureLayoutCallbacksObject(ViewImpl* self)
 template<typename HandleType>
 HandleType GetTraitHandle(const ViewImpl& viewImpl, TraitId id)
 {
-  IntrusivePtr<TraitObject> object   = IntegrationView::GetTrait(viewImpl, id);
-  auto*                   baseObject = dynamic_cast<BaseObject*>(object.Get());
+  IntrusivePtr<TraitObject> object     = IntegrationView::GetTrait(viewImpl, id);
+  auto*                     baseObject = dynamic_cast<BaseObject*>(object.Get());
   return baseObject ? HandleType::DownCast(BaseHandle(baseObject)) : HandleType();
 }
 
@@ -1754,8 +1754,8 @@ TraitId ToTraitId(LayoutParamsType type)
 
 BaseHandle ViewImpl::GetLayoutParams(LayoutParamsType type) const
 {
-  IntrusivePtr<TraitObject> object   = mImpl->GetTrait(ToTraitId(type));
-  auto*                   baseObject = dynamic_cast<BaseObject*>(object.Get());
+  IntrusivePtr<TraitObject> object     = mImpl->GetTrait(ToTraitId(type));
+  auto*                     baseObject = dynamic_cast<BaseObject*>(object.Get());
   return baseObject ? BaseHandle(baseObject) : BaseHandle();
 }
 
@@ -2267,12 +2267,6 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
 void ViewImpl::OnSizeSet(const Vector3& targetSize)
 {
   Vector2 size(targetSize);
-
-  Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::View::Property::BACKGROUND);
-  if(visualImplPtr)
-  {
-    visualImplPtr->SetControlSize(size); // Send an empty map as we do not want to modify the visual's set transform
-  }
 
   // Apply FittingMode here
   mImpl->mSize = Vector2(targetSize);

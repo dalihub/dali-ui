@@ -135,7 +135,7 @@ public:
    * @param[in] transform A property map describing the transform
    * @param[in] controlSize The size of the parent control for visuals that need to scale internally.
    */
-  void SetTransformAndSize(const Dali::Property::Map& transform, Size controlSize);
+  void SetTransformAndSize(const Dali::Property::Map& transform, Size controlSize, float effectiveScale);
 
   /**
    * @brief Returns the height for a given width.

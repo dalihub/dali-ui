@@ -84,6 +84,7 @@ Internal::Visual::Base::Impl::Impl(Ui::Visual::Type type)
   mDecorationData(nullptr),
   mDepthIndex(Ui::DepthIndex::AUTO_INDEX),
   mFlags(0),
+  mViewEffectiveScale(1.0f),
   mResourceStatus(Ui::Visual::ResourceStatus::PREPARING),
   mType(type),
   mAlwaysUsingBorderline(false),

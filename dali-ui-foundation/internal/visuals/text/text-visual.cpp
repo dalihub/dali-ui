@@ -916,6 +916,10 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
     SetRequireRender(renderInfo.isCutoutEnabled);
 
+    // Mark that we don't use viewEffectiveScale at transform's size & offset for this visual.
+    // (Because visual transform size and polic already apply viewEffectiveScale).
+    SetTransformMapUsageForFittingMode(true);
+
     // Transform offset is used for subpixel data upload in text tiling.
     // We should set the transform before creating a tiling texture.
     Property::Map visualTransform;
@@ -927,7 +931,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
            Vector2(Ui::Visual::Transform::Policy::ABSOLUTE, Ui::Visual::Transform::Policy::ABSOLUTE))
       .Add(Ui::Visual::Transform::Property::ORIGIN, Ui::Align::TOP_BEGIN)
       .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
-    SetTransformAndSize(visualTransform, textControlSize);
+    SetTransformAndSize(visualTransform, textControlSize, parameters.effectiveTextScale);
 
     Shader shader = GetTextShader(mFactoryCache, TextVisualShaderFeature::FeatureBuilder()
                                                    .EnableMultiColor(renderInfo.hasMultipleTextColors)

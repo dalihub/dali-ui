@@ -1459,6 +1459,7 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
 {
   Actor   self;
   Extents padding;
+  float   effectiveScale;
   bool    paddingFetched = false;
 
   for(RegisteredVisualContainer::Iterator iter = mVisuals.Begin(); iter != mVisuals.End(); iter++)
@@ -1483,10 +1484,11 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
       {
         std::swap(padding.start, padding.end);
       }
+      effectiveScale = mOuter.mViewImpl.GetEffectiveScale();
       paddingFetched = true;
     }
 
-    visualImpl.ApplyFittingMode(size, padding);
+    visualImpl.ApplyFittingMode(size, padding, effectiveScale);
   }
 }
 

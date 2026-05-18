@@ -59,9 +59,9 @@ const std::string& Visual::Base::GetName() const
   return GetImplementation(*this).GetName();
 }
 
-void Visual::Base::SetTransformAndSize(const Dali::Property::Map& transform, Size controlSize)
+void Visual::Base::SetTransformAndSize(const Dali::Property::Map& transform, Size controlSize, float effectiveScale)
 {
-  GetImplementation(*this).SetTransformAndSize(transform, controlSize);
+  GetImplementation(*this).SetTransformAndSize(transform, controlSize, effectiveScale);
 }
 
 float Visual::Base::GetHeightForWidth(float width)
