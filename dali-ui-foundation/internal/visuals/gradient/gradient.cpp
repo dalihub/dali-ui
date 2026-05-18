@@ -157,6 +157,7 @@ Dali::Texture Gradient::GenerateLookupTexture()
   // Copy the stops to use pre-multiplied colors during texture generation. Also allow we can use additional stops if we need.
   Vector<float>   offsets;
   Vector<Vector4> preMulipliedColors;
+  bool            hasAlpha = false;
 
   offsets.Resize(numStops);
   preMulipliedColors.Resize(numStops);
@@ -164,9 +165,14 @@ Dali::Texture Gradient::GenerateLookupTexture()
   {
     offsets[i]            = mGradientStops[i].mOffset;
     preMulipliedColors[i] = mGradientStops[i].mStopColor;
-    preMulipliedColors[i].r *= preMulipliedColors[i].a;
-    preMulipliedColors[i].g *= preMulipliedColors[i].a;
-    preMulipliedColors[i].b *= preMulipliedColors[i].a;
+
+    if(!Equals(preMulipliedColors[i].a, 1.0f, Math::MACHINE_EPSILON_1))
+    {
+      hasAlpha = true;
+      preMulipliedColors[i].r *= preMulipliedColors[i].a;
+      preMulipliedColors[i].g *= preMulipliedColors[i].a;
+      preMulipliedColors[i].b *= preMulipliedColors[i].a;
+    }
   }
 
   /**
@@ -210,9 +216,12 @@ Dali::Texture Gradient::GenerateLookupTexture()
    */
   unsigned int resolution = EstimateTextureResolution();
 
-  unsigned int   bufferSize = resolution * 4u;
+  const Pixel::Format pixelFormat = hasAlpha ? Pixel::RGBA8888 : Pixel::RGB888;
+  const uint32_t      bpp         = Pixel::GetBytesPerPixel(pixelFormat);
+
+  unsigned int   bufferSize = resolution * bpp;
   unsigned char* pixels     = new unsigned char[bufferSize];
-  PixelData      pixelData  = PixelData::New(pixels, bufferSize, resolution, 1u, Pixel::RGBA8888, PixelData::DELETE_ARRAY);
+  PixelData      pixelData  = PixelData::New(pixels, bufferSize, resolution, 1u, pixelFormat, PixelData::DELETE_ARRAY);
 
   int   segmentStart = 0;
   int   segmentEnd   = 0;
@@ -234,16 +243,19 @@ Dali::Texture Gradient::GenerateLookupTexture()
     {
       float   ratio        = static_cast<float>(j - segmentStart) / (segmentWidth - 1);
       Vector4 currentColor = preMulipliedStartColor * (1.f - ratio) + preMulipliedEndColor * ratio;
-      pixels[k * 4]        = static_cast<unsigned char>(255.f * Clamp(currentColor.r, 0.f, 1.f));
-      pixels[k * 4 + 1]    = static_cast<unsigned char>(255.f * Clamp(currentColor.g, 0.f, 1.f));
-      pixels[k * 4 + 2]    = static_cast<unsigned char>(255.f * Clamp(currentColor.b, 0.f, 1.f));
-      pixels[k * 4 + 3]    = static_cast<unsigned char>(255.f * Clamp(currentColor.a, 0.f, 1.f));
+      pixels[k * bpp]      = static_cast<unsigned char>(255.f * Clamp(currentColor.r, 0.f, 1.f));
+      pixels[k * bpp + 1]  = static_cast<unsigned char>(255.f * Clamp(currentColor.g, 0.f, 1.f));
+      pixels[k * bpp + 2]  = static_cast<unsigned char>(255.f * Clamp(currentColor.b, 0.f, 1.f));
+      if(hasAlpha)
+      {
+        pixels[k * bpp + 3] = static_cast<unsigned char>(255.f * Clamp(currentColor.a, 0.f, 1.f));
+      }
       k++;
     }
     segmentStart = segmentEnd;
   }
 
-  Texture texture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, resolution, 1u);
+  Texture texture = Texture::New(TextureType::TEXTURE_2D, pixelFormat, resolution, 1u);
 #if defined(GPU_MEMORY_PROFILE_ENABLED)
   Dali::Integration::TextureUploadWithContent(texture, pixelData, "gradient", Dali::Integration::TextureContextTypeHint::GRADIENT_TEXTURE);
 #else
