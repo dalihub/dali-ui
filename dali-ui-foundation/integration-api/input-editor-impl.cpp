@@ -1652,7 +1652,7 @@ void InputEditorImpl::GetControlBackgroundColor(Vector4& color) const
   Property::Map*  resultMap = propValue.GetMap();
 
   Property::Value* colorValue = nullptr;
-  if(resultMap && (colorValue = resultMap->Find(Visual::Property::MIX_COLOR)))
+  if(resultMap && (colorValue = resultMap->Find(Ui::VisualBasePropertyIndex::MIX_COLOR)))
   {
     colorValue->Get(color);
   }
