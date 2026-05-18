@@ -27,8 +27,8 @@ namespace Ui
 {
 namespace Internal
 {
-ConicGradient::ConicGradient(const Vector2& center, Dali::Radian startAngle)
-: Gradient()
+ConicGradient::ConicGradient(const Vector2& center, Dali::Radian startAngle, IntrusivePtr<Gradient> oldGradient)
+: Gradient(oldGradient)
 {
   SetCenterAndStartAngle(center, startAngle);
 }

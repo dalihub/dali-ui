@@ -20,6 +20,7 @@
 #include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/math/vector4.h>
 #include <algorithm> // std::sort
+#include <utility>   // std::max
 
 namespace
 {
@@ -33,26 +34,47 @@ namespace Ui
 {
 namespace Internal
 {
-Gradient::Gradient()
+Gradient::Gradient(IntrusivePtr<Gradient> oldGradient)
 : mUnits(Ui::Gradient::Units::OBJECT_BOUNDING_BOX),
   mSpreadMethod(Ui::Gradient::SpreadMethod::PAD),
   mStartOffset(0.f)
 {
+  if(oldGradient)
+  {
+    mGradientStops = oldGradient->GetStops();
+    mUnits         = oldGradient->GetUnits();
+    mSpreadMethod  = oldGradient->GetSpreadMethod();
+    mStartOffset   = oldGradient->GetStartOffset();
+  }
 }
 
 Gradient::~Gradient()
 {
 }
 
-void Gradient::AddStop(float offset, const Vector4& color)
-{
-  // the offset is clamped to the range [0.0, 1.0]
-  mGradientStops.PushBack(GradientStop(Clamp(offset, 0.f, 1.f), color));
-}
-
-const Vector<Gradient::GradientStop>& Gradient::GetStops()
+const Vector<Gradient::GradientStop>& Gradient::GetStops() const
 {
   return mGradientStops;
+}
+
+void Gradient::ClearStop()
+{
+  mGradientStops.Clear();
+}
+
+void Gradient::ApplyStops(const Vector<float>& offsets, const Vector<Vector4>& colors)
+{
+  uint32_t numStops = std::max(mGradientStops.Count(), std::max(offsets.Count(), colors.Count()));
+  mGradientStops.Resize(numStops);
+
+  for(uint32_t i = 0; i < offsets.Count(); ++i)
+  {
+    mGradientStops[i].mOffset = offsets[i];
+  }
+  for(uint32_t i = 0; i < colors.Count(); ++i)
+  {
+    mGradientStops[i].mStopColor = colors[i];
+  }
 }
 
 void Gradient::SetUnits(Ui::Gradient::Units gradientUnits)
@@ -91,10 +113,61 @@ const Matrix3& Gradient::GetAlignmentTransform() const
  */
 Dali::Texture Gradient::GenerateLookupTexture()
 {
+  uint32_t numStops = mGradientStops.Count();
+  if(DALI_UNLIKELY(numStops <= 0))
+  {
+    return Dali::Texture();
+  }
+
+  // Fill -1 offsets automatically.
+  if(Dali::Equals(mGradientStops[0].mOffset, -1.0f))
+  {
+    mGradientStops[0].mOffset = 0.0f;
+  }
+  if(Dali::Equals(mGradientStops[numStops - 1].mOffset, -1.0f))
+  {
+    mGradientStops[numStops - 1].mOffset = 1.0f;
+  }
+  for(uint32_t i = 0u; i < numStops - 1;)
+  {
+    uint32_t j = i + 1;
+    for(; j < numStops; ++j)
+    {
+      if(!Dali::Equals(mGradientStops[j].mOffset, -1.0f))
+      {
+        break;
+      }
+    }
+    if(j == i + 1)
+    {
+      ++i;
+      continue;
+    }
+    const float offsetBegin = mGradientStops[i].mOffset;
+    const float offsetEnd   = mGradientStops[j].mOffset;
+    for(uint32_t k = i + 1; k < j; ++k)
+    {
+      mGradientStops[k].mOffset = offsetBegin + (offsetEnd - offsetBegin) * static_cast<float>(k - i) / (j - i);
+    }
+    i = j;
+  }
+
   std::sort(mGradientStops.Begin(), mGradientStops.End());
 
-  uint32_t numStops = mGradientStops.Count();
-  DALI_ASSERT_ALWAYS(numStops > 0u && "The number of gradient stop should not be zero!");
+  // Copy the stops to use pre-multiplied colors during texture generation. Also allow we can use additional stops if we need.
+  Vector<float>   offsets;
+  Vector<Vector4> preMulipliedColors;
+
+  offsets.Resize(numStops);
+  preMulipliedColors.Resize(numStops);
+  for(uint32_t i = 0u; i < numStops; ++i)
+  {
+    offsets[i]            = mGradientStops[i].mOffset;
+    preMulipliedColors[i] = mGradientStops[i].mStopColor;
+    preMulipliedColors[i].r *= preMulipliedColors[i].a;
+    preMulipliedColors[i].g *= preMulipliedColors[i].a;
+    preMulipliedColors[i].b *= preMulipliedColors[i].a;
+  }
 
   /**
    * If the stops have not covered the whole zero to one range,
@@ -102,32 +175,33 @@ Dali::Texture Gradient::GenerateLookupTexture()
    *                  and use the color of the last stop to fill the range (last stop offset, 1.0]
    * for REPEAT, mix the two color of the first and last stop to fill the remainder
    */
-  bool tempFirstStop = false;
-  if(mGradientStops[0].mOffset > 0.f)
+  if(offsets[0] > 0.f)
   {
-    tempFirstStop = true;
-    Vector4 firstStopColor(mGradientStops[0].mStopColor); // If spread method is PAD or REFLECT
+    Vector4 firstStopColor(preMulipliedColors[0]); // If spread method is PAD or REFLECT
     if(mSpreadMethod == Ui::Gradient::SpreadMethod::REPEAT)
     {
-      firstStopColor = (mGradientStops[0].mStopColor * (1.f - mGradientStops[numStops - 1].mOffset) +
-                        mGradientStops[numStops - 1].mStopColor * mGradientStops[0].mOffset) /
-                       (mGradientStops[0].mOffset + 1.f - mGradientStops[numStops - 1].mOffset);
+      Vector4 preMulipliedFirstColor = preMulipliedColors[0];
+      Vector4 preMulipliedLastColor  = preMulipliedColors[numStops - 1];
+
+      firstStopColor = (preMulipliedFirstColor * (1.f - offsets[numStops - 1]) +
+                        preMulipliedLastColor * offsets[0]) /
+                       (offsets[0] + 1.f - offsets[numStops - 1]);
     }
 
-    mGradientStops.Insert(mGradientStops.Begin(), GradientStop(0.f, firstStopColor));
+    offsets.Insert(offsets.Begin(), 0.0f);
+    preMulipliedColors.Insert(preMulipliedColors.Begin(), firstStopColor);
     numStops++;
   }
 
-  bool tempLastStop = false;
-  if(mGradientStops[numStops - 1].mOffset < 1.f)
+  if(offsets[numStops - 1] < 1.f)
   {
-    tempLastStop = true;
-    Vector4 lastStopColor(mGradientStops[numStops - 1].mStopColor); // If spread method is PAD or REFLECT
+    Vector4 lastStopColor(preMulipliedColors[numStops - 1]); // If spread method is PAD or REFLECT
     if(mSpreadMethod == Ui::Gradient::SpreadMethod::REPEAT)
     {
-      lastStopColor = mGradientStops[0].mStopColor;
+      lastStopColor = preMulipliedColors[0];
     }
-    mGradientStops.PushBack(GradientStop(1.f, lastStopColor));
+    offsets.PushBack(1.0f);
+    preMulipliedColors.PushBack(lastStopColor);
     numStops++;
   }
 
@@ -146,17 +220,20 @@ Dali::Texture Gradient::GenerateLookupTexture()
   float length       = static_cast<float>(resolution);
   for(unsigned int i = 0; i < numStops - 1u; i++)
   {
-    segmentEnd = floorf(mGradientStops[i + 1].mOffset * length + 0.5f);
+    segmentEnd = floorf(offsets[i + 1] * length + 0.5f);
     if(segmentEnd == segmentStart)
     {
       continue;
     }
     float segmentWidth = static_cast<float>(segmentEnd - segmentStart);
 
+    Vector4 preMulipliedStartColor = preMulipliedColors[i];
+    Vector4 preMulipliedEndColor   = preMulipliedColors[i + 1];
+
     for(int j = segmentStart; j < segmentEnd; j++)
     {
       float   ratio        = static_cast<float>(j - segmentStart) / (segmentWidth - 1);
-      Vector4 currentColor = mGradientStops[i].mStopColor * (1.f - ratio) + mGradientStops[i + 1].mStopColor * ratio;
+      Vector4 currentColor = preMulipliedStartColor * (1.f - ratio) + preMulipliedEndColor * ratio;
       pixels[k * 4]        = static_cast<unsigned char>(255.f * Clamp(currentColor.r, 0.f, 1.f));
       pixels[k * 4 + 1]    = static_cast<unsigned char>(255.f * Clamp(currentColor.g, 0.f, 1.f));
       pixels[k * 4 + 2]    = static_cast<unsigned char>(255.f * Clamp(currentColor.b, 0.f, 1.f));
@@ -172,16 +249,6 @@ Dali::Texture Gradient::GenerateLookupTexture()
 #else
   texture.Upload(pixelData);
 #endif
-
-  // remove the stops added temporarily for generating the pixels, as the spread method might get changed later
-  if(tempLastStop)
-  {
-    mGradientStops.Erase(mGradientStops.Begin() + numStops - 1);
-  }
-  if(tempFirstStop)
-  {
-    mGradientStops.Erase(mGradientStops.Begin());
-  }
 
   return texture;
 }

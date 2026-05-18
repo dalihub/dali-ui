@@ -39,8 +39,9 @@ public:
    * Contructor.
    * @param[in] center The point around which the conic gradient rotates.
    * @param[in] startAngle The initial angle from which the gradient begins.
+   * @param[in] oldGradient Previous gradient feature, to copy old variables.
    */
-  ConicGradient(const Vector2& center, Dali::Radian startAngle);
+  ConicGradient(const Vector2& center, Dali::Radian startAngle, IntrusivePtr<Gradient> oldGradient);
 
   /**
    * Destructor.

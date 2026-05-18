@@ -79,6 +79,17 @@ public:
    */
   static GradientVisual New();
 
+  /**
+   * @brief Downcasts a handle to GradientVisual handle.
+   *
+   * If handle points to a GradientVisual, the downcast produces valid handle.
+   * If not, the returned handle is left uninitialized.
+   *
+   * @param[in] handle Handle to an object
+   * @return A handle to a GradientVisual or an uninitialized handle
+   */
+  static GradientVisual DownCast(BaseHandle handle);
+
 public: // Setters for chaining
   // @CHAIN_START(GradientVisual, VisualBase)
   /**

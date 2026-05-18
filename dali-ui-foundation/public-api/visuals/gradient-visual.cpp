@@ -35,6 +35,16 @@ GradientVisual GradientVisual::New()
   return GradientVisual(internal.Get());
 }
 
+GradientVisual GradientVisual::DownCast(BaseHandle handle)
+{
+  Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::GRADIENT)
+  {
+    return GradientVisual(visualBaseImpl);
+  }
+  return GradientVisual();
+}
+
 // =============================================================================
 // Properties
 // =============================================================================

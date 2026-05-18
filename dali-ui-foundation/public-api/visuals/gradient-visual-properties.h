@@ -67,6 +67,36 @@ struct GradientVisualPropertyIndex
     START_OFFSET = MUTABLE_PROPERTY_START_INDEX,
 
     /**
+     * @brief All the stop offsets.
+     * @details Name "stopOffset", type Property::ARRAY of Property::FLOAT.
+     * @note Optional. If not supplied, default is 0.0 and 1.0.
+     */
+    STOP_OFFSET,
+
+    /**
+     * @brief The color at the stop offsets.
+     * @details Name "stopColor", type Property::ARRAY of Property::VECTOR4.
+     * @note Mandatory. At least 2 values required to show a gradient.
+     */
+    STOP_COLOR,
+
+    /**
+     * @brief Defines the coordinate system for certain attributes of the points in a gradient.
+     * @details Name "gradientUnits", type Units (Property::INTEGER) or Property::STRING.
+     * @note Optional. If not supplied, default is Units::OBJECT_BOUNDING_BOX.
+     * @see Units
+     */
+    UNITS,
+
+    /**
+     * @brief Indicates what happens if the gradient starts or ends inside the bounds of the target rectangle.
+     * @details Name "spreadMethod", type SpreadMethod (Property::INTEGER) or Property::STRING.
+     * @note Optional. If not supplied, default is SpreadMethod::PAD.
+     * @see SpreadMethod
+     */
+    SPREAD_METHOD,
+
+    /**
      * @brief The start position of a linear gradient.
      * @details Name "startPosition", type Property::VECTOR2.
      * Gradient is drawn in a rectangular area, depend on Units type.
@@ -110,36 +140,6 @@ struct GradientVisualPropertyIndex
      * @note Mandatory for Conic.
      */
     START_ANGLE,
-
-    /**
-     * @brief All the stop offsets.
-     * @details Name "stopOffset", type Property::ARRAY of Property::FLOAT.
-     * @note Optional. If not supplied, default is 0.0 and 1.0.
-     */
-    STOP_OFFSET,
-
-    /**
-     * @brief The color at the stop offsets.
-     * @details Name "stopColor", type Property::ARRAY of Property::VECTOR4.
-     * @note Mandatory. At least 2 values required to show a gradient.
-     */
-    STOP_COLOR,
-
-    /**
-     * @brief Defines the coordinate system for certain attributes of the points in a gradient.
-     * @details Name "gradientUnits", type Units (Property::INTEGER) or Property::STRING.
-     * @note Optional. If not supplied, default is Units::OBJECT_BOUNDING_BOX.
-     * @see Units
-     */
-    UNITS,
-
-    /**
-     * @brief Indicates what happens if the gradient starts or ends inside the bounds of the target rectangle.
-     * @details Name "spreadMethod", type SpreadMethod (Property::INTEGER) or Property::STRING.
-     * @note Optional. If not supplied, default is SpreadMethod::PAD.
-     * @see SpreadMethod
-     */
-    SPREAD_METHOD,
   };
 
 }; // struct GradientVisualPropertyIndex

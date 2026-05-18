@@ -23,8 +23,8 @@ namespace Ui
 {
 namespace Internal
 {
-RadialGradient::RadialGradient(const Vector2& center, float radius)
-: Gradient()
+RadialGradient::RadialGradient(const Vector2& center, float radius, IntrusivePtr<Gradient> oldGradient)
+: Gradient(oldGradient)
 {
   SetCenterAndRadius(center, radius);
 }

@@ -262,23 +262,6 @@ private:
                                       .SetCornerRadius(GetRandomFloat() * 0.5f)
                                       .SetCornerRadiusPolicyRelative();
 
-    // Set random spread method
-    int         spreadMethodIndex = GetRandomInteger(0, 3);
-    Ui::Gradient::SpreadMethod spreadMethod = Ui::Gradient::SpreadMethod::PAD;
-    switch(spreadMethodIndex)
-    {
-      case 0:
-        spreadMethod = Ui::Gradient::SpreadMethod::PAD;
-        break;
-      case 1:
-        spreadMethod = Ui::Gradient::SpreadMethod::REFLECT;
-        break;
-      case 2:
-        spreadMethod = Ui::Gradient::SpreadMethod::REPEAT;
-        break;
-    }
-    gradientVisual.SetSpreadMethod(spreadMethod);
-
     // Set gradient type specific properties
     switch(gradientType)
     {
@@ -301,6 +284,92 @@ private:
         break;
       }
     }
+
+    UpdateGradientVisualInternal(gradientVisual);
+
+    mView.AddVisual(
+      gradientVisual,
+      Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT
+    );
+
+    UpdateVisualCount();
+  }
+
+  void PopVisual()
+  {
+    uint32_t visualCount = mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    if(visualCount > 0u)
+    {
+      auto visual = mView.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, visualCount - 1u);
+      mView.RemoveVisual(visual);
+
+      UpdateVisualCount();
+    }
+  }
+
+  void ChangeVisual()
+  {
+    uint32_t visualCount = mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+    if(visualCount > 0u)
+    {
+      auto visual = mView.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, visualCount - 1u);
+
+      UpdateGradientVisualInternal(GradientVisual::DownCast(visual));
+    }
+  }
+
+  void UpdateVisualCount()
+  {
+    std::string numberOfVisuals = std::to_string(mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT));
+
+    mVisualCounter.SetText((std::string("Visuals Count : #") + numberOfVisuals).c_str());
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if(event.GetState() != KeyEvent::UP)
+    {
+      return;
+    }
+
+    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+    {
+      mApplication.Quit();
+      return;
+    }
+    if(event.GetKeyName() == "1")
+    {
+      PushVisual();
+    }
+    else if(event.GetKeyName() == "2")
+    {
+      PopVisual();
+    }
+    else if(event.GetKeyName() == "3")
+    {
+      ChangeVisual();
+    }
+  }
+private:
+  void UpdateGradientVisualInternal(GradientVisual gradientVisual)
+  {
+
+    // Set random spread method
+    int         spreadMethodIndex = GetRandomInteger(0, 3);
+    Ui::Gradient::SpreadMethod spreadMethod = Ui::Gradient::SpreadMethod::PAD;
+    switch(spreadMethodIndex)
+    {
+      case 0:
+        spreadMethod = Ui::Gradient::SpreadMethod::PAD;
+        break;
+      case 1:
+        spreadMethod = Ui::Gradient::SpreadMethod::REFLECT;
+        break;
+      case 2:
+        spreadMethod = Ui::Gradient::SpreadMethod::REPEAT;
+        break;
+    }
+    gradientVisual.SetSpreadMethod(spreadMethod);
 
     // Set random stop nodes (2-4 colors)
     int numStops = GetRandomInteger(2, 5);
@@ -333,54 +402,6 @@ private:
           {1.0f, GetRandomColor()},
         });
         break;
-    }
-
-    mView.AddVisual(
-      gradientVisual,
-      Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT
-    );
-
-    UpdateVisualCount();
-  }
-
-  void PopVisual()
-  {
-    uint32_t visualCount = mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
-    if(visualCount > 0u)
-    {
-      auto visual = mView.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, visualCount - 1u);
-      mView.RemoveVisual(visual);
-
-      UpdateVisualCount();
-    }
-  }
-
-  void UpdateVisualCount()
-  {
-    std::string numberOfVisuals = std::to_string(mView.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT));
-
-    mVisualCounter.SetText((std::string("Visuals Count : #") + numberOfVisuals).c_str());
-  }
-
-  void OnKeyEvent(Window window, KeyEvent event)
-  {
-    if(event.GetState() != KeyEvent::UP)
-    {
-      return;
-    }
-
-    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
-    {
-      mApplication.Quit();
-      return;
-    }
-    if(event.GetKeyName() == "1")
-    {
-      PushVisual();
-    }
-    else if(event.GetKeyName() == "2")
-    {
-      PopVisual();
     }
   }
 
