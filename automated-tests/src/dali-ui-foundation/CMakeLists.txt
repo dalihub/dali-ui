@@ -41,6 +41,7 @@ SET(TC_SOURCES
         utc-Dali-GradientVisual.cpp
         utc-Dali-AbsoluteLayout.cpp
         utc-Dali-LayoutController.cpp
+        utc-Dali-LayoutTransition.cpp
         utc-Dali-LayoutTypes.cpp
         utc-Dali-FontVariation.cpp
         utc-Dali-ColorVisual.cpp
