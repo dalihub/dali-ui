@@ -302,6 +302,23 @@ void ControllerImplEventHandler::OnCursorKeyEvent(Controller::Impl& impl, const 
   CharacterIndex& primaryCursorPosition         = eventData.mPrimaryCursorPosition;
   CharacterIndex  previousPrimaryCursorPosition = primaryCursorPosition;
 
+  const bool isLeftRightKey =
+    Dali::DALI_KEY_CURSOR_LEFT == keyCode ||
+    Dali::DALI_KEY_CURSOR_RIGHT == keyCode;
+
+  // Current Shift-Left/Right selection logic uses mRightSelectionPosition
+  // as the moving edge. When selection handles/highlight are updated between
+  // key events, mPrimaryCursorPosition may no longer point to that moving edge.
+  // Restore the active edge before calculating cursor delta.
+  if(isShiftModifier &&
+     eventData.mShiftSelectionFlag &&
+     isLeftRightKey &&
+     eventData.mLeftSelectionPosition != eventData.mRightSelectionPosition)
+  {
+    primaryCursorPosition         = eventData.mRightSelectionPosition;
+    previousPrimaryCursorPosition = primaryCursorPosition;
+  }
+
   if(Dali::DALI_KEY_CURSOR_LEFT == keyCode)
   {
     if(primaryCursorPosition > 0u)
@@ -424,7 +441,9 @@ void ControllerImplEventHandler::OnCursorKeyEvent(Controller::Impl& impl, const 
     if(Dali::DALI_KEY_CURSOR_LEFT == keyCode || Dali::DALI_KEY_CURSOR_RIGHT == keyCode)
     {
       // Shift-Left/Right to select the text
-      int cursorPositionDelta = primaryCursorPosition - previousPrimaryCursorPosition;
+      const int cursorPositionDelta =
+        static_cast<int>(primaryCursorPosition) - static_cast<int>(previousPrimaryCursorPosition);
+
       if(cursorPositionDelta > 0 || eventData.mRightSelectionPosition > 0u) // Check the boundary
       {
         eventData.mRightSelectionPosition += cursorPositionDelta;
