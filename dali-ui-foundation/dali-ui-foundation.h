@@ -101,8 +101,11 @@
 #include <dali-ui-foundation/public-api/layouts/flex-layout.h>
 #include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/grid-layout.h>
+#include <dali-ui-foundation/public-api/layouts/layout-bounds-effects.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
+#include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>

@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
+#include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
@@ -49,6 +50,7 @@
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
@@ -1053,6 +1055,12 @@ MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
   // direction-agnostic.
   ApplyLayoutDirection(bounds.width);
 
+  // Mark this view as having completed an arrange pass. Read by the layout
+  // transition dispatcher to suppress ENTER on initial mount: the dispatcher
+  // records views that were captured before this flag became true and
+  // settles their declarative ENTER specs to final values without firing
+  // OnStart / OnFinished.
+  mImpl->mInitialLayoutDone = true;
   return arrangedSize;
 }
 
@@ -1285,8 +1293,22 @@ void ViewImpl::InvalidateMeasure()
   // OnMeasure/OnArrange accumulation, so its measure result cannot change
   // the parent's measured size. Stop propagation here and register this view
   // as its own layout root.
+  //
+  // When the parent has a LayoutTransition attached, also invalidate the
+  // parent so its CaptureBeforeLayout / StartTransitionsAfterLayout pass
+  // runs in the same layout batch. Combined with the controller's
+  // depth-sorted iteration, this lets the parent capture pre-change
+  // bounds before the standalone child's own arrange updates them, so
+  // a standalone child's RequestedWidth / RequestedHeight change
+  // surfaces as the parent's CHANGE slot. Mirrors the existing
+  // OnChildAdd guard for the standalone+transition combination.
   if(IntegrationView::IsLayoutModeStandalone(*this))
   {
+    Ui::View parentView = GetParentView();
+    if(parentView && GetImpl(parentView).GetLayoutTransition())
+    {
+      GetImpl(parentView).InvalidateMeasure();
+    }
     RegisterWithLayoutController();
     return;
   }
@@ -1527,6 +1549,85 @@ ArrangeCallback* ViewImpl::GetArrangeCallback()
   return object ? object->GetArrangeCallback() : nullptr;
 }
 
+void ViewImpl::SetLayoutTransition(LayoutTransition transition)
+{
+  mImpl->mLayoutTransition = transition;
+  // Detach: drop any pending ENTER / REORDER / REMOVE markers. Records
+  // are only produced while a transition is attached (see OnChildAdd /
+  // Insert / OnChildOrderChanged / RemoveChild); a previously attached
+  // transition could have left entries that we want to discard now so
+  // a later re-attach does not surface them as a stale cause on the
+  // next pass. In particular mPendingChildRemovalForLayoutTransition is
+  // consumed only when StartTransitionsForView runs (which requires an
+  // attached transition), so without this clear the marker would
+  // survive a detach -> layout pass -> reattach cycle and tag the next
+  // unrelated CHANGE as SIBLING_REMOVED.
+  if(!transition)
+  {
+    mImpl->mPendingEnterChildren.clear();
+    mImpl->mPendingReorderedChildren.clear();
+    mImpl->mPendingChildRemovalForLayoutTransition = false;
+    return;
+  }
+
+  // Attach: seed any pre-existing children as pending ENTER candidates,
+  // but only when this view has not yet completed its initial layout
+  // pass. OnChildAdd only inserts into mPendingEnterChildren when a
+  // transition is already attached, so the order
+  //   parent.Add(child); parent.SetLayoutTransition(transition);
+  // would otherwise leave the child out of the pending set entirely.
+  // Without this seed, the dispatcher's first pass would neither
+  // dispatch ENTER nor settle a declarative ENTER spec onto the child,
+  // leaving e.g. a child pre-set to opacity = 0 permanently invisible.
+  //
+  // Restricted to !mInitialLayoutDone so re-attaching a transition on a
+  // view that has already been on screen does not retroactively classify
+  // its already-visible children as initial-mount candidates.
+  if(!mImpl->mInitialLayoutDone)
+  {
+    for(auto& childView : mImpl->mChildren)
+    {
+      mImpl->mPendingEnterChildren.insert(&GetImpl(childView));
+    }
+  }
+}
+
+LayoutTransition ViewImpl::GetLayoutTransition() const
+{
+  return mImpl->mLayoutTransition;
+}
+
+LayoutRect ViewImpl::GetArrangedBounds() const
+{
+  return mImpl->mArrangedBounds;
+}
+
+std::unordered_set<ViewImpl*> ViewImpl::TakePendingEnterChildren()
+{
+  std::unordered_set<ViewImpl*> result;
+  std::swap(result, mImpl->mPendingEnterChildren);
+  return result;
+}
+
+std::unordered_set<ViewImpl*> ViewImpl::TakePendingReorderedChildren()
+{
+  std::unordered_set<ViewImpl*> result;
+  std::swap(result, mImpl->mPendingReorderedChildren);
+  return result;
+}
+
+bool ViewImpl::TakePendingChildRemovalForLayoutTransition()
+{
+  const bool result                              = mImpl->mPendingChildRemovalForLayoutTransition;
+  mImpl->mPendingChildRemovalForLayoutTransition = false;
+  return result;
+}
+
+bool ViewImpl::IsInitialLayoutDone() const
+{
+  return mImpl->mInitialLayoutDone;
+}
+
 // =============================================================================
 // Child Management API
 // =============================================================================
@@ -1578,6 +1679,25 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
   mImpl->mChildren.Erase(it);
   mImpl->mChildren.Insert(mImpl->mChildren.Begin() + index, std::move(moved));
 
+  // Tag every logical child so the layout transition dispatcher reports
+  // CHANGE cause as LayoutChangeCause::REORDERED for both the moved child and the
+  // siblings whose indices shifted as a result. dali-core's
+  // OnChildOrderChanged fires only on actor-tree sibling order changes;
+  // Insert() touches the logical (mChildren) order alone, so this is the
+  // only place that records the reorder for the CHANGE classifier.
+  // Matches OnChildOrderChanged's full-list tagging so a logical reorder
+  // and an actor-tree reorder produce the same cause classification.
+  // Skip the record when no transition is attached — the dispatcher
+  // would never consume it, and stale raw pointers could outlive the
+  // child without any global cleanup.
+  if(mImpl->mLayoutTransition)
+  {
+    for(auto& childView : mImpl->mChildren)
+    {
+      mImpl->mPendingReorderedChildren.insert(&GetImpl(childView));
+    }
+  }
+
   // mChildren order affects layout output (e.g. LinearLayout visual order,
   // GridLayout cell assignment). When the child was already under this view
   // (Self().Add is a no-op in that case), OnChildAdd does not fire, so this
@@ -1589,19 +1709,188 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
 
 void ViewImpl::RemoveAllChildren()
 {
+  // If a LayoutTransition with an EXIT slot is attached, defer each child
+  // to the dispatcher so the EXIT animation plays — same semantics as
+  // RemoveChild for individual removes. Without this, RemoveAllChildren
+  // would silently bypass EXIT and the bulk remove would feel jarring.
+  Ui::LayoutTransition transition = mImpl->mLayoutTransition;
+  bool                 deferred   = false;
+  Dali::Window         window;
+  if(transition)
+  {
+    auto&      impl      = Internal::GetImpl(transition);
+    const bool hasExitFx = static_cast<bool>(impl.GetExitVisualSpec()) || impl.HasExitAnimator() || impl.HasActiveExitBoundsEffect();
+    if(hasExitFx)
+    {
+      window = DevelWindow::Get(Self());
+      if(window)
+      {
+        deferred = true;
+      }
+    }
+  }
+
+  if(deferred)
+  {
+    // Snapshot first because ScheduleLayoutExit does not touch mChildren,
+    // but we want subsequent layout passes to see an empty logical list so
+    // remaining siblings reflow immediately. Clear pending-enter so a
+    // child that was add+remove'd in the same frame does not leak into
+    // the dispatcher's enter set after the bulk remove.
+    std::vector<Ui::View> snapshot;
+    snapshot.reserve(mImpl->mChildren.Count());
+    for(auto& childView : mImpl->mChildren)
+    {
+      GetImpl(childView).InvalidateMeasure();
+      snapshot.push_back(childView);
+    }
+    mImpl->mChildren.Clear();
+    mImpl->mPendingEnterChildren.clear();
+    // Same rationale as the per-child OnChildRemove erase: a stale raw
+    // ViewImpl* in the reorder set could outlive its child and cause a
+    // future address-reused child to be misclassified as REORDERED.
+    mImpl->mPendingReorderedChildren.clear();
+    // Bulk remove via deferred path — the dispatcher fires EXIT on every
+    // child so no siblings remain, but the marker keeps semantics
+    // consistent with the per-child path.
+    if(!snapshot.empty())
+    {
+      mImpl->mPendingChildRemovalForLayoutTransition = true;
+    }
+    InvalidateMeasure();
+
+    auto& controller = LayoutController::Get(window);
+    for(auto& child : snapshot)
+    {
+      controller.ScheduleLayoutExit(this, child);
+    }
+    return;
+  }
+
+  // No EXIT slot configured — original immediate-remove path. The guard
+  // suppresses OnChildRemove (which would re-enter mChildren) so the loop
+  // can iterate safely while removing.
+  const bool hadChildren = mImpl->mChildren.Count() > 0;
   {
     ScopedSkipChildrenUpdate guard(mImpl->mSkipChildrenUpdate);
     for(auto& childView : mImpl->mChildren)
     {
-      // Invalidate each child's measure cache so that re-parented children
-      // are re-measured under the new parent's constraints.
       GetImpl(childView).InvalidateMeasure();
       Self().Remove(childView);
     }
   }
 
   mImpl->mChildren.Clear();
+  // The OnChildRemove guard above suppresses the per-child pending-set
+  // erase that the deferred-remove path performs explicitly. Drop both
+  // pending sets here so the immediate-remove path leaves the same clean
+  // state that the deferred path produces.
+  mImpl->mPendingEnterChildren.clear();
+  mImpl->mPendingReorderedChildren.clear();
+  // Mark sibling removal only when a transition is attached so the next
+  // CHANGE pass on remaining children (e.g. animator-only EXIT path) is
+  // tagged correctly. Skip when no transition is attached.
+  if(transition && hadChildren)
+  {
+    mImpl->mPendingChildRemovalForLayoutTransition = true;
+  }
   InvalidateMeasure();
+}
+
+void ViewImpl::RemoveChild(Ui::View child)
+{
+  if(!child)
+  {
+    return;
+  }
+
+  // If a LayoutTransition with an EXIT slot (spec OR animator) is attached,
+  // hand the child off to the layout transition dispatcher so the EXIT
+  // animation can play. Otherwise unparent immediately.
+  Ui::LayoutTransition transition = mImpl->mLayoutTransition;
+  bool                 deferred   = false;
+  if(transition)
+  {
+    auto&      impl      = Internal::GetImpl(transition);
+    const bool hasExitFx = static_cast<bool>(impl.GetExitVisualSpec()) || impl.HasExitAnimator() || impl.HasActiveExitBoundsEffect();
+    if(hasExitFx)
+    {
+      Actor  self   = Self();
+      Window window = DevelWindow::Get(self);
+      if(window)
+      {
+        // Remove the child from this view's layout-tracking list and
+        // invalidate so siblings flow into the freed slot during the next
+        // layout pass. The child's Actor stays under this Actor so the
+        // dispatcher can animate it before unparenting.
+        ViewImpl& childImpl = GetImpl(child);
+        auto      it        = std::find(mImpl->mChildren.begin(), mImpl->mChildren.end(), child);
+        if(it != mImpl->mChildren.end())
+        {
+          mImpl->mChildren.Erase(it);
+          mImpl->mPendingEnterChildren.erase(&childImpl);
+          // Same rationale as the immediate-remove path's OnChildRemove:
+          // a stale raw ViewImpl* in the reorder set could outlive its
+          // child after deferred-remove EXIT and cause a future heap-
+          // reused address to be misclassified as REORDERED. Erase
+          // per-child here (not full clear) so the cause of any
+          // siblings still pending reorder is preserved.
+          mImpl->mPendingReorderedChildren.erase(&childImpl);
+          // Mark sibling removal so the dispatcher tags this pass's CHANGE
+          // dispatches on the remaining siblings as SIBLING_REMOVED. Set
+          // only when a transition is attached to avoid leaving stale
+          // marker state on views without transitions.
+          mImpl->mPendingChildRemovalForLayoutTransition = true;
+          InvalidateMeasure();
+
+          // Only schedule the EXIT transition when @p child was actually a
+          // tracked child. Calling RemoveChild on a non-child must not fire
+          // any DALi layout-transition lifecycle / animation; without this
+          // guard a misuse would leave a ghost animation that fires
+          // OnStart / OnFinished and races with
+          // the actor's real parent.
+          LayoutController::Get(window).ScheduleLayoutExit(this, child);
+          deferred = true;
+        }
+      }
+    }
+  }
+
+  if(!deferred)
+  {
+    // Guard against re-removing a child that is currently an EXIT ghost
+    // under this view. Ghost detection: actor parent is still Self() (the
+    // deferred-remove keeps the actor attached) AND the child has already
+    // been removed from the logical children list (mChildren). Without
+    // this guard, the second RemoveChild bypasses the dispatcher
+    // duplicate-EXIT guard and synchronously unparents the ghost, which
+    // triggers OnSceneDisconnection → CancelPendingExit/CancelActiveAnimator
+    // and silently cancels the in-flight EXIT (no OnFinished, no fade).
+    // The same applies when the parent's LayoutTransition has been replaced
+    // or cleared between the first and second RemoveChild — the second
+    // call cannot enter the deferred branch but the ghost is still in
+    // flight under its original transition.
+    if(child.GetParent() == Self() &&
+       std::find(mImpl->mChildren.begin(), mImpl->mChildren.end(), child) == mImpl->mChildren.end())
+    {
+      return;
+    }
+    // Mark sibling removal for the next CHANGE pass when a transition is
+    // attached (without an EXIT slot) AND we have a window. The
+    // remaining children may reflow and should be tagged with
+    // SIBLING_REMOVED. Skip the marker when no transition is attached,
+    // or when no window is available — without a window the marker
+    // cannot be consumed by the dispatcher in this pass (no layout
+    // pass runs), so it would leak across a later add-to-window event
+    // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
+    Actor selfActor = Self();
+    if(transition && DevelWindow::Get(selfActor) &&
+       std::find(mImpl->mChildren.begin(), mImpl->mChildren.end(), child) != mImpl->mChildren.end())
+    {
+      mImpl->mPendingChildRemovalForLayoutTransition = true;
+    }
+    selfActor.Remove(child);
+  }
 }
 
 uint32_t ViewImpl::GetChildCount() const
@@ -2135,6 +2424,33 @@ void ViewImpl::OnChildAdd(Actor& child)
 
     ViewImpl& childImpl = GetImpl(view);
 
+    // If this child still has an in-flight transition under an old parent
+    // (reparent during EXIT), cancel it before we mark the child for
+    // ENTER under this view. Otherwise the orphan callback / animation
+    // would keep driving the actor against the old parent's coord system.
+    {
+      Actor  self   = Self();
+      Window window = DevelWindow::Get(self);
+      if(window)
+      {
+        LayoutController::Get(window).NotifyChildReparented(&childImpl);
+      }
+    }
+
+    // Mark this child for ENTER-slot dispatch only when this view has a
+    // LayoutTransition attached at the time of the add. Recording
+    // unconditionally would (a) accumulate stale entries while no
+    // transition is attached, ready to mis-fire as ENTER once a future
+    // SetLayoutTransition + unrelated layout pass runs, and (b) keep
+    // raw ViewImpl* pointers alive in the set after the child is
+    // destroyed (no global cleanup hook today). Recording at the event
+    // time matches the semantic that ENTER is for "child added under a
+    // transition-bearing parent".
+    if(mImpl->mLayoutTransition)
+    {
+      mImpl->mPendingEnterChildren.insert(&childImpl);
+    }
+
     // Standalone children do not contribute to this view's OnMeasure/OnArrange
     // accumulation, so adding one does not invalidate this view's cached
     // measured size or arranged bounds. Skip self-invalidation in that case.
@@ -2182,6 +2498,19 @@ void ViewImpl::OnChildAdd(Actor& child)
       // that were already dirty when reparented.
       InvalidateMeasure();
     }
+    else if(mImpl->mLayoutTransition)
+    {
+      // Standalone child + transition-attached parent: the standalone
+      // path above does not dirty self, so this view would not be
+      // reached by ProcessLayouts and the dispatcher would never run
+      // its CaptureBeforeLayout / StartTransitionsAfterLayout pass for
+      // this parent — meaning the ENTER (and any subsequent CHANGE)
+      // would never be dispatched, while the pending-enter set
+      // accumulates entries that fire late on the next unrelated
+      // dirty event. Force the parent dirty so its dispatcher pass
+      // runs in the same layout batch as the standalone child's.
+      InvalidateMeasure();
+    }
   }
   else
   {
@@ -2215,6 +2544,29 @@ void ViewImpl::OnChildRemove(Actor& child)
       // size or arranged bounds. Skip self-invalidation in that case to avoid
       // an unnecessary parent chain walk.
       const bool childWasAffectingSelf = !IntegrationView::IsLayoutModeStandalone(childImpl);
+
+      // If the child was added and removed within the same frame (before
+      // any layout pass consumed the pending-enter set), drop the ENTER
+      // marker so the dispatcher does not fire on a no-longer-present view.
+      // Same for the reorder marker: Insert() / OnChildOrderChanged keep
+      // raw ViewImpl* pointers in mPendingReorderedChildren which must
+      // not survive the child's removal — otherwise a heap-reused address
+      // could mis-classify a future child as REORDERED.
+      mImpl->mPendingEnterChildren.erase(&childImpl);
+      mImpl->mPendingReorderedChildren.erase(&childImpl);
+
+      // Record sibling removal so the next CHANGE pass tags remaining
+      // siblings as SIBLING_REMOVED. This covers paths that reach
+      // OnChildRemove without going through View::RemoveChild's marker-
+      // setting branch (e.g. inherited Actor::Remove called directly on
+      // the view actor). Same window guard as View::RemoveChild — without
+      // a window the marker cannot be consumed in this pass and would
+      // leak across a later add-to-window event. Setting the marker
+      // here is idempotent with View::RemoveChild's own setter.
+      if(mImpl->mLayoutTransition && DevelWindow::Get(Self()))
+      {
+        mImpl->mPendingChildRemovalForLayoutTransition = true;
+      }
 
       // Invalidate the removed child's measure cache so that it gets
       // re-measured when re-parented to a different container.
@@ -2257,6 +2609,22 @@ void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
   }
 
   mImpl->mChildren = std::move(newChildren);
+
+  // Tag every child as reordered so the layout transition dispatcher can
+  // tag CHANGE-slot dispatches with @c LayoutChangeCause::REORDERED. The
+  // dispatcher consumes this set once per layout pass. Skip when no
+  // transition is attached so stale records cannot leak across an
+  // unrelated SetLayoutTransition + layout pass later, and so raw
+  // ViewImpl* pointers do not outlive their owning views without a
+  // central cleanup hook.
+  if(mImpl->mLayoutTransition)
+  {
+    for(auto& childView : mImpl->mChildren)
+    {
+      mImpl->mPendingReorderedChildren.insert(&GetImpl(childView));
+    }
+  }
+
   InvalidateArrange();
 }
 

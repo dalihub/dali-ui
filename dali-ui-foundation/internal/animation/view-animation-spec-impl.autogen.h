@@ -80,6 +80,15 @@ public:
 
   void ApplyEntries(Animation animation, View view) const;
 
+  /// Returns true if any entry uses AlphaFunction::REVERSE.
+  bool ContainsReverseAlpha() const;
+
+  /// Returns true if any entry targets a layout-owned bounds property
+  /// (POSITION_X, POSITION_Y, SIZE_WIDTH, SIZE_HEIGHT). Used by
+  /// LayoutTransition to reject visual specs that try to drive bounds —
+  /// bounds animation belongs to the bounds-effect channel.
+  bool ContainsLayoutBoundsProperty() const;
+
   static void ApplyBackgroundColorTo(Animation& animation, View view, const Entry& entry);
   static void ApplyBackgroundColorBy(Animation& animation, View view, const Entry& entry);
   static void ApplySizeWidthTo(Animation& animation, View view, const Entry& entry);

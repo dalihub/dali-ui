@@ -32,6 +32,7 @@
 #include <cstdint>
 #include <limits>
 #include <memory>
+#include <unordered_set>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/attachment-id.h>
@@ -58,6 +59,7 @@ namespace Ui
 
 // Forward declarations
 class Layout;
+class LayoutTransition;
 class ViewAccessible;
 
 namespace Internal
@@ -739,6 +741,77 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void SetArrangeCallback(ArrangeCallback callback);
 
+  /**
+   * @copydoc Ui::View::SetLayoutTransition()
+   */
+  void SetLayoutTransition(LayoutTransition transition);
+
+  /**
+   * @copydoc Ui::View::GetLayoutTransition()
+   */
+  LayoutTransition GetLayoutTransition() const;
+
+  /**
+   * @brief Returns the bounds last applied during the layout pass.
+   *
+   * Internal helper used by the layout transition dispatcher to compare
+   * pre/post bounds for the CHANGE slot. Returns a zero rect if the view
+   * has never been arranged.
+   *
+   * @return The most recent arranged bounds
+   */
+  LayoutRect GetArrangedBounds() const;
+
+  /**
+   * @brief Atomically retrieves and clears the set of children that were
+   * added since the previous layout pass.
+   *
+   * Internal helper used by the layout transition dispatcher to fire
+   * ENTER-slot animations. Must be called once per layout pass; subsequent
+   * calls before a new OnChildAdd return an empty set.
+   *
+   * @return Set of child ViewImpl pointers
+   */
+  std::unordered_set<ViewImpl*> TakePendingEnterChildren();
+
+  /**
+   * @brief Atomically retrieves and clears the set of children whose
+   * sibling order changed since the previous layout pass.
+   *
+   * Internal helper used by the layout transition dispatcher to tag
+   * CHANGE-slot dispatches with @c LayoutChangeCause::REORDERED.
+   *
+   * @return Set of child ViewImpl pointers
+   */
+  std::unordered_set<ViewImpl*> TakePendingReorderedChildren();
+
+  /**
+   * @brief Atomically retrieves and clears the marker that records whether
+   * any child was removed via @c View::RemoveChild / @c RemoveAllChildren
+   * since the last layout pass.
+   *
+   * Internal helper used by the layout transition dispatcher to tag
+   * CHANGE-slot dispatches on the remaining children with
+   * @c LayoutChangeCause::SIBLING_REMOVED.
+   *
+   * @return @c true if a removal occurred and the marker was cleared
+   */
+  bool TakePendingChildRemovalForLayoutTransition();
+
+  /**
+   * @brief Returns @c true if this view has completed at least one
+   * @c Arrange pass.
+   *
+   * Used by the layout transition dispatcher to distinguish initial-mount
+   * children from children added at runtime after the parent has already
+   * been arranged. Children present at the parent's first arrange pass are
+   * treated as the view's "always there" state and ENTER is suppressed for
+   * them by default (the surface has typically not been displayed yet, so
+   * the fade-in would be invisible). Apps can opt into firing ENTER for
+   * initial-mount children via @c LayoutTransition::SetEnterOnInitialMount.
+   */
+  bool IsInitialLayoutDone() const;
+
   // Child Management
 
   /**
@@ -750,6 +823,11 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::RemoveAllChildren()
    */
   void RemoveAllChildren();
+
+  /**
+   * @copydoc Ui::View::RemoveChild()
+   */
+  void RemoveChild(Ui::View child);
 
   /**
    * @copydoc Ui::View::GetChildCount()

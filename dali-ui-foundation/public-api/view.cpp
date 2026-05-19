@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
+#include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
@@ -119,6 +120,16 @@ void View::SetMeasureCallback(MeasureCallback callback)
 void View::SetArrangeCallback(ArrangeCallback callback)
 {
   GetImpl(*this).SetArrangeCallback(std::move(callback));
+}
+
+void View::SetLayoutTransition(LayoutTransition transition)
+{
+  GetImpl(*this).SetLayoutTransition(transition);
+}
+
+LayoutTransition View::GetLayoutTransition() const
+{
+  return GetImpl(*this).GetLayoutTransition();
 }
 
 // =============================================================================
@@ -703,6 +714,11 @@ void View::Insert(uint32_t index, View child)
 void View::RemoveAllChildren()
 {
   GetImpl(*this).RemoveAllChildren();
+}
+
+void View::RemoveChild(View child)
+{
+  GetImpl(*this).RemoveChild(child);
 }
 
 uint32_t View::GetChildCount() const

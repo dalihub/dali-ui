@@ -126,6 +126,38 @@ public:
    */
   void ProcessLayouts();
 
+public: // Not intended for application developers
+  /// @cond internal
+  /**
+   * @brief Schedules an EXIT-slot layout transition for @p child under
+   * @p parent.
+   *
+   * Called by ViewImpl::RemoveChild / RemoveAllChildren when the parent
+   * has a LayoutTransition EXIT slot configured through a visual spec,
+   * animator, or active bounds effect. The dispatcher fires the EXIT
+   * animation and unparents the child only when the animation finishes.
+   *
+   * @param[in] parent Parent ViewImpl that owns the EXIT transition
+   * @param[in] child  The child view to remove (kept alive by a strong ref
+   *                   inside the dispatcher until EXIT completes)
+   */
+  DALI_INTERNAL void ScheduleLayoutExit(ViewImpl* parent, Ui::View child);
+
+  /**
+   * @brief Notifies the layout transition dispatcher that @p child was
+   * just attached to a (new) parent.
+   *
+   * Called by @c ViewImpl::OnChildAdd. When the child has an in-flight
+   * transition under an old parent (reparent during EXIT), the dispatcher
+   * cancels it so the application callback does not keep firing against
+   * the old parent's coordinate system. No-op when there is no in-flight
+   * state for @p child (the common fresh-add case).
+   *
+   * @param[in] child The child view whose actor was just attached
+   */
+  DALI_INTERNAL void NotifyChildReparented(ViewImpl* child);
+  /// @endcond
+
 private:
   /**
    * @brief Private constructor.

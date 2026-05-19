@@ -34,8 +34,8 @@
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/state-event.h>
-#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
+#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
@@ -50,6 +50,7 @@ namespace Ui
 {
 
 // Forward declarations
+class LayoutTransition;
 class RenderEffect;
 class UiColor;
 class ViewAnimationBridge;
@@ -253,6 +254,40 @@ public: // Measure / Arrange API
    */
   void SetArrangeCallback(ArrangeCallback callback);
 
+  /**
+   * @brief Attaches a LayoutTransition to this view.
+   *
+   * When attached, the framework animates this view's children between
+   * layout-pass results: ENTER on add, EXIT on remove (deferred until the
+   * EXIT slot finishes), CHANGE on bounds change. Pass an uninitialized
+   * handle to detach.
+   *
+   * @note Replacing the transition at runtime does not interrupt
+   * in-flight transitions. Each in-flight ENTER / EXIT / CHANGE keeps the
+   * transition handle that started it, finishes on its own timing, and
+   * fires its own @c OnFinished. Newly added/removed/moved children
+   * dispatch under the new handle from the next layout pass onward. To
+   * disable transitions, pass an uninitialized handle: in-flight ones
+   * still finish, but no new transitions start.
+   *
+   * @warning Do NOT call @c SetLayoutTransition from inside a custom
+   * @c ArrangeCallback (registered via @c SetArrangeCallback) on this
+   * view. The callback runs in the middle of the layout pass while the
+   * dispatcher has captured the pre-pass bounds; detaching the transition
+   * mid-pass leaves a stale snapshot until the next pass.
+   *
+   * @param[in] transition The transition to attach (uninitialized to detach)
+   */
+  void SetLayoutTransition(LayoutTransition transition);
+
+  /**
+   * @brief Returns the LayoutTransition currently attached, or an
+   * uninitialized handle.
+   *
+   * @return The attached LayoutTransition handle
+   */
+  LayoutTransition GetLayoutTransition() const;
+
 public: // Properties
   // @CHAIN_START(View)
 
@@ -339,6 +374,14 @@ public: // Properties
 
   /**
    * @brief Sets the visibility of the view.
+   *
+   * @note Toggling visibility does NOT fire a parent's
+   * @c LayoutTransition. ENTER / EXIT dispatch only on
+   * @c Actor::Add / @c View::RemoveChild — visibility-driven
+   * transitions are not supported. To animate a hide/show, drive
+   * @c Actor::Property::OPACITY or @c SCALE via your own
+   * @c Animation, or call @c RemoveChild + @c Add to participate in
+   * the layout transition.
    *
    * @param[in] visibility True to make the view visible, false to hide it
    * @return Reference to this View for fluent chaining
@@ -1301,8 +1344,44 @@ public: // Properties
 
   /**
    * @brief Removes all children from this View.
+   *
+   * If a LayoutTransition with an EXIT slot is attached, every child is
+   * handed off to the dispatcher (same semantics as calling
+   * @c RemoveChild on each child individually): the child is dropped
+   * from the layout-tracking list immediately, the actor stays attached
+   * during the EXIT animation, and is unparented when the animation
+   * finishes. With no EXIT slot, every child is unparented synchronously.
    */
   void RemoveAllChildren();
+
+  /**
+   * @brief Removes @p child from this View, optionally running the
+   * attached LayoutTransition's EXIT slot first.
+   *
+   * If a LayoutTransition with a configured EXIT spec or animator is
+   * attached, the child is kept in the actor tree as a "ghost" until the
+   * EXIT animation finishes; the child is then unparented automatically.
+   * Otherwise the child is unparented immediately, matching
+   * @c Actor::Remove behaviour.
+   *
+   * @note During the EXIT animation the child is logically absent from
+   * this view's child list (@c GetChildCount / @c GetChildAt skip it)
+   * but still attached to the actor tree. Re-adding the SAME child to
+   * the SAME parent in this state via @c View::Insert or inherited
+   * @c Actor::Add is silently ignored — the EXIT continues, and the
+   * actor is unparented when the animation finishes. To cancel an
+   * in-flight EXIT, reparent the child to a DIFFERENT parent: the
+   * dispatcher auto-cancels the EXIT, restores interaction state, and
+   * triggers ENTER under the new parent.
+   *
+   * @note When the EXIT spec/animator is "empty" (no entries, or all
+   * entries with zero duration+delay), the child is unparented
+   * immediately and no lifecycle callbacks fire — the same as if no EXIT
+   * slot were configured at all.
+   *
+   * @param[in] child The child view to remove
+   */
+  void RemoveChild(View child);
 
   /**
    * @brief Gets the number of child views.

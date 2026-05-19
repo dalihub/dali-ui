@@ -83,6 +83,34 @@ void ViewAnimationSpecImpl::ApplyEntries(Animation animation, View view) const
   }
 }
 
+bool ViewAnimationSpecImpl::ContainsReverseAlpha() const
+{
+  for(const auto& entry : mEntries)
+  {
+    if(entry.alpha.GetMode() == AlphaFunction::BUILTIN_FUNCTION &&
+       entry.alpha.GetBuiltinFunction() == AlphaFunction::REVERSE)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool ViewAnimationSpecImpl::ContainsLayoutBoundsProperty() const
+{
+  for(const auto& entry : mEntries)
+  {
+    if(entry.apply == &ApplyPositionXTo || entry.apply == &ApplyPositionXBy ||
+       entry.apply == &ApplyPositionYTo || entry.apply == &ApplyPositionYBy ||
+       entry.apply == &ApplySizeWidthTo || entry.apply == &ApplySizeWidthBy ||
+       entry.apply == &ApplySizeHeightTo || entry.apply == &ApplySizeHeightBy)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 void ViewAnimationSpecImpl::ApplyAnimateTo(Animation& animation, View view, const Entry& entry)
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());

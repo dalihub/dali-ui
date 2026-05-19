@@ -26,11 +26,13 @@
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/connection-tracker.h>
+#include <algorithm>
 #include <unordered_map>
 #include <unordered_set>
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layouts/layout-transition-dispatcher.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <algorithm>
@@ -75,6 +77,7 @@ public:
    */
   explicit LayoutControllerImpl(Window window)
   : mWindow(window),
+    mTransitionDispatcher(new Internal::LayoutTransitionDispatcher()),
     mWindowWidth(0),
     mWindowHeight(0),
     mWindowObjectPtr(window.GetObjectPtr()),
@@ -134,12 +137,43 @@ public:
   }
 
   /**
+   * @brief Schedules an EXIT-slot transition (forwarded from ViewImpl::RemoveChild).
+   */
+  void ScheduleLayoutExit(ViewImpl* parent, Ui::View child)
+  {
+    if(mTransitionDispatcher)
+    {
+      mTransitionDispatcher->ScheduleExit(parent, child);
+    }
+  }
+
+  /**
+   * @brief Notifies the dispatcher that @p child was just attached to a
+   * (new) parent, so any in-flight transition under the old parent can be
+   * cancelled before the new parent dispatches ENTER.
+   *
+   * Forwarded from @c ViewImpl::OnChildAdd. No-op when @p child has no
+   * in-flight transition (the common fresh-add case).
+   */
+  void NotifyChildReparented(ViewImpl* child)
+  {
+    if(mTransitionDispatcher)
+    {
+      mTransitionDispatcher->OnChildReparented(child);
+    }
+  }
+
+  /**
    * @brief Removes a view from tracking (called when view is destroyed).
    */
   void UnregisterView(ViewImpl* view)
   {
     mAllLayoutRoots.erase(view);
     mPendingViews.erase(view);
+    if(mTransitionDispatcher)
+    {
+      mTransitionDispatcher->OnViewDestroyed(view);
+    }
   }
 
   /**
@@ -185,6 +219,11 @@ public:
   {
     mWindowWidth  = width;
     mWindowHeight = height;
+
+    if(mTransitionDispatcher)
+    {
+      mTransitionDispatcher->NotifyWindowResize();
+    }
 
     // Invalidate ALL known layout roots (not just pending ones)
     // Collect dead entries to remove after iteration
@@ -234,6 +273,15 @@ public:
     if(!postProcess)
     {
       ProcessLayouts(window);
+
+      if(mTransitionDispatcher)
+      {
+        // The dispatcher computes deltaSec from its own wall clock and,
+        // once an animator becomes active, also drives a periodic tick
+        // timer so subsequent ticks fire even when no other event wakes
+        // the event thread.
+        mTransitionDispatcher->TickAnimators();
+      }
     }
   }
 
@@ -251,20 +299,65 @@ private:
    */
   void ProcessLayouts(Dali::Window window)
   {
+    if(mTransitionDispatcher)
+    {
+      // Mark the start of this batch. Paired with EndLayoutPass at every
+      // exit point below, this protects per-pass flags (mInWindowResize)
+      // from being cleared by a nested ProcessLayouts call invoked from
+      // a lifecycle callback during a window-resize-driven pass.
+      mTransitionDispatcher->BeginLayoutPass();
+    }
     if(mPendingViews.empty())
     {
+      // Still drain per-pass dispatcher state (e.g. mInWindowResize set
+      // by NotifyWindowResize) so a stale flag cannot leak into the next
+      // pass when every layout root happens to be dead at resize time.
+      if(mTransitionDispatcher)
+      {
+        mTransitionDispatcher->EndLayoutPass();
+      }
       return;
     }
 
     // Copy pending views and clear (in case new views are added during processing)
-    decltype(mPendingViews) viewsToProcess;
-    viewsToProcess.swap(mPendingViews);
+    decltype(mPendingViews) viewsSet;
+    viewsSet.swap(mPendingViews);
     mProcessingScheduled = false;
 
     // Default: window size (when root is directly under window or parent size unknown).
     Vector2 windowSize       = window.GetSize();
     float   widthConstraint  = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.width)));
     float   heightConstraint = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.height)));
+
+    // Sort pending roots by tree depth (outer-most first). When a parent
+    // and a descendant root are both in the batch (e.g. a transition-
+    // bearing parent and one of its standalone children that is its own
+    // layout root), the parent must run first so its arrange pass can
+    // measure the descendant via MeasureStandaloneChildren / parent's
+    // recursive arrange. Without this ordering the descendant would
+    // measure with a stale or zero parent SIZE, dispatch its transitions
+    // with bad bounds, and then have those transitions cancelled when
+    // the parent's later pass corrects the bounds.
+    std::vector<ViewImpl*> viewsToProcess(viewsSet.begin(), viewsSet.end());
+    {
+      auto depthOf = [](ViewImpl* v) -> int
+      {
+        int d = 0;
+        if(v)
+        {
+          for(Dali::Actor p = v->Self().GetParent(); p; p = p.GetParent())
+          {
+            ++d;
+          }
+        }
+        return d;
+      };
+      std::sort(viewsToProcess.begin(), viewsToProcess.end(),
+                [&depthOf](ViewImpl* a, ViewImpl* b)
+      {
+        return depthOf(a) < depthOf(b);
+      });
+    }
 
     // Process each layout root
     for(auto* view : viewsToProcess)
@@ -273,13 +366,28 @@ private:
       auto it = mAllLayoutRoots.find(view);
       if(view && it != mAllLayoutRoots.end() && it->second.weakHandle.GetHandle())
       {
+        if(mTransitionDispatcher)
+        {
+          mTransitionDispatcher->CaptureBeforeLayout(view);
+        }
         ProcessLayoutRoot(view, widthConstraint, heightConstraint);
+        if(mTransitionDispatcher)
+        {
+          mTransitionDispatcher->StartTransitionsAfterLayout(view);
+        }
       }
       else if(it != mAllLayoutRoots.end())
       {
         // Dead entry — clean up
         mAllLayoutRoots.erase(it);
       }
+    }
+
+    if(mTransitionDispatcher)
+    {
+      // Reset per-pass flags after the whole batch. Per-root reset would
+      // clear them after the first root and misclassify the rest.
+      mTransitionDispatcher->EndLayoutPass();
     }
   }
 
@@ -369,13 +477,14 @@ private:
   }
 
 private:
-  Dali::WeakHandle<Window>                       mWindow;
-  std::unordered_map<ViewImpl*, LayoutRootEntry> mAllLayoutRoots; ///< All known layout roots (weak-referenced)
-  std::unordered_set<ViewImpl*>                  mPendingViews;   ///< Dirty layout roots needing processing
-  int32_t                                        mWindowWidth;
-  int32_t                                        mWindowHeight;
-  void*                                          mWindowObjectPtr; ///< For self-destruct case.
-  bool                                           mProcessingScheduled;
+  Dali::WeakHandle<Window>                              mWindow;
+  std::unique_ptr<Internal::LayoutTransitionDispatcher> mTransitionDispatcher;
+  std::unordered_map<ViewImpl*, LayoutRootEntry>        mAllLayoutRoots; ///< All known layout roots (weak-referenced)
+  std::unordered_set<ViewImpl*>                         mPendingViews;   ///< Dirty layout roots needing processing
+  int32_t                                               mWindowWidth;
+  int32_t                                               mWindowHeight;
+  void*                                                 mWindowObjectPtr; ///< For self-destruct case.
+  bool                                                  mProcessingScheduled;
 };
 
 } // namespace Integration
@@ -454,6 +563,16 @@ void LayoutController::OnWindowResize(int32_t width, int32_t height)
 void LayoutController::ProcessLayouts()
 {
   mImpl->ProcessLayouts();
+}
+
+void LayoutController::ScheduleLayoutExit(ViewImpl* parent, Ui::View child)
+{
+  mImpl->ScheduleLayoutExit(parent, child);
+}
+
+void LayoutController::NotifyChildReparented(ViewImpl* child)
+{
+  mImpl->NotifyChildReparented(child);
 }
 
 Dali::Window LayoutController::GetCurrentWindow() const

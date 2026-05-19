@@ -31,6 +31,14 @@
   /** \
   * @brief Sets the visibility of the view. \
   * \
+  * @note Toggling visibility does NOT fire a parent's \
+  * @c LayoutTransition. ENTER / EXIT dispatch only on \
+  * @c Actor::Add / @c View::RemoveChild — visibility-driven \
+  * transitions are not supported. To animate a hide/show, drive \
+  * @c Actor::Property::OPACITY or @c SCALE via your own \
+  * @c Animation, or call @c RemoveChild + @c Add to participate in \
+  * the layout transition. \
+  * \
   * @param[in] visibility True to make the view visible, false to hide it \
   * @return Reference to this View for fluent chaining \
   */ \
