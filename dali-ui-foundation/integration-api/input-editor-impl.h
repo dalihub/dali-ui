@@ -620,6 +620,16 @@ public:
 
   // Read Only
   /**
+   * @see Dali::Ui::InputEditor::GetLineCount
+   */
+  int GetLineCount();
+
+  /**
+   * @see Dali::Ui::InputEditor::GetLineCount(float)
+   */
+  int GetLineCount(float width);
+
+  /**
    * @copydoc Dali::Ui::InputEditor::GetAdjustedFontSizeScale
    */
   float GetAdjustedFontSizeScale() const;

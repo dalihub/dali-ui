@@ -416,6 +416,7 @@ public:
     mIsTextDirectionRTL(false),
     mRecalculateNaturalSize(true),
     mRecalculateLayoutSize(true),
+    mRecalculateHeightForWidth(true),
     mMarkupProcessorEnabled(false),
     mClipboardHideEnabled(true),
     mIsMarqueeEnabled(false),
@@ -1292,6 +1293,7 @@ public:
   CharacterDirection mIsTextDirectionRTL : 1;          ///< Whether the text direction is right to left or not
   bool               mRecalculateNaturalSize : 1;      ///< Whether the natural size needs to be recalculated.
   bool               mRecalculateLayoutSize : 1;       ///< Whether the layout size needs to be recalculated.
+  bool               mRecalculateHeightForWidth : 1;   ///< Whether the height for width needs to be recalculated.
   bool               mMarkupProcessorEnabled : 1;      ///< Whether the mark-up procesor is enabled.
   bool               mClipboardHideEnabled : 1;        ///< Whether the ClipboardHide function work or not
   bool               mIsMarqueeEnabled : 1;            ///< Whether auto text scrolling is enabled.

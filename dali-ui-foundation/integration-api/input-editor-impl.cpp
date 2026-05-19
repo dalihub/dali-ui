@@ -1039,6 +1039,22 @@ float InputEditorImpl::GetLetterSpacing() const
 // =============================================================================
 // Read Only
 // =============================================================================
+int InputEditorImpl::GetLineCount()
+{
+  const float width = Self().GetProperty(Actor::Property::SIZE_WIDTH).Get<float>();
+  const float clamp = ClampWithMinPriority(width, GetMinimumWidth(), GetMaximumWidth());
+  DALI_LOG_RELEASE_INFO("[%p] width:%f, min:%f, max:%f, clamp:%f\n", mController.Get(), width, GetMinimumWidth(), GetMaximumWidth(), clamp);
+  return GetLineCount(clamp);
+}
+
+int InputEditorImpl::GetLineCount(float width)
+{
+  Extents padding      = GetEffectiveTextPadding();
+  float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  DALI_LOG_RELEASE_INFO("[%p] contentWidth:%f, padding start:%d, end:%d\n", mController.Get(), contentWidth, padding.start, padding.end);
+  return mController->GetLineCount(contentWidth);
+}
+
 float InputEditorImpl::GetAdjustedFontSizeScale() const
 {
   return mController->GetAdjustedFontSizeScale();

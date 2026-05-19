@@ -969,8 +969,8 @@ float LabelImpl::GetRenderScale() const
 // =============================================================================
 int LabelImpl::GetLineCount()
 {
-  float width = Self().GetProperty(Actor::Property::SIZE_WIDTH).Get<float>();
-  float clamp = std::clamp(width, GetMinimumWidth(), GetMaximumWidth());
+  const float width = Self().GetProperty(Actor::Property::SIZE_WIDTH).Get<float>();
+  const float clamp = ClampWithMinPriority(width, GetMinimumWidth(), GetMaximumWidth());
   DALI_LOG_RELEASE_INFO("[%p] width:%f, min:%f, max:%f, clamp:%f\n", mController.Get(), width, GetMinimumWidth(), GetMaximumWidth(), clamp);
   return GetLineCount(clamp);
 }

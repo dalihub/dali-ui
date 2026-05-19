@@ -703,6 +703,16 @@ InputEditor& InputEditor::ClearFontVariation()
 // =============================================================================
 // Read Only
 // =============================================================================
+int InputEditor::GetLineCount()
+{
+  return GetImpl(*this).GetLineCount();
+}
+
+int InputEditor::GetLineCount(float width)
+{
+  return GetImpl(*this).GetLineCount(width);
+}
+
 float InputEditor::GetAdjustedFontSizeScale() const
 {
   return GetImpl(*this).GetAdjustedFontSizeScale();

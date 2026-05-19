@@ -710,8 +710,9 @@ void Controller::EventHandler::ProcessModifyEvents(Controller& controller)
 void Controller::EventHandler::TextReplacedEvent(Controller& controller)
 {
   // The natural size needs to be re-calculated.
-  controller.mImpl->mRecalculateNaturalSize = true;
-  controller.mImpl->mRecalculateLayoutSize  = true;
+  controller.mImpl->mRecalculateNaturalSize    = true;
+  controller.mImpl->mRecalculateLayoutSize     = true;
+  controller.mImpl->mRecalculateHeightForWidth = true;
 
   // The text direction needs to be updated.
   controller.mImpl->mUpdateTextDirection = true;
@@ -732,8 +733,9 @@ void Controller::EventHandler::TextInsertedEvent(Controller& controller)
   controller.mImpl->mEventData->mCheckScrollAmount = true;
 
   // The natural size needs to be re-calculated.
-  controller.mImpl->mRecalculateNaturalSize = true;
-  controller.mImpl->mRecalculateLayoutSize  = true;
+  controller.mImpl->mRecalculateNaturalSize    = true;
+  controller.mImpl->mRecalculateLayoutSize     = true;
+  controller.mImpl->mRecalculateHeightForWidth = true;
 
   // The text direction needs to be updated.
   controller.mImpl->mUpdateTextDirection = true;
@@ -759,8 +761,9 @@ void Controller::EventHandler::TextDeletedEvent(Controller& controller)
   controller.mImpl->mEventData->mCheckScrollAmount = true;
 
   // The natural size needs to be re-calculated.
-  controller.mImpl->mRecalculateNaturalSize = true;
-  controller.mImpl->mRecalculateLayoutSize  = true;
+  controller.mImpl->mRecalculateNaturalSize    = true;
+  controller.mImpl->mRecalculateLayoutSize     = true;
+  controller.mImpl->mRecalculateHeightForWidth = true;
 
   // The text direction needs to be updated.
   controller.mImpl->mUpdateTextDirection = true;

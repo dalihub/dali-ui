@@ -1760,8 +1760,9 @@ void Controller::Impl::RelayoutAllCharacters()
   mTextUpdateInfo.mFullRelayoutNeeded = true;
 
   // Need to recalculate natural size
-  mRecalculateNaturalSize = true;
-  mRecalculateLayoutSize  = true;
+  mRecalculateNaturalSize    = true;
+  mRecalculateLayoutSize     = true;
+  mRecalculateHeightForWidth = true;
 
   // remove selection
   if((mEventData != nullptr) && (mEventData->mState == EventData::SELECTING))
@@ -2139,8 +2140,9 @@ void Controller::Impl::SetMultiLineEnabled(bool enable)
     mOperationsPending                  = static_cast<OperationsMask>(mOperationsPending | layoutOperations);
 
     // Need to recalculate natural size
-    mRecalculateNaturalSize = true;
-    mRecalculateLayoutSize  = true;
+    mRecalculateNaturalSize    = true;
+    mRecalculateLayoutSize     = true;
+    mRecalculateHeightForWidth = true;
 
     RequestRelayout();
     RequestAsyncRender();
@@ -2404,6 +2406,7 @@ void Controller::Impl::ClearFontData()
   mTextUpdateInfo.mFullRelayoutNeeded = true;
   mRecalculateNaturalSize             = true;
   mRecalculateLayoutSize              = true;
+  mRecalculateHeightForWidth          = true;
 
   mOperationsPending = static_cast<OperationsMask>(mOperationsPending | VALIDATE_FONTS | SHAPE_TEXT | BIDI_INFO |
                                                    GET_GLYPH_METRICS | LAYOUT | UPDATE_LAYOUT_SIZE | REORDER | ALIGN);
