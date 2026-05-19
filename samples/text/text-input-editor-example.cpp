@@ -242,7 +242,7 @@ private:
     // Status label
     mStatusLabel = Label::New()
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(90)
+      .SetRequestedHeight(120)
       .SetFontSize(10.0f)
       .SetMultiLine(true)
       .SetBackgroundColor(UiColor(0xE8E8E8))
@@ -418,15 +418,16 @@ private:
 
   void UpdateStatus()
   {
-    bool  cursorBlinkEnabled    = mInputEditor.IsCursorBlinkEnabled();
-    float cursorBlinkInterval   = mInputEditor.GetCursorBlinkInterval();
-    uint32_t cursorPosition     = mInputEditor.GetCursorPosition();
-    int   cursorWidth           = mInputEditor.GetCursorWidth();
-    int   maximumLength         = mInputEditor.GetMaximumLength();
-    bool  editable              = mInputEditor.IsEditable();
-    bool  selectionEnabled      = mInputEditor.IsSelectionEnabled();
+    bool     cursorBlinkEnabled  = mInputEditor.IsCursorBlinkEnabled();
+    float    cursorBlinkInterval = mInputEditor.GetCursorBlinkInterval();
+    uint32_t cursorPosition      = mInputEditor.GetCursorPosition();
+    int      cursorWidth         = mInputEditor.GetCursorWidth();
+    int      maximumLength       = mInputEditor.GetMaximumLength();
+    bool     editable            = mInputEditor.IsEditable();
+    bool     selectionEnabled    = mInputEditor.IsSelectionEnabled();
     uint32_t selStart            = mInputEditor.GetSelectedTextStart();
     uint32_t selEnd              = mInputEditor.GetSelectedTextEnd();
+    int      lineCount           = mInputEditor.GetLineCount();
 
     Dali::String status;
     status += "Blink:";
@@ -454,10 +455,19 @@ private:
     status += GetLineHeightText(mInputEditor.GetLineHeight());
     status += " Mode:";
     status += GetLineHeightModeName(mInputEditor.GetLineHeightMode());
+    status += " LineCount:";
+    status += std::to_string(lineCount).c_str();
     status += "\nHAlign:";
     status += GetHorizontalAlignmentName(mInputEditor.GetHorizontalTextAlignment());
     status += " VAlign:";
     status += GetVerticalAlignmentName(mInputEditor.GetVerticalTextAlignment());
+    Dali::String selectedText = mInputEditor.GetSelectedText();
+    if(selectedText.Size() > 0)
+    {
+      status += "\nSelected: \"";
+      status += selectedText.CStr();
+      status += "\"";
+    }
 
     mStatusLabel.SetText(status);
   }
@@ -488,72 +498,17 @@ private:
 
   void OnSelectionStarted(View view)
   {
-    UpdateStatusWithSelection();
+    UpdateStatus();
   }
 
   void OnSelectionChanged(View view, uint32_t start, uint32_t end)
   {
-    UpdateStatusWithSelection();
+    UpdateStatus();
   }
 
   void OnSelectionCleared(View view)
   {
     UpdateStatus();
-  }
-
-  void UpdateStatusWithSelection()
-  {
-    bool  cursorBlinkEnabled    = mInputEditor.IsCursorBlinkEnabled();
-    float cursorBlinkInterval   = mInputEditor.GetCursorBlinkInterval();
-    uint32_t cursorPosition     = mInputEditor.GetCursorPosition();
-    int   cursorWidth           = mInputEditor.GetCursorWidth();
-    int   maximumLength         = mInputEditor.GetMaximumLength();
-    bool  editable              = mInputEditor.IsEditable();
-    bool  selectionEnabled      = mInputEditor.IsSelectionEnabled();
-    uint32_t selStart           = mInputEditor.GetSelectedTextStart();
-    uint32_t selEnd             = mInputEditor.GetSelectedTextEnd();
-
-    Dali::String status;
-    status += "Blink:";
-    status += (cursorBlinkEnabled ? "ON" : "OFF");
-    status += "(";
-    status += std::to_string(cursorBlinkInterval).substr(0, 4).c_str();
-    status += "s) Pos:";
-    status += std::to_string(cursorPosition).c_str();
-    status += " W:";
-    status += std::to_string(cursorWidth).c_str();
-    status += "\nMax:";
-    status += std::to_string(maximumLength).c_str();
-    status += " Edit:";
-    status += (editable ? "ON" : "OFF");
-    status += " Sel:";
-    status += (selectionEnabled ? "ON" : "OFF");
-    status += " [";
-    status += std::to_string(selStart).c_str();
-    status += "-";
-    status += std::to_string(selEnd).c_str();
-    status += "]";
-
-    Dali::String selectedText = mInputEditor.GetSelectedText();
-    if(selectedText.Size() > 0)
-    {
-      status += "\nSelected: \"";
-      status += selectedText.CStr();
-      status += "\"";
-    }
-
-    status += "\nWrap:";
-    status += GetLineWrapModeName(mInputEditor.GetLineWrapMode());
-    status += " LineHeight:";
-    status += GetLineHeightText(mInputEditor.GetLineHeight());
-    status += " Mode:";
-    status += GetLineHeightModeName(mInputEditor.GetLineHeightMode());
-    status += "\nHAlign:";
-    status += GetHorizontalAlignmentName(mInputEditor.GetHorizontalTextAlignment());
-    status += " VAlign:";
-    status += GetVerticalAlignmentName(mInputEditor.GetVerticalTextAlignment());
-
-    mStatusLabel.SetText(status);
   }
 
   // --- Button handlers ---

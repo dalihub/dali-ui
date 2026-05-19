@@ -1966,6 +1966,18 @@ public: // Queries & retrieves.
   int GetLineCount(float width);
 
   /**
+   * @brief Sets whether the TextChangedSignal is currently being emitted.
+   * @param[in] emitting Whether the signal is being emitted.
+   */
+  void SetTextChangedSignalEmission(bool emitting);
+
+  /**
+   * @brief Gets whether the TextChangedSignal is currently being emitted.
+   * @return Whether the signal is being emitted.
+   */
+  bool IsTextChangedSignalEmission() const;
+
+  /**
    * @brief Retrieves the text's model.
    *
    * @return A pointer to the text's model.

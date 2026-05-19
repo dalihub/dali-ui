@@ -1309,7 +1309,9 @@ void InputEditorImpl::OnRelayout(const Vector2& size, RelayoutContainer& contain
   // If there is text changed, callback is called.
   if(mTextChanged)
   {
+    mController->SetTextChangedSignalEmission(true);
     EmitTextChanged();
+    mController->SetTextChangedSignalEmission(false);
   }
 
   Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);

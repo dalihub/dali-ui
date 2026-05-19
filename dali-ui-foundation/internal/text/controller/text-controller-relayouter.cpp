@@ -109,9 +109,14 @@ float CalculateLineHeightSum(const Vector<LineRun>& lines)
  *
  * @param impl Controller::Impl reference
  * @param layoutHeight The original layout height from visualModel->GetLayoutSize().height
- * @return Effective height for vertical alignment calculation
+ * @return Effective height for editable multi-line text with trailing empty line.
+ *
+ * Editable multi-line text with a trailing empty line may have an overestimated
+ * raw layout height while relayout or measurement is in progress. In that case,
+ * use the sum of actual line heights so layout-dependent queries and vertical
+ * alignment do not treat the text as having an extra line.
  */
-float GetEffectiveLayoutHeightForVerticalAlignment(Controller::Impl& impl, float layoutHeight)
+float GetEffectiveEditableLayoutHeight(Controller::Impl& impl, float layoutHeight)
 {
   const bool      isEditable  = NULL != impl.mEventData;
   const bool      isMultiline = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
@@ -269,6 +274,13 @@ Vector3 Controller::Relayouter::GetNaturalSize(Controller& controller, bool conv
 
     naturalSize =
       CalculateLayoutSizeOnRequiredControllerSize(controller, sizeMaxWidthAndMaxHeight, requestedOperationsMask);
+
+    // Editable multi-line layout can overestimate the height when the last line is empty.
+    // Use the effective height to correct the overestimation during TextChangedSignal emission.
+    if(impl.mIsEmittingTextChangedSignal)
+    {
+      naturalSize.height = GetEffectiveEditableLayoutHeight(impl, naturalSize.height);
+    }
 
     // Stores the natural size to avoid recalculate it again
     // unless the text/style changes.
@@ -638,6 +650,13 @@ float Controller::Relayouter::GetHeightForWidth(Controller& controller, float wi
                                                              sizeRequestedWidthAndMaxHeight,
                                                              requestedOperationsMask);
 
+    // Editable multi-line layout can overestimate the height when the last line is empty.
+    // Use the effective height to correct the overestimation during TextChangedSignal emission.
+    if(impl.mIsEmittingTextChangedSignal)
+    {
+      layoutSize.height = GetEffectiveEditableLayoutHeight(impl, layoutSize.height);
+    }
+
     // The calculated layout width may not be the same as the requested width.
     // For cache efficiency, the requested width is stored.
     layoutSize.width = width;
@@ -826,7 +845,7 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
   {
     // If layoutSize is bigger than size, vertical align has no meaning.
     // Use effective layout height that accounts for trailing empty lines.
-    const float effectiveLayoutHeight = GetEffectiveLayoutHeightForVerticalAlignment(impl, layoutSize.y);
+    const float effectiveLayoutHeight = GetEffectiveEditableLayoutHeight(impl, layoutSize.y);
     if(effectiveLayoutHeight <= size.y + Math::MACHINE_EPSILON_1000)
     {
       CalculateVerticalOffset(impl, size);
@@ -1228,7 +1247,7 @@ void Controller::Relayouter::CalculateVerticalOffset(Controller::Impl& impl, con
 
   // Use effective layout height that accounts for trailing empty lines.
   // This handles delete-induced trailing empty lines.
-  layoutSize.height = GetEffectiveLayoutHeightForVerticalAlignment(impl, layoutSize.height);
+  layoutSize.height = GetEffectiveEditableLayoutHeight(impl, layoutSize.height);
 
   switch(model->mVerticalAlignment)
   {

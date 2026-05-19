@@ -1706,6 +1706,16 @@ int Controller::GetLineCount(float width)
   return mImpl->mModel->GetNumberOfLines();
 }
 
+void Controller::SetTextChangedSignalEmission(bool emitting)
+{
+  mImpl->mIsEmittingTextChangedSignal = emitting;
+}
+
+bool Controller::IsTextChangedSignalEmission() const
+{
+  return mImpl->mIsEmittingTextChangedSignal;
+}
+
 const ModelInterface* Controller::GetTextModel() const
 {
   return mImpl->mModel.Get();
