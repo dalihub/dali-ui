@@ -4,11 +4,20 @@
 # This script only needs to run mkdocs build.
 
 SOURCE_DOC_DIR="build/doc/source"
+GUIDES_DIR="docs"
 
 # Ensure the docs source directory exists
 if [ ! -d "$SOURCE_DOC_DIR" ]; then
     echo "Error: Documentation source directory '$SOURCE_DOC_DIR' not found."
     exit 1
+fi
+
+# Stage hand-authored guide pages from docs/ into the mkdocs source tree.
+if [ -d "$GUIDES_DIR" ]; then
+    echo "Staging guide pages from '$GUIDES_DIR' into '$SOURCE_DOC_DIR/guides'..."
+    rm -rf "$SOURCE_DOC_DIR/guides"
+    mkdir -p "$SOURCE_DOC_DIR/guides"
+    cp -r "$GUIDES_DIR"/. "$SOURCE_DOC_DIR/guides/"
 fi
 
 echo "Cleaning up previous build artifacts..."
