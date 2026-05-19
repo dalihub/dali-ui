@@ -26,7 +26,7 @@ namespace
 constexpr float STACK_SPACING   = 6.0f;
 constexpr float STACK_PADDING   = 12.0f;
 constexpr float BUTTON_HEIGHT   = 36.0f;
-constexpr float INPUT_HEIGHT    = 60.0f;
+constexpr float INPUT_EDITOR_HEIGHT = 200.0f;
 constexpr float BUTTON_SPACING  = 4.0f;
 constexpr float COLOR_PREVIEW_SIZE = 24.0f;
 
@@ -232,7 +232,7 @@ private:
       .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     // Title
-    Label titleLabel = Label::New("InputField Typing Style Example")
+    Label titleLabel = Label::New("InputEditor Typing Style Example")
       .SetFontSize(18.0f)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -247,8 +247,8 @@ private:
       .SetRequestedHeight(WRAP_CONTENT);
     mainContainer.Add(descLabel);
 
-    // InputField with markup
-    mInputField = InputField::New()
+    // InputEditor with markup
+    mInputEditor = InputEditor::New()
       .SetMarkupEnabled(true)
       .SetText("<font family='DejaVu Sans'><color value='#FF00FF'>Magenta</color> <color value='#00AAFF'>Blue</color> <color value='#00CC66'>Green</color> text</font>")
       .SetFontSize(20.0f)
@@ -259,15 +259,16 @@ private:
       .SetTextHandleEnabled(true)
       .SetTextHandleColor(UiColor(0x000080))
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(INPUT_HEIGHT)
+      .SetRequestedHeight(INPUT_EDITOR_HEIGHT)
       .SetBackgroundColor(UiColor(COLOR_WHITE))
       .SetPadding(Extents(12, 12, 12, 12))
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
+      .SetMaximumLength(500)
+      .SetLineHeight(1.5f)
       .SetFocusable(true);
-    mainContainer.Add(mInputField);
+    mainContainer.Add(mInputEditor);
 
     // Connect TypingStyleChangedSignal
-    mInputField.TypingStyleChangedSignal().Connect(this, &TypingStyleExample::OnTypingStyleChanged);
+    mInputEditor.TypingStyleChangedSignal().Connect(this, &TypingStyleExample::OnTypingStyleChanged);
 
     // Current Typing Style section
     mainContainer.Add(CreateSectionLabel("Current Typing Style:"));
@@ -276,31 +277,38 @@ private:
     mTypingColorView = View::New()
       .SetRequestedWidth(COLOR_PREVIEW_SIZE)
       .SetRequestedHeight(COLOR_PREVIEW_SIZE)
-      .SetBackgroundColor(mInputField.GetTypingTextColor().GetRgba());
+      .SetBackgroundColor(mInputEditor.GetTypingTextColor().GetRgba());
     mainContainer.Add(CreateColorStateRow("Color:", mTypingColorView));
 
     // Font Family row
-    mTypingFontFamilyLabel = CreateStateValueLabel(mInputField.GetTypingFontFamily().CStr());
+    mTypingFontFamilyLabel = CreateStateValueLabel(mInputEditor.GetTypingFontFamily().CStr());
     mainContainer.Add(CreateStateRow("Font Family:", mTypingFontFamilyLabel));
 
     // Font Size row
-    mTypingFontSizeLabel = CreateStateValueLabel(FormatFontSize(mInputField.GetTypingFontSize()).c_str());
+    mTypingFontSizeLabel = CreateStateValueLabel(FormatFontSize(mInputEditor.GetTypingFontSize()).c_str());
     mainContainer.Add(CreateStateRow("Font Size:", mTypingFontSizeLabel));
 
     // Font Weight row
-    mTypingFontWeightLabel = CreateStateValueLabel(ToString(mInputField.GetTypingFontWeight()));
+    mTypingFontWeightLabel = CreateStateValueLabel(ToString(mInputEditor.GetTypingFontWeight()));
     mainContainer.Add(CreateStateRow("Font Weight:", mTypingFontWeightLabel));
 
     // Font Width row
-    mTypingFontWidthLabel = CreateStateValueLabel(ToString(mInputField.GetTypingFontWidth()));
+    mTypingFontWidthLabel = CreateStateValueLabel(ToString(mInputEditor.GetTypingFontWidth()));
     mainContainer.Add(CreateStateRow("Font Width:", mTypingFontWidthLabel));
 
     // Font Slant row
-    mTypingFontSlantLabel = CreateStateValueLabel(ToString(mInputField.GetTypingFontSlant()));
+    mTypingFontSlantLabel = CreateStateValueLabel(ToString(mInputEditor.GetTypingFontSlant()));
     mainContainer.Add(CreateStateRow("Font Slant:", mTypingFontSlantLabel));
 
+    // Scrollable button area
+    StackLayout buttonContainer = StackLayout::New(StackOrientation::VERTICAL)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetSpacing(STACK_SPACING)
+      .SetBackgroundColor(UiColor(0xEFEFEF));
+
     // Color buttons section
-    mainContainer.Add(CreateSectionLabel("Typing Text Color:"));
+    buttonContainer.Add(CreateSectionLabel("Typing Text Color:"));
     Label magentaBtn = CreateButton("Magenta", COLOR_BUTTON_BG);
     Label blueBtn = CreateButton("Blue", COLOR_BUTTON_BG);
     Label greenBtn = CreateButton("Green", COLOR_BUTTON_BG);
@@ -311,10 +319,10 @@ private:
     greenBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnGreenButtonTouched);
     blackBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnBlackButtonTouched);
 
-    mainContainer.Add(CreateButtonRow({magentaBtn, blueBtn, greenBtn, blackBtn}));
+    buttonContainer.Add(CreateButtonRow({magentaBtn, blueBtn, greenBtn, blackBtn}));
 
     // Font family buttons section
-    mainContainer.Add(CreateSectionLabel("Typing Font Family:"));
+    buttonContainer.Add(CreateSectionLabel("Typing Font Family:"));
     Label sansBtn = CreateButton("Sans", COLOR_BUTTON_BG);
     Label serifBtn = CreateButton("Serif", COLOR_BUTTON_BG);
     Label monoBtn = CreateButton("Mono", COLOR_BUTTON_BG);
@@ -323,10 +331,10 @@ private:
     serifBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnSerifButtonTouched);
     monoBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnMonoButtonTouched);
 
-    mainContainer.Add(CreateButtonRow({sansBtn, serifBtn, monoBtn}));
+    buttonContainer.Add(CreateButtonRow({sansBtn, serifBtn, monoBtn}));
 
     // Font size buttons section
-    mainContainer.Add(CreateSectionLabel("Typing Font Size:"));
+    buttonContainer.Add(CreateSectionLabel("Typing Font Size:"));
     Label smallBtn = CreateButton("Small", COLOR_BUTTON_BG);
     Label mediumBtn = CreateButton("Medium", COLOR_BUTTON_BG);
     Label largeBtn = CreateButton("Large", COLOR_BUTTON_BG);
@@ -335,39 +343,65 @@ private:
     mediumBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnMediumFontSizeButtonTouched);
     largeBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnLargeFontSizeButtonTouched);
 
-    mainContainer.Add(CreateButtonRow({smallBtn, mediumBtn, largeBtn}));
+    buttonContainer.Add(CreateButtonRow({smallBtn, mediumBtn, largeBtn}));
 
     // Font weight buttons section
-    mainContainer.Add(CreateSectionLabel("Typing Font Weight:"));
+    buttonContainer.Add(CreateSectionLabel("Typing Font Weight:"));
     Label normalWeightBtn = CreateButton("Normal", COLOR_BUTTON_BG);
     Label boldBtn = CreateButton("Bold", COLOR_BUTTON_BG);
 
     normalWeightBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalWeightButtonTouched);
     boldBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnBoldButtonTouched);
 
-    mainContainer.Add(CreateButtonRow({normalWeightBtn, boldBtn}));
+    buttonContainer.Add(CreateButtonRow({normalWeightBtn, boldBtn}));
 
     // Font width buttons section
-    mainContainer.Add(CreateSectionLabel("Typing Font Width:"));
+    buttonContainer.Add(CreateSectionLabel("Typing Font Width:"));
     Label normalWidthBtn = CreateButton("Normal", COLOR_BUTTON_BG);
     Label condensedBtn = CreateButton("Condensed", COLOR_BUTTON_BG);
 
     normalWidthBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalWidthButtonTouched);
     condensedBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnCondensedButtonTouched);
 
-    mainContainer.Add(CreateButtonRow({normalWidthBtn, condensedBtn}));
+    buttonContainer.Add(CreateButtonRow({normalWidthBtn, condensedBtn}));
 
     // Font slant buttons section
-    mainContainer.Add(CreateSectionLabel("Typing Font Slant:"));
+    buttonContainer.Add(CreateSectionLabel("Typing Font Slant:"));
     Label normalSlantBtn = CreateButton("Normal", COLOR_BUTTON_BG);
     Label italicBtn = CreateButton("Italic", COLOR_BUTTON_BG);
 
     normalSlantBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalSlantButtonTouched);
     italicBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnItalicButtonTouched);
 
-    mainContainer.Add(CreateButtonRow({normalSlantBtn, italicBtn}));
+    buttonContainer.Add(CreateButtonRow({normalSlantBtn, italicBtn}));
+
+    // ScrollView for style buttons
+    ScrollView scrollView = ScrollView::New()
+      .SetScrollDirection(ScrollDirection::Vertical)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(0.0f)
+      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
+      .SetContent(buttonContainer);
+
+    mainContainer.Add(scrollView);
 
     window.Add(mainContainer);
+
+    window.KeyEventSignal().Connect(this, &TypingStyleExample::OnKeyEvent);
+  }
+
+  void OnKeyEvent(Window window, KeyEvent event)
+  {
+    if(event.GetState() != KeyEvent::UP)
+    {
+      return;
+    }
+
+    if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
+    {
+      mApplication.Quit();
+      return;
+    }
   }
 
   void OnTypingStyleChanged(View view, Text::TypingStyle::Mask mask)
@@ -402,32 +436,32 @@ private:
 
   void UpdateTypingColorView()
   {
-    mTypingColorView.SetBackgroundColor(mInputField.GetTypingTextColor().GetRgba());
+    mTypingColorView.SetBackgroundColor(mInputEditor.GetTypingTextColor().GetRgba());
   }
 
   void UpdateTypingFontFamilyLabel()
   {
-    mTypingFontFamilyLabel.SetText(mInputField.GetTypingFontFamily());
+    mTypingFontFamilyLabel.SetText(mInputEditor.GetTypingFontFamily());
   }
 
   void UpdateTypingFontSizeLabel()
   {
-    mTypingFontSizeLabel.SetText(FormatFontSize(mInputField.GetTypingFontSize()).c_str());
+    mTypingFontSizeLabel.SetText(FormatFontSize(mInputEditor.GetTypingFontSize()).c_str());
   }
 
   void UpdateTypingFontWeightLabel()
   {
-    mTypingFontWeightLabel.SetText(ToString(mInputField.GetTypingFontWeight()));
+    mTypingFontWeightLabel.SetText(ToString(mInputEditor.GetTypingFontWeight()));
   }
 
   void UpdateTypingFontWidthLabel()
   {
-    mTypingFontWidthLabel.SetText(ToString(mInputField.GetTypingFontWidth()));
+    mTypingFontWidthLabel.SetText(ToString(mInputEditor.GetTypingFontWidth()));
   }
 
   void UpdateTypingFontSlantLabel()
   {
-    mTypingFontSlantLabel.SetText(ToString(mInputField.GetTypingFontSlant()));
+    mTypingFontSlantLabel.SetText(ToString(mInputEditor.GetTypingFontSlant()));
   }
 
   // Color button handlers
@@ -435,7 +469,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingTextColor(UiColor(Vector4(1.0f, 0.0f, 1.0f, 1.0f)));
+      mInputEditor.SetTypingTextColor(UiColor(Vector4(1.0f, 0.0f, 1.0f, 1.0f)));
       UpdateTypingColorView();
     }
     return true;
@@ -445,7 +479,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingTextColor(UiColor(Vector4(0.0f, 0.67f, 1.0f, 1.0f)));
+      mInputEditor.SetTypingTextColor(UiColor(Vector4(0.0f, 0.67f, 1.0f, 1.0f)));
       UpdateTypingColorView();
     }
     return true;
@@ -455,7 +489,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingTextColor(UiColor(Vector4(0.0f, 0.8f, 0.4f, 1.0f)));
+      mInputEditor.SetTypingTextColor(UiColor(Vector4(0.0f, 0.8f, 0.4f, 1.0f)));
       UpdateTypingColorView();
     }
     return true;
@@ -465,7 +499,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingTextColor(UiColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)));
+      mInputEditor.SetTypingTextColor(UiColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)));
       UpdateTypingColorView();
     }
     return true;
@@ -476,7 +510,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontFamily("DejaVu Sans");
+      mInputEditor.SetTypingFontFamily("DejaVu Sans");
       UpdateTypingFontFamilyLabel();
     }
     return true;
@@ -486,7 +520,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontFamily("DejaVu Serif");
+      mInputEditor.SetTypingFontFamily("DejaVu Serif");
       UpdateTypingFontFamilyLabel();
     }
     return true;
@@ -496,7 +530,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontFamily("DejaVu Sans Mono");
+      mInputEditor.SetTypingFontFamily("DejaVu Sans Mono");
       UpdateTypingFontFamilyLabel();
     }
     return true;
@@ -507,7 +541,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontSize(14.0f);
+      mInputEditor.SetTypingFontSize(14.0f);
       UpdateTypingFontSizeLabel();
     }
     return true;
@@ -517,7 +551,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontSize(20.0f);
+      mInputEditor.SetTypingFontSize(20.0f);
       UpdateTypingFontSizeLabel();
     }
     return true;
@@ -527,7 +561,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontSize(28.0f);
+      mInputEditor.SetTypingFontSize(28.0f);
       UpdateTypingFontSizeLabel();
     }
     return true;
@@ -538,7 +572,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontWeight(Text::FontWeight::NORMAL);
+      mInputEditor.SetTypingFontWeight(Text::FontWeight::NORMAL);
       UpdateTypingFontWeightLabel();
     }
     return true;
@@ -548,7 +582,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontWeight(Text::FontWeight::BOLD);
+      mInputEditor.SetTypingFontWeight(Text::FontWeight::BOLD);
       UpdateTypingFontWeightLabel();
     }
     return true;
@@ -559,7 +593,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontWidth(Text::FontWidth::NORMAL);
+      mInputEditor.SetTypingFontWidth(Text::FontWidth::NORMAL);
       UpdateTypingFontWidthLabel();
     }
     return true;
@@ -569,7 +603,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontWidth(Text::FontWidth::CONDENSED);
+      mInputEditor.SetTypingFontWidth(Text::FontWidth::CONDENSED);
       UpdateTypingFontWidthLabel();
     }
     return true;
@@ -580,7 +614,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontSlant(Text::FontSlant::NORMAL);
+      mInputEditor.SetTypingFontSlant(Text::FontSlant::NORMAL);
       UpdateTypingFontSlantLabel();
     }
     return true;
@@ -590,7 +624,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.SetTypingFontSlant(Text::FontSlant::ITALIC);
+      mInputEditor.SetTypingFontSlant(Text::FontSlant::ITALIC);
       UpdateTypingFontSlantLabel();
     }
     return true;
@@ -598,7 +632,7 @@ private:
 
 private:
   Application& mApplication;
-  InputField mInputField;
+  InputEditor mInputEditor;
   View mTypingColorView;
   Label mTypingFontFamilyLabel;
   Label mTypingFontSizeLabel;
@@ -610,6 +644,7 @@ private:
 int main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
+  UiConfig::New().Apply();
   TypingStyleExample example(application);
   application.MainLoop();
   return 0;
