@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
 {
@@ -33,110 +34,185 @@ namespace Ui
 /**
  * @brief TextVisual is to render a text.
  */
-namespace TextVisual
-{
-/**
- * @brief TextVisual Property.
- */
-namespace Property
-{
-/**
- * @brief Enumeration for the instance of properties belonging to the TextVisual.
- */
-enum
+struct TextVisualPropertyIndex
 {
   /**
-   * @brief The text to display in UTF-8 format.
-   * @details name "text", type Property::STRING.
+   * @brief Enumeration for the start and end property ranges for this visual.
    */
-  TEXT = VISUAL_IMMUTABLE_PROPERTY_START_INDEX,
+  enum PropertyRange
+  {
+    MUTABLE_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::MUTABLE_PROPERTY_END_INDEX + 1,
+    MUTABLE_PROPERTY_END_INDEX   = MUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+    IMMUTABLE_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::IMMUTABLE_PROPERTY_END_INDEX + 1,
+    IMMUTABLE_PROPERTY_END_INDEX   = IMMUTABLE_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+
+    READ_ONLY_PROPERTY_START_INDEX = Ui::VisualBasePropertyIndex::READ_ONLY_PROPERTY_END_INDEX + 1,
+    READ_ONLY_PROPERTY_END_INDEX   = READ_ONLY_PROPERTY_START_INDEX + Dali::PropertyRanges::DEFAULT_PROPERTY_MAX_COUNT_PER_DERIVATION - 1,
+  };
 
   /**
-   * @brief The requested font family to use.
-   * @details name "fontFamily", type Property::STRING.
+   * @brief Enumeration for the instance of properties belonging to the TextVisual.
    */
-  FONT_FAMILY,
+  enum
+  {
+    /**
+     * @brief The text to display in UTF-8 format.
+     * @details Name "text", type Property::STRING.
+     * @see TextVisual::SetText(), TextVisual::GetText().
+     */
+    TEXT = MUTABLE_PROPERTY_START_INDEX,
 
-  /**
-   * @brief The requested font style to use.
-   * @details name "fontStyle", type Property::MAP.
-   */
-  FONT_STYLE,
+    /**
+     * @brief The font family of the text.
+     * @details Name "fontFamily", type Property::STRING.
+     * @see TextVisual::SetFontFamily(), TextVisual::GetFontFamily().
+     */
+    FONT_FAMILY,
 
-  /**
-   * @brief The size of font in points.
-   * @details name "pointSize", type Property::FLOAT.
-   */
-  POINT_SIZE,
+    /**
+     * @brief The size of font in pixels.
+     * @details Name "fontSize", type Property::FLOAT.
+     * @see TextVisual::SetFontSize(), TextVisual::GetFontSize().
+     */
+    FONT_SIZE,
 
-  /**
-   * @brief The single-line or multi-line layout option.
-   * @details name "multiLine", type Property::BOOLEAN, default false.
-   */
-  MULTI_LINE,
+    /**
+     * @brief The font weight.
+     * @details Name "fontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontWeight (Property::INTEGER).
+     * @see TextVisual::SetFontWeight(), TextVisual::GetFontWeight().
+     */
+    FONT_WEIGHT,
 
-  /**
-   * @brief The line horizontal alignment.
-   * @details Name "horizontalAlignment", type HorizontalAlignment::Type (Property::INTEGER) or Property::STRING.
-   * @note Optional. If not specified, the default is HorizontalAlignment::BEGIN
-   * @note Return type is HorizontalAlignment::Type (Property::INTEGER)
-   */
-  HORIZONTAL_ALIGNMENT,
+    /**
+     * @brief The font width.
+     * @details Name "fontWidth", type Text::FontWidth (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontWidth (Property::INTEGER).
+     * @see TextVisual::SetFontWidth(), TextVisual::GetFontWidth().
+     */
+    FONT_WIDTH,
 
-  /**
-   * @brief The line vertical alignment.
-   * @details name "verticalAlignment", VerticalAlignment::Type (Property::INTEGER) or  Property::STRING
-   * @note Optional. If not specified, the default is VerticalAlignment::TOP
-   * @note Return type is VerticalAlignment::Type (Property::INTEGER)`
-   */
-  VERTICAL_ALIGNMENT,
+    /**
+     * @brief The font slant.
+     * @details Name "fontSlant", type Text::FontSlant (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::FontSlant (Property::INTEGER).
+     * @see TextVisual::SetFontSlant(), TextVisual::GetFontSlant().
+     */
+    FONT_SLANT,
 
-  /**
-   * @brief The color of the text.
-   * @details name "textColor", type Property::VECTOR4.
-   */
-  TEXT_COLOR,
+    /**
+     * @brief The single-line or multi-line layout option.
+     * @details Name "multiLine", type Property::BOOLEAN.
+     * @see TextVisual::SetMultiLine(), TextVisual::IsMultiLine().
+     */
+    MULTI_LINE,
 
-  /**
-   * @brief  Whether the mark-up processing is enabled.
-   * @details name "enableMarkup", type Property::BOOLEAN.
-   */
-  ENABLE_MARKUP,
+    /**
+     * @brief Line wrap mode when text lines are greater than the layout width.
+     * @details Name "lineWrapMode", type Text::LineWrapMode (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::LineWrapMode (Property::INTEGER).
+     * @see TextVisual::SetLineWrapMode(), TextVisual::GetLineWrapMode().
+     */
+    LINE_WRAP_MODE,
 
-  /**
-   * @brief The shadow parameters.
-   * @details name "shadow", type Property::MAP.
-   */
-  SHADOW,
+    /**
+     * @brief The horizontal alignment.
+     * @details Name "horizontalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::Alignment (Property::INTEGER).
+     * @see TextVisual::SetHorizontalAlignment(), TextVisual::GetHorizontalAlignment().
+     */
+    HORIZONTAL_ALIGNMENT,
 
-  /**
-   * @brief The default underline parameters.
-   * @details name "underline", type Property::MAP.
-   */
-  UNDERLINE,
+    /**
+     * @brief The vertical alignment.
+     * @details Name "verticalAlignment", type Text::Alignment (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::Alignment (Property::INTEGER).
+     * @see TextVisual::SetVerticalAlignment(), TextVisual::GetVerticalAlignment().
+     */
+    VERTICAL_ALIGNMENT,
 
-  /**
-   * @brief The default outline parameters.
-   * @details name "outline", type Property::MAP.
-   */
-  OUTLINE,
+    /**
+     * @brief The overflow mode.
+     * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::OverflowMode (Property::INTEGER).
+     * @see TextVisual::SetOverflowMode(), TextVisual::GetOverflowMode().
+     */
+    OVERFLOW_MODE,
 
-  /**
-   * @brief The default lineThrough parameters.
-   * @details name "lineThrough", type Property::MAP.
-   */
-  LINE_THROUGH,
+    /**
+     * @brief The line height.
+     * @details Name "lineHeight", type Property::FLOAT.
+     * @see TextVisual::SetLineHeight(), TextVisual::GetLineHeight().
+     */
+    LINE_HEIGHT,
 
-  /**
-   * @brief The default background parameters.
-   * @details name "background", type Property::MAP.
-   */
-  BACKGROUND
-};
+    /**
+     * @brief The line height mode.
+     * @details Name "lineHeightMode", type Text::LineHeightMode (Property::INTEGER) or Property::STRING.
+     * @note Return type is Text::LineHeightMode (Property::INTEGER).
+     * @see TextVisual::SetLineHeightMode(), TextVisual::GetLineHeightMode().
+     */
+    LINE_HEIGHT_MODE,
 
-} // namespace Property
+    /**
+     * @brief The color of the text.
+     * @details Name "textColor", type Property::VECTOR4.
+     * @see TextVisual::SetTextColor(), TextVisual::GetTextColor().
+     */
+    TEXT_COLOR,
 
-} // namespace TextVisual
+    /**
+     * @brief Whether mark-up processing is enabled for the text.
+     * @details Name "markupEnabled", type Property::BOOLEAN.
+     * @see TextVisual::SetMarkupEnabled(), TextVisual::IsMarkupEnabled().
+     */
+    MARKUP_ENABLED,
+
+    /**
+     * @brief Whether cutout rendering is enabled for the text.
+     * @details Name "cutoutEnabled", type Property::BOOLEAN.
+     * @see TextVisual::SetCutoutEnabled(), TextVisual::IsCutoutEnabled().
+     */
+    CUTOUT_ENABLED,
+
+    /**
+     * @brief The shadow parameters.
+     * @details Name "shadow", type Property::MAP.
+     * @see TextVisual::SetShadow(), TextVisual::GetShadow().
+     */
+    SHADOW,
+
+    /**
+     * @brief The underline parameters.
+     * @details Name "underline", type Property::MAP.
+     * @see TextVisual::SetUnderline(), TextVisual::GetUnderline().
+     */
+    UNDERLINE,
+
+    /**
+     * @brief The outline parameters.
+     * @details Name "outline", type Property::MAP.
+     * @see TextVisual::SetOutline(), TextVisual::GetOutline().
+     */
+    OUTLINE,
+
+    /**
+     * @brief The line-through parameters.
+     * @details Name "lineThrough", type Property::MAP.
+     * @see TextVisual::SetLineThrough(), TextVisual::GetLineThrough().
+     */
+    LINE_THROUGH,
+
+    /**
+     * @brief The background parameters.
+     * @details Name "textBackground", type Property::MAP.
+     * @see TextVisual::SetBackground(), TextVisual::GetBackground().
+     */
+    BACKGROUND,
+  };
+
+}; // struct TextVisualPropertyIndex
 
 /**
  * @}

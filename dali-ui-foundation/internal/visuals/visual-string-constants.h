@@ -129,17 +129,24 @@ extern const char* const ENABLE_ASPECT_FIT_NAME;
 // Text visual
 extern const char* const TEXT_PROPERTY;
 extern const char* const FONT_FAMILY_PROPERTY;
-extern const char* const FONT_STYLE_PROPERTY;
-extern const char* const POINT_SIZE_PROPERTY;
+extern const char* const FONT_SIZE_PROPERTY;
+extern const char* const FONT_WEIGHT_PROPERTY;
+extern const char* const FONT_WIDTH_PROPERTY;
+extern const char* const FONT_SLANT_PROPERTY;
 extern const char* const MULTI_LINE_PROPERTY;
+extern const char* const LINE_WRAP_MODE_PROPERTY;
 extern const char* const HORIZONTAL_ALIGNMENT_PROPERTY;
 extern const char* const VERTICAL_ALIGNMENT_PROPERTY;
+extern const char* const OVERFLOW_MODE_PROPERTY;
+extern const char* const LINE_HEIGHT_PROPERTY;
+extern const char* const LINE_HEIGHT_MODE_PROPERTY;
 extern const char* const TEXT_COLOR_PROPERTY;
-extern const char* const ENABLE_MARKUP_PROPERTY;
+extern const char* const MARKUP_ENABLED_PROPERTY;
+extern const char* const CUTOUT_ENABLED_PROPERTY;
 extern const char* const SHADOW_PROPERTY;
 extern const char* const UNDERLINE_PROPERTY;
 extern const char* const OUTLINE_PROPERTY;
-extern const char* const BACKGROUND_PROPERTY;
+extern const char* const TEXT_BACKGROUND_PROPERTY;
 extern const char* const STRIKETHROUGH_PROPERTY;
 
 // NPatch visual

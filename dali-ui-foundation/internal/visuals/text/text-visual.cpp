@@ -84,75 +84,35 @@ const char* GetRequestTypeName(Text::Async::RequestType type)
 }
 #endif
 
-/**
- * Return Property index for the given string key
- * param[in] stringKey the string index key
- * return the key as an index
- */
-
-Dali::Property::Index StringKeyToIndexKey(const Dali::String& stringKey)
+struct NameIndexMatch
 {
-  Dali::Property::Index result = Property::INVALID_KEY;
+  const char* const name;
+  Property::Index   index;
+};
 
-  if(stringKey == VISUAL_TYPE)
-  {
-    result = Ui::VisualBasePropertyIndex::TYPE;
-  }
-  else if(stringKey == TEXT_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::TEXT;
-  }
-  else if(stringKey == FONT_FAMILY_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::FONT_FAMILY;
-  }
-  else if(stringKey == FONT_STYLE_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::FONT_STYLE;
-  }
-  else if(stringKey == POINT_SIZE_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::POINT_SIZE;
-  }
-  else if(stringKey == MULTI_LINE_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::MULTI_LINE;
-  }
-  else if(stringKey == HORIZONTAL_ALIGNMENT_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::HORIZONTAL_ALIGNMENT;
-  }
-  else if(stringKey == VERTICAL_ALIGNMENT_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::VERTICAL_ALIGNMENT;
-  }
-  else if(stringKey == TEXT_COLOR_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::TEXT_COLOR;
-  }
-  else if(stringKey == ENABLE_MARKUP_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::ENABLE_MARKUP;
-  }
-  else if(stringKey == SHADOW_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::SHADOW;
-  }
-  else if(stringKey == UNDERLINE_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::UNDERLINE;
-  }
-  else if(stringKey == OUTLINE_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::OUTLINE;
-  }
-  else if(stringKey == BACKGROUND_PROPERTY)
-  {
-    result = Ui::TextVisual::Property::BACKGROUND;
-  }
-
-  return result;
-}
+const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
+  {TEXT_PROPERTY, Ui::TextVisualPropertyIndex::TEXT},
+  {FONT_FAMILY_PROPERTY, Ui::TextVisualPropertyIndex::FONT_FAMILY},
+  {FONT_SIZE_PROPERTY, Ui::TextVisualPropertyIndex::FONT_SIZE},
+  {FONT_WEIGHT_PROPERTY, Ui::TextVisualPropertyIndex::FONT_WEIGHT},
+  {FONT_WIDTH_PROPERTY, Ui::TextVisualPropertyIndex::FONT_WIDTH},
+  {FONT_SLANT_PROPERTY, Ui::TextVisualPropertyIndex::FONT_SLANT},
+  {MULTI_LINE_PROPERTY, Ui::TextVisualPropertyIndex::MULTI_LINE},
+  {LINE_WRAP_MODE_PROPERTY, Ui::TextVisualPropertyIndex::LINE_WRAP_MODE},
+  {HORIZONTAL_ALIGNMENT_PROPERTY, Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT},
+  {VERTICAL_ALIGNMENT_PROPERTY, Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT},
+  {OVERFLOW_MODE_PROPERTY, Ui::TextVisualPropertyIndex::OVERFLOW_MODE},
+  {LINE_HEIGHT_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT},
+  {LINE_HEIGHT_MODE_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE},
+  {TEXT_COLOR_PROPERTY, Ui::TextVisualPropertyIndex::TEXT_COLOR},
+  {MARKUP_ENABLED_PROPERTY, Ui::TextVisualPropertyIndex::MARKUP_ENABLED},
+  {CUTOUT_ENABLED_PROPERTY, Ui::TextVisualPropertyIndex::CUTOUT_ENABLED},
+  {SHADOW_PROPERTY, Ui::TextVisualPropertyIndex::SHADOW},
+  {UNDERLINE_PROPERTY, Ui::TextVisualPropertyIndex::UNDERLINE},
+  {OUTLINE_PROPERTY, Ui::TextVisualPropertyIndex::OUTLINE},
+  {TEXT_BACKGROUND_PROPERTY, Ui::TextVisualPropertyIndex::BACKGROUND},
+};
+const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
 void TextColorConstraint(Vector4& current, const PropertyInputContainer& inputs)
 {
@@ -187,27 +147,6 @@ TextVisualPtr TextVisual::New(VisualFactoryCache& factoryCache, TextVisualShader
   return textVisualPtr;
 }
 
-Property::Map TextVisual::ConvertStringKeysToIndexKeys(const Property::Map& propertyMap)
-{
-  Property::Map outMap;
-
-  for(Property::Map::SizeType index = 0u, count = propertyMap.Count(); index < count; ++index)
-  {
-    const KeyValuePair& keyValue = propertyMap.GetKeyValue(index);
-
-    Property::Index indexKey = keyValue.first.indexKey;
-
-    if(keyValue.first.type == Property::Key::STRING)
-    {
-      indexKey = StringKeyToIndexKey(keyValue.first.stringKey);
-    }
-
-    outMap.Insert(indexKey, keyValue.second);
-  }
-
-  return outMap;
-}
-
 float TextVisual::GetHeightForWidth(float width)
 {
   return mController->GetHeightForWidth(width);
@@ -227,39 +166,43 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
 
   std::string text;
   mController->GetText(text);
-  map.Insert(Ui::TextVisual::Property::TEXT, ToPropertyValue(text));
+  map.Insert(Ui::TextVisualPropertyIndex::TEXT, ToPropertyValue(text));
 
-  map.Insert(Ui::TextVisual::Property::FONT_FAMILY, ToPropertyValue(mController->GetDefaultFontFamily()));
+  map.Insert(Ui::TextVisualPropertyIndex::FONT_FAMILY, ToPropertyValue(mController->GetDefaultFontFamily()));
+  map.Insert(Ui::TextVisualPropertyIndex::FONT_SIZE, mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE));
+  map.Insert(Ui::TextVisualPropertyIndex::FONT_WEIGHT, Text::ToFontWeight(mController->GetDefaultFontWeight()));
+  map.Insert(Ui::TextVisualPropertyIndex::FONT_WIDTH, Text::ToFontWidth(mController->GetDefaultFontWidth()));
+  map.Insert(Ui::TextVisualPropertyIndex::FONT_SLANT, Text::ToFontSlant(mController->GetDefaultFontSlant()));
 
-  GetFontStyleProperty(mController, value, Text::FontStyle::DEFAULT);
-  map.Insert(Ui::TextVisual::Property::FONT_STYLE, value);
+  map.Insert(Ui::TextVisualPropertyIndex::MULTI_LINE, mController->IsMultiLineEnabled());
+  map.Insert(Ui::TextVisualPropertyIndex::LINE_WRAP_MODE, mController->GetLineWrapMode());
 
-  map.Insert(Ui::TextVisual::Property::POINT_SIZE, mController->GetDefaultFontSize(Text::Controller::POINT_SIZE));
+  map.Insert(Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT, mController->GetHorizontalAlignment());
+  map.Insert(Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT, mController->GetVerticalAlignment());
 
-  map.Insert(Ui::TextVisual::Property::MULTI_LINE, mController->IsMultiLineEnabled());
+  map.Insert(Ui::TextVisualPropertyIndex::OVERFLOW_MODE, mOverflowMode);
+  map.Insert(Ui::TextVisualPropertyIndex::LINE_HEIGHT, mLineHeight);
+  map.Insert(Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE, mLineHeightMode);
 
-  map.Insert(Ui::TextVisual::Property::HORIZONTAL_ALIGNMENT, mController->GetHorizontalAlignment());
+  map.Insert(Ui::TextVisualPropertyIndex::TEXT_COLOR, mController->GetDefaultColor());
 
-  map.Insert(Ui::TextVisual::Property::VERTICAL_ALIGNMENT, mController->GetVerticalAlignment());
-
-  map.Insert(Ui::TextVisual::Property::TEXT_COLOR, mController->GetDefaultColor());
-
-  map.Insert(Ui::TextVisual::Property::ENABLE_MARKUP, mController->IsMarkupProcessorEnabled());
+  map.Insert(Ui::TextVisualPropertyIndex::MARKUP_ENABLED, mController->IsMarkupProcessorEnabled());
+  map.Insert(Ui::TextVisualPropertyIndex::CUTOUT_ENABLED, mController->IsTextCutout());
 
   GetShadowProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisual::Property::SHADOW, value);
+  map.Insert(Ui::TextVisualPropertyIndex::SHADOW, value);
 
   GetUnderlineProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisual::Property::UNDERLINE, value);
+  map.Insert(Ui::TextVisualPropertyIndex::UNDERLINE, value);
 
   GetOutlineProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisual::Property::OUTLINE, value);
+  map.Insert(Ui::TextVisualPropertyIndex::OUTLINE, value);
 
   GetBackgroundProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisual::Property::BACKGROUND, value);
+  map.Insert(Ui::TextVisualPropertyIndex::BACKGROUND, value);
 
   GetStrikethroughProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisual::Property::LINE_THROUGH, value);
+  map.Insert(Ui::TextVisualPropertyIndex::LINE_THROUGH, value);
 }
 
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -268,7 +211,7 @@ void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
   map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::TEXT);
   std::string text;
   mController->GetText(text);
-  map.Insert(Ui::TextVisual::Property::TEXT, ToPropertyValue(text));
+  map.Insert(Ui::TextVisualPropertyIndex::TEXT, ToPropertyValue(text));
 }
 
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
@@ -282,12 +225,15 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mAnimatableTextColorPropertyIndex(Property::INVALID_INDEX),
   mTextColorAnimatableIndex(Property::INVALID_INDEX),
   mTextRequireRenderPropertyIndex(Property::INVALID_INDEX),
-  mRendererUpdateNeeded(false),
-  mTextRequireRender(false),
-  mIsConstraintAppliedAlways(false),
+  mLineHeight(Text::LINE_HEIGHT_AUTO),
+  mLineHeightMode(Text::LineHeightMode::RELATIVE),
+  mOverflowMode(Text::OverflowMode::ELLIPSIS),
   mTextLoadingTaskId(0u),
   mNaturalSizeTaskId(0u),
   mHeightForWidthTaskId(0u),
+  mRendererUpdateNeeded(false),
+  mTextRequireRender(false),
+  mIsConstraintAppliedAlways(false),
   mIsTextLoadingTaskRunning(false),
   mIsNaturalSizeTaskRunning(false),
   mIsHeightForWidthTaskRunning(false)
@@ -311,6 +257,27 @@ void TextVisual::OnInitialize()
   mTextRequireRenderPropertyIndex = mImpl->mRenderer.RegisterUniqueProperty("requireRender", mTextRequireRender);
   mHasMultipleTextColorsIndex =
     mImpl->mRenderer.RegisterUniqueProperty("uHasMultipleTextColors", static_cast<float>(false));
+
+  // Apply overflow mode now. (Because contorller's text elide disabled as default)
+  switch(mOverflowMode)
+  {
+    case Text::OverflowMode::CLIP:
+    {
+      mController->SetTextElideEnabled(false);
+      break;
+    }
+    case Text::OverflowMode::ELLIPSIS:
+    {
+      mController->SetTextElideEnabled(true);
+      break;
+    }
+  }
+
+  // Retrieve the layout engine to set the cursor's width.
+  Text::Layout::Engine& engine = mController->GetLayoutEngine();
+
+  // Sets 0 as cursor's width.
+  engine.SetCursorWidth(0u); // Do not layout space for the cursor.
 }
 
 void TextVisual::DoSetProperties(const Property::Map& propertyMap)
@@ -318,25 +285,22 @@ void TextVisual::DoSetProperties(const Property::Map& propertyMap)
   for(Property::Map::SizeType index = 0u, count = propertyMap.Count(); index < count; ++index)
   {
     const KeyValuePair& keyValue = propertyMap.GetKeyValue(index);
-
-    Property::Index indexKey = keyValue.first.indexKey;
-
-    if(keyValue.first.type == Property::Key::STRING)
+    if(keyValue.first.type == Property::Key::INDEX)
     {
-      indexKey = StringKeyToIndexKey(keyValue.first.stringKey);
+      DoSetProperty(keyValue.first.indexKey, keyValue.second);
     }
-
-    DoSetProperty(indexKey, keyValue.second);
+    else
+    {
+      for(int i = 0; i < NAME_INDEX_MATCH_TABLE_SIZE; ++i)
+      {
+        if(keyValue.first == NAME_INDEX_MATCH_TABLE[i].name)
+        {
+          DoSetProperty(NAME_INDEX_MATCH_TABLE[i].index, keyValue.second);
+          break;
+        }
+      }
+    }
   }
-
-  // Elide the text if it exceeds the boundaries.
-  mController->SetTextElideEnabled(true);
-
-  // Retrieve the layout engine to set the cursor's width.
-  Text::Layout::Engine& engine = mController->GetLayoutEngine();
-
-  // Sets 0 as cursor's width.
-  engine.SetCursorWidth(0u); // Do not layout space for the cursor.
 }
 
 void TextVisual::DoSetOnScene(Actor& actor)
@@ -473,42 +437,67 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
 {
   switch(index)
   {
-    case Ui::TextVisual::Property::ENABLE_MARKUP:
-    {
-      const bool enableMarkup = propertyValue.Get<bool>();
-      mController->SetMarkupProcessorEnabled(enableMarkup);
-      break;
-    }
-    case Ui::TextVisual::Property::TEXT:
+    case Ui::TextVisualPropertyIndex::TEXT:
     {
       mController->SetText(ToStdString(propertyValue));
       break;
     }
-    case Ui::TextVisual::Property::FONT_FAMILY:
+    case Ui::TextVisualPropertyIndex::FONT_FAMILY:
     {
       SetFontFamilyProperty(mController, propertyValue);
       break;
     }
-    case Ui::TextVisual::Property::FONT_STYLE:
+    case Ui::TextVisualPropertyIndex::FONT_SIZE:
     {
-      SetFontStyleProperty(mController, propertyValue, Text::FontStyle::DEFAULT);
-      break;
-    }
-    case Ui::TextVisual::Property::POINT_SIZE:
-    {
-      const float pointSize = propertyValue.Get<float>();
-      if(!Equals(mController->GetDefaultFontSize(Text::Controller::POINT_SIZE), pointSize))
+      const float fontSize = propertyValue.Get<float>();
+      if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize))
       {
-        mController->SetDefaultFontSize(pointSize, Text::Controller::POINT_SIZE);
+        mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
       }
       break;
     }
-    case Ui::TextVisual::Property::MULTI_LINE:
+    case Ui::TextVisualPropertyIndex::FONT_WEIGHT:
+    {
+      Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetFontWeightEnumeration(propertyValue, weight))
+      {
+        mController->SetDefaultFontWeight(Text::ToTextAbstractionFontWeight(weight));
+      }
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::FONT_WIDTH:
+    {
+      Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetFontWidthEnumeration(propertyValue, width))
+      {
+        mController->SetDefaultFontWidth(Text::ToTextAbstractionFontWidth(width));
+      }
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::FONT_SLANT:
+    {
+      Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetFontSlantEnumeration(propertyValue, slant))
+      {
+        mController->SetDefaultFontSlant(Text::ToTextAbstractionFontSlant(slant));
+      }
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::MULTI_LINE:
     {
       mController->SetMultiLineEnabled(propertyValue.Get<bool>());
       break;
     }
-    case Ui::TextVisual::Property::HORIZONTAL_ALIGNMENT:
+    case Ui::TextVisualPropertyIndex::LINE_WRAP_MODE:
+    {
+      Text::LineWrapMode mode(static_cast<Text::LineWrapMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetLineWrapModeEnumeration(propertyValue, mode))
+      {
+        mController->SetLineWrapMode(mode);
+      }
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::HORIZONTAL_ALIGNMENT:
     {
       if(mController)
       {
@@ -520,7 +509,7 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisual::Property::VERTICAL_ALIGNMENT:
+    case Ui::TextVisualPropertyIndex::VERTICAL_ALIGNMENT:
     {
       if(mController)
       {
@@ -532,7 +521,58 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisual::Property::TEXT_COLOR:
+    case Ui::TextVisualPropertyIndex::OVERFLOW_MODE:
+    {
+      Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetOverflowModeEnumeration(propertyValue, mode))
+      {
+        if(mOverflowMode != mode)
+        {
+          mOverflowMode = mode;
+          switch(mode)
+          {
+            case Text::OverflowMode::CLIP:
+            {
+              mController->SetTextElideEnabled(false);
+              break;
+            }
+            case Text::OverflowMode::ELLIPSIS:
+            {
+              mController->SetTextElideEnabled(true);
+              break;
+            }
+          }
+        }
+      }
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::LINE_HEIGHT:
+    {
+      float lineHeight = 0.0f;
+      if(propertyValue.Get(lineHeight))
+      {
+        if(!Dali::Equals(mLineHeight, lineHeight))
+        {
+          mLineHeight = lineHeight;
+          UpdateLineHeight();
+        }
+      }
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE:
+    {
+      Text::LineHeightMode mode(static_cast<Text::LineHeightMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Text::GetLineHeightModeEnumeration(propertyValue, mode))
+      {
+        if(mLineHeightMode != mode)
+        {
+          mLineHeightMode = mode;
+          UpdateLineHeight();
+        }
+      }
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::TEXT_COLOR:
     {
       const Vector4& textColor = propertyValue.Get<Vector4>();
       if(mController->GetDefaultColor() != textColor)
@@ -541,31 +581,61 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisual::Property::SHADOW:
+    case Ui::TextVisualPropertyIndex::MARKUP_ENABLED:
+    {
+      mController->SetMarkupProcessorEnabled(propertyValue.Get<bool>());
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::CUTOUT_ENABLED:
+    {
+      mController->SetTextCutout(propertyValue.Get<bool>());
+      break;
+    }
+    case Ui::TextVisualPropertyIndex::SHADOW:
     {
       SetShadowProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case Ui::TextVisual::Property::UNDERLINE:
+    case Ui::TextVisualPropertyIndex::UNDERLINE:
     {
       SetUnderlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case Ui::TextVisual::Property::OUTLINE:
+    case Ui::TextVisualPropertyIndex::OUTLINE:
     {
       SetOutlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case Ui::TextVisual::Property::LINE_THROUGH:
+    case Ui::TextVisualPropertyIndex::LINE_THROUGH:
     {
       SetStrikethroughProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
-    case Ui::TextVisual::Property::BACKGROUND:
+    case Ui::TextVisualPropertyIndex::BACKGROUND:
     {
       SetBackgroundProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
+  }
+}
+
+void TextVisual::UpdateLineHeight()
+{
+  if(Equals(mLineHeight, Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
+  {
+    // clear explicit line height and use the natural line height.
+    mController->SetRelativeLineSize(-1.0f);
+    mController->SetDefaultLineSize(0.0f);
+  }
+  else if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
+  {
+    mController->SetDefaultLineSize(0.0f);
+    mController->SetRelativeLineSize(mLineHeight);
+  }
+  else // LineHeightMode::ABSOLUTE
+  {
+    mController->SetRelativeLineSize(-1.0f);
+    mController->SetDefaultLineSize(mLineHeight);
   }
 }
 

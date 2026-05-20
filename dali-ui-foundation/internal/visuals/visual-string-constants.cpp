@@ -334,17 +334,24 @@ const char* const ENABLE_ASPECT_FIT_NAME("enableAspectFit");
 // Text visual
 const char* const TEXT_PROPERTY("text");
 const char* const FONT_FAMILY_PROPERTY("fontFamily");
-const char* const FONT_STYLE_PROPERTY("fontStyle");
-const char* const POINT_SIZE_PROPERTY("pointSize");
+const char* const FONT_SIZE_PROPERTY("fontSize");
+const char* const FONT_WEIGHT_PROPERTY("fontWeight");
+const char* const FONT_WIDTH_PROPERTY("fontWidth");
+const char* const FONT_SLANT_PROPERTY("fontSlant");
 const char* const MULTI_LINE_PROPERTY("multiLine");
+const char* const LINE_WRAP_MODE_PROPERTY("lineWrapMode");
 const char* const HORIZONTAL_ALIGNMENT_PROPERTY("horizontalAlignment");
 const char* const VERTICAL_ALIGNMENT_PROPERTY("verticalAlignment");
+const char* const OVERFLOW_MODE_PROPERTY("overflowMode");
+const char* const LINE_HEIGHT_PROPERTY("lineHeight");
+const char* const LINE_HEIGHT_MODE_PROPERTY("lineHeightMode");
 const char* const TEXT_COLOR_PROPERTY("textColor");
-const char* const ENABLE_MARKUP_PROPERTY("enableMarkup");
+const char* const MARKUP_ENABLED_PROPERTY("markupEnabled");
+const char* const CUTOUT_ENABLED_PROPERTY("cutoutEnabled");
 const char* const SHADOW_PROPERTY("shadow");
 const char* const UNDERLINE_PROPERTY("underline");
 const char* const OUTLINE_PROPERTY("outline");
-const char* const BACKGROUND_PROPERTY("textBackground");
+const char* const TEXT_BACKGROUND_PROPERTY("textBackground");
 const char* const STRIKETHROUGH_PROPERTY("strikethrough");
 
 // NPatch visual

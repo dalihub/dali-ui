@@ -79,13 +79,6 @@ public:
                            const Property::Map& properties);
 
   /**
-   * @brief Converts all strings keys in property map to index keys.  Property Map can then be merged correctly.
-   * @param[in] propertyMap containing string keys or a mix of strings and indexes.
-   * @return Property::Map containing index keys.
-   */
-  static Property::Map ConvertStringKeysToIndexKeys(const Property::Map& propertyMap);
-
-  /**
    * @brief Retrieve the text's controller.
    * @param[in] visual The text visual.
    * @return The text controller
@@ -276,6 +269,11 @@ private:
   void DoSetProperty(Dali::Property::Index index, const Dali::Property::Value& propertyValue);
 
   /**
+   * @brief Updates the effective line height based on the current LineHeightMode.
+   */
+  void UpdateLineHeight();
+
+  /**
    * @brief Updates the text's renderer.
    */
   void UpdateRenderer();
@@ -411,19 +409,22 @@ private:
                       mAnimatableTextColorPropertyIndex; ///< The index of animatable text color property registered by the control.
   Property::Index     mTextColorAnimatableIndex;         ///< The index of uTextColorAnimatable property.
   Property::Index     mTextRequireRenderPropertyIndex;   ///< The index of requireRender property.
-  bool                mRendererUpdateNeeded : 1;         ///< The flag to indicate whether the renderer needs to be updated.
-  bool                mTextRequireRender : 1;            ///< The flag to indicate whether the text needs to be rendered.
-  bool                mIsConstraintAppliedAlways : 1;    ///< Whether the constraint need to be applied always.
   RendererContainer   mRendererList;
   ConstraintContainer mColorConstraintList;
   ConstraintContainer mOpacityConstraintList;
 
-  uint32_t mTextLoadingTaskId;               ///< The currently requested text loading(render) task Id.
-  uint32_t mNaturalSizeTaskId;               ///< The currently requested natural size task Id.
-  uint32_t mHeightForWidthTaskId;            ///< The currently requested height for width task Id.
-  bool     mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.
-  bool     mIsNaturalSizeTaskRunning : 1;    ///< Whether the requested natural size task is running or not.
-  bool     mIsHeightForWidthTaskRunning : 1; ///< Whether the requested height for width task is running or not.
+  float                mLineHeight;
+  Text::LineHeightMode mLineHeightMode;
+  Text::OverflowMode   mOverflowMode;
+  uint32_t             mTextLoadingTaskId;               ///< The currently requested text loading(render) task Id.
+  uint32_t             mNaturalSizeTaskId;               ///< The currently requested natural size task Id.
+  uint32_t             mHeightForWidthTaskId;            ///< The currently requested height for width task Id.
+  bool                 mRendererUpdateNeeded : 1;        ///< The flag to indicate whether the renderer needs to be updated.
+  bool                 mTextRequireRender : 1;           ///< The flag to indicate whether the text needs to be rendered.
+  bool                 mIsConstraintAppliedAlways : 1;   ///< Whether the constraint need to be applied always.
+  bool                 mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.
+  bool                 mIsNaturalSizeTaskRunning : 1;    ///< Whether the requested natural size task is running or not.
+  bool                 mIsHeightForWidthTaskRunning : 1; ///< Whether the requested height for width task is running or not.
 };
 
 } // namespace Internal

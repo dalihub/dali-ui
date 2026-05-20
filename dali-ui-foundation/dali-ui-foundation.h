@@ -93,6 +93,7 @@
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
+#include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
