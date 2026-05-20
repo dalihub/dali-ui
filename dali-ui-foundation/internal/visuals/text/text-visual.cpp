@@ -106,11 +106,6 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {LINE_HEIGHT_MODE_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE},
   {TEXT_COLOR_PROPERTY, Ui::TextVisualPropertyIndex::TEXT_COLOR},
   {MARKUP_ENABLED_PROPERTY, Ui::TextVisualPropertyIndex::MARKUP_ENABLED},
-  {CUTOUT_ENABLED_PROPERTY, Ui::TextVisualPropertyIndex::CUTOUT_ENABLED},
-  {SHADOW_PROPERTY, Ui::TextVisualPropertyIndex::SHADOW},
-  {UNDERLINE_PROPERTY, Ui::TextVisualPropertyIndex::UNDERLINE},
-  {OUTLINE_PROPERTY, Ui::TextVisualPropertyIndex::OUTLINE},
-  {TEXT_BACKGROUND_PROPERTY, Ui::TextVisualPropertyIndex::BACKGROUND},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -187,22 +182,6 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::TextVisualPropertyIndex::TEXT_COLOR, mController->GetDefaultColor());
 
   map.Insert(Ui::TextVisualPropertyIndex::MARKUP_ENABLED, mController->IsMarkupProcessorEnabled());
-  map.Insert(Ui::TextVisualPropertyIndex::CUTOUT_ENABLED, mController->IsTextCutout());
-
-  GetShadowProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisualPropertyIndex::SHADOW, value);
-
-  GetUnderlineProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisualPropertyIndex::UNDERLINE, value);
-
-  GetOutlineProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisualPropertyIndex::OUTLINE, value);
-
-  GetBackgroundProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisualPropertyIndex::BACKGROUND, value);
-
-  GetStrikethroughProperties(mController, value, Text::EffectStyle::DEFAULT);
-  map.Insert(Ui::TextVisualPropertyIndex::LINE_THROUGH, value);
 }
 
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -590,36 +569,6 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
     case Ui::TextVisualPropertyIndex::MARKUP_ENABLED:
     {
       mController->SetMarkupProcessorEnabled(propertyValue.Get<bool>());
-      break;
-    }
-    case Ui::TextVisualPropertyIndex::CUTOUT_ENABLED:
-    {
-      mController->SetTextCutout(propertyValue.Get<bool>());
-      break;
-    }
-    case Ui::TextVisualPropertyIndex::SHADOW:
-    {
-      SetShadowProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
-      break;
-    }
-    case Ui::TextVisualPropertyIndex::UNDERLINE:
-    {
-      SetUnderlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
-      break;
-    }
-    case Ui::TextVisualPropertyIndex::OUTLINE:
-    {
-      SetOutlineProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
-      break;
-    }
-    case Ui::TextVisualPropertyIndex::LINE_THROUGH:
-    {
-      SetStrikethroughProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
-      break;
-    }
-    case Ui::TextVisualPropertyIndex::BACKGROUND:
-    {
-      SetBackgroundProperties(mController, propertyValue, Text::EffectStyle::DEFAULT);
       break;
     }
   }

@@ -841,35 +841,6 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
   TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_HEIGHT_MODE, Text::LineHeightMode::RELATIVE);}, false);
   TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::TEXT_COLOR, Vector4(1.0f, 0.0f, 0.0f, 1.0f));}, false);
   TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::MARKUP_ENABLED, true);}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::CUTOUT_ENABLED, true);}, false);
-
-  // MAP type properties
-  Property::Map shadowMap;
-  shadowMap.Insert("color", Vector4(0.0f, 0.0f, 0.0f, 1.0f));
-  shadowMap.Insert("offset", Vector2(2.0f, 2.0f));
-  shadowMap.Insert("blurRadius", 1.0f);
-  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::SHADOW, shadowMap);}, false);
-
-  Property::Map outlineMap;
-  outlineMap.Insert("color", Vector4(1.0f, 1.0f, 1.0f, 1.0f));
-  outlineMap.Insert("width", 1.0f);
-  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::OUTLINE, outlineMap);}, false);
-
-  Property::Map underlineMap;
-  underlineMap.Insert("enable", true);
-  underlineMap.Insert("color", Vector4(0.0f, 0.0f, 1.0f, 1.0f));
-  underlineMap.Insert("height", 1.0f);
-  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::UNDERLINE, underlineMap);}, false);
-
-  Property::Map lineThroughMap;
-  lineThroughMap.Insert("enable", true);
-  lineThroughMap.Insert("color", Vector4(1.0f, 0.0f, 0.0f, 1.0f));
-  lineThroughMap.Insert("height", 1.0f);
-  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_THROUGH, lineThroughMap);}, false);
-
-  Property::Map backgroundMap;
-  backgroundMap.Insert("color", Vector4(0.5f, 0.5f, 0.5f, 1.0f));
-  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::BACKGROUND, backgroundMap);}, false);
 
   END_TEST;
 }

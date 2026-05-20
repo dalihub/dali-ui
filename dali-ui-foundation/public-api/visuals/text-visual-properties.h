@@ -168,48 +168,6 @@ struct TextVisualPropertyIndex
      * @see TextVisual::SetMarkupEnabled(), TextVisual::IsMarkupEnabled().
      */
     MARKUP_ENABLED,
-
-    /**
-     * @brief Whether cutout rendering is enabled for the text.
-     * @details Name "cutoutEnabled", type Property::BOOLEAN.
-     * @see TextVisual::SetCutoutEnabled(), TextVisual::IsCutoutEnabled().
-     */
-    CUTOUT_ENABLED,
-
-    /**
-     * @brief The shadow parameters.
-     * @details Name "shadow", type Property::MAP.
-     * @see TextVisual::SetShadow(), TextVisual::GetShadow().
-     */
-    SHADOW,
-
-    /**
-     * @brief The underline parameters.
-     * @details Name "underline", type Property::MAP.
-     * @see TextVisual::SetUnderline(), TextVisual::GetUnderline().
-     */
-    UNDERLINE,
-
-    /**
-     * @brief The outline parameters.
-     * @details Name "outline", type Property::MAP.
-     * @see TextVisual::SetOutline(), TextVisual::GetOutline().
-     */
-    OUTLINE,
-
-    /**
-     * @brief The line-through parameters.
-     * @details Name "lineThrough", type Property::MAP.
-     * @see TextVisual::SetLineThrough(), TextVisual::GetLineThrough().
-     */
-    LINE_THROUGH,
-
-    /**
-     * @brief The background parameters.
-     * @details Name "textBackground", type Property::MAP.
-     * @see TextVisual::SetBackground(), TextVisual::GetBackground().
-     */
-    BACKGROUND,
   };
 
 }; // struct TextVisualPropertyIndex

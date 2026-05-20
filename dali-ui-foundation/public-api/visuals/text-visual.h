@@ -69,12 +69,6 @@ public:
       LINE_HEIGHT_MODE     = TextVisualPropertyIndex::LINE_HEIGHT_MODE,
       TEXT_COLOR           = TextVisualPropertyIndex::TEXT_COLOR,
       MARKUP_ENABLED       = TextVisualPropertyIndex::MARKUP_ENABLED,
-      CUTOUT_ENABLED       = TextVisualPropertyIndex::CUTOUT_ENABLED,
-      SHADOW               = TextVisualPropertyIndex::SHADOW,
-      UNDERLINE            = TextVisualPropertyIndex::UNDERLINE,
-      OUTLINE              = TextVisualPropertyIndex::OUTLINE,
-      LINE_THROUGH         = TextVisualPropertyIndex::LINE_THROUGH,
-      BACKGROUND           = TextVisualPropertyIndex::BACKGROUND,
     };
   };
 
@@ -308,23 +302,6 @@ public: // Setters for chaining
    * @param[in] enabled True to enable mark-up processing
    */
   TextVisual& SetMarkupEnabled(bool enabled);
-
-  /**
-   * @brief Gets whether the text is rendered as a cutout.
-   *
-   * @return True if the text is rendered as a cutout, otherwise false.
-   */
-  bool IsCutoutEnabled() const;
-
-  /**
-   * @brief Sets whether  the text is rendered as a cutout.
-   *
-   * When enabled, the glyph shapes are cut out from the rendered content
-   * instead of being filled with the text color.
-   *
-   * @param[in] enabled True to render the text as a cutout, false to render it normally.
-   */
-  TextVisual& SetCutoutEnabled(bool enabled);
   // @CHAIN_END
 
 public:

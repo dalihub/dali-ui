@@ -92,13 +92,4 @@
   * \
   * @param[in] enabled True to enable mark-up processing \
   */ \
-  ChildClass& SetMarkupEnabled(bool enabled) { TextVisual::SetMarkupEnabled(enabled); return *this; } \
-  /** \
-  * @brief Sets whether  the text is rendered as a cutout. \
-  * \
-  * When enabled, the glyph shapes are cut out from the rendered content \
-  * instead of being filled with the text color. \
-  * \
-  * @param[in] enabled True to render the text as a cutout, false to render it normally. \
-  */ \
-  ChildClass& SetCutoutEnabled(bool enabled) { TextVisual::SetCutoutEnabled(enabled); return *this; }
+  ChildClass& SetMarkupEnabled(bool enabled) { TextVisual::SetMarkupEnabled(enabled); return *this; }
