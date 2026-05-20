@@ -207,6 +207,7 @@ private:
       .SetMaximumLength(500)
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(EDITOR_HEIGHT)
+      .SetMaximumHeight(200)
       .SetBackgroundColor(UiColor(0xFFFFFF))
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetPadding(Extents(12, 12, 12, 12))
@@ -309,6 +310,10 @@ private:
     Label btnVerticalAlignment = CreateButton("V Align", 0x3498DB);
     View alignmentRow = CreateButtonRow({btnHorizontalAlignment, btnVerticalAlignment});
 
+    // Auto Grow button
+    Label btnAutoGrow = CreateButton("Auto Grow", 0x8E44AD);
+    View autoGrowRow = CreateButtonRow({btnAutoGrow});
+
     // Info button
     Label btnInfo = CreateButton("Print Info (log)", 0x34495E);
     View infoRow = CreateButtonRow({btnInfo});
@@ -350,6 +355,8 @@ private:
         lineHeightRow,
         // Alignment
         alignmentRow,
+        // Auto Grow
+        autoGrowRow,
         infoRow,
       });
 
@@ -409,6 +416,9 @@ private:
     // Connect button touch signals - Alignment
     btnHorizontalAlignment.TouchedSignal().Connect(this, &InputEditorController::OnButtonHorizontalAlignmentTouched);
     btnVerticalAlignment.TouchedSignal().Connect(this, &InputEditorController::OnButtonVerticalAlignmentTouched);
+
+    // Connect button touch signals - Auto Grow
+    btnAutoGrow.TouchedSignal().Connect(this, &InputEditorController::OnButtonAutoGrowTouched);
 
     btnInfo.TouchedSignal().Connect(this, &InputEditorController::OnButtonInfoTouched);
 
@@ -922,6 +932,19 @@ private:
         newAlignment = Text::Alignment::START;
       }
       mInputEditor.SetVerticalTextAlignment(newAlignment);
+      UpdateStatus();
+    }
+    return true;
+  }
+
+  bool OnButtonAutoGrowTouched(Actor, TouchEvent touch)
+  {
+    if(touch.GetState(0) == PointState::UP)
+    {
+      bool enabled = mInputEditor.IsAutoGrowEnabled();
+      mInputEditor.SetAutoGrowEnabled(!enabled);
+      const float height = mInputEditor.IsAutoGrowEnabled() ? WRAP_CONTENT : EDITOR_HEIGHT;
+      mInputEditor.SetRequestedHeight(height);
       UpdateStatus();
     }
     return true;

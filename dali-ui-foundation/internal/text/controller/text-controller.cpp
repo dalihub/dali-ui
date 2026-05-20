@@ -797,6 +797,11 @@ float Controller::GetDefaultFontLineHeight()
   return mImpl->GetDefaultFontLineHeight();
 }
 
+float Controller::GetDefaultLineBoxHeight()
+{
+  return mImpl->GetDefaultLineBoxHeight();
+}
+
 void Controller::SetDefaultFontFamily(const std::string& defaultFontFamily)
 {
   EnsureCreated(mImpl->mFontDefaults);

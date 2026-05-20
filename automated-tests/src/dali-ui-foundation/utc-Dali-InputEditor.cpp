@@ -71,6 +71,7 @@ const char* const PROPERTY_NAME_FONT_SIZE_SCALE                      = "fontSize
 const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE              = "minimumFontSizeScale";
 const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE              = "maximumFontSizeScale";
 const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED       = "systemFontSizeScaleEnabled";
+const char* const PROPERTY_NAME_AUTO_GROW_ENABLED                    = "autoGrowEnabled";
 const char* const PROPERTY_NAME_TYPING_TEXT_COLOR                    = "typingTextColor";
 const char* const PROPERTY_NAME_TYPING_FONT_FAMILY                   = "typingFontFamily";
 const char* const PROPERTY_NAME_TYPING_FONT_SIZE                     = "typingFontSize";
@@ -790,6 +791,52 @@ int UtcDaliInputEditorSystemFontSizeScaleEnabled(void)
   END_TEST;
 }
 
+int UtcDaliInputEditorSetGetAutoGrowEnabled(void)
+{
+  UiTestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  DALI_TEST_CHECK(inputEditor);
+
+  // Default value should be false
+  DALI_TEST_EQUALS(inputEditor.IsAutoGrowEnabled(), false, TEST_LOCATION);
+
+  // Test SetAutoGrowEnabled with true
+  inputEditor.SetAutoGrowEnabled(true);
+  DALI_TEST_EQUALS(inputEditor.IsAutoGrowEnabled(), true, TEST_LOCATION);
+
+  // Test SetAutoGrowEnabled with false
+  inputEditor.SetAutoGrowEnabled(false);
+  DALI_TEST_EQUALS(inputEditor.IsAutoGrowEnabled(), false, TEST_LOCATION);
+
+  // Test chaining
+  InputEditor& ref = inputEditor.SetAutoGrowEnabled(true);
+  DALI_TEST_CHECK(&ref == &inputEditor);
+
+  END_TEST;
+}
+
+int UtcDaliInputEditorAutoGrowEnabledProperty(void)
+{
+  UiTestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  DALI_TEST_CHECK(inputEditor);
+
+  // Default value should be false
+  DALI_TEST_EQUALS(inputEditor.GetProperty<bool>(InputEditor::Property::AUTO_GROW_ENABLED), false, TEST_LOCATION);
+
+  // Test setting via property
+  inputEditor.SetProperty(InputEditor::Property::AUTO_GROW_ENABLED, true);
+  DALI_TEST_EQUALS(inputEditor.GetProperty<bool>(InputEditor::Property::AUTO_GROW_ENABLED), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputEditor.IsAutoGrowEnabled(), true, TEST_LOCATION);
+
+  // Test setting via property string name
+  inputEditor.SetProperty(PROPERTY_NAME_AUTO_GROW_ENABLED, false);
+  DALI_TEST_EQUALS(inputEditor.GetProperty<bool>(InputEditor::Property::AUTO_GROW_ENABLED), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(inputEditor.IsAutoGrowEnabled(), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliInputEditorTypingTextColor(void)
 {
   UiTestApplication application;
@@ -1031,6 +1078,7 @@ int UtcDaliInputEditorGetProperty(void)
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE) == InputEditor::Property::MINIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == InputEditor::Property::MAXIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED) == InputEditor::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED);
+  DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_AUTO_GROW_ENABLED) == InputEditor::Property::AUTO_GROW_ENABLED);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_TYPING_TEXT_COLOR) == InputEditor::Property::TYPING_TEXT_COLOR);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_TYPING_FONT_FAMILY) == InputEditor::Property::TYPING_FONT_FAMILY);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_TYPING_FONT_SIZE) == InputEditor::Property::TYPING_FONT_SIZE);
@@ -1259,6 +1307,13 @@ int UtcDaliInputEditorSetProperty(void)
   // SYSTEM_FONT_SIZE_SCALE_ENABLED
   inputEditor.SetProperty(InputEditor::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED, true);
   DALI_TEST_EQUALS(inputEditor.GetProperty<bool>(InputEditor::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED), true, TEST_LOCATION);
+
+  // AUTO_GROW_ENABLED
+  inputEditor.SetProperty(InputEditor::Property::AUTO_GROW_ENABLED, true);
+  DALI_TEST_EQUALS(inputEditor.GetProperty<bool>(InputEditor::Property::AUTO_GROW_ENABLED), true, TEST_LOCATION);
+
+  inputEditor.SetProperty(InputEditor::Property::AUTO_GROW_ENABLED, false);
+  DALI_TEST_EQUALS(inputEditor.GetProperty<bool>(InputEditor::Property::AUTO_GROW_ENABLED), false, TEST_LOCATION);
 
   // TYPING_TEXT_COLOR
   inputEditor.SetProperty(InputEditor::Property::TYPING_TEXT_COLOR, Color::BLUE);

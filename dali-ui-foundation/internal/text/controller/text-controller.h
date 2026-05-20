@@ -905,6 +905,11 @@ public: // Update.
    */
   float GetDefaultFontLineHeight();
 
+  /**
+   * @brief Retrieve the default editable line box height including line spacing.
+   */
+  float GetDefaultLineBoxHeight();
+
 public: // Default style & Input style
   /**
    * @brief Set the default font family.

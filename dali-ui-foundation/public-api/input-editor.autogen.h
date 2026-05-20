@@ -371,6 +371,16 @@
   */ \
   ChildClass& SetSystemFontSizeScaleEnabled(bool enabled) { InputEditor::SetSystemFontSizeScaleEnabled(enabled); return *this; } \
   /** \
+  * @brief Enables or disables auto grow behavior. \
+  * \
+  * When enabled, InputEditor may invalidate its measured size when text changes. \
+  * Only dimensions using WRAP_CONTENT are affected. \
+  * Fixed-size and MATCH_PARENT dimensions keep their normal layout behavior. \
+  * \
+  * @param[in] enabled True to enable auto grow, false otherwise. \
+  */ \
+  ChildClass& SetAutoGrowEnabled(bool enabled) { InputEditor::SetAutoGrowEnabled(enabled); return *this; } \
+  /** \
   * @brief Sets the text color used for typing. \
   * \
   * If a text range is selected, the color is applied to the selected text. \

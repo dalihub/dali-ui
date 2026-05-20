@@ -523,6 +523,16 @@ public:
   bool IsSystemFontSizeScaleEnabled() const;
 
   /**
+   * @copydoc Dali::Ui::InputEditor::SetAutoGrowEnabled
+   */
+  void SetAutoGrowEnabled(bool enabled);
+
+  /**
+   * @copydoc Dali::Ui::InputEditor::IsAutoGrowEnabled
+   */
+  bool IsAutoGrowEnabled() const;
+
+  /**
    * @copydoc Dali::Ui::InputEditor::SetTypingTextColor
    */
   void SetTypingTextColor(const UiColor& color);
@@ -1131,6 +1141,7 @@ private:
   bool                 mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
   bool                 mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
   bool                 mFocusGainedByTouch : 1;    ///< If true, focus was gained by touch, skip scroll in focus gained.
+  bool                 mAutoGrowEnabled : 1;       ///< Whether auto grow behavior is enabled.
 
 protected:
   struct PropertyHandler;

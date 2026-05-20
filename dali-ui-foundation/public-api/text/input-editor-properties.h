@@ -361,6 +361,13 @@ struct InputEditorPropertyIndex
     SYSTEM_FONT_SIZE_SCALE_ENABLED,
 
     /**
+     * @brief Whether auto grow behavior is enabled.
+     * @details Name "autoGrowEnabled", type Property::BOOLEAN.
+     * @see InputEditor::SetAutoGrowEnabled(), InputEditor::IsAutoGrowEnabled().
+     */
+    AUTO_GROW_ENABLED,
+
+    /**
      * @brief The text color used for typing.
      * @details Name "typingTextColor", type Property::VECTOR4.
      * @see InputEditor::SetTypingTextColor(), InputEditor::GetTypingTextColor().

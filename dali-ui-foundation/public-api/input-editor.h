@@ -109,6 +109,7 @@ public:
       MINIMUM_FONT_SIZE_SCALE              = Text::InputEditorPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
       MAXIMUM_FONT_SIZE_SCALE              = Text::InputEditorPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
       SYSTEM_FONT_SIZE_SCALE_ENABLED       = Text::InputEditorPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
+      AUTO_GROW_ENABLED                    = Text::InputEditorPropertyIndex::AUTO_GROW_ENABLED,
       TYPING_TEXT_COLOR                    = Text::InputEditorPropertyIndex::TYPING_TEXT_COLOR,
       TYPING_FONT_FAMILY                   = Text::InputEditorPropertyIndex::TYPING_FONT_FAMILY,
       TYPING_FONT_SIZE                     = Text::InputEditorPropertyIndex::TYPING_FONT_SIZE,
@@ -924,6 +925,24 @@ public: // Setters for chaining
    * @return True if the system font size scale is applied, otherwise false.
    */
   bool IsSystemFontSizeScaleEnabled() const;
+
+  /**
+   * @brief Enables or disables auto grow behavior.
+   *
+   * When enabled, InputEditor may invalidate its measured size when text changes.
+   * Only dimensions using WRAP_CONTENT are affected.
+   * Fixed-size and MATCH_PARENT dimensions keep their normal layout behavior.
+   *
+   * @param[in] enabled True to enable auto grow, false otherwise.
+   */
+  InputEditor& SetAutoGrowEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether auto grow behavior is enabled.
+   *
+   * @return True if auto grow is enabled, otherwise false.
+   */
+  bool IsAutoGrowEnabled() const;
 
   /**
    * @brief Sets the text color used for typing.

@@ -700,7 +700,24 @@ void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
     mTextUpdateInfo.mRequestedNumberOfCharacters =
       mTextUpdateInfo.mNumberOfCharactersToAdd - mTextUpdateInfo.mNumberOfCharactersToRemove;
 
-    // Nothing else to do if there are no paragraphs.
+    return;
+  }
+
+  if(mTextUpdateInfo.mFullRelayoutNeeded)
+  {
+    const Length currentNumberOfCharacters = mModel->mLogicalModel->mText.Count();
+
+    // A full relayout must rebuild the update range from the beginning.
+    // Do not use mCharacterIndex here because it may still point to the last
+    // edited position. Otherwise the range can be narrowed to a later paragraph
+    // and active visual lines can be cleared partially.
+    mTextUpdateInfo.mCharacterIndex              = 0u;
+    mTextUpdateInfo.mParagraphCharacterIndex     = 0u;
+    mTextUpdateInfo.mRequestedNumberOfCharacters = currentNumberOfCharacters;
+    mTextUpdateInfo.mStartGlyphIndex             = 0u;
+    mTextUpdateInfo.mStartLineIndex              = 0u;
+
+    numberOfCharacters = mTextUpdateInfo.mPreviousNumberOfCharacters;
     return;
   }
 
@@ -721,7 +738,6 @@ void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
       mTextUpdateInfo.mStartLineIndex =
         (mModel->mVisualModel->mLines.Count() > 0u) ? mModel->mVisualModel->mLines.Count() - 1u : 0u;
 
-      // Nothing else to do;
       return;
     }
 
@@ -729,17 +745,11 @@ void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
   }
   else
   {
-    Length numberOfCharactersToUpdate = 0u;
-    if(mTextUpdateInfo.mFullRelayoutNeeded)
-    {
-      numberOfCharactersToUpdate = mTextUpdateInfo.mPreviousNumberOfCharacters;
-    }
-    else
-    {
-      numberOfCharactersToUpdate =
-        (mTextUpdateInfo.mNumberOfCharactersToRemove > 0u) ? mTextUpdateInfo.mNumberOfCharactersToRemove : 1u;
-    }
-    mModel->mLogicalModel->FindParagraphs(mTextUpdateInfo.mCharacterIndex, numberOfCharactersToUpdate,
+    const Length numberOfCharactersToUpdate =
+      (mTextUpdateInfo.mNumberOfCharactersToRemove > 0u) ? mTextUpdateInfo.mNumberOfCharactersToRemove : 1u;
+
+    mModel->mLogicalModel->FindParagraphs(mTextUpdateInfo.mCharacterIndex,
+                                          numberOfCharactersToUpdate,
                                           paragraphsToBeUpdated);
   }
 
@@ -752,18 +762,16 @@ void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
     ParagraphRunIndex   lastParagraphIndex = *(paragraphsToBeUpdated.End() - 1u);
     const ParagraphRun& lastParagraph      = *(mModel->mLogicalModel->mParagraphInfo.Begin() + lastParagraphIndex);
 
-    if((mTextUpdateInfo.mNumberOfCharactersToRemove > 0u) && // Some character are removed.
-       (lastParagraphIndex < numberOfParagraphs - 1u) &&     // There is a next paragraph.
-       ((lastParagraph.characterRun.characterIndex +
-         lastParagraph.characterRun
-           .numberOfCharacters) == // The last removed character is the new paragraph character.
+    if((mTextUpdateInfo.mNumberOfCharactersToRemove > 0u) &&
+       (lastParagraphIndex < numberOfParagraphs - 1u) &&
+       ((lastParagraph.characterRun.characterIndex + lastParagraph.characterRun.numberOfCharacters) ==
         (mTextUpdateInfo.mCharacterIndex + mTextUpdateInfo.mNumberOfCharactersToRemove)))
     {
-      // The new paragraph character of the last updated paragraph has been removed so is going to be merged with the
-      // next one.
-      const ParagraphRun& lastParagraph = *(mModel->mLogicalModel->mParagraphInfo.Begin() + lastParagraphIndex + 1u);
+      // The new paragraph character of the last updated paragraph has been removed so it is going to be merged with
+      // the next one.
+      const ParagraphRun& nextParagraph = *(mModel->mLogicalModel->mParagraphInfo.Begin() + lastParagraphIndex + 1u);
 
-      numberOfCharacters = lastParagraph.characterRun.characterIndex + lastParagraph.characterRun.numberOfCharacters -
+      numberOfCharacters = nextParagraph.characterRun.characterIndex + nextParagraph.characterRun.numberOfCharacters -
                            mTextUpdateInfo.mParagraphCharacterIndex;
     }
     else
@@ -775,6 +783,7 @@ void Controller::Impl::CalculateTextUpdateIndices(Length& numberOfCharacters)
 
   mTextUpdateInfo.mRequestedNumberOfCharacters =
     numberOfCharacters + mTextUpdateInfo.mNumberOfCharactersToAdd - mTextUpdateInfo.mNumberOfCharactersToRemove;
+
   mTextUpdateInfo.mStartGlyphIndex =
     *(mModel->mVisualModel->mCharactersToGlyph.Begin() + mTextUpdateInfo.mParagraphCharacterIndex);
 }

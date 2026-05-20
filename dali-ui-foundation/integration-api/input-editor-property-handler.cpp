@@ -271,6 +271,11 @@ void InputEditorImpl::PropertyHandler::SetProperty(Ui::View view, Property::Inde
       impl.SetSystemFontSizeScaleEnabled(value.Get<bool>());
       break;
     }
+    case Text::InputEditorPropertyIndex::AUTO_GROW_ENABLED:
+    {
+      impl.SetAutoGrowEnabled(value.Get<bool>());
+      break;
+    }
     case Text::InputEditorPropertyIndex::TYPING_TEXT_COLOR:
     {
       impl.SetTypingTextColor(UiColor(value.Get<Vector4>()));
@@ -538,6 +543,11 @@ Property::Value InputEditorImpl::PropertyHandler::GetProperty(Ui::View view, Pro
     case Text::InputEditorPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
     {
       value = impl.IsSystemFontSizeScaleEnabled();
+      break;
+    }
+    case Text::InputEditorPropertyIndex::AUTO_GROW_ENABLED:
+    {
+      value = impl.IsAutoGrowEnabled();
       break;
     }
     case Text::InputEditorPropertyIndex::TYPING_TEXT_COLOR:

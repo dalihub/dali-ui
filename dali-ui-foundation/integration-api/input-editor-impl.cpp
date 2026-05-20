@@ -125,6 +125,7 @@ INPUT_EDITOR_PROPERTY_REGISTRATION("fontSizeScale",                    FLOAT,   
 INPUT_EDITOR_PROPERTY_REGISTRATION("minimumFontSizeScale",             FLOAT,   MINIMUM_FONT_SIZE_SCALE             )
 INPUT_EDITOR_PROPERTY_REGISTRATION("maximumFontSizeScale",             FLOAT,   MAXIMUM_FONT_SIZE_SCALE             )
 INPUT_EDITOR_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled",       BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED      )
+INPUT_EDITOR_PROPERTY_REGISTRATION("autoGrowEnabled",                  BOOLEAN, AUTO_GROW_ENABLED                   )
 INPUT_EDITOR_PROPERTY_REGISTRATION("typingTextColor",                  VECTOR4, TYPING_TEXT_COLOR                   )
 INPUT_EDITOR_PROPERTY_REGISTRATION("typingFontFamily",                 STRING,  TYPING_FONT_FAMILY                  )
 INPUT_EDITOR_PROPERTY_REGISTRATION("typingFontSize",                   FLOAT,   TYPING_FONT_SIZE                    )
@@ -268,7 +269,8 @@ InputEditorImpl::InputEditorImpl()
   mSelectionStarted(false),
   mSelectionChanged(false),
   mSelectionCleared(false),
-  mFocusGainedByTouch(false)
+  mFocusGainedByTouch(false),
+  mAutoGrowEnabled(false)
 {
 }
 
@@ -916,6 +918,21 @@ bool InputEditorImpl::IsSystemFontSizeScaleEnabled() const
   return mController->IsSystemFontSizeScaleEnabled();
 }
 
+void InputEditorImpl::SetAutoGrowEnabled(bool enabled)
+{
+  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
+  if(mAutoGrowEnabled != enabled)
+  {
+    mAutoGrowEnabled = enabled;
+    InvalidateTextMeasure();
+  }
+}
+
+bool InputEditorImpl::IsAutoGrowEnabled() const
+{
+  return mAutoGrowEnabled;
+}
+
 void InputEditorImpl::SetTypingTextColor(const UiColor& color)
 {
   SetColorBinding("TypingTextColor", color, this, &InputEditorImpl::SetTypingTextColorInternal);
@@ -1309,9 +1326,7 @@ void InputEditorImpl::OnRelayout(const Vector2& size, RelayoutContainer& contain
   // If there is text changed, callback is called.
   if(mTextChanged)
   {
-    mController->SetTextChangedSignalEmission(true);
     EmitTextChanged();
-    mController->SetTextChangedSignalEmission(false);
   }
 
   Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
@@ -1587,11 +1602,11 @@ MeasuredSize InputEditorImpl::OnMeasure(float widthConstraint, float heightConst
 
     if(GetText().Empty())
     {
-      // GetNaturalSize() includes view padding, but GetDefaultFontLineHeight() does not.
+      // GetNaturalSize() includes view padding, but GetDefaultLineBoxHeight() does not.
       // Therefore, when text is empty, padding must be added explicitly to keep
       // measurement consistent with the normal natural size path.
       const Extents padding = GetEffectiveTextPadding();
-      height                = mController->GetDefaultFontLineHeight() + padding.top + padding.bottom;
+      height                = mController->GetDefaultLineBoxHeight() + padding.top + padding.bottom;
     }
 
     measuredHeight = ClampWithMinPriority(height, minHeight, allowedMaxHeight);
@@ -1722,6 +1737,11 @@ void InputEditorImpl::PasteText()
 
 void InputEditorImpl::TextChanged(bool immediate)
 {
+  if(mAutoGrowEnabled)
+  {
+    InvalidateTextMeasure();
+  }
+
   if(immediate) // Emits TextChanged signal immediately
   {
     EmitTextChanged();
@@ -1886,6 +1906,10 @@ void InputEditorImpl::UpdateLineHeight()
   if(rendererUpdateNeeded)
   {
     mController->InvalidateFontData();
+    if(mAutoGrowEnabled)
+    {
+      InvalidateTextMeasure();
+    }
   }
 }
 
@@ -2011,9 +2035,11 @@ void InputEditorImpl::RenderText(Text::Controller::UpdateTextType updateTextType
 
 void InputEditorImpl::EmitTextChanged()
 {
+  mController->SetTextChangedSignalEmission(true);
   Ui::View handle(GetOwner());
   mTextChangedSignal.Emit(handle);
   mTextChanged = false;
+  mController->SetTextChangedSignalEmission(false);
 }
 
 void InputEditorImpl::EmitMaximumLengthReached()

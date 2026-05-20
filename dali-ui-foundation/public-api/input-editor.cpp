@@ -611,6 +611,17 @@ bool InputEditor::IsSystemFontSizeScaleEnabled() const
   return GetImpl(*this).IsSystemFontSizeScaleEnabled();
 }
 
+InputEditor& InputEditor::SetAutoGrowEnabled(bool enabled)
+{
+  GetImpl(*this).SetAutoGrowEnabled(enabled);
+  return *this;
+}
+
+bool InputEditor::IsAutoGrowEnabled() const
+{
+  return GetImpl(*this).IsAutoGrowEnabled();
+}
+
 InputEditor& InputEditor::SetTypingTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTypingTextColor(color);
