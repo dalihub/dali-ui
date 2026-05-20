@@ -284,16 +284,16 @@ public: // Setters for chaining
   /**
    * @brief Gets the text color.
    *
-   * @return The text color as Vector4
+   * @return The text color
    */
-  Dali::Vector4 GetTextColor() const;
+  UiColor GetTextColor() const;
 
   /**
    * @brief Sets the color of the text.
    *
    * @param[in] textColor The color of the text
    */
-  TextVisual& SetTextColor(const Dali::Vector4& textColor);
+  TextVisual& SetTextColor(const UiColor& textColor);
 
   /**
    * @brief Gets whether mark-up processing is enabled.

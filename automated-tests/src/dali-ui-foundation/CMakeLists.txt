@@ -43,6 +43,7 @@ SET(TC_SOURCES
         utc-Dali-LayoutTypes.cpp
         utc-Dali-FontVariation.cpp
         utc-Dali-ColorVisual.cpp
+        utc-Dali-TextVisual.cpp
         utc-Dali-VisualBase.cpp
         utc-Dali-WebView.cpp
 )

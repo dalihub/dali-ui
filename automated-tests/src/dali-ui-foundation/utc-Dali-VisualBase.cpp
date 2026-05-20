@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
+#include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -768,6 +769,107 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
     GradientVisual gradientVisual = GradientVisual::DownCast(visual);
     gradientVisual.SetConicGradient(Vector2::ZERO, Dali::Radian(2.0f));
   }, true);
+
+  END_TEST;
+}
+
+int UtcDaliVisualBaseRecreateTextVisual01(void)
+{
+  UiTestApplication application;
+
+  tet_infoline("Test that visual update without newly create Visual::Base for TextVisual\n");
+
+  View       view    = View::New();
+  TextVisual visual  = TextVisual::New()
+    .SetText("Hello")
+    .SetFontSize(20.0f);
+
+  view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+  application.GetScene().Add(view);
+
+  application.SendNotification();
+  application.Render();
+
+  auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
+    // Hold original visual base
+    Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
+
+    static int testCount = 0;
+    tet_printf("TestCase #%d\n", ++testCount);
+
+    func(visual);
+
+    // Do not change visual if processor is not executed.
+    DALI_TEST_EQUALS(originalVisualBase, GetImplementation(visual).GetVisual(), TEST_LOCATION);
+
+    application.SendNotification();
+    application.Render();
+
+    bool changed = (originalVisualBase != GetImplementation(visual).GetVisual());
+    DALI_TEST_EQUALS(changed, expectChanged, TEST_LOCATION);
+  };
+
+  // Change the basic info didn't change visual base
+  TestVisualBaseChanged([](VisualBase visual){visual.SetName("Hello");}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetColor(UiColor("Primary"));}, false);
+
+  // Change the transform didn't change visual base
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetX(0.1f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOffsetY(0.2f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetWidth(0.3f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetHeight(0.4f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraWidth(0.5f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetExtraHeight(0.6f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetOrigin(Align::CENTER);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetPivot(Align::BOTTOM_END);}, false);
+
+  // For TextVisual.
+  // All properties of TextVisual are mutable, so changing them should NOT recreate visual base.
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::TEXT, "World");}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_FAMILY, "Arial");}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_SIZE, 30.0f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_WEIGHT, Text::FontWeight::BOLD);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_WIDTH, Text::FontWidth::EXPANDED);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::FONT_SLANT, Text::FontSlant::ITALIC);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::MULTI_LINE, true);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_WRAP_MODE, Text::LineWrapMode::CHARACTER);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::HORIZONTAL_ALIGNMENT, Text::Alignment::CENTER);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::VERTICAL_ALIGNMENT, Text::Alignment::END);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::OVERFLOW_MODE, Text::OverflowMode::ELLIPSIS);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_HEIGHT, 1.5f);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_HEIGHT_MODE, Text::LineHeightMode::RELATIVE);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::TEXT_COLOR, Vector4(1.0f, 0.0f, 0.0f, 1.0f));}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::MARKUP_ENABLED, true);}, false);
+  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::CUTOUT_ENABLED, true);}, false);
+
+  // MAP type properties
+  Property::Map shadowMap;
+  shadowMap.Insert("color", Vector4(0.0f, 0.0f, 0.0f, 1.0f));
+  shadowMap.Insert("offset", Vector2(2.0f, 2.0f));
+  shadowMap.Insert("blurRadius", 1.0f);
+  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::SHADOW, shadowMap);}, false);
+
+  Property::Map outlineMap;
+  outlineMap.Insert("color", Vector4(1.0f, 1.0f, 1.0f, 1.0f));
+  outlineMap.Insert("width", 1.0f);
+  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::OUTLINE, outlineMap);}, false);
+
+  Property::Map underlineMap;
+  underlineMap.Insert("enable", true);
+  underlineMap.Insert("color", Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+  underlineMap.Insert("height", 1.0f);
+  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::UNDERLINE, underlineMap);}, false);
+
+  Property::Map lineThroughMap;
+  lineThroughMap.Insert("enable", true);
+  lineThroughMap.Insert("color", Vector4(1.0f, 0.0f, 0.0f, 1.0f));
+  lineThroughMap.Insert("height", 1.0f);
+  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_THROUGH, lineThroughMap);}, false);
+
+  Property::Map backgroundMap;
+  backgroundMap.Insert("color", Vector4(0.5f, 0.5f, 0.5f, 1.0f));
+  TestVisualBaseChanged([&](VisualBase visual){visual.SetProperty(TextVisual::Property::BACKGROUND, backgroundMap);}, false);
 
   END_TEST;
 }

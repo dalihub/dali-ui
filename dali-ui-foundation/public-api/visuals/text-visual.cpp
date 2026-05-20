@@ -192,14 +192,16 @@ TextVisual& TextVisual::SetLineHeightMode(Dali::Ui::Text::LineHeightMode lineHei
   return *this;
 }
 
-Dali::Vector4 TextVisual::GetTextColor() const
+UiColor TextVisual::GetTextColor() const
 {
-  return VisualBase::GetProperty<Dali::Vector4>(TextVisual::Property::TEXT_COLOR);
+  // Note: Property system doesn't support UiColor with string token, so we use Vector4 internally.
+  return UiColor(VisualBase::GetProperty<Dali::Vector4>(TextVisual::Property::TEXT_COLOR));
 }
 
-TextVisual& TextVisual::SetTextColor(const Dali::Vector4& textColor)
+TextVisual& TextVisual::SetTextColor(const UiColor& textColor)
 {
-  VisualBase::SetProperty(TextVisual::Property::TEXT_COLOR, textColor);
+  // Note: Property system doesn't support UiColor with string token, so we use GetRgba() directly.
+  VisualBase::SetProperty(TextVisual::Property::TEXT_COLOR, textColor.GetRgba());
   return *this;
 }
 

@@ -301,13 +301,19 @@ void TextVisual::DoSetProperties(const Property::Map& propertyMap)
       }
     }
   }
+
+  if(IsOnScene())
+  {
+    // TODO : Need to trigger the owner to call OnSetTransform()
+    mRendererUpdateNeeded = true;
+
+    UpdateRenderer();
+  }
 }
 
 void TextVisual::DoSetOnScene(Actor& actor)
 {
   mControl = actor;
-
-  mImpl->mRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::DepthIndex::CONTENT);
 
   const Vector4& defaultColor = mController->GetTextModel()->GetDefaultColor();
   if(mTextColorAnimatableIndex == Property::INVALID_INDEX)

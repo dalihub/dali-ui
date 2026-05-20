@@ -17,4 +17,8 @@
         <icon>/usr/share/icons/com.samsung.dali-demo.png</icon>
         <label>DALi UI AnimatedImageVisual sample</label>
 	</ui-application>
+    <ui-application appid="text-visual.example" exec="/usr/apps/com.samsung.dali.visual-base/bin/text-visual.example" type="dali-c++app" multiple="false" taskmanage="true" nodisplay="false">
+        <icon>/usr/share/icons/com.samsung.dali-demo.png</icon>
+        <label>DALi UI TextVisual sample</label>
+	</ui-application>
 </manifest>

@@ -86,7 +86,7 @@
   * \
   * @param[in] textColor The color of the text \
   */ \
-  ChildClass& SetTextColor(const Dali::Vector4& textColor) { TextVisual::SetTextColor(textColor); return *this; } \
+  ChildClass& SetTextColor(const UiColor& textColor) { TextVisual::SetTextColor(textColor); return *this; } \
   /** \
   * @brief Sets whether the mark-up processing is enabled. \
   * \
