@@ -21,6 +21,8 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 
+#include <locale>
+
 namespace Dali
 {
 namespace Ui
@@ -36,6 +38,7 @@ Debug::Filter* gAnimImgLogFilter = Debug::Filter::New(Debug::NoLogging, false, "
   if(gAnimImgLogFilter->IsEnabledFor(Debug::Concise))                                        \
   {                                                                                          \
     std::ostringstream oss;                                                                  \
+    oss.imbue(std::locale::classic());                                                       \
     oss << "Size:" << mImageUrls.size() << " / Batch: " << mReadyFlags.size() << " [ ";      \
     for(std::size_t _i = 0; _i < mImageUrls.size(); ++_i)                                    \
     {                                                                                        \

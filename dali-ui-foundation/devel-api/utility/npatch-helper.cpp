@@ -22,6 +22,8 @@
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 
+#include <locale>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-data.h>
 
@@ -241,6 +243,7 @@ void RegisterStretchProperties(Renderer& renderer, const char* uniformName,
     uint16_t stretch = prevStretch + end - start;
 
     std::stringstream uniform;
+    uniform.imbue(std::locale::classic());
     uniform << uniformName << "[" << i << "]";
     renderer.RegisterProperty(ToDaliStringView(uniform.str()), Vector2(fix, stretch));
 
@@ -252,6 +255,7 @@ void RegisterStretchProperties(Renderer& renderer, const char* uniformName,
   {
     prevFix += imageExtent - prevEnd;
     std::stringstream uniform;
+    uniform.imbue(std::locale::classic());
     uniform << uniformName << "[" << i << "]";
     renderer.RegisterProperty(ToDaliStringView(uniform.str()), Vector2(prevFix, prevStretch));
   }

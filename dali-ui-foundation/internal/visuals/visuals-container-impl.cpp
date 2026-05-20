@@ -27,6 +27,7 @@
 #include <dali/public-api/animation/constraints.h>
 
 #include <algorithm>
+#include <locale>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
@@ -235,6 +236,7 @@ void VisualsContainer::ReplaceVisualBase(Dali::Ui::Internal::VisualBaseImpl& vis
         // Register new property to control using propertyId
         {
           std::ostringstream oss;
+          oss.imbue(std::locale::classic());
           oss << VISUAL_OBJECT_PROPERTY_NAME_PREFIX << "_" << static_cast<int>(mRangeType) << "_" << propertyId;
           index = view.RegisterProperty(ToDaliString(oss.str()), ToPropertyValue(oss.str()), Property::AccessMode::READ_WRITE);
         }

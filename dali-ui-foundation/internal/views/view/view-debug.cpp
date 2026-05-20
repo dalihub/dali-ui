@@ -27,6 +27,7 @@
 #include <algorithm>
 #include <functional>
 #include <iostream>
+#include <locale>
 
 using Dali::Integration::ToStdString;
 
@@ -49,6 +50,7 @@ public:
   std::string ToString()
   {
     std::ostringstream stream;
+    stream.imbue(std::locale::classic());
     ToStream(stream);
     return stream.str();
   }
@@ -296,6 +298,7 @@ std::string DumpView(const ViewImpl& view)
   auto& viewData = ViewDataImpl::Get(view);
 
   std::ostringstream oss;
+  oss.imbue(std::locale::classic());
   oss << "{\n  ";
   const std::string& name = ToStdString(view.Self().GetProperty(Dali::Actor::Property::NAME));
   if(!name.empty())
@@ -320,6 +323,7 @@ std::string DumpView(const ViewImpl& view)
 std::string DumpActor(Actor actor)
 {
   std::ostringstream oss;
+  oss.imbue(std::locale::classic());
   oss << "{\n  ";
   const std::string& name = ToStdString(actor.GetProperty(Dali::Actor::Property::NAME));
   if(!name.empty())

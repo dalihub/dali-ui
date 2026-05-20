@@ -17,10 +17,13 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-shader-factory.h>
 
+// EXTERNAL INCLUDES
+#include <dali/integration-api/debug.h>
+#include <locale>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali/integration-api/debug.h>
 
 namespace Dali
 {
@@ -107,6 +110,7 @@ void NpatchShaderFactory::GetVertexShader(std::string& vertexShader) const
   else if(mNpatchXStretchCount > 0 || mNpatchYStretchCount > 0)
   {
     std::stringstream vertextShaderStream;
+    vertextShaderStream.imbue(std::locale::classic());
     vertextShaderStream << "#define FACTOR_SIZE_X " << mNpatchXStretchCount + 2 << "\n"
                         << "#define FACTOR_SIZE_Y " << mNpatchYStretchCount + 2 << "\n"
                         << SHADER_NPATCH_VISUAL_SHADER_VERT;
@@ -142,6 +146,7 @@ bool NpatchShaderFactory::SavePrecompileShader(VisualFactoryCache::ShaderType sh
     if(mNpatchXStretchCount > 0 || mNpatchYStretchCount > 0)
     {
       std::stringstream shaderNameStream;
+      shaderNameStream.imbue(std::locale::classic());
       shaderNameStream << "NINE_PATCH_SHADER_" << mNpatchXStretchCount << "x" << mNpatchYStretchCount;
       shaderName = shaderNameStream.str();
     }

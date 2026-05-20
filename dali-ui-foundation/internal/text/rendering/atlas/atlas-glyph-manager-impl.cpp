@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
+#include <locale>
 
 namespace
 {
@@ -145,6 +146,7 @@ Pixel::Format AtlasGlyphManager::GetPixelFormat(uint32_t atlasId)
 const Ui::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
 {
   std::ostringstream verboseMetrics;
+  verboseMetrics.imbue(std::locale::classic());
 
   mMetrics.mGlyphCount = 0u;
   for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();

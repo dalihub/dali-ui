@@ -28,6 +28,7 @@
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/integration-api/stream-operators.h>
 #include <algorithm>
+#include <locale>
 
 // INTERNAL HEARDER
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
@@ -577,6 +578,7 @@ void Visual::Base::SetTransformAndSize(const Property::Map& transform, Size cont
 
 #if defined(DEBUG_ENABLED)
   std::ostringstream oss;
+  oss.imbue(std::locale::classic());
   oss << transform;
   DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General,
                 "Visual::Base::SetTransformAndSize(%s) - [\e[1;32mtransform: %s  controlSize: (%3.1f, %3.1f) effectiveScale: %3.1f]\e[0m\n",

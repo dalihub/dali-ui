@@ -20,6 +20,7 @@
 #include <dali-ui-foundation/internal/builder/builder-impl.h>
 #include <cstring>
 #include <iostream>
+#include <locale>
 
 namespace Dali
 {
@@ -37,6 +38,7 @@ void LogTree(const Ui::JsonParser& parser)
          ((*iter).second.GetType() == TreeNode::STRING && strcmp((*iter).second.GetString(), "DUMP_TREE") == 0))
       {
         std::ostringstream oss;
+        oss.imbue(std::locale::classic());
         parser.Write(oss, 2);
         std::cout << oss.str() << std::endl;
       }
@@ -47,6 +49,7 @@ void LogTree(const Ui::JsonParser& parser)
 std::string PropertyValueToString(const Property::Value& value)
 {
   std::ostringstream oss;
+  oss.imbue(std::locale::classic());
   oss << value;
 
   return oss.str();

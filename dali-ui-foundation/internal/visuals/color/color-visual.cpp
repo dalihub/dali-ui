@@ -28,6 +28,8 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/animation/constraints.h>
 
+#include <locale>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
@@ -254,6 +256,7 @@ void ColorVisual::DoSetProperties(const Property::Map& propertyMap)
                                                         CUTOUT_POLICY_TABLE_COUNT, cutoutPolicy)))
     {
       std::ostringstream oss;
+      oss.imbue(std::locale::classic());
       oss << *cutoutPolicyValue;
       DALI_LOG_ERROR("ColorVisual:DoSetProperties:: CUTOUT_POLICY property has incorrect type : %d, value : %s\n",
                      cutoutPolicyValue->GetType(), oss.str().c_str());

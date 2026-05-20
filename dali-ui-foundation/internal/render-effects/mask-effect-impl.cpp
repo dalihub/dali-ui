@@ -29,6 +29,8 @@
 #include <dali/public-api/rendering/renderer.h>
 #include <dali/public-api/rendering/shader.h>
 
+#include <locale>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
@@ -316,6 +318,7 @@ void MaskEffectImpl::CreateFrameBuffers(const ImageDimensions size)
 #if defined(GPU_MEMORY_PROFILE_ENABLED)
   {
     std::ostringstream oss;
+    oss.imbue(std::locale::classic());
     oss << "MaskEffect m:" << mMaskMode << " once: " << mTargetMaskOnce << "/" << mSourceMaskOnce << " r:" << mReverseMaskDirection;
     std::string prefix = oss.str();
 

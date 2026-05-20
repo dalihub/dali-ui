@@ -28,6 +28,8 @@
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/render-tasks/render-task-list.h>
 
+#include <locale>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
@@ -507,6 +509,7 @@ void BackgroundBlurEffectImpl::CreateFrameBuffers(const ImageDimensions downsamp
 #if defined(GPU_MEMORY_PROFILE_ENABLED)
   {
     std::ostringstream oss;
+    oss.imbue(std::locale::classic());
     oss << "BackgroundBlurEffect r:" << mBlurRadius << " d:" << mDownscaleFactor << " once: " << mBlurOnce;
     std::string prefix = oss.str();
 

@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/property-value.h>
+#include <locale>
 #include <sstream>
 
 using Dali::Vector4;
@@ -35,7 +36,9 @@ namespace
 Vector4 HexStringToVector4(const char* s)
 {
   unsigned int value(0u);
-  std::istringstream(s) >> std::hex >> value;
+  auto         iss = std::istringstream(s);
+  iss.imbue(std::locale::classic());
+  iss >> std::hex >> value;
   return Vector4(((value >> 16) & 0xff) / 255.0f, ((value >> 8) & 0xff) / 255.0f, (value & 0xff) / 255.0f, 1.0f);
 }
 

@@ -24,6 +24,8 @@
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/stream-operators.h>
 
+#include <locale>
+
 // INTERNAL
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
@@ -196,6 +198,7 @@ void VisualBaseImpl::DoAction(Dali::Property::Index actionId, const Dali::Proper
 #if defined(DEBUG_ENABLED)
   {
     std::ostringstream oss;
+    oss.imbue(std::locale::classic());
     oss << attributes;
     DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) DoAction(%d, %s) (Visual::Base[%p])\n", this, GetName().CStr(), actionId, oss.str().c_str(), mVisual.GetObjectPtr());
   }
@@ -212,6 +215,7 @@ void VisualBaseImpl::SetProperty(Dali::Property::Index index, Dali::Property::Va
 #if defined(DEBUG_ENABLED)
   {
     std::ostringstream oss;
+    oss.imbue(std::locale::classic());
     oss << propertyValue;
     DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) Status(%d) SetProperty(%d, %s) (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), index, oss.str().c_str(), mVisual.GetObjectPtr());
   }
@@ -898,6 +902,7 @@ void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const 
 #if defined(DEBUG_ENABLED)
   {
     std::ostringstream oss;
+    oss.imbue(std::locale::classic());
     oss << controlSize << ", " << viewPadding << ", " << effectiveScale;
     DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) ApplyFittingModeInternal(%s) Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), oss.str().c_str(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
   }
