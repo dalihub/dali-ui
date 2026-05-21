@@ -69,7 +69,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
 }
 
 WireframeVisual::WireframeVisual(VisualFactoryCache& factoryCache, Visual::BasePtr actualVisual)
-: Visual::Base(factoryCache, actualVisual ? actualVisual->GetType() : Ui::Visual::WIREFRAME),
+: Visual::Base(factoryCache, actualVisual ? actualVisual->GetType() : Ui::InternalVisualType::WIREFRAME),
   mActualVisual(actualVisual)
 {
 }
@@ -111,7 +111,7 @@ void WireframeVisual::DoCreatePropertyMap(Property::Map& map) const
   else
   {
     map.Clear();
-    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::WIREFRAME);
+    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::WIREFRAME);
   }
 }
 

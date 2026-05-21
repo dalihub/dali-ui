@@ -72,7 +72,7 @@ void VisualBase::DoAction(Dali::Property::Index actionId, const Dali::Property::
   GetImplementation(*this).DoAction(actionId, attributes);
 }
 
-Dali::Ui::Visual::Type VisualBase::GetVisualType() const
+Dali::Ui::VisualType VisualBase::GetVisualType() const
 {
   return GetImplementation(*this).GetVisualType();
 }

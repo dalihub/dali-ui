@@ -97,7 +97,7 @@ DALI_TYPE_REGISTRATION_END()
 Dali::Property::Map CreateTransparentColorVisualProperties()
 {
   Dali::Property::Map map;
-  map.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::Visual::Type::COLOR);
+  map.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::InternalVisualType::COLOR);
   map.Insert(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, Color::TRANSPARENT);
   return map;
 }
@@ -486,7 +486,7 @@ void WebViewImpl::OnFrameRendered()
   Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(nativeImagePtr, /*useNativeImage=*/true);
 
   Dali::Property::Map imageVisualMap;
-  imageVisualMap.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Dali::Ui::Visual::Type::IMAGE));
+  imageVisualMap.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::InternalVisualType::IMAGE);
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::URL, nativeImageUrl.GetUrl());
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::PIXEL_AREA, FULL_TEXTURE_RECT);
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_U, static_cast<int>(WrapMode::CLAMP_TO_EDGE));

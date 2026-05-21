@@ -122,7 +122,7 @@ inline Dali::Ui::Visual::Transform::ProportionFlags ConvertOffsetSizeModeToPropo
 }
 } // namespace
 
-VisualBaseImplPtr VisualBaseImpl::New(Dali::Ui::Visual::Type type)
+VisualBaseImplPtr VisualBaseImpl::New(Dali::Ui::VisualType type)
 {
   VisualBaseImplPtr visualObject(new VisualBaseImpl(type));
   return visualObject;
@@ -923,7 +923,7 @@ void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const 
   DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) ApplyFittingModeInternal() Status(%d) done (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
 }
 
-VisualBaseImpl::VisualBaseImpl(Dali::Ui::Visual::Type type)
+VisualBaseImpl::VisualBaseImpl(Dali::Ui::VisualType type)
 : mContainer(),
   mVisualType(type),
   mName(),

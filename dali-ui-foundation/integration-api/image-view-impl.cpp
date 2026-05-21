@@ -800,7 +800,7 @@ void ImageViewImpl::UpdatePlaceholderVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Visual::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
@@ -920,7 +920,7 @@ void ImageViewImpl::UpdateVisual()
   if(visualFactory)
   {
     Dali::Property::Map map;
-    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Visual::IMAGE);
+    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
     map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
     map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, static_cast<int>(mSamplingMode));
     map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());

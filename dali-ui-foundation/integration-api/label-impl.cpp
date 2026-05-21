@@ -1205,7 +1205,7 @@ void LabelImpl::OnInitialize()
   Actor self = Self();
 
   Dali::Property::Map propertyMap;
-  propertyMap.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::TEXT);
+  propertyMap.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::TEXT);
 
   mVisual   = Ui::VisualFactory::Get().CreateVisual(propertyMap);
   View view = Ui::View::DownCast(self);

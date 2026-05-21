@@ -75,7 +75,7 @@ Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type directio
 
 } // unnamed namespace
 
-Internal::Visual::Base::Impl::Impl(Ui::Visual::Type type)
+Internal::Visual::Base::Impl::Impl(Ui::InternalVisualType type)
 : mEventObserver(nullptr),
   mConstraintFeatureList{},
   mTransform(nullptr),

@@ -157,7 +157,7 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   Property::Value value;
 
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::TEXT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::TEXT);
 
   std::string text;
   mController->GetText(text);
@@ -187,14 +187,14 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::TEXT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::TEXT);
   std::string text;
   mController->GetText(text);
   map.Insert(Ui::TextVisualPropertyIndex::TEXT, ToPropertyValue(text));
 }
 
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
-: Visual::Base(factoryCache, Ui::Visual::TEXT),
+: Visual::Base(factoryCache, Ui::InternalVisualType::TEXT),
   mController(Text::Controller::New()),
   mTypesetter(Text::Typesetter::New(mController->GetTextModel())),
   mAsyncTextInterface(nullptr),

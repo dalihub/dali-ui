@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/lottie-animation-visual.h>
+#include <dali-ui-foundation/public-api/visuals/text-visual.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -79,7 +80,7 @@ int UtcDaliLottieAnimationVisualGetVisualType(void)
   // Upcast the handle
   VisualBase visualBase = visual;
 
-  DALI_TEST_EQUALS(visualBase.GetVisualType(), Visual::ANIMATED_VECTOR_IMAGE, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualBase.GetVisualType(), Ui::VisualType::ANIMATED_VECTOR_IMAGE, TEST_LOCATION);
 
   END_TEST;
 }
@@ -103,6 +104,7 @@ int UtcDaliLottieAnimationVisualDownCast(void)
   DALI_TEST_CHECK(!ColorVisual::DownCast(baseHandle));
   DALI_TEST_CHECK(!GradientVisual::DownCast(baseHandle));
   DALI_TEST_CHECK(!ImageVisual::DownCast(baseHandle));
+  DALI_TEST_CHECK(!TextVisual::DownCast(baseHandle));
 
   END_TEST;
 }

@@ -30,14 +30,14 @@ namespace Ui
 {
 ColorVisual ColorVisual::New()
 {
-  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::Visual::COLOR);
+  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::VisualType::COLOR);
   return ColorVisual(internal.Get());
 }
 
 ColorVisual ColorVisual::DownCast(BaseHandle handle)
 {
   Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
-  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::COLOR)
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::VisualType::COLOR)
   {
     return ColorVisual(visualBaseImpl);
   }

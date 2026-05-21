@@ -104,11 +104,6 @@ void Visual::Base::DoActionExtension(const Dali::Property::Index actionId, const
   GetImplementation(*this).DoActionExtension(actionId, attributes);
 }
 
-Visual::Type Visual::Base::GetType() const
-{
-  return GetImplementation(*this).GetType();
-}
-
 Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key)
 {
   return GetImplementation(*this).GetPropertyObject(std::move(key));

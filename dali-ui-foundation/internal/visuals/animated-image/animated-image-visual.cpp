@@ -357,7 +357,7 @@ void AnimatedImageVisual::CreateImageCache()
 
 AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                                          ImageDimensions desiredSize)
-: Visual::Base(factoryCache, Ui::Visual::ANIMATED_IMAGE),
+: Visual::Base(factoryCache, Ui::InternalVisualType::ANIMATED_IMAGE),
   mFrameDelayTimer(),
   mPlacementActor(),
   mImageVisualShaderFactory(shaderFactory),
@@ -532,7 +532,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
 
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::ANIMATED_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_IMAGE);
 
   if(mImageUrl.IsValid())
   {
@@ -624,7 +624,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 void AnimatedImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::ANIMATED_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_IMAGE);
 
   Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
 

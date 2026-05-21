@@ -130,8 +130,8 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 {
   Visual::BasePtr visualPtr;
 
-  Property::Value*      typeValue  = propertyMap.Find(Ui::VisualBasePropertyIndex::TYPE, VISUAL_TYPE);
-  Ui::DevelVisual::Type visualType = Ui::DevelVisual::IMAGE; // Default to IMAGE type.
+  Property::Value*       typeValue  = propertyMap.Find(Ui::VisualBasePropertyIndex::TYPE, VISUAL_TYPE);
+  Ui::InternalVisualType visualType = Ui::InternalVisualType::IMAGE; // Default to IMAGE type.
   if(typeValue)
   {
     Scripting::GetEnumerationProperty(*typeValue, VISUAL_TYPE_TABLE, VISUAL_TYPE_TABLE_COUNT, visualType);
@@ -139,26 +139,26 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 
   switch(visualType)
   {
-    case Ui::Visual::BORDER:
+    case Ui::InternalVisualType::BORDER:
     {
       visualPtr = BorderVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::Visual::COLOR:
+    case Ui::InternalVisualType::COLOR:
     {
       visualPtr = ColorVisual::New(GetFactoryCache(), GetColorVisualShaderFactory(), propertyMap);
       break;
     }
 
-    case Ui::Visual::GRADIENT:
+    case Ui::InternalVisualType::GRADIENT:
     {
       visualPtr = GradientVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::Visual::IMAGE:
-    case Ui::Visual::ANIMATED_IMAGE:
+    case Ui::InternalVisualType::IMAGE:
+    case Ui::InternalVisualType::ANIMATED_IMAGE:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
@@ -191,7 +191,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
               case VisualUrl::GIF:
               case VisualUrl::WEBP:
               {
-                if(visualType == Ui::DevelVisual::ANIMATED_IMAGE ||
+                if(visualType == Ui::InternalVisualType::ANIMATED_IMAGE ||
                    !(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY))
                 {
                   visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
@@ -227,31 +227,31 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       break;
     }
 
-    case Ui::Visual::MESH:
+    case Ui::InternalVisualType::MESH:
     {
       visualPtr = MeshVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::Visual::PRIMITIVE:
+    case Ui::InternalVisualType::PRIMITIVE:
     {
       visualPtr = PrimitiveVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::Visual::WIREFRAME:
+    case Ui::InternalVisualType::WIREFRAME:
     {
       visualPtr = WireframeVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::Visual::TEXT:
+    case Ui::InternalVisualType::TEXT:
     {
       visualPtr = TextVisual::New(GetFactoryCache(), GetTextVisualShaderFactory(), propertyMap);
       break;
     }
 
-    case Ui::Visual::N_PATCH:
+    case Ui::InternalVisualType::N_PATCH:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
@@ -265,7 +265,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       break;
     }
 
-    case Ui::Visual::SVG:
+    case Ui::InternalVisualType::SVG:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
@@ -279,7 +279,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       break;
     }
 
-    case Ui::DevelVisual::ANIMATED_VECTOR_IMAGE:
+    case Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
@@ -294,7 +294,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       break;
     }
 
-    case Ui::DevelVisual::ARC:
+    case Ui::InternalVisualType::ARC:
     {
       visualPtr = ArcVisual::New(GetFactoryCache(), propertyMap);
       break;
@@ -308,9 +308,9 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 
   DALI_LOG_INFO(
     gLogFilter, Debug::Concise, "VisualFactory::CreateVisual( VisualType:%s %s%s)\n",
-    Scripting::GetEnumerationName<Ui::DevelVisual::Type>(visualType, VISUAL_TYPE_TABLE, VISUAL_TYPE_TABLE_COUNT),
-    (visualType == Ui::DevelVisual::IMAGE) ? "url:" : "",
-    ((visualType == Ui::DevelVisual::IMAGE)
+    Scripting::GetEnumerationName<Ui::InternalVisualType>(visualType, VISUAL_TYPE_TABLE, VISUAL_TYPE_TABLE_COUNT),
+    (visualType == Ui::InternalVisualType::IMAGE) ? "url:" : "",
+    ((visualType == Ui::InternalVisualType::IMAGE)
        ? ((
            [&]()
   {
@@ -328,7 +328,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
     DALI_LOG_ERROR("VisualType unknown\n");
   }
 
-  if(mDebugEnabled && visualType != Ui::DevelVisual::WIREFRAME)
+  if(mDebugEnabled && visualType != Ui::InternalVisualType::WIREFRAME)
   {
     // Create a WireframeVisual if we have debug enabled
     visualPtr = WireframeVisual::New(GetFactoryCache(), visualPtr, propertyMap);

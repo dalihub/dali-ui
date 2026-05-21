@@ -54,7 +54,7 @@ BorderVisualPtr BorderVisual::New(VisualFactoryCache& factoryCache, const Proper
 }
 
 BorderVisual::BorderVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::Visual::BORDER),
+: Visual::Base(factoryCache, Ui::InternalVisualType::BORDER),
   mBorderSize(0.f),
   mBorderSizeIndex(Property::INVALID_INDEX),
   mAntiAliasing(false)
@@ -143,7 +143,7 @@ void BorderVisual::DoSetOnScene(Actor& actor)
 void BorderVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::BORDER);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::BORDER);
   map.Insert(Ui::BorderVisualPropertyIndex::BORDER_SIZE, mBorderSize);
   map.Insert(Ui::BorderVisualPropertyIndex::ANTI_ALIASING, mAntiAliasing);
 }

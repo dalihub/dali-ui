@@ -78,7 +78,7 @@ int UtcDaliTextVisualGetVisualType(void)
   // Upcast the handle
   VisualBase visualBase = visual;
 
-  DALI_TEST_EQUALS(visualBase.GetVisualType(), Visual::TEXT, TEST_LOCATION);
+  DALI_TEST_EQUALS(visualBase.GetVisualType(), Ui::VisualType::TEXT, TEST_LOCATION);
 
   END_TEST;
 }

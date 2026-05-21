@@ -29,6 +29,7 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
@@ -108,7 +109,7 @@ MeshVisualPtr MeshVisual::New(VisualFactoryCache& factoryCache, const Property::
 }
 
 MeshVisual::MeshVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::Visual::MESH),
+: Visual::Base(factoryCache, Ui::InternalVisualType::MESH),
   mShadingMode(Ui::MeshVisual::ShadingMode::TEXTURED_WITH_DETAILED_SPECULAR_LIGHTING),
   mUseTexture(true),
   mUseMipmapping(true),
@@ -257,7 +258,7 @@ void MeshVisual::DoSetOnScene(Actor& actor)
 void MeshVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::MESH);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::MESH);
   map.Insert(Ui::MeshVisual::Property::OBJECT_URL, ToPropertyValue(mObjectUrl));
   map.Insert(Ui::MeshVisual::Property::MATERIAL_URL, ToPropertyValue(mMaterialUrl));
   map.Insert(Ui::MeshVisual::Property::TEXTURES_PATH, ToPropertyValue(mTexturesPath));

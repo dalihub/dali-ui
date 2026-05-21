@@ -31,14 +31,14 @@ namespace Ui
 {
 GradientVisual GradientVisual::New()
 {
-  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::Visual::GRADIENT);
+  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::VisualType::GRADIENT);
   return GradientVisual(internal.Get());
 }
 
 GradientVisual GradientVisual::DownCast(BaseHandle handle)
 {
   Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
-  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::GRADIENT)
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::VisualType::GRADIENT)
   {
     return GradientVisual(visualBaseImpl);
   }

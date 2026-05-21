@@ -857,7 +857,7 @@ void LottieAnimationViewImpl::UpdateVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE));
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
 
   map.Insert(Ui::ImageVisualPropertyIndex::LOOP_COUNT, mLoopCount);
@@ -1083,7 +1083,7 @@ void LottieAnimationViewImpl::UpdatePlaceholderVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Visual::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);

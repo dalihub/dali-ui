@@ -30,6 +30,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/utility/npatch-helper.h>
+#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
@@ -327,7 +328,7 @@ void NPatchVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Clear();
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::N_PATCH);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::N_PATCH);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
   map.Insert(Ui::ImageVisualPropertyIndex::BORDER_ONLY, mBorderOnly);
   map.Insert(Ui::ImageVisualPropertyIndex::BORDER, mBorder);
@@ -369,7 +370,7 @@ void NPatchVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 }
 
 NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions)
-: Visual::Base(factoryCache, Ui::Visual::N_PATCH),
+: Visual::Base(factoryCache, Ui::InternalVisualType::N_PATCH),
   mPlacementActor(),
   mLoader(factoryCache.GetNPatchLoader()),
   mImageVisualShaderFactory(shaderFactory),

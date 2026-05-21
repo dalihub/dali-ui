@@ -51,7 +51,7 @@ struct Base::Impl
    * Constructor
    * @param [in] type The type of the this visual
    */
-  Impl(Ui::Visual::Type type);
+  Impl(Ui::InternalVisualType type);
 
   /**
    * Destructor
@@ -510,7 +510,7 @@ public:
   int                                        mFlags;
   float                                      mViewEffectiveScale;
   Ui::Visual::ResourceStatus                 mResourceStatus;
-  const Ui::Visual::Type                     mType;
+  const Ui::InternalVisualType               mType;
 
   bool mAlwaysUsingBorderline : 1;         ///< Whether we need the borderline in shader always.
   bool mAlwaysUsingCornerRadius : 1;       ///< Whether we need the corner radius in shader always.

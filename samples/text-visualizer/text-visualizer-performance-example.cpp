@@ -172,7 +172,7 @@ Property::Map CreateOrbShadowMap(const UiColor& color)
                         static_cast<float>(Ui::Visual::Transform::Policy::RELATIVE)));
 
   Property::Map shadow;
-  shadow.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::COLOR);
+  shadow.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::VisualType::COLOR);
   shadow.Add(Ui::VisualBasePropertyIndex::MIX_COLOR, color.GetRgba());
   shadow.Add(Ui::VisualBasePropertyIndex::TRANSFORM, transform);
   return shadow;

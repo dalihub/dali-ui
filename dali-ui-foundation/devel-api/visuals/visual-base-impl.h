@@ -61,7 +61,7 @@ public:
    * @param[in] type The type of visual base.
    * @return The newly created visual object.
    */
-  static VisualBaseImplPtr New(Dali::Ui::Visual::Type type);
+  static VisualBaseImplPtr New(Dali::Ui::VisualType type);
 
 public: ///< Public API
   /**
@@ -87,7 +87,7 @@ public: ///< Public API
   /**
    * @copydoc Dali::Ui::VisualBase::GetVisualType()
    */
-  Dali::Ui::Visual::Type GetVisualType() const
+  Dali::Ui::VisualType GetVisualType() const
   {
     return mVisualType;
   }
@@ -490,7 +490,7 @@ protected:
   /**
    * @brief Constructor - creates a VisualBaseImpl.
    */
-  VisualBaseImpl(Dali::Ui::Visual::Type type);
+  VisualBaseImpl(Dali::Ui::VisualType type);
 
   /**
    * @brief Registers a color binding for theme-aware color updates.
@@ -530,7 +530,7 @@ public:
 private:
   Dali::WeakHandle<Dali::Ui::VisualsContainer> mContainer;
 
-  const Dali::Ui::Visual::Type mVisualType;
+  const Dali::Ui::VisualType mVisualType;
 
   Dali::String          mName;
   mutable Property::Map mCachedVisualPropertyMap;        ///< Whole collected map of properties.

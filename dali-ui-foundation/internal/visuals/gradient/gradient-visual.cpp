@@ -160,7 +160,7 @@ GradientVisualPtr GradientVisual::New(VisualFactoryCache& factoryCache, const Pr
 }
 
 GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::Visual::GRADIENT),
+: Visual::Base(factoryCache, Ui::InternalVisualType::GRADIENT),
   mGradientTransform(),
   mGradient(nullptr),
   mGradientType(LINEAR),
@@ -304,7 +304,7 @@ void GradientVisual::UpdateShader()
 void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::GRADIENT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::GRADIENT);
 
   if(DALI_LIKELY(mGradient))
   {

@@ -28,6 +28,7 @@
 #include <dali/public-api/common/constants.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
@@ -94,7 +95,7 @@ PrimitiveVisualPtr PrimitiveVisual::New(VisualFactoryCache& factoryCache, const 
 }
 
 PrimitiveVisual::PrimitiveVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::Visual::PRIMITIVE),
+: Visual::Base(factoryCache, Ui::InternalVisualType::PRIMITIVE),
   mScaleDimensions(Vector3::ONE),
   mScaleTopRadius(DEFAULT_SCALE_TOP_RADIUS),
   mScaleBottomRadius(DEFAULT_SCALE_BOTTOM_RADIUS),
@@ -335,7 +336,7 @@ void PrimitiveVisual::DoSetOnScene(Actor& actor)
 void PrimitiveVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::PRIMITIVE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::PRIMITIVE);
   map.Insert(Ui::PrimitiveVisual::Property::MIX_COLOR, mImpl->mMixColor);
   map.Insert(Ui::PrimitiveVisual::Property::SHAPE, mPrimitiveType);
   map.Insert(Ui::PrimitiveVisual::Property::SLICES, mSlices);

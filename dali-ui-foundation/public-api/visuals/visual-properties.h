@@ -92,7 +92,7 @@ struct VisualBasePropertyIndex
 
     /**
      * @brief The index for the visual type.
-     * @details Name "visualType", type [Type](Dali::Ui::Visual::Type) (Property::INTEGER) or Property::STRING.
+     * @details Name "visualType", type [Type](Dali::Ui::VisualType) (Property::INTEGER) or Property::STRING.
      * @note Mandatory.
      * @see Type
      */
@@ -101,29 +101,24 @@ struct VisualBasePropertyIndex
 
 }; // struct VisualBasePropertyIndex
 
-namespace Visual
-{
 /**
  * @brief All the visual types.
  */
-enum Type
+enum class VisualType
 {
   INVALID = -1,
 
   BORDER = 0,            ///< Renders a solid color as an internal border to the control's quad.
   COLOR,                 ///< Renders a solid color to the control's quad.
   GRADIENT,              ///< Renders a smooth transition of colors to the control's quad.
-  IMAGE,                 ///< Renders an image into the control's quad.
-  MESH,                  ///< Renders a mesh using an "obj" file, optionally with textures provided by an "mtl" file.
-  PRIMITIVE,             ///< Renders a simple 3D shape, such as a cube or sphere.
-  WIREFRAME,             ///< Renders a simple wire-frame outlining a quad.
   TEXT,                  ///< Renders text
-  N_PATCH,               ///< Renders an n-patch image.
-  SVG,                   ///< Renders an SVG image.
+  IMAGE,                 ///< Renders an image into the control's quad.
   ANIMATED_IMAGE,        ///< Renders a animated image.
   ANIMATED_VECTOR_IMAGE, ///< Renders an animated vector image.
 };
 
+namespace Visual
+{
 /**
  * @brief Visual Transform for the offset or size.
  */

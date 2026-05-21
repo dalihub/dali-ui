@@ -56,7 +56,7 @@ ArcVisualPtr ArcVisual::New(VisualFactoryCache& factoryCache, const Property::Ma
 }
 
 ArcVisual::ArcVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, static_cast<Ui::Visual::Type>(Ui::DevelVisual::ARC)),
+: Visual::Base(factoryCache, Ui::InternalVisualType::ARC),
   mThickness(0.0f),
   mRadius(0.0f),
   mStartAngle(0.0f),
@@ -169,7 +169,7 @@ void ArcVisual::DoCreatePropertyMap(Property::Map& map) const
   }
 
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::DevelVisual::ARC);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ARC);
   map.Insert(Ui::DevelArcVisual::Property::THICKNESS, thickness);
   map.Insert(Ui::DevelArcVisual::Property::START_ANGLE, startAngle);
   map.Insert(Ui::DevelArcVisual::Property::SWEEP_ANGLE, sweepAngle);

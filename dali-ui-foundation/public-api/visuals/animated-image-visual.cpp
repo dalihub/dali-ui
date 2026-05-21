@@ -31,14 +31,14 @@ namespace Ui
 {
 AnimatedImageVisual AnimatedImageVisual::New()
 {
-  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::Visual::ANIMATED_IMAGE);
+  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::VisualType::ANIMATED_IMAGE);
   return AnimatedImageVisual(internal.Get());
 }
 
 AnimatedImageVisual AnimatedImageVisual::DownCast(BaseHandle handle)
 {
   Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
-  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::ANIMATED_IMAGE)
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::VisualType::ANIMATED_IMAGE)
   {
     return AnimatedImageVisual(visualBaseImpl);
   }

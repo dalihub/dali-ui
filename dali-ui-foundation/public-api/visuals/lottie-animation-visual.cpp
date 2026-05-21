@@ -32,14 +32,14 @@ namespace Ui
 {
 LottieAnimationVisual LottieAnimationVisual::New()
 {
-  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::Visual::ANIMATED_VECTOR_IMAGE);
+  Internal::VisualBaseImplPtr internal = Internal::VisualBaseImpl::New(Dali::Ui::VisualType::ANIMATED_VECTOR_IMAGE);
   return LottieAnimationVisual(internal.Get());
 }
 
 LottieAnimationVisual LottieAnimationVisual::DownCast(BaseHandle handle)
 {
   Internal::VisualBaseImpl* visualBaseImpl = dynamic_cast<Internal::VisualBaseImpl*>(handle.GetObjectPtr());
-  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::Visual::ANIMATED_VECTOR_IMAGE)
+  if(visualBaseImpl && visualBaseImpl->GetVisualType() == Dali::Ui::VisualType::ANIMATED_VECTOR_IMAGE)
   {
     return LottieAnimationVisual(visualBaseImpl);
   }

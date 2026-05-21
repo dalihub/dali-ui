@@ -64,16 +64,16 @@ namespace
  * @param type VisualType that want to checkup
  * @return true if type can use corner radius feature.
  */
-static bool IsTypeAvailableForCornerRadius(Ui::Visual::Type type)
+static bool IsTypeAvailableForCornerRadius(Ui::InternalVisualType type)
 {
-  switch(static_cast<Ui::DevelVisual::Type>(type))
+  switch(type)
   {
-    case Ui::Visual::Type::COLOR:
-    case Ui::Visual::Type::GRADIENT:
-    case Ui::Visual::Type::IMAGE:
-    case Ui::Visual::Type::SVG:
-    case Ui::Visual::Type::ANIMATED_IMAGE:
-    case Ui::DevelVisual::Type::ANIMATED_VECTOR_IMAGE:
+    case Ui::InternalVisualType::COLOR:
+    case Ui::InternalVisualType::GRADIENT:
+    case Ui::InternalVisualType::IMAGE:
+    case Ui::InternalVisualType::SVG:
+    case Ui::InternalVisualType::ANIMATED_IMAGE:
+    case Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE:
     {
       return true;
     }
@@ -89,16 +89,16 @@ static bool IsTypeAvailableForCornerRadius(Ui::Visual::Type type)
  * @param type VisualType that want to checkup
  * @return true if type can use borderline feature.
  */
-static bool IsTypeAvailableForBorderline(Ui::Visual::Type type)
+static bool IsTypeAvailableForBorderline(Ui::InternalVisualType type)
 {
-  switch(static_cast<Ui::DevelVisual::Type>(type))
+  switch(type)
   {
-    case Ui::Visual::Type::COLOR:
-    case Ui::Visual::Type::GRADIENT:
-    case Ui::Visual::Type::IMAGE:
-    case Ui::Visual::Type::SVG:
-    case Ui::Visual::Type::ANIMATED_IMAGE:
-    case Ui::DevelVisual::Type::ANIMATED_VECTOR_IMAGE:
+    case Ui::InternalVisualType::COLOR:
+    case Ui::InternalVisualType::GRADIENT:
+    case Ui::InternalVisualType::IMAGE:
+    case Ui::InternalVisualType::SVG:
+    case Ui::InternalVisualType::ANIMATED_IMAGE:
+    case Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE:
     {
       return true;
     }
@@ -147,7 +147,7 @@ Property::Index GetVisualPropertyIndex(Property::Key key)
 
 } // namespace
 
-Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::Visual::Type type)
+Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::InternalVisualType type)
 : mImpl(new Impl(type)),
   mFactoryCache(factoryCache)
 {
@@ -996,7 +996,7 @@ bool Visual::Base::IsSynchronousLoadingRequired() const
   return (mImpl->mFlags & Impl::IS_SYNCHRONOUS_RESOURCE_LOADING);
 }
 
-Ui::Visual::Type Visual::Base::GetType() const
+Ui::InternalVisualType Visual::Base::GetType() const
 {
   return mImpl->mType;
 }
@@ -1040,7 +1040,8 @@ void Visual::Base::SetTransformMapUsageForFittingMode(bool used)
 
 void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
 {
-  if(GetType() != Ui::Visual::Type::TEXT)
+  // TODO : Remove this if flag.
+  if(GetType() != Ui::InternalVisualType::TEXT)
   {
     SetViewSize(controlSize, effectiveScale);
   }
@@ -1492,13 +1493,13 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     {
       // Special case for MIX_COLOR
       if(key.type == Property::Key::INDEX &&
-         ((mImpl->mType == Ui::Visual::PRIMITIVE && key.indexKey == PrimitiveVisual::Property::MIX_COLOR)))
+         ((mImpl->mType == Ui::InternalVisualType::PRIMITIVE && key.indexKey == PrimitiveVisual::Property::MIX_COLOR)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::MIX_COLOR);
       }
 
       // Special case for PRE_MULTIPLIED_ALPHA (It is not animatable, but keep it just for logical flow)
-      if((mImpl->mType == Ui::Visual::IMAGE || mImpl->mType == Ui::Visual::ANIMATED_IMAGE || mImpl->mType == Ui::Visual::N_PATCH) &&
+      if((mImpl->mType == Ui::InternalVisualType::IMAGE || mImpl->mType == Ui::InternalVisualType::ANIMATED_IMAGE || mImpl->mType == Ui::InternalVisualType::N_PATCH) &&
          ((key.type == Property::Key::INDEX && key.indexKey == ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA) ||
           (key.type == Property::Key::STRING && key.stringKey == PRE_MULTIPLIED_ALPHA)))
       {
@@ -1506,7 +1507,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
       }
 
       // Special case for BLUR_RADIUS
-      if(mImpl->mType == Ui::Visual::COLOR &&
+      if(mImpl->mType == Ui::InternalVisualType::COLOR &&
          ((key.type == Property::Key::INDEX && key.indexKey == ColorVisualPropertyIndex::BLUR_RADIUS) ||
           (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME)))
       {

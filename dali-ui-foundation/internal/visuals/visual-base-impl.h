@@ -330,7 +330,7 @@ public:
    *
    * @return The the type of this visual.
    */
-  Ui::Visual::Type GetType() const;
+  Ui::InternalVisualType GetType() const;
 
   /**
    * @brief Retrieve the property object associated with the property key.
@@ -412,7 +412,7 @@ protected:
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] type The type of the this visual
    */
-  Base(VisualFactoryCache& factoryCache, Ui::Visual::Type type);
+  Base(VisualFactoryCache& factoryCache, Ui::InternalVisualType type);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().

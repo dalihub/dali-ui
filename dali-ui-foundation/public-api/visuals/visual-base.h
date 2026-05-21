@@ -180,7 +180,7 @@ public: ///< Public API
    *
    * @return The type of this VisualBase
    */
-  Dali::Ui::Visual::Type GetVisualType() const;
+  Dali::Ui::VisualType GetVisualType() const;
 
 public: // GetProperty / SetProperty
   /**

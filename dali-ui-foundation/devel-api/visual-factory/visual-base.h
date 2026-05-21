@@ -215,13 +215,6 @@ public:
   void DoActionExtension(const Dali::Property::Index actionId, const Dali::Any& attributes);
 
   /**
-   * @brief Get the type of this visual.
-   *
-   * @return The the type of this visual.
-   */
-  Visual::Type GetType() const;
-
-  /**
    * @brief Retrieve the property object associated with the property key.
    *
    * @param[in] key The Property key of the visual.

@@ -167,7 +167,7 @@ ColorVisualPtr ColorVisual::New(VisualFactoryCache& factoryCache, ColorVisualSha
 }
 
 ColorVisual::ColorVisual(VisualFactoryCache& factoryCache, ColorVisualShaderFactory& shaderFactory)
-: Visual::Base(factoryCache, Ui::Visual::COLOR),
+: Visual::Base(factoryCache, Ui::InternalVisualType::COLOR),
   mBlurRadius(0.0f),
   mCutoutCornerContext(nullptr),
   mCutoutPolicy(Dali::Ui::CutoutPolicy::NONE),
@@ -298,7 +298,7 @@ void ColorVisual::DoSetOffScene(Actor& actor)
 void ColorVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::COLOR);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::COLOR);
   map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImpl->mMixColor);
   map.Insert(Ui::ColorVisualPropertyIndex::CUTOUT_POLICY, mCutoutPolicy);
 

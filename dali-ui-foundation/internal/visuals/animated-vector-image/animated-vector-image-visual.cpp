@@ -149,7 +149,7 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&        
                                                      Ui::VisualFactory::CreationOptions creationOptions,
                                                      const VisualUrl&                   imageUrl,
                                                      ImageDimensions                    size)
-: Visual::Base(factoryCache, static_cast<Ui::Visual::Type>(Ui::DevelVisual::ANIMATED_VECTOR_IMAGE)),
+: Visual::Base(factoryCache, Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE),
   mImageUrl(imageUrl),
   mAnimationData(),
   mVectorAnimationTask(new VectorAnimationTask(factoryCache)),
@@ -260,7 +260,7 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
 void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::DevelVisual::ANIMATED_VECTOR_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE);
   if(mImageUrl.IsValid())
   {
     map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));

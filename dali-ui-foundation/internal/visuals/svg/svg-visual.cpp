@@ -18,14 +18,6 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/visuals/svg/svg-visual.h>
 
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
-#include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
-#include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
-#include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
-#include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
-
 // EXTERNAL INCLUDES
 #include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/scripting/enum-helper.h>
@@ -34,6 +26,15 @@
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/rendering/decorated-visual-renderer.h>
 #include <dali/integration-api/string-utils.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
+#include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
+#include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 
 using Dali::Integration::ToDaliStringView;
 using Dali::Integration::ToPropertyValue;
@@ -108,7 +109,7 @@ SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderF
 
 SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
                      const VisualUrl& imageUrl, ImageDimensions size)
-: Visual::Base(factoryCache, Ui::Visual::SVG),
+: Visual::Base(factoryCache, Ui::InternalVisualType::SVG),
   mImageVisualShaderFactory(shaderFactory),
   mSvgLoader(factoryCache.GetSvgLoader()),
   mSvgLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
@@ -398,7 +399,7 @@ void SvgVisual::GetNaturalSize(Vector2& naturalSize)
 void SvgVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Visual::SVG);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::SVG);
   if(mImageUrl.IsValid())
   {
     map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
