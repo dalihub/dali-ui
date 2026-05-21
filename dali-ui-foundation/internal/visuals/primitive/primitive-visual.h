@@ -48,8 +48,8 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/visuals/primitive-visual-properties-devel.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/public-api/visuals/primitive-visual-properties.h>
 
 namespace Dali
 {

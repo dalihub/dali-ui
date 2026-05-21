@@ -24,9 +24,9 @@
 #include <fstream>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/devel-api/visuals/mesh-visual-properties-devel.h>
 #include <dali-ui-foundation/internal/visuals/mesh/obj-loader.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/public-api/visuals/mesh-visual-properties.h>
 
 namespace Dali
 {
