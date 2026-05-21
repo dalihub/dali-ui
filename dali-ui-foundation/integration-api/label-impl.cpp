@@ -1379,6 +1379,13 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     auto& visualImpl = GetImplementation(mVisual);
     visualImpl.SetTransformMapUsageForFittingMode(true);
 
+    // Reset cutout offset before call SetTransformAndSize.
+    // (cutout offset will be set at OnSetTransform)
+    if(mController->IsTextCutout())
+    {
+      mController->SetOffsetWithCutout(Vector2::ZERO);
+    }
+
     Dali::Property::Map visualTransform;
     visualTransform.Add(Ui::Visual::Transform::Property::SIZE, visualTransformSize)
       .Add(Ui::Visual::Transform::Property::SIZE_POLICY,

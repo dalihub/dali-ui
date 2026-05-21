@@ -902,9 +902,9 @@ private:
 
     StackLayout row5 = MakeHStack();
 
-    // Box M: BorderlineWidth
+    // Box M: BorderlineWidth of Label
     {
-      View container = View::New();
+      Label container = Label::New("BORDER and TEXT");
       container.SetRequestedWidth(VISUAL_BOX_SIZE);
       container.SetRequestedHeight(VISUAL_BOX_SIZE);
       container.SetBackgroundColor(UiColor(0xF5F5F5));
@@ -912,20 +912,35 @@ private:
       container.SetBorderlineColor(UiColor(C_DARK_TEXT));
       container.SetBorderlineOffset(-1.0f);
 
+      container.SetFontSize(22.0f);
+      container.SetTextColor(UiColor(C_DARK_TEXT));
+      container.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+      container.SetMultiLine(true);
+      container.SetLineWrapMode(Text::LineWrapMode::WORD);
+
       row5.Add(MakeLabeled(container, "BorderlineWidth 4px without BorderVisual\n"));
     }
 
-    // Box M: Same result with BorderVisual
+    // Box M: Same result with BorderVisual and TextVisual
     {
-      View container = View::New();
+      Label container = Label::New();
       container.SetRequestedWidth(VISUAL_BOX_SIZE);
       container.SetRequestedHeight(VISUAL_BOX_SIZE);
       container.SetBackgroundColor(UiColor(0xF5F5F5));
 
-      BorderVisual visual = BorderVisual::New();
-      visual.SetColor(UiColor(C_DARK_TEXT));
-      visual.SetBorderSize(BORDER_WIDTH);
-      container.AddVisual(visual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+      BorderVisual borderVisual = BorderVisual::New();
+      borderVisual.SetColor(UiColor(C_DARK_TEXT));
+      borderVisual.SetBorderSize(BORDER_WIDTH);
+      container.AddVisual(borderVisual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
+
+      TextVisual textVisual = TextVisual::New();
+      textVisual.SetText("BORDER and TEXT");
+      textVisual.SetFontSize(22.0f);
+      textVisual.SetTextColor(UiColor(C_DARK_TEXT));
+      textVisual.SetHorizontalAlignment(Text::Alignment::CENTER);
+      textVisual.SetMultiLine(true);
+      textVisual.SetLineWrapMode(Text::LineWrapMode::WORD);
+      container.AddVisual(textVisual, Dali::Ui::Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
 
       row5.Add(MakeLabeled(container, "BorderVisual 4px\n"));
     }

@@ -263,12 +263,11 @@ private:
       .SetTextColor(UiColor(GetRandomFloat(), GetRandomFloat(), GetRandomFloat(), 1.0f))
       .SetHorizontalAlignment(Text::Alignment::CENTER)
       .SetVerticalAlignment(Text::Alignment::CENTER)
-      .SetWidth((GetRandomFloat() * 0.4f + 0.4f) * 400.0f)
-      .SetHeight((GetRandomFloat() * 0.2f + 0.1f) * 600.0f)
-      .SetOffsetX((GetRandomFloat() * 0.2f - 0.1f) * 400.0f)
-      .SetOffsetY((GetRandomFloat() * 0.2f - 0.1f) * 600.0f)
-      .SetProportionFlags(Visual::Transform::ProportionFlags::NONE);
-    // TODO : Looks relative transform don't works well. Need to fix it.
+      .SetWidth(GetRandomFloat() * 0.4f + 0.4f)
+      .SetHeight(GetRandomFloat() * 0.2f + 0.1f)
+      .SetOffsetX(GetRandomFloat() * 0.2f - 0.1f)
+      .SetOffsetY(GetRandomFloat() * 0.2f - 0.1f)
+      .SetProportionFlags(Visual::Transform::ProportionFlags::ALL);
 
     mView.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
     UpdateVisualCount();

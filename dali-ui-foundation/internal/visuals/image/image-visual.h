@@ -170,9 +170,9 @@ public: // from Visual
   void SetFittingMode(Ui::Image::FittingMode fittingMode) override;
 
   /**
-   * @copydoc Visual::Base::ApplyFittingMode
+   * @copydoc Visual::Base::OnApplyFittingMode
    */
-  void ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale) override;
+  void OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale) override;
 
 protected:
   /**

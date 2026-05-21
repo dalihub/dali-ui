@@ -90,9 +90,9 @@ public: // from Visual
   void GetNaturalSize(Vector2& naturalSize) override;
 
   /**
-   * @copydoc Visual::Base::ApplyFittingMode
+   * @copydoc Visual::Base::OnApplyFittingMode
    */
-  void ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale) override;
+  void OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale) override;
 
   /**
    * @copydoc Visual::Base::CreatePropertyMap

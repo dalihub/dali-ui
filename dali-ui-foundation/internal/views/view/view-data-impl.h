@@ -518,6 +518,11 @@ public:
    */
   void RegisterProcessorOnce();
 
+  /**
+   * Call if mSize or EffectiveScale changed.
+   */
+  void SizeOrUiScaleChanged();
+
 protected: // From processor-interface
   /**
    * @copydoc Dali::Integration::Processor::Process()

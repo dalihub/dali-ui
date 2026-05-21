@@ -219,6 +219,9 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
 {
   // Enable the pre-multiplied alpha to improve the text quality
   mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
+
+  // Enable fitting mode, to acquire effectiveScale value.
+  mImpl->mFittingModeRequired = true;
 }
 
 TextVisual::~TextVisual()
@@ -257,6 +260,9 @@ void TextVisual::OnInitialize()
 
   // Sets 0 as cursor's width.
   engine.SetCursorWidth(0u); // Do not layout space for the cursor.
+
+  // Register transform properties
+  mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
 }
 
 void TextVisual::DoSetProperties(const Property::Map& propertyMap)
@@ -283,9 +289,14 @@ void TextVisual::DoSetProperties(const Property::Map& propertyMap)
 
   if(IsOnScene())
   {
-    // TODO : Need to trigger the owner to call OnSetTransform()
     mRendererUpdateNeeded = true;
 
+    // TODO : Need to trigger the owner to call OnSetTransform()
+    // TODO : RelayoutRequest might not be works for dali-ui.
+    // if(mImpl->mEventObserver)
+    // {
+    //   mImpl->mEventObserver->RelayoutRequest(*this);
+    // }
     UpdateRenderer();
   }
 }
@@ -411,6 +422,26 @@ void TextVisual::DoSetOffScene(Actor& actor)
 
   // Resets the control handle.
   mControl.Reset();
+}
+
+void TextVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
+{
+  // Do nothing
+}
+
+void TextVisual::OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
+{
+  // Apply UiScale to controller
+  if(mController->SetUiScale(effectiveScale))
+  {
+    mController->InvalidateFontData();
+
+    // Renderer needs textures and to be added to control
+    mRendererUpdateNeeded = true;
+  }
+
+  // Update control size without change transform.
+  Visual::Base::OnApplyFittingMode(controlSize, padding, effectiveScale);
 }
 
 void TextVisual::OnSetTransform()
@@ -609,21 +640,8 @@ void TextVisual::UpdateRenderer()
   }
 
   // Calculates the size to be used to relayout.
-  Vector2 relayoutSize;
-
-  auto& visualTransform = mImpl->GetOrCreateTransform();
-
-  const bool isWidthRelative  = fabsf(visualTransform.mOffsetSizeMode.z) < Math::MACHINE_EPSILON_1000;
-  const bool isHeightRelative = fabsf(visualTransform.mOffsetSizeMode.w) < Math::MACHINE_EPSILON_1000;
-
-  const float controlWidth  = mImpl->mControlSize.width;
-  const float controlHeight = mImpl->mControlSize.height;
-
-  // Round the size and offset to avoid pixel alignement issues.
-  relayoutSize.width =
-    floorf(0.5f + (isWidthRelative ? controlWidth * visualTransform.mSize.x : visualTransform.mSize.width));
-  relayoutSize.height =
-    floorf(0.5f + (isHeightRelative ? controlHeight * visualTransform.mSize.y : visualTransform.mSize.height));
+  Vector2 relayoutSize = mImpl->GetTransformVisualSize(mImpl->mControlSize);
+  // TODO : Round the size and offset to avoid pixel alignment issues.
 
   auto textLengthUtf32 = mController->GetNumberOfCharacters();
 
@@ -705,22 +723,35 @@ void TextVisual::UpdateRenderer()
 
       if(cutoutEnabled)
       {
-        // mTransform stores the size and offset of the current visual.
-        // padding and alignment information is stored in mOffset.
-        // When Cutout Enabled, the current visual must draw the entire control.
-        // so set the size to controlSize and offset to 0.
+        if(mImpl->mTransformMapUsingDefault)
+        {
+          relayoutSize = mImpl->mControlSize;
+          mController->SetOffsetWithCutout(Vector2::ZERO);
+        }
+        else
+        {
+          // mTransform stores the size and offset of the current visual.
+          // padding and alignment information is stored in mOffset.
+          // When Cutout Enabled, the current visual must draw the entire control.
+          // so set the size to controlSize and offset to 0.
 
-        relayoutSize                 = Vector2(controlWidth, controlHeight);
-        visualTransform.mSize.width  = controlWidth;
-        visualTransform.mSize.height = controlHeight;
+          relayoutSize = mImpl->mControlSize;
 
-        // Relayout to the original size has been completed, so save only the offset information and use it in
-        // typesetter.
+          // Note : TextVisual which is not created by Label should not support cutout feature!
+          // We can assume that current transform is absolute offset / size which is effectScale applied already
+          // and the visualTransform will be change for next layout (mean, we can reset it as initial value freely).
 
-        Vector2 originOffset = Vector2(visualTransform.mOffset.x, visualTransform.mOffset.y);
-        mController->SetOffsetWithCutout(originOffset);
-        visualTransform.mOffset.x = 0;
-        visualTransform.mOffset.y = 0;
+          auto& visualTransform = mImpl->GetOrCreateTransform();
+
+          // Relayout to the original size has been completed, so save only the offset information and use it in
+          // typesetter.
+          // Note : We reset OffsetWithCutout whenever visual trasnform updated. So we need to "append" the offset
+          // if UpdateRenderer() called without visual transform changed.
+          const Vector2& previousCutoutOffset = mController->GetTextModel()->GetOffsetWithCutout();
+          mController->SetOffsetWithCutout(visualTransform.mOffset + previousCutoutOffset);
+
+          visualTransform.SetPropertyMap(Property::Map());
+        }
       }
 
       AddRenderer(control, relayoutSize, hasMultipleTextColors, containsColorGlyph, styleEnabled, isOverlayStyle,
@@ -793,9 +824,6 @@ void TextVisual::CreateTextureSet(TilingInfo& info, VisualRenderer& renderer, Sa
   }
 
   renderer.SetTextures(textureSet);
-
-  // Register transform properties
-  mImpl->SetTransformUniforms(renderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
 
   // Enable the pre-multiplied alpha to improve the text quality
   renderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, true);
@@ -945,6 +973,13 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     // (Because visual transform size and polic already apply viewEffectiveScale).
     SetTransformMapUsageForFittingMode(true);
 
+    // Reset cutout offset before call SetTransformAndSize.
+    // (cutout offset will be set at OnSetTransform)
+    if(mController->IsTextCutout())
+    {
+      mController->SetOffsetWithCutout(Vector2::ZERO);
+    }
+
     // Transform offset is used for subpixel data upload in text tiling.
     // We should set the transform before creating a tiling texture.
     Property::Map visualTransform;
@@ -1005,8 +1040,6 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       }
 
       mImpl->mRenderer.SetTextures(textureSet);
-      // Register transform properties
-      mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
       mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex,
                                    static_cast<float>(mTextShaderFeatureCache.IsEnabledMultiColor()));
       mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
@@ -1085,9 +1118,12 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
     for(RendererContainer::iterator iter = mRendererList.begin(); iter != mRendererList.end(); ++iter)
     {
-      Renderer renderer = (*iter);
+      VisualRenderer renderer = (*iter);
       if(renderer)
       {
+        // Register transform properties
+        mImpl->SetTransformUniforms(renderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+
         control.AddRenderer(renderer);
 
         if(renderInfo.isEmbossEnabled)
@@ -1365,8 +1401,6 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     TextureSet textureSet = GetTextTexture(size);
 
     mImpl->mRenderer.SetTextures(textureSet);
-    // Register transform properties
-    mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
     mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex, static_cast<float>(hasMultipleTextColors));
     mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
 
@@ -1459,9 +1493,12 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
   for(RendererContainer::iterator iter = mRendererList.begin(); iter != mRendererList.end(); ++iter)
   {
-    Renderer renderer = (*iter);
+    VisualRenderer renderer = (*iter);
     if(renderer)
     {
+      // Register transform properties
+      mImpl->SetTransformUniforms(renderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+
       // Note, AddRenderer will ignore renderer if it is already added.
       actor.AddRenderer(renderer);
 

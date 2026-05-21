@@ -189,6 +189,16 @@ public: // from Visual::Base
    */
   void DoCreateInstancePropertyMap(Property::Map& map) const override;
 
+  /**
+   * @copydoc Visual::Base::SetFittingMode
+   */
+  void SetFittingMode(Ui::Image::FittingMode fittingMode) override;
+
+  /**
+   * @copydoc Visual::Base::OnApplyFittingMode
+   */
+  void OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale) override;
+
 protected:
   /**
    * @brief Constructor.
@@ -390,8 +400,8 @@ private:
   void LoadComplete(bool success, const TextInformation& textInformation) override;
 
 private:
-  typedef std::vector<Renderer>   RendererContainer;
-  typedef std::vector<Constraint> ConstraintContainer;
+  typedef std::vector<VisualRenderer> RendererContainer;
+  typedef std::vector<Constraint>     ConstraintContainer;
 
 private:
   Text::ControllerPtr       mController;         ///< The text's controller.

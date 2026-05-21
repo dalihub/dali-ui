@@ -1714,7 +1714,7 @@ void AnimatedImageVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
   mFittingMode = fittingMode;
 }
 
-void AnimatedImageVisual::ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
+void AnimatedImageVisual::OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
 {
   DoApplyFittingMode(controlSize, padding, effectiveScale, mFittingMode);
 }

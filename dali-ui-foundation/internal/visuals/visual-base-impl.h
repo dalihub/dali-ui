@@ -263,16 +263,30 @@ public:
   /**
    * @brief Applies the fitting mode transform to this visual.
    *
-   * Default implementation calls SetViewSize for non-TEXT visuals.
-   * Subclasses that support FittingMode (e.g. ImageVisual) override this to apply
-   * the fitting algorithm using their stored mFittingMode.
+   * Subclasses could determine their own logics at OnApplyFittingMode().
    *
    * @param[in] controlSize The size of the parent control.
    * @param[in] viewPadding The padding of the parent control (start, end, top, bottom).
    *                        For RTL layouts, start/end should already be swapped by the caller.
    * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
    */
-  virtual void ApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale);
+  void ApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale);
+
+  /**
+   * @brief Applies the fitting mode transform to this visual.
+   *
+   * Default implementation calls SetViewSize for non-TEXT visuals.
+   * Subclasses that support FittingMode (e.g. ImageVisual) override this to apply
+   * the fitting algorithm using their stored mFittingMode.
+   *
+   * Should call SetTransformAndSize() here.
+   *
+   * @param[in] controlSize The size of the parent control.
+   * @param[in] viewPadding The padding of the parent control (start, end, top, bottom).
+   *                        For RTL layouts, start/end should already be swapped by the caller.
+   * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
+   */
+  virtual void OnApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale);
 
   /**
    * @brief Query whether the fittingMode is required.
@@ -302,15 +316,6 @@ public:
    * @brief Set the flag to use transformMap in the FittingMode.
    */
   void SetTransformMapUsageForFittingMode(bool used);
-
-  /**
-   * @brief Sets the view size
-   * It will call SetTransformAndSize with empty transform map.
-   *
-   * @param[in] viewSize The size of the parent view for visuals that need to scale internally.
-   * @param[in] effectiveScale The effective scale for the owner.
-   */
-  void SetViewSize(Size viewSize, float effectiveScale);
 
   /**
    * @brief Get the actual Visual Object.

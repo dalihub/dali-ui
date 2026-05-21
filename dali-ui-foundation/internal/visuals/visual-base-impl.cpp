@@ -1040,11 +1040,16 @@ void Visual::Base::SetTransformMapUsageForFittingMode(bool used)
 
 void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
 {
-  // TODO : Remove this if flag.
-  if(GetType() != Ui::InternalVisualType::TEXT)
-  {
-    SetViewSize(controlSize, effectiveScale);
-  }
+  // Notify to visual's constraint that view's size is changed.
+  UpdateApplyRate(Actor::Property::SIZE);
+
+  OnApplyFittingMode(controlSize, padding, effectiveScale);
+}
+
+void Visual::Base::OnApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale)
+{
+  const static Property::Map emptyMap;
+  SetTransformAndSize(emptyMap, controlSize, effectiveScale);
 }
 
 void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale, Ui::Image::FittingMode fittingMode)
@@ -1152,15 +1157,6 @@ void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents&
   }
 
   SetTransformAndSize(transformMap, controlSize, effectiveScale);
-}
-
-void Visual::Base::SetViewSize(Size viewSize, float effectiveScale)
-{
-  // Notify to visual's constraint that view's size is changed.
-  UpdateApplyRate(Actor::Property::SIZE);
-
-  const static Property::Map emptyMap;
-  SetTransformAndSize(emptyMap, viewSize, effectiveScale);
 }
 
 Visual::Base& Visual::Base::GetVisualObject()

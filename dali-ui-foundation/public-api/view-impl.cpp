@@ -2268,20 +2268,10 @@ void ViewImpl::OnSizeSet(const Vector3& targetSize)
 {
   Vector2 size(targetSize);
 
-  // Apply FittingMode here
   mImpl->mSize = Vector2(targetSize);
-  mImpl->RegisterProcessorOnce();
 
-  // Refresh render effects
-  if(mImpl->mRenderEffect)
-  {
-    mImpl->mRenderEffect->Refresh();
-  }
-
-  if(mImpl->mOffScreenRenderingImpl)
-  {
-    mImpl->mOffScreenRenderingImpl->Refresh();
-  }
+  // Notify that size or UiScale changed
+  mImpl->SizeOrUiScaleChanged();
 }
 
 void ViewImpl::OnSizeAnimation(Animation& animation, const Vector3& targetSize)

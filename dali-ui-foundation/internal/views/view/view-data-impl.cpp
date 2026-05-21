@@ -1371,7 +1371,8 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
       case VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX:
       {
-        // TODO : Do something if you need!
+        // We don't need to hold data for it. But need to apply fitting mode now.
+        viewImpl.GetViewDataImpl().SizeOrUiScaleChanged();
         break;
       }
 
@@ -2254,6 +2255,23 @@ void ViewDataImpl::RegisterProcessorOnce()
       Adaptor::Get().RegisterProcessorOnce(*this, true);
       mProcessorRegistered = true;
     }
+  }
+}
+
+void ViewDataImpl::SizeOrUiScaleChanged()
+{
+  // Apply fitting mode at post process.r
+  RegisterProcessorOnce();
+
+  // Refresh render effects
+  if(mRenderEffect)
+  {
+    mRenderEffect->Refresh();
+  }
+
+  if(mOffScreenRenderingImpl)
+  {
+    mOffScreenRenderingImpl->Refresh();
   }
 }
 
