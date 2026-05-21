@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "IDS_COMMON_TITLE"
+msgstr "[ALT/ko_KR] 공통 제목"
+
+msgid "IDS_ALT_TITLE"
+msgstr "[ALT/ko_KR] 제목"
+
+msgid "IDS_ALT_HELLO"
+msgstr "[ALT/ko_KR] 안녕하세요"
+
+msgid "IDS_ALT_DIRECT"
+msgstr "[ALT/ko_KR] 직접 바인딩"
+
+msgid "IDS_ALT_LOOKUP"
+msgstr "[ALT/ko_KR] 직접 조회 결과"

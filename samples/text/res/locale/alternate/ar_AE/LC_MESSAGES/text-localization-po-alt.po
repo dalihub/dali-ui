@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "IDS_COMMON_TITLE"
+msgstr "[ALT/ar_AE] العنوان المشترك"
+
+msgid "IDS_ALT_TITLE"
+msgstr "[ALT/ar_AE] العنوان"
+
+msgid "IDS_ALT_HELLO"
+msgstr "[ALT/ar_AE] مرحبا"
+
+msgid "IDS_ALT_DIRECT"
+msgstr "[ALT/ar_AE] ربط مباشر"
+
+msgid "IDS_ALT_LOOKUP"
+msgstr "[ALT/ar_AE] نتيجة البحث"

@@ -29,6 +29,9 @@
 
 #include <string>
 
+// test
+#include <dali/devel-api/adaptor-framework/application-devel.h>
+
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -407,6 +410,29 @@ private:
     {
       SetManualText();
     }
+    else if(event.GetKeyName() == "1")
+    {
+      SetLocale("en_US");
+    }
+    else if(event.GetKeyName() == "2")
+    {
+      SetLocale("ko_KR");
+    }
+    else if(event.GetKeyName() == "3")
+    {
+      SetLocale("ar_AE");
+    }
+    else if(event.GetKeyName() == "4")
+    {
+      SetLocale("ja_JP");
+    }
+  }
+
+  void SetLocale(Dali::String locale)
+  {
+    // for test.
+    setlocale(LC_MESSAGES, locale.CStr());
+    Dali::DevelApplication::SetApplicationLocale(mApplication, locale.CStr());
   }
 
 private:

@@ -1,0 +1,19 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "IDS_COMMON_TITLE"
+msgstr "[ALT/en_US] Common Title"
+
+msgid "IDS_ALT_TITLE"
+msgstr "[ALT/en_US] Title"
+
+msgid "IDS_ALT_HELLO"
+msgstr "[ALT/en_US] Hello"
+
+msgid "IDS_ALT_DIRECT"
+msgstr "[ALT/en_US] Direct Binding"
+
+msgid "IDS_ALT_LOOKUP"
+msgstr "[ALT/en_US] Lookup Result"

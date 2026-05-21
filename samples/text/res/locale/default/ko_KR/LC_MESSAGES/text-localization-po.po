@@ -1,0 +1,25 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "IDS_COMMON_TITLE"
+msgstr "[DEFAULT/ko_KR] 공통 제목"
+
+msgid "IDS_PO_TITLE"
+msgstr "[DEFAULT/ko_KR] 제목"
+
+msgid "IDS_PO_HELLO"
+msgstr "[DEFAULT/ko_KR] 안녕하세요"
+
+msgid "IDS_PO_THANKS"
+msgstr "[DEFAULT/ko_KR] 감사합니다"
+
+msgid "IDS_PO_DIRECT"
+msgstr "[DEFAULT/ko_KR] 직접 바인딩"
+
+msgid "IDS_PO_LOOKUP"
+msgstr "[DEFAULT/ko_KR] 직접 조회 결과"
+
+msgid "IDS_FLAG_IMAGE_URL"
+msgstr "flag_kr.png"
