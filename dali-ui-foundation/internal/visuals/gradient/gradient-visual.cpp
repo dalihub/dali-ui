@@ -179,24 +179,33 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
   bool needTextureUpdated = false;
   // Mutable properties. Allow to call as UpdateProperty action
   {
-    // TODO : Currently we cannot change gradient type as mutable.
-    // Can we change it as mutable in future?
-    if(!mGradient)
+    bool regenerateGradientRequired = !mGradient;
+    if(!regenerateGradientRequired)
     {
-      mGradientType = Type::LINEAR;
+      // Re-generate gradient only if all mendentary properties are updated at the same time.
+      if((propertyMap.Find(Ui::GradientVisualPropertyIndex::START_POSITION) && propertyMap.Find(Ui::GradientVisualPropertyIndex::END_POSITION)) ||
+         (propertyMap.Find(Ui::GradientVisualPropertyIndex::CENTER) && (propertyMap.Find(Ui::GradientVisualPropertyIndex::RADIUS) || propertyMap.Find(Ui::GradientVisualPropertyIndex::START_ANGLE))))
+      {
+        regenerateGradientRequired = true;
+      }
+    }
+    if(regenerateGradientRequired)
+    {
+      Type gradientType = Type::LINEAR;
       if(propertyMap.Find(Ui::GradientVisualPropertyIndex::RADIUS, RADIUS_NAME))
       {
-        mGradientType = Type::RADIAL;
+        gradientType = Type::RADIAL;
       }
       else if(propertyMap.Find(Ui::GradientVisualPropertyIndex::START_ANGLE, CONIC_START_ANGLE_NAME))
       {
-        mGradientType = Type::CONIC;
+        gradientType = Type::CONIC;
       }
 
-      if(NewGradient(mGradientType, propertyMap))
+      if(NewGradient(gradientType, propertyMap))
       {
         if(DALI_LIKELY(mGradient))
         {
+          mGradientType      = gradientType;
           mGradientTransform = mGradient->GetAlignmentTransform();
 
           if(mImpl->mRenderer)
@@ -262,23 +271,7 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
     }
     if(needTextureUpdated)
     {
-      // Set up the texture set
-      TextureSet    textureSet    = TextureSet::New();
-      Dali::Texture lookupTexture = mGradient->GenerateLookupTexture();
-      textureSet.SetTexture(0u, lookupTexture);
-      Dali::WrapMode::Type wrap = GetWrapMode(mGradient->GetSpreadMethod());
-      if(wrap != Dali::WrapMode::DEFAULT)
-      {
-        Sampler sampler = Sampler::New();
-        sampler.SetWrapMode(wrap, wrap);
-        textureSet.SetSampler(0u, sampler);
-      }
-
-      mImpl->mRenderer.SetTextures(textureSet);
-
-      float textureSize = static_cast<float>(lookupTexture.GetWidth());
-      mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_TEXTURE_COORDINATE_SCALE_FACTOR_NAME),
-                                        (textureSize - 1.0f) / textureSize);
+      ApplyLookupTexture();
     }
   }
 }
@@ -389,32 +382,16 @@ void GradientVisual::OnInitialize()
   mImpl->mRenderer = DecoratedVisualRenderer::New(geometry, shader);
   mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT + (mGradientType == Type::CONIC ? 1 : 0));
 
-  // Set up the texture set
-  if(DALI_LIKELY(mGradient))
-  {
-    TextureSet    textureSet    = TextureSet::New();
-    Dali::Texture lookupTexture = mGradient->GenerateLookupTexture();
-    textureSet.SetTexture(0u, lookupTexture);
-    Dali::WrapMode::Type wrap = GetWrapMode(mGradient->GetSpreadMethod());
-    if(wrap != Dali::WrapMode::DEFAULT)
-    {
-      Sampler sampler = Sampler::New();
-      sampler.SetWrapMode(wrap, wrap);
-      textureSet.SetSampler(0u, sampler);
-    }
-    mImpl->mRenderer.SetTextures(textureSet);
-
-    float textureSize = static_cast<float>(lookupTexture.GetWidth());
-    mImpl->mRenderer.RegisterUniqueProperty(ToDaliStringView(UNIFORM_TEXTURE_COORDINATE_SCALE_FACTOR_NAME),
-                                            (textureSize - 1.0f) / textureSize);
-  }
-
   mImpl->mRenderer.RegisterUniqueProperty(ToDaliStringView(UNIFORM_ALIGNMENT_MATRIX_NAME), mGradientTransform);
   if(DALI_LIKELY(mGradient) && mGradientType == Type::CONIC)
   {
     ConicGradient* gradient = static_cast<ConicGradient*>(mGradient.Get());
     mImpl->mRenderer.RegisterUniqueProperty(ToDaliStringView(UNIFORM_START_ANGLE_NAME), gradient->GetStartAngle().radian);
   }
+
+  mImpl->mRenderer.RegisterUniqueProperty(ToDaliStringView(UNIFORM_TEXTURE_COORDINATE_SCALE_FACTOR_NAME), 1.0f);
+
+  ApplyLookupTexture();
 
   float startOffset = mGradient ? mGradient->GetStartOffset() : 0.0f;
   mStartOffsetIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::GradientVisualPropertyIndex::START_OFFSET,
@@ -507,6 +484,32 @@ bool GradientVisual::ApplyStopNodes(const Property::Map& propertyMap)
   mGradient->ApplyStops(offsetArray, colorArray);
 
   return true;
+}
+
+void GradientVisual::ApplyLookupTexture()
+{
+  // Set up the texture set. If lookup texture generate failed, set empty texture handle so don't be rendered anything.
+  if(DALI_LIKELY(mGradient) && mImpl->mRenderer)
+  {
+    TextureSet    textureSet    = TextureSet::New();
+    Dali::Texture lookupTexture = mGradient->GenerateLookupTexture();
+    textureSet.SetTexture(0u, lookupTexture);
+    Dali::WrapMode::Type wrap = GetWrapMode(mGradient->GetSpreadMethod());
+    if(wrap != Dali::WrapMode::DEFAULT)
+    {
+      Sampler sampler = Sampler::New();
+      sampler.SetWrapMode(wrap, wrap);
+      textureSet.SetSampler(0u, sampler);
+    }
+    mImpl->mRenderer.SetTextures(textureSet);
+
+    if(DALI_LIKELY(lookupTexture))
+    {
+      float textureSize = static_cast<float>(lookupTexture.GetWidth());
+      mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_TEXTURE_COORDINATE_SCALE_FACTOR_NAME),
+                                        (textureSize - 1.0f) / textureSize);
+    }
+  }
 }
 
 Shader GradientVisual::GenerateShader() const

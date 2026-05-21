@@ -38,41 +38,6 @@
   */ \
   ChildClass& SetStartOffset(float startOffset) { GradientVisual::SetStartOffset(startOffset); return *this; } \
   /** \
-  * @brief Sets the start position of the GradientVisual. \
-  * \
-  * @param[in] startPosition The start position to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetStartPosition(const Dali::Vector2& startPosition) { GradientVisual::SetStartPosition(startPosition); return *this; } \
-  /** \
-  * @brief Sets the end position of the GradientVisual. \
-  * \
-  * @param[in] endPosition The end position to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetEndPosition(const Dali::Vector2& endPosition) { GradientVisual::SetEndPosition(endPosition); return *this; } \
-  /** \
-  * @brief Sets the center of the GradientVisual. \
-  * \
-  * @param[in] center The center to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetCenter(const Dali::Vector2& center) { GradientVisual::SetCenter(center); return *this; } \
-  /** \
-  * @brief Sets the radius of the GradientVisual. \
-  * \
-  * @param[in] radius The radius to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetRadius(float radius) { GradientVisual::SetRadius(radius); return *this; } \
-  /** \
-  * @brief Sets the start angle of the GradientVisual. \
-  * \
-  * @param[in] startAngle The start angle to set \
-  * @return Reference to this for fluent chaining \
-  */ \
-  ChildClass& SetStartAngle(Dali::Radian startAngle) { GradientVisual::SetStartAngle(startAngle); return *this; } \
-  /** \
   * @brief Sets the stop nodes of the GradientVisual. \
   * @note Stop nodes must have at least 2 items. \
   * \

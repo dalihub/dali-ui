@@ -160,70 +160,6 @@ int UtcDaliGradientVisualStartOffset(void)
   END_TEST;
 }
 
-int UtcDaliGradientVisualStartPosition(void)
-{
-  UiTestApplication application;
-
-  GradientVisual visual = GradientVisual::New();
-
-  Vector2 startPosition(-0.5f, -0.5f);
-  visual.SetStartPosition(startPosition);
-  DALI_TEST_EQUALS(visual.GetStartPosition(), startPosition, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliGradientVisualEndPosition(void)
-{
-  UiTestApplication application;
-
-  GradientVisual visual = GradientVisual::New();
-
-  Vector2 endPosition(0.5f, 0.5f);
-  visual.SetEndPosition(endPosition);
-  DALI_TEST_EQUALS(visual.GetEndPosition(), endPosition, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliGradientVisualCenter(void)
-{
-  UiTestApplication application;
-
-  GradientVisual visual = GradientVisual::New();
-
-  Vector2 center(0.0f, 0.0f);
-  visual.SetCenter(center);
-  DALI_TEST_EQUALS(visual.GetCenter(), center, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliGradientVisualRadius(void)
-{
-  UiTestApplication application;
-
-  GradientVisual visual = GradientVisual::New();
-
-  visual.SetRadius(0.5f);
-  DALI_TEST_EQUALS(visual.GetRadius(), 0.5f, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliGradientVisualStartAngle(void)
-{
-  UiTestApplication application;
-
-  GradientVisual visual = GradientVisual::New();
-
-  Dali::Radian startAngle(Math::PI_2);
-  visual.SetStartAngle(startAngle);
-  DALI_TEST_EQUALS(visual.GetStartAngle(), startAngle, TEST_LOCATION);
-
-  END_TEST;
-}
-
 int UtcDaliGradientVisualStopNodes(void)
 {
   UiTestApplication application;
@@ -313,9 +249,11 @@ int UtcDaliGradientVisualSetGetPropertyValue(void)
   DALI_TEST_EQUALS(visual.GetStartOffset(), 0.7f, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetProperty<float>(GradientVisual::Property::START_OFFSET), 0.7f, TEST_LOCATION);
 
-  // Test Radius
-  visual.SetRadius(0.4f);
+  // Test RadialGradient
+  visual.SetRadialGradient(Vector2(0.5f, 0.3f), 0.4f);
+  DALI_TEST_EQUALS(visual.GetCenter(), Vector2(0.5f, 0.3f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetRadius(), 0.4f, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetProperty<Vector2>(GradientVisual::Property::CENTER), Vector2(0.5f, 0.3f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetProperty<float>(GradientVisual::Property::RADIUS), 0.4f, TEST_LOCATION);
 
   // Test SpreadMethod
@@ -403,11 +341,9 @@ int UtcDaliGradientVisualInvalidHandle(void)
 
   // GradientVisual specific
   TestAssertFunction([&]() { empty.SetStartOffset(0.0f); });
-  TestAssertFunction([&]() { empty.SetStartPosition(Vector2::ZERO); });
-  TestAssertFunction([&]() { empty.SetEndPosition(Vector2::ZERO); });
-  TestAssertFunction([&]() { empty.SetCenter(Vector2::ZERO); });
-  TestAssertFunction([&]() { empty.SetRadius(0.0f); });
-  TestAssertFunction([&]() { empty.SetStartAngle(Dali::Radian(0.0f)); });
+  TestAssertFunction([&]() { empty.SetLinearGradient(Vector2::ZERO, Vector2::ZERO); });
+  TestAssertFunction([&]() { empty.SetRadialGradient(Vector2::ZERO, 1.0f); });
+  TestAssertFunction([&]() { empty.SetConicGradient(Vector2::ZERO, Dali::Radian(1.0f)); });
   TestAssertFunction([&]() { empty.SetStopNodes({{0.0f, UiColor()}, {1.0f, UiColor()}}); });
   TestAssertFunction([&]() { empty.SetUnits(Ui::Gradient::Units::OBJECT_BOUNDING_BOX); });
   TestAssertFunction([&]() { empty.SetSpreadMethod(Ui::Gradient::SpreadMethod::PAD); });

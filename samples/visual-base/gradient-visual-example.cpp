@@ -251,8 +251,6 @@ private:
 
   void PushVisual()
   {
-    int gradientType = GetRandomInteger(0, 3);
-
     GradientVisual gradientVisual = GradientVisual::New()
                                       .SetOffsetX(GetRandomFloat() * 0.2f)
                                       .SetOffsetY(GetRandomFloat() * 0.2f)
@@ -261,26 +259,6 @@ private:
                                       .SetProportionFlags(Visual::Transform::ProportionFlags::ALL)
                                       .SetCornerRadius(GetRandomFloat() * 0.5f)
                                       .SetCornerRadiusPolicyRelative();
-
-    // Set gradient type specific properties
-    switch(gradientType)
-    {
-      case 0: // Linear gradient
-      {
-        gradientVisual.SetLinearGradient(Vector2(-0.5f + GetRandomFloat(), -0.5f + GetRandomFloat() * 0.5f), Vector2(0.5f - GetRandomFloat() * 0.5f, 0.5f - GetRandomFloat()));
-        break;
-      }
-      case 1: // Radial gradient
-      {
-        gradientVisual.SetRadialGradient(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), GetRandomFloat() * 0.5f + 0.25f);
-        break;
-      }
-      case 2: // Conic gradient
-      {
-        gradientVisual.SetConicGradient(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), Dali::Radian(GetRandomFloat() * Math::PI * 2.0f));
-        break;
-      }
-    }
 
     UpdateGradientVisualInternal(gradientVisual);
 
@@ -350,9 +328,30 @@ private:
 private:
   void UpdateGradientVisualInternal(GradientVisual gradientVisual)
   {
+    int gradientType = GetRandomInteger(0, 3);
+
+    // Set gradient type specific properties
+    switch(gradientType)
+    {
+      case 0: // Linear gradient
+      {
+        gradientVisual.SetLinearGradient(Vector2(-0.5f + GetRandomFloat(), -0.5f + GetRandomFloat() * 0.5f), Vector2(0.5f - GetRandomFloat() * 0.5f, 0.5f - GetRandomFloat()));
+        break;
+      }
+      case 1: // Radial gradient
+      {
+        gradientVisual.SetRadialGradient(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), GetRandomFloat() * 0.5f + 0.25f);
+        break;
+      }
+      case 2: // Conic gradient
+      {
+        gradientVisual.SetConicGradient(Vector2(GetRandomFloat() - 0.5f, GetRandomFloat() - 0.5f), Dali::Radian(GetRandomFloat() * Math::PI * 2.0f));
+        break;
+      }
+    }
 
     // Set random spread method
-    int         spreadMethodIndex = GetRandomInteger(0, 3);
+    int                        spreadMethodIndex = GetRandomInteger(0, 3);
     Ui::Gradient::SpreadMethod spreadMethod = Ui::Gradient::SpreadMethod::PAD;
     switch(spreadMethodIndex)
     {

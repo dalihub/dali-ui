@@ -104,21 +104,9 @@ Dali::Vector2 GradientVisual::GetStartPosition() const
   return VisualBase::GetProperty<Dali::Vector2>(GradientVisual::Property::START_POSITION);
 }
 
-GradientVisual& GradientVisual::SetStartPosition(const Dali::Vector2& startPosition)
-{
-  VisualBase::SetProperty(GradientVisual::Property::START_POSITION, startPosition);
-  return *this;
-}
-
 Dali::Vector2 GradientVisual::GetEndPosition() const
 {
   return VisualBase::GetProperty<Dali::Vector2>(GradientVisual::Property::END_POSITION);
-}
-
-GradientVisual& GradientVisual::SetEndPosition(const Dali::Vector2& endPosition)
-{
-  VisualBase::SetProperty(GradientVisual::Property::END_POSITION, endPosition);
-  return *this;
 }
 
 Dali::Vector2 GradientVisual::GetCenter() const
@@ -126,32 +114,14 @@ Dali::Vector2 GradientVisual::GetCenter() const
   return VisualBase::GetProperty<Dali::Vector2>(GradientVisual::Property::CENTER);
 }
 
-GradientVisual& GradientVisual::SetCenter(const Dali::Vector2& center)
-{
-  VisualBase::SetProperty(GradientVisual::Property::CENTER, center);
-  return *this;
-}
-
 float GradientVisual::GetRadius() const
 {
   return VisualBase::GetProperty<float>(GradientVisual::Property::RADIUS);
 }
 
-GradientVisual& GradientVisual::SetRadius(float radius)
-{
-  VisualBase::SetProperty(GradientVisual::Property::RADIUS, radius);
-  return *this;
-}
-
 Dali::Radian GradientVisual::GetStartAngle() const
 {
   return Dali::Radian(VisualBase::GetProperty<float>(GradientVisual::Property::START_ANGLE));
-}
-
-GradientVisual& GradientVisual::SetStartAngle(Dali::Radian startAngle)
-{
-  VisualBase::SetProperty(GradientVisual::Property::START_ANGLE, startAngle.radian);
-  return *this;
 }
 
 Dali::Vector<Ui::Gradient::StopNode> GradientVisual::GetStopNodes() const

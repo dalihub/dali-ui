@@ -146,27 +146,11 @@ public: // Setters for chaining
   Dali::Vector2 GetStartPosition() const;
 
   /**
-   * @brief Sets the start position of the GradientVisual.
-   *
-   * @param[in] startPosition The start position to set
-   * @return Reference to this for fluent chaining
-   */
-  GradientVisual& SetStartPosition(const Dali::Vector2& startPosition);
-
-  /**
    * @brief Gets the end position of the GradientVisual.
    *
    * @return The end position of the GradientVisual
    */
   Dali::Vector2 GetEndPosition() const;
-
-  /**
-   * @brief Sets the end position of the GradientVisual.
-   *
-   * @param[in] endPosition The end position to set
-   * @return Reference to this for fluent chaining
-   */
-  GradientVisual& SetEndPosition(const Dali::Vector2& endPosition);
 
   /**
    * @brief Gets the center of the GradientVisual.
@@ -176,14 +160,6 @@ public: // Setters for chaining
   Dali::Vector2 GetCenter() const;
 
   /**
-   * @brief Sets the center of the GradientVisual.
-   *
-   * @param[in] center The center to set
-   * @return Reference to this for fluent chaining
-   */
-  GradientVisual& SetCenter(const Dali::Vector2& center);
-
-  /**
    * @brief Gets the radius of the GradientVisual.
    *
    * @return The radius of the GradientVisual
@@ -191,27 +167,11 @@ public: // Setters for chaining
   float GetRadius() const;
 
   /**
-   * @brief Sets the radius of the GradientVisual.
-   *
-   * @param[in] radius The radius to set
-   * @return Reference to this for fluent chaining
-   */
-  GradientVisual& SetRadius(float radius);
-
-  /**
    * @brief Gets the start angle of the GradientVisual.
    *
    * @return The start angle of the GradientVisual
    */
   Dali::Radian GetStartAngle() const;
-
-  /**
-   * @brief Sets the start angle of the GradientVisual.
-   *
-   * @param[in] startAngle The start angle to set
-   * @return Reference to this for fluent chaining
-   */
-  GradientVisual& SetStartAngle(Dali::Radian startAngle);
 
   /**
    * @brief Gets the stop nodes of the GradientVisual.
