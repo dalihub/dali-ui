@@ -212,7 +212,12 @@ int UtcDaliImageViewSetGetPreMultipliedAlphaP(void)
 {
   UiTestApplication application;
   ImageView view = ImageView::New();
+  // Default should be true
+  DALI_TEST_CHECK(view.IsPreMultipliedAlpha());
+
+  view.SetPreMultipliedAlpha(false);
   DALI_TEST_EQUALS(view.IsPreMultipliedAlpha(), false, TEST_LOCATION);
+
   view.SetPreMultipliedAlpha(true);
   DALI_TEST_EQUALS(view.IsPreMultipliedAlpha(), true, TEST_LOCATION);
   END_TEST;

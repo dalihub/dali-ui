@@ -65,7 +65,6 @@ public: // Properties
       DESIRED_HEIGHT             = Ui::LottieAnimationViewPropertyIndex::DESIRED_HEIGHT,
       RELEASE_POLICY             = Ui::LottieAnimationViewPropertyIndex::RELEASE_POLICY,
       SYNCHRONOUS_LOADING        = Ui::LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
-      PRE_MULTIPLIED_ALPHA       = Ui::LottieAnimationViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
       REDRAW_IN_SCALING_DOWN     = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
       REDRAW_IN_SCALING_UP       = Ui::LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_UP,
       ENABLE_FRAME_CACHE         = Ui::LottieAnimationViewPropertyIndex::ENABLE_FRAME_CACHE,
@@ -324,16 +323,6 @@ public: // API
   bool IsSynchronousLoading() const;
 
   /**
-   * @copydoc Dali::Ui::LottieAnimationView::SetPreMultipliedAlpha
-   */
-  void SetPreMultipliedAlpha(bool preMultiplied);
-
-  /**
-   * @copydoc Dali::Ui::LottieAnimationView::IsPreMultipliedAlpha
-   */
-  bool IsPreMultipliedAlpha() const;
-
-  /**
    * @copydoc Dali::Ui::LottieAnimationView::SetImageColor
    */
   void SetImageColor(const UiColor& color);
@@ -342,11 +331,6 @@ public: // API
    * @copydoc Dali::Ui::LottieAnimationView::GetImageColor
    */
   UiColor GetImageColor() const;
-
-  /**
-   * @copydoc Dali::Ui::LottieAnimationView::SetDepthIndex
-   */
-  void SetDepthIndex(int depthIndex);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::SetPlaceholderUrl
@@ -449,7 +433,6 @@ private:                    // Data
   int                              mMaxFrame;
   int                              mDesiredWidth;
   int                              mDesiredHeight;
-  int                              mDepthIndex;
   float                            mFrameSpeedFactor;
   float                            mRenderScale;
 
@@ -458,7 +441,6 @@ private:                    // Data
   bool mEnableFrameCache;
   bool mNotifyAfterRasterization;
   bool mSynchronousLoading;
-  bool mPreMultipliedAlpha;
   bool mEnableAspectFit;
   bool mVisualDirty; ///< True when a property changed and the visual needs rebuilding on the next measure pass
 

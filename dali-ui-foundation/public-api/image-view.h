@@ -510,18 +510,6 @@ public: // N-Patch Border
    */
   bool IsNPatchBorderOnly() const;
 
-public: // Depth Index
-  /**
-   * @brief Sets the depth index of the image visual.
-   *
-   * The depth index controls the rendering order of visuals within the same
-   * layer. Higher values are rendered on top.
-   *
-   * @param[in] depthIndex The depth index to assign to the image visual
-   * @return Reference to this for fluent chaining
-   */
-  ImageView& SetDepthIndex(int depthIndex);
-
 public: // Loading Status & Signals
   /**
    * @brief Gets the current loading status of the image.

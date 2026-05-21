@@ -41,7 +41,6 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
  * @brief Verifies LottieAnimationView loading options:
  *   SetReleasePolicy / GetReleasePolicy
  *   SetSynchronousLoading / IsSynchronousLoading
- *   SetPreMultipliedAlpha / IsPreMultipliedAlpha
  *   SetPlaceholderUrl / GetPlaceholderUrl
  *   GetLoadingStatus
  *
@@ -66,7 +65,7 @@ class TcLottieLoading : public ManualTest::TestCase, public ConnectionTracker
 public:
   Dali::String GetName() const override
   {
-    return "Lottie: ReleasePolicy / SyncLoading / PreMult / Placeholder";
+    return "Lottie: ReleasePolicy / SyncLoading / Placeholder";
   }
 
   Dali::String GetDescription() const override
@@ -94,7 +93,7 @@ public:
                    .SetRequestedHeight(PREVIEW_SIZE);
     mContainer.Add(mView);
 
-    mStatusLabel = MakeStatusLabel("ReleasePolicy: DETACHED | Sync: OFF | PreMult: OFF | Placeholder: none");
+    mStatusLabel = MakeStatusLabel("ReleasePolicy: DETACHED | Sync: OFF | Placeholder: none");
     mReadyLabel  = MakeStatusLabel("ResourceReadySignal: 0 | View: in scene");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
@@ -115,8 +114,6 @@ public:
     content.Add(MakeButtonRow({
       MakeButton("Sync\nON",  [this] { mView.SetSynchronousLoading(true);  UpdateLabel(); }),
       MakeButton("Sync\nOFF", [this] { mView.SetSynchronousLoading(false); UpdateLabel(); }),
-      MakeButton("PreMult\nON",  [this] { mView.SetPreMultipliedAlpha(true);  UpdateLabel(); }),
-      MakeButton("PreMult\nOFF", [this] { mView.SetPreMultipliedAlpha(false); UpdateLabel(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("Set\nPlaceholder",   [this] { mView.SetPlaceholderUrl(IMG_PLACEHOLDER); UpdateLabel(); }),
@@ -167,7 +164,6 @@ private:
     mStatusLabel.SetText(
       Dali::String("Release: ") + rpStr +
       Dali::String(" | Sync: ") + Dali::String(mView.IsSynchronousLoading() ? "ON" : "OFF") +
-      Dali::String("\nPreMult: ") + Dali::String(mView.IsPreMultipliedAlpha() ? "ON" : "OFF") +
       Dali::String(" | PH: ") + Dali::String(phUrl.Empty() ? "none" : "SET"));
 
     Dali::String inScene = mView.GetParent() ? "in scene" : "REMOVED";

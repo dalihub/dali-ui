@@ -858,7 +858,7 @@ struct Decorator::Impl : public ConnectionTracker
         grabHandle.actor.SetUiScalePolicy(UiScalePolicy::DISABLED);
         grabHandle.actor.SetSynchronousLoading(true);
         grabHandle.actor.SetProperty(Actor::Property::POSITION_USES_PIVOT, true);
-        grabHandle.actor.SetDepthIndex(DepthIndex::DECORATION);
+        // grabHandle.actor.SetDepthIndex(DepthIndex::DECORATION); ///< TODO : Make we add ImageVisual at InternalContainerRangeType::DECORATION instead.
         grabHandle.actor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_CENTER);
         grabHandle.actor.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
 #ifdef DECORATOR_DEBUG
@@ -940,7 +940,7 @@ struct Decorator::Impl : public ConnectionTracker
           Actor::Property::PIVOT,
           Pivot::TOP_RIGHT); // Change to BOTTOM_RIGHT if Look'n'Feel requires handle above text.
         primary.actor.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
-        primary.actor.SetDepthIndex(DepthIndex::DECORATION);
+        // primary.actor.SetDepthIndex(DepthIndex::DECORATION); ///< TODO : Make we add ImageVisual at InternalContainerRangeType::DECORATION instead.
         primary.actor.SetProperty(Actor::Property::COLOR, mHandleColor);
 
         primary.grabArea =
@@ -992,7 +992,7 @@ struct Decorator::Impl : public ConnectionTracker
           Actor::Property::PIVOT,
           Pivot::TOP_LEFT); // Change to BOTTOM_LEFT if Look'n'Feel requires handle above text.
         secondary.actor.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
-        secondary.actor.SetDepthIndex(DepthIndex::DECORATION);
+        // secondary.actor.SetDepthIndex(DepthIndex::DECORATION); ///< TODO : Make we add ImageVisual at InternalContainerRangeType::DECORATION instead.
         secondary.actor.SetProperty(Actor::Property::COLOR, mHandleColor);
 
         secondary.grabArea =

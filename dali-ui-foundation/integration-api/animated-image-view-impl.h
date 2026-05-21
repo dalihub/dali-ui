@@ -375,11 +375,6 @@ public: // API
    */
   bool IsPreMultipliedAlpha() const;
 
-  /**
-   * @copydoc Dali::Ui::AnimatedImageView::SetDepthIndex
-   */
-  void SetDepthIndex(int depthIndex);
-
 public: // Loading Status & Signals
   /**
    * @copydoc Dali::Ui::AnimatedImageView::GetLoadingStatus
@@ -463,7 +458,6 @@ private:                    // Data
   int                             mFrameDelay;
   int                             mDesiredWidth;
   int                             mDesiredHeight;
-  int                             mDepthIndex;
   float                           mFrameSpeedFactor;
 
   bool mPreMultipliedAlpha;

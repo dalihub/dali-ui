@@ -297,12 +297,6 @@ bool ImageView::IsNPatchBorderOnly() const
   return Ui::GetImpl(*this).IsNPatchBorderOnly();
 }
 
-ImageView& ImageView::SetDepthIndex(int depthIndex)
-{
-  Ui::GetImpl(*this).SetDepthIndex(depthIndex);
-  return *this;
-}
-
 Ui::Visual::ResourceStatus ImageView::GetLoadingStatus() const
 {
   return Ui::GetImpl(*this).GetLoadingStatus();

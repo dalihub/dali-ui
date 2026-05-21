@@ -72,7 +72,6 @@ LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("desiredWidth",             INTEGER,
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("desiredHeight",            INTEGER, DESIRED_HEIGHT)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("releasePolicy",            INTEGER, RELEASE_POLICY)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("synchronousLoading",       BOOLEAN, SYNCHRONOUS_LOADING)
-LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("preMultipliedAlpha",       BOOLEAN, PRE_MULTIPLIED_ALPHA)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingDown",      BOOLEAN, REDRAW_IN_SCALING_DOWN)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("redrawInScalingUp",        BOOLEAN, REDRAW_IN_SCALING_UP)
 LOTTIE_ANIMATION_VIEW_PROPERTY_REGISTRATION("enableFrameCache",         BOOLEAN, ENABLE_FRAME_CACHE)
@@ -106,7 +105,6 @@ LottieAnimationViewImpl::LottieAnimationViewImpl()
   mMaxFrame(0),
   mDesiredWidth(0),
   mDesiredHeight(0),
-  mDepthIndex(DepthIndex::CONTENT),
   mFrameSpeedFactor(1.0f),
   mRenderScale(1.0f),
   mRedrawInScalingDown(true),
@@ -114,7 +112,6 @@ LottieAnimationViewImpl::LottieAnimationViewImpl()
   mEnableFrameCache(false),
   mNotifyAfterRasterization(false),
   mSynchronousLoading(false),
-  mPreMultipliedAlpha(false),
   mEnableAspectFit(true),
   mVisualDirty(false),
   mAnimationFinishedSignal()
@@ -223,15 +220,6 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         if(value.Get(sync))
         {
           impl.SetSynchronousLoading(sync);
-        }
-        break;
-      }
-      case LottieAnimationViewImpl::Property::PRE_MULTIPLIED_ALPHA:
-      {
-        bool preMultiplied;
-        if(value.Get(preMultiplied))
-        {
-          impl.SetPreMultipliedAlpha(preMultiplied);
         }
         break;
       }
@@ -349,9 +337,6 @@ Dali::Property::Value LottieAnimationViewImpl::GetProperty(Dali::BaseObject* obj
         break;
       case LottieAnimationViewImpl::Property::SYNCHRONOUS_LOADING:
         value = impl.IsSynchronousLoading();
-        break;
-      case LottieAnimationViewImpl::Property::PRE_MULTIPLIED_ALPHA:
-        value = impl.IsPreMultipliedAlpha();
         break;
       case LottieAnimationViewImpl::Property::REDRAW_IN_SCALING_DOWN:
         value = impl.IsRedrawOnScaleDown();
@@ -910,7 +895,7 @@ void LottieAnimationViewImpl::UpdateVisual()
     mVisual = visualFactory.CreateVisual(map);
     if(mVisual)
     {
-      viewData.RegisterVisual(LottieAnimationViewImpl::Property::IMAGE, mVisual, mDepthIndex);
+      viewData.RegisterVisual(LottieAnimationViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
     }
   }
 }
@@ -975,21 +960,6 @@ bool LottieAnimationViewImpl::IsSynchronousLoading() const
   return mSynchronousLoading;
 }
 
-void LottieAnimationViewImpl::SetPreMultipliedAlpha(bool preMultiplied)
-{
-  if(mPreMultipliedAlpha != preMultiplied)
-  {
-    mPreMultipliedAlpha = preMultiplied;
-    mVisualDirty        = true;
-    InvalidateMeasure();
-  }
-}
-
-bool LottieAnimationViewImpl::IsPreMultipliedAlpha() const
-{
-  return mPreMultipliedAlpha;
-}
-
 void LottieAnimationViewImpl::SetImageColor(const UiColor& color)
 {
   if(mImageColor.GetRgba() != color.GetRgba())
@@ -1014,20 +984,6 @@ void LottieAnimationViewImpl::SetImageColor(const UiColor& color)
 UiColor LottieAnimationViewImpl::GetImageColor() const
 {
   return mImageColor;
-}
-
-void LottieAnimationViewImpl::SetDepthIndex(int depthIndex)
-{
-  if(mDepthIndex != depthIndex)
-  {
-    mDepthIndex = depthIndex;
-    if(mVisual)
-    {
-      auto& viewData = Internal::ViewDataImpl::Get(*this);
-      viewData.RegisterVisual(LottieAnimationViewImpl::Property::IMAGE, mVisual, mDepthIndex);
-      UpdatePlaceholderVisual();
-    }
-  }
 }
 
 void LottieAnimationViewImpl::SetPlaceholderUrl(const Dali::String& url)
@@ -1089,7 +1045,7 @@ void LottieAnimationViewImpl::UpdatePlaceholderVisual()
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
   {
-    viewData.RegisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE, visual, mDepthIndex + 1);
+    viewData.RegisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
   }
 }
 

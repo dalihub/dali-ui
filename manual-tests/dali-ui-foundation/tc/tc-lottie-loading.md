@@ -1,16 +1,15 @@
 # Lottie: ReleasePolicy / SyncLoading / PreMult / Placeholder
 
-SetReleasePolicy / GetReleasePolicy, SetSynchronousLoading / IsSynchronousLoading, SetPreMultipliedAlpha / IsPreMultipliedAlpha, SetPlaceholderUrl / GetPlaceholderUrl, GetLoadingStatus 동작을 확인한다.
+SetReleasePolicy / GetReleasePolicy, SetSynchronousLoading / IsSynchronousLoading, SetPlaceholderUrl / GetPlaceholderUrl, GetLoadingStatus 동작을 확인한다.
 
 ## 화면 구성
 
 - 중앙: Lottie 애니메이션 프리뷰 (240x240)
-- 상태 라벨: ReleasePolicy / Sync / PreMult / Placeholder / LoadingStatus
+- 상태 라벨: ReleasePolicy / Sync / Placeholder / LoadingStatus
 - 버튼 행 1: Release NEVER / Release DETACHED
 - 버튼 행 2: Remove View / Re-Add View
 - 버튼 행 3: Sync ON / Sync OFF
 - 버튼 행 4: Set Placeholder / Clear Placeholder / Reload URL
-- 버튼 행 5: PreMult ON / PreMult OFF
 
 ## 테스트 1: ReleasePolicy
 

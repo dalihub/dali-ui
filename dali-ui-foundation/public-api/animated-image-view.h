@@ -376,14 +376,6 @@ public: // Visual Appearance
    */
   bool IsPreMultipliedAlpha() const;
 
-  /**
-   * @brief Sets the depth index for the image.
-   *
-   * @param[in] depthIndex The depth index to set
-   * @return Reference to this for fluent chaining
-   */
-  AnimatedImageView& SetDepthIndex(int depthIndex);
-
 public: // Loading Behavior
   /**
    * @brief Sets the desired image width used as a hint for the image loader.

@@ -354,12 +354,6 @@ Vector4 AnimatedImageView::GetPixelArea() const
   return Ui::GetImpl(*this).GetPixelArea();
 }
 
-AnimatedImageView& AnimatedImageView::SetDepthIndex(int depthIndex)
-{
-  Ui::GetImpl(*this).SetDepthIndex(depthIndex);
-  return *this;
-}
-
 Ui::Visual::ResourceStatus AnimatedImageView::GetLoadingStatus() const
 {
   return Ui::GetImpl(*this).GetLoadingStatus();

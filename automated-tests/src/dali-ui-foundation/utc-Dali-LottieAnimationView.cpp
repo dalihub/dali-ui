@@ -350,24 +350,6 @@ int UtcDaliLottieAnimationViewSetGetSynchronousLoadingP(void)
   END_TEST;
 }
 
-// PreMultipliedAlpha
-
-int UtcDaliLottieAnimationViewSetGetPreMultipliedAlphaP(void)
-{
-  UiTestApplication application;
-  LottieAnimationView view = LottieAnimationView::New();
-
-  // Default should be false
-  DALI_TEST_CHECK(!view.IsPreMultipliedAlpha());
-
-  view.SetPreMultipliedAlpha(true);
-  DALI_TEST_CHECK(view.IsPreMultipliedAlpha());
-
-  view.SetPreMultipliedAlpha(false);
-  DALI_TEST_CHECK(!view.IsPreMultipliedAlpha());
-  END_TEST;
-}
-
 // JumpToFrame
 
 int UtcDaliLottieAnimationViewJumpToFrameP(void)
@@ -720,21 +702,6 @@ int UtcDaliLottieAnimationViewPropertySynchronousLoadingP(void)
   LottieAnimationView view = LottieAnimationView::New();
 
   const int index = LottieAnimationView::Property::SYNCHRONOUS_LOADING;
-
-  view.SetProperty(index, true);
-  DALI_TEST_CHECK(view.GetProperty(index).Get<bool>());
-
-  view.SetProperty(index, false);
-  DALI_TEST_CHECK(!view.GetProperty(index).Get<bool>());
-  END_TEST;
-}
-
-int UtcDaliLottieAnimationViewPropertyPreMultipliedAlphaP(void)
-{
-  UiTestApplication application;
-  LottieAnimationView view = LottieAnimationView::New();
-
-  const int index = LottieAnimationView::Property::PRE_MULTIPLIED_ALPHA;
 
   view.SetProperty(index, true);
   DALI_TEST_CHECK(view.GetProperty(index).Get<bool>());

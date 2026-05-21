@@ -310,12 +310,6 @@ public: // API — N-Patch Border
    */
   bool IsNPatchBorderOnly() const;
 
-public: // Depth Index
-  /**
-   * @copydoc Dali::Ui::ImageView::SetDepthIndex
-   */
-  void SetDepthIndex(int depthIndex);
-
 public: // Loading Status
   /**
    * @copydoc Dali::Ui::ImageView::GetLoadingStatus
@@ -382,7 +376,6 @@ private: // Data
   Ui::Image::ReleasePolicy mReleasePolicy;
   int                      mDesiredWidth;
   int                      mDesiredHeight;
-  int                      mDepthIndex;
 
   bool mPreMultipliedAlpha;
   bool mImageLoadWithViewSize;

@@ -100,8 +100,7 @@ ImageViewImpl::ImageViewImpl()
   mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
   mDesiredWidth(0),
   mDesiredHeight(0),
-  mDepthIndex(DepthIndex::CONTENT),
-  mPreMultipliedAlpha(false),
+  mPreMultipliedAlpha(true), ///< Default as true for ImageView.
   mImageLoadWithViewSize(false),
   mCropToMask(false),
   mSynchronousLoading(false),
@@ -750,19 +749,6 @@ bool ImageViewImpl::IsNPatchBorderOnly() const
   return mNPatchBorderOnly;
 }
 
-void ImageViewImpl::SetDepthIndex(int depthIndex)
-{
-  if(mDepthIndex != depthIndex)
-  {
-    mDepthIndex = depthIndex;
-    if(mVisual)
-    {
-      Internal::ViewDataImpl::Get(*this).RegisterVisual(ImageViewImpl::Property::IMAGE, mVisual, mDepthIndex);
-      UpdatePlaceholderVisual();
-    }
-  }
-}
-
 Ui::Visual::ResourceStatus ImageViewImpl::GetLoadingStatus() const
 {
   return Internal::ViewDataImpl::Get(*this).GetVisualResourceStatus(ImageViewImpl::Property::IMAGE);
@@ -806,7 +792,7 @@ void ImageViewImpl::UpdatePlaceholderVisual()
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
   {
-    viewData.RegisterVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, mDepthIndex + 1);
+    viewData.RegisterVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
   }
 }
 
@@ -961,8 +947,8 @@ void ImageViewImpl::UpdateVisual()
     mVisual = visualFactory.CreateVisual(map, Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY);
     if(mVisual)
     {
-      DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: RegisterVisual result=ok depthIndex=%d\n", mDepthIndex);
-      viewData.RegisterVisual(ImageViewImpl::Property::IMAGE, mVisual, mDepthIndex);
+      DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: RegisterVisual result=ok\n");
+      viewData.RegisterVisual(ImageViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
     }
     else
     {

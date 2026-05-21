@@ -292,17 +292,6 @@ bool LottieAnimationView::IsSynchronousLoading() const
   return Ui::GetImpl(*this).IsSynchronousLoading();
 }
 
-LottieAnimationView& LottieAnimationView::SetPreMultipliedAlpha(bool preMultiplied)
-{
-  Ui::GetImpl(*this).SetPreMultipliedAlpha(preMultiplied);
-  return *this;
-}
-
-bool LottieAnimationView::IsPreMultipliedAlpha() const
-{
-  return Ui::GetImpl(*this).IsPreMultipliedAlpha();
-}
-
 LottieAnimationView& LottieAnimationView::SetImageColor(const UiColor& color)
 {
   Ui::GetImpl(*this).SetImageColor(color);
@@ -312,12 +301,6 @@ LottieAnimationView& LottieAnimationView::SetImageColor(const UiColor& color)
 UiColor LottieAnimationView::GetImageColor() const
 {
   return Ui::GetImpl(*this).GetImageColor();
-}
-
-LottieAnimationView& LottieAnimationView::SetDepthIndex(int depthIndex)
-{
-  Ui::GetImpl(*this).SetDepthIndex(depthIndex);
-  return *this;
 }
 
 LottieAnimationView& LottieAnimationView::SetPlaceholderUrl(const Dali::String& url)

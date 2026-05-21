@@ -141,13 +141,6 @@ struct LottieAnimationViewPropertyIndex
      */
     SYNCHRONOUS_LOADING,
 
-    /**
-     * @brief Whether to apply pre-multiplied alpha to the rendered output.
-     * @details Name "preMultipliedAlpha", type Property::BOOLEAN.
-     * @note See also: LottieAnimationView::SetPreMultipliedAlpha(), LottieAnimationView::IsPreMultipliedAlpha().
-     */
-    PRE_MULTIPLIED_ALPHA,
-
     ///////////////////////////////////////////////////////////////////////////////
     // Rasterization tuning
     ///////////////////////////////////////////////////////////////////////////////

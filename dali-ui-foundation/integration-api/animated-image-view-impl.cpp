@@ -114,9 +114,8 @@ AnimatedImageViewImpl::AnimatedImageViewImpl()
   mFrameDelay(-1),
   mDesiredWidth(0),
   mDesiredHeight(0),
-  mDepthIndex(DepthIndex::CONTENT),
   mFrameSpeedFactor(1.0f),
-  mPreMultipliedAlpha(false),
+  mPreMultipliedAlpha(false), ///< Default as false for AnimatedImageView.
   mImageLoadWithViewSize(false),
   mCropToMask(false),
   mSynchronousLoading(false),
@@ -900,20 +899,6 @@ bool AnimatedImageViewImpl::IsPreMultipliedAlpha() const
   return mPreMultipliedAlpha;
 }
 
-void AnimatedImageViewImpl::SetDepthIndex(int depthIndex)
-{
-  if(mDepthIndex != depthIndex)
-  {
-    mDepthIndex = depthIndex;
-    if(mVisual)
-    {
-      auto& viewData = Internal::ViewDataImpl::Get(*this);
-      viewData.RegisterVisual(AnimatedImageViewImpl::Property::IMAGE, mVisual, mDepthIndex);
-      UpdatePlaceholderVisual();
-    }
-  }
-}
-
 void AnimatedImageViewImpl::SetFittingMode(Ui::Image::FittingMode fittingMode)
 {
   if(mFittingMode != fittingMode)
@@ -1106,6 +1091,7 @@ void AnimatedImageViewImpl::UpdateVisual()
   }
 
   map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
+  map.Insert(Ui::ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA, mPreMultipliedAlpha);
 
   if(mDesiredWidth > 0)
   {
@@ -1143,7 +1129,7 @@ void AnimatedImageViewImpl::UpdateVisual()
     mVisual = visualFactory.CreateVisual(map);
     if(mVisual)
     {
-      viewData.RegisterVisual(AnimatedImageViewImpl::Property::IMAGE, mVisual, mDepthIndex);
+      viewData.RegisterVisual(AnimatedImageViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
     }
   }
 }
@@ -1177,7 +1163,7 @@ void AnimatedImageViewImpl::UpdatePlaceholderVisual()
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
   {
-    viewData.RegisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, mDepthIndex + 1);
+    viewData.RegisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
   }
 }
 

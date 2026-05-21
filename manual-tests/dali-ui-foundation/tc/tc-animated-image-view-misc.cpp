@@ -56,7 +56,6 @@ const char* SamplingModeName(Ui::Image::SamplingMode m)
 
 /**
  * @brief Verifies AnimatedImageView miscellaneous APIs not covered by other TCs:
- *   SetDepthIndex
  *   SetPreMultipliedAlpha / IsPreMultipliedAlpha
  *   SetDesiredWidth / GetDesiredWidth / SetDesiredHeight / GetDesiredHeight
  *   SetPlaceholderUrl / GetPlaceholderUrl
@@ -64,10 +63,6 @@ const char* SamplingModeName(Ui::Image::SamplingMode m)
  *   SetSamplingMode / GetSamplingMode
  *
  * Steps:
- *   [DepthIndex]:
- *   1. [Depth: -1] -> animation drawn behind the red background fill.
- *   2. [Depth: 0]  -> default order; animation visible.
- *
  *   [DesiredSize]:
  *   1. [Desired 50x50]  -> rasterised at low resolution (blurry).
  *   2. [Desired 0x0]    -> use natural size.
@@ -81,7 +76,6 @@ const char* SamplingModeName(Ui::Image::SamplingMode m)
  *
  * Expected result:
  *   After every Set call, the matching Get/Is return value is reflected in the label.
- *   Negative depth index hides the animation behind the background fill.
  *   DesiredSize 50x50 yields a visibly low-resolution image.
  */
 class TcAnimatedImageViewMisc : public ManualTest::TestCase, public ConnectionTracker
@@ -89,12 +83,12 @@ class TcAnimatedImageViewMisc : public ManualTest::TestCase, public ConnectionTr
 public:
   Dali::String GetName() const override
   {
-    return "AnimatedImageView: DepthIndex / PreMult / DesiredSize / Placeholder / Sampling";
+    return "AnimatedImageView: PreMult / DesiredSize / Placeholder / Sampling";
   }
 
   Dali::String GetDescription() const override
   {
-    return "Toggle DepthIndex, PreMultipliedAlpha, DesiredSize, Placeholder, ImageLoadWithViewSize, SamplingMode and verify Get/Is return values";
+    return "Toggle PreMultipliedAlpha, DesiredSize, Placeholder, ImageLoadWithViewSize, SamplingMode and verify Get/Is return values";
   }
 
   void OnEnter(View contentArea) override
@@ -106,7 +100,7 @@ public:
 
     mView.Play();
 
-    mStatusLabel = MakeStatusLabel("Depth: 0 | DesiredSize: 0x0 | Sampling: BOX");
+    mStatusLabel = MakeStatusLabel("DesiredSize: 0x0 | Sampling: BOX");
     mFlagsLabel  = MakeStatusLabel("PreMult: OFF | LoadWithViewSize: OFF | Placeholder: none");
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
@@ -119,11 +113,6 @@ public:
     content.Add(mStatusLabel);
     content.Add(mFlagsLabel);
 
-    content.Add(MakeButtonRow({
-      MakeButton("Depth\n-1", [this] { mView.SetDepthIndex(-1); mDepth = -1; UpdateLabels(); }),
-      MakeButton("Depth\n0",  [this] { mView.SetDepthIndex(0);  mDepth = 0;  UpdateLabels(); }),
-      MakeButton("Depth\n1",  [this] { mView.SetDepthIndex(1);  mDepth = 1;  UpdateLabels(); }),
-    }));
     content.Add(MakeButtonRow({
       MakeButton("Desired\n0x0",    [this] { OnDesired(0,   0); }),
       MakeButton("Desired\n50x50",  [this] { OnDesired(50,  50); }),
@@ -160,7 +149,6 @@ private:
   void UpdateLabels()
   {
     mStatusLabel.SetText(
-      Dali::String("Depth: ") + Dali::String(std::to_string(mDepth).c_str()) +
       Dali::String(" | DesiredSize: ") + Dali::String(std::to_string(mView.GetDesiredWidth()).c_str()) +
       Dali::String("x") + Dali::String(std::to_string(mView.GetDesiredHeight()).c_str()) +
       Dali::String(" | Sampling: ") + Dali::String(SamplingModeName(mView.GetSamplingMode())));
@@ -229,7 +217,6 @@ private:
   AnimatedImageView mView;
   Label             mStatusLabel;
   Label             mFlagsLabel;
-  int               mDepth{0};
 };
 
 REGISTER_MANUAL_TEST(TcAnimatedImageViewMisc)

@@ -72,7 +72,6 @@ public:
       DESIRED_HEIGHT             = LottieAnimationViewPropertyIndex::DESIRED_HEIGHT,
       RELEASE_POLICY             = LottieAnimationViewPropertyIndex::RELEASE_POLICY,
       SYNCHRONOUS_LOADING        = LottieAnimationViewPropertyIndex::SYNCHRONOUS_LOADING,
-      PRE_MULTIPLIED_ALPHA       = LottieAnimationViewPropertyIndex::PRE_MULTIPLIED_ALPHA,
       REDRAW_IN_SCALING_DOWN     = LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_DOWN,
       REDRAW_IN_SCALING_UP       = LottieAnimationViewPropertyIndex::REDRAW_IN_SCALING_UP,
       ENABLE_FRAME_CACHE         = LottieAnimationViewPropertyIndex::ENABLE_FRAME_CACHE,
@@ -456,14 +455,6 @@ public: // Visual Appearance
    */
   UiColor GetImageColor() const;
 
-  /**
-   * @brief Sets the depth index for the animation.
-   *
-   * @param[in] depthIndex The depth index to set
-   * @return Reference to this for fluent chaining
-   */
-  LottieAnimationView& SetDepthIndex(int depthIndex);
-
 public: // Loading Behavior
   /**
    * @brief Sets the desired rasterization width as a hint for the renderer.
@@ -524,21 +515,6 @@ public: // Loading Behavior
    * @return True if synchronous loading is enabled
    */
   bool IsSynchronousLoading() const;
-
-  /**
-   * @brief Sets whether the rendered frames use pre-multiplied alpha.
-   *
-   * @param[in] preMultiplied True if pre-multiplied alpha is used
-   * @return Reference to this for fluent chaining
-   */
-  LottieAnimationView& SetPreMultipliedAlpha(bool preMultiplied);
-
-  /**
-   * @brief Gets whether pre-multiplied alpha is enabled.
-   *
-   * @return True if pre-multiplied alpha is enabled
-   */
-  bool IsPreMultipliedAlpha() const;
 
 public: // Placeholder
   /**
