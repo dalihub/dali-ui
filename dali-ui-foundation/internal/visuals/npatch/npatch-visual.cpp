@@ -383,7 +383,8 @@ NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFa
   mBorderOnly(false),
   mBorder(),
   mAuxiliaryImageAlpha(0.0f),
-  mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED)
+  mReleasePolicy(Ui::Image::ReleasePolicy::DETACHED),
+  mFittingMode(Ui::Image::FittingMode::FILL)
 {
   EnablePreMultipliedAlpha(mFactoryCache.GetPreMultiplyOnLoad());
 

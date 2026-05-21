@@ -195,19 +195,22 @@ void GradientVisual::DoSetProperties(const Property::Map& propertyMap)
 
       if(NewGradient(mGradientType, propertyMap))
       {
-        mGradientTransform = mGradient->GetAlignmentTransform();
-
-        if(mImpl->mRenderer)
+        if(DALI_LIKELY(mGradient))
         {
-          mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_ALIGNMENT_MATRIX_NAME), mGradientTransform);
-          if(DALI_LIKELY(mGradient) && mGradientType == Type::CONIC)
+          mGradientTransform = mGradient->GetAlignmentTransform();
+
+          if(mImpl->mRenderer)
           {
-            ConicGradient* gradient = static_cast<ConicGradient*>(mGradient.Get());
-            mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_START_ANGLE_NAME), gradient->GetStartAngle().radian);
+            mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_ALIGNMENT_MATRIX_NAME), mGradientTransform);
+            if(mGradientType == Type::CONIC)
+            {
+              ConicGradient* gradient = static_cast<ConicGradient*>(mGradient.Get());
+              mImpl->mRenderer.RegisterProperty(ToDaliStringView(UNIFORM_START_ANGLE_NAME), gradient->GetStartAngle().radian);
+            }
           }
+          needShaderUpdated  = true;
+          needTextureUpdated = true;
         }
-        needShaderUpdated  = true;
-        needTextureUpdated = true;
       }
     }
 

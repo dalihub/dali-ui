@@ -452,6 +452,7 @@ private:
     {
       mTransform.reset(new Internal::Visual::Transform());
     }
+    DALI_ASSERT_ALWAYS(mTransform && "Transform must not be null here!");
     return *(mTransform.get());
   }
 
