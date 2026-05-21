@@ -51,6 +51,7 @@
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
+#include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
@@ -68,6 +69,7 @@
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -324,10 +326,16 @@ void ViewImpl::OnInitialize()
 
 void ViewImpl::OnDestroy()
 {
-  auto manager = UiColorManager::Get();
-  if(manager)
+  auto colorManager = UiColorManager::Get();
+  if(colorManager)
   {
-    GetImpl(manager).ClearBindings(GetOwner());
+    GetImpl(colorManager).ClearBindings(GetOwner());
+  }
+
+  auto localizationManager = UiLocalizationManager::Get();
+  if(localizationManager)
+  {
+    GetImpl(localizationManager).ClearBindings(GetOwner());
   }
 
   mImpl->NotifyTraitsViewDestroying();

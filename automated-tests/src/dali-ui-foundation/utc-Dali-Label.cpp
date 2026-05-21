@@ -20,11 +20,14 @@
 #include <limits>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/integration-api/string-utils.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 using namespace Dali::Ui::Integration;
+
+using Dali::Integration::ToStdString;
 
 namespace
 {
@@ -988,5 +991,250 @@ int UtcDaliLabelSetProperty(void)
   label.SetProperty(Label::Property::TEXT_COLOR, Color::BLUE);
   DALI_TEST_EQUALS(label.GetProperty<Vector4>(Label::Property::TEXT_COLOR), Color::BLUE, TEST_LOCATION);
 
+  // Clear localization state
+  label.ClearTranslatableText();
+  UiLocalizationManager::Get().ClearLocalizedStringOverride();
+  UiLocalizationManager::Get().SetBypassEnabled(false);
+  UiLocalizationManager::Get().SetDefaultDomain("");
+
+  END_TEST;
+}
+
+// Localization test helpers
+namespace
+{
+
+bool LabelLocalizationOverride(StringView resourceId, StringView domain, Dali::String& outString)
+{
+  const std::string rid = ToStdString(resourceId);
+  const std::string dom = ToStdString(domain);
+
+  if(rid == "IDS_TITLE")
+  {
+    if(dom == "domainA")
+    {
+      outString = "Title A";
+    }
+    else if(dom == "domainB")
+    {
+      outString = "Title B";
+    }
+    else
+    {
+      outString = "Title Default";
+    }
+    return true;
+  }
+
+  return false;
+}
+
+void CleanupLocalization(Label& label)
+{
+  label.ClearTranslatableText();
+  UiLocalizationManager::Get().ClearLocalizedStringOverride();
+  UiLocalizationManager::Get().SetBypassEnabled(false);
+  UiLocalizationManager::Get().SetDefaultDomain("");
+}
+
+} // anonymous namespace
+
+int UtcDaliLabelTranslatableTextP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  label.SetTranslatableText("IDS_TITLE");
+  DALI_TEST_EQUALS(label.GetTranslatableText(), "IDS_TITLE", TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+
+  CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelSetTranslatableTextDefaultDomainAfterExplicitDomainP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  // Set default domain to domainB
+  locManager.SetDefaultDomain("domainB");
+
+  // First, set with explicit domainA
+  label.SetTranslatableText("IDS_TITLE", "domainA");
+  DALI_TEST_EQUALS(label.GetText(), "Title A", TEST_LOCATION);
+
+  // Now call SetTranslatableText(resourceId) without domain.
+  // This should use default domain (domainB), NOT reuse the previous explicit domainA.
+  label.SetTranslatableText("IDS_TITLE");
+  DALI_TEST_EQUALS(label.GetText(), "Title B", TEST_LOCATION);
+
+  // Verify that RefreshBindings still uses default domain
+  locManager.RefreshBindings();
+  DALI_TEST_EQUALS(label.GetText(), "Title B", TEST_LOCATION);
+
+  CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelTranslatableTextWithDomainP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  label.SetTranslatableText("IDS_TITLE", "domainA");
+  DALI_TEST_EQUALS(label.GetText(), "Title A", TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTranslatableText(), "IDS_TITLE", TEST_LOCATION);
+
+  label.SetTranslatableText("IDS_TITLE", "domainB");
+  DALI_TEST_EQUALS(label.GetText(), "Title B", TEST_LOCATION);
+
+  CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelTranslatableTextWithDomainChainingP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  // Test fluent API with domain overload
+  label.SetTranslatableText("IDS_TITLE", "domainA");
+  DALI_TEST_EQUALS(label.GetTranslatableText(), "IDS_TITLE", TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetText(), "Title A", TEST_LOCATION);
+
+  CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelClearTranslatableTextP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  label.SetTranslatableText("IDS_TITLE");
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+
+  label.ClearTranslatableText();
+  // Current Text value is maintained after clear
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTranslatableText(), Dali::String(), TEST_LOCATION);
+
+  // RefreshBindings should not change the text after clear
+  locManager.RefreshBindings();
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+
+  CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelSetTextDoesNotClearTranslatableTextP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  label.SetTranslatableText("IDS_TITLE");
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+
+  label.SetText("Manual Text");
+  DALI_TEST_EQUALS(label.GetText(), "Manual Text", TEST_LOCATION);
+  // TranslatableText binding is still active
+  DALI_TEST_EQUALS(label.GetTranslatableText(), "IDS_TITLE", TEST_LOCATION);
+
+  // RefreshBindings overwrites Text with localized string
+  locManager.RefreshBindings();
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+
+  CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelLocalizationBypassP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  label.SetTranslatableText("IDS_TITLE");
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+
+  locManager.SetBypassEnabled(true);
+  // Bypass returns resourceId directly
+  DALI_TEST_EQUALS(label.GetText(), "IDS_TITLE", TEST_LOCATION);
+
+  locManager.SetBypassEnabled(false);
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+
+  CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelDefaultDomainChangeP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  // No explicit domain - uses default domain
+  label.SetTranslatableText("IDS_TITLE");
+  DALI_TEST_EQUALS(label.GetText(), "Title Default", TEST_LOCATION);
+
+  locManager.SetDefaultDomain("domainA");
+  DALI_TEST_EQUALS(label.GetText(), "Title A", TEST_LOCATION);
+
+  locManager.SetDefaultDomain("domainB");
+  DALI_TEST_EQUALS(label.GetText(), "Title B", TEST_LOCATION);
+
+  CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelExplicitDomainUnaffectedByDefaultDomainP(void)
+{
+  TestApplication application;
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&LabelLocalizationOverride);
+
+  label.SetTranslatableText("IDS_TITLE", "domainA");
+  DALI_TEST_EQUALS(label.GetText(), "Title A", TEST_LOCATION);
+
+  locManager.SetDefaultDomain("domainB");
+  // Explicit domain should still be domainA
+  DALI_TEST_EQUALS(label.GetText(), "Title A", TEST_LOCATION);
+
+  CleanupLocalization(label);
   END_TEST;
 }

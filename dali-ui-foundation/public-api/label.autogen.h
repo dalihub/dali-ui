@@ -401,4 +401,33 @@
   * \
   * @param[in] scale The render scale. \
   */ \
-  ChildClass& SetRenderScale(float scale) { Label::SetRenderScale(scale); return *this; }
+  ChildClass& SetRenderScale(float scale) { Label::SetRenderScale(scale); return *this; } \
+  /** \
+  * @brief Sets the translatable text resource ID using the default domain. \
+  * \
+  * When set, the Label registers a localization binding with UiLocalizationManager \
+  * and displays the localized string for the given resourceId. \
+  * \
+  * The displayed text is automatically updated when: \
+  * - UiLocalizationManager::RefreshBindings() is called \
+  * - The default domain changes \
+  * - The localization override or bypass mode changes \
+  * \
+  * @note SetText() does not clear the translatable text binding. \
+  *       Use ClearTranslatableText() to remove the binding. \
+  * \
+  * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE"). \
+  * @return A reference to this Label for chaining. \
+  */ \
+  ChildClass& SetTranslatableText(StringView resourceId) { Label::SetTranslatableText(resourceId); return *this; } \
+  /** \
+  * @brief Sets the translatable text resource ID with an explicit domain. \
+  * \
+  * Passing an empty domain makes the binding use the current default domain, \
+  * equivalent to SetTranslatableText(resourceId). \
+  * \
+  * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE"). \
+  * @param[in] domain The translation domain, or empty to use the default domain. \
+  * @return A reference to this Label for chaining. \
+  */ \
+  ChildClass& SetTranslatableText(StringView resourceId, StringView domain) { Label::SetTranslatableText(resourceId, domain); return *this; }

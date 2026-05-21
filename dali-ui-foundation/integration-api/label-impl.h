@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view-impl.h>
+#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
@@ -533,6 +534,26 @@ public:
    */
   float GetRenderScale() const;
 
+  /**
+   * @see Dali::Ui::Label::SetTranslatableText
+   */
+  void SetTranslatableText(StringView resourceId);
+
+  /**
+   * @see Dali::Ui::Label::SetTranslatableText(StringView resourceId, StringView domain);
+   */
+  void SetTranslatableText(StringView resourceId, StringView domain);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTranslatableText
+   */
+  Dali::String GetTranslatableText() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::ClearTranslatableText
+   */
+  void ClearTranslatableText();
+
   // Read Only
   /**
    * @see Dali::Ui::Label::GetLineCount
@@ -954,6 +975,18 @@ private: // Implementation
   void UpdateCutoutState(bool enabled);
 
   /**
+   * @brief Applies a localized text string to the label.
+   *
+   * This is used as the UiLocalizationManager binding callback for the
+   * translatable text binding. The target argument is ignored because the
+   * callback is bound to this LabelImpl instance.
+   *
+   * @param[in] target The target object for the binding.
+   * @param[in] text The localized text to display.
+   */
+  void ApplyLocalizedText(BaseHandle target, const Dali::String& text);
+
+  /**
    * @brief Returns the parameters used for asynchronous text processing.
    *
    * Collects and returns the text label properties required to perform
@@ -1040,6 +1073,7 @@ private:
 
   std::unordered_map<Dali::Property::Index, Dali::String> mVariationIndexMap;
   WeakHandle<Ui::View>                                    mMaskSourceView;
+  Dali::String                                            mTranslatableText; ///< Stored resourceId for localization binding
 
   Visual::Base          mVisual;
   Text::ControllerPtr   mController;

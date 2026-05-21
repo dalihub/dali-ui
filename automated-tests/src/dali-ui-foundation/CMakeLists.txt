@@ -26,6 +26,7 @@ SET(TC_SOURCES
         utc-Dali-LottieAnimationVisual.cpp
         utc-Dali-UiColor.cpp
         utc-Dali-UiColorManager.cpp
+        utc-Dali-UiLocalizationManager.cpp
         utc-Dali-UiThemeManager.cpp
         utc-Dali-InteractiveTrait.cpp
         utc-Dali-InteractiveView.cpp

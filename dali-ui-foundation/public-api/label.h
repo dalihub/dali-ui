@@ -933,6 +933,53 @@ public: // Setters for chaining
    */
   float GetRenderScale() const;
 
+  /**
+   * @brief Sets the translatable text resource ID using the default domain.
+   *
+   * When set, the Label registers a localization binding with UiLocalizationManager
+   * and displays the localized string for the given resourceId.
+   *
+   * The displayed text is automatically updated when:
+   * - UiLocalizationManager::RefreshBindings() is called
+   * - The default domain changes
+   * - The localization override or bypass mode changes
+   *
+   * @note SetText() does not clear the translatable text binding.
+   *       Use ClearTranslatableText() to remove the binding.
+   *
+   * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE").
+   * @return A reference to this Label for chaining.
+   */
+  Label& SetTranslatableText(StringView resourceId);
+
+  /**
+   * @brief Sets the translatable text resource ID with an explicit domain.
+   *
+   * Passing an empty domain makes the binding use the current default domain,
+   * equivalent to SetTranslatableText(resourceId).
+   *
+   * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE").
+   * @param[in] domain The translation domain, or empty to use the default domain.
+   * @return A reference to this Label for chaining.
+   */
+  Label& SetTranslatableText(StringView resourceId, StringView domain);
+
+  /**
+   * @brief Gets the translatable text resource ID.
+   *
+   * @return The resource ID currently set, or an empty string if not set.
+   */
+  Dali::String GetTranslatableText() const;
+
+  /**
+   * @brief Clears the translatable text binding.
+   *
+   * Removes the localization binding from this Label.
+   * The current display text is not changed.
+   * Subsequent RefreshBindings() calls will no longer update this Label's text.
+   */
+  void ClearTranslatableText();
+
   // @CHAIN_END
 
   // Read Only

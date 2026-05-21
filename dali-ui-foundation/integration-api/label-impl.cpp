@@ -38,11 +38,13 @@
 #include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
+#include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 
@@ -114,7 +116,6 @@ LABEL_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled", BOOLEAN, SYSTEM_FONT_S
 LABEL_PROPERTY_REGISTRATION("cutoutEnabled",              BOOLEAN, CUTOUT_ENABLED                )
 LABEL_PROPERTY_REGISTRATION("asyncRendering",             BOOLEAN, ASYNC_RENDERING               )
 LABEL_PROPERTY_REGISTRATION("renderScale",                FLOAT,   RENDER_SCALE                  )
-
 LABEL_ANIMATABLE_PROPERTY_REGISTRATION_WITH_DEFAULT("textColor",       Color::BLACK,     TEXT_COLOR       )
 LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorRed",    TEXT_COLOR_RED,   TEXT_COLOR,     0)
 LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorGreen",  TEXT_COLOR_GREEN, TEXT_COLOR,     1)
@@ -124,6 +125,8 @@ LABEL_ANIMATABLE_PROPERTY_REGISTRATION          (   "pixelSnapFactor", FLOAT,   
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
+
+constexpr const char* LOCALIZATION_TEXT_BINDING_ID = "Text";
 
 /**
  * @brief Lookup table that converts Text::Alignment values
@@ -962,6 +965,41 @@ void LabelImpl::SetRenderScale(float scale)
 float LabelImpl::GetRenderScale() const
 {
   return mController->GetRenderScale();
+}
+
+void LabelImpl::SetTranslatableText(StringView resourceId)
+{
+  SetTranslatableText(resourceId, StringView());
+}
+
+void LabelImpl::SetTranslatableText(StringView resourceId, StringView domain)
+{
+  mTranslatableText = resourceId;
+  auto manager      = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.SetBindingResource(Self(),
+                               LOCALIZATION_TEXT_BINDING_ID,
+                               resourceId,
+                               domain,
+                               LocalizedStringCallback::New(this, &LabelImpl::ApplyLocalizedText));
+  }
+}
+
+Dali::String LabelImpl::GetTranslatableText() const
+{
+  return mTranslatableText;
+}
+
+void LabelImpl::ClearTranslatableText()
+{
+  mTranslatableText.Clear();
+  auto manager = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.ClearBinding(Self(), LOCALIZATION_TEXT_BINDING_ID);
+  }
+  // Current Text value is not changed.
 }
 
 // =============================================================================
@@ -2310,6 +2348,11 @@ void LabelImpl::UpdateCutoutState(bool enabled)
     SetViewBackgroundEnabled(!enabled);
     Internal::TextVisual::SetRequireRender(mVisual, enabled);
   }
+}
+
+void LabelImpl::ApplyLocalizedText(BaseHandle target, const Dali::String& text)
+{
+  SetText(text);
 }
 
 Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::RequestType requestType, const Vector2& contentSize, const Extents& padding, const Dali::LayoutDirection::Type layoutDirection)

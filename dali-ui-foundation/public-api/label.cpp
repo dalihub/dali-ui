@@ -597,6 +597,28 @@ float Label::GetRenderScale() const
   return GetImpl(*this).GetRenderScale();
 }
 
+Label& Label::SetTranslatableText(StringView resourceId)
+{
+  GetImpl(*this).SetTranslatableText(resourceId);
+  return *this;
+}
+
+Label& Label::SetTranslatableText(StringView resourceId, StringView domain)
+{
+  GetImpl(*this).SetTranslatableText(resourceId, domain);
+  return *this;
+}
+
+Dali::String Label::GetTranslatableText() const
+{
+  return GetImpl(*this).GetTranslatableText();
+}
+
+void Label::ClearTranslatableText()
+{
+  GetImpl(*this).ClearTranslatableText();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================
