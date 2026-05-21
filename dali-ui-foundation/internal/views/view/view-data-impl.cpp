@@ -28,7 +28,6 @@
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
-#include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/handle-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/scripting/enum-helper.h>
@@ -685,21 +684,21 @@ Integration::InteractiveTraitImpl* ViewDataImpl::GetInteractiveTrait() const
 
 ViewDataImpl& ViewDataImpl::Get(ViewImpl& viewImpl)
 {
-  DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
   return viewImpl.GetViewDataImpl();
 }
 
 const ViewDataImpl& ViewDataImpl::Get(const ViewImpl& viewImpl)
 {
-  DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
   return viewImpl.GetViewDataImpl();
 }
 
 void ViewDataImpl::ResourceReady()
 {
-  DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
   // Emit signal if all enabled visuals registered by the view are ready or there are no visuals.
   if(DALI_LIKELY(mVisualData) && mVisualData->IsResourceReady())
@@ -895,7 +894,7 @@ Dali::Ui::VisualBase ViewDataImpl::GetVisualObjectAt(Dali::Ui::DevelVisual::Inte
 
 void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const Property::Value& value)
 {
-  DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
   Ui::View view = Ui::View::DownCast(BaseHandle(object));
 
@@ -1520,7 +1519,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
 
 Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index index)
 {
-  DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
   Property::Value value;
 

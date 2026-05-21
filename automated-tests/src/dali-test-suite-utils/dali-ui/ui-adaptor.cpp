@@ -452,6 +452,11 @@ bool Adaptor::IsAvailable()
   return Internal::Adaptor::gAdaptor && (!Internal::Adaptor::Adaptor::GetImpl(*Internal::Adaptor::gAdaptor).IsStopped()) && Dali::Internal::Adaptor::gAvailableFlag;
 }
 
+bool Adaptor::IsEventThread()
+{
+  return Dali::Internal::Adaptor::gAvailableFlag;
+}
+
 void Adaptor::NotifySceneCreated()
 {
 }

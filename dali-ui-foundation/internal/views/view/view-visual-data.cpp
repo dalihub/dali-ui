@@ -19,7 +19,6 @@
 #include "view-visual-data.h"
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/common/stage.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/string-utils.h>
@@ -497,7 +496,7 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual:
                                               VisualState::Type enabled, DepthIndexValue::Type depthIndexValueSet,
                                               int depthIndex)
 {
-  DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
   DALI_LOG_INFO(gLogFilter, Debug::Concise, "RegisterVisual:%d \n", index);
 
@@ -658,7 +657,7 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual:
 
 void ViewDataImpl::VisualData::UnregisterVisual(Property::Index index)
 {
-  DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
   RegisteredVisualContainer::Iterator iter;
   if(FindVisual(index, mVisuals, iter))
@@ -978,7 +977,7 @@ void ViewDataImpl::VisualData::RecreateChangedVisuals(Dictionary<Property::Map>&
 void ViewDataImpl::VisualData::ReplaceStateVisualsAndProperties(const StylePtr oldState, const StylePtr newState,
                                                                 const std::string& subState)
 {
-  DALI_ASSERT_ALWAYS(Stage::IsCoreThread() && "Core is not installed. Might call this API from worker thread?");
+  DALI_ASSERT_ALWAYS(Dali::Adaptor::IsEventThread() && "Must be called from the event thread!");
 
   // Collect all old visual names
   DictionaryKeys stateVisualsToRemove;
