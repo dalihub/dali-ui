@@ -948,7 +948,6 @@ public: // Setters for chaining
    *       Use ClearTranslatableText() to remove the binding.
    *
    * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE").
-   * @return A reference to this Label for chaining.
    */
   Label& SetTranslatableText(StringView resourceId);
 
@@ -960,7 +959,6 @@ public: // Setters for chaining
    *
    * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE").
    * @param[in] domain The translation domain, or empty to use the default domain.
-   * @return A reference to this Label for chaining.
    */
   Label& SetTranslatableText(StringView resourceId, StringView domain);
 

@@ -393,6 +393,24 @@ public:
   Text::MarqueeOrientation GetMarqueeOrientation() const;
 
   /**
+   * @brief Sets the default mode for resolving text layout direction.
+   *
+   * Text-based views use this mode unless their layout direction mode is
+   * explicitly set.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] mode The default LayoutDirectionMode used to determine text layout direction.
+   */
+  void SetTextLayoutDirectionMode(Text::LayoutDirectionMode mode);
+
+  /**
+   * @brief Gets the default mode for resolving text layout direction.
+   *
+   * @return The default LayoutDirectionMode used to resolve text layout direction.
+   */
+  Text::LayoutDirectionMode GetTextLayoutDirectionMode() const;
+
+  /**
    * @brief Sets whether Label uses asynchronous text rendering by default.
    *
    * @pre The config must not be frozen.
@@ -455,29 +473,30 @@ private:
 private:
   Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
 
-  ExecutionKeyPredicate    mExecutionKeyPredicate;
-  Vector4                  mDefaultTextColor;
-  Vector4                  mDefaultPlaceholderTextColor;
-  float                    mScalingFactor;
-  float                    mDefaultFontSize;
-  int                      mDpi;
-  int                      mBaselineDpi;
-  int                      mMarqueeSpeed;
-  int                      mMarqueeLoopCount;
-  float                    mMarqueeLoopDelay;
-  float                    mMarqueeGap;
-  Text::MarqueeStopMode    mMarqueeStopMode;
-  Text::MarqueeOrientation mMarqueeOrientation;
-  KeyClickPolicy           mKeyClickPolicy;
-  uint32_t                 mKeyLongPressThreshold;
-  uint32_t                 mTapRecognizerTime;
-  float                    mCachedDpiFactor{1.0f};
-  float                    mCachedScaledDpiFactor{1.0f};
-  bool                     mClearFocusOnEscape;
-  bool                     mAlwaysShowFocus;
-  bool                     mShowPlaceholderTextOnFocus;
-  bool                     mLabelAsyncRendering;
-  bool                     mFrozen;
+  ExecutionKeyPredicate     mExecutionKeyPredicate;
+  Vector4                   mDefaultTextColor;
+  Vector4                   mDefaultPlaceholderTextColor;
+  float                     mScalingFactor;
+  float                     mDefaultFontSize;
+  int                       mDpi;
+  int                       mBaselineDpi;
+  int                       mMarqueeSpeed;
+  int                       mMarqueeLoopCount;
+  float                     mMarqueeLoopDelay;
+  float                     mMarqueeGap;
+  Text::MarqueeStopMode     mMarqueeStopMode;
+  Text::MarqueeOrientation  mMarqueeOrientation;
+  Text::LayoutDirectionMode mTextLayoutDirectionMode;
+  KeyClickPolicy            mKeyClickPolicy;
+  uint32_t                  mKeyLongPressThreshold;
+  uint32_t                  mTapRecognizerTime;
+  float                     mCachedDpiFactor{1.0f};
+  float                     mCachedScaledDpiFactor{1.0f};
+  bool                      mClearFocusOnEscape;
+  bool                      mAlwaysShowFocus;
+  bool                      mShowPlaceholderTextOnFocus;
+  bool                      mLabelAsyncRendering;
+  bool                      mFrozen;
 };
 
 } // namespace Integration

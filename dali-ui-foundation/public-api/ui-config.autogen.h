@@ -181,6 +181,25 @@
   */ \
   ChildClass& SetMarqueeOrientation(Text::MarqueeOrientation orientation) { UiConfig::SetMarqueeOrientation(orientation); return *this; } \
   /** \
+  * @brief Sets the default mode for resolving text layout direction. \
+  * \
+  * Text-based views use this mode unless their layout direction mode is \
+  * explicitly set. \
+  * \
+  * - Text::LayoutDirectionMode::CONTENTS: \
+  *   The layout direction is determined from the text content itself. \
+  * \
+  * - Text::LayoutDirectionMode::INHERIT: \
+  *   The layout direction is inherited from the parent view. \
+  * \
+  * - Text::LayoutDirectionMode::LOCALE: \
+  *   The layout direction is determined based on the system locale. \
+  * \
+  * @pre The config must not be frozen. \
+  * @param[in] mode The default LayoutDirectionMode used to determine text layout direction. \
+  */ \
+  ChildClass& SetTextLayoutDirectionMode(Text::LayoutDirectionMode mode) { UiConfig::SetTextLayoutDirectionMode(mode); return *this; } \
+  /** \
   * @brief Sets whether Label uses asynchronous text rendering by default. \
   * \
   * @pre The config must not be frozen. \

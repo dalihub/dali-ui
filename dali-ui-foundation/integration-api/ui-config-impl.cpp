@@ -65,6 +65,7 @@ UiConfigImpl::UiConfigImpl()
   mMarqueeGap(50.0f),
   mMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE),
   mMarqueeOrientation(Text::MarqueeOrientation::HORIZONTAL),
+  mTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT),
   mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
   mKeyLongPressThreshold(3),
   mTapRecognizerTime(UINT32_MAX),
@@ -345,6 +346,17 @@ void UiConfigImpl::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
 Text::MarqueeOrientation UiConfigImpl::GetMarqueeOrientation() const
 {
   return mMarqueeOrientation;
+}
+
+void UiConfigImpl::SetTextLayoutDirectionMode(Text::LayoutDirectionMode mode)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mTextLayoutDirectionMode = mode;
+}
+
+Text::LayoutDirectionMode UiConfigImpl::GetTextLayoutDirectionMode() const
+{
+  return mTextLayoutDirectionMode;
 }
 
 void UiConfigImpl::SetLabelAsyncRendering(bool asyncRendering)

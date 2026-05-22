@@ -197,9 +197,10 @@ Dali::String UiLocalizationManagerImpl::GetLocalizedStringInternal(StringView re
     return ToDaliString(resourceId);
   }
 
-  // 6. dgettext lookup
+  // 6. dgettext lookup.
   // Do not pass StringView::Data() directly to dgettext.
   // Always use null-terminated std::string::c_str().
+  // If no translation is found, dgettext returns resourceId.
   const char* translated = dgettext(effectiveDomain.c_str(), resourceId.c_str());
 
   if(translated == nullptr)
@@ -235,6 +236,11 @@ UiLocalizationManagerImpl::ViewBinding& UiLocalizationManagerImpl::GetOrCreateVi
 UiLocalizationManagerImpl::BindingInfo* UiLocalizationManagerImpl::FindBinding(BaseHandle target,
                                                                                StringView bindingId)
 {
+  if(!target)
+  {
+    return nullptr;
+  }
+
   RefObject* targetPtr = target.GetObjectPtr();
   return FindBinding(targetPtr, ToStdString(bindingId));
 }
@@ -242,6 +248,11 @@ UiLocalizationManagerImpl::BindingInfo* UiLocalizationManagerImpl::FindBinding(B
 const UiLocalizationManagerImpl::BindingInfo* UiLocalizationManagerImpl::FindBinding(BaseHandle target,
                                                                                      StringView bindingId) const
 {
+  if(!target)
+  {
+    return nullptr;
+  }
+
   RefObject* targetPtr = target.GetObjectPtr();
   return FindBinding(targetPtr, ToStdString(bindingId));
 }
@@ -338,6 +349,8 @@ void UiLocalizationManagerImpl::SetBindingResource(BaseHandle              targe
   targetInfo->domain        = std::move(domain);
   targetInfo->hasResourceId = true;
 
+  // Apply only this binding immediately. Full refresh is reserved for
+  // locale/default-domain/override/bypass changes or explicit RefreshBindings().
   ApplyBindingIfPossible(target.GetObjectPtr(), bindingId);
 }
 

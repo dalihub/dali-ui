@@ -141,7 +141,6 @@ public:
     Label titleLabel = Label::New()
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_CARD_TITLE))
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetMultiLine(true);
 
     ImageView flagImage = ImageView::New()
@@ -154,13 +153,11 @@ public:
     Label descriptionLabel = Label::New()
       .SetFontSize(DESC_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_CARD_DESCRIPTION))
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetMultiLine(true);
 
     Label actionLabel = Label::New()
       .SetFontSize(DESC_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_CARD_ACTION))
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT);
+      .SetTextColor(UiColor(COLOR_CARD_ACTION));
 
     Add(titleRow);
     Add(descriptionLabel);
@@ -285,6 +282,7 @@ private:
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
       .SetPadding(Extents(10, 10, 10, 10))
       .SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
   }
@@ -296,6 +294,7 @@ private:
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
       .SetMultiLine(true)
       .SetPadding(Extents(10, 10, 10, 10))
       .SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
@@ -315,7 +314,8 @@ private:
       .SetFontSize(STATUS_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_MID_GRAY))
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT);
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
   }
 
   // --- Default-domain card ---
@@ -396,6 +396,7 @@ private:
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
       .SetMultiLine(true)
       .SetPadding(Extents(10, 10, 10, 10))
       .SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));

@@ -21,6 +21,9 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/environment-variable.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+
 namespace Dali
 {
 namespace Ui
@@ -401,11 +404,17 @@ Model::Model()
   mElideEnabled(false),
   mRemoveFrontInset(false),
   mRemoveBackInset(false),
-  mLayoutDirectionMode(LayoutDirectionMode::CONTENTS),
+  mLayoutDirectionMode(LayoutDirectionMode::INHERIT),
   mEllipsisPosition(Text::EllipsisPosition::END)
 {
   mLogicalModel = LogicalModel::New();
   mVisualModel  = VisualModel::New();
+
+  auto uiConfigManager = Integration::UiConfigManager::Get();
+  if(uiConfigManager.IsInitialized())
+  {
+    mLayoutDirectionMode = uiConfigManager.GetConfig().GetTextLayoutDirectionMode();
+  }
 }
 
 Model::~Model()

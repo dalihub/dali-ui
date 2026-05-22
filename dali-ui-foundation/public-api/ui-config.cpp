@@ -285,6 +285,17 @@ Text::MarqueeOrientation UiConfig::GetMarqueeOrientation() const
   return GetImpl(*this).GetMarqueeOrientation();
 }
 
+UiConfig& UiConfig::SetTextLayoutDirectionMode(Text::LayoutDirectionMode mode)
+{
+  GetImpl(*this).SetTextLayoutDirectionMode(mode);
+  return *this;
+}
+
+Text::LayoutDirectionMode UiConfig::GetTextLayoutDirectionMode() const
+{
+  return GetImpl(*this).GetTextLayoutDirectionMode();
+}
+
 UiConfig& UiConfig::SetLabelAsyncRendering(bool asyncRendering)
 {
   GetImpl(*this).SetLabelAsyncRendering(asyncRendering);

@@ -126,7 +126,7 @@ LABEL_ANIMATABLE_PROPERTY_REGISTRATION          (   "pixelSnapFactor", FLOAT,   
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
 
-constexpr const char* LOCALIZATION_TEXT_BINDING_ID = "Text";
+constexpr const char* LOCALIZATION_TEXT_BINDING_ID = "Ui.Label.Text";
 
 /**
  * @brief Lookup table that converts Text::Alignment values

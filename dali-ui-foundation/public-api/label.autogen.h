@@ -417,7 +417,6 @@
   *       Use ClearTranslatableText() to remove the binding. \
   * \
   * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE"). \
-  * @return A reference to this Label for chaining. \
   */ \
   ChildClass& SetTranslatableText(StringView resourceId) { Label::SetTranslatableText(resourceId); return *this; } \
   /** \
@@ -428,6 +427,5 @@
   * \
   * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE"). \
   * @param[in] domain The translation domain, or empty to use the default domain. \
-  * @return A reference to this Label for chaining. \
   */ \
   ChildClass& SetTranslatableText(StringView resourceId, StringView domain) { Label::SetTranslatableText(resourceId, domain); return *this; }

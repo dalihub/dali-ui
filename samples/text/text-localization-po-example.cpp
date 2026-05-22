@@ -142,6 +142,7 @@ private:
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
       .SetPadding(Extents(10, 10, 10, 10))
       .SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
   }
@@ -153,6 +154,7 @@ private:
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
       .SetMultiLine(true)
       .SetPadding(Extents(10, 10, 10, 10))
       .SetBackgroundColor(UiColor(0xEFEFEF));
@@ -172,7 +174,8 @@ private:
       .SetFontSize(STATUS_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_MID_GRAY))
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT);
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
   }
 
   // --- Default domain labels ---
@@ -183,7 +186,6 @@ private:
     // When default domain changes, this label should switch between DEFAULT/ALT.
     return Label::New()
       .SetTranslatableText("IDS_COMMON_TITLE")
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -196,7 +198,6 @@ private:
   {
     return Label::New()
       .SetTranslatableText("IDS_PO_TITLE")
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -209,7 +210,6 @@ private:
   {
     return Label::New()
       .SetTranslatableText("IDS_PO_HELLO")
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -222,7 +222,6 @@ private:
   {
     return Label::New()
       .SetTranslatableText("IDS_PO_THANKS")
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -238,7 +237,6 @@ private:
     // Explicit default domain - should not change when default domain toggles
     return Label::New()
       .SetTranslatableText("IDS_PO_HELLO", TEXT_DOMAIN_DEFAULT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -252,7 +250,6 @@ private:
     // Explicit alt domain - should not change when default domain toggles
     return Label::New()
       .SetTranslatableText("IDS_ALT_HELLO", TEXT_DOMAIN_ALT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -267,7 +264,6 @@ private:
   {
     // Direct binding using default domain
     auto label = Label::New()
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -288,7 +284,6 @@ private:
   {
     // Direct binding with explicit alt domain
     auto label = Label::New()
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
       .SetFontSize(LABEL_FONT_SIZE)
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
@@ -369,6 +364,7 @@ private:
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
       .SetMultiLine(true)
       .SetPadding(Extents(10, 10, 10, 10))
       .SetBackgroundColor(UiColor(0xFAFAFA));
@@ -399,6 +395,7 @@ private:
       .SetTextColor(UiColor(COLOR_DARK_TEXT))
       .SetRequestedWidth(MATCH_PARENT)
       .SetRequestedHeight(WRAP_CONTENT)
+      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
       .SetMultiLine(true)
       .SetPadding(Extents(10, 10, 10, 10))
       .SetBackgroundColor(UiColor(0xFAFAFA));
