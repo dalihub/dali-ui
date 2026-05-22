@@ -3,6 +3,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+# text-localization-po-example: default-domain label strings
 msgid "IDS_COMMON_TITLE"
 msgstr "[DEFAULT/en_US] Common Title"
 
@@ -15,11 +16,23 @@ msgstr "[DEFAULT/en_US] Hello"
 msgid "IDS_PO_THANKS"
 msgstr "[DEFAULT/en_US] Thanks"
 
+# text-localization-po-example: direct binding and lookup strings
 msgid "IDS_PO_DIRECT"
 msgstr "[DEFAULT/en_US] Direct Binding"
 
 msgid "IDS_PO_LOOKUP"
 msgstr "[DEFAULT/en_US] Lookup Result"
 
+# text-localization-po-example: localized image URL
 msgid "IDS_FLAG_IMAGE_URL"
 msgstr "flag_us.png"
+
+# text-localization-custom-component-example: default card strings
+msgid "IDS_CARD_TITLE"
+msgstr "Daily Brief"
+
+msgid "IDS_CARD_DESCRIPTION"
+msgstr "This card updates multiple internal labels from one localization binding."
+
+msgid "IDS_CARD_ACTION"
+msgstr "Open details"
