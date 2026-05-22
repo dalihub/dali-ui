@@ -87,29 +87,59 @@ FIND_PROGRAM(MSGFMT_EXECUTABLE msgfmt)
 IF(MSGFMT_EXECUTABLE)
   SET(PO_MO_FILES)
 
-  # Default domain PO files
-  FOREACH(_locale en_US ko_KR ar_AE)
-    SET(_po "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/default/${_locale}/LC_MESSAGES/text-localization-po.po")
-    SET(_mo "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/default/${_locale}/LC_MESSAGES/text-localization-po.mo")
+  SET(TEXT_LOCALIZATION_LOCALES en_US ko_KR ar_AE)
+
+  # default source PO directory:
+  #   res/po/default/en_US.po
+  #   res/po/default/ko_KR.po
+  #   res/po/default/ar_AE.po
+  #
+  # default runtime MO output:
+  #   res/locale/default/en_US/LC_MESSAGES/text-localization-po.mo
+  SET(TEXT_LOCALIZATION_DEFAULT_DOMAIN text-localization-po)
+  SET(TEXT_LOCALIZATION_DEFAULT_PO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/po/default")
+  SET(TEXT_LOCALIZATION_DEFAULT_LOCALE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/default")
+
+  FOREACH(_locale ${TEXT_LOCALIZATION_LOCALES})
+    SET(_po "${TEXT_LOCALIZATION_DEFAULT_PO_DIR}/${_locale}.po")
+    SET(_mo_dir "${TEXT_LOCALIZATION_DEFAULT_LOCALE_DIR}/${_locale}/LC_MESSAGES")
+    SET(_mo "${_mo_dir}/${TEXT_LOCALIZATION_DEFAULT_DOMAIN}.mo")
+
     ADD_CUSTOM_COMMAND(
       OUTPUT ${_mo}
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${_mo_dir}
       COMMAND ${MSGFMT_EXECUTABLE} -o ${_mo} ${_po}
       DEPENDS ${_po}
       COMMENT "Generating ${_mo} from ${_po}"
     )
+
     LIST(APPEND PO_MO_FILES ${_mo})
   ENDFOREACH()
 
-  # Alternate domain PO files
-  FOREACH(_locale en_US ko_KR ar_AE)
-    SET(_po "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/alternate/${_locale}/LC_MESSAGES/text-localization-po-alt.po")
-    SET(_mo "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/alternate/${_locale}/LC_MESSAGES/text-localization-po-alt.mo")
+  # alternate source PO directory:
+  #   res/po/alternate/en_US.po
+  #   res/po/alternate/ko_KR.po
+  #   res/po/alternate/ar_AE.po
+  #
+  # alternate runtime MO output:
+  #   res/locale/alternate/en_US/LC_MESSAGES/text-localization-po-alt.mo
+  SET(TEXT_LOCALIZATION_ALT_DOMAIN text-localization-po-alt)
+  SET(TEXT_LOCALIZATION_ALT_PO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/po/alternate")
+  SET(TEXT_LOCALIZATION_ALT_LOCALE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/alternate")
+
+  FOREACH(_locale ${TEXT_LOCALIZATION_LOCALES})
+    SET(_po "${TEXT_LOCALIZATION_ALT_PO_DIR}/${_locale}.po")
+    SET(_mo_dir "${TEXT_LOCALIZATION_ALT_LOCALE_DIR}/${_locale}/LC_MESSAGES")
+    SET(_mo "${_mo_dir}/${TEXT_LOCALIZATION_ALT_DOMAIN}.mo")
+
     ADD_CUSTOM_COMMAND(
       OUTPUT ${_mo}
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${_mo_dir}
       COMMAND ${MSGFMT_EXECUTABLE} -o ${_mo} ${_po}
       DEPENDS ${_po}
       COMMENT "Generating ${_mo} from ${_po}"
     )
+
     LIST(APPEND PO_MO_FILES ${_mo})
   ENDFOREACH()
 

@@ -11,6 +11,7 @@ Requires(post): /sbin/ldconfig
 Requires(postun): /sbin/ldconfig
 
 BuildRequires:  cmake
+BuildRequires:  gettext-tools
 BuildRequires:  pkgconfig
 BuildRequires:  pkgconfig(capi-appfw-application)
 BuildRequires:  pkgconfig(capi-appfw-app-control)
@@ -35,7 +36,7 @@ DALi UI Text sample application.
 
 %define app_res_dir      %{app_ro_dir}/res/
 %define app_exe_dir      %{app_ro_dir}/bin/
-%define locale_dir      %{app_res_dir}/locale
+%define locale_dir       %{app_res_dir}/locale
 
 ##############################
 # Build
@@ -67,13 +68,17 @@ make %{?jobs:-j%jobs}
 ##############################
 %install
 rm -rf %{buildroot}
-cd %{app_root_dir}
+cd %{_builddir}/%{name}-%{version}/%{app_root_dir}
 %make_install
 
 mkdir -p %{buildroot}%{xml_file_dir}
 cp -f %{_builddir}/%{name}-%{version}/%{app_root_dir}/%{name}.xml %{buildroot}%{xml_file_dir}
 
 mkdir -p %{buildroot}%{app_res_dir}
+cp -a %{_builddir}/%{name}-%{version}/%{app_root_dir}/res/. %{buildroot}%{app_res_dir}
+
+# Source PO files are not needed at runtime. Runtime uses generated MO files.
+rm -rf %{buildroot}%{app_res_dir}/po
 
 ##############################
 # Post Install
@@ -89,12 +94,30 @@ exit 0
 /sbin/ldconfig
 exit 0
 
+##############################
 # Files in Binary Packages
 ##############################
-
 %files
 %manifest %{app_root_dir}/%{name}.manifest
 %defattr(-,root,root,-)
 %{app_exe_dir}/text.example
+%{app_exe_dir}/text-layout-direction.example
+%{app_exe_dir}/text-markup.example
+%{app_exe_dir}/text-marquee.example
+%{app_exe_dir}/text-style.example
+%{app_exe_dir}/text-style-bevel.example
+%{app_exe_dir}/text-fit.example
+%{app_exe_dir}/text-fit-candidate.example
+%{app_exe_dir}/text-scale.example
+%{app_exe_dir}/text-font-variation.example
+%{app_exe_dir}/text-cutout-mask.example
+%{app_exe_dir}/text-emoji.example
+%{app_exe_dir}/text-render-scale.example
+%{app_exe_dir}/text-input-field.example
+%{app_exe_dir}/text-typing-style.example
+%{app_exe_dir}/text-input-editor.example
+%{app_exe_dir}/text-localization.example
+%{app_exe_dir}/text-localization-po.example
+%{app_exe_dir}/text-localization-custom-component.example
 %{app_res_dir}/*
 %{xml_file_dir}/%{name}.xml
