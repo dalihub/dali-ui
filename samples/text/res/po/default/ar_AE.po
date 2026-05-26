@@ -27,6 +27,13 @@ msgstr "[DEFAULT/ar_AE] نتيجة البحث"
 msgid "IDS_FLAG_IMAGE_URL"
 msgstr "flag_ae.png"
 
+# text-localization-po-example: input placeholder helper strings
+msgid "IDS_INPUT_FIELD_PLACEHOLDER"
+msgstr "[DEFAULT/ar_AE] عنصر نائب حقل الإدخال"
+
+msgid "IDS_INPUT_EDITOR_PLACEHOLDER"
+msgstr "[DEFAULT/ar_AE] عنصر نائب محرر الإدخال"
+
 # text-localization-custom-component-example: default card strings
 msgid "IDS_CARD_TITLE"
 msgstr "موجز اليوم"

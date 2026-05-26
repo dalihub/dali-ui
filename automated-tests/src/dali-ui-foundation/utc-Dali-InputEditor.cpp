@@ -26,6 +26,8 @@ using namespace Dali;
 using namespace Dali::Ui;
 using namespace Dali::Ui::Integration;
 
+using Dali::Integration::ToStdString;
+
 namespace
 {
 const char* const PROPERTY_NAME_TEXT                                 = "text";
@@ -1349,5 +1351,157 @@ int UtcDaliInputEditorSetProperty(void)
   inputEditor.SetProperty(InputEditor::Property::TYPING_FONT_SLANT, "OBLIQUE");
   DALI_TEST_EQUALS(inputEditor.GetProperty<Text::FontSlant>(InputEditor::Property::TYPING_FONT_SLANT), Text::FontSlant::OBLIQUE, TEST_LOCATION);
 
+  END_TEST;
+}
+
+// Localization test helpers for InputEditor
+namespace
+{
+
+bool InputEditorLocalizationOverride(StringView resourceId, StringView domain, Dali::String& outString)
+{
+  const std::string rid = ToStdString(resourceId);
+  const std::string dom = ToStdString(domain);
+
+  if(rid == "IDS_INPUT_PLACEHOLDER")
+  {
+    if(dom == "domainA")
+    {
+      outString = "Placeholder A";
+    }
+    else if(dom == "domainB")
+    {
+      outString = "Placeholder B";
+    }
+    else
+    {
+      outString = "Placeholder Default";
+    }
+    return true;
+  }
+
+  return false;
+}
+
+void CleanupInputEditorLocalization(InputEditor& inputEditor)
+{
+  inputEditor.ClearTranslatablePlaceholder();
+  UiLocalizationManager::Get().ClearLocalizedStringOverride();
+  UiLocalizationManager::Get().SetBypassEnabled(false);
+  UiLocalizationManager::Get().SetDefaultDomain("");
+}
+
+} // anonymous namespace
+
+int UtcDaliInputEditorSetTranslatablePlaceholderDefaultDomainP(void)
+{
+  TestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  application.GetScene().Add(inputEditor);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&InputEditorLocalizationOverride);
+
+  inputEditor.SetTranslatablePlaceholder("IDS_INPUT_PLACEHOLDER");
+  DALI_TEST_EQUALS(inputEditor.GetTranslatablePlaceholder(), "IDS_INPUT_PLACEHOLDER", TEST_LOCATION);
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder Default", TEST_LOCATION);
+
+  CleanupInputEditorLocalization(inputEditor);
+  END_TEST;
+}
+
+int UtcDaliInputEditorSetTranslatablePlaceholderExplicitDomainP(void)
+{
+  TestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  application.GetScene().Add(inputEditor);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&InputEditorLocalizationOverride);
+
+  inputEditor.SetTranslatablePlaceholder("IDS_INPUT_PLACEHOLDER", "domainA");
+  DALI_TEST_EQUALS(inputEditor.GetTranslatablePlaceholder(), "IDS_INPUT_PLACEHOLDER", TEST_LOCATION);
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder A", TEST_LOCATION);
+
+  // Change default domain - explicit domain binding should remain
+  locManager.SetDefaultDomain("domainB");
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder A", TEST_LOCATION);
+
+  CleanupInputEditorLocalization(inputEditor);
+  END_TEST;
+}
+
+int UtcDaliInputEditorSetTranslatablePlaceholderDefaultDomainAfterExplicitDomainP(void)
+{
+  TestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  application.GetScene().Add(inputEditor);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&InputEditorLocalizationOverride);
+
+  // Set default domain to domainB
+  locManager.SetDefaultDomain("domainB");
+
+  // First, set with explicit domainA
+  inputEditor.SetTranslatablePlaceholder("IDS_INPUT_PLACEHOLDER", "domainA");
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder A", TEST_LOCATION);
+
+  // Now call SetTranslatablePlaceholder(resourceId) without domain.
+  // This should use default domain (domainB), NOT reuse the previous explicit domainA.
+  inputEditor.SetTranslatablePlaceholder("IDS_INPUT_PLACEHOLDER");
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder B", TEST_LOCATION);
+
+  CleanupInputEditorLocalization(inputEditor);
+  END_TEST;
+}
+
+int UtcDaliInputEditorClearTranslatablePlaceholderP(void)
+{
+  TestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  application.GetScene().Add(inputEditor);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&InputEditorLocalizationOverride);
+
+  inputEditor.SetTranslatablePlaceholder("IDS_INPUT_PLACEHOLDER");
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder Default", TEST_LOCATION);
+
+  inputEditor.ClearTranslatablePlaceholder();
+  // Current placeholder value is maintained after clear
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder Default", TEST_LOCATION);
+  DALI_TEST_EQUALS(inputEditor.GetTranslatablePlaceholder(), Dali::String(), TEST_LOCATION);
+
+  // RefreshBindings should not change the placeholder after clear
+  locManager.RefreshBindings();
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder Default", TEST_LOCATION);
+
+  CleanupInputEditorLocalization(inputEditor);
+  END_TEST;
+}
+
+int UtcDaliInputEditorSetPlaceholderDoesNotClearTranslatablePlaceholderP(void)
+{
+  TestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  application.GetScene().Add(inputEditor);
+
+  UiLocalizationManager locManager = UiLocalizationManager::Get();
+  locManager.SetLocalizedStringOverride(&InputEditorLocalizationOverride);
+
+  inputEditor.SetTranslatablePlaceholder("IDS_INPUT_PLACEHOLDER");
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder Default", TEST_LOCATION);
+
+  inputEditor.SetPlaceholder("Manual Placeholder");
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Manual Placeholder", TEST_LOCATION);
+  // TranslatablePlaceholder binding is still active
+  DALI_TEST_EQUALS(inputEditor.GetTranslatablePlaceholder(), "IDS_INPUT_PLACEHOLDER", TEST_LOCATION);
+
+  // RefreshBindings overwrites Placeholder with localized string
+  locManager.RefreshBindings();
+  DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder Default", TEST_LOCATION);
+
+  CleanupInputEditorLocalization(inputEditor);
   END_TEST;
 }

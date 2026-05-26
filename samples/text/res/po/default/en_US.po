@@ -27,6 +27,13 @@ msgstr "[DEFAULT/en_US] Lookup Result"
 msgid "IDS_FLAG_IMAGE_URL"
 msgstr "flag_us.png"
 
+# text-localization-po-example: input placeholder helper strings
+msgid "IDS_INPUT_FIELD_PLACEHOLDER"
+msgstr "[DEFAULT/en_US] InputField placeholder"
+
+msgid "IDS_INPUT_EDITOR_PLACEHOLDER"
+msgstr "[DEFAULT/en_US] InputEditor placeholder"
+
 # text-localization-custom-component-example: default card strings
 msgid "IDS_CARD_TITLE"
 msgstr "Daily Brief"

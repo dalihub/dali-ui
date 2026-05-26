@@ -102,15 +102,16 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
+    ScrollView scroll = ScrollView::New()
+      .SetScrollDirection(ScrollDirection::Vertical)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetMaximumHeight(400.0f);
+
+    auto bindingContent = StackLayout::New(StackOrientation::VERTICAL)
       .SetSpacing(STACK_SPACING)
       .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+      .SetRequestedHeight(WRAP_CONTENT)
       .Children({
-        CreateHeaderLabel(),
-        CreateHelpLabel(),
-        CreateSeparator(),
         CreateSectionLabel("Default Domain Labels:"),
         CreateCommonTitleLabel().As(mCommonTitleLabel),
         CreateDefaultTitleLabel().As(mDefaultTitleLabel),
@@ -128,10 +129,28 @@ private:
         CreateSectionLabel("Image URL Binding:"),
         CreateFlagImageView(),
         CreateSeparator(),
+        CreateSectionLabel("InputField / InputEditor Placeholder:"),
+        CreateLocalizedInputField(),
+        CreateLocalizedInputEditor()
+      });
+
+    scroll.SetContent(bindingContent);
+
+    return StackLayout::New(StackOrientation::VERTICAL)
+      .SetSpacing(STACK_SPACING)
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(MATCH_PARENT)
+      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
+      .Children({
+        CreateHeaderLabel(),
+        CreateHelpLabel(),
+        CreateSeparator(),
+        scroll,
+        CreateSeparator(),
         CreateSectionLabel("GetLocalizedString Lookup:"),
         CreateLookupLabel().As(mLookupLabel),
         CreateSeparator(),
-        CreateStatusLabel().As(mStatusLabel),
+        CreateStatusLabel().As(mStatusLabel)
       });
   }
 
@@ -353,6 +372,34 @@ private:
     resourceUrl += ToStdString(url);
 
     imageView.SetResourceUrl(resourceUrl.c_str());
+  }
+
+  // --- InputField / InputEditor localization ---
+
+  InputField CreateLocalizedInputField()
+  {
+    // InputField with translatable placeholder using default domain
+    return InputField::New()
+      .SetTranslatablePlaceholder("IDS_INPUT_FIELD_PLACEHOLDER")
+      .SetFontSize(LABEL_FONT_SIZE)
+      .SetTextColor(UiColor(COLOR_DARK_TEXT))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(WRAP_CONTENT)
+      .SetPadding(Extents(10, 10, 10, 10))
+      .SetBackgroundColor(UiColor(COLOR_LIGHT_YELLOW));
+  }
+
+  InputEditor CreateLocalizedInputEditor()
+  {
+    // InputEditor with translatable placeholder using default domain
+    return InputEditor::New()
+      .SetTranslatablePlaceholder("IDS_INPUT_EDITOR_PLACEHOLDER")
+      .SetFontSize(LABEL_FONT_SIZE)
+      .SetTextColor(UiColor(COLOR_DARK_TEXT))
+      .SetRequestedWidth(MATCH_PARENT)
+      .SetRequestedHeight(80.0f)
+      .SetPadding(Extents(10, 10, 10, 10))
+      .SetBackgroundColor(UiColor(COLOR_LIGHT_CYAN));
   }
 
   // --- Lookup label ---

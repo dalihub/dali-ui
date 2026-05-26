@@ -27,6 +27,13 @@ msgstr "[DEFAULT/ko_KR] 직접 조회 결과"
 msgid "IDS_FLAG_IMAGE_URL"
 msgstr "flag_kr.png"
 
+# text-localization-po-example: input placeholder helper strings
+msgid "IDS_INPUT_FIELD_PLACEHOLDER"
+msgstr "[DEFAULT/ko_KR] 입력 필드 플레이스홀더"
+
+msgid "IDS_INPUT_EDITOR_PLACEHOLDER"
+msgstr "[DEFAULT/ko_KR] 입력 편집기 플레이스홀더"
+
 # text-localization-custom-component-example: default card strings
 msgid "IDS_CARD_TITLE"
 msgstr "오늘의 브리핑"

@@ -711,6 +711,28 @@ InputEditor& InputEditor::ClearFontVariation()
   return *this;
 }
 
+InputEditor& InputEditor::SetTranslatablePlaceholder(StringView resourceId)
+{
+  GetImpl(*this).SetTranslatablePlaceholder(resourceId);
+  return *this;
+}
+
+InputEditor& InputEditor::SetTranslatablePlaceholder(StringView resourceId, StringView domain)
+{
+  GetImpl(*this).SetTranslatablePlaceholder(resourceId, domain);
+  return *this;
+}
+
+Dali::String InputEditor::GetTranslatablePlaceholder() const
+{
+  return GetImpl(*this).GetTranslatablePlaceholder();
+}
+
+void InputEditor::ClearTranslatablePlaceholder()
+{
+  GetImpl(*this).ClearTranslatablePlaceholder();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

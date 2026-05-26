@@ -700,6 +700,28 @@ InputField& InputField::ClearFontVariation()
   return *this;
 }
 
+InputField& InputField::SetTranslatablePlaceholder(StringView resourceId)
+{
+  GetImpl(*this).SetTranslatablePlaceholder(resourceId);
+  return *this;
+}
+
+InputField& InputField::SetTranslatablePlaceholder(StringView resourceId, StringView domain)
+{
+  GetImpl(*this).SetTranslatablePlaceholder(resourceId, domain);
+  return *this;
+}
+
+Dali::String InputField::GetTranslatablePlaceholder() const
+{
+  return GetImpl(*this).GetTranslatablePlaceholder();
+}
+
+void InputField::ClearTranslatablePlaceholder()
+{
+  GetImpl(*this).ClearTranslatablePlaceholder();
+}
+
 // =============================================================================
 // Read Only
 // =============================================================================

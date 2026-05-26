@@ -469,4 +469,31 @@
   * \
   * @param[in] settings The font variation settings string. \
   */ \
-  ChildClass& SetFontVariation(const Dali::String& settings) { InputField::SetFontVariation(settings); return *this; }
+  ChildClass& SetFontVariation(const Dali::String& settings) { InputField::SetFontVariation(settings); return *this; } \
+  /** \
+  * @brief Sets the translatable placeholder resource ID. \
+  * \
+  * Registers a localization binding that resolves the given resource ID \
+  * and displays the localized string for the given resourceId as placeholder text. \
+  * \
+  * The displayed placeholder is automatically updated when: \
+  * - UiLocalizationManager::RefreshBindings() is called \
+  * - The default domain changes \
+  * - The localization override or bypass mode changes \
+  * \
+  * @note SetPlaceholder() does not clear the translatable placeholder binding. \
+  *       Use ClearTranslatablePlaceholder() to remove the binding. \
+  * \
+  * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_PLACEHOLDER"). \
+  */ \
+  ChildClass& SetTranslatablePlaceholder(StringView resourceId) { InputField::SetTranslatablePlaceholder(resourceId); return *this; } \
+  /** \
+  * @brief Sets the translatable placeholder resource ID with an explicit domain. \
+  * \
+  * Passing an empty domain makes the binding use the current default domain, \
+  * equivalent to SetTranslatablePlaceholder(resourceId). \
+  * \
+  * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_PLACEHOLDER"). \
+  * @param[in] domain The translation domain, or empty to use the default domain. \
+  */ \
+  ChildClass& SetTranslatablePlaceholder(StringView resourceId, StringView domain) { InputField::SetTranslatablePlaceholder(resourceId, domain); return *this; }

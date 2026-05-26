@@ -45,6 +45,7 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -69,6 +70,8 @@ namespace
 {
 
 const char* KEY_RETURN_NAME = "Return";
+
+constexpr const char* LOCALIZATION_PLACEHOLDER_BINDING_ID = "Ui.InputField.Placeholder";
 
 BaseHandle Create()
 {
@@ -1016,6 +1019,41 @@ void InputFieldImpl::ClearFontVariation()
   // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   mController->ClearVariationsMap();
+}
+
+void InputFieldImpl::SetTranslatablePlaceholder(StringView resourceId)
+{
+  SetTranslatablePlaceholder(resourceId, StringView());
+}
+
+void InputFieldImpl::SetTranslatablePlaceholder(StringView resourceId, StringView domain)
+{
+  mTranslatablePlaceholder = resourceId;
+  auto manager             = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.SetBindingResource(Self(),
+                               LOCALIZATION_PLACEHOLDER_BINDING_ID,
+                               resourceId,
+                               domain,
+                               LocalizedStringCallback::New(this, &InputFieldImpl::ApplyLocalizedPlaceholder));
+  }
+}
+
+Dali::String InputFieldImpl::GetTranslatablePlaceholder() const
+{
+  return mTranslatablePlaceholder;
+}
+
+void InputFieldImpl::ClearTranslatablePlaceholder()
+{
+  mTranslatablePlaceholder.Clear();
+  auto manager = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.ClearBinding(Self(), LOCALIZATION_PLACEHOLDER_BINDING_ID);
+  }
+  // Current placeholder value is not changed.
 }
 
 // Integration-only implementation for now until public API support is introduced.
@@ -2118,6 +2156,11 @@ void InputFieldImpl::SetTypingTextColorInternal(const Vector4& color)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
   mController->SetInputColor(color);
+}
+
+void InputFieldImpl::ApplyLocalizedPlaceholder(BaseHandle target, const Dali::String& text)
+{
+  SetPlaceholder(text);
 }
 
 // =============================================================================

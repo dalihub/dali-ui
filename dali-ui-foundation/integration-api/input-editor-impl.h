@@ -613,6 +613,26 @@ public:
   void ClearFontVariation();
 
   /**
+   * @see Dali::Ui::InputEditor::SetTranslatablePlaceholder
+   */
+  void SetTranslatablePlaceholder(StringView resourceId);
+
+  /**
+   * @see Dali::Ui::InputEditor::SetTranslatablePlaceholder(StringView resourceId, StringView domain)
+   */
+  void SetTranslatablePlaceholder(StringView resourceId, StringView domain);
+
+  /**
+   * @copydoc Dali::Ui::InputEditor::GetTranslatablePlaceholder
+   */
+  Dali::String GetTranslatablePlaceholder() const;
+
+  /**
+   * @copydoc Dali::Ui::InputEditor::ClearTranslatablePlaceholder
+   */
+  void ClearTranslatablePlaceholder();
+
+  /**
    * @brief Sets the additional spacing between letters in pixels.
    *
    * Positive values increase the spacing, while negative values reduce it.
@@ -1056,6 +1076,14 @@ private: // Implementation
    */
   void EmitTypingStyleChanged(Text::TypingStyle::Mask mask);
 
+  /**
+   * @brief Callback applied when localized placeholder is updated.
+   *
+   * @param[in] target The target handle (unused, bound to this).
+   * @param[in] text The localized placeholder text.
+   */
+  void ApplyLocalizedPlaceholder(BaseHandle target, const Dali::String& text);
+
 private: // UiColorManager
   void SetTextColorInternal(const Vector4& color);
   void SetPlaceholderColorInternal(const Vector4& color);
@@ -1142,6 +1170,8 @@ private:
   bool                 mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
   bool                 mFocusGainedByTouch : 1;    ///< If true, focus was gained by touch, skip scroll in focus gained.
   bool                 mAutoGrowEnabled : 1;       ///< Whether auto grow behavior is enabled.
+
+  Dali::String mTranslatablePlaceholder; ///< Resource ID for translatable placeholder binding.
 
 protected:
   struct PropertyHandler;

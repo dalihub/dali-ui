@@ -23,6 +23,13 @@ msgstr "[ALT/ar_AE] نتيجة البحث"
 msgid "IDS_ALT_FLAG_IMAGE_URL"
 msgstr "flag_ae_alt.png"
 
+# text-localization-po-example: input placeholder helper strings
+msgid "IDS_INPUT_FIELD_PLACEHOLDER"
+msgstr "[ALT/ar_AE] عنصر نائب بديل لحقل الإدخال"
+
+msgid "IDS_INPUT_EDITOR_PLACEHOLDER"
+msgstr "[ALT/ar_AE] عنصر نائب بديل لمحرر الإدخال"
+
 # text-localization-custom-component-example: explicit alt card strings
 msgid "IDS_ALT_CARD_TITLE"
 msgstr "ملخص الإعدادات"

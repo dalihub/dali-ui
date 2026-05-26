@@ -1083,6 +1083,51 @@ public: // Setters for chaining
    */
   InputField& ClearFontVariation();
 
+  /**
+   * @brief Sets the translatable placeholder resource ID.
+   *
+   * Registers a localization binding that resolves the given resource ID
+   * and displays the localized string for the given resourceId as placeholder text.
+   *
+   * The displayed placeholder is automatically updated when:
+   * - UiLocalizationManager::RefreshBindings() is called
+   * - The default domain changes
+   * - The localization override or bypass mode changes
+   *
+   * @note SetPlaceholder() does not clear the translatable placeholder binding.
+   *       Use ClearTranslatablePlaceholder() to remove the binding.
+   *
+   * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_PLACEHOLDER").
+   */
+  InputField& SetTranslatablePlaceholder(StringView resourceId);
+
+  /**
+   * @brief Sets the translatable placeholder resource ID with an explicit domain.
+   *
+   * Passing an empty domain makes the binding use the current default domain,
+   * equivalent to SetTranslatablePlaceholder(resourceId).
+   *
+   * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_PLACEHOLDER").
+   * @param[in] domain The translation domain, or empty to use the default domain.
+   */
+  InputField& SetTranslatablePlaceholder(StringView resourceId, StringView domain);
+
+  /**
+   * @brief Gets the translatable placeholder resource ID.
+   *
+   * @return The resource ID currently set, or an empty string if not set.
+   */
+  Dali::String GetTranslatablePlaceholder() const;
+
+  /**
+   * @brief Clears the translatable placeholder binding.
+   *
+   * Removes the localization binding from this InputField.
+   * The current display placeholder is not changed.
+   * Subsequent RefreshBindings() calls will no longer update this InputField's placeholder.
+   */
+  void ClearTranslatablePlaceholder();
+
   // @CHAIN_END
 
   // Read Only
