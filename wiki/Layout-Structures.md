@@ -1,3 +1,5 @@
+[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-Structures-(kr))
+
 # DALi UI Foundation - Layout
 
 `Layout` is a View that arranges child views using a layout algorithm. The layout system computes **size (Measure)** and **position (Arrange)** of child views within a View hierarchy. dali-ui provides four built-in layout types: `StackLayout`, `FlexLayout`, `GridLayout`, and `AbsoluteLayout`. Layout processing is driven by a `LayoutController` per window, which runs Measure then Arrange on invalidated layout roots each frame.

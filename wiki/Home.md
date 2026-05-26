@@ -1,32 +1,75 @@
-> [!IMPORTANT]
-> **March Release Notice** <br/>
-> The integration of dali-toolkit's `Control` into `View` is in progress. Some existing `Control` features (e.g. `CornerRadius`) may not yet be available in `View`.
+[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr))
+
+## DALi
+
+[DALi (Dynamic Animation Library)](https://github.sec.samsung.net/NUI/dali-guide_auto/blob/main/overview.md) is a UI framework for building high-performance graphics-based UI applications. Applications use DALi to create screen objects, build layouts and animations.
+
+> [!NOTE]
+DALi serves as the backend engine for NUI (C#), providing the same core rendering capabilities.
+
 
 <br/>
 
-## Overview
+```mermaid
+flowchart TB
+  App["Application"]
 
-`dali-ui` is a light-weight DALi toolkit focused on minimal memory footprint, designed to build UI
-applications and framework libraries on top of the [DALi](https://dalihub.github.io/) rendering
-engine (dali-core + dali-adaptor).
+  subgraph DALi["**DALi**"]
+    direction TB
+    UIC["**dali-ui-components**"]
+    UIF["**dali-ui-foundation**"]
+    Adaptor["**dali-adaptor**"]
+    Core["**dali-core**"]
+  end
 
-![overview-layer](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/55224c27-d457-49a7-b3bf-d68fbc1ae570)
+  Ext["**Extra component libs**<br/>(e.g. tv-components)"]
 
+  App --> DALi
+  App --> Ext
 
-It is organized as two layered libraries:
+  UIC --> UIF
+  UIF --> Adaptor
+  Adaptor --> Core
+  Ext --> UIF
+
+classDef dali fill:#e8f4ff,stroke:#2f80ed,stroke-width:2px
+class App dali
+```
+
+<br/>
+
+DALi handles screen composition and rendering, and is organized into `dali-core`, `dali-adaptor`, and `dali-ui` layers. Applications connect to the Tizen runtime environment through `dali-adaptor`, present objects on screen through `dali-core`, and can use `dali-ui` layouts and higher-level APIs to build richer UI structures.
+
+<br/>
 
 | Library | Role |
 |---|---|
-| **dali-ui-foundation** | Core abstractions — layout engine, trait system, theming, image & text rendering |
-| **dali-ui-components** | UI controls built on foundation — Button, Slider, and more |
-
-`dali-ui` targets two audiences: **app developers** who build applications using ready-made controls,
-and **framework library developers** who extend or integrate the toolkit itself.
+| **dali-core** | <ul><li>Core rendering engine</li><li>Provides fundamental rendering models such as scene graph, animation, and shader</li><li>Provides base features such as property system and signal</li><li>[Github](https://github.com/dalihub/dali-core)</li></ul> |
+| **dali-adaptor** | <ul><li>Handles platform and graphics backend integration</li><li>Window, InputMethod, Widget, etc.</li><li>[Github](https://github.com/dalihub/dali-adaptor)</li></ul> |
+| **dali-ui-foundation** | <ul><li>Provides higher-level UI Framework APIs such as layout, accessibility, and theme color</li><li>Provides base components such as `Label`, `ImageView`, and `WebView`</li><li>Provides component feature classes such as button base (UX independent)</li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
+| **dali-ui-components** | <ul><li>OneUI-based components such as `Button`, `Switch`, `ProgressBar`, `Slider`, and `Dialog`, with [about 11 planned components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components#components-tbd)</li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
 
 <br/>
 
-## Table of Contents
-* [API Levels & View Hierarchy](https://github.sec.samsung.net/NUI/dali-ui/wiki/API-Levels-&-View-Hierarchy)
+## API Levels
+
+DALi exposes two API levels with different stability guarantees and intended audiences:
+
+| Level | Location | Audience | ABI Stability |
+|---|---|---|---|
+| **Public API** | `public-api/` | App developers | **Guaranteed** — must not break across releases |
+| **Integration API** | `integration-api/` | Framework developers | Not required — consumers rebuild alongside dali-ui |
+
+**As an app developer**, use only `public-api/`. This is the only layer with guaranteed ABI stability.
+
+**As a framework developer**, you may also depend on `integration-api/`, with the understanding
+that it may change between dali-ui versions and will require a rebuild.
+
+<br/>
+
+## Development Guides
+
+* [View](https://github.sec.samsung.net/NUI/dali-ui/wiki/View)
 * [Fluent API](https://github.sec.samsung.net/NUI/dali-ui/wiki/Fluent-API)
 * [Configuration](https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration)
 * [Unit & Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-&-Scale)
