@@ -2140,6 +2140,28 @@ void ViewImpl::OnChildAdd(Actor& child)
     // measured size or arranged bounds. Skip self-invalidation in that case.
     const bool childAffectsSelf = !IntegrationView::IsLayoutModeStandalone(childImpl);
 
+    // Reset the effective scale cache for the entire subtree being added.
+    // The child may be arriving from a parent with a different UiScalePolicy
+    // context (e.g. reparented from DISABLED to INHERIT), so every descendant's
+    // cached mEffectiveScale is potentially stale and must be recomputed.
+    //
+    // InvalidateMeasure() alone is not sufficient: it only resets
+    // mEffectiveScale on the direct child and propagates *upward*. Descendants
+    // retain their old cached values and use them in the next Measure() call,
+    // producing incorrect font sizes, paddings, and decorations even though
+    // the layout container size updates correctly.
+    //
+    // ResetEffectiveScaleRecursive() sets mEffectiveScale = -1.0f and
+    // mLastMeasuredConstraint = NaN for every node in the subtree, guaranteeing:
+    //   (a) scale is recomputed from the new parent chain on next GetEffectiveScale(), and
+    //   (b) the NaN constraint forces a cache miss in Measure() so all nodes
+    //       fully re-measure with the new scale.
+    //
+    // After this, InvalidateMeasure() transitions the direct child from NaN to
+    // DIRTY (the guard passes because NaN != DIRTY per IEEE 754) and propagates
+    // up to the new layout root.
+    childImpl.ResetEffectiveScaleRecursive();
+
     // Invalidate the child's measure cache — its previous cache was computed
     // under a different parent's constraints and is no longer reliable.
     childImpl.InvalidateMeasure();

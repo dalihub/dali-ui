@@ -42,6 +42,17 @@
  *      - Purple child: INHERIT under DISABLED → does NOT scale
  *      - Orange-red child: ENABLED → scales despite DISABLED parent
  *
+ *  [Zone G] Reparent: DISABLED → INHERIT
+ *    - A box (INHERIT) starts under a DISABLED parent → effectiveScale = 1.0
+ *    - "→ INHERIT 부모로" button moves it to an INHERIT parent
+ *    - Box immediately picks up system scale on reparent
+ *    - "← DISABLED 부모로" button moves it back → effectiveScale = 1.0 again
+ *
+ *  [Zone H] Unparent + scale change + Re-add
+ *    - "Unparent" removes the box from its parent → excluded from scale tracking
+ *    - Change system scale while the box is unparented (no overhead)
+ *    - "Re-add" puts it back → new scale is applied correctly
+ *
  * Press Escape / Back to quit.
  */
 
@@ -279,6 +290,8 @@ private:
     content.Add(BuildZoneD());
     content.Add(BuildZoneE());
     content.Add(BuildZoneF());
+    content.Add(BuildZoneG());
+    content.Add(BuildZoneH());
 
     // ScrollView fills remaining height in the root StackLayout
     ScrollView scrollView = ScrollView::New();
@@ -1313,6 +1326,195 @@ private:
     return zone;
   }
 
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Zone G: Reparent from DISABLED parent to INHERIT parent
+  //
+  // A box (INHERIT policy) starts under a DISABLED container → effectiveScale = 1.0.
+  // Pressing "→ INHERIT 부모로" reparents it to an INHERIT container so it
+  // immediately picks up the system scale.
+  // Pressing "← DISABLED 부모로" moves it back → effectiveScale = 1.0 again.
+  //
+  // Observe: set scale to 1.5+ first, then press the move buttons.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  View BuildZoneG()
+  {
+    StackLayout zone = BuildZoneContainer(UiColor(0xFFF3E0)); // light amber
+
+    zone.Add(MakeZoneTitle("[Zone G] Reparent: DISABLED → INHERIT 시 Scale 재적용"));
+    zone.Add(MakeDesc(
+      "박스(INHERIT)가 처음에 DISABLED 부모 아래에 있어 effectiveScale = 1.0으로 고정됩니다. "
+      "버튼으로 INHERIT 부모로 이동하면 OnChildAdd → 재레이아웃이 트리거되어 "
+      "시스템 스케일이 즉시 적용됩니다."));
+
+    // Two slots side by side
+    StackLayout slotsRow = MakeHStack();
+
+    // Left slot: DISABLED parent (red tint)
+    mDisabledSlot = StackLayout::New(StackOrientation::VERTICAL);
+    mDisabledSlot.SetRequestedWidth(130.0f);
+    mDisabledSlot.SetRequestedHeight(WRAP_CONTENT);
+    mDisabledSlot.SetBackgroundColor(UiColor(0xFFCDD2));
+    mDisabledSlot.SetPadding(Extents(8, 8, 8, 8));
+    mDisabledSlot.SetSpacing(6.0f);
+    mDisabledSlot.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
+    mDisabledSlot.SetUiScalePolicy(UiScalePolicy::DISABLED); // ★ blocks scale
+    mDisabledSlot.Add(Label::New("DISABLED parent")
+                        .SetRequestedWidth(MATCH_PARENT)
+                        .SetRequestedHeight(WRAP_CONTENT)
+                        .SetFontSize(10.0f)
+                        .SetTextColor(UiColor(0xB71C1C)));
+
+    // Right slot: INHERIT parent (teal tint)
+    mInheritSlot = StackLayout::New(StackOrientation::VERTICAL);
+    mInheritSlot.SetRequestedWidth(130.0f);
+    mInheritSlot.SetRequestedHeight(WRAP_CONTENT);
+    mInheritSlot.SetBackgroundColor(UiColor(0xE0F2F1));
+    mInheritSlot.SetPadding(Extents(8, 8, 8, 8));
+    mInheritSlot.SetSpacing(6.0f);
+    mInheritSlot.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
+    // INHERIT (default)
+    mInheritSlot.Add(Label::New("INHERIT parent")
+                       .SetRequestedWidth(MATCH_PARENT)
+                       .SetRequestedHeight(WRAP_CONTENT)
+                       .SetFontSize(10.0f)
+                       .SetTextColor(UiColor(0x1B5E20)));
+
+    // The box that moves between parents — INHERIT policy, so its effective scale
+    // depends entirely on which parent it is attached to.
+    mReparentBox   = MakePolicyBox("INHERIT", UiColor(0x00897B), UiScalePolicy::INHERIT, BOX_SIZE);
+    mBoxInDisabled = true;
+    mDisabledSlot.Add(mReparentBox); // starts in the DISABLED parent
+
+    slotsRow.Add(mDisabledSlot);
+    slotsRow.Add(mInheritSlot);
+    zone.Add(slotsRow);
+
+    // Action buttons
+    StackLayout btnRow = MakeHStack();
+
+    InteractiveView toInheritBtn = MakeButton("→ INHERIT 부모로", UiColor(0x00695C));
+    toInheritBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    toInheritBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+      if(mBoxInDisabled)
+      {
+        mDisabledSlot.Remove(mReparentBox);
+        mInheritSlot.Add(mReparentBox);
+        mBoxInDisabled = false;
+      }
+    });
+
+    InteractiveView toDisabledBtn = MakeButton("← DISABLED 부모로", UiColor(0xC62828));
+    toDisabledBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    toDisabledBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+      if(!mBoxInDisabled)
+      {
+        mInheritSlot.Remove(mReparentBox);
+        mDisabledSlot.Add(mReparentBox);
+        mBoxInDisabled = true;
+      }
+    });
+
+    btnRow.Add(toInheritBtn);
+    btnRow.Add(toDisabledBtn);
+    zone.Add(btnRow);
+
+    zone.Add(MakeDesc(
+      "확인 방법: 위 컨트롤 패널에서 Scale을 1.5 이상으로 설정한 뒤 "
+      "→ INHERIT 부모로 버튼을 누르면 박스가 즉시 커집니다. "
+      "← DISABLED 부모로 복귀하면 다시 1.0 크기로 돌아옵니다."));
+
+    return zone;
+  }
+
+  // ═══════════════════════════════════════════════════════════════════════════
+  // Zone H: Unparent → scale change while detached → Re-add applies new scale
+  //
+  // Shows that:
+  //   (a) An unparented view is excluded from UiScaleManager tracking — no
+  //       overhead when scale changes while the view is off-scene.
+  //   (b) When the view is re-added, it picks up the current system scale
+  //       correctly via OnSceneConnection → InvalidateMeasure → re-layout.
+  //
+  // Steps: ① Unparent → ② change scale in control panel → ③ Re-add.
+  // ═══════════════════════════════════════════════════════════════════════════
+
+  View BuildZoneH()
+  {
+    StackLayout zone = BuildZoneContainer(UiColor(0xE8EAF6)); // light indigo
+
+    zone.Add(MakeZoneTitle("[Zone H] Unparent 후 Scale 변경 → Re-add 시 정확한 Scale 적용"));
+    zone.Add(MakeDesc(
+      "박스를 Unparent 하면 OnSceneDisconnection이 발생하고 UiScaleManager 추적에서 제외됩니다. "
+      "unparent 상태에서 시스템 스케일이 바뀌어도 박스에는 연산이 발생하지 않습니다. "
+      "Re-add 시 OnSceneConnection → InvalidateMeasure → 재레이아웃으로 새 scale이 정확히 적용됩니다."));
+
+    // Status label (updated dynamically)
+    mHStatusLabel = Label::New("상태: 부모에 연결됨");
+    mHStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mHStatusLabel.SetRequestedHeight(WRAP_CONTENT);
+    mHStatusLabel.SetFontSize(13.0f);
+    mHStatusLabel.SetTextColor(UiColor(0x1A237E));
+    zone.Add(mHStatusLabel);
+
+    // INHERIT container where the box lives
+    mHContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mHContainer.SetRequestedWidth(MATCH_PARENT);
+    mHContainer.SetRequestedHeight(WRAP_CONTENT);
+    mHContainer.SetBackgroundColor(UiColor(0xC5CAE9));
+    mHContainer.SetPadding(Extents(8, 8, 8, 8));
+    mHContainer.SetSpacing(6.0f);
+    mHContainer.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
+    // INHERIT (default) — normal scale propagation
+    mHContainer.Add(Label::New("INHERIT parent container")
+                      .SetRequestedWidth(MATCH_PARENT)
+                      .SetRequestedHeight(WRAP_CONTENT)
+                      .SetFontSize(10.0f)
+                      .SetTextColor(UiColor(0x1A237E)));
+
+    mScaleChangeBox = MakePolicyBox("INHERIT", UiColor(0x3949AB), UiScalePolicy::INHERIT, BOX_SIZE);
+    mHContainer.Add(mScaleChangeBox);
+    mIsParented = true;
+
+    zone.Add(mHContainer);
+
+    // Action buttons
+    StackLayout btnRow = MakeHStack();
+
+    InteractiveView unparentBtn = MakeButton("① Unparent", UiColor(0xE53935));
+    unparentBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    unparentBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+      if(mIsParented)
+      {
+        mHContainer.Remove(mScaleChangeBox);
+        mIsParented = false;
+        mHStatusLabel.SetText("상태: Unparented — ② 위 패널에서 Scale 변경 후 ③ Re-add 해보세요");
+      }
+    });
+
+    InteractiveView readdBtn = MakeButton("③ Re-add", UiColor(0x2E7D32));
+    readdBtn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    readdBtn.ConnectClickedSignal(this, [this](View, const InputEvent&) {
+      if(!mIsParented)
+      {
+        mHContainer.Add(mScaleChangeBox);
+        mIsParented = true;
+        std::string s = "상태: 부모에 연결됨 — Scale " + Fmt(UiScaleManager::Get().GetScale()) + " 적용됨";
+        mHStatusLabel.SetText(s.c_str());
+      }
+    });
+
+    btnRow.Add(unparentBtn);
+    btnRow.Add(readdBtn);
+    zone.Add(btnRow);
+
+    zone.Add(MakeDesc(
+      "② 단계에서 Scale을 바꿔도 박스는 화면에 없으므로 재연산이 일어나지 않습니다. "
+      "③ Re-add 후에 변경된 Scale이 올바르게 반영되는지 확인하세요."));
+
+    return zone;
+  }
+
   // ─── Decoration demo helpers ──────────────────────────────────────────────
 
   // Plain colored box, no decorations set
@@ -1443,6 +1645,18 @@ private:
   Application& mApplication;
   Label        mScaleLabel;  // updated on every ApplyScale()
   InputField   mScaleInput;
+
+  // Zone G: reparent between DISABLED / INHERIT parents
+  StackLayout mDisabledSlot;
+  StackLayout mInheritSlot;
+  View        mReparentBox;
+  bool        mBoxInDisabled{true};
+
+  // Zone H: unparent → scale change → re-add
+  StackLayout mHContainer;
+  View        mScaleChangeBox;
+  Label       mHStatusLabel;
+  bool        mIsParented{true};
 };
 
 // ─────────────────────────── Entry point ─────────────────────────────────────
