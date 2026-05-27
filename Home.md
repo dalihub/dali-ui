@@ -10,7 +10,7 @@ DALi serves as the backend engine for NUI (C#), providing the same core renderin
 
 <br/>
 
-<img src="./assets/layered-structure.png" style="display:block;margin:0 auto"/>
+<img src="./assets/layered-structure.svg" style="display:block;margin:0 auto"/>
 
 <br/>
 
