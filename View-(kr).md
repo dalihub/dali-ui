@@ -1,4 +1,4 @@
-## View Architecture (Handle / Impl Pattern)
+## View Architecture
 
 `View`는 **p-impl(pointer-to-implementation) 패턴**을 기반으로 설계되어 있습니다. Framework 개발자는 이 패턴을 이해해야 새로운 컴포넌트를 올바르게 정의할 수 있습니다.
 
