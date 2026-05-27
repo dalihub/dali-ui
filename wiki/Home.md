@@ -71,7 +71,9 @@ For details about the class structure and inheritance of `View`, see [here](http
 * [State Management](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management)
 * [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI)
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
-  * Text
+  * [Text](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text)
+  * [Label](https://github.sec.samsung.net/NUI/dali-ui/wiki/Label)
+  * InputText
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView)
 * Navigation
 * [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView)
