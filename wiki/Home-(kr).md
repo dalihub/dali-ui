@@ -7,7 +7,7 @@ DALi는 NUI(C#) 의 백엔드 엔진으로 기본 렌더링 기능을 동일하�
 
 <br/>
 
-<img src="./assets/layered-structure.png" style="display:block;margin:0 auto"/>
+<img src="./assets/layered-structure.svg" style="display:block;margin:0 auto"/>
 
 <br/>
 
