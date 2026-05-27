@@ -2,7 +2,7 @@
 
 ## View Architecture (Handle / Impl Pattern)
 
-`View` is designed based on DALi's **p-impl (pointer-to-implementation) pattern**. Framework developers must understand this pattern to define new components correctly.
+`View` is designed based on **p-impl (pointer-to-implementation) pattern**. Framework developers must understand this pattern to define new components correctly.
 
 <img src="./assets/view-structure.png" style="display:block;margin:0 auto"/>
 
@@ -168,6 +168,39 @@ MyView MyView::New()
 | Handle destructor | `~MyView()` must be **non-virtual** |
 | Handle data | Do not add member variables to the handle class |
 | Logic location | All state and logic must live in Impl |
+
+<br/>
+
+### Q. Can an app inherit from classes other than `View`?
+
+#### ❌ Apps cannot inherit from classes other than `View`.
+
+This is because only the impl class for `View` is exposed through the public-api. However, impl classes for `Label` and `ImageView` are also provided through the integration-api, so they can be used by modules that can be recompiled. ([See: API levels](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home#api-levels))
+
+#### ✅ You do not need to inherit from `Layout`.
+
+Layout view classes such as `StackLayout` and `AbsoluteLayout` are provided for convenience, but layout functionality is provided as a functional unit called `LayoutManager`, which can be attached to a `View`. For example, if you want to provide a button composed of `Label` and `ImageView` by inheriting from `StackLayout`, you can instead inherit from `View` and attach `StackLayoutManager` to use it in the same form. (TBD: usage link)
+
+#### ✅ You do not need to inherit from a button either.
+
+If you are trying to inherit from a button to use the `Clicked` event, use `View::AsInteractive()` instead.
+
+```cpp
+view.AsInteractive([&](InteractiveTrait trait)
+{
+  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& e)
+  {
+    // Clicked (touch tap or execution key Enter)
+  });
+});
+```
+
+This provides functionality that interprets View interactions and exposes them as high-level signals such as `Clicked` and `LongPressed`.
+
+<br/>
+
+> [!TIP]
+> If inheritance is absolutely necessary, you can consider a [trick](https://github.sec.samsung.net/NUI/dali-ui/pull/327) using data attachment.
 
 <br/>
 

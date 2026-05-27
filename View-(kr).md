@@ -1,6 +1,6 @@
 ## View Architecture (Handle / Impl Pattern)
 
-`View`는 DALi의 **p-impl(pointer-to-implementation) 패턴**을 기반으로 설계되어 있습니다. Framework 개발자는 이 패턴을 이해해야 새로운 컴포넌트를 올바르게 정의할 수 있습니다.
+`View`는 **p-impl(pointer-to-implementation) 패턴**을 기반으로 설계되어 있습니다. Framework 개발자는 이 패턴을 이해해야 새로운 컴포넌트를 올바르게 정의할 수 있습니다.
 
 <img src="./assets/view-structure.png" style="display:block;margin:0 auto"/>
 
@@ -170,16 +170,36 @@ MyView MyView::New()
 
 <br/>
 
-## FAQ
-
 ### Q. View 이외에 다른 클래스를 상속 받을 수 있을까?
 
-#### A. 앱이 `View` 이외의 클래스를 상속받는 것은 불가능합니다.
+#### ❌ 앱이 `View` 이외의 클래스를 상속받는 것은 불가능합니다.
 
 `View`만 impl 클래스가 public-api로 노출되어 있기 때문입니다. 다만 integration-api로는 `Label`이나 `ImageView` 의 impl 클래스도 제공되고 있기 때문에,  재컴파일이 가능한 모듈에서는 사용이 가능합니다. ([참고: API levels](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#api-levels))
 
-#### Tip! Layout 은 상속받을 필요가 없습니다.
-편의를 위해 `StackLayout`이나 `AbsoluteLayout`등의 레이아웃 view 클래스들이 제공되지만, 레이아웃은 `LayoutManager`라는 기능 단위로 제공되므로 `View`에 붙여서 사용할 수 있습니다. 즉, `StackLayout`을 상속받아 `Label`과 `ImageView`로 구성된 버튼을 만들어 제공하고 싶을 경우, `View`를 상속받아 `StackLayoutManager`를 연결하면 동일한 형태로 사용할 수 있습니다.
+#### ✅ Layout 은 상속받을 필요가 없습니다.
+
+편의를 위해 `StackLayout`이나 `AbsoluteLayout`등의 레이아웃 view 클래스들이 제공되지만, 레이아웃은 `LayoutManager`라는 기능 단위로 제공되므로 `View`에 붙여서 사용할 수 있습니다. 즉, `StackLayout`을 상속받아 `Label`과 `ImageView`로 구성된 버튼을 만들어 제공하고 싶을 경우, `View`를 상속받아 `StackLayoutManager`를 연결하면 동일한 형태로 사용할 수 있습니다. (TBD: 사용법 링크)
+
+#### ✅ 버튼도 상속받을 필요가 없습니다.
+
+`Clicked` 이벤트 기능을 사용하기 위해 버튼을 상속받으려고 한다면, `View`의 `AsInteractive()` 를 사용하세요.
+
+```cpp
+view.AsInteractive([&](InteractiveTrait trait)
+{
+  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& e)
+  {
+    // 클릭됨 (터치 탭 또는 실행키 Enter)
+  });
+});
+```
+
+View의 interaction을 해석하여 고수준의 시그널 (Clicked, LongPressed 등)로 제공하는 기능을 제공합니다.
+
+<br/>
+
+> [!TIP]
+> 반드시 상속이 필요한 경우에는 data attachment를 활용한 [트릭](https://github.sec.samsung.net/NUI/dali-ui/pull/327)을 생각해 볼 수 있습니다.
 
 <br/>
 
