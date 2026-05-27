@@ -1,6 +1,6 @@
 ## View Architecture
 
-`View`는 **p-impl(pointer-to-implementation) 패턴**을 기반으로 설계되어 있습니다. Framework 개발자는 이 패턴을 이해해야 새로운 컴포넌트를 올바르게 정의할 수 있습니다.
+`View`는 **p-impl(pointer-to-implementation) 패턴**을 기반으로 설계되어 있습니다. 개발자는 이 패턴을 이해해야 새로운 컴포넌트를 올바르게 정의할 수 있습니다.
 
 <img src="./assets/view-structure.png" style="display:block;margin:0 auto"/>
 
@@ -95,7 +95,7 @@ MyData* data = view.GetAttachment(MY_DATA_ID);
 
 ```cpp
 // Make view to arrange its children like a GridLayout
-view.SetLayoutManager(MakeUnique<GridLayoutManager>());
+view.AttachLayoutManager(MakeUnique<GridLayoutManager>());
 ```
 
 > [!NOTE]
@@ -111,8 +111,8 @@ view.SetLayoutManager(MakeUnique<GridLayoutManager>());
 
 기능명 | 사용법 | 설명
 -- | -- | --
-Interaction | `view.AsInteractive()`| View의 interaction을 고수준의 시그널로 변환하여 송출하는 기능. <ul><li>제공하는 시그널: `Clicked`, `LongPressed` 등</li><li>제공하는 상태: `PRESSED`</li></ul>
-Selection | `view.AsSelectable()` | View의 clicked interaction을 트리거로 selection 상태를 toggle 하는 기능. <ul><li>제공하는 시그널: `SelectionChanged`</li><li>제공하는 상태: `SELECTED`</li></ul>
+Interaction | `view.AsInteractive()`| View의 key/touch 인풋을 고수준의 시그널로 변환하는 기능 <ul><li>제공하는 시그널: `Clicked`, `LongPressed` 등</li><li>제공하는 상태: `PRESSED`</li></ul>
+Selection | `view.AsSelectable()` | View의 clicked interaction을 트리거로 selection 상태를 toggle 하는 기능 <ul><li>제공하는 시그널: `SelectionChanged`</li><li>제공하는 상태: `SELECTED`</li></ul>
 
 ```cpp
 view.AsInteractive([&](InteractiveTrait trait)
