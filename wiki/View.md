@@ -2,7 +2,7 @@
 
 ## View Architecture
 
-`View` is designed based on the **p-impl (pointer-to-implementation) pattern**. Framework developers must understand this pattern to define new components correctly.
+`View` is designed based on the **p-impl (pointer-to-implementation) pattern**. Developers must understand this pattern to define new components correctly.
 
 <img src="./assets/view-structure.png" style="display:block;margin:0 auto"/>
 
@@ -97,7 +97,7 @@ Users can make a `View` instance act as a layout by attaching a `LayoutManager` 
 
 ```cpp
 // Make view to arrange its children like a GridLayout
-view.SetLayoutManager(MakeUnique<GridLayoutManager>());
+view.AttachLayoutManager(MakeUnique<GridLayoutManager>());
 ```
 
 > [!NOTE]
@@ -113,8 +113,8 @@ With this feature, a view can take on a layout role without adding a separate la
 
 Feature | Usage | Description
 -- | -- | --
-Interaction | `view.AsInteractive()` | Converts View interactions into high-level signals. <ul><li>Provided signals: `Clicked`, `LongPressed`, etc.</li><li>Provided state: `PRESSED`</li></ul>
-Selection | `view.AsSelectable()` | Toggles the selection state using the View's clicked interaction as a trigger. <ul><li>Provided signal: `SelectionChanged`</li><li>Provided state: `SELECTED`</li></ul>
+Interaction | `view.AsInteractive()` | Converts View key/touch inputs into high-level signals <ul><li>Provided signals: `Clicked`, `LongPressed`, etc.</li><li>Provided state: `PRESSED`</li></ul>
+Selection | `view.AsSelectable()` | Toggles the selection state using the View's clicked interaction as a trigger <ul><li>Provided signal: `SelectionChanged`</li><li>Provided state: `SELECTED`</li></ul>
 
 ```cpp
 view.AsInteractive([&](InteractiveTrait trait)
