@@ -59,7 +59,7 @@ This section explains how to attach user data or specific features to `View`, an
 
 <br/>
 
-### Data Attachment
+### 1. Data Attachment
 
 `dali-ui` provides APIs for attaching user data to a view. User data is managed so that it is destroyed together with the view instance.
 
@@ -88,7 +88,7 @@ If the only purpose is to store data, data attachment is preferred over inherita
 
 <br/>
 
-### Layout Attachment
+### 2. Layout Attachment
 
 Users can make a `View` instance act as a layout by attaching a `LayoutManager` to it. For example, if `GridLayoutManager` is connected to a view, that view arranges its children like a `GridLayout`.
 
@@ -107,7 +107,7 @@ With this feature, a view can take on a layout role without adding a separate la
 
 <br/>
 
-### Feature Attachment
+### 3. Feature Attachment
 
 `dali-ui` provides several feature modules that can be attached to a view.
 
@@ -130,13 +130,13 @@ With this feature, users can make a view perform the role of a `Button` or `Swit
 
 <br/>
 
-### View Inheritance
+### 4. View Inheritance
 
 When framework developers create a new component, or when an application needs a custom component, inherit from `View`'s **handle class** and **impl class** respectively.
 
 <img src="./assets/custom-view.png" style="display:block;margin:0 auto"/>
 
-#### 1. Define the Impl Class (inherit from `ViewImpl`)
+#### (1) Define the Impl Class (inherit from `ViewImpl`)
 
 ```cpp
 // my-view-impl.h
@@ -152,7 +152,7 @@ private:
 };
 ```
 
-#### 2. Define the Handle Class (inherit from `View`)
+#### (2) Define the Handle Class (inherit from `View`)
 
 ```cpp
 // my-view.h
@@ -173,7 +173,7 @@ public:
 };
 ```
 
-#### 3. Implement `New()`
+#### (3) Implement `New()`
 
 ```cpp
 // my-view.cpp
@@ -188,6 +188,34 @@ MyView MyView::New()
 
 <br/>
 
+#### (4) Type Registration
+
+<ins>Register new type with macro</ins>
+
+```cpp
+// my-view.cpp
+namespace
+{
+
+BaseHandle Create()
+{
+  return MyView::New();
+}
+
+DALI_TYPE_REGISTRATION_BEGIN(MyViewImpl, ViewImpl, Create)
+/* Register property here if needs */
+DALI_TYPE_REGISTRATION_END()
+
+} // anonymous namespace
+```
+
+<ins>Macro Syntax</ins>
+```cpp
+DALI_TYPE_REGISTRATION_BEGIN(/* impType*/, /* baseType */, /* creationMethod*/)
+```
+
+<br/>
+
 #### Notes
 
 | Item | Rule |
@@ -198,7 +226,7 @@ MyView MyView::New()
 
 <br/>
 
-### Inheriting from Classes Derived from View
+### 5. Inheriting from Classes Derived from View
 
 Applications need a small trick to inherit from classes such as `ImageView` or `Label`. Since `View` is the only class for which both the handle and impl classes are provided, inheriting from other classes such as `Label` requires a limited approach using data attachment. For details and precautions, see [#327](https://github.sec.samsung.net/NUI/dali-ui/pull/327).
 
