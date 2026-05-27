@@ -79,8 +79,9 @@ that it may change between dali-ui versions and will require a rebuild.
 * [Focus & Key](https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-&-Key)
 * [Touch & Gesture](https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-&-Gesture)
 * [State Management](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management)
+* [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI)
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
-  * Text and Mutiligual Management
+  * Text
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView)
 * Navigation
 * [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView)
