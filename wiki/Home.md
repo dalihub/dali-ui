@@ -43,18 +43,18 @@ that it may change between dali-ui versions and will require a rebuild.
 
 <br/>
 
-## View and Inheritance
+## View and Extensibility
 
 `View` is the basic UI building block and provides the following main features.
 
-<img src="./assets/view-box-model.png" style="display:block;margin:0 auto; width: 360px;"/>
+<img src="./assets/view-box-model.svg" style="display:block;margin:0 auto; width: 360px;"/>
 
 * Box model arranged by layouts
 * Multi-layer visual composition such as Shadow, Background, and Border
 * State management such as FOCUSED and DISABLED
 * Accessibility
 
-For details about the class structure and inheritance of `View`, see [here](https://github.sec.samsung.net/NUI/dali-ui/wiki/View).
+For details about the class structure and extensibility of `View`, see [here](https://github.sec.samsung.net/NUI/dali-ui/wiki/View).
 
 <br/>
 

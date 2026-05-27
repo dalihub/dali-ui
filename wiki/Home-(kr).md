@@ -41,11 +41,11 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨
 
 <br/>
 
-## View and Inheritance
+## View and Extensibility
 
 `View`는 기본 UI building block 이며 주요 기능은 다음과 같습니다.
 
-<img src="./assets/view-box-model.png" style="display:block;margin:0 auto; width: 360px;"/>
+<img src="./assets/view-box-model.svg" style="display:block;margin:0 auto; width: 360px;"/>
 
 * 레아이웃에 의해 배치되는 박스 모델
 * Shadow, Background, Border 등 다층 비주얼 레이어 구성
@@ -53,7 +53,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨
 * 접근성
 
 
-`View`의 클래스 구조와 상속에 대한 내용은 [여기](https://github.sec.samsung.net/NUI/dali-ui/wiki/View-(kr)) 를 참고하세요.
+`View`의 클래스 구조와 확장에 대한 내용은 [여기](https://github.sec.samsung.net/NUI/dali-ui/wiki/View-(kr)) 를 참고하세요.
 
 <br/>
 

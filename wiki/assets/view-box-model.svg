@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="440" height="326" viewBox="0 0 440 326" role="img" aria-labelledby="title desc">
+  <title id="title">View box model</title>
+  <desc id="desc">Diagram showing the View box model: Margin, Border, Padding, and Content.</desc>
+  <rect width="440" height="326" fill="#ffffff"/>
+
+  <g font-family="Inter, Pretendard, 'Noto Sans KR', 'Segoe UI', Arial, sans-serif" text-rendering="geometricPrecision">
+    <!-- Margin -->
+    <rect x="36" y="24" width="368" height="246" fill="#f3f4f6" stroke="#7b8794" stroke-width="1.1" stroke-dasharray="3.5 3.5"/>
+    <text x="48" y="45" font-size="14" font-weight="500" fill="#374151">Margin</text>
+
+    <!-- Border -->
+    <rect x="72" y="60" width="296" height="180" fill="#9dccf6"/>
+    <text x="84" y="82" font-size="14" font-weight="500" fill="#17324d">Border</text>
+
+    <!-- Padding -->
+    <rect x="108" y="96" width="224" height="116" fill="#f8fafc"/>
+    <text x="120" y="118" font-size="14" font-weight="500" fill="#374151">Padding</text>
+
+    <!-- Content -->
+    <rect x="144" y="132" width="152" height="58" fill="#ffffff" stroke="#7b8794" stroke-width="1.1" stroke-dasharray="3.5 3.5"/>
+    <text x="156" y="154" font-size="14" font-weight="500" fill="#111827">Content</text>
+
+    <!-- View label -->
+    <text x="220" y="296" text-anchor="middle" font-size="16" font-weight="700" fill="#6b7280">View</text>
+  </g>
+</svg>
