@@ -569,6 +569,41 @@ private:
   ScrollViewImpl& operator=(const ScrollViewImpl&) = delete;
   ScrollViewImpl& operator=(ScrollViewImpl&&)      = delete;
 
+  // Accumulates timestamped touch positions and computes a weighted-average
+  // velocity over a recent time window.  Velocity is in pixels per millisecond.
+  struct VelocityTracker
+  {
+    struct Sample
+    {
+      uint32_t timeMs{0u};
+      Vector2  pos{};
+    };
+    static constexpr int      CAPACITY   = 20;
+    static constexpr uint32_t HORIZON_MS = 100u;  // look-back window
+    static constexpr float    WEIGHT_TAU = 30.0f; // exponential decay constant (ms)
+
+    Sample samples[CAPACITY]{};
+    int    writeIdx{0};
+    int    count{0};
+
+    void Clear()
+    {
+      count    = 0;
+      writeIdx = 0;
+    }
+
+    void Add(uint32_t timeMs, const Vector2& pos)
+    {
+      samples[writeIdx] = {timeMs, pos};
+      writeIdx          = (writeIdx + 1) % CAPACITY;
+      if(count < CAPACITY) ++count;
+    }
+
+    // Weighted average of consecutive-sample velocities; recent samples have
+    // higher weight (exp(-age/WEIGHT_TAU)).  Returns px/ms.
+    Vector2 Compute() const;
+  };
+
 private:
   // Data
   View            mContent;              ///< The content view
@@ -612,6 +647,7 @@ private:
   PanGestureDetector mPanGestureDetector; ///< Pan gesture detector
   float              mPanThreshold;       ///< Additional displacement threshold (px) after Pan is recognized
   Vector2            mLastPanPosition;    ///< Last pan position
+  VelocityTracker    mVelocityTracker;    ///< Touch-history velocity tracker for fling
 
   // Intercept touch state
   bool    mIntercepting;     ///< True while this ScrollView owns the touch sequence

@@ -84,7 +84,7 @@ ScrollViewImpl::ScrollViewImpl()
   mScrollDirection(ScrollDirection::Vertical),
   mMaxFlingDistance(6000.0f),
   mMinimumFlingDuration(200),
-  mMaximumFlingDuration(400),
+  mMaximumFlingDuration(1200),
   mFlingSensitivity(1.0f),
   mDecelerationRate(0.998f),
   mOverScrollMode(OverScrollMode::ContentScrolls),
@@ -926,6 +926,44 @@ Ui::ScrollView::DragFinishedSignalType& ScrollViewImpl::DragFinishedSignal()
   return mDragFinishedSignal;
 }
 
+Vector2 ScrollViewImpl::VelocityTracker::Compute() const
+{
+  if(count < 2)
+    return Vector2::ZERO;
+
+  int      newestIdx  = (writeIdx - 1 + CAPACITY) % CAPACITY;
+  uint32_t newestTime = samples[newestIdx].timeMs;
+  uint32_t cutoff     = (newestTime > HORIZON_MS) ? newestTime - HORIZON_MS : 0u;
+
+  float sumVX = 0.0f, sumVY = 0.0f, sumW = 0.0f;
+  int   prevIdx = newestIdx;
+
+  for(int i = 1; i < count; ++i)
+  {
+    int curIdx = (newestIdx - i + CAPACITY) % CAPACITY;
+    if(samples[curIdx].timeMs < cutoff)
+      break;
+
+    float dt = static_cast<float>(samples[prevIdx].timeMs) - static_cast<float>(samples[curIdx].timeMs);
+    if(dt > 0.5f)
+    {
+      float vx  = (samples[prevIdx].pos.x - samples[curIdx].pos.x) / dt;
+      float vy  = (samples[prevIdx].pos.y - samples[curIdx].pos.y) / dt;
+      float age = static_cast<float>(newestTime - samples[prevIdx].timeMs);
+      float w   = std::exp(-age / WEIGHT_TAU);
+      sumVX += w * vx;
+      sumVY += w * vy;
+      sumW += w;
+    }
+    prevIdx = curIdx;
+  }
+
+  if(sumW < 1.0e-6f)
+    return Vector2::ZERO;
+
+  return Vector2(sumVX / sumW, sumVY / sumW);
+}
+
 Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
 {
   float decelerationFactor = std::log(mDecelerationRate);
@@ -1208,11 +1246,16 @@ void ScrollViewImpl::OnPanGesture(Actor actor, PanGesture gesture)
       // measure additional displacement before committing to scroll.
       mPanRecognized    = true;
       mPanStartPosition = gesture.GetScreenPosition();
+      // Seed the velocity tracker with the recognition point.
+      mVelocityTracker.Clear();
+      mVelocityTracker.Add(gesture.GetTime(), gesture.GetScreenPosition());
       // Disambiguation was already signalled in OnInterceptTouch(DOWN).
       break;
     }
     case GestureState::CONTINUING:
     {
+      // Accumulate every touch point for velocity estimation.
+      mVelocityTracker.Add(gesture.GetTime(), gesture.GetScreenPosition());
       if(!mIntercepting)
       {
         // Pan is recognized but we have not yet stolen the touch from children.
@@ -1259,6 +1302,9 @@ void ScrollViewImpl::OnPanGesture(Actor actor, PanGesture gesture)
       // Fall through
     case GestureState::CANCELLED:
     {
+      // Capture the lift-off point before processing so the tracker includes
+      // the final position when OnDragFinished queries it.
+      mVelocityTracker.Add(gesture.GetTime(), gesture.GetScreenPosition());
       if(mDisambiguating && !mIntercepting)
       {
         // Pan was recognized but threshold was never met: resolved as a tap.
@@ -1339,28 +1385,49 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
     mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
   }
 
-  Vector2 velocity = gesture.GetVelocity();
-  Vector2 movement = VelocityToMovement(velocity);
+  // Use the history-weighted velocity instead of the raw last-frame velocity.
+  // mFlingSensitivity lets callers tune the effective speed.
+  Vector2 velocity = mVelocityTracker.Compute() * mFlingSensitivity;
 
-  // Adjust end point incorrect direction balance (from OneUIComponents commit)
-  if(mScrollDirection == ScrollDirection::Horizontal)
+  // Physics model: exponential velocity decay  v(t) = v0 * exp(-k*t)
+  //   total distance = v0 / k_dist
+  //   animation time = ln(v0 / v_stop) / k_dur
+  //
+  // Two separate k values let distance and duration be tuned independently:
+  //   k_dist=0.002, k_dur=0.003  →  distance ~1.5× longer, duration unchanged
+  //   0.5 px/ms → ~250 px / 0.77 s
+  //   1.0 px/ms → ~500 px / 0.92 s
+  //   2.0 px/ms → ~1000 px / 1.15 s
+  constexpr float FLING_K_DIST = 0.002f; // distance deceleration (per ms); smaller = farther
+  constexpr float FLING_K_DUR  = 0.003f; // duration deceleration (per ms); controls timing feel
+  constexpr float FLING_VMIN   = 0.08f;  // below this speed, skip fling (px/ms)
+  constexpr float FLING_VSTOP  = 0.04f;  // velocity at which animation is considered done (px/ms)
+
+  float speed = velocity.Length();
+  if(speed < FLING_VMIN)
   {
-    movement = Vector2(movement.x, 0.0f);
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] speed %.3f < %.3f, no fling\n", speed, FLING_VMIN);
+    SendScrollFinished();
+    return;
   }
-  else if(mScrollDirection == ScrollDirection::Vertical)
-  {
-    movement = Vector2(0.0f, movement.y);
-  }
+
+  float distance = speed / FLING_K_DIST;
+  distance       = std::min(distance, mMaxFlingDistance);
+
+  float effectiveVStop = std::min(FLING_VSTOP, speed * 0.5f);
+  float durationMs     = std::log(speed / effectiveVStop) / FLING_K_DUR;
+  durationMs           = std::max(static_cast<float>(mMinimumFlingDuration),
+                                  std::min(static_cast<float>(mMaximumFlingDuration), durationMs));
+
+  // Preserve the direction of the finger's velocity, scaled to the target distance.
+  Vector2 movement = (velocity / speed) * distance;
 
   Vector2 delta = AdjustDelta(movement, mCurrentPosition);
 
 #ifdef DEBUG_SCROLL
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] velocity=[%.2f, %.2f], movement=[%.2f, %.2f], contentPos=[%.2f, %.2f], scrollPos=[%.2f, %.2f], delta=[%.2f, %.2f], bounds=[minY=%.2f, maxY=%.2f]\n",
-                velocity.x, velocity.y, movement.x, movement.y,
-                mCurrentPosition.x, mCurrentPosition.y,
-                mScrollPosition.x, mScrollPosition.y,
-                delta.x, delta.y,
-                mMinimumStartY, mMaximumStartY);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] trackedVel=[%.3f, %.3f] speed=%.3f dist=%.1f durMs=%.0f movement=[%.1f, %.1f] delta=[%.1f, %.1f]\n",
+                velocity.x, velocity.y, speed, distance, durationMs,
+                movement.x, movement.y, delta.x, delta.y);
 #endif
 
   if(delta.LengthSquared() < 0.0001f)
@@ -1374,10 +1441,10 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
   Vector2 scrollDelta = Vector2(-delta.x, -delta.y);
   Vector2 newPos      = mScrollPosition + scrollDelta;
 
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] scrollDelta=[%.2f, %.2f], target scrollPos=[%.2f, %.2f]\n",
-                scrollDelta.x, scrollDelta.y, newPos.x, newPos.y);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] scrollDelta=[%.1f, %.1f] target=[%.1f, %.1f] dur=%.3fs\n",
+                scrollDelta.x, scrollDelta.y, newPos.x, newPos.y, durationMs / 1000.0f);
 
-  ScrollTo(newPos, true);
+  ScrollToWithDuration(newPos, durationMs / 1000.0f);
 }
 
 void ScrollViewImpl::SendScrollStarted()
