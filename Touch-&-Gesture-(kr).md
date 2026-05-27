@@ -294,13 +294,13 @@ void YourClass::OnPan(Actor actor, const PanGesture& pan)
 
 2. **Touch Consume 필수**: `HandleEvent` 이후 발생하는 touch event는 해당 뷰에서 **consume을 해야** 해당 뷰에서 연속된 touch를 가지고 제스처를 인식할 수 있습니다.
 
-3. **Consume하지 않을 경우**: 만약 `GestureDetector.HandleEvent` 후 `return false`로 TouchEvent를 흘려보낸다면, 해당 뷰는 이후에 오는 TouchEvent를 받지 못하기 때문에 제스처 인식을 할 수 없습니다. 
+3. **Consume하지 않을 경우**: 만약 `GestureDetector.HandleEvent` 후 `return false`로 TouchEvent를 흘려보낸다면, 해당 뷰는 이후에 오는 TouchEvent를 받지 못하기 때문에 제스처 인식을 할 수 없습니다.
 
 ---
 
 ## Gesture Propagation
 
-View의 TouchEvent에서 Gesture를 인식시키려면 해당 View가 Touch를 **consume**해야만 합니다. 그렇기 때문에 제스처를 하위의 뷰로 전파할 수 없습니다. 
+View의 TouchEvent에서 Gesture를 인식시키려면 해당 View가 Touch를 **consume**해야만 합니다. 그렇기 때문에 제스처를 하위의 뷰로 전파할 수 없습니다.
 
 ### 제스처 인식의 제약사항
 
@@ -498,3 +498,9 @@ private:
 ---
 
 ## 참고 사항
+
+<br/>
+
+---
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#development-guides)

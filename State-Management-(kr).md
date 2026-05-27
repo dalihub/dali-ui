@@ -172,4 +172,4 @@ SetState(Loading, false);  // Loading 상태 해제
 
 ---
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#development-guides)

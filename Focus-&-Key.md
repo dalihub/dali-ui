@@ -288,6 +288,8 @@ UiConfig::New()
 > [!WARNING]
 > `SetExecutionKeyPredicate` only accepts a plain function pointer (no capturing lambdas). Pass `nullptr` to restore the default ("Return").
 
+<br/>
+
 ---
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#development-guides)

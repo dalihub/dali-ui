@@ -103,4 +103,6 @@ TVConfig::New().Apply();
 
 <br/>
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+---
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#development-guides)

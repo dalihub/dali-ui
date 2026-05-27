@@ -497,4 +497,4 @@ imageView
 
 ---
 
-[← 목록으로 돌아가기](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#development-guides)

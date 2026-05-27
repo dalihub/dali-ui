@@ -174,4 +174,6 @@ For views that cache values outside the layout pass, subscribe to property chang
 
 <br/>
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+---
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#development-guides)

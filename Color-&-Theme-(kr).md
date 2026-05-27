@@ -227,4 +227,4 @@ Override가 설정되면 기존 View 바인딩이 즉시 갱신됩니다.
 
 ---
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#development-guides)

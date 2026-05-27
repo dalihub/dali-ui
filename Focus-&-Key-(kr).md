@@ -284,6 +284,8 @@ UiConfig::New()
 > [!WARNING]
 > `SetExecutionKeyPredicate`는 캡처 없는 함수 포인터만 허용합니다. `nullptr`를 전달하면 기본값("Return")으로 복원됩니다.
 
+<br/>
+
 ---
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#development-guides)

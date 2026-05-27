@@ -231,4 +231,4 @@ Setting an override immediately refreshes all existing View color bindings.
 
 ---
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#development-guides)
