@@ -7,31 +7,7 @@ DALi는 NUI(C#) 의 백엔드 엔진으로 기본 렌더링 기능을 동일하�
 
 <br/>
 
-```mermaid
-flowchart TB
-  App["Application"]
-
-  subgraph DALi["**DALi**"]
-    direction TB
-    UIC["**dali-ui-components**"]
-    UIF["**dali-ui-foundation**"]
-    Adaptor["**dali-adaptor**"]
-    Core["**dali-core**"]
-  end
-
-  Ext["**Extra component libs**<br/>(e.g. tv-components)"]
-
-  App --> DALi
-  App --> Ext
-
-  UIC --> UIF
-  UIF --> Adaptor
-  Adaptor --> Core
-  Ext --> UIF
-
-classDef dali fill:#e8f4ff,stroke:#2f80ed,stroke-width:2px
-class App dali
-```
+<img src="./assets/layered-structure.png" style="display:block;margin:0 auto"/>
 
 <br/>
 
@@ -42,7 +18,7 @@ DALi는 앱의 화면 구성과 렌더링을 담당하며, 크게 `dali-core`, `
 
 | 라이브러리 | 역할 |
 |---|---|
-| **dali-core** | <ul><li>핵심 렌더링 엔진</li><li>Scene graph, animation, shader 등 렌더링 기본 모델 제공</li><li>Property system, signal 등 베이스 기능 제공</li><li>[Github](https://github.com/dalihub/dali-core)</li></ul>
+| **dali-core** | <ul><li>핵심 렌더링 기능</li><li>Scene graph, animation, shader 등 렌더링 기본 모델 제공</li><li>Property system, signal 등 베이스 기능 제공</li><li>[Github](https://github.com/dalihub/dali-core)</li></ul>
 | **dali-adaptor** | <ul><li>플랫폼 및 그래픽 백엔드 연동 담당</li><li>Window, InputMethod, Widget 등</li><li>[Github](https://github.com/dalihub/dali-adaptor)</li></ul>
 | **dali-ui-foundation** | <ul><li>레이아웃, 접근성, 테마 컬러 등 상위 UI Framework API 제공</li><li>`Label`/`ImageView`/`WebView` 등 기본 컴포넌트 제공</li><li>버튼 베이스 등 컴포넌트 기능 클래스 제공 (UX independent)</li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
 | **dali-ui-components** | <ul><li>`Button`, `Switch`, `ProgressBar`, `Slider`, `Dialog` 등 OneUI 기반 컴포넌트 [약 11종](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components#components-tbd) (계획) </li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
@@ -65,9 +41,24 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨
 
 <br/>
 
+## View 와 상속
+
+`View`는 기본 UI building block 이며 주요 기능은 다음과 같습니다.
+
+<img src="./assets/view-box-model.png" style="display:block;margin:0 auto; width: 360px;"/>
+
+* 레아이웃에 의해 배치되는 박스 모델
+* Shadow, Background, Border 등 다층 비주얼 레이어 구성
+* FOCUSED, DISABLED 등 상태 관리
+* 접근성
+
+
+`View`의 클래스 구조와 상속에 대한 내용은 [여기](https://github.sec.samsung.net/NUI/dali-ui/wiki/View-(kr)) 를 참고하세요.
+
+<br/>
+
 ## Development Guides
 
-* [View](https://github.sec.samsung.net/NUI/dali-ui/wiki/View-(kr))
 * [Fluent API](https://github.sec.samsung.net/NUI/dali-ui/wiki/Fluent-API-(kr))
 * [Configuration](https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration-(kr))
 * [Unit & Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-&-Scale-(kr))
