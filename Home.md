@@ -43,7 +43,7 @@ that it may change between dali-ui versions and will require a rebuild.
 
 <br/>
 
-## View and Extensibility
+## View
 
 `View` is the basic UI building block and provides the following main features.
 

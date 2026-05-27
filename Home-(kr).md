@@ -41,7 +41,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨
 
 <br/>
 
-## View and Extensibility
+## View
 
 `View`는 기본 UI building block 이며 주요 기능은 다음과 같습니다.
 
