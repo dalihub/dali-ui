@@ -57,7 +57,7 @@ View view = View::DownCast(impl.Self());
 
 <br/>
 
-### Data Attachment
+### 1. Data Attachment
 
 `dali-ui`는 view 에 유저 데이터를 붙일 수 있는 API를 제공합니다. 유저 데이터는 view 인스턴스가 소멸될 때 함께 소멸되도록 관리됩니다.
 
@@ -86,7 +86,7 @@ MyData* data = view.GetAttachment(MY_DATA_ID);
 
 <br/>
 
-### Layout Attachment
+### 2. Layout Attachment
 
 사용자는 `View` 인스턴스에 `LayoutManager`를 붙여 레이아웃 역할을 하도록 만들 수 있습니다. 예를 들어 view에 `GridLayoutManager`를 연결하면 해당 view는 `GridLayout`처럼 자식들을 배치합니다.
 
@@ -105,7 +105,7 @@ view.AttachLayoutManager(MakeUnique<GridLayoutManager>());
 
 <br/>
 
-### Feature Attachment
+### 3. Feature Attachment
 
 `dali-ui` 는 view에 붙일 수 있는 몇가지 기능 모듈을 제공합니다.
 
@@ -113,6 +113,10 @@ view.AttachLayoutManager(MakeUnique<GridLayoutManager>());
 -- | -- | --
 Interaction | `view.AsInteractive()`| View의 key/touch 인풋을 고수준의 시그널로 변환하는 기능 <ul><li>제공하는 시그널: `Clicked`, `LongPressed` 등</li><li>제공하는 상태: `PRESSED`</li></ul>
 Selection | `view.AsSelectable()` | View의 clicked interaction을 트리거로 selection 상태를 toggle 하는 기능 <ul><li>제공하는 시그널: `SelectionChanged`</li><li>제공하는 상태: `SELECTED`</li></ul>
+
+<br/>
+
+<ins>Interactive 예제</ins>
 
 ```cpp
 view.AsInteractive([&](InteractiveTrait trait)
@@ -124,17 +128,19 @@ view.AsInteractive([&](InteractiveTrait trait)
 });
 ```
 
+<br/>
+
 이 기능을 사용하여 사용자는 `Button` 이나 `Switch` 컴포넌트를 상속하지 않고도 view가 해당 기능을 수행하도록 만들 수 있으며, view의 내부를 자유롭게 구성할 수 있습니다.
 
 <br/>
 
-### View Inheritance
+### 4. View Inheritance
 
 Framework 개발자가 새 컴포넌트를 만들거나 앱이 커스텀 컴포넌트를 만드고 싶을때는 `View`의 **handle 클래스**와 **impl 클래스**를 각각 상속합니다.
 
 <img src="./assets/custom-view.png" style="display:block;margin:0 auto"/>
 
-#### 1. Impl 클래스 정의 (`ViewImpl` 상속)
+#### (1) Impl 클래스 정의 (`ViewImpl` 상속)
 
 ```cpp
 // my-view-impl.h
@@ -150,7 +156,7 @@ private:
 };
 ```
 
-#### 2. Handle 클래스 정의 (`View` 상속)
+#### (2) Handle 클래스 정의 (`View` 상속)
 
 ```cpp
 // my-view.h
@@ -171,7 +177,7 @@ public:
 };
 ```
 
-#### 3. `New()` 구현
+#### (3) `New()` 구현
 
 ```cpp
 // my-view.cpp
@@ -186,6 +192,34 @@ MyView MyView::New()
 
 <br/>
 
+#### (4) Type Registration
+
+<ins>Register new type with macro</ins>
+
+```cpp
+// my-view.cpp
+namespace
+{
+
+BaseHandle Create()
+{
+  return MyView::New();
+}
+
+DALI_TYPE_REGISTRATION_BEGIN(MyViewImpl, ViewImpl, Create)
+/* Register property here if needs */
+DALI_TYPE_REGISTRATION_END()
+
+} // anonymous namespace
+```
+
+<ins>Macro Syntax</ins>
+```cpp
+DALI_TYPE_REGISTRATION_BEGIN(/* impType*/, /* baseType */, /* creationMethod*/)
+```
+
+<br/>
+
 #### 주의사항
 
 | 항목 | 규칙 |
@@ -196,7 +230,7 @@ MyView MyView::New()
 
 <br/>
 
-### Inheriting from Classes derived from View
+### 5. Inheriting from Classes derived from View
 
 앱이 `ImageView`나 `Label` 등을 상속받으려면 약간의 트릭이 필요합니다. 핸들과 impl 클래스가 모두 제공되는 것은 `View` 뿐이기 때문에, 그 외 ` Label` 과 같은 클래스를 상속하려면 data attachment를 이용한 제한적인 방법을 적용해 볼 수 있습니다. 자세한 방법 및 주의 사항은 [#327](https://github.sec.samsung.net/NUI/dali-ui/pull/327)을 참고하세요.
 
