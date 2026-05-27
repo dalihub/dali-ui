@@ -204,4 +204,4 @@ MyView MyView::New()
 
 ---
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#view-and-extensibility)
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#view)
