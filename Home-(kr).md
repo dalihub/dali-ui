@@ -35,7 +35,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨
 | **Public API** | `public-api/` | 앱 개발자 | **보장** — 릴리즈 간 ABI가 깨져서는 안 됨 |
 | **Integration API** | `integration-api/` | Framework 개발자 | 불필요 — dali-ui와 함께 재빌드 가능 |
 
-**앱 개발자**라면 `public-api/`만 사용하세요. ABI 안정성이 보장되는 유일한 레이어입니다.
+**앱 개발자**라면 `public-api/`만 사용하세요. ABI 안정성이 보장되는 레이어입니다.
 
 **Framework 개발자**라면 `integration-api/`도 사용할 수 있습니다. 다만 dali-ui 버전 간에 변경될 수 있으며, 변경 시 재빌드가 필요합니다.
 

@@ -36,7 +36,7 @@ DALi exposes two API levels with different stability guarantees and intended aud
 | **Public API** | `public-api/` | App developers | **Guaranteed** — must not break across releases |
 | **Integration API** | `integration-api/` | Framework developers | Not required — consumers rebuild alongside dali-ui |
 
-**As an app developer**, use only `public-api/`. This is the only layer with guaranteed ABI stability.
+**As an app developer**, use only `public-api/`. This is the layer with guaranteed ABI stability.
 
 **As a framework developer**, you may also depend on `integration-api/`, with the understanding
 that it may change between dali-ui versions and will require a rebuild.
