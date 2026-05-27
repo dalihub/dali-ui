@@ -500,3 +500,9 @@ This allows flexible control of touch events in complex gesture scenarios.
 ---
 
 ## References
+
+<br/>
+
+---
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#development-guides)

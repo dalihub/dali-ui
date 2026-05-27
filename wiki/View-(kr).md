@@ -178,14 +178,11 @@ MyView MyView::New()
 
 `View`만 impl 클래스가 public-api로 노출되어 있기 때문입니다. 다만 integration-api로는 `Label`이나 `ImageView` 의 impl 클래스도 제공되고 있기 때문에,  재컴파일이 가능한 모듈에서는 사용이 가능합니다. ([참고: API levels](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#api-levels))
 
-
-
 #### Tip! Layout 은 상속받을 필요가 없습니다.
 편의를 위해 `StackLayout`이나 `AbsoluteLayout`등의 레이아웃 view 클래스들이 제공되지만, 레이아웃은 `LayoutManager`라는 기능 단위로 제공되므로 `View`에 붙여서 사용할 수 있습니다. 즉, `StackLayout`을 상속받아 `Label`과 `ImageView`로 구성된 버튼을 만들어 제공하고 싶을 경우, `View`를 상속받아 `StackLayoutManager`를 연결하면 동일한 형태로 사용할 수 있습니다.
-
 
 <br/>
 
 ---
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#documents)
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#view-and-inheritance)

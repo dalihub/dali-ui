@@ -221,4 +221,6 @@ MyView& EnableShadow(bool enable); // not SetXXX — must be marked manually
 
 <br/>
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+---
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#development-guides)

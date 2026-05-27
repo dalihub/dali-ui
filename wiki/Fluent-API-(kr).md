@@ -218,4 +218,6 @@ MyView& EnableShadow(bool enable); // SetXXX가 아니므로 수동 지정 필�
 
 <br/>
 
-[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#documents)
+---
+
+[← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#development-guides)
