@@ -201,7 +201,7 @@ viewB.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(2));
 
 <br/>
 
-## 커스텀 레이아웃: 앱 개발자용
+## 콜백 등록을 통한 커스텀 레이아웃
 
 `SetMeasureCallback` / `SetArrangeCallback`으로 임의의 레이아웃 로직을 주입할 수 있습니다.
 
@@ -244,9 +244,9 @@ root.SetArrangeCallback(LayoutArrangeCallback::New(&DiagonalLayout::OnArrange));
 
 <br/>
 
-## 컴포넌트 개발: Framework 개발자용
+## LayoutManager를 이용한 컴포넌트 레이아웃
 
-Framework 개발자는 `ViewImpl`의 `OnMeasure` / `OnArrange`를 오버라이드하여 레이아웃을 직접 상속하지 않고 레이아웃 로직을 붙일 수 있습니다.
+개발자는 `ViewImpl`의 `OnMeasure` / `OnArrange`를 오버라이드하여 레이아웃을 직접 상속하지 않고 레이아웃 로직을 붙일 수 있습니다.
 이때 `StackLayoutManager`, `GridLayoutManager` 등 integration-api에서 제공하는 레이아웃 매니저 모듈을 활용할 수 있습니다.
 
 ```cpp
@@ -274,12 +274,6 @@ protected:
   }
 };
 ```
-
-<br/>
-
-## 커스텀 레이아웃: Framework 개발자용
-
-(TBD: Customize LayoutManager)
 
 <br/>
 

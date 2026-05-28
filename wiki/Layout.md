@@ -205,7 +205,7 @@ Sample: [gridlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/gridl
 
 <br/>
 
-## Custom Layout: For App Developers
+## Custom Layouting by registering Callbacks
 
 Inject custom layout logic into any `Layout` using `SetMeasureCallback` / `SetArrangeCallback`.
 
@@ -248,14 +248,13 @@ Sample: [customlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/cus
 
 <br/>
 
-## Component development: For Framework Developers
+## Component Layouting by using LayoutManager
 
-Framework developers can override `OnMeasure` / `OnArrange` in `ViewImpl` to define a new component without inheriting layout directly.
+Developers can override `OnMeasure` / `OnArrange` in `ViewImpl` to define a new component without inheriting layout directly.
 The predefined layout manager modules (`StackLayoutManager`, `GridLayoutManager`, etc.) available in
 the integration-api can be composed or subclassed to build on existing algorithms.
 
 ```cpp
-// integration-api level
 class MyButtonImpl : public Dali::Ui::Integration::ViewImpl
 {
 public:
@@ -278,12 +277,6 @@ protected:
   }
 };
 ```
-
-<br/>
-
-## Custom Layout: For Framework Developers
-
-(TBD: Customize LayoutManager)
 
 <br/>
 
