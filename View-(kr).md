@@ -82,7 +82,7 @@ view.SetAttachment(MY_DATA_ID, Dali::MakeUnique<MyData>());
 MyData* data = view.GetAttachment(MY_DATA_ID);
 ```
 
-단순히 데이터 저장을 위한 목적으로는 상속보다 data attachment를 사용하는 것이 좋습니다.
+단순히 데이터 저장을 위한 목적으로는 상속보다 **data attachment**를 사용하는 것이 좋습니다.
 
 <br/>
 
@@ -98,10 +98,7 @@ MyData* data = view.GetAttachment(MY_DATA_ID);
 view.AttachLayoutManager(MakeUnique<GridLayoutManager>());
 ```
 
-> [!NOTE]
-> API 이름과 사용 방식은 변경될 수 있음
-
-이 기능으로 view는 레이아웃 뷰를 child로 붙이지 않고도 레이아웃 역할을 할 수 있게 되므로, 앱이나 컴포넌트를 구현할 때 view의 갯수를 줄이는 데 도움이 됩니다.
+이 기능으로 view는 레이아웃 뷰를 child로 붙이지 않고도 레이아웃 역할을 할 수 있게 되므로, 앱이나 컴포넌트를 구현할 때 **view의 갯수**를 줄이는 데 도움이 됩니다.
 
 <br/>
 
@@ -130,17 +127,22 @@ view.AsInteractive([&](InteractiveTrait trait)
 
 <br/>
 
-이 기능을 사용하여 사용자는 `Button` 이나 `Switch` 컴포넌트를 상속하지 않고도 view가 해당 기능을 수행하도록 만들 수 있으며, view의 내부를 자유롭게 구성할 수 있습니다.
+이 기능을 사용하여 사용자는 `Button` 이나 `Switch` **컴포넌트를 상속하지 않고도 view가 해당 기능을 수행**하도록 만들 수 있으며, view의 내부를 자유롭게 구성할 수 있습니다.
 
 <br/>
 
 ### 4. View Inheritance
 
-Framework 개발자가 새 컴포넌트를 만들거나 앱이 커스텀 컴포넌트를 만드고 싶을때는 `View`의 **handle 클래스**와 **impl 클래스**를 각각 상속합니다.
+Framework 개발자가 새 컴포넌트를 만들거나 앱이 커스텀 컴포넌트를 만드고 싶을때는 `View`의 **handle 클래스**와 **impl 클래스**를 각각 상속해야 합니다.
 
 <img src="./assets/custom-view.png" style="display:block;margin:0 auto"/>
 
-#### (1) Impl 클래스 정의 (`ViewImpl` 상속)
+#### (1) Impl 클래스 정의
+
+`ViewImpl` 을 상속받는 impl 클래스를 정의하고 데이터와 로직을 구현합니다.
+
+<details>
+<summary><ins>code sample</ins></summary>
 
 ```cpp
 // my-view-impl.h
@@ -156,7 +158,14 @@ private:
 };
 ```
 
-#### (2) Handle 클래스 정의 (`View` 상속)
+</details>
+
+#### (2) 핸들 클래스 정의
+
+`View` 를 상속받는 핸들 클래스를 정의합니다.
+
+<details>
+<summary><ins>code sample</ins></summary>
 
 ```cpp
 // my-view.h
@@ -177,7 +186,22 @@ public:
 };
 ```
 
+</details>
+
 #### (3) `New()` 구현
+
+`New()` 메소드를 구현하여 핸들과 impl이 생성 & 연결 될 수 있도록 합니다.
+
+<details>
+<summary><ins>code sample</ins></summary>
+
+```cpp
+// my-view-impl.cpp
+IntrusivePtr<MyViewImpl> MyViewImpl::New()
+{
+  return IntrusivePtr<MyViewImpl>(new MyViewImpl());
+}
+```
 
 ```cpp
 // my-view.cpp
@@ -190,11 +214,14 @@ MyView MyView::New()
 }
 ```
 
-<br/>
+</details>
 
 #### (4) Type Registration
 
-<ins>Register new type with macro</ins>
+새로이 추가된 타입을 등록하여 프로퍼티 시스템이 원활이 동작하도록 합니다.
+
+<details>
+<summary><ins>code sample</ins></summary>
 
 ```cpp
 // my-view.cpp
@@ -213,10 +240,8 @@ DALI_TYPE_REGISTRATION_END()
 } // anonymous namespace
 ```
 
-<ins>Macro Syntax</ins>
-```cpp
-DALI_TYPE_REGISTRATION_BEGIN(/* impType*/, /* baseType */, /* creationMethod*/)
-```
+</details>
+
 
 <br/>
 

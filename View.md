@@ -84,7 +84,7 @@ view.SetAttachment(MY_DATA_ID, Dali::MakeUnique<MyData>());
 MyData* data = view.GetAttachment(MY_DATA_ID);
 ```
 
-If the only purpose is to store data, data attachment is preferred over inheritance.
+If the only purpose is to store data, **data attachment** is preferred over inheritance.
 
 <br/>
 
@@ -100,10 +100,7 @@ Users can make a `View` instance act as a layout by attaching a `LayoutManager` 
 view.AttachLayoutManager(MakeUnique<GridLayoutManager>());
 ```
 
-> [!NOTE]
-> The API name and usage pattern may change.
-
-With this feature, a view can take on a layout role without adding a separate layout view as a child. This can help reduce the number of views when implementing applications or components.
+With this feature, a view can take on a layout role without adding a separate layout view as a child. **This can help reduce the number of views** when implementing applications or components.
 
 <br/>
 
@@ -136,7 +133,12 @@ When framework developers create a new component, or when an application needs a
 
 <img src="./assets/custom-view.png" style="display:block;margin:0 auto"/>
 
-#### (1) Define the Impl Class (inherit from `ViewImpl`)
+#### (1) Define the Impl Class
+
+Define an impl class that inherits from `ViewImpl` and place data and logic.
+
+<details>
+<summary><ins>code sample</ins></summary>
 
 ```cpp
 // my-view-impl.h
@@ -152,7 +154,14 @@ private:
 };
 ```
 
-#### (2) Define the Handle Class (inherit from `View`)
+</details>
+
+#### (2) Define the Handle Class
+
+Define a handle class that inherits from `View`.
+
+<details>
+<summary><ins>code sample</ins></summary>
 
 ```cpp
 // my-view.h
@@ -161,7 +170,7 @@ class MyView : public View
 public:
   static MyView New();
 
-  // DownCast: use the View::DownCast<T, I>() template
+  // DownCast: View::DownCast<T, I>() 템플릿 사용
   static MyView DownCast(BaseHandle handle)
   {
     return View::DownCast<MyView, MyViewImpl>(handle);
@@ -173,24 +182,42 @@ public:
 };
 ```
 
+</details>
+
 #### (3) Implement `New()`
+
+Implement the `New()` method so that the handle and impl can be created and connected.
+
+<details>
+<summary><ins>code sample</ins></summary>
+
+```cpp
+// my-view-impl.cpp
+IntrusivePtr<MyViewImpl> MyViewImpl::New()
+{
+  return IntrusivePtr<MyViewImpl>(new MyViewImpl());
+}
+```
 
 ```cpp
 // my-view.cpp
 MyView MyView::New()
 {
   IntrusivePtr<MyViewImpl> impl = MyViewImpl::New();
-  MyView handle(*impl);   // handle takes ownership of impl
+  MyView handle(*impl);   // handle이 impl의 소유권을 획득
   impl->Initialize();
   return handle;
 }
 ```
 
-<br/>
+</details>
 
 #### (4) Type Registration
 
-<ins>Register new type with macro</ins>
+Register the newly added type so that the property system works properly.
+
+<details>
+<summary><ins>code sample</ins></summary>
 
 ```cpp
 // my-view.cpp
@@ -209,10 +236,7 @@ DALI_TYPE_REGISTRATION_END()
 } // anonymous namespace
 ```
 
-<ins>Macro Syntax</ins>
-```cpp
-DALI_TYPE_REGISTRATION_BEGIN(/* impType*/, /* baseType */, /* creationMethod*/)
-```
+</details>
 
 <br/>
 
