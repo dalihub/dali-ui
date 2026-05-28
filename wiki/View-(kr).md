@@ -53,7 +53,7 @@ View view = View::DownCast(impl.Self());
 
 ## View Extensibility
 
-이 섹션은 `View`에 유저 데이터나 특정 기능을 붙이는 방법, 그리고 `View`를 상속하여 신규 클래스는 정의하는 방법에 대해 설명하고, 사용자가 목적에 따라 적절한 방법을 선택하여 `View`를 확장할 수 있도록 가이드합니다.
+이 섹션은 `View`에 유저 데이터나 특정 기능을 붙이는 방법, 그리고 `View`를 상속하여 신규 클래스를 정의하는 방법에 대해 설명하고, 사용자가 목적에 따라 적절한 방법을 선택하여 `View`를 확장할 수 있도록 가이드합니다.
 
 <br/>
 
@@ -257,7 +257,7 @@ DALI_TYPE_REGISTRATION_END()
 
 ### 5. Inheriting from Classes derived from View
 
-앱이 `ImageView`나 `Label` 등을 상속받으려면 약간의 트릭이 필요합니다. 핸들과 impl 클래스가 모두 제공되는 것은 `View` 뿐이기 때문에, 그 외 ` Label` 과 같은 클래스를 상속하려면 data attachment를 이용한 제한적인 방법을 적용해 볼 수 있습니다. 자세한 방법 및 주의 사항은 [#327](https://github.sec.samsung.net/NUI/dali-ui/pull/327)을 참고하세요.
+앱이 `ImageView`나 `Label` 등을 상속 받으려면 약간의 트릭이 필요합니다. 핸들과 impl 클래스가 모두 제공되는 것은 `View` 뿐이기 때문에, 그 외 ` Label` 과 같은 클래스를 상속하려면 data attachment를 이용한 제한적인 방법을 적용해 볼 수 있습니다. 자세한 방법 및 주의 사항은 [#327](https://github.sec.samsung.net/NUI/dali-ui/pull/327)을 참고하세요.
 
 <br/>
 
