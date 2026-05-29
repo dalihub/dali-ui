@@ -1383,7 +1383,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             dataImpl.mRequestedWidth = width;
             viewImpl.InvalidateMeasure();
             if(width >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
-               !IntegrationView::IsLayout(viewImpl) && viewImpl.GetChildCount() == 0)
+               !IntegrationView::HasLayoutCapability(viewImpl) && viewImpl.GetChildCount() == 0)
             {
               viewImpl.Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
             }
@@ -1403,7 +1403,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             dataImpl.mRequestedHeight = height;
             viewImpl.InvalidateMeasure();
             if(height >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
-               !IntegrationView::IsLayout(viewImpl) && viewImpl.GetChildCount() == 0)
+               !IntegrationView::HasLayoutCapability(viewImpl) && viewImpl.GetChildCount() == 0)
             {
               viewImpl.Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
             }

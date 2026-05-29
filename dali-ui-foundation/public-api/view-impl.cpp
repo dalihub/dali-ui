@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali/devel-api/actors/actor-devel.h>
@@ -49,6 +50,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
+#include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
@@ -521,7 +523,7 @@ void ViewImpl::OnFocusChanged(bool focused)
 
 void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
-  if(IntegrationView::IsLayout(*this) || GetParentLayout() || GetParentView())
+  if(IntegrationView::HasLayoutCapability(*this) || GetParentLayout() || GetParentView())
   {
     return;
   }
@@ -914,9 +916,22 @@ MeasuredSize ViewImpl::Measure(float visualW, float visualH)
   }
 
   // OnMeasure receives and returns visual (scale-applied) sizes, consistent with OnArrange.
-  float        effVisW                  = (effNatW >= 0.f) ? effNatW * s : effNatW;
-  float        effVisH                  = (effNatH >= 0.f) ? effNatH * s : effNatH;
-  MeasuredSize visual                   = OnMeasure(effVisW, effVisH);
+  float        effVisW = (effNatW >= 0.f) ? effNatW * s : effNatW;
+  float        effVisH = (effNatH >= 0.f) ? effNatH * s : effNatH;
+  MeasuredSize visual;
+  if(auto* callback = GetMeasureCallback())
+  {
+    Ui::View view = Ui::View::DownCast(Self());
+    visual        = callback->Invoke(view, effVisW, effVisH);
+  }
+  else if(auto* manager = GetLayoutManager())
+  {
+    visual = DispatchMeasureWithLayoutManager(manager, effVisW, effVisH);
+  }
+  else
+  {
+    visual = OnMeasure(effVisW, effVisH);
+  }
   visual                                = ApplyConstraints(visual);
   mImpl->mMeasuredSize.width            = visual.width;
   mImpl->mMeasuredSize.height           = visual.height;
@@ -1041,9 +1056,21 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
 
 MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
 {
-  MeasuredSize arrangedSize = OnArrange(bounds);
-  mImpl->mArrangedBounds    = bounds;
-  mImpl->mArrangeDirty      = false;
+  MeasuredSize arrangedSize;
+  if(auto* callback = GetArrangeCallback())
+  {
+    arrangedSize = DispatchArrangeWithCallback(callback, bounds);
+  }
+  else if(auto* manager = GetLayoutManager())
+  {
+    arrangedSize = DispatchArrangeWithLayoutManager(manager, bounds);
+  }
+  else
+  {
+    arrangedSize = OnArrange(bounds);
+  }
+  mImpl->mArrangedBounds = bounds;
+  mImpl->mArrangeDirty   = false;
 
   // Ensure standalone children are arranged even when OnArrange (e.g. in
   // leaf views like Label) does not iterate children.
@@ -1530,11 +1557,13 @@ Ui::View ViewImpl::GetParentView() const
 void ViewImpl::SetMeasureCallback(MeasureCallback callback)
 {
   EnsureLayoutCallbacksObject(this)->SetMeasureCallback(std::move(callback));
+  InvalidateMeasure();
 }
 
 void ViewImpl::SetArrangeCallback(ArrangeCallback callback)
 {
   EnsureLayoutCallbacksObject(this)->SetArrangeCallback(std::move(callback));
+  InvalidateArrange();
 }
 
 MeasureCallback* ViewImpl::GetMeasureCallback()
@@ -1547,6 +1576,34 @@ ArrangeCallback* ViewImpl::GetArrangeCallback()
 {
   auto* object = GetLayoutCallbacksObject(this);
   return object ? object->GetArrangeCallback() : nullptr;
+}
+
+void ViewImpl::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
+{
+  DALI_ASSERT_ALWAYS(manager && "AttachLayoutManager requires a non-null LayoutManager.");
+  DALI_ASSERT_ALWAYS(!HasLayoutManager() && "LayoutManager already set. Cannot replace an existing LayoutManager.");
+
+  IntrusivePtr<TraitObject> object(new Internal::LayoutManagerObject(std::move(manager)));
+  IntegrationView::SetTrait(*this, Integration::ReservedTraitId::LAYOUT_MANAGER, object);
+  InvalidateMeasure();
+}
+
+LayoutManager* ViewImpl::GetLayoutManager() const
+{
+  IntrusivePtr<TraitObject> object        = IntegrationView::GetTrait(*this, Integration::ReservedTraitId::LAYOUT_MANAGER);
+  auto*                     managerObject = object ? static_cast<Internal::LayoutManagerObject*>(object.Get()) : nullptr;
+  return managerObject ? managerObject->GetLayoutManager() : nullptr;
+}
+
+bool ViewImpl::HasLayoutManager() const
+{
+  return GetLayoutManager() != nullptr;
+}
+
+bool ViewImpl::HasLayoutCallback() const
+{
+  auto* object = GetLayoutCallbacksObject(const_cast<ViewImpl*>(this));
+  return object && (object->GetMeasureCallback() || object->GetArrangeCallback());
 }
 
 void ViewImpl::SetLayoutTransition(LayoutTransition transition)
@@ -2253,7 +2310,7 @@ View ViewImpl::RequestFocus()
   return OnFocusRequested();
 }
 
-View ViewImpl::OnFocusRequested()
+View ViewImpl::DefaultOnFocusRequested()
 {
   Ui::View self = Ui::View::DownCast(Self());
   if(self.IsFocusable() && self.IsEnabled() && self.IsVisible())
@@ -2261,6 +2318,112 @@ View ViewImpl::OnFocusRequested()
     return self;
   }
   return View();
+}
+
+View ViewImpl::RequestChildFirstFocus()
+{
+  Ui::View self = Ui::View::DownCast(Self());
+
+  if(self.IsDescendantFocusBlocked())
+  {
+    return DefaultOnFocusRequested();
+  }
+
+  const uint32_t childCount = self.GetChildCount();
+  for(uint32_t i = 0; i < childCount; ++i)
+  {
+    View child = self.GetChildAt(i);
+    if(child && child.IsVisible())
+    {
+      View resolved = GetImpl(child).RequestFocus();
+      if(resolved)
+      {
+        return resolved;
+      }
+    }
+  }
+  return DefaultOnFocusRequested();
+}
+
+View ViewImpl::OnFocusRequested()
+{
+  if(IntegrationView::HasLayoutCapability(*this))
+  {
+    return RequestChildFirstFocus();
+  }
+  return DefaultOnFocusRequested();
+}
+
+MeasuredSize ViewImpl::DispatchMeasureWithLayoutManager(LayoutManager* manager, float widthConstraint, float heightConstraint)
+{
+  float s = GetEffectiveScale();
+
+  Extents padding = GetPadding();
+  float   visPadW = static_cast<float>(padding.start + padding.end) * s;
+  float   visPadH = static_cast<float>(padding.top + padding.bottom) * s;
+
+  float requestedWidth  = GetRequestedWidth();
+  float requestedHeight = GetRequestedHeight();
+
+  float requestedVisW = (requestedWidth >= 0.f) ? requestedWidth * s : requestedWidth;
+  float requestedVisH = (requestedHeight >= 0.f) ? requestedHeight * s : requestedHeight;
+  float effectiveVisW = (requestedVisW >= 0.f) ? requestedVisW : widthConstraint;
+  float effectiveVisH = (requestedVisH >= 0.f) ? requestedVisH : heightConstraint;
+  float contentVisW   = std::max(0.0f, effectiveVisW - visPadW);
+  float contentVisH   = std::max(0.0f, effectiveVisH - visPadH);
+
+  MeasuredSize visContent = manager->Measure(this, contentVisW, contentVisH);
+
+  float resultVisW;
+  if(requestedVisW >= 0.f)
+    resultVisW = requestedVisW;
+  else if(requestedWidth == MATCH_PARENT)
+    resultVisW = GetMinimumWidth() * s;
+  else
+    resultVisW = visContent.width + visPadW;
+
+  float resultVisH;
+  if(requestedVisH >= 0.f)
+    resultVisH = requestedVisH;
+  else if(requestedHeight == MATCH_PARENT)
+    resultVisH = GetMinimumHeight() * s;
+  else
+    resultVisH = visContent.height + visPadH;
+
+  return MeasuredSize(resultVisW, resultVisH);
+}
+
+MeasuredSize ViewImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& visualBounds)
+{
+  Actor self = Self();
+  self.SetProperty(Actor::Property::POSITION_X, visualBounds.x);
+  self.SetProperty(Actor::Property::POSITION_Y, visualBounds.y);
+  self.SetProperty(Actor::Property::SIZE_WIDTH, visualBounds.width);
+  self.SetProperty(Actor::Property::SIZE_HEIGHT, visualBounds.height);
+
+  float   s       = GetEffectiveScale();
+  Extents padding = GetPadding();
+
+  LayoutRect visContentBounds;
+  visContentBounds.x      = static_cast<float>(padding.start) * s;
+  visContentBounds.y      = static_cast<float>(padding.top) * s;
+  visContentBounds.width  = visualBounds.width - static_cast<float>(padding.start + padding.end) * s;
+  visContentBounds.height = visualBounds.height - static_cast<float>(padding.top + padding.bottom) * s;
+
+  manager->Arrange(this, visContentBounds);
+
+  return {visualBounds.width, visualBounds.height};
+}
+
+MeasuredSize ViewImpl::DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& visualBounds)
+{
+  Actor self = Self();
+  self.SetProperty(Actor::Property::POSITION_X, visualBounds.x);
+  self.SetProperty(Actor::Property::POSITION_Y, visualBounds.y);
+  self.SetProperty(Actor::Property::SIZE_WIDTH, visualBounds.width);
+  self.SetProperty(Actor::Property::SIZE_HEIGHT, visualBounds.height);
+  Ui::View view = Ui::View::DownCast(self);
+  return callback->Invoke(view, visualBounds);
 }
 
 void ViewImpl::SetAsFocusGroup(bool isFocusGroup)

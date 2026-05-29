@@ -18,21 +18,20 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Integration
-{
 
 /**
  * @brief Implements the flexbox layout algorithm.
  *
- * Passed to LayoutImpl constructor by FlexLayoutImpl.
- * Subclass to customize flex layout behaviour.
+ * Arranges children in a single-direction flow that may wrap onto multiple
+ * lines. Per-child flex-grow, flex-shrink, flex-basis, and align-self are
+ * read from FlexLayoutParams.
  */
 class DALI_UI_API FlexLayoutManager : public LayoutManager
 {
@@ -56,16 +55,11 @@ public:
   bool IsMainAxisReversed() const;
 
   MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) override;
-  MeasuredSize ArrangeChildren(ViewImpl* view, const LayoutRect& bounds) override;
+  MeasuredSize Arrange(ViewImpl* view, const LayoutRect& bounds) override;
 
-protected:
-  FlexDirection mDirection;
-  FlexWrap      mWrap;
-  FlexJustify   mJustifyContent;
-  FlexAlign     mAlignItems;
-  FlexAlign     mAlignContent;
+private:
+  class Impl;
 };
 
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

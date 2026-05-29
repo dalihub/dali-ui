@@ -22,8 +22,8 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/grid-layout-manager.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/public-api/layouts/grid-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/grid-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 

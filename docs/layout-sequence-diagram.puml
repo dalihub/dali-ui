@@ -42,15 +42,16 @@ loop for each layout root
     Root --> LC : mMeasuredSize (cached)
   else measure
     Root -> Root : Subtract margin from constraints
-    Root -> Root : OnMeasure(innerW, innerH)
+    Root -> Root : Dispatch in Measure():\nMeasureCallback -> LayoutManager -> OnMeasure
     activate Root #LightGreen
 
-    alt has LayoutManager
+    alt has MeasureCallback
+      Root -> Root : callback->Invoke(view, w, h)
+    else has LayoutManager
       Root -> LM : Measure(this, widthConstraint, heightConstraint)
       activate LM
-      LM -> LM : GetChildren(view)
-      loop for each child
-        LM -> Child : MeasureChild(child, childW, childH)
+      loop for each child (GetChildAt)
+        LM -> Child : Measure(childW, childH)
         activate Child
         Child -> Child : Measure() [recursive]
         Child --> LM : MeasuredSize
@@ -59,7 +60,7 @@ loop for each layout root
       LM --> Root : content MeasuredSize
       deactivate LM
       Root -> Root : Add padding; apply FILL alignment if needed
-    else no LayoutManager
+    else default (OnMeasure)
       Root -> Root : Compute size from spec\n(fixed / WRAP_CONTENT / MATCH_PARENT)
     end
     Root -> Root : ApplyConstraints(measured)\nStore mMeasuredSize, update cache
@@ -74,17 +75,19 @@ loop for each layout root
   LC -> Root : Arrange(bounds)
   activate Root
 
-  Root -> Root : OnArrange(bounds)
+  Root -> Root : Dispatch in Arrange():\nArrangeCallback -> LayoutManager -> OnArrange
   activate Root #LightYellow
   Root -> Root : Apply alignment, margin;\nset Actor position/size/visibility
 
-  alt has LayoutManager
+  alt has ArrangeCallback
+    Root -> Root : callback->Invoke(view, bounds)
+  else has LayoutManager
     Root -> Root : Compute contentBounds\n(inside padding)
-    Root -> LM : ArrangeChildren(this, contentBounds)
+    Root -> LM : Arrange(this, contentBounds)
     activate LM
     loop for each child
       LM -> LM : Compute child bounds\n(per layout algorithm)
-      LM -> Child : ArrangeChild(child, childBounds)
+      LM -> Child : Arrange(child, childBounds)
       activate Child
       Child -> Child : Arrange() [recursive]
       Child --> LM : arranged size
@@ -92,6 +95,8 @@ loop for each layout root
     end
     LM --> Root : arranged size
     deactivate LM
+  else default (OnArrange)
+    Root -> Root : Arrange standalone / leaf content
   end
   deactivate Root
   Root --> LC : arranged size

@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
@@ -130,6 +131,11 @@ void View::SetLayoutTransition(LayoutTransition transition)
 LayoutTransition View::GetLayoutTransition() const
 {
   return GetImpl(*this).GetLayoutTransition();
+}
+
+void View::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
+{
+  GetImpl(*this).AttachLayoutManager(std::move(manager));
 }
 
 // =============================================================================

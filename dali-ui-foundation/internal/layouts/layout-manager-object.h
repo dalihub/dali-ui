@@ -18,7 +18,7 @@
  */
 
 #include <dali-ui-foundation/public-api/trait-object.h>
-#include <memory>
+#include <dali/public-api/common/unique-ptr.h>
 
 namespace Dali
 {
@@ -37,21 +37,21 @@ namespace Internal
 /**
  * @brief Internal object that holds a LayoutManager.
  *
- * This object is stored in a Layout view trait slot to avoid per-instance
+ * This object is stored in a View trait slot to avoid per-instance
  * storage overhead on View.
  */
 class LayoutManagerObject : public TraitObject
 {
 public:
-  explicit LayoutManagerObject(LayoutManager* layoutManager);
+  explicit LayoutManagerObject(Dali::UniquePtr<LayoutManager> layoutManager);
 
-  LayoutManager* GetLayoutManager() const;
+  LayoutManager* GetLayoutManager();
 
 protected:
   ~LayoutManagerObject() override;
 
 private:
-  std::unique_ptr<LayoutManager> mLayoutManager;
+  Dali::UniquePtr<LayoutManager> mLayoutManager;
 };
 
 } // namespace Internal

@@ -30,7 +30,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
-#include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/public-api/scroll-bar.h>
 
 namespace Dali

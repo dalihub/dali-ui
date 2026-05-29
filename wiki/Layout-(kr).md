@@ -246,34 +246,27 @@ root.SetArrangeCallback(LayoutArrangeCallback::New(&DiagonalLayout::OnArrange));
 
 ## LayoutManager를 이용한 컴포넌트 레이아웃
 
-개발자는 `ViewImpl`의 `OnMeasure` / `OnArrange`를 오버라이드하여 레이아웃을 직접 상속하지 않고 레이아웃 로직을 붙일 수 있습니다.
-이때 `StackLayoutManager`, `GridLayoutManager` 등 integration-api에서 제공하는 레이아웃 매니저 모듈을 활용할 수 있습니다.
+`StackLayoutManager`, `GridLayoutManager` 등 public-api에서 제공하는 레이아웃 매니저 모듈을
+재사용하거나 상속하여 기존 알고리즘 위에 컴포넌트를 만들 수 있습니다.
+컴포넌트는 `View::AttachLayoutManager()`로 매니저를 부착하며, 이후 View가 Measure / Arrange를
+매니저로 자동 디스패치합니다(`MeasureCallback` / `ArrangeCallback`이 설정된 경우 매니저보다 우선합니다).
 
 ```cpp
-// integration-api 레벨
 class MyButtonImpl : public Dali::Ui::Integration::ViewImpl
 {
-public:
-  MyButtonImpl()
-  : ViewImpl()
-  {
-    mLayoutManager = new Dali::Ui::Integration::StackLayoutManager(StackOrientation::VERTICAL, 0.0f); // 기존 매니저 활용
-  }
-
 protected:
-  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override
+  void OnInitialize() override
   {
-    // 필요한 경우 StackLayoutManager의 Measure를 호출하거나
-    // 완전히 커스텀 로직을 작성
-    return mLayoutManager->Measure(this, widthConstraint, heightConstraint);
-  }
-
-  MeasuredSize OnArrange(const LayoutRect& bounds) override
-  {
-    return mLayoutManager->ArrangeChildren(this, bounds);
+    ViewImpl::OnInitialize();
+    // 기존 매니저 재사용; View가 Measure/Arrange를 매니저로 디스패치합니다.
+    AttachLayoutManager(Dali::MakeUnique<Dali::Ui::StackLayoutManager>(StackOrientation::VERTICAL, 0.0f));
   }
 };
 ```
+
+완전히 커스텀 알고리즘을 구현하려면 `Dali::Ui::LayoutManager`를 상속하여 `Measure()` / `Arrange()`를
+오버라이드한 뒤 같은 방식으로 부착합니다
+([custom-layout-manager](https://github.com/dalihub/dali-ui/tree/devel/samples/custom-layout-manager) 샘플 참고).
 
 <br/>
 

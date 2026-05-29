@@ -287,6 +287,17 @@ DALI_UI_API const ChildContainer& GetChildren(const ViewImpl& viewImpl);
  */
 DALI_UI_API bool IsLayout(ViewImpl& viewImpl);
 
+/**
+ * @brief Returns whether this view participates in the layout pass as a
+ *        layout-capable container (Layout subclass, any View with a
+ *        LayoutManager attached, or any View with a MeasureCallback /
+ *        ArrangeCallback set).
+ * @param[in] viewImpl The view implementation to query
+ * @return True if IsLayout(viewImpl) || viewImpl.HasLayoutManager() ||
+ *         viewImpl.HasLayoutCallback()
+ */
+DALI_UI_API bool HasLayoutCapability(ViewImpl& viewImpl);
+
 } // namespace IntegrationView
 } // namespace Ui
 } // namespace Dali

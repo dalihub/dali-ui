@@ -30,14 +30,15 @@
 
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/common/unique-ptr.h>
 #include <cmath>
 #include <limits>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
 
 namespace Dali
 {
@@ -125,7 +126,7 @@ ScrollViewImpl::~ScrollViewImpl()
 void ScrollViewImpl::OnInitialize()
 {
   LayoutImpl::OnInitialize();
-  SetLayoutManager(new ScrollViewLayoutManager());
+  AttachLayoutManager(Dali::MakeUnique<ScrollViewLayoutManager>());
 
   // Enable clipping to bounds for scrollable content
   Self().SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
@@ -1517,7 +1518,7 @@ void ScrollViewImpl::UpdateScrollingProperties()
   mViewportWidth  = Self().GetProperty<float>(Actor::Property::SIZE_WIDTH);
   mViewportHeight = Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT);
 
-  // mScrollableWidth/mScrollableHeight are set by ArrangeChildren via SetScrollableWidth/SetScrollableHeight
+  // mScrollableWidth/mScrollableHeight are set by Arrange via SetScrollableWidth/SetScrollableHeight
   // Do not override them here.
 
   mMinimumStartY = -std::max(0.0f, mScrollableHeight - mViewportHeight);

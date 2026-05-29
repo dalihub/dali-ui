@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/public-api/common/unique-ptr.h>
 
 namespace Dali
 {
@@ -60,7 +61,7 @@ AbsoluteLayoutImpl::~AbsoluteLayoutImpl()
 void AbsoluteLayoutImpl::OnInitialize()
 {
   LayoutImpl::OnInitialize();
-  SetLayoutManager(new AbsoluteLayoutManager());
+  AttachLayoutManager(Dali::MakeUnique<AbsoluteLayoutManager>());
 }
 
 } // namespace Integration

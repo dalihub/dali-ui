@@ -16,11 +16,12 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali/public-api/common/dali-common.h>
 
 namespace Dali
 {
@@ -28,34 +29,34 @@ namespace Ui
 {
 
 LayoutManager::LayoutManager()
+: LayoutManager(new Impl())
 {
+}
+
+LayoutManager::LayoutManager(Impl* impl)
+: mImpl(impl)
+{
+  DALI_ASSERT_ALWAYS(mImpl && "LayoutManager implementation storage must not be null.");
 }
 
 LayoutManager::~LayoutManager()
 {
+  delete mImpl;
 }
 
-MeasuredSize LayoutManager::MeasureChild(ViewImpl* child, float widthConstraint, float heightConstraint)
+uint32_t LayoutManager::GetChildCount(ViewImpl* view) const
 {
-  if(child)
-  {
-    return child->Measure(widthConstraint, heightConstraint);
-  }
-  return MeasuredSize(0.0f, 0.0f);
+  return view ? view->GetChildCount() : 0u;
 }
 
-MeasuredSize LayoutManager::ArrangeChild(ViewImpl* child, const LayoutRect& bounds)
+View LayoutManager::GetChildAt(ViewImpl* view, uint32_t index) const
 {
-  if(child)
-  {
-    return child->Arrange(bounds);
-  }
-  return MeasuredSize(0.0f, 0.0f);
+  return view ? view->GetChildAt(index) : View();
 }
 
-IntegrationView::ChildContainer& LayoutManager::GetChildren(ViewImpl* view)
+bool LayoutManager::IsStandalone(ViewImpl* child) const
 {
-  return IntegrationView::GetChildren(*view);
+  return child && child->GetLayoutMode() == LayoutMode::STANDALONE;
 }
 
 } // namespace Ui

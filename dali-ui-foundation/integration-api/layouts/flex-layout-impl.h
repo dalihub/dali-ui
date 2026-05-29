@@ -21,8 +21,8 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/flex-layout-manager.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 

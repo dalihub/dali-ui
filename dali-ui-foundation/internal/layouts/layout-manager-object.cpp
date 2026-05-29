@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 
 namespace Dali
 {
@@ -28,8 +28,8 @@ namespace Ui
 namespace Internal
 {
 
-LayoutManagerObject::LayoutManagerObject(LayoutManager* layoutManager)
-: mLayoutManager(layoutManager)
+LayoutManagerObject::LayoutManagerObject(Dali::UniquePtr<LayoutManager> layoutManager)
+: mLayoutManager(std::move(layoutManager))
 {
 }
 
@@ -37,9 +37,9 @@ LayoutManagerObject::~LayoutManagerObject()
 {
 }
 
-LayoutManager* LayoutManagerObject::GetLayoutManager() const
+LayoutManager* LayoutManagerObject::GetLayoutManager()
 {
-  return mLayoutManager.get();
+  return mLayoutManager.Get();
 }
 
 } // namespace Internal

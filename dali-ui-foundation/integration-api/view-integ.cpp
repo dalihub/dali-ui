@@ -134,6 +134,11 @@ bool IsLayout(ViewImpl& viewImpl)
   return !!Ui::Layout::DownCast(viewImpl.Self());
 }
 
+bool HasLayoutCapability(ViewImpl& viewImpl)
+{
+  return IsLayout(viewImpl) || viewImpl.HasLayoutManager() || viewImpl.HasLayoutCallback();
+}
+
 } // namespace IntegrationView
 } // namespace Ui
 } // namespace Dali

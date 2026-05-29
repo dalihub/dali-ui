@@ -15,7 +15,7 @@ package "DALi (external)" as dali {
 
 ' ========== Public API (Handles) ==========
 ' Note: Child add/remove uses Actor::Add/Remove. View provides Insert(index, View) and RemoveAllChildren().
-' LayoutManager is stored as a Trait (ReservedTraitId::LAYOUT_MANAGER) and attached in OnInitialize().
+' LayoutManager is stored as a Trait (ReservedTraitId::LAYOUT_MANAGER), attached via View::AttachLayoutManager().
 package "Dali::Ui (Public API)" as public_api {
   class "View" as View <<handle>> {
     + New() : View
@@ -26,6 +26,7 @@ package "Dali::Ui (Public API)" as public_api {
     + GetSize() : MeasuredSize
     + InvalidateMeasure()
     + InvalidateArrange()
+    + AttachLayoutManager(UniquePtr<LayoutManager>)
     __
     - View(Integration::ViewImpl&)
     - View(CustomActor*)
@@ -132,7 +133,7 @@ package "Dali::Ui (Public API)" as public_api {
 
 ' ========== Integration API (Implementations) ==========
 ' ViewImpl: LayoutManager, child API, Contents are integration-only (e.g. ButtonImpl).
-' LayoutImpl inherits child APIs from ViewImpl; attaches LayoutManager as Trait in OnInitialize().
+' ViewImpl provides AttachLayoutManager(); derived layout impls attach their manager in OnInitialize().
 package "Dali::Ui::Integration (Implementation)" as integration {
   class "ViewImpl" as ViewImpl <<impl>> {
     + {static} New() : Ui::View
@@ -141,8 +142,10 @@ package "Dali::Ui::Integration (Implementation)" as integration {
     - mLayoutManager
     - mChildren : ChildContainer
     __
+    + AttachLayoutManager(UniquePtr<LayoutManager>)
     + GetLayoutManager() : LayoutManager*
     + HasLayoutManager() : bool
+    + HasLayoutCallback() : bool
     + Insert(index, Ui::View)
     + RemoveAllChildren()
     + OnChildAdd(Actor&)
@@ -167,7 +170,7 @@ package "Dali::Ui::Integration (Implementation)" as integration {
   class "LayoutImpl" as LayoutImpl <<impl>> {
     + {static} New() : Ui::Layout
     __
-    # LayoutImpl(LayoutManager*)
+    # LayoutImpl()
   }
 
   class "StackLayoutImpl" as StackLayoutImpl <<impl>> {
@@ -235,31 +238,33 @@ package "Dali::Ui::Integration (Implementation)" as integration {
 package "Layout Managers" as managers {
   abstract class "LayoutManager" as LayoutManager {
     + {abstract} Measure(ViewImpl*, widthConstraint, heightConstraint) : MeasuredSize
-    + {abstract} ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+    + {abstract} Arrange(ViewImpl*, bounds) : MeasuredSize
     __
-    # MeasureChild(child, w, h) : MeasuredSize
-    # ArrangeChild(child, bounds) : MeasuredSize
-    # GetChildren(ViewImpl*) : ChildContainer&
+    # GetChildCount(ViewImpl*) : uint32_t
+    # GetChildAt(ViewImpl*, index) : View
+    # IsStandalone(ViewImpl*) : bool
+    __
+    - mImpl : Impl*
   }
 
   class "StackLayoutManager" as StackLayoutManager {
     Measure(ViewImpl*, w, h) : MeasuredSize
-    ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+    Arrange(ViewImpl*, bounds) : MeasuredSize
   }
 
   class "FlexLayoutManager" as FlexLayoutManager {
     Measure(ViewImpl*, w, h) : MeasuredSize
-    ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+    Arrange(ViewImpl*, bounds) : MeasuredSize
   }
 
   class "GridLayoutManager" as GridLayoutManager {
     Measure(ViewImpl*, w, h) : MeasuredSize
-    ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+    Arrange(ViewImpl*, bounds) : MeasuredSize
   }
 
   class "AbsoluteLayoutManager" as AbsoluteLayoutManager {
     Measure(ViewImpl*, w, h) : MeasuredSize
-    ArrangeChildren(ViewImpl*, bounds) : MeasuredSize
+    Arrange(ViewImpl*, bounds) : MeasuredSize
   }
 }
 
@@ -316,7 +321,7 @@ LayoutManager <|-- FlexLayoutManager
 LayoutManager <|-- GridLayoutManager
 LayoutManager <|-- AbsoluteLayoutManager
 
-LayoutImpl ..> LayoutManager : attaches as Trait in OnInitialize
+ViewImpl ..> LayoutManager : owns via Trait (AttachLayoutManager)
 
 ' ========== Layout Params (Handle -> Impl) ==========
 AbsoluteLayoutParams ..> AbsoluteLayoutParamsImpl : uses

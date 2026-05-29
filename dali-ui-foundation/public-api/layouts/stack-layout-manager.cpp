@@ -16,14 +16,15 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/layouts/stack-layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-manager.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>
-#include <functional>
 #include <limits>
+#include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/stack-layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
@@ -31,8 +32,6 @@
 namespace Dali
 {
 namespace Ui
-{
-namespace Integration
 {
 
 namespace
@@ -50,6 +49,11 @@ LayoutAlignment GetChildAlignment(ViewImpl& childImpl)
   return params ? params->GetAlignment() : LayoutAlignment::START;
 }
 
+bool IsChildStandalone(ViewImpl& childImpl)
+{
+  return childImpl.GetLayoutMode() == LayoutMode::STANDALONE;
+}
+
 struct StackMeasureFirstPassResult
 {
   float    mainAxisNonWeight{0.0f};
@@ -58,21 +62,18 @@ struct StackMeasureFirstPassResult
   uint32_t visibleChildCount{0};
 };
 
-StackMeasureFirstPassResult MeasureStackNonWeightChildren(IntegrationView::ChildContainer& children,
-                                                          std::vector<MeasuredSize>&       workingSizes,
-                                                          float contentWidth, float contentHeight,
-                                                          StackOrientation                          orientation,
-                                                          const std::function<ViewImpl&(Ui::View)>& getImpl)
+StackMeasureFirstPassResult MeasureStackNonWeightChildren(std::vector<View>&         children,
+                                                          std::vector<MeasuredSize>& workingSizes,
+                                                          float                      contentWidth,
+                                                          float                      contentHeight,
+                                                          StackOrientation           orientation)
 {
   StackMeasureFirstPassResult result;
-  for(uint32_t i = 0; i < children.Count(); ++i)
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
-    auto&     childData = children[i];
-    ViewImpl& childImpl = getImpl(childData);
+    ViewImpl& childImpl = GetImpl(children[i]);
 
-    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
-    // at the base level; skip them in the layout manager.
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    if(IsChildStandalone(childImpl))
     {
       continue;
     }
@@ -106,21 +107,20 @@ StackMeasureFirstPassResult MeasureStackNonWeightChildren(IntegrationView::Child
   return result;
 }
 
-void MeasureStackWeightChildren(IntegrationView::ChildContainer& children, std::vector<MeasuredSize>& workingSizes,
+void MeasureStackWeightChildren(std::vector<View>& children, std::vector<MeasuredSize>& workingSizes,
                                 float contentMain, float contentWidth,
                                 float contentHeight, float mainAxisNonWeight, float totalWeight,
                                 uint32_t visibleChildCount, float spacing, StackOrientation orientation,
-                                float& maxCrossAxisInOut, const std::function<ViewImpl&(Ui::View)>& getImpl)
+                                float& maxCrossAxisInOut)
 {
   float spacingTotal  = (visibleChildCount > 1) ? spacing * (visibleChildCount - 1) : 0.0f;
   float remainingMain = contentMain - mainAxisNonWeight - spacingTotal;
   remainingMain       = std::max(0.0f, remainingMain);
 
-  for(uint32_t i = 0; i < children.Count(); ++i)
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
-    auto&     childData = children[i];
-    ViewImpl& childImpl = getImpl(childData);
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    ViewImpl& childImpl = GetImpl(children[i]);
+    if(IsChildStandalone(childImpl))
     {
       continue;
     }
@@ -158,10 +158,21 @@ void MeasureStackWeightChildren(IntegrationView::ChildContainer& children, std::
 
 } // namespace
 
+class StackLayoutManager::Impl : public LayoutManager::Impl
+{
+public:
+  Impl(StackOrientation orientation, float spacing)
+  : mOrientation(orientation),
+    mSpacing(spacing)
+  {
+  }
+
+  StackOrientation mOrientation;
+  float            mSpacing;
+};
+
 StackLayoutManager::StackLayoutManager(StackOrientation orientation, float spacing)
-: LayoutManager(),
-  mOrientation(orientation),
-  mSpacing(spacing)
+: LayoutManager(new Impl(orientation, spacing))
 {
 }
 
@@ -171,22 +182,22 @@ StackLayoutManager::~StackLayoutManager()
 
 void StackLayoutManager::SetOrientation(StackOrientation orientation)
 {
-  mOrientation = orientation;
+  GetImplAs<Impl>()->mOrientation = orientation;
 }
 
 StackOrientation StackLayoutManager::GetOrientation() const
 {
-  return mOrientation;
+  return GetImplAs<Impl>()->mOrientation;
 }
 
 void StackLayoutManager::SetSpacing(float spacing)
 {
-  mSpacing = spacing;
+  GetImplAs<Impl>()->mSpacing = spacing;
 }
 
 float StackLayoutManager::GetSpacing() const
 {
-  return mSpacing;
+  return GetImplAs<Impl>()->mSpacing;
 }
 
 MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, float heightConstraint)
@@ -196,28 +207,35 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  float s           = view->GetEffectiveScale();
-  float visSpacing  = mSpacing * s;
-  auto& children    = GetChildren(view);
-  float contentMain = (mOrientation == StackOrientation::VERTICAL) ? heightConstraint : widthConstraint;
+  auto* impl = GetImplAs<Impl>();
 
-  auto getImpl = [](Ui::View v) -> ViewImpl&
-  { return GetImpl(v); };
+  float s           = view->GetEffectiveScale();
+  float visSpacing  = impl->mSpacing * s;
+  float contentMain = (impl->mOrientation == StackOrientation::VERTICAL) ? heightConstraint : widthConstraint;
+
+  // Collect children once and pass to helpers (helpers run twice).
+  const uint32_t    count = GetChildCount(view);
+  std::vector<View> children;
+  children.reserve(count);
+  for(uint32_t i = 0; i < count; ++i)
+  {
+    children.push_back(GetChildAt(view, i));
+  }
 
   // Local working buffer (seed later from child measurements): weight
   // distribution writes allocation values here without persisting on the
   // child, so repeated layout passes do not accumulate.
-  std::vector<MeasuredSize> workingSizes(children.Count());
+  std::vector<MeasuredSize> workingSizes(children.size());
 
   StackMeasureFirstPassResult first = MeasureStackNonWeightChildren(
-    children, workingSizes, widthConstraint, heightConstraint, mOrientation, getImpl);
+    children, workingSizes, widthConstraint, heightConstraint, impl->mOrientation);
 
   float maxCrossAxis = first.maxCrossAxis;
   float mainAxisTotal;
 
   if(first.totalWeight > 0.0f && first.visibleChildCount > 0)
   {
-    float requestedMain  = (mOrientation == StackOrientation::VERTICAL) ? view->GetRequestedHeight() : view->GetRequestedWidth();
+    float requestedMain  = (impl->mOrientation == StackOrientation::VERTICAL) ? view->GetRequestedHeight() : view->GetRequestedWidth();
     bool  isMainAxisWrap = (requestedMain != MATCH_PARENT && requestedMain < 0.0f);
 
     float spacingTotal = (first.visibleChildCount > 1) ? visSpacing * (first.visibleChildCount - 1) : 0.0f;
@@ -227,41 +245,32 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
     float targetMain;
     if(isMainAxisWrap)
     {
-      // WRAP_CONTENT: the target is the larger of the wrapped content and
-      // the view's minimum size (converted to content area by subtracting
-      // padding). The full constraint is NOT used — only the minimum size
-      // can create extra space for weight children.
       Extents padding        = view->GetPadding();
-      float   paddingMain    = (mOrientation == StackOrientation::VERTICAL)
+      float   paddingMain    = (impl->mOrientation == StackOrientation::VERTICAL)
                                  ? static_cast<float>(padding.top + padding.bottom) * s
                                  : static_cast<float>(padding.start + padding.end) * s;
-      float   minMain        = (mOrientation == StackOrientation::VERTICAL) ? view->GetMinimumHeight() : view->GetMinimumWidth();
+      float   minMain        = (impl->mOrientation == StackOrientation::VERTICAL) ? view->GetMinimumHeight() : view->GetMinimumWidth();
       float   minMainContent = std::max(0.0f, minMain * s - paddingMain);
       targetMain             = std::max(wrappedMain, minMainContent);
     }
     else
     {
-      // Fixed or MATCH_PARENT: use the full constraint.
       targetMain = contentMain;
     }
 
     if(targetMain > wrappedMain)
     {
-      // Extra space available — distribute it among weight children.
       MeasureStackWeightChildren(children, workingSizes, targetMain, widthConstraint, heightConstraint,
                                  first.mainAxisNonWeight, first.totalWeight, first.visibleChildCount, visSpacing,
-                                 mOrientation, maxCrossAxis, getImpl);
+                                 impl->mOrientation, maxCrossAxis);
       mainAxisTotal = targetMain;
     }
     else
     {
-      // No extra space: measure weight children at their natural size
-      // and accumulate normally, just like non-weight children.
-      for(uint32_t i = 0; i < children.Count(); ++i)
+      for(uint32_t i = 0; i < children.size(); ++i)
       {
-        auto&     childData = children[i];
-        ViewImpl& childImpl = getImpl(childData);
-        if(IntegrationView::IsLayoutModeStandalone(childImpl))
+        ViewImpl& childImpl = GetImpl(children[i]);
+        if(IsChildStandalone(childImpl))
         {
           continue;
         }
@@ -280,7 +289,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
         MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
         workingSizes[i]                    = childSize;
 
-        if(mOrientation == StackOrientation::VERTICAL)
+        if(impl->mOrientation == StackOrientation::VERTICAL)
         {
           first.mainAxisNonWeight += childSize.height + marginH;
           maxCrossAxis = std::max(maxCrossAxis, childSize.width + marginW);
@@ -304,7 +313,7 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   }
 
   MeasuredSize totalSize(0.0f, 0.0f);
-  if(mOrientation == StackOrientation::VERTICAL)
+  if(impl->mOrientation == StackOrientation::VERTICAL)
   {
     totalSize.width  = maxCrossAxis;
     totalSize.height = mainAxisTotal;
@@ -317,16 +326,25 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   return totalSize;
 }
 
-MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect& bounds)
+MeasuredSize StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
     return MeasuredSize(0.0f, 0.0f);
   }
 
+  auto* impl = GetImplAs<Impl>();
+
   float s          = view->GetEffectiveScale();
-  float visSpacing = mSpacing * s;
-  auto& children   = GetChildren(view);
+  float visSpacing = impl->mSpacing * s;
+
+  const uint32_t    count = GetChildCount(view);
+  std::vector<View> children;
+  children.reserve(count);
+  for(uint32_t i = 0; i < count; ++i)
+  {
+    children.push_back(GetChildAt(view, i));
+  }
 
   float availableWidth  = bounds.width;
   float availableHeight = bounds.height;
@@ -334,10 +352,8 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
   float currentY        = bounds.y;
 
   // Local allocation buffer: seeded from each child's current measured size.
-  // Weight redistribution (below) writes allocation values here without
-  // persisting on the child, so repeated layout passes stay clean.
-  std::vector<MeasuredSize> allocations(children.Count());
-  for(uint32_t i = 0; i < children.Count(); ++i)
+  std::vector<MeasuredSize> allocations(children.size());
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
     allocations[i] = GetImpl(children[i]).GetMeasuredSize();
   }
@@ -348,10 +364,10 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     float    nonWeightMain     = 0.0f;
     uint32_t visibleChildCount = 0;
 
-    for(uint32_t i = 0; i < children.Count(); ++i)
+    for(uint32_t i = 0; i < children.size(); ++i)
     {
       ViewImpl& childImpl = GetImpl(children[i]);
-      if(IntegrationView::IsLayoutModeStandalone(childImpl))
+      if(IsChildStandalone(childImpl))
       {
         continue;
       }
@@ -365,23 +381,23 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       {
         float   childScale = childImpl.GetEffectiveScale();
         Extents margin     = childImpl.GetMargin();
-        float   marginM    = (mOrientation == StackOrientation::VERTICAL) ? static_cast<float>(margin.top + margin.bottom) * childScale
-                                                                          : static_cast<float>(margin.start + margin.end) * childScale;
-        float   mainSize   = (mOrientation == StackOrientation::VERTICAL) ? allocations[i].height : allocations[i].width;
+        float   marginM    = (impl->mOrientation == StackOrientation::VERTICAL) ? static_cast<float>(margin.top + margin.bottom) * childScale
+                                                                                : static_cast<float>(margin.start + margin.end) * childScale;
+        float   mainSize   = (impl->mOrientation == StackOrientation::VERTICAL) ? allocations[i].height : allocations[i].width;
         nonWeightMain += mainSize + marginM;
       }
     }
 
     if(totalWeight > 0.0f)
     {
-      float availableMain = (mOrientation == StackOrientation::VERTICAL) ? availableHeight : availableWidth;
+      float availableMain = (impl->mOrientation == StackOrientation::VERTICAL) ? availableHeight : availableWidth;
       float spacingTotal  = (visibleChildCount > 1) ? visSpacing * (visibleChildCount - 1) : 0.0f;
       float remainingMain = std::max(0.0f, availableMain - nonWeightMain - spacingTotal);
 
-      for(uint32_t i = 0; i < children.Count(); ++i)
+      for(uint32_t i = 0; i < children.size(); ++i)
       {
         ViewImpl& childImpl = GetImpl(children[i]);
-        if(IntegrationView::IsLayoutModeStandalone(childImpl))
+        if(IsChildStandalone(childImpl))
         {
           continue;
         }
@@ -399,7 +415,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
 
         float childWidthConstraint;
         float childHeightConstraint;
-        if(mOrientation == StackOrientation::VERTICAL)
+        if(impl->mOrientation == StackOrientation::VERTICAL)
         {
           childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
           childHeightConstraint = std::max(0.0f, share - marginH);
@@ -412,7 +428,7 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
 
         MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
-        if(mOrientation == StackOrientation::VERTICAL)
+        if(impl->mOrientation == StackOrientation::VERTICAL)
         {
           allocations[i].width  = childSize.width;
           allocations[i].height = std::max(0.0f, share - marginH);
@@ -426,14 +442,11 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     }
   }
 
-  for(uint32_t i = 0; i < children.Count(); ++i)
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
-    auto&     childData = children[i];
-    ViewImpl& childImpl = GetImpl(childData);
+    ViewImpl& childImpl = GetImpl(children[i]);
 
-    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
-    // at the base level; skip them in the layout manager.
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    if(IsChildStandalone(childImpl))
     {
       continue;
     }
@@ -444,24 +457,21 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
     float      marginH    = static_cast<float>(margin.top + margin.bottom) * childScale;
     LayoutRect childBounds;
 
-    if(mOrientation == StackOrientation::VERTICAL)
+    if(impl->mOrientation == StackOrientation::VERTICAL)
     {
       const float crossAvailable = std::max(0.0f, availableWidth - marginW);
-      // MATCH_PARENT on main axis: fill the available main-axis space.
-      float childHeight = allocations[i].height;
+      float       childHeight    = allocations[i].height;
       if(childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
         childHeight = std::max(0.0f, availableHeight - marginH);
       }
       const float slotHeight = childHeight + marginH;
       float       childWidth = allocations[i].width;
-      // MATCH_PARENT on cross axis: fill the available cross-axis space.
       if(childImpl.GetRequestedWidth() == MATCH_PARENT)
       {
         childWidth = crossAvailable;
       }
 
-      // Cross-axis (horizontal) alignment from StackLayoutParams
       LayoutAlignment crossAlign = GetChildAlignment(childImpl);
       float           crossX     = currentX + static_cast<float>(margin.start) * childScale;
       float           finalWidth = childWidth;
@@ -489,33 +499,29 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       childBounds.x      = crossX;
       childBounds.y      = currentY + static_cast<float>(margin.top) * childScale;
 
-      // Re-measure MATCH_PARENT children with their final (scaled) size.
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
         childImpl.Measure(childBounds.width, childBounds.height);
       }
-      ArrangeChild(&childImpl, childBounds);
+      childImpl.Arrange(childBounds);
 
       currentY += slotHeight + visSpacing;
     }
     else
     {
       const float crossAvailable = std::max(0.0f, availableHeight - marginH);
-      // MATCH_PARENT on main axis: fill the available main-axis space.
-      float childWidth = allocations[i].width;
+      float       childWidth     = allocations[i].width;
       if(childImpl.GetRequestedWidth() == MATCH_PARENT)
       {
         childWidth = std::max(0.0f, availableWidth - marginW);
       }
       const float slotWidth   = childWidth + marginW;
       float       childHeight = allocations[i].height;
-      // MATCH_PARENT on cross axis: fill the available cross-axis space.
       if(childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
         childHeight = crossAvailable;
       }
 
-      // Cross-axis (vertical) alignment from StackLayoutParams
       LayoutAlignment crossAlign  = GetChildAlignment(childImpl);
       float           crossY      = currentY + static_cast<float>(margin.top) * childScale;
       float           finalHeight = childHeight;
@@ -543,12 +549,11 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
       childBounds.x      = currentX + static_cast<float>(margin.start) * childScale;
       childBounds.y      = crossY;
 
-      // Re-measure MATCH_PARENT children with their final (scaled) size.
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
         childImpl.Measure(childBounds.width, childBounds.height);
       }
-      ArrangeChild(&childImpl, childBounds);
+      childImpl.Arrange(childBounds);
 
       currentX += slotWidth + visSpacing;
     }
@@ -557,6 +562,5 @@ MeasuredSize StackLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRec
   return MeasuredSize(bounds.width, bounds.height);
 }
 
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

@@ -16,20 +16,19 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/layouts/absolute-layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
 namespace Ui
-{
-namespace Integration
 {
 
 namespace
@@ -55,7 +54,12 @@ AbsoluteLayoutFlags GetChildFlags(Internal::AbsoluteLayoutParamsImpl* params)
 
 } // namespace
 
+class AbsoluteLayoutManager::Impl : public LayoutManager::Impl
+{
+};
+
 AbsoluteLayoutManager::AbsoluteLayoutManager()
+: LayoutManager(new Impl())
 {
 }
 
@@ -70,20 +74,19 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto& children      = GetChildren(view);
-  float contentWidth  = widthConstraint;
-  float contentHeight = heightConstraint;
+  const uint32_t count         = GetChildCount(view);
+  float          contentWidth  = widthConstraint;
+  float          contentHeight = heightConstraint;
 
   float maxRight  = 0.0f;
   float maxBottom = 0.0f;
 
-  for(auto& childData : children)
+  for(uint32_t i = 0; i < count; ++i)
   {
-    ViewImpl& childImpl = GetImpl(childData);
+    View      child     = GetChildAt(view, i);
+    ViewImpl& childImpl = GetImpl(child);
 
-    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
-    // at the base level; skip them in the layout manager.
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    if(IsStandalone(&childImpl))
     {
       continue;
     }
@@ -173,25 +176,23 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
   return MeasuredSize(maxRight, maxBottom);
 }
 
-MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect& bounds)
+MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto& children = GetChildren(view);
+  const uint32_t count           = GetChildCount(view);
+  float          availableWidth  = bounds.width;
+  float          availableHeight = bounds.height;
 
-  float availableWidth  = bounds.width;
-  float availableHeight = bounds.height;
-
-  for(auto& childData : children)
+  for(uint32_t i = 0; i < count; ++i)
   {
-    ViewImpl& childImpl = GetImpl(childData);
+    View      child     = GetChildAt(view, i);
+    ViewImpl& childImpl = GetImpl(child);
 
-    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
-    // at the base level; skip them in the layout manager.
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    if(IsStandalone(&childImpl))
     {
       continue;
     }
@@ -296,12 +297,11 @@ MeasuredSize AbsoluteLayoutManager::ArrangeChildren(ViewImpl* view, const Layout
     {
       childImpl.Measure(w, h);
     }
-    ArrangeChild(&childImpl, childBounds);
+    childImpl.Arrange(childBounds);
   }
 
   return MeasuredSize(bounds.width, bounds.height);
 }
 
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

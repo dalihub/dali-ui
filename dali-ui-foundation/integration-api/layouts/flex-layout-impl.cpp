@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/public-api/common/unique-ptr.h>
 
 namespace Dali
 {
@@ -60,8 +61,8 @@ FlexLayoutImpl::~FlexLayoutImpl()
 void FlexLayoutImpl::OnInitialize()
 {
   LayoutImpl::OnInitialize();
-  SetLayoutManager(
-    new FlexLayoutManager(FlexDirection::ROW, FlexWrap::NO_WRAP, FlexJustify::FLEX_START, FlexAlign::STRETCH, FlexAlign::STRETCH));
+  AttachLayoutManager(Dali::MakeUnique<FlexLayoutManager>(
+    FlexDirection::ROW, FlexWrap::NO_WRAP, FlexJustify::FLEX_START, FlexAlign::STRETCH, FlexAlign::STRETCH));
 }
 
 void FlexLayoutImpl::SetDirection(FlexDirection direction)

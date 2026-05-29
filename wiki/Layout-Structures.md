@@ -702,7 +702,7 @@ view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0
 
 - **Layout inherits View.** All View methods (`SetRequestedWidth`, `SetViewMargin`, `SetViewPadding`, `Add`, `Remove`, etc.) are available on every layout type.
 
-- **One LayoutManager per Layout.** Each layout subclass (StackLayout, FlexLayout, etc.) attaches its LayoutManager during initialization. Custom layouts can subclass `LayoutManager` and attach it via `LayoutImpl::SetLayoutManager()` in `OnInitialize()`.
+- **One LayoutManager per View.** Each layout subclass (StackLayout, FlexLayout, etc.) attaches its LayoutManager during initialization. Custom layouts can subclass `LayoutManager` and attach it to any View via `View::AttachLayoutManager()`.
 
 - **LayoutParams are stored as-is.** `SetLayoutParams()` does not deep-copy the handle. Use `New(other)` (e.g., `GridLayoutParams::New(base)`) to create independent copies when reusing params across multiple Views.
 

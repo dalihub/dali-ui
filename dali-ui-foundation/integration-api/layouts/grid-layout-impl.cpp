@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/public-api/common/unique-ptr.h>
 
 namespace Dali
 {
@@ -60,7 +61,7 @@ GridLayoutImpl::~GridLayoutImpl()
 void GridLayoutImpl::OnInitialize()
 {
   LayoutImpl::OnInitialize();
-  SetLayoutManager(new GridLayoutManager({}, {}, 0.0f, 0.0f));
+  AttachLayoutManager(Dali::MakeUnique<GridLayoutManager>(Dali::Vector<GridLength>{}, Dali::Vector<GridLength>{}, 0.0f, 0.0f));
 }
 
 void GridLayoutImpl::AddRowDefinition(GridLength height)

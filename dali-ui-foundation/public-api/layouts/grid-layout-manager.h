@@ -18,24 +18,24 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-vector.h>
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Integration
-{
 
 /**
  * @brief Implements the grid layout algorithm.
  *
- * Passed to LayoutImpl constructor by GridLayoutImpl.
- * Subclass to customize grid layout behaviour.
+ * Arranges children in a row/column grid described by row/column GridLength
+ * definitions. Per-child row, column, row-span, column-span and alignment
+ * are read from GridLayoutParams.
  */
 class DALI_UI_API GridLayoutManager : public LayoutManager
 {
@@ -54,15 +54,11 @@ public:
   float                           GetColumnSpacing() const;
 
   MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) override;
-  MeasuredSize ArrangeChildren(ViewImpl* view, const LayoutRect& bounds) override;
+  MeasuredSize Arrange(ViewImpl* view, const LayoutRect& bounds) override;
 
-protected:
-  Dali::Vector<GridLength> mRowDefinitions;
-  Dali::Vector<GridLength> mColumnDefinitions;
-  float                    mRowSpacing;
-  float                    mColumnSpacing;
+private:
+  class Impl;
 };
 
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

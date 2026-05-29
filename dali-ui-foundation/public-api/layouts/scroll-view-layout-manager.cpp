@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/layouts/scroll-view-layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>
@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/scroll-bar.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
@@ -33,11 +34,13 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+
+class ScrollViewLayoutManager::Impl : public LayoutManager::Impl
 {
+};
 
 ScrollViewLayoutManager::ScrollViewLayoutManager()
-: LayoutManager()
+: LayoutManager(new Impl())
 {
 }
 
@@ -52,49 +55,34 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto& children = GetChildren(view);
+  const uint32_t count = GetChildCount(view);
 
-  // For ScrollView, we want to allow content to have its natural size
-  // without being constrained by the parent size
   float maxWidth  = 0.0f;
   float maxHeight = 0.0f;
 
-  for(auto& childData : children)
+  for(uint32_t i = 0; i < count; ++i)
   {
-    if(!childData)
+    View child = GetChildAt(view, i);
+    if(!child || !child.GetObjectPtr())
     {
       continue;
     }
 
-    // Check if the view handle is valid
-    if(!childData.GetObjectPtr())
+    ViewImpl& childImpl = GetImpl(child);
+
+    if(IsStandalone(&childImpl))
     {
       continue;
     }
 
-    ViewImpl& childImpl = GetImpl(childData);
-
-    // STANDALONE children (e.g. ScrollBar) are measured by
-    // ViewImpl::MeasureStandaloneChildren; skip them here.
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
-    {
-      continue;
-    }
-
-    // Check if child is using MatchParent for width or height
     bool widthIsMatchParent  = (childImpl.GetRequestedWidth() == MATCH_PARENT);
     bool heightIsMatchParent = (childImpl.GetRequestedHeight() == MATCH_PARENT);
 
-    // For ScrollView, we allow children to have their natural size
-    // unless they explicitly use MatchParent
     float childWidthConstraint  = widthIsMatchParent ? widthConstraint : std::numeric_limits<float>::max();
     float childHeightConstraint = heightIsMatchParent ? heightConstraint : std::numeric_limits<float>::max();
 
-    // Measure the child with appropriate constraints
     MeasuredSize childSize = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
-    // For ScrollView, the measured size represents the content size which can be larger than viewport.
-    // MATCH_PARENT children fill the viewport, so use the constraint as their contribution.
     float effectiveWidth  = widthIsMatchParent ? widthConstraint : childSize.width;
     float effectiveHeight = heightIsMatchParent ? heightConstraint : childSize.height;
     maxWidth              = std::max(maxWidth, effectiveWidth);
@@ -104,51 +92,39 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
   return MeasuredSize(maxWidth, maxHeight);
 }
 
-MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect& bounds)
+MeasuredSize ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  ScrollViewImpl* scrollImpl = dynamic_cast<ScrollViewImpl*>(view);
-  auto&           children   = GetChildren(view);
-  float           s          = view->GetEffectiveScale();
+  Integration::ScrollViewImpl* scrollImpl = dynamic_cast<Integration::ScrollViewImpl*>(view);
+  const uint32_t               count      = GetChildCount(view);
+  float                        s          = view->GetEffectiveScale();
 
-  // In ScrollView, children are arranged at position (0,0) with their measured size
-  // The ScrollView will handle the scrolling/positioning of the content
-  for(auto& childData : children)
+  for(uint32_t i = 0; i < count; ++i)
   {
-    if(!childData)
+    View child = GetChildAt(view, i);
+    if(!child || !child.GetObjectPtr())
     {
       continue;
     }
 
-    // Check if the view handle is valid
-    if(!childData.GetObjectPtr())
+    ViewImpl& childImpl = GetImpl(child);
+
+    if(IsStandalone(&childImpl))
     {
       continue;
     }
 
-    ViewImpl& childImpl = GetImpl(childData);
-
-    // STANDALONE children (e.g. ScrollBar) are arranged by
-    // ViewImpl::ArrangeStandaloneChildren; skip them here so their internal
-    // InvalidateMeasure cycle never re-positions the scroll content.
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
-    {
-      continue;
-    }
-
-    // Positions are stored as natural values; convert to visual coordinates.
     MeasuredSize childMeasured = childImpl.GetMeasuredSize();
     LayoutRect   childBounds;
-    childBounds.x      = childData.GetPositionX() * s;
-    childBounds.y      = childData.GetPositionY() * s;
+    childBounds.x      = child.GetPositionX() * s;
+    childBounds.y      = child.GetPositionY() * s;
     childBounds.width  = childMeasured.width;
     childBounds.height = childMeasured.height;
 
-    // MATCH_PARENT: fill the viewport.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT)
     {
       childBounds.width = bounds.width;
@@ -158,26 +134,21 @@ MeasuredSize ScrollViewLayoutManager::ArrangeChildren(ViewImpl* view, const Layo
       childBounds.height = bounds.height;
     }
 
-    // Re-measure MATCH_PARENT children with their final (scaled) size.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
       childImpl.Measure(childBounds.width, childBounds.height);
     }
-    // Arrange the child
-    ArrangeChild(&childImpl, childBounds);
+    childImpl.Arrange(childBounds);
 
-    // Only update scrollable dimensions from the content child, not from ScrollBar
-    if(scrollImpl != nullptr && childData == scrollImpl->GetContent())
+    if(scrollImpl != nullptr && child == scrollImpl->GetContent())
     {
       scrollImpl->SetScrollableWidth(childBounds.width);
       scrollImpl->SetScrollableHeight(childBounds.height);
     }
   }
 
-  // Return the bounds size, which represents the viewport size
   return MeasuredSize(bounds.width, bounds.height);
 }
 
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

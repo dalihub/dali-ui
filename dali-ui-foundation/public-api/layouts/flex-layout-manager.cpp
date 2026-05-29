@@ -16,22 +16,20 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/layouts/flex-layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout-manager.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>
-#include <functional>
 #include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
 {
 namespace Ui
-{
-namespace Integration
 {
 
 namespace
@@ -61,6 +59,11 @@ float GetFlexBasis(ViewImpl& childImpl)
   return params ? params->GetFlexBasis() : WRAP_CONTENT;
 }
 
+bool IsChildStandalone(ViewImpl& childImpl)
+{
+  return childImpl.GetLayoutMode() == LayoutMode::STANDALONE;
+}
+
 struct FlexLine
 {
   std::vector<uint32_t> childIndices;
@@ -70,26 +73,24 @@ struct FlexLine
   float                 totalFlexShrink{0.0f};
 };
 
-std::vector<FlexLine> BuildFlexLinesForArrange(IntegrationView::ChildContainer& children,
-                                               std::vector<MeasuredSize>& workingSizes, float availableMain,
-                                               bool isMainAxisHorizontal, FlexWrap wrap,
-                                               const std::function<ViewImpl&(Ui::View)>& getImpl)
+std::vector<FlexLine> BuildFlexLinesForArrange(std::vector<View>&         children,
+                                               std::vector<MeasuredSize>& workingSizes,
+                                               float                      availableMain,
+                                               bool                       isMainAxisHorizontal,
+                                               FlexWrap                   wrap)
 {
   std::vector<FlexLine> lines;
   FlexLine              currentLine;
-  for(uint32_t i = 0; i < children.Count(); ++i)
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
-    auto&     childData = children[i];
-    ViewImpl& childImpl = getImpl(childData);
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    ViewImpl& childImpl = GetImpl(children[i]);
+    if(IsChildStandalone(childImpl))
     {
-      // Standalone children are excluded from flex line building.
       continue;
     }
     float   childScale = childImpl.GetEffectiveScale();
     Extents margin     = childImpl.GetMargin();
 
-    // Apply flex-basis: override the main-axis working size when flex-basis is set
     float basis = GetFlexBasis(childImpl);
     if(basis > 0.0f)
     {
@@ -129,25 +130,17 @@ std::vector<FlexLine> BuildFlexLinesForArrange(IntegrationView::ChildContainer& 
   return lines;
 }
 
-/**
- * @brief Applies flex-grow/flex-shrink to adjust child main-axis sizes within a line.
- *
- * When there is free space and totalFlexGrow > 0, distribute extra space.
- * When there is overflow and totalFlexShrink > 0, shrink children proportionally.
- */
-void ApplyFlexGrowShrink(FlexLine& line, IntegrationView::ChildContainer& children,
+void ApplyFlexGrowShrink(FlexLine& line, std::vector<View>& children,
                          std::vector<MeasuredSize>& workingSizes, float availableMain,
-                         bool isMainAxisHorizontal, const std::function<ViewImpl&(Ui::View)>& getImpl)
+                         bool isMainAxisHorizontal)
 {
   float freeSpace = availableMain - line.mainSize;
 
   if(freeSpace > 0.0f && line.totalFlexGrow > 0.0f)
   {
-    // Distribute extra space proportional to flex-grow
     for(uint32_t idx : line.childIndices)
     {
-      auto&     childData = children[idx];
-      ViewImpl& childImpl = getImpl(childData);
+      ViewImpl& childImpl = GetImpl(children[idx]);
       float     grow      = GetFlexGrow(childImpl);
       if(grow > 0.0f)
       {
@@ -166,12 +159,10 @@ void ApplyFlexGrowShrink(FlexLine& line, IntegrationView::ChildContainer& childr
   }
   else if(freeSpace < 0.0f && line.totalFlexShrink > 0.0f)
   {
-    // Shrink proportional to flex-shrink * child base size
     float totalWeightedShrink = 0.0f;
     for(uint32_t idx : line.childIndices)
     {
-      auto&     childData     = children[idx];
-      ViewImpl& childImpl     = getImpl(childData);
+      ViewImpl& childImpl     = GetImpl(children[idx]);
       float     childMainSize = isMainAxisHorizontal ? workingSizes[idx].width : workingSizes[idx].height;
       float     shrink        = GetFlexShrink(childImpl);
       totalWeightedShrink += shrink * childMainSize;
@@ -181,8 +172,7 @@ void ApplyFlexGrowShrink(FlexLine& line, IntegrationView::ChildContainer& childr
       float overflow = -freeSpace;
       for(uint32_t idx : line.childIndices)
       {
-        auto&     childData     = children[idx];
-        ViewImpl& childImpl     = getImpl(childData);
+        ViewImpl& childImpl     = GetImpl(children[idx]);
         float     childMainSize = isMainAxisHorizontal ? workingSizes[idx].width : workingSizes[idx].height;
         float     shrink        = GetFlexShrink(childImpl);
         float     reduction     = (shrink * childMainSize / totalWeightedShrink) * overflow;
@@ -237,16 +227,14 @@ FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, s
   return out;
 }
 
-void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& children,
+void ArrangeOneFlexLine(FlexLine& line, std::vector<View>& children,
                         std::vector<MeasuredSize>& workingSizes, const LayoutRect& bounds,
                         float contentWidth, float contentHeight, float& crossOffsetInOut, float& mainOffsetInOut,
-                        float spacing, FlexAlign alignItems, bool isMainAxisHorizontal, bool isMainAxisReversed,
-                        const std::function<ViewImpl&(Ui::View)>& getImpl)
+                        float spacing, FlexAlign alignItems, bool isMainAxisHorizontal, bool isMainAxisReversed)
 {
   for(uint32_t idx : line.childIndices)
   {
-    auto&     childData  = children[idx];
-    ViewImpl& childImpl  = getImpl(childData);
+    ViewImpl& childImpl  = GetImpl(children[idx]);
     float     childScale = childImpl.GetEffectiveScale();
     Extents   margin     = childImpl.GetMargin();
 
@@ -257,7 +245,6 @@ void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& childre
     float marginCross    = isMainAxisHorizontal ? static_cast<float>(margin.top + margin.bottom) * childScale
                                                 : static_cast<float>(margin.start + margin.end) * childScale;
 
-    // MATCH_PARENT on cross axis: fill the line's cross-axis space.
     bool crossIsMatchParent = isMainAxisHorizontal ? (childImpl.GetRequestedHeight() == MATCH_PARENT)
                                                    : (childImpl.GetRequestedWidth() == MATCH_PARENT);
     if(crossIsMatchParent)
@@ -265,7 +252,6 @@ void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& childre
       childCrossSize = line.crossSize - marginCross;
     }
 
-    // MATCH_PARENT on main axis: fill the available main-axis space.
     bool mainIsMatchParent = isMainAxisHorizontal ? (childImpl.GetRequestedWidth() == MATCH_PARENT)
                                                   : (childImpl.GetRequestedHeight() == MATCH_PARENT);
     if(mainIsMatchParent)
@@ -274,7 +260,6 @@ void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& childre
       childMainSize   = std::max(0.0f, availMain - marginMain);
     }
 
-    // Use align-self if set, otherwise fall back to align-items
     FlexAlign effectiveAlign = GetAlignSelf(childImpl);
     if(effectiveAlign == FlexAlign::AUTO)
     {
@@ -343,7 +328,6 @@ void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& childre
     childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end) * childScale);
     childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom) * childScale);
 
-    // Re-measure MATCH_PARENT children with their final (scaled) size.
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
       childImpl.Measure(childBounds.width, childBounds.height);
@@ -355,13 +339,28 @@ void ArrangeOneFlexLine(FlexLine& line, IntegrationView::ChildContainer& childre
 
 } // namespace
 
+class FlexLayoutManager::Impl : public LayoutManager::Impl
+{
+public:
+  Impl(FlexDirection direction, FlexWrap wrap, FlexJustify justify, FlexAlign alignItems, FlexAlign alignContent)
+  : mDirection(direction),
+    mWrap(wrap),
+    mJustifyContent(justify),
+    mAlignItems(alignItems),
+    mAlignContent(alignContent)
+  {
+  }
+
+  FlexDirection mDirection;
+  FlexWrap      mWrap;
+  FlexJustify   mJustifyContent;
+  FlexAlign     mAlignItems;
+  FlexAlign     mAlignContent;
+};
+
 FlexLayoutManager::FlexLayoutManager(FlexDirection direction, FlexWrap wrap, FlexJustify justify, FlexAlign alignItems,
                                      FlexAlign alignContent)
-: mDirection(direction),
-  mWrap(wrap),
-  mJustifyContent(justify),
-  mAlignItems(alignItems),
-  mAlignContent(alignContent)
+: LayoutManager(new Impl(direction, wrap, justify, alignItems, alignContent))
 {
 }
 
@@ -371,62 +370,64 @@ FlexLayoutManager::~FlexLayoutManager()
 
 void FlexLayoutManager::SetDirection(FlexDirection direction)
 {
-  mDirection = direction;
+  GetImplAs<Impl>()->mDirection = direction;
 }
 
 FlexDirection FlexLayoutManager::GetDirection() const
 {
-  return mDirection;
+  return GetImplAs<Impl>()->mDirection;
 }
 
 void FlexLayoutManager::SetWrap(FlexWrap wrap)
 {
-  mWrap = wrap;
+  GetImplAs<Impl>()->mWrap = wrap;
 }
 
 FlexWrap FlexLayoutManager::GetWrap() const
 {
-  return mWrap;
+  return GetImplAs<Impl>()->mWrap;
 }
 
 void FlexLayoutManager::SetJustifyContent(FlexJustify justify)
 {
-  mJustifyContent = justify;
+  GetImplAs<Impl>()->mJustifyContent = justify;
 }
 
 FlexJustify FlexLayoutManager::GetJustifyContent() const
 {
-  return mJustifyContent;
+  return GetImplAs<Impl>()->mJustifyContent;
 }
 
 void FlexLayoutManager::SetAlignItems(FlexAlign align)
 {
-  mAlignItems = align;
+  GetImplAs<Impl>()->mAlignItems = align;
 }
 
 FlexAlign FlexLayoutManager::GetAlignItems() const
 {
-  return mAlignItems;
+  return GetImplAs<Impl>()->mAlignItems;
 }
 
 void FlexLayoutManager::SetAlignContent(FlexAlign align)
 {
-  mAlignContent = align;
+  GetImplAs<Impl>()->mAlignContent = align;
 }
 
 FlexAlign FlexLayoutManager::GetAlignContent() const
 {
-  return mAlignContent;
+  return GetImplAs<Impl>()->mAlignContent;
 }
 
 bool FlexLayoutManager::IsMainAxisHorizontal() const
 {
-  return mDirection == FlexDirection::ROW || mDirection == FlexDirection::ROW_REVERSE;
+  const FlexDirection direction = GetImplAs<Impl>()->mDirection;
+  return direction == FlexDirection::ROW || direction == FlexDirection::ROW_REVERSE;
 }
 
 bool FlexLayoutManager::IsMainAxisReversed() const
 {
-  return mDirection == FlexDirection::ROW_REVERSE || mDirection == FlexDirection::COLUMN_REVERSE;
+  const FlexDirection direction = GetImplAs<Impl>()->mDirection;
+  return direction == FlexDirection::ROW_REVERSE || direction == FlexDirection::COLUMN_REVERSE;
 }
 
 MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, float heightConstraint)
@@ -436,20 +437,26 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto& children      = GetChildren(view);
+  auto* impl = GetImplAs<Impl>();
+
+  const uint32_t    childCount = GetChildCount(view);
+  std::vector<View> children;
+  children.reserve(childCount);
+  for(uint32_t i = 0; i < childCount; ++i)
+  {
+    children.push_back(GetChildAt(view, i));
+  }
+
   float availableMain = IsMainAxisHorizontal() ? widthConstraint : heightConstraint;
 
   std::vector<FlexLine> lines;
   FlexLine              currentLine;
 
-  for(uint32_t i = 0; i < children.Count(); ++i)
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
-    auto&     childData = children[i];
-    ViewImpl& childImpl = GetImpl(childData);
+    ViewImpl& childImpl = GetImpl(children[i]);
 
-    // Standalone children are measured/arranged by ViewImpl::Measure/Arrange
-    // at the base level; skip them in the layout manager.
-    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    if(IsChildStandalone(childImpl))
     {
       continue;
     }
@@ -462,9 +469,6 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     float        childHeightConstraint = std::max(0.0f, heightConstraint - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
-    // Apply flex-basis: override the main-axis size when flex-basis is set.
-    // We keep the adjustment local (not persisted on the child) so repeated
-    // layout passes do not accumulate.
     MeasuredSize workingSize = childSize;
     float        basis       = GetFlexBasis(childImpl);
     if(basis > 0.0f)
@@ -484,7 +488,7 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     float childCrossSize = IsMainAxisHorizontal() ? workingSize.height + marginH
                                                   : workingSize.width + marginW;
 
-    bool shouldWrap = (mWrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
+    bool shouldWrap = (impl->mWrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
                       (currentLine.mainSize + childMainSize > availableMain);
 
     if(shouldWrap)
@@ -527,49 +531,50 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   return result;
 }
 
-MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect& bounds)
+MeasuredSize FlexLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  auto& children      = GetChildren(view);
+  auto* impl = GetImplAs<Impl>();
+
+  const uint32_t    childCount = GetChildCount(view);
+  std::vector<View> children;
+  children.reserve(childCount);
+  for(uint32_t i = 0; i < childCount; ++i)
+  {
+    children.push_back(GetChildAt(view, i));
+  }
+
   float contentWidth  = bounds.width;
   float contentHeight = bounds.height;
   float availableMain = IsMainAxisHorizontal() ? contentWidth : contentHeight;
-  auto  getImpl       = [](Ui::View v) -> ViewImpl&
-  { return GetImpl(v); };
 
   // Local working buffer: seeded from each child's current measured size.
-  // BuildFlexLinesForArrange / ApplyFlexGrowShrink / ArrangeOneFlexLine mutate
-  // this buffer (flex-basis, grow, shrink) without persisting on the child,
-  // so repeated layout passes do not accumulate adjustments.
-  std::vector<MeasuredSize> workingSizes(children.Count());
-  for(uint32_t i = 0; i < children.Count(); ++i)
+  std::vector<MeasuredSize> workingSizes(children.size());
+  for(uint32_t i = 0; i < children.size(); ++i)
   {
     workingSizes[i] = GetImpl(children[i]).GetMeasuredSize();
   }
 
   std::vector<FlexLine> lines =
-    BuildFlexLinesForArrange(children, workingSizes, availableMain, IsMainAxisHorizontal(), mWrap, getImpl);
+    BuildFlexLinesForArrange(children, workingSizes, availableMain, IsMainAxisHorizontal(), impl->mWrap);
 
-  // Apply flex-grow/flex-shrink to adjust child sizes within each line
   for(auto& line : lines)
   {
-    ApplyFlexGrowShrink(line, children, workingSizes, availableMain, IsMainAxisHorizontal(), getImpl);
+    ApplyFlexGrowShrink(line, children, workingSizes, availableMain, IsMainAxisHorizontal());
   }
 
-  if(mWrap == FlexWrap::WRAP_REVERSE)
+  if(impl->mWrap == FlexWrap::WRAP_REVERSE)
   {
     std::reverse(lines.begin(), lines.end());
   }
 
   float availableCross = IsMainAxisHorizontal() ? contentHeight : contentWidth;
 
-  // For NO_WRAP, the single line fills the entire available cross-axis space.
-  // This matches CSS flexbox: a single flex line stretches to the container's cross size.
-  if(mWrap == FlexWrap::NO_WRAP && lines.size() == 1)
+  if(impl->mWrap == FlexWrap::NO_WRAP && lines.size() == 1)
   {
     lines[0].crossSize = std::max(lines[0].crossSize, availableCross);
   }
@@ -583,10 +588,9 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
 
   float crossOffset = 0.0f;
 
-  // Apply align-content when wrapping is enabled
-  if(mWrap != FlexWrap::NO_WRAP && !lines.empty())
+  if(impl->mWrap != FlexWrap::NO_WRAP && !lines.empty())
   {
-    switch(mAlignContent)
+    switch(impl->mAlignContent)
     {
       case FlexAlign::FLEX_END:
         crossOffset = freeCross;
@@ -614,7 +618,7 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
   for(auto& line : lines)
   {
     float              freeSpace  = availableMain - line.mainSize;
-    FlexJustifyOffsets justify    = GetFlexJustifyOffsets(freeSpace, mJustifyContent, line.childIndices.size());
+    FlexJustifyOffsets justify    = GetFlexJustifyOffsets(freeSpace, impl->mJustifyContent, line.childIndices.size());
     float              mainOffset = justify.mainOffset;
     if(IsMainAxisReversed())
     {
@@ -622,14 +626,11 @@ MeasuredSize FlexLayoutManager::ArrangeChildren(ViewImpl* view, const LayoutRect
       mainOffset        = contentMain - justify.mainOffset;
     }
     ArrangeOneFlexLine(line, children, workingSizes, bounds, contentWidth, contentHeight, crossOffset, mainOffset,
-                       justify.spacing, mAlignItems, IsMainAxisHorizontal(), IsMainAxisReversed(), getImpl);
+                       justify.spacing, impl->mAlignItems, IsMainAxisHorizontal(), IsMainAxisReversed());
   }
-
-  // No restore needed: workingSizes is function-scoped local state.
 
   return MeasuredSize(bounds.width, bounds.height);
 }
 
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

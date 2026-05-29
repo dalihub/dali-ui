@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/public-api/common/unique-ptr.h>
 
 namespace Dali
 {
@@ -61,7 +62,7 @@ StackLayoutImpl::~StackLayoutImpl()
 void StackLayoutImpl::OnInitialize()
 {
   LayoutImpl::OnInitialize();
-  SetLayoutManager(new StackLayoutManager(mInitOrientation, 0.0f));
+  AttachLayoutManager(Dali::MakeUnique<StackLayoutManager>(mInitOrientation, 0.0f));
 }
 
 void StackLayoutImpl::SetOrientation(StackOrientation orientation)

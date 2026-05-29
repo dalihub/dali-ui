@@ -1,3 +1,5 @@
+#pragma once
+
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -15,48 +17,26 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/object/type-registry-helper.h>
-#include <dali/devel-api/object/type-registry.h>
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+
+/**
+ * @brief Polymorphic base for a LayoutManager's implementation storage.
+ *
+ * A single instance is owned by LayoutManager (base-owned mImpl) and deleted
+ * through this virtual destructor, so each concrete manager can subclass it to
+ * hold its own state without changing the manager's instance size.
+ */
+class LayoutManager::Impl
 {
+public:
+  virtual ~Impl() = default;
+};
 
-namespace
-{
-
-BaseHandle Create()
-{
-  return Layout::New();
-}
-
-// Type Registration
-DALI_TYPE_REGISTRATION_BEGIN(Ui::Integration::LayoutImpl, Ui::ViewImpl, Create)
-DALI_TYPE_REGISTRATION_END()
-
-} // namespace
-
-LayoutImplPtr LayoutImpl::New()
-{
-  return LayoutImplPtr(new LayoutImpl());
-}
-
-LayoutImpl::LayoutImpl()
-: ViewImpl()
-{
-}
-
-LayoutImpl::~LayoutImpl()
-{
-}
-
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

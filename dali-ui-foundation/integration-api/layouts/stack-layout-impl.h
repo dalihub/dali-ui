@@ -22,8 +22,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
-#include <dali-ui-foundation/integration-api/layouts/stack-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
 namespace Dali

@@ -25,14 +25,6 @@ namespace Dali
 {
 namespace Ui
 {
-
-class LayoutManager;
-
-namespace Internal
-{
-class LayoutManagerObject;
-} // namespace Internal
-
 namespace Integration
 {
 
@@ -40,13 +32,16 @@ class LayoutImpl;
 using LayoutImplPtr = IntrusivePtr<LayoutImpl>;
 
 /**
- * @brief This is the internal implementation class for Layout.
+ * @brief Implementation class for the Layout handle.
  *
- * Layout extends View with a LayoutManager that defines the layout algorithm.
- * The LayoutManager is stored in a trait slot (ReservedTraitId::LAYOUT_MANAGER),
- * so there is no per-instance member variable overhead.
+ * LayoutImpl is the base implementation for layout containers. It does not
+ * implement any layout algorithm by itself; layout behaviour is supplied by
+ * a LayoutManager attached via View::AttachLayoutManager, or by
+ * MeasureCallback / ArrangeCallback set on the View.
  *
- * @see LayoutManager for the layout algorithm interface
+ * Layout is preserved as a semantic type for "container view" so that
+ * features such as focus child-first and container-only extensions can
+ * remain distinct from plain leaf Views.
  */
 class DALI_UI_API LayoutImpl : public ViewImpl
 {
@@ -58,41 +53,6 @@ public:
    */
   static LayoutImplPtr New();
 
-public: // LayoutManager API
-  /**
-   * @brief Gets the layout manager from the LayoutManager object.
-   *
-   * @return Pointer to the layout manager, or nullptr if not set
-   */
-  LayoutManager* GetLayoutManager() const;
-
-  /**
-   * @brief Checks if this layout has a layout manager.
-   *
-   * @return True if a layout manager is set
-   */
-  bool HasLayoutManager() const;
-
-protected: // From ViewImpl
-  /**
-   * @copydoc ViewImpl::OnMeasure
-   */
-  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
-
-  /**
-   * @copydoc ViewImpl::OnArrange
-   */
-  MeasuredSize OnArrange(const LayoutRect& bounds) override;
-
-  /**
-   * @copydoc ViewImpl::OnFocusRequested
-   *
-   * Iterates visible children calling RequestFocus() on each.
-   * Returns the first child that accepts focus. If no child accepts,
-   * falls back to ViewImpl::OnFocusRequested() (self).
-   */
-  View OnFocusRequested() override;
-
 protected:
   /**
    * A reference counted object may only be deleted by calling Unreference()
@@ -103,16 +63,6 @@ protected:
    * @brief LayoutImpl constructor.
    */
   LayoutImpl();
-
-  /**
-   * @brief Stores a LayoutManager object on this Layout.
-   *
-   * Must be called in OnInitialize() of derived classes, not in constructors
-   * (Self() is not available during construction).
-   *
-   * @param[in] layoutManager The layout manager (ownership transferred)
-   */
-  void SetLayoutManager(LayoutManager* layoutManager);
 
 private:
   // Not copyable or movable

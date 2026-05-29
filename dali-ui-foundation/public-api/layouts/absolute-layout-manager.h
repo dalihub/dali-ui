@@ -18,43 +18,32 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/layouts/layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Integration
-{
 
 /**
- * @brief Implements the scroll view layout algorithm.
+ * @brief Implements the absolute positioning layout algorithm.
  *
- * ScrollViewLayoutManager allows content to have its natural size without
- * being constrained by the parent size, except when the child uses MatchParent
- * in which case the ScrollView's size is used as constraint.
- *
- * This layout manager is designed for ScrollView to enable scrolling of content
- * that can be larger than the viewport.
+ * AbsoluteLayoutManager arranges each child at an explicit position and
+ * size described by its AbsoluteLayoutParams.
  */
-class DALI_UI_API ScrollViewLayoutManager : public LayoutManager
+class DALI_UI_API AbsoluteLayoutManager : public LayoutManager
 {
 public:
-  /**
-   * @brief Creates a new ScrollViewLayoutManager.
-   */
-  ScrollViewLayoutManager();
-
-  /**
-   * @brief Virtual destructor.
-   */
-  ~ScrollViewLayoutManager() override;
+  AbsoluteLayoutManager();
+  ~AbsoluteLayoutManager() override;
 
   MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) override;
-  MeasuredSize ArrangeChildren(ViewImpl* view, const LayoutRect& bounds) override;
+  MeasuredSize Arrange(ViewImpl* view, const LayoutRect& bounds) override;
+
+private:
+  class Impl;
 };
 
-} // namespace Integration
 } // namespace Ui
 } // namespace Dali

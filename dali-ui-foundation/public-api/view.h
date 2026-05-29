@@ -21,6 +21,7 @@
 #include <dali/public-api/actors/custom-actor.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/object/base-handle.h>
 #include <functional>
 #include <initializer_list>
@@ -50,6 +51,7 @@ namespace Ui
 {
 
 // Forward declarations
+class LayoutManager;
 class LayoutTransition;
 class RenderEffect;
 class UiColor;
@@ -287,6 +289,23 @@ public: // Measure / Arrange API
    * @return The attached LayoutTransition handle
    */
   LayoutTransition GetLayoutTransition() const;
+
+  /**
+   * @brief Attaches a LayoutManager to this View.
+   *
+   * After attach, the View's layout pass dispatches to LayoutManager::Measure
+   * and LayoutManager::Arrange unless a MeasureCallback / ArrangeCallback is
+   * also set (which take priority over the manager).
+   *
+   * Only one LayoutManager may be attached for the lifetime of a View. Passing
+   * a null UniquePtr asserts. Attaching when a LayoutManager is already
+   * present asserts. Late attach (after children have been added or the View
+   * has been parented) is permitted; the next Measure pass picks up the
+   * change because attach calls InvalidateMeasure internally.
+   *
+   * @param[in] manager The LayoutManager to attach (ownership transferred)
+   */
+  void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
 
 public: // Properties
   // @CHAIN_START(View)

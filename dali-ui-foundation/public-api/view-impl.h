@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/common/extents.h>
+#include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/events/long-press-gesture.h>
 #include <dali/public-api/events/pan-gesture.h>
 #include <dali/public-api/events/pinch-gesture.h>
@@ -59,6 +60,7 @@ namespace Ui
 
 // Forward declarations
 class Layout;
+class LayoutManager;
 class LayoutTransition;
 class ViewAccessible;
 
@@ -741,6 +743,32 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void SetArrangeCallback(ArrangeCallback callback);
 
+  // Layout Manager
+
+  /**
+   * @copydoc Ui::View::AttachLayoutManager()
+   */
+  void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
+
+  /**
+   * @brief Returns whether this view has a LayoutManager attached.
+   *
+   * @return True if a LayoutManager is attached
+   */
+  bool HasLayoutManager() const;
+
+  /**
+   * @brief Returns whether this view has a MeasureCallback or
+   *        ArrangeCallback set.
+   *
+   * Used by HasLayoutCapability to recognize callback-driven custom
+   * layout views so that legacy relayout and child-first focus behave
+   * consistently with Layout subclasses and LayoutManager attachments.
+   *
+   * @return True if either callback is set
+   */
+  bool HasLayoutCallback() const;
+
   /**
    * @copydoc Ui::View::SetLayoutTransition()
    */
@@ -996,8 +1024,10 @@ protected:
   /**
    * @brief Called when focus is requested on this view via RequestFocus().
    *
-   * The default implementation returns Self() if this view is focusable, enabled, and visible.
-   * Layout views should override this to delegate focus to a child (see LayoutImpl).
+   * For layout-capable views (a Layout, or any View with a LayoutManager attached
+   * or a Measure / Arrange callback set) the default implementation delegates focus
+   * to the first focusable child, falling back to Self(). For all other views it
+   * returns Self() if this view is focusable, enabled, and visible.
    *
    * @return The view that should receive focus, or an empty handle if focus cannot be accepted
    */
@@ -1184,6 +1214,28 @@ protected:
    */
   ArrangeCallback* GetArrangeCallback();
 
+  /**
+   * @brief Gets the LayoutManager, if attached.
+   *
+   * Returned pointer is non-owning. Ownership remains with the View's trait.
+   *
+   * @return Pointer to the LayoutManager, or nullptr if not attached
+   */
+  LayoutManager* GetLayoutManager() const;
+
+  /**
+   * @brief Resolves focus by iterating visible children, with self fallback.
+   *
+   * Used by OnFocusRequested for views that have layout capability (Layout
+   * subclasses or any View with a LayoutManager attached).
+   */
+  View RequestChildFirstFocus();
+
+  /**
+   * @brief Returns self if focusable, enabled and visible; otherwise empty.
+   */
+  View DefaultOnFocusRequested();
+
   // ============================================================
   // private
   // ============================================================
@@ -1201,6 +1253,11 @@ private:
   void                    ArrangeStandaloneChildren(const LayoutRect& bounds);
   void                    ApplyLayoutDirection(float parentWidth);
   float                   ComputeEffectiveScale() const;
+  MeasuredSize            DispatchMeasureWithLayoutManager(LayoutManager* manager,
+                                                           float          widthConstraint,
+                                                           float          heightConstraint);
+  MeasuredSize            DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& bounds);
+  MeasuredSize            DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& bounds);
 
 public:
   /**

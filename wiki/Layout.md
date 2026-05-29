@@ -250,33 +250,28 @@ Sample: [customlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/cus
 
 ## Component Layouting by using LayoutManager
 
-Developers can override `OnMeasure` / `OnArrange` in `ViewImpl` to define a new component without inheriting layout directly.
 The predefined layout manager modules (`StackLayoutManager`, `GridLayoutManager`, etc.) available in
-the integration-api can be composed or subclassed to build on existing algorithms.
+the public-api can be reused or subclassed to build a component on top of an existing algorithm.
+A component attaches a manager via `View::AttachLayoutManager()`; the View then dispatches
+Measure / Arrange to the manager automatically (a `MeasureCallback` / `ArrangeCallback`, if set,
+takes priority over the manager).
 
 ```cpp
 class MyButtonImpl : public Dali::Ui::Integration::ViewImpl
 {
-public:
-  MyButtonImpl()
-  : ViewImpl()
-  {
-    mLayoutManager = new Dali::Ui::Integration::StackLayoutManager(StackOrientation::VERTICAL, 0.0f); // reuse existing manager
-  }
-
 protected:
-  MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override
+  void OnInitialize() override
   {
-    // Delegate to StackLayoutManager, or write fully custom logic
-    return mLayoutManager->Measure(this, widthConstraint, heightConstraint);
-  }
-
-  MeasuredSize OnArrange(const LayoutRect& bounds) override
-  {
-    return mLayoutManager->ArrangeChildren(this, bounds);
+    ViewImpl::OnInitialize();
+    // Reuse an existing manager; the View dispatches Measure/Arrange to it.
+    AttachLayoutManager(Dali::MakeUnique<Dali::Ui::StackLayoutManager>(StackOrientation::VERTICAL, 0.0f));
   }
 };
 ```
+
+To implement a fully custom algorithm, subclass `Dali::Ui::LayoutManager` and override
+`Measure()` / `Arrange()`, then attach it the same way
+(see the [custom-layout-manager](https://github.com/dalihub/dali-ui/tree/devel/samples/custom-layout-manager) sample).
 
 <br/>
 

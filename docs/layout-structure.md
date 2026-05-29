@@ -16,6 +16,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Layout properties: `SetRequestedWidth` / `SetRequestedHeight`, `SetMargin` / `SetPadding`, alignment, visibility, etc.
   - `GetSize()` returns the actual rendered size (read-only).
   - Measure/Arrange are invoked internally by the layout system; applications may request recomputation via `InvalidateMeasure()` / `InvalidateArrange()`.
+  - `AttachLayoutManager(Dali::UniquePtr<LayoutManager>)` attaches a layout algorithm to any View; the View then dispatches Measure/Arrange to the manager (a Measure/Arrange callback, if set, takes priority over the manager).
   - Child add/remove uses inherited Actor `Add`/`Remove`. `Insert(index, View)` and `RemoveAllChildren()` are available for index-based insertion and bulk removal.
 
 - **Layout** (inherits View)
@@ -68,13 +69,13 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - `GetParentLayout()`, `IsLayout()`, and invalidation propagate to the parent until a layout root is reached, which registers with the LayoutController.
 
 - **LayoutImpl** (inherits ViewImpl)
-  - Provides `SetLayoutManager()` (protected) for derived classes to attach a LayoutManager as a Trait in `OnInitialize()`.
-  - `OnMeasure()`/`OnArrange()` check: callback (priority) → LayoutManager → ViewImpl fallback.
+  - Base implementation for layout containers. It holds no layout algorithm itself; derived classes attach a LayoutManager via `View::AttachLayoutManager()` in `OnInitialize()`.
+  - Layout dispatch — callback (priority) → LayoutManager → default `OnMeasure()`/`OnArrange()` — is handled uniformly in `ViewImpl::Measure()`/`Arrange()`.
   - `IsLayout()` returns `true`.
   - Child APIs are inherited from ViewImpl.
 
 - **StackLayoutImpl, FlexLayoutImpl, GridLayoutImpl, AbsoluteLayoutImpl**
-  - Each creates and attaches its LayoutManager via `SetLayoutManager()` in `OnInitialize()`.
+  - Each creates and attaches its LayoutManager via `View::AttachLayoutManager()` in `OnInitialize()`.
 
 - **AbsoluteLayoutParamsImpl, FlexLayoutParamsImpl, GridLayoutParamsImpl, StackLayoutParamsImpl**
   - TraitImpl-derived classes that store per-child layout parameters (e.g., bounds/flags, grow/shrink/basis/alignSelf, row/column/span, weight).
@@ -88,14 +89,14 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **LayoutManager** (abstract)  
   - `Measure(ViewImpl*, widthConstraint, heightConstraint)`: compute measured size for the container and its children.  
-  - `ArrangeChildren(ViewImpl*, bounds)`: place children within the given bounds.  
-  - Uses internal helpers such as `MeasureChild`, `ArrangeChild`, and `GetChildren(ViewImpl*)`.
+  - `Arrange(ViewImpl*, bounds)`: place children within the given bounds.  
+  - Uses protected helpers `GetChildCount(ViewImpl*)`, `GetChildAt(ViewImpl*, index)`, and `IsStandalone(ViewImpl*)` to traverse children.
 
 - **StackLayoutManager, FlexLayoutManager, GridLayoutManager, AbsoluteLayoutManager**  
   - Concrete implementations that measure and arrange children according to stack, flex, grid, or absolute rules.
-  - Each is defined in **integration-api** as a separate header and source pair: `stack-layout-manager.h`/`.cpp`, `grid-layout-manager.h`/`.cpp`, `flex-layout-manager.h`/`.cpp`, `absolute-layout-manager.h`/`.cpp`.
+  - Each is defined in **public-api** as a separate header and source pair: `stack-layout-manager.h`/`.cpp`, `grid-layout-manager.h`/`.cpp`, `flex-layout-manager.h`/`.cpp`, `absolute-layout-manager.h`/`.cpp` (and `scroll-view-layout-manager.h`/`.cpp` for ScrollView).
   - Each reads per-child parameters from the corresponding `*ParamsImpl` trait attached to child views (e.g., `AbsoluteLayoutManager` reads `AbsoluteLayoutParamsImpl`).
-  - Custom layouts can subclass one of these managers and attach it via `LayoutImpl::SetLayoutManager()` in `OnInitialize()`, or use `View::SetMeasureCallback()`/`SetArrangeCallback()` from the public API.
+  - Custom layouts can subclass `LayoutManager` (or one of these managers) and attach it to any View via `View::AttachLayoutManager()`, or use `View::SetMeasureCallback()`/`SetArrangeCallback()` from the public API.
 
 ### 4. Layout Types (layout-types)
 
@@ -210,4 +211,4 @@ When layout must be recomputed (e.g. size or child change):
 |------|-------------|
 | Public child API | Child add/remove uses Actor::Add/Remove. View provides Insert(index, View) for index-based insertion and RemoveAllChildren() for bulk removal. GetChildCount, GetChildAt, IndexOfChild, Children are available on View. |
 | Layout processing | LayoutController collects layout roots per window and runs Measure then Arrange once per frame. |
-| Implementation | ViewImpl holds children; LayoutImpl attaches a LayoutManager as a Trait in `OnInitialize()`. Applications can customize measure/arrange via `SetMeasureCallback()`/`SetArrangeCallback()`. |
+| Implementation | ViewImpl holds children and can attach a LayoutManager as a Trait via `View::AttachLayoutManager()`. Applications can customize measure/arrange via `SetMeasureCallback()`/`SetArrangeCallback()`. |
