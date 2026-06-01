@@ -111,11 +111,17 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
     float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
-    if(rowSpan == 1 && row < rowDefs.Size() && rowDefs[row].GetType() == GridLengthType::AUTO)
+    // An axis with no definitions falls back to a single implicit track. It
+    // behaves like an auto-sized track here, capturing the child content size
+    // as a floor; ApplyGridDefinitions then lets it grow to fill a definite
+    // grid (so MATCH_PARENT children also work), matching a single star cell.
+    bool rowAutoLike = rowDefs.Size() == 0u || (row < rowDefs.Size() && rowDefs[row].GetType() == GridLengthType::AUTO);
+    bool colAutoLike = colDefs.Size() == 0u || (col < colDefs.Size() && colDefs[col].GetType() == GridLengthType::AUTO);
+    if(rowSpan == 1 && rowAutoLike)
     {
       rowHeights[row] = std::max(rowHeights[row], childSize.height + marginH);
     }
-    if(colSpan == 1 && col < colDefs.Size() && colDefs[col].GetType() == GridLengthType::AUTO)
+    if(colSpan == 1 && colAutoLike)
     {
       colWidths[col] = std::max(colWidths[col], childSize.width + marginW);
     }
@@ -152,6 +158,12 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
         totalAbsoluteWidth += colWidths[i];
       }
     }
+    else
+    {
+      // Implicit track (axis has no definitions): treat as Star(1) so it fills
+      // a definite grid. Its auto content floor is preserved by the star pass.
+      totalStarWidth += 1.0f;
+    }
   }
   for(uint32_t i = 0; i < rowCount; ++i)
   {
@@ -172,6 +184,11 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
         totalAbsoluteHeight += rowHeights[i];
       }
     }
+    else
+    {
+      // Implicit track (axis has no definitions): treat as Star(1).
+      totalStarHeight += 1.0f;
+    }
   }
 
   float totalSpacingWidth  = colSpacing * (colCount > 0 ? colCount - 1 : 0);
@@ -186,6 +203,13 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
       float starValue = colDefs[i].GetValue();
       colWidths[i]    = (totalStarWidth > 0) ? (starValue / totalStarWidth) * remainingWidth : 0.0f;
     }
+    else if(i >= colDefs.Size())
+    {
+      // Implicit Star(1) track: fill the available space but never shrink below
+      // the child content floor captured during the auto pass.
+      float share  = (totalStarWidth > 0) ? (1.0f / totalStarWidth) * remainingWidth : 0.0f;
+      colWidths[i] = std::max(colWidths[i], share);
+    }
   }
   for(uint32_t i = 0; i < rowCount; ++i)
   {
@@ -193,6 +217,13 @@ void ApplyGridDefinitions(std::vector<float>& rowHeights, std::vector<float>& co
     {
       float starValue = rowDefs[i].GetValue();
       rowHeights[i]   = (totalStarHeight > 0) ? (starValue / totalStarHeight) * remainingHeight : 0.0f;
+    }
+    else if(i >= rowDefs.Size())
+    {
+      // Implicit Star(1) track: fill the available space but never shrink below
+      // the child content floor captured during the auto pass.
+      float share   = (totalStarHeight > 0) ? (1.0f / totalStarHeight) * remainingHeight : 0.0f;
+      rowHeights[i] = std::max(rowHeights[i], share);
     }
   }
 
