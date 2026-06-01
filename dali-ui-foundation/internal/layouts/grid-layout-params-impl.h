@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/base-handle.h>
+#include <algorithm>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
@@ -112,7 +113,7 @@ public:
    */
   void SetRowSpan(uint32_t span)
   {
-    mRowSpan = span;
+    mRowSpan = std::max(1u, span);
   }
 
   /**
@@ -130,7 +131,7 @@ public:
    */
   void SetColumnSpan(uint32_t span)
   {
-    mColumnSpan = span;
+    mColumnSpan = std::max(1u, span);
   }
 
   /**

@@ -343,6 +343,19 @@ int UtcDaliGridLayoutGetColumnSpanP(void)
   END_TEST;
 }
 
+int UtcDaliGridLayoutSpanZeroClampedP(void)
+{
+  UiTestApplication application;
+  GridLayout layout = GridLayout::New();
+  View child = View::New();
+  layout.Add(child);
+  child.SetLayoutParams(GridLayoutParams::New().SetRowSpan(0).SetColumnSpan(0));
+  // Span has a minimum of 1; a 0 input must be clamped so the child keeps a cell.
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetRowSpan(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetLayoutParams<GridLayoutParams>().GetColumnSpan(), 1u, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliGridLayoutRowSpacingSetterP(void)
 {
   UiTestApplication application;
