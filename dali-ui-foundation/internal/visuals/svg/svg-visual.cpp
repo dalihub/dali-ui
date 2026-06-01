@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/internal/visuals/svg/svg-visual.h>
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
@@ -171,14 +170,11 @@ void SvgVisual::OnInitialize()
 
   if(mSvgLoadId == SvgLoader::INVALID_SVG_LOAD_ID)
   {
-    const Vector2 dpi     = Stage::GetCurrent().GetDpi();
-    const float   meanDpi = (dpi.height + dpi.width) * 0.5f;
-
     const bool synchronousLoading =
       IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
 
     // It will call SvgVisual::LoadComplete() synchronously if it required, or we already loaded same svg before.
-    mSvgLoadId = mSvgLoader.Load(mImageUrl, meanDpi, this, synchronousLoading);
+    mSvgLoadId = mSvgLoader.Load(mImageUrl, this, synchronousLoading);
   }
 }
 
@@ -208,14 +204,11 @@ void SvgVisual::DoSetProperties(const Property::Map& propertyMap)
   // Load image immediately if LOAD_POLICY requires it
   if(mLoadPolicy == Ui::Image::LoadPolicy::IMMEDIATE)
   {
-    const Vector2 dpi     = Stage::GetCurrent().GetDpi();
-    const float   meanDpi = (dpi.height + dpi.width) * 0.5f;
-
     const bool synchronousLoading =
       IsSynchronousLoadingRequired() && (mImageUrl.IsLocalResource() || mImageUrl.IsBufferResource());
 
     // It will call SvgVisual::LoadComplete() synchronously if it required, or we already loaded same svg before.
-    mSvgLoadId = mSvgLoader.Load(mImageUrl, meanDpi, this, synchronousLoading);
+    mSvgLoadId = mSvgLoader.Load(mImageUrl, this, synchronousLoading);
 
     AddRasterizationTask(mDesiredSize);
   }

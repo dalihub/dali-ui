@@ -122,11 +122,10 @@ public:
    * @param[in] id The id of this task.
    * @param[in] url The URL to svg resource to use.
    * @param[in] encodedImageBuffer The resource buffer if required.
-   * @param[in] dpi The DPI of the screen.
    * @param[in] callback The callback that is called when the operation is completed.
    */
   SvgLoadingTask(VectorImageRenderer vectorRenderer, int32_t id, const VisualUrl& url,
-                 EncodedImageBuffer encodedImageBuffer, float dpi, CallbackBase* callback);
+                 EncodedImageBuffer encodedImageBuffer, CallbackBase* callback);
 
   /**
    * Destructor.
@@ -172,8 +171,6 @@ private:
 
   Dali::Mutex                        mMutex;
   std::vector<SvgRasterizingTaskPtr> mNotifyRequiredTasks;
-
-  float mDpi;
 };
 
 class SvgRasterizingTask : public SvgTask
