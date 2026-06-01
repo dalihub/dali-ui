@@ -231,6 +231,20 @@ int UtcDaliFlexLayoutGetFlexShrinkP(void)
   END_TEST;
 }
 
+int UtcDaliFlexLayoutNegativeFlexFactorClampedP(void)
+{
+  UiTestApplication application;
+  FlexLayout layout = FlexLayout::New();
+  View child = View::New();
+  layout.Add(child);
+  // Negative grow/shrink are invalid and must clamp to zero so the
+  // distribution maths is not skewed.
+  child.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(-1.0f).SetFlexShrink(-2.0f));
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetFlexGrow(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetLayoutParams<FlexLayoutParams>().GetFlexShrink(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliFlexLayoutSetFlexBasisP(void)
 {
   UiTestApplication application;

@@ -209,19 +209,36 @@ FlexJustifyOffsets GetFlexJustifyOffsets(float freeSpace, FlexJustify justify, s
     case FlexJustify::CENTER:
       out.mainOffset = freeSpace / 2.0f;
       break;
+    // On overflow (freeSpace < 0) the distributed modes must not produce
+    // negative gaps that overlap children: fall back to start packing
+    // (SPACE_BETWEEN) or centring the overflow (SPACE_AROUND/EVENLY).
     case FlexJustify::SPACE_BETWEEN:
-      if(lineChildCount > 1)
+      if(freeSpace > 0.0f && lineChildCount > 1)
       {
         out.spacing = freeSpace / (lineChildCount - 1);
       }
       break;
     case FlexJustify::SPACE_AROUND:
-      out.spacing    = freeSpace / lineChildCount;
-      out.mainOffset = out.spacing / 2.0f;
+      if(freeSpace > 0.0f)
+      {
+        out.spacing    = freeSpace / lineChildCount;
+        out.mainOffset = out.spacing / 2.0f;
+      }
+      else
+      {
+        out.mainOffset = freeSpace / 2.0f;
+      }
       break;
     case FlexJustify::SPACE_EVENLY:
-      out.spacing    = freeSpace / (lineChildCount + 1);
-      out.mainOffset = out.spacing;
+      if(freeSpace > 0.0f)
+      {
+        out.spacing    = freeSpace / (lineChildCount + 1);
+        out.mainOffset = out.spacing;
+      }
+      else
+      {
+        out.mainOffset = freeSpace / 2.0f;
+      }
       break;
   }
   return out;

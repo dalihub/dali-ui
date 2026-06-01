@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/base-handle.h>
+#include <algorithm>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
@@ -72,7 +73,7 @@ public:
    */
   void SetFlexGrow(float grow)
   {
-    mFlexGrow = grow;
+    mFlexGrow = std::max(0.0f, grow);
   }
 
   /**
@@ -90,7 +91,7 @@ public:
    */
   void SetFlexShrink(float shrink)
   {
-    mFlexShrink = shrink;
+    mFlexShrink = std::max(0.0f, shrink);
   }
 
   /**
