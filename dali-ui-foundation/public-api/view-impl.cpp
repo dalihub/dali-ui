@@ -2413,8 +2413,8 @@ MeasuredSize ViewImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, 
   LayoutRect visContentBounds;
   visContentBounds.x      = static_cast<float>(padding.start) * s;
   visContentBounds.y      = static_cast<float>(padding.top) * s;
-  visContentBounds.width  = visualBounds.width - static_cast<float>(padding.start + padding.end) * s;
-  visContentBounds.height = visualBounds.height - static_cast<float>(padding.top + padding.bottom) * s;
+  visContentBounds.width  = std::max(0.0f, visualBounds.width - static_cast<float>(padding.start + padding.end) * s);
+  visContentBounds.height = std::max(0.0f, visualBounds.height - static_cast<float>(padding.top + padding.bottom) * s);
 
   manager->Arrange(this, visContentBounds);
 
