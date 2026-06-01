@@ -421,10 +421,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mPadding(),
   mRequestedWidth(WRAP_CONTENT),
   mRequestedHeight(WRAP_CONTENT),
-  mMinimumWidth(0.0f),
-  mMinimumHeight(0.0f),
-  mMaximumWidth(std::numeric_limits<float>::max()),
-  mMaximumHeight(std::numeric_limits<float>::max()),
   mLayoutMode(Ui::LayoutMode::DEFAULT),
   mRenderEffect(nullptr),
   mSize(0, 0),
@@ -1422,9 +1418,9 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         if(value.Get(width))
         {
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(!FloatEqual(dataImpl.mMinimumWidth, width))
+          if(!FloatEqual(dataImpl.GetMinimumWidth(), width))
           {
-            dataImpl.mMinimumWidth = width;
+            dataImpl.EnsureSizeConstraints().minWidth = width;
             viewImpl.InvalidateMeasure();
           }
         }
@@ -1437,9 +1433,9 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         if(value.Get(height))
         {
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(!FloatEqual(dataImpl.mMinimumHeight, height))
+          if(!FloatEqual(dataImpl.GetMinimumHeight(), height))
           {
-            dataImpl.mMinimumHeight = height;
+            dataImpl.EnsureSizeConstraints().minHeight = height;
             viewImpl.InvalidateMeasure();
           }
         }
@@ -1452,9 +1448,9 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         if(value.Get(width))
         {
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(!FloatEqual(dataImpl.mMaximumWidth, width))
+          if(!FloatEqual(dataImpl.GetMaximumWidth(), width))
           {
-            dataImpl.mMaximumWidth = width;
+            dataImpl.EnsureSizeConstraints().maxWidth = width;
             viewImpl.InvalidateMeasure();
           }
         }
@@ -1467,9 +1463,9 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         if(value.Get(height))
         {
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(!FloatEqual(dataImpl.mMaximumHeight, height))
+          if(!FloatEqual(dataImpl.GetMaximumHeight(), height))
           {
-            dataImpl.mMaximumHeight = height;
+            dataImpl.EnsureSizeConstraints().maxHeight = height;
             viewImpl.InvalidateMeasure();
           }
         }
@@ -1770,25 +1766,25 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
       case Ui::View::Property::MINIMUM_WIDTH:
       {
-        value = viewImpl.GetViewDataImpl().mMinimumWidth;
+        value = viewImpl.GetViewDataImpl().GetMinimumWidth();
         break;
       }
 
       case Ui::View::Property::MINIMUM_HEIGHT:
       {
-        value = viewImpl.GetViewDataImpl().mMinimumHeight;
+        value = viewImpl.GetViewDataImpl().GetMinimumHeight();
         break;
       }
 
       case Ui::View::Property::MAXIMUM_WIDTH:
       {
-        value = viewImpl.GetViewDataImpl().mMaximumWidth;
+        value = viewImpl.GetViewDataImpl().GetMaximumWidth();
         break;
       }
 
       case Ui::View::Property::MAXIMUM_HEIGHT:
       {
-        value = viewImpl.GetViewDataImpl().mMaximumHeight;
+        value = viewImpl.GetViewDataImpl().GetMaximumHeight();
         break;
       }
 

@@ -42,6 +42,7 @@
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali/integration-api/debug.h>
+#include <limits>
 #include <map>
 #include <memory>
 #include <set>
@@ -610,6 +611,41 @@ public:
   std::unique_ptr<VisualData>          mVisualData;
   std::unique_ptr<AttachmentContainer> mAttachments;
 
+  struct SizeConstraints
+  {
+    float minWidth  = 0.0f;
+    float minHeight = 0.0f;
+    float maxWidth  = std::numeric_limits<float>::max();
+    float maxHeight = std::numeric_limits<float>::max();
+  };
+  std::unique_ptr<SizeConstraints> mSizeConstraints; ///< Lazy-allocated measurement min/max bounds (natural units).
+
+  SizeConstraints& EnsureSizeConstraints()
+  {
+    if(!mSizeConstraints)
+    {
+      mSizeConstraints = std::make_unique<SizeConstraints>();
+    }
+    return *mSizeConstraints;
+  }
+
+  float GetMinimumWidth() const
+  {
+    return mSizeConstraints ? mSizeConstraints->minWidth : 0.0f;
+  }
+  float GetMinimumHeight() const
+  {
+    return mSizeConstraints ? mSizeConstraints->minHeight : 0.0f;
+  }
+  float GetMaximumWidth() const
+  {
+    return mSizeConstraints ? mSizeConstraints->maxWidth : std::numeric_limits<float>::max();
+  }
+  float GetMaximumHeight() const
+  {
+    return mSizeConstraints ? mSizeConstraints->maxHeight : std::numeric_limits<float>::max();
+  }
+
   struct FocusNavigationData
   {
     int leftId             = -1;
@@ -643,10 +679,6 @@ public:
   Extents                           mPadding;         ///< Layout padding
   float                             mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
   float                             mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float                             mMinimumWidth;    ///< Minimum width applied during measurement
-  float                             mMinimumHeight;   ///< Minimum height applied during measurement
-  float                             mMaximumWidth;    ///< Maximum width applied during measurement
-  float                             mMaximumHeight;   ///< Maximum height applied during measurement
   Ui::LayoutMode                    mLayoutMode;      ///< Layout mode of the view
   RenderEffectImplPtr               mRenderEffect;    ///< The render effect on this view
   Vector2                           mSize;            ///< The size of the view

@@ -904,8 +904,8 @@ MeasuredSize ViewImpl::Measure(float visualW, float visualH)
   // available space. Without this, children would be measured against
   // the original (smaller) constraint, then ApplyConstraints would
   // enlarge the result — leaving children incorrectly sized.
-  float effNatW = std::min(std::max(natW, mImpl->mMinimumWidth), mImpl->mMaximumWidth);
-  float effNatH = std::min(std::max(natH, mImpl->mMinimumHeight), mImpl->mMaximumHeight);
+  float effNatW = std::min(std::max(natW, mImpl->GetMinimumWidth()), mImpl->GetMaximumWidth());
+  float effNatH = std::min(std::max(natH, mImpl->GetMinimumHeight()), mImpl->GetMaximumHeight());
 
   if(mImpl->mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mImpl->mLastMeasuredConstraint.width, effNatW) &&
      FloatEqual(mImpl->mLastMeasuredConstraint.height, effNatH))
@@ -988,7 +988,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
     else if(mImpl->mRequestedWidth == MATCH_PARENT)
     {
-      size.width = mImpl->mMinimumWidth;
+      size.width = mImpl->GetMinimumWidth();
     }
     else
     {
@@ -1000,7 +1000,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
     else if(mImpl->mRequestedHeight == MATCH_PARENT)
     {
-      size.height = mImpl->mMinimumHeight;
+      size.height = mImpl->GetMinimumHeight();
     }
     else
     {
@@ -1016,7 +1016,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else if(mImpl->mRequestedWidth == MATCH_PARENT)
   {
-    size.width = mImpl->mMinimumWidth;
+    size.width = mImpl->GetMinimumWidth();
   }
   else
   {
@@ -1029,7 +1029,7 @@ MeasuredSize ViewImpl::OnMeasure(float widthConstraint, float heightConstraint)
   }
   else if(mImpl->mRequestedHeight == MATCH_PARENT)
   {
-    size.height = mImpl->mMinimumHeight;
+    size.height = mImpl->GetMinimumHeight();
   }
   else
   {
@@ -1398,10 +1398,10 @@ MeasuredSize ViewImpl::ApplyConstraints(const MeasuredSize& size) const
   // size is in visual (scale-applied) units; scale min/max (natural) accordingly.
   float        s           = GetEffectiveScale();
   MeasuredSize constrained = size;
-  constrained.width        = std::max(constrained.width, mImpl->mMinimumWidth * s);
-  constrained.height       = std::max(constrained.height, mImpl->mMinimumHeight * s);
-  constrained.width        = std::min(constrained.width, mImpl->mMaximumWidth * s);
-  constrained.height       = std::min(constrained.height, mImpl->mMaximumHeight * s);
+  constrained.width        = std::max(constrained.width, mImpl->GetMinimumWidth() * s);
+  constrained.height       = std::max(constrained.height, mImpl->GetMinimumHeight() * s);
+  constrained.width        = std::min(constrained.width, mImpl->GetMaximumWidth() * s);
+  constrained.height       = std::min(constrained.height, mImpl->GetMaximumHeight() * s);
   return constrained;
 }
 
@@ -1436,7 +1436,7 @@ void ViewImpl::SetMinimumWidth(float width)
 
 float ViewImpl::GetMinimumWidth() const
 {
-  return mImpl->mMinimumWidth;
+  return mImpl->GetMinimumWidth();
 }
 
 void ViewImpl::SetMinimumHeight(float height)
@@ -1446,7 +1446,7 @@ void ViewImpl::SetMinimumHeight(float height)
 
 float ViewImpl::GetMinimumHeight() const
 {
-  return mImpl->mMinimumHeight;
+  return mImpl->GetMinimumHeight();
 }
 
 void ViewImpl::SetMaximumWidth(float width)
@@ -1456,7 +1456,7 @@ void ViewImpl::SetMaximumWidth(float width)
 
 float ViewImpl::GetMaximumWidth() const
 {
-  return mImpl->mMaximumWidth;
+  return mImpl->GetMaximumWidth();
 }
 
 void ViewImpl::SetMaximumHeight(float height)
@@ -1466,7 +1466,7 @@ void ViewImpl::SetMaximumHeight(float height)
 
 float ViewImpl::GetMaximumHeight() const
 {
-  return mImpl->mMaximumHeight;
+  return mImpl->GetMaximumHeight();
 }
 
 // =============================================================================
