@@ -440,10 +440,15 @@ private:
       heightConstraint = parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT);
     }
 
-    // Root view has no parent that subtracts margin, so do it here.
+    // Root view has no parent that subtracts margin, so do it here. Margin,
+    // requested position and min/max are stored in natural units, while the
+    // layout pass works in visual (scale-applied) units. Convert with the
+    // root's effective scale so the root matches the non-root path, which
+    // already scales these properties.
+    float   s        = view->GetEffectiveScale();
     Extents margin   = view->GetMargin();
-    float   marginW  = static_cast<float>(margin.start + margin.end);
-    float   marginH  = static_cast<float>(margin.top + margin.bottom);
+    float   marginW  = static_cast<float>(margin.start + margin.end) * s;
+    float   marginH  = static_cast<float>(margin.top + margin.bottom) * s;
     widthConstraint  = std::max(0.0f, widthConstraint - marginW);
     heightConstraint = std::max(0.0f, heightConstraint - marginH);
 
@@ -454,16 +459,16 @@ private:
     // MATCH_PARENT roots fill the available constraint rather than using
     // their measured (minimum) size.
     LayoutRect bounds;
-    bounds.x      = view->GetRequestedPositionX() + static_cast<float>(margin.start);
-    bounds.y      = view->GetRequestedPositionY() + static_cast<float>(margin.top);
+    bounds.x      = (view->GetRequestedPositionX() + static_cast<float>(margin.start)) * s;
+    bounds.y      = (view->GetRequestedPositionY() + static_cast<float>(margin.top)) * s;
     bounds.width  = (layoutWidth == MATCH_PARENT) ? widthConstraint : measuredSize.width;
     bounds.height = (layoutHeight == MATCH_PARENT) ? heightConstraint : measuredSize.height;
 
     // Root has no parent layout to clamp against, so enforce the view's
     // own min/max here. For MATCH_PARENT axes, the measured value was
     // discarded above, so this is the only place min/max is applied.
-    bounds.width  = std::min(std::max(bounds.width, view->GetMinimumWidth()), view->GetMaximumWidth());
-    bounds.height = std::min(std::max(bounds.height, view->GetMinimumHeight()), view->GetMaximumHeight());
+    bounds.width  = std::min(std::max(bounds.width, view->GetMinimumWidth() * s), view->GetMaximumWidth() * s);
+    bounds.height = std::min(std::max(bounds.height, view->GetMinimumHeight() * s), view->GetMaximumHeight() * s);
 
     view->Arrange(bounds);
   }
