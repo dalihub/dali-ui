@@ -98,7 +98,7 @@ MyData* data = view.GetAttachment(MY_DATA_ID);
 view.AttachLayoutManager(MakeUnique<GridLayoutManager>());
 ```
 
-이 기능으로 view는 레이아웃 뷰를 child로 붙이지 않고도 레이아웃 역할을 할 수 있게 되므로, 앱이나 컴포넌트를 구현할 때 **view의 갯수**를 줄이는 데 도움이 됩니다.
+이 기능으로 view는 레이아웃 뷰를 child로 붙이지 않고도 레이아웃 역할을 할 수 있게 되므로, 컴포넌트를 구현할 때 **view의 갯수**를 줄이는 데 도움이 됩니다.
 
 <br/>
 
@@ -135,112 +135,37 @@ view.AsInteractive([&](InteractiveTrait trait)
 
 Framework 개발자가 새 컴포넌트를 만들거나 앱이 커스텀 컴포넌트를 만드고 싶을때는 `View`의 **handle 클래스**와 **impl 클래스**를 각각 상속해야 합니다.
 
+> [!NOTE]
+> <b>ViewImpl 의 특수성</b> <br/>
+> Impl 클래스는 ABI 안정성을 위해 라이브러리 외부로 노출하지 않는것이 원칙이지만, `ViewImpl`은 예외적으로 public 레벨로 공개되어 있습니다. dali-ui는 `ViewImpl`의 객체 사이즈와 vtable 변경을 통제하여 ABI 안정성을 보장할 수 있도록 관리합니다.
+
 <img src="./assets/custom-view.png" style="display:block;margin:0 auto"/>
 
-#### (1) Impl 클래스 정의
+<br/>
 
-`ViewImpl` 을 상속받는 impl 클래스를 정의하고 데이터와 로직을 구현합니다.
 
-<details>
-<summary><ins>code sample</ins></summary>
+#### MyView 예제 ([Link](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view))
 
-```cpp
-// my-view-impl.h
+* [my-view.h](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view.h)
+* [my-view.cpp](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view.cpp)
+* [my-view-impl.h](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.h)
+* [my-view-impl.cpp](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp)
 
-class MyViewImpl : public ViewImpl
-{
-public:
-  static IntrusivePtr<MyViewImpl> New();
+<br/>
 
-private:
-  int mMyData0;
-  float mMyData1;
-};
-```
+#### 클래스 설명
 
-</details>
+이름 | 역할 | 주요 메소드
+-- | -- | --
+`MyView` | <ul><li><b>핸들 클래스</b></li><li>View 상속</li></ul> | <ui><li>`static New()`</li><li>`MyView DownCast(BaseHandle)`</li><li>`MyView(MyViewImpl)` 생성자</li></ul>
+`MyViewImpl` | <ul><li><b>Impl 클래스</b></li><li>ViewImpl 상속</li></ul> | <ui><li>`static New()`</li><li>`void OnInitialize()`</li></ul>
 
-#### (2) 핸들 클래스 정의
+<br/>
 
-`View` 를 상속받는 핸들 클래스를 정의합니다.
-
-<details>
-<summary><ins>code sample</ins></summary>
-
-```cpp
-// my-view.h
-class MyView : public View
-{
-public:
-  static MyView New();
-
-  // DownCast: View::DownCast<T, I>() 템플릿 사용
-  static MyView DownCast(BaseHandle handle)
-  {
-    return View::DownCast<MyView, MyViewImpl>(handle);
-  }
-
-  void DoSomething();
-
-  ~MyView(); // non-virtual
-};
-```
-
-</details>
-
-#### (3) `New()` 구현
-
-`New()` 메소드를 구현하여 핸들과 impl이 생성 & 연결 될 수 있도록 합니다.
-
-<details>
-<summary><ins>code sample</ins></summary>
-
-```cpp
-// my-view-impl.cpp
-IntrusivePtr<MyViewImpl> MyViewImpl::New()
-{
-  return IntrusivePtr<MyViewImpl>(new MyViewImpl());
-}
-```
-
-```cpp
-// my-view.cpp
-MyView MyView::New()
-{
-  IntrusivePtr<MyViewImpl> impl = MyViewImpl::New();
-  MyView handle(*impl);   // handle이 impl의 소유권을 획득
-  impl->Initialize();
-  return handle;
-}
-```
-
-</details>
-
-#### (4) Type Registration
-
-새로이 추가된 타입을 등록하여 프로퍼티 시스템이 원활이 동작하도록 합니다.
-
-<details>
-<summary><ins>code sample</ins></summary>
-
-```cpp
-// my-view.cpp
-namespace
-{
-
-BaseHandle Create()
-{
-  return MyView::New();
-}
-
-DALI_TYPE_REGISTRATION_BEGIN(MyViewImpl, ViewImpl, Create)
-/* Register property here if needs */
-DALI_TYPE_REGISTRATION_END()
-
-} // anonymous namespace
-```
-
-</details>
+#### 그외 중요 포인트들
+* [GetImpl(MyView&)](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view.cpp#L13) : 핸들로부터 impl 을 얻어냄
+* [Self()](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L57) : Impl로 부터 핸들을 얻어냄
+* [DALI_TYPE_REGISTRATION_BEGIN(..)](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L19) : DALi 타입 등록을 위한 매크로
 
 
 <br/>

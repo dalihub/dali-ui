@@ -64,6 +64,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨
 * [Unit & Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Unit-&-Scale-(kr))
 * [Ui Scale](https://github.sec.samsung.net/NUI/dali-ui/wiki/Ui-Scale-(Kr))
 * [Color & Theme](https://github.sec.samsung.net/NUI/dali-ui/wiki/Color-&-Theme-(kr))
+* [View Architecture](https://github.sec.samsung.net/NUI/dali-ui/wiki/View-(kr))
 * [Layout](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-(kr))
 * [Focus & Key](https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-&-Key-(kr))
 * [Touch & Gesture](https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-&-Gesture-(kr))
