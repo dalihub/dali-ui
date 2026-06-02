@@ -155,6 +155,12 @@ public:
   void SetEnterOnInitialMount(bool enable);
   bool GetEnterOnInitialMount() const;
 
+  /// Selects whether a CHANGE transition reaches only the attached view's
+  /// direct children (default) or the whole subtree beneath it. See
+  /// @c LayoutReflowScope.
+  void              SetReflowScope(LayoutReflowScope scope);
+  LayoutReflowScope GetReflowScope() const;
+
   // ─── Lifecycle ──────────────────────────────────────────────────────────
   void SetOnStart(LayoutLifecycleCallback callback);
   void SetOnFinished(LayoutLifecycleCallback callback);
@@ -207,8 +213,9 @@ private:
   bool                   mChangeAnimatorSet;
 
   // ─── Options ─────────
-  bool mChangeOnWindowResize;
-  bool mEnterOnInitialMount;
+  bool              mChangeOnWindowResize;
+  bool              mEnterOnInitialMount;
+  LayoutReflowScope mReflowScope;
 
   // ─── Lifecycle ───────
   LayoutLifecycleCallback mOnStart;

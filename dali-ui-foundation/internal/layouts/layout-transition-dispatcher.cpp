@@ -445,16 +445,39 @@ void LayoutTransitionDispatcher::CaptureBeforeLayout(ViewImpl* root)
   }
 }
 
-void LayoutTransitionDispatcher::CaptureSingleView(ViewImpl* view)
+void LayoutTransitionDispatcher::CaptureGovernedChildren(ViewImpl*                    parent,
+                                                         std::vector<CapturedBounds>& out,
+                                                         bool                         recurse)
 {
-  std::vector<CapturedBounds> captured;
-  auto&                       children = IntegrationView::GetChildren(*view);
-  captured.reserve(children.Count());
+  auto& children = IntegrationView::GetChildren(*parent);
+  out.reserve(out.size() + children.Count());
   for(auto& childView : children)
   {
     ViewImpl& childImpl = GetImpl(childView);
-    captured.push_back({&childImpl, VisualBoundsOf(view, &childImpl)});
+    out.push_back({&childImpl, parent, VisualBoundsOf(parent, &childImpl)});
+
+    // Under SUBTREE scope, descend into descendants the owner governs: those
+    // with no transition of their own (a child with its own transition
+    // governs its own subtree, so the scope stops there) and that are not
+    // standalone layout roots (those run as a separate layout pass).
+    if(recurse &&
+       !childImpl.GetLayoutTransition() &&
+       !IntegrationView::IsLayoutModeStandalone(childImpl))
+    {
+      CaptureGovernedChildren(&childImpl, out, true);
+    }
   }
+}
+
+void LayoutTransitionDispatcher::CaptureSingleView(ViewImpl* view)
+{
+  std::vector<CapturedBounds> captured;
+
+  Ui::LayoutTransition transition = view->GetLayoutTransition();
+  const bool           subtree =
+    transition && GetImpl(transition).GetReflowScope() == LayoutReflowScope::SUBTREE;
+  CaptureGovernedChildren(view, captured, subtree);
+
   mCaptured[view] = std::move(captured);
 
   // Record the view as "captured before first arrange" if it has not yet
@@ -557,6 +580,25 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
     return;
   }
 
+  // Pin every distinct inherited-descendant parent (SUBTREE scope) alive for
+  // the loop. OnStart callbacks below fire synchronously and may mutate the
+  // tree; without a strong handle an intermediate container dropped by an
+  // earlier callback could be destroyed before a later entry dereferences it
+  // via ChildStillPresent / VisualBoundsOf. The owner (root) is already
+  // pinned by rootHandle, so only parents other than root need pinning.
+  std::vector<Ui::View> pinnedParents;
+  for(const CapturedBounds& cap : snapshot)
+  {
+    if(cap.parent && cap.parent != root)
+    {
+      Ui::View parentHandle = Ui::View::DownCast(cap.parent->Self());
+      if(parentHandle)
+      {
+        pinnedParents.push_back(parentHandle);
+      }
+    }
+  }
+
   std::unordered_set<ViewImpl*> enterChildren     = root->TakePendingEnterChildren();
   std::unordered_set<ViewImpl*> reorderedChildren = root->TakePendingReorderedChildren();
   // Capture sibling add/remove markers for CHANGE cause refinement. A
@@ -587,9 +629,64 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
 
   for(const CapturedBounds& cap : snapshot)
   {
-    ViewImpl* child = cap.child;
-    if(!child || !ChildStillPresent(root, child))
+    ViewImpl* child  = cap.child;
+    ViewImpl* parent = cap.parent;
+    if(!child || !ChildStillPresent(parent, child))
     {
+      continue;
+    }
+
+    // SUBTREE-scope inherited descendant (not a direct child of the owner):
+    // CHANGE slot only. ENTER/EXIT remain governed by the descendant's own
+    // direct parent (Phase 1). For a direct child @c parent == @c root and
+    // this branch is skipped, so the existing per-child logic runs unchanged.
+    if(parent != root)
+    {
+      // Owner's first arrange (initial mount): the actor is already at its
+      // final arranged bounds. Starting a CHANGE here would animate the
+      // grand-child from its pre-arrange (zero) bounds while the surface is
+      // typically still off screen — mirror the direct-child initial-mount
+      // suppression. Opt back in via SetEnterOnInitialMount(true).
+      if(suppressInitialEnter)
+      {
+        continue;
+      }
+      if(mPendingExits.count(child) > 0)
+      {
+        continue;
+      }
+      auto inheritedExitIt = mActiveAnimators.find(child);
+      if(inheritedExitIt != mActiveAnimators.end() &&
+         inheritedExitIt->second.slot == LayoutTransitionSlot::EXIT)
+      {
+        continue;
+      }
+      const LayoutRect inheritedFrom = cap.bounds;
+      const LayoutRect inheritedTo   = VisualBoundsOf(parent, child);
+      if(BoundsApproxEqual(inheritedFrom, inheritedTo))
+      {
+        continue;
+      }
+      // WINDOW_RESIZED is a per-pass global flag and is honoured here
+      // (including the resize opt-out). Sibling/reorder causes need
+      // per-direct-parent markers and are deferred to a later phase; use
+      // OTHER otherwise.
+      const LayoutChangeCause inheritedCause =
+        isWindowResize ? LayoutChangeCause::WINDOW_RESIZED : LayoutChangeCause::OTHER;
+      if(inheritedCause == LayoutChangeCause::WINDOW_RESIZED &&
+         !GetImpl(transition).GetChangeOnWindowResize())
+      {
+        SettleChangeWithoutAnimation(child, inheritedTo);
+        continue;
+      }
+      if(GetImpl(transition).HasChangeAnimator())
+      {
+        StartAnimatorChange(child, inheritedFrom, inheritedTo, transition, inheritedCause);
+      }
+      else
+      {
+        StartChangeTransition(child, inheritedFrom, inheritedTo, transition, inheritedCause);
+      }
       continue;
     }
 
@@ -1710,12 +1807,17 @@ void LayoutTransitionDispatcher::OnViewDestroyed(ViewImpl* view)
 
   mCaptured.erase(view);
   mInitialMountViews.erase(view);
+  // Drop captured entries that reference the destroyed view as either the
+  // child OR the (SUBTREE-scope inherited) direct parent. A stale parent
+  // pointer would otherwise be dereferenced by the pin / VisualBoundsOf /
+  // ChildStillPresent paths in StartTransitionsForView when this snapshot
+  // is processed.
   for(auto& entry : mCaptured)
   {
     auto& vec = entry.second;
     vec.erase(std::remove_if(vec.begin(), vec.end(),
                              [view](const CapturedBounds& cb)
-    { return cb.child == view; }),
+    { return cb.child == view || cb.parent == view; }),
               vec.end());
   }
 }

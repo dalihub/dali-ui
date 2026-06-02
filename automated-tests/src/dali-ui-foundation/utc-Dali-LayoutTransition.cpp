@@ -2763,3 +2763,337 @@ int UtcDaliLayoutTransitionBoundsEffectRejectsNonTerminalAlphaN(void)
   DALI_TEST_CHECK(&result == &positiveTransition);
   END_TEST;
 }
+
+// ─── Cascade reflow verification (grand-child) ─────────────────────────────
+//
+// A LayoutTransition animates only the DIRECT children of the view it is
+// attached to. These two tests empirically verify the consequence for a
+// grand-child:
+//
+//  * The grand-child reflows (animates) during a layout change ONLY when its
+//    own immediate parent ALSO carries a LayoutTransition. The effect
+//    cascades level by level inside a single layout pass.
+//  * Without a transition on the intermediate container, the grand-child
+//    snaps straight to its final arranged position while the outer container
+//    is still animating.
+//
+// Tree:  a (vertical stack) ── [ spacer , b ]
+//                                          b (vertical stack) ── [ d , c ]
+// Change in one pass: spacer.height 100->0 (moves b up) AND d.height 40->0
+// (moves grand-child c up inside b).
+
+int UtcDaliLayoutTransitionCascadeReflowsGrandChildP(void)
+{
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(80.0f);
+
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+
+  a.Add(spacer);
+  a.Add(b);
+
+  // Run the initial layout BEFORE attaching transitions so the first arrange
+  // (from default (0,0,0,0) bounds) is not surfaced as a spurious CHANGE.
+  application.SendNotification();
+  application.Render(0);
+
+  // Initial arranged positions: b sits below the 100px spacer; c sits below
+  // the 40px d inside b.
+  DALI_TEST_EQUALS(b.GetProperty<float>(Actor::Property::POSITION_Y), 100.0f, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  // Attach a CHANGE transition to BOTH the outer and the intermediate
+  // container. LINEAR alpha gives a predictable mid-point.
+  LayoutTransitionTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition       tA = LayoutTransition::New();
+  tA.SetChangeTiming(timing);
+  a.SetLayoutTransition(tA);
+  LayoutTransition tB = LayoutTransition::New();
+  tB.SetChangeTiming(timing);
+  b.SetLayoutTransition(tB);
+
+  // One layout pass that shifts BOTH levels.
+  spacer.SetRequestedHeight(0.0f); // b.y : 100 -> 0   (driven by tA)
+  d.SetRequestedHeight(0.0f);      // c.y :  40 -> 0   (driven by tB)
+
+  application.SendNotification();
+  application.Render(0);   // transitions start
+  application.Render(100); // advance ~50% of the 200ms duration
+
+  // Mid-animation: read the scene-graph (animated) current values. POSITION_Y
+  // is parent-local, so c's value is its offset within b, independent of b's
+  // own animation.
+  const float bY = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+
+  // Outer container is animating toward 0 (not yet snapped).
+  DALI_TEST_CHECK(bY > 5.0f && bY < 95.0f);
+  // Grand-child is ALSO animating toward 0 — the cascade reached it because b
+  // carries its own transition. Had it snapped, cY would be ~0.
+  DALI_TEST_CHECK(cY > 5.0f && cY < 38.0f);
+
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionNoCascadeWithoutChildTransitionP(void)
+{
+  // Contrast with the cascade test: with NO transition on the intermediate
+  // container b, the grand-child c snaps straight to its final position while
+  // the outer container a is still animating b.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(80.0f);
+
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+
+  a.Add(spacer);
+  a.Add(b);
+
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  // Transition ONLY on the outer container — b has none.
+  LayoutTransitionTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition       tA = LayoutTransition::New();
+  tA.SetChangeTiming(timing);
+  a.SetLayoutTransition(tA);
+
+  spacer.SetRequestedHeight(0.0f);
+  d.SetRequestedHeight(0.0f);
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  const float bY = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+
+  // Outer container is still animating ...
+  DALI_TEST_CHECK(bY > 5.0f && bY < 95.0f);
+  // ... but the grand-child has snapped to its final position (no cascade).
+  DALI_TEST_EQUALS(cY, 0.0f, 1.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ─── Reflow scope (SUBTREE) ────────────────────────────────────────────────
+//
+// LayoutReflowScope::SUBTREE lets a single transition on a container reflow
+// the whole subtree under it (CHANGE slot) without a transition on every
+// intermediate container. Same tree as the cascade tests above.
+
+int UtcDaliLayoutTransitionSubtreeReflowsGrandChildP(void)
+{
+  // A single transition with SUBTREE scope on the outer container animates
+  // the grand-child c even though the intermediate container b has NO
+  // transition of its own. This is the same tree as
+  // UtcDaliLayoutTransitionNoCascadeWithoutChildTransitionP, which snaps c
+  // under the default DIRECT_CHILDREN scope.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(80.0f);
+
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+
+  a.Add(spacer);
+  a.Add(b);
+
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  // ONE transition on the outer container, SUBTREE scope. b has none.
+  LayoutTransitionTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition       tA = LayoutTransition::New();
+  tA.SetChangeTiming(timing).SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+
+  spacer.SetRequestedHeight(0.0f);
+  d.SetRequestedHeight(0.0f);
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  const float bY = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+
+  // Outer container animating ...
+  DALI_TEST_CHECK(bY > 5.0f && bY < 95.0f);
+  // ... and the grand-child ALSO animating, reached by SUBTREE without a
+  // transition on b. Had it snapped, cY would be ~0.
+  DALI_TEST_CHECK(cY > 5.0f && cY < 38.0f);
+
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeStopsAtOwnTransitionP(void)
+{
+  // A descendant that carries its own transition stops the SUBTREE scope at
+  // that boundary: the grand-child c is governed by b (its direct parent),
+  // NOT by a's SUBTREE scope. Verified by distinct durations — c follows b's
+  // slower 0.4s timing, not a's 0.2s.
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  View spacer = View::New();
+  spacer.SetRequestedWidth(100.0f);
+  spacer.SetRequestedHeight(100.0f);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(80.0f);
+
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+
+  a.Add(spacer);
+  a.Add(b);
+
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(c.GetProperty<float>(Actor::Property::POSITION_Y), 40.0f, 0.5f, TEST_LOCATION);
+
+  // a: SUBTREE, fast (0.2s). b: its own transition, slow (0.4s).
+  LayoutTransition tA = LayoutTransition::New();
+  tA.SetChangeTiming(LayoutTransitionTiming{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()})
+    .SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+
+  LayoutTransition tB = LayoutTransition::New();
+  tB.SetChangeTiming(LayoutTransitionTiming{Duration(0.4f), AlphaFunction(AlphaFunction::LINEAR), Duration()});
+  b.SetLayoutTransition(tB);
+
+  spacer.SetRequestedHeight(0.0f);
+  d.SetRequestedHeight(0.0f);
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100); // a: ~50%, b: ~25%
+
+  const float bY = b.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+
+  // a drove b toward 0 (~50% of 100->0).
+  DALI_TEST_CHECK(bY > 5.0f && bY < 95.0f);
+  // c follows b's slower 0.4s timing: ~25% of 40->0 => ~30, clearly above
+  // the ~20 it would show if a's 0.2s scope had (wrongly) reached it.
+  DALI_TEST_CHECK(cY > 25.0f && cY < 38.0f);
+
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeInitialMountSuppressedP(void)
+{
+  // SUBTREE must honour initial-mount suppression: when the transition is
+  // attached before the owner's first arrange, inherited grand-children
+  // settle at their final bounds without a CHANGE animation (the surface is
+  // typically still off screen at first arrange).
+  UiTestApplication application;
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  // SUBTREE transition attached BEFORE the first arrange.
+  LayoutTransition tA = LayoutTransition::New();
+  tA.SetChangeTiming(LayoutTransitionTiming{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()})
+    .SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(80.0f);
+
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+  a.Add(b);
+
+  // First arrange happens here, with the transition already attached.
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+  application.Render(16);
+
+  // Grand-child settled at its final local position (below the 40px d), not
+  // animating up from the pre-arrange zero bounds.
+  const float cY = c.GetCurrentProperty<float>(Actor::Property::POSITION_Y);
+  DALI_TEST_EQUALS(cY, 40.0f, 1.0f, TEST_LOCATION);
+
+  END_TEST;
+}

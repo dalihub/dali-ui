@@ -127,8 +127,45 @@ layout.SetLayoutTransition(transition);
 |------------------------------|-------------|-----------------------------------------------------------------------------------------------------------|
 | `SetChangeOnWindowResize`    | `false`     | If `true`, CHANGE fires on window-resize-driven layout changes (cause `WINDOW_RESIZED`).                  |
 | `SetEnterOnInitialMount`     | `false`     | If `true`, ENTER fires for children present at the parent's very first arrange pass. The default suppresses initial-mount ENTER (declarative ENTER specs are still settled to their final values; animator ENTER is skipped). Adds at runtime always fire ENTER regardless. |
+| `SetReflowScope`             | `DIRECT_CHILDREN` | Selects how far the CHANGE slot reaches. `SUBTREE` reflows every descendant that has no transition of its own. See below. |
 | `SetOnStart`                 | unset       | Lifecycle callback fired when a per-(view, slot) transition starts.                                       |
 | `SetOnFinished`              | unset       | Lifecycle callback fired when a per-(view, slot) transition reaches normal completion (cancellation is silent — see Caveats). |
+
+### Reflow scope
+
+By default a transition animates only the **direct children** of the view it
+is attached to. A grand-child therefore animates only when its own immediate
+parent also carries a transition — the effect cascades level by level, and
+each level is configured independently.
+
+`SetReflowScope(LayoutReflowScope::SUBTREE)` removes that requirement for the
+**CHANGE slot**: one transition on a container reflows the whole subtree under
+it with a single timing, without a transition on every intermediate container.
+
+```cpp
+LayoutTransition t = LayoutTransition::New();
+t.SetChangeTiming(LayoutTransitionTiming{Duration(0.25f), AlphaFunction(AlphaFunction::EASE_IN_OUT), Duration()})
+ .SetReflowScope(LayoutReflowScope::SUBTREE);
+container.SetLayoutTransition(t); // grand-children reflow too
+```
+
+Scope resolution: a node is animated by the **closest ancestor that has a
+transition**. That ancestor reaches the node when it is the node's direct
+parent, or when its scope is `SUBTREE`. A descendant that has its own
+transition becomes the closest ancestor for its own children, so a `SUBTREE`
+scope stops at that boundary (no double animation).
+
+Notes and limits:
+
+- Applies to the **CHANGE slot only**. ENTER and EXIT stay scoped to the
+  direct parent.
+- Inherited descendants resolve their CHANGE timing with cause `OTHER` (or
+  `WINDOW_RESIZED` during a window resize), so configure a **default** CHANGE
+  timing or animator for `SUBTREE` to take effect. Cause-specific timing
+  (`REORDERED`, `SIBLING_*`) is honoured only for direct children.
+- `SUBTREE` does not cross a standalone layout-mode boundary.
+- Each governed descendant is interpolated between its old and new arranged
+  bounds; the layout is not re-run at intermediate sizes.
 
 ---
 

@@ -222,7 +222,8 @@ private:
   void CollectTransitionViews(ViewImpl* node, std::vector<ViewImpl*>& out);
 
   /// Snapshots a single transition-attached view's children (helper for the
-  /// per-root traversal).
+  /// per-root traversal). When the view's reflow scope is SUBTREE, also
+  /// snapshots inherited descendants via @c CaptureGovernedChildren.
   void CaptureSingleView(ViewImpl* view);
 
   /// Dispatches ENTER / CHANGE for a single transition-attached view's
@@ -324,9 +325,18 @@ private:
 
   struct CapturedBounds
   {
-    ViewImpl*  child;
-    LayoutRect bounds;
+    ViewImpl* child;
+    ViewImpl* parent;  ///< The child's DIRECT parent at capture time. Equals the
+                       ///< owner for direct children; differs for SUBTREE-scope
+                       ///< inherited descendants.
+    LayoutRect bounds; ///< Visual bounds in @c parent 's local space.
   };
+
+  /// Appends @p parent 's direct children to @p out (each tagged with
+  /// @p parent). When @p recurse is true, descends into children that have
+  /// no transition of their own and are not standalone layout roots, so a
+  /// SUBTREE-scope owner captures the whole governed subtree in one snapshot.
+  void CaptureGovernedChildren(ViewImpl* parent, std::vector<CapturedBounds>& out, bool recurse);
 
   /// State for an in-flight spec-mode CHANGE / ENTER animation. Records the
   /// transition handle and slot so OnFinished can be emitted with the

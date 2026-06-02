@@ -464,6 +464,29 @@ public:
    */
   LayoutTransition& SetEnterOnInitialMount(bool enable);
 
+  /**
+   * @brief Selects how far the CHANGE slot reaches into the view tree.
+   *
+   * Default is @c LayoutReflowScope::DIRECT_CHILDREN: only the attached
+   * view's direct children animate, so a grand-child reflows only when its
+   * own immediate parent also carries a transition.
+   *
+   * @c LayoutReflowScope::SUBTREE reflows the whole subtree under the
+   * attached view with this transition's timing, without a transition on
+   * every intermediate container. A descendant that has its own transition
+   * stops the scope at that boundary (it governs its own children).
+   *
+   * @note Affects the CHANGE slot only; ENTER and EXIT stay scoped to the
+   * direct parent. Inherited descendants use @c LayoutChangeCause::OTHER
+   * (or @c WINDOW_RESIZED during a window resize) to resolve their timing,
+   * so configure a default CHANGE timing or animator for @c SUBTREE to take
+   * effect. The scope does not cross a standalone layout-mode boundary.
+   *
+   * @param[in] scope The reflow scope to apply
+   * @return Reference to this for chaining
+   */
+  LayoutTransition& SetReflowScope(LayoutReflowScope scope);
+
   // ──────────────────────────────────────────────────────────────────────
   // Lifecycle hooks (event-thread, per child × slot)
   // ──────────────────────────────────────────────────────────────────────

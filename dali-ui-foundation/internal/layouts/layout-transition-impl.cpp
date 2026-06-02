@@ -53,7 +53,8 @@ LayoutTransitionImpl::LayoutTransitionImpl()
   mExitAnimatorSet(false),
   mChangeAnimatorSet(false),
   mChangeOnWindowResize(false),
-  mEnterOnInitialMount(false)
+  mEnterOnInitialMount(false),
+  mReflowScope(LayoutReflowScope::DIRECT_CHILDREN)
 {
 }
 
@@ -316,6 +317,16 @@ void LayoutTransitionImpl::SetEnterOnInitialMount(bool enable)
 bool LayoutTransitionImpl::GetEnterOnInitialMount() const
 {
   return mEnterOnInitialMount;
+}
+
+void LayoutTransitionImpl::SetReflowScope(LayoutReflowScope scope)
+{
+  mReflowScope = scope;
+}
+
+LayoutReflowScope LayoutTransitionImpl::GetReflowScope() const
+{
+  return mReflowScope;
 }
 
 // ─── Lifecycle ───────────────────────────────────────────────────────────────

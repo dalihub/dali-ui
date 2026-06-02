@@ -185,6 +185,12 @@ LayoutTransition& LayoutTransition::SetEnterOnInitialMount(bool enable)
   return *this;
 }
 
+LayoutTransition& LayoutTransition::SetReflowScope(LayoutReflowScope scope)
+{
+  Internal::GetImpl(*this).SetReflowScope(scope);
+  return *this;
+}
+
 // ─── Lifecycle ───────────────────────────────────────────────────────────────
 
 LayoutTransition& LayoutTransition::SetOnStart(LayoutLifecycleCallback callback)

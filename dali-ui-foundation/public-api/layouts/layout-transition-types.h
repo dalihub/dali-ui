@@ -71,6 +71,33 @@ enum class LayoutChangeCause : uint8_t
 };
 
 /**
+ * @brief Selects how far a CHANGE transition reaches into the view tree.
+ *
+ * A LayoutTransition normally animates only the DIRECT children of the view
+ * it is attached to. A grand-child therefore animates only when its own
+ * immediate parent also carries a transition. @c SUBTREE removes that
+ * requirement for the CHANGE slot: one transition on a container reflows the
+ * whole subtree under it with a single timing.
+ *
+ * Scope resolution: a node is animated by the CLOSEST ancestor that has a
+ * transition. That ancestor reaches the node when it is the node's direct
+ * parent, or when its scope is @c SUBTREE. A descendant that has its own
+ * transition becomes the closest ancestor for its own children, so a
+ * @c SUBTREE scope does not cross it (no double animation).
+ *
+ * @note Applies to the CHANGE slot only. ENTER and EXIT remain scoped to the
+ * direct parent. Inherited descendants resolve their CHANGE timing with
+ * @c LayoutChangeCause::OTHER (or @c WINDOW_RESIZED during a window resize),
+ * so a default CHANGE timing or animator should be configured for @c SUBTREE
+ * to take effect. @c SUBTREE does not cross a standalone layout-mode boundary.
+ */
+enum class LayoutReflowScope : uint8_t
+{
+  DIRECT_CHILDREN = 0, ///< (default) Animate only the attached view's direct children
+  SUBTREE         = 1  ///< Also reach deeper descendants; recursion stops at (and includes) a descendant with its own transition, which then governs its subtree
+};
+
+/**
  * @brief Per-slot timing for declarative spec-mode layout transitions.
  *
  * Used by:
