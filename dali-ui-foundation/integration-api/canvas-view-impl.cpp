@@ -176,6 +176,9 @@ Dali::Property::Value CanvasViewImpl::GetProperty(Dali::BaseObject* object, Dali
 
 void CanvasViewImpl::OnInitialize()
 {
+  // Call base class initialization
+  ViewImpl::OnInitialize();
+
   // Trigger an initial rasterize so the view shows content as soon as it has a size.
   RequestRasterization();
 }
