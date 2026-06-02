@@ -57,6 +57,12 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨
 
 <br/>
 
+## Tools
+
+* [AI Agent Skills](https://github.sec.samsung.net/NUI/dali-ui/wiki/AI-Agent-Skills-(kr))
+
+<br/>
+
 ## Development Guides
 
 * [Fluent API](https://github.sec.samsung.net/NUI/dali-ui/wiki/Fluent-API-(kr))

@@ -180,6 +180,12 @@ Framework 개발자가 새 컴포넌트를 만들거나 앱이 커스텀 컴포�
 
 <br/>
 
+#### AI Agent Skill
+
+`View` 상속 클래스를 AI agent로 생성하려면 [AI Agent Skills - View Inheritance](https://github.sec.samsung.net/NUI/dali-ui/wiki/AI-Agent-Skills-(kr)#view-inheritance)를 참고하세요.
+
+<br/>
+
 ### 5. Inheriting from Classes derived from View
 
 앱이 `ImageView`나 `Label` 등을 상속 받으려면 약간의 트릭이 필요합니다. 핸들과 impl 클래스가 모두 제공되는 것은 `View` 뿐이기 때문에, 그 외 ` Label` 과 같은 클래스를 상속하려면 data attachment를 이용한 제한적인 방법을 적용해 볼 수 있습니다. 자세한 방법 및 주의 사항은 [#327](https://github.sec.samsung.net/NUI/dali-ui/pull/327)을 참고하세요.

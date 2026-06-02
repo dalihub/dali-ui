@@ -58,6 +58,12 @@ For details about the class structure and extensibility of `View`, see [here](ht
 
 <br/>
 
+## Tools
+
+* [AI Agent Skills](https://github.sec.samsung.net/NUI/dali-ui/wiki/AI-Agent-Skills)
+
+<br/>
+
 ## Development Guides
 
 * [Fluent API](https://github.sec.samsung.net/NUI/dali-ui/wiki/Fluent-API)

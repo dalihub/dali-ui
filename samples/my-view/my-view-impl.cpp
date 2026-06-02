@@ -34,6 +34,8 @@ MyViewImpl::MyViewImpl()
 
 void MyViewImpl::OnInitialize()
 {
+  ViewImpl::OnInitialize();
+
   MyView handle = MyView::DownCast(Self()); // Get handle
   handle.SetBackgroundColor(UiColor(0x00FFFF));
   handle.SetRequestedWidth(200_spx);

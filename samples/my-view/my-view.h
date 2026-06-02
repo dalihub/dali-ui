@@ -20,8 +20,8 @@ public:
   MyView();
   MyView(const MyView& DummyComponent);
   MyView(MyView&& rhs) noexcept;
-  MyView(MyViewImpl& impl);
-  MyView(Dali::Internal::CustomActor* customActor);
+  DALI_INTERNAL MyView(MyViewImpl& impl);
+  DALI_INTERNAL MyView(Dali::Internal::CustomActor* customActor);
 
   ~MyView();
 
