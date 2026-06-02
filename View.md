@@ -131,112 +131,39 @@ With this feature, users can make a view perform the role of a `Button` or `Swit
 
 When framework developers create a new component, or when an application needs a custom component, inherit from `View`'s **handle class** and **impl class** respectively.
 
+> [!NOTE]
+> <b>Special nature of ViewImpl</b> <br/>
+> In principle, impl classes are not exposed outside the library in order to preserve ABI stability. `ViewImpl` is an exception and is exposed at the public level. dali-ui controls changes to the object size and vtable of `ViewImpl` so that ABI stability can be maintained.
+
 <img src="./assets/custom-view.png" style="display:block;margin:0 auto"/>
 
-#### (1) Define the Impl Class
+<br/>
 
-Define an impl class that inherits from `ViewImpl` and place data and logic.
 
-<details>
-<summary><ins>code sample</ins></summary>
+#### MyView Example ([Link](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view))
 
-```cpp
-// my-view-impl.h
+* [my-view.h](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view.h)
+* [my-view.cpp](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view.cpp)
+* [my-view-impl.h](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.h)
+* [my-view-impl.cpp](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp)
 
-class MyViewImpl : public ViewImpl
-{
-public:
-  static IntrusivePtr<MyViewImpl> New();
+<br/>
 
-private:
-  int mMyData0;
-  float mMyData1;
-};
-```
+#### Class Description
 
-</details>
+Name | Role | Main Methods
+-- | -- | --
+`MyView` | <ul><li><b>Handle class</b></li><li>Inherits from View</li></ul> | <ul><li>`static New()`</li><li>`MyView DownCast(BaseHandle)`</li><li>`MyView(MyViewImpl)` constructor</li></ul>
+`MyViewImpl` | <ul><li><b>Impl class</b></li><li>Inherits from ViewImpl</li></ul> | <ul><li>`static New()`</li><li>`void OnInitialize()`</li></ul>
 
-#### (2) Define the Handle Class
+<br/>
 
-Define a handle class that inherits from `View`.
+#### Other Important Points
 
-<details>
-<summary><ins>code sample</ins></summary>
+* [GetImpl(MyView&)](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view.cpp#L13): obtains the impl from the handle
+* [Self()](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L57): obtains the handle from the impl
+* [DALI_TYPE_REGISTRATION_BEGIN(..)](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/samples/my-view/my-view-impl.cpp#L19): macro for DALi type registration
 
-```cpp
-// my-view.h
-class MyView : public View
-{
-public:
-  static MyView New();
-
-  // DownCast: View::DownCast<T, I>() 템플릿 사용
-  static MyView DownCast(BaseHandle handle)
-  {
-    return View::DownCast<MyView, MyViewImpl>(handle);
-  }
-
-  void DoSomething();
-
-  ~MyView(); // non-virtual
-};
-```
-
-</details>
-
-#### (3) Implement `New()`
-
-Implement the `New()` method so that the handle and impl can be created and connected.
-
-<details>
-<summary><ins>code sample</ins></summary>
-
-```cpp
-// my-view-impl.cpp
-IntrusivePtr<MyViewImpl> MyViewImpl::New()
-{
-  return IntrusivePtr<MyViewImpl>(new MyViewImpl());
-}
-```
-
-```cpp
-// my-view.cpp
-MyView MyView::New()
-{
-  IntrusivePtr<MyViewImpl> impl = MyViewImpl::New();
-  MyView handle(*impl);   // handle이 impl의 소유권을 획득
-  impl->Initialize();
-  return handle;
-}
-```
-
-</details>
-
-#### (4) Type Registration
-
-Register the newly added type so that the property system works properly.
-
-<details>
-<summary><ins>code sample</ins></summary>
-
-```cpp
-// my-view.cpp
-namespace
-{
-
-BaseHandle Create()
-{
-  return MyView::New();
-}
-
-DALI_TYPE_REGISTRATION_BEGIN(MyViewImpl, ViewImpl, Create)
-/* Register property here if needs */
-DALI_TYPE_REGISTRATION_END()
-
-} // anonymous namespace
-```
-
-</details>
 
 <br/>
 
