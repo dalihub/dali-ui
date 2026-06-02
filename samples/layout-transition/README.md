@@ -28,6 +28,17 @@ bounds change.
   own still has its inner items reflow. Toggle the scope back to
   `DIRECT_CHILDREN` to see the inner items snap while only the card
   animates.
+- **layout-transition-grid-reorder.example**: grid reorder sample. A
+  white root holds a translucent rounded panel at (80, 80) with a
+  right-aligned notification / edit row, a Wi-Fi / Bluetooth button row,
+  and a scrollable 3-column `GridLayout` of SVG icons (each with its
+  file-name label). Long-pressing a cell floats it under the window while
+  an invisible proxy reserves its slot; dragging moves the proxy to the
+  cell under the finger and reassigns every cell's `Row` / `Column`, so
+  the CHANGE slot animates the reflow. Dragging near the top / bottom of
+  the grid auto-scrolls. Because the cell captures the touch stream once a
+  drag can start, free scrolling uses the empty margins between cells; the
+  auto-scroll keeps off-screen cells reachable during a reorder.
 
 ## Controls
 
@@ -46,6 +57,9 @@ bounds change.
 - **Tap "Toggle layout" / "Scope: ..."**: in the subtree example, toggle
   the nested sizes, or switch the root transition between `SUBTREE` and
   `DIRECT_CHILDREN`.
+- **Long-press + drag a grid cell**: in the grid reorder example, hold a
+  cell to pick it up, then drag to move it through the grid order; release
+  to drop. Drag near the top or bottom of the grid to auto-scroll.
 - **Up arrow**: same as the ENTER button (Toggle layout in the subtree
   example).
 - **Down arrow**: same as the EXIT button (Toggle layout in the subtree
@@ -86,4 +100,5 @@ Run:
 ./bin/layout-transition-animator.example
 ./bin/layout-transition-reorder.example
 ./bin/layout-transition-subtree.example
+./bin/layout-transition-grid-reorder.example
 ```
