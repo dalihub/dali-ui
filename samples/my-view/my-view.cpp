@@ -59,21 +59,6 @@ MyView::~MyView()
 {
 }
 
-MyView& MyView::operator=(const MyView& handle)
-{
-  if(&handle != this)
-  {
-    View::operator=(handle);
-  }
-  return *this;
-}
-
-MyView& MyView::operator=(MyView&& rhs) noexcept
-{
-  View::operator=(std::move(rhs));
-  return *this;
-}
-
 void MyView::ChangeBackground()
 {
   GetImpl(*this).ChangeBackground();

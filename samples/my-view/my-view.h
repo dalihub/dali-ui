@@ -25,8 +25,8 @@ public:
 
   ~MyView();
 
-  MyView& operator=(const MyView& handle);
-  MyView& operator=(MyView&& rhs) noexcept;
+  MyView& operator=(const MyView& handle) = default;
+  MyView& operator=(MyView&& rhs) noexcept = default;
 
   void ChangeBackground();
 
