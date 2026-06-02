@@ -22,6 +22,12 @@ bounds change.
   dragging an item near the top / bottom edge of the viewport
   auto-scrolls the list in that direction so items beyond the visible
   area become reachable without releasing the drag.
+- **layout-transition-subtree.example**: reflow-scope sample. A single
+  transition on the root container reflows the whole subtree under
+  `LayoutReflowScope::SUBTREE` — a nested card with no transition of its
+  own still has its inner items reflow. Toggle the scope back to
+  `DIRECT_CHILDREN` to see the inner items snap while only the card
+  animates.
 
 ## Controls
 
@@ -37,8 +43,13 @@ bounds change.
   sibling order; release to drop. Drag near the top or bottom of the
   ScrollView viewport to auto-scroll the list and continue reordering
   items beyond the visible area.
-- **Up arrow**: same as the ENTER button.
-- **Down arrow**: same as the EXIT button.
+- **Tap "Toggle layout" / "Scope: ..."**: in the subtree example, toggle
+  the nested sizes, or switch the root transition between `SUBTREE` and
+  `DIRECT_CHILDREN`.
+- **Up arrow**: same as the ENTER button (Toggle layout in the subtree
+  example).
+- **Down arrow**: same as the EXIT button (Toggle layout in the subtree
+  example).
 - **Esc / Back**: quit.
 
 The remaining children also reflow on every add / remove; their
@@ -74,4 +85,5 @@ Run:
 ./bin/layout-transition-spec.example
 ./bin/layout-transition-animator.example
 ./bin/layout-transition-reorder.example
+./bin/layout-transition-subtree.example
 ```

@@ -98,5 +98,6 @@ exit 0
 %{app_exe_dir}/layout-transition-spec.example
 %{app_exe_dir}/layout-transition-animator.example
 %{app_exe_dir}/layout-transition-reorder.example
+%{app_exe_dir}/layout-transition-subtree.example
 %{app_res_dir}/*
 %{xml_file_dir}/%{name}.xml
