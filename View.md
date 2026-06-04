@@ -177,6 +177,12 @@ Name | Role | Main Methods
 
 <br/>
 
+#### AI Agent Skill
+
+To generate a `View`-derived class with an AI agent, see [AI Agent Skills - View Inheritance](https://github.sec.samsung.net/NUI/dali-ui/wiki/AI-Agent-Skills#view-inheritance).
+
+<br/>
+
 ### 5. Inheriting from Classes Derived from View
 
 Applications need a small trick to inherit from classes such as `ImageView` or `Label`. Since `View` is the only class for which both the handle and impl classes are provided, inheriting from other classes such as `Label` requires a limited approach using data attachment. For details and precautions, see [#327](https://github.sec.samsung.net/NUI/dali-ui/pull/327).
