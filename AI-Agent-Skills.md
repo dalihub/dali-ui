@@ -1,8 +1,11 @@
-# AI Agent Skills
-
 [→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/AI-Agent-Skills-(kr))
 
-This page lists AI agent skills that can be used for DALi UI development.
+# AI Agent Skills
+
+dali-ui provides several AI Coding Agent skills that help with development. The skills below help developers avoid missing rules that must be followed in specific situations.
+
+> [!WARNING]
+> Skills are aimed at reviewing rules for specific situations to ensure code correctness, so they are different from using MCP server.
 
 <br/>
 
