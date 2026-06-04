@@ -1342,7 +1342,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       return;
     }
 
-    DALI_LOG_RELEASE_INFO("[%p] Request render, size : %f, %f [%s] \n", mController.Get(), contentSize.width, contentSize.height, GetText().CStr());
+    DALI_LOG_RELEASE_INFO("[%p] Request render, size : %f, %f\n", mController.Get(), contentSize.width, contentSize.height);
 
     Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
     Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);

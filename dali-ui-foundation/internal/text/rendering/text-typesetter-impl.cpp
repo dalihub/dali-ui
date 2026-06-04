@@ -29,6 +29,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/character-spacing-glyph-run.h>
+#include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
@@ -166,7 +167,7 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
   const int32_t xOffset = data.horizontalOffset + position->x;
 
   // Whether the given glyph is a color one.
-  const bool     isColorGlyph    = data.glyphBitmap.isColorEmoji || data.glyphBitmap.isColorBitmap;
+  const bool     isColorGlyph    = Internal::IsColorGlyphBuffer(data.glyphBitmap);
   const uint32_t glyphPixelSize  = Pixel::GetBytesPerPixel(data.glyphBitmap.format);
   const uint32_t glyphAlphaIndex = (glyphPixelSize > 0u) ? glyphPixelSize - 1u : 0u;
 

@@ -31,6 +31,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
+#include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-run.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.h>
@@ -202,7 +203,8 @@ struct AtlasRenderer::Impl
       const bool isOutline = 0u != style.outline;
 
       // Whether the current glyph is a color one.
-      const bool isColorGlyph = mFontClient.IsColorGlyph(glyph.fontId, glyph.index);
+      const bool isColorGlyph =
+        Dali::Ui::Text::Internal::IsRenderableColorGlyph(mFontClient, glyph.fontId, glyph.index);
 
       if(!isOutline || (isOutline && !isColorGlyph))
       {
