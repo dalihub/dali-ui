@@ -37,7 +37,16 @@ git clone -b {skill-name} --single-branch https://github.com/dalihub/dali-skills
 <br/>
 
 * **skill-name** : 스킬의 이름. [스킬 목록](https://github.sec.samsung.net/NUI/dali-ui/wiki/AI-Agent-Skills-(kr)#skill-list)에서 확인 가능
-* **agent-skills-dir** : 설치 폴더. Claude의 경우 전역은 `~/.claude/skills`, 프로젝트는 `/path/to/project/.claude/skills`
+* **agent-skills-dir** : 설치 폴더.
+
+<br/>
+
+#### 참고: 스킬 설치 위치
+
+| Agent | Project-local | User-global |
+|---|---|---|
+| Codex | `<project-root>/.agents/skills` | `~/.agents/skills` |
+| Claude Code | `<project-root>/.claude/skills` | `~/.claude/skills` |
 
 <br/>
 
@@ -50,7 +59,7 @@ git clone -b dali-ui-view-inheritance --single-branch https://github.com/dalihub
 #### 예: Codex 프로젝트 폴더에 설치
 
 ```bash
-git clone -b dali-ui-view-inheritance --single-branch https://github.com/dalihub/dali-skills.git /path/to/project/.codex/skills
+git clone -b dali-ui-view-inheritance --single-branch https://github.com/dalihub/dali-skills.git /path/to/project/.agents/skills
 ```
 
 <br/>
