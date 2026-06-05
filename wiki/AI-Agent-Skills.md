@@ -38,6 +38,15 @@ git clone -b {skill-name} --single-branch https://github.com/dalihub/dali-skills
 
 <br/>
 
+#### Reference : Coding Agents Skill Directory
+
+| Agent | Project-local | User-global |
+|---|---|---|
+| Codex | `<project-root>/.agents/skills` | `~/.agents/skills` |
+| Claude Code | `<project-root>/.claude/skills` | `~/.claude/skills` |
+
+<br/>
+
 #### 예: Install to Claude global settings
 
 ```bash
@@ -47,7 +56,7 @@ git clone -b dali-ui-view-inheritance --single-branch https://github.com/dalihub
 #### 예: Install to Codex project settings
 
 ```bash
-git clone -b dali-ui-view-inheritance --single-branch https://github.com/dalihub/dali-skills.git /path/to/project/.codex/skills
+git clone -b dali-ui-view-inheritance --single-branch https://github.com/dalihub/dali-skills.git /path/to/project/.agents/skills
 ```
 
 <br/>
