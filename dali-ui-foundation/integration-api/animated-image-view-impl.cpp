@@ -1130,6 +1130,7 @@ void AnimatedImageViewImpl::UpdateVisual()
     if(mVisual)
     {
       viewData.RegisterVisual(AnimatedImageViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
+      viewData.EnableCornerPropertiesOverridden(mVisual, true);
     }
   }
 }
@@ -1164,6 +1165,7 @@ void AnimatedImageViewImpl::UpdatePlaceholderVisual()
   if(visual)
   {
     viewData.RegisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
+    viewData.EnableCornerPropertiesOverridden(visual, true);
   }
 }
 

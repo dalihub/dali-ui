@@ -896,6 +896,7 @@ void LottieAnimationViewImpl::UpdateVisual()
     if(mVisual)
     {
       viewData.RegisterVisual(LottieAnimationViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
+      viewData.EnableCornerPropertiesOverridden(mVisual, true);
     }
   }
 }
@@ -1046,6 +1047,7 @@ void LottieAnimationViewImpl::UpdatePlaceholderVisual()
   if(visual)
   {
     viewData.RegisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
+    viewData.EnableCornerPropertiesOverridden(visual, true);
   }
 }
 

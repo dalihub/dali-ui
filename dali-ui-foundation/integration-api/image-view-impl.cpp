@@ -793,6 +793,7 @@ void ImageViewImpl::UpdatePlaceholderVisual()
   if(visual)
   {
     viewData.RegisterVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
+    viewData.EnableCornerPropertiesOverridden(visual, true);
   }
 }
 
@@ -949,6 +950,7 @@ void ImageViewImpl::UpdateVisual()
     {
       DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: RegisterVisual result=ok\n");
       viewData.RegisterVisual(ImageViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
+      viewData.EnableCornerPropertiesOverridden(mVisual, true);
     }
     else
     {
