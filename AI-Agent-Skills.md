@@ -1,11 +1,14 @@
 [→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/AI-Agent-Skills-(kr))
 
+> [!CAUTION]
+> This page contains experimental content.
+
+> [!IMPORTANT]
+> Once the dali MCP server is operational, the static templates included in the skills will be removed and updated to query the latest patterns from the MCP server.
+
 # AI Agent Skills
 
 dali-ui provides several AI Coding Agent skills that assist with development. These skills use **code templates** applicable to specific situations to write customized code, helping you quickly scaffold your app.
-
-> [!IMPORTANT]
-> dali-ui skills are intended to provide templates suitable for specific situations, so they are different in nature from using MCP servers.
 
 <br/>
 
