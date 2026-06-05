@@ -17,7 +17,10 @@
 
 #ifndef DALI_UI_ELEMENTS_SCROLL_VIEW_H
 #define DALI_UI_ELEMENTS_SCROLL_VIEW_H
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/edge-effect.h>
 #include <dali-ui-foundation/public-api/scrollable-enum.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/public-api/math/vector2.h>
@@ -369,6 +372,41 @@ public: // Scroll Bar Visibility
    * @return The horizontal scroll bar visibility
    */
   ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
+
+public: // Edge Effects
+  /**
+   * @brief Sets the edge effect shown when content is dragged or flung past the start boundary.
+   *
+   * For Vertical scrolling: the top (beginning) edge.
+   * For Horizontal scrolling: the left (beginning) edge.
+   * Pass an uninitialized EdgeEffect() to remove the effect.
+   *
+   * @param[in] effect The edge effect to activate at the start boundary.
+   */
+  void SetStartEdgeEffect(EdgeEffect effect);
+
+  /**
+   * @brief Gets the start-boundary edge effect (uninitialized if none is set).
+   */
+  EdgeEffect GetStartEdgeEffect() const;
+
+  /**
+   * @brief Sets the edge effect shown when content is dragged or flung past the end boundary.
+   *
+   * For Vertical scrolling: the bottom (end) edge.
+   * For Horizontal scrolling: the right (end) edge.
+   * Pass an uninitialized EdgeEffect() to remove the effect.
+   *
+   * @param[in] effect The edge effect to activate at the end boundary.
+   */
+  void SetEndEdgeEffect(EdgeEffect effect);
+
+  /**
+   * @brief Gets the end-boundary edge effect (uninitialized if none is set).
+   */
+  EdgeEffect GetEndEdgeEffect() const;
+
+  // @CHAIN_END
 
 public: // Non-Chainable Methods
   /**

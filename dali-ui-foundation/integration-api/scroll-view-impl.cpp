@@ -207,6 +207,10 @@ void ScrollViewImpl::SetContent(View content)
                                                                     StepCondition(1.0f, 0.0f));
     mContentPositionNotification.NotifySignal().Connect(this, &ScrollViewImpl::OnContentPositionChanged);
 
+    // Keep edge-effect sources in sync with the content view.
+    if(mStartEdgeEffect) mStartEdgeEffect.SetSource(mContent);
+    if(mEndEdgeEffect) mEndEdgeEffect.SetSource(mContent);
+
     UpdateScrollingProperties();
   }
 }
@@ -644,9 +648,13 @@ View ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDi
 
   if(!next)
   {
-    // No more focusable items inside the content in this direction.
-    // Return an empty handle so FocusFinder can move focus to a view outside
-    // this ScrollView (e.g. a sibling widget below the scroll area).
+    // No more focusable items in this direction. If we are also at the scroll
+    // boundary, play a one-shot absorb animation so the user gets visual
+    // feedback that the list has ended.
+    if(IsAtScrollBoundary(direction))
+    {
+      TriggerKeyEdgeFeedback(direction);
+    }
     return View();
   }
 
@@ -789,6 +797,38 @@ bool ScrollViewImpl::IsAtScrollBoundary(FocusDirection direction) const
   }
 }
 
+void ScrollViewImpl::TriggerKeyEdgeFeedback(FocusDirection direction)
+{
+  // velocity chosen so |vel| * ABSORB_FACTOR (~0.05) ≈ 30 px displacement.
+  constexpr float KEY_ABSORB_VEL = 600.0f;
+
+  switch(direction)
+  {
+    case FocusDirection::UP:
+    case FocusDirection::PAGE_UP:
+      if(mStartEdgeEffect)
+        mStartEdgeEffect.OnAbsorb(KEY_ABSORB_VEL);
+      break;
+    case FocusDirection::DOWN:
+    case FocusDirection::PAGE_DOWN:
+      if(mEndEdgeEffect)
+        mEndEdgeEffect.OnAbsorb(-KEY_ABSORB_VEL);
+      break;
+    case FocusDirection::LEFT:
+    {
+      if(mStartEdgeEffect) mStartEdgeEffect.OnAbsorb(KEY_ABSORB_VEL);
+      break;
+    }
+    case FocusDirection::RIGHT:
+    {
+      if(mEndEdgeEffect) mEndEdgeEffect.OnAbsorb(-KEY_ABSORB_VEL);
+      break;
+    }
+    default:
+      break;
+  }
+}
+
 void ScrollViewImpl::ScrollByKeyDirection(FocusDirection direction)
 {
   Vector2 pos = GetScrollPosition();
@@ -895,6 +935,34 @@ void ScrollViewImpl::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibi
 {
   mHorizontalScrollBarVisibility = visibility;
   mScrollBar.SetHorizontalScrollBarVisibility(visibility);
+}
+
+void ScrollViewImpl::SetStartEdgeEffect(Ui::EdgeEffect effect)
+{
+  mStartEdgeEffect = effect;
+  if(mStartEdgeEffect && mContent)
+  {
+    mStartEdgeEffect.SetSource(mContent);
+  }
+}
+
+Ui::EdgeEffect ScrollViewImpl::GetStartEdgeEffect() const
+{
+  return mStartEdgeEffect;
+}
+
+void ScrollViewImpl::SetEndEdgeEffect(Ui::EdgeEffect effect)
+{
+  mEndEdgeEffect = effect;
+  if(mEndEdgeEffect && mContent)
+  {
+    mEndEdgeEffect.SetSource(mContent);
+  }
+}
+
+Ui::EdgeEffect ScrollViewImpl::GetEndEdgeEffect() const
+{
+  return mEndEdgeEffect;
 }
 
 Ui::ScrollView::ScrollStartedSignalType& ScrollViewImpl::ScrollStartedSignal()
@@ -1180,6 +1248,31 @@ bool ScrollViewImpl::OnInterceptTouch(Actor actor, TouchEvent touch)
 
   if(state == PointState::DOWN)
   {
+    // mIntercepting stays true only when the previous touch sequence was abandoned
+    // (pointer left the window with no UP/INTERRUPTED reaching OnTouch).
+    // A normal release always reaches OnTouch(UP) which sets mIntercepting=false,
+    // so this block is a no-op for every properly-terminated sequence.
+    if(mIntercepting)
+    {
+      if(mStartEdgeActive)
+      {
+        if(mStartEdgeEffect) mStartEdgeEffect.Finish();
+        mStartEdgeActive  = false;
+        mEdgeDisplacement = 0.0f;
+      }
+      if(mEndEdgeActive)
+      {
+        if(mEndEdgeEffect) mEndEdgeEffect.Finish();
+        mEndEdgeActive    = false;
+        mEdgeDisplacement = 0.0f;
+      }
+      if(mIsDragging)
+      {
+        CancelScrollAnimation();
+        SendDragFinished();
+      }
+    }
+
     // Reset all state on every new touch sequence.
     mIntercepting    = false;
     mJustIntercepted = false;
@@ -1199,10 +1292,10 @@ bool ScrollViewImpl::OnInterceptTouch(Actor actor, TouchEvent touch)
   TouchEvent& nonConstTouch = touch;
   mPanGestureDetector.HandleEvent(actor, nonConstTouch);
 
-  if((state == PointState::UP || state == PointState::INTERRUPTED) && mDisambiguating)
+  if((state == PointState::UP || state == PointState::INTERRUPTED || state == PointState::LEAVE) && mDisambiguating)
   {
-    // Touch ended without the gesture detector resolving disambiguation
-    // (pure tap: pan was never recognized, so OnPanGesture never fired).
+    // Touch ended (or left window) without the gesture detector resolving
+    // disambiguation (pure tap / pointer exit before threshold).
     mDisambiguating = false;
     Ui::Internal::ScrollStateObserver::Get().NotifyGestureDisambiguationEnded();
   }
@@ -1231,6 +1324,56 @@ bool ScrollViewImpl::OnTouch(Actor actor, TouchEvent touch)
   PointState::Type state = touch.GetState(0);
   if(state == PointState::UP || state == PointState::INTERRUPTED)
   {
+    // Pan CANCELLED fires synchronously inside HandleEvent above, so OnDragFinished
+    // has already cleared mIsDragging/mStartEdgeActive.  This block is therefore a
+    // no-op for the common case and acts as a safety net for any path where
+    // OnDragFinished was skipped (e.g. gesture not yet recognised at lift-off).
+    if(mIsDragging)
+    {
+      if(mStartEdgeActive)
+      {
+        if(mStartEdgeEffect) mStartEdgeEffect.OnRelease();
+        mStartEdgeActive  = false;
+        mEdgeDisplacement = 0.0f;
+      }
+      if(mEndEdgeActive)
+      {
+        if(mEndEdgeEffect) mEndEdgeEffect.OnRelease();
+        mEndEdgeActive    = false;
+        mEdgeDisplacement = 0.0f;
+      }
+      CancelScrollAnimation();
+      SendDragFinished();
+    }
+    mIntercepting = false;
+  }
+  else if(state == PointState::LEAVE)
+  {
+    // Touch left the ScrollView bounds. The pan gesture may fire CANCELLED
+    // synchronously inside HandleEvent() above, in which case OnDragFinished
+    // has already handled edge-effect cleanup and any fling.  If the gesture
+    // detector does not cancel on LEAVE (gesture still live), we treat this
+    // the same as an interrupted touch to avoid a dangling drag state.
+    if(mIsDragging)
+    {
+      // Use Finish() (immediate reset, no spring-back animation) so that a
+      // subsequent gesture CANCELLED / finger-up fling can animate content
+      // without conflicting with a bounce animation.
+      if(mStartEdgeActive)
+      {
+        if(mStartEdgeEffect) mStartEdgeEffect.Finish();
+        mStartEdgeActive  = false;
+        mEdgeDisplacement = 0.0f;
+      }
+      if(mEndEdgeActive)
+      {
+        if(mEndEdgeEffect) mEndEdgeEffect.Finish();
+        mEndEdgeActive    = false;
+        mEdgeDisplacement = 0.0f;
+      }
+      CancelScrollAnimation();
+      SendDragFinished();
+    }
     mIntercepting = false;
   }
 
@@ -1340,26 +1483,82 @@ void ScrollViewImpl::OnDragging(const PanGesture& gesture)
 {
   // Threshold check is done in OnPanGesture before OnDragging is ever called,
   // so here we unconditionally apply the displacement to the content position.
-  Vector2 delta = AdjustDelta(gesture.GetDisplacement(),
-                              Vector2(mContent.GetProperty<float>(Actor::Property::POSITION_X),
-                                      mContent.GetProperty<float>(Actor::Property::POSITION_Y)));
+  //
+  // Use mCurrentPosition (scroll-managed) rather than reading the live actor
+  // position.  When an edge effect is active it physically displaces mContent,
+  // so GetProperty would return boundary + bounceOffset.  Feeding that offset
+  // back into AdjustDelta produces a large negative delta and a runaway
+  // over-scroll feedback loop ("bouncing forever").
+  Vector2 curPos   = mCurrentPosition;
+  Vector2 adjusted = AdjustMovement(gesture.GetDisplacement());      // direction-filtered, NOT clamped
+  Vector2 delta    = AdjustDelta(gesture.GetDisplacement(), curPos); // clamped to scroll bounds
 
-  if(delta.LengthSquared() < 0.0001f)
+  // If the user reverses direction while an edge effect is still active (scroll
+  // resumes into the valid range), dismiss the effect immediately so its
+  // internal offset does not compound on the next pull.
+  if(delta.LengthSquared() > 0.0001f && (mStartEdgeActive || mEndEdgeActive))
+  {
+    if(mStartEdgeActive)
+    {
+      if(mStartEdgeEffect) mStartEdgeEffect.Finish();
+      mStartEdgeActive  = false;
+      mEdgeDisplacement = 0.0f;
+    }
+    if(mEndEdgeActive)
+    {
+      if(mEndEdgeEffect) mEndEdgeEffect.Finish();
+      mEndEdgeActive    = false;
+      mEdgeDisplacement = 0.0f;
+    }
+  }
+  // Compute the over-scroll: the finger displacement that exceeds the scroll boundary.
+  // overScroll.y > 0 → dragging content down at top boundary (start edge).
+  // overScroll.y < 0 → dragging content up at bottom boundary (end edge).
+  Vector2 overScroll = adjusted - delta;
+
+  if(delta.LengthSquared() < 0.0001f && overScroll.LengthSquared() < 0.0001f)
   {
     return;
   }
 
-  float newX = mContent.GetProperty<float>(Actor::Property::POSITION_X) + delta.x;
-  float newY = mContent.GetProperty<float>(Actor::Property::POSITION_Y) + delta.y;
-  // Scroll offset drives the rendered position directly. Setting the
-  // Actor property bypasses layout so this does not feed back into the
-  // requested layout position.
-  mContent.SetProperty(Actor::Property::POSITION_X, newX);
-  mContent.SetProperty(Actor::Property::POSITION_Y, newY);
+  // Update content position BEFORE calling OnPull so that CaptureBasePosition()
+  // inside BounceEdgeEffectImpl reads the boundary position, not the pre-delta position.
+  // Without this ordering, mBasePosition is captured one frame early (e.g. y=-800 instead
+  // of y=-900), causing ApplyOffset to never push the content past the visible boundary.
+  if(delta.LengthSquared() > 0.0001f)
+  {
+    float newX = curPos.x + delta.x;
+    float newY = curPos.y + delta.y;
+    // Scroll offset drives the rendered position directly. Setting the
+    // Actor property bypasses layout so this does not feed back into the
+    // requested layout position.
+    mContent.SetProperty(Actor::Property::POSITION_X, newX);
+    mContent.SetProperty(Actor::Property::POSITION_Y, newY);
 
-  // Update scroll position from the actual content position
-  mCurrentPosition = Vector2(newX, newY);
-  mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
+    // Update scroll position from the actual content position
+    mCurrentPosition = Vector2(newX, newY);
+    mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
+  }
+
+  // Drive edge effects AFTER content position is updated so that
+  // CaptureBasePosition() inside BounceEdgeEffectImpl reads the boundary
+  // position (just set above), not the previous frame's position.
+  if((mStartEdgeEffect || mEndEdgeEffect) && overScroll.LengthSquared() > 0.0f)
+  {
+    float over = (mScrollDirection == ScrollDirection::Horizontal) ? overScroll.x : overScroll.y;
+    if(over > 0.0f && mStartEdgeEffect)
+    {
+      mEdgeDisplacement += over;
+      mStartEdgeEffect.OnPull(over, mEdgeDisplacement);
+      mStartEdgeActive = true;
+    }
+    else if(over < 0.0f && mEndEdgeEffect)
+    {
+      mEdgeDisplacement += -over;
+      mEndEdgeEffect.OnPull(over, -mEdgeDisplacement);
+      mEndEdgeActive = true;
+    }
+  }
 
   if(!mIsScrolling)
   {
@@ -1378,13 +1577,10 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
 {
   SendDragFinished();
 
-  // Update mCurrentPosition from the actual content position after dragging
-  if(mContent)
-  {
-    mCurrentPosition = Vector2(mContent.GetProperty<float>(Actor::Property::POSITION_X),
-                               mContent.GetProperty<float>(Actor::Property::POSITION_Y));
-    mScrollPosition  = ContentPositionToScrollPosition(mCurrentPosition);
-  }
+  // Do NOT read mContent.GetProperty here: if an edge effect displaced mContent
+  // for the bounce visual, the live position includes that offset and would
+  // contaminate mCurrentPosition / mScrollPosition.  Both were kept accurate
+  // throughout the drag by OnDragging (updated on every non-zero delta).
 
   // Use the history-weighted velocity instead of the raw last-frame velocity.
   // mFlingSensitivity lets callers tune the effective speed.
@@ -1405,6 +1601,73 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
   constexpr float FLING_VSTOP  = 0.04f;  // velocity at which animation is considered done (px/ms)
 
   float speed = velocity.Length();
+
+  // Compute fling movement vector (zero if speed is below threshold).
+  // Edge-effect release logic below needs movement/delta regardless of whether
+  // a fling animation will be started, so compute them before the early-return.
+  Vector2 movement = Vector2::ZERO;
+  Vector2 delta    = Vector2::ZERO;
+  if(speed >= FLING_VMIN)
+  {
+    float distance = speed / FLING_K_DIST;
+    distance       = std::min(distance, mMaxFlingDistance);
+    movement       = (velocity / speed) * distance;
+    delta          = AdjustDelta(movement, mCurrentPosition);
+  }
+
+  // Release any active edge effects (or trigger absorb for a fling into the boundary).
+  // Must happen before any early return so that a slow lift always springs back.
+  if(mStartEdgeActive || mEndEdgeActive)
+  {
+    if(mStartEdgeActive)
+    {
+      // Fling delta is also clamped: if movement != delta, the fling hits the start boundary
+      float flingAxis         = (mScrollDirection == ScrollDirection::Horizontal) ? movement.x : movement.y;
+      float deltaAxis         = (mScrollDirection == ScrollDirection::Horizontal) ? delta.x : delta.y;
+      bool  flingHitsBoundary = std::abs(flingAxis) > 0.001f && std::abs(deltaAxis) < std::abs(flingAxis) * 0.5f;
+      if(flingHitsBoundary && mStartEdgeEffect)
+      {
+        float absVel = (mScrollDirection == ScrollDirection::Horizontal)
+                         ? std::abs(velocity.x)
+                         : std::abs(velocity.y);
+        mStartEdgeEffect.OnAbsorb(absVel);
+      }
+      else if(mStartEdgeEffect)
+      {
+        // When a fling is about to start, finish immediately so the fling animation
+        // has sole ownership of content position (no spring-back conflict).
+        if(speed >= FLING_VMIN)
+          mStartEdgeEffect.Finish();
+        else
+          mStartEdgeEffect.OnRelease();
+      }
+      mStartEdgeActive  = false;
+      mEdgeDisplacement = 0.0f;
+    }
+    else if(mEndEdgeActive)
+    {
+      float flingAxis         = (mScrollDirection == ScrollDirection::Horizontal) ? movement.x : movement.y;
+      float deltaAxis         = (mScrollDirection == ScrollDirection::Horizontal) ? delta.x : delta.y;
+      bool  flingHitsBoundary = std::abs(flingAxis) > 0.001f && std::abs(deltaAxis) < std::abs(flingAxis) * 0.5f;
+      if(flingHitsBoundary && mEndEdgeEffect)
+      {
+        float absVel = (mScrollDirection == ScrollDirection::Horizontal)
+                         ? std::abs(velocity.x)
+                         : std::abs(velocity.y);
+        mEndEdgeEffect.OnAbsorb(-absVel); // negative: moving toward end boundary
+      }
+      else if(mEndEdgeEffect)
+      {
+        if(speed >= FLING_VMIN)
+          mEndEdgeEffect.Finish();
+        else
+          mEndEdgeEffect.OnRelease();
+      }
+      mEndEdgeActive    = false;
+      mEdgeDisplacement = 0.0f;
+    }
+  }
+
   if(speed < FLING_VMIN)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] speed %.3f < %.3f, no fling\n", speed, FLING_VMIN);
@@ -1412,22 +1675,14 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
     return;
   }
 
-  float distance = speed / FLING_K_DIST;
-  distance       = std::min(distance, mMaxFlingDistance);
-
   float effectiveVStop = std::min(FLING_VSTOP, speed * 0.5f);
   float durationMs     = std::log(speed / effectiveVStop) / FLING_K_DUR;
   durationMs           = std::max(static_cast<float>(mMinimumFlingDuration),
                                   std::min(static_cast<float>(mMaximumFlingDuration), durationMs));
 
-  // Preserve the direction of the finger's velocity, scaled to the target distance.
-  Vector2 movement = (velocity / speed) * distance;
-
-  Vector2 delta = AdjustDelta(movement, mCurrentPosition);
-
 #ifdef DEBUG_SCROLL
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] trackedVel=[%.3f, %.3f] speed=%.3f dist=%.1f durMs=%.0f movement=[%.1f, %.1f] delta=[%.1f, %.1f]\n",
-                velocity.x, velocity.y, speed, distance, durationMs,
+                velocity.x, velocity.y, speed, movement.Length(), durationMs,
                 movement.x, movement.y, delta.x, delta.y);
 #endif
 
@@ -1630,6 +1885,15 @@ void ScrollViewImpl::OnLayoutDirectionChanged(Actor actor, LayoutDirection::Type
 void ScrollViewImpl::OnContentPositionChanged(PropertyNotification source)
 {
   if(!mContent)
+  {
+    return;
+  }
+
+  // Only track position during a DALi scroll animation. When no scroll animation
+  // is running the notification fires because a bounce edge effect is physically
+  // displacing mContent, and reading GetCurrentProperty would contaminate
+  // mCurrentPosition / mScrollPosition with the bounce offset.
+  if(!mScrollAnimation)
   {
     return;
   }

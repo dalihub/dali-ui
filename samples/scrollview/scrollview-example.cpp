@@ -38,10 +38,12 @@
  *   + / -     — increase / decrease FocusScrollPeek by 10 px
  *   K         — toggle KeyScrollEnabled on / off
  *   [ / ]     — decrease / increase KeyScrollStep by 20 px
+ *   E         — toggle BounceEdgeEffect on / off (drag past top/bottom to test)
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
+#include <dali-ui-foundation/public-api/bounce-edge-effect.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <sstream>
 
@@ -53,7 +55,7 @@ using ScrollStateObserver = Dali::Ui::Internal::ScrollStateObserver;
 static constexpr float WINDOW_W      = 600.0f;
 static constexpr float WINDOW_H      = 1080.0f;
 static constexpr float OBSERVER_H    = 130.0f;
-static constexpr float SIGNAL_LOG_H  = 90.0f;
+static constexpr float SIGNAL_LOG_H  = 116.0f; // +26px for edge-effect status row
 static constexpr float FOCUS_PANEL_H     = 214.0f;
 static constexpr float SCROLL_Y          = OBSERVER_H + SIGNAL_LOG_H + FOCUS_PANEL_H; // 434
 static constexpr float SCROLL_VIEW_H     = WINDOW_H - SCROLL_Y;                       // 646
@@ -266,6 +268,14 @@ private:
     mFlingVelocityLabel.SetTextColor(Color::WHITE);
     panel.Add(mFlingVelocityLabel);
 
+    mEdgeEffectLabel = Label::New("EdgeEffect: OFF  ( E to toggle )");
+    mEdgeEffectLabel.SetRequestedWidth(WINDOW_W - 8.0f);
+    mEdgeEffectLabel.SetRequestedHeight(26.0f);
+    mEdgeEffectLabel.SetRequestedPositionX(8.0f);
+    mEdgeEffectLabel.SetRequestedPositionY(84.0f);
+    mEdgeEffectLabel.SetTextColor(Color::WHITE);
+    panel.Add(mEdgeEffectLabel);
+
     window.Add(panel);
   }
 
@@ -397,7 +407,7 @@ private:
     panel.Add(mKeyScrollStepLabel);
 
     // Key hint row
-    Label keyHint = Label::New("Keys: ↑↓ focus  S scroll-on-focus  1~4 mode  +/- peek  K key-scroll  [/] step");
+    Label keyHint = Label::New("Keys: ↑↓ focus  S scroll-on-focus  1~4 mode  +/- peek  K key-scroll  [/] step  E edge-effect");
     keyHint.SetRequestedWidth(WINDOW_W - 8.0f);
     keyHint.SetRequestedHeight(22.0f);
     keyHint.SetRequestedPositionX(8.0f);
@@ -471,6 +481,21 @@ private:
     mScrollView.DragStartedSignal().Connect(this,    &ScrollViewController::OnSVDragStarted);
     mScrollView.DraggingSignal().Connect(this,       &ScrollViewController::OnSVDragging);
     mScrollView.DragFinishedSignal().Connect(this,   &ScrollViewController::OnSVDragFinished);
+    mScrollView.TouchedSignal().Connect(this,        &ScrollViewController::OnSVTouched);
+  }
+
+  bool OnSVTouched(Actor /*actor*/, TouchEvent touch)
+  {
+    static const char* STATE_NAMES[] = {"DOWN", "UP", "MOTION", "LEAVE", "STATIONARY", "INTERRUPTED"};
+    PointState::Type   state         = touch.GetState(0);
+    int                idx           = static_cast<int>(state);
+    const char*        name          = (idx >= 0 && idx < 6) ? STATE_NAMES[idx] : "UNKNOWN";
+    printf("[SV Touch] state=%s pos=(%.1f, %.1f)\n",
+           name,
+           touch.GetScreenPosition(0).x,
+           touch.GetScreenPosition(0).y);
+    fflush(stdout);
+    return false;
   }
 
   void OnSVScrollStarted(ScrollView sv)
@@ -505,6 +530,7 @@ private:
     std::ostringstream oss;
     oss << "Delta: (" << deltaX << ", " << deltaY << ")";
     mDragDeltaLabel.SetText(oss.str().c_str());
+    if(mEdgeEffectEnabled) RefreshEdgeEffectLabel();
   }
 
   void OnSVDragFinished(ScrollView sv)
@@ -615,6 +641,23 @@ private:
     mScrollView.SetRequestedPositionY(SCROLL_Y);
     mScrollView.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
     mScrollView.SetContent(content);
+
+    // Create bounce edge effects. Source is set automatically to the ScrollView's
+    // content by SetStartEdgeEffect / SetEndEdgeEffect — do not call SetSource here.
+    mTopEdgeEffect = BounceEdgeEffect::New(ScrollDirection::Vertical);
+    mTopEdgeEffect.SetPullResistance(0.35f);
+    mTopEdgeEffect.SetBounceDuration(0.40f);
+
+    mBottomEdgeEffect = BounceEdgeEffect::New(ScrollDirection::Vertical);
+    mBottomEdgeEffect.SetPullResistance(0.35f);
+    mBottomEdgeEffect.SetBounceDuration(0.40f);
+
+    // Connect Finished signals to refresh the status label
+    mTopEdgeEffect.FinishedSignal().Connect(this, &ScrollViewController::OnEdgeEffectFinished);
+    mBottomEdgeEffect.FinishedSignal().Connect(this, &ScrollViewController::OnEdgeEffectFinished);
+
+    // Attach to ScrollView (edge effects are initially disabled until user presses E)
+    RefreshEdgeEffects();
 
     window.Add(mScrollView);
   }
@@ -783,6 +826,59 @@ private:
       mScrollView.SetKeyScrollStep(mScrollView.GetKeyScrollStep() + 20.0f);
       RefreshFocusPanel();
     }
+    else if(key == "e" || key == "E")
+    {
+      mEdgeEffectEnabled = !mEdgeEffectEnabled;
+      RefreshEdgeEffects();
+    }
+  }
+
+  // ── Edge Effects ───────────────────────────────────────────────────────────
+
+  void RefreshEdgeEffects()
+  {
+    if(mEdgeEffectEnabled)
+    {
+      mScrollView.SetStartEdgeEffect(mTopEdgeEffect);
+      mScrollView.SetEndEdgeEffect(mBottomEdgeEffect);
+    }
+    else
+    {
+      mScrollView.SetStartEdgeEffect(EdgeEffect());
+      mScrollView.SetEndEdgeEffect(EdgeEffect());
+    }
+    RefreshEdgeEffectLabel();
+  }
+
+  void RefreshEdgeEffectLabel()
+  {
+    std::ostringstream oss;
+    if(!mEdgeEffectEnabled)
+    {
+      oss << "EdgeEffect: OFF  ( E to enable )";
+    }
+    else
+    {
+      auto stateStr = [](EdgeEffect::State s) -> const char* {
+        switch(s)
+        {
+          case EdgeEffect::State::PULL:     return "PULL";
+          case EdgeEffect::State::ABSORB:   return "ABSORB";
+          case EdgeEffect::State::RECEDE:   return "RECEDE";
+          case EdgeEffect::State::PULLDECAY:return "PULLDECAY";
+          default:                          return "IDLE";
+        }
+      };
+      oss << "EdgeEffect: ON  Top=" << stateStr(mTopEdgeEffect.GetState())
+          << "  Bottom=" << stateStr(mBottomEdgeEffect.GetState())
+          << "  ( E to disable )";
+    }
+    mEdgeEffectLabel.SetText(oss.str().c_str());
+  }
+
+  void OnEdgeEffectFinished()
+  {
+    RefreshEdgeEffectLabel();
   }
 
   // ── Members ────────────────────────────────────────────────────────────────
@@ -812,6 +908,12 @@ private:
   View  mFocusItems[ITEM_COUNT];
   Label mFocusItemNames[ITEM_COUNT];
   int   mCurrentFocusIndex{-1};
+
+  // Edge effects
+  BounceEdgeEffect mTopEdgeEffect;
+  BounceEdgeEffect mBottomEdgeEffect;
+  Label                             mEdgeEffectLabel;
+  bool                              mEdgeEffectEnabled{false};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

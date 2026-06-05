@@ -18,20 +18,18 @@
  */
 
 // EXTERNAL INCLUDES
-// #include <dali/public-api/adaptor-framework/pan-gesture-detector.h>
-#include <dali-ui-foundation/public-api/scroll-view.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/wheel-event.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/object/property-notification.h>
-// #include <dali/public-api/signals/signal.h>
-#include <dali-ui-foundation/public-api/scroll-view.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/public-api/edge-effect.h>
 #include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
 #include <dali-ui-foundation/public-api/scroll-bar.h>
+#include <dali-ui-foundation/public-api/scroll-view.h>
 
 namespace Dali
 {
@@ -295,6 +293,32 @@ public: // API
    */
   void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
 
+  // Edge effects
+
+  /**
+   * @brief Sets the edge effect activated when the content is dragged past the start boundary.
+   *
+   * For Vertical scrolling this is the top edge; for Horizontal it is the left edge.
+   */
+  void SetStartEdgeEffect(Ui::EdgeEffect effect);
+
+  /**
+   * @brief Gets the start-edge effect.
+   */
+  Ui::EdgeEffect GetStartEdgeEffect() const;
+
+  /**
+   * @brief Sets the edge effect activated when the content is dragged past the end boundary.
+   *
+   * For Vertical scrolling this is the bottom edge; for Horizontal it is the right edge.
+   */
+  void SetEndEdgeEffect(Ui::EdgeEffect effect);
+
+  /**
+   * @brief Gets the end-edge effect.
+   */
+  Ui::EdgeEffect GetEndEdgeEffect() const;
+
   // Signals
 
   /**
@@ -520,6 +544,11 @@ private:
   bool IsAtScrollBoundary(FocusDirection direction) const;
 
   /**
+   * @brief Fires a one-shot absorb edge effect when a key press hits a scroll boundary.
+   */
+  void TriggerKeyEdgeFeedback(FocusDirection direction);
+
+  /**
    * @brief Scrolls by mKeyScrollStep in the given focus direction.
    * PAGE_UP / PAGE_DOWN scrolls by the full viewport size.
    */
@@ -659,6 +688,13 @@ private:
 
   // Scroll bar
   ScrollBar mScrollBar; ///< Scroll bar for visual indication of scroll position
+
+  // Edge effects — primary axis (vertical for Vertical/Both, horizontal for Horizontal)
+  Ui::EdgeEffect mStartEdgeEffect;        ///< Effect at start boundary (top for Vertical/Both, left for Horizontal)
+  Ui::EdgeEffect mEndEdgeEffect;          ///< Effect at end boundary (bottom for Vertical/Both, right for Horizontal)
+  bool           mStartEdgeActive{false}; ///< True while start edge effect is pulling
+  bool           mEndEdgeActive{false};   ///< True while end edge effect is pulling
+  float          mEdgeDisplacement{0.0f}; ///< Accumulated over-scroll displacement for the active primary effect
 
   // Property notification for content position changes during animation
   PropertyNotification mContentPositionNotification; ///< Notifies when content position changes

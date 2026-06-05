@@ -120,6 +120,8 @@
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 
+#include <dali-ui-foundation/public-api/bounce-edge-effect.h>
+#include <dali-ui-foundation/public-api/edge-effect.h>
 #include <dali-ui-foundation/public-api/i-scroll-bar.h>
 #include <dali-ui-foundation/public-api/scroll-bar.h>
 #include <dali-ui-foundation/public-api/scroll-view.h>

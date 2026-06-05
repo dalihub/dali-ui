@@ -284,6 +284,26 @@ void ScrollView::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility
   GetImpl(*this).SetHorizontalScrollBarVisibility(visibility);
 }
 
+void ScrollView::SetStartEdgeEffect(EdgeEffect effect)
+{
+  GetImpl(*this).SetStartEdgeEffect(effect);
+}
+
+EdgeEffect ScrollView::GetStartEdgeEffect() const
+{
+  return GetImpl(*this).GetStartEdgeEffect();
+}
+
+void ScrollView::SetEndEdgeEffect(EdgeEffect effect)
+{
+  GetImpl(*this).SetEndEdgeEffect(effect);
+}
+
+EdgeEffect ScrollView::GetEndEdgeEffect() const
+{
+  return GetImpl(*this).GetEndEdgeEffect();
+}
+
 ScrollView::ScrollStartedSignalType& ScrollView::ScrollStartedSignal()
 {
   return GetImpl(*this).ScrollStartedSignal();
