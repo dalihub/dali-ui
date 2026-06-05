@@ -33,11 +33,12 @@ RecyclerView | (~10.2026) | -
 
 <br/>
 
-#### Components (TBD)
+#### Components
 `dali-ui-components`
 
 name | desc. | sample
 -- | -- | --
+[ChartView](ChartView.md) | Line, Bar, Pie, Area, Scatter, Gauge charts using ThorVG rendering. Supports zoom/pan gestures, animated data transitions, and real-time data feeds. | [samples/chart-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/chart-view)
 Button | (~10.2026) | -
 IconButton | (~10.2026) | -
 Checkbox | (~10.2026) | -

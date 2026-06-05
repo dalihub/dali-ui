@@ -1,4 +1,5 @@
 #pragma once
+
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -17,13 +18,26 @@
  */
 
 // EXTERNAL INCLUDES
-// INTERNAL INCLUDES
-#include <dali-ui-components/public-api/chart/bar-series.h>
-#include <dali-ui-components/public-api/chart/chart-axis.h>
-#include <dali-ui-components/public-api/chart/chart-section.h>
-#include <dali-ui-components/public-api/chart/chart-series.h>
-#include <dali-ui-components/public-api/chart/chart-view-properties.h>
-#include <dali-ui-components/public-api/chart/chart-view.h>
-#include <dali-ui-components/public-api/chart/line-series.h>
-#include <dali-ui-components/public-api/chart/pie-series.h>
-#include <dali-ui-components/public-api/chart/scatter-series.h>
+#include <dali/public-api/math/vector4.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration
+{
+
+class ChartColorPalette
+{
+public:
+  static constexpr int DEFAULT_SIZE = 8;
+
+  static Vector4 Get(int seriesIndex);
+
+private:
+  static const Vector4 sColors[DEFAULT_SIZE];
+};
+
+} // namespace Integration
+} // namespace Ui
+} // namespace Dali

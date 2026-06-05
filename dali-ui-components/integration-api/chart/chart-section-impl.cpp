@@ -1,4 +1,3 @@
-#pragma once
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -16,14 +15,18 @@
  *
  */
 
-// EXTERNAL INCLUDES
-// INTERNAL INCLUDES
-#include <dali-ui-components/public-api/chart/bar-series.h>
-#include <dali-ui-components/public-api/chart/chart-axis.h>
-#include <dali-ui-components/public-api/chart/chart-section.h>
-#include <dali-ui-components/public-api/chart/chart-series.h>
-#include <dali-ui-components/public-api/chart/chart-view-properties.h>
-#include <dali-ui-components/public-api/chart/chart-view.h>
-#include <dali-ui-components/public-api/chart/line-series.h>
-#include <dali-ui-components/public-api/chart/pie-series.h>
-#include <dali-ui-components/public-api/chart/scatter-series.h>
+// CLASS HEADER
+#include <dali-ui-components/integration-api/chart/chart-section-impl.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration
+{
+
+ChartSection::ChartSection() = default;
+
+} // namespace Integration
+} // namespace Ui
+} // namespace Dali

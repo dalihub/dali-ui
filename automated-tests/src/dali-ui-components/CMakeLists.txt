@@ -7,6 +7,11 @@ SET(CAPI_LIB "dali-ui-components")
 
 SET(TC_SOURCES
     utc-Dali-DummyComponent.cpp
+    utc-Dali-ChartView.cpp
+    utc-Dali-ChartSeries.cpp
+    utc-Dali-PieSeries.cpp
+    utc-Dali-ChartAxis.cpp
+    utc-Dali-ChartSection.cpp
 )
 
 LIST(APPEND TC_SOURCES

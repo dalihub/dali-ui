@@ -1,4 +1,3 @@
-#pragma once
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -16,14 +15,31 @@
  *
  */
 
-// EXTERNAL INCLUDES
-// INTERNAL INCLUDES
-#include <dali-ui-components/public-api/chart/bar-series.h>
-#include <dali-ui-components/public-api/chart/chart-axis.h>
-#include <dali-ui-components/public-api/chart/chart-section.h>
-#include <dali-ui-components/public-api/chart/chart-series.h>
-#include <dali-ui-components/public-api/chart/chart-view-properties.h>
-#include <dali-ui-components/public-api/chart/chart-view.h>
-#include <dali-ui-components/public-api/chart/line-series.h>
-#include <dali-ui-components/public-api/chart/pie-series.h>
-#include <dali-ui-components/public-api/chart/scatter-series.h>
+// CLASS HEADER
+#include <dali-ui-components/integration-api/chart/pie-series-impl.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Integration
+{
+
+PieSeries::PieSeries() = default;
+
+void PieSeries::AddSlice(const Dali::String& label, float value, const Vector4& color)
+{
+  if(value <= 0.0f) return;
+  mSlices.push_back({label, value, color});
+  EmitDataChangedSignal();
+}
+
+void PieSeries::ClearSlices()
+{
+  mSlices.clear();
+  EmitDataChangedSignal();
+}
+
+} // namespace Integration
+} // namespace Ui
+} // namespace Dali
