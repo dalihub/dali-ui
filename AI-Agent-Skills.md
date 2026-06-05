@@ -2,72 +2,65 @@
 
 # AI Agent Skills
 
-dali-ui provides several AI Coding Agent skills that help with development. The skills below help developers avoid missing rules that must be followed in specific situations.
+dali-ui provides several AI Coding Agent skills that assist with development. These skills use **code templates** applicable to specific situations to write customized code, helping you quickly scaffold your app.
 
-> [!WARNING]
-> Skills are aimed at reviewing rules for specific situations to ensure code correctness, so they are different from using MCP server.
+> [!IMPORTANT]
+> dali-ui skills are intended to provide templates suitable for specific situations, so they are different in nature from using MCP servers.
 
 <br/>
 
-## Skill Index
+## Skill List
 
 | Skill | When to use | Last update |
 |---|---|---|
-| [View Inheritance](#view-inheritance) | When creating a new UI class derived from `View` | 2026-06-04T05:02:19Z |
+| [dali-ui-view-inheritance](#view-inheritance) | When creating a new UI class derived from `View` | 2026-06-04T05:02:19Z |
 
 <br/>
+
+FYI, available skills are the remote branches in the `dali-skills` repository:
+
+```bash
+git ls-remote --heads https://github.com/dalihub/dali-skills.git
+```
+<br/>
+
+## Installation
+
+Download the skill to your desired location using the code below, then restart the agent.
+
+```bash
+git clone -b {skill-name} --single-branch https://github.com/dalihub/dali-skills.git {agent-skills-dir}
+```
+<br/>
+
+* **skill-name**: The name of the skill. See [Skill list](https://github.sec.samsung.net/NUI/dali-ui/wiki/AI-Agent-Skills#skill-list) for available skills.
+* **agent-skills-dir**: Installation folder. For Claude, global is `~/.claude/skills`, project-local is `/path/to/project/.claude/skills`.
+
+<br/>
+
+#### 예: Install to Claude global settings
+
+```bash
+git clone -b dali-ui-view-inheritance --single-branch https://github.com/dalihub/dali-skills.git ~/.claude/skills
+```
+
+#### 예: Install to Codex project settings
+
+```bash
+git clone -b dali-ui-view-inheritance --single-branch https://github.com/dalihub/dali-skills.git /path/to/project/.codex/skills
+```
+
+<br/>
+
+# Skills Description
 
 ## View Inheritance
-
-This skill is used when defining a new class derived from `View`. It helps the agent follow the DALi UI View inheritance pattern, including the handle/impl class structure, `ViewImpl` inheritance, type registration, `New()`, `DownCast()`, `GetImpl()`, and `Self()`.
-
-<br/>
-
-### When to Use
 
 Use this skill for requests such as:
 
 - Creating a new custom component derived from `View`
 - Generating both handle and impl classes
 - Creating a new class that follows the DALi UI View inheritance rules
-
-<br/>
-
-### Installation
-
-<details>
-<summary><ins>Codex</ins></summary>
-
-```bash
-git clone --filter=blob:none --sparse https://github.sec.samsung.net/NUI/dali-ui.git /tmp/dali-ui-skill-codex
-git -C /tmp/dali-ui-skill-codex sparse-checkout set skills/codex/dali-ui-view-inheritance
-```
-
-Copy it into your Codex skills directory and then restart Codex. The example below installs it into `~/.codex/skills` so it applies globally. For project-local installation, the usual location is `{project-directory}/.codex/skills`.
-
-```bash
-mkdir -p ~/.codex/skills
-cp -R /tmp/dali-ui-skill-codex/skills/codex/dali-ui-view-inheritance ~/.codex/skills/
-```
-
-</details>
-
-<details>
-<summary><ins>Claude</ins></summary>
-
-```bash
-git clone --filter=blob:none --sparse https://github.sec.samsung.net/NUI/dali-ui.git /tmp/dali-ui-skill-claude
-git -C /tmp/dali-ui-skill-claude sparse-checkout set skills/claude/dali-ui-view-inheritance
-```
-
-Copy it into your Claude skills directory and then restart Claude. The example below installs it into `~/.claude/skills` so it applies globally. For project-local installation, the usual location is `{project-directory}/.claude/skills`.
-
-```bash
-mkdir -p ~/.claude/skills
-cp -R /tmp/dali-ui-skill-claude/skills/claude/dali-ui-view-inheritance ~/.claude/skills/
-```
-
-</details>
 
 <br/>
 
