@@ -28,21 +28,28 @@ fi
 
 function build
 {
-    if [ $opt_generate == true -o $opt_rebuild == false ] ; then
-        (cd src/$1; ../../scripts/tcheadgen.sh tct-$1-core.h)
-        if [ $? -ne 0 ]; then echo "Aborting..."; exit 1; fi
-    fi
     BUILDSYSTEM="Unix Makefiles"
     BUILDCMD=make
     if [ -e ../build/tizen/build.ninja ] ; then
         BUILDSYSTEM="Ninja"
         BUILDCMD=ninja
     fi
+
+    if [ $opt_generate == true -o $opt_rebuild == false ] ; then
+        (cd src/$1; ../../scripts/tcheadgen.sh tct-$1-core.h)
+        if [ $? -ne 0 ]; then echo "Aborting..."; exit 1; fi
+    fi
+
+    echo "Detected C++ compiler: $CXX, C compiler: $CC"
+
     CACHE_CPP='/usr/lib/ccache/g++' CACHE_CC='/usr/lib/ccache/gcc'
-    if [ -e $CACHE_CPP ] ; then
-        (cd build ; CXX=$CACHE_CPP CC=$CACHE_CC cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" ; $BUILDCMD -j7 )
-    else
-        (cd build ; cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" ; $BUILDCMD -j7 )
+
+    # Detect C/C++ compiler and set appropriate ccache wrapper
+    if [[ "$CXX" == *"clang++"* ]]; then
+        CACHE_CPP='/usr/lib/ccache/clang++'
+    fi
+    if [[ "$CC" == *"clang"* ]]; then
+        CACHE_CC='/usr/lib/ccache/clang'
     fi
 }
 
