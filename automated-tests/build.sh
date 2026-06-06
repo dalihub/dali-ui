@@ -28,6 +28,8 @@ fi
 
 function build
 {
+    echo Building $1
+
     BUILDSYSTEM="Unix Makefiles"
     BUILDCMD=make
     if [ -e ../build/tizen/build.ninja ] ; then
@@ -50,6 +52,14 @@ function build
     fi
     if [[ "$CC" == *"clang"* ]]; then
         CACHE_CC='/usr/lib/ccache/clang'
+    fi
+
+    if [ -e $CACHE_CPP ] ; then
+        echo "Using ccache C++ wrapper: $CACHE_CPP , C wrapper: $CACHE_CC "
+        (cd build ; CXX=$CACHE_CPP CC=$CACHE_CC cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" ; $BUILDCMD -j7 )
+    else
+        echo "C++ compiler for $CXX wrapper for ccache not found at $CACHE_CPP . ccache will be disabled."
+        (cd build ; cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" ; $BUILDCMD -j7 )
     fi
 }
 
