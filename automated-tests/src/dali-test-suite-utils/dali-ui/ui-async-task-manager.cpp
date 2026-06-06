@@ -328,7 +328,7 @@ private:
 
 struct AsyncTaskManager::TasksCompletedImpl
 {
-  TasksCompletedImpl(AsyncTaskManager& manager, EventThreadCallback* trigger)
+  TasksCompletedImpl(EventThreadCallback* trigger)
   : mTrigger(trigger),
     mEmitCompletedTaskTriggered(false)
   {
