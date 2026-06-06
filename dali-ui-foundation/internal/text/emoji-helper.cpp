@@ -25,6 +25,242 @@ namespace Ui
 {
 namespace Text
 {
+namespace
+{
+struct EmojiElement
+{
+  Length                  nextIndex{0u};
+  TextAbstraction::Script script{TextAbstraction::UNKNOWN};
+  bool                    hasColorSelector{false};
+  bool                    hasTextSelector{false};
+  bool                    hasModifier{false};
+  bool                    hasTagSequence{false};
+};
+
+bool IsPresentationSelector(Character character)
+{
+  return TextAbstraction::IsEmojiPresentationSelector(character) ||
+         TextAbstraction::IsTextPresentationSelector(character);
+}
+
+bool IsEmojiCodepointRangeFallback(Character character)
+{
+  return (0x1F000u <= character && character <= 0x1FAFFu);
+}
+
+bool IsEmojiBase(Character character, TextAbstraction::Script script, bool allowComponentBase)
+{
+  if(TextAbstraction::IsEmojiPresentationSelector(character) ||
+     TextAbstraction::IsTextPresentationSelector(character) ||
+     TextAbstraction::IsZeroWidthJoiner(character) ||
+     TextAbstraction::IsZeroWidthNonJoiner(character) ||
+     TextAbstraction::IsCombiningEnclosingKeycap(character) ||
+     TextAbstraction::IsEmojiModifier(character) ||
+     TextAbstraction::IsTagSpec(character) ||
+     TextAbstraction::IsTagEnd(character))
+  {
+    return false;
+  }
+
+  if(IsStartForKeycapSequence(character))
+  {
+    return false;
+  }
+
+  if(TextAbstraction::IsEmojiComponent(character))
+  {
+    return allowComponentBase;
+  }
+
+  if(TextAbstraction::IsNegativeSquaredLatinCapitalLetter(character))
+  {
+    return false;
+  }
+
+  return IsOneOfEmojiScripts(script) ||
+         TextAbstraction::IsEmojiVariationSequences(character) ||
+         TextAbstraction::IsRegionalIndicator(character) ||
+         TextAbstraction::IsMiscellaneousSymbolsAndArrowsEmoji(character) ||
+         TextAbstraction::IsDingbatsEmoji(character) ||
+         IsEmojiCodepointRangeFallback(character);
+}
+
+bool IsVariationFallbackBase(Character character, TextAbstraction::Script script)
+{
+  if(TextAbstraction::IsEmojiPresentationSelector(character) ||
+     TextAbstraction::IsTextPresentationSelector(character) ||
+     TextAbstraction::IsZeroWidthJoiner(character) ||
+     TextAbstraction::IsZeroWidthNonJoiner(character) ||
+     TextAbstraction::IsCombiningEnclosingKeycap(character) ||
+     TextAbstraction::IsEmojiModifier(character) ||
+     TextAbstraction::IsEmojiComponent(character) ||
+     TextAbstraction::IsTagSpec(character) ||
+     TextAbstraction::IsTagEnd(character) ||
+     TextAbstraction::IsNegativeSquaredLatinCapitalLetter(character))
+  {
+    return false;
+  }
+
+  return IsOneOfEmojiScripts(script) ||
+         TextAbstraction::IsSymbolScript(script) ||
+         IsStartForKeycapSequence(character) ||
+         TextAbstraction::IsEmojiVariationSequences(character) ||
+         TextAbstraction::IsMiscellaneousSymbolsAndArrowsEmoji(character) ||
+         TextAbstraction::IsDingbatsEmoji(character) ||
+         IsEmojiCodepointRangeFallback(character);
+}
+
+TextAbstraction::Script ResolveEmojiBaseScript(TextAbstraction::Script baseScript)
+{
+  if(TextAbstraction::COMMON == baseScript || TextAbstraction::UNKNOWN == baseScript)
+  {
+    return TextAbstraction::EMOJI;
+  }
+
+  return baseScript;
+}
+
+bool ConsumeTagSequence(const Character* const textBuffer, Length& index, const Length& lastCharacterIndex)
+{
+  const Length tagStartIndex = index;
+
+  while(index <= lastCharacterIndex && TextAbstraction::IsTagSpec(*(textBuffer + index)))
+  {
+    ++index;
+  }
+
+  if(index <= lastCharacterIndex && TextAbstraction::IsTagEnd(*(textBuffer + index)) && index > tagStartIndex)
+  {
+    ++index;
+    return true;
+  }
+
+  index = tagStartIndex;
+  return false;
+}
+
+bool ConsumeEmojiElement(const Character* const textBuffer, const Length& currentCharacterIndex,
+                         const Length& lastCharacterIndex, bool allowComponentBase, EmojiElement& element)
+{
+  if(currentCharacterIndex > lastCharacterIndex)
+  {
+    return false;
+  }
+
+  const Character               character = *(textBuffer + currentCharacterIndex);
+  const TextAbstraction::Script script    = TextAbstraction::GetCharacterScript(character);
+  const bool                    hasVariationFallbackSelector =
+    (currentCharacterIndex + 1u <= lastCharacterIndex) &&
+    IsPresentationSelector(*(textBuffer + currentCharacterIndex + 1u));
+
+  if(!IsEmojiBase(character, script, allowComponentBase) &&
+     !(hasVariationFallbackSelector && IsVariationFallbackBase(character, script)))
+  {
+    return false;
+  }
+
+  Length index = currentCharacterIndex + 1u;
+
+  element.nextIndex = index;
+  element.script    = ResolveEmojiBaseScript(script);
+
+  while(index <= lastCharacterIndex && IsPresentationSelector(*(textBuffer + index)))
+  {
+    const Character selector = *(textBuffer + index);
+    element.hasColorSelector = element.hasColorSelector || TextAbstraction::IsEmojiPresentationSelector(selector);
+    element.hasTextSelector  = element.hasTextSelector || TextAbstraction::IsTextPresentationSelector(selector);
+    ++index;
+  }
+
+  while(index <= lastCharacterIndex && TextAbstraction::IsEmojiModifier(*(textBuffer + index)))
+  {
+    element.hasModifier = true;
+    ++index;
+  }
+
+  if(index <= lastCharacterIndex && TextAbstraction::IsTagSpec(*(textBuffer + index)))
+  {
+    element.hasTagSequence = ConsumeTagSequence(textBuffer, index, lastCharacterIndex);
+  }
+
+  if(element.hasColorSelector || element.hasModifier || element.hasTagSequence)
+  {
+    element.script = TextAbstraction::EMOJI_COLOR;
+  }
+  else if(element.hasTextSelector)
+  {
+    element.script = TextAbstraction::EMOJI_TEXT;
+  }
+
+  element.nextIndex = index;
+  return true;
+}
+
+bool GetKeycapSequence(const Character* const textBuffer, const Length& currentCharacterIndex,
+                       const Length& lastCharacterIndex, Length& sequenceLength,
+                       TextAbstraction::Script& sequenceScript)
+{
+  const Character character = *(textBuffer + currentCharacterIndex);
+  if(!IsStartForKeycapSequence(character))
+  {
+    return false;
+  }
+
+  Length index            = currentCharacterIndex + 1u;
+  bool   hasColorSelector = false;
+  bool   hasTextSelector  = false;
+
+  while(index <= lastCharacterIndex && IsPresentationSelector(*(textBuffer + index)))
+  {
+    const Character selector = *(textBuffer + index);
+    hasColorSelector         = hasColorSelector || TextAbstraction::IsEmojiPresentationSelector(selector);
+    hasTextSelector          = hasTextSelector || TextAbstraction::IsTextPresentationSelector(selector);
+    ++index;
+  }
+
+  if(index <= lastCharacterIndex && TextAbstraction::IsCombiningEnclosingKeycap(*(textBuffer + index)))
+  {
+    sequenceLength = index - currentCharacterIndex + 1u;
+    if(hasColorSelector)
+    {
+      sequenceScript = TextAbstraction::EMOJI_COLOR;
+    }
+    else if(hasTextSelector)
+    {
+      sequenceScript = TextAbstraction::EMOJI_TEXT;
+    }
+    else
+    {
+      sequenceScript = TextAbstraction::EMOJI;
+    }
+    return true;
+  }
+
+  return false;
+}
+
+bool GetRegionalIndicatorSequence(const Character* const textBuffer, const Length& currentCharacterIndex,
+                                  const Length& lastCharacterIndex, Length& sequenceLength,
+                                  TextAbstraction::Script& sequenceScript)
+{
+  if(!TextAbstraction::IsRegionalIndicator(*(textBuffer + currentCharacterIndex)))
+  {
+    return false;
+  }
+
+  if(currentCharacterIndex + 1u <= lastCharacterIndex &&
+     TextAbstraction::IsRegionalIndicator(*(textBuffer + currentCharacterIndex + 1u)))
+  {
+    sequenceLength = 2u;
+    sequenceScript = TextAbstraction::EMOJI_COLOR;
+    return true;
+  }
+
+  sequenceLength = 1u;
+  sequenceScript = TextAbstraction::EMOJI;
+  return true;
+}
+
 bool IsTextPresentationSequence(const TextAbstraction::Script&    currentRunScript,
                                 const TextAbstraction::Character& character)
 {
@@ -49,6 +285,15 @@ bool IsEmojiSequence(const TextAbstraction::Script& currentRunScript, const Text
             TextAbstraction::IsDingbatsEmoji(character))));
 }
 
+bool IsNewKeycapSequence(const Character* const textBuffer, const Length& currentCharacterIndex,
+                         const Length& lastCharacterIndex, TextAbstraction::Script& currentCharacterScript);
+
+bool IsNewVariationSelectorSequence(const Character* const textBuffer, const TextAbstraction::Script& currentRunScript,
+                                    const Length& currentCharacterIndex, const Length& lastCharacterIndex,
+                                    TextAbstraction::Script& currentCharacterScript);
+
+} // unnamed namespace
+
 bool IsNewSequence(const Character* const textBuffer, const TextAbstraction::Script& currentRunScript,
                    const Length& currentCharacterIndex, const Length& lastCharacterIndex,
                    TextAbstraction::Script& currentCharacterScript)
@@ -61,8 +306,76 @@ bool IsNewSequence(const Character* const textBuffer, const TextAbstraction::Scr
                                         currentCharacterScript);
 }
 
-//
+bool GetEmojiSequence(const Character* const textBuffer, const Length& currentCharacterIndex,
+                      const Length& lastCharacterIndex, const TextAbstraction::Script& currentCharacterScript,
+                      Length& sequenceLength, TextAbstraction::Script& sequenceScript)
+{
+  sequenceLength = 0u;
+  sequenceScript = currentCharacterScript;
 
+  if(currentCharacterIndex > lastCharacterIndex)
+  {
+    return false;
+  }
+
+  if(GetKeycapSequence(textBuffer, currentCharacterIndex, lastCharacterIndex, sequenceLength, sequenceScript))
+  {
+    return true;
+  }
+
+  if(GetRegionalIndicatorSequence(textBuffer,
+                                  currentCharacterIndex,
+                                  lastCharacterIndex,
+                                  sequenceLength,
+                                  sequenceScript))
+  {
+    return true;
+  }
+
+  EmojiElement firstElement;
+  if(!ConsumeEmojiElement(textBuffer, currentCharacterIndex, lastCharacterIndex, false, firstElement))
+  {
+    return false;
+  }
+
+  bool   hasJoinerSequence = false;
+  Length nextIndex         = firstElement.nextIndex;
+  sequenceScript           = firstElement.script;
+
+  while(nextIndex <= lastCharacterIndex && TextAbstraction::IsZeroWidthJoiner(*(textBuffer + nextIndex)))
+  {
+    Length       afterJoinerIndex = nextIndex + 1u;
+    EmojiElement nextElement;
+
+    if(afterJoinerIndex <= lastCharacterIndex &&
+       ConsumeEmojiElement(textBuffer, afterJoinerIndex, lastCharacterIndex, true, nextElement))
+    {
+      hasJoinerSequence = true;
+      sequenceScript    = TextAbstraction::EMOJI_COLOR;
+      nextIndex         = nextElement.nextIndex;
+    }
+    else
+    {
+      // Keep a dangling ZWJ with the preceding emoji unit. It is malformed, but shaping it with the preceding
+      // emoji is a better fallback than splitting a sequence in the middle.
+      hasJoinerSequence = true;
+      sequenceScript    = TextAbstraction::EMOJI_COLOR;
+      nextIndex         = afterJoinerIndex;
+      break;
+    }
+  }
+
+  if(hasJoinerSequence)
+  {
+    sequenceScript = TextAbstraction::EMOJI_COLOR;
+  }
+
+  sequenceLength = nextIndex - currentCharacterIndex;
+  return sequenceLength > 0u;
+}
+
+namespace
+{
 bool IsNewKeycapSequence(const Character* const textBuffer, const Length& currentCharacterIndex,
                          const Length& lastCharacterIndex, TextAbstraction::Script& currentCharacterScript)
 {
@@ -157,6 +470,7 @@ bool IsNewVariationSelectorSequence(const Character* const textBuffer, const Tex
 
   return isNewVariationSelectorSequence;
 }
+} // unnamed namespace
 
 bool IsStartForKeycapSequence(const TextAbstraction::Character& character)
 {

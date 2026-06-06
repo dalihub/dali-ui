@@ -22,6 +22,8 @@
 #include <dali/devel-api/text-abstraction/icu.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/connection-tracker.h>
+#include <cstddef>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
@@ -131,6 +133,18 @@ struct DefaultFonts
 };
 
 /**
+ * @brief Stores font ids returned from FontClient::GetFontId().
+ */
+struct FontIdLookupCacheItem
+{
+  TextAbstraction::FontDescription fontDescription;
+  TextAbstraction::PointSize26Dot6 pointSize{0};
+  TextAbstraction::FaceIndex       faceIndex{0};
+  std::size_t                      variationsMapHash{0u};
+  FontId                           fontId{0u};
+};
+
+/**
  * @brief Multi-language support implementation. @see Text::MultilanguageSupport.
  */
 class MultilanguageSupport : public BaseObject, public ConnectionTracker
@@ -202,15 +216,33 @@ public:
                           TextAbstraction::LineBreakInfo* breakInfo);
 
 private:
-  TextAbstraction::ICU            mICU;                       ///< Handle to the dali ICU.
-  Vector<DefaultFonts*>           mDefaultFontPerScriptCache; ///< Caches default fonts for a script.
-  Vector<ValidateFontsPerScript*> mValidFontsPerScriptCache;  ///< Caches valid fonts for a script.
+  TextAbstraction::ICU               mICU;                       ///< Handle to the dali ICU.
+  Vector<DefaultFonts*>              mDefaultFontPerScriptCache; ///< Caches default fonts for a script.
+  Vector<ValidateFontsPerScript*>    mValidFontsPerScriptCache;  ///< Caches valid fonts for a script.
+  std::vector<FontIdLookupCacheItem> mFontIdLookupCache;         ///< Caches font ids during this support object's lifetime.
 
   std::string mLocale;
   bool        mIsICUEnabled : 1;
   bool        mIsICULineBreakNeededForLocale : 1;
 
   // Methods
+
+  /**
+   * @brief Finds a cached font id returned from FontClient::GetFontId().
+   */
+  FontId FindCachedFontId(const TextAbstraction::FontDescription& fontDescription,
+                          TextAbstraction::PointSize26Dot6        pointSize,
+                          TextAbstraction::FaceIndex              faceIndex,
+                          std::size_t                             variationsMapHash);
+
+  /**
+   * @brief Caches a font id returned from FontClient::GetFontId().
+   */
+  void CacheFontId(const TextAbstraction::FontDescription& fontDescription,
+                   TextAbstraction::PointSize26Dot6        pointSize,
+                   TextAbstraction::FaceIndex              faceIndex,
+                   std::size_t                             variationsMapHash,
+                   FontId                                  fontId);
 
   /**
    * @brief Add the current script to scripts and create new script.

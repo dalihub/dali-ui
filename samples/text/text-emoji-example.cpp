@@ -63,6 +63,8 @@ constexpr uint32_t COLOR_LIGHT_GRAY = 0xEEEEEE;
 
 // Font family
 constexpr const char* FONT_FAMILY = "SamsungOneUI_400";
+// constexpr const char* FONT_FAMILY = "Noto Emoji";
+// constexpr const char* FONT_FAMILY = "Noto Color Emoji";
 
 // Unicode constants for emoji sequences
 constexpr const char* ZWJ  = "\u200d";   // Zero Width Joiner

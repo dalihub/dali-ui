@@ -166,6 +166,7 @@ ADD_COMPILE_DEFINITIONS(
     DALI_SOUND_DIR="${dataReadOnlyDir}/toolkit/sounds/"
     DALI_STYLE_DIR="${dataReadOnlyDir}/toolkit/styles/"
     DALI_STYLE_IMAGE_DIR="${dataReadOnlyDir}/toolkit/styles/images/"
+    DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}/resources"
 )
 
 ADD_DEFINITIONS(-DADDON_LIBS_PATH=\"${CMAKE_CURRENT_BINARY_DIR}\")
@@ -212,4 +213,85 @@ TARGET_LINK_LIBRARIES(${EXEC_NAME}
 
 INSTALL(PROGRAMS ${EXEC_NAME}
     DESTINATION ${BIN_DIR}/${EXEC_NAME}
+)
+
+# ---------------------------------------------------------
+# 11. Manual Unicode Emoji Sweep Tool
+#     This is intentionally excluded from the default build/test path.
+#     Build explicitly with:
+#       cmake --build <build-dir> --target dali-emoji-sequence-sweep
+# ---------------------------------------------------------
+SET(EMOJI_SEQUENCE_SWEEP_NAME dali-emoji-sequence-sweep)
+SET(EMOJI_SEQUENCE_SWEEP_SOURCES
+    ${LIBRARY_SOURCES}
+    emoji-sequence-sweep-manual.cpp
+)
+
+ADD_EXECUTABLE(${EMOJI_SEQUENCE_SWEEP_NAME} EXCLUDE_FROM_ALL
+    ${EMOJI_SEQUENCE_SWEEP_SOURCES}
+)
+
+ADD_DEPENDENCIES(${EMOJI_SEQUENCE_SWEEP_NAME} generate_builtin_shaders_internal)
+
+TARGET_LINK_LIBRARIES(${EMOJI_SEQUENCE_SWEEP_NAME}
+    ${DALICORE_LIBRARIES}
+    ${DALIADAPTOR_LIBRARIES}
+    -lpthread
+    -ldl
+    --coverage
+    -rdynamic
+)
+
+# ---------------------------------------------------------
+# 12. Manual Unicode Emoji Visual Viewer
+#     This is intentionally excluded from the default build/test path.
+#     Build explicitly with:
+#       cmake --build <build-dir> --target dali-emoji-sequence-visual
+# ---------------------------------------------------------
+SET(EMOJI_SEQUENCE_VISUAL_NAME dali-emoji-sequence-visual)
+SET(EMOJI_SEQUENCE_VISUAL_SOURCES
+    ${LIBRARY_SOURCES}
+    emoji-sequence-visual-manual.cpp
+)
+
+ADD_EXECUTABLE(${EMOJI_SEQUENCE_VISUAL_NAME} EXCLUDE_FROM_ALL
+    ${EMOJI_SEQUENCE_VISUAL_SOURCES}
+)
+
+ADD_DEPENDENCIES(${EMOJI_SEQUENCE_VISUAL_NAME} generate_builtin_shaders_internal)
+
+TARGET_LINK_LIBRARIES(${EMOJI_SEQUENCE_VISUAL_NAME}
+    ${DALICORE_LIBRARIES}
+    ${DALIADAPTOR_LIBRARIES}
+    -lpthread
+    -ldl
+    --coverage
+    -rdynamic
+)
+
+# ---------------------------------------------------------
+# 13. Manual Unicode Emoji Label Performance Tool
+#     This is intentionally excluded from the default build/test path.
+#     Build explicitly with:
+#       cmake --build <build-dir> --target dali-emoji-label-perf
+# ---------------------------------------------------------
+SET(EMOJI_LABEL_PERF_NAME dali-emoji-label-perf)
+SET(EMOJI_LABEL_PERF_SOURCES
+    ${LIBRARY_SOURCES}
+    emoji-label-perf-manual.cpp
+)
+
+ADD_EXECUTABLE(${EMOJI_LABEL_PERF_NAME} EXCLUDE_FROM_ALL
+    ${EMOJI_LABEL_PERF_SOURCES}
+)
+
+ADD_DEPENDENCIES(${EMOJI_LABEL_PERF_NAME} generate_builtin_shaders_internal)
+
+TARGET_LINK_LIBRARIES(${EMOJI_LABEL_PERF_NAME}
+    ${DALICORE_LIBRARIES}
+    ${DALIADAPTOR_LIBRARIES}
+    -lpthread
+    -ldl
+    --coverage
+    -rdynamic
 )
