@@ -1,3 +1,8 @@
+> [!CAUTION]
+> This page is no longer valid (2026.06.08~)
+
+<br/>
+
 # Fluent API
 복잡한 UI 계층 구조를 선언형의 메서드 체인으로 보다 쉽게 표현할 수 있도록 하는 장치입니다.
 
