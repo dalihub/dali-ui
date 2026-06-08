@@ -1,3 +1,8 @@
+> [!CAUTION]
+> This page is no longer valid (2026.06.08~)
+
+<br/>
+
 [→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/Fluent-API-(kr))
 
 # Fluent API
