@@ -14,12 +14,8 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-components/public-api/chart/chart-view.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-components/integration-api/chart/chart-view-impl.h>
+#include <dali-ui-components/public-api/chart/chart-view.h>
 
 namespace Dali
 {
@@ -77,22 +73,19 @@ ChartView ChartView::DownCast(BaseHandle handle)
   return Ui::View::DownCast<ChartView, Integration::ChartViewImpl>(handle);
 }
 
-ChartView& ChartView::AddSeries(Ui::ChartSeries series)
+void ChartView::AddSeries(Ui::ChartSeries series)
 {
   GetImpl(*this).AddSeries(series);
-  return *this;
 }
 
-ChartView& ChartView::SetXAxis(Ui::ChartAxis axis)
+void ChartView::SetXAxis(Ui::ChartAxis axis)
 {
   GetImpl(*this).SetXAxis(axis);
-  return *this;
 }
 
-ChartView& ChartView::SetYAxis(Ui::ChartAxis axis)
+void ChartView::SetYAxis(Ui::ChartAxis axis)
 {
   GetImpl(*this).SetYAxis(axis);
-  return *this;
 }
 
 bool ChartView::RemoveSeries(const Dali::String& name)
@@ -100,16 +93,14 @@ bool ChartView::RemoveSeries(const Dali::String& name)
   return GetImpl(*this).RemoveSeries(name);
 }
 
-ChartView& ChartView::RemoveAllSeries()
+void ChartView::RemoveAllSeries()
 {
   GetImpl(*this).RemoveAllSeries();
-  return *this;
 }
 
-ChartView& ChartView::SetTitle(const Dali::String& title)
+void ChartView::SetTitle(const Dali::String& title)
 {
   GetImpl(*this).SetTitle(title);
-  return *this;
 }
 
 Dali::String ChartView::GetTitle() const
@@ -117,10 +108,9 @@ Dali::String ChartView::GetTitle() const
   return GetImpl(*this).GetTitle();
 }
 
-ChartView& ChartView::SetTitlePosition(TitlePosition position)
+void ChartView::SetTitlePosition(TitlePosition position)
 {
   GetImpl(*this).SetTitlePosition(position);
-  return *this;
 }
 
 ChartView::TitlePosition ChartView::GetTitlePosition() const
@@ -128,10 +118,9 @@ ChartView::TitlePosition ChartView::GetTitlePosition() const
   return GetImpl(*this).GetTitlePosition();
 }
 
-ChartView& ChartView::SetTitleColor(const Vector4& color)
+void ChartView::SetTitleColor(const Vector4& color)
 {
   GetImpl(*this).SetTitleColor(color);
-  return *this;
 }
 
 Vector4 ChartView::GetTitleColor() const
@@ -139,16 +128,14 @@ Vector4 ChartView::GetTitleColor() const
   return GetImpl(*this).GetTitleColor();
 }
 
-ChartView& ChartView::SetTooltipFormatter(TooltipFormatterType formatter)
+void ChartView::SetTooltipFormatter(TooltipFormatterType formatter)
 {
   GetImpl(*this).SetTooltipFormatter(std::move(formatter));
-  return *this;
 }
 
-ChartView& ChartView::SetAnimationDuration(float milliseconds)
+void ChartView::SetAnimationDuration(float milliseconds)
 {
   GetImpl(*this).SetAnimationDuration(milliseconds);
-  return *this;
 }
 
 float ChartView::GetAnimationDuration() const
@@ -156,10 +143,9 @@ float ChartView::GetAnimationDuration() const
   return GetImpl(*this).GetAnimationDuration();
 }
 
-ChartView& ChartView::SetAnimationEasing(EasingType easing)
+void ChartView::SetAnimationEasing(EasingType easing)
 {
   GetImpl(*this).SetAnimationEasing(easing);
-  return *this;
 }
 
 ChartView::EasingType ChartView::GetAnimationEasing() const
@@ -167,10 +153,9 @@ ChartView::EasingType ChartView::GetAnimationEasing() const
   return GetImpl(*this).GetAnimationEasing();
 }
 
-ChartView& ChartView::SetUpdateThrottle(float ms)
+void ChartView::SetUpdateThrottle(float ms)
 {
   GetImpl(*this).SetUpdateThrottle(ms);
-  return *this;
 }
 
 float ChartView::GetUpdateThrottle() const
@@ -178,10 +163,9 @@ float ChartView::GetUpdateThrottle() const
   return GetImpl(*this).GetUpdateThrottle();
 }
 
-ChartView& ChartView::SetHitThreshold(float pixels)
+void ChartView::SetHitThreshold(float pixels)
 {
   GetImpl(*this).SetHitThreshold(pixels);
-  return *this;
 }
 
 float ChartView::GetHitThreshold() const
@@ -189,10 +173,9 @@ float ChartView::GetHitThreshold() const
   return GetImpl(*this).GetHitThreshold();
 }
 
-ChartView& ChartView::SetFindingStrategy(FindingStrategy strategy)
+void ChartView::SetFindingStrategy(FindingStrategy strategy)
 {
   GetImpl(*this).SetFindingStrategy(strategy);
-  return *this;
 }
 
 ChartView::FindingStrategy ChartView::GetFindingStrategy() const
@@ -200,10 +183,9 @@ ChartView::FindingStrategy ChartView::GetFindingStrategy() const
   return GetImpl(*this).GetFindingStrategy();
 }
 
-ChartView& ChartView::SetLegendToggleEnabled(bool enabled)
+void ChartView::SetLegendToggleEnabled(bool enabled)
 {
   GetImpl(*this).SetLegendToggleEnabled(enabled);
-  return *this;
 }
 
 bool ChartView::GetLegendToggleEnabled() const
@@ -211,10 +193,9 @@ bool ChartView::GetLegendToggleEnabled() const
   return GetImpl(*this).GetLegendToggleEnabled();
 }
 
-ChartView& ChartView::SetZoomMode(int flags)
+void ChartView::SetZoomMode(int flags)
 {
   GetImpl(*this).SetZoomMode(flags);
-  return *this;
 }
 
 int ChartView::GetZoomMode() const
@@ -222,16 +203,14 @@ int ChartView::GetZoomMode() const
   return GetImpl(*this).GetZoomMode();
 }
 
-ChartView& ChartView::ResetZoom()
+void ChartView::ResetZoom()
 {
   GetImpl(*this).ResetZoom();
-  return *this;
 }
 
-ChartView& ChartView::SetZoomClampEnabled(bool enabled)
+void ChartView::SetZoomClampEnabled(bool enabled)
 {
   GetImpl(*this).SetZoomClampEnabled(enabled);
-  return *this;
 }
 
 bool ChartView::IsZoomClampEnabled() const
@@ -239,10 +218,9 @@ bool ChartView::IsZoomClampEnabled() const
   return GetImpl(*this).IsZoomClampEnabled();
 }
 
-ChartView& ChartView::SetAutoFitYOnPan(bool enabled)
+void ChartView::SetAutoFitYOnPan(bool enabled)
 {
   GetImpl(*this).SetAutoFitYOnPan(enabled);
-  return *this;
 }
 
 bool ChartView::IsAutoFitYOnPan() const
@@ -250,22 +228,19 @@ bool ChartView::IsAutoFitYOnPan() const
   return GetImpl(*this).IsAutoFitYOnPan();
 }
 
-ChartView& ChartView::AddSection(ChartSection section)
+void ChartView::AddSection(ChartSection section)
 {
   GetImpl(*this).AddSection(section);
-  return *this;
 }
 
-ChartView& ChartView::RemoveSection(ChartSection section)
+void ChartView::RemoveSection(ChartSection section)
 {
   GetImpl(*this).RemoveSection(section);
-  return *this;
 }
 
-ChartView& ChartView::ClearSections()
+void ChartView::ClearSections()
 {
   GetImpl(*this).ClearSections();
-  return *this;
 }
 
 ChartView::DataPointSelectedSignalType& ChartView::DataPointSelectedSignal()
@@ -288,108 +263,95 @@ ChartView::ZoomedSignalType& ChartView::ZoomedSignal()
   return GetImpl(*this).ZoomedSignal();
 }
 
-// Gauge
-
-ChartView& ChartView::SetGaugeValue(float v)
+void ChartView::SetGaugeValue(float v)
 {
   GetImpl(*this).SetGaugeValue(v);
-  return *this;
 }
 float ChartView::GetGaugeValue() const
 {
   return GetImpl(*this).GetGaugeValue();
 }
 
-ChartView& ChartView::SetGaugeMinValue(float v)
+void ChartView::SetGaugeMinValue(float v)
 {
   GetImpl(*this).SetGaugeMinValue(v);
-  return *this;
 }
 float ChartView::GetGaugeMinValue() const
 {
   return GetImpl(*this).GetGaugeMinValue();
 }
 
-ChartView& ChartView::SetGaugeMaxValue(float v)
+void ChartView::SetGaugeMaxValue(float v)
 {
   GetImpl(*this).SetGaugeMaxValue(v);
-  return *this;
 }
 float ChartView::GetGaugeMaxValue() const
 {
   return GetImpl(*this).GetGaugeMaxValue();
 }
 
-ChartView& ChartView::SetGaugeArcSpan(float d)
+void ChartView::SetGaugeArcSpan(float d)
 {
   GetImpl(*this).SetGaugeArcSpan(d);
-  return *this;
 }
 float ChartView::GetGaugeArcSpan() const
 {
   return GetImpl(*this).GetGaugeArcSpan();
 }
 
-ChartView& ChartView::SetGaugeStartAngle(float d)
+void ChartView::SetGaugeStartAngle(float d)
 {
   GetImpl(*this).SetGaugeStartAngle(d);
-  return *this;
 }
 float ChartView::GetGaugeStartAngle() const
 {
   return GetImpl(*this).GetGaugeStartAngle();
 }
 
-ChartView& ChartView::SetGaugeArcWidth(float r)
+void ChartView::SetGaugeArcWidth(float r)
 {
   GetImpl(*this).SetGaugeArcWidth(r);
-  return *this;
 }
 float ChartView::GetGaugeArcWidth() const
 {
   return GetImpl(*this).GetGaugeArcWidth();
 }
 
-ChartView& ChartView::SetGaugeTrackColor(const Vector4& c)
+void ChartView::SetGaugeTrackColor(const Vector4& c)
 {
   GetImpl(*this).SetGaugeTrackColor(c);
-  return *this;
 }
 Vector4 ChartView::GetGaugeTrackColor() const
 {
   return GetImpl(*this).GetGaugeTrackColor();
 }
 
-ChartView& ChartView::SetGaugeProgressColor(const Vector4& c)
+void ChartView::SetGaugeProgressColor(const Vector4& c)
 {
   GetImpl(*this).SetGaugeProgressColor(c);
-  return *this;
 }
 Vector4 ChartView::GetGaugeProgressColor() const
 {
   return GetImpl(*this).GetGaugeProgressColor();
 }
 
-ChartView& ChartView::SetGaugeCenterLabel(const Dali::String& t)
+void ChartView::SetGaugeCenterLabel(const Dali::String& t)
 {
   GetImpl(*this).SetGaugeCenterLabel(t);
-  return *this;
 }
 Dali::String ChartView::GetGaugeCenterLabel() const
 {
   return GetImpl(*this).GetGaugeCenterLabel();
 }
 
-ChartView& ChartView::AddGaugeRange(float from, float to, const Vector4& color)
+void ChartView::AddGaugeRange(float from, float to, const Vector4& color)
 {
   GetImpl(*this).AddGaugeRange(from, to, color);
-  return *this;
 }
 
-ChartView& ChartView::ClearGaugeRanges()
+void ChartView::ClearGaugeRanges()
 {
   GetImpl(*this).ClearGaugeRanges();
-  return *this;
 }
 
 ChartView::ChartView(Integration::ChartViewImpl& implementation)

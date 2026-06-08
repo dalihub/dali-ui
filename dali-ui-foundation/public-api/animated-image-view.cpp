@@ -47,8 +47,6 @@ AnimatedImageView  AnimatedImageView::New(const Dali::String& url)
 {
   Integration::AnimatedImageViewImplPtr impl = Integration::AnimatedImageViewImpl::New();
   AnimatedImageView                     view(*impl);
-
-  // Second-phase initialization
   impl->Initialize();
   if(!url.Empty())
   {
@@ -62,10 +60,9 @@ AnimatedImageView AnimatedImageView::DownCast(BaseHandle handle)
   return Ui::View::DownCast<AnimatedImageView, Ui::Integration::AnimatedImageViewImpl>(handle);
 }
 
-AnimatedImageView& AnimatedImageView::SetResourceUrl(const Dali::String& url)
+void AnimatedImageView::SetResourceUrl(const Dali::String& url)
 {
   Ui::GetImpl(*this).SetResourceUrl(url);
-  return *this;
 }
 
 Dali::String AnimatedImageView::GetResourceUrl() const
@@ -73,28 +70,24 @@ Dali::String AnimatedImageView::GetResourceUrl() const
   return Ui::GetImpl(*this).GetResourceUrl();
 }
 
-AnimatedImageView& AnimatedImageView::Play()
+void AnimatedImageView::Play()
 {
   Ui::GetImpl(*this).Play();
-  return *this;
 }
 
-AnimatedImageView& AnimatedImageView::Pause()
+void AnimatedImageView::Pause()
 {
   Ui::GetImpl(*this).Pause();
-  return *this;
 }
 
-AnimatedImageView& AnimatedImageView::Stop()
+void AnimatedImageView::Stop()
 {
   Ui::GetImpl(*this).Stop();
-  return *this;
 }
 
-AnimatedImageView& AnimatedImageView::SetLoopCount(int count)
+void AnimatedImageView::SetLoopCount(int count)
 {
   Ui::GetImpl(*this).SetLoopCount(count);
-  return *this;
 }
 
 int AnimatedImageView::GetLoopCount() const
@@ -102,10 +95,9 @@ int AnimatedImageView::GetLoopCount() const
   return Ui::GetImpl(*this).GetLoopCount();
 }
 
-AnimatedImageView& AnimatedImageView::SetImageColor(const UiColor& color)
+void AnimatedImageView::SetImageColor(const UiColor& color)
 {
   Ui::GetImpl(*this).SetImageColor(color);
-  return *this;
 }
 
 UiColor AnimatedImageView::GetImageColor() const
@@ -113,16 +105,14 @@ UiColor AnimatedImageView::GetImageColor() const
   return Ui::GetImpl(*this).GetImageColor();
 }
 
-AnimatedImageView& AnimatedImageView::JumpToFrame(int frame)
+void AnimatedImageView::JumpToFrame(int frame)
 {
   Ui::GetImpl(*this).JumpToFrame(frame);
-  return *this;
 }
 
-AnimatedImageView& AnimatedImageView::SetStopBehavior(AnimatedImage::StopBehavior behavior)
+void AnimatedImageView::SetStopBehavior(AnimatedImage::StopBehavior behavior)
 {
   Ui::GetImpl(*this).SetStopBehavior(behavior);
-  return *this;
 }
 
 AnimatedImage::StopBehavior AnimatedImageView::GetStopBehavior() const
@@ -130,10 +120,9 @@ AnimatedImage::StopBehavior AnimatedImageView::GetStopBehavior() const
   return Ui::GetImpl(*this).GetStopBehavior();
 }
 
-AnimatedImageView& AnimatedImageView::SetFrameSpeedFactor(float factor)
+void AnimatedImageView::SetFrameSpeedFactor(float factor)
 {
   Ui::GetImpl(*this).SetFrameSpeedFactor(factor);
-  return *this;
 }
 
 float AnimatedImageView::GetFrameSpeedFactor() const
@@ -141,10 +130,9 @@ float AnimatedImageView::GetFrameSpeedFactor() const
   return Ui::GetImpl(*this).GetFrameSpeedFactor();
 }
 
-AnimatedImageView& AnimatedImageView::SetBatchSize(int size)
+void AnimatedImageView::SetBatchSize(int size)
 {
   Ui::GetImpl(*this).SetBatchSize(size);
-  return *this;
 }
 
 int AnimatedImageView::GetBatchSize() const
@@ -152,10 +140,9 @@ int AnimatedImageView::GetBatchSize() const
   return Ui::GetImpl(*this).GetBatchSize();
 }
 
-AnimatedImageView& AnimatedImageView::SetCacheSize(int size)
+void AnimatedImageView::SetCacheSize(int size)
 {
   Ui::GetImpl(*this).SetCacheSize(size);
-  return *this;
 }
 
 int AnimatedImageView::GetCacheSize() const
@@ -163,10 +150,9 @@ int AnimatedImageView::GetCacheSize() const
   return Ui::GetImpl(*this).GetCacheSize();
 }
 
-AnimatedImageView& AnimatedImageView::SetFrameDelay(int milliseconds)
+void AnimatedImageView::SetFrameDelay(int milliseconds)
 {
   Ui::GetImpl(*this).SetFrameDelay(milliseconds);
-  return *this;
 }
 
 int AnimatedImageView::GetFrameDelay() const
@@ -189,10 +175,9 @@ int AnimatedImageView::GetTotalFrame() const
   return Ui::GetImpl(*this).GetTotalFrame();
 }
 
-AnimatedImageView& AnimatedImageView::SetDesiredWidth(int width)
+void AnimatedImageView::SetDesiredWidth(int width)
 {
   Ui::GetImpl(*this).SetDesiredWidth(width);
-  return *this;
 }
 
 int AnimatedImageView::GetDesiredWidth() const
@@ -200,10 +185,9 @@ int AnimatedImageView::GetDesiredWidth() const
   return Ui::GetImpl(*this).GetDesiredWidth();
 }
 
-AnimatedImageView& AnimatedImageView::SetDesiredHeight(int height)
+void AnimatedImageView::SetDesiredHeight(int height)
 {
   Ui::GetImpl(*this).SetDesiredHeight(height);
-  return *this;
 }
 
 int AnimatedImageView::GetDesiredHeight() const
@@ -211,10 +195,9 @@ int AnimatedImageView::GetDesiredHeight() const
   return Ui::GetImpl(*this).GetDesiredHeight();
 }
 
-AnimatedImageView& AnimatedImageView::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
+void AnimatedImageView::SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy)
 {
   Ui::GetImpl(*this).SetLoadPolicy(loadPolicy);
-  return *this;
 }
 
 Ui::Image::LoadPolicy AnimatedImageView::GetLoadPolicy() const
@@ -222,10 +205,9 @@ Ui::Image::LoadPolicy AnimatedImageView::GetLoadPolicy() const
   return Ui::GetImpl(*this).GetLoadPolicy();
 }
 
-AnimatedImageView& AnimatedImageView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
+void AnimatedImageView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
 {
   Ui::GetImpl(*this).SetReleasePolicy(releasePolicy);
-  return *this;
 }
 
 Ui::Image::ReleasePolicy AnimatedImageView::GetReleasePolicy() const
@@ -233,10 +215,9 @@ Ui::Image::ReleasePolicy AnimatedImageView::GetReleasePolicy() const
   return Ui::GetImpl(*this).GetReleasePolicy();
 }
 
-AnimatedImageView& AnimatedImageView::SetSynchronousLoading(bool synchronous)
+void AnimatedImageView::SetSynchronousLoading(bool synchronous)
 {
   Ui::GetImpl(*this).SetSynchronousLoading(synchronous);
-  return *this;
 }
 
 bool AnimatedImageView::IsSynchronousLoading() const
@@ -244,10 +225,9 @@ bool AnimatedImageView::IsSynchronousLoading() const
   return Ui::GetImpl(*this).IsSynchronousLoading();
 }
 
-AnimatedImageView& AnimatedImageView::SetPreMultipliedAlpha(bool preMultiplied)
+void AnimatedImageView::SetPreMultipliedAlpha(bool preMultiplied)
 {
   Ui::GetImpl(*this).SetPreMultipliedAlpha(preMultiplied);
-  return *this;
 }
 
 bool AnimatedImageView::IsPreMultipliedAlpha() const
@@ -255,10 +235,9 @@ bool AnimatedImageView::IsPreMultipliedAlpha() const
   return Ui::GetImpl(*this).IsPreMultipliedAlpha();
 }
 
-AnimatedImageView& AnimatedImageView::SetFittingMode(Ui::Image::FittingMode fittingMode)
+void AnimatedImageView::SetFittingMode(Ui::Image::FittingMode fittingMode)
 {
   Ui::GetImpl(*this).SetFittingMode(fittingMode);
-  return *this;
 }
 
 Ui::Image::FittingMode AnimatedImageView::GetFittingMode() const
@@ -266,10 +245,9 @@ Ui::Image::FittingMode AnimatedImageView::GetFittingMode() const
   return Ui::GetImpl(*this).GetFittingMode();
 }
 
-AnimatedImageView& AnimatedImageView::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
+void AnimatedImageView::SetSamplingMode(Ui::Image::SamplingMode samplingMode)
 {
   Ui::GetImpl(*this).SetSamplingMode(samplingMode);
-  return *this;
 }
 
 Ui::Image::SamplingMode AnimatedImageView::GetSamplingMode() const
@@ -277,10 +255,9 @@ Ui::Image::SamplingMode AnimatedImageView::GetSamplingMode() const
   return Ui::GetImpl(*this).GetSamplingMode();
 }
 
-AnimatedImageView& AnimatedImageView::SetImageLoadWithViewSize(bool enabled)
+void AnimatedImageView::SetImageLoadWithViewSize(bool enabled)
 {
   Ui::GetImpl(*this).SetImageLoadWithViewSize(enabled);
-  return *this;
 }
 
 bool AnimatedImageView::IsImageLoadWithViewSizeEnabled() const
@@ -288,10 +265,9 @@ bool AnimatedImageView::IsImageLoadWithViewSizeEnabled() const
   return Ui::GetImpl(*this).IsImageLoadWithViewSizeEnabled();
 }
 
-AnimatedImageView& AnimatedImageView::SetAlphaMaskUrl(const Dali::String& maskUrl)
+void AnimatedImageView::SetAlphaMaskUrl(const Dali::String& maskUrl)
 {
   Ui::GetImpl(*this).SetAlphaMaskUrl(maskUrl);
-  return *this;
 }
 
 Dali::String AnimatedImageView::GetAlphaMaskUrl() const
@@ -299,10 +275,9 @@ Dali::String AnimatedImageView::GetAlphaMaskUrl() const
   return Ui::GetImpl(*this).GetAlphaMaskUrl();
 }
 
-AnimatedImageView& AnimatedImageView::SetCropToMask(bool cropToMask)
+void AnimatedImageView::SetCropToMask(bool cropToMask)
 {
   Ui::GetImpl(*this).SetCropToMask(cropToMask);
-  return *this;
 }
 
 bool AnimatedImageView::IsCropToMask() const
@@ -310,10 +285,9 @@ bool AnimatedImageView::IsCropToMask() const
   return Ui::GetImpl(*this).IsCropToMask();
 }
 
-AnimatedImageView& AnimatedImageView::SetMaskingMode(Ui::Image::MaskingType maskingMode)
+void AnimatedImageView::SetMaskingMode(Ui::Image::MaskingType maskingMode)
 {
   Ui::GetImpl(*this).SetMaskingMode(maskingMode);
-  return *this;
 }
 
 Ui::Image::MaskingType AnimatedImageView::GetMaskingMode() const
@@ -321,10 +295,9 @@ Ui::Image::MaskingType AnimatedImageView::GetMaskingMode() const
   return Ui::GetImpl(*this).GetMaskingMode();
 }
 
-AnimatedImageView& AnimatedImageView::SetPlaceholderUrl(const Dali::String& url)
+void AnimatedImageView::SetPlaceholderUrl(const Dali::String& url)
 {
   Ui::GetImpl(*this).SetPlaceholderUrl(url);
-  return *this;
 }
 
 Dali::String AnimatedImageView::GetPlaceholderUrl() const
@@ -332,10 +305,9 @@ Dali::String AnimatedImageView::GetPlaceholderUrl() const
   return Ui::GetImpl(*this).GetPlaceholderUrl();
 }
 
-AnimatedImageView& AnimatedImageView::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
+void AnimatedImageView::SetResourceUrls(const Dali::Vector<Dali::String>& urls)
 {
   Ui::GetImpl(*this).SetResourceUrls(urls);
-  return *this;
 }
 
 const Dali::Vector<Dali::String>& AnimatedImageView::GetResourceUrls() const
@@ -343,10 +315,9 @@ const Dali::Vector<Dali::String>& AnimatedImageView::GetResourceUrls() const
   return Ui::GetImpl(*this).GetResourceUrls();
 }
 
-AnimatedImageView& AnimatedImageView::SetPixelArea(const Vector4& pixelArea)
+void AnimatedImageView::SetPixelArea(const Vector4& pixelArea)
 {
   Ui::GetImpl(*this).SetPixelArea(pixelArea);
-  return *this;
 }
 
 Vector4 AnimatedImageView::GetPixelArea() const

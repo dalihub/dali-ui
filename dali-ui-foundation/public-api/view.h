@@ -44,6 +44,12 @@
 #include <dali-ui-foundation/public-api/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali/public-api/actors/custom-actor.h>
+#include <dali/public-api/animation/animation.h>
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/object/base-handle.h>
+#include <functional>
+#include <initializer_list>
 
 namespace Dali
 {
@@ -57,13 +63,6 @@ class RenderEffect;
 class UiColor;
 class ViewAnimationBridge;
 class ViewAnimationSpec;
-
-// @ANIMATION_CONFIG(View)
-// @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
-// @ANIMATABLE_MANUAL(SizeWidth, float)
-// @ANIMATABLE_MANUAL(SizeHeight, float)
-// @ANIMATABLE_MANUAL(PositionX, float)
-// @ANIMATABLE_MANUAL(PositionY, float)
 
 class ViewImpl;
 
@@ -82,7 +81,6 @@ class ViewImpl;
  */
 using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
 
-#include "view.autogen.h"
 /**
  * @brief View is a base UI component class that extends CustomActor.
  *
@@ -94,8 +92,6 @@ using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
 class DALI_UI_API View : public CustomActor
 {
 public:
-  // Typedefs
-
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized View handle.
@@ -308,8 +304,6 @@ public: // Measure / Arrange API
   void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
 
 public: // Properties
-  // @CHAIN_START(View)
-
   /**
    * @brief Gets the x scale factor applied to the view.
    *
@@ -323,14 +317,12 @@ public: // Properties
    * @return The current x scale factor
    */
   float GetCurrentScaleX() const;
-
-  // @ANIMATABLE(Actor::Property::SCALE_X, float)
   /**
    * @brief Sets the x scale factor applied to the view.
    *
    * @param[in] scaleX The X scale factor to set
    */
-  View& SetScaleX(float scaleX);
+  void SetScaleX(float scaleX);
 
   /**
    * @brief Gets the y scale factor applied to the view.
@@ -352,7 +344,7 @@ public: // Properties
    * @param[in] policy The UiScalePolicy to apply
    * @return Reference to this View for fluent chaining
    */
-  View& SetUiScalePolicy(UiScalePolicy policy);
+  void SetUiScalePolicy(UiScalePolicy policy);
 
   /**
    * @brief Gets the UiScale participation policy of this view.
@@ -360,14 +352,12 @@ public: // Properties
    * @return The current UiScalePolicy
    */
   UiScalePolicy GetUiScalePolicy() const;
-
-  // @ANIMATABLE(Actor::Property::SCALE_Y, float)
   /**
    * @brief Sets the y scale factor applied to the view.
    *
    * @param[in] scaleY The Y scale factor to set
    */
-  View& SetScaleY(float scaleY);
+  void SetScaleY(float scaleY);
 
   /**
    * @brief Sets the y scale factor applied to the view.
@@ -375,7 +365,7 @@ public: // Properties
    * @param[in] scaleX The X scale factor to set
    * @param[in] scaleY The Y scale factor to set
    */
-  View& SetScale(float scaleX, float scaleY);
+  void SetScale(float scaleX, float scaleY);
 
   /**
    * @brief Gets the current scale factor applied to the view.
@@ -405,7 +395,7 @@ public: // Properties
    * @param[in] visibility True to make the view visible, false to hide it
    * @return Reference to this View for fluent chaining
    */
-  View& SetVisibility(bool visibility);
+  void SetVisibility(bool visibility);
 
   /**
    * @brief Gets the opacity of the view.
@@ -413,15 +403,13 @@ public: // Properties
    * @return The opacity value (0.0 to 1.0)
    */
   float GetOpacity() const;
-
-  // @ANIMATABLE(Actor::Property::OPACITY, float)
   /**
    * @brief Sets the opacity of the view.
    *
    * @param[in] opacity The opacity value to set (0.0 to 1.0)
    * @return Reference to this View for fluent chaining
    */
-  View& SetOpacity(float opacity);
+  void SetOpacity(float opacity);
 
   /**
    * @brief Gets the actual rendered size of this View after layout.
@@ -454,7 +442,7 @@ public: // Properties
    *
    * @param[in] x The requested X position
    */
-  View& SetRequestedPositionX(float x);
+  void SetRequestedPositionX(float x);
 
   /**
    * @brief Returns the user-requested X position.
@@ -473,7 +461,7 @@ public: // Properties
    * @param[in] y The requested Y position
    * @see SetRequestedPositionX
    */
-  View& SetRequestedPositionY(float y);
+  void SetRequestedPositionY(float y);
 
   /**
    * @brief Returns the user-requested Y position.
@@ -515,7 +503,7 @@ public: // Properties
    *
    * @param[in] point The parent origin to set
    */
-  View& SetParentOrigin(const Vector3& point);
+  void SetParentOrigin(const Vector3& point);
 
   /**
    * @brief Gets the parent origin of the View.
@@ -529,7 +517,7 @@ public: // Properties
    *
    * @param[in] point The pivot to set
    */
-  View& SetPivot(const Vector3& point);
+  void SetPivot(const Vector3& point);
 
   /**
    * @brief Gets the pivot of the View.
@@ -547,7 +535,7 @@ public: // Properties
    *
    * @param[in] width The requested width
    */
-  View& SetRequestedWidth(float width);
+  void SetRequestedWidth(float width);
 
   /**
    * @brief Gets the requested width.
@@ -565,7 +553,7 @@ public: // Properties
    *
    * @param[in] height The requested height
    */
-  View& SetRequestedHeight(float height);
+  void SetRequestedHeight(float height);
 
   /**
    * @brief Gets the requested height.
@@ -579,7 +567,7 @@ public: // Properties
    *
    * @param[in] width The minimum width
    */
-  View& SetMinimumWidth(float width);
+  void SetMinimumWidth(float width);
 
   /**
    * @brief Gets the minimum width.
@@ -593,7 +581,7 @@ public: // Properties
    *
    * @param[in] height The minimum height
    */
-  View& SetMinimumHeight(float height);
+  void SetMinimumHeight(float height);
 
   /**
    * @brief Gets the minimum height.
@@ -607,7 +595,7 @@ public: // Properties
    *
    * @param[in] width The maximum width
    */
-  View& SetMaximumWidth(float width);
+  void SetMaximumWidth(float width);
 
   /**
    * @brief Gets the maximum width.
@@ -621,7 +609,7 @@ public: // Properties
    *
    * @param[in] height The maximum height
    */
-  View& SetMaximumHeight(float height);
+  void SetMaximumHeight(float height);
 
   /**
    * @brief Gets the maximum height.
@@ -635,7 +623,7 @@ public: // Properties
    *
    * @param[in] margin The margin to set
    */
-  View& SetMargin(const Extents& margin);
+  void SetMargin(const Extents& margin);
 
   /**
    * @brief Gets the view margin.
@@ -649,7 +637,7 @@ public: // Properties
    *
    * @param[in] padding The padding to set
    */
-  View& SetPadding(const Extents& padding);
+  void SetPadding(const Extents& padding);
 
   /**
    * @brief Gets the view padding.
@@ -681,7 +669,7 @@ public: // Properties
    *
    * @param[in] mode The layout mode to set
    */
-  View& SetLayoutMode(LayoutMode mode);
+  void SetLayoutMode(LayoutMode mode);
 
   /**
    * @brief Gets the layout mode of this View.
@@ -702,7 +690,7 @@ public: // Properties
    *
    * @param[in] focusable True if it is focusable
    */
-  View& SetFocusable(bool focusable);
+  void SetFocusable(bool focusable);
 
   /**
    * @brief Gets whether the actor should be focused when touched.
@@ -716,7 +704,7 @@ public: // Properties
    *
    * @param[in] touchFocusable True if it gets focused when touched
    */
-  View& SetTouchFocusable(bool touchFocusable);
+  void SetTouchFocusable(bool touchFocusable);
 
   /**
    * @brief Sets whether descendant focus is blocked.
@@ -726,7 +714,7 @@ public: // Properties
    *
    * @param[in] blocked True to block descendant focus
    */
-  View& SetDescendantFocusBlocked(bool blocked);
+  void SetDescendantFocusBlocked(bool blocked);
 
   /**
    * @brief Gets whether descendant focus is blocked.
@@ -750,56 +738,56 @@ public: // Properties
    *
    * @param[in] view The View to focus when navigating left
    */
-  View& SetLeftFocusableView(View view);
+  void SetLeftFocusableView(View view);
 
   /**
    * @brief Sets the right focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating right
    */
-  View& SetRightFocusableView(View view);
+  void SetRightFocusableView(View view);
 
   /**
    * @brief Sets the up focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating up
    */
-  View& SetUpFocusableView(View view);
+  void SetUpFocusableView(View view);
 
   /**
    * @brief Sets the down focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating down
    */
-  View& SetDownFocusableView(View view);
+  void SetDownFocusableView(View view);
 
   /**
    * @brief Sets the clockwise focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating clockwise
    */
-  View& SetClockwiseFocusableView(View view);
+  void SetClockwiseFocusableView(View view);
 
   /**
    * @brief Sets the counter-clockwise focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating counter-clockwise
    */
-  View& SetCounterClockwiseFocusableView(View view);
+  void SetCounterClockwiseFocusableView(View view);
 
   /**
    * @brief Sets the forward focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating forward
    */
-  View& SetForwardFocusableView(View view);
+  void SetForwardFocusableView(View view);
 
   /**
    * @brief Sets the backward focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating backward
    */
-  View& SetBackwardFocusableView(View view);
+  void SetBackwardFocusableView(View view);
 
   /**
    * @brief Sets a callback for focus navigation within this view's children.
@@ -830,7 +818,7 @@ public: // Properties
    *
    * @param[in] color The UiColor to apply
    */
-  View& SetBackgroundColor(const UiColor& color);
+  void SetBackgroundColor(const UiColor& color);
 
   /**
    * @brief Gets the color.
@@ -845,7 +833,7 @@ public: // Properties
    * @param[in] color The color to set
    * @return Reference to this View for fluent chaining
    */
-  View& SetColor(const UiColor& color);
+  void SetColor(const UiColor& color);
 
   /**
    * @brief Gets the current color.
@@ -869,7 +857,7 @@ public: // Properties
    *
    * @param[in] enabled True to enable, false to disable
    */
-  View& SetEnabled(bool enabled);
+  void SetEnabled(bool enabled);
 
   /**
    * @brief Gets the corner radius of the view.
@@ -883,7 +871,7 @@ public: // Properties
    *
    * @param[in] radius The corner radius to apply to all corners
    */
-  View& SetCornerRadius(float radius);
+  void SetCornerRadius(float radius);
 
   /**
    * @brief Sets individual corner radii for all four corners.
@@ -893,15 +881,13 @@ public: // Properties
    * @param[in] bottomRight The radius for the bottom-right corner
    * @param[in] bottomLeft  The radius for the bottom-left corner
    */
-  View& SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft);
-
-  // @ANIMATABLE(View::Property::CORNER_RADIUS, Vector4)
+  void SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft);
   /**
    * @brief Sets corner radii from a Vector4.
    *
    * @param[in] radius Corner radii as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
-  View& SetCornerRadius(const Vector4& radius);
+  void SetCornerRadius(const Vector4& radius);
 
   /**
    * @brief Gets the corner radius policy.
@@ -915,14 +901,14 @@ public: // Properties
    *
    * @param[in] policy ABSOLUTE for world-unit values (default), RELATIVE for percentage [0.0, 0.5] of the shorter side
    */
-  View& SetCornerRadiusPolicy(CornerRadiusPolicy policy);
+  void SetCornerRadiusPolicy(CornerRadiusPolicy policy);
 
   /**
    * @brief Shortcut to set the corner radius policy to RELATIVE.
    *
    * Equivalent to SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE).
    */
-  View& SetCornerRadiusPolicyRelative();
+  void SetCornerRadiusPolicyRelative();
 
   /**
    * @brief Returns true if the corner radius policy is RELATIVE.
@@ -943,7 +929,7 @@ public: // Properties
    *
    * @param[in] squareness The squareness value to apply to all corners
    */
-  View& SetCornerSquareness(float squareness);
+  void SetCornerSquareness(float squareness);
 
   /**
    * @brief Sets individual corner squareness values for all four corners.
@@ -953,15 +939,13 @@ public: // Properties
    * @param[in] bottomRight The squareness for the bottom-right corner
    * @param[in] bottomLeft  The squareness for the bottom-left corner
    */
-  View& SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft);
-
-  // @ANIMATABLE(View::Property::CORNER_SQUARENESS, Vector4)
+  void SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft);
   /**
    * @brief Sets corner squareness from a Vector4.
    *
    * @param[in] squareness Squareness values as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
-  View& SetCornerSquareness(const Vector4& squareness);
+  void SetCornerSquareness(const Vector4& squareness);
 
   /**
    * @brief Gets the borderline width of the view.
@@ -969,14 +953,12 @@ public: // Properties
    * @return The borderline width
    */
   float GetBorderlineWidth() const;
-
-  // @ANIMATABLE(View::Property::BORDERLINE_WIDTH, float)
   /**
    * @brief Sets the borderline width of the view.
    *
    * @param[in] width The borderline width to set
    */
-  View& SetBorderlineWidth(float width);
+  void SetBorderlineWidth(float width);
 
   /**
    * @brief Gets the borderline color of the view.
@@ -984,8 +966,6 @@ public: // Properties
    * @return The borderline color
    */
   UiColor GetBorderlineColor();
-
-  // @ANIMATABLE(View::Property::BORDERLINE_COLOR, UiColor)
   /**
    * @brief Sets the borderline color of the view.
    *
@@ -995,7 +975,7 @@ public: // Properties
    *
    * @param[in] color The UiColor to apply
    */
-  View& SetBorderlineColor(const UiColor& color);
+  void SetBorderlineColor(const UiColor& color);
 
   /**
    * @brief Gets the borderline offset of the view.
@@ -1003,14 +983,12 @@ public: // Properties
    * @return The borderline offset
    */
   float GetBorderlineOffset() const;
-
-  // @ANIMATABLE(View::Property::BORDERLINE_OFFSET, float)
   /**
    * @brief Sets the borderline offset of the view.
    *
    * @param[in] offset The borderline offset to set
    */
-  View& SetBorderlineOffset(float offset);
+  void SetBorderlineOffset(float offset);
 
   /**
    * @brief Gets the name of the view.
@@ -1024,7 +1002,7 @@ public: // Properties
    *
    * @param[in] name The name to set
    */
-  View& SetName(const Dali::String& name);
+  void SetName(const Dali::String& name);
 
   /**
    * @brief Sets the layout direction of this view explicitly.
@@ -1035,7 +1013,7 @@ public: // Properties
    * @param[in] direction The layout direction to set (LEFT_TO_RIGHT or RIGHT_TO_LEFT)
    * @return Reference to this View for fluent chaining
    */
-  View& SetLayoutDirection(Dali::LayoutDirection::Type direction);
+  void SetLayoutDirection(Dali::LayoutDirection::Type direction);
 
   /**
    * @brief Clears the explicitly set layout direction.
@@ -1084,104 +1062,23 @@ public: // Properties
    * @return True if the view itself or at least one ancestor is focused
    */
   bool IsEffectivelyFocused() const;
-
-  // @CHAIN_MANUAL
   /**
-   * @brief Attaches the interaction trait to this View.
+   * @brief Attaches the interaction trait to this View and returns it.
    *
-   * @return Reference to this View for fluent chaining
-   */
-  View& AsInteractive()
-  {
-    EnsureInteractiveTrait();
-    return *this;
-  }
-
-  // @CHAIN_MANUAL
-  /**
-   * @brief Attaches the interaction trait to this View and configures it.
+   * If this View already has an InteractiveTrait, the existing trait is reused.
    *
-   * @param[in] configure Callable with signature void(InteractiveTrait&)
-   * @return Reference to this View for fluent chaining
+   * @return InteractiveTrait handle
    */
-  template<typename F>
-  View& AsInteractive(F&& configure)
-  {
-    InteractiveTrait trait = EnsureInteractiveTrait();
-    if(trait)
-    {
-      configure(trait);
-    }
-    return *this;
-  }
-
-  // @CHAIN_MANUAL
+  InteractiveTrait AsInteractive();
   /**
    * @brief Attaches the selectable trait to this View.
    *
    * A View can have at most one selectable trait. If the View already has a
    * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused.
    *
-   * @return Reference to this View for fluent chaining
+   * @return SelectableTrait handle
    */
-  View& AsSelectable()
-  {
-    EnsureSelectableTrait();
-    return *this;
-  }
-
-  // @CHAIN_MANUAL
-  /**
-   * @brief Attaches the selectable trait to this View and configures it.
-   *
-   * A View can have at most one selectable trait. If the View already has a
-   * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is
-   * used and the configure callback is invoked with it.
-   *
-   * @param[in] configure Callable with signature void(SelectableTrait&)
-   * @return Reference to this View for fluent chaining
-   */
-  template<typename F>
-  View& AsSelectable(F&& configure)
-  {
-    SelectableTrait trait = EnsureSelectableTrait();
-    if(trait)
-    {
-      configure(trait);
-    }
-    return *this;
-  }
-
-  // @CHAIN_MANUAL
-  /**
-   * @brief Assigns this View instance to a target variable.
-   * This method is useful for capturing a reference to a View created within
-   * a declarative UI tree for later use.
-   */
-  View& As(View& self)
-  {
-    self = static_cast<View&>(*this);
-    return *this;
-  }
-
-  // @CHAIN_MANUAL_SELF
-  /**
-   * @brief Executes a custom action on this View instance.
-   *
-   * Useful for performing additional setup (e.g. signal connections,
-   * predefined style application) without breaking the method chain.
-   *
-   * @param[in] action A callable (lambda or free function) invoked with
-   *                   a reference to this instance.
-   *
-   * @return Reference to this View for fluent chaining.
-   */
-  template<typename F>
-  View& With(F&& action)
-  {
-    action(*this);
-    return *this;
-  }
+  SelectableTrait AsSelectable();
 
   /**
    * @brief Sets layout parameters on this View.
@@ -1190,34 +1087,27 @@ public: // Properties
    * measure cache is invalidated.
    *
    * @param[in] params The layout parameters to attach to this View
-   * @return Reference to this View for fluent chaining
-   *
    * @code
-   * child.SetLayoutParams(
-   *   AbsoluteLayoutParams::New()
-   *     .SetBounds(LayoutRect(10, 20, 100, 200))
-   *     .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+   * auto params = AbsoluteLayoutParams::New();
+   * params.SetBounds(LayoutRect(10, 20, 100, 200));
+   * params.SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL);
+   * child.SetLayoutParams(params);
    * @endcode
    */
-  View& SetLayoutParams(LayoutParams params);
-
-  // @CHAIN_MANUAL
+  void SetLayoutParams(LayoutParams params);
   /**
    * @brief Adds a list of children to this View in a declarative way.
    * This method allows for a hierarchical UI tree construction by passing
    * a brace-enclosed initializer list of View objects.
    * @param[in] children The initializer list containing child View handles to be added.
    */
-  View& Children(std::initializer_list<View> children)
+  void AddChildren(std::initializer_list<View> children)
   {
     for(const auto& child : children)
     {
       Add(child);
     }
-    return *this;
   }
-
-  // @CHAIN_MANUAL
   /**
    * @brief Adds a list of visuals to this View in a declarative way.
    * This method allows for append visuals construction by passing
@@ -1229,17 +1119,14 @@ public: // Properties
    * @param[in] containerRangeType The range of visuals to be added.
    * @param[in] visuals The initializer list containing VisualBase handles to be added.
    */
-  View& Visuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals)
+  void AddVisuals(Dali::Ui::Visual::ContainerRangeType containerRangeType, std::initializer_list<Dali::Ui::VisualBase> visuals)
   {
     for(const auto& visual : visuals)
     {
       bool added = AddVisual(visual, containerRangeType);
       DALI_ASSERT_ALWAYS(added && "Too many visuals are added by declarative method, or try to add duplicated VisualBase!");
     }
-    return *this;
   }
-
-  // @CHAIN_MANUAL_SELF
   /**
    * @brief Sets an attachment from uniquely owned data.
    *
@@ -1259,17 +1146,13 @@ public: // Properties
    *
    * @param[in] id The key to identify the attachment
    * @param[in] data The data whose ownership is transferred to this View
-   * @return Reference to this View
    */
   template<typename T>
-  View& SetAttachment(AttachmentId id, Dali::UniquePtr<T> data)
+  void SetAttachment(AttachmentId id, Dali::UniquePtr<T> data)
   {
     DALI_ASSERT_ALWAYS(data && "SetAttachment requires non-null data");
     View::SetAttachment(id, UniqueAny(Dali::Move(data)));
-    return *this;
   }
-
-  // @CHAIN_END
 
   /**
    * @brief Removes an attachment.
@@ -1424,11 +1307,6 @@ public: // Properties
    * @return Index of the view, or -1 if not a child
    */
   int32_t IndexOfChild(View view) const;
-
-  // Keep the base Actor sibling-order APIs reachable. The overloads below take
-  // LayoutOrderPolicy and would otherwise hide the inherited Actor versions;
-  // pulling them back in lets callers that don't care about layout order use
-  // `view.Raise()`, `view.RaiseAbove(actor)`, etc. exactly as before.
   using Dali::Actor::Lower;
   using Dali::Actor::LowerBelow;
   using Dali::Actor::LowerToBottom;
@@ -1549,33 +1427,11 @@ public: // State API (non-chaining)
 
 public: // Trait accessors (non-chaining)
   /**
-   * @brief Ensures this View has an interaction trait and returns it.
-   *
-   * If no interaction trait is set, an InteractiveTrait is attached and returned.
-   * If an InteractiveTrait is already attached, it is returned. If a different
-   * interaction trait is set, an assertion may fire and an empty handle is returned.
-   *
-   * @return InteractiveTrait handle, or an uninitialized handle on error
-   */
-  InteractiveTrait EnsureInteractiveTrait();
-
-  /**
    * @brief Returns whether this View has an interaction trait attached.
    *
    * @return True if this View has an InteractiveTrait
    */
   bool IsInteractive() const;
-
-  /**
-   * @brief Ensures this View has a selectable trait and returns it.
-   *
-   * If no selectable trait is set, a SelectableTrait is attached and returned.
-   * If a SelectableTrait is already attached, it is returned. If a different
-   * selectable trait type is set, an assertion may fire and an empty handle is returned.
-   *
-   * @return SelectableTrait handle, or an uninitialized handle on error
-   */
-  SelectableTrait EnsureSelectableTrait();
 
   /**
    * @brief Returns whether this View has a selectable trait attached.
@@ -1653,9 +1509,6 @@ private:
    * @return The trait as a BaseHandle, or an empty handle if not found
    */
   BaseHandle GetLayoutParamsInternal(LayoutParamsType type) const;
-
-  // From Control.h
-  // TODO: Refactoring
 
 public:
   /**
@@ -1982,8 +1835,6 @@ public:
     };
   };
 
-  // Typedefs
-
   /// @brief Key Event signal type.
   typedef Signal<bool(View, KeyEvent)> KeyEventSignalType;
 
@@ -2027,8 +1878,6 @@ public:
   /// @brief Visual Event signal type.
   typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
 
-  // Background
-
   /**
    * @brief Clears the background.
    */
@@ -2054,8 +1903,6 @@ public:
    */
   void ClearRenderEffect();
 
-  // Resources
-
   /**
    * @brief Query if all resources required by a View are loaded and ready.
    *
@@ -2070,8 +1917,6 @@ public:
    * @return true if the view is on scene, false otherwise
    */
   bool IsOnScene() const;
-
-  // Signals
 
   /**
    * @brief This signal is emitted after all resources required by a View are loaded and ready.
@@ -2227,8 +2072,6 @@ public: // Templates for Deriving Classes
   template<typename I>
   DALI_INTERNAL void VerifyCustomActorPointer(Dali::Internal::CustomActor* internal)
   {
-    // Can have a NULL pointer so we only need to check if the internal implementation is our class
-    // when there is a value.
     if(internal)
     {
       DALI_ASSERT_DEBUG(dynamic_cast<I*>(&CustomActor(internal).GetImplementation()));

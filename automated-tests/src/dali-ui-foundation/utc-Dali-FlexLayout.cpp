@@ -275,52 +275,47 @@ int UtcDaliFlexLayoutGetAlignSelfP(void)
   END_TEST;
 }
 
-int UtcDaliFlexLayoutDirectionChainingP(void)
+int UtcDaliFlexLayoutDirectionSetterP(void)
 {
   UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
-  FlexLayout& result = layout.SetDirection(FlexDirection::COLUMN);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetDirection(FlexDirection::COLUMN);
   DALI_TEST_EQUALS(layout.GetDirection(), FlexDirection::COLUMN, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliFlexLayoutWrapChainingP(void)
+int UtcDaliFlexLayoutWrapSetterP(void)
 {
   UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
-  FlexLayout& result = layout.SetWrap(FlexWrap::WRAP_REVERSE);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetWrap(FlexWrap::WRAP_REVERSE);
   DALI_TEST_EQUALS(layout.GetWrap(), FlexWrap::WRAP_REVERSE, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliFlexLayoutJustifyContentChainingP(void)
+int UtcDaliFlexLayoutJustifyContentSetterP(void)
 {
   UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
-  FlexLayout& result = layout.SetJustifyContent(FlexJustify::SPACE_EVENLY);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetJustifyContent(FlexJustify::SPACE_EVENLY);
   DALI_TEST_EQUALS(layout.GetJustifyContent(), FlexJustify::SPACE_EVENLY, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliFlexLayoutAlignItemsChainingP(void)
+int UtcDaliFlexLayoutAlignItemsSetterP(void)
 {
   UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
-  FlexLayout& result = layout.SetAlignItems(FlexAlign::STRETCH);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetAlignItems(FlexAlign::STRETCH);
   DALI_TEST_EQUALS(layout.GetAlignItems(), FlexAlign::STRETCH, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliFlexLayoutAlignContentChainingP(void)
+int UtcDaliFlexLayoutAlignContentSetterP(void)
 {
   UiTestApplication application;
   FlexLayout layout = FlexLayout::New();
-  FlexLayout& result = layout.SetAlignContent(FlexAlign::CENTER);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetAlignContent(FlexAlign::CENTER);
   DALI_TEST_EQUALS(layout.GetAlignContent(), FlexAlign::CENTER, TEST_LOCATION);
   END_TEST;
 }

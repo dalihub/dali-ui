@@ -69,6 +69,28 @@ const Dali::Vector<Text::FitCandidate>& GetFontSizeCandidates()
   return candidates;
 }
 
+Label CreateSectionLabel(const char* text)
+{
+  Label label = Label::New(text);
+  label.SetFontSize(16.0f);
+  label.SetBackgroundColor(UiColor(0xE0E0E0));
+  label.SetPadding(Extents(10, 10, 10, 10));
+  return label;
+}
+
+Label CreateFitLabel(const char* text, float width, float height, bool multiLine)
+{
+  Label label = Label::New(text);
+  label.SetRequestedWidth(width);
+  label.SetRequestedHeight(height);
+  label.SetMultiLine(multiLine);
+  label.SetFontSize(20.0f);
+  label.SetBackgroundColor(UiColor(0xEFEFEF));
+  label.SetPadding(Extents(10, 10, 10, 10));
+  label.SetTextFit(GetFitCandidates());
+  return label;
+}
+
 } // namespace
 
 class TextFitCandidateController : public ConnectionTracker
@@ -86,87 +108,40 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetSpacing(STACK_SPACING)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-        .Children({
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetSpacing(STACK_SPACING);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
-          Label::New("TextFit Candidate Example")
-            .SetFontSize(24.0f),
+    Label titleLabel = Label::New("TextFit Candidate Example");
+    titleLabel.SetFontSize(24.0f);
+    root.Add(titleLabel);
 
-          Label::New("Press '1' to clear TextFit, '2' and '3' to set alternative candidates")
-            .SetFontSize(14.0f)
-            .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetPadding(Extents(10, 10, 10, 10)),
+    Label instructionLabel = Label::New("Press '1' to clear TextFit, '2' and '3' to set alternative candidates");
+    instructionLabel.SetFontSize(14.0f);
+    instructionLabel.SetBackgroundColor(UiColor(0xE0E0E0));
+    instructionLabel.SetPadding(Extents(10, 10, 10, 10));
+    root.Add(instructionLabel);
 
-          // 1. MATCH_PARENT + fixed height / single line
-          Label::New("1. MATCH_PARENT + fixed height / single line")
-            .SetFontSize(16.0f)
-            .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetPadding(Extents(10, 10, 10, 10)),
+    root.Add(CreateSectionLabel("1. MATCH_PARENT + fixed height / single line"));
+    mFixedSingleLineLabel = CreateFitLabel(SINGLE_LINE_TEXT, MATCH_PARENT, LABEL_HEIGHT, false);
+    root.Add(mFixedSingleLineLabel);
 
-          Label::New(SINGLE_LINE_TEXT)
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(LABEL_HEIGHT)
-            .SetMultiLine(false)
-            .SetFontSize(20.0f)
-            .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(GetFitCandidates())
-            .As(mFixedSingleLineLabel),
+    root.Add(CreateSectionLabel("2. MATCH_PARENT + fixed height / multi line"));
+    mFixedMultiLineLabel = CreateFitLabel(MULTI_LINE_TEXT, MATCH_PARENT, LABEL_HEIGHT * 2.0f, true);
+    root.Add(mFixedMultiLineLabel);
 
-          // 2. MATCH_PARENT + fixed height / multi line
-          Label::New("2. MATCH_PARENT + fixed height / multi line")
-            .SetFontSize(16.0f)
-            .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetPadding(Extents(10, 10, 10, 10)),
+    root.Add(CreateSectionLabel("3. WRAP_CONTENT + WRAP_CONTENT / single line"));
+    mWrapWrapSingleLine = CreateFitLabel(SINGLE_LINE_TEXT, WRAP_CONTENT, WRAP_CONTENT, false);
+    root.Add(mWrapWrapSingleLine);
 
-          Label::New(MULTI_LINE_TEXT)
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(LABEL_HEIGHT * 2.0f)
-            .SetMultiLine(true)
-            .SetFontSize(20.0f)
-            .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(GetFitCandidates())
-            .As(mFixedMultiLineLabel),
+    root.Add(CreateSectionLabel("4. WRAP_CONTENT + WRAP_CONTENT / multi line"));
+    mWrapWrapMultiLine = CreateFitLabel(MULTI_LINE_TEXT, WRAP_CONTENT, WRAP_CONTENT, true);
+    mWrapWrapMultiLine.SetMaximumHeight(200);
+    root.Add(mWrapWrapMultiLine);
 
-          // 3. WRAP_CONTENT + WRAP_CONTENT / single line
-          Label::New("3. WRAP_CONTENT + WRAP_CONTENT / single line")
-            .SetFontSize(16.0f)
-            .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetPadding(Extents(10, 10, 10, 10)),
-
-          Label::New(SINGLE_LINE_TEXT)
-            .SetRequestedWidth(WRAP_CONTENT)
-            .SetRequestedHeight(WRAP_CONTENT)
-            .SetMultiLine(false)
-            .SetFontSize(20.0f)
-            .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(GetFitCandidates())
-            .As(mWrapWrapSingleLine),
-
-          // 4. WRAP_CONTENT + WRAP_CONTENT / multi line
-          Label::New("4. WRAP_CONTENT + WRAP_CONTENT / multi line")
-            .SetFontSize(16.0f)
-            .SetBackgroundColor(UiColor(0xE0E0E0))
-            .SetPadding(Extents(10, 10, 10, 10)),
-
-          Label::New(MULTI_LINE_TEXT)
-            .SetRequestedWidth(WRAP_CONTENT)
-            .SetRequestedHeight(WRAP_CONTENT)
-            .SetMaximumHeight(200)
-            .SetMultiLine(true)
-            .SetFontSize(20.0f)
-            .SetBackgroundColor(UiColor(0xEFEFEF))
-            .SetPadding(Extents(10, 10, 10, 10))
-            .SetTextFit(GetFitCandidates())
-            .As(mWrapWrapMultiLine),
-        }));
+    window.Add(root);
 
     window.KeyEventSignal().Connect(this, &TextFitCandidateController::OnKeyEvent);
   }

@@ -50,13 +50,13 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: GridLayout with padding
-    GridLayout root = GridLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetBackgroundColor(Color::GRAY)
-      .SetPadding(Extents(50, 50, 50, 50)) // start, end, top, bottom
-      .SetRowSpacing(0.0f)
-      .SetColumnSpacing(0.0f);
+    GridLayout root = GridLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(Color::GRAY);
+    root.SetPadding(Extents(50, 50, 50, 50)); // start, end, top, bottom
+    root.SetRowSpacing(0.0f);
+    root.SetColumnSpacing(0.0f);
 
     // 3 rows x 2 columns, no spacing (margin only)
     root.AddRowDefinition(GridLength::Absolute(200.0f));

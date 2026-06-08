@@ -17,16 +17,12 @@
 
 #ifndef DALI_UI_FOUNDATION_SCROLL_BAR_H
 #define DALI_UI_FOUNDATION_SCROLL_BAR_H
-
-// EXTERNAL INCLUDES
-#include <dali/public-api/math/vector2.h>
-#include <dali/public-api/object/property-map.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/i-scroll-bar.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/scrollable-enum.h>
+#include <dali/public-api/math/vector2.h>
+#include <dali/public-api/object/property-map.h>
 
 namespace Dali
 {
@@ -200,7 +196,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_LAYOUT_METHODS(ScrollBar)
 };
 
 } // namespace Ui

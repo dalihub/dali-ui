@@ -55,16 +55,36 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1B1B1B));
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT)
-        .SetSpacing(8.0f).SetPadding(Extents(10, 10, 10, 10))
-        .Children({
-          Label::New("Image Placeholder Sample").SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(40.0f).SetFontSize(16.0f).SetTextColor(UiColor(0xFFFFFF)).SetHorizontalTextAlignment(Text::Alignment::CENTER).SetVerticalTextAlignment(Text::Alignment::CENTER),
-          mContainer = StackLayout::New(StackOrientation::VERTICAL).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)).SetBackgroundColor(UiColor(0x2A2A2A)),
-          mStatusLabel = Label::New("Status: —").SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(28.0f).SetFontSize(12.0f).SetTextColor(UiColor(0xCCCCCC)).SetHorizontalTextAlignment(Text::Alignment::CENTER).SetVerticalTextAlignment(Text::Alignment::CENTER),
-          CreateControlRow(),
-        }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetSpacing(8.0f);
+    root.SetPadding(Extents(10, 10, 10, 10));
+
+    Label title = Label::New("Image Placeholder Sample");
+    title.SetRequestedWidth(MATCH_PARENT);
+    title.SetRequestedHeight(40.0f);
+    title.SetFontSize(16.0f);
+    title.SetTextColor(UiColor(0xFFFFFF));
+    title.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    title.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    mContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mContainer.SetRequestedWidth(MATCH_PARENT);
+    mContainer.SetRequestedHeight(WRAP_CONTENT);
+    mContainer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    mContainer.SetBackgroundColor(UiColor(0x2A2A2A));
+
+    mStatusLabel = Label::New("Status: —");
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(28.0f);
+    mStatusLabel.SetFontSize(12.0f);
+    mStatusLabel.SetTextColor(UiColor(0xCCCCCC));
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    root.AddChildren({title, mContainer, mStatusLabel, CreateControlRow()});
+    window.Add(root);
 
     window.KeyEventSignal().Connect(this, &ImagePlaceholderController::OnKeyEvent);
     ResetImage();
@@ -72,21 +92,32 @@ private:
 
   View CreateControlRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL).SetSpacing(8.0f).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(50.0f);
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(8.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(50.0f);
 
-    mTypeButton = Label::New(TYPE_NAMES[(int)mViewType])
-                    .SetRequestedWidth(WRAP_CONTENT).SetRequestedHeight(MATCH_PARENT)
-                    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                    .SetBackgroundColor(UiColor(0x1565C0)).SetFontSize(13.0f).SetTextColor(UiColor(0xFFFFFF))
-                    .SetHorizontalTextAlignment(Text::Alignment::CENTER).SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mTypeButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImagePlaceholderController::OnTypeToggleClicked);
+    mTypeButton = Label::New(TYPE_NAMES[(int)mViewType]);
+    mTypeButton.SetRequestedWidth(WRAP_CONTENT);
+    mTypeButton.SetRequestedHeight(MATCH_PARENT);
+    mTypeButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    mTypeButton.SetBackgroundColor(UiColor(0x1565C0));
+    mTypeButton.SetFontSize(13.0f);
+    mTypeButton.SetTextColor(UiColor(0xFFFFFF));
+    mTypeButton.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mTypeButton.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mTypeButton.AsInteractive().ClickedSignal().Connect(this, &ImagePlaceholderController::OnTypeToggleClicked);
 
-    View reloadButton = Label::New("RELOAD")
-                          .SetRequestedWidth(WRAP_CONTENT).SetRequestedHeight(MATCH_PARENT)
-                          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                          .SetBackgroundColor(UiColor(0x2E7D32)).SetFontSize(13.0f).SetTextColor(UiColor(0xFFFFFF))
-                          .SetHorizontalTextAlignment(Text::Alignment::CENTER).SetVerticalTextAlignment(Text::Alignment::CENTER);
-    reloadButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImagePlaceholderController::OnReloadClicked);
+    View reloadButton = Label::New("RELOAD");
+    reloadButton.SetRequestedWidth(WRAP_CONTENT);
+    reloadButton.SetRequestedHeight(MATCH_PARENT);
+    reloadButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    reloadButton.SetBackgroundColor(UiColor(0x2E7D32));
+    Label::DownCast(reloadButton).SetFontSize(13.0f);
+    Label::DownCast(reloadButton).SetTextColor(UiColor(0xFFFFFF));
+    Label::DownCast(reloadButton).SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    Label::DownCast(reloadButton).SetVerticalTextAlignment(Text::Alignment::CENTER);
+    reloadButton.AsInteractive().ClickedSignal().Connect(this, &ImagePlaceholderController::OnReloadClicked);
 
     row.Add(mTypeButton);
     row.Add(reloadButton);
@@ -107,7 +138,8 @@ private:
       case ViewType::ANIMATED:
       {
         AnimatedImageView view = AnimatedImageView::New();
-        view.SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT);
+        view.SetRequestedWidth(MATCH_PARENT);
+        view.SetRequestedHeight(MATCH_PARENT);
         view.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
         view.SetPlaceholderUrl(RESOURCES_DIR "placeholder_image.png");
         view.SetLoopCount(-1);
@@ -118,7 +150,8 @@ private:
       case ViewType::LOTTIE:
       {
         LottieAnimationView view = LottieAnimationView::New();
-        view.SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT);
+        view.SetRequestedWidth(MATCH_PARENT);
+        view.SetRequestedHeight(MATCH_PARENT);
         view.SetPlaceholderUrl(RESOURCES_DIR "placeholder_image.png");
         view.SetLoopCount(-1);
         view.ResourceReadySignal().Connect(this, &ImagePlaceholderController::OnResourceReady);
@@ -128,7 +161,8 @@ private:
       default:
       {
         ImageView view = ImageView::New();
-        view.SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT);
+        view.SetRequestedWidth(MATCH_PARENT);
+        view.SetRequestedHeight(MATCH_PARENT);
         view.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
         view.SetPlaceholderUrl(RESOURCES_DIR "placeholder_image.png");
         view.ResourceReadySignal().Connect(this, &ImagePlaceholderController::OnResourceReady);

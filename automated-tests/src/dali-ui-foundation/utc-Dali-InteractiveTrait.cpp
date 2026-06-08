@@ -155,11 +155,11 @@ struct LongPressedSignalFunctor
  */
 View CreateInteractiveView(TestApplication& application, float width = 100.0f, float height = 100.0f)
 {
-  View view = View::New()
-    .SetRequestedWidth(width)
-    .SetRequestedHeight(height)
-    .SetPivot(Pivot::TOP_LEFT)
-    .SetParentOrigin(ParentOrigin::TOP_LEFT);
+  View view = View::New();
+  view.SetRequestedWidth(width);
+  view.SetRequestedHeight(height);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
 
   application.GetScene().Add(view);
   view.AsInteractive();
@@ -232,8 +232,8 @@ int UtcDaliViewAsInteractiveP(void)
   UiTestApplication application;
   View view = View::New();
 
-  View& result = view.AsInteractive();
-  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  InteractiveTrait result = view.AsInteractive();
+  DALI_TEST_CHECK(result);
 
   DALI_TEST_CHECK(view.IsInteractive());
   END_TEST;
@@ -245,14 +245,13 @@ int UtcDaliViewAsInteractiveWithConfigureP(void)
   bool configureCalled = false;
 
   View view = View::New();
-  view.AsInteractive([&configureCalled](InteractiveTrait& trait) {
-    configureCalled = true;
-    trait.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
-  });
+  InteractiveTrait configuredTrait = view.AsInteractive();
+  configureCalled                  = true;
+  configuredTrait.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
 
   DALI_TEST_CHECK(configureCalled);
 
-  InteractiveTrait clickable = view.EnsureInteractiveTrait();
+  InteractiveTrait clickable = view.AsInteractive();
   DALI_TEST_CHECK(clickable);
   DALI_TEST_EQUALS(static_cast<uint32_t>(clickable.GetKeyClickPolicy()),
                    static_cast<uint32_t>(KeyClickPolicy::ON_PRESS),
@@ -266,10 +265,10 @@ int UtcDaliViewAsInteractiveIdempotentP(void)
   View view = View::New();
 
   view.AsInteractive();
-  InteractiveTrait first = view.EnsureInteractiveTrait();
+  InteractiveTrait first = view.AsInteractive();
 
   view.AsInteractive();
-  InteractiveTrait second = view.EnsureInteractiveTrait();
+  InteractiveTrait second = view.AsInteractive();
 
   DALI_TEST_CHECK(first == second);
   END_TEST;
@@ -289,11 +288,11 @@ int UtcDaliViewEnsureInteractiveTraitP(void)
   UiTestApplication application;
   View view = View::New();
 
-  InteractiveTrait clickable = view.EnsureInteractiveTrait();
+  InteractiveTrait clickable = view.AsInteractive();
   DALI_TEST_CHECK(clickable);
 
   // Second call returns the same trait
-  InteractiveTrait again = view.EnsureInteractiveTrait();
+  InteractiveTrait again = view.AsInteractive();
   DALI_TEST_CHECK(clickable == again);
   END_TEST;
 }
@@ -380,7 +379,7 @@ int UtcDaliInteractiveTraitTapClickedSignalP(void)
 
   ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+  view.AsInteractive().ClickedSignal().Connect(&application, functor);
 
   // Generate tap at center of the view
   TestGenerateTap(application, 50.0f, 50.0f, 100);
@@ -397,7 +396,7 @@ int UtcDaliInteractiveTraitTapOutsideN(void)
 
   ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+  view.AsInteractive().ClickedSignal().Connect(&application, functor);
 
   // Generate tap outside the view (view is 100x100 at top-left)
   TestGenerateTap(application, 200.0f, 200.0f, 100);
@@ -410,11 +409,11 @@ int UtcDaliInteractiveTraitSetClickableFalseBlocksTapP(void)
 {
   UiTestApplication application;
   View view = CreateInteractiveView(application);
-  view.EnsureInteractiveTrait().SetClickable(false);
+  view.AsInteractive().SetClickable(false);
 
   ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+  view.AsInteractive().ClickedSignal().Connect(&application, functor);
 
   TestGenerateTap(application, 50.0f, 50.0f, 100);
 
@@ -433,7 +432,7 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
 
   PressedChangedSignalData    data;
   PressedChangedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().PressedChangedSignal().Connect(&application, functor);
+  view.AsInteractive().PressedChangedSignal().Connect(&application, functor);
 
   // Touch down
   Dali::Integration::TouchEvent touchDown;
@@ -448,7 +447,7 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
   application.ProcessEvent(touchDown);
 
   DALI_TEST_CHECK(data.called);
-  DALI_TEST_CHECK(view.EnsureInteractiveTrait().IsPressed());
+  DALI_TEST_CHECK(view.AsInteractive().IsPressed());
 
   data.Reset();
 
@@ -465,7 +464,7 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
   application.ProcessEvent(touchUp);
 
   DALI_TEST_CHECK(data.called);
-  DALI_TEST_CHECK(!view.EnsureInteractiveTrait().IsPressed());
+  DALI_TEST_CHECK(!view.AsInteractive().IsPressed());
   END_TEST;
 }
 
@@ -476,7 +475,7 @@ int UtcDaliInteractiveTraitSceneDisconnectionClearsPressedP(void)
 
   PressedChangedSignalData    data;
   PressedChangedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().PressedChangedSignal().Connect(&application, functor);
+  view.AsInteractive().PressedChangedSignal().Connect(&application, functor);
 
   Dali::Integration::TouchEvent touchDown;
   Dali::Integration::Point      point;
@@ -491,7 +490,7 @@ int UtcDaliInteractiveTraitSceneDisconnectionClearsPressedP(void)
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(data.pressed);
-  DALI_TEST_CHECK(view.EnsureInteractiveTrait().IsPressed());
+  DALI_TEST_CHECK(view.AsInteractive().IsPressed());
 
   data.Reset();
 
@@ -501,7 +500,7 @@ int UtcDaliInteractiveTraitSceneDisconnectionClearsPressedP(void)
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(!data.pressed);
-  DALI_TEST_CHECK(!view.EnsureInteractiveTrait().IsPressed());
+  DALI_TEST_CHECK(!view.AsInteractive().IsPressed());
   END_TEST;
 }
 
@@ -513,11 +512,11 @@ int UtcDaliInteractiveTraitKeyEventClickedOnReleaseP(void)
 {
   UiTestApplication application;
   View view = CreateInteractiveView(application);
-  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+  view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
 
   ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+  view.AsInteractive().ClickedSignal().Connect(&application, functor);
 
   // Give focus to the view
   FocusManager::Get().SetCurrentFocusView(view);
@@ -545,11 +544,11 @@ int UtcDaliInteractiveTraitKeyEventClickedOnPressP(void)
 {
   UiTestApplication application;
   View view = CreateInteractiveView(application);
-  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+  view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
 
   ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+  view.AsInteractive().ClickedSignal().Connect(&application, functor);
 
   FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
@@ -568,11 +567,11 @@ int UtcDaliInteractiveTraitKeyEventDisabledPolicyP(void)
 {
   UiTestApplication application;
   View view = CreateInteractiveView(application);
-  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::DISABLED);
+  view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::DISABLED);
 
   ClickedSignalData    data;
   ClickedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, functor);
+  view.AsInteractive().ClickedSignal().Connect(&application, functor);
 
   FocusManager::Get().SetCurrentFocusView(view);
   application.SendNotification();
@@ -601,7 +600,7 @@ int UtcDaliInteractiveTraitLongPressedSignalP(void)
 
   LongPressedSignalData    data;
   LongPressedSignalFunctor functor(data);
-  view.EnsureInteractiveTrait().LongPressedSignal().Connect(&application, functor);
+  view.AsInteractive().LongPressedSignal().Connect(&application, functor);
 
   TestGenerateLongPress(application, 50.0f, 50.0f, 100);
 
@@ -617,11 +616,11 @@ int UtcDaliInteractiveTraitLongPressBlocksClickP(void)
 
   LongPressedSignalData    lpData;
   LongPressedSignalFunctor lpFunctor(lpData, true); // consume the long press
-  view.EnsureInteractiveTrait().LongPressedSignal().Connect(&application, lpFunctor);
+  view.AsInteractive().LongPressedSignal().Connect(&application, lpFunctor);
 
   ClickedSignalData    clickData;
   ClickedSignalFunctor clickFunctor(clickData);
-  view.EnsureInteractiveTrait().ClickedSignal().Connect(&application, clickFunctor);
+  view.AsInteractive().ClickedSignal().Connect(&application, clickFunctor);
 
   TestGenerateLongPress(application, 50.0f, 50.0f, 100);
   TestEndLongPress(application, 50.0f, 50.0f, 800);
@@ -638,20 +637,19 @@ int UtcDaliInteractiveTraitLongPressBlocksClickP(void)
 int UtcDaliViewAsInteractiveWithLambdaP(void)
 {
   UiTestApplication application;
-  View view = View::New()
-    .SetRequestedWidth(100.0f)
-    .SetRequestedHeight(100.0f)
-    .SetPivot(Pivot::TOP_LEFT)
-    .SetParentOrigin(ParentOrigin::TOP_LEFT);
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
 
   application.GetScene().Add(view);
 
   bool clicked = false;
-  view.AsInteractive([&application, &clicked](InteractiveTrait& trait) {
-    trait.ClickedSignal().Connect(&application, [&clicked](View v, InputEvent e) -> bool {
-      clicked = true;
-      return false;
-    });
+  InteractiveTrait interactive = view.AsInteractive();
+  interactive.ClickedSignal().Connect(&application, [&clicked](View v, InputEvent e) -> bool {
+    clicked = true;
+    return false;
   });
 
   application.SendNotification();

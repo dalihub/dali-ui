@@ -24,6 +24,14 @@
 namespace ManualTest
 {
 
+inline Dali::Ui::View MakeWeightedSpacer()
+{
+  Dali::Ui::View spacer = Dali::Ui::View::New();
+  spacer.SetRequestedWidth(Dali::Ui::WRAP_CONTENT);
+  spacer.SetLayoutParams(Dali::Ui::StackLayoutParams::New().SetWeight(1.0f));
+  return spacer;
+}
+
 /**
  * @brief Abstract base class for all manual test cases.
  *

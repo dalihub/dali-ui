@@ -46,52 +46,51 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    mStatusLabel = Label::New()
-                     .SetText("Press button to test")
-                     .SetFontSize(FONT_SIZE)
-                     .SetTextColor(UiColor(COLOR_TEXT))
-                     .SetRequestedWidth(MATCH_PARENT)
-                     .SetRequestedHeight(60.0f)
-                     .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                     .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                     .SetMultiLine(true);
+    mStatusLabel = Label::New();
+    mStatusLabel.SetText("Press button to test");
+    mStatusLabel.SetFontSize(FONT_SIZE);
+    mStatusLabel.SetTextColor(UiColor(COLOR_TEXT));
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(60.0f);
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetMultiLine(true);
 
-    mNonFocusable = Label::New()
-                      .SetText("Non-focusable")
-                      .SetFontSize(FONT_SIZE)
-                      .SetBackgroundColor(UiColor(COLOR_DEFAULT))
-                      .SetLayoutParams(StackLayoutParams::New().SetWeight(1))
-                      .SetRequestedHeight(60.0f);
+    Label nonFocusable = Label::New();
+    nonFocusable.SetText("Non-focusable");
+    nonFocusable.SetFontSize(FONT_SIZE);
+    nonFocusable.SetBackgroundColor(UiColor(COLOR_DEFAULT));
+    nonFocusable.SetLayoutParams(StackLayoutParams::New().SetWeight(1));
+    nonFocusable.SetRequestedHeight(60.0f);
+    mNonFocusable = nonFocusable;
 
-    mFocusableChild = Label::New()
-                        .SetText("Focusable")
-                        .SetFontSize(FONT_SIZE)
-                        .SetBackgroundColor(UiColor(COLOR_DEFAULT))
-                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1))
-                        .SetRequestedHeight(60.0f)
-                        .SetFocusable(true)
-                        .With([this](View& view)
-                        {
-                          view.FocusChangedSignal().Connect(this, [](View focusedView, bool focused)
-                          {
-                            focusedView.SetBackgroundColor(UiColor(focused ? COLOR_FOCUSED : COLOR_DEFAULT));
-                          });
-                        });
+    Label focusableChild = Label::New();
+    focusableChild.SetText("Focusable");
+    focusableChild.SetFontSize(FONT_SIZE);
+    focusableChild.SetBackgroundColor(UiColor(COLOR_DEFAULT));
+    focusableChild.SetLayoutParams(StackLayoutParams::New().SetWeight(1));
+    focusableChild.SetRequestedHeight(60.0f);
+    focusableChild.SetFocusable(true);
+    focusableChild.FocusChangedSignal().Connect(this, [](View focusedView, bool focused)
+    {
+      focusedView.SetBackgroundColor(UiColor(focused ? COLOR_FOCUSED : COLOR_DEFAULT));
+    });
+    mFocusableChild = focusableChild;
 
-    mLayout = StackLayout::New(StackOrientation::HORIZONTAL)
-                .SetRequestedWidth(MATCH_PARENT)
-                .SetRequestedHeight(60.0f)
-                .Children({mNonFocusable, mFocusableChild});
+    mLayout = StackLayout::New(StackOrientation::HORIZONTAL);
+    mLayout.SetRequestedWidth(MATCH_PARENT);
+    mLayout.SetRequestedHeight(60.0f);
+    mLayout.AddChildren({mNonFocusable, mFocusableChild});
 
-    auto btnRequestFocus = Label::New()
-                             .SetText("RequestFocus on Layout")
-                             .SetFontSize(FONT_SIZE)
-                             .SetTextColor(UiColor(0xFFFFFF))
-                             .SetBackgroundColor(UiColor(0x4285F4))
-                             .SetRequestedWidth(MATCH_PARENT)
-                             .SetRequestedHeight(44.0f)
-                             .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                             .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    auto btnRequestFocus = Label::New();
+    btnRequestFocus.SetText("RequestFocus on Layout");
+    btnRequestFocus.SetFontSize(FONT_SIZE);
+    btnRequestFocus.SetTextColor(UiColor(0xFFFFFF));
+    btnRequestFocus.SetBackgroundColor(UiColor(0x4285F4));
+    btnRequestFocus.SetRequestedWidth(MATCH_PARENT);
+    btnRequestFocus.SetRequestedHeight(44.0f);
+    btnRequestFocus.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    btnRequestFocus.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
     btnRequestFocus.TouchedSignal().Connect(this, [this](Actor, TouchEvent e) -> bool {
       if(e.GetState(0) == PointState::UP)
@@ -103,15 +102,18 @@ public:
       return true;
     });
 
-    contentArea.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetBackgroundColor(UiColor(COLOR_BG))
-        .SetPadding(Extents(GAP, GAP, GAP, GAP))
-        .Children({mStatusLabel, btnRequestFocus,
-                   Label::New().SetText("Layout:").SetFontSize(FONT_SIZE).SetTextColor(UiColor(COLOR_TEXT)),
-                   mLayout}));
+    Label layoutLabel = Label::New();
+    layoutLabel.SetText("Layout:");
+    layoutLabel.SetFontSize(FONT_SIZE);
+    layoutLabel.SetTextColor(UiColor(COLOR_TEXT));
+
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(UiColor(COLOR_BG));
+    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.AddChildren({mStatusLabel, btnRequestFocus, layoutLabel, mLayout});
+    contentArea.Add(root);
 
   }
 

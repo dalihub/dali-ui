@@ -14,15 +14,11 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/object/type-registry.h>
-#include <dali/public-api/actors/actor.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/public-api/scroll-view.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/actors/actor.h>
 
 namespace Dali
 {
@@ -54,8 +50,6 @@ ScrollView ScrollView::New()
   Integration::ScrollViewImplPtr impl = Integration::ScrollViewImpl::New();
 
   ScrollView scrollView = ScrollView(*impl);
-
-  // Second-phase initialization
   impl->Initialize();
   return scrollView;
 }
@@ -105,14 +99,9 @@ ScrollView::ScrollView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::ScrollViewImpl>(internal);
 }
 
-// =============================================================================
-// Properties
-// =============================================================================
-
-ScrollView& ScrollView::SetContent(View content)
+void ScrollView::SetContent(View content)
 {
   GetImpl(*this).SetContent(content);
-  return *this;
 }
 
 View ScrollView::GetContent() const
@@ -125,10 +114,9 @@ Vector2 ScrollView::GetScrollPosition() const
   return GetImpl(*this).GetScrollPosition();
 }
 
-ScrollView& ScrollView::SetScrollPosition(const Vector2& position)
+void ScrollView::SetScrollPosition(const Vector2& position)
 {
   GetImpl(*this).SetScrollPosition(position);
-  return *this;
 }
 
 bool ScrollView::IsScrolling() const
@@ -141,10 +129,9 @@ ScrollDirection ScrollView::GetScrollDirection() const
   return GetImpl(*this).GetScrollDirection();
 }
 
-ScrollView& ScrollView::SetScrollDirection(ScrollDirection direction)
+void ScrollView::SetScrollDirection(ScrollDirection direction)
 {
   GetImpl(*this).SetScrollDirection(direction);
-  return *this;
 }
 
 float ScrollView::GetMaxFlingDistance() const
@@ -152,10 +139,9 @@ float ScrollView::GetMaxFlingDistance() const
   return GetImpl(*this).GetMaxFlingDistance();
 }
 
-ScrollView& ScrollView::SetMaxFlingDistance(float distance)
+void ScrollView::SetMaxFlingDistance(float distance)
 {
   GetImpl(*this).SetMaxFlingDistance(distance);
-  return *this;
 }
 
 int ScrollView::GetMinimumFlingDuration() const
@@ -163,10 +149,9 @@ int ScrollView::GetMinimumFlingDuration() const
   return GetImpl(*this).GetMinimumFlingDuration();
 }
 
-ScrollView& ScrollView::SetMinimumFlingDuration(int duration)
+void ScrollView::SetMinimumFlingDuration(int duration)
 {
   GetImpl(*this).SetMinimumFlingDuration(duration);
-  return *this;
 }
 
 int ScrollView::GetMaximumFlingDuration() const
@@ -174,10 +159,9 @@ int ScrollView::GetMaximumFlingDuration() const
   return GetImpl(*this).GetMaximumFlingDuration();
 }
 
-ScrollView& ScrollView::SetMaximumFlingDuration(int duration)
+void ScrollView::SetMaximumFlingDuration(int duration)
 {
   GetImpl(*this).SetMaximumFlingDuration(duration);
-  return *this;
 }
 
 float ScrollView::GetFlingSensitivity() const
@@ -185,10 +169,9 @@ float ScrollView::GetFlingSensitivity() const
   return GetImpl(*this).GetFlingSensitivity();
 }
 
-ScrollView& ScrollView::SetFlingSensitivity(float sensitivity)
+void ScrollView::SetFlingSensitivity(float sensitivity)
 {
   GetImpl(*this).SetFlingSensitivity(sensitivity);
-  return *this;
 }
 
 float ScrollView::GetDecelerationRate() const
@@ -196,10 +179,9 @@ float ScrollView::GetDecelerationRate() const
   return GetImpl(*this).GetDecelerationRate();
 }
 
-ScrollView& ScrollView::SetDecelerationRate(float rate)
+void ScrollView::SetDecelerationRate(float rate)
 {
   GetImpl(*this).SetDecelerationRate(rate);
-  return *this;
 }
 
 OverScrollMode ScrollView::GetOverScrollMode() const
@@ -207,16 +189,14 @@ OverScrollMode ScrollView::GetOverScrollMode() const
   return GetImpl(*this).GetOverScrollMode();
 }
 
-ScrollView& ScrollView::SetOverScrollMode(OverScrollMode mode)
+void ScrollView::SetOverScrollMode(OverScrollMode mode)
 {
   GetImpl(*this).SetOverScrollMode(mode);
-  return *this;
 }
 
-ScrollView& ScrollView::SetScrollOnFocus(bool enable)
+void ScrollView::SetScrollOnFocus(bool enable)
 {
   GetImpl(*this).SetScrollOnFocus(enable);
-  return *this;
 }
 
 bool ScrollView::GetScrollOnFocus() const
@@ -224,10 +204,9 @@ bool ScrollView::GetScrollOnFocus() const
   return GetImpl(*this).GetScrollOnFocus();
 }
 
-ScrollView& ScrollView::SetFocusScrollToPosition(ScrollToPosition position)
+void ScrollView::SetFocusScrollToPosition(ScrollToPosition position)
 {
   GetImpl(*this).SetFocusScrollToPosition(position);
-  return *this;
 }
 
 ScrollToPosition ScrollView::GetFocusScrollToPosition() const
@@ -235,10 +214,9 @@ ScrollToPosition ScrollView::GetFocusScrollToPosition() const
   return GetImpl(*this).GetFocusScrollToPosition();
 }
 
-ScrollView& ScrollView::SetFocusScrollPeek(float peek)
+void ScrollView::SetFocusScrollPeek(float peek)
 {
   GetImpl(*this).SetFocusScrollPeek(peek);
-  return *this;
 }
 
 float ScrollView::GetFocusScrollPeek() const
@@ -271,10 +249,9 @@ ScrollBarVisibility ScrollView::GetVerticalScrollBarVisibility() const
   return GetImpl(*this).GetVerticalScrollBarVisibility();
 }
 
-ScrollView& ScrollView::SetKeyScrollEnabled(bool enable)
+void ScrollView::SetKeyScrollEnabled(bool enable)
 {
   GetImpl(*this).SetKeyScrollEnabled(enable);
-  return *this;
 }
 
 bool ScrollView::GetKeyScrollEnabled() const
@@ -282,10 +259,9 @@ bool ScrollView::GetKeyScrollEnabled() const
   return GetImpl(*this).GetKeyScrollEnabled();
 }
 
-ScrollView& ScrollView::SetKeyScrollStep(float step)
+void ScrollView::SetKeyScrollStep(float step)
 {
   GetImpl(*this).SetKeyScrollStep(step);
-  return *this;
 }
 
 float ScrollView::GetKeyScrollStep() const
@@ -293,10 +269,9 @@ float ScrollView::GetKeyScrollStep() const
   return GetImpl(*this).GetKeyScrollStep();
 }
 
-ScrollView& ScrollView::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
+void ScrollView::SetVerticalScrollBarVisibility(ScrollBarVisibility visibility)
 {
   GetImpl(*this).SetVerticalScrollBarVisibility(visibility);
-  return *this;
 }
 
 ScrollBarVisibility ScrollView::GetHorizontalScrollBarVisibility() const
@@ -304,10 +279,9 @@ ScrollBarVisibility ScrollView::GetHorizontalScrollBarVisibility() const
   return GetImpl(*this).GetHorizontalScrollBarVisibility();
 }
 
-ScrollView& ScrollView::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility)
+void ScrollView::SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility)
 {
   GetImpl(*this).SetHorizontalScrollBarVisibility(visibility);
-  return *this;
 }
 
 ScrollView::ScrollStartedSignalType& ScrollView::ScrollStartedSignal()

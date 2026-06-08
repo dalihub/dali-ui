@@ -60,20 +60,20 @@ public:
     }
 
     // Create a ScrollView with vertical scrolling and scroll bars
-    ScrollView scrollView = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
-      .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never)
-      .SetMaxFlingDistance(6000.0f)
-      .SetMinimumFlingDuration(1000)
-      .SetMaximumFlingDuration(2000)
-      .SetFlingSensitivity(1.0f)
-      .SetDecelerationRate(0.998f)
-      .SetOverScrollMode(OverScrollMode::ContentScrolls)
-      .SetRequestedWidth(600.0f)
-      .SetRequestedHeight(1200.0f)
-      .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))
-      .SetContent(content);
+    ScrollView scrollView = ScrollView::New();
+    scrollView.SetScrollDirection(ScrollDirection::Vertical);
+    scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+    scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+    scrollView.SetMaxFlingDistance(6000.0f);
+    scrollView.SetMinimumFlingDuration(1000);
+    scrollView.SetMaximumFlingDuration(2000);
+    scrollView.SetFlingSensitivity(1.0f);
+    scrollView.SetDecelerationRate(0.998f);
+    scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+    scrollView.SetRequestedWidth(600.0f);
+    scrollView.SetRequestedHeight(1200.0f);
+    scrollView.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
+    scrollView.SetContent(content);
 
     // Add scroll view to window
     window.Add(scrollView);

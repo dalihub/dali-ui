@@ -361,7 +361,7 @@ int UtcDaliViewStateDisabledClearsFocusedAndPressedP(void)
   View              view = CreateView(application);
   ConnectionTracker tracker;
 
-  view.EnsureInteractiveTrait();
+  view.AsInteractive();
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
   IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
@@ -389,7 +389,7 @@ int UtcDaliViewStateDisabledClearsInteractiveTraitPressedP(void)
   View              view = CreateView(application);
   ConnectionTracker tracker;
 
-  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  InteractiveTrait trait = view.AsInteractive();
   IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
@@ -420,7 +420,7 @@ int UtcDaliViewStatePseudoDisabledClearsPressedKeepsFocusedP(void)
   View              view = CreateView(application);
   ConnectionTracker tracker;
 
-  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  InteractiveTrait trait = view.AsInteractive();
   IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
   IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
@@ -455,10 +455,10 @@ int UtcDaliViewStatePseudoDisabledKeepsFocusedN(void)
   UiTestApplication application;
   View            view = CreateView(application);
 
-  view.EnsureInteractiveTrait();
+  view.AsInteractive();
   IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
-  InteractiveTrait trait = view.EnsureInteractiveTrait();
+  InteractiveTrait trait = view.AsInteractive();
   trait.SetPseudoDisabled(true);
 
   // FOCUSED must still be present

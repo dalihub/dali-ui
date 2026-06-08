@@ -16,20 +16,16 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/callback.h>
+#include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/web-view-types.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/events/key-event.h>
 #include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
-
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/callback.h>
-#include <dali-ui-foundation/public-api/image-view.h>
-#include <dali-ui-foundation/public-api/view.h>
-#include <dali-ui-foundation/public-api/web-view-types.h>
 
 namespace Dali
 {
@@ -40,7 +36,6 @@ namespace Integration DALI_INTERNAL
 class WebViewImpl;
 } //namespace Integration DALI_INTERNAL
 
-#include "web-view.autogen.h"
 /**
  * @brief WebView is a View for displaying web content.
  *
@@ -55,7 +50,6 @@ class WebViewImpl;
 class DALI_UI_API WebView : public View
 {
 public: // Callback types
-  // -- JavaScript --
   /// @brief Callback for JavaScript result or message.
   using JavaScriptCallback = Callback<void(const Dali::String&)>;
 
@@ -67,8 +61,6 @@ public: // Callback types
 
   /// @brief Callback for JavaScript prompt dialog.
   using JavaScriptPromptCallback = Callback<bool(const Dali::String&, const Dali::String&)>;
-
-  // -- Async operations --
   /// @brief Callback for screenshot captured asynchronously.
   using ScreenshotCapturedCallback = Callback<void(Dali::Ui::ImageView)>;
 
@@ -79,7 +71,6 @@ public: // Callback types
   using VideoPlayingCallback = Callback<void(bool)>;
 
 public: // Signal types
-  // -- Page loading --
   /// @brief Signal type for page load started events.
   using PageLoadStartedSignalType = Signal<void(WebView, const Dali::String&)>;
 
@@ -88,38 +79,24 @@ public: // Signal types
 
   /// @brief Signal type for page load finished events.
   using PageLoadFinishedSignalType = Signal<void(WebView, const Dali::String&)>;
-
-  // -- Navigation --
   /// @brief Signal type for URL changes.
   using UrlChangedSignalType = Signal<void(WebView, const Dali::String&)>;
-
-  // -- Rendering --
   /// @brief Signal type for frame rendered events.
   using FrameRenderedSignalType = Signal<void(WebView)>;
-
-  // -- Scroll --
   /// @brief Signal type for scroll edge reached events.
   using ScrollEdgeReachedSignalType = Signal<void(WebView, WebViewScrollEdge)>;
 
   /// @brief Signal type for over-scroll events.
   using OverScrolledSignalType = Signal<void(WebView, WebViewOverScrolled)>;
-
-  // -- Fullscreen --
   /// @brief Signal type for fullscreen enter events.
   using FullscreenEnteredSignalType = Signal<void(WebView)>;
 
   /// @brief Signal type for fullscreen exit events.
   using FullscreenExitedSignalType = Signal<void(WebView)>;
-
-  // -- Text search --
   /// @brief Signal type for text search results.
   using TextFoundSignalType = Signal<void(WebView, uint32_t)>;
-
-  // -- Geolocation --
   /// @brief Signal type for geolocation permission requests.
   using GeolocationPermissionSignalType = Signal<bool(WebView, const Dali::String&, const Dali::String&)>;
-
-  // -- Process events --
   /// @brief Signal type for web process crash events.
   using WebProcessCrashedSignalType = Signal<void(WebView)>;
 
@@ -175,15 +152,13 @@ public: // Static Methods
   static WebView DownCast(BaseHandle handle);
 
 public: // Setters for chaining
-  // @CHAIN_START(WebView, View)
-
   /**
    * @brief Sets the user agent string.
    *
    * @param[in] userAgent The user agent string
    * @return Reference to this for fluent chaining
    */
-  WebView& SetUserAgent(const Dali::String& userAgent);
+  void SetUserAgent(const Dali::String& userAgent);
 
   /**
    * @brief Loads the specified URL.
@@ -191,7 +166,7 @@ public: // Setters for chaining
    * @param[in] url The URL to load
    * @return Reference to this for fluent chaining
    */
-  WebView& LoadUrl(const Dali::String& url);
+  void LoadUrl(const Dali::String& url);
 
   /**
    * @brief Loads the specified HTML string.
@@ -199,56 +174,56 @@ public: // Setters for chaining
    * @param[in] htmlString The HTML string to load
    * @return Reference to this for fluent chaining
    */
-  WebView& LoadHtmlString(const Dali::String& htmlString);
+  void LoadHtmlString(const Dali::String& htmlString);
 
   /**
    * @brief Reloads the current page.
    *
    * @return Reference to this for fluent chaining
    */
-  WebView& Reload();
+  void Reload();
 
   /**
    * @brief Stops loading the current page.
    *
    * @return Reference to this for fluent chaining
    */
-  WebView& StopLoading();
+  void StopLoading();
 
   /**
    * @brief Suspends the web view.
    *
    * @return Reference to this for fluent chaining
    */
-  WebView& Suspend();
+  void Suspend();
 
   /**
    * @brief Resumes the web view.
    *
    * @return Reference to this for fluent chaining
    */
-  WebView& Resume();
+  void Resume();
 
   /**
    * @brief Navigates forward in history.
    *
    * @return Reference to this for fluent chaining
    */
-  WebView& GoForward();
+  void GoForward();
 
   /**
    * @brief Navigates backward in history.
    *
    * @return Reference to this for fluent chaining
    */
-  WebView& GoBack();
+  void GoBack();
 
   /**
    * @brief Clears the navigation history.
    *
    * @return Reference to this for fluent chaining
    */
-  WebView& ClearHistory();
+  void ClearHistory();
 
   /**
    * @brief Sets the page zoom factor.
@@ -256,7 +231,7 @@ public: // Setters for chaining
    * @param[in] zoomFactor The zoom factor
    * @return Reference to this for fluent chaining
    */
-  WebView& SetPageZoomFactor(float zoomFactor);
+  void SetPageZoomFactor(float zoomFactor);
 
   /**
    * @brief Sets the text zoom factor.
@@ -264,7 +239,7 @@ public: // Setters for chaining
    * @param[in] zoomFactor The zoom factor
    * @return Reference to this for fluent chaining
    */
-  WebView& SetTextZoomFactor(float zoomFactor);
+  void SetTextZoomFactor(float zoomFactor);
 
   /**
    * @brief Sets whether mouse events are enabled.
@@ -272,7 +247,7 @@ public: // Setters for chaining
    * @param[in] enabled True to enable mouse events
    * @return Reference to this for fluent chaining
    */
-  WebView& SetMouseEventsEnabled(bool enabled);
+  void SetMouseEventsEnabled(bool enabled);
 
   /**
    * @brief Sets whether key events are enabled.
@@ -280,7 +255,7 @@ public: // Setters for chaining
    * @param[in] enabled True to enable key events
    * @return Reference to this for fluent chaining
    */
-  WebView& SetKeyEventsEnabled(bool enabled);
+  void SetKeyEventsEnabled(bool enabled);
 
   /**
    * @brief Sets whether video hole is enabled.
@@ -288,7 +263,7 @@ public: // Setters for chaining
    * @param[in] enabled True to enable video hole
    * @return Reference to this for fluent chaining
    */
-  WebView& SetVideoHoleEnabled(bool enabled);
+  void SetVideoHoleEnabled(bool enabled);
 
   /**
    * @brief Sets the document background color.
@@ -296,7 +271,7 @@ public: // Setters for chaining
    * @param[in] color The background color
    * @return Reference to this for fluent chaining
    */
-  WebView& SetDocumentBackgroundColor(const Dali::Vector4& color);
+  void SetDocumentBackgroundColor(const Dali::Vector4& color);
 
   /**
    * @brief Sets whether tiles are cleared when hidden.
@@ -304,7 +279,7 @@ public: // Setters for chaining
    * @param[in] cleared True to clear tiles when hidden
    * @return Reference to this for fluent chaining
    */
-  WebView& SetTilesClearedWhenHidden(bool cleared);
+  void SetTilesClearedWhenHidden(bool cleared);
 
   /**
    * @brief Sets the tile cover area multiplier.
@@ -312,7 +287,7 @@ public: // Setters for chaining
    * @param[in] multiplier The multiplier value
    * @return Reference to this for fluent chaining
    */
-  WebView& SetTileCoverAreaMultiplier(float multiplier);
+  void SetTileCoverAreaMultiplier(float multiplier);
 
   /**
    * @brief Sets whether cursor is enabled by client.
@@ -320,9 +295,7 @@ public: // Setters for chaining
    * @param[in] enabled True to enable cursor by client
    * @return Reference to this for fluent chaining
    */
-  WebView& SetCursorEnabledByClient(bool enabled);
-
-  // @CHAIN_END
+  void SetCursorEnabledByClient(bool enabled);
 
 public: // Getters (non-chainable)
   /**
@@ -736,7 +709,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(WebView)
 };
 
 } // namespace Ui

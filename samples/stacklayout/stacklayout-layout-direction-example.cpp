@@ -45,11 +45,11 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: horizontal StackLayout filling the window
-    mRoot = StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetSpacing(10.0f)
-      .SetPadding(Extents(50, 50, 50, 50));
+    mRoot = StackLayout::New(StackOrientation::HORIZONTAL);
+    mRoot.SetRequestedWidth(MATCH_PARENT);
+    mRoot.SetRequestedHeight(MATCH_PARENT);
+    mRoot.SetSpacing(10.0f);
+    mRoot.SetPadding(Extents(50, 50, 50, 50));
 
     // Left bar: fixed width, fill cross-axis
     View leftBar = View::New();
@@ -81,12 +81,13 @@ public:
     toggleBtn.SetRequestedPositionY(0.0f);
     toggleBtn.SetLayoutMode(LayoutMode::STANDALONE);
     toggleBtn.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
-    toggleBtn.Add(Label::New("Change LayoutDirection")
-      .SetTextColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER));
+    Label toggleLabel = Label::New("Change LayoutDirection");
+    toggleLabel.SetTextColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f));
+    toggleLabel.SetRequestedWidth(MATCH_PARENT);
+    toggleLabel.SetRequestedHeight(MATCH_PARENT);
+    toggleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    toggleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    toggleBtn.Add(toggleLabel);
     toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
       mIsRtl = !mIsRtl;
       mRoot.SetLayoutDirection(mIsRtl ? Dali::LayoutDirection::RIGHT_TO_LEFT : Dali::LayoutDirection::LEFT_TO_RIGHT);

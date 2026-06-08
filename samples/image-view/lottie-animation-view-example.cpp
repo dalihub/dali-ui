@@ -69,24 +69,24 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetSpacing(4.0f)
-        .SetPadding(Extents(8, 8, 8, 8))
-        .Children({
-          CreateAnimationArea(),
-          CreateStatusLabel(),
-          CreatePlaybackRow(),
-          CreateLoopRow(),
-          CreateLoopingModeRow(),
-          CreateSpeedRow(),
-          CreateStopBehaviorRow(),
-          CreateFrameRangeRow(),
-          CreateRenderScaleRow(),
-          CreatePlaceholderRow(),
-        }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetSpacing(4.0f);
+    root.SetPadding(Extents(8, 8, 8, 8));
+    root.AddChildren({
+      CreateAnimationArea(),
+      CreateStatusLabel(),
+      CreatePlaybackRow(),
+      CreateLoopRow(),
+      CreateLoopingModeRow(),
+      CreateSpeedRow(),
+      CreateStopBehaviorRow(),
+      CreateFrameRangeRow(),
+      CreateRenderScaleRow(),
+      CreatePlaceholderRow(),
+    });
+    window.Add(root);
 
     window.KeyEventSignal().Connect(this, &LottieAnimationViewSampleController::OnKeyEvent);
 
@@ -97,33 +97,33 @@ private:
 
   View CreateAnimationArea()
   {
-    LottieAnimationView::New(RESOURCES_DIR "jolly_walker.json")
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetLoopCount(-1)
-      .As(mLottieView);
+    mLottieView = LottieAnimationView::New(RESOURCES_DIR "jolly_walker.json");
+    mLottieView.SetRequestedWidth(MATCH_PARENT);
+    mLottieView.SetRequestedHeight(MATCH_PARENT);
+    mLottieView.SetLoopCount(-1);
 
     mLottieView.AnimationFinishedSignal().Connect(this, &LottieAnimationViewSampleController::OnAnimationFinished);
     mLottieView.ResourceReadySignal().Connect(this, &LottieAnimationViewSampleController::OnResourceReady);
 
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .SetBackgroundColor(UiColor(0x2A2A2A))
-      .Children({mLottieView});
+    StackLayout area = StackLayout::New(StackOrientation::VERTICAL);
+    area.SetRequestedWidth(MATCH_PARENT);
+    area.SetRequestedHeight(WRAP_CONTENT);
+    area.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    area.SetBackgroundColor(UiColor(0x2A2A2A));
+    area.Add(mLottieView);
+    return area;
   }
 
   View CreateStatusLabel()
   {
-    return Label::New("Status: loading...")
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(28.0f)
-      .SetFontSize(13.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mStatusLabel);
+    mStatusLabel = Label::New("Status: loading...");
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(28.0f);
+    mStatusLabel.SetFontSize(13.0f);
+    mStatusLabel.SetTextColor(UiColor(0xCCCCCC));
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mStatusLabel;
   }
 
   View CreatePlaybackRow()
@@ -138,122 +138,118 @@ private:
 
   View CreateLoopRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Loop:")
-          .SetRequestedWidth(80.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Loop:");
+    label.SetRequestedWidth(80.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton)});
+    return row;
   }
 
   View CreateLoopingModeRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Mode:")
-          .SetRequestedWidth(80.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(LOOPING_MODE_LABELS[mLoopingModeIndex], [this](View, InputEvent) { OnLoopingModeToggle(); }, mLoopingModeButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Mode:");
+    label.SetRequestedWidth(80.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(LOOPING_MODE_LABELS[mLoopingModeIndex], [this](View, InputEvent) { OnLoopingModeToggle(); }, mLoopingModeButton)});
+    return row;
   }
 
   View CreateSpeedRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Speed:")
-          .SetRequestedWidth(80.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Speed:");
+    label.SetRequestedWidth(80.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton)});
+    return row;
   }
 
   View CreateStopBehaviorRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("StopAt:")
-          .SetRequestedWidth(80.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("StopAt:");
+    label.SetRequestedWidth(80.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton)});
+    return row;
   }
 
   View CreateFrameRangeRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Range:")
-          .SetRequestedWidth(80.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(FRAME_RANGE_LABELS[mFrameRangeIndex], [this](View, InputEvent) { OnFrameRangeToggle(); }, mFrameRangeButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Range:");
+    label.SetRequestedWidth(80.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(FRAME_RANGE_LABELS[mFrameRangeIndex], [this](View, InputEvent) { OnFrameRangeToggle(); }, mFrameRangeButton)});
+    return row;
   }
 
   View CreateRenderScaleRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Scale:")
-          .SetRequestedWidth(80.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(RENDER_SCALE_LABELS[mRenderScaleIndex], [this](View, InputEvent) { OnRenderScaleToggle(); }, mRenderScaleButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Scale:");
+    label.SetRequestedWidth(80.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(RENDER_SCALE_LABELS[mRenderScaleIndex], [this](View, InputEvent) { OnRenderScaleToggle(); }, mRenderScaleButton)});
+    return row;
   }
 
   View CreatePlaceholderRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Holder:")
-          .SetRequestedWidth(80.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateButton("Set Placeholder", [this](View, const InputEvent&) { OnSetPlaceholder(); }),
-        CreateButton("Clear URL",       [this](View, const InputEvent&) { OnClearUrl(); }),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Holder:");
+    label.SetRequestedWidth(80.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({
+      label,
+      CreateButton("Set Placeholder", [this](View, const InputEvent&) { OnSetPlaceholder(); }),
+      CreateButton("Clear URL", [this](View, const InputEvent&) { OnClearUrl(); }),
+    });
+    return row;
   }
 
   // ── Button helpers ───────────────────────────────────────────────────────
@@ -262,10 +258,10 @@ private:
 
   View CreateButtonRow(std::initializer_list<View> buttons)
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(52.0f);
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(52.0f);
     for(auto& btn : buttons)
     {
       row.Add(btn);
@@ -275,42 +271,40 @@ private:
 
   View CreateButton(const char* label, ClickCallback callback)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(UiColor(0x444444))
-                           .Children({
-                             Label::New(label)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(12.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, callback);
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(UiColor(0x444444));
+    Label buttonLabel = Label::New(label);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(12.0f);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
+    button.AsInteractive().ClickedSignal().Connect(this, callback);
     return button;
   }
 
   View CreateToggleButton(const char* label, ClickCallback callback, View& outHandle)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(UiColor(0x1565C0))
-                           .Children({
-                             Label::New(label)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(12.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(outHandle),
-                           });
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, callback);
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(UiColor(0x1565C0));
+    Label buttonLabel = Label::New(label);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(12.0f);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    outHandle = buttonLabel;
+    button.Add(buttonLabel);
+    button.AsInteractive().ClickedSignal().Connect(this, callback);
     return button;
   }
 

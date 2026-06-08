@@ -100,97 +100,95 @@ private:
   View CreateContents()
   {
     // ImageView (JPG)
-    ImageView::New(IMAGES[mImageIndex])
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(MODES[mActiveIndex].mode)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .As(mImageView);
+    mImageView = ImageView::New(IMAGES[mImageIndex]);
+    mImageView.SetRequestedWidth(MATCH_PARENT);
+    mImageView.SetRequestedHeight(MATCH_PARENT);
+    mImageView.SetFittingMode(MODES[mActiveIndex].mode);
+    mImageView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 
     // ImageView (GIF)
-    ImageView::New(GIF_IMAGES[mGifIndex])
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(MODES[mActiveIndex].mode)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .As(mGifImageView);
+    mGifImageView = ImageView::New(GIF_IMAGES[mGifIndex]);
+    mGifImageView.SetRequestedWidth(MATCH_PARENT);
+    mGifImageView.SetRequestedHeight(MATCH_PARENT);
+    mGifImageView.SetFittingMode(MODES[mActiveIndex].mode);
+    mGifImageView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 
     // AnimatedImageView (GIF)
-    AnimatedImageView::New(GIF_IMAGES[mGifIndex])
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(MODES[mActiveIndex].mode)
-      .SetLoopCount(-1)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .As(mAnimatedImageView);
+    mAnimatedImageView = AnimatedImageView::New(GIF_IMAGES[mGifIndex]);
+    mAnimatedImageView.SetRequestedWidth(MATCH_PARENT);
+    mAnimatedImageView.SetRequestedHeight(MATCH_PARENT);
+    mAnimatedImageView.SetFittingMode(MODES[mActiveIndex].mode);
+    mAnimatedImageView.SetLoopCount(-1);
+    mAnimatedImageView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 
     mAnimatedImageView.Play();
 
     // LottieAnimationView (JSON)
-    LottieAnimationView::New(LOTTIE_IMAGES[mLottieIndex])
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetLoopCount(-1)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .As(mLottieView);
+    mLottieView = LottieAnimationView::New(LOTTIE_IMAGES[mLottieIndex]);
+    mLottieView.SetRequestedWidth(MATCH_PARENT);
+    mLottieView.SetRequestedHeight(MATCH_PARENT);
+    mLottieView.SetLoopCount(-1);
+    mLottieView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 
     mLottieView.Play();
 
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        CreateImageRow(),
-        CreateButtonRow(),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.AddChildren({CreateImageRow(), CreateButtonRow()});
+    return contents;
   }
 
   View CreateImageRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(300.0f)
-      .Children({
-        CreateImageContainer("ImageView\n(JPG)", mImageView),
-        CreateImageContainer("ImageView\n(GIF)", mGifImageView),
-        CreateImageContainer("AnimatedImageView\n(GIF)", mAnimatedImageView),
-        CreateImageContainer("LottieAnimationView\n(always AspectRatio)", mLottieView),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(300.0f);
+    row.AddChildren({
+      CreateImageContainer("ImageView\n(JPG)", mImageView),
+      CreateImageContainer("ImageView\n(GIF)", mGifImageView),
+      CreateImageContainer("AnimatedImageView\n(GIF)", mAnimatedImageView),
+      CreateImageContainer("LottieAnimationView\n(always AspectRatio)", mLottieView),
+    });
+    return row;
   }
 
   View CreateImageContainer(const char* label, View imageView)
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(2.0f)
-      .SetRequestedWidth(WRAP_CONTENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .Children({
-        Label::New(label)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(32.0f)
-          .SetFontSize(10.0f)
-          .SetMultiLine(true)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        StackLayout::New(StackOrientation::HORIZONTAL)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(WRAP_CONTENT)
-          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-          .SetBackgroundColor(UiColor(0x2A2A2A))
-          .Children({imageView}),
-      });
+    StackLayout container = StackLayout::New(StackOrientation::VERTICAL);
+    container.SetSpacing(2.0f);
+    container.SetRequestedWidth(WRAP_CONTENT);
+    container.SetRequestedHeight(MATCH_PARENT);
+    container.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+
+    Label title = Label::New(label);
+    title.SetRequestedWidth(MATCH_PARENT);
+    title.SetRequestedHeight(32.0f);
+    title.SetFontSize(10.0f);
+    title.SetMultiLine(true);
+    title.SetTextColor(UiColor(0xAAAAAA));
+    title.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    title.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    StackLayout imageContainer = StackLayout::New(StackOrientation::HORIZONTAL);
+    imageContainer.SetRequestedWidth(MATCH_PARENT);
+    imageContainer.SetRequestedHeight(WRAP_CONTENT);
+    imageContainer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    imageContainer.SetBackgroundColor(UiColor(0x2A2A2A));
+    imageContainer.Add(imageView);
+
+    container.AddChildren({title, imageContainer});
+    return container;
   }
 
   View CreateButtonRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(100.0f)
-                        .SetPadding(Extents(4, 4, 4, 4));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(100.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < MODE_COUNT; ++i)
     {
@@ -204,23 +202,23 @@ private:
 
   View CreateModeButton(int index)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(index == mActiveIndex ? UiColor(0x4A90E2) : UiColor(0x333333))
-                           .Children({
-                             Label::New(MODES[index].name)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(14.0f)
-                               .SetMultiLine(true)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(index == mActiveIndex ? UiColor(0x4A90E2) : UiColor(0x333333));
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageFittingModeController::OnModeButtonClicked);
+    Label buttonLabel = Label::New(MODES[index].name);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(14.0f);
+    buttonLabel.SetMultiLine(true);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
+
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageFittingModeController::OnModeButtonClicked);
 
     mButtons[index] = button;
     return button;
@@ -228,23 +226,23 @@ private:
 
   View CreateSwapButton()
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(UiColor(0x2E7D32))
-                           .Children({
-                             Label::New("SWAP\nIMAGE")
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(14.0f)
-                               .SetMultiLine(true)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(UiColor(0x2E7D32));
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageFittingModeController::OnSwapButtonClicked);
+    Label buttonLabel = Label::New("SWAP\nIMAGE");
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(14.0f);
+    buttonLabel.SetMultiLine(true);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
+
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageFittingModeController::OnSwapButtonClicked);
 
     mSwapButton = button;
     return button;

@@ -177,23 +177,21 @@ int UtcDaliStackLayoutGetLayoutWeightP(void)
   END_TEST;
 }
 
-int UtcDaliStackLayoutOrientationChainingP(void)
+int UtcDaliStackLayoutOrientationSetterP(void)
 {
   UiTestApplication application;
   StackLayout layout = StackLayout::New();
-  StackLayout& result = layout.SetOrientation(StackOrientation::HORIZONTAL);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetOrientation(StackOrientation::HORIZONTAL);
   DALI_TEST_EQUALS(layout.GetOrientation(), StackOrientation::HORIZONTAL, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliStackLayoutSpacingChainingP(void)
+int UtcDaliStackLayoutSpacingSetterP(void)
 {
   UiTestApplication application;
   StackLayout layout = StackLayout::New();
   const float spacing = 5.0f;
-  StackLayout& result = layout.SetSpacing(spacing);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetSpacing(spacing);
   DALI_TEST_EQUALS(layout.GetSpacing(), spacing, TEST_LOCATION);
   END_TEST;
 }
@@ -203,7 +201,7 @@ int UtcDaliStackLayoutContentsP(void)
   UiTestApplication application;
   StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
   View a = View::New();
-  layout.Children({a});
+  layout.AddChildren({a});
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
   DALI_TEST_CHECK(layout.GetChildAt(0) == a);
   END_TEST;

@@ -16,13 +16,7 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/view.h>
-#include <functional>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
@@ -34,27 +28,22 @@
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
-
-// None
+#include <dali-ui-foundation/public-api/view.h>
+#include <functional>
 
 namespace Dali
 {
 
 namespace Ui
 {
-
-// Forward declarations
 class LabelAnimationBridge;
 class LabelAnimationSpec;
-
-// @ANIMATION_CONFIG(Label, View)
 
 namespace Integration
 {
 class LabelImpl;
 }
 
-#include "label.autogen.h"
 /**
  * @brief Label is a non-editable View that displays text.
  *
@@ -191,13 +180,12 @@ public: // Static Methods
   static Label DownCast(BaseHandle handle);
 
 public: // Setters for chaining
-  // @CHAIN_START(Label, View)
   /**
    * @brief Sets the text.
    *
    * @param[in] text The text to display in UTF-8 format.
    */
-  Label& SetText(const Dali::String& text);
+  void SetText(const Dali::String& text);
 
   /**
    * @brief Gets the text.
@@ -211,7 +199,7 @@ public: // Setters for chaining
    *
    * @param[in] fontFamily The requested font family to use.
    */
-  Label& SetFontFamily(const Dali::String& fontFamily);
+  void SetFontFamily(const Dali::String& fontFamily);
 
   /**
    * @brief Gets the font family of the text.
@@ -225,7 +213,7 @@ public: // Setters for chaining
    *
    * @param[in] fontSize The font size in pixels.
    */
-  Label& SetFontSize(float fontSize);
+  void SetFontSize(float fontSize);
 
   /**
    * @brief Gets the font size of the text.
@@ -239,7 +227,7 @@ public: // Setters for chaining
    *
    * @param[in] multiLine True for multi-line layout, false for single-line layout.
    */
-  Label& SetMultiLine(bool multiLine);
+  void SetMultiLine(bool multiLine);
 
   /**
    * @brief Gets whether the text should be multi-line.
@@ -253,7 +241,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The line wrap mode to apply.
    */
-  Label& SetLineWrapMode(Text::LineWrapMode mode);
+  void SetLineWrapMode(Text::LineWrapMode mode);
 
   /**
    * @brief Gets the line wrap mode.
@@ -261,14 +249,12 @@ public: // Setters for chaining
    * @return The current line wrap mode.
    */
   Text::LineWrapMode GetLineWrapMode() const;
-
-  // @ANIMATABLE(Label::Property::TEXT_COLOR, UiColor)
   /**
    * @brief Sets the color of the text.
    *
    * @param[in] color The required text color value.
    */
-  Label& SetTextColor(const UiColor& color);
+  void SetTextColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the text.
@@ -282,7 +268,7 @@ public: // Setters for chaining
    *
    * @param[in] alignment The horizontal text alignment.
    */
-  Label& SetHorizontalTextAlignment(Text::Alignment alignment);
+  void SetHorizontalTextAlignment(Text::Alignment alignment);
 
   /**
    * @brief Gets the horizontal text alignment.
@@ -296,7 +282,7 @@ public: // Setters for chaining
    *
    * @param[in] alignment The vertical text alignment.
    */
-  Label& SetVerticalTextAlignment(Text::Alignment alignment);
+  void SetVerticalTextAlignment(Text::Alignment alignment);
 
   /**
    * @brief Gets the vertical text alignment.
@@ -310,7 +296,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The overflow mode to apply.
    */
-  Label& SetOverflowMode(Text::OverflowMode mode);
+  void SetOverflowMode(Text::OverflowMode mode);
 
   /**
    * @brief Gets the overflow mode.
@@ -346,7 +332,7 @@ public: // Setters for chaining
    *
    * @param[in] lineHeight The line height value.
    */
-  Label& SetLineHeight(float lineHeight);
+  void SetLineHeight(float lineHeight);
 
   /**
    * @brief Gets the current line height value.
@@ -374,7 +360,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The line height mode.
    */
-  Label& SetLineHeightMode(Text::LineHeightMode mode);
+  void SetLineHeightMode(Text::LineHeightMode mode);
 
   /**
    * @brief Gets the current line height mode.
@@ -397,7 +383,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The LayoutDirectionMode used to determine the text layout direction.
    */
-  Label& SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
+  void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
 
   /**
    * @brief Gets the current layout direction mode.
@@ -411,7 +397,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to enable mark-up parsing, false to render text as plain string.
    */
-  Label& SetMarkupEnabled(bool enabled);
+  void SetMarkupEnabled(bool enabled);
 
   /**
    * @brief Gets whether mark-up processing is enabled.
@@ -425,7 +411,7 @@ public: // Setters for chaining
    *
    * @param[in] color The color to apply to anchors.
    */
-  Label& SetAnchorColor(const UiColor& color);
+  void SetAnchorColor(const UiColor& color);
 
   /**
    * @brief Gets the color of anchors in the text.
@@ -439,7 +425,7 @@ public: // Setters for chaining
    *
    * @param[in] color The color to apply to clicked anchors.
    */
-  Label& SetAnchorClickedColor(const UiColor& color);
+  void SetAnchorClickedColor(const UiColor& color);
 
   /**
    * @brief Gets the color of anchors when they are clicked.
@@ -462,7 +448,7 @@ public: // Setters for chaining
    *
    * @param[in] policy The marquee trigger policy.
    */
-  Label& SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy);
+  void SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy);
 
   /**
    * @brief Returns when the marquee animation is triggered.
@@ -476,7 +462,7 @@ public: // Setters for chaining
    *
    * @param[in] speed The marquee speed in pixels per second.
    */
-  Label& SetMarqueeSpeed(int speed);
+  void SetMarqueeSpeed(int speed);
 
   /**
    * @brief Returns the marquee speed.
@@ -490,7 +476,7 @@ public: // Setters for chaining
    *
    * @param[in] loopCount The number of loops.
    */
-  Label& SetMarqueeLoopCount(int loopCount);
+  void SetMarqueeLoopCount(int loopCount);
 
   /**
    * @brief Returns the number of complete loops for marquee.
@@ -504,7 +490,7 @@ public: // Setters for chaining
    *
    * @param[in] delay The delay time in seconds.
    */
-  Label& SetMarqueeLoopDelay(float delay);
+  void SetMarqueeLoopDelay(float delay);
 
   /**
    * @brief Returns the amount of time to delay the start of marquee and further loops.
@@ -518,7 +504,7 @@ public: // Setters for chaining
    *
    * @param[in] gap The gap in pixels.
    */
-  Label& SetMarqueeGap(int gap);
+  void SetMarqueeGap(int gap);
 
   /**
    * @brief Returns the gap before marquee wraps.
@@ -535,7 +521,7 @@ public: // Setters for chaining
    *
    * @param[in] orientation The marquee orientation.
    */
-  Label& SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+  void SetMarqueeOrientation(Text::MarqueeOrientation orientation);
 
   /**
    * @brief Returns the marquee orientation.
@@ -549,7 +535,7 @@ public: // Setters for chaining
    *
    * @param[in] stopMode The marquee stop mode.
    */
-  Label& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+  void SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
 
   /**
    * @brief Returns how the marquee stops.
@@ -563,7 +549,7 @@ public: // Setters for chaining
    *
    * @param[in] weight The font weight.
    */
-  Label& SetFontWeight(Text::FontWeight weight);
+  void SetFontWeight(Text::FontWeight weight);
 
   /**
    * @brief Returns the font weight.
@@ -577,7 +563,7 @@ public: // Setters for chaining
    *
    * @param[in] width The font width.
    */
-  Label& SetFontWidth(Text::FontWidth width);
+  void SetFontWidth(Text::FontWidth width);
 
   /**
    * @brief Returns the font width.
@@ -591,7 +577,7 @@ public: // Setters for chaining
    *
    * @param[in] slant The font slant.
    */
-  Label& SetFontSlant(Text::FontSlant slant);
+  void SetFontSlant(Text::FontSlant slant);
 
   /**
    * @brief Returns the font slant.
@@ -607,7 +593,7 @@ public: // Setters for chaining
    *
    * @param[in] color The text background color.
    */
-  Label& SetTextBackgroundColor(const UiColor& color);
+  void SetTextBackgroundColor(const UiColor& color);
 
   /**
    * @brief Gets the background color behind the text.
@@ -628,7 +614,7 @@ public: // Setters for chaining
    *
    * @param[in] underline The underline configuration.
    */
-  Label& SetUnderline(const Text::Underline& underline);
+  void SetUnderline(const Text::Underline& underline);
 
   /**
    * @brief Clears the underline style.
@@ -640,7 +626,7 @@ public: // Setters for chaining
    *
    * @param[in] shadow The shadow configuration.
    */
-  Label& SetShadow(const Text::Shadow& shadow);
+  void SetShadow(const Text::Shadow& shadow);
 
   /**
    * @brief Clears the shadow style.
@@ -652,7 +638,7 @@ public: // Setters for chaining
    *
    * @param[in] outline The outline configuration.
    */
-  Label& SetOutline(const Text::Outline& outline);
+  void SetOutline(const Text::Outline& outline);
 
   /**
    * @brief Clears the outline style.
@@ -664,7 +650,7 @@ public: // Setters for chaining
    *
    * @param[in] lineThrough The line-through configuration.
    */
-  Label& SetLineThrough(const Text::LineThrough& lineThrough);
+  void SetLineThrough(const Text::LineThrough& lineThrough);
 
   /**
    * @brief Clears the line-through style.
@@ -676,7 +662,7 @@ public: // Setters for chaining
    *
    * @param[in] bevel The bevel configuration.
    */
-  Label& SetBevel(const Text::Bevel& bevel);
+  void SetBevel(const Text::Bevel& bevel);
 
   /**
    * @brief Clears the bevel style.
@@ -698,7 +684,7 @@ public: // Setters for chaining
    *
    * @param[in] range The text fit range configuration.
    */
-  Label& SetTextFit(const Text::FitRange& range);
+  void SetTextFit(const Text::FitRange& range);
 
   /**
    * @brief Sets the text fit candidates.
@@ -717,7 +703,7 @@ public: // Setters for chaining
    *
    * @param[in] candidates The vector of text fit candidates.
    */
-  Label& SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
+  void SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
 
   /**
    * @brief Clears the text fit configuration.
@@ -732,7 +718,7 @@ public: // Setters for chaining
    *
    * @param[in] scale The font size scale.
    */
-  Label& SetFontSizeScale(float scale);
+  void SetFontSizeScale(float scale);
 
   /**
    * @brief Gets the font size scale.
@@ -749,7 +735,7 @@ public: // Setters for chaining
    *
    * @param[in] scale The minimum font size scale.
    */
-  Label& SetMinimumFontSizeScale(float scale);
+  void SetMinimumFontSizeScale(float scale);
 
   /**
    * @brief Gets the minimum font size scale.
@@ -766,7 +752,7 @@ public: // Setters for chaining
    *
    * @param[in] scale The maximum font size scale.
    */
-  Label& SetMaximumFontSizeScale(float scale);
+  void SetMaximumFontSizeScale(float scale);
 
   /**
    * @brief Gets the maximum font size scale.
@@ -783,7 +769,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to apply the system font size scale, false otherwise.
    */
-  Label& SetSystemFontSizeScaleEnabled(bool enabled);
+  void SetSystemFontSizeScaleEnabled(bool enabled);
 
   /**
    * @brief Gets whether the system font size scale is applied.
@@ -803,7 +789,7 @@ public: // Setters for chaining
    *
    * @param[in] axes The font variation axes.
    */
-  Label& SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
+  void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
 
   /**
    * @brief Sets the font variation from a settings string.
@@ -831,7 +817,7 @@ public: // Setters for chaining
    *
    * @param[in] settings The font variation settings string.
    */
-  Label& SetFontVariation(const Dali::String& settings);
+  void SetFontVariation(const Dali::String& settings);
 
   /**
    * @brief Returns the font variation axes.
@@ -855,7 +841,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to render the text as a cutout, false to render it normally.
    */
-  Label& SetCutoutEnabled(bool enabled);
+  void SetCutoutEnabled(bool enabled);
 
   /**
    * @brief Gets whether the text is rendered as a cutout.
@@ -880,7 +866,7 @@ public: // Setters for chaining
    * @see Dali::Ui::MaskEffect
    * @see Dali::Ui::View::SetRenderEffect()
    */
-  Label& SetMaskEffect(View view);
+  void SetMaskEffect(View view);
 
   /**
    * @brief Clears the mask effect applied to the label.
@@ -905,7 +891,7 @@ public: // Setters for chaining
    *
    * @note The render result is delivered through Label::AsyncRenderFinishedSignal().
    */
-  Label& SetAsyncRendering(bool asyncRendering);
+  void SetAsyncRendering(bool asyncRendering);
 
   /**
    * @brief Gets whether asynchronous text rendering is enabled.
@@ -924,7 +910,7 @@ public: // Setters for chaining
    *
    * @param[in] scale The render scale.
    */
-  Label& SetRenderScale(float scale);
+  void SetRenderScale(float scale);
 
   /**
    * @brief Gets the render scale of the text.
@@ -949,7 +935,7 @@ public: // Setters for chaining
    *
    * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE").
    */
-  Label& SetTranslatableText(StringView resourceId);
+  void SetTranslatableText(StringView resourceId);
 
   /**
    * @brief Sets the translatable text resource ID with an explicit domain.
@@ -960,7 +946,7 @@ public: // Setters for chaining
    * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_TITLE").
    * @param[in] domain The translation domain, or empty to use the default domain.
    */
-  Label& SetTranslatableText(StringView resourceId, StringView domain);
+  void SetTranslatableText(StringView resourceId, StringView domain);
 
   /**
    * @brief Gets the translatable text resource ID.
@@ -977,10 +963,6 @@ public: // Setters for chaining
    * Subsequent RefreshBindings() calls will no longer update this Label's text.
    */
   void ClearTranslatableText();
-
-  // @CHAIN_END
-
-  // Read Only
   /**
    * @brief Gets the number of lines of text within the current layout width.
    *
@@ -1030,8 +1012,6 @@ public: // Setters for chaining
    * @return The adjusted font size scale used for rendering.
    */
   float GetAdjustedFontSizeScale() const;
-
-  // Method
   /**
    * @brief Starts the marquee animation using the current marquee settings.
    *
@@ -1192,7 +1172,6 @@ public: // Animation
   static LabelAnimationSpec NewAnimationSpec();
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(Label)
 };
 
 } // namespace Ui

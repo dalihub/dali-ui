@@ -70,23 +70,23 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetSpacing(4.0f)
-        .SetPadding(Extents(8, 8, 8, 8))
-        .Children({
-          CreateImageSourceLabel(),
-          CreateAnimationArea(),
-          CreateStatusLabel(),
-          CreatePlaybackRow(),
-          CreateChangeImageRow(),
-          CreateLoopRow(),
-          CreateSpeedRow(),
-          CreateStopBehaviorRow(),
-          CreateFrameDelayRow(),
-        }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetSpacing(4.0f);
+    root.SetPadding(Extents(8, 8, 8, 8));
+    root.AddChildren({
+      CreateImageSourceLabel(),
+      CreateAnimationArea(),
+      CreateStatusLabel(),
+      CreatePlaybackRow(),
+      CreateChangeImageRow(),
+      CreateLoopRow(),
+      CreateSpeedRow(),
+      CreateStopBehaviorRow(),
+      CreateFrameDelayRow(),
+    });
+    window.Add(root);
 
     window.KeyEventSignal().Connect(this, &AnimatedImageViewSampleController::OnKeyEvent);
 
@@ -100,45 +100,46 @@ private:
 
   View CreateImageSourceLabel()
   {
-    return Label::New(IMAGE_NAMES[mImageIndex])
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(24.0f)
-      .SetFontSize(12.0f)
-      .SetTextColor(UiColor(0x888888))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mImageSourceLabel);
+    Label imageSourceLabel = Label::New(IMAGE_NAMES[mImageIndex]);
+    imageSourceLabel.SetRequestedWidth(MATCH_PARENT);
+    imageSourceLabel.SetRequestedHeight(24.0f);
+    imageSourceLabel.SetFontSize(12.0f);
+    imageSourceLabel.SetTextColor(UiColor(0x888888));
+    imageSourceLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    imageSourceLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mImageSourceLabel = imageSourceLabel;
+    return imageSourceLabel;
   }
 
   View CreateAnimationArea()
   {
-    AnimatedImageView::New("")
-      .SetRequestedWidth(300.0f)
-      .SetRequestedHeight(300.0f)
-      .SetLoopCount(-1)
-      .As(mAnimatedImageView);
+    mAnimatedImageView = AnimatedImageView::New("");
+    mAnimatedImageView.SetRequestedWidth(300.0f);
+    mAnimatedImageView.SetRequestedHeight(300.0f);
+    mAnimatedImageView.SetLoopCount(-1);
 
     mAnimatedImageView.AnimationFinishedSignal().Connect(this, &AnimatedImageViewSampleController::OnAnimationFinished);
     mAnimatedImageView.ResourceReadySignal().Connect(this, &AnimatedImageViewSampleController::OnResourceReady);
 
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .SetBackgroundColor(UiColor(0x2A2A2A))
-      .Children({mAnimatedImageView});
+    StackLayout area = StackLayout::New(StackOrientation::HORIZONTAL);
+    area.SetRequestedWidth(MATCH_PARENT);
+    area.SetRequestedHeight(WRAP_CONTENT);
+    area.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    area.SetBackgroundColor(UiColor(0x2A2A2A));
+    area.Add(mAnimatedImageView);
+    return area;
   }
 
   View CreateStatusLabel()
   {
-    return Label::New("Status: loading...")
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(28.0f)
-      .SetFontSize(13.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mStatusLabel);
+    mStatusLabel = Label::New("Status: loading...");
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(28.0f);
+    mStatusLabel.SetFontSize(13.0f);
+    mStatusLabel.SetTextColor(UiColor(0xCCCCCC));
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mStatusLabel;
   }
 
   View CreatePlaybackRow()
@@ -161,70 +162,66 @@ private:
 
   View CreateLoopRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Loop:")
-          .SetRequestedWidth(64.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Loop:");
+    label.SetRequestedWidth(64.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton)});
+    return row;
   }
 
   View CreateSpeedRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Speed:")
-          .SetRequestedWidth(64.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Speed:");
+    label.SetRequestedWidth(64.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton)});
+    return row;
   }
 
   View CreateStopBehaviorRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("StopAt:")
-          .SetRequestedWidth(64.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("StopAt:");
+    label.SetRequestedWidth(64.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton)});
+    return row;
   }
 
   View CreateFrameDelayRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(4.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(44.0f)
-      .Children({
-        Label::New("Delay:")
-          .SetRequestedWidth(64.0f)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(12.0f)
-          .SetTextColor(UiColor(0xAAAAAA))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateToggleButton(FRAME_DELAY_LABELS[mFrameDelayIndex], [this](View, InputEvent) { OnFrameDelayToggle(); }, mFrameDelayButton),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    Label label = Label::New("Delay:");
+    label.SetRequestedWidth(64.0f);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(0xAAAAAA));
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    row.AddChildren({label, CreateToggleButton(FRAME_DELAY_LABELS[mFrameDelayIndex], [this](View, InputEvent) { OnFrameDelayToggle(); }, mFrameDelayButton)});
+    return row;
   }
 
   // ── Button helpers ───────────────────────────────────────────────────────
@@ -233,10 +230,10 @@ private:
 
   View CreateButtonRow(std::initializer_list<View> buttons)
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(52.0f);
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(52.0f);
     for(auto& btn : buttons)
     {
       row.Add(btn);
@@ -246,42 +243,40 @@ private:
 
   View CreateButton(const char* label, ClickCallback callback)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(UiColor(0x444444))
-                           .Children({
-                             Label::New(label)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(12.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, callback);
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(UiColor(0x444444));
+    Label buttonLabel = Label::New(label);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(12.0f);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
+    button.AsInteractive().ClickedSignal().Connect(this, callback);
     return button;
   }
 
   View CreateToggleButton(const char* label, ClickCallback callback, View& outHandle)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(UiColor(0x1565C0))
-                           .Children({
-                             Label::New(label)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(12.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(outHandle),
-                           });
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, callback);
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(UiColor(0x1565C0));
+    Label buttonLabel = Label::New(label);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(12.0f);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    outHandle = buttonLabel;
+    button.Add(buttonLabel);
+    button.AsInteractive().ClickedSignal().Connect(this, callback);
     return button;
   }
 

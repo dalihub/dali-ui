@@ -180,101 +180,112 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        CreateHeaderLabel(),
-        CreateHelpLabel(),
-        CreateSeparator(),
-        CreateTitleLabel().As(mTitleLabel),
-        CreateSubtitleLabel().As(mSubtitleLabel),
-        CreateExplicitDomainLabel().As(mExplicitDomainLabel),
-        CreateDirectBindingLabel(),
-        CreateDirectExplicitDomainBindingLabel(),
-        CreateStatusLabel().As(mStatusLabel),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetSpacing(STACK_SPACING);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    mTitleLabel          = CreateTitleLabel();
+    mSubtitleLabel       = CreateSubtitleLabel();
+    mExplicitDomainLabel = CreateExplicitDomainLabel();
+    mStatusLabel         = CreateStatusLabel();
+
+    contents.Add(CreateHeaderLabel());
+    contents.Add(CreateHelpLabel());
+    contents.Add(CreateSeparator());
+    contents.Add(mTitleLabel);
+    contents.Add(mSubtitleLabel);
+    contents.Add(mExplicitDomainLabel);
+    contents.Add(CreateDirectBindingLabel());
+    contents.Add(CreateDirectExplicitDomainBindingLabel());
+    contents.Add(mStatusLabel);
+    return contents;
   }
 
   Label CreateHeaderLabel()
   {
-    return Label::New("UiLocalizationManager Label Example")
-      .SetFontSize(TITLE_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
+    Label label = Label::New("UiLocalizationManager Label Example");
+    label.SetFontSize(TITLE_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
+    return label;
   }
 
   Label CreateHelpLabel()
   {
-    return Label::New("Keys: D=domain, B=bypass, R=refresh, M=manual text, ESC/BACK=quit")
-      .SetFontSize(HELP_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(0xEFEFEF));
+    Label label = Label::New("Keys: D=domain, B=bypass, R=refresh, M=manual text, ESC/BACK=quit");
+    label.SetFontSize(HELP_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(0xEFEFEF));
+    return label;
   }
 
   View CreateSeparator()
   {
-    return View::New()
-      .SetBackgroundColor(UiColor(COLOR_MID_GRAY))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(2.0f);
+    View separator = View::New();
+    separator.SetBackgroundColor(UiColor(COLOR_MID_GRAY));
+    separator.SetRequestedWidth(MATCH_PARENT);
+    separator.SetRequestedHeight(2.0f);
+    return separator;
   }
 
   Label CreateTitleLabel()
   {
-    return Label::New()
-      .SetTranslatableText("IDS_TITLE")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_RED));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_TITLE");
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_RED));
+    return label;
   }
 
   Label CreateSubtitleLabel()
   {
-    return Label::New()
-      .SetTranslatableText("IDS_SUBTITLE")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_SUBTITLE");
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
+    return label;
   }
 
   Label CreateExplicitDomainLabel()
   {
-    return Label::New()
-      .SetTranslatableText("IDS_EXPLICIT_DOMAIN", "domainA")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .SetBackgroundColor(UiColor(0xF0F0F0));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_EXPLICIT_DOMAIN", "domainA");
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetBackgroundColor(UiColor(0xF0F0F0));
+    return label;
   }
 
   Label CreateDirectBindingLabel()
   {
     // Demonstrates generic UiLocalizationManager binding without Label::SetTranslatableText().
     // The label is created first, then SetBindingResource() is called directly.
-    auto label = Label::New()
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .SetBackgroundColor(UiColor(0xFFF7E6));
+    auto label = Label::New();
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetBackgroundColor(UiColor(0xFFF7E6));
 
     UiLocalizationManager::Get().SetBindingResource(
       label,
@@ -299,13 +310,13 @@ private:
     // Demonstrates generic UiLocalizationManager binding with an explicit domain.
     // This label uses domainA directly, so default domain changes should not affect it.
     // Compare with CreateDirectBindingLabel() which uses the default domain.
-    auto label = Label::New()
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .SetBackgroundColor(UiColor(0xEFFFF2));
+    auto label = Label::New();
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetBackgroundColor(UiColor(0xEFFFF2));
 
     UiLocalizationManager::Get().SetBindingResource(
       label,
@@ -328,13 +339,14 @@ private:
 
   Label CreateStatusLabel()
   {
-    return Label::New()
-      .SetFontSize(STATUS_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(0xFAFAFA));
+    Label label = Label::New();
+    label.SetFontSize(STATUS_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(0xFAFAFA));
+    return label;
   }
 
   void UpdateStatusLabel()

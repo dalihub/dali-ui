@@ -42,112 +42,97 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetSpacing(STACK_SPACING)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-        .Children({
-          Label::New("Text Style Example"),
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetSpacing(STACK_SPACING);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
-          // Font styles
-          CreateBaseLabel("Italic Lorem ipsum dolor sit amet.")
-            .SetFontSlant(Text::FontSlant::ITALIC)
-            .As(mSlantLabel),
-          CreateBaseLabel("Bold Lorem ipsum dolor sit amet.")
-            .SetFontWeight(Text::FontWeight::BOLD)
-            .As(mWeightLabel),
-          CreateBaseLabel("Semi condensed Lorem ipsum dolor sit amet.")
-            .SetFontWidth(Text::FontWidth::SEMI_CONDENSED)
-            .As(mWidthLabel),
+    mSlantLabel = CreateBaseLabel("Italic Lorem ipsum dolor sit amet.");
+    mSlantLabel.SetFontSlant(Text::FontSlant::ITALIC);
+    mWeightLabel = CreateBaseLabel("Bold Lorem ipsum dolor sit amet.");
+    mWeightLabel.SetFontWeight(Text::FontWeight::BOLD);
+    mWidthLabel = CreateBaseLabel("Semi condensed Lorem ipsum dolor sit amet.");
+    mWidthLabel.SetFontWidth(Text::FontWidth::SEMI_CONDENSED);
 
-          // Underline
-          CreateBaseLabel("Underline Label Minimum")
-            .SetUnderline(Text::Underline()),
-          CreateBaseLabel("Dashed Underline Label")
-            .SetUnderline(
-              Text::Underline()
-                .SetColor(UiColor(0x0088FF))
-                .SetThickness(2.0f)
-                .SetType(Text::Underline::Type::DASHED)
-                .SetDashLength(4.0f)
-                .SetDashGap(4.0f))
-            .As(mUnderlineLabel),
+    Label underlineMinLabel = CreateBaseLabel("Underline Label Minimum");
+    underlineMinLabel.SetUnderline(Text::Underline());
+    mUnderlineLabel = CreateBaseLabel("Dashed Underline Label");
+    mUnderlineLabel.SetUnderline(Text::Underline()
+                                   .SetColor(UiColor(0x0088FF))
+                                   .SetThickness(2.0f)
+                                   .SetType(Text::Underline::Type::DASHED)
+                                   .SetDashLength(4.0f)
+                                   .SetDashGap(4.0f));
 
-          // Shadow
-          CreateBaseLabel("Shadow Label Minimum")
-            .SetShadow(
-              Text::Shadow()
-                .SetOffset(Vector2(1.0f, 1.0f))),
-          CreateBaseLabel("Shadow Label Properties")
-            .SetShadow(
-              Text::Shadow()
-                .SetColor(UiColor(0xFF5500))
-                .SetOffset(Vector2(3.0f, 3.0f))
-                .SetBlurRadius(2.0f))
-            .As(mShadowLabel),
+    Label shadowMinLabel = CreateBaseLabel("Shadow Label Minimum");
+    shadowMinLabel.SetShadow(Text::Shadow().SetOffset(Vector2(1.0f, 1.0f)));
+    mShadowLabel = CreateBaseLabel("Shadow Label Properties");
+    mShadowLabel.SetShadow(Text::Shadow()
+                             .SetColor(UiColor(0xFF5500))
+                             .SetOffset(Vector2(3.0f, 3.0f))
+                             .SetBlurRadius(2.0f));
 
-          // Outline
-          CreateBaseLabel("Outline Label Minimum")
-            .SetOutline(
-              Text::Outline()
-                .SetWidth(2.0f)),
-          CreateBaseLabel("Outline Label Properties")
-            .SetOutline(
-              Text::Outline()
-                .SetColor(UiColor(0x0066FF))
-                .SetOffset(Vector2(1.0f, 1.0f))
-                .SetWidth(2.0f)
-                .SetBlurRadius(1.0f))
-            .As(mOutlineLabel),
+    Label outlineMinLabel = CreateBaseLabel("Outline Label Minimum");
+    outlineMinLabel.SetOutline(Text::Outline().SetWidth(2.0f));
+    mOutlineLabel = CreateBaseLabel("Outline Label Properties");
+    mOutlineLabel.SetOutline(Text::Outline()
+                               .SetColor(UiColor(0x0066FF))
+                               .SetOffset(Vector2(1.0f, 1.0f))
+                               .SetWidth(2.0f)
+                               .SetBlurRadius(1.0f));
 
-          // LineThrough
-          CreateBaseLabel("LineThrough Label Minimum")
-            .SetLineThrough(Text::LineThrough()),
-          CreateBaseLabel("LineThrough Label Properties")
-            .SetLineThrough(
-              Text::LineThrough()
-                .SetColor(UiColor(0xFF00FF))
-                .SetThickness(3.0f))
-            .As(mLineThroughLabel),
+    Label lineThroughMinLabel = CreateBaseLabel("LineThrough Label Minimum");
+    lineThroughMinLabel.SetLineThrough(Text::LineThrough());
+    mLineThroughLabel = CreateBaseLabel("LineThrough Label Properties");
+    mLineThroughLabel.SetLineThrough(Text::LineThrough()
+                                       .SetColor(UiColor(0xFF00FF))
+                                       .SetThickness(3.0f));
 
-          // Text background color
-          CreateBaseLabel("Text Background Color Label")
-            .SetTextBackgroundColor(UiColor(0xFFFF00))
-            .As(mTextBackgroundColorLabel),
+    mTextBackgroundColorLabel = CreateBaseLabel("Text Background Color Label");
+    mTextBackgroundColorLabel.SetTextBackgroundColor(UiColor(0xFFFF00));
 
-          // InputField styles
-          Label::New("InputField with Styles:"),
+    mInputFieldUnderline = CreateBaseInputField("InputField with Underline");
+    mInputFieldUnderline.SetUnderline(Text::Underline()
+                                        .SetColor(UiColor(0x0088FF))
+                                        .SetThickness(2.0f));
+    mInputFieldShadow = CreateBaseInputField("InputField with Shadow");
+    mInputFieldShadow.SetShadow(Text::Shadow()
+                                  .SetColor(UiColor(0xFF5500))
+                                  .SetOffset(Vector2(2.0f, 2.0f)));
+    mInputFieldOutline = CreateBaseInputField("InputField with Outline");
+    mInputFieldOutline.SetOutline(Text::Outline()
+                                    .SetColor(UiColor(0x0066FF))
+                                    .SetWidth(2.0f));
+    mInputFieldLineThrough = CreateBaseInputField("InputField with LineThrough");
+    mInputFieldLineThrough.SetLineThrough(Text::LineThrough()
+                                            .SetColor(UiColor(0xFF00FF))
+                                            .SetThickness(2.0f));
+    mInputFieldTextBackgroundColor = CreateBaseInputField("InputField Text Background Color");
+    mInputFieldTextBackgroundColor.SetTextBackgroundColor(UiColor(0x00FFFF));
 
-          CreateBaseInputField("InputField with Underline")
-            .SetUnderline(
-              Text::Underline()
-                .SetColor(UiColor(0x0088FF))
-                .SetThickness(2.0f))
-            .As(mInputFieldUnderline),
-          CreateBaseInputField("InputField with Shadow")
-            .SetShadow(
-              Text::Shadow()
-                .SetColor(UiColor(0xFF5500))
-                .SetOffset(Vector2(2.0f, 2.0f)))
-            .As(mInputFieldShadow),
-          CreateBaseInputField("InputField with Outline")
-            .SetOutline(
-              Text::Outline()
-                .SetColor(UiColor(0x0066FF))
-                .SetWidth(2.0f))
-            .As(mInputFieldOutline),
-          CreateBaseInputField("InputField with LineThrough")
-            .SetLineThrough(
-              Text::LineThrough()
-                .SetColor(UiColor(0xFF00FF))
-                .SetThickness(2.0f))
-            .As(mInputFieldLineThrough),
-          CreateBaseInputField("InputField Text Background Color")
-            .SetTextBackgroundColor(UiColor(0x00FFFF))
-            .As(mInputFieldTextBackgroundColor),
-        }));
+    root.AddChildren({
+      Label::New("Text Style Example"),
+      mSlantLabel,
+      mWeightLabel,
+      mWidthLabel,
+      underlineMinLabel,
+      mUnderlineLabel,
+      shadowMinLabel,
+      mShadowLabel,
+      outlineMinLabel,
+      mOutlineLabel,
+      lineThroughMinLabel,
+      mLineThroughLabel,
+      mTextBackgroundColorLabel,
+      Label::New("InputField with Styles:"),
+      mInputFieldUnderline,
+      mInputFieldShadow,
+      mInputFieldOutline,
+      mInputFieldLineThrough,
+      mInputFieldTextBackgroundColor,
+    });
+    window.Add(root);
 
 
     PrintTextBackgroundColorInfo(mTextBackgroundColorLabel, "TextBackgroundColor Label");
@@ -164,21 +149,23 @@ private:
 
   Label CreateBaseLabel(const char* text)
   {
-    return Label::New(text)
-      .SetBackgroundColor(BACKGROUND_COLOR)
-      .SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING))
-      .SetFontSize(FONT_SIZE)
-      .SetRequestedWidth(MATCH_PARENT);
+    Label label = Label::New(text);
+    label.SetBackgroundColor(BACKGROUND_COLOR);
+    label.SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING));
+    label.SetFontSize(FONT_SIZE);
+    label.SetRequestedWidth(MATCH_PARENT);
+    return label;
   }
 
   InputField CreateBaseInputField(const char* text)
   {
-    return InputField::New()
-      .SetText(text)
-      .SetBackgroundColor(BACKGROUND_COLOR)
-      .SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING))
-      .SetFontSize(FONT_SIZE)
-      .SetRequestedWidth(MATCH_PARENT);
+    InputField field = InputField::New();
+    field.SetText(text);
+    field.SetBackgroundColor(BACKGROUND_COLOR);
+    field.SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING));
+    field.SetFontSize(FONT_SIZE);
+    field.SetRequestedWidth(MATCH_PARENT);
+    return field;
   }
 
   void PlayAnimation(Label label, Vector4 startColor, Vector4 endColor)

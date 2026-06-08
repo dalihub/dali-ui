@@ -61,38 +61,40 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x202020));
 
-    Label label = Label::New("Count: 0")
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetFontSize(18.0f)
-      .SetTextColor(UiColor(0xFFFFFF))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    Label label = Label::New("Count: 0");
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(18.0f);
+    label.SetTextColor(UiColor(0xFFFFFF));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
-    InteractiveView counter = InteractiveView::New()
-      .SetAttachment(COUNTER_DATA_ID, Dali::MakeUnique<CounterData>(label))
-      .SetRequestedWidth(220.0f)
-      .SetRequestedHeight(80.0f)
-      .SetRequestedPositionX(60.0f)
-      .SetRequestedPositionY(60.0f)
-      .SetBackgroundColor(UiColor(0x1565C0))
-      .Children({label})
-      .ConnectClickedSignal(this, &AttachmentExampleController::OnCounterClicked);
+    InteractiveView counter = InteractiveView::New();
+    counter.SetAttachment(COUNTER_DATA_ID, Dali::MakeUnique<CounterData>(label));
+    counter.SetRequestedWidth(220.0f);
+    counter.SetRequestedHeight(80.0f);
+    counter.SetRequestedPositionX(60.0f);
+    counter.SetRequestedPositionY(60.0f);
+    counter.SetBackgroundColor(UiColor(0x1565C0));
+    counter.AddChildren({label});
+    counter.ConnectClickedSignal(this, &AttachmentExampleController::OnCounterClicked);
 
-    InteractiveView reset = InteractiveView::New()
-      .SetRequestedWidth(220.0f)
-      .SetRequestedHeight(64.0f)
-      .SetRequestedPositionX(60.0f)
-      .SetRequestedPositionY(160.0f)
-      .SetBackgroundColor(UiColor(0x424242))
-      .ConnectClickedSignal(this, &AttachmentExampleController::OnResetClicked)
-      .Children({Label::New("Detach and Reset")
-                    .SetRequestedWidth(MATCH_PARENT)
-                    .SetRequestedHeight(MATCH_PARENT)
-                    .SetFontSize(16.0f)
-                    .SetTextColor(UiColor(0xFFFFFF))
-                    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                    .SetVerticalTextAlignment(Text::Alignment::CENTER)});
+    Label resetLabel = Label::New("Detach and Reset");
+    resetLabel.SetRequestedWidth(MATCH_PARENT);
+    resetLabel.SetRequestedHeight(MATCH_PARENT);
+    resetLabel.SetFontSize(16.0f);
+    resetLabel.SetTextColor(UiColor(0xFFFFFF));
+    resetLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    resetLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    InteractiveView reset = InteractiveView::New();
+    reset.SetRequestedWidth(220.0f);
+    reset.SetRequestedHeight(64.0f);
+    reset.SetRequestedPositionX(60.0f);
+    reset.SetRequestedPositionY(160.0f);
+    reset.SetBackgroundColor(UiColor(0x424242));
+    reset.ConnectClickedSignal(this, &AttachmentExampleController::OnResetClicked);
+    reset.AddChildren({resetLabel});
 
     mCounter = counter;
     window.Add(counter);
@@ -117,8 +119,8 @@ public:
     {
       data->count = 0u;
       data->label.SetText("Count: 0");
-      mCounter.SetAttachment(COUNTER_DATA_ID, Dali::Move(data))
-        .SetBackgroundColor(UiColor(0x1565C0));
+      mCounter.SetAttachment(COUNTER_DATA_ID, Dali::Move(data));
+      mCounter.SetBackgroundColor(UiColor(0x1565C0));
     }
   }
 
@@ -130,7 +132,8 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  UiConfig config = UiConfig::New();
+  config.Apply();
   AttachmentExampleController controller(application);
   application.MainLoop();
   return 0;

@@ -57,210 +57,216 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetSpacing(STACK_SPACING)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-        .Children({
-          Label::New("AnimatedImageVisual Example")
-            .SetRequestedWidth(WRAP_CONTENT)
-            .SetRequestedHeight(WRAP_CONTENT),
-          Label::New("")
-            .SetRequestedWidth(WRAP_CONTENT)
-            .SetRequestedHeight(WRAP_CONTENT)
-            .As(mVisualState),
-          Label::New("Contents")
-            .SetBackgroundColor(UiColor(0x003070).WithAlpha(0.5f))
-            .SetFontFamily("SamsungOneUI_700")
-            .SetTextColor(UiColor(0x000000).WithAlpha(1.0f))
-            .SetTextFit(Text::FitRange(20, 1000, 10))
-            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-            .SetVerticalTextAlignment(Text::Alignment::CENTER)
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-            .SetPadding(Extents(VIEW_PADDING, VIEW_PADDING, VIEW_PADDING, VIEW_PADDING))
-            .SetMargin(Extents(VIEW_MARGIN, VIEW_MARGIN, VIEW_MARGIN, VIEW_MARGIN))
-            .SetCornerRadius(0.25f)
-            .SetCornerSquareness(0.6f)
-            .SetCornerRadiusPolicyRelative()
-            .SetBorderlineWidth(2_spx)
-            .SetBorderlineColor(UiColor(0x3F3F3F).WithAlpha(0.5f))
-            .SetBorderlineOffset(-0.98f)
-            .Visuals( // Custom Shadow
-              Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, {
-                ColorVisual::New()
-                  .SetName("CustomShadow1")
-                  .SetOffsetX(10_spx)
-                  .SetOffsetY(-10_spx)
-                  .SetWidth(1.01f)
-                  .SetHeight(1.0f)
-                  .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-                  .SetExtraWidth(50_spx)
-                  .SetExtraHeight(-20_spx)
-                  .SetOrigin(Align::TOP_CENTER)
-                  .SetPivot(Align::TOP_CENTER)
-                  .SetBlurRadius(12_spx)
-                  .SetCornerRadius(12_spx)
-                  .SetColor(UiColor(0x3F0F0F).WithAlpha(0.2f))
-                  .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
-                ColorVisual::New()
-                  .SetName("CustomShadow2")
-                  .SetOffsetX(-10_spx)
-                  .SetOffsetY(-20_spx)
-                  .SetWidth(1.01f)
-                  .SetHeight(1.01f)
-                  .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-                  .SetExtraWidth(0_spx)
-                  .SetExtraHeight(0_spx)
-                  .SetOrigin(Align::TOP_BEGIN)
-                  .SetPivot(Align::TOP_BEGIN)
-                  .SetBlurRadius(15_spx)
-                  .SetCornerRadius(15_spx)
-                  .SetColor(UiColor(0x7F7FCF).WithAlpha(0.3f))
-                  .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
-                ColorVisual::New()
-                  .SetName("CustomShadow3")
-                  .SetOffsetX(10_spx)
-                  .SetOffsetY(20_spx)
-                  .SetWidth(1.0f)
-                  .SetHeight(1.01f)
-                  .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-                  .SetExtraWidth(10_spx)
-                  .SetExtraHeight(-10_spx)
-                  .SetOrigin(Align::TOP_END)
-                  .SetPivot(Align::TOP_END)
-                  .SetBlurRadius(10_spx)
-                  .SetCornerRadius(10_spx)
-                  .SetColor(UiColor(0x0F040F).WithAlpha(0.3f))
-                  .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
-              })
-            .Visuals( // Custom InnerShadow
-              Visual::ContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT, {
-                ColorVisual::New()
-                  .SetName("CustomInnerShadow1")
-                  .SetOffsetX(10_spx)
-                  .SetOffsetY(20_spx)
-                  .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-                  .SetOrigin(Align::CENTER)
-                  .SetPivot(Align::CENTER)
-                  .SetCornerRadius(0.25f)
-                  .SetCornerSquareness(0.6f)
-                  .SetCornerRadiusPolicyRelative()
-                  .SetBlurRadius(40_spx)
-                  .SetBorderlineWidth(30_spx)
-                  .SetBorderlineColor(UiColor(0xFFFFFF).WithAlpha(0.6f))
-                  .SetBorderlineOffset(1.0f)
-                  .SetColor(UiColor(0x000000).WithAlpha(0.0f))
-                  .SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS),
-                ColorVisual::New()
-                  .SetName("CustomInnerShadow2")
-                  .SetOffsetX(-10_spx)
-                  .SetOffsetY(-20_spx)
-                  .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-                  .SetOrigin(Align::CENTER)
-                  .SetPivot(Align::CENTER)
-                  .SetCornerRadius(0.25f)
-                  .SetCornerSquareness(0.6f)
-                  .SetCornerRadiusPolicyRelative()
-                  .SetBlurRadius(40_spx)
-                  .SetBorderlineWidth(30_spx)
-                  .SetBorderlineColor(UiColor(0x000000).WithAlpha(0.6f))
-                  .SetBorderlineOffset(1.0f)
-                  .SetColor(UiColor(0x000000).WithAlpha(0.0f))
-                  .SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS),
-              })
-            .Visuals( // AnimatedImageVisual
-              Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, {
-                AnimatedImageVisual::New()
-                  .SetResourceUrl(RESOURCES_DIR "dali-logo-anim.gif")
-                  .SetWidth(0.5f)
-                  .SetCornerRadius(0.25f, 0.0f, 0.0f, 0.25f)
-                  .SetCornerRadiusPolicyRelative()
-                  .SetCornerSquareness(0.6f)
-                  .Play()
-                  .As(mLeftVisual),
-                BorderVisual::New()
-                  .SetWidth(0.5f)
-                  .SetColor(UiColor(0xCFCFFF).WithAlpha(0.8f))
-                  .SetBorderSize(20_spx)
-                  .As(mLeftBorder),
-                AnimatedImageVisual::New()
-                  .SetResourceUrlList({
-                    RESOURCES_DIR "gallery-large-1.jpg",
-                    RESOURCES_DIR "gallery-large-3.jpg",
-                    RESOURCES_DIR "gallery-medium-3.jpg",
-                    RESOURCES_DIR "gallery-medium-49.jpg",
-                  })
-                  .SetOffsetX(0.5f)
-                  .SetWidth(0.5f)
-                  .SetCornerRadius(0.0f, 0.25f, 0.25f, 0.0f)
-                  .SetCornerRadiusPolicyRelative()
-                  .SetCornerSquareness(0.6f)
-                  .SetFrameDelay(1000.0f)
-                  .Play()
-                  .As(mRightVisual),
-                BorderVisual::New()
-                  .SetOffsetX(0.5f)
-                  .SetWidth(0.5f)
-                  .SetColor(UiColor(0xCFCFFF).WithAlpha(0.8f))
-                  .SetBorderSize(20_spx)
-                  .As(mRightBorder),
-              })
-            .As(mView),
-          StackLayout::New(StackOrientation::HORIZONTAL)
-            .SetSpacing(STACK_SPACING)
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(WRAP_CONTENT)
-            .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-            .Children({
-              AbsoluteLayout::New()
-                .SetBackgroundColor(UiColor(0xFF0000))
-                .SetRequestedHeight(50_spx)
-                .SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f))
-                .AsInteractive([this](InteractiveTrait& trait) {
-                  trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
-                  {
-                    ChangeLeftVisual();
-                    return true;
-                  });
-                })
-                .Children({
-                  Label::New("Change Left Visual State")
-                    .SetLayoutParams(AbsoluteLayoutParams::New()
-                      .SetX(0.5f)
-                      .SetY(0.5f)
-                      .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL))
-                    .SetRequestedWidth(WRAP_CONTENT)
-                    .SetRequestedHeight(WRAP_CONTENT)
-                    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                    .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                }),
-              AbsoluteLayout::New()
-                .SetBackgroundColor(UiColor(0x00FF00))
-                .SetRequestedHeight(50_spx)
-                .SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f))
-                .AsInteractive([this](InteractiveTrait& trait) {
-                  trait.ClickedSignal().Connect(this, [this](View, const InputEvent&) -> bool
-                  {
-                    ChangeRightVisual();
-                    return true;
-                  });
-                })
-                .Children({
-                  Label::New("Change Right Visual State")
-                    .SetLayoutParams(AbsoluteLayoutParams::New()
-                      .SetX(0.5f)
-                      .SetY(0.5f)
-                      .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL))
-                    .SetRequestedWidth(WRAP_CONTENT)
-                    .SetRequestedHeight(WRAP_CONTENT)
-                    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                    .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                }),
-            }),
-        }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetSpacing(STACK_SPACING);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    Label titleLabel = Label::New("AnimatedImageVisual Example");
+    titleLabel.SetRequestedWidth(WRAP_CONTENT);
+    titleLabel.SetRequestedHeight(WRAP_CONTENT);
+    root.Add(titleLabel);
+
+    mVisualState = Label::New("");
+    mVisualState.SetRequestedWidth(WRAP_CONTENT);
+    mVisualState.SetRequestedHeight(WRAP_CONTENT);
+    root.Add(mVisualState);
+
+    Label contentLabel = Label::New("Contents");
+    contentLabel.SetBackgroundColor(UiColor(0x003070).WithAlpha(0.5f));
+    contentLabel.SetFontFamily("SamsungOneUI_700");
+    contentLabel.SetTextColor(UiColor(0x000000).WithAlpha(1.0f));
+    contentLabel.SetTextFit(Text::FitRange(20, 1000, 10));
+    contentLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    contentLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    contentLabel.SetRequestedWidth(MATCH_PARENT);
+    contentLabel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    contentLabel.SetPadding(Extents(VIEW_PADDING, VIEW_PADDING, VIEW_PADDING, VIEW_PADDING));
+    contentLabel.SetMargin(Extents(VIEW_MARGIN, VIEW_MARGIN, VIEW_MARGIN, VIEW_MARGIN));
+    contentLabel.SetCornerRadius(0.25f);
+    contentLabel.SetCornerSquareness(0.6f);
+    contentLabel.SetCornerRadiusPolicyRelative();
+    contentLabel.SetBorderlineWidth(2_spx);
+    contentLabel.SetBorderlineColor(UiColor(0x3F3F3F).WithAlpha(0.5f));
+    contentLabel.SetBorderlineOffset(-0.98f);
+    mView = contentLabel;
+    mView.AddVisuals( // Custom Shadow
+      Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, {
+        ColorVisual::New()
+          .SetName("CustomShadow1")
+          .SetOffsetX(10_spx)
+          .SetOffsetY(-10_spx)
+          .SetWidth(1.01f)
+          .SetHeight(1.0f)
+          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
+          .SetExtraWidth(50_spx)
+          .SetExtraHeight(-20_spx)
+          .SetOrigin(Align::TOP_CENTER)
+          .SetPivot(Align::TOP_CENTER)
+          .SetBlurRadius(12_spx)
+          .SetCornerRadius(12_spx)
+          .SetColor(UiColor(0x3F0F0F).WithAlpha(0.2f))
+          .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
+        ColorVisual::New()
+          .SetName("CustomShadow2")
+          .SetOffsetX(-10_spx)
+          .SetOffsetY(-20_spx)
+          .SetWidth(1.01f)
+          .SetHeight(1.01f)
+          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
+          .SetExtraWidth(0_spx)
+          .SetExtraHeight(0_spx)
+          .SetOrigin(Align::TOP_BEGIN)
+          .SetPivot(Align::TOP_BEGIN)
+          .SetBlurRadius(15_spx)
+          .SetCornerRadius(15_spx)
+          .SetColor(UiColor(0x7F7FCF).WithAlpha(0.3f))
+          .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
+        ColorVisual::New()
+          .SetName("CustomShadow3")
+          .SetOffsetX(10_spx)
+          .SetOffsetY(20_spx)
+          .SetWidth(1.0f)
+          .SetHeight(1.01f)
+          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
+          .SetExtraWidth(10_spx)
+          .SetExtraHeight(-10_spx)
+          .SetOrigin(Align::TOP_END)
+          .SetPivot(Align::TOP_END)
+          .SetBlurRadius(10_spx)
+          .SetCornerRadius(10_spx)
+          .SetColor(UiColor(0x0F040F).WithAlpha(0.3f))
+          .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
+      });
+    mView.AddVisuals( // Custom InnerShadow
+      Visual::ContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT, {
+        ColorVisual::New()
+          .SetName("CustomInnerShadow1")
+          .SetOffsetX(10_spx)
+          .SetOffsetY(20_spx)
+          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
+          .SetOrigin(Align::CENTER)
+          .SetPivot(Align::CENTER)
+          .SetCornerRadius(0.25f)
+          .SetCornerSquareness(0.6f)
+          .SetCornerRadiusPolicyRelative()
+          .SetBlurRadius(40_spx)
+          .SetBorderlineWidth(30_spx)
+          .SetBorderlineColor(UiColor(0xFFFFFF).WithAlpha(0.6f))
+          .SetBorderlineOffset(1.0f)
+          .SetColor(UiColor(0x000000).WithAlpha(0.0f))
+          .SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS),
+        ColorVisual::New()
+          .SetName("CustomInnerShadow2")
+          .SetOffsetX(-10_spx)
+          .SetOffsetY(-20_spx)
+          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
+          .SetOrigin(Align::CENTER)
+          .SetPivot(Align::CENTER)
+          .SetCornerRadius(0.25f)
+          .SetCornerSquareness(0.6f)
+          .SetCornerRadiusPolicyRelative()
+          .SetBlurRadius(40_spx)
+          .SetBorderlineWidth(30_spx)
+          .SetBorderlineColor(UiColor(0x000000).WithAlpha(0.6f))
+          .SetBorderlineOffset(1.0f)
+          .SetColor(UiColor(0x000000).WithAlpha(0.0f))
+          .SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS),
+      });
+    mView.AddVisuals( // AnimatedImageVisual
+      Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT, {
+        AnimatedImageVisual::New()
+          .SetResourceUrl(RESOURCES_DIR "dali-logo-anim.gif")
+          .SetWidth(0.5f)
+          .SetCornerRadius(0.25f, 0.0f, 0.0f, 0.25f)
+          .SetCornerRadiusPolicyRelative()
+          .SetCornerSquareness(0.6f)
+          .Play()
+          .As(mLeftVisual),
+        BorderVisual::New()
+          .SetWidth(0.5f)
+          .SetColor(UiColor(0xCFCFFF).WithAlpha(0.8f))
+          .SetBorderSize(20_spx)
+          .As(mLeftBorder),
+        AnimatedImageVisual::New()
+          .SetResourceUrlList({
+            RESOURCES_DIR "gallery-large-1.jpg",
+            RESOURCES_DIR "gallery-large-3.jpg",
+            RESOURCES_DIR "gallery-medium-3.jpg",
+            RESOURCES_DIR "gallery-medium-49.jpg",
+          })
+          .SetOffsetX(0.5f)
+          .SetWidth(0.5f)
+          .SetCornerRadius(0.0f, 0.25f, 0.25f, 0.0f)
+          .SetCornerRadiusPolicyRelative()
+          .SetCornerSquareness(0.6f)
+          .SetFrameDelay(1000.0f)
+          .Play()
+          .As(mRightVisual),
+        BorderVisual::New()
+          .SetOffsetX(0.5f)
+          .SetWidth(0.5f)
+          .SetColor(UiColor(0xCFCFFF).WithAlpha(0.8f))
+          .SetBorderSize(20_spx)
+          .As(mRightBorder),
+      });
+    root.Add(mView);
+
+    StackLayout buttonRow = StackLayout::New(StackOrientation::HORIZONTAL);
+    buttonRow.SetSpacing(STACK_SPACING);
+    buttonRow.SetRequestedWidth(MATCH_PARENT);
+    buttonRow.SetRequestedHeight(WRAP_CONTENT);
+    buttonRow.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    AbsoluteLayout addButton = AbsoluteLayout::New();
+    addButton.SetBackgroundColor(UiColor(0xFF0000));
+    addButton.SetRequestedHeight(50_spx);
+    addButton.SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f));
+    InteractiveTrait addInteractive = addButton.AsInteractive();
+    addInteractive.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
+    {
+      ChangeLeftVisual();
+      return true;
+    });
+
+    Label addLabel = Label::New("Change Left Visual State");
+    addLabel.SetLayoutParams(AbsoluteLayoutParams::New()
+                               .SetX(0.5f)
+                               .SetY(0.5f)
+                               .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+    addLabel.SetRequestedWidth(WRAP_CONTENT);
+    addLabel.SetRequestedHeight(WRAP_CONTENT);
+    addLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    addLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    addButton.Add(addLabel);
+    buttonRow.Add(addButton);
+
+    AbsoluteLayout removeButton = AbsoluteLayout::New();
+    removeButton.SetBackgroundColor(UiColor(0x00FF00));
+    removeButton.SetRequestedHeight(50_spx);
+    removeButton.SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f));
+    InteractiveTrait removeInteractive = removeButton.AsInteractive();
+    removeInteractive.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
+    {
+      ChangeRightVisual();
+      return true;
+    });
+
+    Label removeLabel = Label::New("Change Right Visual State");
+    removeLabel.SetLayoutParams(AbsoluteLayoutParams::New()
+                                  .SetX(0.5f)
+                                  .SetY(0.5f)
+                                  .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+    removeLabel.SetRequestedWidth(WRAP_CONTENT);
+    removeLabel.SetRequestedHeight(WRAP_CONTENT);
+    removeLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    removeLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    removeButton.Add(removeLabel);
+    buttonRow.Add(removeButton);
+
+    root.Add(buttonRow);
+    window.Add(root);
   
     UpdateVisualState();
     window.KeyEventSignal().Connect(this, &VisualBaseController::OnKeyEvent);

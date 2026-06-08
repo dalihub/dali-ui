@@ -51,10 +51,10 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    AbsoluteLayout root = AbsoluteLayout::New()
-                            .SetBackgroundColor(Color::GAINSBORO)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(MATCH_PARENT);
+    AbsoluteLayout root = AbsoluteLayout::New();
+    root.SetBackgroundColor(Color::GAINSBORO);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
 
     // Child 1: Height proportional only.
     View yellowBox = View::New();

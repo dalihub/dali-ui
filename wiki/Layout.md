@@ -59,15 +59,15 @@ Stacks children sequentially in a single direction.
 **When to use**: Simple vertical or horizontal lists — button rows, menu items, form fields.
 
 ```cpp
-StackLayout::New(StackOrientation::VERTICAL)
-  .Spacing(8_spx)
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(WRAP_CONTENT)
-  .Children({
-    label,
-    button,
-    input,
-  });
+StackLayout stack = StackLayout::New(StackOrientation::VERTICAL);
+stack.SetSpacing(8_spx);
+stack.SetRequestedWidth(MATCH_PARENT);
+stack.SetRequestedHeight(WRAP_CONTENT);
+stack.AddChildren({
+  label,
+  button,
+  input,
+});
 ```
 
 **Per-child options** (`StackLayoutParams`):
@@ -96,20 +96,20 @@ Positions children at explicit coordinates.
 **When to use**: Overlays, floating UI elements, or any layout requiring pixel-precise positioning.
 
 ```cpp
-AbsoluteLayout::New()
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(MATCH_PARENT)
-  .Children({
-    icon.SetLayoutParams(
-      AbsoluteLayoutParams::New()
-        .SetX(20_spx).SetY(20_spx)
-        .SetWidth(48_spx).SetHeight(48_spx)),
+icon.SetLayoutParams(
+  AbsoluteLayoutParams::New()
+    .SetX(20_spx).SetY(20_spx)
+    .SetWidth(48_spx).SetHeight(48_spx));
 
-    badge.SetLayoutParams(
-      AbsoluteLayoutParams::New()
-        .SetBounds(LayoutRect(0.9f, 0.0f, 0.1f, 0.1f))
-        .SetFlags(AbsoluteLayoutFlags::ALL)),  // proportional
-  });
+badge.SetLayoutParams(
+  AbsoluteLayoutParams::New()
+    .SetBounds(LayoutRect(0.9f, 0.0f, 0.1f, 0.1f))
+    .SetFlags(AbsoluteLayoutFlags::ALL));  // proportional
+
+AbsoluteLayout absolute = AbsoluteLayout::New();
+absolute.SetRequestedWidth(MATCH_PARENT);
+absolute.SetRequestedHeight(MATCH_PARENT);
+absolute.AddChildren({icon, badge});
 ```
 
 **AbsoluteLayoutFlags**:
@@ -134,12 +134,12 @@ Uses the CSS Flexbox algorithm.
 **When to use**: Complex one-dimensional layouts requiring direction control, wrapping, or fine-grained alignment.
 
 ```cpp
-FlexLayout::New()
-  .Direction(FlexDirection::ROW)
-  .Wrap(FlexWrap::WRAP)
-  .JustifyContent(FlexJustify::SPACE_BETWEEN)
-  .AlignItems(FlexAlign::CENTER)
-  .Children({ itemA, itemB, itemC });
+FlexLayout flex = FlexLayout::New();
+flex.SetDirection(FlexDirection::ROW);
+flex.SetWrap(FlexWrap::WRAP);
+flex.SetJustifyContent(FlexJustify::SPACE_BETWEEN);
+flex.SetAlignItems(FlexAlign::CENTER);
+flex.AddChildren({itemA, itemB, itemC});
 ```
 
 **Per-child options** (`FlexLayoutParams`):
@@ -164,12 +164,12 @@ Positions children in a grid of defined rows and columns.
 **When to use**: App grids, settings screens, dashboards — any two-dimensional arrangement.
 
 ```cpp
-GridLayout::New()
-  .Rows({GridLength::Auto(), GridLength::Star(), GridLength::Absolute(100_spx)})
-  .Columns({GridLength::Star(), GridLength::Star(2.0f)})
-  .RowSpacing(4_spx)
-  .ColumnSpacing(4_spx)
-  .Children({ header, sideBar, main, footer });
+GridLayout grid = GridLayout::New();
+grid.SetRowDefinitions({GridLength::Auto(), GridLength::Star(), GridLength::Absolute(100_spx)});
+grid.SetColumnDefinitions({GridLength::Star(), GridLength::Star(2.0f)});
+grid.SetRowSpacing(4_spx);
+grid.SetColumnSpacing(4_spx);
+grid.AddChildren({header, sideBar, main, footer});
 ```
 
 **GridLength types**:

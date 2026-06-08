@@ -343,46 +343,42 @@ int UtcDaliGridLayoutGetColumnSpanP(void)
   END_TEST;
 }
 
-int UtcDaliGridLayoutRowSpacingChainingP(void)
+int UtcDaliGridLayoutRowSpacingSetterP(void)
 {
   UiTestApplication application;
   GridLayout layout = GridLayout::New();
-  GridLayout& result = layout.SetRowSpacing(5.0f);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetRowSpacing(5.0f);
   DALI_TEST_EQUALS(layout.GetRowSpacing(), 5.0f, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliGridLayoutColumnSpacingChainingP(void)
+int UtcDaliGridLayoutColumnSpacingSetterP(void)
 {
   UiTestApplication application;
   GridLayout layout = GridLayout::New();
-  GridLayout& result = layout.SetColumnSpacing(7.0f);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetColumnSpacing(7.0f);
   DALI_TEST_EQUALS(layout.GetColumnSpacing(), 7.0f, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliGridLayoutRowsChainingP(void)
+int UtcDaliGridLayoutRowsSetterP(void)
 {
   UiTestApplication application;
   GridLayout layout = GridLayout::New();
   Dali::Vector<GridLength> rows;
   rows.PushBack(GridLength::Absolute(20.0f));
-  GridLayout& result = layout.SetRowDefinitions(rows);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetRowDefinitions(rows);
   DALI_TEST_EQUALS(layout.GetRowCount(), 1u, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliGridLayoutColumnsChainingP(void)
+int UtcDaliGridLayoutColumnsSetterP(void)
 {
   UiTestApplication application;
   GridLayout layout = GridLayout::New();
   Dali::Vector<GridLength> cols;
   cols.PushBack(GridLength::Star(1.0f));
-  GridLayout& result = layout.SetColumnDefinitions(cols);
-  DALI_TEST_EQUALS(&result, &layout, TEST_LOCATION);
+  layout.SetColumnDefinitions(cols);
   DALI_TEST_EQUALS(layout.GetColumnCount(), 1u, TEST_LOCATION);
   END_TEST;
 }

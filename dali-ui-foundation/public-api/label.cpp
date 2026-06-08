@@ -14,15 +14,11 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/object/type-registry.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/label.h>
+#include <dali/devel-api/object/type-registry.h>
 
 namespace Dali
 {
@@ -57,8 +53,6 @@ Label Label::New()
   Integration::LabelImplPtr impl = Integration::LabelImpl::New();
 
   Label label = Label(*impl);
-
-  // Second-phase initialization
   impl->Initialize();
   return label;
 }
@@ -68,8 +62,6 @@ Label Label::New(const Dali::String& text)
   Integration::LabelImplPtr impl = Integration::LabelImpl::New();
 
   Label label = Label(*impl);
-
-  // Second-phase initialization
   impl->Initialize();
   label.SetText(text);
   return label;
@@ -120,14 +112,9 @@ Label::Label(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::LabelImpl>(internal);
 }
 
-// =============================================================================
-// Properties
-// =============================================================================
-
-Label& Label::SetText(const Dali::String& text)
+void Label::SetText(const Dali::String& text)
 {
   GetImpl(*this).SetText(text);
-  return *this;
 }
 
 Dali::String Label::GetText() const
@@ -135,10 +122,9 @@ Dali::String Label::GetText() const
   return GetImpl(*this).GetText();
 }
 
-Label& Label::SetFontFamily(const Dali::String& fontFamily)
+void Label::SetFontFamily(const Dali::String& fontFamily)
 {
   GetImpl(*this).SetFontFamily(fontFamily);
-  return *this;
 }
 
 Dali::String Label::GetFontFamily() const
@@ -146,10 +132,9 @@ Dali::String Label::GetFontFamily() const
   return GetImpl(*this).GetFontFamily();
 }
 
-Label& Label::SetFontSize(float fontSize)
+void Label::SetFontSize(float fontSize)
 {
   GetImpl(*this).SetFontSize(fontSize);
-  return *this;
 }
 
 float Label::GetFontSize() const
@@ -157,10 +142,9 @@ float Label::GetFontSize() const
   return GetImpl(*this).GetFontSize();
 }
 
-Label& Label::SetMultiLine(bool multiLine)
+void Label::SetMultiLine(bool multiLine)
 {
   GetImpl(*this).SetMultiLine(multiLine);
-  return *this;
 }
 
 bool Label::IsMultiLine() const
@@ -168,10 +152,9 @@ bool Label::IsMultiLine() const
   return GetImpl(*this).IsMultiLine();
 }
 
-Label& Label::SetLineWrapMode(Text::LineWrapMode mode)
+void Label::SetLineWrapMode(Text::LineWrapMode mode)
 {
   GetImpl(*this).SetLineWrapMode(mode);
-  return *this;
 }
 
 Text::LineWrapMode Label::GetLineWrapMode() const
@@ -179,10 +162,9 @@ Text::LineWrapMode Label::GetLineWrapMode() const
   return GetImpl(*this).GetLineWrapMode();
 }
 
-Label& Label::SetTextColor(const UiColor& color)
+void Label::SetTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTextColor(color);
-  return *this;
 }
 
 UiColor Label::GetTextColor()
@@ -190,10 +172,9 @@ UiColor Label::GetTextColor()
   return GetImpl(*this).GetTextColor();
 }
 
-Label& Label::SetHorizontalTextAlignment(Text::Alignment alignment)
+void Label::SetHorizontalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetHorizontalTextAlignment(alignment);
-  return *this;
 }
 
 Text::Alignment Label::GetHorizontalTextAlignment() const
@@ -201,10 +182,9 @@ Text::Alignment Label::GetHorizontalTextAlignment() const
   return GetImpl(*this).GetHorizontalTextAlignment();
 }
 
-Label& Label::SetVerticalTextAlignment(Text::Alignment alignment)
+void Label::SetVerticalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetVerticalTextAlignment(alignment);
-  return *this;
 }
 
 Text::Alignment Label::GetVerticalTextAlignment() const
@@ -212,10 +192,9 @@ Text::Alignment Label::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
-Label& Label::SetOverflowMode(Text::OverflowMode mode)
+void Label::SetOverflowMode(Text::OverflowMode mode)
 {
   GetImpl(*this).SetOverflowMode(mode);
-  return *this;
 }
 
 Text::OverflowMode Label::GetOverflowMode() const
@@ -223,10 +202,9 @@ Text::OverflowMode Label::GetOverflowMode() const
   return GetImpl(*this).GetOverflowMode();
 }
 
-Label& Label::SetLineHeight(float lineHeight)
+void Label::SetLineHeight(float lineHeight)
 {
   GetImpl(*this).SetLineHeight(lineHeight);
-  return *this;
 }
 
 float Label::GetLineHeight() const
@@ -234,10 +212,9 @@ float Label::GetLineHeight() const
   return GetImpl(*this).GetLineHeight();
 }
 
-Label& Label::SetLineHeightMode(Text::LineHeightMode mode)
+void Label::SetLineHeightMode(Text::LineHeightMode mode)
 {
   GetImpl(*this).SetLineHeightMode(mode);
-  return *this;
 }
 
 Text::LineHeightMode Label::GetLineHeightMode() const
@@ -245,10 +222,9 @@ Text::LineHeightMode Label::GetLineHeightMode() const
   return GetImpl(*this).GetLineHeightMode();
 }
 
-Label& Label::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+void Label::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 {
   GetImpl(*this).SetLayoutDirectionMode(mode);
-  return *this;
 }
 
 Text::LayoutDirectionMode Label::GetLayoutDirectionMode() const
@@ -256,10 +232,9 @@ Text::LayoutDirectionMode Label::GetLayoutDirectionMode() const
   return GetImpl(*this).GetLayoutDirectionMode();
 }
 
-Label& Label::SetMarkupEnabled(bool enabled)
+void Label::SetMarkupEnabled(bool enabled)
 {
   GetImpl(*this).SetMarkupEnabled(enabled);
-  return *this;
 }
 
 bool Label::IsMarkupEnabled() const
@@ -267,10 +242,9 @@ bool Label::IsMarkupEnabled() const
   return GetImpl(*this).IsMarkupEnabled();
 }
 
-Label& Label::SetAnchorColor(const UiColor& color)
+void Label::SetAnchorColor(const UiColor& color)
 {
   GetImpl(*this).SetAnchorColor(color);
-  return *this;
 }
 
 UiColor Label::GetAnchorColor()
@@ -278,10 +252,9 @@ UiColor Label::GetAnchorColor()
   return GetImpl(*this).GetAnchorColor();
 }
 
-Label& Label::SetAnchorClickedColor(const UiColor& color)
+void Label::SetAnchorClickedColor(const UiColor& color)
 {
   GetImpl(*this).SetAnchorClickedColor(color);
-  return *this;
 }
 
 UiColor Label::GetAnchorClickedColor()
@@ -289,10 +262,9 @@ UiColor Label::GetAnchorClickedColor()
   return GetImpl(*this).GetAnchorClickedColor();
 }
 
-Label& Label::SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy)
+void Label::SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy)
 {
   GetImpl(*this).SetMarqueeTriggerPolicy(policy);
-  return *this;
 }
 
 Text::MarqueeTriggerPolicy Label::GetMarqueeTriggerPolicy() const
@@ -300,10 +272,9 @@ Text::MarqueeTriggerPolicy Label::GetMarqueeTriggerPolicy() const
   return GetImpl(*this).GetMarqueeTriggerPolicy();
 }
 
-Label& Label::SetMarqueeSpeed(int speed)
+void Label::SetMarqueeSpeed(int speed)
 {
   GetImpl(*this).SetMarqueeSpeed(speed);
-  return *this;
 }
 
 int Label::GetMarqueeSpeed() const
@@ -311,10 +282,9 @@ int Label::GetMarqueeSpeed() const
   return GetImpl(*this).GetMarqueeSpeed();
 }
 
-Label& Label::SetMarqueeLoopCount(int loopCount)
+void Label::SetMarqueeLoopCount(int loopCount)
 {
   GetImpl(*this).SetMarqueeLoopCount(loopCount);
-  return *this;
 }
 
 int Label::GetMarqueeLoopCount() const
@@ -322,10 +292,9 @@ int Label::GetMarqueeLoopCount() const
   return GetImpl(*this).GetMarqueeLoopCount();
 }
 
-Label& Label::SetMarqueeLoopDelay(float delay)
+void Label::SetMarqueeLoopDelay(float delay)
 {
   GetImpl(*this).SetMarqueeLoopDelay(delay);
-  return *this;
 }
 
 float Label::GetMarqueeLoopDelay() const
@@ -333,10 +302,9 @@ float Label::GetMarqueeLoopDelay() const
   return GetImpl(*this).GetMarqueeLoopDelay();
 }
 
-Label& Label::SetMarqueeGap(int gap)
+void Label::SetMarqueeGap(int gap)
 {
   GetImpl(*this).SetMarqueeGap(gap);
-  return *this;
 }
 
 int Label::GetMarqueeGap() const
@@ -344,10 +312,9 @@ int Label::GetMarqueeGap() const
   return GetImpl(*this).GetMarqueeGap();
 }
 
-Label& Label::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+void Label::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
 {
   GetImpl(*this).SetMarqueeOrientation(orientation);
-  return *this;
 }
 
 Text::MarqueeOrientation Label::GetMarqueeOrientation() const
@@ -355,10 +322,9 @@ Text::MarqueeOrientation Label::GetMarqueeOrientation() const
   return GetImpl(*this).GetMarqueeOrientation();
 }
 
-Label& Label::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+void Label::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
 {
   GetImpl(*this).SetMarqueeStopMode(stopMode);
-  return *this;
 }
 
 Text::MarqueeStopMode Label::GetMarqueeStopMode() const
@@ -366,10 +332,9 @@ Text::MarqueeStopMode Label::GetMarqueeStopMode() const
   return GetImpl(*this).GetMarqueeStopMode();
 }
 
-Label& Label::SetFontWeight(Text::FontWeight weight)
+void Label::SetFontWeight(Text::FontWeight weight)
 {
   GetImpl(*this).SetFontWeight(weight);
-  return *this;
 }
 
 Text::FontWeight Label::GetFontWeight() const
@@ -377,10 +342,9 @@ Text::FontWeight Label::GetFontWeight() const
   return GetImpl(*this).GetFontWeight();
 }
 
-Label& Label::SetFontWidth(Text::FontWidth width)
+void Label::SetFontWidth(Text::FontWidth width)
 {
   GetImpl(*this).SetFontWidth(width);
-  return *this;
 }
 
 Text::FontWidth Label::GetFontWidth() const
@@ -388,10 +352,9 @@ Text::FontWidth Label::GetFontWidth() const
   return GetImpl(*this).GetFontWidth();
 }
 
-Label& Label::SetFontSlant(Text::FontSlant slant)
+void Label::SetFontSlant(Text::FontSlant slant)
 {
   GetImpl(*this).SetFontSlant(slant);
-  return *this;
 }
 
 Text::FontSlant Label::GetFontSlant() const
@@ -399,10 +362,9 @@ Text::FontSlant Label::GetFontSlant() const
   return GetImpl(*this).GetFontSlant();
 }
 
-Label& Label::SetTextBackgroundColor(const UiColor& color)
+void Label::SetTextBackgroundColor(const UiColor& color)
 {
   GetImpl(*this).SetTextBackgroundColor(color);
-  return *this;
 }
 
 UiColor Label::GetTextBackgroundColor() const
@@ -415,10 +377,9 @@ void Label::ClearTextBackgroundColor()
   GetImpl(*this).ClearTextBackgroundColor();
 }
 
-Label& Label::SetUnderline(const Text::Underline& underline)
+void Label::SetUnderline(const Text::Underline& underline)
 {
   GetImpl(*this).SetUnderline(underline);
-  return *this;
 }
 
 void Label::ClearUnderline()
@@ -426,10 +387,9 @@ void Label::ClearUnderline()
   return GetImpl(*this).ClearUnderline();
 }
 
-Label& Label::SetShadow(const Text::Shadow& shadow)
+void Label::SetShadow(const Text::Shadow& shadow)
 {
   GetImpl(*this).SetShadow(shadow);
-  return *this;
 }
 
 void Label::ClearShadow()
@@ -437,10 +397,9 @@ void Label::ClearShadow()
   return GetImpl(*this).ClearShadow();
 }
 
-Label& Label::SetOutline(const Text::Outline& outline)
+void Label::SetOutline(const Text::Outline& outline)
 {
   GetImpl(*this).SetOutline(outline);
-  return *this;
 }
 
 void Label::ClearOutline()
@@ -448,10 +407,9 @@ void Label::ClearOutline()
   return GetImpl(*this).ClearOutline();
 }
 
-Label& Label::SetLineThrough(const Text::LineThrough& lineThrough)
+void Label::SetLineThrough(const Text::LineThrough& lineThrough)
 {
   GetImpl(*this).SetLineThrough(lineThrough);
-  return *this;
 }
 
 void Label::ClearLineThrough()
@@ -459,10 +417,9 @@ void Label::ClearLineThrough()
   return GetImpl(*this).ClearLineThrough();
 }
 
-Label& Label::SetBevel(const Text::Bevel& bevel)
+void Label::SetBevel(const Text::Bevel& bevel)
 {
   GetImpl(*this).SetBevel(bevel);
-  return *this;
 }
 
 void Label::ClearBevel()
@@ -470,16 +427,14 @@ void Label::ClearBevel()
   return GetImpl(*this).ClearBevel();
 }
 
-Label& Label::SetTextFit(const Text::FitRange& range)
+void Label::SetTextFit(const Text::FitRange& range)
 {
   GetImpl(*this).SetTextFit(range);
-  return *this;
 }
 
-Label& Label::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
+void Label::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
 {
   GetImpl(*this).SetTextFit(candidates);
-  return *this;
 }
 
 void Label::ClearTextFit()
@@ -487,10 +442,9 @@ void Label::ClearTextFit()
   GetImpl(*this).ClearTextFit();
 }
 
-Label& Label::SetFontSizeScale(float scale)
+void Label::SetFontSizeScale(float scale)
 {
   GetImpl(*this).SetFontSizeScale(scale);
-  return *this;
 }
 
 float Label::GetFontSizeScale() const
@@ -498,10 +452,9 @@ float Label::GetFontSizeScale() const
   return GetImpl(*this).GetFontSizeScale();
 }
 
-Label& Label::SetMinimumFontSizeScale(float scale)
+void Label::SetMinimumFontSizeScale(float scale)
 {
   GetImpl(*this).SetMinimumFontSizeScale(scale);
-  return *this;
 }
 
 float Label::GetMinimumFontSizeScale() const
@@ -509,10 +462,9 @@ float Label::GetMinimumFontSizeScale() const
   return GetImpl(*this).GetMinimumFontSizeScale();
 }
 
-Label& Label::SetMaximumFontSizeScale(float scale)
+void Label::SetMaximumFontSizeScale(float scale)
 {
   GetImpl(*this).SetMaximumFontSizeScale(scale);
-  return *this;
 }
 
 float Label::GetMaximumFontSizeScale() const
@@ -520,10 +472,9 @@ float Label::GetMaximumFontSizeScale() const
   return GetImpl(*this).GetMaximumFontSizeScale();
 }
 
-Label& Label::SetSystemFontSizeScaleEnabled(bool enabled)
+void Label::SetSystemFontSizeScaleEnabled(bool enabled)
 {
   GetImpl(*this).SetSystemFontSizeScaleEnabled(enabled);
-  return *this;
 }
 
 bool Label::IsSystemFontSizeScaleEnabled() const
@@ -531,16 +482,14 @@ bool Label::IsSystemFontSizeScaleEnabled() const
   return GetImpl(*this).IsSystemFontSizeScaleEnabled();
 }
 
-Label& Label::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+void Label::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
 {
   GetImpl(*this).SetFontVariation(axes);
-  return *this;
 }
 
-Label& Label::SetFontVariation(const Dali::String& settings)
+void Label::SetFontVariation(const Dali::String& settings)
 {
   GetImpl(*this).SetFontVariation(settings);
-  return *this;
 }
 
 Dali::Vector<Text::FontVariationAxis> Label::GetFontVariation() const
@@ -553,10 +502,9 @@ void Label::ClearFontVariation()
   GetImpl(*this).ClearFontVariation();
 }
 
-Label& Label::SetCutoutEnabled(bool enabled)
+void Label::SetCutoutEnabled(bool enabled)
 {
   GetImpl(*this).SetCutoutEnabled(enabled);
-  return *this;
 }
 
 bool Label::IsCutoutEnabled() const
@@ -564,10 +512,9 @@ bool Label::IsCutoutEnabled() const
   return GetImpl(*this).IsCutoutEnabled();
 }
 
-Label& Label::SetMaskEffect(View view)
+void Label::SetMaskEffect(View view)
 {
   GetImpl(*this).SetMaskEffect(view);
-  return *this;
 }
 
 void Label::ClearMaskEffect()
@@ -575,10 +522,9 @@ void Label::ClearMaskEffect()
   GetImpl(*this).ClearMaskEffect();
 }
 
-Label& Label::SetAsyncRendering(bool asyncRendering)
+void Label::SetAsyncRendering(bool asyncRendering)
 {
   GetImpl(*this).SetAsyncRendering(asyncRendering);
-  return *this;
 }
 
 bool Label::IsAsyncRendering() const
@@ -586,10 +532,9 @@ bool Label::IsAsyncRendering() const
   return GetImpl(*this).IsAsyncRendering();
 }
 
-Label& Label::SetRenderScale(float scale)
+void Label::SetRenderScale(float scale)
 {
   GetImpl(*this).SetRenderScale(scale);
-  return *this;
 }
 
 float Label::GetRenderScale() const
@@ -597,16 +542,14 @@ float Label::GetRenderScale() const
   return GetImpl(*this).GetRenderScale();
 }
 
-Label& Label::SetTranslatableText(StringView resourceId)
+void Label::SetTranslatableText(StringView resourceId)
 {
   GetImpl(*this).SetTranslatableText(resourceId);
-  return *this;
 }
 
-Label& Label::SetTranslatableText(StringView resourceId, StringView domain)
+void Label::SetTranslatableText(StringView resourceId, StringView domain)
 {
   GetImpl(*this).SetTranslatableText(resourceId, domain);
-  return *this;
 }
 
 Dali::String Label::GetTranslatableText() const
@@ -618,10 +561,6 @@ void Label::ClearTranslatableText()
 {
   GetImpl(*this).ClearTranslatableText();
 }
-
-// =============================================================================
-// Read Only
-// =============================================================================
 int Label::GetLineCount()
 {
   return GetImpl(*this).GetLineCount();
@@ -646,10 +585,6 @@ float Label::GetAdjustedFontSizeScale() const
 {
   return GetImpl(*this).GetAdjustedFontSizeScale();
 }
-
-// =============================================================================
-// Method
-// =============================================================================
 void Label::StartMarquee()
 {
   GetImpl(*this).StartMarquee();
@@ -669,10 +604,6 @@ void Label::RequestAsyncHeightForWidth(float width)
 {
   GetImpl(*this).RequestAsyncHeightForWidth(width);
 }
-
-// =============================================================================
-// Signals
-// =============================================================================
 Signal<void(View, const Dali::String&)>& Label::AnchorClickedSignal()
 {
   return GetImpl(*this).AnchorClickedSignal();

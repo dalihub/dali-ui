@@ -14,16 +14,6 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-foundation/public-api/view.h>
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/object/type-registry.h>
-#include <dali/integration-api/debug.h>
-#include <dali/public-api/actors/actor.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -37,6 +27,10 @@
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/view.h>
+#include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/debug.h>
+#include <dali/public-api/actors/actor.h>
 
 namespace Dali
 {
@@ -51,9 +45,7 @@ View::View()
 View View::New()
 {
   ViewImplPtr impl = ViewImpl::New();
-
-  // Pass ownership to handle
-  View handle(*impl);
+  View        handle(*impl);
 
   impl->Initialize();
 
@@ -83,10 +75,6 @@ View::View(Dali::Internal::CustomActor* internal)
 {
   VerifyCustomActorPointer<ViewImpl>(internal);
 }
-
-// =============================================================================
-// Measure / Arrange API
-// =============================================================================
 
 MeasuredSize View::Measure(float widthConstraint, float heightConstraint)
 {
@@ -152,10 +140,9 @@ float View::GetCurrentScaleX() const
   return GetImpl(*this).GetCurrentScaleX();
 }
 
-View& View::SetScaleX(float scaleX)
+void View::SetScaleX(float scaleX)
 {
   GetImpl(*this).SetScaleX(scaleX);
-  return *this;
 }
 
 float View::GetScaleY() const
@@ -168,17 +155,15 @@ float View::GetCurrentScaleY() const
   return GetImpl(*this).GetCurrentScaleY();
 }
 
-View& View::SetScaleY(float scaleY)
+void View::SetScaleY(float scaleY)
 {
   GetImpl(*this).SetScaleY(scaleY);
-  return *this;
 }
 
-View& View::SetScale(float scaleX, float scaleY)
+void View::SetScale(float scaleX, float scaleY)
 {
   SetScaleX(scaleX);
   SetScaleY(scaleY);
-  return *this;
 }
 
 Vector2 View::GetCurrentScale() const
@@ -186,10 +171,9 @@ Vector2 View::GetCurrentScale() const
   return Vector2(GetCurrentScaleX(), GetCurrentScaleY());
 }
 
-View& View::SetLayoutDirection(Dali::LayoutDirection::Type direction)
+void View::SetLayoutDirection(Dali::LayoutDirection::Type direction)
 {
   GetImpl(*this).SetLayoutDirection(direction);
-  return *this;
 }
 
 void View::ClearLayoutDirection()
@@ -207,10 +191,9 @@ Dali::LayoutDirection::Type View::GetEffectiveLayoutDirection() const
   return GetImpl(*this).GetEffectiveLayoutDirection();
 }
 
-View& View::SetUiScalePolicy(UiScalePolicy policy)
+void View::SetUiScalePolicy(UiScalePolicy policy)
 {
   GetImpl(*this).SetUiScalePolicy(policy);
-  return *this;
 }
 
 UiScalePolicy View::GetUiScalePolicy() const
@@ -223,10 +206,9 @@ bool View::IsVisible() const
   return GetImpl(*this).IsVisible();
 }
 
-View& View::SetVisibility(bool visibility)
+void View::SetVisibility(bool visibility)
 {
   GetImpl(*this).SetVisibility(visibility);
-  return *this;
 }
 
 float View::GetOpacity() const
@@ -234,10 +216,9 @@ float View::GetOpacity() const
   return GetImpl(*this).GetOpacity();
 }
 
-View& View::SetOpacity(float opacity)
+void View::SetOpacity(float opacity)
 {
   GetImpl(*this).SetOpacity(opacity);
-  return *this;
 }
 
 MeasuredSize View::GetSize() const
@@ -250,10 +231,9 @@ MeasuredSize View::GetCurrentSize() const
   return GetImpl(*this).GetCurrentSize();
 }
 
-View& View::SetRequestedPositionX(float x)
+void View::SetRequestedPositionX(float x)
 {
   GetImpl(*this).SetRequestedPositionX(x);
-  return *this;
 }
 
 float View::GetRequestedPositionX() const
@@ -261,10 +241,9 @@ float View::GetRequestedPositionX() const
   return GetImpl(*this).GetRequestedPositionX();
 }
 
-View& View::SetRequestedPositionY(float y)
+void View::SetRequestedPositionY(float y)
 {
   GetImpl(*this).SetRequestedPositionY(y);
-  return *this;
 }
 
 float View::GetRequestedPositionY() const
@@ -287,10 +266,9 @@ Vector2 View::GetCurrentPosition() const
   return Vector2(GetImpl(*this).GetCurrentPositionX(), GetImpl(*this).GetCurrentPositionY());
 }
 
-View& View::SetParentOrigin(const Vector3& point)
+void View::SetParentOrigin(const Vector3& point)
 {
   GetImpl(*this).SetParentOrigin(point);
-  return *this;
 }
 
 Vector3 View::GetParentOrigin() const
@@ -298,10 +276,9 @@ Vector3 View::GetParentOrigin() const
   return GetImpl(*this).GetParentOrigin();
 }
 
-View& View::SetPivot(const Vector3& point)
+void View::SetPivot(const Vector3& point)
 {
   GetImpl(*this).SetPivot(point);
-  return *this;
 }
 
 Vector3 View::GetPivot() const
@@ -309,10 +286,9 @@ Vector3 View::GetPivot() const
   return GetImpl(*this).GetPivot();
 }
 
-View& View::SetRequestedWidth(float width)
+void View::SetRequestedWidth(float width)
 {
   GetImpl(*this).SetRequestedWidth(width);
-  return *this;
 }
 
 float View::GetRequestedWidth() const
@@ -320,10 +296,9 @@ float View::GetRequestedWidth() const
   return GetImpl(*this).GetRequestedWidth();
 }
 
-View& View::SetRequestedHeight(float height)
+void View::SetRequestedHeight(float height)
 {
   GetImpl(*this).SetRequestedHeight(height);
-  return *this;
 }
 
 float View::GetRequestedHeight() const
@@ -331,10 +306,9 @@ float View::GetRequestedHeight() const
   return GetImpl(*this).GetRequestedHeight();
 }
 
-View& View::SetMinimumWidth(float width)
+void View::SetMinimumWidth(float width)
 {
   GetImpl(*this).SetMinimumWidth(width);
-  return *this;
 }
 
 float View::GetMinimumWidth() const
@@ -342,10 +316,9 @@ float View::GetMinimumWidth() const
   return GetImpl(*this).GetMinimumWidth();
 }
 
-View& View::SetMinimumHeight(float height)
+void View::SetMinimumHeight(float height)
 {
   GetImpl(*this).SetMinimumHeight(height);
-  return *this;
 }
 
 float View::GetMinimumHeight() const
@@ -353,10 +326,9 @@ float View::GetMinimumHeight() const
   return GetImpl(*this).GetMinimumHeight();
 }
 
-View& View::SetMaximumWidth(float width)
+void View::SetMaximumWidth(float width)
 {
   GetImpl(*this).SetMaximumWidth(width);
-  return *this;
 }
 
 float View::GetMaximumWidth() const
@@ -364,10 +336,9 @@ float View::GetMaximumWidth() const
   return GetImpl(*this).GetMaximumWidth();
 }
 
-View& View::SetMaximumHeight(float height)
+void View::SetMaximumHeight(float height)
 {
   GetImpl(*this).SetMaximumHeight(height);
-  return *this;
 }
 
 float View::GetMaximumHeight() const
@@ -375,14 +346,9 @@ float View::GetMaximumHeight() const
   return GetImpl(*this).GetMaximumHeight();
 }
 
-// =============================================================================
-// Layout Properties API
-// =============================================================================
-
-View& View::SetMargin(const Extents& margin)
+void View::SetMargin(const Extents& margin)
 {
   GetImpl(*this).SetMargin(margin);
-  return *this;
 }
 
 Extents View::GetMargin() const
@@ -390,10 +356,9 @@ Extents View::GetMargin() const
   return GetImpl(*this).GetMargin();
 }
 
-View& View::SetPadding(const Extents& padding)
+void View::SetPadding(const Extents& padding)
 {
   GetImpl(*this).SetPadding(padding);
-  return *this;
 }
 
 Extents View::GetPadding() const
@@ -401,10 +366,9 @@ Extents View::GetPadding() const
   return GetImpl(*this).GetPadding();
 }
 
-View& View::SetLayoutMode(LayoutMode mode)
+void View::SetLayoutMode(LayoutMode mode)
 {
   GetImpl(*this).SetLayoutMode(mode);
-  return *this;
 }
 
 LayoutMode View::GetLayoutMode() const
@@ -417,10 +381,9 @@ bool View::IsFocusable() const
   return GetImpl(*this).IsFocusable();
 }
 
-View& View::SetFocusable(bool focusable)
+void View::SetFocusable(bool focusable)
 {
   GetImpl(*this).SetFocusable(focusable);
-  return *this;
 }
 
 bool View::IsTouchFocusable() const
@@ -428,16 +391,14 @@ bool View::IsTouchFocusable() const
   return GetImpl(*this).IsTouchFocusable();
 }
 
-View& View::SetTouchFocusable(bool touchFocusable)
+void View::SetTouchFocusable(bool touchFocusable)
 {
   GetImpl(*this).SetTouchFocusable(touchFocusable);
-  return *this;
 }
 
-View& View::SetDescendantFocusBlocked(bool blocked)
+void View::SetDescendantFocusBlocked(bool blocked)
 {
   GetImpl(*this).SetDescendantFocusBlocked(blocked);
-  return *this;
 }
 
 bool View::IsDescendantFocusBlocked() const
@@ -450,52 +411,44 @@ bool View::HasAncestorBlockingFocus() const
   return GetImpl(*this).HasAncestorBlockingFocus();
 }
 
-View& View::SetLeftFocusableView(View view)
+void View::SetLeftFocusableView(View view)
 {
   SetProperty(Property::LEFT_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
-  return *this;
 }
 
-View& View::SetRightFocusableView(View view)
+void View::SetRightFocusableView(View view)
 {
   SetProperty(Property::RIGHT_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
-  return *this;
 }
 
-View& View::SetUpFocusableView(View view)
+void View::SetUpFocusableView(View view)
 {
   SetProperty(Property::UP_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
-  return *this;
 }
 
-View& View::SetDownFocusableView(View view)
+void View::SetDownFocusableView(View view)
 {
   SetProperty(Property::DOWN_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
-  return *this;
 }
 
-View& View::SetClockwiseFocusableView(View view)
+void View::SetClockwiseFocusableView(View view)
 {
   SetProperty(Property::CLOCKWISE_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
-  return *this;
 }
 
-View& View::SetCounterClockwiseFocusableView(View view)
+void View::SetCounterClockwiseFocusableView(View view)
 {
   SetProperty(Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
-  return *this;
 }
 
-View& View::SetForwardFocusableView(View view)
+void View::SetForwardFocusableView(View view)
 {
   SetProperty(Property::FORWARD_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
-  return *this;
 }
 
-View& View::SetBackwardFocusableView(View view)
+void View::SetBackwardFocusableView(View view)
 {
   SetProperty(Property::BACKWARD_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
-  return *this;
 }
 
 void View::SetFocusNavigationCallback(FocusNavigationCallback callback)
@@ -508,10 +461,9 @@ UiColor View::GetBackgroundColor()
   return GetImpl(*this).GetBackgroundColor();
 }
 
-View& View::SetBackgroundColor(const UiColor& color)
+void View::SetBackgroundColor(const UiColor& color)
 {
   GetImpl(*this).SetBackgroundColor(color);
-  return *this;
 }
 
 UiColor View::GetColor() const
@@ -519,10 +471,9 @@ UiColor View::GetColor() const
   return GetImpl(*this).GetColor();
 }
 
-View& View::SetColor(const UiColor& color)
+void View::SetColor(const UiColor& color)
 {
   GetImpl(*this).SetColor(color);
-  return *this;
 }
 
 UiColor View::GetCurrentColor() const
@@ -535,10 +486,9 @@ bool View::IsEnabled() const
   return GetImpl(*this).IsEnabled();
 }
 
-View& View::SetEnabled(bool enabled)
+void View::SetEnabled(bool enabled)
 {
   GetImpl(*this).SetEnabled(enabled);
-  return *this;
 }
 
 bool View::IsEffectivelyEnabled() const
@@ -550,10 +500,6 @@ bool View::IsEffectivelyFocused() const
 {
   return GetImpl(*this).IsEffectivelyFocused();
 }
-
-// =============================================================================
-// State API
-// =============================================================================
 
 const ViewState& View::GetState() const
 {
@@ -570,22 +516,19 @@ Vector4 View::GetCornerRadius() const
   return GetImpl(*this).GetCornerRadius();
 }
 
-View& View::SetCornerRadius(float radius)
+void View::SetCornerRadius(float radius)
 {
   GetImpl(*this).SetCornerRadius(Vector4(radius, radius, radius, radius));
-  return *this;
 }
 
-View& View::SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft)
+void View::SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft)
 {
   GetImpl(*this).SetCornerRadius(Vector4(topLeft, topRight, bottomRight, bottomLeft));
-  return *this;
 }
 
-View& View::SetCornerRadius(const Vector4& radius)
+void View::SetCornerRadius(const Vector4& radius)
 {
   GetImpl(*this).SetCornerRadius(radius);
-  return *this;
 }
 
 CornerRadiusPolicy View::GetCornerRadiusPolicy() const
@@ -593,16 +536,14 @@ CornerRadiusPolicy View::GetCornerRadiusPolicy() const
   return GetImpl(*this).GetCornerRadiusPolicy();
 }
 
-View& View::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
+void View::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
 {
   GetImpl(*this).SetCornerRadiusPolicy(policy);
-  return *this;
 }
 
-View& View::SetCornerRadiusPolicyRelative()
+void View::SetCornerRadiusPolicyRelative()
 {
   GetImpl(*this).SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
-  return *this;
 }
 
 bool View::IsCornerRadiusPolicyRelative() const
@@ -615,22 +556,19 @@ Vector4 View::GetCornerSquareness() const
   return GetImpl(*this).GetCornerSquareness();
 }
 
-View& View::SetCornerSquareness(float squareness)
+void View::SetCornerSquareness(float squareness)
 {
   GetImpl(*this).SetCornerSquareness(Vector4(squareness, squareness, squareness, squareness));
-  return *this;
 }
 
-View& View::SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft)
+void View::SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft)
 {
   GetImpl(*this).SetCornerSquareness(Vector4(topLeft, topRight, bottomRight, bottomLeft));
-  return *this;
 }
 
-View& View::SetCornerSquareness(const Vector4& squareness)
+void View::SetCornerSquareness(const Vector4& squareness)
 {
   GetImpl(*this).SetCornerSquareness(squareness);
-  return *this;
 }
 
 float View::GetBorderlineWidth() const
@@ -638,10 +576,9 @@ float View::GetBorderlineWidth() const
   return GetImpl(*this).GetBorderlineWidth();
 }
 
-View& View::SetBorderlineWidth(float width)
+void View::SetBorderlineWidth(float width)
 {
   GetImpl(*this).SetBorderlineWidth(width);
-  return *this;
 }
 
 UiColor View::GetBorderlineColor()
@@ -649,10 +586,9 @@ UiColor View::GetBorderlineColor()
   return GetImpl(*this).GetBorderlineColor();
 }
 
-View& View::SetBorderlineColor(const UiColor& color)
+void View::SetBorderlineColor(const UiColor& color)
 {
   GetImpl(*this).SetBorderlineColor(color);
-  return *this;
 }
 
 float View::GetBorderlineOffset() const
@@ -660,10 +596,9 @@ float View::GetBorderlineOffset() const
   return GetImpl(*this).GetBorderlineOffset();
 }
 
-View& View::SetBorderlineOffset(float offset)
+void View::SetBorderlineOffset(float offset)
 {
   GetImpl(*this).SetBorderlineOffset(offset);
-  return *this;
 }
 
 Dali::String View::GetName() const
@@ -671,13 +606,12 @@ Dali::String View::GetName() const
   return GetImpl(*this).GetName();
 }
 
-View& View::SetName(const Dali::String& name)
+void View::SetName(const Dali::String& name)
 {
   GetImpl(*this).SetName(name);
-  return *this;
 }
 
-InteractiveTrait View::EnsureInteractiveTrait()
+InteractiveTrait View::AsInteractive()
 {
   return GetImpl(*this).EnsureInteractiveTrait();
 }
@@ -687,7 +621,7 @@ bool View::IsInteractive() const
   return GetImpl(*this).IsInteractive();
 }
 
-SelectableTrait View::EnsureSelectableTrait()
+SelectableTrait View::AsSelectable()
 {
   return GetImpl(*this).EnsureSelectableTrait();
 }
@@ -702,15 +636,10 @@ BaseHandle View::GetLayoutParamsInternal(LayoutParamsType type) const
   return GetImpl(*this).GetLayoutParams(type);
 }
 
-View& View::SetLayoutParams(LayoutParams params)
+void View::SetLayoutParams(LayoutParams params)
 {
   GetImpl(*this).SetLayoutParams(params);
-  return *this;
 }
-
-// =============================================================================
-// Child Management API
-// =============================================================================
 
 void View::Insert(uint32_t index, View child)
 {
@@ -772,10 +701,6 @@ void View::LowerBelow(View target, LayoutOrderPolicy policy)
   GetImpl(*this).LowerBelow(target, policy);
 }
 
-// =============================================================================
-// VisualBase API
-// =============================================================================
-
 bool View::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
 {
   return GetImpl(*this).AddVisual(visualBase, containerRangeType);
@@ -795,8 +720,6 @@ Dali::Ui::VisualBase View::GetVisualAt(Dali::Ui::Visual::ContainerRangeType cont
 {
   return GetImpl(*this).GetVisualAt(containerRangeType, siblingOrder);
 }
-
-// From control.cpp
 
 void View::ClearBackground()
 {

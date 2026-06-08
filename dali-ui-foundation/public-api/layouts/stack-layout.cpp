@@ -14,12 +14,8 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/stack-layout-impl.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
 namespace Dali
 {
@@ -62,11 +58,7 @@ StackLayout& StackLayout::operator=(StackLayout&& rhs) noexcept
 StackLayout StackLayout::New(StackOrientation orientation)
 {
   Integration::StackLayoutImplPtr impl = Integration::StackLayoutImpl::New(orientation);
-
-  // Pass ownership to handle
-  StackLayout handle(*impl);
-
-  // Second-phase initialization
+  StackLayout                     handle(*impl);
   impl->Initialize();
 
   return handle;
@@ -88,10 +80,9 @@ StackLayout::StackLayout(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::StackLayoutImpl>(internal);
 }
 
-StackLayout& StackLayout::SetOrientation(StackOrientation orientation)
+void StackLayout::SetOrientation(StackOrientation orientation)
 {
   GetImpl(*this).SetOrientation(orientation);
-  return *this;
 }
 
 StackOrientation StackLayout::GetOrientation() const
@@ -99,10 +90,9 @@ StackOrientation StackLayout::GetOrientation() const
   return GetImpl(*this).GetOrientation();
 }
 
-StackLayout& StackLayout::SetSpacing(float spacing)
+void StackLayout::SetSpacing(float spacing)
 {
   GetImpl(*this).SetSpacing(spacing);
-  return *this;
 }
 
 float StackLayout::GetSpacing() const

@@ -14,12 +14,8 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-foundation/public-api/layouts/grid-layout.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/grid-layout-impl.h>
+#include <dali-ui-foundation/public-api/layouts/grid-layout.h>
 
 namespace Dali
 {
@@ -62,11 +58,7 @@ GridLayout& GridLayout::operator=(GridLayout&& rhs) noexcept
 GridLayout GridLayout::New()
 {
   Integration::GridLayoutImplPtr impl = Integration::GridLayoutImpl::New();
-
-  // Pass ownership to handle
-  GridLayout handle(*impl);
-
-  // Second-phase initialization
+  GridLayout                     handle(*impl);
   impl->Initialize();
 
   return handle;
@@ -98,16 +90,14 @@ void GridLayout::AddColumnDefinition(GridLength width)
   GetImpl(*this).AddColumnDefinition(width);
 }
 
-GridLayout& GridLayout::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
+void GridLayout::SetRowDefinitions(const Dali::Vector<GridLength>& rows)
 {
   GetImpl(*this).SetRowDefinitions(rows);
-  return *this;
 }
 
-GridLayout& GridLayout::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
+void GridLayout::SetColumnDefinitions(const Dali::Vector<GridLength>& columns)
 {
   GetImpl(*this).SetColumnDefinitions(columns);
-  return *this;
 }
 
 Dali::Vector<GridLength> GridLayout::GetRowDefinitions() const
@@ -140,10 +130,9 @@ void GridLayout::ClearColumnDefinitions()
   GetImpl(*this).ClearColumnDefinitions();
 }
 
-GridLayout& GridLayout::SetRowSpacing(float spacing)
+void GridLayout::SetRowSpacing(float spacing)
 {
   GetImpl(*this).SetRowSpacing(spacing);
-  return *this;
 }
 
 float GridLayout::GetRowSpacing() const
@@ -151,10 +140,9 @@ float GridLayout::GetRowSpacing() const
   return GetImpl(*this).GetRowSpacing();
 }
 
-GridLayout& GridLayout::SetColumnSpacing(float spacing)
+void GridLayout::SetColumnSpacing(float spacing)
 {
   GetImpl(*this).SetColumnSpacing(spacing);
-  return *this;
 }
 
 float GridLayout::GetColumnSpacing() const

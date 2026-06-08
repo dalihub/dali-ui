@@ -327,15 +327,14 @@ int UtcDaliChartViewSectionP(void)
   END_TEST;
 }
 
-int UtcDaliChartViewMethodChainingP(void)
+int UtcDaliChartViewSettersP(void)
 {
   UiTestApplication application;
   ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
-  ChartView& ref = chartView.SetTitle(Dali::String("Test"))
-                             .SetAnimationDuration(300.0f)
-                             .SetHitThreshold(15.0f);
-  DALI_TEST_CHECK(&ref == &chartView);
+  chartView.SetTitle(Dali::String("Test"));
+  chartView.SetAnimationDuration(300.0f);
+  chartView.SetHitThreshold(15.0f);
   DALI_TEST_EQUALS(chartView.GetTitle(), Dali::String("Test"), TEST_LOCATION);
   END_TEST;
 }

@@ -46,8 +46,6 @@ LottieAnimationView LottieAnimationView::New(const Dali::String& url)
 {
   Integration::LottieAnimationViewImplPtr impl = Integration::LottieAnimationViewImpl::New();
   LottieAnimationView                     view(*impl);
-
-  // Second-phase initialization
   impl->Initialize();
   if(!url.Empty())
   {
@@ -61,10 +59,9 @@ LottieAnimationView LottieAnimationView::DownCast(BaseHandle handle)
   return Ui::View::DownCast<LottieAnimationView, Ui::Integration::LottieAnimationViewImpl>(handle);
 }
 
-LottieAnimationView& LottieAnimationView::SetResourceUrl(const Dali::String& url)
+void LottieAnimationView::SetResourceUrl(const Dali::String& url)
 {
   Ui::GetImpl(*this).SetResourceUrl(url);
-  return *this;
 }
 
 Dali::String LottieAnimationView::GetResourceUrl() const
@@ -72,28 +69,24 @@ Dali::String LottieAnimationView::GetResourceUrl() const
   return Ui::GetImpl(*this).GetResourceUrl();
 }
 
-LottieAnimationView& LottieAnimationView::Play()
+void LottieAnimationView::Play()
 {
   Ui::GetImpl(*this).Play();
-  return *this;
 }
 
-LottieAnimationView& LottieAnimationView::Pause()
+void LottieAnimationView::Pause()
 {
   Ui::GetImpl(*this).Pause();
-  return *this;
 }
 
-LottieAnimationView& LottieAnimationView::Stop()
+void LottieAnimationView::Stop()
 {
   Ui::GetImpl(*this).Stop();
-  return *this;
 }
 
-LottieAnimationView& LottieAnimationView::SetLoopCount(int count)
+void LottieAnimationView::SetLoopCount(int count)
 {
   Ui::GetImpl(*this).SetLoopCount(count);
-  return *this;
 }
 
 int LottieAnimationView::GetLoopCount() const
@@ -101,28 +94,24 @@ int LottieAnimationView::GetLoopCount() const
   return Ui::GetImpl(*this).GetLoopCount();
 }
 
-LottieAnimationView& LottieAnimationView::JumpToFrame(int frame)
+void LottieAnimationView::JumpToFrame(int frame)
 {
   Ui::GetImpl(*this).JumpToFrame(frame);
-  return *this;
 }
 
-LottieAnimationView& LottieAnimationView::SetMinMaxFrame(int minFrame, int maxFrame)
+void LottieAnimationView::SetMinMaxFrame(int minFrame, int maxFrame)
 {
   Ui::GetImpl(*this).SetMinMaxFrame(minFrame, maxFrame);
-  return *this;
 }
 
-LottieAnimationView& LottieAnimationView::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
+void LottieAnimationView::SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker)
 {
   Ui::GetImpl(*this).SetMinMaxFrameByMarker(minMarker, maxMarker);
-  return *this;
 }
 
-LottieAnimationView& LottieAnimationView::SetStopBehavior(AnimatedImage::StopBehavior behavior)
+void LottieAnimationView::SetStopBehavior(AnimatedImage::StopBehavior behavior)
 {
   Ui::GetImpl(*this).SetStopBehavior(behavior);
-  return *this;
 }
 
 AnimatedImage::StopBehavior LottieAnimationView::GetStopBehavior() const
@@ -130,10 +119,9 @@ AnimatedImage::StopBehavior LottieAnimationView::GetStopBehavior() const
   return Ui::GetImpl(*this).GetStopBehavior();
 }
 
-LottieAnimationView& LottieAnimationView::SetLoopingMode(LottieAnimation::LoopingMode mode)
+void LottieAnimationView::SetLoopingMode(LottieAnimation::LoopingMode mode)
 {
   Ui::GetImpl(*this).SetLoopingMode(mode);
-  return *this;
 }
 
 LottieAnimation::LoopingMode LottieAnimationView::GetLoopingMode() const
@@ -141,10 +129,9 @@ LottieAnimation::LoopingMode LottieAnimationView::GetLoopingMode() const
   return Ui::GetImpl(*this).GetLoopingMode();
 }
 
-LottieAnimationView& LottieAnimationView::SetFrameSpeedFactor(float factor)
+void LottieAnimationView::SetFrameSpeedFactor(float factor)
 {
   Ui::GetImpl(*this).SetFrameSpeedFactor(factor);
-  return *this;
 }
 
 float LottieAnimationView::GetFrameSpeedFactor() const
@@ -167,10 +154,9 @@ int LottieAnimationView::GetTotalFrame() const
   return Ui::GetImpl(*this).GetTotalFrame();
 }
 
-LottieAnimationView& LottieAnimationView::SetRedrawOnScaleDown(bool redraw)
+void LottieAnimationView::SetRedrawOnScaleDown(bool redraw)
 {
   Ui::GetImpl(*this).SetRedrawOnScaleDown(redraw);
-  return *this;
 }
 
 bool LottieAnimationView::IsRedrawOnScaleDown() const
@@ -178,10 +164,9 @@ bool LottieAnimationView::IsRedrawOnScaleDown() const
   return Ui::GetImpl(*this).IsRedrawOnScaleDown();
 }
 
-LottieAnimationView& LottieAnimationView::SetRedrawOnScaleUp(bool redraw)
+void LottieAnimationView::SetRedrawOnScaleUp(bool redraw)
 {
   Ui::GetImpl(*this).SetRedrawOnScaleUp(redraw);
-  return *this;
 }
 
 bool LottieAnimationView::IsRedrawOnScaleUp() const
@@ -189,10 +174,9 @@ bool LottieAnimationView::IsRedrawOnScaleUp() const
   return Ui::GetImpl(*this).IsRedrawOnScaleUp();
 }
 
-LottieAnimationView& LottieAnimationView::SetEnableFrameCache(bool enable)
+void LottieAnimationView::SetEnableFrameCache(bool enable)
 {
   Ui::GetImpl(*this).SetEnableFrameCache(enable);
-  return *this;
 }
 
 bool LottieAnimationView::IsFrameCacheEnabled() const
@@ -200,10 +184,9 @@ bool LottieAnimationView::IsFrameCacheEnabled() const
   return Ui::GetImpl(*this).IsFrameCacheEnabled();
 }
 
-LottieAnimationView& LottieAnimationView::SetNotifyAfterRasterization(bool notify)
+void LottieAnimationView::SetNotifyAfterRasterization(bool notify)
 {
   Ui::GetImpl(*this).SetNotifyAfterRasterization(notify);
-  return *this;
 }
 
 bool LottieAnimationView::IsNotifyAfterRasterizationEnabled() const
@@ -211,10 +194,9 @@ bool LottieAnimationView::IsNotifyAfterRasterizationEnabled() const
   return Ui::GetImpl(*this).IsNotifyAfterRasterizationEnabled();
 }
 
-LottieAnimationView& LottieAnimationView::SetRenderScale(float scale)
+void LottieAnimationView::SetRenderScale(float scale)
 {
   Ui::GetImpl(*this).SetRenderScale(scale);
-  return *this;
 }
 
 float LottieAnimationView::GetRenderScale() const
@@ -222,10 +204,9 @@ float LottieAnimationView::GetRenderScale() const
   return Ui::GetImpl(*this).GetRenderScale();
 }
 
-LottieAnimationView& LottieAnimationView::SetEnableAspectFit(bool enableAspectFit)
+void LottieAnimationView::SetEnableAspectFit(bool enableAspectFit)
 {
   Ui::GetImpl(*this).SetEnableAspectFit(enableAspectFit);
-  return *this;
 }
 bool LottieAnimationView::IsAspectFitEnabled() const
 {
@@ -242,16 +223,14 @@ Dali::Property::Map LottieAnimationView::GetMarkerInfo()
   return Ui::GetImpl(*this).GetMarkerInfo();
 }
 
-LottieAnimationView& LottieAnimationView::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
+void LottieAnimationView::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
 {
   Ui::GetImpl(*this).SetDynamicProperty(info);
-  return *this;
 }
 
-LottieAnimationView& LottieAnimationView::SetDesiredWidth(int width)
+void LottieAnimationView::SetDesiredWidth(int width)
 {
   Ui::GetImpl(*this).SetDesiredWidth(width);
-  return *this;
 }
 
 int LottieAnimationView::GetDesiredWidth() const
@@ -259,10 +238,9 @@ int LottieAnimationView::GetDesiredWidth() const
   return Ui::GetImpl(*this).GetDesiredWidth();
 }
 
-LottieAnimationView& LottieAnimationView::SetDesiredHeight(int height)
+void LottieAnimationView::SetDesiredHeight(int height)
 {
   Ui::GetImpl(*this).SetDesiredHeight(height);
-  return *this;
 }
 
 int LottieAnimationView::GetDesiredHeight() const
@@ -270,10 +248,9 @@ int LottieAnimationView::GetDesiredHeight() const
   return Ui::GetImpl(*this).GetDesiredHeight();
 }
 
-LottieAnimationView& LottieAnimationView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
+void LottieAnimationView::SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy)
 {
   Ui::GetImpl(*this).SetReleasePolicy(releasePolicy);
-  return *this;
 }
 
 Ui::Image::ReleasePolicy LottieAnimationView::GetReleasePolicy() const
@@ -281,10 +258,9 @@ Ui::Image::ReleasePolicy LottieAnimationView::GetReleasePolicy() const
   return Ui::GetImpl(*this).GetReleasePolicy();
 }
 
-LottieAnimationView& LottieAnimationView::SetSynchronousLoading(bool synchronous)
+void LottieAnimationView::SetSynchronousLoading(bool synchronous)
 {
   Ui::GetImpl(*this).SetSynchronousLoading(synchronous);
-  return *this;
 }
 
 bool LottieAnimationView::IsSynchronousLoading() const
@@ -292,10 +268,9 @@ bool LottieAnimationView::IsSynchronousLoading() const
   return Ui::GetImpl(*this).IsSynchronousLoading();
 }
 
-LottieAnimationView& LottieAnimationView::SetImageColor(const UiColor& color)
+void LottieAnimationView::SetImageColor(const UiColor& color)
 {
   Ui::GetImpl(*this).SetImageColor(color);
-  return *this;
 }
 
 UiColor LottieAnimationView::GetImageColor() const
@@ -303,10 +278,9 @@ UiColor LottieAnimationView::GetImageColor() const
   return Ui::GetImpl(*this).GetImageColor();
 }
 
-LottieAnimationView& LottieAnimationView::SetPlaceholderUrl(const Dali::String& url)
+void LottieAnimationView::SetPlaceholderUrl(const Dali::String& url)
 {
   Ui::GetImpl(*this).SetPlaceholderUrl(url);
-  return *this;
 }
 
 Dali::String LottieAnimationView::GetPlaceholderUrl() const
@@ -314,10 +288,9 @@ Dali::String LottieAnimationView::GetPlaceholderUrl() const
   return Ui::GetImpl(*this).GetPlaceholderUrl();
 }
 
-LottieAnimationView& LottieAnimationView::SetPixelArea(const Dali::Vector4& pixelArea)
+void LottieAnimationView::SetPixelArea(const Dali::Vector4& pixelArea)
 {
   Ui::GetImpl(*this).SetPixelArea(pixelArea);
-  return *this;
 }
 
 Dali::Vector4 LottieAnimationView::GetPixelArea() const

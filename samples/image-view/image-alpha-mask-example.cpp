@@ -76,16 +76,11 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x1A1A1A));
 
-    window.Add(StackLayout::New(StackOrientation::VERTICAL)
-                 .SetRequestedWidth(MATCH_PARENT)
-                 .SetRequestedHeight(MATCH_PARENT)
-                 .Children({
-                   CreateCompareRow(),
-                   CreateInfoLabel(),
-                   CreateMaskButtonRow(),
-                   CreateImageTypeButton(),
-                   CreateModeToggle(),
-                 }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.AddChildren({CreateCompareRow(), CreateInfoLabel(), CreateMaskButtonRow(), CreateImageTypeButton(), CreateModeToggle()});
+    window.Add(root);
 
     window.KeyEventSignal().Connect(this, &ImageAlphaMaskController::OnKeyEvent);
   }
@@ -94,87 +89,82 @@ private:
 
   View CreateCompareRow()
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetSpacing(8.0f)
-      .SetPadding(Extents(8, 8, 8, 8))
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .Children({
-        CreatePanel("CROP: OFF", false, PANEL_CROP_OFF),
-        CreatePanel("CROP: ON",  true,  PANEL_CROP_ON),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(WRAP_CONTENT);
+    row.SetSpacing(8.0f);
+    row.SetPadding(Extents(8, 8, 8, 8));
+    row.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    row.AddChildren({CreatePanel("CROP: OFF", false, PANEL_CROP_OFF), CreatePanel("CROP: ON", true, PANEL_CROP_ON)});
+    return row;
   }
 
   View CreateSpacer()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    StackLayout spacer = StackLayout::New(StackOrientation::VERTICAL);
+    spacer.SetRequestedWidth(MATCH_PARENT);
+    spacer.SetRequestedHeight(WRAP_CONTENT);
+    spacer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    return spacer;
   }
 
   View CreatePanel(const char* title, bool cropToMask, int panelIdx)
   {
-    ImageView::New(STATIC_URL)
-      .SetRequestedWidth(cropToMask ? WRAP_CONTENT : MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-      .SetAlphaMaskUrl(MASKS[mMaskIndex].url)
-      .SetCropToMask(cropToMask)
-      .SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING)
-      .SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER))
-      .As(mStaticImages[panelIdx]);
+    mStaticImages[panelIdx] = ImageView::New(STATIC_URL);
+    mStaticImages[panelIdx].SetRequestedWidth(cropToMask ? WRAP_CONTENT : MATCH_PARENT);
+    mStaticImages[panelIdx].SetRequestedHeight(WRAP_CONTENT);
+    mStaticImages[panelIdx].SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+    mStaticImages[panelIdx].SetAlphaMaskUrl(MASKS[mMaskIndex].url);
+    mStaticImages[panelIdx].SetCropToMask(cropToMask);
+    mStaticImages[panelIdx].SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
+    mStaticImages[panelIdx].SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
 
-    AnimatedImageView::New(ANIMATED_URL)
-      .SetRequestedWidth(cropToMask ? WRAP_CONTENT : MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetAlphaMaskUrl(MASKS[mMaskIndex].url)
-      .SetCropToMask(cropToMask)
-      .SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING)
-      .SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER))
-      .SetVisibility(false)
-      .As(mAnimatedImages[panelIdx]);
+    mAnimatedImages[panelIdx] = AnimatedImageView::New(ANIMATED_URL);
+    mAnimatedImages[panelIdx].SetRequestedWidth(cropToMask ? WRAP_CONTENT : MATCH_PARENT);
+    mAnimatedImages[panelIdx].SetRequestedHeight(WRAP_CONTENT);
+    mAnimatedImages[panelIdx].SetAlphaMaskUrl(MASKS[mMaskIndex].url);
+    mAnimatedImages[panelIdx].SetCropToMask(cropToMask);
+    mAnimatedImages[panelIdx].SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
+    mAnimatedImages[panelIdx].SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
+    mAnimatedImages[panelIdx].SetVisibility(false);
 
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(WRAP_CONTENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .SetBackgroundColor(UiColor(0x2A2A2A))
-      .Children({
-        Label::New(title)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(36.0f)
-          .SetFontSize(14.0f)
-          .SetTextColor(UiColor(0xFFFFFF))
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-        CreateSpacer(),
-        mStaticImages[panelIdx],
-        mAnimatedImages[panelIdx],
-        CreateSpacer(),
-      });
+    StackLayout panel = StackLayout::New(StackOrientation::VERTICAL);
+    panel.SetRequestedWidth(WRAP_CONTENT);
+    panel.SetRequestedHeight(MATCH_PARENT);
+    panel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    panel.SetBackgroundColor(UiColor(0x2A2A2A));
+
+    Label titleLabel = Label::New(title);
+    titleLabel.SetRequestedWidth(MATCH_PARENT);
+    titleLabel.SetRequestedHeight(36.0f);
+    titleLabel.SetFontSize(14.0f);
+    titleLabel.SetTextColor(UiColor(0xFFFFFF));
+    titleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    panel.AddChildren({titleLabel, CreateSpacer(), mStaticImages[panelIdx], mAnimatedImages[panelIdx], CreateSpacer()});
+    return panel;
   }
 
   View CreateInfoLabel()
   {
-    return Label::New(MakeInfoText())
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(36.0f)
-      .SetFontSize(13.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mInfoLabel);
+    mInfoLabel = Label::New(MakeInfoText());
+    mInfoLabel.SetRequestedWidth(MATCH_PARENT);
+    mInfoLabel.SetRequestedHeight(36.0f);
+    mInfoLabel.SetFontSize(13.0f);
+    mInfoLabel.SetTextColor(UiColor(0xCCCCCC));
+    mInfoLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mInfoLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mInfoLabel;
   }
 
   View CreateMaskButtonRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(60.0f)
-                        .SetPadding(Extents(4, 4, 4, 4));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(60.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
     for(int i = 0; i < MASK_COUNT; ++i)
     {
       row.Add(CreateMaskButton(i));
@@ -184,67 +174,62 @@ private:
 
   View CreateMaskButton(int index)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(index == mMaskIndex ? UiColor(0x4A90E2) : UiColor(0x333333))
-                           .Children({
-                             Label::New(MASKS[index].name)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(14.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(index == mMaskIndex ? UiColor(0x4A90E2) : UiColor(0x333333));
+    Label buttonLabel = Label::New(MASKS[index].name);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(14.0f);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnMaskButtonClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnMaskButtonClicked);
     mMaskButtons[index] = button;
     return button;
   }
 
   View CreateImageTypeButton()
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(MATCH_PARENT)
-                           .SetRequestedHeight(60.0f)
-                           .SetPadding(Extents(4, 4, 4, 4))
-                           .SetBackgroundColor(UiColor(0x2E7D32))
-                           .Children({
-                             Label::New(MakeImageTypeText())
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(14.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(mImageTypeLabel),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(MATCH_PARENT);
+    button.SetRequestedHeight(60.0f);
+    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetBackgroundColor(UiColor(0x2E7D32));
+    mImageTypeLabel = Label::New(MakeImageTypeText());
+    mImageTypeLabel.SetRequestedWidth(MATCH_PARENT);
+    mImageTypeLabel.SetRequestedHeight(MATCH_PARENT);
+    mImageTypeLabel.SetFontSize(14.0f);
+    mImageTypeLabel.SetTextColor(UiColor(0xFFFFFF));
+    mImageTypeLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mImageTypeLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(mImageTypeLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnImageTypeToggleClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnImageTypeToggleClicked);
     return button;
   }
 
   View CreateModeToggle()
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(MATCH_PARENT)
-                           .SetRequestedHeight(60.0f)
-                           .SetPadding(Extents(4, 4, 4, 4))
-                           .SetBackgroundColor(UiColor(0x444444))
-                           .Children({
-                             Label::New("MODE: ON_RENDERING")
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(14.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(mModeLabel),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(MATCH_PARENT);
+    button.SetRequestedHeight(60.0f);
+    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetBackgroundColor(UiColor(0x444444));
+    mModeLabel = Label::New("MODE: ON_RENDERING");
+    mModeLabel.SetRequestedWidth(MATCH_PARENT);
+    mModeLabel.SetRequestedHeight(MATCH_PARENT);
+    mModeLabel.SetFontSize(14.0f);
+    mModeLabel.SetTextColor(UiColor(0xFFFFFF));
+    mModeLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mModeLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(mModeLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnModeToggleClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageAlphaMaskController::OnModeToggleClicked);
     return button;
   }
 

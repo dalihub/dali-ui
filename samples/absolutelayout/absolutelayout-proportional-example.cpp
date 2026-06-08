@@ -48,9 +48,9 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    AbsoluteLayout root = AbsoluteLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT);
+    AbsoluteLayout root = AbsoluteLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
 
     // Blue box: SIZE_PROPORTIONAL fills the entire root.
     View blueBox = View::New();

@@ -16,26 +16,19 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/public-api/common/dali-vector.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali/public-api/common/dali-vector.h>
 
 namespace Dali
 {
 namespace Ui
 {
-
-// Forward declarations
 namespace Integration
 {
 class GridLayoutImpl;
 }
 
-#include "grid-layout.autogen.h"
 /**
  * @brief GridLayout arranges its children in a grid of rows and columns.
  *
@@ -101,8 +94,6 @@ public:
   static GridLayout DownCast(BaseHandle handle);
 
 public: // Row/Column Definition API
-  // @CHAIN_START(GridLayout, Layout)
-
   /**
    * @brief Adds a row definition.
    *
@@ -122,14 +113,14 @@ public: // Row/Column Definition API
    *
    * @param[in] rows Vector of row height specifications
    */
-  GridLayout& SetRowDefinitions(const Dali::Vector<GridLength>& rows);
+  void SetRowDefinitions(const Dali::Vector<GridLength>& rows);
 
   /**
    * @brief Sets all column definitions at once.
    *
    * @param[in] columns Vector of column width specifications
    */
-  GridLayout& SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
+  void SetColumnDefinitions(const Dali::Vector<GridLength>& columns);
 
   /**
    * @brief Gets the row definitions.
@@ -175,7 +166,7 @@ public: // Spacing API
    *
    * @param[in] spacing The spacing between rows
    */
-  GridLayout& SetRowSpacing(float spacing);
+  void SetRowSpacing(float spacing);
 
   /**
    * @brief Gets the row spacing.
@@ -189,7 +180,7 @@ public: // Spacing API
    *
    * @param[in] spacing The spacing between columns
    */
-  GridLayout& SetColumnSpacing(float spacing);
+  void SetColumnSpacing(float spacing);
 
   /**
    * @brief Gets the column spacing.
@@ -197,8 +188,6 @@ public: // Spacing API
    * @return The column spacing
    */
   float GetColumnSpacing() const;
-
-  // @CHAIN_END
 
 public: // Not intended for application developers
   /// @cond internal
@@ -218,7 +207,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_LAYOUT_METHODS(GridLayout)
 };
 
 } // namespace Ui

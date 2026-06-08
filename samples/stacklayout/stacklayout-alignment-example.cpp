@@ -45,11 +45,11 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: vertical stack showing cross-axis (horizontal) alignment
-    StackLayout root = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetSpacing(50.0f)
-      .SetPadding(Extents(50, 50, 50, 50));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetSpacing(50.0f);
+    root.SetPadding(Extents(50, 50, 50, 50));
 
     // Row 1: Start (left-aligned narrow box)
     View rowStart = View::New();

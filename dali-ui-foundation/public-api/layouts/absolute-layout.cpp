@@ -14,12 +14,8 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/absolute-layout-impl.h>
+#include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 
 namespace Dali
 {
@@ -62,11 +58,7 @@ AbsoluteLayout& AbsoluteLayout::operator=(AbsoluteLayout&& rhs) noexcept
 AbsoluteLayout AbsoluteLayout::New()
 {
   Integration::AbsoluteLayoutImplPtr impl = Integration::AbsoluteLayoutImpl::New();
-
-  // Pass ownership to handle
-  AbsoluteLayout handle(*impl);
-
-  // Second-phase initialization
+  AbsoluteLayout                     handle(*impl);
   impl->Initialize();
 
   return handle;

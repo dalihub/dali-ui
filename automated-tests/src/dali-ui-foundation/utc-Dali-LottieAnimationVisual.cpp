@@ -242,17 +242,17 @@ int UtcDaliLottieAnimationVisualPlayState(void)
 
   LottieAnimationVisual visual;
 
-  View view = View::New()
-    .SetRequestedWidth(100.0f)
-    .SetRequestedHeight(100.0f)
-    .Visuals(
-      Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
-      {
-        LottieAnimationVisual::New()
-          .SetResourceUrl("anim.json")
-          .Play()
-          .As(visual),
-      });
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.AddVisuals(
+    Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
+    {
+      LottieAnimationVisual::New()
+        .SetResourceUrl("anim.json")
+        .Play()
+        .As(visual),
+    });
   
   application.GetScene().Add(view);
 

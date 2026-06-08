@@ -251,14 +251,13 @@ Even without `InteractiveView`, you can give any `View` the same interaction cap
 
 ```cpp
 View view = View::New();
-view.AsInteractive([&](InteractiveTrait trait) {
-  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
-    // Clicked (via touch tap or execution key Enter)
-  });
+InteractiveTrait interactive = view.AsInteractive();
+interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+  // Clicked (via touch tap or execution key Enter)
 });
 ```
 
-If no configuration is needed, simply call `view.AsInteractive()` without a callback.
+If no configuration is needed, simply call `view.AsInteractive()` and ignore the returned trait.
 
 <br/>
 

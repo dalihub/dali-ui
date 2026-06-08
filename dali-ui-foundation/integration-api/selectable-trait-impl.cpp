@@ -162,7 +162,7 @@ void SelectableTraitImpl::EnsureClickableAndConnect()
   }
 
   // Get or create InteractiveTrait on the owner view
-  InteractiveTrait clickable = owner.EnsureInteractiveTrait();
+  InteractiveTrait clickable = owner.AsInteractive();
   if(clickable)
   {
     clickable.ClickedSignal().Connect(this, &SelectableTraitImpl::OnClickedForToggle);

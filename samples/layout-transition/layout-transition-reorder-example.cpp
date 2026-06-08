@@ -121,23 +121,23 @@ public:
       AppendChild();
     }
 
-    FlexLayout buttonRow = FlexLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(60.0f)
-      .SetDirection(FlexDirection::ROW)
-      .SetAlignItems(FlexAlign::STRETCH);
+    FlexLayout buttonRow = FlexLayout::New();
+    buttonRow.SetRequestedWidth(MATCH_PARENT);
+    buttonRow.SetRequestedHeight(60.0f);
+    buttonRow.SetDirection(FlexDirection::ROW);
+    buttonRow.SetAlignItems(FlexAlign::STRETCH);
     buttonRow.Add(mEnterButton);
     buttonRow.Add(mExitButton);
     buttonRow.Add(mEditButton);
 
     // Vertical ScrollView wraps mStack so the list can grow taller than
     // the available area.
-    mScrollView = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetOverScrollMode(OverScrollMode::ContentScrolls)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetContent(mStack);
+    mScrollView = ScrollView::New();
+    mScrollView.SetScrollDirection(ScrollDirection::Vertical);
+    mScrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+    mScrollView.SetRequestedWidth(MATCH_PARENT);
+    mScrollView.SetRequestedHeight(MATCH_PARENT);
+    mScrollView.SetContent(mStack);
 
     mRoot = StackLayout::New();
     mRoot.SetRequestedWidth(MATCH_PARENT);

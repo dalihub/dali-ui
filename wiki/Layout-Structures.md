@@ -34,9 +34,8 @@
 8. [Layout Processing](#8-layout-processing)
    - [Two-Phase Layout](#81-two-phase-layout)
    - [Invalidation Flow](#82-invalidation-flow)
-9. [Method Chaining](#9-method-chaining)
-10. [Default Values](#10-default-values)
-11. [Important Notes](#11-important-notes)
+9. [Default Values](#9-default-values)
+10. [Important Notes](#10-important-notes)
 
 ---
 
@@ -608,42 +607,7 @@ LayoutController controller = LayoutController::Get(window);
 
 ---
 
-## 9. Method Chaining
-
-All layout setters support fluent configuration via chaining methods:
-
-```cpp
-StackLayout stack = StackLayout::New()
-    .Orientation(StackOrientation::VERTICAL)
-    .Spacing(10.0f)
-    .RequestedWidth(MATCH_PARENT)
-    .RequestedHeight(MATCH_PARENT)
-    .ViewPadding(Extents(20, 20, 20, 20));
-
-FlexLayout flex = FlexLayout::New()
-    .Direction(FlexDirection::ROW)
-    .Wrap(FlexWrap::WRAP)
-    .JustifyContent(FlexJustify::SPACE_BETWEEN)
-    .AlignItems(FlexAlign::CENTER);
-
-GridLayout grid = GridLayout::New()
-    .Rows({GridLength::Absolute(60.0f), GridLength::Star(1.0f)})
-    .Columns({GridLength::Star(1.0f), GridLength::Star(2.0f)})
-    .RowSpacing(10.0f)
-    .ColumnSpacing(10.0f);
-```
-
-LayoutParams setters also return `*this` for chaining:
-
-```cpp
-view.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-view.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(2).SetColumnSpan(3));
-view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0f));
-```
-
----
-
-## 10. Default Values
+## 9. Default Values
 
 ### StackLayout
 
@@ -698,7 +662,7 @@ view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0
 
 ---
 
-## 11. Important Notes
+## 10. Important Notes
 
 - **Layout inherits View.** All View methods (`SetRequestedWidth`, `SetViewMargin`, `SetViewPadding`, `Add`, `Remove`, etc.) are available on every layout type.
 

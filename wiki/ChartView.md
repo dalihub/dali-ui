@@ -24,11 +24,10 @@
 12. [Signals](#12-signals)
 13. [Animation](#13-animation)
 14. [Gauge](#14-gauge)
-15. [Method Chaining](#15-method-chaining)
-16. [Layout Integration](#16-layout-integration)
-17. [CMake Integration](#17-cmake-integration)
-18. [Default Values](#18-default-values)
-19. [Important Notes](#19-important-notes)
+15. [Layout Integration](#15-layout-integration)
+16. [CMake Integration](#16-cmake-integration)
+17. [Default Values](#17-default-values)
+18. [Important Notes](#18-important-notes)
 
 ---
 
@@ -66,16 +65,16 @@ using namespace Dali::Ui;
 // Create a LINE chart with explicit size
 ChartView chart = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
-// Configure chart with method chaining
-chart.SetTitle("Monthly Revenue")
-     .SetXAxis(ChartAxis::New()
-         .SetTitle("Month")
-         .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}))
-     .SetYAxis(ChartAxis::New()
-         .SetTitle("Amount (USD)"))
-     .AddSeries(LineSeries::New()
-         .SetName("Revenue")
-         .SetValues({120.0f, 190.0f, 150.0f, 250.0f, 210.0f, 280.0f}));
+// Configure chart
+chart.SetTitle("Monthly Revenue");
+chart.SetXAxis(ChartAxis::New()
+    .SetTitle("Month")
+    .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
+chart.SetYAxis(ChartAxis::New()
+    .SetTitle("Amount (USD)"));
+chart.AddSeries(LineSeries::New()
+    .SetName("Revenue")
+    .SetValues({120.0f, 190.0f, 150.0f, 250.0f, 210.0f, 280.0f}));
 
 // Enable grid and legend via properties
 chart.SetProperty(ChartView::Property::SHOW_GRID, true);
@@ -90,10 +89,10 @@ chart.SetLayoutParams(AbsoluteLayoutParams::New()
     .SetX(20.0f).SetY(60.0f)
     .SetWidth(480.0f).SetHeight(360.0f));
 
-AbsoluteLayout root = AbsoluteLayout::New()
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(MATCH_PARENT)
-    .Children({chart});
+AbsoluteLayout root = AbsoluteLayout::New();
+root.SetRequestedWidth(MATCH_PARENT);
+root.SetRequestedHeight(MATCH_PARENT);
+root.AddChildren({chart});
 window.Add(root);
 ```
 
@@ -1008,60 +1007,7 @@ gauge.AddGaugeRange(50.0f, 100.0f, Vector4(1.0f, 0.3f, 0.3f, 1.0f));
 
 ---
 
-## 15. Method Chaining
-
-All setter methods on `ChartView`, `LineSeries`, `BarSeries`, `PieSeries`, `ScatterSeries`, `ChartAxis`, and `ChartSection` return a reference to the object, enabling fluent method chaining.
-
-> 💡 **Chaining order rule**: Call derived-class setters (`SetColor`, `SetSmoothness`, `SetStacked`, etc.) **before** base `ChartSeries` setters (`SetName`, `SetValues`, `SetZIndex`). Base-class methods return `ChartSeries&`, which does not expose derived-class methods.
-
-### Series Configuration
-
-```cpp
-// Chain series setup and add inline
-chart.AddSeries(LineSeries::New()
-    .SetName("Revenue")
-    .SetColor(Vector4(0.2f, 0.6f, 1.0f, 1.0f))
-    .SetSmoothness(0.65f)
-    .SetMarkersVisible(true)
-    .SetMarkerShape(LineSeries::MarkerShape::CIRCLE)
-    .SetValues({120.0f, 190.0f, 150.0f, 250.0f, 220.0f, 280.0f}));
-```
-
-### ChartView Configuration
-
-`ChartView` setters also return `ChartView&`:
-
-```cpp
-chart.SetTitle("Monthly Sales")
-     .SetAnimationDuration(300.0f)
-     .SetAnimationEasing(ChartView::EasingType::EASE_OUT)
-     .SetZoomMode(static_cast<int>(ChartView::ZoomMode::PAN_X));
-
-chart.SetXAxis(ChartAxis::New()
-    .SetTitle("Month")
-    .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
-```
-
-### Layout Builder Chaining
-
-Layout containers also use the same fluent pattern:
-
-```cpp
-AbsoluteLayout root = AbsoluteLayout::New()
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(MATCH_PARENT)
-    .Children({chart});
-
-chart.SetLayoutParams(AbsoluteLayoutParams::New()
-    .SetX(20.0f).SetY(60.0f)
-    .SetWidth(480.0f).SetHeight(360.0f));
-```
-
-<br/>
-
----
-
-## 16. Layout Integration
+## 15. Layout Integration
 
 `ChartView` inherits from `View` and integrates fully with the dali-ui layout system.
 
@@ -1077,10 +1023,10 @@ chart.SetLayoutParams(AbsoluteLayoutParams::New()
     .SetWidth(480.0f)
     .SetHeight(360.0f));
 
-AbsoluteLayout root = AbsoluteLayout::New()
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(MATCH_PARENT)
-    .Children({chart});
+AbsoluteLayout root = AbsoluteLayout::New();
+root.SetRequestedWidth(MATCH_PARENT);
+root.SetRequestedHeight(MATCH_PARENT);
+root.AddChildren({chart});
 window.Add(root);
 ```
 
@@ -1122,7 +1068,7 @@ rootLayout.Add(chart);
 
 ---
 
-## 17. CMake Integration
+## 16. CMake Integration
 
 Add the following to your `CMakeLists.txt`:
 
@@ -1164,7 +1110,7 @@ target_compile_options(my-chart-app PRIVATE
 
 ---
 
-## 18. Default Values
+## 17. Default Values
 
 ### ChartView (StyleConfig defaults)
 
@@ -1226,7 +1172,7 @@ target_compile_options(my-chart-app PRIVATE
 
 ---
 
-## 19. Important Notes
+## 18. Important Notes
 
 - **`UiComponentConfig` is required.** Call `UiComponentConfig::New().Apply()` before `Application::MainLoop()` when using `dali-ui-components`. Using `UiConfig` alone is not sufficient. See [Configuration](Configuration.md).
 

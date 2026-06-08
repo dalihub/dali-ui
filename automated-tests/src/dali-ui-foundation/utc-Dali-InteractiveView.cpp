@@ -496,11 +496,11 @@ int UtcDaliInteractiveViewConnectClickedSignalP(void)
   ClickedSignalFunctor functor(data);
 
   InteractiveView view = InteractiveView::New();
-  view.SetRequestedWidth(100.0f)
-      .SetRequestedHeight(100.0f)
-      .SetPivot(Pivot::TOP_LEFT)
-      .SetParentOrigin(ParentOrigin::TOP_LEFT)
-      .ConnectClickedSignal(&application, functor);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  view.ConnectClickedSignal(&application, functor);
 
   application.GetScene().Add(view);
   application.SendNotification();
@@ -544,11 +544,11 @@ int UtcDaliInteractiveViewConnectPressedChangedSignalP(void)
   PressedChangedSignalFunctor functor(data);
 
   InteractiveView view = InteractiveView::New();
-  view.SetRequestedWidth(100.0f)
-      .SetRequestedHeight(100.0f)
-      .SetPivot(Pivot::TOP_LEFT)
-      .SetParentOrigin(ParentOrigin::TOP_LEFT)
-      .ConnectPressedChangedSignal(&application, functor);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  view.ConnectPressedChangedSignal(&application, functor);
 
   application.GetScene().Add(view);
   application.SendNotification();
@@ -583,11 +583,11 @@ int UtcDaliInteractiveViewConnectLongPressedSignalP(void)
   LongPressedSignalFunctor functor(data);
 
   InteractiveView view = InteractiveView::New();
-  view.SetRequestedWidth(100.0f)
-      .SetRequestedHeight(100.0f)
-      .SetPivot(Pivot::TOP_LEFT)
-      .SetParentOrigin(ParentOrigin::TOP_LEFT)
-      .ConnectLongPressedSignal(&application, functor);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  view.ConnectLongPressedSignal(&application, functor);
 
   application.GetScene().Add(view);
   application.SendNotification();

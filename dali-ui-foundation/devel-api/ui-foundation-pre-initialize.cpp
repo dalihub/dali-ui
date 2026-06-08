@@ -43,7 +43,8 @@ void Preload()
   {
     DALI_LOG_RELEASE_INFO("IsSupportPreInitializedCreation() : true\n");
 
-    [[maybe_unused]] auto view      = View::New().SetBackgroundColor(UiColor(0xFFFFFF));
+    [[maybe_unused]] auto view = View::New();
+    view.SetBackgroundColor(UiColor(0xFFFFFF));
     [[maybe_unused]] auto imageView = ImageView::New();
     [[maybe_unused]] auto label     = Label::New("text");
   }

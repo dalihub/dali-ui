@@ -33,8 +33,5 @@ public:
   TestConfig& operator=(const TestConfig& handle) = default;
   TestConfig& operator=(TestConfig&& rhs) noexcept = default;
 
-  DALI_UI_CHAIN_UICONFIG_METHODS(TestConfig);
-
   static TestConfig New();
 };
-

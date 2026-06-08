@@ -71,72 +71,86 @@ public:
     mMaskingMode = Ui::Image::MaskingType::MASKING_ON_RENDERING;
 
     // Left: CropToMask OFF
-    mImageLeft = ImageView::New(IMG_A)
-                   .SetRequestedWidth(PREVIEW_SIZE)
-                   .SetRequestedHeight(PREVIEW_SIZE)
-                   .SetCropToMask(false);
+    mImageLeft = ImageView::New(IMG_A);
+    mImageLeft.SetRequestedWidth(PREVIEW_SIZE);
+    mImageLeft.SetRequestedHeight(PREVIEW_SIZE);
+    mImageLeft.SetCropToMask(false);
 
     // Right: CropToMask ON
-    mImageRight = ImageView::New(IMG_A)
-                    .SetRequestedWidth(PREVIEW_SIZE)
-                    .SetRequestedHeight(PREVIEW_SIZE)
-                    .SetCropToMask(true);
+    mImageRight = ImageView::New(IMG_A);
+    mImageRight.SetRequestedWidth(PREVIEW_SIZE);
+    mImageRight.SetRequestedHeight(PREVIEW_SIZE);
+    mImageRight.SetCropToMask(true);
 
     mStatusLabel = MakeStatusLabel("Mask: none | MaskingMode: ON_RENDERING");
 
-    StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(WRAP_CONTENT)
-                            .SetBackgroundColor(UiColor(C_BG))
-                            .SetPadding(Extents(8, 8, 8, 8));
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
+    content.SetRequestedWidth(MATCH_PARENT);
+    content.SetRequestedHeight(WRAP_CONTENT);
+    content.SetBackgroundColor(UiColor(C_BG));
+    content.SetPadding(Extents(8, 8, 8, 8));
 
     // Column labels
-    StackLayout colLabels = StackLayout::New(StackOrientation::HORIZONTAL)
-                              .SetRequestedWidth(MATCH_PARENT)
-                              .SetRequestedHeight(LABEL_H);
-    colLabels.Add(
-      Label::New("CropToMask: OFF")
-        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-        .SetRequestedHeight(LABEL_H)
-        .SetFontSize(FONT_LABEL)
-        .SetTextColor(UiColor(C_STATUS_TEXT))
-        .SetBackgroundColor(UiColor(C_LABEL_BG))
-        .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-        .SetVerticalTextAlignment(Text::Alignment::CENTER));
-    colLabels.Add(View::New().SetRequestedWidth(8).SetRequestedHeight(LABEL_H)); // spacer
-    colLabels.Add(
-      Label::New("CropToMask: ON")
-        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-        .SetRequestedHeight(LABEL_H)
-        .SetFontSize(FONT_LABEL)
-        .SetTextColor(UiColor(C_STATUS_TEXT))
-        .SetBackgroundColor(UiColor(C_LABEL_BG))
-        .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-        .SetVerticalTextAlignment(Text::Alignment::CENTER));
+    StackLayout colLabels = StackLayout::New(StackOrientation::HORIZONTAL);
+    colLabels.SetRequestedWidth(MATCH_PARENT);
+    colLabels.SetRequestedHeight(LABEL_H);
+    Label cropOffLabel = Label::New("CropToMask: OFF");
+    cropOffLabel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    cropOffLabel.SetRequestedHeight(LABEL_H);
+    cropOffLabel.SetFontSize(FONT_LABEL);
+    cropOffLabel.SetTextColor(UiColor(C_STATUS_TEXT));
+    cropOffLabel.SetBackgroundColor(UiColor(C_LABEL_BG));
+    cropOffLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    cropOffLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    colLabels.Add(cropOffLabel);
+
+    View labelSpacer = View::New();
+    labelSpacer.SetRequestedWidth(8);
+    labelSpacer.SetRequestedHeight(LABEL_H);
+    colLabels.Add(labelSpacer);
+
+    Label cropOnLabel = Label::New("CropToMask: ON");
+    cropOnLabel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    cropOnLabel.SetRequestedHeight(LABEL_H);
+    cropOnLabel.SetFontSize(FONT_LABEL);
+    cropOnLabel.SetTextColor(UiColor(C_STATUS_TEXT));
+    cropOnLabel.SetBackgroundColor(UiColor(C_LABEL_BG));
+    cropOnLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    cropOnLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    colLabels.Add(cropOnLabel);
     content.Add(colLabels);
 
     // Preview row (side by side)
-    StackLayout previewRow = StackLayout::New(StackOrientation::HORIZONTAL)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(PREVIEW_SIZE + 16)
-                               .SetPadding(Extents(0, 0, 4, 4));
-    previewRow.Add(StackLayout::New(StackOrientation::HORIZONTAL)
-                     .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                     .SetRequestedHeight(PREVIEW_SIZE)
-                     .Children({
-                       View::New().SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)),
-                       mImageLeft,
-                       View::New().SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)),
-                     }));
-    previewRow.Add(View::New().SetRequestedWidth(8).SetRequestedHeight(PREVIEW_SIZE)); // spacer
-    previewRow.Add(StackLayout::New(StackOrientation::HORIZONTAL)
-                     .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                     .SetRequestedHeight(PREVIEW_SIZE)
-                     .Children({
-                       View::New().SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)),
-                       mImageRight,
-                       View::New().SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)),
-                     }));
+    StackLayout previewRow = StackLayout::New(StackOrientation::HORIZONTAL);
+    previewRow.SetRequestedWidth(MATCH_PARENT);
+    previewRow.SetRequestedHeight(PREVIEW_SIZE + 16);
+    previewRow.SetPadding(Extents(0, 0, 4, 4));
+    View leftLeadingSpacer = View::New();
+    leftLeadingSpacer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    View leftTrailingSpacer = View::New();
+    leftTrailingSpacer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+
+    StackLayout leftPreview = StackLayout::New(StackOrientation::HORIZONTAL);
+    leftPreview.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    leftPreview.SetRequestedHeight(PREVIEW_SIZE);
+    leftPreview.AddChildren({leftLeadingSpacer, mImageLeft, leftTrailingSpacer});
+    previewRow.Add(leftPreview);
+
+    View previewSpacer = View::New();
+    previewSpacer.SetRequestedWidth(8);
+    previewSpacer.SetRequestedHeight(PREVIEW_SIZE);
+    previewRow.Add(previewSpacer);
+
+    View rightLeadingSpacer = View::New();
+    rightLeadingSpacer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    View rightTrailingSpacer = View::New();
+    rightTrailingSpacer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+
+    StackLayout rightPreview = StackLayout::New(StackOrientation::HORIZONTAL);
+    rightPreview.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    rightPreview.SetRequestedHeight(PREVIEW_SIZE);
+    rightPreview.AddChildren({rightLeadingSpacer, mImageRight, rightTrailingSpacer});
+    previewRow.Add(rightPreview);
 
     content.Add(previewRow);
     content.Add(mStatusLabel);
@@ -154,12 +168,12 @@ public:
       MakeButton("MaskingMode\nON_LOADING",   [this] { OnMaskingMode(Ui::Image::MaskingType::MASKING_ON_LOADING); }),
     }));
 
-    contentArea.Add(
-      ScrollView::New()
-        .SetScrollDirection(ScrollDirection::Vertical)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-        .SetContent(content));
+    ScrollView scrollView = ScrollView::New();
+    scrollView.SetScrollDirection(ScrollDirection::Vertical);
+    scrollView.SetRequestedWidth(MATCH_PARENT);
+    scrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    scrollView.SetContent(content);
+    contentArea.Add(scrollView);
   }
 
 private:
@@ -206,48 +220,56 @@ private:
 
   Label MakeStatusLabel(const Dali::String& text)
   {
-    return Label::New(text)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(STATUS_H)
-      .SetFontSize(FONT_STATUS)
-      .SetTextColor(UiColor(C_STATUS_TEXT))
-      .SetBackgroundColor(UiColor(C_STATUS_BG))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetMultiLine(true);
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(STATUS_H);
+    label.SetFontSize(FONT_STATUS);
+    label.SetTextColor(UiColor(C_STATUS_TEXT));
+    label.SetBackgroundColor(UiColor(C_STATUS_BG));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    label.SetMultiLine(true);
+    return label;
   }
 
   View MakeButton(const Dali::String& label, std::function<void()> onClick)
   {
-    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL)
-                        .SetRequestedHeight(BTN_H)
-                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                        .SetBackgroundColor(UiColor(C_BTN_BG))
-                        .Children({
-                          Label::New(label)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(MATCH_PARENT)
-                            .SetFontSize(FONT_BTN)
-                            .SetTextColor(UiColor(C_BTN_TEXT))
-                            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                            .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                            .SetMultiLine(true),
-                        });
-    btn.SetFocusable(true).AsInteractive([this, onClick = std::move(onClick)](InteractiveTrait& trait) {
-      trait.ClickedSignal().Connect(this, [onClick](View, InputEvent) -> bool {
-        onClick();
-        return true;
-      });
+    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL);
+    btn.SetRequestedHeight(BTN_H);
+    btn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    btn.SetBackgroundColor(UiColor(C_BTN_BG));
+    Label buttonLabel = Label::New(label);
+
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+
+    buttonLabel.SetFontSize(FONT_BTN);
+
+    buttonLabel.SetTextColor(UiColor(C_BTN_TEXT));
+
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    buttonLabel.SetMultiLine(true);
+
+    btn.AddChildren({buttonLabel});
+    btn.SetFocusable(true);
+    InteractiveTrait interactive = btn.AsInteractive();
+    interactive.ClickedSignal().Connect(this, [onClick = std::move(onClick)](View, InputEvent) -> bool {
+      onClick();
+      return true;
     });
     return btn;
   }
 
   StackLayout MakeButtonRow(std::initializer_list<View> buttons)
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(BTN_H)
-                        .SetPadding(Extents(0, 0, 2, 2));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(BTN_H);
+    row.SetPadding(Extents(0, 0, 2, 2));
     for(auto& b : buttons)
     {
       row.Add(b);

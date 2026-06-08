@@ -65,52 +65,47 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        CreateImageArea(),
-        CreateInfoLabel(),
-        CreateSizeButtonRow(),
-        CreateToggleRow(),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.AddChildren({CreateImageArea(), CreateInfoLabel(), CreateSizeButtonRow(), CreateToggleRow()});
+    return contents;
   }
 
   View CreateImageArea()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .SetPadding(Extents(16, 16, 16, 16))
-      .Children({
-        ImageView::New(RESOURCES_DIR "button-up-1.9.png")
-          .SetRequestedWidth(SIZES[mSizeIndex].width)
-          .SetRequestedHeight(SIZES[mSizeIndex].height)
-          .SetNPatchBorderOnly(mNPatchBorderOnly)
-          .As(mImage),
-      });
+    StackLayout area = StackLayout::New(StackOrientation::VERTICAL);
+    area.SetRequestedWidth(MATCH_PARENT);
+    area.SetRequestedHeight(WRAP_CONTENT);
+    area.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    area.SetPadding(Extents(16, 16, 16, 16));
+    mImage = ImageView::New(RESOURCES_DIR "button-up-1.9.png");
+    mImage.SetRequestedWidth(SIZES[mSizeIndex].width);
+    mImage.SetRequestedHeight(SIZES[mSizeIndex].height);
+    mImage.SetNPatchBorderOnly(mNPatchBorderOnly);
+    area.Add(mImage);
+    return area;
   }
 
   View CreateInfoLabel()
   {
-    return Label::New(MakeInfoText())
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(40.0f)
-      .SetFontSize(13.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mInfoLabel);
+    mInfoLabel = Label::New(MakeInfoText());
+    mInfoLabel.SetRequestedWidth(MATCH_PARENT);
+    mInfoLabel.SetRequestedHeight(40.0f);
+    mInfoLabel.SetFontSize(13.0f);
+    mInfoLabel.SetTextColor(UiColor(0xCCCCCC));
+    mInfoLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mInfoLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mInfoLabel;
   }
 
   View CreateSizeButtonRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(80.0f)
-                        .SetPadding(Extents(4, 4, 4, 4));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(80.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < SIZE_COUNT; ++i)
     {
@@ -121,44 +116,41 @@ private:
 
   View CreateToggleRow()
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(MATCH_PARENT)
-                           .SetRequestedHeight(80.0f)
-                           .SetPadding(Extents(4, 4, 4, 4))
-                           .SetBackgroundColor(UiColor(0x444444))
-                           .Children({
-                             Label::New("BORDER ONLY: OFF")
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(14.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(mNPatchBorderOnlyLabel),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(MATCH_PARENT);
+    button.SetRequestedHeight(80.0f);
+    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetBackgroundColor(UiColor(0x444444));
+    mNPatchBorderOnlyLabel = Label::New("BORDER ONLY: OFF");
+    mNPatchBorderOnlyLabel.SetRequestedWidth(MATCH_PARENT);
+    mNPatchBorderOnlyLabel.SetRequestedHeight(MATCH_PARENT);
+    mNPatchBorderOnlyLabel.SetFontSize(14.0f);
+    mNPatchBorderOnlyLabel.SetTextColor(UiColor(0xFFFFFF));
+    mNPatchBorderOnlyLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mNPatchBorderOnlyLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(mNPatchBorderOnlyLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewNPatchController::OnBorderOnlyClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageViewNPatchController::OnBorderOnlyClicked);
     return button;
   }
 
   View CreateSizeButton(int index)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(index == mSizeIndex ? UiColor(0x4A90E2) : UiColor(0x333333))
-                           .Children({
-                             Label::New(SIZES[index].label)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(14.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(index == mSizeIndex ? UiColor(0x4A90E2) : UiColor(0x333333));
+    Label buttonLabel = Label::New(SIZES[index].label);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(14.0f);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewNPatchController::OnSizeButtonClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageViewNPatchController::OnSizeButtonClicked);
     mSizeButtons[index] = button;
     return button;
   }

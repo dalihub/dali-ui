@@ -83,11 +83,10 @@ private:
 
     // ---- Create WebView ------------------------------------------------
     mWebView = WebView::New();
-    mWebView
-      .SetRequestedWidth(static_cast<float>(windowSize.GetWidth()))
-      .SetRequestedHeight(static_cast<float>(windowSize.GetHeight()))
-      .SetRequestedPositionX(0.0f)
-      .SetRequestedPositionY(0.0f);
+    mWebView.SetRequestedWidth(static_cast<float>(windowSize.GetWidth()));
+    mWebView.SetRequestedHeight(static_cast<float>(windowSize.GetHeight()));
+    mWebView.SetRequestedPositionX(0.0f);
+    mWebView.SetRequestedPositionY(0.0f);
 
     window.Add(mWebView);
 

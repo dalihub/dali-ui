@@ -14,12 +14,8 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-foundation/public-api/interactive-view.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-view-impl.h>
+#include <dali-ui-foundation/public-api/interactive-view.h>
 
 namespace Dali
 {
@@ -66,10 +62,6 @@ InteractiveView::InteractiveView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::InteractiveViewImpl>(internal);
 }
 
-// =============================================================================
-// Signals
-// =============================================================================
-
 Signal<void(View, bool, InputEvent)>& InteractiveView::PressedChangedSignal()
 {
   return GetImpl(*this).GetInteractiveTrait().PressedChangedSignal();
@@ -90,10 +82,6 @@ Signal<bool(View, InputEvent)>& InteractiveView::LongPressedSignal()
   return GetImpl(*this).GetInteractiveTrait().LongPressedSignal();
 }
 
-// =============================================================================
-// API
-// =============================================================================
-
 bool InteractiveView::IsPressed() const
 {
   return GetImpl(*this).GetInteractiveTrait().IsPressed();
@@ -104,10 +92,9 @@ bool InteractiveView::IsPseudoDisabled() const
   return GetImpl(*this).GetInteractiveTrait().IsPseudoDisabled();
 }
 
-InteractiveView& InteractiveView::SetPseudoDisabled(bool pseudoDisabled)
+void InteractiveView::SetPseudoDisabled(bool pseudoDisabled)
 {
   GetImpl(*this).GetInteractiveTrait().SetPseudoDisabled(pseudoDisabled);
-  return *this;
 }
 
 bool InteractiveView::IsClickable() const
@@ -115,10 +102,9 @@ bool InteractiveView::IsClickable() const
   return GetImpl(*this).GetInteractiveTrait().IsClickable();
 }
 
-InteractiveView& InteractiveView::SetClickable(bool clickable)
+void InteractiveView::SetClickable(bool clickable)
 {
   GetImpl(*this).GetInteractiveTrait().SetClickable(clickable);
-  return *this;
 }
 
 KeyClickPolicy InteractiveView::GetKeyClickPolicy() const
@@ -126,10 +112,9 @@ KeyClickPolicy InteractiveView::GetKeyClickPolicy() const
   return GetImpl(*this).GetInteractiveTrait().GetKeyClickPolicy();
 }
 
-InteractiveView& InteractiveView::SetKeyClickPolicy(KeyClickPolicy policy)
+void InteractiveView::SetKeyClickPolicy(KeyClickPolicy policy)
 {
   GetImpl(*this).GetInteractiveTrait().SetKeyClickPolicy(policy);
-  return *this;
 }
 
 } // namespace Ui

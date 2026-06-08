@@ -127,12 +127,13 @@ public:
     toggleBtn.SetRequestedPositionY(0.0f);
     toggleBtn.SetLayoutMode(LayoutMode::STANDALONE);
     toggleBtn.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
-    toggleBtn.Add(Label::New("Change LayoutDirection")
-      .SetTextColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER));
+    Label toggleLabel = Label::New("Change LayoutDirection");
+    toggleLabel.SetTextColor(UiColor(1.0f, 1.0f, 1.0f, 1.0f));
+    toggleLabel.SetRequestedWidth(MATCH_PARENT);
+    toggleLabel.SetRequestedHeight(MATCH_PARENT);
+    toggleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    toggleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    toggleBtn.Add(toggleLabel);
     toggleBtn.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
       mIsRtl = !mIsRtl;
       mRoot.SetLayoutDirection(mIsRtl ? Dali::LayoutDirection::RIGHT_TO_LEFT : Dali::LayoutDirection::LEFT_TO_RIGHT);

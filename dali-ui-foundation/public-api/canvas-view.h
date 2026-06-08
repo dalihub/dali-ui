@@ -16,14 +16,10 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h>
-#include <dali/public-api/math/vector2.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/canvas-view-properties.h>
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h>
+#include <dali/public-api/math/vector2.h>
 
 namespace Dali
 {
@@ -172,7 +168,7 @@ public: // Rasterization control
    * @param[in] viewBox The new width and height of the viewbox
    * @return Reference to this for fluent chaining
    */
-  CanvasView& SetViewBox(const Vector2& viewBox);
+  void SetViewBox(const Vector2& viewBox);
 
   /**
    * @brief Gets the current viewbox.
@@ -187,7 +183,7 @@ public: // Rasterization control
    * @param[in] synchronous True to rasterize synchronously, false for background thread
    * @return Reference to this for fluent chaining
    */
-  CanvasView& SetSynchronousLoading(bool synchronous);
+  void SetSynchronousLoading(bool synchronous);
 
   /**
    * @brief Gets whether synchronous rasterization is enabled.
@@ -205,7 +201,7 @@ public: // Rasterization control
    * @param[in] manually True to require explicit RequestRasterization() calls
    * @return Reference to this for fluent chaining
    */
-  CanvasView& SetRasterizationRequestManually(bool manually);
+  void SetRasterizationRequestManually(bool manually);
 
   /**
    * @brief Gets whether manual rasterization mode is active.
@@ -231,7 +227,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(CanvasView)
 };
 
 } // namespace Ui

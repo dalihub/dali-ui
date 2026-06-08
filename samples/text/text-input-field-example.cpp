@@ -38,23 +38,24 @@ constexpr uint32_t COLOR_MAGENTA      = 0xFF00FF;
 
 Label CreateButton(const char* text, uint32_t bgColor)
 {
-  return Label::New(text)
-    .SetFontSize(11.0f)
-    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-    .SetVerticalTextAlignment(Text::Alignment::CENTER)
-    .SetBackgroundColor(UiColor(bgColor))
-    .SetRequestedWidth(0.0f)
-    .SetRequestedHeight(BUTTON_HEIGHT)
-    .SetPadding(Extents(4, 4, 4, 4))
-    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+  Label button = Label::New(text);
+  button.SetFontSize(11.0f);
+  button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+  button.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  button.SetBackgroundColor(UiColor(bgColor));
+  button.SetRequestedWidth(0.0f);
+  button.SetRequestedHeight(BUTTON_HEIGHT);
+  button.SetPadding(Extents(4, 4, 4, 4));
+  button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+  return button;
 }
 
 View CreateButtonRow(std::initializer_list<Label> buttons)
 {
-  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(WRAP_CONTENT)
-    .SetSpacing(BUTTON_SPACING);
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+  row.SetRequestedWidth(MATCH_PARENT);
+  row.SetRequestedHeight(WRAP_CONTENT);
+  row.SetSpacing(BUTTON_SPACING);
 
   for(auto& btn : buttons)
   {
@@ -80,23 +81,23 @@ private:
     window.SetBackgroundColor(UiColor(0xF5F5F5));
 
     // Target InputField
-    mInputField = InputField::New()
-      .SetPlaceholder("Type here")
-      .SetPlaceholderColor(UiColor(COLOR_DARK_GRAY))
-      .SetFontSize(20.0f)
-      .SetCursorWidth(2)
-      .SetCursorColor(UiColor(COLOR_DARK_TEXT))
-      .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))
-      .SetTextHandleEnabled(true)
-      .SetTextHandleColor(UiColor(0x000080))
-      .SetMaximumLength(50)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(INPUT_HEIGHT)
-      .SetBackgroundColor(UiColor(0xFFFFFF))
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetPadding(Extents(12, 12, 12, 12))
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetFocusable(true);
+    mInputField = InputField::New();
+    mInputField.SetPlaceholder("Type here");
+    mInputField.SetPlaceholderColor(UiColor(COLOR_DARK_GRAY));
+    mInputField.SetFontSize(20.0f);
+    mInputField.SetCursorWidth(2);
+    mInputField.SetCursorColor(UiColor(COLOR_DARK_TEXT));
+    mInputField.SetSelectionColor(UiColor(COLOR_LIGHT_BLUE));
+    mInputField.SetTextHandleEnabled(true);
+    mInputField.SetTextHandleColor(UiColor(0x000080));
+    mInputField.SetMaximumLength(50);
+    mInputField.SetRequestedWidth(MATCH_PARENT);
+    mInputField.SetRequestedHeight(INPUT_HEIGHT);
+    mInputField.SetBackgroundColor(UiColor(0xFFFFFF));
+    mInputField.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    mInputField.SetPadding(Extents(12, 12, 12, 12));
+    mInputField.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mInputField.SetFocusable(true);
 
     // RTL test
     // mInputField.SetText("ABC العربية DEF עברית GHI 12345 JKL שלום MNO مرحبا PQR 67890 STU");
@@ -120,25 +121,25 @@ private:
     mInputField.SelectionClearedSignal().Connect(this, &InputFieldController::OnSelectionCleared);
 
     // Status label
-    mStatusLabel = Label::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(90)
-      .SetFontSize(10.0f)
-      .SetMultiLine(true)
-      .SetBackgroundColor(UiColor(0xE8E8E8))
-      .SetPadding(Extents(8, 8, 8, 8));
+    mStatusLabel = Label::New();
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(90);
+    mStatusLabel.SetFontSize(10.0f);
+    mStatusLabel.SetMultiLine(true);
+    mStatusLabel.SetBackgroundColor(UiColor(0xE8E8E8));
+    mStatusLabel.SetPadding(Extents(8, 8, 8, 8));
 
     UpdateStatus();
 
     // Title
-    Label titleLabel = Label::New("InputField Test")
-      .SetFontSize(14.0f)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetTextColor(UiColor(0xFFFFFF))
-      .SetBackgroundColor(UiColor(0x2C3E50))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(32);
+    Label titleLabel = Label::New("InputField Test");
+    titleLabel.SetFontSize(14.0f);
+    titleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    titleLabel.SetTextColor(UiColor(0xFFFFFF));
+    titleLabel.SetBackgroundColor(UiColor(0x2C3E50));
+    titleLabel.SetRequestedWidth(MATCH_PARENT);
+    titleLabel.SetRequestedHeight(32);
 
     // Cursor buttons row
     Label btnCursorBlink = CreateButton("Cursor Blink", 0x3498DB);
@@ -187,60 +188,54 @@ private:
     View infoRow = CreateButtonRow({btnInfo});
 
     // Fixed header area (title, input field, status label)
-    StackLayout fixedHeader = StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .Children({
-        titleLabel,
-        mInputField,
-        mStatusLabel,
-      });
+    StackLayout fixedHeader = StackLayout::New(StackOrientation::VERTICAL);
+    fixedHeader.SetSpacing(STACK_SPACING);
+    fixedHeader.SetRequestedWidth(MATCH_PARENT);
+    fixedHeader.SetRequestedHeight(WRAP_CONTENT);
+    fixedHeader.AddChildren({
+      titleLabel,
+      mInputField,
+      mStatusLabel,
+    });
 
     // Scrollable content area (all test buttons)
-    StackLayout scrollContent = StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(0, 0, 0, STACK_PADDING))
-      .Children({
-        // Cursor controls
-        cursorRow1,
-        cursorRow2,
-        // Placeholder controls
-        placeholderRow,
-        // Selection controls
-        selectionRow1,
-        selectionRow2,
-        selectionRow3,
-        // Input filter controls
-        inputFilterRow,
-        // Other controls
-        otherRow,
-        // Password controls
-        passwordRow1,
-        passwordRow2,
-        infoRow,
-      });
+    StackLayout scrollContent = StackLayout::New(StackOrientation::VERTICAL);
+    scrollContent.SetSpacing(STACK_SPACING);
+    scrollContent.SetRequestedWidth(MATCH_PARENT);
+    scrollContent.SetRequestedHeight(WRAP_CONTENT);
+    scrollContent.SetPadding(Extents(0, 0, 0, STACK_PADDING));
+    scrollContent.AddChildren({
+      cursorRow1,
+      cursorRow2,
+      placeholderRow,
+      selectionRow1,
+      selectionRow2,
+      selectionRow3,
+      inputFilterRow,
+      otherRow,
+      passwordRow1,
+      passwordRow2,
+      infoRow,
+    });
 
     // ScrollView for test buttons
-    ScrollView scrollView = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(0.0f)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetContent(scrollContent);
+    ScrollView scrollView = ScrollView::New();
+    scrollView.SetScrollDirection(ScrollDirection::Vertical);
+    scrollView.SetRequestedWidth(MATCH_PARENT);
+    scrollView.SetRequestedHeight(0.0f);
+    scrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    scrollView.SetContent(scrollContent);
 
     // Root layout
-    StackLayout rootLayout = StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        fixedHeader,
-        scrollView,
-      });
+    StackLayout rootLayout = StackLayout::New(StackOrientation::VERTICAL);
+    rootLayout.SetSpacing(STACK_SPACING);
+    rootLayout.SetRequestedWidth(MATCH_PARENT);
+    rootLayout.SetRequestedHeight(MATCH_PARENT);
+    rootLayout.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    rootLayout.AddChildren({
+      fixedHeader,
+      scrollView,
+    });
 
     window.Add(rootLayout);
 

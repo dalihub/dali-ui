@@ -142,123 +142,140 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        Label::New("Text Example"),
-        CreateInputField().As(mField),
-        CreateLayoutLabel1().As(mLabel),
-        CreateLayoutLabel2().As(mLabel2),
-        CreateLayoutLabel3().As(mLabel3),
-        CreateLineHeightLabel("LineHeight:2, LineHeightMode:Relative", 2, Text::LineHeightMode::RELATIVE).As(mLineHeightLabel),
-        CreateLineHeightLabel("LineHeight:50, LineHeightMode:Absolute", 50, Text::LineHeightMode::ABSOLUTE).As(mLineHeightLabel2),
-        CreateSeparator(),
-        CreateAlignmentLabel(Text::Alignment::START),
-        CreateAlignmentLabel(Text::Alignment::CENTER),
-        CreateAlignmentLabel(Text::Alignment::END),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetSpacing(STACK_SPACING);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    mField            = CreateInputField();
+    mLabel            = CreateLayoutLabel1();
+    mLabel2           = CreateLayoutLabel2();
+    mLabel3           = CreateLayoutLabel3();
+    mLineHeightLabel  = CreateLineHeightLabel("LineHeight:2, LineHeightMode:Relative", 2, Text::LineHeightMode::RELATIVE);
+    mLineHeightLabel2 = CreateLineHeightLabel("LineHeight:50, LineHeightMode:Absolute", 50, Text::LineHeightMode::ABSOLUTE);
+
+    contents.AddChildren({
+      Label::New("Text Example"),
+      mField,
+      mLabel,
+      mLabel2,
+      mLabel3,
+      mLineHeightLabel,
+      mLineHeightLabel2,
+      CreateSeparator(),
+      CreateAlignmentLabel(Text::Alignment::START),
+      CreateAlignmentLabel(Text::Alignment::CENTER),
+      CreateAlignmentLabel(Text::Alignment::END),
+    });
+    return contents;
   }
 
   Label CreateLabel(const Dali::String& text, const Dali::String& fontFamily, float fontSize)
   {
-    return Label::New()
-      .SetText(text)
-      .SetFontFamily(fontFamily)
-      .SetFontSize(fontSize)
-      .SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+    Label label = Label::New();
+    label.SetText(text);
+    label.SetFontFamily(fontFamily);
+    label.SetFontSize(fontSize);
+    label.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+    return label;
   }
 
   InputField CreateInputField()
   {
-    return InputField::New()
-      .SetPlaceholder("Enter your text here")
-      .SetPlaceholderColor(UiColor(COLOR_DARK_GRAY))
-      .SetFontSize(INPUT_FONT_SIZE)
-      .SetCursorWidth(CURSOR_WIDTH)
-      .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_BG))
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetCursorColor(UiColor(COLOR_DARK_TEXT))
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    InputField field = InputField::New();
+    field.SetPlaceholder("Enter your text here");
+    field.SetPlaceholderColor(UiColor(COLOR_DARK_GRAY));
+    field.SetFontSize(INPUT_FONT_SIZE);
+    field.SetCursorWidth(CURSOR_WIDTH);
+    field.SetSelectionColor(UiColor(COLOR_LIGHT_BLUE));
+    field.SetRequestedWidth(MATCH_PARENT);
+    field.SetRequestedHeight(WRAP_CONTENT);
+    field.SetPadding(Extents(20, 20, 20, 20));
+    field.SetBackgroundColor(UiColor(COLOR_LIGHT_BG));
+    field.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    field.SetCursorColor(UiColor(COLOR_DARK_TEXT));
+    field.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return field;
   }
 
   Label CreateLayoutLabel1()
   {
     // Verify wrap-content width with fixed height
-    return CreateLabel("Hello world", "SamsungOneUI_400", LABEL1_FONT_SIZE)
-      .SetRequestedWidth(WRAP_CONTENT)
-      .SetRequestedHeight(100.0f)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT1))
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    Label label = CreateLabel("Hello world", "SamsungOneUI_400", LABEL1_FONT_SIZE);
+    label.SetRequestedWidth(WRAP_CONTENT);
+    label.SetRequestedHeight(100.0f);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT1));
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return label;
   }
 
   Label CreateLayoutLabel2()
   {
     // Verify min/max size and padding with wrap-content (width & height)
-    return CreateLabel("Hello world, this is a multi-line enabled long long text", "Ubuntu Mono", LABEL2_FONT_SIZE)
-      .SetMinimumWidth(100)
-      .SetMinimumHeight(100)
-      .SetMaximumWidth(600)
-      .SetMaximumHeight(300)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT2))
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetMultiLine(true)
-      .SetLineWrapMode(Text::LineWrapMode::WORD);
+    Label label = CreateLabel("Hello world, this is a multi-line enabled long long text", "Ubuntu Mono", LABEL2_FONT_SIZE);
+    label.SetMinimumWidth(100);
+    label.SetMinimumHeight(100);
+    label.SetMaximumWidth(600);
+    label.SetMaximumHeight(300);
+    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT2));
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetMultiLine(true);
+    label.SetLineWrapMode(Text::LineWrapMode::WORD);
+    return label;
   }
 
   Label CreateLayoutLabel3()
   {
     // Verify match-parent width with fixed height
-    return CreateLabel("변화는 한 순간에 일어나지 않습니다. 매일의 작은 실천이 모여 지속가능한 삶을 이루는 것. 이것이 우리가 꿈꾸는 지속가능성입니다.",
-                       "SamsungOneUI_700",
-                       LABEL3_FONT_SIZE)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(150.0f)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT3))
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetMultiLine(true)
-      .SetLineWrapMode(Text::LineWrapMode::WORD);
+    Label label = CreateLabel("변화는 한 순간에 일어나지 않습니다. 매일의 작은 실천이 모여 지속가능한 삶을 이루는 것. 이것이 우리가 꿈꾸는 지속가능성입니다.",
+                              "SamsungOneUI_700",
+                              LABEL3_FONT_SIZE);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(150.0f);
+    label.SetPadding(Extents(20, 20, 20, 20));
+    label.SetBackgroundColor(UiColor(COLOR_LABEL_LIGHT3));
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetMultiLine(true);
+    label.SetLineWrapMode(Text::LineWrapMode::WORD);
+    return label;
   }
 
   Label CreateLineHeightLabel(Dali::String text, float lineHeight, Text::LineHeightMode mode)
   {
-    return CreateLabel(text, "SamsungOneUI_400", 20)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetBackgroundColor(UiColor(0xEFEFEF))
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetLineHeight(lineHeight)
-      .SetLineHeightMode(mode);
+    Label label = CreateLabel(text, "SamsungOneUI_400", 20);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetBackgroundColor(UiColor(0xEFEFEF));
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetLineHeight(lineHeight);
+    label.SetLineHeightMode(mode);
+    return label;
   }
 
   View CreateSeparator()
   {
-    return View::New()
-      .SetBackgroundColor(UiColor(COLOR_BLUE))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(4.0f);
+    View separator = View::New();
+    separator.SetBackgroundColor(UiColor(COLOR_BLUE));
+    separator.SetRequestedWidth(MATCH_PARENT);
+    separator.SetRequestedHeight(4.0f);
+    return separator;
   }
 
   Label CreateAlignmentLabel(Text::Alignment alignment)
   {
-    return Label::New("Label Alignment")
-      .SetBackgroundColor(UiColor(COLOR_MID_GRAY))
-      .SetTextColor(UiColor(COLOR_WHITE))
-      .SetFontSize(10.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(30.0f)
-      .SetHorizontalTextAlignment(alignment)
-      .SetVerticalTextAlignment(alignment);
+    Label label = Label::New("Label Alignment");
+    label.SetBackgroundColor(UiColor(COLOR_MID_GRAY));
+    label.SetTextColor(UiColor(COLOR_WHITE));
+    label.SetFontSize(10.0f);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(30.0f);
+    label.SetHorizontalTextAlignment(alignment);
+    label.SetVerticalTextAlignment(alignment);
+    return label;
   }
 
   void PrintLabelInfo(Label label, const char* title)

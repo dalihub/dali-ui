@@ -30,9 +30,6 @@ public:
 
   void ChangeBackground();
 
-  // 체인 메소드 재정의 매크로 호출
-  DALI_UI_CHAIN_VIEW_METHODS(MyView)
-
   // [IMPORTANT] 데이터 필드를 넣지 않아야 함
 };
 

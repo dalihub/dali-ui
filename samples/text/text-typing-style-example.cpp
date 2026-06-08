@@ -42,23 +42,24 @@ constexpr uint32_t COLOR_BUTTON_BG    = 0xE0E0E0;
 
 Label CreateButton(const char* text, uint32_t bgColor)
 {
-  return Label::New(text)
-    .SetFontSize(11.0f)
-    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-    .SetVerticalTextAlignment(Text::Alignment::CENTER)
-    .SetBackgroundColor(UiColor(bgColor))
-    .SetRequestedWidth(0.0f)
-    .SetRequestedHeight(BUTTON_HEIGHT)
-    .SetPadding(Extents(4, 4, 4, 4))
-    .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+  Label button = Label::New(text);
+  button.SetFontSize(11.0f);
+  button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+  button.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  button.SetBackgroundColor(UiColor(bgColor));
+  button.SetRequestedWidth(0.0f);
+  button.SetRequestedHeight(BUTTON_HEIGHT);
+  button.SetPadding(Extents(4, 4, 4, 4));
+  button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+  return button;
 }
 
 View CreateButtonRow(std::initializer_list<Label> buttons)
 {
-  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(WRAP_CONTENT)
-    .SetSpacing(BUTTON_SPACING);
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+  row.SetRequestedWidth(MATCH_PARENT);
+  row.SetRequestedHeight(WRAP_CONTENT);
+  row.SetSpacing(BUTTON_SPACING);
 
   for(auto& btn : buttons)
   {
@@ -69,38 +70,40 @@ View CreateButtonRow(std::initializer_list<Label> buttons)
 
 Label CreateSectionLabel(const char* text)
 {
-  return Label::New(text)
-    .SetFontSize(12.0f)
-    .SetTextColor(UiColor(COLOR_DARK_GRAY))
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(WRAP_CONTENT)
-    .SetPadding(Extents(0, 0, 4, 4));
+  Label label = Label::New(text);
+  label.SetFontSize(12.0f);
+  label.SetTextColor(UiColor(COLOR_DARK_GRAY));
+  label.SetRequestedWidth(MATCH_PARENT);
+  label.SetRequestedHeight(WRAP_CONTENT);
+  label.SetPadding(Extents(0, 0, 4, 4));
+  return label;
 }
 
 Label CreateStateValueLabel(const char* text)
 {
-  return Label::New(text)
-    .SetFontSize(12.0f)
-    .SetTextColor(UiColor(COLOR_DARK_TEXT))
-    .SetRequestedWidth(WRAP_CONTENT)
-    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
-    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  Label label = Label::New(text);
+  label.SetFontSize(12.0f);
+  label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+  label.SetRequestedWidth(WRAP_CONTENT);
+  label.SetRequestedHeight(COLOR_PREVIEW_SIZE);
+  label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  return label;
 }
 
 View CreateStateRow(const char* title, Label valueLabel)
 {
-  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(WRAP_CONTENT)
-    .SetSpacing(8.0f)
-    .SetPadding(Extents(0, 0, 2, 2));
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+  row.SetRequestedWidth(MATCH_PARENT);
+  row.SetRequestedHeight(WRAP_CONTENT);
+  row.SetSpacing(8.0f);
+  row.SetPadding(Extents(0, 0, 2, 2));
 
-  Label titleLabel = Label::New(title)
-    .SetFontSize(12.0f)
-    .SetTextColor(UiColor(COLOR_DARK_GRAY))
-    .SetRequestedWidth(WRAP_CONTENT)
-    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
-    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  Label titleLabel = Label::New(title);
+  titleLabel.SetFontSize(12.0f);
+  titleLabel.SetTextColor(UiColor(COLOR_DARK_GRAY));
+  titleLabel.SetRequestedWidth(WRAP_CONTENT);
+  titleLabel.SetRequestedHeight(COLOR_PREVIEW_SIZE);
+  titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
   row.Add(titleLabel);
 
   row.Add(valueLabel);
@@ -109,18 +112,18 @@ View CreateStateRow(const char* title, Label valueLabel)
 
 View CreateColorStateRow(const char* title, View colorView)
 {
-  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(WRAP_CONTENT)
-    .SetSpacing(8.0f)
-    .SetPadding(Extents(0, 0, 2, 2));
+  StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+  row.SetRequestedWidth(MATCH_PARENT);
+  row.SetRequestedHeight(WRAP_CONTENT);
+  row.SetSpacing(8.0f);
+  row.SetPadding(Extents(0, 0, 2, 2));
 
-  Label titleLabel = Label::New(title)
-    .SetFontSize(12.0f)
-    .SetTextColor(UiColor(COLOR_DARK_GRAY))
-    .SetRequestedWidth(WRAP_CONTENT)
-    .SetRequestedHeight(COLOR_PREVIEW_SIZE)
-    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+  Label titleLabel = Label::New(title);
+  titleLabel.SetFontSize(12.0f);
+  titleLabel.SetTextColor(UiColor(COLOR_DARK_GRAY));
+  titleLabel.SetRequestedWidth(WRAP_CONTENT);
+  titleLabel.SetRequestedHeight(COLOR_PREVIEW_SIZE);
+  titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
   row.Add(titleLabel);
 
   row.Add(colorView);
@@ -225,46 +228,46 @@ private:
     window.SetBackgroundColor(UiColor(0xF5F5F5));
 
     // Main container
-    StackLayout mainContainer = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetSpacing(STACK_SPACING)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    StackLayout mainContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mainContainer.SetRequestedWidth(MATCH_PARENT);
+    mainContainer.SetRequestedHeight(MATCH_PARENT);
+    mainContainer.SetSpacing(STACK_SPACING);
+    mainContainer.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
     // Title
-    Label titleLabel = Label::New("InputEditor Typing Style Example")
-      .SetFontSize(18.0f)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT);
+    Label titleLabel = Label::New("InputEditor Typing Style Example");
+    titleLabel.SetFontSize(18.0f);
+    titleLabel.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    titleLabel.SetRequestedWidth(MATCH_PARENT);
+    titleLabel.SetRequestedHeight(WRAP_CONTENT);
     mainContainer.Add(titleLabel);
 
     // Description
-    Label descLabel = Label::New("Move cursor or select text, then press a style button.")
-      .SetFontSize(12.0f)
-      .SetTextColor(UiColor(COLOR_DARK_GRAY))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT);
+    Label descLabel = Label::New("Move cursor or select text, then press a style button.");
+    descLabel.SetFontSize(12.0f);
+    descLabel.SetTextColor(UiColor(COLOR_DARK_GRAY));
+    descLabel.SetRequestedWidth(MATCH_PARENT);
+    descLabel.SetRequestedHeight(WRAP_CONTENT);
     mainContainer.Add(descLabel);
 
     // InputEditor with markup
-    mInputEditor = InputEditor::New()
-      .SetMarkupEnabled(true)
-      .SetText("<font family='DejaVu Sans'><color value='#FF00FF'>Magenta</color> <color value='#00AAFF'>Blue</color> <color value='#00CC66'>Green</color> text</font>")
-      .SetFontSize(20.0f)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetCursorWidth(2)
-      .SetCursorColor(UiColor(COLOR_DARK_TEXT))
-      .SetSelectionColor(UiColor(COLOR_LIGHT_BLUE))
-      .SetTextHandleEnabled(true)
-      .SetTextHandleColor(UiColor(0x000080))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(INPUT_EDITOR_HEIGHT)
-      .SetBackgroundColor(UiColor(COLOR_WHITE))
-      .SetPadding(Extents(12, 12, 12, 12))
-      .SetMaximumLength(500)
-      .SetLineHeight(1.5f)
-      .SetFocusable(true);
+    mInputEditor = InputEditor::New();
+    mInputEditor.SetMarkupEnabled(true);
+    mInputEditor.SetText("<font family='DejaVu Sans'><color value='#FF00FF'>Magenta</color> <color value='#00AAFF'>Blue</color> <color value='#00CC66'>Green</color> text</font>");
+    mInputEditor.SetFontSize(20.0f);
+    mInputEditor.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    mInputEditor.SetCursorWidth(2);
+    mInputEditor.SetCursorColor(UiColor(COLOR_DARK_TEXT));
+    mInputEditor.SetSelectionColor(UiColor(COLOR_LIGHT_BLUE));
+    mInputEditor.SetTextHandleEnabled(true);
+    mInputEditor.SetTextHandleColor(UiColor(0x000080));
+    mInputEditor.SetRequestedWidth(MATCH_PARENT);
+    mInputEditor.SetRequestedHeight(INPUT_EDITOR_HEIGHT);
+    mInputEditor.SetBackgroundColor(UiColor(COLOR_WHITE));
+    mInputEditor.SetPadding(Extents(12, 12, 12, 12));
+    mInputEditor.SetMaximumLength(500);
+    mInputEditor.SetLineHeight(1.5f);
+    mInputEditor.SetFocusable(true);
     mainContainer.Add(mInputEditor);
 
     // Connect TypingStyleChangedSignal
@@ -274,10 +277,10 @@ private:
     mainContainer.Add(CreateSectionLabel("Current Typing Style:"));
 
     // Color preview row
-    mTypingColorView = View::New()
-      .SetRequestedWidth(COLOR_PREVIEW_SIZE)
-      .SetRequestedHeight(COLOR_PREVIEW_SIZE)
-      .SetBackgroundColor(mInputEditor.GetTypingTextColor().GetRgba());
+    mTypingColorView = View::New();
+    mTypingColorView.SetRequestedWidth(COLOR_PREVIEW_SIZE);
+    mTypingColorView.SetRequestedHeight(COLOR_PREVIEW_SIZE);
+    mTypingColorView.SetBackgroundColor(mInputEditor.GetTypingTextColor().GetRgba());
     mainContainer.Add(CreateColorStateRow("Color:", mTypingColorView));
 
     // Font Family row
@@ -301,11 +304,11 @@ private:
     mainContainer.Add(CreateStateRow("Font Slant:", mTypingFontSlantLabel));
 
     // Scrollable button area
-    StackLayout buttonContainer = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetSpacing(STACK_SPACING)
-      .SetBackgroundColor(UiColor(0xEFEFEF));
+    StackLayout buttonContainer = StackLayout::New(StackOrientation::VERTICAL);
+    buttonContainer.SetRequestedWidth(MATCH_PARENT);
+    buttonContainer.SetRequestedHeight(WRAP_CONTENT);
+    buttonContainer.SetSpacing(STACK_SPACING);
+    buttonContainer.SetBackgroundColor(UiColor(0xEFEFEF));
 
     // Color buttons section
     buttonContainer.Add(CreateSectionLabel("Typing Text Color:"));
@@ -376,12 +379,12 @@ private:
     buttonContainer.Add(CreateButtonRow({normalSlantBtn, italicBtn}));
 
     // ScrollView for style buttons
-    ScrollView scrollView = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(0.0f)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetContent(buttonContainer);
+    ScrollView scrollView = ScrollView::New();
+    scrollView.SetScrollDirection(ScrollDirection::Vertical);
+    scrollView.SetRequestedWidth(MATCH_PARENT);
+    scrollView.SetRequestedHeight(0.0f);
+    scrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    scrollView.SetContent(buttonContainer);
 
     mainContainer.Add(scrollView);
 

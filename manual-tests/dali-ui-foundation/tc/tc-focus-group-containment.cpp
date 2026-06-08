@@ -47,79 +47,83 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    mStatusLabel = Label::New()
-                     .SetText("Set FocusGroup state, then use arrow keys")
-                     .SetFontSize(FONT_SIZE)
-                     .SetTextColor(UiColor(COLOR_TEXT))
-                     .SetRequestedWidth(MATCH_PARENT)
-                     .SetRequestedHeight(60.0f)
-                     .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                     .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                     .SetMultiLine(true);
+    mStatusLabel = Label::New();
+    mStatusLabel.SetText("Set FocusGroup state, then use arrow keys");
+    mStatusLabel.SetFontSize(FONT_SIZE);
+    mStatusLabel.SetTextColor(UiColor(COLOR_TEXT));
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(60.0f);
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetMultiLine(true);
 
-    mInsideA = Label::New()
-                 .SetText("Inside A")
-                 .SetFontSize(FONT_SIZE)
-                 .SetBackgroundColor(UiColor(COLOR_GROUP))
-                 .SetRequestedWidth(MATCH_PARENT)
-                 .SetRequestedHeight(60.0f)
-                 .SetFocusable(true)
-                 .SetTouchFocusable(true)
-                 .With([this](View& view)
-                 {
-                   ConnectFocusColor(view, COLOR_GROUP);
-                 });
+    Label insideA = Label::New();
+    insideA.SetText("Inside A");
+    insideA.SetFontSize(FONT_SIZE);
+    insideA.SetBackgroundColor(UiColor(COLOR_GROUP));
+    insideA.SetRequestedWidth(MATCH_PARENT);
+    insideA.SetRequestedHeight(60.0f);
+    insideA.SetFocusable(true);
+    insideA.SetTouchFocusable(true);
+    ConnectFocusColor(insideA, COLOR_GROUP);
+    mInsideA = insideA;
 
-    mInsideB = Label::New()
-                 .SetText("Inside B")
-                 .SetFontSize(FONT_SIZE)
-                 .SetBackgroundColor(UiColor(COLOR_GROUP))
-                 .SetRequestedWidth(MATCH_PARENT)
-                 .SetRequestedHeight(60.0f)
-                 .SetFocusable(true)
-                 .SetTouchFocusable(true)
-                 .With([this](View& view)
-                 {
-                   ConnectFocusColor(view, COLOR_GROUP);
-                 });
+    Label insideB = Label::New();
+    insideB.SetText("Inside B");
+    insideB.SetFontSize(FONT_SIZE);
+    insideB.SetBackgroundColor(UiColor(COLOR_GROUP));
+    insideB.SetRequestedWidth(MATCH_PARENT);
+    insideB.SetRequestedHeight(60.0f);
+    insideB.SetFocusable(true);
+    insideB.SetTouchFocusable(true);
+    ConnectFocusColor(insideB, COLOR_GROUP);
+    mInsideB = insideB;
 
-    mGroup = StackLayout::New(StackOrientation::VERTICAL)
-               .SetRequestedWidth(MATCH_PARENT)
-               .SetRequestedHeight(132.0f)
-               .Children({mInsideA, mInsideB});
+    mGroup = StackLayout::New(StackOrientation::VERTICAL);
+    mGroup.SetRequestedWidth(MATCH_PARENT);
+    mGroup.SetRequestedHeight(132.0f);
+    mGroup.AddChildren({mInsideA, mInsideB});
 
-    mOutside = Label::New()
-                 .SetText("Outside")
-                 .SetFontSize(FONT_SIZE)
-                 .SetBackgroundColor(UiColor(COLOR_DEFAULT))
-                 .SetRequestedWidth(MATCH_PARENT)
-                 .SetRequestedHeight(60.0f)
-                 .SetFocusable(true)
-                 .SetTouchFocusable(true)
-                 .With([this](View& view)
-                 {
-                   ConnectFocusColor(view, COLOR_DEFAULT);
-                 });
+    Label outside = Label::New();
+    outside.SetText("Outside");
+    outside.SetFontSize(FONT_SIZE);
+    outside.SetBackgroundColor(UiColor(COLOR_DEFAULT));
+    outside.SetRequestedWidth(MATCH_PARENT);
+    outside.SetRequestedHeight(60.0f);
+    outside.SetFocusable(true);
+    outside.SetTouchFocusable(true);
+    ConnectFocusColor(outside, COLOR_DEFAULT);
+    mOutside = outside;
 
-    contentArea.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetBackgroundColor(UiColor(COLOR_BG))
-        .SetPadding(Extents(GAP, GAP, GAP, GAP))
-        .Children({mStatusLabel,
-                   CreateButton("Set FocusGroup OFF", [this]() {
-                     FocusManager::Get().SetAsFocusGroup(mGroup, false);
-                     mStatusLabel.SetText("FocusGroup: OFF");
-                   }),
-                   CreateButton("Set FocusGroup ON", [this]() {
-                     FocusManager::Get().SetAsFocusGroup(mGroup, true);
-                     mStatusLabel.SetText("FocusGroup: ON (default navigation scoped)");
-                   }),
-                   Label::New().SetText("Group:").SetFontSize(FONT_SIZE).SetTextColor(UiColor(COLOR_TEXT)),
-                   mGroup,
-                   Label::New().SetText("Outside:").SetFontSize(FONT_SIZE).SetTextColor(UiColor(COLOR_TEXT)),
-                   mOutside}));
+    Label groupLabel = Label::New();
+    groupLabel.SetText("Group:");
+    groupLabel.SetFontSize(FONT_SIZE);
+    groupLabel.SetTextColor(UiColor(COLOR_TEXT));
+
+    Label outsideLabel = Label::New();
+    outsideLabel.SetText("Outside:");
+    outsideLabel.SetFontSize(FONT_SIZE);
+    outsideLabel.SetTextColor(UiColor(COLOR_TEXT));
+
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(UiColor(COLOR_BG));
+    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.AddChildren({mStatusLabel,
+                      CreateButton("Set FocusGroup OFF", [this]() {
+                        FocusManager::Get().SetAsFocusGroup(mGroup, false);
+                        mStatusLabel.SetText("FocusGroup: OFF");
+                      }),
+                      CreateButton("Set FocusGroup ON", [this]() {
+                        FocusManager::Get().SetAsFocusGroup(mGroup, true);
+                        mStatusLabel.SetText("FocusGroup: ON (default navigation scoped)");
+                      }),
+                      groupLabel,
+                      mGroup,
+                      outsideLabel,
+                      mOutside});
+    contentArea.Add(root);
 
     // Start focus on Inside A
     FocusManager::Get().RequestFocus(mInsideA);
@@ -128,16 +132,16 @@ public:
 private:
   View CreateButton(const char* text, std::function<void()> onClick)
   {
-    auto btn = Label::New()
-                 .SetText(text)
-                 .SetFontSize(FONT_SIZE)
-                 .SetTextColor(UiColor(0xFFFFFF))
-                 .SetBackgroundColor(UiColor(0x4285F4))
-                 .SetRequestedWidth(MATCH_PARENT)
-                 .SetRequestedHeight(44.0f)
-                 .SetMargin(Extents(0, 0, 4, 4))
-                 .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                 .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    auto btn = Label::New();
+    btn.SetText(text);
+    btn.SetFontSize(FONT_SIZE);
+    btn.SetTextColor(UiColor(0xFFFFFF));
+    btn.SetBackgroundColor(UiColor(0x4285F4));
+    btn.SetRequestedWidth(MATCH_PARENT);
+    btn.SetRequestedHeight(44.0f);
+    btn.SetMargin(Extents(0, 0, 4, 4));
+    btn.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    btn.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
     btn.TouchedSignal().Connect(this, [onClick](Actor, TouchEvent e) -> bool {
       if(e.GetState(0) == PointState::UP) onClick();

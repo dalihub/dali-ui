@@ -443,9 +443,8 @@ int UtcDaliInputFieldSelectionEnabled(void)
   inputField.SetSelectionEnabled(true);
   DALI_TEST_EQUALS(inputField.IsSelectionEnabled(), true, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetSelectionEnabled(false);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetSelectionEnabled(false);
 
   END_TEST;
 }
@@ -480,9 +479,8 @@ int UtcDaliInputFieldTextHandle(void)
   inputField.SetTextHandleEnabled(false);
   DALI_TEST_EQUALS(inputField.IsTextHandleEnabled(), false, TEST_LOCATION);
 
-  // Test chaining for SetTextHandleEnabled
-  InputField& ref = inputField.SetTextHandleEnabled(true);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter for SetTextHandleEnabled
+  inputField.SetTextHandleEnabled(true);
 
   // Test SetTextHandleColor
   UiColor handleColor(Color::BLUE);
@@ -493,9 +491,8 @@ int UtcDaliInputFieldTextHandle(void)
   inputField.SetTextHandleColor(handleColor2);
   DALI_TEST_EQUALS(inputField.GetTextHandleColor().GetRgba(), Color::RED, TEST_LOCATION);
 
-  // Test chaining for SetTextHandleColor
-  InputField& ref2 = inputField.SetTextHandleColor(Color::GREEN);
-  DALI_TEST_CHECK(&ref2 == &inputField);
+  // Test setter for SetTextHandleColor
+  inputField.SetTextHandleColor(Color::GREEN);
 
   END_TEST;
 }
@@ -530,12 +527,10 @@ int UtcDaliInputFieldHandleImages(void)
   inputField.SetSelectionHandlePressedImageRight("selection-right-pressed.png");
   DALI_TEST_EQUALS(inputField.GetSelectionHandlePressedImageRight(), std::string("selection-right-pressed.png"), TEST_LOCATION);
 
-  // Test chaining for a couple of setters
-  InputField& ref = inputField.SetCursorHandleImage("new-cursor.png");
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter for a couple of setters
+  inputField.SetCursorHandleImage("new-cursor.png");
 
-  InputField& ref2 = inputField.SetSelectionHandleImageLeft("new-left.png");
-  DALI_TEST_CHECK(&ref2 == &inputField);
+  inputField.SetSelectionHandleImageLeft("new-left.png");
 
   END_TEST;
 }
@@ -566,9 +561,8 @@ int UtcDaliInputFieldPasswordMode(void)
   // Default should be NONE
   DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::NONE, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetPasswordMode(Text::PasswordMode::HIDE_ALL);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetPasswordMode(Text::PasswordMode::HIDE_ALL);
 
   inputField.SetPasswordMode(Text::PasswordMode::HIDE_ALL);
   DALI_TEST_EQUALS(inputField.GetPasswordMode(), Text::PasswordMode::HIDE_ALL, TEST_LOCATION);
@@ -589,8 +583,7 @@ int UtcDaliInputFieldPasswordMaskCharacter(void)
   DALI_TEST_CHECK(inputField);
 
   // Test with '*' (U+002A)
-  InputField& ref = inputField.SetPasswordMaskCharacter(0x2A);
-  DALI_TEST_CHECK(&ref == &inputField);
+  inputField.SetPasswordMaskCharacter(0x2A);
   DALI_TEST_EQUALS(inputField.GetPasswordMaskCharacter(), 0x2Au, TEST_LOCATION);
 
   // Test with '•' (U+2022)
@@ -607,8 +600,7 @@ int UtcDaliInputFieldPasswordRevealDuration(void)
   DALI_TEST_CHECK(inputField);
 
   // Test with 0
-  InputField& ref = inputField.SetPasswordRevealDuration(0u);
-  DALI_TEST_CHECK(&ref == &inputField);
+  inputField.SetPasswordRevealDuration(0u);
   DALI_TEST_EQUALS(inputField.GetPasswordRevealDuration(), 0u, TEST_LOCATION);
 
   // Test with 1000ms
@@ -688,9 +680,8 @@ int UtcDaliInputFieldEditable(void)
   inputField.SetEditable(true);
   DALI_TEST_EQUALS(inputField.IsEditable(), true, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetEditable(false);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetEditable(false);
 
   END_TEST;
 }
@@ -728,9 +719,8 @@ int UtcDaliInputFieldMarkupEnabled(void)
   inputField.SetMarkupEnabled(false);
   DALI_TEST_EQUALS(inputField.IsMarkupEnabled(), false, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetMarkupEnabled(true);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetMarkupEnabled(true);
 
   END_TEST;
 }
@@ -879,9 +869,8 @@ int UtcDaliInputFieldTypingTextColor(void)
   inputField.SetTypingTextColor(color2);
   DALI_TEST_EQUALS(inputField.GetTypingTextColor().GetRgba(), Color::RED, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetTypingTextColor(Color::GREEN);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetTypingTextColor(Color::GREEN);
   DALI_TEST_EQUALS(inputField.GetTypingTextColor().GetRgba(), Color::GREEN, TEST_LOCATION);
 
   END_TEST;
@@ -899,9 +888,8 @@ int UtcDaliInputFieldTypingFontFamily(void)
   inputField.SetTypingFontFamily("Roboto");
   DALI_TEST_EQUALS(inputField.GetTypingFontFamily(), std::string("Roboto"), TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetTypingFontFamily("DejaVu Sans");
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetTypingFontFamily("DejaVu Sans");
   DALI_TEST_EQUALS(inputField.GetTypingFontFamily(), std::string("DejaVu Sans"), TEST_LOCATION);
 
   END_TEST;
@@ -921,9 +909,8 @@ int UtcDaliInputFieldTypingFontSize(void)
   // TODO: Enable once UTC provides a font client for FONT_SIZE property resolution.
   // DALI_TEST_EQUALS(inputField.GetTypingFontSize(), 32.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetTypingFontSize(28.0f);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetTypingFontSize(28.0f);
   // TODO: Enable once UTC provides a font client for FONT_SIZE property resolution.
   // DALI_TEST_EQUALS(inputField.GetTypingFontSize(), 28.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
@@ -942,9 +929,8 @@ int UtcDaliInputFieldTypingFontWeight(void)
   inputField.SetTypingFontWeight(Text::FontWeight::LIGHT);
   DALI_TEST_EQUALS(inputField.GetTypingFontWeight(), Text::FontWeight::LIGHT, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetTypingFontWeight(Text::FontWeight::MEDIUM);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetTypingFontWeight(Text::FontWeight::MEDIUM);
   DALI_TEST_EQUALS(inputField.GetTypingFontWeight(), Text::FontWeight::MEDIUM, TEST_LOCATION);
 
   END_TEST;
@@ -962,9 +948,8 @@ int UtcDaliInputFieldTypingFontWidth(void)
   inputField.SetTypingFontWidth(Text::FontWidth::CONDENSED);
   DALI_TEST_EQUALS(inputField.GetTypingFontWidth(), Text::FontWidth::CONDENSED, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetTypingFontWidth(Text::FontWidth::NORMAL);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetTypingFontWidth(Text::FontWidth::NORMAL);
   DALI_TEST_EQUALS(inputField.GetTypingFontWidth(), Text::FontWidth::NORMAL, TEST_LOCATION);
 
   END_TEST;
@@ -982,9 +967,8 @@ int UtcDaliInputFieldTypingFontSlant(void)
   inputField.SetTypingFontSlant(Text::FontSlant::OBLIQUE);
   DALI_TEST_EQUALS(inputField.GetTypingFontSlant(), Text::FontSlant::OBLIQUE, TEST_LOCATION);
 
-  // Test chaining
-  InputField& ref = inputField.SetTypingFontSlant(Text::FontSlant::NORMAL);
-  DALI_TEST_CHECK(&ref == &inputField);
+  // Test setter
+  inputField.SetTypingFontSlant(Text::FontSlant::NORMAL);
   DALI_TEST_EQUALS(inputField.GetTypingFontSlant(), Text::FontSlant::NORMAL, TEST_LOCATION);
 
   END_TEST;

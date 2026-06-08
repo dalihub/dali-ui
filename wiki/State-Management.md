@@ -115,15 +115,13 @@ Predefined states are managed automatically by the system:
 view.SetEnabled(false);
 
 // PSEUDO_DISABLED
-view.AsInteractive([](InteractiveTrait& t) {
-  t.SetPseudoDisabled(true);
-});
+InteractiveTrait interactive = view.AsInteractive();
+interactive.SetPseudoDisabled(true);
 
 // SELECTED (toggle on click)
-view.AsSelectable([](SelectableTrait& t) {
-  t.SetSelected(true);
-  t.EnableToggleByClick(true);
-});
+SelectableTrait selectable = view.AsSelectable();
+selectable.SetSelected(true);
+selectable.EnableToggleByClick(true);
 ```
 
 <br/>

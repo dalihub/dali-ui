@@ -55,32 +55,32 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    contentArea.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetBackgroundColor(UiColor(COLOR_BG))
-        .SetPadding(Extents(CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD))
-        .Children({
-          CreateLabel(0),
-          CreateLabel(1),
-          CreateLabel(2)
-        }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(UiColor(COLOR_BG));
+    root.SetPadding(Extents(CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD));
+    root.AddChildren({
+      CreateLabel(0),
+      CreateLabel(1),
+      CreateLabel(2)
+    });
+    contentArea.Add(root);
   }
 
   Label CreateLabel(int index)
   {
-    mLabels[index] = Label::New()
-      .SetFontSize(FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(LABEL_HEIGHT)
-      .SetBackgroundColor(UiColor(LABEL_COLORS[index]))
-      .SetMargin(Extents(0, 0, 0, LABEL_MARGIN))
-      .SetMultiLine(true)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetFocusable(true);
+    mLabels[index] = Label::New();
+    mLabels[index].SetFontSize(FONT_SIZE);
+    mLabels[index].SetTextColor(UiColor(COLOR_TEXT));
+    mLabels[index].SetRequestedWidth(MATCH_PARENT);
+    mLabels[index].SetRequestedHeight(LABEL_HEIGHT);
+    mLabels[index].SetBackgroundColor(UiColor(LABEL_COLORS[index]));
+    mLabels[index].SetMargin(Extents(0, 0, 0, LABEL_MARGIN));
+    mLabels[index].SetMultiLine(true);
+    mLabels[index].SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mLabels[index].SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mLabels[index].SetFocusable(true);
 
     UpdateText(index);
 

@@ -500,7 +500,7 @@ public: // Non-virtual API (safe to reorder / extend)
   void ClearRenderEffect();
 
   /**
-   * @copydoc Ui::View::EnsureInteractiveTrait()
+   * @brief Ensures this View has an interaction trait and returns it.
    */
   Ui::InteractiveTrait EnsureInteractiveTrait();
 
@@ -510,7 +510,7 @@ public: // Non-virtual API (safe to reorder / extend)
   bool IsInteractive() const;
 
   /**
-   * @copydoc Ui::View::EnsureSelectableTrait()
+   * @brief Ensures this View has a selectable trait and returns it.
    */
   Ui::SelectableTrait EnsureSelectableTrait();
 

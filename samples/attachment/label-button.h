@@ -29,9 +29,6 @@ public:
   // [MANDATORY] Define DownCast
   static LabelButton DownCast(BaseHandle handle);
 
-  // [MANDATORY] Overload chain method
-  DALI_UI_CHAIN_LABEL_METHODS(LabelButton)
-
 private:
   explicit LabelButton(Label view);
 

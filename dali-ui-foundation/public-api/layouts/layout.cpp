@@ -14,12 +14,8 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-foundation/public-api/layouts/layout.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
@@ -34,11 +30,7 @@ Layout::Layout()
 Layout Layout::New()
 {
   Integration::LayoutImplPtr impl = Integration::LayoutImpl::New();
-
-  // Pass ownership to handle
-  Layout handle(*impl);
-
-  // Second-phase initialization
+  Layout                     handle(*impl);
   impl->Initialize();
 
   return handle;
@@ -88,10 +80,6 @@ Layout::Layout(Dali::Internal::CustomActor* internal)
 {
   VerifyCustomActorPointer<Integration::LayoutImpl>(internal);
 }
-
-// =============================================================================
-// Layout Properties API
-// =============================================================================
 
 } // namespace Ui
 } // namespace Dali

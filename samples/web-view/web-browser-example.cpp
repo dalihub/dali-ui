@@ -36,15 +36,16 @@ const float FONT_SIZE_STS  = 15.0f;
 
 Label MakeNavButton(const char* text)
 {
-  return Label::New(text)
-    .SetFontSize(FONT_SIZE_BTN)
-    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-    .SetVerticalTextAlignment(Text::Alignment::CENTER)
-    .SetBackgroundColor(Color::IVORY)
-    .SetTextColor(Color::DARK_BLUE)
-    .SetRequestedWidth(NAV_BTN_WIDTH)
-    .SetRequestedHeight(TOOLBAR_HEIGHT)
-    .SetFocusable(true);
+  Label button = Label::New(text);
+  button.SetFontSize(FONT_SIZE_BTN);
+  button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+  button.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  button.SetBackgroundColor(Color::IVORY);
+  button.SetTextColor(Color::DARK_BLUE);
+  button.SetRequestedWidth(NAV_BTN_WIDTH);
+  button.SetRequestedHeight(TOOLBAR_HEIGHT);
+  button.SetFocusable(true);
+  return button;
 }
 
 } // namespace
@@ -78,38 +79,36 @@ private:
     mBtnForward = MakeNavButton("Forward");
     mBtnReload  = MakeNavButton("Reload");
 
-    mUrlBar = InputField::New()
-      .SetPlaceholder("Enter URL")
-      .SetPlaceholderColor(Color::GRAY)
-      .SetText(Dali::String(HOME_URL))
-      .SetFontSize(FONT_SIZE_URL)
-      .SetTextColor(Color::DARK_BLUE)
-      .SetBackgroundColor(Color::LIGHT_SKY_BLUE)
-      .SetCursorWidth(2)
-      .SetRequestedWidth(0.0f)
-      .SetRequestedHeight(TOOLBAR_HEIGHT)
-      .SetPadding(Extents(10, 10, 0, 0))
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetFocusable(true)
-      .SetLayoutParams(StackLayoutParams::New()
-                         .SetWeight(1.0f)
-                         .SetAlignment(LayoutAlignment::FILL));
+    mUrlBar = InputField::New();
+    mUrlBar.SetPlaceholder("Enter URL");
+    mUrlBar.SetPlaceholderColor(Color::GRAY);
+    mUrlBar.SetText(Dali::String(HOME_URL));
+    mUrlBar.SetFontSize(FONT_SIZE_URL);
+    mUrlBar.SetTextColor(Color::DARK_BLUE);
+    mUrlBar.SetBackgroundColor(Color::LIGHT_SKY_BLUE);
+    mUrlBar.SetCursorWidth(2);
+    mUrlBar.SetRequestedWidth(0.0f);
+    mUrlBar.SetRequestedHeight(TOOLBAR_HEIGHT);
+    mUrlBar.SetPadding(Extents(10, 10, 0, 0));
+    mUrlBar.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mUrlBar.SetFocusable(true);
+    mUrlBar.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 
-    mBtnGo = Label::New("Go")
-      .SetFontSize(FONT_SIZE_BTN)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetTextColor(Color::WHITE)
-      .SetBackgroundColor(Color::DARK_ORANGE)
-      .SetRequestedWidth(GO_BTN_WIDTH)
-      .SetRequestedHeight(TOOLBAR_HEIGHT)
-      .SetFocusable(true);
+    mBtnGo = Label::New("Go");
+    mBtnGo.SetFontSize(FONT_SIZE_BTN);
+    mBtnGo.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mBtnGo.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mBtnGo.SetTextColor(Color::WHITE);
+    mBtnGo.SetBackgroundColor(Color::DARK_ORANGE);
+    mBtnGo.SetRequestedWidth(GO_BTN_WIDTH);
+    mBtnGo.SetRequestedHeight(TOOLBAR_HEIGHT);
+    mBtnGo.SetFocusable(true);
 
-    StackLayout toolbar = StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(TOOLBAR_HEIGHT)
-      .SetSpacing(2.0f)
-      .SetBackgroundColor(Color::AQUA_MARINE);
+    StackLayout toolbar = StackLayout::New(StackOrientation::HORIZONTAL);
+    toolbar.SetRequestedWidth(MATCH_PARENT);
+    toolbar.SetRequestedHeight(TOOLBAR_HEIGHT);
+    toolbar.SetSpacing(2.0f);
+    toolbar.SetBackgroundColor(Color::AQUA_MARINE);
 
       toolbar.Add(mBtnBack);
       toolbar.Add(mBtnForward);
@@ -117,26 +116,26 @@ private:
       toolbar.Add(mUrlBar);
       toolbar.Add(mBtnGo);
 
-    mStatusLabel = Label::New("Ready")
-      .SetFontSize(FONT_SIZE_STS)
-      .SetHorizontalTextAlignment(Text::Alignment::START)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetTextColor(Color::YELLOW)
-      .SetBackgroundColor(Color::DEEP_PINK)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(STATUS_HEIGHT)
-      .SetPadding(Extents(8, 8, 0, 0));
+    mStatusLabel = Label::New("Ready");
+    mStatusLabel.SetFontSize(FONT_SIZE_STS);
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::START);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetTextColor(Color::YELLOW);
+    mStatusLabel.SetBackgroundColor(Color::DEEP_PINK);
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(STATUS_HEIGHT);
+    mStatusLabel.SetPadding(Extents(8, 8, 0, 0));
 
     float webViewHeight = static_cast<float>(mWindowSize.height) - TOOLBAR_HEIGHT - STATUS_HEIGHT;
-    mWebView = WebView::New()
-      .SetRequestedWidth(static_cast<float>(mWindowSize.width))
-      .SetRequestedHeight(webViewHeight)
-      .SetRequestedPositionX(0.0f)
-      .SetRequestedPositionY(TOOLBAR_HEIGHT + STATUS_HEIGHT);
+    mWebView = WebView::New();
+    mWebView.SetRequestedWidth(static_cast<float>(mWindowSize.width));
+    mWebView.SetRequestedHeight(webViewHeight);
+    mWebView.SetRequestedPositionX(0.0f);
+    mWebView.SetRequestedPositionY(TOOLBAR_HEIGHT + STATUS_HEIGHT);
 
-    StackLayout root = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT);
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
 
       root.Add(toolbar);
       root.Add(mStatusLabel);

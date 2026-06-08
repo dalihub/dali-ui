@@ -14,12 +14,8 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-foundation/public-api/layouts/flex-layout.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/flex-layout-impl.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout.h>
 
 namespace Dali
 {
@@ -62,11 +58,7 @@ FlexLayout& FlexLayout::operator=(FlexLayout&& rhs) noexcept
 FlexLayout FlexLayout::New()
 {
   Integration::FlexLayoutImplPtr impl = Integration::FlexLayoutImpl::New();
-
-  // Pass ownership to handle
-  FlexLayout handle(*impl);
-
-  // Second-phase initialization
+  FlexLayout                     handle(*impl);
   impl->Initialize();
 
   return handle;
@@ -88,10 +80,9 @@ FlexLayout::FlexLayout(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::FlexLayoutImpl>(internal);
 }
 
-FlexLayout& FlexLayout::SetDirection(FlexDirection direction)
+void FlexLayout::SetDirection(FlexDirection direction)
 {
   GetImpl(*this).SetDirection(direction);
-  return *this;
 }
 
 FlexDirection FlexLayout::GetDirection() const
@@ -99,10 +90,9 @@ FlexDirection FlexLayout::GetDirection() const
   return GetImpl(*this).GetDirection();
 }
 
-FlexLayout& FlexLayout::SetWrap(FlexWrap wrap)
+void FlexLayout::SetWrap(FlexWrap wrap)
 {
   GetImpl(*this).SetWrap(wrap);
-  return *this;
 }
 
 FlexWrap FlexLayout::GetWrap() const
@@ -110,10 +100,9 @@ FlexWrap FlexLayout::GetWrap() const
   return GetImpl(*this).GetWrap();
 }
 
-FlexLayout& FlexLayout::SetJustifyContent(FlexJustify justify)
+void FlexLayout::SetJustifyContent(FlexJustify justify)
 {
   GetImpl(*this).SetJustifyContent(justify);
-  return *this;
 }
 
 FlexJustify FlexLayout::GetJustifyContent() const
@@ -121,10 +110,9 @@ FlexJustify FlexLayout::GetJustifyContent() const
   return GetImpl(*this).GetJustifyContent();
 }
 
-FlexLayout& FlexLayout::SetAlignItems(FlexAlign align)
+void FlexLayout::SetAlignItems(FlexAlign align)
 {
   GetImpl(*this).SetAlignItems(align);
-  return *this;
 }
 
 FlexAlign FlexLayout::GetAlignItems() const
@@ -132,10 +120,9 @@ FlexAlign FlexLayout::GetAlignItems() const
   return GetImpl(*this).GetAlignItems();
 }
 
-FlexLayout& FlexLayout::SetAlignContent(FlexAlign align)
+void FlexLayout::SetAlignContent(FlexAlign align)
 {
   GetImpl(*this).SetAlignContent(align);
-  return *this;
 }
 
 FlexAlign FlexLayout::GetAlignContent() const

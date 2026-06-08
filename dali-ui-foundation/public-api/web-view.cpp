@@ -40,10 +40,6 @@ const Integration::WebViewImpl& GetImpl(const WebView& obj)
 
 } // anonymous namespace
 
-// ---------------------------------------------------------------------------
-// Construction & Destruction
-// ---------------------------------------------------------------------------
-
 WebView::WebView()
 {
 }
@@ -56,10 +52,6 @@ WebView& WebView::operator=(WebView&& rhs) noexcept = default;
 WebView::~WebView()
 {
 }
-
-// ---------------------------------------------------------------------------
-// Static factories
-// ---------------------------------------------------------------------------
 
 WebView WebView::New()
 {
@@ -86,10 +78,6 @@ WebView WebView::DownCast(BaseHandle handle)
   return Ui::View::DownCast<WebView, Ui::Integration::WebViewImpl>(handle);
 }
 
-// ---------------------------------------------------------------------------
-// Internal construction (not for application use)
-// ---------------------------------------------------------------------------
-
 WebView::WebView(Integration::WebViewImpl& implementation)
 : View(implementation)
 {
@@ -101,19 +89,14 @@ WebView::WebView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::WebViewImpl>(internal);
 }
 
-// ---------------------------------------------------------------------------
-// URL & User Agent (Fluent API)
-// ---------------------------------------------------------------------------
-
 Dali::String WebView::GetUrl() const
 {
   return GetImpl(*this).GetUrl();
 }
 
-WebView& WebView::SetUserAgent(const Dali::String& userAgent)
+void WebView::SetUserAgent(const Dali::String& userAgent)
 {
   GetImpl(*this).SetUserAgent(userAgent);
-  return *this;
 }
 
 Dali::String WebView::GetUserAgent() const
@@ -121,49 +104,35 @@ Dali::String WebView::GetUserAgent() const
   return GetImpl(*this).GetUserAgent();
 }
 
-// ---------------------------------------------------------------------------
-// Page Loading (Fluent API)
-// ---------------------------------------------------------------------------
-
-WebView& WebView::LoadUrl(const Dali::String& url)
+void WebView::LoadUrl(const Dali::String& url)
 {
   GetImpl(*this).LoadUrl(url);
-  return *this;
 }
 
-WebView& WebView::LoadHtmlString(const Dali::String& htmlString)
+void WebView::LoadHtmlString(const Dali::String& htmlString)
 {
   GetImpl(*this).LoadHtmlString(htmlString);
-  return *this;
 }
 
-WebView& WebView::Reload()
+void WebView::Reload()
 {
   GetImpl(*this).Reload();
-  return *this;
 }
 
-WebView& WebView::StopLoading()
+void WebView::StopLoading()
 {
   GetImpl(*this).StopLoading();
-  return *this;
 }
 
-WebView& WebView::Suspend()
+void WebView::Suspend()
 {
   GetImpl(*this).Suspend();
-  return *this;
 }
 
-WebView& WebView::Resume()
+void WebView::Resume()
 {
   GetImpl(*this).Resume();
-  return *this;
 }
-
-// ---------------------------------------------------------------------------
-// Page Loading (Non-chainable)
-// ---------------------------------------------------------------------------
 
 bool WebView::LoadHtmlStringOverrideCurrentEntry(const Dali::String& html, const Dali::String& basicUri, const Dali::String& unreachableUrl)
 {
@@ -185,10 +154,6 @@ float WebView::GetLoadProgressPercentage() const
   return GetImpl(*this).GetLoadProgressPercentage();
 }
 
-// ---------------------------------------------------------------------------
-// Custom Headers
-// ---------------------------------------------------------------------------
-
 bool WebView::AddCustomHeader(const Dali::String& name, const Dali::String& value)
 {
   return GetImpl(*this).AddCustomHeader(name, value);
@@ -198,10 +163,6 @@ bool WebView::RemoveCustomHeader(const Dali::String& name)
 {
   return GetImpl(*this).RemoveCustomHeader(name);
 }
-
-// ---------------------------------------------------------------------------
-// Scroll (Getters)
-// ---------------------------------------------------------------------------
 
 Dali::Vector2 WebView::GetScrollPosition() const
 {
@@ -218,10 +179,6 @@ Dali::Vector2 WebView::GetContentSize() const
   return GetImpl(*this).GetContentSize();
 }
 
-// ---------------------------------------------------------------------------
-// Scroll (Actions)
-// ---------------------------------------------------------------------------
-
 void WebView::ScrollBy(int32_t deltaX, int32_t deltaY)
 {
   GetImpl(*this).ScrollBy(deltaX, deltaY);
@@ -232,31 +189,20 @@ bool WebView::ScrollEdgeBy(int32_t deltaX, int32_t deltaY)
   return GetImpl(*this).ScrollEdgeBy(deltaX, deltaY);
 }
 
-// ---------------------------------------------------------------------------
-// Navigation (Fluent API)
-// ---------------------------------------------------------------------------
-
-WebView& WebView::GoForward()
+void WebView::GoForward()
 {
   GetImpl(*this).GoForward();
-  return *this;
 }
 
-WebView& WebView::GoBack()
+void WebView::GoBack()
 {
   GetImpl(*this).GoBack();
-  return *this;
 }
 
-WebView& WebView::ClearHistory()
+void WebView::ClearHistory()
 {
   GetImpl(*this).ClearHistory();
-  return *this;
 }
-
-// ---------------------------------------------------------------------------
-// Navigation (Non-chainable)
-// ---------------------------------------------------------------------------
 
 bool WebView::CanGoForward()
 {
@@ -288,25 +234,15 @@ void WebView::ResumeNetworkLoading()
   GetImpl(*this).ResumeNetworkLoading();
 }
 
-// ---------------------------------------------------------------------------
-// Zoom (Fluent API)
-// ---------------------------------------------------------------------------
-
-WebView& WebView::SetPageZoomFactor(float zoomFactor)
+void WebView::SetPageZoomFactor(float zoomFactor)
 {
   GetImpl(*this).SetPageZoomFactor(zoomFactor);
-  return *this;
 }
 
-WebView& WebView::SetTextZoomFactor(float zoomFactor)
+void WebView::SetTextZoomFactor(float zoomFactor)
 {
   GetImpl(*this).SetTextZoomFactor(zoomFactor);
-  return *this;
 }
-
-// ---------------------------------------------------------------------------
-// Zoom (Getters)
-// ---------------------------------------------------------------------------
 
 float WebView::GetPageZoomFactor() const
 {
@@ -318,10 +254,6 @@ float WebView::GetTextZoomFactor() const
   return GetImpl(*this).GetTextZoomFactor();
 }
 
-// ---------------------------------------------------------------------------
-// Scale
-// ---------------------------------------------------------------------------
-
 void WebView::SetScaleFactor(float scaleFactor, Dali::Vector2 point)
 {
   GetImpl(*this).SetScaleFactor(scaleFactor, point);
@@ -331,10 +263,6 @@ float WebView::GetScaleFactor() const
 {
   return GetImpl(*this).GetScaleFactor();
 }
-
-// ---------------------------------------------------------------------------
-// Screenshot & Page Info
-// ---------------------------------------------------------------------------
 
 Dali::Ui::ImageView WebView::GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)
 {
@@ -366,59 +294,40 @@ void WebView::GetPlainTextAsynchronously(PlainTextCallback callback)
   GetImpl(*this).GetPlainTextAsynchronously(std::move(callback));
 }
 
-// ---------------------------------------------------------------------------
-// Document Appearance (Fluent API)
-// ---------------------------------------------------------------------------
-
-WebView& WebView::SetDocumentBackgroundColor(const Dali::Vector4& color)
+void WebView::SetDocumentBackgroundColor(const Dali::Vector4& color)
 {
   GetImpl(*this).SetDocumentBackgroundColor(color);
-  return *this;
 }
 
-WebView& WebView::SetTilesClearedWhenHidden(bool cleared)
+void WebView::SetTilesClearedWhenHidden(bool cleared)
 {
   GetImpl(*this).SetTilesClearedWhenHidden(cleared);
-  return *this;
 }
 
-WebView& WebView::SetTileCoverAreaMultiplier(float multiplier)
+void WebView::SetTileCoverAreaMultiplier(float multiplier)
 {
   GetImpl(*this).SetTileCoverAreaMultiplier(multiplier);
-  return *this;
 }
 
-WebView& WebView::SetCursorEnabledByClient(bool enabled)
+void WebView::SetCursorEnabledByClient(bool enabled)
 {
   GetImpl(*this).SetCursorEnabledByClient(enabled);
-  return *this;
 }
 
-// ---------------------------------------------------------------------------
-// Input & Video (Fluent API)
-// ---------------------------------------------------------------------------
-
-WebView& WebView::SetMouseEventsEnabled(bool enabled)
+void WebView::SetMouseEventsEnabled(bool enabled)
 {
   GetImpl(*this).SetMouseEventsEnabled(enabled);
-  return *this;
 }
 
-WebView& WebView::SetKeyEventsEnabled(bool enabled)
+void WebView::SetKeyEventsEnabled(bool enabled)
 {
   GetImpl(*this).SetKeyEventsEnabled(enabled);
-  return *this;
 }
 
-WebView& WebView::SetVideoHoleEnabled(bool enabled)
+void WebView::SetVideoHoleEnabled(bool enabled)
 {
   GetImpl(*this).SetVideoHoleEnabled(enabled);
-  return *this;
 }
-
-// ---------------------------------------------------------------------------
-// Input & Video (Getters)
-// ---------------------------------------------------------------------------
 
 bool WebView::GetMouseEventsEnabled() const
 {
@@ -434,10 +343,6 @@ bool WebView::GetVideoHoleEnabled() const
 {
   return GetImpl(*this).GetVideoHoleEnabled();
 }
-
-// ---------------------------------------------------------------------------
-// Input & Video (Actions)
-// ---------------------------------------------------------------------------
 
 void WebView::FeedMouseWheel(bool yDirection, int step, int x, int y)
 {
@@ -458,10 +363,6 @@ bool WebView::CheckVideoPlayingAsynchronously(VideoPlayingCallback callback)
 {
   return GetImpl(*this).CheckVideoPlayingAsynchronously(std::move(callback));
 }
-
-// ---------------------------------------------------------------------------
-// JavaScript
-// ---------------------------------------------------------------------------
 
 void WebView::EvaluateJavaScript(const Dali::String& script)
 {
@@ -508,10 +409,6 @@ void WebView::JavaScriptPromptReply(const Dali::String& result)
   GetImpl(*this).JavaScriptPromptReply(result);
 }
 
-// ---------------------------------------------------------------------------
-// Signals - Page Loading
-// ---------------------------------------------------------------------------
-
 WebView::PageLoadStartedSignalType& WebView::PageLoadStartedSignal()
 {
   return GetImpl(*this).mPageLoadStartedSignal;
@@ -527,18 +424,10 @@ WebView::PageLoadFinishedSignalType& WebView::PageLoadFinishedSignal()
   return GetImpl(*this).mPageLoadFinishedSignal;
 }
 
-// ---------------------------------------------------------------------------
-// Signals - Navigation
-// ---------------------------------------------------------------------------
-
 WebView::UrlChangedSignalType& WebView::UrlChangedSignal()
 {
   return GetImpl(*this).mUrlChangedSignal;
 }
-
-// ---------------------------------------------------------------------------
-// Signals - Scroll
-// ---------------------------------------------------------------------------
 
 WebView::ScrollEdgeReachedSignalType& WebView::ScrollEdgeReachedSignal()
 {
@@ -550,18 +439,10 @@ WebView::OverScrolledSignalType& WebView::OverScrolledSignal()
   return GetImpl(*this).mOverScrolledSignal;
 }
 
-// ---------------------------------------------------------------------------
-// Signals - Rendering
-// ---------------------------------------------------------------------------
-
 WebView::FrameRenderedSignalType& WebView::FrameRenderedSignal()
 {
   return GetImpl(*this).mFrameRenderedSignal;
 }
-
-// ---------------------------------------------------------------------------
-// Signals - Fullscreen
-// ---------------------------------------------------------------------------
 
 WebView::FullscreenEnteredSignalType& WebView::FullscreenEnteredSignal()
 {
@@ -573,10 +454,6 @@ WebView::FullscreenExitedSignalType& WebView::FullscreenExitedSignal()
   return GetImpl(*this).mFullscreenExitedSignal;
 }
 
-// ---------------------------------------------------------------------------
-// Signals - Text Search & Geolocation
-// ---------------------------------------------------------------------------
-
 WebView::TextFoundSignalType& WebView::TextFoundSignal()
 {
   return GetImpl(*this).mTextFoundSignal;
@@ -586,10 +463,6 @@ WebView::GeolocationPermissionSignalType& WebView::GeolocationPermissionSignal()
 {
   return GetImpl(*this).mGeolocationPermissionSignal;
 }
-
-// ---------------------------------------------------------------------------
-// Signals - Process Events
-// ---------------------------------------------------------------------------
 
 WebView::WebProcessCrashedSignalType& WebView::WebProcessCrashedSignal()
 {

@@ -16,20 +16,16 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/signals/dali-signal.h>
-#include <functional>
-#include <utility>
-#include <vector>
-
-// INTERNAL INCLUDES
 #include <dali-ui-components/public-api/chart/chart-axis.h>
 #include <dali-ui-components/public-api/chart/chart-section.h>
 #include <dali-ui-components/public-api/chart/chart-series.h>
 #include <dali-ui-components/public-api/chart/chart-view-properties.h>
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/signals/dali-signal.h>
+#include <functional>
+#include <utility>
+#include <vector>
 
 namespace Dali
 {
@@ -152,10 +148,6 @@ public:
     };
   };
 
-  // =========================================================================
-  // Construction
-  // =========================================================================
-
   ChartView();
   ~ChartView();
 
@@ -167,94 +159,58 @@ public:
   ChartView& operator=(const ChartView& rhs);
   ChartView& operator=(ChartView&& rhs) noexcept;
 
-  // =========================================================================
-  // Series Management
-  // =========================================================================
+  void AddSeries(Ui::ChartSeries series);
+  void SetXAxis(Ui::ChartAxis axis);
+  void SetYAxis(Ui::ChartAxis axis);
+  bool RemoveSeries(const Dali::String& name);
+  void RemoveAllSeries();
 
-  ChartView& AddSeries(Ui::ChartSeries series);
-  ChartView& SetXAxis(Ui::ChartAxis axis);
-  ChartView& SetYAxis(Ui::ChartAxis axis);
-  bool       RemoveSeries(const Dali::String& name);
-  ChartView& RemoveAllSeries();
-
-  // =========================================================================
-  // Title
-  // =========================================================================
-
-  ChartView&   SetTitle(const Dali::String& title);
+  void         SetTitle(const Dali::String& title);
   Dali::String GetTitle() const;
 
-  ChartView&    SetTitlePosition(TitlePosition position);
+  void          SetTitlePosition(TitlePosition position);
   TitlePosition GetTitlePosition() const;
 
-  ChartView& SetTitleColor(const Vector4& color);
-  Vector4    GetTitleColor() const;
-
-  // =========================================================================
-  // Tooltip formatter
-  // =========================================================================
+  void    SetTitleColor(const Vector4& color);
+  Vector4 GetTitleColor() const;
 
   using TooltipFormatterType = std::function<Dali::String(const Dali::String& seriesName,
                                                           const Dali::String& xLabel,
                                                           float               dataY)>;
-  ChartView& SetTooltipFormatter(TooltipFormatterType formatter);
+  void SetTooltipFormatter(TooltipFormatterType formatter);
 
-  // =========================================================================
-  // Animation
-  // =========================================================================
+  void  SetAnimationDuration(float milliseconds);
+  float GetAnimationDuration() const;
 
-  ChartView& SetAnimationDuration(float milliseconds);
-  float      GetAnimationDuration() const;
-
-  ChartView& SetAnimationEasing(EasingType easing);
+  void       SetAnimationEasing(EasingType easing);
   EasingType GetAnimationEasing() const;
 
-  ChartView& SetUpdateThrottle(float milliseconds);
-  float      GetUpdateThrottle() const;
+  void  SetUpdateThrottle(float milliseconds);
+  float GetUpdateThrottle() const;
 
-  // =========================================================================
-  // Hit testing
-  // =========================================================================
+  void  SetHitThreshold(float pixels);
+  float GetHitThreshold() const;
 
-  ChartView& SetHitThreshold(float pixels);
-  float      GetHitThreshold() const;
-
-  ChartView&      SetFindingStrategy(FindingStrategy strategy);
+  void            SetFindingStrategy(FindingStrategy strategy);
   FindingStrategy GetFindingStrategy() const;
 
-  // =========================================================================
-  // Interaction control
-  // =========================================================================
+  void SetLegendToggleEnabled(bool enabled);
+  bool GetLegendToggleEnabled() const;
 
-  ChartView& SetLegendToggleEnabled(bool enabled);
-  bool       GetLegendToggleEnabled() const;
+  void SetZoomMode(int zoomModeFlags);
+  int  GetZoomMode() const;
 
-  // =========================================================================
-  // Zoom / Pan
-  // =========================================================================
+  void ResetZoom();
 
-  ChartView& SetZoomMode(int zoomModeFlags);
-  int        GetZoomMode() const;
+  void SetZoomClampEnabled(bool enabled);
+  bool IsZoomClampEnabled() const;
 
-  ChartView& ResetZoom();
+  void SetAutoFitYOnPan(bool enabled);
+  bool IsAutoFitYOnPan() const;
 
-  ChartView& SetZoomClampEnabled(bool enabled);
-  bool       IsZoomClampEnabled() const;
-
-  ChartView& SetAutoFitYOnPan(bool enabled);
-  bool       IsAutoFitYOnPan() const;
-
-  // =========================================================================
-  // Sections
-  // =========================================================================
-
-  ChartView& AddSection(ChartSection section);
-  ChartView& RemoveSection(ChartSection section);
-  ChartView& ClearSections();
-
-  // =========================================================================
-  // Signals
-  // =========================================================================
+  void AddSection(ChartSection section);
+  void RemoveSection(ChartSection section);
+  void ClearSections();
 
   using DataPointSelectedSignalType  = Signal<void(const ChartPointEventArgs&)>;
   using LegendItemTappedSignalType   = Signal<void(int, bool)>;
@@ -266,39 +222,35 @@ public:
   MultiPointSelectedSignalType& MultiPointSelectedSignal();
   ZoomedSignalType&             ZoomedSignal();
 
-  // =========================================================================
-  // Gauge
-  // =========================================================================
+  void  SetGaugeValue(float value);
+  float GetGaugeValue() const;
 
-  ChartView& SetGaugeValue(float value);
-  float      GetGaugeValue() const;
+  void  SetGaugeMinValue(float value);
+  float GetGaugeMinValue() const;
 
-  ChartView& SetGaugeMinValue(float value);
-  float      GetGaugeMinValue() const;
+  void  SetGaugeMaxValue(float value);
+  float GetGaugeMaxValue() const;
 
-  ChartView& SetGaugeMaxValue(float value);
-  float      GetGaugeMaxValue() const;
+  void  SetGaugeArcSpan(float degrees);
+  float GetGaugeArcSpan() const;
 
-  ChartView& SetGaugeArcSpan(float degrees);
-  float      GetGaugeArcSpan() const;
+  void  SetGaugeStartAngle(float degrees);
+  float GetGaugeStartAngle() const;
 
-  ChartView& SetGaugeStartAngle(float degrees);
-  float      GetGaugeStartAngle() const;
+  void  SetGaugeArcWidth(float ratio);
+  float GetGaugeArcWidth() const;
 
-  ChartView& SetGaugeArcWidth(float ratio);
-  float      GetGaugeArcWidth() const;
+  void    SetGaugeTrackColor(const Vector4& color);
+  Vector4 GetGaugeTrackColor() const;
 
-  ChartView& SetGaugeTrackColor(const Vector4& color);
-  Vector4    GetGaugeTrackColor() const;
+  void    SetGaugeProgressColor(const Vector4& color);
+  Vector4 GetGaugeProgressColor() const;
 
-  ChartView& SetGaugeProgressColor(const Vector4& color);
-  Vector4    GetGaugeProgressColor() const;
-
-  ChartView&   SetGaugeCenterLabel(const Dali::String& text);
+  void         SetGaugeCenterLabel(const Dali::String& text);
   Dali::String GetGaugeCenterLabel() const;
 
-  ChartView& AddGaugeRange(float fromValue, float toValue, const Vector4& color);
-  ChartView& ClearGaugeRanges();
+  void AddGaugeRange(float fromValue, float toValue, const Vector4& color);
+  void ClearGaugeRanges();
 
 public:
   /// @cond internal
@@ -307,7 +259,6 @@ public:
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(ChartView)
 };
 
 } // namespace Ui

@@ -114,12 +114,10 @@ Interaction | `view.AsInteractive()` | Converts View key/touch inputs into high-
 Selection | `view.AsSelectable()` | Toggles the selection state using the View's clicked interaction as a trigger <ul><li>Provided signal: `SelectionChanged`</li><li>Provided state: `SELECTED`</li></ul>
 
 ```cpp
-view.AsInteractive([&](InteractiveTrait trait)
+InteractiveTrait interactive = view.AsInteractive();
+interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& e)
 {
-  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& e)
-  {
-    // Clicked (touch tap or execution key press)
-  });
+  // Clicked (touch tap or execution key press)
 });
 ```
 

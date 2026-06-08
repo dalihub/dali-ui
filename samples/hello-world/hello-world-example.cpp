@@ -40,27 +40,29 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    window.Add(Layout::New() // Parent
-      .SetBackgroundColor(UiColor(0xFFFF00))
-      .SetRequestedWidth(200_spx)
-      .SetRequestedHeight(200_spx)
-      .Children({
-        InteractiveView::New() // Red child
-          .SetBackgroundColor(UiColor(0xFF0000))
-          .SetRequestedWidth(100_spx)
-          .SetRequestedHeight(100_spx)
-          .ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
-            mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
-            return true;
-          }),
-        View::New() // Blue child
-          .SetBackgroundColor(UiColor(0x0000FF))
-          .SetRequestedWidth(100_spx)
-          .SetRequestedHeight(100_spx)
-          .SetRequestedPositionX(100_spx)
-          .SetRequestedPositionY(100_spx)
-          .As(mSecondChild)
-      }));
+    Layout parent = Layout::New();
+    parent.SetBackgroundColor(UiColor(0xFFFF00));
+    parent.SetRequestedWidth(200_spx);
+    parent.SetRequestedHeight(200_spx);
+
+    InteractiveView redChild = InteractiveView::New();
+    redChild.SetBackgroundColor(UiColor(0xFF0000));
+    redChild.SetRequestedWidth(100_spx);
+    redChild.SetRequestedHeight(100_spx);
+    redChild.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
+      mSecondChild.SetBackgroundColor(UiColor(0x00FF00));
+      return true;
+    });
+
+    mSecondChild = View::New();
+    mSecondChild.SetBackgroundColor(UiColor(0x0000FF));
+    mSecondChild.SetRequestedWidth(100_spx);
+    mSecondChild.SetRequestedHeight(100_spx);
+    mSecondChild.SetRequestedPositionX(100_spx);
+    mSecondChild.SetRequestedPositionY(100_spx);
+
+    parent.AddChildren({redChild, mSecondChild});
+    window.Add(parent);
   }
 
 private:
@@ -71,7 +73,8 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  UiConfig config = UiConfig::New();
+  config.Apply();
   HelloWorldController test(application);
   application.MainLoop();
   return 0;

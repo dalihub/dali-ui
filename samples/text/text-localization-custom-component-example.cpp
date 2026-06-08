@@ -125,39 +125,49 @@ public:
 
   void Initialize()
   {
-    SetSpacing(6.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(18, 18, 16, 16))
-      .SetBackgroundColor(UiColor(COLOR_CARD_BACKGROUND))
-      .SetCornerRadius(16.0f);
+    SetSpacing(6.0f);
+    SetRequestedWidth(MATCH_PARENT);
+    SetRequestedHeight(WRAP_CONTENT);
+    SetPadding(Extents(18, 18, 16, 16));
+    SetBackgroundColor(UiColor(COLOR_CARD_BACKGROUND));
+    SetCornerRadius(16.0f);
 
     SetProperty(View::Property::SHADOW, CreateCardShadowMap());
 
-    StackLayout titleRow = StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(6.0f)
-      .SetRequestedHeight(WRAP_CONTENT);
+    StackLayout titleRow = StackLayout::New(StackOrientation::HORIZONTAL);
+    titleRow.SetSpacing(6.0f);
+    titleRow.SetRequestedHeight(WRAP_CONTENT);
 
-    Label titleLabel = Label::New()
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_CARD_TITLE))
-      .SetMultiLine(true);
+    Label titleLabel = Label::New();
 
-    ImageView flagImage = ImageView::New()
-      .SetRequestedHeight(20.0f)
-      .SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
+    titleLabel.SetFontSize(LABEL_FONT_SIZE);
+
+    titleLabel.SetTextColor(UiColor(COLOR_CARD_TITLE));
+
+    titleLabel.SetMultiLine(true);
+
+    ImageView flagImage = ImageView::New();
+
+    flagImage.SetRequestedHeight(20.0f);
+
+    flagImage.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
 
     titleRow.Add(titleLabel);
     titleRow.Add(flagImage);
 
-    Label descriptionLabel = Label::New()
-      .SetFontSize(DESC_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_CARD_DESCRIPTION))
-      .SetMultiLine(true);
+    Label descriptionLabel = Label::New();
 
-    Label actionLabel = Label::New()
-      .SetFontSize(DESC_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_CARD_ACTION));
+    descriptionLabel.SetFontSize(DESC_FONT_SIZE);
+
+    descriptionLabel.SetTextColor(UiColor(COLOR_CARD_DESCRIPTION));
+
+    descriptionLabel.SetMultiLine(true);
+
+    Label actionLabel = Label::New();
+
+    actionLabel.SetFontSize(DESC_FONT_SIZE);
+
+    actionLabel.SetTextColor(UiColor(COLOR_CARD_ACTION));
 
     Add(titleRow);
     Add(descriptionLabel);
@@ -201,8 +211,6 @@ public:
       data->flagImage.SetResourceUrl(url);
     }
   }
-
-  DALI_UI_CHAIN_STACKLAYOUT_METHODS(LocalizedCard)
 
 private:
   explicit LocalizedCard(StackLayout layout)
@@ -256,66 +264,74 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        CreateHeaderLabel(),
-        CreateHelpLabel(),
-        CreateSeparator(),
-        CreateSectionLabel("Default-domain card:"),
-        CreateDefaultCard().As(mDefaultCard),
-        CreateSeparator(),
-        CreateSectionLabel("Explicit alt-domain card:"),
-        CreateAltCard().As(mAltCard),
-        CreateSeparator(),
-        CreateStatusLabel().As(mStatusLabel),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetSpacing(STACK_SPACING);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    mDefaultCard = CreateDefaultCard();
+    mAltCard     = CreateAltCard();
+    mStatusLabel = CreateStatusLabel();
+
+    contents.Add(CreateHeaderLabel());
+    contents.Add(CreateHelpLabel());
+    contents.Add(CreateSeparator());
+    contents.Add(CreateSectionLabel("Default-domain card:"));
+    contents.Add(mDefaultCard);
+    contents.Add(CreateSeparator());
+    contents.Add(CreateSectionLabel("Explicit alt-domain card:"));
+    contents.Add(mAltCard);
+    contents.Add(CreateSeparator());
+    contents.Add(mStatusLabel);
+    return contents;
   }
 
   Label CreateHeaderLabel()
   {
-    return Label::New("Localization Custom Component Example")
-      .SetFontSize(TITLE_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
+    Label label = Label::New("Localization Custom Component Example");
+    label.SetFontSize(TITLE_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
+    return label;
   }
 
   Label CreateHelpLabel()
   {
-    return Label::New("Keys: 1=en_US, 2=ko_KR, 3=ar_AE, B=bypass, D=domain, R=refresh, M=manual, ESC/BACK=quit")
-      .SetFontSize(HELP_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
-      .SetMultiLine(true)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
+    Label label = Label::New("Keys: 1=en_US, 2=ko_KR, 3=ar_AE, B=bypass, D=domain, R=refresh, M=manual, ESC/BACK=quit");
+    label.SetFontSize(HELP_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    label.SetMultiLine(true);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
+    return label;
   }
 
   View CreateSeparator()
   {
-    return View::New()
-      .SetBackgroundColor(UiColor(COLOR_SEPARATOR))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(2.0f);
+    View separator = View::New();
+    separator.SetBackgroundColor(UiColor(COLOR_SEPARATOR));
+    separator.SetRequestedWidth(MATCH_PARENT);
+    separator.SetRequestedHeight(2.0f);
+    return separator;
   }
 
   Label CreateSectionLabel(const char* text)
   {
-    return Label::New(text)
-      .SetFontSize(STATUS_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_MID_GRAY))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    Label label = Label::New(text);
+    label.SetFontSize(STATUS_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_MID_GRAY));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    return label;
   }
 
   // --- Default-domain card ---
@@ -391,15 +407,16 @@ private:
 
   Label CreateStatusLabel()
   {
-    return Label::New()
-      .SetFontSize(STATUS_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
-      .SetMultiLine(true)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
+    Label label = Label::New();
+    label.SetFontSize(STATUS_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    label.SetMultiLine(true);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_PANEL_BACKGROUND));
+    return label;
   }
 
   void UpdateStatusLabel()

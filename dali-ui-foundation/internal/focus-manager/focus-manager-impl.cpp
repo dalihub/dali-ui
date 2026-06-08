@@ -693,13 +693,14 @@ View FocusManager::GetFocusIndicatorView()
   if(!mFocusIndicatorView)
   {
     // Create the default if it hasn't been set and one that's shared by all the keyboard focusable views
-    const std::string imageDirPath = AssetManager::GetDaliImagePath();
-    mFocusIndicatorView            = Ui::ImageView::New()
-                            .SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME))
-                            .SetFittingMode(Ui::Image::FittingMode::FILL)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(MATCH_PARENT)
-                            .SetLayoutMode(LayoutMode::STANDALONE);
+    const std::string imageDirPath        = AssetManager::GetDaliImagePath();
+    Ui::ImageView     focusIndicatorImage = Ui::ImageView::New();
+    focusIndicatorImage.SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
+    focusIndicatorImage.SetFittingMode(Ui::Image::FittingMode::FILL);
+    mFocusIndicatorView = focusIndicatorImage;
+    mFocusIndicatorView.SetRequestedWidth(MATCH_PARENT);
+    mFocusIndicatorView.SetRequestedHeight(MATCH_PARENT);
+    mFocusIndicatorView.SetLayoutMode(LayoutMode::STANDALONE);
   }
 
   return mFocusIndicatorView;

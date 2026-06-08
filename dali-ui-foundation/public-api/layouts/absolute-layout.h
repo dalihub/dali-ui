@@ -16,24 +16,17 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 
 namespace Dali
 {
 namespace Ui
 {
-
-// Forward declarations
 namespace Integration
 {
 class AbsoluteLayoutImpl;
 }
 
-#include "absolute-layout.autogen.h"
 /**
  * @brief AbsoluteLayout positions its children at explicit coordinates.
  *
@@ -101,9 +94,6 @@ public:
   static AbsoluteLayout DownCast(BaseHandle handle);
 
 public: // API
-  // @CHAIN_START(AbsoluteLayout, Layout)
-  // @CHAIN_END
-
 public: // Not intended for application developers
   /// @cond internal
   /**
@@ -122,7 +112,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_LAYOUT_METHODS(AbsoluteLayout)
 };
 
 } // namespace Ui

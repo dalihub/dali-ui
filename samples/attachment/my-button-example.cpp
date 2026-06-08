@@ -65,13 +65,13 @@ public:
 
   void Initialize(const Dali::String& text)
   {
-    Label label = Label::New(text)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetFontSize(18.0f)
-        .SetTextColor(UiColor(0xFFFFFF))
-        .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-        .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(18.0f);
+    label.SetTextColor(UiColor(0xFFFFFF));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
     Add(label);
     SetAttachment(GetDataId(), Dali::MakeUnique<Data>(label, UiColor(0x1565C0), UiColor(0x2E7D32)));
@@ -91,9 +91,6 @@ public:
       data->label.SetText(text);
     }
   }
-
-public:
-  DALI_UI_CHAIN_INTERACTIVEVIEW_METHODS(MyButton)
 
 private:
   explicit MyButton(InteractiveView view)
@@ -122,12 +119,13 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0x202020));
 
-    window.Add(MyButton::New("MyButton: 0")
-      .SetRequestedWidth(220.0f)
-      .SetRequestedHeight(80.0f)
-      .SetRequestedPositionX(60.0f)
-      .SetRequestedPositionY(60.0f)
-      .ConnectClickedSignal(this, &MyButtonExampleController::OnClicked));
+    MyButton button = MyButton::New("MyButton: 0");
+    button.SetRequestedWidth(220.0f);
+    button.SetRequestedHeight(80.0f);
+    button.SetRequestedPositionX(60.0f);
+    button.SetRequestedPositionY(60.0f);
+    button.ConnectClickedSignal(this, &MyButtonExampleController::OnClicked);
+    window.Add(button);
   }
 
   void OnClicked(View view, InputEvent event)
@@ -146,7 +144,8 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  UiConfig config = UiConfig::New();
+  config.Apply();
   MyButtonExampleController controller(application);
   application.MainLoop();
   return 0;

@@ -14,13 +14,9 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/object/type-registry.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-components/internal/dummy-component-impl.h>
 #include <dali-ui-components/public-api/dummy-component.h>
+#include <dali/devel-api/object/type-registry.h>
 
 namespace Dali
 {

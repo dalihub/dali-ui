@@ -72,21 +72,21 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    mStatusLabel = Label::New()
-      .SetText("Press Tab / Shift+Tab to move focus")
-      .SetFontSize(FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(STATUS_HEIGHT)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetMultiLine(true);
+    mStatusLabel = Label::New();
+    mStatusLabel.SetText("Press Tab / Shift+Tab to move focus");
+    mStatusLabel.SetFontSize(FONT_SIZE);
+    mStatusLabel.SetTextColor(UiColor(COLOR_TEXT));
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(STATUS_HEIGHT);
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetMultiLine(true);
 
-    auto root = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetBackgroundColor(UiColor(COLOR_BG))
-      .SetPadding(Extents(GAP, GAP, GAP, GAP));
+    auto root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(UiColor(COLOR_BG));
+    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
 
     root.Add(mStatusLabel);
     root.Add(CreateSectionLabel("Scenario 1: Reverse-index position"));
@@ -104,27 +104,34 @@ public:
 private:
   Label CreateSectionLabel(const char* text)
   {
-    return Label::New()
-      .SetText(text)
-      .SetFontSize(FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(30.0f)
-      .SetMargin(Extents(0, 0, GAP, 0));
+    Label label = Label::New();
+    label.SetText(text);
+    label.SetFontSize(FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(30.0f);
+    label.SetMargin(Extents(0, 0, GAP, 0));
+    return label;
   }
 
   // Scenario 1: child index 0 at rightmost, 2 at leftmost
   View CreateScenario1()
   {
-    auto container = View::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(60.0f);
+    auto container = View::New();
+    container.SetRequestedWidth(MATCH_PARENT);
+    container.SetRequestedHeight(60.0f);
     FocusManager::Get().SetAsFocusGroup(container, true);
 
     // Index 0 at x=200, index 1 at x=100, index 2 at x=0
-    mS1[0] = CreateView("v0(idx0)", 0).SetRequestedPositionX(200.0f).SetRequestedPositionY(0.0f);
-    mS1[1] = CreateView("v1(idx1)", 1).SetRequestedPositionX(100.0f).SetRequestedPositionY(0.0f);
-    mS1[2] = CreateView("v2(idx2)", 2).SetRequestedPositionX(0.0f).SetRequestedPositionY(0.0f);
+    mS1[0] = CreateView("v0(idx0)", 0);
+    mS1[0].SetRequestedPositionX(200.0f);
+    mS1[0].SetRequestedPositionY(0.0f);
+    mS1[1] = CreateView("v1(idx1)", 1);
+    mS1[1].SetRequestedPositionX(100.0f);
+    mS1[1].SetRequestedPositionY(0.0f);
+    mS1[2] = CreateView("v2(idx2)", 2);
+    mS1[2].SetRequestedPositionX(0.0f);
+    mS1[2].SetRequestedPositionY(0.0f);
     container.Add(mS1[0]);
     container.Add(mS1[1]);
     container.Add(mS1[2]);
@@ -134,28 +141,32 @@ private:
   // Scenario 2: two nested groups side by side
   View CreateScenario2()
   {
-    auto container = View::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(60.0f);
+    auto container = View::New();
+    container.SetRequestedWidth(MATCH_PARENT);
+    container.SetRequestedHeight(60.0f);
     FocusManager::Get().SetAsFocusGroup(container, true);
 
-    auto groupA = View::New()
-      .SetRequestedPositionX(0.0f)
-      .SetRequestedPositionY(0.0f)
-      .SetRequestedWidth(100.0f)
-      .SetRequestedHeight(MATCH_PARENT);
-    mS2[0] = CreateView("a1", 0).SetRequestedPositionY(0.0f);
-    mS2[1] = CreateView("a2", 1).SetRequestedPositionY(30.0f);
+    auto groupA = View::New();
+    groupA.SetRequestedPositionX(0.0f);
+    groupA.SetRequestedPositionY(0.0f);
+    groupA.SetRequestedWidth(100.0f);
+    groupA.SetRequestedHeight(MATCH_PARENT);
+    mS2[0] = CreateView("a1", 0);
+    mS2[0].SetRequestedPositionY(0.0f);
+    mS2[1] = CreateView("a2", 1);
+    mS2[1].SetRequestedPositionY(30.0f);
     groupA.Add(mS2[0]);
     groupA.Add(mS2[1]);
 
-    auto groupB = View::New()
-      .SetRequestedPositionX(120.0f)
-      .SetRequestedPositionY(0.0f)
-      .SetRequestedWidth(100.0f)
-      .SetRequestedHeight(MATCH_PARENT);
-    mS2[2] = CreateView("b1", 2).SetRequestedPositionY(0.0f);
-    mS2[3] = CreateView("b2", 3).SetRequestedPositionY(30.0f);
+    auto groupB = View::New();
+    groupB.SetRequestedPositionX(120.0f);
+    groupB.SetRequestedPositionY(0.0f);
+    groupB.SetRequestedWidth(100.0f);
+    groupB.SetRequestedHeight(MATCH_PARENT);
+    mS2[2] = CreateView("b1", 2);
+    mS2[2].SetRequestedPositionY(0.0f);
+    mS2[3] = CreateView("b2", 3);
+    mS2[3].SetRequestedPositionY(30.0f);
     groupB.Add(mS2[2]);
     groupB.Add(mS2[3]);
 
@@ -167,22 +178,28 @@ private:
   // Scenario 3: three overlapping centered squares
   View CreateScenario3()
   {
-    auto container = View::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(160.0f);
+    auto container = View::New();
+    container.SetRequestedWidth(MATCH_PARENT);
+    container.SetRequestedHeight(160.0f);
     FocusManager::Get().SetAsFocusGroup(container, true);
 
     float cx = 150.0f, cy = 80.0f;
 
-    mS3[0] = CreateView("large", 0)
-      .SetRequestedPositionX(cx - 70.0f).SetRequestedPositionY(cy - 70.0f)
-      .SetRequestedWidth(140.0f).SetRequestedHeight(140.0f);
-    mS3[1] = CreateView("medium", 1)
-      .SetRequestedPositionX(cx - 45.0f).SetRequestedPositionY(cy - 45.0f)
-      .SetRequestedWidth(90.0f).SetRequestedHeight(90.0f);
-    mS3[2] = CreateView("small", 2)
-      .SetRequestedPositionX(cx - 20.0f).SetRequestedPositionY(cy - 20.0f)
-      .SetRequestedWidth(40.0f).SetRequestedHeight(40.0f);
+    mS3[0] = CreateView("large", 0);
+    mS3[0].SetRequestedPositionX(cx - 70.0f);
+    mS3[0].SetRequestedPositionY(cy - 70.0f);
+    mS3[0].SetRequestedWidth(140.0f);
+    mS3[0].SetRequestedHeight(140.0f);
+    mS3[1] = CreateView("medium", 1);
+    mS3[1].SetRequestedPositionX(cx - 45.0f);
+    mS3[1].SetRequestedPositionY(cy - 45.0f);
+    mS3[1].SetRequestedWidth(90.0f);
+    mS3[1].SetRequestedHeight(90.0f);
+    mS3[2] = CreateView("small", 2);
+    mS3[2].SetRequestedPositionX(cx - 20.0f);
+    mS3[2].SetRequestedPositionY(cy - 20.0f);
+    mS3[2].SetRequestedWidth(40.0f);
+    mS3[2].SetRequestedHeight(40.0f);
 
     container.Add(mS3[0]);
     container.Add(mS3[1]);
@@ -193,17 +210,17 @@ private:
   View CreateView(const char* name, uint32_t colorIndex)
   {
     uint32_t ci = colorIndex % 6;
-    auto label = Label::New()
-      .SetText(name)
-      .SetFontSize(FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_TEXT))
-      .SetRequestedWidth(90.0f)
-      .SetRequestedHeight(28.0f)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetBackgroundColor(UiColor(COLORS[ci]))
-      .SetFocusable(true)
-      .SetTouchFocusable(true);
+    auto label = Label::New();
+    label.SetText(name);
+    label.SetFontSize(FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_TEXT));
+    label.SetRequestedWidth(90.0f);
+    label.SetRequestedHeight(28.0f);
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    label.SetBackgroundColor(UiColor(COLORS[ci]));
+    label.SetFocusable(true);
+    label.SetTouchFocusable(true);
 
     mAllViews.push_back({label, name, COLORS[ci]});
 

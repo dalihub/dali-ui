@@ -79,12 +79,12 @@ struct SelectionChangedSignalFunctor
  */
 View CreateSelectableView(TestApplication& application, float width = 100.0f, float height = 100.0f)
 {
-  View view = View::New()
-  .SetRequestedWidth(width)
-  .SetRequestedHeight(height)
-  .SetPivot(Pivot::TOP_LEFT)
-  .SetParentOrigin(ParentOrigin::TOP_LEFT)
-  .AsSelectable();
+  View view = View::New();
+  view.SetRequestedWidth(width);
+  view.SetRequestedHeight(height);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  view.AsSelectable();
 
   application.GetScene().Add(view);
   application.SendNotification();
@@ -155,8 +155,8 @@ int UtcDaliViewAsSelectableP(void)
   UiTestApplication application;
   View view = View::New();
 
-  View& result = view.AsSelectable();
-  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  SelectableTrait result = view.AsSelectable();
+  DALI_TEST_CHECK(result);
 
   DALI_TEST_CHECK(view.IsSelectable());
   END_TEST;
@@ -168,14 +168,13 @@ int UtcDaliViewAsSelectableWithConfigureP(void)
   bool configureCalled = false;
 
   View view = View::New();
-  view.AsSelectable([&configureCalled](SelectableTrait& trait) {
-    configureCalled = true;
-    trait.EnableToggleByClick();
-  });
+  SelectableTrait configuredTrait = view.AsSelectable();
+  configureCalled                 = true;
+  configuredTrait.EnableToggleByClick();
 
   DALI_TEST_CHECK(configureCalled);
 
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
   DALI_TEST_CHECK(selectable);
   DALI_TEST_CHECK(selectable.IsToggleByClickEnabled());
   END_TEST;
@@ -187,10 +186,10 @@ int UtcDaliViewAsSelectableIdempotentP(void)
   View view = View::New();
 
   view.AsSelectable();
-  SelectableTrait first = view.EnsureSelectableTrait();
+  SelectableTrait first = view.AsSelectable();
 
   view.AsSelectable();
-  SelectableTrait second = view.EnsureSelectableTrait();
+  SelectableTrait second = view.AsSelectable();
 
   DALI_TEST_CHECK(first == second);
   END_TEST;
@@ -210,11 +209,11 @@ int UtcDaliViewEnsureSelectableTraitP(void)
   UiTestApplication application;
   View view = View::New();
 
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
   DALI_TEST_CHECK(selectable);
 
   // Second call returns the same trait
-  SelectableTrait again = view.EnsureSelectableTrait();
+  SelectableTrait again = view.AsSelectable();
   DALI_TEST_CHECK(selectable == again);
   END_TEST;
 }
@@ -266,7 +265,7 @@ int UtcDaliSelectableTraitSetSelectedP(void)
 {
   UiTestApplication application;
   View view = CreateSelectableView(application);
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
 
   selectable.SetSelected(true);
   DALI_TEST_CHECK(selectable.IsSelected());
@@ -280,7 +279,7 @@ int UtcDaliSelectableTraitSetSelectedNoChangeP(void)
 {
   UiTestApplication application;
   View view = CreateSelectableView(application);
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
 
   SelectionChangedSignalData    data;
   SelectionChangedSignalFunctor functor(data);
@@ -321,7 +320,7 @@ int UtcDaliSelectableTraitSelectionChangedSignalP(void)
 {
   UiTestApplication application;
   View view = CreateSelectableView(application);
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
 
   SelectionChangedSignalData    data;
   SelectionChangedSignalFunctor functor(data);
@@ -349,16 +348,13 @@ int UtcDaliViewAsSelectableWithSignalLambdaP(void)
   bool signalCalled   = false;
   bool signalSelected = false;
 
-  View view = View::New();
-  view.AsSelectable([&application, &signalCalled, &signalSelected](SelectableTrait& trait) {
-    trait.SelectionChangedSignal().Connect(&application,
-      [&signalCalled, &signalSelected](View v, bool selected, InputEvent e) {
-        signalCalled   = true;
-        signalSelected = selected;
-      });
-  });
-
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  View            view       = View::New();
+  SelectableTrait selectable = view.AsSelectable();
+  selectable.SelectionChangedSignal().Connect(&application,
+    [&signalCalled, &signalSelected](View v, bool selected, InputEvent e) {
+      signalCalled   = true;
+      signalSelected = selected;
+    });
   DALI_TEST_CHECK(selectable);
 
   // Manually add to scene for proper lifecycle
@@ -387,17 +383,15 @@ int UtcDaliSelectableTraitToggleByClickP(void)
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
-  view.AsSelectable([](SelectableTrait& trait) {
-    trait.EnableToggleByClick();
-  });
+  view.AsSelectable().EnableToggleByClick();
 
   application.SendNotification();
   application.Render();
 
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
 
   // InteractiveTrait should have been auto-created by EnableToggleByClick
-  InteractiveTrait clickable = view.EnsureInteractiveTrait();
+  InteractiveTrait clickable = view.AsInteractive();
   DALI_TEST_CHECK(clickable);
 
   SelectionChangedSignalData    data;
@@ -438,9 +432,7 @@ int UtcDaliSelectableTraitToggleByClickAutoCreatesInteractiveP(void)
   DALI_TEST_CHECK(!view.IsInteractive());
 
   // AsSelectable with toggle-by-click should auto-create clickable
-  view.AsSelectable([](SelectableTrait& trait) {
-    trait.EnableToggleByClick();
-  });
+  view.AsSelectable().EnableToggleByClick();
 
   application.SendNotification();
   application.Render();
@@ -462,22 +454,20 @@ int UtcDaliSelectableTraitToggleByClickWithExistingInteractiveP(void)
 
   // Attach clickable first
   view.AsInteractive();
-  InteractiveTrait existingInteractive = view.EnsureInteractiveTrait();
+  InteractiveTrait existingInteractive = view.AsInteractive();
 
   // Then attach selectable with toggle
-  view.AsSelectable([](SelectableTrait& trait) {
-    trait.EnableToggleByClick();
-  });
+  view.AsSelectable().EnableToggleByClick();
 
   application.SendNotification();
   application.Render();
 
   // Should reuse the existing clickable, not create a new one
-  InteractiveTrait clickableAfter = view.EnsureInteractiveTrait();
+  InteractiveTrait clickableAfter = view.AsInteractive();
   DALI_TEST_CHECK(existingInteractive == clickableAfter);
 
   // Toggle should still work
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
   TestGenerateTap(application, 50.0f, 50.0f, 100);
   DALI_TEST_CHECK(selectable.IsSelected());
   END_TEST;
@@ -494,16 +484,14 @@ int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
   application.GetScene().Add(view);
 
   view.AsInteractive();
-  view.AsSelectable([](SelectableTrait& trait) {
-    trait.EnableToggleByClick();
-  });
+  view.AsSelectable().EnableToggleByClick();
 
   application.SendNotification();
   application.Render();
 
   // Connect a separate clicked handler
   bool appClickedCalled = false;
-  view.EnsureInteractiveTrait().ClickedSignal().Connect(
+  view.AsInteractive().ClickedSignal().Connect(
     &application,
     [&appClickedCalled](View v, InputEvent e) -> bool {
       appClickedCalled = true;
@@ -513,7 +501,7 @@ int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
   TestGenerateTap(application, 50.0f, 50.0f, 100);
 
   // Both should fire: selectable toggle AND app clicked handler
-  DALI_TEST_CHECK(view.EnsureSelectableTrait().IsSelected());
+  DALI_TEST_CHECK(view.AsSelectable().IsSelected());
   DALI_TEST_CHECK(appClickedCalled);
   END_TEST;
 }
@@ -532,10 +520,8 @@ int UtcDaliSelectableTraitToggleByKeyP(void)
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
-  view.AsSelectable([](SelectableTrait& trait) {
-    trait.EnableToggleByClick();
-  });
-  view.EnsureInteractiveTrait().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+  view.AsSelectable().EnableToggleByClick();
+  view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
 
   application.SendNotification();
   application.Render();
@@ -544,7 +530,7 @@ int UtcDaliSelectableTraitToggleByKeyP(void)
   application.SendNotification();
   application.Render();
 
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
   DALI_TEST_CHECK(!selectable.IsSelected());
 
   // Key press + release → click → toggle
@@ -575,14 +561,12 @@ int UtcDaliSelectableTraitEnableToggleByClickAfterAttachP(void)
   application.GetScene().Add(view);
 
   // Attach selectable WITHOUT toggle-by-click (explicitly disable, since default is true)
-  view.AsSelectable([](SelectableTrait& trait) {
-    trait.EnableToggleByClick(false);
-  });
+  view.AsSelectable().EnableToggleByClick(false);
 
   application.SendNotification();
   application.Render();
 
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
 
   // Tap should NOT toggle
   TestGenerateTap(application, 50.0f, 50.0f, 100);
@@ -607,14 +591,12 @@ int UtcDaliSelectableTraitDisableToggleByClickP(void)
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
-  view.AsSelectable([](SelectableTrait& trait) {
-    trait.EnableToggleByClick();
-  });
+  view.AsSelectable().EnableToggleByClick();
 
   application.SendNotification();
   application.Render();
 
-  SelectableTrait selectable = view.EnsureSelectableTrait();
+  SelectableTrait selectable = view.AsSelectable();
 
   // First tap works
   TestGenerateTap(application, 50.0f, 50.0f, 100);
@@ -638,8 +620,10 @@ int UtcDaliViewAsInteractiveAsSelectableChainingP(void)
   UiTestApplication application;
   View view = View::New();
 
-  View& result = view.AsInteractive().AsSelectable();
-  DALI_TEST_EQUALS(&result, &view, TEST_LOCATION);
+  InteractiveTrait interactive = view.AsInteractive();
+  SelectableTrait  result      = view.AsSelectable();
+  DALI_TEST_CHECK(interactive);
+  DALI_TEST_CHECK(result);
 
   DALI_TEST_CHECK(view.IsInteractive());
   DALI_TEST_CHECK(view.IsSelectable());

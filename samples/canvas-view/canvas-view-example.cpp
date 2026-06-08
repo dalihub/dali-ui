@@ -107,51 +107,66 @@ private:
     mW      = static_cast<float>(ws.GetWidth());
     mH      = static_cast<float>(ws.GetHeight());
 
-    const float btnH = 64.0f;
-
     // Canvas fills the full window area; AbsoluteLayout overlay lets the
     // button bar sit on top without shrinking the canvas.
-    mCanvasView = CanvasView::New()
-                    .SetLayoutParams(AbsoluteLayoutParams::New()
-                                       .SetBounds(LayoutRect(0.f, 0.f, 1.f, 1.f))
-                                       .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL |
-                                                 AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+    mCanvasView = CanvasView::New();
+    mCanvasView.SetLayoutParams(AbsoluteLayoutParams::New()
+                                  .SetBounds(LayoutRect(0.f, 0.f, 1.f, 1.f))
+                                  .SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL |
+                                            AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
 
-    auto btnBar =
-      StackLayout::New(StackOrientation::HORIZONTAL)
-        .SetSpacing(4.0f)
-        .SetLayoutParams(AbsoluteLayoutParams::New()
-                           .SetX(0.f)
-                           .SetY(mH - btnH)
-                           .SetWidth(mW)
-                           .SetHeight(btnH))
-        .Children({
-          AbsoluteLayout::New()
-            .SetRequestedWidth(WRAP_CONTENT)
-            .SetRequestedHeight(MATCH_PARENT)
-            .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-            .SetBackgroundColor(UiColor(0x222222, 0.75f))
-            .AsInteractive([this](InteractiveTrait& trait)
-    {
-      trait.ClickedSignal().Connect(this, [this](View, InputEvent)
-      { OnPrevScene(); });
-    }).Children({
-              Label::New("< Prev").SetLayoutParams(AbsoluteLayoutParams::New().SetX(0.5f).SetY(0.5f).SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)).SetRequestedWidth(WRAP_CONTENT).SetRequestedHeight(WRAP_CONTENT).SetTextColor(UiColor(1.f, 1.f, 1.f, 1.f)).SetFontSize(26.f).SetHorizontalTextAlignment(Text::Alignment::CENTER).SetVerticalTextAlignment(Text::Alignment::CENTER),
-            }),
-          AbsoluteLayout::New().SetRequestedWidth(WRAP_CONTENT).SetRequestedHeight(MATCH_PARENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)).SetBackgroundColor(UiColor(0x222222, 0.75f)).AsInteractive([this](InteractiveTrait& trait)
-    {
-      trait.ClickedSignal().Connect(this, [this](View, InputEvent)
-      { OnNextScene(); });
-    }).Children({
-            Label::New("Next >").SetLayoutParams(AbsoluteLayoutParams::New().SetX(0.5f).SetY(0.5f).SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL)).SetRequestedWidth(WRAP_CONTENT).SetRequestedHeight(WRAP_CONTENT).SetTextColor(UiColor(1.f, 1.f, 1.f, 1.f)).SetFontSize(26.f).SetHorizontalTextAlignment(Text::Alignment::CENTER).SetVerticalTextAlignment(Text::Alignment::CENTER),
-          }),
-        });
+    const float btnH = 64.0f;
 
-    window.Add(
-      AbsoluteLayout::New()
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .Children({mCanvasView, btnBar}));
+    Label prevLabel = Label::New("< Prev");
+    prevLabel.SetLayoutParams(AbsoluteLayoutParams::New().SetX(0.5f).SetY(0.5f).SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+    prevLabel.SetRequestedWidth(WRAP_CONTENT);
+    prevLabel.SetRequestedHeight(WRAP_CONTENT);
+    prevLabel.SetTextColor(UiColor(1.f, 1.f, 1.f, 1.f));
+    prevLabel.SetFontSize(26.f);
+    prevLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    prevLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    AbsoluteLayout prevButton = AbsoluteLayout::New();
+    prevButton.SetRequestedWidth(WRAP_CONTENT);
+    prevButton.SetRequestedHeight(MATCH_PARENT);
+    prevButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    prevButton.SetBackgroundColor(UiColor(0x222222, 0.75f));
+    prevButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { OnPrevScene(); });
+    prevButton.AddChildren({prevLabel});
+
+    Label nextLabel = Label::New("Next >");
+    nextLabel.SetLayoutParams(AbsoluteLayoutParams::New().SetX(0.5f).SetY(0.5f).SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
+    nextLabel.SetRequestedWidth(WRAP_CONTENT);
+    nextLabel.SetRequestedHeight(WRAP_CONTENT);
+    nextLabel.SetTextColor(UiColor(1.f, 1.f, 1.f, 1.f));
+    nextLabel.SetFontSize(26.f);
+    nextLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    nextLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    AbsoluteLayout nextButton = AbsoluteLayout::New();
+    nextButton.SetRequestedWidth(WRAP_CONTENT);
+    nextButton.SetRequestedHeight(MATCH_PARENT);
+    nextButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    nextButton.SetBackgroundColor(UiColor(0x222222, 0.75f));
+    nextButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    { OnNextScene(); });
+    nextButton.AddChildren({nextLabel});
+
+    StackLayout btnBar = StackLayout::New(StackOrientation::HORIZONTAL);
+    btnBar.SetSpacing(4.0f);
+    btnBar.SetLayoutParams(AbsoluteLayoutParams::New()
+                             .SetX(0.f)
+                             .SetY(mH - btnH)
+                             .SetWidth(mW)
+                             .SetHeight(btnH));
+    btnBar.AddChildren({prevButton, nextButton});
+
+    AbsoluteLayout root = AbsoluteLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.AddChildren({mCanvasView, btnBar});
+    window.Add(root);
 
     mTimer = Timer::New(1000.0f / 30.0f); // 30 fps
     mTimer.TickSignal().Connect(this, &CanvasViewSample::OnTick);

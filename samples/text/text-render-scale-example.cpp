@@ -114,16 +114,14 @@ private:
     window.SetSize(Dali::Window::WindowSize(1920, 1080));
 
     // Create main container with vertical layout
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetSpacing(SECTION_SPACING)
-        .Children({
-          CreateScaleControlSection(),
-          CreateCardSection("RenderScale", true),
-          CreateCardSection("Original", false)
-    }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetSpacing(SECTION_SPACING);
+    root.Add(CreateScaleControlSection());
+    root.Add(CreateCardSection("RenderScale", true));
+    root.Add(CreateCardSection("Original", false));
+    window.Add(root);
 
     window.KeyEventSignal().Connect(this, &TextRenderScaleController::OnKeyEvent);
   }
@@ -133,56 +131,53 @@ private:
   // -------------------------------------------------------------------------
   View CreateScaleControlSection()
   {
-    StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(20, 20, 20, 20))
-      .Children({
-        Label::New("SCALE")
-          .SetFontSize(FONT_SIZE_LABEL)
-          .SetTextColor(TEXT_COLOR)
-          .SetBackgroundColor(SECTION_LABEL_BG)
-          .SetRequestedWidth(200.0f)
-          .SetRequestedHeight(40.0f)
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
+    StackLayout layout = StackLayout::New(StackOrientation::HORIZONTAL);
+    layout.SetRequestedWidth(MATCH_PARENT);
+    layout.SetRequestedHeight(WRAP_CONTENT);
+    layout.SetPadding(Extents(20, 20, 20, 20));
 
-        // Scale control bar (visual indicator)
-        StackLayout::New()
-          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-          .SetRequestedHeight(SCALE_CONTROL_HEIGHT)
-          .SetBackgroundColor(CARD_BG_COLOR)
-          .SetMargin(Extents(10, 0, 0, 0))
-          .Children({
-            // Overlay for description
-            Label::New("Press 1/2 or drag to adjust scale")
-              .SetTextColor(TEXT_COLOR)
-              .SetRequestedWidth(MATCH_PARENT)
-              .SetRequestedHeight(MATCH_PARENT)
-              .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-              .SetVerticalTextAlignment(Text::Alignment::CENTER)
-              .SetLayoutMode(LayoutMode::STANDALONE)
-              .SetBackgroundColor(UiColor(0xFFFFFF).WithAlpha(0.1f)),
+    Label scaleLabel = Label::New("SCALE");
+    scaleLabel.SetFontSize(FONT_SIZE_LABEL);
+    scaleLabel.SetTextColor(TEXT_COLOR);
+    scaleLabel.SetBackgroundColor(SECTION_LABEL_BG);
+    scaleLabel.SetRequestedWidth(200.0f);
+    scaleLabel.SetRequestedHeight(40.0f);
+    scaleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    scaleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    layout.Add(scaleLabel);
 
-            // Indicator line for visual feedback
-            View::New()
-              .SetRequestedWidth(2.0f)
-              .SetRequestedHeight(MATCH_PARENT)
-              .SetLayoutMode(LayoutMode::STANDALONE)
-              .SetBackgroundColor(UiColor(0xFF0000))
-              .As(mScaleIndicator)
-        }).As(mScaleBar),
+    mScaleBar = StackLayout::New();
+    mScaleBar.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    mScaleBar.SetRequestedHeight(SCALE_CONTROL_HEIGHT);
+    mScaleBar.SetBackgroundColor(CARD_BG_COLOR);
+    mScaleBar.SetMargin(Extents(10, 0, 0, 0));
 
-        // Scale value display
-        Label::New()
-          .SetFontSize(FONT_SIZE_LABEL)
-          .SetTextColor(TEXT_COLOR)
-          .SetRequestedWidth(WRAP_CONTENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER)
-          .SetMargin(Extents(10, 0, 0, 0))
-          .As(mScaleValueLabel)
-    });
+    Label overlayLabel = Label::New("Press 1/2 or drag to adjust scale");
+    overlayLabel.SetTextColor(TEXT_COLOR);
+    overlayLabel.SetRequestedWidth(MATCH_PARENT);
+    overlayLabel.SetRequestedHeight(MATCH_PARENT);
+    overlayLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    overlayLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    overlayLabel.SetLayoutMode(LayoutMode::STANDALONE);
+    overlayLabel.SetBackgroundColor(UiColor(0xFFFFFF).WithAlpha(0.1f));
+    mScaleBar.Add(overlayLabel);
+
+    mScaleIndicator = View::New();
+    mScaleIndicator.SetRequestedWidth(2.0f);
+    mScaleIndicator.SetRequestedHeight(MATCH_PARENT);
+    mScaleIndicator.SetLayoutMode(LayoutMode::STANDALONE);
+    mScaleIndicator.SetBackgroundColor(UiColor(0xFF0000));
+    mScaleBar.Add(mScaleIndicator);
+    layout.Add(mScaleBar);
+
+    mScaleValueLabel = Label::New();
+    mScaleValueLabel.SetFontSize(FONT_SIZE_LABEL);
+    mScaleValueLabel.SetTextColor(TEXT_COLOR);
+    mScaleValueLabel.SetRequestedWidth(WRAP_CONTENT);
+    mScaleValueLabel.SetRequestedHeight(MATCH_PARENT);
+    mScaleValueLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mScaleValueLabel.SetMargin(Extents(10, 0, 0, 0));
+    layout.Add(mScaleValueLabel);
 
     // Update scale display
     UpdateScaleDisplay();
@@ -209,23 +204,21 @@ private:
   // -------------------------------------------------------------------------
   View CreateCardSection(const char* title, bool useRenderScale)
   {
-    StackLayout cardLayout;
+    StackLayout section = StackLayout::New(StackOrientation::VERTICAL);
+    section.SetRequestedWidth(MATCH_PARENT);
+    section.SetRequestedHeight(WRAP_CONTENT);
 
-    StackLayout section = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .Children({
-        Label::New(title)
-          .SetFontSize(FONT_SIZE_LABEL)
-          .SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER))
-          .SetTextColor(TEXT_COLOR),
+    Label titleLabel = Label::New(title);
+    titleLabel.SetFontSize(FONT_SIZE_LABEL);
+    titleLabel.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
+    titleLabel.SetTextColor(TEXT_COLOR);
+    section.Add(titleLabel);
 
-        StackLayout::New(StackOrientation::HORIZONTAL)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(WRAP_CONTENT)
-          .SetMargin(Extents(0, 0, 10, 0))
-          .As(cardLayout)
-      });
+    StackLayout cardLayout = StackLayout::New(StackOrientation::HORIZONTAL);
+    cardLayout.SetRequestedWidth(MATCH_PARENT);
+    cardLayout.SetRequestedHeight(WRAP_CONTENT);
+    cardLayout.SetMargin(Extents(0, 0, 10, 0));
+    section.Add(cardLayout);
 
     // Create 5 cards
     for(int i = 0; i < 5; ++i)
@@ -239,60 +232,50 @@ private:
 
   View CreateCard(int index, bool useRenderScale)
   {
-    StackLayout card;
-    Label titleLabel;
-    Label descLabel;
-    View colorBlock;
+    StackLayout card = StackLayout::New(StackOrientation::VERTICAL);
+    card.SetRequestedWidth(CARD_WIDTH);
+    card.SetRequestedHeight(CARD_HEIGHT);
+    card.SetBackgroundColor(CARD_BG_COLOR);
+    card.SetCornerRadius(CARD_CORNER_RADIUS);
+    card.SetMargin(Extents(CARD_SPACING / 2, CARD_SPACING / 2, 0, 0));
+    card.SetFocusable(true);
+    card.SetTouchFocusable(true);
 
-    StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(CARD_WIDTH)
-      .SetRequestedHeight(CARD_HEIGHT)
-      .SetBackgroundColor(CARD_BG_COLOR)
-      .SetCornerRadius(CARD_CORNER_RADIUS)
-      .SetMargin(Extents(CARD_SPACING / 2, CARD_SPACING / 2, 0, 0))
-      .SetFocusable(true)
-      .SetTouchFocusable(true)
-      .Children({
-        // Title label
-        Label::New(CARD_TEXTS[index])
-          .SetFontSize(FONT_SIZE_TITLE)
-          .SetFontFamily("SamsungOneUI_700")
-          .SetTextColor(TEXT_COLOR)
-          .SetMultiLine(true)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(TITLE_HEIGHT)
-          .SetPadding(Extents(PADDING, PADDING, PADDING, PADDING))
-          .SetVerticalTextAlignment(Text::Alignment::CENTER)
-          .SetAsyncRendering(true)
-          .SetMarqueeSpeed(100)
-          .SetMarqueeLoopCount(2)
-          .SetMarqueeLoopDelay(1.0f)
-          .SetMarqueeGap(50)
-          .SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE)
-          .SetMarqueeOrientation(Text::MarqueeOrientation::VERTICAL)
-          .As(titleLabel),
+    Label titleLabel = Label::New(CARD_TEXTS[index]);
+    titleLabel.SetFontSize(FONT_SIZE_TITLE);
+    titleLabel.SetFontFamily("SamsungOneUI_700");
+    titleLabel.SetTextColor(TEXT_COLOR);
+    titleLabel.SetMultiLine(true);
+    titleLabel.SetRequestedWidth(MATCH_PARENT);
+    titleLabel.SetRequestedHeight(TITLE_HEIGHT);
+    titleLabel.SetPadding(Extents(PADDING, PADDING, PADDING, PADDING));
+    titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    titleLabel.SetAsyncRendering(true);
+    titleLabel.SetMarqueeSpeed(100);
+    titleLabel.SetMarqueeLoopCount(2);
+    titleLabel.SetMarqueeLoopDelay(1.0f);
+    titleLabel.SetMarqueeGap(50);
+    titleLabel.SetMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE);
+    titleLabel.SetMarqueeOrientation(Text::MarqueeOrientation::VERTICAL);
+    card.Add(titleLabel);
 
-        // Description label
-        Label::New(CARD_DESCS[index])
-          .SetFontSize(FONT_SIZE_DESC)
-          .SetFontFamily("SamsungOneUI_600")
-          .SetTextColor(DESC_TEXT_COLOR)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(DESC_HEIGHT)
-          .SetPadding(Extents(PADDING, PADDING, 0, 0))
-          .SetHorizontalTextAlignment(Text::Alignment::START)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER)
-          .SetAsyncRendering(true)
-          .As(descLabel),
+    Label descLabel = Label::New(CARD_DESCS[index]);
+    descLabel.SetFontSize(FONT_SIZE_DESC);
+    descLabel.SetFontFamily("SamsungOneUI_600");
+    descLabel.SetTextColor(DESC_TEXT_COLOR);
+    descLabel.SetRequestedWidth(MATCH_PARENT);
+    descLabel.SetRequestedHeight(DESC_HEIGHT);
+    descLabel.SetPadding(Extents(PADDING, PADDING, 0, 0));
+    descLabel.SetHorizontalTextAlignment(Text::Alignment::START);
+    descLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    descLabel.SetAsyncRendering(true);
+    card.Add(descLabel);
 
-        // Color block at bottom
-        View::New()
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-          .SetBackgroundColor(UiColor(CARD_COLORS[index]))
-          .As(colorBlock)
-
-      }).As(card);
+    View colorBlock = View::New();
+    colorBlock.SetRequestedWidth(MATCH_PARENT);
+    colorBlock.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    colorBlock.SetBackgroundColor(UiColor(CARD_COLORS[index]));
+    card.Add(colorBlock);
 
     card.SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_CHILDREN);
     card.SetProperty(Actor::Property::PIVOT, Pivot::CENTER);

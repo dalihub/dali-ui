@@ -16,8 +16,6 @@
  * limitations under the License.
  *
  */
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/key-click-policy.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -33,13 +31,12 @@ namespace Integration
 class InteractiveViewImpl;
 }
 
-#include "interactive-view.autogen.h"
 /**
  * @brief InteractiveView is a View subclass with interactive behavior built in.
  *
  * InteractiveView guarantees that an InteractiveTrait is attached for the
  * lifetime of the view. It exposes the InteractiveTrait API directly, so
- * callers do not need to go through EnsureInteractiveTrait().
+ * callers do not need to call AsInteractive().
  *
  * InteractiveView is intended as a base class for clickable UI components
  * such as Button and Checkbox. It can also be instantiated directly when
@@ -145,8 +142,6 @@ public: // Signals
   Signal<bool(View, InputEvent)>& LongPressedSignal();
 
 public: // API
-  // @CHAIN_START(InteractiveView, View)
-
   /**
    * @brief Returns whether the view is currently in the pressed state.
    *
@@ -169,7 +164,7 @@ public: // API
    * @param[in] pseudoDisabled True to set pseudo disabled
    * @see InteractiveTrait::SetPseudoDisabled
    */
-  InteractiveView& SetPseudoDisabled(bool pseudoDisabled);
+  void SetPseudoDisabled(bool pseudoDisabled);
 
   /**
    * @brief Returns whether clicking is currently allowed.
@@ -185,7 +180,7 @@ public: // API
    * @param[in] clickable True to allow clicking
    * @see InteractiveTrait::SetClickable
    */
-  InteractiveView& SetClickable(bool clickable);
+  void SetClickable(bool clickable);
 
   /**
    * @brief Returns the current key click policy.
@@ -201,10 +196,9 @@ public: // API
    * @param[in] policy The KeyClickPolicy to apply
    * @see InteractiveTrait::SetKeyClickPolicy
    */
-  InteractiveView& SetKeyClickPolicy(KeyClickPolicy policy);
+  void SetKeyClickPolicy(KeyClickPolicy policy);
 
 public: // Signal connection helpers
-  // @CHAIN_MANUAL
   /**
    * @brief Connects a handler to ClickedSignal.
    *
@@ -220,16 +214,12 @@ public: // Signal connection helpers
    *
    * @param[in] obj  The object to connect to (must implement ConnectionTrackerInterface for auto-disconnect)
    * @param[in] func Member function pointer or functor with signature void(View, InputEvent)
-   * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
-  InteractiveView& ConnectClickedSignal(T* obj, Func func)
+  void ConnectClickedSignal(T* obj, Func func)
   {
     ClickedSignal().Connect(obj, func);
-    return *this;
   }
-
-  // @CHAIN_MANUAL
   /**
    * @brief Connects a handler to PressedChangedSignal.
    *
@@ -239,16 +229,12 @@ public: // Signal connection helpers
    *
    * @param[in] obj  The object to connect to
    * @param[in] func Member function pointer or functor with signature void(View, bool, InputEvent)
-   * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
-  InteractiveView& ConnectPressedChangedSignal(T* obj, Func func)
+  void ConnectPressedChangedSignal(T* obj, Func func)
   {
     PressedChangedSignal().Connect(obj, func);
-    return *this;
   }
-
-  // @CHAIN_MANUAL
   /**
    * @brief Connects a handler to LongPressedSignal.
    *
@@ -263,16 +249,12 @@ public: // Signal connection helpers
    *
    * @param[in] obj  The object to connect to
    * @param[in] func Member function pointer or functor with signature bool(View, InputEvent)
-   * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
-  InteractiveView& ConnectLongPressedSignal(T* obj, Func func)
+  void ConnectLongPressedSignal(T* obj, Func func)
   {
     LongPressedSignal().Connect(obj, func);
-    return *this;
   }
-
-  // @CHAIN_END
 
 public: // Not intended for application developers
   /// @cond internal
@@ -292,7 +274,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(InteractiveView)
 };
 
 } // namespace Ui

@@ -53,20 +53,20 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetSpacing(16.0f)
-      .SetPadding(Extents(50, 50, 50, 50));
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
+    outer.SetRequestedWidth(MATCH_PARENT);
+    outer.SetRequestedHeight(MATCH_PARENT);
+    outer.SetSpacing(16.0f);
+    outer.SetPadding(Extents(50, 50, 50, 50));
 
     // Row 1: Default shrink - all items shrink equally
-    FlexLayout row1 = FlexLayout::New()
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetDirection(FlexDirection::ROW)
-      .SetWrap(FlexWrap::NO_WRAP)
-      .SetAlignItems(FlexAlign::STRETCH)
-      .SetPadding(Extents(50, 50, 50, 50))
-      .SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
+    FlexLayout row1 = FlexLayout::New();
+    row1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    row1.SetDirection(FlexDirection::ROW);
+    row1.SetWrap(FlexWrap::NO_WRAP);
+    row1.SetAlignItems(FlexAlign::STRETCH);
+    row1.SetPadding(Extents(50, 50, 50, 50));
+    row1.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     // All three items: basis 250, default shrink (1.0)
     View r1box1 = View::New();
@@ -90,13 +90,13 @@ public:
     outer.Add(row1);
 
     // Row 2: Varied shrink values
-    FlexLayout row2 = FlexLayout::New()
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetDirection(FlexDirection::ROW)
-      .SetWrap(FlexWrap::NO_WRAP)
-      .SetAlignItems(FlexAlign::STRETCH)
-      .SetPadding(Extents(50, 50, 50, 50))
-      .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
+    FlexLayout row2 = FlexLayout::New();
+    row2.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    row2.SetDirection(FlexDirection::ROW);
+    row2.SetWrap(FlexWrap::NO_WRAP);
+    row2.SetAlignItems(FlexAlign::STRETCH);
+    row2.SetPadding(Extents(50, 50, 50, 50));
+    row2.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     // Item 1: shrink 0 (will not shrink)
     View r2box1 = View::New();

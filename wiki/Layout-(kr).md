@@ -55,15 +55,15 @@ view.SetVisibility(false);  // 숨김 (레이아웃 공간에서 빠짐)
 **언제 사용하면 좋은가**: 버튼 목록, 메뉴 항목, 폼 필드처럼 단순히 세로 또는 가로로 나열할 때.
 
 ```cpp
-StackLayout::New(StackOrientation::VERTICAL)
-  .Spacing(8_spx)
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(WRAP_CONTENT)
-  .Children({
-    label,
-    button,
-    input,
-  });
+StackLayout stack = StackLayout::New(StackOrientation::VERTICAL);
+stack.SetSpacing(8_spx);
+stack.SetRequestedWidth(MATCH_PARENT);
+stack.SetRequestedHeight(WRAP_CONTENT);
+stack.AddChildren({
+  label,
+  button,
+  input,
+});
 ```
 
 **Per-child 옵션** (`StackLayoutParams`):
@@ -92,20 +92,20 @@ viewB.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 **언제 사용하면 좋은가**: 자유로운 오버레이, 떠있는 UI 요소, 또는 픽셀 단위 정밀 제어가 필요할 때.
 
 ```cpp
-AbsoluteLayout::New()
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(MATCH_PARENT)
-  .Children({
-    icon.SetLayoutParams(
-      AbsoluteLayoutParams::New()
-        .SetX(20_spx).SetY(20_spx)
-        .SetWidth(48_spx).SetHeight(48_spx)),
+icon.SetLayoutParams(
+  AbsoluteLayoutParams::New()
+    .SetX(20_spx).SetY(20_spx)
+    .SetWidth(48_spx).SetHeight(48_spx));
 
-    badge.SetLayoutParams(
-      AbsoluteLayoutParams::New()
-        .SetBounds(LayoutRect(0.9f, 0.0f, 0.1f, 0.1f))
-        .SetFlags(AbsoluteLayoutFlags::ALL)),  // 비율 기반
-  });
+badge.SetLayoutParams(
+  AbsoluteLayoutParams::New()
+    .SetBounds(LayoutRect(0.9f, 0.0f, 0.1f, 0.1f))
+    .SetFlags(AbsoluteLayoutFlags::ALL));  // 비율 기반
+
+AbsoluteLayout absolute = AbsoluteLayout::New();
+absolute.SetRequestedWidth(MATCH_PARENT);
+absolute.SetRequestedHeight(MATCH_PARENT);
+absolute.AddChildren({icon, badge});
 ```
 
 **AbsoluteLayoutFlags**:
@@ -130,12 +130,12 @@ CSS Flexbox 알고리즘을 사용합니다.
 **언제 사용하면 좋은가**: 방향 전환, 줄바꿈, 정렬 제어가 필요한 복잡한 1차원 레이아웃.
 
 ```cpp
-FlexLayout::New()
-  .Direction(FlexDirection::ROW)
-  .Wrap(FlexWrap::WRAP)
-  .JustifyContent(FlexJustify::SPACE_BETWEEN)
-  .AlignItems(FlexAlign::CENTER)
-  .Children({ itemA, itemB, itemC });
+FlexLayout flex = FlexLayout::New();
+flex.SetDirection(FlexDirection::ROW);
+flex.SetWrap(FlexWrap::WRAP);
+flex.SetJustifyContent(FlexJustify::SPACE_BETWEEN);
+flex.SetAlignItems(FlexAlign::CENTER);
+flex.AddChildren({itemA, itemB, itemC});
 ```
 
 **Per-child 옵션** (`FlexLayoutParams`):
@@ -160,12 +160,12 @@ FlexLayout::New()
 **언제 사용하면 좋은가**: 앱 그리드, 설정 화면, 대시보드처럼 2차원 격자가 필요할 때.
 
 ```cpp
-GridLayout::New()
-  .Rows({GridLength::Auto(), GridLength::Star(), GridLength::Absolute(100_spx)})
-  .Columns({GridLength::Star(), GridLength::Star(2.0f)})
-  .RowSpacing(4_spx)
-  .ColumnSpacing(4_spx)
-  .Children({ header, sideBar, main, footer });
+GridLayout grid = GridLayout::New();
+grid.SetRowDefinitions({GridLength::Auto(), GridLength::Star(), GridLength::Absolute(100_spx)});
+grid.SetColumnDefinitions({GridLength::Star(), GridLength::Star(2.0f)});
+grid.SetRowSpacing(4_spx);
+grid.SetColumnSpacing(4_spx);
+grid.AddChildren({header, sideBar, main, footer});
 ```
 
 **GridLength 타입**:

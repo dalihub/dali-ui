@@ -112,42 +112,46 @@ private:
 
   View CreateContents()
   {
-    auto scrollView = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT);
+    auto scrollView = ScrollView::New();
+    scrollView.SetScrollDirection(ScrollDirection::Vertical);
+    scrollView.SetRequestedWidth(MATCH_PARENT);
+    scrollView.SetRequestedHeight(MATCH_PARENT);
 
-    auto layout = StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        Label::New("🥰💀✌️🌴🐢🐐🍄⚽🍻👑📸😬👀🚨🏡🕊️🏆😻🌟🧿🍀🎨🍜🔮")
-          .SetFontFamily("Noto Color Emoji")
-          .SetMultiLine(true)
-          .SetFontSize(50),
+    auto layout = StackLayout::New(StackOrientation::VERTICAL);
+    layout.SetSpacing(STACK_SPACING);
+    layout.SetRequestedWidth(MATCH_PARENT);
+    layout.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
-        Label::New("Whereas disregard and contempt for human rights have resulted")
-          .SetFontFamily("Nabla")
-          .SetFontVariation("EDPT=100,EHLT=12")
-          .SetMultiLine(true)
-          .SetFontSize(50),
+    Label emojiLabel = Label::New("🥰💀✌️🌴🐢🐐🍄⚽🍻👑📸😬👀🚨🏡🕊️🏆😻🌟🧿🍀🎨🍜🔮");
+    emojiLabel.SetFontFamily("Noto Color Emoji");
+    emojiLabel.SetMultiLine(true);
+    emojiLabel.SetFontSize(50);
+    layout.Add(emojiLabel);
 
-        Label::New(COLRV1_STATIC_TEST_GLYPHS)
-          .SetFontFamily("COLRv1 Static Test Glyphs")
-          .SetMultiLine(true)
-          .SetFontSize(50),
+    Label nablaLabel = Label::New("Whereas disregard and contempt for human rights have resulted");
+    nablaLabel.SetFontFamily("Nabla");
+    nablaLabel.SetFontVariation("EDPT=100,EHLT=12");
+    nablaLabel.SetMultiLine(true);
+    nablaLabel.SetFontSize(50);
+    layout.Add(nablaLabel);
 
-        Label::New(COLRV1_BOUNDARY_TEST_GLYPHS)
-          .SetFontFamily("COLRv1 Static Test Glyphs")
-          .SetMultiLine(true)
-          .SetFontSize(50),
+    Label staticTestLabel = Label::New(COLRV1_STATIC_TEST_GLYPHS);
+    staticTestLabel.SetFontFamily("COLRv1 Static Test Glyphs");
+    staticTestLabel.SetMultiLine(true);
+    staticTestLabel.SetFontSize(50);
+    layout.Add(staticTestLabel);
 
-        Label::New(COLRV1_STATIC_TEST_GLYPHS)
-          .SetFontFamily("COLRv1 Variable Test Glyphs")
-          .SetMultiLine(true)
-          .SetFontSize(50),
-      });
+    Label boundaryTestLabel = Label::New(COLRV1_BOUNDARY_TEST_GLYPHS);
+    boundaryTestLabel.SetFontFamily("COLRv1 Static Test Glyphs");
+    boundaryTestLabel.SetMultiLine(true);
+    boundaryTestLabel.SetFontSize(50);
+    layout.Add(boundaryTestLabel);
+
+    Label variableTestLabel = Label::New(COLRV1_STATIC_TEST_GLYPHS);
+    variableTestLabel.SetFontFamily("COLRv1 Variable Test Glyphs");
+    variableTestLabel.SetMultiLine(true);
+    variableTestLabel.SetFontSize(50);
+    layout.Add(variableTestLabel);
 
     scrollView.SetContent(layout);
 

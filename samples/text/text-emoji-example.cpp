@@ -464,11 +464,12 @@ private:
 
   View CreateContainerView(int width, int height, bool horizontal)
   {
-    return StackLayout::New(horizontal ? StackOrientation::HORIZONTAL : StackOrientation::VERTICAL)
-      .SetSpacing(1)
-      .SetRequestedWidth(width)
-      .SetRequestedHeight(height)
-      .SetBackgroundColor(UiColor(COLOR_BLACK));
+    StackLayout layout = StackLayout::New(horizontal ? StackOrientation::HORIZONTAL : StackOrientation::VERTICAL);
+    layout.SetSpacing(1);
+    layout.SetRequestedWidth(width);
+    layout.SetRequestedHeight(height);
+    layout.SetBackgroundColor(UiColor(COLOR_BLACK));
+    return layout;
   }
 
   View AddRow(View parent)
@@ -480,22 +481,23 @@ private:
 
   Label CreateBaseLabel()
   {
-    return Label::New()
-      .SetFontFamily(Dali::String(FONT_FAMILY))
-      .SetOverflowMode(Text::OverflowMode::CLIP)
-      .SetBackgroundColor(UiColor(COLOR_WHITE))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetAsyncRendering(mAsyncRendering);
+    Label label = Label::New();
+    label.SetFontFamily(Dali::String(FONT_FAMILY));
+    label.SetOverflowMode(Text::OverflowMode::CLIP);
+    label.SetBackgroundColor(UiColor(COLOR_WHITE));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    label.SetAsyncRendering(mAsyncRendering);
+    return label;
   }
 
   Label CreateEmojiLabel(const std::string& text, float pixelSize, bool tapEnabled)
   {
-    Label label = CreateBaseLabel()
-      .SetText(Dali::String(text.c_str()))
-      .SetFontSize(pixelSize)
-      .SetRequestedWidth(mWidth)
-      .SetRequestedHeight(mHeight);
+    Label label = CreateBaseLabel();
+    label.SetText(Dali::String(text.c_str()));
+    label.SetFontSize(pixelSize);
+    label.SetRequestedWidth(mWidth);
+    label.SetRequestedHeight(mHeight);
 
     if(tapEnabled)
     {
@@ -507,16 +509,17 @@ private:
 
   Label CreateOverlayLabel(const char* text)
   {
-    return Label::New()
-      .SetText(Dali::String(text ? text : ""))
-      .SetFontSize(mPixelSize / 3)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetLayoutMode(LayoutMode::STANDALONE)
-      .SetOverflowMode(Text::OverflowMode::CLIP)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetAsyncRendering(mAsyncRendering);
+    Label label = Label::New();
+    label.SetText(Dali::String(text ? text : ""));
+    label.SetFontSize(mPixelSize / 3);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetLayoutMode(LayoutMode::STANDALONE);
+    label.SetOverflowMode(Text::OverflowMode::CLIP);
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    label.SetAsyncRendering(mAsyncRendering);
+    return label;
   }
 
   void GenerateUI()
@@ -553,11 +556,11 @@ private:
     logMainView.Add(logTopView);
 
     Label titleLabel = CreateEmojiLabel("History", mPixelSize / 3, false);
-    titleLabel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetRequestedHeight(mHeight)
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    titleLabel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    titleLabel.SetRequestedHeight(mHeight);
+    titleLabel.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
+    titleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     logTopView.Add(titleLabel);
     TrackTitleLabel(titleLabel);
 
@@ -584,11 +587,11 @@ private:
     View mainTopView = AddRow(mMainView);
 
     mWorkBench = CreateEmojiLabel("", mPixelSize, true);
-    mWorkBench.SetRequestedWidth(GetBenchLength())
-      .SetRequestedHeight(mHeight)
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY))
-      .SetHorizontalTextAlignment(Text::Alignment::START)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mWorkBench.SetRequestedWidth(GetBenchLength());
+    mWorkBench.SetRequestedHeight(mHeight);
+    mWorkBench.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
+    mWorkBench.SetHorizontalTextAlignment(Text::Alignment::START);
+    mWorkBench.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mainTopView.Add(mWorkBench);
     TrackWorkbench(mWorkBench);
 
@@ -1615,15 +1618,15 @@ private:
     View row = CreateContainerView(MATCH_PARENT, WRAP_CONTENT, true);
     mLogView.Add(row);
 
-    Label emoji = Label::New()
-      .SetText(Dali::String(unicode.c_str()))
-      .SetFontFamily(Dali::String(FONT_FAMILY))
-      .SetRequestedWidth(mWidth / 2)
-      .SetRequestedHeight(mHeight / 2)
-      .SetFontSize(mPixelSize / 2)
-      .SetOverflowMode(Text::OverflowMode::CLIP)
-      .SetBackgroundColor(UiColor(COLOR_WHITE))
-      .SetAsyncRendering(mAsyncRendering);
+    Label emoji = Label::New();
+    emoji.SetText(Dali::String(unicode.c_str()));
+    emoji.SetFontFamily(Dali::String(FONT_FAMILY));
+    emoji.SetRequestedWidth(mWidth / 2);
+    emoji.SetRequestedHeight(mHeight / 2);
+    emoji.SetFontSize(mPixelSize / 2);
+    emoji.SetOverflowMode(Text::OverflowMode::CLIP);
+    emoji.SetBackgroundColor(UiColor(COLOR_WHITE));
+    emoji.SetAsyncRendering(mAsyncRendering);
     row.Add(emoji);
 
     mHistory.push_back(unicode);
@@ -1635,16 +1638,16 @@ private:
       desc = " " + it->second;
     }
 
-    Label description = Label::New()
-      .SetText(Dali::String(desc.c_str()))
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetRequestedHeight(mHeight / 2)
-      .SetFontSize(mPixelSize / 3 - 1)
-      .SetOverflowMode(Text::OverflowMode::ELLIPSIS)
-      .SetHorizontalTextAlignment(Text::Alignment::START)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetBackgroundColor(UiColor(COLOR_WHITE))
-      .SetAsyncRendering(mAsyncRendering);
+    Label description = Label::New();
+    description.SetText(Dali::String(desc.c_str()));
+    description.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    description.SetRequestedHeight(mHeight / 2);
+    description.SetFontSize(mPixelSize / 3 - 1);
+    description.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+    description.SetHorizontalTextAlignment(Text::Alignment::START);
+    description.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    description.SetBackgroundColor(UiColor(COLOR_WHITE));
+    description.SetAsyncRendering(mAsyncRendering);
     row.Add(description);
 
     // Track log row for in-place scale updates

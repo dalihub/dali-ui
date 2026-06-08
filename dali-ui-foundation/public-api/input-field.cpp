@@ -14,13 +14,9 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/object/type-registry.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/public-api/input-field.h>
+#include <dali/devel-api/object/type-registry.h>
 
 namespace Dali
 {
@@ -55,8 +51,6 @@ InputField InputField::New()
   Integration::InputFieldImplPtr impl = Integration::InputFieldImpl::New();
 
   InputField inputField = InputField(*impl);
-
-  // Second-phase initialization
   impl->Initialize();
   return inputField;
 }
@@ -106,14 +100,9 @@ InputField::InputField(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::InputFieldImpl>(internal);
 }
 
-// =============================================================================
-// Properties
-// =============================================================================
-
-InputField& InputField::SetText(const Dali::String& text)
+void InputField::SetText(const Dali::String& text)
 {
   GetImpl(*this).SetText(text);
-  return *this;
 }
 
 Dali::String InputField::GetText() const
@@ -121,10 +110,9 @@ Dali::String InputField::GetText() const
   return GetImpl(*this).GetText();
 }
 
-InputField& InputField::SetFontFamily(const Dali::String& fontFamily)
+void InputField::SetFontFamily(const Dali::String& fontFamily)
 {
   GetImpl(*this).SetFontFamily(fontFamily);
-  return *this;
 }
 
 Dali::String InputField::GetFontFamily() const
@@ -132,10 +120,9 @@ Dali::String InputField::GetFontFamily() const
   return GetImpl(*this).GetFontFamily();
 }
 
-InputField& InputField::SetFontSize(float fontSize)
+void InputField::SetFontSize(float fontSize)
 {
   GetImpl(*this).SetFontSize(fontSize);
-  return *this;
 }
 
 float InputField::GetFontSize() const
@@ -143,10 +130,9 @@ float InputField::GetFontSize() const
   return GetImpl(*this).GetFontSize();
 }
 
-InputField& InputField::SetTextColor(const UiColor& color)
+void InputField::SetTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTextColor(color);
-  return *this;
 }
 
 UiColor InputField::GetTextColor()
@@ -154,10 +140,9 @@ UiColor InputField::GetTextColor()
   return GetImpl(*this).GetTextColor();
 }
 
-InputField& InputField::SetHorizontalTextAlignment(Text::Alignment alignment)
+void InputField::SetHorizontalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetHorizontalTextAlignment(alignment);
-  return *this;
 }
 
 Text::Alignment InputField::GetHorizontalTextAlignment() const
@@ -165,10 +150,9 @@ Text::Alignment InputField::GetHorizontalTextAlignment() const
   return GetImpl(*this).GetHorizontalTextAlignment();
 }
 
-InputField& InputField::SetVerticalTextAlignment(Text::Alignment alignment)
+void InputField::SetVerticalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetVerticalTextAlignment(alignment);
-  return *this;
 }
 
 Text::Alignment InputField::GetVerticalTextAlignment() const
@@ -176,10 +160,9 @@ Text::Alignment InputField::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
-InputField& InputField::SetOverflowMode(Text::OverflowMode mode)
+void InputField::SetOverflowMode(Text::OverflowMode mode)
 {
   GetImpl(*this).SetOverflowMode(mode);
-  return *this;
 }
 
 Text::OverflowMode InputField::GetOverflowMode() const
@@ -187,10 +170,9 @@ Text::OverflowMode InputField::GetOverflowMode() const
   return GetImpl(*this).GetOverflowMode();
 }
 
-InputField& InputField::SetPlaceholder(const Dali::String& text)
+void InputField::SetPlaceholder(const Dali::String& text)
 {
   GetImpl(*this).SetPlaceholder(text);
-  return *this;
 }
 
 Dali::String InputField::GetPlaceholder() const
@@ -198,10 +180,9 @@ Dali::String InputField::GetPlaceholder() const
   return GetImpl(*this).GetPlaceholder();
 }
 
-InputField& InputField::SetPlaceholderColor(const UiColor& color)
+void InputField::SetPlaceholderColor(const UiColor& color)
 {
   GetImpl(*this).SetPlaceholderColor(color);
-  return *this;
 }
 
 UiColor InputField::GetPlaceholderColor()
@@ -209,10 +190,9 @@ UiColor InputField::GetPlaceholderColor()
   return GetImpl(*this).GetPlaceholderColor();
 }
 
-InputField& InputField::SetShowPlaceholderOnFocus(bool enabled)
+void InputField::SetShowPlaceholderOnFocus(bool enabled)
 {
   GetImpl(*this).SetShowPlaceholderOnFocus(enabled);
-  return *this;
 }
 
 bool InputField::IsPlaceholderShownOnFocus() const
@@ -220,10 +200,9 @@ bool InputField::IsPlaceholderShownOnFocus() const
   return GetImpl(*this).IsPlaceholderShownOnFocus();
 }
 
-InputField& InputField::SetCursorWidth(int width)
+void InputField::SetCursorWidth(int width)
 {
   GetImpl(*this).SetCursorWidth(width);
-  return *this;
 }
 
 int InputField::GetCursorWidth() const
@@ -231,10 +210,9 @@ int InputField::GetCursorWidth() const
   return GetImpl(*this).GetCursorWidth();
 }
 
-InputField& InputField::SetCursorColor(const UiColor& color)
+void InputField::SetCursorColor(const UiColor& color)
 {
   GetImpl(*this).SetCursorColor(color);
-  return *this;
 }
 
 UiColor InputField::GetCursorColor()
@@ -242,10 +220,9 @@ UiColor InputField::GetCursorColor()
   return GetImpl(*this).GetCursorColor();
 }
 
-InputField& InputField::SetCursorBlinkEnabled(bool enabled)
+void InputField::SetCursorBlinkEnabled(bool enabled)
 {
   GetImpl(*this).SetCursorBlinkEnabled(enabled);
-  return *this;
 }
 
 bool InputField::IsCursorBlinkEnabled() const
@@ -253,10 +230,9 @@ bool InputField::IsCursorBlinkEnabled() const
   return GetImpl(*this).IsCursorBlinkEnabled();
 }
 
-InputField& InputField::SetCursorBlinkInterval(float interval)
+void InputField::SetCursorBlinkInterval(float interval)
 {
   GetImpl(*this).SetCursorBlinkInterval(interval);
-  return *this;
 }
 
 float InputField::GetCursorBlinkInterval() const
@@ -264,10 +240,9 @@ float InputField::GetCursorBlinkInterval() const
   return GetImpl(*this).GetCursorBlinkInterval();
 }
 
-InputField& InputField::SetCursorPosition(uint32_t position)
+void InputField::SetCursorPosition(uint32_t position)
 {
   GetImpl(*this).SetCursorPosition(position);
-  return *this;
 }
 
 uint32_t InputField::GetCursorPosition() const
@@ -275,10 +250,9 @@ uint32_t InputField::GetCursorPosition() const
   return GetImpl(*this).GetCursorPosition();
 }
 
-InputField& InputField::SetSelectionEnabled(bool enabled)
+void InputField::SetSelectionEnabled(bool enabled)
 {
   GetImpl(*this).SetSelectionEnabled(enabled);
-  return *this;
 }
 
 bool InputField::IsSelectionEnabled() const
@@ -286,10 +260,9 @@ bool InputField::IsSelectionEnabled() const
   return GetImpl(*this).IsSelectionEnabled();
 }
 
-InputField& InputField::SetSelectionColor(const UiColor& color)
+void InputField::SetSelectionColor(const UiColor& color)
 {
   GetImpl(*this).SetSelectionColor(color);
-  return *this;
 }
 
 UiColor InputField::GetSelectionColor()
@@ -297,10 +270,9 @@ UiColor InputField::GetSelectionColor()
   return GetImpl(*this).GetSelectionColor();
 }
 
-InputField& InputField::SetTextHandleEnabled(bool enabled)
+void InputField::SetTextHandleEnabled(bool enabled)
 {
   GetImpl(*this).SetTextHandleEnabled(enabled);
-  return *this;
 }
 
 bool InputField::IsTextHandleEnabled() const
@@ -308,10 +280,9 @@ bool InputField::IsTextHandleEnabled() const
   return GetImpl(*this).IsTextHandleEnabled();
 }
 
-InputField& InputField::SetTextHandleColor(const UiColor& color)
+void InputField::SetTextHandleColor(const UiColor& color)
 {
   GetImpl(*this).SetTextHandleColor(color);
-  return *this;
 }
 
 UiColor InputField::GetTextHandleColor() const
@@ -319,10 +290,9 @@ UiColor InputField::GetTextHandleColor() const
   return GetImpl(*this).GetTextHandleColor();
 }
 
-InputField& InputField::SetCursorHandleImage(const Dali::String& image)
+void InputField::SetCursorHandleImage(const Dali::String& image)
 {
   GetImpl(*this).SetCursorHandleImage(image);
-  return *this;
 }
 
 Dali::String InputField::GetCursorHandleImage() const
@@ -330,10 +300,9 @@ Dali::String InputField::GetCursorHandleImage() const
   return GetImpl(*this).GetCursorHandleImage();
 }
 
-InputField& InputField::SetCursorHandlePressedImage(const Dali::String& image)
+void InputField::SetCursorHandlePressedImage(const Dali::String& image)
 {
   GetImpl(*this).SetCursorHandlePressedImage(image);
-  return *this;
 }
 
 Dali::String InputField::GetCursorHandlePressedImage() const
@@ -341,10 +310,9 @@ Dali::String InputField::GetCursorHandlePressedImage() const
   return GetImpl(*this).GetCursorHandlePressedImage();
 }
 
-InputField& InputField::SetSelectionHandleImageLeft(const Dali::String& image)
+void InputField::SetSelectionHandleImageLeft(const Dali::String& image)
 {
   GetImpl(*this).SetSelectionHandleImageLeft(image);
-  return *this;
 }
 
 Dali::String InputField::GetSelectionHandleImageLeft() const
@@ -352,10 +320,9 @@ Dali::String InputField::GetSelectionHandleImageLeft() const
   return GetImpl(*this).GetSelectionHandleImageLeft();
 }
 
-InputField& InputField::SetSelectionHandleImageRight(const Dali::String& image)
+void InputField::SetSelectionHandleImageRight(const Dali::String& image)
 {
   GetImpl(*this).SetSelectionHandleImageRight(image);
-  return *this;
 }
 
 Dali::String InputField::GetSelectionHandleImageRight() const
@@ -363,10 +330,9 @@ Dali::String InputField::GetSelectionHandleImageRight() const
   return GetImpl(*this).GetSelectionHandleImageRight();
 }
 
-InputField& InputField::SetSelectionHandlePressedImageLeft(const Dali::String& image)
+void InputField::SetSelectionHandlePressedImageLeft(const Dali::String& image)
 {
   GetImpl(*this).SetSelectionHandlePressedImageLeft(image);
-  return *this;
 }
 
 Dali::String InputField::GetSelectionHandlePressedImageLeft() const
@@ -374,10 +340,9 @@ Dali::String InputField::GetSelectionHandlePressedImageLeft() const
   return GetImpl(*this).GetSelectionHandlePressedImageLeft();
 }
 
-InputField& InputField::SetSelectionHandlePressedImageRight(const Dali::String& image)
+void InputField::SetSelectionHandlePressedImageRight(const Dali::String& image)
 {
   GetImpl(*this).SetSelectionHandlePressedImageRight(image);
-  return *this;
 }
 
 Dali::String InputField::GetSelectionHandlePressedImageRight() const
@@ -385,10 +350,9 @@ Dali::String InputField::GetSelectionHandlePressedImageRight() const
   return GetImpl(*this).GetSelectionHandlePressedImageRight();
 }
 
-InputField& InputField::SetMaximumLength(int length)
+void InputField::SetMaximumLength(int length)
 {
   GetImpl(*this).SetMaximumLength(length);
-  return *this;
 }
 
 int InputField::GetMaximumLength() const
@@ -396,22 +360,19 @@ int InputField::GetMaximumLength() const
   return GetImpl(*this).GetMaximumLength();
 }
 
-InputField& InputField::SetInputFilter(const Text::InputFilter& inputFilter)
+void InputField::SetInputFilter(const Text::InputFilter& inputFilter)
 {
   GetImpl(*this).SetInputFilter(inputFilter);
-  return *this;
 }
 
-InputField& InputField::ClearInputFilter()
+void InputField::ClearInputFilter()
 {
   GetImpl(*this).ClearInputFilter();
-  return *this;
 }
 
-InputField& InputField::SetPasswordMode(Text::PasswordMode mode)
+void InputField::SetPasswordMode(Text::PasswordMode mode)
 {
   GetImpl(*this).SetPasswordMode(mode);
-  return *this;
 }
 
 Text::PasswordMode InputField::GetPasswordMode() const
@@ -419,10 +380,9 @@ Text::PasswordMode InputField::GetPasswordMode() const
   return GetImpl(*this).GetPasswordMode();
 }
 
-InputField& InputField::SetPasswordMaskCharacter(uint32_t character)
+void InputField::SetPasswordMaskCharacter(uint32_t character)
 {
   GetImpl(*this).SetPasswordMaskCharacter(character);
-  return *this;
 }
 
 uint32_t InputField::GetPasswordMaskCharacter() const
@@ -430,10 +390,9 @@ uint32_t InputField::GetPasswordMaskCharacter() const
   return GetImpl(*this).GetPasswordMaskCharacter();
 }
 
-InputField& InputField::SetPasswordRevealDuration(uint32_t duration)
+void InputField::SetPasswordRevealDuration(uint32_t duration)
 {
   GetImpl(*this).SetPasswordRevealDuration(duration);
-  return *this;
 }
 
 uint32_t InputField::GetPasswordRevealDuration() const
@@ -441,10 +400,9 @@ uint32_t InputField::GetPasswordRevealDuration() const
   return GetImpl(*this).GetPasswordRevealDuration();
 }
 
-InputField& InputField::SetEditable(bool editable)
+void InputField::SetEditable(bool editable)
 {
   GetImpl(*this).SetEditable(editable);
-  return *this;
 }
 
 bool InputField::IsEditable() const
@@ -452,10 +410,9 @@ bool InputField::IsEditable() const
   return GetImpl(*this).IsEditable();
 }
 
-InputField& InputField::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+void InputField::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 {
   GetImpl(*this).SetLayoutDirectionMode(mode);
-  return *this;
 }
 
 Text::LayoutDirectionMode InputField::GetLayoutDirectionMode() const
@@ -463,10 +420,9 @@ Text::LayoutDirectionMode InputField::GetLayoutDirectionMode() const
   return GetImpl(*this).GetLayoutDirectionMode();
 }
 
-InputField& InputField::SetMarkupEnabled(bool enabled)
+void InputField::SetMarkupEnabled(bool enabled)
 {
   GetImpl(*this).SetMarkupEnabled(enabled);
-  return *this;
 }
 
 bool InputField::IsMarkupEnabled() const
@@ -474,10 +430,9 @@ bool InputField::IsMarkupEnabled() const
   return GetImpl(*this).IsMarkupEnabled();
 }
 
-InputField& InputField::SetFontWeight(Text::FontWeight weight)
+void InputField::SetFontWeight(Text::FontWeight weight)
 {
   GetImpl(*this).SetFontWeight(weight);
-  return *this;
 }
 
 Text::FontWeight InputField::GetFontWeight() const
@@ -485,10 +440,9 @@ Text::FontWeight InputField::GetFontWeight() const
   return GetImpl(*this).GetFontWeight();
 }
 
-InputField& InputField::SetFontWidth(Text::FontWidth width)
+void InputField::SetFontWidth(Text::FontWidth width)
 {
   GetImpl(*this).SetFontWidth(width);
-  return *this;
 }
 
 Text::FontWidth InputField::GetFontWidth() const
@@ -496,10 +450,9 @@ Text::FontWidth InputField::GetFontWidth() const
   return GetImpl(*this).GetFontWidth();
 }
 
-InputField& InputField::SetFontSlant(Text::FontSlant slant)
+void InputField::SetFontSlant(Text::FontSlant slant)
 {
   GetImpl(*this).SetFontSlant(slant);
-  return *this;
 }
 
 Text::FontSlant InputField::GetFontSlant() const
@@ -507,10 +460,9 @@ Text::FontSlant InputField::GetFontSlant() const
   return GetImpl(*this).GetFontSlant();
 }
 
-InputField& InputField::SetTextBackgroundColor(const UiColor& color)
+void InputField::SetTextBackgroundColor(const UiColor& color)
 {
   GetImpl(*this).SetTextBackgroundColor(color);
-  return *this;
 }
 
 UiColor InputField::GetTextBackgroundColor() const
@@ -523,10 +475,9 @@ void InputField::ClearTextBackgroundColor()
   GetImpl(*this).ClearTextBackgroundColor();
 }
 
-InputField& InputField::SetUnderline(const Text::Underline& underline)
+void InputField::SetUnderline(const Text::Underline& underline)
 {
   GetImpl(*this).SetUnderline(underline);
-  return *this;
 }
 
 void InputField::ClearUnderline()
@@ -534,10 +485,9 @@ void InputField::ClearUnderline()
   return GetImpl(*this).ClearUnderline();
 }
 
-InputField& InputField::SetShadow(const Text::Shadow& shadow)
+void InputField::SetShadow(const Text::Shadow& shadow)
 {
   GetImpl(*this).SetShadow(shadow);
-  return *this;
 }
 
 void InputField::ClearShadow()
@@ -545,10 +495,9 @@ void InputField::ClearShadow()
   return GetImpl(*this).ClearShadow();
 }
 
-InputField& InputField::SetOutline(const Text::Outline& outline)
+void InputField::SetOutline(const Text::Outline& outline)
 {
   GetImpl(*this).SetOutline(outline);
-  return *this;
 }
 
 void InputField::ClearOutline()
@@ -556,10 +505,9 @@ void InputField::ClearOutline()
   return GetImpl(*this).ClearOutline();
 }
 
-InputField& InputField::SetLineThrough(const Text::LineThrough& lineThrough)
+void InputField::SetLineThrough(const Text::LineThrough& lineThrough)
 {
   GetImpl(*this).SetLineThrough(lineThrough);
-  return *this;
 }
 
 void InputField::ClearLineThrough()
@@ -567,10 +515,9 @@ void InputField::ClearLineThrough()
   return GetImpl(*this).ClearLineThrough();
 }
 
-InputField& InputField::SetFontSizeScale(float scale)
+void InputField::SetFontSizeScale(float scale)
 {
   GetImpl(*this).SetFontSizeScale(scale);
-  return *this;
 }
 
 float InputField::GetFontSizeScale() const
@@ -578,10 +525,9 @@ float InputField::GetFontSizeScale() const
   return GetImpl(*this).GetFontSizeScale();
 }
 
-InputField& InputField::SetMinimumFontSizeScale(float scale)
+void InputField::SetMinimumFontSizeScale(float scale)
 {
   GetImpl(*this).SetMinimumFontSizeScale(scale);
-  return *this;
 }
 
 float InputField::GetMinimumFontSizeScale() const
@@ -589,10 +535,9 @@ float InputField::GetMinimumFontSizeScale() const
   return GetImpl(*this).GetMinimumFontSizeScale();
 }
 
-InputField& InputField::SetMaximumFontSizeScale(float scale)
+void InputField::SetMaximumFontSizeScale(float scale)
 {
   GetImpl(*this).SetMaximumFontSizeScale(scale);
-  return *this;
 }
 
 float InputField::GetMaximumFontSizeScale() const
@@ -600,10 +545,9 @@ float InputField::GetMaximumFontSizeScale() const
   return GetImpl(*this).GetMaximumFontSizeScale();
 }
 
-InputField& InputField::SetSystemFontSizeScaleEnabled(bool enabled)
+void InputField::SetSystemFontSizeScaleEnabled(bool enabled)
 {
   GetImpl(*this).SetSystemFontSizeScaleEnabled(enabled);
-  return *this;
 }
 
 bool InputField::IsSystemFontSizeScaleEnabled() const
@@ -611,10 +555,9 @@ bool InputField::IsSystemFontSizeScaleEnabled() const
   return GetImpl(*this).IsSystemFontSizeScaleEnabled();
 }
 
-InputField& InputField::SetTypingTextColor(const UiColor& color)
+void InputField::SetTypingTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTypingTextColor(color);
-  return *this;
 }
 
 UiColor InputField::GetTypingTextColor() const
@@ -622,10 +565,9 @@ UiColor InputField::GetTypingTextColor() const
   return GetImpl(*this).GetTypingTextColor();
 }
 
-InputField& InputField::SetTypingFontFamily(const Dali::String& fontFamily)
+void InputField::SetTypingFontFamily(const Dali::String& fontFamily)
 {
   GetImpl(*this).SetTypingFontFamily(fontFamily);
-  return *this;
 }
 
 Dali::String InputField::GetTypingFontFamily() const
@@ -633,10 +575,9 @@ Dali::String InputField::GetTypingFontFamily() const
   return GetImpl(*this).GetTypingFontFamily();
 }
 
-InputField& InputField::SetTypingFontSize(float fontSize)
+void InputField::SetTypingFontSize(float fontSize)
 {
   GetImpl(*this).SetTypingFontSize(fontSize);
-  return *this;
 }
 
 float InputField::GetTypingFontSize() const
@@ -644,10 +585,9 @@ float InputField::GetTypingFontSize() const
   return GetImpl(*this).GetTypingFontSize();
 }
 
-InputField& InputField::SetTypingFontWeight(Text::FontWeight weight)
+void InputField::SetTypingFontWeight(Text::FontWeight weight)
 {
   GetImpl(*this).SetTypingFontWeight(weight);
-  return *this;
 }
 
 Text::FontWeight InputField::GetTypingFontWeight() const
@@ -655,10 +595,9 @@ Text::FontWeight InputField::GetTypingFontWeight() const
   return GetImpl(*this).GetTypingFontWeight();
 }
 
-InputField& InputField::SetTypingFontWidth(Text::FontWidth width)
+void InputField::SetTypingFontWidth(Text::FontWidth width)
 {
   GetImpl(*this).SetTypingFontWidth(width);
-  return *this;
 }
 
 Text::FontWidth InputField::GetTypingFontWidth() const
@@ -666,10 +605,9 @@ Text::FontWidth InputField::GetTypingFontWidth() const
   return GetImpl(*this).GetTypingFontWidth();
 }
 
-InputField& InputField::SetTypingFontSlant(Text::FontSlant slant)
+void InputField::SetTypingFontSlant(Text::FontSlant slant)
 {
   GetImpl(*this).SetTypingFontSlant(slant);
-  return *this;
 }
 
 Text::FontSlant InputField::GetTypingFontSlant() const
@@ -677,16 +615,14 @@ Text::FontSlant InputField::GetTypingFontSlant() const
   return GetImpl(*this).GetTypingFontSlant();
 }
 
-InputField& InputField::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+void InputField::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
 {
   GetImpl(*this).SetFontVariation(axes);
-  return *this;
 }
 
-InputField& InputField::SetFontVariation(const Dali::String& settings)
+void InputField::SetFontVariation(const Dali::String& settings)
 {
   GetImpl(*this).SetFontVariation(settings);
-  return *this;
 }
 
 Dali::Vector<Text::FontVariationAxis> InputField::GetFontVariation() const
@@ -694,22 +630,19 @@ Dali::Vector<Text::FontVariationAxis> InputField::GetFontVariation() const
   return GetImpl(*this).GetFontVariation();
 }
 
-InputField& InputField::ClearFontVariation()
+void InputField::ClearFontVariation()
 {
   GetImpl(*this).ClearFontVariation();
-  return *this;
 }
 
-InputField& InputField::SetTranslatablePlaceholder(StringView resourceId)
+void InputField::SetTranslatablePlaceholder(StringView resourceId)
 {
   GetImpl(*this).SetTranslatablePlaceholder(resourceId);
-  return *this;
 }
 
-InputField& InputField::SetTranslatablePlaceholder(StringView resourceId, StringView domain)
+void InputField::SetTranslatablePlaceholder(StringView resourceId, StringView domain)
 {
   GetImpl(*this).SetTranslatablePlaceholder(resourceId, domain);
-  return *this;
 }
 
 Dali::String InputField::GetTranslatablePlaceholder() const
@@ -721,10 +654,6 @@ void InputField::ClearTranslatablePlaceholder()
 {
   GetImpl(*this).ClearTranslatablePlaceholder();
 }
-
-// =============================================================================
-// Read Only
-// =============================================================================
 float InputField::GetAdjustedFontSizeScale() const
 {
   return GetImpl(*this).GetAdjustedFontSizeScale();
@@ -744,31 +673,20 @@ uint32_t InputField::GetSelectedTextEnd() const
 {
   return GetImpl(*this).GetSelectedTextEnd();
 }
-
-// =============================================================================
-// Method
-// =============================================================================
-InputField& InputField::SelectText(uint32_t startIndex, uint32_t endIndex)
+void InputField::SelectText(uint32_t startIndex, uint32_t endIndex)
 {
   GetImpl(*this).SelectText(startIndex, endIndex);
-  return *this;
 }
 
-InputField& InputField::SelectWholeText()
+void InputField::SelectWholeText()
 {
   GetImpl(*this).SelectWholeText();
-  return *this;
 }
 
-InputField& InputField::ClearSelection()
+void InputField::ClearSelection()
 {
   GetImpl(*this).ClearSelection();
-  return *this;
 }
-
-// =============================================================================
-// Signals
-// =============================================================================
 Signal<void(View)>& InputField::TextChangedSignal()
 {
   return GetImpl(*this).TextChangedSignal();

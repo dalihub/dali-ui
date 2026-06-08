@@ -22,6 +22,31 @@ namespace
 constexpr float STACK_SPACING = 10.0f;
 constexpr float STACK_PADDING = 20.0f;
 const char* BACKGROUND_TEXT = "HELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLDHELLOWORLD";
+Label CreateBackgroundLabel()
+{
+  Label label = Label::New(BACKGROUND_TEXT);
+  label.SetRequestedWidth(400);
+  label.SetRequestedHeight(100);
+  label.SetTextColor(UiColor(0x3A6D75));
+  label.SetFontSize(10.0f);
+  label.SetMultiLine(true);
+  label.SetLineHeight(0.8f);
+  return label;
+}
+
+Label CreateMaskLabel()
+{
+  Label label = Label::New("Hello Mask");
+  label.SetFontFamily("SamsungOneUI_700");
+  label.SetRequestedWidth(400);
+  label.SetRequestedHeight(100);
+  label.SetTextColor(UiColor(0xff0000));
+  label.SetBackgroundColor(UiColor(0x1F2A36).WithAlpha(0.25f));
+  label.SetTextFit(Text::FitRange(20, 100, 10));
+  label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+  label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  return label;
+}
 } // namespace
 
 class TextController : public ConnectionTracker
@@ -39,93 +64,60 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetSpacing(STACK_SPACING)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-        .Children({
-          Label::New("Text Cutout Example"),
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetSpacing(STACK_SPACING);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
-          AbsoluteLayout::New()
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(WRAP_CONTENT)
-          .Children({
-            Label::New(BACKGROUND_TEXT)
-            .SetTextColor(UiColor(0x3A6D75))
-            .SetBackgroundColor(UiColor(0x9ED8DB))
-            .SetFontSize(10.0f)
-            .SetMultiLine(true)
-            .SetLineHeight(0.8f)
-            .SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, 400.0f, 100.0f))),
+    root.Add(Label::New("Text Cutout Example"));
 
-            Label::New("Hello World")
-            .SetFontFamily("SamsungOneUI_700")
-            .SetTextColor(UiColor(0x000000).WithAlpha(0.0f))
-            .SetBackgroundColor(UiColor(0x1F2A36))
-            .SetTextFit(Text::FitRange(20, 100, 10))
-            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-            .SetVerticalTextAlignment(Text::Alignment::CENTER)
-            .SetCutoutEnabled(true)
-            .SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, 400.0f, 100.0f)))
-            .As(mLabel),
-          }),
+    AbsoluteLayout cutoutLayout = AbsoluteLayout::New();
+    cutoutLayout.SetRequestedWidth(MATCH_PARENT);
+    cutoutLayout.SetRequestedHeight(WRAP_CONTENT);
 
-          Label::New("Text Mask Effect Example"),
+    Label backgroundLabel = Label::New(BACKGROUND_TEXT);
+    backgroundLabel.SetTextColor(UiColor(0x3A6D75));
+    backgroundLabel.SetBackgroundColor(UiColor(0x9ED8DB));
+    backgroundLabel.SetFontSize(10.0f);
+    backgroundLabel.SetMultiLine(true);
+    backgroundLabel.SetLineHeight(0.8f);
+    backgroundLabel.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, 400.0f, 100.0f)));
+    cutoutLayout.Add(backgroundLabel);
 
-          Label::New("Label::SetMaskEffect"),
+    mLabel = Label::New("Hello World");
+    mLabel.SetFontFamily("SamsungOneUI_700");
+    mLabel.SetTextColor(UiColor(0x000000).WithAlpha(0.0f));
+    mLabel.SetBackgroundColor(UiColor(0x1F2A36));
+    mLabel.SetTextFit(Text::FitRange(20, 100, 10));
+    mLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mLabel.SetCutoutEnabled(true);
+    mLabel.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, 400.0f, 100.0f)));
+    cutoutLayout.Add(mLabel);
+    root.Add(cutoutLayout);
 
-          Label::New("Hello Mask")
-          .SetFontFamily("SamsungOneUI_700")
-          .SetRequestedWidth(400)
-          .SetRequestedHeight(100)
-          .SetTextColor(UiColor(0xff0000))
-          .SetBackgroundColor(UiColor(0x1F2A36).WithAlpha(0.25f))
-          .SetTextFit(Text::FitRange(20, 100, 10))
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER)
-          // This produces the same masking result as CreateLabelAsMaskSource().
-          .SetMaskEffect(
-            Label::New(BACKGROUND_TEXT)
-            .SetRequestedWidth(400)
-            .SetRequestedHeight(100)
-            .SetTextColor(UiColor(0x3A6D75))
-            .SetFontSize(10.0f)
-            .SetMultiLine(true)
-            .SetLineHeight(0.8f))
-          .As(mMaskLabel),
+    root.Add(Label::New("Text Mask Effect Example"));
+    root.Add(Label::New("Label::SetMaskEffect"));
 
-          Label::New("View::SetRenderEffect(MaskEffect)"),
+    mMaskLabel = CreateMaskLabel();
+    // This produces the same masking result as CreateLabelAsMaskSource().
+    mMaskLabel.SetMaskEffect(CreateBackgroundLabel());
+    root.Add(mMaskLabel);
 
-          CreateLabelAsMaskTarget(),
+    root.Add(Label::New("View::SetRenderEffect(MaskEffect)"));
+    root.Add(CreateLabelAsMaskTarget());
+    root.Add(CreateLabelAsMaskSource());
 
-          // Manual equivalent of Label::SetMaskEffect().
-          CreateLabelAsMaskSource(),
-        }));
+    window.Add(root);
   
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
   }
 
   Label CreateLabelAsMaskTarget()
   {
-    auto maskSource = Label::New(BACKGROUND_TEXT)
-      .SetRequestedWidth(400)
-      .SetRequestedHeight(100)
-      .SetTextColor(UiColor(0x3A6D75))
-      .SetFontSize(10.0f)
-      .SetMultiLine(true)
-      .SetLineHeight(0.8f);
-
-    auto target = Label::New("Hello Mask")
-      .SetFontFamily("SamsungOneUI_700")
-      .SetRequestedWidth(400)
-      .SetRequestedHeight(100)
-      .SetTextColor(UiColor(0xff0000))
-      .SetBackgroundColor(UiColor(0x1F2A36).WithAlpha(0.25f))
-      .SetTextFit(Text::FitRange(20, 100, 10))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    auto maskSource = CreateBackgroundLabel();
+    auto target     = CreateMaskLabel();
 
     target.Add(maskSource);
     target.SetRenderEffect(MaskEffect::New(maskSource));
@@ -135,23 +127,8 @@ private:
 
   Label CreateLabelAsMaskSource()
   {
-    auto maskTarget = Label::New(BACKGROUND_TEXT)
-      .SetRequestedWidth(400)
-      .SetRequestedHeight(100)
-      .SetTextColor(UiColor(0x3A6D75))
-      .SetFontSize(10.0f)
-      .SetMultiLine(true)
-      .SetLineHeight(0.8f);
-
-    auto source = Label::New("Hello Mask")
-      .SetFontFamily("SamsungOneUI_700")
-      .SetRequestedWidth(400)
-      .SetRequestedHeight(100)
-      .SetTextColor(UiColor(0xff0000))
-      .SetBackgroundColor(UiColor(0x1F2A36).WithAlpha(0.25f))
-      .SetTextFit(Text::FitRange(20, 100, 10))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    auto maskTarget = CreateBackgroundLabel();
+    auto source     = CreateMaskLabel();
 
     maskTarget.Add(source);
     maskTarget.SetRenderEffect(MaskEffect::New(source));
@@ -179,14 +156,7 @@ private:
     else if(event.GetKeyName() == "2")
     {
       mLabel.SetCutoutEnabled(true);
-      mMaskLabel.SetMaskEffect(
-        Label::New(BACKGROUND_TEXT)
-        .SetRequestedWidth(400)
-        .SetRequestedHeight(100)
-        .SetTextColor(UiColor(0x3A6D75))
-        .SetFontSize(10.0f)
-        .SetMultiLine(true)
-        .SetLineHeight(0.8f));
+      mMaskLabel.SetMaskEffect(CreateBackgroundLabel());
     }
   }
 

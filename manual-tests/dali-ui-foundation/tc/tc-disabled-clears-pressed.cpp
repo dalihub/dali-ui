@@ -57,49 +57,49 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    mLog = Label::New("State log:\n")
-      .SetMultiLine(true)
-      .SetFontSize(20.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(LOG_H);
+    mLog = Label::New("State log:\n");
+    mLog.SetMultiLine(true);
+    mLog.SetFontSize(20.0f);
+    mLog.SetRequestedWidth(MATCH_PARENT);
+    mLog.SetRequestedHeight(LOG_H);
 
     mTarget = InteractiveView::New();
-    mTarget
-      .SetBackgroundColor(UiColor(COLOR_TARGET))
-      .SetRequestedWidth(TARGET_W)
-      .SetRequestedHeight(TARGET_H);
+    mTarget.SetBackgroundColor(UiColor(COLOR_TARGET));
+    mTarget.SetRequestedWidth(TARGET_W);
+    mTarget.SetRequestedHeight(TARGET_H);
 
     mTarget.StateChangedSignal().Connect(this, &TcDisabledClearsPressed::OnStateChanged);
     mTarget.PressedChangedSignal().Connect(this, &TcDisabledClearsPressed::OnPressedChanged);
 
-    mTarget.Add(Label::New("Press & Hold me")
-      .SetFontSize(28.0f)
-      .SetTextColor(UiColor(COLOR_WHITE)));
+    Label targetLabel = Label::New("Press & Hold me");
+    targetLabel.SetFontSize(28.0f);
+    targetLabel.SetTextColor(UiColor(COLOR_WHITE));
+    mTarget.Add(targetLabel);
 
     mResetButton = InteractiveView::New();
-    mResetButton
-      .SetBackgroundColor(UiColor(COLOR_RESET))
-      .SetRequestedWidth(TARGET_W)
-      .SetRequestedHeight(RESET_H)
-      .ConnectClickedSignal(this, [this](View, InputEvent) -> bool {
-        mTarget.SetEnabled(true);
-        mTarget.SetBackgroundColor(UiColor(COLOR_TARGET));
-        AppendLog("-- Reset: re-enabled --\n");
-        return true;
-      });
+    mResetButton.SetBackgroundColor(UiColor(COLOR_RESET));
+    mResetButton.SetRequestedWidth(TARGET_W);
+    mResetButton.SetRequestedHeight(RESET_H);
+    mResetButton.ConnectClickedSignal(this, [this](View, InputEvent) -> bool {
+      mTarget.SetEnabled(true);
+      mTarget.SetBackgroundColor(UiColor(COLOR_TARGET));
+      AppendLog("-- Reset: re-enabled --\n");
+      return true;
+    });
 
-    mResetButton.Add(Label::New("Re-enable")
-      .SetFontSize(22.0f)
-      .SetTextColor(UiColor(COLOR_WHITE)));
+    Label resetLabel = Label::New("Re-enable");
+    resetLabel.SetFontSize(22.0f);
+    resetLabel.SetTextColor(UiColor(COLOR_WHITE));
+    mResetButton.Add(resetLabel);
 
     mDisableTimer = Timer::New(DISABLE_DELAY);
-    mDisableTimer.TickSignal().Connect(this, &TcDisabledClearsPressed::OnDisableTimerTick);
 
-    contentArea.Add(StackLayout::New()
-      .SetSpacing(SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetPadding(Extents(PAD, PAD, PAD, PAD))
-      .Children({mTarget, mResetButton, mLog}));
+    StackLayout root = StackLayout::New();
+    root.SetSpacing(SPACING);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetPadding(Extents(PAD, PAD, PAD, PAD));
+    root.AddChildren({mTarget, mResetButton, mLog});
+    contentArea.Add(root);
   }
 
   void OnExit() override

@@ -75,35 +75,34 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(8.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        CreateRow(0),
-        CreateRow(2),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetSpacing(8.0f);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.AddChildren({CreateRow(0), CreateRow(2)});
+    return contents;
   }
 
   StackLayout CreateRow(int startIndex)
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(8.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .Children({
-        ImageView::New(IMAGE_URLS[startIndex])
-          .SetRequestedWidth(WRAP_CONTENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-          .As(mImages[startIndex]),
-        ImageView::New(IMAGE_URLS[startIndex + 1])
-          .SetRequestedWidth(WRAP_CONTENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-          .As(mImages[startIndex + 1]),
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(8.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(WRAP_CONTENT);
+    row.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+
+    mImages[startIndex] = ImageView::New(IMAGE_URLS[startIndex]);
+    mImages[startIndex].SetRequestedWidth(WRAP_CONTENT);
+    mImages[startIndex].SetRequestedHeight(MATCH_PARENT);
+    mImages[startIndex].SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+
+    mImages[startIndex + 1] = ImageView::New(IMAGE_URLS[startIndex + 1]);
+    mImages[startIndex + 1].SetRequestedWidth(WRAP_CONTENT);
+    mImages[startIndex + 1].SetRequestedHeight(MATCH_PARENT);
+    mImages[startIndex + 1].SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+
+    row.AddChildren({mImages[startIndex], mImages[startIndex + 1]});
+    return row;
   }
 
   void OnResourceReady(View view)

@@ -54,43 +54,41 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    mStatusLabel = Label::New()
-      .SetText("Tap an InputField to give it focus")
-      .SetFontSize(FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(LABEL_HEIGHT)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetMultiLine(true);
+    mStatusLabel = Label::New();
+    mStatusLabel.SetText("Tap an InputField to give it focus");
+    mStatusLabel.SetFontSize(FONT_SIZE);
+    mStatusLabel.SetTextColor(UiColor(COLOR_TEXT));
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(LABEL_HEIGHT);
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetMultiLine(true);
 
     mField1 = CreateInputField("Field 1", "Type here...");
     mField2 = CreateInputField("Field 2", "Or here...");
 
-    contentArea.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetBackgroundColor(UiColor(COLOR_BG))
-        .SetPadding(Extents(PAD, PAD, PAD, PAD))
-        .Children({
-          mStatusLabel,
-          Label::New()
-            .SetText("Field 1:")
-            .SetFontSize(FONT_SIZE)
-            .SetTextColor(UiColor(COLOR_TEXT))
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(30.0f),
-          mField1,
-          Label::New()
-            .SetText("Field 2:")
-            .SetFontSize(FONT_SIZE)
-            .SetTextColor(UiColor(COLOR_TEXT))
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(30.0f)
-            .SetMargin(Extents(0, 0, GAP, 0)),
-          mField2
-        }));
+    Label field1Label = Label::New();
+    field1Label.SetText("Field 1:");
+    field1Label.SetFontSize(FONT_SIZE);
+    field1Label.SetTextColor(UiColor(COLOR_TEXT));
+    field1Label.SetRequestedWidth(MATCH_PARENT);
+    field1Label.SetRequestedHeight(30.0f);
+
+    Label field2Label = Label::New();
+    field2Label.SetText("Field 2:");
+    field2Label.SetFontSize(FONT_SIZE);
+    field2Label.SetTextColor(UiColor(COLOR_TEXT));
+    field2Label.SetRequestedWidth(MATCH_PARENT);
+    field2Label.SetRequestedHeight(30.0f);
+    field2Label.SetMargin(Extents(0, 0, GAP, 0));
+
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(UiColor(COLOR_BG));
+    root.SetPadding(Extents(PAD, PAD, PAD, PAD));
+    root.AddChildren({mStatusLabel, field1Label, mField1, field2Label, mField2});
+    contentArea.Add(root);
 
     FocusManager::Get().FocusChangedSignal().Connect(this, &TcInputFieldFocus::OnFocusChanged);
   }
@@ -98,13 +96,13 @@ public:
 private:
   InputField CreateInputField(const char* name, const char* placeholder)
   {
-    auto field = InputField::New()
-      .SetPlaceholder(Dali::String(placeholder))
-      .SetFontSize(FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(FIELD_HEIGHT)
-      .SetBackgroundColor(UiColor(COLOR_FIELD_BG));
+    auto field = InputField::New();
+    field.SetPlaceholder(Dali::String(placeholder));
+    field.SetFontSize(FONT_SIZE);
+    field.SetTextColor(UiColor(COLOR_TEXT));
+    field.SetRequestedWidth(MATCH_PARENT);
+    field.SetRequestedHeight(FIELD_HEIGHT);
+    field.SetBackgroundColor(UiColor(COLOR_FIELD_BG));
 
     field.FocusChangedSignal().Connect(this, [](View view, bool focused)
     {

@@ -88,43 +88,43 @@ public:
     mActiveIndex = 0;
     mAnimating   = false;
 
-    mView = LottieAnimationView::New(LOTTIE_WALKER)
-              .SetRequestedWidth(PREVIEW_W)
-              .SetRequestedHeight(PREVIEW_H)
-              .SetLoopCount(-1);
+    mView = LottieAnimationView::New(LOTTIE_WALKER);
+    mView.SetRequestedWidth(PREVIEW_W);
+    mView.SetRequestedHeight(PREVIEW_H);
+    mView.SetLoopCount(-1);
     mView.Play();
 
     mStatusLabel = MakeStatusLabel(MakeStatusText());
 
-    StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(WRAP_CONTENT)
-                            .SetBackgroundColor(UiColor(C_BG))
-                            .SetPadding(Extents(8, 8, 8, 8));
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
+    content.SetRequestedWidth(MATCH_PARENT);
+    content.SetRequestedHeight(WRAP_CONTENT);
+    content.SetBackgroundColor(UiColor(C_BG));
+    content.SetPadding(Extents(8, 8, 8, 8));
 
     // Preview frame
-    StackLayout frame = StackLayout::New(StackOrientation::VERTICAL)
-                          .SetRequestedWidth(MATCH_PARENT)
-                          .SetRequestedHeight(PREVIEW_H + 16)
-                          .SetBackgroundColor(UiColor(C_FRAME_BG))
-                          .SetPadding(Extents(0, 0, 8, 8));
+    StackLayout frame = StackLayout::New(StackOrientation::VERTICAL);
+    frame.SetRequestedWidth(MATCH_PARENT);
+    frame.SetRequestedHeight(PREVIEW_H + 16);
+    frame.SetBackgroundColor(UiColor(C_FRAME_BG));
+    frame.SetPadding(Extents(0, 0, 8, 8));
 
-    StackLayout centreRow = StackLayout::New(StackOrientation::HORIZONTAL)
-                              .SetRequestedWidth(MATCH_PARENT)
-                              .SetRequestedHeight(PREVIEW_H);
-    centreRow.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+    StackLayout centreRow = StackLayout::New(StackOrientation::HORIZONTAL);
+    centreRow.SetRequestedWidth(MATCH_PARENT);
+    centreRow.SetRequestedHeight(PREVIEW_H);
+    centreRow.Add(ManualTest::MakeWeightedSpacer());
     centreRow.Add(mView);
-    centreRow.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+    centreRow.Add(ManualTest::MakeWeightedSpacer());
 
     frame.Add(centreRow);
     content.Add(frame);
     content.Add(mStatusLabel);
 
     // Area preset buttons
-    StackLayout areaRow = StackLayout::New(StackOrientation::HORIZONTAL)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(BTN_H)
-                            .SetPadding(Extents(0, 0, 2, 2));
+    StackLayout areaRow = StackLayout::New(StackOrientation::HORIZONTAL);
+    areaRow.SetRequestedWidth(MATCH_PARENT);
+    areaRow.SetRequestedHeight(BTN_H);
+    areaRow.SetPadding(Extents(0, 0, 2, 2));
     for(int i = 0; i < AREA_COUNT; ++i)
     {
       areaRow.Add(MakeAreaButton(i));
@@ -173,14 +173,12 @@ private:
     mAnimateButton.SetBackgroundColor(UiColor(0xE91E63));
 
     KeyFrames kf = KeyFrames::New();
-    kf.Add(0.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
     kf.Add(0.25f, Property::Value(Vector4(0.0f,  0.0f,  0.5f,  0.5f)));
     kf.Add(0.50f, Property::Value(Vector4(0.25f, 0.25f, 0.5f,  0.5f)));
     kf.Add(0.75f, Property::Value(Vector4(0.5f,  0.5f,  0.5f,  0.5f)));
     kf.Add(1.00f, Property::Value(Vector4(0.0f,  0.0f,  1.0f,  1.0f)));
 
     mAnimation = Animation::New(3.0f);
-    mAnimation.SetLooping(true);
     mAnimation.AnimateBetween(
       Property(mView, LottieAnimationView::Property::PIXEL_AREA),
       kf,
@@ -237,36 +235,48 @@ private:
 
   Label MakeStatusLabel(const Dali::String& text)
   {
-    return Label::New(text)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(STATUS_H)
-      .SetFontSize(11.0f)
-      .SetTextColor(UiColor(C_STATUS_TEXT))
-      .SetBackgroundColor(UiColor(C_STATUS_BG))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(STATUS_H);
+    label.SetFontSize(11.0f);
+    label.SetTextColor(UiColor(C_STATUS_TEXT));
+    label.SetBackgroundColor(UiColor(C_STATUS_BG));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return label;
   }
 
   View MakeAreaButton(int index)
   {
-    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL)
-                        .SetRequestedHeight(BTN_H)
-                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                        .SetBackgroundColor(UiColor(C_BTN_BG))
-                        .Children({
-                          Label::New(AREAS[index].name)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(MATCH_PARENT)
-                            .SetFontSize(11.0f)
-                            .SetTextColor(UiColor(C_BTN_TEXT))
-                            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                            .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                        });
-    btn.SetFocusable(true).AsInteractive([this, index](InteractiveTrait& trait) {
-      trait.ClickedSignal().Connect(this, [this, index](View, const InputEvent&) -> bool {
-        OnAreaClicked(index);
-        return true;
-      });
+    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL);
+    btn.SetRequestedHeight(BTN_H);
+    btn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    btn.SetBackgroundColor(UiColor(C_BTN_BG));
+    Label buttonLabel = Label::New(AREAS[index].name);
+
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+
+    buttonLabel.SetFontSize(11.0f);
+
+    buttonLabel.SetTextColor(UiColor(C_BTN_TEXT));
+
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    btn.AddChildren({buttonLabel});
+    btn.SetFocusable(true);
+
+    InteractiveTrait interactive = btn.AsInteractive();
+
+    interactive.ClickedSignal().Connect(this, [this, index](View, const InputEvent&) -> bool {
+
+      OnAreaClicked(index);
+
+      return true;
+
     });
     mAreaButtons[index] = btn;
     return btn;
@@ -274,35 +284,47 @@ private:
 
   View MakeButton(const Dali::String& label, uint32_t bgColor, std::function<void()> onClick)
   {
-    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL)
-                        .SetRequestedHeight(BTN_H)
-                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                        .SetBackgroundColor(UiColor(bgColor))
-                        .Children({
-                          Label::New(label)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(MATCH_PARENT)
-                            .SetFontSize(11.0f)
-                            .SetMultiLine(true)
-                            .SetTextColor(UiColor(C_BTN_TEXT))
-                            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                            .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                        });
-    btn.SetFocusable(true).AsInteractive([this, onClick = std::move(onClick)](InteractiveTrait& trait) {
-      trait.ClickedSignal().Connect(this, [onClick](View, const InputEvent&) -> bool {
-        onClick();
-        return true;
-      });
+    StackLayout btn = StackLayout::New(StackOrientation::VERTICAL);
+    btn.SetRequestedHeight(BTN_H);
+    btn.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    btn.SetBackgroundColor(UiColor(bgColor));
+    Label buttonLabel = Label::New(label);
+
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+
+    buttonLabel.SetFontSize(11.0f);
+
+    buttonLabel.SetMultiLine(true);
+
+    buttonLabel.SetTextColor(UiColor(C_BTN_TEXT));
+
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    btn.AddChildren({buttonLabel});
+    btn.SetFocusable(true);
+
+    InteractiveTrait interactive = btn.AsInteractive();
+
+    interactive.ClickedSignal().Connect(this, [onClick = std::move(onClick)](View, const InputEvent&) -> bool {
+
+      onClick();
+
+      return true;
+
     });
     return btn;
   }
 
   StackLayout MakeButtonRow(std::initializer_list<View> buttons)
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(BTN_H)
-                        .SetPadding(Extents(0, 0, 2, 2));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(BTN_H);
+    row.SetPadding(Extents(0, 0, 2, 2));
     for(auto& b : buttons)
     {
       row.Add(b);

@@ -38,54 +38,55 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
-    window.Add(StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        Label::New("Text Layout Direction Mode Example"),
-        StackLayout::New(StackOrientation::HORIZONTAL)
-        .SetSpacing(STACK_SPACING)
-        .SetRequestedWidth(MATCH_PARENT)
-        .Children({
-          Label::New("Dir")
-          .SetRequestedWidth(40.0f),
-          Label::New("Mode")
-          .SetRequestedWidth(100.0f),
-          Label::New("Result")
-        }),
-        CreateLayoutDirection("LTR", "CONTENTS", "Hello world", Text::LayoutDirectionMode::CONTENTS),
-        CreateLayoutDirection("LTR", "INHERIT", "Hello world", Text::LayoutDirectionMode::INHERIT),
-        CreateLayoutDirection("LTR", "LOCALE", "Hello world", Text::LayoutDirectionMode::LOCALE),
-        CreateLayoutDirection("RTL", "CONTENTS", "שלום עולם", Text::LayoutDirectionMode::CONTENTS),
-        CreateLayoutDirection("RTL", "INHERIT", "שלום עולם", Text::LayoutDirectionMode::INHERIT),
-        CreateLayoutDirection("RTL", "LOCALE", "שלום עולם", Text::LayoutDirectionMode::LOCALE),
-        CreateLayoutDirection("MIX", "CONTENTS", "שלום עולם, Hello world", Text::LayoutDirectionMode::CONTENTS),
-        CreateLayoutDirection("MIX", "INHERIT", "שלום עולם, Hello world", Text::LayoutDirectionMode::INHERIT),
-        CreateLayoutDirection("MIX", "LOCALE", "שלום עולם, Hello world", Text::LayoutDirectionMode::LOCALE),
-      })
-    );
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetSpacing(STACK_SPACING);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    StackLayout header = StackLayout::New(StackOrientation::HORIZONTAL);
+    header.SetSpacing(STACK_SPACING);
+    header.SetRequestedWidth(MATCH_PARENT);
+    Label dirLabel = Label::New("Dir");
+    dirLabel.SetRequestedWidth(40.0f);
+    Label modeLabel = Label::New("Mode");
+    modeLabel.SetRequestedWidth(100.0f);
+    header.AddChildren({dirLabel, modeLabel, Label::New("Result")});
+
+    root.AddChildren({
+      Label::New("Text Layout Direction Mode Example"),
+      header,
+      CreateLayoutDirection("LTR", "CONTENTS", "Hello world", Text::LayoutDirectionMode::CONTENTS),
+      CreateLayoutDirection("LTR", "INHERIT", "Hello world", Text::LayoutDirectionMode::INHERIT),
+      CreateLayoutDirection("LTR", "LOCALE", "Hello world", Text::LayoutDirectionMode::LOCALE),
+      CreateLayoutDirection("RTL", "CONTENTS", "שלום עולם", Text::LayoutDirectionMode::CONTENTS),
+      CreateLayoutDirection("RTL", "INHERIT", "שלום עולם", Text::LayoutDirectionMode::INHERIT),
+      CreateLayoutDirection("RTL", "LOCALE", "שלום עולם", Text::LayoutDirectionMode::LOCALE),
+      CreateLayoutDirection("MIX", "CONTENTS", "שלום עולם, Hello world", Text::LayoutDirectionMode::CONTENTS),
+      CreateLayoutDirection("MIX", "INHERIT", "שלום עולם, Hello world", Text::LayoutDirectionMode::INHERIT),
+      CreateLayoutDirection("MIX", "LOCALE", "שלום עולם, Hello world", Text::LayoutDirectionMode::LOCALE),
+    });
+    window.Add(root);
 
     window.KeyEventSignal().Connect(this, &TextLayoutController::OnKeyEvent);
   }
 
   View CreateLayoutDirection(Dali::String textTypeDesc, Dali::String layoutModeDesc, Dali::String text, Text::LayoutDirectionMode mode)
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .Children({
-        Label::New(textTypeDesc)
-        .SetRequestedWidth(40.0f),
-        Label::New(layoutModeDesc)
-        .SetRequestedWidth(100.0f),
-        Label::New(text)
-        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-        .SetLayoutDirectionMode(mode)
-        .SetTextColor(UiColor(0xEFEFEF))
-        .SetBackgroundColor(UiColor(0x020202))
-      });
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(STACK_SPACING);
+    row.SetRequestedWidth(MATCH_PARENT);
+    Label textTypeLabel = Label::New(textTypeDesc);
+    textTypeLabel.SetRequestedWidth(40.0f);
+    Label layoutModeLabel = Label::New(layoutModeDesc);
+    layoutModeLabel.SetRequestedWidth(100.0f);
+    Label resultLabel = Label::New(text);
+    resultLabel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    resultLabel.SetLayoutDirectionMode(mode);
+    resultLabel.SetTextColor(UiColor(0xEFEFEF));
+    resultLabel.SetBackgroundColor(UiColor(0x020202));
+    row.AddChildren({textTypeLabel, layoutModeLabel, resultLabel});
+    return row;
   }
 
   void OnKeyEvent(Window window, KeyEvent event)

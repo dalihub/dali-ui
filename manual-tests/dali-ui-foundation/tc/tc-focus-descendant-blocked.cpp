@@ -48,77 +48,81 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    contentArea.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetBackgroundColor(UiColor(COLOR_BG))
-        .SetPadding(Extents(GAP, GAP, GAP, GAP))
-        .Children({
-          Label::New()
-            .As(mStatusLabel)
-            .SetText("Set block state, then try RequestFocus")
-            .SetFontSize(FONT_SIZE)
-            .SetTextColor(UiColor(COLOR_TEXT))
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(60.0f)
-            .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-            .SetVerticalTextAlignment(Text::Alignment::CENTER)
-            .SetMultiLine(true),
-          CreateButton("Set Block OFF", [this]() {
-            SetBlocked(false);
-            mStatusLabel.SetText("BLOCKED: OFF");
-          }),
-          CreateButton("Set Block ON", [this]() {
-            SetBlocked(true);
-            mStatusLabel.SetText("BLOCKED: ON");
-          }),
-          CreateButton("RequestFocus on Child", [this]() {
-            bool ok = FocusManager::Get().RequestFocus(mChild);
-            mStatusLabel.SetText(ok ? "Child focused: SUCCESS" : "Child focus REJECTED");
-          }),
-          Label::New().SetText("Container (blue/red area):").SetFontSize(FONT_SIZE).SetTextColor(UiColor(COLOR_TEXT)),
-          StackLayout::New(StackOrientation::VERTICAL)
-            .As(mContainer)
-            .SetRequestedWidth(MATCH_PARENT)
-            .SetRequestedHeight(96.0f)
-            .SetBackgroundColor(UiColor(COLOR_CONTAINER))
-            .SetPadding(Extents(GAP, GAP, GAP, GAP))
-            .Children({
-              Label::New()
-                .As(mChild)
-                .SetText("Focusable Child")
-                .SetFontSize(FONT_SIZE)
-                .SetBackgroundColor(UiColor(COLOR_DEFAULT))
-                .SetRequestedWidth(MATCH_PARENT)
-                .SetRequestedHeight(60.0f)
-                .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                .SetFocusable(true)
-                .With([this](View& view)
-                {
-                  view.FocusChangedSignal().Connect(this, [](View child, bool focused)
-                  {
-                    child.SetBackgroundColor(UiColor(focused ? COLOR_FOCUSED : COLOR_DEFAULT));
-                  });
-                }),
-            }),
-        }));
+    mStatusLabel = Label::New();
+    mStatusLabel.SetText("Set block state, then try RequestFocus");
+    mStatusLabel.SetFontSize(FONT_SIZE);
+    mStatusLabel.SetTextColor(UiColor(COLOR_TEXT));
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(60.0f);
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetMultiLine(true);
+
+    Label containerLabel = Label::New();
+    containerLabel.SetText("Container (blue/red area):");
+    containerLabel.SetFontSize(FONT_SIZE);
+    containerLabel.SetTextColor(UiColor(COLOR_TEXT));
+
+    Label childLabel = Label::New();
+    childLabel.SetText("Focusable Child");
+    childLabel.SetFontSize(FONT_SIZE);
+    childLabel.SetBackgroundColor(UiColor(COLOR_DEFAULT));
+    childLabel.SetRequestedWidth(MATCH_PARENT);
+    childLabel.SetRequestedHeight(60.0f);
+    childLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    childLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    childLabel.SetFocusable(true);
+    childLabel.FocusChangedSignal().Connect(this, [](View child, bool focused)
+    {
+      child.SetBackgroundColor(UiColor(focused ? COLOR_FOCUSED : COLOR_DEFAULT));
+    });
+    mChild = childLabel;
+
+    mContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mContainer.SetRequestedWidth(MATCH_PARENT);
+    mContainer.SetRequestedHeight(96.0f);
+    mContainer.SetBackgroundColor(UiColor(COLOR_CONTAINER));
+    mContainer.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    mContainer.AddChildren({mChild});
+
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(UiColor(COLOR_BG));
+    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.AddChildren({
+      mStatusLabel,
+      CreateButton("Set Block OFF", [this]() {
+        SetBlocked(false);
+        mStatusLabel.SetText("BLOCKED: OFF");
+      }),
+      CreateButton("Set Block ON", [this]() {
+        SetBlocked(true);
+        mStatusLabel.SetText("BLOCKED: ON");
+      }),
+      CreateButton("RequestFocus on Child", [this]() {
+        bool ok = FocusManager::Get().RequestFocus(mChild);
+        mStatusLabel.SetText(ok ? "Child focused: SUCCESS" : "Child focus REJECTED");
+      }),
+      containerLabel,
+      mContainer,
+    });
+    contentArea.Add(root);
   }
 
 private:
   View CreateButton(const char* text, std::function<void()> onClick)
   {
-    auto btn = Label::New()
-                 .SetText(text)
-                 .SetFontSize(FONT_SIZE)
-                 .SetTextColor(UiColor(0xFFFFFF))
-                 .SetBackgroundColor(UiColor(0x4285F4))
-                 .SetRequestedWidth(MATCH_PARENT)
-                 .SetRequestedHeight(44.0f)
-                 .SetMargin(Extents(0, 0, 4, 4))
-                 .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                 .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    auto btn = Label::New();
+    btn.SetText(text);
+    btn.SetFontSize(FONT_SIZE);
+    btn.SetTextColor(UiColor(0xFFFFFF));
+    btn.SetBackgroundColor(UiColor(0x4285F4));
+    btn.SetRequestedWidth(MATCH_PARENT);
+    btn.SetRequestedHeight(44.0f);
+    btn.SetMargin(Extents(0, 0, 4, 4));
+    btn.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    btn.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
     btn.TouchedSignal().Connect(this, [onClick](Actor, TouchEvent e) -> bool {
       if(e.GetState(0) == PointState::UP) onClick();

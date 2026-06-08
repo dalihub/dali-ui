@@ -45,14 +45,22 @@ const Dali::Vector<Text::FitCandidate>& GetFitCandidates()
 
 Label CreateButton(const char* text, float fontSize = 14.0f)
 {
-  return Label::New(text)
-    .SetFontSize(fontSize)
-    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-    .SetVerticalTextAlignment(Text::Alignment::CENTER)
-    .SetBackgroundColor(UiColor(0x4A90D9))
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(BUTTON_HEIGHT)
-    .SetPadding(Extents(10, 10, 10, 10));
+  Label button = Label::New(text);
+  button.SetFontSize(fontSize);
+  button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+  button.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  button.SetBackgroundColor(UiColor(0x4A90D9));
+  button.SetRequestedWidth(MATCH_PARENT);
+  button.SetRequestedHeight(BUTTON_HEIGHT);
+  button.SetPadding(Extents(10, 10, 10, 10));
+  return button;
+}
+
+Label CreateHeaderLabel(const char* text)
+{
+  Label label = Label::New(text);
+  label.SetFontSize(14.0f);
+  return label;
 }
 } // namespace
 
@@ -73,97 +81,102 @@ private:
     window.KeyEventSignal().Connect(this, &TextScaleController::OnKeyEvent);
 
     // Target Label for visual testing
-    mTargetLabel = Label::New(TEST_TEXT)
-                     .SetRequestedWidth(MATCH_PARENT)
-                     .SetRequestedHeight(TARGET_LABEL_HEIGHT)
-                     .SetMultiLine(true)
-                     .SetFontSize(24.0f)
-                     .SetBackgroundColor(UiColor(0xFFFFFF))
-                     .SetPadding(Extents(16, 16, 16, 16));
+    mTargetLabel = Label::New(TEST_TEXT);
+    mTargetLabel.SetRequestedWidth(MATCH_PARENT);
+    mTargetLabel.SetRequestedHeight(TARGET_LABEL_HEIGHT);
+    mTargetLabel.SetMultiLine(true);
+    mTargetLabel.SetFontSize(24.0f);
+    mTargetLabel.SetBackgroundColor(UiColor(0xFFFFFF));
+    mTargetLabel.SetPadding(Extents(16, 16, 16, 16));
 
     // Target InputField for visual testing
-    mTargetInputField = InputField::New()
-                          .SetRequestedWidth(MATCH_PARENT)
-                          .SetRequestedHeight(TARGET_INPUT_HEIGHT)
-                          .SetFontSize(24.0f)
-                          .SetText("InputField test text")
-                          .SetBackgroundColor(UiColor(0xFFFFFF))
-                          .SetPadding(Extents(16, 16, 16, 16));
+    mTargetInputField = InputField::New();
+    mTargetInputField.SetRequestedWidth(MATCH_PARENT);
+    mTargetInputField.SetRequestedHeight(TARGET_INPUT_HEIGHT);
+    mTargetInputField.SetFontSize(24.0f);
+    mTargetInputField.SetText("InputField test text");
+    mTargetInputField.SetBackgroundColor(UiColor(0xFFFFFF));
+    mTargetInputField.SetPadding(Extents(16, 16, 16, 16));
 
-    mFitLabel = Label::New(TEST_TEXT)
-                     .SetRequestedWidth(MATCH_PARENT)
-                     .SetRequestedHeight(WRAP_CONTENT)
-                     .SetMaximumHeight(120)
-                     .SetMultiLine(true)
-                     .SetBackgroundColor(UiColor(0xFFFFFF))
-                     .SetTextFit(Text::FitRange(10, 20, 2))
-                     .SetLineHeight(40.0f)
-                     .SetLineHeightMode(Text::LineHeightMode::ABSOLUTE)
-                     .SetPadding(Extents(16, 16, 0, 0));
+    mFitLabel = Label::New(TEST_TEXT);
+    mFitLabel.SetRequestedWidth(MATCH_PARENT);
+    mFitLabel.SetRequestedHeight(WRAP_CONTENT);
+    mFitLabel.SetMaximumHeight(120);
+    mFitLabel.SetMultiLine(true);
+    mFitLabel.SetBackgroundColor(UiColor(0xFFFFFF));
+    mFitLabel.SetTextFit(Text::FitRange(10, 20, 2));
+    mFitLabel.SetLineHeight(40.0f);
+    mFitLabel.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
+    mFitLabel.SetPadding(Extents(16, 16, 0, 0));
 
-   mFitCandidateLabel = Label::New(TEST_TEXT)
-                     .SetRequestedWidth(MATCH_PARENT)
-                     .SetRequestedHeight(WRAP_CONTENT)
-                     .SetMaximumHeight(120)
-                     .SetMultiLine(true)
-                     .SetBackgroundColor(UiColor(0xFFFFFF))
-                     .SetTextFit(GetFitCandidates())
-                     .SetPadding(Extents(16, 16, 0, 0));
+    mFitCandidateLabel = Label::New(TEST_TEXT);
+    mFitCandidateLabel.SetRequestedWidth(MATCH_PARENT);
+    mFitCandidateLabel.SetRequestedHeight(WRAP_CONTENT);
+    mFitCandidateLabel.SetMaximumHeight(120);
+    mFitCandidateLabel.SetMultiLine(true);
+    mFitCandidateLabel.SetBackgroundColor(UiColor(0xFFFFFF));
+    mFitCandidateLabel.SetTextFit(GetFitCandidates());
+    mFitCandidateLabel.SetPadding(Extents(16, 16, 0, 0));
 
-   mStatusLabel = Label::New()
-                     .SetRequestedWidth(MATCH_PARENT)
-                     .SetRequestedHeight(WRAP_CONTENT)
-                     .SetFontSize(12.0f)
-                     .SetMultiLine(true)
-                     .SetBackgroundColor(UiColor(0xE8E8E8))
-                     .SetPadding(Extents(16, 16, 16, 16));
+    mStatusLabel = Label::New();
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(WRAP_CONTENT);
+    mStatusLabel.SetFontSize(12.0f);
+    mStatusLabel.SetMultiLine(true);
+    mStatusLabel.SetBackgroundColor(UiColor(0xE8E8E8));
+    mStatusLabel.SetPadding(Extents(16, 16, 16, 16));
 
     UpdateStatus();
 
-    Label titleButton = CreateButton("Font Size Scale Test", 16.0f)
-                          .SetBackgroundColor(UiColor(0x2C3E50));
+    Label titleButton = CreateButton("Font Size Scale Test", 16.0f);
+    titleButton.SetBackgroundColor(UiColor(0x2C3E50));
 
-    Label btn1 = CreateButton("1. Normal Scale (1.0, min=0.5, max=2.0)")
-                   .SetBackgroundColor(UiColor(0x3498DB));
+    Label btn1 = CreateButton("1. Normal Scale (1.0, min=0.5, max=2.0)");
+    btn1.SetBackgroundColor(UiColor(0x3498DB));
 
-    Label btn2 = CreateButton("2. Increase Scale (1.5)")
-                   .SetBackgroundColor(UiColor(0x2ECC71));
+    Label btn2 = CreateButton("2. Increase Scale (1.5)");
+    btn2.SetBackgroundColor(UiColor(0x2ECC71));
 
-    Label btn3 = CreateButton("3. Clamp to Min (scale=0.8, min=1.2)")
-                   .SetBackgroundColor(UiColor(0xE74C3C));
+    Label btn3 = CreateButton("3. Clamp to Min (scale=0.8, min=1.2)");
+    btn3.SetBackgroundColor(UiColor(0xE74C3C));
 
-    Label btn4 = CreateButton("4. Clamp to Max (scale=1.8, max=1.3)")
-                   .SetBackgroundColor(UiColor(0xE67E22));
+    Label btn4 = CreateButton("4. Clamp to Max (scale=1.8, max=1.3)");
+    btn4.SetBackgroundColor(UiColor(0xE67E22));
 
-    Label btn5 = CreateButton("5. Inverted Range (min=1.4 > max=1.0)")
-                   .SetBackgroundColor(UiColor(0x9B59B6));
+    Label btn5 = CreateButton("5. Inverted Range (min=1.4 > max=1.0)");
+    btn5.SetBackgroundColor(UiColor(0x9B59B6));
 
-    Label btn6 = CreateButton("6. Enable System Scale")
-                   .SetBackgroundColor(UiColor(0x1ABC9C));
+    Label btn6 = CreateButton("6. Enable System Scale");
+    btn6.SetBackgroundColor(UiColor(0x1ABC9C));
 
-    Label btn7 = CreateButton("7. Disable System Scale (scale=1.6)")
-                   .SetBackgroundColor(UiColor(0x7F8C8D));
+    Label btn7 = CreateButton("7. Disable System Scale (scale=1.6)");
+    btn7.SetBackgroundColor(UiColor(0x7F8C8D));
 
-    window.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetSpacing(STACK_SPACING)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-        .Children({
-          titleButton,
-          Label::New("Target Label:").SetFontSize(14.0f),
-          mTargetLabel,
-          Label::New("Target InputField:").SetFontSize(14.0f),
-          mTargetInputField,
-          Label::New("Fit & FitCandidate:").SetFontSize(14.0f),
-          mFitLabel,
-          mFitCandidateLabel,
-          Label::New("Current Status:").SetFontSize(14.0f),
-          mStatusLabel,
-          Label::New("Test Scenarios:").SetFontSize(14.0f),
-          btn1, btn2, btn3, btn4, btn5, btn6, btn7,
-        }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetSpacing(STACK_SPACING);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    root.Add(titleButton);
+    root.Add(CreateHeaderLabel("Target Label:"));
+    root.Add(mTargetLabel);
+    root.Add(CreateHeaderLabel("Target InputField:"));
+    root.Add(mTargetInputField);
+    root.Add(CreateHeaderLabel("Fit & FitCandidate:"));
+    root.Add(mFitLabel);
+    root.Add(mFitCandidateLabel);
+    root.Add(CreateHeaderLabel("Current Status:"));
+    root.Add(mStatusLabel);
+    root.Add(CreateHeaderLabel("Test Scenarios:"));
+    root.Add(btn1);
+    root.Add(btn2);
+    root.Add(btn3);
+    root.Add(btn4);
+    root.Add(btn5);
+    root.Add(btn6);
+    root.Add(btn7);
+    window.Add(root);
 
     btn1.TouchedSignal().Connect(this, &TextScaleController::OnButton1Touched);
     btn2.TouchedSignal().Connect(this, &TextScaleController::OnButton2Touched);
@@ -221,25 +234,25 @@ private:
 
   void ApplyScaleToBoth(float scale, float minScale, float maxScale, bool systemEnabled)
   {
-    mTargetLabel.SetFontSizeScale(scale)
-                .SetMinimumFontSizeScale(minScale)
-                .SetMaximumFontSizeScale(maxScale)
-                .SetSystemFontSizeScaleEnabled(systemEnabled);
+    mTargetLabel.SetFontSizeScale(scale);
+    mTargetLabel.SetMinimumFontSizeScale(minScale);
+    mTargetLabel.SetMaximumFontSizeScale(maxScale);
+    mTargetLabel.SetSystemFontSizeScaleEnabled(systemEnabled);
 
-    mTargetInputField.SetFontSizeScale(scale)
-                     .SetMinimumFontSizeScale(minScale)
-                     .SetMaximumFontSizeScale(maxScale)
-                     .SetSystemFontSizeScaleEnabled(systemEnabled);
+    mTargetInputField.SetFontSizeScale(scale);
+    mTargetInputField.SetMinimumFontSizeScale(minScale);
+    mTargetInputField.SetMaximumFontSizeScale(maxScale);
+    mTargetInputField.SetSystemFontSizeScaleEnabled(systemEnabled);
 
-    mFitLabel.SetFontSizeScale(scale)
-                .SetMinimumFontSizeScale(minScale)
-                .SetMaximumFontSizeScale(maxScale)
-                .SetSystemFontSizeScaleEnabled(systemEnabled);
+    mFitLabel.SetFontSizeScale(scale);
+    mFitLabel.SetMinimumFontSizeScale(minScale);
+    mFitLabel.SetMaximumFontSizeScale(maxScale);
+    mFitLabel.SetSystemFontSizeScaleEnabled(systemEnabled);
 
-    mFitCandidateLabel.SetFontSizeScale(scale)
-                .SetMinimumFontSizeScale(minScale)
-                .SetMaximumFontSizeScale(maxScale)
-                .SetSystemFontSizeScaleEnabled(systemEnabled);
+    mFitCandidateLabel.SetFontSizeScale(scale);
+    mFitCandidateLabel.SetMinimumFontSizeScale(minScale);
+    mFitCandidateLabel.SetMaximumFontSizeScale(maxScale);
+    mFitCandidateLabel.SetSystemFontSizeScaleEnabled(systemEnabled);
 
     UpdateStatus();
   }

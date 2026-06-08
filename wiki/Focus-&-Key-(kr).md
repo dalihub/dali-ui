@@ -247,14 +247,13 @@ view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
 
 ```cpp
 View view = View::New();
-view.AsInteractive([&](InteractiveTrait trait) {
-  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
-    // 클릭됨 (터치 탭 또는 실행키 Enter)
-  });
+InteractiveTrait interactive = view.AsInteractive();
+interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+  // 클릭됨 (터치 탭 또는 실행키 Enter)
 });
 ```
 
-설정이 필요 없는 경우 콜백 없이 `view.AsInteractive()`만 호출해도 됩니다.
+설정이 필요 없는 경우 `view.AsInteractive()`만 호출하고 반환된 trait을 무시해도 됩니다.
 
 <br/>
 

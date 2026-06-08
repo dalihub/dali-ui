@@ -16,18 +16,14 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/math/vector4.h>
-#include <dali/public-api/signals/dali-signal.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/image-view-properties.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <dali/public-api/common/dali-string.h>
+#include <dali/public-api/math/vector4.h>
+#include <dali/public-api/signals/dali-signal.h>
 
 namespace Dali
 {
@@ -173,7 +169,7 @@ public: // Image
    * @param[in] url The URL of the image resource
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetResourceUrl(const Dali::String& url);
+  void SetResourceUrl(const Dali::String& url);
 
   /**
    * @brief Gets the current image URL.
@@ -195,7 +191,7 @@ public: // Image
    * @param[in] url The URL of the placeholder image resource
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetPlaceholderUrl(const Dali::String& url);
+  void SetPlaceholderUrl(const Dali::String& url);
 
   /**
    * @brief Gets the placeholder image URL.
@@ -212,7 +208,7 @@ public: // Image
    * @param[in] color The color to multiply with the image
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetImageColor(const UiColor& color);
+  void SetImageColor(const UiColor& color);
 
   /**
    * @brief Gets the color multiplier applied to the image.
@@ -230,7 +226,7 @@ public: // Image
    * @param[in] pixelArea The normalized sub-region of the image to display
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetPixelArea(const Vector4& pixelArea);
+  void SetPixelArea(const Vector4& pixelArea);
 
   /**
    * @brief Gets the pixel area.
@@ -246,7 +242,7 @@ public: // Size & Fitting Control
    * @param[in] samplingMode The sampling mode to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetSamplingMode(Image::SamplingMode samplingMode);
+  void SetSamplingMode(Image::SamplingMode samplingMode);
 
   /**
    * @brief Gets the sampling mode.
@@ -263,7 +259,7 @@ public: // Size & Fitting Control
    * @param[in] fittingMode The fitting mode to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetFittingMode(Image::FittingMode fittingMode);
+  void SetFittingMode(Image::FittingMode fittingMode);
 
   /**
    * @brief Gets the fitting mode.
@@ -278,7 +274,7 @@ public: // Size & Fitting Control
    * @param[in] width The desired width in pixels (0 to use natural size)
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetDesiredWidth(int width);
+  void SetDesiredWidth(int width);
 
   /**
    * @brief Gets the desired rasterization width hint.
@@ -293,7 +289,7 @@ public: // Size & Fitting Control
    * @param[in] height The desired height in pixels (0 to use natural size)
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetDesiredHeight(int height);
+  void SetDesiredHeight(int height);
 
   /**
    * @brief Gets the desired rasterization height hint.
@@ -318,7 +314,7 @@ public: // Size & Fitting Control
    * @param[in] enabled True to enable loading image with view size
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSize(bool enabled);
 
   /**
    * @brief Gets whether the image is loaded with the view size.
@@ -334,7 +330,7 @@ public: // Advanced Rendering & Masking
    * @param[in] preMultiplied True if the image has pre-multiplied alpha
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultipliedAlpha(bool preMultiplied);
 
   /**
    * @brief Gets whether pre-multiplied alpha is enabled.
@@ -351,7 +347,7 @@ public: // Advanced Rendering & Masking
    * @param[in] maskUrl The URL of the alpha mask image
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetAlphaMaskUrl(const Dali::String& maskUrl);
+  void SetAlphaMaskUrl(const Dali::String& maskUrl);
 
   /**
    * @brief Gets the alpha mask image URL.
@@ -366,7 +362,7 @@ public: // Advanced Rendering & Masking
    * @param[in] cropToMask True to crop the image to the mask
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetCropToMask(bool cropToMask);
+  void SetCropToMask(bool cropToMask);
 
   /**
    * @brief Gets whether crop-to-mask is enabled.
@@ -381,7 +377,7 @@ public: // Advanced Rendering & Masking
    * @param[in] maskingMode The masking mode to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetMaskingMode(Image::MaskingType maskingMode);
+  void SetMaskingMode(Image::MaskingType maskingMode);
 
   /**
    * @brief Gets the masking mode.
@@ -400,7 +396,7 @@ public: // Loading Behavior
    * @param[in] loadPolicy The load policy to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetLoadPolicy(Image::LoadPolicy loadPolicy);
+  void SetLoadPolicy(Image::LoadPolicy loadPolicy);
 
   /**
    * @brief Gets the load policy.
@@ -417,7 +413,7 @@ public: // Loading Behavior
    * @param[in] releasePolicy The release policy to use
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
+  void SetReleasePolicy(Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets the release policy.
@@ -432,7 +428,7 @@ public: // Loading Behavior
    * @param[in] synchronous True to load the image on the main thread synchronously
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetSynchronousLoading(bool synchronous);
+  void SetSynchronousLoading(bool synchronous);
 
   /**
    * @brief Gets whether synchronous loading is enabled.
@@ -450,7 +446,7 @@ public: // Loading Behavior
    * @param[in] fastTrack True to enable fast-track uploading
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetFastTrackUpload(bool fastTrack);
+  void SetFastTrackUpload(bool fastTrack);
 
   /**
    * @brief Gets whether fast-track uploading is enabled.
@@ -465,7 +461,7 @@ public: // Loading Behavior
    * @param[in] orientationCorrection True to apply orientation correction
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetOrientationCorrection(bool orientationCorrection);
+  void SetOrientationCorrection(bool orientationCorrection);
 
   /**
    * @brief Gets whether orientation correction is enabled.
@@ -484,7 +480,7 @@ public: // N-Patch Border
    * @param[in] border The border insets as (left, top, right, bottom)
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetNPatchBorder(const Vector4& border);
+  void SetNPatchBorder(const Vector4& border);
 
   /**
    * @brief Gets the N-patch border insets.
@@ -501,7 +497,7 @@ public: // N-Patch Border
    * @param[in] borderOnly True to render only the border regions
    * @return Reference to this for fluent chaining
    */
-  ImageView& SetNPatchBorderOnly(bool borderOnly);
+  void SetNPatchBorderOnly(bool borderOnly);
 
   /**
    * @brief Gets whether border-only rendering is enabled.
@@ -543,7 +539,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(ImageView)
 };
 
 } // namespace Ui

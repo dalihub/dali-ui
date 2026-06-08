@@ -86,18 +86,18 @@ public:
     window.KeyEventSignal().Connect(this, &ScrollInteractiveChildrenController::OnKeyEvent);
 
     // ── Status bar (placed at top, explicit size) ─────────────────────────────
-    mStatusBar = View::New()
-      .SetBackgroundColor(COLOR_STATUS_BG)
-      .SetRequestedWidth(WINDOW_WIDTH)
-      .SetRequestedHeight(STATUS_BAR_HEIGHT)
-      .SetRequestedPositionX(0.0f)
-      .SetRequestedPositionY(0.0f);
+    mStatusBar = View::New();
+    mStatusBar.SetBackgroundColor(COLOR_STATUS_BG);
+    mStatusBar.SetRequestedWidth(WINDOW_WIDTH);
+    mStatusBar.SetRequestedHeight(STATUS_BAR_HEIGHT);
+    mStatusBar.SetRequestedPositionX(0.0f);
+    mStatusBar.SetRequestedPositionY(0.0f);
 
-    mStatusLabel = Label::New("Tap an item or scroll the list")
-      .SetRequestedWidth(WINDOW_WIDTH - 20.0f)
-      .SetRequestedHeight(STATUS_BAR_HEIGHT)
-      .SetRequestedPositionX(10.0f)
-      .SetRequestedPositionY(0.0f);
+    mStatusLabel = Label::New("Tap an item or scroll the list");
+    mStatusLabel.SetRequestedWidth(WINDOW_WIDTH - 20.0f);
+    mStatusLabel.SetRequestedHeight(STATUS_BAR_HEIGHT);
+    mStatusLabel.SetRequestedPositionX(10.0f);
+    mStatusLabel.SetRequestedPositionY(0.0f);
     mStatusBar.Add(mStatusLabel);
     window.Add(mStatusBar);
 
@@ -106,11 +106,11 @@ public:
     // constraint to its content; WRAP_CONTENT would resolve to 0.
     const float contentHeight = ITEM_COUNT * (ITEM_HEIGHT + ITEM_SPACING) + ITEM_SPACING;
 
-    StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(WINDOW_WIDTH)
-      .SetRequestedHeight(contentHeight)
-      .SetSpacing(ITEM_SPACING)
-      .SetPadding(Extents(0, 0, ITEM_SPACING, ITEM_SPACING));
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
+    content.SetRequestedWidth(WINDOW_WIDTH);
+    content.SetRequestedHeight(contentHeight);
+    content.SetSpacing(ITEM_SPACING);
+    content.SetPadding(Extents(0, 0, ITEM_SPACING, ITEM_SPACING));
     mContent = content;
 
     for(int i = 0; i < ITEM_COUNT; ++i)
@@ -126,14 +126,14 @@ public:
     // ── ScrollView (explicit size, below status bar) ──────────────────────────
     const float scrollViewHeight = WINDOW_HEIGHT - STATUS_BAR_HEIGHT;
 
-    mScrollView = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetOverScrollMode(OverScrollMode::ContentScrolls)
-      .SetRequestedWidth(WINDOW_WIDTH)
-      .SetRequestedHeight(scrollViewHeight)
-      .SetRequestedPositionX(0.0f)
-      .SetRequestedPositionY(STATUS_BAR_HEIGHT)
-      .SetContent(content);
+    mScrollView = ScrollView::New();
+    mScrollView.SetScrollDirection(ScrollDirection::Vertical);
+    mScrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+    mScrollView.SetRequestedWidth(WINDOW_WIDTH);
+    mScrollView.SetRequestedHeight(scrollViewHeight);
+    mScrollView.SetRequestedPositionX(0.0f);
+    mScrollView.SetRequestedPositionY(STATUS_BAR_HEIGHT);
+    mScrollView.SetContent(content);
 
     mScrollView.ScrollStartedSignal().Connect(this, &ScrollInteractiveChildrenController::OnScrollStarted);
     mScrollView.ScrollingSignal().Connect(this, &ScrollInteractiveChildrenController::OnScrolling);
@@ -155,33 +155,32 @@ private:
   {
     const Vector4 normalColor = index % 2 == 0 ? COLOR_ITEM_A : COLOR_ITEM_B;
 
-    View item = View::New()
-      .SetRequestedWidth(WINDOW_WIDTH)
-      .SetRequestedHeight(ITEM_HEIGHT)
-      .SetBackgroundColor(normalColor);
+    View item = View::New();
+    item.SetRequestedWidth(WINDOW_WIDTH);
+    item.SetRequestedHeight(ITEM_HEIGHT);
+    item.SetBackgroundColor(normalColor);
 
     std::ostringstream oss;
     oss << "Item " << index << "  (tap me)";
-    Label text = Label::New(oss.str().c_str())
-      .SetRequestedWidth(WINDOW_WIDTH - 32.0f)
-      .SetRequestedHeight(ITEM_HEIGHT)
-      .SetRequestedPositionX(16.0f)
-      .SetFocusable(true);
+    Label text = Label::New(oss.str().c_str());
+    text.SetRequestedWidth(WINDOW_WIDTH - 32.0f);
+    text.SetRequestedHeight(ITEM_HEIGHT);
+    text.SetRequestedPositionX(16.0f);
+    text.SetFocusable(true);
     item.Add(text);
 
-    item.AsInteractive([this, index, item, normalColor](InteractiveTrait& trait) mutable {
-      trait.PressedChangedSignal().Connect(
-        this,
-        [item, normalColor](View, bool isPressed, InputEvent) mutable {
-          item.SetBackgroundColor(isPressed ? COLOR_PRESSED : normalColor);
-        });
+    InteractiveTrait interactive = item.AsInteractive();
+    interactive.PressedChangedSignal().Connect(
+      this,
+      [item, normalColor](View, bool isPressed, InputEvent) mutable {
+        item.SetBackgroundColor(isPressed ? COLOR_PRESSED : normalColor);
+      });
 
-      trait.ClickedSignal().Connect(
-        this,
-        [this, index](View, InputEvent) {
-          OnItemClicked(index);
-        });
-    });
+    interactive.ClickedSignal().Connect(
+      this,
+      [this, index](View, InputEvent) {
+        OnItemClicked(index);
+      });
 
     return item;
   }

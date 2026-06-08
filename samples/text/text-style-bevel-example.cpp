@@ -20,6 +20,20 @@ using namespace Dali::Ui;
 namespace
 {
 constexpr float FONT_SIZE = 140.0f;
+
+Label CreateBevelLabel(const char* text, uint32_t backgroundColor, uint32_t textColor, Text::Bevel bevel, Extents padding = Extents(10, 10, 10, 10))
+{
+  Label label = Label::New(text);
+  label.SetBackgroundColor(UiColor(backgroundColor));
+  label.SetPadding(padding);
+  label.SetFontFamily("SamsungOneUI_700");
+  label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+  label.SetFontSize(FONT_SIZE);
+  label.SetRequestedWidth(MATCH_PARENT);
+  label.SetTextColor(UiColor(textColor));
+  label.SetBevel(bevel);
+  return label;
+}
 } // namespace
 
 class TextController : public ConnectionTracker
@@ -38,90 +52,47 @@ private:
     window.SetBackgroundColor(UiColor(0xFFFFFF));
     window.SetSize(Dali::Window::WindowSize(1200, 1080));
 
-    window.Add(StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        // Embossed Style - Light from top-left creates raised effect
-        Label::New("Embossed")
-          .SetBackgroundColor(UiColor(0x212121))
-          .SetPadding(Extents(10, 10, 10, 10))
-          .SetFontFamily("SamsungOneUI_700")
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetFontSize(FONT_SIZE)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetTextColor(UiColor(0x333333))
-          .SetBevel(Text::Bevel()
-            .SetDirection(Vector2(-1.0f, -1.0f))
-            .SetIntensity(2.0f)
-            .SetLightColor(UiColor(0x808080))
-            .SetShadowColor(UiColor(0x0D0D0D)))
-          .As(mEmbossedLabel),
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
 
-        // Engraved Style - Light from top-left creates sunken effect
-        Label::New("Engraved")
-          .SetBackgroundColor(UiColor(0x333333))
-          .SetPadding(Extents(10, 10, 10, 10))
-          .SetFontFamily("SamsungOneUI_700")
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetFontSize(FONT_SIZE)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetTextColor(UiColor(0x212121))
-          .SetBevel(Text::Bevel()
-            .SetDirection(Vector2(-1.0f, -1.0f))
-            .SetIntensity(2.0f)
-            .SetLightColor(UiColor(0x0D0D0D))
-            .SetShadowColor(UiColor(0x808080)))
-          .As(mEngravedLabel),
+    mEmbossedLabel = CreateBevelLabel("Embossed", 0x212121, 0x333333, Text::Bevel()
+                                                                             .SetDirection(Vector2(-1.0f, -1.0f))
+                                                                             .SetIntensity(2.0f)
+                                                                             .SetLightColor(UiColor(0x808080))
+                                                                             .SetShadowColor(UiColor(0x0D0D0D)));
+    root.Add(mEmbossedLabel);
 
-        // Glass Style - Subtle bevel effect
-        Label::New("Glass")
-          .SetBackgroundColor(UiColor(0xFFFFFF))
-          .SetPadding(Extents(10, 10, 10, 10))
-          .SetFontFamily("SamsungOneUI_700")
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetFontSize(FONT_SIZE)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetTextColor(UiColor(0xF3F3F3))
-          .SetBevel(Text::Bevel()
-            .SetDirection(Vector2(-1.0f, -1.0f))
-            .SetIntensity(5.0f)
-            .SetLightColor(UiColor(0x555555))
-            .SetShadowColor(UiColor(0x666666)))
-          .As(mGlassLabel),
+    mEngravedLabel = CreateBevelLabel("Engraved", 0x333333, 0x212121, Text::Bevel()
+                                                                             .SetDirection(Vector2(-1.0f, -1.0f))
+                                                                             .SetIntensity(2.0f)
+                                                                             .SetLightColor(UiColor(0x0D0D0D))
+                                                                             .SetShadowColor(UiColor(0x808080)));
+    root.Add(mEngravedLabel);
 
-        // Same Color Style - Text matches background
-        Label::New("Same Color")
-          .SetBackgroundColor(UiColor(0xEEF3F9))
-          .SetPadding(Extents(10, 10, 10, 10))
-          .SetFontFamily("SamsungOneUI_700")
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetFontSize(FONT_SIZE)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetTextColor(UiColor(0xEEF3F9))
-          .SetBevel(Text::Bevel()
-            .SetDirection(Vector2(1.0f, -1.0f))
-            .SetIntensity(4.0f)
-            .SetLightColor(UiColor(0xFFFFFF))
-            .SetShadowColor(UiColor(0xD8E2E9)))
-          .As(mSameColorLabel),
+    mGlassLabel = CreateBevelLabel("Glass", 0xFFFFFF, 0xF3F3F3, Text::Bevel()
+                                                                        .SetDirection(Vector2(-1.0f, -1.0f))
+                                                                        .SetIntensity(5.0f)
+                                                                        .SetLightColor(UiColor(0x555555))
+                                                                        .SetShadowColor(UiColor(0x666666)));
+    root.Add(mGlassLabel);
 
-        // Bronze Style - Decorative warm-toned metallic bevel
-        Label::New("Bronze")
-          .SetBackgroundColor(UiColor(0x6B4A34))
-          .SetPadding(Extents(20, 20, 20, 20))
-          .SetFontFamily("SamsungOneUI_700")
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetFontSize(FONT_SIZE)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetTextColor(UiColor(0x6B4A34))
-          .SetBevel(Text::Bevel()
-            .SetDirection(Vector2(-1.0f, -1.0f))
-            .SetIntensity(4.0f)
-            .SetLightColor(UiColor(0xB8845E))
-            .SetShadowColor(UiColor(0x40281C)))
-          .As(mBronzeColorLabel),
-        }));
+    mSameColorLabel = CreateBevelLabel("Same Color", 0xEEF3F9, 0xEEF3F9, Text::Bevel()
+                                                                                 .SetDirection(Vector2(1.0f, -1.0f))
+                                                                                 .SetIntensity(4.0f)
+                                                                                 .SetLightColor(UiColor(0xFFFFFF))
+                                                                                 .SetShadowColor(UiColor(0xD8E2E9)));
+    root.Add(mSameColorLabel);
+
+    mBronzeColorLabel = CreateBevelLabel("Bronze", 0x6B4A34, 0x6B4A34, Text::Bevel()
+                                                                              .SetDirection(Vector2(-1.0f, -1.0f))
+                                                                              .SetIntensity(4.0f)
+                                                                              .SetLightColor(UiColor(0xB8845E))
+                                                                              .SetShadowColor(UiColor(0x40281C)),
+                                         Extents(20, 20, 20, 20));
+    root.Add(mBronzeColorLabel);
+
+    window.Add(root);
 
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
   }

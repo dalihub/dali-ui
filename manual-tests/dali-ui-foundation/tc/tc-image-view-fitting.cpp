@@ -83,41 +83,48 @@ public:
   {
     mCurrentIdx = 0;
 
-    StackLayout boxContainer = StackLayout::New(StackOrientation::VERTICAL)
-                                 .SetRequestedWidth(BOX_W)
-                                 .SetRequestedHeight(BOX_H)
-                                 .SetBackgroundColor(UiColor(C_BOX_BORDER));
+    StackLayout boxContainer = StackLayout::New(StackOrientation::VERTICAL);
+    boxContainer.SetRequestedWidth(BOX_W);
+    boxContainer.SetRequestedHeight(BOX_H);
+    boxContainer.SetBackgroundColor(UiColor(C_BOX_BORDER));
 
-    mImage = ImageView::New(IMG)
-               .SetRequestedWidth(BOX_W)
-               .SetRequestedHeight(BOX_H)
-               .SetFittingMode(FITTING[0].mode);
+    mImage = ImageView::New(IMG);
+    mImage.SetRequestedWidth(BOX_W);
+    mImage.SetRequestedHeight(BOX_H);
+    mImage.SetFittingMode(FITTING[0].mode);
     mImage.SetMargin(Extents(2, 2, 2, 2));
 
     boxContainer.Add(mImage);
 
     mModeLabel = MakeStatusLabel("FittingMode: FIT_KEEP_ASPECT_RATIO");
 
-    StackLayout content = StackLayout::New(StackOrientation::VERTICAL)
-                            .SetRequestedWidth(MATCH_PARENT)
-                            .SetRequestedHeight(WRAP_CONTENT)
-                            .SetBackgroundColor(UiColor(C_BG))
-                            .SetPadding(Extents(8, 8, 8, 8));
+    StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
+    content.SetRequestedWidth(MATCH_PARENT);
+    content.SetRequestedHeight(WRAP_CONTENT);
+    content.SetBackgroundColor(UiColor(C_BG));
+    content.SetPadding(Extents(8, 8, 8, 8));
 
     content.Add(MakeCentered(boxContainer));
     content.Add(mModeLabel);
 
-    StackLayout btnRow = StackLayout::New(StackOrientation::HORIZONTAL)
-                           .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(BTN_H)
-                           .SetPadding(Extents(0, 0, 2, 2));
+    StackLayout btnRow = StackLayout::New(StackOrientation::HORIZONTAL);
+    btnRow.SetRequestedWidth(MATCH_PARENT);
+    btnRow.SetRequestedHeight(BTN_H);
+    btnRow.SetPadding(Extents(0, 0, 2, 2));
     for(int i = 0; i < FITTING_COUNT; ++i)
     {
       mBtns[i] = MakeToggleBtn(FITTING[i].name, i == 0);
       int idx   = i;
-      mBtns[i].SetFocusable(true).AsInteractive([this, idx](InteractiveTrait& trait) {
-        trait.ClickedSignal().Connect(this, [this, idx](View, InputEvent) -> bool {
-          OnFitting(idx); return true;
-        });
+      mBtns[i].SetFocusable(true);
+
+      InteractiveTrait interactive = mBtns[i].AsInteractive();
+
+      interactive.ClickedSignal().Connect(this, [this, idx](View, InputEvent) -> bool {
+
+        OnFitting(idx);
+
+        return true;
+
       });
       btnRow.Add(mBtns[i]);
     }
@@ -142,40 +149,45 @@ private:
 
   View MakeCentered(View child)
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(BOX_H + 16)
-                        .SetPadding(Extents(0, 0, 8, 8));
-    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(BOX_H + 16);
+    row.SetPadding(Extents(0, 0, 8, 8));
+    row.Add(ManualTest::MakeWeightedSpacer());
     row.Add(child);
-    row.Add(View::New().SetRequestedWidth(WRAP_CONTENT).SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f)));
+    row.Add(ManualTest::MakeWeightedSpacer());
     return row;
   }
 
   Label MakeStatusLabel(const Dali::String& text)
   {
-    return Label::New(text)
-      .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(STATUS_H)
-      .SetFontSize(12.0f).SetTextColor(UiColor(C_STATUS_TEXT))
-      .SetBackgroundColor(UiColor(C_STATUS_BG))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(STATUS_H);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(C_STATUS_TEXT));
+    label.SetBackgroundColor(UiColor(C_STATUS_BG));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return label;
   }
 
   StackLayout MakeToggleBtn(const char* label, bool active)
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedHeight(BTN_H)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .SetBackgroundColor(UiColor(active ? C_BTN_ACT : C_BTN_BG))
-      .Children({
-        Label::New(label)
-          .SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(11.0f).SetTextColor(UiColor(C_BTN_TEXT))
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER)
-          .SetMultiLine(true),
-      });
+    StackLayout layout = StackLayout::New(StackOrientation::VERTICAL);
+    layout.SetRequestedHeight(BTN_H);
+    layout.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    layout.SetBackgroundColor(UiColor(active ? C_BTN_ACT : C_BTN_BG));
+    Label buttonLabel = Label::New(label);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(11.0f);
+    buttonLabel.SetTextColor(UiColor(C_BTN_TEXT));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetMultiLine(true);
+    layout.AddChildren({buttonLabel});
+    return layout;
   }
 
   ImageView   mImage;

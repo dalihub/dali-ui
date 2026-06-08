@@ -310,15 +310,15 @@ int UtcDaliScrollViewSetGetContentP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetContentChainingP(void)
+int UtcDaliScrollViewSetContentSetterP(void)
 {
   UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   View       content    = View::New();
 
-  ScrollView& result = scrollView.SetContent(content);
-  DALI_TEST_CHECK(&result == &scrollView);
+  scrollView.SetContent(content);
+  DALI_TEST_CHECK(scrollView.GetContent() == content);
 
   END_TEST;
 }
@@ -344,7 +344,7 @@ int UtcDaliScrollViewSetGetScrollPositionP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetScrollPositionChainingP(void)
+int UtcDaliScrollViewSetScrollPositionSetterP(void)
 {
   UiTestApplication application;
 
@@ -357,8 +357,8 @@ int UtcDaliScrollViewSetScrollPositionChainingP(void)
   scrollView.SetContent(content);
 
   const Vector2  position(50.0f, 75.0f);
-  ScrollView& result = scrollView.SetScrollPosition(position);
-  DALI_TEST_CHECK(&result == &scrollView);
+  scrollView.SetScrollPosition(position);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition(), position, TEST_LOCATION);
 
   END_TEST;
 }
@@ -401,14 +401,14 @@ int UtcDaliScrollViewSetGetScrollDirectionBothP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetScrollDirectionChainingP(void)
+int UtcDaliScrollViewSetScrollDirectionSetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetScrollDirection(), ScrollDirection::Vertical, TEST_LOCATION);
 
   END_TEST;
 }
@@ -428,14 +428,14 @@ int UtcDaliScrollViewSetGetMaxFlingDistanceP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetMaxFlingDistanceChainingP(void)
+int UtcDaliScrollViewSetMaxFlingDistanceSetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetMaxFlingDistance(1000.0f);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetMaxFlingDistance(1000.0f);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetMaxFlingDistance(), 1000.0f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -455,14 +455,14 @@ int UtcDaliScrollViewSetGetMinimumFlingDurationP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetMinimumFlingDurationChainingP(void)
+int UtcDaliScrollViewSetMinimumFlingDurationSetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetMinimumFlingDuration(500);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetMinimumFlingDuration(500);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetMinimumFlingDuration(), 500, TEST_LOCATION);
 
   END_TEST;
 }
@@ -482,14 +482,14 @@ int UtcDaliScrollViewSetGetMaximumFlingDurationP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetMaximumFlingDurationChainingP(void)
+int UtcDaliScrollViewSetMaximumFlingDurationSetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetMaximumFlingDuration(3000);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetMaximumFlingDuration(3000);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetMaximumFlingDuration(), 3000, TEST_LOCATION);
 
   END_TEST;
 }
@@ -509,14 +509,14 @@ int UtcDaliScrollViewSetGetFlingSensitivityP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetFlingSensitivityChainingP(void)
+int UtcDaliScrollViewSetFlingSensitivitySetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetFlingSensitivity(1.5f);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetFlingSensitivity(1.5f);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetFlingSensitivity(), 1.5f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -536,14 +536,14 @@ int UtcDaliScrollViewSetGetDecelerationRateP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetDecelerationRateChainingP(void)
+int UtcDaliScrollViewSetDecelerationRateSetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetDecelerationRate(0.95f);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetDecelerationRate(0.95f);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetDecelerationRate(), 0.95f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -586,14 +586,14 @@ int UtcDaliScrollViewSetGetOverScrollModeContentScrollsP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetOverScrollModeChainingP(void)
+int UtcDaliScrollViewSetOverScrollModeSetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetOverScrollMode(OverScrollMode::Never);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetOverScrollMode(OverScrollMode::Never);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetOverScrollMode(), OverScrollMode::Never, TEST_LOCATION);
 
   END_TEST;
 }
@@ -624,14 +624,14 @@ int UtcDaliScrollViewSetGetVerticalScrollBarVisibilityNeverP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetVerticalScrollBarVisibilityChainingP(void)
+int UtcDaliScrollViewSetVerticalScrollBarVisibilitySetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetVerticalScrollBarVisibility(), ScrollBarVisibility::Auto, TEST_LOCATION);
 
   END_TEST;
 }
@@ -648,14 +648,14 @@ int UtcDaliScrollViewSetGetHorizontalScrollBarVisibilityP(void)
   END_TEST;
 }
 
-int UtcDaliScrollViewSetHorizontalScrollBarVisibilityChainingP(void)
+int UtcDaliScrollViewSetHorizontalScrollBarVisibilitySetterP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView = ScrollView::New();
-  ScrollView& result     = scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
 
-  DALI_TEST_CHECK(&result == &scrollView);
+  DALI_TEST_EQUALS(scrollView.GetHorizontalScrollBarVisibility(), ScrollBarVisibility::Never, TEST_LOCATION);
 
   END_TEST;
 }
@@ -828,29 +828,25 @@ int UtcDaliScrollViewDraggingSignalP(void)
   END_TEST;
 }
 
-// Method Chaining Tests
+// Setter Tests
 
-int UtcDaliScrollViewMethodChainingP(void)
+int UtcDaliScrollViewSettersP(void)
 {
   UiTestApplication application;
 
   ScrollView scrollView = ScrollView::New();
   View       content    = View::New();
 
-  // Verify all setters can be chained
-  ScrollView& result = scrollView
-                         .SetContent(content)
-                         .SetScrollDirection(ScrollDirection::Vertical)
-                         .SetMaxFlingDistance(5000.0f)
-                         .SetMinimumFlingDuration(800)
-                         .SetMaximumFlingDuration(2500)
-                         .SetFlingSensitivity(1.2f)
-                         .SetDecelerationRate(0.99f)
-                         .SetOverScrollMode(OverScrollMode::ContentScrolls)
-                         .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
-                         .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
-
-  DALI_TEST_CHECK(&result == &scrollView);
+  scrollView.SetContent(content);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+  scrollView.SetMaxFlingDistance(5000.0f);
+  scrollView.SetMinimumFlingDuration(800);
+  scrollView.SetMaximumFlingDuration(2500);
+  scrollView.SetFlingSensitivity(1.2f);
+  scrollView.SetDecelerationRate(0.99f);
+  scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+  scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+  scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
 
   // Verify all values were set correctly
   DALI_TEST_EQUALS(scrollView.GetScrollDirection(), ScrollDirection::Vertical, TEST_LOCATION);

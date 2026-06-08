@@ -85,25 +85,22 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetSpacing(8.0f)
-      .Children({
-        CreateTypeButton(),
-        CreateImageGrid(),
-        CreateSwapButton(),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.SetPadding(Extents(10, 10, 10, 10));
+    contents.SetSpacing(8.0f);
+    contents.AddChildren({CreateTypeButton(), CreateImageGrid(), CreateSwapButton()});
+    return contents;
   }
 
   View CreateImageGrid()
   {
-    mGridContainer = StackLayout::New(StackOrientation::HORIZONTAL)
-                       .SetRequestedWidth(MATCH_PARENT)
-                       .SetRequestedHeight(WRAP_CONTENT)
-                       .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                       .SetSpacing(8.0f);
+    mGridContainer = StackLayout::New(StackOrientation::HORIZONTAL);
+    mGridContainer.SetRequestedWidth(MATCH_PARENT);
+    mGridContainer.SetRequestedHeight(WRAP_CONTENT);
+    mGridContainer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    mGridContainer.SetSpacing(8.0f);
 
     PopulateGrid();
     return mGridContainer;
@@ -120,21 +117,22 @@ private:
 
   View CreateRadiusCard(int radiusIndex)
   {
-    StackLayout card = StackLayout::New(StackOrientation::VERTICAL)
-                         .SetRequestedWidth(WRAP_CONTENT)
-                         .SetRequestedHeight(MATCH_PARENT)
-                         .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                         .SetBackgroundColor(UiColor(0x303134))
-                         .SetPadding(Extents(8, 8, 8, 8))
-                         .SetSpacing(6.0f);
+    StackLayout card = StackLayout::New(StackOrientation::VERTICAL);
+    card.SetRequestedWidth(WRAP_CONTENT);
+    card.SetRequestedHeight(MATCH_PARENT);
+    card.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    card.SetBackgroundColor(UiColor(0x303134));
+    card.SetPadding(Extents(8, 8, 8, 8));
+    card.SetSpacing(6.0f);
 
-    card.Add(Label::New(RADIUS_CASES[radiusIndex].label)
-               .SetRequestedWidth(MATCH_PARENT)
-               .SetRequestedHeight(28.0f)
-               .SetFontSize(11.0f)
-               .SetTextColor(UiColor(0xFFFFFF))
-               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-               .SetVerticalTextAlignment(Text::Alignment::CENTER));
+    Label title = Label::New(RADIUS_CASES[radiusIndex].label);
+    title.SetRequestedWidth(MATCH_PARENT);
+    title.SetRequestedHeight(28.0f);
+    title.SetFontSize(11.0f);
+    title.SetTextColor(UiColor(0xFFFFFF));
+    title.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    title.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    card.Add(title);
 
     card.Add(CreateVisualView(radiusIndex));
     return card;
@@ -148,40 +146,37 @@ private:
     {
       case ViewType::IMAGE:
       {
-        ImageView::New(IMAGES[mResourceIndex % IMAGE_COUNT])
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(WRAP_CONTENT)
-          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-          .SetFittingMode(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO)
-          .SetCornerRadius(radiusCase.radius)
-          .SetCornerRadiusPolicy(radiusCase.policy)
-          .As(mImages[radiusIndex]);
+        mImages[radiusIndex] = ImageView::New(IMAGES[mResourceIndex % IMAGE_COUNT]);
+        mImages[radiusIndex].SetRequestedWidth(MATCH_PARENT);
+        mImages[radiusIndex].SetRequestedHeight(WRAP_CONTENT);
+        mImages[radiusIndex].SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+        mImages[radiusIndex].SetFittingMode(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+        mImages[radiusIndex].SetCornerRadius(radiusCase.radius);
+        mImages[radiusIndex].SetCornerRadiusPolicy(radiusCase.policy);
         return mImages[radiusIndex];
       }
       case ViewType::ANIMATED_IMAGE:
       {
-        AnimatedImageView::New(ANIMATED_IMAGES[mResourceIndex % ANIMATED_IMAGE_COUNT])
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(WRAP_CONTENT)
-          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-          .SetFittingMode(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO)
-          .SetLoopCount(-1)
-          .SetCornerRadius(radiusCase.radius)
-          .SetCornerRadiusPolicy(radiusCase.policy)
-          .As(mAnimatedImages[radiusIndex]);
+        mAnimatedImages[radiusIndex] = AnimatedImageView::New(ANIMATED_IMAGES[mResourceIndex % ANIMATED_IMAGE_COUNT]);
+        mAnimatedImages[radiusIndex].SetRequestedWidth(MATCH_PARENT);
+        mAnimatedImages[radiusIndex].SetRequestedHeight(WRAP_CONTENT);
+        mAnimatedImages[radiusIndex].SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+        mAnimatedImages[radiusIndex].SetFittingMode(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
+        mAnimatedImages[radiusIndex].SetLoopCount(-1);
+        mAnimatedImages[radiusIndex].SetCornerRadius(radiusCase.radius);
+        mAnimatedImages[radiusIndex].SetCornerRadiusPolicy(radiusCase.policy);
         mAnimatedImages[radiusIndex].Play();
         return mAnimatedImages[radiusIndex];
       }
       case ViewType::LOTTIE_ANIMATION:
       {
-        LottieAnimationView::New(LOTTIE_IMAGES[mResourceIndex % LOTTIE_IMAGE_COUNT])
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(WRAP_CONTENT)
-          .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-          .SetLoopCount(-1)
-          .SetCornerRadius(radiusCase.radius)
-          .SetCornerRadiusPolicy(radiusCase.policy)
-          .As(mLottieAnimations[radiusIndex]);
+        mLottieAnimations[radiusIndex] = LottieAnimationView::New(LOTTIE_IMAGES[mResourceIndex % LOTTIE_IMAGE_COUNT]);
+        mLottieAnimations[radiusIndex].SetRequestedWidth(MATCH_PARENT);
+        mLottieAnimations[radiusIndex].SetRequestedHeight(WRAP_CONTENT);
+        mLottieAnimations[radiusIndex].SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+        mLottieAnimations[radiusIndex].SetLoopCount(-1);
+        mLottieAnimations[radiusIndex].SetCornerRadius(radiusCase.radius);
+        mLottieAnimations[radiusIndex].SetCornerRadiusPolicy(radiusCase.policy);
         mLottieAnimations[radiusIndex].Play();
         return mLottieAnimations[radiusIndex];
       }
@@ -192,42 +187,39 @@ private:
 
   View CreateTypeButton()
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(MATCH_PARENT)
-                           .SetRequestedHeight(48.0f)
-                           .SetBackgroundColor(UiColor(0x5F6368))
-                           .Children({
-                             Label::New(GetViewTypeLabel())
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(15.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(mTypeLabel),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(MATCH_PARENT);
+    button.SetRequestedHeight(48.0f);
+    button.SetBackgroundColor(UiColor(0x5F6368));
+    mTypeLabel = Label::New(GetViewTypeLabel());
+    mTypeLabel.SetRequestedWidth(MATCH_PARENT);
+    mTypeLabel.SetRequestedHeight(MATCH_PARENT);
+    mTypeLabel.SetFontSize(15.0f);
+    mTypeLabel.SetTextColor(UiColor(0xFFFFFF));
+    mTypeLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mTypeLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(mTypeLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageCornerRadiusController::OnTypeButtonClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageCornerRadiusController::OnTypeButtonClicked);
     return button;
   }
 
   View CreateSwapButton()
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(MATCH_PARENT)
-                           .SetRequestedHeight(64.0f)
-                           .SetBackgroundColor(UiColor(0x1E88E5))
-                           .Children({
-                             Label::New("SWAP RESOURCE")
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(16.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(MATCH_PARENT);
+    button.SetRequestedHeight(64.0f);
+    button.SetBackgroundColor(UiColor(0x1E88E5));
+    Label buttonLabel = Label::New("SWAP RESOURCE");
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(16.0f);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageCornerRadiusController::OnSwapButtonClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageCornerRadiusController::OnSwapButtonClicked);
     return button;
   }
 

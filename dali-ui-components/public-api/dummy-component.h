@@ -16,37 +16,26 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <functional>
-
-// INTERNAL INCLUDES
-
-// None
 
 namespace Dali
 {
 
 namespace Ui
 {
-
-// Forward declarations
 namespace Internal
 {
 class DummyComponentImpl;
 }
 
-#include "dummy-component.autogen.h"
 /**
  * @brief Dummy
  */
 class DALI_UI_API DummyComponent : public View
 {
 public:
-  // Typedefs
-
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized DummyComponent handle.
@@ -116,9 +105,6 @@ public: // Static Methods
   static DummyComponent DownCast(BaseHandle handle);
 
 public: // Setters for chaining
-  // @CHAIN_START(DummyComponent, View)
-  // @CHAIN_END
-
 public: // Signals
 public: // Not intended for application developers
   /// @cond internal
@@ -138,7 +124,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(DummyComponent)
 };
 
 } // namespace Ui

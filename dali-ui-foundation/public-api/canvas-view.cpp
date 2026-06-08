@@ -14,12 +14,8 @@
  * limitations under the License.
  *
  */
-
-// CLASS HEADER
-#include <dali-ui-foundation/public-api/canvas-view.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/canvas-view-impl.h>
+#include <dali-ui-foundation/public-api/canvas-view.h>
 
 namespace Dali
 {
@@ -84,10 +80,9 @@ bool CanvasView::RemoveAllDrawables()
   return GetImpl(*this).RemoveAllDrawables();
 }
 
-CanvasView& CanvasView::SetViewBox(const Vector2& viewBox)
+void CanvasView::SetViewBox(const Vector2& viewBox)
 {
   GetImpl(*this).SetViewBox(viewBox);
-  return *this;
 }
 
 Vector2 CanvasView::GetViewBox()
@@ -95,10 +90,9 @@ Vector2 CanvasView::GetViewBox()
   return GetImpl(*this).GetViewBox();
 }
 
-CanvasView& CanvasView::SetSynchronousLoading(bool synchronous)
+void CanvasView::SetSynchronousLoading(bool synchronous)
 {
   GetImpl(*this).SetSynchronousLoading(synchronous);
-  return *this;
 }
 
 bool CanvasView::IsSynchronousLoading() const
@@ -106,10 +100,9 @@ bool CanvasView::IsSynchronousLoading() const
   return GetImpl(*this).IsSynchronousLoading();
 }
 
-CanvasView& CanvasView::SetRasterizationRequestManually(bool manually)
+void CanvasView::SetRasterizationRequestManually(bool manually)
 {
   GetImpl(*this).SetRasterizationRequestManually(manually);
-  return *this;
 }
 
 bool CanvasView::IsRasterizationRequestManually() const

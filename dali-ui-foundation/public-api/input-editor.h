@@ -16,13 +16,7 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/view.h>
-#include <functional>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-editor-properties.h>
 #include <dali-ui-foundation/public-api/text/input-filter.h>
@@ -32,22 +26,19 @@
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
-
-// None
+#include <dali-ui-foundation/public-api/view.h>
+#include <functional>
 
 namespace Dali
 {
 
 namespace Ui
 {
-
-// Forward declarations
 namespace Integration
 {
 class InputEditorImpl;
 }
 
-#include "input-editor.autogen.h"
 /**
  * @brief InputEditor is a multi-line editable text view.
  *
@@ -188,13 +179,12 @@ public: // Static Methods
   static InputEditor DownCast(BaseHandle handle);
 
 public: // Setters for chaining
-  // @CHAIN_START(InputEditor, View)
   /**
    * @brief Sets the text.
    *
    * @param[in] text The text to display in UTF-8 format.
    */
-  InputEditor& SetText(const Dali::String& text);
+  void SetText(const Dali::String& text);
 
   /**
    * @brief Gets the text.
@@ -208,7 +198,7 @@ public: // Setters for chaining
    *
    * @param[in] fontFamily The requested font family to use.
    */
-  InputEditor& SetFontFamily(const Dali::String& fontFamily);
+  void SetFontFamily(const Dali::String& fontFamily);
 
   /**
    * @brief Gets the font family of the text.
@@ -222,7 +212,7 @@ public: // Setters for chaining
    *
    * @param[in] fontSize The font size in pixels.
    */
-  InputEditor& SetFontSize(float fontSize);
+  void SetFontSize(float fontSize);
 
   /**
    * @brief Gets the font size of the text.
@@ -236,7 +226,7 @@ public: // Setters for chaining
    *
    * @param[in] color The required text color value.
    */
-  InputEditor& SetTextColor(const UiColor& color);
+  void SetTextColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the text.
@@ -250,7 +240,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The line wrap mode to apply.
    */
-  InputEditor& SetLineWrapMode(Text::LineWrapMode mode);
+  void SetLineWrapMode(Text::LineWrapMode mode);
 
   /**
    * @brief Gets the line wrap mode.
@@ -264,7 +254,7 @@ public: // Setters for chaining
    *
    * @param[in] alignment The horizontal text alignment.
    */
-  InputEditor& SetHorizontalTextAlignment(Text::Alignment alignment);
+  void SetHorizontalTextAlignment(Text::Alignment alignment);
 
   /**
    * @brief Gets the horizontal text alignment.
@@ -278,7 +268,7 @@ public: // Setters for chaining
    *
    * @param[in] alignment The vertical text alignment.
    */
-  InputEditor& SetVerticalTextAlignment(Text::Alignment alignment);
+  void SetVerticalTextAlignment(Text::Alignment alignment);
 
   /**
    * @brief Gets the vertical text alignment.
@@ -292,7 +282,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The overflow mode to apply.
    */
-  InputEditor& SetOverflowMode(Text::OverflowMode mode);
+  void SetOverflowMode(Text::OverflowMode mode);
 
   /**
    * @brief Gets the overflow mode.
@@ -328,7 +318,7 @@ public: // Setters for chaining
    *
    * @param[in] lineHeight The line height value.
    */
-  InputEditor& SetLineHeight(float lineHeight);
+  void SetLineHeight(float lineHeight);
 
   /**
    * @brief Gets the current line height value.
@@ -356,7 +346,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The line height mode.
    */
-  InputEditor& SetLineHeightMode(Text::LineHeightMode mode);
+  void SetLineHeightMode(Text::LineHeightMode mode);
 
   /**
    * @brief Gets the current line height mode.
@@ -370,7 +360,7 @@ public: // Setters for chaining
    *
    * @param[in] text The placeholder text in UTF-8 encoding.
    */
-  InputEditor& SetPlaceholder(const Dali::String& text);
+  void SetPlaceholder(const Dali::String& text);
 
   /**
    * @brief Gets the placeholder text.
@@ -384,7 +374,7 @@ public: // Setters for chaining
    *
    * @param[in] color The placeholder text color as a UiColor.
    */
-  InputEditor& SetPlaceholderColor(const UiColor& color);
+  void SetPlaceholderColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the placeholder text.
@@ -398,7 +388,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to show the placeholder text when focused, false otherwise.
    */
-  InputEditor& SetShowPlaceholderOnFocus(bool enabled);
+  void SetShowPlaceholderOnFocus(bool enabled);
 
   /**
    * @brief Returns whether the placeholder text is shown when the input editor has focus.
@@ -412,7 +402,7 @@ public: // Setters for chaining
    *
    * @param[in] width The cursor width in pixels.
    */
-  InputEditor& SetCursorWidth(int width);
+  void SetCursorWidth(int width);
 
   /**
    * @brief Gets the width of the text cursor.
@@ -429,7 +419,7 @@ public: // Setters for chaining
    *
    * @param[in] color The cursor color as a UiColor.
    */
-  InputEditor& SetCursorColor(const UiColor& color);
+  void SetCursorColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the text cursor.
@@ -443,7 +433,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to enable cursor blinking, false otherwise.
    */
-  InputEditor& SetCursorBlinkEnabled(bool enabled);
+  void SetCursorBlinkEnabled(bool enabled);
 
   /**
    * @brief Returns whether the cursor is set to blink.
@@ -457,7 +447,7 @@ public: // Setters for chaining
    *
    * @param[in] interval The cursor blink interval in seconds.
    */
-  InputEditor& SetCursorBlinkInterval(float interval);
+  void SetCursorBlinkInterval(float interval);
 
   /**
    * @brief Returns the time interval in seconds between cursor on and off states.
@@ -473,7 +463,7 @@ public: // Setters for chaining
    *
    * @param[in] position The cursor position.
    */
-  InputEditor& SetCursorPosition(uint32_t position);
+  void SetCursorPosition(uint32_t position);
 
   /**
    * @brief Returns the current cursor position.
@@ -489,7 +479,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to enable text selection, false otherwise.
    */
-  InputEditor& SetSelectionEnabled(bool enabled);
+  void SetSelectionEnabled(bool enabled);
 
   /**
    * @brief Returns whether text selection is enabled.
@@ -503,7 +493,7 @@ public: // Setters for chaining
    *
    * @param[in] color The selection highlight color as a UiColor.
    */
-  InputEditor& SetSelectionColor(const UiColor& color);
+  void SetSelectionColor(const UiColor& color);
 
   /**
    * @brief Gets the highlight color of the selected text region.
@@ -520,7 +510,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to enable text editing handles, false otherwise.
    */
-  InputEditor& SetTextHandleEnabled(bool enabled);
+  void SetTextHandleEnabled(bool enabled);
 
   /**
    * @brief Returns whether text editing handles are enabled.
@@ -536,7 +526,7 @@ public: // Setters for chaining
    *
    * @param[in] color The text editing handle color as a UiColor.
    */
-  InputEditor& SetTextHandleColor(const UiColor& color);
+  void SetTextHandleColor(const UiColor& color);
 
   /**
    * @brief Gets the color of the text editing handles.
@@ -552,7 +542,7 @@ public: // Setters for chaining
    *
    * @param[in] image The cursor handle image URL.
    */
-  InputEditor& SetCursorHandleImage(const Dali::String& image);
+  void SetCursorHandleImage(const Dali::String& image);
 
   /**
    * @brief Gets the cursor handle image.
@@ -568,7 +558,7 @@ public: // Setters for chaining
    *
    * @param[in] image The pressed cursor handle image URL.
    */
-  InputEditor& SetCursorHandlePressedImage(const Dali::String& image);
+  void SetCursorHandlePressedImage(const Dali::String& image);
 
   /**
    * @brief Gets the pressed cursor handle image.
@@ -584,7 +574,7 @@ public: // Setters for chaining
    *
    * @param[in] image The left selection handle image URL.
    */
-  InputEditor& SetSelectionHandleImageLeft(const Dali::String& image);
+  void SetSelectionHandleImageLeft(const Dali::String& image);
 
   /**
    * @brief Gets the left selection handle image.
@@ -600,7 +590,7 @@ public: // Setters for chaining
    *
    * @param[in] image The right selection handle image URL.
    */
-  InputEditor& SetSelectionHandleImageRight(const Dali::String& image);
+  void SetSelectionHandleImageRight(const Dali::String& image);
 
   /**
    * @brief Gets the right selection handle image.
@@ -616,7 +606,7 @@ public: // Setters for chaining
    *
    * @param[in] image The pressed left selection handle image URL.
    */
-  InputEditor& SetSelectionHandlePressedImageLeft(const Dali::String& image);
+  void SetSelectionHandlePressedImageLeft(const Dali::String& image);
 
   /**
    * @brief Gets the pressed left selection handle image.
@@ -632,7 +622,7 @@ public: // Setters for chaining
    *
    * @param[in] image The pressed right selection handle image URL.
    */
-  InputEditor& SetSelectionHandlePressedImageRight(const Dali::String& image);
+  void SetSelectionHandlePressedImageRight(const Dali::String& image);
 
   /**
    * @brief Gets the pressed right selection handle image.
@@ -646,7 +636,7 @@ public: // Setters for chaining
    *
    * @param[in] length The maximum number of characters allowed.
    */
-  InputEditor& SetMaximumLength(int length);
+  void SetMaximumLength(int length);
 
   /**
    * @brief Gets the maximum number of characters allowed in the InputEditor.
@@ -674,7 +664,7 @@ public: // Setters for chaining
    * @param[in] inputFilter The input filter to apply.
    * @return This input editor.
    */
-  InputEditor& SetInputFilter(const Text::InputFilter& inputFilter);
+  void SetInputFilter(const Text::InputFilter& inputFilter);
 
   /**
    * @brief Clears the input filter.
@@ -684,14 +674,14 @@ public: // Setters for chaining
    *
    * @return This input editor.
    */
-  InputEditor& ClearInputFilter();
+  void ClearInputFilter();
 
   /**
    * @brief Sets whether the InputEditor can be edited by user interaction.
    *
    * @param[in] editable True to allow editing, false otherwise.
    */
-  InputEditor& SetEditable(bool editable);
+  void SetEditable(bool editable);
 
   /**
    * @brief Returns whether the InputEditor can be edited by user interaction.
@@ -716,7 +706,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The LayoutDirectionMode used to determine the text layout direction.
    */
-  InputEditor& SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
+  void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
 
   /**
    * @brief Gets the current layout direction mode.
@@ -733,7 +723,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to enable mark-up parsing, false to render text as plain string.
    */
-  InputEditor& SetMarkupEnabled(bool enabled);
+  void SetMarkupEnabled(bool enabled);
 
   /**
    * @brief Gets whether mark-up processing is enabled.
@@ -747,7 +737,7 @@ public: // Setters for chaining
    *
    * @param[in] weight The font weight.
    */
-  InputEditor& SetFontWeight(Text::FontWeight weight);
+  void SetFontWeight(Text::FontWeight weight);
 
   /**
    * @brief Returns the font weight.
@@ -761,7 +751,7 @@ public: // Setters for chaining
    *
    * @param[in] width The font width.
    */
-  InputEditor& SetFontWidth(Text::FontWidth width);
+  void SetFontWidth(Text::FontWidth width);
 
   /**
    * @brief Returns the font width.
@@ -775,7 +765,7 @@ public: // Setters for chaining
    *
    * @param[in] slant The font slant.
    */
-  InputEditor& SetFontSlant(Text::FontSlant slant);
+  void SetFontSlant(Text::FontSlant slant);
 
   /**
    * @brief Returns the font slant.
@@ -793,7 +783,7 @@ public: // Setters for chaining
    *
    * @return This input editor.
    */
-  InputEditor& SetTextBackgroundColor(const UiColor& color);
+  void SetTextBackgroundColor(const UiColor& color);
 
   /**
    * @brief Gets the background color behind the text.
@@ -814,7 +804,7 @@ public: // Setters for chaining
    *
    * @param[in] underline The underline configuration.
    */
-  InputEditor& SetUnderline(const Text::Underline& underline);
+  void SetUnderline(const Text::Underline& underline);
 
   /**
    * @brief Clears the underline style.
@@ -826,7 +816,7 @@ public: // Setters for chaining
    *
    * @param[in] shadow The shadow configuration.
    */
-  InputEditor& SetShadow(const Text::Shadow& shadow);
+  void SetShadow(const Text::Shadow& shadow);
 
   /**
    * @brief Clears the shadow style.
@@ -838,7 +828,7 @@ public: // Setters for chaining
    *
    * @param[in] outline The outline configuration.
    */
-  InputEditor& SetOutline(const Text::Outline& outline);
+  void SetOutline(const Text::Outline& outline);
 
   /**
    * @brief Clears the outline style.
@@ -850,7 +840,7 @@ public: // Setters for chaining
    *
    * @param[in] lineThrough The line-through configuration.
    */
-  InputEditor& SetLineThrough(const Text::LineThrough& lineThrough);
+  void SetLineThrough(const Text::LineThrough& lineThrough);
 
   /**
    * @brief Clears the line-through style.
@@ -865,7 +855,7 @@ public: // Setters for chaining
    *
    * @param[in] scale The font size scale.
    */
-  InputEditor& SetFontSizeScale(float scale);
+  void SetFontSizeScale(float scale);
 
   /**
    * @brief Gets the font size scale.
@@ -882,7 +872,7 @@ public: // Setters for chaining
    *
    * @param[in] scale The minimum font size scale.
    */
-  InputEditor& SetMinimumFontSizeScale(float scale);
+  void SetMinimumFontSizeScale(float scale);
 
   /**
    * @brief Gets the minimum font size scale.
@@ -899,7 +889,7 @@ public: // Setters for chaining
    *
    * @param[in] scale The maximum font size scale.
    */
-  InputEditor& SetMaximumFontSizeScale(float scale);
+  void SetMaximumFontSizeScale(float scale);
 
   /**
    * @brief Gets the maximum font size scale.
@@ -917,7 +907,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to apply the system font size scale, false otherwise.
    */
-  InputEditor& SetSystemFontSizeScaleEnabled(bool enabled);
+  void SetSystemFontSizeScaleEnabled(bool enabled);
 
   /**
    * @brief Gets whether the system font size scale is applied.
@@ -935,7 +925,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to enable auto grow, false otherwise.
    */
-  InputEditor& SetAutoGrowEnabled(bool enabled);
+  void SetAutoGrowEnabled(bool enabled);
 
   /**
    * @brief Gets whether auto grow behavior is enabled.
@@ -954,7 +944,7 @@ public: // Setters for chaining
    * @param[in] color The typing text color.
    * @return This input editor.
    */
-  InputEditor& SetTypingTextColor(const UiColor& color);
+  void SetTypingTextColor(const UiColor& color);
 
   /**
    * @brief Gets the text color used for typing.
@@ -973,7 +963,7 @@ public: // Setters for chaining
    * @param[in] fontFamily The typing font family.
    * @return This input editor.
    */
-  InputEditor& SetTypingFontFamily(const Dali::String& fontFamily);
+  void SetTypingFontFamily(const Dali::String& fontFamily);
 
   /**
    * @brief Gets the font family used for typing.
@@ -992,7 +982,7 @@ public: // Setters for chaining
    * @param[in] fontSize The typing font size in pixels.
    * @return This input editor.
    */
-  InputEditor& SetTypingFontSize(float fontSize);
+  void SetTypingFontSize(float fontSize);
 
   /**
    * @brief Gets the font size in pixels used for typing.
@@ -1011,7 +1001,7 @@ public: // Setters for chaining
    * @param[in] weight The typing font weight.
    * @return This input editor.
    */
-  InputEditor& SetTypingFontWeight(Text::FontWeight weight);
+  void SetTypingFontWeight(Text::FontWeight weight);
 
   /**
    * @brief Gets the font weight used for typing.
@@ -1030,7 +1020,7 @@ public: // Setters for chaining
    * @param[in] width The typing font width.
    * @return This input editor.
    */
-  InputEditor& SetTypingFontWidth(Text::FontWidth width);
+  void SetTypingFontWidth(Text::FontWidth width);
 
   /**
    * @brief Gets the font width used for typing.
@@ -1049,7 +1039,7 @@ public: // Setters for chaining
    * @param[in] slant The typing font slant.
    * @return This input editor.
    */
-  InputEditor& SetTypingFontSlant(Text::FontSlant slant);
+  void SetTypingFontSlant(Text::FontSlant slant);
 
   /**
    * @brief Gets the font slant used for typing.
@@ -1069,7 +1059,7 @@ public: // Setters for chaining
    *
    * @param[in] axes The font variation axes.
    */
-  InputEditor& SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
+  void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
 
   /**
    * @brief Sets the font variation from a settings string.
@@ -1097,7 +1087,7 @@ public: // Setters for chaining
    *
    * @param[in] settings The font variation settings string.
    */
-  InputEditor& SetFontVariation(const Dali::String& settings);
+  void SetFontVariation(const Dali::String& settings);
 
   /**
    * @brief Returns the font variation axes.
@@ -1111,7 +1101,7 @@ public: // Setters for chaining
    *
    * This removes all previously set font variation axes.
    */
-  InputEditor& ClearFontVariation();
+  void ClearFontVariation();
 
   /**
    * @brief Sets the translatable placeholder resource ID.
@@ -1129,7 +1119,7 @@ public: // Setters for chaining
    *
    * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_PLACEHOLDER").
    */
-  InputEditor& SetTranslatablePlaceholder(StringView resourceId);
+  void SetTranslatablePlaceholder(StringView resourceId);
 
   /**
    * @brief Sets the translatable placeholder resource ID with an explicit domain.
@@ -1140,7 +1130,7 @@ public: // Setters for chaining
    * @param[in] resourceId The resource ID for the localized string (e.g., "IDS_PLACEHOLDER").
    * @param[in] domain The translation domain, or empty to use the default domain.
    */
-  InputEditor& SetTranslatablePlaceholder(StringView resourceId, StringView domain);
+  void SetTranslatablePlaceholder(StringView resourceId, StringView domain);
 
   /**
    * @brief Gets the translatable placeholder resource ID.
@@ -1157,10 +1147,6 @@ public: // Setters for chaining
    * Subsequent RefreshBindings() calls will no longer update this InputEditor's placeholder.
    */
   void ClearTranslatablePlaceholder();
-
-  // @CHAIN_END
-
-  // Read Only
   /**
    * @brief Gets the number of lines of text within the current layout width.
    *
@@ -1214,8 +1200,6 @@ public: // Setters for chaining
    * @return The end index of the selected text.
    */
   uint32_t GetSelectedTextEnd() const;
-
-  // Method
   /**
    * @brief Selects the text within the specified index range.
    *
@@ -1223,21 +1207,21 @@ public: // Setters for chaining
    * @param[in] endIndex The end index of the selection.
    * @return This input editor.
    */
-  InputEditor& SelectText(uint32_t startIndex, uint32_t endIndex);
+  void SelectText(uint32_t startIndex, uint32_t endIndex);
 
   /**
    * @brief Selects the whole text.
    *
    * @return This input editor.
    */
-  InputEditor& SelectWholeText();
+  void SelectWholeText();
 
   /**
    * @brief Clears the current selection.
    *
    * @return This input editor.
    */
-  InputEditor& ClearSelection();
+  void ClearSelection();
 
 public: // Signals
   /**
@@ -1370,7 +1354,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(InputEditor)
 };
 
 } // namespace Ui

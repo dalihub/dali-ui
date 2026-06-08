@@ -16,22 +16,17 @@
  * limitations under the License.
  *
  */
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
 namespace Ui
 {
-
-// Forward declarations
 namespace Integration
 {
 class LayoutImpl;
 }
 
-#include "layout.autogen.h"
 /**
  * @brief Layout is a View that arranges child views using a layout algorithm.
  *
@@ -106,9 +101,6 @@ public:
   static Layout DownCast(BaseHandle handle);
 
 public:
-  // @CHAIN_START(Layout, View)
-  // @CHAIN_END
-
 public: // Not intended for application developers
   /// @cond internal
   /**
@@ -127,7 +119,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(Layout)
 };
 
 } // namespace Ui

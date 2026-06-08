@@ -203,11 +203,12 @@ private:
     panel.SetSpacing(10.0f);
 
     // Title
-    panel.Add(Label::New("UiScale System Test")
-                .SetRequestedWidth(MATCH_PARENT)
-                .SetRequestedHeight(WRAP_CONTENT)
-                .SetFontSize(22.0f)
-                .SetTextColor(UiColor(C_LIGHT_TEXT)));
+    Label title = Label::New("UiScale System Test");
+    title.SetRequestedWidth(MATCH_PARENT);
+    title.SetRequestedHeight(WRAP_CONTENT);
+    title.SetFontSize(22.0f);
+    title.SetTextColor(UiColor(C_LIGHT_TEXT));
+    panel.Add(title);
 
     // Current scale display (updated dynamically)
     mScaleLabel = Label::New("System Scale: 1.00");
@@ -441,11 +442,12 @@ private:
     disabledSub.SetCornerRadius(Vector4(ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS, ZONE_RADIUS));
     disabledSub.SetUiScalePolicy(UiScalePolicy::DISABLED); // ★ isolated island
 
-    disabledSub.Add(Label::New("DISABLED sub-container")
-                      .SetRequestedWidth(WRAP_CONTENT)
-                      .SetRequestedHeight(WRAP_CONTENT)
-                      .SetFontSize(12.0f)
-                      .SetTextColor(UiColor(0x6A1B9A)));
+    Label disabledSubLabel = Label::New("DISABLED sub-container");
+    disabledSubLabel.SetRequestedWidth(WRAP_CONTENT);
+    disabledSubLabel.SetRequestedHeight(WRAP_CONTENT);
+    disabledSubLabel.SetFontSize(12.0f);
+    disabledSubLabel.SetTextColor(UiColor(0x6A1B9A));
+    disabledSub.Add(disabledSubLabel);
 
     StackLayout subRow = MakeHStack();
     // INHERIT under DISABLED → fixed size (1.0)
@@ -980,6 +982,27 @@ private:
   //
   // ═══════════════════════════════════════════════════════════════════════════
 
+  Label MakeSmallLabel(const char* text, uint32_t color)
+  {
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetFontSize(10.0f);
+    label.SetTextColor(UiColor(color));
+    return label;
+  }
+
+  View MakeEffectChild(float size, float x, float y, UiColor color)
+  {
+    View child = View::New();
+    child.SetRequestedWidth(size);
+    child.SetRequestedHeight(size);
+    child.SetRequestedPositionX(x);
+    child.SetRequestedPositionY(y);
+    child.SetBackgroundColor(color);
+    return child;
+  }
+
   View BuildZoneF()
   {
     constexpr uint32_t C_ZONE_F_BG       = 0xDCF4DC; // light green
@@ -1009,31 +1032,11 @@ private:
       box.SetBackgroundColor(UiColor(C_BLUE));
       box.SetCornerRadius(ABS_CORNER_RADIUS);
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
-      box.Children({
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_RED)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_GREEN)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_BLUE)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_ORANGE)),
+      box.AddChildren({
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)),
       });
 
       GaussianBlurEffect blurEffect = GaussianBlurEffect::New(BLUR_RADIUS);
@@ -1048,40 +1051,15 @@ private:
       View box = View::New();
       box.SetRequestedWidth(EFFECT_BOX_SIZE);
       box.SetRequestedHeight(EFFECT_BOX_SIZE);
-      box.Children({
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_RED)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_GREEN)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_BLUE)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_ORANGE)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE)
-          .SetRequestedHeight(EFFECT_BOX_SIZE)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(0.0f)
-          .SetCornerRadius(ABS_CORNER_RADIUS)
-          .SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE)
-          .SetBackgroundColor(UiColor(C_WHITE).WithAlpha(0.3f)) // semi-transparent for background blur
-          .As(bgBlurBox),
+      bgBlurBox = MakeEffectChild(EFFECT_BOX_SIZE, 0.0f, 0.0f, UiColor(C_WHITE).WithAlpha(0.3f));
+      bgBlurBox.SetCornerRadius(ABS_CORNER_RADIUS);
+      bgBlurBox.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
+      box.AddChildren({
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)),
+        bgBlurBox,
       });
 
       BackgroundBlurEffect bgBlurEffect = BackgroundBlurEffect::New(BLUR_RADIUS);
@@ -1125,31 +1103,11 @@ private:
       box.SetCornerRadius(ABS_CORNER_RADIUS);
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
       box.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING, Ui::View::OffScreenRenderingType::REFRESH_ALWAYS);
-      box.Children({
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_RED)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_GREEN)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_BLUE)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_ORANGE)),
+      box.AddChildren({
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)),
       });
 
       rowAbs.Add(MakeLabeled(box, "OffscreenRendering\nABS radius"));
@@ -1170,31 +1128,11 @@ private:
       box.SetBackgroundColor(UiColor(C_BLUE));
       box.SetCornerRadius(REL_CORNER_RADIUS);
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
-      box.Children({
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_RED)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_GREEN)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_BLUE)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_ORANGE)),
+      box.AddChildren({
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)),
       });
 
       GaussianBlurEffect blurEffect = GaussianBlurEffect::New(BLUR_RADIUS);
@@ -1209,40 +1147,15 @@ private:
       View box = View::New();
       box.SetRequestedWidth(EFFECT_BOX_SIZE);
       box.SetRequestedHeight(EFFECT_BOX_SIZE);
-      box.Children({
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_RED)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_GREEN)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_BLUE)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_ORANGE)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE)
-          .SetRequestedHeight(EFFECT_BOX_SIZE)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(0.0f)
-          .SetCornerRadius(REL_CORNER_RADIUS)
-          .SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE)
-          .SetBackgroundColor(UiColor(C_WHITE).WithAlpha(0.3f)) // semi-transparent for background blur
-          .As(bgBlurBox),
+      bgBlurBox = MakeEffectChild(EFFECT_BOX_SIZE, 0.0f, 0.0f, UiColor(C_WHITE).WithAlpha(0.3f));
+      bgBlurBox.SetCornerRadius(REL_CORNER_RADIUS);
+      bgBlurBox.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
+      box.AddChildren({
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)),
+        bgBlurBox,
       });
 
       BackgroundBlurEffect bgBlurEffect = BackgroundBlurEffect::New(BLUR_RADIUS);
@@ -1285,31 +1198,11 @@ private:
       box.SetBackgroundColor(UiColor(C_PURPLE));
       box.SetCornerRadius(REL_CORNER_RADIUS);
       box.SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE);
-      box.Children({
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_RED)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(0.0f)
-          .SetBackgroundColor(UiColor(C_GREEN)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(0.0f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_BLUE)),
-        View::New()
-          .SetRequestedWidth(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedHeight(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f)
-          .SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f)
-          .SetBackgroundColor(UiColor(C_ORANGE)),
+      box.AddChildren({
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, 0.0f, UiColor(C_RED)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, 0.0f, UiColor(C_GREEN)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, 0.0f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_BLUE)),
+        MakeEffectChild(EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, EFFECT_BOX_SIZE * 0.5f, UiColor(C_ORANGE)),
       });
 
       box.SetProperty(Ui::View::Property::OFFSCREEN_RENDERING, Ui::View::OffScreenRenderingType::REFRESH_ALWAYS);
@@ -1359,11 +1252,7 @@ private:
     mDisabledSlot.SetSpacing(6.0f);
     mDisabledSlot.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
     mDisabledSlot.SetUiScalePolicy(UiScalePolicy::DISABLED); // ★ blocks scale
-    mDisabledSlot.Add(Label::New("DISABLED parent")
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(WRAP_CONTENT)
-                        .SetFontSize(10.0f)
-                        .SetTextColor(UiColor(0xB71C1C)));
+    mDisabledSlot.Add(MakeSmallLabel("DISABLED parent", 0xB71C1C));
 
     // Right slot: INHERIT parent (teal tint)
     mInheritSlot = StackLayout::New(StackOrientation::VERTICAL);
@@ -1374,11 +1263,7 @@ private:
     mInheritSlot.SetSpacing(6.0f);
     mInheritSlot.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
     // INHERIT (default)
-    mInheritSlot.Add(Label::New("INHERIT parent")
-                       .SetRequestedWidth(MATCH_PARENT)
-                       .SetRequestedHeight(WRAP_CONTENT)
-                       .SetFontSize(10.0f)
-                       .SetTextColor(UiColor(0x1B5E20)));
+    mInheritSlot.Add(MakeSmallLabel("INHERIT parent", 0x1B5E20));
 
     // The box that moves between parents — INHERIT policy, so its effective scale
     // depends entirely on which parent it is attached to.
@@ -1466,11 +1351,7 @@ private:
     mHContainer.SetSpacing(6.0f);
     mHContainer.SetCornerRadius(Vector4(8.0f, 8.0f, 8.0f, 8.0f));
     // INHERIT (default) — normal scale propagation
-    mHContainer.Add(Label::New("INHERIT parent container")
-                      .SetRequestedWidth(MATCH_PARENT)
-                      .SetRequestedHeight(WRAP_CONTENT)
-                      .SetFontSize(10.0f)
-                      .SetTextColor(UiColor(0x1A237E)));
+    mHContainer.Add(MakeSmallLabel("INHERIT parent container", 0x1A237E));
 
     mScaleChangeBox = MakePolicyBox("INHERIT", UiColor(0x3949AB), UiScalePolicy::INHERIT, BOX_SIZE);
     mHContainer.Add(mScaleChangeBox);
@@ -1622,23 +1503,25 @@ private:
   // Zone section title label
   Label MakeZoneTitle(const char* text)
   {
-    return Label::New(text)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetFontSize(15.0f)
-      .SetTextColor(UiColor(C_ZONE_TITLE));
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetFontSize(15.0f);
+    label.SetTextColor(UiColor(C_ZONE_TITLE));
+    return label;
   }
 
   // Small description label (multi-line, gray)
   Label MakeDesc(const char* text)
   {
-    return Label::New(text)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetFontSize(12.0f)
-      .SetTextColor(UiColor(C_GRAY_TEXT))
-      .SetMultiLine(true)
-      .SetLineWrapMode(Text::LineWrapMode::WORD);
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetFontSize(12.0f);
+    label.SetTextColor(UiColor(C_GRAY_TEXT));
+    label.SetMultiLine(true);
+    label.SetLineWrapMode(Text::LineWrapMode::WORD);
+    return label;
   }
 
 private:

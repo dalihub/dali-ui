@@ -19,9 +19,8 @@
    - [Scroll State Query](#45-scroll-state-query)
 5. [Programmatic Scrolling](#5-programmatic-scrolling)
 6. [Events (Signals)](#6-events-signals)
-7. [Method Chaining](#7-method-chaining)
-8. [Default Values](#8-default-values)
-9. [Important Notes](#9-important-notes)
+7. [Default Values](#7-default-values)
+8. [Important Notes](#8-important-notes)
 
 ---
 
@@ -451,29 +450,7 @@ void OnButtonClicked()
 
 ---
 
-## 7. Method Chaining
-
-All setters return `ScrollView&`, enabling fluent configuration:
-
-```cpp
-ScrollView scrollView = ScrollView::New();
-
-scrollView
-    .SetScrollDirection(ScrollDirection::Vertical)
-    .SetMaxFlingDistance(4000.0f)
-    .SetMinimumFlingDuration(800)
-    .SetMaximumFlingDuration(2000)
-    .SetFlingSensitivity(1.2f)
-    .SetDecelerationRate(0.997f)
-    .SetOverScrollMode(OverScrollMode::ContentScrolls)
-    .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
-    .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never)
-    .SetContent(content);
-```
-
----
-
-## 8. Default Values
+## 7. Default Values
 
 | Property | Default |
 |---|---|
@@ -490,7 +467,7 @@ scrollView
 
 ---
 
-## 9. Important Notes
+## 8. Important Notes
 
 - **Content must be set first.** Calling `ScrollTo`, `ScrollToX`, `ScrollToY`, or `SetScrollPosition` before `SetContent()` will result in a crash because the implementation reads content actor properties directly.
 

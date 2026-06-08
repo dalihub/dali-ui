@@ -17,8 +17,6 @@
 
 #ifndef DALI_UI_ELEMENTS_SCROLL_VIEW_H
 #define DALI_UI_ELEMENTS_SCROLL_VIEW_H
-
-// EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/scrollable-enum.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -29,14 +27,11 @@ namespace Dali
 
 namespace Ui
 {
-
-// Forward declarations
 namespace Integration
 {
 class ScrollViewImpl;
 }
 
-#include "scroll-view.autogen.h"
 /**
  * @brief ScrollView is a scrollable container that displays content larger than its viewport.
  *
@@ -121,13 +116,12 @@ public: // Static Methods
   static ScrollView DownCast(BaseHandle handle);
 
 public: // Setters for chaining
-  // @CHAIN_START(ScrollView, View)
   /**
    * @brief Sets the content view to be scrolled.
    *
    * @param[in] content The content view
    */
-  ScrollView& SetContent(View content);
+  void SetContent(View content);
 
   /**
    * @brief Gets the content view.
@@ -141,7 +135,7 @@ public: // Setters for chaining
    *
    * @param[in] position The scroll position to set
    */
-  ScrollView& SetScrollPosition(const Vector2& position);
+  void SetScrollPosition(const Vector2& position);
 
   /**
    * @brief Gets the current scroll position.
@@ -155,7 +149,7 @@ public: // Setters for chaining
    *
    * @param[in] direction The scroll direction
    */
-  ScrollView& SetScrollDirection(ScrollDirection direction);
+  void SetScrollDirection(ScrollDirection direction);
 
   /**
    * @brief Gets the direction of the scroll.
@@ -169,7 +163,7 @@ public: // Setters for chaining
    *
    * @param[in] distance The maximum fling distance
    */
-  ScrollView& SetMaxFlingDistance(float distance);
+  void SetMaxFlingDistance(float distance);
 
   /**
    * @brief Gets the maximum distance by fling action.
@@ -183,7 +177,7 @@ public: // Setters for chaining
    *
    * @param[in] duration The minimum fling duration
    */
-  ScrollView& SetMinimumFlingDuration(int duration);
+  void SetMinimumFlingDuration(int duration);
 
   /**
    * @brief Gets the minimum duration of fling scroll animation.
@@ -197,7 +191,7 @@ public: // Setters for chaining
    *
    * @param[in] duration The maximum fling duration
    */
-  ScrollView& SetMaximumFlingDuration(int duration);
+  void SetMaximumFlingDuration(int duration);
 
   /**
    * @brief Gets the maximum duration of fling scroll animation.
@@ -211,7 +205,7 @@ public: // Setters for chaining
    *
    * @param[in] sensitivity The fling sensitivity
    */
-  ScrollView& SetFlingSensitivity(float sensitivity);
+  void SetFlingSensitivity(float sensitivity);
 
   /**
    * @brief Gets the sensitivity of fling action.
@@ -225,7 +219,7 @@ public: // Setters for chaining
    *
    * @param[in] rate The deceleration rate
    */
-  ScrollView& SetDecelerationRate(float rate);
+  void SetDecelerationRate(float rate);
 
   /**
    * @brief Gets the deceleration rate of fling.
@@ -239,7 +233,7 @@ public: // Setters for chaining
    *
    * @param[in] mode The over scroll mode
    */
-  ScrollView& SetOverScrollMode(OverScrollMode mode);
+  void SetOverScrollMode(OverScrollMode mode);
 
   /**
    * @brief Gets the over scroll mode.
@@ -257,7 +251,7 @@ public: // Focus Scroll
    *
    * @param[in] enable True to enable auto-scroll on focus (default: true)
    */
-  ScrollView& SetScrollOnFocus(bool enable);
+  void SetScrollOnFocus(bool enable);
 
   /**
    * @brief Gets whether auto-scroll on focus is enabled.
@@ -272,7 +266,7 @@ public: // Focus Scroll
    * @param[in] position The target scroll position (default: ScrollToPosition::MakeVisible)
    * @see ScrollToPosition
    */
-  ScrollView& SetFocusScrollToPosition(ScrollToPosition position);
+  void SetFocusScrollToPosition(ScrollToPosition position);
 
   /**
    * @brief Gets the target scroll position used when auto-scrolling to a focused child.
@@ -293,7 +287,7 @@ public: // Focus Scroll
    *
    * @param[in] peek Extra scroll distance in pixels (default: 0.0f, disabled)
    */
-  ScrollView& SetFocusScrollPeek(float peek);
+  void SetFocusScrollPeek(float peek);
 
   /**
    * @brief Gets the peek distance applied when auto-scrolling to a focused child.
@@ -317,7 +311,7 @@ public: // Key Scroll
    *
    * @param[in] enable True to enable (default: false)
    */
-  ScrollView& SetKeyScrollEnabled(bool enable);
+  void SetKeyScrollEnabled(bool enable);
 
   /**
    * @brief Gets whether key-based step scrolling is enabled.
@@ -336,7 +330,7 @@ public: // Key Scroll
    *
    * @param[in] step Step distance in pixels (default: 200.0f)
    */
-  ScrollView& SetKeyScrollStep(float step);
+  void SetKeyScrollStep(float step);
 
   /**
    * @brief Gets the step distance used for key-based step scrolling.
@@ -351,7 +345,7 @@ public: // Scroll Bar Visibility
    *
    * @param[in] visibility The vertical scroll bar visibility
    */
-  ScrollView& SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
+  void SetVerticalScrollBarVisibility(ScrollBarVisibility visibility);
 
   /**
    * @brief Gets the visibility of the vertical scroll bar.
@@ -365,7 +359,7 @@ public: // Scroll Bar Visibility
    *
    * @param[in] visibility The horizontal scroll bar visibility
    */
-  ScrollView& SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
+  void SetHorizontalScrollBarVisibility(ScrollBarVisibility visibility);
 
   /**
    * @brief Gets the visibility of the horizontal scroll bar.
@@ -373,8 +367,6 @@ public: // Scroll Bar Visibility
    * @return The horizontal scroll bar visibility
    */
   ScrollBarVisibility GetHorizontalScrollBarVisibility() const;
-
-  // @CHAIN_END
 
 public: // Non-Chainable Methods
   /**
@@ -418,10 +410,7 @@ public: // Non-Chainable Methods
   void ScrollToY(float position, bool animation = true);
 
 public:
-  // Typedefs
   using ScrollPosition = Vector2;
-
-  // Signals
   /**
    * @brief Scroll started signal type.
    */
@@ -496,7 +485,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(ScrollView)
 };
 
 } // namespace Ui

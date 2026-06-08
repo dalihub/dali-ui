@@ -121,7 +121,7 @@ public: // Image
    * @param[in] url The URL of the image resource
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetResourceUrl(const Dali::String& url);
+  void SetResourceUrl(const Dali::String& url);
 
   /**
    * @brief Gets the URL of the animated image resource.
@@ -139,7 +139,7 @@ public: // Image
    * @param[in] urls Array of image URLs
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetResourceUrls(const Dali::Vector<Dali::String>& urls);
+  void SetResourceUrls(const Dali::Vector<Dali::String>& urls);
 
   /**
    * @brief Gets the array of image URLs.
@@ -154,7 +154,7 @@ public: // Image
    * @param[in] enabled True to enable loading image with view size
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetImageLoadWithViewSize(bool enabled);
+  void SetImageLoadWithViewSize(bool enabled);
 
   /**
    * @brief Gets whether the image is loaded with the view size.
@@ -169,21 +169,21 @@ public: // Playback Control
    *
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& Play();
+  void Play();
 
   /**
    * @brief Pauses playback of the animation.
    *
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& Pause();
+  void Pause();
 
   /**
    * @brief Stops playback of the animation and resets to the first frame.
    *
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& Stop();
+  void Stop();
 
   /**
    * @brief Sets the number of times the animation should loop.
@@ -194,7 +194,7 @@ public: // Playback Control
    * @param[in] count The loop count (-1 for infinite)
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetLoopCount(int count);
+  void SetLoopCount(int count);
 
   /**
    * @brief Gets the current loop count.
@@ -210,7 +210,7 @@ public: // Frame Control
    * @param[in] frame The frame index to jump to
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& JumpToFrame(int frame);
+  void JumpToFrame(int frame);
 
   /**
    * @brief Sets the behavior of the animation when it is stopped.
@@ -218,7 +218,7 @@ public: // Frame Control
    * @param[in] behavior The stop behavior (CURRENT_FRAME, FIRST_FRAME, or LAST_FRAME)
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetStopBehavior(AnimatedImage::StopBehavior behavior);
+  void SetStopBehavior(AnimatedImage::StopBehavior behavior);
 
   /**
    * @brief Gets the current stop behavior.
@@ -236,7 +236,7 @@ public: // Frame Control
    * @param[in] factor The speed multiplier (default: 1.0)
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetFrameSpeedFactor(float factor);
+  void SetFrameSpeedFactor(float factor);
 
   /**
    * @brief Gets the current frame speed factor.
@@ -251,7 +251,7 @@ public: // Frame Control
    * @param[in] size The batch size (default: 1)
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetBatchSize(int size);
+  void SetBatchSize(int size);
 
   /**
    * @brief Gets the current batch size.
@@ -266,7 +266,7 @@ public: // Frame Control
    * @param[in] size The cache size (default: 1)
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetCacheSize(int size);
+  void SetCacheSize(int size);
 
   /**
    * @brief Gets the current cache size.
@@ -283,7 +283,7 @@ public: // Frame Control
    * @param[in] milliseconds The delay between frames in milliseconds
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetFrameDelay(int milliseconds);
+  void SetFrameDelay(int milliseconds);
 
   /**
    * @brief Gets the current frame delay override.
@@ -320,7 +320,7 @@ public: // Visual Appearance
    * @param[in] color The color to apply
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetImageColor(const UiColor& color);
+  void SetImageColor(const UiColor& color);
 
   /**
    * @brief Gets the color applied to the image.
@@ -337,7 +337,7 @@ public: // Visual Appearance
    * @param[in] fittingMode The fitting mode to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetFittingMode(Ui::Image::FittingMode fittingMode);
+  void SetFittingMode(Ui::Image::FittingMode fittingMode);
 
   /**
    * @brief Gets the fitting mode.
@@ -352,7 +352,7 @@ public: // Visual Appearance
    * @param[in] samplingMode The sampling mode to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetSamplingMode(Ui::Image::SamplingMode samplingMode);
+  void SetSamplingMode(Ui::Image::SamplingMode samplingMode);
 
   /**
    * @brief Gets the sampling mode.
@@ -367,7 +367,7 @@ public: // Visual Appearance
    * @param[in] preMultiplied True if the image has pre-multiplied alpha
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultipliedAlpha(bool preMultiplied);
 
   /**
    * @brief Gets whether pre-multiplied alpha is enabled.
@@ -383,7 +383,7 @@ public: // Loading Behavior
    * @param[in] width The desired width in pixels (0 to use natural size)
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetDesiredWidth(int width);
+  void SetDesiredWidth(int width);
 
   /**
    * @brief Gets the desired image width hint.
@@ -398,7 +398,7 @@ public: // Loading Behavior
    * @param[in] height The desired height in pixels (0 to use natural size)
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetDesiredHeight(int height);
+  void SetDesiredHeight(int height);
 
   /**
    * @brief Gets the desired image height hint.
@@ -413,7 +413,7 @@ public: // Loading Behavior
    * @param[in] loadPolicy The load policy to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
+  void SetLoadPolicy(Ui::Image::LoadPolicy loadPolicy);
 
   /**
    * @brief Gets the load policy.
@@ -428,7 +428,7 @@ public: // Loading Behavior
    * @param[in] releasePolicy The release policy to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
+  void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets the release policy.
@@ -443,7 +443,7 @@ public: // Loading Behavior
    * @param[in] synchronous True to load the image on the main thread synchronously
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetSynchronousLoading(bool synchronous);
+  void SetSynchronousLoading(bool synchronous);
 
   /**
    * @brief Gets whether synchronous loading is enabled.
@@ -459,7 +459,7 @@ public: // Advanced Rendering & Masking
    * @param[in] maskUrl The URL of the alpha mask image
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetAlphaMaskUrl(const Dali::String& maskUrl);
+  void SetAlphaMaskUrl(const Dali::String& maskUrl);
 
   /**
    * @brief Gets the alpha mask image URL.
@@ -474,7 +474,7 @@ public: // Advanced Rendering & Masking
    * @param[in] cropToMask True to crop the image to the mask
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetCropToMask(bool cropToMask);
+  void SetCropToMask(bool cropToMask);
 
   /**
    * @brief Gets whether crop-to-mask is enabled.
@@ -489,7 +489,7 @@ public: // Advanced Rendering & Masking
    * @param[in] maskingMode The masking mode to use
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetMaskingMode(Ui::Image::MaskingType maskingMode);
+  void SetMaskingMode(Ui::Image::MaskingType maskingMode);
 
   /**
    * @brief Gets the masking mode.
@@ -504,7 +504,7 @@ public: // Advanced Rendering & Masking
    * @param[in] url The URL of the placeholder image
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetPlaceholderUrl(const Dali::String& url);
+  void SetPlaceholderUrl(const Dali::String& url);
 
   /**
    * @brief Gets the placeholder image URL.
@@ -522,7 +522,7 @@ public: // Advanced Rendering & Masking
    * @param[in] pixelArea The normalized sub-region of the image to display
    * @return Reference to this for fluent chaining
    */
-  AnimatedImageView& SetPixelArea(const Vector4& pixelArea);
+  void SetPixelArea(const Vector4& pixelArea);
 
   /**
    * @brief Gets the pixel area.
@@ -571,7 +571,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(AnimatedImageView)
 };
 
 } // namespace Ui

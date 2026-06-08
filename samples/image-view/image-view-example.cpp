@@ -44,13 +44,12 @@ private:
     float  halfH      = windowSize.GetHeight() * 0.5f;
     window.SetBackgroundColor(Color::DARK_GRAY);
 
-    window.Add(
-      ImageView::New(RESOURCES_DIR "gallery-large-3.jpg")
-        .SetRequestedWidth(halfW - 4.0f)
-        .SetRequestedHeight(halfH - 4.0f)
-        .SetRequestedPositionX(0.0f)
-        .SetRequestedPositionY(0.0f)
-        .As(mImage));
+    mImage = ImageView::New(RESOURCES_DIR "gallery-large-3.jpg");
+    mImage.SetRequestedWidth(halfW - 4.0f);
+    mImage.SetRequestedHeight(halfH - 4.0f);
+    mImage.SetRequestedPositionX(0.0f);
+    mImage.SetRequestedPositionY(0.0f);
+    window.Add(mImage);
 
     mImage.ResourceReadySignal().Connect(this, &ImageViewSampleController::OnResourceReady);
 

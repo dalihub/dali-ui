@@ -56,10 +56,10 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Columns: AUTO, 1*STAR.  Row: 1*STAR.
-    GridLayout root = GridLayout::New()
-      .SetBackgroundColor(Color::GAINSBORO)
-      .SetMinimumWidth(400.0f)
-      .SetRequestedHeight(200.0f);
+    GridLayout root = GridLayout::New();
+    root.SetBackgroundColor(Color::GAINSBORO);
+    root.SetMinimumWidth(400.0f);
+    root.SetRequestedHeight(200.0f);
     root.AddColumnDefinition(GridLength::Auto());
     root.AddColumnDefinition(GridLength::Star(1.0f));
     root.AddRowDefinition(GridLength::Star(1.0f));
@@ -73,9 +73,9 @@ public:
 
     // Child 2: col 1 (STAR) — GridLayout that fills the remaining 200px (400 - 200).
     // Contains two grandchildren in 1*STAR columns, each getting 100px.
-    GridLayout child2 = GridLayout::New()
-      .SetBackgroundColor(Color::GREEN)
-      .SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
+    GridLayout child2 = GridLayout::New();
+    child2.SetBackgroundColor(Color::GREEN);
+    child2.SetLayoutParams(GridLayoutParams::New().SetRow(0).SetColumn(1));
     child2.AddColumnDefinition(GridLength::Star(1.0f));
     child2.AddColumnDefinition(GridLength::Star(1.0f));
     child2.AddRowDefinition(GridLength::Star(1.0f));

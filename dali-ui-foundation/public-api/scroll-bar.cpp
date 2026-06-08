@@ -14,15 +14,11 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/object/type-registry.h>
-#include <dali/public-api/actors/actor.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-bar-impl.h>
 #include <dali-ui-foundation/public-api/scroll-bar.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/debug.h>
+#include <dali/public-api/actors/actor.h>
 
 namespace Dali
 {
@@ -53,8 +49,6 @@ ScrollBar ScrollBar::New()
   Integration::ScrollBarImplPtr impl = Integration::ScrollBarImpl::New();
 
   ScrollBar scrollBar = ScrollBar(*impl);
-
-  // Second-phase initialization
   impl->Initialize();
   return scrollBar;
 }
@@ -104,10 +98,6 @@ ScrollBar::ScrollBar(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::ScrollBarImpl>(internal);
 }
 
-// =============================================================================
-// IScrollBar Implementation
-// =============================================================================
-
 View ScrollBar::GetTarget() const
 {
   return GetImpl(*this).GetTarget();
@@ -147,10 +137,6 @@ void ScrollBar::HideBar()
 {
   GetImpl(*this).HideBar();
 }
-
-// =============================================================================
-// Properties
-// =============================================================================
 
 float ScrollBar::GetBarThickness() const
 {

@@ -55,15 +55,15 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    mStatusLabel = Label::New()
-      .SetText("Press arrow keys to move focus")
-      .SetFontSize(FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(STATUS_HEIGHT)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetMultiLine(true);
+    mStatusLabel = Label::New();
+    mStatusLabel.SetText("Press arrow keys to move focus");
+    mStatusLabel.SetFontSize(FONT_SIZE);
+    mStatusLabel.SetTextColor(UiColor(COLOR_TEXT));
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(STATUS_HEIGHT);
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetMultiLine(true);
 
     // Create 4 views in a 2x2 arrangement
     for(uint32_t i = 0; i < VIEW_COUNT; ++i)
@@ -83,23 +83,23 @@ public:
     mViews[3].SetLeftFocusableView(mViews[2]);
     mViews[3].SetUpFocusableView(mViews[1]);
 
-    auto row0 = StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(CELL_SIZE)
-      .Children({mViews[0], mViews[1]});
+    auto row0 = StackLayout::New(StackOrientation::HORIZONTAL);
+    row0.SetRequestedWidth(MATCH_PARENT);
+    row0.SetRequestedHeight(CELL_SIZE);
+    row0.AddChildren({mViews[0], mViews[1]});
 
-    auto row1 = StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(CELL_SIZE)
-      .Children({mViews[2], mViews[3]});
+    auto row1 = StackLayout::New(StackOrientation::HORIZONTAL);
+    row1.SetRequestedWidth(MATCH_PARENT);
+    row1.SetRequestedHeight(CELL_SIZE);
+    row1.AddChildren({mViews[2], mViews[3]});
 
-    contentArea.Add(
-      StackLayout::New(StackOrientation::VERTICAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetBackgroundColor(UiColor(COLOR_BG))
-        .SetPadding(Extents(GAP, GAP, GAP, GAP))
-        .Children({mStatusLabel, row0, row1}));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetBackgroundColor(UiColor(COLOR_BG));
+    root.SetPadding(Extents(GAP, GAP, GAP, GAP));
+    root.AddChildren({mStatusLabel, row0, row1});
+    contentArea.Add(root);
 
     FocusManager::Get().RequestFocus(mViews[0]);
   }
@@ -107,17 +107,17 @@ public:
 private:
   View CreateFocusableView(uint32_t index)
   {
-    auto label = Label::New()
-      .SetText(Dali::String("View ") + Dali::String(std::to_string(index + 1).c_str()))
-      .SetFontSize(FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_TEXT))
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetBackgroundColor(UiColor(COLORS[index]))
-      .SetMargin(Extents(GAP / 2, GAP / 2, GAP / 2, GAP / 2))
-      .SetFocusable(true);
+    auto label = Label::New();
+    label.SetText(Dali::String("View ") + Dali::String(std::to_string(index + 1).c_str()));
+    label.SetFontSize(FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_TEXT));
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetLayoutParams(StackLayoutParams::New().SetWeight(1));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    label.SetBackgroundColor(UiColor(COLORS[index]));
+    label.SetMargin(Extents(GAP / 2, GAP / 2, GAP / 2, GAP / 2));
+    label.SetFocusable(true);
 
     label.FocusChangedSignal().Connect(this, [this, index](View view, bool focused)
     {

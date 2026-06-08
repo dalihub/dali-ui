@@ -45,23 +45,25 @@ public:
     mFadeInSpec = View::NewAnimationSpec()
       .Opacity(1.0f, 500_ms, AlphaFunction::EASE_IN_OUT);
 
-    window.Add(Layout::New()
-      .Children({
-        InteractiveView::New()
-          .SetBackgroundColor(UiColor(0xFF0000))
-          .SetRequestedWidth(200_spx)
-          .SetRequestedHeight(200_spx)
-          .ConnectClickedSignal(this, &AnimationExample::OnRedClicked)
-          .As(mRedBox),
-        InteractiveView::New()
-          .SetBackgroundColor(UiColor(0x0000FF))
-          .SetOpacity(0.3f)
-          .SetRequestedWidth(200_spx)
-          .SetRequestedHeight(200_spx)
-          .SetRequestedPositionX(220_spx)
-          .ConnectClickedSignal(this, &AnimationExample::OnBlueClicked)
-          .As(mBlueBox),
-      }));
+    InteractiveView redBox = InteractiveView::New();
+    redBox.SetBackgroundColor(UiColor(0xFF0000));
+    redBox.SetRequestedWidth(200_spx);
+    redBox.SetRequestedHeight(200_spx);
+    redBox.ConnectClickedSignal(this, &AnimationExample::OnRedClicked);
+    mRedBox = redBox;
+
+    InteractiveView blueBox = InteractiveView::New();
+    blueBox.SetBackgroundColor(UiColor(0x0000FF));
+    blueBox.SetOpacity(0.3f);
+    blueBox.SetRequestedWidth(200_spx);
+    blueBox.SetRequestedHeight(200_spx);
+    blueBox.SetRequestedPositionX(220_spx);
+    blueBox.ConnectClickedSignal(this, &AnimationExample::OnBlueClicked);
+    mBlueBox = blueBox;
+
+    Layout root = Layout::New();
+    root.AddChildren({mRedBox, mBlueBox});
+    window.Add(root);
   }
 
   void OnRedClicked(View view, InputEvent e)
@@ -93,7 +95,8 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  UiConfig config = UiConfig::New();
+  config.Apply();
   AnimationExample example(application);
   application.MainLoop();
   return 0;

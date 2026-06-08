@@ -39,13 +39,13 @@ public:
 
   void OnEnter(View contentArea) override
   {
-    contentArea.Add(
-      Label::New("Hello, World!")
-        .SetFontSize(40.0f)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-        .SetVerticalTextAlignment(Text::Alignment::CENTER));
+    Label label = Label::New("Hello, World!");
+    label.SetFontSize(40.0f);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    contentArea.Add(label);
   }
 };
 

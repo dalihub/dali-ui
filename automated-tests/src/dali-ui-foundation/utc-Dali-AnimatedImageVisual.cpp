@@ -256,17 +256,17 @@ int UtcDaliAnimatedImageVisualPlayState(void)
 
   AnimatedImageVisual visual;
 
-  View view = View::New()
-    .SetRequestedWidth(100.0f)
-    .SetRequestedHeight(100.0f)
-    .Visuals(
-      Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
-      {
-        AnimatedImageVisual::New()
-          .SetResourceUrlList({"image01.png", "image02.png"})
-          .Play()
-          .As(visual),
-      });
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.AddVisuals(
+    Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
+    {
+      AnimatedImageVisual::New()
+        .SetResourceUrlList({"image01.png", "image02.png"})
+        .Play()
+        .As(visual),
+    });
       
   application.GetScene().Add(view);
 

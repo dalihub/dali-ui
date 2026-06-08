@@ -19,14 +19,13 @@ public:
 
   void Initialize(LabelButton label)
   {
-    label
-      .SetRequestedWidth(220.0f)
-      .SetRequestedHeight(80.0f)
-      .SetFontSize(18.0f)
-      .SetTextColor(UiColor(0xFFFFFF))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetBackgroundColor(UiColor(0x1565C0));
+    label.SetRequestedWidth(220.0f);
+    label.SetRequestedHeight(80.0f);
+    label.SetFontSize(18.0f);
+    label.SetTextColor(UiColor(0xFFFFFF));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    label.SetBackgroundColor(UiColor(0x1565C0));
 
     label.TouchedSignal().Connect(this, &LabelButtonImpl::OnTouched);
   }

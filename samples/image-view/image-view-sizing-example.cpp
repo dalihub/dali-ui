@@ -72,19 +72,20 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        CreateSectionLabel("1. ImageLoadWithViewSize  (view size → image load size)"),
-        CreateSyncSizeContainer(),
-        CreateSyncSizeInfoLabel(),
-        CreateSyncSizeRow(),
-        CreateSectionLabel("2. OrientationCorrection  (exif-rotated.jpg: EXIF orientation=6, Rotate 90 CW)"),
-        CreateOrientationArea(),
-        CreateOrientationInfoLabel(),
-        CreateOrientationToggle(),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.AddChildren({
+      CreateSectionLabel("1. ImageLoadWithViewSize  (view size → image load size)"),
+      CreateSyncSizeContainer(),
+      CreateSyncSizeInfoLabel(),
+      CreateSyncSizeRow(),
+      CreateSectionLabel("2. OrientationCorrection  (exif-rotated.jpg: EXIF orientation=6, Rotate 90 CW)"),
+      CreateOrientationArea(),
+      CreateOrientationInfoLabel(),
+      CreateOrientationToggle(),
+    });
+    return contents;
   }
 
   // ── Section 1: ImageLoadWithViewSize ───────────────────────────────────────
@@ -97,74 +98,71 @@ private:
     //           dimensions → ResourceReady fires a 2nd time (texture size == view size).
     //           For explicit Reload() after view is laid out, mLastRequiredSize already
     //           holds the view size → ResourceReady fires 1 time only.
-    ImageView::New(RESOURCES_DIR "gallery-medium-49.jpg")
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-      .SetImageLoadWithViewSize(mImageLoadWithViewSize)
-      .As(mSyncImage);
+    mSyncImage = ImageView::New(RESOURCES_DIR "gallery-medium-49.jpg");
+    mSyncImage.SetRequestedWidth(MATCH_PARENT);
+    mSyncImage.SetRequestedHeight(MATCH_PARENT);
+    mSyncImage.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+    mSyncImage.SetImageLoadWithViewSize(mImageLoadWithViewSize);
 
     mSyncImage.ResourceReadySignal().Connect(this, &ImageViewSizingController::OnSyncImageResourceReady);
 
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(200.0f)
-      .SetBackgroundColor(UiColor(0x2A2A2A))
-      .Children({mSyncImage});
+    StackLayout container = StackLayout::New(StackOrientation::VERTICAL);
+    container.SetRequestedWidth(MATCH_PARENT);
+    container.SetRequestedHeight(200.0f);
+    container.SetBackgroundColor(UiColor(0x2A2A2A));
+    container.Add(mSyncImage);
+    return container;
   }
 
   View CreateSyncSizeInfoLabel()
   {
-    return Label::New(MakeSyncSizeInfoText())
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(32.0f)
-      .SetFontSize(13.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mSyncSizeInfoLabel);
+    mSyncSizeInfoLabel = Label::New(MakeSyncSizeInfoText());
+    mSyncSizeInfoLabel.SetRequestedWidth(MATCH_PARENT);
+    mSyncSizeInfoLabel.SetRequestedHeight(32.0f);
+    mSyncSizeInfoLabel.SetFontSize(13.0f);
+    mSyncSizeInfoLabel.SetTextColor(UiColor(0xCCCCCC));
+    mSyncSizeInfoLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mSyncSizeInfoLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mSyncSizeInfoLabel;
   }
 
   View CreateSyncSizeRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(56.0f)
-                        .SetPadding(Extents(4, 4, 4, 4));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(56.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
 
-    StackLayout toggleButton = StackLayout::New(StackOrientation::VERTICAL)
-                                 .SetRequestedWidth(WRAP_CONTENT)
-                                 .SetRequestedHeight(MATCH_PARENT)
-                                 .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                                 .SetBackgroundColor(UiColor(0x444444))
-                                 .Children({
-                                   Label::New("SYNC_SIZE: OFF")
-                                     .SetRequestedWidth(MATCH_PARENT)
-                                     .SetRequestedHeight(MATCH_PARENT)
-                                     .SetFontSize(13.0f)
-                                     .SetTextColor(UiColor(0xFFFFFF))
-                                     .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                                     .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                                     .As(mSyncSizeLabel),
-                                 });
-    toggleButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewSizingController::OnSyncSizeToggleClicked);
+    StackLayout toggleButton = StackLayout::New(StackOrientation::VERTICAL);
+    toggleButton.SetRequestedWidth(WRAP_CONTENT);
+    toggleButton.SetRequestedHeight(MATCH_PARENT);
+    toggleButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    toggleButton.SetBackgroundColor(UiColor(0x444444));
+    mSyncSizeLabel = Label::New("SYNC_SIZE: OFF");
+    mSyncSizeLabel.SetRequestedWidth(MATCH_PARENT);
+    mSyncSizeLabel.SetRequestedHeight(MATCH_PARENT);
+    mSyncSizeLabel.SetFontSize(13.0f);
+    mSyncSizeLabel.SetTextColor(UiColor(0xFFFFFF));
+    mSyncSizeLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mSyncSizeLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    toggleButton.Add(mSyncSizeLabel);
+    toggleButton.AsInteractive().ClickedSignal().Connect(this, &ImageViewSizingController::OnSyncSizeToggleClicked);
 
-    StackLayout reloadButton = StackLayout::New(StackOrientation::VERTICAL)
-                                 .SetRequestedWidth(WRAP_CONTENT)
-                                 .SetRequestedHeight(MATCH_PARENT)
-                                 .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                                 .SetBackgroundColor(UiColor(0x2E7D32))
-                                 .Children({
-                                   Label::New("RELOAD")
-                                     .SetRequestedWidth(MATCH_PARENT)
-                                     .SetRequestedHeight(MATCH_PARENT)
-                                     .SetFontSize(13.0f)
-                                     .SetTextColor(UiColor(0xFFFFFF))
-                                     .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                                     .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                                 });
-    reloadButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewSizingController::OnSyncReloadClicked);
+    StackLayout reloadButton = StackLayout::New(StackOrientation::VERTICAL);
+    reloadButton.SetRequestedWidth(WRAP_CONTENT);
+    reloadButton.SetRequestedHeight(MATCH_PARENT);
+    reloadButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    reloadButton.SetBackgroundColor(UiColor(0x2E7D32));
+    Label reloadLabel = Label::New("RELOAD");
+    reloadLabel.SetRequestedWidth(MATCH_PARENT);
+    reloadLabel.SetRequestedHeight(MATCH_PARENT);
+    reloadLabel.SetFontSize(13.0f);
+    reloadLabel.SetTextColor(UiColor(0xFFFFFF));
+    reloadLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    reloadLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    reloadButton.Add(reloadLabel);
+    reloadButton.AsInteractive().ClickedSignal().Connect(this, &ImageViewSizingController::OnSyncReloadClicked);
 
     row.Add(toggleButton);
     row.Add(reloadButton);
@@ -180,63 +178,62 @@ private:
     //
     // ON : EXIF is applied → displayed as landscape (640x360 aspect ratio)
     // OFF: EXIF ignored    → displayed as portrait  (360x640 aspect ratio)
-    ImageView::New(RESOURCES_DIR "exif-rotated.jpg")
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-      .SetOrientationCorrection(mOrientationCorrection)
-      .As(mOrientationImage);
+    mOrientationImage = ImageView::New(RESOURCES_DIR "exif-rotated.jpg");
+    mOrientationImage.SetRequestedWidth(MATCH_PARENT);
+    mOrientationImage.SetRequestedHeight(MATCH_PARENT);
+    mOrientationImage.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+    mOrientationImage.SetOrientationCorrection(mOrientationCorrection);
 
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(200.0f)
-      .SetBackgroundColor(UiColor(0x222222))
-      .Children({mOrientationImage});
+    StackLayout container = StackLayout::New(StackOrientation::VERTICAL);
+    container.SetRequestedWidth(MATCH_PARENT);
+    container.SetRequestedHeight(200.0f);
+    container.SetBackgroundColor(UiColor(0x222222));
+    container.Add(mOrientationImage);
+    return container;
   }
 
   View CreateOrientationInfoLabel()
   {
-    return Label::New(MakeOrientationInfoText())
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(32.0f)
-      .SetFontSize(13.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mOrientationInfoLabel);
+    mOrientationInfoLabel = Label::New(MakeOrientationInfoText());
+    mOrientationInfoLabel.SetRequestedWidth(MATCH_PARENT);
+    mOrientationInfoLabel.SetRequestedHeight(32.0f);
+    mOrientationInfoLabel.SetFontSize(13.0f);
+    mOrientationInfoLabel.SetTextColor(UiColor(0xCCCCCC));
+    mOrientationInfoLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mOrientationInfoLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mOrientationInfoLabel;
   }
 
   View CreateOrientationToggle()
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(MATCH_PARENT)
-                           .SetRequestedHeight(56.0f)
-                           .SetPadding(Extents(4, 4, 4, 4))
-                           .SetBackgroundColor(UiColor(0x555555))
-                           .Children({
-                             Label::New("ORIENTATION CORRECTION: ON")
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(13.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(mOrientationLabel),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(MATCH_PARENT);
+    button.SetRequestedHeight(56.0f);
+    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetBackgroundColor(UiColor(0x555555));
+    mOrientationLabel = Label::New("ORIENTATION CORRECTION: ON");
+    mOrientationLabel.SetRequestedWidth(MATCH_PARENT);
+    mOrientationLabel.SetRequestedHeight(MATCH_PARENT);
+    mOrientationLabel.SetFontSize(13.0f);
+    mOrientationLabel.SetTextColor(UiColor(0xFFFFFF));
+    mOrientationLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mOrientationLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(mOrientationLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewSizingController::OnOrientationToggleClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageViewSizingController::OnOrientationToggleClicked);
     return button;
   }
 
   View CreateSectionLabel(const char* text)
   {
-    return Label::New(text)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(28.0f)
-      .SetFontSize(11.0f)
-      .SetTextColor(UiColor(0x888888))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(28.0f);
+    label.SetFontSize(11.0f);
+    label.SetTextColor(UiColor(0x888888));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return label;
   }
 
   // ── Callbacks ───────────────────────────────────────────────────────────

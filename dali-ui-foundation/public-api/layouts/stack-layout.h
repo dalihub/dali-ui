@@ -16,10 +16,6 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 
@@ -27,14 +23,11 @@ namespace Dali
 {
 namespace Ui
 {
-
-// Forward declarations
 namespace Integration
 {
 class StackLayoutImpl;
 }
 
-#include "stack-layout.autogen.h"
 /**
  * @brief StackLayout arranges its children in a single row or column.
  *
@@ -120,14 +113,12 @@ public:
   static StackLayout DownCast(BaseHandle handle);
 
 public: // API
-  // @CHAIN_START(StackLayout, Layout)
-
   /**
    * @brief Sets the orientation of the stack layout.
    *
    * @param[in] orientation The orientation to set
    */
-  StackLayout& SetOrientation(StackOrientation orientation);
+  void SetOrientation(StackOrientation orientation);
 
   /**
    * @brief Gets the orientation of the stack layout.
@@ -141,7 +132,7 @@ public: // API
    *
    * @param[in] spacing The spacing to set (in pixels)
    */
-  StackLayout& SetSpacing(float spacing);
+  void SetSpacing(float spacing);
 
   /**
    * @brief Gets the spacing between children in the stack.
@@ -149,8 +140,6 @@ public: // API
    * @return The current spacing
    */
   float GetSpacing() const;
-
-  // @CHAIN_END
 
 public: // Not intended for application developers
   /// @cond internal
@@ -170,7 +159,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_LAYOUT_METHODS(StackLayout)
 };
 
 } // namespace Ui

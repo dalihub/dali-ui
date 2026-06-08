@@ -43,29 +43,29 @@ public:
     window.SetBackgroundColor(Color::WHITE);
     window.KeyEventSignal().Connect(this, &ColorControlsExample::OnKeyEvent);
 
-    window.Add(Layout::New() // Parent
-      .SetBackgroundColor(UiColor::BACKGROUND)
-      .SetRequestedWidth(200_spx)
-      .SetRequestedHeight(200_spx)
-      .Children({
-        View::New() // Red child
-          .SetBackgroundColor(UiColor::PRIMARY)
-          .SetRequestedWidth(100_spx)
-          .SetRequestedHeight(100_spx)
-          .AsInteractive([this](InteractiveTrait& trait) {
-            trait.ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool {
-              mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
-              return true;
-            });
-          }),
-        View::New() // Blue child
-          .SetBackgroundColor(UiColor("ThemeColor2"))
-          .SetRequestedWidth(100_spx)
-          .SetRequestedHeight(100_spx)
-          .SetRequestedPositionX(100_spx)
-          .SetRequestedPositionY(100_spx)
-          .As(mSecondChild),
-      }));
+    Layout parent = Layout::New(); // Parent
+    parent.SetBackgroundColor(UiColor::BACKGROUND);
+    parent.SetRequestedWidth(200_spx);
+    parent.SetRequestedHeight(200_spx);
+
+    View redChild = View::New(); // Red child
+    redChild.SetBackgroundColor(UiColor::PRIMARY);
+    redChild.SetRequestedWidth(100_spx);
+    redChild.SetRequestedHeight(100_spx);
+    redChild.AsInteractive().ClickedSignal().Connect(this, [this](View view, InputEvent event) -> bool {
+      mSecondChild.SetBackgroundColor(UiColor("ThemeColor1"));
+      return true;
+    });
+
+    mSecondChild = View::New(); // Blue child
+    mSecondChild.SetBackgroundColor(UiColor("ThemeColor2"));
+    mSecondChild.SetRequestedWidth(100_spx);
+    mSecondChild.SetRequestedHeight(100_spx);
+    mSecondChild.SetRequestedPositionX(100_spx);
+    mSecondChild.SetRequestedPositionY(100_spx);
+
+    parent.AddChildren({redChild, mSecondChild});
+    window.Add(parent);
   }
 
   void OnKeyEvent(Window window, KeyEvent event)

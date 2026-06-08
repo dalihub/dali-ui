@@ -14,13 +14,9 @@
  * limitations under the License.
  *
  */
-
-// EXTERNAL INCLUDES
-#include <dali/devel-api/object/type-registry.h>
-
-// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/public-api/input-editor.h>
+#include <dali/devel-api/object/type-registry.h>
 
 namespace Dali
 {
@@ -55,8 +51,6 @@ InputEditor InputEditor::New()
   Integration::InputEditorImplPtr impl = Integration::InputEditorImpl::New();
 
   InputEditor inputEditor = InputEditor(*impl);
-
-  // Second-phase initialization
   impl->Initialize();
   return inputEditor;
 }
@@ -106,14 +100,9 @@ InputEditor::InputEditor(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::InputEditorImpl>(internal);
 }
 
-// =============================================================================
-// Properties
-// =============================================================================
-
-InputEditor& InputEditor::SetText(const Dali::String& text)
+void InputEditor::SetText(const Dali::String& text)
 {
   GetImpl(*this).SetText(text);
-  return *this;
 }
 
 Dali::String InputEditor::GetText() const
@@ -121,10 +110,9 @@ Dali::String InputEditor::GetText() const
   return GetImpl(*this).GetText();
 }
 
-InputEditor& InputEditor::SetFontFamily(const Dali::String& fontFamily)
+void InputEditor::SetFontFamily(const Dali::String& fontFamily)
 {
   GetImpl(*this).SetFontFamily(fontFamily);
-  return *this;
 }
 
 Dali::String InputEditor::GetFontFamily() const
@@ -132,10 +120,9 @@ Dali::String InputEditor::GetFontFamily() const
   return GetImpl(*this).GetFontFamily();
 }
 
-InputEditor& InputEditor::SetFontSize(float fontSize)
+void InputEditor::SetFontSize(float fontSize)
 {
   GetImpl(*this).SetFontSize(fontSize);
-  return *this;
 }
 
 float InputEditor::GetFontSize() const
@@ -143,10 +130,9 @@ float InputEditor::GetFontSize() const
   return GetImpl(*this).GetFontSize();
 }
 
-InputEditor& InputEditor::SetTextColor(const UiColor& color)
+void InputEditor::SetTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTextColor(color);
-  return *this;
 }
 
 UiColor InputEditor::GetTextColor()
@@ -154,10 +140,9 @@ UiColor InputEditor::GetTextColor()
   return GetImpl(*this).GetTextColor();
 }
 
-InputEditor& InputEditor::SetLineWrapMode(Text::LineWrapMode mode)
+void InputEditor::SetLineWrapMode(Text::LineWrapMode mode)
 {
   GetImpl(*this).SetLineWrapMode(mode);
-  return *this;
 }
 
 Text::LineWrapMode InputEditor::GetLineWrapMode() const
@@ -165,10 +150,9 @@ Text::LineWrapMode InputEditor::GetLineWrapMode() const
   return GetImpl(*this).GetLineWrapMode();
 }
 
-InputEditor& InputEditor::SetHorizontalTextAlignment(Text::Alignment alignment)
+void InputEditor::SetHorizontalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetHorizontalTextAlignment(alignment);
-  return *this;
 }
 
 Text::Alignment InputEditor::GetHorizontalTextAlignment() const
@@ -176,10 +160,9 @@ Text::Alignment InputEditor::GetHorizontalTextAlignment() const
   return GetImpl(*this).GetHorizontalTextAlignment();
 }
 
-InputEditor& InputEditor::SetVerticalTextAlignment(Text::Alignment alignment)
+void InputEditor::SetVerticalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetVerticalTextAlignment(alignment);
-  return *this;
 }
 
 Text::Alignment InputEditor::GetVerticalTextAlignment() const
@@ -187,10 +170,9 @@ Text::Alignment InputEditor::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
-InputEditor& InputEditor::SetOverflowMode(Text::OverflowMode mode)
+void InputEditor::SetOverflowMode(Text::OverflowMode mode)
 {
   GetImpl(*this).SetOverflowMode(mode);
-  return *this;
 }
 
 Text::OverflowMode InputEditor::GetOverflowMode() const
@@ -198,10 +180,9 @@ Text::OverflowMode InputEditor::GetOverflowMode() const
   return GetImpl(*this).GetOverflowMode();
 }
 
-InputEditor& InputEditor::SetLineHeight(float lineHeight)
+void InputEditor::SetLineHeight(float lineHeight)
 {
   GetImpl(*this).SetLineHeight(lineHeight);
-  return *this;
 }
 
 float InputEditor::GetLineHeight() const
@@ -209,10 +190,9 @@ float InputEditor::GetLineHeight() const
   return GetImpl(*this).GetLineHeight();
 }
 
-InputEditor& InputEditor::SetLineHeightMode(Text::LineHeightMode mode)
+void InputEditor::SetLineHeightMode(Text::LineHeightMode mode)
 {
   GetImpl(*this).SetLineHeightMode(mode);
-  return *this;
 }
 
 Text::LineHeightMode InputEditor::GetLineHeightMode() const
@@ -220,10 +200,9 @@ Text::LineHeightMode InputEditor::GetLineHeightMode() const
   return GetImpl(*this).GetLineHeightMode();
 }
 
-InputEditor& InputEditor::SetPlaceholder(const Dali::String& text)
+void InputEditor::SetPlaceholder(const Dali::String& text)
 {
   GetImpl(*this).SetPlaceholder(text);
-  return *this;
 }
 
 Dali::String InputEditor::GetPlaceholder() const
@@ -231,10 +210,9 @@ Dali::String InputEditor::GetPlaceholder() const
   return GetImpl(*this).GetPlaceholder();
 }
 
-InputEditor& InputEditor::SetPlaceholderColor(const UiColor& color)
+void InputEditor::SetPlaceholderColor(const UiColor& color)
 {
   GetImpl(*this).SetPlaceholderColor(color);
-  return *this;
 }
 
 UiColor InputEditor::GetPlaceholderColor()
@@ -242,10 +220,9 @@ UiColor InputEditor::GetPlaceholderColor()
   return GetImpl(*this).GetPlaceholderColor();
 }
 
-InputEditor& InputEditor::SetShowPlaceholderOnFocus(bool enabled)
+void InputEditor::SetShowPlaceholderOnFocus(bool enabled)
 {
   GetImpl(*this).SetShowPlaceholderOnFocus(enabled);
-  return *this;
 }
 
 bool InputEditor::IsPlaceholderShownOnFocus() const
@@ -253,10 +230,9 @@ bool InputEditor::IsPlaceholderShownOnFocus() const
   return GetImpl(*this).IsPlaceholderShownOnFocus();
 }
 
-InputEditor& InputEditor::SetCursorWidth(int width)
+void InputEditor::SetCursorWidth(int width)
 {
   GetImpl(*this).SetCursorWidth(width);
-  return *this;
 }
 
 int InputEditor::GetCursorWidth() const
@@ -264,10 +240,9 @@ int InputEditor::GetCursorWidth() const
   return GetImpl(*this).GetCursorWidth();
 }
 
-InputEditor& InputEditor::SetCursorColor(const UiColor& color)
+void InputEditor::SetCursorColor(const UiColor& color)
 {
   GetImpl(*this).SetCursorColor(color);
-  return *this;
 }
 
 UiColor InputEditor::GetCursorColor()
@@ -275,10 +250,9 @@ UiColor InputEditor::GetCursorColor()
   return GetImpl(*this).GetCursorColor();
 }
 
-InputEditor& InputEditor::SetCursorBlinkEnabled(bool enabled)
+void InputEditor::SetCursorBlinkEnabled(bool enabled)
 {
   GetImpl(*this).SetCursorBlinkEnabled(enabled);
-  return *this;
 }
 
 bool InputEditor::IsCursorBlinkEnabled() const
@@ -286,10 +260,9 @@ bool InputEditor::IsCursorBlinkEnabled() const
   return GetImpl(*this).IsCursorBlinkEnabled();
 }
 
-InputEditor& InputEditor::SetCursorBlinkInterval(float interval)
+void InputEditor::SetCursorBlinkInterval(float interval)
 {
   GetImpl(*this).SetCursorBlinkInterval(interval);
-  return *this;
 }
 
 float InputEditor::GetCursorBlinkInterval() const
@@ -297,10 +270,9 @@ float InputEditor::GetCursorBlinkInterval() const
   return GetImpl(*this).GetCursorBlinkInterval();
 }
 
-InputEditor& InputEditor::SetCursorPosition(uint32_t position)
+void InputEditor::SetCursorPosition(uint32_t position)
 {
   GetImpl(*this).SetCursorPosition(position);
-  return *this;
 }
 
 uint32_t InputEditor::GetCursorPosition() const
@@ -308,10 +280,9 @@ uint32_t InputEditor::GetCursorPosition() const
   return GetImpl(*this).GetCursorPosition();
 }
 
-InputEditor& InputEditor::SetSelectionEnabled(bool enabled)
+void InputEditor::SetSelectionEnabled(bool enabled)
 {
   GetImpl(*this).SetSelectionEnabled(enabled);
-  return *this;
 }
 
 bool InputEditor::IsSelectionEnabled() const
@@ -319,10 +290,9 @@ bool InputEditor::IsSelectionEnabled() const
   return GetImpl(*this).IsSelectionEnabled();
 }
 
-InputEditor& InputEditor::SetSelectionColor(const UiColor& color)
+void InputEditor::SetSelectionColor(const UiColor& color)
 {
   GetImpl(*this).SetSelectionColor(color);
-  return *this;
 }
 
 UiColor InputEditor::GetSelectionColor()
@@ -330,10 +300,9 @@ UiColor InputEditor::GetSelectionColor()
   return GetImpl(*this).GetSelectionColor();
 }
 
-InputEditor& InputEditor::SetTextHandleEnabled(bool enabled)
+void InputEditor::SetTextHandleEnabled(bool enabled)
 {
   GetImpl(*this).SetTextHandleEnabled(enabled);
-  return *this;
 }
 
 bool InputEditor::IsTextHandleEnabled() const
@@ -341,10 +310,9 @@ bool InputEditor::IsTextHandleEnabled() const
   return GetImpl(*this).IsTextHandleEnabled();
 }
 
-InputEditor& InputEditor::SetTextHandleColor(const UiColor& color)
+void InputEditor::SetTextHandleColor(const UiColor& color)
 {
   GetImpl(*this).SetTextHandleColor(color);
-  return *this;
 }
 
 UiColor InputEditor::GetTextHandleColor() const
@@ -352,10 +320,9 @@ UiColor InputEditor::GetTextHandleColor() const
   return GetImpl(*this).GetTextHandleColor();
 }
 
-InputEditor& InputEditor::SetCursorHandleImage(const Dali::String& image)
+void InputEditor::SetCursorHandleImage(const Dali::String& image)
 {
   GetImpl(*this).SetCursorHandleImage(image);
-  return *this;
 }
 
 Dali::String InputEditor::GetCursorHandleImage() const
@@ -363,10 +330,9 @@ Dali::String InputEditor::GetCursorHandleImage() const
   return GetImpl(*this).GetCursorHandleImage();
 }
 
-InputEditor& InputEditor::SetCursorHandlePressedImage(const Dali::String& image)
+void InputEditor::SetCursorHandlePressedImage(const Dali::String& image)
 {
   GetImpl(*this).SetCursorHandlePressedImage(image);
-  return *this;
 }
 
 Dali::String InputEditor::GetCursorHandlePressedImage() const
@@ -374,10 +340,9 @@ Dali::String InputEditor::GetCursorHandlePressedImage() const
   return GetImpl(*this).GetCursorHandlePressedImage();
 }
 
-InputEditor& InputEditor::SetSelectionHandleImageLeft(const Dali::String& image)
+void InputEditor::SetSelectionHandleImageLeft(const Dali::String& image)
 {
   GetImpl(*this).SetSelectionHandleImageLeft(image);
-  return *this;
 }
 
 Dali::String InputEditor::GetSelectionHandleImageLeft() const
@@ -385,10 +350,9 @@ Dali::String InputEditor::GetSelectionHandleImageLeft() const
   return GetImpl(*this).GetSelectionHandleImageLeft();
 }
 
-InputEditor& InputEditor::SetSelectionHandleImageRight(const Dali::String& image)
+void InputEditor::SetSelectionHandleImageRight(const Dali::String& image)
 {
   GetImpl(*this).SetSelectionHandleImageRight(image);
-  return *this;
 }
 
 Dali::String InputEditor::GetSelectionHandleImageRight() const
@@ -396,10 +360,9 @@ Dali::String InputEditor::GetSelectionHandleImageRight() const
   return GetImpl(*this).GetSelectionHandleImageRight();
 }
 
-InputEditor& InputEditor::SetSelectionHandlePressedImageLeft(const Dali::String& image)
+void InputEditor::SetSelectionHandlePressedImageLeft(const Dali::String& image)
 {
   GetImpl(*this).SetSelectionHandlePressedImageLeft(image);
-  return *this;
 }
 
 Dali::String InputEditor::GetSelectionHandlePressedImageLeft() const
@@ -407,10 +370,9 @@ Dali::String InputEditor::GetSelectionHandlePressedImageLeft() const
   return GetImpl(*this).GetSelectionHandlePressedImageLeft();
 }
 
-InputEditor& InputEditor::SetSelectionHandlePressedImageRight(const Dali::String& image)
+void InputEditor::SetSelectionHandlePressedImageRight(const Dali::String& image)
 {
   GetImpl(*this).SetSelectionHandlePressedImageRight(image);
-  return *this;
 }
 
 Dali::String InputEditor::GetSelectionHandlePressedImageRight() const
@@ -418,10 +380,9 @@ Dali::String InputEditor::GetSelectionHandlePressedImageRight() const
   return GetImpl(*this).GetSelectionHandlePressedImageRight();
 }
 
-InputEditor& InputEditor::SetMaximumLength(int length)
+void InputEditor::SetMaximumLength(int length)
 {
   GetImpl(*this).SetMaximumLength(length);
-  return *this;
 }
 
 int InputEditor::GetMaximumLength() const
@@ -429,22 +390,19 @@ int InputEditor::GetMaximumLength() const
   return GetImpl(*this).GetMaximumLength();
 }
 
-InputEditor& InputEditor::SetInputFilter(const Text::InputFilter& inputFilter)
+void InputEditor::SetInputFilter(const Text::InputFilter& inputFilter)
 {
   GetImpl(*this).SetInputFilter(inputFilter);
-  return *this;
 }
 
-InputEditor& InputEditor::ClearInputFilter()
+void InputEditor::ClearInputFilter()
 {
   GetImpl(*this).ClearInputFilter();
-  return *this;
 }
 
-InputEditor& InputEditor::SetEditable(bool editable)
+void InputEditor::SetEditable(bool editable)
 {
   GetImpl(*this).SetEditable(editable);
-  return *this;
 }
 
 bool InputEditor::IsEditable() const
@@ -452,10 +410,9 @@ bool InputEditor::IsEditable() const
   return GetImpl(*this).IsEditable();
 }
 
-InputEditor& InputEditor::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+void InputEditor::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 {
   GetImpl(*this).SetLayoutDirectionMode(mode);
-  return *this;
 }
 
 Text::LayoutDirectionMode InputEditor::GetLayoutDirectionMode() const
@@ -463,10 +420,9 @@ Text::LayoutDirectionMode InputEditor::GetLayoutDirectionMode() const
   return GetImpl(*this).GetLayoutDirectionMode();
 }
 
-InputEditor& InputEditor::SetMarkupEnabled(bool enabled)
+void InputEditor::SetMarkupEnabled(bool enabled)
 {
   GetImpl(*this).SetMarkupEnabled(enabled);
-  return *this;
 }
 
 bool InputEditor::IsMarkupEnabled() const
@@ -474,10 +430,9 @@ bool InputEditor::IsMarkupEnabled() const
   return GetImpl(*this).IsMarkupEnabled();
 }
 
-InputEditor& InputEditor::SetFontWeight(Text::FontWeight weight)
+void InputEditor::SetFontWeight(Text::FontWeight weight)
 {
   GetImpl(*this).SetFontWeight(weight);
-  return *this;
 }
 
 Text::FontWeight InputEditor::GetFontWeight() const
@@ -485,10 +440,9 @@ Text::FontWeight InputEditor::GetFontWeight() const
   return GetImpl(*this).GetFontWeight();
 }
 
-InputEditor& InputEditor::SetFontWidth(Text::FontWidth width)
+void InputEditor::SetFontWidth(Text::FontWidth width)
 {
   GetImpl(*this).SetFontWidth(width);
-  return *this;
 }
 
 Text::FontWidth InputEditor::GetFontWidth() const
@@ -496,10 +450,9 @@ Text::FontWidth InputEditor::GetFontWidth() const
   return GetImpl(*this).GetFontWidth();
 }
 
-InputEditor& InputEditor::SetFontSlant(Text::FontSlant slant)
+void InputEditor::SetFontSlant(Text::FontSlant slant)
 {
   GetImpl(*this).SetFontSlant(slant);
-  return *this;
 }
 
 Text::FontSlant InputEditor::GetFontSlant() const
@@ -507,10 +460,9 @@ Text::FontSlant InputEditor::GetFontSlant() const
   return GetImpl(*this).GetFontSlant();
 }
 
-InputEditor& InputEditor::SetTextBackgroundColor(const UiColor& color)
+void InputEditor::SetTextBackgroundColor(const UiColor& color)
 {
   GetImpl(*this).SetTextBackgroundColor(color);
-  return *this;
 }
 
 UiColor InputEditor::GetTextBackgroundColor() const
@@ -523,10 +475,9 @@ void InputEditor::ClearTextBackgroundColor()
   GetImpl(*this).ClearTextBackgroundColor();
 }
 
-InputEditor& InputEditor::SetUnderline(const Text::Underline& underline)
+void InputEditor::SetUnderline(const Text::Underline& underline)
 {
   GetImpl(*this).SetUnderline(underline);
-  return *this;
 }
 
 void InputEditor::ClearUnderline()
@@ -534,10 +485,9 @@ void InputEditor::ClearUnderline()
   return GetImpl(*this).ClearUnderline();
 }
 
-InputEditor& InputEditor::SetShadow(const Text::Shadow& shadow)
+void InputEditor::SetShadow(const Text::Shadow& shadow)
 {
   GetImpl(*this).SetShadow(shadow);
-  return *this;
 }
 
 void InputEditor::ClearShadow()
@@ -545,10 +495,9 @@ void InputEditor::ClearShadow()
   return GetImpl(*this).ClearShadow();
 }
 
-InputEditor& InputEditor::SetOutline(const Text::Outline& outline)
+void InputEditor::SetOutline(const Text::Outline& outline)
 {
   GetImpl(*this).SetOutline(outline);
-  return *this;
 }
 
 void InputEditor::ClearOutline()
@@ -556,10 +505,9 @@ void InputEditor::ClearOutline()
   return GetImpl(*this).ClearOutline();
 }
 
-InputEditor& InputEditor::SetLineThrough(const Text::LineThrough& lineThrough)
+void InputEditor::SetLineThrough(const Text::LineThrough& lineThrough)
 {
   GetImpl(*this).SetLineThrough(lineThrough);
-  return *this;
 }
 
 void InputEditor::ClearLineThrough()
@@ -567,10 +515,9 @@ void InputEditor::ClearLineThrough()
   return GetImpl(*this).ClearLineThrough();
 }
 
-InputEditor& InputEditor::SetFontSizeScale(float scale)
+void InputEditor::SetFontSizeScale(float scale)
 {
   GetImpl(*this).SetFontSizeScale(scale);
-  return *this;
 }
 
 float InputEditor::GetFontSizeScale() const
@@ -578,10 +525,9 @@ float InputEditor::GetFontSizeScale() const
   return GetImpl(*this).GetFontSizeScale();
 }
 
-InputEditor& InputEditor::SetMinimumFontSizeScale(float scale)
+void InputEditor::SetMinimumFontSizeScale(float scale)
 {
   GetImpl(*this).SetMinimumFontSizeScale(scale);
-  return *this;
 }
 
 float InputEditor::GetMinimumFontSizeScale() const
@@ -589,10 +535,9 @@ float InputEditor::GetMinimumFontSizeScale() const
   return GetImpl(*this).GetMinimumFontSizeScale();
 }
 
-InputEditor& InputEditor::SetMaximumFontSizeScale(float scale)
+void InputEditor::SetMaximumFontSizeScale(float scale)
 {
   GetImpl(*this).SetMaximumFontSizeScale(scale);
-  return *this;
 }
 
 float InputEditor::GetMaximumFontSizeScale() const
@@ -600,10 +545,9 @@ float InputEditor::GetMaximumFontSizeScale() const
   return GetImpl(*this).GetMaximumFontSizeScale();
 }
 
-InputEditor& InputEditor::SetSystemFontSizeScaleEnabled(bool enabled)
+void InputEditor::SetSystemFontSizeScaleEnabled(bool enabled)
 {
   GetImpl(*this).SetSystemFontSizeScaleEnabled(enabled);
-  return *this;
 }
 
 bool InputEditor::IsSystemFontSizeScaleEnabled() const
@@ -611,10 +555,9 @@ bool InputEditor::IsSystemFontSizeScaleEnabled() const
   return GetImpl(*this).IsSystemFontSizeScaleEnabled();
 }
 
-InputEditor& InputEditor::SetAutoGrowEnabled(bool enabled)
+void InputEditor::SetAutoGrowEnabled(bool enabled)
 {
   GetImpl(*this).SetAutoGrowEnabled(enabled);
-  return *this;
 }
 
 bool InputEditor::IsAutoGrowEnabled() const
@@ -622,10 +565,9 @@ bool InputEditor::IsAutoGrowEnabled() const
   return GetImpl(*this).IsAutoGrowEnabled();
 }
 
-InputEditor& InputEditor::SetTypingTextColor(const UiColor& color)
+void InputEditor::SetTypingTextColor(const UiColor& color)
 {
   GetImpl(*this).SetTypingTextColor(color);
-  return *this;
 }
 
 UiColor InputEditor::GetTypingTextColor() const
@@ -633,10 +575,9 @@ UiColor InputEditor::GetTypingTextColor() const
   return GetImpl(*this).GetTypingTextColor();
 }
 
-InputEditor& InputEditor::SetTypingFontFamily(const Dali::String& fontFamily)
+void InputEditor::SetTypingFontFamily(const Dali::String& fontFamily)
 {
   GetImpl(*this).SetTypingFontFamily(fontFamily);
-  return *this;
 }
 
 Dali::String InputEditor::GetTypingFontFamily() const
@@ -644,10 +585,9 @@ Dali::String InputEditor::GetTypingFontFamily() const
   return GetImpl(*this).GetTypingFontFamily();
 }
 
-InputEditor& InputEditor::SetTypingFontSize(float fontSize)
+void InputEditor::SetTypingFontSize(float fontSize)
 {
   GetImpl(*this).SetTypingFontSize(fontSize);
-  return *this;
 }
 
 float InputEditor::GetTypingFontSize() const
@@ -655,10 +595,9 @@ float InputEditor::GetTypingFontSize() const
   return GetImpl(*this).GetTypingFontSize();
 }
 
-InputEditor& InputEditor::SetTypingFontWeight(Text::FontWeight weight)
+void InputEditor::SetTypingFontWeight(Text::FontWeight weight)
 {
   GetImpl(*this).SetTypingFontWeight(weight);
-  return *this;
 }
 
 Text::FontWeight InputEditor::GetTypingFontWeight() const
@@ -666,10 +605,9 @@ Text::FontWeight InputEditor::GetTypingFontWeight() const
   return GetImpl(*this).GetTypingFontWeight();
 }
 
-InputEditor& InputEditor::SetTypingFontWidth(Text::FontWidth width)
+void InputEditor::SetTypingFontWidth(Text::FontWidth width)
 {
   GetImpl(*this).SetTypingFontWidth(width);
-  return *this;
 }
 
 Text::FontWidth InputEditor::GetTypingFontWidth() const
@@ -677,10 +615,9 @@ Text::FontWidth InputEditor::GetTypingFontWidth() const
   return GetImpl(*this).GetTypingFontWidth();
 }
 
-InputEditor& InputEditor::SetTypingFontSlant(Text::FontSlant slant)
+void InputEditor::SetTypingFontSlant(Text::FontSlant slant)
 {
   GetImpl(*this).SetTypingFontSlant(slant);
-  return *this;
 }
 
 Text::FontSlant InputEditor::GetTypingFontSlant() const
@@ -688,16 +625,14 @@ Text::FontSlant InputEditor::GetTypingFontSlant() const
   return GetImpl(*this).GetTypingFontSlant();
 }
 
-InputEditor& InputEditor::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+void InputEditor::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
 {
   GetImpl(*this).SetFontVariation(axes);
-  return *this;
 }
 
-InputEditor& InputEditor::SetFontVariation(const Dali::String& settings)
+void InputEditor::SetFontVariation(const Dali::String& settings)
 {
   GetImpl(*this).SetFontVariation(settings);
-  return *this;
 }
 
 Dali::Vector<Text::FontVariationAxis> InputEditor::GetFontVariation() const
@@ -705,22 +640,19 @@ Dali::Vector<Text::FontVariationAxis> InputEditor::GetFontVariation() const
   return GetImpl(*this).GetFontVariation();
 }
 
-InputEditor& InputEditor::ClearFontVariation()
+void InputEditor::ClearFontVariation()
 {
   GetImpl(*this).ClearFontVariation();
-  return *this;
 }
 
-InputEditor& InputEditor::SetTranslatablePlaceholder(StringView resourceId)
+void InputEditor::SetTranslatablePlaceholder(StringView resourceId)
 {
   GetImpl(*this).SetTranslatablePlaceholder(resourceId);
-  return *this;
 }
 
-InputEditor& InputEditor::SetTranslatablePlaceholder(StringView resourceId, StringView domain)
+void InputEditor::SetTranslatablePlaceholder(StringView resourceId, StringView domain)
 {
   GetImpl(*this).SetTranslatablePlaceholder(resourceId, domain);
-  return *this;
 }
 
 Dali::String InputEditor::GetTranslatablePlaceholder() const
@@ -732,10 +664,6 @@ void InputEditor::ClearTranslatablePlaceholder()
 {
   GetImpl(*this).ClearTranslatablePlaceholder();
 }
-
-// =============================================================================
-// Read Only
-// =============================================================================
 int InputEditor::GetLineCount()
 {
   return GetImpl(*this).GetLineCount();
@@ -765,31 +693,20 @@ uint32_t InputEditor::GetSelectedTextEnd() const
 {
   return GetImpl(*this).GetSelectedTextEnd();
 }
-
-// =============================================================================
-// Method
-// =============================================================================
-InputEditor& InputEditor::SelectText(uint32_t startIndex, uint32_t endIndex)
+void InputEditor::SelectText(uint32_t startIndex, uint32_t endIndex)
 {
   GetImpl(*this).SelectText(startIndex, endIndex);
-  return *this;
 }
 
-InputEditor& InputEditor::SelectWholeText()
+void InputEditor::SelectWholeText()
 {
   GetImpl(*this).SelectWholeText();
-  return *this;
 }
 
-InputEditor& InputEditor::ClearSelection()
+void InputEditor::ClearSelection()
 {
   GetImpl(*this).ClearSelection();
-  return *this;
 }
-
-// =============================================================================
-// Signals
-// =============================================================================
 Signal<void(View)>& InputEditor::TextChangedSignal()
 {
   return GetImpl(*this).TextChangedSignal();

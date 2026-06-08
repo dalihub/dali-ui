@@ -72,9 +72,9 @@ private:
 
     mTestCases = ManualTest::Registry::Get().CreateAll();
 
-    mRootContainer = StackLayout::New(StackOrientation::VERTICAL)
-                       .SetRequestedWidth(MATCH_PARENT)
-                       .SetRequestedHeight(MATCH_PARENT);
+    mRootContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mRootContainer.SetRequestedWidth(MATCH_PARENT);
+    mRootContainer.SetRequestedHeight(MATCH_PARENT);
     window.Add(mRootContainer);
 
     ShowListScreen();
@@ -93,19 +93,19 @@ private:
     mRootContainer.Add(MakeHeader("Manual Tests"));
 
     // ── TC list ─────────────────────────────────────────────────────────────
-    StackLayout listContent = StackLayout::New(StackOrientation::VERTICAL)
-                                .SetRequestedWidth(MATCH_PARENT)
-                                .SetRequestedHeight(WRAP_CONTENT);
+    StackLayout listContent = StackLayout::New(StackOrientation::VERTICAL);
+    listContent.SetRequestedWidth(MATCH_PARENT);
+    listContent.SetRequestedHeight(WRAP_CONTENT);
 
     if(mTestCases.empty())
     {
-      listContent.Add(
-        Label::New("No test cases registered.")
-          .SetTextColor(UiColor(COLOR_ITEM_DESC))
-          .SetFontSize(FONT_TC_NAME)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(WRAP_CONTENT)
-          .SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2)));
+      Label emptyLabel = Label::New("No test cases registered.");
+      emptyLabel.SetTextColor(UiColor(COLOR_ITEM_DESC));
+      emptyLabel.SetFontSize(FONT_TC_NAME);
+      emptyLabel.SetRequestedWidth(MATCH_PARENT);
+      emptyLabel.SetRequestedHeight(WRAP_CONTENT);
+      emptyLabel.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
+      listContent.Add(emptyLabel);
     }
 
     for(std::size_t i = 0; i < mTestCases.size(); ++i)
@@ -114,60 +114,71 @@ private:
       listContent.Add(MakeSeparator());
     }
 
-    mRootContainer.Add(
-      ScrollView::New()
-        .SetScrollDirection(ScrollDirection::Vertical)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-        .SetContent(listContent));
+    ScrollView scrollView = ScrollView::New();
+    scrollView.SetScrollDirection(ScrollDirection::Vertical);
+    scrollView.SetRequestedWidth(MATCH_PARENT);
+    scrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    scrollView.SetContent(listContent);
+    mRootContainer.Add(scrollView);
   }
 
   View MakeHeader(const Dali::String& title)
   {
-    return StackLayout::New(StackOrientation::HORIZONTAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(HEADER_HEIGHT)
-      .SetBackgroundColor(UiColor(COLOR_HEADER_BG))
-      .SetPadding(Extents(PADDING_H, PADDING_H, 0, 0))
-      .Children({
-        Label::New(title)
-          .SetTextColor(UiColor(COLOR_HEADER_TEXT))
-          .SetFontSize(FONT_HEADER)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-      });
+    Label titleLabel = Label::New(title);
+    titleLabel.SetTextColor(UiColor(COLOR_HEADER_TEXT));
+    titleLabel.SetFontSize(FONT_HEADER);
+    titleLabel.SetRequestedWidth(MATCH_PARENT);
+    titleLabel.SetRequestedHeight(MATCH_PARENT);
+    titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    StackLayout header = StackLayout::New(StackOrientation::HORIZONTAL);
+    header.SetRequestedWidth(MATCH_PARENT);
+    header.SetRequestedHeight(HEADER_HEIGHT);
+    header.SetBackgroundColor(UiColor(COLOR_HEADER_BG));
+    header.SetPadding(Extents(PADDING_H, PADDING_H, 0, 0));
+    header.AddChildren({titleLabel});
+    return header;
   }
 
   View MakeListItem(std::size_t index)
   {
     const auto& tc = mTestCases[index];
 
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetBackgroundColor(UiColor(COLOR_ITEM_BG))
-      .SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V, PADDING_V))
-      .SetFocusable(true)
-      .AsInteractive([this, index](InteractiveTrait& trait)
+    Label nameLabel = Label::New(tc->GetName());
+    nameLabel.SetTextColor(UiColor(COLOR_ITEM_NAME));
+    nameLabel.SetFontSize(FONT_TC_NAME);
+    nameLabel.SetRequestedWidth(MATCH_PARENT);
+    nameLabel.SetRequestedHeight(WRAP_CONTENT);
+
+    Label descriptionLabel = Label::New(tc->GetDescription());
+    descriptionLabel.SetTextColor(UiColor(COLOR_ITEM_DESC));
+    descriptionLabel.SetFontSize(FONT_TC_DESC);
+    descriptionLabel.SetRequestedWidth(MATCH_PARENT);
+    descriptionLabel.SetRequestedHeight(WRAP_CONTENT);
+
+    StackLayout item = StackLayout::New(StackOrientation::VERTICAL);
+    item.SetRequestedWidth(MATCH_PARENT);
+    item.SetRequestedHeight(WRAP_CONTENT);
+    item.SetBackgroundColor(UiColor(COLOR_ITEM_BG));
+    item.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V, PADDING_V));
+    item.SetFocusable(true);
+    InteractiveTrait interactive = item.AsInteractive();
+    interactive.ClickedSignal().Connect(this, [this, index](View, InputEvent) -> bool
     {
-      trait.ClickedSignal().Connect(this, [this, index](View, InputEvent) -> bool
-      {
-        EnterTestCase(index);
-        return true;
-      });
-    }).Children({
-        Label::New(tc->GetName()).SetTextColor(UiColor(COLOR_ITEM_NAME)).SetFontSize(FONT_TC_NAME).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT),
-        Label::New(tc->GetDescription()).SetTextColor(UiColor(COLOR_ITEM_DESC)).SetFontSize(FONT_TC_DESC).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(WRAP_CONTENT),
-      });
+      EnterTestCase(index);
+      return true;
+    });
+    item.AddChildren({nameLabel, descriptionLabel});
+    return item;
   }
 
   View MakeSeparator()
   {
-    return View::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(SEPARATOR_H)
-      .SetBackgroundColor(UiColor(COLOR_SEPARATOR));
+    View separator = View::New();
+    separator.SetRequestedWidth(MATCH_PARENT);
+    separator.SetRequestedHeight(SEPARATOR_H);
+    separator.SetBackgroundColor(UiColor(COLOR_SEPARATOR));
+    return separator;
   }
 
   // -------------------------------------------------------------------------
@@ -185,35 +196,39 @@ private:
     mRootContainer.RemoveAllChildren();
 
     // ── Navigation header ───────────────────────────────────────────────────
-    mRootContainer.Add(
-      StackLayout::New(StackOrientation::HORIZONTAL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(HEADER_HEIGHT)
-        .SetBackgroundColor(UiColor(COLOR_HEADER_BG))
-        .Children({
-          Label::New("< Back")
-            .SetTextColor(UiColor(COLOR_HEADER_TEXT))
-            .SetFontSize(FONT_HEADER)
-            .SetRequestedWidth(WRAP_CONTENT)
-            .SetRequestedHeight(MATCH_PARENT)
-            .SetPadding(Extents(PADDING_H, PADDING_H * 2, 0, 0))
-            .SetVerticalTextAlignment(Text::Alignment::CENTER)
-            .SetFocusable(true)
-            .AsInteractive([this](InteractiveTrait& trait)
+    Label backLabel = Label::New("< Back");
+    backLabel.SetTextColor(UiColor(COLOR_HEADER_TEXT));
+    backLabel.SetFontSize(FONT_HEADER);
+    backLabel.SetRequestedWidth(WRAP_CONTENT);
+    backLabel.SetRequestedHeight(MATCH_PARENT);
+    backLabel.SetPadding(Extents(PADDING_H, PADDING_H * 2, 0, 0));
+    backLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    backLabel.SetFocusable(true);
+    InteractiveTrait backInteractive = backLabel.AsInteractive();
+    backInteractive.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
     {
-      trait.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
-      {
-        BackToList();
-        return true;
-      });
-    }),
-          Label::New(mActiveCase->GetName()).SetTextColor(UiColor(COLOR_HEADER_TEXT)).SetFontSize(FONT_HEADER).SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT).SetVerticalTextAlignment(Text::Alignment::CENTER),
-        }));
+      BackToList();
+      return true;
+    });
+
+    Label titleLabel = Label::New(mActiveCase->GetName());
+    titleLabel.SetTextColor(UiColor(COLOR_HEADER_TEXT));
+    titleLabel.SetFontSize(FONT_HEADER);
+    titleLabel.SetRequestedWidth(MATCH_PARENT);
+    titleLabel.SetRequestedHeight(MATCH_PARENT);
+    titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+
+    StackLayout header = StackLayout::New(StackOrientation::HORIZONTAL);
+    header.SetRequestedWidth(MATCH_PARENT);
+    header.SetRequestedHeight(HEADER_HEIGHT);
+    header.SetBackgroundColor(UiColor(COLOR_HEADER_BG));
+    header.AddChildren({backLabel, titleLabel});
+    mRootContainer.Add(header);
 
     // ── Content area: TC adds its views here ────────────────────────────────
-    StackLayout contentArea = StackLayout::New(StackOrientation::VERTICAL)
-                                .SetRequestedWidth(MATCH_PARENT)
-                                .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    StackLayout contentArea = StackLayout::New(StackOrientation::VERTICAL);
+    contentArea.SetRequestedWidth(MATCH_PARENT);
+    contentArea.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     mRootContainer.Add(contentArea);
 
     mActiveCase->OnEnter(contentArea);
@@ -268,7 +283,6 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
   ManualTestLauncher launcher(application);
   application.MainLoop();
   return 0;

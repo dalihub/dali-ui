@@ -148,7 +148,7 @@ public: // Image
    * @param[in] url The URL of the Lottie JSON file
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetResourceUrl(const Dali::String& url);
+  void SetResourceUrl(const Dali::String& url);
 
   /**
    * @brief Gets the current resource URL.
@@ -163,21 +163,21 @@ public: // Playback Control
    *
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& Play();
+  void Play();
 
   /**
    * @brief Pauses playback of the animation.
    *
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& Pause();
+  void Pause();
 
   /**
    * @brief Stops playback of the animation.
    *
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& Stop();
+  void Stop();
 
   /**
    * @brief Sets the number of times the animation should loop.
@@ -188,7 +188,7 @@ public: // Playback Control
    * @param[in] count The loop count (-1 for infinite)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetLoopCount(int count);
+  void SetLoopCount(int count);
 
   /**
    * @brief Gets the current loop count.
@@ -203,7 +203,7 @@ public: // Playback Control
    * @param[in] frame The frame index to jump to
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& JumpToFrame(int frame);
+  void JumpToFrame(int frame);
 
 public: // Frame Range
   /**
@@ -215,7 +215,7 @@ public: // Frame Range
    * @param[in] maxFrame The end frame index
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetMinMaxFrame(int minFrame, int maxFrame);
+  void SetMinMaxFrame(int minFrame, int maxFrame);
 
   /**
    * @brief Sets the playback range using marker names embedded in the Lottie file.
@@ -228,7 +228,7 @@ public: // Frame Range
    * @param[in] maxMarker Name of the end marker (optional)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker = "");
+  void SetMinMaxFrameByMarker(const Dali::String& minMarker, const Dali::String& maxMarker = "");
 
 public: // Playback Options
   /**
@@ -237,7 +237,7 @@ public: // Playback Options
    * @param[in] behavior The stop behavior
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetStopBehavior(AnimatedImage::StopBehavior behavior);
+  void SetStopBehavior(AnimatedImage::StopBehavior behavior);
 
   /**
    * @brief Gets the current stop behavior.
@@ -252,7 +252,7 @@ public: // Playback Options
    * @param[in] mode RESTART or AUTO_REVERSE
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetLoopingMode(LottieAnimation::LoopingMode mode);
+  void SetLoopingMode(LottieAnimation::LoopingMode mode);
 
   /**
    * @brief Gets the current looping mode.
@@ -270,7 +270,7 @@ public: // Playback Options
    * @param[in] factor The speed multiplier (default: 1.0)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetFrameSpeedFactor(float factor);
+  void SetFrameSpeedFactor(float factor);
 
   /**
    * @brief Gets the current frame speed factor.
@@ -308,7 +308,7 @@ public: // Performance Options
    * @param[in] redraw True to redraw on scale-down (default: true)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetRedrawOnScaleDown(bool redraw);
+  void SetRedrawOnScaleDown(bool redraw);
 
   /**
    * @brief Returns whether redraw on scale-down is enabled.
@@ -323,7 +323,7 @@ public: // Performance Options
    * @param[in] redraw True to redraw on scale-up (default: true)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetRedrawOnScaleUp(bool redraw);
+  void SetRedrawOnScaleUp(bool redraw);
 
   /**
    * @brief Returns whether redraw on scale-up is enabled.
@@ -341,7 +341,7 @@ public: // Performance Options
    * @param[in] enable True to enable frame caching (default: false)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetEnableFrameCache(bool enable);
+  void SetEnableFrameCache(bool enable);
 
   /**
    * @brief Returns whether frame caching is enabled.
@@ -358,7 +358,7 @@ public: // Performance Options
    * @param[in] notify True to notify after rasterization (default: false)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetNotifyAfterRasterization(bool notify);
+  void SetNotifyAfterRasterization(bool notify);
 
   /**
    * @brief Returns whether notify-after-rasterization is enabled.
@@ -378,7 +378,7 @@ public: // Performance Options
    * @param[in] scale The render scale multiplier (default: 1.0)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetRenderScale(float scale);
+  void SetRenderScale(float scale);
 
   /**
    * @brief Gets the current render scale factor.
@@ -396,7 +396,7 @@ public: // Performance Options
    *
    * @param[in] enableAspectFit True to enable aspect fit, false to disable
    */
-  LottieAnimationView& SetEnableAspectFit(bool enableAspectFit);
+  void SetEnableAspectFit(bool enableAspectFit);
 
   /**
    * @brief Gets whether aspect fit scaling is enabled.
@@ -435,7 +435,7 @@ public: // Advanced
    * @param[in] info The dynamic property info
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
+  void SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
 
 public: // Visual Appearance
   /**
@@ -446,7 +446,7 @@ public: // Visual Appearance
    * @param[in] color The RGBA color to multiply with the animation
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetImageColor(const UiColor& color);
+  void SetImageColor(const UiColor& color);
 
   /**
    * @brief Gets the color multiplier applied to the animation.
@@ -462,7 +462,7 @@ public: // Loading Behavior
    * @param[in] width The desired width in pixels (0 to use natural size)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetDesiredWidth(int width);
+  void SetDesiredWidth(int width);
 
   /**
    * @brief Gets the desired rasterization width hint.
@@ -477,7 +477,7 @@ public: // Loading Behavior
    * @param[in] height The desired height in pixels (0 to use natural size)
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetDesiredHeight(int height);
+  void SetDesiredHeight(int height);
 
   /**
    * @brief Gets the desired rasterization height hint.
@@ -492,7 +492,7 @@ public: // Loading Behavior
    * @param[in] releasePolicy The release policy to use
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
+  void SetReleasePolicy(Ui::Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets the release policy.
@@ -507,7 +507,7 @@ public: // Loading Behavior
    * @param[in] synchronous True to load synchronously on the main thread
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetSynchronousLoading(bool synchronous);
+  void SetSynchronousLoading(bool synchronous);
 
   /**
    * @brief Gets whether synchronous loading is enabled.
@@ -523,7 +523,7 @@ public: // Placeholder
    * @param[in] url The URL of the placeholder image
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetPlaceholderUrl(const Dali::String& url);
+  void SetPlaceholderUrl(const Dali::String& url);
 
   /**
    * @brief Gets the placeholder image URL.
@@ -541,7 +541,7 @@ public: // Placeholder
    * @param[in] pixelArea The normalized sub-region of the animation to display
    * @return Reference to this for fluent chaining
    */
-  LottieAnimationView& SetPixelArea(const Dali::Vector4& pixelArea);
+  void SetPixelArea(const Dali::Vector4& pixelArea);
 
   /**
    * @brief Gets the pixel area.
@@ -590,7 +590,6 @@ public: // Not intended for application developers
   /// @endcond
 
 public:
-  DALI_UI_CHAIN_VIEW_METHODS(LottieAnimationView)
 };
 
 } // namespace Ui

@@ -29,9 +29,8 @@
    - [Orientation Correction](#64-orientation-correction)
 7. [N-Patch Border](#7-n-patch-border)
 8. [Loading Status & Signals](#8-loading-status--signals)
-9. [Method Chaining](#9-method-chaining)
-10. [Default Values](#10-default-values)
-11. [Important Notes](#11-important-notes)
+9. [Default Values](#9-default-values)
+10. [Important Notes](#10-important-notes)
 
 ---
 
@@ -441,26 +440,7 @@ imageView.ResourceReadySignal().Connect(&handler, &MyImageHandler::OnImageReady)
 
 ---
 
-## 9. Method Chaining
-
-All setters return `ImageView&`, enabling fluent configuration:
-
-```cpp
-ImageView imageView = ImageView::New("photo.jpg");
-
-imageView
-    .SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-    .SetSamplingMode(Image::SamplingMode::LINEAR)
-    .SetImageColor(UiColor(0xFFFFFFFF))
-    .SetSynchronousLoading(false)
-    .SetFastTrackUploading(true)
-    .SetOrientationCorrection(true)
-    .SetReleasePolicy(Image::ReleasePolicy::DETACHED);
-```
-
----
-
-## 10. Default Values
+## 9. Default Values
 
 | Property | Default |
 |---|---|
@@ -481,7 +461,7 @@ imageView
 
 ---
 
-## 11. Important Notes
+## 10. Important Notes
 
 - **Asynchronous loading by default.** Use `ResourceReadySignal()` to know when loading completes.
 

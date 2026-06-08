@@ -47,52 +47,52 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetSpacing(50.0f)
-      .SetPadding(Extents(50, 50, 50, 50));
+    StackLayout outer = StackLayout::New(StackOrientation::VERTICAL);
+    outer.SetRequestedWidth(MATCH_PARENT);
+    outer.SetRequestedHeight(MATCH_PARENT);
+    outer.SetSpacing(50.0f);
+    outer.SetPadding(Extents(50, 50, 50, 50));
 
     // Row 1: FlexEnd
-    FlexLayout rowEnd = FlexLayout::New()
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetDirection(FlexDirection::ROW)
-      .SetJustifyContent(FlexJustify::FLEX_END)
-      .SetAlignItems(FlexAlign::CENTER)
-      .SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
+    FlexLayout rowEnd = FlexLayout::New();
+    rowEnd.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    rowEnd.SetDirection(FlexDirection::ROW);
+    rowEnd.SetJustifyContent(FlexJustify::FLEX_END);
+    rowEnd.SetAlignItems(FlexAlign::CENTER);
+    rowEnd.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     AddThreeBoxes(rowEnd, Color::RED, Color::GREEN, Color::BLUE);
     outer.Add(rowEnd);
 
     // Row 2: Center
-    FlexLayout rowCenter = FlexLayout::New()
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetDirection(FlexDirection::ROW)
-      .SetJustifyContent(FlexJustify::CENTER)
-      .SetAlignItems(FlexAlign::CENTER)
-      .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
+    FlexLayout rowCenter = FlexLayout::New();
+    rowCenter.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    rowCenter.SetDirection(FlexDirection::ROW);
+    rowCenter.SetJustifyContent(FlexJustify::CENTER);
+    rowCenter.SetAlignItems(FlexAlign::CENTER);
+    rowCenter.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     AddThreeBoxes(rowCenter, Color::YELLOW, Color::CYAN, Color::MAGENTA);
     outer.Add(rowCenter);
 
     // Row 3: SpaceAround
-    FlexLayout rowAround = FlexLayout::New()
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetDirection(FlexDirection::ROW)
-      .SetJustifyContent(FlexJustify::SPACE_AROUND)
-      .SetAlignItems(FlexAlign::CENTER)
-      .SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
+    FlexLayout rowAround = FlexLayout::New();
+    rowAround.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    rowAround.SetDirection(FlexDirection::ROW);
+    rowAround.SetJustifyContent(FlexJustify::SPACE_AROUND);
+    rowAround.SetAlignItems(FlexAlign::CENTER);
+    rowAround.SetBackgroundColor(Vector4(0.95f, 0.95f, 0.95f, 1.0f));
 
     AddThreeBoxes(rowAround, Color::RED, Color::GREEN, Color::BLUE);
     outer.Add(rowAround);
 
     // Row 4: SpaceEvenly
-    FlexLayout rowEvenly = FlexLayout::New()
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL))
-      .SetDirection(FlexDirection::ROW)
-      .SetJustifyContent(FlexJustify::SPACE_EVENLY)
-      .SetAlignItems(FlexAlign::CENTER)
-      .SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
+    FlexLayout rowEvenly = FlexLayout::New();
+    rowEvenly.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    rowEvenly.SetDirection(FlexDirection::ROW);
+    rowEvenly.SetJustifyContent(FlexJustify::SPACE_EVENLY);
+    rowEvenly.SetAlignItems(FlexAlign::CENTER);
+    rowEvenly.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
 
     AddThreeBoxes(rowEvenly, Color::YELLOW, Color::CYAN, Color::MAGENTA);
     outer.Add(rowEvenly);

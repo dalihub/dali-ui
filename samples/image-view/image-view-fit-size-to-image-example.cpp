@@ -61,15 +61,16 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        CreateSectionLabel("FitSizeToImage  (ImageLoadWithViewSize is always OFF)"),
-        CreateFitSizeContainer(),
-        CreateFitSizeInfoLabel(),
-        CreateFitSizeToggle(),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.AddChildren({
+      CreateSectionLabel("FitSizeToImage  (ImageLoadWithViewSize is always OFF)"),
+      CreateFitSizeContainer(),
+      CreateFitSizeInfoLabel(),
+      CreateFitSizeToggle(),
+    });
+    return contents;
   }
 
   View CreateFitSizeContainer()
@@ -80,63 +81,63 @@ private:
     // FitSizeToImage=OFF → ImageView height stays 0 (WRAP_CONTENT before load),
     //                       only the gray container background is visible.
     // FitSizeToImage=ON  → After load, height = MATCH_PARENT_width * (360/640) ≈ 270px.
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetBackgroundColor(UiColor(0x444444))
-      .Children({
-        ImageView::New(RESOURCES_DIR "landscape-sample.jpg")
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(WRAP_CONTENT)
-          .SetFitSizeToImage(mFitSizeToImage)
-          .SetImageLoadWithViewSize(false)
-          .As(mFitImage),
-      });
+    mFitImage = ImageView::New(RESOURCES_DIR "landscape-sample.jpg");
+    mFitImage.SetRequestedWidth(MATCH_PARENT);
+    mFitImage.SetRequestedHeight(WRAP_CONTENT);
+    mFitImage.SetFitSizeToImage(mFitSizeToImage);
+    mFitImage.SetImageLoadWithViewSize(false);
+
+    StackLayout container = StackLayout::New(StackOrientation::VERTICAL);
+    container.SetRequestedWidth(MATCH_PARENT);
+    container.SetRequestedHeight(WRAP_CONTENT);
+    container.SetBackgroundColor(UiColor(0x444444));
+    container.AddChildren({mFitImage});
+    return container;
   }
 
   View CreateFitSizeInfoLabel()
   {
-    return Label::New(MakeFitSizeInfoText())
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(32.0f)
-      .SetFontSize(13.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mFitSizeInfoLabel);
+    mFitSizeInfoLabel = Label::New(MakeFitSizeInfoText());
+    mFitSizeInfoLabel.SetRequestedWidth(MATCH_PARENT);
+    mFitSizeInfoLabel.SetRequestedHeight(32.0f);
+    mFitSizeInfoLabel.SetFontSize(13.0f);
+    mFitSizeInfoLabel.SetTextColor(UiColor(0xCCCCCC));
+    mFitSizeInfoLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mFitSizeInfoLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mFitSizeInfoLabel;
   }
 
   View CreateFitSizeToggle()
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(MATCH_PARENT)
-                           .SetRequestedHeight(56.0f)
-                           .SetPadding(Extents(4, 4, 4, 4))
-                           .SetBackgroundColor(UiColor(0x444444))
-                           .Children({
-                             Label::New("FIT_SIZE: OFF")
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(13.0f)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                               .As(mFitSizeLabel)
-                           });
+    mFitSizeLabel = Label::New("FIT_SIZE: OFF");
+    mFitSizeLabel.SetRequestedWidth(MATCH_PARENT);
+    mFitSizeLabel.SetRequestedHeight(MATCH_PARENT);
+    mFitSizeLabel.SetFontSize(13.0f);
+    mFitSizeLabel.SetTextColor(UiColor(0xFFFFFF));
+    mFitSizeLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mFitSizeLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageViewFitSizeController::OnFitSizeToggleClicked);
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(MATCH_PARENT);
+    button.SetRequestedHeight(56.0f);
+    button.SetPadding(Extents(4, 4, 4, 4));
+    button.SetBackgroundColor(UiColor(0x444444));
+    button.AddChildren({mFitSizeLabel});
+
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageViewFitSizeController::OnFitSizeToggleClicked);
     return button;
   }
 
   View CreateSectionLabel(const char* text)
   {
-    return Label::New(text)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(28.0f)
-      .SetFontSize(11.0f)
-      .SetTextColor(UiColor(0x888888))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    Label label = Label::New(text);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(28.0f);
+    label.SetFontSize(11.0f);
+    label.SetTextColor(UiColor(0x888888));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return label;
   }
 
   void OnFitSizeToggleClicked(View /*clickedView*/, InputEvent /*event*/)

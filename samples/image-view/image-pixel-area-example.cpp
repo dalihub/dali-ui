@@ -76,29 +76,25 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        CreateImageArea(),
-        CreateInfoLabel(),
-        CreateAreaButtonRow(),
-        CreateExtraButtonRow(),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.AddChildren({CreateImageArea(), CreateInfoLabel(), CreateAreaButtonRow(), CreateExtraButtonRow()});
+    return contents;
   }
 
   View CreateImageArea()
   {
-    mImageContainer = StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    mImageContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mImageContainer.SetRequestedWidth(MATCH_PARENT);
+    mImageContainer.SetRequestedHeight(WRAP_CONTENT);
+    mImageContainer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 
-    mImage = ImageView::New(JPG_URL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-      .SetPixelArea(AREAS[mActiveIndex].area);
+    mImage = ImageView::New(JPG_URL);
+    mImage.SetRequestedWidth(MATCH_PARENT);
+    mImage.SetRequestedHeight(MATCH_PARENT);
+    ImageView::DownCast(mImage).SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+    ImageView::DownCast(mImage).SetPixelArea(AREAS[mActiveIndex].area);
 
     mImageContainer.Add(mImage);
     return mImageContainer;
@@ -106,23 +102,23 @@ private:
 
   View CreateInfoLabel()
   {
-    return Label::New(MakeInfoText())
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(40.0f)
-      .SetFontSize(14.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mInfoLabel);
+    mInfoLabel = Label::New(MakeInfoText());
+    mInfoLabel.SetRequestedWidth(MATCH_PARENT);
+    mInfoLabel.SetRequestedHeight(40.0f);
+    mInfoLabel.SetFontSize(14.0f);
+    mInfoLabel.SetTextColor(UiColor(0xCCCCCC));
+    mInfoLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mInfoLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mInfoLabel;
   }
 
   View CreateAreaButtonRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(80.0f)
-                        .SetPadding(Extents(4, 4, 4, 4));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(80.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < AREA_COUNT; ++i)
     {
@@ -134,48 +130,46 @@ private:
 
   View CreateExtraButtonRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(80.0f)
-                        .SetPadding(Extents(4, 4, 4, 4));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(80.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
 
     // GIF toggle button
-    StackLayout gifButton = StackLayout::New(StackOrientation::VERTICAL)
-                              .SetRequestedWidth(WRAP_CONTENT)
-                              .SetRequestedHeight(MATCH_PARENT)
-                              .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                              .SetBackgroundColor(UiColor(0x2E7D32))
-                              .Children({
-                                Label::New("GIF")
-                                  .SetRequestedWidth(MATCH_PARENT)
-                                  .SetRequestedHeight(MATCH_PARENT)
-                                  .SetFontSize(15.0f)
-                                  .SetTextColor(UiColor(0xFFFFFF))
-                                  .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                                  .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                              });
-    gifButton.EnsureInteractiveTrait().ClickedSignal().Connect(
+    StackLayout gifButton = StackLayout::New(StackOrientation::VERTICAL);
+    gifButton.SetRequestedWidth(WRAP_CONTENT);
+    gifButton.SetRequestedHeight(MATCH_PARENT);
+    gifButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    gifButton.SetBackgroundColor(UiColor(0x2E7D32));
+    Label gifLabel = Label::New("GIF");
+    gifLabel.SetRequestedWidth(MATCH_PARENT);
+    gifLabel.SetRequestedHeight(MATCH_PARENT);
+    gifLabel.SetFontSize(15.0f);
+    gifLabel.SetTextColor(UiColor(0xFFFFFF));
+    gifLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    gifLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    gifButton.Add(gifLabel);
+    gifButton.AsInteractive().ClickedSignal().Connect(
       this, [this](View, InputEvent) { OnGifButtonClicked(); });
     mGifButton = gifButton;
 
     // Animate PixelArea button
-    StackLayout animButton = StackLayout::New(StackOrientation::VERTICAL)
-                               .SetRequestedWidth(WRAP_CONTENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                               .SetBackgroundColor(UiColor(0x7B1FA2))
-                               .Children({
-                                 Label::New("ANIMATE\nPIXEL\nAREA")
-                                   .SetRequestedWidth(MATCH_PARENT)
-                                   .SetRequestedHeight(MATCH_PARENT)
-                                   .SetFontSize(13.0f)
-                                   .SetMultiLine(true)
-                                   .SetTextColor(UiColor(0xFFFFFF))
-                                   .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                                   .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                               });
-    animButton.EnsureInteractiveTrait().ClickedSignal().Connect(
+    StackLayout animButton = StackLayout::New(StackOrientation::VERTICAL);
+    animButton.SetRequestedWidth(WRAP_CONTENT);
+    animButton.SetRequestedHeight(MATCH_PARENT);
+    animButton.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    animButton.SetBackgroundColor(UiColor(0x7B1FA2));
+    Label animLabel = Label::New("ANIMATE\nPIXEL\nAREA");
+    animLabel.SetRequestedWidth(MATCH_PARENT);
+    animLabel.SetRequestedHeight(MATCH_PARENT);
+    animLabel.SetFontSize(13.0f);
+    animLabel.SetMultiLine(true);
+    animLabel.SetTextColor(UiColor(0xFFFFFF));
+    animLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    animLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    animButton.Add(animLabel);
+    animButton.AsInteractive().ClickedSignal().Connect(
       this, [this](View, InputEvent) { OnAnimateButtonClicked(); });
     mAnimateButton = animButton;
 
@@ -187,23 +181,22 @@ private:
 
   View CreateAreaButton(int index)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(index == mActiveIndex ? UiColor(0x4A90E2) : UiColor(0x333333))
-                           .Children({
-                             Label::New(AREAS[index].name)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(13.0f)
-                               .SetMultiLine(true)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(index == mActiveIndex ? UiColor(0x4A90E2) : UiColor(0x333333));
+    Label buttonLabel = Label::New(AREAS[index].name);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(13.0f);
+    buttonLabel.SetMultiLine(true);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImagePixelAreaController::OnAreaButtonClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImagePixelAreaController::OnAreaButtonClicked);
 
     mButtons[index] = button;
     return button;
@@ -230,20 +223,20 @@ private:
 
     if(mUsingGif)
     {
-      mImage = AnimatedImageView::New(GIF_URL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-        .SetPixelArea(AREAS[mActiveIndex].area);
+      mImage = AnimatedImageView::New(GIF_URL);
+      mImage.SetRequestedWidth(MATCH_PARENT);
+      mImage.SetRequestedHeight(MATCH_PARENT);
+      AnimatedImageView::DownCast(mImage).SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+      AnimatedImageView::DownCast(mImage).SetPixelArea(AREAS[mActiveIndex].area);
       AnimatedImageView::DownCast(mImage).Play();
     }
     else
     {
-      mImage = ImageView::New(JPG_URL)
-        .SetRequestedWidth(MATCH_PARENT)
-        .SetRequestedHeight(MATCH_PARENT)
-        .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-        .SetPixelArea(AREAS[mActiveIndex].area);
+      mImage = ImageView::New(JPG_URL);
+      mImage.SetRequestedWidth(MATCH_PARENT);
+      mImage.SetRequestedHeight(MATCH_PARENT);
+      ImageView::DownCast(mImage).SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+      ImageView::DownCast(mImage).SetPixelArea(AREAS[mActiveIndex].area);
     }
 
     mImageContainer.Add(mImage);

@@ -102,99 +102,112 @@ private:
 
   View CreateContents()
   {
-    ScrollView scroll = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetMaximumHeight(400.0f);
+    ScrollView scroll = ScrollView::New();
+    scroll.SetScrollDirection(ScrollDirection::Vertical);
+    scroll.SetRequestedWidth(MATCH_PARENT);
+    scroll.SetMaximumHeight(400.0f);
 
-    auto bindingContent = StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .Children({
-        CreateSectionLabel("Default Domain Labels:"),
-        CreateCommonTitleLabel().As(mCommonTitleLabel),
-        CreateDefaultTitleLabel().As(mDefaultTitleLabel),
-        CreateDefaultHelloLabel().As(mDefaultHelloLabel),
-        CreateDefaultThanksLabel().As(mDefaultThanksLabel),
-        CreateSeparator(),
-        CreateSectionLabel("Explicit Domain Labels:"),
-        CreateExplicitDefaultLabel().As(mExplicitDefaultLabel),
-        CreateExplicitAltLabel().As(mExplicitAltLabel),
-        CreateSeparator(),
-        CreateSectionLabel("Direct Binding Labels:"),
-        CreateDirectBindingLabel(),
-        CreateDirectAltBindingLabel(),
-        CreateSeparator(),
-        CreateSectionLabel("Image URL Binding:"),
-        CreateFlagImageView(),
-        CreateSeparator(),
-        CreateSectionLabel("InputField / InputEditor Placeholder:"),
-        CreateLocalizedInputField(),
-        CreateLocalizedInputEditor()
-      });
+    auto bindingContent = StackLayout::New(StackOrientation::VERTICAL);
+    bindingContent.SetSpacing(STACK_SPACING);
+    bindingContent.SetRequestedWidth(MATCH_PARENT);
+    bindingContent.SetRequestedHeight(WRAP_CONTENT);
+
+    mCommonTitleLabel     = CreateCommonTitleLabel();
+    mDefaultTitleLabel    = CreateDefaultTitleLabel();
+    mDefaultHelloLabel    = CreateDefaultHelloLabel();
+    mDefaultThanksLabel   = CreateDefaultThanksLabel();
+    mExplicitDefaultLabel = CreateExplicitDefaultLabel();
+    mExplicitAltLabel     = CreateExplicitAltLabel();
+
+    bindingContent.Add(CreateSectionLabel("Default Domain Labels:"));
+    bindingContent.Add(mCommonTitleLabel);
+    bindingContent.Add(mDefaultTitleLabel);
+    bindingContent.Add(mDefaultHelloLabel);
+    bindingContent.Add(mDefaultThanksLabel);
+    bindingContent.Add(CreateSeparator());
+    bindingContent.Add(CreateSectionLabel("Explicit Domain Labels:"));
+    bindingContent.Add(mExplicitDefaultLabel);
+    bindingContent.Add(mExplicitAltLabel);
+    bindingContent.Add(CreateSeparator());
+    bindingContent.Add(CreateSectionLabel("Direct Binding Labels:"));
+    bindingContent.Add(CreateDirectBindingLabel());
+    bindingContent.Add(CreateDirectAltBindingLabel());
+    bindingContent.Add(CreateSeparator());
+    bindingContent.Add(CreateSectionLabel("Image URL Binding:"));
+    bindingContent.Add(CreateFlagImageView());
+    bindingContent.Add(CreateSeparator());
+    bindingContent.Add(CreateSectionLabel("InputField / InputEditor Placeholder:"));
+    bindingContent.Add(CreateLocalizedInputField());
+    bindingContent.Add(CreateLocalizedInputEditor());
 
     scroll.SetContent(bindingContent);
 
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        CreateHeaderLabel(),
-        CreateHelpLabel(),
-        CreateSeparator(),
-        scroll,
-        CreateSeparator(),
-        CreateSectionLabel("GetLocalizedString Lookup:"),
-        CreateLookupLabel().As(mLookupLabel),
-        CreateSeparator(),
-        CreateStatusLabel().As(mStatusLabel)
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetSpacing(STACK_SPACING);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    mLookupLabel = CreateLookupLabel();
+    mStatusLabel = CreateStatusLabel();
+
+    contents.Add(CreateHeaderLabel());
+    contents.Add(CreateHelpLabel());
+    contents.Add(CreateSeparator());
+    contents.Add(scroll);
+    contents.Add(CreateSeparator());
+    contents.Add(CreateSectionLabel("GetLocalizedString Lookup:"));
+    contents.Add(mLookupLabel);
+    contents.Add(CreateSeparator());
+    contents.Add(mStatusLabel);
+    return contents;
   }
 
   Label CreateHeaderLabel()
   {
-    return Label::New("UiLocalizationManager PO/MO Example")
-      .SetFontSize(TITLE_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
+    Label label = Label::New("UiLocalizationManager PO/MO Example");
+    label.SetFontSize(TITLE_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
+    return label;
   }
 
   Label CreateHelpLabel()
   {
-    return Label::New("Keys: 1=en_US, 2=ko_KR, 3=ar_AE, B=bypass, D=toggle default domain, R=refresh, M=manual text, ESC/BACK=quit")
-      .SetFontSize(HELP_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
-      .SetMultiLine(true)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(0xEFEFEF));
+    Label label = Label::New("Keys: 1=en_US, 2=ko_KR, 3=ar_AE, B=bypass, D=toggle default domain, R=refresh, M=manual text, ESC/BACK=quit");
+    label.SetFontSize(HELP_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    label.SetMultiLine(true);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(0xEFEFEF));
+    return label;
   }
 
   View CreateSeparator()
   {
-    return View::New()
-      .SetBackgroundColor(UiColor(COLOR_MID_GRAY))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(2.0f);
+    View separator = View::New();
+    separator.SetBackgroundColor(UiColor(COLOR_MID_GRAY));
+    separator.SetRequestedWidth(MATCH_PARENT);
+    separator.SetRequestedHeight(2.0f);
+    return separator;
   }
 
   Label CreateSectionLabel(const char* text)
   {
-    return Label::New(text)
-      .SetFontSize(STATUS_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_MID_GRAY))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    Label label = Label::New(text);
+    label.SetFontSize(STATUS_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_MID_GRAY));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    return label;
   }
 
   // --- Default domain labels ---
@@ -203,50 +216,54 @@ private:
   {
     // Uses IDS_COMMON_TITLE which exists in both domains.
     // When default domain changes, this label should switch between DEFAULT/ALT.
-    return Label::New()
-      .SetTranslatableText("IDS_COMMON_TITLE")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_RED));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_COMMON_TITLE");
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_RED));
+    return label;
   }
 
   Label CreateDefaultTitleLabel()
   {
-    return Label::New()
-      .SetTranslatableText("IDS_PO_TITLE")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_PO_TITLE");
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
+    return label;
   }
 
   Label CreateDefaultHelloLabel()
   {
-    return Label::New()
-      .SetTranslatableText("IDS_PO_HELLO")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_PO_HELLO");
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
+    return label;
   }
 
   Label CreateDefaultThanksLabel()
   {
-    return Label::New()
-      .SetTranslatableText("IDS_PO_THANKS")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_PO_THANKS");
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_BLUE));
+    return label;
   }
 
   // --- Explicit domain labels ---
@@ -254,27 +271,29 @@ private:
   Label CreateExplicitDefaultLabel()
   {
     // Explicit default domain - should not change when default domain toggles
-    return Label::New()
-      .SetTranslatableText("IDS_PO_HELLO", TEXT_DOMAIN_DEFAULT)
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_GREEN));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_PO_HELLO", TEXT_DOMAIN_DEFAULT);
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_GREEN));
+    return label;
   }
 
   Label CreateExplicitAltLabel()
   {
     // Explicit alt domain - should not change when default domain toggles
-    return Label::New()
-      .SetTranslatableText("IDS_ALT_HELLO", TEXT_DOMAIN_ALT)
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_GREEN));
+    Label label = Label::New();
+    label.SetTranslatableText("IDS_ALT_HELLO", TEXT_DOMAIN_ALT);
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_GREEN));
+    return label;
   }
 
   // --- Direct binding labels ---
@@ -282,13 +301,13 @@ private:
   Label CreateDirectBindingLabel()
   {
     // Direct binding using default domain
-    auto label = Label::New()
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_YELLOW));
+    Label label = Label::New();
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_YELLOW));
 
     UiLocalizationManager::Get().SetBindingResource(
       label,
@@ -302,13 +321,13 @@ private:
   Label CreateDirectAltBindingLabel()
   {
     // Direct binding with explicit alt domain
-    auto label = Label::New()
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_CYAN));
+    Label label = Label::New();
+    label.SetFontSize(LABEL_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(COLOR_LIGHT_CYAN));
 
     UiLocalizationManager::Get().SetBindingResource(
       label,
@@ -343,10 +362,10 @@ private:
   ImageView CreateFlagImageView()
   {
     // Default domain image URL binding - locale changes update the flag image
-    auto imageView = ImageView::New()
-      .SetRequestedWidth(100.0f)
-      .SetRequestedHeight(50.0f)
-      .SetBackgroundColor(UiColor(0xFAFAFA));
+    ImageView imageView = ImageView::New();
+    imageView.SetRequestedWidth(100.0f);
+    imageView.SetRequestedHeight(50.0f);
+    imageView.SetBackgroundColor(UiColor(0xFAFAFA));
 
     UiLocalizationManager::Get().SetBindingResource(
       imageView,
@@ -379,42 +398,45 @@ private:
   InputField CreateLocalizedInputField()
   {
     // InputField with translatable placeholder using default domain
-    return InputField::New()
-      .SetTranslatablePlaceholder("IDS_INPUT_FIELD_PLACEHOLDER")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_YELLOW));
+    InputField field = InputField::New();
+    field.SetTranslatablePlaceholder("IDS_INPUT_FIELD_PLACEHOLDER");
+    field.SetFontSize(LABEL_FONT_SIZE);
+    field.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    field.SetRequestedWidth(MATCH_PARENT);
+    field.SetRequestedHeight(WRAP_CONTENT);
+    field.SetPadding(Extents(10, 10, 10, 10));
+    field.SetBackgroundColor(UiColor(COLOR_LIGHT_YELLOW));
+    return field;
   }
 
   InputEditor CreateLocalizedInputEditor()
   {
     // InputEditor with translatable placeholder using default domain
-    return InputEditor::New()
-      .SetTranslatablePlaceholder("IDS_INPUT_EDITOR_PLACEHOLDER")
-      .SetFontSize(LABEL_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(80.0f)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(COLOR_LIGHT_CYAN));
+    InputEditor editor = InputEditor::New();
+    editor.SetTranslatablePlaceholder("IDS_INPUT_EDITOR_PLACEHOLDER");
+    editor.SetFontSize(LABEL_FONT_SIZE);
+    editor.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    editor.SetRequestedWidth(MATCH_PARENT);
+    editor.SetRequestedHeight(80.0f);
+    editor.SetPadding(Extents(10, 10, 10, 10));
+    editor.SetBackgroundColor(UiColor(COLOR_LIGHT_CYAN));
+    return editor;
   }
 
   // --- Lookup label ---
 
   Label CreateLookupLabel()
   {
-    return Label::New()
-      .SetFontSize(STATUS_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
-      .SetMultiLine(true)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(0xFAFAFA));
+    Label label = Label::New();
+    label.SetFontSize(STATUS_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    label.SetMultiLine(true);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(0xFAFAFA));
+    return label;
   }
 
   void UpdateLookupLabel()
@@ -437,15 +459,16 @@ private:
 
   Label CreateStatusLabel()
   {
-    return Label::New()
-      .SetFontSize(STATUS_FONT_SIZE)
-      .SetTextColor(UiColor(COLOR_DARK_TEXT))
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS)
-      .SetMultiLine(true)
-      .SetPadding(Extents(10, 10, 10, 10))
-      .SetBackgroundColor(UiColor(0xFAFAFA));
+    Label label = Label::New();
+    label.SetFontSize(STATUS_FONT_SIZE);
+    label.SetTextColor(UiColor(COLOR_DARK_TEXT));
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(WRAP_CONTENT);
+    label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+    label.SetMultiLine(true);
+    label.SetPadding(Extents(10, 10, 10, 10));
+    label.SetBackgroundColor(UiColor(0xFAFAFA));
+    return label;
   }
 
   void UpdateStatusLabel()

@@ -43,12 +43,12 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     // Root: FlexLayout in row direction
-    FlexLayout root = FlexLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetDirection(FlexDirection::ROW)
-      .SetAlignItems(FlexAlign::STRETCH)
-      .SetPadding(Extents(50, 50, 50, 50));
+    FlexLayout root = FlexLayout::New();
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetDirection(FlexDirection::ROW);
+    root.SetAlignItems(FlexAlign::STRETCH);
+    root.SetPadding(Extents(50, 50, 50, 50));
 
     // Red box: fixed width
     View redBox = View::New();

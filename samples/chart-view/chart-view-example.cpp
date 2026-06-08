@@ -128,73 +128,77 @@ public:
     mWinH = windowSize.y;
 
     // --- Scene title label (top) ---
-    mSceneLabel = Label::New()
-      .SetLayoutParams(AbsoluteLayoutParams::New()
-        .SetX(10.0f).SetY(4.0f)
-        .SetWidth(mWinW - 20.0f).SetHeight(36.0f))
-      .SetFontSize(9.0f)
-      .SetTextColor(UiColor(0x000000))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mSceneLabel = Label::New();
+    mSceneLabel.SetLayoutParams(AbsoluteLayoutParams::New()
+                                  .SetX(10.0f)
+                                  .SetY(4.0f)
+                                  .SetWidth(mWinW - 20.0f)
+                                  .SetHeight(36.0f));
+    mSceneLabel.SetFontSize(9.0f);
+    mSceneLabel.SetTextColor(UiColor(0x000000));
+    mSceneLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mSceneLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
     // --- Debug label (above navigation buttons) ---
-    mDebugLabel = Label::New()
-      .SetLayoutParams(AbsoluteLayoutParams::New()
-        .SetX(10.0f).SetY(mWinH - 92.0f)
-        .SetWidth(mWinW - 20.0f).SetHeight(36.0f))
-      .SetFontSize(7.0f)
-      .SetTextColor(UiColor(COLOR_DARK_SLATE_GRAY))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mDebugLabel = Label::New();
+    mDebugLabel.SetLayoutParams(AbsoluteLayoutParams::New()
+                                  .SetX(10.0f)
+                                  .SetY(mWinH - 92.0f)
+                                  .SetWidth(mWinW - 20.0f)
+                                  .SetHeight(36.0f));
+    mDebugLabel.SetFontSize(7.0f);
+    mDebugLabel.SetTextColor(UiColor(COLOR_DARK_SLATE_GRAY));
+    mDebugLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mDebugLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
     // --- Prev button (bottom-left) ---
-    mPrevButton = AbsoluteLayout::New()
-      .SetRequestedWidth(100.0f)
-      .SetRequestedHeight(50.0f)
-      .SetLayoutParams(AbsoluteLayoutParams::New()
-        .SetX(0.0f).SetY(mWinH - 50.0f)
-        .SetWidth(100.0f).SetHeight(50.0f))
-      .SetBackgroundColor(UiColor(0x424242, 0.85f))
-      .AsInteractive([this](InteractiveTrait& t) {
-        t.ClickedSignal().Connect(this, [this](View, InputEvent) { OnPrevScene(); });
-      })
-      .Children({
-        Label::New("Prev")
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(11.0f)
-          .SetTextColor(UiColor(0xFFFFFF))
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-      });
+    mPrevButton = AbsoluteLayout::New();
+    mPrevButton.SetRequestedWidth(100.0f);
+    mPrevButton.SetRequestedHeight(50.0f);
+    mPrevButton.SetLayoutParams(AbsoluteLayoutParams::New()
+                                  .SetX(0.0f)
+                                  .SetY(mWinH - 50.0f)
+                                  .SetWidth(100.0f)
+                                  .SetHeight(50.0f));
+    mPrevButton.SetBackgroundColor(UiColor(0x424242, 0.85f));
+    mPrevButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { OnPrevScene(); });
+
+    Label prevLabel = Label::New("Prev");
+    prevLabel.SetRequestedWidth(MATCH_PARENT);
+    prevLabel.SetRequestedHeight(MATCH_PARENT);
+    prevLabel.SetFontSize(11.0f);
+    prevLabel.SetTextColor(UiColor(0xFFFFFF));
+    prevLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    prevLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mPrevButton.Add(prevLabel);
 
     // --- Next button (bottom-right) ---
-    mNextButton = AbsoluteLayout::New()
-      .SetRequestedWidth(100.0f)
-      .SetRequestedHeight(50.0f)
-      .SetLayoutParams(AbsoluteLayoutParams::New()
-        .SetX(mWinW - 100.0f).SetY(mWinH - 50.0f)
-        .SetWidth(100.0f).SetHeight(50.0f))
-      .SetBackgroundColor(UiColor(0x424242, 0.85f))
-      .AsInteractive([this](InteractiveTrait& t) {
-        t.ClickedSignal().Connect(this, [this](View, InputEvent) { OnNextScene(); });
-      })
-      .Children({
-        Label::New("Next")
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(11.0f)
-          .SetTextColor(UiColor(0xFFFFFF))
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-      });
+    mNextButton = AbsoluteLayout::New();
+    mNextButton.SetRequestedWidth(100.0f);
+    mNextButton.SetRequestedHeight(50.0f);
+    mNextButton.SetLayoutParams(AbsoluteLayoutParams::New()
+                                  .SetX(mWinW - 100.0f)
+                                  .SetY(mWinH - 50.0f)
+                                  .SetWidth(100.0f)
+                                  .SetHeight(50.0f));
+    mNextButton.SetBackgroundColor(UiColor(0x424242, 0.85f));
+    mNextButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { OnNextScene(); });
+
+    Label nextLabel = Label::New("Next");
+    nextLabel.SetRequestedWidth(MATCH_PARENT);
+    nextLabel.SetRequestedHeight(MATCH_PARENT);
+    nextLabel.SetFontSize(11.0f);
+    nextLabel.SetTextColor(UiColor(0xFFFFFF));
+    nextLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    nextLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mNextButton.Add(nextLabel);
 
     // Single root layout — ALL UI in one hierarchy so the dali-ui layout
     // system processes everything, including ChartView::OnArrange.
-    mRootLayout = AbsoluteLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({mSceneLabel, mDebugLabel, mPrevButton, mNextButton});
+    mRootLayout = AbsoluteLayout::New();
+    mRootLayout.SetRequestedWidth(MATCH_PARENT);
+    mRootLayout.SetRequestedHeight(MATCH_PARENT);
+    mRootLayout.AddChildren({mSceneLabel, mDebugLabel, mPrevButton, mNextButton});
     window.Add(mRootLayout);
 
     // Show first scene

@@ -38,17 +38,21 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
-    window.Add(StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(STACK_SPACING)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING))
-      .Children({
-        Label::New("Text Markup Example"),
-        CreateMarkupLabel("<font size='24' family='SamsungOneUI_700'>Markup </font><color value='red'>Text</color>"),
-        CreateMarkupLabel("클릭하면 사이트로 이동 합니다: <a href='https://www.samsung.com'>Samsung Electronics</a>").As(mAnchorLabel),
-        CreateMarkupLabel("색깔이 다른 Anchor: <a href='https://research.samsung.com'>Samsung Research</a>").As(mAnchorColorLabel),
-      }));
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetSpacing(STACK_SPACING);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+
+    mAnchorLabel      = CreateMarkupLabel("클릭하면 사이트로 이동 합니다: <a href='https://www.samsung.com'>Samsung Electronics</a>");
+    mAnchorColorLabel = CreateMarkupLabel("색깔이 다른 Anchor: <a href='https://research.samsung.com'>Samsung Research</a>");
+    root.AddChildren({
+      Label::New("Text Markup Example"),
+      CreateMarkupLabel("<font size='24' family='SamsungOneUI_700'>Markup </font><color value='red'>Text</color>"),
+      mAnchorLabel,
+      mAnchorColorLabel,
+    });
+    window.Add(root);
 
     mAnchorColorLabel.SetAnchorColor(UiColor(0xFF0000));
     mAnchorColorLabel.SetAnchorClickedColor(UiColor(0x00FF00));
@@ -72,10 +76,11 @@ private:
 
   Label CreateMarkupLabel(Dali::String text)
   {
-    return Label::New(text)
-      .SetMarkupEnabled(true)
-      .SetFontSize(20.0f)
-      .SetFontFamily("SamsungOneUI_400");
+    Label label = Label::New(text);
+    label.SetMarkupEnabled(true);
+    label.SetFontSize(20.0f);
+    label.SetFontFamily("SamsungOneUI_400");
+    return label;
   }
 
   void PrintLabelInfo(Label label, const char* title)

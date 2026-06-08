@@ -489,9 +489,8 @@ int UtcDaliInputEditorSelectionEnabled(void)
   inputEditor.SetSelectionEnabled(true);
   DALI_TEST_EQUALS(inputEditor.IsSelectionEnabled(), true, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetSelectionEnabled(false);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetSelectionEnabled(false);
 
   END_TEST;
 }
@@ -526,9 +525,8 @@ int UtcDaliInputEditorTextHandle(void)
   inputEditor.SetTextHandleEnabled(false);
   DALI_TEST_EQUALS(inputEditor.IsTextHandleEnabled(), false, TEST_LOCATION);
 
-  // Test chaining for SetTextHandleEnabled
-  InputEditor& ref = inputEditor.SetTextHandleEnabled(true);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter for SetTextHandleEnabled
+  inputEditor.SetTextHandleEnabled(true);
 
   // Test SetTextHandleColor
   UiColor handleColor(Color::BLUE);
@@ -539,9 +537,8 @@ int UtcDaliInputEditorTextHandle(void)
   inputEditor.SetTextHandleColor(handleColor2);
   DALI_TEST_EQUALS(inputEditor.GetTextHandleColor().GetRgba(), Color::RED, TEST_LOCATION);
 
-  // Test chaining for SetTextHandleColor
-  InputEditor& ref2 = inputEditor.SetTextHandleColor(Color::GREEN);
-  DALI_TEST_CHECK(&ref2 == &inputEditor);
+  // Test setter for SetTextHandleColor
+  inputEditor.SetTextHandleColor(Color::GREEN);
 
   END_TEST;
 }
@@ -576,12 +573,10 @@ int UtcDaliInputEditorHandleImages(void)
   inputEditor.SetSelectionHandlePressedImageRight("selection-right-pressed.png");
   DALI_TEST_EQUALS(inputEditor.GetSelectionHandlePressedImageRight(), std::string("selection-right-pressed.png"), TEST_LOCATION);
 
-  // Test chaining for a couple of setters
-  InputEditor& ref = inputEditor.SetCursorHandleImage("new-cursor.png");
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter for a couple of setters
+  inputEditor.SetCursorHandleImage("new-cursor.png");
 
-  InputEditor& ref2 = inputEditor.SetSelectionHandleImageLeft("new-left.png");
-  DALI_TEST_CHECK(&ref2 == &inputEditor);
+  inputEditor.SetSelectionHandleImageLeft("new-left.png");
 
   END_TEST;
 }
@@ -616,9 +611,8 @@ int UtcDaliInputEditorEditable(void)
   inputEditor.SetEditable(true);
   DALI_TEST_EQUALS(inputEditor.IsEditable(), true, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetEditable(false);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetEditable(false);
 
   END_TEST;
 }
@@ -656,9 +650,8 @@ int UtcDaliInputEditorMarkupEnabled(void)
   inputEditor.SetMarkupEnabled(false);
   DALI_TEST_EQUALS(inputEditor.IsMarkupEnabled(), false, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetMarkupEnabled(true);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetMarkupEnabled(true);
 
   END_TEST;
 }
@@ -810,9 +803,8 @@ int UtcDaliInputEditorSetGetAutoGrowEnabled(void)
   inputEditor.SetAutoGrowEnabled(false);
   DALI_TEST_EQUALS(inputEditor.IsAutoGrowEnabled(), false, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetAutoGrowEnabled(true);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetAutoGrowEnabled(true);
 
   END_TEST;
 }
@@ -853,9 +845,8 @@ int UtcDaliInputEditorTypingTextColor(void)
   inputEditor.SetTypingTextColor(color2);
   DALI_TEST_EQUALS(inputEditor.GetTypingTextColor().GetRgba(), Color::RED, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetTypingTextColor(Color::GREEN);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetTypingTextColor(Color::GREEN);
   DALI_TEST_EQUALS(inputEditor.GetTypingTextColor().GetRgba(), Color::GREEN, TEST_LOCATION);
 
   END_TEST;
@@ -873,9 +864,8 @@ int UtcDaliInputEditorTypingFontFamily(void)
   inputEditor.SetTypingFontFamily("Roboto");
   DALI_TEST_EQUALS(inputEditor.GetTypingFontFamily(), std::string("Roboto"), TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetTypingFontFamily("DejaVu Sans");
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetTypingFontFamily("DejaVu Sans");
   DALI_TEST_EQUALS(inputEditor.GetTypingFontFamily(), std::string("DejaVu Sans"), TEST_LOCATION);
 
   END_TEST;
@@ -895,9 +885,8 @@ int UtcDaliInputEditorTypingFontSize(void)
   // TODO: Enable once UTC provides a font client for FONT_SIZE property resolution.
   // DALI_TEST_EQUALS(inputEditor.GetTypingFontSize(), 32.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetTypingFontSize(28.0f);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetTypingFontSize(28.0f);
   // TODO: Enable once UTC provides a font client for FONT_SIZE property resolution.
   // DALI_TEST_EQUALS(inputEditor.GetTypingFontSize(), 28.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
@@ -916,9 +905,8 @@ int UtcDaliInputEditorTypingFontWeight(void)
   inputEditor.SetTypingFontWeight(Text::FontWeight::LIGHT);
   DALI_TEST_EQUALS(inputEditor.GetTypingFontWeight(), Text::FontWeight::LIGHT, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetTypingFontWeight(Text::FontWeight::MEDIUM);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetTypingFontWeight(Text::FontWeight::MEDIUM);
   DALI_TEST_EQUALS(inputEditor.GetTypingFontWeight(), Text::FontWeight::MEDIUM, TEST_LOCATION);
 
   END_TEST;
@@ -936,9 +924,8 @@ int UtcDaliInputEditorTypingFontWidth(void)
   inputEditor.SetTypingFontWidth(Text::FontWidth::CONDENSED);
   DALI_TEST_EQUALS(inputEditor.GetTypingFontWidth(), Text::FontWidth::CONDENSED, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetTypingFontWidth(Text::FontWidth::NORMAL);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetTypingFontWidth(Text::FontWidth::NORMAL);
   DALI_TEST_EQUALS(inputEditor.GetTypingFontWidth(), Text::FontWidth::NORMAL, TEST_LOCATION);
 
   END_TEST;
@@ -956,9 +943,8 @@ int UtcDaliInputEditorTypingFontSlant(void)
   inputEditor.SetTypingFontSlant(Text::FontSlant::OBLIQUE);
   DALI_TEST_EQUALS(inputEditor.GetTypingFontSlant(), Text::FontSlant::OBLIQUE, TEST_LOCATION);
 
-  // Test chaining
-  InputEditor& ref = inputEditor.SetTypingFontSlant(Text::FontSlant::NORMAL);
-  DALI_TEST_CHECK(&ref == &inputEditor);
+  // Test setter
+  inputEditor.SetTypingFontSlant(Text::FontSlant::NORMAL);
   DALI_TEST_EQUALS(inputEditor.GetTypingFontSlant(), Text::FontSlant::NORMAL, TEST_LOCATION);
 
   END_TEST;

@@ -99,15 +99,11 @@ private:
 
   View CreateRoot()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        CreateTypeRow(),
-        CreateImageArea(),
-        CreateStatusBar(),
-        CreateControls(),
-      });
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+    root.AddChildren({CreateTypeRow(), CreateImageArea(), CreateStatusBar(), CreateControls()});
+    return root;
   }
 
   // ── ViewType selector ─────────────────────────────────────────────────────
@@ -115,16 +111,16 @@ private:
   View CreateTypeRow()
   {
     static const char* NAMES[TYPE_COUNT] = {"IMAGE", "ANIMATED", "LOTTIE"};
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(44.0f)
-                        .SetPadding(Extents(4, 4, 4, 4))
-                        .SetBackgroundColor(UiColor(0x111111));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
+    row.SetBackgroundColor(UiColor(0x111111));
     for(int i = 0; i < TYPE_COUNT; ++i)
     {
       mTypeButtons[i] = MakeBtn(NAMES[i], i == static_cast<int>(mViewType) ? UiColor(0xD32F2F) : UiColor(0x444444));
-      mTypeButtons[i].EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnTypeClicked);
+      mTypeButtons[i].AsInteractive().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnTypeClicked);
       row.Add(mTypeButtons[i]);
     }
     return row;
@@ -134,11 +130,11 @@ private:
 
   View CreateImageArea()
   {
-    mImageContainer = StackLayout::New(StackOrientation::VERTICAL)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(WRAP_CONTENT)
-                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                        .SetBackgroundColor(UiColor(0x222222));
+    mImageContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mImageContainer.SetRequestedWidth(MATCH_PARENT);
+    mImageContainer.SetRequestedHeight(WRAP_CONTENT);
+    mImageContainer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    mImageContainer.SetBackgroundColor(UiColor(0x222222));
     RebuildView();
     return mImageContainer;
   }
@@ -147,14 +143,13 @@ private:
 
   View CreateStatusBar()
   {
-    Label::New("")
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(20.0f)
-      .SetFontSize(10.0f)
-      .SetTextColor(UiColor(0x888888))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mStatusLabel);
+    mStatusLabel = Label::New("");
+    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
+    mStatusLabel.SetRequestedHeight(20.0f);
+    mStatusLabel.SetFontSize(10.0f);
+    mStatusLabel.SetTextColor(UiColor(0x888888));
+    mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     RefreshStatus();
     return mStatusLabel;
   }
@@ -176,17 +171,13 @@ private:
 
   View CreateControls()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetSpacing(2.0f)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetPadding(Extents(2, 2, 2, 2))
-      .Children({
-        CreateImageControlRow(),
-        CreateLoadingToggleRow(),
-        CreateReleasePolicyRow(),
-        CreateLoadPolicyRow(),
-      });
+    StackLayout controls = StackLayout::New(StackOrientation::VERTICAL);
+    controls.SetSpacing(2.0f);
+    controls.SetRequestedWidth(MATCH_PARENT);
+    controls.SetRequestedHeight(WRAP_CONTENT);
+    controls.SetPadding(Extents(2, 2, 2, 2));
+    controls.AddChildren({CreateImageControlRow(), CreateLoadingToggleRow(), CreateReleasePolicyRow(), CreateLoadPolicyRow()});
+    return controls;
   }
 
   View CreateImageControlRow()
@@ -200,16 +191,16 @@ private:
 
   View CreateLoadingToggleRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(2.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(40.0f);
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(2.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(40.0f);
 
     mSyncBtn = MakeToggleBtn("SYNC: OFF", false, mSyncBtnLabel);
-    mSyncBtn.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnSyncClicked);
+    mSyncBtn.AsInteractive().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnSyncClicked);
 
     mFastTrackBtn = MakeToggleBtn("FASTTRACK: OFF", false, mFastTrackBtnLabel);
-    mFastTrackBtn.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnFastTrackClicked);
+    mFastTrackBtn.AsInteractive().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnFastTrackClicked);
 
     row.Add(mSyncBtn);
     row.Add(mFastTrackBtn);
@@ -225,18 +216,18 @@ private:
       &ImageLoadingPolicyController::OnRelDestroyedClicked,
       &ImageLoadingPolicyController::OnRelNeverClicked,
     };
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(2.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(40.0f);
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(2.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(40.0f);
     for(int i = 0; i < 3; ++i)
     {
       mReleaseBtns[i] = MakeBtn(LABELS[i], i == mReleasePolicyIndex ? UiColor(0x1565C0) : UiColor(0x444444));
-      mReleaseBtns[i].EnsureInteractiveTrait().ClickedSignal().Connect(this, CBS[i]);
+      mReleaseBtns[i].AsInteractive().ClickedSignal().Connect(this, CBS[i]);
       row.Add(mReleaseBtns[i]);
     }
     auto hideBtn = MakeBtn("HIDE 1s", UiColor(0x444444));
-    hideBtn.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnHideClicked);
+    hideBtn.AsInteractive().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnHideClicked);
     row.Add(hideBtn);
     return row;
   }
@@ -249,18 +240,18 @@ private:
       &ImageLoadingPolicyController::OnLoadAttachedClicked,
       &ImageLoadingPolicyController::OnLoadImmediateClicked,
     };
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(2.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(40.0f);
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(2.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(40.0f);
     for(int i = 0; i < 2; ++i)
     {
       mLoadBtns[i] = MakeBtn(LABELS[i], i == mLoadPolicyIndex ? UiColor(0x1565C0) : UiColor(0x444444));
-      mLoadBtns[i].EnsureInteractiveTrait().ClickedSignal().Connect(this, CBS[i]);
+      mLoadBtns[i].AsInteractive().ClickedSignal().Connect(this, CBS[i]);
       row.Add(mLoadBtns[i]);
     }
     auto testBtn = MakeBtn("TEST LOAD", UiColor(0x2E7D32));
-    testBtn.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnLoadTestClicked);
+    testBtn.AsInteractive().ClickedSignal().Connect(this, &ImageLoadingPolicyController::OnLoadTestClicked);
     row.Add(testBtn);
     return row;
   }
@@ -269,53 +260,52 @@ private:
 
   StackLayout MakeBtn(const char* labelText, UiColor bg)
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(WRAP_CONTENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .SetBackgroundColor(bg)
-      .Children({
-        Label::New(labelText)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(10.0f)
-          .SetTextColor(UiColor(0xFFFFFF))
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER),
-      });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(bg);
+    Label label = Label::New(labelText);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(MATCH_PARENT);
+    label.SetFontSize(10.0f);
+    label.SetTextColor(UiColor(0xFFFFFF));
+    label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(label);
+    return button;
   }
 
   StackLayout MakeToggleBtn(const char* labelText, bool active, Label& labelRef)
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(WRAP_CONTENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-      .SetBackgroundColor(active ? UiColor(0x1565C0) : UiColor(0x444444))
-      .Children({
-        Label::New(labelText)
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFontSize(10.0f)
-          .SetTextColor(UiColor(0xFFFFFF))
-          .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-          .SetVerticalTextAlignment(Text::Alignment::CENTER)
-          .As(labelRef),
-      });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(active ? UiColor(0x1565C0) : UiColor(0x444444));
+    labelRef = Label::New(labelText);
+    labelRef.SetRequestedWidth(MATCH_PARENT);
+    labelRef.SetRequestedHeight(MATCH_PARENT);
+    labelRef.SetFontSize(10.0f);
+    labelRef.SetTextColor(UiColor(0xFFFFFF));
+    labelRef.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    labelRef.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(labelRef);
+    return button;
   }
 
   typedef void (ImageLoadingPolicyController::*Cb)(View, InputEvent);
 
   View MakeRow(std::vector<const char*> labels, std::vector<Cb> callbacks)
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(2.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(40.0f);
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(2.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(40.0f);
     for(size_t i = 0; i < labels.size(); ++i)
     {
       auto btn = MakeBtn(labels[i], UiColor(0x444444));
-      btn.EnsureInteractiveTrait().ClickedSignal().Connect(this, callbacks[i]);
+      btn.AsInteractive().ClickedSignal().Connect(this, callbacks[i]);
       row.Add(btn);
     }
     return row;
@@ -354,7 +344,8 @@ private:
     else
       view = ImageView::New(url);
 
-    view.SetRequestedWidth(MATCH_PARENT).SetRequestedHeight(MATCH_PARENT);
+    view.SetRequestedWidth(MATCH_PARENT);
+    view.SetRequestedHeight(MATCH_PARENT);
     view.SetProperty(ImageView::Property::FITTING_MODE, static_cast<int>(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO));
     view.SetProperty(ImageView::Property::SYNCHRONOUS_LOADING, mSyncLoading);
     if(mViewType != ViewType::LOTTIE)

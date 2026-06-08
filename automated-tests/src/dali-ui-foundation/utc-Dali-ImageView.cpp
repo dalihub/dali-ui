@@ -450,15 +450,15 @@ int UtcDaliImageViewSignalsP(void)
   END_TEST;
 }
 
-// Fluent chaining
+// Setter tests
 
-int UtcDaliImageViewChainingP(void)
+int UtcDaliImageViewSettersP(void)
 {
   UiTestApplication application;
-  ImageView view = ImageView::New()
-                     .SetResourceUrl("image.jpg")
-                     .SetFittingMode(Ui::Image::FittingMode::FILL)
-                     .SetImageColor(UiColor(1.0f, 1.0f, 1.0f, 0.5f));
+  ImageView view = ImageView::New();
+  view.SetResourceUrl("image.jpg");
+  view.SetFittingMode(Ui::Image::FittingMode::FILL);
+  view.SetImageColor(UiColor(1.0f, 1.0f, 1.0f, 0.5f));
   DALI_TEST_CHECK(view);
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("image.jpg"), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetFittingMode(), Ui::Image::FittingMode::FILL, TEST_LOCATION);

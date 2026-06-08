@@ -70,40 +70,35 @@ private:
 
   View CreateContents()
   {
-    return StackLayout::New(StackOrientation::VERTICAL)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(MATCH_PARENT)
-      .Children({
-        CreateImageTypeRow(),
-        CreateImageArea(),
-        CreateInfoLabel(),
-        CreateColorButtonRow(),
-      });
+    StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
+    contents.SetRequestedWidth(MATCH_PARENT);
+    contents.SetRequestedHeight(MATCH_PARENT);
+    contents.AddChildren({CreateImageTypeRow(), CreateImageArea(), CreateInfoLabel(), CreateColorButtonRow()});
+    return contents;
   }
 
   View CreateImageTypeRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(44.0f)
-                        .SetPadding(Extents(4, 4, 4, 4));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(44.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
 
-    StackLayout typeButton = StackLayout::New(StackOrientation::VERTICAL)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetBackgroundColor(UiColor(0x1565C0))
-                               .Children({
-                                 Label::New(IMAGE_TYPE_NAMES[mImageTypeIndex])
-                                   .SetRequestedWidth(MATCH_PARENT)
-                                   .SetRequestedHeight(MATCH_PARENT)
-                                   .SetFontSize(13.0f)
-                                   .SetTextColor(UiColor(0xFFFFFF))
-                                   .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                                   .SetVerticalTextAlignment(Text::Alignment::CENTER)
-                                   .As(mImageTypeLabel),
-                               });
-    typeButton.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageColorController::OnImageTypeClicked);
+    StackLayout typeButton = StackLayout::New(StackOrientation::VERTICAL);
+    typeButton.SetRequestedWidth(MATCH_PARENT);
+    typeButton.SetRequestedHeight(MATCH_PARENT);
+    typeButton.SetBackgroundColor(UiColor(0x1565C0));
+    Label imageTypeLabel = Label::New(IMAGE_TYPE_NAMES[mImageTypeIndex]);
+    imageTypeLabel.SetRequestedWidth(MATCH_PARENT);
+    imageTypeLabel.SetRequestedHeight(MATCH_PARENT);
+    imageTypeLabel.SetFontSize(13.0f);
+    imageTypeLabel.SetTextColor(UiColor(0xFFFFFF));
+    imageTypeLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    imageTypeLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mImageTypeLabel = imageTypeLabel;
+    typeButton.Add(imageTypeLabel);
+    typeButton.AsInteractive().ClickedSignal().Connect(this, &ImageColorController::OnImageTypeClicked);
     mImageTypeButton = typeButton;
 
     row.Add(typeButton);
@@ -113,10 +108,10 @@ private:
   View CreateImageArea()
   {
     // Create initial ImageView
-    mImageContainer = StackLayout::New(StackOrientation::VERTICAL)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(WRAP_CONTENT)
-                        .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    mImageContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mImageContainer.SetRequestedWidth(MATCH_PARENT);
+    mImageContainer.SetRequestedHeight(WRAP_CONTENT);
+    mImageContainer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 
     CreateImageView();
     return mImageContainer;
@@ -130,37 +125,34 @@ private:
     {
       case 0: // ImageView
       {
-        ImageView::New(IMAGE_URLS[mImageTypeIndex])
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-          .SetImageColor(COLORS[mColorIndex].color)
-          .As(mImageView);
+        mImageView = ImageView::New(IMAGE_URLS[mImageTypeIndex]);
+        mImageView.SetRequestedWidth(MATCH_PARENT);
+        mImageView.SetRequestedHeight(MATCH_PARENT);
+        mImageView.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+        mImageView.SetImageColor(COLORS[mColorIndex].color);
         mImageContainer.Add(mImageView);
         break;
       }
       case 1: // AnimatedImageView (GIF)
       {
-        AnimatedImageView::New(IMAGE_URLS[mImageTypeIndex])
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-          .SetImageColor(COLORS[mColorIndex].color)
-          .SetLoopCount(-1)
-          .Play()
-          .As(mAnimatedImageView);
+        mAnimatedImageView = AnimatedImageView::New(IMAGE_URLS[mImageTypeIndex]);
+        mAnimatedImageView.SetRequestedWidth(MATCH_PARENT);
+        mAnimatedImageView.SetRequestedHeight(MATCH_PARENT);
+        mAnimatedImageView.SetFittingMode(Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+        mAnimatedImageView.SetImageColor(COLORS[mColorIndex].color);
+        mAnimatedImageView.SetLoopCount(-1);
+        mAnimatedImageView.Play();
         mImageContainer.Add(mAnimatedImageView);
         break;
       }
       case 2: // LottieAnimationView
       {
-        LottieAnimationView::New(IMAGE_URLS[mImageTypeIndex])
-          .SetRequestedWidth(MATCH_PARENT)
-          .SetRequestedHeight(MATCH_PARENT)
-          .SetImageColor(COLORS[mColorIndex].color)
-          .SetLoopCount(-1)
-          .Play()
-          .As(mLottieView);
+        mLottieView = LottieAnimationView::New(IMAGE_URLS[mImageTypeIndex]);
+        mLottieView.SetRequestedWidth(MATCH_PARENT);
+        mLottieView.SetRequestedHeight(MATCH_PARENT);
+        mLottieView.SetImageColor(COLORS[mColorIndex].color);
+        mLottieView.SetLoopCount(-1);
+        mLottieView.Play();
         mImageContainer.Add(mLottieView);
         break;
       }
@@ -169,23 +161,23 @@ private:
 
   View CreateInfoLabel()
   {
-    return Label::New(MakeInfoText())
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(40.0f)
-      .SetFontSize(13.0f)
-      .SetTextColor(UiColor(0xCCCCCC))
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .As(mInfoLabel);
+    mInfoLabel = Label::New(MakeInfoText());
+    mInfoLabel.SetRequestedWidth(MATCH_PARENT);
+    mInfoLabel.SetRequestedHeight(40.0f);
+    mInfoLabel.SetFontSize(13.0f);
+    mInfoLabel.SetTextColor(UiColor(0xCCCCCC));
+    mInfoLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mInfoLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mInfoLabel;
   }
 
   View CreateColorButtonRow()
   {
-    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL)
-                        .SetSpacing(4.0f)
-                        .SetRequestedWidth(MATCH_PARENT)
-                        .SetRequestedHeight(100.0f)
-                        .SetPadding(Extents(4, 4, 4, 4));
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetSpacing(4.0f);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(100.0f);
+    row.SetPadding(Extents(4, 4, 4, 4));
 
     for(int i = 0; i < COLOR_COUNT; ++i)
     {
@@ -196,23 +188,22 @@ private:
 
   View CreateColorButton(int index)
   {
-    StackLayout button = StackLayout::New(StackOrientation::VERTICAL)
-                           .SetRequestedWidth(WRAP_CONTENT)
-                           .SetRequestedHeight(MATCH_PARENT)
-                           .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f))
-                           .SetBackgroundColor(index == mColorIndex ? UiColor(0x4A90E2) : UiColor(0x333333))
-                           .Children({
-                             Label::New(COLORS[index].name)
-                               .SetRequestedWidth(MATCH_PARENT)
-                               .SetRequestedHeight(MATCH_PARENT)
-                               .SetFontSize(13.0f)
-                               .SetMultiLine(true)
-                               .SetTextColor(UiColor(0xFFFFFF))
-                               .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                               .SetVerticalTextAlignment(Text::Alignment::CENTER),
-                           });
+    StackLayout button = StackLayout::New(StackOrientation::VERTICAL);
+    button.SetRequestedWidth(WRAP_CONTENT);
+    button.SetRequestedHeight(MATCH_PARENT);
+    button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+    button.SetBackgroundColor(index == mColorIndex ? UiColor(0x4A90E2) : UiColor(0x333333));
+    Label buttonLabel = Label::New(COLORS[index].name);
+    buttonLabel.SetRequestedWidth(MATCH_PARENT);
+    buttonLabel.SetRequestedHeight(MATCH_PARENT);
+    buttonLabel.SetFontSize(13.0f);
+    buttonLabel.SetMultiLine(true);
+    buttonLabel.SetTextColor(UiColor(0xFFFFFF));
+    buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.Add(buttonLabel);
 
-    button.EnsureInteractiveTrait().ClickedSignal().Connect(this, &ImageColorController::OnColorButtonClicked);
+    button.AsInteractive().ClickedSignal().Connect(this, &ImageColorController::OnColorButtonClicked);
     mColorButtons[index] = button;
     return button;
   }

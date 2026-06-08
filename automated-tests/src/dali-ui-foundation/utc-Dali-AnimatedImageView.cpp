@@ -284,13 +284,13 @@ int UtcDaliAnimatedImageViewPropertyImageP(void)
   END_TEST;
 }
 
-int UtcDaliAnimatedImageViewChainingP(void)
+int UtcDaliAnimatedImageViewSettersP(void)
 {
   UiTestApplication application;
-  AnimatedImageView view = AnimatedImageView::New()
-                             .SetResourceUrl("animation.gif")
-                             .SetLoopCount(2)
-                             .SetImageColor(UiColor(1.0f, 1.0f, 1.0f, 0.5f));
+  AnimatedImageView view = AnimatedImageView::New();
+  view.SetResourceUrl("animation.gif");
+  view.SetLoopCount(2);
+  view.SetImageColor(UiColor(1.0f, 1.0f, 1.0f, 0.5f));
   DALI_TEST_CHECK(view);
   DALI_TEST_EQUALS(view.GetResourceUrl(), Dali::String("animation.gif"), TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetLoopCount(), 2, TEST_LOCATION);

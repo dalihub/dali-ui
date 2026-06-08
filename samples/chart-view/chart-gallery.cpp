@@ -121,33 +121,33 @@ public:
     // All UI lives in one MATCH_PARENT AbsoluteLayout so the dali-ui layout
     // system processes everything — essential for ChartView::OnArrange.
     // Scrolling works by updating AbsoluteLayoutParams Y for each chart/label.
-    mRootLayout = AbsoluteLayout::New()
-                    .SetRequestedWidth(MATCH_PARENT)
-                    .SetRequestedHeight(MATCH_PARENT);
+    mRootLayout = AbsoluteLayout::New();
+    mRootLayout.SetRequestedWidth(MATCH_PARENT);
+    mRootLayout.SetRequestedHeight(MATCH_PARENT);
 
     // Header
-    Label header = Label::New("LiveCharts Gallery")
-                     .SetLayoutParams(AbsoluteLayoutParams::New()
-                                        .SetX(0.0f)
-                                        .SetY(0.0f)
-                                        .SetWidth(winSz.x)
-                                        .SetHeight(HEADER_H))
-                     .SetFontSize(11.0f)
-                     .SetTextColor(UiColor(1.f, 1.f, 1.f, 1.f))
-                     .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                     .SetVerticalTextAlignment(Text::Alignment::CENTER);
+    Label header = Label::New("LiveCharts Gallery");
+    header.SetLayoutParams(AbsoluteLayoutParams::New()
+                             .SetX(0.0f)
+                             .SetY(0.0f)
+                             .SetWidth(winSz.x)
+                             .SetHeight(HEADER_H));
+    header.SetFontSize(11.0f);
+    header.SetTextColor(UiColor(1.f, 1.f, 1.f, 1.f));
+    header.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    header.SetVerticalTextAlignment(Text::Alignment::CENTER);
     header.SetBackgroundColor(UiColor(LC_PURPLE.r, LC_PURPLE.g, LC_PURPLE.b, LC_PURPLE.a));
 
     // Content area starts below the header. CLIPPING_MODE ensures charts
     // scrolled above the header boundary are clipped and do not overlap it.
-    mContentArea = AbsoluteLayout::New()
-                     .SetRequestedWidth(winSz.x)
-                     .SetRequestedHeight(mWinH)
-                     .SetLayoutParams(AbsoluteLayoutParams::New()
-                                        .SetX(0.0f)
-                                        .SetY(HEADER_H)
-                                        .SetWidth(winSz.x)
-                                        .SetHeight(mWinH));
+    mContentArea = AbsoluteLayout::New();
+    mContentArea.SetRequestedWidth(winSz.x);
+    mContentArea.SetRequestedHeight(mWinH);
+    mContentArea.SetLayoutParams(AbsoluteLayoutParams::New()
+                                   .SetX(0.0f)
+                                   .SetY(HEADER_H)
+                                   .SetWidth(winSz.x)
+                                   .SetHeight(mWinH));
     mContentArea.SetProperty(Actor::Property::CLIPPING_MODE,
                              static_cast<int>(ClippingMode::CLIP_TO_BOUNDING_BOX));
 
@@ -208,16 +208,16 @@ public:
       mContentArea.Add(cv);
       mAllCharts.push_back(cv);
 
-      Label lbl = Label::New(entries[i].label)
-                    .SetLayoutParams(AbsoluteLayoutParams::New()
-                                       .SetX(x)
-                                       .SetY(y + mCh)
-                                       .SetWidth(mCw)
-                                       .SetHeight(LABEL_H))
-                    .SetFontSize(6.0f)
-                    .SetTextColor(UiColor(0.25f, 0.25f, 0.25f, 1.0f))
-                    .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-                    .SetVerticalTextAlignment(Text::Alignment::CENTER);
+      Label lbl = Label::New(entries[i].label);
+      lbl.SetLayoutParams(AbsoluteLayoutParams::New()
+                            .SetX(x)
+                            .SetY(y + mCh)
+                            .SetWidth(mCw)
+                            .SetHeight(LABEL_H));
+      lbl.SetFontSize(6.0f);
+      lbl.SetTextColor(UiColor(0.25f, 0.25f, 0.25f, 1.0f));
+      lbl.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+      lbl.SetVerticalTextAlignment(Text::Alignment::CENTER);
       mContentArea.Add(lbl);
       mEntryLabels.push_back(lbl);
     }
