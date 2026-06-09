@@ -36,8 +36,6 @@ namespace Integration
 class ChartSeries;
 }
 
-#include "chart-series.autogen.h"
-
 /**
  * @brief Base class for all chart series (Line, Bar, Pie, Scatter).
  */
@@ -53,29 +51,29 @@ public:
 
   static ChartSeries DownCast(BaseHandle handle);
 
-  ChartSeries& SetName(const Dali::String& name);
+  void         SetName(const Dali::String& name);
   Dali::String GetName() const;
 
   // Common color shared by all concrete series types (line/marker/bar/scatter color).
   // For PieSeries this sets the default color applied to new slices.
-  ChartSeries& SetColor(const Vector4& color);
-  Vector4      GetColor() const;
+  void    SetColor(const Vector4& color);
+  Vector4 GetColor() const;
 
-  ChartSeries& SetValues(const std::vector<float>& values);
-  ChartSeries& SetValues(const std::vector<std::pair<float, float>>& xyValues);
+  void SetValues(const std::vector<float>& values);
+  void SetValues(const std::vector<std::pair<float, float>>& xyValues);
 
-  ChartSeries& SetVisible(bool visible);
-  bool         IsVisible() const;
+  void SetVisible(bool visible);
+  bool IsVisible() const;
 
-  ChartSeries& AppendValue(float y);
-  ChartSeries& AppendValue(float x, float y);
-  ChartSeries& AppendValues(const std::vector<float>& values);
+  void AppendValue(float y);
+  void AppendValue(float x, float y);
+  void AppendValues(const std::vector<float>& values);
 
-  ChartSeries& SetMaxDataPoints(int maxCount);
-  int          GetMaxDataPoints() const;
+  void SetMaxDataPoints(int maxCount);
+  int  GetMaxDataPoints() const;
 
-  ChartSeries& SetZIndex(int zIndex);
-  int          GetZIndex() const;
+  void SetZIndex(int zIndex);
+  int  GetZIndex() const;
 
 public:
   explicit DALI_UI_API ChartSeries(Integration::ChartSeries* impl);

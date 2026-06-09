@@ -50,26 +50,24 @@ public:
   static PieSeries New();
   static PieSeries DownCast(BaseHandle handle);
 
-  PieSeries& AddSlice(const Dali::String& label, float value, const Vector4& color);
-  PieSeries& ClearSlices();
-  int        GetSliceCount() const;
+  void AddSlice(const Dali::String& label, float value, const Vector4& color);
+  void ClearSlices();
+  int  GetSliceCount() const;
 
-  PieSeries& SetInnerRadiusRatio(float ratio);
-  float      GetInnerRadiusRatio() const;
+  void  SetInnerRadiusRatio(float ratio);
+  float GetInnerRadiusRatio() const;
 
-  PieSeries&   SetCenterLabel(const Dali::String& text);
+  void         SetCenterLabel(const Dali::String& text);
   Dali::String GetCenterLabel() const;
 
-  PieSeries& SetSliceGap(float degrees);
-  float      GetSliceGap() const;
+  void  SetSliceGap(float degrees);
+  float GetSliceGap() const;
 
-  PieSeries& SetDataLabelsVisible(bool visible);
-  bool       IsDataLabelsVisible() const;
+  void SetDataLabelsVisible(bool visible);
+  bool IsDataLabelsVisible() const;
 
-  PieSeries& SetDataLabelMinAngle(float degrees);
-  float      GetDataLabelMinAngle() const;
-
-  DALI_UI_CHAIN_CHARTSERIES_METHODS(PieSeries)
+  void  SetDataLabelMinAngle(float degrees);
+  float GetDataLabelMinAngle() const;
 
 public:
   explicit DALI_UI_API PieSeries(Integration::PieSeries* impl);

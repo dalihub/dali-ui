@@ -45,70 +45,63 @@ BarSeries BarSeries::DownCast(BaseHandle handle)
   return BarSeries(dynamic_cast<Integration::BarSeries*>(handle.GetObjectPtr()));
 }
 
-BarSeries& BarSeries::SetColor(const Vector4& c)
+void BarSeries::SetColor(const Vector4& c)
 {
   GetImplementation(*this).SetColor(c);
-  return *this;
 }
 Vector4 BarSeries::GetColor() const
 {
   return GetImplementation(*this).GetColor();
 }
 
-BarSeries& BarSeries::SetBarGroupWidth(float r)
+void BarSeries::SetBarGroupWidth(float r)
 {
   GetImplementation(*this).SetBarGroupWidth(r);
-  return *this;
 }
 float BarSeries::GetBarGroupWidth() const
 {
   return GetImplementation(*this).GetBarGroupWidth();
 }
 
-BarSeries& BarSeries::SetStacked(bool s)
+void BarSeries::SetStacked(bool s)
 {
   GetImplementation(*this).SetStacked(s);
-  return *this;
 }
 bool BarSeries::IsStacked() const
 {
   return GetImplementation(*this).IsStacked();
 }
 
-BarSeries& BarSeries::SetDataLabelsVisible(bool v)
+void BarSeries::SetDataLabelsVisible(bool v)
 {
   GetImplementation(*this).SetDataLabelsVisible(v);
-  return *this;
 }
 bool BarSeries::IsDataLabelsVisible() const
 {
   return GetImplementation(*this).IsDataLabelsVisible();
 }
 
-BarSeries& BarSeries::SetDataLabelFormat(const Dali::String& f)
+void BarSeries::SetDataLabelFormat(const Dali::String& f)
 {
   GetImplementation(*this).SetDataLabelFormat(f);
-  return *this;
 }
 Dali::String BarSeries::GetDataLabelFormat() const
 {
   return GetImplementation(*this).GetDataLabelFormat();
 }
 
-BarSeries& BarSeries::SetDataLabelColor(const Vector4& c)
+void BarSeries::SetDataLabelColor(const Vector4& c)
 {
   GetImplementation(*this).SetDataLabelColor(c);
-  return *this;
 }
 Vector4 BarSeries::GetDataLabelColor() const
 {
   return GetImplementation(*this).GetDataLabelColor();
 }
 
-BarSeries& BarSeries::SetDataLabelSize(float s)
+void BarSeries::SetDataLabelSize(float s)
 {
   GetImplementation(*this).SetDataLabelSize(s);
-  return *this;
 }
 float BarSeries::GetDataLabelSize() const
 {

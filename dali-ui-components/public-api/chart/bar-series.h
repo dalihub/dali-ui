@@ -48,28 +48,26 @@ public:
   BarSeries(const BarSeries&)            = default;
   BarSeries& operator=(const BarSeries&) = default;
 
-  BarSeries& SetColor(const Vector4& color);
-  Vector4    GetColor() const;
+  void    SetColor(const Vector4& color);
+  Vector4 GetColor() const;
 
-  BarSeries& SetBarGroupWidth(float ratio);
-  float      GetBarGroupWidth() const;
+  void  SetBarGroupWidth(float ratio);
+  float GetBarGroupWidth() const;
 
-  BarSeries& SetStacked(bool stacked);
-  bool       IsStacked() const;
+  void SetStacked(bool stacked);
+  bool IsStacked() const;
 
-  BarSeries& SetDataLabelsVisible(bool visible);
-  bool       IsDataLabelsVisible() const;
+  void SetDataLabelsVisible(bool visible);
+  bool IsDataLabelsVisible() const;
 
-  BarSeries&   SetDataLabelFormat(const Dali::String& fmt);
+  void         SetDataLabelFormat(const Dali::String& fmt);
   Dali::String GetDataLabelFormat() const;
 
-  BarSeries& SetDataLabelColor(const Vector4& color);
-  Vector4    GetDataLabelColor() const;
+  void    SetDataLabelColor(const Vector4& color);
+  Vector4 GetDataLabelColor() const;
 
-  BarSeries& SetDataLabelSize(float pointSize);
-  float      GetDataLabelSize() const;
-
-  DALI_UI_CHAIN_CHARTSERIES_METHODS_BASE(BarSeries)
+  void  SetDataLabelSize(float pointSize);
+  float GetDataLabelSize() const;
 
 public:
   explicit DALI_UI_API BarSeries(Integration::BarSeries* impl);

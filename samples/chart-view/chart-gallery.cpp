@@ -321,12 +321,15 @@ public:
           {"S1", LC_BLUE, {4, 4, 7, 2, 8, 5, 9, 4, 6}},
           {"S2", LC_PURPLE, {2, 3, 5, 8, 1, 6, 3, 7, 2}}})
     {
-      c.AddSeries(LineSeries::New()
-                    .SetColor(std::get<1>(p))
-                    .SetSmoothness(0.65f)
-                    .SetFillEnabled(true)
-                    .SetName(std::get<0>(p))
-                    .SetValues(std::get<2>(p)));
+      {
+        LineSeries lineSeries1 = LineSeries::New();
+        lineSeries1.SetColor(std::get<1>(p));
+        lineSeries1.SetSmoothness(0.65f);
+        lineSeries1.SetFillEnabled(true);
+        lineSeries1.SetName(std::get<0>(p));
+        lineSeries1.SetValues(std::get<2>(p));
+        c.AddSeries(lineSeries1);
+      }
     }
     return c;
   }
@@ -351,14 +354,17 @@ public:
           {"Triangle", LC_ORANGE, MS::TRIANGLE, {2, 7, 4, 6, 3}},
           {"Diamond", LC_BLUE, MS::DIAMOND, {7, 3, 6, 2, 8}}})
     {
-      c.AddSeries(LineSeries::New()
-                    .SetColor(g.col)
-                    .SetSmoothness(0.65f)
-                    .SetMarkerShape(g.shape)
-                    .SetMarkerRadius(4.5f)
-                    .SetMarkersVisible(true)
-                    .SetName(g.nm)
-                    .SetValues(g.v));
+      {
+        LineSeries lineSeries2 = LineSeries::New();
+        lineSeries2.SetColor(g.col);
+        lineSeries2.SetSmoothness(0.65f);
+        lineSeries2.SetMarkerShape(g.shape);
+        lineSeries2.SetMarkerRadius(4.5f);
+        lineSeries2.SetMarkersVisible(true);
+        lineSeries2.SetName(g.nm);
+        lineSeries2.SetValues(g.v);
+        c.AddSeries(lineSeries2);
+      }
     }
     return c;
   }
@@ -372,8 +378,11 @@ public:
     c.SetAnimationDuration(300.0f);
     c.SetAnimationEasing(ChartView::EasingType::EASE_OUT);
 
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
+    {
+      ChartAxis chartAxis1 = ChartAxis::New();
+      chartAxis1.SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"});
+      c.SetXAxis(chartAxis1);
+    }
 
     mAnimSeries = LineSeries::New();
     mAnimSeries.SetName("Revenue");
@@ -383,12 +392,15 @@ public:
     mAnimSeries.SetValues({120, 190, 150, 250, 220, 280});
     c.AddSeries(mAnimSeries);
 
-    c.AddSeries(LineSeries::New()
-                  .SetColor(LC_RED)
-                  .SetSmoothness(0.65f)
-                  .SetMarkersVisible(true)
-                  .SetName("Cost")
-                  .SetValues({80, 110, 90, 150, 130, 160}));
+    {
+      LineSeries lineSeries3 = LineSeries::New();
+      lineSeries3.SetColor(LC_RED);
+      lineSeries3.SetSmoothness(0.65f);
+      lineSeries3.SetMarkersVisible(true);
+      lineSeries3.SetName("Cost");
+      lineSeries3.SetValues({80, 110, 90, 150, 130, 160});
+      c.AddSeries(lineSeries3);
+    }
     return c;
   }
 
@@ -412,9 +424,12 @@ public:
   {
     auto c = NewLine(w, h);
     c.SetUpdateThrottle(0.0f);
-    c.SetYAxis(ChartAxis::New()
-                 .SetMinLimit(-1.5f)
-                 .SetMaxLimit(1.5f));
+    {
+      ChartAxis chartAxis2 = ChartAxis::New();
+      chartAxis2.SetMinLimit(-1.5f);
+      chartAxis2.SetMaxLimit(1.5f);
+      c.SetYAxis(chartAxis2);
+    }
     mSineSeries = LineSeries::New();
     mSineSeries.SetName("Signal");
     mSineSeries.SetColor(LC_BLUE);
@@ -429,15 +444,21 @@ public:
   {
     auto c = NewLine(w, h);
     c.SetProperty(ChartView::Property::SHOW_MARKERS, true);
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"}));
+    {
+      ChartAxis chartAxis3 = ChartAxis::New();
+      chartAxis3.SetLabels({"1", "2", "3", "4", "5", "6", "7", "8", "9", "10"});
+      c.SetXAxis(chartAxis3);
+    }
     const float N = std::numeric_limits<float>::quiet_NaN();
-    c.AddSeries(LineSeries::New()
-                  .SetColor(LC_PURPLE)
-                  .SetSmoothness(0.65f)
-                  .SetMarkersVisible(true)
-                  .SetName("Gaps")
-                  .SetValues({3, N, N, 5, 2, N, 8, 4, N, 6}));
+    {
+      LineSeries lineSeries4 = LineSeries::New();
+      lineSeries4.SetColor(LC_PURPLE);
+      lineSeries4.SetSmoothness(0.65f);
+      lineSeries4.SetMarkersVisible(true);
+      lineSeries4.SetName("Gaps");
+      lineSeries4.SetValues({3, N, N, 5, 2, N, 8, 4, N, 6});
+      c.AddSeries(lineSeries4);
+    }
     return c;
   }
 
@@ -447,18 +468,24 @@ public:
     auto c = ChartView::New(ChartView::Type::BAR, Vector2(w, h));
     Light(c);
     c.SetProperty(ChartView::Property::SHOW_LEGEND, true);
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
+    {
+      ChartAxis chartAxis4 = ChartAxis::New();
+      chartAxis4.SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"});
+      c.SetXAxis(chartAxis4);
+    }
     for(auto& p : std::vector<std::tuple<const char*, Vector4, std::vector<float>>>{
           {"S1", LC_PURPLE, {7, 3, 6, 4, 8, 2}},
           {"S2", LC_RED, {4, 6, 2, 7, 3, 5}},
           {"S3", LC_ORANGE, {5, 4, 7, 2, 6, 8}}})
     {
-      c.AddSeries(BarSeries::New()
-                    .SetColor(std::get<1>(p))
-                    .SetStacked(false)
-                    .SetName(std::get<0>(p))
-                    .SetValues(std::get<2>(p)));
+      {
+        BarSeries barSeries1 = BarSeries::New();
+        barSeries1.SetColor(std::get<1>(p));
+        barSeries1.SetStacked(false);
+        barSeries1.SetName(std::get<0>(p));
+        barSeries1.SetValues(std::get<2>(p));
+        c.AddSeries(barSeries1);
+      }
     }
     return c;
   }
@@ -469,18 +496,24 @@ public:
     auto c = ChartView::New(ChartView::Type::BAR, Vector2(w, h));
     Light(c);
     c.SetProperty(ChartView::Property::SHOW_LEGEND, true);
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
+    {
+      ChartAxis chartAxis5 = ChartAxis::New();
+      chartAxis5.SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"});
+      c.SetXAxis(chartAxis5);
+    }
     for(auto& p : std::vector<std::tuple<const char*, Vector4, std::vector<float>>>{
           {"S1", LC_BLUE, {6, 2, 3, 4, 2, 5}},
           {"S2", LC_PURPLE, {2, 4, 2, 2, 3, 3}},
           {"S3", LC_CYAN, {1, 1, 3, 2, 3, 2}}})
     {
-      c.AddSeries(BarSeries::New()
-                    .SetColor(std::get<1>(p))
-                    .SetStacked(true)
-                    .SetName(std::get<0>(p))
-                    .SetValues(std::get<2>(p)));
+      {
+        BarSeries barSeries2 = BarSeries::New();
+        barSeries2.SetColor(std::get<1>(p));
+        barSeries2.SetStacked(true);
+        barSeries2.SetName(std::get<0>(p));
+        barSeries2.SetValues(std::get<2>(p));
+        c.AddSeries(barSeries2);
+      }
     }
     return c;
   }
@@ -491,18 +524,24 @@ public:
     auto c = ChartView::New(ChartView::Type::BAR, Vector2(w, h));
     Light(c);
     c.SetProperty(ChartView::Property::SHOW_LEGEND, true);
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"Q1", "Q2", "Q3", "Q4"}));
+    {
+      ChartAxis chartAxis6 = ChartAxis::New();
+      chartAxis6.SetLabels({"Q1", "Q2", "Q3", "Q4"});
+      c.SetXAxis(chartAxis6);
+    }
     for(auto& p : std::vector<std::tuple<const char*, Vector4, std::vector<float>>>{
           {"Revenue", LC_BLUE, {210, 280, 250, 320}},
           {"Cost", LC_RED, {140, 160, 130, 190}}})
     {
-      c.AddSeries(BarSeries::New()
-                    .SetColor(std::get<1>(p))
-                    .SetStacked(false)
-                    .SetDataLabelsVisible(true)
-                    .SetName(std::get<0>(p))
-                    .SetValues(std::get<2>(p)));
+      {
+        BarSeries barSeries3 = BarSeries::New();
+        barSeries3.SetColor(std::get<1>(p));
+        barSeries3.SetStacked(false);
+        barSeries3.SetDataLabelsVisible(true);
+        barSeries3.SetName(std::get<0>(p));
+        barSeries3.SetValues(std::get<2>(p));
+        c.AddSeries(barSeries3);
+      }
     }
     return c;
   }
@@ -560,12 +599,15 @@ public:
           {"S1", LC_PURPLE, {{1.2f, 5.3f}, {2.5f, 2.8f}, {3.1f, 7.1f}, {4.7f, 4.6f}, {2.3f, 6.9f}, {5.8f, 3.2f}, {1.9f, 8.4f}, {3.6f, 5.7f}, {4.2f, 2.3f}, {6.1f, 7.8f}}},
           {"S2", LC_RED, {{7.1f, 1.4f}, {8.4f, 3.7f}, {6.3f, 2.1f}, {9.2f, 4.8f}, {7.8f, 1.9f}, {8.9f, 3.2f}, {6.6f, 2.6f}, {9.5f, 4.5f}, {7.4f, 1.7f}, {8.1f, 3.9f}}}})
     {
-      c.AddSeries(ScatterSeries::New()
-                    .SetColor(s.col)
-                    .SetMarkerRadius(4.0f)
-                    .SetMarkerShape(ScatterSeries::MarkerShape::CIRCLE)
-                    .SetName(s.nm)
-                    .SetValues(s.pts));
+      {
+        ScatterSeries scatterSeries1 = ScatterSeries::New();
+        scatterSeries1.SetColor(s.col);
+        scatterSeries1.SetMarkerRadius(4.0f);
+        scatterSeries1.SetMarkerShape(ScatterSeries::MarkerShape::CIRCLE);
+        scatterSeries1.SetName(s.nm);
+        scatterSeries1.SetValues(s.pts);
+        c.AddSeries(scatterSeries1);
+      }
     }
     return c;
   }
@@ -576,25 +618,34 @@ public:
     auto c = NewLine(w, h);
     c.SetProperty(ChartView::Property::SHOW_MARKERS, true);
     c.SetProperty(ChartView::Property::SHOW_LEGEND, true);
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"A", "B", "C", "D", "E", "F", "G"}));
+    {
+      ChartAxis chartAxis7 = ChartAxis::New();
+      chartAxis7.SetLabels({"A", "B", "C", "D", "E", "F", "G"});
+      c.SetXAxis(chartAxis7);
+    }
 
-    c.AddSeries(LineSeries::New()
-                  .SetColor(LC_BLUE)
-                  .SetSmoothness(0.5f)
-                  .SetMarkersVisible(true)
-                  .SetZIndex(10)
-                  .SetName("Top (ZIndex=10)")
-                  .SetValues({100, 150, 120, 170, 200, 180, 220}));
+    {
+      LineSeries lineSeries5 = LineSeries::New();
+      lineSeries5.SetColor(LC_BLUE);
+      lineSeries5.SetSmoothness(0.5f);
+      lineSeries5.SetMarkersVisible(true);
+      lineSeries5.SetZIndex(10);
+      lineSeries5.SetName("Top (ZIndex=10)");
+      lineSeries5.SetValues({100, 150, 120, 170, 200, 180, 220});
+      c.AddSeries(lineSeries5);
+    }
 
-    c.AddSeries(LineSeries::New()
-                  .SetColor(LC_RED)
-                  .SetSmoothness(0.5f)
-                  .SetLineWidth(6.0f)
-                  .SetMarkersVisible(true)
-                  .SetZIndex(0)
-                  .SetName("Base (ZIndex=0)")
-                  .SetValues({80, 130, 160, 140, 170, 160, 190}));
+    {
+      LineSeries lineSeries6 = LineSeries::New();
+      lineSeries6.SetColor(LC_RED);
+      lineSeries6.SetSmoothness(0.5f);
+      lineSeries6.SetLineWidth(6.0f);
+      lineSeries6.SetMarkersVisible(true);
+      lineSeries6.SetZIndex(0);
+      lineSeries6.SetName("Base (ZIndex=0)");
+      lineSeries6.SetValues({80, 130, 160, 140, 170, 160, 190});
+      c.AddSeries(lineSeries6);
+    }
     return c;
   }
 
@@ -633,16 +684,22 @@ public:
   ChartView MakeSections(float w, float h)
   {
     auto c = NewLine(w, h);
-    c.SetYAxis(ChartAxis::New()
-                 .SetMinLimit(0)
-                 .SetMaxLimit(10));
+    {
+      ChartAxis chartAxis8 = ChartAxis::New();
+      chartAxis8.SetMinLimit(0);
+      chartAxis8.SetMaxLimit(10);
+      c.SetYAxis(chartAxis8);
+    }
     AddLine(c, "Value", LC_PURPLE, 0.5f, {2, 4, 6, 3, 7, 5, 8, 4, 6, 3});
     auto band = [&](float a, float b, const Vector4& col)
     {
-      c.AddSection(ChartSection::New()
-                     .SetYMin(a)
-                     .SetYMax(b)
-                     .SetFillColor(Vector4(col.r, col.g, col.b, 0.15f)));
+      {
+        ChartSection chartSection1 = ChartSection::New();
+        chartSection1.SetYMin(a);
+        chartSection1.SetYMax(b);
+        chartSection1.SetFillColor(Vector4(col.r, col.g, col.b, 0.15f));
+        c.AddSection(chartSection1);
+      }
     };
     band(7, 10, MD_RED);
     band(4, 7, MD_AMBER);
@@ -656,21 +713,30 @@ public:
     auto c = ChartView::New(ChartView::Type::BAR, Vector2(w, h));
     Light(c);
     c.SetProperty(ChartView::Property::SHOW_LEGEND, true);
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
+    {
+      ChartAxis chartAxis9 = ChartAxis::New();
+      chartAxis9.SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"});
+      c.SetXAxis(chartAxis9);
+    }
 
-    c.AddSeries(BarSeries::New()
-                  .SetColor(LC_BLUE)
-                  .SetStacked(false)
-                  .SetName("Revenue")
-                  .SetValues({210, 280, 250, 320, 300, 360}));
+    {
+      BarSeries barSeries4 = BarSeries::New();
+      barSeries4.SetColor(LC_BLUE);
+      barSeries4.SetStacked(false);
+      barSeries4.SetName("Revenue");
+      barSeries4.SetValues({210, 280, 250, 320, 300, 360});
+      c.AddSeries(barSeries4);
+    }
 
-    c.AddSeries(LineSeries::New()
-                  .SetColor(LC_RED)
-                  .SetSmoothness(0.5f)
-                  .SetMarkersVisible(true)
-                  .SetName("Target")
-                  .SetValues({220, 260, 270, 300, 310, 340}));
+    {
+      LineSeries lineSeries7 = LineSeries::New();
+      lineSeries7.SetColor(LC_RED);
+      lineSeries7.SetSmoothness(0.5f);
+      lineSeries7.SetMarkersVisible(true);
+      lineSeries7.SetName("Target");
+      lineSeries7.SetValues({220, 260, 270, 300, 310, 340});
+      c.AddSeries(lineSeries7);
+    }
     return c;
   }
 
@@ -678,13 +744,19 @@ public:
   ChartView MakeAxisLabels(float w, float h)
   {
     auto c = NewLine(w, h);
-    c.SetXAxis(ChartAxis::New()
-                 .SetTitle("Month")
-                 .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"}));
-    c.SetYAxis(ChartAxis::New()
-                 .SetTitle("Revenue (M)")
-                 .SetMinLimit(0)
-                 .SetMaxLimit(4));
+    {
+      ChartAxis chartAxis10 = ChartAxis::New();
+      chartAxis10.SetTitle("Month");
+      chartAxis10.SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"});
+      c.SetXAxis(chartAxis10);
+    }
+    {
+      ChartAxis chartAxis11 = ChartAxis::New();
+      chartAxis11.SetTitle("Revenue (M)");
+      chartAxis11.SetMinLimit(0);
+      chartAxis11.SetMaxLimit(4);
+      c.SetYAxis(chartAxis11);
+    }
     AddLine(c, "Revenue", LC_BLUE, 0.5f, {1.2f, 1.8f, 2.1f, 1.5f, 2.4f, 3.1f, 2.8f});
     return c;
   }
@@ -701,8 +773,11 @@ public:
       std::snprintf(buf, sizeof(buf), "%s @ %s: %.0f%%", name.CStr(), xLabel.CStr(), y);
       return Dali::String(buf);
     });
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"Mon", "Tue", "Wed", "Thu", "Fri"}));
+    {
+      ChartAxis chartAxis12 = ChartAxis::New();
+      chartAxis12.SetLabels({"Mon", "Tue", "Wed", "Thu", "Fri"});
+      c.SetXAxis(chartAxis12);
+    }
     AddLine(c, "CPU", LC_BLUE, 0.65f, {42, 58, 71, 49, 83});
     AddLine(c, "Memory", LC_PURPLE, 0.65f, {65, 72, 68, 74, 79});
     return c;
@@ -714,59 +789,83 @@ public:
     auto c = NewLine(w, h);
     c.SetProperty(ChartView::Property::SHOW_MARKERS, true);
     c.SetProperty(ChartView::Property::SHOW_LEGEND, true);
-    c.SetXAxis(ChartAxis::New()
-                 .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun",
-                              "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"}));
+    {
+      ChartAxis chartAxis13 = ChartAxis::New();
+      chartAxis13.SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun",
+                             "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"});
+      c.SetXAxis(chartAxis13);
+    }
 
-    c.AddSeries(LineSeries::New()
-                  .SetColor(MD_BLUE)
-                  .SetMarkersVisible(true)
-                  .SetName("Revenue")
-                  .SetValues({120, 150, 130, 190, 210, 250, 230, 280, 260, 300, 290, 320}));
+    {
+      LineSeries lineSeries8 = LineSeries::New();
+      lineSeries8.SetColor(MD_BLUE);
+      lineSeries8.SetMarkersVisible(true);
+      lineSeries8.SetName("Revenue");
+      lineSeries8.SetValues({120, 150, 130, 190, 210, 250, 230, 280, 260, 300, 290, 320});
+      c.AddSeries(lineSeries8);
+    }
 
-    c.AddSeries(LineSeries::New()
-                  .SetColor(MD_RED)
-                  .SetMarkersVisible(true)
-                  .SetName("Cost")
-                  .SetValues({80, 95, 90, 110, 130, 150, 140, 170, 160, 190, 180, 200}));
+    {
+      LineSeries lineSeries9 = LineSeries::New();
+      lineSeries9.SetColor(MD_RED);
+      lineSeries9.SetMarkersVisible(true);
+      lineSeries9.SetName("Cost");
+      lineSeries9.SetValues({80, 95, 90, 110, 130, 150, 140, 170, 160, 190, 180, 200});
+      c.AddSeries(lineSeries9);
+    }
 
     // X band: Q2 (green)
-    c.AddSection(ChartSection::New()
-                   .SetXMin(2.5f)
-                   .SetXMax(5.5f)
-                   .SetFillColor(Vector4(0.2f, 0.7f, 0.3f, 0.12f))
-                   .SetStrokeColor(Vector4(0.2f, 0.7f, 0.3f, 0.5f))
-                   .SetStrokeWidth(1.5f));
+    {
+      ChartSection chartSection2 = ChartSection::New();
+      chartSection2.SetXMin(2.5f);
+      chartSection2.SetXMax(5.5f);
+      chartSection2.SetFillColor(Vector4(0.2f, 0.7f, 0.3f, 0.12f));
+      chartSection2.SetStrokeColor(Vector4(0.2f, 0.7f, 0.3f, 0.5f));
+      chartSection2.SetStrokeWidth(1.5f);
+      c.AddSection(chartSection2);
+    }
 
     // Y band: target range 200~280 (yellow)
-    c.AddSection(ChartSection::New()
-                   .SetYMin(200.0f)
-                   .SetYMax(280.0f)
-                   .SetFillColor(Vector4(1.0f, 0.85f, 0.2f, 0.10f)));
+    {
+      ChartSection chartSection3 = ChartSection::New();
+      chartSection3.SetYMin(200.0f);
+      chartSection3.SetYMax(280.0f);
+      chartSection3.SetFillColor(Vector4(1.0f, 0.85f, 0.2f, 0.10f));
+      c.AddSection(chartSection3);
+    }
 
     // H-line: Y=250 (red)
-    c.AddSection(ChartSection::New()
-                   .SetYMin(250.0f)
-                   .SetYMax(250.0f)
-                   .SetStrokeColor(Vector4(1.0f, 0.3f, 0.3f, 0.9f))
-                   .SetStrokeWidth(2.0f));
+    {
+      ChartSection chartSection4 = ChartSection::New();
+      chartSection4.SetYMin(250.0f);
+      chartSection4.SetYMax(250.0f);
+      chartSection4.SetStrokeColor(Vector4(1.0f, 0.3f, 0.3f, 0.9f));
+      chartSection4.SetStrokeWidth(2.0f);
+      c.AddSection(chartSection4);
+    }
 
     // V-line: July (blue)
-    c.AddSection(ChartSection::New()
-                   .SetXMin(6.0f)
-                   .SetXMax(6.0f)
-                   .SetStrokeColor(Vector4(0.4f, 0.4f, 1.0f, 0.8f))
-                   .SetStrokeWidth(2.0f));
+    {
+      ChartSection chartSection5 = ChartSection::New();
+      chartSection5.SetXMin(6.0f);
+      chartSection5.SetXMax(6.0f);
+      chartSection5.SetStrokeColor(Vector4(0.4f, 0.4f, 1.0f, 0.8f));
+      chartSection5.SetStrokeWidth(2.0f);
+      c.AddSection(chartSection5);
+    }
 
     // Rect: Q4 high zone Oct~Dec, Y 270~320 (purple)
-    c.AddSection(ChartSection::New()
-                   .SetXMin(8.5f)
-                   .SetXMax(11.5f)
-                   .SetYMin(270.0f)
-                   .SetYMax(320.0f)
-                   .SetFillColor(Vector4(0.6f, 0.2f, 1.0f, 0.12f))
-                   .SetStrokeColor(Vector4(0.6f, 0.2f, 1.0f, 0.6f))
-                   .SetStrokeWidth(1.5f));
+    {
+      ChartSection chartSection6 = ChartSection::New();
+      chartSection6.SetXMin(8.5f);
+      chartSection6.SetXMax(11.5f);
+      chartSection6.SetYMin(270.0f);
+      chartSection6.SetYMax(320.0f);
+      chartSection6.SetFillColor(Vector4(0.6f, 0.2f, 1.0f, 0.12f));
+      chartSection6.SetStrokeColor(Vector4(0.6f, 0.2f, 1.0f, 0.6f));
+      chartSection6.SetStrokeWidth(1.5f);
+      c.AddSection(chartSection6);
+    }
     return c;
   }
 
@@ -804,11 +903,14 @@ public:
   void AddLine(ChartView& c, const char* name, const Vector4& col,
                float smooth, std::vector<float> vals)
   {
-    c.AddSeries(LineSeries::New()
-                  .SetColor(col)
-                  .SetSmoothness(smooth)
-                  .SetName(name)
-                  .SetValues(vals));
+    {
+      LineSeries lineSeries10 = LineSeries::New();
+      lineSeries10.SetColor(col);
+      lineSeries10.SetSmoothness(smooth);
+      lineSeries10.SetName(name);
+      lineSeries10.SetValues(vals);
+      c.AddSeries(lineSeries10);
+    }
   }
 
   void OnKeyEvent(Window /*window*/, KeyEvent event)

@@ -59,56 +59,54 @@ public:
   static LineSeries New();
   static LineSeries DownCast(BaseHandle handle);
 
-  LineSeries& SetLineWidth(float width);
-  float       GetLineWidth() const;
+  void  SetLineWidth(float width);
+  float GetLineWidth() const;
 
-  LineSeries& SetSmoothness(float value);
-  float       GetSmoothness() const;
+  void  SetSmoothness(float value);
+  float GetSmoothness() const;
 
-  LineSeries& SetColor(const Vector4& color);
-  Vector4     GetColor() const;
+  void    SetColor(const Vector4& color);
+  Vector4 GetColor() const;
 
-  LineSeries& SetMarkersVisible(bool visible);
-  bool        IsMarkersVisible() const;
+  void SetMarkersVisible(bool visible);
+  bool IsMarkersVisible() const;
 
-  LineSeries& SetMarkerRadius(float radius);
-  float       GetMarkerRadius() const;
+  void  SetMarkerRadius(float radius);
+  float GetMarkerRadius() const;
 
-  LineSeries& SetMarkerShape(MarkerShape shape);
+  void        SetMarkerShape(MarkerShape shape);
   MarkerShape GetMarkerShape() const;
 
-  LineSeries& SetMarkerColor(const Vector4& color);
-  Vector4     GetMarkerColor() const;
+  void    SetMarkerColor(const Vector4& color);
+  Vector4 GetMarkerColor() const;
 
-  LineSeries& SetMarkerBorderColor(const Vector4& color);
-  Vector4     GetMarkerBorderColor() const;
+  void    SetMarkerBorderColor(const Vector4& color);
+  Vector4 GetMarkerBorderColor() const;
 
-  LineSeries& SetMarkerBorderWidth(float width);
-  float       GetMarkerBorderWidth() const;
+  void  SetMarkerBorderWidth(float width);
+  float GetMarkerBorderWidth() const;
 
-  LineSeries& SetDataLabelsVisible(bool visible);
-  bool        IsDataLabelsVisible() const;
+  void SetDataLabelsVisible(bool visible);
+  bool IsDataLabelsVisible() const;
 
-  LineSeries&  SetDataLabelFormat(const Dali::String& format);
+  void         SetDataLabelFormat(const Dali::String& format);
   Dali::String GetDataLabelFormat() const;
 
-  LineSeries& SetDataLabelColor(const Vector4& color);
-  Vector4     GetDataLabelColor() const;
+  void    SetDataLabelColor(const Vector4& color);
+  Vector4 GetDataLabelColor() const;
 
-  LineSeries& SetDataLabelSize(float pointSize);
-  float       GetDataLabelSize() const;
+  void  SetDataLabelSize(float pointSize);
+  float GetDataLabelSize() const;
 
-  LineSeries& SetFillEnabled(bool enabled);
-  bool        GetFillEnabled() const;
+  void SetFillEnabled(bool enabled);
+  bool GetFillEnabled() const;
 
-  LineSeries& SetFillColor(const Vector4& color);
-  Vector4     GetFillColor() const;
+  void    SetFillColor(const Vector4& color);
+  Vector4 GetFillColor() const;
 
   using DataLabelFormatterType = std::function<Dali::String(float value, int pointIndex)>;
-  LineSeries&                   SetDataLabelFormatter(DataLabelFormatterType formatter);
+  void                          SetDataLabelFormatter(DataLabelFormatterType formatter);
   const DataLabelFormatterType& GetDataLabelFormatter() const;
-
-  DALI_UI_CHAIN_CHARTSERIES_METHODS_BASE(LineSeries)
 
 public:
   explicit DALI_UI_API LineSeries(Integration::LineSeries* impl);

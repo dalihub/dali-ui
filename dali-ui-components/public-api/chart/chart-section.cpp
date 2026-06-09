@@ -40,65 +40,58 @@ ChartSection::ChartSection(Integration::ChartSection* impl)
 {
 }
 
-ChartSection& ChartSection::SetXMin(float v)
+void ChartSection::SetXMin(float v)
 {
   GetImplementation(*this).SetXMin(v);
-  return *this;
 }
 float ChartSection::GetXMin() const
 {
   return GetImplementation(*this).GetXMin();
 }
-ChartSection& ChartSection::SetXMax(float v)
+void ChartSection::SetXMax(float v)
 {
   GetImplementation(*this).SetXMax(v);
-  return *this;
 }
 float ChartSection::GetXMax() const
 {
   return GetImplementation(*this).GetXMax();
 }
-ChartSection& ChartSection::SetYMin(float v)
+void ChartSection::SetYMin(float v)
 {
   GetImplementation(*this).SetYMin(v);
-  return *this;
 }
 float ChartSection::GetYMin() const
 {
   return GetImplementation(*this).GetYMin();
 }
-ChartSection& ChartSection::SetYMax(float v)
+void ChartSection::SetYMax(float v)
 {
   GetImplementation(*this).SetYMax(v);
-  return *this;
 }
 float ChartSection::GetYMax() const
 {
   return GetImplementation(*this).GetYMax();
 }
 
-ChartSection& ChartSection::SetFillColor(const Vector4& c)
+void ChartSection::SetFillColor(const Vector4& c)
 {
   GetImplementation(*this).SetFillColor(c);
-  return *this;
 }
 Vector4 ChartSection::GetFillColor() const
 {
   return GetImplementation(*this).GetFillColor();
 }
-ChartSection& ChartSection::SetStrokeColor(const Vector4& c)
+void ChartSection::SetStrokeColor(const Vector4& c)
 {
   GetImplementation(*this).SetStrokeColor(c);
-  return *this;
 }
 Vector4 ChartSection::GetStrokeColor() const
 {
   return GetImplementation(*this).GetStrokeColor();
 }
-ChartSection& ChartSection::SetStrokeWidth(float w)
+void ChartSection::SetStrokeWidth(float w)
 {
   GetImplementation(*this).SetStrokeWidth(w);
-  return *this;
 }
 float ChartSection::GetStrokeWidth() const
 {

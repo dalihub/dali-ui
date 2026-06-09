@@ -15,14 +15,14 @@
  *
  */
 
+#include <dali-ui-components/public-api/chart/chart-axis.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali.h>
 #include <stdlib.h>
 #include <iostream>
 #include <utility>
 #include <vector>
-#include <dali.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-components/public-api/chart/chart-axis.h>
-#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -40,7 +40,7 @@ void utc_dali_chartaxis_cleanup(void)
 int UtcDaliChartAxisConstructorP(void)
 {
   UiTestApplication application;
-  ChartAxis axis;
+  ChartAxis         axis;
   DALI_TEST_CHECK(!axis);
   END_TEST;
 }
@@ -48,7 +48,7 @@ int UtcDaliChartAxisConstructorP(void)
 int UtcDaliChartAxisNewP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
   DALI_TEST_CHECK(axis);
   END_TEST;
 }
@@ -56,8 +56,8 @@ int UtcDaliChartAxisNewP(void)
 int UtcDaliChartAxisCopyConstructorP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
-  ChartAxis copy(axis);
+  ChartAxis         axis = ChartAxis::New();
+  ChartAxis         copy(axis);
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(axis == copy);
   END_TEST;
@@ -66,7 +66,7 @@ int UtcDaliChartAxisCopyConstructorP(void)
 int UtcDaliChartAxisMoveConstructor(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
   DALI_TEST_EQUALS(1, axis.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
   ChartAxis moved = std::move(axis);
@@ -79,9 +79,9 @@ int UtcDaliChartAxisMoveConstructor(void)
 int UtcDaliChartAxisDownCastP(void)
 {
   UiTestApplication application;
-  ChartAxis  axis = ChartAxis::New();
-  BaseHandle handle(axis);
-  ChartAxis  downCast = ChartAxis::DownCast(handle);
+  ChartAxis         axis = ChartAxis::New();
+  BaseHandle        handle(axis);
+  ChartAxis         downCast = ChartAxis::DownCast(handle);
   DALI_TEST_CHECK(downCast);
   END_TEST;
 }
@@ -89,8 +89,8 @@ int UtcDaliChartAxisDownCastP(void)
 int UtcDaliChartAxisDownCastN(void)
 {
   UiTestApplication application;
-  BaseHandle unInitializedObject;
-  ChartAxis  downCast = ChartAxis::DownCast(unInitializedObject);
+  BaseHandle        unInitializedObject;
+  ChartAxis         downCast = ChartAxis::DownCast(unInitializedObject);
   DALI_TEST_CHECK(!downCast);
   END_TEST;
 }
@@ -98,7 +98,7 @@ int UtcDaliChartAxisDownCastN(void)
 int UtcDaliChartAxisSetLabelsP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
   std::vector<Dali::String> labels = {Dali::String("Jan"),
                                       Dali::String("Feb"),
@@ -114,7 +114,7 @@ int UtcDaliChartAxisSetLabelsP(void)
 int UtcDaliChartAxisSetTitleP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
   axis.SetTitle(Dali::String("Month"));
   DALI_TEST_EQUALS(axis.GetTitle(), Dali::String("Month"), TEST_LOCATION);
@@ -124,7 +124,7 @@ int UtcDaliChartAxisSetTitleP(void)
 int UtcDaliChartAxisSetRangeLimitsP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
   axis.SetMinLimit(10.0f);
   DALI_TEST_EQUALS(axis.GetMinLimit(), 10.0f, 0.001f, TEST_LOCATION);
@@ -137,7 +137,7 @@ int UtcDaliChartAxisSetRangeLimitsP(void)
 int UtcDaliChartAxisSetAutoRangeP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
   axis.SetAutoRange(false);
   DALI_TEST_CHECK(!axis.IsAutoRange());
@@ -150,7 +150,7 @@ int UtcDaliChartAxisSetAutoRangeP(void)
 int UtcDaliChartAxisSetGridLinesP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
   axis.SetShowGridLines(false);
   DALI_TEST_CHECK(!axis.GetShowGridLines());
@@ -169,7 +169,7 @@ int UtcDaliChartAxisSetGridLinesP(void)
 int UtcDaliChartAxisSetAxisLineP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
   axis.SetAxisLineColor(Vector4(0.2f, 0.2f, 0.2f, 1.0f));
   DALI_TEST_EQUALS(axis.GetAxisLineColor(), Vector4(0.2f, 0.2f, 0.2f, 1.0f), TEST_LOCATION);
@@ -182,7 +182,7 @@ int UtcDaliChartAxisSetAxisLineP(void)
 int UtcDaliChartAxisSetDataPaddingP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
   axis.SetDataPadding(0.1f);
   DALI_TEST_EQUALS(axis.GetDataPadding(), 0.1f, 0.001f, TEST_LOCATION);
@@ -195,23 +195,22 @@ int UtcDaliChartAxisSetDataPaddingP(void)
 int UtcDaliChartAxisSetLabelsRotationP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
   axis.SetLabelsRotation(45.0f);
   DALI_TEST_EQUALS(axis.GetLabelsRotation(), 45.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliChartAxisMethodChainingP(void)
+int UtcDaliChartAxisSettersP(void)
 {
   UiTestApplication application;
-  ChartAxis axis = ChartAxis::New();
+  ChartAxis         axis = ChartAxis::New();
 
-  ChartAxis& ref = axis.SetTitle(Dali::String("Value"))
-                       .SetAutoRange(true)
-                       .SetShowGridLines(true)
-                       .SetDataPadding(0.05f);
-  DALI_TEST_CHECK(&ref == &axis);
+  axis.SetTitle(Dali::String("Value"));
+  axis.SetAutoRange(true);
+  axis.SetShowGridLines(true);
+  axis.SetDataPadding(0.05f);
   DALI_TEST_EQUALS(axis.GetTitle(), Dali::String("Value"), TEST_LOCATION);
   END_TEST;
 }

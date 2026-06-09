@@ -45,30 +45,27 @@ ScatterSeries ScatterSeries::DownCast(BaseHandle handle)
   return ScatterSeries(dynamic_cast<Integration::ScatterSeries*>(handle.GetObjectPtr()));
 }
 
-ScatterSeries& ScatterSeries::SetColor(const Vector4& c)
+void ScatterSeries::SetColor(const Vector4& c)
 {
   GetImplementation(*this).SetColor(c);
-  return *this;
 }
 Vector4 ScatterSeries::GetColor() const
 {
   return GetImplementation(*this).GetColor();
 }
 
-ScatterSeries& ScatterSeries::SetMarkerRadius(float r)
+void ScatterSeries::SetMarkerRadius(float r)
 {
   GetImplementation(*this).SetMarkerRadius(r);
-  return *this;
 }
 float ScatterSeries::GetMarkerRadius() const
 {
   return GetImplementation(*this).GetMarkerRadius();
 }
 
-ScatterSeries& ScatterSeries::SetMarkerShape(MarkerShape s)
+void ScatterSeries::SetMarkerShape(MarkerShape s)
 {
   GetImplementation(*this).SetMarkerShape(s);
-  return *this;
 }
 ScatterSeries::MarkerShape ScatterSeries::GetMarkerShape() const
 {

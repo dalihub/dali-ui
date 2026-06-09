@@ -15,16 +15,16 @@
  *
  */
 
+#include <dali-ui-components/public-api/chart/chart-axis.h>
+#include <dali-ui-components/public-api/chart/chart-section.h>
+#include <dali-ui-components/public-api/chart/chart-view.h>
+#include <dali-ui-components/public-api/chart/line-series.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali.h>
 #include <stdlib.h>
 #include <iostream>
 #include <utility>
-#include <dali.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-components/public-api/chart/chart-view.h>
-#include <dali-ui-components/public-api/chart/line-series.h>
-#include <dali-ui-components/public-api/chart/chart-axis.h>
-#include <dali-ui-components/public-api/chart/chart-section.h>
-#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -52,7 +52,7 @@ void OnDataPointSelected(const ChartPointEventArgs&)
 int UtcDaliChartViewConstructorP(void)
 {
   UiTestApplication application;
-  ChartView chartView;
+  ChartView         chartView;
   DALI_TEST_CHECK(!chartView);
   END_TEST;
 }
@@ -60,7 +60,7 @@ int UtcDaliChartViewConstructorP(void)
 int UtcDaliChartViewNewLineP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
   DALI_TEST_CHECK(chartView);
   END_TEST;
 }
@@ -68,7 +68,7 @@ int UtcDaliChartViewNewLineP(void)
 int UtcDaliChartViewNewBarP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::BAR, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::BAR, Vector2(480.0f, 360.0f));
   DALI_TEST_CHECK(chartView);
   END_TEST;
 }
@@ -76,7 +76,7 @@ int UtcDaliChartViewNewBarP(void)
 int UtcDaliChartViewNewPieP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::PIE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::PIE, Vector2(480.0f, 360.0f));
   DALI_TEST_CHECK(chartView);
   END_TEST;
 }
@@ -84,7 +84,7 @@ int UtcDaliChartViewNewPieP(void)
 int UtcDaliChartViewNewGaugeP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(480.0f, 360.0f));
   DALI_TEST_CHECK(chartView);
   END_TEST;
 }
@@ -92,8 +92,8 @@ int UtcDaliChartViewNewGaugeP(void)
 int UtcDaliChartViewCopyConstructorP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  ChartView copy(chartView);
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         copy(chartView);
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(chartView == copy);
   END_TEST;
@@ -102,7 +102,7 @@ int UtcDaliChartViewCopyConstructorP(void)
 int UtcDaliChartViewMoveConstructor(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
   DALI_TEST_EQUALS(1, chartView.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
   ChartView moved = std::move(chartView);
@@ -115,8 +115,8 @@ int UtcDaliChartViewMoveConstructor(void)
 int UtcDaliChartViewAssignmentOperatorP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  ChartView copy;
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         copy;
   copy = chartView;
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(chartView == copy);
@@ -126,7 +126,7 @@ int UtcDaliChartViewAssignmentOperatorP(void)
 int UtcDaliChartViewMoveAssignment(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
   DALI_TEST_EQUALS(1, chartView.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
   ChartView moved;
@@ -140,9 +140,9 @@ int UtcDaliChartViewMoveAssignment(void)
 int UtcDaliChartViewDownCastP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  BaseHandle handle(chartView);
-  ChartView  downCast = ChartView::DownCast(handle);
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  BaseHandle        handle(chartView);
+  ChartView         downCast = ChartView::DownCast(handle);
   DALI_TEST_CHECK(downCast);
   END_TEST;
 }
@@ -150,8 +150,8 @@ int UtcDaliChartViewDownCastP(void)
 int UtcDaliChartViewDownCastN(void)
 {
   UiTestApplication application;
-  BaseHandle unInitializedObject;
-  ChartView  downCast = ChartView::DownCast(unInitializedObject);
+  BaseHandle        unInitializedObject;
+  ChartView         downCast = ChartView::DownCast(unInitializedObject);
   DALI_TEST_CHECK(!downCast);
   END_TEST;
 }
@@ -159,7 +159,7 @@ int UtcDaliChartViewDownCastN(void)
 int UtcDaliChartViewSetTitleP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   chartView.SetTitle(Dali::String("Monthly Sales"));
   DALI_TEST_EQUALS(chartView.GetTitle(), Dali::String("Monthly Sales"), TEST_LOCATION);
@@ -177,7 +177,7 @@ int UtcDaliChartViewSetTitleP(void)
 int UtcDaliChartViewAnimationP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   chartView.SetAnimationDuration(500.0f);
   DALI_TEST_EQUALS(chartView.GetAnimationDuration(), 500.0f, 0.001f, TEST_LOCATION);
@@ -195,8 +195,8 @@ int UtcDaliChartViewAnimationP(void)
 int UtcDaliChartViewAddRemoveSeriesP(void)
 {
   UiTestApplication application;
-  ChartView  chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  LineSeries series    = LineSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries        series    = LineSeries::New();
   series.SetName(Dali::String("series1"));
 
   chartView.AddSeries(series);
@@ -208,7 +208,7 @@ int UtcDaliChartViewAddRemoveSeriesP(void)
 int UtcDaliChartViewRemoveSeriesN(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   bool removed = chartView.RemoveSeries(Dali::String("nonexistent"));
   DALI_TEST_CHECK(!removed);
@@ -218,9 +218,9 @@ int UtcDaliChartViewRemoveSeriesN(void)
 int UtcDaliChartViewRemoveAllSeriesP(void)
 {
   UiTestApplication application;
-  ChartView  chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  LineSeries s1        = LineSeries::New();
-  LineSeries s2        = LineSeries::New();
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  LineSeries        s1        = LineSeries::New();
+  LineSeries        s2        = LineSeries::New();
   s1.SetName(Dali::String("s1"));
   s2.SetName(Dali::String("s2"));
   chartView.AddSeries(s1);
@@ -233,7 +233,7 @@ int UtcDaliChartViewRemoveAllSeriesP(void)
 int UtcDaliChartViewZoomModeP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   chartView.SetZoomMode(static_cast<int>(ChartView::ZoomMode::PAN_X));
   DALI_TEST_EQUALS(chartView.GetZoomMode(), static_cast<int>(ChartView::ZoomMode::PAN_X), TEST_LOCATION);
@@ -249,7 +249,7 @@ int UtcDaliChartViewZoomModeP(void)
 int UtcDaliChartViewHitTestingP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   chartView.SetHitThreshold(20.0f);
   DALI_TEST_EQUALS(chartView.GetHitThreshold(), 20.0f, 0.001f, TEST_LOCATION);
@@ -264,7 +264,7 @@ int UtcDaliChartViewHitTestingP(void)
 int UtcDaliChartViewPropertyP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   chartView.SetProperty(ChartView::Property::SHOW_GRID, false);
   DALI_TEST_CHECK(!chartView.GetProperty<bool>(ChartView::Property::SHOW_GRID));
@@ -280,7 +280,7 @@ int UtcDaliChartViewPropertyP(void)
 int UtcDaliChartViewSignalP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   gSignalReceived = false;
   chartView.DataPointSelectedSignal().Connect(OnDataPointSelected);
@@ -292,7 +292,7 @@ int UtcDaliChartViewSignalP(void)
 int UtcDaliChartViewGaugeP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::GAUGE, Vector2(480.0f, 360.0f));
 
   chartView.SetGaugeValue(75.0f);
   DALI_TEST_EQUALS(chartView.GetGaugeValue(), 75.0f, 0.001f, TEST_LOCATION);
@@ -316,9 +316,10 @@ int UtcDaliChartViewGaugeP(void)
 int UtcDaliChartViewSectionP(void)
 {
   UiTestApplication application;
-  ChartView    chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
-  ChartSection section   = ChartSection::New();
-  section.SetXMin(1.0f).SetXMax(3.0f);
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartSection      section   = ChartSection::New();
+  section.SetXMin(1.0f);
+  section.SetXMax(3.0f);
 
   chartView.AddSection(section);
   chartView.RemoveSection(section);
@@ -330,7 +331,7 @@ int UtcDaliChartViewSectionP(void)
 int UtcDaliChartViewSettersP(void)
 {
   UiTestApplication application;
-  ChartView chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
+  ChartView         chartView = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
   chartView.SetTitle(Dali::String("Test"));
   chartView.SetAnimationDuration(300.0f);

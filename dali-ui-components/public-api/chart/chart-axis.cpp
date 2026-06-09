@@ -73,10 +73,9 @@ ChartAxis ChartAxis::DownCast(BaseHandle handle)
   return ChartAxis(dynamic_cast<Integration::ChartAxis*>(handle.GetObjectPtr()));
 }
 
-ChartAxis& ChartAxis::SetLabels(const std::vector<Dali::String>& labels)
+void ChartAxis::SetLabels(const std::vector<Dali::String>& labels)
 {
   GetImplementation(*this).SetLabels(labels);
-  return *this;
 }
 
 std::vector<Dali::String> ChartAxis::GetLabels() const
@@ -84,10 +83,9 @@ std::vector<Dali::String> ChartAxis::GetLabels() const
   return GetImplementation(*this).GetLabels();
 }
 
-ChartAxis& ChartAxis::SetMinLimit(float min)
+void ChartAxis::SetMinLimit(float min)
 {
   GetImplementation(*this).SetMinLimit(min);
-  return *this;
 }
 
 float ChartAxis::GetMinLimit() const
@@ -95,10 +93,9 @@ float ChartAxis::GetMinLimit() const
   return GetImplementation(*this).GetMinLimit();
 }
 
-ChartAxis& ChartAxis::SetMaxLimit(float max)
+void ChartAxis::SetMaxLimit(float max)
 {
   GetImplementation(*this).SetMaxLimit(max);
-  return *this;
 }
 
 float ChartAxis::GetMaxLimit() const
@@ -106,10 +103,9 @@ float ChartAxis::GetMaxLimit() const
   return GetImplementation(*this).GetMaxLimit();
 }
 
-ChartAxis& ChartAxis::SetAutoRange(bool autoRange)
+void ChartAxis::SetAutoRange(bool autoRange)
 {
   GetImplementation(*this).SetAutoRange(autoRange);
-  return *this;
 }
 
 bool ChartAxis::IsAutoRange() const
@@ -117,10 +113,9 @@ bool ChartAxis::IsAutoRange() const
   return GetImplementation(*this).GetAutoRange();
 }
 
-ChartAxis& ChartAxis::SetShowGridLines(bool show)
+void ChartAxis::SetShowGridLines(bool show)
 {
   GetImplementation(*this).SetShowGridLines(show);
-  return *this;
 }
 
 bool ChartAxis::GetShowGridLines() const
@@ -128,10 +123,9 @@ bool ChartAxis::GetShowGridLines() const
   return GetImplementation(*this).GetShowGridLines();
 }
 
-ChartAxis& ChartAxis::SetLabelSize(float size)
+void ChartAxis::SetLabelSize(float size)
 {
   GetImplementation(*this).SetLabelSize(size);
-  return *this;
 }
 
 float ChartAxis::GetLabelSize() const
@@ -139,10 +133,9 @@ float ChartAxis::GetLabelSize() const
   return GetImplementation(*this).GetLabelSize();
 }
 
-ChartAxis& ChartAxis::SetTitle(const Dali::String& title)
+void ChartAxis::SetTitle(const Dali::String& title)
 {
   GetImplementation(*this).SetTitle(title);
-  return *this;
 }
 
 Dali::String ChartAxis::GetTitle() const
@@ -150,10 +143,9 @@ Dali::String ChartAxis::GetTitle() const
   return GetImplementation(*this).GetTitle();
 }
 
-ChartAxis& ChartAxis::SetAxisLineColor(const Vector4& color)
+void ChartAxis::SetAxisLineColor(const Vector4& color)
 {
   GetImplementation(*this).SetAxisLineColor(color);
-  return *this;
 }
 
 Vector4 ChartAxis::GetAxisLineColor() const
@@ -161,10 +153,9 @@ Vector4 ChartAxis::GetAxisLineColor() const
   return GetImplementation(*this).GetAxisLineColor();
 }
 
-ChartAxis& ChartAxis::SetAxisLineWidth(float width)
+void ChartAxis::SetAxisLineWidth(float width)
 {
   GetImplementation(*this).SetAxisLineWidth(width);
-  return *this;
 }
 
 float ChartAxis::GetAxisLineWidth() const
@@ -172,10 +163,9 @@ float ChartAxis::GetAxisLineWidth() const
   return GetImplementation(*this).GetAxisLineWidth();
 }
 
-ChartAxis& ChartAxis::SetGridDash(float dashLength, float gapLength)
+void ChartAxis::SetGridDash(float dashLength, float gapLength)
 {
   GetImplementation(*this).SetGridDash(dashLength, gapLength);
-  return *this;
 }
 
 void ChartAxis::GetGridDash(float& dashLength, float& gapLength) const
@@ -183,10 +173,9 @@ void ChartAxis::GetGridDash(float& dashLength, float& gapLength) const
   GetImplementation(*this).GetGridDash(dashLength, gapLength);
 }
 
-ChartAxis& ChartAxis::SetGridColor(const Vector4& color)
+void ChartAxis::SetGridColor(const Vector4& color)
 {
   GetImplementation(*this).SetGridColor(color);
-  return *this;
 }
 
 Vector4 ChartAxis::GetGridColor() const
@@ -194,10 +183,9 @@ Vector4 ChartAxis::GetGridColor() const
   return GetImplementation(*this).GetGridColor();
 }
 
-ChartAxis& ChartAxis::SetMinStep(float step)
+void ChartAxis::SetMinStep(float step)
 {
   GetImplementation(*this).SetMinStep(step);
-  return *this;
 }
 
 float ChartAxis::GetMinStep() const
@@ -205,10 +193,9 @@ float ChartAxis::GetMinStep() const
   return GetImplementation(*this).GetMinStep();
 }
 
-ChartAxis& ChartAxis::SetDataPadding(float fraction)
+void ChartAxis::SetDataPadding(float fraction)
 {
   GetImplementation(*this).SetDataPadding(fraction);
-  return *this;
 }
 
 float ChartAxis::GetDataPadding() const
@@ -216,10 +203,9 @@ float ChartAxis::GetDataPadding() const
   return GetImplementation(*this).GetDataPadding();
 }
 
-ChartAxis& ChartAxis::SetLabelsRotation(float degrees)
+void ChartAxis::SetLabelsRotation(float degrees)
 {
   GetImplementation(*this).SetLabelsRotation(degrees);
-  return *this;
 }
 
 float ChartAxis::GetLabelsRotation() const

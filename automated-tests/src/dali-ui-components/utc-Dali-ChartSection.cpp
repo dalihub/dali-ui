@@ -15,12 +15,12 @@
  *
  */
 
+#include <dali-ui-components/public-api/chart/chart-section.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali.h>
 #include <stdlib.h>
 #include <iostream>
-#include <dali.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-components/public-api/chart/chart-section.h>
-#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -38,7 +38,7 @@ void utc_dali_chartsection_cleanup(void)
 int UtcDaliChartSectionConstructorP(void)
 {
   UiTestApplication application;
-  ChartSection section;
+  ChartSection      section;
   DALI_TEST_CHECK(!section);
   END_TEST;
 }
@@ -46,7 +46,7 @@ int UtcDaliChartSectionConstructorP(void)
 int UtcDaliChartSectionNewP(void)
 {
   UiTestApplication application;
-  ChartSection section = ChartSection::New();
+  ChartSection      section = ChartSection::New();
   DALI_TEST_CHECK(section);
   END_TEST;
 }
@@ -54,8 +54,8 @@ int UtcDaliChartSectionNewP(void)
 int UtcDaliChartSectionCopyConstructorP(void)
 {
   UiTestApplication application;
-  ChartSection section = ChartSection::New();
-  ChartSection copy(section);
+  ChartSection      section = ChartSection::New();
+  ChartSection      copy(section);
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(section == copy);
   END_TEST;
@@ -64,8 +64,8 @@ int UtcDaliChartSectionCopyConstructorP(void)
 int UtcDaliChartSectionAssignmentOperatorP(void)
 {
   UiTestApplication application;
-  ChartSection section = ChartSection::New();
-  ChartSection copy;
+  ChartSection      section = ChartSection::New();
+  ChartSection      copy;
   copy = section;
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(section == copy);
@@ -75,7 +75,7 @@ int UtcDaliChartSectionAssignmentOperatorP(void)
 int UtcDaliChartSectionSetBoundsP(void)
 {
   UiTestApplication application;
-  ChartSection section = ChartSection::New();
+  ChartSection      section = ChartSection::New();
 
   section.SetXMin(1.0f);
   DALI_TEST_EQUALS(section.GetXMin(), 1.0f, 0.001f, TEST_LOCATION);
@@ -94,7 +94,7 @@ int UtcDaliChartSectionSetBoundsP(void)
 int UtcDaliChartSectionSetFillColorP(void)
 {
   UiTestApplication application;
-  ChartSection section = ChartSection::New();
+  ChartSection      section = ChartSection::New();
 
   section.SetFillColor(Vector4(0.0f, 0.5f, 0.0f, 0.3f));
   DALI_TEST_EQUALS(section.GetFillColor(), Vector4(0.0f, 0.5f, 0.0f, 0.3f), TEST_LOCATION);
@@ -104,7 +104,7 @@ int UtcDaliChartSectionSetFillColorP(void)
 int UtcDaliChartSectionSetStrokeP(void)
 {
   UiTestApplication application;
-  ChartSection section = ChartSection::New();
+  ChartSection      section = ChartSection::New();
 
   section.SetStrokeColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f));
   DALI_TEST_EQUALS(section.GetStrokeColor(), Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
@@ -114,16 +114,15 @@ int UtcDaliChartSectionSetStrokeP(void)
   END_TEST;
 }
 
-int UtcDaliChartSectionMethodChainingP(void)
+int UtcDaliChartSectionSettersP(void)
 {
   UiTestApplication application;
-  ChartSection section = ChartSection::New();
+  ChartSection      section = ChartSection::New();
 
-  ChartSection& ref = section.SetXMin(0.0f)
-                             .SetXMax(10.0f)
-                             .SetFillColor(Vector4(0.0f, 0.0f, 1.0f, 0.2f))
-                             .SetStrokeWidth(1.5f);
-  DALI_TEST_CHECK(&ref == &section);
+  section.SetXMin(0.0f);
+  section.SetXMax(10.0f);
+  section.SetFillColor(Vector4(0.0f, 0.0f, 1.0f, 0.2f));
+  section.SetStrokeWidth(1.5f);
   DALI_TEST_EQUALS(section.GetXMax(), 10.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }

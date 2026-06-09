@@ -50,26 +50,26 @@ public:
   ChartSection(const ChartSection&)            = default;
   ChartSection& operator=(const ChartSection&) = default;
 
-  ChartSection& SetXMin(float value);
-  float         GetXMin() const;
+  void  SetXMin(float value);
+  float GetXMin() const;
 
-  ChartSection& SetXMax(float value);
-  float         GetXMax() const;
+  void  SetXMax(float value);
+  float GetXMax() const;
 
-  ChartSection& SetYMin(float value);
-  float         GetYMin() const;
+  void  SetYMin(float value);
+  float GetYMin() const;
 
-  ChartSection& SetYMax(float value);
-  float         GetYMax() const;
+  void  SetYMax(float value);
+  float GetYMax() const;
 
-  ChartSection& SetFillColor(const Vector4& color);
-  Vector4       GetFillColor() const;
+  void    SetFillColor(const Vector4& color);
+  Vector4 GetFillColor() const;
 
-  ChartSection& SetStrokeColor(const Vector4& color);
-  Vector4       GetStrokeColor() const;
+  void    SetStrokeColor(const Vector4& color);
+  Vector4 GetStrokeColor() const;
 
-  ChartSection& SetStrokeWidth(float width);
-  float         GetStrokeWidth() const;
+  void  SetStrokeWidth(float width);
+  float GetStrokeWidth() const;
 
 public:
   explicit DALI_UI_API ChartSection(Integration::ChartSection* impl);

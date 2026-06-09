@@ -52,47 +52,47 @@ public:
   static ChartAxis New();
   static ChartAxis DownCast(BaseHandle handle);
 
-  ChartAxis&                SetLabels(const std::vector<Dali::String>& labels);
+  void                      SetLabels(const std::vector<Dali::String>& labels);
   std::vector<Dali::String> GetLabels() const;
 
-  ChartAxis& SetMinLimit(float min);
-  float      GetMinLimit() const;
+  void  SetMinLimit(float min);
+  float GetMinLimit() const;
 
-  ChartAxis& SetMaxLimit(float max);
-  float      GetMaxLimit() const;
+  void  SetMaxLimit(float max);
+  float GetMaxLimit() const;
 
-  ChartAxis& SetAutoRange(bool autoRange);
-  bool       IsAutoRange() const;
+  void SetAutoRange(bool autoRange);
+  bool IsAutoRange() const;
 
-  ChartAxis& SetShowGridLines(bool show);
-  bool       GetShowGridLines() const;
+  void SetShowGridLines(bool show);
+  bool GetShowGridLines() const;
 
-  ChartAxis& SetLabelSize(float size);
-  float      GetLabelSize() const;
+  void  SetLabelSize(float size);
+  float GetLabelSize() const;
 
-  ChartAxis&   SetTitle(const Dali::String& title);
+  void         SetTitle(const Dali::String& title);
   Dali::String GetTitle() const;
 
-  ChartAxis& SetAxisLineColor(const Vector4& color);
-  Vector4    GetAxisLineColor() const;
+  void    SetAxisLineColor(const Vector4& color);
+  Vector4 GetAxisLineColor() const;
 
-  ChartAxis& SetAxisLineWidth(float width);
-  float      GetAxisLineWidth() const;
+  void  SetAxisLineWidth(float width);
+  float GetAxisLineWidth() const;
 
-  ChartAxis& SetGridDash(float dashLength, float gapLength);
-  void       GetGridDash(float& dashLength, float& gapLength) const;
+  void SetGridDash(float dashLength, float gapLength);
+  void GetGridDash(float& dashLength, float& gapLength) const;
 
-  ChartAxis& SetGridColor(const Vector4& color);
-  Vector4    GetGridColor() const;
+  void    SetGridColor(const Vector4& color);
+  Vector4 GetGridColor() const;
 
-  ChartAxis& SetMinStep(float step);
-  float      GetMinStep() const;
+  void  SetMinStep(float step);
+  float GetMinStep() const;
 
-  ChartAxis& SetDataPadding(float fraction);
-  float      GetDataPadding() const;
+  void  SetDataPadding(float fraction);
+  float GetDataPadding() const;
 
-  ChartAxis& SetLabelsRotation(float degrees);
-  float      GetLabelsRotation() const;
+  void  SetLabelsRotation(float degrees);
+  float GetLabelsRotation() const;
 
 public:
   explicit DALI_UI_API ChartAxis(Integration::ChartAxis* impl);

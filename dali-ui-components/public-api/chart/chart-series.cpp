@@ -67,10 +67,9 @@ ChartSeries ChartSeries::DownCast(BaseHandle handle)
   return ChartSeries(dynamic_cast<Integration::ChartSeries*>(handle.GetObjectPtr()));
 }
 
-ChartSeries& ChartSeries::SetName(const Dali::String& name)
+void ChartSeries::SetName(const Dali::String& name)
 {
   GetImplementation(*this).SetName(name);
-  return *this;
 }
 
 Dali::String ChartSeries::GetName() const
@@ -78,10 +77,9 @@ Dali::String ChartSeries::GetName() const
   return GetImplementation(*this).GetName();
 }
 
-ChartSeries& ChartSeries::SetColor(const Vector4& color)
+void ChartSeries::SetColor(const Vector4& color)
 {
   GetImplementation(*this).SetColor(color);
-  return *this;
 }
 
 Vector4 ChartSeries::GetColor() const
@@ -89,22 +87,19 @@ Vector4 ChartSeries::GetColor() const
   return GetImplementation(*this).GetColor();
 }
 
-ChartSeries& ChartSeries::SetValues(const std::vector<float>& values)
+void ChartSeries::SetValues(const std::vector<float>& values)
 {
   GetImplementation(*this).SetValues(values);
-  return *this;
 }
 
-ChartSeries& ChartSeries::SetValues(const std::vector<std::pair<float, float>>& xyValues)
+void ChartSeries::SetValues(const std::vector<std::pair<float, float>>& xyValues)
 {
   GetImplementation(*this).SetValues(xyValues);
-  return *this;
 }
 
-ChartSeries& ChartSeries::SetVisible(bool visible)
+void ChartSeries::SetVisible(bool visible)
 {
   GetImplementation(*this).SetVisible(visible);
-  return *this;
 }
 
 bool ChartSeries::IsVisible() const
@@ -112,28 +107,24 @@ bool ChartSeries::IsVisible() const
   return GetImplementation(*this).IsVisible();
 }
 
-ChartSeries& ChartSeries::AppendValue(float y)
+void ChartSeries::AppendValue(float y)
 {
   GetImplementation(*this).AppendValue(y);
-  return *this;
 }
 
-ChartSeries& ChartSeries::AppendValue(float x, float y)
+void ChartSeries::AppendValue(float x, float y)
 {
   GetImplementation(*this).AppendValue(x, y);
-  return *this;
 }
 
-ChartSeries& ChartSeries::AppendValues(const std::vector<float>& values)
+void ChartSeries::AppendValues(const std::vector<float>& values)
 {
   GetImplementation(*this).AppendValues(values);
-  return *this;
 }
 
-ChartSeries& ChartSeries::SetMaxDataPoints(int maxCount)
+void ChartSeries::SetMaxDataPoints(int maxCount)
 {
   GetImplementation(*this).SetMaxDataPoints(maxCount);
-  return *this;
 }
 
 int ChartSeries::GetMaxDataPoints() const
@@ -141,10 +132,9 @@ int ChartSeries::GetMaxDataPoints() const
   return GetImplementation(*this).GetMaxDataPoints();
 }
 
-ChartSeries& ChartSeries::SetZIndex(int zIndex)
+void ChartSeries::SetZIndex(int zIndex)
 {
   GetImplementation(*this).SetZIndex(zIndex);
-  return *this;
 }
 
 int ChartSeries::GetZIndex() const

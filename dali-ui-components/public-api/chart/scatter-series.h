@@ -55,16 +55,14 @@ public:
   ScatterSeries(const ScatterSeries&)            = default;
   ScatterSeries& operator=(const ScatterSeries&) = default;
 
-  ScatterSeries& SetColor(const Vector4& color);
-  Vector4        GetColor() const;
+  void    SetColor(const Vector4& color);
+  Vector4 GetColor() const;
 
-  ScatterSeries& SetMarkerRadius(float radius);
-  float          GetMarkerRadius() const;
+  void  SetMarkerRadius(float radius);
+  float GetMarkerRadius() const;
 
-  ScatterSeries& SetMarkerShape(MarkerShape shape);
-  MarkerShape    GetMarkerShape() const;
-
-  DALI_UI_CHAIN_CHARTSERIES_METHODS_BASE(ScatterSeries)
+  void        SetMarkerShape(MarkerShape shape);
+  MarkerShape GetMarkerShape() const;
 
 public:
   explicit DALI_UI_API ScatterSeries(Integration::ScatterSeries* impl);

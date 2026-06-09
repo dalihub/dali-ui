@@ -15,15 +15,15 @@
  *
  */
 
+#include <dali-ui-components/public-api/chart/bar-series.h>
+#include <dali-ui-components/public-api/chart/chart-series.h>
+#include <dali-ui-components/public-api/chart/line-series.h>
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali.h>
 #include <stdlib.h>
 #include <iostream>
 #include <utility>
-#include <dali.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-components/public-api/chart/chart-series.h>
-#include <dali-ui-components/public-api/chart/line-series.h>
-#include <dali-ui-components/public-api/chart/bar-series.h>
-#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -45,9 +45,9 @@ void utc_dali_chartseries_cleanup(void)
 int UtcDaliChartSeriesDownCastP(void)
 {
   UiTestApplication application;
-  LineSeries lineSeries = LineSeries::New();
-  BaseHandle handle(lineSeries);
-  ChartSeries series = ChartSeries::DownCast(handle);
+  LineSeries        lineSeries = LineSeries::New();
+  BaseHandle        handle(lineSeries);
+  ChartSeries       series = ChartSeries::DownCast(handle);
   DALI_TEST_CHECK(series);
   END_TEST;
 }
@@ -55,8 +55,8 @@ int UtcDaliChartSeriesDownCastP(void)
 int UtcDaliChartSeriesDownCastN(void)
 {
   UiTestApplication application;
-  BaseHandle  unInitializedObject;
-  ChartSeries series = ChartSeries::DownCast(unInitializedObject);
+  BaseHandle        unInitializedObject;
+  ChartSeries       series = ChartSeries::DownCast(unInitializedObject);
   DALI_TEST_CHECK(!series);
   END_TEST;
 }
@@ -64,7 +64,7 @@ int UtcDaliChartSeriesDownCastN(void)
 int UtcDaliChartSeriesSetNameP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
   series.SetName(Dali::String("temperature"));
   DALI_TEST_EQUALS(series.GetName(), Dali::String("temperature"), TEST_LOCATION);
   END_TEST;
@@ -73,7 +73,7 @@ int UtcDaliChartSeriesSetNameP(void)
 int UtcDaliChartSeriesSetValuesP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
   series.SetValues({1.0f, 2.0f, 3.0f, 4.0f, 5.0f});
   DALI_TEST_CHECK(series);
   END_TEST;
@@ -82,7 +82,7 @@ int UtcDaliChartSeriesSetValuesP(void)
 int UtcDaliChartSeriesAppendValueP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
   series.AppendValue(10.0f);
   series.AppendValue(1.0f, 10.0f);
   series.AppendValues({5.0f, 6.0f, 7.0f});
@@ -93,7 +93,7 @@ int UtcDaliChartSeriesAppendValueP(void)
 int UtcDaliChartSeriesSetVisibleP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
   series.SetVisible(false);
   DALI_TEST_CHECK(!series.IsVisible());
   series.SetVisible(true);
@@ -104,7 +104,7 @@ int UtcDaliChartSeriesSetVisibleP(void)
 int UtcDaliChartSeriesSetMaxDataPointsP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
   series.SetMaxDataPoints(50);
   DALI_TEST_EQUALS(series.GetMaxDataPoints(), 50, TEST_LOCATION);
   END_TEST;
@@ -113,7 +113,7 @@ int UtcDaliChartSeriesSetMaxDataPointsP(void)
 int UtcDaliChartSeriesSetZIndexP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
   series.SetZIndex(3);
   DALI_TEST_EQUALS(series.GetZIndex(), 3, TEST_LOCATION);
   END_TEST;
@@ -126,7 +126,7 @@ int UtcDaliChartSeriesSetZIndexP(void)
 int UtcDaliLineSeriesConstructorP(void)
 {
   UiTestApplication application;
-  LineSeries lineSeries;
+  LineSeries        lineSeries;
   DALI_TEST_CHECK(!lineSeries);
   END_TEST;
 }
@@ -134,7 +134,7 @@ int UtcDaliLineSeriesConstructorP(void)
 int UtcDaliLineSeriesNewP(void)
 {
   UiTestApplication application;
-  LineSeries lineSeries = LineSeries::New();
+  LineSeries        lineSeries = LineSeries::New();
   DALI_TEST_CHECK(lineSeries);
   END_TEST;
 }
@@ -142,8 +142,8 @@ int UtcDaliLineSeriesNewP(void)
 int UtcDaliLineSeriesCopyConstructorP(void)
 {
   UiTestApplication application;
-  LineSeries lineSeries = LineSeries::New();
-  LineSeries copy(lineSeries);
+  LineSeries        lineSeries = LineSeries::New();
+  LineSeries        copy(lineSeries);
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(lineSeries == copy);
   END_TEST;
@@ -152,7 +152,7 @@ int UtcDaliLineSeriesCopyConstructorP(void)
 int UtcDaliLineSeriesMoveConstructor(void)
 {
   UiTestApplication application;
-  LineSeries lineSeries = LineSeries::New();
+  LineSeries        lineSeries = LineSeries::New();
   DALI_TEST_EQUALS(1, lineSeries.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
   LineSeries moved = std::move(lineSeries);
@@ -165,9 +165,9 @@ int UtcDaliLineSeriesMoveConstructor(void)
 int UtcDaliLineSeriesDownCastP(void)
 {
   UiTestApplication application;
-  LineSeries lineSeries = LineSeries::New();
-  BaseHandle handle(lineSeries);
-  LineSeries downCast = LineSeries::DownCast(handle);
+  LineSeries        lineSeries = LineSeries::New();
+  BaseHandle        handle(lineSeries);
+  LineSeries        downCast = LineSeries::DownCast(handle);
   DALI_TEST_CHECK(downCast);
   END_TEST;
 }
@@ -175,8 +175,8 @@ int UtcDaliLineSeriesDownCastP(void)
 int UtcDaliLineSeriesDownCastN(void)
 {
   UiTestApplication application;
-  BaseHandle unInitializedObject;
-  LineSeries downCast = LineSeries::DownCast(unInitializedObject);
+  BaseHandle        unInitializedObject;
+  LineSeries        downCast = LineSeries::DownCast(unInitializedObject);
   DALI_TEST_CHECK(!downCast);
   END_TEST;
 }
@@ -184,7 +184,7 @@ int UtcDaliLineSeriesDownCastN(void)
 int UtcDaliLineSeriesSetLinePropertiesP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
 
   series.SetLineWidth(3.0f);
   DALI_TEST_EQUALS(series.GetLineWidth(), 3.0f, 0.001f, TEST_LOCATION);
@@ -200,7 +200,7 @@ int UtcDaliLineSeriesSetLinePropertiesP(void)
 int UtcDaliLineSeriesSetMarkerPropertiesP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
 
   series.SetMarkersVisible(true);
   DALI_TEST_CHECK(series.IsMarkersVisible());
@@ -218,7 +218,7 @@ int UtcDaliLineSeriesSetMarkerPropertiesP(void)
 int UtcDaliLineSeriesFillP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
 
   series.SetFillEnabled(true);
   DALI_TEST_CHECK(series.GetFillEnabled());
@@ -231,7 +231,7 @@ int UtcDaliLineSeriesFillP(void)
 int UtcDaliLineSeriesDataLabelsP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
 
   series.SetDataLabelsVisible(true);
   DALI_TEST_CHECK(series.IsDataLabelsVisible());
@@ -241,15 +241,14 @@ int UtcDaliLineSeriesDataLabelsP(void)
   END_TEST;
 }
 
-int UtcDaliLineSeriesMethodChainingP(void)
+int UtcDaliLineSeriesSettersP(void)
 {
   UiTestApplication application;
-  LineSeries series = LineSeries::New();
+  LineSeries        series = LineSeries::New();
 
-  LineSeries& ref = series.SetLineWidth(2.0f)
-                          .SetSmoothness(0.5f)
-                          .SetMarkersVisible(true);
-  DALI_TEST_CHECK(&ref == &series);
+  series.SetLineWidth(2.0f);
+  series.SetSmoothness(0.5f);
+  series.SetMarkersVisible(true);
   DALI_TEST_EQUALS(series.GetLineWidth(), 2.0f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
@@ -261,7 +260,7 @@ int UtcDaliLineSeriesMethodChainingP(void)
 int UtcDaliBarSeriesNewP(void)
 {
   UiTestApplication application;
-  BarSeries barSeries = BarSeries::New();
+  BarSeries         barSeries = BarSeries::New();
   DALI_TEST_CHECK(barSeries);
   END_TEST;
 }
@@ -269,9 +268,9 @@ int UtcDaliBarSeriesNewP(void)
 int UtcDaliBarSeriesDownCastP(void)
 {
   UiTestApplication application;
-  BarSeries  barSeries = BarSeries::New();
-  BaseHandle handle(barSeries);
-  BarSeries  downCast = BarSeries::DownCast(handle);
+  BarSeries         barSeries = BarSeries::New();
+  BaseHandle        handle(barSeries);
+  BarSeries         downCast = BarSeries::DownCast(handle);
   DALI_TEST_CHECK(downCast);
   END_TEST;
 }
@@ -279,8 +278,8 @@ int UtcDaliBarSeriesDownCastP(void)
 int UtcDaliBarSeriesDownCastN(void)
 {
   UiTestApplication application;
-  BaseHandle unInitializedObject;
-  BarSeries  downCast = BarSeries::DownCast(unInitializedObject);
+  BaseHandle        unInitializedObject;
+  BarSeries         downCast = BarSeries::DownCast(unInitializedObject);
   DALI_TEST_CHECK(!downCast);
   END_TEST;
 }
@@ -288,7 +287,7 @@ int UtcDaliBarSeriesDownCastN(void)
 int UtcDaliBarSeriesSetPropertiesP(void)
 {
   UiTestApplication application;
-  BarSeries series = BarSeries::New();
+  BarSeries         series = BarSeries::New();
 
   series.SetColor(Vector4(0.2f, 0.4f, 0.8f, 1.0f));
   DALI_TEST_EQUALS(series.GetColor(), Vector4(0.2f, 0.4f, 0.8f, 1.0f), TEST_LOCATION);
@@ -304,7 +303,7 @@ int UtcDaliBarSeriesSetPropertiesP(void)
 int UtcDaliBarSeriesDataLabelsP(void)
 {
   UiTestApplication application;
-  BarSeries series = BarSeries::New();
+  BarSeries         series = BarSeries::New();
 
   series.SetDataLabelsVisible(true);
   DALI_TEST_CHECK(series.IsDataLabelsVisible());

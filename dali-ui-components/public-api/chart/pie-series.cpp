@@ -49,16 +49,14 @@ PieSeries::PieSeries(Integration::PieSeries* impl)
 {
 }
 
-PieSeries& PieSeries::AddSlice(const Dali::String& label, float value, const Vector4& color)
+void PieSeries::AddSlice(const Dali::String& label, float value, const Vector4& color)
 {
   GetImplementation(*this).AddSlice(label, value, color);
-  return *this;
 }
 
-PieSeries& PieSeries::ClearSlices()
+void PieSeries::ClearSlices()
 {
   GetImplementation(*this).ClearSlices();
-  return *this;
 }
 
 int PieSeries::GetSliceCount() const
@@ -66,50 +64,45 @@ int PieSeries::GetSliceCount() const
   return GetImplementation(*this).GetSliceCount();
 }
 
-PieSeries& PieSeries::SetInnerRadiusRatio(float r)
+void PieSeries::SetInnerRadiusRatio(float r)
 {
   GetImplementation(*this).SetInnerRadiusRatio(r);
-  return *this;
 }
 float PieSeries::GetInnerRadiusRatio() const
 {
   return GetImplementation(*this).GetInnerRadiusRatio();
 }
 
-PieSeries& PieSeries::SetCenterLabel(const Dali::String& t)
+void PieSeries::SetCenterLabel(const Dali::String& t)
 {
   GetImplementation(*this).SetCenterLabel(t);
-  return *this;
 }
 Dali::String PieSeries::GetCenterLabel() const
 {
   return GetImplementation(*this).GetCenterLabel();
 }
 
-PieSeries& PieSeries::SetSliceGap(float d)
+void PieSeries::SetSliceGap(float d)
 {
   GetImplementation(*this).SetSliceGap(d);
-  return *this;
 }
 float PieSeries::GetSliceGap() const
 {
   return GetImplementation(*this).GetSliceGap();
 }
 
-PieSeries& PieSeries::SetDataLabelsVisible(bool v)
+void PieSeries::SetDataLabelsVisible(bool v)
 {
   GetImplementation(*this).SetDataLabelsVisible(v);
-  return *this;
 }
 bool PieSeries::IsDataLabelsVisible() const
 {
   return GetImplementation(*this).IsDataLabelsVisible();
 }
 
-PieSeries& PieSeries::SetDataLabelMinAngle(float d)
+void PieSeries::SetDataLabelMinAngle(float d)
 {
   GetImplementation(*this).SetDataLabelMinAngle(d);
-  return *this;
 }
 float PieSeries::GetDataLabelMinAngle() const
 {
