@@ -187,11 +187,6 @@ IF( NOT ${ENABLE_EXPORTALL} )
   ADD_COMPILE_OPTIONS( "-fvisibility=hidden" )
 ENDIF( NOT ${ENABLE_EXPORTALL} )
 
-# Include method chaining autogen script
-IF (NOT GBS_BUILD)
-  INCLUDE(${ROOT_SRC_DIR}/scripts/autogen/autogen_chain.cmake)
-ENDIF()
-
 # Include animation autogen script
 IF (NOT GBS_BUILD)
   INCLUDE(${ROOT_SRC_DIR}/scripts/autogen/autogen_anim.cmake)

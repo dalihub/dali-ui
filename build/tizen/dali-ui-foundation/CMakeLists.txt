@@ -55,11 +55,6 @@ ADD_LIBRARY(${PROJECT_LIB_NAME} SHARED ${SOURCES})
 # Ensure shaders are generated before the library starts compiling its sources
 ADD_DEPENDENCIES(${PROJECT_LIB_NAME} generate_builtin_shaders)
 
-# Run method chaining script
-IF (NOT GBS_BUILD)
-  DALI_UI_AUTOGEN_CHAINING_MACRO(${PROJECT_LIB_NAME} "${FOUNDATION_ROOT_SRC_DIR}/public-api")
-ENDIF()
-
 # Run animation autogen script
 IF (NOT GBS_BUILD)
   DALI_UI_AUTOGEN_ANIMATION_SPEC(${PROJECT_LIB_NAME} "${FOUNDATION_ROOT_SRC_DIR}/public-api")
