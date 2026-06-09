@@ -697,7 +697,7 @@ view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0
 
 - **Layout은 View를 상속합니다.** 모든 View 메서드(`SetRequestedWidth`, `SetViewMargin`, `SetViewPadding`, `Add`, `Remove` 등)를 모든 레이아웃 타입에서 사용할 수 있습니다.
 
-- **Layout당 하나의 LayoutManager.** 각 레이아웃 서브클래스(StackLayout, FlexLayout 등)는 초기화 시 자체 LayoutManager를 연결합니다. 커스텀 레이아웃은 `LayoutManager`를 서브클래싱하고 `OnInitialize()`에서 `LayoutImpl::SetLayoutManager()`로 연결할 수 있습니다.
+- **View당 하나의 LayoutManager.** 각 레이아웃 서브클래스(StackLayout, FlexLayout 등)는 초기화 시 자체 LayoutManager를 연결합니다. 커스텀 레이아웃은 `LayoutManager`를 서브클래싱하고 `View::AttachLayoutManager()`로 임의의 View에 연결할 수 있습니다.
 
 - **LayoutParams는 그대로 저장됩니다.** `SetLayoutParams()`는 핸들을 깊은 복사하지 않습니다. 여러 View에 params를 재사용할 때는 `New(other)` (예: `GridLayoutParams::New(base)`)를 사용하여 독립적인 복사본을 만드세요.
 
