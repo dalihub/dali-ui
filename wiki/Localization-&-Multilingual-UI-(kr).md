@@ -452,9 +452,9 @@ UiLocalizationManager::Get().SetLocalizedStringOverride(&MyOverride);
 기본 text layout direction mode는 `UiConfig`에서 설정할 수 있습니다.
 
 ~~~cpp
-UiConfig::New()
-  .SetTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
-  .Apply();
+UiConfig config = UiConfig::New();
+config.SetTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT);
+config.Apply();
 ~~~
 
 각 text view에서도 직접 설정할 수 있습니다:

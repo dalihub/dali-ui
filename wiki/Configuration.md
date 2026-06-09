@@ -33,10 +33,10 @@ int main(int argc, char** argv)
   Application application = Application::New(&argc, &argv);
 
   // Apply() must be called before application.MainLoop().
-  UiConfig::New()
-    .SetDpi(320)
-    .SetScalingFactor(1.5f)
-    .Apply();
+  UiConfig config = UiConfig::New();
+  config.SetDpi(320);
+  config.SetScalingFactor(1.5f);
+  config.Apply();
 
   MyAppController controller(application);
   application.MainLoop();
@@ -47,10 +47,10 @@ int main(int argc, char** argv)
 When using `dali-ui-components`:
 
 ```cpp
-UiComponentConfig::New()
-  .SetDpi(320)
-  .SetScalingFactor(1.5f)
-  .Apply();
+UiComponentConfig config = UiComponentConfig::New();
+config.SetDpi(320);
+config.SetScalingFactor(1.5f);
+config.Apply();
 ```
 
 For a full working example, see the [hello-world sample](https://github.com/dalihub/dali-ui/tree/main/samples/hello-world).
@@ -70,7 +70,7 @@ The following describes key configuration options. For the full API, see [UiConf
 | Default Text Color | `SetDefaultTextColor(Vector4)` | `Color::BLACK` | Default color for text elements |
 | Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Determines whether the Clicked event fires on key press or key release |
 | Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | Function that determines which key triggers a click |
-| Min Long Press Key Count | `SetMinLongPressKeyCount(uint32_t)` | — | Minimum key repeat count to trigger a long-press |
+| Min Long Press Key Count | `SetKeyLongPressThreshold(uint32_t)` | — | Minimum key repeat count to trigger a long-press |
 | Tap Recognizer Time | `SetTapRecognizerTime(uint32_t)` | — | Time limit for tap recognition (ms) |
 | Broken Image URL | `SetBrokenImageUrl(type, url)` | — | Fallback image shown on load failure (SMALL/NORMAL/LARGE) |
 | Focus Clear on Escape | `EnableFocusClearOnEscape(bool)` | — | Whether to clear focus when Escape is pressed |
@@ -88,12 +88,18 @@ or `UiComponentConfig` to define a pre-configured Config class and distribute it
 class TVConfig : public Dali::Ui::UiComponentConfig
 {
 public:
+  explicit TVConfig(const Dali::Ui::UiComponentConfig& config)
+  : Dali::Ui::UiComponentConfig(config)
+  {
+  }
+
   static TVConfig New()
   {
-    return UiComponentConfig::New()
-      .SetDpi(72)
-      .SetScalingFactor(2.0f)
-      .SetDefaultFontSize(28.0f);
+    TVConfig config(Dali::Ui::UiComponentConfig::New());
+    config.SetDpi(72);
+    config.SetScalingFactor(2.0f);
+    config.SetDefaultFontSize(28.0f);
+    return config;
   }
 };
 ```

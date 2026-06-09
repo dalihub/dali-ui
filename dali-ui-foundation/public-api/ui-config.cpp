@@ -55,10 +55,9 @@ void UiConfig::Apply()
   Integration::UiConfigManager::Get().Initialize(*this);
 }
 
-UiConfig& UiConfig::SetScalingFactor(float scalingFactor)
+void UiConfig::SetScalingFactor(float scalingFactor)
 {
   GetImpl(*this).SetScalingFactor(scalingFactor);
-  return *this;
 }
 
 float UiConfig::GetScalingFactor() const
@@ -76,10 +75,9 @@ float UiConfig::GetScaledDpiFactor() const
   return GetImpl(*this).GetScaledDpiFactor();
 }
 
-UiConfig& UiConfig::SetDpi(int dpi)
+void UiConfig::SetDpi(int dpi)
 {
   GetImpl(*this).SetDpi(dpi);
-  return *this;
 }
 
 int UiConfig::GetDpi() const
@@ -87,10 +85,9 @@ int UiConfig::GetDpi() const
   return GetImpl(*this).GetDpi();
 }
 
-UiConfig& UiConfig::SetBaselineDpi(int baselineDpi)
+void UiConfig::SetBaselineDpi(int baselineDpi)
 {
   GetImpl(*this).SetBaselineDpi(baselineDpi);
-  return *this;
 }
 
 int UiConfig::GetBaselineDpi() const
@@ -98,10 +95,9 @@ int UiConfig::GetBaselineDpi() const
   return GetImpl(*this).GetBaselineDpi();
 }
 
-UiConfig& UiConfig::SetKeyClickPolicy(KeyClickPolicy policy)
+void UiConfig::SetKeyClickPolicy(KeyClickPolicy policy)
 {
   GetImpl(*this).SetKeyClickPolicy(policy);
-  return *this;
 }
 
 KeyClickPolicy UiConfig::GetKeyClickPolicy() const
@@ -109,10 +105,9 @@ KeyClickPolicy UiConfig::GetKeyClickPolicy() const
   return GetImpl(*this).GetKeyClickPolicy();
 }
 
-UiConfig& UiConfig::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
+void UiConfig::SetExecutionKeyPredicate(ExecutionKeyPredicate predicate)
 {
   GetImpl(*this).SetExecutionKeyPredicate(predicate);
-  return *this;
 }
 
 ExecutionKeyPredicate UiConfig::GetExecutionKeyPredicate() const
@@ -120,10 +115,9 @@ ExecutionKeyPredicate UiConfig::GetExecutionKeyPredicate() const
   return GetImpl(*this).GetExecutionKeyPredicate();
 }
 
-UiConfig& UiConfig::SetKeyLongPressThreshold(uint32_t count)
+void UiConfig::SetKeyLongPressThreshold(uint32_t count)
 {
   GetImpl(*this).SetKeyLongPressThreshold(count);
-  return *this;
 }
 
 uint32_t UiConfig::GetKeyLongPressThreshold() const
@@ -131,10 +125,9 @@ uint32_t UiConfig::GetKeyLongPressThreshold() const
   return GetImpl(*this).GetKeyLongPressThreshold();
 }
 
-UiConfig& UiConfig::SetTapRecognizerTime(uint32_t timeMs)
+void UiConfig::SetTapRecognizerTime(uint32_t timeMs)
 {
   GetImpl(*this).SetTapRecognizerTime(timeMs);
-  return *this;
 }
 
 uint32_t UiConfig::GetTapRecognizerTime() const
@@ -142,10 +135,9 @@ uint32_t UiConfig::GetTapRecognizerTime() const
   return GetImpl(*this).GetTapRecognizerTime();
 }
 
-UiConfig& UiConfig::SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
+void UiConfig::SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)
 {
   GetImpl(*this).SetBrokenImageUrl(brokenImageType, brokenImageUrl);
-  return *this;
 }
 
 const Dali::String& UiConfig::GetBrokenImageUrl(BrokenImageType brokenImageType) const
@@ -153,10 +145,9 @@ const Dali::String& UiConfig::GetBrokenImageUrl(BrokenImageType brokenImageType)
   return GetImpl(*this).GetBrokenImageUrl(brokenImageType);
 }
 
-UiConfig& UiConfig::EnableFocusClearOnEscape(bool enable)
+void UiConfig::EnableFocusClearOnEscape(bool enable)
 {
   GetImpl(*this).EnableFocusClearOnEscape(enable);
-  return *this;
 }
 
 bool UiConfig::IsFocusClearOnEscapeEnabled() const
@@ -164,10 +155,9 @@ bool UiConfig::IsFocusClearOnEscapeEnabled() const
   return GetImpl(*this).IsFocusClearOnEscapeEnabled();
 }
 
-UiConfig& UiConfig::SetAlwaysShowFocus(bool alwaysShow)
+void UiConfig::SetAlwaysShowFocus(bool alwaysShow)
 {
   GetImpl(*this).SetAlwaysShowFocus(alwaysShow);
-  return *this;
 }
 
 bool UiConfig::IsFocusIndicatorAlwaysShown() const
@@ -175,10 +165,9 @@ bool UiConfig::IsFocusIndicatorAlwaysShown() const
   return GetImpl(*this).IsFocusIndicatorAlwaysShown();
 }
 
-UiConfig& UiConfig::SetDefaultFontSize(float fontSize)
+void UiConfig::SetDefaultFontSize(float fontSize)
 {
   GetImpl(*this).SetDefaultFontSize(fontSize);
-  return *this;
 }
 
 float UiConfig::GetDefaultFontSize() const
@@ -186,10 +175,9 @@ float UiConfig::GetDefaultFontSize() const
   return GetImpl(*this).GetDefaultFontSize();
 }
 
-UiConfig& UiConfig::SetDefaultTextColor(const Vector4& color)
+void UiConfig::SetDefaultTextColor(const Vector4& color)
 {
   GetImpl(*this).SetDefaultTextColor(color);
-  return *this;
 }
 
 Vector4 UiConfig::GetDefaultTextColor() const
@@ -197,10 +185,9 @@ Vector4 UiConfig::GetDefaultTextColor() const
   return GetImpl(*this).GetDefaultTextColor();
 }
 
-UiConfig& UiConfig::SetDefaultPlaceholderTextColor(const Vector4& color)
+void UiConfig::SetDefaultPlaceholderTextColor(const Vector4& color)
 {
   GetImpl(*this).SetDefaultPlaceholderTextColor(color);
-  return *this;
 }
 
 Vector4 UiConfig::GetDefaultPlaceholderTextColor() const
@@ -208,10 +195,9 @@ Vector4 UiConfig::GetDefaultPlaceholderTextColor() const
   return GetImpl(*this).GetDefaultPlaceholderTextColor();
 }
 
-UiConfig& UiConfig::SetShowPlaceholderTextOnFocus(bool enabled)
+void UiConfig::SetShowPlaceholderTextOnFocus(bool enabled)
 {
   GetImpl(*this).SetShowPlaceholderTextOnFocus(enabled);
-  return *this;
 }
 
 bool UiConfig::IsPlaceholderTextShownOnFocus() const
@@ -219,10 +205,9 @@ bool UiConfig::IsPlaceholderTextShownOnFocus() const
   return GetImpl(*this).IsPlaceholderTextShownOnFocus();
 }
 
-UiConfig& UiConfig::SetMarqueeSpeed(int speed)
+void UiConfig::SetMarqueeSpeed(int speed)
 {
   GetImpl(*this).SetMarqueeSpeed(speed);
-  return *this;
 }
 
 int UiConfig::GetMarqueeSpeed() const
@@ -230,10 +215,9 @@ int UiConfig::GetMarqueeSpeed() const
   return GetImpl(*this).GetMarqueeSpeed();
 }
 
-UiConfig& UiConfig::SetMarqueeLoopCount(int loopCount)
+void UiConfig::SetMarqueeLoopCount(int loopCount)
 {
   GetImpl(*this).SetMarqueeLoopCount(loopCount);
-  return *this;
 }
 
 int UiConfig::GetMarqueeLoopCount() const
@@ -241,10 +225,9 @@ int UiConfig::GetMarqueeLoopCount() const
   return GetImpl(*this).GetMarqueeLoopCount();
 }
 
-UiConfig& UiConfig::SetMarqueeLoopDelay(float delay)
+void UiConfig::SetMarqueeLoopDelay(float delay)
 {
   GetImpl(*this).SetMarqueeLoopDelay(delay);
-  return *this;
 }
 
 float UiConfig::GetMarqueeLoopDelay() const
@@ -252,10 +235,9 @@ float UiConfig::GetMarqueeLoopDelay() const
   return GetImpl(*this).GetMarqueeLoopDelay();
 }
 
-UiConfig& UiConfig::SetMarqueeGap(float gap)
+void UiConfig::SetMarqueeGap(float gap)
 {
   GetImpl(*this).SetMarqueeGap(gap);
-  return *this;
 }
 
 float UiConfig::GetMarqueeGap() const
@@ -263,10 +245,9 @@ float UiConfig::GetMarqueeGap() const
   return GetImpl(*this).GetMarqueeGap();
 }
 
-UiConfig& UiConfig::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
+void UiConfig::SetMarqueeStopMode(Text::MarqueeStopMode stopMode)
 {
   GetImpl(*this).SetMarqueeStopMode(stopMode);
-  return *this;
 }
 
 Text::MarqueeStopMode UiConfig::GetMarqueeStopMode() const
@@ -274,10 +255,9 @@ Text::MarqueeStopMode UiConfig::GetMarqueeStopMode() const
   return GetImpl(*this).GetMarqueeStopMode();
 }
 
-UiConfig& UiConfig::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+void UiConfig::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
 {
   GetImpl(*this).SetMarqueeOrientation(orientation);
-  return *this;
 }
 
 Text::MarqueeOrientation UiConfig::GetMarqueeOrientation() const
@@ -285,10 +265,9 @@ Text::MarqueeOrientation UiConfig::GetMarqueeOrientation() const
   return GetImpl(*this).GetMarqueeOrientation();
 }
 
-UiConfig& UiConfig::SetTextLayoutDirectionMode(Text::LayoutDirectionMode mode)
+void UiConfig::SetTextLayoutDirectionMode(Text::LayoutDirectionMode mode)
 {
   GetImpl(*this).SetTextLayoutDirectionMode(mode);
-  return *this;
 }
 
 Text::LayoutDirectionMode UiConfig::GetTextLayoutDirectionMode() const
@@ -296,10 +275,9 @@ Text::LayoutDirectionMode UiConfig::GetTextLayoutDirectionMode() const
   return GetImpl(*this).GetTextLayoutDirectionMode();
 }
 
-UiConfig& UiConfig::SetLabelAsyncRendering(bool asyncRendering)
+void UiConfig::SetLabelAsyncRendering(bool asyncRendering)
 {
   GetImpl(*this).SetLabelAsyncRendering(asyncRendering);
-  return *this;
 }
 
 bool UiConfig::IsLabelAsyncRendering() const

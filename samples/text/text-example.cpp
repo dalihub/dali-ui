@@ -431,11 +431,11 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New()
-    .SetLabelAsyncRendering(true)
-    .SetDefaultPlaceholderTextColor(Color::DARK_GRAY)
-    .SetShowPlaceholderTextOnFocus(false)
-    .Apply();
+  UiConfig config = UiConfig::New();
+  config.SetLabelAsyncRendering(true);
+  config.SetDefaultPlaceholderTextColor(Color::DARK_GRAY);
+  config.SetShowPlaceholderTextOnFocus(false);
+  config.Apply();
 
   TextController controller(application);
   application.MainLoop();

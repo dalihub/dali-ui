@@ -30,10 +30,10 @@ int main(int argc, char** argv)
   Application application = Application::New(&argc, &argv);
 
   // Apply()는 application.MainLoop() 호출 전에 호출합니다.
-  UiConfig::New()
-    .SetDpi(320)
-    .SetScalingFactor(1.5f)
-    .Apply();
+  UiConfig config = UiConfig::New();
+  config.SetDpi(320);
+  config.SetScalingFactor(1.5f);
+  config.Apply();
 
   MyAppController controller(application);
   application.MainLoop();
@@ -44,10 +44,10 @@ int main(int argc, char** argv)
 `dali-ui-components`를 사용하는 경우:
 
 ```cpp
-UiComponentConfig::New()
-  .SetDpi(320)
-  .SetScalingFactor(1.5f)
-  .Apply();
+UiComponentConfig config = UiComponentConfig::New();
+config.SetDpi(320);
+config.SetScalingFactor(1.5f);
+config.Apply();
 ```
 
 전체 예제는 [hello-world sample](https://github.com/dalihub/dali-ui/tree/main/samples/hello-world)을 참고하세요.
@@ -67,7 +67,7 @@ UiComponentConfig::New()
 | Default Text Color | `SetDefaultTextColor(Vector4)` | `Color::BLACK` | 텍스트 요소의 기본 색상 |
 | Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Clicked 이벤트 발생이 key press 시점인지 release 시점인지 설정 |
 | Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | 클릭 실행으로 인식할 키를 결정하는 함수 |
-| Min Long Press Key Count | `SetMinLongPressKeyCount(uint32_t)` | — | 롱프레스로 인식할 최소 키 반복 횟수 |
+| Min Long Press Key Count | `SetKeyLongPressThreshold(uint32_t)` | — | 롱프레스로 인식할 최소 키 반복 횟수 |
 | Tap Recognizer Time | `SetTapRecognizerTime(uint32_t)` | — | 탭으로 인식할 시간 제한 (ms) |
 | Broken Image URL | `SetBrokenImageUrl(type, url)` | — | 이미지 로딩 실패 시 표시할 이미지 (SMALL/NORMAL/LARGE) |
 | Focus Clear on Escape | `EnableFocusClearOnEscape(bool)` | — | Escape 키 입력 시 포커스 해제 여부 |
@@ -85,12 +85,18 @@ UiComponentConfig::New()
 class TVConfig : public Dali::Ui::UiComponentConfig
 {
 public:
+  explicit TVConfig(const Dali::Ui::UiComponentConfig& config)
+  : Dali::Ui::UiComponentConfig(config)
+  {
+  }
+
   static TVConfig New()
   {
-    return UiComponentConfig::New()
-      .SetDpi(72)
-      .SetScalingFactor(2.0f)
-      .SetDefaultFontSize(28.0f);
+    TVConfig config(Dali::Ui::UiComponentConfig::New());
+    config.SetDpi(72);
+    config.SetScalingFactor(2.0f);
+    config.SetDefaultFontSize(28.0f);
+    return config;
   }
 };
 ```

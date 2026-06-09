@@ -505,7 +505,9 @@ int DALI_EXPORT_API main(int argc, char** argv)
     std::vector<PerfCase> items = LoadCases(options);
 
     Application application = Application::New(&argc, &argv);
-    UiConfig::New().SetLabelAsyncRendering(true).Apply();
+    UiConfig config = UiConfig::New();
+    config.SetLabelAsyncRendering(true);
+    config.Apply();
     EmojiLabelPerfController controller(application, options, std::move(items));
     application.MainLoop();
     return controller.ExitStatus();

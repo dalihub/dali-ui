@@ -47,7 +47,6 @@ namespace Integration
 class UiConfigImpl;
 }
 
-#include "ui-config.autogen.h"
 /**
  * @brief An immutable-after-init configuration object for dali-ui global settings.
  *
@@ -57,16 +56,15 @@ class UiConfigImpl;
  * Setter methods may only be called before the config is applied via Apply().
  * After that point, any setter call will trigger an assertion failure.
  *
- * Setters return a reference to this object to support fluent method chaining:
  * @code
  *  int main(int argc, char** argv)
  *  {
  *    Application application = Application::New(&argc, &argv);
  *
- *    UiConfig::New()
- *       .SetScalingFactor(1.5f)
- *       .SetDpi(320)
- *       .Apply();
+ *    UiConfig config = UiConfig::New();
+ *    config.SetScalingFactor(1.5f);
+ *    config.SetDpi(320);
+ *    config.Apply();
  *
  *    HelloWorldController test(application);
  *    application.MainLoop();
@@ -167,14 +165,13 @@ public: // Properties
    */
   void Apply();
 
-  // @CHAIN_START(UiConfig)
   /**
    * @brief Sets the scaling factor applied to spx and sdp units.
    *
    * @pre The config must not be frozen (i.e. not yet call UiConfig::Apply()).
    * @param[in] scalingFactor The scaling factor value
    */
-  UiConfig& SetScalingFactor(float scalingFactor);
+  void SetScalingFactor(float scalingFactor);
 
   /**
    * @brief Retrieves the scaling factor.
@@ -205,7 +202,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] dpi The dots-per-inch value of the target display
    */
-  UiConfig& SetDpi(int dpi);
+  void SetDpi(int dpi);
 
   /**
    * @brief Retrieves the screen DPI.
@@ -220,7 +217,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] baselineDpi The baseline dots-per-inch value
    */
-  UiConfig& SetBaselineDpi(int baselineDpi);
+  void SetBaselineDpi(int baselineDpi);
 
   /**
    * @brief Retrieves the baseline DPI.
@@ -235,7 +232,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] policy The key click policy
    */
-  UiConfig& SetKeyClickPolicy(KeyClickPolicy policy);
+  void SetKeyClickPolicy(KeyClickPolicy policy);
 
   /**
    * @brief Retrieves the default key click policy.
@@ -265,18 +262,16 @@ public: // Properties
    *
    * @param[in] predicate A function pointer matching the ExecutionKeyPredicate
    *                      signature, or @c nullptr to restore the default
-   * @return Reference to this UiConfig for method chaining
-   *
    * @code
    *   bool MyKeyPredicate(const Dali::String& keyName) {
    *     return keyName == "Return" || keyName == "KP_Enter";
    *   }
-   *   UiConfig::New()
-   *     .SetExecutionKeyPredicate(MyKeyPredicate)
-   *     .Apply();
+   *   UiConfig config = UiConfig::New();
+   *   config.SetExecutionKeyPredicate(MyKeyPredicate);
+   *   config.Apply();
    * @endcode
    */
-  UiConfig& SetExecutionKeyPredicate(ExecutionKeyPredicate predicate);
+  void SetExecutionKeyPredicate(ExecutionKeyPredicate predicate);
 
   /**
    * @brief Retrieves the execution key predicate.
@@ -296,7 +291,7 @@ public: // Properties
    * @param[in] threshold The minimum number of consecutive key press events
    *                      required to trigger a long-press
    */
-  UiConfig& SetKeyLongPressThreshold(uint32_t threshold);
+  void SetKeyLongPressThreshold(uint32_t threshold);
 
   /**
    * @brief Retrieves the threshold for recognizing a key long-press.
@@ -312,7 +307,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] timeMs The time limit in milliseconds
    */
-  UiConfig& SetTapRecognizerTime(uint32_t timeMs);
+  void SetTapRecognizerTime(uint32_t timeMs);
 
   /**
    * @brief Retrieves the tap recognizer time limit.
@@ -332,7 +327,7 @@ public: // Properties
    * @param[in] brokenImageType The type of broken image (SMALL, NORMAL, or LARGE)
    * @param[in] brokenImageUrl The URL of the broken image to use
    */
-  UiConfig& SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl);
+  void SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl);
 
   /**
    * @brief Gets the image URL to be displayed when image loading fails.
@@ -345,15 +340,13 @@ public: // Properties
    */
   const Dali::String& GetBrokenImageUrl(BrokenImageType brokenImageType) const;
 
-  // @CHAIN_MANUAL
   /**
    * @brief Sets whether to clear focus when the Escape key is pressed.
    *
    * @pre The config must not be frozen.
    * @param[in] enable True to enable focus clearing on Escape key
-   * @return Reference to this for method chaining
    */
-  UiConfig& EnableFocusClearOnEscape(bool enable);
+  void EnableFocusClearOnEscape(bool enable);
 
   /**
    * @brief Retrieves whether to clear focus when the Escape key is pressed.
@@ -367,9 +360,8 @@ public: // Properties
    *
    * @pre The config must not be frozen.
    * @param[in] alwaysShow True to always show focus indicator
-   * @return Reference to this for method chaining
    */
-  UiConfig& SetAlwaysShowFocus(bool alwaysShow);
+  void SetAlwaysShowFocus(bool alwaysShow);
 
   /**
    * @brief Retrieves whether to always show the keyboard focus indicator.
@@ -384,7 +376,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] fontSize The default font size in points
    */
-  UiConfig& SetDefaultFontSize(float fontSize);
+  void SetDefaultFontSize(float fontSize);
 
   /**
    * @brief Retrieves the default font point-size.
@@ -399,7 +391,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] color The default text color
    */
-  UiConfig& SetDefaultTextColor(const Vector4& color);
+  void SetDefaultTextColor(const Vector4& color);
 
   /**
    * @brief Retrieves the default text color.
@@ -414,7 +406,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] color The default placeholder text color.
    */
-  UiConfig& SetDefaultPlaceholderTextColor(const Vector4& color);
+  void SetDefaultPlaceholderTextColor(const Vector4& color);
 
   /**
    * @brief Returns the default placeholder text color.
@@ -429,7 +421,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] enabled True to show the placeholder text when focused, false otherwise.
    */
-  UiConfig& SetShowPlaceholderTextOnFocus(bool enabled);
+  void SetShowPlaceholderTextOnFocus(bool enabled);
 
   /**
    * @brief Returns whether the placeholder text is shown when the control has focus.
@@ -444,7 +436,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] speed The marquee speed in pixels per second
    */
-  UiConfig& SetMarqueeSpeed(int speed);
+  void SetMarqueeSpeed(int speed);
 
   /**
    * @brief Retrieves the marquee speed.
@@ -459,7 +451,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] loopCount The number of loops
    */
-  UiConfig& SetMarqueeLoopCount(int loopCount);
+  void SetMarqueeLoopCount(int loopCount);
 
   /**
    * @brief Retrieves the number of complete loops for marquee.
@@ -474,7 +466,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] delay The delay time in seconds
    */
-  UiConfig& SetMarqueeLoopDelay(float delay);
+  void SetMarqueeLoopDelay(float delay);
 
   /**
    * @brief Retrieves the amount of time to delay the start of marquee and further loops.
@@ -489,7 +481,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] gap The gap in pixels
    */
-  UiConfig& SetMarqueeGap(float gap);
+  void SetMarqueeGap(float gap);
 
   /**
    * @brief Retrieves the gap before marquee wraps.
@@ -504,7 +496,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] stopMode The marquee stop mode
    */
-  UiConfig& SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+  void SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
 
   /**
    * @brief Retrieves the marquee stop behaviour.
@@ -519,7 +511,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] orientation The marquee orientation
    */
-  UiConfig& SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+  void SetMarqueeOrientation(Text::MarqueeOrientation orientation);
 
   /**
    * @brief Retrieves the marquee orientation.
@@ -546,7 +538,7 @@ public: // Properties
    * @pre The config must not be frozen.
    * @param[in] mode The default LayoutDirectionMode used to determine text layout direction.
    */
-  UiConfig& SetTextLayoutDirectionMode(Text::LayoutDirectionMode mode);
+  void SetTextLayoutDirectionMode(Text::LayoutDirectionMode mode);
 
   /**
    * @brief Gets the default mode for resolving text layout direction.
@@ -562,7 +554,7 @@ public: // Properties
    * @param[in] asyncRendering True to enable asynchronous rendering for Label by default,
    * false to use synchronous rendering.
    */
-  UiConfig& SetLabelAsyncRendering(bool asyncRendering);
+  void SetLabelAsyncRendering(bool asyncRendering);
 
   /**
    * @brief Retrieves whether Label uses asynchronous text rendering by default.
@@ -570,8 +562,6 @@ public: // Properties
    * @return True if asynchronous rendering is enabled for Label by default
    */
   bool IsLabelAsyncRendering() const;
-
-  // @CHAIN_END
 
 public: // Not intended for Application developers
   /**

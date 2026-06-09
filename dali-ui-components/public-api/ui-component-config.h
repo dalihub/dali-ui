@@ -32,7 +32,6 @@ namespace Integration
 class UiComponentConfigImpl;
 }
 
-#include "ui-component-config.autogen.h"
 /**
  * @brief Configuration for dali-ui-components default values.
  *
@@ -41,11 +40,11 @@ class UiComponentConfigImpl;
  * library grows, component-specific settings can be added here.
  *
  * @code
- *  UiComponentConfig::New()
- *       .SetScalingFactor(1.5f)
- *       .SetDefaultFontSize(24.0f)
- *       .SetDefaultTextColor(Color::BLACK)
- *       .Apply();
+ *  UiComponentConfig config = UiComponentConfig::New();
+ *  config.SetScalingFactor(1.5f);
+ *  config.SetDefaultFontSize(24.0f);
+ *  config.SetDefaultTextColor(Color::BLACK);
+ *  config.Apply();
  * @endcode
  */
 class DALI_UI_API UiComponentConfig : public UiConfig
@@ -112,10 +111,6 @@ public:
    */
   static UiComponentConfig DownCast(BaseHandle handle);
 
-public: // Properties
-  // @CHAIN_START(UiComponentConfig, UiConfig)
-  // @CHAIN_END
-
 public: // Not intended for Application developers
   /**
    * @brief This constructor is used internally to wrap an implementation object.
@@ -123,9 +118,6 @@ public: // Not intended for Application developers
    * @param[in] impl A pointer to the internal UiComponentConfig implementation
    */
   explicit UiComponentConfig(Integration::UiComponentConfigImpl* impl);
-
-public:
-  DALI_UI_CHAIN_UICONFIG_METHODS(UiComponentConfig)
 };
 
 } // namespace Ui

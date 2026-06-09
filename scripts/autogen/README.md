@@ -4,16 +4,16 @@ Fluent method chaining을 위한 코드 자동 생성 도구입니다.
 
 ## 상태
 
-View와 View를 상속하는 public API 클래스의 fluent chaining은 제거되었습니다.
+View와 View를 상속하는 public API 클래스, 그리고 UiConfig 계열의 fluent chaining은 제거되었습니다.
 `View`, `Label`, `InputField`, layout class 등 앱/프레임워크 개발자가 상속할 수 있는
-handle 계층에는 이 generator를 사용하지 않습니다.
+handle 계층과 `UiConfig`, `UiComponentConfig`에는 이 generator를 사용하지 않습니다.
 
 이 generator는 아직 fluent style을 유지하기로 결정한 제한된 API 영역에서만 사용합니다.
 예를 들어 Visual 계열과 Chart 계열처럼 설정 객체/팩토리 성격이 강하거나 별도 보류 상태인
 클래스가 여기에 해당합니다.
 
-새로운 View 계열 API에는 `@CHAIN_START`, `@CHAIN_MANUAL`, `DALI_UI_CHAIN_*` 매크로를
-추가하지 마세요.
+새로운 View 계열 API나 Config 계열 API에는 `@CHAIN_START`, `@CHAIN_MANUAL`,
+`DALI_UI_CHAIN_*` 매크로를 추가하지 마세요.
 
 ## 매크로 생성 스크립트
 

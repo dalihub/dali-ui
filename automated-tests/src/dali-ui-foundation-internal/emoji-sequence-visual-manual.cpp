@@ -2234,7 +2234,9 @@ int DALI_EXPORT_API main(int argc, char** argv)
     }
 
     Application application = Application::New(&argc, &argv);
-    UiConfig::New().SetLabelAsyncRendering(true).Apply();
+    UiConfig config = UiConfig::New();
+    config.SetLabelAsyncRendering(true);
+    config.Apply();
     EmojiVisualController controller(application, options);
     application.MainLoop();
   }

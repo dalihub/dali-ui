@@ -324,10 +324,10 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New()
-    .SetLabelAsyncRendering(true)
-    .SetMarqueeLoopCount(1)
-    .Apply();
+  UiConfig config = UiConfig::New();
+  config.SetLabelAsyncRendering(true);
+  config.SetMarqueeLoopCount(1);
+  config.Apply();
 
   TextController controller(application);
   application.MainLoop();

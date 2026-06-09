@@ -454,9 +454,9 @@ In multilingual UI, layout direction should also be considered along with string
 The default text layout direction mode can be set via `UiConfig`.
 
 ~~~cpp
-UiConfig::New()
-  .SetTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
-  .Apply();
+UiConfig config = UiConfig::New();
+config.SetTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT);
+config.Apply();
 ~~~
 
 It can also be set directly on individual text views:
