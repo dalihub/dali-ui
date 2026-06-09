@@ -2,21 +2,18 @@
 
 Fluent method chaining을 위한 코드 자동 생성 도구입니다.
 
-## 목적
+## 상태
 
-DALi UI의 View, Label 등 public-api 클래스는 fluent chaining 패턴을 지원합니다:
+View와 View를 상속하는 public API 클래스의 fluent chaining은 제거되었습니다.
+`View`, `Label`, `InputField`, layout class 등 앱/프레임워크 개발자가 상속할 수 있는
+handle 계층에는 이 generator를 사용하지 않습니다.
 
-```cpp
-Label::New()
-  .SetText("Hello")
-  .SetFontSize(24)
-  .SetBackgroundColor(UiColor::RED)
-  .SetOpacity(0.8f);  // View에서 상속받은 메소드
-```
+이 generator는 아직 fluent style을 유지하기로 결정한 제한된 API 영역에서만 사용합니다.
+예를 들어 Visual 계열과 Chart 계열처럼 설정 객체/팩토리 성격이 강하거나 별도 보류 상태인
+클래스가 여기에 해당합니다.
 
-derived class(Label)에서 부모(View)의 체이닝 메소드를 사용하려면
-리턴 타입을 `Label&`로 오버로딩해야 합니다.
-이 스크립트가 해당 오버로딩 코드를 자동 생성합니다.
+새로운 View 계열 API에는 `@CHAIN_START`, `@CHAIN_MANUAL`, `DALI_UI_CHAIN_*` 매크로를
+추가하지 마세요.
 
 ## 매크로 생성 스크립트
 
@@ -31,29 +28,14 @@ derived class(Label)에서 부모(View)의 체이닝 메소드를 사용하려�
 ### 사용 예
 
 ```cpp
-// view.h — base class
-class View : public CustomActor
+// color-visual.h
+class ColorVisual : public VisualBase
 {
-  //@CHAIN_START(View)
+  //@CHAIN_START(ColorVisual, VisualBase)
 
-  View& SetOpacity(float opacity);
+  ColorVisual& SetColor(const Vector4& color);
 
-  float GetOpacity() const;
-
-  //@CHAIN_MANUAL
-  View& EnableFocusEscape(bool enable);
-
-  //@CHAIN_END
-};
-
-// label.h — derived class
-class Label : public View
-{
-  //@CHAIN_START(Label, View)
-
-  Label& SetText(const Dali::String& text);
-
-  //@CHAIN_END
+  // @CHAIN_END
 };
 ```
 
@@ -61,33 +43,25 @@ class Label : public View
 
 위 코드에 대해 다음 파일이 생성됩니다:
 
-* **view.autogen.h** — `DALI_UI_CHAIN_VIEW_METHODS` 매크로가 총 2개 메소드 오버로딩 (`SetOpacity`, `EnableFocusEscape`)
+* **color-visual.autogen.h** — `DALI_UI_CHAIN_COLORVISUAL_METHODS` 매크로 생성
 
-* **label.autogen.h** — `DALI_UI_CHAIN_LABEL_METHODS` 매크로가 2개의 View 메소드 및 1개의 Label 메소드 오버로딩 (`SetText`)
-
-앱 개발자는 생성된 매크로를 사용하여 자신의 클래스에서 체이닝 메소드를 오버로드 할 수 있습니다:
+생성된 매크로는 해당 public API 클래스 내부에서만 사용합니다. 앱 개발자가 View를 상속한
+클래스에 이 매크로를 직접 사용하는 방식은 지원하지 않습니다.
 
 ```cpp
-#include <dali-ui-foundation/public-api/label.h>
-
-class MyLabel : public Label
+class ColorVisual : public VisualBase
 {
 public:
-  DALI_UI_CHAIN_LABEL_METHODS(MyLabel)
+  DALI_UI_CHAIN_VISUALBASE_METHODS(ColorVisual)
 };
-
-// View + Label의 모든 체이닝 메소드가 MyLabel& 리턴으로 사용 가능
-MyLabel::New()
-  .SetText("Hello")      // Label 메소드
-  .SetOpacity(0.5f);      // View 메소드
 ```
 
 <br/>
 
 ## 확장 라이브러리에서 사용
 
-스크립트와 CMake 모듈을 빌드에 통합하면 확장 라이브러리에서도
-동일한 태그 기반 코드 생성을 사용할 수 있습니다.
+이 generator는 dali-ui 내부 빌드용입니다. 확장 라이브러리나 앱 개발자가 View 상속
+클래스의 fluent API를 생성하기 위해 사용하는 것은 권장하지 않습니다.
 
 ## CMake 통합
 

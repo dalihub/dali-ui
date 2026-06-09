@@ -210,7 +210,6 @@ public: // API
    *
    * @param[in] obj  The object to connect to (must implement ConnectionTrackerInterface for auto-disconnect)
    * @param[in] func Member function pointer or functor with signature void(View, InputEvent)
-   * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
   void ConnectClickedSignal(T* obj, Func func)
@@ -218,7 +217,6 @@ public: // API
     ClickedSignal().Connect(obj, func);
   }
 
-  // @CHAIN_MANUAL
   /**
    * @brief Connects a handler to PressedChangedSignal.
    *
@@ -228,7 +226,6 @@ public: // API
    *
    * @param[in] obj  The object to connect to
    * @param[in] func Member function pointer or functor with signature void(View, bool, InputEvent)
-   * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
   void ConnectPressedChangedSignal(T* obj, Func func)
@@ -236,7 +233,6 @@ public: // API
     PressedChangedSignal().Connect(obj, func);
   }
 
-  // @CHAIN_MANUAL
   /**
    * @brief Connects a handler to LongPressedSignal.
    *
@@ -251,7 +247,6 @@ public: // API
    *
    * @param[in] obj  The object to connect to
    * @param[in] func Member function pointer or functor with signature bool(View, InputEvent)
-   * @return Reference to this for method chaining
    */
   template<typename T, typename Func>
   void ConnectLongPressedSignal(T* obj, Func func)
