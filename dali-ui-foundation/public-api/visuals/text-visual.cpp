@@ -54,10 +54,9 @@ Dali::String TextVisual::GetText() const
   return VisualBase::GetProperty<Dali::String>(TextVisual::Property::TEXT);
 }
 
-TextVisual& TextVisual::SetText(const Dali::String& text)
+void TextVisual::SetText(const Dali::String& text)
 {
   VisualBase::SetProperty(TextVisual::Property::TEXT, text);
-  return *this;
 }
 
 Dali::String TextVisual::GetFontFamily() const
@@ -65,10 +64,9 @@ Dali::String TextVisual::GetFontFamily() const
   return VisualBase::GetProperty<Dali::String>(TextVisual::Property::FONT_FAMILY);
 }
 
-TextVisual& TextVisual::SetFontFamily(const Dali::String& fontFamily)
+void TextVisual::SetFontFamily(const Dali::String& fontFamily)
 {
   VisualBase::SetProperty(TextVisual::Property::FONT_FAMILY, fontFamily);
-  return *this;
 }
 
 float TextVisual::GetFontSize() const
@@ -76,10 +74,9 @@ float TextVisual::GetFontSize() const
   return VisualBase::GetProperty<float>(TextVisual::Property::FONT_SIZE);
 }
 
-TextVisual& TextVisual::SetFontSize(float fontSize)
+void TextVisual::SetFontSize(float fontSize)
 {
   VisualBase::SetProperty(TextVisual::Property::FONT_SIZE, fontSize);
-  return *this;
 }
 
 Dali::Ui::Text::FontWeight TextVisual::GetFontWeight() const
@@ -87,10 +84,9 @@ Dali::Ui::Text::FontWeight TextVisual::GetFontWeight() const
   return VisualBase::GetProperty<Dali::Ui::Text::FontWeight>(TextVisual::Property::FONT_WEIGHT);
 }
 
-TextVisual& TextVisual::SetFontWeight(Dali::Ui::Text::FontWeight fontWeight)
+void TextVisual::SetFontWeight(Dali::Ui::Text::FontWeight fontWeight)
 {
   VisualBase::SetProperty(TextVisual::Property::FONT_WEIGHT, fontWeight);
-  return *this;
 }
 
 Dali::Ui::Text::FontWidth TextVisual::GetFontWidth() const
@@ -98,10 +94,9 @@ Dali::Ui::Text::FontWidth TextVisual::GetFontWidth() const
   return VisualBase::GetProperty<Dali::Ui::Text::FontWidth>(TextVisual::Property::FONT_WIDTH);
 }
 
-TextVisual& TextVisual::SetFontWidth(Dali::Ui::Text::FontWidth fontWidth)
+void TextVisual::SetFontWidth(Dali::Ui::Text::FontWidth fontWidth)
 {
   VisualBase::SetProperty(TextVisual::Property::FONT_WIDTH, fontWidth);
-  return *this;
 }
 
 Dali::Ui::Text::FontSlant TextVisual::GetFontSlant() const
@@ -109,10 +104,9 @@ Dali::Ui::Text::FontSlant TextVisual::GetFontSlant() const
   return VisualBase::GetProperty<Dali::Ui::Text::FontSlant>(TextVisual::Property::FONT_SLANT);
 }
 
-TextVisual& TextVisual::SetFontSlant(Dali::Ui::Text::FontSlant fontSlant)
+void TextVisual::SetFontSlant(Dali::Ui::Text::FontSlant fontSlant)
 {
   VisualBase::SetProperty(TextVisual::Property::FONT_SLANT, fontSlant);
-  return *this;
 }
 
 bool TextVisual::IsMultiLine() const
@@ -120,10 +114,9 @@ bool TextVisual::IsMultiLine() const
   return VisualBase::GetProperty<bool>(TextVisual::Property::MULTI_LINE);
 }
 
-TextVisual& TextVisual::SetMultiLine(bool multiLine)
+void TextVisual::SetMultiLine(bool multiLine)
 {
   VisualBase::SetProperty(TextVisual::Property::MULTI_LINE, multiLine);
-  return *this;
 }
 
 Dali::Ui::Text::LineWrapMode TextVisual::GetLineWrapMode() const
@@ -131,10 +124,9 @@ Dali::Ui::Text::LineWrapMode TextVisual::GetLineWrapMode() const
   return VisualBase::GetProperty<Dali::Ui::Text::LineWrapMode>(TextVisual::Property::LINE_WRAP_MODE);
 }
 
-TextVisual& TextVisual::SetLineWrapMode(Dali::Ui::Text::LineWrapMode lineWrapMode)
+void TextVisual::SetLineWrapMode(Dali::Ui::Text::LineWrapMode lineWrapMode)
 {
   VisualBase::SetProperty(TextVisual::Property::LINE_WRAP_MODE, lineWrapMode);
-  return *this;
 }
 
 Dali::Ui::Text::Alignment TextVisual::GetHorizontalAlignment() const
@@ -142,10 +134,9 @@ Dali::Ui::Text::Alignment TextVisual::GetHorizontalAlignment() const
   return VisualBase::GetProperty<Dali::Ui::Text::Alignment>(TextVisual::Property::HORIZONTAL_ALIGNMENT);
 }
 
-TextVisual& TextVisual::SetHorizontalAlignment(Dali::Ui::Text::Alignment alignment)
+void TextVisual::SetHorizontalAlignment(Dali::Ui::Text::Alignment alignment)
 {
   VisualBase::SetProperty(TextVisual::Property::HORIZONTAL_ALIGNMENT, alignment);
-  return *this;
 }
 
 Dali::Ui::Text::Alignment TextVisual::GetVerticalAlignment() const
@@ -153,10 +144,9 @@ Dali::Ui::Text::Alignment TextVisual::GetVerticalAlignment() const
   return VisualBase::GetProperty<Dali::Ui::Text::Alignment>(TextVisual::Property::VERTICAL_ALIGNMENT);
 }
 
-TextVisual& TextVisual::SetVerticalAlignment(Dali::Ui::Text::Alignment alignment)
+void TextVisual::SetVerticalAlignment(Dali::Ui::Text::Alignment alignment)
 {
   VisualBase::SetProperty(TextVisual::Property::VERTICAL_ALIGNMENT, alignment);
-  return *this;
 }
 
 Dali::Ui::Text::OverflowMode TextVisual::GetOverflowMode() const
@@ -164,10 +154,9 @@ Dali::Ui::Text::OverflowMode TextVisual::GetOverflowMode() const
   return VisualBase::GetProperty<Dali::Ui::Text::OverflowMode>(TextVisual::Property::OVERFLOW_MODE);
 }
 
-TextVisual& TextVisual::SetOverflowMode(Dali::Ui::Text::OverflowMode overflowMode)
+void TextVisual::SetOverflowMode(Dali::Ui::Text::OverflowMode overflowMode)
 {
   VisualBase::SetProperty(TextVisual::Property::OVERFLOW_MODE, overflowMode);
-  return *this;
 }
 
 float TextVisual::GetLineHeight() const
@@ -175,10 +164,9 @@ float TextVisual::GetLineHeight() const
   return VisualBase::GetProperty<float>(TextVisual::Property::LINE_HEIGHT);
 }
 
-TextVisual& TextVisual::SetLineHeight(float lineHeight)
+void TextVisual::SetLineHeight(float lineHeight)
 {
   VisualBase::SetProperty(TextVisual::Property::LINE_HEIGHT, lineHeight);
-  return *this;
 }
 
 Dali::Ui::Text::LineHeightMode TextVisual::GetLineHeightMode() const
@@ -186,10 +174,9 @@ Dali::Ui::Text::LineHeightMode TextVisual::GetLineHeightMode() const
   return VisualBase::GetProperty<Dali::Ui::Text::LineHeightMode>(TextVisual::Property::LINE_HEIGHT_MODE);
 }
 
-TextVisual& TextVisual::SetLineHeightMode(Dali::Ui::Text::LineHeightMode lineHeightMode)
+void TextVisual::SetLineHeightMode(Dali::Ui::Text::LineHeightMode lineHeightMode)
 {
   VisualBase::SetProperty(TextVisual::Property::LINE_HEIGHT_MODE, lineHeightMode);
-  return *this;
 }
 
 UiColor TextVisual::GetTextColor() const
@@ -198,11 +185,10 @@ UiColor TextVisual::GetTextColor() const
   return UiColor(VisualBase::GetProperty<Dali::Vector4>(TextVisual::Property::TEXT_COLOR));
 }
 
-TextVisual& TextVisual::SetTextColor(const UiColor& textColor)
+void TextVisual::SetTextColor(const UiColor& textColor)
 {
   // Note: Property system doesn't support UiColor with string token, so we use GetRgba() directly.
   VisualBase::SetProperty(TextVisual::Property::TEXT_COLOR, textColor.GetRgba());
-  return *this;
 }
 
 bool TextVisual::IsMarkupEnabled() const
@@ -210,10 +196,9 @@ bool TextVisual::IsMarkupEnabled() const
   return VisualBase::GetProperty<bool>(TextVisual::Property::MARKUP_ENABLED);
 }
 
-TextVisual& TextVisual::SetMarkupEnabled(bool enabled)
+void TextVisual::SetMarkupEnabled(bool enabled)
 {
   VisualBase::SetProperty(TextVisual::Property::MARKUP_ENABLED, enabled);
-  return *this;
 }
 
 // =============================================================================

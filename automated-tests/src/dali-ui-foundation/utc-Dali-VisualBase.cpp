@@ -584,13 +584,14 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
 
   tet_infoline("Test that visual update without newly create Visual::Base for GradientVisual\n");
 
-  View       view    = View::New();
-  VisualBase visual = GradientVisual::New()
-    .SetLinearGradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f))
-    .SetStopNodes({
-      {0.0f, UiColor("#000000")},
-      {1.0f, UiColor("#FFFFFF")},
-    });
+  View           view           = View::New();
+  GradientVisual gradientVisual = GradientVisual::New();
+  gradientVisual.SetLinearGradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  gradientVisual.SetStopNodes({
+    {0.0f, UiColor("#000000")},
+    {1.0f, UiColor("#FFFFFF")},
+  });
+  VisualBase visual = gradientVisual;
 
   view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
 
@@ -775,10 +776,10 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
 
   tet_infoline("Test that visual update without newly create Visual::Base for TextVisual\n");
 
-  View       view    = View::New();
-  TextVisual visual  = TextVisual::New()
-    .SetText("Hello")
-    .SetFontSize(20.0f);
+  View       view   = View::New();
+  TextVisual visual = TextVisual::New();
+  visual.SetText("Hello");
+  visual.SetFontSize(20.0f);
 
   view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
 

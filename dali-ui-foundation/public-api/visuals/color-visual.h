@@ -35,7 +35,6 @@ namespace Ui
  * @{
  */
 
-#include "color-visual.autogen.h"
 /**
  * @brief ColorVisual is a owner of Visual::Base with Visual::COLOR, to render simple color.
  *
@@ -77,8 +76,7 @@ public:
    */
   static ColorVisual DownCast(BaseHandle handle);
 
-public: // Setters for chaining
-  // @CHAIN_START(ColorVisual, VisualBase)
+public: // Setters
   /**
    * @brief Gets the blur radius of the ColorVisual.
    *
@@ -91,7 +89,7 @@ public: // Setters for chaining
    *
    * @param[in] blurRadius The blur radius to set
    */
-  ColorVisual& SetBlurRadius(float blurRadius);
+  void SetBlurRadius(float blurRadius);
 
   /**
    * @brief Gets the cutout policy of the ColorVisual.
@@ -105,8 +103,7 @@ public: // Setters for chaining
    *
    * @param[in] cutoutPolicy The cutout policy to set
    */
-  ColorVisual& SetCutoutPolicy(CutoutPolicy cutoutPolicy);
-  // @CHAIN_END
+  void SetCutoutPolicy(CutoutPolicy cutoutPolicy);
 
 public:
   ColorVisual()                                      = default;
@@ -125,7 +122,6 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL ColorVisual(Dali::Ui::Internal::VisualBaseImpl* object);
 
 public:
-  DALI_UI_CHAIN_VISUALBASE_METHODS(ColorVisual)
 };
 
 /**

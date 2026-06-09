@@ -49,6 +49,125 @@ float GetRandomFloat()
   return static_cast<float>(rand) / static_cast<float>(MAX_INTEGER);
 }
 
+ColorVisual CreateCustomShadow1()
+{
+  ColorVisual visual = ColorVisual::New();
+  visual.SetName("CustomShadow1");
+  visual.SetOffsetX(10_spx);
+  visual.SetOffsetY(-10_spx);
+  visual.SetWidth(1.01f);
+  visual.SetHeight(1.0f);
+  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetExtraWidth(50_spx);
+  visual.SetExtraHeight(-20_spx);
+  visual.SetOrigin(Align::TOP_CENTER);
+  visual.SetPivot(Align::TOP_CENTER);
+  visual.SetBlurRadius(12_spx);
+  visual.SetCornerRadius(12_spx);
+  visual.SetColor(UiColor(0x3F0F0F).WithAlpha(0.2f));
+  visual.SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+  return visual;
+}
+
+ColorVisual CreateCustomShadow2()
+{
+  ColorVisual visual = ColorVisual::New();
+  visual.SetName("CustomShadow2");
+  visual.SetOffsetX(-10_spx);
+  visual.SetOffsetY(-20_spx);
+  visual.SetWidth(1.01f);
+  visual.SetHeight(1.01f);
+  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetExtraWidth(0_spx);
+  visual.SetExtraHeight(0_spx);
+  visual.SetOrigin(Align::TOP_BEGIN);
+  visual.SetPivot(Align::TOP_BEGIN);
+  visual.SetBlurRadius(15_spx);
+  visual.SetCornerRadius(15_spx);
+  visual.SetColor(UiColor(0x7F7FCF).WithAlpha(0.3f));
+  visual.SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+  return visual;
+}
+
+ColorVisual CreateCustomShadow3()
+{
+  ColorVisual visual = ColorVisual::New();
+  visual.SetName("CustomShadow3");
+  visual.SetOffsetX(10_spx);
+  visual.SetOffsetY(20_spx);
+  visual.SetWidth(1.0f);
+  visual.SetHeight(1.01f);
+  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetExtraWidth(10_spx);
+  visual.SetExtraHeight(-10_spx);
+  visual.SetOrigin(Align::TOP_END);
+  visual.SetPivot(Align::TOP_END);
+  visual.SetBlurRadius(10_spx);
+  visual.SetCornerRadius(10_spx);
+  visual.SetColor(UiColor(0x0F040F).WithAlpha(0.3f));
+  visual.SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS);
+  return visual;
+}
+
+ColorVisual CreateCustomInnerShadow1()
+{
+  ColorVisual visual = ColorVisual::New();
+  visual.SetName("CustomInnerShadow1");
+  visual.SetOffsetX(10_spx);
+  visual.SetOffsetY(20_spx);
+  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetOrigin(Align::CENTER);
+  visual.SetPivot(Align::CENTER);
+  visual.SetCornerRadius(0.25f);
+  visual.SetCornerSquareness(0.6f);
+  visual.SetCornerRadiusPolicyRelative();
+  visual.SetBlurRadius(40_spx);
+  visual.SetBorderlineWidth(30_spx);
+  visual.SetBorderlineColor(UiColor(0xFFFFFF).WithAlpha(0.6f));
+  visual.SetBorderlineOffset(1.0f);
+  visual.SetColor(UiColor(0x000000).WithAlpha(0.0f));
+  visual.SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS);
+  return visual;
+}
+
+ColorVisual CreateCustomInnerShadow2()
+{
+  ColorVisual visual = ColorVisual::New();
+  visual.SetName("CustomInnerShadow2");
+  visual.SetOffsetX(-10_spx);
+  visual.SetOffsetY(-20_spx);
+  visual.SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL);
+  visual.SetOrigin(Align::CENTER);
+  visual.SetPivot(Align::CENTER);
+  visual.SetCornerRadius(0.25f);
+  visual.SetCornerSquareness(0.6f);
+  visual.SetCornerRadiusPolicyRelative();
+  visual.SetBlurRadius(40_spx);
+  visual.SetBorderlineWidth(30_spx);
+  visual.SetBorderlineColor(UiColor(0x000000).WithAlpha(0.6f));
+  visual.SetBorderlineOffset(1.0f);
+  visual.SetColor(UiColor(0x000000).WithAlpha(0.0f));
+  visual.SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS);
+  return visual;
+}
+
+void AddDecorativeVisuals(View view)
+{
+  view.AddVisuals(
+    Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND,
+    {
+      CreateCustomShadow1(),
+      CreateCustomShadow2(),
+      CreateCustomShadow3(),
+    });
+  view.AddVisuals(
+    Visual::ContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT,
+    {
+      CreateCustomInnerShadow1(),
+      CreateCustomInnerShadow2(),
+    });
+}
+
 constexpr std::string_view IMAGE_PATH[] = {
   RESOURCES_DIR "gallery-large-1.jpg",
   RESOURCES_DIR "gallery-large-3.jpg",
@@ -111,89 +230,7 @@ private:
     contentLabel.SetBorderlineColor(UiColor(0x3F3F3F).WithAlpha(0.5f));
     contentLabel.SetBorderlineOffset(-0.98f);
     mView = contentLabel;
-    mView.AddVisuals( // Custom Shadow
-      Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, {
-        ColorVisual::New()
-          .SetName("CustomShadow1")
-          .SetOffsetX(10_spx)
-          .SetOffsetY(-10_spx)
-          .SetWidth(1.01f)
-          .SetHeight(1.0f)
-          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-          .SetExtraWidth(50_spx)
-          .SetExtraHeight(-20_spx)
-          .SetOrigin(Align::TOP_CENTER)
-          .SetPivot(Align::TOP_CENTER)
-          .SetBlurRadius(12_spx)
-          .SetCornerRadius(12_spx)
-          .SetColor(UiColor(0x3F0F0F).WithAlpha(0.2f))
-          .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
-        ColorVisual::New()
-          .SetName("CustomShadow2")
-          .SetOffsetX(-10_spx)
-          .SetOffsetY(-20_spx)
-          .SetWidth(1.01f)
-          .SetHeight(1.01f)
-          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-          .SetExtraWidth(0_spx)
-          .SetExtraHeight(0_spx)
-          .SetOrigin(Align::TOP_BEGIN)
-          .SetPivot(Align::TOP_BEGIN)
-          .SetBlurRadius(15_spx)
-          .SetCornerRadius(15_spx)
-          .SetColor(UiColor(0x7F7FCF).WithAlpha(0.3f))
-          .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
-        ColorVisual::New()
-          .SetName("CustomShadow3")
-          .SetOffsetX(10_spx)
-          .SetOffsetY(20_spx)
-          .SetWidth(1.0f)
-          .SetHeight(1.01f)
-          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-          .SetExtraWidth(10_spx)
-          .SetExtraHeight(-10_spx)
-          .SetOrigin(Align::TOP_END)
-          .SetPivot(Align::TOP_END)
-          .SetBlurRadius(10_spx)
-          .SetCornerRadius(10_spx)
-          .SetColor(UiColor(0x0F040F).WithAlpha(0.3f))
-          .SetCutoutPolicy(CutoutPolicy::CUTOUT_VIEW_WITH_CORNER_RADIUS),
-      });
-    mView.AddVisuals( // Custom InnerShadow
-      Visual::ContainerRangeType::BETWEEN_DECORATION_AND_FOREGROUND_EFFECT, {
-        ColorVisual::New()
-          .SetName("CustomInnerShadow1")
-          .SetOffsetX(10_spx)
-          .SetOffsetY(20_spx)
-          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-          .SetOrigin(Align::CENTER)
-          .SetPivot(Align::CENTER)
-          .SetCornerRadius(0.25f)
-          .SetCornerSquareness(0.6f)
-          .SetCornerRadiusPolicyRelative()
-          .SetBlurRadius(40_spx)
-          .SetBorderlineWidth(30_spx)
-          .SetBorderlineColor(UiColor(0xFFFFFF).WithAlpha(0.6f))
-          .SetBorderlineOffset(1.0f)
-          .SetColor(UiColor(0x000000).WithAlpha(0.0f))
-          .SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS),
-        ColorVisual::New()
-          .SetName("CustomInnerShadow2")
-          .SetOffsetX(-10_spx)
-          .SetOffsetY(-20_spx)
-          .SetProportionFlags(Visual::Transform::ProportionFlags::SIZE_PROPORTIONAL)
-          .SetOrigin(Align::CENTER)
-          .SetPivot(Align::CENTER)
-          .SetCornerRadius(0.25f)
-          .SetCornerSquareness(0.6f)
-          .SetCornerRadiusPolicyRelative()
-          .SetBlurRadius(40_spx)
-          .SetBorderlineWidth(30_spx)
-          .SetBorderlineColor(UiColor(0x000000).WithAlpha(0.6f))
-          .SetBorderlineOffset(1.0f)
-          .SetColor(UiColor(0x000000).WithAlpha(0.0f))
-          .SetCutoutPolicy(CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS),
-      });
+    AddDecorativeVisuals(mView);
     root.Add(mView);
 
     StackLayout buttonRow = StackLayout::New(StackOrientation::HORIZONTAL);
@@ -264,20 +301,18 @@ private:
   void PushVisual()
   {
     int imageIndex = GetRandomInteger(0, IMAGE_PATH_COUNT);
-    mView.AddVisual(
-      ImageVisual::New()
-       .SetColor(UiColor(1.0f, 1.0f, 1.0f, GetRandomFloat() * 0.5f + 0.5f))
-       .SetOffsetX(GetRandomFloat() * 0.2f)
-       .SetOffsetY(GetRandomFloat() * 0.2f)
-       .SetWidth(GetRandomFloat() * 0.4f + 0.4f)
-       .SetHeight(GetRandomFloat() * 0.4f + 0.4f)
-       .SetProportionFlags(Visual::Transform::ProportionFlags::ALL)
-       .SetCornerRadius(GetRandomFloat() * 0.5f)
-       .SetCornerRadiusPolicyRelative()
-       .SetResourceUrl(Dali::StringView(IMAGE_PATH[imageIndex].data(), IMAGE_PATH[imageIndex].size()))
-      ,
-      Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT
-    );
+    ImageVisual visual = ImageVisual::New();
+    visual.SetColor(UiColor(1.0f, 1.0f, 1.0f, GetRandomFloat() * 0.5f + 0.5f));
+    visual.SetOffsetX(GetRandomFloat() * 0.2f);
+    visual.SetOffsetY(GetRandomFloat() * 0.2f);
+    visual.SetWidth(GetRandomFloat() * 0.4f + 0.4f);
+    visual.SetHeight(GetRandomFloat() * 0.4f + 0.4f);
+    visual.SetProportionFlags(Visual::Transform::ProportionFlags::ALL);
+    visual.SetCornerRadius(GetRandomFloat() * 0.5f);
+    visual.SetCornerRadiusPolicyRelative();
+    visual.SetResourceUrl(Dali::StringView(IMAGE_PATH[imageIndex].data(), IMAGE_PATH[imageIndex].size()));
+
+    mView.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT);
 
     UpdateVisualCount();
   }

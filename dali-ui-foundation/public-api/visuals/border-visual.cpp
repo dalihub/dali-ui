@@ -53,10 +53,9 @@ float BorderVisual::GetBorderSize() const
   return VisualBase::GetProperty<float>(BorderVisual::Property::BORDER_SIZE);
 }
 
-BorderVisual& BorderVisual::SetBorderSize(float borderSize)
+void BorderVisual::SetBorderSize(float borderSize)
 {
   VisualBase::SetProperty(BorderVisual::Property::BORDER_SIZE, borderSize);
-  return *this;
 }
 
 bool BorderVisual::IsAntiAliasingEnabled() const
@@ -64,10 +63,9 @@ bool BorderVisual::IsAntiAliasingEnabled() const
   return VisualBase::GetProperty<bool>(BorderVisual::Property::ANTI_ALIASING);
 }
 
-BorderVisual& BorderVisual::SetEnableAntiAliasing(bool enable)
+void BorderVisual::SetEnableAntiAliasing(bool enable)
 {
   VisualBase::SetProperty(BorderVisual::Property::ANTI_ALIASING, enable);
-  return *this;
 }
 
 // =============================================================================

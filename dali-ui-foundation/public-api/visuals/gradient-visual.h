@@ -19,11 +19,11 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/public-api/math/radian.h>
 #include <dali/public-api/object/property-array.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-stop-node.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
@@ -39,7 +39,6 @@ namespace Ui
  * @{
  */
 
-#include "gradient-visual.autogen.h"
 /**
  * @brief GradientVisual is a owner of Visual::Base with Visual::GRADIENT,
  * to render a smooth transition of colors to the visual's quad.
@@ -91,17 +90,15 @@ public:
    */
   static GradientVisual DownCast(BaseHandle handle);
 
-public: // Setters for chaining
-  // @CHAIN_START(GradientVisual, VisualBase)
+public: // Setters
   /**
    * @brief Sets the start position and end position of the GradientVisual.
    * It will make linear gradient
    *
    * @param[in] startPosition The start position to set
    * @param[in] endPosition The end position to set
-   * @return Reference to this for fluent chaining
    */
-  GradientVisual& SetLinearGradient(const Dali::Vector2& startPosition, const Dali::Vector2& endPosition);
+  void SetLinearGradient(const Dali::Vector2& startPosition, const Dali::Vector2& endPosition);
 
   /**
    * @brief Sets the center position and radius of the GradientVisual.
@@ -109,9 +106,8 @@ public: // Setters for chaining
    *
    * @param[in] center The center to set
    * @param[in] radius The radius to set
-   * @return Reference to this for fluent chaining
    */
-  GradientVisual& SetRadialGradient(const Dali::Vector2& center, float radius);
+  void SetRadialGradient(const Dali::Vector2& center, float radius);
 
   /**
    * @brief Sets the center position and start angle of the GradientVisual.
@@ -119,9 +115,8 @@ public: // Setters for chaining
    *
    * @param[in] center The center to set
    * @param[in] startAngle The start angle to set
-   * @return Reference to this for fluent chaining
    */
-  GradientVisual& SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle);
+  void SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle);
 
   /**
    * @brief Gets the start offset of the GradientVisual.
@@ -134,9 +129,8 @@ public: // Setters for chaining
    * @brief Sets the start offset of the GradientVisual.
    *
    * @param[in] startOffset The start offset to set
-   * @return Reference to this for fluent chaining
    */
-  GradientVisual& SetStartOffset(float startOffset);
+  void SetStartOffset(float startOffset);
 
   /**
    * @brief Gets the start position of the GradientVisual.
@@ -185,11 +179,8 @@ public: // Setters for chaining
    * @note Stop nodes must have at least 2 items.
    *
    * @param[in] stopOffset The stop nodes to set.
-   * @return Reference to this for fluent chaining
    */
-  GradientVisual& SetStopNodes(const Dali::Vector<Ui::Gradient::StopNode>& stopNodes);
-
-  // @CHAIN_MANUAL
+  void SetStopNodes(const Dali::Vector<Ui::Gradient::StopNode>& stopNodes);
   /**
    * @brief Sets the stop nodes of the GradientVisual in a declarative way.
    * This method allows for set stop nodes construction by passing
@@ -197,9 +188,8 @@ public: // Setters for chaining
    * @note Stop nodes must have at least 2 items.
    *
    * @param[in] stopOffset The stop nodes to set
-   * @return Reference to this for fluent chaining
    */
-  GradientVisual& SetStopNodes(std::initializer_list<Ui::Gradient::StopNode> stopNodes)
+  void SetStopNodes(std::initializer_list<Ui::Gradient::StopNode> stopNodes)
   {
     Dali::Vector<Ui::Gradient::StopNode> convertedStopNodes;
     convertedStopNodes.Reserve(stopNodes.size());
@@ -209,7 +199,7 @@ public: // Setters for chaining
       convertedStopNodes.PushBack(std::move(stopNode));
     }
 
-    return SetStopNodes(convertedStopNodes);
+    SetStopNodes(convertedStopNodes);
   }
 
   /**
@@ -223,9 +213,8 @@ public: // Setters for chaining
    * @brief Sets the gradient units of the GradientVisual.
    *
    * @param[in] gradientUnits The gradient units to set
-   * @return Reference to this for fluent chaining
    */
-  GradientVisual& SetUnits(Ui::Gradient::Units gradientUnits);
+  void SetUnits(Ui::Gradient::Units gradientUnits);
 
   /**
    * @brief Gets the spread method of the GradientVisual.
@@ -238,10 +227,8 @@ public: // Setters for chaining
    * @brief Sets the spread method of the GradientVisual.
    *
    * @param[in] spreadMethod The spread method to set
-   * @return Reference to this for fluent chaining
    */
-  GradientVisual& SetSpreadMethod(Ui::Gradient::SpreadMethod spreadMethod);
-  // @CHAIN_END
+  void SetSpreadMethod(Ui::Gradient::SpreadMethod spreadMethod);
 
 public:
   GradientVisual()                                         = default;
@@ -260,7 +247,6 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL GradientVisual(Dali::Ui::Internal::VisualBaseImpl* object);
 
 public:
-  DALI_UI_CHAIN_VISUALBASE_METHODS(GradientVisual)
 };
 
 /**

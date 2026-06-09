@@ -240,19 +240,16 @@ int UtcDaliLottieAnimationVisualPlayState(void)
 {
   UiTestApplication application;
 
-  LottieAnimationVisual visual;
+  LottieAnimationVisual visual = LottieAnimationVisual::New();
+  visual.SetResourceUrl("anim.json");
+  visual.Play();
 
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.AddVisuals(
     Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
-    {
-      LottieAnimationVisual::New()
-        .SetResourceUrl("anim.json")
-        .Play()
-        .As(visual),
-    });
+    {visual});
   
   application.GetScene().Add(view);
 

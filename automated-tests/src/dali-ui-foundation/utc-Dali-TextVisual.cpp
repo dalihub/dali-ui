@@ -454,28 +454,27 @@ int UtcDaliTextVisualSetGetPropertyValue(void)
   END_TEST;
 }
 
-int UtcDaliTextVisualChaining(void)
+int UtcDaliTextVisualSetters(void)
 {
   UiTestApplication application;
 
   TextVisual visual = TextVisual::New();
 
-  // Test that setter methods return *this for chaining
-  visual.SetText("Hello")
-        .SetFontFamily("Arial")
-        .SetFontSize(20.0f)
-        .SetFontWeight(Text::FontWeight::BOLD)
-        .SetFontWidth(Text::FontWidth::NORMAL)
-        .SetFontSlant(Text::FontSlant::NORMAL)
-        .SetMultiLine(true)
-        .SetLineWrapMode(Text::LineWrapMode::WORD)
-        .SetHorizontalAlignment(Text::Alignment::CENTER)
-        .SetVerticalAlignment(Text::Alignment::CENTER)
-        .SetOverflowMode(Text::OverflowMode::ELLIPSIS)
-        .SetLineHeight(1.5f)
-        .SetLineHeightMode(Text::LineHeightMode::RELATIVE)
-        .SetTextColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f))
-        .SetMarkupEnabled(true);
+  visual.SetText("Hello");
+  visual.SetFontFamily("Arial");
+  visual.SetFontSize(20.0f);
+  visual.SetFontWeight(Text::FontWeight::BOLD);
+  visual.SetFontWidth(Text::FontWidth::NORMAL);
+  visual.SetFontSlant(Text::FontSlant::NORMAL);
+  visual.SetMultiLine(true);
+  visual.SetLineWrapMode(Text::LineWrapMode::WORD);
+  visual.SetHorizontalAlignment(Text::Alignment::CENTER);
+  visual.SetVerticalAlignment(Text::Alignment::CENTER);
+  visual.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+  visual.SetLineHeight(1.5f);
+  visual.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+  visual.SetTextColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+  visual.SetMarkupEnabled(true);
 
   DALI_TEST_EQUALS(visual.GetText(), "Hello", TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetFontFamily(), "Arial", TEST_LOCATION);

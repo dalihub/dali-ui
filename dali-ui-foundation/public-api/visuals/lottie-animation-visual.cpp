@@ -55,10 +55,9 @@ Dali::String LottieAnimationVisual::GetResourceUrl() const
   return VisualBase::GetProperty<Dali::String>(LottieAnimationVisual::Property::URL);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetResourceUrl(const Dali::String& resourceUrl)
+void LottieAnimationVisual::SetResourceUrl(const Dali::String& resourceUrl)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::URL, resourceUrl);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsSynchronousLoading() const
@@ -66,10 +65,9 @@ bool LottieAnimationVisual::IsSynchronousLoading() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::SYNCHRONOUS_LOADING);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetSynchronousLoading(bool synchronous)
+void LottieAnimationVisual::SetSynchronousLoading(bool synchronous)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::SYNCHRONOUS_LOADING, synchronous);
-  return *this;
 }
 
 int LottieAnimationVisual::GetDesiredWidth() const
@@ -77,10 +75,9 @@ int LottieAnimationVisual::GetDesiredWidth() const
   return VisualBase::GetProperty<int>(LottieAnimationVisual::Property::DESIRED_WIDTH);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetDesiredWidth(int desiredWidth)
+void LottieAnimationVisual::SetDesiredWidth(int desiredWidth)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::DESIRED_WIDTH, desiredWidth);
-  return *this;
 }
 
 int LottieAnimationVisual::GetDesiredHeight() const
@@ -88,10 +85,9 @@ int LottieAnimationVisual::GetDesiredHeight() const
   return VisualBase::GetProperty<int>(LottieAnimationVisual::Property::DESIRED_HEIGHT);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetDesiredHeight(int desiredHeight)
+void LottieAnimationVisual::SetDesiredHeight(int desiredHeight)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::DESIRED_HEIGHT, desiredHeight);
-  return *this;
 }
 
 Image::SamplingMode LottieAnimationVisual::GetSamplingMode() const
@@ -99,10 +95,9 @@ Image::SamplingMode LottieAnimationVisual::GetSamplingMode() const
   return VisualBase::GetProperty<Image::SamplingMode>(LottieAnimationVisual::Property::SAMPLING_MODE);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetSamplingMode(Image::SamplingMode samplingMode)
+void LottieAnimationVisual::SetSamplingMode(Image::SamplingMode samplingMode)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::SAMPLING_MODE, samplingMode);
-  return *this;
 }
 
 Dali::Vector4 LottieAnimationVisual::GetPixelArea() const
@@ -110,10 +105,9 @@ Dali::Vector4 LottieAnimationVisual::GetPixelArea() const
   return VisualBase::GetProperty<Dali::Vector4>(LottieAnimationVisual::Property::PIXEL_AREA);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetPixelArea(const Dali::Vector4& pixelArea)
+void LottieAnimationVisual::SetPixelArea(const Dali::Vector4& pixelArea)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::PIXEL_AREA, pixelArea);
-  return *this;
 }
 
 Dali::WrapMode::Type LottieAnimationVisual::GetWrapModeU() const
@@ -121,10 +115,9 @@ Dali::WrapMode::Type LottieAnimationVisual::GetWrapModeU() const
   return VisualBase::GetProperty<Dali::WrapMode::Type>(LottieAnimationVisual::Property::WRAP_MODE_U);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetWrapModeU(Dali::WrapMode::Type wrapModeU)
+void LottieAnimationVisual::SetWrapModeU(Dali::WrapMode::Type wrapModeU)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::WRAP_MODE_U, wrapModeU);
-  return *this;
 }
 
 Dali::WrapMode::Type LottieAnimationVisual::GetWrapModeV() const
@@ -132,10 +125,9 @@ Dali::WrapMode::Type LottieAnimationVisual::GetWrapModeV() const
   return VisualBase::GetProperty<Dali::WrapMode::Type>(LottieAnimationVisual::Property::WRAP_MODE_V);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetWrapModeV(Dali::WrapMode::Type wrapModeV)
+void LottieAnimationVisual::SetWrapModeV(Dali::WrapMode::Type wrapModeV)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::WRAP_MODE_V, wrapModeV);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsBrokenImageEnabled() const
@@ -143,10 +135,9 @@ bool LottieAnimationVisual::IsBrokenImageEnabled() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_BROKEN_IMAGE);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetEnableBrokenImage(bool enableBrokenImage)
+void LottieAnimationVisual::SetEnableBrokenImage(bool enableBrokenImage)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_BROKEN_IMAGE, enableBrokenImage);
-  return *this;
 }
 
 Image::LoadPolicy LottieAnimationVisual::GetLoadPolicy() const
@@ -154,10 +145,9 @@ Image::LoadPolicy LottieAnimationVisual::GetLoadPolicy() const
   return VisualBase::GetProperty<Image::LoadPolicy>(LottieAnimationVisual::Property::LOAD_POLICY);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetLoadPolicy(Image::LoadPolicy loadPolicy)
+void LottieAnimationVisual::SetLoadPolicy(Image::LoadPolicy loadPolicy)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::LOAD_POLICY, loadPolicy);
-  return *this;
 }
 
 Image::ReleasePolicy LottieAnimationVisual::GetReleasePolicy() const
@@ -165,10 +155,9 @@ Image::ReleasePolicy LottieAnimationVisual::GetReleasePolicy() const
   return VisualBase::GetProperty<Image::ReleasePolicy>(LottieAnimationVisual::Property::RELEASE_POLICY);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetReleasePolicy(Image::ReleasePolicy releasePolicy)
+void LottieAnimationVisual::SetReleasePolicy(Image::ReleasePolicy releasePolicy)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::RELEASE_POLICY, releasePolicy);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsOrientationCorrection() const
@@ -176,10 +165,9 @@ bool LottieAnimationVisual::IsOrientationCorrection() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ORIENTATION_CORRECTION);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetOrientationCorrection(bool orientationCorrection)
+void LottieAnimationVisual::SetOrientationCorrection(bool orientationCorrection)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::ORIENTATION_CORRECTION, orientationCorrection);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsSynchronousSizing() const
@@ -187,10 +175,9 @@ bool LottieAnimationVisual::IsSynchronousSizing() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::SYNCHRONOUS_SIZING);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetSynchronousSizing(bool synchronousSizing)
+void LottieAnimationVisual::SetSynchronousSizing(bool synchronousSizing)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::SYNCHRONOUS_SIZING, synchronousSizing);
-  return *this;
 }
 
 int LottieAnimationVisual::GetLoopCount() const
@@ -198,10 +185,9 @@ int LottieAnimationVisual::GetLoopCount() const
   return VisualBase::GetProperty<int>(LottieAnimationVisual::Property::LOOP_COUNT);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetLoopCount(int loopCount)
+void LottieAnimationVisual::SetLoopCount(int loopCount)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::LOOP_COUNT, loopCount);
-  return *this;
 }
 
 Dali::Property::Array LottieAnimationVisual::GetPlayRange() const
@@ -215,10 +201,9 @@ Dali::Property::Array LottieAnimationVisual::GetPlayRange() const
   return Dali::Property::Array();
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetPlayRange(const Dali::Property::Array& playRange)
+void LottieAnimationVisual::SetPlayRange(const Dali::Property::Array& playRange)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::PLAY_RANGE, playRange);
-  return *this;
 }
 
 AnimatedImage::StopBehavior LottieAnimationVisual::GetStopBehavior() const
@@ -226,10 +211,9 @@ AnimatedImage::StopBehavior LottieAnimationVisual::GetStopBehavior() const
   return VisualBase::GetProperty<AnimatedImage::StopBehavior>(LottieAnimationVisual::Property::STOP_BEHAVIOR);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetStopBehavior(AnimatedImage::StopBehavior stopBehavior)
+void LottieAnimationVisual::SetStopBehavior(AnimatedImage::StopBehavior stopBehavior)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::STOP_BEHAVIOR, stopBehavior);
-  return *this;
 }
 
 float LottieAnimationVisual::GetFrameSpeedFactor() const
@@ -237,10 +221,9 @@ float LottieAnimationVisual::GetFrameSpeedFactor() const
   return VisualBase::GetProperty<float>(LottieAnimationVisual::Property::FRAME_SPEED_FACTOR);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetFrameSpeedFactor(float frameSpeedFactor)
+void LottieAnimationVisual::SetFrameSpeedFactor(float frameSpeedFactor)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::FRAME_SPEED_FACTOR, frameSpeedFactor);
-  return *this;
 }
 
 LottieAnimation::LoopingMode LottieAnimationVisual::GetLoopingMode() const
@@ -248,10 +231,9 @@ LottieAnimation::LoopingMode LottieAnimationVisual::GetLoopingMode() const
   return VisualBase::GetProperty<LottieAnimation::LoopingMode>(LottieAnimationVisual::Property::LOOPING_MODE);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetLoopingMode(LottieAnimation::LoopingMode loopingMode)
+void LottieAnimationVisual::SetLoopingMode(LottieAnimation::LoopingMode loopingMode)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::LOOPING_MODE, loopingMode);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsRedrawInScalingDown() const
@@ -259,10 +241,9 @@ bool LottieAnimationVisual::IsRedrawInScalingDown() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::REDRAW_IN_SCALING_DOWN);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetRedrawInScalingDown(bool redrawInScalingDown)
+void LottieAnimationVisual::SetRedrawInScalingDown(bool redrawInScalingDown)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::REDRAW_IN_SCALING_DOWN, redrawInScalingDown);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsRedrawInScalingUp() const
@@ -270,10 +251,9 @@ bool LottieAnimationVisual::IsRedrawInScalingUp() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::REDRAW_IN_SCALING_UP);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetRedrawInScalingUp(bool redrawInScalingUp)
+void LottieAnimationVisual::SetRedrawInScalingUp(bool redrawInScalingUp)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::REDRAW_IN_SCALING_UP, redrawInScalingUp);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsEnableFrameCache() const
@@ -281,10 +261,9 @@ bool LottieAnimationVisual::IsEnableFrameCache() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_FRAME_CACHE);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetEnableFrameCache(bool enableFrameCache)
+void LottieAnimationVisual::SetEnableFrameCache(bool enableFrameCache)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_FRAME_CACHE, enableFrameCache);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsNotifyAfterRasterization() const
@@ -292,10 +271,9 @@ bool LottieAnimationVisual::IsNotifyAfterRasterization() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::NOTIFY_AFTER_RASTERIZATION);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetNotifyAfterRasterization(bool notifyAfterRasterization)
+void LottieAnimationVisual::SetNotifyAfterRasterization(bool notifyAfterRasterization)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::NOTIFY_AFTER_RASTERIZATION, notifyAfterRasterization);
-  return *this;
 }
 
 float LottieAnimationVisual::GetRenderScale() const
@@ -303,10 +281,9 @@ float LottieAnimationVisual::GetRenderScale() const
   return VisualBase::GetProperty<float>(LottieAnimationVisual::Property::RENDER_SCALE);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetRenderScale(float renderScale)
+void LottieAnimationVisual::SetRenderScale(float renderScale)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::RENDER_SCALE, renderScale);
-  return *this;
 }
 
 bool LottieAnimationVisual::IsAspectFitEnabled() const
@@ -314,10 +291,9 @@ bool LottieAnimationVisual::IsAspectFitEnabled() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT);
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetEnableAspectFit(bool enableAspectFit)
+void LottieAnimationVisual::SetEnableAspectFit(bool enableAspectFit)
 {
   VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT, enableAspectFit);
-  return *this;
 }
 
 // =============================================================================
@@ -379,39 +355,35 @@ Dali::Property::Map LottieAnimationVisual::GetMarkerInfo() const
 // Action API
 // =============================================================================
 
-LottieAnimationVisual& LottieAnimationVisual::Play()
+void LottieAnimationVisual::Play()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
   VisualBase::DoAction(Ui::DevelAnimatedVectorImageVisual::Action::PLAY, Dali::Property::Value());
-  return *this;
 }
 
-LottieAnimationVisual& LottieAnimationVisual::Pause()
+void LottieAnimationVisual::Pause()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
   VisualBase::DoAction(Ui::DevelAnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Value());
-  return *this;
 }
 
-LottieAnimationVisual& LottieAnimationVisual::Stop()
+void LottieAnimationVisual::Stop()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
   VisualBase::DoAction(Ui::DevelAnimatedVectorImageVisual::Action::STOP, Dali::Property::Value());
-  return *this;
 }
 
-LottieAnimationVisual& LottieAnimationVisual::JumpTo(int frame)
+void LottieAnimationVisual::JumpTo(int frame)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
   VisualBase::DoAction(Ui::DevelAnimatedVectorImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
-  return *this;
 }
 
-LottieAnimationVisual& LottieAnimationVisual::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
+void LottieAnimationVisual::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
@@ -421,7 +393,6 @@ LottieAnimationVisual& LottieAnimationVisual::SetDynamicProperty(const LottieAni
   dynamicInfo.property = static_cast<int32_t>(info.property);
   dynamicInfo.callback = info.callback;
   GetImplementation(*this).DoActionExtension(Ui::DevelAnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY, Dali::Any(dynamicInfo));
-  return *this;
 }
 
 // =============================================================================

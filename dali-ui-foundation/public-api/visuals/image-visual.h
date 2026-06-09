@@ -39,7 +39,6 @@ namespace Ui
  * @{
  */
 
-#include "image-visual.autogen.h"
 /**
  * @brief ImageVisual is a owner of Visual::Base with Visual::IMAGE, to render simple image.
  *
@@ -112,8 +111,7 @@ public:
    */
   static ImageVisual DownCast(BaseHandle handle);
 
-public: // Setters for chaining
-  // @CHAIN_START(ImageVisual, VisualBase)
+public: // Setters
   /**
    * @brief Gets the resource url of the ImageVisual.
    *
@@ -126,7 +124,7 @@ public: // Setters for chaining
    *
    * @param[in] resourceUrl The resource url to set
    */
-  ImageVisual& SetResourceUrl(const Dali::String& resourceUrl);
+  void SetResourceUrl(const Dali::String& resourceUrl);
 
   /**
    * @brief Gets whether synchronous loading is enabled.
@@ -139,9 +137,8 @@ public: // Setters for chaining
    * @brief Sets whether the image is loaded synchronously.
    *
    * @param[in] synchronous True to load the image on the main thread synchronously
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetSynchronousLoading(bool synchronous);
+  void SetSynchronousLoading(bool synchronous);
 
   /**
    * @brief Gets the desired width of the ImageVisual.
@@ -154,9 +151,8 @@ public: // Setters for chaining
    * @brief Sets the desired width of the ImageVisual.
    *
    * @param[in] desiredWidth The desired width to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetDesiredWidth(int desiredWidth);
+  void SetDesiredWidth(int desiredWidth);
 
   /**
    * @brief Gets the desired height of the ImageVisual.
@@ -169,9 +165,8 @@ public: // Setters for chaining
    * @brief Sets the desired height of the ImageVisual.
    *
    * @param[in] desiredHeight The desired height to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetDesiredHeight(int desiredHeight);
+  void SetDesiredHeight(int desiredHeight);
 
   /**
    * @brief Gets the sampling mode of the ImageVisual.
@@ -184,9 +179,8 @@ public: // Setters for chaining
    * @brief Sets the sampling mode of the ImageVisual.
    *
    * @param[in] samplingMode The sampling mode to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetSamplingMode(Image::SamplingMode samplingMode);
+  void SetSamplingMode(Image::SamplingMode samplingMode);
 
   /**
    * @brief Gets the pixel area of the ImageVisual.
@@ -199,9 +193,8 @@ public: // Setters for chaining
    * @brief Sets the pixel area of the ImageVisual.
    *
    * @param[in] pixelArea The pixel area to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetPixelArea(const Dali::Vector4& pixelArea);
+  void SetPixelArea(const Dali::Vector4& pixelArea);
 
   /**
    * @brief Gets the wrap mode for u coordinate of the ImageVisual.
@@ -214,9 +207,8 @@ public: // Setters for chaining
    * @brief Sets the wrap mode for u coordinate of the ImageVisual.
    *
    * @param[in] wrapModeU The wrap mode for u coordinate to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetWrapModeU(Dali::WrapMode::Type wrapModeU);
+  void SetWrapModeU(Dali::WrapMode::Type wrapModeU);
 
   /**
    * @brief Gets the wrap mode for v coordinate of the ImageVisual.
@@ -229,9 +221,8 @@ public: // Setters for chaining
    * @brief Sets the wrap mode for v coordinate of the ImageVisual.
    *
    * @param[in] wrapModeV The wrap mode for v coordinate to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetWrapModeV(Dali::WrapMode::Type wrapModeV);
+  void SetWrapModeV(Dali::WrapMode::Type wrapModeV);
 
   /**
    * @brief Gets whether broken image is enabled.
@@ -244,9 +235,8 @@ public: // Setters for chaining
    * @brief Sets whether to enable broken image.
    *
    * @param[in] enableBrokenImage True to enable broken image
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetEnableBrokenImage(bool enableBrokenImage);
+  void SetEnableBrokenImage(bool enableBrokenImage);
 
   /**
    * @brief Gets the load policy of the ImageVisual.
@@ -259,9 +249,8 @@ public: // Setters for chaining
    * @brief Sets the load policy of the ImageVisual.
    *
    * @param[in] loadPolicy The load policy to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetLoadPolicy(Image::LoadPolicy loadPolicy);
+  void SetLoadPolicy(Image::LoadPolicy loadPolicy);
 
   /**
    * @brief Gets the release policy of the ImageVisual.
@@ -274,9 +263,8 @@ public: // Setters for chaining
    * @brief Sets the release policy of the ImageVisual.
    *
    * @param[in] releasePolicy The release policy to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
+  void SetReleasePolicy(Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets the fitting mode of the ImageVisual.
@@ -289,9 +277,8 @@ public: // Setters for chaining
    * @brief Sets the fitting mode of the ImageVisual.
    *
    * @param[in] fittingMode The fitting mode to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetFittingMode(Image::FittingMode fittingMode);
+  void SetFittingMode(Image::FittingMode fittingMode);
 
   /**
    * @brief Gets whether orientation correction is enabled.
@@ -304,9 +291,8 @@ public: // Setters for chaining
    * @brief Sets whether to correct the image orientation.
    *
    * @param[in] orientationCorrection True to correct the image orientation
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetOrientationCorrection(bool orientationCorrection);
+  void SetOrientationCorrection(bool orientationCorrection);
 
   /**
    * @brief Gets whether synchronous sizing is enabled.
@@ -319,9 +305,8 @@ public: // Setters for chaining
    * @brief Sets whether to use synchronous sizing.
    *
    * @param[in] synchronousSizing True to use synchronous sizing
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetSynchronousSizing(bool synchronousSizing);
+  void SetSynchronousSizing(bool synchronousSizing);
 
   /**
    * @brief Gets whether fast track uploading is enabled.
@@ -334,9 +319,8 @@ public: // Setters for chaining
    * @brief Sets whether to use fast track uploading.
    *
    * @param[in] fastTrackUploading True to use fast track uploading
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetFastTrackUploading(bool fastTrackUploading);
+  void SetFastTrackUploading(bool fastTrackUploading);
 
   /**
    * @brief Gets the NPatch border of the ImageVisual.
@@ -349,9 +333,8 @@ public: // Setters for chaining
    * @brief Sets the NPatch border of the ImageVisual.
    *
    * @param[in] border The NPatch border to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetNPatchBorder(const Dali::Extents& border);
+  void SetNPatchBorder(const Dali::Extents& border);
 
   /**
    * @brief Gets whether NPatch border only is enabled.
@@ -364,9 +347,8 @@ public: // Setters for chaining
    * @brief Sets whether to draw only the borders.
    *
    * @param[in] borderOnly True to draw only the borders
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetNPatchBorderOnly(bool borderOnly);
+  void SetNPatchBorderOnly(bool borderOnly);
 
   /**
    * @brief Gets the auxiliary image url of the ImageVisual.
@@ -380,9 +362,8 @@ public: // Setters for chaining
    * @note Only available if resource is n-patch, or NpatchBorder applied.
    *
    * @param[in] auxiliaryImage The auxiliary image url to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetNPatchAuxiliaryImage(const Dali::String& auxiliaryImage);
+  void SetNPatchAuxiliaryImage(const Dali::String& auxiliaryImage);
 
   /**
    * @brief Gets the auxiliary image alpha of the ImageVisual.
@@ -397,9 +378,8 @@ public: // Setters for chaining
    * @note Only available if resource is n-patch, or NpatchBorder applied.
    *
    * @param[in] auxiliaryImageAlpha The auxiliary image alpha to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetNPatchAuxiliaryImageAlpha(float auxiliaryImageAlpha);
+  void SetNPatchAuxiliaryImageAlpha(float auxiliaryImageAlpha);
 
   /**
    * @brief Gets whether pre-multiplied alpha is enabled.
@@ -412,9 +392,8 @@ public: // Setters for chaining
    * @brief Sets whether the image uses pre-multiplied alpha.
    *
    * @param[in] preMultiplied True if the image has pre-multiplied alpha
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultipliedAlpha(bool preMultiplied);
 
   /**
    * @brief Gets the alpha mask url of the ImageVisual.
@@ -427,9 +406,8 @@ public: // Setters for chaining
    * @brief Sets the alpha mask url of the ImageVisual.
    *
    * @param[in] alphaMaskUrl The alpha mask url to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetAlphaMaskUrl(const Dali::String& alphaMaskUrl);
+  void SetAlphaMaskUrl(const Dali::String& alphaMaskUrl);
 
   /**
    * @brief Gets the mask content scale of the ImageVisual.
@@ -442,9 +420,8 @@ public: // Setters for chaining
    * @brief Sets the mask content scale of the ImageVisual.
    *
    * @param[in] maskContentScale The mask content scale to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetMaskContentScale(float maskContentScale);
+  void SetMaskContentScale(float maskContentScale);
 
   /**
    * @brief Gets whether crop to mask is enabled.
@@ -457,9 +434,8 @@ public: // Setters for chaining
    * @brief Sets whether to crop to mask.
    *
    * @param[in] cropToMask True to crop to mask
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetCropToMask(bool cropToMask);
+  void SetCropToMask(bool cropToMask);
 
   /**
    * @brief Gets the masking type of the ImageVisual.
@@ -472,10 +448,8 @@ public: // Setters for chaining
    * @brief Sets the masking type of the ImageVisual.
    *
    * @param[in] maskingType The masking type to set
-   * @return Reference to this for fluent chaining
    */
-  ImageVisual& SetMaskingType(Image::MaskingType maskingType);
-  // @CHAIN_END
+  void SetMaskingType(Image::MaskingType maskingType);
 
 public:
   ImageVisual()                                      = default;
@@ -494,7 +468,6 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL ImageVisual(Dali::Ui::Internal::VisualBaseImpl* object);
 
 public:
-  DALI_UI_CHAIN_VISUALBASE_METHODS(ImageVisual)
 };
 
 /**

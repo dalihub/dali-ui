@@ -254,19 +254,16 @@ int UtcDaliAnimatedImageVisualPlayState(void)
 {
   UiTestApplication application;
 
-  AnimatedImageVisual visual;
+  AnimatedImageVisual visual = AnimatedImageVisual::New();
+  visual.SetResourceUrlList({"image01.png", "image02.png"});
+  visual.Play();
 
   View view = View::New();
   view.SetRequestedWidth(100.0f);
   view.SetRequestedHeight(100.0f);
   view.AddVisuals(
     Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT,
-    {
-      AnimatedImageVisual::New()
-        .SetResourceUrlList({"image01.png", "image02.png"})
-        .Play()
-        .As(visual),
-    });
+    {visual});
       
   application.GetScene().Add(view);
 

@@ -35,7 +35,6 @@ namespace Ui
  * @{
  */
 
-#include "border-visual.autogen.h"
 /**
  * @brief BorderVisual is a owner of Visual::Base with Visual::BORDER, to render simple rectangle borderline.
  *
@@ -77,8 +76,7 @@ public:
    */
   static BorderVisual DownCast(BaseHandle handle);
 
-public: // Setters for chaining
-  // @CHAIN_START(BorderVisual, VisualBase)
+public: // Setters
   /**
    * @brief Gets the size of border of the BorderVisual.
    *
@@ -91,7 +89,7 @@ public: // Setters for chaining
    *
    * @param[in] borderSize The size of border to set
    */
-  BorderVisual& SetBorderSize(float borderSize);
+  void SetBorderSize(float borderSize);
 
   /**
    * @brief Gets the soft anti-aliasing enabled of the BorderVisual.
@@ -105,8 +103,7 @@ public: // Setters for chaining
    *
    * @param[in] enable True if soft anti-aliasing enabled
    */
-  BorderVisual& SetEnableAntiAliasing(bool enable);
-  // @CHAIN_END
+  void SetEnableAntiAliasing(bool enable);
 
 public:
   BorderVisual()                                       = default;
@@ -125,7 +122,6 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL BorderVisual(Dali::Ui::Internal::VisualBaseImpl* object);
 
 public:
-  DALI_UI_CHAIN_VISUALBASE_METHODS(BorderVisual)
 };
 
 /**

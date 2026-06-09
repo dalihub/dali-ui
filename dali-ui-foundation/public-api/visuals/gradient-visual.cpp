@@ -49,7 +49,7 @@ GradientVisual GradientVisual::DownCast(BaseHandle handle)
 // Properties
 // =============================================================================
 
-GradientVisual& GradientVisual::SetLinearGradient(const Dali::Vector2& startPosition, const Dali::Vector2& endPosition)
+void GradientVisual::SetLinearGradient(const Dali::Vector2& startPosition, const Dali::Vector2& endPosition)
 {
   // Remove other caches first if exist
   auto& visualBaseImpl = GetImplementation(*this);
@@ -59,10 +59,9 @@ GradientVisual& GradientVisual::SetLinearGradient(const Dali::Vector2& startPosi
 
   VisualBase::SetProperty(GradientVisual::Property::START_POSITION, startPosition);
   VisualBase::SetProperty(GradientVisual::Property::END_POSITION, endPosition);
-  return *this;
 }
 
-GradientVisual& GradientVisual::SetRadialGradient(const Dali::Vector2& center, float radius)
+void GradientVisual::SetRadialGradient(const Dali::Vector2& center, float radius)
 {
   // Remove other caches first if exist
   auto& visualBaseImpl = GetImplementation(*this);
@@ -72,10 +71,9 @@ GradientVisual& GradientVisual::SetRadialGradient(const Dali::Vector2& center, f
 
   VisualBase::SetProperty(GradientVisual::Property::CENTER, center);
   VisualBase::SetProperty(GradientVisual::Property::RADIUS, radius);
-  return *this;
 }
 
-GradientVisual& GradientVisual::SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle)
+void GradientVisual::SetConicGradient(const Dali::Vector2& center, Dali::Radian startAngle)
 {
   // Remove other caches first if exist
   auto& visualBaseImpl = GetImplementation(*this);
@@ -85,7 +83,6 @@ GradientVisual& GradientVisual::SetConicGradient(const Dali::Vector2& center, Da
 
   VisualBase::SetProperty(GradientVisual::Property::CENTER, center);
   VisualBase::SetProperty(GradientVisual::Property::START_ANGLE, startAngle.radian);
-  return *this;
 }
 
 float GradientVisual::GetStartOffset() const
@@ -93,10 +90,9 @@ float GradientVisual::GetStartOffset() const
   return VisualBase::GetProperty<float>(GradientVisual::Property::START_OFFSET);
 }
 
-GradientVisual& GradientVisual::SetStartOffset(float startOffset)
+void GradientVisual::SetStartOffset(float startOffset)
 {
   VisualBase::SetProperty(GradientVisual::Property::START_OFFSET, startOffset);
-  return *this;
 }
 
 Dali::Vector2 GradientVisual::GetStartPosition() const
@@ -146,7 +142,7 @@ Dali::Vector<Ui::Gradient::StopNode> GradientVisual::GetStopNodes() const
   return convertedStopNodes;
 }
 
-GradientVisual& GradientVisual::SetStopNodes(const Dali::Vector<Ui::Gradient::StopNode>& stopNodes)
+void GradientVisual::SetStopNodes(const Dali::Vector<Ui::Gradient::StopNode>& stopNodes)
 {
   // TODO : We need to binding for the stop node color
   Dali::Property::Array offsetArray;
@@ -161,7 +157,6 @@ GradientVisual& GradientVisual::SetStopNodes(const Dali::Vector<Ui::Gradient::St
   }
   VisualBase::SetProperty(GradientVisual::Property::STOP_OFFSET, offsetArray);
   VisualBase::SetProperty(GradientVisual::Property::STOP_COLOR, colorArray);
-  return *this;
 }
 
 Ui::Gradient::Units GradientVisual::GetUnits() const
@@ -169,10 +164,9 @@ Ui::Gradient::Units GradientVisual::GetUnits() const
   return VisualBase::GetProperty<Ui::Gradient::Units>(GradientVisual::Property::UNITS);
 }
 
-GradientVisual& GradientVisual::SetUnits(Ui::Gradient::Units gradientUnits)
+void GradientVisual::SetUnits(Ui::Gradient::Units gradientUnits)
 {
   VisualBase::SetProperty(GradientVisual::Property::UNITS, gradientUnits);
-  return *this;
 }
 
 Ui::Gradient::SpreadMethod GradientVisual::GetSpreadMethod() const
@@ -180,10 +174,9 @@ Ui::Gradient::SpreadMethod GradientVisual::GetSpreadMethod() const
   return VisualBase::GetProperty<Ui::Gradient::SpreadMethod>(GradientVisual::Property::SPREAD_METHOD);
 }
 
-GradientVisual& GradientVisual::SetSpreadMethod(Ui::Gradient::SpreadMethod spreadMethod)
+void GradientVisual::SetSpreadMethod(Ui::Gradient::SpreadMethod spreadMethod)
 {
   VisualBase::SetProperty(GradientVisual::Property::SPREAD_METHOD, spreadMethod);
-  return *this;
 }
 
 // =============================================================================

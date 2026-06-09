@@ -96,10 +96,9 @@ const Dali::String& VisualBase::GetName() const
   return GetImplementation(*this).GetName();
 }
 
-VisualBase& VisualBase::SetName(const Dali::String& name)
+void VisualBase::SetName(const Dali::String& name)
 {
   GetImplementation(*this).SetName(name);
-  return *this;
 }
 
 UiColor VisualBase::GetColor() const
@@ -107,10 +106,9 @@ UiColor VisualBase::GetColor() const
   return GetImplementation(*this).GetColor();
 }
 
-VisualBase& VisualBase::SetColor(const UiColor& color)
+void VisualBase::SetColor(const UiColor& color)
 {
   GetImplementation(*this).SetColor(color);
-  return *this;
 }
 
 // Transform relative properties
@@ -119,10 +117,9 @@ float VisualBase::GetOffsetX() const
   return GetImplementation(*this).GetOffsetX();
 }
 
-VisualBase& VisualBase::SetOffsetX(float x)
+void VisualBase::SetOffsetX(float x)
 {
   GetImplementation(*this).SetOffsetX(x);
-  return *this;
 }
 
 float VisualBase::GetOffsetY() const
@@ -130,10 +127,9 @@ float VisualBase::GetOffsetY() const
   return GetImplementation(*this).GetOffsetY();
 }
 
-VisualBase& VisualBase::SetOffsetY(float y)
+void VisualBase::SetOffsetY(float y)
 {
   GetImplementation(*this).SetOffsetY(y);
-  return *this;
 }
 
 float VisualBase::GetWidth() const
@@ -141,10 +137,9 @@ float VisualBase::GetWidth() const
   return GetImplementation(*this).GetWidth();
 }
 
-VisualBase& VisualBase::SetWidth(float width)
+void VisualBase::SetWidth(float width)
 {
   GetImplementation(*this).SetWidth(width);
-  return *this;
 }
 
 float VisualBase::GetHeight() const
@@ -152,10 +147,9 @@ float VisualBase::GetHeight() const
   return GetImplementation(*this).GetHeight();
 }
 
-VisualBase& VisualBase::SetHeight(float height)
+void VisualBase::SetHeight(float height)
 {
   GetImplementation(*this).SetHeight(height);
-  return *this;
 }
 
 Dali::Ui::Visual::Transform::ProportionFlags VisualBase::GetProportionFlags() const
@@ -163,10 +157,9 @@ Dali::Ui::Visual::Transform::ProportionFlags VisualBase::GetProportionFlags() co
   return GetImplementation(*this).GetProportionFlags();
 }
 
-VisualBase& VisualBase::SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags)
+void VisualBase::SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags)
 {
   GetImplementation(*this).SetProportionFlags(flags);
-  return *this;
 }
 
 float VisualBase::GetExtraWidth() const
@@ -174,10 +167,9 @@ float VisualBase::GetExtraWidth() const
   return GetImplementation(*this).GetExtraWidth();
 }
 
-VisualBase& VisualBase::SetExtraWidth(float extraWidth)
+void VisualBase::SetExtraWidth(float extraWidth)
 {
   GetImplementation(*this).SetExtraWidth(extraWidth);
-  return *this;
 }
 
 float VisualBase::GetExtraHeight() const
@@ -185,10 +177,9 @@ float VisualBase::GetExtraHeight() const
   return GetImplementation(*this).GetExtraHeight();
 }
 
-VisualBase& VisualBase::SetExtraHeight(float extraHeight)
+void VisualBase::SetExtraHeight(float extraHeight)
 {
   GetImplementation(*this).SetExtraHeight(extraHeight);
-  return *this;
 }
 
 Align::Type VisualBase::GetOrigin() const
@@ -196,10 +187,9 @@ Align::Type VisualBase::GetOrigin() const
   return GetImplementation(*this).GetOrigin();
 }
 
-VisualBase& VisualBase::SetOrigin(Align::Type origin)
+void VisualBase::SetOrigin(Align::Type origin)
 {
   GetImplementation(*this).SetOrigin(origin);
-  return *this;
 }
 
 Align::Type VisualBase::GetPivot() const
@@ -207,10 +197,9 @@ Align::Type VisualBase::GetPivot() const
   return GetImplementation(*this).GetPivot();
 }
 
-VisualBase& VisualBase::SetPivot(Align::Type pivot)
+void VisualBase::SetPivot(Align::Type pivot)
 {
   GetImplementation(*this).SetPivot(pivot);
-  return *this;
 }
 
 // Decorated properties (CornerRadius / Borderline)
@@ -220,22 +209,19 @@ Vector4 VisualBase::GetCornerRadius() const
   return GetProperty<Vector4>(DevelVisual::Property::CORNER_RADIUS);
 }
 
-VisualBase& VisualBase::SetCornerRadius(float radius)
+void VisualBase::SetCornerRadius(float radius)
 {
   SetProperty(DevelVisual::Property::CORNER_RADIUS, Vector4(radius, radius, radius, radius));
-  return *this;
 }
 
-VisualBase& VisualBase::SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft)
+void VisualBase::SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft)
 {
   SetProperty(DevelVisual::Property::CORNER_RADIUS, Vector4(topLeft, topRight, bottomRight, bottomLeft));
-  return *this;
 }
 
-VisualBase& VisualBase::SetCornerRadius(const Vector4& radius)
+void VisualBase::SetCornerRadius(const Vector4& radius)
 {
   SetProperty(DevelVisual::Property::CORNER_RADIUS, radius);
-  return *this;
 }
 
 CornerRadiusPolicy VisualBase::GetCornerRadiusPolicy() const
@@ -243,16 +229,14 @@ CornerRadiusPolicy VisualBase::GetCornerRadiusPolicy() const
   return GetProperty<CornerRadiusPolicy>(DevelVisual::Property::CORNER_RADIUS_POLICY);
 }
 
-VisualBase& VisualBase::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
+void VisualBase::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
 {
   SetProperty(DevelVisual::Property::CORNER_RADIUS_POLICY, policy);
-  return *this;
 }
 
-VisualBase& VisualBase::SetCornerRadiusPolicyRelative()
+void VisualBase::SetCornerRadiusPolicyRelative()
 {
   SetProperty(DevelVisual::Property::CORNER_RADIUS_POLICY, CornerRadiusPolicy::RELATIVE);
-  return *this;
 }
 
 bool VisualBase::IsCornerRadiusPolicyRelative() const
@@ -265,22 +249,19 @@ Vector4 VisualBase::GetCornerSquareness() const
   return GetProperty<Vector4>(DevelVisual::Property::CORNER_SQUARENESS);
 }
 
-VisualBase& VisualBase::SetCornerSquareness(float squareness)
+void VisualBase::SetCornerSquareness(float squareness)
 {
   SetProperty(DevelVisual::Property::CORNER_SQUARENESS, Vector4(squareness, squareness, squareness, squareness));
-  return *this;
 }
 
-VisualBase& VisualBase::SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft)
+void VisualBase::SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft)
 {
   SetProperty(DevelVisual::Property::CORNER_SQUARENESS, Vector4(topLeft, topRight, bottomRight, bottomLeft));
-  return *this;
 }
 
-VisualBase& VisualBase::SetCornerSquareness(const Vector4& squareness)
+void VisualBase::SetCornerSquareness(const Vector4& squareness)
 {
   SetProperty(DevelVisual::Property::CORNER_SQUARENESS, squareness);
-  return *this;
 }
 
 float VisualBase::GetBorderlineWidth() const
@@ -288,10 +269,9 @@ float VisualBase::GetBorderlineWidth() const
   return GetProperty<float>(DevelVisual::Property::BORDERLINE_WIDTH);
 }
 
-VisualBase& VisualBase::SetBorderlineWidth(float width)
+void VisualBase::SetBorderlineWidth(float width)
 {
   SetProperty(DevelVisual::Property::BORDERLINE_WIDTH, width);
-  return *this;
 }
 
 UiColor VisualBase::GetBorderlineColor() const
@@ -299,10 +279,9 @@ UiColor VisualBase::GetBorderlineColor() const
   return GetImplementation(*this).GetBorderlineColor();
 }
 
-VisualBase& VisualBase::SetBorderlineColor(const UiColor& color)
+void VisualBase::SetBorderlineColor(const UiColor& color)
 {
   GetImplementation(*this).SetBorderlineColor(color);
-  return *this;
 }
 
 float VisualBase::GetBorderlineOffset() const
@@ -310,10 +289,9 @@ float VisualBase::GetBorderlineOffset() const
   return GetProperty<float>(DevelVisual::Property::BORDERLINE_OFFSET);
 }
 
-VisualBase& VisualBase::SetBorderlineOffset(float offset)
+void VisualBase::SetBorderlineOffset(float offset)
 {
   SetProperty(DevelVisual::Property::BORDERLINE_OFFSET, offset);
-  return *this;
 }
 
 // =============================================================================

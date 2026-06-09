@@ -36,7 +36,6 @@ namespace Ui
  * @{
  */
 
-#include "text-visual.autogen.h"
 /**
  * @brief TextVisual is a owner of Visual::Base with Visual::TEXT, to render simple text.
  *
@@ -91,8 +90,7 @@ public:
    */
   static TextVisual DownCast(BaseHandle handle);
 
-public: // Setters for chaining
-  // @CHAIN_START(TextVisual, VisualBase)
+public: // Setters
   /**
    * @brief Gets the text.
    *
@@ -105,7 +103,7 @@ public: // Setters for chaining
    *
    * @param[in] text The text to display in UTF-8 format.
    */
-  TextVisual& SetText(const Dali::String& text);
+  void SetText(const Dali::String& text);
 
   /**
    * @brief Gets the font family.
@@ -119,7 +117,7 @@ public: // Setters for chaining
    *
    * @param[in] fontFamily The requested font family to use
    */
-  TextVisual& SetFontFamily(const Dali::String& fontFamily);
+  void SetFontFamily(const Dali::String& fontFamily);
 
   /**
    * @brief Gets the font size in pixels.
@@ -133,7 +131,7 @@ public: // Setters for chaining
    *
    * @param[in] fontSize The size of font in pixels
    */
-  TextVisual& SetFontSize(float fontSize);
+  void SetFontSize(float fontSize);
 
   /**
    * @brief Gets the font weight.
@@ -147,7 +145,7 @@ public: // Setters for chaining
    *
    * @param[in] fontWeight The font weight to set
    */
-  TextVisual& SetFontWeight(Dali::Ui::Text::FontWeight fontWeight);
+  void SetFontWeight(Dali::Ui::Text::FontWeight fontWeight);
 
   /**
    * @brief Gets the font width.
@@ -161,7 +159,7 @@ public: // Setters for chaining
    *
    * @param[in] fontWidth The font width to set
    */
-  TextVisual& SetFontWidth(Dali::Ui::Text::FontWidth fontWidth);
+  void SetFontWidth(Dali::Ui::Text::FontWidth fontWidth);
 
   /**
    * @brief Gets the font slant.
@@ -175,7 +173,7 @@ public: // Setters for chaining
    *
    * @param[in] fontSlant The font slant to set
    */
-  TextVisual& SetFontSlant(Dali::Ui::Text::FontSlant fontSlant);
+  void SetFontSlant(Dali::Ui::Text::FontSlant fontSlant);
 
   /**
    * @brief Gets whether multi-line layout is enabled.
@@ -189,7 +187,7 @@ public: // Setters for chaining
    *
    * @param[in] multiLine True to enable multi-line layout, false for single-line
    */
-  TextVisual& SetMultiLine(bool multiLine);
+  void SetMultiLine(bool multiLine);
 
   /**
    * @brief Gets the line wrap mode.
@@ -203,7 +201,7 @@ public: // Setters for chaining
    *
    * @param[in] lineWrapMode The line wrap mode to set
    */
-  TextVisual& SetLineWrapMode(Dali::Ui::Text::LineWrapMode lineWrapMode);
+  void SetLineWrapMode(Dali::Ui::Text::LineWrapMode lineWrapMode);
 
   /**
    * @brief Gets the horizontal alignment.
@@ -217,7 +215,7 @@ public: // Setters for chaining
    *
    * @param[in] alignment The horizontal alignment to set
    */
-  TextVisual& SetHorizontalAlignment(Dali::Ui::Text::Alignment alignment);
+  void SetHorizontalAlignment(Dali::Ui::Text::Alignment alignment);
 
   /**
    * @brief Gets the vertical alignment.
@@ -231,7 +229,7 @@ public: // Setters for chaining
    *
    * @param[in] alignment The vertical alignment to set
    */
-  TextVisual& SetVerticalAlignment(Dali::Ui::Text::Alignment alignment);
+  void SetVerticalAlignment(Dali::Ui::Text::Alignment alignment);
 
   /**
    * @brief Gets the overflow mode.
@@ -245,7 +243,7 @@ public: // Setters for chaining
    *
    * @param[in] overflowMode The overflow mode to set
    */
-  TextVisual& SetOverflowMode(Dali::Ui::Text::OverflowMode overflowMode);
+  void SetOverflowMode(Dali::Ui::Text::OverflowMode overflowMode);
 
   /**
    * @brief Gets the line height.
@@ -259,7 +257,7 @@ public: // Setters for chaining
    *
    * @param[in] lineHeight The line height to set
    */
-  TextVisual& SetLineHeight(float lineHeight);
+  void SetLineHeight(float lineHeight);
 
   /**
    * @brief Gets the line height mode.
@@ -273,7 +271,7 @@ public: // Setters for chaining
    *
    * @param[in] lineHeightMode The line height mode to set
    */
-  TextVisual& SetLineHeightMode(Dali::Ui::Text::LineHeightMode lineHeightMode);
+  void SetLineHeightMode(Dali::Ui::Text::LineHeightMode lineHeightMode);
 
   /**
    * @brief Gets the text color.
@@ -287,7 +285,7 @@ public: // Setters for chaining
    *
    * @param[in] textColor The color of the text
    */
-  TextVisual& SetTextColor(const UiColor& textColor);
+  void SetTextColor(const UiColor& textColor);
 
   /**
    * @brief Gets whether mark-up processing is enabled.
@@ -301,8 +299,7 @@ public: // Setters for chaining
    *
    * @param[in] enabled True to enable mark-up processing
    */
-  TextVisual& SetMarkupEnabled(bool enabled);
-  // @CHAIN_END
+  void SetMarkupEnabled(bool enabled);
 
 public:
   TextVisual()                                     = default;
@@ -321,7 +318,6 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL TextVisual(Dali::Ui::Internal::VisualBaseImpl* object);
 
 public:
-  DALI_UI_CHAIN_VISUALBASE_METHODS(TextVisual)
 };
 
 /**

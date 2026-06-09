@@ -45,7 +45,6 @@ class VisualBaseImpl;
 
 class View;
 
-#include "visual-base.autogen.h"
 /**
  * @brief VisualBase is a owner of Visual::Base.
  *
@@ -218,8 +217,7 @@ public: // GetProperty / SetProperty
    */
   void SetProperty(Dali::Property::Index index, Dali::Property::Value propertyValue);
 
-public: // Setters for chaining
-  // @CHAIN_START(VisualBase)
+public: // Setters
   /**
    * @brief Gets the name of the VisualBase.
    *
@@ -232,7 +230,7 @@ public: // Setters for chaining
    *
    * @param[in] name The name to set
    */
-  VisualBase& SetName(const Dali::String& name);
+  void SetName(const Dali::String& name);
 
   /**
    * @brief Gets the color of the VisualBase.
@@ -246,7 +244,7 @@ public: // Setters for chaining
    *
    * @param[in] color The UiColor to apply
    */
-  VisualBase& SetColor(const UiColor& color);
+  void SetColor(const UiColor& color);
 
   /**
    * @brief Gets the X offset of the VisualBase.
@@ -261,7 +259,7 @@ public: // Setters for chaining
    *
    * @param[in] x The X offset to set
    */
-  VisualBase& SetOffsetX(float x);
+  void SetOffsetX(float x);
 
   /**
    * @brief Gets the Y offset of the VisualBase.
@@ -275,7 +273,7 @@ public: // Setters for chaining
    *
    * @param[in] y The Y offset to set
    */
-  VisualBase& SetOffsetY(float y);
+  void SetOffsetY(float y);
 
   /**
    * @brief Gets the width of the VisualBase.
@@ -289,7 +287,7 @@ public: // Setters for chaining
    *
    * @param[in] width The width to set
    */
-  VisualBase& SetWidth(float width);
+  void SetWidth(float width);
 
   /**
    * @brief Gets the height of the VisualBase.
@@ -303,7 +301,7 @@ public: // Setters for chaining
    *
    * @param[in] height The height to set
    */
-  VisualBase& SetHeight(float height);
+  void SetHeight(float height);
 
   /**
    * @brief Gets the proportion flags of the VisualBase.
@@ -317,7 +315,7 @@ public: // Setters for chaining
    *
    * @param[in] flags The proportion flags to set
    */
-  VisualBase& SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags);
+  void SetProportionFlags(Dali::Ui::Visual::Transform::ProportionFlags flags);
 
   /**
    * @brief Gets the extra width of the VisualBase.
@@ -332,7 +330,7 @@ public: // Setters for chaining
    *
    * @param[in] extraWidth The extra width to set
    */
-  VisualBase& SetExtraWidth(float extraWidth);
+  void SetExtraWidth(float extraWidth);
 
   /**
    * @brief Gets the extra height of the VisualBase.
@@ -347,7 +345,7 @@ public: // Setters for chaining
    *
    * @param[in] extraHeight The extra height to set
    */
-  VisualBase& SetExtraHeight(float extraHeight);
+  void SetExtraHeight(float extraHeight);
 
   /**
    * @brief Gets the origin of the VisualBase.
@@ -361,7 +359,7 @@ public: // Setters for chaining
    *
    * @param[in] origin The origin type to set
    */
-  VisualBase& SetOrigin(Align::Type origin);
+  void SetOrigin(Align::Type origin);
 
   /**
    * @brief Gets the pivot of the VisualBase.
@@ -375,7 +373,7 @@ public: // Setters for chaining
    *
    * @param[in] pivot The pivot to set
    */
-  VisualBase& SetPivot(Align::Type pivot);
+  void SetPivot(Align::Type pivot);
 
   // Decorated properties (CornerRadius / Borderline)
   /**
@@ -391,7 +389,7 @@ public: // Setters for chaining
    *
    * @param[in] radius The corner radius to apply to all corners
    */
-  VisualBase& SetCornerRadius(float radius);
+  void SetCornerRadius(float radius);
 
   /**
    * @brief Sets individual corner radii for all four corners.
@@ -402,7 +400,7 @@ public: // Setters for chaining
    * @param[in] bottomRight The radius for the bottom-right corner
    * @param[in] bottomLeft  The radius for the bottom-left corner
    */
-  VisualBase& SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft);
+  void SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft);
 
   /**
    * @brief Sets corner radii from a Vector4.
@@ -410,7 +408,7 @@ public: // Setters for chaining
    *
    * @param[in] radius Corner radii as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
-  VisualBase& SetCornerRadius(const Vector4& radius);
+  void SetCornerRadius(const Vector4& radius);
 
   /**
    * @brief Gets the corner radius policy.
@@ -425,7 +423,7 @@ public: // Setters for chaining
    *
    * @param[in] policy ABSOLUTE for world-unit values (default), RELATIVE for percentage [0.0, 0.5] of the shorter side
    */
-  VisualBase& SetCornerRadiusPolicy(CornerRadiusPolicy policy);
+  void SetCornerRadiusPolicy(CornerRadiusPolicy policy);
 
   /**
    * @brief Shortcut to set the corner radius policy to RELATIVE.
@@ -433,7 +431,7 @@ public: // Setters for chaining
    *
    * Equivalent to SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE).
    */
-  VisualBase& SetCornerRadiusPolicyRelative();
+  void SetCornerRadiusPolicyRelative();
 
   /**
    * @brief Returns true if the corner radius policy is RELATIVE.
@@ -455,7 +453,7 @@ public: // Setters for chaining
    *
    * @param[in] squareness The squareness value to apply to all corners
    */
-  VisualBase& SetCornerSquareness(float squareness);
+  void SetCornerSquareness(float squareness);
 
   /**
    * @brief Sets individual corner squareness values for all four corners.
@@ -466,7 +464,7 @@ public: // Setters for chaining
    * @param[in] bottomRight The squareness for the bottom-right corner
    * @param[in] bottomLeft  The squareness for the bottom-left corner
    */
-  VisualBase& SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft);
+  void SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft);
 
   /**
    * @brief Sets corner squareness from a Vector4.
@@ -474,7 +472,7 @@ public: // Setters for chaining
    *
    * @param[in] squareness Squareness values as Vector4 (x=topLeft, y=topRight, z=bottomRight, w=bottomLeft)
    */
-  VisualBase& SetCornerSquareness(const Vector4& squareness);
+  void SetCornerSquareness(const Vector4& squareness);
 
   /**
    * @brief Gets the borderline width of the VisualBase.
@@ -489,7 +487,7 @@ public: // Setters for chaining
    *
    * @param[in] width The borderline width to set
    */
-  VisualBase& SetBorderlineWidth(float width);
+  void SetBorderlineWidth(float width);
 
   /**
    * @brief Gets the borderline color of the VisualBase.
@@ -508,7 +506,7 @@ public: // Setters for chaining
    *
    * @param[in] color The UiColor to apply
    */
-  VisualBase& SetBorderlineColor(const UiColor& color);
+  void SetBorderlineColor(const UiColor& color);
 
   /**
    * @brief Gets the borderline offset of the VisualBase.
@@ -523,40 +521,7 @@ public: // Setters for chaining
    *
    * @param[in] offset The borderline offset to set
    */
-  VisualBase& SetBorderlineOffset(float offset);
-
-  // @CHAIN_MANUAL
-  /**
-   * @brief Assigns this VisualBase instance to a target variable.
-   * This method is useful for capturing a reference to a VisualBase created within
-   * a declarative UI tree for later use.
-   */
-  VisualBase& As(VisualBase& self)
-  {
-    self = static_cast<VisualBase&>(*this);
-    return *this;
-  }
-
-  // @CHAIN_MANUAL_SELF
-  /**
-   * @brief Executes a custom action on this View instance.
-   *
-   * Useful for performing additional setup (e.g. signal connections,
-   * predefined style application) without breaking the method chain.
-   *
-   * @param[in] action A callable (lambda or free function) invoked with
-   *                   a reference to this instance.
-   *
-   * @return Reference to this View for fluent chaining.
-   */
-  template<typename F>
-  VisualBase& With(F&& action)
-  {
-    action(*this);
-    return *this;
-  }
-
-  // @CHAIN_END
+  void SetBorderlineOffset(float offset);
 
 public: /// Sibling Order Change API
   /**

@@ -41,7 +41,6 @@ namespace Ui
  * @{
  */
 
-#include "animated-image-visual.autogen.h"
 /**
  * @brief AnimatedImageVisual is a owner of Visual::Base with Visual::ANIMATED_IMAGE, to render sequence of images.
  *
@@ -120,8 +119,7 @@ public:
    */
   static AnimatedImageVisual DownCast(BaseHandle handle);
 
-public: // Setters for chaining
-  // @CHAIN_START(AnimatedImageVisual, VisualBase)
+public: // Setters
   /**
    * @brief Gets the resource url of the AnimatedImageVisual.
    * @note Only valid value returns if SetResourceUrl called.
@@ -139,7 +137,7 @@ public: // Setters for chaining
    *
    * @param[in] resourceUrl The resource URL to set
    */
-  AnimatedImageVisual& SetResourceUrl(const Dali::String& resourceUrl);
+  void SetResourceUrl(const Dali::String& resourceUrl);
 
   /**
    * @brief Gets the list of resource urls of the AnimatedImageVisual.
@@ -155,9 +153,7 @@ public: // Setters for chaining
    *
    * @param[in] resourceUrlList The list of resource URLs to set
    */
-  AnimatedImageVisual& SetResourceUrlList(const Dali::Vector<Dali::String>& resourceUrlList);
-
-  // @CHAIN_MANUAL
+  void SetResourceUrlList(const Dali::Vector<Dali::String>& resourceUrlList);
   /**
    * @brief Sets a list of resource URLs for an animated image sequence.
    *
@@ -166,7 +162,7 @@ public: // Setters for chaining
    *
    * @param[in] resourceUrlList The list of resource URLs to set
    */
-  AnimatedImageVisual& SetResourceUrlList(std::initializer_list<Dali::String> resourceUrlList)
+  void SetResourceUrlList(std::initializer_list<Dali::String> resourceUrlList)
   {
     Dali::Vector<Dali::String> list;
     list.Reserve(resourceUrlList.size());
@@ -175,7 +171,7 @@ public: // Setters for chaining
     {
       list.PushBack(std::move(resourceUrl));
     }
-    return SetResourceUrlList(list);
+    SetResourceUrlList(list);
   }
 
   /**
@@ -189,9 +185,8 @@ public: // Setters for chaining
    * @brief Sets whether the image is loaded synchronously.
    *
    * @param[in] synchronous True to load the image on the main thread synchronously
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetSynchronousLoading(bool synchronous);
+  void SetSynchronousLoading(bool synchronous);
 
   /**
    * @brief Gets the desired width of the AnimatedImageVisual.
@@ -204,9 +199,8 @@ public: // Setters for chaining
    * @brief Sets the desired width of the AnimatedImageVisual.
    *
    * @param[in] desiredWidth The desired width to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetDesiredWidth(int desiredWidth);
+  void SetDesiredWidth(int desiredWidth);
 
   /**
    * @brief Gets the desired height of the AnimatedImageVisual.
@@ -219,9 +213,8 @@ public: // Setters for chaining
    * @brief Sets the desired height of the AnimatedImageVisual.
    *
    * @param[in] desiredHeight The desired height to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetDesiredHeight(int desiredHeight);
+  void SetDesiredHeight(int desiredHeight);
 
   /**
    * @brief Gets the sampling mode of the AnimatedImageVisual.
@@ -234,9 +227,8 @@ public: // Setters for chaining
    * @brief Sets the sampling mode of the AnimatedImageVisual.
    *
    * @param[in] samplingMode The sampling mode to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetSamplingMode(Image::SamplingMode samplingMode);
+  void SetSamplingMode(Image::SamplingMode samplingMode);
 
   /**
    * @brief Gets the pixel area of the AnimatedImageVisual.
@@ -249,9 +241,8 @@ public: // Setters for chaining
    * @brief Sets the pixel area of the AnimatedImageVisual.
    *
    * @param[in] pixelArea The pixel area to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetPixelArea(const Dali::Vector4& pixelArea);
+  void SetPixelArea(const Dali::Vector4& pixelArea);
 
   /**
    * @brief Gets the wrap mode for u coordinate of the AnimatedImageVisual.
@@ -264,9 +255,8 @@ public: // Setters for chaining
    * @brief Sets the wrap mode for u coordinate of the AnimatedImageVisual.
    *
    * @param[in] wrapModeU The wrap mode for u coordinate to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetWrapModeU(Dali::WrapMode::Type wrapModeU);
+  void SetWrapModeU(Dali::WrapMode::Type wrapModeU);
 
   /**
    * @brief Gets the wrap mode for v coordinate of the AnimatedImageVisual.
@@ -279,9 +269,8 @@ public: // Setters for chaining
    * @brief Sets the wrap mode for v coordinate of the AnimatedImageVisual.
    *
    * @param[in] wrapModeV The wrap mode for v coordinate to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetWrapModeV(Dali::WrapMode::Type wrapModeV);
+  void SetWrapModeV(Dali::WrapMode::Type wrapModeV);
 
   /**
    * @brief Gets whether broken image is enabled.
@@ -294,9 +283,8 @@ public: // Setters for chaining
    * @brief Sets whether to enable broken image.
    *
    * @param[in] enableBrokenImage True to enable broken image
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetEnableBrokenImage(bool enableBrokenImage);
+  void SetEnableBrokenImage(bool enableBrokenImage);
 
   /**
    * @brief Gets the load policy of the AnimatedImageVisual.
@@ -309,9 +297,8 @@ public: // Setters for chaining
    * @brief Sets the load policy of the AnimatedImageVisual.
    *
    * @param[in] loadPolicy The load policy to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetLoadPolicy(Image::LoadPolicy loadPolicy);
+  void SetLoadPolicy(Image::LoadPolicy loadPolicy);
 
   /**
    * @brief Gets the release policy of the AnimatedImageVisual.
@@ -324,9 +311,8 @@ public: // Setters for chaining
    * @brief Sets the release policy of the AnimatedImageVisual.
    *
    * @param[in] releasePolicy The release policy to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
+  void SetReleasePolicy(Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets the fitting mode of the AnimatedImageVisual.
@@ -339,9 +325,8 @@ public: // Setters for chaining
    * @brief Sets the fitting mode of the AnimatedImageVisual.
    *
    * @param[in] fittingMode The fitting mode to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetFittingMode(Image::FittingMode fittingMode);
+  void SetFittingMode(Image::FittingMode fittingMode);
 
   /**
    * @brief Gets whether orientation correction is enabled.
@@ -354,9 +339,8 @@ public: // Setters for chaining
    * @brief Sets whether to correct the image orientation.
    *
    * @param[in] orientationCorrection True to correct the image orientation
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetOrientationCorrection(bool orientationCorrection);
+  void SetOrientationCorrection(bool orientationCorrection);
 
   /**
    * @brief Gets whether synchronous sizing is enabled.
@@ -369,9 +353,8 @@ public: // Setters for chaining
    * @brief Sets whether to use synchronous sizing.
    *
    * @param[in] synchronousSizing True to use synchronous sizing
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetSynchronousSizing(bool synchronousSizing);
+  void SetSynchronousSizing(bool synchronousSizing);
 
   /**
    * @brief Gets whether pre-multiplied alpha is enabled.
@@ -384,9 +367,8 @@ public: // Setters for chaining
    * @brief Sets whether the image uses pre-multiplied alpha.
    *
    * @param[in] preMultiplied True if the image has pre-multiplied alpha
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetPreMultipliedAlpha(bool preMultiplied);
+  void SetPreMultipliedAlpha(bool preMultiplied);
 
   /**
    * @brief Gets the alpha mask url of the AnimatedImageVisual.
@@ -399,9 +381,8 @@ public: // Setters for chaining
    * @brief Sets the alpha mask url of the AnimatedImageVisual.
    *
    * @param[in] alphaMaskUrl The alpha mask url to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetAlphaMaskUrl(const Dali::String& alphaMaskUrl);
+  void SetAlphaMaskUrl(const Dali::String& alphaMaskUrl);
 
   /**
    * @brief Gets the mask content scale of the AnimatedImageVisual.
@@ -414,9 +395,8 @@ public: // Setters for chaining
    * @brief Sets the mask content scale of the AnimatedImageVisual.
    *
    * @param[in] maskContentScale The mask content scale to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetMaskContentScale(float maskContentScale);
+  void SetMaskContentScale(float maskContentScale);
 
   /**
    * @brief Gets whether crop to mask is enabled.
@@ -429,9 +409,8 @@ public: // Setters for chaining
    * @brief Sets whether to crop to mask.
    *
    * @param[in] cropToMask True to crop to mask
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetCropToMask(bool cropToMask);
+  void SetCropToMask(bool cropToMask);
 
   /**
    * @brief Gets the masking type of the AnimatedImageVisual.
@@ -444,9 +423,8 @@ public: // Setters for chaining
    * @brief Sets the masking type of the AnimatedImageVisual.
    *
    * @param[in] maskingType The masking type to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetMaskingType(Image::MaskingType maskingType);
+  void SetMaskingType(Image::MaskingType maskingType);
 
   /**
    * @brief Gets the loop count of the AnimatedImageVisual.
@@ -459,9 +437,8 @@ public: // Setters for chaining
    * @brief Sets the loop count of the AnimatedImageVisual.
    *
    * @param[in] loopCount The loop count to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetLoopCount(int loopCount);
+  void SetLoopCount(int loopCount);
 
   /**
    * @brief Gets the play range of the AnimatedImageVisual.
@@ -474,9 +451,8 @@ public: // Setters for chaining
    * @brief Sets the play range of the AnimatedImageVisual.
    *
    * @param[in] playRange The play range to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetPlayRange(const Dali::Property::Array& playRange);
+  void SetPlayRange(const Dali::Property::Array& playRange);
 
   /**
    * @brief Gets the stop behavior of the AnimatedImageVisual.
@@ -489,9 +465,8 @@ public: // Setters for chaining
    * @brief Sets the stop behavior of the AnimatedImageVisual.
    *
    * @param[in] stopBehavior The stop behavior to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetStopBehavior(AnimatedImage::StopBehavior stopBehavior);
+  void SetStopBehavior(AnimatedImage::StopBehavior stopBehavior);
 
   /**
    * @brief Gets the frame speed factor of the AnimatedImageVisual.
@@ -504,9 +479,8 @@ public: // Setters for chaining
    * @brief Sets the frame speed factor of the AnimatedImageVisual.
    *
    * @param[in] frameSpeedFactor The frame speed factor to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetFrameSpeedFactor(float frameSpeedFactor);
+  void SetFrameSpeedFactor(float frameSpeedFactor);
 
   /**
    * @brief Gets the batch size of the AnimatedImageVisual.
@@ -519,9 +493,8 @@ public: // Setters for chaining
    * @brief Sets the batch size of the AnimatedImageVisual.
    *
    * @param[in] batchSize The batch size to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetBatchSize(int batchSize);
+  void SetBatchSize(int batchSize);
 
   /**
    * @brief Gets the cache size of the AnimatedImageVisual.
@@ -534,9 +507,8 @@ public: // Setters for chaining
    * @brief Sets the cache size of the AnimatedImageVisual.
    *
    * @param[in] cacheSize The cache size to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetCacheSize(int cacheSize);
+  void SetCacheSize(int cacheSize);
 
   /**
    * @brief Gets the frame delay of the AnimatedImageVisual.
@@ -552,9 +524,8 @@ public: // Setters for chaining
    * It specifies the delay between frames in milliseconds.
    *
    * @param[in] frameDelay The frame delay to set
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& SetFrameDelay(int frameDelay);
+  void SetFrameDelay(int frameDelay);
 
   /**
    * @brief Gets the play state of the AnimatedImageVisual.
@@ -584,33 +555,27 @@ public: // API to control play state
   /**
    * @brief Play animation
    *
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& Play();
+  void Play();
 
   /**
    * @brief Pause animation
    *
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& Pause();
+  void Pause();
 
   /**
    * @brief Stop animation
    *
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& Stop();
+  void Stop();
 
   /**
    * @brief Jump to specific frame
    *
    * @param[in] frame The frame to jump
-   * @return Reference to this for fluent chaining
    */
-  AnimatedImageVisual& JumpTo(int frame);
-
-  // @CHAIN_END
+  void JumpTo(int frame);
 
 public:
   AnimatedImageVisual()                                              = default;
@@ -629,7 +594,6 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL AnimatedImageVisual(Dali::Ui::Internal::VisualBaseImpl* object);
 
 public:
-  DALI_UI_CHAIN_VISUALBASE_METHODS(AnimatedImageVisual)
 };
 
 /**

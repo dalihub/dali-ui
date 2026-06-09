@@ -42,8 +42,6 @@ namespace Ui
  * @{
  */
 
-#include "image-visual.autogen.h"
-#include "lottie-animation-visual.autogen.h"
 /**
  * @brief LottieAnimationVisual is a owner of Visual::Base with Visual::ANIMATED_VECTOR_IMAGE, to render lottie image.
  *
@@ -120,8 +118,7 @@ public:
    */
   static LottieAnimationVisual DownCast(BaseHandle handle);
 
-public: // Setters for chaining
-  // @CHAIN_START(LottieAnimationVisual, VisualBase)
+public: // Setters
   /**
    * @brief Gets the resource url of the LottieAnimationVisual.
    *
@@ -134,7 +131,7 @@ public: // Setters for chaining
    *
    * @param[in] resourceUrl The resource url to set
    */
-  LottieAnimationVisual& SetResourceUrl(const Dali::String& resourceUrl);
+  void SetResourceUrl(const Dali::String& resourceUrl);
 
   /**
    * @brief Gets whether synchronous loading is enabled.
@@ -147,9 +144,8 @@ public: // Setters for chaining
    * @brief Sets whether the image is loaded synchronously.
    *
    * @param[in] synchronous True to load the image on the main thread synchronously
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetSynchronousLoading(bool synchronous);
+  void SetSynchronousLoading(bool synchronous);
 
   /**
    * @brief Gets the desired width of the LottieAnimationVisual.
@@ -162,9 +158,8 @@ public: // Setters for chaining
    * @brief Sets the desired width of the LottieAnimationVisual.
    *
    * @param[in] desiredWidth The desired width to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetDesiredWidth(int desiredWidth);
+  void SetDesiredWidth(int desiredWidth);
 
   /**
    * @brief Gets the desired height of the LottieAnimationVisual.
@@ -177,9 +172,8 @@ public: // Setters for chaining
    * @brief Sets the desired height of the LottieAnimationVisual.
    *
    * @param[in] desiredHeight The desired height to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetDesiredHeight(int desiredHeight);
+  void SetDesiredHeight(int desiredHeight);
 
   /**
    * @brief Gets the sampling mode of the LottieAnimationVisual.
@@ -192,9 +186,8 @@ public: // Setters for chaining
    * @brief Sets the sampling mode of the LottieAnimationVisual.
    *
    * @param[in] samplingMode The sampling mode to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetSamplingMode(Image::SamplingMode samplingMode);
+  void SetSamplingMode(Image::SamplingMode samplingMode);
 
   /**
    * @brief Gets the pixel area of the LottieAnimationVisual.
@@ -207,9 +200,8 @@ public: // Setters for chaining
    * @brief Sets the pixel area of the LottieAnimationVisual.
    *
    * @param[in] pixelArea The pixel area to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetPixelArea(const Dali::Vector4& pixelArea);
+  void SetPixelArea(const Dali::Vector4& pixelArea);
 
   /**
    * @brief Gets the wrap mode for u coordinate of the LottieAnimationVisual.
@@ -222,9 +214,8 @@ public: // Setters for chaining
    * @brief Sets the wrap mode for u coordinate of the LottieAnimationVisual.
    *
    * @param[in] wrapModeU The wrap mode for u coordinate to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetWrapModeU(Dali::WrapMode::Type wrapModeU);
+  void SetWrapModeU(Dali::WrapMode::Type wrapModeU);
 
   /**
    * @brief Gets the wrap mode for v coordinate of the LottieAnimationVisual.
@@ -237,9 +228,8 @@ public: // Setters for chaining
    * @brief Sets the wrap mode for v coordinate of the LottieAnimationVisual.
    *
    * @param[in] wrapModeV The wrap mode for v coordinate to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetWrapModeV(Dali::WrapMode::Type wrapModeV);
+  void SetWrapModeV(Dali::WrapMode::Type wrapModeV);
 
   /**
    * @brief Gets whether broken image is enabled.
@@ -252,9 +242,8 @@ public: // Setters for chaining
    * @brief Sets whether to enable broken image.
    *
    * @param[in] enableBrokenImage True to enable broken image
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetEnableBrokenImage(bool enableBrokenImage);
+  void SetEnableBrokenImage(bool enableBrokenImage);
 
   /**
    * @brief Gets the load policy of the LottieAnimationVisual.
@@ -267,9 +256,8 @@ public: // Setters for chaining
    * @brief Sets the load policy of the LottieAnimationVisual.
    *
    * @param[in] loadPolicy The load policy to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetLoadPolicy(Image::LoadPolicy loadPolicy);
+  void SetLoadPolicy(Image::LoadPolicy loadPolicy);
 
   /**
    * @brief Gets the release policy of the LottieAnimationVisual.
@@ -282,9 +270,8 @@ public: // Setters for chaining
    * @brief Sets the release policy of the LottieAnimationVisual.
    *
    * @param[in] releasePolicy The release policy to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetReleasePolicy(Image::ReleasePolicy releasePolicy);
+  void SetReleasePolicy(Image::ReleasePolicy releasePolicy);
 
   /**
    * @brief Gets whether orientation correction is enabled.
@@ -297,9 +284,8 @@ public: // Setters for chaining
    * @brief Sets whether to correct the image orientation.
    *
    * @param[in] orientationCorrection True to correct the image orientation
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetOrientationCorrection(bool orientationCorrection);
+  void SetOrientationCorrection(bool orientationCorrection);
 
   /**
    * @brief Gets whether synchronous sizing is enabled.
@@ -312,9 +298,8 @@ public: // Setters for chaining
    * @brief Sets whether to use synchronous sizing.
    *
    * @param[in] synchronousSizing True to use synchronous sizing
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetSynchronousSizing(bool synchronousSizing);
+  void SetSynchronousSizing(bool synchronousSizing);
 
   /**
    * @brief Gets the loop count of the LottieAnimationVisual.
@@ -327,9 +312,8 @@ public: // Setters for chaining
    * @brief Sets the loop count of the LottieAnimationVisual.
    *
    * @param[in] loopCount The loop count to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetLoopCount(int loopCount);
+  void SetLoopCount(int loopCount);
 
   /**
    * @brief Gets the play range of the LottieAnimationVisual.
@@ -342,9 +326,8 @@ public: // Setters for chaining
    * @brief Sets the play range of the LottieAnimationVisual.
    *
    * @param[in] playRange The play range to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetPlayRange(const Dali::Property::Array& playRange);
+  void SetPlayRange(const Dali::Property::Array& playRange);
 
   /**
    * @brief Gets the stop behavior of the LottieAnimationVisual.
@@ -357,9 +340,8 @@ public: // Setters for chaining
    * @brief Sets the stop behavior of the LottieAnimationVisual.
    *
    * @param[in] stopBehavior The stop behavior to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetStopBehavior(AnimatedImage::StopBehavior stopBehavior);
+  void SetStopBehavior(AnimatedImage::StopBehavior stopBehavior);
 
   /**
    * @brief Gets the frame speed factor of the LottieAnimationVisual.
@@ -372,9 +354,8 @@ public: // Setters for chaining
    * @brief Sets the frame speed factor of the LottieAnimationVisual.
    *
    * @param[in] frameSpeedFactor The frame speed factor to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetFrameSpeedFactor(float frameSpeedFactor);
+  void SetFrameSpeedFactor(float frameSpeedFactor);
 
   /**
    * @brief Gets the looping mode of the LottieAnimationVisual.
@@ -387,9 +368,8 @@ public: // Setters for chaining
    * @brief Sets the looping mode of the LottieAnimationVisual.
    *
    * @param[in] loopingMode The looping mode to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetLoopingMode(LottieAnimation::LoopingMode loopingMode);
+  void SetLoopingMode(LottieAnimation::LoopingMode loopingMode);
 
   /**
    * @brief Gets whether redraw in scaling down is enabled.
@@ -402,9 +382,8 @@ public: // Setters for chaining
    * @brief Sets whether to redraw when the visual is scaled down.
    *
    * @param[in] redrawInScalingDown True to redraw when scaled down
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetRedrawInScalingDown(bool redrawInScalingDown);
+  void SetRedrawInScalingDown(bool redrawInScalingDown);
 
   /**
    * @brief Gets whether redraw in scaling up is enabled.
@@ -417,9 +396,8 @@ public: // Setters for chaining
    * @brief Sets whether to redraw when the visual is scaled up.
    *
    * @param[in] redrawInScalingUp True to redraw when scaled up
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetRedrawInScalingUp(bool redrawInScalingUp);
+  void SetRedrawInScalingUp(bool redrawInScalingUp);
 
   /**
    * @brief Gets whether frame cache is enabled.
@@ -432,9 +410,8 @@ public: // Setters for chaining
    * @brief Sets whether to enable frame cache.
    *
    * @param[in] enableFrameCache True to enable frame cache
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetEnableFrameCache(bool enableFrameCache);
+  void SetEnableFrameCache(bool enableFrameCache);
 
   /**
    * @brief Gets whether notify after rasterization is enabled.
@@ -447,9 +424,8 @@ public: // Setters for chaining
    * @brief Sets whether to notify after rasterization.
    *
    * @param[in] notifyAfterRasterization True to notify after rasterization
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetNotifyAfterRasterization(bool notifyAfterRasterization);
+  void SetNotifyAfterRasterization(bool notifyAfterRasterization);
 
   /**
    * @brief Gets the render scale of the LottieAnimationVisual.
@@ -462,9 +438,8 @@ public: // Setters for chaining
    * @brief Sets the render scale of the LottieAnimationVisual.
    *
    * @param[in] renderScale The render scale to set
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetRenderScale(float renderScale);
+  void SetRenderScale(float renderScale);
 
   /**
    * @brief Gets whether aspect fit scaling is enabled.
@@ -482,7 +457,7 @@ public: // Setters for chaining
    *
    * @param[in] enableAspectFit True to enable aspect fit, false to disable
    */
-  LottieAnimationVisual& SetEnableAspectFit(bool enableAspectFit);
+  void SetEnableAspectFit(bool enableAspectFit);
 
   /**
    * @brief Gets the play state of the LottieAnimationVisual.
@@ -528,31 +503,27 @@ public: // API to control play state
   /**
    * @brief Play animation
    *
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& Play();
+  void Play();
 
   /**
    * @brief Pause animation
    *
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& Pause();
+  void Pause();
 
   /**
    * @brief Stop animation
    *
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& Stop();
+  void Stop();
 
   /**
    * @brief Jump to specific frame
    *
    * @param[in] frame The frame to jump
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& JumpTo(int frame);
+  void JumpTo(int frame);
 
 public: // Advanced
   /**
@@ -561,10 +532,8 @@ public: // Advanced
    * Ownership of DynamicPropertyInfo::callback is transferred to the visual.
    *
    * @param[in] info The dynamic property info
-   * @return Reference to this for fluent chaining
    */
-  LottieAnimationVisual& SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
-  // @CHAIN_END
+  void SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info);
 
 public:
   LottieAnimationVisual()                                                = default;
@@ -583,7 +552,6 @@ public: // Not intended for application developers
   explicit DALI_INTERNAL LottieAnimationVisual(Dali::Ui::Internal::VisualBaseImpl* object);
 
 public:
-  DALI_UI_CHAIN_VISUALBASE_METHODS(LottieAnimationVisual)
 };
 
 /**

@@ -53,10 +53,9 @@ float ColorVisual::GetBlurRadius() const
   return VisualBase::GetProperty<float>(ColorVisual::Property::BLUR_RADIUS);
 }
 
-ColorVisual& ColorVisual::SetBlurRadius(float blurRadius)
+void ColorVisual::SetBlurRadius(float blurRadius)
 {
   VisualBase::SetProperty(ColorVisual::Property::BLUR_RADIUS, blurRadius);
-  return *this;
 }
 
 CutoutPolicy ColorVisual::GetCutoutPolicy() const
@@ -64,10 +63,9 @@ CutoutPolicy ColorVisual::GetCutoutPolicy() const
   return VisualBase::GetProperty<CutoutPolicy>(ColorVisual::Property::CUTOUT_POLICY);
 }
 
-ColorVisual& ColorVisual::SetCutoutPolicy(CutoutPolicy cutoutPolicy)
+void ColorVisual::SetCutoutPolicy(CutoutPolicy cutoutPolicy)
 {
   VisualBase::SetProperty(ColorVisual::Property::CUTOUT_POLICY, cutoutPolicy);
-  return *this;
 }
 
 // =============================================================================
