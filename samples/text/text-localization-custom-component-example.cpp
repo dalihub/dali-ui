@@ -29,20 +29,23 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <dali/integration-api/string-utils.h>
+// Apps can only use public headers in platform builds.
+// #include <dali/integration-api/string-utils.h>
 
 #include <clocale>
 #include <cstdio>
 #include <string>
 
 // for desktop test
-#include <dali/devel-api/adaptor-framework/application-devel.h>
+// Apps can only use public headers in platform builds.
+// #include <dali/devel-api/adaptor-framework/application-devel.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
-using Dali::Integration::ToDaliStringView;
-using Dali::Integration::ToStdString;
+// Apps can only use public headers in platform builds.
+// using Dali::Integration::ToDaliStringView;
+// using Dali::Integration::ToStdString;
 
 namespace
 {
@@ -458,7 +461,10 @@ private:
       std::printf("setlocale(LC_MESSAGES, \"%s\") failed\n", locale.c_str());
     }
 
-    Dali::DevelApplication::SetApplicationLocale(mApplication, locale);
+    // Apps can only use public headers in platform builds.
+    // Dali::DevelApplication::SetApplicationLocale(mApplication, locale);
+
+    UiLocalizationManager::Get().RefreshBindings();
 
     UpdateStatusLabel();
 
@@ -486,7 +492,7 @@ private:
       mCurrentDomain = TEXT_DOMAIN_DEFAULT;
     }
 
-    UiLocalizationManager::Get().SetDefaultDomain(ToDaliStringView(mCurrentDomain));
+    UiLocalizationManager::Get().SetDefaultDomain(mCurrentDomain.c_str());
 
     UpdateStatusLabel();
   }

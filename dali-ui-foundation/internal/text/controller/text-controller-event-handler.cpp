@@ -825,12 +825,12 @@ bool Controller::EventHandler::DeleteEvent(Controller& controller, int keyCode)
   return removed;
 }
 
-InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextEvent(
+Dali::Integration::InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextEvent(
   Controller& controller, InputMethodContext& inputMethodContext,
-  const InputMethodContext::EventData& inputMethodContextEvent)
+  const Dali::Integration::InputMethodContext::EventData& inputMethodContextEvent)
 {
   DALI_LOG_RELEASE_INFO("EventHandler eventName: [%d] predictveString: [%s]\n", inputMethodContextEvent.eventName,
-                        inputMethodContextEvent.predictiveString.c_str());
+                        inputMethodContextEvent.predictiveString.CStr());
 
   // Whether the text needs to be relaid-out.
   bool requestRelayout = false;
@@ -841,21 +841,21 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
 
   switch(inputMethodContextEvent.eventName)
   {
-    case InputMethodContext::COMMIT:
+    case Dali::Integration::InputMethodContext::COMMIT:
     {
-      TextUpdater::InsertText(controller, inputMethodContextEvent.predictiveString, Text::Controller::COMMIT);
+      TextUpdater::InsertText(controller, std::string(inputMethodContextEvent.predictiveString.CStr()), Text::Controller::COMMIT);
       requestRelayout = true;
       retrieveCursor  = true;
       break;
     }
-    case InputMethodContext::PRE_EDIT:
+    case Dali::Integration::InputMethodContext::PRE_EDIT:
     {
-      TextUpdater::InsertText(controller, inputMethodContextEvent.predictiveString, Text::Controller::PRE_EDIT);
+      TextUpdater::InsertText(controller, std::string(inputMethodContextEvent.predictiveString.CStr()), Text::Controller::PRE_EDIT);
       requestRelayout = true;
       retrieveCursor  = true;
       break;
     }
-    case InputMethodContext::DELETE_SURROUNDING:
+    case Dali::Integration::InputMethodContext::DELETE_SURROUNDING:
     {
       const bool textDeleted =
         TextUpdater::RemoveText(controller, inputMethodContextEvent.cursorOffset,
@@ -879,20 +879,20 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
       }
       break;
     }
-    case InputMethodContext::GET_SURROUNDING:
+    case Dali::Integration::InputMethodContext::GET_SURROUNDING:
     {
       retrieveText   = true;
       retrieveCursor = true;
       break;
     }
-    case InputMethodContext::PRIVATE_COMMAND:
+    case Dali::Integration::InputMethodContext::PRIVATE_COMMAND:
     {
       // PRIVATECOMMAND event is just for getting the private command message
       retrieveText   = true;
       retrieveCursor = true;
       break;
     }
-    case InputMethodContext::SELECTION_SET:
+    case Dali::Integration::InputMethodContext::SELECTION_SET:
     {
       uint32_t start = static_cast<uint32_t>(inputMethodContextEvent.startIndex);
       uint32_t end   = static_cast<uint32_t>(inputMethodContextEvent.endIndex);
@@ -907,7 +907,7 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
 
       break;
     }
-    case InputMethodContext::VOID:
+    case Dali::Integration::InputMethodContext::VOID:
     {
       // do nothing
       break;
@@ -943,7 +943,7 @@ InputMethodContext::CallbackData Controller::EventHandler::OnInputMethodContextE
     }
   }
 
-  InputMethodContext::CallbackData callbackData((retrieveText || retrieveCursor), cursorPosition, text, false);
+  Dali::Integration::InputMethodContext::CallbackData callbackData((retrieveText || retrieveCursor), cursorPosition, Dali::String(text.c_str()), false);
 
   if(requestRelayout && (NULL != controller.mImpl->mEditableControlInterface))
   {

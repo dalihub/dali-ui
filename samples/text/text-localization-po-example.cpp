@@ -28,20 +28,23 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <dali/integration-api/string-utils.h>
+// Apps can only use public headers in platform builds.
+// #include <dali/integration-api/string-utils.h>
 
 #include <clocale>
 #include <cstdio>
 #include <string>
 
 // for desktop test
-#include <dali/devel-api/adaptor-framework/application-devel.h>
+// Apps can only use public headers in platform builds.
+// #include <dali/devel-api/adaptor-framework/application-devel.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
-using Dali::Integration::ToDaliStringView;
-using Dali::Integration::ToStdString;
+// Apps can only use public headers in platform builds.
+// using Dali::Integration::ToDaliStringView;
+// using Dali::Integration::ToStdString;
 
 namespace
 {
@@ -388,7 +391,7 @@ private:
     // In bypass mode, url will be the msgid (e.g. "IDS_FLAG_IMAGE_URL") which is not a valid image.
     // This is expected behavior - bypass shows the raw resource ID.
     std::string resourceUrl = RESOURCES_DIR;
-    resourceUrl += ToStdString(url);
+    resourceUrl += url.CStr();
 
     imageView.SetResourceUrl(resourceUrl.c_str());
   }
@@ -510,7 +513,10 @@ private:
       std::printf("setlocale(LC_MESSAGES, \"%s\") failed\n", locale.c_str());
     }
 
-    Dali::DevelApplication::SetApplicationLocale(mApplication, locale);
+    // Apps can only use public headers in platform builds.
+    // Dali::DevelApplication::SetApplicationLocale(mApplication, locale);
+
+    UiLocalizationManager::Get().RefreshBindings();
 
     UpdateLookupLabel();
     UpdateStatusLabel();
@@ -540,7 +546,7 @@ private:
       mCurrentDomain = TEXT_DOMAIN_DEFAULT;
     }
 
-    UiLocalizationManager::Get().SetDefaultDomain(ToDaliStringView(mCurrentDomain));
+    UiLocalizationManager::Get().SetDefaultDomain(mCurrentDomain.c_str());
 
     UpdateLookupLabel();
     UpdateStatusLabel();

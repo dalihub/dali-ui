@@ -1462,6 +1462,24 @@ int UtcDaliInputFieldClearTranslatablePlaceholderP(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldGetInputMethodContextP(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  // Get the InputMethodContext - it should not be empty after control is created
+  InputMethodContext context = inputField.GetInputMethodContext();
+  DALI_TEST_CHECK(context);
+
+  // Calling GetInputMethodContext() twice should return the same context handle
+  InputMethodContext context2 = inputField.GetInputMethodContext();
+  DALI_TEST_CHECK(context2);
+  DALI_TEST_CHECK(context == context2);
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldSetPlaceholderDoesNotClearTranslatablePlaceholderP(void)
 {
   TestApplication application;

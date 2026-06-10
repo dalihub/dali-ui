@@ -1834,7 +1834,7 @@ bool ViewDataImpl::FilterKeyEvent(const KeyEvent& event)
 
   if(mInputMethodContext)
   {
-    consumed = mInputMethodContext.FilterEventKey(event);
+    consumed = Dali::Integration::InputMethodContext::FilterEventKey(mInputMethodContext, event);
   }
   return consumed;
 }

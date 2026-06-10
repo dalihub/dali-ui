@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/view.h>
+#include <dali/public-api/adaptor-framework/input-method-context.h>
 #include <functional>
 
 namespace Dali
@@ -1224,6 +1225,16 @@ public: // Setters for chaining
    * @return This input editor.
    */
   void ClearSelection();
+
+  /**
+   * @brief Gets the input method context used by this input editor.
+   *
+   * The returned context can be used to control input panel behavior and
+   * configure application-level input method options.
+   *
+   * @return The input method context.
+   */
+  InputMethodContext GetInputMethodContext();
 
 public: // Signals
   /**

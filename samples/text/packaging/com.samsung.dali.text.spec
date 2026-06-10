@@ -111,11 +111,13 @@ exit 0
 %{app_exe_dir}/text-scale.example
 %{app_exe_dir}/text-font-variation.example
 %{app_exe_dir}/text-cutout-mask.example
+%{app_exe_dir}/text-colrv1.example
 %{app_exe_dir}/text-emoji.example
 %{app_exe_dir}/text-render-scale.example
 %{app_exe_dir}/text-input-field.example
 %{app_exe_dir}/text-typing-style.example
 %{app_exe_dir}/text-input-editor.example
+%{app_exe_dir}/text-input-method-context.example
 %{app_exe_dir}/text-localization.example
 %{app_exe_dir}/text-localization-po.example
 %{app_exe_dir}/text-localization-custom-component.example

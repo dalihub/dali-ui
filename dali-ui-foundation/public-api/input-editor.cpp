@@ -707,6 +707,15 @@ void InputEditor::ClearSelection()
 {
   GetImpl(*this).ClearSelection();
 }
+
+InputMethodContext InputEditor::GetInputMethodContext()
+{
+  return GetImpl(*this).GetInputMethodContext();
+}
+
+// =============================================================================
+// Signals
+// =============================================================================
 Signal<void(View)>& InputEditor::TextChangedSignal()
 {
   return GetImpl(*this).TextChangedSignal();

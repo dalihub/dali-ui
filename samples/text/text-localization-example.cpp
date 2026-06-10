@@ -25,18 +25,22 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <dali/integration-api/string-utils.h>
+// Apps can only use public headers in platform builds.
+// #include <dali/integration-api/string-utils.h>
 
+#include <clocale>
 #include <string>
 
 // test
-#include <dali/devel-api/adaptor-framework/application-devel.h>
+// Apps can only use public headers in platform builds.
+// #include <dali/devel-api/adaptor-framework/application-devel.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
-using Dali::Integration::ToDaliStringView;
-using Dali::Integration::ToStdString;
+// Apps can only use public headers in platform builds.
+// using Dali::Integration::ToDaliStringView;
+// using Dali::Integration::ToStdString;
 
 namespace
 {
@@ -55,10 +59,15 @@ constexpr uint32_t COLOR_LIGHT_BLUE = 0xEAF4FF;
 constexpr uint32_t COLOR_LIGHT_RED  = 0xFFE8E8;
 constexpr uint32_t COLOR_LIGHT_GRAY = 0xF2F2F2;
 
+std::string ToStdStringPublic(StringView stringView)
+{
+  return std::string(stringView.Data(), stringView.Size());
+}
+
 bool LocalizationOverride(StringView resourceId, StringView domain, Dali::String& outString)
 {
-  const std::string id  = ToStdString(resourceId);
-  const std::string dom = ToStdString(domain);
+  const std::string id  = ToStdStringPublic(resourceId);
+  const std::string dom = ToStdStringPublic(domain);
 
   if(id == "IDS_TITLE")
   {
@@ -169,7 +178,7 @@ private:
 
     UiLocalizationManager manager = UiLocalizationManager::Get();
     manager.SetLocalizedStringOverride(&LocalizationOverride);
-    manager.SetDefaultDomain(ToDaliStringView(mCurrentDomain));
+    manager.SetDefaultDomain(mCurrentDomain.c_str());
 
     window.Add(CreateContents());
 
@@ -354,7 +363,7 @@ private:
     const std::string status =
       "DefaultDomain: " + mCurrentDomain +
       " | Bypass: " + std::string(mBypassEnabled ? "ON" : "OFF") +
-      " | Title resourceId: " + ToStdString(mTitleLabel.GetTranslatableText()) +
+      " | Title resourceId: " + ToStdStringPublic(mTitleLabel.GetTranslatableText()) +
       " | Explicit label domain: domainA" +
       " | Direct binding: IDS_DIRECT_BINDING" +
       " | Direct explicit: IDS_DIRECT_EXPLICIT_DOMAIN/domainA";
@@ -366,7 +375,7 @@ private:
   {
     mCurrentDomain = (mCurrentDomain == "domainA") ? "domainB" : "domainA";
 
-    UiLocalizationManager::Get().SetDefaultDomain(ToDaliStringView(mCurrentDomain));
+    UiLocalizationManager::Get().SetDefaultDomain(mCurrentDomain.c_str());
 
     // mExplicitDomainLabel has explicit domainA, so it should not change
     // when only default domain changes.
@@ -444,7 +453,8 @@ private:
   {
     // for test.
     setlocale(LC_MESSAGES, locale.CStr());
-    Dali::DevelApplication::SetApplicationLocale(mApplication, locale.CStr());
+    // Apps can only use public headers in platform builds.
+    // Dali::DevelApplication::SetApplicationLocale(mApplication, locale.CStr());
   }
 
 private:

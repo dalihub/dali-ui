@@ -687,6 +687,15 @@ void InputField::ClearSelection()
 {
   GetImpl(*this).ClearSelection();
 }
+
+InputMethodContext InputField::GetInputMethodContext()
+{
+  return GetImpl(*this).GetInputMethodContext();
+}
+
+// =============================================================================
+// Signals
+// =============================================================================
 Signal<void(View)>& InputField::TextChangedSignal()
 {
   return GetImpl(*this).TextChangedSignal();

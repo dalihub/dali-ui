@@ -541,8 +541,8 @@ void Controller::Impl::NotifyInputMethodContext()
   if(mEventData && mEventData->mInputMethodContext)
   {
     CharacterIndex cursorPosition = GetLogicalCursorPosition();
-    mEventData->mInputMethodContext.SetCursorPosition(cursorPosition);
-    mEventData->mInputMethodContext.NotifyCursorPosition();
+    Dali::Integration::InputMethodContext::SetCursorPosition(mEventData->mInputMethodContext, cursorPosition);
+    Dali::Integration::InputMethodContext::NotifyCursorPosition(mEventData->mInputMethodContext);
   }
 }
 
@@ -551,7 +551,7 @@ void Controller::Impl::NotifyInputMethodContextMultiLineStatus()
   if(mEventData && mEventData->mInputMethodContext)
   {
     Text::Layout::Engine::Type layout = mLayoutEngine.GetLayout();
-    mEventData->mInputMethodContext.NotifyTextInputMultiLine(layout == Text::Layout::Engine::MULTI_LINE_BOX);
+    Dali::Integration::InputMethodContext::NotifyTextInputMultiLine(mEventData->mInputMethodContext, layout == Text::Layout::Engine::MULTI_LINE_BOX);
   }
 }
 

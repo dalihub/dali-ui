@@ -19,7 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view-impl.h>
-#include <dali/devel-api/adaptor-framework/input-method-context.h>
+#include <dali/integration-api/adaptor-framework/input-method-context-integ.h>
 #include <dali/public-api/events/long-press-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/tap-gesture-detector.h>
@@ -676,6 +676,11 @@ public:
 
   // Method
 
+  /**
+   * @copydoc InputEditor::GetInputMethodContext()
+   */
+  InputMethodContext GetInputMethodContext();
+
 public: // Signals
   /**
    * @copydoc Dali::Ui::InputEditor::TextChangedSignal()
@@ -960,9 +965,11 @@ private: // Implementation
   void UpdateLineHeight();
 
   /**
-   * @copydoc Dali::Ui::Text::Controller::(InputMethodContext& inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent)
+   * @copydoc Dali::Ui::Text::Controller::OnInputMethodContextEvent()
    */
-  InputMethodContext::CallbackData OnInputMethodContextEvent(InputMethodContext inputMethodContext, const InputMethodContext::EventData& inputMethodContextEvent);
+  Dali::Integration::InputMethodContext::CallbackData OnInputMethodContextEvent(
+    InputMethodContext                                      inputMethodContext,
+    const Dali::Integration::InputMethodContext::EventData& inputMethodContextEvent);
 
   /**
    * @brief Connection needed to re-render text, when a Input Editor returns to the scene.
@@ -1006,10 +1013,11 @@ private: // Implementation
   void OnLocaleChanged(std::string locale);
 
   /**
-   * @brief Callback when keyboard is shown/hidden.
-   * @param[in] keyboardShown True if keyboard is shown.
+   * @brief Callback when keyboard status changes.
+   * @param[in] inputMethodContext The input method context.
+   * @param[in] state The input panel state.
    */
-  void OnKeyboardStatusChanged(bool keyboardShown);
+  void OnKeyboardStatusChanged(InputMethodContext context, InputMethodContext::State state);
 
   /**
    * @brief Enable or disable clipping.
@@ -1150,12 +1158,10 @@ private:
   Actor                       mStencil;
   std::vector<Actor>          mClippingDecorationActors; ///< Decoration actors which need clipping.
   std::vector<Ui::TextAnchor> mAnchorActors;
-  Dali::InputMethodOptions    mInputMethodOptions;
-
-  Actor mRenderableActor;
-  Actor mActiveLayer;
-  Actor mCursorLayer;
-  Actor mBackgroundActor;
+  Actor                       mRenderableActor;
+  Actor                       mActiveLayer;
+  Actor                       mCursorLayer;
+  Actor                       mBackgroundActor;
 
   float                mLineHeight;
   Text::LineHeightMode mLineHeightMode;
