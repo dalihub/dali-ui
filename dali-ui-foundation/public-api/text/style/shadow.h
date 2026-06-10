@@ -60,7 +60,6 @@ public:
    * @brief Copies another shadow to this object.
    *
    * @param[in] rhs The shadow to copy.
-   * @return A reference to this shadow.
    */
   Shadow& operator=(const Shadow& rhs);
 
@@ -68,7 +67,6 @@ public:
    * @brief Moves another shadow to this object.
    *
    * @param[in] rhs The shadow to move.
-   * @return A reference to this shadow.
    */
   Shadow& operator=(Shadow&& rhs) noexcept;
 
@@ -82,9 +80,8 @@ public:
    * @brief Sets the shadow color.
    *
    * @param[in] color The shadow color.
-   * @return A reference to this shadow.
    */
-  Shadow& SetColor(const UiColor& color);
+  void SetColor(const UiColor& color);
 
   /**
    * @brief Returns the shadow color.
@@ -97,9 +94,8 @@ public:
    * @brief Sets the shadow offset.
    *
    * @param[in] offset The shadow offset in pixels.
-   * @return A reference to this shadow.
    */
-  Shadow& SetOffset(const Vector2& offset);
+  void SetOffset(const Vector2& offset);
 
   /**
    * @brief Returns the shadow offset.
@@ -112,9 +108,8 @@ public:
    * @brief Sets the shadow blur radius.
    *
    * @param[in] blurRadius The shadow blur radius in pixels.
-   * @return A reference to this shadow.
    */
-  Shadow& SetBlurRadius(float blurRadius);
+  void SetBlurRadius(float blurRadius);
 
   /**
    * @brief Returns the shadow blur radius.

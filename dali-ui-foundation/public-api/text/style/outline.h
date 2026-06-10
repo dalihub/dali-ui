@@ -60,7 +60,6 @@ public:
    * @brief Copies another outline to this object.
    *
    * @param[in] rhs The outline to copy.
-   * @return A reference to this outline.
    */
   Outline& operator=(const Outline& rhs);
 
@@ -68,7 +67,6 @@ public:
    * @brief Moves another outline to this object.
    *
    * @param[in] rhs The outline to move.
-   * @return A reference to this outline.
    */
   Outline& operator=(Outline&& rhs) noexcept;
 
@@ -82,9 +80,8 @@ public:
    * @brief Sets the outline color.
    *
    * @param[in] color The outline color.
-   * @return A reference to this outline.
    */
-  Outline& SetColor(const UiColor& color);
+  void SetColor(const UiColor& color);
 
   /**
    * @brief Returns the outline color.
@@ -97,9 +94,8 @@ public:
    * @brief Sets the outline offset.
    *
    * @param[in] offset The outline offset in pixels.
-   * @return A reference to this outline.
    */
-  Outline& SetOffset(const Vector2& offset);
+  void SetOffset(const Vector2& offset);
 
   /**
    * @brief Returns the outline offset.
@@ -112,9 +108,8 @@ public:
    * @brief Sets the outline width.
    *
    * @param[in] width The outline width in pixels.
-   * @return A reference to this outline.
    */
-  Outline& SetWidth(float width);
+  void SetWidth(float width);
 
   /**
    * @brief Returns the outline width.
@@ -127,9 +122,8 @@ public:
    * @brief Sets the outline blur radius.
    *
    * @param[in] blurRadius The outline blur radius in pixels.
-   * @return A reference to this outline.
    */
-  Outline& SetBlurRadius(float blurRadius);
+  void SetBlurRadius(float blurRadius);
 
   /**
    * @brief Returns the outline blur radius.

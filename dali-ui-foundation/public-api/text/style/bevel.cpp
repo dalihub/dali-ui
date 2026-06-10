@@ -110,11 +110,10 @@ Bevel::~Bevel()
   delete mImpl;
 }
 
-Bevel& Bevel::SetDirection(const Vector2& direction)
+void Bevel::SetDirection(const Vector2& direction)
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
   mImpl->mDirection = direction;
-  return *this;
 }
 
 const Vector2& Bevel::GetDirection() const
@@ -123,11 +122,10 @@ const Vector2& Bevel::GetDirection() const
   return mImpl->mDirection;
 }
 
-Bevel& Bevel::SetIntensity(float intensity)
+void Bevel::SetIntensity(float intensity)
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
   mImpl->mIntensity = std::max(0.0f, intensity);
-  return *this;
 }
 
 float Bevel::GetIntensity() const
@@ -136,11 +134,10 @@ float Bevel::GetIntensity() const
   return mImpl->mIntensity;
 }
 
-Bevel& Bevel::SetLightColor(const UiColor& color)
+void Bevel::SetLightColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
   mImpl->mLightColor = color;
-  return *this;
 }
 
 const UiColor& Bevel::GetLightColor() const
@@ -149,11 +146,10 @@ const UiColor& Bevel::GetLightColor() const
   return mImpl->mLightColor;
 }
 
-Bevel& Bevel::SetShadowColor(const UiColor& color)
+void Bevel::SetShadowColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
   mImpl->mShadowColor = color;
-  return *this;
 }
 
 const UiColor& Bevel::GetShadowColor() const

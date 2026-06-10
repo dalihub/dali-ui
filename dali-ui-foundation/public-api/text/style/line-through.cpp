@@ -102,11 +102,10 @@ LineThrough::~LineThrough()
   delete mImpl;
 }
 
-LineThrough& LineThrough::SetColor(const UiColor& color)
+void LineThrough::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_LINETHROUGH(mImpl);
   mImpl->mColor = color;
-  return *this;
 }
 
 const UiColor& LineThrough::GetColor() const
@@ -115,11 +114,10 @@ const UiColor& LineThrough::GetColor() const
   return mImpl->mColor;
 }
 
-LineThrough& LineThrough::SetThickness(float thickness)
+void LineThrough::SetThickness(float thickness)
 {
   DALI_ASSERT_VALID_LINETHROUGH(mImpl);
   mImpl->mThickness = std::max(0.0f, thickness);
-  return *this;
 }
 
 float LineThrough::GetThickness() const

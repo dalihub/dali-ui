@@ -675,7 +675,8 @@ private:
     if(touch.GetState(0) == PointState::UP)
     {
       Text::InputFilter inputFilter;
-      inputFilter.SetAllowPattern("[\\d]").SetDenyPattern("[0-5]");
+      inputFilter.SetAllowPattern("[\\d]");
+      inputFilter.SetDenyPattern("[0-5]");
       mInputField.SetInputFilter(inputFilter);
       mInputFilterSet = true;
       mInputField.InputRejectedSignal().Connect(this, &InputFieldController::OnInputRejected);

@@ -59,11 +59,16 @@ const Dali::Vector<Text::FitCandidate>& GetFontSizeCandidates()
 {
   static Dali::Vector<Text::FitCandidate> candidates = [] {
     Dali::Vector<Text::FitCandidate> values;
-    values.PushBack(Text::FitCandidate().SetFontSize(16.0f));
-    values.PushBack(Text::FitCandidate().SetFontSize(20.0f));
-    values.PushBack(Text::FitCandidate().SetFontSize(24.0f));
-    values.PushBack(Text::FitCandidate().SetFontSize(28.0f));
-    values.PushBack(Text::FitCandidate().SetFontSize(32.0f));
+    auto addCandidate = [&values](float fontSize) {
+      Text::FitCandidate candidate;
+      candidate.SetFontSize(fontSize);
+      values.PushBack(candidate);
+    };
+    addCandidate(16.0f);
+    addCandidate(20.0f);
+    addCandidate(24.0f);
+    addCandidate(28.0f);
+    addCandidate(32.0f);
     return values;
   }();
   return candidates;

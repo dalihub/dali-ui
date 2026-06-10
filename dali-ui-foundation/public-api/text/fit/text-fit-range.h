@@ -77,7 +77,6 @@ public:
    * @brief Copies another fit range to this object.
    *
    * @param[in] rhs The fit range to copy.
-   * @return A reference to this fit range.
    */
   FitRange& operator=(const FitRange& rhs);
 
@@ -85,7 +84,6 @@ public:
    * @brief Moves another fit range to this object.
    *
    * @param[in] rhs The fit range to move.
-   * @return A reference to this fit range.
    */
   FitRange& operator=(FitRange&& rhs) noexcept;
 
@@ -99,9 +97,8 @@ public:
    * @brief Sets the minimum font size.
    *
    * @param[in] size The minimum font size in pixels.
-   * @return A reference to this fit range.
    */
-  FitRange& SetMinimumFontSize(float size);
+  void SetMinimumFontSize(float size);
 
   /**
    * @brief Returns the minimum font size.
@@ -114,9 +111,8 @@ public:
    * @brief Sets the maximum font size.
    *
    * @param[in] size The maximum font size in pixels.
-   * @return A reference to this fit range.
    */
-  FitRange& SetMaximumFontSize(float size);
+  void SetMaximumFontSize(float size);
 
   /**
    * @brief Returns the maximum font size.
@@ -132,9 +128,8 @@ public:
    * searching for the largest fitting size.
    *
    * @param[in] step The font size step in pixels.
-   * @return A reference to this fit range.
    */
-  FitRange& SetFontSizeStep(float step);
+  void SetFontSizeStep(float step);
 
   /**
    * @brief Returns the font size step.

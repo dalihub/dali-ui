@@ -58,56 +58,68 @@ private:
     Label underlineMinLabel = CreateBaseLabel("Underline Label Minimum");
     underlineMinLabel.SetUnderline(Text::Underline());
     mUnderlineLabel = CreateBaseLabel("Dashed Underline Label");
-    mUnderlineLabel.SetUnderline(Text::Underline()
-                                   .SetColor(UiColor(0x0088FF))
-                                   .SetThickness(2.0f)
-                                   .SetType(Text::Underline::Type::DASHED)
-                                   .SetDashLength(4.0f)
-                                   .SetDashGap(4.0f));
+    Text::Underline underline;
+    underline.SetColor(UiColor(0x0088FF));
+    underline.SetThickness(2.0f);
+    underline.SetType(Text::Underline::Type::DASHED);
+    underline.SetDashLength(4.0f);
+    underline.SetDashGap(4.0f);
+    mUnderlineLabel.SetUnderline(underline);
 
     Label shadowMinLabel = CreateBaseLabel("Shadow Label Minimum");
-    shadowMinLabel.SetShadow(Text::Shadow().SetOffset(Vector2(1.0f, 1.0f)));
+    Text::Shadow shadowMin;
+    shadowMin.SetOffset(Vector2(1.0f, 1.0f));
+    shadowMinLabel.SetShadow(shadowMin);
     mShadowLabel = CreateBaseLabel("Shadow Label Properties");
-    mShadowLabel.SetShadow(Text::Shadow()
-                             .SetColor(UiColor(0xFF5500))
-                             .SetOffset(Vector2(3.0f, 3.0f))
-                             .SetBlurRadius(2.0f));
+    Text::Shadow shadow;
+    shadow.SetColor(UiColor(0xFF5500));
+    shadow.SetOffset(Vector2(3.0f, 3.0f));
+    shadow.SetBlurRadius(2.0f);
+    mShadowLabel.SetShadow(shadow);
 
     Label outlineMinLabel = CreateBaseLabel("Outline Label Minimum");
-    outlineMinLabel.SetOutline(Text::Outline().SetWidth(2.0f));
+    Text::Outline outlineMin;
+    outlineMin.SetWidth(2.0f);
+    outlineMinLabel.SetOutline(outlineMin);
     mOutlineLabel = CreateBaseLabel("Outline Label Properties");
-    mOutlineLabel.SetOutline(Text::Outline()
-                               .SetColor(UiColor(0x0066FF))
-                               .SetOffset(Vector2(1.0f, 1.0f))
-                               .SetWidth(2.0f)
-                               .SetBlurRadius(1.0f));
+    Text::Outline outline;
+    outline.SetColor(UiColor(0x0066FF));
+    outline.SetOffset(Vector2(1.0f, 1.0f));
+    outline.SetWidth(2.0f);
+    outline.SetBlurRadius(1.0f);
+    mOutlineLabel.SetOutline(outline);
 
     Label lineThroughMinLabel = CreateBaseLabel("LineThrough Label Minimum");
     lineThroughMinLabel.SetLineThrough(Text::LineThrough());
     mLineThroughLabel = CreateBaseLabel("LineThrough Label Properties");
-    mLineThroughLabel.SetLineThrough(Text::LineThrough()
-                                       .SetColor(UiColor(0xFF00FF))
-                                       .SetThickness(3.0f));
+    Text::LineThrough lineThrough;
+    lineThrough.SetColor(UiColor(0xFF00FF));
+    lineThrough.SetThickness(3.0f);
+    mLineThroughLabel.SetLineThrough(lineThrough);
 
     mTextBackgroundColorLabel = CreateBaseLabel("Text Background Color Label");
     mTextBackgroundColorLabel.SetTextBackgroundColor(UiColor(0xFFFF00));
 
     mInputFieldUnderline = CreateBaseInputField("InputField with Underline");
-    mInputFieldUnderline.SetUnderline(Text::Underline()
-                                        .SetColor(UiColor(0x0088FF))
-                                        .SetThickness(2.0f));
+    Text::Underline inputFieldUnderline;
+    inputFieldUnderline.SetColor(UiColor(0x0088FF));
+    inputFieldUnderline.SetThickness(2.0f);
+    mInputFieldUnderline.SetUnderline(inputFieldUnderline);
     mInputFieldShadow = CreateBaseInputField("InputField with Shadow");
-    mInputFieldShadow.SetShadow(Text::Shadow()
-                                  .SetColor(UiColor(0xFF5500))
-                                  .SetOffset(Vector2(2.0f, 2.0f)));
+    Text::Shadow inputFieldShadow;
+    inputFieldShadow.SetColor(UiColor(0xFF5500));
+    inputFieldShadow.SetOffset(Vector2(2.0f, 2.0f));
+    mInputFieldShadow.SetShadow(inputFieldShadow);
     mInputFieldOutline = CreateBaseInputField("InputField with Outline");
-    mInputFieldOutline.SetOutline(Text::Outline()
-                                    .SetColor(UiColor(0x0066FF))
-                                    .SetWidth(2.0f));
+    Text::Outline inputFieldOutline;
+    inputFieldOutline.SetColor(UiColor(0x0066FF));
+    inputFieldOutline.SetWidth(2.0f);
+    mInputFieldOutline.SetOutline(inputFieldOutline);
     mInputFieldLineThrough = CreateBaseInputField("InputField with LineThrough");
-    mInputFieldLineThrough.SetLineThrough(Text::LineThrough()
-                                            .SetColor(UiColor(0xFF00FF))
-                                            .SetThickness(2.0f));
+    Text::LineThrough inputFieldLineThrough;
+    inputFieldLineThrough.SetColor(UiColor(0xFF00FF));
+    inputFieldLineThrough.SetThickness(2.0f);
+    mInputFieldLineThrough.SetLineThrough(inputFieldLineThrough);
     mInputFieldTextBackgroundColor = CreateBaseInputField("InputField Text Background Color");
     mInputFieldTextBackgroundColor.SetTextBackgroundColor(UiColor(0x00FFFF));
 
@@ -225,56 +237,56 @@ private:
     }
     else if(event.GetKeyName() == "5")
     {
-      mUnderlineLabel.SetUnderline(
-        Text::Underline()
-          .SetColor(UiColor(0xFF0000))
-          .SetThickness(4.0f)
-          .SetType(Text::Underline::Type::DASHED)
-          .SetDashLength(8.0f)
-          .SetDashGap(2.0f));
+      Text::Underline underline;
+      underline.SetColor(UiColor(0xFF0000));
+      underline.SetThickness(4.0f);
+      underline.SetType(Text::Underline::Type::DASHED);
+      underline.SetDashLength(8.0f);
+      underline.SetDashGap(2.0f);
+      mUnderlineLabel.SetUnderline(underline);
 
-      mShadowLabel.SetShadow(
-        Text::Shadow()
-          .SetColor(UiColor(0x00FF00))
-          .SetOffset(Vector2(-2.0f, -2.0f))
-          .SetBlurRadius(4.0f));
+      Text::Shadow shadow;
+      shadow.SetColor(UiColor(0x00FF00));
+      shadow.SetOffset(Vector2(-2.0f, -2.0f));
+      shadow.SetBlurRadius(4.0f);
+      mShadowLabel.SetShadow(shadow);
 
-      mOutlineLabel.SetOutline(
-        Text::Outline()
-          .SetColor(UiColor(0xFF00FF))
-          .SetOffset(Vector2(-1.0f, -1.0f))
-          .SetWidth(3.0f)
-          .SetBlurRadius(2.0f));
+      Text::Outline outline;
+      outline.SetColor(UiColor(0xFF00FF));
+      outline.SetOffset(Vector2(-1.0f, -1.0f));
+      outline.SetWidth(3.0f);
+      outline.SetBlurRadius(2.0f);
+      mOutlineLabel.SetOutline(outline);
 
-      mLineThroughLabel.SetLineThrough(
-        Text::LineThrough()
-          .SetColor(UiColor(0x00FFFF))
-          .SetThickness(1.0f));
+      Text::LineThrough lineThrough;
+      lineThrough.SetColor(UiColor(0x00FFFF));
+      lineThrough.SetThickness(1.0f);
+      mLineThroughLabel.SetLineThrough(lineThrough);
     }
     else if(event.GetKeyName() == "6")
     {
-      mInputFieldUnderline.SetUnderline(
-        Text::Underline()
-          .SetColor(UiColor(0xFF0000))
-          .SetThickness(4.0f)
-          .SetType(Text::Underline::Type::DASHED)
-          .SetDashLength(8.0f)
-          .SetDashGap(2.0f));
+      Text::Underline underline;
+      underline.SetColor(UiColor(0xFF0000));
+      underline.SetThickness(4.0f);
+      underline.SetType(Text::Underline::Type::DASHED);
+      underline.SetDashLength(8.0f);
+      underline.SetDashGap(2.0f);
+      mInputFieldUnderline.SetUnderline(underline);
 
-      mInputFieldShadow.SetShadow(
-        Text::Shadow()
-          .SetColor(UiColor(0x00FF00))
-          .SetOffset(Vector2(-2.0f, -2.0f)));
+      Text::Shadow shadow;
+      shadow.SetColor(UiColor(0x00FF00));
+      shadow.SetOffset(Vector2(-2.0f, -2.0f));
+      mInputFieldShadow.SetShadow(shadow);
 
-      mInputFieldOutline.SetOutline(
-        Text::Outline()
-          .SetColor(UiColor(0xFF00FF))
-          .SetWidth(3.0f));
+      Text::Outline outline;
+      outline.SetColor(UiColor(0xFF00FF));
+      outline.SetWidth(3.0f);
+      mInputFieldOutline.SetOutline(outline);
 
-      mInputFieldLineThrough.SetLineThrough(
-        Text::LineThrough()
-          .SetColor(UiColor(0x00FFFF))
-          .SetThickness(1.0f));
+      Text::LineThrough lineThrough;
+      lineThrough.SetColor(UiColor(0x00FFFF));
+      lineThrough.SetThickness(1.0f);
+      mInputFieldLineThrough.SetLineThrough(lineThrough);
     }
     else if(event.GetKeyName() == "7")
     {

@@ -61,7 +61,6 @@ public:
    * @brief Copies another bevel to this object.
    *
    * @param[in] rhs The bevel to copy.
-   * @return A reference to this bevel.
    */
   Bevel& operator=(const Bevel& rhs);
 
@@ -69,7 +68,6 @@ public:
    * @brief Moves another bevel to this object.
    *
    * @param[in] rhs The bevel to move.
-   * @return A reference to this bevel.
    */
   Bevel& operator=(Bevel&& rhs) noexcept;
 
@@ -86,9 +84,8 @@ public:
    * Typical values are (-1.0f, -1.0f) for top-left light or (1.0f, -1.0f) for top-right light.
    *
    * @param[in] direction The bevel direction vector.
-   * @return A reference to this bevel.
    */
-  Bevel& SetDirection(const Vector2& direction);
+  void SetDirection(const Vector2& direction);
 
   /**
    * @brief Returns the bevel direction.
@@ -103,9 +100,8 @@ public:
    * Higher values create a more pronounced bevel effect.
    *
    * @param[in] intensity The bevel intensity.
-   * @return A reference to this bevel.
    */
-  Bevel& SetIntensity(float intensity);
+  void SetIntensity(float intensity);
 
   /**
    * @brief Returns the bevel intensity.
@@ -120,9 +116,8 @@ public:
    * This color is applied to the highlighted side of the text.
    *
    * @param[in] color The light color.
-   * @return A reference to this bevel.
    */
-  Bevel& SetLightColor(const UiColor& color);
+  void SetLightColor(const UiColor& color);
 
   /**
    * @brief Returns the light color for the bevel effect.
@@ -137,9 +132,8 @@ public:
    * This color is applied to the shadowed side of the text.
    *
    * @param[in] color The shadow color.
-   * @return A reference to this bevel.
    */
-  Bevel& SetShadowColor(const UiColor& color);
+  void SetShadowColor(const UiColor& color);
 
   /**
    * @brief Returns the shadow color for the bevel effect.

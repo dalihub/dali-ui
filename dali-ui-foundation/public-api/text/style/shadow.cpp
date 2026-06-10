@@ -105,11 +105,10 @@ Shadow::~Shadow()
   delete mImpl;
 }
 
-Shadow& Shadow::SetColor(const UiColor& color)
+void Shadow::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
   mImpl->mColor = color;
-  return *this;
 }
 
 const UiColor& Shadow::GetColor() const
@@ -118,11 +117,10 @@ const UiColor& Shadow::GetColor() const
   return mImpl->mColor;
 }
 
-Shadow& Shadow::SetOffset(const Vector2& offset)
+void Shadow::SetOffset(const Vector2& offset)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
   mImpl->mOffset = offset;
-  return *this;
 }
 
 const Vector2& Shadow::GetOffset() const
@@ -131,11 +129,10 @@ const Vector2& Shadow::GetOffset() const
   return mImpl->mOffset;
 }
 
-Shadow& Shadow::SetBlurRadius(float blurRadius)
+void Shadow::SetBlurRadius(float blurRadius)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
   mImpl->mBlurRadius = std::max(0.0f, blurRadius);
-  return *this;
 }
 
 float Shadow::GetBlurRadius() const

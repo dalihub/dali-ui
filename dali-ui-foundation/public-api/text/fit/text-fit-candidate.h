@@ -73,7 +73,6 @@ public:
    * @brief Copies another fit candidate to this object.
    *
    * @param[in] rhs The fit candidate to copy.
-   * @return A reference to this fit candidate.
    */
   FitCandidate& operator=(const FitCandidate& rhs);
 
@@ -81,7 +80,6 @@ public:
    * @brief Moves another fit candidate to this object.
    *
    * @param[in] rhs The fit candidate to move.
-   * @return A reference to this fit candidate.
    */
   FitCandidate& operator=(FitCandidate&& rhs) noexcept;
 
@@ -95,9 +93,8 @@ public:
    * @brief Sets the font size.
    *
    * @param[in] size The font size in pixels.
-   * @return A reference to this fit candidate.
    */
-  FitCandidate& SetFontSize(float size);
+  void SetFontSize(float size);
 
   /**
    * @brief Returns the font size.
@@ -110,9 +107,8 @@ public:
    * @brief Sets the line height.
    *
    * @param[in] height The line height in pixels.
-   * @return A reference to this fit candidate.
    */
-  FitCandidate& SetLineHeight(float height);
+  void SetLineHeight(float height);
 
   /**
    * @brief Returns the line height.

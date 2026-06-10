@@ -72,7 +72,6 @@ public:
    * @brief Copies another font variation axis to this object.
    *
    * @param[in] rhs The font variation axis to copy.
-   * @return A reference to this font variation axis.
    */
   FontVariationAxis& operator=(const FontVariationAxis& rhs);
 
@@ -80,7 +79,6 @@ public:
    * @brief Moves another font variation axis to this object.
    *
    * @param[in] rhs The font variation axis to move.
-   * @return A reference to this font variation axis.
    */
   FontVariationAxis& operator=(FontVariationAxis&& rhs) noexcept;
 
@@ -94,9 +92,8 @@ public:
    * @brief Sets the axis tag.
    *
    * @param[in] tag The OpenType axis tag.
-   * @return A reference to this font variation axis.
    */
-  FontVariationAxis& SetTag(const Dali::String& tag);
+  void SetTag(const Dali::String& tag);
 
   /**
    * @brief Returns the axis tag.
@@ -109,9 +106,8 @@ public:
    * @brief Sets the axis value.
    *
    * @param[in] value The axis value.
-   * @return A reference to this font variation axis.
    */
-  FontVariationAxis& SetValue(float value);
+  void SetValue(float value);
 
   /**
    * @brief Returns the axis value.

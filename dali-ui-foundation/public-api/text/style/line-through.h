@@ -59,7 +59,6 @@ public:
    * @brief Copies another line-through to this object.
    *
    * @param[in] rhs The line-through to copy.
-   * @return A reference to this line-through.
    */
   LineThrough& operator=(const LineThrough& rhs);
 
@@ -67,7 +66,6 @@ public:
    * @brief Moves another line-through to this object.
    *
    * @param[in] rhs The line-through to move.
-   * @return A reference to this line-through.
    */
   LineThrough& operator=(LineThrough&& rhs) noexcept;
 
@@ -81,9 +79,8 @@ public:
    * @brief Sets the line-through color.
    *
    * @param[in] color The line-through color.
-   * @return A reference to this line-through.
    */
-  LineThrough& SetColor(const UiColor& color);
+  void SetColor(const UiColor& color);
 
   /**
    * @brief Returns the line-through color.
@@ -96,9 +93,8 @@ public:
    * @brief Sets the line-through thickness.
    *
    * @param[in] thickness The line-through thickness in pixels.
-   * @return A reference to this line-through.
    */
-  LineThrough& SetThickness(float thickness);
+  void SetThickness(float thickness);
 
   /**
    * @brief Returns the line-through thickness.

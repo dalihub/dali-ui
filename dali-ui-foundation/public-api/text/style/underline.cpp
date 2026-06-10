@@ -113,11 +113,10 @@ Underline::~Underline()
   delete mImpl;
 }
 
-Underline& Underline::SetColor(const UiColor& color)
+void Underline::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mColor = color;
-  return *this;
 }
 
 const UiColor& Underline::GetColor() const
@@ -126,11 +125,10 @@ const UiColor& Underline::GetColor() const
   return mImpl->mColor;
 }
 
-Underline& Underline::SetThickness(float thickness)
+void Underline::SetThickness(float thickness)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mThickness = std::max(0.0f, thickness);
-  return *this;
 }
 
 float Underline::GetThickness() const
@@ -139,11 +137,10 @@ float Underline::GetThickness() const
   return mImpl->mThickness;
 }
 
-Underline& Underline::SetType(Type type)
+void Underline::SetType(Type type)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mType = type;
-  return *this;
 }
 
 Underline::Type Underline::GetType() const
@@ -152,11 +149,10 @@ Underline::Type Underline::GetType() const
   return mImpl->mType;
 }
 
-Underline& Underline::SetDashLength(float length)
+void Underline::SetDashLength(float length)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mDashLength = std::max(0.0f, length);
-  return *this;
 }
 
 float Underline::GetDashLength() const
@@ -165,11 +161,10 @@ float Underline::GetDashLength() const
   return mImpl->mDashLength;
 }
 
-Underline& Underline::SetDashGap(float gap)
+void Underline::SetDashGap(float gap)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
   mImpl->mDashGap = std::max(0.0f, gap);
-  return *this;
 }
 
 float Underline::GetDashGap() const

@@ -252,10 +252,11 @@ Dali::String BuildBrickText(const char* word)
 
 Text::Outline BuildBrickOutline(const UiColor& color)
 {
-  return Text::Outline()
-    .SetColor(color.WithAlpha(0.48f))
-    .SetWidth(1.5f)
-    .SetBlurRadius(1.6f);
+  Text::Outline outline;
+  outline.SetColor(color.WithAlpha(0.48f));
+  outline.SetWidth(1.5f);
+  outline.SetBlurRadius(1.6f);
+  return outline;
 }
 
 const char* GetBrickRenderModeName(BrickRenderMode mode)

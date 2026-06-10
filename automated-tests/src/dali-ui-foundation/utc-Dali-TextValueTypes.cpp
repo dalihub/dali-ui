@@ -1466,9 +1466,8 @@ int UtcDaliTextInputFilterP(void)
   DALI_TEST_EQUALS(filter.GetAllowPattern(), Dali::String(""), TEST_LOCATION);
   DALI_TEST_EQUALS(filter.GetDenyPattern(), Dali::String(""), TEST_LOCATION);
 
-  // SetAllowPattern and chain return
-  Text::InputFilter& result = filter.SetAllowPattern("[\\d]");
-  DALI_TEST_CHECK(&result == &filter);
+  // SetAllowPattern
+  filter.SetAllowPattern("[\\d]");
   DALI_TEST_EQUALS(filter.GetAllowPattern(), Dali::String("[\\d]"), TEST_LOCATION);
 
   // SetDenyPattern

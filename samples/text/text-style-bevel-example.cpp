@@ -21,6 +21,16 @@ namespace
 {
 constexpr float FONT_SIZE = 140.0f;
 
+Text::Bevel CreateBevel(const Vector2& direction, float intensity, uint32_t lightColor, uint32_t shadowColor)
+{
+  Text::Bevel bevel;
+  bevel.SetDirection(direction);
+  bevel.SetIntensity(intensity);
+  bevel.SetLightColor(UiColor(lightColor));
+  bevel.SetShadowColor(UiColor(shadowColor));
+  return bevel;
+}
+
 Label CreateBevelLabel(const char* text, uint32_t backgroundColor, uint32_t textColor, Text::Bevel bevel, Extents padding = Extents(10, 10, 10, 10))
 {
   Label label = Label::New(text);
@@ -56,39 +66,19 @@ private:
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
 
-    mEmbossedLabel = CreateBevelLabel("Embossed", 0x212121, 0x333333, Text::Bevel()
-                                                                             .SetDirection(Vector2(-1.0f, -1.0f))
-                                                                             .SetIntensity(2.0f)
-                                                                             .SetLightColor(UiColor(0x808080))
-                                                                             .SetShadowColor(UiColor(0x0D0D0D)));
+    mEmbossedLabel = CreateBevelLabel("Embossed", 0x212121, 0x333333, CreateBevel(Vector2(-1.0f, -1.0f), 2.0f, 0x808080, 0x0D0D0D));
     root.Add(mEmbossedLabel);
 
-    mEngravedLabel = CreateBevelLabel("Engraved", 0x333333, 0x212121, Text::Bevel()
-                                                                             .SetDirection(Vector2(-1.0f, -1.0f))
-                                                                             .SetIntensity(2.0f)
-                                                                             .SetLightColor(UiColor(0x0D0D0D))
-                                                                             .SetShadowColor(UiColor(0x808080)));
+    mEngravedLabel = CreateBevelLabel("Engraved", 0x333333, 0x212121, CreateBevel(Vector2(-1.0f, -1.0f), 2.0f, 0x0D0D0D, 0x808080));
     root.Add(mEngravedLabel);
 
-    mGlassLabel = CreateBevelLabel("Glass", 0xFFFFFF, 0xF3F3F3, Text::Bevel()
-                                                                        .SetDirection(Vector2(-1.0f, -1.0f))
-                                                                        .SetIntensity(5.0f)
-                                                                        .SetLightColor(UiColor(0x555555))
-                                                                        .SetShadowColor(UiColor(0x666666)));
+    mGlassLabel = CreateBevelLabel("Glass", 0xFFFFFF, 0xF3F3F3, CreateBevel(Vector2(-1.0f, -1.0f), 5.0f, 0x555555, 0x666666));
     root.Add(mGlassLabel);
 
-    mSameColorLabel = CreateBevelLabel("Same Color", 0xEEF3F9, 0xEEF3F9, Text::Bevel()
-                                                                                 .SetDirection(Vector2(1.0f, -1.0f))
-                                                                                 .SetIntensity(4.0f)
-                                                                                 .SetLightColor(UiColor(0xFFFFFF))
-                                                                                 .SetShadowColor(UiColor(0xD8E2E9)));
+    mSameColorLabel = CreateBevelLabel("Same Color", 0xEEF3F9, 0xEEF3F9, CreateBevel(Vector2(1.0f, -1.0f), 4.0f, 0xFFFFFF, 0xD8E2E9));
     root.Add(mSameColorLabel);
 
-    mBronzeColorLabel = CreateBevelLabel("Bronze", 0x6B4A34, 0x6B4A34, Text::Bevel()
-                                                                              .SetDirection(Vector2(-1.0f, -1.0f))
-                                                                              .SetIntensity(4.0f)
-                                                                              .SetLightColor(UiColor(0xB8845E))
-                                                                              .SetShadowColor(UiColor(0x40281C)),
+    mBronzeColorLabel = CreateBevelLabel("Bronze", 0x6B4A34, 0x6B4A34, CreateBevel(Vector2(-1.0f, -1.0f), 4.0f, 0xB8845E, 0x40281C),
                                          Extents(20, 20, 20, 20));
     root.Add(mBronzeColorLabel);
 

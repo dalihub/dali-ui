@@ -81,7 +81,6 @@ public:
    * @brief Copies another underline to this object.
    *
    * @param[in] rhs The underline to copy.
-   * @return A reference to this underline.
    */
   Underline& operator=(const Underline& rhs);
 
@@ -89,7 +88,6 @@ public:
    * @brief Moves another underline to this object.
    *
    * @param[in] rhs The underline to move.
-   * @return A reference to this underline.
    */
   Underline& operator=(Underline&& rhs) noexcept;
 
@@ -103,9 +101,8 @@ public:
    * @brief Sets the underline color.
    *
    * @param[in] color The underline color.
-   * @return A reference to this underline.
    */
-  Underline& SetColor(const UiColor& color);
+  void SetColor(const UiColor& color);
 
   /**
    * @brief Returns the underline color.
@@ -118,9 +115,8 @@ public:
    * @brief Sets the underline thickness.
    *
    * @param[in] thickness The underline thickness in pixels.
-   * @return A reference to this underline.
    */
-  Underline& SetThickness(float thickness);
+  void SetThickness(float thickness);
 
   /**
    * @brief Returns the underline thickness.
@@ -133,9 +129,8 @@ public:
    * @brief Sets the underline type.
    *
    * @param[in] type The underline type.
-   * @return A reference to this underline.
    */
-  Underline& SetType(Type type);
+  void SetType(Type type);
 
   /**
    * @brief Returns the underline type.
@@ -150,9 +145,8 @@ public:
    * This value is used only when the underline type is DASHED.
    *
    * @param[in] length The length of each dash in pixels.
-   * @return A reference to this underline.
    */
-  Underline& SetDashLength(float length);
+  void SetDashLength(float length);
 
   /**
    * @brief Returns the dash length for a dashed underline.
@@ -167,9 +161,8 @@ public:
    * This value is used only when the underline type is DASHED.
    *
    * @param[in] gap The gap between dashes in pixels.
-   * @return A reference to this underline.
    */
-  Underline& SetDashGap(float gap);
+  void SetDashGap(float gap);
 
   /**
    * @brief Returns the gap between dashes for a dashed underline.

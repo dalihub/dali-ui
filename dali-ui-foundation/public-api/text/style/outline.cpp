@@ -109,11 +109,10 @@ Outline::~Outline()
   delete mImpl;
 }
 
-Outline& Outline::SetColor(const UiColor& color)
+void Outline::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
   mImpl->mColor = color;
-  return *this;
 }
 
 const UiColor& Outline::GetColor() const
@@ -122,11 +121,10 @@ const UiColor& Outline::GetColor() const
   return mImpl->mColor;
 }
 
-Outline& Outline::SetOffset(const Vector2& offset)
+void Outline::SetOffset(const Vector2& offset)
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
   mImpl->mOffset = offset;
-  return *this;
 }
 
 const Vector2& Outline::GetOffset() const
@@ -135,11 +133,10 @@ const Vector2& Outline::GetOffset() const
   return mImpl->mOffset;
 }
 
-Outline& Outline::SetWidth(float width)
+void Outline::SetWidth(float width)
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
   mImpl->mWidth = std::max(0.0f, width);
-  return *this;
 }
 
 float Outline::GetWidth() const
@@ -148,11 +145,10 @@ float Outline::GetWidth() const
   return mImpl->mWidth;
 }
 
-Outline& Outline::SetBlurRadius(float blurRadius)
+void Outline::SetBlurRadius(float blurRadius)
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
   mImpl->mBlurRadius = std::max(0.0f, blurRadius);
-  return *this;
 }
 
 float Outline::GetBlurRadius() const

@@ -118,11 +118,10 @@ FitRange::~FitRange()
   delete mImpl;
 }
 
-FitRange& FitRange::SetMinimumFontSize(float size)
+void FitRange::SetMinimumFontSize(float size)
 {
   DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   mImpl->mMinimumFontSize = std::max(1.0f, size);
-  return *this;
 }
 
 float FitRange::GetMinimumFontSize() const
@@ -131,11 +130,10 @@ float FitRange::GetMinimumFontSize() const
   return mImpl->mMinimumFontSize;
 }
 
-FitRange& FitRange::SetMaximumFontSize(float size)
+void FitRange::SetMaximumFontSize(float size)
 {
   DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   mImpl->mMaximumFontSize = std::max(1.0f, size);
-  return *this;
 }
 
 float FitRange::GetMaximumFontSize() const
@@ -144,11 +142,10 @@ float FitRange::GetMaximumFontSize() const
   return mImpl->mMaximumFontSize;
 }
 
-FitRange& FitRange::SetFontSizeStep(float step)
+void FitRange::SetFontSizeStep(float step)
 {
   DALI_ASSERT_VALID_FIT_RANGE(mImpl);
   mImpl->mFontSizeStep = std::max(1.0f, step);
-  return *this;
 }
 
 float FitRange::GetFontSizeStep() const

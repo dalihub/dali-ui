@@ -113,11 +113,10 @@ FitCandidate::~FitCandidate()
   delete mImpl;
 }
 
-FitCandidate& FitCandidate::SetFontSize(float size)
+void FitCandidate::SetFontSize(float size)
 {
   DALI_ASSERT_VALID_FIT_CANDIDATE(mImpl);
   mImpl->mFontSize = std::max(1.0f, size);
-  return *this;
 }
 
 float FitCandidate::GetFontSize() const
@@ -126,11 +125,10 @@ float FitCandidate::GetFontSize() const
   return mImpl->mFontSize;
 }
 
-FitCandidate& FitCandidate::SetLineHeight(float height)
+void FitCandidate::SetLineHeight(float height)
 {
   DALI_ASSERT_VALID_FIT_CANDIDATE(mImpl);
   mImpl->mLineHeight = std::max(0.0f, height);
-  return *this;
 }
 
 float FitCandidate::GetLineHeight() const

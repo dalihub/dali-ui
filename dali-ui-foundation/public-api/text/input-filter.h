@@ -90,7 +90,6 @@ public:
    * @brief Copies another input filter to this object.
    *
    * @param[in] rhs The input filter to copy.
-   * @return A reference to this input filter.
    */
   InputFilter& operator=(const InputFilter& rhs);
 
@@ -98,7 +97,6 @@ public:
    * @brief Moves another input filter to this object.
    *
    * @param[in] rhs The input filter to move.
-   * @return A reference to this input filter.
    */
   InputFilter& operator=(InputFilter&& rhs) noexcept;
 
@@ -114,9 +112,8 @@ public:
    * If set, input that does not match this pattern is rejected.
    *
    * @param[in] pattern A regular expression that defines allowed input.
-   * @return A reference to this input filter.
    */
-  InputFilter& SetAllowPattern(const Dali::String& pattern);
+  void SetAllowPattern(const Dali::String& pattern);
 
   /**
    * @brief Returns the allow pattern.
@@ -131,9 +128,8 @@ public:
    * If set, input that matches this pattern is rejected.
    *
    * @param[in] pattern A regular expression that defines denied input.
-   * @return A reference to this input filter.
    */
-  InputFilter& SetDenyPattern(const Dali::String& pattern);
+  void SetDenyPattern(const Dali::String& pattern);
 
   /**
    * @brief Returns the deny pattern.

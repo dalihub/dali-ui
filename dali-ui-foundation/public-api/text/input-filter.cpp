@@ -100,11 +100,10 @@ InputFilter::~InputFilter()
   delete mImpl;
 }
 
-InputFilter& InputFilter::SetAllowPattern(const Dali::String& pattern)
+void InputFilter::SetAllowPattern(const Dali::String& pattern)
 {
   DALI_ASSERT_VALID_INPUT_FILTER(mImpl);
   mImpl->mAllowPattern = pattern;
-  return *this;
 }
 
 const Dali::String& InputFilter::GetAllowPattern() const
@@ -113,11 +112,10 @@ const Dali::String& InputFilter::GetAllowPattern() const
   return mImpl->mAllowPattern;
 }
 
-InputFilter& InputFilter::SetDenyPattern(const Dali::String& pattern)
+void InputFilter::SetDenyPattern(const Dali::String& pattern)
 {
   DALI_ASSERT_VALID_INPUT_FILTER(mImpl);
   mImpl->mDenyPattern = pattern;
-  return *this;
 }
 
 const Dali::String& InputFilter::GetDenyPattern() const

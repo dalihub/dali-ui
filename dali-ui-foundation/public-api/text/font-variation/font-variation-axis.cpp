@@ -111,11 +111,10 @@ FontVariationAxis::~FontVariationAxis()
   delete mImpl;
 }
 
-FontVariationAxis& FontVariationAxis::SetTag(const Dali::String& tag)
+void FontVariationAxis::SetTag(const Dali::String& tag)
 {
   DALI_ASSERT_VALID_FONT_VARIATION_AXIS(mImpl);
   mImpl->mTag = tag;
-  return *this;
 }
 
 const Dali::String& FontVariationAxis::GetTag() const
@@ -124,11 +123,10 @@ const Dali::String& FontVariationAxis::GetTag() const
   return mImpl->mTag;
 }
 
-FontVariationAxis& FontVariationAxis::SetValue(float value)
+void FontVariationAxis::SetValue(float value)
 {
   DALI_ASSERT_VALID_FONT_VARIATION_AXIS(mImpl);
   mImpl->mValue = value;
-  return *this;
 }
 
 float FontVariationAxis::GetValue() const
