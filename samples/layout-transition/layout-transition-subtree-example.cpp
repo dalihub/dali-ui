@@ -59,6 +59,9 @@ public:
     mScopeButton = MakeClickableLabel("Scope: SUBTREE");
     mScopeButton.TouchedSignal().Connect(this, &LayoutTransitionSubtreeController::OnScopeTouched);
 
+    mItemButton = MakeClickableLabel("Add/Remove item");
+    mItemButton.TouchedSignal().Connect(this, &LayoutTransitionSubtreeController::OnItemTouched);
+
     // Root: a single transition is attached here and governs the whole
     // subtree under SUBTREE scope.
     mRoot = StackLayout::New();
@@ -105,6 +108,7 @@ public:
     buttonRow.SetAlignItems(FlexAlign::STRETCH);
     buttonRow.Add(mToggleButton);
     buttonRow.Add(mScopeButton);
+    buttonRow.Add(mItemButton);
 
     StackLayout outer = StackLayout::New();
     outer.SetRequestedWidth(MATCH_PARENT);
@@ -121,8 +125,19 @@ public:
     LayoutTransitionTiming timing{Duration(0.4f),
                                   AlphaFunction(AlphaFunction::EASE_IN_OUT_SINE),
                                   Duration()};
+
+    // ENTER fades a newly added item in; EXIT fades a removed item out. Under
+    // SUBTREE scope these reach grand-children inside the no-transition card,
+    // all driven by this single root transition.
+    ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+    enterSpec.Opacity(1.0f, Duration(0.3f));
+    ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
+    exitSpec.Opacity(0.0f, Duration(0.3f));
+
     LayoutTransition transition = LayoutTransition::New();
     transition.SetChangeTiming(timing)
+              .SetEnterVisualSpec(enterSpec)
+              .SetExitVisualSpec(exitSpec)
               .SetReflowScope(subtree ? LayoutReflowScope::SUBTREE
                                       : LayoutReflowScope::DIRECT_CHILDREN);
     return transition;
@@ -160,6 +175,33 @@ public:
     mSubtree = !mSubtree;
     mRoot.SetLayoutTransition(MakeTransition(mSubtree));
     mScopeButton.SetText(mSubtree ? "Scope: SUBTREE" : "Scope: DIRECT");
+    return true;
+  }
+
+  bool OnItemTouched(Actor /*actor*/, TouchEvent touch)
+  {
+    if(touch.GetState(0) != PointState::STARTED)
+    {
+      return false;
+    }
+    // The card has NO transition of its own. Under SUBTREE scope the add /
+    // remove of this grand-child is animated by the ROOT transition's ENTER /
+    // EXIT slot (fade in / out); under DIRECT scope it snaps.
+    if(mExtraItem)
+    {
+      mCard.RemoveChild(mExtraItem); // inherited EXIT fades it out, then unparents
+      mExtraItem.Reset();
+    }
+    else
+    {
+      View item = View::New();
+      item.SetBackgroundColor(Color::MAGENTA);
+      item.SetRequestedWidth(MATCH_PARENT);
+      item.SetRequestedHeight(60.0f);
+      item.SetProperty(Actor::Property::OPACITY, 0.0f); // inherited ENTER fades from 0
+      mCard.Add(item);
+      mExtraItem = item;
+    }
     return true;
   }
 
@@ -202,6 +244,8 @@ private:
   View         mSpacer;
   Label        mToggleButton;
   Label        mScopeButton;
+  Label        mItemButton;
+  View         mExtraItem;
   bool         mExpanded;
   bool         mSubtree;
 };
