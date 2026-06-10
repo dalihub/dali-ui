@@ -1432,13 +1432,13 @@ private:
 
     BuildNavigationBar();
 
-    mScrollView = ScrollView::New()
-      .SetScrollDirection(ScrollDirection::Vertical)
-      .SetOverScrollMode(OverScrollMode::ContentScrolls)
-      .SetBackgroundColor(Color::WHITE)
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(WRAP_CONTENT)
-      .SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    mScrollView = ScrollView::New();
+    mScrollView.SetScrollDirection(ScrollDirection::Vertical);
+    mScrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+    mScrollView.SetBackgroundColor(Color::WHITE);
+    mScrollView.SetRequestedWidth(MATCH_PARENT);
+    mScrollView.SetRequestedHeight(WRAP_CONTENT);
+    mScrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     mRoot.Add(mScrollView);
 
     BuildDetailDiagnosticTimer();
@@ -1498,12 +1498,12 @@ private:
 
   void BuildNavigationBar()
   {
-    mNavigation = FlexLayout::New()
-      .SetRequestedWidth(MATCH_PARENT)
-      .SetRequestedHeight(NAV_HEIGHT)
-      .SetDirection(FlexDirection::ROW)
-      .SetWrap(FlexWrap::WRAP)
-      .SetAlignItems(FlexAlign::FLEX_START);
+    mNavigation = FlexLayout::New();
+    mNavigation.SetRequestedWidth(MATCH_PARENT);
+    mNavigation.SetRequestedHeight(NAV_HEIGHT);
+    mNavigation.SetDirection(FlexDirection::ROW);
+    mNavigation.SetWrap(FlexWrap::WRAP);
+    mNavigation.SetAlignItems(FlexAlign::FLEX_START);
     mNavigation.SetPadding(Extents(12, 12, 8, 6));
     mNavigation.SetBackgroundColor(Vector4(0.96f, 0.97f, 0.99f, 1.0f));
 
@@ -1525,19 +1525,19 @@ private:
                       float width,
                       const Vector4& backgroundColor)
   {
-    Label button = Label::New()
-      .SetRequestedWidth(width)
-      .SetRequestedHeight(NAV_BUTTON_HEIGHT)
-      .SetText(text.c_str())
-      .SetFontSize(NAV_SIZE)
-      .SetTextColor(Color::BLACK)
-      .SetMultiLine(false)
-      .SetOverflowMode(Text::OverflowMode::ELLIPSIS)
-      .SetAsyncRendering(false)
-      .SetHorizontalTextAlignment(Text::Alignment::CENTER)
-      .SetVerticalTextAlignment(Text::Alignment::CENTER)
-      .SetParentOrigin(ParentOrigin::TOP_LEFT)
-      .SetPivot(Pivot::TOP_LEFT);
+    Label button = Label::New();
+    button.SetRequestedWidth(width);
+    button.SetRequestedHeight(NAV_BUTTON_HEIGHT);
+    button.SetText(text.c_str());
+    button.SetFontSize(NAV_SIZE);
+    button.SetTextColor(Color::BLACK);
+    button.SetMultiLine(false);
+    button.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+    button.SetAsyncRendering(false);
+    button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    button.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    button.SetParentOrigin(ParentOrigin::TOP_LEFT);
+    button.SetPivot(Pivot::TOP_LEFT);
     button.SetBackgroundColor(backgroundColor);
     button.SetMargin(Extents(0, 6, 0, 6));
     button.SetPadding(Extents(6, 6, 0, 0));
@@ -2086,9 +2086,9 @@ private:
   {
     RowActors actors;
 
-    actors.row = AbsoluteLayout::New()
-      .SetRequestedWidth(RowWidth())
-      .SetRequestedHeight(ROW_HEIGHT);
+    actors.row = AbsoluteLayout::New();
+    actors.row.SetRequestedWidth(RowWidth());
+    actors.row.SetRequestedHeight(ROW_HEIGHT);
     actors.rowParams = AbsoluteLayoutParams::New();
     actors.row.SetLayoutParams(actors.rowParams);
 
