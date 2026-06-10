@@ -132,6 +132,8 @@ public: // Operators
    */
   LottieAnimationView& operator=(LottieAnimationView&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(LottieAnimationView)
+
 public: // Static Methods
   /**
    * @brief Downcasts a handle to LottieAnimationView handle.

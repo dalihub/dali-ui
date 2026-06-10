@@ -98,6 +98,8 @@ public: // Creation & Destruction
   AnimatedImageView& operator=(const AnimatedImageView& rhs);
   AnimatedImageView& operator=(AnimatedImageView&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(AnimatedImageView)
+
   /**
    * @brief Creates a new AnimatedImageView.
    *

@@ -88,6 +88,8 @@ public:
    */
   GridLayout& operator=(GridLayout&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(GridLayout)
+
   /**
    * @brief Downcasts a handle to GridLayout handle.
    */

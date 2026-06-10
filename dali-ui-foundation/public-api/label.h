@@ -167,6 +167,8 @@ public: // Operators
    */
   Label& operator=(Label&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(Label)
+
 public: // Static Methods
   /**
    * @brief Downcasts a handle to Label handle.

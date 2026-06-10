@@ -88,6 +88,8 @@ public:
    */
   AbsoluteLayout& operator=(AbsoluteLayout&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(AbsoluteLayout)
+
   /**
    * @brief Downcasts a handle to AbsoluteLayout handle.
    */

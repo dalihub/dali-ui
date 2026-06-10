@@ -159,6 +159,8 @@ public:
   ChartView& operator=(const ChartView& rhs);
   ChartView& operator=(ChartView&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(ChartView)
+
   void AddSeries(Ui::ChartSeries series);
   void SetXAxis(Ui::ChartAxis axis);
   void SetYAxis(Ui::ChartAxis axis);

@@ -71,6 +71,8 @@ public:
    */
   ScrollBar& operator=(ScrollBar&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(ScrollBar)
+
 public: // Creation & Destruction
   /**
    * @brief Creates an initialized ScrollBar.

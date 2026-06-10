@@ -152,6 +152,22 @@ DummyTrait GetDummyTrait(ViewImpl& viewImpl, TraitId id)
   return baseObject ? DummyTrait::DownCast(BaseHandle(baseObject)) : DummyTrait();
 }
 
+void ApplyViewExtension(View& view)
+{
+  view.SetName("ViewExtension");
+}
+
+void ApplyLabelExtension(Label& label)
+{
+  label.SetText("LabelExtension");
+}
+
+int ApplyLabelExtensionWithArgs(Label& label, int value, int offset)
+{
+  label.SetName("LabelExtensionWithArgs");
+  return value + offset;
+}
+
 } // namespace
 
 void utc_dali_view_startup(void)
@@ -177,6 +193,25 @@ int UtcDaliViewNewP(void)
   UiTestApplication application;
   View              view = View::New();
   DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliViewWithExtensionHookP(void)
+{
+  UiTestApplication application;
+
+  View view = View::New();
+  view.With(ApplyViewExtension);
+  DALI_TEST_EQUALS(view.GetName(), Dali::String("ViewExtension"), TEST_LOCATION);
+
+  Label label = Label::New();
+  label.With(ApplyLabelExtension);
+  DALI_TEST_EQUALS(label.GetText(), Dali::String("LabelExtension"), TEST_LOCATION);
+
+  int result = label.With(ApplyLabelExtensionWithArgs, 20, 3);
+  DALI_TEST_EQUALS(label.GetName(), Dali::String("LabelExtensionWithArgs"), TEST_LOCATION);
+  DALI_TEST_EQUALS(result, 23, TEST_LOCATION);
+
   END_TEST;
 }
 

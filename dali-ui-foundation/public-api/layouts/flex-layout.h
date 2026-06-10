@@ -90,6 +90,8 @@ public:
    */
   FlexLayout& operator=(FlexLayout&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(FlexLayout)
+
   /**
    * @brief Downcasts a handle to FlexLayout handle.
    *

@@ -92,6 +92,8 @@ public: // Operators
    */
   DummyComponent& operator=(DummyComponent&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(DummyComponent)
+
 public: // Static Methods
   /**
    * @brief Downcasts a handle to DummyComponent handle.

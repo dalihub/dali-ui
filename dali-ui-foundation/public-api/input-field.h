@@ -165,6 +165,8 @@ public: // Operators
    */
   InputField& operator=(InputField&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(InputField)
+
 public: // Static Methods
   /**
    * @brief Downcasts a handle to InputField handle.

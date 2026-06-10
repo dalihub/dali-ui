@@ -106,6 +106,8 @@ public: // Creation & Destruction
    */
   ScrollView& operator=(ScrollView&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(ScrollView)
+
 public: // Static Methods
   /**
    * @brief Downcasts a handle to ScrollView handle.

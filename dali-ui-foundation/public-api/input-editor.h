@@ -166,6 +166,8 @@ public: // Operators
    */
   InputEditor& operator=(InputEditor&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(InputEditor)
+
 public: // Static Methods
   /**
    * @brief Downcasts a handle to InputEditor handle.

@@ -108,6 +108,8 @@ public: // Operators
    */
   InteractiveView& operator=(InteractiveView&& rhs) noexcept = default;
 
+  DALI_UI_VIEW_WITH(InteractiveView)
+
 public: // Signals
   /**
    * @brief Emitted when the pressed state changes.

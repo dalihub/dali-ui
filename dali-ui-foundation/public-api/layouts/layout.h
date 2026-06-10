@@ -92,6 +92,8 @@ public:
    */
   Layout& operator=(Layout&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(Layout)
+
   /**
    * @brief Downcasts a handle to Layout handle.
    *

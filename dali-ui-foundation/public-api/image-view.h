@@ -147,6 +147,8 @@ public: // Operators
    */
   ImageView& operator=(ImageView&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(ImageView)
+
 public: // Static Methods
   /**
    * @brief Downcasts a handle to ImageView handle.

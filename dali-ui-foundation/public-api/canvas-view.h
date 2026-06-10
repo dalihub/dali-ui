@@ -123,6 +123,8 @@ public: // Operators
    */
   CanvasView& operator=(CanvasView&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(CanvasView)
+
 public: // Static methods
   /**
    * @brief Downcasts a handle to CanvasView handle.

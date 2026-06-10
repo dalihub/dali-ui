@@ -42,6 +42,7 @@
 #include <dali-ui-foundation/public-api/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/view-state.h>
 #include <dali-ui-foundation/public-api/view-types.h>
+#include <dali-ui-foundation/public-api/view-with.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali/public-api/actors/custom-actor.h>
@@ -1062,6 +1063,9 @@ public: // Properties
    * @return True if the view itself or at least one ancestor is focused
    */
   bool IsEffectivelyFocused() const;
+
+  DALI_UI_VIEW_WITH(View)
+
   /**
    * @brief Attaches the interaction trait to this View and returns it.
    *

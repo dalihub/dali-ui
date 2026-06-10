@@ -145,6 +145,8 @@ public: // Operators
    */
   WebView& operator=(WebView&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(WebView)
+
 public: // Static Methods
   /**
    * @brief Downcasts a handle to WebView.

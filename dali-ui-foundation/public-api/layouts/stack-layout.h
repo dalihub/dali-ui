@@ -104,6 +104,8 @@ public:
    */
   StackLayout& operator=(StackLayout&& rhs) noexcept;
 
+  DALI_UI_VIEW_WITH(StackLayout)
+
   /**
    * @brief Downcasts a handle to StackLayout handle.
    *
