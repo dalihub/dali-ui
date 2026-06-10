@@ -283,6 +283,7 @@ private:
                             const TickLabelStyle&                             labelStyle);
   Ui::Label GetOrCreateLabel(std::vector<Ui::Label>& pool, size_t index);
   void      HideExcessLabels(std::vector<Ui::Label>& pool, size_t usedCount);
+  void      ClearLabelPool(std::vector<Ui::Label>& pool);
 
   // Throttle timer
   bool OnUpdateThrottleTimer();

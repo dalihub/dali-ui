@@ -54,6 +54,58 @@ namespace Integration
 namespace
 {
 
+using PointVec = std::vector<std::pair<float, float>>;
+
+PointVec DecimateMinMax(const PointVec& src, size_t targetCount)
+{
+  if(src.size() <= targetCount) return {};
+
+  PointVec out;
+  out.reserve(targetCount + 2);
+  out.push_back(src.front());
+
+  const size_t buckets    = (targetCount > 2) ? (targetCount - 2) / 2 : 1;
+  const double bucketSize = static_cast<double>(src.size() - 2) / static_cast<double>(buckets);
+
+  for(size_t b = 0; b < buckets; ++b)
+  {
+    const size_t start      = 1u + static_cast<size_t>(static_cast<double>(b) * bucketSize);
+    const size_t end        = 1u + static_cast<size_t>(static_cast<double>(b + 1) * bucketSize);
+    const size_t clampedEnd = std::min(end, src.size() - 1u);
+
+    float  minVal = src[start].second, maxVal = src[start].second;
+    size_t minIdx = start, maxIdx = start;
+    for(size_t i = start; i < clampedEnd; ++i)
+    {
+      if(std::isnan(src[i].second)) continue;
+      if(src[i].second < minVal)
+      {
+        minVal = src[i].second;
+        minIdx = i;
+      }
+      if(src[i].second > maxVal)
+      {
+        maxVal = src[i].second;
+        maxIdx = i;
+      }
+    }
+
+    if(minIdx <= maxIdx)
+    {
+      out.push_back(src[minIdx]);
+      if(minIdx != maxIdx) out.push_back(src[maxIdx]);
+    }
+    else
+    {
+      out.push_back(src[maxIdx]);
+      if(minIdx != maxIdx) out.push_back(src[minIdx]);
+    }
+  }
+
+  out.push_back(src.back());
+  return out;
+}
+
 Vector4 GetSeriesDisplayColor(Ui::ChartSeries& series, size_t paletteIdx)
 {
   if(auto ls = Ui::LineSeries::DownCast(series))
@@ -554,9 +606,15 @@ void DataRenderer::RenderLines(Dali::CanvasRenderer::DrawableGroup& group, const
     Ui::LineSeries lineSeries = Ui::LineSeries::DownCast(baseSeries);
     if(!lineSeries) continue;
 
-    auto&       impl   = GetImplementation(lineSeries);
-    const auto& points = impl.GetValues();
-    if(points.empty()) continue;
+    auto&       impl      = GetImplementation(lineSeries);
+    const auto& rawPoints = impl.GetValues();
+    if(rawPoints.empty()) continue;
+
+    const size_t   maxPts    = static_cast<size_t>(scale.GetPlotArea().width) * 2u;
+    const PointVec decimated = (maxPts > 0u && rawPoints.size() > maxPts)
+                                 ? DecimateMinMax(rawPoints, maxPts)
+                                 : PointVec{};
+    const auto&    points    = decimated.empty() ? rawPoints : decimated;
 
     auto lineShape = Dali::CanvasRenderer::Shape::New();
     lineShape.SetStrokeColor(impl.GetColor());
@@ -640,8 +698,14 @@ void DataRenderer::RenderMarkers(Dali::CanvasRenderer::DrawableGroup& group, con
     auto& impl = GetImplementation(lineSeries);
     if(!impl.IsMarkersVisible()) continue;
 
-    const auto& points = impl.GetValues();
-    if(points.empty()) continue;
+    const auto& rawPoints = impl.GetValues();
+    if(rawPoints.empty()) continue;
+
+    const size_t   maxPts    = static_cast<size_t>(scale.GetPlotArea().width) * 2u;
+    const PointVec decimated = (maxPts > 0u && rawPoints.size() > maxPts)
+                                 ? DecimateMinMax(rawPoints, maxPts)
+                                 : PointVec{};
+    const auto&    points    = decimated.empty() ? rawPoints : decimated;
 
     auto markerShape = Dali::CanvasRenderer::Shape::New();
     markerShape.SetFillColor(impl.GetMarkerColor());
@@ -810,6 +874,9 @@ void DataRenderer::RenderBars(Dali::CanvasRenderer::DrawableGroup&    group,
 
     const auto& pts = GetImplementation(model.mSeriesList[idx]).GetValues();
 
+    auto barsShape = Dali::CanvasRenderer::Shape::New();
+    barsShape.SetFillColor(color);
+
     for(const auto& pt : pts)
     {
       if(std::isnan(pt.second)) continue;
@@ -820,14 +887,12 @@ void DataRenderer::RenderBars(Dali::CanvasRenderer::DrawableGroup&    group,
 
       if(std::abs(topCY - baseCY) < 0.5f) continue;
 
-      auto bar = Dali::CanvasRenderer::Shape::New();
       if(pt.second >= 0.0f)
-        bar.AddRect(Rect<float>(barLeft, topCY, singleW, baseCY - topCY), Vector2::ZERO);
+        barsShape.AddRect(Rect<float>(barLeft, topCY, singleW, baseCY - topCY), Vector2::ZERO);
       else
-        bar.AddRect(Rect<float>(barLeft, baseCY, singleW, topCY - baseCY), Vector2::ZERO);
-      bar.SetFillColor(color);
-      group.AddDrawable(bar);
+        barsShape.AddRect(Rect<float>(barLeft, baseCY, singleW, topCY - baseCY), Vector2::ZERO);
     }
+    group.AddDrawable(barsShape);
     ++k;
   }
 }

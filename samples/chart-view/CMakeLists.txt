@@ -31,9 +31,13 @@ IF(NOT WIN32)
   IF(HAVE_NO_UNUSED_CONST_VARIABLE)
     SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-const-variable)
   ENDIF()
-  CHECK_CXX_COMPILER_FLAG(-Wno-unused-command-line-argument HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT)
-  IF(HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT)
-    SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-command-line-argument)
+  # -Wno-unused-command-line-argument is Clang-only; GCC treats it as an
+  # unknown option which becomes a fatal error under -Werror.
+  IF(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
+    CHECK_CXX_COMPILER_FLAG(-Wno-unused-command-line-argument HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT)
+    IF(HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT)
+      SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-command-line-argument)
+    ENDIF()
   ENDIF()
 ENDIF()
 
@@ -75,3 +79,4 @@ ENDMACRO()
 
 ADD_CHART_VIEW_SAMPLE(chart-view.example    chart-view-example.cpp)
 ADD_CHART_VIEW_SAMPLE(chart-gallery.example chart-gallery.cpp)
+ADD_CHART_VIEW_SAMPLE(chart-memory-probe    chart-memory-probe.cpp)

@@ -68,14 +68,19 @@ ChartView chart = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f))
 
 // 차트 구성
 chart.SetTitle("Monthly Revenue");
-chart.SetXAxis(ChartAxis::New()
-    .SetTitle("Month")
-    .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
-chart.SetYAxis(ChartAxis::New()
-    .SetTitle("Amount (USD)"));
-chart.AddSeries(LineSeries::New()
-    .SetName("Revenue")
-    .SetValues({120.0f, 190.0f, 150.0f, 250.0f, 210.0f, 280.0f}));
+ChartAxis xAxis = ChartAxis::New();
+xAxis.SetTitle("Month");
+xAxis.SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"});
+chart.SetXAxis(xAxis);
+
+ChartAxis yAxis = ChartAxis::New();
+yAxis.SetTitle("Amount (USD)");
+chart.SetYAxis(yAxis);
+
+LineSeries series = LineSeries::New();
+series.SetName("Revenue");
+series.SetValues({120.0f, 190.0f, 150.0f, 250.0f, 210.0f, 280.0f});
+chart.AddSeries(series);
 
 // 속성으로 그리드 및 범례 활성화
 chart.SetProperty(ChartView::Property::SHOW_GRID, true);
@@ -93,7 +98,7 @@ chart.SetLayoutParams(AbsoluteLayoutParams::New()
 AbsoluteLayout root = AbsoluteLayout::New();
 root.SetRequestedWidth(MATCH_PARENT);
 root.SetRequestedHeight(MATCH_PARENT);
-root.AddChildren({chart});
+root.Add(chart);
 window.Add(root);
 ```
 
@@ -240,19 +245,20 @@ series.SetZIndex(10);   // 값이 높을수록 Z값이 낮은 시리즈 위에 �
 ### 전체 예제
 
 ```cpp
-chart.AddSeries(LineSeries::New()
-    .SetName("Sales")
-    .SetColor(Vector4(0.2f, 0.6f, 1.0f, 1.0f))
-    .SetValues({50.0f, 80.0f, 60.0f, 100.0f, 70.0f})
-    .SetLineWidth(2.5f)
-    .SetSmoothness(0.5f)
-    .SetMarkersVisible(true)
-    .SetMarkerShape(LineSeries::MarkerShape::DIAMOND)
-    .SetMarkerRadius(5.0f)
-    .SetFillEnabled(true)
-    .SetFillColor(Vector4(0.2f, 0.6f, 1.0f, 0.2f))
-    .SetDataLabelsVisible(true)
-    .SetDataLabelFormat("%.0f"));
+LineSeries sales = LineSeries::New();
+sales.SetName("Sales");
+sales.SetColor(Vector4(0.2f, 0.6f, 1.0f, 1.0f));
+sales.SetValues({50.0f, 80.0f, 60.0f, 100.0f, 70.0f});
+sales.SetLineWidth(2.5f);
+sales.SetSmoothness(0.5f);
+sales.SetMarkersVisible(true);
+sales.SetMarkerShape(LineSeries::MarkerShape::DIAMOND);
+sales.SetMarkerRadius(5.0f);
+sales.SetFillEnabled(true);
+sales.SetFillColor(Vector4(0.2f, 0.6f, 1.0f, 0.2f));
+sales.SetDataLabelsVisible(true);
+sales.SetDataLabelFormat("%.0f");
+chart.AddSeries(sales);
 ```
 
 <br/>
@@ -268,36 +274,37 @@ chart.AddSeries(LineSeries::New()
 ### 기본 바 차트
 
 ```cpp
-chart.AddSeries(BarSeries::New()
-    .SetColor(Vector4(0.39f, 0.58f, 0.93f, 1.0f))
-    .SetDataLabelsVisible(true)
-    .SetName("Revenue")
-    .SetValues({320.0f, 410.0f, 380.0f, 450.0f}));
+BarSeries revenue = BarSeries::New();
+revenue.SetColor(Vector4(0.39f, 0.58f, 0.93f, 1.0f));
+revenue.SetDataLabelsVisible(true);
+revenue.SetName("Revenue");
+revenue.SetValues({320.0f, 410.0f, 380.0f, 450.0f});
+chart.AddSeries(revenue);
 
-chart.AddSeries(BarSeries::New()
-    .SetColor(Vector4(1.0f, 0.39f, 0.28f, 1.0f))
-    .SetDataLabelsVisible(true)
-    .SetName("Cost")
-    .SetValues({210.0f, 250.0f, 230.0f, 280.0f}));
-
-// 주의: 메서드 체인에서 파생 클래스 세터(SetColor, SetStacked 등)를
-// 기본 ChartSeries 세터(SetName, SetValues) 보다 먼저 호출하세요.
+BarSeries cost = BarSeries::New();
+cost.SetColor(Vector4(1.0f, 0.39f, 0.28f, 1.0f));
+cost.SetDataLabelsVisible(true);
+cost.SetName("Cost");
+cost.SetValues({210.0f, 250.0f, 230.0f, 280.0f});
+chart.AddSeries(cost);
 ```
 
 ### 누적 바
 
 ```cpp
-chart.AddSeries(BarSeries::New()
-    .SetColor(Vector4(0.39f, 0.58f, 0.93f, 1.0f))
-    .SetStacked(true)
-    .SetName("Base")
-    .SetValues({200.0f, 240.0f, 220.0f, 270.0f}));
+BarSeries base = BarSeries::New();
+base.SetColor(Vector4(0.39f, 0.58f, 0.93f, 1.0f));
+base.SetStacked(true);
+base.SetName("Base");
+base.SetValues({200.0f, 240.0f, 220.0f, 270.0f});
+chart.AddSeries(base);
 
-chart.AddSeries(BarSeries::New()
-    .SetColor(Vector4(0.24f, 0.70f, 0.44f, 1.0f))
-    .SetStacked(true)
-    .SetName("Add-on")
-    .SetValues({80.0f, 110.0f, 90.0f, 130.0f}));
+BarSeries addon = BarSeries::New();
+addon.SetColor(Vector4(0.24f, 0.70f, 0.44f, 1.0f));
+addon.SetStacked(true);
+addon.SetName("Add-on");
+addon.SetValues({80.0f, 110.0f, 90.0f, 130.0f});
+chart.AddSeries(addon);
 ```
 
 > 💡 **팁**: 누적 바와 그룹 바는 동일한 차트 안에서 공존할 수 있습니다. `SetStacked(true)`인 시리즈는 누적되고, `SetStacked(false)`(기본값)인 시리즈는 자신만의 그룹 슬롯을 차지합니다.
@@ -408,19 +415,21 @@ chart.SetProperty(ChartView::Property::SHOW_GRID, true);
 chart.SetProperty(ChartView::Property::SHOW_LEGEND, true);
 
 // SetValues는 (x, y) 쌍의 벡터를 받음
-chart.AddSeries(ScatterSeries::New()
-    .SetName("Group A")
-    .SetColor(Vector4(0.39f, 0.58f, 0.93f, 1.0f))
-    .SetMarkerShape(ScatterSeries::MarkerShape::CIRCLE)
-    .SetMarkerRadius(7.0f)
-    .SetValues({{0.5f, 30.0f}, {1.8f, 55.0f}, {3.2f, 45.0f}, {4.1f, 80.0f}}));
+ScatterSeries groupA = ScatterSeries::New();
+groupA.SetName("Group A");
+groupA.SetColor(Vector4(0.39f, 0.58f, 0.93f, 1.0f));
+groupA.SetMarkerShape(ScatterSeries::MarkerShape::CIRCLE);
+groupA.SetMarkerRadius(7.0f);
+groupA.SetValues({{0.5f, 30.0f}, {1.8f, 55.0f}, {3.2f, 45.0f}, {4.1f, 80.0f}});
+chart.AddSeries(groupA);
 
-chart.AddSeries(ScatterSeries::New()
-    .SetName("Group B")
-    .SetColor(Vector4(1.0f, 0.39f, 0.28f, 1.0f))
-    .SetMarkerShape(ScatterSeries::MarkerShape::DIAMOND)
-    .SetMarkerRadius(10.0f)
-    .SetValues({{1.0f, 70.0f}, {2.5f, 40.0f}, {3.8f, 90.0f}, {5.0f, 25.0f}}));
+ScatterSeries groupB = ScatterSeries::New();
+groupB.SetName("Group B");
+groupB.SetColor(Vector4(1.0f, 0.39f, 0.28f, 1.0f));
+groupB.SetMarkerShape(ScatterSeries::MarkerShape::DIAMOND);
+groupB.SetMarkerRadius(10.0f);
+groupB.SetValues({{1.0f, 70.0f}, {2.5f, 40.0f}, {3.8f, 90.0f}, {5.0f, 25.0f}});
+chart.AddSeries(groupB);
 ```
 
 | `MarkerShape` | 설명 |
@@ -705,11 +714,11 @@ chart.SetUpdateThrottle(0.0f);
 
 ```cpp
 // 나중에 AppendValue를 호출하기 위해 참조 보관
-LineSeries liveSeries = LineSeries::New()
-    .SetName("Temperature")
-    .SetColor(Vector4(1.0f, 0.4f, 0.2f, 1.0f))
-    .SetMaxDataPoints(120)
-    .SetMarkersVisible(false);
+LineSeries liveSeries = LineSeries::New();
+liveSeries.SetName("Temperature");
+liveSeries.SetColor(Vector4(1.0f, 0.4f, 0.2f, 1.0f));
+liveSeries.SetMaxDataPoints(120);
+liveSeries.SetMarkersVisible(false);
 
 chart.AddSeries(liveSeries);
 chart.SetUpdateThrottle(50.0f);   // 초당 최대 20회 갱신
@@ -1027,7 +1036,7 @@ chart.SetLayoutParams(AbsoluteLayoutParams::New()
 AbsoluteLayout root = AbsoluteLayout::New();
 root.SetRequestedWidth(MATCH_PARENT);
 root.SetRequestedHeight(MATCH_PARENT);
-root.AddChildren({chart});
+root.Add(chart);
 window.Add(root);
 ```
 

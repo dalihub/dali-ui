@@ -102,6 +102,51 @@ ChartViewImpl::ChartViewImpl(Ui::ChartView::Type type, const Vector2& size)
 
 ChartViewImpl::~ChartViewImpl()
 {
+  // Stop timers first so no callbacks fire after destruction begins.
+  if(mUpdateThrottleTimer)
+  {
+    mUpdateThrottleTimer.Stop();
+  }
+  if(mAnimTimer)
+  {
+    mAnimTimer.Stop();
+  }
+
+  // Explicitly disconnect signals on external objects (series, axes).
+  // mModel members are still valid here (member destructors run after this body).
+  // ViewImpl inherits ConnectionTrackerInterface, not ConnectionTracker, so
+  // auto-disconnect on destruction is not guaranteed for externally-owned signals.
+  for(auto& s : mModel.mSeriesList)
+  {
+    GetImplementation(s).DataChangedSignal().Disconnect(this, &ChartViewImpl::OnSeriesDataChanged);
+  }
+  if(mModel.mXAxis)
+  {
+    GetImplementation(mModel.mXAxis).ConfigChangedSignal().Disconnect(this, &ChartViewImpl::OnAxisConfigChanged);
+  }
+  if(mModel.mYAxis)
+  {
+    GetImplementation(mModel.mYAxis).ConfigChangedSignal().Disconnect(this, &ChartViewImpl::OnAxisConfigChanged);
+  }
+
+  // Release Handle references so refcounts drop.
+  // Do NOT call Self() here — the CustomActorImpl base is already in
+  // teardown; Self() triggers DALI_ASSERT_ALWAYS in that state.
+  // The Actor tree cleanup (children removed) is handled automatically
+  // by the Actor's own destructor after this runs.
+  mBackgroundCanvas.Reset();
+  mDataCanvas.Reset();
+  mOverlayCanvas.Reset();
+
+  mTitleLabel.Reset();
+  mXAxisTitleLabel.Reset();
+  mYAxisTitleLabel.Reset();
+  mTooltipLabel.Reset();
+
+  mXTickLabels.clear();
+  mYTickLabels.clear();
+  mLegendLabels.clear();
+  mDataLabels.clear();
 }
 
 Ui::ChartView ChartViewImpl::New(Ui::ChartView::Type type, const Vector2& size)
@@ -1439,13 +1484,30 @@ Ui::Label ChartViewImpl::GetOrCreateLabel(std::vector<Ui::Label>& pool, size_t i
 
 void ChartViewImpl::HideExcessLabels(std::vector<Ui::Label>& pool, size_t usedCount)
 {
+  if(usedCount >= pool.size()) return;
+
+  Actor self = Self();
   for(size_t i = usedCount; i < pool.size(); ++i)
   {
     if(pool[i])
     {
-      pool[i].SetProperty(Actor::Property::VISIBLE, false);
+      self.Remove(pool[i]);
     }
   }
+  pool.erase(pool.begin() + static_cast<ptrdiff_t>(usedCount), pool.end());
+}
+
+void ChartViewImpl::ClearLabelPool(std::vector<Ui::Label>& pool)
+{
+  Actor self = Self();
+  for(auto& label : pool)
+  {
+    if(label)
+    {
+      self.Remove(label);
+    }
+  }
+  pool.clear();
 }
 
 // =============================================================================
