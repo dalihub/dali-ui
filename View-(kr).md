@@ -116,12 +116,10 @@ Selection | `view.AsSelectable()` | View의 clicked interaction을 트리거로 
 <ins>Interactive 예제</ins>
 
 ```cpp
-view.AsInteractive([&](InteractiveTrait trait)
+InteractiveTrait interactive = view.AsInteractive();
+interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& e)
 {
-  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& e)
-  {
-    // 클릭됨 (터치 탭 또는 실행키 누름)
-  });
+  // 클릭됨 (터치 탭 또는 실행키 누름)
 });
 ```
 

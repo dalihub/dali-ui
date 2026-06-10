@@ -24,10 +24,10 @@
 12. [시그널](#12-시그널)
 13. [애니메이션](#13-애니메이션)
 14. [게이지](#14-게이지)
-15. [메서드 체이닝](#15-메서드-체이닝)
-16. [레이아웃 통합](#16-레이아웃-통합)
-17. [CMake 통합](#17-cmake-통합)
-18. [기본값](#18-기본값)
+15. [레이아웃 통합](#15-레이아웃-통합)
+16. [CMake 통합](#16-cmake-통합)
+17. [기본값](#17-기본값)
+18. [주요 참고사항](#18-주요-참고사항)
 19. [주요 참고사항](#19-주요-참고사항)
 
 ---
@@ -66,16 +66,16 @@ using namespace Dali::Ui;
 // 명시적 크기로 LINE 차트 생성
 ChartView chart = ChartView::New(ChartView::Type::LINE, Vector2(480.0f, 360.0f));
 
-// 메서드 체이닝으로 차트 구성
-chart.SetTitle("Monthly Revenue")
-     .SetXAxis(ChartAxis::New()
-         .SetTitle("Month")
-         .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}))
-     .SetYAxis(ChartAxis::New()
-         .SetTitle("Amount (USD)"))
-     .AddSeries(LineSeries::New()
-         .SetName("Revenue")
-         .SetValues({120.0f, 190.0f, 150.0f, 250.0f, 210.0f, 280.0f}));
+// 차트 구성
+chart.SetTitle("Monthly Revenue");
+chart.SetXAxis(ChartAxis::New()
+    .SetTitle("Month")
+    .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
+chart.SetYAxis(ChartAxis::New()
+    .SetTitle("Amount (USD)"));
+chart.AddSeries(LineSeries::New()
+    .SetName("Revenue")
+    .SetValues({120.0f, 190.0f, 150.0f, 250.0f, 210.0f, 280.0f}));
 
 // 속성으로 그리드 및 범례 활성화
 chart.SetProperty(ChartView::Property::SHOW_GRID, true);
@@ -90,10 +90,10 @@ chart.SetLayoutParams(AbsoluteLayoutParams::New()
     .SetX(20.0f).SetY(60.0f)
     .SetWidth(480.0f).SetHeight(360.0f));
 
-AbsoluteLayout root = AbsoluteLayout::New()
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(MATCH_PARENT)
-    .Children({chart});
+AbsoluteLayout root = AbsoluteLayout::New();
+root.SetRequestedWidth(MATCH_PARENT);
+root.SetRequestedHeight(MATCH_PARENT);
+root.AddChildren({chart});
 window.Add(root);
 ```
 
@@ -1008,60 +1008,7 @@ gauge.AddGaugeRange(50.0f, 100.0f, Vector4(1.0f, 0.3f, 0.3f, 1.0f));
 
 ---
 
-## 15. 메서드 체이닝
-
-`ChartView`, `LineSeries`, `BarSeries`, `PieSeries`, `ScatterSeries`, `ChartAxis`, `ChartSection`의 모든 세터 메서드는 객체에 대한 참조를 반환하여 유연한 메서드 체이닝이 가능합니다.
-
-> 💡 **체이닝 순서 규칙**: 파생 클래스 세터(`SetColor`, `SetSmoothness`, `SetStacked` 등)는 기본 `ChartSeries` 세터(`SetName`, `SetValues`, `SetZIndex`) **보다 먼저** 호출해야 합니다. 기본 클래스 메서드는 `ChartSeries&`를 반환하므로 파생 클래스 메서드를 노출하지 않습니다.
-
-### 시리즈 구성
-
-```cpp
-// 시리즈 설정을 체인으로 연결하고 인라인으로 추가
-chart.AddSeries(LineSeries::New()
-    .SetName("Revenue")
-    .SetColor(Vector4(0.2f, 0.6f, 1.0f, 1.0f))
-    .SetSmoothness(0.65f)
-    .SetMarkersVisible(true)
-    .SetMarkerShape(LineSeries::MarkerShape::CIRCLE)
-    .SetValues({120.0f, 190.0f, 150.0f, 250.0f, 220.0f, 280.0f}));
-```
-
-### ChartView 구성
-
-`ChartView` 세터도 `ChartView&`를 반환합니다:
-
-```cpp
-chart.SetTitle("Monthly Sales")
-     .SetAnimationDuration(300.0f)
-     .SetAnimationEasing(ChartView::EasingType::EASE_OUT)
-     .SetZoomMode(static_cast<int>(ChartView::ZoomMode::PAN_X));
-
-chart.SetXAxis(ChartAxis::New()
-    .SetTitle("Month")
-    .SetLabels({"Jan", "Feb", "Mar", "Apr", "May", "Jun"}));
-```
-
-### 레이아웃 빌더 체이닝
-
-레이아웃 컨테이너도 동일한 유연한 패턴을 사용합니다:
-
-```cpp
-AbsoluteLayout root = AbsoluteLayout::New()
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(MATCH_PARENT)
-    .Children({chart});
-
-chart.SetLayoutParams(AbsoluteLayoutParams::New()
-    .SetX(20.0f).SetY(60.0f)
-    .SetWidth(480.0f).SetHeight(360.0f));
-```
-
-<br/>
-
----
-
-## 16. 레이아웃 통합
+## 15. 레이아웃 통합
 
 `ChartView`는 `View`를 상속하며 dali-ui 레이아웃 시스템과 완전히 통합됩니다.
 
@@ -1077,10 +1024,10 @@ chart.SetLayoutParams(AbsoluteLayoutParams::New()
     .SetWidth(480.0f)
     .SetHeight(360.0f));
 
-AbsoluteLayout root = AbsoluteLayout::New()
-    .SetRequestedWidth(MATCH_PARENT)
-    .SetRequestedHeight(MATCH_PARENT)
-    .Children({chart});
+AbsoluteLayout root = AbsoluteLayout::New();
+root.SetRequestedWidth(MATCH_PARENT);
+root.SetRequestedHeight(MATCH_PARENT);
+root.AddChildren({chart});
 window.Add(root);
 ```
 
@@ -1122,7 +1069,7 @@ rootLayout.Add(chart);
 
 ---
 
-## 17. CMake 통합
+## 16. CMake 통합
 
 `CMakeLists.txt`에 다음을 추가하세요:
 
@@ -1164,7 +1111,7 @@ target_compile_options(my-chart-app PRIVATE
 
 ---
 
-## 18. 기본값
+## 17. 기본값
 
 ### ChartView (StyleConfig 기본값)
 
@@ -1226,7 +1173,7 @@ target_compile_options(my-chart-app PRIVATE
 
 ---
 
-## 19. 주요 참고사항
+## 18. 주요 참고사항
 
 - **`UiComponentConfig`는 필수입니다.** `dali-ui-components`를 사용할 때는 `Application::MainLoop()` 전에 `UiComponentConfig::New().Apply()`를 호출해야 합니다. `UiConfig`만으로는 충분하지 않습니다. [Configuration](Configuration.md)을 참조하세요.
 

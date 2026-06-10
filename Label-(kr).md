@@ -93,44 +93,48 @@ Label은 style object를 통해 underline, shadow, outline, line-through, bevel 
 
 ~~~cpp
 // Underline
-Label label = Label::New("Underline")
-  .SetUnderline(Text::Underline());
+Label label = Label::New("Underline");
+label.SetUnderline(Text::Underline());
 
 // Dashed underline with color
-Label label2 = Label::New("Dashed")
-  .SetUnderline(
-    Text::Underline()
-      .SetColor(UiColor(0x0088FF))
-      .SetThickness(2.0f)
-      .SetType(Text::Underline::Type::DASHED)
-      .SetDashLength(4.0f)
-      .SetDashGap(4.0f));
+Text::Underline underline;
+underline.SetColor(UiColor(0x0088FF));
+underline.SetThickness(2.0f);
+underline.SetType(Text::Underline::Type::DASHED);
+underline.SetDashLength(4.0f);
+underline.SetDashGap(4.0f);
+
+Label label2 = Label::New("Dashed");
+label2.SetUnderline(underline);
 
 // Shadow
-Label label3 = Label::New("Shadow")
-  .SetShadow(
-    Text::Shadow()
-      .SetColor(UiColor(0xFF5500))
-      .SetOffset(Vector2(3.0f, 3.0f))
-      .SetBlurRadius(2.0f));
+Text::Shadow shadow;
+shadow.SetColor(UiColor(0xFF5500));
+shadow.SetOffset(Vector2(3.0f, 3.0f));
+shadow.SetBlurRadius(2.0f);
+
+Label label3 = Label::New("Shadow");
+label3.SetShadow(shadow);
 
 // Outline
-Label label4 = Label::New("Outline")
-  .SetOutline(
-    Text::Outline()
-      .SetColor(UiColor(0x0066FF))
-      .SetWidth(2.0f));
+Text::Outline outline;
+outline.SetColor(UiColor(0x0066FF));
+outline.SetWidth(2.0f);
+
+Label label4 = Label::New("Outline");
+label4.SetOutline(outline);
 
 // LineThrough
-Label label5 = Label::New("Strikethrough")
-  .SetLineThrough(
-    Text::LineThrough()
-      .SetColor(UiColor(0xFF00FF))
-      .SetThickness(3.0f));
+Text::LineThrough lineThrough;
+lineThrough.SetColor(UiColor(0xFF00FF));
+lineThrough.SetThickness(3.0f);
+
+Label label5 = Label::New("Strikethrough");
+label5.SetLineThrough(lineThrough);
 
 // Text background color
-Label label6 = Label::New("Highlighted")
-  .SetTextBackgroundColor(UiColor(0xFFFF00));
+Label label6 = Label::New("Highlighted");
+label6.SetTextBackgroundColor(UiColor(0xFFFF00));
 ~~~
 
 참고 샘플:

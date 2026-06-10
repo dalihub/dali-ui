@@ -247,14 +247,13 @@ view.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
 
 ```cpp
 View view = View::New();
-view.AsInteractive([&](InteractiveTrait trait) {
-  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
-    // 클릭됨 (터치 탭 또는 실행키 Enter)
-  });
+InteractiveTrait interactive = view.AsInteractive();
+interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+  // 클릭됨 (터치 탭 또는 실행키 Enter)
 });
 ```
 
-설정이 필요 없는 경우 콜백 없이 `view.AsInteractive()`만 호출해도 됩니다.
+설정이 필요 없는 경우 `view.AsInteractive()`만 호출하고 반환된 trait을 무시해도 됩니다.
 
 <br/>
 
@@ -274,11 +273,11 @@ bool MyKeyPredicate(const Dali::String& keyName)
   return keyName == "Return" || keyName == "KP_Enter";
 }
 
-UiConfig::New()
-  .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)   // 키를 뗄 때 클릭 시그널 발동
-  .SetExecutionKeyPredicate(MyKeyPredicate)        // Return, KP_Enter를 클릭 키로 인식
-  .SetKeyLongPressThreshold(3)                     // 키 pressed 이벤트가 3회 이상 연속 감지되면 롱프레스로 인식
-  .Apply();
+UiConfig config = UiConfig::New();
+config.SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);   // 키를 뗄 때 클릭 시그널 발동
+config.SetExecutionKeyPredicate(MyKeyPredicate);        // Return, KP_Enter를 클릭 키로 인식
+config.SetKeyLongPressThreshold(3);                     // 키 pressed 이벤트가 3회 이상 연속 감지되면 롱프레스로 인식
+config.Apply();
 ```
 
 > [!WARNING]

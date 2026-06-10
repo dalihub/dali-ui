@@ -251,14 +251,13 @@ Even without `InteractiveView`, you can give any `View` the same interaction cap
 
 ```cpp
 View view = View::New();
-view.AsInteractive([&](InteractiveTrait trait) {
-  trait.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
-    // Clicked (via touch tap or execution key Enter)
-  });
+InteractiveTrait interactive = view.AsInteractive();
+interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event) {
+  // Clicked (via touch tap or execution key Enter)
 });
 ```
 
-If no configuration is needed, simply call `view.AsInteractive()` without a callback.
+If no configuration is needed, simply call `view.AsInteractive()` and ignore the returned trait.
 
 <br/>
 
@@ -278,11 +277,11 @@ bool MyKeyPredicate(const Dali::String& keyName)
   return keyName == "Return" || keyName == "KP_Enter";
 }
 
-UiConfig::New()
-  .SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE)   // Fire clicked signal when the key is released
-  .SetExecutionKeyPredicate(MyKeyPredicate)        // Treat Return and KP_Enter as click keys
-  .SetKeyLongPressThreshold(3)                     // Recognize as long-press when 3+ consecutive key-pressed events are detected
-  .Apply();
+UiConfig config = UiConfig::New();
+config.SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);   // Fire clicked signal when the key is released
+config.SetExecutionKeyPredicate(MyKeyPredicate);        // Treat Return and KP_Enter as click keys
+config.SetKeyLongPressThreshold(3);                     // Recognize as long-press when 3+ consecutive key-pressed events are detected
+config.Apply();
 ```
 
 > [!WARNING]

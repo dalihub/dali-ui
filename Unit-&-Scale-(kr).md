@@ -21,11 +21,11 @@ dali-ui는 다양한 화면 밀도(DPI)를 가진 디바이스에서 일관된 U
 ScalingFactor는 [Configuration](https://github.sec.samsung.net/NUI/dali-ui/wiki/Configuration-(kr)#configuration-options)에서 설정합니다.
 
 ```cpp
-UiConfig::New()
-  .SetScalingFactor(1.5f)
-  .SetDpi(320)
-  .SetBaselineDpi(160)
-  .Apply();
+UiConfig config = UiConfig::New();
+config.SetScalingFactor(1.5f);
+config.SetDpi(320);
+config.SetBaselineDpi(160);
+config.Apply();
 ```
 
 위 설정에서 각 단위의 변환 예시:

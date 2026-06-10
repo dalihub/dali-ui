@@ -68,9 +68,9 @@ int lineCount = label.GetLineCount(300.0f);
 The default mode can be set through `UiConfig`:
 
 ~~~cpp
-UiConfig::New()
-  .SetTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT)
-  .Apply();
+UiConfig config = UiConfig::New();
+config.SetTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT);
+config.Apply();
 ~~~
 
 Each text view can also be configured directly:

@@ -120,15 +120,13 @@ predefined 상태들은 시스템이 자동으로 관리합니다.
 view.SetEnabled(false);
 
 // PSEUDO_DISABLED
-view.AsInteractive([](InteractiveTrait& t) {
-  t.SetPseudoDisabled(true);
-});
+InteractiveTrait interactive = view.AsInteractive();
+interactive.SetPseudoDisabled(true);
 
 // SELECTED (클릭 시 토글)
-view.AsSelectable([](SelectableTrait& t) {
-  t.SetSelected(true);
-  t.EnableToggleByClick(true);
-});
+SelectableTrait selectable = view.AsSelectable();
+selectable.SetSelected(true);
+selectable.EnableToggleByClick(true);
 ```
 
 <br/>
