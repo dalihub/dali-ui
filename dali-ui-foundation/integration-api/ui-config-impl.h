@@ -427,6 +427,16 @@ public:
   bool IsLabelAsyncRendering() const;
 
   /**
+   * @copydoc UiConfig::SetViewInitializer
+   */
+  void SetViewInitializer(ViewInitializer initializer);
+
+  /**
+   * @copydoc UiConfig::GetViewInitializer
+   */
+  ViewInitializer GetViewInitializer() const;
+
+  /**
    * @brief Called after this config is applied via UiConfig::Apply().
    *
    * Derived config implementations override this to register themselves
@@ -474,6 +484,7 @@ private:
   Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
 
   ExecutionKeyPredicate     mExecutionKeyPredicate;
+  ViewInitializer           mViewInitializer;
   Vector4                   mDefaultTextColor;
   Vector4                   mDefaultPlaceholderTextColor;
   float                     mScalingFactor;

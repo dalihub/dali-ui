@@ -21,6 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
 {
@@ -283,6 +284,23 @@ void UiConfig::SetLabelAsyncRendering(bool asyncRendering)
 bool UiConfig::IsLabelAsyncRendering() const
 {
   return GetImpl(*this).IsLabelAsyncRendering();
+}
+
+void UiConfig::SetViewInitializer(ViewInitializer initializer)
+{
+  GetImpl(*this).SetViewInitializer(initializer);
+}
+
+ViewInitializer UiConfig::GetViewInitializer() const
+{
+  return GetImpl(*this).GetViewInitializer();
+}
+
+void UiConfig::DefaultViewInitializer(View view)
+{
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  view.SetProperty(Actor::Property::POSITION_USES_PIVOT, false);
 }
 
 } // namespace Ui

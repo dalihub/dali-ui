@@ -33,6 +33,7 @@ namespace Dali
 {
 namespace Ui
 {
+class View;
 
 /**
  * @brief Function pointer type for determining whether a key triggers click execution.
@@ -41,6 +42,13 @@ namespace Ui
  * @return True if the key should trigger click execution
  */
 using ExecutionKeyPredicate = bool (*)(const Dali::String& keyName);
+
+/**
+ * @brief Function pointer type for initializing View defaults.
+ *
+ * @param[in] view The View to initialize
+ */
+using ViewInitializer = void (*)(View view);
 
 namespace Integration
 {
@@ -562,6 +570,30 @@ public: // Properties
    * @return True if asynchronous rendering is enabled for Label by default
    */
   bool IsLabelAsyncRendering() const;
+
+  /**
+   * @brief Sets the initializer called from ViewImpl::OnInitialize().
+   *
+   * The initializer is called for every View after the internal child-order
+   * tracking signal has been connected. Passing @c nullptr restores the
+   * default initializer.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] initializer The view initializer function
+   */
+  void SetViewInitializer(ViewInitializer initializer);
+
+  /**
+   * @brief Retrieves the initializer called from ViewImpl::OnInitialize().
+   *
+   * @return The current view initializer function pointer
+   */
+  ViewInitializer GetViewInitializer() const;
+
+  /**
+   * @brief The default View initializer.
+   */
+  static void DefaultViewInitializer(View view);
 
 public: // Not intended for Application developers
   /**

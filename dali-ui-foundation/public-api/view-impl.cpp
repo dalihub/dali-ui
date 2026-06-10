@@ -321,10 +321,6 @@ ViewImpl::~ViewImpl()
 
 void ViewImpl::OnInitialize()
 {
-  Self().SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-  Self().SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-  Self().SetProperty(Actor::Property::POSITION_USES_PIVOT, false);
-
   DevelActor::ChildOrderChangedSignal(Self()).Connect(this, &ViewImpl::OnChildOrderChanged);
 }
 
@@ -2166,6 +2162,16 @@ void ViewImpl::Initialize()
 
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
+
+  auto uiConfigManager = Integration::UiConfigManager::Get();
+  if(uiConfigManager.IsInitialized())
+  {
+    uiConfigManager.GetConfig().GetViewInitializer()(View::DownCast(Self()));
+  }
+  else
+  {
+    UiConfig::DefaultViewInitializer(View::DownCast(Self()));
+  }
 }
 
 void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
