@@ -476,11 +476,18 @@ public:
    * every intermediate container. A descendant that has its own transition
    * stops the scope at that boundary (it governs its own children).
    *
-   * @note Affects the CHANGE slot only; ENTER and EXIT stay scoped to the
-   * direct parent. Inherited descendants use @c LayoutChangeCause::OTHER
-   * (or @c WINDOW_RESIZED during a window resize) to resolve their timing,
-   * so configure a default CHANGE timing or animator for @c SUBTREE to take
-   * effect. The scope does not cross a standalone layout-mode boundary.
+   * @note Applies to CHANGE, and to ENTER / EXIT when the owner carries the
+   * corresponding slot effect: a child added under a no-transition descendant
+   * fires the owner's ENTER, and a child removed via @c View::RemoveChild /
+   * @c RemoveAllChildren fires the owner's EXIT (raw @c Actor::Remove that
+   * bypasses the View remove API is not deferred). The effect is sourced from
+   * this owner while geometry and the EXIT ghost use the child's real direct
+   * parent. The closest transition-bearing ancestor wins (a descendant with its
+   * own transition governs its own subtree). Inherited descendants use
+   * @c LayoutChangeCause::OTHER (or @c WINDOW_RESIZED during a window resize)
+   * for CHANGE timing, so configure a default CHANGE timing or animator for
+   * @c SUBTREE CHANGE to take effect. The scope does not cross a standalone
+   * layout-mode boundary.
    *
    * @param[in] scope The reflow scope to apply
    * @return Reference to this for chaining

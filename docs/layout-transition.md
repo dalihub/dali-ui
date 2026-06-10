@@ -157,11 +157,17 @@ scope stops at that boundary (no double animation).
 
 Notes and limits:
 
-- Applies to the **CHANGE slot only**. ENTER and EXIT stay scoped to the
-  direct parent.
+- Applies to **CHANGE**, and to **ENTER / EXIT** when the owner carries the
+  corresponding slot effect: a child added under a no-transition descendant
+  fires the owner's ENTER, and a child removed via `View::RemoveChild` /
+  `RemoveAllChildren` fires the owner's EXIT. Raw `Actor::Remove` (bypassing the
+  View remove API) is **not** deferred. The effect is sourced from the owner
+  while geometry and the EXIT ghost use the child's real direct parent. The
+  closest transition-bearing ancestor wins, so a descendant with its own
+  transition governs its own subtree.
 - Inherited descendants resolve their CHANGE timing with cause `OTHER` (or
   `WINDOW_RESIZED` during a window resize), so configure a **default** CHANGE
-  timing or animator for `SUBTREE` to take effect. Cause-specific timing
+  timing or animator for `SUBTREE` CHANGE to take effect. Cause-specific timing
   (`REORDERED`, `SIBLING_*`) is honoured only for direct children.
 - `SUBTREE` does not cross a standalone layout-mode boundary.
 - Each governed descendant is interpolated between its old and new arranged

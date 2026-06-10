@@ -30,6 +30,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-validation.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
@@ -454,7 +455,7 @@ void LayoutTransitionDispatcher::CaptureGovernedChildren(ViewImpl*              
   for(auto& childView : children)
   {
     ViewImpl& childImpl = GetImpl(childView);
-    out.push_back({&childImpl, parent, VisualBoundsOf(parent, &childImpl)});
+    out.push_back({&childImpl, parent, VisualBoundsOf(parent, &childImpl), !childImpl.IsInitialLayoutDone()});
 
     // Under SUBTREE scope, descend into descendants the owner governs: those
     // with no transition of their own (a child with its own transition
@@ -627,6 +628,28 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
   const bool optInOnInitialMount  = GetImpl(transition).GetEnterOnInitialMount();
   const bool suppressInitialEnter = wasInitialMount && !optInOnInitialMount;
 
+  // Children freshly added under a no-transition descendant since the last pass
+  // are registered as inherited-ENTER candidates by NotifyChildAdded. They are
+  // ALSO captured in this snapshot (with their pre-arrange bounds), but they
+  // must be dispatched as ENTER by DispatchPendingInheritedEnters below — never
+  // as a spurious CHANGE (their captured "from" predates the arrange) and never
+  // as an initial-mount seed. Collect them so the inherited branch skips them.
+  std::unordered_set<ViewImpl*> pendingInheritedEnterChildren;
+  {
+    auto pendIt = mPendingInheritedEnters.find(root);
+    if(pendIt != mPendingInheritedEnters.end())
+    {
+      for(const PendingInheritedEnter& rec : pendIt->second)
+      {
+        Ui::View recChild = rec.child.GetHandle();
+        if(recChild)
+        {
+          pendingInheritedEnterChildren.insert(&GetImpl(recChild));
+        }
+      }
+    }
+  }
+
   for(const CapturedBounds& cap : snapshot)
   {
     ViewImpl* child  = cap.child;
@@ -636,19 +659,62 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
       continue;
     }
 
-    // SUBTREE-scope inherited descendant (not a direct child of the owner):
-    // CHANGE slot only. ENTER/EXIT remain governed by the descendant's own
-    // direct parent (Phase 1). For a direct child @c parent == @c root and
-    // this branch is skipped, so the existing per-child logic runs unchanged.
+    // SUBTREE-scope inherited descendant (not a direct child of the owner).
+    // This per-pass branch handles the descendant's CHANGE and, on the owner's
+    // first arrange with SetEnterOnInitialMount(true), seeds its ENTER. Runtime
+    // ENTER (a child added later) is dispatched by DispatchPendingInheritedEnters
+    // from records registered in NotifyChildAdded, and inherited EXIT is routed
+    // at remove time by ViewImpl::RemoveChild. For a direct child @c parent ==
+    // @c root and this branch is skipped, so the existing per-child logic runs
+    // unchanged.
     if(parent != root)
     {
+      // A fresh inherited add (recorded by NotifyChildAdded) is dispatched as
+      // ENTER by DispatchPendingInheritedEnters below; skip it here so it is
+      // neither mis-dispatched as a CHANGE (its captured "from" predates the
+      // arrange) nor double-fired by the initial-mount seed.
+      if(pendingInheritedEnterChildren.count(child) > 0)
+      {
+        continue;
+      }
       // Owner's first arrange (initial mount): the actor is already at its
       // final arranged bounds. Starting a CHANGE here would animate the
       // grand-child from its pre-arrange (zero) bounds while the surface is
-      // typically still off screen — mirror the direct-child initial-mount
-      // suppression. Opt back in via SetEnterOnInitialMount(true).
-      if(suppressInitialEnter)
+      // typically still off screen. By default suppress (mirror direct-child
+      // initial-mount suppression). With SetEnterOnInitialMount(true), seed an
+      // inherited ENTER instead so the opt-in launch animation reaches deep
+      // descendants present at the owner's first arrange — event-based ENTER
+      // records only later adds, never pre-existing children, so this seed is
+      // the only path that fires ENTER for them.
+      if(wasInitialMount)
       {
+        if(suppressInitialEnter)
+        {
+          // Suppress the launch ENTER on the owner's first arrange, but still
+          // settle a declarative ENTER spec to its final values — same contract
+          // as the direct-child path (SetEnterOnInitialMount docs). Without this
+          // a grand-child pre-set to a fade-in start (e.g. opacity 0) stays
+          // there forever. SettleInitialEnter skips animator mode.
+          SettleInitialEnter(child, transition);
+          continue;
+        }
+        if(GetImpl(transition).HasEnterFx() && mPendingExits.count(child) == 0)
+        {
+          auto       seedExitIt   = mActiveAnimators.find(child);
+          const bool seedExitBusy = seedExitIt != mActiveAnimators.end() &&
+                                    seedExitIt->second.slot == LayoutTransitionSlot::EXIT;
+          if(!seedExitBusy)
+          {
+            if(GetImpl(transition).HasEnterAnimator())
+            {
+              StartAnimatorEnter(child, VisualBoundsOf(parent, child), transition);
+            }
+            else
+            {
+              StartEnterTransition(child, transition);
+            }
+          }
+        }
         continue;
       }
       if(mPendingExits.count(child) > 0)
@@ -665,6 +731,29 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
       const LayoutRect inheritedTo   = VisualBoundsOf(parent, child);
       if(BoundsApproxEqual(inheritedFrom, inheritedTo))
       {
+        continue;
+      }
+      // A freshly-added inherited grand-child (never arranged before this pass)
+      // has a degenerate pre-arrange "from"; animating a CHANGE from there would
+      // slide/grow it from nothing. This is reachable when the child's
+      // inherited-ENTER candidate was dropped before this pass (e.g. the owner's
+      // transition was detached then re-attached, emptying the skip-set), so the
+      // child is no longer skipped above. Settle to the arranged bounds without
+      // animation instead of firing a spurious CHANGE. (The owner's own first
+      // arrange is already handled by the wasInitialMount branch above; this
+      // also hardens any other drop path — reparent / governance change /
+      // EXIT-in-flight — against the same zero-from artifact.)
+      if(cap.freshChild)
+      {
+        // Snap geometry to the arranged bounds (no zero-from animation) AND
+        // settle the declarative ENTER spec to its final values: the dropped
+        // candidate was an inherited ENTER, and SettleChangeWithoutAnimation
+        // writes only POSITION/SIZE, so without SettleInitialEnter a grand-child
+        // pre-set to a fade-in start (e.g. opacity 0) would stay invisible
+        // forever. SettleInitialEnter skips animator mode (the application owns
+        // those property writes) and no-ops when the owner has no ENTER spec.
+        SettleChangeWithoutAnimation(child, inheritedTo);
+        SettleInitialEnter(child, transition);
         continue;
       }
       // WINDOW_RESIZED is a per-pass global flag and is honoured here
@@ -737,6 +826,22 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
       continue;
     }
 
+    // Same per-child freshness guard as the inherited branch: a fresh direct
+    // child (never arranged) reaches the CHANGE branch only when it is neither
+    // in enterChildren nor seeded — e.g. added to an already-laid-out owner that
+    // had no transition at add time, then SetLayoutTransition (the catch-up seed
+    // is gated on !mInitialLayoutDone), or detach -> add -> reattach. Its "from"
+    // is a degenerate pre-arrange zero, so animating a CHANGE would slide/grow it
+    // from nothing. Owner-keyed wasInitialMount does NOT cover this child (it is
+    // keyed on the owner's first arrange, not per-child). Settle geometry and the
+    // declarative ENTER spec instead of firing a spurious CHANGE.
+    if(cap.freshChild)
+    {
+      SettleChangeWithoutAnimation(child, to);
+      SettleInitialEnter(child, transition);
+      continue;
+    }
+
     // Cause precedence (deterministic):
     //   REORDERED > SIBLING_ADDED > SIBLING_REMOVED > WINDOW_RESIZED > OTHER
     // hadSiblingAdd / hadSiblingRemove are per-parent flags; every CHANGE
@@ -784,6 +889,135 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
     else
     {
       StartChangeTransition(child, from, to, transition, cause);
+    }
+  }
+
+  // Inherited (SUBTREE-scope) ENTER: dispatch any candidates registered by
+  // NotifyChildAdded for this owner since the last pass (re-validated inside).
+  DispatchPendingInheritedEnters(root, suppressInitialEnter);
+}
+
+void LayoutTransitionDispatcher::NotifyChildAdded(ViewImpl* directParent, Ui::View child)
+{
+  if(!directParent || !child)
+  {
+    return;
+  }
+  // Walk up from the (no-transition) direct parent to the closest ancestor
+  // SUBTREE owner with an ENTER effect. Returns nullptr when a closer
+  // transition claims the child, a standalone boundary intervenes, or no such
+  // owner exists — in which case there is nothing to record.
+  ViewImpl* owner = FindGoverningSubtreeOwner(directParent, ReflowSlot::ENTER);
+  if(!owner)
+  {
+    return;
+  }
+  Ui::View directParentView = Ui::View::DownCast(directParent->Self());
+  if(!directParentView)
+  {
+    return;
+  }
+  PendingInheritedEnter record;
+  record.directParent = WeakHandle<Ui::View>(directParentView);
+  record.child        = WeakHandle<Ui::View>(child);
+  mPendingInheritedEnters[owner].push_back(std::move(record));
+}
+
+void LayoutTransitionDispatcher::ClearPendingInheritedEnters(ViewImpl* owner)
+{
+  mPendingInheritedEnters.erase(owner);
+}
+
+void LayoutTransitionDispatcher::DispatchPendingInheritedEnters(ViewImpl* owner, bool suppressInitialEnter)
+{
+  auto it = mPendingInheritedEnters.find(owner);
+  if(it == mPendingInheritedEnters.end())
+  {
+    return;
+  }
+
+  // Move the records out and erase the map slot before iterating: the
+  // StartEnter* helpers fire OnStart synchronously, which may mutate the tree
+  // (and this map) re-entrantly.
+  std::vector<PendingInheritedEnter> records = std::move(it->second);
+  mPendingInheritedEnters.erase(it);
+
+  // Owner must still govern inherited ENTER (it may have detached / changed
+  // scope / cleared the ENTER effect since the add). This runs BEFORE the
+  // initial-mount handling because the suppress path still needs the owner's
+  // transition to settle declarative specs.
+  Ui::LayoutTransition ownerTransition = owner->GetLayoutTransition();
+  if(!ownerTransition)
+  {
+    return; // detached since the add — drop the candidates
+  }
+  LayoutTransitionImpl& ownerImpl = GetImpl(ownerTransition);
+  if(ownerImpl.GetReflowScope() != LayoutReflowScope::SUBTREE || !ownerImpl.HasEnterFx())
+  {
+    return; // owner no longer governs inherited ENTER — drop the candidates
+  }
+  const bool ownerHasEnterAnimator = ownerImpl.HasEnterAnimator();
+
+  for(PendingInheritedEnter& record : records)
+  {
+    Ui::View childView  = record.child.GetHandle();
+    Ui::View parentView = record.directParent.GetHandle();
+    if(!childView || !parentView)
+    {
+      continue; // child or its direct parent destroyed since the add
+    }
+    ViewImpl* childImpl  = &GetImpl(childView);
+    ViewImpl* parentImpl = &GetImpl(parentView);
+
+    // Re-validate current parentage and governance: transition replace on the
+    // owner is tolerated (owner state was re-checked above), but a reparent, a
+    // remove, or an intervening transition added higher up since the add must
+    // drop the candidate.
+    if(!ChildStillPresent(parentImpl, childImpl))
+    {
+      continue;
+    }
+    if(FindGoverningSubtreeOwner(parentImpl, ReflowSlot::ENTER) != owner)
+    {
+      continue;
+    }
+
+    // EXIT precedence: never start OR settle ENTER on a child whose EXIT is in
+    // flight (a blind settle here would corrupt the fading ghost's visual state).
+    if(mPendingExits.count(childImpl) > 0)
+    {
+      continue;
+    }
+    auto activeIt = mActiveAnimators.find(childImpl);
+    if(activeIt != mActiveAnimators.end() && activeIt->second.slot == LayoutTransitionSlot::EXIT)
+    {
+      continue;
+    }
+
+    if(suppressInitialEnter)
+    {
+      // Owner's first arrange: suppress the launch ENTER but still settle a
+      // declarative ENTER spec to its final values (same contract as the
+      // direct-child path). SettleInitialEnter skips animator mode, so an
+      // animator-only owner correctly settles nothing. Re-validation above
+      // ensures we never settle onto a since-reparented or removed child.
+      SettleInitialEnter(childImpl, ownerTransition);
+      continue;
+    }
+
+    // Dispatch using the child's REAL direct parent frame (INV-GEOMETRY): the
+    // owner supplies only the spec / animator / timing. StartEnterTransition
+    // self-derives the parent from the actor, and the animator path is given
+    // VisualBoundsOf(directParent, child) — not the owner/root — so RTL
+    // mirroring and parent-fraction effects anchor to the intermediate
+    // container.
+    if(ownerHasEnterAnimator)
+    {
+      StartAnimatorEnter(childImpl, VisualBoundsOf(parentImpl, childImpl), ownerTransition);
+    }
+    else
+    {
+      StartEnterTransition(childImpl, ownerTransition);
     }
   }
 }
@@ -1608,12 +1842,19 @@ bool LayoutTransitionDispatcher::HasActiveAnimators() const
   return !mActiveAnimators.empty();
 }
 
-void LayoutTransitionDispatcher::ScheduleExit(ViewImpl* parent, Ui::View child)
+void LayoutTransitionDispatcher::ScheduleExit(ViewImpl* parent, Ui::View child, ViewImpl* transitionOwner)
 {
   if(!parent || !child)
   {
     return;
   }
+
+  // @p parent is the child's direct (visual) parent — bounds frame, ghost
+  // host, and unparent target. The EXIT effect is sourced from @c owner,
+  // which is an ancestor for SUBTREE-scope inherited EXIT and equals @p parent
+  // for a direct EXIT (transitionOwner == nullptr), so existing 2-arg call
+  // sites behave identically.
+  ViewImpl* owner = transitionOwner ? transitionOwner : parent;
 
   ViewImpl* childImpl = &GetImpl(child);
 
@@ -1631,7 +1872,7 @@ void LayoutTransitionDispatcher::ScheduleExit(ViewImpl* parent, Ui::View child)
     }
   }
 
-  Ui::LayoutTransition transition   = parent->GetLayoutTransition();
+  Ui::LayoutTransition transition   = owner->GetLayoutTransition();
   Ui::View             parentHandle = Ui::View::DownCast(parent->Self());
 
   // Fallback: no transition or no EXIT spec → unparent immediately. Also
@@ -1805,6 +2046,49 @@ void LayoutTransitionDispatcher::OnViewDestroyed(ViewImpl* view)
   CancelPendingExit(view);
   CancelActiveAnimator(view);
 
+  // Inherited EXIT: the destroyed view may be the GHOST'S DIRECT (visual)
+  // parent — the intermediate container — rather than the exiting child
+  // itself. The common on-scene case self-heals (destroying the container
+  // scene-disconnects the ghost child, which reaches OnViewDestroyed as the
+  // child key above), but an off-scene destroy of the container would leave
+  // the entry — keyed by child, holding a now-stale parent weak handle —
+  // dangling until the animation finished, firing OnFinished on a child whose
+  // visual parent is gone. Cancel any pending-exit / EXIT-animator whose
+  // visual parent resolves to the destroyed view. Cancellation is silent per
+  // the lifecycle contract, and Cancel* is idempotent, so a later
+  // child-keyed OnViewDestroyed on the same ghost is a no-op.
+  std::vector<ViewImpl*> orphanedPendingExits;
+  for(auto& entry : mPendingExits)
+  {
+    Ui::View ghostParent = entry.second.parent.GetHandle();
+    if(ghostParent && &GetImpl(ghostParent) == view)
+    {
+      orphanedPendingExits.push_back(entry.first);
+    }
+  }
+  for(ViewImpl* child : orphanedPendingExits)
+  {
+    CancelPendingExit(child);
+  }
+
+  std::vector<ViewImpl*> orphanedExitAnimators;
+  for(auto& entry : mActiveAnimators)
+  {
+    if(entry.second.slot != LayoutTransitionSlot::EXIT)
+    {
+      continue;
+    }
+    Ui::View ghostParent = entry.second.parentRef.GetHandle();
+    if(ghostParent && &GetImpl(ghostParent) == view)
+    {
+      orphanedExitAnimators.push_back(entry.first);
+    }
+  }
+  for(ViewImpl* child : orphanedExitAnimators)
+  {
+    CancelActiveAnimator(child);
+  }
+
   mCaptured.erase(view);
   mInitialMountViews.erase(view);
   // Drop captured entries that reference the destroyed view as either the
@@ -1819,6 +2103,25 @@ void LayoutTransitionDispatcher::OnViewDestroyed(ViewImpl* view)
                              [view](const CapturedBounds& cb)
     { return cb.child == view || cb.parent == view; }),
               vec.end());
+  }
+
+  // Inherited ENTER candidates: drop the whole list when the destroyed view is
+  // the governing OWNER (the map key), and prune records that reference the
+  // destroyed view as child or direct parent. Records whose weak handles have
+  // already expired are caught by the dispatch-time re-validation, so this is a
+  // best-effort proactive cleanup that bounds growth and avoids stale handles.
+  mPendingInheritedEnters.erase(view);
+  for(auto& entry : mPendingInheritedEnters)
+  {
+    auto& records = entry.second;
+    records.erase(std::remove_if(records.begin(), records.end(),
+                                 [view](const PendingInheritedEnter& r)
+    {
+      Ui::View c = r.child.GetHandle();
+      Ui::View p = r.directParent.GetHandle();
+      return (c && &GetImpl(c) == view) || (p && &GetImpl(p) == view);
+    }),
+                  records.end());
   }
 }
 

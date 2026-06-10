@@ -139,11 +139,11 @@ public:
   /**
    * @brief Schedules an EXIT-slot transition (forwarded from ViewImpl::RemoveChild).
    */
-  void ScheduleLayoutExit(ViewImpl* parent, Ui::View child)
+  void ScheduleLayoutExit(ViewImpl* parent, Ui::View child, ViewImpl* transitionOwner)
   {
     if(mTransitionDispatcher)
     {
-      mTransitionDispatcher->ScheduleExit(parent, child);
+      mTransitionDispatcher->ScheduleExit(parent, child, transitionOwner);
     }
   }
 
@@ -160,6 +160,22 @@ public:
     if(mTransitionDispatcher)
     {
       mTransitionDispatcher->OnChildReparented(child);
+    }
+  }
+
+  void NotifyChildAdded(ViewImpl* directParent, Ui::View child)
+  {
+    if(mTransitionDispatcher)
+    {
+      mTransitionDispatcher->NotifyChildAdded(directParent, child);
+    }
+  }
+
+  void ClearPendingInheritedEnters(ViewImpl* owner)
+  {
+    if(mTransitionDispatcher)
+    {
+      mTransitionDispatcher->ClearPendingInheritedEnters(owner);
     }
   }
 
@@ -570,14 +586,24 @@ void LayoutController::ProcessLayouts()
   mImpl->ProcessLayouts();
 }
 
-void LayoutController::ScheduleLayoutExit(ViewImpl* parent, Ui::View child)
+void LayoutController::ScheduleLayoutExit(ViewImpl* parent, Ui::View child, ViewImpl* transitionOwner)
 {
-  mImpl->ScheduleLayoutExit(parent, child);
+  mImpl->ScheduleLayoutExit(parent, child, transitionOwner);
 }
 
 void LayoutController::NotifyChildReparented(ViewImpl* child)
 {
   mImpl->NotifyChildReparented(child);
+}
+
+void LayoutController::NotifyChildAdded(ViewImpl* directParent, Ui::View child)
+{
+  mImpl->NotifyChildAdded(directParent, child);
+}
+
+void LayoutController::ClearPendingInheritedEnters(ViewImpl* owner)
+{
+  mImpl->ClearPendingInheritedEnters(owner);
 }
 
 Dali::Window LayoutController::GetCurrentWindow() const

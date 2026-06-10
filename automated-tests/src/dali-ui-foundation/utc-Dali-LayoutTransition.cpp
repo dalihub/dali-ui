@@ -3097,3 +3097,687 @@ int UtcDaliLayoutTransitionSubtreeInitialMountSuppressedP(void)
 
   END_TEST;
 }
+
+// ─── Reflow scope (SUBTREE) — inherited ENTER / EXIT and animator ──────────
+//
+// Under LayoutReflowScope::SUBTREE the owner's transition reaches not only
+// CHANGE but also ENTER (child added under a no-transition intermediate
+// container) and EXIT (child removed via View::RemoveChild), when the owner
+// carries the corresponding slot effect. The effect is sourced from the owner;
+// geometry and ghosting use the child's real direct parent.
+
+namespace
+{
+LayoutTransitionSlot gInhSlot     = LayoutTransitionSlot::CHANGE;
+bool                 gInhFromEqTo = false;
+uint32_t             gInhInvokes  = 0;
+
+void CaptureInheritedAnimator(const LayoutAnimatorContext& ctx)
+{
+  ++gInhInvokes;
+  gInhSlot     = ctx.slot;
+  gInhFromEqTo = (ctx.fromBounds.x == ctx.toBounds.x &&
+                  ctx.fromBounds.y == ctx.toBounds.y &&
+                  ctx.fromBounds.width == ctx.toBounds.width &&
+                  ctx.fromBounds.height == ctx.toBounds.height);
+}
+
+void ResetInherited()
+{
+  gInhSlot     = LayoutTransitionSlot::CHANGE;
+  gInhFromEqTo = false;
+  gInhInvokes  = 0;
+}
+} // namespace
+
+int UtcDaliLayoutTransitionSubtreeChangeAnimatorP(void)
+{
+  // Regression lock: CHANGE animator + SUBTREE reaches an inherited grand-child.
+  // The card (b) is fixed-size so only the grand-child (c) inside it moves, so
+  // any animator callback proves the inherited descendant was driven.
+  UiTestApplication application;
+  ResetInherited();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(a);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition, fixed size
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View d = View::New();
+  d.SetRequestedWidth(100.0f);
+  d.SetRequestedHeight(40.0f);
+  View c = View::New();
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(40.0f);
+  b.Add(d);
+  b.Add(c);
+  a.Add(b);
+
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     tA = LayoutTransition::New();
+  tA.SetChangeAnimator(LayoutAnimatorCallback::New(&CaptureInheritedAnimator), timing)
+    .SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+
+  // Shrink d so c slides up inside the fixed-size card; b itself does not move.
+  d.SetRequestedHeight(0.0f);
+
+  application.SendNotification();
+  application.Render(0);
+  application.Render(16);
+
+  DALI_TEST_CHECK(gInhInvokes > 0u);
+  DALI_TEST_EQUALS(static_cast<int>(gInhSlot),
+                   static_cast<int>(LayoutTransitionSlot::CHANGE), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterGrandChildP(void)
+{
+  // SUBTREE owner with an ENTER spec fires ENTER for a grand-child added at
+  // runtime under a no-transition intermediate container.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  a.Add(b);
+
+  LayoutTransition  tA        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  tA.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  g.SetProperty(Actor::Property::OPACITY, 0.0f);
+  b.Add(g);
+
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
+                   static_cast<int>(LayoutTransitionSlot::ENTER), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterAnimatorP(void)
+{
+  // SUBTREE owner with an ENTER animator drives a grand-child's inherited ENTER.
+  // ENTER context contract: slot==ENTER and fromBounds==toBounds.
+  UiTestApplication application;
+  ResetInherited();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  a.Add(b);
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     tA = LayoutTransition::New();
+  tA.SetEnterAnimator(LayoutAnimatorCallback::New(&CaptureInheritedAnimator), timing)
+    .SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(gInhInvokes > 0u);
+  DALI_TEST_EQUALS(static_cast<int>(gInhSlot),
+                   static_cast<int>(LayoutTransitionSlot::ENTER), TEST_LOCATION);
+  DALI_TEST_CHECK(gInhFromEqTo);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeExitGrandChildP(void)
+{
+  // SUBTREE owner with an EXIT spec defers a grand-child removed via the card's
+  // View::RemoveChild, firing EXIT and unparenting the ghost only when the
+  // animation finishes.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+  a.Add(b);
+
+  LayoutTransition  tA       = LayoutTransition::New();
+  ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.2f));
+  tA.SetExitVisualSpec(exitSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  // Remove the grand-child via the card's public RemoveChild — inherited EXIT.
+  b.RemoveChild(g);
+
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT), TEST_LOCATION);
+  // Ghost stays under its real direct parent (the card) during the EXIT.
+  DALI_TEST_CHECK(g.GetParent() == b);
+
+  // After the EXIT animation finishes the ghost is unparented.
+  application.Render(300);
+  application.SendNotification();
+  DALI_TEST_CHECK(!g.GetParent());
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterLateAttachNoSpuriousP(void)
+{
+  // INV-NO-STALE-ENTER: attaching a SUBTREE+ENTER transition to an already-laid-
+  // out owner must NOT retroactively fire ENTER for pre-existing descendants.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+  a.Add(b);
+
+  // Full initial layout BEFORE the transition exists.
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  // Now attach the SUBTREE+ENTER transition. Pre-existing b/g must not animate.
+  LayoutTransition  tA        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  tA.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterDirectParentPrecedenceP(void)
+{
+  // Direct-parent precedence: when the intermediate container has its own
+  // transition it is the closest owner, so an ancestor SUBTREE owner must NOT
+  // also fire ENTER for the grand-child. Only the ancestor carries OnStart, so
+  // a non-zero count would indicate the ancestor wrongly stole the ENTER.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL);
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  a.Add(b);
+
+  LayoutTransition  tA        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  tA.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  // b has its OWN transition (CHANGE-only, no OnStart) — it is the closest owner.
+  LayoutTransition tB = LayoutTransition::New();
+  tB.SetChangeTiming({Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()});
+  b.SetLayoutTransition(tB);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+
+  application.SendNotification();
+  application.Render(16);
+
+  // Ancestor 'a' must not fire ENTER — 'b' is the closest owner of g.
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterDirectChildrenScopeNoDeepN(void)
+{
+  // DIRECT_CHILDREN scope (default) must NOT reach a grand-child: deep ENTER
+  // requires SUBTREE.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  a.Add(b);
+
+  LayoutTransition  tA        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  tA.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::DIRECT_CHILDREN)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterInitialMountSettleP(void)
+{
+  // P1 regression guard (inherited): the inherited initial-mount ENTER is
+  // suppressed (no OnStart), but a declarative ENTER spec must still be SETTLED
+  // to its target — same contract as the direct-child path. A grand-child
+  // pre-set OPACITY=0 under a no-transition card, present at the SUBTREE owner's
+  // first arrange, must land at opacity 1.0 rather than staying invisible.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View g = View::New();
+  g.SetProperty(Actor::Property::OPACITY, 0.0f); // fade-in start
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+  a.Add(b);
+
+  LayoutTransition  tA        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  tA.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  // First arrange (initial mount) happens here.
+  application.GetWindow().Add(a);
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(50);
+  }
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION); // suppressed (no launch)
+  DALI_TEST_EQUALS(g.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterDetachReattachNoStaleP(void)
+{
+  // P2 regression guard: an inherited ENTER candidate recorded while the owner
+  // had a transition must NOT fire a stale ENTER after the owner's transition
+  // is detached and a new one re-attached — symmetric with the direct path.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  a.Add(b);
+
+  LayoutTransition  tA1        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec1 = ViewAnimationSpec::New();
+  enterSpec1.Opacity(1.0f, Duration(0.2f));
+  tA1.SetEnterVisualSpec(enterSpec1)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA1);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  // Add a grand-child on-window (records an inherited ENTER candidate), then
+  // detach the owner's transition before the next pass consumes it. Detach must
+  // clear the candidate.
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+  a.SetLayoutTransition(LayoutTransition());
+  ResetCaptures();
+
+  // Re-attach a fresh SUBTREE+ENTER transition; the pre-detach candidate must
+  // not surface as a stale ENTER.
+  LayoutTransition  tA2        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec2 = ViewAnimationSpec::New();
+  enterSpec2.Opacity(1.0f, Duration(0.2f));
+  tA2.SetEnterVisualSpec(enterSpec2)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA2);
+
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeExitAnimatorP(void)
+{
+  // Inherited EXIT via an owner EXIT animator: removing a grand-child through
+  // the card's RemoveChild drives the owner's EXIT animator (slot EXIT,
+  // fromBounds==toBounds).
+  UiTestApplication application;
+  ResetInherited();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+  a.Add(b);
+
+  LayoutAnimatorTiming timing{Duration(0.2f), AlphaFunction(AlphaFunction::LINEAR), Duration()};
+  LayoutTransition     tA = LayoutTransition::New();
+  tA.SetExitAnimator(LayoutAnimatorCallback::New(&CaptureInheritedAnimator), timing)
+    .SetReflowScope(LayoutReflowScope::SUBTREE);
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  b.RemoveChild(g);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(gInhInvokes > 0u);
+  DALI_TEST_EQUALS(static_cast<int>(gInhSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT), TEST_LOCATION);
+  DALI_TEST_CHECK(gInhFromEqTo);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeExitViaRemoveAllChildrenP(void)
+{
+  // Inherited EXIT via the card's RemoveAllChildren: every grand-child defers to
+  // the owner's EXIT spec, stays a ghost under its real direct parent, then
+  // unparents when the EXIT animation finishes.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View g1 = View::New();
+  g1.SetRequestedWidth(50.0f);
+  g1.SetRequestedHeight(50.0f);
+  View g2 = View::New();
+  g2.SetRequestedWidth(50.0f);
+  g2.SetRequestedHeight(50.0f);
+  b.Add(g1);
+  b.Add(g2);
+  a.Add(b);
+
+  LayoutTransition  tA       = LayoutTransition::New();
+  ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.2f));
+  tA.SetExitVisualSpec(exitSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  b.RemoveAllChildren();
+  application.SendNotification();
+  application.Render(16);
+
+  // Both grand-children fire the owner's EXIT and remain ghosts under b.
+  DALI_TEST_EQUALS(gOnStartInvokes, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT), TEST_LOCATION);
+  DALI_TEST_CHECK(g1.GetParent() == b);
+  DALI_TEST_CHECK(g2.GetParent() == b);
+
+  // After the EXIT animation finishes both are unparented from the card.
+  application.Render(300);
+  application.SendNotification();
+  DALI_TEST_CHECK(!g1.GetParent());
+  DALI_TEST_CHECK(!g2.GetParent());
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterInitialMountSettleSiteBP(void)
+{
+  // P1 Site-B coverage: an inherited ENTER candidate RECORDED on-window before
+  // the owner's first arrange (via NotifyChildAdded) must, under initial-mount
+  // suppression, be SETTLED to its target by DispatchPendingInheritedEnters
+  // (not dropped). Distinct from the Site-A test, where the grand-child is added
+  // off-window so no record exists.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  a.Add(b);
+
+  LayoutTransition  tA        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  tA.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  // Put a+b on-window with the transition already set, then add the grand-child
+  // BEFORE the first arrange so OnChildAdd(b) is on-window and records an
+  // inherited-ENTER candidate that reaches the Site-B suppress path.
+  application.GetWindow().Add(a);
+  View g = View::New();
+  g.SetProperty(Actor::Property::OPACITY, 0.0f);
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(50);
+  }
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION); // suppressed (no launch)
+  DALI_TEST_EQUALS(g.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionFreshDirectChildAddThenAttachP(void)
+{
+  // A fresh DIRECT child added to an ALREADY-laid-out parent that had no
+  // transition at add time, then SetLayoutTransition, must NOT fire a spurious
+  // zero-from CHANGE; its declarative ENTER spec settles to final without a
+  // launch animation (it is part of the parent's state at attach). Guards the
+  // direct-branch analogue of the inherited freshChild fix.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout p = StackLayout::New(StackOrientation::VERTICAL);
+  p.SetRequestedWidth(MATCH_PARENT);
+  p.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(p);
+  application.SendNotification();
+  application.Render(0); // p laid out, NO transition yet
+
+  View c = View::New();
+  c.SetProperty(Actor::Property::OPACITY, 0.0f);
+  c.SetRequestedWidth(100.0f);
+  c.SetRequestedHeight(50.0f);
+  p.Add(c); // fresh, never arranged, added while p has no transition
+
+  LayoutTransition  t         = LayoutTransition::New(); // default CHANGE timing enabled
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  t.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::DIRECT_CHILDREN)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  p.SetLayoutTransition(t);
+
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(50);
+  }
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION); // no spurious zero-from CHANGE
+  DALI_TEST_EQUALS(c.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeEnterDetachReattachSettlesOpacityP(void)
+{
+  // A grand-child added on-window under a no-transition card, whose inherited
+  // ENTER candidate is dropped by the owner's transition detach, must still
+  // have its declarative ENTER spec SETTLED (opacity -> 1.0) on reattach — not
+  // left stuck at its fade-in start — while firing no ENTER OnStart. Guards the
+  // freshChild fallback's spec-settle.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  a.Add(b);
+
+  LayoutTransition  tA1       = LayoutTransition::New();
+  ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
+  enterSpec.Opacity(1.0f, Duration(0.2f));
+  tA1.SetEnterVisualSpec(enterSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA1);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  View g = View::New();
+  g.SetProperty(Actor::Property::OPACITY, 0.0f);
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);                                  // records an inherited ENTER candidate
+  a.SetLayoutTransition(LayoutTransition()); // detach -> clears the candidate
+
+  LayoutTransition  tA2        = LayoutTransition::New();
+  ViewAnimationSpec enterSpec2 = ViewAnimationSpec::New();
+  enterSpec2.Opacity(1.0f, Duration(0.2f));
+  tA2.SetEnterVisualSpec(enterSpec2)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA2);
+
+  for(int i = 0; i < 10; ++i)
+  {
+    application.SendNotification();
+    application.Render(50);
+  }
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION); // no stale ENTER
+  DALI_TEST_EQUALS(g.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}

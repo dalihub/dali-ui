@@ -137,11 +137,17 @@ public: // Not intended for application developers
    * animator, or active bounds effect. The dispatcher fires the EXIT
    * animation and unparents the child only when the animation finishes.
    *
-   * @param[in] parent Parent ViewImpl that owns the EXIT transition
-   * @param[in] child  The child view to remove (kept alive by a strong ref
-   *                   inside the dispatcher until EXIT completes)
+   * @param[in] parent          The child's direct (visual) parent (ghost host
+   *                            / unparent target)
+   * @param[in] child           The child view to remove (kept alive by a
+   *                            strong ref inside the dispatcher until EXIT
+   *                            completes)
+   * @param[in] transitionOwner The view whose LayoutTransition drives the EXIT
+   *                            effect; @c nullptr means @p parent (direct EXIT).
+   *                            Differs from @p parent only for SUBTREE-scope
+   *                            inherited EXIT.
    */
-  DALI_INTERNAL void ScheduleLayoutExit(ViewImpl* parent, Ui::View child);
+  DALI_INTERNAL void ScheduleLayoutExit(ViewImpl* parent, Ui::View child, ViewImpl* transitionOwner = nullptr);
 
   /**
    * @brief Notifies the layout transition dispatcher that @p child was
@@ -156,6 +162,27 @@ public: // Not intended for application developers
    * @param[in] child The child view whose actor was just attached
    */
   DALI_INTERNAL void NotifyChildReparented(ViewImpl* child);
+
+  /**
+   * @brief Notifies the dispatcher that @p child was added under @p directParent,
+   * which has no LayoutTransition of its own, so an inherited (SUBTREE-scope)
+   * ENTER candidate can be registered against the closest governing ancestor.
+   *
+   * Called by @c ViewImpl::OnChildAdd. No-op when no ancestor SUBTREE owner with
+   * an ENTER effect governs the child.
+   *
+   * @param[in] directParent The child's direct (no-transition) parent
+   * @param[in] child         The freshly added child
+   */
+  DALI_INTERNAL void NotifyChildAdded(ViewImpl* directParent, Ui::View child);
+
+  /**
+   * @brief Drops inherited-ENTER candidates registered against @p owner in the
+   * dispatcher, called when @p owner detaches its LayoutTransition.
+   *
+   * @param[in] owner The view whose transition was just detached
+   */
+  DALI_INTERNAL void ClearPendingInheritedEnters(ViewImpl* owner);
   /// @endcond
 
 private:

@@ -52,6 +52,7 @@
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
@@ -1620,6 +1621,17 @@ void ViewImpl::SetLayoutTransition(LayoutTransition transition)
     mImpl->mPendingEnterChildren.clear();
     mImpl->mPendingReorderedChildren.clear();
     mImpl->mPendingChildRemovalForLayoutTransition = false;
+    // Symmetric with the direct markers above: drop any inherited-ENTER
+    // candidates this view owns in the dispatcher, so a detach -> reattach
+    // cycle does not surface a stale ENTER for a grand-child added under the
+    // old transition. The records live in the per-window dispatcher; an
+    // off-window view's records were already dropped by its scene-disconnect
+    // cleanup (OnViewDestroyed).
+    Window window = DevelWindow::Get(Self());
+    if(window)
+    {
+      LayoutController::Get(window).ClearPendingInheritedEnters(this);
+    }
     return;
   }
 
@@ -1762,28 +1774,28 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
 
 void ViewImpl::RemoveAllChildren()
 {
-  // If a LayoutTransition with an EXIT slot is attached, defer each child
-  // to the dispatcher so the EXIT animation plays — same semantics as
-  // RemoveChild for individual removes. Without this, RemoveAllChildren
-  // would silently bypass EXIT and the bulk remove would feel jarring.
+  // If an EXIT effect governs these children — either this view's own EXIT
+  // slot (direct EXIT) or, when this view has no EXIT slot, the closest
+  // ancestor SUBTREE owner with an EXIT effect (inherited EXIT) — defer each
+  // child to the dispatcher so the EXIT animation plays. Without this,
+  // RemoveAllChildren would silently bypass EXIT and the bulk remove would
+  // feel jarring.
+  //
+  // All direct children of this view share the same EXIT owner: it depends
+  // only on this view and the ancestor chain above it, not on the individual
+  // child, so a single resolution covers the whole bulk remove.
   Ui::LayoutTransition transition = mImpl->mLayoutTransition;
-  bool                 deferred   = false;
-  Dali::Window         window;
-  if(transition)
+  Dali::Window         window     = DevelWindow::Get(Self());
+  ViewImpl*            exitOwner  = nullptr;
+  if(window)
   {
-    auto&      impl      = Internal::GetImpl(transition);
-    const bool hasExitFx = static_cast<bool>(impl.GetExitVisualSpec()) || impl.HasExitAnimator() || impl.HasActiveExitBoundsEffect();
-    if(hasExitFx)
-    {
-      window = DevelWindow::Get(Self());
-      if(window)
-      {
-        deferred = true;
-      }
-    }
+    const bool selfHasExitFx = transition && Internal::GetImpl(transition).HasExitFx();
+    exitOwner                = selfHasExitFx
+                                 ? this
+                                 : Internal::FindGoverningSubtreeOwner(this, Internal::ReflowSlot::EXIT);
   }
 
-  if(deferred)
+  if(exitOwner)
   {
     // Snapshot first because ScheduleLayoutExit does not touch mChildren,
     // but we want subsequent layout passes to see an empty logical list so
@@ -1804,9 +1816,12 @@ void ViewImpl::RemoveAllChildren()
     // future address-reused child to be misclassified as REORDERED.
     mImpl->mPendingReorderedChildren.clear();
     // Bulk remove via deferred path — the dispatcher fires EXIT on every
-    // child so no siblings remain, but the marker keeps semantics
-    // consistent with the per-child path.
-    if(!snapshot.empty())
+    // child so no siblings remain, but the marker keeps semantics consistent
+    // with the per-child path. Set it only when THIS view owns a transition to
+    // consume it: for an inherited (ancestor-owned) EXIT this view may have no
+    // transition, and the marker — consumed only by a transition-bearing view's
+    // layout pass — would never be cleared and would mis-tag a future CHANGE.
+    if(transition && !snapshot.empty())
     {
       mImpl->mPendingChildRemovalForLayoutTransition = true;
     }
@@ -1815,7 +1830,7 @@ void ViewImpl::RemoveAllChildren()
     auto& controller = LayoutController::Get(window);
     for(auto& child : snapshot)
     {
-      controller.ScheduleLayoutExit(this, child);
+      controller.ScheduleLayoutExit(this, child, exitOwner);
     }
     return;
   }
@@ -1928,6 +1943,47 @@ void ViewImpl::RemoveChild(Ui::View child)
     {
       return;
     }
+
+    Actor      selfActor      = Self();
+    Window     window         = DevelWindow::Get(selfActor);
+    auto       it             = std::find(mImpl->mChildren.begin(), mImpl->mChildren.end(), child);
+    const bool isCurrentChild = (it != mImpl->mChildren.end());
+
+    // Inherited (SUBTREE-scope) EXIT: this view does not handle EXIT through
+    // its own transition (otherwise the deferred branch above would have run).
+    // Walk up to the closest ancestor SUBTREE owner that carries an EXIT
+    // effect; if found, defer the child to that owner. The actor stays under
+    // this view — the ghost's direct/visual parent — while the owner's
+    // transition drives the EXIT effect (INV-GHOST-UNDER-DIRECT-PARENT). The
+    // closest-owner / standalone-boundary rules are enforced inside the
+    // resolver, so a child claimed by a closer (non-SUBTREE or non-EXIT)
+    // transition is not stolen by an ancestor.
+    if(window && isCurrentChild)
+    {
+      ViewImpl* owner = Internal::FindGoverningSubtreeOwner(this, Internal::ReflowSlot::EXIT);
+      if(owner)
+      {
+        ViewImpl& childImpl = GetImpl(child);
+        mImpl->mChildren.Erase(it);
+        mImpl->mPendingEnterChildren.erase(&childImpl);
+        mImpl->mPendingReorderedChildren.erase(&childImpl);
+        // Remaining siblings under THIS direct parent reflow into the freed
+        // slot; tag their CHANGE as SIBLING_REMOVED on the next pass — but only
+        // when THIS view owns a transition to consume the marker. For an
+        // inherited EXIT this view may have no transition, and the marker —
+        // consumed only by a transition-bearing view's layout pass — would
+        // never be cleared and would mis-tag a future CHANGE if it later gains
+        // one.
+        if(transition)
+        {
+          mImpl->mPendingChildRemovalForLayoutTransition = true;
+        }
+        InvalidateMeasure();
+        LayoutController::Get(window).ScheduleLayoutExit(this, child, owner);
+        return;
+      }
+    }
+
     // Mark sibling removal for the next CHANGE pass when a transition is
     // attached (without an EXIT slot) AND we have a window. The
     // remaining children may reflow and should be tagged with
@@ -1936,9 +1992,7 @@ void ViewImpl::RemoveChild(Ui::View child)
     // cannot be consumed by the dispatcher in this pass (no layout
     // pass runs), so it would leak across a later add-to-window event
     // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
-    Actor selfActor = Self();
-    if(transition && DevelWindow::Get(selfActor) &&
-       std::find(mImpl->mChildren.begin(), mImpl->mChildren.end(), child) != mImpl->mChildren.end())
+    if(transition && window && isCurrentChild)
     {
       mImpl->mPendingChildRemovalForLayoutTransition = true;
     }
@@ -2602,7 +2656,20 @@ void ViewImpl::OnChildAdd(Actor& child)
       Window window = DevelWindow::Get(self);
       if(window)
       {
-        LayoutController::Get(window).NotifyChildReparented(&childImpl);
+        auto& controller = LayoutController::Get(window);
+        controller.NotifyChildReparented(&childImpl);
+
+        // Inherited (SUBTREE-scope) ENTER: when THIS view has no transition of
+        // its own, a child added here is not recorded for direct ENTER (the
+        // gate below requires this view's transition). Notify the dispatcher so
+        // it can walk up to the closest ancestor SUBTREE owner with an ENTER
+        // effect and register an inherited-ENTER candidate. When this view HAS
+        // a transition it is the closest owner and the direct path below claims
+        // the child, so the inherited walk is skipped here.
+        if(!mImpl->mLayoutTransition)
+        {
+          controller.NotifyChildAdded(this, view);
+        }
       }
     }
 

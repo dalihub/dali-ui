@@ -85,11 +85,18 @@ enum class LayoutChangeCause : uint8_t
  * transition becomes the closest ancestor for its own children, so a
  * @c SUBTREE scope does not cross it (no double animation).
  *
- * @note Applies to the CHANGE slot only. ENTER and EXIT remain scoped to the
- * direct parent. Inherited descendants resolve their CHANGE timing with
- * @c LayoutChangeCause::OTHER (or @c WINDOW_RESIZED during a window resize),
- * so a default CHANGE timing or animator should be configured for @c SUBTREE
- * to take effect. @c SUBTREE does not cross a standalone layout-mode boundary.
+ * @note Applies to CHANGE, and to ENTER / EXIT when the owner carries the
+ * corresponding slot effect: a child added under a no-transition descendant
+ * fires the owner's ENTER, and a child removed via @c View::RemoveChild /
+ * @c RemoveAllChildren fires the owner's EXIT (raw @c Actor::Remove that
+ * bypasses the View remove API is not deferred). The effect is sourced from the
+ * owner while geometry and the EXIT ghost use the child's real direct parent.
+ * The closest transition-bearing ancestor always wins, so a descendant with its
+ * own transition governs its own subtree. Inherited descendants resolve their
+ * CHANGE timing with @c LayoutChangeCause::OTHER (or @c WINDOW_RESIZED during a
+ * window resize), so a default CHANGE timing or animator should be configured
+ * for @c SUBTREE CHANGE to take effect. @c SUBTREE does not cross a standalone
+ * layout-mode boundary.
  */
 enum class LayoutReflowScope : uint8_t
 {

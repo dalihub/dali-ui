@@ -141,6 +141,20 @@ public:
   LayoutAnimatorCallback* GetExitAnimatorCallback();
   LayoutAnimatorCallback* GetChangeAnimatorCallback();
 
+  // ─── Composite slot-effect predicates ───────────────────────────────────
+
+  /// Whether the ENTER slot has any dispatchable effect: a visual spec, an
+  /// active (non-noop) bounds effect, or an animator. Used to decide whether
+  /// a SUBTREE owner should reach an inherited descendant's ENTER, and by
+  /// ViewImpl when deciding the ENTER path.
+  bool HasEnterFx() const;
+
+  /// Whether the EXIT slot has any dispatchable effect: a visual spec, an
+  /// active (non-noop) bounds effect, or an animator. Mirrors the inline
+  /// predicate ViewImpl::RemoveChild uses to decide deferral, and is reused
+  /// by the inherited (SUBTREE) EXIT routing.
+  bool HasExitFx() const;
+
   // ─── Composition options ────────────────────────────────────────────────
   void SetChangeOnWindowResize(bool enable);
   bool GetChangeOnWindowResize() const;

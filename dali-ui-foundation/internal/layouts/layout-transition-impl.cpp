@@ -297,6 +297,18 @@ LayoutAnimatorCallback* LayoutTransitionImpl::GetChangeAnimatorCallback()
   return mChangeAnimatorSet ? &mChangeAnimator : nullptr;
 }
 
+// ─── Composite slot-effect predicates ────────────────────────────────────────
+
+bool LayoutTransitionImpl::HasEnterFx() const
+{
+  return static_cast<bool>(mEnterVisualSpec) || HasActiveEnterBoundsEffect() || mEnterAnimatorSet;
+}
+
+bool LayoutTransitionImpl::HasExitFx() const
+{
+  return static_cast<bool>(mExitVisualSpec) || HasActiveExitBoundsEffect() || mExitAnimatorSet;
+}
+
 // ─── Composition options ─────────────────────────────────────────────────────
 
 void LayoutTransitionImpl::SetChangeOnWindowResize(bool enable)
