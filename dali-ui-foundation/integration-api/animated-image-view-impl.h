@@ -386,7 +386,7 @@ public: // Loading Status & Signals
    */
   Dali::Signal<void(Dali::Ui::View)>& AnimationFinishedSignal();
 
-private: // From ViewImpl
+protected: // From ViewImpl
   /**
    * @copydoc ViewImpl::OnInitialize
    */

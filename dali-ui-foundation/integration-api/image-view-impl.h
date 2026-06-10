@@ -316,7 +316,7 @@ public: // Loading Status
    */
   Ui::Visual::ResourceStatus GetLoadingStatus() const;
 
-private: // From ViewImpl
+protected: // From ViewImpl
   /**
    * @copydoc ViewImpl::OnInitialize
    */
