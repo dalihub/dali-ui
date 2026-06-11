@@ -34,6 +34,9 @@ using namespace Dali::Ui;
  *   - Tap "Toggle layout": flip the spacer + inner-item sizes.
  *   - Tap "Scope: ...": toggle the root transition between SUBTREE and
  *     DIRECT_CHILDREN.
+ *   - Tap "Add/Remove item": add or remove a magenta grand-child inside the
+ *     card. Under SUBTREE the root's inherited ENTER/EXIT animates it (opacity
+ *     fade + height expand/shrink); under DIRECT it snaps in/out (visible).
  *   - Up / Down keys: same as Toggle layout.
  *   - Esc / Back: quit.
  */
@@ -126,9 +129,10 @@ public:
                                   AlphaFunction(AlphaFunction::EASE_IN_OUT_SINE),
                                   Duration()};
 
-    // ENTER fades a newly added item in; EXIT fades a removed item out. Under
-    // SUBTREE scope these reach grand-children inside the no-transition card,
-    // all driven by this single root transition.
+    // ENTER fades a newly added item in (opacity 0->1) AND expands its height
+    // from 0 to full (ExpandFrom TOP); EXIT mirrors it (fade out + shrink to 0).
+    // Under SUBTREE scope these reach grand-children inside the no-transition
+    // card, all driven by this single root transition.
     ViewAnimationSpec enterSpec = ViewAnimationSpec::New();
     enterSpec.Opacity(1.0f, Duration(0.3f));
     ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
@@ -138,6 +142,10 @@ public:
     transition.SetChangeTiming(timing)
               .SetEnterVisualSpec(enterSpec)
               .SetExitVisualSpec(exitSpec)
+              .SetEnterBoundsEffect(LayoutBoundsEffects::ExpandFrom(
+                LayoutBoundsEdge::TOP, timing))
+              .SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
+                LayoutBoundsEdge::TOP, timing))
               .SetReflowScope(subtree ? LayoutReflowScope::SUBTREE
                                       : LayoutReflowScope::DIRECT_CHILDREN);
     return transition;
@@ -186,7 +194,9 @@ public:
     }
     // The card has NO transition of its own. Under SUBTREE scope the add /
     // remove of this grand-child is animated by the ROOT transition's ENTER /
-    // EXIT slot (fade in / out); under DIRECT scope it snaps.
+    // EXIT slot (opacity fade + height expand / shrink). Under DIRECT scope the
+    // grand-child is outside the root's governed set, so it snaps in / out
+    // instantly (visible, no animation).
     if(mExtraItem)
     {
       mCard.RemoveChild(mExtraItem); // inherited EXIT fades it out, then unparents
@@ -198,7 +208,14 @@ public:
       item.SetBackgroundColor(Color::MAGENTA);
       item.SetRequestedWidth(MATCH_PARENT);
       item.SetRequestedHeight(60.0f);
-      item.SetProperty(Actor::Property::OPACITY, 0.0f); // inherited ENTER fades from 0
+      if(mSubtree)
+      {
+        // SUBTREE: the root's inherited ENTER fades this grand-child from 0->1
+        // (and now expands its height). Pre-set opacity to 0 so the fade has a
+        // start value. Under DIRECT scope no inherited ENTER reaches this
+        // grand-child, so leave opacity at 1 and let it snap in visible.
+        item.SetProperty(Actor::Property::OPACITY, 0.0f);
+      }
       mCard.Add(item);
       mExtraItem = item;
     }
