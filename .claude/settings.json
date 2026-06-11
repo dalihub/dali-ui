@@ -1,9 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(GIT_SEQUENCE_EDITOR=: git rebase --autosquash HEAD~3)",
-      "Bash(git log:*)",
-      "Bash(git rm:*)"
-    ]
-  }
-}
