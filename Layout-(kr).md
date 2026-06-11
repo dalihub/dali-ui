@@ -26,10 +26,11 @@ Padding은 View의 **안쪽 여백**으로, View의 배경 영역과 자식 콘�
 
 ![layout-margin-padding](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/b0fa6f35-d006-4109-9261-0e3479e52808)
 
-`Extents`의 인자 순서는 **(top, right, bottom, left)** 입니다.
+`Extents`의 인자 순서는 **(start, end, top, bottom)** 입니다. `start`/`end`는 레이아웃 방향에 따라 결정되며, LTR에서는 각각 왼쪽/오른쪽입니다.
 
 ```cpp
-view.SetViewMargin(Extents(8_spx, 16_spx, 8_spx, 16_spx));   // 상하 8spx, 좌우 16spx
+// 인자 순서: Extents(start, end, top, bottom)
+view.SetViewMargin(Extents(4_spx, 8_spx, 12_spx, 16_spx));    // start 4, end 8, top 12, bottom 16
 view.SetViewPadding(Extents(12_spx, 12_spx, 12_spx, 12_spx)); // 사방 12spx
 ```
 

@@ -30,10 +30,12 @@ background boundary and its child content.
 
 ![layout-margin-padding](https://github.sec.samsung.net/NUI/dali-ui/assets/1000/b0fa6f35-d006-4109-9261-0e3479e52808)
 
-The `Extents` argument order is **(top, right, bottom, left)**.
+The `Extents` argument order is **(start, end, top, bottom)**. `start`/`end` are
+layout-direction aware; under LTR they map to left/right respectively.
 
 ```cpp
-view.SetViewMargin(Extents(8_spx, 16_spx, 8_spx, 16_spx));    // 8spx top/bottom, 16spx left/right
+// argument order: Extents(start, end, top, bottom)
+view.SetViewMargin(Extents(4_spx, 8_spx, 12_spx, 16_spx));    // start 4, end 8, top 12, bottom 16
 view.SetViewPadding(Extents(12_spx, 12_spx, 12_spx, 12_spx)); // 12spx on all sides
 ```
 
