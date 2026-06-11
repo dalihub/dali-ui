@@ -283,6 +283,8 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
+  UiConfig config = UiConfig::New();
+  config.Apply();
   ManualTestLauncher launcher(application);
   application.MainLoop();
   return 0;
