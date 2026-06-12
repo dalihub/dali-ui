@@ -16,11 +16,18 @@
 
 /**
  * @file  chart-memory-probe.cpp
- * @brief ChartView memory usage measurement sample app
+ * @brief ChartView memory & performance measurement sample app
  *
- * Runs 18 phases sequentially and measures /proc/self/status (VmRSS, VmHWM)
- * and mallinfo2 heap usage before and after each phase. Results are shown
- * in the right-side info panel and printed to stdout.
+ * Runs 18 phases sequentially and measures, before and after each phase:
+ *   - memory:      /proc/self/status (VmRSS, VmHWM) + mallinfo2 heap usage
+ *   - build time:  main-thread CPU time to create + configure the chart (ms)
+ *   - render time: wall-clock from build start until the GPU finishes the
+ *                  first frame containing the chart, via the DevelWindow
+ *                  frame-rendered callback
+ * Results are shown in the right-side info panel and printed to stdout.
+ *
+ * Note: build time is measured on the event thread and render time on the
+ * render thread. They are distinct numbers and must not be summed.
  *
  * Controls:
  *   [Next]  button / → / Enter — advance to next phase
@@ -33,6 +40,7 @@
  */
 
 #include <algorithm>
+#include <chrono>
 #include <cmath>
 #include <cstdio>
 #include <cstring>
@@ -47,8 +55,19 @@
 #include <dali-ui-components/public-api/ui-component-config.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
+#include <dali/devel-api/adaptor-framework/window-devel.h>
+#include <dali/public-api/signals/callback.h>
+
 using namespace Dali;
 using namespace Dali::Ui;
+
+using SteadyClock = std::chrono::steady_clock;
+
+// Elapsed milliseconds between two steady-clock time points.
+static double MsBetween(SteadyClock::time_point a, SteadyClock::time_point b)
+{
+  return std::chrono::duration<double, std::milli>(b - a).count();
+}
 
 // =============================================================================
 // MemSnapshot — /proc/self/status + mallinfo2
@@ -127,9 +146,10 @@ const float HEADER_H         = 40.0f;
 const float FOOTER_H         = 54.0f;
 const float BTN_W            = 120.0f;
 const float BTN_H            = 44.0f;
-const unsigned int SNAP_DELAY_MS = 48u;   // wait for render completion (~3 frames)
-const unsigned int LEAK_DELAY_MS = 32u;   // leak cycle interval
-const unsigned int AUTO_NEXT_MS  = 1200u; // delay between phases in auto mode
+const int          SNAP_FRAME_COUNT = 3;     // rendered frames to wait for buffer settle
+const unsigned int SNAP_FALLBACK_MS = 300u;  // safety net if frame callbacks never arrive
+const unsigned int LEAK_DELAY_MS    = 32u;   // leak cycle interval
+const unsigned int AUTO_NEXT_MS     = 1200u; // delay between phases in auto mode
 } // namespace
 
 // =============================================================================
@@ -189,6 +209,15 @@ private:
   int         mLeakCycleCount{0};
   MemSnapshot mLeakStartSnap;
   bool        mLeakRunning{false};
+
+  // ── performance timing ────────────────────────────────────────────────────
+  SteadyClock::time_point mBuildStart;          // captured before chart construction
+  double                  mBuildMs{0.0};        // main-thread build time
+  double                  mRenderMs{-1.0};      // -1 until frame-rendered callback fires
+  int32_t                 mFrameIdSeq{0};       // monotonic frame-callback id
+  int32_t                 mPendingFrameId{-1};  // id we are currently waiting on
+  int                     mFramesRemaining{0};  // rendered frames left before snapshot
+  bool                    mSnapPending{false};  // a snapshot is in flight
 
   // ── baseline / log ────────────────────────────────────────────────────────
   MemSnapshot              mBaseline;
@@ -409,21 +438,80 @@ private:
   // =========================================================================
   // Helper: snapshot after render completes
   // Measuring immediately after AddSeries() is inaccurate — CanvasView
-  // re-render buffers are allocated in subsequent frames, so we wait via
-  // Timer before taking the snapshot.
+  // re-render buffers are allocated in subsequent frames. We drive the
+  // snapshot off DevelWindow frame-rendered callbacks: the first callback
+  // gives the real time-to-rendered, and we wait SNAP_FRAME_COUNT frames so
+  // the rasterization buffers settle before reading memory. A fallback Timer
+  // guarantees completion if the graphics backend never delivers the
+  // callbacks (e.g. some desktop GL drivers).
   // =========================================================================
 
   void SnapAfterFrame(std::function<void(MemSnapshot)> cb)
   {
+    // Build just completed (this runs synchronously right after construction),
+    // so now() marks the end of the main-thread build work.
+    mBuildMs  = MsBetween(mBuildStart, SteadyClock::now());
+    mRenderMs = -1.0;
+
+    mSnapCallback    = std::move(cb);
+    mSnapPending     = true;
+    mFramesRemaining = SNAP_FRAME_COUNT;
+
+    RegisterFrameRenderedCallback();
+
+    // Safety net: snapshot anyway if frame-rendered callbacks never arrive.
     if(mSnapTimer) { mSnapTimer.Stop(); mSnapTimer.Reset(); }
-    mSnapCallback = std::move(cb);
-    mSnapTimer = Timer::New(SNAP_DELAY_MS);
+    mSnapTimer = Timer::New(SNAP_FALLBACK_MS);
     mSnapTimer.TickSignal().Connect(this, &MemProbeApp::OnSnapTimerTick);
     mSnapTimer.Start();
   }
 
+  void RegisterFrameRenderedCallback()
+  {
+    mPendingFrameId = ++mFrameIdSeq;
+    DevelWindow::AddFrameRenderedCallback(
+      mApp.GetWindow(),
+      MakeCallback(this, &MemProbeApp::OnFrameRendered),
+      mPendingFrameId);
+  }
+
+  // Frame-rendered callback (DevelWindow): fires when the graphics driver
+  // finishes rendering. The first one records the real time-to-rendered; we
+  // then wait a few more frames for buffer settle before snapshotting memory.
+  // Signature must be void(int32_t frameId).
+  void OnFrameRendered(int32_t frameId)
+  {
+    if(frameId != mPendingFrameId || !mSnapPending) return; // stale / already done
+
+    if(mRenderMs < 0.0)
+      mRenderMs = MsBetween(mBuildStart, SteadyClock::now());
+
+    if(--mFramesRemaining > 0)
+    {
+      RegisterFrameRenderedCallback(); // wait for buffers to settle
+      return;
+    }
+
+    FinishSnapshot();
+  }
+
   bool OnSnapTimerTick()
   {
+    FinishSnapshot(); // fallback path — frame callbacks did not complete in time
+    return false;     // fires once then stops
+  }
+
+  // Takes the memory snapshot and delivers it to the pending phase callback.
+  // Reached via either the frame-rendered path or the fallback Timer; guarded
+  // so it runs exactly once per phase.
+  void FinishSnapshot()
+  {
+    if(!mSnapPending) return;
+    mSnapPending    = false;
+    mPendingFrameId = -1; // ignore any further/stale frame callbacks
+
+    if(mSnapTimer) { mSnapTimer.Stop(); mSnapTimer.Reset(); }
+
     MemSnapshot snap = TakeSnapshot();
     auto cb = std::move(mSnapCallback);
     mSnapCallback = nullptr;
@@ -431,8 +519,19 @@ private:
 
     if(mAutoRunning && !mLeakRunning)
       ScheduleAutoNext();
+  }
 
-    return false; // fires once then stops
+  // Formats the build/render performance lines appended to each phase log.
+  std::string PerfLine() const
+  {
+    char buf[96];
+    if(mRenderMs >= 0.0)
+      std::snprintf(buf, sizeof(buf),
+        "\n  Build: %.2f ms\n  Rendered: %.2f ms", mBuildMs, mRenderMs);
+    else
+      std::snprintf(buf, sizeof(buf),
+        "\n  Build: %.2f ms\n  Rendered: n/a", mBuildMs);
+    return std::string(buf);
   }
 
   // =========================================================================
@@ -444,6 +543,7 @@ private:
   void PhaseCreateEmpty()
   {
     MemSnapshot before = TakeSnapshot();
+    mBuildStart        = SteadyClock::now();
 
     ChartView chart = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
@@ -469,6 +569,7 @@ private:
         CalcGpuTexKb(static_cast<int>(mChartW), static_cast<int>(mChartH)),
         mChartW, mChartH);
       log += gpu;
+      log += PerfLine();
       PrintAndLog(log);
       mPrevSnap = after;
     });
@@ -481,6 +582,7 @@ private:
   void PhaseDataScale(int numSeries, int numPoints)
   {
     MemSnapshot before = TakeSnapshot();
+    mBuildStart        = SteadyClock::now();
 
     ChartView chart = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
@@ -532,6 +634,7 @@ private:
       std::snprintf(extra, sizeof(extra),
         "\n  Data theory: %ld B\n  Heap/point: %.1f B", theoryB, perPoint);
       log += extra;
+      log += PerfLine();
 
       PrintAndLog(log);
       mPrevSnap = after;
@@ -548,6 +651,7 @@ private:
                        const char* typeName)
   {
     MemSnapshot before = TakeSnapshot();
+    mBuildStart        = SteadyClock::now();
 
     ChartView chart = ChartView::New(ChartView::Type::LINE,
                                       Vector2(mChartW, mChartH));
@@ -597,7 +701,9 @@ private:
     SnapAfterFrame([this, before, typeName, numSeries, numPoints](MemSnapshot after) {
       char tag[64];
       std::snprintf(tag, sizeof(tag), "%s (%d series x %d points)", typeName, numSeries, numPoints);
-      PrintAndLog(FormatDelta(tag, before, after));
+      std::string log = FormatDelta(tag, before, after);
+      log += PerfLine();
+      PrintAndLog(log);
       mPrevSnap = after;
     });
 
@@ -611,6 +717,7 @@ private:
   void PhaseChartTypePie()
   {
     MemSnapshot before = TakeSnapshot();
+    mBuildStart        = SteadyClock::now();
 
     ChartView chart = ChartView::New(ChartView::Type::PIE,
                                       Vector2(mChartW, mChartH));
@@ -627,7 +734,9 @@ private:
     SetActiveChart(chart, mChartW, mChartH);
 
     SnapAfterFrame([this, before](MemSnapshot after) {
-      PrintAndLog(FormatDelta("PIE chart (4 slices)", before, after));
+      std::string log = FormatDelta("PIE chart (4 slices)", before, after);
+      log += PerfLine();
+      PrintAndLog(log);
       mPrevSnap = after;
     });
 
@@ -639,6 +748,7 @@ private:
   void PhaseSize(int w, int h)
   {
     MemSnapshot before = TakeSnapshot();
+    mBuildStart        = SteadyClock::now();
 
     ChartView chart = ChartView::New(ChartView::Type::LINE,
                                       Vector2(static_cast<float>(w),
@@ -677,6 +787,7 @@ private:
       char gpu[80];
       std::snprintf(gpu, sizeof(gpu), "\n  GPU theory: %d kB", CalcGpuTexKb(w, h));
       log += gpu;
+      log += PerfLine();
 
       PrintAndLog(log);
       mPrevSnap = after;
@@ -797,6 +908,7 @@ private:
   void PhaseTickLabels(int numTicks)
   {
     MemSnapshot before = TakeSnapshot();
+    mBuildStart        = SteadyClock::now();
 
     // SetLabels requires std::vector<Dali::String>
     std::vector<Dali::String> labels(numTicks);
@@ -840,6 +952,7 @@ private:
         std::snprintf(per, sizeof(per), "\n  Heap/label: %.0f B", heapDelta / numTicks);
         log += per;
       }
+      log += PerfLine();
 
       PrintAndLog(log);
       mPrevSnap = after;
@@ -950,12 +1063,17 @@ private:
     if(mSnapTimer) { mSnapTimer.Stop(); mSnapTimer.Reset(); }
     if(mLeakTimer) { mLeakTimer.Stop(); mLeakTimer.Reset(); }
     mSnapCallback = nullptr;
+    mSnapPending  = false;
 
     if(mLeakChart) { mChartPanel.Remove(mLeakChart); mLeakChart.Reset(); }
     if(mChart)     { mChartPanel.Remove(mChart);     mChart.Reset(); }
 
-    mCurrentPhase   = -1;
-    mLeakCycleCount = 0;
+    mCurrentPhase    = -1;
+    mLeakCycleCount  = 0;
+    mBuildMs         = 0.0;
+    mRenderMs        = -1.0;
+    mFramesRemaining = 0;
+    mPendingFrameId  = -1;   // ignore any in-flight frame-rendered callback
     mLogLines.clear();
     mBaseline = TakeSnapshot();
     mPrevSnap = mBaseline;
