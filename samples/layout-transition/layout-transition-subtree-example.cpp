@@ -199,7 +199,7 @@ public:
     // instantly (visible, no animation).
     if(mExtraItem)
     {
-      mCard.RemoveChild(mExtraItem); // inherited EXIT fades it out, then unparents
+      mCard.Remove(mExtraItem, RemovePolicy::ANIMATE_EXIT); // inherited EXIT fades it out, then unparents
       mExtraItem.Reset();
     }
     else

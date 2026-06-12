@@ -1607,7 +1607,7 @@ void ViewImpl::SetLayoutTransition(LayoutTransition transition)
   mImpl->mLayoutTransition = transition;
   // Detach: drop any pending ENTER / REORDER / REMOVE markers. Records
   // are only produced while a transition is attached (see OnChildAdd /
-  // Insert / OnChildOrderChanged / RemoveChild); a previously attached
+  // Insert / OnChildOrderChanged / Remove); a previously attached
   // transition could have left entries that we want to discard now so
   // a later re-attach does not surface them as a stale cause on the
   // next pass. In particular mPendingChildRemovalForLayoutTransition is
@@ -1864,19 +1864,22 @@ void ViewImpl::RemoveAllChildren()
   InvalidateMeasure();
 }
 
-void ViewImpl::RemoveChild(Ui::View child)
+void ViewImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
 {
   if(!child)
   {
     return;
   }
 
-  // If a LayoutTransition with an EXIT slot (spec OR animator) is attached,
-  // hand the child off to the layout transition dispatcher so the EXIT
-  // animation can play. Otherwise unparent immediately.
+  const bool animateExit = (policy == Ui::RemovePolicy::ANIMATE_EXIT);
+
+  // ANIMATE_EXIT only: if a LayoutTransition with an EXIT slot (spec OR
+  // animator) is attached, hand the child off to the layout transition
+  // dispatcher so the EXIT animation can play. IMMEDIATE (and the
+  // no-EXIT-slot case) falls through to the immediate unparent below.
   Ui::LayoutTransition transition = mImpl->mLayoutTransition;
   bool                 deferred   = false;
-  if(transition)
+  if(animateExit && transition)
   {
     auto&      impl      = Internal::GetImpl(transition);
     const bool hasExitFx = static_cast<bool>(impl.GetExitVisualSpec()) || impl.HasExitAnimator() || impl.HasActiveExitBoundsEffect();
@@ -1911,7 +1914,7 @@ void ViewImpl::RemoveChild(Ui::View child)
           InvalidateMeasure();
 
           // Only schedule the EXIT transition when @p child was actually a
-          // tracked child. Calling RemoveChild on a non-child must not fire
+          // tracked child. Calling Remove on a non-child must not fire
           // any DALi layout-transition lifecycle / animation; without this
           // guard a misuse would leave a ghost animation that fires
           // OnStart / OnFinished and races with
@@ -1929,12 +1932,12 @@ void ViewImpl::RemoveChild(Ui::View child)
     // under this view. Ghost detection: actor parent is still Self() (the
     // deferred-remove keeps the actor attached) AND the child has already
     // been removed from the logical children list (mChildren). Without
-    // this guard, the second RemoveChild bypasses the dispatcher
+    // this guard, the second Remove bypasses the dispatcher
     // duplicate-EXIT guard and synchronously unparents the ghost, which
     // triggers OnSceneDisconnection → CancelPendingExit/CancelActiveAnimator
     // and silently cancels the in-flight EXIT (no OnFinished, no fade).
     // The same applies when the parent's LayoutTransition has been replaced
-    // or cleared between the first and second RemoveChild — the second
+    // or cleared between the first and second Remove — the second
     // call cannot enter the deferred branch but the ghost is still in
     // flight under its original transition.
     if(child.GetParent() == Self() &&
@@ -1957,7 +1960,9 @@ void ViewImpl::RemoveChild(Ui::View child)
     // closest-owner / standalone-boundary rules are enforced inside the
     // resolver, so a child claimed by a closer (non-SUBTREE or non-EXIT)
     // transition is not stolen by an ancestor.
-    if(window && isCurrentChild)
+    // ANIMATE_EXIT only: inherited (SUBTREE-scope) EXIT defer. IMMEDIATE skips
+    // this and unparents synchronously below.
+    if(animateExit && window && isCurrentChild)
     {
       ViewImpl* owner = Internal::FindGoverningSubtreeOwner(this, Internal::ReflowSlot::EXIT);
       if(owner)
@@ -2792,12 +2797,12 @@ void ViewImpl::OnChildRemove(Actor& child)
 
       // Record sibling removal so the next CHANGE pass tags remaining
       // siblings as SIBLING_REMOVED. This covers paths that reach
-      // OnChildRemove without going through View::RemoveChild's marker-
+      // OnChildRemove without going through View::Remove's marker-
       // setting branch (e.g. inherited Actor::Remove called directly on
-      // the view actor). Same window guard as View::RemoveChild — without
+      // the view actor). Same window guard as View::Remove — without
       // a window the marker cannot be consumed in this pass and would
       // leak across a later add-to-window event. Setting the marker
-      // here is idempotent with View::RemoveChild's own setter.
+      // here is idempotent with View::Remove's own setter.
       if(mImpl->mLayoutTransition && DevelWindow::Get(Self()))
       {
         mImpl->mPendingChildRemovalForLayoutTransition = true;

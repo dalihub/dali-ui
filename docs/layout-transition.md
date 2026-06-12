@@ -14,7 +14,7 @@ an animation in the matching slot.
 | Slot     | Fired when                                                                |
 |----------|---------------------------------------------------------------------------|
 | `ENTER`  | A new child is added after the parent has completed its initial arrange.  |
-| `EXIT`   | `View::RemoveChild` is called and the EXIT slot is configured.            |
+| `EXIT`   | `View::Remove(child, RemovePolicy::ANIMATE_EXIT)` is called and the EXIT slot is configured. |
 | `CHANGE` | An existing child's arranged bounds differ from the previous pass.        |
 
 Each slot holds its own configuration. All slots dispatch independently
@@ -159,7 +159,7 @@ Notes and limits:
 
 - Applies to **CHANGE**, and to **ENTER / EXIT** when the owner carries the
   corresponding slot effect: a child added under a no-transition descendant
-  fires the owner's ENTER, and a child removed via `View::RemoveChild` /
+  fires the owner's ENTER, and a child removed via `View::Remove` /
   `RemoveAllChildren` fires the owner's EXIT. Raw `Actor::Remove` (bypassing the
   View remove API) is **not** deferred. The effect is sourced from the owner
   while geometry and the EXIT ghost use the child's real direct parent. The
@@ -177,11 +177,13 @@ Notes and limits:
 
 ## Lifecycle and removal
 
-`View::RemoveChild` performs a **deferred remove** when an EXIT slot is
-configured: the child is dropped from the layout-tracking list immediately
-(so siblings reflow into the freed slot) but the actor stays attached
-during the EXIT animation. The actor is unparented automatically when the
-EXIT animation finishes.
+`View::Remove(child, RemovePolicy::ANIMATE_EXIT)` performs a **deferred
+remove** when an EXIT slot is configured: the child is dropped from the
+layout-tracking list immediately (so siblings reflow into the freed slot)
+but the actor stays attached during the EXIT animation. The actor is
+unparented automatically when the EXIT animation finishes. Using the
+inherited one-argument `Actor::Remove`, or `RemovePolicy::IMMEDIATE`,
+unparents immediately and skips EXIT.
 
 If you call `Actor::Remove` (or the inherited `Self().Remove`) directly,
 the actor is unparented synchronously and **EXIT is skipped entirely**.
@@ -225,7 +227,7 @@ cancel in-flight transitions — see the caveat below.
   callback body each frame.
 
 - **No view-tree mutations from animator callbacks.** Do not call
-  `Add` / `RemoveChild` / `Unparent` / `InvalidateMeasure` from inside
+  `Add` / `Remove` / `Unparent` / `InvalidateMeasure` from inside
   a `LayoutAnimatorCallback`. Tree mutations are supported only from
   lifecycle callbacks (`OnStart` / `OnFinished`).
 
@@ -264,7 +266,7 @@ cancel in-flight transitions — see the caveat below.
     - same-slot supersession (a new spec/animator started for the same
       slot of the same child),
     - cross-slot supersession on the same child:
-        - `RemoveChild` starts EXIT and cancels any in-flight CHANGE or
+        - `Remove` starts EXIT and cancels any in-flight CHANGE or
           ENTER on the child,
         - a new layout pass starts CHANGE and cancels any in-flight
           ENTER on the child,

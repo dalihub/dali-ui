@@ -59,7 +59,7 @@ namespace Internal
  *   - @c StartTransitionsAfterLayout: for each transition-attached view,
  *     compares new arranged bounds against the snapshot. New children
  *     fire ENTER, removed children (handled separately via
- *     ScheduleExit / View::RemoveChild) fire EXIT, and remaining
+ *     ScheduleExit / View::Remove) fire EXIT, and remaining
  *     children whose bounds changed fire CHANGE.
  *   - @c TickAnimators: every frame, advances elapsed time on active
  *     animator-mode states and invokes their callbacks.
@@ -509,7 +509,7 @@ private:
   /// is armed at the moment of state insertion rather than at the next
   /// LayoutControllerImpl::Process — making animator-mode dispatch robust
   /// against call sites that do not run inside a layout pass (e.g. the
-  /// EXIT-via-RemoveChild path). Also resets @c mLastTickTime so the first
+  /// EXIT-via-Remove path). Also resets @c mLastTickTime so the first
   /// tick after a long idle interval starts from a fresh wall clock.
   void EnsureAnimatorTicking();
 };

@@ -414,7 +414,7 @@ int UtcDaliLayoutTransitionRemoveChildNonChildN(void)
   parent.SetLayoutTransition(transition);
 
   // nonKid is never added to parent — RemoveChild must be a silent no-op.
-  parent.RemoveChild(nonKid);
+  parent.Remove(nonKid, RemovePolicy::ANIMATE_EXIT);
 
   application.SendNotification();
   application.Render(0);
@@ -555,7 +555,7 @@ int UtcDaliLayoutTransitionGhostInteractionDisabledP(void)
   transition.SetExitVisualSpec(exitSpec);
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(0);
 
@@ -661,7 +661,7 @@ void RunSmokeRemoveChildExit(UiTestApplication& application, View parent)
   transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(0);
 }
@@ -731,6 +731,166 @@ int UtcDaliLayoutTransitionAbsoluteLayoutSmokeP(void)
   END_TEST;
 }
 
+// ─── RemovePolicy: immediate vs animate-exit ──────────────────────────────
+
+int UtcDaliLayoutTransitionRemoveImmediatePolicyP(void)
+{
+  // RemovePolicy::IMMEDIATE unparents synchronously and skips EXIT even when
+  // an EXIT transition is attached: the child is NOT kept as a ghost.
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.5f));
+  transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  parent.Remove(child, RemovePolicy::IMMEDIATE);
+
+  // Synchronously unparented (not a deferred EXIT ghost).
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(child.GetParent() != parent);
+
+  application.SendNotification();
+  application.Render(0);
+
+  // No EXIT lifecycle was started.
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionRemoveInheritedImmediateP(void)
+{
+  // C1: the inherited one-argument Remove(child) performs an immediate,
+  // EXIT-free unparent — identical through a derived (StackLayout) handle and
+  // through an Actor-typed handle, so a bare Remove(child) never diverges by
+  // static handle type and never animates EXIT.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout parent = StackLayout::New(StackOrientation::VERTICAL);
+  parent.SetRequestedWidth(MATCH_PARENT);
+  parent.SetRequestedHeight(MATCH_PARENT);
+  application.GetWindow().Add(parent);
+
+  View childA = View::New();
+  View childB = View::New();
+  parent.Add(childA);
+  parent.Add(childB);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.5f));
+  transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  // Derived (StackLayout) handle, one-argument inherited Remove -> immediate.
+  parent.Remove(childA);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(childA.GetParent() != parent);
+
+  // Actor-typed handle, same one-argument call -> same immediate behavior.
+  Actor actorHandle = parent;
+  actorHandle.Remove(childB);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(childB.GetParent() != parent);
+
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionRemoveImmediateOnGhostN(void)
+{
+  // RemovePolicy::IMMEDIATE on a child that is already an in-flight EXIT ghost
+  // is a silent no-op (the in-flight-ghost guard): the EXIT keeps running and
+  // the child stays attached until it finishes — IMMEDIATE does NOT force-
+  // unparent a ghost (that distinguishes it from a raw Actor::Remove).
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.5f));
+  transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  // Start a deferred EXIT — child becomes a ghost.
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(gOnStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(child.GetParent() == parent);
+
+  // IMMEDIATE on the ghost — no-op: EXIT keeps running, no new lifecycle,
+  // child still attached.
+  parent.Remove(child, RemovePolicy::IMMEDIATE);
+  DALI_TEST_EQUALS(gOnStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(child.GetParent() == parent);
+
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionRemoveImmediateInheritedSubtreeP(void)
+{
+  // RemovePolicy::IMMEDIATE bypasses an inherited SUBTREE-scope EXIT owner: the
+  // grand-child is unparented synchronously and the owner's EXIT does NOT fire
+  // (contrast with UtcDaliLayoutTransitionSubtreeExitGrandChildP, which defers).
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View g = View::New();
+  g.SetRequestedWidth(50.0f);
+  g.SetRequestedHeight(50.0f);
+  b.Add(g);
+  a.Add(b);
+
+  LayoutTransition  tA       = LayoutTransition::New();
+  ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.2f));
+  tA.SetExitVisualSpec(exitSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  // IMMEDIATE skips the inherited SUBTREE EXIT — synchronous unparent, no EXIT.
+  b.Remove(g, RemovePolicy::IMMEDIATE);
+  DALI_TEST_CHECK(!g.GetParent());
+
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
 // ─── Regression tests for recent bug fixes ────────────────────────────────
 
 int UtcDaliLayoutTransitionRemoveChildGhostReRemovalN(void)
@@ -757,7 +917,7 @@ int UtcDaliLayoutTransitionRemoveChildGhostReRemovalN(void)
   parent.SetLayoutTransition(transition);
 
   // First removal — schedules deferred EXIT.
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(0);
 
@@ -767,7 +927,7 @@ int UtcDaliLayoutTransitionRemoveChildGhostReRemovalN(void)
   DALI_TEST_EQUALS(child.GetParent() == parent, true, TEST_LOCATION);
 
   // Second RemoveChild on the same ghost child — must be silent.
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(0);
 
@@ -948,7 +1108,7 @@ int UtcDaliLayoutTransitionCrossSlotCancelChangeOnRemoveP(void)
   // Mid-CHANGE (1s duration, only ~16ms elapsed): remove `a`.
   // Cross-slot supersession: CHANGE on `a` must be cancelled silently,
   // EXIT must start and run to completion.
-  parent.RemoveChild(a);
+  parent.Remove(a, RemovePolicy::ANIMATE_EXIT);
 
   // Let EXIT play through to completion (0.2s duration).
   for(int i = 0; i < 30; ++i)
@@ -1144,7 +1304,7 @@ int UtcDaliLayoutTransitionRejectsReverseExitSpecMutationN(void)
   // Mutate the registered EXIT spec after initial arrange.
   spec.Opacity(0.0f, Duration(0.2f), AlphaFunction(AlphaFunction::REVERSE));
 
-  DALI_TEST_ASSERTION(parent.RemoveChild(child), "REVERSE is not supported");
+  DALI_TEST_ASSERTION(parent.Remove(child, RemovePolicy::ANIMATE_EXIT), "REVERSE is not supported");
   END_TEST;
 }
 
@@ -1340,7 +1500,7 @@ int UtcDaliLayoutTransitionRejectsExitVisualSpecBoundsMutationN(void)
   // Mutate the registered EXIT spec after initial arrange.
   spec.SizeHeight(0.0f, Duration(0.2f));
 
-  DALI_TEST_ASSERTION(parent.RemoveChild(child), "bounds properties");
+  DALI_TEST_ASSERTION(parent.Remove(child, RemovePolicy::ANIMATE_EXIT), "bounds properties");
   END_TEST;
 }
 
@@ -1698,7 +1858,7 @@ int UtcDaliLayoutTransitionChangeCauseSiblingRemovedP(void)
   parent.SetLayoutTransition(transition);
 
   // Remove `a`, causing `b` to shift up.
-  parent.RemoveChild(a);
+  parent.Remove(a, RemovePolicy::ANIMATE_EXIT);
 
   for(int i = 0; i < 5; ++i)
   {
@@ -1977,7 +2137,7 @@ int UtcDaliLayoutTransitionExitBoundsEffectOnlyDefersRemoveP(void)
   transition.SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
 
   // Logical child list cleared immediately; actor stays under parent
   // during the deferred EXIT.
@@ -2061,7 +2221,7 @@ int UtcDaliLayoutTransitionExitBoundsEffectNoopIsImmediateP(void)
   transition.SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
 
   // No EXIT is scheduled — child is unparented synchronously.
   DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
@@ -2115,7 +2275,7 @@ int UtcDaliLayoutTransitionDetachClearsPendingRemovalMarkerP(void)
   transition.SetExitVisualSpec(exitSpec);
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveChild(a);
+  parent.Remove(a, RemovePolicy::ANIMATE_EXIT);
   // Detach immediately — the marker would otherwise survive on the view
   // because the dispatcher only consumes it for attached transitions.
   parent.SetLayoutTransition(LayoutTransition());
@@ -2197,7 +2357,7 @@ int UtcDaliLayoutTransitionBoundsEffectExitRestoresClippingAfterInterruptedEnter
                    static_cast<int>(ClippingMode::CLIP_TO_BOUNDING_BOX),
                    TEST_LOCATION);
 
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(16);
 
@@ -2302,7 +2462,7 @@ int UtcDaliLayoutTransitionResizeWithSiblingRemoveKeepsSiblingRemovedCauseP(void
   parent.SetLayoutTransition(transition);
 
   Dali::Ui::LayoutController::Get(application.GetWindow()).OnWindowResize(320, 600);
-  parent.RemoveChild(a);
+  parent.Remove(a, RemovePolicy::ANIMATE_EXIT);
 
   for(int i = 0; i < 5; ++i)
   {
@@ -2518,7 +2678,7 @@ int UtcDaliLayoutTransitionGhostInteractionRestoredBeforeUnparentP(void)
   transition.SetExitVisualSpec(exitSpec);
   parent.SetLayoutTransition(transition);
 
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
   for(int i = 0; i < 20; ++i)
   {
     application.SendNotification();
@@ -2633,7 +2793,7 @@ int UtcDaliLayoutTransitionEnterBoundsInterruptedByVisualOnlyExitPreservesCurren
   DALI_TEST_CHECK(midX < -1.0f);
   DALI_TEST_CHECK(midX > -100.0f);
 
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(0);
 
@@ -2690,7 +2850,7 @@ int UtcDaliLayoutTransitionEnterOpacityInterruptedByExitPreservesCurrentOpacityP
   const float midOpacity = child.GetCurrentProperty<float>(Actor::Property::OPACITY);
   DALI_TEST_CHECK(midOpacity > 0.0f && midOpacity < 0.9f);
 
-  parent.RemoveChild(child);
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(0);
 
@@ -3296,7 +3456,7 @@ int UtcDaliLayoutTransitionSubtreeExitGrandChildP(void)
   application.Render(0);
 
   // Remove the grand-child via the card's public RemoveChild — inherited EXIT.
-  b.RemoveChild(g);
+  b.Remove(g, RemovePolicy::ANIMATE_EXIT);
 
   application.SendNotification();
   application.Render(16);
@@ -3571,7 +3731,7 @@ int UtcDaliLayoutTransitionSubtreeExitAnimatorP(void)
   application.SendNotification();
   application.Render(0);
 
-  b.RemoveChild(g);
+  b.Remove(g, RemovePolicy::ANIMATE_EXIT);
   application.SendNotification();
   application.Render(16);
 

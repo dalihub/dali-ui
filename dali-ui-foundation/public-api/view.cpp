@@ -651,9 +651,9 @@ void View::RemoveAllChildren()
   GetImpl(*this).RemoveAllChildren();
 }
 
-void View::RemoveChild(View child)
+void View::Remove(View child, RemovePolicy policy)
 {
-  GetImpl(*this).RemoveChild(child);
+  GetImpl(*this).Remove(child, policy);
 }
 
 uint32_t View::GetChildCount() const

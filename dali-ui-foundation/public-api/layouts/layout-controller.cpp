@@ -136,7 +136,7 @@ public:
   }
 
   /**
-   * @brief Schedules an EXIT-slot transition (forwarded from ViewImpl::RemoveChild).
+   * @brief Schedules an EXIT-slot transition (forwarded from ViewImpl::Remove).
    */
   void ScheduleLayoutExit(ViewImpl* parent, Ui::View child, ViewImpl* transitionOwner)
   {

@@ -605,7 +605,7 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
   // Capture sibling add/remove markers for CHANGE cause refinement. A
   // sibling add is detected as "this pass introduced at least one ENTER
   // child", a sibling remove via the dispatcher-facing marker set in
-  // ViewImpl::RemoveChild / RemoveAllChildren. Per-cause precedence is:
+  // ViewImpl::Remove / RemoveAllChildren. Per-cause precedence is:
   // REORDERED > SIBLING_ADDED > SIBLING_REMOVED > WINDOW_RESIZED > OTHER.
   const bool hadSiblingAdd    = !enterChildren.empty();
   const bool hadSiblingRemove = root->TakePendingChildRemovalForLayoutTransition();
@@ -664,7 +664,7 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
     // first arrange with SetEnterOnInitialMount(true), seeds its ENTER. Runtime
     // ENTER (a child added later) is dispatched by DispatchPendingInheritedEnters
     // from records registered in NotifyChildAdded, and inherited EXIT is routed
-    // at remove time by ViewImpl::RemoveChild. For a direct child @c parent ==
+    // at remove time by ViewImpl::Remove. For a direct child @c parent ==
     // @c root and this branch is skipped, so the existing per-child logic runs
     // unchanged.
     if(parent != root)
@@ -1607,7 +1607,7 @@ void LayoutTransitionDispatcher::DispatchOneTick(ViewImpl* child)
     // The user callback can mutate the view tree (docs forbid this for
     // animator callbacks, but applications may still do it). Once we
     // return from cb the @c state reference may dangle if a self-
-    // targeted RemoveChild erased the entry, so this function does not
+    // targeted Remove erased the entry, so this function does not
     // touch state again. The end-of-animation marker is set in
     // TickAnimators step 2 instead, which iterates @c mActiveAnimators
     // fresh and skips entries that were just inserted by a misuse
@@ -1730,7 +1730,7 @@ void LayoutTransitionDispatcher::TickAnimators()
   // makes the framework safe against animator callbacks that violate the
   // "no view-tree mutation" contract: such a callback might erase the
   // entry we were dispatching and insert a new one (e.g. cancel CHANGE
-  // and start EXIT via RemoveChild on self). A new entry has
+  // and start EXIT via Remove on self). A new entry has
   // freshlyCreated == true and its own elapsed=0; skipping it here
   // ensures the new transition plays from frame 0 rather than being
   // immediately marked finished by a stale @c rawProgress carried over

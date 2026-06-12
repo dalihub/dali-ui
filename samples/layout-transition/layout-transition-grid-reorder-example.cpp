@@ -469,7 +469,7 @@ private:
     // in-drag reorders animate through the CHANGE slot.
     LayoutTransition savedTransition = mGrid.GetLayoutTransition();
     mGrid.SetLayoutTransition(LayoutTransition());
-    mGrid.RemoveChild(cell);
+    mGrid.Remove(cell, RemovePolicy::IMMEDIATE);
 
     mDragProxy = View::New();
     mDragProxy.SetRequestedWidth(bounds.width);
@@ -585,7 +585,7 @@ private:
     LayoutTransition savedTransition = mGrid.GetLayoutTransition();
     mGrid.SetLayoutTransition(LayoutTransition());
 
-    mGrid.RemoveChild(proxyToRemove);
+    mGrid.Remove(proxyToRemove, RemovePolicy::IMMEDIATE);
     if(droppedChild.GetParent())
     {
       droppedChild.Unparent();

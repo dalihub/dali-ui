@@ -387,11 +387,11 @@ public: // Properties
    *
    * @note Toggling visibility does NOT fire a parent's
    * @c LayoutTransition. ENTER / EXIT dispatch only on
-   * @c Actor::Add / @c View::RemoveChild — visibility-driven
-   * transitions are not supported. To animate a hide/show, drive
-   * @c Actor::Property::OPACITY or @c SCALE via your own
-   * @c Animation, or call @c RemoveChild + @c Add to participate in
-   * the layout transition.
+   * @c Actor::Add / @c View::Remove(View, RemovePolicy::ANIMATE_EXIT) —
+   * visibility-driven transitions are not supported. To animate a
+   * hide/show, drive @c Actor::Property::OPACITY or @c SCALE via your own
+   * @c Animation, or call @c Remove(child, RemovePolicy::ANIMATE_EXIT) +
+   * @c Add to participate in the layout transition.
    *
    * @param[in] visibility True to make the view visible, false to hide it
    * @return Reference to this View for fluent chaining
@@ -1253,22 +1253,34 @@ public: // Properties
    *
    * If a LayoutTransition with an EXIT slot is attached, every child is
    * handed off to the dispatcher (same semantics as calling
-   * @c RemoveChild on each child individually): the child is dropped
-   * from the layout-tracking list immediately, the actor stays attached
-   * during the EXIT animation, and is unparented when the animation
-   * finishes. With no EXIT slot, every child is unparented synchronously.
+   * @c Remove(child, RemovePolicy::ANIMATE_EXIT) on each child
+   * individually): the child is dropped from the layout-tracking list
+   * immediately, the actor stays attached during the EXIT animation, and
+   * is unparented when the animation finishes. With no EXIT slot, every
+   * child is unparented synchronously.
    */
   void RemoveAllChildren();
 
   /**
-   * @brief Removes @p child from this View, optionally running the
+   * @brief Removes @p child from this View, choosing whether to run the
    * attached LayoutTransition's EXIT slot first.
    *
-   * If a LayoutTransition with a configured EXIT spec or animator is
-   * attached, the child is kept in the actor tree as a "ghost" until the
-   * EXIT animation finishes; the child is then unparented automatically.
-   * Otherwise the child is unparented immediately, matching
-   * @c Actor::Remove behaviour.
+   * This is the symmetric counterpart of the inherited @c Actor::Add: just
+   * as adding a child auto-dispatches ENTER, calling @c Remove with
+   * @c RemovePolicy::ANIMATE_EXIT dispatches EXIT. The policy argument is
+   * mandatory by design: the inherited one-argument @c Actor::Remove(Actor)
+   * remains available (re-exposed via @c using below) and always performs an
+   * immediate, EXIT-free unparent, identical for both @c View-typed and
+   * @c Actor-typed handles. There is deliberately NO one-argument
+   * @c View::Remove(View) overload, so a bare @c Remove(child) call never
+   * diverges by static handle type.
+   *
+   * With @c RemovePolicy::ANIMATE_EXIT and a configured EXIT spec or animator
+   * (this view's own slot, or an ancestor SUBTREE-scope owner's), the child is
+   * kept in the actor tree as a "ghost" until the EXIT animation finishes and
+   * is then unparented automatically. With no EXIT slot it is unparented
+   * immediately. @c RemovePolicy::IMMEDIATE always unparents now, skipping both
+   * the own and inherited EXIT effects (see @c RemovePolicy).
    *
    * @note During the EXIT animation the child is logically absent from
    * this view's child list (@c GetChildCount / @c GetChildAt skip it)
@@ -1285,9 +1297,10 @@ public: // Properties
    * immediately and no lifecycle callbacks fire — the same as if no EXIT
    * slot were configured at all.
    *
-   * @param[in] child The child view to remove
+   * @param[in] child  The child view to remove
+   * @param[in] policy Whether to animate the EXIT transition or unparent immediately
    */
-  void RemoveChild(View child);
+  void Remove(View child, RemovePolicy policy);
 
   /**
    * @brief Gets the number of child views.
@@ -1317,6 +1330,9 @@ public: // Properties
   using Dali::Actor::Raise;
   using Dali::Actor::RaiseAbove;
   using Dali::Actor::RaiseToTop;
+  // Re-expose the inherited one-argument immediate remove; the
+  // Remove(View, RemovePolicy) overload would otherwise hide it (C++ name hiding).
+  using Dali::Actor::Remove;
 
   /**
    * @brief Raises this view one step above its immediate next sibling in the

@@ -198,7 +198,7 @@ public:
     {
       return;
     }
-    mStack.RemoveChild(mStack.GetChildAt(count - 1));
+    mStack.Remove(mStack.GetChildAt(count - 1), RemovePolicy::ANIMATE_EXIT);
   }
 
   bool OnEnterTouched(Actor /*actor*/, TouchEvent touch)

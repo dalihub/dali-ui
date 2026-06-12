@@ -600,7 +600,7 @@ public:
   Ui::LayoutTransition          mLayoutTransition;
   std::unordered_set<ViewImpl*> mPendingEnterChildren;                          ///< Children added since last layout pass; consumed by transition dispatcher
   std::unordered_set<ViewImpl*> mPendingReorderedChildren;                      ///< Children whose sibling order changed since the last layout pass
-  bool                          mPendingChildRemovalForLayoutTransition{false}; ///< True if at least one child was removed via View::RemoveChild / RemoveAllChildren since the last layout pass; consumed by dispatcher to tag remaining children's CHANGE cause as SIBLING_REMOVED
+  bool                          mPendingChildRemovalForLayoutTransition{false}; ///< True if at least one child was removed via View::Remove / RemoveAllChildren since the last layout pass; consumed by dispatcher to tag remaining children's CHANGE cause as SIBLING_REMOVED
   bool                          mInitialLayoutDone{false};                      ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
 
   // Trait storage

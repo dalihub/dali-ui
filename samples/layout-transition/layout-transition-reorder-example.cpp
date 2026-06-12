@@ -200,7 +200,7 @@ public:
       return;
     }
 
-    mStack.RemoveChild(mStack.GetChildAt(count - 1u));
+    mStack.Remove(mStack.GetChildAt(count - 1u), RemovePolicy::ANIMATE_EXIT);
   }
 
   bool OnEnterTouched(Actor /*actor*/, TouchEvent touch)
@@ -442,17 +442,16 @@ private:
     mLastDragRootPosition = rootPosition;
     mDragging             = true;
 
-    // Detach the LayoutTransition while we swap the pressed child for the
-    // proxy. With the transition attached, RemoveChild would defer through
-    // the EXIT slot (animating the child out instead of unparenting it
-    // immediately) and the proxy's subsequent Insert would mark it as a
-    // pending ENTER and fade it in from OPACITY 0. The swap is supposed to
-    // be invisible — siblings should not move and the slot should look
-    // unchanged — so we run it with no transition and re-attach right
-    // after, which leaves CHANGE animations for the in-drag reorders.
+    // Swap the pressed child for the proxy invisibly. The dragged child is
+    // removed with RemovePolicy::IMMEDIATE (unparent now, no EXIT animation).
+    // We also detach the LayoutTransition for the swap so the proxy's
+    // subsequent Insert is not marked as a pending ENTER and faded in from
+    // OPACITY 0. The swap is supposed to be invisible — siblings should not
+    // move and the slot should look unchanged — so we re-attach right after,
+    // which leaves CHANGE animations for the in-drag reorders.
     LayoutTransition savedTransition = mStack.GetLayoutTransition();
     mStack.SetLayoutTransition(LayoutTransition());
-    mStack.RemoveChild(mDraggedChild);
+    mStack.Remove(mDraggedChild, RemovePolicy::IMMEDIATE);
 
     // Proxy reserves the dragged child's slot. Same layout-request size
     // means the layout pass produces the same arranged rectangle, so
@@ -589,15 +588,14 @@ private:
     // CHANGE snapshot will see.
     LayoutController::Get(mWindow).ProcessLayouts();
 
-    // Mirror of BeginDrag's swap: detach the transition so RemoveChild on
-    // the proxy is immediate (no EXIT) and Insert on the dropped child
-    // does not mark it for ENTER. Re-attach right after so the next
-    // mStack layout pass dispatches CHANGE on the dropped child using
-    // the pre-baked snapshot.
+    // Mirror of BeginDrag's swap: remove the proxy with RemovePolicy::IMMEDIATE
+    // (no EXIT) and detach the transition so Insert on the dropped child does
+    // not mark it for ENTER. Re-attach right after so the next mStack layout
+    // pass dispatches CHANGE on the dropped child using the pre-baked snapshot.
     LayoutTransition savedTransition = mStack.GetLayoutTransition();
     mStack.SetLayoutTransition(LayoutTransition());
 
-    mStack.RemoveChild(proxyToRemove);
+    mStack.Remove(proxyToRemove, RemovePolicy::IMMEDIATE);
 
     if(droppedChild.GetParent())
     {

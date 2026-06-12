@@ -815,7 +815,7 @@ public: // Non-virtual API (safe to reorder / extend)
 
   /**
    * @brief Atomically retrieves and clears the marker that records whether
-   * any child was removed via @c View::RemoveChild / @c RemoveAllChildren
+   * any child was removed via @c View::Remove / @c RemoveAllChildren
    * since the last layout pass.
    *
    * Internal helper used by the layout transition dispatcher to tag
@@ -853,9 +853,9 @@ public: // Non-virtual API (safe to reorder / extend)
   void RemoveAllChildren();
 
   /**
-   * @copydoc Ui::View::RemoveChild()
+   * @copydoc Ui::View::Remove(Ui::View, RemovePolicy)
    */
-  void RemoveChild(Ui::View child);
+  void Remove(Ui::View child, Ui::RemovePolicy policy);
 
   /**
    * @copydoc Ui::View::GetChildCount()

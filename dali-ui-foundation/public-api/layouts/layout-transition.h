@@ -61,7 +61,7 @@ class LayoutTransitionImpl;
  * it is executing is undefined behaviour. Schedule the change from a
  * lifecycle callback (OnFinished) or an external event handler instead.
  *
- * @warning Do NOT modify the view tree (Add / RemoveChild / Unparent) or
+ * @warning Do NOT modify the view tree (Add / Remove / Unparent) or
  * call @c InvalidateMeasure from inside the callback. Such mutations are
  * supported only from lifecycle callbacks.
  */
@@ -92,7 +92,7 @@ using LayoutAnimatorCallback = Callback<void(const LayoutAnimatorContext&)>;
  *     finishes (e.g. CHANGE replaces an in-flight CHANGE).
  *   - Cross-slot supersession: a different slot is dispatched for the
  *     SAME child while an in-flight transition exists. Specifically:
- *     - @c RemoveChild starts EXIT and supersedes any in-flight CHANGE
+ *     - @c Remove starts EXIT and supersedes any in-flight CHANGE
  *       or ENTER on that child (the cancelled slot's @c OnFinished is
  *       NOT fired).
  *     - A new layout pass starts CHANGE and supersedes any in-flight
@@ -129,7 +129,7 @@ using LayoutLifecycleCallback = Callback<void(View, LayoutTransitionSlot)>;
  * - @c ENTER:  fired when a new child is added under this view AFTER the
  *              parent has completed its initial arrange pass (see
  *              @c SetEnterOnInitialMount for the initial-mount opt-in)
- * - @c EXIT:   fired when @c View::RemoveChild / @c RemoveAllChildren removes
+ * - @c EXIT:   fired when @c View::Remove / @c RemoveAllChildren removes
  *              a child (deferred until the EXIT slot finishes)
  * - @c CHANGE: fired when an existing child's bounds change between layout passes
  *
@@ -163,11 +163,15 @@ using LayoutLifecycleCallback = Callback<void(View, LayoutTransitionSlot)>;
  * without settling property values. Use @c SetEnterOnInitialMount(true) to
  * opt back in to firing ENTER on the initial mount.
  *
- * @note When @c View::RemoveChild is called and an EXIT slot is configured,
- * the child is removed from the layout-tracking list immediately so siblings
- * reflow into the freed slot — but the actor stays attached during the EXIT
- * animation. If you instead call @c Actor::Remove directly, the actor is
- * unparented immediately and EXIT is skipped entirely.
+ * @note When @c View::Remove(child, RemovePolicy::ANIMATE_EXIT) is called and
+ * an EXIT slot is configured, the child is removed from the layout-tracking
+ * list immediately so siblings reflow into the freed slot — but the actor
+ * stays attached during the EXIT animation. If you instead call
+ * @c Remove(child, RemovePolicy::IMMEDIATE), the child is unparented
+ * immediately and its EXIT is skipped (though IMMEDIATE still honors the
+ * in-flight-ghost guard: it is a no-op on a child already mid-EXIT, leaving
+ * that animation to finish). The inherited one-argument @c Actor::Remove also
+ * unparents immediately, bypassing the View remove path entirely.
  *
  * @note During the EXIT animation the child is a "ghost": it stays in the
  * actor tree but is absent from the parent's logical child list. Adding
@@ -478,9 +482,10 @@ public:
    *
    * @note Applies to CHANGE, and to ENTER / EXIT when the owner carries the
    * corresponding slot effect: a child added under a no-transition descendant
-   * fires the owner's ENTER, and a child removed via @c View::RemoveChild /
-   * @c RemoveAllChildren fires the owner's EXIT (raw @c Actor::Remove that
-   * bypasses the View remove API is not deferred). The effect is sourced from
+   * fires the owner's ENTER, and a child removed via
+   * @c View::Remove(child, RemovePolicy::ANIMATE_EXIT) / @c RemoveAllChildren
+   * fires the owner's EXIT (an immediate remove — the inherited
+   * @c Actor::Remove or @c RemovePolicy::IMMEDIATE — is not deferred). The effect is sourced from
    * this owner while geometry and the EXIT ghost use the child's real direct
    * parent. The closest transition-bearing ancestor wins (a descendant with its
    * own transition governs its own subtree). Inherited descendants use
@@ -515,7 +520,7 @@ public:
    *   - Same-slot supersession: a new spec/animator started for the SAME
    *     slot on the SAME child before the in-flight transition finishes.
    *   - Cross-slot supersession on the SAME child:
-   *     - @c RemoveChild starts EXIT and cancels any in-flight CHANGE
+   *     - @c Remove starts EXIT and cancels any in-flight CHANGE
    *       or ENTER on the child.
    *     - A new layout pass starts CHANGE and cancels any in-flight
    *       ENTER on the child.

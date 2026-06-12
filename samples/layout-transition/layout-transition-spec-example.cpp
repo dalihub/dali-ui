@@ -172,8 +172,8 @@ public:
       return;
     }
     View last = mStack.GetChildAt(count - 1);
-    // Use View::RemoveChild so the EXIT slot is honoured (deferred-remove).
-    mStack.RemoveChild(last);
+    // Use View::Remove so the EXIT slot is honoured (deferred-remove).
+    mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
   bool OnEnterTouched(Actor /*actor*/, TouchEvent touch)

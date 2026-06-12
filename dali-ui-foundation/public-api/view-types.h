@@ -47,5 +47,24 @@ enum class LayoutOrderPolicy
   PRESERVE = 1, ///< Keep layout children order unchanged; only visual z-order is affected.
 };
 
+/**
+ * @brief Controls how View::Remove(View, RemovePolicy) treats an attached
+ * LayoutTransition's EXIT slot.
+ *
+ * ENTER is dispatched automatically for every add path (Actor::Add, Insert),
+ * but EXIT cannot be hooked transparently on removal, so the EXIT intent must
+ * be requested explicitly through this policy.
+ *
+ * @note IMMEDIATE is not identical to the inherited Actor::Remove(Actor): it
+ * still runs the View's child bookkeeping and the in-flight-ghost guard, but
+ * unparents now and skips BOTH the view's own EXIT slot and any inherited
+ * SUBTREE-scope EXIT effect.
+ */
+enum class RemovePolicy
+{
+  IMMEDIATE    = 0, ///< Unparent now; do not run any EXIT transition.
+  ANIMATE_EXIT = 1, ///< Run the attached EXIT transition (own or inherited SUBTREE) first, then unparent; immediate when no EXIT slot is configured.
+};
+
 } // namespace Ui
 } // namespace Dali
