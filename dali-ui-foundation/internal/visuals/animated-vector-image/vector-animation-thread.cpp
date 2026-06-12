@@ -21,7 +21,6 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/environment-variable.h>
 #include <dali/devel-api/adaptor-framework/thread-settings.h>
-#include <dali/devel-api/common/stage.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/stream-operators.h>
@@ -521,10 +520,8 @@ void VectorAnimationThread::OnEventCallbackTriggered()
       {
         // Request to remove pending tasks at AsyncTaskManager side.
         mAsyncTaskManager.AddTask(nullptr);
-        Stage::GetCurrent().KeepRendering(0.0f); // Trigger event processing
 
-        // Request ProcessEvents on idle to make ensure Processor executed.
-        Dali::Adaptor::Get().RequestProcessEventsOnIdle();
+        Dali::Adaptor::Get().RequestProcessEventsAndUpdate(); // Trigger event processing
       }
       if(mForceRenderOnce)
       {

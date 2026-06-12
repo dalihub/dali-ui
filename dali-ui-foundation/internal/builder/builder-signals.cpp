@@ -16,9 +16,10 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/common/vector-wrapper.h>
 #include <dali/devel-api/object/type-info.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/object/property-notification.h>
@@ -50,6 +51,19 @@ namespace
 {
 using namespace Dali;
 
+Actor FindActorByName(Dali::StringView name)
+{
+  for(auto& sh : Dali::Adaptor::Get().GetSceneHolders())
+  {
+    Actor found = sh.GetRootLayer().FindChildByName(name);
+    if(found)
+    {
+      return found;
+    }
+  }
+  return Actor();
+}
+
 //
 // Signal Actions
 //
@@ -64,7 +78,7 @@ struct ChildActorAction
 
   void operator()(void)
   {
-    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(actorName));
+    Actor actor = FindActorByName(ToDaliStringView(actorName));
 
     if(actor)
     {
@@ -91,7 +105,7 @@ struct PropertySetAction
 
   void operator()(void)
   {
-    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(actorName));
+    Actor actor = FindActorByName(ToDaliStringView(actorName));
 
     if(actor)
     {
@@ -125,7 +139,7 @@ struct GenericAction
 
   void operator()(void)
   {
-    Actor actor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(actorName));
+    Actor actor = FindActorByName(ToDaliStringView(actorName));
     if(actor)
     {
       actor.DoAction(ToDaliString(actionName), parameters);
@@ -184,7 +198,7 @@ struct DelayedConstrainerApply
   bool GetApplyParameters(size_t i, Actor& targetActor, Property::Index& targetPropertyIndex, Actor& sourceActor,
                           Property::Index& sourcePropertyIndex)
   {
-    targetActor         = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(targetActorNames[i]));
+    targetActor         = FindActorByName(ToDaliStringView(targetActorNames[i]));
     targetPropertyIndex = Property::INVALID_INDEX;
     if(targetActor)
     {
@@ -202,7 +216,7 @@ struct DelayedConstrainerApply
       return false;
     }
 
-    sourceActor         = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(sourceActorNames[i]));
+    sourceActor         = FindActorByName(ToDaliStringView(sourceActorNames[i]));
     sourcePropertyIndex = Property::INVALID_INDEX;
     if(sourceActor)
     {
@@ -290,7 +304,7 @@ struct DelayedConstrainerRemove
       {
         for(size_t i(0); i < actorCount; ++i)
         {
-          Actor targetActor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(targetActorNames[i]));
+          Actor targetActor = FindActorByName(ToDaliStringView(targetActorNames[i]));
           if(targetActor)
           {
             constrainer.Remove(targetActor);
@@ -309,7 +323,7 @@ struct DelayedConstrainerRemove
       {
         for(size_t i(0); i < actorCount; ++i)
         {
-          Actor targetActor = Stage::GetCurrent().GetRootLayer().FindChildByName(ToDaliStringView(targetActorNames[i]));
+          Actor targetActor = FindActorByName(ToDaliStringView(targetActorNames[i]));
           if(targetActor)
           {
             constrainer.Remove(targetActor);

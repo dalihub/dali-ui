@@ -17,7 +17,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/adaptor-framework/timer.h>

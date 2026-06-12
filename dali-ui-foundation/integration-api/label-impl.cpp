@@ -18,7 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/image-loading.h>
-#include <dali/devel-api/common/stage.h>
+#include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
@@ -1267,11 +1267,6 @@ void LabelImpl::OnInitialize()
   // Enable the text ellipsis.
   mController->SetTextElideEnabled(true);
 
-  // Sets layoutDirection value
-  Dali::Stage                 stage           = Dali::Stage::GetCurrent();
-  Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(stage.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
-  mController->SetLayoutDirection(layoutDirection);
-
   self.InheritedVisibilityChangedSignal().Connect(this, &LabelImpl::OnViewInheritedVisibilityChanged);
   self.LayoutDirectionChangedSignal().Connect(this, &LabelImpl::OnLayoutDirectionChanged);
 
@@ -2158,6 +2153,19 @@ bool LabelImpl::IsVisible()
     mIsVisibleInitialized = true;
   }
   return mIsVisible;
+}
+
+void LabelImpl::OnSceneConnection(int depth)
+{
+  ViewImpl::OnSceneConnection(depth);
+
+  Dali::Window window = DevelWindow::Get(Self());
+  if(window)
+  {
+    // Sets layoutDirection value
+    Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(window.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+    mController->SetLayoutDirection(layoutDirection);
+  }
 }
 
 void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOrientation orientation)

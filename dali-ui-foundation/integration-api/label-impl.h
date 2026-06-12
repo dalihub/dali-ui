@@ -703,6 +703,11 @@ public: // From ViewImpl
   void OnInitialize() override;
 
   /**
+   * @copydoc ViewImpl::OnSceneConnection()
+   */
+  void OnSceneConnection(int depth) override;
+
+  /**
    * @copydoc ViewImpl::OnRelayout()
    */
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;

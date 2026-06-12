@@ -17,7 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/common/stage.h>
+#include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/actors/custom-actor-impl.h>
@@ -1037,7 +1037,9 @@ Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
 {
   float decelerationFactor = std::log(mDecelerationRate);
 
-  Vector2 screenSize = Stage::GetCurrent().GetSize();
+  // VelocityToMovement is called during gesture handling, so the window is guaranteed to be available.
+  Dali::Window::WindowSize windowSize = DevelWindow::Get(Self()).GetSize();
+  Vector2                  screenSize(static_cast<float>(windowSize.GetWidth()), static_cast<float>(windowSize.GetHeight()));
 
   // Updated formula based on OneUIComponents commit
   float movementX = -1.0f * mFlingSensitivity * velocity.x * screenSize.width / (mMaximumFlingDuration * decelerationFactor);

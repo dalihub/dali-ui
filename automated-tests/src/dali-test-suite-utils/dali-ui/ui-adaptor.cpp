@@ -212,6 +212,11 @@ void Adaptor::RequestProcessEventsOnIdle()
   }
 }
 
+void Adaptor::RequestProcessEventsAndUpdate()
+{
+  RequestProcessEventsOnIdle();
+}
+
 Dali::Integration::RenderSurfaceInterface& Adaptor::GetSurface()
 {
   DALI_ASSERT_ALWAYS(!mWindows.empty());
@@ -504,6 +509,11 @@ void Adaptor::FlushUpdateMessages()
 void Adaptor::RequestProcessEventsOnIdle()
 {
   mImpl->RequestProcessEventsOnIdle();
+}
+
+void Adaptor::RequestProcessEventsAndUpdate()
+{
+  mImpl->RequestProcessEventsAndUpdate();
 }
 
 class LogFactory : public LogFactoryInterface

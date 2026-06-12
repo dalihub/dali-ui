@@ -18,7 +18,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/key-devel.h>
-#include <dali/devel-api/common/stage.h>
+#include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
@@ -1255,11 +1255,6 @@ void InputEditorImpl::OnInitialize()
   // Disable the text ellipsis.
   mController->SetTextElideEnabled(false);
 
-  // Sets layoutDirection value
-  Dali::Stage                 stage           = Dali::Stage::GetCurrent();
-  Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(stage.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
-  mController->SetLayoutDirection(layoutDirection);
-
   self.LayoutDirectionChangedSignal().Connect(this, &InputEditorImpl::OnLayoutDirectionChanged);
 
   auto viewHandle = View::DownCast(self);
@@ -1288,16 +1283,6 @@ void InputEditorImpl::OnInitialize()
   mLongPressGestureDetector.Attach(self);
 
   self.TouchedSignal().Connect(this, &InputEditorImpl::OnTouched);
-
-  // Set BoundingBox to stage size if not already set.
-  BoundsInteger boundingBox;
-  mDecorator->GetBoundingBox(boundingBox);
-
-  if(boundingBox.IsEmpty())
-  {
-    Vector2 stageSize = Dali::Stage::GetCurrent().GetSize();
-    mDecorator->SetBoundingBox(BoundsInteger(0.0f, 0.0f, stageSize.width, stageSize.height));
-  }
 
   // Flip vertically the 'left' selection handle
   mDecorator->FlipHandleVertically(Text::LEFT_SELECTION_HANDLE, true);
@@ -1503,6 +1488,23 @@ void InputEditorImpl::OnSceneConnection(int depth)
 
   // Call the Control::OnSceneConnection() to set the depth of the background.
   ViewImpl::OnSceneConnection(depth);
+
+  Dali::Window window = DevelWindow::Get(Self());
+  if(window)
+  {
+    // Sets layoutDirection value
+    Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(window.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+    mController->SetLayoutDirection(layoutDirection);
+
+    // Set BoundingBox to window size if not already set.
+    BoundsInteger boundingBox;
+    mDecorator->GetBoundingBox(boundingBox);
+    if(boundingBox.IsEmpty())
+    {
+      Dali::Window::WindowSize windowSize = window.GetSize();
+      mDecorator->SetBoundingBox(BoundsInteger(0, 0, static_cast<int32_t>(windowSize.GetWidth()), static_cast<int32_t>(windowSize.GetHeight())));
+    }
+  }
 }
 
 bool InputEditorImpl::OnKeyEvent(const KeyEvent& event)

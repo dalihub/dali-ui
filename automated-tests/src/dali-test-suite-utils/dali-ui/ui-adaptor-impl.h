@@ -72,6 +72,7 @@ public:
 
   void RequestUpdateOnce();
   void RequestProcessEventsOnIdle();
+  void RequestProcessEventsAndUpdate();
 
   static Dali::Integration::Scene GetScene(Dali::Window window);
 

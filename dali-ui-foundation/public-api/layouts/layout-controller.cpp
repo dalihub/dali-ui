@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/common/stage.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/processor-interface.h>

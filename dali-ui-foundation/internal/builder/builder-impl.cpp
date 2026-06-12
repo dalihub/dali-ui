@@ -22,10 +22,11 @@
 #include <sys/stat.h>
 #include <sstream>
 
-#include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/type-info.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/devel-api/scripting/scripting.h>
+#include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/camera-actor.h>
@@ -266,7 +267,8 @@ Animation Builder::CreateAnimation(const std::string& animationName, const Prope
 Animation Builder::CreateAnimation(const std::string& animationName, const Property::Map& map)
 {
   Replacement replacement(map, mReplacementMap);
-  return CreateAnimation(animationName, replacement, Stage::GetCurrent().GetRootLayer());
+  // TODO: Use the appropriate SceneHolder for multi-window support.
+  return CreateAnimation(animationName, replacement, Dali::Adaptor::Get().GetSceneHolders()[0].GetRootLayer());
 }
 
 Animation Builder::CreateAnimation(const std::string& animationName, Dali::Actor sourceActor)
@@ -280,7 +282,8 @@ Animation Builder::CreateAnimation(const std::string& animationName)
 {
   Replacement replacement(mReplacementMap);
 
-  return CreateAnimation(animationName, replacement, Dali::Stage::GetCurrent().GetRootLayer());
+  // TODO: Use the appropriate SceneHolder for multi-window support.
+  return CreateAnimation(animationName, replacement, Dali::Adaptor::Get().GetSceneHolders()[0].GetRootLayer());
 }
 
 BaseHandle Builder::Create(const std::string& templateName)
@@ -410,7 +413,8 @@ void Builder::CreateRenderTask(const std::string& name)
 
   Replacement constant(mReplacementMap);
 
-  const Stage& stage = Stage::GetCurrent();
+  // TODO: Use the appropriate SceneHolder for multi-window support.
+  Dali::Integration::SceneHolder sceneHolder = Dali::Adaptor::Get().GetSceneHolders()[0];
 
   OptionalChild tasks = IsChild(*mParser.GetRoot(), "renderTasks");
 
@@ -423,7 +427,7 @@ void Builder::CreateRenderTask(const std::string& name)
     //
     if(OptionalChild renderTask = IsChild(*tasks, name))
     {
-      RenderTaskList list  = stage.GetRenderTaskList();
+      RenderTaskList list  = sceneHolder.GetRenderTaskList();
       unsigned int   start = list.GetTaskCount();
 
       RenderTask task;
@@ -1033,8 +1037,9 @@ BaseHandle Builder::DoCreate(const TreeNode& root, const TreeNode& node, Actor p
 
 void Builder::SetupTask(RenderTask& task, const TreeNode& node, const Replacement& constant)
 {
-  const Stage& stage = Stage::GetCurrent();
-  Layer        root  = stage.GetRootLayer();
+  // TODO: Use the appropriate SceneHolder for multi-window support.
+  Dali::Integration::SceneHolder sceneHolder = Dali::Adaptor::Get().GetSceneHolders()[0];
+  Layer                          root        = sceneHolder.GetRootLayer();
 
   if(OptionalString s = constant.IsString(IsChild(node, "sourceActor")))
   {

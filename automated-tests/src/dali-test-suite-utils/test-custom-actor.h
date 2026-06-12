@@ -311,7 +311,7 @@ struct TestCustomActorVariant4 : public TestCustomActor
 };
 
 /**
- * Variant which removes its parent from Stage during OnSceneConnection
+ * Variant which removes its parent from Scene during OnSceneConnection
  */
 struct TestCustomActorVariant5 : public TestCustomActor
 {
@@ -342,7 +342,7 @@ private:
 };
 
 /**
- * Variant which adds its parent to Stage during OnSceneDisconnection
+ * Variant which adds its parent to Scene during OnSceneDisconnection
  */
 struct TestCustomActorVariant6 : public TestCustomActor
 {

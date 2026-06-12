@@ -187,7 +187,7 @@ private:
   /**
    * @brief Update shader related info, uniforms, etc. for the new shader.
    */
-  void UpdateShaderUniforms();
+  void UpdateShaderUniforms(Vector2 windowSize);
 
   /**
    * @brief Create the geometry of the given primitive type.

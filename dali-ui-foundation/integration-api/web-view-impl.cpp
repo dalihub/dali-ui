@@ -20,7 +20,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/common/stage.h>
 #include <dali/devel-api/object/property-map-devel.h>
 #include <dali/devel-api/object/property-value-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
@@ -143,7 +142,7 @@ BoundsInteger CalculateDisplayArea(Dali::Actor self)
 WebViewImpl::WebViewImpl()
 : ViewImpl(),
   mVisual(),
-  mWebViewSize(Stage::GetCurrent().GetSize()),
+  mWebViewSize(Vector2(1.0f, 1.0f)),
   mWebViewArea(0, 0, static_cast<int32_t>(mWebViewSize.width), static_cast<int32_t>(mWebViewSize.height)),
   mLastRenderedNativeImageWidth(0u),
   mLastRenderedNativeImageHeight(0u),
