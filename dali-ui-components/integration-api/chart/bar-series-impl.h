@@ -38,15 +38,18 @@ class BarSeries : public ChartSeries
 public:
   BarSeries();
 
-  Vector4 GetColor() const
+public: /// ChartSeries overrides
+  Vector4 GetColor() const override
   {
     return mColor;
   }
-  void SetColor(const Vector4& c)
+  void SetColor(const Vector4& c) override
   {
     mColor    = c;
     mColorSet = true;
   }
+
+public:
   bool IsColorSet() const
   {
     return mColorSet;
