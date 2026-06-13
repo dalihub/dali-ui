@@ -54,12 +54,14 @@ function build
         CACHE_CC='/usr/lib/ccache/clang'
     fi
 
+    CACHE_CPP='/not-existing-path/g++' CACHE_CC='/not-existing-path/gcc'
+
     if [ -e $CACHE_CPP ] ; then
         echo "Using ccache C++ wrapper: $CACHE_CPP , C wrapper: $CACHE_CC "
         (cd build ; CXX=$CACHE_CPP CC=$CACHE_CC cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" && $BUILDCMD -j7 )
     else
         echo "C++ compiler for $CXX wrapper for ccache not found at $CACHE_CPP . ccache will be disabled."
-        (cd build ; cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" && $BUILDCMD -j7 )
+        (cd build ; CXXFLAGS='-g -O0 -ggdb -fsanitize=address -fno-omit-frame-pointer -static-libasan' CFLAGS='-fsanitize=address -fno-omit-frame-pointer -static-libasan' LDFLAGS='-fsanitize=address -fno-omit-frame-pointer -static-libasan' cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" && $BUILDCMD -j7 )
     fi
 }
 
