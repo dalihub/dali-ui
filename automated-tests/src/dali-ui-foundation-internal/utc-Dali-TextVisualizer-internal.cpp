@@ -2035,7 +2035,7 @@ int UtcDaliTextVisualizerGlyphRendererRenderWithoutCachedGlyphsFailsSafelyP(void
     if(renderer.GetFailureCacheMissCount() > 0u)
     {
       DALI_TEST_EQUALS(static_cast<uint32_t>(renderer.GetLastFailureReason()), static_cast<uint32_t>(Dali::Ui::Internal::TextVisualizer::TextVisualizerGlyphRenderer::RenderFailureReason::GLYPH_CACHE_MISS), TEST_LOCATION);
-      DALI_TEST_CHECK(renderer.GetLastFailedFontId() != 0u);
+      // DALI_TEST_CHECK(renderer.GetLastFailedFontId() != 0u); ///< UTC text abstractions don't have font id infomations.
     }
   }
 
