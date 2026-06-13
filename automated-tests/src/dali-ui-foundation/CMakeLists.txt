@@ -86,6 +86,7 @@ LIST(APPEND TC_SOURCES
     ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
     ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
     ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
+    ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
     ../dali-test-suite-utils/dali-ui/ui-timer.cpp
     ../dali-test-suite-utils/dali-ui/ui-window.cpp
 )
