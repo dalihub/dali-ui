@@ -38,13 +38,17 @@ class LineSeries : public ChartSeries
 public:
   LineSeries();
 
+public: /// ChartSeries overrides
+  Vector4 GetColor() const override
+  {
+    return mColor;
+  }
+  void SetColor(const Vector4& color) override;
+
+public:
   float GetLineWidth() const
   {
     return mLineWidth;
-  }
-  Vector4 GetColor() const
-  {
-    return mColor;
   }
   bool IsMarkersVisible() const
   {
@@ -62,7 +66,6 @@ public:
   }
 
   void SetLineWidth(float width);
-  void SetColor(const Vector4& color);
   void SetMarkersVisible(bool visible);
   void SetMarkerRadius(float radius);
 
