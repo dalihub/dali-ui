@@ -37,15 +37,17 @@ class ScatterSeries : public ChartSeries
 public:
   ScatterSeries();
 
-  Vector4 GetColor() const
+public: /// ChartSeries overrides
+  Vector4 GetColor() const override
   {
     return mColor;
   }
-  void SetColor(const Vector4& c)
+  void SetColor(const Vector4& c) override
   {
     mColor = c;
   }
 
+public:
   float GetMarkerRadius() const
   {
     return mMarkerRadius;
