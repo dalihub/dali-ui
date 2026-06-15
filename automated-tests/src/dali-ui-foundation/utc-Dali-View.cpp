@@ -435,8 +435,8 @@ int UtcDaliViewGetPivotP(void)
   View              view = View::New();
 
   Vector3 pivot = view.GetPivot();
-  DALI_TEST_EQUALS(pivot.x, 0.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(pivot.y, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivot.x, 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(pivot.y, 0.5f, TEST_LOCATION);
   DALI_TEST_EQUALS(pivot.z, 0.5f, TEST_LOCATION);
 
   END_TEST;
