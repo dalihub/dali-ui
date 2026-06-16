@@ -18,13 +18,13 @@ Label label = Label::New("Hello");
 window.Add(label);
 ~~~
 
-Fluent API를 사용한 생성:
+생성 후 설정:
 
 ~~~cpp
-Label label = Label::New()
-  .SetText("Hello")
-  .SetFontSize(24.0f)
-  .SetTextColor(UiColor::PRIMARY);
+Label label = Label::New();
+label.SetText("Hello");
+label.SetFontSize(24.0f);
+label.SetTextColor(UiColor::PRIMARY);
 ~~~
 
 <br/>
@@ -42,10 +42,10 @@ Label label = Label::New()
 | `SetOverflowMode()` | 오버플로우 처리 (`ELLIPSIS`, `CLIP`) |
 
 ~~~cpp
-Label label = Label::New("Long text...")
-  .SetMultiLine(true)
-  .SetLineWrapMode(Text::LineWrapMode::WORD)
-  .SetHorizontalTextAlignment(Text::Alignment::CENTER);
+Label label = Label::New("Long text...");
+label.SetMultiLine(true);
+label.SetLineWrapMode(Text::LineWrapMode::WORD);
+label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
 ~~~
 
 <br/>
@@ -62,15 +62,15 @@ Label label = Label::New("Long text...")
 effective scale에는 UI scale과 font size scale 등이 반영됩니다.
 
 ~~~cpp
-Label label = Label::New("Line height")
-  .SetMultiLine(true)
-  .SetLineHeight(1.4f)
-  .SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+Label label = Label::New("Line height");
+label.SetMultiLine(true);
+label.SetLineHeight(1.4f);
+label.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
 ~~~
 
 ~~~cpp
-Label label = Label::New("Auto line height")
-  .SetLineHeight(Text::LINE_HEIGHT_AUTO);
+Label label = Label::New("Auto line height");
+label.SetLineHeight(Text::LINE_HEIGHT_AUTO);
 ~~~
 
 > [!NOTE]
@@ -161,9 +161,9 @@ font family를 명시하지 않으면 platform에서 설정한 default font가 �
 문자열로 설정:
 
 ~~~cpp
-Label label = Label::New("Variable Font")
-  .SetFontFamily("Sans VF")
-  .SetFontVariation("wght=700,wdth=90");
+Label label = Label::New("Variable Font");
+label.SetFontFamily("Sans VF");
+label.SetFontVariation("wght=700,wdth=90");
 ~~~
 
 `FontVariationAxis`로 설정:
@@ -173,9 +173,9 @@ Dali::Vector<Text::FontVariationAxis> axes;
 axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
 axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
 
-Label label = Label::New("Variable Font")
-  .SetFontFamily("Sans VF")
-  .SetFontVariation(axes);
+Label label = Label::New("Variable Font");
+label.SetFontFamily("Sans VF");
+label.SetFontVariation(axes);
 ~~~
 
 > [!NOTE]
@@ -212,19 +212,19 @@ minimum/maximum font size scale은 최종 scale 범위를 제한하며, minimum 
 사용자 지정 scale:
 
 ~~~cpp
-Label label = Label::New("Scaled text")
-  .SetFontSizeScale(1.5f)
-  .SetMinimumFontSizeScale(0.8f)
-  .SetMaximumFontSizeScale(2.0f);
+Label label = Label::New("Scaled text");
+label.SetFontSizeScale(1.5f);
+label.SetMinimumFontSizeScale(0.8f);
+label.SetMaximumFontSizeScale(2.0f);
 ~~~
 
 시스템 font size scale 반영:
 
 ~~~cpp
-Label label = Label::New("System scaled text")
-  .SetSystemFontSizeScaleEnabled(true)
-  .SetMinimumFontSizeScale(0.8f)
-  .SetMaximumFontSizeScale(2.0f);
+Label label = Label::New("System scaled text");
+label.SetSystemFontSizeScaleEnabled(true);
+label.SetMinimumFontSizeScale(0.8f);
+label.SetMaximumFontSizeScale(2.0f);
 ~~~
 
 `GetAdjustedFontSizeScale()`로 최종 적용된 font size scale을 조회할 수 있습니다.
@@ -271,25 +271,25 @@ Hexadecimal 형식:
 color (RGB / ARGB):
 
 ~~~cpp
-Label rgb = Label::New("<color value='0xFF0000'>Red Text</color>")
-  .SetMarkupEnabled(true);
+Label rgb = Label::New("<color value='0xFF0000'>Red Text</color>");
+rgb.SetMarkupEnabled(true);
 
-Label argb = Label::New("<color value='0xFFFF0000'>Red Text</color>")
-  .SetMarkupEnabled(true);
+Label argb = Label::New("<color value='0xFFFF0000'>Red Text</color>");
+argb.SetMarkupEnabled(true);
 ~~~
 
 font:
 
 ~~~cpp
-Label label = Label::New("<font family='Sans' size='20'>Hello world</font>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<font family='Sans' size='20'>Hello world</font>");
+label.SetMarkupEnabled(true);
 ~~~
 
 bold:
 
 ~~~cpp
-Label label = Label::New("<b>Bold</b>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<b>Bold</b>");
+label.SetMarkupEnabled(true);
 ~~~
 
 > [!NOTE]
@@ -298,8 +298,8 @@ Label label = Label::New("<b>Bold</b>")
 italic:
 
 ~~~cpp
-Label label = Label::New("<i>Italic</i>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<i>Italic</i>");
+label.SetMarkupEnabled(true);
 ~~~
 
 > [!NOTE]
@@ -308,29 +308,29 @@ Label label = Label::New("<i>Italic</i>")
 underline:
 
 ~~~cpp
-Label label = Label::New("<u color='0xFF0000' height='2'>Underline</u>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<u color='0xFF0000' height='2'>Underline</u>");
+label.SetMarkupEnabled(true);
 ~~~
 
 line-through:
 
 ~~~cpp
-Label label = Label::New("<s color='#9C3A64' height='2'>Strike</s>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<s color='#9C3A64' height='2'>Strike</s>");
+label.SetMarkupEnabled(true);
 ~~~
 
 background:
 
 ~~~cpp
-Label label = Label::New("<background color='yellow'>Background</background>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<background color='yellow'>Background</background>");
+label.SetMarkupEnabled(true);
 ~~~
 
 anchor:
 
 ~~~cpp
-Label label = Label::New("<a href='https://www.tizen.org'>Tizen</a>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<a href='https://www.tizen.org'>Tizen</a>");
+label.SetMarkupEnabled(true);
 ~~~
 
 anchor 클릭 처리:
@@ -373,9 +373,9 @@ Marquee는 긴 텍스트를 한정된 영역 안에서 스크롤 애니메이션
 `MANUAL`에서는 overflow 여부와 관계없이 `StartMarquee()`를 호출해야 marquee가 시작됩니다. `StopMarquee()`로 정지합니다.
 
 ~~~cpp
-Label label = Label::New("Very long text...")
-  .SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL)
-  .SetMarqueeSpeed(80);
+Label label = Label::New("Very long text...");
+label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+label.SetMarqueeSpeed(80);
 
 label.StartMarquee();
 label.StopMarquee();
@@ -386,10 +386,10 @@ label.StopMarquee();
 layout 중 텍스트가 available space를 초과하면 자동으로 시작됩니다. 조건이 맞으면 `StartMarquee()`를 호출할 필요가 없습니다.
 
 ~~~cpp
-Label label = Label::New("Very long text...")
-  .SetRequestedWidth(200.0f)
-  .SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW)
-  .SetMarqueeSpeed(80);
+Label label = Label::New("Very long text...");
+label.SetRequestedWidth(200.0f);
+label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+label.SetMarqueeSpeed(80);
 ~~~
 
 > [!NOTE]
@@ -417,11 +417,11 @@ Text fit은 주어진 width/height 안에서 텍스트가 overflow되지 않도�
 min/max font size와 step으로 범위를 지정합니다. line height는 현재 style 설정을 따릅니다.
 
 ~~~cpp
-Label label = Label::New("Auto-sized text")
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(66.0f)
-  .SetMultiLine(true)
-  .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+Label label = Label::New("Auto-sized text");
+label.SetRequestedWidth(MATCH_PARENT);
+label.SetRequestedHeight(66.0f);
+label.SetMultiLine(true);
+label.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
 ~~~
 
 ### FitCandidate
@@ -434,11 +434,11 @@ candidates.PushBack(Text::FitCandidate(16.0f, 32.0f));
 candidates.PushBack(Text::FitCandidate(20.0f, 40.0f));
 candidates.PushBack(Text::FitCandidate(24.0f, 48.0f));
 
-Label label = Label::New("Candidate fit")
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(80.0f)
-  .SetMultiLine(true)
-  .SetTextFit(candidates);
+Label label = Label::New("Candidate fit");
+label.SetRequestedWidth(MATCH_PARENT);
+label.SetRequestedHeight(80.0f);
+label.SetMultiLine(true);
+label.SetTextFit(candidates);
 ~~~
 
 > [!WARNING]
@@ -456,15 +456,15 @@ Label label = Label::New("Candidate fit")
 `SetTranslatableText()`를 사용하여 다국어 문자열을 바인딩할 수 있습니다.
 
 ~~~cpp
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE");
 ~~~
 
 explicit domain 지정:
 
 ~~~cpp
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE", "myapp-settings");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE", "myapp-settings");
 ~~~
 
 > [!WARNING]
@@ -484,10 +484,10 @@ async rendering은 Label의 text model update, layout, render(pixel buffer 생�
 async rendering이 활성화되면 OnMeasure/OnArrange로 결정된 size를 기반으로 OnRelayout 단계에서 async rendering이 자동 요청됩니다. 완료되면 `AsyncRenderFinishedSignal()`이 호출됩니다.
 
 ~~~cpp
-Label label = Label::New("Async")
-  .SetRequestedWidth(300.0f)
-  .SetRequestedHeight(80.0f)
-  .SetAsyncRendering(true);
+Label label = Label::New("Async");
+label.SetRequestedWidth(300.0f);
+label.SetRequestedHeight(80.0f);
+label.SetAsyncRendering(true);
 ~~~
 
 > [!NOTE]
@@ -535,9 +535,9 @@ label.RequestAsyncHeightForWidth(300.0f);
 Render scale은 glyph를 더 큰 scale로 rasterize한 뒤 downscale하여, View가 시각적으로 확대될 때 texture upscaling으로 인한 품질 저하를 줄이는 기능입니다. layout size에는 영향을 주지 않습니다. async rendering이 활성화된 상태에서만 유효하며, 값은 1.0 이상이어야 합니다.
 
 ~~~cpp
-Label label = Label::New("High quality")
-  .SetAsyncRendering(true)
-  .SetRenderScale(2.0f);
+Label label = Label::New("High quality");
+label.SetAsyncRendering(true);
+label.SetRenderScale(2.0f);
 ~~~
 
 ### Cutout & Mask Effect
@@ -546,14 +546,14 @@ Label label = Label::New("High quality")
 
 ~~~cpp
 // Cutout
-Label label = Label::New("Cutout")
-  .SetCutoutEnabled(true);
+Label label = Label::New("Cutout");
+label.SetCutoutEnabled(true);
 
 // Mask effect
 View maskView = ImageView::New("mask.png");
 
-Label label2 = Label::New("Masked")
-  .SetMaskEffect(maskView);
+Label label2 = Label::New("Masked");
+label2.SetMaskEffect(maskView);
 ~~~
 
 참고 샘플:

@@ -76,8 +76,8 @@ config.Apply();
 Each text view can also be configured directly:
 
 ~~~cpp
-Label label = Label::New()
-  .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+Label label = Label::New();
+label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
 ~~~
 
 | Mode | Description |

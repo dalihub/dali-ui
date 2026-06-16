@@ -32,8 +32,8 @@ UiLocalizationManager manager = UiLocalizationManager::Get();
 manager.RegisterDomain(TEXT_DOMAIN, TEXT_LOCALE_DIR);
 manager.SetDefaultDomain(TEXT_DOMAIN);
 
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE");
 ~~~
 
 > [!NOTE]
@@ -134,8 +134,8 @@ manager.RegisterDomain("myapp", RESOURCES_DIR "locale");
 ~~~cpp
 manager.SetDefaultDomain("myapp");
 
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE");
 ~~~
 
 default domain은 domain 인자를 생략한 lookup/binding에서 사용할 기준 domain입니다.
@@ -145,8 +145,8 @@ default domain이 변경되면 domain 없이 등록된 binding이 refresh됩니�
 ### Explicit Domain
 
 ~~~cpp
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE", "myapp-settings");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE", "myapp-settings");
 ~~~
 
 explicit domain은 default domain 변경에 영향을 받지 않습니다.
@@ -159,8 +159,8 @@ explicit domain은 default domain 변경에 영향을 받지 않습니다.
 ## Label 다국어 텍스트
 
 ~~~cpp
-Label& SetTranslatableText(StringView resourceId);
-Label& SetTranslatableText(StringView resourceId, StringView domain);
+void SetTranslatableText(StringView resourceId);
+void SetTranslatableText(StringView resourceId, StringView domain);
 Dali::String GetTranslatableText() const;
 void ClearTranslatableText();
 ~~~
@@ -175,15 +175,15 @@ msgstr "Title"
 default domain 사용:
 
 ~~~cpp
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE");
 ~~~
 
 explicit domain 사용:
 
 ~~~cpp
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE", "myapp-settings");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE", "myapp-settings");
 ~~~
 
 > [!WARNING]
@@ -196,24 +196,24 @@ Label title = Label::New()
 
 ~~~cpp
 // InputField
-InputField& SetTranslatablePlaceholder(StringView resourceId);
-InputField& SetTranslatablePlaceholder(StringView resourceId, StringView domain);
+void SetTranslatablePlaceholder(StringView resourceId);
+void SetTranslatablePlaceholder(StringView resourceId, StringView domain);
 Dali::String GetTranslatablePlaceholder() const;
 void ClearTranslatablePlaceholder();
 
 // InputEditor
-InputEditor& SetTranslatablePlaceholder(StringView resourceId);
-InputEditor& SetTranslatablePlaceholder(StringView resourceId, StringView domain);
+void SetTranslatablePlaceholder(StringView resourceId);
+void SetTranslatablePlaceholder(StringView resourceId, StringView domain);
 Dali::String GetTranslatablePlaceholder() const;
 void ClearTranslatablePlaceholder();
 ~~~
 
 ~~~cpp
-InputField field = InputField::New()
-  .SetTranslatablePlaceholder("IDS_SEARCH_PLACEHOLDER");
+InputField field = InputField::New();
+field.SetTranslatablePlaceholder("IDS_SEARCH_PLACEHOLDER");
 
-InputEditor editor = InputEditor::New()
-  .SetTranslatablePlaceholder("IDS_COMMENT_PLACEHOLDER");
+InputEditor editor = InputEditor::New();
+editor.SetTranslatablePlaceholder("IDS_COMMENT_PLACEHOLDER");
 ~~~
 
 <br/>
@@ -460,8 +460,8 @@ config.Apply();
 각 text view에서도 직접 설정할 수 있습니다:
 
 ~~~cpp
-Label label = Label::New()
-  .SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
+Label label = Label::New();
+label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
 ~~~
 
 Mode 설명:
