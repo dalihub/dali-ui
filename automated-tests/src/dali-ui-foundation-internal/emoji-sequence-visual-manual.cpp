@@ -16,8 +16,10 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
+#include <dali/devel-api/adaptor-framework/clipboard.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/shaping.h>
 #include <dali/public-api/adaptor-framework/capture.h>
@@ -47,7 +49,8 @@ namespace
 #define DALI_UI_FOUNDATION_INTERNAL_TEST_RESOURCE_DIR "automated-tests/src/dali-ui-foundation-internal/resources"
 #endif
 
-constexpr float HEADER_HEIGHT                    = 96.0f;
+constexpr float HEADER_MIN_HEIGHT                = 50.0f;
+constexpr float HEADER_LINE_HEIGHT               = 17.0f;
 constexpr float ROW_HEIGHT                       = 230.0f;
 constexpr float ROW_SPACING                      = 8.0f;
 constexpr float PAGE_PADDING_X                   = 12.0f;
@@ -58,11 +61,23 @@ constexpr float PREVIEW_WIDTH                    = 160.0f;
 constexpr float PREVIEW_SIZE                     = 52.0f;
 constexpr float DETAIL_SIZE                      = 15.0f;
 constexpr float MIN_DETAIL_WIDTH                 = 220.0f;
-constexpr float HEADER_SIZE                      = 17.0f;
-constexpr float NAV_HEIGHT                       = 86.0f;
-constexpr float NAV_BUTTON_WIDTH                 = 170.0f;
-constexpr float NAV_BUTTON_HEIGHT                = 30.0f;
+constexpr float HEADER_SIZE                      = 12.0f;
+constexpr float NAV_BUTTON_WIDTH                 = 150.0f;
+constexpr float NAV_PAGE_BUTTON_WIDTH            = 96.0f;
+constexpr float NAV_BUTTON_HEIGHT                = 26.0f;
 constexpr float NAV_SIZE                         = 12.0f;
+constexpr float NAV_PADDING_X                    = 8.0f;
+constexpr float NAV_PADDING_Y                    = 6.0f;
+constexpr float NAV_BUTTON_GAP_X                 = 4.0f;
+constexpr float NAV_BUTTON_GAP_Y                 = 4.0f;
+constexpr float FLOATING_SEARCH_MARGIN           = 18.0f;
+constexpr float FLOATING_SEARCH_BUTTON_SIZE      = 48.0f;
+constexpr float FLOATING_SEARCH_INPUT_HEIGHT     = 42.0f;
+constexpr float FLOATING_SEARCH_INPUT_MAX_WIDTH  = 420.0f;
+constexpr float FLOATING_SEARCH_INPUT_MIN_WIDTH  = 220.0f;
+constexpr float FLOATING_SEARCH_FONT_SIZE        = 14.0f;
+constexpr float FLOATING_SEARCH_ICON_SIZE        = 23.0f;
+constexpr float FLOATING_SEARCH_ANIMATION_TIME   = 0.18f;
 constexpr float PREVIEW_POPUP_MARGIN             = 64.0f;
 constexpr float PREVIEW_POPUP_MAX_WIDTH          = 800.0f;
 constexpr float PREVIEW_POPUP_MAX_HEIGHT         = 800.0f;
@@ -72,6 +87,8 @@ constexpr float PREVIEW_POPUP_TEXT_FIT_STEP_SIZE = 10.0f;
 constexpr size_t DEFAULT_PAGE_SIZE               = 100u;
 constexpr uint32_t DETAIL_DIAGNOSTIC_TIMER_MS    = 16u;
 constexpr size_t DETAIL_DIAGNOSTIC_BATCH_SIZE    = 2u;
+constexpr const char* MIME_TYPE_TEXT_PLAIN        = "text/plain;charset=utf-8";
+constexpr const char* SEARCH_BUTTON_EMOJI         = "\xF0\x9F\x94\x8D\xEF\xB8\x8F"; // U+1F50D U+FE0F
 
 struct VisualCase
 {
@@ -98,6 +115,17 @@ struct VisualOptions
   bool                  exportOnly{false};
   bool                  exitAfterExport{false};
   bool                  exitAfterCapture{false};
+};
+
+struct FloatingSearchBounds
+{
+  float buttonX{0.0f};
+  float buttonY{0.0f};
+  float buttonSize{FLOATING_SEARCH_BUTTON_SIZE};
+  float inputX{0.0f};
+  float inputY{0.0f};
+  float inputWidth{FLOATING_SEARCH_INPUT_MIN_WIDTH};
+  float inputHeight{FLOATING_SEARCH_INPUT_HEIGHT};
 };
 
 const char* GetEnv(const char* name)
@@ -165,7 +193,7 @@ std::vector<uint32_t> ParseCodepoints(const std::string& text)
   return codepoints;
 }
 
-std::string CodepointsToString(const std::vector<uint32_t>& codepoints)
+std::string CodepointsToString(const std::vector<uint32_t>& codepoints, bool prefixed = false)
 {
   std::stringstream stream;
   for(size_t index = 0u; index < codepoints.size(); ++index)
@@ -174,9 +202,96 @@ std::string CodepointsToString(const std::vector<uint32_t>& codepoints)
     {
       stream << ' ';
     }
+    if(prefixed)
+    {
+      stream << "U+";
+    }
     stream << std::uppercase << std::hex << codepoints[index] << std::dec;
   }
   return stream.str();
+}
+
+std::string ToLowerAscii(const std::string& text)
+{
+  std::string lower;
+  lower.reserve(text.size());
+  for(char character : text)
+  {
+    const unsigned char value = static_cast<unsigned char>(character);
+    if(value >= 'A' && value <= 'Z')
+    {
+      lower.push_back(static_cast<char>(value - 'A' + 'a'));
+    }
+    else
+    {
+      lower.push_back(character);
+    }
+  }
+  return lower;
+}
+
+std::string TrimAscii(const std::string& text)
+{
+  size_t begin = 0u;
+  while(begin < text.size() && std::isspace(static_cast<unsigned char>(text[begin])))
+  {
+    ++begin;
+  }
+
+  size_t end = text.size();
+  while(end > begin && std::isspace(static_cast<unsigned char>(text[end - 1u])))
+  {
+    --end;
+  }
+
+  return text.substr(begin, end - begin);
+}
+
+std::string NormalizeSearchQuery(const std::string& text)
+{
+  const std::string trimmed = TrimAscii(ToLowerAscii(text));
+  std::string       normalized;
+  normalized.reserve(trimmed.size());
+
+  bool previousWasSpace = false;
+  for(char character : trimmed)
+  {
+    const bool isSpace = std::isspace(static_cast<unsigned char>(character));
+    if(isSpace)
+    {
+      if(!previousWasSpace)
+      {
+        normalized.push_back(' ');
+      }
+      previousWasSpace = true;
+    }
+    else
+    {
+      normalized.push_back(character);
+      previousWasSpace = false;
+    }
+  }
+
+  return normalized;
+}
+
+std::string RemoveUnicodePrefixes(const std::string& text)
+{
+  std::string withoutPrefix;
+  withoutPrefix.reserve(text.size());
+
+  for(size_t index = 0u; index < text.size();)
+  {
+    if(index + 1u < text.size() && text[index] == 'u' && text[index + 1u] == '+')
+    {
+      index += 2u;
+      continue;
+    }
+
+    withoutPrefix.push_back(text[index++]);
+  }
+
+  return NormalizeSearchQuery(withoutPrefix);
 }
 
 Dali::Vector<Dali::Ui::Text::Character> MakeGuardedText(const std::vector<uint32_t>& codepoints)
@@ -469,6 +584,34 @@ std::string HtmlEscape(const std::string& text)
     }
   }
   return escaped;
+}
+
+void AppendMarkupEscaped(std::string& output, const std::string& text, size_t begin, size_t length)
+{
+  for(size_t index = begin; index < begin + length && index < text.size(); ++index)
+  {
+    switch(text[index])
+    {
+      case '&':
+        output += "&amp;";
+        break;
+      case '<':
+        output += "&lt;";
+        break;
+      case '>':
+        output += "&gt;";
+        break;
+      case '"':
+        output += "&quot;";
+        break;
+      case '\'':
+        output += "&apos;";
+        break;
+      default:
+        output.push_back(text[index]);
+        break;
+    }
+  }
 }
 
 void AppendUtf8(std::string& output, uint32_t codepoint)
@@ -974,6 +1117,7 @@ Label MakeLabel(const std::string& text, float fontSize, const Vector4& color)
   label.SetFontSize(fontSize);
   label.SetTextColor(color);
   label.SetMultiLine(true);
+  label.SetOverflowMode(Text::OverflowMode::CLIP);
   label.SetHorizontalTextAlignment(Text::Alignment::START);
   label.SetVerticalTextAlignment(Text::Alignment::CENTER);
   return label;
@@ -1067,36 +1211,26 @@ std::string BuildRunDiagnosticText(Text::MultilanguageSupport& multilanguageSupp
   }
 }
 
+std::string MakeDetailText(const VisualCase& item, const std::string& diagnostics)
+{
+  std::stringstream stream;
+  stream << SectionForCase(item) << '\n'
+         << item.signature << " / " << item.status << '\n'
+         << CodepointsToString(item.codepoints) << '\n'
+         << item.name;
+  if(!item.reason.empty())
+  {
+    stream << '\n' << item.reason;
+  }
+  stream << '\n' << diagnostics;
+  return stream.str();
+}
+
 std::string MakeDetailText(Text::MultilanguageSupport& multilanguageSupport,
                            TextAbstraction::FontClient& fontClient,
                            const VisualCase&            item)
 {
-  std::stringstream stream;
-  stream << SectionForCase(item) << '\n'
-         << item.signature << " / " << item.status << '\n'
-         << CodepointsToString(item.codepoints) << '\n'
-         << item.name;
-  if(!item.reason.empty())
-  {
-    stream << '\n' << item.reason;
-  }
-  stream << '\n' << BuildRunDiagnosticText(multilanguageSupport, fontClient, item);
-  return stream.str();
-}
-
-std::string MakeBasicDetailText(const VisualCase& item)
-{
-  std::stringstream stream;
-  stream << SectionForCase(item) << '\n'
-         << item.signature << " / " << item.status << '\n'
-         << CodepointsToString(item.codepoints) << '\n'
-         << item.name;
-  if(!item.reason.empty())
-  {
-    stream << '\n' << item.reason;
-  }
-  stream << "\nrun diagnostics: pending";
-  return stream.str();
+  return MakeDetailText(item, BuildRunDiagnosticText(multilanguageSupport, fontClient, item));
 }
 
 std::string SourcePathForOptions(const VisualOptions& options)
@@ -1109,6 +1243,59 @@ std::string SourcePathForOptions(const VisualOptions& options)
   return "mode=" + options.mode + " fixture=" + options.fixturePath;
 }
 
+Property::Map CreateSoftShadowMap(float alpha, float offsetY, float blurRadius, const Vector2& sizeScale)
+{
+  Property::Map transform;
+  transform.Add(Ui::Visual::Transform::Property::OFFSET, Vector2(0.0f, offsetY));
+  transform.Add(Ui::Visual::Transform::Property::OFFSET_POLICY,
+                Vector2(static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE),
+                        static_cast<float>(Ui::Visual::Transform::Policy::ABSOLUTE)));
+  transform.Add(Ui::Visual::Transform::Property::SIZE, sizeScale);
+  transform.Add(Ui::Visual::Transform::Property::SIZE_POLICY,
+                Vector2(static_cast<float>(Ui::Visual::Transform::Policy::RELATIVE),
+                        static_cast<float>(Ui::Visual::Transform::Policy::RELATIVE)));
+
+  Property::Map shadow;
+  shadow.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::VisualType::COLOR);
+  shadow.Add(Ui::VisualBasePropertyIndex::MIX_COLOR, Vector4(0.0f, 0.0f, 0.0f, alpha));
+  shadow.Add(Ui::ColorVisualPropertyIndex::BLUR_RADIUS, blurRadius);
+  shadow.Add(Ui::VisualBasePropertyIndex::TRANSFORM, transform);
+  return shadow;
+}
+
+std::string CompactPath(const std::string& path, size_t maxLength = 88u)
+{
+  std::string compact = path;
+  const char* home    = GetEnv("HOME");
+  if(home && home[0] != '\0')
+  {
+    const std::string homePath(home);
+    if(compact.compare(0u, homePath.size(), homePath) == 0)
+    {
+      compact = "~" + compact.substr(homePath.size());
+  }
+}
+
+  if(compact.size() <= maxLength)
+  {
+    return compact;
+  }
+
+  const std::string prefix = compact.compare(0u, 2u, "~/") == 0 ? "~/..." : "...";
+  const size_t      keep   = maxLength > prefix.size() ? maxLength - prefix.size() : 0u;
+  return prefix + compact.substr(compact.size() - keep);
+}
+
+std::string DisplaySourceForOptions(const VisualOptions& options)
+{
+  if(!options.inputPath.empty())
+  {
+    return "input: " + CompactPath(options.inputPath);
+  }
+
+  return "mode=" + options.mode + " fixture: " + CompactPath(options.fixturePath);
+}
+
 std::string SignatureFilterToString(const VisualOptions& options)
 {
   std::stringstream stream;
@@ -1119,11 +1306,6 @@ std::string SignatureFilterToString(const VisualOptions& options)
     first = false;
   }
   return stream.str();
-}
-
-std::string MaxItemsToString(const VisualOptions& options)
-{
-  return options.maxItems == 0u ? "all" : std::to_string(options.maxItems);
 }
 
 std::string AnchorIdForSection(const std::string& section)
@@ -1161,23 +1343,6 @@ std::vector<std::string> SectionsForShownItems(const std::vector<VisualCase>& it
   return sections;
 }
 
-std::vector<std::pair<std::string, size_t>> SectionAnchorsForShownItems(const std::vector<VisualCase>& items, size_t shownCount)
-{
-  std::set<std::string>                    seenSections;
-  std::vector<std::pair<std::string, size_t>> sections;
-
-  for(size_t index = 0u; index < shownCount; ++index)
-  {
-    const std::string section = SectionForCase(items[index]);
-    if(seenSections.insert(section).second)
-    {
-      sections.push_back(std::make_pair(section, index));
-    }
-  }
-
-  return sections;
-}
-
 void WriteHtmlExport(const VisualOptions&             options,
                      const std::vector<VisualCase>&  items,
                      Text::MultilanguageSupport&     multilanguageSupport,
@@ -1191,6 +1356,7 @@ void WriteHtmlExport(const VisualOptions&             options,
 
   const size_t              shownCount = ShownCountForOptions(items, options);
   const std::vector<std::string> sections = SectionsForShownItems(items, shownCount);
+  const std::string         maxItemsText = options.maxItems == 0u ? "all" : std::to_string(options.maxItems);
   output << "<!doctype html>\n"
          << "<html lang=\"ko\">\n"
          << "<head>\n"
@@ -1219,7 +1385,7 @@ void WriteHtmlExport(const VisualOptions&             options,
          << "<br>mode=" << HtmlEscape(options.inputPath.empty() ? options.mode : "input")
          << "<br>selected=" << items.size()
          << " shown=" << shownCount
-         << " max=" << HtmlEscape(MaxItemsToString(options));
+         << " max=" << HtmlEscape(maxItemsText);
   if(!options.signatureFilter.empty())
   {
     output << "<br>filter=" << HtmlEscape(SignatureFilterToString(options));
@@ -1316,6 +1482,7 @@ private:
     mWindow.SetBackgroundColor(Color::WHITE);
     mWindow.KeyEventSignal().Connect(this, &EmojiVisualController::OnKeyEvent);
     mWindow.ResizeSignal().Connect(this, &EmojiVisualController::OnWindowResized);
+    DevelFocusManager::EnableFocusIndicator(FocusManager::Get(), false);
 
     mMultilanguageSupport = Text::MultilanguageSupport::New(false);
     mFontClient           = TextAbstraction::FontClient::New();
@@ -1367,6 +1534,19 @@ private:
     }
 
     const Dali::String keyName = event.GetKeyName();
+    if(mIsSearchOpen)
+    {
+      if(keyName == "Escape" || keyName == "XF86Back")
+      {
+        CloseSearchInput();
+        return;
+      }
+      if(keyName == "BackSpace")
+      {
+        return;
+      }
+    }
+
     if(keyName == "Escape" || keyName == "BackSpace" || keyName == "XF86Back")
     {
       if(mIsPreviewOverlayVisible)
@@ -1406,7 +1586,10 @@ private:
 
   void OnWindowResized(Window /*window*/, Window::WindowSize /*size*/)
   {
+    UpdateHeaderText();
+    UpdateNavigationHeight();
     UpdateLayoutBounds();
+    UpdateFloatingSearchBounds();
     UpdatePreviewOverlayBounds();
   }
 
@@ -1417,17 +1600,19 @@ private:
     mRoot.SetRequestedHeight(MATCH_PARENT);
     mRoot.SetBackgroundColor(Color::WHITE);
 
-    mShownCount = ShownCountForOptions(mItems, mOptions);
-    mSectionAnchors = SectionAnchorsForShownItems(mItems, mShownCount);
+    mBaseShownCount = ShownCountForOptions(mItems, mOptions);
+    mShownCount     = mBaseShownCount;
     mDetailTextCache.resize(mItems.size());
     mBasicDetailTextCache.resize(mItems.size());
     mDetailTextQueued.assign(mItems.size(), false);
+    BuildSearchIndex();
+    mSectionAnchors = BuildCurrentSectionAnchors();
 
     mHeader = MakeLabel(BuildHeaderText(), HEADER_SIZE, Color::BLACK);
     mHeader.SetRequestedWidth(MATCH_PARENT);
-    mHeader.SetRequestedHeight(HEADER_HEIGHT);
+    mHeader.SetRequestedHeight(HeaderHeightForText(BuildHeaderText()));
     mHeader.SetBackgroundColor(Vector4(0.92f, 0.94f, 0.96f, 1.0f));
-    mHeader.SetPadding(Extents(16, 16, 10, 10));
+    mHeader.SetPadding(Extents(12, 12, 7, 7));
     mRoot.Add(mHeader);
 
     BuildNavigationBar();
@@ -1446,26 +1631,26 @@ private:
     BuildPreviewOverlay();
 
     mWindow.Add(mRoot);
+    BuildFloatingSearch();
   }
 
   std::string BuildHeaderText() const
   {
     std::stringstream stream;
-    stream << "Emoji Visual Manual\n";
-    stream << "source=" << SourcePathForOptions(mOptions)
-           << " mode=" << (mOptions.inputPath.empty() ? mOptions.mode : "input")
-           << " selected=" << mItems.size()
-           << " shown=" << mShownCount
-           << " max=" << MaxItemsToString(mOptions)
-           << " pageSize=" << PageSize();
+    stream << "Source: " << DisplaySourceForOptions(mOptions)
+           << " | Items: " << mBaseShownCount;
+    if(IsSearchActive())
+    {
+      stream << " | Search: \"" << mSearchText << "\""
+             << " | Matches: " << mShownCount;
+    }
     if(mShownCount > 0u)
     {
-      stream << " page=" << CurrentPageNumber() << "/" << PageCount()
-             << " range=[" << mPageStartIndex << "," << PageEndIndex() << ")";
+      stream << " | Page: " << CurrentPageNumber() << "/" << PageCount();
     }
     if(!mOptions.signatureFilter.empty())
     {
-      stream << " filter=" << SignatureFilterToString(mOptions);
+      stream << " | Filter: " << SignatureFilterToString(mOptions);
     }
     if(!mSectionAnchors.empty())
     {
@@ -1474,41 +1659,96 @@ private:
       stream << "\n";
       if(startSectionIndex == endSectionIndex)
       {
-        stream << "section=" << (startSectionIndex + 1u) << "/" << mSectionAnchors.size()
+        stream << "Section: " << (startSectionIndex + 1u) << "/" << mSectionAnchors.size()
                << " " << mSectionAnchors[startSectionIndex].first;
       }
       else
       {
-        stream << "sections=" << (startSectionIndex + 1u) << "-" << (endSectionIndex + 1u) << "/" << mSectionAnchors.size()
+        stream << "Sections: " << (startSectionIndex + 1u) << "-" << (endSectionIndex + 1u) << "/" << mSectionAnchors.size()
                << " " << mSectionAnchors[startSectionIndex].first
                << " -> " << mSectionAnchors[endSectionIndex].first;
       }
-      stream << " keys: N/P page, [/ ] section, Home/End";
+      stream << " | Keys: N/P page, [/ ] section, Home/End";
     }
     if(!mOptions.exportHtmlPath.empty())
     {
-      stream << "\nexportHtml=" << mOptions.exportHtmlPath;
+      stream << "\nExport HTML: " << CompactPath(mOptions.exportHtmlPath);
     }
     if(!mOptions.capturePath.empty())
     {
-      stream << "\ncapture=" << mOptions.capturePath;
+      stream << "\nCapture: " << CompactPath(mOptions.capturePath);
     }
     return stream.str();
+  }
+
+  float HeaderHeightForText(const std::string& text) const
+  {
+    const float availableWidth      = std::max(120.0f, CurrentWindowWidth() - 24.0f);
+    const size_t estimatedCharsPerLine = std::max<size_t>(24u, static_cast<size_t>(availableWidth / (HEADER_SIZE * 0.62f)));
+    size_t      lineCount           = 0u;
+    size_t      lineLength          = 0u;
+
+    auto addEstimatedLine = [&]() {
+      lineCount += std::max<size_t>(1u, (lineLength + estimatedCharsPerLine - 1u) / estimatedCharsPerLine);
+      lineLength = 0u;
+    };
+
+    for(char character : text)
+    {
+      if(character == '\n')
+      {
+        addEstimatedLine();
+      }
+      else
+      {
+        ++lineLength;
+      }
+    }
+    addEstimatedLine();
+
+    return std::max(HEADER_MIN_HEIGHT, HEADER_LINE_HEIGHT * static_cast<float>(lineCount) + 14.0f);
+  }
+
+  void UpdateHeaderText()
+  {
+    if(!mHeader)
+    {
+      return;
+    }
+
+    const std::string text = BuildHeaderText();
+    mHeader.SetText(text.c_str());
+    mHeader.SetRequestedHeight(HeaderHeightForText(text));
   }
 
   void BuildNavigationBar()
   {
     mNavigation = FlexLayout::New();
     mNavigation.SetRequestedWidth(MATCH_PARENT);
-    mNavigation.SetRequestedHeight(NAV_HEIGHT);
     mNavigation.SetDirection(FlexDirection::ROW);
     mNavigation.SetWrap(FlexWrap::WRAP);
     mNavigation.SetAlignItems(FlexAlign::FLEX_START);
-    mNavigation.SetPadding(Extents(12, 12, 8, 6));
+    mNavigation.SetPadding(Extents(static_cast<uint16_t>(NAV_PADDING_X),
+                                   static_cast<uint16_t>(NAV_PADDING_X),
+                                   static_cast<uint16_t>(NAV_PADDING_Y),
+                                   static_cast<uint16_t>(NAV_PADDING_Y)));
     mNavigation.SetBackgroundColor(Vector4(0.96f, 0.97f, 0.99f, 1.0f));
 
-    mNavigation.Add(MakeNavButton("Prev page", [this]() { PreviousPage(); }, 120.0f, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
-    mNavigation.Add(MakeNavButton("Next page", [this]() { NextPage(); }, 120.0f, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
+    PopulateNavigationBar();
+    UpdateNavigationHeight();
+    mRoot.Add(mNavigation);
+  }
+
+  void PopulateNavigationBar()
+  {
+    if(!mNavigation)
+    {
+      return;
+    }
+
+    mNavigation.RemoveAllChildren();
+    mNavigation.Add(MakeNavButton("Prev page", [this]() { PreviousPage(); }, NAV_PAGE_BUTTON_WIDTH, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
+    mNavigation.Add(MakeNavButton("Next page", [this]() { NextPage(); }, NAV_PAGE_BUTTON_WIDTH, Vector4(0.84f, 0.88f, 0.95f, 1.0f)));
 
     for(size_t sectionIndex = 0u; sectionIndex < mSectionAnchors.size(); ++sectionIndex)
     {
@@ -1516,8 +1756,61 @@ private:
       label << (sectionIndex + 1u) << ". " << mSectionAnchors[sectionIndex].first;
       mNavigation.Add(MakeNavButton(label.str(), [this, sectionIndex]() { JumpToSection(sectionIndex); }, NAV_BUTTON_WIDTH, Vector4(0.90f, 0.93f, 0.98f, 1.0f)));
     }
+  }
 
-    mRoot.Add(mNavigation);
+  void RebuildNavigationBar()
+  {
+    PopulateNavigationBar();
+    UpdateNavigationHeight();
+  }
+
+  float CurrentWindowWidth() const
+  {
+    if(!mWindow)
+    {
+      return MinimumRowWidth() + PAGE_PADDING_X * 2.0f;
+    }
+
+    const auto size = mWindow.GetSize();
+    return static_cast<float>(size.GetWidth());
+  }
+
+  void UpdateNavigationHeight()
+  {
+    if(!mNavigation)
+    {
+      return;
+    }
+
+    const float windowWidth  = std::max(1.0f, CurrentWindowWidth());
+    const float usableWidth  = std::max(1.0f, windowWidth - NAV_PADDING_X * 2.0f);
+    size_t      rowCount     = 1u;
+    float       currentWidth = 0.0f;
+
+    auto addButtonWidth = [&](float width) {
+      const float buttonWidth = width + NAV_BUTTON_GAP_X;
+      if(currentWidth > 0.0f && currentWidth + buttonWidth > usableWidth)
+      {
+        ++rowCount;
+        currentWidth = buttonWidth;
+      }
+      else
+      {
+        currentWidth += buttonWidth;
+      }
+    };
+
+    addButtonWidth(NAV_PAGE_BUTTON_WIDTH);
+    addButtonWidth(NAV_PAGE_BUTTON_WIDTH);
+    for(size_t index = 0u; index < mSectionAnchors.size(); ++index)
+    {
+      addButtonWidth(NAV_BUTTON_WIDTH);
+    }
+
+    const float height = NAV_PADDING_Y * 2.0f +
+                         static_cast<float>(rowCount) * NAV_BUTTON_HEIGHT +
+                         static_cast<float>(rowCount - 1u) * NAV_BUTTON_GAP_Y;
+    mNavigation.SetRequestedHeight(height);
   }
 
   Label MakeNavButton(const std::string& text,
@@ -1532,15 +1825,18 @@ private:
     button.SetFontSize(NAV_SIZE);
     button.SetTextColor(Color::BLACK);
     button.SetMultiLine(false);
-    button.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+    button.SetOverflowMode(Text::OverflowMode::CLIP);
     button.SetAsyncRendering(false);
     button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     button.SetVerticalTextAlignment(Text::Alignment::CENTER);
     button.SetParentOrigin(ParentOrigin::TOP_LEFT);
     button.SetPivot(Pivot::TOP_LEFT);
     button.SetBackgroundColor(backgroundColor);
-    button.SetMargin(Extents(0, 6, 0, 6));
-    button.SetPadding(Extents(6, 6, 0, 0));
+    button.SetMargin(Extents(0,
+                             static_cast<uint16_t>(NAV_BUTTON_GAP_X),
+                             0,
+                             static_cast<uint16_t>(NAV_BUTTON_GAP_Y)));
+    button.SetPadding(Extents(4, 4, 0, 0));
     button.TouchedSignal().Connect(this, [action, backgroundColor](Actor actor, const TouchEvent& touch) {
       Label button = Label::DownCast(actor);
       if(button)
@@ -1556,6 +1852,197 @@ private:
       return true;
     });
     return button;
+  }
+
+  std::string BuildSearchableText(const VisualCase& item) const
+  {
+    std::stringstream stream;
+    stream << CodepointsToUtf8(item.codepoints) << ' '
+           << CodepointsToString(item.codepoints) << ' '
+           << CodepointsToString(item.codepoints, true) << ' '
+           << SectionForCase(item) << ' '
+           << item.signature << ' '
+           << item.status << ' '
+           << item.name;
+    if(!item.reason.empty())
+    {
+      stream << ' ' << item.reason;
+    }
+    return NormalizeSearchQuery(stream.str());
+  }
+
+  void BuildSearchIndex()
+  {
+    mSearchIndex.clear();
+    mSearchIndex.reserve(mItems.size());
+    for(const VisualCase& item : mItems)
+    {
+      mSearchIndex.push_back(BuildSearchableText(item));
+    }
+  }
+
+  bool IsSearchActive() const
+  {
+    return !mSearchQuery.empty();
+  }
+
+  size_t ItemIndexForVisibleIndex(size_t visibleIndex) const
+  {
+    if(IsSearchActive())
+    {
+      return visibleIndex < mSearchMatches.size() ? mSearchMatches[visibleIndex] : static_cast<size_t>(-1);
+    }
+
+    return visibleIndex;
+  }
+
+  std::vector<std::pair<std::string, size_t>> BuildCurrentSectionAnchors() const
+  {
+    std::set<std::string>                         seenSections;
+    std::vector<std::pair<std::string, size_t>>   sections;
+
+    for(size_t visibleIndex = 0u; visibleIndex < mShownCount; ++visibleIndex)
+    {
+      const size_t itemIndex = ItemIndexForVisibleIndex(visibleIndex);
+      if(itemIndex >= mItems.size())
+      {
+        continue;
+      }
+
+      const std::string section = SectionForCase(mItems[itemIndex]);
+      if(seenSections.insert(section).second)
+      {
+        sections.push_back(std::make_pair(section, visibleIndex));
+      }
+    }
+
+    return sections;
+  }
+
+  std::vector<std::string> HighlightNeedlesForCurrentSearch() const
+  {
+    std::vector<std::string> needles;
+    if(mSearchQuery.empty())
+    {
+      return needles;
+    }
+
+    needles.push_back(mSearchQuery);
+    const std::string withoutUnicodePrefixes = RemoveUnicodePrefixes(mSearchQuery);
+    if(!withoutUnicodePrefixes.empty() && withoutUnicodePrefixes != mSearchQuery)
+    {
+      needles.push_back(withoutUnicodePrefixes);
+    }
+    return needles;
+  }
+
+  std::string HighlightSearchMatches(const std::string& text) const
+  {
+    const std::vector<std::string> needles = HighlightNeedlesForCurrentSearch();
+    if(needles.empty())
+    {
+      return HtmlEscape(text);
+    }
+
+    const std::string lowerText = ToLowerAscii(text);
+    std::string       markup;
+    markup.reserve(text.size() + 64u);
+
+    size_t cursor = 0u;
+    while(cursor < text.size())
+    {
+      size_t matchBegin = std::string::npos;
+      size_t matchSize  = 0u;
+      for(const std::string& needle : needles)
+      {
+        if(needle.empty())
+        {
+          continue;
+        }
+
+        const size_t found = lowerText.find(needle, cursor);
+        if(found != std::string::npos &&
+           (matchBegin == std::string::npos || found < matchBegin || (found == matchBegin && needle.size() > matchSize)))
+        {
+          matchBegin = found;
+          matchSize  = needle.size();
+        }
+      }
+
+      if(matchBegin == std::string::npos)
+      {
+        AppendMarkupEscaped(markup, text, cursor, text.size() - cursor);
+        break;
+      }
+
+      if(matchBegin > cursor)
+      {
+        AppendMarkupEscaped(markup, text, cursor, matchBegin - cursor);
+      }
+
+      markup += "<color value='#B42318'>";
+      AppendMarkupEscaped(markup, text, matchBegin, matchSize);
+      markup += "</color>";
+      cursor = matchBegin + matchSize;
+    }
+
+    return markup;
+  }
+
+  std::string VisibleDetailMarkupForIndex(size_t index)
+  {
+    return HighlightSearchMatches(VisibleDetailTextForIndex(index));
+  }
+
+  void SetRowDetailText(RowActors& row, size_t index)
+  {
+    const bool searchActive = IsSearchActive();
+    row.detail.SetMarkupEnabled(searchActive);
+    row.detail.SetText(searchActive ? VisibleDetailMarkupForIndex(index).c_str()
+                                    : VisibleDetailTextForIndex(index).c_str());
+  }
+
+  void ApplySearchText(const std::string& text)
+  {
+    const std::string normalized = NormalizeSearchQuery(text);
+    if(normalized == mSearchQuery && text == mSearchText)
+    {
+      return;
+    }
+
+    mSearchText  = text;
+    mSearchQuery = normalized;
+    mSearchMatches.clear();
+
+    if(IsSearchActive())
+    {
+      for(size_t index = 0u; index < mBaseShownCount && index < mSearchIndex.size(); ++index)
+      {
+        if(mSearchIndex[index].find(mSearchQuery) != std::string::npos)
+        {
+          mSearchMatches.push_back(index);
+        }
+      }
+      mShownCount = mSearchMatches.size();
+    }
+    else
+    {
+      mShownCount = mBaseShownCount;
+    }
+
+    mPageStartIndex = 0u;
+    mSectionAnchors = BuildCurrentSectionAnchors();
+    RebuildNavigationBar();
+    UpdatePageContent();
+  }
+
+  void OnSearchTextChanged(View view)
+  {
+    InputField input = InputField::DownCast(view);
+    if(input)
+    {
+      ApplySearchText(input.GetText().CStr());
+    }
   }
 
   size_t PageSize() const
@@ -1771,7 +2258,7 @@ private:
 
     if(mShownCount == 0u)
     {
-      if(widthChanged && mEmptyLabel && mEmptyLabelParams)
+      if(mEmptyLabel && mEmptyLabelParams)
       {
         mEmptyLabel.SetRequestedWidth(rowWidth);
         mEmptyLabelParams.SetBounds(LayoutRect(PAGE_PADDING_X, PAGE_PADDING_Y, rowWidth, ROW_HEIGHT));
@@ -1817,20 +2304,19 @@ private:
     mPageContent.SetRequestedWidth(PageContentWidth());
     mPageContent.SetRequestedHeight(PageContentHeight(mShownCount == 0u ? 1u : std::min(PageSize(), mShownCount)));
 
-    if(mShownCount == 0u)
+    mEmptyLabel = MakeLabel(EmptyMessageText(), DETAIL_SIZE, Color::BLACK);
+    mEmptyLabel.SetRequestedWidth(RowWidth());
+    mEmptyLabel.SetRequestedHeight(ROW_HEIGHT);
+    mEmptyLabel.SetBackgroundColor(Vector4(0.98f, 0.88f, 0.88f, 1.0f));
+    mEmptyLabel.SetPadding(Extents(16, 16, 10, 10));
+    mEmptyLabel.SetProperty(Actor::Property::VISIBLE, mShownCount == 0u);
+    mEmptyLabelParams = AbsoluteLayoutParams::New();
+    mEmptyLabel.SetLayoutParams(mEmptyLabelParams);
+    mPageContent.Add(mEmptyLabel);
+
+    if(mBaseShownCount > 0u)
     {
-      mEmptyLabel = MakeLabel(mLoadError.empty() ? "No emoji cases selected." : mLoadError, DETAIL_SIZE, Color::BLACK);
-      mEmptyLabel.SetRequestedWidth(RowWidth());
-      mEmptyLabel.SetRequestedHeight(ROW_HEIGHT);
-      mEmptyLabel.SetBackgroundColor(Vector4(0.98f, 0.88f, 0.88f, 1.0f));
-      mEmptyLabel.SetPadding(Extents(16, 16, 10, 10));
-      mEmptyLabelParams = AbsoluteLayoutParams::New();
-      mEmptyLabel.SetLayoutParams(mEmptyLabelParams);
-      mPageContent.Add(mEmptyLabel);
-    }
-    else
-    {
-      const size_t rowCount = std::min(PageSize(), mShownCount);
+      const size_t rowCount = std::min(PageSize(), mBaseShownCount);
       mRowPool.reserve(rowCount);
       for(size_t slot = 0u; slot < rowCount; ++slot)
       {
@@ -1842,6 +2328,295 @@ private:
 
     mScrollView.SetContent(mPageContent);
     UpdatePageContent();
+  }
+
+  std::string EmptyMessageText() const
+  {
+    if(!mLoadError.empty())
+    {
+      return mLoadError;
+    }
+    if(IsSearchActive())
+    {
+      return "No matches for \"" + mSearchText + "\".";
+    }
+    return "No emoji cases selected.";
+  }
+
+  void BuildFloatingSearch()
+  {
+    mSearchOverlay = AbsoluteLayout::New();
+    mSearchOverlay.SetLayoutMode(LayoutMode::STANDALONE);
+    mSearchOverlay.SetRequestedPositionX(0.0f);
+    mSearchOverlay.SetRequestedPositionY(0.0f);
+    mSearchOverlay.SetBackgroundColor(Color::TRANSPARENT);
+
+    mSearchDismissLayer = View::New();
+    mSearchDismissLayer.SetLayoutMode(LayoutMode::STANDALONE);
+    mSearchDismissLayer.SetBackgroundColor(Color::TRANSPARENT);
+    mSearchDismissLayer.SetProperty(Actor::Property::VISIBLE, false);
+    mSearchDismissLayer.TouchedSignal().Connect(this, &EmojiVisualController::OnSearchDismissTouched);
+    mSearchOverlay.Add(mSearchDismissLayer);
+
+    mSearchInput = InputField::New();
+    mSearchInput.SetLayoutMode(LayoutMode::STANDALONE);
+    mSearchInput.SetFontSize(FLOATING_SEARCH_FONT_SIZE);
+    mSearchInput.SetTextColor(Color::BLACK);
+    mSearchInput.SetBackgroundColor(Color::WHITE);
+    mSearchInput.SetPlaceholder("Search Unicode or Emoji");
+    mSearchInput.SetPlaceholderColor(Vector4(0.45f, 0.48f, 0.55f, 1.0f));
+    mSearchInput.SetShowPlaceholderOnFocus(true);
+    mSearchInput.SetCursorWidth(2);
+    mSearchInput.SetCursorColor(Color::BLACK);
+    mSearchInput.SetPadding(Extents(14, 14, 8, 8));
+    mSearchInput.SetHorizontalTextAlignment(Text::Alignment::START);
+    mSearchInput.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mSearchInput.SetOverflowMode(Text::OverflowMode::CLIP);
+    mSearchInput.SetCornerRadiusPolicyRelative();
+    mSearchInput.SetCornerRadius(0.5f);
+    mSearchInput.SetProperty(View::Property::SHADOW, CreateSoftShadowMap(0.14f, 3.0f, 5.0f, Vector2(1.02f, 1.08f)));
+    mSearchInput.SetFocusable(true);
+    mSearchInput.SetTouchFocusable(true);
+    mSearchInput.SetProperty(Actor::Property::VISIBLE, false);
+    mSearchInput.SetProperty(Actor::Property::SENSITIVE, false);
+    mSearchInput.SetProperty(Actor::Property::OPACITY, 0.0f);
+    mSearchInput.TouchedSignal().Connect(this, &EmojiVisualController::OnSearchInputTouched);
+    mSearchInput.TextChangedSignal().Connect(this, &EmojiVisualController::OnSearchTextChanged);
+    mSearchOverlay.Add(mSearchInput);
+
+    mSearchButton = View::New();
+    mSearchButton.SetLayoutMode(LayoutMode::STANDALONE);
+    mSearchButton.SetBackgroundColor(Color::WHITE);
+    mSearchButton.SetCornerRadiusPolicyRelative();
+    mSearchButton.SetCornerRadius(0.5f);
+    mSearchButton.SetProperty(View::Property::SHADOW, CreateSoftShadowMap(0.18f, 3.0f, 4.0f, Vector2(1.08f, 1.08f)));
+    mSearchButton.TouchedSignal().Connect(this, &EmojiVisualController::OnSearchButtonTouched);
+
+    mSearchIcon = Label::New(SEARCH_BUTTON_EMOJI);
+    mSearchIcon.SetLayoutMode(LayoutMode::STANDALONE);
+    mSearchIcon.SetBackgroundColor(Color::TRANSPARENT);
+    mSearchIcon.SetTextColor(Color::WHITE);
+    mSearchIcon.SetFontSize(FLOATING_SEARCH_ICON_SIZE);
+    mSearchIcon.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mSearchIcon.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mSearchIcon.SetOverflowMode(Text::OverflowMode::CLIP);
+    mSearchIcon.SetRequestedPositionX(0.0f);
+    mSearchIcon.SetRequestedPositionY(-1.0f);
+    mSearchIcon.SetRequestedWidth(FLOATING_SEARCH_BUTTON_SIZE);
+    mSearchIcon.SetRequestedHeight(FLOATING_SEARCH_BUTTON_SIZE);
+    mSearchIcon.TouchedSignal().Connect(this, &EmojiVisualController::OnSearchButtonTouched);
+    mSearchButton.Add(mSearchIcon);
+
+    mSearchOverlay.Add(mSearchButton);
+
+    mWindow.Add(mSearchOverlay);
+    UpdateFloatingSearchBounds();
+  }
+
+  float FloatingSearchInputWidth() const
+  {
+    const float windowWidth = std::max(1.0f, CurrentWindowWidth());
+    const float available   = std::max(FLOATING_SEARCH_BUTTON_SIZE, windowWidth - FLOATING_SEARCH_MARGIN * 2.0f);
+    return std::min(FLOATING_SEARCH_INPUT_MAX_WIDTH, std::max(FLOATING_SEARCH_INPUT_MIN_WIDTH, available));
+  }
+
+  FloatingSearchBounds CurrentFloatingSearchBounds() const
+  {
+    const auto  size   = mWindow.GetSize();
+    const float width  = std::max(1.0f, static_cast<float>(size.GetWidth()));
+    const float height = std::max(1.0f, static_cast<float>(size.GetHeight()));
+    const float right  = std::max(FLOATING_SEARCH_MARGIN + FLOATING_SEARCH_BUTTON_SIZE, width - FLOATING_SEARCH_MARGIN);
+    const float bottom = std::max(FLOATING_SEARCH_MARGIN + FLOATING_SEARCH_BUTTON_SIZE, height - FLOATING_SEARCH_MARGIN);
+
+    FloatingSearchBounds bounds;
+    bounds.buttonX    = right - FLOATING_SEARCH_BUTTON_SIZE;
+    bounds.buttonY    = bottom - FLOATING_SEARCH_BUTTON_SIZE;
+    bounds.buttonSize = FLOATING_SEARCH_BUTTON_SIZE;
+    bounds.inputWidth = std::max(FLOATING_SEARCH_BUTTON_SIZE, std::min(FloatingSearchInputWidth(), right - FLOATING_SEARCH_MARGIN));
+    bounds.inputHeight = FLOATING_SEARCH_INPUT_HEIGHT;
+    bounds.inputX      = right - bounds.inputWidth;
+    bounds.inputY      = bottom - bounds.inputHeight;
+    return bounds;
+  }
+
+  void SetSearchActorBounds(View view, float x, float y, float width, float height)
+  {
+    if(!view)
+    {
+      return;
+    }
+
+    view.SetRequestedPositionX(x);
+    view.SetRequestedPositionY(y);
+    view.SetRequestedWidth(width);
+    view.SetRequestedHeight(height);
+    view.SetProperty(Actor::Property::POSITION_X, x);
+    view.SetProperty(Actor::Property::POSITION_Y, y);
+    view.SetProperty(Actor::Property::SIZE_WIDTH, width);
+    view.SetProperty(Actor::Property::SIZE_HEIGHT, height);
+  }
+
+  void UpdateFloatingSearchBounds()
+  {
+    if(!mSearchOverlay)
+    {
+      return;
+    }
+
+    const auto  size   = mWindow.GetSize();
+    const float width  = std::max(1.0f, static_cast<float>(size.GetWidth()));
+    const float height = std::max(1.0f, static_cast<float>(size.GetHeight()));
+    const FloatingSearchBounds bounds = CurrentFloatingSearchBounds();
+
+    mSearchOverlay.SetRequestedWidth(width);
+    mSearchOverlay.SetRequestedHeight(height);
+    SetSearchActorBounds(mSearchDismissLayer, 0.0f, 0.0f, width, height);
+
+    SetSearchActorBounds(mSearchButton, bounds.buttonX, bounds.buttonY, bounds.buttonSize, bounds.buttonSize);
+    SetSearchActorBounds(mSearchInput, bounds.inputX, bounds.inputY, bounds.inputWidth, bounds.inputHeight);
+
+    mSearchOverlay.RaiseToTop();
+  }
+
+  bool OnSearchButtonTouched(Actor /*actor*/, TouchEvent touch)
+  {
+    const PointState::Type state = touch.GetState(0u);
+    if(state == PointState::UP || state == PointState::FINISHED)
+    {
+      OpenSearchInput();
+    }
+    return true;
+  }
+
+  bool OnSearchDismissTouched(Actor /*actor*/, TouchEvent touch)
+  {
+    const PointState::Type state = touch.GetState(0u);
+    if(state == PointState::UP || state == PointState::FINISHED)
+    {
+      CloseSearchInput();
+    }
+    return true;
+  }
+
+  bool OnSearchInputTouched(Actor /*actor*/, TouchEvent touch)
+  {
+    const PointState::Type state = touch.GetState(0u);
+    if(state == PointState::UP || state == PointState::FINISHED)
+    {
+      if(mIsSearchOpen && mSearchInput)
+      {
+        FocusManager::Get().RequestFocus(mSearchInput);
+      }
+    }
+    return true;
+  }
+
+  void OpenSearchInput()
+  {
+    if(mIsSearchOpen)
+    {
+      FocusManager::Get().RequestFocus(mSearchInput);
+      return;
+    }
+
+    StopSearchAnimation();
+
+    const FloatingSearchBounds bounds = CurrentFloatingSearchBounds();
+    mIsSearchOpen                    = true;
+    mSearchDismissLayer.SetProperty(Actor::Property::VISIBLE, true);
+    mSearchButton.SetProperty(Actor::Property::VISIBLE, true);
+    mSearchButton.SetProperty(Actor::Property::SENSITIVE, false);
+    mSearchButton.SetProperty(Actor::Property::OPACITY, 1.0f);
+    mSearchInput.SetProperty(Actor::Property::VISIBLE, true);
+    mSearchInput.SetProperty(Actor::Property::SENSITIVE, true);
+    mSearchInput.SetProperty(Actor::Property::OPACITY, 0.0f);
+    SetSearchActorBounds(mSearchButton, bounds.buttonX, bounds.buttonY, bounds.buttonSize, bounds.buttonSize);
+    SetSearchActorBounds(mSearchInput, bounds.buttonX, bounds.buttonY, bounds.buttonSize, bounds.buttonSize);
+    mSearchOverlay.RaiseToTop();
+
+    mSearchAnimation = Animation::New(FLOATING_SEARCH_ANIMATION_TIME);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::POSITION_X), bounds.inputX, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::POSITION_Y), bounds.inputY, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::SIZE_WIDTH), bounds.inputWidth, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::SIZE_HEIGHT), bounds.inputHeight, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_IN);
+    mSearchAnimation.AnimateTo(Property(mSearchButton, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
+    mSearchAnimation.FinishedSignal().Connect(this, &EmojiVisualController::OnSearchAnimationFinished);
+    mSearchAnimation.Play();
+
+    FocusManager::Get().RequestFocus(mSearchInput);
+  }
+
+  void CloseSearchInput()
+  {
+    if(!mIsSearchOpen)
+    {
+      return;
+    }
+
+    StopSearchAnimation();
+
+    const FloatingSearchBounds bounds = CurrentFloatingSearchBounds();
+    mIsSearchOpen = false;
+    FocusManager::Get().ClearFocus();
+    mSearchButton.SetProperty(Actor::Property::VISIBLE, true);
+    mSearchButton.SetProperty(Actor::Property::SENSITIVE, true);
+    mSearchButton.SetProperty(Actor::Property::OPACITY, 0.0f);
+    mSearchInput.SetProperty(Actor::Property::SENSITIVE, false);
+    mSearchDismissLayer.SetProperty(Actor::Property::VISIBLE, false);
+    SetSearchActorBounds(mSearchButton, bounds.buttonX, bounds.buttonY, bounds.buttonSize, bounds.buttonSize);
+    SetSearchActorBounds(mSearchInput, bounds.inputX, bounds.inputY, bounds.inputWidth, bounds.inputHeight);
+    mSearchInput.SetProperty(Actor::Property::VISIBLE, true);
+    mSearchInput.SetProperty(Actor::Property::OPACITY, 1.0f);
+    mSearchOverlay.RaiseToTop();
+
+    mSearchAnimation = Animation::New(FLOATING_SEARCH_ANIMATION_TIME * 0.85f);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::POSITION_X), bounds.buttonX, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::POSITION_Y), bounds.buttonY, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::SIZE_WIDTH), bounds.buttonSize, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::SIZE_HEIGHT), bounds.buttonSize, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchInput, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
+    mSearchAnimation.AnimateTo(Property(mSearchButton, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_IN);
+    mSearchAnimation.FinishedSignal().Connect(this, &EmojiVisualController::OnSearchAnimationFinished);
+    mSearchAnimation.Play();
+  }
+
+  void StopSearchAnimation()
+  {
+    if(mSearchAnimation)
+    {
+      mSearchAnimation.Stop();
+      mSearchAnimation.Reset();
+    }
+  }
+
+  void OnSearchAnimationFinished(Animation /*animation*/)
+  {
+    const FloatingSearchBounds bounds = CurrentFloatingSearchBounds();
+    mSearchAnimation.Reset();
+
+    if(mIsSearchOpen)
+    {
+      SetSearchActorBounds(mSearchInput, bounds.inputX, bounds.inputY, bounds.inputWidth, bounds.inputHeight);
+      SetSearchActorBounds(mSearchButton, bounds.buttonX, bounds.buttonY, bounds.buttonSize, bounds.buttonSize);
+      mSearchInput.SetProperty(Actor::Property::VISIBLE, true);
+      mSearchInput.SetProperty(Actor::Property::SENSITIVE, true);
+      mSearchInput.SetProperty(Actor::Property::OPACITY, 1.0f);
+      mSearchButton.SetProperty(Actor::Property::VISIBLE, false);
+      mSearchButton.SetProperty(Actor::Property::SENSITIVE, false);
+      mSearchButton.SetProperty(Actor::Property::OPACITY, 0.0f);
+      FocusManager::Get().RequestFocus(mSearchInput);
+      return;
+    }
+
+    SetSearchActorBounds(mSearchInput, bounds.inputX, bounds.inputY, bounds.inputWidth, bounds.inputHeight);
+    SetSearchActorBounds(mSearchButton, bounds.buttonX, bounds.buttonY, bounds.buttonSize, bounds.buttonSize);
+    mSearchInput.SetProperty(Actor::Property::VISIBLE, false);
+    mSearchInput.SetProperty(Actor::Property::SENSITIVE, false);
+    mSearchInput.SetProperty(Actor::Property::OPACITY, 0.0f);
+    mSearchButton.SetProperty(Actor::Property::VISIBLE, true);
+    mSearchButton.SetProperty(Actor::Property::SENSITIVE, true);
+    mSearchButton.SetProperty(Actor::Property::OPACITY, 1.0f);
   }
 
   void BuildDetailDiagnosticTimer()
@@ -1904,6 +2679,11 @@ private:
       mLargePreview.SetRequestedHeight(previewHeight);
       mLargePreviewParams.SetBounds(LayoutRect(previewX, previewY, previewWidth, previewHeight));
     }
+
+    if(mIsPreviewOverlayVisible)
+    {
+      mPreviewOverlay.RaiseToTop();
+    }
   }
 
   void UpdatePageContent()
@@ -1911,14 +2691,28 @@ private:
     ResetPendingDetailDiagnostics();
     UpdateLayoutBounds();
 
+    if(mEmptyLabel)
+    {
+      mEmptyLabel.SetText(EmptyMessageText().c_str());
+      mEmptyLabel.SetProperty(Actor::Property::VISIBLE, mShownCount == 0u);
+    }
+
     const size_t pageEnd = PageEndIndex();
     for(size_t slot = 0u; slot < mRowPool.size(); ++slot)
     {
-      const size_t itemIndex = mPageStartIndex + slot;
+      const size_t visibleIndex = mPageStartIndex + slot;
       RowActors& row = mRowPool[slot];
-      if(itemIndex < pageEnd)
+      if(visibleIndex < pageEnd)
       {
-        UpdateRow(row, mItems[itemIndex], itemIndex);
+        const size_t itemIndex = ItemIndexForVisibleIndex(visibleIndex);
+        if(itemIndex < mItems.size())
+        {
+          UpdateRow(row, mItems[itemIndex], itemIndex, visibleIndex);
+        }
+        else
+        {
+          HideRow(row);
+        }
       }
       else
       {
@@ -1927,10 +2721,7 @@ private:
     }
 
     mScrollView.SetScrollPosition(Vector2::ZERO);
-    if(mHeader)
-    {
-      mHeader.SetText(BuildHeaderText().c_str());
-    }
+    UpdateHeaderText();
     StartDetailDiagnosticTimerIfNeeded();
   }
 
@@ -2040,7 +2831,7 @@ private:
   {
     if(mBasicDetailTextCache[index].empty())
     {
-      mBasicDetailTextCache[index] = ::MakeBasicDetailText(mItems[index]);
+      mBasicDetailTextCache[index] = ::MakeDetailText(mItems[index], "run diagnostics: pending");
     }
     return mBasicDetailTextCache[index];
   }
@@ -2070,13 +2861,60 @@ private:
     return mDetailTextCache[index];
   }
 
+  std::string ClipboardTextForIndex(size_t index)
+  {
+    if(index >= mItems.size())
+    {
+      return std::string();
+    }
+
+    if(mDetailTextCache[index].empty())
+    {
+      mDetailTextCache[index] = ::MakeDetailText(mMultilanguageSupport, mFontClient, mItems[index]);
+      if(index < mDetailTextQueued.size())
+      {
+        mDetailTextQueued[index] = false;
+      }
+      UpdateVisibleDetailText(index);
+    }
+
+    std::stringstream stream;
+    stream << "emoji: " << CodepointsToUtf8(mItems[index].codepoints) << '\n'
+           << mDetailTextCache[index];
+    return stream.str();
+  }
+
+  bool CopyItemToClipboard(size_t index)
+  {
+    const std::string source = ClipboardTextForIndex(index);
+    if(source.empty())
+    {
+      return false;
+    }
+
+    Clipboard clipboard = Clipboard::Get();
+    if(!clipboard)
+    {
+      std::cerr << "emoji visual warning: clipboard is not available\n";
+      return false;
+    }
+
+    Dali::Clipboard::ClipData data(MIME_TYPE_TEXT_PLAIN, source.c_str());
+    if(!clipboard.SetData(data))
+    {
+      std::cerr << "emoji visual warning: failed to copy emoji case to clipboard\n";
+      return false;
+    }
+    return true;
+  }
+
   void UpdateVisibleDetailText(size_t itemIndex)
   {
     for(RowActors& row : mRowPool)
     {
       if(row.itemIndex == itemIndex)
       {
-        row.detail.SetText(VisibleDetailTextForIndex(itemIndex).c_str());
+        SetRowDetailText(row, itemIndex);
         return;
       }
     }
@@ -2110,24 +2948,45 @@ private:
     actors.detail.SetPadding(Extents(14, 8, 0, 0));
     actors.detailParams = AbsoluteLayoutParams::New();
     actors.detail.SetLayoutParams(actors.detailParams);
+    actors.detail.TouchedSignal().Connect(this, &EmojiVisualController::OnDetailTouched);
     actors.row.Add(actors.detail);
 
     return actors;
   }
 
-  void UpdateRow(RowActors& row, const VisualCase& item, size_t index)
+  void UpdateRow(RowActors& row, const VisualCase& item, size_t index, size_t visibleIndex)
   {
     row.itemIndex = index;
     row.row.SetProperty(Actor::Property::VISIBLE, true);
-    row.row.SetBackgroundColor(index % 2u == 0u ? Vector4(0.98f, 0.98f, 0.98f, 1.0f) : Vector4(0.94f, 0.96f, 0.98f, 1.0f));
+    row.row.SetBackgroundColor(visibleIndex % 2u == 0u ? Vector4(0.98f, 0.98f, 0.98f, 1.0f) : Vector4(0.94f, 0.96f, 0.98f, 1.0f));
     row.preview.SetText(CodepointsToUtf8(item.codepoints).c_str());
-    row.detail.SetText(VisibleDetailTextForIndex(index).c_str());
+    SetRowDetailText(row, index);
   }
 
   void HideRow(RowActors& row)
   {
     row.itemIndex = static_cast<size_t>(-1);
     row.row.SetProperty(Actor::Property::VISIBLE, false);
+  }
+
+  bool OnDetailTouched(Actor actor, TouchEvent touch)
+  {
+    const PointState::Type state = touch.GetState(0u);
+    if(state != PointState::UP && state != PointState::FINISHED)
+    {
+      return true;
+    }
+
+    for(const RowActors& row : mRowPool)
+    {
+      if(row.detail == actor && row.itemIndex < mItems.size())
+      {
+        CopyItemToClipboard(row.itemIndex);
+        return true;
+      }
+    }
+
+    return true;
   }
 
   bool OnPreviewTouched(Actor actor, TouchEvent touch)
@@ -2140,7 +2999,7 @@ private:
 
     for(const RowActors& row : mRowPool)
     {
-      if(row.preview == actor && row.itemIndex < mShownCount)
+      if(row.preview == actor && row.itemIndex < mItems.size())
       {
         ShowPreviewOverlay(mItems[row.itemIndex]);
         return true;
@@ -2190,12 +3049,18 @@ private:
   Label                      mHeader;
   AbsoluteLayout             mPageContent;
   AbsoluteLayout             mPreviewOverlay;
+  AbsoluteLayout             mSearchOverlay;
   FlexLayout                 mNavigation;
   ScrollView                 mScrollView;
+  View                       mSearchDismissLayer;
+  View                       mSearchButton;
+  Label                      mSearchIcon;
   Label                      mEmptyLabel;
   Label                      mLargePreview;
+  InputField                 mSearchInput;
   AbsoluteLayoutParams       mEmptyLabelParams;
   AbsoluteLayoutParams       mLargePreviewParams;
+  Animation                  mSearchAnimation;
   Timer                      mCaptureTimer;
   Timer                      mDetailDiagnosticTimer;
   Capture                    mCapture;
@@ -2203,18 +3068,24 @@ private:
   TextAbstraction::FontClient mFontClient;
   std::vector<VisualCase>    mItems;
   std::vector<RowActors>     mRowPool;
+  std::vector<std::string>   mSearchIndex;
+  std::vector<size_t>        mSearchMatches;
   std::vector<std::string>   mDetailTextCache;
   std::vector<std::string>   mBasicDetailTextCache;
   std::vector<bool>          mDetailTextQueued;
   std::vector<size_t>        mPendingDetailTextIndices;
   std::vector<std::pair<std::string, size_t>> mSectionAnchors;
   std::string                mLoadError;
+  std::string                mSearchText;
+  std::string                mSearchQuery;
+  size_t                     mBaseShownCount{0u};
   size_t                     mShownCount{0u};
   size_t                     mPageStartIndex{0u};
   size_t                     mPendingDetailTextIndex{0u};
   float                      mLastPageContentWidth{-1.0f};
   size_t                     mLastVisibleRowCount{static_cast<size_t>(-1)};
   bool                       mIsPreviewOverlayVisible{false};
+  bool                       mIsSearchOpen{false};
 };
 
 } // namespace
@@ -2236,6 +3107,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
     Application application = Application::New(&argc, &argv);
     UiConfig config = UiConfig::New();
     config.SetLabelAsyncRendering(true);
+    config.SetAlwaysShowFocus(false);
     config.Apply();
     EmojiVisualController controller(application, options);
     application.MainLoop();

@@ -15,7 +15,9 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
+#include <initializer_list>
 #include <string>
+#include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -27,6 +29,7 @@ constexpr float STACK_SPACING  = 6.0f;
 constexpr float STACK_PADDING  = 12.0f;
 constexpr float BUTTON_HEIGHT  = 36.0f;
 constexpr float BUTTON_SPACING = 4.0f;
+constexpr size_t MAX_LOG_LINES = 10u;
 
 const char* GetStateName(InputMethodContext::State state)
 {
@@ -205,6 +208,14 @@ Dali::InputMethod::PanelLayout GetPanelLayoutForVariation(Dali::InputMethod::Pan
   return Dali::InputMethod::PanelLayout::NORMAL;
 }
 
+StackLayoutParams CreateFillWeightParams()
+{
+  StackLayoutParams params = StackLayoutParams::New();
+  params.SetWeight(1.0f);
+  params.SetAlignment(LayoutAlignment::FILL);
+  return params;
+}
+
 Label CreateButton(const char* text, uint32_t bgColor)
 {
   Label button = Label::New(text);
@@ -212,10 +223,11 @@ Label CreateButton(const char* text, uint32_t bgColor)
   button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
   button.SetVerticalTextAlignment(Text::Alignment::CENTER);
   button.SetBackgroundColor(UiColor(bgColor));
+  button.SetTextColor(UiColor(0xFFFFFF));
   button.SetRequestedWidth(0.0f);
   button.SetRequestedHeight(BUTTON_HEIGHT);
   button.SetPadding(Extents(4, 4, 4, 4));
-  button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+  button.SetLayoutParams(CreateFillWeightParams());
   return button;
 }
 
@@ -254,11 +266,6 @@ public:
   : mApplication(application),
     mFieldAutoShowEnabled(true),
     mEditorAutoShowEnabled(true),
-    mRestoreAfterFocusLost(true),
-    mFieldReturnKeyEnabled(true),
-    mEditorReturnKeyEnabled(true),
-    mPredictionEnabled(true),
-    mFullScreenEnabled(false),
     mLastFocusedInputIsEditor(false)
   {
     mApplication.InitSignal().Connect(this, &InputMethodContextExample::OnInit);
@@ -270,25 +277,26 @@ private:
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xF5F5F5));
 
-    // Title label
-    Label titleLabel = Label::New("InputMethodContext Test");
-    titleLabel.SetFontSize(14.0f);
-    titleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
-    titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    titleLabel.SetTextColor(UiColor(0xFFFFFF));
-    titleLabel.SetBackgroundColor(UiColor(0x2C3E50));
-    titleLabel.SetRequestedWidth(MATCH_PARENT);
-    titleLabel.SetRequestedHeight(32);
+    // Status labels
+    mStatusLeftLabel = Label::New();
+    mStatusLeftLabel.SetRequestedWidth(0.0f);
+    mStatusLeftLabel.SetRequestedHeight(72);
+    mStatusLeftLabel.SetFontSize(9.0f);
+    mStatusLeftLabel.SetMultiLine(true);
+    mStatusLeftLabel.SetFocusable(false);
+    mStatusLeftLabel.SetBackgroundColor(UiColor(0xE8E8E8));
+    mStatusLeftLabel.SetPadding(Extents(8, 8, 6, 6));
+    mStatusLeftLabel.SetLayoutParams(CreateFillWeightParams());
 
-    // Status label (multi-line, focusable for IME focus testing)
-    mStatusLabel = Label::New();
-    mStatusLabel.SetRequestedWidth(MATCH_PARENT);
-    mStatusLabel.SetRequestedHeight(120);
-    mStatusLabel.SetFontSize(10.0f);
-    mStatusLabel.SetMultiLine(true);
-    mStatusLabel.SetFocusable(true);
-    mStatusLabel.SetBackgroundColor(UiColor(0xE8E8E8));
-    mStatusLabel.SetPadding(Extents(8, 8, 8, 8));
+    mStatusRightLabel = Label::New();
+    mStatusRightLabel.SetRequestedWidth(0.0f);
+    mStatusRightLabel.SetRequestedHeight(72);
+    mStatusRightLabel.SetFontSize(9.0f);
+    mStatusRightLabel.SetMultiLine(true);
+    mStatusRightLabel.SetFocusable(false);
+    mStatusRightLabel.SetBackgroundColor(UiColor(0xE8E8E8));
+    mStatusRightLabel.SetPadding(Extents(8, 8, 6, 6));
+    mStatusRightLabel.SetLayoutParams(CreateFillWeightParams());
 
     // InputField - single line context test
     mInputField = InputField::New();
@@ -300,7 +308,7 @@ private:
     mInputField.SetTextColor(UiColor(0x222222));
     mInputField.SetPadding(Extents(12, 12, 8, 8));
     mInputField.SetFocusable(true);
-    mInputField.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    mInputField.SetLayoutParams(CreateFillWeightParams());
 
     // InputEditor - context test
     mInputEditor = InputEditor::New();
@@ -312,50 +320,27 @@ private:
     mInputEditor.SetTextColor(UiColor(0x222222));
     mInputEditor.SetPadding(Extents(12, 12, 8, 8));
     mInputEditor.SetFocusable(true);
-    mInputEditor.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    mInputEditor.SetLayoutParams(CreateFillWeightParams());
 
     // Get InputMethodContext from each control
     mFieldContext = mInputField.GetInputMethodContext();
     mEditorContext = mInputEditor.GetInputMethodContext();
 
     // Connect IME signals for Field context
-    if(mFieldContext)
-    {
-      mFieldContext.ActivatedSignal().Connect(this, &InputMethodContextExample::OnFieldActivated);
-      mFieldContext.StatusChangedSignal().Connect(this, &InputMethodContextExample::OnFieldStatusChanged);
-      mFieldContext.ResizedSignal().Connect(this, &InputMethodContextExample::OnFieldResized);
-      mFieldContext.LanguageChangedSignal().Connect(this, &InputMethodContextExample::OnFieldLanguageChanged);
-      mFieldContext.KeyboardTypeChangedSignal().Connect(this, &InputMethodContextExample::OnFieldKeyboardTypeChanged);
-      mFieldContext.PrivateCommandReceivedSignal().Connect(this, &InputMethodContextExample::OnFieldPrivateCommandReceived);
-    }
-
+    ConnectContextSignals(mFieldContext);
     // Connect IME signals for Editor context
-    if(mEditorContext)
-    {
-      mEditorContext.ActivatedSignal().Connect(this, &InputMethodContextExample::OnEditorActivated);
-      mEditorContext.StatusChangedSignal().Connect(this, &InputMethodContextExample::OnEditorStatusChanged);
-      mEditorContext.ResizedSignal().Connect(this, &InputMethodContextExample::OnEditorResized);
-      mEditorContext.LanguageChangedSignal().Connect(this, &InputMethodContextExample::OnEditorLanguageChanged);
-      mEditorContext.KeyboardTypeChangedSignal().Connect(this, &InputMethodContextExample::OnEditorKeyboardTypeChanged);
-      mEditorContext.PrivateCommandReceivedSignal().Connect(this, &InputMethodContextExample::OnEditorPrivateCommandReceived);
-    }
+    ConnectContextSignals(mEditorContext);
+
     FocusManager::Get().FocusChangedSignal().Connect(this, &InputMethodContextExample::OnFocusChanged);
 
     // --- Create buttons ---
 
-    // Target Context
-    Label btnUseField = CreateButton("Use Field", 0x3498DB);
-    Label btnUseEditor = CreateButton("Use Editor", 0x2ECC71);
-    View targetRow = CreateButtonRow({btnUseField, btnUseEditor});
-
     // Panel Visibility
     Label btnShowPanel = CreateButton("Show", 0x3498DB);
     Label btnHidePanel = CreateButton("Hide", 0xE74C3C);
-    View panelRow1 = CreateButtonRow({btnShowPanel, btnHidePanel});
-
     Label btnGetState = CreateButton("Get State", 0x9B59B6);
     Label btnGetArea = CreateButton("Get Area", 0x1ABC9C);
-    View panelRow2 = CreateButtonRow({btnGetState, btnGetArea});
+    View panelRow = CreateButtonRow({btnShowPanel, btnHidePanel, btnGetState, btnGetArea});
 
     // Auto / Restore / Return
     Label btnAutoShow = CreateButton("AutoShow", 0x2980B9);
@@ -363,15 +348,12 @@ private:
     Label btnReturn = CreateButton("ReturnKey", 0xE67E22);
     View autoRow = CreateButtonRow({btnAutoShow, btnRestore, btnReturn});
 
-    // Prediction / Fullscreen
+    // Prediction / Fullscreen / Panel Data
     Label btnPrediction = CreateButton("Prediction", 0x8E44AD);
     Label btnFullscreen = CreateButton("Fullscreen", 0x16A085);
-    View modeRow1 = CreateButtonRow({btnPrediction, btnFullscreen});
-
-    // Panel Data
     Label btnSetData = CreateButton("Set Data", 0xD35400);
     Label btnGetData = CreateButton("Get Data", 0x7F8C8D);
-    View dataRow = CreateButtonRow({btnSetData, btnGetData});
+    View modeDataRow = CreateButtonRow({btnPrediction, btnFullscreen, btnSetData, btnGetData});
 
     // Panel Position
     Label btnPos00 = CreateButton("Pos 0,0", 0x95A5A6);
@@ -398,11 +380,9 @@ private:
 
     Label btnLayoutPassword = CreateButton("Password", 0xE67E22);
     Label btnLayoutDateTime = CreateButton("DateTime", 0x9B59B6);
-    View  layoutRow3        = CreateButtonRow({btnLayoutPassword, btnLayoutDateTime});
-
     Label btnLayoutEmoticon = CreateButton("Emoticon", 0x3498DB);
     Label btnLayoutVoice    = CreateButton("Voice", 0x2ECC71);
-    View  layoutRow4        = CreateButtonRow({btnLayoutEmoticon, btnLayoutVoice});
+    View  layoutRow3        = CreateButtonRow({btnLayoutPassword, btnLayoutDateTime, btnLayoutEmoticon, btnLayoutVoice});
 
     Label btnReturnDefault = CreateButton("Ret Default", 0x3498DB);
     Label btnReturnDone    = CreateButton("Ret Done", 0x2ECC71);
@@ -446,6 +426,15 @@ private:
     Label btnRefresh = CreateButton("Refresh", 0x95A5A6);
     View queryRow = CreateButtonRow({btnKeyboardType, btnLocale, btnRefresh});
 
+    mLogLabel = Label::New();
+    mLogLabel.SetRequestedWidth(MATCH_PARENT);
+    mLogLabel.SetRequestedHeight(128);
+    mLogLabel.SetFontSize(11.0f);
+    mLogLabel.SetMultiLine(true);
+    mLogLabel.SetBackgroundColor(UiColor(0x202020));
+    mLogLabel.SetTextColor(UiColor(0xFFFFFF));
+    mLogLabel.SetPadding(Extents(8, 8, 6, 6));
+
     // --- Build layout ---
 
     StackLayout inputRow = StackLayout::New(StackOrientation::HORIZONTAL);
@@ -457,14 +446,22 @@ private:
       mInputEditor,
     });
 
+    StackLayout statusRow = StackLayout::New(StackOrientation::HORIZONTAL);
+    statusRow.SetRequestedWidth(MATCH_PARENT);
+    statusRow.SetRequestedHeight(WRAP_CONTENT);
+    statusRow.SetSpacing(STACK_SPACING);
+    statusRow.AddChildren({
+      mStatusLeftLabel,
+      mStatusRightLabel,
+    });
+
     // Fixed header area
     StackLayout fixedHeader = StackLayout::New(StackOrientation::VERTICAL);
     fixedHeader.SetSpacing(STACK_SPACING);
     fixedHeader.SetRequestedWidth(MATCH_PARENT);
     fixedHeader.SetRequestedHeight(WRAP_CONTENT);
     fixedHeader.AddChildren({
-      titleLabel,
-      mStatusLabel,
+      statusRow,
       inputRow,
     });
 
@@ -475,21 +472,14 @@ private:
     scrollContent.SetRequestedHeight(WRAP_CONTENT);
     scrollContent.SetPadding(Extents(0, 0, 0, STACK_PADDING));
     scrollContent.AddChildren({
-      CreateSectionTitle("Target Context"),
-      targetRow,
-
       CreateSectionTitle("Panel Visibility"),
-      panelRow1,
-      panelRow2,
+      panelRow,
 
       CreateSectionTitle("Auto / Restore / Return"),
       autoRow,
 
-      CreateSectionTitle("Prediction / Fullscreen"),
-      modeRow1,
-
-      CreateSectionTitle("Panel Data"),
-      dataRow,
+      CreateSectionTitle("Prediction / Fullscreen / Panel Data"),
+      modeDataRow,
 
       CreateSectionTitle("Panel Position"),
       posRow,
@@ -499,7 +489,6 @@ private:
       layoutRow1,
       layoutRow2,
       layoutRow3,
-      layoutRow4,
 
       CreateSectionTitle("Return Key"),
       returnKeyRow1,
@@ -516,6 +505,9 @@ private:
 
       CreateSectionTitle("Query"),
       queryRow,
+
+      CreateSectionTitle("Log"),
+      mLogLabel,
     });
 
     // ScrollView for options
@@ -523,7 +515,7 @@ private:
     scrollView.SetScrollDirection(ScrollDirection::Vertical);
     scrollView.SetRequestedWidth(MATCH_PARENT);
     scrollView.SetRequestedHeight(0.0f);
-    scrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    scrollView.SetLayoutParams(CreateFillWeightParams());
     scrollView.SetContent(scrollContent);
 
     // Root layout
@@ -540,10 +532,6 @@ private:
     window.Add(rootLayout);
 
     // --- Connect button touch signals ---
-
-    // Target Context
-    btnUseField.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonUseFieldTouched);
-    btnUseEditor.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonUseEditorTouched);
 
     // Panel Visibility
     btnShowPanel.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonShowPanelTouched);
@@ -621,6 +609,11 @@ private:
 
   // --- Helper ---
 
+  bool IsTouchUp(const TouchEvent& touch)
+  {
+    return touch.GetPointCount() > 0u && touch.GetState(0) == PointState::UP;
+  }
+
   InputMethodContext GetCurrentContext()
   {
     if(IsEditorTarget())
@@ -629,6 +622,19 @@ private:
     }
 
     return mFieldContext ? mFieldContext : mEditorContext;
+  }
+
+  const char* GetContextName(InputMethodContext context) const
+  {
+    if(context == mFieldContext)
+    {
+      return "Field";
+    }
+    if(context == mEditorContext)
+    {
+      return "Editor";
+    }
+    return "Unknown";
   }
 
   const char* GetCurrentTargetName()
@@ -662,26 +668,10 @@ private:
     return mFieldAutoShowEnabled;
   }
 
-  bool& GetCurrentReturnKeyEnabled()
-  {
-    if(IsEditorTarget())
-    {
-      return mEditorReturnKeyEnabled;
-    }
-
-    return mFieldReturnKeyEnabled;
-  }
-
   void FocusInputField()
   {
     mLastFocusedInputIsEditor = false;
     FocusManager::Get().SetCurrentFocusView(mInputField);
-  }
-
-  void FocusInputEditor()
-  {
-    mLastFocusedInputIsEditor = true;
-    FocusManager::Get().SetCurrentFocusView(mInputEditor);
   }
 
   void SetPanelLayout(Dali::InputMethod::PanelLayout layout)
@@ -694,6 +684,7 @@ private:
       Dali::String info = "Layout=";
       info += GetPanelLayoutName(context.GetInputPanelLayout());
       UpdateStatus(info.CStr());
+      AppendLog(info.CStr());
     }
   }
 
@@ -710,14 +701,15 @@ private:
       info += " Variation=";
       info += GetPanelLayoutVariationName(context.GetInputPanelLayoutVariation());
       UpdateStatus(info.CStr());
+      AppendLog(info.CStr());
     }
   }
 
   void ConnectLayoutButton(Label button, Dali::InputMethod::PanelLayout layout)
   {
-    button.TouchedSignal().Connect(this, [this, layout](Actor, const TouchEvent& touch) -> bool
+    button.TouchedSignal().Connect(this, [this, layout](Actor, const TouchEvent touch) -> bool
     {
-      if(touch.GetState(0) == PointState::UP)
+      if(IsTouchUp(touch))
       {
         SetPanelLayout(layout);
       }
@@ -727,9 +719,9 @@ private:
 
   void ConnectVariationButton(Label button, Dali::InputMethod::PanelLayoutVariation variation)
   {
-    button.TouchedSignal().Connect(this, [this, variation](Actor, const TouchEvent& touch) -> bool
+    button.TouchedSignal().Connect(this, [this, variation](Actor, const TouchEvent touch) -> bool
     {
-      if(touch.GetState(0) == PointState::UP)
+      if(IsTouchUp(touch))
       {
         SetPanelLayoutVariation(variation);
       }
@@ -739,9 +731,9 @@ private:
 
   void ConnectReturnKeyButton(Label button, Dali::InputMethod::ReturnKeyType action)
   {
-    button.TouchedSignal().Connect(this, [this, action](Actor, const TouchEvent& touch) -> bool
+    button.TouchedSignal().Connect(this, [this, action](Actor, const TouchEvent touch) -> bool
     {
-      if(touch.GetState(0) == PointState::UP)
+      if(IsTouchUp(touch))
       {
         InputMethodContext context = GetCurrentContext();
         if(context)
@@ -750,6 +742,7 @@ private:
           Dali::String info = "ReturnKey=";
           info += GetReturnKeyName(context.GetInputPanelReturnKeyType());
           UpdateStatus(info.CStr());
+          AppendLog(info.CStr());
         }
       }
       return true;
@@ -758,9 +751,9 @@ private:
 
   void ConnectAutoCapitalButton(Label button, Dali::InputMethod::AutoCapitalType autoCapital)
   {
-    button.TouchedSignal().Connect(this, [this, autoCapital](Actor, const TouchEvent& touch) -> bool
+    button.TouchedSignal().Connect(this, [this, autoCapital](Actor, const TouchEvent touch) -> bool
     {
-      if(touch.GetState(0) == PointState::UP)
+      if(IsTouchUp(touch))
       {
         InputMethodContext context = GetCurrentContext();
         if(context)
@@ -769,32 +762,36 @@ private:
           Dali::String info = "AutoCapital=";
           info += GetAutoCapitalName(context.GetInputPanelAutoCapitalType());
           UpdateStatus(info.CStr());
+          AppendLog(info.CStr());
         }
       }
       return true;
     });
   }
 
-  void SyncLocalStateFromContext()
+  void ConnectContextSignals(InputMethodContext context)
   {
-    InputMethodContext context = GetCurrentContext();
     if(!context)
     {
       return;
     }
-    mRestoreAfterFocusLost = context.IsRestoreAfterFocusLostEnabled();
-    mPredictionEnabled     = context.IsTextPredictionEnabled();
-    mFullScreenEnabled     = context.IsFullScreenModeEnabled();
-    GetCurrentReturnKeyEnabled() = context.IsReturnKeyEnabled();
+
+    context.ActivatedSignal().Connect(this, &InputMethodContextExample::OnActivated);
+    context.StatusChangedSignal().Connect(this, &InputMethodContextExample::OnStatusChanged);
+    context.ResizedSignal().Connect(this, &InputMethodContextExample::OnResized);
+    context.LanguageChangedSignal().Connect(this, &InputMethodContextExample::OnLanguageChanged);
+    context.KeyboardTypeChangedSignal().Connect(this, &InputMethodContextExample::OnKeyboardTypeChanged);
+    context.PrivateCommandReceivedSignal().Connect(this, &InputMethodContextExample::OnPrivateCommandReceived);
   }
 
   void UpdateStatus(const char* extra = nullptr)
   {
     InputMethodContext context = GetCurrentContext();
 
-    Dali::String status;
-    status += "Target:";
-    status += GetCurrentTargetName();
+    Dali::String leftStatus;
+    Dali::String rightStatus;
+    leftStatus += "Target:";
+    leftStatus += GetCurrentTargetName();
 
     if(context)
     {
@@ -813,114 +810,146 @@ private:
 
       Dali::BoundsInteger area = context.GetInputPanelArea();
 
-      status += " State:";
-      status += GetStateName(state);
-      status += " KB:";
-      status += GetKeyboardTypeName(keyboardType);
-      status += " Locale:";
-      status += locale.CStr();
+      leftStatus += "\nState:";
+      leftStatus += GetStateName(state);
+      leftStatus += " KB:";
+      leftStatus += GetKeyboardTypeName(keyboardType);
+      leftStatus += "\nLocale:";
+      leftStatus += locale.CStr();
+      leftStatus += "\nArea:";
+      leftStatus += FormatArea(area);
 
-      status += "\nRestore:";
-      status += restoreEnabled ? "ON" : "OFF";
-      status += " Prediction:";
-      status += predictionEnabled ? "ON" : "OFF";
-      status += " Full:";
-      status += fullScreenEnabled ? "ON" : "OFF";
-      status += " AutoShow(set):";
-      status += GetCurrentAutoShowEnabled() ? "ON" : "OFF";
-      status += " Return:";
-      status += returnKeyEnabled ? "ON" : "OFF";
+      rightStatus += "Restore:";
+      rightStatus += restoreEnabled ? "ON" : "OFF";
+      rightStatus += " Prediction:";
+      rightStatus += predictionEnabled ? "ON" : "OFF";
+      rightStatus += "\nFull:";
+      rightStatus += fullScreenEnabled ? "ON" : "OFF";
+      rightStatus += " AutoShow(set):";
+      rightStatus += GetCurrentAutoShowEnabled() ? "ON" : "OFF";
+      rightStatus += " Return:";
+      rightStatus += returnKeyEnabled ? "ON" : "OFF";
 
-      status += "\nLayout:";
-      status += GetPanelLayoutName(layout);
-      status += " ReturnKey:";
-      status += GetReturnKeyName(returnKey);
-      status += " AutoCap:";
-      status += GetAutoCapitalName(autoCapital);
-
-      status += "\nVariation:";
-      status += GetPanelLayoutVariationName(variation);
-
-      status += "\nArea:";
-      std::string areaStr = std::to_string(area.x) + "," + std::to_string(area.y) + "," + std::to_string(area.width) + "," + std::to_string(area.height);
-      status += areaStr.c_str();
+      rightStatus += "\nLayout:";
+      rightStatus += GetPanelLayoutName(layout);
+      rightStatus += " Ret:";
+      rightStatus += GetReturnKeyName(returnKey);
+      rightStatus += "\nAutoCap:";
+      rightStatus += GetAutoCapitalName(autoCapital);
+      rightStatus += " Var:";
+      rightStatus += GetPanelLayoutVariationName(variation);
     }
     else
     {
-      status += " Context:null";
+      leftStatus += "\nContext:null";
     }
 
     if(mLastSignal.Size() > 0)
     {
-      status += "\nLast Signal: ";
-      status += mLastSignal.CStr();
+      rightStatus += "\nLast Signal:";
+      rightStatus += mLastSignal.CStr();
     }
 
     if(extra)
     {
-      status += "\n";
-      status += extra;
+      rightStatus += "\n";
+      rightStatus += extra;
     }
 
-    mStatusLabel.SetText(status);
+    mStatusLeftLabel.SetText(leftStatus);
+    mStatusRightLabel.SetText(rightStatus);
   }
 
-  // --- IME Signal callbacks: Field ---
+  Dali::String FormatArea(const Dali::BoundsInteger& area)
+  {
+    std::string str = "(" + std::to_string(area.x) + "," + std::to_string(area.y) + "," + std::to_string(area.width) + "," + std::to_string(area.height) + ")";
+    return Dali::String(str.c_str());
+  }
+
+  void AppendLog(const char* text)
+  {
+    if(!text)
+    {
+      return;
+    }
+
+    mLogLines.insert(mLogLines.begin(), text);
+    while(mLogLines.size() > MAX_LOG_LINES)
+    {
+      mLogLines.pop_back();
+    }
+
+    Dali::String logText;
+    for(size_t index = 0u; index < mLogLines.size(); ++index)
+    {
+      if(index > 0u)
+      {
+        logText += "\n";
+      }
+      logText += mLogLines[index].c_str();
+    }
+
+    if(mLogLabel)
+    {
+      mLogLabel.SetText(logText);
+    }
+  }
+
+  // --- IME Signal callbacks ---
 
   void OnFocusChanged(View, View current)
   {
     if(current == mInputEditor)
     {
       mLastFocusedInputIsEditor = true;
-      SyncLocalStateFromContext();
+      AppendLog("FocusChanged Target=Editor");
       UpdateStatus();
     }
     else if(current == mInputField)
     {
       mLastFocusedInputIsEditor = false;
-      SyncLocalStateFromContext();
+      AppendLog("FocusChanged Target=Field");
       UpdateStatus();
     }
   }
 
-  void OnFieldActivated(InputMethodContext ctx)
+  void OnActivated(InputMethodContext context)
   {
-    (void)ctx;
-    mLastSignal = "Field Activated";
+    mLastSignal = GetContextName(context);
+    mLastSignal += " Activated";
+    AppendLog(mLastSignal.CStr());
     UpdateStatus();
   }
 
-  void OnFieldStatusChanged(InputMethodContext ctx, InputMethodContext::State state)
+  void OnStatusChanged(InputMethodContext context, InputMethodContext::State state)
   {
-    (void)ctx;
-    mLastSignal = "Field StatusChanged ";
+    mLastSignal = GetContextName(context);
+    mLastSignal += " StatusChanged ";
     mLastSignal += GetStateName(state);
+    AppendLog(mLastSignal.CStr());
     UpdateStatus();
   }
 
-  void OnFieldResized(InputMethodContext context)
+  void OnResized(InputMethodContext context)
   {
-    mLastSignal = "Field GeometryChanged";
+    mLastSignal = GetContextName(context);
+    mLastSignal += " GeometryChanged";
 
     if(context)
     {
       Dali::BoundsInteger area = context.GetInputPanelArea();
       mLastSignal += " area=";
-      mLastSignal += std::to_string(area.x).c_str();
-      mLastSignal += ",";
-      mLastSignal += std::to_string(area.y).c_str();
-      mLastSignal += ",";
-      mLastSignal += std::to_string(area.width).c_str();
-      mLastSignal += ",";
-      mLastSignal += std::to_string(area.height).c_str();
+      mLastSignal += FormatArea(area);
     }
 
+    AppendLog(mLastSignal.CStr());
     UpdateStatus();
   }
 
-  void OnFieldLanguageChanged(InputMethodContext context)
+  void OnLanguageChanged(InputMethodContext context)
   {
-    mLastSignal = "Field LanguageChanged";
+    mLastSignal = GetContextName(context);
+    mLastSignal += " LanguageChanged";
 
     if(context)
     {
@@ -932,124 +961,33 @@ private:
       }
     }
 
+    AppendLog(mLastSignal.CStr());
     UpdateStatus();
   }
 
-  void OnFieldKeyboardTypeChanged(InputMethodContext context, InputMethodContext::KeyboardType type)
+  void OnKeyboardTypeChanged(InputMethodContext context, InputMethodContext::KeyboardType type)
   {
-    (void)context;
-    mLastSignal = "Field KBTypeChanged ";
+    mLastSignal = GetContextName(context);
+    mLastSignal += " KBTypeChanged ";
     mLastSignal += GetKeyboardTypeName(type);
+    AppendLog(mLastSignal.CStr());
     UpdateStatus();
   }
 
-  void OnFieldPrivateCommandReceived(InputMethodContext ctx, const Dali::String& cmd)
+  void OnPrivateCommandReceived(InputMethodContext context, const Dali::String& cmd)
   {
-    (void)ctx;
-    mLastSignal = "Field PrivateCmd ";
-    mLastSignal += cmd.CStr();
+    mLastSignal = GetContextName(context);
+    mLastSignal += " PrivateCmd ";
+    mLastSignal += cmd;
+    AppendLog(mLastSignal.CStr());
     UpdateStatus();
-  }
-
-  // --- IME Signal callbacks: Editor ---
-
-  void OnEditorActivated(InputMethodContext ctx)
-  {
-    (void)ctx;
-    mLastSignal = "Editor Activated";
-    UpdateStatus();
-  }
-
-  void OnEditorStatusChanged(InputMethodContext ctx, InputMethodContext::State state)
-  {
-    (void)ctx;
-    mLastSignal = "Editor StatusChanged ";
-    mLastSignal += GetStateName(state);
-    UpdateStatus();
-  }
-
-  void OnEditorResized(InputMethodContext context)
-  {
-    mLastSignal = "Editor GeometryChanged";
-
-    if(context)
-    {
-      Dali::BoundsInteger area = context.GetInputPanelArea();
-      mLastSignal += " area=";
-      mLastSignal += std::to_string(area.x).c_str();
-      mLastSignal += ",";
-      mLastSignal += std::to_string(area.y).c_str();
-      mLastSignal += ",";
-      mLastSignal += std::to_string(area.width).c_str();
-      mLastSignal += ",";
-      mLastSignal += std::to_string(area.height).c_str();
-    }
-
-    UpdateStatus();
-  }
-
-  void OnEditorLanguageChanged(InputMethodContext context)
-  {
-    mLastSignal = "Editor LanguageChanged";
-
-    if(context)
-    {
-      Dali::String locale = context.GetInputPanelLanguageLocale();
-      if(locale.Size() > 0)
-      {
-        mLastSignal += " locale=";
-        mLastSignal += locale.CStr();
-      }
-    }
-
-    UpdateStatus();
-  }
-
-  void OnEditorKeyboardTypeChanged(InputMethodContext context, InputMethodContext::KeyboardType type)
-  {
-    (void)context;
-    mLastSignal = "Editor KBTypeChanged ";
-    mLastSignal += GetKeyboardTypeName(type);
-    UpdateStatus();
-  }
-
-  void OnEditorPrivateCommandReceived(InputMethodContext ctx, const Dali::String& cmd)
-  {
-    (void)ctx;
-    mLastSignal = "Editor PrivateCmd ";
-    mLastSignal += cmd.CStr();
-    UpdateStatus();
-  }
-
-  // --- Button handlers: Target Context ---
-
-  bool OnButtonUseFieldTouched(Actor, TouchEvent touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      FocusInputField();
-      SyncLocalStateFromContext();
-      UpdateStatus();
-    }
-    return true;
-  }
-
-  bool OnButtonUseEditorTouched(Actor, TouchEvent touch)
-  {
-    if(touch.GetState(0) == PointState::UP)
-    {
-      FocusInputEditor();
-      SyncLocalStateFromContext();
-      UpdateStatus();
-    }
-    return true;
   }
 
   // --- Button handlers: Panel Visibility ---
 
-  bool OnButtonShowPanelTouched(Actor, TouchEvent touch)
+  bool OnButtonShowPanelTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1057,13 +995,14 @@ private:
         context.ShowInputPanel();
       }
       UpdateStatus();
+      AppendLog("ShowInputPanel");
     }
     return true;
   }
 
-  bool OnButtonHidePanelTouched(Actor, TouchEvent touch)
+  bool OnButtonHidePanelTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1071,13 +1010,14 @@ private:
         context.HideInputPanel();
       }
       UpdateStatus();
+      AppendLog("HideInputPanel");
     }
     return true;
   }
 
-  bool OnButtonGetStateTouched(Actor, TouchEvent touch)
+  bool OnButtonGetStateTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1085,29 +1025,24 @@ private:
         Dali::String info = "PanelState=";
         info += GetStateName(context.GetInputPanelState());
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
   }
 
-  bool OnButtonGetAreaTouched(Actor, TouchEvent touch)
+  bool OnButtonGetAreaTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
         auto area = context.GetInputPanelArea();
-        Dali::String info = "Area=(";
-        info += std::to_string(area.x).c_str();
-        info += ",";
-        info += std::to_string(area.y).c_str();
-        info += ",";
-        info += std::to_string(area.width).c_str();
-        info += ",";
-        info += std::to_string(area.height).c_str();
-        info += ")";
+        Dali::String info = "Area=";
+        info += FormatArea(area);
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
@@ -1115,9 +1050,9 @@ private:
 
   // --- Button handlers: Auto / Restore / Return ---
 
-  bool OnButtonAutoShowTouched(Actor, TouchEvent touch)
+  bool OnButtonAutoShowTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       bool& enabled = GetCurrentAutoShowEnabled();
       enabled = !enabled;
@@ -1127,49 +1062,48 @@ private:
         context.SetInputPanelAutoShowEnabled(enabled);
       }
       UpdateStatus();
+      AppendLog(enabled ? "AutoShow=ON" : "AutoShow=OFF");
     }
     return true;
   }
 
-  bool OnButtonRestoreTouched(Actor, TouchEvent touch)
+  bool OnButtonRestoreTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
-        bool enabled = context.IsRestoreAfterFocusLostEnabled();
-        enabled = !enabled;
+        bool enabled = !context.IsRestoreAfterFocusLostEnabled();
         context.SetRestoreAfterFocusLostEnabled(enabled);
-        mRestoreAfterFocusLost = context.IsRestoreAfterFocusLostEnabled();
+        UpdateStatus();
+        AppendLog(enabled ? "Restore=ON" : "Restore=OFF");
       }
-      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButtonReturnKeyTouched(Actor, TouchEvent touch)
+  bool OnButtonReturnKeyTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
-        bool enabled = context.IsReturnKeyEnabled();
-        enabled = !enabled;
+        bool enabled = !context.IsReturnKeyEnabled();
         context.SetReturnKeyEnabled(enabled);
-        GetCurrentReturnKeyEnabled() = context.IsReturnKeyEnabled();
+        UpdateStatus();
+        AppendLog(enabled ? "ReturnKey=ON" : "ReturnKey=OFF");
       }
-      UpdateStatus();
     }
     return true;
   }
 
   // --- Button handlers: Prediction / Fullscreen ---
 
-  bool OnButtonPredictionTouched(Actor, TouchEvent touch)
+  bool OnButtonPredictionTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1177,16 +1111,16 @@ private:
         bool enabled = context.IsTextPredictionEnabled();
         enabled = !enabled;
         context.SetTextPredictionEnabled(enabled);
-        mPredictionEnabled = context.IsTextPredictionEnabled();
+        UpdateStatus();
+        AppendLog(enabled ? "Prediction=ON" : "Prediction=OFF");
       }
-      UpdateStatus();
     }
     return true;
   }
 
-  bool OnButtonFullscreenTouched(Actor, TouchEvent touch)
+  bool OnButtonFullscreenTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1194,18 +1128,18 @@ private:
         bool enabled = context.IsFullScreenModeEnabled();
         enabled = !enabled;
         context.SetFullScreenModeEnabled(enabled);
-        mFullScreenEnabled = context.IsFullScreenModeEnabled();
+        UpdateStatus();
+        AppendLog(enabled ? "Fullscreen=ON" : "Fullscreen=OFF");
       }
-      UpdateStatus();
     }
     return true;
   }
 
   // --- Button handlers: Panel Data ---
 
-  bool OnButtonSetDataTouched(Actor, TouchEvent touch)
+  bool OnButtonSetDataTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1215,14 +1149,15 @@ private:
         Dali::String info = "SetPanelData=";
         info += data;
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
   }
 
-  bool OnButtonGetDataTouched(Actor, TouchEvent touch)
+  bool OnButtonGetDataTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1231,6 +1166,7 @@ private:
         Dali::String info = "PanelData=";
         info += data.CStr();
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
@@ -1238,37 +1174,39 @@ private:
 
   // --- Button handlers: Panel Position ---
 
-  bool OnButtonPos00Touched(Actor, TouchEvent touch)
+  bool OnButtonPos00Touched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
         context.SetInputPanelPosition(0, 0);
         UpdateStatus("Pos=0,0");
+        AppendLog("Pos=0,0");
       }
     }
     return true;
   }
 
-  bool OnButtonPos100Touched(Actor, TouchEvent touch)
+  bool OnButtonPos100Touched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
       {
         context.SetInputPanelPosition(100, 100);
         UpdateStatus("Pos=100,100");
+        AppendLog("Pos=100,100");
       }
     }
     return true;
   }
 
-  bool OnButtonAlignTLTouched(Actor, TouchEvent touch)
+  bool OnButtonAlignTLTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1279,14 +1217,15 @@ private:
         info += GetAlignName(align);
         info += result ? "=true" : "=false";
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
   }
 
-  bool OnButtonAlignBCTouched(Actor, TouchEvent touch)
+  bool OnButtonAlignBCTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1297,14 +1236,15 @@ private:
         info += GetAlignName(align);
         info += result ? "=true" : "=false";
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
   }
 
-  bool OnButtonAlignMCTouched(Actor, TouchEvent touch)
+  bool OnButtonAlignMCTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1315,6 +1255,7 @@ private:
         info += GetAlignName(align);
         info += result ? "=true" : "=false";
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
@@ -1322,9 +1263,9 @@ private:
 
   // --- Button handlers: Query ---
 
-  bool OnButtonKeyboardTypeTouched(Actor, TouchEvent touch)
+  bool OnButtonKeyboardTypeTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1332,14 +1273,15 @@ private:
         Dali::String info = "KBType=";
         info += GetKeyboardTypeName(context.GetKeyboardType());
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
   }
 
-  bool OnButtonLocaleTouched(Actor, TouchEvent touch)
+  bool OnButtonLocaleTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1348,18 +1290,19 @@ private:
         Dali::String info = "Locale=";
         info += locale.CStr();
         UpdateStatus(info.CStr());
+        AppendLog(info.CStr());
       }
     }
     return true;
   }
 
-  bool OnButtonRefreshTouched(Actor, TouchEvent touch)
+  bool OnButtonRefreshTouched(Actor, const TouchEvent touch)
   {
-    if(touch.GetState(0) == PointState::UP)
+    if(IsTouchUp(touch))
     {
       mLastSignal.Clear();
-      SyncLocalStateFromContext();
       UpdateStatus();
+      AppendLog("Refresh");
     }
     return true;
   }
@@ -1380,19 +1323,7 @@ private:
       return;
     }
 
-    if(event.GetKeyName() == "1")
-    {
-      FocusInputField();
-      SyncLocalStateFromContext();
-      UpdateStatus("Key: Use Field");
-    }
-    else if(event.GetKeyName() == "2")
-    {
-      FocusInputEditor();
-      SyncLocalStateFromContext();
-      UpdateStatus("Key: Use Editor");
-    }
-    else if(event.GetKeyName() == "s")
+    if(event.GetKeyName() == "s")
     {
       InputMethodContext context = GetCurrentContext();
       if(context)
@@ -1400,6 +1331,7 @@ private:
         context.ShowInputPanel();
       }
       UpdateStatus("Key: Show");
+      AppendLog("Key: Show");
     }
     else if(event.GetKeyName() == "h")
     {
@@ -1409,12 +1341,13 @@ private:
         context.HideInputPanel();
       }
       UpdateStatus("Key: Hide");
+      AppendLog("Key: Hide");
     }
     else if(event.GetKeyName() == "r")
     {
       mLastSignal.Clear();
-      SyncLocalStateFromContext();
       UpdateStatus("Key: Refresh");
+      AppendLog("Key: Refresh");
     }
   }
 
@@ -1424,16 +1357,14 @@ private:
   InputEditor        mInputEditor;
   InputMethodContext mFieldContext;
   InputMethodContext mEditorContext;
-  Label              mStatusLabel;
+  Label              mStatusLeftLabel;
+  Label              mStatusRightLabel;
+  Label              mLogLabel;
   Dali::String       mLastSignal;
+  std::vector<std::string> mLogLines;
 
   bool mFieldAutoShowEnabled;
   bool mEditorAutoShowEnabled;
-  bool mRestoreAfterFocusLost;
-  bool mFieldReturnKeyEnabled;
-  bool mEditorReturnKeyEnabled;
-  bool mPredictionEnabled;
-  bool mFullScreenEnabled;
   bool mLastFocusedInputIsEditor;
 };
 
