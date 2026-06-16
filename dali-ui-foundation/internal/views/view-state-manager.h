@@ -68,7 +68,7 @@ public:
    * @param[in] next   State after the change
    * @param[in] cause  Input event that triggered the change, or invalid handle if programmatic
    */
-  void NotifyStateChanged(Ui::View view, ViewState prev, ViewState next, InputEvent cause = InputEvent::None());
+  void NotifyStateChanged(Ui::View view, ViewState prev, ViewState next, InputEvent cause = InputEvent::Programmatic());
 
   /**
    * @brief Returns true if the view and all its View ancestors are enabled.

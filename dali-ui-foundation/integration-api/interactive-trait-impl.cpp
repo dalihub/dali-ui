@@ -114,7 +114,7 @@ void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
 
   if(mPseudoDisabled && mPressed)
   {
-    SetPressedInternal(false, InputEvent::None());
+    SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
   }
 
   mPseudoDisabledChangedSignal.Emit(owner, mPseudoDisabled);
@@ -154,7 +154,7 @@ void InteractiveTraitImpl::OnFocusedChanged(View view, bool focused)
     // the key release event never come to this view.
     if(mPressed)
     {
-      SetPressedInternal(false, InputEvent::None());
+      SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
     }
   }
 }
@@ -163,7 +163,7 @@ void InteractiveTraitImpl::OnEnabledChanged(View view, bool enabled)
 {
   if(!enabled && mPressed)
   {
-    SetPressedInternal(false, InputEvent::None());
+    SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
   }
 }
 
@@ -179,7 +179,7 @@ void InteractiveTraitImpl::OnSceneDisconnection(View)
 
   if(mPressed)
   {
-    SetPressedInternal(false, InputEvent::None());
+    SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
   }
 }
 

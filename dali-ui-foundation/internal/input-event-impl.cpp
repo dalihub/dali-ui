@@ -16,6 +16,7 @@
  */
 
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/events/point-state.h>
 #include <dali/public-api/object/base-handle.h>
 
 // CLASS HEADER
@@ -30,9 +31,11 @@ namespace Ui
 namespace Internal
 {
 
-InputEventImpl::InputEventImpl()
+InputEventImpl::InputEventImpl(bool programmatic, bool cancellation)
 : BaseObject(),
   mEventType(InputEventType::NONE),
+  mProgrammatic(programmatic),
+  mCancellation(cancellation),
   mEvent(std::monostate{})
 {
 }
@@ -40,6 +43,8 @@ InputEventImpl::InputEventImpl()
 InputEventImpl::InputEventImpl(const TouchEvent& originEvent)
 : BaseObject(),
   mEventType(InputEventType::TOUCH_EVENT),
+  mProgrammatic(false),
+  mCancellation(originEvent.GetState(0u) == PointState::INTERRUPTED),
   mEvent(originEvent)
 {
 }
@@ -47,6 +52,8 @@ InputEventImpl::InputEventImpl(const TouchEvent& originEvent)
 InputEventImpl::InputEventImpl(const KeyEvent& originEvent)
 : BaseObject(),
   mEventType(InputEventType::KEY_EVENT),
+  mProgrammatic(false),
+  mCancellation(false),
   mEvent(originEvent)
 {
 }
@@ -54,6 +61,8 @@ InputEventImpl::InputEventImpl(const KeyEvent& originEvent)
 InputEventImpl::InputEventImpl(const TapGesture& originEvent)
 : BaseObject(),
   mEventType(InputEventType::TAP_GESTURE),
+  mProgrammatic(false),
+  mCancellation(false),
   mEvent(originEvent)
 {
 }
@@ -61,6 +70,8 @@ InputEventImpl::InputEventImpl(const TapGesture& originEvent)
 InputEventImpl::InputEventImpl(const LongPressGesture& originEvent)
 : BaseObject(),
   mEventType(InputEventType::LONG_PRESS_GESTURE),
+  mProgrammatic(false),
+  mCancellation(false),
   mEvent(originEvent)
 {
 }
@@ -68,6 +79,8 @@ InputEventImpl::InputEventImpl(const LongPressGesture& originEvent)
 InputEventImpl::InputEventImpl(const WheelEvent& originEvent)
 : BaseObject(),
   mEventType(InputEventType::WHEEL_EVENT),
+  mProgrammatic(false),
+  mCancellation(false),
   mEvent(originEvent)
 {
 }
@@ -76,9 +89,9 @@ InputEventImpl::~InputEventImpl()
 {
 }
 
-InputEventImplPtr InputEventImpl::New()
+InputEventImplPtr InputEventImpl::New(bool programmatic, bool cancellation)
 {
-  return InputEventImplPtr(new InputEventImpl());
+  return InputEventImplPtr(new InputEventImpl(programmatic, cancellation));
 }
 
 InputEventImplPtr InputEventImpl::New(const TouchEvent& originEvent)
@@ -106,9 +119,27 @@ InputEventImplPtr InputEventImpl::New(const WheelEvent& originEvent)
   return InputEventImplPtr(new InputEventImpl(originEvent));
 }
 
+InputEventImplPtr InputEventImpl::WithCancellation() const
+{
+  InputEventImplPtr clone(new InputEventImpl(mProgrammatic, true));
+  clone->mEventType = mEventType;
+  clone->mEvent     = mEvent;
+  return clone;
+}
+
 InputEventType InputEventImpl::GetInputEventType() const
 {
   return mEventType;
+}
+
+bool InputEventImpl::IsProgrammatic() const
+{
+  return mProgrammatic;
+}
+
+bool InputEventImpl::IsCancellation() const
+{
+  return mCancellation;
 }
 
 const TouchEvent& InputEventImpl::GetTouchEvent() const

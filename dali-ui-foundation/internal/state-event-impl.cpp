@@ -56,7 +56,7 @@ const ViewState& StateEventImpl::GetCurrent() const
 
 const InputEvent& StateEventImpl::GetCause() const
 {
-  return mCause ? mCause : InputEvent::None();
+  return mCause ? mCause : InputEvent::Programmatic();
 }
 
 } // namespace Internal

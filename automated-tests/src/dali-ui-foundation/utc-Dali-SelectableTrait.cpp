@@ -21,6 +21,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/selectable-trait-impl.h>
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <test-gesture-generator.h>
 #include <dali/integration-api/events/key-event-integ.h>
@@ -50,11 +51,13 @@ struct SelectionChangedSignalData
     called   = false;
     selected = false;
     view     = View();
+    event    = InputEvent();
   }
 
   bool called;
   bool selected;
   View view;
+  InputEvent event;
 };
 
 struct SelectionChangedSignalFunctor
@@ -69,6 +72,7 @@ struct SelectionChangedSignalFunctor
     signalData.called   = true;
     signalData.selected = selected;
     signalData.view     = view;
+    signalData.event    = event;
   }
 
   SelectionChangedSignalData& signalData;
@@ -398,6 +402,17 @@ int UtcDaliSelectableTraitToggleByClickP(void)
   SelectionChangedSignalFunctor functor(data);
   selectable.SelectionChangedSignal().Connect(&application, functor);
 
+  InputEvent stateCause;
+  int        stateChangedCount = 0;
+  ConnectionTracker tracker;
+  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+    if(e.Changed(ViewState::SELECTED))
+    {
+      ++stateChangedCount;
+      stateCause = e.GetCause();
+    }
+  });
+
   DALI_TEST_CHECK(!selectable.IsSelected());
 
   // First tap: select
@@ -405,7 +420,13 @@ int UtcDaliSelectableTraitToggleByClickP(void)
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(data.selected);
+  DALI_TEST_CHECK(!data.event.IsProgrammatic());
+  DALI_TEST_CHECK(!data.event.IsCancellation());
   DALI_TEST_CHECK(selectable.IsSelected());
+  DALI_TEST_EQUALS(stateChangedCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(stateCause.GetInputEventType() == InputEventType::TAP_GESTURE);
+  DALI_TEST_CHECK(!stateCause.IsProgrammatic());
+  DALI_TEST_CHECK(!stateCause.IsCancellation());
 
   data.Reset();
 
@@ -414,7 +435,13 @@ int UtcDaliSelectableTraitToggleByClickP(void)
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(!data.selected);
+  DALI_TEST_CHECK(!data.event.IsProgrammatic());
+  DALI_TEST_CHECK(!data.event.IsCancellation());
   DALI_TEST_CHECK(!selectable.IsSelected());
+  DALI_TEST_EQUALS(stateChangedCount, 2, TEST_LOCATION);
+  DALI_TEST_CHECK(stateCause.GetInputEventType() == InputEventType::TAP_GESTURE);
+  DALI_TEST_CHECK(!stateCause.IsProgrammatic());
+  DALI_TEST_CHECK(!stateCause.IsCancellation());
   END_TEST;
 }
 

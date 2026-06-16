@@ -139,7 +139,7 @@ DALI_UI_API void SetNamedStateHandler(ViewImpl& viewImpl, const Dali::String& id
  * @param[in] on    True to add the state, false to remove it
  * @param[in] cause Input event that triggered the change; leave default if programmatic
  */
-DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause = InputEvent::None());
+DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause = InputEvent::Programmatic());
 
 /**
  * @brief Registers a named state-change handler using a member function.
@@ -194,7 +194,7 @@ DALI_UI_API bool UnsetStateHandlerWhenNotProcessing(ViewImpl& viewImpl, const Da
 /**
  * @copydoc SetState(ViewImpl&, ViewState, bool, InputEvent)
  */
-DALI_UI_API void SetState(Ui::View view, ViewState state, bool on, InputEvent cause = InputEvent::None());
+DALI_UI_API void SetState(Ui::View view, ViewState state, bool on, InputEvent cause = InputEvent::Programmatic());
 
 /**
  * @brief Internal helper for WhenStateChanged templates (View overload).

@@ -38,6 +38,7 @@ struct CallRecord
   std::string tag;    ///< Which handler was called (for ordering verification)
   ViewState     prev;
   ViewState     cur;
+  InputEvent    cause;
 };
 
 View CreateView(UiTestApplication& application)
@@ -85,12 +86,14 @@ int UtcDaliViewStateBasicDispatchP(void)
   ConnectionTracker tracker;
 
   ViewState receivedPrev, receivedCur;
-  int     callCount = 0;
+  InputEvent receivedCause;
+  int        callCount = 0;
 
   IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
     ++callCount;
     receivedPrev = e.GetPrev();
     receivedCur  = e.GetCurrent();
+    receivedCause = e.GetCause();
   });
 
   IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
@@ -98,6 +101,8 @@ int UtcDaliViewStateBasicDispatchP(void)
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(receivedCur.Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(receivedCause.IsProgrammatic());
+  DALI_TEST_CHECK(!receivedCause.IsCancellation());
 
   END_TEST;
 }
@@ -336,7 +341,7 @@ int UtcDaliViewStateDisabledClearsPressedSingleEventP(void)
 
   std::vector<CallRecord> log;
   IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
-    log.push_back({"observer", e.GetPrev(), e.GetCurrent()});
+    log.push_back({"observer", e.GetPrev(), e.GetCurrent(), e.GetCause()});
   });
 
   IntegrationView::SetState(GetImpl(view), ViewState::DISABLED, true);
@@ -347,6 +352,8 @@ int UtcDaliViewStateDisabledClearsPressedSingleEventP(void)
   DALI_TEST_CHECK(!log[0].prev.Contains(ViewState::DISABLED));
   DALI_TEST_CHECK(log[0].cur.Contains(ViewState::DISABLED));
   DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
+  DALI_TEST_CHECK(log[0].cause.IsProgrammatic());
+  DALI_TEST_CHECK(log[0].cause.IsCancellation());
 
   END_TEST;
 }

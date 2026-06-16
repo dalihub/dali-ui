@@ -633,6 +633,11 @@ void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
 
   if(mState != prev)
   {
+    if(prev.Contains(ViewState::PRESSED) && !mState.Contains(ViewState::PRESSED) && mState.IsAnyDisabled())
+    {
+      cause = cause ? cause.WithCancellation() : InputEvent::Programmatic().WithCancellation();
+    }
+
     ViewStateManager::Get().NotifyStateChanged(View::DownCast(mViewImpl.Self()), prev, mState, cause);
   }
 }

@@ -27,11 +27,11 @@ namespace Dali::Ui
 enum class InputEventType : uint32_t
 {
   /**
-   * @brief The change did not originate from a concrete input event.
+   * @brief The InputEvent does not contain a concrete input event payload.
    *
-   * This includes explicit API calls, such as programmatic state changes,
-   * and framework-triggered lifecycle changes, such as focus loss, disabling,
-   * or scene disconnection.
+   * Use InputEvent::IsProgrammatic() to distinguish programmatic changes.
+   * InputEvent::IsCancellation() can also be true for concrete input events
+   * whose sequence was cancelled.
    */
   NONE = 0,
 

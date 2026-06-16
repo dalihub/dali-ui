@@ -87,25 +87,15 @@ public:
   InputEvent& operator=(InputEvent&& rhs) noexcept = default;
 
   /**
-   * @brief Creates a new InputEvent with NONE type, representing a non-input change.
+   * @brief Returns a shared InputEvent for programmatic changes.
    *
    * The returned event has InputEventType::NONE. Use this when emitting signals
-   * for changes that do not originate from a concrete user input event, including
-   * explicit API calls and framework-triggered lifecycle changes.
+   * for changes that do not originate from a concrete user input event, such as
+   * explicit API calls or framework initiated state changes.
    *
-   * @return A handle to the new InputEvent
+   * @return A const reference to the shared programmatic InputEvent
    */
-  static InputEvent New();
-
-  /**
-   * @brief Returns a shared NONE-type InputEvent instance.
-   *
-   * No heap allocation on each call. Use this wherever a valid InputEvent
-   * with InputEventType::NONE is needed without per-call cost.
-   *
-   * @return A const reference to the shared NONE InputEvent
-   */
-  static const InputEvent& None();
+  static const InputEvent& Programmatic();
 
   /**
    * @brief Creates a new InputEvent from a touch event.
@@ -155,6 +145,36 @@ public:
   InputEventType GetInputEventType() const;
 
   /**
+   * @brief Returns true if this event represents a programmatic change.
+   *
+   * Programmatic changes are not caused by a concrete input event. This can be
+   * true together with IsCancellation().
+   *
+   * @return true if this event represents a programmatic change
+   */
+  bool IsProgrammatic() const;
+
+  /**
+   * @brief Returns true if this event represents a cancellation.
+   *
+   * Cancellation changes include lifecycle or system resets without a concrete
+   * input event, and concrete input events whose sequence was interrupted. This
+   * can be true together with IsProgrammatic().
+   *
+   * @return true if this event represents a cancellation
+   */
+  bool IsCancellation() const;
+
+  /**
+   * @brief Returns a copy of this event marked as a cancellation.
+   *
+   * The input payload and existing origin flags are preserved.
+   *
+   * @return A copy of this event with the cancellation flag set
+   */
+  InputEvent WithCancellation() const;
+
+  /**
    * @brief
    */
   const TouchEvent& GetTouchEvent() const;
@@ -181,7 +201,7 @@ public:
 
 public: // Not intended for Application developers
   /**
-   * @brief This constructor is used by InputEvent::New() methods.
+   * @brief This constructor is used by InputEvent factory methods.
    *
    * @param[in] impl The implementation of the input event
    */

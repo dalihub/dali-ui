@@ -44,15 +44,9 @@ class DALI_UI_API InputEventImpl : public BaseObject
 {
 public:
   /**
-   * @brief Create a new InputEvent.
-   *
-   * @param[in] originEvent The handle of originated event
-   * @return An InputEvent handle
+   * @brief Create a new InputEvent with NONE type.
    */
-  /**
-   * @brief Create a new InputEvent with NONE type (programmatic / no input event).
-   */
-  InputEventImpl();
+  InputEventImpl(bool programmatic, bool cancellation);
 
   InputEventImpl(const TouchEvent& originEvent);
 
@@ -83,15 +77,9 @@ public:
   InputEventImpl(const WheelEvent& originEvent);
 
   /**
-   * @brief Create a new InputEvent implementation.
-   *
-   * @param[in] originEvent The handle of originated event
-   * @return An IntrusivePtr to the new InputEventImpl
+   * @brief Create a new InputEvent with NONE type.
    */
-  /**
-   * @brief Create a new InputEvent with NONE type (programmatic / no input event).
-   */
-  static InputEventImplPtr New();
+  static InputEventImplPtr New(bool programmatic, bool cancellation);
 
   static InputEventImplPtr New(const TouchEvent& originEvent);
 
@@ -121,10 +109,22 @@ public:
 
   static InputEventImplPtr New(const WheelEvent& originEvent);
 
+  InputEventImplPtr WithCancellation() const;
+
   /**
    * @copydoc Dali::Ui::InputEvent::GetInputEventType
    */
   InputEventType GetInputEventType() const;
+
+  /**
+   * @copydoc Dali::Ui::InputEvent::IsProgrammatic
+   */
+  bool IsProgrammatic() const;
+
+  /**
+   * @copydoc Dali::Ui::InputEvent::IsCancellation
+   */
+  bool IsCancellation() const;
 
   /**
    * @copydoc Dali::Ui::InputEvent::GetTouchEvent
@@ -161,6 +161,8 @@ private:
 
 private:
   InputEventType                                                                               mEventType;
+  bool                                                                                         mProgrammatic : 1;
+  bool                                                                                         mCancellation : 1;
   std::variant<std::monostate, TouchEvent, KeyEvent, TapGesture, LongPressGesture, WheelEvent> mEvent;
 };
 

@@ -25,17 +25,9 @@ namespace Dali
 namespace Ui
 {
 
-InputEvent InputEvent::New()
+const InputEvent& InputEvent::Programmatic()
 {
-  Internal::InputEventImplPtr impl = Internal::InputEventImpl::New();
-
-  // Pass ownership to handle
-  return InputEvent(impl.Get());
-}
-
-const InputEvent& InputEvent::None()
-{
-  static const InputEvent instance = InputEvent::New();
+  static const InputEvent instance(Internal::InputEventImpl::New(true, false).Get());
   return instance;
 }
 
@@ -87,6 +79,22 @@ InputEvent::InputEvent(Internal::InputEventImpl* impl)
 InputEventType InputEvent::GetInputEventType() const
 {
   return GetImpl(*this).GetInputEventType();
+}
+
+bool InputEvent::IsProgrammatic() const
+{
+  return GetImpl(*this).IsProgrammatic();
+}
+
+bool InputEvent::IsCancellation() const
+{
+  return GetImpl(*this).IsCancellation();
+}
+
+InputEvent InputEvent::WithCancellation() const
+{
+  Internal::InputEventImplPtr impl = GetImpl(*this).WithCancellation();
+  return InputEvent(impl.Get());
 }
 
 const TouchEvent& InputEvent::GetTouchEvent() const

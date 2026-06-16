@@ -88,11 +88,13 @@ struct PressedChangedSignalData
     called  = false;
     pressed = false;
     view    = View();
+    event   = InputEvent();
   }
 
   bool called;
   bool pressed;
   View view;
+  InputEvent event;
 };
 
 struct PressedChangedSignalFunctor
@@ -107,6 +109,7 @@ struct PressedChangedSignalFunctor
     signalData.called  = true;
     signalData.pressed = pressed;
     signalData.view    = view;
+    signalData.event   = event;
   }
 
   PressedChangedSignalData& signalData;
@@ -447,6 +450,7 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
   application.ProcessEvent(touchDown);
 
   DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.event.IsCancellation());
   DALI_TEST_CHECK(view.AsInteractive().IsPressed());
 
   data.Reset();
@@ -464,6 +468,7 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
   application.ProcessEvent(touchUp);
 
   DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.event.IsCancellation());
   DALI_TEST_CHECK(!view.AsInteractive().IsPressed());
   END_TEST;
 }
@@ -500,6 +505,7 @@ int UtcDaliInteractiveTraitSceneDisconnectionClearsPressedP(void)
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(!data.pressed);
+  DALI_TEST_CHECK(data.event.IsCancellation());
   DALI_TEST_CHECK(!view.AsInteractive().IsPressed());
   END_TEST;
 }
