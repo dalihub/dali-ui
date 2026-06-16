@@ -18,13 +18,13 @@ Label label = Label::New("Hello");
 window.Add(label);
 ~~~
 
-Create using fluent API:
+Create and configure:
 
 ~~~cpp
-Label label = Label::New()
-  .SetText("Hello")
-  .SetFontSize(24.0f)
-  .SetTextColor(UiColor::PRIMARY);
+Label label = Label::New();
+label.SetText("Hello");
+label.SetFontSize(24.0f);
+label.SetTextColor(UiColor::PRIMARY);
 ~~~
 
 <br/>
@@ -42,10 +42,10 @@ Representative text layout APIs.
 | `SetOverflowMode()` | Overflow handling (`ELLIPSIS`, `CLIP`) |
 
 ~~~cpp
-Label label = Label::New("Long text...")
-  .SetMultiLine(true)
-  .SetLineWrapMode(Text::LineWrapMode::WORD)
-  .SetHorizontalTextAlignment(Text::Alignment::CENTER);
+Label label = Label::New("Long text...");
+label.SetMultiLine(true);
+label.SetLineWrapMode(Text::LineWrapMode::WORD);
+label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
 ~~~
 
 <br/>
@@ -62,15 +62,15 @@ Control line spacing with `SetLineHeight()` and `SetLineHeightMode()`.
 Effective scale may include UI scale and font size scale.
 
 ~~~cpp
-Label label = Label::New("Line height")
-  .SetMultiLine(true)
-  .SetLineHeight(1.4f)
-  .SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+Label label = Label::New("Line height");
+label.SetMultiLine(true);
+label.SetLineHeight(1.4f);
+label.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
 ~~~
 
 ~~~cpp
-Label label = Label::New("Auto line height")
-  .SetLineHeight(Text::LINE_HEIGHT_AUTO);
+Label label = Label::New("Auto line height");
+label.SetLineHeight(Text::LINE_HEIGHT_AUTO);
 ~~~
 
 > [!NOTE]
@@ -161,9 +161,9 @@ If no font family is specified, the platform default font is used. Font family, 
 Set using string:
 
 ~~~cpp
-Label label = Label::New("Variable Font")
-  .SetFontFamily("Sans VF")
-  .SetFontVariation("wght=700,wdth=90");
+Label label = Label::New("Variable Font");
+label.SetFontFamily("Sans VF");
+label.SetFontVariation("wght=700,wdth=90");
 ~~~
 
 Set using `FontVariationAxis`:
@@ -173,9 +173,9 @@ Dali::Vector<Text::FontVariationAxis> axes;
 axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
 axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
 
-Label label = Label::New("Variable Font")
-  .SetFontFamily("Sans VF")
-  .SetFontVariation(axes);
+Label label = Label::New("Variable Font");
+label.SetFontFamily("Sans VF");
+label.SetFontVariation(axes);
 ~~~
 
 > [!NOTE]
@@ -212,19 +212,19 @@ Minimum/maximum font size scale limits the final scale range. If the minimum val
 User-defined scale:
 
 ~~~cpp
-Label label = Label::New("Scaled text")
-  .SetFontSizeScale(1.5f)
-  .SetMinimumFontSizeScale(0.8f)
-  .SetMaximumFontSizeScale(2.0f);
+Label label = Label::New("Scaled text");
+label.SetFontSizeScale(1.5f);
+label.SetMinimumFontSizeScale(0.8f);
+label.SetMaximumFontSizeScale(2.0f);
 ~~~
 
 System font size scale:
 
 ~~~cpp
-Label label = Label::New("System scaled text")
-  .SetSystemFontSizeScaleEnabled(true)
-  .SetMinimumFontSizeScale(0.8f)
-  .SetMaximumFontSizeScale(2.0f);
+Label label = Label::New("System scaled text");
+label.SetSystemFontSizeScaleEnabled(true);
+label.SetMinimumFontSizeScale(0.8f);
+label.SetMaximumFontSizeScale(2.0f);
 ~~~
 
 `GetAdjustedFontSizeScale()` returns the final applied font size scale.
@@ -271,25 +271,25 @@ Hexadecimal formats:
 color (RGB / ARGB):
 
 ~~~cpp
-Label rgb = Label::New("<color value='0xFF0000'>Red Text</color>")
-  .SetMarkupEnabled(true);
+Label rgb = Label::New("<color value='0xFF0000'>Red Text</color>");
+rgb.SetMarkupEnabled(true);
 
-Label argb = Label::New("<color value='0xFFFF0000'>Red Text</color>")
-  .SetMarkupEnabled(true);
+Label argb = Label::New("<color value='0xFFFF0000'>Red Text</color>");
+argb.SetMarkupEnabled(true);
 ~~~
 
 font:
 
 ~~~cpp
-Label label = Label::New("<font family='Sans' size='20'>Hello world</font>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<font family='Sans' size='20'>Hello world</font>");
+label.SetMarkupEnabled(true);
 ~~~
 
 bold:
 
 ~~~cpp
-Label label = Label::New("<b>Bold</b>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<b>Bold</b>");
+label.SetMarkupEnabled(true);
 ~~~
 
 > [!NOTE]
@@ -298,8 +298,8 @@ Label label = Label::New("<b>Bold</b>")
 italic:
 
 ~~~cpp
-Label label = Label::New("<i>Italic</i>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<i>Italic</i>");
+label.SetMarkupEnabled(true);
 ~~~
 
 > [!NOTE]
@@ -308,29 +308,29 @@ Label label = Label::New("<i>Italic</i>")
 underline:
 
 ~~~cpp
-Label label = Label::New("<u color='0xFF0000' height='2'>Underline</u>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<u color='0xFF0000' height='2'>Underline</u>");
+label.SetMarkupEnabled(true);
 ~~~
 
 line-through:
 
 ~~~cpp
-Label label = Label::New("<s color='#9C3A64' height='2'>Strike</s>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<s color='#9C3A64' height='2'>Strike</s>");
+label.SetMarkupEnabled(true);
 ~~~
 
 background:
 
 ~~~cpp
-Label label = Label::New("<background color='yellow'>Background</background>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<background color='yellow'>Background</background>");
+label.SetMarkupEnabled(true);
 ~~~
 
 anchor:
 
 ~~~cpp
-Label label = Label::New("<a href='https://www.tizen.org'>Tizen</a>")
-  .SetMarkupEnabled(true);
+Label label = Label::New("<a href='https://www.tizen.org'>Tizen</a>");
+label.SetMarkupEnabled(true);
 ~~~
 
 anchor click handling:
@@ -373,9 +373,9 @@ Marquee is a feature that displays long text with scroll animation within a limi
 With `MANUAL`, `StartMarquee()` must be called to start the marquee regardless of overflow. `StopMarquee()` stops it.
 
 ~~~cpp
-Label label = Label::New("Very long text...")
-  .SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL)
-  .SetMarqueeSpeed(80);
+Label label = Label::New("Very long text...");
+label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+label.SetMarqueeSpeed(80);
 
 label.StartMarquee();
 label.StopMarquee();
@@ -386,10 +386,10 @@ label.StopMarquee();
 With `ON_OVERFLOW`, marquee starts automatically during layout when the text exceeds the available space. If the condition is met, there is no need to call `StartMarquee()`.
 
 ~~~cpp
-Label label = Label::New("Very long text...")
-  .SetRequestedWidth(200.0f)
-  .SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW)
-  .SetMarqueeSpeed(80);
+Label label = Label::New("Very long text...");
+label.SetRequestedWidth(200.0f);
+label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::ON_OVERFLOW);
+label.SetMarqueeSpeed(80);
 ~~~
 
 > [!NOTE]
@@ -417,11 +417,11 @@ Text fit selects the largest font size that does not overflow within the given w
 Specify a range with min/max font size and step. Line height follows the current style setting.
 
 ~~~cpp
-Label label = Label::New("Auto-sized text")
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(66.0f)
-  .SetMultiLine(true)
-  .SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+Label label = Label::New("Auto-sized text");
+label.SetRequestedWidth(MATCH_PARENT);
+label.SetRequestedHeight(66.0f);
+label.SetMultiLine(true);
+label.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
 ~~~
 
 ### FitCandidate
@@ -434,11 +434,11 @@ candidates.PushBack(Text::FitCandidate(16.0f, 32.0f));
 candidates.PushBack(Text::FitCandidate(20.0f, 40.0f));
 candidates.PushBack(Text::FitCandidate(24.0f, 48.0f));
 
-Label label = Label::New("Candidate fit")
-  .SetRequestedWidth(MATCH_PARENT)
-  .SetRequestedHeight(80.0f)
-  .SetMultiLine(true)
-  .SetTextFit(candidates);
+Label label = Label::New("Candidate fit");
+label.SetRequestedWidth(MATCH_PARENT);
+label.SetRequestedHeight(80.0f);
+label.SetMultiLine(true);
+label.SetTextFit(candidates);
 ~~~
 
 > [!WARNING]
@@ -456,15 +456,15 @@ See also:
 Use `SetTranslatableText()` to bind a localized string.
 
 ~~~cpp
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE");
 ~~~
 
 With explicit domain:
 
 ~~~cpp
-Label title = Label::New()
-  .SetTranslatableText("IDS_TITLE", "myapp-settings");
+Label title = Label::New();
+title.SetTranslatableText("IDS_TITLE", "myapp-settings");
 ~~~
 
 > [!WARNING]
@@ -484,10 +484,10 @@ Async rendering runs the major stages of the text rendering stack — text model
 When async rendering is enabled, an async render request is automatically made during the OnRelayout phase based on the size determined by OnMeasure/OnArrange. When complete, `AsyncRenderFinishedSignal()` is emitted.
 
 ~~~cpp
-Label label = Label::New("Async")
-  .SetRequestedWidth(300.0f)
-  .SetRequestedHeight(80.0f)
-  .SetAsyncRendering(true);
+Label label = Label::New("Async");
+label.SetRequestedWidth(300.0f);
+label.SetRequestedHeight(80.0f);
+label.SetAsyncRendering(true);
 ~~~
 
 > [!NOTE]
@@ -535,9 +535,9 @@ label.RequestAsyncHeightForWidth(300.0f);
 Render scale rasterizes glyphs at a larger scale and downscales them to reduce texture upscaling quality loss when the View is visually scaled up. It does not affect layout size. It is only valid when async rendering is enabled, and the value must be 1.0 or greater.
 
 ~~~cpp
-Label label = Label::New("High quality")
-  .SetAsyncRendering(true)
-  .SetRenderScale(2.0f);
+Label label = Label::New("High quality");
+label.SetAsyncRendering(true);
+label.SetRenderScale(2.0f);
 ~~~
 
 ### Cutout & Mask Effect
@@ -546,14 +546,14 @@ Apply cutout using glyph shapes or mask effects.
 
 ~~~cpp
 // Cutout
-Label label = Label::New("Cutout")
-  .SetCutoutEnabled(true);
+Label label = Label::New("Cutout");
+label.SetCutoutEnabled(true);
 
 // Mask effect
 View maskView = ImageView::New("mask.png");
 
-Label label2 = Label::New("Masked")
-  .SetMaskEffect(maskView);
+Label label2 = Label::New("Masked");
+label2.SetMaskEffect(maskView);
 ~~~
 
 See also:

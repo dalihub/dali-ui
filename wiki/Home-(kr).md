@@ -79,7 +79,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
   * [Text](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-(kr))
   * [Label](https://github.sec.samsung.net/NUI/dali-ui/wiki/Label-(kr))
-  * InputText
+  * [Text Input](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-Input-(kr))
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView-(kr))
 * Navigation
 * [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView-(kr))
