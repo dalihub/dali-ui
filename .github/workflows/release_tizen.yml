@@ -157,7 +157,6 @@ jobs:
         git tag -fa "v$VERSION" -m "Release $VERSION"
         git push origin HEAD:$DESTINATION_BRANCH --force-with-lease
         git push origin "v$VERSION" --force
-        echo v${{ steps.version.outputs.version }} >> $GITHUB_STEP_SUMMARY
 
     - name: Create Release
       uses: code-actions/softprops-action-gh-release@v2
@@ -167,5 +166,21 @@ jobs:
         tag_name: v${{ steps.version.outputs.version }}
         name: v${{ steps.version.outputs.version }}
         generate_release_notes: true
+        body: |
+          ## DALi Dependency Commits
+
+          - dali-core: ${{ steps.dependencies.outputs.dali_core_commit }}
+          - dali-adaptor: ${{ steps.dependencies.outputs.dali_adaptor_commit }}
+
+          ## Binary Images
+
+          (None)
         draft: false
         prerelease: false
+
+    - name: Add release summary
+      env:
+        VERSION: ${{ steps.version.outputs.version }}
+      run: |
+        echo "- Release note: [v$VERSION](${{ github.server_url }}/${{ github.repository }}/releases/tag/v$VERSION)" >> $GITHUB_STEP_SUMMARY
+        echo "- Please visit [dali-ui Gerrit Gitweb](https://review.tizen.org/gerrit/gitweb?p=platform%2Fcore%2Fuifw%2Fdali-ui.git;a=summary) after a few minutes to check whether the automatic sync has completed." >> $GITHUB_STEP_SUMMARY
