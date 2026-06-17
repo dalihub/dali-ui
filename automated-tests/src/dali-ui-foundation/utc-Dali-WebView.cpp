@@ -385,6 +385,24 @@ int UtcDaliWebViewClearAllTilesResourcesP(void)
   END_TEST;
 }
 
+int UtcDaliWebViewClearCacheP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.ClearCache();
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewClearCookiesP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.ClearCookies();
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
 int UtcDaliWebViewExitFullscreenP(void)
 {
   UiTestApplication application;
@@ -630,27 +648,27 @@ int UtcDaliWebViewSetCursorEnabledByClientP(void)
 // Input & Video
 // ===========================================================================
 
-int UtcDaliWebViewSetGetMouseEventsEnabledP(void)
+int UtcDaliWebViewSetIsMouseEventsEnabledP(void)
 {
   UiTestApplication application;
   WebView view = WebView::New();
-  DALI_TEST_EQUALS(view.GetMouseEventsEnabled(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsMouseEventsEnabled(), true, TEST_LOCATION);
   view.SetMouseEventsEnabled(false);
-  DALI_TEST_EQUALS(view.GetMouseEventsEnabled(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsMouseEventsEnabled(), false, TEST_LOCATION);
   view.SetMouseEventsEnabled(true);
-  DALI_TEST_EQUALS(view.GetMouseEventsEnabled(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsMouseEventsEnabled(), true, TEST_LOCATION);
   END_TEST;
 }
 
-int UtcDaliWebViewSetGetKeyEventsEnabledP(void)
+int UtcDaliWebViewSetIsKeyEventsEnabledP(void)
 {
   UiTestApplication application;
   WebView view = WebView::New();
-  DALI_TEST_EQUALS(view.GetKeyEventsEnabled(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsKeyEventsEnabled(), true, TEST_LOCATION);
   view.SetKeyEventsEnabled(false);
-  DALI_TEST_EQUALS(view.GetKeyEventsEnabled(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsKeyEventsEnabled(), false, TEST_LOCATION);
   view.SetKeyEventsEnabled(true);
-  DALI_TEST_EQUALS(view.GetKeyEventsEnabled(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsKeyEventsEnabled(), true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -673,14 +691,14 @@ int UtcDaliWebViewSetVideoHoleEnabledP(void)
   END_TEST;
 }
 
-int UtcDaliWebViewSetGetVideoHoleEnabledP(void)
+int UtcDaliWebViewSetIsVideoHoleEnabledP(void)
 {
   UiTestApplication application;
   WebView view = WebView::New();
   view.SetVideoHoleEnabled(true);
-  DALI_TEST_EQUALS(view.GetVideoHoleEnabled(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsVideoHoleEnabled(), true, TEST_LOCATION);
   view.SetVideoHoleEnabled(false);
-  DALI_TEST_EQUALS(view.GetVideoHoleEnabled(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.IsVideoHoleEnabled(), false, TEST_LOCATION);
   END_TEST;
 }
 
@@ -721,6 +739,15 @@ int UtcDaliWebViewPageLoadFinishedSignalP(void)
   UiTestApplication application;
   WebView view = WebView::New();
   view.PageLoadFinishedSignal().Connect([](WebView v, const Dali::String& url) {});
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
+int UtcDaliWebViewPageLoadErrorSignalP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.PageLoadErrorSignal().Connect([](WebView v, const WebViewPageLoadError& error) {});
   DALI_TEST_CHECK(view);
   END_TEST;
 }
@@ -808,6 +835,22 @@ int UtcDaliWebViewTextFoundSignalP(void)
   END_TEST;
 }
 
+int UtcDaliWebViewFindTextP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  DALI_TEST_CHECK(view);
+
+  // Matches are reported asynchronously through TextFoundSignal().
+  view.TextFoundSignal().Connect([](WebView /*v*/, uint32_t /*count*/) {});
+
+  // Single option and OR-combined options (WebViewFindOption supports bitwise OR).
+  view.FindText("hello", WebViewFindOption::CASE_INSENSITIVE, 100u);
+  view.FindText("world", WebViewFindOption::CASE_INSENSITIVE | WebViewFindOption::WRAP_AROUND, 10u);
+
+  END_TEST;
+}
+
 int UtcDaliWebViewGeolocationPermissionSignalP(void)
 {
   UiTestApplication application;
@@ -859,6 +902,22 @@ int UtcDaliWebViewFindOptionEnumP(void)
   DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::AT_WORD_STARTS), 1u << 1, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::BACKWARDS), 1u << 3, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<uint32_t>(WebViewFindOption::WRAP_AROUND), 1u << 4, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewPageLoadErrorCodeEnumP(void)
+{
+  DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorCode::UNKNOWN), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorCode::CANCELED), 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorCode::OTHER), 15, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliWebViewPageLoadErrorTypeEnumP(void)
+{
+  DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorType::NONE), 0, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorType::NETWORK), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorType::PRINT), 6, TEST_LOCATION);
   END_TEST;
 }
 

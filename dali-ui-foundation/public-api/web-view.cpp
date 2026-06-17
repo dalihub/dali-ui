@@ -204,12 +204,12 @@ void WebView::ClearHistory()
   GetImpl(*this).ClearHistory();
 }
 
-bool WebView::CanGoForward()
+bool WebView::CanGoForward() const
 {
   return GetImpl(*this).CanGoForward();
 }
 
-bool WebView::CanGoBack()
+bool WebView::CanGoBack() const
 {
   return GetImpl(*this).CanGoBack();
 }
@@ -222,6 +222,16 @@ void WebView::ExitFullscreen()
 void WebView::ClearAllTilesResources()
 {
   GetImpl(*this).ClearAllTilesResources();
+}
+
+void WebView::ClearCache()
+{
+  GetImpl(*this).ClearCache();
+}
+
+void WebView::ClearCookies()
+{
+  GetImpl(*this).ClearCookies();
 }
 
 void WebView::SuspendNetworkLoading()
@@ -329,19 +339,19 @@ void WebView::SetVideoHoleEnabled(bool enabled)
   GetImpl(*this).SetVideoHoleEnabled(enabled);
 }
 
-bool WebView::GetMouseEventsEnabled() const
+bool WebView::IsMouseEventsEnabled() const
 {
-  return GetImpl(*this).GetMouseEventsEnabled();
+  return GetImpl(*this).IsMouseEventsEnabled();
 }
 
-bool WebView::GetKeyEventsEnabled() const
+bool WebView::IsKeyEventsEnabled() const
 {
-  return GetImpl(*this).GetKeyEventsEnabled();
+  return GetImpl(*this).IsKeyEventsEnabled();
 }
 
-bool WebView::GetVideoHoleEnabled() const
+bool WebView::IsVideoHoleEnabled() const
 {
-  return GetImpl(*this).GetVideoHoleEnabled();
+  return GetImpl(*this).IsVideoHoleEnabled();
 }
 
 void WebView::FeedMouseWheel(bool yDirection, int step, int x, int y)
@@ -409,6 +419,11 @@ void WebView::JavaScriptPromptReply(const Dali::String& result)
   GetImpl(*this).JavaScriptPromptReply(result);
 }
 
+bool WebView::FindText(const Dali::String& text, WebViewFindOption options, uint32_t maxMatchCount)
+{
+  return GetImpl(*this).FindText(text, options, maxMatchCount);
+}
+
 WebView::PageLoadStartedSignalType& WebView::PageLoadStartedSignal()
 {
   return GetImpl(*this).mPageLoadStartedSignal;
@@ -422,6 +437,11 @@ WebView::PageLoadInProgressSignalType& WebView::PageLoadInProgressSignal()
 WebView::PageLoadFinishedSignalType& WebView::PageLoadFinishedSignal()
 {
   return GetImpl(*this).mPageLoadFinishedSignal;
+}
+
+WebView::PageLoadErrorSignalType& WebView::PageLoadErrorSignal()
+{
+  return GetImpl(*this).mPageLoadErrorSignal;
 }
 
 WebView::UrlChangedSignalType& WebView::UrlChangedSignal()

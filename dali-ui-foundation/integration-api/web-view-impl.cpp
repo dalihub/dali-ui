@@ -20,6 +20,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
+#include <dali/devel-api/adaptor-framework/web-engine/web-engine-context.h>
+#include <dali/devel-api/adaptor-framework/web-engine/web-engine-cookie-manager.h>
 #include <dali/devel-api/object/property-map-devel.h>
 #include <dali/devel-api/object/property-value-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
@@ -408,10 +410,48 @@ void WebViewImpl::OnInitialize()
     }
   }
 
-  // --- Register frame-rendered callback ---
+  // --- Bridge web-engine callbacks to public signals ---
+  // The dali-adaptor WebEngine is callback-based (it exposes no signals of its own), so each
+  // engine event is forwarded here to the matching WebView signal through an Emit* helper.
   if(mWebEngine)
   {
     mWebEngine.RegisterFrameRenderedCallback(std::bind(&WebViewImpl::OnFrameRendered, this));
+
+    mWebEngine.RegisterPageLoadStartedCallback([this](const std::string& url)
+    { EmitPageLoadStarted(ToDaliString(url)); });
+    mWebEngine.RegisterPageLoadInProgressCallback([this](const std::string& url)
+    { EmitPageLoadInProgress(ToDaliString(url)); });
+    mWebEngine.RegisterPageLoadFinishedCallback([this](const std::string& url)
+    { EmitPageLoadFinished(ToDaliString(url)); });
+    mWebEngine.RegisterPageLoadErrorCallback([this](std::unique_ptr<Dali::WebEngineLoadError> error)
+    {
+      if(!error)
+      {
+        return;
+      }
+      WebViewPageLoadError uiError;
+      uiError.url         = ToDaliString(error->GetUrl());
+      uiError.code        = ToUiPageLoadErrorCode(error->GetCode());
+      uiError.description = ToDaliString(error->GetDescription());
+      uiError.type        = ToUiPageLoadErrorType(error->GetType());
+      EmitPageLoadError(uiError);
+    });
+    mWebEngine.RegisterUrlChangedCallback([this](const std::string& url)
+    { EmitUrlChanged(ToDaliString(url)); });
+    mWebEngine.RegisterScrollEdgeReachedCallback([this](Dali::WebEnginePlugin::ScrollEdge edge)
+    { EmitScrollEdgeReached(ToUiScrollEdge(edge)); });
+    mWebEngine.RegisterOverScrolledCallback([this](Dali::WebEnginePlugin::OverScrolled overScrolled)
+    { EmitOverScrolled(ToUiOverScrolled(overScrolled)); });
+    mWebEngine.RegisterFullscreenEnteredCallback([this]()
+    { EmitFullscreenEntered(); });
+    mWebEngine.RegisterFullscreenExitedCallback([this]()
+    { EmitFullscreenExited(); });
+    mWebEngine.RegisterTextFoundCallback([this](uint32_t count)
+    { EmitTextFound(count); });
+    mWebEngine.RegisterGeolocationPermissionCallback([this](const std::string& host, const std::string& protocol) -> bool
+    { return EmitGeolocationPermission(ToDaliString(host), ToDaliString(protocol)); });
+    mWebEngine.RegisterWebProcessCrashedCallback([this]()
+    { EmitWebProcessCrashed(); });
   }
 }
 
@@ -450,11 +490,8 @@ MeasuredSize WebViewImpl::OnArrange(const LayoutRect& bounds)
 
 void WebViewImpl::OnFrameRendered()
 {
-  // Forward to any user-registered frame-rendered callback first.
-  if(mFrameRenderedCallback)
-  {
-    mFrameRenderedCallback();
-  }
+  // Notify listeners that the web engine produced a new frame.
+  EmitFrameRendered();
 
   // Only rebuild the visual when it hasn't been created yet or a size change occurred.
   if(!mVisualChangeRequired && mVisual)
@@ -642,6 +679,18 @@ Dali::WebEnginePlugin::FindOption WebViewImpl::ToEngineFindOption(WebViewFindOpt
   return static_cast<Dali::WebEnginePlugin::FindOption>(static_cast<uint32_t>(options));
 }
 
+WebViewPageLoadErrorCode WebViewImpl::ToUiPageLoadErrorCode(Dali::WebEngineLoadError::ErrorCode code)
+{
+  // WebViewPageLoadErrorCode mirrors WebEngineLoadError::ErrorCode value-for-value.
+  return static_cast<WebViewPageLoadErrorCode>(static_cast<int>(code));
+}
+
+WebViewPageLoadErrorType WebViewImpl::ToUiPageLoadErrorType(Dali::WebEngineLoadError::ErrorType type)
+{
+  // WebViewPageLoadErrorType mirrors WebEngineLoadError::ErrorType value-for-value.
+  return static_cast<WebViewPageLoadErrorType>(static_cast<int>(type));
+}
+
 // ===========================================================================
 // URL & User Agent
 // ===========================================================================
@@ -750,7 +799,9 @@ void WebViewImpl::ResumeNetworkLoading()
 
 float WebViewImpl::GetLoadProgressPercentage() const
 {
-  return mWebEngine ? mWebEngine.GetPlugin()->GetLoadProgressPercentage() : 0.0f;
+  // The web engine reports progress as a 0.0-1.0 ratio; the public API contract is a
+  // 0.0-100.0 percentage, so scale it here.
+  return (mWebEngine && mWebEngine.GetPlugin()) ? mWebEngine.GetPlugin()->GetLoadProgressPercentage() * 100.0f : 0.0f;
 }
 
 // ===========================================================================
@@ -815,9 +866,11 @@ bool WebViewImpl::ScrollEdgeBy(int32_t deltaX, int32_t deltaY)
 // Navigation
 // ===========================================================================
 
-bool WebViewImpl::CanGoForward()
+bool WebViewImpl::CanGoForward() const
 {
-  return mWebEngine && mWebEngine.CanGoForward();
+  // WebEngine::CanGoForward() is not declared const in dali-adaptor, but the query does not
+  // modify observable state, so the const_cast keeps this public query const-correct.
+  return mWebEngine && const_cast<Dali::WebEngine&>(mWebEngine).CanGoForward();
 }
 
 void WebViewImpl::GoForward()
@@ -828,9 +881,11 @@ void WebViewImpl::GoForward()
   }
 }
 
-bool WebViewImpl::CanGoBack()
+bool WebViewImpl::CanGoBack() const
 {
-  return mWebEngine && mWebEngine.CanGoBack();
+  // WebEngine::CanGoBack() is not declared const in dali-adaptor, but the query does not
+  // modify observable state, so the const_cast keeps this public query const-correct.
+  return mWebEngine && const_cast<Dali::WebEngine&>(mWebEngine).CanGoBack();
 }
 
 void WebViewImpl::GoBack()
@@ -854,6 +909,28 @@ void WebViewImpl::ClearAllTilesResources()
   if(mWebEngine)
   {
     mWebEngine.ClearAllTilesResources();
+  }
+}
+
+void WebViewImpl::ClearCache()
+{
+  // Cache lives on the (process-wide) browsing context, reached statically. Match the
+  // incognito mode of this view's engine so the correct context is cleared.
+  const bool isIncognito = mWebEngine && mWebEngine.IsIncognito();
+  if(Dali::WebEngineContext* context = Dali::WebEngine::GetContext(isIncognito))
+  {
+    context->ClearCache();
+  }
+}
+
+void WebViewImpl::ClearCookies()
+{
+  // Cookies live on the (process-wide) cookie manager, reached statically. Match the
+  // incognito mode of this view's engine so the correct store is cleared.
+  const bool isIncognito = mWebEngine && mWebEngine.IsIncognito();
+  if(Dali::WebEngineCookieManager* cookieManager = Dali::WebEngine::GetCookieManager(isIncognito))
+  {
+    cookieManager->ClearCookies();
   }
 }
 
@@ -996,12 +1073,12 @@ float WebViewImpl::GetScaleFactor() const
 
 float WebViewImpl::GetPageZoomFactor() const
 {
-  return mWebEngine ? mWebEngine.GetPlugin()->GetPageZoomFactor() : 1.0f;
+  return (mWebEngine && mWebEngine.GetPlugin()) ? mWebEngine.GetPlugin()->GetPageZoomFactor() : 1.0f;
 }
 
 void WebViewImpl::SetPageZoomFactor(float zoomFactor)
 {
-  if(mWebEngine)
+  if(mWebEngine && mWebEngine.GetPlugin())
   {
     mWebEngine.GetPlugin()->SetPageZoomFactor(zoomFactor);
   }
@@ -1009,12 +1086,12 @@ void WebViewImpl::SetPageZoomFactor(float zoomFactor)
 
 float WebViewImpl::GetTextZoomFactor() const
 {
-  return mWebEngine ? mWebEngine.GetPlugin()->GetTextZoomFactor() : 1.0f;
+  return (mWebEngine && mWebEngine.GetPlugin()) ? mWebEngine.GetPlugin()->GetTextZoomFactor() : 1.0f;
 }
 
 void WebViewImpl::SetTextZoomFactor(float zoomFactor)
 {
-  if(mWebEngine)
+  if(mWebEngine && mWebEngine.GetPlugin())
   {
     mWebEngine.GetPlugin()->SetTextZoomFactor(zoomFactor);
   }
@@ -1076,7 +1153,7 @@ Dali::Ui::ImageView WebViewImpl::GetFavicon() const
 
 Dali::String WebViewImpl::GetSelectedText() const
 {
-  return mWebEngine ? ToDaliString(mWebEngine.GetPlugin()->GetSelectedText()) : Dali::String();
+  return (mWebEngine && mWebEngine.GetPlugin()) ? ToDaliString(mWebEngine.GetPlugin()->GetSelectedText()) : Dali::String();
 }
 
 void WebViewImpl::GetPlainTextAsynchronously(WebView::PlainTextCallback callback)
@@ -1094,13 +1171,20 @@ void WebViewImpl::GetPlainTextAsynchronously(WebView::PlainTextCallback callback
   });
 }
 
+bool WebViewImpl::FindText(const Dali::String& text, WebViewFindOption options, uint32_t maxMatchCount)
+{
+  // dali-adaptor exposes find-and-highlight as HighlightText(); the match count arrives via the
+  // text-found callback wired in OnInitialize(), which emits TextFoundSignal.
+  return mWebEngine && mWebEngine.HighlightText(ToStdString(text), ToEngineFindOption(options), maxMatchCount);
+}
+
 // ===========================================================================
 // Document Appearance
 // ===========================================================================
 
 void WebViewImpl::SetDocumentBackgroundColor(const Dali::Vector4& color)
 {
-  if(mWebEngine)
+  if(mWebEngine && mWebEngine.GetPlugin())
   {
     mWebEngine.GetPlugin()->SetDocumentBackgroundColor(color);
   }
@@ -1116,7 +1200,7 @@ void WebViewImpl::SetTilesClearedWhenHidden(bool cleared)
 
 void WebViewImpl::SetTileCoverAreaMultiplier(float multiplier)
 {
-  if(mWebEngine)
+  if(mWebEngine && mWebEngine.GetPlugin())
   {
     mWebEngine.GetPlugin()->SetTileCoverAreaMultiplier(multiplier);
   }
@@ -1143,7 +1227,7 @@ void WebViewImpl::SetMouseEventsEnabled(bool enabled)
   }
 }
 
-bool WebViewImpl::GetMouseEventsEnabled() const
+bool WebViewImpl::IsMouseEventsEnabled() const
 {
   return mMouseEventsEnabled;
 }
@@ -1157,7 +1241,7 @@ void WebViewImpl::SetKeyEventsEnabled(bool enabled)
   }
 }
 
-bool WebViewImpl::GetKeyEventsEnabled() const
+bool WebViewImpl::IsKeyEventsEnabled() const
 {
   return mKeyEventsEnabled;
 }
@@ -1221,7 +1305,7 @@ void WebViewImpl::SetVideoHoleEnabled(bool enabled)
   SetVideoHole(enabled, /*isWaylandWindow=*/true);
 }
 
-bool WebViewImpl::GetVideoHoleEnabled() const
+bool WebViewImpl::IsVideoHoleEnabled() const
 {
   return mVideoHoleEnabled;
 }
@@ -1241,173 +1325,89 @@ bool WebViewImpl::CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback 
 }
 
 // ===========================================================================
-// Callback Registration — Page Loading
+// Signal emission helpers
+//
+// Each helper bridges a web-engine callback to the matching public WebView signal.
+// The signal's first argument is the emitting WebView handle, obtained from Self().
+// Empty() is checked first so no handle is constructed when nothing is connected.
 // ===========================================================================
 
-void WebViewImpl::RegisterPageLoadStartedCallback(PageLoadCallback callback)
+void WebViewImpl::EmitPageLoadStarted(const Dali::String& url)
 {
-  if(!mWebEngine) return;
-  auto sharedCb            = std::shared_ptr<CallbackBase>(callback.Release());
-  mPageLoadStartedCallback = [sharedCb](const std::string& url)
-  {
-    Dali::String daliUrl(url.c_str());
-    CallbackBase::Execute<Dali::String>(*sharedCb, daliUrl);
-  };
-  mWebEngine.RegisterPageLoadStartedCallback(mPageLoadStartedCallback);
+  if(mPageLoadStartedSignal.Empty()) return;
+  mPageLoadStartedSignal.Emit(WebView::DownCast(Self()), url);
 }
 
-void WebViewImpl::RegisterPageLoadInProgressCallback(PageLoadCallback callback)
+void WebViewImpl::EmitPageLoadInProgress(const Dali::String& url)
 {
-  if(!mWebEngine) return;
-  auto sharedCb               = std::shared_ptr<CallbackBase>(callback.Release());
-  mPageLoadInProgressCallback = [sharedCb](const std::string& url)
-  {
-    Dali::String daliUrl(url.c_str());
-    CallbackBase::Execute<Dali::String>(*sharedCb, daliUrl);
-  };
-  mWebEngine.RegisterPageLoadInProgressCallback(mPageLoadInProgressCallback);
+  if(mPageLoadInProgressSignal.Empty()) return;
+  mPageLoadInProgressSignal.Emit(WebView::DownCast(Self()), url);
 }
 
-void WebViewImpl::RegisterPageLoadFinishedCallback(PageLoadCallback callback)
+void WebViewImpl::EmitPageLoadFinished(const Dali::String& url)
 {
-  if(!mWebEngine) return;
-  auto sharedCb             = std::shared_ptr<CallbackBase>(callback.Release());
-  mPageLoadFinishedCallback = [sharedCb](const std::string& url)
-  {
-    Dali::String daliUrl(url.c_str());
-    CallbackBase::Execute<Dali::String>(*sharedCb, daliUrl);
-  };
-  mWebEngine.RegisterPageLoadFinishedCallback(mPageLoadFinishedCallback);
+  if(mPageLoadFinishedSignal.Empty()) return;
+  mPageLoadFinishedSignal.Emit(WebView::DownCast(Self()), url);
 }
 
-// ===========================================================================
-// Callback Registration — Scroll
-// ===========================================================================
-
-void WebViewImpl::RegisterScrollEdgeReachedCallback(ScrollEdgeReachedCallback callback)
+void WebViewImpl::EmitPageLoadError(const WebViewPageLoadError& error)
 {
-  if(!mWebEngine) return;
-  auto sharedCb              = std::shared_ptr<CallbackBase>(callback.Release());
-  mScrollEdgeReachedCallback = [sharedCb](const Dali::WebEnginePlugin::ScrollEdge edge)
-  {
-    WebViewScrollEdge uiEdge = ToUiScrollEdge(edge);
-    CallbackBase::Execute<WebViewScrollEdge>(*sharedCb, uiEdge);
-  };
-  mWebEngine.RegisterScrollEdgeReachedCallback(mScrollEdgeReachedCallback);
+  if(mPageLoadErrorSignal.Empty()) return;
+  mPageLoadErrorSignal.Emit(WebView::DownCast(Self()), error);
 }
 
-void WebViewImpl::RegisterOverScrolledCallback(OverScrolledCallback callback)
+void WebViewImpl::EmitScrollEdgeReached(WebViewScrollEdge edge)
 {
-  if(!mWebEngine) return;
-  auto sharedCb         = std::shared_ptr<CallbackBase>(callback.Release());
-  mOverScrolledCallback = [sharedCb](const Dali::WebEnginePlugin::OverScrolled overScrolled)
-  {
-    WebViewOverScrolled uiOs = ToUiOverScrolled(overScrolled);
-    CallbackBase::Execute<WebViewOverScrolled>(*sharedCb, uiOs);
-  };
-  mWebEngine.RegisterOverScrolledCallback(mOverScrolledCallback);
+  if(mScrollEdgeReachedSignal.Empty()) return;
+  mScrollEdgeReachedSignal.Emit(WebView::DownCast(Self()), edge);
 }
 
-// ===========================================================================
-// Callback Registration — Navigation
-// ===========================================================================
-
-void WebViewImpl::RegisterUrlChangedCallback(UrlChangedCallback callback)
+void WebViewImpl::EmitOverScrolled(WebViewOverScrolled overScrolled)
 {
-  if(!mWebEngine) return;
-  auto sharedCb       = std::shared_ptr<CallbackBase>(callback.Release());
-  mUrlChangedCallback = [sharedCb](const std::string& url)
-  {
-    Dali::String daliUrl(url.c_str());
-    CallbackBase::Execute<Dali::String>(*sharedCb, daliUrl);
-  };
-  mWebEngine.RegisterUrlChangedCallback(mUrlChangedCallback);
+  if(mOverScrolledSignal.Empty()) return;
+  mOverScrolledSignal.Emit(WebView::DownCast(Self()), overScrolled);
 }
 
-// ===========================================================================
-// Callback Registration — Rendering
-// ===========================================================================
-
-void WebViewImpl::RegisterFrameRenderedCallback(FrameRenderedCallback callback)
+void WebViewImpl::EmitUrlChanged(const Dali::String& url)
 {
-  // Store alongside our internal frame-rendered logic.
-  // We wrap the user callback and call it from OnFrameRendered().
-  auto sharedCb          = std::shared_ptr<CallbackBase>(callback.Release());
-  mFrameRenderedCallback = [sharedCb]()
-  {
-    CallbackBase::Execute(*sharedCb);
-  };
-  // Note: the web engine's frame-rendered callback is already registered in OnInitialize()
-  // pointing to our OnFrameRendered() method, which internally calls mFrameRenderedCallback.
+  if(mUrlChangedSignal.Empty()) return;
+  mUrlChangedSignal.Emit(WebView::DownCast(Self()), url);
 }
 
-// ===========================================================================
-// Callback Registration — Fullscreen
-// ===========================================================================
-
-void WebViewImpl::RegisterFullscreenEnteredCallback(FullscreenCallback callback)
+void WebViewImpl::EmitFrameRendered()
 {
-  if(!mWebEngine) return;
-  auto sharedCb              = std::shared_ptr<CallbackBase>(callback.Release());
-  mFullscreenEnteredCallback = [sharedCb]()
-  {
-    CallbackBase::Execute(*sharedCb);
-  };
-  mWebEngine.RegisterFullscreenEnteredCallback(mFullscreenEnteredCallback);
+  if(mFrameRenderedSignal.Empty()) return;
+  mFrameRenderedSignal.Emit(WebView::DownCast(Self()));
 }
 
-void WebViewImpl::RegisterFullscreenExitedCallback(FullscreenCallback callback)
+void WebViewImpl::EmitFullscreenEntered()
 {
-  if(!mWebEngine) return;
-  auto sharedCb             = std::shared_ptr<CallbackBase>(callback.Release());
-  mFullscreenExitedCallback = [sharedCb]()
-  {
-    CallbackBase::Execute(*sharedCb);
-  };
-  mWebEngine.RegisterFullscreenExitedCallback(mFullscreenExitedCallback);
+  if(mFullscreenEnteredSignal.Empty()) return;
+  mFullscreenEnteredSignal.Emit(WebView::DownCast(Self()));
 }
 
-// ===========================================================================
-// Callback Registration — Text Search & Geolocation
-// ===========================================================================
-
-void WebViewImpl::RegisterTextFoundCallback(TextFoundCallback callback)
+void WebViewImpl::EmitFullscreenExited()
 {
-  if(!mWebEngine) return;
-  auto sharedCb      = std::shared_ptr<CallbackBase>(callback.Release());
-  mTextFoundCallback = [sharedCb](uint32_t count)
-  {
-    CallbackBase::Execute<uint32_t>(*sharedCb, count);
-  };
-  mWebEngine.RegisterTextFoundCallback(mTextFoundCallback);
+  if(mFullscreenExitedSignal.Empty()) return;
+  mFullscreenExitedSignal.Emit(WebView::DownCast(Self()));
 }
 
-void WebViewImpl::RegisterGeolocationPermissionCallback(GeolocationPermissionCallback callback)
+void WebViewImpl::EmitTextFound(uint32_t count)
 {
-  if(!mWebEngine) return;
-  auto sharedCb                  = std::shared_ptr<CallbackBase>(callback.Release());
-  mGeolocationPermissionCallback = [sharedCb](const std::string& host, const std::string& protocol) -> bool
-  {
-    Dali::String daliHost(host.c_str());
-    Dali::String daliProtocol(protocol.c_str());
-    return CallbackBase::ExecuteReturn<bool, Dali::String, Dali::String>(*sharedCb, daliHost, daliProtocol);
-  };
-  mWebEngine.RegisterGeolocationPermissionCallback(mGeolocationPermissionCallback);
+  if(mTextFoundSignal.Empty()) return;
+  mTextFoundSignal.Emit(WebView::DownCast(Self()), count);
 }
 
-// ===========================================================================
-// Callback Registration — Process Events
-// ===========================================================================
-
-void WebViewImpl::RegisterWebProcessCrashedCallback(WebProcessCrashedCallback callback)
+bool WebViewImpl::EmitGeolocationPermission(const Dali::String& host, const Dali::String& protocol)
 {
-  if(!mWebEngine) return;
-  auto sharedCb              = std::shared_ptr<CallbackBase>(callback.Release());
-  mWebProcessCrashedCallback = [sharedCb]()
-  {
-    CallbackBase::Execute(*sharedCb);
-  };
-  mWebEngine.GetPlugin()->RegisterWebProcessCrashedCallback(mWebProcessCrashedCallback);
+  if(mGeolocationPermissionSignal.Empty()) return false;
+  return mGeolocationPermissionSignal.Emit(WebView::DownCast(Self()), host, protocol);
+}
+
+void WebViewImpl::EmitWebProcessCrashed()
+{
+  if(mWebProcessCrashedSignal.Empty()) return;
+  mWebProcessCrashedSignal.Emit(WebView::DownCast(Self()));
 }
 
 } // namespace Integration

@@ -19,6 +19,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali/devel-api/common/bitwise-enum.h>
+#include <dali/public-api/common/dali-string.h>
 
 namespace Dali
 {
@@ -63,5 +65,64 @@ enum class WebViewFindOption : uint32_t
   SHOW_HIGHLIGHT                     = 1 << 7,
 };
 
+/**
+ * @brief Enumeration for the error code of a page load failure.
+ *
+ * The values mirror the underlying web engine's load-error codes.
+ */
+enum class WebViewPageLoadErrorCode
+{
+  UNKNOWN = 0,           ///< Unknown error.
+  CANCELED,              ///< User canceled.
+  CANT_SUPPORT_MIMETYPE, ///< Can't show the page for this MIME type.
+  FAILED_FILE_IO,        ///< File IO error.
+  CANT_CONNECT,          ///< Cannot connect to the network.
+  CANT_LOOKUP_HOST,      ///< Failed to look up the host from the DNS.
+  FAILED_TLS_HANDSHAKE,  ///< Failed the SSL/TLS handshake.
+  INVALID_CERTIFICATE,   ///< The received certificate is invalid.
+  REQUEST_TIMEOUT,       ///< Connection timeout.
+  TOO_MANY_REDIRECTS,    ///< Too many redirects.
+  TOO_MANY_REQUESTS,     ///< Too many requests during this load.
+  BAD_URL,               ///< Malformed URL.
+  UNSUPPORTED_SCHEME,    ///< Unsupported scheme.
+  AUTHENTICATION,        ///< User authentication failed on the server.
+  INTERNAL_SERVER,       ///< The web server reported an internal error.
+  OTHER,                 ///< Other error.
+};
+
+/**
+ * @brief Enumeration for the type of a page load failure.
+ */
+enum class WebViewPageLoadErrorType
+{
+  NONE,     ///< No error type.
+  INTERNAL, ///< Internal error.
+  NETWORK,  ///< Network error.
+  POLICY,   ///< Policy error.
+  PLUGIN,   ///< Plugin error.
+  DOWNLOAD, ///< Download error.
+  PRINT,    ///< Print error.
+};
+
+/**
+ * @brief Holds the details of a page load failure, reported through PageLoadErrorSignal.
+ */
+struct WebViewPageLoadError
+{
+  Dali::String             url;                                     ///< The URL that failed to load.
+  WebViewPageLoadErrorCode code{WebViewPageLoadErrorCode::UNKNOWN}; ///< The error code.
+  Dali::String             description;                             ///< A human-readable description of the error.
+  WebViewPageLoadErrorType type{WebViewPageLoadErrorType::NONE};    ///< The error type.
+};
+
 } // namespace Ui
+
+// Enable bitwise OR/AND so WebViewFindOption flags can be combined.
+// (EnableBitMaskOperators must be specialized in namespace Dali.)
+template<>
+struct EnableBitMaskOperators<Dali::Ui::WebViewFindOption>
+{
+  static const bool ENABLE = true;
+};
+
 } // namespace Dali

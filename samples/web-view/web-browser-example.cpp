@@ -23,6 +23,18 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+// === Test instrumentation ===
+// Plain DALI_LOG_RELEASE_INFO calls with a [WVLOG] prefix so signal/callback firing is
+// observable on the console. Filter with:  ./web-browser.example 2>&1 | grep WVLOG
+//   [WVLOG][signal] = WebView signal handler actually fired   (the thing under test)
+//   [WVLOG][button] = button TouchedSignal fired
+//   [WVLOG][cmd]    = imperative WebView call (LoadUrl/GoBack/query...)
+//   [WVLOG][init]   = setup / lifecycle
+//
+// Newly added APIs under test (see migration from EWK):
+//   PageLoadErrorSignal -> OnPageLoadError ([WVLOG][signal], e.g. load an unreachable URL)
+//   Key 'C' = ClearCache(), Key 'K' = ClearCookies()  ([WVLOG][cmd])
+
 namespace
 {
 const char* HOME_URL       = "https://www.samsung.com";
@@ -67,9 +79,12 @@ private:
     Window window = application.GetWindow();
     mWindowSize = window.GetSize();
 
+    DALI_LOG_RELEASE_INFO("[WVLOG][init] OnInit: window=%.0fx%.0f\n", mWindowSize.width, mWindowSize.height);
+
     BuildUI(window);
     ConnectSignals(window);
 
+    DALI_LOG_RELEASE_INFO("[WVLOG][init] OnInit: navigating to HOME_URL=%s\n", HOME_URL);
     Navigate(Dali::String(HOME_URL));
   }
 
@@ -128,6 +143,7 @@ private:
 
     float webViewHeight = static_cast<float>(mWindowSize.height) - TOOLBAR_HEIGHT - STATUS_HEIGHT;
     mWebView = WebView::New();
+    DALI_LOG_RELEASE_INFO("[WVLOG][init] WebView::New() -> handle=%s\n", mWebView ? "valid" : "EMPTY");
     mWebView.SetRequestedWidth(static_cast<float>(mWindowSize.width));
     mWebView.SetRequestedHeight(webViewHeight);
     mWebView.SetRequestedPositionX(0.0f);
@@ -159,10 +175,13 @@ private:
       return OnGoTouched(actor, touch);
     });
 
+    DALI_LOG_RELEASE_INFO("[WVLOG][init] ConnectSignals: connecting 4 WebView signals...\n");
     mWebView.PageLoadStartedSignal().Connect(this, &BrowserController::OnPageLoadStarted);
     mWebView.PageLoadInProgressSignal().Connect(this, &BrowserController::OnPageLoadInProgress);
     mWebView.PageLoadFinishedSignal().Connect(this, &BrowserController::OnPageLoadFinished);
+    mWebView.PageLoadErrorSignal().Connect(this, &BrowserController::OnPageLoadError);
     mWebView.UrlChangedSignal().Connect(this, &BrowserController::OnUrlChanged);
+    DALI_LOG_RELEASE_INFO("[WVLOG][init] ConnectSignals: connected (started/inProgress/finished/error/urlChanged). If these never fire on load, signals are dead.\n");
 
     window.KeyEventSignal().Connect(this, [this](Window /*window*/, const KeyEvent& event) {
       OnKeyEvent(event);
@@ -176,6 +195,7 @@ private:
       url = Dali::String("https://") + url;
     }
 
+    DALI_LOG_RELEASE_INFO("[WVLOG][cmd] Navigate -> WebView.LoadUrl(%s)\n", url.CStr());
     mWebView.LoadUrl(url);
     mUrlBar.SetText(url);
     UpdateNavButtons();
@@ -183,8 +203,11 @@ private:
 
   void UpdateNavButtons()
   {
-    mBtnBack.SetTextColor(mWebView.CanGoBack() ? Color::BLACK : Color::GRAY);
-    mBtnForward.SetTextColor(mWebView.CanGoForward() ? Color::BLACK : Color::GRAY);
+    bool canBack = mWebView.CanGoBack();
+    bool canFwd  = mWebView.CanGoForward();
+    DALI_LOG_RELEASE_INFO("[WVLOG][cmd] UpdateNavButtons: CanGoBack=%d CanGoForward=%d isLoading=%d\n", canBack, canFwd, mIsLoading);
+    mBtnBack.SetTextColor(canBack ? Color::BLACK : Color::GRAY);
+    mBtnForward.SetTextColor(canFwd ? Color::BLACK : Color::GRAY);
     mBtnReload.SetText(mIsLoading ? Dali::String("Stop") : Dali::String("Reload"));
   }
 
@@ -195,8 +218,10 @@ private:
 
   bool OnBackTouched(Actor /*actor*/, const TouchEvent& touch)
   {
+    DALI_LOG_RELEASE_INFO("[WVLOG][button] Back touched (pointState=%d) canGoBack=%d\n", static_cast<int>(touch.GetState(0)), mWebView.CanGoBack());
     if(mWebView.CanGoBack())
     {
+      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebView.GoBack()\n");
       mWebView.GoBack();
       UpdateNavButtons();
     }
@@ -205,8 +230,10 @@ private:
 
   bool OnForwardTouched(Actor /*actor*/, const TouchEvent& touch)
   {
+    DALI_LOG_RELEASE_INFO("[WVLOG][button] Forward touched (pointState=%d) canGoForward=%d\n", static_cast<int>(touch.GetState(0)), mWebView.CanGoForward());
     if(mWebView.CanGoForward())
     {
+      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebView.GoForward()\n");
       mWebView.GoForward();
       UpdateNavButtons();
     }
@@ -215,14 +242,17 @@ private:
 
   bool OnReloadTouched(Actor /*actor*/, const TouchEvent& touch)
   {
+    DALI_LOG_RELEASE_INFO("[WVLOG][button] Reload/Stop touched (pointState=%d) isLoading=%d\n", static_cast<int>(touch.GetState(0)), mIsLoading);
     if(mIsLoading)
     {
+      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebView.StopLoading()\n");
       mWebView.StopLoading();
       mIsLoading = false;
       SetStatus(Dali::String("Stopped"));
     }
     else
     {
+      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebView.Reload()\n");
       mWebView.Reload();
     }
     UpdateNavButtons();
@@ -232,21 +262,23 @@ private:
 
   bool OnGoTouched(Actor /*actor*/, const TouchEvent& touch)
   {
+    DALI_LOG_RELEASE_INFO("[WVLOG][button] Go touched (pointState=%d) url=%s\n", static_cast<int>(touch.GetState(0)), mUrlBar.GetText().CStr());
     Navigate(mUrlBar.GetText());
     return true;
   }
 
   void OnPageLoadStarted(WebView /*view*/, const Dali::String& url)
   {
+    DALI_LOG_RELEASE_INFO("[WVLOG][signal] >>>> OnPageLoadStarted FIRED: %s\n", url.CStr());
     mIsLoading = true;
     SetStatus(Dali::String("Loading..."));
     UpdateNavButtons();
-    DALI_LOG_RELEASE_INFO("[Browser] Loading: %s\n", url.CStr());
   }
 
   void OnPageLoadInProgress(WebView /*view*/, const Dali::String& url)
   {
     float pct = mWebView.GetLoadProgressPercentage();
+    DALI_LOG_RELEASE_INFO("[WVLOG][signal] >>>> OnPageLoadInProgress FIRED: %s (%.0f%%)\n", url.CStr(), pct);
     char  buf[64];
     snprintf(buf, sizeof(buf), "Loading  %.0f%%", pct);
     SetStatus(Dali::String(buf));
@@ -256,13 +288,23 @@ private:
   {
     mIsLoading = false;
     Dali::String title = mWebView.GetTitle();
+    DALI_LOG_RELEASE_INFO("[WVLOG][signal] >>>> OnPageLoadFinished FIRED: %s title=\"%s\"\n", url.CStr(), title.CStr());
     SetStatus(title.Empty() ? url : title);
     UpdateNavButtons();
-    DALI_LOG_RELEASE_INFO("[Browser] Loaded: %s  title=\"%s\"\n", url.CStr(), title.CStr());
+  }
+
+  void OnPageLoadError(WebView /*view*/, const WebViewPageLoadError& error)
+  {
+    mIsLoading = false;
+    DALI_LOG_RELEASE_INFO("[WVLOG][signal] >>>> OnPageLoadError FIRED: url=%s code=%d desc=\"%s\"\n",
+                          error.url.CStr(), static_cast<int>(error.code), error.description.CStr());
+    SetStatus(Dali::String("Load error: ") + error.description);
+    UpdateNavButtons();
   }
 
   void OnUrlChanged(WebView /*view*/, const Dali::String& url)
   {
+    DALI_LOG_RELEASE_INFO("[WVLOG][signal] >>>> OnUrlChanged FIRED: %s\n", url.CStr());
     mUrlBar.SetText(url);
   }
 
@@ -274,7 +316,20 @@ private:
     }
     else if(event.GetKeyName() == "Return")
     {
+      DALI_LOG_RELEASE_INFO("[WVLOG][button] Return key -> navigate\n");
       Navigate(mUrlBar.GetText());
+    }
+    else if(event.GetKeyName() == "C" || event.GetKeyName() == "c")
+    {
+      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebView.ClearCache()\n");
+      mWebView.ClearCache();
+      SetStatus(Dali::String("Cache cleared"));
+    }
+    else if(event.GetKeyName() == "K" || event.GetKeyName() == "k")
+    {
+      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebView.ClearCookies()\n");
+      mWebView.ClearCookies();
+      SetStatus(Dali::String("Cookies cleared"));
     }
   }
 
@@ -296,6 +351,7 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
+  DALI_LOG_RELEASE_INFO("[WVLOG][init] main: starting. Watch [WVLOG][signal] lines: if a page loads but no [signal] line appears, WebView signals are dead.\n");
   Application    application = Application::New(&argc, &argv);
   UiConfig::New().Apply();
   BrowserController browser(application);

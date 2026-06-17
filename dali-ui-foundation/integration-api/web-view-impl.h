@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/web-engine/web-engine-load-error.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine-plugin.h>
 #include <dali/devel-api/adaptor-framework/web-engine/web-engine.h>
 #include <dali/public-api/common/dali-string.h>
@@ -235,7 +236,7 @@ public: // API — Navigation
   /**
    * @copydoc Dali::Ui::WebView::CanGoForward
    */
-  bool CanGoForward();
+  bool CanGoForward() const;
 
   /**
    * @copydoc Dali::Ui::WebView::GoForward
@@ -245,7 +246,7 @@ public: // API — Navigation
   /**
    * @copydoc Dali::Ui::WebView::CanGoBack
    */
-  bool CanGoBack();
+  bool CanGoBack() const;
 
   /**
    * @copydoc Dali::Ui::WebView::GoBack
@@ -261,6 +262,16 @@ public: // API — Navigation
    * @copydoc Dali::Ui::WebView::ClearAllTilesResources
    */
   void ClearAllTilesResources();
+
+  /**
+   * @copydoc Dali::Ui::WebView::ClearCache
+   */
+  void ClearCache();
+
+  /**
+   * @copydoc Dali::Ui::WebView::ClearCookies
+   */
+  void ClearCookies();
 
   /**
    * @copydoc Dali::Ui::WebView::ExitFullscreen
@@ -376,6 +387,11 @@ public: // API — Page Info
    */
   void GetPlainTextAsynchronously(WebView::PlainTextCallback callback);
 
+  /**
+   * @copydoc Dali::Ui::WebView::FindText
+   */
+  bool FindText(const Dali::String& text, WebViewFindOption options, uint32_t maxMatchCount);
+
 public: // API — Document Appearance
   /**
    * @copydoc Dali::Ui::WebView::SetDocumentBackgroundColor
@@ -404,9 +420,9 @@ public: // API — Input & Video
   void SetMouseEventsEnabled(bool enabled);
 
   /**
-   * @copydoc Dali::Ui::WebView::GetMouseEventsEnabled
+   * @copydoc Dali::Ui::WebView::IsMouseEventsEnabled
    */
-  bool GetMouseEventsEnabled() const;
+  bool IsMouseEventsEnabled() const;
 
   /**
    * @copydoc Dali::Ui::WebView::SetKeyEventsEnabled
@@ -414,9 +430,9 @@ public: // API — Input & Video
   void SetKeyEventsEnabled(bool enabled);
 
   /**
-   * @copydoc Dali::Ui::WebView::GetKeyEventsEnabled
+   * @copydoc Dali::Ui::WebView::IsKeyEventsEnabled
    */
-  bool GetKeyEventsEnabled() const;
+  bool IsKeyEventsEnabled() const;
 
   /**
    * @copydoc Dali::Ui::WebView::FeedMouseWheel
@@ -444,55 +460,14 @@ public: // API — Input & Video
   void SetVideoHoleEnabled(bool enabled);
 
   /**
-   * @copydoc Dali::Ui::WebView::GetVideoHoleEnabled
+   * @copydoc Dali::Ui::WebView::IsVideoHoleEnabled
    */
-  bool GetVideoHoleEnabled() const;
+  bool IsVideoHoleEnabled() const;
 
   /**
    * @copydoc Dali::Ui::WebView::CheckVideoPlayingAsynchronously
    */
   bool CheckVideoPlayingAsynchronously(WebView::VideoPlayingCallback callback);
-
-public: // Callback Registration (for internal impl use)
-  /// @brief Callback type for page load events.
-  using PageLoadCallback = Callback<void(const Dali::String&)>;
-
-  /// @brief Callback type for scroll edge reached events.
-  using ScrollEdgeReachedCallback = Callback<void(WebViewScrollEdge)>;
-
-  /// @brief Callback type for over-scrolled events.
-  using OverScrolledCallback = Callback<void(WebViewOverScrolled)>;
-
-  /// @brief Callback type for URL changed events.
-  using UrlChangedCallback = Callback<void(const Dali::String&)>;
-
-  /// @brief Callback type for frame rendered events.
-  using FrameRenderedCallback = Callback<void()>;
-
-  /// @brief Callback type for fullscreen events.
-  using FullscreenCallback = Callback<void()>;
-
-  /// @brief Callback type for text found events.
-  using TextFoundCallback = Callback<void(uint32_t)>;
-
-  /// @brief Callback type for geolocation permission requests.
-  using GeolocationPermissionCallback = Callback<bool(const Dali::String&, const Dali::String&)>;
-
-  /// @brief Callback type for web process crashed events.
-  using WebProcessCrashedCallback = Callback<void()>;
-
-  void RegisterPageLoadStartedCallback(PageLoadCallback callback);
-  void RegisterPageLoadInProgressCallback(PageLoadCallback callback);
-  void RegisterPageLoadFinishedCallback(PageLoadCallback callback);
-  void RegisterScrollEdgeReachedCallback(ScrollEdgeReachedCallback callback);
-  void RegisterOverScrolledCallback(OverScrolledCallback callback);
-  void RegisterUrlChangedCallback(UrlChangedCallback callback);
-  void RegisterFrameRenderedCallback(FrameRenderedCallback callback);
-  void RegisterFullscreenEnteredCallback(FullscreenCallback callback);
-  void RegisterFullscreenExitedCallback(FullscreenCallback callback);
-  void RegisterTextFoundCallback(TextFoundCallback callback);
-  void RegisterGeolocationPermissionCallback(GeolocationPermissionCallback callback);
-  void RegisterWebProcessCrashedCallback(WebProcessCrashedCallback callback);
 
 public: // Signal emission helpers (called by WebView to emit signals)
   /// @brief Emits the PageLoadStartedSignal
@@ -501,6 +476,8 @@ public: // Signal emission helpers (called by WebView to emit signals)
   void EmitPageLoadInProgress(const Dali::String& url);
   /// @brief Emits the PageLoadFinishedSignal
   void EmitPageLoadFinished(const Dali::String& url);
+  /// @brief Emits the PageLoadErrorSignal
+  void EmitPageLoadError(const WebViewPageLoadError& error);
   /// @brief Emits the ScrollEdgeReachedSignal
   void EmitScrollEdgeReached(WebViewScrollEdge edge);
   /// @brief Emits the OverScrolledSignal
@@ -617,6 +594,16 @@ private: // Internal conversion helpers
    */
   static Dali::WebEnginePlugin::FindOption ToEngineFindOption(WebViewFindOption options);
 
+  /**
+   * @brief Converts a WebEngineLoadError::ErrorCode to Dali::Ui::WebViewPageLoadErrorCode.
+   */
+  static WebViewPageLoadErrorCode ToUiPageLoadErrorCode(Dali::WebEngineLoadError::ErrorCode code);
+
+  /**
+   * @brief Converts a WebEngineLoadError::ErrorType to Dali::Ui::WebViewPageLoadErrorType.
+   */
+  static WebViewPageLoadErrorType ToUiPageLoadErrorType(Dali::WebEngineLoadError::ErrorType type);
+
 private:
   // Not copyable or movable
   WebViewImpl(const WebViewImpl&)            = delete;
@@ -644,6 +631,7 @@ public: // Signal members (accessible by WebView for signal emission)
   WebView::PageLoadStartedSignalType       mPageLoadStartedSignal;
   WebView::PageLoadInProgressSignalType    mPageLoadInProgressSignal;
   WebView::PageLoadFinishedSignalType      mPageLoadFinishedSignal;
+  WebView::PageLoadErrorSignalType         mPageLoadErrorSignal;
   WebView::ScrollEdgeReachedSignalType     mScrollEdgeReachedSignal;
   WebView::OverScrolledSignalType          mOverScrolledSignal;
   WebView::UrlChangedSignalType            mUrlChangedSignal;
@@ -661,21 +649,9 @@ private:                      // Data — Engine
   std::function<void(Dali::Ui::ImageView)> mPendingScreenshotCallback;
 
   // Stored callbacks for web engine events
-  Dali::WebEnginePlugin::WebEnginePageLoadCallback          mPageLoadStartedCallback;
-  Dali::WebEnginePlugin::WebEnginePageLoadCallback          mPageLoadInProgressCallback;
-  Dali::WebEnginePlugin::WebEnginePageLoadCallback          mPageLoadFinishedCallback;
-  Dali::WebEnginePlugin::WebEngineScrollEdgeReachedCallback mScrollEdgeReachedCallback;
-  Dali::WebEnginePlugin::WebEngineOverScrolledCallback      mOverScrolledCallback;
-  Dali::WebEnginePlugin::WebEngineUrlChangedCallback        mUrlChangedCallback;
-  Dali::WebEnginePlugin::WebEngineFrameRenderedCallback     mFrameRenderedCallback;
-  Dali::WebEnginePlugin::WebEngineFullscreenEnteredCallback mFullscreenEnteredCallback;
-  Dali::WebEnginePlugin::WebEngineFullscreenExitedCallback  mFullscreenExitedCallback;
-  Dali::WebEnginePlugin::WebEngineTextFoundCallback         mTextFoundCallback;
-  Dali::WebEnginePlugin::GeolocationPermissionCallback      mGeolocationPermissionCallback;
-  Dali::WebEnginePlugin::WebEngineWebProcessCrashedCallback mWebProcessCrashedCallback;
-  Dali::WebEnginePlugin::JavaScriptAlertCallback            mJavaScriptAlertCallback;
-  Dali::WebEnginePlugin::JavaScriptConfirmCallback          mJavaScriptConfirmCallback;
-  Dali::WebEnginePlugin::JavaScriptPromptCallback           mJavaScriptPromptCallback;
+  Dali::WebEnginePlugin::JavaScriptAlertCallback   mJavaScriptAlertCallback;
+  Dali::WebEnginePlugin::JavaScriptConfirmCallback mJavaScriptConfirmCallback;
+  Dali::WebEnginePlugin::JavaScriptPromptCallback  mJavaScriptPromptCallback;
 };
 
 } // namespace Integration

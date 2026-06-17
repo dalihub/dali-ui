@@ -27,6 +27,11 @@
  *   L            Load local HTML file (test.html)
  *   J            EvaluateJavaScript (get document.title)
  *   S            GetScreenshot → saved as screenshot.png via PixelData
+ *   T            FindText ("the") → highlights matches; count via TextFoundSignal
+ *   C            ClearCache (clears the web engine resource cache)
+ *   K            ClearCookies (clears all cookies)
+ *
+ * Page-load failures are reported through PageLoadErrorSignal (see OnPageLoadError).
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -93,8 +98,10 @@ private:
     // ---- Connect signals ----------------------------------
     mWebView.PageLoadStartedSignal().Connect(this, &WebViewSampleController::OnPageLoadStarted);
     mWebView.PageLoadFinishedSignal().Connect(this, &WebViewSampleController::OnPageLoadFinished);
+    mWebView.PageLoadErrorSignal().Connect(this, &WebViewSampleController::OnPageLoadError);
     mWebView.UrlChangedSignal().Connect(this, &WebViewSampleController::OnUrlChanged);
     mWebView.FrameRenderedSignal().Connect(this, &WebViewSampleController::OnFrameRendered);
+    mWebView.TextFoundSignal().Connect(this, &WebViewSampleController::OnTextFound);
 
     // ---- Load initial URL ----------------------------------------------
     mWebView.LoadUrl(Dali::String(DEFAULT_URL));
@@ -118,6 +125,14 @@ private:
     Dali::String title = mWebView.GetTitle();
     DALI_LOG_RELEASE_INFO("[WebViewSample] Page load finished: %s  title=\"%s\"\n",
                           url.CStr(), title.CStr());
+  }
+
+  void OnPageLoadError(WebView view, const WebViewPageLoadError& error)
+  {
+    DALI_LOG_RELEASE_INFO("[WebViewSample] Page load error: url=%s code=%d desc=\"%s\"\n",
+                          error.url.CStr(),
+                          static_cast<int>(error.code),
+                          error.description.CStr());
   }
 
   bool TryLoadLocalHtml(const Dali::String& path)
@@ -149,6 +164,11 @@ private:
       mFirstFrameReceived = true;
       DALI_LOG_RELEASE_INFO("[WebViewSample] First frame rendered!\n");
     }
+  }
+
+  void OnTextFound(WebView view, uint32_t matchCount)
+  {
+    DALI_LOG_RELEASE_INFO("[WebViewSample] FindText matches: %u\n", matchCount);
   }
 
   // -----------------------------------------------------------------------
@@ -237,6 +257,24 @@ private:
         viewArea,
         /*scaleFactor=*/1.0f,
         WebView::ScreenshotCapturedCallback::New(this, &WebViewSampleController::OnScreenshotCaptured));
+    }
+    else if(event.GetKeyName() == "T" || event.GetKeyName() == "t")
+    {
+      // Find & highlight text; the match count is reported via TextFoundSignal -> OnTextFound.
+      DALI_LOG_RELEASE_INFO("[WebViewSample] FindText(\"the\")\n");
+      mWebView.FindText(Dali::String("the"),
+                        WebViewFindOption::CASE_INSENSITIVE | WebViewFindOption::SHOW_HIGHLIGHT,
+                        /*maxMatchCount=*/100u);
+    }
+    else if(event.GetKeyName() == "C" || event.GetKeyName() == "c")
+    {
+      DALI_LOG_RELEASE_INFO("[WebViewSample] ClearCache\n");
+      mWebView.ClearCache();
+    }
+    else if(event.GetKeyName() == "K" || event.GetKeyName() == "k")
+    {
+      DALI_LOG_RELEASE_INFO("[WebViewSample] ClearCookies\n");
+      mWebView.ClearCookies();
     }
   }
 

@@ -79,6 +79,8 @@ public: // Signal types
 
   /// @brief Signal type for page load finished events.
   using PageLoadFinishedSignalType = Signal<void(WebView, const Dali::String&)>;
+  /// @brief Signal type for page load error events.
+  using PageLoadErrorSignalType = Signal<void(WebView, const WebViewPageLoadError&)>;
   /// @brief Signal type for URL changes.
   using UrlChangedSignalType = Signal<void(WebView, const Dali::String&)>;
   /// @brief Signal type for frame rendered events.
@@ -153,12 +155,11 @@ public: // Static Methods
    */
   static WebView DownCast(BaseHandle handle);
 
-public: // Setters for chaining
+public: // Setters & actions
   /**
    * @brief Sets the user agent string.
    *
    * @param[in] userAgent The user agent string
-   * @return Reference to this for fluent chaining
    */
   void SetUserAgent(const Dali::String& userAgent);
 
@@ -166,7 +167,6 @@ public: // Setters for chaining
    * @brief Loads the specified URL.
    *
    * @param[in] url The URL to load
-   * @return Reference to this for fluent chaining
    */
   void LoadUrl(const Dali::String& url);
 
@@ -174,56 +174,48 @@ public: // Setters for chaining
    * @brief Loads the specified HTML string.
    *
    * @param[in] htmlString The HTML string to load
-   * @return Reference to this for fluent chaining
    */
   void LoadHtmlString(const Dali::String& htmlString);
 
   /**
    * @brief Reloads the current page.
    *
-   * @return Reference to this for fluent chaining
    */
   void Reload();
 
   /**
    * @brief Stops loading the current page.
    *
-   * @return Reference to this for fluent chaining
    */
   void StopLoading();
 
   /**
    * @brief Suspends the web view.
    *
-   * @return Reference to this for fluent chaining
    */
   void Suspend();
 
   /**
    * @brief Resumes the web view.
    *
-   * @return Reference to this for fluent chaining
    */
   void Resume();
 
   /**
    * @brief Navigates forward in history.
    *
-   * @return Reference to this for fluent chaining
    */
   void GoForward();
 
   /**
    * @brief Navigates backward in history.
    *
-   * @return Reference to this for fluent chaining
    */
   void GoBack();
 
   /**
    * @brief Clears the navigation history.
    *
-   * @return Reference to this for fluent chaining
    */
   void ClearHistory();
 
@@ -231,7 +223,6 @@ public: // Setters for chaining
    * @brief Sets the page zoom factor.
    *
    * @param[in] zoomFactor The zoom factor
-   * @return Reference to this for fluent chaining
    */
   void SetPageZoomFactor(float zoomFactor);
 
@@ -239,7 +230,6 @@ public: // Setters for chaining
    * @brief Sets the text zoom factor.
    *
    * @param[in] zoomFactor The zoom factor
-   * @return Reference to this for fluent chaining
    */
   void SetTextZoomFactor(float zoomFactor);
 
@@ -247,7 +237,6 @@ public: // Setters for chaining
    * @brief Sets whether mouse events are enabled.
    *
    * @param[in] enabled True to enable mouse events
-   * @return Reference to this for fluent chaining
    */
   void SetMouseEventsEnabled(bool enabled);
 
@@ -255,7 +244,6 @@ public: // Setters for chaining
    * @brief Sets whether key events are enabled.
    *
    * @param[in] enabled True to enable key events
-   * @return Reference to this for fluent chaining
    */
   void SetKeyEventsEnabled(bool enabled);
 
@@ -263,7 +251,6 @@ public: // Setters for chaining
    * @brief Sets whether video hole is enabled.
    *
    * @param[in] enabled True to enable video hole
-   * @return Reference to this for fluent chaining
    */
   void SetVideoHoleEnabled(bool enabled);
 
@@ -271,7 +258,6 @@ public: // Setters for chaining
    * @brief Sets the document background color.
    *
    * @param[in] color The background color
-   * @return Reference to this for fluent chaining
    */
   void SetDocumentBackgroundColor(const Dali::Vector4& color);
 
@@ -279,7 +265,6 @@ public: // Setters for chaining
    * @brief Sets whether tiles are cleared when hidden.
    *
    * @param[in] cleared True to clear tiles when hidden
-   * @return Reference to this for fluent chaining
    */
   void SetTilesClearedWhenHidden(bool cleared);
 
@@ -287,7 +272,6 @@ public: // Setters for chaining
    * @brief Sets the tile cover area multiplier.
    *
    * @param[in] multiplier The multiplier value
-   * @return Reference to this for fluent chaining
    */
   void SetTileCoverAreaMultiplier(float multiplier);
 
@@ -295,11 +279,10 @@ public: // Setters for chaining
    * @brief Sets whether cursor is enabled by client.
    *
    * @param[in] enabled True to enable cursor by client
-   * @return Reference to this for fluent chaining
    */
   void SetCursorEnabledByClient(bool enabled);
 
-public: // Getters (non-chainable)
+public: // Getters
   /**
    * @brief Gets the current URL.
    *
@@ -368,21 +351,21 @@ public: // Getters (non-chainable)
    *
    * @return True if mouse events are enabled
    */
-  bool GetMouseEventsEnabled() const;
+  bool IsMouseEventsEnabled() const;
 
   /**
    * @brief Gets whether key events are enabled.
    *
    * @return True if key events are enabled
    */
-  bool GetKeyEventsEnabled() const;
+  bool IsKeyEventsEnabled() const;
 
   /**
    * @brief Gets whether video hole is enabled.
    *
    * @return True if video hole is enabled
    */
-  bool GetVideoHoleEnabled() const;
+  bool IsVideoHoleEnabled() const;
 
   /**
    * @brief Gets the currently selected text.
@@ -398,20 +381,20 @@ public: // Getters (non-chainable)
    */
   float GetScaleFactor() const;
 
-public: // Query methods (non-chainable, bool return)
+public: // Query methods
   /**
    * @brief Checks if forward navigation is possible.
    *
    * @return True if can go forward
    */
-  bool CanGoForward();
+  bool CanGoForward() const;
 
   /**
    * @brief Checks if backward navigation is possible.
    *
    * @return True if can go back
    */
-  bool CanGoBack();
+  bool CanGoBack() const;
 
   /**
    * @brief Loads HTML string with override current entry.
@@ -459,7 +442,7 @@ public: // Query methods (non-chainable, bool return)
    */
   bool RemoveCustomHeader(const Dali::String& name);
 
-public: // Actions (non-chainable, void or special return)
+public: // Actions
   /**
    * @brief Scrolls by the specified delta.
    *
@@ -486,6 +469,21 @@ public: // Actions (non-chainable, void or special return)
    * @brief Clears all tiles resources.
    */
   void ClearAllTilesResources();
+
+  /**
+   * @brief Clears the web engine's resource cache.
+   *
+   * The cache is shared by all WebViews that use the same browsing context, so
+   * this affects every page loaded in that context.
+   */
+  void ClearCache();
+
+  /**
+   * @brief Clears all cookies stored by the web engine.
+   *
+   * The cookie store is shared by all WebViews that use the same browsing context.
+   */
+  void ClearCookies();
 
   /**
    * @brief Suspends network loading.
@@ -643,6 +641,19 @@ public: // JavaScript
    */
   void JavaScriptPromptReply(const Dali::String& result);
 
+public: // Text search
+  /**
+   * @brief Searches for and highlights the given text in the page.
+   *
+   * The number of matches is reported asynchronously through TextFoundSignal().
+   *
+   * @param[in] text The text to find
+   * @param[in] options The find options (combine WebViewFindOption values with bitwise OR)
+   * @param[in] maxMatchCount The maximum number of matches to highlight
+   * @return True if the search was started successfully
+   */
+  bool FindText(const Dali::String& text, WebViewFindOption options, uint32_t maxMatchCount);
+
 public: // Signals
   /**
    * @brief Signal emitted when page load starts.
@@ -658,6 +669,11 @@ public: // Signals
    * @brief Signal emitted when page load finishes.
    */
   PageLoadFinishedSignalType& PageLoadFinishedSignal();
+
+  /**
+   * @brief Signal emitted when an error occurs during page load.
+   */
+  PageLoadErrorSignalType& PageLoadErrorSignal();
 
   /**
    * @brief Signal emitted when URL changes.
