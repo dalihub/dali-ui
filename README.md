@@ -24,8 +24,8 @@ dali-ui-foundation을 기반으로 구축되며, 애플리케이션 개발에 �
 
 `dali-ui`는 `tizen` 브랜치로 릴리즈 됩니다. [→ Releases](https://github.sec.samsung.net/NUI/dali-ui/releases)
 
-릴리즈 노트에 명시된 `DALi dependency` 태그를 사용하여 dali 버전을 맞출 수 있습니다.
-예를 들어 dali-ui [v2.5.14.10210](https://github.sec.samsung.net/NUI/dali-ui/releases/tag/v2.5.14.10210) 의 경우 명시된 dali-core와 dali-adaptor 태그를 사용하여 아래와 같이 버전을 맞출 수 있습니다.
+릴리즈 노트의 `DALi Dependency Commits` 섹션에 명시된 commit id를 사용하여 DALi 버전을 맞출 수 있습니다.
+예를 들어 dali-ui [v2.5.14.10210](https://github.sec.samsung.net/NUI/dali-ui/releases/tag/v2.5.14.10210) 의 경우 명시된 dali-core와 dali-adaptor commit id를 사용하여 아래와 같이 버전을 맞출 수 있습니다.
 
 * dali-core: git://review.tizen.org/git/platform/core/uifw/dali-core
 * dali-adaptor: git://review.tizen.org/git/platform/core/uifw/dali-adaptor
@@ -33,12 +33,12 @@ dali-ui-foundation을 기반으로 구축되며, 애플리케이션 개발에 �
 
 ```sh
 cd dali-core
-git checkout accepted/tizen/unified/20260327.174826
+git checkout <dali-core commit id>
 ```
 
 ```sh
 cd dali-adaptor
-git checkout accepted/tizen/unified/20260327.174830
+git checkout <dali-adaptor commit id>
 ```
 
 ```sh

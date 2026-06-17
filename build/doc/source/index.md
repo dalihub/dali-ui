@@ -1,47 +1,50 @@
 # DALi UI Framework
 
-DALi UI is a high-performance UI library designed with a **Low Memory Assumption (LMA)** architecture. It provides a **Modern C++ Fluent API** with method chaining, enabling declarative and intuitive UI development for resource-constrained systems.
+DALi UI is a high-performance UI library designed with a **Low Memory Assumption (LMA)** architecture. It provides a lightweight handle-based C++ API for building responsive UI on top of the DALi scene graph.
 
 ---
 
 ### Core Philosophy
 - **Low Memory Assumption**: Minimal object overhead and efficient memory management.
-- **Fluent Interface**: Method chaining for readable, declarative UI composition.
+- **Handle-Based API**: Lightweight public handles keep UI code explicit while implementation details stay in internal objects.
 - **Native Speed**: Zero-cost abstractions over the underlying DALi scene graph.
 
 ---
 
-### Quick Start (Fluent API)
+### Quick Start
 
-Construct complex UI hierarchies with ease using our declarative method chaining:
+Create views, configure them with explicit property calls, and add them to the hierarchy:
 
 ```cpp
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-using namespace Dali::UI;
+using namespace Dali;
+using namespace Dali::Ui;
 
-void Create(Application application) {
-  application.GetWindow().Add(
-    View::New()
-      .SetBackgroundColor(Color::YELLOW)
-      .SetRequestedWidth(200_spx)
-      .SetRequestedHeight(200_spx)
-      .Children({
-        View::New()
-          .SetBackgroundColor(Color::RED)
-          .SetRequestedWidth(100_spx)
-          .SetRequestedHeight(100_spx)
-          .With([](View& v) {
-            v.TouchedSignal().Connect([](Actor a, TouchEvent t) {
-              return true;
-            });
-          }),
-        View::New()
-          .SetBackgroundColor(Color::BLUE)
-          .SetPositionX(100_spx)
-          .SetPositionY(100_spx)
-      })
-  );
+void Create(Application application)
+{
+  Window window = application.GetWindow();
+
+  View root = View::New();
+  root.SetBackgroundColor(UiColor(0xFFFF00));
+  root.SetRequestedWidth(200_spx);
+  root.SetRequestedHeight(200_spx);
+
+  View redBox = View::New();
+  redBox.SetBackgroundColor(UiColor(0xFF0000));
+  redBox.SetRequestedWidth(100_spx);
+  redBox.SetRequestedHeight(100_spx);
+
+  View blueBox = View::New();
+  blueBox.SetBackgroundColor(UiColor(0x0000FF));
+  blueBox.SetRequestedWidth(100_spx);
+  blueBox.SetRequestedHeight(100_spx);
+  blueBox.SetRequestedPositionX(100_spx);
+  blueBox.SetRequestedPositionY(100_spx);
+
+  root.Add(redBox);
+  root.Add(blueBox);
+  window.Add(root);
 }
 ```
 
