@@ -246,7 +246,7 @@ InputField field = InputField::New();
 field.SetInputFilter(inputFilter);
 ~~~
 
-위 예시는 숫자만 허용하되 0~5는 거부하므로, 6~9만 입력 가능합니다.
+위 예시는 숫자만 허용하되 0-5는 거부하므로, 6-9만 입력 가능합니다.
 
 거부 사유는 `InputRejectedSignal`에서 확인할 수 있습니다:
 
