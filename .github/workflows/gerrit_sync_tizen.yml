@@ -1,0 +1,37 @@
+name: "Mirror tizen to Gerrit"
+
+on:
+  push:
+    branches:
+      - tizen
+  workflow_dispatch:
+
+jobs:
+  mirror:
+    runs-on: [ code-linux, code-large ]
+    steps:
+      - name: Checkout tizen
+        uses: code-actions/checkout@v3
+        with:
+          ref: tizen
+          fetch-depth: 0
+
+      - name: Setup SSH
+        uses: code-actions/webfactory-ssh-agent@v0.7.0
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Configure known hosts
+        env:
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+
+      - name: Mirror tizen branch to Gerrit
+        run: |
+          set -euo pipefail
+
+          REMOTE_URL="ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-ui"
+          git remote add gerrit "$REMOTE_URL"
+          git push gerrit HEAD:refs/heads/tizen --force

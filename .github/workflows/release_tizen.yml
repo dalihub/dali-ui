@@ -14,6 +14,12 @@ on:
       dali_version:
         description: 'Dali version (e.g. 2.5.15)'
         required: true
+      dali_core_commit:
+        description: 'dali-core commit id (optional; defaults to latest tizen)'
+        required: false
+      dali_adaptor_commit:
+        description: 'dali-adaptor commit id (optional; defaults to latest tizen)'
+        required: false
 
 jobs:
   deploy:
@@ -28,8 +34,15 @@ jobs:
     #     ssh-private-key: ${{ secrets.JY_SSH_PRIVATE_KEY }}
 
     - name: Git config
+      env:
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
       run: |
         mkdir -p ~/.ssh
+        if [ -n "$SSH_KNOWN_HOSTS" ]; then
+          printf '%s\n' "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        else
+          touch ~/.ssh/known_hosts
+        fi
         ssh-keyscan -t rsa github.sec.samsung.net >> ~/.ssh/known_hosts
         git config --global user.name "github-action[bot]"
         git config --global user.email "github-action[bot]@users.noreply.com"
@@ -50,38 +63,95 @@ jobs:
         echo "version=$VERSION" >> $GITHUB_OUTPUT
         ./packaging/makespec.sh -r $VERSION
 
-    - name: Prepare GBS tool
+    - name: Resolve dependency commits
+      id: dependencies
+      shell: bash
+      env:
+        DALI_CORE_COMMIT_INPUT: ${{ github.event.inputs.dali_core_commit }}
+        DALI_ADAPTOR_COMMIT_INPUT: ${{ github.event.inputs.dali_adaptor_commit }}
       run: |
-        VERSION_ID=$(lsb_release -rs)
-        echo "Current Ubuntu version is $VERSION_ID"
-        REPO_URL="http://download.tizen.org/tools/latest-release/Ubuntu_${VERSION_ID}/ /"
-        sudo echo "deb [trusted=yes] $REPO_URL" | sudo tee /etc/apt/sources.list.d/tizen.list
-        sudo apt-get update
-        sudo apt-get install -y gbs
+        set -euo pipefail
 
-    - name: GBS build
-      run: |
-        gbs -c .github/workflows/gbs.conf build -A armv7l --include-all
-        mkdir rpms
-        cp ~/GBS_ROOT/Unified/local/repos/tizen_unified/armv7l/RPMS/*.rpm rpms
-        rm rpms/*debug*
+        resolve_commit() {
+          local name=$1
+          local repo=$2
+          local input=$3
+          local commit
+
+          if [ -n "$input" ]; then
+            commit=$input
+          else
+            commit=$(git ls-remote "$repo" refs/heads/tizen | awk '{print $1}')
+          fi
+
+          if [ -z "$commit" ]; then
+            echo "::error::Failed to resolve $name commit"
+            exit 1
+          fi
+
+          echo "$commit"
+        }
+
+        DALI_CORE_COMMIT=$(resolve_commit "dali-core" "ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git" "$DALI_CORE_COMMIT_INPUT")
+        DALI_ADAPTOR_COMMIT=$(resolve_commit "dali-adaptor" "ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git" "$DALI_ADAPTOR_COMMIT_INPUT")
+
+        echo "dali_core_commit=$DALI_CORE_COMMIT" >> $GITHUB_OUTPUT
+        echo "dali_adaptor_commit=$DALI_ADAPTOR_COMMIT" >> $GITHUB_OUTPUT
+
+        {
+          echo "Dependency commits"
+          echo "- dali-core: $DALI_CORE_COMMIT"
+          echo "- dali-adaptor: $DALI_ADAPTOR_COMMIT"
+        } >> $GITHUB_STEP_SUMMARY
+
+#    - name: Prepare GBS tool
+#      run: |
+#        VERSION_ID=$(lsb_release -rs)
+#        echo "Current Ubuntu version is $VERSION_ID"
+#        REPO_URL="http://download.tizen.org/tools/latest-release/Ubuntu_${VERSION_ID}/ /"
+#        sudo echo "deb [trusted=yes] $REPO_URL" | sudo tee /etc/apt/sources.list.d/tizen.list
+#        sudo apt-get update
+#        sudo apt-get install -y gbs
+#
+#    - name: GBS build
+#      run: |
+#        gbs -c .github/workflows/gbs.conf build -A armv7l --include-all
+#        mkdir rpms
+#        cp ~/GBS_ROOT/Unified/local/repos/tizen_unified/armv7l/RPMS/*.rpm rpms
+#        rm rpms/*debug*
 
     - name: Commit changes
       env:
         VERSION: ${{ steps.version.outputs.version }}
+        SOURCE_BRANCH: ${{ github.event.inputs.source_branch }}
+        DESTINATION_BRANCH: ${{ github.event.inputs.destination_branch }}
+        DALI_CORE_COMMIT: ${{ steps.dependencies.outputs.dali_core_commit }}
+        DALI_ADAPTOR_COMMIT: ${{ steps.dependencies.outputs.dali_adaptor_commit }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       run: |
+        set -euo pipefail
+
         # Push release commit
         git add .
-        git restore --staged rpms
-        git commit -m "Release $VERSION"
-        git push
+        if [ -e rpms ]; then
+          git restore --staged rpms
+        fi
+        git commit \
+          -m "Release $VERSION" \
+          -m "Dependencies:" \
+          -m "dali-core: $DALI_CORE_COMMIT" \
+          -m "dali-adaptor: $DALI_ADAPTOR_COMMIT"
+        git push origin HEAD:$SOURCE_BRANCH
 
-        # Sync to destination branch
-        git checkout -B ${{ github.event.inputs.destination_branch }}
-        git merge ${{ github.event.inputs.source_branch }}
+        # Sync to destination branch and keep destination-only patches on top
+        git fetch origin \
+          "+refs/heads/$SOURCE_BRANCH:refs/remotes/origin/$SOURCE_BRANCH" \
+          "+refs/heads/$DESTINATION_BRANCH:refs/remotes/origin/$DESTINATION_BRANCH"
+        git checkout -B "$DESTINATION_BRANCH" "origin/$DESTINATION_BRANCH"
+        git rebase "origin/$SOURCE_BRANCH"
         git tag -fa "v$VERSION" -m "Release $VERSION"
-        git push origin ${{ github.event.inputs.destination_branch }} --follow-tags
+        git push origin HEAD:$DESTINATION_BRANCH --force-with-lease
+        git push origin "v$VERSION" --force
         echo v${{ steps.version.outputs.version }} >> $GITHUB_STEP_SUMMARY
 
     - name: Create Release
@@ -94,6 +164,3 @@ jobs:
         generate_release_notes: true
         draft: false
         prerelease: false
-        files: |
-          rpms/*
-          !rpms/*debug*
