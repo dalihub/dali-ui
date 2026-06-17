@@ -19,10 +19,12 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/adaptor-framework/clipboard-integ.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/actors/layer.h>
+#include <dali/public-api/adaptor-framework/clipboard-data.h>
 #include <dali/public-api/rendering/renderer.h>
 #include <cmath>
 #include <limits>
@@ -1247,7 +1249,7 @@ void Controller::Impl::ShowClipboard()
 {
   if(EnsureClipboardCreated())
   {
-    mClipboard.ShowClipboard();
+    Dali::Integration::Clipboard::ShowClipboard(mClipboard);
   }
 }
 
@@ -1255,7 +1257,7 @@ void Controller::Impl::HideClipboard()
 {
   if(EnsureClipboardCreated() && mClipboardHideEnabled)
   {
-    mClipboard.HideClipboard();
+    Dali::Integration::Clipboard::HideClipboard(mClipboard);
   }
 }
 
@@ -1268,7 +1270,7 @@ bool Controller::Impl::CopyStringToClipboard(const std::string& source)
 {
   if(EnsureClipboardCreated())
   {
-    Dali::Clipboard::ClipData data(MIME_TYPE_TEXT_PLAIN, source.c_str());
+    Dali::ClipboardData data(MIME_TYPE_TEXT_PLAIN, source.c_str());
     return mClipboard.SetData(data); // Send clipboard data to clipboard.
   }
 
@@ -1277,7 +1279,7 @@ bool Controller::Impl::CopyStringToClipboard(const std::string& source)
 
 bool Controller::Impl::IsClipboardEmpty()
 {
-  bool result(Clipboard::IsAvailable() && EnsureClipboardCreated() &&
+  bool result(Dali::Integration::Clipboard::IsAvailable() && EnsureClipboardCreated() &&
               (mClipboard.HasType(MIME_TYPE_TEXT_PLAIN) || mClipboard.HasType(MIME_TYPE_HTML)));
   return !result;
 }

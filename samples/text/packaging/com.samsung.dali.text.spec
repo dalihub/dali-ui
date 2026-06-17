@@ -115,6 +115,7 @@ exit 0
 %{app_exe_dir}/text-emoji.example
 %{app_exe_dir}/text-render-scale.example
 %{app_exe_dir}/text-input-field.example
+%{app_exe_dir}/text-clipboard.example
 %{app_exe_dir}/text-typing-style.example
 %{app_exe_dir}/text-input-editor.example
 %{app_exe_dir}/text-input-method-context.example

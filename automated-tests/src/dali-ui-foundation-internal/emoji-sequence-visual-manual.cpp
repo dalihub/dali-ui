@@ -19,10 +19,11 @@
 #include <dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
-#include <dali/devel-api/adaptor-framework/clipboard.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/shaping.h>
 #include <dali/public-api/adaptor-framework/capture.h>
+#include <dali/public-api/adaptor-framework/clipboard.h>
+#include <dali/public-api/adaptor-framework/clipboard-data.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 
 #include <algorithm>
@@ -3093,7 +3094,7 @@ private:
       return false;
     }
 
-    Dali::Clipboard::ClipData data(MIME_TYPE_TEXT_PLAIN, source.c_str());
+    Dali::ClipboardData data(MIME_TYPE_TEXT_PLAIN, source.c_str());
     if(!clipboard.SetData(data))
     {
       std::cerr << "emoji visual warning: failed to copy emoji case to clipboard\n";

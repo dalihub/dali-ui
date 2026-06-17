@@ -37,6 +37,7 @@ This sample demonstrates DALi UI text features.
 | `text-emoji.example` | Emoji rendering sample |
 | `text-render-scale.example` | Text render scale sample |
 | `text-input-field.example` | InputField sample |
+| `text-clipboard.example` | Clipboard public API sample |
 | `text-input-editor.example` | InputEditor sample |
 | `text-typing-style.example` | Typing style sample |
 | `text-localization.example` | Localization sample using override callback |

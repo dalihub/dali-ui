@@ -19,9 +19,9 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/clipboard.h>
 #include <dali/integration-api/adaptor-framework/input-method-context-integ.h>
 #include <dali/integration-api/processor-interface.h>
+#include <dali/public-api/adaptor-framework/clipboard.h>
 #include <dali/public-api/events/gesture.h>
 
 // INTERNAL INCLUDES
@@ -2596,7 +2596,7 @@ public: // Text-input Event Queuing.
    * @param[in] mimeType The mime type of data received.
    * @param[in] data The data received.
    * @note
-   * This event is executed by receiving the Clipboard's DataReceivedSignal.
+   * This event is executed by receiving the integration Clipboard DataReceivedSignal.
    */
   void PasteClipboardItemEvent(uint32_t id, const char* mimeType, const char* data);
 
