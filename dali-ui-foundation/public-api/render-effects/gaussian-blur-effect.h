@@ -114,7 +114,7 @@ public:
   uint32_t GetBlurRadius() const;
 
   /**
-   * @brief Set blur downscale factor. The value resides between 0.0f to 1.0f.
+   * @brief Set blur downscale factor. The value is clamped to the range [0.25f, 1.0f].
    * @param[in] downscaleFactor The downscale factor for input texture.
    */
   void SetBlurDownscaleFactor(float downscaleFactor);
