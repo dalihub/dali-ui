@@ -33,6 +33,11 @@ jobs:
     #   with:
     #     ssh-private-key: ${{ secrets.JY_SSH_PRIVATE_KEY }}
 
+    - name: Setup SSH for Tizen review
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
     - name: Git config
       env:
         SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
