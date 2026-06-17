@@ -351,7 +351,7 @@ LayoutRect LayoutTransitionDispatcher::VisualBoundsOf(ViewImpl* parent, ViewImpl
   // there (see ViewImpl::ApplyLayoutDirection), so mirroring them here
   // would diverge from the actor's actual on-screen position and cause a
   // visible jump on the first transition under an RTL parent.
-  if(parent && child &&
+  if(parent &&
      !IntegrationView::IsLayoutModeStandalone(*child) &&
      parent->GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT)
   {
@@ -1126,8 +1126,11 @@ void LayoutTransitionDispatcher::StartEnterTransition(ViewImpl* child, Ui::Layou
   Ui::ViewAnimationSpec     spec        = GetImpl(transition).GetEnterVisualSpec();
   const bool                hasSpec     = static_cast<bool>(spec);
   const bool                isEffectSet = GetImpl(transition).IsEnterBoundsEffectSet();
-  const bool                hasEffect   = GetImpl(transition).HasActiveEnterBoundsEffect();
   const LayoutBoundsEffect* effectPtr   = isEffectSet ? &GetImpl(transition).GetEnterBoundsEffect() : nullptr;
+  // Derive hasEffect from effectPtr so the non-null guard is explicit in the
+  // data flow: hasEffect is true only when effectPtr is non-null. Equivalent
+  // to HasActiveEnterBoundsEffect() (mEnterBoundsEffectSet && !IsNoop).
+  const bool hasEffect = (effectPtr != nullptr) && !IsNoopBoundsEffect(*effectPtr);
 
   if(!hasSpec && !hasEffect)
   {
@@ -1899,8 +1902,11 @@ void LayoutTransitionDispatcher::ScheduleExit(ViewImpl* parent, Ui::View child, 
   Ui::ViewAnimationSpec     exitSpec    = GetImpl(transition).GetExitVisualSpec();
   const bool                hasSpec     = static_cast<bool>(exitSpec);
   const bool                isEffectSet = GetImpl(transition).IsExitBoundsEffectSet();
-  const bool                hasEffect   = GetImpl(transition).HasActiveExitBoundsEffect();
   const LayoutBoundsEffect* effectPtr   = isEffectSet ? &GetImpl(transition).GetExitBoundsEffect() : nullptr;
+  // Derive hasEffect from effectPtr so the non-null guard is explicit in the
+  // data flow: hasEffect is true only when effectPtr is non-null. Equivalent
+  // to HasActiveExitBoundsEffect() (mExitBoundsEffectSet && !IsNoop).
+  const bool hasEffect = (effectPtr != nullptr) && !IsNoopBoundsEffect(*effectPtr);
 
   if(!hasSpec && !hasEffect)
   {
