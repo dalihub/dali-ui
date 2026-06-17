@@ -30,22 +30,6 @@ namespace Ui
 namespace DevelFocusManager
 {
 /**
- * @brief Decide using focus indicator or not
- *
- * @param[in] focusManager The instance of FocusManager
- * @param[in] enable Whether using focus indicator or not
- */
-DALI_UI_API void EnableFocusIndicator(FocusManager focusManager, bool enable);
-
-/**
- * @brief Check focus indicator is enabled or not
- *
- * @param[in] focusManager The instance of FocusManager
- * @return True when focus indicator is enabled
- */
-DALI_UI_API bool IsFocusIndicatorEnabled(FocusManager focusManager);
-
-/**
  * @brief Decide using default focus algorithm or not
  *
  * @param[in] focusManager The instance of FocusManager

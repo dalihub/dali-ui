@@ -71,6 +71,11 @@ void FocusManager::ClearFocus()
   GetImpl(*this).ClearFocus();
 }
 
+void FocusManager::ClearFocusIndication()
+{
+  GetImpl(*this).ClearFocusIndication();
+}
+
 void FocusManager::SetAsFocusGroup(View view, bool isFocusGroup)
 {
   GetImpl(*this).SetAsFocusGroup(view, isFocusGroup);
@@ -86,14 +91,14 @@ View FocusManager::GetFocusGroup(View view)
   return GetImpl(*this).GetFocusGroup(view);
 }
 
-void FocusManager::SetFocusIndicatorActor(View indicator)
+void FocusManager::SetDefaultFocusIndicatorEnabled(bool enabled)
 {
-  GetImpl(*this).SetFocusIndicatorActor(indicator);
+  GetImpl(*this).SetDefaultFocusIndicatorEnabled(enabled);
 }
 
-View FocusManager::GetFocusIndicatorView()
+bool FocusManager::IsDefaultFocusIndicatorEnabled() const
 {
-  return GetImpl(*this).GetFocusIndicatorView();
+  return GetImpl(*this).IsDefaultFocusIndicatorEnabled();
 }
 
 void FocusManager::MoveFocusBackward()
@@ -126,6 +131,26 @@ void FocusManager::SetClearFocusOnWindowFocusLost(bool enabled)
 bool FocusManager::GetClearFocusOnWindowFocusLost() const
 {
   return GetImpl(*this).GetClearFocusOnWindowFocusLost();
+}
+
+void FocusManager::SetClearFocusIndicationOnTouch(bool clear)
+{
+  GetImpl(*this).SetClearFocusIndicationOnTouch(clear);
+}
+
+bool FocusManager::IsClearFocusIndicationOnTouchEnabled() const
+{
+  return GetImpl(*this).IsClearFocusIndicationOnTouchEnabled();
+}
+
+void FocusManager::SetClearFocusIndicationOnHover(bool clear)
+{
+  GetImpl(*this).SetClearFocusIndicationOnHover(clear);
+}
+
+bool FocusManager::IsClearFocusIndicationOnHoverEnabled() const
+{
+  return GetImpl(*this).IsClearFocusIndicationOnHoverEnabled();
 }
 
 } // namespace Ui

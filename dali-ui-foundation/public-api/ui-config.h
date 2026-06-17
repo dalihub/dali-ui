@@ -364,19 +364,49 @@ public: // Properties
   bool IsFocusClearOnEscapeEnabled() const;
 
   /**
-   * @brief Sets whether to always show the keyboard focus indicator.
+   * @brief Sets whether touch interaction clears focus indication by default.
    *
    * @pre The config must not be frozen.
-   * @param[in] alwaysShow True to always show focus indicator
+   * @param[in] clear Whether touch interaction clears focus indication from the focused view
    */
-  void SetAlwaysShowFocus(bool alwaysShow);
+  void SetClearFocusIndicationOnTouch(bool clear);
 
   /**
-   * @brief Retrieves whether to always show the keyboard focus indicator.
+   * @brief Gets whether touch interaction clears focus indication by default.
    *
-   * @return True if focus indicator is always shown
+   * @return True if touch interaction clears focus indication from the focused view
    */
-  bool IsFocusIndicatorAlwaysShown() const;
+  bool IsClearFocusIndicationOnTouchEnabled() const;
+
+  /**
+   * @brief Sets whether hover outside the focused view clears focus indication by default.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] clear Whether hover outside the focused view clears focus indication
+   */
+  void SetClearFocusIndicationOnHover(bool clear);
+
+  /**
+   * @brief Gets whether hover outside the focused view clears focus indication by default.
+   *
+   * @return True if hover outside the focused view clears focus indication
+   */
+  bool IsClearFocusIndicationOnHoverEnabled() const;
+
+  /**
+   * @brief Sets whether FocusManager's default focus indicator is enabled by default.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] enabled Whether the default focus indicator is enabled
+   */
+  void SetDefaultFocusIndicatorEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether FocusManager's default focus indicator is enabled by default.
+   *
+   * @return True if the default focus indicator is enabled
+   */
+  bool IsDefaultFocusIndicatorEnabled() const;
 
   /**
    * @brief Sets the default font point-size for text elements.

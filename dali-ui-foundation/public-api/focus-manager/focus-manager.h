@@ -133,6 +133,16 @@ public:
   void ClearFocus();
 
   /**
+   * @brief Clears focus indication from the current focused view without clearing focus.
+   *
+   * This clears FOCUS_INDICATED from the current focused view. It also hides
+   * the FocusManager-managed default focus indicator, if any.
+   *
+   * @pre The FocusManager has been initialized.
+   */
+  void ClearFocusIndication();
+
+  /**
    * @brief Sets whether a view is a focus group (focus trap).
    *
    * When a view is set as a focus group, keyboard focus cannot leave
@@ -166,25 +176,23 @@ public:
   View GetFocusGroup(View view);
 
   /**
-   * @brief Sets the focus indicator actor.
+   * @brief Sets whether FocusManager's default focus indicator is enabled.
    *
-   * This will replace the default focus indicator actor in
-   * FocusManager and will be added to the focused actor as a
-   * highlight.
+   * This controls only the default focus indicator actor managed by
+   * FocusManager. It does not change focus state or FOCUS_INDICATED state.
    *
-   * @param indicator The indicator view to be added
+   * @param enabled Whether to enable the default focus indicator
    * @pre The FocusManager has been initialized.
-   * @pre The indicator view has been initialized.
    */
-  void SetFocusIndicatorActor(View indicator);
+  void SetDefaultFocusIndicatorEnabled(bool enabled);
 
   /**
-   * @brief Gets the focus indicator view.
+   * @brief Gets whether FocusManager's default focus indicator is enabled.
    *
-   * @return A handle to the focus indicator view
+   * @return True if the default focus indicator is enabled
    * @pre The FocusManager has been initialized.
    */
-  View GetFocusIndicatorView();
+  bool IsDefaultFocusIndicatorEnabled() const;
 
   /**
    * @brief Move the focus to prev focused actor
@@ -230,6 +238,34 @@ public:
    * @return Whether clear focus is enabled when window loses focus
    */
   bool GetClearFocusOnWindowFocusLost() const;
+
+  /**
+   * @brief Sets whether touch interaction clears focus indication.
+   *
+   * @param clear Whether touch interaction clears focus indication from the focused view
+   */
+  void SetClearFocusIndicationOnTouch(bool clear);
+
+  /**
+   * @brief Gets whether touch interaction clears focus indication.
+   *
+   * @return True if touch interaction clears focus indication from the focused view
+   */
+  bool IsClearFocusIndicationOnTouchEnabled() const;
+
+  /**
+   * @brief Sets whether hover outside the focused view clears focus indication.
+   *
+   * @param clear Whether hover outside the focused view clears focus indication
+   */
+  void SetClearFocusIndicationOnHover(bool clear);
+
+  /**
+   * @brief Gets whether hover outside the focused view clears focus indication.
+   *
+   * @return True if hover outside the focused view clears focus indication
+   */
+  bool IsClearFocusIndicationOnHoverEnabled() const;
 
 public: // Signals
   /**

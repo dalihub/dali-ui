@@ -118,6 +118,7 @@ String ViewState::ToString() const
 const ViewState ViewState::NORMAL{};
 const ViewState ViewState::ALL{UINT32_MAX};
 const ViewState ViewState::FOCUSED         = ViewState::Create("Focused");
+const ViewState ViewState::FOCUS_INDICATED = ViewState::Create("FocusIndicated");
 const ViewState ViewState::PRESSED         = ViewState::Create("Pressed");
 const ViewState ViewState::DISABLED        = ViewState::Create("Disabled");
 const ViewState ViewState::PSEUDO_DISABLED = ViewState::Create("PseudoDisabled");

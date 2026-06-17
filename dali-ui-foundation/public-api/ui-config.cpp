@@ -156,14 +156,34 @@ bool UiConfig::IsFocusClearOnEscapeEnabled() const
   return GetImpl(*this).IsFocusClearOnEscapeEnabled();
 }
 
-void UiConfig::SetAlwaysShowFocus(bool alwaysShow)
+void UiConfig::SetClearFocusIndicationOnTouch(bool clear)
 {
-  GetImpl(*this).SetAlwaysShowFocus(alwaysShow);
+  GetImpl(*this).SetClearFocusIndicationOnTouch(clear);
 }
 
-bool UiConfig::IsFocusIndicatorAlwaysShown() const
+bool UiConfig::IsClearFocusIndicationOnTouchEnabled() const
 {
-  return GetImpl(*this).IsFocusIndicatorAlwaysShown();
+  return GetImpl(*this).IsClearFocusIndicationOnTouchEnabled();
+}
+
+void UiConfig::SetClearFocusIndicationOnHover(bool clear)
+{
+  GetImpl(*this).SetClearFocusIndicationOnHover(clear);
+}
+
+bool UiConfig::IsClearFocusIndicationOnHoverEnabled() const
+{
+  return GetImpl(*this).IsClearFocusIndicationOnHoverEnabled();
+}
+
+void UiConfig::SetDefaultFocusIndicatorEnabled(bool enabled)
+{
+  GetImpl(*this).SetDefaultFocusIndicatorEnabled(enabled);
+}
+
+bool UiConfig::IsDefaultFocusIndicatorEnabled() const
+{
+  return GetImpl(*this).IsDefaultFocusIndicatorEnabled();
 }
 
 void UiConfig::SetDefaultFontSize(float fontSize)

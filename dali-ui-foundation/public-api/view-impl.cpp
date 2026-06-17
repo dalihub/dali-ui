@@ -507,7 +507,9 @@ void ViewImpl::OnFocusChanged(bool focused)
   {
     cause = GetImpl(focusManager).FocusChangedContext().inputEvent;
   }
-  IntegrationView::SetState(*this, ViewState::FOCUSED, focused, cause);
+
+  const bool focusIndicated = focusManager && GetImpl(focusManager).FocusChangedContext().focusIndicated;
+  IntegrationView::SetState(*this, ViewState::FOCUSED + (focusIndicated ? ViewState::FOCUS_INDICATED : ViewState::NORMAL), focused, cause);
 
   if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
   {

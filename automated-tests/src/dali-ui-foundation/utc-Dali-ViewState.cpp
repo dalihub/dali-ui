@@ -21,6 +21,9 @@
 #include <vector>
 
 #include <dali.h>
+#include <dali/integration-api/events/hover-event-integ.h>
+#include <dali/integration-api/events/key-event-integ.h>
+#include <dali/integration-api/events/touch-event-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
@@ -61,6 +64,43 @@ View CreateChildView(UiTestApplication& application, View& parent)
   application.SendNotification();
   application.Render();
   return child;
+}
+
+Dali::Integration::TouchEvent GenerateTouch(PointState::Type state, const Vector2& screenPosition, uint32_t time)
+{
+  Dali::Integration::TouchEvent touchEvent;
+  Dali::Integration::Point      point;
+  point.SetState(state);
+  point.SetDeviceId(4);
+  point.SetScreenPosition(screenPosition);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchEvent.points.push_back(point);
+  touchEvent.time = time;
+  return touchEvent;
+}
+
+Dali::Integration::HoverEvent GenerateHover(PointState::Type state, const Vector2& screenPosition, uint32_t time)
+{
+  Dali::Integration::HoverEvent hoverEvent(time);
+  Dali::Integration::Point      point;
+  point.SetState(state);
+  point.SetDeviceId(5);
+  point.SetScreenPosition(screenPosition);
+  point.SetDeviceClass(Device::Class::MOUSE);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  hoverEvent.points.push_back(point);
+  return hoverEvent;
+}
+
+void MakeTopLeftHitTestView(UiTestApplication& application, View view, const Vector2& position)
+{
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  view.SetRequestedPositionX(position.x);
+  view.SetRequestedPositionY(position.y);
+  application.SendNotification();
+  application.Render();
 }
 
 } // namespace
@@ -622,9 +662,204 @@ int UtcDaliViewStateFocusedViaFocusManagerP(void)
   FocusManager::Get().SetCurrentFocusView(view);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED));
   DALI_TEST_CHECK(view.IsEffectivelyFocused());
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(receivedCur.Contains(ViewState::FOCUSED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// FocusManager integration: programmatic focus move carries FOCUS_INDICATED
+// =============================================================================
+
+int UtcDaliViewStateFocusIndicatedProgrammaticCarryP(void)
+{
+  UiTestApplication application;
+  View              view1 = CreateView(application);
+  View              view2 = CreateView(application);
+
+  view1.SetFocusable(true);
+  view2.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(view1);
+  IntegrationView::SetState(GetImpl(view1), ViewState::FOCUS_INDICATED, true);
+
+  DALI_TEST_CHECK(GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(GetImpl(view1).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  FocusManager::Get().SetCurrentFocusView(view2);
+
+  DALI_TEST_CHECK(!GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view1).GetState().Contains(ViewState::FOCUS_INDICATED));
+  DALI_TEST_CHECK(GetImpl(view2).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(GetImpl(view2).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// FocusManager integration: touch outside clears FOCUS_INDICATED only
+// =============================================================================
+
+int UtcDaliViewStateFocusIndicatedClearedByTouchOutsideP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+  View              touchReceiver = CreateView(application);
+
+  MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
+  MakeTopLeftHitTestView(application, touchReceiver, Vector2(200.0f, 200.0f));
+  touchReceiver.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  view.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(view);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(220.0f, 220.0f), 100u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+int UtcDaliViewStateFocusIndicatedClearedByTouchOnFocusedViewP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+
+  MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
+  view.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  view.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(view);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+int UtcDaliViewStateFocusIndicatedClearedByTouchOnFocusedDescendantP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateView(application);
+  View              child  = CreateChildView(application, parent);
+
+  MakeTopLeftHitTestView(application, parent, Vector2(0.0f, 0.0f));
+  MakeTopLeftHitTestView(application, child, Vector2(0.0f, 0.0f));
+  child.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  parent.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(parent);
+  IntegrationView::SetState(GetImpl(parent), ViewState::FOCUS_INDICATED, true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == parent);
+  DALI_TEST_CHECK(GetImpl(parent).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(parent).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+int UtcDaliViewStateFocusIndicatedPreservedByTouchOutsideWhenDisabledP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+  View              touchReceiver = CreateView(application);
+  FocusManager      focusManager = FocusManager::Get();
+
+  MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
+  MakeTopLeftHitTestView(application, touchReceiver, Vector2(200.0f, 200.0f));
+  touchReceiver.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  view.SetFocusable(true);
+  focusManager.SetClearFocusIndicationOnTouch(false);
+  focusManager.SetCurrentFocusView(view);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(220.0f, 220.0f), 100u));
+
+  DALI_TEST_CHECK(focusManager.GetCurrentFocusView() == view);
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// FocusManager integration: hover outside does not clear FOCUS_INDICATED by default
+// =============================================================================
+
+int UtcDaliViewStateFocusIndicatedPreservedByHoverOutsideByDefaultP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+
+  view.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(view);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+
+  application.ProcessEvent(GenerateHover(PointState::STARTED, Vector2(300.0f, 300.0f), 100u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+int UtcDaliViewStateFocusIndicatedClearedByHoverOutsideWhenEnabledP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+  FocusManager      focusManager = FocusManager::Get();
+
+  view.SetFocusable(true);
+  focusManager.SetClearFocusIndicationOnHover(true);
+  focusManager.SetCurrentFocusView(view);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+
+  application.ProcessEvent(GenerateHover(PointState::STARTED, Vector2(300.0f, 300.0f), 100u));
+
+  DALI_TEST_CHECK(focusManager.GetCurrentFocusView() == view);
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+// =============================================================================
+// FocusManager integration: navigation key restores FOCUS_INDICATED
+// =============================================================================
+
+int UtcDaliViewStateFocusIndicatedRestoredByKeyP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+  View              touchReceiver = CreateView(application);
+
+  MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
+  MakeTopLeftHitTestView(application, touchReceiver, Vector2(200.0f, 200.0f));
+  touchReceiver.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  view.SetFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(view);
+  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(220.0f, 220.0f), 100u));
+
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  Dali::Integration::KeyEvent keyDown(
+    "Tab", "", "", 0, 0, 120u, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUS_INDICATED));
 
   END_TEST;
 }

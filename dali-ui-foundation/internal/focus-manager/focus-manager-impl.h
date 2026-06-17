@@ -20,11 +20,11 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/common/vector-wrapper.h>
+#include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -52,25 +52,7 @@ public:
     Ui::FocusDevice device = Ui::FocusDevice::UNKNOWN;
     Dali::String    deviceName;
     Ui::InputEvent  inputEvent;
-  };
-
-  enum FocusIndicatorState
-  {
-    UNKNOWN = -1, ///< Unknown state
-    HIDE    = 0,  ///< FocusIndicator is hidden
-    SHOW    = 1,  ///< FocusIndicator is shown
-  };
-
-  enum EnableFocusedIndicatorState
-  {
-    DISABLE = 0, ///< FocusIndicator is disable
-    ENABLE  = 1, ///< FocusIndicator is enable
-  };
-
-  enum FocusedIndicatorModeState
-  {
-    NONE        = 0, ///< Set nothing
-    ALWAYS_SHOW = 1, ///< FocusIndicator is always shown
+    bool            focusIndicated = false;
   };
 
   /**
@@ -117,6 +99,11 @@ public:
   void ClearFocus();
 
   /**
+   * @copydoc Ui::FocusManager::ClearFocusIndication
+   */
+  void ClearFocusIndication(InputEvent cause = InputEvent::Programmatic());
+
+  /**
    * @copydoc Ui::FocusManager::SetAsFocusGroup
    */
   void SetAsFocusGroup(View view, bool isFocusGroup);
@@ -132,29 +119,19 @@ public:
   View GetFocusGroup(View view);
 
   /**
-   * @copydoc Ui::FocusManager::SetFocusIndicatorActor
-   */
-  void SetFocusIndicatorActor(View indicator);
-
-  /**
-   * @copydoc Ui::FocusManager::GetFocusIndicatorView
-   */
-  View GetFocusIndicatorView();
-
-  /**
    * Move current focus to backward
    */
   void MoveFocusBackward();
 
   /**
-   * @copydoc Ui::DevelFocusManager::UseFocusIndicator
+   * @copydoc Ui::FocusManager::SetDefaultFocusIndicatorEnabled
    */
-  void EnableFocusIndicator(bool enable);
+  void SetDefaultFocusIndicatorEnabled(bool enabled);
 
   /**
-   * @copydoc Ui::DevelFocusManager::UseFocusIndicator
+   * @copydoc Ui::FocusManager::IsDefaultFocusIndicatorEnabled
    */
-  bool IsFocusIndicatorEnabled() const;
+  bool IsDefaultFocusIndicatorEnabled() const;
 
   /**
    * @copydoc Ui::DevelFocusManager::EnableDefaultAlgorithm
@@ -182,6 +159,26 @@ public:
    * @return Whether clear focus is enabled when window loses focus
    */
   bool GetClearFocusOnWindowFocusLost() const;
+
+  /**
+   * @copydoc Ui::FocusManager::SetClearFocusIndicationOnTouch
+   */
+  void SetClearFocusIndicationOnTouch(bool clear);
+
+  /**
+   * @copydoc Ui::FocusManager::IsClearFocusIndicationOnTouchEnabled
+   */
+  bool IsClearFocusIndicationOnTouchEnabled() const;
+
+  /**
+   * @copydoc Ui::FocusManager::SetClearFocusIndicationOnHover
+   */
+  void SetClearFocusIndicationOnHover(bool clear);
+
+  /**
+   * @copydoc Ui::FocusManager::IsClearFocusIndicationOnHoverEnabled
+   */
+  bool IsClearFocusIndicationOnHoverEnabled() const;
 
 public:
   /**
@@ -273,6 +270,8 @@ private:
    */
   void OnTouch(Dali::Integration::SceneHolder sceneHolder, TouchEvent touch);
 
+  bool OnHover(Actor actor, HoverEvent hover);
+
   /**
    * Callback for the wheel event when the custom wheel event occurs.
    * @param[in] sceneHolder The scene holder
@@ -327,11 +326,15 @@ private:
    */
   void ClearFocus(View view);
 
-  /**
-   * Clear the focus indicator view.
-   * @param[in] view View to be cleared of focus indicator.
-   */
-  void ClearFocusIndicator(View view);
+  void DetachFocusIndicator(View view);
+
+  void RefreshFocusIndicator(View view);
+
+  View GetFocusIndicatorView();
+
+  void SetFocusIndicated(View view, bool indicated, InputEvent cause = InputEvent::Programmatic());
+
+  bool ShouldIndicateFocus(const FocusChangeContext& context, bool previousFocusIndicated) const;
 
   /**
    * Gets the current native window id
@@ -359,21 +362,19 @@ private:
   FocusStack                                                          mFocusHistory; ///< Stack to contain pre-focused view history
   SlotDelegate<FocusManager>                                          mSlotDelegate;
   typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<View>>> FocusViewContainer;
-  FocusViewContainer                                                  mCurrentFocusViews;     ///< A container of focused views per window
-  WeakHandle<Layer>                                                   mCurrentFocusedWindow;  ///< A weak handle to the current focused window's root layer
-  FocusIndicatorState                                                 mIsFocusIndicatorShown; ///< Whether indicator should be shown / hidden when getting focus. It could be enabled
-                                                                                              ///< when keyboard focus feature is enabled and navigation keys or 'Tab' key are pressed.
-  EnableFocusedIndicatorState mEnableFocusIndicator;                                          ///< Whether use focus indicator
-  FocusedIndicatorModeState   mAlwaysShowIndicator;                                           ///< Whether always show indicator. If true, the indicator would be
-                                                                                              ///< directly shown when focused
+  FocusViewContainer                                                  mCurrentFocusViews;                ///< A container of focused views per window
+  WeakHandle<Layer>                                                   mCurrentFocusedWindow;             ///< A weak handle to the current focused window's root layer
+  bool                                                                mDefaultFocusIndicatorEnabled : 1; ///< Whether FocusManager's default focus indicator is enabled.
 
   FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
 
   uint32_t mCurrentWindowId; ///< The current native window id
 
-  bool mClearFocusOnTouch : 1;           ///< Whether clear focus on touch.
-  bool mEnableDefaultAlgorithm : 1;      ///< Whether use default algorithm focus
-  bool mClearFocusOnWindowFocusLost : 1; ///< Whether clear focus when window loses focus
+  bool mClearFocusIndicationOnTouch : 1; ///< Whether touch outside the focused view clears focus indication.
+  bool mClearFocusIndicationOnHover : 1; ///< Whether hover outside the focused view clears focus indication.
+  bool mConfigurationLoaded : 1;         ///< Whether default configuration has been loaded from UiConfig.
+  bool mEnableDefaultAlgorithm : 1;      ///< Whether use default algorithm focus.
+  bool mClearFocusOnWindowFocusLost : 1; ///< Whether clear focus when window loses focus.
 };
 
 } // namespace Internal

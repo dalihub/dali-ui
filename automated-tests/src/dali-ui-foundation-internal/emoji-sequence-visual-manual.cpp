@@ -1482,7 +1482,7 @@ private:
     mWindow.SetBackgroundColor(Color::WHITE);
     mWindow.KeyEventSignal().Connect(this, &EmojiVisualController::OnKeyEvent);
     mWindow.ResizeSignal().Connect(this, &EmojiVisualController::OnWindowResized);
-    DevelFocusManager::EnableFocusIndicator(FocusManager::Get(), false);
+    FocusManager::Get().SetDefaultFocusIndicatorEnabled(false);
 
     mMultilanguageSupport = Text::MultilanguageSupport::New(false);
     mFontClient           = TextAbstraction::FontClient::New();
@@ -3107,7 +3107,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
     Application application = Application::New(&argc, &argv);
     UiConfig config = UiConfig::New();
     config.SetLabelAsyncRendering(true);
-    config.SetAlwaysShowFocus(false);
+    config.SetDefaultFocusIndicatorEnabled(false);
     config.Apply();
     EmojiVisualController controller(application, options);
     application.MainLoop();

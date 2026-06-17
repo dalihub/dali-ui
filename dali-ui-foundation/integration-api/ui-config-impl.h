@@ -228,19 +228,34 @@ public:
   bool IsFocusClearOnEscapeEnabled() const;
 
   /**
-   * @brief Sets whether to always show the keyboard focus indicator.
-   *
-   * @pre Must not be frozen.
-   * @param[in] alwaysShow True to always show focus indicator
+   * @copydoc UiConfig::SetClearFocusIndicationOnTouch
    */
-  void SetAlwaysShowFocus(bool alwaysShow);
+  void SetClearFocusIndicationOnTouch(bool clear);
 
   /**
-   * @brief Retrieves whether to always show the keyboard focus indicator.
-   *
-   * @return True if focus indicator is always shown
+   * @copydoc UiConfig::IsClearFocusIndicationOnTouchEnabled
    */
-  bool IsFocusIndicatorAlwaysShown() const;
+  bool IsClearFocusIndicationOnTouchEnabled() const;
+
+  /**
+   * @copydoc UiConfig::SetClearFocusIndicationOnHover
+   */
+  void SetClearFocusIndicationOnHover(bool clear);
+
+  /**
+   * @copydoc UiConfig::IsClearFocusIndicationOnHoverEnabled
+   */
+  bool IsClearFocusIndicationOnHoverEnabled() const;
+
+  /**
+   * @copydoc UiConfig::SetDefaultFocusIndicatorEnabled
+   */
+  void SetDefaultFocusIndicatorEnabled(bool enabled);
+
+  /**
+   * @copydoc UiConfig::IsDefaultFocusIndicatorEnabled
+   */
+  bool IsDefaultFocusIndicatorEnabled() const;
 
   /**
    * @brief Sets the default font size.
@@ -504,7 +519,9 @@ private:
   float                     mCachedDpiFactor{1.0f};
   float                     mCachedScaledDpiFactor{1.0f};
   bool                      mClearFocusOnEscape;
-  bool                      mAlwaysShowFocus;
+  bool                      mClearFocusIndicationOnTouch;
+  bool                      mClearFocusIndicationOnHover;
+  bool                      mDefaultFocusIndicatorEnabled;
   bool                      mShowPlaceholderTextOnFocus;
   bool                      mLabelAsyncRendering;
   bool                      mFrozen;

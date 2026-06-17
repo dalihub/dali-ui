@@ -625,7 +625,12 @@ void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
     // -> Immediately update states at once.
     mState = mState - state;
 
-    if(state == ViewState::FOCUSED && !mViewImpl.IsEnabled())
+    if(state.Contains(ViewState::FOCUSED))
+    {
+      mState = mState - ViewState::FOCUS_INDICATED;
+    }
+
+    if(state.Contains(ViewState::FOCUSED) && !mViewImpl.IsEnabled())
     {
       mState = mState - ViewState::PRESSED + ViewState::DISABLED;
     }

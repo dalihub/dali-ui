@@ -71,7 +71,9 @@ UiConfigImpl::UiConfigImpl()
   mKeyLongPressThreshold(3),
   mTapRecognizerTime(UINT32_MAX),
   mClearFocusOnEscape(true),
-  mAlwaysShowFocus(true),
+  mClearFocusIndicationOnTouch(true),
+  mClearFocusIndicationOnHover(false),
+  mDefaultFocusIndicatorEnabled(true),
   mShowPlaceholderTextOnFocus(true),
   mLabelAsyncRendering(false),
   mFrozen(false)
@@ -228,15 +230,37 @@ bool UiConfigImpl::IsFocusClearOnEscapeEnabled() const
   return mClearFocusOnEscape;
 }
 
-void UiConfigImpl::SetAlwaysShowFocus(bool alwaysShow)
+void UiConfigImpl::SetClearFocusIndicationOnTouch(bool clear)
 {
   DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mAlwaysShowFocus = alwaysShow;
+  mClearFocusIndicationOnTouch = clear;
 }
 
-bool UiConfigImpl::IsFocusIndicatorAlwaysShown() const
+bool UiConfigImpl::IsClearFocusIndicationOnTouchEnabled() const
 {
-  return mAlwaysShowFocus;
+  return mClearFocusIndicationOnTouch;
+}
+
+void UiConfigImpl::SetClearFocusIndicationOnHover(bool clear)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mClearFocusIndicationOnHover = clear;
+}
+
+bool UiConfigImpl::IsClearFocusIndicationOnHoverEnabled() const
+{
+  return mClearFocusIndicationOnHover;
+}
+
+void UiConfigImpl::SetDefaultFocusIndicatorEnabled(bool enabled)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mDefaultFocusIndicatorEnabled = enabled;
+}
+
+bool UiConfigImpl::IsDefaultFocusIndicatorEnabled() const
+{
+  return mDefaultFocusIndicatorEnabled;
 }
 
 void UiConfigImpl::SetDefaultFontSize(float fontSize)
@@ -389,11 +413,6 @@ void UiConfigImpl::OnApplied()
 void UiConfigImpl::OnApplicationCreated()
 {
   Dali::TextAbstraction::EnableDesignCompatibility();
-
-  // TODO Disable default focus ring when default interaction effect applied.
-  // auto  handle           = FocusManager::Get();
-  // auto& focusManagerImpl = GetImpl(handle);
-  // focusManagerImpl.EnableFocusIndicator(false);
 
   Dali::DevelWindowSystem::SetGeometryHittestEnabled(true);
 }

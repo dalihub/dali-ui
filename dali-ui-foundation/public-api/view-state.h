@@ -67,6 +67,7 @@ public:
   static const ViewState ALL;             ///< Represents all possible states
   static const ViewState NORMAL;          ///< No state (0)
   static const ViewState FOCUSED;         ///< View has keyboard focus
+  static const ViewState FOCUS_INDICATED; ///< View has focus and its focus should be visibly indicated
   static const ViewState PRESSED;         ///< View is being pressed (touch or key)
   static const ViewState DISABLED;        ///< View is disabled
   static const ViewState PSEUDO_DISABLED; ///< View appears disabled but still interactive

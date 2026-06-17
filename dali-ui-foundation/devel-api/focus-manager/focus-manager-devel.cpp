@@ -25,16 +25,6 @@ namespace Ui
 {
 namespace DevelFocusManager
 {
-void EnableFocusIndicator(FocusManager focusManager, bool enable)
-{
-  GetImpl(focusManager).EnableFocusIndicator(enable);
-}
-
-bool IsFocusIndicatorEnabled(FocusManager focusManager)
-{
-  return GetImpl(focusManager).IsFocusIndicatorEnabled();
-}
-
 void EnableDefaultAlgorithm(FocusManager focusManager, bool enable)
 {
   GetImpl(focusManager).EnableDefaultAlgorithm(enable);
