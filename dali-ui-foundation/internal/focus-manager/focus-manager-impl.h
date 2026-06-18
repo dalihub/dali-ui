@@ -337,6 +337,11 @@ private:
   bool ShouldIndicateFocus(const FocusChangeContext& context, bool previousFocusIndicated) const;
 
   /**
+   * Clears the pending touch focus candidate.
+   */
+  void ClearTouchFocusCandidate();
+
+  /**
    * Gets the current native window id
    */
   uint32_t GetCurrentWindowId() const;
@@ -354,8 +359,9 @@ private:
   FocusManager& operator=(const FocusManager& rhs);
 
 private:
-  Ui::FocusManager::FocusChangedSignalType mFocusChangedSignal; ///< The signal to notify the focus change
-  WeakHandle<View>                         mCurrentFocusView;   ///< A weak handle to the current focused view
+  Ui::FocusManager::FocusChangedSignalType mFocusChangedSignal;  ///< The signal to notify the focus change
+  WeakHandle<View>                         mCurrentFocusView;    ///< A weak handle to the current focused view
+  WeakHandle<View>                         mTouchFocusCandidate; ///< A weak handle to the view that may receive focus when touch is released
 
   View mFocusIndicatorView; ///< The focus indicator view shared by all the keyboard focusable views for highlight
 
@@ -368,7 +374,8 @@ private:
 
   FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
 
-  uint32_t mCurrentWindowId; ///< The current native window id
+  uint32_t mCurrentWindowId;    ///< The current native window id
+  int32_t  mTouchFocusDeviceId; ///< The device id for the pending touch focus candidate
 
   bool mClearFocusIndicationOnTouch : 1; ///< Whether touch outside the focused view clears focus indication.
   bool mClearFocusIndicationOnHover : 1; ///< Whether hover outside the focused view clears focus indication.

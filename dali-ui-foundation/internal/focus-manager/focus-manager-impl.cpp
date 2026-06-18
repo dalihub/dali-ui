@@ -42,6 +42,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
+#include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -152,6 +153,7 @@ Ui::FocusManager FocusManager::Get()
 FocusManager::FocusManager()
 : mFocusChangedSignal(),
   mCurrentFocusView(),
+  mTouchFocusCandidate(),
   mFocusIndicatorView(),
 
   mFocusHistory(),
@@ -160,6 +162,7 @@ FocusManager::FocusManager()
   mDefaultFocusIndicatorEnabled(true),
   mLastFocusChangeContext(),
   mCurrentWindowId(0),
+  mTouchFocusDeviceId(-1),
   mClearFocusIndicationOnTouch(true),
   mClearFocusIndicationOnHover(false),
   mConfigurationLoaded(false),
@@ -167,6 +170,7 @@ FocusManager::FocusManager()
   mClearFocusOnWindowFocusLost(true)
 {
   LifecycleController::Get().PreInitSignal().Connect(mSlotDelegate, &FocusManager::OnAdaptorInit);
+  ScrollStateObserver::Get().DragStartedSignal().Connect(mSlotDelegate, &FocusManager::ClearTouchFocusCandidate);
 }
 
 void FocusManager::OnAdaptorInit()
@@ -656,6 +660,12 @@ void FocusManager::SetFocusIndicated(View view, bool indicated, InputEvent cause
   }
 }
 
+void FocusManager::ClearTouchFocusCandidate()
+{
+  mTouchFocusCandidate.Reset();
+  mTouchFocusDeviceId = -1;
+}
+
 bool FocusManager::ShouldIndicateFocus(const FocusChangeContext& context, bool previousFocusIndicated) const
 {
   switch(context.device)
@@ -892,28 +902,62 @@ void FocusManager::OnTouch(Dali::Integration::SceneHolder sceneHolder, TouchEven
     GetConfiguration();
   }
 
-  // Clear the focus when user touch the screen.
-  // We only do this on a Down event, otherwise the clear action may override a manually focused actor.
-  if(((touch.GetPointCount() < 1) || (touch.GetState(0) == PointState::DOWN)))
+  if(touch.GetPointCount() < 1)
   {
-    Ui::FocusDevice device = ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0));
+    ClearTouchFocusCandidate();
+    return;
+  }
 
-    // If you touch the currently focused view again, you don't need to do SetCurrentFocusView again.
-    View hitView = View::DownCast(touch.GetHitActor(0));
-    if(mClearFocusIndicationOnTouch)
+  switch(touch.GetState(0))
+  {
+    case PointState::DOWN:
     {
-      ClearFocusIndication(Ui::InputEvent::New(touch));
+      ClearTouchFocusCandidate();
+
+      // If you touch the currently focused view again, you don't need to do SetCurrentFocusView again.
+      View hitView = View::DownCast(touch.GetHitActor(0));
+      if(mClearFocusIndicationOnTouch)
+      {
+        ClearFocusIndication(Ui::InputEvent::New(touch));
+      }
+
+      if(hitView && hitView == GetCurrentFocusView())
+      {
+        return;
+      }
+
+      // If KEYBOARD_FOCUSABLE and TOUCH_FOCUSABLE is true, set focus view on touch release.
+      if(hitView && hitView.IsFocusable() && hitView.IsTouchFocusable() && !hitView.HasAncestorBlockingFocus())
+      {
+        mTouchFocusCandidate = hitView;
+        mTouchFocusDeviceId  = touch.GetDeviceId(0);
+      }
+      break;
     }
-
-    if(hitView && hitView == GetCurrentFocusView())
+    case PointState::UP:
     {
-      return;
+      View candidate = mTouchFocusCandidate.GetHandle();
+      if(candidate && touch.GetDeviceId(0) == mTouchFocusDeviceId)
+      {
+        View hitView = View::DownCast(touch.GetHitActor(0));
+        if(hitView == candidate && candidate.IsFocusable() && candidate.IsTouchFocusable() && !candidate.HasAncestorBlockingFocus())
+        {
+          Ui::FocusDevice device = ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0));
+          DoSetCurrentFocusView(candidate, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});
+        }
+      }
+      ClearTouchFocusCandidate();
+      break;
     }
-
-    // If KEYBOARD_FOCUSABLE and TOUCH_FOCUSABLE is true, set focus view
-    if(hitView && hitView.IsFocusable() && hitView.IsTouchFocusable() && !hitView.HasAncestorBlockingFocus())
+    case PointState::INTERRUPTED:
+    case PointState::LEAVE:
     {
-      DoSetCurrentFocusView(hitView, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});
+      ClearTouchFocusCandidate();
+      break;
+    }
+    default:
+    {
+      break;
     }
   }
 }

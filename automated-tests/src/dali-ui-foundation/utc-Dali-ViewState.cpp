@@ -865,6 +865,152 @@ int UtcDaliViewStateFocusIndicatedRestoredByKeyP(void)
 }
 
 // =============================================================================
+// FocusManager integration: touch focus waits for release
+// =============================================================================
+
+int UtcDaliViewStateTouchFocusableDoesNotFocusOnDownP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+
+  MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
+  view.SetFocusable(true);
+  view.SetTouchFocusable(true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+
+  DALI_TEST_CHECK(!FocusManager::Get().GetCurrentFocusView());
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+
+  END_TEST;
+}
+
+int UtcDaliViewStateTouchFocusableFocusesOnReleaseP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+
+  MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
+  view.SetFocusable(true);
+  view.SetTouchFocusable(true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 20.0f), 120u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+
+  END_TEST;
+}
+
+int UtcDaliViewStateTouchFocusableDoesNotFocusWhenInterruptedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+
+  MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
+  view.SetFocusable(true);
+  view.SetTouchFocusable(true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+  application.ProcessEvent(GenerateTouch(PointState::INTERRUPTED, Vector2(20.0f, 20.0f), 120u));
+
+  DALI_TEST_CHECK(!FocusManager::Get().GetCurrentFocusView());
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::FOCUSED));
+
+  END_TEST;
+}
+
+int UtcDaliViewStateTouchFocusableDoesNotFocusRemovedCandidateOnReleaseP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+
+  MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
+  view.SetFocusable(true);
+  view.SetTouchFocusable(true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+
+  application.GetScene().Remove(view);
+  view.Reset();
+  application.SendNotification();
+  application.Render();
+
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 20.0f), 120u));
+
+  DALI_TEST_CHECK(!FocusManager::Get().GetCurrentFocusView());
+
+  END_TEST;
+}
+
+int UtcDaliViewStateTouchFocusableClearsFocusIndicationOnDownAndFocusesOnReleaseP(void)
+{
+  UiTestApplication application;
+  View              view1 = CreateView(application);
+  View              view2 = CreateView(application);
+
+  MakeTopLeftHitTestView(application, view1, Vector2(0.0f, 0.0f));
+  MakeTopLeftHitTestView(application, view2, Vector2(200.0f, 200.0f));
+  view2.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  view1.SetFocusable(true);
+  view2.SetFocusable(true);
+  view2.SetTouchFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(view1);
+  IntegrationView::SetState(GetImpl(view1), ViewState::FOCUS_INDICATED, true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(220.0f, 220.0f), 100u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view1);
+  DALI_TEST_CHECK(GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view1).GetState().Contains(ViewState::FOCUS_INDICATED));
+  DALI_TEST_CHECK(!GetImpl(view2).GetState().Contains(ViewState::FOCUSED));
+
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(220.0f, 220.0f), 120u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view2);
+  DALI_TEST_CHECK(!GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view1).GetState().Contains(ViewState::FOCUS_INDICATED));
+  DALI_TEST_CHECK(GetImpl(view2).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(view2).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+int UtcDaliViewStateTouchFocusableDescendantClearsAncestorFocusIndicationAndFocusesOnReleaseP(void)
+{
+  UiTestApplication application;
+  View              parent = CreateView(application);
+  View              child  = CreateChildView(application, parent);
+
+  MakeTopLeftHitTestView(application, parent, Vector2(0.0f, 0.0f));
+  MakeTopLeftHitTestView(application, child, Vector2(0.0f, 0.0f));
+  child.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  parent.SetFocusable(true);
+  child.SetFocusable(true);
+  child.SetTouchFocusable(true);
+  FocusManager::Get().SetCurrentFocusView(parent);
+  IntegrationView::SetState(GetImpl(parent), ViewState::FOCUS_INDICATED, true);
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == parent);
+  DALI_TEST_CHECK(GetImpl(parent).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(parent).GetState().Contains(ViewState::FOCUS_INDICATED));
+  DALI_TEST_CHECK(!GetImpl(child).GetState().Contains(ViewState::FOCUSED));
+
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 20.0f), 120u));
+
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == child);
+  DALI_TEST_CHECK(!GetImpl(parent).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(parent).GetState().Contains(ViewState::FOCUS_INDICATED));
+  DALI_TEST_CHECK(GetImpl(child).GetState().Contains(ViewState::FOCUSED));
+  DALI_TEST_CHECK(!GetImpl(child).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
+
+// =============================================================================
 // FocusManager integration: moving focus clears FOCUSED on old view
 // =============================================================================
 

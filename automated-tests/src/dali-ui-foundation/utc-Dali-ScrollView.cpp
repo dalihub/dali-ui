@@ -18,6 +18,7 @@
 #include <stdlib.h>
 #include <iostream>
 #include <dali.h>
+#include <dali/integration-api/events/touch-event-integ.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 
@@ -26,6 +27,20 @@ using namespace Dali::Ui;
 
 namespace
 {
+
+Dali::Integration::TouchEvent GenerateTouch(PointState::Type state, const Vector2& screenPosition, uint32_t time)
+{
+  Dali::Integration::TouchEvent touchEvent;
+  Dali::Integration::Point      point;
+  point.SetState(state);
+  point.SetDeviceId(4);
+  point.SetScreenPosition(screenPosition);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchEvent.points.push_back(point);
+  touchEvent.time = time;
+  return touchEvent;
+}
 
 class ScrollStartedCallback : public ConnectionTracker
 {
@@ -824,6 +839,55 @@ int UtcDaliScrollViewDraggingSignalP(void)
   scrollView.DraggingSignal().Connect(&callback, &DraggingCallback::OnDragging);
 
   DALI_TEST_CHECK(scrollView.DraggingSignal().GetConnectionCount() > 0u);
+
+  END_TEST;
+}
+
+int UtcDaliScrollViewDoesNotFocusTouchFocusableChildWhenDraggingP(void)
+{
+  UiTestApplication application;
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetPivot(Pivot::TOP_LEFT);
+  scrollView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+
+  View content = View::New();
+  content.SetPivot(Pivot::TOP_LEFT);
+  content.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+
+  View child = View::New();
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+  child.SetFocusable(true);
+  child.SetTouchFocusable(true);
+  child.TouchedSignal().Connect([](Actor, TouchEvent) { return true; });
+
+  content.Add(child);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+
+  DragStartedCallback callback;
+  scrollView.DragStartedSignal().Connect(&callback, &DragStartedCallback::OnDragStarted);
+
+  application.SendNotification();
+  application.Render();
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 40.0f), 116u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 60.0f), 132u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 100.0f), 148u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 160.0f), 164u));
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 160.0f), 180u));
+
+  DALI_TEST_CHECK(callback.called);
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() != child);
 
   END_TEST;
 }
