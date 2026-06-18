@@ -221,6 +221,64 @@ Composition이 성공한 case는 `compositionGlyphs`를 생략하고, 실패한 
 `missingGlyphs: none`이어도 `compositionGlyphs`의 actual 값이 split visible glyphs이면
 font에 component glyph는 있지만 sequence composition이 실패한 것이다.
 
+### Unicode/Vendor Sample Preview
+
+visual viewer는 optional Unicode/vendor sample image를 actual DALi preview 오른쪽에
+보여줄 수 있다. sample image는 사람이 눈으로 비교하기 위한 helper이며 pass/fail 기준,
+golden image, image diff oracle로 취급하지 않는다. 코드와 문서에서는
+가능하면 `reference` 대신 `sample`, `unicode sample`, `vendor sample` 용어를 쓴다.
+
+sample preview는 `visual-test.sh`에서 다음 option으로 켠다.
+
+```bash
+./automated-tests/emoji/visual-test.sh -s
+./automated-tests/emoji/visual-test.sh --sample-dir /tmp/dali-emoji-unicode-samples
+```
+
+`-s`는 `/tmp/dali-emoji-unicode-samples`를 사용한다. `--sample-dir PATH`는 지정한
+sample pack directory를 사용한다. directory가 없으면 warning만 출력하고 sample env를
+설정하지 않은 상태로 기존 viewer를 실행해야 한다. `--no-sample`이나 `--sample-set`
+script option은 추가하지 않는다. sample set 선택이 필요하면 app env를 직접 사용한다.
+
+app env:
+
+```bash
+DALI_EMOJI_VISUAL_SAMPLE_DIR=/tmp/dali-emoji-unicode-samples
+DALI_EMOJI_VISUAL_SAMPLE_SET=sample
+```
+
+`DALI_EMOJI_VISUAL_SAMPLE_SET` 기본값은 `sample`이다. legacy 호환을 위해 app은
+`DALI_EMOJI_VISUAL_SAMPLE_VENDOR`도 fallback으로 읽을 수 있지만, 새 문서와 script는
+`SAMPLE_SET`을 우선한다.
+
+sample pack layout:
+
+```text
+/tmp/dali-emoji-unicode-samples/
+  metadata.json
+  index.tsv
+  sample/
+    1f436.png
+    1f9ae-200d-1f415.png
+    23-fe0f-20e3.png
+```
+
+sample image path 규칙은 `${DALI_EMOJI_VISUAL_SAMPLE_DIR}/${sample_set}/${sequence_key}.png`다.
+`sequence_key`는 lowercase hex codepoint를 hyphen으로 연결한다. `U+` prefix, whitespace,
+comma, hyphen separator는 normalize할 수 있어야 한다. ZWJ, VS15/VS16, skin tone modifier,
+tag character, combining enclosing keycap은 제거하지 않는다.
+
+예:
+
+- `U+1F436` -> `1f436`
+- `U+1F9AE U+200D U+1F415` -> `1f9ae-200d-1f415`
+- `U+0023 U+FE0F U+20E3` -> `23-fe0f-20e3`
+
+sample image가 없거나 key를 만들 수 없어도 viewer가 실패하면 안 된다. actual preview와
+diagnostics는 그대로 보여주고 sample 영역에는 `No sample` placeholder를 표시한다.
+sample ImageView는 aspect ratio를 유지해야 하며, sample label은 preview 내부 하단 overlay라
+row 높이를 늘리면 안 된다.
+
 ### Label Performance
 
 실제 `Dali::Ui::Label` 렌더링 시간을 비교해야 하면 perf helper를 사용한다.
@@ -240,7 +298,7 @@ sweep profile을 이용한 text stack 단계별 비용이다. 두 측정은 목�
 fixture는 다음 script로 갱신한다.
 
 ```bash
-python3 automated-tests/scripts/update-unicode-emoji-fixtures.py
+python3 automated-tests/emoji/tools/update-unicode-emoji-fixtures.py
 ```
 
 갱신해야 하는 경우:
@@ -260,6 +318,32 @@ python3 automated-tests/scripts/update-unicode-emoji-fixtures.py
 CI나 일반 build에서 Unicode latest를 자동 다운로드하면 안 된다. 최신 표준이 바뀌면
 fixture update PR로 고정된 데이터를 갱신한다.
 
+## Unicode Chart Sample Pack
+
+Unicode chart sample pack은 fixture가 아니라 visual viewer용 local PNG cache다.
+생성 script는 다음 위치에 둔다.
+
+```bash
+python3 automated-tests/emoji/tools/generate-unicode-emoji-samples.py \
+  --output /tmp/dali-emoji-unicode-samples \
+  --sample-set sample
+```
+
+기본 chart URL은 Unicode emoji chart의 full list, modifiers, ZWJ sequences, emoji
+sequences를 포함해야 한다. `--chart-file`은 다운로드한 chart HTML로 offline 재생성할 때
+사용한다. `--vendor`는 legacy alias이고 새 사용법은 `--sample-set`이다.
+
+생성물인 `metadata.json`, `index.tsv`, PNG directory는 repository에 커밋하지 않는다.
+script나 parser를 고칠 때는 spot key를 확인한다.
+
+```text
+1f436
+1f44b-1f3fb
+1f9d1-200d-1f4bb
+23-fe0f-20e3
+1f1f0-1f1f7
+```
+
 ## 변경 시 체크리스트
 
 emoji sequence 관련 코드를 수정한 에이전트는 최소한 다음을 확인한다.
@@ -274,6 +358,8 @@ emoji sequence 관련 코드를 수정한 에이전트는 최소한 다음을 �
 - visual evidence의 `missingGlyphs`와 `compositionGlyphs`가 failure 원인을 설명하는가?
 - sequence 조합 문제가 의심되면 `compositionGlyphs`가 생략되었는지, 또는 actual 값이 failure 원인을 설명하는지 확인했는가?
 - full visual viewer 변경이라면 page 단위 렌더링과 section jump가 유지되는가?
+- sample preview 변경이라면 sample env가 없을 때 기존 layout이 깨지지 않고, sample이 없을 때 placeholder가 나오는가?
+- sample pack/script 변경이라면 생성 PNG가 git status에 포함되지 않았는가?
 - 성능 변경이면 `perf.sh` report에서 actual Label timing과 pipeline timing을 모두 확인했는가?
 
 ## 금지 사항
@@ -282,6 +368,9 @@ emoji sequence 관련 코드를 수정한 에이전트는 최소한 다음을 �
 - emoji sequence UTC를 `utc-Dali-TextVisualizer-internal.cpp`에 추가하지 않는다.
 - 비표준 VS/ZWJ fallback을 Strict Unicode conformance로 설명하지 않는다.
 - fixture를 CI에서 매번 latest로 다운로드하지 않는다.
+- sample pack을 visual test script에서 자동 생성하거나 Unicode chart를 자동 다운로드하지 않는다.
+- sample image를 pass/fail 기준으로 사용하지 않는다.
+- 생성된 sample PNG pack을 repository에 커밋하지 않는다.
 - emoji workaround를 추가하면서 일반 script boundary 테스트를 생략하지 않는다.
 - 성능 측정용 임시 코드를 emoji sequence 개선 코드와 섞어 커밋하지 않는다.
 

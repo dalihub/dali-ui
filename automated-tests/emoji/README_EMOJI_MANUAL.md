@@ -24,7 +24,7 @@ Agent용 유지보수 규칙은 [`EMOJI_TEST_SKILL.md`](EMOJI_TEST_SKILL.md)에 
 | --- | --- |
 | `build.sh` | emoji UTC target과 manual emoji tool을 빌드한다. |
 | `sweep-test.sh` | emoji sequence의 script/font/shaping 상태를 검증하고 failure log를 만든다. |
-| `visual-test.sh` | full/review/failure case를 viewer로 열거나 HTML evidence를 생성한다. |
+| `visual-test.sh` | full/review/failure case를 viewer로 열고, 필요하면 HTML evidence나 sample preview를 생성한다. |
 | `perf.sh` | 실제 `Dali::Ui::Label` rendering 시간과 sweep pipeline timing을 측정한다. |
 
 failure log를 HTML evidence로 만들려면 `-html`을 붙인다.
@@ -146,6 +146,35 @@ screenshot이 아니라 case 목록과 diagnostics를 공유하기 위한 파일
 viewer에서 emoji preview 영역을 누르면 중앙 확대 view가 열린다. 확대 view는 TextFit을
 사용하며, 다시 누르면 닫힌다.
 
+### Unicode Chart Sample Preview
+
+Unicode chart sample preview는 사람이 눈으로 비교하기 위한 visual helper다. pass/fail
+기준이나 image diff 기준으로 사용하지 않는다.
+
+먼저 local sample pack을 만든다. 생성된 PNG는 repository에 커밋하지 않는다.
+
+```bash
+python3 automated-tests/emoji/tools/generate-unicode-emoji-samples.py \
+  --output /tmp/dali-emoji-unicode-samples \
+  --sample-set sample
+```
+
+viewer에서 sample preview를 켜려면 `-s`를 사용한다.
+
+```bash
+./automated-tests/emoji/visual-test.sh -s
+./automated-tests/emoji/visual-test.sh -s -r
+./automated-tests/emoji/visual-test.sh -s /tmp/dali-emoji-sequence-sweep-failures.log
+```
+
+다른 sample pack directory를 쓰려면 `--sample-dir`을 지정한다.
+
+```bash
+./automated-tests/emoji/visual-test.sh --sample-dir /tmp/dali-emoji-unicode-samples
+```
+
+sample directory가 없으면 warning만 출력하고 기존 viewer로 계속 실행한다.
+
 ## Label Performance
 
 `perf.sh`는 실제 `Dali::Ui::Label` async rendering 경로를 측정한다. 기본적으로 sweep
@@ -257,11 +286,22 @@ fixture는 Unicode emoji data에서 생성해 repository에 고정한다. 일반
 새 Unicode Emoji version을 채택하거나 fixture format/classification을 변경할 때만 갱신한다.
 
 ```bash
-python3 automated-tests/scripts/update-unicode-emoji-fixtures.py
+python3 automated-tests/emoji/tools/update-unicode-emoji-fixtures.py
 ```
 
 갱신 후에는 TSV metadata의 Unicode version, source URL, SHA-256, row count, signature
 count를 확인한다.
+
+Unicode chart sample pack은 fixture와 별개다. sample preview를 위한 PNG cache이며,
+기본 위치는 `/tmp/dali-emoji-unicode-samples`다.
+
+```text
+/tmp/dali-emoji-unicode-samples/
+  metadata.json
+  index.tsv
+  sample/
+    1f436.png
+```
 
 ## 고급 사용법
 
@@ -306,6 +346,8 @@ DALI_EMOJI_VISUAL_EXPORT_ONLY=1 \
 | `DALI_EMOJI_VISUAL_MAX_ITEMS` | `0` | debug용 row 제한 |
 | `DALI_EMOJI_VISUAL_PAGE_SIZE` | `100` | debug용 page row 수 |
 | `DALI_EMOJI_VISUAL_FONT_SIZE` | `52` | preview emoji font size |
+| `DALI_EMOJI_VISUAL_SAMPLE_DIR` | unset | optional Unicode/vendor sample pack directory |
+| `DALI_EMOJI_VISUAL_SAMPLE_SET` | `sample` | sample image directory name under sample pack |
 | `DALI_EMOJI_VISUAL_CAPTURE` | unset | visible viewer capture path |
 | `DALI_EMOJI_VISUAL_EXIT_AFTER_CAPTURE` | unset | capture 후 종료 |
 

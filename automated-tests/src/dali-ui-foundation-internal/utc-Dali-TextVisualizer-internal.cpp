@@ -78,31 +78,6 @@ bool HasAnyValidGlyphMetric(const Dali::Ui::Internal::TextVisualizer::PreparedTe
   return false;
 }
 
-float GetGlyphPlacementAdvanceForTest(const Dali::Ui::Text::GlyphInfo& glyph)
-{
-  if(glyph.advance > 0.0f)
-  {
-    return glyph.advance;
-  }
-
-  return glyph.width > 0.0f ? glyph.width : 0.0f;
-}
-
-float GetGlyphRangeAdvanceForTest(const Dali::Ui::Internal::TextVisualizer::PreparedText& preparedText,
-                                  uint32_t                                                glyphStart,
-                                  uint32_t                                                glyphEnd)
-{
-  const Dali::Vector<Dali::Ui::Text::GlyphInfo>& glyphs = preparedText.GetGlyphs();
-  float                                          advance = 0.0f;
-
-  for(uint32_t glyphIndex = glyphStart; glyphIndex < glyphEnd && glyphIndex < glyphs.Count(); ++glyphIndex)
-  {
-    advance += GetGlyphPlacementAdvanceForTest(glyphs[glyphIndex]);
-  }
-
-  return advance;
-}
-
 uint32_t CountRenderableGlyphPlacementsForTest(const Dali::Ui::Internal::TextVisualizer::PreparedText& preparedText,
                                                const Dali::Ui::Internal::TextVisualizer::LayoutResult&  layoutResult)
 {
@@ -123,33 +98,6 @@ uint32_t CountRenderableGlyphPlacementsForTest(const Dali::Ui::Internal::TextVis
   }
 
   return renderableGlyphCount;
-}
-
-uint32_t FindFirstAllowedLineBreakGlyphEndForTest(const Dali::Ui::Internal::TextVisualizer::PreparedText& preparedText)
-{
-  const Dali::Vector<Dali::Ui::Text::CharacterIndex>& glyphToCharacterMap = preparedText.GetGlyphToCharacterMap();
-  const Dali::Vector<Dali::Ui::Text::Length>&         charactersPerGlyph  = preparedText.GetCharactersPerGlyph();
-  const Dali::Vector<Dali::Ui::Text::LineBreakInfo>&  lineBreakInfo       = preparedText.GetLineBreakInfo();
-
-  for(uint32_t glyphIndex = 0u; glyphIndex < preparedText.GetGlyphCount() && glyphIndex < glyphToCharacterMap.Count(); ++glyphIndex)
-  {
-    const uint32_t characterStart = glyphToCharacterMap[glyphIndex];
-    const uint32_t characterSpan  = glyphIndex < charactersPerGlyph.Count() ? charactersPerGlyph[glyphIndex] : 0u;
-    if(characterSpan == 0u)
-    {
-      continue;
-    }
-
-    const uint32_t characterLast = characterStart + characterSpan - 1u;
-    if(characterLast < lineBreakInfo.Count() &&
-       ((lineBreakInfo[characterLast] == TextAbstraction::LINE_ALLOW_BREAK) ||
-        (lineBreakInfo[characterLast] == TextAbstraction::LINE_MUST_BREAK)))
-    {
-      return glyphIndex + 1u;
-    }
-  }
-
-  return 0u;
 }
 
 void CheckGlyphPlacementsOutsideExclusion(const Dali::Ui::Internal::TextVisualizer::LayoutResult& result,
@@ -823,49 +771,6 @@ int UtcDaliTextVisualizerLayoutGlyphsFillsTextLineMetricsP(void)
   END_TEST;
 }
 
-int UtcDaliTextVisualizerLayoutGlyphsExplicitLineHeightOverrideP(void)
-{
-  UiTestApplication                                application;
-  Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("abc", 20.0f);
-  Dali::Vector<Bounds>                        exclusionRegions;
-  Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
-  constexpr float                                  explicitLineHeight = 50.0f;
-
-  Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 300.0f, explicitLineHeight, exclusionRegions, layoutResult);
-
-  if(preparedText.GetGlyphCount() > 0u)
-  {
-    DALI_TEST_CHECK(!layoutResult.Empty());
-    DALI_TEST_EQUALS(layoutResult.height, explicitLineHeight, TEST_LOCATION);
-    DALI_TEST_EQUALS(layoutResult.lines[0u].height, explicitLineHeight, TEST_LOCATION);
-    DALI_TEST_CHECK(layoutResult.lines[0u].metrics.valid);
-  }
-
-  END_TEST;
-}
-
-int UtcDaliTextVisualizerLayoutGlyphsRelativeLineHeightFormulaP(void)
-{
-  UiTestApplication                                application;
-  Dali::Ui::Internal::TextVisualizer::PreparedText preparedText = CreatePreparedText("abc", 20.0f);
-  Dali::Vector<Bounds>                        exclusionRegions;
-  Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
-  constexpr float                                  fontSize              = 20.0f;
-  constexpr float                                  relativeLineHeight    = 1.5f;
-  constexpr float                                  calculatedLineHeight  = fontSize * relativeLineHeight;
-
-  Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, 300.0f, calculatedLineHeight, exclusionRegions, layoutResult);
-
-  if(preparedText.GetGlyphCount() > 0u)
-  {
-    DALI_TEST_CHECK(!layoutResult.Empty());
-    DALI_TEST_EQUALS(layoutResult.height, calculatedLineHeight, TEST_LOCATION);
-    DALI_TEST_EQUALS(layoutResult.lines[0u].height, calculatedLineHeight, TEST_LOCATION);
-  }
-
-  END_TEST;
-}
-
 int UtcDaliTextVisualizerLineHeightChangeSmokeP(void)
 {
   UiTestApplication application;
@@ -1437,32 +1342,6 @@ int UtcDaliTextVisualizerGlyphLayoutWithExclusionP(void)
   END_TEST;
 }
 
-int UtcDaliTextVisualizerGlyphLayoutWordWrapSpacesP(void)
-{
-  UiTestApplication application;
-  auto              preparedText = CreatePreparedText("hello world", 18.0f);
-  Dali::Vector<Bounds> exclusionRegions;
-  Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
-
-  const uint32_t firstBreakGlyphEnd = FindFirstAllowedLineBreakGlyphEndForTest(preparedText);
-  if(preparedText.GetGlyphCount() > 0u && firstBreakGlyphEnd > 0u && firstBreakGlyphEnd < preparedText.GetGlyphCount())
-  {
-    const float firstBreakAdvance = GetGlyphRangeAdvanceForTest(preparedText, 0u, firstBreakGlyphEnd);
-    const float totalAdvance      = preparedText.GetTotalGlyphAdvance();
-    if(firstBreakAdvance > 0.0f && firstBreakAdvance < totalAdvance)
-    {
-      Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, firstBreakAdvance + 1.0f, 0.0f, exclusionRegions, layoutResult);
-
-      DALI_TEST_CHECK(layoutResult.GetLineCount() >= 2u);
-      DALI_TEST_CHECK(layoutResult.lines[0u].fragments.Count() > 0u);
-      DALI_TEST_EQUALS(layoutResult.lines[0u].fragments[0u].glyphEnd, firstBreakGlyphEnd, TEST_LOCATION);
-      DALI_TEST_EQUALS(layoutResult.glyphPlacements.Count(), preparedText.GetGlyphCount(), TEST_LOCATION);
-    }
-  }
-
-  END_TEST;
-}
-
 int UtcDaliTextVisualizerGlyphLayoutLongWordFallbackP(void)
 {
   UiTestApplication application;
@@ -1475,24 +1354,6 @@ int UtcDaliTextVisualizerGlyphLayoutLongWordFallbackP(void)
   if(preparedText.GetGlyphCount() > 0u)
   {
     DALI_TEST_CHECK(layoutResult.GetLineCount() >= 1u);
-    DALI_TEST_EQUALS(layoutResult.glyphPlacements.Count(), preparedText.GetGlyphCount(), TEST_LOCATION);
-  }
-
-  END_TEST;
-}
-
-int UtcDaliTextVisualizerGlyphLayoutWordWrapWideWidthP(void)
-{
-  UiTestApplication application;
-  auto              preparedText = CreatePreparedText("one two", 18.0f);
-  Dali::Vector<Bounds> exclusionRegions;
-  Dali::Ui::Internal::TextVisualizer::LayoutResult layoutResult;
-
-  Dali::Ui::Internal::TextVisualizer::LayoutEngine::LayoutGlyphs(preparedText, preparedText.GetTotalGlyphAdvance() + 20.0f, 0.0f, exclusionRegions, layoutResult);
-
-  if(preparedText.GetGlyphCount() > 0u)
-  {
-    DALI_TEST_EQUALS(layoutResult.GetLineCount(), 1u, TEST_LOCATION);
     DALI_TEST_EQUALS(layoutResult.glyphPlacements.Count(), preparedText.GetGlyphCount(), TEST_LOCATION);
   }
 

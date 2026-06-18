@@ -59,6 +59,11 @@ constexpr float ROW_PADDING_X                    = 10.0f;
 constexpr float ROW_PADDING_Y                    = 8.0f;
 constexpr float PREVIEW_WIDTH                    = 160.0f;
 constexpr float PREVIEW_SIZE                     = 52.0f;
+constexpr float SAMPLE_PREVIEW_GAP               = 8.0f;
+constexpr float SAMPLE_IMAGE_SCALE               = 1.12f;
+constexpr float SAMPLE_SET_LABEL_HEIGHT          = 22.0f;
+constexpr float SAMPLE_SET_LABEL_SIZE            = 11.0f;
+constexpr float SAMPLE_PLACEHOLDER_SIZE           = 13.0f;
 constexpr float DETAIL_SIZE                      = 15.0f;
 constexpr float MIN_DETAIL_WIDTH                 = 220.0f;
 constexpr float HEADER_SIZE                      = 12.0f;
@@ -100,6 +105,14 @@ struct VisualCase
   std::string           reason;
 };
 
+struct SampleOptions
+{
+  bool        enabled{false};
+  std::string directory;
+  std::string sampleSet{"sample"};
+  std::string displaySampleName{"Unicode chart sample"};
+};
+
 struct VisualOptions
 {
   std::string           inputPath;
@@ -112,6 +125,7 @@ struct VisualOptions
   size_t                pageSize{DEFAULT_PAGE_SIZE};
   uint32_t              captureDelayMs{700u};
   float                 fontSize{PREVIEW_SIZE};
+  SampleOptions         sample;
   bool                  exportOnly{false};
   bool                  exitAfterExport{false};
   bool                  exitAfterCapture{false};
@@ -245,6 +259,127 @@ std::string TrimAscii(const std::string& text)
   }
 
   return text.substr(begin, end - begin);
+}
+
+std::string JoinPath(const std::string& directory, const std::string& name)
+{
+  if(directory.empty())
+  {
+    return name;
+  }
+  if(name.empty())
+  {
+    return directory;
+  }
+  if(directory[directory.size() - 1u] == '/')
+  {
+    return directory + name;
+  }
+  return directory + "/" + name;
+}
+
+bool FileExists(const std::string& path)
+{
+  std::ifstream input(path.c_str(), std::ios::binary);
+  return input.good();
+}
+
+std::string SequenceKeyForCodepoints(const std::vector<uint32_t>& codepoints)
+{
+  if(codepoints.empty())
+  {
+    return std::string();
+  }
+
+  std::stringstream stream;
+  for(size_t index = 0u; index < codepoints.size(); ++index)
+  {
+    if(index > 0u)
+    {
+      stream << '-';
+    }
+    stream << std::nouppercase << std::hex << codepoints[index] << std::dec;
+  }
+  return stream.str();
+}
+
+std::string SampleDisplayName(const std::string& sampleSet)
+{
+  if(sampleSet == "sample")
+  {
+    return "Unicode chart sample";
+  }
+  if(sampleSet == "google")
+  {
+    return "Google sample";
+  }
+  if(sampleSet == "apple")
+  {
+    return "Apple sample";
+  }
+  if(sampleSet == "samsung")
+  {
+    return "Samsung sample";
+  }
+  if(sampleSet == "windows")
+  {
+    return "Windows sample";
+  }
+  if(sampleSet == "twitter")
+  {
+    return "Twitter sample";
+  }
+  if(sampleSet == "facebook")
+  {
+    return "Facebook sample";
+  }
+  return sampleSet + " sample";
+}
+
+SampleOptions LoadSampleOptions()
+{
+  SampleOptions options;
+
+  const char* sampleDir = GetEnv("DALI_EMOJI_VISUAL_SAMPLE_DIR");
+  if(!sampleDir || sampleDir[0] == '\0')
+  {
+    return options;
+  }
+
+  options.enabled   = true;
+  options.directory = sampleDir;
+
+  const char* sampleSet = GetEnv("DALI_EMOJI_VISUAL_SAMPLE_SET");
+  if(!sampleSet || sampleSet[0] == '\0')
+  {
+    sampleSet = GetEnv("DALI_EMOJI_VISUAL_SAMPLE_VENDOR");
+  }
+  if(sampleSet && sampleSet[0] != '\0')
+  {
+    options.sampleSet = ToLowerAscii(TrimAscii(sampleSet));
+  }
+  if(options.sampleSet.empty())
+  {
+    options.sampleSet = "sample";
+  }
+  options.displaySampleName = SampleDisplayName(options.sampleSet);
+  return options;
+}
+
+std::string SampleImagePathForCase(const SampleOptions& options, const VisualCase& item)
+{
+  if(!options.enabled)
+  {
+    return std::string();
+  }
+
+  const std::string sequenceKey = SequenceKeyForCodepoints(item.codepoints);
+  if(sequenceKey.empty())
+  {
+    return std::string();
+  }
+
+  return JoinPath(JoinPath(options.directory, options.sampleSet), sequenceKey + ".png");
 }
 
 std::string NormalizeSearchQuery(const std::string& text)
@@ -773,6 +908,7 @@ VisualOptions LoadOptions()
   options.pageSize     = GetEnvSize("DALI_EMOJI_VISUAL_PAGE_SIZE", DEFAULT_PAGE_SIZE);
   options.fontSize    = GetEnvFloat("DALI_EMOJI_VISUAL_FONT_SIZE", PREVIEW_SIZE);
   options.captureDelayMs = static_cast<uint32_t>(GetEnvSize("DALI_EMOJI_VISUAL_CAPTURE_DELAY_MS", options.captureDelayMs));
+  options.sample         = LoadSampleOptions();
   options.exportOnly       = GetEnvBool("DALI_EMOJI_VISUAL_EXPORT_ONLY");
   options.exitAfterExport  = GetEnvBool("DALI_EMOJI_VISUAL_EXIT_AFTER_EXPORT");
   options.exitAfterCapture = GetEnvBool("DALI_EMOJI_VISUAL_EXIT_AFTER_CAPTURE");
@@ -1469,9 +1605,17 @@ private:
   {
     AbsoluteLayout       row;
     Label                preview;
+    AbsoluteLayout       sampleContainer;
+    ImageView            sampleImage;
+    Label                samplePlaceholder;
+    Label                sampleSetLabel;
     Label                detail;
     AbsoluteLayoutParams rowParams;
     AbsoluteLayoutParams previewParams;
+    AbsoluteLayoutParams sampleContainerParams;
+    AbsoluteLayoutParams sampleImageParams;
+    AbsoluteLayoutParams samplePlaceholderParams;
+    AbsoluteLayoutParams sampleSetLabelParams;
     AbsoluteLayoutParams detailParams;
     size_t               itemIndex{static_cast<size_t>(-1)};
   };
@@ -1651,6 +1795,11 @@ private:
     if(!mOptions.signatureFilter.empty())
     {
       stream << " | Filter: " << SignatureFilterToString(mOptions);
+    }
+    if(mOptions.sample.enabled)
+    {
+      stream << "\nSample: " << mOptions.sample.displaySampleName
+             << " dir=" << CompactPath(mOptions.sample.directory);
     }
     if(!mSectionAnchors.empty())
     {
@@ -2189,9 +2338,26 @@ private:
     return std::max(0.0f, ROW_HEIGHT - ROW_PADDING_Y * 2.0f);
   }
 
+  float SampleImageSize() const
+  {
+    const float contentHeight = RowContentHeight();
+    const float maxSize       = std::max(1.0f, std::min(PREVIEW_WIDTH, contentHeight - SAMPLE_SET_LABEL_HEIGHT));
+    return std::max(1.0f, std::min(mOptions.fontSize * SAMPLE_IMAGE_SCALE, maxSize));
+  }
+
+  float SampleBlockWidth() const
+  {
+    return mOptions.sample.enabled ? SAMPLE_PREVIEW_GAP + PREVIEW_WIDTH : 0.0f;
+  }
+
+  float PreviewBlockWidth() const
+  {
+    return PREVIEW_WIDTH + SampleBlockWidth();
+  }
+
   float MinimumRowWidth() const
   {
-    return ROW_PADDING_X * 2.0f + PREVIEW_WIDTH + MIN_DETAIL_WIDTH;
+    return ROW_PADDING_X * 2.0f + PreviewBlockWidth() + MIN_DETAIL_WIDTH;
   }
 
   float PageContentWidth() const
@@ -2212,7 +2378,7 @@ private:
 
   float DetailWidth(float rowWidth) const
   {
-    return std::max(MIN_DETAIL_WIDTH, rowWidth - ROW_PADDING_X * 2.0f - PREVIEW_WIDTH);
+    return std::max(MIN_DETAIL_WIDTH, rowWidth - ROW_PADDING_X * 2.0f - PreviewBlockWidth());
   }
 
   float PageContentHeight(size_t rowCount) const
@@ -2293,9 +2459,37 @@ private:
     row.preview.SetRequestedHeight(contentHeight);
     row.previewParams.SetBounds(LayoutRect(ROW_PADDING_X, ROW_PADDING_Y, PREVIEW_WIDTH, contentHeight));
 
+    if(row.sampleContainer)
+    {
+      const float sampleX         = ROW_PADDING_X + PREVIEW_WIDTH + SAMPLE_PREVIEW_GAP;
+      const float sampleImageSize = SampleImageSize();
+      const float sampleImageX    = (PREVIEW_WIDTH - sampleImageSize) * 0.5f;
+      const float sampleLabelY    = std::max(0.0f, contentHeight - SAMPLE_SET_LABEL_HEIGHT);
+      const float sampleImageY    = std::max(0.0f, std::min((contentHeight - sampleImageSize) * 0.5f,
+                                                            sampleLabelY - sampleImageSize));
+      row.sampleContainer.SetRequestedWidth(PREVIEW_WIDTH);
+      row.sampleContainer.SetRequestedHeight(contentHeight);
+      row.sampleContainerParams.SetBounds(LayoutRect(sampleX, ROW_PADDING_Y, PREVIEW_WIDTH, contentHeight));
+
+      row.sampleImage.SetRequestedWidth(sampleImageSize);
+      row.sampleImage.SetRequestedHeight(sampleImageSize);
+      row.sampleImageParams.SetBounds(LayoutRect(sampleImageX, sampleImageY, sampleImageSize, sampleImageSize));
+
+      row.samplePlaceholder.SetRequestedWidth(PREVIEW_WIDTH);
+      row.samplePlaceholder.SetRequestedHeight(contentHeight);
+      row.samplePlaceholderParams.SetBounds(LayoutRect(0.0f, 0.0f, PREVIEW_WIDTH, contentHeight));
+
+      row.sampleSetLabel.SetRequestedWidth(PREVIEW_WIDTH);
+      row.sampleSetLabel.SetRequestedHeight(SAMPLE_SET_LABEL_HEIGHT);
+      row.sampleSetLabelParams.SetBounds(LayoutRect(0.0f,
+                                                    std::max(0.0f, contentHeight - SAMPLE_SET_LABEL_HEIGHT),
+                                                    PREVIEW_WIDTH,
+                                                    SAMPLE_SET_LABEL_HEIGHT));
+    }
+
     row.detail.SetRequestedWidth(detailWidth);
     row.detail.SetRequestedHeight(contentHeight);
-    row.detailParams.SetBounds(LayoutRect(ROW_PADDING_X + PREVIEW_WIDTH, ROW_PADDING_Y, detailWidth, contentHeight));
+    row.detailParams.SetBounds(LayoutRect(ROW_PADDING_X + PreviewBlockWidth(), ROW_PADDING_Y, detailWidth, contentHeight));
   }
 
   void BuildPageContentPool()
@@ -2941,6 +3135,46 @@ private:
     actors.preview.TouchedSignal().Connect(this, &EmojiVisualController::OnPreviewTouched);
     actors.row.Add(actors.preview);
 
+    if(mOptions.sample.enabled)
+    {
+      actors.sampleContainer = AbsoluteLayout::New();
+      actors.sampleContainer.SetRequestedWidth(PREVIEW_WIDTH);
+      actors.sampleContainer.SetRequestedHeight(RowContentHeight());
+      actors.sampleContainer.SetBackgroundColor(Color::WHITE);
+      actors.sampleContainerParams = AbsoluteLayoutParams::New();
+      actors.sampleContainer.SetLayoutParams(actors.sampleContainerParams);
+
+      actors.sampleImage = ImageView::New();
+      actors.sampleImage.SetRequestedWidth(SampleImageSize());
+      actors.sampleImage.SetRequestedHeight(SampleImageSize());
+      actors.sampleImage.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
+      actors.sampleImage.SetBackgroundColor(Color::WHITE);
+      actors.sampleImage.SetProperty(Actor::Property::VISIBLE, false);
+      actors.sampleImageParams = AbsoluteLayoutParams::New();
+      actors.sampleImage.SetLayoutParams(actors.sampleImageParams);
+      actors.sampleContainer.Add(actors.sampleImage);
+
+      actors.samplePlaceholder = MakeLabel("No sample", SAMPLE_PLACEHOLDER_SIZE, Vector4(0.42f, 0.45f, 0.50f, 1.0f));
+      actors.samplePlaceholder.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+      actors.samplePlaceholder.SetVerticalTextAlignment(Text::Alignment::CENTER);
+      actors.samplePlaceholder.SetBackgroundColor(Vector4(0.94f, 0.95f, 0.97f, 1.0f));
+      actors.samplePlaceholderParams = AbsoluteLayoutParams::New();
+      actors.samplePlaceholder.SetLayoutParams(actors.samplePlaceholderParams);
+      actors.sampleContainer.Add(actors.samplePlaceholder);
+
+      actors.sampleSetLabel = MakeLabel(mOptions.sample.displaySampleName, SAMPLE_SET_LABEL_SIZE, Color::WHITE);
+      actors.sampleSetLabel.SetMultiLine(false);
+      actors.sampleSetLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+      actors.sampleSetLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+      actors.sampleSetLabel.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.62f));
+      actors.sampleSetLabel.SetPadding(Extents(4, 4, 0, 0));
+      actors.sampleSetLabelParams = AbsoluteLayoutParams::New();
+      actors.sampleSetLabel.SetLayoutParams(actors.sampleSetLabelParams);
+      actors.sampleContainer.Add(actors.sampleSetLabel);
+
+      actors.row.Add(actors.sampleContainer);
+    }
+
     actors.detail = MakeLabel(std::string(), DETAIL_SIZE, Color::BLACK);
     actors.detail.SetFontFamily("Ubuntu Mono");
     actors.detail.SetRequestedWidth(DetailWidth(RowWidth()));
@@ -2954,12 +3188,36 @@ private:
     return actors;
   }
 
+  void UpdateSamplePreview(RowActors& row, const VisualCase& item)
+  {
+    if(!mOptions.sample.enabled || !row.sampleContainer)
+    {
+      return;
+    }
+
+    row.sampleSetLabel.SetText(mOptions.sample.displaySampleName.c_str());
+
+    const std::string samplePath = SampleImagePathForCase(mOptions.sample, item);
+    if(!samplePath.empty() && FileExists(samplePath))
+    {
+      row.sampleImage.SetResourceUrl(samplePath.c_str());
+      row.sampleImage.SetProperty(Actor::Property::VISIBLE, true);
+      row.samplePlaceholder.SetProperty(Actor::Property::VISIBLE, false);
+      return;
+    }
+
+    row.sampleImage.SetProperty(Actor::Property::VISIBLE, false);
+    row.samplePlaceholder.SetText("No sample");
+    row.samplePlaceholder.SetProperty(Actor::Property::VISIBLE, true);
+  }
+
   void UpdateRow(RowActors& row, const VisualCase& item, size_t index, size_t visibleIndex)
   {
     row.itemIndex = index;
     row.row.SetProperty(Actor::Property::VISIBLE, true);
     row.row.SetBackgroundColor(visibleIndex % 2u == 0u ? Vector4(0.98f, 0.98f, 0.98f, 1.0f) : Vector4(0.94f, 0.96f, 0.98f, 1.0f));
     row.preview.SetText(CodepointsToUtf8(item.codepoints).c_str());
+    UpdateSamplePreview(row, item);
     SetRowDetailText(row, index);
   }
 
