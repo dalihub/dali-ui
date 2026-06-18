@@ -530,7 +530,10 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
           {
             const GlyphInfo& glyphToRemove = *(elidedGlyphsBuffer + indexOfEllipsis);
 
+            if(0u != glyphToRemove.fontId)
             {
+              // i.e. The font id of the glyph shaped from the '\n' character is zero.
+
               // Need to reshape the glyph as the font may be different in size.
               const GlyphInfo& ellipsisGlyph =
                 fontClient.GetEllipsisGlyph(fontClient.GetPointSize(glyphToRemove.fontId));
