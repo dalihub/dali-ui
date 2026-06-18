@@ -70,6 +70,8 @@ UiConfigImpl::UiConfigImpl()
   mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
   mKeyLongPressThreshold(3),
   mTapRecognizerTime(UINT32_MAX),
+  mAmbiguousPressDelay(100u),
+  mAmbiguousPressDuration(64u),
   mClearFocusOnEscape(true),
   mClearFocusIndicationOnTouch(true),
   mClearFocusIndicationOnHover(false),
@@ -186,6 +188,28 @@ void UiConfigImpl::SetTapRecognizerTime(uint32_t timeMs)
 uint32_t UiConfigImpl::GetTapRecognizerTime() const
 {
   return mTapRecognizerTime;
+}
+
+void UiConfigImpl::SetAmbiguousPressDelay(uint32_t timeMs)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mAmbiguousPressDelay = timeMs;
+}
+
+uint32_t UiConfigImpl::GetAmbiguousPressDelay() const
+{
+  return mAmbiguousPressDelay;
+}
+
+void UiConfigImpl::SetAmbiguousPressDuration(uint32_t timeMs)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mAmbiguousPressDuration = timeMs;
+}
+
+uint32_t UiConfigImpl::GetAmbiguousPressDuration() const
+{
+  return mAmbiguousPressDuration;
 }
 
 void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)

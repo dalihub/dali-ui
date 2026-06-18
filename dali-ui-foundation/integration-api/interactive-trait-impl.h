@@ -39,8 +39,14 @@ namespace Ui
 
 class InputEvent;
 
+namespace Internal
+{
+class PendingPressManager;
+}
+
 namespace Integration
 {
+
 /**
  * @brief Internal implementation of Interaction trait.
  */
@@ -203,6 +209,8 @@ protected:
   virtual bool IsExecutionKey(const Dali::String& keyName) const;
 
 private:
+  friend class Dali::Ui::Internal::PendingPressManager;
+
   bool OnTouchInternal(Actor actor, TouchEvent touchEvent);
   void OnTapInternal(Actor actor, TapGesture event);
   void OnLongPressedInternal(Actor actor, LongPressGesture event);

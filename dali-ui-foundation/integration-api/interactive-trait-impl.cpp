@@ -20,11 +20,12 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/input-options.h>
-#include <cstdint>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/internal/interactive-trait/pending-press-manager.h>
+#include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
@@ -51,6 +52,7 @@ InteractiveTraitImpl::InteractiveTraitImpl()
 
 InteractiveTraitImpl::~InteractiveTraitImpl()
 {
+  Internal::PendingPressManager::Get().ClearAll(*this);
 }
 
 void InteractiveTraitImpl::EnableLongPressDetection()
@@ -161,6 +163,11 @@ void InteractiveTraitImpl::OnFocusedChanged(View view, bool focused)
 
 void InteractiveTraitImpl::OnEnabledChanged(View view, bool enabled)
 {
+  if(!enabled)
+  {
+    Internal::PendingPressManager::Get().Cancel(*this);
+  }
+
   if(!enabled && mPressed)
   {
     SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
@@ -173,6 +180,7 @@ void InteractiveTraitImpl::OnSceneConnection(View)
 
 void InteractiveTraitImpl::OnSceneDisconnection(View)
 {
+  Internal::PendingPressManager::Get().Cancel(*this);
   ClearKeyPressedHistory();
   mClickBlockedByTouch = false;
   mClickBlockedByKey   = false;
@@ -267,11 +275,13 @@ void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
 
 void InteractiveTraitImpl::OnDetaching(TraitId id, View& view)
 {
+  Internal::PendingPressManager::Get().Cancel(*this);
   DALI_ASSERT_ALWAYS(false && "The trait can not be detached once it attached to a view");
 }
 
 void InteractiveTraitImpl::OnViewDestroying(ViewImpl* viewImpl)
 {
+  Internal::PendingPressManager::Get().Cancel(*this);
 }
 
 bool InteractiveTraitImpl::OnTouch(View view, TouchEvent touchEvent)
@@ -285,12 +295,45 @@ bool InteractiveTraitImpl::OnTouch(View view, TouchEvent touchEvent)
   {
     case PointState::STARTED:
     {
-      SetPressedInternal(true, InputEvent::New(touchEvent));
+      InputEvent inputEvent = InputEvent::New(touchEvent);
+      if(Internal::PendingPressManager::Get().HasPendingPress())
+      {
+        Internal::PendingPressManager::Get().FlushPendingPress();
+        SetPressedInternal(true, inputEvent);
+        return true;
+      }
+
+      if(Internal::ScrollStateObserver::Get().IsGestureDisambiguating() &&
+         UiConfigManager::Get().GetConfig().GetAmbiguousPressDelay() > 0u)
+      {
+        Internal::PendingPressManager::Get().AddPendingPress(*this, inputEvent, touchEvent.GetDeviceId(0));
+        return true;
+      }
+
+      Internal::PendingPressManager::Get().ClearPendingPress(*this);
+      SetPressedInternal(true, inputEvent);
       return true;
     }
     case PointState::FINISHED:
-    case PointState::INTERRUPTED:
     {
+      InputEvent releaseEvent = InputEvent::New(touchEvent);
+      if(Internal::PendingPressManager::Get().FinishPendingPress(*this, touchEvent.GetDeviceId(0), releaseEvent))
+      {
+        return true;
+      }
+      if(Internal::PendingPressManager::Get().HasPendingRelease(*this))
+      {
+        return true;
+      }
+
+      Internal::PendingPressManager::Get().ClearPendingPress(*this);
+      SetPressedInternal(false, releaseEvent);
+      return true;
+    }
+    case PointState::INTERRUPTED:
+    case PointState::LEAVE:
+    {
+      Internal::PendingPressManager::Get().Cancel(*this);
       SetPressedInternal(false, InputEvent::New(touchEvent));
       return true;
     }
@@ -356,6 +399,7 @@ bool InteractiveTraitImpl::OnTouchInternal(Actor actor, TouchEvent touchEvent)
 
 void InteractiveTraitImpl::OnTapInternal(Actor actor, TapGesture event)
 {
+  Internal::PendingPressManager::Get().CompletePendingPressWithDuration(*this, InputEvent::New(event));
   OnTap(View::DownCast(actor), event);
 }
 
@@ -364,8 +408,10 @@ void InteractiveTraitImpl::OnLongPressedInternal(Actor actor, LongPressGesture e
   // NOTE OnLongPressedInternal will invoke this method twice: once for Start and once for Finished.
   if(event.GetState() == GestureState::STARTED)
   {
+    View view = View::DownCast(actor);
+    Internal::PendingPressManager::Get().FlushPendingPress(*this);
     InputEvent inputEvent = InputEvent::New(event);
-    mClickBlockedByTouch  = OnLongPressed(View::DownCast(actor), inputEvent);
+    mClickBlockedByTouch  = OnLongPressed(view, inputEvent);
   }
 }
 

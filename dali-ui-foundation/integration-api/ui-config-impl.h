@@ -452,6 +452,26 @@ public:
   ViewInitializer GetViewInitializer() const;
 
   /**
+   * @copydoc UiConfig::SetAmbiguousPressDelay()
+   */
+  void SetAmbiguousPressDelay(uint32_t timeMs);
+
+  /**
+   * @copydoc UiConfig::GetAmbiguousPressDelay()
+   */
+  uint32_t GetAmbiguousPressDelay() const;
+
+  /**
+   * @copydoc UiConfig::SetAmbiguousPressDuration()
+   */
+  void SetAmbiguousPressDuration(uint32_t timeMs);
+
+  /**
+   * @copydoc UiConfig::GetAmbiguousPressDuration()
+   */
+  uint32_t GetAmbiguousPressDuration() const;
+
+  /**
    * @brief Called after this config is applied via UiConfig::Apply().
    *
    * Derived config implementations override this to register themselves
@@ -516,6 +536,8 @@ private:
   KeyClickPolicy            mKeyClickPolicy;
   uint32_t                  mKeyLongPressThreshold;
   uint32_t                  mTapRecognizerTime;
+  uint32_t                  mAmbiguousPressDelay;
+  uint32_t                  mAmbiguousPressDuration;
   float                     mCachedDpiFactor{1.0f};
   float                     mCachedScaledDpiFactor{1.0f};
   bool                      mClearFocusOnEscape;

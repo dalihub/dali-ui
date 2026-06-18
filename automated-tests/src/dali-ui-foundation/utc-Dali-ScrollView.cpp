@@ -25,6 +25,11 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+namespace Test
+{
+void EmitGlobalTimerSignal();
+}
+
 namespace
 {
 
@@ -41,6 +46,83 @@ Dali::Integration::TouchEvent GenerateTouch(PointState::Type state, const Vector
   touchEvent.time = time;
   return touchEvent;
 }
+
+Dali::Integration::TouchEvent GenerateTouch(PointState::Type state, const Vector2& screenPosition, uint32_t time, int32_t deviceId)
+{
+  Dali::Integration::TouchEvent touchEvent;
+  Dali::Integration::Point      point;
+  point.SetState(state);
+  point.SetDeviceId(deviceId);
+  point.SetScreenPosition(screenPosition);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchEvent.points.push_back(point);
+  touchEvent.time = time;
+  return touchEvent;
+}
+
+Dali::Integration::TouchEvent GenerateDoubleTouch(PointState::Type stateA, const Vector2& screenPositionA, PointState::Type stateB, const Vector2& screenPositionB, uint32_t time)
+{
+  Dali::Integration::TouchEvent touchEvent;
+  Dali::Integration::Point      point;
+  point.SetState(stateA);
+  point.SetDeviceId(4);
+  point.SetScreenPosition(screenPositionA);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchEvent.points.push_back(point);
+
+  point.SetState(stateB);
+  point.SetDeviceId(7);
+  point.SetScreenPosition(screenPositionB);
+  touchEvent.points.push_back(point);
+
+  touchEvent.time = time;
+  return touchEvent;
+}
+
+struct PressedChangedSignalData
+{
+  void Reset()
+  {
+    called     = false;
+    pressed    = false;
+    trueCount  = 0u;
+    falseCount = 0u;
+    view       = View();
+  }
+
+  bool     called{false};
+  bool     pressed{false};
+  uint32_t trueCount{0u};
+  uint32_t falseCount{0u};
+  View     view;
+};
+
+struct PressedChangedSignalFunctor
+{
+  PressedChangedSignalFunctor(PressedChangedSignalData& data)
+  : signalData(data)
+  {
+  }
+
+  void operator()(View view, bool pressed, InputEvent event)
+  {
+    signalData.called  = true;
+    signalData.pressed = pressed;
+    signalData.view    = view;
+    if(pressed)
+    {
+      signalData.trueCount++;
+    }
+    else
+    {
+      signalData.falseCount++;
+    }
+  }
+
+  PressedChangedSignalData& signalData;
+};
 
 class ScrollStartedCallback : public ConnectionTracker
 {
@@ -183,6 +265,28 @@ void utc_dali_scroll_view_startup(void)
 void utc_dali_scroll_view_cleanup(void)
 {
   test_return_value = TET_PASS;
+}
+
+int UtcDaliUiConfigAmbiguousPressDefaultsAndSettersP(void)
+{
+  UiConfig config = UiConfig::New();
+
+  DALI_TEST_EQUALS(config.GetAmbiguousPressDelay(), 100u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetAmbiguousPressDuration(), 64u, TEST_LOCATION);
+
+  config.SetAmbiguousPressDelay(120u);
+  config.SetAmbiguousPressDuration(48u);
+
+  DALI_TEST_EQUALS(config.GetAmbiguousPressDelay(), 120u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetAmbiguousPressDuration(), 48u, TEST_LOCATION);
+
+  config.SetAmbiguousPressDelay(0u);
+  config.SetAmbiguousPressDuration(0u);
+
+  DALI_TEST_EQUALS(config.GetAmbiguousPressDelay(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(config.GetAmbiguousPressDuration(), 0u, TEST_LOCATION);
+
+  END_TEST;
 }
 
 // Constructor Tests
@@ -888,6 +992,288 @@ int UtcDaliScrollViewDoesNotFocusTouchFocusableChildWhenDraggingP(void)
 
   DALI_TEST_CHECK(callback.called);
   DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() != child);
+
+  END_TEST;
+}
+
+int UtcDaliScrollViewDefersInteractiveChildPressedWhileDisambiguatingP(void)
+{
+  UiTestApplication application;
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetPivot(Pivot::TOP_LEFT);
+  scrollView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+
+  View content = View::New();
+  content.SetPivot(Pivot::TOP_LEFT);
+  content.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+
+  View child = View::New();
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+
+  InteractiveTrait interactive = child.AsInteractive();
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  interactive.PressedChangedSignal().Connect(&application, functor);
+
+  content.Add(child);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+
+  application.SendNotification();
+  application.Render();
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+
+  DALI_TEST_CHECK(!data.called);
+  DALI_TEST_CHECK(data.trueCount == 0u);
+  DALI_TEST_CHECK(!interactive.IsPressed());
+
+  END_TEST;
+}
+
+int UtcDaliScrollViewAmbiguousPressDelayExpiresP(void)
+{
+  UiTestApplication application;
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetPivot(Pivot::TOP_LEFT);
+  scrollView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+
+  View content = View::New();
+  content.SetPivot(Pivot::TOP_LEFT);
+  content.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+
+  View child = View::New();
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+
+  InteractiveTrait interactive = child.AsInteractive();
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  interactive.PressedChangedSignal().Connect(&application, functor);
+
+  content.Add(child);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+
+  application.SendNotification();
+  application.Render();
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+
+  DALI_TEST_CHECK(!data.called);
+  DALI_TEST_CHECK(!interactive.IsPressed());
+
+  Test::EmitGlobalTimerSignal();
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.pressed);
+  DALI_TEST_CHECK(data.trueCount == 1u);
+  DALI_TEST_CHECK(interactive.IsPressed());
+
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 20.0f), 120u));
+
+  DALI_TEST_CHECK(data.falseCount == 1u);
+  DALI_TEST_CHECK(!interactive.IsPressed());
+
+  END_TEST;
+}
+
+int UtcDaliScrollViewMultiTouchFlushesPendingPressAndPressesNewTouchP(void)
+{
+  UiTestApplication application;
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetPivot(Pivot::TOP_LEFT);
+  scrollView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+
+  View content = View::New();
+  content.SetPivot(Pivot::TOP_LEFT);
+  content.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+
+  View childA = View::New();
+  childA.SetPivot(Pivot::TOP_LEFT);
+  childA.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  childA.SetRequestedWidth(80.0f);
+  childA.SetRequestedHeight(80.0f);
+
+  View childB = View::New();
+  childB.SetPivot(Pivot::TOP_LEFT);
+  childB.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  childB.SetRequestedPositionX(100.0f);
+  childB.SetRequestedWidth(80.0f);
+  childB.SetRequestedHeight(80.0f);
+
+  InteractiveTrait interactiveA = childA.AsInteractive();
+  InteractiveTrait interactiveB = childB.AsInteractive();
+
+  PressedChangedSignalData    dataA;
+  PressedChangedSignalFunctor functorA(dataA);
+  interactiveA.PressedChangedSignal().Connect(&application, functorA);
+
+  PressedChangedSignalData    dataB;
+  PressedChangedSignalFunctor functorB(dataB);
+  interactiveB.PressedChangedSignal().Connect(&application, functorB);
+
+  content.Add(childA);
+  content.Add(childB);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+
+  application.SendNotification();
+  application.Render();
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u, 4));
+
+  DALI_TEST_CHECK(!dataA.called);
+  DALI_TEST_CHECK(!interactiveA.IsPressed());
+
+  application.ProcessEvent(GenerateDoubleTouch(PointState::MOTION, Vector2(20.0f, 20.0f), PointState::DOWN, Vector2(120.0f, 20.0f), 110u));
+
+  DALI_TEST_CHECK(dataA.called);
+  DALI_TEST_CHECK(dataA.pressed);
+  DALI_TEST_CHECK(dataA.trueCount == 1u);
+  DALI_TEST_CHECK(interactiveA.IsPressed());
+
+  DALI_TEST_CHECK(dataB.called);
+  DALI_TEST_CHECK(dataB.pressed);
+  DALI_TEST_CHECK(dataB.trueCount == 1u);
+  DALI_TEST_CHECK(interactiveB.IsPressed());
+
+  application.ProcessEvent(GenerateDoubleTouch(PointState::MOTION, Vector2(20.0f, 20.0f), PointState::UP, Vector2(120.0f, 20.0f), 120u));
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 20.0f), 130u, 4));
+
+  DALI_TEST_CHECK(dataA.falseCount == 1u);
+  DALI_TEST_CHECK(!interactiveA.IsPressed());
+  DALI_TEST_CHECK(dataB.falseCount == 1u);
+  DALI_TEST_CHECK(!interactiveB.IsPressed());
+
+  END_TEST;
+}
+
+int UtcDaliScrollViewDoesNotPressInteractiveChildWhenDraggingP(void)
+{
+  UiTestApplication application;
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetPivot(Pivot::TOP_LEFT);
+  scrollView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+
+  View content = View::New();
+  content.SetPivot(Pivot::TOP_LEFT);
+  content.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+
+  View child = View::New();
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+
+  InteractiveTrait interactive = child.AsInteractive();
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  interactive.PressedChangedSignal().Connect(&application, functor);
+
+  content.Add(child);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+
+  DragStartedCallback callback;
+  scrollView.DragStartedSignal().Connect(&callback, &DragStartedCallback::OnDragStarted);
+
+  application.SendNotification();
+  application.Render();
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 40.0f), 116u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 60.0f), 132u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 100.0f), 148u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 160.0f), 164u));
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 160.0f), 180u));
+
+  DALI_TEST_CHECK(callback.called);
+  DALI_TEST_CHECK(data.trueCount == 0u);
+  DALI_TEST_CHECK(!interactive.IsPressed());
+
+  END_TEST;
+}
+
+int UtcDaliScrollViewPressesInteractiveChildOnTapReleaseP(void)
+{
+  UiTestApplication application;
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetPivot(Pivot::TOP_LEFT);
+  scrollView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+
+  View content = View::New();
+  content.SetPivot(Pivot::TOP_LEFT);
+  content.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+
+  View child = View::New();
+  child.SetPivot(Pivot::TOP_LEFT);
+  child.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  child.SetRequestedWidth(100.0f);
+  child.SetRequestedHeight(100.0f);
+
+  InteractiveTrait interactive = child.AsInteractive();
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  interactive.PressedChangedSignal().Connect(&application, functor);
+
+  content.Add(child);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+
+  application.SendNotification();
+  application.Render();
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
+
+  DALI_TEST_CHECK(!data.called);
+  DALI_TEST_CHECK(!interactive.IsPressed());
+
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 20.0f), 120u));
+
+  DALI_TEST_CHECK(data.trueCount == 1u);
+  DALI_TEST_CHECK(data.falseCount == 0u);
+  DALI_TEST_CHECK(interactive.IsPressed());
+
+  Test::EmitGlobalTimerSignal();
+
+  DALI_TEST_CHECK(data.falseCount == 1u);
+  DALI_TEST_CHECK(!interactive.IsPressed());
 
   END_TEST;
 }

@@ -625,6 +625,45 @@ public: // Properties
    */
   static void DefaultViewInitializer(View view);
 
+  /**
+   * @brief Sets the delay before an ambiguous touch press is applied.
+   *
+   * When a touch starts while a scrollable parent is still deciding whether the
+   * gesture is a tap or a scroll, the pressed state of the touched interactive
+   * View is delayed by this time.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] timeMs The delay in milliseconds
+   */
+  void SetAmbiguousPressDelay(uint32_t timeMs);
+
+  /**
+   * @brief Retrieves the delay before an ambiguous touch press is applied.
+   *
+   * @return The delay in milliseconds
+   */
+  uint32_t GetAmbiguousPressDelay() const;
+
+  /**
+   * @brief Sets how long a completed ambiguous press is kept visible.
+   *
+   * This duration is used only when an ambiguous press is still delayed and a
+   * release or tap completes it before the press delay expires. In that case,
+   * the pressed state is applied synchronously and then kept for this duration
+   * before being released.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] timeMs The duration in milliseconds
+   */
+  void SetAmbiguousPressDuration(uint32_t timeMs);
+
+  /**
+   * @brief Retrieves how long a completed ambiguous press is kept visible.
+   *
+   * @return The duration in milliseconds
+   */
+  uint32_t GetAmbiguousPressDuration() const;
+
 public: // Not intended for Application developers
   /**
    * @brief This constructor is used internally to wrap an implementation object.

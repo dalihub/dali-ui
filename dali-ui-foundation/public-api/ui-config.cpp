@@ -316,6 +316,26 @@ ViewInitializer UiConfig::GetViewInitializer() const
   return GetImpl(*this).GetViewInitializer();
 }
 
+void UiConfig::SetAmbiguousPressDelay(uint32_t timeMs)
+{
+  GetImpl(*this).SetAmbiguousPressDelay(timeMs);
+}
+
+uint32_t UiConfig::GetAmbiguousPressDelay() const
+{
+  return GetImpl(*this).GetAmbiguousPressDelay();
+}
+
+void UiConfig::SetAmbiguousPressDuration(uint32_t timeMs)
+{
+  GetImpl(*this).SetAmbiguousPressDuration(timeMs);
+}
+
+uint32_t UiConfig::GetAmbiguousPressDuration() const
+{
+  return GetImpl(*this).GetAmbiguousPressDuration();
+}
+
 void UiConfig::DefaultViewInitializer(View view)
 {
   // NOTE: UI layout coordinates are normally based on the parent's top-left,
