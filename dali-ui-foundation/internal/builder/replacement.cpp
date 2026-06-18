@@ -138,16 +138,23 @@ bool ResolvePartialReplacement(const std::string& initialValue, Property::Value&
         if(Property::STRING != value->GetType())
         {
           DALI_SCRIPT_WARNING("Cannot replace substring in non string property type='%s'. Initial value '%s'\n",
-                              PropertyTypes::GetName(out.GetType()), initialValue.c_str());
+                              PropertyTypes::GetName(value->GetType()), initialValue.c_str());
         }
         else
         {
           Dali::String valueString;
-          value->Get(valueString);
-          std::string newString = initialValue.substr(0, startPos - 1) + ToStdString(valueString) +
-                                  initialValue.substr(startPos + size + 1);
+          if(value->Get(valueString))
+          {
+            std::string newString = initialValue.substr(0, startPos - 1) + ToStdString(valueString) +
+                                    initialValue.substr(startPos + size + 1);
 
-          return ResolvePartialReplacement(newString, out, overrideMap, defaultMap);
+            return ResolvePartialReplacement(newString, out, overrideMap, defaultMap);
+          }
+          else
+          {
+            DALI_SCRIPT_WARNING("Cannot get string replacement for '%s'. Initial value '%s'\n",
+                                str.c_str(), initialValue.c_str());
+          }
         }
       }
     }
