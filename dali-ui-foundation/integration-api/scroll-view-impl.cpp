@@ -248,11 +248,22 @@ void ScrollViewImpl::SetScrollableWidth(float width)
   }
   mScrollableWidth = width;
   UpdateScrollingProperties();
+  OnScrollableAreaChanged();
 }
 
 float ScrollViewImpl::GetScrollableHeight() const
 {
   return mScrollableHeight;
+}
+
+float ScrollViewImpl::GetViewportWidth() const
+{
+  return mViewportWidth;
+}
+
+float ScrollViewImpl::GetViewportHeight() const
+{
+  return mViewportHeight;
 }
 
 void ScrollViewImpl::SetScrollableHeight(float height)
@@ -263,6 +274,7 @@ void ScrollViewImpl::SetScrollableHeight(float height)
   }
   mScrollableHeight = height;
   UpdateScrollingProperties();
+  OnScrollableAreaChanged();
 }
 
 ScrollDirection ScrollViewImpl::GetScrollDirection() const
@@ -1461,7 +1473,12 @@ void ScrollViewImpl::OnPanGesture(Actor actor, PanGesture gesture)
       // OnTouch(UP) before gesture FINISHED fires asynchronously.
       if(mIntercepting || mIsDragging)
       {
-        CancelScrollAnimation();
+        // Cancel any in-flight snap animation before processing the drag end.
+        // Skip entirely when no animation is running: CancelScrollAnimation would
+        // call SendScrollFinished with a mid-drag scroll position, corrupting
+        // mCurrentPage before OnDragFinished processes the gesture velocity.
+        if(mScrollAnimation)
+          CancelScrollAnimation();
         OnDragFinished(gesture);
       }
       mPanRecognized = false;
@@ -1673,7 +1690,13 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
   if(speed < FLING_VMIN)
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] speed %.3f < %.3f, no fling\n", speed, FLING_VMIN);
-    SendScrollFinished();
+    Vector2 snapPos = mScrollPosition;
+    float   snapDur = 0.0f;
+    OnBeforeScrollAnimation(snapPos, snapDur);
+    if(snapDur > 0.0f && (snapPos - mScrollPosition).LengthSquared() > 0.01f)
+      ScrollToWithDuration(snapPos, snapDur);
+    else
+      SendScrollFinished();
     return;
   }
 
@@ -1702,7 +1725,20 @@ void ScrollViewImpl::OnDragFinished(const PanGesture& gesture)
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[ScrollView::OnDragFinished] scrollDelta=[%.1f, %.1f] target=[%.1f, %.1f] dur=%.3fs\n",
                 scrollDelta.x, scrollDelta.y, newPos.x, newPos.y, durationMs / 1000.0f);
 
-  ScrollToWithDuration(newPos, durationMs / 1000.0f);
+  float   targetDur = durationMs / 1000.0f;
+  Vector2 targetPos = newPos;
+  OnBeforeScrollAnimation(targetPos, targetDur);
+  ScrollToWithDuration(targetPos, targetDur);
+}
+
+void ScrollViewImpl::OnBeforeScrollAnimation(Vector2& /*targetPosition*/, float& /*durationSec*/)
+{
+  // Default: no-op — subclasses override to redirect to snap points.
+}
+
+void ScrollViewImpl::OnScrollableAreaChanged()
+{
+  // Default: no-op — subclasses override to react to layout-driven dimension changes.
 }
 
 void ScrollViewImpl::SendScrollStarted()

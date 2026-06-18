@@ -318,6 +318,21 @@ public: // API
    * @brief Gets the end-edge effect.
    */
   Ui::EdgeEffect GetEndEdgeEffect() const;
+  // Viewport query
+
+  /**
+   * @brief Returns the current viewport width (pixels).
+   *
+   * Reflects the last layout pass; zero before first layout.
+   */
+  float GetViewportWidth() const;
+
+  /**
+   * @brief Returns the current viewport height (pixels).
+   *
+   * Reflects the last layout pass; zero before first layout.
+   */
+  float GetViewportHeight() const;
 
   // Signals
 
@@ -386,6 +401,58 @@ protected:
    * @brief Converts scroll position to delta.
    */
   Vector2 DeltaFromScrollPosition(const Vector2& scrollPosition) const;
+
+  /**
+   * @brief Cancels any in-progress scroll/fling animation.
+   *
+   * After this call the content position is frozen at its current rendered
+   * position, which may differ from mScrollPosition if an animation was
+   * mid-flight.
+   */
+  void CancelScrollAnimation();
+
+  /**
+   * @brief Scrolls to @p position over @p durationSec seconds.
+   *
+   * Uses an EASE_OUT_SINE curve.  If durationSec <= 0 the content is snapped
+   * immediately with no animation.
+   */
+  void ScrollToWithDuration(const Vector2& position, float durationSec);
+
+  /**
+   * @brief Called inside OnDragFinished just before the scroll/fling animation starts.
+   *
+   * @p targetPosition is the computed fling destination (or the current scroll
+   * position when there is no fling).  @p durationSec is the computed fling
+   * duration in seconds (0 when there is no fling).
+   *
+   * Subclasses may override to redirect the animation to a snap point (e.g.
+   * page boundaries).  Modifying @p targetPosition and/or @p durationSec here
+   * takes effect for the animation that is about to be started.
+   *
+   * The default implementation is a no-op.
+   *
+   * @note ABI note: do NOT reorder or remove this method after first publication.
+   */
+  virtual void OnBeforeScrollAnimation(Vector2& targetPosition, float& durationSec);
+
+  /**
+   * @brief Called whenever the scrollable area dimensions change.
+   *
+   * Fired by SetScrollableWidth() and SetScrollableHeight() after
+   * UpdateScrollingProperties() has been applied — i.e. the new bounds
+   * are already in effect when this is invoked.
+   *
+   * Subclasses may override to react to layout-driven dimension changes
+   * (e.g. PageScrollViewImpl uses this to re-emit PageChangedSignal when
+   * the layout-computed page count first becomes accurate after the initial
+   * layout pass).
+   *
+   * The default implementation is a no-op.
+   *
+   * @note ABI note: do NOT reorder or remove this method after first publication.
+   */
+  virtual void OnScrollableAreaChanged();
 
 private:
   /**
@@ -477,11 +544,6 @@ private:
   void ApplyScrollPosition(const Vector2& position);
 
   /**
-   * @brief Cancels scroll animation.
-   */
-  void CancelScrollAnimation();
-
-  /**
    * @brief Callback for scroll animation finished.
    */
   void OnScrollAnimationFinished(Animation animation);
@@ -553,13 +615,6 @@ private:
    * PAGE_UP / PAGE_DOWN scrolls by the full viewport size.
    */
   void ScrollByKeyDirection(FocusDirection direction);
-
-  /**
-   * @brief Internal ScrollTo with an explicit animation duration in seconds.
-   * Used by ScrollByKeyDirection to apply a short fixed duration independent
-   * of the distance-based fling duration calculation.
-   */
-  void ScrollToWithDuration(const Vector2& position, float durationSec);
 
   /**
    * @brief Returns the signed axis distance from @p from to @p to in @p direction.

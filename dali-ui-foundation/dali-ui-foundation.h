@@ -122,7 +122,9 @@
 
 #include <dali-ui-foundation/public-api/bounce-edge-effect.h>
 #include <dali-ui-foundation/public-api/edge-effect.h>
+#include <dali-ui-foundation/public-api/i-page-scrollable.h>
 #include <dali-ui-foundation/public-api/i-scroll-bar.h>
+#include <dali-ui-foundation/public-api/page-scroll-view.h>
 #include <dali-ui-foundation/public-api/scroll-bar.h>
 #include <dali-ui-foundation/public-api/scroll-view.h>
 #include <dali-ui-foundation/public-api/scrollable-enum.h>
