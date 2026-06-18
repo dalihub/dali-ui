@@ -778,6 +778,8 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
 
   View       view   = View::New();
   TextVisual visual = TextVisual::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
   visual.SetText("Hello");
   visual.SetFontSize(20.0f);
 
