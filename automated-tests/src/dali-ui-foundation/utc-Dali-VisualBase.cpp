@@ -777,6 +777,8 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
   tet_infoline("Test that visual update without newly create Visual::Base for TextVisual\n");
 
   View       view   = View::New();
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
   TextVisual visual = TextVisual::New();
   view.SetRequestedWidth(200.0f);
   view.SetRequestedHeight(200.0f);
