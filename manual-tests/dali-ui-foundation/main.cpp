@@ -162,6 +162,7 @@ private:
     item.SetBackgroundColor(UiColor(COLOR_ITEM_BG));
     item.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V, PADDING_V));
     item.SetFocusable(true);
+    item.SetStateEffect(OverlayEffect::ListItem());
     InteractiveTrait interactive = item.AsInteractive();
     interactive.ClickedSignal().Connect(this, [this, index](View, InputEvent) -> bool
     {
@@ -204,6 +205,7 @@ private:
     backLabel.SetPadding(Extents(PADDING_H, PADDING_H * 2, 0, 0));
     backLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     backLabel.SetFocusable(true);
+    backLabel.SetStateEffect(OverlayEffect::ListItem());
     InteractiveTrait backInteractive = backLabel.AsInteractive();
     backInteractive.ClickedSignal().Connect(this, [this](View, InputEvent) -> bool
     {

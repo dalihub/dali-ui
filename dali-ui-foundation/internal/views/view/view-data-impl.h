@@ -701,12 +701,12 @@ public:
   // Keep it on ViewDataImpl to avoid AccessibilityData creation.
   int32_t mAccessibilityRole : Dali::Log<static_cast<uint32_t>(AccessibilityRole::MAX_COUNT)>::value + 2;
 
-  bool mIsFocusGroup : 1;                  ///< Stores whether the view is a focus group.
-  bool mIsEmittingResourceReadySignal : 1; ///< True during ResourceReady().
-  bool mIdleCallbackRegistered : 1;        ///< True if need to emit the resource ready signal again.
-  bool mDispatchKeyEvents : 1;             ///< Whether the actor emits key event signals
-  bool mAccessibleCreatable : 1;           ///< Whether we can create new accessible or not.
-  bool mProcessorRegistered : 1;           ///< Whether the processor is registered.
+  bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
+  bool mIsEmittingResourceReadySignal : 1;                ///< True during ResourceReady().
+  bool mIdleCallbackRegistered : 1;                       ///< True if need to emit the resource ready signal again.
+  bool mDispatchKeyEvents : 1;                            ///< Whether the actor emits key event signals
+  bool mAccessibleCreatable : 1;                          ///< Whether we can create new accessible or not.
+  bool mProcessorRegistered : 1;                          ///< Whether the processor is registered.
   bool mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
 
   // Properties - these need to be members of Internal::ViewDataImpl as they access private methods/data of

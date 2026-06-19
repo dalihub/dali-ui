@@ -322,6 +322,39 @@ int UtcDaliViewStateDisabledClearsFocusedP(void)
   END_TEST;
 }
 
+int UtcDaliViewStateSetEnabledKeepsOpacityP(void)
+{
+  UiTestApplication application;
+  View              view = CreateView(application);
+
+  view.SetOpacity(0.75f);
+
+  view.SetEnabled(false);
+
+  DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::DISABLED));
+  DALI_TEST_EQUALS(view.GetOpacity(), 0.75f, 0.001f, TEST_LOCATION);
+
+  view.SetEnabled(false);
+
+  DALI_TEST_EQUALS(view.GetOpacity(), 0.75f, 0.001f, TEST_LOCATION);
+
+  view.SetEnabled(true);
+
+  DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::DISABLED));
+  DALI_TEST_EQUALS(view.GetOpacity(), 0.75f, 0.001f, TEST_LOCATION);
+
+  view.SetEnabled(true);
+
+  DALI_TEST_EQUALS(view.GetOpacity(), 0.75f, 0.001f, TEST_LOCATION);
+
+  view.SetEnabled(false);
+  view.SetOpacity(0.8f);
+  view.SetEnabled(true);
+
+  DALI_TEST_EQUALS(view.GetOpacity(), 0.8f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
 // =============================================================================
 // Orthogonal state: becoming Disabled immediately clears Pressed
 // =============================================================================

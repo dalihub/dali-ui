@@ -3040,6 +3040,7 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
     case DevelActor::Property::USER_INTERACTION_ENABLED:
     {
       const bool enabled = propertyValue.Get<bool>();
+
       if(!enabled && Self() == Dali::Ui::FocusManager::Get().GetCurrentFocusView())
       {
         Dali::Ui::FocusManager::Get().ClearFocus();
