@@ -26,7 +26,7 @@ InputEditor | (~06.2026) | -
 [ScrollView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1ScrollView.html) | A scrollable container that displays content larger than its viewport. | [samples/scrollview](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/scrollview)
 InteractiveView | (~06.2026) | -
 WidgetView | (~10.2026) | -
-WebView | (~10.2026) | -
+[WebView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1WebView.html) | A `View` for displaying web content (HTML, web pages). Supports navigation, JavaScript integration, and various web engine features. | [samples/web-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/web-view)
 CanvasView | (~10.2026) | -
 VideoView | (~10.2026) | -
 RecyclerView | (~10.2026) | -
