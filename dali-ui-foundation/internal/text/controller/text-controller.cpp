@@ -29,7 +29,6 @@
 #include <regex>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-background-actor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-event-handler.h>

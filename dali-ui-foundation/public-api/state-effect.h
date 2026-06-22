@@ -66,7 +66,7 @@ public:
    * This returns UiConfig::GetDefaultStateEffectForInteractive() from the
    * current UiConfig.
    *
-   * @pre UiConfigManager must be initialized.
+   * @pre UiConfig::Apply() must have been called.
    * @return The default StateEffect for interactive Views
    */
   static StateEffect DefaultForInteractive();

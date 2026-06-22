@@ -61,7 +61,7 @@ UiConfigManager UiConfigManager::Get()
         uiConfigManager = std::move(gPreInitializedUiConfigManager);
         gPreInitializedUiConfigManager.Reset();
 
-        // Register lifecycle controller callback now for pre-initialized UiConfigManager use case.
+        // Kept for compatibility; UiConfig owns lifecycle callbacks.
         GetImpl(uiConfigManager).RegisterLifecycleControllerCallback();
       }
       else

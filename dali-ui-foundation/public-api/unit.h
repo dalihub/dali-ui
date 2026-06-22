@@ -30,11 +30,11 @@ namespace Ui
  * @brief Converts an integer spx value to a float pixel value.
  * @details The input value is multiplied by a scaling-factor configured via UiConfig.
  *
- * @pre UiConfigManager::Init() must have been called before using this operator.
+ * @pre UiConfig::Apply() must have been called before using this operator.
  *      An assertion failure is triggered if UiConfig has not been initialized.
  * @warning Do NOT use this operator to initialize static or global variables.
  *          Static initialization order is undefined across translation units,
- *          so UiConfigManager::Init() may not have been called yet at that point.
+ *          so UiConfig::Apply() may not have been called yet at that point.
  *          Use lazy initialization or compute values at first access instead.
  *
  * @param v The value in spx (e.g. 35_spx)
@@ -46,11 +46,11 @@ DALI_UI_API float operator"" _spx(unsigned long long int v);
  * @brief Converts a floating-point spx value to a float pixel value.
  * @details The input value is multiplied by a scaling-factor configured via UiConfig.
  *
- * @pre UiConfigManager::Init() must have been called before using this operator.
+ * @pre UiConfig::Apply() must have been called before using this operator.
  *      An assertion failure is triggered if UiConfig has not been initialized.
  * @warning Do NOT use this operator to initialize static or global variables.
  *          Static initialization order is undefined across translation units,
- *          so UiConfigManager::Init() may not have been called yet at that point.
+ *          so UiConfig::Apply() may not have been called yet at that point.
  *          Use lazy initialization or compute values at first access instead.
  *
  * @param v The value in spx (e.g. 35.0_spx)
@@ -62,11 +62,11 @@ DALI_UI_API float operator"" _spx(long double v);
  * @brief Converts an integer dp value to a float pixel value.
  * @details The input value is computed with dpi and baseline-dpi configured via UiConfig.
  *
- * @pre UiConfigManager::Init() must have been called before using this operator.
+ * @pre UiConfig::Apply() must have been called before using this operator.
  *      An assertion failure is triggered if UiConfig has not been initialized.
  * @warning Do NOT use this operator to initialize static or global variables.
  *          Static initialization order is undefined across translation units,
- *          so UiConfigManager::Init() may not have been called yet at that point.
+ *          so UiConfig::Apply() may not have been called yet at that point.
  *          Use lazy initialization or compute values at first access instead.
  *
  * @param v The value in dp (e.g. 35_dp)
@@ -78,11 +78,11 @@ DALI_UI_API float operator"" _dp(unsigned long long int v);
  * @brief Converts a floating-point dp value to a float pixel value.
  * @details The input value is computed with dpi and baseline-dpi configured via UiConfig.
  *
- * @pre UiConfigManager::Init() must have been called before using this operator.
+ * @pre UiConfig::Apply() must have been called before using this operator.
  *      An assertion failure is triggered if UiConfig has not been initialized.
  * @warning Do NOT use this operator to initialize static or global variables.
  *          Static initialization order is undefined across translation units,
- *          so UiConfigManager::Init() may not have been called yet at that point.
+ *          so UiConfig::Apply() may not have been called yet at that point.
  *          Use lazy initialization or compute values at first access instead.
  *
  * @param v The value in dp (e.g. 35.0_dp)
@@ -95,11 +95,11 @@ DALI_UI_API float operator"" _dp(long double v);
  * @details The input value is computed with dpi, baseline-dpi and scaling-factor
  *          configured via UiConfig.
  *
- * @pre UiConfigManager::Init() must have been called before using this operator.
+ * @pre UiConfig::Apply() must have been called before using this operator.
  *      An assertion failure is triggered if UiConfig has not been initialized.
  * @warning Do NOT use this operator to initialize static or global variables.
  *          Static initialization order is undefined across translation units,
- *          so UiConfigManager::Init() may not have been called yet at that point.
+ *          so UiConfig::Apply() may not have been called yet at that point.
  *          Use lazy initialization or compute values at first access instead.
  *
  * @param v The value in sdp (e.g. 35_sdp)
@@ -112,11 +112,11 @@ DALI_UI_API float operator"" _sdp(unsigned long long int v);
  * @details The input value is computed with dpi, baseline-dpi and scaling-factor
  *          configured via UiConfig.
  *
- * @pre UiConfigManager::Init() must have been called before using this operator.
+ * @pre UiConfig::Apply() must have been called before using this operator.
  *      An assertion failure is triggered if UiConfig has not been initialized.
  * @warning Do NOT use this operator to initialize static or global variables.
  *          Static initialization order is undefined across translation units,
- *          so UiConfigManager::Init() may not have been called yet at that point.
+ *          so UiConfig::Apply() may not have been called yet at that point.
  *          Use lazy initialization or compute values at first access instead.
  *
  * @param v The value in sdp (e.g. 35.0_sdp)

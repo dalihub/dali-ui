@@ -353,7 +353,7 @@ int UtcDaliInteractiveTraitKeyClickPolicyDefaultP(void)
   UiTestApplication application;
   InteractiveTrait clickable = InteractiveTrait::New();
 
-  // Default depends on UiConfigManager, just verify it returns a valid value
+  // Default depends on UiConfig, just verify it returns a valid value
   KeyClickPolicy policy = clickable.GetKeyClickPolicy();
   DALI_TEST_CHECK(static_cast<uint32_t>(policy) <= static_cast<uint32_t>(KeyClickPolicy::RESERVED));
   END_TEST;

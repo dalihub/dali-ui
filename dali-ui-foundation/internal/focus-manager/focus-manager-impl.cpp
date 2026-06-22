@@ -38,12 +38,12 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
@@ -225,10 +225,9 @@ FocusManager::~FocusManager()
 
 void FocusManager::GetConfiguration()
 {
-  auto uiConfigManager = Integration::UiConfigManager::Get();
-  if(uiConfigManager.IsInitialized())
+  if(UiConfig::HasCurrent())
   {
-    const UiConfig config         = uiConfigManager.GetConfig();
+    const UiConfig config         = UiConfig::GetCurrent();
     mClearFocusIndicationOnTouch  = config.IsClearFocusIndicationOnTouchEnabled();
     mClearFocusIndicationOnHover  = config.IsClearFocusIndicationOnHoverEnabled();
     mDefaultFocusIndicatorEnabled = config.IsDefaultFocusIndicatorEnabled();

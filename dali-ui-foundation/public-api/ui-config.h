@@ -700,6 +700,21 @@ public: // Properties
    */
   uint32_t GetAmbiguousPressDuration() const;
 
+  /**
+   * @brief Returns whether a current global UiConfig is available.
+   *
+   * @return True if UiConfig::Apply() has been called
+   */
+  static bool HasCurrent();
+
+  /**
+   * @brief Returns the currently applied global UiConfig.
+   *
+   * @pre UiConfig::Apply() must have been called.
+   * @return The currently applied UiConfig handle
+   */
+  static UiConfig GetCurrent();
+
 public: // Not intended for Application developers
   /**
    * @brief This constructor is used internally to wrap an implementation object.

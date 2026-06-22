@@ -30,7 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/integration-api/ui-config-impl.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/animated-image-visual.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/animated-vector-image-visual.h>
@@ -53,6 +53,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/internal/visuals/wireframe/wireframe-visual.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
@@ -509,10 +510,9 @@ Internal::VisualFactoryCache& VisualFactory::GetFactoryCache()
     auto brokenImageUrl = imageDirPath + BROKEN_IMAGE_FILE_NAME;
 
     std::vector<Dali::String> customBrokenImageUrlList{};
-    auto                      uiConfigManager = Integration::UiConfigManager::Get();
-    if(uiConfigManager.IsInitialized())
+    if(UiConfig::HasCurrent())
     {
-      customBrokenImageUrlList = GetImpl(uiConfigManager.GetConfig()).GetBrokenImageUrlList();
+      customBrokenImageUrlList = GetImpl(UiConfig::GetCurrent()).GetBrokenImageUrlList();
     }
 
     // Add default image

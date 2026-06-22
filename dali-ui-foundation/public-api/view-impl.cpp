@@ -45,7 +45,6 @@
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
@@ -75,6 +74,7 @@
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
@@ -497,7 +497,7 @@ Ui::InteractiveTrait ViewImpl::EnsureInteractiveTrait()
     }
     else
     {
-      StateEffect defaultEffect = Integration::UiConfigManager::Get().GetConfig().GetDefaultStateEffectForInteractive();
+      StateEffect defaultEffect = UiConfig::GetCurrent().GetDefaultStateEffectForInteractive();
       if(defaultEffect && !defaultEffect.IsNone())
       {
         ResetStateEffect(*this, defaultEffect);
@@ -2375,10 +2375,9 @@ void ViewImpl::Initialize()
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
 
-  auto uiConfigManager = Integration::UiConfigManager::Get();
-  if(uiConfigManager.IsInitialized())
+  if(UiConfig::HasCurrent())
   {
-    uiConfigManager.GetConfig().GetViewInitializer()(View::DownCast(Self()));
+    UiConfig::GetCurrent().GetViewInitializer()(View::DownCast(Self()));
   }
   else
   {

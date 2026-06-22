@@ -19,9 +19,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/base-object.h>
-#include <dali/public-api/signals/connection-tracker.h>
-#include <dali/public-api/signals/dali-signal.h>
-#include <dali/public-api/signals/slot-delegate.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/theme-loader-interface.h>
@@ -37,9 +34,12 @@ namespace Integration
 class UiConfigManagerImpl;
 using UiConfigManagerImplPtr = IntrusivePtr<UiConfigManagerImpl>;
 /**
- * @brief Internal implementation of UiConfigManager.
+ * @brief Compatibility implementation of UiConfigManager.
+ *
+ * UiConfig owns the active configuration runtime. This class remains only for
+ * existing integration callers and forwards to UiConfig.
  */
-class DALI_UI_API UiConfigManagerImpl : public BaseObject, public ConnectionTracker
+class DALI_UI_API UiConfigManagerImpl : public BaseObject
 {
 public:
   static UiConfigManagerImplPtr New();
@@ -67,9 +67,11 @@ public: ///< Method from UiConfigManager
 
 public: ///< Internal API for UiConfigManager
   /**
-   * @brief Register callbacks to LifecycleController.
-   * @note It could be failed if we try to register too ealy timing, like before Core::New().
-   * @return True if register successed, or already registered. False if register failed.
+   * @brief Compatibility hook for the old singleton promotion path.
+   *
+   * UiConfig now owns lifecycle callbacks, so this always succeeds.
+   *
+   * @return True
    */
   bool RegisterLifecycleControllerCallback();
 
@@ -84,11 +86,6 @@ protected:
    */
   ~UiConfigManagerImpl() override;
 
-  /*
-   * @brief Called when the adaptor is ready.
-   */
-  void OnApplicationCreated();
-
 private:
   UiConfigManagerImpl(const UiConfigManagerImpl&)            = delete;
   UiConfigManagerImpl(UiConfigManagerImpl&&)                 = delete;
@@ -96,10 +93,7 @@ private:
   UiConfigManagerImpl& operator=(UiConfigManagerImpl&&)      = delete;
 
 private:
-  UiConfig mConfig;
-  bool     mUiConfigInitialized{false};
-  bool     mApplicationCreated{false};
-  bool     mLifecycleControllerCallbackConnected{false};
+  mutable UiConfig mConfig;
 };
 
 } // namespace Integration

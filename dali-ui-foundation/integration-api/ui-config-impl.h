@@ -46,7 +46,7 @@ using UiConfigImplPtr = IntrusivePtr<UiConfigImpl>;
 /**
  * @brief Internal implementation of UiConfig.
  *
- * Supports a "freeze" mechanism: once Freeze() is called (by UiConfigManager::Init()),
+ * Supports a "freeze" mechanism: once Freeze() is called (by UiConfig::Apply()),
  * all subsequent setter calls will trigger DALI_ASSERT_ALWAYS.
  */
 class DALI_UI_API UiConfigImpl : public BaseObject
@@ -209,7 +209,9 @@ public:
   const Dali::String& GetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType) const;
 
   /**
-   * @copydoc UiConfigManager::GetBrokenImageUrlList
+   * @brief Returns the configured broken image URL list.
+   *
+   * @return The broken image URLs ordered by UiConfig::BrokenImageType
    */
   std::vector<Dali::String> GetBrokenImageUrlList() const;
 
@@ -501,7 +503,7 @@ public:
   /**
    * @brief Creates a ThemeLoaderInterface instance.
    *
-   * Called internally by UiConfigManager during initialization. Derived
+   * Called internally by UiThemeManagerImpl while creating the theme loader. Derived
    * implementations override this to provide a custom theme loader.
    * The framework takes ownership of the returned pointer.
    *

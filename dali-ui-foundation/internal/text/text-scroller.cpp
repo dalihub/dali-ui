@@ -23,10 +23,10 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 
 using Dali::Integration::ToDaliStringView;
 
@@ -216,10 +216,9 @@ TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
   mIsStoppedImmediately(false)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller Default Constructor\n");
-  auto uiConfigManager = Integration::UiConfigManager::Get();
-  if(uiConfigManager.IsInitialized())
+  if(UiConfig::HasCurrent())
   {
-    const auto& config = uiConfigManager.GetConfig();
+    const auto config = UiConfig::GetCurrent();
     SetSpeed(config.GetMarqueeSpeed());
     SetLoopCount(config.GetMarqueeLoopCount());
     SetLoopDelay(config.GetMarqueeLoopDelay());

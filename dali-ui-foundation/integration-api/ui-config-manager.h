@@ -36,13 +36,14 @@ namespace Integration
 class UiConfigManagerImpl;
 
 /**
- * @brief Singleton manager that holds the global UiConfig instance.
+ * @brief Compatibility wrapper for the global UiConfig instance.
  *
- * UiConfigManager provides process-wide access to the UiConfig.
- * Configuration values should be read directly from the UiConfig
- * returned by GetConfig().
+ * UiConfig now owns process-wide configuration state. New code should use
+ * UiConfig::Apply(), UiConfig::HasCurrent(), and UiConfig::GetCurrent()
+ * directly. UiConfigManager remains for existing integration callers and
+ * forwards to UiConfig.
  *
- * Must be initialized exactly once before the application main loop starts.
+ * UiConfig::Apply() must be called exactly once before the application main loop starts.
  */
 class DALI_UI_API UiConfigManager : public BaseHandle
 {
@@ -100,9 +101,9 @@ public:
   UiConfigManager& operator=(UiConfigManager&& rhs) noexcept;
 
   /**
-   * @brief Initializes the manager with the given UiConfig.
+   * @brief Applies the given UiConfig globally.
    *
-   * This method must be called exactly once before the application main loop starts.
+   * This forwards to UiConfig::Apply() and must be called exactly once before the application main loop starts.
    * After this call, the UiConfig is frozen and its setter methods can no longer be used.
    * Calling Initialize() more than once triggers an assertion failure.
    *
@@ -111,16 +112,16 @@ public:
   void Initialize(const UiConfig& config);
 
   /**
-   * @brief Returns whether Initialize() has been called.
+   * @brief Returns whether UiConfig::Apply() has been called.
    *
-   * @return True if the manager has been initialized
+   * @return True if a UiConfig has been applied
    */
   bool IsInitialized() const;
 
   /**
-   * @brief Returns the global UiConfig instance.
+   * @brief Returns the current global UiConfig instance.
    *
-   * @pre Initialize() must have been called. Triggers assertion failure otherwise.
+   * @pre UiConfig::Apply() must have been called. Triggers assertion failure otherwise.
    * @return The global UiConfig handle
    */
   const UiConfig& GetConfig() const;
@@ -128,10 +129,10 @@ public:
   /*
    * @brief Creates a ThemeLoaderInterface instance from the current config.
    *
-   * Forwards to UiConfigImpl::CreateThemeLoader(). Called internally by
-   * UiThemeManagerImpl during on-demand loader creation.
+   * Compatibility wrapper around UiConfig::GetCurrent() and
+   * UiConfigImpl::CreateThemeLoader().
    *
-   * @pre Initialize() must have been called.
+   * @pre UiConfig::Apply() must have been called.
    * @return A new ThemeLoaderInterface instance. Caller takes ownership.
    */
   ThemeLoaderInterface* CreateThemeLoader();

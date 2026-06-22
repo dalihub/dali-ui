@@ -30,7 +30,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
@@ -44,6 +43,7 @@
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -459,7 +459,7 @@ int LabelImpl::GetMarqueeSpeed() const
   {
     return mTextScroller->GetSpeed();
   }
-  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeSpeed();
+  return UiConfig::GetCurrent().GetMarqueeSpeed();
 }
 
 void LabelImpl::SetMarqueeLoopCount(int loopCount)
@@ -474,7 +474,7 @@ int LabelImpl::GetMarqueeLoopCount() const
   {
     return mTextScroller->GetLoopCount();
   }
-  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeLoopCount();
+  return UiConfig::GetCurrent().GetMarqueeLoopCount();
 }
 
 void LabelImpl::SetMarqueeLoopDelay(float delay)
@@ -489,7 +489,7 @@ float LabelImpl::GetMarqueeLoopDelay() const
   {
     return mTextScroller->GetLoopDelay();
   }
-  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeLoopDelay();
+  return UiConfig::GetCurrent().GetMarqueeLoopDelay();
 }
 
 void LabelImpl::SetMarqueeGap(int gap)
@@ -504,7 +504,7 @@ int LabelImpl::GetMarqueeGap() const
   {
     return mTextScroller->GetGap();
   }
-  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeGap();
+  return UiConfig::GetCurrent().GetMarqueeGap();
 }
 
 void LabelImpl::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
@@ -520,7 +520,7 @@ Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
   {
     return mTextScroller->GetOrientation();
   }
-  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeOrientation();
+  return UiConfig::GetCurrent().GetMarqueeOrientation();
 }
 
 void LabelImpl::SetMarqueeStopMode(Text::MarqueeStopMode mode)
@@ -535,7 +535,7 @@ Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
   {
     return mTextScroller->GetStopMode();
   }
-  return Integration::UiConfigManager::Get().GetConfig().GetMarqueeStopMode();
+  return UiConfig::GetCurrent().GetMarqueeStopMode();
 }
 
 void LabelImpl::SetFontWeight(Text::FontWeight weight)
@@ -1194,15 +1194,14 @@ Signal<void(View, float, float)>& LabelImpl::AsyncHeightForWidthComputedSignal()
 // =============================================================================
 void LabelImpl::ApplyInitialConfig()
 {
-  // UiConfigManager may not be initialized during preload phase
-  auto configManager = UiConfigManager::Get();
-  if(!configManager.IsInitialized())
+  // UiConfig may not be applied during preload phase
+  if(!UiConfig::HasCurrent())
   {
-    DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfigManager is not initialized (possible preload phase)\n");
+    DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfig is not applied (possible preload phase)\n");
     return;
   }
 
-  const auto& config = configManager.GetConfig();
+  const auto config = UiConfig::GetCurrent();
   SetFontSize(config.GetDefaultFontSize());
   SetTextColor(config.GetDefaultTextColor());
   SetAsyncRendering(config.IsLabelAsyncRendering());

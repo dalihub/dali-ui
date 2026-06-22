@@ -22,7 +22,7 @@
 #include <dali/devel-api/adaptor-framework/environment-variable.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
 {
@@ -410,10 +410,9 @@ Model::Model()
   mLogicalModel = LogicalModel::New();
   mVisualModel  = VisualModel::New();
 
-  auto uiConfigManager = Integration::UiConfigManager::Get();
-  if(uiConfigManager.IsInitialized())
+  if(UiConfig::HasCurrent())
   {
-    mLayoutDirectionMode = uiConfigManager.GetConfig().GetTextLayoutDirectionMode();
+    mLayoutDirectionMode = UiConfig::GetCurrent().GetTextLayoutDirectionMode();
   }
 }
 

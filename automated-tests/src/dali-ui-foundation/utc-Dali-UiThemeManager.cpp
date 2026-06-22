@@ -19,6 +19,7 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/ui-config-impl.h>
 #include <dali-ui-foundation/public-api/ui-theme-manager.h>
 #include <dali-ui-test-suite-utils.h>
 
@@ -29,6 +30,7 @@ namespace
 {
 
 bool gThemeChangedCalled = false;
+int  gThemeLoaderCreateCount = 0;
 
 class ThemeChangedCallback : public ConnectionTracker
 {
@@ -39,12 +41,47 @@ public:
   }
 };
 
+class TestThemeLoader : public ThemeLoaderInterface
+{
+public:
+  bool GetColor(StringView colorId, Vector4& outColor) override
+  {
+    (void)colorId;
+    (void)outColor;
+    return false;
+  }
+
+  String GetCurrentThemeId() const override
+  {
+    return "custom";
+  }
+
+  ThemeChangedSignalType& ThemeChangedSignal() override
+  {
+    return mThemeChangedSignal;
+  }
+
+private:
+  ThemeChangedSignalType mThemeChangedSignal;
+};
+
+class TestUiConfigImpl : public Dali::Ui::Integration::UiConfigImpl
+{
+public:
+  ThemeLoaderInterface* CreateThemeLoader() override
+  {
+    ++gThemeLoaderCreateCount;
+    return new TestThemeLoader();
+  }
+};
+
 } // namespace
 
 void utc_dali_uithememanager_startup(void)
 {
-  test_return_value    = TET_UNDEF;
-  gThemeChangedCalled  = false;
+  test_return_value       = TET_UNDEF;
+  gThemeChangedCalled     = false;
+  gThemeLoaderCreateCount = 0;
 }
 
 void utc_dali_uithememanager_cleanup(void)
@@ -72,6 +109,8 @@ int UtcDaliUiThemeManagerGetP(void)
 
   UiThemeManager manager = UiThemeManager::Get();
   DALI_TEST_CHECK(manager);
+  DALI_TEST_CHECK(UiConfig::HasCurrent());
+  DALI_TEST_CHECK(UiConfig::GetCurrent());
 
   END_TEST;
 }
@@ -185,6 +224,19 @@ int UtcDaliUiThemeManagerGetCurrentThemeIdP(void)
 
   // DefaultThemeLoader returns "default"
   DALI_TEST_EQUALS(themeId, String("default"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiThemeManagerUsesCurrentUiConfigThemeLoaderP(void)
+{
+  UiConfig config(new TestUiConfigImpl());
+
+  config.Apply();
+
+  UiThemeManager manager = UiThemeManager::Get();
+  DALI_TEST_EQUALS(manager.GetCurrentThemeId(), String("custom"), TEST_LOCATION);
+  DALI_TEST_EQUALS(gThemeLoaderCreateCount, 1, TEST_LOCATION);
 
   END_TEST;
 }

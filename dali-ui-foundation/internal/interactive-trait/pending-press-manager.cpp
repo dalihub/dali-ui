@@ -20,8 +20,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
 {
@@ -34,12 +34,12 @@ namespace
 
 uint32_t GetPressDelayTime()
 {
-  return Integration::UiConfigManager::Get().GetConfig().GetAmbiguousPressDelay();
+  return UiConfig::GetCurrent().GetAmbiguousPressDelay();
 }
 
 uint32_t GetPressDurationTime()
 {
-  return Integration::UiConfigManager::Get().GetConfig().GetAmbiguousPressDuration();
+  return UiConfig::GetCurrent().GetAmbiguousPressDuration();
 }
 
 } // unnamed namespace

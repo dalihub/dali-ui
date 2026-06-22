@@ -19,14 +19,14 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/object/base-object.h>
 #include <dali/public-api/math/vector4.h>
+#include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <dali/public-api/signals/slot-delegate.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/integration-api/theme-loader-interface.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/ui-theme-manager.h>
 
 namespace Dali
@@ -62,14 +62,14 @@ public:
    * If CreateThemeLoader() returns nullptr, a built-in DefaultThemeLoader is used.
    * Subsequent calls are no-ops.
    *
-   * @pre UiConfigManager must be initialized. Triggers assertion failure otherwise.
+   * @pre UiConfig::Apply() must have been called. Triggers assertion failure otherwise.
    */
   void EnsureThemeLoader();
 
   /**
    * @brief Returns the ThemeLoaderInterface instance, creating it if necessary.
    *
-   * @pre UiConfigManager must be initialized. Triggers assertion failure otherwise.
+   * @pre UiConfig::Apply() must have been called. Triggers assertion failure otherwise.
    * @return A reference to the ThemeLoaderInterface
    */
   ThemeLoaderInterface& GetLoader();
@@ -100,16 +100,16 @@ protected:
   ~UiThemeManagerImpl() override;
 
 private:
-  UiThemeManagerImpl(const UiThemeManagerImpl&) = delete;
-  UiThemeManagerImpl(UiThemeManagerImpl&&) = delete;
+  UiThemeManagerImpl(const UiThemeManagerImpl&)            = delete;
+  UiThemeManagerImpl(UiThemeManagerImpl&&)                 = delete;
   UiThemeManagerImpl& operator=(const UiThemeManagerImpl&) = delete;
-  UiThemeManagerImpl& operator=(UiThemeManagerImpl&&) = delete;
+  UiThemeManagerImpl& operator=(UiThemeManagerImpl&&)      = delete;
 
   void OnLoaderThemeChanged();
 
 private:
-  ThemeLoaderInterface* mLoader{nullptr};
-  ThemeChangedSignalType mThemeChangedSignal;
+  ThemeLoaderInterface*            mLoader{nullptr};
+  ThemeChangedSignalType           mThemeChangedSignal;
   SlotDelegate<UiThemeManagerImpl> mSlotDelegate{this};
 };
 

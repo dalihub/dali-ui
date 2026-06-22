@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/signals/dali-signal.h>
-#include <dali/public-api/common/dali-string.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -43,7 +43,7 @@ class UiThemeManagerImpl;
  * through UiColorManager, not directly through this class.
  *
  * The ThemeLoaderInterface instance is created via UiConfigImpl::CreateThemeLoader()
- * during UiConfig initialization. If CreateThemeLoader() returns nullptr,
+ * after UiConfig::Apply(). If CreateThemeLoader() returns nullptr,
  * a built-in default loader is used.
  */
 class DALI_UI_API UiThemeManager : public BaseHandle

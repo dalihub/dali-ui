@@ -18,9 +18,17 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/ui-config.h>
 
+// EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/lifecycle-controller.h>
+#include <dali/devel-api/common/singleton-service.h>
+#include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/object/base-object.h>
+#include <dali/public-api/signals/connection-tracker.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
+#include <dali-ui-foundation/public-api/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
 
 namespace Dali
@@ -28,6 +36,154 @@ namespace Dali
 
 namespace Ui
 {
+
+namespace
+{
+const char* const UICONFIG_NOT_APPLIED_MESSAGE =
+  "UiConfig has not been applied. "
+  "Call UiConfig::New().Apply() in main() before the application main loop starts. "
+  "UiConfig provides global settings for the entire dali-ui framework. "
+  "Do NOT access UiConfig-dependent features in static/global variable initializers.";
+
+class UiConfigRuntime : public BaseObject, public ConnectionTracker
+{
+public:
+  UiConfigRuntime()
+  {
+    RegisterLifecycleControllerCallback();
+  }
+
+  void Apply(const UiConfig& config)
+  {
+    DALI_ASSERT_ALWAYS(!mApplied && "UiConfig::Apply() must be called only once");
+
+    mConfig = config;
+    GetImpl(mConfig).Freeze();
+    mApplied = true;
+
+    RegisterLifecycleControllerCallback();
+
+    UiThemeManager themeManager = UiThemeManager::Get();
+    GetImpl(themeManager).EnsureThemeLoader();
+
+    GetImpl(mConfig).OnApplied();
+
+    if(mApplicationCreated)
+    {
+      GetImpl(mConfig).OnApplicationCreated();
+    }
+  }
+
+  bool HasCurrent() const
+  {
+    return mApplied;
+  }
+
+  UiConfig GetCurrent() const
+  {
+    DALI_ASSERT_ALWAYS(mApplied && UICONFIG_NOT_APPLIED_MESSAGE);
+    return mConfig;
+  }
+
+  bool RegisterLifecycleControllerCallback()
+  {
+    if(!mLifecycleControllerCallbackConnected)
+    {
+      Dali::LifecycleController lifecycleController = Dali::LifecycleController::Get();
+      if(DALI_LIKELY(lifecycleController))
+      {
+        mLifecycleControllerCallbackConnected = true;
+        lifecycleController.PreInitSignal().Connect(this, &UiConfigRuntime::OnApplicationCreated);
+      }
+    }
+    return mLifecycleControllerCallbackConnected;
+  }
+
+protected:
+  ~UiConfigRuntime() override = default;
+
+private:
+  UiConfigRuntime(const UiConfigRuntime&)            = delete;
+  UiConfigRuntime(UiConfigRuntime&&)                 = delete;
+  UiConfigRuntime& operator=(const UiConfigRuntime&) = delete;
+  UiConfigRuntime& operator=(UiConfigRuntime&&)      = delete;
+
+  void OnApplicationCreated()
+  {
+    if(mApplicationCreated)
+    {
+      return;
+    }
+
+    mApplicationCreated = true;
+
+    if(mApplied)
+    {
+      GetImpl(mConfig).OnApplicationCreated();
+    }
+  }
+
+private:
+  UiConfig mConfig;
+  bool     mApplied{false};
+  bool     mApplicationCreated{false};
+  bool     mLifecycleControllerCallbackConnected{false};
+};
+
+BaseHandle gPreInitializedUiConfigRuntime;
+
+BaseHandle CreateRuntime()
+{
+  return BaseHandle(new UiConfigRuntime());
+}
+
+UiConfigRuntime& GetRuntimeObject(BaseHandle& handle)
+{
+  return static_cast<UiConfigRuntime&>(handle.GetBaseObject());
+}
+
+BaseHandle GetRuntime()
+{
+  BaseHandle runtime;
+
+  SingletonService singletonService(SingletonService::Get());
+  if(singletonService)
+  {
+    BaseHandle handle = singletonService.GetSingleton(typeid(UiConfigRuntime));
+    if(handle)
+    {
+      runtime = handle;
+    }
+
+    if(!runtime)
+    {
+      if(gPreInitializedUiConfigRuntime)
+      {
+        runtime = std::move(gPreInitializedUiConfigRuntime);
+        gPreInitializedUiConfigRuntime.Reset();
+
+        GetRuntimeObject(runtime).RegisterLifecycleControllerCallback();
+      }
+      else
+      {
+        runtime = CreateRuntime();
+      }
+      singletonService.Register(typeid(UiConfigRuntime), runtime);
+    }
+  }
+  else
+  {
+    if(!gPreInitializedUiConfigRuntime)
+    {
+      gPreInitializedUiConfigRuntime = CreateRuntime();
+    }
+    runtime = gPreInitializedUiConfigRuntime;
+  }
+
+  return runtime;
+}
+
+} // unnamed namespace
 
 UiConfig::UiConfig(Integration::UiConfigImpl* impl)
 : BaseHandle(impl)
@@ -53,7 +209,20 @@ void UiConfig::Apply()
 {
   // Do not self-move: Apply() freezes the underlying implementation, but the handle
   // should remain usable (e.g. for getters) to match user expectations.
-  Integration::UiConfigManager::Get().Initialize(*this);
+  BaseHandle runtime = GetRuntime();
+  GetRuntimeObject(runtime).Apply(*this);
+}
+
+bool UiConfig::HasCurrent()
+{
+  BaseHandle runtime = GetRuntime();
+  return GetRuntimeObject(runtime).HasCurrent();
+}
+
+UiConfig UiConfig::GetCurrent()
+{
+  BaseHandle runtime = GetRuntime();
+  return GetRuntimeObject(runtime).GetCurrent();
 }
 
 void UiConfig::SetScalingFactor(float scalingFactor)

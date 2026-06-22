@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <test-gesture-generator.h>
@@ -179,7 +178,7 @@ int UtcDaliStateEffectDefaultForInteractiveP(void)
   UiTestApplication application;
 
   StateEffect defaultEffect = StateEffect::DefaultForInteractive();
-  StateEffect configEffect  = UiConfigManager::Get().GetConfig().GetDefaultStateEffectForInteractive();
+  StateEffect configEffect  = UiConfig::GetCurrent().GetDefaultStateEffectForInteractive();
 
   DALI_TEST_CHECK(defaultEffect);
   DALI_TEST_EQUALS(defaultEffect, configEffect, TEST_LOCATION);

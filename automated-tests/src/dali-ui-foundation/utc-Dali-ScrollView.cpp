@@ -271,6 +271,9 @@ int UtcDaliUiConfigAmbiguousPressDefaultsAndSettersP(void)
 {
   UiConfig config = UiConfig::New();
 
+  DALI_TEST_CHECK(!UiConfig::HasCurrent());
+  DALI_TEST_ASSERTION(UiConfig::GetCurrent(), "UICONFIG_NOT_APPLIED_MESSAGE");
+
   DALI_TEST_EQUALS(config.GetAmbiguousPressDelay(), 100u, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetAmbiguousPressDuration(), 64u, TEST_LOCATION);
 
@@ -285,6 +288,16 @@ int UtcDaliUiConfigAmbiguousPressDefaultsAndSettersP(void)
 
   DALI_TEST_EQUALS(config.GetAmbiguousPressDelay(), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(config.GetAmbiguousPressDuration(), 0u, TEST_LOCATION);
+
+  config.Apply();
+
+  DALI_TEST_CHECK(UiConfig::HasCurrent());
+  UiConfig current = UiConfig::GetCurrent();
+  DALI_TEST_EQUALS(current.GetAmbiguousPressDelay(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(current.GetAmbiguousPressDuration(), 0u, TEST_LOCATION);
+
+  UiConfig secondConfig = UiConfig::New();
+  DALI_TEST_ASSERTION(secondConfig.Apply(), "UiConfig::Apply() must be called only once");
 
   END_TEST;
 }

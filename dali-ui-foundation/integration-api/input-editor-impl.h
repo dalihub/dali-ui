@@ -732,7 +732,7 @@ protected:
 
 public: // Config
   /**
-   * @brief Applies default values from UiConfigManager if initialized.
+   * @brief Applies default values from UiConfig if applied.
    */
   void ApplyInitialConfig();
 

@@ -29,7 +29,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/input-field-property-handler.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
@@ -45,6 +44,7 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
@@ -1140,15 +1140,14 @@ Signal<void(View, Text::TypingStyle::Mask)>& InputFieldImpl::TypingStyleChangedS
 // =============================================================================
 void InputFieldImpl::ApplyInitialConfig()
 {
-  // UiConfigManager may not be initialized during preload phase
-  auto configureManager = UiConfigManager::Get();
-  if(!configureManager.IsInitialized())
+  // UiConfig may not be applied during preload phase
+  if(!UiConfig::HasCurrent())
   {
-    DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfigManager is not initialized (possible preload phase)\n");
+    DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfig is not applied (possible preload phase)\n");
     return;
   }
 
-  const auto& config = configureManager.GetConfig();
+  const auto config = UiConfig::GetCurrent();
   SetFontSize(config.GetDefaultFontSize());
   SetTextColor(config.GetDefaultTextColor());
   SetPlaceholderColor(config.GetDefaultPlaceholderTextColor());

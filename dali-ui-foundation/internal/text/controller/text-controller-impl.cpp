@@ -28,7 +28,6 @@
 #include <limits>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-data-clearer.h>
@@ -45,6 +44,7 @@
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 #include <dali-ui-foundation/internal/text/text-selection-handle-controller.h>
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 
 using namespace Dali;
 
@@ -1940,10 +1940,9 @@ bool Controller::Impl::ShouldClearFocusOnEscape() const
 {
   if(DALI_UNLIKELY(mShouldClearFocusOnEscape == ClearFocusOnEscapeState::UNKNOWN))
   {
-    auto uiConfigManager = Integration::UiConfigManager::Get();
-    if(uiConfigManager.IsInitialized())
+    if(UiConfig::HasCurrent())
     {
-      mShouldClearFocusOnEscape = uiConfigManager.GetConfig().IsFocusClearOnEscapeEnabled()
+      mShouldClearFocusOnEscape = UiConfig::GetCurrent().IsFocusClearOnEscapeEnabled()
                                     ? ClearFocusOnEscapeState::ENABLE
                                     : ClearFocusOnEscapeState::DISABLE;
     }

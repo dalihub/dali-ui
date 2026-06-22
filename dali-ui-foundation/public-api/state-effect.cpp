@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
 {
@@ -58,7 +58,7 @@ StateEffect StateEffect::None()
 
 StateEffect StateEffect::DefaultForInteractive()
 {
-  return Integration::UiConfigManager::Get().GetConfig().GetDefaultStateEffectForInteractive();
+  return UiConfig::GetCurrent().GetDefaultStateEffectForInteractive();
 }
 
 bool StateEffect::IsNone() const

@@ -24,7 +24,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/default-theme-loader.h>
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/integration-api/ui-config-impl.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
 {
@@ -99,10 +100,10 @@ void UiThemeManagerImpl::EnsureThemeLoader()
 {
   if(!mLoader)
   {
-    auto configManager = UiConfigManager::Get();
-    DALI_ASSERT_ALWAYS(configManager.IsInitialized() && UICONFIG_NOT_INITIALIZED_MESSAGE);
+    DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && UICONFIG_NOT_INITIALIZED_MESSAGE);
 
-    mLoader = configManager.CreateThemeLoader();
+    UiConfig config = UiConfig::GetCurrent();
+    mLoader         = GetImpl(config).CreateThemeLoader();
     if(!mLoader)
     {
       mLoader = new DefaultThemeLoader();

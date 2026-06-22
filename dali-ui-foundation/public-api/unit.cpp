@@ -16,7 +16,7 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/ui-config-manager.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/unit.h>
 
 namespace Dali
@@ -27,32 +27,32 @@ namespace Ui
 
 float operator"" _spx(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetScalingFactor();
+  return static_cast<float>(v) * UiConfig::GetCurrent().GetScalingFactor();
 }
 
 float operator"" _spx(long double v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetScalingFactor();
+  return static_cast<float>(v) * UiConfig::GetCurrent().GetScalingFactor();
 }
 
 float operator"" _dp(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetDpiFactor();
+  return static_cast<float>(v) * UiConfig::GetCurrent().GetDpiFactor();
 }
 
 float operator"" _dp(long double v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetDpiFactor();
+  return static_cast<float>(v) * UiConfig::GetCurrent().GetDpiFactor();
 }
 
 float operator"" _sdp(unsigned long long int v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetScaledDpiFactor();
+  return static_cast<float>(v) * UiConfig::GetCurrent().GetScaledDpiFactor();
 }
 
 float operator"" _sdp(long double v)
 {
-  return static_cast<float>(v) * Integration::UiConfigManager::Get().GetConfig().GetScaledDpiFactor();
+  return static_cast<float>(v) * UiConfig::GetCurrent().GetScaledDpiFactor();
 }
 
 } // namespace Ui
