@@ -16,32 +16,23 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-components/integration-api/ui-component-config-impl.h>
-#include <dali-ui-components/public-api/ui-component-config.h>
+#include <dali-ui-components/public-api/components-style-sheet.h>
 
 namespace Dali
 {
-
 namespace Ui
 {
-
-UiComponentConfig::UiComponentConfig(Integration::UiComponentConfigImpl* impl)
-: UiConfig(impl)
+namespace Components
 {
+namespace StyleSheet
+{
+
+UiStyleSheet New()
+{
+  return UiStyleSheet::New();
 }
 
-UiComponentConfig UiComponentConfig::New()
-{
-  Integration::UiComponentConfigImplPtr impl = Integration::UiComponentConfigImpl::New();
-
-  // Pass ownership to handle
-  return UiComponentConfig(impl.Get());
-}
-
-UiComponentConfig UiComponentConfig::DownCast(BaseHandle handle)
-{
-  return UiComponentConfig(dynamic_cast<Integration::UiComponentConfigImpl*>(handle.GetObjectPtr()));
-}
-
+} // namespace StyleSheet
+} // namespace Components
 } // namespace Ui
 } // namespace Dali

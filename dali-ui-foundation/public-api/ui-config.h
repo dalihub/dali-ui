@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
+#include <dali-ui-foundation/public-api/ui-style-sheet.h>
 
 namespace Dali
 {
@@ -714,6 +715,28 @@ public: // Properties
    * @return The currently applied UiConfig handle
    */
   static UiConfig GetCurrent();
+
+  /**
+   * @brief Sets the style sheet used by dali-ui components.
+   *
+   * The style sheet is stored as a shared handle. If no style sheet is set
+   * before Apply(), components use their fallback styles.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] styleSheet The style sheet to use
+   */
+  void SetStyleSheet(UiStyleSheet styleSheet);
+
+  /**
+   * @brief Gets the style registered for @p key in this config's style sheet.
+   *
+   * If no style sheet or style entry is found, an uninitialized UiStyle is returned.
+   * Components may use their own built-in style in that case.
+   *
+   * @param[in] key The style key
+   * @return The resolved style, or an uninitialized handle
+   */
+  UiStyle GetStyle(UiStyleKey key) const;
 
 public: // Not intended for Application developers
   /**

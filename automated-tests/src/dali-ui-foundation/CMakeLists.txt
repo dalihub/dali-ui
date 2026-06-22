@@ -7,6 +7,7 @@ SET(CAPI_LIB "dali-ui-foundation")
 
 SET(TC_SOURCES
         utc-Dali-UniqueAny.cpp
+        utc-Dali-UiStyle.cpp
         utc-Dali-ScrollView.cpp
         utc-Dali-ScrollBar.cpp
         utc-Dali-AnimatedImageVisual.cpp

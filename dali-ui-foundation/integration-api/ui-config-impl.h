@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
+#include <dali-ui-foundation/public-api/ui-style-sheet.h>
 
 namespace Dali
 {
@@ -465,6 +466,16 @@ public:
   StateEffect GetDefaultStateEffectForInteractive() const;
 
   /**
+   * @copydoc UiConfig::SetStyleSheet()
+   */
+  void SetStyleSheet(UiStyleSheet styleSheet);
+
+  /**
+   * @copydoc UiConfig::GetStyle()
+   */
+  UiStyle GetStyle(UiStyleKey key) const;
+
+  /**
    * @copydoc UiConfig::SetAmbiguousPressDelay()
    */
   void SetAmbiguousPressDelay(uint32_t timeMs);
@@ -532,6 +543,7 @@ private:
   Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
 
   StateEffect               mDefaultStateEffectForInteractive; ///< Default effect for interactive views
+  UiStyleSheet              mStyleSheet;
   ExecutionKeyPredicate     mExecutionKeyPredicate;
   ViewInitializer           mViewInitializer;
   Vector4                   mDefaultTextColor;

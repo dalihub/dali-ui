@@ -93,6 +93,12 @@ UiConfigImplPtr UiConfigImpl::New()
 
 void UiConfigImpl::Freeze()
 {
+  if(!mStyleSheet)
+  {
+    mStyleSheet = UiStyleSheet::New();
+  }
+  mStyleSheet.Freeze();
+
   mFrozen                = true;
   mCachedDpiFactor       = static_cast<float>(mDpi) / static_cast<float>(mBaselineDpi);
   mCachedScaledDpiFactor = mCachedDpiFactor * mScalingFactor;
@@ -445,6 +451,18 @@ void UiConfigImpl::SetDefaultStateEffectForInteractive(StateEffect effect)
 StateEffect UiConfigImpl::GetDefaultStateEffectForInteractive() const
 {
   return mDefaultStateEffectForInteractive;
+}
+
+void UiConfigImpl::SetStyleSheet(UiStyleSheet styleSheet)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  DALI_ASSERT_ALWAYS(styleSheet && "UiStyleSheet must be initialized");
+  mStyleSheet = styleSheet;
+}
+
+UiStyle UiConfigImpl::GetStyle(UiStyleKey key) const
+{
+  return mStyleSheet.GetStyle(key);
 }
 
 void UiConfigImpl::OnApplied()

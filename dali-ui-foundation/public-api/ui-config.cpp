@@ -24,6 +24,7 @@
 #include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/connection-tracker.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-config-impl.h>
@@ -513,6 +514,16 @@ void UiConfig::SetAmbiguousPressDuration(uint32_t timeMs)
 uint32_t UiConfig::GetAmbiguousPressDuration() const
 {
   return GetImpl(*this).GetAmbiguousPressDuration();
+}
+
+void UiConfig::SetStyleSheet(UiStyleSheet styleSheet)
+{
+  GetImpl(*this).SetStyleSheet(styleSheet);
+}
+
+UiStyle UiConfig::GetStyle(UiStyleKey key) const
+{
+  return GetImpl(*this).GetStyle(key);
 }
 
 void UiConfig::DefaultViewInitializer(View view)

@@ -147,7 +147,7 @@ public:
 
 ```cpp
 // tv-config.h (public-api 레벨)
-class TVConfig : public Dali::Ui::UiComponentConfig
+class TVConfig : public Dali::Ui::UiConfig
 {
 public:
   static TVConfig New()
@@ -161,7 +161,7 @@ public:
 
 private:
   explicit TVConfig(Dali::Ui::Integration::UiConfigImpl* impl)
-  : UiComponentConfig(/* ... */) {}
+  : UiConfig(impl) {}
 };
 ```
 

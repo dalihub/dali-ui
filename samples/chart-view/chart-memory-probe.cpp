@@ -52,7 +52,6 @@
 #include <vector>
 
 #include <dali-ui-components/dali-ui-components.h>
-#include <dali-ui-components/public-api/ui-component-config.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
 #include <dali/devel-api/adaptor-framework/window-devel.h>
@@ -1143,7 +1142,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application         app = Application::New(&argc, &argv);
-  UiComponentConfig::New().Apply();
+  UiConfig::New().Apply();
   MemProbeApp         probe(app);
   app.MainLoop();
   return 0;

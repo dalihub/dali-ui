@@ -1,5 +1,3 @@
-#pragma once
-
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -17,9 +15,32 @@
  *
  */
 
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
-#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
-#include <dali-ui-foundation/provider-api/property-registration-helper.h>
-#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
+// CLASS HEADER
 #include <dali-ui-foundation/provider-api/ui-style-impl.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Internal
+{
+
+class UiStylePrivate
+{
+  // Reserved ABI slot for future UiStyleImpl private data.
+};
+
+} // namespace Internal
+
+UiStyleImpl::UiStyleImpl()
+: mPrivate(nullptr)
+{
+}
+
+UiStyleImpl::~UiStyleImpl()
+{
+  delete mPrivate;
+}
+
+} // namespace Ui
+} // namespace Dali

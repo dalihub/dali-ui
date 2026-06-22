@@ -42,6 +42,9 @@
 #include <dali-ui-foundation/public-api/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/ui-scale-policy.h>
+#include <dali-ui-foundation/public-api/ui-style-key.h>
+#include <dali-ui-foundation/public-api/ui-style-sheet.h>
+#include <dali-ui-foundation/public-api/ui-style.h>
 #include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/unit.h>
 #include <dali-ui-foundation/public-api/view-impl.h>

@@ -6,6 +6,7 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 SET(CAPI_LIB "dali-ui-components")
 
 SET(TC_SOURCES
+    utc-Dali-Components.cpp
     utc-Dali-DummyComponent.cpp
     utc-Dali-ChartView.cpp
     utc-Dali-ChartSeries.cpp

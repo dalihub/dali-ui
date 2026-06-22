@@ -31,7 +31,6 @@
 #include <vector>
 
 #include <dali-ui-components/dali-ui-components.h>
-#include <dali-ui-components/public-api/ui-component-config.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture.h>
@@ -958,7 +957,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiComponentConfig::New().Apply();
+  UiConfig::New().Apply();
   ChartGalleryController controller(application);
   application.MainLoop();
   return 0;

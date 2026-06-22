@@ -11,15 +11,12 @@ changed at runtime.
 
 ## Which Config should I use?
 
-The Config class depends on which library you are using.
+Use `UiConfig` for both `dali-ui-foundation` and `dali-ui-components`.
 
 | Library | Config Class | Header |
 |---|---|---|
 | `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
-| `dali-ui-components` | `UiComponentConfig` | `<dali-ui-components/public-api/ui-component-config.h>` |
-
-`UiComponentConfig` inherits from `UiConfig` and supports all the same settings.
-If you are using `dali-ui-components`, always use `UiComponentConfig`.
+| `dali-ui-components` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
 
 <br/>
 
@@ -44,10 +41,10 @@ int main(int argc, char** argv)
 }
 ```
 
-When using `dali-ui-components`:
+When using `dali-ui-components`, still apply a single `UiConfig`:
 
 ```cpp
-UiComponentConfig config = UiComponentConfig::New();
+UiConfig config = UiConfig::New();
 config.SetDpi(320);
 config.SetScalingFactor(1.5f);
 config.Apply();
@@ -59,7 +56,7 @@ For a full working example, see the [hello-world sample](https://github.com/dali
 
 ## Configuration Options
 
-The following describes key configuration options. For the full API, see [UiConfig](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1UiConfig.html), [UiComponentConfig](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1UiComponentConfig.html).
+The following describes key configuration options. For the full API, see [UiConfig](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1UiConfig.html).
 
 | Option | Method | Default | Description |
 |---|---|---|---|
@@ -77,27 +74,47 @@ The following describes key configuration options. For the full API, see [UiConf
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | Whether the default focus indicator is enabled |
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | Whether touch interaction clears focus indication |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | Whether hovering outside the focused view clears focus indication |
+| Style Sheet | `SetStyleSheet(UiStyleSheet)`, `GetStyle(UiStyleKey)` | Built-in component styles | Component style creator lookup table and style resolver |
+
+<br/>
+
+## Component Style Sheets
+
+`UiConfig` may carry a `UiStyleSheet`. Components resolve configured styles
+through `UiConfig::GetStyle(UiStyleKey)`.
+
+Device or product libraries can start from the default components sheet and
+override selected style entries before applying the config:
+
+```cpp
+UiStyleSheet styleSheet = Dali::Ui::Components::StyleSheet::New();
+styleSheet.SetStyle(MyButtonStyleKey(), ProvideMyButtonStyle);
+
+UiConfig config = UiConfig::New();
+config.SetStyleSheet(styleSheet);
+config.Apply(); // Freezes both config and styleSheet.
+```
 
 <br/>
 
 ## For Framework Library Developers
 
 If you are building a platform- or device-specific framework library, you can subclass `UiConfig`
-or `UiComponentConfig` to define a pre-configured Config class and distribute it to app developers.
+to define a pre-configured Config class and distribute it to app developers.
 
 ```cpp
 // TVConfig.h (defined and distributed by the Framework developer)
-class TVConfig : public Dali::Ui::UiComponentConfig
+class TVConfig : public Dali::Ui::UiConfig
 {
 public:
-  explicit TVConfig(const Dali::Ui::UiComponentConfig& config)
-  : Dali::Ui::UiComponentConfig(config)
+  explicit TVConfig(const Dali::Ui::UiConfig& config)
+  : Dali::Ui::UiConfig(config)
   {
   }
 
   static TVConfig New()
   {
-    TVConfig config(Dali::Ui::UiComponentConfig::New());
+    TVConfig config(Dali::Ui::UiConfig::New());
     config.SetDpi(72);
     config.SetScalingFactor(2.0f);
     config.SetDefaultFontSize(28.0f);

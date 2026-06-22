@@ -1,4 +1,5 @@
 #pragma once
+
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -16,15 +17,31 @@
  *
  */
 
-// EXTERNAL INCLUDES
 // INTERNAL INCLUDES
-#include <dali-ui-components/public-api/chart/bar-series.h>
-#include <dali-ui-components/public-api/chart/chart-axis.h>
-#include <dali-ui-components/public-api/chart/chart-section.h>
-#include <dali-ui-components/public-api/chart/chart-series.h>
-#include <dali-ui-components/public-api/chart/chart-view-properties.h>
-#include <dali-ui-components/public-api/chart/chart-view.h>
-#include <dali-ui-components/public-api/chart/line-series.h>
-#include <dali-ui-components/public-api/chart/pie-series.h>
-#include <dali-ui-components/public-api/chart/scatter-series.h>
-#include <dali-ui-components/public-api/components-style-sheet.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/ui-style-sheet.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Components
+{
+namespace StyleSheet
+{
+
+/**
+ * @brief Creates a new components style sheet.
+ *
+ * The returned style sheet is a fresh mutable object. Applications and product
+ * libraries may set or override entries before passing it to
+ * UiConfig::SetStyleSheet().
+ *
+ * @return A new components style sheet
+ */
+DALI_UI_API UiStyleSheet New();
+
+} // namespace StyleSheet
+} // namespace Components
+} // namespace Ui
+} // namespace Dali

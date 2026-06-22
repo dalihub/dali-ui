@@ -1,5 +1,3 @@
-#pragma once
-
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -17,9 +15,26 @@
  *
  */
 
-#include <dali-ui-foundation/dali-ui-foundation.h>
+// CLASS HEADER
+#include <dali-ui-foundation/public-api/ui-style.h>
 
-#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
-#include <dali-ui-foundation/provider-api/property-registration-helper.h>
-#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/provider-api/ui-style-impl.h>
+
+namespace Dali
+{
+namespace Ui
+{
+
+UiStyle UiStyle::DownCast(BaseHandle handle)
+{
+  return UiStyle(dynamic_cast<UiStyleImpl*>(handle.GetObjectPtr()));
+}
+
+UiStyle::UiStyle(UiStyleImpl* impl)
+: BaseHandle(impl)
+{
+}
+
+} // namespace Ui
+} // namespace Dali
