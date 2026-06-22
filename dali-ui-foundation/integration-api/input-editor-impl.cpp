@@ -1984,7 +1984,7 @@ bool InputEditorImpl::OnTouched(Actor actor, TouchEvent touch)
 
   const PointState::Type state = touch.GetState(0);
 
-  if(PointState::UP == state)
+  if(PointState::DOWN == state)
   {
     if(!HasKeyInputFocus(*this))
     {
@@ -1992,7 +1992,7 @@ bool InputEditorImpl::OnTouched(Actor actor, TouchEvent touch)
       mFocusGainedByTouch = true;
     }
   }
-  else if(PointState::INTERRUPTED == state || PointState::LEAVE == state)
+  else if(PointState::UP == state || PointState::INTERRUPTED == state)
   {
     mFocusGainedByTouch = false;
   }
