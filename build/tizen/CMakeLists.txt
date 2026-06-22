@@ -178,7 +178,7 @@ IF (HAVE_NO_ENUM_COMPARE_SWITCH)
   ADD_COMPILE_OPTIONS(-Wno-enum-compare-switch)
 ENDIF()
 
-IF( ENABLE_COVERAGE OR "$ENV{CXXFLAGS}" MATCHES --coverage )
+IF( ENABLE_COVERAGE OR "$ENV{CXXFLAGS}" MATCHES --coverage OR "${CMAKE_CXX_FLAGS}" MATCHES --coverage )
   ADD_COMPILE_OPTIONS( --coverage )
   SET(ENABLE_COVERAGE ON)
   SET(COVERAGE --coverage)
@@ -203,15 +203,42 @@ SET(CUSTOM_COMPILE_OPTIONS "")
 # target names duplication with other DALi modules.
 IF( ENABLE_COVERAGE )
   SET(FASTCOV_BIN "${PREFIX}/bin/fastcov.py")
+  FIND_PROGRAM(GCOV_BIN "gcov")
+  SET(GCOV_EXPECTED_VERSION_MAJOR "")
+
+  IF( CMAKE_CXX_COMPILER_ID STREQUAL "GNU" )
+    STRING(REGEX MATCH "^[0-9]+" GCOV_EXPECTED_VERSION_MAJOR "${CMAKE_CXX_COMPILER_VERSION}")
+    UNSET(GCOV_VERSIONED_BIN CACHE)
+    FIND_PROGRAM(GCOV_VERSIONED_BIN "gcov-${GCOV_EXPECTED_VERSION_MAJOR}")
+
+    IF( GCOV_VERSIONED_BIN )
+      SET(GCOV_BIN "${GCOV_VERSIONED_BIN}")
+    ENDIF()
+  ENDIF()
 
   IF( EXISTS ${FASTCOV_BIN} )
+    IF( NOT GCOV_BIN )
+      MESSAGE( FATAL_ERROR "gcov not found; coverage targets cannot be generated" )
+    ENDIF()
+    IF( GCOV_EXPECTED_VERSION_MAJOR )
+      EXECUTE_PROCESS(
+        COMMAND ${GCOV_BIN} --version
+        OUTPUT_VARIABLE GCOV_VERSION_OUTPUT
+        OUTPUT_STRIP_TRAILING_WHITESPACE )
+      STRING(REGEX MATCH "[0-9]+\\." GCOV_VERSION_MAJOR_MATCH "${GCOV_VERSION_OUTPUT}")
+      STRING(REGEX REPLACE "\\.$" "" GCOV_VERSION_MAJOR "${GCOV_VERSION_MAJOR_MATCH}")
+
+      IF( GCOV_VERSION_MAJOR AND NOT GCOV_VERSION_MAJOR STREQUAL GCOV_EXPECTED_VERSION_MAJOR )
+        MESSAGE( FATAL_ERROR "${GCOV_BIN} does not match ${CMAKE_CXX_COMPILER}. Compiler major version: ${GCOV_EXPECTED_VERSION_MAJOR}, gcov major version: ${GCOV_VERSION_MAJOR}" )
+      ENDIF()
+    ENDIF()
 
     # Define custom rules for coverage
     SET(COVERAGE_DIR .cov)
     SET(COVERAGE_OUTPUT_DIR doc/coverage)
 
     # fastcov.py doesn't need version detection or complex rc options
-    SET(FASTCOV_OPTS "--branch-coverage" "--lcov")
+    SET(FASTCOV_OPTS "--branch-coverage" "--lcov" "--gcov" "${GCOV_BIN}")
 
     ADD_CUSTOM_TARGET( ${DALI_UI_PREFIX}rename_cov_data ./rename-cov-data )
 
@@ -265,7 +292,7 @@ IF( ENABLE_COVERAGE )
           )
 
   ELSE()
-    MESSAGE( WARNING "fastcov.py not found at ${FASTCOV_BIN}, coverage targets will not be available" )
+    MESSAGE( FATAL_ERROR "fastcov.py not found at ${FASTCOV_BIN}; coverage targets cannot be generated" )
   ENDIF()
 ENDIF()
 
