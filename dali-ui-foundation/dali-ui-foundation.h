@@ -32,6 +32,7 @@
 #include <dali-ui-foundation/public-api/interactive-view.h>
 #include <dali-ui-foundation/public-api/label.h>
 #include <dali-ui-foundation/public-api/overlay-effect.h>
+#include <dali-ui-foundation/public-api/selectable-view.h>
 #include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
@@ -46,6 +47,10 @@
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view-types.h>
 #include <dali-ui-foundation/public-api/view.h>
+
+// Component implementation base classes
+#include <dali-ui-foundation/public-api/interactive-view-impl.h>
+#include <dali-ui-foundation/public-api/selectable-view-impl.h>
 
 #include <dali-ui-foundation/public-api/image-view.h>
 

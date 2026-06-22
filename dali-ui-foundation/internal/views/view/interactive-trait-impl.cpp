@@ -360,31 +360,17 @@ void InteractiveTraitImpl::OnTap(View view, TapGesture tap)
 
 void InteractiveTraitImpl::OnPressedChanged(View view, InputEvent inputEvent)
 {
-  if(auto* receiver = dynamic_cast<Integration::InteractiveEventReceiverInterface*>(&GetImpl(view)))
-  {
-    receiver->OnPressedChanged(view, mPressed, inputEvent);
-  }
   mPressedChangedSignal.Emit(view, mPressed, inputEvent);
 }
 
 void InteractiveTraitImpl::OnClicked(View view, InputEvent inputEvent)
 {
-  if(auto* receiver = dynamic_cast<Integration::InteractiveEventReceiverInterface*>(&GetImpl(view)))
-  {
-    receiver->OnClicked(view, inputEvent);
-  }
   mClickedSignal.Emit(view, inputEvent);
 }
 
 bool InteractiveTraitImpl::OnLongPressed(View view, InputEvent inputEvent)
 {
-  bool consumed = false;
-  if(auto* receiver = dynamic_cast<Integration::InteractiveEventReceiverInterface*>(&GetImpl(view)))
-  {
-    consumed = receiver->OnLongPressed(view, inputEvent);
-  }
-  bool signalResult = mLongPressedSignal.Emit(view, inputEvent);
-  return consumed || signalResult;
+  return mLongPressedSignal.Emit(view, inputEvent);
 }
 
 bool InteractiveTraitImpl::IsExecutionKey(const Dali::String& keyName) const

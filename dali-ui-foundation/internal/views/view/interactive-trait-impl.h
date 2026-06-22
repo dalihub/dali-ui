@@ -27,7 +27,6 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/interactive-event-receiver-interface.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 
 namespace Dali

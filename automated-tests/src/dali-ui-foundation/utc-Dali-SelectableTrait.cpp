@@ -656,3 +656,92 @@ int UtcDaliViewAsInteractiveAsSelectableChainingP(void)
   DALI_TEST_CHECK(view.IsSelectable());
   END_TEST;
 }
+
+// ============================================================================
+// SelectableView
+// ============================================================================
+
+int UtcDaliSelectableViewNewP(void)
+{
+  UiTestApplication application;
+  SelectableView    view = SelectableView::New();
+
+  DALI_TEST_CHECK(view);
+  DALI_TEST_CHECK(view.IsInteractive());
+  DALI_TEST_CHECK(view.IsSelectable());
+  END_TEST;
+}
+
+int UtcDaliSelectableViewDownCastP(void)
+{
+  UiTestApplication application;
+  SelectableView    view     = SelectableView::New();
+  BaseHandle        handle   = view;
+  SelectableView    downcast = SelectableView::DownCast(handle);
+
+  DALI_TEST_CHECK(downcast);
+  DALI_TEST_CHECK(downcast == view);
+  END_TEST;
+}
+
+int UtcDaliSelectableViewDownCastN(void)
+{
+  UiTestApplication application;
+  View              view     = View::New();
+  SelectableView    downcast = SelectableView::DownCast(view);
+
+  DALI_TEST_CHECK(!downcast);
+  END_TEST;
+}
+
+int UtcDaliSelectableViewSelectionApiP(void)
+{
+  UiTestApplication application;
+  SelectableView    view = SelectableView::New();
+
+  DALI_TEST_CHECK(!view.IsSelected());
+
+  view.SetSelected(true);
+  DALI_TEST_CHECK(view.IsSelected());
+
+  view.SetSelected(false);
+  DALI_TEST_CHECK(!view.IsSelected());
+  END_TEST;
+}
+
+int UtcDaliSelectableViewSelectionChangedSignalP(void)
+{
+  UiTestApplication application;
+  SelectableView    view = SelectableView::New();
+
+  SelectionChangedSignalData    data;
+  SelectionChangedSignalFunctor functor(data);
+  view.SelectionChangedSignal().Connect(&application, functor);
+
+  view.SetSelected(true);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.selected);
+  DALI_TEST_CHECK(data.view == view);
+  END_TEST;
+}
+
+int UtcDaliSelectableViewToggleByClickP(void)
+{
+  UiTestApplication application;
+  SelectableView    view = SelectableView::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  view.EnableToggleByClick();
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+
+  DALI_TEST_CHECK(view.IsSelected());
+  END_TEST;
+}

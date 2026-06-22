@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/integration-api/interactive-view-impl.h>
+#include <dali-ui-foundation/public-api/interactive-view-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
@@ -148,62 +148,6 @@ struct LongPressedSignalFunctor
   LongPressedSignalData& signalData;
 };
 
-// ============================================================================
-// InteractiveEventReceiverInterface test subclass
-// ============================================================================
-
-class TestInteractiveViewImpl : public InteractiveViewImpl
-{
-public:
-  static IntrusivePtr<TestInteractiveViewImpl> New()
-  {
-    return new TestInteractiveViewImpl();
-  }
-
-  bool clickedCalled{false};
-  bool pressedChangedCalled{false};
-  bool pressedValue{false};
-  bool longPressedCalled{false};
-  bool longPressedConsumed{false};
-
-  void ResetFlags()
-  {
-    clickedCalled        = false;
-    pressedChangedCalled = false;
-    pressedValue         = false;
-    longPressedCalled    = false;
-  }
-
-  void OnInitialize() override
-  {
-    InteractiveViewImpl::OnInitialize();
-    EnableLongPressDetection();
-  }
-
-protected:
-  void OnClicked(View view, const InputEvent& event) override
-  {
-    clickedCalled = true;
-  }
-
-  void OnPressedChanged(View view, bool pressed, const InputEvent& event) override
-  {
-    pressedChangedCalled = true;
-    pressedValue         = pressed;
-  }
-
-  bool OnLongPressed(View view, const InputEvent& event) override
-  {
-    longPressedCalled = true;
-    return longPressedConsumed;
-  }
-};
-
-// Register TestInteractiveViewImpl so that DALi TypeInfo lookup can walk
-// the chain TestInteractiveViewImpl -> InteractiveViewImpl -> ViewImpl -> View
-// and find View-registered properties (REQUESTED_WIDTH, etc.).
-Dali::TypeRegistration testInteractiveViewTypeReg(typeid(TestInteractiveViewImpl), typeid(InteractiveViewImpl), nullptr);
-
 InteractiveView CreateTestInteractiveView(TestApplication& application, float width = 100.0f, float height = 100.0f)
 {
   InteractiveView view = InteractiveView::New();
@@ -224,24 +168,6 @@ View CreateTestView(TestApplication& application, float width = 100.0f, float he
   View view = View::New();
   view.SetRequestedWidth(width);
   view.SetRequestedHeight(height);
-  view.SetPivot(Pivot::TOP_LEFT);
-  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
-
-  application.GetScene().Add(view);
-  application.SendNotification();
-  application.Render();
-
-  return view;
-}
-
-InteractiveView CreateTestInteractiveViewFromImpl(TestApplication& application, IntrusivePtr<TestInteractiveViewImpl> impl)
-{
-  // Handle must be created BEFORE Initialize() — wrapping in CustomActor makes Self() valid
-  InteractiveView view(*impl);
-  impl->Initialize();
-
-  view.SetRequestedWidth(100.0f);
-  view.SetRequestedHeight(100.0f);
   view.SetPivot(Pivot::TOP_LEFT);
   view.SetParentOrigin(ParentOrigin::TOP_LEFT);
 
@@ -656,105 +582,25 @@ int UtcDaliInteractiveViewConnectLongPressedSignalP(void)
   END_TEST;
 }
 
-// ============================================================================
-// InteractiveEventReceiverInterface virtual dispatch tests
-// ============================================================================
-
-int UtcDaliInteractiveViewOnClickedVirtualP(void)
+int UtcDaliInteractiveViewLongPressedSignalSuppressesClickP(void)
 {
   UiTestApplication application;
 
-  auto impl = TestInteractiveViewImpl::New();
-
-  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
-
-  TestGenerateTap(application, 50.0f, 50.0f, 100);
-
-  DALI_TEST_CHECK(impl->clickedCalled);
-  END_TEST;
-}
-
-int UtcDaliInteractiveViewOnPressedChangedVirtualP(void)
-{
-  UiTestApplication application;
-
-  auto impl = TestInteractiveViewImpl::New();
-
-  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
-
-  // Touch down
-  Dali::Integration::TouchEvent touchDown;
-  Dali::Integration::Point      point;
-  point.SetState(PointState::DOWN);
-  point.SetScreenPosition(Vector2(50.0f, 50.0f));
-  point.SetDeviceId(1);
-  point.SetDeviceClass(Device::Class::TOUCH);
-  point.SetDeviceSubclass(Device::Subclass::NONE);
-  touchDown.points.push_back(point);
-  touchDown.time = 100;
-  application.ProcessEvent(touchDown);
-
-  DALI_TEST_CHECK(impl->pressedChangedCalled);
-  DALI_TEST_CHECK(impl->pressedValue);
-  END_TEST;
-}
-
-int UtcDaliInteractiveViewOnLongPressedVirtualP(void)
-{
-  UiTestApplication application;
-
-  auto impl = TestInteractiveViewImpl::New();
-
-  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
-
-  TestGenerateLongPress(application, 50.0f, 50.0f);
-
-  DALI_TEST_CHECK(impl->longPressedCalled);
-  END_TEST;
-}
-
-int UtcDaliInteractiveViewOnLongPressedSuppressesClickP(void)
-{
-  UiTestApplication application;
-
-  auto impl                 = TestInteractiveViewImpl::New();
-  impl->longPressedConsumed = true;
-
-  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
+  InteractiveView view = CreateTestInteractiveView(application);
 
   ClickedSignalData    clickData;
   ClickedSignalFunctor clickFunctor(clickData);
   view.ClickedSignal().Connect(&application, clickFunctor);
 
+  LongPressedSignalData    longPressData;
+  LongPressedSignalFunctor longPressFunctor(longPressData, true);
+  view.LongPressedSignal().Connect(&application, longPressFunctor);
+
   TestGenerateLongPress(application, 50.0f, 50.0f);
   TestEndLongPress(application, 50.0f, 50.0f);
 
-  DALI_TEST_CHECK(impl->longPressedCalled);
+  DALI_TEST_CHECK(longPressData.called);
   DALI_TEST_CHECK(!clickData.called);
-  END_TEST;
-}
-
-// ============================================================================
-// Virtual + Signal both called
-// ============================================================================
-
-int UtcDaliInteractiveViewVirtualAndSignalBothCalledP(void)
-{
-  UiTestApplication application;
-
-  auto impl = TestInteractiveViewImpl::New();
-
-  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
-
-  ClickedSignalData    signalData;
-  ClickedSignalFunctor signalFunctor(signalData);
-  view.ClickedSignal().Connect(&application, signalFunctor);
-
-  TestGenerateTap(application, 50.0f, 50.0f, 100);
-
-  // Both virtual and signal should be called
-  DALI_TEST_CHECK(impl->clickedCalled);
-  DALI_TEST_CHECK(signalData.called);
   END_TEST;
 }
 

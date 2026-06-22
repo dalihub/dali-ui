@@ -26,10 +26,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Integration
-{
 class InteractiveViewImpl;
-}
 
 /**
  * @brief InteractiveView is a View subclass with interactive behavior built in.
@@ -265,7 +262,7 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The InteractiveView implementation
    */
-  explicit DALI_UI_API InteractiveView(Integration::InteractiveViewImpl& implementation);
+  explicit DALI_UI_API InteractiveView(InteractiveViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this InteractiveView from an Internal::CustomActor pointer.
