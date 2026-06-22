@@ -365,7 +365,7 @@ emoji sequence 관련 코드를 수정한 에이전트는 최소한 다음을 �
 ## 금지 사항
 
 - 전체 Unicode full sweep을 기본 UTC 경로에 무조건 넣지 않는다.
-- emoji sequence UTC를 `utc-Dali-TextVisualizer-internal.cpp`에 추가하지 않는다.
+- emoji sequence UTC를 unrelated internal UTC file에 추가하지 않는다.
 - 비표준 VS/ZWJ fallback을 Strict Unicode conformance로 설명하지 않는다.
 - fixture를 CI에서 매번 latest로 다운로드하지 않는다.
 - sample pack을 visual test script에서 자동 생성하거나 Unicode chart를 자동 다운로드하지 않는다.

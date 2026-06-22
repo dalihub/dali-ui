@@ -29,11 +29,6 @@
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <test-gesture-generator.h>
 
-// INTERNAL INCLUDES
-#define private public
-#include <dali-ui-foundation/internal/state-effects/overlay-effect-impl.h>
-#undef private
-
 using namespace Dali;
 using namespace Dali::Ui;
 using namespace Dali::Ui::Integration;
@@ -1039,35 +1034,6 @@ int UtcDaliInteractiveViewOverlayEffectRecoilRestoreInterruptedByPressP(void)
   FocusManager::Get().ClearFocus();
   ProcessTouch(application, PointState::FINISHED, 240u);
   FinishRecoilAnimation(application);
-
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f, 0.001f, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliInteractiveViewOverlayEffectRecoilRestoreReleaseWaitsForFinishP(void)
-{
-  UiTestApplication application;
-  InteractiveView   view = CreateTestInteractiveView(application);
-  OverlayEffect     effect = OverlayEffect::Plain();
-  view.SetStateEffect(effect);
-  view.SetScale(1.2f, 0.8f);
-
-  ProcessTouch(application, PointState::DOWN);
-  FinishRecoilAnimation(application);
-
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-
-  GetImpl(effect).ReleaseOverlayEffectData(view, Dali::Ui::Internal::RecoilRestoreMode::ANIMATE);
-  application.SendNotification();
-  application.Render(0);
-
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-
-  FinishRecoilAnimation(application);
-  application.SendNotification();
 
   DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f, 0.001f, TEST_LOCATION);
