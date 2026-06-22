@@ -18,12 +18,12 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
@@ -36,26 +36,26 @@ namespace Ui
 class View;
 
 // Forward declarations
-namespace Integration
+namespace Internal
 {
-class SelectableTraitImpl;
+class CoreInteractionObject;
 }
 
 /**
  * @brief SelectableTrait is a state trait that provides selection behavior to a View.
  *
  * SelectableTrait manages a boolean selected state and emits a signal when
- * the state changes. It can optionally toggle the selected state on click
- * by leveraging the owner View's InteractiveTrait.
+ * the state changes.
  *
- * Unlike InteractiveTrait, SelectableTrait does not handle key events or focus
- * directly. It uses a separate reserved trait slot (SELECTABLE_TRAIT) and can
- * coexist with InteractiveTrait on the same View.
+ * Selectable implies Interactive. A View with SelectableTrait also has
+ * InteractiveTrait behavior such as click handling, pressed state handling, and
+ * interactive StateEffect attachment. SelectableTrait derives from
+ * InteractiveTrait so callers can use the returned handle for both selection
+ * APIs and interactive APIs such as ClickedSignal().
  *
- * @note When toggle-by-click is enabled and the owner View does not have a
- * InteractiveTrait, one is automatically created and attached.
+ * Internally both traits share the core interaction trait slot.
  */
-class DALI_UI_API SelectableTrait : public BaseHandle
+class DALI_UI_API SelectableTrait : public InteractiveTrait
 {
 public:
   // Typedefs
@@ -65,13 +65,6 @@ public: // Creation & Destruction
    * @brief Creates an uninitialized SelectableTrait handle.
    */
   SelectableTrait();
-
-  /**
-   * @brief Creates an initialized SelectableTrait.
-   *
-   * @return A handle to a newly allocated Dali resource
-   */
-  static SelectableTrait New();
 
   /**
    * @brief Downcasts a handle to SelectableTrait handle.
@@ -124,8 +117,7 @@ public: // API
    * @brief Sets the selection state of this View.
    *
    * If the new state differs from the current state, the SelectionChangedSignal
-   * is emitted. Subclass implementations (e.g. GroupSelectable) may veto or
-   * modify the state change.
+   * is emitted.
    *
    * @param[in] selected True to select, false to deselect
    */
@@ -144,8 +136,9 @@ public: // API
    * @brief Enables or disables toggle-by-click.
    *
    * When enabled, the SelectableTrait listens to the owner View's ClickedSignal
-   * and toggles the selected state on each click. If the owner View does not
-   * already have a InteractiveTrait, one is automatically created and attached.
+   * and toggles the selected state on each click. Disabling this option only
+   * disables automatic selection toggling; the inherited InteractiveTrait
+   * behavior remains attached to the owner View.
    *
    * @param[in] enabled True to enable toggle-by-click, false to disable
    */
@@ -153,11 +146,25 @@ public: // API
 
 public: // Not intended for application developers
   /**
-   * @brief Creates a handle using the Internal implementation.
+   * @brief Creates an internal SelectableTrait handle.
    *
-   * @param[in] implementation The implementation
+   * The returned handle stores a CoreInteractionObject and owns both interactive and selectable trait implementations.
+   * Application developers should obtain this trait through View::AsSelectable().
+   *
+   * @return A handle to a newly allocated SelectableTrait.
    */
-  explicit SelectableTrait(Integration::SelectableTraitImpl* implementation);
+  DALI_INTERNAL static SelectableTrait New();
+
+  /**
+   * @brief Creates a handle using the internal core interaction trait object.
+   *
+   * @param[in] container The core interaction trait object
+   * @return A handle to SelectableTrait
+   */
+  DALI_INTERNAL static SelectableTrait New(Internal::CoreInteractionObject* container);
+
+private:
+  explicit DALI_INTERNAL SelectableTrait(Internal::CoreInteractionObject* container);
 };
 
 } // namespace Ui

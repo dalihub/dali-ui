@@ -29,13 +29,9 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
-{
-class InteractiveTraitImpl;
-}
-
 namespace Internal
 {
+class InteractiveTraitImpl;
 
 class PendingPressManager : public ConnectionTracker
 {
@@ -43,15 +39,15 @@ public:
   static PendingPressManager& Get();
 
   bool HasPendingPress() const;
-  void AddPendingPress(Integration::InteractiveTraitImpl& trait, InputEvent pressEvent, uint32_t deviceId);
-  bool FinishPendingPress(Integration::InteractiveTraitImpl& trait, uint32_t deviceId, InputEvent releaseEvent);
-  bool CompletePendingPressWithDuration(Integration::InteractiveTraitImpl& trait, InputEvent releaseEvent);
-  bool HasPendingRelease(Integration::InteractiveTraitImpl& trait) const;
-  void ClearPendingPress(Integration::InteractiveTraitImpl& trait);
-  void ClearAll(Integration::InteractiveTraitImpl& trait);
-  void Cancel(Integration::InteractiveTraitImpl& trait);
+  void AddPendingPress(InteractiveTraitImpl& trait, InputEvent pressEvent, uint32_t deviceId);
+  bool FinishPendingPress(InteractiveTraitImpl& trait, uint32_t deviceId, InputEvent releaseEvent);
+  bool CompletePendingPressWithDuration(InteractiveTraitImpl& trait, InputEvent releaseEvent);
+  bool HasPendingRelease(InteractiveTraitImpl& trait) const;
+  void ClearPendingPress(InteractiveTraitImpl& trait);
+  void ClearAll(InteractiveTraitImpl& trait);
+  void Cancel(InteractiveTraitImpl& trait);
   void FlushPendingPress();
-  void FlushPendingPress(Integration::InteractiveTraitImpl& trait);
+  void FlushPendingPress(InteractiveTraitImpl& trait);
 
 private:
   PendingPressManager();
@@ -65,20 +61,20 @@ private:
   void OnDragStarted();
   void CancelPendingPress();
   void ClearPendingPress();
-  void SchedulePendingRelease(Integration::InteractiveTraitImpl& trait, InputEvent releaseEvent);
+  void SchedulePendingRelease(InteractiveTraitImpl& trait, InputEvent releaseEvent);
   void CompletePendingRelease();
   void ClearPendingRelease();
   void CancelPendingRelease();
 
 private:
-  Integration::InteractiveTraitImpl* mPendingPressTrait{nullptr};
-  InputEvent                         mPendingPressEvent;
-  uint32_t                           mPendingPressDeviceId{0u};
-  Timer                              mPendingPressTimer;
-  Integration::InteractiveTraitImpl* mPendingReleaseTrait{nullptr};
-  InputEvent                         mPendingReleaseEvent;
-  Timer                              mPendingReleaseTimer;
-  bool                               mPendingPressApplied{false};
+  InteractiveTraitImpl* mPendingPressTrait{nullptr};
+  InputEvent            mPendingPressEvent;
+  uint32_t              mPendingPressDeviceId{0u};
+  Timer                 mPendingPressTimer;
+  InteractiveTraitImpl* mPendingReleaseTrait{nullptr};
+  InputEvent            mPendingReleaseEvent;
+  Timer                 mPendingReleaseTimer;
+  bool                  mPendingPressApplied{false};
 };
 
 } // namespace Internal

@@ -22,14 +22,13 @@
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/events/long-press-gesture-detector.h>
 #include <dali/public-api/events/tap-gesture-detector.h>
-#include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
+#include <dali/public-api/signals/connection-tracker.h>
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/interactive-event-receiver-interface.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
 {
@@ -42,15 +41,12 @@ class InputEvent;
 namespace Internal
 {
 class PendingPressManager;
-}
-
-namespace Integration
-{
+class CoreInteractionObject;
 
 /**
- * @brief Internal implementation of Interaction trait.
+ * @brief Internal implementation of InteractiveTrait stored inside CoreInteractionObject.
  */
-class DALI_UI_API InteractiveTraitImpl : public TraitObject, public ConnectionTracker
+class InteractiveTraitImpl : public ConnectionTracker
 {
 public:
   /**
@@ -124,6 +120,11 @@ public: // API
    */
   void SetKeyClickPolicy(KeyClickPolicy policy);
 
+  /**
+   * @copydoc Dali::Ui::InteractiveTrait::~InteractiveTrait
+   */
+  virtual ~InteractiveTraitImpl();
+
 public: // InteractiveTrait
   /**
    * @brief Called when the view gains or loses key input focus.
@@ -154,29 +155,15 @@ public: // InteractiveTrait
 
 protected:
   /**
-   * @copydoc Dali::Ui::InteractiveTrait::~InteractiveTrait
-   */
-  virtual ~InteractiveTraitImpl() override;
-
-  /**
    * @brief Gets the owner view
    */
   View GetOwner() const;
 
-  /**
-   * @copydoc Dali::Ui::TraitObject::OnAttached
-   */
-  void OnAttached(TraitId id, View& view) override;
+  void OnAttached(View& view);
 
-  /**
-   * @copydoc Dali::Ui::TraitObject::OnDetaching
-   */
-  void OnDetaching(TraitId id, View& view) override;
+  void OnDetaching(View& view);
 
-  /**
-   * @copydoc Dali::Ui::TraitObject::OnViewDestroying
-   */
-  void OnViewDestroying(ViewImpl* viewImpl) override;
+  void OnViewDestroying(ViewImpl* viewImpl);
 
   /**
    * @brief This is called when touch input is received.
@@ -209,6 +196,7 @@ protected:
   virtual bool IsExecutionKey(const Dali::String& keyName) const;
 
 private:
+  friend class CoreInteractionObject;
   friend class Dali::Ui::Internal::PendingPressManager;
 
   bool OnTouchInternal(Actor actor, TouchEvent touchEvent);
@@ -242,17 +230,10 @@ private:
   bool                                 mClickBlockedByKey : 1;
 };
 
-} // namespace Integration
+} // namespace Internal
 
-inline DALI_UI_API Integration::InteractiveTraitImpl& GetImpl(InteractiveTrait& obj)
-{
-  return static_cast<Integration::InteractiveTraitImpl&>(obj.GetBaseObject());
-}
-
-inline DALI_UI_API const Integration::InteractiveTraitImpl& GetImpl(const InteractiveTrait& obj)
-{
-  return static_cast<const Integration::InteractiveTraitImpl&>(obj.GetBaseObject());
-}
+Internal::InteractiveTraitImpl&       GetImpl(InteractiveTrait& obj);
+const Internal::InteractiveTraitImpl& GetImpl(const InteractiveTrait& obj);
 
 } // namespace Ui
 

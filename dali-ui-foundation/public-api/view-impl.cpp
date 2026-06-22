@@ -41,7 +41,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
@@ -59,6 +58,7 @@
 #include <dali-ui-foundation/internal/views/state-effect-target-trait.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
+#include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
@@ -400,9 +400,12 @@ void ViewImpl::OnSceneConnection(int depth)
 {
   mImpl->OnSceneConnection();
 
-  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
+  if(auto* traitObject = mImpl->GetCoreInteractionObject())
   {
-    interactiveTrait->OnSceneConnection(View::DownCast(Self()));
+    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+    {
+      interactiveTraitImpl->OnSceneConnection(View::DownCast(Self()));
+    }
   }
 
   CreateClippingRenderer(*this);
@@ -439,9 +442,12 @@ void ViewImpl::OnSceneConnection(int depth)
 
 bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
 {
-  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
+  if(auto* traitObject = mImpl->GetCoreInteractionObject())
   {
-    return interactiveTrait->OnKeyEvent(View::DownCast(Self()), event);
+    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+    {
+      return interactiveTraitImpl->OnKeyEvent(View::DownCast(Self()), event);
+    }
   }
   return false;
 }
@@ -482,33 +488,25 @@ ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
 
 Ui::InteractiveTrait ViewImpl::EnsureInteractiveTrait()
 {
-  Ui::InteractiveTrait existing = GetKnownTraitHandle<Ui::InteractiveTrait>(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
+  auto* traitObject = mImpl->GetCoreInteractionObject();
 
-  if(!existing)
+  Ui::InteractiveTrait trait;
+
+  if(!traitObject)
   {
-    Ui::InteractiveTrait interaction = Ui::InteractiveTrait::New();
-    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT, AsTraitObject(interaction));
+    IntrusivePtr<Internal::CoreInteractionObject> newTraitObject = new Internal::CoreInteractionObject();
 
-    StateEffect existingEffect = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
-    if(existingEffect)
-    {
-      GetImpl(existingEffect).OnInteractiveAttached(View::DownCast(Self()));
-      RefreshDefaultFocusIndicatorSuppression();
-    }
-    else
-    {
-      StateEffect defaultEffect = UiConfig::GetCurrent().GetDefaultStateEffectForInteractive();
-      if(defaultEffect && !defaultEffect.IsNone())
-      {
-        ResetStateEffect(*this, defaultEffect);
-        GetImpl(defaultEffect).OnInteractiveAttached(View::DownCast(Self()));
-        RefreshDefaultFocusIndicatorSuppression();
-      }
-    }
-    return interaction;
+    traitObject = newTraitObject.Get();
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
+    trait = Ui::InteractiveTrait::New(traitObject);
+    AttachInteractiveStateEffect();
+  }
+  else
+  {
+    trait = Ui::InteractiveTrait::New(traitObject);
   }
 
-  return existing;
+  return trait;
 }
 
 void ViewImpl::SetStateEffect(StateEffect effect)
@@ -524,6 +522,25 @@ void ViewImpl::SetStateEffect(StateEffect effect)
     GetImpl(effect).OnInteractiveAttached(View::DownCast(Self()));
   }
   RefreshDefaultFocusIndicatorSuppression();
+}
+
+void ViewImpl::AttachInteractiveStateEffect()
+{
+  StateEffect existingEffect = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+  if(existingEffect)
+  {
+    GetImpl(existingEffect).OnInteractiveAttached(View::DownCast(Self()));
+    RefreshDefaultFocusIndicatorSuppression();
+    return;
+  }
+
+  StateEffect defaultEffect = UiConfig::GetCurrent().GetDefaultStateEffectForInteractive();
+  if(defaultEffect && !defaultEffect.IsNone())
+  {
+    ResetStateEffect(*this, defaultEffect);
+    GetImpl(defaultEffect).OnInteractiveAttached(View::DownCast(Self()));
+    RefreshDefaultFocusIndicatorSuppression();
+  }
 }
 
 bool ViewImpl::IsDefaultFocusIndicatorSuppressedByStateEffect() const
@@ -599,7 +616,8 @@ View ViewImpl::GetStateEffectTarget() const
 
 bool ViewImpl::IsInteractive() const
 {
-  return !!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::INTERACTION_TRAIT);
+  auto* traitObject = mImpl->GetCoreInteractionObject();
+  return traitObject && traitObject->GetInteractiveTraitImpl();
 }
 
 void ViewImpl::SetAttachment(AttachmentId id, UniqueAny attachment)
@@ -629,21 +647,27 @@ const UniqueAny* ViewImpl::GetAttachment(AttachmentId id) const
 
 Ui::SelectableTrait ViewImpl::EnsureSelectableTrait()
 {
-  Ui::SelectableTrait existing = GetKnownTraitHandle<Ui::SelectableTrait>(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
+  auto* traitObject = mImpl->GetCoreInteractionObject();
 
-  if(!existing)
+  if(!traitObject)
   {
-    Ui::SelectableTrait selectable = Ui::SelectableTrait::New();
-    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT, AsTraitObject(selectable));
-    return selectable;
+    IntrusivePtr<Internal::CoreInteractionObject> newTraitObject = new Internal::CoreInteractionObject();
+
+    traitObject = newTraitObject.Get();
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
+
+    Ui::SelectableTrait trait = Ui::SelectableTrait::New(traitObject);
+    AttachInteractiveStateEffect();
+    return trait;
   }
 
-  return existing;
+  return Ui::SelectableTrait::New(traitObject);
 }
 
 bool ViewImpl::IsSelectable() const
 {
-  return !!IntegrationView::GetTrait(*this, Integration::ReservedTraitId::SELECTABLE_TRAIT);
+  auto* traitObject = mImpl->GetCoreInteractionObject();
+  return traitObject && traitObject->GetSelectableTraitImpl();
 }
 
 void ViewImpl::NotifyFocusChanged(bool focused)
@@ -663,9 +687,12 @@ void ViewImpl::OnFocusChanged(bool focused)
   const bool focusIndicated = focusManager && GetImpl(focusManager).FocusChangedContext().focusIndicated;
   IntegrationView::SetState(*this, ViewState::FOCUSED + (focusIndicated ? ViewState::FOCUS_INDICATED : ViewState::NORMAL), focused, cause);
 
-  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
+  if(auto* traitObject = mImpl->GetCoreInteractionObject())
   {
-    interactiveTrait->OnFocusedChanged(View::DownCast(Self()), focused);
+    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+    {
+      interactiveTraitImpl->OnFocusedChanged(View::DownCast(Self()), focused);
+    }
   }
 
   EmitFocusChangedSignal(focused);
@@ -2773,9 +2800,12 @@ void ViewImpl::OnSceneDisconnection()
   // avoids stale pending work between disconnect and destruction.
   LayoutController::UnregisterFromAll(this);
 
-  if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
+  if(auto* traitObject = mImpl->GetCoreInteractionObject())
   {
-    interactiveTrait->OnSceneDisconnection(View::DownCast(Self()));
+    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+    {
+      interactiveTraitImpl->OnSceneDisconnection(View::DownCast(Self()));
+    }
   }
 
   mImpl->OnSceneDisconnection();
@@ -3047,9 +3077,12 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
 
       IntegrationView::SetState(*this, ViewState::DISABLED, !enabled);
 
-      if(auto* interactiveTrait = mImpl->GetInteractiveTrait())
+      if(auto* traitObject = mImpl->GetCoreInteractionObject())
       {
-        interactiveTrait->OnEnabledChanged(View::DownCast(Self()), enabled);
+        if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+        {
+          interactiveTraitImpl->OnEnabledChanged(View::DownCast(Self()), enabled);
+        }
       }
       break;
     }

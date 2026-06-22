@@ -37,9 +37,9 @@ namespace Ui
 class View;
 
 // Forward declarations
-namespace Integration
+namespace Internal
 {
-class InteractiveTraitImpl;
+class CoreInteractionObject;
 }
 
 /**
@@ -59,13 +59,6 @@ public: // Creation & Destruction
    * @brief Creates an uninitialized InteractiveTrait handle.
    */
   InteractiveTrait();
-
-  /**
-   * @brief Creates an initialized InteractiveTrait.
-   *
-   * @return A handle to a newly allocated Dali resource
-   */
-  static InteractiveTrait New();
 
   /**
    * @brief Downcasts a handle to InteractiveTrait handle.
@@ -256,11 +249,25 @@ public: // API
 
 public: // Not intended for application developers
   /**
-   * @brief Creates a handle using the Internal implementation.
+   * @brief Creates an internal InteractiveTrait handle.
    *
-   * @param[in] implementation The implementation
+   * The returned handle stores a CoreInteractionObject and owns an interactive trait implementation.
+   * Application developers should obtain this trait through View::AsInteractive().
+   *
+   * @return A handle to a newly allocated InteractiveTrait.
    */
-  explicit InteractiveTrait(Integration::InteractiveTraitImpl* implementation);
+  DALI_INTERNAL static InteractiveTrait New();
+
+  /**
+   * @brief Creates a handle using the internal core interaction trait object.
+   *
+   * @param[in] container The core interaction trait object
+   * @return A handle to InteractiveTrait
+   */
+  DALI_INTERNAL static InteractiveTrait New(Internal::CoreInteractionObject* container);
+
+protected:
+  explicit DALI_INTERNAL InteractiveTrait(Internal::CoreInteractionObject* container);
 };
 
 } // namespace Ui

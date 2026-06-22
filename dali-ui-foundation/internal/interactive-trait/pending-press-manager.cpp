@@ -19,8 +19,8 @@
 #include <dali-ui-foundation/internal/interactive-trait/pending-press-manager.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
+#include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
@@ -55,7 +55,7 @@ bool PendingPressManager::HasPendingPress() const
   return mPendingPressTrait != nullptr;
 }
 
-void PendingPressManager::AddPendingPress(Integration::InteractiveTraitImpl& trait, InputEvent pressEvent, uint32_t deviceId)
+void PendingPressManager::AddPendingPress(Internal::InteractiveTraitImpl& trait, InputEvent pressEvent, uint32_t deviceId)
 {
   CancelPendingPress();
   CompletePendingRelease();
@@ -66,7 +66,7 @@ void PendingPressManager::AddPendingPress(Integration::InteractiveTraitImpl& tra
   StartPendingPressTimer();
 }
 
-bool PendingPressManager::FinishPendingPress(Integration::InteractiveTraitImpl& trait, uint32_t deviceId, InputEvent releaseEvent)
+bool PendingPressManager::FinishPendingPress(Internal::InteractiveTraitImpl& trait, uint32_t deviceId, InputEvent releaseEvent)
 {
   if(mPendingPressTrait != &trait || mPendingPressDeviceId != deviceId)
   {
@@ -87,7 +87,7 @@ bool PendingPressManager::FinishPendingPress(Integration::InteractiveTraitImpl& 
   return true;
 }
 
-bool PendingPressManager::CompletePendingPressWithDuration(Integration::InteractiveTraitImpl& trait, InputEvent releaseEvent)
+bool PendingPressManager::CompletePendingPressWithDuration(Internal::InteractiveTraitImpl& trait, InputEvent releaseEvent)
 {
   if(mPendingPressTrait != &trait)
   {
@@ -104,12 +104,12 @@ bool PendingPressManager::CompletePendingPressWithDuration(Integration::Interact
   return true;
 }
 
-bool PendingPressManager::HasPendingRelease(Integration::InteractiveTraitImpl& trait) const
+bool PendingPressManager::HasPendingRelease(Internal::InteractiveTraitImpl& trait) const
 {
   return mPendingReleaseTrait == &trait;
 }
 
-void PendingPressManager::ClearPendingPress(Integration::InteractiveTraitImpl& trait)
+void PendingPressManager::ClearPendingPress(Internal::InteractiveTraitImpl& trait)
 {
   if(mPendingPressTrait == &trait)
   {
@@ -117,7 +117,7 @@ void PendingPressManager::ClearPendingPress(Integration::InteractiveTraitImpl& t
   }
 }
 
-void PendingPressManager::ClearAll(Integration::InteractiveTraitImpl& trait)
+void PendingPressManager::ClearAll(Internal::InteractiveTraitImpl& trait)
 {
   if(mPendingPressTrait == &trait)
   {
@@ -129,7 +129,7 @@ void PendingPressManager::ClearAll(Integration::InteractiveTraitImpl& trait)
   }
 }
 
-void PendingPressManager::Cancel(Integration::InteractiveTraitImpl& trait)
+void PendingPressManager::Cancel(Internal::InteractiveTraitImpl& trait)
 {
   if(mPendingPressTrait == &trait)
   {
@@ -151,7 +151,7 @@ void PendingPressManager::FlushPendingPress()
   }
 }
 
-void PendingPressManager::FlushPendingPress(Integration::InteractiveTraitImpl& trait)
+void PendingPressManager::FlushPendingPress(Internal::InteractiveTraitImpl& trait)
 {
   if(mPendingPressTrait == &trait)
   {
@@ -249,7 +249,7 @@ void PendingPressManager::ClearPendingPress()
   mPendingPressApplied  = false;
 }
 
-void PendingPressManager::SchedulePendingRelease(Integration::InteractiveTraitImpl& trait, InputEvent releaseEvent)
+void PendingPressManager::SchedulePendingRelease(Internal::InteractiveTraitImpl& trait, InputEvent releaseEvent)
 {
   CompletePendingRelease();
   mPendingReleaseTrait = &trait;

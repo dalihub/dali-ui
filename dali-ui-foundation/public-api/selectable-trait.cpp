@@ -17,9 +17,11 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/selectable-trait-impl.h>
+#include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
+#include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 
 namespace Dali
@@ -32,14 +34,8 @@ SelectableTrait::SelectableTrait()
 {
 }
 
-SelectableTrait SelectableTrait::New()
-{
-  IntrusivePtr<Integration::SelectableTraitImpl> impl = new Integration::SelectableTraitImpl();
-  return SelectableTrait(impl.Get());
-}
-
 SelectableTrait::SelectableTrait(const SelectableTrait& trait)
-: BaseHandle(trait)
+: InteractiveTrait(trait)
 {
 }
 
@@ -47,14 +43,50 @@ SelectableTrait::~SelectableTrait()
 {
 }
 
-SelectableTrait::SelectableTrait(Integration::SelectableTraitImpl* implementation)
-: BaseHandle(implementation)
+SelectableTrait SelectableTrait::New()
+{
+  IntrusivePtr<Internal::CoreInteractionObject> traitObject = new Internal::CoreInteractionObject();
+  return New(traitObject.Get());
+}
+
+SelectableTrait SelectableTrait::New(Internal::CoreInteractionObject* container)
+{
+  DALI_ASSERT_ALWAYS(container && "SelectableTrait::New requires CoreInteractionObject");
+  container->EnsureSelectableTraitImpl();
+  return SelectableTrait(container);
+}
+
+SelectableTrait::SelectableTrait(Internal::CoreInteractionObject* container)
+: InteractiveTrait(container)
 {
 }
 
 SelectableTrait SelectableTrait::DownCast(BaseHandle handle)
 {
-  return SelectableTrait(dynamic_cast<Integration::SelectableTraitImpl*>(handle.GetObjectPtr()));
+  if(auto* traitObject = dynamic_cast<Internal::CoreInteractionObject*>(handle.GetObjectPtr()))
+  {
+    return traitObject->GetSelectableTraitImpl() ? SelectableTrait(traitObject) : SelectableTrait();
+  }
+
+  return SelectableTrait();
+}
+
+Internal::SelectableTraitImpl& GetImpl(SelectableTrait& obj)
+{
+  BaseObject& baseObject  = obj.GetBaseObject();
+  auto&       traitObject = static_cast<Internal::CoreInteractionObject&>(baseObject);
+  auto*       traitImpl   = traitObject.GetSelectableTraitImpl();
+  DALI_ASSERT_ALWAYS(traitImpl && "SelectableTrait handle does not contain a SelectableTraitImpl");
+  return *traitImpl;
+}
+
+const Internal::SelectableTraitImpl& GetImpl(const SelectableTrait& obj)
+{
+  const BaseObject& baseObject  = obj.GetBaseObject();
+  auto&             traitObject = static_cast<const Internal::CoreInteractionObject&>(baseObject);
+  auto*             traitImpl   = traitObject.GetSelectableTraitImpl();
+  DALI_ASSERT_ALWAYS(traitImpl && "SelectableTrait handle does not contain a SelectableTraitImpl");
+  return *traitImpl;
 }
 
 Signal<void(View, bool, InputEvent)>& SelectableTrait::SelectionChangedSignal()

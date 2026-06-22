@@ -1078,6 +1078,11 @@ public: // Properties
   /**
    * @brief Attaches the selectable trait to this View.
    *
+   * Selectable implies Interactive. Calling this method also enables this View's
+   * interactive behavior, including click handling, pressed state handling, and
+   * the default StateEffect for interactive Views when no explicit StateEffect
+   * has been assigned.
+   *
    * A View can have at most one selectable trait. If the View already has a
    * SelectableTrait (e.g. from a previous AsSelectable call), the existing trait is reused.
    *

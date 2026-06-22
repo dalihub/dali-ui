@@ -15,14 +15,14 @@
  *
  */
 
-#include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>
-#include <test-gesture-generator.h>
+#include <dali.h>
 #include <dali/integration-api/events/touch-event-integ.h>
+#include <test-gesture-generator.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -34,12 +34,12 @@ namespace
 class TestStateEffectImpl : public StateEffectImpl
 {
 public:
-  int attachedCount{0};
-  int detachingCount{0};
-  int stateChangedCount{0};
-  int interactiveAttachedCount{0};
-  int targetChangedCount{0};
-  bool suppressDefaultFocusIndicator{false};
+  int         attachedCount{0};
+  int         detachingCount{0};
+  int         stateChangedCount{0};
+  int         interactiveAttachedCount{0};
+  int         targetChangedCount{0};
+  bool        suppressDefaultFocusIndicator{false};
   mutable int suppressQueryCount{0};
 
   void OnAttached(TraitId /*id*/, View& /*view*/) override
@@ -222,6 +222,22 @@ int UtcDaliStateEffectInteractiveAttachedP(void)
   END_TEST;
 }
 
+int UtcDaliStateEffectSelectableInteractiveAttachedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateTestView(application);
+
+  TestStateEffectImpl* impl   = nullptr;
+  StateEffect          effect = TestStateEffect::New(impl);
+
+  view.SetStateEffect(effect);
+  DALI_TEST_EQUALS(impl->interactiveAttachedCount, 0, TEST_LOCATION);
+
+  view.AsSelectable();
+  DALI_TEST_EQUALS(impl->interactiveAttachedCount, 1, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliStateEffectSetAfterInteractiveAttachedP(void)
 {
   UiTestApplication application;
@@ -277,8 +293,8 @@ int UtcDaliStateEffectDefaultFocusIndicatorSuppressionP(void)
   View              view = CreateTestView(application);
   view.SetFocusable(true);
 
-  TestStateEffectImpl* impl   = nullptr;
-  StateEffect          effect = TestStateEffect::New(impl);
+  TestStateEffectImpl* impl           = nullptr;
+  StateEffect          effect         = TestStateEffect::New(impl);
   impl->suppressDefaultFocusIndicator = true;
 
   view.SetStateEffect(effect);

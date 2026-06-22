@@ -18,14 +18,13 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/base-object.h>
 #include <dali/public-api/object/weak-handle.h>
+#include <dali/public-api/signals/connection-tracker.h>
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
 
 namespace Dali
 {
@@ -35,17 +34,19 @@ namespace Ui
 
 class InputEvent;
 
-namespace Integration
+namespace Internal
 {
+class CoreInteractionObject;
+
 /**
  * @brief Internal implementation of Selectable trait.
  *
- * SelectableTraitImpl manages the selected state of a View and optionally
+ * SelectableTraitImpl is stored inside CoreInteractionObject.
+ * It manages the selected state of a View and optionally
  * toggles selection on click by listening to the owner View's InteractiveTrait.
- * Unlike InteractiveTraitImpl, this uses a separate reserved trait slot
- * (SELECTABLE_TRAIT).
+ * It is installed as the selectable trait implementation inside CoreInteractionObject.
  */
-class DALI_UI_API SelectableTraitImpl : public TraitObject, public ConnectionTracker
+class SelectableTraitImpl : public ConnectionTracker
 {
 public:
   /**
@@ -80,43 +81,24 @@ public: // API
    */
   void EnableToggleByClick(bool enabled);
 
-protected:
   /**
    * @copydoc Dali::Ui::SelectableTrait::~SelectableTrait
    */
-  virtual ~SelectableTraitImpl() override;
+  virtual ~SelectableTraitImpl();
+
+protected:
+  friend class CoreInteractionObject;
 
   /**
    * @brief Gets the owner view
    */
   View GetOwner() const;
 
-  /**
-   * @copydoc Dali::Ui::TraitObject::OnAttached
-   */
-  void OnAttached(TraitId id, View& view) override;
+  void OnAttached(View& view);
 
-  /**
-   * @copydoc Dali::Ui::TraitObject::OnDetaching
-   */
-  void OnDetaching(TraitId id, View& view) override;
+  void OnDetaching(View& view);
 
-  /**
-   * @copydoc Dali::Ui::TraitObject::OnViewDestroying
-   */
-  void OnViewDestroying(ViewImpl* viewImpl) override;
-
-  /**
-   * @brief Called when the selection state is about to change.
-   *
-   * Subclasses (e.g. GroupSelectableTraitImpl) can override this to
-   * implement group deselection logic or to veto a selection change.
-   *
-   * @param[in] view The owner view
-   * @param[in] newSelected The proposed new selection state
-   * @return True to allow the change, false to reject it
-   */
-  virtual bool OnSelectionChanging(View view, bool newSelected);
+  void OnViewDestroying(ViewImpl* viewImpl);
 
 private:
   void EnsureClickableAndConnect();
@@ -132,17 +114,10 @@ private:
   bool                                 mAttached : 1;
 };
 
-} // namespace Integration
+} // namespace Internal
 
-inline DALI_UI_API Integration::SelectableTraitImpl& GetImpl(SelectableTrait& obj)
-{
-  return static_cast<Integration::SelectableTraitImpl&>(obj.GetBaseObject());
-}
-
-inline DALI_UI_API const Integration::SelectableTraitImpl& GetImpl(const SelectableTrait& obj)
-{
-  return static_cast<const Integration::SelectableTraitImpl&>(obj.GetBaseObject());
-}
+Internal::SelectableTraitImpl&       GetImpl(SelectableTrait& obj);
+const Internal::SelectableTraitImpl& GetImpl(const SelectableTrait& obj);
 
 } // namespace Ui
 

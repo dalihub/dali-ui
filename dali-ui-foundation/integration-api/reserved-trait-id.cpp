@@ -32,9 +32,8 @@ namespace Integration
 namespace ReservedTraitId
 {
 
-const TraitId INTERACTION_TRAIT   = TraitId::Alloc();
-const TraitId SELECTABLE_TRAIT    = TraitId::Alloc();
-const TraitId STATE_HANDLER_TRAIT = TraitId::Alloc();
+const TraitId CORE_INTERACTION_TRAITS = TraitId::Alloc();
+const TraitId STATE_HANDLER_TRAIT     = TraitId::Alloc();
 
 const TraitId ABSOLUTE_LAYOUT_PARAMS = TraitId::Alloc();
 const TraitId STACK_LAYOUT_PARAMS    = TraitId::Alloc();

@@ -536,6 +536,11 @@ public: // Non-virtual API (safe to reorder / extend)
   void RefreshDefaultFocusIndicatorSuppression();
 
   /**
+   * @brief Applies the current or default StateEffect after this View becomes interactive.
+   */
+  void AttachInteractiveStateEffect();
+
+  /**
    * @brief Recomputes default focus indicator suppression if the given effect is currently attached.
    *
    * @param[in] effect The StateEffect implementation requesting invalidation

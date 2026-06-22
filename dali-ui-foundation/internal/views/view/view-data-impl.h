@@ -52,12 +52,11 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
-{
-class InteractiveTraitImpl;
-}
 namespace Internal
 {
+class InteractiveTraitImpl;
+class CoreInteractionObject;
+
 /// @brief Type-level animatable property index for effective UI scale.
 /// Defined here (not in the public View::Property enum) to keep it internal.
 /// Value matches Dali::Ui::View::ANIMATABLE_PROPERTY_START_INDEX + 500,
@@ -222,9 +221,9 @@ public:
   bool UnsetStateHandlerWhenNotProcessing(const Dali::String& id);
 
   /**
-   * @brief Returns the interactive trait pointer (may be null).
+   * @brief Returns the core interaction trait object pointer (may be null).
    */
-  Integration::InteractiveTraitImpl* GetInteractiveTrait() const;
+  Internal::CoreInteractionObject* GetCoreInteractionObject() const;
 
   /**
    * @brief Called when resources of view are ready.
@@ -605,7 +604,11 @@ public:
 
   // Trait storage
   std::vector<std::pair<TraitId, IntrusivePtr<TraitObject>>> mTraits;
-  Integration::InteractiveTraitImpl*                         mInteractiveTrait;
+
+  // Owned by mTraits through ReservedTraitId::CORE_INTERACTION_TRAITS so the trait object lifecycle
+  // continues to use the trait attachment hooks; cached here for fast framework
+  // access on input, focus, and state hot paths.
+  Internal::CoreInteractionObject* mCoreInteractionObject;
 
   std::unique_ptr<AccessibilityData>   mAccessibilityData;
   std::unique_ptr<VisualData>          mVisualData;

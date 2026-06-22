@@ -17,9 +17,11 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
+#include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
+#include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 
 namespace Dali
@@ -32,12 +34,6 @@ InteractiveTrait::InteractiveTrait()
 {
 }
 
-InteractiveTrait InteractiveTrait::New()
-{
-  IntrusivePtr<Integration::InteractiveTraitImpl> impl = new Integration::InteractiveTraitImpl();
-  return InteractiveTrait(impl.Get());
-}
-
 InteractiveTrait::InteractiveTrait(const InteractiveTrait& trait)
 : BaseHandle(trait)
 {
@@ -47,14 +43,50 @@ InteractiveTrait::~InteractiveTrait()
 {
 }
 
-InteractiveTrait::InteractiveTrait(Integration::InteractiveTraitImpl* implementation)
-: BaseHandle(implementation)
+InteractiveTrait InteractiveTrait::New()
+{
+  IntrusivePtr<Internal::CoreInteractionObject> traitObject = new Internal::CoreInteractionObject();
+  return New(traitObject.Get());
+}
+
+InteractiveTrait InteractiveTrait::New(Internal::CoreInteractionObject* container)
+{
+  DALI_ASSERT_ALWAYS(container && "InteractiveTrait::New requires CoreInteractionObject");
+  container->EnsureInteractiveTraitImpl();
+  return InteractiveTrait(container);
+}
+
+InteractiveTrait::InteractiveTrait(Internal::CoreInteractionObject* container)
+: BaseHandle(container)
 {
 }
 
 InteractiveTrait InteractiveTrait::DownCast(BaseHandle handle)
 {
-  return InteractiveTrait(dynamic_cast<Integration::InteractiveTraitImpl*>(handle.GetObjectPtr()));
+  if(auto* traitObject = dynamic_cast<Internal::CoreInteractionObject*>(handle.GetObjectPtr()))
+  {
+    return traitObject->GetInteractiveTraitImpl() ? InteractiveTrait(traitObject) : InteractiveTrait();
+  }
+
+  return InteractiveTrait();
+}
+
+Internal::InteractiveTraitImpl& GetImpl(InteractiveTrait& obj)
+{
+  BaseObject& baseObject  = obj.GetBaseObject();
+  auto&       traitObject = static_cast<Internal::CoreInteractionObject&>(baseObject);
+  auto*       traitImpl   = traitObject.GetInteractiveTraitImpl();
+  DALI_ASSERT_ALWAYS(traitImpl && "InteractiveTrait handle does not contain an InteractiveTraitImpl");
+  return *traitImpl;
+}
+
+const Internal::InteractiveTraitImpl& GetImpl(const InteractiveTrait& obj)
+{
+  const BaseObject& baseObject  = obj.GetBaseObject();
+  auto&             traitObject = static_cast<const Internal::CoreInteractionObject&>(baseObject);
+  auto*             traitImpl   = traitObject.GetInteractiveTraitImpl();
+  DALI_ASSERT_ALWAYS(traitImpl && "InteractiveTrait handle does not contain an InteractiveTraitImpl");
+  return *traitImpl;
 }
 
 Signal<void(View, bool, InputEvent)>& InteractiveTrait::PressedChangedSignal()

@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
+#include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/input-options.h>
@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
-namespace Dali::Ui::Integration
+namespace Dali::Ui::Internal
 {
 
 InteractiveTraitImpl::InteractiveTraitImpl()
@@ -257,7 +257,7 @@ View InteractiveTraitImpl::GetOwner() const
   return mOwner.GetHandle();
 }
 
-void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
+void InteractiveTraitImpl::OnAttached(View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "The trait can not be attached multiple target views");
   mOwner = view;
@@ -273,7 +273,7 @@ void InteractiveTraitImpl::OnAttached(TraitId id, View& view)
   }
 }
 
-void InteractiveTraitImpl::OnDetaching(TraitId id, View& view)
+void InteractiveTraitImpl::OnDetaching(View& view)
 {
   Internal::PendingPressManager::Get().Cancel(*this);
   DALI_ASSERT_ALWAYS(false && "The trait can not be detached once it attached to a view");
@@ -360,7 +360,7 @@ void InteractiveTraitImpl::OnTap(View view, TapGesture tap)
 
 void InteractiveTraitImpl::OnPressedChanged(View view, InputEvent inputEvent)
 {
-  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
+  if(auto* receiver = dynamic_cast<Integration::InteractiveEventReceiverInterface*>(&GetImpl(view)))
   {
     receiver->OnPressedChanged(view, mPressed, inputEvent);
   }
@@ -369,7 +369,7 @@ void InteractiveTraitImpl::OnPressedChanged(View view, InputEvent inputEvent)
 
 void InteractiveTraitImpl::OnClicked(View view, InputEvent inputEvent)
 {
-  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
+  if(auto* receiver = dynamic_cast<Integration::InteractiveEventReceiverInterface*>(&GetImpl(view)))
   {
     receiver->OnClicked(view, inputEvent);
   }
@@ -379,7 +379,7 @@ void InteractiveTraitImpl::OnClicked(View view, InputEvent inputEvent)
 bool InteractiveTraitImpl::OnLongPressed(View view, InputEvent inputEvent)
 {
   bool consumed = false;
-  if(auto* receiver = dynamic_cast<InteractiveEventReceiverInterface*>(&GetImpl(view)))
+  if(auto* receiver = dynamic_cast<Integration::InteractiveEventReceiverInterface*>(&GetImpl(view)))
   {
     consumed = receiver->OnLongPressed(view, inputEvent);
   }
@@ -476,4 +476,4 @@ bool InteractiveTraitImpl::ShouldKeyPressTriggerLongPressed() const
          (mPressedExecutionKeyCount >= UiConfig::GetCurrent().GetKeyLongPressThreshold());
 }
 
-} // namespace Dali::Ui::Integration
+} // namespace Dali::Ui::Internal

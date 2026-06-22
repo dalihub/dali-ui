@@ -48,11 +48,11 @@
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/integration-api/interactive-trait-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
+#include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
 #include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
@@ -341,9 +341,9 @@ TypeAction registerAction9(typeRegistration, ACTION_ACCESSIBILITY_READING_RESUME
 
 DALI_TYPE_REGISTRATION_END()
 
-Integration::InteractiveTraitImpl* AsInteractiveTraitImpl(TraitObject* object)
+Internal::CoreInteractionObject* AsCoreInteractionObject(TraitObject* object)
 {
-  return object ? dynamic_cast<Integration::InteractiveTraitImpl*>(object) : nullptr;
+  return object ? dynamic_cast<Internal::CoreInteractionObject*>(object) : nullptr;
 }
 
 } // unnamed namespace
@@ -411,7 +411,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mArrangeDirty(false),
   mSkipChildrenUpdate(false),
-  mInteractiveTrait(nullptr),
+  mCoreInteractionObject(nullptr),
   mAccessibilityData(nullptr),
   mVisualData(nullptr),
   mAttachments(nullptr),
@@ -487,17 +487,17 @@ void ViewDataImpl::SetTrait(TraitId id, IntrusivePtr<TraitObject> object)
 {
   Ui::View self = Ui::View::DownCast(mViewImpl.Self());
 
-  if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
+  if(id == Integration::ReservedTraitId::CORE_INTERACTION_TRAITS)
   {
-    if(mInteractiveTrait)
+    if(mCoreInteractionObject)
     {
-      DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be replaced once set");
+      DALI_ASSERT_ALWAYS(false && "Core interaction trait object cannot be replaced once set");
       return;
     }
-    auto* interactive = AsInteractiveTraitImpl(object.Get());
-    DALI_ASSERT_ALWAYS(interactive &&
-                       "Trait for ReservedTraitId::INTERACTION_TRAIT must be an InteractiveTraitImpl");
-    mInteractiveTrait = interactive;
+    auto* traitObject = AsCoreInteractionObject(object.Get());
+    DALI_ASSERT_ALWAYS(traitObject &&
+                       "Trait for ReservedTraitId::CORE_INTERACTION_TRAITS must be a CoreInteractionObject");
+    mCoreInteractionObject = traitObject;
   }
 
   for(auto& entry : mTraits)
@@ -542,9 +542,9 @@ IntrusivePtr<TraitObject> ViewDataImpl::GetTrait(TraitId id) const
 
 bool ViewDataImpl::RemoveTrait(TraitId id)
 {
-  if(id == Integration::ReservedTraitId::INTERACTION_TRAIT)
+  if(id == Integration::ReservedTraitId::CORE_INTERACTION_TRAITS)
   {
-    DALI_ASSERT_ALWAYS(false && "Interaction trait cannot be removed once set");
+    DALI_ASSERT_ALWAYS(false && "Core interaction trait object cannot be removed once set");
     return false;
   }
 
@@ -684,9 +684,9 @@ bool ViewDataImpl::UnsetStateHandlerWhenNotProcessing(const Dali::String& id)
   return existing->UnsetWhenNotProcessing(id.CStr());
 }
 
-Integration::InteractiveTraitImpl* ViewDataImpl::GetInteractiveTrait() const
+Internal::CoreInteractionObject* ViewDataImpl::GetCoreInteractionObject() const
 {
-  return mInteractiveTrait;
+  return mCoreInteractionObject;
 }
 
 ViewDataImpl& ViewDataImpl::Get(ViewImpl& viewImpl)

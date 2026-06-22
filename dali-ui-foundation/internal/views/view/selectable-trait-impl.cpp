@@ -16,26 +16,25 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/integration-api/selectable-trait-impl.h>
+#include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/reserved-trait-id.h>
-#include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
 
-namespace Dali::Ui::Integration
+namespace Dali::Ui::Internal
 {
 namespace
 {
 
 InteractiveTrait GetInteractiveTrait(ViewImpl& viewImpl)
 {
-  IntrusivePtr<TraitObject> object     = IntegrationView::GetTrait(viewImpl, ReservedTraitId::INTERACTION_TRAIT);
-  auto*                     baseObject = dynamic_cast<BaseObject*>(object.Get());
-  return baseObject ? InteractiveTrait::DownCast(BaseHandle(baseObject)) : InteractiveTrait();
+  auto* traitObject = ViewDataImpl::Get(viewImpl).GetCoreInteractionObject();
+  return traitObject ? InteractiveTrait::DownCast(BaseHandle(static_cast<BaseObject*>(traitObject))) : InteractiveTrait();
 }
 
 } // unnamed namespace
@@ -82,10 +81,7 @@ void SelectableTraitImpl::SetSelectedInternal(bool selected, InputEvent event)
     return;
   }
 
-  if(!OnSelectionChanging(owner, selected))
-  {
-    return;
-  }
+  // TODO: Consult group-selection policy before committing state.
 
   mSelected = selected;
   IntegrationView::SetState(GetImpl(owner), ViewState::SELECTED, selected, event);
@@ -124,7 +120,7 @@ View SelectableTraitImpl::GetOwner() const
   return mOwner.GetHandle();
 }
 
-void SelectableTraitImpl::OnAttached(TraitId id, View& view)
+void SelectableTraitImpl::OnAttached(View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "The trait can not be attached multiple target views");
   mOwner = view;
@@ -137,7 +133,7 @@ void SelectableTraitImpl::OnAttached(TraitId id, View& view)
   }
 }
 
-void SelectableTraitImpl::OnDetaching(TraitId id, View& view)
+void SelectableTraitImpl::OnDetaching(View& view)
 {
   DisconnectClickable();
   mAttached = false;
@@ -148,11 +144,6 @@ void SelectableTraitImpl::OnViewDestroying(ViewImpl* viewImpl)
 {
 }
 
-bool SelectableTraitImpl::OnSelectionChanging(View view, bool newSelected)
-{
-  return true;
-}
-
 void SelectableTraitImpl::EnsureClickableAndConnect()
 {
   View owner = mOwner.GetHandle();
@@ -161,12 +152,9 @@ void SelectableTraitImpl::EnsureClickableAndConnect()
     return;
   }
 
-  // Get or create InteractiveTrait on the owner view
-  InteractiveTrait clickable = owner.AsInteractive();
-  if(clickable)
-  {
-    clickable.ClickedSignal().Connect(this, &SelectableTraitImpl::OnClickedForToggle);
-  }
+  InteractiveTrait clickable = GetInteractiveTrait(GetImpl(owner));
+  DALI_ASSERT_ALWAYS(clickable && "SelectableTraitImpl requires InteractiveTrait");
+  clickable.ClickedSignal().Connect(this, &SelectableTraitImpl::OnClickedForToggle);
 }
 
 void SelectableTraitImpl::DisconnectClickable()
@@ -189,4 +177,4 @@ void SelectableTraitImpl::OnClickedForToggle(View view, InputEvent event)
   SetSelectedInternal(!mSelected, event);
 }
 
-} // namespace Dali::Ui::Integration
+} // namespace Dali::Ui::Internal
