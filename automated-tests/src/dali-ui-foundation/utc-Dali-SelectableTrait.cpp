@@ -22,7 +22,9 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/public-api/selectable-view-impl.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <test-gesture-generator.h>
 #include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/events/touch-event-integ.h>
@@ -37,6 +39,33 @@ namespace
 // ============================================================================
 // Signal callback helpers
 // ============================================================================
+
+struct ClickedSignalData
+{
+  ClickedSignalData()
+  : called(false)
+  {
+  }
+
+  bool called;
+  View view;
+};
+
+struct ClickedSignalFunctor
+{
+  ClickedSignalFunctor(ClickedSignalData& data)
+  : signalData(data)
+  {
+  }
+
+  void operator()(View view, InputEvent event)
+  {
+    signalData.called = true;
+    signalData.view   = view;
+  }
+
+  ClickedSignalData& signalData;
+};
 
 struct SelectionChangedSignalData
 {
@@ -78,6 +107,17 @@ struct SelectionChangedSignalFunctor
   SelectionChangedSignalData& signalData;
 };
 
+class TestSelectableViewImpl : public SelectableViewImpl
+{
+public:
+  static IntrusivePtr<TestSelectableViewImpl> New()
+  {
+    return new TestSelectableViewImpl();
+  }
+};
+
+Dali::TypeRegistration testSelectableViewImplTypeReg(typeid(TestSelectableViewImpl), typeid(SelectableViewImpl), nullptr);
+
 /**
  * @brief Helper to create a View, add it to the scene, attach selectable, and render.
  */
@@ -89,6 +129,23 @@ View CreateSelectableView(TestApplication& application, float width = 100.0f, fl
   view.SetPivot(Pivot::TOP_LEFT);
   view.SetParentOrigin(ParentOrigin::TOP_LEFT);
   view.AsSelectable();
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  return view;
+}
+
+SelectableView CreateSelectableViewFromImpl(TestApplication& application, IntrusivePtr<TestSelectableViewImpl> impl)
+{
+  SelectableView view(*impl);
+  impl->Initialize();
+
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
 
   application.GetScene().Add(view);
   application.SendNotification();
@@ -743,5 +800,71 @@ int UtcDaliSelectableViewToggleByClickP(void)
   TestGenerateTap(application, 50.0f, 50.0f, 100);
 
   DALI_TEST_CHECK(view.IsSelected());
+  END_TEST;
+}
+
+int UtcDaliSelectableViewInheritedInteractiveApiP(void)
+{
+  UiTestApplication application;
+  SelectableView    view = SelectableView::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  ClickedSignalData    data;
+  ClickedSignalFunctor functor(data);
+  view.ClickedSignal().Connect(&application, functor);
+
+  view.SetClickable(false);
+  DALI_TEST_CHECK(!view.IsClickable());
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+  DALI_TEST_CHECK(!data.called);
+
+  view.SetClickable(true);
+  view.SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(view.GetKeyClickPolicy()),
+                   static_cast<uint32_t>(KeyClickPolicy::ON_RELEASE),
+                   TEST_LOCATION);
+
+  TestGenerateTap(application, 50.0f, 50.0f, 300);
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
+  END_TEST;
+}
+
+int UtcDaliSelectableViewImplSubclassSmokeP(void)
+{
+  UiTestApplication application;
+
+  auto           impl = TestSelectableViewImpl::New();
+  SelectableView view = CreateSelectableViewFromImpl(application, impl);
+
+  DALI_TEST_CHECK(view.IsInteractive());
+  DALI_TEST_CHECK(view.IsSelectable());
+  DALI_TEST_CHECK(!view.IsSelected());
+
+  SelectionChangedSignalData    selectionData;
+  SelectionChangedSignalFunctor selectionFunctor(selectionData);
+  view.SelectionChangedSignal().Connect(&application, selectionFunctor);
+
+  view.SetSelected(true);
+  DALI_TEST_CHECK(view.IsSelected());
+  DALI_TEST_CHECK(selectionData.called);
+  DALI_TEST_CHECK(selectionData.selected);
+  DALI_TEST_CHECK(selectionData.view == view);
+
+  ClickedSignalData    clickData;
+  ClickedSignalFunctor clickFunctor(clickData);
+  view.ClickedSignal().Connect(&application, clickFunctor);
+
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+  DALI_TEST_CHECK(clickData.called);
+  DALI_TEST_CHECK(clickData.view == view);
   END_TEST;
 }

@@ -110,6 +110,36 @@ struct PressedChangedSignalFunctor
   PressedChangedSignalData& signalData;
 };
 
+struct PseudoDisabledChangedSignalData
+{
+  PseudoDisabledChangedSignalData()
+  : called(false),
+    pseudoDisabled(false)
+  {
+  }
+
+  bool called;
+  bool pseudoDisabled;
+  View view;
+};
+
+struct PseudoDisabledChangedSignalFunctor
+{
+  PseudoDisabledChangedSignalFunctor(PseudoDisabledChangedSignalData& data)
+  : signalData(data)
+  {
+  }
+
+  void operator()(View view, bool pseudoDisabled)
+  {
+    signalData.called         = true;
+    signalData.pseudoDisabled = pseudoDisabled;
+    signalData.view           = view;
+  }
+
+  PseudoDisabledChangedSignalData& signalData;
+};
+
 struct LongPressedSignalData
 {
   LongPressedSignalData()
@@ -148,11 +178,39 @@ struct LongPressedSignalFunctor
   LongPressedSignalData& signalData;
 };
 
+class TestInteractiveViewImpl : public InteractiveViewImpl
+{
+public:
+  static IntrusivePtr<TestInteractiveViewImpl> New()
+  {
+    return new TestInteractiveViewImpl();
+  }
+};
+
+Dali::TypeRegistration testInteractiveViewImplTypeReg(typeid(TestInteractiveViewImpl), typeid(InteractiveViewImpl), nullptr);
+
 InteractiveView CreateTestInteractiveView(TestApplication& application, float width = 100.0f, float height = 100.0f)
 {
   InteractiveView view = InteractiveView::New();
   view.SetRequestedWidth(width);
   view.SetRequestedHeight(height);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  return view;
+}
+
+InteractiveView CreateTestInteractiveViewFromImpl(TestApplication& application, IntrusivePtr<TestInteractiveViewImpl> impl)
+{
+  InteractiveView view(*impl);
+  impl->Initialize();
+
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
   view.SetPivot(Pivot::TOP_LEFT);
   view.SetParentOrigin(ParentOrigin::TOP_LEFT);
 
@@ -327,6 +385,23 @@ int UtcDaliInteractiveViewPseudoDisabledP(void)
 
   view.SetPseudoDisabled(false);
   DALI_TEST_CHECK(!view.IsPseudoDisabled());
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewPseudoDisabledChangedSignalP(void)
+{
+  UiTestApplication application;
+  InteractiveView   view = CreateTestInteractiveView(application);
+
+  PseudoDisabledChangedSignalData    data;
+  PseudoDisabledChangedSignalFunctor functor(data);
+  view.PseudoDisabledChangedSignal().Connect(&application, functor);
+
+  view.SetPseudoDisabled(true);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.pseudoDisabled);
+  DALI_TEST_CHECK(data.view == view);
   END_TEST;
 }
 
@@ -601,6 +676,36 @@ int UtcDaliInteractiveViewLongPressedSignalSuppressesClickP(void)
 
   DALI_TEST_CHECK(longPressData.called);
   DALI_TEST_CHECK(!clickData.called);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewImplSubclassSmokeP(void)
+{
+  UiTestApplication application;
+
+  auto            impl = TestInteractiveViewImpl::New();
+  InteractiveView view = CreateTestInteractiveViewFromImpl(application, impl);
+
+  DALI_TEST_CHECK(view.IsInteractive());
+  DALI_TEST_CHECK(view.IsClickable());
+
+  view.SetClickable(false);
+  DALI_TEST_CHECK(!view.IsClickable());
+
+  view.SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(view.GetKeyClickPolicy()),
+                   static_cast<uint32_t>(KeyClickPolicy::ON_PRESS),
+                   TEST_LOCATION);
+
+  ClickedSignalData    data;
+  ClickedSignalFunctor functor(data);
+  view.ClickedSignal().Connect(&application, functor);
+
+  view.SetClickable(true);
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
   END_TEST;
 }
 
