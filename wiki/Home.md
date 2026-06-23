@@ -29,14 +29,17 @@ DALi handles screen composition and rendering, and is organized into `dali-core`
 
 ## API Levels
 
-DALi exposes two API levels with different stability guarantees and intended audiences:
+DALi exposes three API levels with different stability guarantees and intended audiences:
 
 | Level | Location | Audience | ABI Stability |
 |---|---|---|---|
 | **Public API** | `public-api/` | App developers | **Guaranteed** — must not break across releases |
+| **Provider API** | `provider-api/` | DALi UI module providers | **Guaranteed** — must not break across releases |
 | **Integration API** | `integration-api/` | Framework developers | Not required — consumers rebuild alongside dali-ui |
 
 **As an app developer**, use only `public-api/`. This is the layer with guaranteed ABI stability.
+
+**As a DALi UI module provider**, use `provider-api/` when you need ABI-stable implementation-level extension points.
 
 **As a framework developer**, you may also depend on `integration-api/`, with the understanding
 that it may change between dali-ui versions and will require a rebuild.

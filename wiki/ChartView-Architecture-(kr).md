@@ -107,6 +107,7 @@ dali-ui-components/
 | 레이어 | 위치 | 가시성 |
 |--------|------|--------|
 | Public API | `public-api/chart/` | 앱 개발자 |
+| Provider API | `provider-api/` | DALi UI 모듈 제공자 |
 | Integration API | `integration-api/chart/` | 컴포넌트 기여자 |
 | 렌더링 헬퍼 | `integration-api/chart/` | `ChartViewImpl` 내부용 |
 | DALi UI Foundation | `dali-ui-foundation/` | 공유 인프라 |
