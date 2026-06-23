@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
-#include <dali-ui-foundation/public-api/selectable-view-impl.h>
+#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <test-gesture-generator.h>

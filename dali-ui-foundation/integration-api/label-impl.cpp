@@ -34,11 +34,11 @@
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/integration-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/provider-api/property-registration-helper.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>

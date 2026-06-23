@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/selectable-view-impl.h>
+#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
 #include <dali-ui-foundation/public-api/selectable-view.h>
 
 namespace Dali

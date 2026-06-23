@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-#include <dali-ui-foundation/public-api/interactive-view-impl.h>
+#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
 #include <dali-ui-foundation/public-api/interactive-view.h>
 
 namespace Dali

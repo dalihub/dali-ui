@@ -48,10 +48,6 @@
 #include <dali-ui-foundation/public-api/view-types.h>
 #include <dali-ui-foundation/public-api/view.h>
 
-// Component implementation base classes
-#include <dali-ui-foundation/public-api/interactive-view-impl.h>
-#include <dali-ui-foundation/public-api/selectable-view-impl.h>
-
 #include <dali-ui-foundation/public-api/image-view.h>
 
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>

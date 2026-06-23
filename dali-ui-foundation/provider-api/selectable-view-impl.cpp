@@ -22,7 +22,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/selectable-view-impl.h>
+#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
 #include <dali-ui-foundation/public-api/selectable-view.h>
 
 namespace Dali

@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/interactive-view-impl.h>
+#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
 #include <dali-ui-foundation/public-api/selectable-view.h>
 

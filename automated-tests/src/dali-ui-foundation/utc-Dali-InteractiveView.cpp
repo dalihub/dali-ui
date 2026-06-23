@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/interactive-view-impl.h>
+#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-test-suite-utils.h>

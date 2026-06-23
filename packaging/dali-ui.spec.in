@@ -220,6 +220,8 @@ exit 0
 %defattr(-,root,root,-)
 %{_libdir}/pkgconfig/%{name}.pc
 %{dev_include_path}/dali-ui-foundation/dali-ui-foundation.h
+%{dev_include_path}/dali-ui-foundation/dali-ui-foundation-provider.h
+%{dev_include_path}/dali-ui-foundation/provider-api/*
 %{dev_include_path}/dali-ui-foundation/public-api/*
 %{_bindir}/dali-shader-generator
 

@@ -44,7 +44,7 @@
 #include <dali-ui-components/integration-api/chart/pie-series-impl.h>
 #include <dali-ui-components/public-api/chart/bar-series.h>
 #include <dali-ui-components/public-api/chart/pie-series.h>
-#include <dali-ui-foundation/integration-api/property-registration-helper.h>
+#include <dali-ui-foundation/provider-api/property-registration-helper.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 
 namespace Dali
