@@ -22,9 +22,28 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-test-suite-utils.h>
+#include <test-gesture-generator.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+namespace
+{
+// Creates an on-scene View sized for tapping at the scene origin.
+View CreateSceneView(UiTestApplication& application)
+{
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  view.SetProperty(Actor::Property::POSITION, Vector3(0.0f, 0.0f, 0.0f));
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+  return view;
+}
+} // namespace
 
 void utc_dali_selectabletrait_internal_startup(void)
 {
@@ -90,5 +109,55 @@ int UtcDaliSelectableTraitEnableToggleByClickP(void)
 
   selectable.EnableToggleByClick(false);
   DALI_TEST_CHECK(!selectable.IsToggleByClickEnabled());
+  END_TEST;
+}
+
+// With select-only-by-click set, a click is select-only: the first tap selects, a
+// second tap is a no-op (stays selected). A programmatic SetSelected(false) still unselects
+// because it does not go through the click path.
+int UtcDaliSelectableTraitSelectOnlyByClickP(void)
+{
+  UiTestApplication application;
+  View              view = CreateSceneView(application);
+
+  SelectableTrait selectable = view.AsSelectable();
+  DALI_TEST_CHECK(selectable.IsToggleByClickEnabled());
+  DALI_TEST_CHECK(!selectable.IsSelected());
+
+  // Make clicks select-only: now OnClickedForToggle only ever selects.
+  GetImpl(selectable).SetSelectOnlyByClick(true);
+  DALI_TEST_CHECK(GetImpl(selectable).IsSelectOnlyByClickEnabled());
+
+  // First tap selects.
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+  DALI_TEST_CHECK(selectable.IsSelected());
+
+  // Second tap is a no-op: still selected (a click can never unselect).
+  TestGenerateTap(application, 50.0f, 50.0f, 300);
+  DALI_TEST_CHECK(selectable.IsSelected());
+
+  // Programmatic SetSelected(false) is unaffected by the flag: it unselects.
+  selectable.SetSelected(false);
+  DALI_TEST_CHECK(!selectable.IsSelected());
+  END_TEST;
+}
+
+// With the select-only-by-click flag clear (the default), a click toggles the selected
+// state as usual: tap selects, tap again unselects.
+int UtcDaliSelectableTraitSelectOnlyByClickDefaultTogglesP(void)
+{
+  UiTestApplication application;
+  View              view = CreateSceneView(application);
+
+  SelectableTrait selectable = view.AsSelectable();
+  DALI_TEST_CHECK(!GetImpl(selectable).IsSelectOnlyByClickEnabled());
+
+  // First tap selects.
+  TestGenerateTap(application, 50.0f, 50.0f, 100);
+  DALI_TEST_CHECK(selectable.IsSelected());
+
+  // Second tap toggles back to unselected.
+  TestGenerateTap(application, 50.0f, 50.0f, 300);
+  DALI_TEST_CHECK(!selectable.IsSelected());
   END_TEST;
 }

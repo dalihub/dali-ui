@@ -670,6 +670,31 @@ bool ViewImpl::IsSelectable() const
   return traitObject && traitObject->GetSelectableTraitImpl();
 }
 
+Ui::GroupSelectableTrait ViewImpl::EnsureGroupSelectableTrait()
+{
+  auto* traitObject = mImpl->GetCoreInteractionObject();
+
+  if(!traitObject)
+  {
+    IntrusivePtr<Internal::CoreInteractionObject> newTraitObject = new Internal::CoreInteractionObject();
+
+    traitObject = newTraitObject.Get();
+    IntegrationView::SetTrait(*this, Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
+
+    Ui::GroupSelectableTrait trait = Ui::GroupSelectableTrait::New(traitObject);
+    AttachInteractiveStateEffect();
+    return trait;
+  }
+
+  return Ui::GroupSelectableTrait::New(traitObject);
+}
+
+bool ViewImpl::IsGroupSelectable() const
+{
+  auto* traitObject = mImpl->GetCoreInteractionObject();
+  return traitObject && traitObject->GetGroupSelectableTraitImpl();
+}
+
 void ViewImpl::NotifyFocusChanged(bool focused)
 {
   OnFocusChanged(focused);

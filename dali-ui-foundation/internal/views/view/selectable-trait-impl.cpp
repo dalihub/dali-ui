@@ -43,6 +43,7 @@ SelectableTraitImpl::SelectableTraitImpl()
 : mSelectionChangedSignal(),
   mSelected(false),
   mToggleByClickEnabled(true),
+  mSelectOnlyByClick(false),
   mAttached(false)
 {
 }
@@ -64,6 +65,11 @@ bool SelectableTraitImpl::IsSelected() const
 void SelectableTraitImpl::SetSelected(bool selected)
 {
   SetSelectedInternal(selected, InputEvent::Programmatic());
+}
+
+void SelectableTraitImpl::SetSelected(bool selected, InputEvent event)
+{
+  SetSelectedInternal(selected, event);
 }
 
 void SelectableTraitImpl::SetSelectedInternal(bool selected, InputEvent event)
@@ -113,6 +119,16 @@ void SelectableTraitImpl::EnableToggleByClick(bool enabled)
       DisconnectClickable();
     }
   }
+}
+
+bool SelectableTraitImpl::IsSelectOnlyByClickEnabled() const
+{
+  return mSelectOnlyByClick;
+}
+
+void SelectableTraitImpl::SetSelectOnlyByClick(bool selectOnly)
+{
+  mSelectOnlyByClick = selectOnly;
 }
 
 View SelectableTraitImpl::GetOwner() const
@@ -174,6 +190,11 @@ void SelectableTraitImpl::DisconnectClickable()
 
 void SelectableTraitImpl::OnClickedForToggle(View view, InputEvent event)
 {
+  if(mSelected && mSelectOnlyByClick)
+  {
+    // Select-only: keep an already-selected View selected; a click never unselects.
+    return;
+  }
   SetSelectedInternal(!mSelected, event);
 }
 

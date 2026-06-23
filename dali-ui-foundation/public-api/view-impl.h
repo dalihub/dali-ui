@@ -568,6 +568,16 @@ public: // Non-virtual API (safe to reorder / extend)
   bool IsSelectable() const;
 
   /**
+   * @brief Ensures this View has a group-selectable trait and returns it.
+   */
+  Ui::GroupSelectableTrait EnsureGroupSelectableTrait();
+
+  /**
+   * @copydoc Ui::View::IsGroupSelectable()
+   */
+  bool IsGroupSelectable() const;
+
+  /**
    * @copydoc Ui::View::SetAttachment()
    */
   DALI_INTERNAL void SetAttachment(AttachmentId id, UniqueAny attachment);

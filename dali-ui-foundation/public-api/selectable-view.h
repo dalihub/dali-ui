@@ -128,7 +128,7 @@ public: // API
   /**
    * @brief Sets the selection state.
    *
-   * @param[in] selected True to select, false to deselect
+   * @param[in] selected True to select, false to unselect
    * @see SelectableTrait::SetSelected
    */
   void SetSelected(bool selected);

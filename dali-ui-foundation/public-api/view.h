@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/public-api/attachment-id.h>
 #include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/group-selectable-trait.h>
 #include <dali-ui-foundation/public-api/interactive-trait.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
@@ -1125,6 +1126,23 @@ public: // Properties
   SelectableTrait AsSelectable();
 
   /**
+   * @brief Attaches the group-selectable trait to this View.
+   *
+   * GroupSelectable implies Selectable implies Interactive. Calling this method
+   * also enables this View's selectable behavior (a boolean selected state and
+   * SelectionChangedSignal) and its interactive behavior (click handling, pressed
+   * state, the default StateEffect for interactive Views).
+   *
+   * A View can have at most one group-selectable trait. If the View already has a
+   * GroupSelectableTrait, the existing trait is reused. Membership in a SelectionGroup
+   * is declarative: an on-scene View with no group name auto-joins its parent View's
+   * group, or GroupSelectableTrait::SetGroupName(name) joins a named group.
+   *
+   * @return GroupSelectableTrait handle
+   */
+  GroupSelectableTrait AsGroupSelectable();
+
+  /**
    * @brief Sets layout parameters on this View.
    *
    * The params handle is stored on the View as-is, and the View's
@@ -1499,6 +1517,13 @@ public: // Trait accessors (non-chaining)
    * @return True if this View has a SelectableTrait
    */
   bool IsSelectable() const;
+
+  /**
+   * @brief Returns whether this View has a group-selectable trait attached.
+   *
+   * @return True if this View has a GroupSelectableTrait
+   */
+  bool IsGroupSelectable() const;
 
 public: // VisualBase (non-chaining)
   /**

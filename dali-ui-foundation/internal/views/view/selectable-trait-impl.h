@@ -72,6 +72,18 @@ public: // API
   void SetSelected(bool selected);
 
   /**
+   * @brief Sets the selection state, carrying the originating input cause.
+   *
+   * Internal-only overload (not exposed on the public SelectableTrait handle) used by
+   * collaborators such as GroupSelectableTraitImpl to preserve the real click cause
+   * instead of substituting InputEvent::Programmatic().
+   *
+   * @param[in] selected True to select, false to unselect
+   * @param[in] event    The originating input cause
+   */
+  void SetSelected(bool selected, InputEvent event);
+
+  /**
    * @copydoc Dali::Ui::SelectableTrait::IsToggleByClickEnabled
    */
   bool IsToggleByClickEnabled() const;
@@ -80,6 +92,26 @@ public: // API
    * @copydoc Dali::Ui::SelectableTrait::EnableToggleByClick
    */
   void EnableToggleByClick(bool enabled);
+
+  /**
+   * @brief Returns whether clicks are select-only (a click can only select, never unselect).
+   * @return True if click-to-unselect is prevented
+   */
+  bool IsSelectOnlyByClickEnabled() const;
+
+  /**
+   * @brief Internal-only knob (not on the public SelectableTrait handle), used only by
+   * GroupSelectableTraitImpl.
+   *
+   * While set, OnClickedForToggle becomes select-only: a click keeps an already-selected
+   * View selected (never unselects). It does NOT touch toggle-by-click
+   * (mToggleByClickEnabled); if toggle-by-click is disabled the click path is inert.
+   * Programmatic SetSelected(false) and SelectionGroupImpl::ClearSelection() are unaffected
+   * (they bypass the click path).
+   *
+   * @param[in] selectOnly True to make clicks select-only, false for normal toggle
+   */
+  void SetSelectOnlyByClick(bool selectOnly);
 
   /**
    * @copydoc Dali::Ui::SelectableTrait::~SelectableTrait
@@ -111,6 +143,7 @@ private:
   Signal<void(View, bool, InputEvent)> mSelectionChangedSignal;
   bool                                 mSelected : 1;
   bool                                 mToggleByClickEnabled : 1;
+  bool                                 mSelectOnlyByClick : 1; ///< Internal-only (GroupSelectableTraitImpl). When set, OnClickedForToggle keeps a selected View selected; never touches toggle-by-click.
   bool                                 mAttached : 1;
 };
 

@@ -48,6 +48,11 @@ class CoreInteractionObject;
  * InteractiveTrait provides click, long-press, and pressed-state handling
  * functionality. It can be attached to any View to make it interactive.
  *
+ * @note InteractiveTrait, SelectableTrait, and GroupSelectableTrait are facets of a
+ * single shared interaction object on a View. Comparing handles with operator== compares
+ * that same underlying object, and DownCast is presence-based (does the requested facet's
+ * sub-implementation exist?) rather than identity-based.
+ *
  */
 class DALI_UI_API InteractiveTrait : public BaseHandle
 {

@@ -33,6 +33,7 @@
 #include <dali-ui-foundation/public-api/label.h>
 #include <dali-ui-foundation/public-api/overlay-effect.h>
 #include <dali-ui-foundation/public-api/selectable-view.h>
+#include <dali-ui-foundation/public-api/selection-group.h>
 #include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait-object.h>

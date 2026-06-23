@@ -429,7 +429,7 @@ int UtcDaliSelectableTraitToggleByClickP(void)
 
   data.Reset();
 
-  // Second tap: deselect
+  // Second tap: unselect
   TestGenerateTap(application, 50.0f, 50.0f, 300);
 
   DALI_TEST_CHECK(data.called);

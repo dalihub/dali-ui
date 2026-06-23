@@ -63,6 +63,23 @@ SelectableTraitImpl& CoreInteractionObject::EnsureSelectableTraitImpl()
   return *mSelectableTraitImpl;
 }
 
+GroupSelectableTraitImpl& CoreInteractionObject::EnsureGroupSelectableTraitImpl()
+{
+  EnsureSelectableTraitImpl();
+
+  if(!mGroupSelectableTraitImpl)
+  {
+    mGroupSelectableTraitImpl = std::make_unique<GroupSelectableTraitImpl>();
+
+    View owner = mOwner.GetHandle();
+    if(owner)
+    {
+      mGroupSelectableTraitImpl->OnAttached(owner);
+    }
+  }
+  return *mGroupSelectableTraitImpl;
+}
+
 InteractiveTraitImpl* CoreInteractionObject::GetInteractiveTraitImpl() const
 {
   return mInteractiveTraitImpl.get();
@@ -71,6 +88,11 @@ InteractiveTraitImpl* CoreInteractionObject::GetInteractiveTraitImpl() const
 SelectableTraitImpl* CoreInteractionObject::GetSelectableTraitImpl() const
 {
   return mSelectableTraitImpl.get();
+}
+
+GroupSelectableTraitImpl* CoreInteractionObject::GetGroupSelectableTraitImpl() const
+{
+  return mGroupSelectableTraitImpl.get();
 }
 
 void CoreInteractionObject::OnAttached(TraitId id, View& view)
@@ -87,10 +109,20 @@ void CoreInteractionObject::OnAttached(TraitId id, View& view)
   {
     mSelectableTraitImpl->OnAttached(view);
   }
+
+  if(mGroupSelectableTraitImpl)
+  {
+    mGroupSelectableTraitImpl->OnAttached(view);
+  }
 }
 
 void CoreInteractionObject::OnDetaching(TraitId id, View& view)
 {
+  if(mGroupSelectableTraitImpl)
+  {
+    mGroupSelectableTraitImpl->OnDetaching(view);
+  }
+
   if(mSelectableTraitImpl)
   {
     mSelectableTraitImpl->OnDetaching(view);
@@ -109,6 +141,11 @@ void CoreInteractionObject::OnViewDestroying(ViewImpl* viewImpl)
   if(mSelectableTraitImpl)
   {
     mSelectableTraitImpl->OnViewDestroying(viewImpl);
+  }
+
+  if(mGroupSelectableTraitImpl)
+  {
+    mGroupSelectableTraitImpl->OnViewDestroying(viewImpl);
   }
 }
 

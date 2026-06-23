@@ -22,6 +22,7 @@
 #include <memory>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/views/view/group-selectable-trait-impl.h>
 #include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
@@ -45,11 +46,13 @@ class CoreInteractionObject : public TraitObject
 public:
   CoreInteractionObject();
 
-  InteractiveTraitImpl& EnsureInteractiveTraitImpl();
-  SelectableTraitImpl&  EnsureSelectableTraitImpl();
+  InteractiveTraitImpl&     EnsureInteractiveTraitImpl();
+  SelectableTraitImpl&      EnsureSelectableTraitImpl();
+  GroupSelectableTraitImpl& EnsureGroupSelectableTraitImpl();
 
-  InteractiveTraitImpl* GetInteractiveTraitImpl() const;
-  SelectableTraitImpl*  GetSelectableTraitImpl() const;
+  InteractiveTraitImpl*     GetInteractiveTraitImpl() const;
+  SelectableTraitImpl*      GetSelectableTraitImpl() const;
+  GroupSelectableTraitImpl* GetGroupSelectableTraitImpl() const;
 
 protected:
   ~CoreInteractionObject() override;
@@ -59,9 +62,10 @@ protected:
   void OnViewDestroying(ViewImpl* viewImpl) override;
 
 private:
-  WeakHandle<View>                      mOwner;
-  std::unique_ptr<InteractiveTraitImpl> mInteractiveTraitImpl;
-  std::unique_ptr<SelectableTraitImpl>  mSelectableTraitImpl;
+  WeakHandle<View>                          mOwner;
+  std::unique_ptr<InteractiveTraitImpl>     mInteractiveTraitImpl;
+  std::unique_ptr<SelectableTraitImpl>      mSelectableTraitImpl;
+  std::unique_ptr<GroupSelectableTraitImpl> mGroupSelectableTraitImpl;
 };
 
 } // namespace Internal
