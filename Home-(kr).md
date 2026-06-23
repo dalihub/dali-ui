@@ -28,14 +28,17 @@ DALi는 앱의 화면 구성과 렌더링을 담당하며, 크게 `dali-core`, `
 
 ## API Levels
 
-DALi는 안정성 보장 수준과 대상 독자에 따라 두 가지 API 레벨을 제공합니다.
+DALi는 안정성 보장 수준과 대상 독자에 따라 세 가지 API 레벨을 제공합니다.
 
 | 레벨 | 위치 | 대상 | ABI 안정성 |
 |------|------|------|------------|
 | **Public API** | `public-api/` | 앱 개발자 | **보장** — 릴리즈 간 ABI가 깨져서는 안 됨 |
+| **Provider API** | `provider-api/` | DALi UI 모듈 제공자 | **보장** — 릴리즈 간 ABI가 깨져서는 안 됨 |
 | **Integration API** | `integration-api/` | Framework 개발자 | 불필요 — dali-ui와 함께 재빌드 가능 |
 
 **앱 개발자**라면 `public-api/`만 사용하세요. ABI 안정성이 보장되는 레이어입니다.
+
+**DALi UI 모듈 제공자**라면 ABI 안정성이 필요한 구현 레벨 확장 지점에 `provider-api/`를 사용하세요.
 
 **Framework 개발자**라면 `integration-api/`도 사용할 수 있습니다. 다만 dali-ui 버전 간에 변경될 수 있으며, 변경 시 재빌드가 필요합니다.
 
