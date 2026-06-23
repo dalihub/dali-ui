@@ -30,6 +30,17 @@ namespace Gradient
 {
 
 /**
+ * @brief The gradient authored value type.
+ */
+enum class Type : uint8_t
+{
+  NONE   = 0u, ///< No gradient type has been authored.
+  LINEAR = 1u, ///< Linear gradient.
+  RADIAL = 2u, ///< Radial gradient.
+  CONIC  = 3u, ///< Conic gradient.
+};
+
+/**
  * @brief The type of coordinate system for certain attributes of the points in a gradient.
  *
  * This applies to the:
@@ -39,7 +50,7 @@ namespace Gradient
  */
 enum class Units : uint8_t
 {
-  OBJECT_BOUNDING_BOX, ///< Uses the normals for the start, end & center points, i.e. top-left is (-0.5, -0.5) and
+  OBJECT_BOUNDING_BOX, ///< Uses normalized coordinates for the start, end & center points, i.e. top-left is (-0.5, -0.5) and
                        ///< bottom-right is (0.5, 0.5).
   USER_SPACE           ///< Uses the user coordinates for the start, end & center points, i.e. in a 200 by 200 view, top-left
                        ///< is (0, 0) and bottom-right is (200, 200).

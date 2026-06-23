@@ -59,8 +59,12 @@
 
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
+#include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-stop-node.h>
+#include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
+#include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>

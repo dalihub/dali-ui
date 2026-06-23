@@ -126,6 +126,55 @@ public: // Image buffer creation
                                        const int32_t verticalOffset, const TextAbstraction::GlyphIndex fromGlyphIndex,
                                        const TextAbstraction::GlyphIndex toGlyphIndex);
 
+  /**
+   * @brief Create & draw a L8 mask containing TextGradient target glyph coverage only.
+   *
+   * The mask includes default-color monochrome glyph fill. Explicit-color glyphs, renderable color glyphs and text
+   * styles are excluded.
+   *
+   * @param[in] bufferWidth The width of the image buffer.
+   * @param[in] bufferHeight The height of the image buffer.
+   * @param[in] ignoreHorizontalAlignment Whether to ignore the horizontal alignment, not ignored by default.
+   * @param[in] pixelFormat The format of the mask. The initial implementation uses Pixel::L8.
+   * @param[in] horizontalOffset The horizontal offset to be added to the glyph's position.
+   * @param[in] verticalOffset The vertical offset to be added to the glyph's position.
+   * @param[in] fromGlyphIndex The index of the first glyph within the text to be drawn.
+   * @param[in] toGlyphIndex The index of the last glyph within the text to be drawn.
+   *
+   * @return An image buffer containing TextGradient target glyph coverage only.
+   */
+  Devel::PixelBuffer CreateTextGradientMaskImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                                       const bool                        ignoreHorizontalAlignment,
+                                                       const Pixel::Format               pixelFormat,
+                                                       const int32_t                     horizontalOffset,
+                                                       const int32_t                     verticalOffset,
+                                                       const TextAbstraction::GlyphIndex fromGlyphIndex,
+                                                       const TextAbstraction::GlyphIndex toGlyphIndex);
+
+  /**
+   * @brief Create & draw a RGBA buffer containing TextGradient non-target glyphs only.
+   *
+   * Explicit-color glyphs and renderable color glyphs are preserved. Default-color monochrome glyphs are excluded.
+   *
+   * @param[in] bufferWidth The width of the image buffer.
+   * @param[in] bufferHeight The height of the image buffer.
+   * @param[in] ignoreHorizontalAlignment Whether to ignore the horizontal alignment, not ignored by default.
+   * @param[in] pixelFormat The format of the preserved buffer. The initial implementation uses Pixel::RGBA8888.
+   * @param[in] horizontalOffset The horizontal offset to be added to the glyph's position.
+   * @param[in] verticalOffset The vertical offset to be added to the glyph's position.
+   * @param[in] fromGlyphIndex The index of the first glyph within the text to be drawn.
+   * @param[in] toGlyphIndex The index of the last glyph within the text to be drawn.
+   *
+   * @return An image buffer containing TextGradient non-target glyphs only.
+   */
+  Devel::PixelBuffer CreateTextGradientPreservedImageBuffer(const uint32_t bufferWidth, const uint32_t bufferHeight,
+                                                            const bool                        ignoreHorizontalAlignment,
+                                                            const Pixel::Format               pixelFormat,
+                                                            const int32_t                     horizontalOffset,
+                                                            const int32_t                     verticalOffset,
+                                                            const TextAbstraction::GlyphIndex fromGlyphIndex,
+                                                            const TextAbstraction::GlyphIndex toGlyphIndex);
+
 private:
   std::unique_ptr<ViewModel>  mModel;
   TextAbstraction::FontClient mFontClient;

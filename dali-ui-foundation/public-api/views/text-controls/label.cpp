@@ -172,6 +172,26 @@ UiColor Label::GetTextColor()
   return GetImpl(*this).GetTextColor();
 }
 
+void Label::SetTextGradient(const Gradient::Base& gradient)
+{
+  GetImpl(*this).SetTextGradient(gradient);
+}
+
+Gradient::Base Label::GetTextGradient() const
+{
+  return GetImpl(*this).GetTextGradient();
+}
+
+void Label::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
+{
+  GetImpl(*this).SetTextGradientBoundsMode(mode);
+}
+
+Text::GradientBoundsMode Label::GetTextGradientBoundsMode() const
+{
+  return GetImpl(*this).GetTextGradientBoundsMode();
+}
+
 void Label::SetHorizontalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetHorizontalTextAlignment(alignment);

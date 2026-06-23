@@ -28,6 +28,7 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/public-api/actors/actor-enumerations.h>
+#include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
 
 namespace Dali
@@ -135,7 +136,8 @@ struct AsyncTextParameters
     isMarqueeMaxTextureExceeded{false},
     isCutoutEnabled{false},
     isBackgroundWithCutoutEnabled{false},
-    isEmbossEnabled{false}
+    isEmbossEnabled{false},
+    isTextGradientRequested{false}
   {
   }
 
@@ -226,6 +228,7 @@ struct AsyncTextParameters
   bool isCutoutEnabled : 1;               ///< Cutout enabled flag.
   bool isBackgroundWithCutoutEnabled : 1; ///< Background with cutout enabled flag.
   bool isEmbossEnabled : 1;               ///< Emboss enabled flag.
+  bool isTextGradientRequested : 1;       ///< Whether async render may generate TextGradient-only payloads.
 };
 
 struct AsyncTextRenderInfo
@@ -233,11 +236,15 @@ struct AsyncTextRenderInfo
   AsyncTextRenderInfo()
   : requestType(Async::RENDER_FIXED_SIZE),
     textPixelData(),
+    textGradientPreservedPixelData(),
+    textGradientMaskPixelData(),
     stylePixelData(),
     overlayStylePixelData(),
     maskPixelData(),
     marqueePixelData(),
     size(),
+    textLogicalBounds(0.0f, 0.0f, 1.0f, 1.0f),
+    textGradientMarqueeViewportBounds(0.0f, 0.0f, 1.0f, 1.0f),
     controlSize(),
     renderedSize(),
     lineCount(0),
@@ -245,6 +252,8 @@ struct AsyncTextRenderInfo
     hasMultipleTextColors(false),
     containsColorGlyph(false),
     styleEnabled(false),
+    styleTextureEnabled(false),
+    styleBlocksTextGradient(false),
     isOverlayStyle(false),
     isTextDirectionRTL(false),
     isCutoutEnabled(false),
@@ -257,18 +266,24 @@ struct AsyncTextRenderInfo
   }
   Async::RequestType requestType;
   PixelData          textPixelData;
+  PixelData          textGradientPreservedPixelData;
+  PixelData          textGradientMaskPixelData;
   PixelData          stylePixelData;
   PixelData          overlayStylePixelData;
   PixelData          maskPixelData;
   PixelData          marqueePixelData;
-  Size               size;         ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
-  Size               controlSize;  ///< View size used to display the rendered text.
-  Size               renderedSize; ///< Final displayed size reported back to the caller.
+  Size               size;                              ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
+  Vector4            textLogicalBounds;                 ///< Normalized logical text bounds inside @p size.
+  Vector4            textGradientMarqueeViewportBounds; ///< Normalized TextGradient bounds inside the visible marquee viewport.
+  Size               controlSize;                       ///< View size used to display the rendered text.
+  Size               renderedSize;                      ///< Final displayed size reported back to the caller.
   int                lineCount;
   float              marqueeWrapGap;
   bool               hasMultipleTextColors : 1;
   bool               containsColorGlyph : 1;
   bool               styleEnabled : 1;
+  bool               styleTextureEnabled : 1;
+  bool               styleBlocksTextGradient : 1;
   bool               isOverlayStyle : 1;
   bool               isTextDirectionRTL : 1;
   bool               isCutoutEnabled : 1;

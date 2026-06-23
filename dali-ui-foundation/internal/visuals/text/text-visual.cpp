@@ -40,6 +40,8 @@
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
+#include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
@@ -62,17 +64,23 @@ namespace
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
 DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_TEXT_ASYNC, false);
 
-const int CUSTOM_PROPERTY_COUNT(3); // uTextColorAnimatable, uHasMultipleTextColors, requireRender
+const int CUSTOM_PROPERTY_COUNT(7); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, TextGradient uniforms
 
 static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
 static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
                                                              22);
+static constexpr uint32_t TEXT_VISUAL_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 23);
 
 const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
   0.0f, // Text::Alignment::START
   0.5f, // Text::Alignment::CENTER
   1.0f  // Text::Alignment::END
 };
+
+constexpr const char* UNIFORM_TEXT_GRADIENT_START_POSITION_NAME = "uTextGradientStartPosition";
+constexpr const char* UNIFORM_TEXT_GRADIENT_END_POSITION_NAME   = "uTextGradientEndPosition";
+constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME   = "uTextGradientStartOffset";
+constexpr const char* UNIFORM_TEXT_GRADIENT_BOUNDS_NAME         = "uTextGradientBounds";
 
 #ifdef TRACE_ENABLED
 const char* GetRequestTypeName(Text::Async::RequestType type)
@@ -130,6 +138,11 @@ void OpacityConstraint(float& current, const PropertyInputContainer& inputs)
   {
     current = 1.0f;
   }
+}
+
+void GradientOffsetConstraint(float& current, const PropertyInputContainer& inputs)
+{
+  current = inputs[0]->GetFloat();
 }
 
 } // unnamed namespace
@@ -199,10 +212,14 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mController(Text::Controller::New()),
   mTypesetter(Text::Typesetter::New(mController->GetTextModel())),
   mAsyncTextInterface(nullptr),
+  mGradientRenderer(),
+  mLastGradientCoordSize(Vector2::ZERO),
+  mLastGradientBounds(Vector4::ZERO),
   mTextVisualShaderFactory(shaderFactory),
   mTextShaderFeatureCache(),
   mHasMultipleTextColorsIndex(Property::INVALID_INDEX),
   mAnimatableTextColorPropertyIndex(Property::INVALID_INDEX),
+  mGradientAnimOffsetIndex(Property::INVALID_INDEX),
   mTextColorAnimatableIndex(Property::INVALID_INDEX),
   mTextRequireRenderPropertyIndex(Property::INVALID_INDEX),
   mLineHeight(Text::LINE_HEIGHT_AUTO),
@@ -214,6 +231,8 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mRendererUpdateNeeded(false),
   mTextRequireRender(false),
   mIsConstraintAppliedAlways(false),
+  mGradientAnimApplyAlways(false),
+  mHasGradientContext(false),
   mIsTextLoadingTaskRunning(false),
   mIsNaturalSizeTaskRunning(false),
   mIsHeightForWidthTaskRunning(false)
@@ -370,6 +389,10 @@ void TextVisual::RemoveRenderer(Actor& actor, bool removeDefaultRenderer)
   }
   // Clear the renderer list
   mRendererList.clear();
+  mTextGradientMaskPixelData = PixelData();
+  mGradientRenderer          = VisualRenderer();
+  mHasGradientContext        = false;
+  RemoveGradientAnimConstraints();
 
   if(removeDefaultRenderer)
   {
@@ -443,6 +466,23 @@ void TextVisual::OnApplyFittingMode(const Vector2& controlSize, const Extents& p
 
   // Update control size without change transform.
   Visual::Base::OnApplyFittingMode(controlSize, padding, effectiveScale);
+}
+
+Vector4 TextVisual::CalculateTextGradientViewBounds(Ui::Visual::Base visual, const Vector2& coordinateSize)
+{
+  TextVisual& visualObject = GetVisualObject(visual);
+  Vector2     visualOffset = Vector2::ZERO;
+  if(visualObject.mImpl->mTransform)
+  {
+    visualOffset = visualObject.mImpl->mTransform->mOffset;
+  }
+  return Text::Internal::CalculateTextGradientViewBounds(coordinateSize, visualObject.mImpl->mControlSize, visualOffset);
+}
+
+Vector2 TextVisual::GetTextGradientVisualCoordinateSize(Ui::Visual::Base visual)
+{
+  TextVisual& visualObject = GetVisualObject(visual);
+  return visualObject.mImpl->GetTransformVisualSize(visualObject.mImpl->mControlSize);
 }
 
 void TextVisual::OnSetTransform()
@@ -672,24 +712,33 @@ void TextVisual::UpdateRenderer()
     if((relayoutSize.width > Math::MACHINE_EPSILON_1000) && (relayoutSize.height > Math::MACHINE_EPSILON_1000))
     {
       // Check whether it is a markup text with multiple text colors
-      const Vector4* const colorsBuffer          = mController->GetTextModel()->GetColors();
-      bool                 hasMultipleTextColors = (NULL != colorsBuffer);
+      const Vector4* const          colorsBuffer = mController->GetTextModel()->GetColors();
+      const Text::ColorIndex* const colorIndices = mController->GetTextModel()->GetColorIndices();
 
-      // Check whether the text contains any color glyph
-      bool containsColorGlyph = false;
-
-      TextAbstraction::FontClient  fontClient     = TextAbstraction::FontClient::Get();
-      const Text::GlyphInfo* const glyphsBuffer   = mController->GetTextModel()->GetGlyphs();
-      const Text::Length           numberOfGlyphs = mController->GetTextModel()->GetNumberOfGlyphs();
+      TextAbstraction::FontClient  fontClient            = TextAbstraction::FontClient::Get();
+      const Text::GlyphInfo* const glyphsBuffer          = mController->GetTextModel()->GetGlyphs();
+      const Text::Length           numberOfGlyphs        = mController->GetTextModel()->GetNumberOfGlyphs();
+      const bool                   hasColorIndexBuffer   = nullptr != colorsBuffer && nullptr != colorIndices;
+      bool                         hasMultipleTextColors = false;
+      bool                         containsColorGlyph    = false;
       for(Text::Length glyphIndex = 0; glyphIndex < numberOfGlyphs; glyphIndex++)
       {
-        // Retrieve the glyph's info.
-        const Text::GlyphInfo* const glyphInfo = glyphsBuffer + glyphIndex;
-
-        // Whether the current glyph is a color one.
-        if(Text::Internal::IsRenderableColorGlyph(fontClient, glyphInfo->fontId, glyphInfo->index))
+        if(hasColorIndexBuffer && *(colorIndices + glyphIndex) > 0u)
         {
-          containsColorGlyph = true;
+          hasMultipleTextColors = true;
+        }
+
+        if(!containsColorGlyph)
+        {
+          const Text::GlyphInfo* const glyphInfo = glyphsBuffer + glyphIndex;
+          if(Text::Internal::IsRenderableColorGlyph(fontClient, glyphInfo->fontId, glyphInfo->index))
+          {
+            containsColorGlyph = true;
+          }
+        }
+
+        if(hasMultipleTextColors && containsColorGlyph)
+        {
           break;
         }
       }
@@ -700,18 +749,19 @@ void TextVisual::UpdateRenderer()
 
       const bool outlineEnabled         = mController->GetTextModel()->IsOutlineEnabled();
       const bool backgroundEnabled      = mController->GetTextModel()->IsBackgroundEnabled();
-      const bool markupOrEnabled        = mController->IsMarkupProcessorEnabled();
-      const bool markupUnderlineEnabled = markupOrEnabled && mController->GetTextModel()->IsMarkupUnderlineSet();
+      const bool markupEnabled          = mController->IsMarkupProcessorEnabled();
+      const bool markupUnderlineEnabled = markupEnabled && mController->GetTextModel()->IsMarkupUnderlineSet();
       const bool markupStrikethroughEnabled =
-        markupOrEnabled && mController->GetTextModel()->IsMarkupStrikethroughSet();
+        markupEnabled && mController->GetTextModel()->IsMarkupStrikethroughSet();
       const bool underlineEnabled = mController->GetTextModel()->IsUnderlineEnabled() || markupUnderlineEnabled;
       const bool strikethroughEnabled =
         mController->GetTextModel()->IsStrikethroughEnabled() || markupStrikethroughEnabled;
       const bool backgroundMarkupSet         = mController->GetTextModel()->IsMarkupBackgroundColorSet();
       const bool cutoutEnabled               = mController->IsTextCutout();
       const bool backgroundWithCutoutEnabled = mController->GetTextModel()->IsBackgroundWithCutoutEnabled();
-      const bool styleEnabled                = (shadowEnabled || outlineEnabled || backgroundEnabled || markupOrEnabled ||
-                                 backgroundMarkupSet || cutoutEnabled || backgroundWithCutoutEnabled);
+      const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
+      const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
+      const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient || markupEnabled;
       const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
       const bool embossEnabled               = mController->IsEmbossEnabled();
 
@@ -750,8 +800,8 @@ void TextVisual::UpdateRenderer()
         }
       }
 
-      AddRenderer(control, relayoutSize, hasMultipleTextColors, containsColorGlyph, styleEnabled, isOverlayStyle,
-                  embossEnabled);
+      AddRenderer(control, relayoutSize, hasMultipleTextColors, containsColorGlyph, styleEnabled,
+                  styleTextureEnabled, styleBlocksTextGradient, isOverlayStyle, embossEnabled);
 
       // Text rendered and ready to display
       ResourceReady(Ui::Visual::ResourceStatus::READY);
@@ -989,19 +1039,46 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       .Add(Ui::Visual::Transform::Property::PIVOT, Ui::Align::TOP_BEGIN);
     SetTransformAndSize(visualTransform, textControlSize, parameters.effectiveTextScale);
 
-    Shader shader = GetTextShader(mFactoryCache, TextVisualShaderFeature::FeatureBuilder()
-                                                   .EnableMultiColor(renderInfo.hasMultipleTextColors)
-                                                   .EnableEmoji(renderInfo.containsColorGlyph)
-                                                   .EnableStyle(renderInfo.styleEnabled)
-                                                   .EnableOverlay(renderInfo.isOverlayStyle)
-                                                   .EnableEmboss(renderInfo.isEmbossEnabled));
+    // Get the maximum texture size.
+    const int  maxTextureSize   = Dali::GetMaxTextureSize();
+    const bool isHeightTiling   = renderInfo.size.height > static_cast<float>(maxTextureSize);
+    const bool isCutoutEnabled  = renderInfo.isCutoutEnabled || parameters.isCutoutEnabled;
+    const bool isMarqueeEnabled = parameters.isMarqueeEnabled;
+    const bool textGradientStyleBlocksComposition =
+      renderInfo.styleBlocksTextGradient ||
+      (isMarqueeEnabled && (renderInfo.styleTextureEnabled || renderInfo.isOverlayStyle));
+    const bool textGradientCompositionEnabled =
+      IsTextGradientCompositionSupported(renderInfo.size, renderInfo.hasMultipleTextColors,
+                                         renderInfo.containsColorGlyph, textGradientStyleBlocksComposition,
+                                         renderInfo.isOverlayStyle, renderInfo.isEmbossEnabled, isHeightTiling,
+                                         isMarqueeEnabled, isCutoutEnabled);
+    const bool textGradientMixedPixelDataAvailable =
+      renderInfo.textGradientPreservedPixelData && renderInfo.textGradientMaskPixelData;
+    const bool textGradientMixedCompositionEnabled =
+      IsTextGradientMixedCompositionSupported(renderInfo.size, renderInfo.hasMultipleTextColors,
+                                              renderInfo.containsColorGlyph, textGradientStyleBlocksComposition,
+                                              renderInfo.styleTextureEnabled, renderInfo.isOverlayStyle,
+                                              renderInfo.isEmbossEnabled, isHeightTiling,
+                                              isMarqueeEnabled, isCutoutEnabled) &&
+      textGradientMixedPixelDataAvailable;
+    const bool featureStyleEnabled =
+      textGradientCompositionEnabled ? renderInfo.styleTextureEnabled
+                                     : (textGradientMixedCompositionEnabled ? false : renderInfo.styleEnabled);
+
+    TextVisualShaderFeature::FeatureBuilder featureBuilder;
+    featureBuilder.EnableMultiColor(renderInfo.hasMultipleTextColors)
+      .EnableEmoji(renderInfo.containsColorGlyph)
+      .EnableStyle(featureStyleEnabled)
+      .EnableOverlay(renderInfo.isOverlayStyle)
+      .EnableEmboss(renderInfo.isEmbossEnabled)
+      .EnableTextGradient(textGradientCompositionEnabled)
+      .EnableTextGradientMixed(textGradientMixedCompositionEnabled);
+
+    Shader shader = GetTextShader(mFactoryCache, featureBuilder);
     mImpl->mRenderer.SetShader(shader);
 
     // Remove the texture set and any renderer previously set.
     RemoveRenderer(control, false);
-
-    // Get the maximum texture size.
-    const int maxTextureSize = Dali::GetMaxTextureSize();
 
     // No tiling required. Use the default renderer.
     if(renderInfo.size.height <= static_cast<float>(maxTextureSize))
@@ -1013,8 +1090,25 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       TextureSet textureSet = TextureSet::New();
 
       uint32_t textureSetIndex = 0u;
-      AddTexture(textureSet, renderInfo.textPixelData, sampler, textureSetIndex);
-      ++textureSetIndex;
+      if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
+      {
+        AddTexture(textureSet, renderInfo.textGradientPreservedPixelData, sampler, textureSetIndex);
+        ++textureSetIndex;
+        mTextGradientMaskPixelData = renderInfo.textGradientMaskPixelData;
+        AddTexture(textureSet, renderInfo.textGradientMaskPixelData, sampler, textureSetIndex);
+        ++textureSetIndex;
+        Text::Internal::TextGradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
+      }
+      else
+      {
+        AddTexture(textureSet, renderInfo.textPixelData, sampler, textureSetIndex);
+        ++textureSetIndex;
+
+        if(mTextShaderFeatureCache.IsEnabledTextGradient())
+        {
+          Text::Internal::TextGradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
+        }
+      }
 
       if(mTextShaderFeatureCache.IsEnabledStyle())
       {
@@ -1029,7 +1123,9 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
         ++textureSetIndex;
       }
 
-      if(mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor())
+      if(mTextShaderFeatureCache.IsEnabledEmoji() &&
+         !mTextShaderFeatureCache.IsEnabledMultiColor() &&
+         !mTextShaderFeatureCache.IsEnabledAnyTextGradient())
       {
         // Create a L8 texture as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
         AddTexture(textureSet, renderInfo.maskPixelData, sampler, textureSetIndex);
@@ -1039,6 +1135,12 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex,
                                    static_cast<float>(mTextShaderFeatureCache.IsEnabledMultiColor()));
       mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
+
+      if(mTextShaderFeatureCache.IsEnabledAnyTextGradient())
+      {
+        const Vector4 textBounds = ResolveTextGradientBounds(renderInfo.size, renderInfo.textLogicalBounds);
+        ApplyTextGradientUniforms(mImpl->mRenderer, renderInfo.size, textBounds);
+      }
 
       mRendererList.push_back(mImpl->mRenderer);
     }
@@ -1203,6 +1305,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     {
       // Apply constraint once after async text completed.
       SetConstraintApplyAlways(mIsConstraintAppliedAlways, true);
+      SetGradientAnimApplyAlways(mGradientAnimApplyAlways, true);
     }
   }
   else
@@ -1217,6 +1320,18 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 void TextVisual::SetAsyncTextInterface(Text::AsyncTextInterface* asyncTextInterface)
 {
   mAsyncTextInterface = asyncTextInterface;
+}
+
+void TextVisual::SetGradientAnimProperties(Property::Index startOffsetPropertyIndex)
+{
+  const bool changed = mGradientAnimOffsetIndex != startOffsetPropertyIndex;
+
+  mGradientAnimOffsetIndex = startOffsetPropertyIndex;
+
+  if(changed)
+  {
+    RebindGradientAnimConstraints();
+  }
 }
 
 void TextVisual::SetConstraintApplyAlways(bool applyAlways, bool notifyToConstraint)
@@ -1245,6 +1360,93 @@ void TextVisual::SetConstraintApplyAlways(bool applyAlways, bool notifyToConstra
         }
       }
     }
+  }
+}
+
+void TextVisual::SetGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint)
+{
+  if(mGradientAnimApplyAlways != applyAlways || notifyToConstraint)
+  {
+    mGradientAnimApplyAlways = applyAlways;
+
+    if(mControl.GetHandle())
+    {
+      for(auto& constraint : mGradientAnimConstraints)
+      {
+        if(constraint)
+        {
+          constraint.SetApplyRate(mGradientAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                           : Dali::Constraint::APPLY_ONCE);
+        }
+      }
+    }
+  }
+}
+
+void TextVisual::RemoveGradientAnimConstraints()
+{
+  for(auto& constraint : mGradientAnimConstraints)
+  {
+    if(constraint)
+    {
+      constraint.Remove();
+    }
+  }
+  mGradientAnimConstraints.clear();
+}
+
+void TextVisual::RebindGradientAnimConstraints()
+{
+  RemoveGradientAnimConstraints();
+
+  if(!mHasGradientContext ||
+     !mTextShaderFeatureCache.IsEnabledAnyTextGradient() ||
+     !mGradientRenderer ||
+     mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  const Vector2 startPosition =
+    Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units,
+                                                mTextGradientStyle.linearStart,
+                                                mLastGradientBounds,
+                                                mLastGradientCoordSize);
+  const Vector2 endPosition =
+    Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units,
+                                                mTextGradientStyle.linearEnd,
+                                                mLastGradientBounds,
+                                                mLastGradientCoordSize);
+
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, startPosition);
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, endPosition);
+  const Property::Index startOffsetIndex =
+    Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, mTextGradientStyle.startOffset);
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, mLastGradientBounds);
+
+  BindGradientAnimConstraints(mGradientRenderer, startOffsetIndex);
+}
+
+void TextVisual::BindGradientAnimConstraints(VisualRenderer& renderer,
+                                             Property::Index startOffsetIndex)
+{
+  Actor control = mControl.GetHandle();
+  if(!control || mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  const auto applyRate = mGradientAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                  : Dali::Constraint::APPLY_ONCE;
+
+  if(mGradientAnimOffsetIndex != Property::INVALID_INDEX)
+  {
+    Constraint constraint = Constraint::New<float>(renderer, startOffsetIndex, GradientOffsetConstraint);
+    constraint.AddSource(Source(control, mGradientAnimOffsetIndex));
+    constraint.SetApplyRate(applyRate);
+    Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_VISUAL_GRADIENT_START_OFFSET_CONSTRAINT_TAG);
+    constraint.Apply();
+    mGradientAnimConstraints.push_back(constraint);
   }
 }
 
@@ -1375,21 +1577,162 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
   return true;
 }
 
-void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultipleTextColors, bool containsColorGlyph,
-                             bool styleEnabled, bool isOverlayStyle, bool embossEnabled)
+bool TextVisual::IsTextGradientCompositionSupported(const Vector2& size, bool hasMultipleTextColors,
+                                                    bool containsColorGlyph, bool styleBlocksTextGradient,
+                                                    bool isOverlayStyle, bool embossEnabled, bool isHeightTiling,
+                                                    bool isMarqueeEnabled, bool isCutoutEnabled) const
 {
-  Shader shader = GetTextShader(mFactoryCache, TextVisualShaderFeature::FeatureBuilder()
-                                                 .EnableMultiColor(hasMultipleTextColors)
-                                                 .EnableEmoji(containsColorGlyph)
-                                                 .EnableStyle(styleEnabled)
-                                                 .EnableOverlay(isOverlayStyle)
-                                                 .EnableEmboss(embossEnabled));
+  (void)isOverlayStyle;
+  (void)isMarqueeEnabled;
+
+  if(!mTextGradientStyle.enabled ||
+     mTextGradientStyle.type != Dali::Ui::Gradient::Type::LINEAR ||
+     mTextGradientStyle.stops.Count() < 2u)
+  {
+    return false;
+  }
+
+  if(isHeightTiling || isCutoutEnabled)
+  {
+    return false;
+  }
+
+  if(hasMultipleTextColors || containsColorGlyph || styleBlocksTextGradient || embossEnabled)
+  {
+    return false;
+  }
+
+  if(size.width < Math::MACHINE_EPSILON_1000 || size.height < Math::MACHINE_EPSILON_1000)
+  {
+    return false;
+  }
+
+  const Vector2 gradientVector = mTextGradientStyle.linearEnd - mTextGradientStyle.linearStart;
+  return gradientVector.LengthSquared() > Math::MACHINE_EPSILON_1000;
+}
+
+bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bool hasMultipleTextColors,
+                                                         bool containsColorGlyph, bool styleBlocksTextGradient,
+                                                         bool styleTextureEnabled, bool isOverlayStyle,
+                                                         bool embossEnabled, bool isHeightTiling,
+                                                         bool isMarqueeEnabled, bool isCutoutEnabled) const
+{
+  if(!mTextGradientStyle.enabled ||
+     mTextGradientStyle.type != Dali::Ui::Gradient::Type::LINEAR ||
+     mTextGradientStyle.stops.Count() < 2u)
+  {
+    return false;
+  }
+
+  if(isHeightTiling || isMarqueeEnabled || isCutoutEnabled)
+  {
+    return false;
+  }
+
+  if(!(hasMultipleTextColors || containsColorGlyph) ||
+     styleBlocksTextGradient ||
+     styleTextureEnabled ||
+     isOverlayStyle ||
+     embossEnabled)
+  {
+    return false;
+  }
+
+  if(size.width < Math::MACHINE_EPSILON_1000 || size.height < Math::MACHINE_EPSILON_1000)
+  {
+    return false;
+  }
+
+  const Vector2 gradientVector = mTextGradientStyle.linearEnd - mTextGradientStyle.linearStart;
+  return gradientVector.LengthSquared() > Math::MACHINE_EPSILON_1000;
+}
+
+Vector4 TextVisual::CalculateTextGradientBounds(const Vector2& textureSize) const
+{
+  const Text::ModelInterface* const textModel = mController->GetTextModel();
+  return Text::Internal::CalculateTextGradientBounds(textureSize,
+                                                     textModel->GetLayoutSize(),
+                                                     textModel->GetLines(),
+                                                     textModel->GetNumberOfLines(),
+                                                     textModel->GetVerticalAlignment());
+}
+
+Vector4 TextVisual::ResolveTextGradientBounds(const Vector2& textureSize, const Vector4& contentBounds) const
+{
+  if(mTextGradientBoundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+  {
+    Vector2 visualOffset = Vector2::ZERO;
+    if(mImpl->mTransform)
+    {
+      visualOffset = mImpl->mTransform->mOffset;
+    }
+
+    return Text::Internal::CalculateTextGradientViewBounds(textureSize, mImpl->mControlSize, visualOffset);
+  }
+
+  return contentBounds;
+}
+
+void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds)
+{
+  const Vector2 startPosition =
+    Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.linearStart, textBounds, textureSize);
+  const Vector2 endPosition =
+    Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.linearEnd, textBounds, textureSize);
+
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, startPosition);
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, endPosition);
+  const Property::Index startOffsetIndex =
+    Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, mTextGradientStyle.startOffset);
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, textBounds);
+
+  mGradientRenderer      = renderer;
+  mLastGradientCoordSize = textureSize;
+  mLastGradientBounds    = textBounds;
+  mHasGradientContext    = true;
+
+  RemoveGradientAnimConstraints();
+  BindGradientAnimConstraints(renderer, startOffsetIndex);
+}
+
+void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultipleTextColors, bool containsColorGlyph,
+                             bool styleEnabled, bool styleTextureEnabled, bool styleBlocksTextGradient,
+                             bool isOverlayStyle, bool embossEnabled)
+{
+  // Get the maximum size.
+  const int  maxTextureSize   = Dali::GetMaxTextureSize();
+  const bool isHeightTiling   = size.height >= static_cast<float>(maxTextureSize);
+  const bool isMarqueeEnabled = mController->IsMarqueeEnabled();
+  const bool textGradientStyleBlocksComposition =
+    styleBlocksTextGradient ||
+    (isMarqueeEnabled && (styleTextureEnabled || isOverlayStyle));
+  const bool textGradientCompositionEnabled =
+    IsTextGradientCompositionSupported(size, hasMultipleTextColors, containsColorGlyph, textGradientStyleBlocksComposition,
+                                       isOverlayStyle, embossEnabled, isHeightTiling,
+                                       isMarqueeEnabled, mController->IsTextCutout());
+  const bool textGradientMixedCompositionEnabled =
+    IsTextGradientMixedCompositionSupported(size, hasMultipleTextColors, containsColorGlyph, textGradientStyleBlocksComposition,
+                                            styleTextureEnabled, isOverlayStyle, embossEnabled, isHeightTiling,
+                                            isMarqueeEnabled, mController->IsTextCutout());
+  const bool featureStyleEnabled =
+    textGradientCompositionEnabled ? styleTextureEnabled
+                                   : (textGradientMixedCompositionEnabled ? false : styleEnabled);
+
+  TextVisualShaderFeature::FeatureBuilder featureBuilder;
+  featureBuilder.EnableMultiColor(hasMultipleTextColors)
+    .EnableEmoji(containsColorGlyph)
+    .EnableStyle(featureStyleEnabled)
+    .EnableOverlay(isOverlayStyle)
+    .EnableEmboss(embossEnabled)
+    .EnableTextGradient(textGradientCompositionEnabled)
+    .EnableTextGradientMixed(textGradientMixedCompositionEnabled);
+
+  Shader shader = GetTextShader(mFactoryCache, featureBuilder);
   mImpl->mRenderer.SetShader(shader);
 
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_VISUAL_UPDATE_RENDERER");
 
-  // Get the maximum size.
-  const int maxTextureSize = Dali::GetMaxTextureSize();
+  mTextGradientMaskPixelData = PixelData();
 
   // No tiling required. Use the default renderer.
   if(size.height < maxTextureSize)
@@ -1399,6 +1742,12 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     mImpl->mRenderer.SetTextures(textureSet);
     mImpl->mRenderer.SetProperty(mHasMultipleTextColorsIndex, static_cast<float>(hasMultipleTextColors));
     mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
+
+    if(mTextShaderFeatureCache.IsEnabledAnyTextGradient())
+    {
+      const Vector4 textBounds = ResolveTextGradientBounds(size, CalculateTextGradientBounds(size));
+      ApplyTextGradientUniforms(mImpl->mRenderer, size, textBounds);
+    }
 
     mRendererList.push_back(mImpl->mRenderer);
   }
@@ -1573,6 +1922,22 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
   // Check the text direction
   Text::Direction textDirection   = mController->GetTextDirection();
   uint32_t        textureSetIndex = 0u;
+
+  if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
+  {
+    PixelData preservedData =
+      mTypesetter->RenderTextGradientPreserved(size, textDirection, false, Pixel::RGBA8888);
+    AddTexture(textureSet, preservedData, sampler, textureSetIndex);
+    ++textureSetIndex;
+
+    mTextGradientMaskPixelData = mTypesetter->RenderTextGradientMask(size, textDirection, false, Pixel::L8);
+    AddTexture(textureSet, mTextGradientMaskPixelData, sampler, textureSetIndex);
+    ++textureSetIndex;
+
+    Text::Internal::TextGradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
+    return textureSet;
+  }
+
   // Create a texture for the text without any styles
 
   Devel::PixelBuffer cutoutData;
@@ -1595,6 +1960,11 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
       mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
     AddTexture(textureSet, data, sampler, textureSetIndex);
     ++textureSetIndex;
+  }
+
+  if(mTextShaderFeatureCache.IsEnabledTextGradient())
+  {
+    Text::Internal::TextGradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
   }
 
   if(mTextShaderFeatureCache.IsEnabledStyle())

@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
@@ -135,6 +136,36 @@ public:
    * @copydoc Dali::Ui::Label::GetTextColor
    */
   UiColor GetTextColor();
+
+  /**
+   * @copydoc Dali::Ui::Label::SetTextGradient
+   */
+  void SetTextGradient(const Gradient::Base& gradient);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextGradient
+   */
+  Gradient::Base GetTextGradient() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetTextGradientBoundsMode
+   */
+  void SetTextGradientBoundsMode(Text::GradientBoundsMode mode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextGradientBoundsMode
+   */
+  Text::GradientBoundsMode GetTextGradientBoundsMode() const;
+
+  /**
+   * @brief Lazily registers the animatable TextGradient start offset source property.
+   *
+   * The property is registered on the Label actor using the same name as the
+   * renderer uniform, but it is not exposed through Label::Property.
+   *
+   * @return The registered property index.
+   */
+  Dali::Property::Index EnsureGradientAnimOffset();
 
   /**
    * @copydoc Dali::Ui::Label::SetHorizontalTextAlignment
@@ -821,6 +852,53 @@ private: // Implementation
   void RequestRendererUpdate();
 
   /**
+   * @brief Stops the current sync marquee so it can be rebuilt on the next relayout.
+   */
+  void RequestSyncMarqueeRestart();
+
+  /**
+   * @brief Updates the TextVisual with the current TextGradient snapshot.
+   */
+  void UpdateTextGradientStyle();
+
+  /**
+   * @brief Updates hidden TextGradient animation source properties from mTextGradient.
+   */
+  void SyncGradientAnimProperties();
+
+  /**
+   * @brief Returns true when the current TextGradient can drive the supported animation uniforms.
+   */
+  bool IsGradientAnimSupported() const;
+
+  /**
+   * @brief Binds current TextGradient animation source property indices to the TextVisual.
+   */
+  void BindGradientAnimProperties();
+
+  /**
+   * @brief Returns true when index is one of the hidden TextGradient animation source properties.
+   *
+   * @param[in] index The property index to check.
+   * @return True if the index is a TextGradient animation property.
+   */
+  bool IsGradientAnimProperty(Dali::Property::Index index) const;
+
+  /**
+   * @brief Updates TextGradient animation constraint apply rate on the visual and active scroller.
+   *
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  void SetGradientAnimApplyRate(bool notifyToConstraint = false);
+
+  /**
+   * @brief Adds cached TextGradient animation source property indices to scroller configuration.
+   *
+   * @param[in,out] textGradient The scroller TextGradient configuration.
+   */
+  void PopulateGradientAnimProperties(Text::TextScrollerTextGradient& textGradient) const;
+
+  /**
    * @brief Updates the effective line height based on the current LineHeightMode.
    */
   void UpdateLineHeight();
@@ -1110,21 +1188,28 @@ private:
   Text::TextScrollerPtr mTextScroller;
 
   Vector2                    mSize;
+  Vector2                    mLastMeasureConstraints;
+  Vector2                    mLastMeasureRequestedSize;
   Vector2                    mTouchPosition; ///< The initial touch down position.
   float                      mLineHeight;
   Text::LineHeightMode       mLineHeightMode;
   Text::OverflowMode         mOverflowMode;
   Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
+  Gradient::Base             mTextGradient;
+  Text::GradientBoundsMode   mTextGradientBoundsMode;
+  Dali::Property::Index      mGradientAnimOffsetIndex;
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;
+  int  mGradientAnimCount;
   bool mRendererUpdateNeeded : 1;     // Whether the text renderer needs to be updated.
   bool mMeasureInvalidated : 1;       // whether measurement has been invalidated.
   bool mIsAsyncRenderRequested : 1;   // whether an async render has been requested.
   bool mIsContentLayoutDirty : 1;     // Whether content size or padding has changed.
   bool mSuppressAutoMarquee : 1;      // whether automatic marquee evaluation is suppressed.
   bool mLastMarqueeEnabled : 1;       // whether manual marquee was enabled in the previous state.
-  bool mRestartMarquee : 1;           // whether sync marquee needs one-shot restart after UI scale changes.
+  bool mRestartMarquee : 1;           // whether sync marquee needs one-shot restart after measure-affecting changes.
+  bool mHasLastMeasureMetrics : 1;    // whether the last OnMeasure inputs have been captured.
   bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
   bool mHasAnchors : 1;               // whether the text has anchors.
   bool mIsVisible : 1;                // cached result of IsEffectivelyVisible().

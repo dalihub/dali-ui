@@ -17,6 +17,7 @@ SET(TC_SOURCES
         utc-Dali-View.cpp
         utc-Dali-ViewLayoutBoundary.cpp
         utc-Dali-Label.cpp
+        utc-Dali-LabelTextGradient.cpp
         utc-Dali-InputField.cpp
         utc-Dali-InputEditor.cpp
         utc-Dali-TextValueTypes.cpp
@@ -43,6 +44,7 @@ SET(TC_SOURCES
         utc-Dali-StackLayout.cpp
         utc-Dali-FlexLayout.cpp
         utc-Dali-GridLayout.cpp
+        utc-Dali-GradientValue.cpp
         utc-Dali-GradientVisual.cpp
         utc-Dali-AbsoluteLayout.cpp
         utc-Dali-LayoutController.cpp
@@ -55,6 +57,14 @@ SET(TC_SOURCES
         utc-Dali-VisualBase.cpp
         utc-Dali-WebView.cpp
         utc-Dali-CanvasView.cpp
+)
+
+ADD_CUSTOM_COMMAND(
+    COMMAND ../../scripts/tcheadgen.sh ${EXEC_NAME}.h
+    WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
+    OUTPUT ${EXEC_NAME}.h
+    DEPENDS ${TC_SOURCES} CMakeLists.txt ../../scripts/tcheadgen.sh ../../scripts/retriever.sh
+    COMMENT "Generating test tables for ${EXEC_NAME}"
 )
 
 LIST(APPEND TC_SOURCES
@@ -121,7 +131,7 @@ INCLUDE_DIRECTORIES(
 
 ADD_DEFINITIONS( -DADDON_LIBS_PATH=\"${CMAKE_CURRENT_BINARY_DIR}\" )
 
-ADD_EXECUTABLE(${EXEC_NAME} ${EXEC_NAME}.cpp ${TC_SOURCES})
+ADD_EXECUTABLE(${EXEC_NAME} ${EXEC_NAME}.h ${EXEC_NAME}.cpp ${TC_SOURCES})
 TARGET_LINK_LIBRARIES(${EXEC_NAME}
     ${${CAPI_LIB}_LIBRARIES}
     -lpthread -ldl --coverage -rdynamic

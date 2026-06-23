@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/internal/text/markup-processor/markup-processor.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
+#include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 
 namespace Dali
 {
@@ -873,23 +874,33 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   mTypesetter->SetFontClient(mModule.GetFontClient());
 
   // Check whether it is a markup text with multiple text colors
-  const Vector4* const colorsBuffer          = mTextModel->GetColors();
-  bool                 hasMultipleTextColors = (NULL != colorsBuffer);
+  const Vector4* const    colorsBuffer       = mTextModel->GetColors();
+  const ColorIndex* const colorIndicesBuffer = mTextModel->GetColorIndices();
 
-  // Check whether the text contains any color glyph
-  bool containsColorGlyph = false;
-
-  const Text::GlyphInfo* const glyphsBuffer   = mTextModel->GetGlyphs();
-  const Text::Length           numberOfGlyphs = mTextModel->GetNumberOfGlyphs();
+  const Text::GlyphInfo* const glyphsBuffer          = mTextModel->GetGlyphs();
+  const Text::Length           numberOfGlyphs        = mTextModel->GetNumberOfGlyphs();
+  const bool                   hasColorIndexBuffer   = nullptr != colorsBuffer && nullptr != colorIndicesBuffer;
+  TextAbstraction::FontClient& fontClient            = mModule.GetFontClient();
+  bool                         hasMultipleTextColors = false;
+  bool                         containsColorGlyph    = false;
   for(Text::Length glyphIndex = 0; glyphIndex < numberOfGlyphs; glyphIndex++)
   {
-    // Retrieve the glyph's info.
-    const Text::GlyphInfo* const glyphInfo = glyphsBuffer + glyphIndex;
-
-    // Whether the current glyph is a color one.
-    if(IsRenderableColorGlyph(mModule.GetFontClient(), glyphInfo->fontId, glyphInfo->index))
+    if(hasColorIndexBuffer && *(colorIndicesBuffer + glyphIndex) > 0u)
     {
-      containsColorGlyph = true;
+      hasMultipleTextColors = true;
+    }
+
+    if(!containsColorGlyph)
+    {
+      const Text::GlyphInfo* const glyphInfo = glyphsBuffer + glyphIndex;
+      if(IsRenderableColorGlyph(fontClient, glyphInfo->fontId, glyphInfo->index))
+      {
+        containsColorGlyph = true;
+      }
+    }
+
+    if(hasMultipleTextColors && containsColorGlyph)
+    {
       break;
     }
   }
@@ -908,8 +919,9 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool backgroundMarkupSet         = mTextModel->IsMarkupBackgroundColorSet();
   const bool cutoutEnabled               = mTextModel->IsCutoutEnabled();
   const bool backgroundWithCutoutEnabled = mTextModel->IsBackgroundWithCutoutEnabled();
-  const bool styleEnabled                = (shadowEnabled || outlineEnabled || backgroundEnabled || markupEnabled ||
-                             backgroundMarkupSet || cutoutEnabled || backgroundWithCutoutEnabled);
+  const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
+  const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
+  const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient || markupEnabled;
   const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
   const bool embossEnabled               = parameters.isEmbossEnabled;
 
@@ -974,6 +986,11 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     renderInfo.size = layoutSize;
   }
+  renderInfo.textLogicalBounds = CalculateTextGradientBounds(layoutSize,
+                                                             mTextModel->mVisualModel->GetLayoutSize(),
+                                                             mTextModel->mVisualModel->mLines.Begin(),
+                                                             mTextModel->mVisualModel->mLines.Count(),
+                                                             parameters.verticalAlignment);
 
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
@@ -1026,6 +1043,20 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     renderInfo.maskPixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
   }
+  if(parameters.isTextGradientRequested &&
+     (hasMultipleTextColors || containsColorGlyph) &&
+     !styleBlocksTextGradient &&
+     !styleTextureEnabled &&
+     !isOverlayStyle &&
+     !embossEnabled &&
+     !cutoutEnabled &&
+     !parameters.isMarqueeEnabled)
+  {
+    renderInfo.textGradientPreservedPixelData =
+      mTypesetter->RenderTextGradientPreserved(layoutSize, textDirection, false, Pixel::RGBA8888);
+    renderInfo.textGradientMaskPixelData =
+      mTypesetter->RenderTextGradientMask(layoutSize, textDirection, false, Pixel::L8);
+  }
   if(parameters.isMarqueeEnabled)
   {
     // This will be uploaded in async text interface's setup marquee.
@@ -1035,12 +1066,14 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                           Size(parameters.originWidth, parameters.originHeight));
   }
 
-  renderInfo.hasMultipleTextColors = hasMultipleTextColors;
-  renderInfo.containsColorGlyph    = containsColorGlyph;
-  renderInfo.styleEnabled          = styleEnabled;
-  renderInfo.isOverlayStyle        = isOverlayStyle;
-  renderInfo.lineCount             = mTextModel->GetNumberOfLines();
-  renderInfo.isEmbossEnabled       = embossEnabled;
+  renderInfo.hasMultipleTextColors   = hasMultipleTextColors;
+  renderInfo.containsColorGlyph      = containsColorGlyph;
+  renderInfo.styleEnabled            = styleEnabled;
+  renderInfo.styleTextureEnabled     = styleTextureEnabled;
+  renderInfo.styleBlocksTextGradient = styleBlocksTextGradient;
+  renderInfo.isOverlayStyle          = isOverlayStyle;
+  renderInfo.lineCount               = mTextModel->GetNumberOfLines();
+  renderInfo.isEmbossEnabled         = embossEnabled;
 
   if(cutoutEnabled)
   {
@@ -1471,6 +1504,13 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
   parameters.textHeight = verifiedSize.height;
 
   AsyncTextRenderInfo renderInfo = Render(parameters);
+  renderInfo.textGradientMarqueeViewportBounds =
+    CalculateMarqueeTextGradientViewportBounds(controlSize,
+                                               mTextModel->mVisualModel->GetLayoutSize(),
+                                               mTextModel->mVisualModel->mLines.Begin(),
+                                               mTextModel->mVisualModel->mLines.Count(),
+                                               parameters.horizontalAlignment,
+                                               parameters.verticalAlignment);
 
   parameters.textWidth  = actualWidth;
   parameters.textHeight = actualHeight;

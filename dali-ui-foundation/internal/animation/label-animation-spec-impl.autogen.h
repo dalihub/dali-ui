@@ -44,7 +44,8 @@ class DALI_UI_API LabelAnimationSpecImpl : public ViewAnimationSpecImpl
 public:
   static LabelAnimationSpecImplPtr New();
 
-
+  static void ApplyTextGradientStartOffsetTo(Animation& animation, Label view, const Entry& entry);
+  static void ApplyTextGradientStartOffsetBy(Animation& animation, Label view, const Entry& entry);
 
 protected:
   LabelAnimationSpecImpl();

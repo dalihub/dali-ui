@@ -21,13 +21,18 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/camera-actor.h>
 #include <dali/public-api/animation/animation.h>
+#include <dali/public-api/animation/constraint.h>
+#include <dali/public-api/math/vector2.h>
+#include <dali/public-api/math/vector4.h>
 #include <dali/public-api/render-tasks/render-task.h>
 #include <dali/public-api/rendering/renderer.h>
 #include <atomic>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali
@@ -40,6 +45,17 @@ class TextScroller;
 class ScrollerInterface;
 
 typedef IntrusivePtr<TextScroller> TextScrollerPtr;
+
+struct TextScrollerTextGradient
+{
+  bool            enabled{false};
+  Vector2         startPosition{Vector2::ZERO};
+  Vector2         endPosition{Vector2::ONE};
+  float           startOffset{0.0f};
+  Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized viewport-local bounds for TextGradient evaluation.
+  Property::Index startOffsetPropertyIndex{Property::INVALID_INDEX};
+  bool            applyConstraintsAlways{false};
+};
 
 /**
  * @brief A helper class for scrolling text
@@ -73,7 +89,8 @@ public:
   void SetParameters(Actor scrollingTextActor, Dali::Renderer renderer, TextureSet textureSet, const Size& controlSize,
                      const Size& textureSize, const float wrapGap, CharacterDirection direction,
                      Alignment horizontalAlignment, Alignment verticalAlignment,
-                     bool animationReStart = false);
+                     bool                            animationReStart = false,
+                     const TextScrollerTextGradient& textGradient     = TextScrollerTextGradient());
 
   /**
    * @brief Set the gap distance to elapse before the text wraps around
@@ -162,6 +179,14 @@ public:
    */
   bool IsScrolling() const;
 
+  /**
+   * @brief Sets whether TextGradient animation constraints should be applied every frame.
+   *
+   * @param[in] applyAlways True to use APPLY_ALWAYS, false to use APPLY_ONCE.
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  void SetGradientApplyAlways(bool applyAlways, bool notifyToConstraint = false);
+
 private: // Implementation
   /**
    * Constructor
@@ -194,22 +219,29 @@ private: // Implementation
    */
   void StartScrolling(Actor scrollingTextActor, float scrollAmount, float scrollDuration, int loopCount);
 
-private:
-  ScrollerInterface& mScrollerInterface; // Interface implemented by control that requires scrolling
-  Property::Index    mScrollDeltaIndex;  // Property used by shader to represent distance to scroll
-  Animation          mScrollAnimation;   // Animation used to update the mScrollDeltaIndex
-  Dali::Renderer     mRenderer;          // Renderer used to render the text
-  Shader             mShader;            // Shader originally used by the renderer while not scrolling
-  TextureSet         mTextureSet;        // Texture originally used by the renderer while not scrolling
+  /**
+   * @brief Removes TextGradient animation constraints from the current renderer.
+   */
+  void RemoveGradientConstraints();
 
-  int                      mScrollSpeed;          ///< Speed which text should automatically scroll at
-  int                      mLoopCount;            ///< Number of time the text should scroll
-  float                    mLoopDelay;            ///< Time delay of loop start
-  float                    mWrapGap;              ///< Gap before text wraps around when scrolling
-  Text::MarqueeStopMode    mStopMode;             ///< Stop mode of scrolling text, when loop count is 0.
-  Text::MarqueeOrientation mOrientation;          ///< Orientation of the marquee. (HORIZONTAL, VERTICAL)
-  bool                     mIsStopRequested : 1;  ///< Whether the stop scrolling has been triggered or not.
-  std::atomic<bool>        mIsStoppedImmediately; ///< Whether the stop is triggered by immediate stop.
+private:
+  ScrollerInterface&      mScrollerInterface;   // Interface implemented by control that requires scrolling
+  Property::Index         mScrollDeltaIndex;    // Property used by shader to represent distance to scroll
+  Animation               mScrollAnimation;     // Animation used to update the mScrollDeltaIndex
+  Dali::Renderer          mRenderer;            // Renderer used to render the text
+  Shader                  mShader;              // Shader originally used by the renderer while not scrolling
+  TextureSet              mTextureSet;          // Texture originally used by the renderer while not scrolling
+  std::vector<Constraint> mGradientConstraints; // Constraints for animated TextGradient uniforms.
+
+  int                      mScrollSpeed;             ///< Speed which text should automatically scroll at
+  int                      mLoopCount;               ///< Number of time the text should scroll
+  float                    mLoopDelay;               ///< Time delay of loop start
+  float                    mWrapGap;                 ///< Gap before text wraps around when scrolling
+  Text::MarqueeStopMode    mStopMode;                ///< Stop mode of scrolling text, when loop count is 0.
+  Text::MarqueeOrientation mOrientation;             ///< Orientation of the marquee. (HORIZONTAL, VERTICAL)
+  bool                     mIsStopRequested : 1;     ///< Whether the stop scrolling has been triggered or not.
+  bool                     mGradientApplyAlways : 1; ///< Whether TextGradient constraints need to be applied always.
+  std::atomic<bool>        mIsStoppedImmediately;    ///< Whether the stop is triggered by immediate stop.
 
 }; // TextScroller class
 

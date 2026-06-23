@@ -48,6 +48,31 @@ enum class Alignment : uint8_t
 };
 
 /**
+ * @brief Enumeration for selecting the bounds used to evaluate text gradient coordinates.
+ *
+ * The selected bounds define the target rectangle for Label TextGradient rendering.
+ * Gradient::Units then defines whether coordinates inside that rectangle are
+ * normalized or pixel-based.
+ */
+enum class GradientBoundsMode : uint8_t
+{
+  /**
+   * @brief Use laid-out text content bounds.
+   *
+   * This is the default mode. For marquee text, the visible marquee content
+   * viewport is used to keep the gradient stable while scrolling.
+   */
+  CONTENT_BOUND = 0,
+
+  /**
+   * @brief Use the Label view bounds.
+   *
+   * The full Label size is used, including padding.
+   */
+  VIEW_BOUND = 1
+};
+
+/**
  * @brief Enumeration for line wrapping strategies.
  *
  * Specifies how text is wrapped when the available layout width

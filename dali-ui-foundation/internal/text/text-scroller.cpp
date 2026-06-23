@@ -19,14 +19,20 @@
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 
 // EXTERNAL INCLUDES
+#include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
+#include <dali/public-api/animation/constraint.h>
+#include <string>
+#include <string_view>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
+#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 
 using Dali::Integration::ToDaliStringView;
 
@@ -41,6 +47,15 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 #endif
 
 const int MINIMUM_SCROLL_SPEED = 1; // Speed should be set by Property system.
+
+static constexpr const char* TEXT_GRADIENT_SHADER_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT\n";
+// Keep this tag separate from TextVisual gradient constraint tags because
+// TextScroller reuses the visual renderer while marquee is active.
+static constexpr uint32_t TEXT_SCROLLER_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 26u);
+constexpr const char*     UNIFORM_TEXT_GRADIENT_START_POSITION_NAME("uTextGradientStartPosition");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_END_POSITION_NAME("uTextGradientEndPosition");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME("uTextGradientStartOffset");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_BOUNDS_NAME("uTextGradientBounds");
 
 /**
  * @brief How the text should be aligned horizontally when scrolling the text.
@@ -80,6 +95,22 @@ const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1]
   0.0f,  // Alignment::CENTER
   0.5f   // Alignment::END
 };
+
+void GradientOffsetConstraint(float& current, const PropertyInputContainer& inputs)
+{
+  current = inputs[0]->GetFloat();
+}
+
+std::string BuildTextScrollerShaderSource(std::string_view shaderSource, bool textGradientEnabled)
+{
+  std::string shader;
+  if(textGradientEnabled)
+  {
+    shader += TEXT_GRADIENT_SHADER_DEFINE;
+  }
+  shader.append(shaderSource.data(), shaderSource.size());
+  return shader;
+}
 
 } // namespace
 
@@ -203,6 +234,34 @@ bool TextScroller::IsScrolling() const
   return (mScrollAnimation && mScrollAnimation.GetState() == Animation::PLAYING);
 }
 
+void TextScroller::SetGradientApplyAlways(bool applyAlways, bool notifyToConstraint)
+{
+  if(mGradientApplyAlways != applyAlways || notifyToConstraint)
+  {
+    mGradientApplyAlways = applyAlways;
+    for(auto& constraint : mGradientConstraints)
+    {
+      if(constraint)
+      {
+        constraint.SetApplyRate(mGradientApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                     : Dali::Constraint::APPLY_ONCE);
+      }
+    }
+  }
+}
+
+void TextScroller::RemoveGradientConstraints()
+{
+  for(auto& constraint : mGradientConstraints)
+  {
+    if(constraint)
+    {
+      constraint.Remove();
+    }
+  }
+  mGradientConstraints.clear();
+}
+
 TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
 : mScrollerInterface(scrollerInterface),
   mScrollDeltaIndex(Property::INVALID_INDEX),
@@ -213,6 +272,7 @@ TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
   mStopMode(Text::MarqueeStopMode::FINISH_LOOP),
   mOrientation(Text::MarqueeOrientation::HORIZONTAL),
   mIsStopRequested(false),
+  mGradientApplyAlways(false),
   mIsStoppedImmediately(false)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller Default Constructor\n");
@@ -235,12 +295,14 @@ TextScroller::~TextScroller()
 void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, TextureSet textureSet,
                                  const Size& controlSize, const Size& textureSize, const float wrapGap,
                                  CharacterDirection direction, Alignment horizontalAlignment,
-                                 Alignment verticalAlignment, bool animationReStart)
+                                 Alignment verticalAlignment, bool animationReStart,
+                                 const TextScrollerTextGradient& textGradient)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                 "TextScroller::SetParameters controlSize[%f,%f] textureSize[%f,%f] direction[%d]\n", controlSize.x,
                 controlSize.y, textureSize.x, textureSize.y, direction);
   mRenderer = renderer;
+  RemoveGradientConstraints();
 
   bool  isHorizontal      = mOrientation == Text::MarqueeOrientation::HORIZONTAL;
   float animationProgress = 0.0f;
@@ -271,14 +333,22 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   mTextureSet = mRenderer.GetTextures();
 
   // Set the shader and texture for scrolling
-  Shader shader =
-    isHorizontal
-      ? Shader::New(ToDaliStringView(SHADER_TEXT_SCROLLER_SHADER_VERT), ToDaliStringView(SHADER_TEXT_SCROLLER_SHADER_FRAG),
-                    static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
-                    "TEXT_SCROLLER")
-      : Shader::New(ToDaliStringView(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_VERT), ToDaliStringView(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG),
-                    static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
-                    "TEXT_SCROLLER_VERTICAL");
+  const std::string_view vertexShaderSource   = isHorizontal ? SHADER_TEXT_SCROLLER_SHADER_VERT : SHADER_TEXT_SCROLLER_VERTICAL_SHADER_VERT;
+  const std::string_view fragmentShaderSource = isHorizontal ? SHADER_TEXT_SCROLLER_SHADER_FRAG : SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG;
+  const std::string      vertexShader         = BuildTextScrollerShaderSource(vertexShaderSource, textGradient.enabled);
+  const std::string      fragmentShader       = BuildTextScrollerShaderSource(fragmentShaderSource, textGradient.enabled);
+  std::string            shaderName           = isHorizontal ? "TEXT_SCROLLER" : "TEXT_SCROLLER_VERTICAL";
+  if(textGradient.enabled)
+  {
+    shaderName += "_TEXT_GRADIENT";
+  }
+
+  const Dali::StringView vertexShaderView   = ToDaliStringView(vertexShader);
+  const Dali::StringView fragmentShaderView = ToDaliStringView(fragmentShader);
+  Shader                 shader             = Shader::New(vertexShaderView,
+                                                          fragmentShaderView,
+                                                          static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
+                                                          ToDaliStringView(shaderName));
 
   shader.RegisterUniqueProperty("viewEffectiveScale", 1.0f);
   shader.RegisterUniqueProperty("visualTransformUseEffectiveScale", 1.0f);
@@ -311,6 +381,30 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   shader.RegisterProperty("uHorizontalAlign", horizontalAlign);
   shader.RegisterProperty("uVerticalAlign", verticalAlign);
   shader.RegisterProperty("uGap", wrapGap);
+  if(textGradient.enabled)
+  {
+    // The text visual may have registered TextGradient uniforms on this renderer.
+    // Update the renderer values so stale non-marquee bounds cannot override the scroller shader.
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, textGradient.startPosition);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, textGradient.endPosition);
+    const Property::Index startOffsetIndex =
+      Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, textGradient.startOffset);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, textGradient.bounds);
+
+    mGradientApplyAlways = textGradient.applyConstraintsAlways;
+    const auto applyRate = mGradientApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                : Dali::Constraint::APPLY_ONCE;
+
+    if(textGradient.startOffsetPropertyIndex != Property::INVALID_INDEX)
+    {
+      Constraint constraint = Constraint::New<float>(mRenderer, startOffsetIndex, GradientOffsetConstraint);
+      constraint.AddSource(Source(scrollingTextActor, textGradient.startOffsetPropertyIndex));
+      constraint.SetApplyRate(applyRate);
+      Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_SCROLLER_GRADIENT_START_OFFSET_CONSTRAINT_TAG);
+      constraint.Apply();
+      mGradientConstraints.push_back(constraint);
+    }
+  }
   mScrollDeltaIndex = shader.RegisterProperty("uDelta", 0.0f);
 
   float scrollAmount =

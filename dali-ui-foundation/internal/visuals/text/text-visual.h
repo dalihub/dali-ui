@@ -29,8 +29,10 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
+#include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali
 {
@@ -99,6 +101,18 @@ public:
   };
 
   /**
+   * @brief Sets the TextGradient start-offset source property index registered by the control.
+   *
+   * @param[in] visual The text visual.
+   * @param[in] startOffsetPropertyIndex The source property index for uTextGradientStartOffset.
+   */
+  static void SetGradientAnimProperties(Ui::Visual::Base visual,
+                                        Property::Index  startOffsetPropertyIndex)
+  {
+    GetVisualObject(visual).SetGradientAnimProperties(startOffsetPropertyIndex);
+  };
+
+  /**
    * @brief Set the flag to trigger the textures to be initialized and renderer to be added to the control.
    * @param[in] visual The text visual.
    */
@@ -161,11 +175,89 @@ public:
    * @brief Set the visual constraints need to be applied always or not.
    * @param[in] visual The text visual.
    * @param[in] applyAlways True if constraint need to be applied always. False if we need once only.
-   * @param[in] notifyToConstraint True if we need to notify changeness to constraints.
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
    */
   static void SetConstraintApplyAlways(Ui::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
   {
     GetVisualObject(visual).SetConstraintApplyAlways(applyAlways, notifyToConstraint);
+  };
+
+  /**
+   * @brief Sets whether TextGradient animation constraints should be applied every frame.
+   *
+   * @param[in] visual The text visual.
+   * @param[in] applyAlways True to use APPLY_ALWAYS, false to use APPLY_ONCE.
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  static void SetGradientAnimApplyAlways(Ui::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
+  {
+    GetVisualObject(visual).SetGradientAnimApplyAlways(applyAlways, notifyToConstraint);
+  };
+
+  /**
+   * @brief Store the TextGradient style snapshot for a future gradient-enabled render path.
+   * @param[in] visual The text visual.
+   * @param[in] style The TextGradient style snapshot.
+   */
+  static void SetTextGradientStyle(Ui::Visual::Base visual, const Text::Internal::TextGradientStyle& style)
+  {
+    TextVisual& visualObject                = GetVisualObject(visual);
+    visualObject.mTextGradientStyle         = style;
+    visualObject.mTextGradientMaskPixelData = PixelData();
+    visualObject.mGradientRenderer          = VisualRenderer();
+    visualObject.mHasGradientContext        = false;
+    visualObject.mRendererUpdateNeeded      = true;
+
+    if(visualObject.IsOnScene())
+    {
+      visualObject.UpdateRenderer();
+    }
+  };
+
+  /**
+   * @brief Store the TextGradient bounds mode used by Label rendering.
+   * @param[in] visual The text visual.
+   * @param[in] mode The TextGradient bounds mode.
+   */
+  static void SetTextGradientBoundsMode(Ui::Visual::Base visual, Text::GradientBoundsMode mode)
+  {
+    TextVisual& visualObject             = GetVisualObject(visual);
+    visualObject.mTextGradientBoundsMode = mode;
+    visualObject.mGradientRenderer       = VisualRenderer();
+    visualObject.mHasGradientContext     = false;
+    visualObject.mRendererUpdateNeeded   = true;
+
+    if(visualObject.IsOnScene())
+    {
+      visualObject.UpdateRenderer();
+    }
+  };
+
+  /**
+   * @brief Calculates view-local TextGradient bounds in a caller-supplied coordinate space.
+   *
+   * @param[in] visual The text visual.
+   * @param[in] coordinateSize The coordinate space size used by the target shader.
+   * @return Bounds that map the Label view into the target coordinate space.
+   */
+  static Vector4 CalculateTextGradientViewBounds(Ui::Visual::Base visual, const Vector2& coordinateSize);
+
+  /**
+   * @brief Returns the current visual coordinate size used by TextScroller shaders.
+   *
+   * @param[in] visual The text visual.
+   * @return The visual size in Label coordinates.
+   */
+  static Vector2 GetTextGradientVisualCoordinateSize(Ui::Visual::Base visual);
+
+  /**
+   * @brief Retrieve the stored TextGradient mask PixelData for internal rendering/tests.
+   * @param[in] visual The text visual.
+   * @return The stored TextGradient mask PixelData.
+   */
+  static PixelData GetTextGradientMaskPixelData(Ui::Visual::Base visual)
+  {
+    return GetVisualObject(visual).mTextGradientMaskPixelData;
   };
 
 public: // from Visual::Base
@@ -308,11 +400,40 @@ private:
   void SetAsyncTextInterface(Text::AsyncTextInterface* asyncTextInterface);
 
   /**
+   * @brief Sets the TextGradient start-offset source property index registered by the control.
+   */
+  void SetGradientAnimProperties(Property::Index startOffsetPropertyIndex);
+
+  /**
    * @brief Set the visual constraints need to be applied always or not.
    * @param[in] applyAlways True if constraint need to be applied always. False if we need once only.
-   * @param[in] notifyToConstraint True if we need to notify changeness to constraints.
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
    */
   void SetConstraintApplyAlways(bool applyAlways, bool notifyToConstraint);
+
+  /**
+   * @brief Sets whether TextGradient animation constraints should be applied every frame.
+   *
+   * @param[in] applyAlways True to use APPLY_ALWAYS, false to use APPLY_ONCE.
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  void SetGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint);
+
+  /**
+   * @brief Removes TextGradient animation constraints.
+   */
+  void RemoveGradientAnimConstraints();
+
+  /**
+   * @brief Rebinds TextGradient animation constraints to the current renderer uniforms.
+   */
+  void RebindGradientAnimConstraints();
+
+  /**
+   * @brief Binds TextGradient animation constraints to registered renderer uniform properties.
+   */
+  void BindGradientAnimConstraints(VisualRenderer& renderer,
+                                   Property::Index startOffsetIndex);
 
   /**
    * @brief Removes the text's renderer.
@@ -353,12 +474,45 @@ private:
    * @param[in] size The texture size.
    * @param[in] hasMultipleTextColors Whether the text contains multiple colors.
    * @param[in] containsColorGlyph Whether the text contains color glyph.
-   * @param[in] styleEnabled Whether the text contains any styles (e.g. shadow, underline, etc.).
+   * @param[in] styleEnabled Whether the legacy renderer should use the style feature.
+   * @param[in] styleTextureEnabled Whether style texture plane generation is required.
+   * @param[in] styleBlocksTextGradient Whether the current style state blocks TextGradient composition.
    * @param[in] isOverlayStyle Whether the style needs to overlay on the text (e.g. strikethrough, underline, etc.).
    * @param[in] embossEnabled Whether the style contains emboss.
    */
   void AddRenderer(Actor& actor, const Vector2& size, bool hasMultipleTextColors, bool containsColorGlyph,
-                   bool styleEnabled, bool isOverlayStyle, bool embossEnabled);
+                   bool styleEnabled, bool styleTextureEnabled, bool styleBlocksTextGradient, bool isOverlayStyle,
+                   bool embossEnabled);
+
+  /**
+   * @brief Whether simple TextGradient shader composition is supported for the current render.
+   */
+  bool IsTextGradientCompositionSupported(const Vector2& size, bool hasMultipleTextColors, bool containsColorGlyph,
+                                          bool styleBlocksTextGradient, bool isOverlayStyle, bool embossEnabled,
+                                          bool isHeightTiling, bool isMarqueeEnabled, bool isCutoutEnabled) const;
+
+  /**
+   * @brief Whether mixed TextGradient shader composition is supported for the current render.
+   */
+  bool IsTextGradientMixedCompositionSupported(const Vector2& size, bool hasMultipleTextColors, bool containsColorGlyph,
+                                               bool styleBlocksTextGradient, bool styleTextureEnabled,
+                                               bool isOverlayStyle, bool embossEnabled, bool isHeightTiling,
+                                               bool isMarqueeEnabled, bool isCutoutEnabled) const;
+
+  /**
+   * @brief Calculates normalized logical text bounds inside the text texture.
+   */
+  Vector4 CalculateTextGradientBounds(const Vector2& textureSize) const;
+
+  /**
+   * @brief Resolves the active TextGradient bounds mode for the texture.
+   */
+  Vector4 ResolveTextGradientBounds(const Vector2& textureSize, const Vector4& contentBounds) const;
+
+  /**
+   * @brief Register TextGradient uniforms on a gradient-enabled renderer.
+   */
+  void ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds);
 
   /**
    * Get the texture of the text for rendering. It will use cached shader feature for text visual.
@@ -408,6 +562,13 @@ private:
   Text::TypesetterPtr       mTypesetter;         ///< The text's typesetter.
   Text::AsyncTextInterface* mAsyncTextInterface; ///< The text's async interface.
 
+  Text::Internal::TextGradientStyle mTextGradientStyle; ///< Stored TextGradient snapshot.
+  Text::GradientBoundsMode          mTextGradientBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
+  PixelData                         mTextGradientMaskPixelData; ///< Stored TextGradient mask for future shader composition.
+  VisualRenderer                    mGradientRenderer;          ///< Last renderer where TextGradient uniforms were registered.
+  Vector2                           mLastGradientCoordSize;     ///< Last coordinate size used for TextGradient uniforms.
+  Vector4                           mLastGradientBounds;        ///< Last bounds used for TextGradient uniforms.
+
   TextVisualShaderFactory&                mTextVisualShaderFactory; ///< The shader factory for text visual.
   TextVisualShaderFeature::FeatureBuilder mTextShaderFeatureCache;  ///< The cached shader feature for text visual.
 
@@ -417,11 +578,13 @@ private:
   Property::Index   mHasMultipleTextColorsIndex; ///< The index of uHasMultipleTextColors proeprty.
   Property::Index
                       mAnimatableTextColorPropertyIndex; ///< The index of animatable text color property registered by the control.
+  Property::Index     mGradientAnimOffsetIndex;          ///< Animatable TextGradient start offset source property.
   Property::Index     mTextColorAnimatableIndex;         ///< The index of uTextColorAnimatable property.
   Property::Index     mTextRequireRenderPropertyIndex;   ///< The index of requireRender property.
   RendererContainer   mRendererList;
   ConstraintContainer mColorConstraintList;
   ConstraintContainer mOpacityConstraintList;
+  ConstraintContainer mGradientAnimConstraints;
 
   float                mLineHeight;
   Text::LineHeightMode mLineHeightMode;
@@ -432,6 +595,8 @@ private:
   bool                 mRendererUpdateNeeded : 1;        ///< The flag to indicate whether the renderer needs to be updated.
   bool                 mTextRequireRender : 1;           ///< The flag to indicate whether the text needs to be rendered.
   bool                 mIsConstraintAppliedAlways : 1;   ///< Whether the constraint need to be applied always.
+  bool                 mGradientAnimApplyAlways : 1;     ///< Whether TextGradient constraints need to be applied always.
+  bool                 mHasGradientContext : 1;          ///< Whether cached TextGradient uniform bounds are valid.
   bool                 mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.
   bool                 mIsNaturalSizeTaskRunning : 1;    ///< Whether the requested natural size task is running or not.
   bool                 mIsHeightForWidthTaskRunning : 1; ///< Whether the requested height for width task is running or not.

@@ -6,6 +6,12 @@ precision highp float;
 
 INPUT highp vec2 vTexCoord;
 UNIFORM sampler2D sTexture;
+#ifdef IS_REQUIRED_TEXT_GRADIENT_MIXED
+UNIFORM sampler2D sTextGradientMask;
+#endif
+#ifdef IS_REQUIRED_TEXT_GRADIENT
+UNIFORM sampler2D sGradientLookup;
+#endif
 #ifdef IS_REQUIRED_STYLE
 UNIFORM sampler2D sStyle;
 #endif
@@ -13,21 +19,32 @@ UNIFORM sampler2D sStyle;
 UNIFORM sampler2D sOverlayStyle;
 #endif
 
-#ifdef IS_REQUIRED_MULTI_COLOR
-#elif defined(IS_REQUIRED_EMOJI)
-// Single color with emoji.
-UNIFORM sampler2D sMask;
+#ifndef IS_REQUIRED_TEXT_GRADIENT
+  #ifdef IS_REQUIRED_MULTI_COLOR
+  #elif defined(IS_REQUIRED_EMOJI)
+  // Single color with emoji.
+  UNIFORM sampler2D sMask;
+  #endif
 #endif
 
 UNIFORM_BLOCK FragBlock
 {
-  #ifdef IS_REQUIRED_MULTI_COLOR
-  #elif defined(IS_REQUIRED_EMOJI)
-  // Single color with emoji.
-  UNIFORM lowp float uHasMultipleTextColors;
+  #ifndef IS_REQUIRED_TEXT_GRADIENT
+    #ifdef IS_REQUIRED_MULTI_COLOR
+    #elif defined(IS_REQUIRED_EMOJI)
+    // Single color with emoji.
+    UNIFORM lowp float uHasMultipleTextColors;
+    #endif
   #endif
   UNIFORM lowp vec4 uTextColorAnimatable;
   UNIFORM lowp vec4 uColor;
+
+  #ifdef IS_REQUIRED_TEXT_GRADIENT
+  UNIFORM highp vec2 uTextGradientStartPosition;
+  UNIFORM highp vec2 uTextGradientEndPosition;
+  UNIFORM highp float uTextGradientStartOffset;
+  UNIFORM highp vec4 uTextGradientBounds;
+  #endif
 
   #ifdef IS_REQUIRED_EMBOSS
   UNIFORM lowp vec2 uEmbossSize;
@@ -47,8 +64,31 @@ void main()
   mediump vec4 overlayStyleTexture = TEXTURE( sOverlayStyle, vTexCoord );
 #endif
 
-mediump vec4 textColor;
-#if defined(IS_REQUIRED_MULTI_COLOR) || defined(IS_REQUIRED_EMOJI)
+  mediump vec4 textColor;
+#ifdef IS_REQUIRED_TEXT_GRADIENT_MIXED
+  mediump vec4 preservedColor = TEXTURE(sTexture, vTexCoord);
+  mediump float textTexture = TEXTURE(sTextGradientMask, vTexCoord).r;
+  highp vec2 textGradientCoord =
+    (vTexCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
+  highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;
+  highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
+  highp float gradientPosition =
+    dot(textGradientCoord - uTextGradientStartPosition, gradientVector) / gradientLengthSquared;
+  mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
+  mediump vec4 gradientFill = vec4(gradientColor.rgb * textTexture,
+                                   gradientColor.a * textTexture * uTextColorAnimatable.a);
+  textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);
+#elif defined(IS_REQUIRED_TEXT_GRADIENT)
+  mediump float textTexture = TEXTURE(sTexture, vTexCoord).r;
+  highp vec2 textGradientCoord =
+    (vTexCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
+  highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;
+  highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
+  highp float gradientPosition =
+    dot(textGradientCoord - uTextGradientStartPosition, gradientVector) / gradientLengthSquared;
+  mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
+  textColor = vec4(gradientColor.rgb * textTexture, gradientColor.a * textTexture * uTextColorAnimatable.a);
+#elif defined(IS_REQUIRED_MULTI_COLOR) || defined(IS_REQUIRED_EMOJI)
   // Multiple color or use emoji.
   textColor = TEXTURE(sTexture, vTexCoord);
 #ifdef IS_REQUIRED_EMBOSS
@@ -68,7 +108,8 @@ mediump vec4 textColor;
 #endif
 #endif
 
-#ifdef IS_REQUIRED_MULTI_COLOR
+#ifdef IS_REQUIRED_TEXT_GRADIENT
+#elif defined(IS_REQUIRED_MULTI_COLOR)
 #elif defined(IS_REQUIRED_EMOJI)
   // Single color with emoji.
   mediump float maskTexture = TEXTURE(sMask, vTexCoord).r;

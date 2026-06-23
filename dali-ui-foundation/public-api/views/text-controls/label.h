@@ -17,7 +17,9 @@
  *
  */
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/style/bevel.h>
@@ -265,6 +267,53 @@ public: // Setters for chaining
    * @return The text color currently set on the label.
    */
   UiColor GetTextColor();
+
+  // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)
+  /**
+   * @brief Sets the text gradient.
+   *
+   * A gradient value with Type::NONE, or a gradient with fewer than two stops,
+   * removes the text gradient and restores normal single-color text rendering.
+   *
+   * @note For Label text rendering, Gradient::Units::OBJECT_BOUNDING_BOX uses
+   * normalized coordinates inside the bounds selected by
+   * SetTextGradientBoundsMode(), where the top-left is (-0.5, -0.5) and
+   * bottom-right is (0.5, 0.5). Gradient::Units::USER_SPACE uses pixel
+   * coordinates inside the same selected bounds. This text-specific bounds
+   * selection does not change the coordinate contract used by GradientVisual.
+   *
+   * @note A stored authored gradient may still fall back to normal text rendering
+   * when the active Label rendering path does not support its type, units, or
+   * composition.
+   *
+   * @param[in] gradient The authored gradient value.
+   */
+  void SetTextGradient(const Gradient::Base& gradient);
+
+  /**
+   * @brief Gets the text gradient.
+   *
+   * @return The authored text gradient, or Type::NONE if no text gradient is set.
+   */
+  Gradient::Base GetTextGradient() const;
+
+  /**
+   * @brief Sets the bounds used to evaluate text gradient coordinates.
+   *
+   * The default is Text::GradientBoundsMode::CONTENT_BOUND, which maps the
+   * gradient to the laid-out text content. Text::GradientBoundsMode::VIEW_BOUND
+   * maps the gradient to the full Label view bounds, including padding.
+   *
+   * @param[in] mode The text gradient bounds mode.
+   */
+  void SetTextGradientBoundsMode(Text::GradientBoundsMode mode);
+
+  /**
+   * @brief Gets the bounds mode used to evaluate text gradient coordinates.
+   *
+   * @return The current text gradient bounds mode.
+   */
+  Text::GradientBoundsMode GetTextGradientBoundsMode() const;
 
   /**
    * @brief Sets the horizontal alignment of the text within the label.

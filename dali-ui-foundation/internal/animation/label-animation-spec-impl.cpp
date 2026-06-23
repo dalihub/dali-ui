@@ -20,8 +20,11 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/public-api/animation/time-period.h>
+#include <dali/public-api/object/property.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
 namespace Dali
@@ -34,6 +37,17 @@ namespace
 {
 Dali::TypeRegistration LABEL_ANIMATION_SPEC_TYPE("LabelAnimationSpec", typeid(Dali::Ui::ViewAnimationSpec), nullptr);
 Dali::TypeRegistration LABEL_ANIMATION_SPEC_IMPL_TYPE(typeid(Dali::Ui::Internal::LabelAnimationSpecImpl), typeid(Dali::Ui::LabelAnimationSpec), nullptr);
+
+Dali::Ui::Integration::LabelImpl* GetLabelImpl(Label label)
+{
+  if(!label)
+  {
+    return nullptr;
+  }
+
+  Dali::RefObject& handle = label.GetImplementation();
+  return &static_cast<Dali::Ui::Integration::LabelImpl&>(handle);
+}
 } // namespace
 
 LabelAnimationSpecImpl::LabelAnimationSpecImpl() = default;
@@ -43,6 +57,36 @@ LabelAnimationSpecImpl::~LabelAnimationSpecImpl() = default;
 LabelAnimationSpecImplPtr LabelAnimationSpecImpl::New()
 {
   return LabelAnimationSpecImplPtr(new LabelAnimationSpecImpl());
+}
+
+void LabelAnimationSpecImpl::ApplyTextGradientStartOffsetTo(Animation& animation, Label label, const Entry& entry)
+{
+  if(auto* labelImpl = GetLabelImpl(label))
+  {
+    const Property::Index index = labelImpl->EnsureGradientAnimOffset();
+    if(index == Property::INVALID_INDEX)
+    {
+      return;
+    }
+
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateTo(Property(label, index), entry.value, entry.alpha, period);
+  }
+}
+
+void LabelAnimationSpecImpl::ApplyTextGradientStartOffsetBy(Animation& animation, Label label, const Entry& entry)
+{
+  if(auto* labelImpl = GetLabelImpl(label))
+  {
+    const Property::Index index = labelImpl->EnsureGradientAnimOffset();
+    if(index == Property::INVALID_INDEX)
+    {
+      return;
+    }
+
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateBy(Property(label, index), entry.value, entry.alpha, period);
+  }
 }
 
 } // namespace Internal

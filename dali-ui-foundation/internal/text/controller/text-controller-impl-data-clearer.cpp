@@ -91,7 +91,9 @@ void ControllerImplDataClearer::ClearFullModelData(Controller::Impl& impl, Contr
 
   if(Controller::NO_OPERATION != (Controller::COLOR & operations))
   {
+    model->mVisualModel->mColors.Clear();
     model->mVisualModel->mColorIndices.Clear();
+    model->mVisualModel->mBackgroundColors.Clear();
     model->mVisualModel->mBackgroundColorIndices.Clear();
   }
 }

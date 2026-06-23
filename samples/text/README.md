@@ -9,6 +9,7 @@ This sample demonstrates DALi UI text features.
 - Markup text
 - Marquee
 - Text style, bevel, and cutout mask
+- TextGradient visual playground
 - Text fit and fit candidate
 - Font variation
 - Emoji rendering
@@ -34,6 +35,8 @@ This sample demonstrates DALi UI text features.
 | `text-scale.example` | Text scale sample |
 | `text-font-variation.example` | Font variation sample |
 | `text-cutout-mask.example` | Text cutout mask sample |
+| `text-gradient.example` | Label TextGradient visual playground |
+| `text-gradient-simple.example` | Minimal Label TextGradient animation sample |
 | `text-emoji.example` | Emoji rendering sample |
 | `text-render-scale.example` | Text render scale sample |
 | `text-input-field.example` | InputField sample |
@@ -89,6 +92,8 @@ Run:
 
 ~~~bash
 ./bin/text.example
+./bin/text-gradient.example
+./bin/text-gradient-simple.example
 ~~~
 
 Run localization samples:

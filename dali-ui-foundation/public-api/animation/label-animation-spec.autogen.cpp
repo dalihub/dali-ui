@@ -26,6 +26,20 @@ namespace Dali
 {
 namespace Ui
 {
+namespace
+{
+
+void ApplyTextGradientStartOffsetTo(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+{
+  Internal::LabelAnimationSpecImpl::ApplyTextGradientStartOffsetTo(animation, Label::DownCast(view), entry);
+}
+
+void ApplyTextGradientStartOffsetBy(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+{
+  Internal::LabelAnimationSpecImpl::ApplyTextGradientStartOffsetBy(animation, Label::DownCast(view), entry);
+}
+
+} // namespace
 
 LabelAnimationSpec::LabelAnimationSpec() = default;
 
@@ -238,6 +252,18 @@ LabelAnimationSpec& LabelAnimationSpec::TextColor(const UiColor& target, Duratio
 LabelAnimationSpec& LabelAnimationSpec::TextColorBy(const UiColor& relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateByEntry(Label::Property::TEXT_COLOR, relative.GetRgba(), duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::TextGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &ApplyTextGradientStartOffsetTo);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::TextGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyTextGradientStartOffsetBy);
   return *this;
 }
 

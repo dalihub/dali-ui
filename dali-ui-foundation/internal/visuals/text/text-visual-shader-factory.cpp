@@ -91,7 +91,8 @@ FeatureBuilder::FeatureBuilder()
   mTextEmoji(TextEmoji::NO_EMOJI),
   mTextStyle(TextStyle::NO_STYLES),
   mTextOverlay(TextOverlay::NO_OVERLAY),
-  mTextEmboss(TextEmboss::NO_EMBOSS)
+  mTextEmboss(TextEmboss::NO_EMBOSS),
+  mTextGradient(TextGradient::NO_TEXT_GRADIENT)
 {
 }
 
@@ -120,11 +121,57 @@ FeatureBuilder& FeatureBuilder::EnableEmboss(bool enableEmboss)
   mTextEmboss = enableEmboss ? TextEmboss::HAS_EMBOSS : TextEmboss::NO_EMBOSS;
   return *this;
 }
+FeatureBuilder& FeatureBuilder::EnableTextGradient(bool enableTextGradient)
+{
+  if(enableTextGradient)
+  {
+    mTextGradient = TextGradient::HAS_TEXT_GRADIENT;
+  }
+  else if(mTextGradient == TextGradient::HAS_TEXT_GRADIENT)
+  {
+    mTextGradient = TextGradient::NO_TEXT_GRADIENT;
+  }
+  return *this;
+}
+FeatureBuilder& FeatureBuilder::EnableTextGradientMixed(bool enableTextGradientMixed)
+{
+  if(enableTextGradientMixed)
+  {
+    mTextGradient = TextGradient::HAS_TEXT_GRADIENT_MIXED;
+  }
+  else if(mTextGradient == TextGradient::HAS_TEXT_GRADIENT_MIXED)
+  {
+    mTextGradient = TextGradient::NO_TEXT_GRADIENT;
+  }
+  return *this;
+}
 
 VisualFactoryCache::ShaderType FeatureBuilder::GetShaderType() const
 {
   uint32_t                       shaderTypeFlag = static_cast<uint32_t>(TextVisualRequireFlag::DEFAULT);
   VisualFactoryCache::ShaderType shaderType     = VisualFactoryCache::TEXT_SHADER_SINGLE_COLOR_TEXT;
+
+  if(IsEnabledTextGradient())
+  {
+    if(mTextStyle == TextVisualShaderFeature::TextStyle::HAS_STYLES &&
+       mTextOverlay == TextVisualShaderFeature::TextOverlay::HAS_OVERLAY)
+    {
+      return VisualFactoryCache::TEXT_SHADER_SINGLE_COLOR_TEXT_WITH_TEXT_GRADIENT_AND_STYLE_AND_OVERLAY;
+    }
+    if(mTextStyle == TextVisualShaderFeature::TextStyle::HAS_STYLES)
+    {
+      return VisualFactoryCache::TEXT_SHADER_SINGLE_COLOR_TEXT_WITH_TEXT_GRADIENT_AND_STYLE;
+    }
+    if(mTextOverlay == TextVisualShaderFeature::TextOverlay::HAS_OVERLAY)
+    {
+      return VisualFactoryCache::TEXT_SHADER_SINGLE_COLOR_TEXT_WITH_TEXT_GRADIENT_AND_OVERLAY;
+    }
+    return VisualFactoryCache::TEXT_SHADER_SINGLE_COLOR_TEXT_WITH_TEXT_GRADIENT;
+  }
+  if(IsEnabledTextGradientMixed())
+  {
+    return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED;
+  }
 
   if(mTextStyle == TextVisualShaderFeature::TextStyle::HAS_STYLES)
   {
@@ -160,6 +207,14 @@ void FeatureBuilder::GetVertexShaderPrefixList(std::string& vertexShaderPrefixLi
 
 void FeatureBuilder::GetFragmentShaderPrefixList(std::string& fragmentShaderPrefixList) const
 {
+  if(IsEnabledAnyTextGradient())
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_TEXT_GRADIENT\n";
+  }
+  if(IsEnabledTextGradientMixed())
+  {
+    fragmentShaderPrefixList += "#define IS_REQUIRED_TEXT_GRADIENT_MIXED\n";
+  }
   if(mTextStyle == TextVisualShaderFeature::TextStyle::HAS_STYLES)
   {
     fragmentShaderPrefixList += "#define IS_REQUIRED_STYLE\n";

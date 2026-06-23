@@ -23,7 +23,7 @@
 #include <dali/public-api/object/property.h>
 
 // INTERNAL INCLUDES
-
+#include <dali-ui-foundation/internal/animation/label-animation-spec-impl.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
 namespace Dali
@@ -227,6 +227,20 @@ LabelAnimationBridge& LabelAnimationBridge::TextColorBy(const UiColor& relative,
 {
   ExtendIfNeeded(delay, duration);
   mAnimation.AnimateBy(Property(mView, Label::Property::TEXT_COLOR), relative.GetRgba(), alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::TextGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::LabelAnimationSpecImpl::ApplyTextGradientStartOffsetTo(mAnimation, Label::DownCast(mView), {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::TextGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::LabelAnimationSpecImpl::ApplyTextGradientStartOffsetBy(mAnimation, Label::DownCast(mView), {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
   return *this;
 }
 

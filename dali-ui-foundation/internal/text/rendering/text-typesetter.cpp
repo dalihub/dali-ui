@@ -214,6 +214,156 @@ PixelData Typesetter::Render(const Vector2& size, Direction textDirection,
   return pixelData;
 }
 
+PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction textDirection,
+                                             bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
+                                             const Vector2& originSize)
+{
+  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER_TEXT_GRADIENT_MASK");
+
+  auto& viewModel = *(mImpl->GetViewModel());
+
+  viewModel.ElideGlyphs(mImpl->GetFontClient());
+
+  const Size&   layoutSize   = viewModel.GetLayoutSize();
+  const int32_t outlineWidth = static_cast<int32_t>(viewModel.GetOutlineWidth());
+
+  int32_t penX = 0;
+  switch(viewModel.GetHorizontalAlignment())
+  {
+    case Alignment::START:
+    {
+      break;
+    }
+    case Alignment::CENTER:
+    {
+      penX += (textDirection == Direction::LEFT_TO_RIGHT) ? -outlineWidth : outlineWidth;
+      break;
+    }
+    case Alignment::END:
+    {
+      penX += (textDirection == Direction::LEFT_TO_RIGHT) ? -outlineWidth * 2 : outlineWidth * 2;
+      break;
+    }
+  }
+
+  const bool  isOriginHeight = originSize.height > 0.0f ? true : false;
+  const float controlHeight  = isOriginHeight ? viewModel.GetControlSize().height : size.height;
+  const float layoutHeight   = isOriginHeight ? originSize.height : layoutSize.height;
+
+  int32_t penY = 0u;
+  switch(viewModel.GetVerticalAlignment())
+  {
+    case Alignment::START:
+    {
+      break;
+    }
+    case Alignment::CENTER:
+    {
+      penY = static_cast<int32_t>(std::round(0.5f * (controlHeight - layoutHeight)));
+      break;
+    }
+    case Alignment::END:
+    {
+      penY = static_cast<int32_t>(controlHeight - layoutHeight);
+      break;
+    }
+  }
+
+  if(viewModel.IsCutoutEnabled())
+  {
+    Vector2 offset = viewModel.GetOffsetWithCutout();
+    penX           = offset.x;
+    penY           = offset.y;
+  }
+
+  const uint32_t bufferWidth  = static_cast<uint32_t>(size.width);
+  const uint32_t bufferHeight = static_cast<uint32_t>(size.height);
+
+  auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
+  auto endIndexOfGlyphs   = viewModel.GetEndIndexOfElidedGlyphs();
+
+  Devel::PixelBuffer result =
+    mImpl->CreateTextGradientMaskImageBuffer(bufferWidth, bufferHeight, ignoreHorizontalAlignment, pixelFormat, penX,
+                                             penY, startIndexOfGlyphs, endIndexOfGlyphs);
+
+  return Devel::PixelBuffer::Convert(result);
+}
+
+PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction textDirection,
+                                                  bool ignoreHorizontalAlignment, Pixel::Format pixelFormat,
+                                                  const Vector2& originSize)
+{
+  DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_RENDERING_TYPESETTER_TEXT_GRADIENT_PRESERVED");
+
+  auto& viewModel = *(mImpl->GetViewModel());
+
+  viewModel.ElideGlyphs(mImpl->GetFontClient());
+
+  const Size&   layoutSize   = viewModel.GetLayoutSize();
+  const int32_t outlineWidth = static_cast<int32_t>(viewModel.GetOutlineWidth());
+
+  int32_t penX = 0;
+  switch(viewModel.GetHorizontalAlignment())
+  {
+    case Alignment::START:
+    {
+      break;
+    }
+    case Alignment::CENTER:
+    {
+      penX += (textDirection == Direction::LEFT_TO_RIGHT) ? -outlineWidth : outlineWidth;
+      break;
+    }
+    case Alignment::END:
+    {
+      penX += (textDirection == Direction::LEFT_TO_RIGHT) ? -outlineWidth * 2 : outlineWidth * 2;
+      break;
+    }
+  }
+
+  const bool  isOriginHeight = originSize.height > 0.0f ? true : false;
+  const float controlHeight  = isOriginHeight ? viewModel.GetControlSize().height : size.height;
+  const float layoutHeight   = isOriginHeight ? originSize.height : layoutSize.height;
+
+  int32_t penY = 0u;
+  switch(viewModel.GetVerticalAlignment())
+  {
+    case Alignment::START:
+    {
+      break;
+    }
+    case Alignment::CENTER:
+    {
+      penY = static_cast<int32_t>(std::round(0.5f * (controlHeight - layoutHeight)));
+      break;
+    }
+    case Alignment::END:
+    {
+      penY = static_cast<int32_t>(controlHeight - layoutHeight);
+      break;
+    }
+  }
+
+  if(viewModel.IsCutoutEnabled())
+  {
+    Vector2 offset = viewModel.GetOffsetWithCutout();
+    penX           = offset.x;
+    penY           = offset.y;
+  }
+
+  const uint32_t bufferWidth  = static_cast<uint32_t>(size.width);
+  const uint32_t bufferHeight = static_cast<uint32_t>(size.height);
+
+  auto startIndexOfGlyphs = viewModel.GetStartIndexOfElidedGlyphs();
+  auto endIndexOfGlyphs   = viewModel.GetEndIndexOfElidedGlyphs();
+
+  Devel::PixelBuffer result =
+    mImpl->CreateTextGradientPreservedImageBuffer(bufferWidth, bufferHeight, ignoreHorizontalAlignment, pixelFormat,
+                                                  penX, penY, startIndexOfGlyphs, endIndexOfGlyphs);
+
+  return Devel::PixelBuffer::Convert(result);
+}
+
 PixelData Typesetter::RenderWithCutout(const Vector2& size, Direction textDirection,
                                        Devel::PixelBuffer mask, RenderBehaviour behaviour,
                                        bool ignoreHorizontalAlignment, Pixel::Format pixelFormat, float originAlpha,

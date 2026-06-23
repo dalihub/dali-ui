@@ -130,6 +130,47 @@ public:
                    Pixel::Format pixelFormat = Pixel::RGBA8888, const Vector2& originSize = Size::ZERO);
 
   /**
+   * @brief Renders the default-color monochrome glyph fill coverage for TextGradient.
+   *
+   * This is a separate mask path for future TextGradient composition. It does not reuse RENDER_MASK, which is reserved
+   * for the existing color-glyph protection path.
+   *
+   * @param[in] size The renderer size.
+   * @param[in] textDirection The direction of the text.
+   * @param[in] ignoreHorizontalAlignment Whether to ignore the horizontal alignment (i.e. always render as if
+   * HORIZONTAL_ALIGN_BEGIN).
+   * @param[in] pixelFormat The format of the mask. The initial implementation uses Pixel::L8.
+   * @param[in] originSize The origin size for calculating vertical alignment. (default) If zero, the control and
+   * renderer sizes are used.
+   *
+   * @return A pixel data containing glyph coverage for TextGradient target glyphs only.
+   */
+  PixelData RenderTextGradientMask(const Vector2& size, Direction textDirection,
+                                   bool ignoreHorizontalAlignment = false, Pixel::Format pixelFormat = Pixel::L8,
+                                   const Vector2& originSize = Size::ZERO);
+
+  /**
+   * @brief Renders non-gradient glyphs for mixed TextGradient composition.
+   *
+   * This path renders explicit-color glyphs and renderable color glyphs while skipping default-color monochrome glyphs
+   * that will be filled by the TextGradient mask. It does not render text styles.
+   *
+   * @param[in] size The renderer size.
+   * @param[in] textDirection The direction of the text.
+   * @param[in] ignoreHorizontalAlignment Whether to ignore the horizontal alignment (i.e. always render as if
+   * HORIZONTAL_ALIGN_BEGIN).
+   * @param[in] pixelFormat The format of the preserved texture. The initial implementation uses Pixel::RGBA8888.
+   * @param[in] originSize The origin size for calculating vertical alignment. (default) If zero, the control and
+   * renderer sizes are used.
+   *
+   * @return A pixel data containing non-gradient text glyphs only.
+   */
+  PixelData RenderTextGradientPreserved(const Vector2& size, Direction textDirection,
+                                        bool           ignoreHorizontalAlignment = false,
+                                        Pixel::Format  pixelFormat               = Pixel::RGBA8888,
+                                        const Vector2& originSize                = Size::ZERO);
+
+  /**
    * @brief After the Render, use the pixel information of the given cutoutBuffer to make the part where the pixel is
    * drawn transparent.
    *

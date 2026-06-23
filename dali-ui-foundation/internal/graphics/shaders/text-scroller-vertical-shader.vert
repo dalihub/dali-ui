@@ -6,6 +6,9 @@ precision highp float;
 
 INPUT highp vec2 aPosition;
 OUTPUT highp vec2 vTexCoord;
+#ifdef IS_REQUIRED_TEXT_GRADIENT
+OUTPUT highp vec2 vTextGradientCoord;
+#endif
 
 UNIFORM_BLOCK VertBlock
 {
@@ -41,6 +44,9 @@ void main()
 
   vTexCoord.x = ( uHorizontalAlign * ( uTextureSize.x - visualSize.x ) + aPosition.x * visualSize.x ) / uTextureSize.x + 0.5;
   vTexCoord.y = ( uDelta + uVerticalAlign * ( uTextureSize.y - visualSize.y - uGap ) + aPosition.y * visualSize.y - uGap * 0.5 ) / ( uTextureSize.y ) + 0.5;
+#ifdef IS_REQUIRED_TEXT_GRADIENT
+  vTextGradientCoord = aPosition + vec2(0.5);
+#endif
 
   highp vec4 vertexPosition = vec4( ( aPosition + pivot ) * visualSize + visualOffset + origin * uSize.xy, 0.0, 1.0 );
 

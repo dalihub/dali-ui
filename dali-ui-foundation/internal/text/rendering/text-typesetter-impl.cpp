@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/text/character-spacing-glyph-run.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
+#include <dali-ui-foundation/internal/text/gradient-glyph-classification.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
@@ -1119,6 +1120,153 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
     -line.descender + GetPostOffsetVerticalLineAlignment(line, inputParamsForLine.verticalLineAlignType));
 }
 
+void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient       fontClient,
+                                                  GlyphData&                        glyphData,
+                                                  Length&                           hyphenIndex,
+                                                  const LineRun&                    line,
+                                                  const InputParameterForEachLine&  inputParamsForLine,
+                                                  const InputParameterForEachGlyph& inputParamsForGlyph,
+                                                  const ColorIndex*                 gradientColorIndexBuffer,
+                                                  const bool                        renderGradientTargets)
+{
+  if(inputParamsForLine.ignoreHorizontalAlignment)
+  {
+    glyphData.horizontalOffset = 0;
+  }
+  else
+  {
+    glyphData.horizontalOffset = line.ellipsis ? static_cast<int32_t>(inputParamsForLine.elidedOffset)
+                                               : static_cast<int32_t>(line.alignmentOffset);
+  }
+  glyphData.horizontalOffset += inputParamsForLine.horizontalOffset;
+
+  glyphData.verticalOffset += static_cast<int32_t>(
+    line.ascender + GetPreOffsetVerticalLineAlignment(line, inputParamsForLine.verticalLineAlignType));
+
+  UnderlineStyleProperties currentUnderlineProperties = inputParamsForGlyph.modelUnderlineProperties;
+  float                    maxUnderlineHeight         = currentUnderlineProperties.height;
+  bool                     thereAreUnderlinedGlyphs   = false;
+
+  StrikethroughStyleProperties currentStrikethroughProperties = inputParamsForGlyph.modelStrikethroughProperties;
+  float                        maxStrikethroughHeight         = currentStrikethroughProperties.height;
+  bool                         thereAreStrikethroughGlyphs    = false;
+
+  float  currentUnderlinePosition = 0.0f;
+  float  lineExtentLeft           = inputParamsForLine.bufferWidth;
+  float  lineExtentRight          = 0.0f;
+  float  baseline                 = 0.0f;
+  FontId lastFontId               = 0;
+  bool   addHyphen                = false;
+
+  const GlyphIndex startGlyphIndex = std::max(std::max(line.glyphRun.glyphIndex, inputParamsForLine.startIndexOfGlyphs),
+                                              inputParamsForLine.fromGlyphIndex);
+  GlyphIndex       endGlyphIndex =
+    (line.isSplitToTwoHalves ? line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs
+                             : line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs) -
+    1u;
+  endGlyphIndex =
+    std::min(std::min(endGlyphIndex, inputParamsForLine.endIndexOfGlyphs), inputParamsForLine.toGlyphIndex);
+
+  for(GlyphIndex glyphIndex = startGlyphIndex; glyphIndex <= endGlyphIndex; ++glyphIndex)
+  {
+    GlyphIndex elidedGlyphIndex = glyphIndex - inputParamsForLine.startIndexOfGlyphs;
+
+    if(inputParamsForLine.ellipsisPosition == Text::EllipsisPosition::MIDDLE)
+    {
+      if(glyphIndex > inputParamsForLine.firstMiddleIndexOfElidedGlyphs &&
+         glyphIndex < inputParamsForLine.secondMiddleIndexOfElidedGlyphs)
+      {
+        continue;
+      }
+      if(glyphIndex >= inputParamsForLine.secondMiddleIndexOfElidedGlyphs)
+      {
+        elidedGlyphIndex -= (inputParamsForLine.secondMiddleIndexOfElidedGlyphs -
+                             inputParamsForLine.firstMiddleIndexOfElidedGlyphs - 1u);
+      }
+    }
+
+    const GlyphInfo* glyphInfo = nullptr;
+    if(addHyphen && inputParamsForLine.hyphens)
+    {
+      glyphInfo = inputParamsForLine.hyphens + hyphenIndex;
+      hyphenIndex++;
+    }
+    else
+    {
+      glyphInfo = inputParamsForGlyph.glyphsBuffer + elidedGlyphIndex;
+    }
+
+    if((glyphInfo->width < Math::MACHINE_EPSILON_1000) || (glyphInfo->height < Math::MACHINE_EPSILON_1000))
+    {
+      continue;
+    }
+
+    const Internal::GradientGlyphInfo classification =
+      Internal::ClassifyGradientGlyph(fontClient, *glyphInfo, gradientColorIndexBuffer, glyphIndex);
+    const bool shouldRenderGlyph =
+      renderGradientTargets ? classification.usesGradientFill : !classification.usesGradientFill;
+    if(!shouldRenderGlyph)
+    {
+      if(inputParamsForLine.hyphenIndices)
+      {
+        while((hyphenIndex < inputParamsForLine.hyphensCount) &&
+              (glyphIndex > inputParamsForLine.hyphenIndices[hyphenIndex]))
+        {
+          hyphenIndex++;
+        }
+
+        addHyphen = ((hyphenIndex < inputParamsForLine.hyphensCount) &&
+                     ((glyphIndex + 1) == inputParamsForLine.hyphenIndices[hyphenIndex]));
+        if(addHyphen)
+        {
+          glyphIndex--;
+        }
+      }
+      continue;
+    }
+
+    OutputParameterForEachGlyph outputParamsForGlyph{currentUnderlineProperties,
+
+                                                     maxUnderlineHeight,
+                                                     thereAreUnderlinedGlyphs,
+
+                                                     currentStrikethroughProperties,
+
+                                                     maxStrikethroughHeight,
+                                                     thereAreStrikethroughGlyphs,
+
+                                                     currentUnderlinePosition,
+
+                                                     baseline,
+                                                     lineExtentLeft,
+                                                     lineExtentRight,
+
+                                                     lastFontId};
+
+    CreateImageBufferForEachGlyph(fontClient, glyphData, glyphIndex, elidedGlyphIndex, glyphInfo, addHyphen,
+                                  inputParamsForGlyph, outputParamsForGlyph);
+
+    if(inputParamsForLine.hyphenIndices)
+    {
+      while((hyphenIndex < inputParamsForLine.hyphensCount) &&
+            (glyphIndex > inputParamsForLine.hyphenIndices[hyphenIndex]))
+      {
+        hyphenIndex++;
+      }
+
+      addHyphen = ((hyphenIndex < inputParamsForLine.hyphensCount) &&
+                   ((glyphIndex + 1) == inputParamsForLine.hyphenIndices[hyphenIndex]));
+      if(addHyphen)
+      {
+        glyphIndex--;
+      }
+    }
+  }
+
+  glyphData.verticalOffset += static_cast<int32_t>(
+    -line.descender + GetPostOffsetVerticalLineAlignment(line, inputParamsForLine.verticalLineAlignType));
+}
+
 /// Helper functions to create image buffer end
 
 /**
@@ -1460,6 +1608,251 @@ Devel::PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidt
     const LineRun& line = *(modelLinesBuffer + lineIndex);
     CreateImageBufferForEachLine(GetFontClient(), glyphData, hyphenIndex, line, (lineIndex == 0u), inputParamsForLine,
                                  inputParamsForGlyph);
+  }
+
+  return glyphData.bitmapBuffer;
+}
+
+Devel::PixelBuffer Typesetter::Impl::CreateTextGradientMaskImageBuffer(const uint32_t      bufferWidth,
+                                                                       const uint32_t      bufferHeight,
+                                                                       const bool          ignoreHorizontalAlignment,
+                                                                       const Pixel::Format pixelFormat,
+                                                                       const int32_t       horizontalOffset,
+                                                                       const int32_t       verticalOffset,
+                                                                       const GlyphIndex    fromGlyphIndex,
+                                                                       const GlyphIndex    toGlyphIndex)
+{
+  auto& viewModel = *(mModel.get());
+
+  const Length modelNumberOfLines                       = viewModel.GetNumberOfLines();
+  const LineRun* const __restrict__ modelLinesBuffer    = viewModel.GetLines();
+  const GlyphInfo* const __restrict__ glyphsBuffer      = viewModel.GetGlyphs();
+  const Vector2* const __restrict__ positionBuffer      = viewModel.GetLayout();
+  const ColorIndex* const __restrict__ colorIndexBuffer = viewModel.GetColorIndices();
+  const GlyphInfo* __restrict__ hyphens                 = viewModel.GetHyphens();
+  const Length* __restrict__ hyphenIndices              = viewModel.GetHyphenIndices();
+  const Length hyphensCount                             = viewModel.GetHyphensCount();
+
+  GlyphData glyphData;
+  glyphData.verticalOffset   = verticalOffset;
+  glyphData.width            = bufferWidth;
+  glyphData.height           = bufferHeight;
+  glyphData.bitmapBuffer     = CreateTransparentImageBuffer(bufferWidth, bufferHeight, pixelFormat);
+  glyphData.horizontalOffset = 0;
+
+  Length hyphenIndex = 0;
+
+  const Character* __restrict__ textBuffer                       = viewModel.GetTextBuffer();
+  const Vector<CharacterIndex>& __restrict__ glyphToCharacterMap = viewModel.GetGlyphsToCharacters();
+  const CharacterIndex* __restrict__ glyphToCharacterMapBuffer   = glyphToCharacterMap.Begin();
+
+  const Vector<UnderlinedGlyphRun>    emptyUnderlineRuns;
+  const Vector<StrikethroughGlyphRun> emptyStrikethroughRuns;
+
+  const Vector<CharacterSpacingGlyphRun>& __restrict__ characterSpacingGlyphRuns =
+    viewModel.GetCharacterSpacingGlyphRuns();
+
+  const Vector2 styleOffset = Vector2::ZERO;
+
+  const InputParameterForEachLine inputParamsForLine{bufferWidth,
+                                                     bufferHeight,
+                                                     horizontalOffset,
+
+                                                     styleOffset,
+
+                                                     fromGlyphIndex,
+                                                     toGlyphIndex,
+
+                                                     viewModel.GetStartIndexOfElidedGlyphs(),
+                                                     viewModel.GetEndIndexOfElidedGlyphs(),
+                                                     viewModel.GetFirstMiddleIndexOfElidedGlyphs(),
+                                                     viewModel.GetSecondMiddleIndexOfElidedGlyphs(),
+                                                     viewModel.GetElidedOffset(),
+                                                     viewModel.GetVerticalLineAlignment(),
+                                                     viewModel.GetEllipsisPosition(),
+
+                                                     hyphens,
+                                                     hyphenIndices,
+                                                     hyphensCount,
+
+                                                     ignoreHorizontalAlignment};
+
+  const UnderlineStyleProperties modelUnderlineProperties{Text::Underline::Type::SOLID,
+                                                          Vector4::ZERO,
+                                                          0.0f,
+                                                          0.0f,
+                                                          0.0f,
+                                                          false,
+                                                          false,
+                                                          false,
+                                                          false,
+                                                          false};
+
+  const StrikethroughStyleProperties modelStrikethroughProperties{Vector4::ZERO, 0.0f, false, false};
+
+  const Vector4 maskColor(1.0f, 1.0f, 1.0f, 1.0f);
+
+  const InputParameterForEachGlyph inputParamsForGlyph{Typesetter::STYLE_NONE,
+                                                       pixelFormat,
+
+                                                       0.0f,
+
+                                                       viewModel.GetCharacterSpacing(),
+
+                                                       maskColor,
+
+                                                       emptyUnderlineRuns,
+                                                       emptyStrikethroughRuns,
+                                                       characterSpacingGlyphRuns,
+
+                                                       glyphsBuffer,
+                                                       textBuffer,
+                                                       glyphToCharacterMapBuffer,
+
+                                                       positionBuffer,
+
+                                                       nullptr,
+                                                       nullptr,
+
+                                                       modelUnderlineProperties,
+                                                       modelStrikethroughProperties,
+
+                                                       false,
+                                                       false,
+                                                       false,
+
+                                                       viewModel.IsRemoveFrontInset(),
+                                                       viewModel.IsRemoveBackInset(),
+
+                                                       true};
+
+  for(LineIndex lineIndex = 0u; lineIndex < modelNumberOfLines; ++lineIndex)
+  {
+    const LineRun& line = *(modelLinesBuffer + lineIndex);
+    CreateTextGradientMaskImageBufferForEachLine(GetFontClient(), glyphData, hyphenIndex, line, inputParamsForLine,
+                                                 inputParamsForGlyph, colorIndexBuffer, true);
+  }
+
+  return glyphData.bitmapBuffer;
+}
+
+Devel::PixelBuffer Typesetter::Impl::CreateTextGradientPreservedImageBuffer(const uint32_t      bufferWidth,
+                                                                            const uint32_t      bufferHeight,
+                                                                            const bool          ignoreHorizontalAlignment,
+                                                                            const Pixel::Format pixelFormat,
+                                                                            const int32_t       horizontalOffset,
+                                                                            const int32_t       verticalOffset,
+                                                                            const GlyphIndex    fromGlyphIndex,
+                                                                            const GlyphIndex    toGlyphIndex)
+{
+  auto& viewModel = *(mModel.get());
+
+  const Length modelNumberOfLines                       = viewModel.GetNumberOfLines();
+  const LineRun* const __restrict__ modelLinesBuffer    = viewModel.GetLines();
+  const GlyphInfo* const __restrict__ glyphsBuffer      = viewModel.GetGlyphs();
+  const Vector2* const __restrict__ positionBuffer      = viewModel.GetLayout();
+  const Vector4* const __restrict__ colorsBuffer        = viewModel.GetColors();
+  const ColorIndex* const __restrict__ colorIndexBuffer = viewModel.GetColorIndices();
+  const GlyphInfo* __restrict__ hyphens                 = viewModel.GetHyphens();
+  const Length* __restrict__ hyphenIndices              = viewModel.GetHyphenIndices();
+  const Length hyphensCount                             = viewModel.GetHyphensCount();
+
+  GlyphData glyphData;
+  glyphData.verticalOffset   = verticalOffset;
+  glyphData.width            = bufferWidth;
+  glyphData.height           = bufferHeight;
+  glyphData.bitmapBuffer     = CreateTransparentImageBuffer(bufferWidth, bufferHeight, pixelFormat);
+  glyphData.horizontalOffset = 0;
+
+  Length hyphenIndex = 0;
+
+  const Character* __restrict__ textBuffer                       = viewModel.GetTextBuffer();
+  const Vector<CharacterIndex>& __restrict__ glyphToCharacterMap = viewModel.GetGlyphsToCharacters();
+  const CharacterIndex* __restrict__ glyphToCharacterMapBuffer   = glyphToCharacterMap.Begin();
+
+  const Vector<UnderlinedGlyphRun>    emptyUnderlineRuns;
+  const Vector<StrikethroughGlyphRun> emptyStrikethroughRuns;
+
+  const Vector<CharacterSpacingGlyphRun>& __restrict__ characterSpacingGlyphRuns =
+    viewModel.GetCharacterSpacingGlyphRuns();
+
+  const Vector2 styleOffset = Vector2::ZERO;
+
+  const InputParameterForEachLine inputParamsForLine{bufferWidth,
+                                                     bufferHeight,
+                                                     horizontalOffset,
+
+                                                     styleOffset,
+
+                                                     fromGlyphIndex,
+                                                     toGlyphIndex,
+
+                                                     viewModel.GetStartIndexOfElidedGlyphs(),
+                                                     viewModel.GetEndIndexOfElidedGlyphs(),
+                                                     viewModel.GetFirstMiddleIndexOfElidedGlyphs(),
+                                                     viewModel.GetSecondMiddleIndexOfElidedGlyphs(),
+                                                     viewModel.GetElidedOffset(),
+                                                     viewModel.GetVerticalLineAlignment(),
+                                                     viewModel.GetEllipsisPosition(),
+
+                                                     hyphens,
+                                                     hyphenIndices,
+                                                     hyphensCount,
+
+                                                     ignoreHorizontalAlignment};
+
+  const UnderlineStyleProperties modelUnderlineProperties{Text::Underline::Type::SOLID,
+                                                          Vector4::ZERO,
+                                                          0.0f,
+                                                          0.0f,
+                                                          0.0f,
+                                                          false,
+                                                          false,
+                                                          false,
+                                                          false,
+                                                          false};
+
+  const StrikethroughStyleProperties modelStrikethroughProperties{Vector4::ZERO, 0.0f, false, false};
+
+  const InputParameterForEachGlyph inputParamsForGlyph{Typesetter::STYLE_NONE,
+                                                       pixelFormat,
+
+                                                       0.0f,
+
+                                                       viewModel.GetCharacterSpacing(),
+
+                                                       viewModel.GetDefaultColor(),
+
+                                                       emptyUnderlineRuns,
+                                                       emptyStrikethroughRuns,
+                                                       characterSpacingGlyphRuns,
+
+                                                       glyphsBuffer,
+                                                       textBuffer,
+                                                       glyphToCharacterMapBuffer,
+
+                                                       positionBuffer,
+
+                                                       colorsBuffer,
+                                                       colorIndexBuffer,
+
+                                                       modelUnderlineProperties,
+                                                       modelStrikethroughProperties,
+
+                                                       false,
+                                                       false,
+                                                       false,
+
+                                                       viewModel.IsRemoveFrontInset(),
+                                                       viewModel.IsRemoveBackInset(),
+
+                                                       nullptr == colorsBuffer || nullptr == colorIndexBuffer};
+
+  for(LineIndex lineIndex = 0u; lineIndex < modelNumberOfLines; ++lineIndex)
+  {
+    const LineRun& line = *(modelLinesBuffer + lineIndex);
+    CreateTextGradientMaskImageBufferForEachLine(GetFontClient(), glyphData, hyphenIndex, line, inputParamsForLine,
+                                                 inputParamsForGlyph, colorIndexBuffer, false);
   }
 
   return glyphData.bitmapBuffer;

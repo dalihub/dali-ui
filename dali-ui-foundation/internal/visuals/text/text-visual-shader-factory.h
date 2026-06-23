@@ -96,6 +96,19 @@ enum Type
 };
 } // namespace TextEmboss
 
+namespace TextGradient
+{
+/**
+ * @brief Whether text uses TextGradient fill or not.
+ */
+enum Type
+{
+  NO_TEXT_GRADIENT = 0,   ///< The text uses the existing text color fill.
+  HAS_TEXT_GRADIENT,      ///< The single-color text uses TextGradient fill.
+  HAS_TEXT_GRADIENT_MIXED ///< The default-color glyphs in mixed text use TextGradient fill.
+};
+} // namespace TextGradient
+
 /**
  * @brief Collection of current text visual feature.
  */
@@ -108,6 +121,8 @@ public:
   FeatureBuilder& EnableStyle(bool enableStyle);
   FeatureBuilder& EnableOverlay(bool enableOverlay);
   FeatureBuilder& EnableEmboss(bool enableEmboss);
+  FeatureBuilder& EnableTextGradient(bool enableTextGradient);
+  FeatureBuilder& EnableTextGradientMixed(bool enableTextGradientMixed);
 
   VisualFactoryCache::ShaderType GetShaderType() const;
   void                           GetVertexShaderPrefixList(std::string& vertexShaderPrefixList) const;
@@ -133,6 +148,26 @@ public:
   {
     return mTextEmboss == TextEmboss::HAS_EMBOSS;
   }
+  bool IsEnabledTextGradient() const
+  {
+    return mTextGradient == TextGradient::HAS_TEXT_GRADIENT &&
+           mTextMultiColor == TextMultiColor::SINGLE_COLOR_TEXT &&
+           mTextEmoji == TextEmoji::NO_EMOJI &&
+           mTextEmboss == TextEmboss::NO_EMBOSS;
+  }
+  bool IsEnabledTextGradientMixed() const
+  {
+    return mTextGradient == TextGradient::HAS_TEXT_GRADIENT_MIXED &&
+           (mTextMultiColor == TextMultiColor::MULTI_COLOR_TEXT ||
+            mTextEmoji == TextEmoji::HAS_EMOJI) &&
+           mTextStyle == TextStyle::NO_STYLES &&
+           mTextOverlay == TextOverlay::NO_OVERLAY &&
+           mTextEmboss == TextEmboss::NO_EMBOSS;
+  }
+  bool IsEnabledAnyTextGradient() const
+  {
+    return IsEnabledTextGradient() || IsEnabledTextGradientMixed();
+  }
 
 private:
   TextMultiColor::Type
@@ -141,6 +176,8 @@ private:
   TextStyle::Type   mTextStyle : 2;      ///< Whether text has style, or not. default as TextStyle::NO_STYLES
   TextOverlay::Type mTextOverlay : 2;    ///< Whether text has overlay style, or not. default as TextOverlay::NO_OVERLAY
   TextEmboss::Type  mTextEmboss : 2;     ///< Whether text has emboss style, or not. default as TextEmboss::NO_EMBOSS
+  TextGradient::Type
+    mTextGradient : 2; ///< Whether text uses TextGradient fill, or not. default as TextGradient::NO_TEXT_GRADIENT
 };
 
 } // namespace TextVisualShaderFeature
