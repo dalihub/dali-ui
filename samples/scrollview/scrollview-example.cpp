@@ -30,12 +30,14 @@
  *
  * Keyboard:
  *   ↑ / ↓     — move focus between items (FocusManager navigation)
+ *   F         — programmatically focus last item (tests scroll-on-focus via API)
  *   S         — toggle ScrollOnFocus on / off
  *   1         — mode: MakeVisible
  *   2         — mode: Start
  *   3         — mode: Center
  *   4         — mode: End
  *   + / -     — increase / decrease FocusScrollPeek by 10 px
+ *   F         — programmatically focus Item 15 (tests scroll-on-focus via API)
  *   K         — toggle KeyScrollEnabled on / off
  *   [ / ]     — decrease / increase KeyScrollStep by 20 px
  *   E         — toggle BounceEdgeEffect on / off (drag past top/bottom to test)
@@ -300,10 +302,11 @@ private:
     title.SetTextColor(Color::WHITE);
     panel.Add(title);
 
-    // Row 1: ScrollOnFocus toggle chip + Focused label
-    static constexpr float CHIP_H   = 34.0f;
-    static constexpr float CHIP_W   = 160.0f;
-    static constexpr float ROW1_Y   = 34.0f;
+    // Row 1: ScrollOnFocus toggle chip + Focus-Last button + Focused label
+    static constexpr float CHIP_H        = 34.0f;
+    static constexpr float CHIP_W        = 160.0f;
+    static constexpr float FOCUS_LAST_W  = 150.0f;
+    static constexpr float ROW1_Y        = 34.0f;
 
     mScrollOnFocusChip = View::New();
     mScrollOnFocusChip.SetBackgroundColor(COLOR_ACTIVE);
@@ -319,10 +322,26 @@ private:
     mScrollOnFocusChip.Add(scrollOnFocusLabel);
     panel.Add(mScrollOnFocusChip);
 
+    // Button: programmatically move focus to Item 15 (last) to test scroll-on-focus
+    mFocusLastChip = View::New();
+    mFocusLastChip.SetBackgroundColor(Vector4(0.55f, 0.25f, 0.75f, 1.0f));
+    mFocusLastChip.SetRequestedWidth(FOCUS_LAST_W);
+    mFocusLastChip.SetRequestedHeight(CHIP_H);
+    mFocusLastChip.SetRequestedPositionX(CHIP_W + 16.0f);
+    mFocusLastChip.SetRequestedPositionY(ROW1_Y);
+    mFocusLastChip.SetProperty(View::Property::CORNER_RADIUS, Vector4(6, 6, 6, 6));
+    Label focusLastLabel = Label::New("Focus Last (F)");
+    focusLastLabel.SetRequestedWidth(FOCUS_LAST_W);
+    focusLastLabel.SetRequestedHeight(CHIP_H);
+    focusLastLabel.SetTextColor(Color::WHITE);
+    mFocusLastChip.Add(focusLastLabel);
+    mFocusLastChip.TouchedSignal().Connect(this, &ScrollViewController::OnFocusLastChipTouched);
+    panel.Add(mFocusLastChip);
+
     mFocusedLabel = Label::New("Focused: —");
-    mFocusedLabel.SetRequestedWidth(WINDOW_W - CHIP_W - 24.0f);
+    mFocusedLabel.SetRequestedWidth(WINDOW_W - CHIP_W - FOCUS_LAST_W - 32.0f);
     mFocusedLabel.SetRequestedHeight(CHIP_H);
-    mFocusedLabel.SetRequestedPositionX(CHIP_W + 16.0f);
+    mFocusedLabel.SetRequestedPositionX(CHIP_W + FOCUS_LAST_W + 24.0f);
     mFocusedLabel.SetRequestedPositionY(ROW1_Y);
     mFocusedLabel.SetTextColor(Color::WHITE);
     panel.Add(mFocusedLabel);
@@ -407,7 +426,7 @@ private:
     panel.Add(mKeyScrollStepLabel);
 
     // Key hint row
-    Label keyHint = Label::New("Keys: ↑↓ focus  S scroll-on-focus  1~4 mode  +/- peek  K key-scroll  [/] step  E edge-effect");
+    Label keyHint = Label::New("Keys: ↑↓ focus  F focus-last  S scroll-on-focus  1~4 mode  +/- peek  K key-scroll  [/] step  E edge-effect");
     keyHint.SetRequestedWidth(WINDOW_W - 8.0f);
     keyHint.SetRequestedHeight(22.0f);
     keyHint.SetRequestedPositionX(8.0f);
@@ -662,6 +681,15 @@ private:
     window.Add(mScrollView);
   }
 
+  // ── Focus Last chip touch ─────────────────────────────────────────────────
+
+  bool OnFocusLastChipTouched(Actor /*actor*/, TouchEvent touch)
+  {
+    if(touch.GetState(0) != PointState::UP) return false;
+    FocusManager::Get().SetCurrentFocusView(mFocusItems[ITEM_COUNT - 1]);
+    return true;
+  }
+
   // ── KeyScroll chip touch ───────────────────────────────────────────────────
 
   bool OnKeyScrollChipTouched(Actor /*actor*/, TouchEvent touch)
@@ -769,6 +797,10 @@ private:
       {
         FocusManager::Get().SetCurrentFocusView(mFocusItems[0]);
       }
+    }
+    else if(key == "f" || key == "F")
+    {
+      FocusManager::Get().SetCurrentFocusView(mFocusItems[ITEM_COUNT - 1]);
     }
     else if(key == "s" || key == "S")
     {
@@ -898,6 +930,7 @@ private:
 
   // Focus scroll panel
   View  mScrollOnFocusChip;
+  View  mFocusLastChip;
   View  mModeChips[4];
   Label mFocusedLabel;
   Label mPeekLabel;

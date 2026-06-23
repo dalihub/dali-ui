@@ -102,6 +102,8 @@ ScrollViewImpl::ScrollViewImpl()
   mFocusScrollPeek(0.0f),
   mKeyScrollEnabled(false),
   mKeyScrollStep(200.0f),
+  mKeyScrollLastChild(),
+  mKeyScrollLastDir(FocusDirection::DOWN),
   mVerticalScrollBarVisibility(ScrollBarVisibility::Auto),
   mHorizontalScrollBarVisibility(ScrollBarVisibility::Auto),
   mPanGestureDetector(PanGestureDetector::New()),
@@ -186,6 +188,7 @@ void ScrollViewImpl::SetContent(View content)
     mContentPositionNotification.Reset();
   }
 
+  mKeyScrollLastChild.Reset(); // stale child reference is invalid after content swap
   mContent = content;
 
   // Add new content
@@ -621,6 +624,8 @@ float ScrollViewImpl::GetFocusScrollPeek() const
 void ScrollViewImpl::SetKeyScrollEnabled(bool enable)
 {
   mKeyScrollEnabled = enable;
+  if(!enable)
+    mKeyScrollLastChild.Reset(); // case-3 state is only valid while key-scroll is active
 }
 
 bool ScrollViewImpl::GetKeyScrollEnabled() const
@@ -641,49 +646,302 @@ float ScrollViewImpl::GetKeyScrollStep() const
   return mKeyScrollStep;
 }
 
+namespace
+{
+// Returns true when a View can receive keyboard focus. Mirrors the conditions
+// DALi's global FocusFinder applies so we never propose a candidate that the
+// FocusManager would then reject.
+// USER_INTERACTION_ENABLED (not SENSITIVE) is the correct "enabled/disabled"
+// flag for keyboard focus: SENSITIVE controls touch hit-testing only.
+bool IsFocusableCandidate(View view)
+{
+  return view &&
+         view.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
+         view.GetProperty<bool>(Actor::Property::VISIBLE) &&
+         view.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED);
+}
+
+} // namespace
+
+bool ScrollViewImpl::IsChildInViewport(View child) const
+{
+  Vector2 pos  = GetScrollPositionForChild(child, Vector2::ZERO);
+  Vector2 size = child.GetProperty<Vector2>(Actor::Property::SIZE);
+  Vector2 sp   = GetScrollPosition();
+
+  bool visibleY = true;
+  bool visibleX = true;
+
+  if(CanScrollVertically(mScrollDirection))
+    visibleY = (pos.y + size.y) > sp.y && pos.y < (sp.y + mViewportHeight);
+  if(CanScrollHorizontally(mScrollDirection))
+    visibleX = (pos.x + size.x) > sp.x && pos.x < (sp.x + mViewportWidth);
+
+  return visibleX && visibleY;
+}
+
+View ScrollViewImpl::OnFocusRequested()
+{
+  View selfView = View::DownCast(Self());
+
+  // When key-scroll is disabled the ScrollView shouldn't absorb focus into
+  // Self() — use the base class implementation which delegates to the first
+  // focusable child.  return View() would cause FocusManager::RequestFocus()
+  // to fail outright rather than falling back to child delegation.
+  if(!mKeyScrollEnabled || !mContent) return LayoutImpl::OnFocusRequested();
+
+  // Always focus the content item nearest to the entry edge: the ScrollView
+  // should self-focus (for OnKeyEvent step-scroll) only when there are no
+  // focusable items at all (nofocus case).  This makes entering from any
+  // external direction behave consistently — the item at the approached edge
+  // receives focus directly, without the ScrollView acting as an intermediary.
+  //
+  // Guard: skip entry-edge detection when the previous focus is already one of
+  // our content descendants (happens in case 3, where OnFocusNavigationRequested
+  // returns Self() and FocusManager calls back into OnFocusRequested).  Content
+  // items can have their world-position center outside the visible viewport when
+  // they are only partially on-screen, which would otherwise falsely trigger the
+  // "approaching from below/above" branch and re-focus the same item.
+  View prevFocus = FocusManager::Get().GetCurrentFocusView();
+
+  if(prevFocus && !IsDescendantOfContent(prevFocus))
+  {
+    Vector3 prevPos  = prevFocus.GetProperty<Vector3>(Actor::Property::WORLD_POSITION);
+    Vector3 selfPos  = selfView.GetProperty<Vector3>(Actor::Property::WORLD_POSITION);
+    Vector3 selfSize = selfView.GetProperty<Vector3>(Actor::Property::SIZE);
+
+    float selfTop    = selfPos.y - selfSize.y * 0.5f;
+    float selfBottom = selfPos.y + selfSize.y * 0.5f;
+    float selfLeft   = selfPos.x - selfSize.x * 0.5f;
+    float selfRight  = selfPos.x + selfSize.x * 0.5f;
+
+    FocusDirection edgeDirection = FocusDirection::UP;
+    Vector2        edgePos;
+    bool           hasEdge = false;
+
+    // Vertical axis takes priority; horizontal checked only if vertical doesn't fire.
+    if(!hasEdge && CanScrollVertically(mScrollDirection))
+    {
+      if(prevPos.y < selfTop)
+      {
+        // Approaching from above → item nearest to top of current viewport.
+        edgeDirection = FocusDirection::DOWN;
+        edgePos       = Vector2(0.0f, GetScrollPosition().y);
+        hasEdge       = true;
+      }
+      else if(prevPos.y > selfBottom)
+      {
+        // Approaching from below → item nearest to bottom of current viewport.
+        edgeDirection = FocusDirection::UP;
+        edgePos       = Vector2(0.0f, GetScrollPosition().y + mViewportHeight);
+        hasEdge       = true;
+      }
+    }
+    if(!hasEdge && CanScrollHorizontally(mScrollDirection))
+    {
+      if(prevPos.x < selfLeft)
+      {
+        edgeDirection = FocusDirection::RIGHT;
+        edgePos       = Vector2(GetScrollPosition().x, 0.0f);
+        hasEdge       = true;
+      }
+      else if(prevPos.x > selfRight)
+      {
+        edgeDirection = FocusDirection::LEFT;
+        edgePos       = Vector2(GetScrollPosition().x + mViewportWidth, 0.0f);
+        hasEdge       = true;
+      }
+    }
+
+    if(hasEdge)
+    {
+      View edgeItem = FindNextFocusableInContent(View(), edgePos, edgeDirection);
+      // Only return the edge item if it is already visible in the current viewport.
+      // If it is off-screen, fall through to Self() so OnKeyEvent step-scrolls
+      // toward it — the same path used when there are no focusable items at all.
+      if(edgeItem && IsChildInViewport(edgeItem)) return edgeItem;
+      // Entering from outside with no visible item: clear case-3 skip memory so
+      // OnKeyEvent treats items freshly (the previous last-child is no longer relevant).
+      mKeyScrollLastChild.Reset();
+    }
+  }
+
+  // No visible item at the entry edge (or no prevFocus context).
+  // Return Self() so OnKeyEvent can step-scroll toward the first/last focusable
+  // item.  Only valid if ScrollView is keyboard-focusable; otherwise delegate to
+  // the base class so FocusManager can use child delegation instead of failing.
+  if(!selfView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+    return LayoutImpl::OnFocusRequested();
+  return selfView;
+}
+
+bool ScrollViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
+{
+  if(!mKeyScrollEnabled || !mContent) return false;
+  if(event.GetState() != Dali::KeyEvent::DOWN) return false;
+
+  const Dali::String keyName = event.GetKeyName();
+
+  // HOME / END: intercepted at ScrollView level regardless of which view has focus,
+  // mirroring Android ScrollView.onKeyDown().
+  // Assumption: DALi dispatches key events to the focused actor and, if not consumed
+  // (returns false), propagates them up the parent chain.  If DALi ever changes to
+  // not bubble key events, Home/End will only work when ScrollView itself is focused.
+  if(keyName == "Home" || keyName == "End")
+  {
+    bool toEnd = (keyName == "End");
+    if(!IsDirectionCompatible(toEnd ? FocusDirection::DOWN : FocusDirection::UP)) return false;
+    View result = FullScrollAndFocus(toEnd);
+    if(result) FocusManager::Get().SetCurrentFocusView(result);
+    return true;
+  }
+
+  // All other navigation keys: only act when ScrollView itself is the focused view.
+  // When a content descendant is focused, OnFocusNavigationRequested handles key-scroll;
+  // acting here too would fire scroll twice per key press.
+  if(FocusManager::Get().GetCurrentFocusView() != View::DownCast(Self())) return false;
+
+  FocusDirection direction;
+  if(keyName == "Up")
+    direction = FocusDirection::UP;
+  else if(keyName == "Down")
+    direction = FocusDirection::DOWN;
+  else if(keyName == "Left")
+    direction = FocusDirection::LEFT;
+  else if(keyName == "Right")
+    direction = FocusDirection::RIGHT;
+  else if(keyName == "Prior" || keyName == "Page_Up")
+    direction = FocusDirection::PAGE_UP;
+  else if(keyName == "Next" || keyName == "Page_Down")
+    direction = FocusDirection::PAGE_DOWN;
+  else
+    return false;
+
+  if(!IsDirectionCompatible(direction)) return false;
+
+  // PAGE_* when ScrollView is focused: FocusManager fires first (via sceneHolder.
+  // KeyEventSignal) but skips MoveFocus when the focused view lacks FOCUS_INDICATED
+  // (as in case-3 mode — confirmed by arrow keys working correctly in that state).
+  // The key then reaches here.  If FocusManager did call MoveFocus and changed focus,
+  // it would dispatch the key to the new view instead, so no double-scroll can occur.
+  if(direction == FocusDirection::PAGE_UP || direction == FocusDirection::PAGE_DOWN)
+  {
+    View result = PageScrollAndFocus(direction);
+    if(result) FocusManager::Get().SetCurrentFocusView(result);
+    return true;
+  }
+
+  // Arrow keys: use the TRAILING viewport edge as the search anchor so items that
+  // have just entered the viewport from the leading side are still "ahead" of it.
+  Vector2 scrollPos = GetScrollPosition();
+  Vector2 viewportEdge;
+  switch(direction)
+  {
+    case FocusDirection::DOWN:
+      viewportEdge = Vector2(0.0f, scrollPos.y);
+      break;
+    case FocusDirection::UP:
+      viewportEdge = Vector2(0.0f, scrollPos.y + mViewportHeight);
+      break;
+    case FocusDirection::RIGHT:
+      viewportEdge = Vector2(scrollPos.x, 0.0f);
+      break;
+    default: // LEFT
+      viewportEdge = Vector2(scrollPos.x + mViewportWidth, 0.0f);
+      break;
+  }
+
+  // Case-3 step-scroll mode: a content item transferred focus to ScrollView because
+  // it was the last focusable item but the content could still scroll.  While in this
+  // mode skip item re-selection to avoid the focus cycle (item → case3 → ScrollView →
+  // item → …).  Any direction reversal immediately clears the mode.
+  if(mKeyScrollLastChild && direction != mKeyScrollLastDir)
+    mKeyScrollLastChild.Reset();
+
+  if(mKeyScrollLastChild) // implies direction == mKeyScrollLastDir
+  {
+    if(IsAtScrollBoundary(direction))
+    {
+      mKeyScrollLastChild.Reset();
+      TriggerKeyEdgeFeedback(direction);
+      return false;
+    }
+    ScrollByKeyDirection(direction);
+    return true;
+  }
+
+  // Normal arrow-key mode: focus the nearest visible item, or step-scroll toward it.
+  View next = FindNextFocusableInContent(View(), viewportEdge, direction);
+  if(next && IsChildInViewport(next))
+  {
+    mKeyScrollLastChild.Reset();
+    FocusManager::Get().SetCurrentFocusView(next);
+    return true;
+  }
+
+  if(IsAtScrollBoundary(direction))
+  {
+    TriggerKeyEdgeFeedback(direction);
+    return false;
+  }
+
+  ScrollByKeyDirection(direction);
+  return true;
+}
+
 View ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction)
 {
-  // Only act when key-scroll is enabled and the focused view lives inside our content
-  if(!mKeyScrollEnabled || !mContent || !IsDescendantOfContent(currentFocusedView))
-  {
-    return View();
-  }
+  if(!mKeyScrollEnabled || !mContent) return View();
 
-  // Only handle directions that match our scroll axis
-  if(!IsDirectionCompatible(direction))
-  {
-    return View();
-  }
+  // OnFocusNavigationRequested is only called on PARENT layouts (FindNextFocusByParentNavigation
+  // traverses GetParent() chain).  When ScrollView itself is the focused view, it is never
+  // called here — PAGE_* and HOME/END are handled in OnKeyEvent instead.
+  if(!IsDescendantOfContent(currentFocusedView)) return View();
 
+  View selfView = View::DownCast(Self());
+  if(!IsDirectionCompatible(direction)) return View();
+
+  // PAGE_*: scroll one full page and focus the topmost / bottommost item in the
+  // destination viewport (mirrors Android ScrollView.pageScroll behavior).
+  if(direction == FocusDirection::PAGE_UP || direction == FocusDirection::PAGE_DOWN)
+    return PageScrollAndFocus(direction);
+
+  // Arrow key navigation below.
   Vector2 currentPos = GetScrollPositionForChild(currentFocusedView, Vector2::ZERO);
   View    next       = FindNextFocusableInContent(currentFocusedView, currentPos, direction);
 
   if(!next)
   {
-    // No more focusable items in this direction. If we are also at the scroll
-    // boundary, play a one-shot absorb animation so the user gets visual
-    // feedback that the list has ended.
     if(IsAtScrollBoundary(direction))
     {
+      // At boundary with no next item: let FocusFinder exit to a neighboring view.
       TriggerKeyEdgeFeedback(direction);
+      return View();
     }
-    return View();
+    // Case 3: past the last focusable item, content can still scroll.
+    // Transfer focus to Self() so subsequent arrow presses are handled by OnKeyEvent.
+    // Scroll one step immediately so this key press is not wasted.
+    ScrollByKeyDirection(direction);
+    if(selfView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+    {
+      mKeyScrollLastChild = currentFocusedView;
+      mKeyScrollLastDir   = direction;
+      return selfView;
+    }
+    return currentFocusedView;
   }
 
-  // Measure how far the next item is from the current viewport edge in the
-  // direction of travel.  The viewport boundary moves with every scroll step,
-  // so this distance shrinks as the user keeps pressing the key.
+  // Case 5: next item is within one step of the viewport edge — focus it directly.
+  // ScrollOnFocus will animate it into full view.
   Vector2 scrollPos = GetScrollPosition();
   Vector2 nextPos   = GetScrollPositionForChild(next, Vector2::ZERO);
   float   distance  = 0.0f;
   switch(direction)
   {
     case FocusDirection::DOWN:
-    case FocusDirection::PAGE_DOWN:
       distance = std::max(0.0f, nextPos.y - (scrollPos.y + mViewportHeight));
       break;
     case FocusDirection::UP:
-    case FocusDirection::PAGE_UP:
       distance = std::max(0.0f, scrollPos.y - nextPos.y);
       break;
     case FocusDirection::RIGHT:
@@ -699,21 +957,20 @@ View ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDi
 
   if(distance < mKeyScrollStep)
   {
+    mKeyScrollLastChild.Reset();
     return next;
   }
 
-  // Next item exists but is far away.  Check whether the scroll can still move
-  // in this direction.  If we are already at the boundary, scrolling would be
-  // a no-op and the user would be permanently stuck; focus the next item directly
-  // instead so the key always makes progress.
+  // Case 4b: boundary override — scrolling is a no-op, focus next directly.
   if(IsAtScrollBoundary(direction))
   {
+    mKeyScrollLastChild.Reset();
     return next;
   }
 
-  // Step-scroll toward the next item and block FocusFinder (returning a non-null
-  // view prevents Steps 2/3 of the MoveFocus pipeline from jumping further).
+  // Case 4: step-scroll toward next item, keep current focus to block FocusFinder.
   ScrollByKeyDirection(direction);
+  mKeyScrollLastChild.Reset();
   return currentFocusedView;
 }
 
@@ -753,9 +1010,7 @@ void ScrollViewImpl::CollectNextFocusCandidate(View container, View excludeView,
       continue;
     }
 
-    if(child != excludeView &&
-       child.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-       child.GetProperty<bool>(Actor::Property::VISIBLE))
+    if(child != excludeView && IsFocusableCandidate(child))
     {
       Vector2 childPos = GetScrollPositionForChild(child, Vector2::ZERO);
       if(IsAheadInDirection(currentPos, childPos, direction))
@@ -778,6 +1033,126 @@ void ScrollViewImpl::CollectNextFocusCandidate(View container, View excludeView,
       CollectNextFocusCandidate(child, excludeView, currentPos, direction, bestView, bestDist);
     }
   }
+}
+
+View ScrollViewImpl::PageScrollAndFocus(FocusDirection direction)
+{
+  mKeyScrollLastChild.Reset();
+
+  const float maxScrollY = std::max(0.0f, mScrollableHeight - mViewportHeight);
+
+  Vector2 pos = GetScrollPosition();
+  // PAGE_UP/PAGE_DOWN always move the Y axis.  In ScrollDirection::Both the X
+  // position is kept unchanged because there is no horizontal equivalent of a
+  // "page" — horizontal paging would require PAGE_LEFT/PAGE_RIGHT directions.
+  float destY = pos.y;
+  switch(direction)
+  {
+    case FocusDirection::PAGE_DOWN:
+      destY = std::min(pos.y + mViewportHeight, maxScrollY);
+      break;
+    case FocusDirection::PAGE_UP:
+      destY = std::max(pos.y - mViewportHeight, 0.0f);
+      break;
+    default:
+      break;
+  }
+  ScrollToWithDuration(Vector2(pos.x, destY), KEY_SCROLL_ANIM_SEC);
+
+  // Find the best item that intersects the destination viewport.
+  // Use full rectangle intersection (item top/bottom vs dest top/bottom) so that
+  // a large item whose leading edge is outside the viewport but whose body
+  // overlaps it is correctly included — matching IsChildInViewport's logic.
+  float destTop    = destY;
+  float destBottom = destY + mViewportHeight;
+
+  View    bestItem;
+  Vector2 anchor;
+  if(direction == FocusDirection::PAGE_DOWN)
+  {
+    // topmost focusable item that intersects destination viewport
+    anchor   = Vector2(0.0f, destTop - 1.0f);
+    bestItem = FindNextFocusableInContent(View(), anchor, FocusDirection::DOWN);
+    if(bestItem)
+    {
+      Vector2 itemPos  = GetScrollPositionForChild(bestItem, Vector2::ZERO);
+      Vector2 itemSize = bestItem.GetProperty<Vector2>(Actor::Property::SIZE);
+      if(itemPos.y >= destBottom || (itemPos.y + itemSize.y) <= destTop)
+        bestItem = View();
+    }
+  }
+  else // PAGE_UP
+  {
+    // bottommost focusable item that intersects destination viewport
+    anchor   = Vector2(0.0f, destBottom + 1.0f);
+    bestItem = FindNextFocusableInContent(View(), anchor, FocusDirection::UP);
+    if(bestItem)
+    {
+      Vector2 itemPos  = GetScrollPositionForChild(bestItem, Vector2::ZERO);
+      Vector2 itemSize = bestItem.GetProperty<Vector2>(Actor::Property::SIZE);
+      if((itemPos.y + itemSize.y) <= destTop || itemPos.y >= destBottom)
+        bestItem = View();
+    }
+  }
+
+  if(bestItem) return bestItem;
+
+  // No focusable item in destination viewport.
+  bool atBoundary = (direction == FocusDirection::PAGE_DOWN)
+                      ? (destY >= maxScrollY - 1.0f)
+                      : (destY <= 1.0f);
+  if(atBoundary) TriggerKeyEdgeFeedback(direction);
+
+  View selfView = View::DownCast(Self());
+  return selfView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ? selfView : View();
+}
+
+View ScrollViewImpl::FullScrollAndFocus(bool toEnd)
+{
+  mKeyScrollLastChild.Reset();
+
+  const float maxScrollY = std::max(0.0f, mScrollableHeight - mViewportHeight);
+  float       destY      = toEnd ? maxScrollY : 0.0f;
+
+  Vector2 pos = GetScrollPosition();
+  ScrollToWithDuration(Vector2(pos.x, destY), KEY_SCROLL_ANIM_SEC);
+
+  float destTop    = destY;
+  float destBottom = destY + mViewportHeight;
+
+  View    bestItem;
+  Vector2 anchor;
+  if(!toEnd)
+  {
+    // Home: topmost focusable item intersecting [destTop, destBottom]
+    anchor   = Vector2(0.0f, destTop - 1.0f);
+    bestItem = FindNextFocusableInContent(View(), anchor, FocusDirection::DOWN);
+    if(bestItem)
+    {
+      Vector2 itemPos  = GetScrollPositionForChild(bestItem, Vector2::ZERO);
+      Vector2 itemSize = bestItem.GetProperty<Vector2>(Actor::Property::SIZE);
+      if(itemPos.y >= destBottom || (itemPos.y + itemSize.y) <= destTop)
+        bestItem = View();
+    }
+  }
+  else
+  {
+    // End: bottommost focusable item intersecting [destTop, destBottom]
+    anchor   = Vector2(0.0f, destBottom + 1.0f);
+    bestItem = FindNextFocusableInContent(View(), anchor, FocusDirection::UP);
+    if(bestItem)
+    {
+      Vector2 itemPos  = GetScrollPositionForChild(bestItem, Vector2::ZERO);
+      Vector2 itemSize = bestItem.GetProperty<Vector2>(Actor::Property::SIZE);
+      if((itemPos.y + itemSize.y) <= destTop || itemPos.y >= destBottom)
+        bestItem = View();
+    }
+  }
+
+  if(bestItem) return bestItem;
+
+  View selfView = View::DownCast(Self());
+  return selfView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ? selfView : View();
 }
 
 bool ScrollViewImpl::IsAtScrollBoundary(FocusDirection direction) const

@@ -22,6 +22,12 @@ ADD_EXECUTABLE(${EXE_INTERACTIVE} scrollview-interactive-children.cpp)
 SET(EXE_SCROLLBAR scrollview-scrollbar-example)
 ADD_EXECUTABLE(${EXE_SCROLLBAR} scrollbar-example.cpp)
 
+SET(EXE_NOFOCUS scrollview-nofocus-keyscroll)
+ADD_EXECUTABLE(${EXE_NOFOCUS} scrollview-nofocus-keyscroll.cpp)
+
+SET(EXE_FARFOCUS scrollview-farfocus-keyscroll)
+ADD_EXECUTABLE(${EXE_FARFOCUS} scrollview-farfocus-keyscroll.cpp)
+
 # Build Options
 SET(DALI_UI_TEST_APP_CFLAGS -fvisibility=hidden -DHIDE_DALI_INTERNALS)
 
@@ -54,7 +60,7 @@ ELSE()
 ENDIF()
 
 # Set output directory
-FOREACH(TARGET_EXE ${EXE_NAME} ${EXE_INTERACTIVE} ${EXE_SCROLLBAR})
+FOREACH(TARGET_EXE ${EXE_NAME} ${EXE_INTERACTIVE} ${EXE_SCROLLBAR} ${EXE_NOFOCUS} ${EXE_FARFOCUS})
   SET_TARGET_PROPERTIES(${TARGET_EXE} PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
 

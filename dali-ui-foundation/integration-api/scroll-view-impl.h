@@ -559,15 +559,47 @@ private:
   static bool CanScrollVertically(ScrollDirection direction);
 
   /**
+   * @brief Resolves which view actually receives focus when FocusManager targets Self().
+   *
+   * Called by FocusManager after Step 1 selects this ScrollView as a candidate.
+   * Returns the content item nearest to the entry edge if it is already visible in
+   * the current viewport (external-entry shortcut), or Self() when step-scrolling is
+   * needed, or delegates to the base class when key-scroll is disabled.
+   */
+  View OnFocusRequested() override;
+
+  bool OnKeyEvent(const Dali::KeyEvent& event) override;
+
+  /**
    * @brief Intercepts focus navigation for content children.
    *
    * Called by FocusManager (Step 1 of MoveFocus pipeline) when the current
-   * focused view is a descendant of this ScrollView. If key-scroll is enabled:
-   *  - next focusable within mKeyScrollStep  → return it (normal focus move)
-   *  - next focusable beyond mKeyScrollStep, or none → scroll by step, return
-   *    currentFocusedView to block FocusFinder (Step 3) from jumping further.
+   * focused view is a descendant of this ScrollView. If key-scroll is enabled,
+   * four cases apply:
+   *
+   *  !next AND at scroll boundary:
+   *    Return View() so FocusFinder can exit to a neighboring view (e.g. Ext Bottom).
+   *  Case 3 — no next focusable AND not at scroll boundary:
+   *    Transfer focus to Self() (if KEYBOARD_FOCUSABLE) so OnKeyEvent drives
+   *    further step-scrolling. Sets mKeyScrollLastChild/Dir to suppress re-selection
+   *    of content items while in this blind-scroll mode.
+   *  Case 4 — next focusable beyond mKeyScrollStep:
+   *    Scroll one step, return currentFocusedView to keep focus in place and
+   *    block FocusFinder from jumping further.
+   *  Case 5 — next focusable within mKeyScrollStep (or at scroll boundary):
+   *    Return next directly; ScrollOnFocus animates it into full view.
    */
   View OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction) override;
+
+  /**
+   * @brief Returns true if `child` (a content descendant) overlaps the current viewport.
+   *
+   * Uses rectangle intersection so partial visibility counts. This is used as
+   * the trigger for transferring keyboard focus to a content item: we only focus
+   * the item when it is actually visible, rather than pre-focusing off-screen items
+   * and relying on scroll-on-focus to catch up.
+   */
+  bool IsChildInViewport(View child) const;
 
   /**
    * @brief Callback invoked when the focused view changes.
@@ -615,6 +647,24 @@ private:
    * PAGE_UP / PAGE_DOWN scrolls by the full viewport size.
    */
   void ScrollByKeyDirection(FocusDirection direction);
+
+  /**
+   * @brief Scrolls one page in @p direction and focuses the topmost (PAGE_DOWN) or
+   * bottommost (PAGE_UP) focusable item in the destination viewport.
+   *
+   * Returns the item to focus, Self() when no item is found but ScrollView is
+   * keyboard-focusable, or View() otherwise.  Always clears mKeyScrollLastChild.
+   */
+  View PageScrollAndFocus(FocusDirection direction);
+
+  /**
+   * @brief Scrolls to the very start (toEnd=false) or end (toEnd=true) of content and
+   * focuses the topmost (Home) or bottommost (End) focusable item in the destination
+   * viewport.  Falls back to Self() or View() as in PageScrollAndFocus.
+   *
+   * Mirrors Android ScrollView behavior for KEYCODE_MOVE_HOME / KEYCODE_MOVE_END.
+   */
+  View FullScrollAndFocus(bool toEnd);
 
   /**
    * @brief Returns the signed axis distance from @p from to @p to in @p direction.
@@ -717,8 +767,10 @@ private:
   float            mFocusScrollPeek;       ///< Extra scroll distance past the item edge on focus (MakeVisible only)
 
   // Key-scroll behaviour
-  bool  mKeyScrollEnabled; ///< Whether key-based step scrolling is active
-  float mKeyScrollStep;    ///< Proximity threshold and step size for key scrolling (px)
+  bool           mKeyScrollEnabled;   ///< Whether key-based step scrolling is active
+  float          mKeyScrollStep;      ///< Proximity threshold and step size for key scrolling (px)
+  View           mKeyScrollLastChild; ///< Content child that last triggered a case-3 focus transfer to Self()
+  FocusDirection mKeyScrollLastDir;   ///< Direction of that transfer (only valid when mKeyScrollLastChild is set)
 
   // Scroll bar visibility
   ScrollBarVisibility mVerticalScrollBarVisibility;   ///< Vertical scroll bar visibility
