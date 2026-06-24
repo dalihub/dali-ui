@@ -83,14 +83,14 @@ struct TrackedLabel
   bool  updateWidth;
   bool  updateHeight;
   bool  updateFontSize;
-  float fontSizeScale;  // Multiplier for mPixelSize
+  float fontSizeRatio;  // Multiplier for mPixelSize
 
   TrackedLabel()
   : label(),
     updateWidth(true),
     updateHeight(true),
     updateFontSize(true),
-    fontSizeScale(1.0f)
+    fontSizeRatio(1.0f)
   {}
 };
 
@@ -285,7 +285,7 @@ private:
     info.updateWidth    = true;
     info.updateHeight   = true;
     info.updateFontSize = true;
-    info.fontSizeScale  = 1.0f;
+    info.fontSizeRatio  = 1.0f;
     mTrackedEmojiLabels.push_back(info);
   }
 
@@ -296,7 +296,7 @@ private:
     info.updateWidth    = false;
     info.updateHeight   = false;
     info.updateFontSize = true;
-    info.fontSizeScale  = 1.0f / 3.0f;
+    info.fontSizeRatio  = 1.0f / 3.0f;
     mTrackedOverlayLabels.push_back(info);
   }
 
@@ -306,7 +306,7 @@ private:
     mTrackedWorkbench.updateWidth    = true;
     mTrackedWorkbench.updateHeight   = true;
     mTrackedWorkbench.updateFontSize = true;
-    mTrackedWorkbench.fontSizeScale  = 1.0f;
+    mTrackedWorkbench.fontSizeRatio  = 1.0f;
   }
 
   void TrackTitleLabel(Label label)
@@ -315,7 +315,7 @@ private:
     mTrackedTitleLabel.updateWidth    = false;
     mTrackedTitleLabel.updateHeight   = true;
     mTrackedTitleLabel.updateFontSize = true;
-    mTrackedTitleLabel.fontSizeScale  = 1.0f / 3.0f;
+    mTrackedTitleLabel.fontSizeRatio  = 1.0f / 3.0f;
   }
 
   void TrackMainContainer(View container)
@@ -401,7 +401,7 @@ private:
         }
         if(info.updateFontSize)
         {
-          info.label.SetFontSize(mPixelSize * info.fontSizeScale);
+          info.label.SetFontSize(mPixelSize * info.fontSizeRatio);
         }
       }
     }

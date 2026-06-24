@@ -24,6 +24,7 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
+#include <dali/integration-api/system/system-settings.h>
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
@@ -78,6 +79,37 @@ BaseHandle Create()
   return BaseHandle();
 }
 
+UiConfig::SystemFontSize ToUiConfigSystemFontSize(Dali::Integration::SystemSettings::FontSize fontSize)
+{
+  using AdaptorFontSize = Dali::Integration::SystemSettings::FontSize;
+
+  switch(fontSize)
+  {
+    case AdaptorFontSize::SMALL:
+    {
+      return UiConfig::SystemFontSize::SMALL;
+    }
+    case AdaptorFontSize::NORMAL:
+    {
+      return UiConfig::SystemFontSize::NORMAL;
+    }
+    case AdaptorFontSize::LARGE:
+    {
+      return UiConfig::SystemFontSize::LARGE;
+    }
+    case AdaptorFontSize::EXTRA_LARGE:
+    {
+      return UiConfig::SystemFontSize::EXTRA_LARGE;
+    }
+    case AdaptorFontSize::GIANT:
+    {
+      return UiConfig::SystemFontSize::GIANT;
+    }
+  }
+
+  return UiConfig::SystemFontSize::NORMAL;
+}
+
 #define INPUT_FIELD_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
   DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui::Text, InputFieldPropertyIndex, Ui::Integration, InputFieldImpl, text, valueType, enumIndex)
 
@@ -127,7 +159,6 @@ INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                       INTEGER, F
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",                        INTEGER, FONT_WIDTH                          )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontSlant",                        INTEGER, FONT_SLANT                          )
 INPUT_FIELD_PROPERTY_REGISTRATION("textBackgroundColor",              VECTOR4, TEXT_BACKGROUND_COLOR               )
-INPUT_FIELD_PROPERTY_REGISTRATION("fontSizeScale",                    FLOAT,   FONT_SIZE_SCALE                     )
 INPUT_FIELD_PROPERTY_REGISTRATION("minimumFontSizeScale",             FLOAT,   MINIMUM_FONT_SIZE_SCALE             )
 INPUT_FIELD_PROPERTY_REGISTRATION("maximumFontSizeScale",             FLOAT,   MAXIMUM_FONT_SIZE_SCALE             )
 INPUT_FIELD_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled",       BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED      )
@@ -1152,6 +1183,15 @@ void InputFieldImpl::ApplyInitialConfig()
   SetTextColor(config.GetDefaultTextColor());
   SetPlaceholderColor(config.GetDefaultPlaceholderTextColor());
   SetShowPlaceholderOnFocus(config.IsPlaceholderTextShownOnFocus());
+  SetMinimumFontSizeScale(config.GetDefaultMinimumFontSizeScale());
+  SetMaximumFontSizeScale(config.GetDefaultMaximumFontSizeScale());
+  SetSystemFontSizeScaleEnabled(config.IsDefaultSystemFontSizeScaleEnabled());
+
+  auto systemSettings = Dali::Integration::SystemSettings::Get();
+  if(systemSettings)
+  {
+    ApplySystemFontSize(systemSettings.GetFontSize());
+  }
 }
 
 // =============================================================================
@@ -1177,6 +1217,27 @@ Extents InputFieldImpl::GetEffectiveTextPadding() const
   padding.top             = static_cast<uint16_t>(static_cast<float>(padding.top) * textUiScale);
   padding.bottom          = static_cast<uint16_t>(static_cast<float>(padding.bottom) * textUiScale);
   return padding;
+}
+
+// =============================================================================
+// System FontSize
+// =============================================================================
+void InputFieldImpl::ApplySystemFontSize(Dali::Integration::SystemSettings::FontSize fontSize)
+{
+  if(!UiConfig::HasCurrent())
+  {
+    return;
+  }
+
+  const auto  config = UiConfig::GetCurrent();
+  const float scale  = config.GetScaleForSystemFontSize(ToUiConfigSystemFontSize(fontSize));
+
+  mController->SetSystemFontSizeScale(scale);
+}
+
+void InputFieldImpl::OnSystemFontSizeChanged(Dali::Integration::SystemSettings::FontSize fontSize)
+{
+  ApplySystemFontSize(fontSize);
 }
 
 // =============================================================================
@@ -1261,6 +1322,12 @@ void InputFieldImpl::OnInitialize()
   // TODO: Re-enable when grab handle and popup support are fully implemented.
   mController->SetGrabHandleEnabled(false);
   mController->SetGrabHandlePopupEnabled(false);
+
+  auto systemSettings = Dali::Integration::SystemSettings::Get();
+  if(systemSettings)
+  {
+    systemSettings.FontSizeChangedSignal().Connect(this, &InputFieldImpl::OnSystemFontSizeChanged);
+  }
 
   ApplyInitialConfig();
 }

@@ -251,11 +251,6 @@ void InputEditorImpl::PropertyHandler::SetProperty(Ui::View view, Property::Inde
       impl.SetTextBackgroundColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputEditorPropertyIndex::FONT_SIZE_SCALE:
-    {
-      impl.SetFontSizeScale(value.Get<float>());
-      break;
-    }
     case Text::InputEditorPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
     {
       impl.SetMinimumFontSizeScale(value.Get<float>());
@@ -523,11 +518,6 @@ Property::Value InputEditorImpl::PropertyHandler::GetProperty(Ui::View view, Pro
     case Text::InputEditorPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
       value = impl.GetTextBackgroundColor().GetRgba();
-      break;
-    }
-    case Text::InputEditorPropertyIndex::FONT_SIZE_SCALE:
-    {
-      value = impl.GetFontSizeScale();
       break;
     }
     case Text::InputEditorPropertyIndex::MINIMUM_FONT_SIZE_SCALE:

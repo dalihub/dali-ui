@@ -60,6 +60,10 @@ UiConfigImpl::UiConfigImpl()
   mDefaultPlaceholderTextColor(Vector4(0.8f, 0.8f, 0.8f, 0.8f)),
   mScalingFactor(1.0f),
   mDefaultFontSize(16.0f),
+  mDefaultSystemFontSizeScaleEnabled(true),
+  mSystemFontSizeScales{{0.87f, 1.0f, 1.13f, 1.26f, 1.4f}}, // SMALL, NORMAL, LARGE, EXTRA_LARGE, GIANT
+  mDefaultMinimumFontSizeScale(0.01f),
+  mDefaultMaximumFontSizeScale(10.0f),
   mDpi(160),
   mBaselineDpi(160),
   mMarqueeSpeed(80),
@@ -304,6 +308,65 @@ void UiConfigImpl::SetDefaultFontSize(float fontSize)
 float UiConfigImpl::GetDefaultFontSize() const
 {
   return mDefaultFontSize;
+}
+
+void UiConfigImpl::SetDefaultSystemFontSizeScaleEnabled(bool enabled)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  mDefaultSystemFontSizeScaleEnabled = enabled;
+}
+
+bool UiConfigImpl::IsDefaultSystemFontSizeScaleEnabled() const
+{
+  return mDefaultSystemFontSizeScaleEnabled;
+}
+
+void UiConfigImpl::SetDefaultMinimumFontSizeScale(float scale)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  mDefaultMinimumFontSizeScale = scale;
+}
+
+float UiConfigImpl::GetDefaultMinimumFontSizeScale() const
+{
+  return mDefaultMinimumFontSizeScale;
+}
+
+void UiConfigImpl::SetDefaultMaximumFontSizeScale(float scale)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  mDefaultMaximumFontSizeScale = scale;
+}
+
+float UiConfigImpl::GetDefaultMaximumFontSizeScale() const
+{
+  return mDefaultMaximumFontSizeScale;
+}
+
+void UiConfigImpl::SetScaleForSystemFontSize(UiConfig::SystemFontSize fontSize, float scale)
+{
+  DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+
+  const auto index = static_cast<size_t>(fontSize);
+  if(index >= mSystemFontSizeScales.size())
+  {
+    DALI_LOG_ERROR("Invalid SystemFontSize: [%zu]\n", index);
+    return;
+  }
+
+  mSystemFontSizeScales[index] = scale;
+}
+
+float UiConfigImpl::GetScaleForSystemFontSize(UiConfig::SystemFontSize fontSize) const
+{
+  const auto index = static_cast<size_t>(fontSize);
+  if(index >= mSystemFontSizeScales.size())
+  {
+    DALI_LOG_ERROR("Invalid SystemFontSize: [%zu]\n", index);
+    return 1.0f;
+  }
+
+  return mSystemFontSizeScales[index];
 }
 
 void UiConfigImpl::SetDefaultTextColor(const Vector4& color)

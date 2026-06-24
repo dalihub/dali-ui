@@ -101,6 +101,18 @@ public:
     LARGE  = 2  ///< Broken image for large-sized views
   };
 
+  /**
+   * @brief Platform font size preference categories used by dali-ui policy.
+   */
+  enum class SystemFontSize
+  {
+    SMALL       = 0, ///< Small system font size preference
+    NORMAL      = 1, ///< Normal system font size preference
+    LARGE       = 2, ///< Large system font size preference
+    EXTRA_LARGE = 3, ///< Extra large system font size preference
+    GIANT       = 4  ///< Giant system font size preference
+  };
+
 public:
   /**
    * @brief Creates an uninitialized UiConfig handle.
@@ -424,6 +436,94 @@ public: // Properties
    * @return The default font size in points
    */
   float GetDefaultFontSize() const;
+
+  /**
+   * @brief Sets whether text views use system font size scale by default.
+   *
+   * This value is applied to newly initialized text views.
+   * Each text view may override it with its own system font size scale enabled property.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] enabled True to enable system font size scaling by default.
+   */
+  void SetDefaultSystemFontSizeScaleEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether text views use system font size scale by default.
+   *
+   * @return True if system font size scaling is enabled by default.
+   */
+  bool IsDefaultSystemFontSizeScaleEnabled() const;
+
+  /**
+   * @brief Sets the minimum font size scale used by text views by default.
+   *
+   * This clamps the adjusted font size scale computed for text views.
+   * It does not clamp UI scale or view scale.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] scale The minimum font size scale.
+   */
+  void SetDefaultMinimumFontSizeScale(float scale);
+
+  /**
+   * @brief Gets the minimum font size scale used by text views by default.
+   *
+   * @return The minimum font size scale.
+   */
+  float GetDefaultMinimumFontSizeScale() const;
+
+  /**
+   * @brief Sets the maximum font size scale used by text views by default.
+   *
+   * This clamps the adjusted font size scale computed for text views.
+   * It does not clamp UI scale or view scale.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] scale The maximum font size scale.
+   */
+  void SetDefaultMaximumFontSizeScale(float scale);
+
+  /**
+   * @brief Gets the maximum font size scale used by text views by default.
+   *
+   * @return The maximum font size scale.
+   */
+  float GetDefaultMaximumFontSizeScale() const;
+
+  /**
+   * @brief Sets the scale used for a system font size preference.
+   *
+   * UiConfig stores one scale value for each SystemFontSize value.
+   * This method updates only the scale mapped to the given @p fontSize;
+   * the other SystemFontSize scale values remain unchanged.
+   *
+   * Text views use this mapping when system font size scaling is enabled.
+   * The mapped scale is applied as part of the text view's adjusted font size scale.
+   * This value is not a point size or pixel size.
+   *
+   * The default mapping is:
+   * - SystemFontSize::SMALL: 0.87
+   * - SystemFontSize::NORMAL: 1.0
+   * - SystemFontSize::LARGE: 1.13
+   * - SystemFontSize::EXTRA_LARGE: 1.26
+   * - SystemFontSize::GIANT: 1.4
+   *
+   * @pre The config must not be frozen.
+   * @param[in] fontSize The system font size preference.
+   * @param[in] scale The scale used for the preference.
+   */
+  void SetScaleForSystemFontSize(SystemFontSize fontSize, float scale);
+
+  /**
+   * @brief Gets the scale used for a system font size preference.
+   *
+   * Returns the scale mapped to the given @p fontSize.
+   *
+   * @param[in] fontSize The system font size preference.
+   * @return The scale used for the preference.
+   */
+  float GetScaleForSystemFontSize(SystemFontSize fontSize) const;
 
   /**
    * @brief Sets the default text color for text elements.

@@ -333,13 +333,6 @@ struct InputEditorPropertyIndex
     TEXT_BACKGROUND_COLOR,
 
     /**
-     * @brief The font size scale.
-     * @details Name "fontSizeScale", type Property::FLOAT.
-     * @see InputEditor::SetFontSizeScale(), InputEditor::GetFontSizeScale().
-     */
-    FONT_SIZE_SCALE,
-
-    /**
      * @brief The minimum font size scale.
      * @details Name "minimumFontSizeScale", type Property::FLOAT.
      * @see InputEditor::SetMinimumFontSizeScale(), InputEditor::GetMinimumFontSizeScale().

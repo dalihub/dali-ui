@@ -97,7 +97,6 @@ public:
       FONT_WIDTH                           = Text::InputEditorPropertyIndex::FONT_WIDTH,
       FONT_SLANT                           = Text::InputEditorPropertyIndex::FONT_SLANT,
       TEXT_BACKGROUND_COLOR                = Text::InputEditorPropertyIndex::TEXT_BACKGROUND_COLOR,
-      FONT_SIZE_SCALE                      = Text::InputEditorPropertyIndex::FONT_SIZE_SCALE,
       MINIMUM_FONT_SIZE_SCALE              = Text::InputEditorPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
       MAXIMUM_FONT_SIZE_SCALE              = Text::InputEditorPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
       SYSTEM_FONT_SIZE_SCALE_ENABLED       = Text::InputEditorPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
@@ -300,16 +299,21 @@ public: // Setters for chaining
    * The interpretation of this value depends on the current LineHeightMode.
    *
    * - If the mode is LineHeightMode::RELATIVE, the line height is calculated
-   *   as a multiplier of the effective scaled font pixel size:
+   *   as a multiplier of the configured font pixel size after applying the
+   *   effective text scale:
    *   @code
-   *   CalculatedLineHeight(px) = fontSize(px) * lineHeight * fontSizeScale
+   *   CalculatedLineHeight(px) = fontSize(px) * lineHeight * effectiveTextScale
    *   @endcode
    *
    * - If the mode is LineHeightMode::ABSOLUTE, the value is treated as
-   *   an absolute line height in pixels.
+   *   an absolute line height in pixels and then scaled by the effective text scale.
    *   @code
-   *   CalculatedLineHeight(px) = lineHeight(px) * fontSizeScale
+   *   CalculatedLineHeight(px) = lineHeight(px) * effectiveTextScale
    *   @endcode
+   *
+   * The effective text scale includes both UI scale and adjusted font size scale.
+   * The minimum and maximum font size scale clamp only the adjusted font size scale;
+   * they do not clamp UI scale or view scale.
    *
    * Setting lineHeight to LINE_HEIGHT_AUTO uses the natural line height
    * derived from the font metrics, regardless of the current LineHeightMode.
@@ -849,23 +853,6 @@ public: // Setters for chaining
    * @brief Clears the line-through style.
    */
   void ClearTextLineThrough();
-
-  /**
-   * @brief Sets the font size scale.
-   *
-   * The scaled font size is calculated from the current font size
-   * multiplied by this scale value.
-   *
-   * @param[in] scale The font size scale.
-   */
-  void SetFontSizeScale(float scale);
-
-  /**
-   * @brief Gets the font size scale.
-   *
-   * @return The font size scale.
-   */
-  float GetFontSizeScale() const;
 
   /**
    * @brief Sets the minimum font size scale.

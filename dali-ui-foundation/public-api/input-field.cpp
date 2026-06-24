@@ -515,16 +515,6 @@ void InputField::ClearTextLineThrough()
   return GetImpl(*this).ClearTextLineThrough();
 }
 
-void InputField::SetFontSizeScale(float scale)
-{
-  GetImpl(*this).SetFontSizeScale(scale);
-}
-
-float InputField::GetFontSizeScale() const
-{
-  return GetImpl(*this).GetFontSizeScale();
-}
-
 void InputField::SetMinimumFontSizeScale(float scale)
 {
   GetImpl(*this).SetMinimumFontSizeScale(scale);

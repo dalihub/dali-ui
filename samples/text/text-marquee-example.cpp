@@ -217,11 +217,11 @@ private:
     }
     else if(event.GetKeyName() == "q")
     {
-      SetOverflowFontSizeScale(1.5f);
+      SetOverflowFontSize(30.0f);
     }
     else if(event.GetKeyName() == "w")
     {
-      SetOverflowFontSizeScale(1.0f);
+      SetOverflowFontSize(20.0f);
     }
     else if(event.GetKeyName() == "a")
     {
@@ -278,12 +278,12 @@ private:
     mLabelVerticalEnd.SetAsyncRendering(enabled);
   }
 
-  void SetOverflowFontSizeScale(float scale)
+  void SetOverflowFontSize(float size)
   {
-    mOverflowLabel.SetFontSizeScale(scale);
-    mOverflowLabelRtl.SetFontSizeScale(scale);
-    mOverflowLabelMultiline.SetFontSizeScale(scale);
-    mOverflowLabelFocus.SetFontSizeScale(scale);
+    mOverflowLabel.SetFontSize(size);
+    mOverflowLabelRtl.SetFontSize(size);
+    mOverflowLabelMultiline.SetFontSize(size);
+    mOverflowLabelFocus.SetFontSize(size);
   }
 
   void SetOverflowVisibility(bool visible)

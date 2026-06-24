@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali/integration-api/system/system-settings.h>
 #include <string>
 
 // INTERNAL INCLUDES
@@ -407,12 +408,12 @@ public:
   void ClearTextFit();
 
   /**
-   * @copydoc Dali::Ui::Label::SetFontSizeScale
+   * @brief Sets the explicit font size scale used internally.
    */
   void SetFontSizeScale(float scale);
 
   /**
-   * @copydoc Dali::Ui::Label::GetFontSizeScale
+   * @brief Gets the explicit font size scale used internally.
    */
   float GetFontSizeScale() const;
 
@@ -663,13 +664,13 @@ protected:
    */
   LabelImpl();
 
-public: // Config
+private: // Config
   /**
    * @brief Applies default values from UiConfig if applied.
    */
   void ApplyInitialConfig();
 
-public: // UiScale
+private: // UiScale
   /**
    * @brief Sets the UI scale used for text-specific metrics.
    *
@@ -695,6 +696,21 @@ public: // UiScale
    * @return The effective text padding.
    */
   Extents GetEffectiveTextPadding() const;
+
+private: // System FontSize
+  /**
+   * @brief Applies the current platform font size preference.
+   *
+   * @param[in] fontSize The platform font size preference.
+   */
+  void ApplySystemFontSize(Dali::Integration::SystemSettings::FontSize fontSize);
+
+  /**
+   * @brief Called when the platform font size preference changes.
+   *
+   * @param[in] fontSize The changed platform font size preference.
+   */
+  void OnSystemFontSizeChanged(Dali::Integration::SystemSettings::FontSize fontSize);
 
 public: // From ViewImpl
   /**
@@ -745,7 +761,7 @@ public: // From CustomActorImpl
    */
   void OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied) override;
 
-public: // From ControlInterface
+private: // From ControlInterface
   /**
    * @copydoc Text::ControlInterface::RequestTextRelayout()
    */
@@ -761,13 +777,13 @@ public: // From ControlInterface
    */
   void RequestAsyncRender() override;
 
-private: // from ScrollerInterface
+private: // From ScrollerInterface
   /**
    * @copydoc Text::ScrollerInterface::ScrollingFinished()
    */
   void ScrollingFinished() override;
 
-public: // From AnchorControlInterface
+private: // From AnchorControlInterface
   /**
    * @copydoc Text::AnchorControlInterface::AnchorClicked()
    */
@@ -778,7 +794,7 @@ public: // From AnchorControlInterface
    */
   void EmitAnchorClicked(const std::string& href) override;
 
-public: // From AsyncTextInterface
+private: // From AsyncTextInterface
   /**
    * @copydoc Text::AsyncTextInterface::AsyncInitializeMarquee()
    */

@@ -366,6 +366,46 @@ float UiConfig::GetDefaultFontSize() const
   return GetImpl(*this).GetDefaultFontSize();
 }
 
+void UiConfig::SetDefaultSystemFontSizeScaleEnabled(bool enabled)
+{
+  GetImpl(*this).SetDefaultSystemFontSizeScaleEnabled(enabled);
+}
+
+bool UiConfig::IsDefaultSystemFontSizeScaleEnabled() const
+{
+  return GetImpl(*this).IsDefaultSystemFontSizeScaleEnabled();
+}
+
+void UiConfig::SetDefaultMinimumFontSizeScale(float scale)
+{
+  GetImpl(*this).SetDefaultMinimumFontSizeScale(scale);
+}
+
+float UiConfig::GetDefaultMinimumFontSizeScale() const
+{
+  return GetImpl(*this).GetDefaultMinimumFontSizeScale();
+}
+
+void UiConfig::SetDefaultMaximumFontSizeScale(float scale)
+{
+  GetImpl(*this).SetDefaultMaximumFontSizeScale(scale);
+}
+
+float UiConfig::GetDefaultMaximumFontSizeScale() const
+{
+  return GetImpl(*this).GetDefaultMaximumFontSizeScale();
+}
+
+void UiConfig::SetScaleForSystemFontSize(SystemFontSize fontSize, float scale)
+{
+  GetImpl(*this).SetScaleForSystemFontSize(fontSize, scale);
+}
+
+float UiConfig::GetScaleForSystemFontSize(SystemFontSize fontSize) const
+{
+  return GetImpl(*this).GetScaleForSystemFontSize(fontSize);
+}
+
 void UiConfig::SetDefaultTextColor(const Vector4& color)
 {
   GetImpl(*this).SetDefaultTextColor(color);

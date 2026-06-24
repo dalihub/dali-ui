@@ -97,7 +97,6 @@ public:
       FONT_WIDTH                           = Text::InputFieldPropertyIndex::FONT_WIDTH,
       FONT_SLANT                           = Text::InputFieldPropertyIndex::FONT_SLANT,
       TEXT_BACKGROUND_COLOR                = Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR,
-      FONT_SIZE_SCALE                      = Text::InputFieldPropertyIndex::FONT_SIZE_SCALE,
       MINIMUM_FONT_SIZE_SCALE              = Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE,
       MAXIMUM_FONT_SIZE_SCALE              = Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE,
       SYSTEM_FONT_SIZE_SCALE_ENABLED       = Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED,
@@ -837,23 +836,6 @@ public: // Setters for chaining
    * @brief Clears the line-through style.
    */
   void ClearTextLineThrough();
-
-  /**
-   * @brief Sets the font size scale.
-   *
-   * The scaled font size is calculated from the current font size
-   * multiplied by this scale value.
-   *
-   * @param[in] scale The font size scale.
-   */
-  void SetFontSizeScale(float scale);
-
-  /**
-   * @brief Gets the font size scale.
-   *
-   * @return The font size scale.
-   */
-  float GetFontSizeScale() const;
 
   /**
    * @brief Sets the minimum font size scale.

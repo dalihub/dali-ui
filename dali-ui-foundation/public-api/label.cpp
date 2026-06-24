@@ -442,16 +442,6 @@ void Label::ClearTextFit()
   GetImpl(*this).ClearTextFit();
 }
 
-void Label::SetFontSizeScale(float scale)
-{
-  GetImpl(*this).SetFontSizeScale(scale);
-}
-
-float Label::GetFontSizeScale() const
-{
-  return GetImpl(*this).GetFontSizeScale();
-}
-
 void Label::SetMinimumFontSizeScale(float scale)
 {
   GetImpl(*this).SetMinimumFontSizeScale(scale);

@@ -257,11 +257,6 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       impl.SetTextBackgroundColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:
-    {
-      impl.SetFontSizeScale(value.Get<float>());
-      break;
-    }
     case Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
     {
       impl.SetMinimumFontSizeScale(value.Get<float>());
@@ -524,11 +519,6 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
       value = impl.GetTextBackgroundColor().GetRgba();
-      break;
-    }
-    case Text::InputFieldPropertyIndex::FONT_SIZE_SCALE:
-    {
-      value = impl.GetFontSizeScale();
       break;
     }
     case Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:

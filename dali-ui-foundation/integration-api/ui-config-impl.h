@@ -22,6 +22,7 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/object/base-object.h>
+#include <array>
 #include <cstdint>
 #include <vector>
 
@@ -275,6 +276,46 @@ public:
    * @return The default font size
    */
   float GetDefaultFontSize() const;
+
+  /**
+   * @copydoc UiConfig::SetDefaultSystemFontSizeScaleEnabled
+   */
+  void SetDefaultSystemFontSizeScaleEnabled(bool enabled);
+
+  /**
+   * @copydoc UiConfig::IsDefaultSystemFontSizeScaleEnabled
+   */
+  bool IsDefaultSystemFontSizeScaleEnabled() const;
+
+  /**
+   * @copydoc UiConfig::SetDefaultMinimumFontSizeScale
+   */
+  void SetDefaultMinimumFontSizeScale(float scale);
+
+  /**
+   * @copydoc UiConfig::GetDefaultMinimumFontSizeScale
+   */
+  float GetDefaultMinimumFontSizeScale() const;
+
+  /**
+   * @copydoc UiConfig::SetDefaultMaximumFontSizeScale
+   */
+  void SetDefaultMaximumFontSizeScale(float scale);
+
+  /**
+   * @copydoc UiConfig::GetDefaultMaximumFontSizeScale
+   */
+  float GetDefaultMaximumFontSizeScale() const;
+
+  /**
+   * @copydoc UiConfig::SetScaleForSystemFontSize
+   */
+  void SetScaleForSystemFontSize(UiConfig::SystemFontSize fontSize, float scale);
+
+  /**
+   * @copydoc UiConfig::GetScaleForSystemFontSize
+   */
+  float GetScaleForSystemFontSize(UiConfig::SystemFontSize fontSize) const;
 
   /**
    * @brief Sets the default text color.
@@ -550,6 +591,10 @@ private:
   Vector4                   mDefaultPlaceholderTextColor;
   float                     mScalingFactor;
   float                     mDefaultFontSize;
+  bool                      mDefaultSystemFontSizeScaleEnabled;
+  std::array<float, 5>      mSystemFontSizeScales;
+  float                     mDefaultMinimumFontSizeScale;
+  float                     mDefaultMaximumFontSizeScale;
   int                       mDpi;
   int                       mBaselineDpi;
   int                       mMarqueeSpeed;

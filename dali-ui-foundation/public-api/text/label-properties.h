@@ -237,13 +237,6 @@ struct LabelPropertyIndex
     TEXT_BACKGROUND_COLOR,
 
     /**
-     * @brief The font size scale.
-     * @details Name "fontSizeScale", type Property::FLOAT.
-     * @see Label::SetFontSizeScale(), Label::GetFontSizeScale().
-     */
-    FONT_SIZE_SCALE,
-
-    /**
      * @brief The minimum font size scale.
      * @details Name "minimumFontSizeScale", type Property::FLOAT.
      * @see Label::SetMinimumFontSizeScale(), Label::GetMinimumFontSizeScale().

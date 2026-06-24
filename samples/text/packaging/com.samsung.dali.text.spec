@@ -106,6 +106,7 @@ exit 0
 %{app_exe_dir}/text-marquee.example
 %{app_exe_dir}/text-style.example
 %{app_exe_dir}/text-style-bevel.example
+%{app_exe_dir}/text-effect.example
 %{app_exe_dir}/text-fit.example
 %{app_exe_dir}/text-fit-candidate.example
 %{app_exe_dir}/text-scale.example

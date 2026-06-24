@@ -24,6 +24,7 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
+#include <dali/integration-api/system/system-settings.h>
 #include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/actors/actor.h>
 
@@ -109,7 +110,6 @@ LABEL_PROPERTY_REGISTRATION("fontWeight",                 INTEGER, FONT_WEIGHT  
 LABEL_PROPERTY_REGISTRATION("fontWidth",                  INTEGER, FONT_WIDTH                    )
 LABEL_PROPERTY_REGISTRATION("fontSlant",                  INTEGER, FONT_SLANT                    )
 LABEL_PROPERTY_REGISTRATION("textBackgroundColor",        VECTOR4, TEXT_BACKGROUND_COLOR         )
-LABEL_PROPERTY_REGISTRATION("fontSizeScale",              FLOAT,   FONT_SIZE_SCALE               )
 LABEL_PROPERTY_REGISTRATION("minimumFontSizeScale",       FLOAT,   MINIMUM_FONT_SIZE_SCALE       )
 LABEL_PROPERTY_REGISTRATION("maximumFontSizeScale",       FLOAT,   MAXIMUM_FONT_SIZE_SCALE       )
 LABEL_PROPERTY_REGISTRATION("systemFontSizeScaleEnabled", BOOLEAN, SYSTEM_FONT_SIZE_SCALE_ENABLED)
@@ -167,6 +167,37 @@ float ScaleIfFixedSize(float value, float scale)
 float ClampWithMinPriority(float value, float minValue, float maxValue)
 {
   return std::max(std::min(value, maxValue), minValue);
+}
+
+UiConfig::SystemFontSize ToUiConfigSystemFontSize(Dali::Integration::SystemSettings::FontSize fontSize)
+{
+  using AdaptorFontSize = Dali::Integration::SystemSettings::FontSize;
+
+  switch(fontSize)
+  {
+    case AdaptorFontSize::SMALL:
+    {
+      return UiConfig::SystemFontSize::SMALL;
+    }
+    case AdaptorFontSize::NORMAL:
+    {
+      return UiConfig::SystemFontSize::NORMAL;
+    }
+    case AdaptorFontSize::LARGE:
+    {
+      return UiConfig::SystemFontSize::LARGE;
+    }
+    case AdaptorFontSize::EXTRA_LARGE:
+    {
+      return UiConfig::SystemFontSize::EXTRA_LARGE;
+    }
+    case AdaptorFontSize::GIANT:
+    {
+      return UiConfig::SystemFontSize::GIANT;
+    }
+  }
+
+  return UiConfig::SystemFontSize::NORMAL;
 }
 
 } // namespace
@@ -1205,6 +1236,15 @@ void LabelImpl::ApplyInitialConfig()
   SetFontSize(config.GetDefaultFontSize());
   SetTextColor(config.GetDefaultTextColor());
   SetAsyncRendering(config.IsLabelAsyncRendering());
+  SetMinimumFontSizeScale(config.GetDefaultMinimumFontSizeScale());
+  SetMaximumFontSizeScale(config.GetDefaultMaximumFontSizeScale());
+  SetSystemFontSizeScaleEnabled(config.IsDefaultSystemFontSizeScaleEnabled());
+
+  auto systemSettings = Dali::Integration::SystemSettings::Get();
+  if(systemSettings)
+  {
+    ApplySystemFontSize(systemSettings.GetFontSize());
+  }
 }
 
 // =============================================================================
@@ -1229,6 +1269,27 @@ Extents LabelImpl::GetEffectiveTextPadding() const
   padding.top             = static_cast<int16_t>(static_cast<float>(padding.top) * textUiScale);
   padding.bottom          = static_cast<int16_t>(static_cast<float>(padding.bottom) * textUiScale);
   return padding;
+}
+
+// =============================================================================
+// System FontSize
+// =============================================================================
+void LabelImpl::ApplySystemFontSize(Dali::Integration::SystemSettings::FontSize fontSize)
+{
+  if(!UiConfig::HasCurrent())
+  {
+    return;
+  }
+
+  const auto  config = UiConfig::GetCurrent();
+  const float scale  = config.GetScaleForSystemFontSize(ToUiConfigSystemFontSize(fontSize));
+
+  mController->SetSystemFontSizeScale(scale);
+}
+
+void LabelImpl::OnSystemFontSizeChanged(Dali::Integration::SystemSettings::FontSize fontSize)
+{
+  ApplySystemFontSize(fontSize);
 }
 
 // =============================================================================
@@ -1272,6 +1333,12 @@ void LabelImpl::OnInitialize()
   if(Dali::Adaptor::IsAvailable())
   {
     Dali::Adaptor::Get().LocaleChangedSignal().Connect(this, &LabelImpl::OnLocaleChanged);
+  }
+
+  auto systemSettings = Dali::Integration::SystemSettings::Get();
+  if(systemSettings)
+  {
+    systemSettings.FontSizeChangedSignal().Connect(this, &LabelImpl::OnSystemFontSizeChanged);
   }
 
   Text::Layout::Engine& engine = mController->GetLayoutEngine();

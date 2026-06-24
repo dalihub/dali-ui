@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/integration-api/adaptor-framework/input-method-context-integ.h>
+#include <dali/integration-api/system/system-settings.h>
 #include <dali/public-api/events/long-press-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/tap-gesture-detector.h>
@@ -483,12 +484,12 @@ public:
   void ClearTextLineThrough();
 
   /**
-   * @copydoc Dali::Ui::InputField::SetFontSizeScale
+   * @brief Sets the explicit font size scale used internally.
    */
   void SetFontSizeScale(float scale);
 
   /**
-   * @copydoc Dali::Ui::InputField::GetFontSizeScale
+   * @brief Gets the explicit font size scale used internally.
    */
   float GetFontSizeScale() const;
 
@@ -710,13 +711,13 @@ protected:
    */
   InputFieldImpl();
 
-public: // Config
+private: // Config
   /**
    * @brief Applies default values from UiConfig if applied.
    */
   void ApplyInitialConfig();
 
-public: // UiScale
+private: // UiScale
   /**
    * @brief Sets the UI scale used for text-specific metrics.
    *
@@ -742,6 +743,21 @@ public: // UiScale
    * @return The effective text padding.
    */
   Extents GetEffectiveTextPadding() const;
+
+private: // System FontSize
+  /**
+   * @brief Applies the current platform font size preference.
+   *
+   * @param[in] fontSize The platform font size preference.
+   */
+  void ApplySystemFontSize(Dali::Integration::SystemSettings::FontSize fontSize);
+
+  /**
+   * @brief Called when the platform font size preference changes.
+   *
+   * @param[in] fontSize The changed platform font size preference.
+   */
+  void OnSystemFontSizeChanged(Dali::Integration::SystemSettings::FontSize fontSize);
 
 public: // From ViewImpl
   /**
@@ -791,7 +807,7 @@ protected: // From ViewImpl
    */
   MeasuredSize OnArrange(const LayoutRect& bounds) override;
 
-public: // From ControlInterface
+private: // From ControlInterface
   /**
    * @copydoc Text::ControlInterface::RequestTextRelayout()
    */
@@ -807,8 +823,7 @@ public: // From ControlInterface
    */
   void RequestAsyncRender() override;
 
-  // From EditableControlInterface
-
+public: // From EditableControlInterface
   /**
    * @copydoc Text::EditableControlInterface::AddDecoration()
    */
@@ -879,8 +894,7 @@ public: // From ControlInterface
    */
   void TextDeleted(unsigned int position, unsigned int length, const std::string& content) override;
 
-  // From SelectableControlInterface
-public:
+public: // From SelectableControlInterface
   /**
    * @copydoc Text::SelectableControlInterface::SelectText()
    */
@@ -916,8 +930,7 @@ public:
    */
   void SelectionChanged(uint32_t oldStart, uint32_t oldEnd, uint32_t newStart, uint32_t newEnd) override;
 
-  // From AnchorControlInterface
-public:
+private: // From AnchorControlInterface
   /**
    * @copydoc Text::AnchorControlInterface::AnchorClicked()
    */

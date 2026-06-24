@@ -69,7 +69,6 @@ const char* const PROPERTY_NAME_FONT_WEIGHT                          = "fontWeig
 const char* const PROPERTY_NAME_FONT_WIDTH                           = "fontWidth";
 const char* const PROPERTY_NAME_FONT_SLANT                           = "fontSlant";
 const char* const PROPERTY_NAME_TEXT_BACKGROUND_COLOR                = "textBackgroundColor";
-const char* const PROPERTY_NAME_FONT_SIZE_SCALE                      = "fontSizeScale";
 const char* const PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE              = "minimumFontSizeScale";
 const char* const PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE              = "maximumFontSizeScale";
 const char* const PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED       = "systemFontSizeScaleEnabled";
@@ -726,21 +725,6 @@ int UtcDaliInputEditorTextBackgroundColor(void)
   END_TEST;
 }
 
-int UtcDaliInputEditorFontSizeScale(void)
-{
-  UiTestApplication application;
-  InputEditor inputEditor = InputEditor::New();
-  DALI_TEST_CHECK(inputEditor);
-
-  inputEditor.SetFontSizeScale(1.5f);
-  DALI_TEST_EQUALS(inputEditor.GetFontSizeScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-
-  inputEditor.SetFontSizeScale(2.0f);
-  DALI_TEST_EQUALS(inputEditor.GetFontSizeScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-
-  END_TEST;
-}
-
 int UtcDaliInputEditorMinimumFontSizeScale(void)
 {
   UiTestApplication application;
@@ -956,20 +940,21 @@ int UtcDaliInputEditorAdjustedFontSizeScale(void)
   InputEditor inputEditor = InputEditor::New();
   DALI_TEST_CHECK(inputEditor);
 
-  // Test clamping to minimum
-  inputEditor.SetFontSizeScale(0.5f);
-  inputEditor.SetMinimumFontSizeScale(1.0f);
+  // Test clamping to minimum from default scale 1.0
+  inputEditor.SetMinimumFontSizeScale(1.2f);
   inputEditor.SetMaximumFontSizeScale(2.0f);
   inputEditor.SetSystemFontSizeScaleEnabled(false);
+  DALI_TEST_EQUALS(inputEditor.GetAdjustedFontSizeScale(), 1.2f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Test clamping to maximum from default scale 1.0
+  inputEditor.SetMinimumFontSizeScale(0.1f);
+  inputEditor.SetMaximumFontSizeScale(0.8f);
+  DALI_TEST_EQUALS(inputEditor.GetAdjustedFontSizeScale(), 0.8f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Test normal range with default scale 1.0
+  inputEditor.SetMinimumFontSizeScale(0.5f);
+  inputEditor.SetMaximumFontSizeScale(2.0f);
   DALI_TEST_EQUALS(inputEditor.GetAdjustedFontSizeScale(), 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-
-  // Test clamping to maximum
-  inputEditor.SetFontSizeScale(3.0f);
-  DALI_TEST_EQUALS(inputEditor.GetAdjustedFontSizeScale(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-
-  // Test normal range
-  inputEditor.SetFontSizeScale(1.5f);
-  DALI_TEST_EQUALS(inputEditor.GetAdjustedFontSizeScale(), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
   END_TEST;
 }
@@ -1062,7 +1047,6 @@ int UtcDaliInputEditorGetProperty(void)
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == InputEditor::Property::FONT_WIDTH);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_FONT_SLANT) == InputEditor::Property::FONT_SLANT);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_TEXT_BACKGROUND_COLOR) == InputEditor::Property::TEXT_BACKGROUND_COLOR);
-  DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_FONT_SIZE_SCALE) == InputEditor::Property::FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_MINIMUM_FONT_SIZE_SCALE) == InputEditor::Property::MINIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_FONT_SIZE_SCALE) == InputEditor::Property::MAXIMUM_FONT_SIZE_SCALE);
   DALI_TEST_CHECK(inputEditor.GetPropertyIndex(PROPERTY_NAME_SYSTEM_FONT_SIZE_SCALE_ENABLED) == InputEditor::Property::SYSTEM_FONT_SIZE_SCALE_ENABLED);
@@ -1279,10 +1263,6 @@ int UtcDaliInputEditorSetProperty(void)
   // TEXT_BACKGROUND_COLOR
   inputEditor.SetProperty(InputEditor::Property::TEXT_BACKGROUND_COLOR, Color::YELLOW);
   DALI_TEST_EQUALS(inputEditor.GetProperty<Vector4>(InputEditor::Property::TEXT_BACKGROUND_COLOR), Color::YELLOW, TEST_LOCATION);
-
-  // FONT_SIZE_SCALE
-  inputEditor.SetProperty(InputEditor::Property::FONT_SIZE_SCALE, 1.5f);
-  DALI_TEST_EQUALS(inputEditor.GetProperty<float>(InputEditor::Property::FONT_SIZE_SCALE), 1.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
   // MINIMUM_FONT_SIZE_SCALE
   inputEditor.SetProperty(InputEditor::Property::MINIMUM_FONT_SIZE_SCALE, 0.5f);

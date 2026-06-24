@@ -208,11 +208,6 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       impl.SetTextBackgroundColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::LabelPropertyIndex::FONT_SIZE_SCALE:
-    {
-      impl.SetFontSizeScale(value.Get<float>());
-      break;
-    }
     case Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
     {
       impl.SetMinimumFontSizeScale(value.Get<float>());
@@ -378,11 +373,6 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     case Text::LabelPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
       value = impl.GetTextBackgroundColor().GetRgba();
-      break;
-    }
-    case Text::LabelPropertyIndex::FONT_SIZE_SCALE:
-    {
-      value = impl.GetFontSizeScale();
       break;
     }
     case Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE:

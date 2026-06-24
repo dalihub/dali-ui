@@ -15,6 +15,8 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
+#include <cstdlib>
+
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -26,6 +28,8 @@ constexpr float BUTTON_HEIGHT       = 44.0f;
 constexpr float TARGET_LABEL_HEIGHT = 80.0f;
 constexpr float TARGET_INPUT_HEIGHT = 80.0f;
 
+const char* FONT_SIZE_ENV       = "DALI_SYSTEM_FONT_SIZE";
+const char* FONT_SIZE_WATCH_ENV = "DALI_SYSTEM_FONT_SIZE_WATCH";
 const char* TEST_TEXT = "The quick brown fox jumps over the lazy dog. 1234567890";
 
 const Dali::Vector<Text::FitCandidate>& GetFitCandidates()
@@ -61,6 +65,11 @@ Label CreateHeaderLabel(const char* text)
   Label label = Label::New(text);
   label.SetFontSize(14.0f);
   return label;
+}
+
+void SetSystemFontSizeEnv(const char* fontSize)
+{
+  setenv(FONT_SIZE_ENV, fontSize, 1);
 }
 } // namespace
 
@@ -128,28 +137,28 @@ private:
 
     UpdateStatus();
 
-    Label titleButton = CreateButton("Font Size Scale Test", 16.0f);
+    Label titleButton = CreateButton("System Font Size Scale Test", 16.0f);
     titleButton.SetBackgroundColor(UiColor(0x2C3E50));
 
-    Label btn1 = CreateButton("1. Normal Scale (1.0, min=0.5, max=2.0)");
+    Label btn1 = CreateButton("1. System Font SMALL");
     btn1.SetBackgroundColor(UiColor(0x3498DB));
 
-    Label btn2 = CreateButton("2. Increase Scale (1.5)");
+    Label btn2 = CreateButton("2. System Font NORMAL");
     btn2.SetBackgroundColor(UiColor(0x2ECC71));
 
-    Label btn3 = CreateButton("3. Clamp to Min (scale=0.8, min=1.2)");
+    Label btn3 = CreateButton("3. System Font LARGE");
     btn3.SetBackgroundColor(UiColor(0xE74C3C));
 
-    Label btn4 = CreateButton("4. Clamp to Max (scale=1.8, max=1.3)");
+    Label btn4 = CreateButton("4. System Font EXTRA_LARGE");
     btn4.SetBackgroundColor(UiColor(0xE67E22));
 
-    Label btn5 = CreateButton("5. Inverted Range (min=1.4 > max=1.0)");
+    Label btn5 = CreateButton("5. System Font GIANT");
     btn5.SetBackgroundColor(UiColor(0x9B59B6));
 
     Label btn6 = CreateButton("6. Enable System Scale");
     btn6.SetBackgroundColor(UiColor(0x1ABC9C));
 
-    Label btn7 = CreateButton("7. Disable System Scale (scale=1.6)");
+    Label btn7 = CreateButton("7. Disable System Scale");
     btn7.SetBackgroundColor(UiColor(0x7F8C8D));
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
@@ -190,14 +199,12 @@ private:
   void UpdateStatus()
   {
     // Get Label values
-    float labelFontSizeScale    = mTargetLabel.GetFontSizeScale();
     float labelMinFontSizeScale = mTargetLabel.GetMinimumFontSizeScale();
     float labelMaxFontSizeScale = mTargetLabel.GetMaximumFontSizeScale();
     bool  labelSystemEnabled    = mTargetLabel.IsSystemFontSizeScaleEnabled();
     float labelAdjustedScale    = mTargetLabel.GetAdjustedFontSizeScale();
 
     // Get InputField values
-    float inputFontSizeScale    = mTargetInputField.GetFontSizeScale();
     float inputMinFontSizeScale = mTargetInputField.GetMinimumFontSizeScale();
     float inputMaxFontSizeScale = mTargetInputField.GetMaximumFontSizeScale();
     bool  inputSystemEnabled    = mTargetInputField.IsSystemFontSizeScaleEnabled();
@@ -205,10 +212,15 @@ private:
 
     Dali::String status;
 
+    const char* envFontSize = std::getenv(FONT_SIZE_ENV);
+
+    status += "[System Font Env]\n";
+    status += envFontSize ? envFontSize : "(null)";
+    status += "\nScale updates after X backend watch tick.";
+    status += "\n\n";
+
     status += "[Label]\n";
-    status += "Scale: ";
-    status += std::to_string(labelFontSizeScale).substr(0, 5).c_str();
-    status += ", Min: ";
+    status += "Min: ";
     status += std::to_string(labelMinFontSizeScale).substr(0, 5).c_str();
     status += ", Max: ";
     status += std::to_string(labelMaxFontSizeScale).substr(0, 5).c_str();
@@ -218,9 +230,7 @@ private:
     status += std::to_string(labelAdjustedScale).substr(0, 5).c_str();
 
     status += "\n\n[InputField]\n";
-    status += "Scale: ";
-    status += std::to_string(inputFontSizeScale).substr(0, 5).c_str();
-    status += ", Min: ";
+    status += "Min: ";
     status += std::to_string(inputMinFontSizeScale).substr(0, 5).c_str();
     status += ", Max: ";
     status += std::to_string(inputMaxFontSizeScale).substr(0, 5).c_str();
@@ -232,27 +242,36 @@ private:
     mStatusLabel.SetText(status);
   }
 
-  void ApplyScaleToBoth(float scale, float minScale, float maxScale, bool systemEnabled)
+  void SetSystemFontSize(const char* fontSize)
   {
-    mTargetLabel.SetFontSizeScale(scale);
+    SetSystemFontSizeEnv(fontSize);
+
+    UpdateStatus();
+  }
+
+  void SetSystemFontSizeScaleEnabled(bool enabled)
+  {
+    mTargetLabel.SetSystemFontSizeScaleEnabled(enabled);
+    mTargetInputField.SetSystemFontSizeScaleEnabled(enabled);
+    mFitLabel.SetSystemFontSizeScaleEnabled(enabled);
+    mFitCandidateLabel.SetSystemFontSizeScaleEnabled(enabled);
+
+    UpdateStatus();
+  }
+
+  void ApplyMinMaxScale(float minScale, float maxScale)
+  {
     mTargetLabel.SetMinimumFontSizeScale(minScale);
     mTargetLabel.SetMaximumFontSizeScale(maxScale);
-    mTargetLabel.SetSystemFontSizeScaleEnabled(systemEnabled);
 
-    mTargetInputField.SetFontSizeScale(scale);
     mTargetInputField.SetMinimumFontSizeScale(minScale);
     mTargetInputField.SetMaximumFontSizeScale(maxScale);
-    mTargetInputField.SetSystemFontSizeScaleEnabled(systemEnabled);
 
-    mFitLabel.SetFontSizeScale(scale);
     mFitLabel.SetMinimumFontSizeScale(minScale);
     mFitLabel.SetMaximumFontSizeScale(maxScale);
-    mFitLabel.SetSystemFontSizeScaleEnabled(systemEnabled);
 
-    mFitCandidateLabel.SetFontSizeScale(scale);
     mFitCandidateLabel.SetMinimumFontSizeScale(minScale);
     mFitCandidateLabel.SetMaximumFontSizeScale(maxScale);
-    mFitCandidateLabel.SetSystemFontSizeScaleEnabled(systemEnabled);
 
     UpdateStatus();
   }
@@ -261,7 +280,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ApplyScaleToBoth(1.0f, 0.5f, 2.0f, false);
+      SetSystemFontSize("SMALL");
     }
     return true;
   }
@@ -270,7 +289,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ApplyScaleToBoth(1.5f, 0.5f, 2.0f, false);
+      SetSystemFontSize("NORMAL");
     }
     return true;
   }
@@ -279,7 +298,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ApplyScaleToBoth(0.8f, 1.2f, 2.0f, false);
+      SetSystemFontSize("LARGE");
     }
     return true;
   }
@@ -288,7 +307,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ApplyScaleToBoth(1.8f, 0.5f, 1.3f, false);
+      SetSystemFontSize("EXTRA_LARGE");
     }
     return true;
   }
@@ -297,7 +316,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ApplyScaleToBoth(0.7f, 1.4f, 1.0f, false);
+      SetSystemFontSize("GIANT");
     }
     return true;
   }
@@ -306,7 +325,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ApplyScaleToBoth(1.8f, 0.8f, 1.3f, true);
+      SetSystemFontSizeScaleEnabled(true);
     }
     return true;
   }
@@ -315,7 +334,7 @@ private:
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      ApplyScaleToBoth(1.6f, 0.5f, 2.0f, false);
+      SetSystemFontSizeScaleEnabled(false);
     }
     return true;
   }
@@ -333,41 +352,68 @@ private:
       return;
     }
 
+    // system font size scale
     if(event.GetKeyName() == "1")
     {
-      ApplyScaleToBoth(1.0f, 0.5f, 2.0f, false);
+      SetSystemFontSize("SMALL");
+      ApplyMinMaxScale(0.5f, 2.0f);
     }
     else if(event.GetKeyName() == "2")
     {
-      ApplyScaleToBoth(1.5f, 0.5f, 2.0f, false);
+      SetSystemFontSize("NORMAL");
+      ApplyMinMaxScale(0.5f, 2.0f);
     }
     else if(event.GetKeyName() == "3")
     {
-      ApplyScaleToBoth(0.8f, 1.2f, 2.0f, false);
+      SetSystemFontSize("LARGE");
+      ApplyMinMaxScale(1.2f, 2.0f);
     }
     else if(event.GetKeyName() == "4")
     {
-      ApplyScaleToBoth(1.8f, 0.5f, 1.3f, false);
+      SetSystemFontSize("EXTRA_LARGE");
+      ApplyMinMaxScale(0.5f, 1.3f);
     }
     else if(event.GetKeyName() == "5")
     {
-      ApplyScaleToBoth(0.7f, 1.4f, 1.0f, false);
+      SetSystemFontSize("GIANT");
+      ApplyMinMaxScale(1.4f, 1.0f);
     }
     else if(event.GetKeyName() == "6")
     {
-      ApplyScaleToBoth(1.8f, 0.8f, 1.3f, true);
+      SetSystemFontSizeScaleEnabled(true);
     }
     else if(event.GetKeyName() == "7")
     {
-      ApplyScaleToBoth(1.6f, 0.5f, 2.0f, false);
+      SetSystemFontSizeScaleEnabled(false);
     }
+    // ui scale
     else if(event.GetKeyName() == "q")
+    {
+      UiScaleManager::Get().SetScale(0.8f);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      UiScaleManager::Get().SetScale(1.0f);
+    }
+    else if(event.GetKeyName() == "e")
+    {
+      UiScaleManager::Get().SetScale(1.2f);
+    }
+    else if(event.GetKeyName() == "r")
+    {
+      UiScaleManager::Get().SetScale(1.5f);
+    }
+    else if(event.GetKeyName() == "t")
+    {
+      UiScaleManager::Get().SetScale(2.0f);
+    }
+    else if(event.GetKeyName() == "s")
     {
       mTargetLabel.SetAsyncRendering(false);
       mFitLabel.SetAsyncRendering(false);
       mFitCandidateLabel.SetAsyncRendering(false);
     }
-    else if(event.GetKeyName() == "w")
+    else if(event.GetKeyName() == "a")
     {
       mTargetLabel.SetAsyncRendering(true);
       mFitLabel.SetAsyncRendering(true);
@@ -386,8 +432,18 @@ private:
 
 int DALI_EXPORT_API main(int argc, char** argv)
 {
+  // Ubuntu/X backend-only test hook for runtime system font size changes.
+  setenv(FONT_SIZE_WATCH_ENV, "1", 1);
+  setenv(FONT_SIZE_ENV, "NORMAL", 1);
+
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  auto config = UiConfig::New();
+  config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::SMALL, 0.8f);
+  config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::NORMAL, 1.0f);
+  config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::LARGE, 1.2f);
+  config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::EXTRA_LARGE, 1.4f);
+  config.SetScaleForSystemFontSize(UiConfig::SystemFontSize::GIANT, 1.5f);
+  config.Apply();
 
   TextScaleController controller(application);
   application.MainLoop();
