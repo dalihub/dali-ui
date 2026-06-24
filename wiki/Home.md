@@ -20,7 +20,7 @@ DALi handles screen composition and rendering, and is organized into `dali-core`
 
 | Library | Role |
 |---|---|
-| **dali-core** | <ul><li>Core rendering funtionality</li><li>Provides fundamental rendering models such as scene graph, animation, and shader</li><li>Provides base features such as property system and signal</li><li>[Github](https://github.com/dalihub/dali-core)</li></ul> |
+| **dali-core** | <ul><li>Core rendering functionality</li><li>Provides fundamental rendering models such as scene graph, animation, and shader</li><li>Provides base features such as property system and signal</li><li>[Github](https://github.com/dalihub/dali-core)</li></ul> |
 | **dali-adaptor** | <ul><li>Handles platform and graphics backend integration</li><li>Window, InputMethod, Widget, etc.</li><li>[Github](https://github.com/dalihub/dali-adaptor)</li></ul> |
 | **dali-ui-foundation** | <ul><li>Provides higher-level UI Framework APIs such as layout, accessibility, and theme color</li><li>Provides base components such as `Label`, `ImageView`, and `WebView`</li><li>Provides component feature classes such as button base (UX independent)</li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
 | **dali-ui-components** | <ul><li>OneUI-based components such as `Button`, `Switch`, `ProgressBar`, `Slider`, and `Dialog`, with [about 11 planned components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components#components-tbd)</li><li>[Github(Sec)](https://github.sec.samsung.net/NUI/dali-ui)</li></ul> |
@@ -88,6 +88,7 @@ For details about the class structure and extensibility of `View`, see [here](ht
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
   * [Text](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text)
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView)
+  * [VideoView](https://github.sec.samsung.net/NUI/dali-ui/wiki/VideoView)
   * [CanvasView](https://github.sec.samsung.net/NUI/dali-ui/wiki/CanvasView)
   * [ChartView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ChartView)
   * [Navigator](https://github.sec.samsung.net/NUI/dali-ui/wiki/Navigator)

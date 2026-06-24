@@ -60,6 +60,7 @@ SET(TC_SOURCES
         utc-Dali-VisualBase.cpp
         utc-Dali-WebView.cpp
         utc-Dali-CanvasView.cpp
+        utc-Dali-VideoView.cpp
 )
 
 ADD_CUSTOM_COMMAND(
