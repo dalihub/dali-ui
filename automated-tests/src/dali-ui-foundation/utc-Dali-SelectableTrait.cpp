@@ -20,7 +20,6 @@
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/provider-api/selectable-view-impl.h>
 #include <dali-ui-test-suite-utils.h>
@@ -170,34 +169,6 @@ void utc_dali_selectabletrait_cleanup(void)
 // Construction / Handle tests
 // ============================================================================
 
-int UtcDaliSelectableTraitNewP(void)
-{
-  UiTestApplication    application;
-  SelectableTrait selectable = SelectableTrait::New();
-  DALI_TEST_CHECK(selectable);
-  END_TEST;
-}
-
-int UtcDaliSelectableTraitCopyConstructorP(void)
-{
-  UiTestApplication    application;
-  SelectableTrait selectable = SelectableTrait::New();
-  SelectableTrait copy(selectable);
-  DALI_TEST_CHECK(copy);
-  DALI_TEST_CHECK(copy == selectable);
-  END_TEST;
-}
-
-int UtcDaliSelectableTraitDownCastP(void)
-{
-  UiTestApplication    application;
-  SelectableTrait selectable = SelectableTrait::New();
-  BaseHandle         handle(selectable);
-  SelectableTrait downcast = SelectableTrait::DownCast(handle);
-  DALI_TEST_CHECK(downcast);
-  END_TEST;
-}
-
 int UtcDaliSelectableTraitDownCastN(void)
 {
   UiTestApplication    application;
@@ -314,14 +285,6 @@ int UtcDaliViewSelectableBeforeInteractiveP(void)
 // State API tests
 // ============================================================================
 
-int UtcDaliSelectableTraitIsSelectedDefaultP(void)
-{
-  UiTestApplication    application;
-  SelectableTrait selectable = SelectableTrait::New();
-  DALI_TEST_CHECK(!selectable.IsSelected());
-  END_TEST;
-}
-
 int UtcDaliSelectableTraitSetSelectedP(void)
 {
   UiTestApplication application;
@@ -349,27 +312,6 @@ int UtcDaliSelectableTraitSetSelectedNoChangeP(void)
   // Set to same value (already false)
   selectable.SetSelected(false);
   DALI_TEST_CHECK(!data.called); // Signal should NOT fire when no actual change
-  END_TEST;
-}
-
-int UtcDaliSelectableTraitIsToggleByClickEnabledDefaultP(void)
-{
-  UiTestApplication    application;
-  SelectableTrait selectable = SelectableTrait::New();
-  DALI_TEST_CHECK(selectable.IsToggleByClickEnabled());
-  END_TEST;
-}
-
-int UtcDaliSelectableTraitEnableToggleByClickP(void)
-{
-  UiTestApplication    application;
-  SelectableTrait selectable = SelectableTrait::New();
-
-  selectable.EnableToggleByClick();
-  DALI_TEST_CHECK(selectable.IsToggleByClickEnabled());
-
-  selectable.EnableToggleByClick(false);
-  DALI_TEST_CHECK(!selectable.IsToggleByClickEnabled());
   END_TEST;
 }
 

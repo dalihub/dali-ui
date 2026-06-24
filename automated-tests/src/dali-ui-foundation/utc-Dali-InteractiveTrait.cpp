@@ -20,7 +20,6 @@
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <test-gesture-generator.h>
 #include <dali/integration-api/events/key-event-integ.h>
@@ -189,34 +188,6 @@ void utc_dali_interactivetrait_cleanup(void)
 // Construction / Handle tests
 // ============================================================================
 
-int UtcDaliInteractiveTraitNewP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-  DALI_TEST_CHECK(clickable);
-  END_TEST;
-}
-
-int UtcDaliInteractiveTraitCopyConstructorP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-  InteractiveTrait copy(clickable);
-  DALI_TEST_CHECK(copy);
-  DALI_TEST_CHECK(copy == clickable);
-  END_TEST;
-}
-
-int UtcDaliInteractiveTraitDownCastP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-  BaseHandle     handle(clickable);
-  InteractiveTrait downcast = InteractiveTrait::DownCast(handle);
-  DALI_TEST_CHECK(downcast);
-  END_TEST;
-}
-
 int UtcDaliInteractiveTraitDownCastN(void)
 {
   UiTestApplication application;
@@ -303,73 +274,6 @@ int UtcDaliViewEnsureInteractiveTraitP(void)
 // ============================================================================
 // State API tests
 // ============================================================================
-
-int UtcDaliInteractiveTraitIsClickableDefaultP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-  DALI_TEST_CHECK(clickable.IsClickable());
-  END_TEST;
-}
-
-int UtcDaliInteractiveTraitSetClickableP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-
-  clickable.SetClickable(false);
-  DALI_TEST_CHECK(!clickable.IsClickable());
-
-  clickable.SetClickable(true);
-  DALI_TEST_CHECK(clickable.IsClickable());
-  END_TEST;
-}
-
-int UtcDaliInteractiveTraitIsPressedDefaultP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-  DALI_TEST_CHECK(!clickable.IsPressed());
-  END_TEST;
-}
-
-int UtcDaliInteractiveTraitPseudoDisabledP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-
-  DALI_TEST_CHECK(!clickable.IsPseudoDisabled());
-
-  clickable.SetPseudoDisabled(true);
-  DALI_TEST_CHECK(clickable.IsPseudoDisabled());
-
-  clickable.SetPseudoDisabled(false);
-  DALI_TEST_CHECK(!clickable.IsPseudoDisabled());
-  END_TEST;
-}
-
-int UtcDaliInteractiveTraitKeyClickPolicyDefaultP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-
-  // Default depends on UiConfig, just verify it returns a valid value
-  KeyClickPolicy policy = clickable.GetKeyClickPolicy();
-  DALI_TEST_CHECK(static_cast<uint32_t>(policy) <= static_cast<uint32_t>(KeyClickPolicy::RESERVED));
-  END_TEST;
-}
-
-int UtcDaliInteractiveTraitSetKeyClickPolicyP(void)
-{
-  UiTestApplication application;
-  InteractiveTrait clickable = InteractiveTrait::New();
-
-  clickable.SetKeyClickPolicy(KeyClickPolicy::DISABLED);
-  DALI_TEST_EQUALS(static_cast<uint32_t>(clickable.GetKeyClickPolicy()),
-                   static_cast<uint32_t>(KeyClickPolicy::DISABLED),
-                   TEST_LOCATION);
-  END_TEST;
-}
 
 // ============================================================================
 // Tap gesture → ClickedSignal

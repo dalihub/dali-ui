@@ -56,16 +56,17 @@ function build
 
     if [ -e $CACHE_CPP ] ; then
         echo "Using ccache C++ wrapper: $CACHE_CPP , C wrapper: $CACHE_CC "
-        (cd build ; CXX=$CACHE_CPP CC=$CACHE_CC cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" ; $BUILDCMD -j7 )
+        (cd build ; CXX=$CACHE_CPP CC=$CACHE_CC cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" && $BUILDCMD -j7 )
     else
         echo "C++ compiler for $CXX wrapper for ccache not found at $CACHE_CPP . ccache will be disabled."
-        (cd build ; cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" ; $BUILDCMD -j7 )
+        (cd build ; cmake .. -DMODULE=$1 -G "$BUILDSYSTEM" && $BUILDCMD -j7 )
     fi
 }
 
 if [ -n "$1" ] ; then
   echo BUILDING ONLY $1
   build $1
+  if [ $? -ne 0 ]; then echo "Build failed" ; exit 1; fi
 else
   for mod in `ls -1 src/ | grep -v CMakeList `
   do

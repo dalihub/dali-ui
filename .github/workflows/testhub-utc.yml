@@ -69,6 +69,7 @@ jobs:
         cd -
         cd manual-tests
         CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Debug
+        make install -j8
         cd -
         cd samples
         ./build.sh
@@ -124,6 +125,30 @@ jobs:
       with:
         name: coverage
         path: coverage
+
+    - name: Release build check
+      run: |
+        . setenv
+        export CC=gcc
+        export CXX=g++
+
+        cd build/tizen
+        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Release -DENABLE_GRAPHICS_BACKEND="GLES"
+        make install -j8
+        cd -
+
+        cd automated-tests
+        ./build.sh
+        cd -
+
+        cd manual-tests
+        cmake -DCMAKE_INSTALL_PREFIX=$DESKTOP_PREFIX -DCMAKE_BUILD_TYPE=Release
+        make install -j8
+        cd -
+
+        cd samples
+        ./build.sh Release
+        cd -
 
   testhub:
     runs-on: [ code-linux ]          # runner whatever you want
