@@ -48,6 +48,30 @@ LabelAnimationBridge& LabelAnimationBridge::BackgroundColorBy(const UiColor& rel
   return *this;
 }
 
+LabelAnimationBridge& LabelAnimationBridge::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ShadowBlurRadius(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::ShadowBlurRadiusBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ShadowBlurRadiusBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::ShadowOpacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ShadowOpacity(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::ShadowOpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ShadowOpacityBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationBridge& LabelAnimationBridge::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::SizeWidth(target, duration, alpha, delay);

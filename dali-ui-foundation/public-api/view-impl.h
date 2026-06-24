@@ -491,6 +491,21 @@ public: // Non-virtual API (safe to reorder / extend)
   void ClearBackground();
 
   /**
+   * @copydoc Ui::View::SetShadow()
+   */
+  void SetShadow(const Shadow& shadow);
+
+  /**
+   * @copydoc Ui::View::SetShadow(const ShadowStack&)
+   */
+  void SetShadow(const ShadowStack& shadowStack);
+
+  /**
+   * @copydoc Ui::View::ClearShadow()
+   */
+  void ClearShadow();
+
+  /**
    * @copydoc Ui::View::SetRenderEffect()
    */
   void SetRenderEffect(Ui::RenderEffect effect);

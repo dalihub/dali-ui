@@ -79,6 +79,30 @@ ViewAnimationSpec& ViewAnimationSpec::BackgroundColorBy(const UiColor& relative,
   return *this;
 }
 
+ViewAnimationSpec& ViewAnimationSpec::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyShadowBlurRadiusTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::ShadowBlurRadiusBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyShadowBlurRadiusBy);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::ShadowOpacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyShadowOpacityTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::ShadowOpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyShadowOpacityBy);
+  return *this;
+}
+
 ViewAnimationSpec& ViewAnimationSpec::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeWidthTo);

@@ -26,6 +26,7 @@
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/object/property-notification.h>
 #include <string>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
@@ -35,6 +36,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/attachment-id.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
+#include <dali-ui-foundation/public-api/shadow.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/unique-any.h>
@@ -311,6 +313,14 @@ public:
   bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
 
   /**
+   * @brief Adds a shadow visual object.
+   * @param[in] visualBase The shadow visual to add
+   * @param[in] internalContainerRangeType The range of visuals to be added
+   * @return True if the visual was added successfully, false otherwise
+   */
+  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
+
+  /**
    * @copydoc Ui::View::RemoveVisual()
    */
   void RemoveVisualObject(Dali::Ui::VisualBase visualBase);
@@ -425,13 +435,38 @@ public:
   Ui::View::VisualEventSignalType& VisualEventSignal();
 
   /**
-   * @brief Sets the shadow with a property map.
+   * @brief Replaces all shadows with a single shadow described by a property map.
+   *
+   * This is the View::Property::SHADOW setter path. It clears both the first
+   * shadow and any additional shadows, then installs @p map as the first shadow.
+   *
    * @param[in] map The shadow property map
    */
   void SetShadow(const Property::Map& map);
 
   /**
-   * @brief Clear the shadow.
+   * @brief Sets only the first shadow visual.
+   *
+   * The first shadow is registered as View::Property::SHADOW so property lookup
+   * and typed shadow animations can target it directly.
+   *
+   * @param[in] map The shadow property map
+   */
+  void SetFirstShadow(const Property::Map& map);
+
+  /**
+   * @brief Appends a shadow value to the shadow stack.
+   *
+   * The first appended shadow is installed through SetFirstShadow() so it keeps
+   * the View::Property::SHADOW identity used by property lookup and typed
+   * shadow animations. Later shadows are appended as container visuals.
+   *
+   * @param[in] shadow The shadow value to append
+   */
+  void AppendShadow(const Dali::Ui::Shadow& shadow);
+
+  /**
+   * @brief Clears the first shadow and all additional shadow visuals.
    */
   void ClearShadow();
 
@@ -693,6 +728,8 @@ public:
   Ui::View::OffScreenRenderingType        mOffScreenRenderingType;
   Ui::View::OffScreenRenderingFinishedSignalType
     mOffScreenRenderingFinishedSignal; ///< Emits only when type is REFRESH_ONCE
+
+  std::vector<Dali::Ui::VisualBase> mShadowVisualObjects; ///< Additional shadow visuals after the primary shadow.
 
   InputMethodContext mInputMethodContext;
   CallbackBase*      mIdleCallback; ///< The idle callback to emit the resource ready signal.

@@ -66,6 +66,7 @@
 #include <dali-ui-foundation/internal/visuals/color/color-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
+#include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/align-enumerations.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/image-view.h>
@@ -2528,6 +2529,26 @@ void ViewImpl::ClearBackground()
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
   RelayoutRequest();
+}
+
+void ViewImpl::SetShadow(const Shadow& shadow)
+{
+  mImpl->SetShadow(Provider::Shadow::CreatePropertyMap(shadow));
+}
+
+void ViewImpl::SetShadow(const ShadowStack& shadowStack)
+{
+  ClearShadow();
+  const uint32_t shadowCount = shadowStack.GetInternalShadowCount();
+  for(uint32_t index = 0u; index < shadowCount; ++index)
+  {
+    mImpl->AppendShadow(shadowStack.GetInternalShadow(index));
+  }
+}
+
+void ViewImpl::ClearShadow()
+{
+  mImpl->ClearShadow();
 }
 
 void ViewImpl::SetRenderEffect(Ui::RenderEffect effect)

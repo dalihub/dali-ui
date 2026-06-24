@@ -61,6 +61,30 @@ LabelAnimationSpec& LabelAnimationSpec::BackgroundColorBy(const UiColor& relativ
   return *this;
 }
 
+LabelAnimationSpec& LabelAnimationSpec::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ShadowBlurRadius(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::ShadowBlurRadiusBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ShadowBlurRadiusBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::ShadowOpacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ShadowOpacity(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::ShadowOpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ShadowOpacityBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationSpec& LabelAnimationSpec::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::SizeWidth(target, duration, alpha, delay);

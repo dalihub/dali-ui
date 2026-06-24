@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/debug.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/animation/time-period.h>
 #include <dali/public-api/object/property.h>
@@ -29,6 +30,7 @@
 
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 
@@ -42,6 +44,16 @@ namespace
 {
 Dali::TypeRegistration VIEW_ANIMATION_SPEC_TYPE("ViewAnimationSpec", typeid(Dali::BaseHandle), nullptr);
 Dali::TypeRegistration VIEW_ANIMATION_SPEC_IMPL_TYPE(typeid(Dali::Ui::Internal::ViewAnimationSpecImpl), typeid(Dali::Ui::ViewAnimationSpec), nullptr);
+
+Dali::Property GetShadowVisualProperty(View view, Property::Key visualPropertyKey, const char* propertyName)
+{
+  Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::SHADOW, visualPropertyKey);
+  if(visualProperty.propertyIndex == Property::INVALID_INDEX)
+  {
+    DALI_LOG_DEBUG_INFO("Skip shadow %s animation: primary shadow visual is not set.\n", propertyName);
+  }
+  return visualProperty;
+}
 } // namespace
 
 ViewAnimationSpecImpl::ViewAnimationSpecImpl() = default;
@@ -149,6 +161,46 @@ void ViewAnimationSpecImpl::ApplyBackgroundColorTo(Animation& animation, View vi
 void ViewAnimationSpecImpl::ApplyBackgroundColorBy(Animation& animation, View view, const Entry& entry)
 {
   Dali::Property visualProperty = IntegrationView::GetVisualProperty(view, View::Property::BACKGROUND, Ui::VisualBasePropertyIndex::MIX_COLOR);
+  if(visualProperty.propertyIndex != Property::INVALID_INDEX)
+  {
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateBy(visualProperty, entry.value, entry.alpha, period);
+  }
+}
+
+void ViewAnimationSpecImpl::ApplyShadowBlurRadiusTo(Animation& animation, View view, const Entry& entry)
+{
+  Dali::Property visualProperty = GetShadowVisualProperty(view, Ui::ColorVisualPropertyIndex::BLUR_RADIUS, "blur radius");
+  if(visualProperty.propertyIndex != Property::INVALID_INDEX)
+  {
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateTo(visualProperty, entry.value, entry.alpha, period);
+  }
+}
+
+void ViewAnimationSpecImpl::ApplyShadowBlurRadiusBy(Animation& animation, View view, const Entry& entry)
+{
+  Dali::Property visualProperty = GetShadowVisualProperty(view, Ui::ColorVisualPropertyIndex::BLUR_RADIUS, "blur radius");
+  if(visualProperty.propertyIndex != Property::INVALID_INDEX)
+  {
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateBy(visualProperty, entry.value, entry.alpha, period);
+  }
+}
+
+void ViewAnimationSpecImpl::ApplyShadowOpacityTo(Animation& animation, View view, const Entry& entry)
+{
+  Dali::Property visualProperty = GetShadowVisualProperty(view, Ui::VisualBasePropertyIndex::OPACITY, "opacity");
+  if(visualProperty.propertyIndex != Property::INVALID_INDEX)
+  {
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateTo(visualProperty, entry.value, entry.alpha, period);
+  }
+}
+
+void ViewAnimationSpecImpl::ApplyShadowOpacityBy(Animation& animation, View view, const Entry& entry)
+{
+  Dali::Property visualProperty = GetShadowVisualProperty(view, Ui::VisualBasePropertyIndex::OPACITY, "opacity");
   if(visualProperty.propertyIndex != Property::INVALID_INDEX)
   {
     TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());

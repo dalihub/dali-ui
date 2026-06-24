@@ -318,6 +318,15 @@ public:
   bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
 
   /**
+   * @brief Adds a shadow visual object to this view.
+   *
+   * @param[in] visualBase The shadow visual to add
+   * @param[in] internalContainerRangeType The range of visuals to be added
+   * @return True if the visual was added successfully, false otherwise
+   */
+  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
+
+  /**
    * @copydoc Ui::View::RemoveVisual()
    */
   void RemoveVisualObject(Dali::Ui::VisualBase visualBase);

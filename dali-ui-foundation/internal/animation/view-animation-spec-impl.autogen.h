@@ -91,6 +91,10 @@ public:
 
   static void ApplyBackgroundColorTo(Animation& animation, View view, const Entry& entry);
   static void ApplyBackgroundColorBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyShadowBlurRadiusTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyShadowBlurRadiusBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyShadowOpacityTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyShadowOpacityBy(Animation& animation, View view, const Entry& entry);
   static void ApplySizeWidthTo(Animation& animation, View view, const Entry& entry);
   static void ApplySizeWidthBy(Animation& animation, View view, const Entry& entry);
   static void ApplySizeHeightTo(Animation& animation, View view, const Entry& entry);

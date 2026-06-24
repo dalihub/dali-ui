@@ -135,7 +135,12 @@ def parse_animation_config(header_path):
 # ---------------------------------------------------------------------------
 
 def _gen_doxygen(name_words, is_by):
-    brief = f'Animates the {name_words} by a relative amount.' if is_by else f'Animates the {name_words}.'
+    brief_name_overrides = {
+        'shadow blur radius': 'first shadow blur radius',
+        'shadow opacity': 'first shadow opacity',
+    }
+    brief_name = brief_name_overrides.get(name_words, name_words)
+    brief = f'Animates the {brief_name} by a relative amount.' if is_by else f'Animates the {brief_name}.'
     params = [('relative' if is_by else 'target', 'The relative value' if is_by else 'The target value'),
               ('duration', 'The animation duration'),
               ('alpha', 'The alpha function (default: linear)'),

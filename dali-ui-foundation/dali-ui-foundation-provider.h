@@ -22,4 +22,5 @@
 #include <dali-ui-foundation/provider-api/interactive-view-impl.h>
 #include <dali-ui-foundation/provider-api/property-registration-helper.h>
 #include <dali-ui-foundation/provider-api/selectable-view-impl.h>
+#include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/provider-api/ui-style-impl.h>

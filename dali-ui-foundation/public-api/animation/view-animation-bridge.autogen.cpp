@@ -51,6 +51,34 @@ ViewAnimationBridge& ViewAnimationBridge::BackgroundColorBy(const UiColor& relat
   return *this;
 }
 
+ViewAnimationBridge& ViewAnimationBridge::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyShadowBlurRadiusTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::ShadowBlurRadiusBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyShadowBlurRadiusBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::ShadowOpacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyShadowOpacityTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::ShadowOpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyShadowOpacityBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
 ViewAnimationBridge& ViewAnimationBridge::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);

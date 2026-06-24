@@ -1408,6 +1408,20 @@ bool ViewDataImpl::VisualData::AddVisualObject(Dali::Ui::VisualBase visualBase, 
   return mVisualObjectsContainer[containerIndex].AddVisualBase(visualBase);
 }
 
+bool ViewDataImpl::VisualData::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType)
+{
+  int containerIndex = static_cast<int>(internalContainerRangeType);
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+
+  if(!mVisualObjectsContainer[containerIndex])
+  {
+    Dali::Ui::View handle(mOuter.mViewImpl.GetOwner());
+    mVisualObjectsContainer[containerIndex] = Dali::Ui::VisualsContainer::New(handle, internalContainerRangeType);
+  }
+
+  return mVisualObjectsContainer[containerIndex].AddShadowVisualBase(visualBase, Dali::Ui::VisualsContainer::ShadowType::BOX_SHADOW);
+}
+
 void ViewDataImpl::VisualData::RemoveVisualObject(Dali::Ui::VisualBase visualBase)
 {
   if(DALI_UNLIKELY(!visualBase))

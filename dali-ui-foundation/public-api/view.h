@@ -35,6 +35,8 @@
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/selectable-trait.h>
+#include <dali-ui-foundation/public-api/shadow-stack.h>
+#include <dali-ui-foundation/public-api/shadow.h>
 #include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
@@ -309,6 +311,8 @@ public: // Measure / Arrange API
 
 public: // Properties
   // @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+  // @ANIMATABLE_MANUAL(ShadowBlurRadius, float)
+  // @ANIMATABLE_MANUAL(ShadowOpacity, float)
   // @ANIMATABLE_MANUAL(SizeWidth, float)
   // @ANIMATABLE_MANUAL(SizeHeight, float)
   // @ANIMATABLE_MANUAL(PositionX, float)
@@ -841,6 +845,27 @@ public: // Properties
    * @param[in] color The UiColor to apply
    */
   void SetBackgroundColor(const UiColor& color);
+
+  /**
+   * @brief Sets a single shadow for this View.
+   *
+   * This replaces all shadows previously set by SetShadow().
+   *
+   * @param[in] shadow The shadow value to apply
+   */
+  void SetShadow(const Shadow& shadow);
+
+  /**
+   * @brief Replaces all shadows for this View.
+   *
+   * @param[in] shadowStack The ordered shadow stack to apply
+   */
+  void SetShadow(const ShadowStack& shadowStack);
+
+  /**
+   * @brief Clears all shadows from this View.
+   */
+  void ClearShadow();
 
   /**
    * @brief Gets the color.

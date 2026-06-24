@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
+#include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -220,6 +221,14 @@ MeasuredSize ReentrantRemoveArrange(View, const LayoutRect&)
     gReentrantParent.Remove(gSiblingToRemove, RemovePolicy::IMMEDIATE);
   }
   return MeasuredSize(40.0f, 30.0f);
+}
+
+Shadow GetShadowProperty(View view)
+{
+  Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
+  const Property::Map* shadowMap = shadowValue.GetMap();
+  DALI_TEST_CHECK(shadowMap);
+  return shadowMap ? Shadow(*shadowMap) : Shadow();
 }
 
 } // namespace
@@ -431,6 +440,159 @@ int UtcDaliViewBackgroundColorSetterP(void)
   const UiColor     testColor(1.0f, 0.0f, 0.0f, 0.5f);
   view.SetBackgroundColor(testColor);
   DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), testColor.GetRgba(), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewShadowValueTypeP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  const UiColor originalColor(0.1f, 0.2f, 0.3f, 0.4f);
+  const UiColor changedColor(0.8f, 0.7f, 0.6f, 0.5f);
+  Shadow        shadow(12.0f, Vector2(3.0f, 4.0f), originalColor, Vector2(5.0f, 6.0f));
+
+  view.SetShadow(shadow);
+  shadow.SetColor(changedColor);
+  shadow.SetBlurRadius(24.0f);
+
+  Shadow appliedShadow = GetShadowProperty(view);
+  DALI_TEST_EQUALS(appliedShadow.GetColor().GetRgba(), originalColor.GetRgba(), TEST_LOCATION);
+  DALI_TEST_EQUALS(appliedShadow.GetBlurRadius(), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(appliedShadow.GetOffset(), Vector2(3.0f, 4.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(appliedShadow.GetExtents(), Vector2(5.0f, 6.0f), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewShadowStackReplaceAndClearP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  Shadow shadow1(4.0f, Vector2(1.0f, 2.0f), UiColor(0.0f, 0.0f, 0.0f, 0.2f), Vector2(3.0f, 4.0f));
+  Shadow shadow2(8.0f, Vector2(5.0f, 6.0f), UiColor(0.0f, 0.0f, 0.0f, 0.4f), Vector2(7.0f, 8.0f));
+  Shadow shadow3(12.0f, Vector2(9.0f, 10.0f), UiColor(0.0f, 0.0f, 0.0f, 0.6f), Vector2(11.0f, 12.0f));
+
+  view.SetShadow(shadow1);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
+
+  ShadowStack stack{shadow2, shadow3};
+  ShadowStack copiedStack(stack);
+  stack.Clear();
+
+  view.SetShadow(copiedStack);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow2.GetBlurRadius(), TEST_LOCATION);
+
+  copiedStack.Add(shadow1);
+  view.SetShadow(copiedStack);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow2.GetBlurRadius(), TEST_LOCATION);
+
+  view.SetProperty(View::Property::SHADOW, Provider::Shadow::CreatePropertyMap(shadow1));
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
+
+  view.SetShadow(copiedStack);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 2u, TEST_LOCATION);
+  view.SetProperty(View::Property::SHADOW, Property::Map());
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  Property::Value emptyShadowPropertyValue = view.GetProperty(View::Property::SHADOW);
+  DALI_TEST_CHECK(emptyShadowPropertyValue.GetMap() && emptyShadowPropertyValue.GetMap()->Empty());
+
+  ShadowStack deepCopiedStack{shadow2};
+  shadow2.SetBlurRadius(99.0f);
+  view.SetShadow(deepCopiedStack);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), 8.0f, TEST_LOCATION);
+
+  ShadowStack assignedStack;
+  assignedStack = deepCopiedStack;
+  deepCopiedStack.Clear();
+  view.SetShadow(assignedStack);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), 8.0f, TEST_LOCATION);
+
+  view.SetShadow(stack);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  Property::Value emptyShadowStackValue = view.GetProperty(View::Property::SHADOW);
+  DALI_TEST_CHECK(emptyShadowStackValue.GetMap() && emptyShadowStackValue.GetMap()->Empty());
+
+  view.SetShadow(shadow1);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
+
+  view.ClearShadow();
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
+  Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
+  DALI_TEST_CHECK(shadowValue.GetMap() && shadowValue.GetMap()->Empty());
+  END_TEST;
+}
+
+int UtcDaliViewShadowAnimationNoShadowP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  Animation bridgeAnimation = Animation::New(0.0f);
+  view.Animate(bridgeAnimation)
+    .ShadowBlurRadius(8.0f, Duration(0.2f))
+    .ShadowOpacity(0.25f, Duration(0.2f));
+  DALI_TEST_EQUALS(bridgeAnimation.GetDuration(), 0.2f, TEST_LOCATION);
+
+  ViewAnimationSpec spec = View::NewAnimationSpec();
+  spec.ShadowBlurRadius(4.0f, Duration(0.1f))
+    .ShadowOpacity(0.5f, Duration(0.1f));
+
+  Animation specAnimation = Animation::New(0.0f);
+  spec.ApplyTo(specAnimation, view);
+  DALI_TEST_EQUALS(specAnimation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewShadowAnimationPrimaryShadowP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  view.SetShadow(Shadow(0.0f, Vector2::ZERO, UiColor(0.0f, 0.0f, 0.0f, 0.5f)));
+  application.GetWindow().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  Dali::Property blurProperty = IntegrationView::GetVisualProperty(view, View::Property::SHADOW, ColorVisualPropertyIndex::BLUR_RADIUS);
+  Dali::Property opacityProperty = IntegrationView::GetVisualProperty(view, View::Property::SHADOW, VisualBasePropertyIndex::OPACITY);
+  DALI_TEST_CHECK(blurProperty.propertyIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(opacityProperty.propertyIndex != Property::INVALID_INDEX);
+
+  Animation bridgeAnimation = Animation::New(0.0f);
+  view.Animate(bridgeAnimation)
+    .ShadowBlurRadius(12.0f, Duration(0.1f))
+    .ShadowOpacity(0.25f, Duration(0.1f));
+  bridgeAnimation.Play();
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  DALI_TEST_EQUALS(blurProperty.object.GetCurrentProperty<float>(blurProperty.propertyIndex), 12.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(opacityProperty.object.GetCurrentProperty<float>(opacityProperty.propertyIndex), 0.25f, 0.01f, TEST_LOCATION);
+
+  ViewAnimationSpec spec = View::NewAnimationSpec();
+  spec.ShadowBlurRadius(4.0f, Duration(0.1f))
+    .ShadowOpacity(0.75f, Duration(0.1f));
+
+  Animation specAnimation = Animation::New(0.0f);
+  spec.ApplyTo(specAnimation, view);
+  specAnimation.Play();
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+
+  DALI_TEST_EQUALS(blurProperty.object.GetCurrentProperty<float>(blurProperty.propertyIndex), 4.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(opacityProperty.object.GetCurrentProperty<float>(opacityProperty.propertyIndex), 0.75f, 0.01f, TEST_LOCATION);
+
   END_TEST;
 }
 
