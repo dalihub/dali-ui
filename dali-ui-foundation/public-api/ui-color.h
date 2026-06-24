@@ -54,8 +54,13 @@ class DALI_UI_API UiColor
 {
 public:
   static const UiColor PRIMARY;
+  static const UiColor ON_PRIMARY;
   static const UiColor BACKGROUND;
+  static const UiColor SURFACE;
+  static const UiColor ON_SURFACE;
   static const UiColor OUTLINE;
+  static const UiColor SHADOW;
+  static const UiColor BLUR_SURFACE;
 
   /**
    * @brief Creates a default UiColor (transparent black, no ID).

@@ -39,6 +39,7 @@ RecyclerView | (~10.2026) | -
 name | desc. | sample
 -- | -- | --
 [ChartView](ChartView.md) | Line, Bar, Pie, Area, Scatter, Gauge charts using ThorVG rendering. Supports zoom/pan gestures, animated data transitions, and real-time data feeds. | [samples/chart-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/chart-view)
+TextButton | Label-only interactive button with text styling support. | -
 Button | (~10.2026) | -
 IconButton | (~10.2026) | -
 Checkbox | (~10.2026) | -
@@ -50,6 +51,16 @@ Loading | (~10.2026) | -
 Slider | (~10.2026) | -
 Toast | (~10.2026) | -
 Dialog | (~10.2026) | -
+
+<br/>
+
+#### TextButton Example
+
+```cpp
+Dali::Ui::TextButton button = Dali::Ui::TextButton::New("OK");
+button.SetText("Apply");
+button.SetHorizontalAlignment(Dali::Ui::LayoutAlignment::CENTER);
+```
 
 <br/>
 

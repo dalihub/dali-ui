@@ -76,6 +76,8 @@ private:
 
 int gPrimaryStyleCreateCount = 0;
 int gEmptyStyleCreateCount   = 0;
+UiStyleSheet gRecursiveStyleSheet;
+UiStyleKey   gRecursiveKey = UiStyleKey::Alloc();
 
 UiStyle CreatePrimaryStyle()
 {
@@ -94,12 +96,18 @@ UiStyle CreateEmptyStyle()
   return UiStyle();
 }
 
+UiStyle CreateRecursiveStyle()
+{
+  return gRecursiveStyleSheet.GetStyle(gRecursiveKey);
+}
+
 } // namespace
 
 void utc_dali_ui_style_startup(void)
 {
   gPrimaryStyleCreateCount = 0;
   gEmptyStyleCreateCount   = 0;
+  gRecursiveStyleSheet     = UiStyleSheet();
   test_return_value = TET_UNDEF;
 }
 
@@ -169,6 +177,15 @@ int UtcDaliUiStyleSheetFreezeViaConfigP(void)
   TestStyle style = TestStyle::DownCast(styleSheet.GetStyle(key));
   DALI_TEST_CHECK(style);
   DALI_TEST_EQUALS(style.GetValue(), 7, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliUiStyleSheetRecursiveResolutionN(void)
+{
+  gRecursiveStyleSheet = UiStyleSheet::New();
+  gRecursiveStyleSheet.SetStyle(gRecursiveKey, CreateRecursiveStyle);
+
+  DALI_TEST_ASSERTION(gRecursiveStyleSheet.GetStyle(gRecursiveKey), "UiStyleSheet detected recursive style resolution");
   END_TEST;
 }
 

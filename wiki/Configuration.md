@@ -74,7 +74,7 @@ The following describes key configuration options. For the full API, see [UiConf
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | Whether the default focus indicator is enabled |
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | Whether touch interaction clears focus indication |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | Whether hovering outside the focused view clears focus indication |
-| Style Sheet | `SetStyleSheet(UiStyleSheet)`, `GetStyle(UiStyleKey)` | Built-in component styles | Component style creator lookup table and style resolver |
+| Style Sheet | `SetStyleSheet(UiStyleSheet)`, `GetStyle(UiStyleKey)` | Component style overrides | Component style creator lookup table and style resolver |
 
 <br/>
 
@@ -83,8 +83,8 @@ The following describes key configuration options. For the full API, see [UiConf
 `UiConfig` may carry a `UiStyleSheet`. Components resolve configured styles
 through `UiConfig::GetStyle(UiStyleKey)`.
 
-Device or product libraries can start from the default components sheet and
-override selected style entries before applying the config:
+Device or product libraries can create a components style sheet and register
+only the style entries they want to override before applying the config:
 
 ```cpp
 UiStyleSheet styleSheet = Dali::Ui::Components::StyleSheet::New();

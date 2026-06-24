@@ -548,6 +548,16 @@ int UtcDaliUiColorPredefinedPrimaryP(void)
   END_TEST;
 }
 
+int UtcDaliUiColorPredefinedOnPrimaryP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor::ON_PRIMARY.HasColorId());
+  DALI_TEST_EQUALS(UiColor::ON_PRIMARY.GetColorId(), "OnPrimary", TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliUiColorPredefinedBackgroundP(void)
 {
   UiTestApplication application;
@@ -558,12 +568,52 @@ int UtcDaliUiColorPredefinedBackgroundP(void)
   END_TEST;
 }
 
+int UtcDaliUiColorPredefinedSurfaceP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor::SURFACE.HasColorId());
+  DALI_TEST_EQUALS(UiColor::SURFACE.GetColorId(), "Surface", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorPredefinedOnSurfaceP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor::ON_SURFACE.HasColorId());
+  DALI_TEST_EQUALS(UiColor::ON_SURFACE.GetColorId(), "OnSurface", TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliUiColorPredefinedOutlineP(void)
 {
   UiTestApplication application;
 
   DALI_TEST_CHECK(UiColor::OUTLINE.HasColorId());
   DALI_TEST_EQUALS(UiColor::OUTLINE.GetColorId(), "Outline", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorPredefinedShadowP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor::SHADOW.HasColorId());
+  DALI_TEST_EQUALS(UiColor::SHADOW.GetColorId(), "Shadow", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorPredefinedBlurSurfaceP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor::BLUR_SURFACE.HasColorId());
+  DALI_TEST_EQUALS(UiColor::BLUR_SURFACE.GetColorId(), "BlurSurface", TEST_LOCATION);
 
   END_TEST;
 }

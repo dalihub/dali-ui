@@ -205,9 +205,14 @@ int UtcDaliUiColorManagerGetColorP(void)
 
   UiColorManager manager = UiColorManager::Get();
 
-  // "Primary" is provided by DefaultThemeLoader
-  Vector4 color = manager.GetColor("Primary");
-  DALI_TEST_CHECK(color != Vector4::ZERO);
+  DALI_TEST_EQUALS(manager.GetColor("Primary"), Vector4(0x38 / 255.0f, 0x7A / 255.0f, 0xFF / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("OnPrimary"), Vector4(0xFC / 255.0f, 0xFC / 255.0f, 0xFF / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("Background"), Vector4(0xF1 / 255.0f, 0xF1 / 255.0f, 0xF3 / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("Surface"), Vector4(0xE4 / 255.0f, 0xE4 / 255.0f, 0xE7 / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("OnSurface"), Vector4(0x4D / 255.0f, 0x4D / 255.0f, 0x52 / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("Outline"), Vector4(0xB7 / 255.0f, 0xB7 / 255.0f, 0xBB / 255.0f, 1.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("Shadow"), Vector4(0.0f, 0.0f, 0.0f, 0.1f), TEST_LOCATION);
+  DALI_TEST_EQUALS(manager.GetColor("BlurSurface"), Vector4(0xFC / 255.0f, 0xFC / 255.0f, 0xFF / 255.0f, 0.8f), TEST_LOCATION);
 
   END_TEST;
 }

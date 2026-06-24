@@ -33,10 +33,18 @@ namespace Internal
 {
 namespace
 {
+enum class StyleEntryState
+{
+  UNRESOLVED,
+  RESOLVING,
+  RESOLVED
+};
+
 struct StyleEntry
 {
-  mutable UiStyleCreator creator{nullptr};
-  mutable UiStyle        style;
+  mutable UiStyleCreator  creator{nullptr};
+  mutable UiStyle         style;
+  mutable StyleEntryState state{StyleEntryState::UNRESOLVED};
 };
 
 // UiStyleKey is allocated sequentially, and expected style entry counts are
@@ -59,8 +67,10 @@ public:
       mEntries.resize(index + 1u);
     }
 
-    mEntries[index].creator = creator;
-    mEntries[index].style   = UiStyle();
+    StyleEntry& entry = mEntries[index];
+    entry.creator     = creator;
+    entry.style       = UiStyle();
+    entry.state       = StyleEntryState::UNRESOLVED;
   }
 
   UiStyle GetStyle(UiStyleKey key) const
@@ -72,10 +82,17 @@ public:
     }
 
     const StyleEntry& entry = mEntries[index];
-    if(entry.creator)
+    if(entry.state == StyleEntryState::RESOLVING)
     {
+      DALI_ASSERT_ALWAYS(false && "UiStyleSheet detected recursive style resolution");
+    }
+
+    if(entry.state == StyleEntryState::UNRESOLVED && entry.creator)
+    {
+      entry.state   = StyleEntryState::RESOLVING;
       entry.style   = entry.creator();
       entry.creator = nullptr;
+      entry.state   = StyleEntryState::RESOLVED;
     }
 
     return entry.style;

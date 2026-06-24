@@ -71,7 +71,7 @@ config.Apply();
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | 기본 포커스 인디케이터 활성화 여부 |
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | 터치 입력 시 포커스 indication을 해제할지 여부 |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | 포커스된 뷰 밖을 hover했을 때 포커스 indication을 해제할지 여부 |
-| Style Sheet | `SetStyleSheet(UiStyleSheet)`, `GetStyle(UiStyleKey)` | 컴포넌트 built-in style | 컴포넌트 스타일 creator lookup table 및 style resolver |
+| Style Sheet | `SetStyleSheet(UiStyleSheet)`, `GetStyle(UiStyleKey)` | 컴포넌트 style override | 컴포넌트 스타일 creator lookup table 및 style resolver |
 
 <br/>
 
@@ -80,8 +80,8 @@ config.Apply();
 `UiConfig`는 `UiStyleSheet`를 가질 수 있습니다. 컴포넌트는
 `UiConfig::GetStyle(UiStyleKey)`를 통해 설정된 style을 resolve합니다.
 
-디바이스나 제품 전용 라이브러리는 components 기본 style sheet에서 시작해
-필요한 style entry만 override한 뒤 config에 적용할 수 있습니다:
+디바이스나 제품 전용 라이브러리는 components style sheet를 생성하고
+override하려는 style entry만 등록한 뒤 config에 적용할 수 있습니다:
 
 ```cpp
 UiStyleSheet styleSheet = Dali::Ui::Components::StyleSheet::New();

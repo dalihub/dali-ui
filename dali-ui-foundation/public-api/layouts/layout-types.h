@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/math/vector2.h>
+#include <cfloat>
 #include <cstdint>
 
 // INTERNAL INCLUDES
@@ -71,6 +72,20 @@ constexpr float WRAP_CONTENT = -1.0f;
  * the View fills the parent container's available space on that axis.
  */
 constexpr float MATCH_PARENT = -2.0f;
+
+/**
+ * @brief Constant representing no minimum size constraint.
+ *
+ * Use this with minimum width or height APIs to remove the lower size bound.
+ */
+constexpr float UNCONSTRAINED_MIN_SIZE = 0.0f;
+
+/**
+ * @brief Constant representing no maximum size constraint.
+ *
+ * Use this with maximum width or height APIs to remove the upper size bound.
+ */
+constexpr float UNCONSTRAINED_MAX_SIZE = FLT_MAX;
 
 /**
  * @brief Layout mode of a View.
