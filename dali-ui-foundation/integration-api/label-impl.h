@@ -157,14 +157,14 @@ public:
   Text::Alignment GetVerticalTextAlignment() const;
 
   /**
-   * @copydoc Dali::Ui::Label::SetOverflowMode
+   * @copydoc Dali::Ui::Label::SetTextOverflowMode
    */
-  void SetOverflowMode(Text::OverflowMode mode);
+  void SetTextOverflowMode(Text::OverflowMode mode);
 
   /**
-   * @copydoc Dali::Ui::Label::GetOverflowMode
+   * @copydoc Dali::Ui::Label::GetTextOverflowMode
    */
-  Text::OverflowMode GetOverflowMode() const;
+  Text::OverflowMode GetTextOverflowMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetLineHeight
@@ -342,54 +342,54 @@ public:
   void ClearTextBackgroundColor();
 
   /**
-   * @copydoc Dali::Ui::Label::SetUnderline
+   * @copydoc Dali::Ui::Label::SetTextUnderline
    */
-  void SetUnderline(const Text::Underline& underline);
+  void SetTextUnderline(const Text::Underline& underline);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearUnderline
+   * @copydoc Dali::Ui::Label::ClearTextUnderline
    */
-  void ClearUnderline();
+  void ClearTextUnderline();
 
   /**
-   * @copydoc Dali::Ui::Label::SetShadow
+   * @copydoc Dali::Ui::Label::SetTextShadow
    */
-  void SetShadow(const Text::Shadow& shadow);
+  void SetTextShadow(const Text::Shadow& shadow);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearShadow
+   * @copydoc Dali::Ui::Label::ClearTextShadow
    */
-  void ClearShadow();
+  void ClearTextShadow();
 
   /**
-   * @copydoc Dali::Ui::Label::SetOutline
+   * @copydoc Dali::Ui::Label::SetTextOutline
    */
-  void SetOutline(const Text::Outline& outline);
+  void SetTextOutline(const Text::Outline& outline);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearOutline
+   * @copydoc Dali::Ui::Label::ClearTextOutline
    */
-  void ClearOutline();
+  void ClearTextOutline();
 
   /**
-   * @copydoc Dali::Ui::Label::SetLineThrough
+   * @copydoc Dali::Ui::Label::SetTextLineThrough
    */
-  void SetLineThrough(const Text::LineThrough& lineThrough);
+  void SetTextLineThrough(const Text::LineThrough& lineThrough);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearLineThrough
+   * @copydoc Dali::Ui::Label::ClearTextLineThrough
    */
-  void ClearLineThrough();
+  void ClearTextLineThrough();
 
   /**
-   * @copydoc Dali::Ui::Label::SetBevel
+   * @copydoc Dali::Ui::Label::SetTextBevel
    */
-  void SetBevel(const Text::Bevel& bevel);
+  void SetTextBevel(const Text::Bevel& bevel);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearBevel
+   * @copydoc Dali::Ui::Label::ClearTextBevel
    */
-  void ClearBevel();
+  void ClearTextBevel();
 
   /**
    * @see Dali::Ui::Label::SetTextFit
@@ -479,14 +479,14 @@ public:
   Dali::Property::Index RegisterFontVariationProperty(const Dali::String& tag);
 
   /**
-   * @copydoc Dali::Ui::Label::SetCutoutEnabled
+   * @copydoc Dali::Ui::Label::SetTextCutoutEnabled
    */
-  void SetCutoutEnabled(bool enabled);
+  void SetTextCutoutEnabled(bool enabled);
 
   /**
-   * @copydoc Dali::Ui::Label::IsCutoutEnabled
+   * @copydoc Dali::Ui::Label::IsTextCutoutEnabled
    */
-  bool IsCutoutEnabled() const;
+  bool IsTextCutoutEnabled() const;
 
   /**
    * @brief Sets the additional spacing between letters in pixels.

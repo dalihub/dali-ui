@@ -41,7 +41,7 @@ Label CreateBevelLabel(const char* text, uint32_t backgroundColor, uint32_t text
   label.SetFontSize(FONT_SIZE);
   label.SetRequestedWidth(MATCH_PARENT);
   label.SetTextColor(UiColor(textColor));
-  label.SetBevel(bevel);
+  label.SetTextBevel(bevel);
   return label;
 }
 } // namespace
@@ -103,23 +103,23 @@ private:
     // Clears bevel styles with number keys
     if(event.GetKeyName() == "1")
     {
-      mEmbossedLabel.ClearBevel();
+      mEmbossedLabel.ClearTextBevel();
     }
     else if(event.GetKeyName() == "2")
     {
-      mEngravedLabel.ClearBevel();
+      mEngravedLabel.ClearTextBevel();
     }
     else if(event.GetKeyName() == "3")
     {
-      mGlassLabel.ClearBevel();
+      mGlassLabel.ClearTextBevel();
     }
     else if(event.GetKeyName() == "4")
     {
-      mSameColorLabel.ClearBevel();
+      mSameColorLabel.ClearTextBevel();
     }
     else if(event.GetKeyName() == "5")
     {
-      mBronzeColorLabel.ClearBevel();
+      mBronzeColorLabel.ClearTextBevel();
     }
   }
 

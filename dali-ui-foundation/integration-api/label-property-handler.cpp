@@ -87,7 +87,7 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetOverflowModeEnumeration(value, mode))
       {
-        impl.SetOverflowMode(mode);
+        impl.SetTextOverflowMode(mode);
       }
       break;
     }
@@ -292,7 +292,7 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     }
     case Text::LabelPropertyIndex::OVERFLOW_MODE:
     {
-      value = impl.GetOverflowMode();
+      value = impl.GetTextOverflowMode();
       break;
     }
     case Text::LabelPropertyIndex::LINE_HEIGHT:
@@ -402,7 +402,7 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     }
     case Text::LabelPropertyIndex::CUTOUT_ENABLED:
     {
-      value = impl.IsCutoutEnabled();
+      value = impl.IsTextCutoutEnabled();
       break;
     }
     case Text::LabelPropertyIndex::ASYNC_RENDERING:

@@ -170,14 +170,14 @@ Text::Alignment InputEditor::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
-void InputEditor::SetOverflowMode(Text::OverflowMode mode)
+void InputEditor::SetTextOverflowMode(Text::OverflowMode mode)
 {
-  GetImpl(*this).SetOverflowMode(mode);
+  GetImpl(*this).SetTextOverflowMode(mode);
 }
 
-Text::OverflowMode InputEditor::GetOverflowMode() const
+Text::OverflowMode InputEditor::GetTextOverflowMode() const
 {
-  return GetImpl(*this).GetOverflowMode();
+  return GetImpl(*this).GetTextOverflowMode();
 }
 
 void InputEditor::SetLineHeight(float lineHeight)
@@ -475,44 +475,44 @@ void InputEditor::ClearTextBackgroundColor()
   GetImpl(*this).ClearTextBackgroundColor();
 }
 
-void InputEditor::SetUnderline(const Text::Underline& underline)
+void InputEditor::SetTextUnderline(const Text::Underline& underline)
 {
-  GetImpl(*this).SetUnderline(underline);
+  GetImpl(*this).SetTextUnderline(underline);
 }
 
-void InputEditor::ClearUnderline()
+void InputEditor::ClearTextUnderline()
 {
-  return GetImpl(*this).ClearUnderline();
+  return GetImpl(*this).ClearTextUnderline();
 }
 
-void InputEditor::SetShadow(const Text::Shadow& shadow)
+void InputEditor::SetTextShadow(const Text::Shadow& shadow)
 {
-  GetImpl(*this).SetShadow(shadow);
+  GetImpl(*this).SetTextShadow(shadow);
 }
 
-void InputEditor::ClearShadow()
+void InputEditor::ClearTextShadow()
 {
-  return GetImpl(*this).ClearShadow();
+  return GetImpl(*this).ClearTextShadow();
 }
 
-void InputEditor::SetOutline(const Text::Outline& outline)
+void InputEditor::SetTextOutline(const Text::Outline& outline)
 {
-  GetImpl(*this).SetOutline(outline);
+  GetImpl(*this).SetTextOutline(outline);
 }
 
-void InputEditor::ClearOutline()
+void InputEditor::ClearTextOutline()
 {
-  return GetImpl(*this).ClearOutline();
+  return GetImpl(*this).ClearTextOutline();
 }
 
-void InputEditor::SetLineThrough(const Text::LineThrough& lineThrough)
+void InputEditor::SetTextLineThrough(const Text::LineThrough& lineThrough)
 {
-  GetImpl(*this).SetLineThrough(lineThrough);
+  GetImpl(*this).SetTextLineThrough(lineThrough);
 }
 
-void InputEditor::ClearLineThrough()
+void InputEditor::ClearTextLineThrough()
 {
-  return GetImpl(*this).ClearLineThrough();
+  return GetImpl(*this).ClearTextLineThrough();
 }
 
 void InputEditor::SetFontSizeScale(float scale)

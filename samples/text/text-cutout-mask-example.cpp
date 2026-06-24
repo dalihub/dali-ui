@@ -92,7 +92,7 @@ private:
     mLabel.SetTextFit(Text::FitRange(20, 100, 10));
     mLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     mLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mLabel.SetCutoutEnabled(true);
+    mLabel.SetTextCutoutEnabled(true);
     mLabel.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0.0f, 0.0f, 400.0f, 100.0f)));
     cutoutLayout.Add(mLabel);
     root.Add(cutoutLayout);
@@ -150,12 +150,12 @@ private:
     }
     if(event.GetKeyName() == "1")
     {
-      mLabel.SetCutoutEnabled(false);
+      mLabel.SetTextCutoutEnabled(false);
       mMaskLabel.ClearMaskEffect();
     }
     else if(event.GetKeyName() == "2")
     {
-      mLabel.SetCutoutEnabled(true);
+      mLabel.SetTextCutoutEnabled(true);
       mMaskLabel.SetMaskEffect(CreateBackgroundLabel());
     }
   }

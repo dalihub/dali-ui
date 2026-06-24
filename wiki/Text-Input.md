@@ -179,10 +179,10 @@ Common style APIs:
 | `SetFontWidth()` | Font width |
 | `SetFontSlant()` | Font slant |
 | `SetTextBackgroundColor()` | Text background color |
-| `SetUnderline()` | Underline style |
-| `SetShadow()` | Shadow style |
-| `SetOutline()` | Outline style |
-| `SetLineThrough()` | Line-through style |
+| `SetTextUnderline()` | Underline style |
+| `SetTextShadow()` | Shadow style |
+| `SetTextOutline()` | Outline style |
+| `SetTextLineThrough()` | Line-through style |
 | `SetFontVariation()` | Variable font axis |
 
 ~~~cpp

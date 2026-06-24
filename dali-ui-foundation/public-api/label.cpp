@@ -192,14 +192,14 @@ Text::Alignment Label::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
-void Label::SetOverflowMode(Text::OverflowMode mode)
+void Label::SetTextOverflowMode(Text::OverflowMode mode)
 {
-  GetImpl(*this).SetOverflowMode(mode);
+  GetImpl(*this).SetTextOverflowMode(mode);
 }
 
-Text::OverflowMode Label::GetOverflowMode() const
+Text::OverflowMode Label::GetTextOverflowMode() const
 {
-  return GetImpl(*this).GetOverflowMode();
+  return GetImpl(*this).GetTextOverflowMode();
 }
 
 void Label::SetLineHeight(float lineHeight)
@@ -377,54 +377,54 @@ void Label::ClearTextBackgroundColor()
   GetImpl(*this).ClearTextBackgroundColor();
 }
 
-void Label::SetUnderline(const Text::Underline& underline)
+void Label::SetTextUnderline(const Text::Underline& underline)
 {
-  GetImpl(*this).SetUnderline(underline);
+  GetImpl(*this).SetTextUnderline(underline);
 }
 
-void Label::ClearUnderline()
+void Label::ClearTextUnderline()
 {
-  return GetImpl(*this).ClearUnderline();
+  return GetImpl(*this).ClearTextUnderline();
 }
 
-void Label::SetShadow(const Text::Shadow& shadow)
+void Label::SetTextShadow(const Text::Shadow& shadow)
 {
-  GetImpl(*this).SetShadow(shadow);
+  GetImpl(*this).SetTextShadow(shadow);
 }
 
-void Label::ClearShadow()
+void Label::ClearTextShadow()
 {
-  return GetImpl(*this).ClearShadow();
+  return GetImpl(*this).ClearTextShadow();
 }
 
-void Label::SetOutline(const Text::Outline& outline)
+void Label::SetTextOutline(const Text::Outline& outline)
 {
-  GetImpl(*this).SetOutline(outline);
+  GetImpl(*this).SetTextOutline(outline);
 }
 
-void Label::ClearOutline()
+void Label::ClearTextOutline()
 {
-  return GetImpl(*this).ClearOutline();
+  return GetImpl(*this).ClearTextOutline();
 }
 
-void Label::SetLineThrough(const Text::LineThrough& lineThrough)
+void Label::SetTextLineThrough(const Text::LineThrough& lineThrough)
 {
-  GetImpl(*this).SetLineThrough(lineThrough);
+  GetImpl(*this).SetTextLineThrough(lineThrough);
 }
 
-void Label::ClearLineThrough()
+void Label::ClearTextLineThrough()
 {
-  return GetImpl(*this).ClearLineThrough();
+  return GetImpl(*this).ClearTextLineThrough();
 }
 
-void Label::SetBevel(const Text::Bevel& bevel)
+void Label::SetTextBevel(const Text::Bevel& bevel)
 {
-  GetImpl(*this).SetBevel(bevel);
+  GetImpl(*this).SetTextBevel(bevel);
 }
 
-void Label::ClearBevel()
+void Label::ClearTextBevel()
 {
-  return GetImpl(*this).ClearBevel();
+  return GetImpl(*this).ClearTextBevel();
 }
 
 void Label::SetTextFit(const Text::FitRange& range)
@@ -502,14 +502,14 @@ void Label::ClearFontVariation()
   GetImpl(*this).ClearFontVariation();
 }
 
-void Label::SetCutoutEnabled(bool enabled)
+void Label::SetTextCutoutEnabled(bool enabled)
 {
-  GetImpl(*this).SetCutoutEnabled(enabled);
+  GetImpl(*this).SetTextCutoutEnabled(enabled);
 }
 
-bool Label::IsCutoutEnabled() const
+bool Label::IsTextCutoutEnabled() const
 {
-  return GetImpl(*this).IsCutoutEnabled();
+  return GetImpl(*this).IsTextCutoutEnabled();
 }
 
 void Label::SetMaskEffect(View view)

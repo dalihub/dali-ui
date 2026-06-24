@@ -1254,7 +1254,7 @@ Label MakeLabel(const std::string& text, float fontSize, const Vector4& color)
   label.SetFontSize(fontSize);
   label.SetTextColor(color);
   label.SetMultiLine(true);
-  label.SetOverflowMode(Text::OverflowMode::CLIP);
+  label.SetTextOverflowMode(Text::OverflowMode::CLIP);
   label.SetHorizontalTextAlignment(Text::Alignment::START);
   label.SetVerticalTextAlignment(Text::Alignment::CENTER);
   return label;
@@ -1975,7 +1975,7 @@ private:
     button.SetFontSize(NAV_SIZE);
     button.SetTextColor(Color::BLACK);
     button.SetMultiLine(false);
-    button.SetOverflowMode(Text::OverflowMode::CLIP);
+    button.SetTextOverflowMode(Text::OverflowMode::CLIP);
     button.SetAsyncRendering(false);
     button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     button.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -2566,7 +2566,7 @@ private:
     mSearchInput.SetPadding(Extents(14, 14, 8, 8));
     mSearchInput.SetHorizontalTextAlignment(Text::Alignment::START);
     mSearchInput.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mSearchInput.SetOverflowMode(Text::OverflowMode::CLIP);
+    mSearchInput.SetTextOverflowMode(Text::OverflowMode::CLIP);
     mSearchInput.SetCornerRadiusPolicyRelative();
     mSearchInput.SetCornerRadius(0.5f);
     mSearchInput.SetProperty(View::Property::SHADOW, CreateSoftShadowMap(0.14f, 3.0f, 5.0f, Vector2(1.02f, 1.08f)));
@@ -2594,7 +2594,7 @@ private:
     mSearchIcon.SetFontSize(FLOATING_SEARCH_ICON_SIZE);
     mSearchIcon.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     mSearchIcon.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mSearchIcon.SetOverflowMode(Text::OverflowMode::CLIP);
+    mSearchIcon.SetTextOverflowMode(Text::OverflowMode::CLIP);
     mSearchIcon.SetRequestedPositionX(0.0f);
     mSearchIcon.SetRequestedPositionY(-1.0f);
     mSearchIcon.SetRequestedWidth(FLOATING_SEARCH_BUTTON_SIZE);

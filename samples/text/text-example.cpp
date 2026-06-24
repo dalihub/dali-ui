@@ -177,7 +177,7 @@ private:
     label.SetText(text);
     label.SetFontFamily(fontFamily);
     label.SetFontSize(fontSize);
-    label.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+    label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
     return label;
   }
 
@@ -326,14 +326,14 @@ private:
     if(isLightColor)
     {
       ApplyDarkColor();
-      mLabel3.SetOverflowMode(Text::OverflowMode::CLIP);
-      mField.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+      mLabel3.SetTextOverflowMode(Text::OverflowMode::CLIP);
+      mField.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
     }
     else
     {
       ApplyLightColor();
-      mLabel3.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
-      mField.SetOverflowMode(Text::OverflowMode::CLIP);
+      mLabel3.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+      mField.SetTextOverflowMode(Text::OverflowMode::CLIP);
     }
   }
 

@@ -281,11 +281,11 @@ int UtcDaliInputFieldOverflowMode(void)
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
-  inputField.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
-  DALI_TEST_EQUALS(inputField.GetOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+  inputField.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(inputField.GetTextOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
 
-  inputField.SetOverflowMode(Text::OverflowMode::CLIP);
-  DALI_TEST_EQUALS(inputField.GetOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
+  inputField.SetTextOverflowMode(Text::OverflowMode::CLIP);
+  DALI_TEST_EQUALS(inputField.GetTextOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
 
   END_TEST;
 }

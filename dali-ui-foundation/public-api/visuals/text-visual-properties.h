@@ -136,7 +136,7 @@ struct TextVisualPropertyIndex
      * @brief The overflow mode.
      * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::OverflowMode (Property::INTEGER).
-     * @see TextVisual::SetOverflowMode(), TextVisual::GetOverflowMode().
+     * @see TextVisual::SetTextOverflowMode(), TextVisual::GetTextOverflowMode().
      */
     OVERFLOW_MODE,
 

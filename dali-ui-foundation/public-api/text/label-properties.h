@@ -107,7 +107,7 @@ struct LabelPropertyIndex
      * @brief The overflow mode.
      * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or type Property::STRING.
      * @note Return type is Text::OverflowMode (Property::INTEGER).
-     * @see Label::SetOverflowMode(), Label::GetOverflowMode().
+     * @see Label::SetTextOverflowMode(), Label::GetTextOverflowMode().
      */
     OVERFLOW_MODE,
 
@@ -267,7 +267,7 @@ struct LabelPropertyIndex
     /**
      * @brief Whether cutout rendering is enabled for the text.
      * @details Name "cutoutEnabled", type Property::BOOLEAN.
-     * @see Label::SetCutoutEnabled(), Label::IsCutoutEnabled().
+     * @see Label::SetTextCutoutEnabled(), Label::IsTextCutoutEnabled().
      */
     CUTOUT_ENABLED,
 

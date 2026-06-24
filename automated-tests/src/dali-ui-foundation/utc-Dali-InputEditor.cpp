@@ -297,11 +297,11 @@ int UtcDaliInputEditorOverflowMode(void)
   InputEditor inputEditor = InputEditor::New();
   DALI_TEST_CHECK(inputEditor);
 
-  inputEditor.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
-  DALI_TEST_EQUALS(inputEditor.GetOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+  inputEditor.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(inputEditor.GetTextOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
 
-  inputEditor.SetOverflowMode(Text::OverflowMode::CLIP);
-  DALI_TEST_EQUALS(inputEditor.GetOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
+  inputEditor.SetTextOverflowMode(Text::OverflowMode::CLIP);
+  DALI_TEST_EQUALS(inputEditor.GetTextOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
 
   END_TEST;
 }

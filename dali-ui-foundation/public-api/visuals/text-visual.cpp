@@ -149,12 +149,12 @@ void TextVisual::SetVerticalAlignment(Dali::Ui::Text::Alignment alignment)
   VisualBase::SetProperty(TextVisual::Property::VERTICAL_ALIGNMENT, alignment);
 }
 
-Dali::Ui::Text::OverflowMode TextVisual::GetOverflowMode() const
+Dali::Ui::Text::OverflowMode TextVisual::GetTextOverflowMode() const
 {
   return VisualBase::GetProperty<Dali::Ui::Text::OverflowMode>(TextVisual::Property::OVERFLOW_MODE);
 }
 
-void TextVisual::SetOverflowMode(Dali::Ui::Text::OverflowMode overflowMode)
+void TextVisual::SetTextOverflowMode(Dali::Ui::Text::OverflowMode overflowMode)
 {
   VisualBase::SetProperty(TextVisual::Property::OVERFLOW_MODE, overflowMode);
 }

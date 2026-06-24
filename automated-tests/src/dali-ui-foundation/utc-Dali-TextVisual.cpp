@@ -256,11 +256,11 @@ int UtcDaliTextVisualOverflowMode(void)
 
   TextVisual visual = TextVisual::New();
 
-  visual.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
-  DALI_TEST_EQUALS(visual.GetOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+  visual.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(visual.GetTextOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
 
-  visual.SetOverflowMode(Text::OverflowMode::CLIP);
-  DALI_TEST_EQUALS(visual.GetOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
+  visual.SetTextOverflowMode(Text::OverflowMode::CLIP);
+  DALI_TEST_EQUALS(visual.GetTextOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
 
   END_TEST;
 }
@@ -415,8 +415,8 @@ int UtcDaliTextVisualSetGetPropertyValue(void)
   DALI_TEST_EQUALS(visual.GetProperty<Text::Alignment>(TextVisual::Property::VERTICAL_ALIGNMENT), Text::Alignment::END, TEST_LOCATION);
 
   // OVERFLOW_MODE
-  visual.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
-  DALI_TEST_EQUALS(visual.GetOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+  visual.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(visual.GetTextOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetProperty<Text::OverflowMode>(TextVisual::Property::OVERFLOW_MODE), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
 
   // LINE_HEIGHT
@@ -470,7 +470,7 @@ int UtcDaliTextVisualSetters(void)
   visual.SetLineWrapMode(Text::LineWrapMode::WORD);
   visual.SetHorizontalAlignment(Text::Alignment::CENTER);
   visual.SetVerticalAlignment(Text::Alignment::CENTER);
-  visual.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+  visual.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
   visual.SetLineHeight(1.5f);
   visual.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
   visual.SetTextColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
@@ -486,7 +486,7 @@ int UtcDaliTextVisualSetters(void)
   DALI_TEST_EQUALS(visual.GetLineWrapMode(), Text::LineWrapMode::WORD, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetHorizontalAlignment(), Text::Alignment::CENTER, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetVerticalAlignment(), Text::Alignment::CENTER, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+  DALI_TEST_EQUALS(visual.GetTextOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetLineHeight(), 1.5f, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetTextColor().GetRgba(), Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
@@ -576,7 +576,7 @@ int UtcDaliTextVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.SetLineWrapMode(Text::LineWrapMode::CHARACTER);});
   TestAssertFunction([&](){empty.SetHorizontalAlignment(Text::Alignment::CENTER);});
   TestAssertFunction([&](){empty.SetVerticalAlignment(Text::Alignment::CENTER);});
-  TestAssertFunction([&](){empty.SetOverflowMode(Text::OverflowMode::ELLIPSIS);});
+  TestAssertFunction([&](){empty.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);});
   TestAssertFunction([&](){empty.SetLineHeight(1.5f);});
   TestAssertFunction([&](){empty.SetLineHeightMode(Text::LineHeightMode::RELATIVE);});
   TestAssertFunction([&](){empty.SetTextColor(UiColor(Vector4::ONE));});
@@ -592,7 +592,7 @@ int UtcDaliTextVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.GetLineWrapMode();});
   TestAssertFunction([&](){empty.GetHorizontalAlignment();});
   TestAssertFunction([&](){empty.GetVerticalAlignment();});
-  TestAssertFunction([&](){empty.GetOverflowMode();});
+  TestAssertFunction([&](){empty.GetTextOverflowMode();});
   TestAssertFunction([&](){empty.GetLineHeight();});
   TestAssertFunction([&](){empty.GetLineHeightMode();});
   TestAssertFunction([&](){empty.GetTextColor();});

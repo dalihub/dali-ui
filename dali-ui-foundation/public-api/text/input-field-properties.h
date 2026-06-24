@@ -100,7 +100,7 @@ struct InputFieldPropertyIndex
      * @brief The overflow mode.
      * @details Name "overflowMode", type Text::OverflowMode (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::OverflowMode (Property::INTEGER).
-     * @see InputField::SetOverflowMode(), InputField::GetOverflowMode().
+     * @see InputField::SetTextOverflowMode(), InputField::GetTextOverflowMode().
      */
     OVERFLOW_MODE,
 

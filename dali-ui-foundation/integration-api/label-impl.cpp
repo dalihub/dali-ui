@@ -314,7 +314,7 @@ Text::Alignment LabelImpl::GetVerticalTextAlignment() const
   return mController->GetVerticalAlignment();
 }
 
-void LabelImpl::SetOverflowMode(Text::OverflowMode mode)
+void LabelImpl::SetTextOverflowMode(Text::OverflowMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mode != mOverflowMode)
@@ -338,7 +338,7 @@ void LabelImpl::SetOverflowMode(Text::OverflowMode mode)
   }
 }
 
-Text::OverflowMode LabelImpl::GetOverflowMode() const
+Text::OverflowMode LabelImpl::GetTextOverflowMode() const
 {
   return mOverflowMode;
 }
@@ -604,7 +604,7 @@ void LabelImpl::ClearTextBackgroundColor()
   }
 }
 
-void LabelImpl::SetUnderline(const Text::Underline& underline)
+void LabelImpl::SetTextUnderline(const Text::Underline& underline)
 {
   const UiColor& color = underline.GetColor();
 
@@ -617,7 +617,7 @@ void LabelImpl::SetUnderline(const Text::Underline& underline)
   }
 }
 
-void LabelImpl::ClearUnderline()
+void LabelImpl::ClearTextUnderline()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
@@ -627,7 +627,7 @@ void LabelImpl::ClearUnderline()
   }
 }
 
-void LabelImpl::SetShadow(const Text::Shadow& shadow)
+void LabelImpl::SetTextShadow(const Text::Shadow& shadow)
 {
   const UiColor& color = shadow.GetColor();
 
@@ -640,7 +640,7 @@ void LabelImpl::SetShadow(const Text::Shadow& shadow)
   }
 }
 
-void LabelImpl::ClearShadow()
+void LabelImpl::ClearTextShadow()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
@@ -650,7 +650,7 @@ void LabelImpl::ClearShadow()
   }
 }
 
-void LabelImpl::SetOutline(const Text::Outline& outline)
+void LabelImpl::SetTextOutline(const Text::Outline& outline)
 {
   const UiColor& color = outline.GetColor();
 
@@ -663,7 +663,7 @@ void LabelImpl::SetOutline(const Text::Outline& outline)
   }
 }
 
-void LabelImpl::ClearOutline()
+void LabelImpl::ClearTextOutline()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
@@ -673,7 +673,7 @@ void LabelImpl::ClearOutline()
   }
 }
 
-void LabelImpl::SetLineThrough(const Text::LineThrough& lineThrough)
+void LabelImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
 {
   const UiColor& color = lineThrough.GetColor();
 
@@ -686,7 +686,7 @@ void LabelImpl::SetLineThrough(const Text::LineThrough& lineThrough)
   }
 }
 
-void LabelImpl::ClearLineThrough()
+void LabelImpl::ClearTextLineThrough()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
@@ -696,7 +696,7 @@ void LabelImpl::ClearLineThrough()
   }
 }
 
-void LabelImpl::SetBevel(const Text::Bevel& bevel)
+void LabelImpl::SetTextBevel(const Text::Bevel& bevel)
 {
   const UiColor& lightColor  = bevel.GetLightColor();
   const UiColor& shadowColor = bevel.GetShadowColor();
@@ -711,7 +711,7 @@ void LabelImpl::SetBevel(const Text::Bevel& bevel)
   }
 }
 
-void LabelImpl::ClearBevel()
+void LabelImpl::ClearTextBevel()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "BevelLightColor");
@@ -884,7 +884,7 @@ Dali::Property::Index LabelImpl::RegisterFontVariationProperty(const Dali::Strin
   return index;
 }
 
-void LabelImpl::SetCutoutEnabled(bool enabled)
+void LabelImpl::SetTextCutoutEnabled(bool enabled)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
   // Set through the property system so that dependent background and rendering
@@ -892,7 +892,7 @@ void LabelImpl::SetCutoutEnabled(bool enabled)
   Self().SetProperty(Text::LabelPropertyIndex::CUTOUT_ENABLED, enabled);
 }
 
-bool LabelImpl::IsCutoutEnabled() const
+bool LabelImpl::IsTextCutoutEnabled() const
 {
   return mController->IsTextCutout();
 }

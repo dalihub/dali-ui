@@ -341,11 +341,11 @@ int UtcDaliLabelOverflowMode(void)
   Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
-  label.SetOverflowMode(Text::OverflowMode::CLIP);
-  DALI_TEST_EQUALS(label.GetOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
+  label.SetTextOverflowMode(Text::OverflowMode::CLIP);
+  DALI_TEST_EQUALS(label.GetTextOverflowMode(), Text::OverflowMode::CLIP, TEST_LOCATION);
 
-  label.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
-  DALI_TEST_EQUALS(label.GetOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
+  label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
+  DALI_TEST_EQUALS(label.GetTextOverflowMode(), Text::OverflowMode::ELLIPSIS, TEST_LOCATION);
 
   END_TEST;
 }
@@ -726,11 +726,11 @@ int UtcDaliLabelCutoutEnabled(void)
   Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
-  label.SetCutoutEnabled(true);
-  DALI_TEST_EQUALS(label.IsCutoutEnabled(), true, TEST_LOCATION);
+  label.SetTextCutoutEnabled(true);
+  DALI_TEST_EQUALS(label.IsTextCutoutEnabled(), true, TEST_LOCATION);
 
-  label.SetCutoutEnabled(false);
-  DALI_TEST_EQUALS(label.IsCutoutEnabled(), false, TEST_LOCATION);
+  label.SetTextCutoutEnabled(false);
+  DALI_TEST_EQUALS(label.IsTextCutoutEnabled(), false, TEST_LOCATION);
 
   END_TEST;
 }

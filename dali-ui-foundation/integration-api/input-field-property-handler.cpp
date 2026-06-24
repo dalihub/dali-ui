@@ -78,7 +78,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
       if(Text::GetOverflowModeEnumeration(value, mode))
       {
-        impl.SetOverflowMode(mode);
+        impl.SetTextOverflowMode(mode);
       }
       break;
     }
@@ -363,7 +363,7 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     }
     case Text::InputFieldPropertyIndex::OVERFLOW_MODE:
     {
-      value = impl.GetOverflowMode();
+      value = impl.GetTextOverflowMode();
       break;
     }
     case Text::InputFieldPropertyIndex::PLACEHOLDER:

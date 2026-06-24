@@ -236,14 +236,14 @@ public: // Setters
    *
    * @return The overflow mode
    */
-  Dali::Ui::Text::OverflowMode GetOverflowMode() const;
+  Dali::Ui::Text::OverflowMode GetTextOverflowMode() const;
 
   /**
    * @brief Sets the overflow mode.
    *
    * @param[in] overflowMode The overflow mode to set
    */
-  void SetOverflowMode(Dali::Ui::Text::OverflowMode overflowMode);
+  void SetTextOverflowMode(Dali::Ui::Text::OverflowMode overflowMode);
 
   /**
    * @brief Gets the line height.

@@ -362,7 +362,7 @@ Text::Alignment InputFieldImpl::GetVerticalTextAlignment() const
   return mController->GetVerticalAlignment();
 }
 
-void InputFieldImpl::SetOverflowMode(Text::OverflowMode mode)
+void InputFieldImpl::SetTextOverflowMode(Text::OverflowMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mode != mOverflowMode)
@@ -385,7 +385,7 @@ void InputFieldImpl::SetOverflowMode(Text::OverflowMode mode)
   }
 }
 
-Text::OverflowMode InputFieldImpl::GetOverflowMode() const
+Text::OverflowMode InputFieldImpl::GetTextOverflowMode() const
 {
   return mOverflowMode;
 }
@@ -773,7 +773,7 @@ void InputFieldImpl::ClearTextBackgroundColor()
   }
 }
 
-void InputFieldImpl::SetUnderline(const Text::Underline& underline)
+void InputFieldImpl::SetTextUnderline(const Text::Underline& underline)
 {
   const UiColor& color = underline.GetColor();
 
@@ -785,7 +785,7 @@ void InputFieldImpl::SetUnderline(const Text::Underline& underline)
   }
 }
 
-void InputFieldImpl::ClearUnderline()
+void InputFieldImpl::ClearTextUnderline()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
@@ -796,7 +796,7 @@ void InputFieldImpl::ClearUnderline()
   }
 }
 
-void InputFieldImpl::SetShadow(const Text::Shadow& shadow)
+void InputFieldImpl::SetTextShadow(const Text::Shadow& shadow)
 {
   const UiColor& color = shadow.GetColor();
 
@@ -808,7 +808,7 @@ void InputFieldImpl::SetShadow(const Text::Shadow& shadow)
   }
 }
 
-void InputFieldImpl::ClearShadow()
+void InputFieldImpl::ClearTextShadow()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
@@ -819,7 +819,7 @@ void InputFieldImpl::ClearShadow()
   }
 }
 
-void InputFieldImpl::SetOutline(const Text::Outline& outline)
+void InputFieldImpl::SetTextOutline(const Text::Outline& outline)
 {
   const UiColor& color = outline.GetColor();
 
@@ -831,7 +831,7 @@ void InputFieldImpl::SetOutline(const Text::Outline& outline)
   }
 }
 
-void InputFieldImpl::ClearOutline()
+void InputFieldImpl::ClearTextOutline()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
@@ -842,7 +842,7 @@ void InputFieldImpl::ClearOutline()
   }
 }
 
-void InputFieldImpl::SetLineThrough(const Text::LineThrough& lineThrough)
+void InputFieldImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
 {
   const UiColor& color = lineThrough.GetColor();
 
@@ -854,7 +854,7 @@ void InputFieldImpl::SetLineThrough(const Text::LineThrough& lineThrough)
   }
 }
 
-void InputFieldImpl::ClearLineThrough()
+void InputFieldImpl::ClearTextLineThrough()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");

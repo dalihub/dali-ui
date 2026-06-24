@@ -483,7 +483,7 @@ private:
   {
     Label label = Label::New();
     label.SetFontFamily(Dali::String(FONT_FAMILY));
-    label.SetOverflowMode(Text::OverflowMode::CLIP);
+    label.SetTextOverflowMode(Text::OverflowMode::CLIP);
     label.SetBackgroundColor(UiColor(COLOR_WHITE));
     label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -515,7 +515,7 @@ private:
     label.SetRequestedWidth(MATCH_PARENT);
     label.SetRequestedHeight(MATCH_PARENT);
     label.SetLayoutMode(LayoutMode::STANDALONE);
-    label.SetOverflowMode(Text::OverflowMode::CLIP);
+    label.SetTextOverflowMode(Text::OverflowMode::CLIP);
     label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     label.SetAsyncRendering(mAsyncRendering);
@@ -1624,7 +1624,7 @@ private:
     emoji.SetRequestedWidth(mWidth / 2);
     emoji.SetRequestedHeight(mHeight / 2);
     emoji.SetFontSize(mPixelSize / 2);
-    emoji.SetOverflowMode(Text::OverflowMode::CLIP);
+    emoji.SetTextOverflowMode(Text::OverflowMode::CLIP);
     emoji.SetBackgroundColor(UiColor(COLOR_WHITE));
     emoji.SetAsyncRendering(mAsyncRendering);
     row.Add(emoji);
@@ -1643,7 +1643,7 @@ private:
     description.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     description.SetRequestedHeight(mHeight / 2);
     description.SetFontSize(mPixelSize / 3 - 1);
-    description.SetOverflowMode(Text::OverflowMode::ELLIPSIS);
+    description.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
     description.SetHorizontalTextAlignment(Text::Alignment::START);
     description.SetVerticalTextAlignment(Text::Alignment::CENTER);
     description.SetBackgroundColor(UiColor(COLOR_WHITE));

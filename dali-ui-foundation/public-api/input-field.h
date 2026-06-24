@@ -270,14 +270,14 @@ public: // Setters for chaining
    *
    * @param[in] mode The overflow mode to apply.
    */
-  void SetOverflowMode(Text::OverflowMode mode);
+  void SetTextOverflowMode(Text::OverflowMode mode);
 
   /**
    * @brief Gets the overflow mode.
    *
    * @return The current overflow mode.
    */
-  Text::OverflowMode GetOverflowMode() const;
+  Text::OverflowMode GetTextOverflowMode() const;
 
   /**
    * @brief Sets the placeholder text displayed when the input field is empty.
@@ -795,48 +795,48 @@ public: // Setters for chaining
    *
    * @param[in] underline The underline configuration.
    */
-  void SetUnderline(const Text::Underline& underline);
+  void SetTextUnderline(const Text::Underline& underline);
 
   /**
    * @brief Clears the underline style.
    */
-  void ClearUnderline();
+  void ClearTextUnderline();
 
   /**
    * @brief Sets the shadow style.
    *
    * @param[in] shadow The shadow configuration.
    */
-  void SetShadow(const Text::Shadow& shadow);
+  void SetTextShadow(const Text::Shadow& shadow);
 
   /**
    * @brief Clears the shadow style.
    */
-  void ClearShadow();
+  void ClearTextShadow();
 
   /**
    * @brief Sets the outline style.
    *
    * @param[in] outline The outline configuration.
    */
-  void SetOutline(const Text::Outline& outline);
+  void SetTextOutline(const Text::Outline& outline);
 
   /**
    * @brief Clears the outline style.
    */
-  void ClearOutline();
+  void ClearTextOutline();
 
   /**
    * @brief Sets the line-through style.
    *
    * @param[in] lineThrough The line-through configuration.
    */
-  void SetLineThrough(const Text::LineThrough& lineThrough);
+  void SetTextLineThrough(const Text::LineThrough& lineThrough);
 
   /**
    * @brief Clears the line-through style.
    */
-  void ClearLineThrough();
+  void ClearTextLineThrough();
 
   /**
    * @brief Sets the font size scale.

@@ -148,14 +148,14 @@ public:
   Text::Alignment GetVerticalTextAlignment() const;
 
   /**
-   * @copydoc Dali::Ui::InputEditor::SetOverflowMode
+   * @copydoc Dali::Ui::InputEditor::SetTextOverflowMode
    */
-  void SetOverflowMode(Text::OverflowMode mode);
+  void SetTextOverflowMode(Text::OverflowMode mode);
 
   /**
-   * @copydoc Dali::Ui::InputEditor::GetOverflowMode
+   * @copydoc Dali::Ui::InputEditor::GetTextOverflowMode
    */
-  Text::OverflowMode GetOverflowMode() const;
+  Text::OverflowMode GetTextOverflowMode() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetLineHeight
@@ -443,44 +443,44 @@ public:
   void ClearTextBackgroundColor();
 
   /**
-   * @copydoc Dali::Ui::InputEditor::SetUnderline
+   * @copydoc Dali::Ui::InputEditor::SetTextUnderline
    */
-  void SetUnderline(const Text::Underline& underline);
+  void SetTextUnderline(const Text::Underline& underline);
 
   /**
-   * @copydoc Dali::Ui::InputEditor::ClearUnderline
+   * @copydoc Dali::Ui::InputEditor::ClearTextUnderline
    */
-  void ClearUnderline();
+  void ClearTextUnderline();
 
   /**
-   * @copydoc Dali::Ui::InputEditor::SetShadow
+   * @copydoc Dali::Ui::InputEditor::SetTextShadow
    */
-  void SetShadow(const Text::Shadow& shadow);
+  void SetTextShadow(const Text::Shadow& shadow);
 
   /**
-   * @copydoc Dali::Ui::InputEditor::ClearShadow
+   * @copydoc Dali::Ui::InputEditor::ClearTextShadow
    */
-  void ClearShadow();
+  void ClearTextShadow();
 
   /**
-   * @copydoc Dali::Ui::InputEditor::SetOutline
+   * @copydoc Dali::Ui::InputEditor::SetTextOutline
    */
-  void SetOutline(const Text::Outline& outline);
+  void SetTextOutline(const Text::Outline& outline);
 
   /**
-   * @copydoc Dali::Ui::InputEditor::ClearOutline
+   * @copydoc Dali::Ui::InputEditor::ClearTextOutline
    */
-  void ClearOutline();
+  void ClearTextOutline();
 
   /**
-   * @copydoc Dali::Ui::InputEditor::SetLineThrough
+   * @copydoc Dali::Ui::InputEditor::SetTextLineThrough
    */
-  void SetLineThrough(const Text::LineThrough& lineThrough);
+  void SetTextLineThrough(const Text::LineThrough& lineThrough);
 
   /**
-   * @copydoc Dali::Ui::InputEditor::ClearLineThrough
+   * @copydoc Dali::Ui::InputEditor::ClearTextLineThrough
    */
-  void ClearLineThrough();
+  void ClearTextLineThrough();
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetFontSizeScale

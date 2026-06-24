@@ -160,14 +160,14 @@ Text::Alignment InputField::GetVerticalTextAlignment() const
   return GetImpl(*this).GetVerticalTextAlignment();
 }
 
-void InputField::SetOverflowMode(Text::OverflowMode mode)
+void InputField::SetTextOverflowMode(Text::OverflowMode mode)
 {
-  GetImpl(*this).SetOverflowMode(mode);
+  GetImpl(*this).SetTextOverflowMode(mode);
 }
 
-Text::OverflowMode InputField::GetOverflowMode() const
+Text::OverflowMode InputField::GetTextOverflowMode() const
 {
-  return GetImpl(*this).GetOverflowMode();
+  return GetImpl(*this).GetTextOverflowMode();
 }
 
 void InputField::SetPlaceholder(const Dali::String& text)
@@ -475,44 +475,44 @@ void InputField::ClearTextBackgroundColor()
   GetImpl(*this).ClearTextBackgroundColor();
 }
 
-void InputField::SetUnderline(const Text::Underline& underline)
+void InputField::SetTextUnderline(const Text::Underline& underline)
 {
-  GetImpl(*this).SetUnderline(underline);
+  GetImpl(*this).SetTextUnderline(underline);
 }
 
-void InputField::ClearUnderline()
+void InputField::ClearTextUnderline()
 {
-  return GetImpl(*this).ClearUnderline();
+  return GetImpl(*this).ClearTextUnderline();
 }
 
-void InputField::SetShadow(const Text::Shadow& shadow)
+void InputField::SetTextShadow(const Text::Shadow& shadow)
 {
-  GetImpl(*this).SetShadow(shadow);
+  GetImpl(*this).SetTextShadow(shadow);
 }
 
-void InputField::ClearShadow()
+void InputField::ClearTextShadow()
 {
-  return GetImpl(*this).ClearShadow();
+  return GetImpl(*this).ClearTextShadow();
 }
 
-void InputField::SetOutline(const Text::Outline& outline)
+void InputField::SetTextOutline(const Text::Outline& outline)
 {
-  GetImpl(*this).SetOutline(outline);
+  GetImpl(*this).SetTextOutline(outline);
 }
 
-void InputField::ClearOutline()
+void InputField::ClearTextOutline()
 {
-  return GetImpl(*this).ClearOutline();
+  return GetImpl(*this).ClearTextOutline();
 }
 
-void InputField::SetLineThrough(const Text::LineThrough& lineThrough)
+void InputField::SetTextLineThrough(const Text::LineThrough& lineThrough)
 {
-  GetImpl(*this).SetLineThrough(lineThrough);
+  GetImpl(*this).SetTextLineThrough(lineThrough);
 }
 
-void InputField::ClearLineThrough()
+void InputField::ClearTextLineThrough()
 {
-  return GetImpl(*this).ClearLineThrough();
+  return GetImpl(*this).ClearTextLineThrough();
 }
 
 void InputField::SetFontSizeScale(float scale)
