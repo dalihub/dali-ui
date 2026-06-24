@@ -44,6 +44,7 @@ namespace Integration
 class LabelImpl;
 }
 
+// @ANIMATION_CONFIG(Label, View)
 /**
  * @brief Label is a non-editable View that displays text.
  *
@@ -251,6 +252,8 @@ public: // Setters for chaining
    * @return The current line wrap mode.
    */
   Text::LineWrapMode GetLineWrapMode() const;
+
+  // @ANIMATABLE(Label::Property::TEXT_COLOR, UiColor)
   /**
    * @brief Sets the color of the text.
    *

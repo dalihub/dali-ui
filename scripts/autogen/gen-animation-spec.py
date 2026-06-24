@@ -47,7 +47,7 @@ MANUAL_TAG_RE = re.compile(r'//\s*@ANIMATABLE_MANUAL\(\s*(\w+)\s*,\s*(\w+)\s*\)'
 # @ANIMATION_CONFIG(Class) or @ANIMATION_CONFIG(Class, Parent)
 CONFIG_TAG_RE = re.compile(r'//\s*@ANIMATION_CONFIG\(\s*(\w+)(?:\s*,\s*(\w+))?\s*\)')
 
-SETTER_RE = re.compile(r'\w+&\s+Set(\w+)\s*\(')
+SETTER_RE = re.compile(r'(?:\w+&|void)\s+Set(\w+)\s*\(')
 
 
 def _camel_to_words(name):

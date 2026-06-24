@@ -83,6 +83,7 @@ class ViewImpl;
  */
 using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
 
+// @ANIMATION_CONFIG(View)
 /**
  * @brief View is a base UI component class that extends CustomActor.
  *
@@ -306,6 +307,12 @@ public: // Measure / Arrange API
   void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
 
 public: // Properties
+  // @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+  // @ANIMATABLE_MANUAL(SizeWidth, float)
+  // @ANIMATABLE_MANUAL(SizeHeight, float)
+  // @ANIMATABLE_MANUAL(PositionX, float)
+  // @ANIMATABLE_MANUAL(PositionY, float)
+
   /**
    * @brief Gets the x scale factor applied to the view.
    *
@@ -319,6 +326,8 @@ public: // Properties
    * @return The current x scale factor
    */
   float GetCurrentScaleX() const;
+
+  // @ANIMATABLE(Actor::Property::SCALE_X, float)
   /**
    * @brief Sets the x scale factor applied to the view.
    *
@@ -354,6 +363,8 @@ public: // Properties
    * @return The current UiScalePolicy
    */
   UiScalePolicy GetUiScalePolicy() const;
+
+  // @ANIMATABLE(Actor::Property::SCALE_Y, float)
   /**
    * @brief Sets the y scale factor applied to the view.
    *
@@ -405,6 +416,8 @@ public: // Properties
    * @return The opacity value (0.0 to 1.0)
    */
   float GetOpacity() const;
+
+  // @ANIMATABLE(Actor::Property::OPACITY, float)
   /**
    * @brief Sets the opacity of the view.
    *
@@ -884,6 +897,8 @@ public: // Properties
    * @param[in] bottomLeft  The radius for the bottom-left corner
    */
   void SetCornerRadius(float topLeft, float topRight, float bottomRight, float bottomLeft);
+
+  // @ANIMATABLE(View::Property::CORNER_RADIUS, Vector4)
   /**
    * @brief Sets corner radii from a Vector4.
    *
@@ -942,6 +957,8 @@ public: // Properties
    * @param[in] bottomLeft  The squareness for the bottom-left corner
    */
   void SetCornerSquareness(float topLeft, float topRight, float bottomRight, float bottomLeft);
+
+  // @ANIMATABLE(View::Property::CORNER_SQUARENESS, Vector4)
   /**
    * @brief Sets corner squareness from a Vector4.
    *
@@ -955,6 +972,8 @@ public: // Properties
    * @return The borderline width
    */
   float GetBorderlineWidth() const;
+
+  // @ANIMATABLE(View::Property::BORDERLINE_WIDTH, float)
   /**
    * @brief Sets the borderline width of the view.
    *
@@ -968,6 +987,8 @@ public: // Properties
    * @return The borderline color
    */
   UiColor GetBorderlineColor();
+
+  // @ANIMATABLE(View::Property::BORDERLINE_COLOR, UiColor)
   /**
    * @brief Sets the borderline color of the view.
    *
@@ -985,6 +1006,8 @@ public: // Properties
    * @return The borderline offset
    */
   float GetBorderlineOffset() const;
+
+  // @ANIMATABLE(View::Property::BORDERLINE_OFFSET, float)
   /**
    * @brief Sets the borderline offset of the view.
    *
