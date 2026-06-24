@@ -36,12 +36,12 @@ namespace
 
 OverlayEffect CreatePlainOverlayEffect()
 {
-  return OverlayEffect::Builder::New().Build();
+  return OverlayEffect::Builder().Build();
 }
 
 OverlayEffect CreateRoundOverlayEffect()
 {
-  return OverlayEffect::Builder::New()
+  return OverlayEffect::Builder()
     .SetCornerRadius(Vector4(0.5f, 0.5f, 0.5f, 0.5f))
     .SetCornerRadiusPolicyRelative()
     .Build();
@@ -49,7 +49,7 @@ OverlayEffect CreateRoundOverlayEffect()
 
 OverlayEffect CreateListItemOverlayEffect()
 {
-  return OverlayEffect::Builder::New()
+  return OverlayEffect::Builder()
     .SetRecoilScope(RecoilScope::OVERLAY_TARGET_CHILDREN)
     .Build();
 }
@@ -115,10 +115,9 @@ OverlayEffect::OverlayEffect(Internal::OverlayEffectImpl* impl)
 {
 }
 
-OverlayEffect::Builder OverlayEffect::Builder::New()
+OverlayEffect::Builder::Builder()
+: mImpl(new Internal::OverlayEffectImpl())
 {
-  IntrusivePtr<Internal::OverlayEffectImpl> impl(new Internal::OverlayEffectImpl());
-  return Builder(impl.Get());
 }
 
 OverlayEffect::Builder::Builder(Builder&& rhs) noexcept = default;
@@ -137,11 +136,6 @@ OverlayEffect::Builder&& OverlayEffect::Builder::SetOverlayColor(const UiColor& 
 {
   SetOverlayColor(color);
   return std::move(*this);
-}
-
-UiColor OverlayEffect::Builder::GetOverlayColor() const
-{
-  return mImpl->GetOverlayColor();
 }
 
 OverlayEffect::Builder& OverlayEffect::Builder::SetCornerRadius(float radius) &
@@ -179,11 +173,6 @@ OverlayEffect::Builder&& OverlayEffect::Builder::SetCornerRadius(const Vector4& 
   return std::move(*this);
 }
 
-Vector4 OverlayEffect::Builder::GetCornerRadius() const
-{
-  return mImpl->GetCornerRadius();
-}
-
 OverlayEffect::Builder& OverlayEffect::Builder::SetCornerRadiusPolicy(CornerRadiusPolicy policy) &
 {
   mImpl->SetCornerRadiusPolicy(policy);
@@ -208,11 +197,6 @@ OverlayEffect::Builder&& OverlayEffect::Builder::SetCornerRadiusPolicyRelative()
   return std::move(*this);
 }
 
-CornerRadiusPolicy OverlayEffect::Builder::GetCornerRadiusPolicy() const
-{
-  return mImpl->GetCornerRadiusPolicy();
-}
-
 OverlayEffect OverlayEffect::Builder::Build() &&
 {
   DALI_ASSERT_ALWAYS(mImpl && "OverlayEffect::Builder has already been consumed");
@@ -233,11 +217,6 @@ OverlayEffect::Builder&& OverlayEffect::Builder::SetUseTargetCornerRadius(bool u
   return std::move(*this);
 }
 
-bool OverlayEffect::Builder::IsUsingTargetCornerRadius() const
-{
-  return mImpl->IsUsingTargetCornerRadius();
-}
-
 OverlayEffect::Builder& OverlayEffect::Builder::SetRecoilScope(RecoilScope scope) &
 {
   mImpl->SetRecoilScope(scope);
@@ -248,11 +227,6 @@ OverlayEffect::Builder&& OverlayEffect::Builder::SetRecoilScope(RecoilScope scop
 {
   SetRecoilScope(scope);
   return std::move(*this);
-}
-
-RecoilScope OverlayEffect::Builder::GetRecoilScope() const
-{
-  return mImpl->GetRecoilScope();
 }
 
 OverlayEffect::Builder::Builder(Internal::OverlayEffectImpl* impl)

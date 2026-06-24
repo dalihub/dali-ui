@@ -912,8 +912,12 @@ int UtcDaliInteractiveViewOverlayEffectConfigureP(void)
                                .SetOverlayColor(UiColor(0x000000, 0.2f))
                                .SetRecoilScope(RecoilScope::OVERLAY_TARGET_CHILDREN)
                                .Build();
-  OverlayEffect explicitCorner       = OverlayEffect::Plain().Configure().SetCornerRadius(12.0f).Build();
+  OverlayEffect explicitCorner = OverlayEffect::Plain().Configure().SetCornerRadius(12.0f).Build();
   OverlayEffect restoredTargetCorner = explicitCorner.Configure().SetUseTargetCornerRadius(true).Build();
+  OverlayEffect configuredExplicitCorner = explicitCorner.Configure().Build();
+  OverlayEffect defaultBuilderEffect = OverlayEffect::Builder().Build();
+  OverlayEffect relativeCornerBuilder = OverlayEffect::Builder().SetCornerRadiusPolicyRelative().Build();
+  OverlayEffect targetCornerBuilder = OverlayEffect::Builder().SetCornerRadiusPolicyRelative().SetUseTargetCornerRadius(true).Build();
 
   DALI_TEST_EQUALS(OverlayEffect::Plain().GetOverlayColor().GetRgba(), UiColor(0x000000, 0.1f).GetRgba(), TEST_LOCATION);
   DALI_TEST_EQUALS(OverlayEffect::Plain().GetRecoilScope(), RecoilScope::OVERLAY_TARGET, TEST_LOCATION);
@@ -927,14 +931,14 @@ int UtcDaliInteractiveViewOverlayEffectConfigureP(void)
   DALI_TEST_EQUALS(configured.GetRecoilScope(), RecoilScope::OVERLAY_TARGET_CHILDREN, TEST_LOCATION);
   DALI_TEST_CHECK(configured.IsUsingTargetCornerRadius());
   DALI_TEST_CHECK(!explicitCorner.IsUsingTargetCornerRadius());
-  DALI_TEST_CHECK(!explicitCorner.Configure().IsUsingTargetCornerRadius());
+  DALI_TEST_CHECK(!configuredExplicitCorner.IsUsingTargetCornerRadius());
   DALI_TEST_CHECK(restoredTargetCorner.IsUsingTargetCornerRadius());
   DALI_TEST_CHECK(!configured.IsNone());
-  DALI_TEST_EQUALS(OverlayEffect::Builder::New().GetOverlayColor().GetRgba(), UiColor(0x000000, 0.1f).GetRgba(), TEST_LOCATION);
-  DALI_TEST_EQUALS(OverlayEffect::Builder::New().GetRecoilScope(), RecoilScope::OVERLAY_TARGET, TEST_LOCATION);
-  DALI_TEST_CHECK(OverlayEffect::Builder::New().IsUsingTargetCornerRadius());
-  DALI_TEST_CHECK(!OverlayEffect::Builder::New().SetCornerRadiusPolicyRelative().IsUsingTargetCornerRadius());
-  DALI_TEST_CHECK(OverlayEffect::Builder::New().SetCornerRadiusPolicyRelative().SetUseTargetCornerRadius(true).IsUsingTargetCornerRadius());
+  DALI_TEST_EQUALS(defaultBuilderEffect.GetOverlayColor().GetRgba(), UiColor(0x000000, 0.1f).GetRgba(), TEST_LOCATION);
+  DALI_TEST_EQUALS(defaultBuilderEffect.GetRecoilScope(), RecoilScope::OVERLAY_TARGET, TEST_LOCATION);
+  DALI_TEST_CHECK(defaultBuilderEffect.IsUsingTargetCornerRadius());
+  DALI_TEST_CHECK(!relativeCornerBuilder.IsUsingTargetCornerRadius());
+  DALI_TEST_CHECK(targetCornerBuilder.IsUsingTargetCornerRadius());
   END_TEST;
 }
 

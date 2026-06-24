@@ -178,11 +178,9 @@ class DALI_UI_API OverlayEffect::Builder
 {
 public:
   /**
-   * @brief Creates a new builder with default overlay effect values.
-   *
-   * @return A new builder
+   * @brief Creates a builder with default overlay effect values.
    */
-  static Builder New();
+  Builder();
 
   Builder(Builder&& rhs) noexcept;
   Builder& operator=(Builder&& rhs) noexcept;
@@ -207,13 +205,6 @@ public:
    * @return Rvalue reference to this builder
    */
   Builder&& SetOverlayColor(const UiColor& color) &&;
-
-  /**
-   * @brief Gets the overlay visual color.
-   *
-   * @return The overlay color
-   */
-  UiColor GetOverlayColor() const;
 
   /**
    * @brief Sets a uniform explicit corner radius.
@@ -270,13 +261,6 @@ public:
   Builder&& SetCornerRadius(const Vector4& radius) &&;
 
   /**
-   * @brief Gets the configured corner radius.
-   *
-   * @return The configured corner radius
-   */
-  Vector4 GetCornerRadius() const;
-
-  /**
    * @brief Sets an explicit corner radius policy.
    *
    * @param[in] policy The corner radius policy
@@ -305,13 +289,6 @@ public:
    * @return Rvalue reference to this builder
    */
   Builder&& SetCornerRadiusPolicyRelative() &&;
-
-  /**
-   * @brief Gets the configured corner radius policy.
-   *
-   * @return The configured corner radius policy
-   */
-  CornerRadiusPolicy GetCornerRadiusPolicy() const;
 
   /**
    * @brief Creates an OverlayEffect from this builder.
@@ -351,13 +328,6 @@ public:
   Builder&& SetUseTargetCornerRadius(bool useTargetCornerRadius) &&;
 
   /**
-   * @brief Gets whether the overlay follows the target View corner radius and policy.
-   *
-   * @return True if the target View corner radius and policy are used at runtime
-   */
-  bool IsUsingTargetCornerRadius() const;
-
-  /**
    * @brief Sets which View receives pressed-state recoil feedback.
    *
    * RecoilScope::OVERLAY_TARGET_CHILDREN applies only when the resolved overlay
@@ -380,13 +350,6 @@ public:
    * @return Rvalue reference to this builder
    */
   Builder&& SetRecoilScope(RecoilScope scope) &&;
-
-  /**
-   * @brief Gets the recoil feedback scope.
-   *
-   * @return The recoil feedback scope
-   */
-  RecoilScope GetRecoilScope() const;
 
 private:
   explicit Builder(Internal::OverlayEffectImpl* impl);
