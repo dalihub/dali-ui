@@ -27,6 +27,10 @@ namespace Dali
 
 namespace Ui
 {
+namespace Provider
+{
+
+class InteractiveViewImpl;
 
 using InteractiveViewImplPtr = IntrusivePtr<InteractiveViewImpl>;
 
@@ -151,6 +155,7 @@ inline DALI_UI_API const InteractiveViewImpl& GetImpl(const InteractiveView& vie
   return static_cast<const InteractiveViewImpl&>(handle);
 }
 
+} // namespace Provider
 } // namespace Ui
 
 } // namespace Dali

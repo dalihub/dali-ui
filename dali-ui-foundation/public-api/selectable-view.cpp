@@ -30,7 +30,7 @@ SelectableView::SelectableView()
 
 SelectableView SelectableView::New()
 {
-  SelectableViewImplPtr impl = SelectableViewImpl::New();
+  Provider::SelectableViewImplPtr impl = Provider::SelectableViewImpl::New();
 
   SelectableView handle(*impl);
 
@@ -41,7 +41,7 @@ SelectableView SelectableView::New()
 
 SelectableView SelectableView::DownCast(BaseHandle handle)
 {
-  return View::DownCast<SelectableView, SelectableViewImpl>(handle);
+  return View::DownCast<SelectableView, Provider::SelectableViewImpl>(handle);
 }
 
 SelectableView::SelectableView(const SelectableView& view) = default;
@@ -52,7 +52,7 @@ SelectableView::~SelectableView()
 {
 }
 
-SelectableView::SelectableView(SelectableViewImpl& implementation)
+SelectableView::SelectableView(Provider::SelectableViewImpl& implementation)
 : InteractiveView(implementation)
 {
 }
@@ -60,32 +60,32 @@ SelectableView::SelectableView(SelectableViewImpl& implementation)
 SelectableView::SelectableView(Dali::Internal::CustomActor* internal)
 : InteractiveView(internal)
 {
-  VerifyCustomActorPointer<SelectableViewImpl>(internal);
+  VerifyCustomActorPointer<Provider::SelectableViewImpl>(internal);
 }
 
 Signal<void(View, bool, InputEvent)>& SelectableView::SelectionChangedSignal()
 {
-  return GetImpl(*this).SelectionChangedSignal();
+  return Provider::GetImpl(*this).SelectionChangedSignal();
 }
 
 bool SelectableView::IsSelected() const
 {
-  return GetImpl(*this).IsSelected();
+  return Provider::GetImpl(*this).IsSelected();
 }
 
 void SelectableView::SetSelected(bool selected)
 {
-  GetImpl(*this).SetSelected(selected);
+  Provider::GetImpl(*this).SetSelected(selected);
 }
 
 bool SelectableView::IsToggleByClickEnabled() const
 {
-  return GetImpl(*this).IsToggleByClickEnabled();
+  return Provider::GetImpl(*this).IsToggleByClickEnabled();
 }
 
 void SelectableView::EnableToggleByClick(bool enabled)
 {
-  GetImpl(*this).EnableToggleByClick(enabled);
+  Provider::GetImpl(*this).EnableToggleByClick(enabled);
 }
 
 } // namespace Ui

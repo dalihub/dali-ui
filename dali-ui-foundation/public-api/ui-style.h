@@ -28,7 +28,10 @@ namespace Dali
 namespace Ui
 {
 
+namespace Provider
+{
 class UiStyleImpl;
+}
 
 /**
  * @brief Base handle for immutable UI style objects.
@@ -55,7 +58,7 @@ protected:
    *
    * @param[in] impl The implementation object
    */
-  explicit UiStyle(UiStyleImpl* impl);
+  explicit UiStyle(Provider::UiStyleImpl* impl);
 };
 
 /**

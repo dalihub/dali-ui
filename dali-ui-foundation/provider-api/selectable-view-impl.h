@@ -26,6 +26,10 @@ namespace Dali
 
 namespace Ui
 {
+namespace Provider
+{
+
+class SelectableViewImpl;
 
 using SelectableViewImplPtr = IntrusivePtr<SelectableViewImpl>;
 
@@ -121,6 +125,7 @@ inline DALI_UI_API const SelectableViewImpl& GetImpl(const SelectableView& view)
   return static_cast<const SelectableViewImpl&>(handle);
 }
 
+} // namespace Provider
 } // namespace Ui
 
 } // namespace Dali

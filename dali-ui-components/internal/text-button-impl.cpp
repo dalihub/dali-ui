@@ -41,7 +41,7 @@ BaseHandle Create()
   return BaseHandle();
 }
 
-DALI_TYPE_REGISTRATION_BEGIN(TextButtonImpl, InteractiveViewImpl, Create)
+DALI_TYPE_REGISTRATION_BEGIN(TextButtonImpl, Provider::InteractiveViewImpl, Create)
 DALI_TYPE_REGISTRATION_END()
 
 Text::Alignment ToTextAlignment(LayoutAlignment alignment)
@@ -158,7 +158,7 @@ Text::Underline TextButtonImpl::GetTextUnderline() const
 
 void TextButtonImpl::OnInitialize()
 {
-  InteractiveViewImpl::OnInitialize();
+  Provider::InteractiveViewImpl::OnInitialize();
 
   mLabel = Ui::Label::New();
   Self().Add(mLabel);

@@ -108,7 +108,7 @@ struct SelectionChangedSignalFunctor
   SelectionChangedSignalData& signalData;
 };
 
-class TestSelectableViewImpl : public SelectableViewImpl
+class TestSelectableViewImpl : public Provider::SelectableViewImpl
 {
 public:
   static IntrusivePtr<TestSelectableViewImpl> New()
@@ -117,7 +117,7 @@ public:
   }
 };
 
-Dali::TypeRegistration testSelectableViewImplTypeReg(typeid(TestSelectableViewImpl), typeid(SelectableViewImpl), nullptr);
+Dali::TypeRegistration testSelectableViewImplTypeReg(typeid(TestSelectableViewImpl), typeid(Provider::SelectableViewImpl), nullptr);
 
 /**
  * @brief Helper to create a View, add it to the scene, attach selectable, and render.

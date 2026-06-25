@@ -29,7 +29,7 @@ namespace Ui
 namespace Internal
 {
 
-class TextButtonImpl : public InteractiveViewImpl
+class TextButtonImpl : public Provider::InteractiveViewImpl
 {
 public:
   static Ui::TextButton New(TextButtonStyle style);

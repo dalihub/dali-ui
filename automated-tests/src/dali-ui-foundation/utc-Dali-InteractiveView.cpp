@@ -181,7 +181,7 @@ struct LongPressedSignalFunctor
   LongPressedSignalData& signalData;
 };
 
-class TestInteractiveViewImpl : public InteractiveViewImpl
+class TestInteractiveViewImpl : public Provider::InteractiveViewImpl
 {
 public:
   static IntrusivePtr<TestInteractiveViewImpl> New()
@@ -190,7 +190,7 @@ public:
   }
 };
 
-Dali::TypeRegistration testInteractiveViewImplTypeReg(typeid(TestInteractiveViewImpl), typeid(InteractiveViewImpl), nullptr);
+Dali::TypeRegistration testInteractiveViewImplTypeReg(typeid(TestInteractiveViewImpl), typeid(Provider::InteractiveViewImpl), nullptr);
 
 InteractiveView CreateTestInteractiveView(TestApplication& application, float width = 100.0f, float height = 100.0f)
 {

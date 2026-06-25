@@ -30,6 +30,8 @@ namespace Dali
 
 namespace Ui
 {
+namespace Provider
+{
 
 namespace
 {
@@ -100,6 +102,7 @@ SelectableViewImpl::~SelectableViewImpl()
 {
 }
 
+} // namespace Provider
 } // namespace Ui
 
 } // namespace Dali

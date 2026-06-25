@@ -29,6 +29,8 @@ namespace Dali
 
 namespace Ui
 {
+namespace Provider
+{
 
 namespace
 {
@@ -129,6 +131,7 @@ InteractiveViewImpl::~InteractiveViewImpl()
 {
 }
 
+} // namespace Provider
 } // namespace Ui
 
 } // namespace Dali

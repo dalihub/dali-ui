@@ -26,7 +26,10 @@ namespace Dali
 namespace Ui
 {
 
+namespace Provider
+{
 class SelectableViewImpl;
+}
 
 /**
  * @brief SelectableView is an InteractiveView subclass with selectable behavior built in.
@@ -156,7 +159,7 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The SelectableView implementation
    */
-  explicit DALI_UI_API SelectableView(SelectableViewImpl& implementation);
+  explicit DALI_UI_API SelectableView(Provider::SelectableViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this SelectableView from an Internal::CustomActor pointer.

@@ -22,6 +22,8 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Provider
+{
 namespace Internal
 {
 
@@ -42,5 +44,6 @@ UiStyleImpl::~UiStyleImpl()
   delete mPrivate;
 }
 
+} // namespace Provider
 } // namespace Ui
 } // namespace Dali

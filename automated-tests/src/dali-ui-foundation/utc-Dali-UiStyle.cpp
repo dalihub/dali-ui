@@ -26,7 +26,7 @@ using namespace Dali::Ui;
 namespace
 {
 
-class TestStyleImpl : public UiStyleImpl
+class TestStyleImpl : public Provider::UiStyleImpl
 {
 public:
   explicit TestStyleImpl(int value)

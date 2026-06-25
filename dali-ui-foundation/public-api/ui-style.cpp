@@ -28,10 +28,10 @@ namespace Ui
 
 UiStyle UiStyle::DownCast(BaseHandle handle)
 {
-  return UiStyle(dynamic_cast<UiStyleImpl*>(handle.GetObjectPtr()));
+  return UiStyle(dynamic_cast<Provider::UiStyleImpl*>(handle.GetObjectPtr()));
 }
 
-UiStyle::UiStyle(UiStyleImpl* impl)
+UiStyle::UiStyle(Provider::UiStyleImpl* impl)
 : BaseHandle(impl)
 {
 }
