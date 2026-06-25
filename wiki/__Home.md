@@ -43,7 +43,7 @@ and **framework library developers** who extend or integrate the toolkit itself.
 * [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView)
 * ListView & GridView
 * Blur
-* Animations
+* [Animation](https://github.sec.samsung.net/NUI/dali-ui/wiki/Animation)
 * [API Reference](https://pages.github.sec.samsung.net/NUI/dali-ui/)
 
 <br/>
