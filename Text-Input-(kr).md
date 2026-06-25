@@ -177,10 +177,10 @@ context.ResizedSignal().Connect(
 | `SetFontWidth()` | font width |
 | `SetFontSlant()` | font slant |
 | `SetTextBackgroundColor()` | 텍스트 배경 색상 |
-| `SetUnderline()` | underline style |
-| `SetShadow()` | shadow style |
-| `SetOutline()` | outline style |
-| `SetLineThrough()` | line-through style |
+| `SetTextUnderline()` | underline style |
+| `SetTextShadow()` | shadow style |
+| `SetTextOutline()` | outline style |
+| `SetTextLineThrough()` | line-through style |
 | `SetFontVariation()` | variable font axis |
 
 ~~~cpp

@@ -39,7 +39,7 @@ label.SetTextColor(UiColor::PRIMARY);
 | `SetLineWrapMode()` | 줄바꿈 모드 (`WORD`, `CHARACTER`, `HYPHENATION`, `MIXED`) |
 | `SetHorizontalTextAlignment()` | 수평 정렬 (`START`, `CENTER`, `END`) |
 | `SetVerticalTextAlignment()` | 수직 정렬 (`START`, `CENTER`, `END`) |
-| `SetOverflowMode()` | 오버플로우 처리 (`ELLIPSIS`, `CLIP`) |
+| `SetTextOverflowMode()` | 오버플로우 처리 (`ELLIPSIS`, `CLIP`) |
 
 ~~~cpp
 Label label = Label::New("Long text...");
@@ -84,17 +84,17 @@ Label은 style object를 통해 underline, shadow, outline, line-through, bevel 
 
 | Style | API | Clear |
 |---|---|---|
-| Underline | `SetUnderline(Text::Underline())` | `ClearUnderline()` |
-| Shadow | `SetShadow(Text::Shadow())` | `ClearShadow()` |
-| Outline | `SetOutline(Text::Outline())` | `ClearOutline()` |
-| LineThrough | `SetLineThrough(Text::LineThrough())` | `ClearLineThrough()` |
-| Bevel | `SetBevel(Text::Bevel())` | `ClearBevel()` |
+| Text Underline | `SetTextUnderline(Text::Underline())` | `ClearTextUnderline()` |
+| Text Shadow | `SetTextShadow(Text::Shadow())` | `ClearTextShadow()` |
+| Text Outline | `SetTextOutline(Text::Outline())` | `ClearTextOutline()` |
+| Text LineThrough | `SetTextLineThrough(Text::LineThrough())` | `ClearTextLineThrough()` |
+| Text Bevel | `SetTextBevel(Text::Bevel())` | `ClearTextBevel()` |
 | Text Background | `SetTextBackgroundColor(UiColor)` | `ClearTextBackgroundColor()` |
 
 ~~~cpp
 // Underline
 Label label = Label::New("Underline");
-label.SetUnderline(Text::Underline());
+label.SetTextUnderline(Text::Underline());
 
 // Dashed underline with color
 Text::Underline underline;
@@ -105,7 +105,7 @@ underline.SetDashLength(4.0f);
 underline.SetDashGap(4.0f);
 
 Label label2 = Label::New("Dashed");
-label2.SetUnderline(underline);
+label2.SetTextUnderline(underline);
 
 // Shadow
 Text::Shadow shadow;
@@ -114,7 +114,7 @@ shadow.SetOffset(Vector2(3.0f, 3.0f));
 shadow.SetBlurRadius(2.0f);
 
 Label label3 = Label::New("Shadow");
-label3.SetShadow(shadow);
+label3.SetTextShadow(shadow);
 
 // Outline
 Text::Outline outline;
@@ -122,7 +122,7 @@ outline.SetColor(UiColor(0x0066FF));
 outline.SetWidth(2.0f);
 
 Label label4 = Label::New("Outline");
-label4.SetOutline(outline);
+label4.SetTextOutline(outline);
 
 // LineThrough
 Text::LineThrough lineThrough;
@@ -130,7 +130,7 @@ lineThrough.SetColor(UiColor(0xFF00FF));
 lineThrough.SetThickness(3.0f);
 
 Label label5 = Label::New("Strikethrough");
-label5.SetLineThrough(lineThrough);
+label5.SetTextLineThrough(lineThrough);
 
 // Text background color
 Label label6 = Label::New("Highlighted");
@@ -547,7 +547,7 @@ label.SetRenderScale(2.0f);
 ~~~cpp
 // Cutout
 Label label = Label::New("Cutout");
-label.SetCutoutEnabled(true);
+label.SetTextCutoutEnabled(true);
 
 // Mask effect
 View maskView = ImageView::New("mask.png");
