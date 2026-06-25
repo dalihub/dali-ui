@@ -609,6 +609,9 @@ public: // Properties
    * @brief Sets the maximum width.
    *
    * @param[in] width The maximum width
+   * @note max-wins: when the minimum width exceeds the maximum width, the
+   * MAXIMUM wins. Constraints are applied by flooring to the minimum first and
+   * then ceiling to the maximum, so the final clamp to the maximum prevails.
    */
   void SetMaximumWidth(float width);
 
@@ -623,6 +626,9 @@ public: // Properties
    * @brief Sets the maximum height.
    *
    * @param[in] height The maximum height
+   * @note max-wins: when the minimum height exceeds the maximum height, the
+   * MAXIMUM wins. Constraints are applied by flooring to the minimum first and
+   * then ceiling to the maximum, so the final clamp to the maximum prevails.
    */
   void SetMaximumHeight(float height);
 
@@ -1037,6 +1043,11 @@ public: // Properties
    *
    * @param[in] direction The layout direction to set (LEFT_TO_RIGHT or RIGHT_TO_LEFT)
    * @return Reference to this View for fluent chaining
+   * @note RTL mirror: when the effective layout direction resolves to
+   * RIGHT_TO_LEFT, every non-standalone child's X position is mirrored about
+   * the parent width after arrange (newX = parentWidth - oldX - childWidth),
+   * regardless of the layout manager. The only opt-out is placing a child in
+   * LayoutMode STANDALONE, which is never mirrored.
    */
   void SetLayoutDirection(Dali::LayoutDirection::Type direction);
 
@@ -1792,6 +1803,9 @@ public:
       /**
        * @brief The maximum width applied during measurement.
        * @details Name "maximumWidth", type Property::FLOAT.
+       * @note max-wins: if the minimum exceeds the maximum, the MAXIMUM wins
+       * (measurement floors to the minimum then ceils to the maximum).
+       * See SetMaximumWidth().
        */
       MAXIMUM_WIDTH,
 

@@ -461,7 +461,7 @@ MeasuredSize StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bound
     {
       const float crossAvailable = std::max(0.0f, availableWidth - marginW);
       float       childHeight    = allocations[i].height;
-      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT && GetChildWeight(childImpl) <= 0.0f)
       {
         childHeight = std::max(0.0f, availableHeight - marginH);
       }
@@ -511,7 +511,7 @@ MeasuredSize StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bound
     {
       const float crossAvailable = std::max(0.0f, availableHeight - marginH);
       float       childWidth     = allocations[i].width;
-      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT && GetChildWeight(childImpl) <= 0.0f)
       {
         childWidth = std::max(0.0f, availableWidth - marginW);
       }

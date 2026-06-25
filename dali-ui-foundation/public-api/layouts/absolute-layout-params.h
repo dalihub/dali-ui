@@ -100,6 +100,10 @@ public:
    *
    * @param[in] bounds The layout bounds (x, y, width, height)
    * @return Reference to this for chaining
+   * @note RTL mirror: under a RIGHT_TO_LEFT effective layout direction the X
+   * supplied here is mirrored about the parent width after arrange
+   * (newX = parentWidth - x - childWidth). This applies to every child;
+   * the only opt-out is placing the child in LayoutMode STANDALONE.
    */
   AbsoluteLayoutParams& SetBounds(const LayoutRect& bounds);
 

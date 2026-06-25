@@ -721,3 +721,81 @@ int UtcDaliStackLayoutHorizontalDirectionRtlP(void)
   DALI_TEST_EQUALS(c.GetSize().width, 60.0f, TEST_LOCATION);
   END_TEST;
 }
+
+// FIX 2: VERTICAL stack — a weighted child with RequestedHeight=MATCH_PARENT must
+// receive its weight-allocated height, not the full available height.
+//
+// Container 200x120, spacing 0.
+// Child A: weight=1, RequestedHeight=MATCH_PARENT, RequestedWidth=100.
+// Child B: weight=0, RequestedHeight=40,           RequestedWidth=100.
+//
+// Measure pass: B is fixed at 40; A has MATCH_PARENT so it contributes 0 to
+// the natural accumulation.  Total natural = 40; remaining = 120 - 40 = 80.
+// Weight distribution: A gets all 80 (weight share 1/1).
+// Arrange pass: A height = 80 (weight allocation), NOT 120 (MATCH_PARENT full).
+// A.y = 0; B.y = 80; B.height = 40.
+int UtcDaliStackLayoutWeightWithMainAxisMatchParentP(void)
+{
+  UiTestApplication application;
+  StackLayout       layout = StackLayout::New(StackOrientation::VERTICAL);
+  layout.SetSpacing(0.0f);
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(120.0f);
+
+  View childA = View::New();
+  childA.SetRequestedWidth(100.0f);
+  childA.SetRequestedHeight(MATCH_PARENT);
+  childA.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+  layout.Add(childA);
+
+  View childB = View::New();
+  childB.SetRequestedWidth(100.0f);
+  childB.SetRequestedHeight(40.0f);
+  layout.Add(childB);
+
+  layout.Measure(200.0f, 120.0f);
+  layout.Arrange(LayoutRect(0, 0, 200, 120));
+
+  DALI_TEST_EQUALS(childA.GetSize().height, 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childA.GetPositionY(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childB.GetPositionY(), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childB.GetSize().height, 40.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+// FIX 2: HORIZONTAL stack — mirror of the VERTICAL test above.
+//
+// Container 120x200, spacing 0.
+// Child A: weight=1, RequestedWidth=MATCH_PARENT, RequestedHeight=100.
+// Child B: weight=0, RequestedWidth=40,           RequestedHeight=100.
+//
+// Remaining after B = 120 - 40 = 80; A gets all 80 via weight.
+// A.x = 0; A.width = 80; B.x = 80; B.width = 40.
+int UtcDaliStackLayoutWeightWithMainAxisMatchParentHorizontalP(void)
+{
+  UiTestApplication application;
+  StackLayout       layout = StackLayout::New(StackOrientation::HORIZONTAL);
+  layout.SetSpacing(0.0f);
+  layout.SetRequestedWidth(120.0f);
+  layout.SetRequestedHeight(200.0f);
+
+  View childA = View::New();
+  childA.SetRequestedWidth(MATCH_PARENT);
+  childA.SetRequestedHeight(100.0f);
+  childA.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
+  layout.Add(childA);
+
+  View childB = View::New();
+  childB.SetRequestedWidth(40.0f);
+  childB.SetRequestedHeight(100.0f);
+  layout.Add(childB);
+
+  layout.Measure(120.0f, 200.0f);
+  layout.Arrange(LayoutRect(0, 0, 120, 200));
+
+  DALI_TEST_EQUALS(childA.GetSize().width, 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childA.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childB.GetPositionX(), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(childB.GetSize().width, 40.0f, TEST_LOCATION);
+  END_TEST;
+}

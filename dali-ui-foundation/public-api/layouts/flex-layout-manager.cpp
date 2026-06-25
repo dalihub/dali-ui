@@ -92,7 +92,7 @@ std::vector<FlexLine> BuildFlexLinesForArrange(std::vector<View>&         childr
     Extents margin     = childImpl.GetMargin();
 
     float basis = GetFlexBasis(childImpl);
-    if(basis > 0.0f)
+    if(basis >= 0.0f)
     {
       if(isMainAxisHorizontal)
       {
@@ -271,7 +271,11 @@ void ArrangeOneFlexLine(FlexLine& line, std::vector<View>& children,
 
     bool mainIsMatchParent = isMainAxisHorizontal ? (childImpl.GetRequestedWidth() == MATCH_PARENT)
                                                   : (childImpl.GetRequestedHeight() == MATCH_PARENT);
-    if(mainIsMatchParent)
+    // A main-axis MATCH_PARENT child only fills the whole line when it does not
+    // participate in flex-grow distribution. When flex-grow is set, the grow
+    // distribution already produced the child's share in workingSizes; trusting
+    // that value keeps siblings from being overlapped by a full-line overwrite.
+    if(mainIsMatchParent && GetFlexGrow(childImpl) == 0.0f)
     {
       float availMain = isMainAxisHorizontal ? contentWidth : contentHeight;
       childMainSize   = std::max(0.0f, availMain - marginMain);
@@ -488,7 +492,7 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
 
     MeasuredSize workingSize = childSize;
     float        basis       = GetFlexBasis(childImpl);
-    if(basis > 0.0f)
+    if(basis >= 0.0f)
     {
       if(IsMainAxisHorizontal())
       {

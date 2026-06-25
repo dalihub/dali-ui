@@ -554,6 +554,11 @@ private:
  * to be independently specified as either absolute values or proportions of the
  * parent's content area. The composite values POSITION_PROPORTIONAL and
  * SIZE_PROPORTIONAL are provided for convenience.
+ *
+ * @note RTL mirror: these flags control only proportional resolution of the
+ * bounds. They do not affect right-to-left mirroring. Under a RIGHT_TO_LEFT
+ * effective layout direction a child's X is mirrored about the parent width
+ * regardless of these flags; the only opt-out is LayoutMode STANDALONE.
  */
 enum class AbsoluteLayoutFlags : uint8_t
 {

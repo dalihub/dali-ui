@@ -168,6 +168,58 @@ int ApplyLabelExtensionWithArgs(Label& label, int value, int offset)
   return value + offset;
 }
 
+// --- Reentrant layout mutation helpers (child mutates parent's child list
+// during the parent's Measure/Arrange snapshot loop). Callbacks cannot be
+// capturing lambdas (Callback::New only supports free/member fns), so the
+// parent + sibling handles are carried via file-static state. ---
+Ui::View gReentrantParent;
+Ui::View gSiblingToAdd;
+Ui::View gSiblingToRemove;
+
+MeasuredSize PlainMeasure(View, float, float)
+{
+  return MeasuredSize(40.0f, 30.0f);
+}
+
+MeasuredSize PlainArrange(View, const LayoutRect&)
+{
+  return MeasuredSize(40.0f, 30.0f);
+}
+
+// During the child's own Measure, add a new sibling to the parent. This
+// reaches ViewImpl::OnChildAdd -> mChildren.PushBack while the parent loop
+// is mid-iteration, forcing a Dali::Vector reallocation.
+MeasuredSize ReentrantAddMeasure(View, float, float)
+{
+  if(gSiblingToAdd && gSiblingToAdd.GetParent() != static_cast<Actor>(gReentrantParent))
+  {
+    gReentrantParent.Add(gSiblingToAdd);
+  }
+  return MeasuredSize(40.0f, 30.0f);
+}
+
+// During the child's own Measure, remove a sibling from the parent. This
+// reaches ViewImpl::OnChildRemove -> mChildren.Erase mid-iteration.
+MeasuredSize ReentrantRemoveMeasure(View, float, float)
+{
+  if(gSiblingToRemove && gSiblingToRemove.GetParent() == static_cast<Actor>(gReentrantParent))
+  {
+    gReentrantParent.Remove(gSiblingToRemove, RemovePolicy::IMMEDIATE);
+  }
+  return MeasuredSize(40.0f, 30.0f);
+}
+
+// During the child's own Arrange, remove a sibling from the parent. This
+// reaches ViewImpl::OnChildRemove -> mChildren.Erase mid-iteration.
+MeasuredSize ReentrantRemoveArrange(View, const LayoutRect&)
+{
+  if(gSiblingToRemove && gSiblingToRemove.GetParent() == static_cast<Actor>(gReentrantParent))
+  {
+    gReentrantParent.Remove(gSiblingToRemove, RemovePolicy::IMMEDIATE);
+  }
+  return MeasuredSize(40.0f, 30.0f);
+}
+
 } // namespace
 
 void utc_dali_view_startup(void)
@@ -2809,5 +2861,323 @@ int UtcDaliViewLayoutDirectionSetReArrangesP(void)
   parent.ClearLayoutDirection();
   parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
   DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+// A MATCH_PARENT child inside a fixed-size DEFAULT parent must fill
+// the parent's content area. OnArrange re-measures MATCH_PARENT children but
+// must discard the Measure return (which is the child's GetMinimum == 0);
+// adopting it would collapse the child to 0.
+int UtcDaliViewDefaultModeMatchParentChildFillsParentP(void)
+{
+  UiTestApplication application;
+  View              parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(200.0f);
+
+  View child = View::New();
+  child.SetRequestedWidth(MATCH_PARENT);
+  child.SetRequestedHeight(MATCH_PARENT);
+  parent.Add(child);
+
+  parent.Measure(200.0f, 200.0f);
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 200.0f));
+
+  // Child fills the parent (no padding, no margin). Buggy code collapses to 0.
+  DALI_TEST_EQUALS(child.GetSize().width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetSize().height, 200.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+// A leaf WRAP view with padding and no visual must measure to its
+// padding (pw, ph), not collapse to 0. GetNaturalSize returns ZERO with no
+// visual, so the result must re-add padding.
+int UtcDaliViewWrapNoVisualPaddingMeasuresPaddingP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  view.SetRequestedWidth(WRAP_CONTENT);
+  view.SetRequestedHeight(WRAP_CONTENT);
+  view.SetPadding(Extents(5, 15, 25, 35)); // pw = 20, ph = 60
+
+  MeasuredSize size = view.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 20.0f, TEST_LOCATION);  // buggy: 0
+  DALI_TEST_EQUALS(size.GetHeight(), 60.0f, TEST_LOCATION); // buggy: 0
+  END_TEST;
+}
+
+// Guard: with a background color visual (natural size 0) plus padding,
+// the WRAP measure must still be exactly pw, ph (no double-count of padding).
+int UtcDaliViewWrapBackgroundPaddingNoDoubleCountP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  view.SetRequestedWidth(WRAP_CONTENT);
+  view.SetRequestedHeight(WRAP_CONTENT);
+  view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+  view.SetPadding(Extents(5, 15, 25, 35)); // pw = 20, ph = 60
+
+  MeasuredSize size = view.Measure(1000.0f, 1000.0f);
+  // Color visual has natural size 0, so result == padding only, not 2x padding.
+  DALI_TEST_EQUALS(size.GetWidth(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(size.GetHeight(), 60.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+// F2-docs anchor: min/max conflict resolution is "max wins" (floor to min, then
+// ceil to max). Min 100 > Max 30 with a requested 50 yields 30.
+int UtcDaliViewMinMaxConflictMaxWinsP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  view.SetRequestedWidth(50.0f);
+  view.SetRequestedHeight(50.0f);
+  view.SetMinimumWidth(100.0f);
+  view.SetMaximumWidth(30.0f);
+
+  MeasuredSize size = view.Measure(500.0f, 500.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 30.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+// A child whose Measure() adds a sibling to the parent must not corrupt the
+// parent's default OnMeasure iteration. OnMeasure snapshots mChildren into a
+// std::vector before iterating (view-impl.cpp:969-970); without that snapshot
+// the PushBack inside OnChildAdd reallocates the live Dali::Vector mid-loop.
+int UtcDaliViewReentrantChildAddDuringMeasureP(void)
+{
+  UiTestApplication application;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  // Parent has no MeasureCallback / LayoutManager -> default OnMeasure runs the
+  // snapshot loop.
+  application.GetScene().Add(parent);
+  gReentrantParent = parent;
+
+  for(int i = 0; i < 4; ++i)
+  {
+    View c = View::New();
+    c.SetRequestedWidth(10.0f);
+    c.SetRequestedHeight(10.0f);
+    // First child mutates the parent during its own Measure; the rest are plain.
+    if(i == 0)
+    {
+      c.SetMeasureCallback(MeasureCallback::New(&ReentrantAddMeasure));
+    }
+    else
+    {
+      c.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+    }
+    parent.Add(c);
+  }
+
+  gSiblingToAdd = View::New();
+  gSiblingToAdd.SetRequestedWidth(10.0f);
+  gSiblingToAdd.SetRequestedHeight(10.0f);
+  gSiblingToAdd.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 4u, TEST_LOCATION);
+
+  // Drives the default OnMeasure snapshot loop; the first child's Measure adds
+  // a sibling mid-iteration. Must complete without crashing.
+  parent.Measure(200.0f, 100.0f);
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 5u, TEST_LOCATION);
+
+  gReentrantParent.Reset();
+  gSiblingToAdd.Reset();
+  END_TEST;
+}
+
+// A child whose Measure() removes a sibling from the parent must not corrupt
+// the parent's default OnMeasure iteration. The Erase inside OnChildRemove
+// shifts/shrinks the live Dali::Vector mid-loop; the snapshot makes the
+// iteration target immune.
+int UtcDaliViewReentrantChildRemoveDuringMeasureP(void)
+{
+  UiTestApplication application;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  application.GetScene().Add(parent);
+  gReentrantParent = parent;
+
+  View first = View::New();
+  first.SetRequestedWidth(10.0f);
+  first.SetRequestedHeight(10.0f);
+  first.SetMeasureCallback(MeasureCallback::New(&ReentrantRemoveMeasure));
+  parent.Add(first);
+
+  gSiblingToRemove = View::New();
+  gSiblingToRemove.SetRequestedWidth(10.0f);
+  gSiblingToRemove.SetRequestedHeight(10.0f);
+  gSiblingToRemove.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  parent.Add(gSiblingToRemove);
+
+  View third = View::New();
+  third.SetRequestedWidth(10.0f);
+  third.SetRequestedHeight(10.0f);
+  third.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  parent.Add(third);
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 3u, TEST_LOCATION);
+
+  // First child's Measure removes the sibling mid-loop. Must complete cleanly.
+  parent.Measure(200.0f, 100.0f);
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 2u, TEST_LOCATION);
+
+  gReentrantParent.Reset();
+  gSiblingToRemove.Reset();
+  END_TEST;
+}
+
+// A child whose Arrange() removes a sibling must not corrupt the parent's default
+// OnArrange iteration; the Erase inside OnChildRemove shifts the live Dali::Vector
+// mid-loop, and the snapshot at view-impl.cpp:1153-1154 makes the loop immune.
+int UtcDaliViewReentrantChildRemoveDuringArrangeP(void)
+{
+  UiTestApplication application;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  application.GetScene().Add(parent);
+  gReentrantParent = parent;
+
+  View first = View::New();
+  first.SetRequestedWidth(10.0f);
+  first.SetRequestedHeight(10.0f);
+  first.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  first.SetArrangeCallback(ArrangeCallback::New(&ReentrantRemoveArrange));
+  parent.Add(first);
+
+  gSiblingToRemove = View::New();
+  gSiblingToRemove.SetRequestedWidth(10.0f);
+  gSiblingToRemove.SetRequestedHeight(10.0f);
+  gSiblingToRemove.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  gSiblingToRemove.SetArrangeCallback(ArrangeCallback::New(&PlainArrange));
+  parent.Add(gSiblingToRemove);
+
+  View third = View::New();
+  third.SetRequestedWidth(10.0f);
+  third.SetRequestedHeight(10.0f);
+  third.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  third.SetArrangeCallback(ArrangeCallback::New(&PlainArrange));
+  parent.Add(third);
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 3u, TEST_LOCATION);
+
+  parent.Measure(200.0f, 100.0f);
+  // First child's Arrange removes the sibling mid-loop. Must complete cleanly.
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 2u, TEST_LOCATION);
+
+  gReentrantParent.Reset();
+  gSiblingToRemove.Reset();
+  END_TEST;
+}
+
+// A STANDALONE child whose Measure() removes a STANDALONE sibling must not corrupt
+// MeasureStandaloneChildren's iteration. Standalone children are skipped by the
+// default OnMeasure loop (view-impl.cpp:976-979) and iterated by the snapshot at
+// view-impl.cpp:1211-1212; the Erase shifts the live vector mid-loop.
+int UtcDaliViewReentrantStandaloneChildRemoveDuringMeasureP(void)
+{
+  UiTestApplication application;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  application.GetScene().Add(parent);
+  gReentrantParent = parent;
+
+  View first = View::New();
+  first.SetRequestedWidth(10.0f);
+  first.SetRequestedHeight(10.0f);
+  first.SetLayoutMode(LayoutMode::STANDALONE);
+  first.SetMeasureCallback(MeasureCallback::New(&ReentrantRemoveMeasure));
+  parent.Add(first);
+
+  gSiblingToRemove = View::New();
+  gSiblingToRemove.SetRequestedWidth(10.0f);
+  gSiblingToRemove.SetRequestedHeight(10.0f);
+  gSiblingToRemove.SetLayoutMode(LayoutMode::STANDALONE);
+  gSiblingToRemove.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  parent.Add(gSiblingToRemove);
+
+  View third = View::New();
+  third.SetRequestedWidth(10.0f);
+  third.SetRequestedHeight(10.0f);
+  third.SetLayoutMode(LayoutMode::STANDALONE);
+  third.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  parent.Add(third);
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 3u, TEST_LOCATION);
+
+  // Drives MeasureStandaloneChildren (called at view-impl.cpp:940); the first
+  // standalone child's Measure removes a standalone sibling mid-loop.
+  parent.Measure(200.0f, 100.0f);
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 2u, TEST_LOCATION);
+
+  gReentrantParent.Reset();
+  gSiblingToRemove.Reset();
+  END_TEST;
+}
+
+// A STANDALONE child whose Arrange() removes a STANDALONE sibling must not corrupt
+// ArrangeStandaloneChildren's iteration. Standalone children are arranged only by
+// the snapshot loop at view-impl.cpp:1232-1233 (via ArrangeStandaloneChild ->
+// childImpl.Arrange()); the Erase shifts the live vector mid-loop.
+int UtcDaliViewReentrantStandaloneChildRemoveDuringArrangeP(void)
+{
+  UiTestApplication application;
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  application.GetScene().Add(parent);
+  gReentrantParent = parent;
+
+  View first = View::New();
+  first.SetRequestedWidth(10.0f);
+  first.SetRequestedHeight(10.0f);
+  first.SetLayoutMode(LayoutMode::STANDALONE);
+  first.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  first.SetArrangeCallback(ArrangeCallback::New(&ReentrantRemoveArrange));
+  parent.Add(first);
+
+  gSiblingToRemove = View::New();
+  gSiblingToRemove.SetRequestedWidth(10.0f);
+  gSiblingToRemove.SetRequestedHeight(10.0f);
+  gSiblingToRemove.SetLayoutMode(LayoutMode::STANDALONE);
+  gSiblingToRemove.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  gSiblingToRemove.SetArrangeCallback(ArrangeCallback::New(&PlainArrange));
+  parent.Add(gSiblingToRemove);
+
+  View third = View::New();
+  third.SetRequestedWidth(10.0f);
+  third.SetRequestedHeight(10.0f);
+  third.SetLayoutMode(LayoutMode::STANDALONE);
+  third.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  third.SetArrangeCallback(ArrangeCallback::New(&PlainArrange));
+  parent.Add(third);
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 3u, TEST_LOCATION);
+
+  parent.Measure(200.0f, 100.0f);
+  // Drives ArrangeStandaloneChildren (called at view-impl.cpp:1113); the first
+  // standalone child's Arrange removes a standalone sibling mid-loop.
+  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(parent.GetChildCount(), 2u, TEST_LOCATION);
+
+  gReentrantParent.Reset();
+  gSiblingToRemove.Reset();
   END_TEST;
 }

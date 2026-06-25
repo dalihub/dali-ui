@@ -23,6 +23,48 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+namespace
+{
+// --- Reentrant layout mutation helpers. A child removes a sibling from the
+// parent during the parent's own Measure/Arrange pass, mutating the live child
+// list mid-iteration. Callbacks cannot be capturing lambdas (Callback::New only
+// supports free/member fns), so the parent + sibling handles are file-static. ---
+Ui::View gReentrantParent;
+Ui::View gSiblingToRemove;
+
+MeasuredSize PlainMeasure(View, float, float)
+{
+  return MeasuredSize(40.0f, 30.0f);
+}
+
+MeasuredSize PlainArrange(View, const LayoutRect&)
+{
+  return MeasuredSize(40.0f, 30.0f);
+}
+
+// During the child's own Measure, remove a sibling from the parent. This
+// reaches ViewImpl::OnChildRemove -> mChildren.Erase mid-iteration.
+MeasuredSize ReentrantRemoveMeasure(View, float, float)
+{
+  if(gSiblingToRemove && gSiblingToRemove.GetParent() == static_cast<Actor>(gReentrantParent))
+  {
+    gReentrantParent.Remove(gSiblingToRemove, RemovePolicy::IMMEDIATE);
+  }
+  return MeasuredSize(40.0f, 30.0f);
+}
+
+// During the child's own Arrange, remove a sibling from the parent.
+MeasuredSize ReentrantRemoveArrange(View, const LayoutRect&)
+{
+  if(gSiblingToRemove && gSiblingToRemove.GetParent() == static_cast<Actor>(gReentrantParent))
+  {
+    gReentrantParent.Remove(gSiblingToRemove, RemovePolicy::IMMEDIATE);
+  }
+  return MeasuredSize(40.0f, 30.0f);
+}
+
+} // namespace
+
 void utc_dali_absolutelayout_startup(void)
 {
   test_return_value = TET_UNDEF;
@@ -584,5 +626,154 @@ int UtcDaliAbsoluteLayoutBoundsRepeatedUpdateP(void)
     DALI_TEST_EQUALS(child.GetSize().width, rect.GetWidth(), TEST_LOCATION);
     DALI_TEST_EQUALS(child.GetSize().height, rect.GetHeight(), TEST_LOCATION);
   }
+  END_TEST;
+}
+
+// A position-only-proportional child on a WRAP container axis has a
+// determinate extent, so it must contribute that extent to the WRAP intrinsic
+// size (only its circular position offset is dropped). Buggy code excluded it
+// entirely, collapsing the WRAP width to 0.
+int UtcDaliAbsoluteLayoutWrapWidthPositionOnlyProportionalP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  // Width stays WRAP_CONTENT (default); height fixed so only width is exercised.
+  layout.SetRequestedHeight(150.0f);
+  View child = View::New();
+  layout.Add(child);
+  // X proportional (0.5) but width is a determinate fixed 100; height fixed 50.
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(0.5f, 20.0f, 100.0f, 50.0f))
+                          .SetFlags(AbsoluteLayoutFlags::X_PROPORTIONAL));
+  MeasuredSize m = layout.Measure(300.0f, 150.0f);
+  // Buggy: child excluded -> width 0. Fixed: contributes w + marginW = 100.
+  DALI_TEST_CHECK(m.GetWidth() >= 100.0f);
+  END_TEST;
+}
+
+// Guard: a width-proportional child stays excluded on a WRAP width axis
+// (genuinely circular), so the WRAP width remains 0. Passes before and after.
+int UtcDaliAbsoluteLayoutWrapWidthSizeProportionalExcludedP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  layout.SetRequestedHeight(150.0f); // width WRAP_CONTENT
+  View child = View::New();
+  layout.Add(child);
+  // Width is proportional (0.4): circular on a WRAP axis -> excluded.
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(10.0f, 20.0f, 0.4f, 50.0f))
+                          .SetFlags(AbsoluteLayoutFlags::WIDTH_PROPORTIONAL));
+  MeasuredSize m = layout.Measure(300.0f, 150.0f);
+  DALI_TEST_EQUALS(m.GetWidth(), 0.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+// Symmetric height: position-only Y-proportional child on a WRAP height
+// axis must contribute its determinate height. Buggy: collapses to 0.
+int UtcDaliAbsoluteLayoutWrapHeightPositionOnlyProportionalP(void)
+{
+  UiTestApplication application;
+  AbsoluteLayout    layout = AbsoluteLayout::New();
+  layout.SetRequestedWidth(200.0f); // height WRAP_CONTENT
+  View child = View::New();
+  layout.Add(child);
+  child.SetLayoutParams(AbsoluteLayoutParams::New()
+                          .SetBounds(LayoutRect(10.0f, 0.5f, 80.0f, 60.0f))
+                          .SetFlags(AbsoluteLayoutFlags::Y_PROPORTIONAL));
+  MeasuredSize m = layout.Measure(200.0f, 300.0f);
+  DALI_TEST_CHECK(m.GetHeight() >= 60.0f);
+  END_TEST;
+}
+
+// A child whose Measure() removes a sibling must not corrupt the
+// AbsoluteLayoutManager::Measure pass. The manager snapshots its children up
+// front, so the mid-loop Erase inside OnChildRemove cannot make GetChildAt
+// return an empty handle (which would DALI_ASSERT_ALWAYS in GetImpl). Without
+// the snapshot this aborts.
+int UtcDaliAbsoluteLayoutReentrantChildRemoveDuringMeasureP(void)
+{
+  UiTestApplication application;
+
+  AbsoluteLayout layout = AbsoluteLayout::New();
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  application.GetScene().Add(layout);
+  gReentrantParent = layout;
+
+  View first = View::New();
+  first.SetRequestedWidth(10.0f);
+  first.SetRequestedHeight(10.0f);
+  first.SetMeasureCallback(MeasureCallback::New(&ReentrantRemoveMeasure));
+  layout.Add(first);
+
+  gSiblingToRemove = View::New();
+  gSiblingToRemove.SetRequestedWidth(10.0f);
+  gSiblingToRemove.SetRequestedHeight(10.0f);
+  gSiblingToRemove.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  layout.Add(gSiblingToRemove);
+
+  View third = View::New();
+  third.SetRequestedWidth(10.0f);
+  third.SetRequestedHeight(10.0f);
+  third.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  layout.Add(third);
+
+  DALI_TEST_EQUALS(layout.GetChildCount(), 3u, TEST_LOCATION);
+
+  // First child's Measure removes the sibling mid-loop. Must complete cleanly.
+  layout.Measure(200.0f, 100.0f);
+
+  DALI_TEST_EQUALS(layout.GetChildCount(), 2u, TEST_LOCATION);
+
+  gReentrantParent.Reset();
+  gSiblingToRemove.Reset();
+  END_TEST;
+}
+
+// A child whose Arrange() removes a sibling must not corrupt the
+// AbsoluteLayoutManager::Arrange pass. Same snapshot guarantee as the Measure
+// variant; without the snapshot this aborts.
+int UtcDaliAbsoluteLayoutReentrantChildRemoveDuringArrangeP(void)
+{
+  UiTestApplication application;
+
+  AbsoluteLayout layout = AbsoluteLayout::New();
+  layout.SetRequestedWidth(200.0f);
+  layout.SetRequestedHeight(100.0f);
+  application.GetScene().Add(layout);
+  gReentrantParent = layout;
+
+  View first = View::New();
+  first.SetRequestedWidth(10.0f);
+  first.SetRequestedHeight(10.0f);
+  first.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  first.SetArrangeCallback(ArrangeCallback::New(&ReentrantRemoveArrange));
+  layout.Add(first);
+
+  gSiblingToRemove = View::New();
+  gSiblingToRemove.SetRequestedWidth(10.0f);
+  gSiblingToRemove.SetRequestedHeight(10.0f);
+  gSiblingToRemove.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  gSiblingToRemove.SetArrangeCallback(ArrangeCallback::New(&PlainArrange));
+  layout.Add(gSiblingToRemove);
+
+  View third = View::New();
+  third.SetRequestedWidth(10.0f);
+  third.SetRequestedHeight(10.0f);
+  third.SetMeasureCallback(MeasureCallback::New(&PlainMeasure));
+  third.SetArrangeCallback(ArrangeCallback::New(&PlainArrange));
+  layout.Add(third);
+
+  DALI_TEST_EQUALS(layout.GetChildCount(), 3u, TEST_LOCATION);
+
+  layout.Measure(200.0f, 100.0f);
+  // First child's Arrange removes the sibling mid-loop. Must complete cleanly.
+  layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
+
+  DALI_TEST_EQUALS(layout.GetChildCount(), 2u, TEST_LOCATION);
+
+  gReentrantParent.Reset();
+  gSiblingToRemove.Reset();
   END_TEST;
 }

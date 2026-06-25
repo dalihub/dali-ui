@@ -122,6 +122,48 @@ A **layout root** is a top-level View in the layout hierarchy (its parent is not
 2. **Arrange**  
    - The View is given a `LayoutRect` (typically from 0,0 with the measured size). It applies its own alignment and margin, and if it has a LayoutManager, the manager calls `Arrange(child, childBounds)` for each child to set position and size.
 
+### Measure constraints (sign-encoded budget)
+
+During Measure the parent passes the width and height constraints each as a single **sign-encoded `float`** — there is no separate mode field and no measure-mode enum anywhere in the API:
+
+- **Non-negative value** — a concrete available-space budget in *visual* (scale-applied) pixels. `OnMeasure` divides it by `GetEffectiveScale()` to obtain the natural-unit budget before computing sizes. This budget acts as an **at-most ceiling**.
+- **Negative value** — a sentinel carrying intent, not a size: `WRAP_CONTENT` (-1.0f) or `MATCH_PARENT` (-2.0f).
+
+Before `OnMeasure` runs, `ViewImpl::Measure` reconciles the incoming constraint against this view's min/max bounds: `effective = std::min(std::max(constraint, Minimum), Maximum)`. With the default `Minimum` of `0`, a negative sentinel constraint is therefore **floored to 0** — so the budget that actually reaches `OnMeasure` is always `>= 0`. (An axis is left "unbounded" not by a negative value but by passing a large positive budget such as `FLT_MAX`, as ScrollView does on its scrollable axes.)
+
+For a `WRAP_CONTENT` view, the measured result (children bounding box for a container, or `GetNaturalSize()` for a leaf) is **clamped down to the incoming budget** via `std::min(size, budget)` whenever that budget is non-negative. So a `WRAP_CONTENT` child measured against a finite budget is clamped to it and does **not** overflow the parent; measured against a very large budget it is effectively unclamped and sizes purely to its content. `MATCH_PARENT` and fixed-size requests do not go through this clamp — they resolve directly to the minimum size and the requested size respectively.
+
+This clamp bounds a `WRAP_CONTENT` result to the available budget. Setting `SetMaximumWidth()` / `SetMaximumHeight()` is therefore not needed to stop a `WRAP_CONTENT` child from overflowing its parent's budget — those are a separate min/max bounds mechanism applied earlier in Measure.
+
+### Requested vs Minimum/Maximum (max-wins)
+
+Each view can carry independent minimum and maximum size bounds
+(`SetMinimumWidth()` / `SetMaximumWidth()` and the height equivalents).
+After the measured size is produced by `OnMeasure` / the LayoutManager /
+the measure callback, `ViewImpl::ApplyConstraints` reconciles it against
+those bounds, for width and height independently.
+
+**Clamp order:** the minimum (floor) is applied first, then the maximum
+(ceiling) — `result = std::min(std::max(value, Minimum), Maximum)`.
+Because the `std::min` against `Maximum` is the *last* operation, the
+maximum always wins on conflict. So when `Minimum > Maximum`, the result
+collapses to `Maximum` ("max-wins"). Example: with `value = 50`,
+`Minimum = 100`, `Maximum = 30`, the floor lifts it to `100`, then the
+ceiling drops it to `30` — the final size is `30`.
+
+- **Defaults:** `Minimum` is `0` and `Maximum` is `FLT_MAX`, so by
+  default the clamp is a no-op; the bound storage is allocated lazily.
+- **Units:** the bounds are stored in natural (pre-scale) units and
+  multiplied by the effective scale at clamp time, so they compare
+  against the visual-unit measured size.
+- The incoming constraint is itself pre-clamped to `[Minimum, Maximum]`
+  before children are measured, so children see the effective available
+  space rather than the raw constraint.
+
+DALi UI unconditionally lets the maximum win via the fixed clamp order —
+there is no min-wins branch or configurable policy for a
+`Minimum > Maximum` conflict.
+
 ### MATCH_PARENT semantics
 
 A `MATCH_PARENT` view acts as a **follower**: it fills the space assigned by
@@ -151,7 +193,8 @@ during Measure.
 **Per-LayoutManager behavior:**
 - **StackLayout**: cross-axis `MATCH_PARENT` fills the available cross-axis
   space. Main-axis `MATCH_PARENT` fills the full available main-axis space
-  (use weight for proportional sharing).
+  unless the child also has weight > 0, in which case the weight share
+  determines the main-axis size and main-axis `MATCH_PARENT` is ignored.
 - **FlexLayout**: cross-axis `MATCH_PARENT` fills the flex line's cross
   size. Main-axis `MATCH_PARENT` fills the available main axis; use
   flex-grow for proportional distribution.
@@ -160,6 +203,81 @@ during Measure.
 - **AbsoluteLayout**: `MATCH_PARENT` children fill the available content
   area (when no explicit bounds are set via AbsoluteLayoutParams).
 - **ScrollView**: `MATCH_PARENT` children fill the viewport in Arrange.
+
+### Grid placement (explicit cells)
+
+`GridLayout` uses **explicit placement**. Every child's cell
+comes solely from its `GridLayoutParams` `Row` / `Column` / `RowSpan` /
+`ColumnSpan` properties; there is no automatic placement (auto-flow). A
+child with no params defaults to row 0, column 0, span 1 (`mRow=0`,
+`mColumn=0`, `mRowSpan=1`, `mColumnSpan=1`). A consequence is that placement is
+**not auto-distributed** — every unplaced child (and any children sharing the
+same row/column) simply **stacks on cell (0,0)**.
+
+- **Track count is fixed.** Rows/columns count = `max(1, definitions count)`,
+  so an axis with no definitions falls back to a single implicit track. No
+  implicit tracks are ever created for out-of-range indices.
+- **Out-of-range indices clamp to the last track.** `row`/`col` are clamped to
+  `[0, count-1]` and spans are clamped to the remaining tracks
+  (`rowSpan = min(rowSpan, rowCount - row)`), in both Measure and Arrange. An
+  index past the grid is pinned to the last existing track, not given a new one.
+
+**Spanning children and AUTO tracks.** Auto-track intrinsic sizing runs in two
+passes (in both Measure and Arrange). Pass 1 records the content size of each
+**non-spanning** child as the floor of its **auto-like** track — a track that is
+explicitly `AUTO`, or the implicit single track of an axis with no definitions.
+Pass 2 distributes extra space for spanning children: for
+a child with span > 1, it sums the sizes of the spanned tracks plus the gaps
+between them; if the child (size + margin) needs more, the deficit is
+distributed **equally** across only the spanned auto-like tracks
+(`share = deficit / spannedAutoCount`). `STAR` and `ABSOLUTE` tracks crossed by
+the span are left untouched. A spanning child therefore enlarges a crossed auto
+track **only** when its measured size exceeds the floors already accumulated for
+the tracks it spans — if they are already large enough, it adds nothing. (As
+elsewhere, `MATCH_PARENT` children do not drive auto sizing.)
+
+The model is deliberately simple: no auto-placement, no implicit track
+creation, and the deficit is shared equally across the spanned auto tracks
+rather than via any growth-limit ordering — an explicit, fixed-track grid.
+
+### RTL layout direction (child X mirroring)
+
+Right-to-left (RTL) handling lives entirely at the View level, not in any
+LayoutManager. After every `OnArrange` variant — `ArrangeCallback`,
+LayoutManager, or the default `OnArrange` — `ViewImpl::Arrange` makes a
+single call to `ViewImpl::ApplyLayoutDirection(bounds.width)`, keeping all
+layout managers **direction-agnostic**. Layout managers (including
+`AbsoluteLayoutManager`) always arrange in a `LEFT_TO_RIGHT` frame and never
+inspect the layout direction themselves.
+
+`ApplyLayoutDirection` early-returns unless the View's effective layout
+direction resolves to `RIGHT_TO_LEFT`, so under `LEFT_TO_RIGHT` nothing is
+mirrored. Under `RIGHT_TO_LEFT` it flips each direct child's X about the
+parent's arranged width: `POSITION_X = parentWidth − oldX − childW`, where
+`oldX` and `childW` are the child's already-arranged `POSITION_X` and
+`SIZE_WIDTH`.
+
+- The mirror is **generic**: it applies uniformly to every direct child of
+  every View. `AbsoluteLayout` is just one case — a child arranged at some X
+  under `LEFT_TO_RIGHT` is flipped about the parent's content width under
+  `RIGHT_TO_LEFT`. A child placed at `X = 0` therefore lands flush against
+  the right edge, so the layout origin effectively moves to the **top-right**
+  under RTL.
+- **STANDALONE children are skipped.** `ApplyLayoutDirection` `continue`s
+  past any child whose `LayoutMode` is `STANDALONE`, so the only way to opt a
+  child out of mirroring is `SetLayoutMode(LayoutMode::STANDALONE)`.
+- There is **no RTL-specific opt-out flag** for Absolute children:
+  `AbsoluteLayoutFlags` contains only proportional sizing/positioning flags
+  (`X_PROPORTIONAL`, `WIDTH_PROPORTIONAL`, `POSITION_PROPORTIONAL`, …) and
+  nothing related to layout direction.
+- `ArrangeCallback`s share the same contract: arrange children in a
+  `LEFT_TO_RIGHT` frame and let the framework mirror — callbacks must not
+  apply RTL mirroring themselves.
+
+Note the offset value itself is mirrored: under `RIGHT_TO_LEFT` every direct
+child's X is reflected about the parent width regardless of how it was
+positioned, so even an absolutely positioned child is moved to the mirrored
+edge.
 
 ### LayoutMode::STANDALONE
 

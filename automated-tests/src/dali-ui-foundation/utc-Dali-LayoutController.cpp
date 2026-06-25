@@ -18,8 +18,6 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali/public-api/adaptor-framework/window.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -34,59 +32,56 @@ void utc_dali_layoutcontroller_cleanup(void)
   test_return_value = TET_PASS;
 }
 
-// int UtcDaliLayoutControllerGetP(void)
-// {
-//   UiTestApplication application;
-//   Dali::Window window = Dali::Window::New(Dali::PositionSize(0, 0, 480, 800), "LayoutControllerTest", true);
-//   if (!window)
-//   {
-//     tet_result(TET_PASS);
-//     return 0;
-//   }
-//   LayoutController& controller = LayoutController::Get(window);
-//   controller.ProcessLayouts();
-//   END_TEST;
-// }
+int UtcDaliLayoutControllerGetP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
 
-// int UtcDaliLayoutControllerOnWindowResizeP(void)
-// {
-//   UiTestApplication application;
-//   Dali::Window window = Dali::Window::New(Dali::PositionSize(0, 0, 480, 800), "LayoutControllerResizeTest", true);
-//   if (!window)
-//   {
-//     tet_result(TET_PASS);
-//     return 0;
-//   }
-//   LayoutController& controller = LayoutController::Get(window);
-//   controller.OnWindowResize(320, 240);
-//   END_TEST;
-// }
+  LayoutController& controller = LayoutController::Get(window);
+  controller.ProcessLayouts();
+  DALI_TEST_CHECK(true);
+  END_TEST;
+}
 
-// int UtcDaliLayoutControllerProcessLayoutsP(void)
-// {
-//   UiTestApplication application;
-//   Dali::Window window = Dali::Window::New(Dali::PositionSize(0, 0, 480, 800), "LayoutControllerProcessTest", true);
-//   if (!window)
-//   {
-//     tet_result(TET_PASS);
-//     return 0;
-//   }
-//   LayoutController& controller = LayoutController::Get(window);
-//   controller.ProcessLayouts();
-//   END_TEST;
-// }
+int UtcDaliLayoutControllerOnWindowResizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
 
-// int UtcDaliLayoutControllerGetSameWindowReturnsSameInstanceP(void)
-// {
-//   UiTestApplication application;
-//   Dali::Window window = Dali::Window::New(Dali::PositionSize(0, 0, 100, 100), "LayoutControllerSameTest", true);
-//   if (!window)
-//   {
-//     tet_result(TET_PASS);
-//     return 0;
-//   }
-//   LayoutController& a = LayoutController::Get(window);
-//   LayoutController& b = LayoutController::Get(window);
-//   DALI_TEST_EQUALS(&a, &b, TEST_LOCATION);
-//   END_TEST;
-// }
+  LayoutController& controller = LayoutController::Get(window);
+  controller.OnWindowResize(320, 240);
+  DALI_TEST_CHECK(true);
+  END_TEST;
+}
+
+int UtcDaliLayoutControllerProcessLayoutsP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  // Add a view to the window so the controller has something to process.
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  window.Add(view);
+
+  LayoutController& controller = LayoutController::Get(window);
+  controller.ProcessLayouts();
+
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(true);
+  END_TEST;
+}
+
+int UtcDaliLayoutControllerGetSameWindowReturnsSameInstanceP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  LayoutController& a = LayoutController::Get(window);
+  LayoutController& b = LayoutController::Get(window);
+  DALI_TEST_CHECK(&a == &b);
+  END_TEST;
+}

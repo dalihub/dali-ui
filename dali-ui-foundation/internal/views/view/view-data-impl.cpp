@@ -41,6 +41,7 @@
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/object/object-registry.h>
+#include <cmath>
 #include <cstring>
 #include <limits>
 
@@ -103,6 +104,20 @@ constexpr int BORDERLINE_DEPTH_INDEX   = DepthIndex::FOREGROUND_EFFECT - 1;
 inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 {
   return std::abs(a - b) < epsilon;
+}
+
+// Sanitize size property inputs. RequestedWidth/Height accept any
+// non-negative value plus the special values WRAP_CONTENT (-1.0f) and
+// MATCH_PARENT (-2.0f). NaN/Inf and other negative values are rejected.
+inline bool IsValidRequestedSize(float v)
+{
+  return std::isfinite(v) && (v >= 0.0f || FloatEqual(v, WRAP_CONTENT) || FloatEqual(v, MATCH_PARENT));
+}
+
+// Minimum/Maximum bounds must be finite and non-negative.
+inline bool IsValidSizeBound(float v)
+{
+  return std::isfinite(v) && v >= 0.0f;
 }
 
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(
@@ -1386,8 +1401,18 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       case Ui::View::Property::REQUESTED_WIDTH:
       {
         float width;
-        if(value.Get(width))
+        if(value.Get(width) && IsValidRequestedSize(width))
         {
+          // Snap a near-sentinel input to the exact sentinel so downstream
+          // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
+          if(FloatEqual(width, WRAP_CONTENT))
+          {
+            width = WRAP_CONTENT;
+          }
+          else if(FloatEqual(width, MATCH_PARENT))
+          {
+            width = MATCH_PARENT;
+          }
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
           if(!FloatEqual(dataImpl.mRequestedWidth, width))
           {
@@ -1406,8 +1431,18 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       case Ui::View::Property::REQUESTED_HEIGHT:
       {
         float height;
-        if(value.Get(height))
+        if(value.Get(height) && IsValidRequestedSize(height))
         {
+          // Snap a near-sentinel input to the exact sentinel so downstream
+          // exact comparisons (== WRAP_CONTENT / == MATCH_PARENT) are correct.
+          if(FloatEqual(height, WRAP_CONTENT))
+          {
+            height = WRAP_CONTENT;
+          }
+          else if(FloatEqual(height, MATCH_PARENT))
+          {
+            height = MATCH_PARENT;
+          }
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
           if(!FloatEqual(dataImpl.mRequestedHeight, height))
           {
@@ -1426,7 +1461,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       case Ui::View::Property::MINIMUM_WIDTH:
       {
         float width;
-        if(value.Get(width))
+        if(value.Get(width) && IsValidSizeBound(width))
         {
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
           if(!FloatEqual(dataImpl.GetMinimumWidth(), width))
@@ -1441,7 +1476,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       case Ui::View::Property::MINIMUM_HEIGHT:
       {
         float height;
-        if(value.Get(height))
+        if(value.Get(height) && IsValidSizeBound(height))
         {
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
           if(!FloatEqual(dataImpl.GetMinimumHeight(), height))
@@ -1456,7 +1491,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       case Ui::View::Property::MAXIMUM_WIDTH:
       {
         float width;
-        if(value.Get(width))
+        if(value.Get(width) && IsValidSizeBound(width))
         {
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
           if(!FloatEqual(dataImpl.GetMaximumWidth(), width))
@@ -1471,7 +1506,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
       case Ui::View::Property::MAXIMUM_HEIGHT:
       {
         float height;
-        if(value.Get(height))
+        if(value.Get(height) && IsValidSizeBound(height))
         {
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
           if(!FloatEqual(dataImpl.GetMaximumHeight(), height))

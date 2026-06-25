@@ -78,13 +78,26 @@ bool IsChildStandalone(ViewImpl& childImpl)
   return childImpl.GetLayoutMode() == LayoutMode::STANDALONE;
 }
 
+// Reports whether the track at the given index behaves as auto-sized. An axis
+// with no definitions falls back to a single implicit track, which behaves
+// like an auto-sized track here, capturing the child content size as a floor;
+// ApplyGridDefinitions then lets it grow to fill a definite grid (so
+// MATCH_PARENT children also work), matching a single star cell.
+bool IsAutoLikeTrack(const Dali::Vector<GridLength>& defs, uint32_t index)
+{
+  return defs.Size() == 0u || (index < defs.Size() && defs[index].GetType() == GridLengthType::AUTO);
+}
+
 void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float availableWidth, float availableHeight,
                                     uint32_t rowCount, uint32_t colCount,
                                     const Dali::Vector<GridLength>& rowDefs,
                                     const Dali::Vector<GridLength>& colDefs,
                                     std::vector<float>&             rowHeights,
-                                    std::vector<float>&             colWidths)
+                                    std::vector<float>&             colWidths,
+                                    float rowSpacing, float colSpacing, float scale)
 {
+  // First pass: capture the content size of every non-spanning child as the
+  // floor of its auto-sized track (auto track intrinsic sizing).
   for(auto& childView : children)
   {
     ViewImpl& childImpl = GetImpl(childView);
@@ -111,12 +124,8 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
     float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
 
-    // An axis with no definitions falls back to a single implicit track. It
-    // behaves like an auto-sized track here, capturing the child content size
-    // as a floor; ApplyGridDefinitions then lets it grow to fill a definite
-    // grid (so MATCH_PARENT children also work), matching a single star cell.
-    bool rowAutoLike = rowDefs.Size() == 0u || (row < rowDefs.Size() && rowDefs[row].GetType() == GridLengthType::AUTO);
-    bool colAutoLike = colDefs.Size() == 0u || (col < colDefs.Size() && colDefs[col].GetType() == GridLengthType::AUTO);
+    bool rowAutoLike = IsAutoLikeTrack(rowDefs, row);
+    bool colAutoLike = IsAutoLikeTrack(colDefs, col);
     if(rowSpan == 1 && rowAutoLike)
     {
       rowHeights[row] = std::max(rowHeights[row], childSize.height + marginH);
@@ -124,6 +133,128 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
     if(colSpan == 1 && colAutoLike)
     {
       colWidths[col] = std::max(colWidths[col], childSize.width + marginW);
+    }
+  }
+
+  // Between the passes, seed each ABSOLUTE track with its resolved base size
+  // (def.GetValue() * scale, identical to ApplyGridDefinitions). Without this
+  // the span pass below sees ABSOLUTE tracks as 0, overstates the deficit, and
+  // dumps the surplus onto the spanned AUTO tracks. STAR tracks are left at
+  // their intrinsic 0 here: their final size depends on the remaining space
+  // (which in turn depends on the AUTO sizes computed below), so it is not yet
+  // known. The minimum guarantee this restores is that AUTO is not over-grown
+  // by the ABSOLUTE portion of a span.
+  for(uint32_t i = 0; i < colCount; ++i)
+  {
+    if(i < colDefs.Size() && colDefs[i].GetType() == GridLengthType::ABSOLUTE)
+    {
+      colWidths[i] = colDefs[i].GetValue() * scale;
+    }
+  }
+  for(uint32_t i = 0; i < rowCount; ++i)
+  {
+    if(i < rowDefs.Size() && rowDefs[i].GetType() == GridLengthType::ABSOLUTE)
+    {
+      rowHeights[i] = rowDefs[i].GetValue() * scale;
+    }
+  }
+
+  // Second pass: distribute extra space for spanning children (span > 1) across
+  // the auto-sized tracks they cross. After the first pass the auto tracks hold
+  // their single-cell content floor;
+  // a spanning child that needs more than the sum of the tracks (plus the gaps
+  // between them) it currently spans grows the auto tracks so it is not
+  // clipped. The deficit is shared equally across only the spanned auto tracks;
+  // non-auto tracks (absolute/star) are left untouched here.
+  for(auto& childView : children)
+  {
+    ViewImpl& childImpl = GetImpl(childView);
+
+    if(IsChildStandalone(childImpl))
+    {
+      continue;
+    }
+
+    uint32_t row     = GetChildRow(childImpl);
+    uint32_t col     = GetChildColumn(childImpl);
+    uint32_t rowSpan = GetChildRowSpan(childImpl);
+    uint32_t colSpan = GetChildColumnSpan(childImpl);
+    row              = std::min(row, rowCount - 1);
+    col              = std::min(col, colCount - 1);
+    rowSpan          = std::min(rowSpan, rowCount - row);
+    colSpan          = std::min(colSpan, colCount - col);
+
+    if(rowSpan <= 1 && colSpan <= 1)
+    {
+      continue; // Non-spanning children are already handled by the first pass.
+    }
+
+    float        childScale            = childImpl.GetEffectiveScale();
+    Extents      margin                = childImpl.GetMargin();
+    float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
+    float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
+    float        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
+    float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
+    MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+
+    // Column axis: grow spanned auto columns to fit the child's width.
+    if(colSpan > 1)
+    {
+      uint32_t spannedAutoCount = 0u;
+      float    currentSpanSize  = colSpacing * static_cast<float>(colSpan - 1); // Gaps between spanned tracks.
+      for(uint32_t i = 0; i < colSpan; ++i)
+      {
+        currentSpanSize += colWidths[col + i];
+        if(IsAutoLikeTrack(colDefs, col + i))
+        {
+          ++spannedAutoCount;
+        }
+      }
+      if(spannedAutoCount > 0u)
+      {
+        float deficit = std::max(0.0f, (childSize.width + marginW) - currentSpanSize);
+        if(deficit > 0.0f)
+        {
+          float share = deficit / static_cast<float>(spannedAutoCount);
+          for(uint32_t i = 0; i < colSpan; ++i)
+          {
+            if(IsAutoLikeTrack(colDefs, col + i))
+            {
+              colWidths[col + i] += share;
+            }
+          }
+        }
+      }
+    }
+
+    // Row axis: grow spanned auto rows to fit the child's height.
+    if(rowSpan > 1)
+    {
+      uint32_t spannedAutoCount = 0u;
+      float    currentSpanSize  = rowSpacing * static_cast<float>(rowSpan - 1); // Gaps between spanned tracks.
+      for(uint32_t i = 0; i < rowSpan; ++i)
+      {
+        currentSpanSize += rowHeights[row + i];
+        if(IsAutoLikeTrack(rowDefs, row + i))
+        {
+          ++spannedAutoCount;
+        }
+      }
+      if(spannedAutoCount > 0u)
+      {
+        float deficit = std::max(0.0f, (childSize.height + marginH) - currentSpanSize);
+        if(deficit > 0.0f)
+        {
+          float share = deficit / static_cast<float>(spannedAutoCount);
+          for(uint32_t i = 0; i < rowSpan; ++i)
+          {
+            if(IsAutoLikeTrack(rowDefs, row + i))
+            {
+              rowHeights[row + i] += share;
+            }
+          }
+        }
+      }
     }
   }
 }
@@ -449,7 +580,8 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   std::vector<float> colWidths(colCount, 0.0f);
 
   MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount,
-                                 colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths);
+                                 colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths,
+                                 visRowSpacing, visColSpacing, s);
 
   Extents parentPadding   = view->GetPadding();
   float   requestedWidth  = view->GetRequestedWidth();
@@ -528,7 +660,8 @@ MeasuredSize GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds
 
   // Re-measure children to get fresh auto row/column sizes using actual arrange bounds
   MeasureGridChildrenAndFillAuto(children, availableWidth, availableHeight, rowCount,
-                                 colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths);
+                                 colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths,
+                                 visRowSpacing, visColSpacing, s);
 
   float totalWidth  = 0.0f;
   float totalHeight = 0.0f;

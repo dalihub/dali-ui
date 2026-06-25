@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <algorithm>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
@@ -78,12 +79,29 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
   float          contentWidth  = widthConstraint;
   float          contentHeight = heightConstraint;
 
+  // Snapshot children up front: a child's Measure callback may remove a
+  // sibling mid-pass, which would invalidate a cached-index live traversal.
+  std::vector<View> children;
+  children.reserve(count);
+  for(uint32_t i = 0; i < count; ++i)
+  {
+    children.push_back(GetChildAt(view, i));
+  }
+
   float maxRight  = 0.0f;
   float maxBottom = 0.0f;
 
-  for(uint32_t i = 0; i < count; ++i)
+  // Size circularity guard. When the container axis is WRAP_CONTENT,
+  // its intrinsic size is what we are computing here, yet a proportional
+  // child resolves its extent/position against that very (still undetermined)
+  // size. Letting such a child feed maxRight/maxBottom would make the
+  // proportional result define the basis it depends on. A proportional value
+  // therefore does not contribute to the WRAP axis intrinsic size.
+  const bool containerWrapW = (view->GetRequestedWidth() == WRAP_CONTENT);
+  const bool containerWrapH = (view->GetRequestedHeight() == WRAP_CONTENT);
+
+  for(auto& child : children)
   {
-    View      child     = GetChildAt(view, i);
     ViewImpl& childImpl = GetImpl(child);
 
     if(IsStandalone(&childImpl))
@@ -132,12 +150,13 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     float   marginW = static_cast<float>(margin.start + margin.end) * childScale;
     float   marginH = static_cast<float>(margin.top + margin.bottom) * childScale;
 
-    // Always measure children. For negative axes (WRAP_CONTENT / MATCH_PARENT)
-    // the constraint is the available content space; for explicit positive
-    // bounds the constraint is the bounds value itself. Calling Measure
-    // unconditionally keeps the child's measure cache and dirty state coherent
-    // with the layout pass — required so a later InvalidateMeasure can
-    // propagate. The child's own cache no-ops when constraints repeat.
+    // Always measure children. When the child has no explicit positive extent
+    // on an axis (WRAP_CONTENT / MATCH_PARENT), the constraint is the available
+    // content budget clamped to be non-negative; for explicit positive bounds
+    // the constraint is the bounds value itself. Calling Measure unconditionally
+    // keeps the child's measure cache and dirty state coherent with the layout
+    // pass — required so a later InvalidateMeasure can propagate. The child's
+    // own cache no-ops when constraints repeat.
     float        measureW  = w >= 0.0f ? w : std::max(0.0f, contentWidth - marginW);
     float        measureH  = h >= 0.0f ? h : std::max(0.0f, contentHeight - marginH);
     MeasuredSize childSize = childImpl.Measure(measureW, measureH);
@@ -169,8 +188,41 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       y *= childScale;
     }
 
-    maxRight  = std::max(maxRight, x + w + marginW);
-    maxBottom = std::max(maxBottom, y + h + marginH);
+    // On a WRAP container axis the intrinsic size is what we are
+    // computing, so only the genuinely circular contribution must be dropped.
+    // A WIDTH_PROPORTIONAL child resolves its extent against that undetermined
+    // size, so it is excluded entirely. A position-only proportional child
+    // (X_PROPORTIONAL && !WIDTH_PROPORTIONAL) has a determinate extent w; only
+    // its proportional position offset x = (contentWidth - w) * p is circular.
+    // For it, contribute the determinate extent (w + marginW) while dropping
+    // the circular position offset. Non-WRAP axes accumulate normally.
+    if(containerWrapW && widthProportional)
+    {
+      // Size-proportional on a WRAP axis: fully circular, exclude.
+    }
+    else if(containerWrapW && xProportional)
+    {
+      // Position-only proportional on a WRAP axis: drop the circular x offset,
+      // keep the determinate extent.
+      maxRight = std::max(maxRight, w + marginW);
+    }
+    else
+    {
+      maxRight = std::max(maxRight, x + w + marginW);
+    }
+
+    if(containerWrapH && heightProportional)
+    {
+      // Size-proportional on a WRAP axis: fully circular, exclude.
+    }
+    else if(containerWrapH && yProportional)
+    {
+      maxBottom = std::max(maxBottom, h + marginH);
+    }
+    else
+    {
+      maxBottom = std::max(maxBottom, y + h + marginH);
+    }
   }
 
   return MeasuredSize(maxRight, maxBottom);
@@ -187,9 +239,17 @@ MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bo
   float          availableWidth  = bounds.width;
   float          availableHeight = bounds.height;
 
+  // Snapshot children up front: a child's Arrange callback may remove a
+  // sibling mid-pass, which would invalidate a cached-index live traversal.
+  std::vector<View> children;
+  children.reserve(count);
   for(uint32_t i = 0; i < count; ++i)
   {
-    View      child     = GetChildAt(view, i);
+    children.push_back(GetChildAt(view, i));
+  }
+
+  for(auto& child : children)
+  {
     ViewImpl& childImpl = GetImpl(child);
 
     if(IsStandalone(&childImpl))
