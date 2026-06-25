@@ -31,3 +31,9 @@
 #include <dali-ui-components/public-api/styles/components-style-sheet.h>
 #include <dali-ui-components/public-api/styles/text-button-style.h>
 #include <dali-ui-components/public-api/text-button.h>
+#include <dali-ui-components/public-api/dialog/alert-dialog.h>
+#include <dali-ui-components/public-api/dialog/dialog-container.h>
+#include <dali-ui-components/public-api/dialog/dialog-properties.h>
+#include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/navigator/navigator-properties.h>
+#include <dali-ui-components/public-api/navigator/navigator.h>

@@ -14,6 +14,10 @@ SET(TC_SOURCES
     utc-Dali-PieSeries.cpp
     utc-Dali-ChartAxis.cpp
     utc-Dali-ChartSection.cpp
+    utc-Dali-Navigator.cpp
+    utc-Dali-Dialog.cpp
+    utc-Dali-DialogContainer.cpp
+    utc-Dali-AlertDialog.cpp
 )
 
 LIST(APPEND TC_SOURCES
