@@ -57,6 +57,16 @@ Run:
 - SetMargin: 자식 뷰 바깥 간격 (없음, 균등, 비대칭 비교).
 - 중첩 AbsoluteLayout에 별도 padding 적용.
 
+**WRAP_CONTENT position-proportional label sample**:
+
+```bash
+./bin/absolutelayout-wrapcontent-position-proportional-label.example
+```
+
+- Green root View: MATCH_PARENT.
+- Red parent AbsoluteLayout: WRAP_CONTENT.
+- Blue child Label: WRAP_CONTENT with `LayoutRect(0.5, 0.5, -1, -1)` and `POSITION_PROPORTIONAL`.
+
 ### GBS build (Tizen)
 
 ```bash
