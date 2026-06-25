@@ -137,24 +137,24 @@ Dali::String TextButton::GetFontFamily() const
   return GetImpl(*this).GetFontFamily();
 }
 
-void TextButton::SetUnderline(const Text::Underline& underline)
+void TextButton::SetTextUnderline(const Text::Underline& underline)
 {
-  GetImpl(*this).SetUnderline(underline);
+  GetImpl(*this).SetTextUnderline(underline);
 }
 
-void TextButton::ClearUnderline()
+void TextButton::ClearTextUnderline()
 {
-  GetImpl(*this).ClearUnderline();
+  GetImpl(*this).ClearTextUnderline();
 }
 
-bool TextButton::IsUnderlineEnabled() const
+bool TextButton::IsTextUnderlineEnabled() const
 {
-  return GetImpl(*this).IsUnderlineEnabled();
+  return GetImpl(*this).IsTextUnderlineEnabled();
 }
 
-Text::Underline TextButton::GetUnderline() const
+Text::Underline TextButton::GetTextUnderline() const
 {
-  return GetImpl(*this).GetUnderline();
+  return GetImpl(*this).GetTextUnderline();
 }
 
 TextButton::TextButton(Internal::TextButtonImpl& implementation)

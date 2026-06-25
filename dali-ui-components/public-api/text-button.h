@@ -75,10 +75,10 @@ public:
   void         SetFontFamily(const Dali::String& fontFamily);
   Dali::String GetFontFamily() const;
 
-  void            SetUnderline(const Text::Underline& underline);
-  void            ClearUnderline();
-  bool            IsUnderlineEnabled() const;
-  Text::Underline GetUnderline() const;
+  void            SetTextUnderline(const Text::Underline& underline);
+  void            ClearTextUnderline();
+  bool            IsTextUnderlineEnabled() const;
+  Text::Underline GetTextUnderline() const;
 
 public: // Not intended for application developers
   /// @cond internal

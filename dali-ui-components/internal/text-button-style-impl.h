@@ -80,10 +80,10 @@ public:
   void        SetStateEffect(StateEffect effect);
   StateEffect GetStateEffect() const;
 
-  void            SetUnderline(const Text::Underline& underline);
-  void            ClearUnderline();
-  bool            IsUnderlineEnabled() const;
-  Text::Underline GetUnderline() const;
+  void            SetTextUnderline(const Text::Underline& underline);
+  void            ClearTextUnderline();
+  bool            IsTextUnderlineEnabled() const;
+  Text::Underline GetTextUnderline() const;
 
 protected:
   ~TextButtonStyleImpl() override;

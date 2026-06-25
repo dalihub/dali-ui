@@ -87,8 +87,8 @@ public:
 
   StateEffect GetStateEffect() const;
 
-  bool            IsUnderlineEnabled() const;
-  Text::Underline GetUnderline() const;
+  bool            IsTextUnderlineEnabled() const;
+  Text::Underline GetTextUnderline() const;
 
 public: // Not intended for application developers
   /// @cond internal
@@ -162,11 +162,11 @@ public:
   Builder&  SetStateEffect(StateEffect effect) &;
   Builder&& SetStateEffect(StateEffect effect) &&;
 
-  Builder&  SetUnderline(const Text::Underline& underline) &;
-  Builder&& SetUnderline(const Text::Underline& underline) &&;
+  Builder&  SetTextUnderline(const Text::Underline& underline) &;
+  Builder&& SetTextUnderline(const Text::Underline& underline) &&;
 
-  Builder&  ClearUnderline() &;
-  Builder&& ClearUnderline() &&;
+  Builder&  ClearTextUnderline() &;
+  Builder&& ClearTextUnderline() &&;
 
   TextButtonStyle Build() &&;
 

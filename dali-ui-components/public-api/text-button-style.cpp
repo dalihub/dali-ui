@@ -147,14 +147,14 @@ StateEffect TextButtonStyle::GetStateEffect() const
   return GetImpl(*this).GetStateEffect();
 }
 
-bool TextButtonStyle::IsUnderlineEnabled() const
+bool TextButtonStyle::IsTextUnderlineEnabled() const
 {
-  return GetImpl(*this).IsUnderlineEnabled();
+  return GetImpl(*this).IsTextUnderlineEnabled();
 }
 
-Text::Underline TextButtonStyle::GetUnderline() const
+Text::Underline TextButtonStyle::GetTextUnderline() const
 {
-  return GetImpl(*this).GetUnderline();
+  return GetImpl(*this).GetTextUnderline();
 }
 
 TextButtonStyle::TextButtonStyle(Internal::TextButtonStyleImpl* impl)
@@ -377,27 +377,27 @@ TextButtonStyle::Builder&& TextButtonStyle::Builder::SetStateEffect(StateEffect 
   return std::move(*this);
 }
 
-TextButtonStyle::Builder& TextButtonStyle::Builder::SetUnderline(const Text::Underline& underline) &
+TextButtonStyle::Builder& TextButtonStyle::Builder::SetTextUnderline(const Text::Underline& underline) &
 {
-  mImpl->SetUnderline(underline);
+  mImpl->SetTextUnderline(underline);
   return *this;
 }
 
-TextButtonStyle::Builder&& TextButtonStyle::Builder::SetUnderline(const Text::Underline& underline) &&
+TextButtonStyle::Builder&& TextButtonStyle::Builder::SetTextUnderline(const Text::Underline& underline) &&
 {
-  SetUnderline(underline);
+  SetTextUnderline(underline);
   return std::move(*this);
 }
 
-TextButtonStyle::Builder& TextButtonStyle::Builder::ClearUnderline() &
+TextButtonStyle::Builder& TextButtonStyle::Builder::ClearTextUnderline() &
 {
-  mImpl->ClearUnderline();
+  mImpl->ClearTextUnderline();
   return *this;
 }
 
-TextButtonStyle::Builder&& TextButtonStyle::Builder::ClearUnderline() &&
+TextButtonStyle::Builder&& TextButtonStyle::Builder::ClearTextUnderline() &&
 {
-  ClearUnderline();
+  ClearTextUnderline();
   return std::move(*this);
 }
 
@@ -569,23 +569,23 @@ StateEffect TextButtonStyleImpl::GetStateEffect() const
   return mStateEffect;
 }
 
-void TextButtonStyleImpl::SetUnderline(const Text::Underline& underline)
+void TextButtonStyleImpl::SetTextUnderline(const Text::Underline& underline)
 {
   mUnderline        = underline;
   mUnderlineEnabled = true;
 }
 
-void TextButtonStyleImpl::ClearUnderline()
+void TextButtonStyleImpl::ClearTextUnderline()
 {
   mUnderlineEnabled = false;
 }
 
-bool TextButtonStyleImpl::IsUnderlineEnabled() const
+bool TextButtonStyleImpl::IsTextUnderlineEnabled() const
 {
   return mUnderlineEnabled;
 }
 
-Text::Underline TextButtonStyleImpl::GetUnderline() const
+Text::Underline TextButtonStyleImpl::GetTextUnderline() const
 {
   return mUnderline;
 }

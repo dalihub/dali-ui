@@ -133,25 +133,25 @@ Dali::String TextButtonImpl::GetFontFamily() const
   return mLabel.GetFontFamily();
 }
 
-void TextButtonImpl::SetUnderline(const Text::Underline& underline)
+void TextButtonImpl::SetTextUnderline(const Text::Underline& underline)
 {
   mUnderline        = underline;
   mUnderlineEnabled = true;
-  mLabel.SetUnderline(underline);
+  mLabel.SetTextUnderline(underline);
 }
 
-void TextButtonImpl::ClearUnderline()
+void TextButtonImpl::ClearTextUnderline()
 {
   mUnderlineEnabled = false;
-  mLabel.ClearUnderline();
+  mLabel.ClearTextUnderline();
 }
 
-bool TextButtonImpl::IsUnderlineEnabled() const
+bool TextButtonImpl::IsTextUnderlineEnabled() const
 {
   return mUnderlineEnabled;
 }
 
-Text::Underline TextButtonImpl::GetUnderline() const
+Text::Underline TextButtonImpl::GetTextUnderline() const
 {
   return mUnderline;
 }
@@ -263,13 +263,13 @@ void TextButtonImpl::ApplyStyle(TextButtonStyle style)
   SetFontFamily(style.GetFontFamily());
   self.SetStateEffect(style.GetStateEffect());
 
-  if(style.IsUnderlineEnabled())
+  if(style.IsTextUnderlineEnabled())
   {
-    SetUnderline(style.GetUnderline());
+    SetTextUnderline(style.GetTextUnderline());
   }
   else
   {
-    ClearUnderline();
+    ClearTextUnderline();
   }
 }
 
