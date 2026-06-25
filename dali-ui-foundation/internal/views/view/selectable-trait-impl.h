@@ -60,6 +60,28 @@ public: // Signals
    */
   Signal<void(View, bool, InputEvent)>& SelectionChangedSignal();
 
+  /**
+   * @brief Type of the internal-only post-commit selection observer.
+   *
+   * A plain (stateless) function pointer: it receives the owner View and re-resolves any
+   * collaborator from it, so no per-instance object identity is captured or stored. This keeps
+   * the slot one pointer wide, never dangling, and needing no lifetime cleanup.
+   */
+  using SelectionCommitObserver = void (*)(View view, bool selected, InputEvent event);
+
+  /**
+   * @brief Sets the internal-only post-commit selection observer (single slot).
+   *
+   * Invoked from SetSelectedInternal AFTER the state is committed and immediately BEFORE the
+   * public SelectionChangedSignal, so an internal collaborator (GroupSelectableTraitImpl) can
+   * fully settle group-selection arbitration before any user-facing SelectionChangedSignal
+   * callback runs, independent of signal connection order. NOT mirrored on the public
+   * SelectableTrait handle; single known consumer. Pass nullptr to clear.
+   *
+   * @param[in] observer The observer function, or nullptr to clear
+   */
+  void SetSelectionCommitObserver(SelectionCommitObserver observer);
+
 public: // API
   /**
    * @copydoc Dali::Ui::SelectableTrait::IsSelected
@@ -141,6 +163,7 @@ private:
 private:
   WeakHandle<View>                     mOwner;
   Signal<void(View, bool, InputEvent)> mSelectionChangedSignal;
+  SelectionCommitObserver              mSelectionCommitObserver; ///< Internal-only (GroupSelectableTraitImpl); stateless post-commit hook, invoked before mSelectionChangedSignal.
   bool                                 mSelected : 1;
   bool                                 mToggleByClickEnabled : 1;
   bool                                 mSelectOnlyByClick : 1; ///< Internal-only (GroupSelectableTraitImpl). When set, OnClickedForToggle keeps a selected View selected; never touches toggle-by-click.

@@ -305,7 +305,7 @@ void GroupSelectableTraitImpl::OnAttached(View& view)
   mOwner    = view;
   mAttached = true;
 
-  // Connect the membership-INDEPENDENT selection observer only. The click policy
+  // Install the membership-INDEPENDENT selection observer only. The click policy
   // is membership-GATED and is applied by JoinGroup(); in practice mGroup is null here
   // because AsGroupSelectable() attaches the trait BEFORE any declarative JoinGroup() runs. The
   // if(mGroup) branch below is defensive for a (currently impossible) attach-after-join.
@@ -395,12 +395,15 @@ void GroupSelectableTraitImpl::ConnectSelectionObserver()
     return;
   }
 
-  // Membership-INDEPENDENT: observe the sibling SelectableTrait's post-commit selection
-  // change for the whole attached lifetime. OnSelectionChanged no-ops while mGroup is
-  // null, so keeping it connected when ungrouped is harmless.
+  // Membership-INDEPENDENT: install the sibling SelectableTraitImpl's INTERNAL post-commit
+  // observer (a stateless function pointer, DispatchCommit, invoked just before the public
+  // SelectionChangedSignal) for the whole attached lifetime, so group arbitration settles
+  // before any user-facing SelectionChangedSignal callback runs regardless of connection
+  // order. The dispatcher re-resolves this view's group trait, and OnSelectionChanged no-ops
+  // while mGroup is null, so keeping it installed when ungrouped is harmless.
   SelectableTrait selectable = GetSelectableTrait(GetImpl(owner));
   DALI_ASSERT_ALWAYS(selectable && "GroupSelectableTraitImpl requires SelectableTrait");
-  selectable.SelectionChangedSignal().Connect(this, &GroupSelectableTraitImpl::OnSelectionChanged);
+  GetImpl(selectable).SetSelectionCommitObserver(&GroupSelectableTraitImpl::DispatchCommit);
 }
 
 void GroupSelectableTraitImpl::DisconnectSelectionObserver()
@@ -411,12 +414,14 @@ void GroupSelectableTraitImpl::DisconnectSelectionObserver()
     return;
   }
 
-  // Only ever disconnect the handler THIS trait connected; user-connected callbacks on
-  // the same signal are untouched.
+  // Clear the post-commit observer THIS trait installed. User-connected callbacks on the
+  // public SelectionChangedSignal are untouched (this trait uses the separate INTERNAL
+  // function-pointer observer slot). The dispatcher is stateless, so a missed clear (e.g. the
+  // dead detach path) cannot dangle anyway.
   SelectableTrait selectable = GetSelectableTrait(GetImpl(owner));
   if(selectable)
   {
-    selectable.SelectionChangedSignal().Disconnect(this, &GroupSelectableTraitImpl::OnSelectionChanged);
+    GetImpl(selectable).SetSelectionCommitObserver(nullptr);
   }
 }
 
@@ -454,10 +459,28 @@ void GroupSelectableTraitImpl::RestoreClickPolicy()
   }
 }
 
+void GroupSelectableTraitImpl::DispatchCommit(View view, bool selected, InputEvent event)
+{
+  // Stateless post-commit dispatcher installed on the sibling SelectableTraitImpl. It captures
+  // NO object identity (so it can never dangle); instead it re-resolves THIS view's group trait
+  // from the owner View and forwards to the instance handler. Resolution mirrors the sibling
+  // lookups in this file (GetSelectableTrait) and in selectable-trait-impl.cpp.
+  CoreInteractionObject* core = ViewDataImpl::Get(GetImpl(view)).GetCoreInteractionObject();
+  if(!core)
+  {
+    return;
+  }
+  if(GroupSelectableTraitImpl* group = core->GetGroupSelectableTraitImpl())
+  {
+    group->OnSelectionChanged(view, selected, event);
+  }
+}
+
 void GroupSelectableTraitImpl::OnSelectionChanged(View view, bool selected, InputEvent event)
 {
-  // Post-commit (SelectionChangedSignal is the last line of SetSelectedInternal,
-  // selectable-trait-impl.cpp:94). Mirror CHECKED accessibility first.
+  // Post-commit: the SelectableTraitImpl invokes its internal commit observer right after the
+  // state is committed and just before the public SelectionChangedSignal in SetSelectedInternal.
+  // Mirror CHECKED accessibility first.
   if(mGroup)
   {
     WriteCheckedState(view, selected);

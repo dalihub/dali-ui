@@ -41,6 +41,7 @@ InteractiveTrait GetInteractiveTrait(ViewImpl& viewImpl)
 
 SelectableTraitImpl::SelectableTraitImpl()
 : mSelectionChangedSignal(),
+  mSelectionCommitObserver(nullptr),
   mSelected(false),
   mToggleByClickEnabled(true),
   mSelectOnlyByClick(false),
@@ -55,6 +56,11 @@ SelectableTraitImpl::~SelectableTraitImpl()
 Signal<void(View, bool, InputEvent)>& SelectableTraitImpl::SelectionChangedSignal()
 {
   return mSelectionChangedSignal;
+}
+
+void SelectableTraitImpl::SetSelectionCommitObserver(SelectionCommitObserver observer)
+{
+  mSelectionCommitObserver = observer;
 }
 
 bool SelectableTraitImpl::IsSelected() const
@@ -87,11 +93,21 @@ void SelectableTraitImpl::SetSelectedInternal(bool selected, InputEvent event)
     return;
   }
 
-  // TODO: Consult group-selection policy before committing state.
-
   mSelected = selected;
   IntegrationView::SetState(GetImpl(owner), ViewState::SELECTED, selected, event);
-  mSelectionChangedSignal.Emit(owner, mSelected, event);
+
+  // Post-commit, pre-public notification. The internal commit observer lets an internal
+  // collaborator (GroupSelectableTraitImpl) observe the already-committed state and fully
+  // settle group-selection arbitration BEFORE any user-facing SelectionChangedSignal callback
+  // runs, independent of signal connection order. Both emit the local `selected` (this
+  // transition's result), not a re-read of mSelected: a re-entrant selection change during the
+  // commit cascade (e.g. a callback that calls SetSelected on this view again) could otherwise
+  // flip mSelected before the public emit reads it.
+  if(mSelectionCommitObserver)
+  {
+    mSelectionCommitObserver(owner, selected, event);
+  }
+  mSelectionChangedSignal.Emit(owner, selected, event);
 }
 
 bool SelectableTraitImpl::IsToggleByClickEnabled() const

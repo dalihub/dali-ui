@@ -62,9 +62,10 @@ class SelectionGroupImpl;
  *    While the member is ungrouped (AsGroupSelectable() with no group name and not
  *    under a parent's auto-group, or after it has left its group) it behaves exactly
  *    as a plain Selectable: the internal select-only flag is cleared.
- *  - The selection observer is MEMBERSHIP-INDEPENDENT: it stays connected to
- *    the sibling SelectableTrait SelectionChangedSignal for the whole attached
- *    lifetime, no-opping while mGroup is null. When this member becomes selected
+ *  - The selection observer is MEMBERSHIP-INDEPENDENT: it stays installed as the
+ *    sibling SelectableTraitImpl's INTERNAL post-commit observer (a stateless function
+ *    pointer invoked just before the public SelectionChangedSignal) for the whole
+ *    attached lifetime, no-opping while mGroup is null. When this member becomes selected
  *    (and is grouped) it notifies its SelectionGroupImpl, which records the new
  *    winner and unselects the previous winner.
  *
@@ -205,16 +206,19 @@ private:
   void JoinParentGroupIfApplicable();
 
   /**
-   * @brief Connects the membership-INDEPENDENT selection observer.
+   * @brief Installs the membership-INDEPENDENT selection observer.
    *
-   * Connects SelectableTrait::SelectionChangedSignal -> OnSelectionChanged. The handler
-   * no-ops while mGroup is null (if(mGroup) guard), so it is safe to keep connected for
-   * the whole attached lifetime regardless of group membership.
+   * Installs the sibling SelectableTraitImpl's INTERNAL post-commit observer (a stateless
+   * function pointer, DispatchCommit, invoked just before the public SelectionChangedSignal),
+   * so group arbitration settles before any user-facing SelectionChangedSignal callback
+   * regardless of connection order. The handler no-ops while mGroup is null (if(mGroup)
+   * guard), so it is safe to keep installed for the whole attached lifetime regardless of
+   * group membership.
    */
   void ConnectSelectionObserver();
 
   /**
-   * @brief Disconnects the selection observer connected by ConnectSelectionObserver().
+   * @brief Clears the selection observer installed by ConnectSelectionObserver().
    */
   void DisconnectSelectionObserver();
 
@@ -237,6 +241,15 @@ private:
    * never changed it).
    */
   void RestoreClickPolicy();
+
+  /**
+   * @brief Stateless post-commit dispatcher installed on the sibling SelectableTraitImpl.
+   *
+   * Captures no object identity (cannot dangle); re-resolves this view's group trait from the
+   * owner View and forwards to OnSelectionChanged. Installed/cleared by
+   * ConnectSelectionObserver/DisconnectSelectionObserver.
+   */
+  static void DispatchCommit(View view, bool selected, InputEvent event);
 
   /**
    * @brief Post-commit selection-changed handler.

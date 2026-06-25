@@ -597,6 +597,57 @@ int UtcDaliGroupSelectableTraitUserSignalsSurviveGroupingP(void)
   END_TEST;
 }
 
+// Group arbitration must fully settle BEFORE any user-facing SelectionChangedSignal callback,
+// independent of signal connection order. The user callback is connected to the public
+// SelectionChangedSignal BEFORE the View is grouped (the connection order that would otherwise
+// run the user callback ahead of the group). When the swap selects b, b's user callback must
+// already observe the group as settled: b is the winner and the previous winner a is unselected.
+int UtcDaliGroupSelectableTraitGroupArbitratesBeforeUserCallbackP(void)
+{
+  UiTestApplication application;
+  View              a = CreateSceneView(application, 0.0f, 0.0f);
+  View              b = CreateSceneView(application, 200.0f, 0.0f);
+
+  // Connect the user callback to b's PUBLIC signal BEFORE grouping (user becomes the earlier
+  // slot). It records what the group looked like at the instant the callback ran.
+  bool userCallbackRan          = false;
+  bool winnerWasBInCallback     = false;
+  bool aStillSelectedInCallback = true;
+  b.AsSelectable().SelectionChangedSignal().Connect(&application, [&](View, bool selected, InputEvent) {
+    if(selected)
+    {
+      SelectionGroup g         = SelectionGroup::Find("UtcArbOrder");
+      userCallbackRan          = true;
+      winnerWasBInCallback     = (g.GetSelectedMember() == b);
+      aStillSelectedInCallback = a.AsSelectable().IsSelected();
+    }
+  });
+
+  // Group both members AFTER the user callback is connected.
+  a.AsGroupSelectable().SetGroupName("UtcArbOrder");
+  b.AsGroupSelectable().SetGroupName("UtcArbOrder");
+
+  SelectionGroup group = SelectionGroup::Find("UtcArbOrder");
+
+  // Pre-select a (current winner).
+  a.AsSelectable().SetSelected(true);
+  DALI_TEST_CHECK(group.GetSelectedMember() == a);
+
+  // Select b -> radio swap. b's user callback runs from the public SelectionChangedSignal.
+  b.AsSelectable().SetSelected(true);
+
+  // The group had already settled when the user callback ran: b winner, a unselected.
+  DALI_TEST_CHECK(userCallbackRan);
+  DALI_TEST_CHECK(winnerWasBInCallback);
+  DALI_TEST_CHECK(!aStillSelectedInCallback);
+
+  // Final state is consistent too.
+  DALI_TEST_CHECK(group.GetSelectedMember() == b);
+  DALI_TEST_CHECK(b.AsSelectable().IsSelected());
+  DALI_TEST_CHECK(!a.AsSelectable().IsSelected());
+  END_TEST;
+}
+
 // FIX-5 postcondition: with a default-role View, after clearing the winner's name the
 // logical SELECTED state is preserved (IsSelected()==true), the role is restored to its
 // pre-join value (NONE), and the a11y CHECKED bit follows that restored non-checkable role
