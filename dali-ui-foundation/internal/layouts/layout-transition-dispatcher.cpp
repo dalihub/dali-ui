@@ -30,6 +30,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-validation.h>
@@ -39,6 +40,8 @@
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali-ui-foundation/public-api/view.h>
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali
 {

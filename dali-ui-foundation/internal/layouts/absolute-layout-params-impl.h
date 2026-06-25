@@ -125,7 +125,7 @@ public:
    */
   static AbsoluteLayoutParamsImpl* Get(ViewImpl& viewImpl)
   {
-    IntrusivePtr<TraitObject> object = IntegrationView::GetTrait(viewImpl, Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
+    IntrusivePtr<TraitObject> object = Integration::View::GetTrait(viewImpl, Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
     DALI_ASSERT_DEBUG(!object || (dynamic_cast<AbsoluteLayoutParamsImpl*>(object.Get()) && "ABSOLUTE_LAYOUT_PARAMS trait must be an AbsoluteLayoutParamsImpl"));
     return object ? static_cast<AbsoluteLayoutParamsImpl*>(object.Get()) : nullptr;
   }
@@ -143,7 +143,7 @@ public:
       return *existing;
     }
     AbsoluteLayoutParams params = AbsoluteLayoutParams::New();
-    IntegrationView::SetTrait(viewImpl, Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, IntrusivePtr<TraitObject>(&static_cast<TraitObject&>(params.GetBaseObject())));
+    Integration::View::SetTrait(viewImpl, Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, IntrusivePtr<TraitObject>(&static_cast<TraitObject&>(params.GetBaseObject())));
     return static_cast<AbsoluteLayoutParamsImpl&>(params.GetBaseObject());
   }
 

@@ -38,6 +38,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/public-api/image-view.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
@@ -47,6 +48,8 @@
 #define DECORATOR_DEBUG
 
 #endif
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToDaliStringView;

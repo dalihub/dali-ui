@@ -28,9 +28,10 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
+namespace IntegrationView = Dali::Ui::Integration::View;
+
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
 
 namespace
 {

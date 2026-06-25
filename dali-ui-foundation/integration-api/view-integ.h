@@ -40,7 +40,9 @@ namespace Ui
 
 class ViewImpl;
 
-namespace IntegrationView
+namespace Integration
+{
+namespace View
 {
 
 /**
@@ -298,6 +300,7 @@ DALI_UI_API bool IsLayout(ViewImpl& viewImpl);
  */
 DALI_UI_API bool HasLayoutCapability(ViewImpl& viewImpl);
 
-} // namespace IntegrationView
+} // namespace View
+} // namespace Integration
 } // namespace Ui
 } // namespace Dali

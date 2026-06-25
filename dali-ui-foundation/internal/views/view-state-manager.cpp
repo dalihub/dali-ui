@@ -25,10 +25,13 @@
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/internal/state-event-impl.h>
 #include <dali-ui-foundation/public-api/state-event.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali
 {

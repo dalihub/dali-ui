@@ -32,24 +32,24 @@ StateEffectImpl::StateEffectImpl() = default;
 
 StateEffectImpl::~StateEffectImpl() = default;
 
-void StateEffectImpl::OnViewStateChanged(View /*view*/, const StateEvent& /*event*/)
+void StateEffectImpl::OnViewStateChanged(Ui::View /*view*/, const StateEvent& /*event*/)
 {
 }
 
-void StateEffectImpl::OnInteractiveAttached(View /*view*/)
+void StateEffectImpl::OnInteractiveAttached(Ui::View /*view*/)
 {
 }
 
-void StateEffectImpl::OnStateEffectTargetsChanged(View /*view*/)
+void StateEffectImpl::OnStateEffectTargetsChanged(Ui::View /*view*/)
 {
 }
 
-bool StateEffectImpl::ShouldSuppressDefaultFocusIndicator(View /*view*/) const
+bool StateEffectImpl::ShouldSuppressDefaultFocusIndicator(Ui::View /*view*/) const
 {
   return false;
 }
 
-void StateEffectImpl::InvalidateDefaultFocusIndicatorSuppression(View view)
+void StateEffectImpl::InvalidateDefaultFocusIndicatorSuppression(Ui::View view)
 {
   if(view)
   {

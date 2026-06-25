@@ -95,7 +95,7 @@ inline ViewImpl* FindGoverningSubtreeOwner(ViewImpl* start, ReflowSlot slot)
 
     // No transition here: an ancestor SUBTREE owner descends through this node
     // only if it is not a standalone layout root (matches CaptureGovernedChildren).
-    if(IntegrationView::IsLayoutModeStandalone(*node))
+    if(Integration::View::IsLayoutModeStandalone(*node))
     {
       return nullptr;
     }

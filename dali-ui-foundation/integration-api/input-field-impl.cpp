@@ -34,6 +34,7 @@
 
 #include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
@@ -54,6 +55,8 @@
 
 #include <algorithm>
 #include <limits>
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -223,7 +226,7 @@ Text::TypingStyle::Mask ToTypingStyleMask(Text::InputStyle::Mask inputStyleMask)
  */
 void SetKeyInputFocus(ViewImpl& impl)
 {
-  Ui::View view = View::DownCast(impl.Self());
+  Ui::View view = Ui::View::DownCast(impl.Self());
   if(view && view.IsOnScene())
   {
     Internal::KeyInputFocusManager::Get().SetFocus(view);
@@ -240,7 +243,7 @@ void SetKeyInputFocus(ViewImpl& impl)
  */
 void ClearKeyInputFocus(ViewImpl& impl)
 {
-  Ui::View view = View::DownCast(impl.Self());
+  Ui::View view = Ui::View::DownCast(impl.Self());
   if(view && view.IsOnScene())
   {
     Internal::KeyInputFocusManager::Get().RemoveFocus(view);
@@ -1126,42 +1129,42 @@ uint32_t InputFieldImpl::GetSelectedTextEnd() const
 // =============================================================================
 // Signals
 // =============================================================================
-Signal<void(View)>& InputFieldImpl::TextChangedSignal()
+Signal<void(Ui::View)>& InputFieldImpl::TextChangedSignal()
 {
   return mTextChangedSignal;
 }
 
-Signal<void(View)>& InputFieldImpl::MaximumLengthReachedSignal()
+Signal<void(Ui::View)>& InputFieldImpl::MaximumLengthReachedSignal()
 {
   return mMaxLengthReachedSignal;
 }
 
-Signal<void(View, Text::InputFilter::RejectReason)>& InputFieldImpl::InputRejectedSignal()
+Signal<void(Ui::View, Text::InputFilter::RejectReason)>& InputFieldImpl::InputRejectedSignal()
 {
   return mInputRejectedSignal;
 }
 
-Signal<void(View, uint32_t)>& InputFieldImpl::CursorPositionChangedSignal()
+Signal<void(Ui::View, uint32_t)>& InputFieldImpl::CursorPositionChangedSignal()
 {
   return mCursorPositionChangedSignal;
 }
 
-Signal<void(View)>& InputFieldImpl::SelectionStartedSignal()
+Signal<void(Ui::View)>& InputFieldImpl::SelectionStartedSignal()
 {
   return mSelectionStartedSignal;
 }
 
-Signal<void(View, uint32_t, uint32_t)>& InputFieldImpl::SelectionChangedSignal()
+Signal<void(Ui::View, uint32_t, uint32_t)>& InputFieldImpl::SelectionChangedSignal()
 {
   return mSelectionChangedSignal;
 }
 
-Signal<void(View)>& InputFieldImpl::SelectionClearedSignal()
+Signal<void(Ui::View)>& InputFieldImpl::SelectionClearedSignal()
 {
   return mSelectionClearedSignal;
 }
 
-Signal<void(View, Text::TypingStyle::Mask)>& InputFieldImpl::TypingStyleChangedSignal()
+Signal<void(Ui::View, Text::TypingStyle::Mask)>& InputFieldImpl::TypingStyleChangedSignal()
 {
   return mTypingStyleChangedSignal;
 }
@@ -1278,7 +1281,7 @@ void InputFieldImpl::OnInitialize()
 
   self.LayoutDirectionChangedSignal().Connect(this, &InputFieldImpl::OnLayoutDirectionChanged);
 
-  auto viewHandle = View::DownCast(self);
+  auto viewHandle = Ui::View::DownCast(self);
   viewHandle.SetFocusable(true);
   viewHandle.SetTouchFocusable(true);
 
@@ -1313,7 +1316,7 @@ void InputFieldImpl::OnInitialize()
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
   self.OnSceneSignal().Connect(this, &InputFieldImpl::OnSceneConnect);
 
-  View      view         = Dali::Ui::View::DownCast(self);
+  Ui::View  view         = Ui::View::DownCast(self);
   ViewImpl& viewInternal = Ui::GetImpl(view);
   Internal::ViewDataImpl::Get(viewInternal).SetInputMethodContext(mInputMethodContext);
 

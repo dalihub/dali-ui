@@ -21,6 +21,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/provider-api/selectable-view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/devel-api/object/type-registry.h>
@@ -28,9 +29,10 @@
 #include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/events/touch-event-integ.h>
 
+namespace IntegrationView = Dali::Ui::Integration::View;
+
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
 
 namespace
 {

@@ -90,7 +90,7 @@ public:
   /**
    * @brief Invokes all registered handlers.
    *
-   * Called by IntegrationView::SetState when the view's ViewState changes.
+   * Called by Integration::View::SetState when the view's ViewState changes.
    *
    * @param[in] view The owner view
    * @param[in] prev The previous ViewState

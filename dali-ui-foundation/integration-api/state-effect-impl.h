@@ -51,7 +51,7 @@ protected:
    * @param[in] view The View whose state changed
    * @param[in] event The state transition event
    */
-  virtual void OnViewStateChanged(View view, const StateEvent& event);
+  virtual void OnViewStateChanged(Ui::View view, const StateEvent& event);
 
   /**
    * @brief Called when the attached View receives an interactive trait.
@@ -62,14 +62,14 @@ protected:
    *
    * @param[in] view The View that became interactive
    */
-  virtual void OnInteractiveAttached(View view);
+  virtual void OnInteractiveAttached(Ui::View view);
 
   /**
    * @brief Called when the attached View's state effect targets change.
    *
    * @param[in] view The View whose state effect targets changed
    */
-  virtual void OnStateEffectTargetsChanged(View view);
+  virtual void OnStateEffectTargetsChanged(Ui::View view);
 
   /**
    * @brief Returns whether this effect suppresses FocusManager's default focus indicator for the given owner View.
@@ -93,7 +93,7 @@ protected:
    * @param[in] view The owner View this effect is attached to
    * @return True if FocusManager's default focus indicator should be suppressed
    */
-  virtual bool ShouldSuppressDefaultFocusIndicator(View view) const;
+  virtual bool ShouldSuppressDefaultFocusIndicator(Ui::View view) const;
 
   /**
    * @brief Invalidates the cached default focus indicator suppression result for an attached View.
@@ -108,7 +108,7 @@ protected:
    *
    * @param[in] view The owner View whose cached suppression result may be stale
    */
-  void InvalidateDefaultFocusIndicatorSuppression(View view);
+  void InvalidateDefaultFocusIndicatorSuppression(Ui::View view);
 
 private:
   friend class Internal::ViewStateManager;

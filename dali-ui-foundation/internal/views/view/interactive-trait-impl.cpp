@@ -23,11 +23,14 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/internal/interactive-trait/pending-press-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/input-event.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali::Ui::Internal
 {

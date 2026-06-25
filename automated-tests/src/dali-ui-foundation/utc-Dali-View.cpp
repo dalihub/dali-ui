@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -27,9 +28,10 @@
 #include <limits>
 #include <vector>
 
+namespace IntegrationView = Dali::Ui::Integration::View;
+
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
 
 namespace
 {

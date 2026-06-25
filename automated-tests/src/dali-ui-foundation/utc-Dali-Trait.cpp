@@ -21,13 +21,18 @@
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/public-api/actors/actor.h>
 #include <typeinfo>
 
+
+
+namespace IntegrationView = Dali::Ui::Integration::View;
+
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
+namespace ReservedTraitId = Dali::Ui::Integration::ReservedTraitId;
 
 namespace
 {

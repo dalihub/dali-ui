@@ -43,7 +43,9 @@ const Internal::ViewDataImpl& GetViewImplData(const ViewImpl& viewImpl)
 
 } // namespace
 
-namespace IntegrationView
+namespace Integration
+{
+namespace View
 {
 
 void SetTrait(ViewImpl& viewImpl, TraitId id, IntrusivePtr<TraitObject> object)
@@ -139,6 +141,7 @@ bool HasLayoutCapability(ViewImpl& viewImpl)
   return IsLayout(viewImpl) || viewImpl.HasLayoutManager() || viewImpl.HasLayoutCallback();
 }
 
-} // namespace IntegrationView
+} // namespace View
+} // namespace Integration
 } // namespace Ui
 } // namespace Dali

@@ -46,6 +46,7 @@
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
@@ -85,6 +86,8 @@
 // Verify CornerRadiusPolicy values stay in sync with Ui::Visual::Policy::Type.
 static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::RELATIVE) == Dali::Ui::Visual::Transform::Policy::RELATIVE);
 static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::ABSOLUTE) == Dali::Ui::Visual::Transform::Policy::ABSOLUTE);
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali
 {
@@ -3295,7 +3298,9 @@ void ViewImpl::SignalDisconnected(SlotObserver* slotObserver, CallbackBase* call
   mImpl->SignalDisconnected(slotObserver, callback);
 }
 
-namespace IntegrationView
+namespace Integration
+{
+namespace View
 {
 
 void AddActorChild(Ui::View view, Dali::Actor actor)
@@ -3320,6 +3325,7 @@ void AllowToAddActorToChildEnd(Ui::View view)
   gAllowScopeList.pop_back();
 }
 
-} // namespace IntegrationView
+} // namespace View
+} // namespace Integration
 } // namespace Ui
 } // namespace Dali

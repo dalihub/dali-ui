@@ -17,7 +17,6 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
 
 namespace
 {
@@ -37,11 +36,11 @@ void TVViewInitializer(View view)
 
 } // unnamed namespace
 
-class TVConfigImpl : public UiConfigImpl
+class TVConfigImpl : public Integration::UiConfigImpl
 {
 };
 
-TVConfig::TVConfig(UiConfigImpl* impl)
+TVConfig::TVConfig(Integration::UiConfigImpl* impl)
 : UiConfig(impl)
 {
 }

@@ -26,8 +26,11 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/public-api/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali
 {

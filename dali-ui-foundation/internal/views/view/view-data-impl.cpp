@@ -22,6 +22,7 @@
 #include "visual-constraint-functions.h"
 
 // EXTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
@@ -1419,7 +1420,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             dataImpl.mRequestedWidth = width;
             viewImpl.InvalidateMeasure();
             if(width >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
-               !IntegrationView::HasLayoutCapability(viewImpl) && viewImpl.GetChildCount() == 0)
+               !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildCount() == 0)
             {
               viewImpl.Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
             }
@@ -1449,7 +1450,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             dataImpl.mRequestedHeight = height;
             viewImpl.InvalidateMeasure();
             if(height >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
-               !IntegrationView::HasLayoutCapability(viewImpl) && viewImpl.GetChildCount() == 0)
+               !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildCount() == 0)
             {
               viewImpl.Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
             }

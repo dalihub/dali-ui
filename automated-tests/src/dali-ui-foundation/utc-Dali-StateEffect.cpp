@@ -19,14 +19,18 @@
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <test-gesture-generator.h>
 
+namespace IntegrationView = Dali::Ui::Integration::View;
+
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
+using Dali::Ui::Integration::StateEffectImpl;
+namespace ReservedTraitId = Dali::Ui::Integration::ReservedTraitId;
 
 namespace
 {

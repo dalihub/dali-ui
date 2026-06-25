@@ -30,7 +30,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
-#include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
@@ -592,8 +591,8 @@ public:
   bool mArrangeDirty;
 
   // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
-  IntegrationView::ChildContainer mChildren;
-  bool                            mSkipChildrenUpdate;
+  Dali::Vector<Ui::View> mChildren;
+  bool                   mSkipChildrenUpdate;
 
   // Layout transition
   Ui::LayoutTransition          mLayoutTransition;

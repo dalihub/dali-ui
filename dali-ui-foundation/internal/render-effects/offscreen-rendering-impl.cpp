@@ -23,12 +23,15 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
+
 #include <dali-ui-foundation/public-api/view-impl.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/texture-integ.h>
 
 #include <locale>
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 using Dali::Integration::ToDaliString;
 
