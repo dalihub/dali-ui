@@ -89,7 +89,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 세 가지 API 레벨
 * [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView-(kr))
 * ListView & GridView
 * Blur
-* Animations
+* [Animation](https://github.sec.samsung.net/NUI/dali-ui/wiki/Animation-(kr))
 * [API Reference](https://pages.github.sec.samsung.net/NUI/dali-ui/)
 
 <br/>

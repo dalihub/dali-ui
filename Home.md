@@ -91,7 +91,7 @@ For details about the class structure and extensibility of `View`, see [here](ht
 * [WebView](https://github.sec.samsung.net/NUI/dali-ui/wiki/WebView)
 * ListView & GridView
 * Blur
-* Animations
+* [Animation](https://github.sec.samsung.net/NUI/dali-ui/wiki/Animation)
 * [API Reference](https://pages.github.sec.samsung.net/NUI/dali-ui/)
 
 <br/>
