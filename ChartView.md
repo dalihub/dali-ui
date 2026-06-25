@@ -33,7 +33,7 @@
 
 ## 1. Basic Setup
 
-> ⚠️ **Note**: `ChartView` is part of `dali-ui-components`. You must call `UiComponentConfig::New().Apply()` before `MainLoop()`. See [Configuration](Configuration.md) for details.
+> ⚠️ **Note**: `ChartView` is part of `dali-ui-components`. You must call `UiConfig::New().Apply()` before `MainLoop()`. See [Configuration](Configuration.md) for details.
 
 ### main.cpp
 
@@ -46,8 +46,8 @@ int main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
 
-  // Required before MainLoop() when using dali-ui-components
-  UiComponentConfig::New().Apply();
+  // Apply UiConfig before MainLoop().
+  UiConfig::New().Apply();
 
   MyController controller(application);
   application.MainLoop();
@@ -1183,7 +1183,7 @@ target_compile_options(my-chart-app PRIVATE
 
 ## 18. Important Notes
 
-- **`UiComponentConfig` is required.** Call `UiComponentConfig::New().Apply()` before `Application::MainLoop()` when using `dali-ui-components`. Using `UiConfig` alone is not sufficient. See [Configuration](Configuration.md).
+- **`UiConfig` is required.** Call `UiConfig::New().Apply()` before `Application::MainLoop()` when using `dali-ui-components`. See [Configuration](Configuration.md).
 
 - **Chart type is fixed at creation.** `ChartView::New(type, size)` determines the chart type for the lifetime of the object. There is no `SetType()` method — create a new `ChartView` if you need a different type.
 

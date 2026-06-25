@@ -151,7 +151,7 @@ Combining with the `TVConfig` pattern introduced in [Configuration](링크):
 
 ```cpp
 // tv-config.h (public-api level)
-class TVConfig : public Dali::Ui::UiComponentConfig
+class TVConfig : public Dali::Ui::UiConfig
 {
 public:
   static TVConfig New()
@@ -165,7 +165,7 @@ public:
 
 private:
   explicit TVConfig(Dali::Ui::Integration::UiConfigImpl* impl)
-  : UiComponentConfig(/* ... */) {}
+  : UiConfig(impl) {}
 };
 ```
 

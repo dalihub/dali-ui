@@ -8,15 +8,12 @@ dali-ui를 사용하려면 앱 시작 시 반드시 Config 객체를 생성하�
 
 ## 어떤 Config를 사용해야 하나요?
 
-사용하는 라이브러리에 따라 Config 클래스가 달라집니다.
+`dali-ui-foundation`과 `dali-ui-components` 모두 `UiConfig`를 사용합니다.
 
 | 사용 라이브러리 | Config 클래스 | 헤더 |
 |---|---|---|
 | `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
-| `dali-ui-components` | `UiComponentConfig` | `<dali-ui-components/public-api/ui-component-config.h>` |
-
-`UiComponentConfig`는 `UiConfig`를 상속하므로 동일한 설정 항목을 모두 사용할 수 있습니다.
-`dali-ui-components`를 사용하는 경우 반드시 `UiComponentConfig`를 사용하세요.
+| `dali-ui-components` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
 
 <br/>
 
@@ -41,10 +38,10 @@ int main(int argc, char** argv)
 }
 ```
 
-`dali-ui-components`를 사용하는 경우:
+`dali-ui-components`를 사용하는 경우에도 하나의 `UiConfig`만 적용합니다:
 
 ```cpp
-UiComponentConfig config = UiComponentConfig::New();
+UiConfig config = UiConfig::New();
 config.SetDpi(320);
 config.SetScalingFactor(1.5f);
 config.Apply();
@@ -56,7 +53,7 @@ config.Apply();
 
 ## 설정 항목
 
-아래는 몇가지 주요 항목에 대한 설명입니다. 전체 API는 다음 링크에서 확인할 수 있습니다: [UiConfig](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1UiConfig.html), [UiComponentConfig](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1UiComponentConfig.html)
+아래는 몇가지 주요 항목에 대한 설명입니다. 전체 API는 다음 링크에서 확인할 수 있습니다: [UiConfig](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1UiConfig.html)
 
 | 항목 | 메서드 | 기본값 | 설명 |
 |---|---|---|---|
@@ -74,27 +71,47 @@ config.Apply();
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | 기본 포커스 인디케이터 활성화 여부 |
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | 터치 입력 시 포커스 indication을 해제할지 여부 |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | 포커스된 뷰 밖을 hover했을 때 포커스 indication을 해제할지 여부 |
+| Style Sheet | `SetStyleSheet(UiStyleSheet)`, `GetStyle(UiStyleKey)` | 컴포넌트 style override | 컴포넌트 스타일 creator lookup table 및 style resolver |
+
+<br/>
+
+## Component Style Sheet
+
+`UiConfig`는 `UiStyleSheet`를 가질 수 있습니다. 컴포넌트는
+`UiConfig::GetStyle(UiStyleKey)`를 통해 설정된 style을 resolve합니다.
+
+디바이스나 제품 전용 라이브러리는 components style sheet를 생성하고
+override하려는 style entry만 등록한 뒤 config에 적용할 수 있습니다:
+
+```cpp
+UiStyleSheet styleSheet = Dali::Ui::Components::StyleSheet::New();
+styleSheet.SetStyle(MyButtonStyleKey(), ProvideMyButtonStyle);
+
+UiConfig config = UiConfig::New();
+config.SetStyleSheet(styleSheet);
+config.Apply(); // config와 styleSheet를 모두 freeze합니다.
+```
 
 <br/>
 
 ## Framework 개발자를 위한 Config 확장
 
-특정 디바이스나 플랫폼 전용 Framework를 개발하는 경우, `UiConfig` 또는 `UiComponentConfig`를
+특정 디바이스나 플랫폼 전용 Framework를 개발하는 경우, `UiConfig`를
 상속하여 플랫폼에 맞는 설정이 미리 적용된 Config 클래스를 정의하고 앱 개발자에게 배포할 수 있습니다.
 
 ```cpp
 // TVConfig.h (Framework 개발자가 정의 및 배포)
-class TVConfig : public Dali::Ui::UiComponentConfig
+class TVConfig : public Dali::Ui::UiConfig
 {
 public:
-  explicit TVConfig(const Dali::Ui::UiComponentConfig& config)
-  : Dali::Ui::UiComponentConfig(config)
+  explicit TVConfig(const Dali::Ui::UiConfig& config)
+  : Dali::Ui::UiConfig(config)
   {
   }
 
   static TVConfig New()
   {
-    TVConfig config(Dali::Ui::UiComponentConfig::New());
+    TVConfig config(Dali::Ui::UiConfig::New());
     config.SetDpi(72);
     config.SetScalingFactor(2.0f);
     config.SetDefaultFontSize(28.0f);
