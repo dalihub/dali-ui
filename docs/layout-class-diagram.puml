@@ -28,7 +28,7 @@ package "Dali::Ui (Public API)" as public_api {
     + InvalidateArrange()
     + AttachLayoutManager(UniquePtr<LayoutManager>)
     __
-    - View(Integration::ViewImpl&)
+    - View(ViewImpl&)
     - View(CustomActor*)
   }
 
@@ -123,7 +123,7 @@ package "Dali::Ui (Public API)" as public_api {
 
   class "LayoutController" as LayoutController <<singleton>> {
     + {static} Get(Window) : LayoutController&
-    + RequestLayout(Integration::ViewImpl*)
+    + RequestLayout(ViewImpl*)
     + OnWindowResize(width, height)
     + ProcessLayouts()
     __

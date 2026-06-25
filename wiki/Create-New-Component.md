@@ -13,8 +13,8 @@ A public component handle should inherit from the foundation class that matches 
 | Use case | Public base | Internal impl base |
 |---|---|---|
 | Basic visual/container component | `View` | `ViewImpl` |
-| Clickable/focusable interactive component | `InteractiveView` | `InteractiveViewImpl` |
-| Component with selectable state | `SelectableView` | `SelectableViewImpl` |
+| Clickable/focusable interactive component | `InteractiveView` | `Provider::InteractiveViewImpl` |
+| Component with selectable state | `SelectableView` | `Provider::SelectableViewImpl` |
 
 Keep the public handle and internal impl hierarchy aligned:
 
@@ -24,7 +24,7 @@ class TextButton : public InteractiveView
   ...
 };
 
-class TextButtonImpl : public InteractiveViewImpl
+class TextButtonImpl : public Provider::InteractiveViewImpl
 {
   ...
 };

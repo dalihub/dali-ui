@@ -11,8 +11,8 @@ Public component handle은 컴포넌트의 동작에 맞는 foundation class를 
 | 사용 목적 | Public base | Internal impl base |
 |---|---|---|
 | 기본 visual/container component | `View` | `ViewImpl` |
-| click/focus 등 interaction이 필요한 component | `InteractiveView` | `InteractiveViewImpl` |
-| selection 상태가 필요한 component | `SelectableView` | `SelectableViewImpl` |
+| click/focus 등 interaction이 필요한 component | `InteractiveView` | `Provider::InteractiveViewImpl` |
+| selection 상태가 필요한 component | `SelectableView` | `Provider::SelectableViewImpl` |
 
 Public handle과 internal impl의 상속 계층을 맞춥니다.
 
@@ -22,7 +22,7 @@ class TextButton : public InteractiveView
   ...
 };
 
-class TextButtonImpl : public InteractiveViewImpl
+class TextButtonImpl : public Provider::InteractiveViewImpl
 {
   ...
 };

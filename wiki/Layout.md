@@ -259,7 +259,7 @@ Measure / Arrange to the manager automatically (a `MeasureCallback` / `ArrangeCa
 takes priority over the manager).
 
 ```cpp
-class MyButtonImpl : public Dali::Ui::Integration::ViewImpl
+class MyButtonImpl : public Dali::Ui::ViewImpl
 {
 protected:
   void OnInitialize() override
