@@ -48,18 +48,6 @@ constexpr uint32_t MASK_TARGET_INDEX = 1u;
 constexpr const char* UNIFORM_MASK_MODE_NAME     = "uMaskMode";
 constexpr const char* UNIFORM_MASK_POSITION_NAME = "uMaskPosition";
 constexpr const char* UNIFORM_MASK_SCALE_NAME    = "uMaskScale";
-
-void ClearMaskRenderTaskState(Dali::RenderTask renderTask)
-{
-  if(renderTask)
-  {
-    renderTask.SetInputEnabled(false);
-    renderTask.SetFrameBuffer(Dali::FrameBuffer());
-    renderTask.SetSourceActor(Dali::Actor());
-    renderTask.SetCameraActor(Dali::CameraActor());
-    renderTask.SetScreenToFrameBufferMappingActor(Dali::Actor());
-  }
-}
 } // namespace
 
 namespace Dali
@@ -400,19 +388,6 @@ void MaskEffectImpl::CreateRenderTasks(Ui::View ownerView)
 
 void MaskEffectImpl::ResetMaskData()
 {
-  if(mMaskSourceRenderTask && !mMaskSourceRenderTask.FinishedSignal().Empty())
-  {
-    mMaskSourceRenderTask.FinishedSignal().Disconnect(this, &MaskEffectImpl::OnSourceRenderFinished);
-  }
-
-  if(mMaskTargetRenderTask && !mMaskTargetRenderTask.FinishedSignal().Empty())
-  {
-    mMaskTargetRenderTask.FinishedSignal().Disconnect(this, &MaskEffectImpl::OnTargetRenderFinished);
-  }
-
-  ClearMaskRenderTaskState(mMaskSourceRenderTask);
-  ClearMaskRenderTaskState(mMaskTargetRenderTask);
-
   auto sceneHolder = GetSceneHolder();
   if(DALI_LIKELY(sceneHolder))
   {
