@@ -15,10 +15,10 @@
  *
  */
 
-#include <dali-ui-test-suite-utils.h>
-#include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/canvas-view.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali.h>
 #include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
 
 using namespace Dali;
@@ -41,7 +41,7 @@ void utc_dali_canvasview_cleanup(void)
 int UtcDaliCanvasViewConstructorP(void)
 {
   UiTestApplication application;
-  CanvasView         view;
+  CanvasView        view;
   DALI_TEST_CHECK(!view);
   END_TEST;
 }
@@ -49,7 +49,7 @@ int UtcDaliCanvasViewConstructorP(void)
 int UtcDaliCanvasViewNewP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
   END_TEST;
 }
@@ -57,7 +57,7 @@ int UtcDaliCanvasViewNewP(void)
 int UtcDaliCanvasViewNewWithoutViewboxP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New();
+  CanvasView        view = CanvasView::New();
   DALI_TEST_CHECK(view);
   END_TEST;
 }
@@ -65,8 +65,8 @@ int UtcDaliCanvasViewNewWithoutViewboxP(void)
 int UtcDaliCanvasViewCopyConstructorP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
-  CanvasView         copy(view);
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
+  CanvasView        copy(view);
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(view == copy);
   END_TEST;
@@ -75,8 +75,8 @@ int UtcDaliCanvasViewCopyConstructorP(void)
 int UtcDaliCanvasViewMoveConstructorP(void)
 {
   UiTestApplication application;
-  CanvasView         view  = CanvasView::New(Vector2(100, 100));
-  CanvasView         moved = std::move(view);
+  CanvasView        view  = CanvasView::New(Vector2(100, 100));
+  CanvasView        moved = std::move(view);
   DALI_TEST_CHECK(moved);
   DALI_TEST_CHECK(!view);
   END_TEST;
@@ -85,8 +85,8 @@ int UtcDaliCanvasViewMoveConstructorP(void)
 int UtcDaliCanvasViewAssignmentOperatorP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
-  CanvasView         copy;
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
+  CanvasView        copy;
   copy = view;
   DALI_TEST_CHECK(copy);
   DALI_TEST_CHECK(view == copy);
@@ -96,8 +96,8 @@ int UtcDaliCanvasViewAssignmentOperatorP(void)
 int UtcDaliCanvasViewMoveAssignmentOperatorP(void)
 {
   UiTestApplication application;
-  CanvasView         view  = CanvasView::New(Vector2(100, 100));
-  CanvasView         moved;
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
+  CanvasView        moved;
   moved = std::move(view);
   DALI_TEST_CHECK(moved);
   END_TEST;
@@ -110,9 +110,9 @@ int UtcDaliCanvasViewMoveAssignmentOperatorP(void)
 int UtcDaliCanvasViewDownCastP(void)
 {
   UiTestApplication application;
-  CanvasView         view   = CanvasView::New(Vector2(100, 100));
-  View               base   = view;
-  CanvasView         result = CanvasView::DownCast(base);
+  CanvasView        view   = CanvasView::New(Vector2(100, 100));
+  View              base   = view;
+  CanvasView        result = CanvasView::DownCast(base);
   DALI_TEST_CHECK(result);
   END_TEST;
 }
@@ -120,8 +120,8 @@ int UtcDaliCanvasViewDownCastP(void)
 int UtcDaliCanvasViewDownCastN(void)
 {
   UiTestApplication application;
-  View               base   = View::New();
-  CanvasView         result = CanvasView::DownCast(base);
+  View              base   = View::New();
+  CanvasView        result = CanvasView::DownCast(base);
   DALI_TEST_CHECK(!result);
   END_TEST;
 }
@@ -133,7 +133,7 @@ int UtcDaliCanvasViewDownCastN(void)
 int UtcDaliCanvasViewAddDrawableP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
@@ -147,12 +147,12 @@ int UtcDaliCanvasViewAddDrawableP(void)
 int UtcDaliCanvasViewAddDrawableN(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
+  // Adding an empty (uninitialized) drawable handle is a programming error and asserts.
   Dali::CanvasRenderer::Shape emptyShape;
-  bool                        result = view.AddDrawable(emptyShape);
-  DALI_TEST_CHECK(!result);
+  DALI_TEST_ASSERTION(view.AddDrawable(emptyShape), "Drawable handle is empty.");
   END_TEST;
 }
 
@@ -163,7 +163,7 @@ int UtcDaliCanvasViewAddDrawableN(void)
 int UtcDaliCanvasViewRemoveDrawableP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
@@ -177,7 +177,7 @@ int UtcDaliCanvasViewRemoveDrawableP(void)
 int UtcDaliCanvasViewRemoveDrawableN(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
@@ -193,7 +193,7 @@ int UtcDaliCanvasViewRemoveDrawableN(void)
 int UtcDaliCanvasViewRemoveAllDrawablesP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
@@ -208,7 +208,7 @@ int UtcDaliCanvasViewRemoveAllDrawablesP(void)
 int UtcDaliCanvasViewRemoveAllDrawablesN(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   // Nothing added — still should not crash, result may be false
@@ -224,7 +224,7 @@ int UtcDaliCanvasViewRemoveAllDrawablesN(void)
 int UtcDaliCanvasViewSetGetViewBoxP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   view.SetViewBox(Vector2(200, 200));
@@ -236,7 +236,7 @@ int UtcDaliCanvasViewSetGetViewBoxP(void)
 int UtcDaliCanvasViewPropertyViewBoxP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   view.SetProperty(CanvasView::Property::VIEW_BOX, Vector2(300, 300));
@@ -252,7 +252,7 @@ int UtcDaliCanvasViewPropertyViewBoxP(void)
 int UtcDaliCanvasViewSetGetSynchronousLoadingP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   // Default should be true
@@ -269,7 +269,7 @@ int UtcDaliCanvasViewSetGetSynchronousLoadingP(void)
 int UtcDaliCanvasViewPropertySynchronousLoadingP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   view.SetProperty(CanvasView::Property::SYNCHRONOUS_LOADING, false);
@@ -285,7 +285,7 @@ int UtcDaliCanvasViewPropertySynchronousLoadingP(void)
 int UtcDaliCanvasViewSetGetRasterizationRequestManuallyP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   // Default should be false
@@ -302,7 +302,7 @@ int UtcDaliCanvasViewSetGetRasterizationRequestManuallyP(void)
 int UtcDaliCanvasViewPropertyRasterizationRequestManuallyP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   view.SetProperty(CanvasView::Property::RASTERIZATION_REQUEST_MANUALLY, true);
@@ -318,7 +318,7 @@ int UtcDaliCanvasViewPropertyRasterizationRequestManuallyP(void)
 int UtcDaliCanvasViewRequestRasterizationP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(100, 100));
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
 
   application.GetScene().Add(view);
@@ -340,10 +340,11 @@ int UtcDaliCanvasViewRequestRasterizationP(void)
 int UtcDaliCanvasViewAddDrawableAndRenderSyncP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(200, 200));
+  CanvasView        view = CanvasView::New(Vector2(200, 200));
   DALI_TEST_CHECK(view);
 
-  view.SetRequestedWidth(200.0f).SetRequestedHeight(200.0f);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
   application.GetScene().Add(view);
 
   Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
@@ -365,11 +366,12 @@ int UtcDaliCanvasViewAddDrawableAndRenderSyncP(void)
 int UtcDaliCanvasViewAddDrawableAndRenderAsyncP(void)
 {
   UiTestApplication application;
-  CanvasView         view = CanvasView::New(Vector2(200, 200));
+  CanvasView        view = CanvasView::New(Vector2(200, 200));
   DALI_TEST_CHECK(view);
 
   view.SetSynchronousLoading(false);
-  view.SetRequestedWidth(200.0f).SetRequestedHeight(200.0f);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
   application.GetScene().Add(view);
 
   Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
@@ -387,23 +389,90 @@ int UtcDaliCanvasViewAddDrawableAndRenderAsyncP(void)
 }
 
 // =============================================================================
-// Fluent API chaining
+// Scene effects (drop shadow / gaussian blur / auto-padding)
+//
+// These verify the dali-ui delegation and the effect state. Numeric conversion
+// (sigma/distance) and the auto-padding buffer sizing are covered at the adaptor
+// level in utc-Dali-CanvasRenderer.cpp.
 // =============================================================================
 
-int UtcDaliCanvasViewFluentApiP(void)
+int UtcDaliCanvasViewDropShadowP(void)
 {
   UiTestApplication application;
-
-  CanvasView view = CanvasView::New(Vector2(100, 100))
-                      .SetRequestedWidth(100.0f)
-                      .SetRequestedHeight(100.0f)
-                      .SetSynchronousLoading(true)
-                      .SetRasterizationRequestManually(false)
-                      .SetViewBox(Vector2(200, 200));
-
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
   DALI_TEST_CHECK(view);
-  DALI_TEST_EQUALS(view.IsSynchronousLoading(), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.IsRasterizationRequestManually(), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetViewBox(), Vector2(200, 200), TEST_LOCATION);
+
+  DALI_TEST_EQUALS(view.HasDropShadow(), false, TEST_LOCATION);
+
+  view.SetDropShadow(Vector4(0.0f, 0.0f, 0.0f, 0.5f), 0.0f, 5.0f, 8.0f);
+  DALI_TEST_EQUALS(view.HasDropShadow(), true, TEST_LOCATION);
+
+  view.ClearDropShadow();
+  DALI_TEST_EQUALS(view.HasDropShadow(), false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCanvasViewGaussianBlurP(void)
+{
+  UiTestApplication application;
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
+  DALI_TEST_CHECK(view);
+
+  DALI_TEST_EQUALS(view.HasGaussianBlur(), false, TEST_LOCATION);
+
+  view.SetGaussianBlur(10.0f);
+  DALI_TEST_EQUALS(view.HasGaussianBlur(), true, TEST_LOCATION);
+
+  // Effects are mutually exclusive: a drop shadow replaces the blur.
+  view.SetDropShadow(Vector4(0.0f, 0.0f, 0.0f, 0.5f), 0.0f, 5.0f, 8.0f);
+  DALI_TEST_EQUALS(view.HasGaussianBlur(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.HasDropShadow(), true, TEST_LOCATION);
+
+  view.ClearDropShadow();
+  DALI_TEST_EQUALS(view.HasDropShadow(), false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCanvasViewEffectAutoPaddingP(void)
+{
+  UiTestApplication application;
+  CanvasView        view = CanvasView::New(Vector2(100, 100));
+  DALI_TEST_CHECK(view);
+
+  // Enabled by default; togglable.
+  DALI_TEST_EQUALS(view.IsEffectAutoPaddingEnabled(), true, TEST_LOCATION);
+  view.SetEffectAutoPaddingEnable(false);
+  DALI_TEST_EQUALS(view.IsEffectAutoPaddingEnabled(), false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCanvasViewEffectRenderSyncP(void)
+{
+  UiTestApplication application;
+  CanvasView        view = CanvasView::New(Vector2(200, 200));
+  DALI_TEST_CHECK(view);
+
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
+  application.GetScene().Add(view);
+
+  Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
+  shape.AddRect(Bounds(40, 40, 120, 120), Vector2(16, 16));
+  shape.SetFillColor(Color::BLUE);
+  view.AddDrawable(shape);
+
+  // Drives the full commit/rasterize pipeline with an effect, then clears it.
+  view.SetDropShadow(Vector4(0.0f, 0.0f, 0.0f, 0.5f), 0.0f, 5.0f, 8.0f);
+  application.SendNotification();
+  application.Render();
+
+  view.ClearDropShadow();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.HasDropShadow(), false, TEST_LOCATION);
+
+  application.GetScene().Remove(view);
+  application.SendNotification();
+  application.Render();
   END_TEST;
 }

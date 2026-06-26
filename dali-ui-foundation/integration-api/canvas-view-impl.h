@@ -24,6 +24,7 @@
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/math/vector2.h>
+#include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/rendering/texture.h>
 
@@ -114,6 +115,46 @@ public: // Drawable management
    * @copydoc Dali::Ui::CanvasView::RemoveAllDrawables
    */
   bool RemoveAllDrawables();
+
+  /**
+   * @copydoc Dali::Ui::CanvasView::SetDropShadow
+   */
+  void SetDropShadow(const Vector4& color, float offsetX, float offsetY, float blurRadius);
+
+  /**
+   * @copydoc Dali::Ui::CanvasView::ClearDropShadow
+   */
+  void ClearDropShadow();
+
+  /**
+   * @copydoc Dali::Ui::CanvasView::HasDropShadow
+   */
+  bool HasDropShadow() const;
+
+  /**
+   * @copydoc Dali::Ui::CanvasView::SetGaussianBlur
+   */
+  void SetGaussianBlur(float blurRadius);
+
+  /**
+   * @copydoc Dali::Ui::CanvasView::ClearGaussianBlur
+   */
+  void ClearGaussianBlur();
+
+  /**
+   * @copydoc Dali::Ui::CanvasView::HasGaussianBlur
+   */
+  bool HasGaussianBlur() const;
+
+  /**
+   * @copydoc Dali::Ui::CanvasView::SetEffectAutoPaddingEnable
+   */
+  void SetEffectAutoPaddingEnable(bool enable);
+
+  /**
+   * @copydoc Dali::Ui::CanvasView::IsEffectAutoPaddingEnabled
+   */
+  bool IsEffectAutoPaddingEnabled() const;
 
 public: // Rasterization control
   /**

@@ -54,6 +54,7 @@ SET(TC_SOURCES
         utc-Dali-TextVisual.cpp
         utc-Dali-VisualBase.cpp
         utc-Dali-WebView.cpp
+        utc-Dali-CanvasView.cpp
 )
 
 LIST(APPEND TC_SOURCES

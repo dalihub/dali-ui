@@ -70,3 +70,4 @@ MACRO(ADD_CANVAS_VIEW_SAMPLE EXE_NAME SOURCE_FILE)
 ENDMACRO()
 
 ADD_CANVAS_VIEW_SAMPLE(canvas-view.example canvas-view-example.cpp)
+ADD_CANVAS_VIEW_SAMPLE(tooltip-shadow.example tooltip-shadow-example.cpp)

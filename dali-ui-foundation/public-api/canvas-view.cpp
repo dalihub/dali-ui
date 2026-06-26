@@ -80,6 +80,46 @@ bool CanvasView::RemoveAllDrawables()
   return GetImpl(*this).RemoveAllDrawables();
 }
 
+void CanvasView::SetDropShadow(const Vector4& color, float offsetX, float offsetY, float blurRadius)
+{
+  GetImpl(*this).SetDropShadow(color, offsetX, offsetY, blurRadius);
+}
+
+void CanvasView::ClearDropShadow()
+{
+  GetImpl(*this).ClearDropShadow();
+}
+
+bool CanvasView::HasDropShadow() const
+{
+  return GetImpl(*this).HasDropShadow();
+}
+
+void CanvasView::SetGaussianBlur(float blurRadius)
+{
+  GetImpl(*this).SetGaussianBlur(blurRadius);
+}
+
+void CanvasView::ClearGaussianBlur()
+{
+  GetImpl(*this).ClearGaussianBlur();
+}
+
+bool CanvasView::HasGaussianBlur() const
+{
+  return GetImpl(*this).HasGaussianBlur();
+}
+
+void CanvasView::SetEffectAutoPaddingEnable(bool enable)
+{
+  GetImpl(*this).SetEffectAutoPaddingEnable(enable);
+}
+
+bool CanvasView::IsEffectAutoPaddingEnabled() const
+{
+  return GetImpl(*this).IsEffectAutoPaddingEnabled();
+}
+
 void CanvasView::SetViewBox(const Vector2& viewBox)
 {
   GetImpl(*this).SetViewBox(viewBox);

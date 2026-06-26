@@ -398,6 +398,95 @@ bool CanvasViewImpl::RemoveAllDrawables()
   return false;
 }
 
+void CanvasViewImpl::SetDropShadow(const Vector4& color, float offsetX, float offsetY, float blurRadius)
+{
+  if(DALI_LIKELY(mCanvasRenderer))
+  {
+    mCanvasRenderer.SetDropShadow(color, offsetX, offsetY, blurRadius);
+    // The renderer marks the canvas as changed, so automatic mode re-rasterizes on the next
+    // Process(). In manual mode the request must be made explicitly.
+    if(mManualRasterization)
+    {
+      RequestRasterization();
+    }
+  }
+}
+
+void CanvasViewImpl::ClearDropShadow()
+{
+  if(DALI_LIKELY(mCanvasRenderer))
+  {
+    mCanvasRenderer.ClearDropShadow();
+    if(mManualRasterization)
+    {
+      RequestRasterization();
+    }
+  }
+}
+
+bool CanvasViewImpl::HasDropShadow() const
+{
+  if(DALI_LIKELY(mCanvasRenderer))
+  {
+    return mCanvasRenderer.HasDropShadow();
+  }
+  return false;
+}
+
+void CanvasViewImpl::SetGaussianBlur(float blurRadius)
+{
+  if(DALI_LIKELY(mCanvasRenderer))
+  {
+    mCanvasRenderer.SetGaussianBlur(blurRadius);
+    if(mManualRasterization)
+    {
+      RequestRasterization();
+    }
+  }
+}
+
+void CanvasViewImpl::ClearGaussianBlur()
+{
+  if(DALI_LIKELY(mCanvasRenderer))
+  {
+    mCanvasRenderer.ClearGaussianBlur();
+    if(mManualRasterization)
+    {
+      RequestRasterization();
+    }
+  }
+}
+
+bool CanvasViewImpl::HasGaussianBlur() const
+{
+  if(DALI_LIKELY(mCanvasRenderer))
+  {
+    return mCanvasRenderer.HasGaussianBlur();
+  }
+  return false;
+}
+
+void CanvasViewImpl::SetEffectAutoPaddingEnable(bool enable)
+{
+  if(DALI_LIKELY(mCanvasRenderer))
+  {
+    mCanvasRenderer.SetEffectAutoPaddingEnable(enable);
+    if(mManualRasterization)
+    {
+      RequestRasterization();
+    }
+  }
+}
+
+bool CanvasViewImpl::IsEffectAutoPaddingEnabled() const
+{
+  if(DALI_LIKELY(mCanvasRenderer))
+  {
+    return mCanvasRenderer.IsEffectAutoPaddingEnabled();
+  }
+  return false;
+}
+
 // ---------------------------------------------------------------------------
 // Property getters / setters
 // ---------------------------------------------------------------------------
