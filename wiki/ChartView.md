@@ -1,6 +1,6 @@
 # DALi UI Components - ChartView
 
-[→ 한국어 문서](ChartView-(kr).md)
+[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/ChartView-(kr).md)
 
 `ChartView` is a multi-type chart component for `dali-ui-components`. It renders line, bar, pie, area, scatter, and gauge charts using ThorVG-backed `CanvasView` layers, with full support for zoom/pan gestures, interactive tooltips, animated data transitions, and real-time data feeds.
 
