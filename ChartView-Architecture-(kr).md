@@ -1,4 +1,4 @@
-[→ English](ChartView-Architecture.md)
+[→ English](https://github.sec.samsung.net/NUI/dali-ui/wiki/ChartView-Architecture.md)
 
 # DALi UI Components — ChartView 아키텍처
 
