@@ -20,6 +20,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/string-utils.h>
+#include <dali/public-api/math/math-utils.h>
 #include <algorithm>
 #include <cstring>
 #include <deque>
@@ -215,6 +216,34 @@ UiColor::UiColor(uint32_t rgb, float a)
                   ((rgb >> 8) & 0xFF) / 255.0f,
                   (rgb & 0xFF) / 255.0f,
                   a));
+}
+
+bool UiColor::operator==(const UiColor& rhs) const
+{
+  if(GetType() != rhs.GetType())
+  {
+    return false;
+  }
+
+  if(GetType() == Type::Rgba)
+  {
+    const Vector4 lhsColor = ReadRgbaPayload();
+    const Vector4 rhsColor = rhs.ReadRgbaPayload();
+
+    return Dali::Equals(lhsColor.r, rhsColor.r) &&
+           Dali::Equals(lhsColor.g, rhsColor.g) &&
+           Dali::Equals(lhsColor.b, rhsColor.b) &&
+           Dali::Equals(lhsColor.a, rhsColor.a);
+  }
+
+  return GetTokenId() == rhs.GetTokenId() &&
+         GetAlphaMode() == rhs.GetAlphaMode() &&
+         Dali::Equals(GetTokenAlpha(), rhs.GetTokenAlpha());
+}
+
+bool UiColor::operator!=(const UiColor& rhs) const
+{
+  return !(*this == rhs);
 }
 
 bool UiColor::HasColorId() const

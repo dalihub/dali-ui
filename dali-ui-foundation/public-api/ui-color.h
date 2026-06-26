@@ -123,6 +123,25 @@ public:
   UiColor& operator=(UiColor&&) noexcept = default;
 
   /**
+   * @brief Compares this color with another color.
+   *
+   * This compares the stored color representation, not the currently resolved
+   * RGBA value from the theme.
+   *
+   * @param[in] rhs The color to compare with
+   * @return true if both colors have the same stored representation
+   */
+  bool operator==(const UiColor& rhs) const;
+
+  /**
+   * @brief Compares this color with another color.
+   *
+   * @param[in] rhs The color to compare with
+   * @return true if both colors do not have the same stored representation
+   */
+  bool operator!=(const UiColor& rhs) const;
+
+  /**
    * @brief Returns whether this UiColor holds a string color ID.
    *
    * @return True if this UiColor was constructed with a color ID

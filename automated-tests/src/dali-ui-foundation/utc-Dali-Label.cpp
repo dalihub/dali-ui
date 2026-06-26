@@ -552,6 +552,52 @@ int UtcDaliLabelTextColor(void)
   END_TEST;
 }
 
+int UtcDaliLabelTextStyleNoneP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  DALI_TEST_CHECK(label.GetTextUnderline() == Text::Underline::None());
+  Text::Underline underline;
+  label.SetTextUnderline(underline);
+  DALI_TEST_CHECK(label.GetTextUnderline() != Text::Underline::None());
+  label.SetTextUnderline(Text::Underline::None());
+  DALI_TEST_CHECK(label.GetTextUnderline() == Text::Underline::None());
+
+  DALI_TEST_CHECK(label.GetTextShadow() == Text::Shadow::None());
+  Text::Shadow zeroOffsetShadow;
+  zeroOffsetShadow.SetOffset(Vector2::ZERO);
+  label.SetTextShadow(zeroOffsetShadow);
+  DALI_TEST_CHECK(label.GetTextShadow() != Text::Shadow::None());
+  label.SetTextShadow(Text::Shadow::None());
+  DALI_TEST_CHECK(label.GetTextShadow() == Text::Shadow::None());
+
+  DALI_TEST_CHECK(label.GetTextOutline() == Text::Outline::None());
+  Text::Outline zeroWidthOutline;
+  zeroWidthOutline.SetWidth(0.0f);
+  label.SetTextOutline(zeroWidthOutline);
+  DALI_TEST_CHECK(label.GetTextOutline() != Text::Outline::None());
+  label.SetTextOutline(Text::Outline::None());
+  DALI_TEST_CHECK(label.GetTextOutline() == Text::Outline::None());
+
+  DALI_TEST_CHECK(label.GetTextLineThrough() == Text::LineThrough::None());
+  Text::LineThrough lineThrough;
+  label.SetTextLineThrough(lineThrough);
+  DALI_TEST_CHECK(label.GetTextLineThrough() != Text::LineThrough::None());
+  label.SetTextLineThrough(Text::LineThrough::None());
+  DALI_TEST_CHECK(label.GetTextLineThrough() == Text::LineThrough::None());
+
+  DALI_TEST_CHECK(label.GetTextBevel() == Text::Bevel::None());
+  Text::Bevel bevel;
+  label.SetTextBevel(bevel);
+  DALI_TEST_CHECK(label.GetTextBevel() != Text::Bevel::None());
+  label.SetTextBevel(Text::Bevel::None());
+  DALI_TEST_CHECK(label.GetTextBevel() == Text::Bevel::None());
+
+  END_TEST;
+}
+
 int UtcDaliLabelFontWeight(void)
 {
   UiTestApplication application;

@@ -136,14 +136,8 @@ Dali::String TextButtonImpl::GetFontFamily() const
 void TextButtonImpl::SetTextUnderline(const Text::Underline& underline)
 {
   mUnderline        = underline;
-  mUnderlineEnabled = true;
+  mUnderlineEnabled = (underline != Text::Underline::None());
   mLabel.SetTextUnderline(underline);
-}
-
-void TextButtonImpl::ClearTextUnderline()
-{
-  mUnderlineEnabled = false;
-  mLabel.ClearTextUnderline();
 }
 
 bool TextButtonImpl::IsTextUnderlineEnabled() const
@@ -153,7 +147,7 @@ bool TextButtonImpl::IsTextUnderlineEnabled() const
 
 Text::Underline TextButtonImpl::GetTextUnderline() const
 {
-  return mUnderline;
+  return mUnderlineEnabled ? mUnderline : Text::Underline::None();
 }
 
 void TextButtonImpl::OnInitialize()
@@ -269,7 +263,7 @@ void TextButtonImpl::ApplyStyle(TextButtonStyle style)
   }
   else
   {
-    ClearTextUnderline();
+    SetTextUnderline(Text::Underline::None());
   }
 }
 

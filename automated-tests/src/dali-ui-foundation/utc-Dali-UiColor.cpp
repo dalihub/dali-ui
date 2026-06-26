@@ -252,6 +252,27 @@ int UtcDaliUiColorMoveAssignmentP(void)
   END_TEST;
 }
 
+int UtcDaliUiColorEqualityP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(UiColor() == UiColor());
+
+  DALI_TEST_CHECK(UiColor(1.0f, 0.0f, 0.0f, 1.0f) == UiColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f)));
+  DALI_TEST_CHECK(UiColor(1.0f, 0.0f, 0.0f, 1.0f) == UiColor(0xFF0000u));
+  DALI_TEST_CHECK(UiColor(1.0f, 0.0f, 0.0f, 1.0f) != UiColor(0.0f, 1.0f, 0.0f, 1.0f));
+
+  DALI_TEST_CHECK(UiColor("Primary") == UiColor("Primary"));
+  DALI_TEST_CHECK(UiColor("Primary") != UiColor("Secondary"));
+
+  DALI_TEST_CHECK(UiColor("Primary").WithAlpha(0.5f) == UiColor("Primary").WithAlpha(0.5f));
+  DALI_TEST_CHECK(UiColor("Primary").WithAlpha(0.5f) != UiColor("Primary").WithAlpha(0.7f));
+
+  DALI_TEST_CHECK(UiColor("Primary") != UiColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
+
+  END_TEST;
+}
+
 // === HasColorId / GetColorId ===
 
 int UtcDaliUiColorHasColorIdRgbaN(void)

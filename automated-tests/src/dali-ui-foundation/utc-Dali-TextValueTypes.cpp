@@ -994,6 +994,117 @@ int UtcDaliTextBevelCopyAssignFromMovedN(void)
   END_TEST;
 }
 
+int UtcDaliTextStyleNoneEqualityP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_CHECK(Text::Underline::None() == Text::Underline::None());
+  DALI_TEST_CHECK(Text::Shadow::None() == Text::Shadow::None());
+  DALI_TEST_CHECK(Text::Outline::None() == Text::Outline::None());
+  DALI_TEST_CHECK(Text::LineThrough::None() == Text::LineThrough::None());
+  DALI_TEST_CHECK(Text::Bevel::None() == Text::Bevel::None());
+
+  DALI_TEST_CHECK(Text::Underline() != Text::Underline::None());
+  DALI_TEST_CHECK(Text::LineThrough() != Text::LineThrough::None());
+  DALI_TEST_CHECK(Text::Bevel() != Text::Bevel::None());
+
+  Text::Shadow zeroOffsetShadow;
+  zeroOffsetShadow.SetOffset(Vector2::ZERO);
+  DALI_TEST_CHECK(zeroOffsetShadow != Text::Shadow::None());
+
+  Text::Outline zeroWidthOutline;
+  zeroWidthOutline.SetWidth(0.0f);
+  DALI_TEST_CHECK(zeroWidthOutline != Text::Outline::None());
+
+  Text::Underline copiedNone(Text::Underline::None());
+  DALI_TEST_CHECK(copiedNone == Text::Underline::None());
+
+  Text::Shadow assignedNone;
+  assignedNone = Text::Shadow::None();
+  DALI_TEST_CHECK(assignedNone == Text::Shadow::None());
+
+  END_TEST;
+}
+
+int UtcDaliTextStyleNoneAccessorN(void)
+{
+  UiTestApplication application;
+
+  Text::Underline underline = Text::Underline::None();
+  DALI_TEST_ASSERTION(Text::Underline::None().GetColor(), "Cannot access Text::Underline::None() properties.");
+  DALI_TEST_ASSERTION(underline.SetColor(UiColor(Color::RED)), "Cannot modify Text::Underline::None().");
+
+  Text::Shadow shadow = Text::Shadow::None();
+  DALI_TEST_ASSERTION(Text::Shadow::None().GetOffset(), "Cannot access Text::Shadow::None() properties.");
+  DALI_TEST_ASSERTION(shadow.SetOffset(Vector2(1.0f, 1.0f)), "Cannot modify Text::Shadow::None().");
+
+  Text::Outline outline = Text::Outline::None();
+  DALI_TEST_ASSERTION(Text::Outline::None().GetWidth(), "Cannot access Text::Outline::None() properties.");
+  DALI_TEST_ASSERTION(outline.SetWidth(1.0f), "Cannot modify Text::Outline::None().");
+
+  Text::LineThrough lineThrough = Text::LineThrough::None();
+  DALI_TEST_ASSERTION(Text::LineThrough::None().GetColor(), "Cannot access Text::LineThrough::None() properties.");
+  DALI_TEST_ASSERTION(lineThrough.SetColor(UiColor(Color::GREEN)), "Cannot modify Text::LineThrough::None().");
+
+  Text::Bevel bevel = Text::Bevel::None();
+  DALI_TEST_ASSERTION(Text::Bevel::None().GetDirection(), "Cannot access Text::Bevel::None() properties.");
+  DALI_TEST_ASSERTION(bevel.SetDirection(Vector2(1.0f, 1.0f)), "Cannot modify Text::Bevel::None().");
+
+  END_TEST;
+}
+
+int UtcDaliTextStyleEqualityAuthoredColorP(void)
+{
+  UiTestApplication application;
+
+  Text::Underline tokenUnderlineA;
+  tokenUnderlineA.SetColor(UiColor("Primary"));
+  Text::Underline tokenUnderlineB;
+  tokenUnderlineB.SetColor(UiColor("Primary"));
+  Text::Underline rgbaUnderline;
+  rgbaUnderline.SetColor(UiColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
+  DALI_TEST_CHECK(tokenUnderlineA == tokenUnderlineB);
+  DALI_TEST_CHECK(tokenUnderlineA != rgbaUnderline);
+
+  Text::Shadow tokenShadowA;
+  tokenShadowA.SetColor(UiColor("Primary").WithAlpha(0.5f));
+  Text::Shadow tokenShadowB;
+  tokenShadowB.SetColor(UiColor("Primary").WithAlpha(0.5f));
+  Text::Shadow tokenShadowC;
+  tokenShadowC.SetColor(UiColor("Primary").WithAlpha(0.7f));
+  DALI_TEST_CHECK(tokenShadowA == tokenShadowB);
+  DALI_TEST_CHECK(tokenShadowA != tokenShadowC);
+
+  Text::Outline tokenOutlineA;
+  tokenOutlineA.SetColor(UiColor("Outline"));
+  Text::Outline tokenOutlineB;
+  tokenOutlineB.SetColor(UiColor("Outline"));
+  Text::Outline tokenOutlineC;
+  tokenOutlineC.SetColor(UiColor("Primary"));
+  DALI_TEST_CHECK(tokenOutlineA == tokenOutlineB);
+  DALI_TEST_CHECK(tokenOutlineA != tokenOutlineC);
+
+  Text::LineThrough tokenLineThroughA;
+  tokenLineThroughA.SetColor(UiColor("Primary"));
+  Text::LineThrough tokenLineThroughB;
+  tokenLineThroughB.SetColor(UiColor("Primary"));
+  DALI_TEST_CHECK(tokenLineThroughA == tokenLineThroughB);
+
+  Text::Bevel tokenBevelA;
+  tokenBevelA.SetLightColor(UiColor("Primary"));
+  tokenBevelA.SetShadowColor(UiColor("Shadow").WithAlpha(0.5f));
+  Text::Bevel tokenBevelB;
+  tokenBevelB.SetLightColor(UiColor("Primary"));
+  tokenBevelB.SetShadowColor(UiColor("Shadow").WithAlpha(0.5f));
+  Text::Bevel tokenBevelC;
+  tokenBevelC.SetLightColor(UiColor("Primary"));
+  tokenBevelC.SetShadowColor(UiColor("Shadow").WithAlpha(0.7f));
+  DALI_TEST_CHECK(tokenBevelA == tokenBevelB);
+  DALI_TEST_CHECK(tokenBevelA != tokenBevelC);
+
+  END_TEST;
+}
+
 // FontVariationAxis Tests
 
 int UtcDaliTextFontVariationAxisTagP(void)

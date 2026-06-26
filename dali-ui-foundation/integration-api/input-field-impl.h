@@ -449,9 +449,9 @@ public:
   void SetTextUnderline(const Text::Underline& underline);
 
   /**
-   * @copydoc Dali::Ui::InputField::ClearTextUnderline
+   * @copydoc Dali::Ui::InputField::GetTextUnderline
    */
-  void ClearTextUnderline();
+  Text::Underline GetTextUnderline() const;
 
   /**
    * @copydoc Dali::Ui::InputField::SetTextShadow
@@ -459,9 +459,9 @@ public:
   void SetTextShadow(const Text::Shadow& shadow);
 
   /**
-   * @copydoc Dali::Ui::InputField::ClearTextShadow
+   * @copydoc Dali::Ui::InputField::GetTextShadow
    */
-  void ClearTextShadow();
+  Text::Shadow GetTextShadow() const;
 
   /**
    * @copydoc Dali::Ui::InputField::SetTextOutline
@@ -469,9 +469,9 @@ public:
   void SetTextOutline(const Text::Outline& outline);
 
   /**
-   * @copydoc Dali::Ui::InputField::ClearTextOutline
+   * @copydoc Dali::Ui::InputField::GetTextOutline
    */
-  void ClearTextOutline();
+  Text::Outline GetTextOutline() const;
 
   /**
    * @copydoc Dali::Ui::InputField::SetTextLineThrough
@@ -479,9 +479,9 @@ public:
   void SetTextLineThrough(const Text::LineThrough& lineThrough);
 
   /**
-   * @copydoc Dali::Ui::InputField::ClearTextLineThrough
+   * @copydoc Dali::Ui::InputField::GetTextLineThrough
    */
-  void ClearTextLineThrough();
+  Text::LineThrough GetTextLineThrough() const;
 
   /**
    * @brief Sets the explicit font size scale used internally.

@@ -84,11 +84,11 @@ Label can apply text styles such as underline, shadow, outline, line-through, an
 
 | Style | API | Clear |
 |---|---|---|
-| Text Underline | `SetTextUnderline(Text::Underline())` | `ClearTextUnderline()` |
-| Text Shadow | `SetTextShadow(Text::Shadow())` | `ClearTextShadow()` |
-| Text Outline | `SetTextOutline(Text::Outline())` | `ClearTextOutline()` |
-| Text LineThrough | `SetTextLineThrough(Text::LineThrough())` | `ClearTextLineThrough()` |
-| Text Bevel | `SetTextBevel(Text::Bevel())` | `ClearTextBevel()` |
+| Text Underline | `SetTextUnderline(Text::Underline())` | `SetTextUnderline(Text::Underline::None())` |
+| Text Shadow | `SetTextShadow(Text::Shadow())` | `SetTextShadow(Text::Shadow::None())` |
+| Text Outline | `SetTextOutline(Text::Outline())` | `SetTextOutline(Text::Outline::None())` |
+| Text LineThrough | `SetTextLineThrough(Text::LineThrough())` | `SetTextLineThrough(Text::LineThrough::None())` |
+| Text Bevel | `SetTextBevel(Text::Bevel())` | `SetTextBevel(Text::Bevel::None())` |
 | Text Background | `SetTextBackgroundColor(UiColor)` | `ClearTextBackgroundColor()` |
 
 ~~~cpp

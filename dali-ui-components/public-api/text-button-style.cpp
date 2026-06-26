@@ -389,18 +389,6 @@ TextButtonStyle::Builder&& TextButtonStyle::Builder::SetTextUnderline(const Text
   return std::move(*this);
 }
 
-TextButtonStyle::Builder& TextButtonStyle::Builder::ClearTextUnderline() &
-{
-  mImpl->ClearTextUnderline();
-  return *this;
-}
-
-TextButtonStyle::Builder&& TextButtonStyle::Builder::ClearTextUnderline() &&
-{
-  ClearTextUnderline();
-  return std::move(*this);
-}
-
 TextButtonStyle TextButtonStyle::Builder::Build() &&
 {
   DALI_ASSERT_ALWAYS(mImpl && "TextButtonStyle::Builder has already been consumed");
@@ -572,12 +560,7 @@ StateEffect TextButtonStyleImpl::GetStateEffect() const
 void TextButtonStyleImpl::SetTextUnderline(const Text::Underline& underline)
 {
   mUnderline        = underline;
-  mUnderlineEnabled = true;
-}
-
-void TextButtonStyleImpl::ClearTextUnderline()
-{
-  mUnderlineEnabled = false;
+  mUnderlineEnabled = (underline != Text::Underline::None());
 }
 
 bool TextButtonStyleImpl::IsTextUnderlineEnabled() const
@@ -587,7 +570,7 @@ bool TextButtonStyleImpl::IsTextUnderlineEnabled() const
 
 Text::Underline TextButtonStyleImpl::GetTextUnderline() const
 {
-  return mUnderline;
+  return mUnderlineEnabled ? mUnderline : Text::Underline::None();
 }
 
 TextButtonStyleImpl::TextButtonStyleImpl()

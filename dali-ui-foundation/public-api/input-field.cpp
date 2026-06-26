@@ -480,9 +480,9 @@ void InputField::SetTextUnderline(const Text::Underline& underline)
   GetImpl(*this).SetTextUnderline(underline);
 }
 
-void InputField::ClearTextUnderline()
+Text::Underline InputField::GetTextUnderline() const
 {
-  return GetImpl(*this).ClearTextUnderline();
+  return GetImpl(*this).GetTextUnderline();
 }
 
 void InputField::SetTextShadow(const Text::Shadow& shadow)
@@ -490,9 +490,9 @@ void InputField::SetTextShadow(const Text::Shadow& shadow)
   GetImpl(*this).SetTextShadow(shadow);
 }
 
-void InputField::ClearTextShadow()
+Text::Shadow InputField::GetTextShadow() const
 {
-  return GetImpl(*this).ClearTextShadow();
+  return GetImpl(*this).GetTextShadow();
 }
 
 void InputField::SetTextOutline(const Text::Outline& outline)
@@ -500,9 +500,9 @@ void InputField::SetTextOutline(const Text::Outline& outline)
   GetImpl(*this).SetTextOutline(outline);
 }
 
-void InputField::ClearTextOutline()
+Text::Outline InputField::GetTextOutline() const
 {
-  return GetImpl(*this).ClearTextOutline();
+  return GetImpl(*this).GetTextOutline();
 }
 
 void InputField::SetTextLineThrough(const Text::LineThrough& lineThrough)
@@ -510,9 +510,9 @@ void InputField::SetTextLineThrough(const Text::LineThrough& lineThrough)
   GetImpl(*this).SetTextLineThrough(lineThrough);
 }
 
-void InputField::ClearTextLineThrough()
+Text::LineThrough InputField::GetTextLineThrough() const
 {
-  return GetImpl(*this).ClearTextLineThrough();
+  return GetImpl(*this).GetTextLineThrough();
 }
 
 void InputField::SetMinimumFontSizeScale(float scale)

@@ -96,6 +96,31 @@ public:
    */
   ~Underline();
 
+  /**
+   * @brief Returns a value representing no underline style.
+   *
+   * This value can be passed to SetTextUnderline() to clear the underline style.
+   *
+   * @return A shared immutable none value.
+   */
+  static const Underline& None();
+
+  /**
+   * @brief Compares this underline with another underline.
+   *
+   * @param[in] rhs The underline to compare with.
+   * @return true if both values are equal.
+   */
+  bool operator==(const Underline& rhs) const;
+
+  /**
+   * @brief Compares this underline with another underline.
+   *
+   * @param[in] rhs The underline to compare with.
+   * @return true if both values are not equal.
+   */
+  bool operator!=(const Underline& rhs) const;
+
 public:
   /**
    * @brief Sets the underline color.

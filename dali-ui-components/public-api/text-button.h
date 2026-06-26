@@ -76,7 +76,6 @@ public:
   Dali::String GetFontFamily() const;
 
   void            SetTextUnderline(const Text::Underline& underline);
-  void            ClearTextUnderline();
   bool            IsTextUnderlineEnabled() const;
   Text::Underline GetTextUnderline() const;
 

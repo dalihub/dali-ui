@@ -817,6 +817,18 @@ void InputEditorImpl::ClearTextBackgroundColor()
 
 void InputEditorImpl::SetTextUnderline(const Text::Underline& underline)
 {
+  if(underline == Text::Underline::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
+    if(mController->IsUnderlineEnabled())
+    {
+      mController->SetUnderlineEnabled(false);
+      mRenderer.Reset();
+    }
+    return;
+  }
+
   const UiColor& color = underline.GetColor();
 
   SetColorBinding("UnderlineColor", color, this, &InputEditorImpl::SetUnderlineColorInternal);
@@ -827,19 +839,51 @@ void InputEditorImpl::SetTextUnderline(const Text::Underline& underline)
   }
 }
 
-void InputEditorImpl::ClearTextUnderline()
+Text::Underline InputEditorImpl::GetTextUnderline() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
-  if(mController->IsUnderlineEnabled())
+  if(!mController->IsUnderlineEnabled())
   {
-    mController->SetUnderlineEnabled(false);
-    mRenderer.Reset();
+    return Text::Underline::None();
   }
+
+  Text::Underline underline;
+
+  UiColor color;
+  if(UiColorManager::Get().GetBindingColor(Self(), "UnderlineColor", color))
+  {
+    underline.SetColor(color);
+  }
+  else
+  {
+    underline.SetColor(mController->GetUnderlineColor());
+  }
+  underline.SetThickness(mController->GetUnderlineHeight());
+  underline.SetType(mController->GetUnderlineType());
+  underline.SetDashLength(mController->GetDashedUnderlineWidth());
+  underline.SetDashGap(mController->GetDashedUnderlineGap());
+
+  return underline;
 }
 
 void InputEditorImpl::SetTextShadow(const Text::Shadow& shadow)
 {
+  if(shadow == Text::Shadow::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
+    if(mController->IsShadowEnabled())
+    {
+      mController->SetShadowEnabled(false);
+      mRenderer.Reset();
+    }
+    if(Vector2::ZERO != mController->GetShadowOffset())
+    {
+      mController->SetShadowOffset(Vector2::ZERO);
+      mRenderer.Reset();
+    }
+    return;
+  }
+
   const UiColor& color = shadow.GetColor();
 
   SetColorBinding("ShadowColor", color, this, &InputEditorImpl::SetShadowColorInternal);
@@ -850,24 +894,49 @@ void InputEditorImpl::SetTextShadow(const Text::Shadow& shadow)
   }
 }
 
-void InputEditorImpl::ClearTextShadow()
+Text::Shadow InputEditorImpl::GetTextShadow() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
-  if(mController->IsShadowEnabled())
+  if(!mController->IsShadowEnabled())
   {
-    mController->SetShadowEnabled(false);
-    mRenderer.Reset();
+    return Text::Shadow::None();
   }
-  if(Vector2::ZERO != mController->GetShadowOffset())
+
+  Text::Shadow shadow;
+
+  UiColor color;
+  if(UiColorManager::Get().GetBindingColor(Self(), "ShadowColor", color))
   {
-    mController->SetShadowOffset(Vector2::ZERO);
-    mRenderer.Reset();
+    shadow.SetColor(color);
   }
+  else
+  {
+    shadow.SetColor(mController->GetShadowColor());
+  }
+  shadow.SetOffset(mController->GetShadowOffset());
+  shadow.SetBlurRadius(mController->GetShadowBlurRadius());
+
+  return shadow;
 }
 
 void InputEditorImpl::SetTextOutline(const Text::Outline& outline)
 {
+  if(outline == Text::Outline::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
+    if(mController->IsOutlineEnabled())
+    {
+      mController->SetOutlineEnabled(false);
+      mRenderer.Reset();
+    }
+    if(0u != mController->GetOutlineWidth())
+    {
+      mController->SetOutlineWidth(0u);
+      mRenderer.Reset();
+    }
+    return;
+  }
+
   const UiColor& color = outline.GetColor();
 
   SetColorBinding("OutlineColor", color, this, &InputEditorImpl::SetOutlineColorInternal);
@@ -878,24 +947,45 @@ void InputEditorImpl::SetTextOutline(const Text::Outline& outline)
   }
 }
 
-void InputEditorImpl::ClearTextOutline()
+Text::Outline InputEditorImpl::GetTextOutline() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
-  if(mController->IsOutlineEnabled())
+  if(!mController->IsOutlineEnabled())
   {
-    mController->SetOutlineEnabled(false);
-    mRenderer.Reset();
+    return Text::Outline::None();
   }
-  if(0u != mController->GetOutlineWidth())
+
+  Text::Outline outline;
+
+  UiColor color;
+  if(UiColorManager::Get().GetBindingColor(Self(), "OutlineColor", color))
   {
-    mController->SetOutlineWidth(0u);
-    mRenderer.Reset();
+    outline.SetColor(color);
   }
+  else
+  {
+    outline.SetColor(mController->GetOutlineColor());
+  }
+  outline.SetOffset(mController->GetOutlineOffset());
+  outline.SetWidth(static_cast<float>(mController->GetOutlineWidth()));
+  outline.SetBlurRadius(mController->GetOutlineBlurRadius());
+
+  return outline;
 }
 
 void InputEditorImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
 {
+  if(lineThrough == Text::LineThrough::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
+    if(mController->IsStrikethroughEnabled())
+    {
+      mController->SetStrikethroughEnabled(false);
+      mRenderer.Reset();
+    }
+    return;
+  }
+
   const UiColor& color = lineThrough.GetColor();
 
   SetColorBinding("LineThroughColor", color, this, &InputEditorImpl::SetLineThroughColorInternal);
@@ -906,15 +996,27 @@ void InputEditorImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
   }
 }
 
-void InputEditorImpl::ClearTextLineThrough()
+Text::LineThrough InputEditorImpl::GetTextLineThrough() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
-  if(mController->IsStrikethroughEnabled())
+  if(!mController->IsStrikethroughEnabled())
   {
-    mController->SetStrikethroughEnabled(false);
-    mRenderer.Reset();
+    return Text::LineThrough::None();
   }
+
+  Text::LineThrough lineThrough;
+
+  UiColor color;
+  if(UiColorManager::Get().GetBindingColor(Self(), "LineThroughColor", color))
+  {
+    lineThrough.SetColor(color);
+  }
+  else
+  {
+    lineThrough.SetColor(mController->GetStrikethroughColor());
+  }
+  lineThrough.SetThickness(mController->GetStrikethroughHeight());
+
+  return lineThrough;
 }
 
 void InputEditorImpl::SetFontSizeScale(float scale)

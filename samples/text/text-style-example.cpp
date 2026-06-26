@@ -217,23 +217,23 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      mUnderlineLabel.ClearTextUnderline();
-      mInputFieldUnderline.ClearTextUnderline();
+      mUnderlineLabel.SetTextUnderline(Text::Underline::None());
+      mInputFieldUnderline.SetTextUnderline(Text::Underline::None());
     }
     else if(event.GetKeyName() == "2")
     {
-      mShadowLabel.ClearTextShadow();
-      mInputFieldShadow.ClearTextShadow();
+      mShadowLabel.SetTextShadow(Text::Shadow::None());
+      mInputFieldShadow.SetTextShadow(Text::Shadow::None());
     }
     else if(event.GetKeyName() == "3")
     {
-      mOutlineLabel.ClearTextOutline();
-      mInputFieldOutline.ClearTextOutline();
+      mOutlineLabel.SetTextOutline(Text::Outline::None());
+      mInputFieldOutline.SetTextOutline(Text::Outline::None());
     }
     else if(event.GetKeyName() == "4")
     {
-      mLineThroughLabel.ClearTextLineThrough();
-      mInputFieldLineThrough.ClearTextLineThrough();
+      mLineThroughLabel.SetTextLineThrough(Text::LineThrough::None());
+      mInputFieldLineThrough.SetTextLineThrough(Text::LineThrough::None());
     }
     else if(event.GetKeyName() == "5")
     {

@@ -248,8 +248,9 @@ int UtcDaliTextButtonTextPropertiesP(void)
   DALI_TEST_CHECK(button.IsTextUnderlineEnabled());
   DALI_TEST_EQUALS(button.GetTextUnderline().GetThickness(), 3.0f, TEST_LOCATION);
 
-  button.ClearTextUnderline();
+  button.SetTextUnderline(Text::Underline::None());
   DALI_TEST_CHECK(!button.IsTextUnderlineEnabled());
+  DALI_TEST_CHECK(button.GetTextUnderline() == Text::Underline::None());
   END_TEST;
 }
 

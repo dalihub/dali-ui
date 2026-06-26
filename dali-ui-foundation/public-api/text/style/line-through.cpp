@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
@@ -24,6 +25,9 @@
 
 #define DALI_ASSERT_VALID_LINETHROUGH(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from LineThrough object")
+
+#define DALI_ASSERT_LINETHROUGH_NOT_NONE(impl, message) \
+  DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
 namespace Dali
 {
@@ -42,18 +46,21 @@ class LineThrough::Impl
 public:
   Impl()
   : mColor(DEFAULT_COLOR),
-    mThickness(DEFAULT_THICKNESS)
+    mThickness(DEFAULT_THICKNESS),
+    mIsNone(false)
   {
   }
 
   Impl(const Impl& rhs)
   : mColor(rhs.mColor),
-    mThickness(rhs.mThickness)
+    mThickness(rhs.mThickness),
+    mIsNone(rhs.mIsNone)
   {
   }
 
   UiColor mColor;
   float   mThickness;
+  bool    mIsNone;
 };
 
 LineThrough::LineThrough()
@@ -102,27 +109,62 @@ LineThrough::~LineThrough()
   delete mImpl;
 }
 
+const LineThrough& LineThrough::None()
+{
+  static const LineThrough none = []()
+  {
+    LineThrough lineThrough;
+    lineThrough.mImpl->mIsNone = true;
+    return lineThrough;
+  }();
+
+  return none;
+}
+
+bool LineThrough::operator==(const LineThrough& rhs) const
+{
+  DALI_ASSERT_VALID_LINETHROUGH(mImpl);
+  DALI_ASSERT_VALID_LINETHROUGH(rhs.mImpl);
+
+  if(mImpl->mIsNone || rhs.mImpl->mIsNone)
+  {
+    return mImpl->mIsNone == rhs.mImpl->mIsNone;
+  }
+
+  return mImpl->mColor == rhs.mImpl->mColor &&
+         Dali::Equals(mImpl->mThickness, rhs.mImpl->mThickness);
+}
+
+bool LineThrough::operator!=(const LineThrough& rhs) const
+{
+  return !(*this == rhs);
+}
+
 void LineThrough::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_LINETHROUGH(mImpl);
+  DALI_ASSERT_LINETHROUGH_NOT_NONE(mImpl, "Cannot modify Text::LineThrough::None().");
   mImpl->mColor = color;
 }
 
 const UiColor& LineThrough::GetColor() const
 {
   DALI_ASSERT_VALID_LINETHROUGH(mImpl);
+  DALI_ASSERT_LINETHROUGH_NOT_NONE(mImpl, "Cannot access Text::LineThrough::None() properties.");
   return mImpl->mColor;
 }
 
 void LineThrough::SetThickness(float thickness)
 {
   DALI_ASSERT_VALID_LINETHROUGH(mImpl);
+  DALI_ASSERT_LINETHROUGH_NOT_NONE(mImpl, "Cannot modify Text::LineThrough::None().");
   mImpl->mThickness = std::max(0.0f, thickness);
 }
 
 float LineThrough::GetThickness() const
 {
   DALI_ASSERT_VALID_LINETHROUGH(mImpl);
+  DALI_ASSERT_LINETHROUGH_NOT_NONE(mImpl, "Cannot access Text::LineThrough::None() properties.");
   return mImpl->mThickness;
 }
 
@@ -130,4 +172,5 @@ float LineThrough::GetThickness() const
 } // namespace Ui
 } // namespace Dali
 
+#undef DALI_ASSERT_LINETHROUGH_NOT_NONE
 #undef DALI_ASSERT_VALID_LINETHROUGH

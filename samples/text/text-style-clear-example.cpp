@@ -210,14 +210,14 @@ private:
 
   void ClearShadowRows()
   {
-    mShadowNonZeroLabel.SetText("Label shadow: ClearTextShadow() -> no shadow");
-    mShadowNonZeroLabel.ClearTextShadow();
-    mShadowZeroLabel.SetText("Label shadow: ClearTextShadow() -> no shadow");
-    mShadowZeroLabel.ClearTextShadow();
-    mInputFieldShadowNonZero.SetText("InputField shadow: ClearTextShadow() -> no shadow");
-    mInputFieldShadowNonZero.ClearTextShadow();
-    mInputFieldShadowZero.SetText("InputField shadow: ClearTextShadow() -> no shadow");
-    mInputFieldShadowZero.ClearTextShadow();
+    mShadowNonZeroLabel.SetText("Label shadow: SetTextShadow(None()) -> no shadow");
+    mShadowNonZeroLabel.SetTextShadow(Text::Shadow::None());
+    mShadowZeroLabel.SetText("Label shadow: SetTextShadow(None()) -> no shadow");
+    mShadowZeroLabel.SetTextShadow(Text::Shadow::None());
+    mInputFieldShadowNonZero.SetText("InputField shadow: SetTextShadow(None()) -> no shadow");
+    mInputFieldShadowNonZero.SetTextShadow(Text::Shadow::None());
+    mInputFieldShadowZero.SetText("InputField shadow: SetTextShadow(None()) -> no shadow");
+    mInputFieldShadowZero.SetTextShadow(Text::Shadow::None());
   }
 
   void ApplyOutlineWithWidth()
@@ -246,14 +246,14 @@ private:
 
   void ClearOutlineRows()
   {
-    mOutlineLabel.SetText("Label outline: ClearTextOutline() -> no outline");
-    mOutlineLabel.ClearTextOutline();
-    mOutlineZeroWidthLabel.SetText("Label outline: ClearTextOutline() -> no outline");
-    mOutlineZeroWidthLabel.ClearTextOutline();
-    mInputFieldOutline.SetText("InputField outline: ClearTextOutline() -> no outline");
-    mInputFieldOutline.ClearTextOutline();
-    mInputFieldOutlineZeroWidth.SetText("InputField outline: ClearTextOutline() -> no outline");
-    mInputFieldOutlineZeroWidth.ClearTextOutline();
+    mOutlineLabel.SetText("Label outline: SetTextOutline(None()) -> no outline");
+    mOutlineLabel.SetTextOutline(Text::Outline::None());
+    mOutlineZeroWidthLabel.SetText("Label outline: SetTextOutline(None()) -> no outline");
+    mOutlineZeroWidthLabel.SetTextOutline(Text::Outline::None());
+    mInputFieldOutline.SetText("InputField outline: SetTextOutline(None()) -> no outline");
+    mInputFieldOutline.SetTextOutline(Text::Outline::None());
+    mInputFieldOutlineZeroWidth.SetText("InputField outline: SetTextOutline(None()) -> no outline");
+    mInputFieldOutlineZeroWidth.SetTextOutline(Text::Outline::None());
   }
 
   void OnKeyEvent(Window window, KeyEvent event)

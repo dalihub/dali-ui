@@ -245,6 +245,45 @@ int UtcDaliInputEditorTextColor(void)
   END_TEST;
 }
 
+int UtcDaliInputEditorTextStyleNoneP(void)
+{
+  UiTestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  DALI_TEST_CHECK(inputEditor);
+
+  DALI_TEST_CHECK(inputEditor.GetTextUnderline() == Text::Underline::None());
+  Text::Underline underline;
+  inputEditor.SetTextUnderline(underline);
+  DALI_TEST_CHECK(inputEditor.GetTextUnderline() != Text::Underline::None());
+  inputEditor.SetTextUnderline(Text::Underline::None());
+  DALI_TEST_CHECK(inputEditor.GetTextUnderline() == Text::Underline::None());
+
+  DALI_TEST_CHECK(inputEditor.GetTextShadow() == Text::Shadow::None());
+  Text::Shadow zeroOffsetShadow;
+  zeroOffsetShadow.SetOffset(Vector2::ZERO);
+  inputEditor.SetTextShadow(zeroOffsetShadow);
+  DALI_TEST_CHECK(inputEditor.GetTextShadow() != Text::Shadow::None());
+  inputEditor.SetTextShadow(Text::Shadow::None());
+  DALI_TEST_CHECK(inputEditor.GetTextShadow() == Text::Shadow::None());
+
+  DALI_TEST_CHECK(inputEditor.GetTextOutline() == Text::Outline::None());
+  Text::Outline zeroWidthOutline;
+  zeroWidthOutline.SetWidth(0.0f);
+  inputEditor.SetTextOutline(zeroWidthOutline);
+  DALI_TEST_CHECK(inputEditor.GetTextOutline() != Text::Outline::None());
+  inputEditor.SetTextOutline(Text::Outline::None());
+  DALI_TEST_CHECK(inputEditor.GetTextOutline() == Text::Outline::None());
+
+  DALI_TEST_CHECK(inputEditor.GetTextLineThrough() == Text::LineThrough::None());
+  Text::LineThrough lineThrough;
+  inputEditor.SetTextLineThrough(lineThrough);
+  DALI_TEST_CHECK(inputEditor.GetTextLineThrough() != Text::LineThrough::None());
+  inputEditor.SetTextLineThrough(Text::LineThrough::None());
+  DALI_TEST_CHECK(inputEditor.GetTextLineThrough() == Text::LineThrough::None());
+
+  END_TEST;
+}
+
 int UtcDaliInputEditorLineWrapMode(void)
 {
   UiTestApplication application;

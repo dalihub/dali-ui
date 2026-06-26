@@ -637,6 +637,17 @@ void LabelImpl::ClearTextBackgroundColor()
 
 void LabelImpl::SetTextUnderline(const Text::Underline& underline)
 {
+  if(underline == Text::Underline::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
+    if(mController->IsUnderlineEnabled())
+    {
+      mController->SetUnderlineEnabled(false);
+    }
+    return;
+  }
+
   const UiColor& color = underline.GetColor();
 
   SetColorBinding("UnderlineColor", color, this, &LabelImpl::SetUnderlineColorInternal);
@@ -648,18 +659,49 @@ void LabelImpl::SetTextUnderline(const Text::Underline& underline)
   }
 }
 
-void LabelImpl::ClearTextUnderline()
+Text::Underline LabelImpl::GetTextUnderline() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
-  if(mController->IsUnderlineEnabled())
+  if(!mController->IsUnderlineEnabled())
   {
-    mController->SetUnderlineEnabled(false);
+    return Text::Underline::None();
   }
+
+  Text::Underline underline;
+
+  UiColor color;
+  if(UiColorManager::Get().GetBindingColor(Self(), "UnderlineColor", color))
+  {
+    underline.SetColor(color);
+  }
+  else
+  {
+    underline.SetColor(mController->GetUnderlineColor());
+  }
+  underline.SetThickness(mController->GetUnderlineHeight());
+  underline.SetType(mController->GetUnderlineType());
+  underline.SetDashLength(mController->GetDashedUnderlineWidth());
+  underline.SetDashGap(mController->GetDashedUnderlineGap());
+
+  return underline;
 }
 
 void LabelImpl::SetTextShadow(const Text::Shadow& shadow)
 {
+  if(shadow == Text::Shadow::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
+    if(mController->IsShadowEnabled())
+    {
+      mController->SetShadowEnabled(false);
+    }
+    if(Vector2::ZERO != mController->GetShadowOffset())
+    {
+      mController->SetShadowOffset(Vector2::ZERO);
+    }
+    return;
+  }
+
   const UiColor& color = shadow.GetColor();
 
   SetColorBinding("ShadowColor", color, this, &LabelImpl::SetShadowColorInternal);
@@ -671,22 +713,47 @@ void LabelImpl::SetTextShadow(const Text::Shadow& shadow)
   }
 }
 
-void LabelImpl::ClearTextShadow()
+Text::Shadow LabelImpl::GetTextShadow() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
-  if(mController->IsShadowEnabled())
+  if(!mController->IsShadowEnabled())
   {
-    mController->SetShadowEnabled(false);
+    return Text::Shadow::None();
   }
-  if(Vector2::ZERO != mController->GetShadowOffset())
+
+  Text::Shadow shadow;
+
+  UiColor color;
+  if(UiColorManager::Get().GetBindingColor(Self(), "ShadowColor", color))
   {
-    mController->SetShadowOffset(Vector2::ZERO);
+    shadow.SetColor(color);
   }
+  else
+  {
+    shadow.SetColor(mController->GetShadowColor());
+  }
+  shadow.SetOffset(mController->GetShadowOffset());
+  shadow.SetBlurRadius(mController->GetShadowBlurRadius());
+
+  return shadow;
 }
 
 void LabelImpl::SetTextOutline(const Text::Outline& outline)
 {
+  if(outline == Text::Outline::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
+    if(mController->IsOutlineEnabled())
+    {
+      mController->SetOutlineEnabled(false);
+    }
+    if(0u != mController->GetOutlineWidth())
+    {
+      mController->SetOutlineWidth(0u);
+    }
+    return;
+  }
+
   const UiColor& color = outline.GetColor();
 
   SetColorBinding("OutlineColor", color, this, &LabelImpl::SetOutlineColorInternal);
@@ -698,22 +765,44 @@ void LabelImpl::SetTextOutline(const Text::Outline& outline)
   }
 }
 
-void LabelImpl::ClearTextOutline()
+Text::Outline LabelImpl::GetTextOutline() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
-  if(mController->IsOutlineEnabled())
+  if(!mController->IsOutlineEnabled())
   {
-    mController->SetOutlineEnabled(false);
+    return Text::Outline::None();
   }
-  if(0u != mController->GetOutlineWidth())
+
+  Text::Outline outline;
+
+  UiColor color;
+  if(UiColorManager::Get().GetBindingColor(Self(), "OutlineColor", color))
   {
-    mController->SetOutlineWidth(0u);
+    outline.SetColor(color);
   }
+  else
+  {
+    outline.SetColor(mController->GetOutlineColor());
+  }
+  outline.SetOffset(mController->GetOutlineOffset());
+  outline.SetWidth(static_cast<float>(mController->GetOutlineWidth()));
+  outline.SetBlurRadius(mController->GetOutlineBlurRadius());
+
+  return outline;
 }
 
 void LabelImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
 {
+  if(lineThrough == Text::LineThrough::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
+    if(mController->IsStrikethroughEnabled())
+    {
+      mController->SetStrikethroughEnabled(false);
+    }
+    return;
+  }
+
   const UiColor& color = lineThrough.GetColor();
 
   SetColorBinding("LineThroughColor", color, this, &LabelImpl::SetLineThroughColorInternal);
@@ -725,18 +814,43 @@ void LabelImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
   }
 }
 
-void LabelImpl::ClearTextLineThrough()
+Text::LineThrough LabelImpl::GetTextLineThrough() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
-  if(mController->IsStrikethroughEnabled())
+  if(!mController->IsStrikethroughEnabled())
   {
-    mController->SetStrikethroughEnabled(false);
+    return Text::LineThrough::None();
   }
+
+  Text::LineThrough lineThrough;
+
+  UiColor color;
+  if(UiColorManager::Get().GetBindingColor(Self(), "LineThroughColor", color))
+  {
+    lineThrough.SetColor(color);
+  }
+  else
+  {
+    lineThrough.SetColor(mController->GetStrikethroughColor());
+  }
+  lineThrough.SetThickness(mController->GetStrikethroughHeight());
+
+  return lineThrough;
 }
 
 void LabelImpl::SetTextBevel(const Text::Bevel& bevel)
 {
+  if(bevel == Text::Bevel::None())
+  {
+    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+    UiColorManager::Get().ClearBinding(Self(), "BevelLightColor");
+    UiColorManager::Get().ClearBinding(Self(), "BevelShadowColor");
+    if(mController->IsEmbossEnabled())
+    {
+      mController->SetEmbossEnabled(false);
+    }
+    return;
+  }
+
   const UiColor& lightColor  = bevel.GetLightColor();
   const UiColor& shadowColor = bevel.GetShadowColor();
 
@@ -750,15 +864,38 @@ void LabelImpl::SetTextBevel(const Text::Bevel& bevel)
   }
 }
 
-void LabelImpl::ClearTextBevel()
+Text::Bevel LabelImpl::GetTextBevel() const
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  UiColorManager::Get().ClearBinding(Self(), "BevelLightColor");
-  UiColorManager::Get().ClearBinding(Self(), "BevelShadowColor");
-  if(mController->IsEmbossEnabled())
+  if(!mController->IsEmbossEnabled())
   {
-    mController->SetEmbossEnabled(false);
+    return Text::Bevel::None();
   }
+
+  Text::Bevel bevel;
+
+  UiColor lightColor;
+  if(UiColorManager::Get().GetBindingColor(Self(), "BevelLightColor", lightColor))
+  {
+    bevel.SetLightColor(lightColor);
+  }
+  else
+  {
+    bevel.SetLightColor(mController->GetEmbossLightColor());
+  }
+
+  UiColor shadowColor;
+  if(UiColorManager::Get().GetBindingColor(Self(), "BevelShadowColor", shadowColor))
+  {
+    bevel.SetShadowColor(shadowColor);
+  }
+  else
+  {
+    bevel.SetShadowColor(mController->GetEmbossShadowColor());
+  }
+  bevel.SetDirection(mController->GetEmbossDirection());
+  bevel.SetIntensity(mController->GetEmbossStrength());
+
+  return bevel;
 }
 
 void LabelImpl::SetTextFit(const Text::FitRange& range)

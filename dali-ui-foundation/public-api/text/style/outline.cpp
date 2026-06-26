@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/outline.h>
@@ -24,6 +25,9 @@
 
 #define DALI_ASSERT_VALID_OUTLINE(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Outline object")
+
+#define DALI_ASSERT_OUTLINE_NOT_NONE(impl, message) \
+  DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
 namespace Dali
 {
@@ -45,7 +49,8 @@ public:
   : mColor(DEFAULT_COLOR),
     mOffset(Vector2::ZERO),
     mWidth(DEFAULT_WIDTH),
-    mBlurRadius(DEFAULT_BLUR_RADIUS)
+    mBlurRadius(DEFAULT_BLUR_RADIUS),
+    mIsNone(false)
   {
   }
 
@@ -53,7 +58,8 @@ public:
   : mColor(rhs.mColor),
     mOffset(rhs.mOffset),
     mWidth(rhs.mWidth),
-    mBlurRadius(rhs.mBlurRadius)
+    mBlurRadius(rhs.mBlurRadius),
+    mIsNone(rhs.mIsNone)
   {
   }
 
@@ -61,6 +67,7 @@ public:
   Vector2 mOffset;
   float   mWidth;
   float   mBlurRadius;
+  bool    mIsNone;
 };
 
 Outline::Outline()
@@ -109,51 +116,92 @@ Outline::~Outline()
   delete mImpl;
 }
 
+const Outline& Outline::None()
+{
+  static const Outline none = []()
+  {
+    Outline outline;
+    outline.mImpl->mIsNone = true;
+    return outline;
+  }();
+
+  return none;
+}
+
+bool Outline::operator==(const Outline& rhs) const
+{
+  DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_VALID_OUTLINE(rhs.mImpl);
+
+  if(mImpl->mIsNone || rhs.mImpl->mIsNone)
+  {
+    return mImpl->mIsNone == rhs.mImpl->mIsNone;
+  }
+
+  return mImpl->mColor == rhs.mImpl->mColor &&
+         mImpl->mOffset == rhs.mImpl->mOffset &&
+         Dali::Equals(mImpl->mWidth, rhs.mImpl->mWidth) &&
+         Dali::Equals(mImpl->mBlurRadius, rhs.mImpl->mBlurRadius);
+}
+
+bool Outline::operator!=(const Outline& rhs) const
+{
+  return !(*this == rhs);
+}
+
 void Outline::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_OUTLINE_NOT_NONE(mImpl, "Cannot modify Text::Outline::None().");
   mImpl->mColor = color;
 }
 
 const UiColor& Outline::GetColor() const
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_OUTLINE_NOT_NONE(mImpl, "Cannot access Text::Outline::None() properties.");
   return mImpl->mColor;
 }
 
 void Outline::SetOffset(const Vector2& offset)
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_OUTLINE_NOT_NONE(mImpl, "Cannot modify Text::Outline::None().");
   mImpl->mOffset = offset;
 }
 
 const Vector2& Outline::GetOffset() const
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_OUTLINE_NOT_NONE(mImpl, "Cannot access Text::Outline::None() properties.");
   return mImpl->mOffset;
 }
 
 void Outline::SetWidth(float width)
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_OUTLINE_NOT_NONE(mImpl, "Cannot modify Text::Outline::None().");
   mImpl->mWidth = std::max(0.0f, width);
 }
 
 float Outline::GetWidth() const
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_OUTLINE_NOT_NONE(mImpl, "Cannot access Text::Outline::None() properties.");
   return mImpl->mWidth;
 }
 
 void Outline::SetBlurRadius(float blurRadius)
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_OUTLINE_NOT_NONE(mImpl, "Cannot modify Text::Outline::None().");
   mImpl->mBlurRadius = std::max(0.0f, blurRadius);
 }
 
 float Outline::GetBlurRadius() const
 {
   DALI_ASSERT_VALID_OUTLINE(mImpl);
+  DALI_ASSERT_OUTLINE_NOT_NONE(mImpl, "Cannot access Text::Outline::None() properties.");
   return mImpl->mBlurRadius;
 }
 
@@ -161,4 +209,5 @@ float Outline::GetBlurRadius() const
 } // namespace Ui
 } // namespace Dali
 
+#undef DALI_ASSERT_OUTLINE_NOT_NONE
 #undef DALI_ASSERT_VALID_OUTLINE

@@ -104,23 +104,23 @@ private:
     // Clears bevel styles with number keys
     if(event.GetKeyName() == "1")
     {
-      mEmbossedLabel.ClearTextBevel();
+      mEmbossedLabel.SetTextBevel(Text::Bevel::None());
     }
     else if(event.GetKeyName() == "2")
     {
-      mEngravedLabel.ClearTextBevel();
+      mEngravedLabel.SetTextBevel(Text::Bevel::None());
     }
     else if(event.GetKeyName() == "3")
     {
-      mGlassLabel.ClearTextBevel();
+      mGlassLabel.SetTextBevel(Text::Bevel::None());
     }
     else if(event.GetKeyName() == "4")
     {
-      mSameColorLabel.ClearTextBevel();
+      mSameColorLabel.SetTextBevel(Text::Bevel::None());
     }
     else if(event.GetKeyName() == "5")
     {
-      mBronzeColorLabel.ClearTextBevel();
+      mBronzeColorLabel.SetTextBevel(Text::Bevel::None());
     }
   }
 

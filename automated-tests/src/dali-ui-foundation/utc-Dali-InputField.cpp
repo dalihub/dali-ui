@@ -244,6 +244,45 @@ int UtcDaliInputFieldTextColor(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldTextStyleNoneP(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  DALI_TEST_CHECK(inputField.GetTextUnderline() == Text::Underline::None());
+  Text::Underline underline;
+  inputField.SetTextUnderline(underline);
+  DALI_TEST_CHECK(inputField.GetTextUnderline() != Text::Underline::None());
+  inputField.SetTextUnderline(Text::Underline::None());
+  DALI_TEST_CHECK(inputField.GetTextUnderline() == Text::Underline::None());
+
+  DALI_TEST_CHECK(inputField.GetTextShadow() == Text::Shadow::None());
+  Text::Shadow zeroOffsetShadow;
+  zeroOffsetShadow.SetOffset(Vector2::ZERO);
+  inputField.SetTextShadow(zeroOffsetShadow);
+  DALI_TEST_CHECK(inputField.GetTextShadow() != Text::Shadow::None());
+  inputField.SetTextShadow(Text::Shadow::None());
+  DALI_TEST_CHECK(inputField.GetTextShadow() == Text::Shadow::None());
+
+  DALI_TEST_CHECK(inputField.GetTextOutline() == Text::Outline::None());
+  Text::Outline zeroWidthOutline;
+  zeroWidthOutline.SetWidth(0.0f);
+  inputField.SetTextOutline(zeroWidthOutline);
+  DALI_TEST_CHECK(inputField.GetTextOutline() != Text::Outline::None());
+  inputField.SetTextOutline(Text::Outline::None());
+  DALI_TEST_CHECK(inputField.GetTextOutline() == Text::Outline::None());
+
+  DALI_TEST_CHECK(inputField.GetTextLineThrough() == Text::LineThrough::None());
+  Text::LineThrough lineThrough;
+  inputField.SetTextLineThrough(lineThrough);
+  DALI_TEST_CHECK(inputField.GetTextLineThrough() != Text::LineThrough::None());
+  inputField.SetTextLineThrough(Text::LineThrough::None());
+  DALI_TEST_CHECK(inputField.GetTextLineThrough() == Text::LineThrough::None());
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldHorizontalTextAlignment(void)
 {
   UiTestApplication application;

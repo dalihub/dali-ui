@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/underline.h>
@@ -24,6 +25,9 @@
 
 #define DALI_ASSERT_VALID_UNDERLINE(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Underline object")
+
+#define DALI_ASSERT_UNDERLINE_NOT_NONE(impl, message) \
+  DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
 namespace Dali
 {
@@ -47,7 +51,8 @@ public:
     mThickness(DEFAULT_THICKNESS),
     mType(Type::SOLID),
     mDashLength(DEFAULT_DASH_LENGTH),
-    mDashGap(DEFAULT_DASH_GAP)
+    mDashGap(DEFAULT_DASH_GAP),
+    mIsNone(false)
   {
   }
 
@@ -56,7 +61,8 @@ public:
     mThickness(rhs.mThickness),
     mType(rhs.mType),
     mDashLength(rhs.mDashLength),
-    mDashGap(rhs.mDashGap)
+    mDashGap(rhs.mDashGap),
+    mIsNone(rhs.mIsNone)
   {
   }
 
@@ -65,6 +71,7 @@ public:
   Type    mType;
   float   mDashLength;
   float   mDashGap;
+  bool    mIsNone;
 };
 
 Underline::Underline()
@@ -113,63 +120,107 @@ Underline::~Underline()
   delete mImpl;
 }
 
+const Underline& Underline::None()
+{
+  static const Underline none = []()
+  {
+    Underline underline;
+    underline.mImpl->mIsNone = true;
+    return underline;
+  }();
+
+  return none;
+}
+
+bool Underline::operator==(const Underline& rhs) const
+{
+  DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_VALID_UNDERLINE(rhs.mImpl);
+
+  if(mImpl->mIsNone || rhs.mImpl->mIsNone)
+  {
+    return mImpl->mIsNone == rhs.mImpl->mIsNone;
+  }
+
+  return mImpl->mColor == rhs.mImpl->mColor &&
+         Dali::Equals(mImpl->mThickness, rhs.mImpl->mThickness) &&
+         mImpl->mType == rhs.mImpl->mType &&
+         Dali::Equals(mImpl->mDashLength, rhs.mImpl->mDashLength) &&
+         Dali::Equals(mImpl->mDashGap, rhs.mImpl->mDashGap);
+}
+
+bool Underline::operator!=(const Underline& rhs) const
+{
+  return !(*this == rhs);
+}
+
 void Underline::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot modify Text::Underline::None().");
   mImpl->mColor = color;
 }
 
 const UiColor& Underline::GetColor() const
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot access Text::Underline::None() properties.");
   return mImpl->mColor;
 }
 
 void Underline::SetThickness(float thickness)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot modify Text::Underline::None().");
   mImpl->mThickness = std::max(0.0f, thickness);
 }
 
 float Underline::GetThickness() const
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot access Text::Underline::None() properties.");
   return mImpl->mThickness;
 }
 
 void Underline::SetType(Type type)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot modify Text::Underline::None().");
   mImpl->mType = type;
 }
 
 Underline::Type Underline::GetType() const
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot access Text::Underline::None() properties.");
   return mImpl->mType;
 }
 
 void Underline::SetDashLength(float length)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot modify Text::Underline::None().");
   mImpl->mDashLength = std::max(0.0f, length);
 }
 
 float Underline::GetDashLength() const
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot access Text::Underline::None() properties.");
   return mImpl->mDashLength;
 }
 
 void Underline::SetDashGap(float gap)
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot modify Text::Underline::None().");
   mImpl->mDashGap = std::max(0.0f, gap);
 }
 
 float Underline::GetDashGap() const
 {
   DALI_ASSERT_VALID_UNDERLINE(mImpl);
+  DALI_ASSERT_UNDERLINE_NOT_NONE(mImpl, "Cannot access Text::Underline::None() properties.");
   return mImpl->mDashGap;
 }
 
@@ -177,4 +228,5 @@ float Underline::GetDashGap() const
 } // namespace Ui
 } // namespace Dali
 
+#undef DALI_ASSERT_UNDERLINE_NOT_NONE
 #undef DALI_ASSERT_VALID_UNDERLINE

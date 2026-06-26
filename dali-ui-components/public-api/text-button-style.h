@@ -165,9 +165,6 @@ public:
   Builder&  SetTextUnderline(const Text::Underline& underline) &;
   Builder&& SetTextUnderline(const Text::Underline& underline) &&;
 
-  Builder&  ClearTextUnderline() &;
-  Builder&& ClearTextUnderline() &&;
-
   TextButtonStyle Build() &&;
 
 private:

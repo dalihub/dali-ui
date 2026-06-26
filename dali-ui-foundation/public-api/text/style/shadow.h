@@ -75,6 +75,31 @@ public:
    */
   ~Shadow();
 
+  /**
+   * @brief Returns a value representing no shadow style.
+   *
+   * This value can be passed to SetTextShadow() to clear the shadow style.
+   *
+   * @return A shared immutable none value.
+   */
+  static const Shadow& None();
+
+  /**
+   * @brief Compares this shadow with another shadow.
+   *
+   * @param[in] rhs The shadow to compare with.
+   * @return true if both values are equal.
+   */
+  bool operator==(const Shadow& rhs) const;
+
+  /**
+   * @brief Compares this shadow with another shadow.
+   *
+   * @param[in] rhs The shadow to compare with.
+   * @return true if both values are not equal.
+   */
+  bool operator!=(const Shadow& rhs) const;
+
 public:
   /**
    * @brief Sets the shadow color.

@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
@@ -24,6 +25,9 @@
 
 #define DALI_ASSERT_VALID_SHADOW(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Shadow object")
+
+#define DALI_ASSERT_SHADOW_NOT_NONE(impl, message) \
+  DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
 namespace Dali
 {
@@ -43,20 +47,23 @@ public:
   Impl()
   : mColor(DEFAULT_COLOR),
     mOffset(Vector2::ONE),
-    mBlurRadius(DEFAULT_BLUR_RADIUS)
+    mBlurRadius(DEFAULT_BLUR_RADIUS),
+    mIsNone(false)
   {
   }
 
   Impl(const Impl& rhs)
   : mColor(rhs.mColor),
     mOffset(rhs.mOffset),
-    mBlurRadius(rhs.mBlurRadius)
+    mBlurRadius(rhs.mBlurRadius),
+    mIsNone(rhs.mIsNone)
   {
   }
 
   UiColor mColor;
   Vector2 mOffset;
   float   mBlurRadius;
+  bool    mIsNone;
 };
 
 Shadow::Shadow()
@@ -105,39 +112,77 @@ Shadow::~Shadow()
   delete mImpl;
 }
 
+const Shadow& Shadow::None()
+{
+  static const Shadow none = []()
+  {
+    Shadow shadow;
+    shadow.mImpl->mIsNone = true;
+    return shadow;
+  }();
+
+  return none;
+}
+
+bool Shadow::operator==(const Shadow& rhs) const
+{
+  DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_VALID_SHADOW(rhs.mImpl);
+
+  if(mImpl->mIsNone || rhs.mImpl->mIsNone)
+  {
+    return mImpl->mIsNone == rhs.mImpl->mIsNone;
+  }
+
+  return mImpl->mColor == rhs.mImpl->mColor &&
+         mImpl->mOffset == rhs.mImpl->mOffset &&
+         Dali::Equals(mImpl->mBlurRadius, rhs.mImpl->mBlurRadius);
+}
+
+bool Shadow::operator!=(const Shadow& rhs) const
+{
+  return !(*this == rhs);
+}
+
 void Shadow::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot modify Text::Shadow::None().");
   mImpl->mColor = color;
 }
 
 const UiColor& Shadow::GetColor() const
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot access Text::Shadow::None() properties.");
   return mImpl->mColor;
 }
 
 void Shadow::SetOffset(const Vector2& offset)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot modify Text::Shadow::None().");
   mImpl->mOffset = offset;
 }
 
 const Vector2& Shadow::GetOffset() const
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot access Text::Shadow::None() properties.");
   return mImpl->mOffset;
 }
 
 void Shadow::SetBlurRadius(float blurRadius)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot modify Text::Shadow::None().");
   mImpl->mBlurRadius = std::max(0.0f, blurRadius);
 }
 
 float Shadow::GetBlurRadius() const
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot access Text::Shadow::None() properties.");
   return mImpl->mBlurRadius;
 }
 
@@ -145,4 +190,5 @@ float Shadow::GetBlurRadius() const
 } // namespace Ui
 } // namespace Dali
 
+#undef DALI_ASSERT_SHADOW_NOT_NONE
 #undef DALI_ASSERT_VALID_SHADOW

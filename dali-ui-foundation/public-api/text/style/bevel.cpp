@@ -17,6 +17,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/bevel.h>
@@ -24,6 +25,9 @@
 
 #define DALI_ASSERT_VALID_BEVEL(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Bevel object")
+
+#define DALI_ASSERT_BEVEL_NOT_NONE(impl, message) \
+  DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
 namespace Dali
 {
@@ -46,7 +50,8 @@ public:
   : mDirection(DEFAULT_DIRECTION),
     mIntensity(DEFAULT_INTENSITY),
     mLightColor(DEFAULT_LIGHT_COLOR),
-    mShadowColor(DEFAULT_SHADOW_COLOR)
+    mShadowColor(DEFAULT_SHADOW_COLOR),
+    mIsNone(false)
   {
   }
 
@@ -54,7 +59,8 @@ public:
   : mDirection(rhs.mDirection),
     mIntensity(rhs.mIntensity),
     mLightColor(rhs.mLightColor),
-    mShadowColor(rhs.mShadowColor)
+    mShadowColor(rhs.mShadowColor),
+    mIsNone(rhs.mIsNone)
   {
   }
 
@@ -62,6 +68,7 @@ public:
   float   mIntensity;
   UiColor mLightColor;
   UiColor mShadowColor;
+  bool    mIsNone;
 };
 
 Bevel::Bevel()
@@ -110,51 +117,92 @@ Bevel::~Bevel()
   delete mImpl;
 }
 
+const Bevel& Bevel::None()
+{
+  static const Bevel none = []()
+  {
+    Bevel bevel;
+    bevel.mImpl->mIsNone = true;
+    return bevel;
+  }();
+
+  return none;
+}
+
+bool Bevel::operator==(const Bevel& rhs) const
+{
+  DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_VALID_BEVEL(rhs.mImpl);
+
+  if(mImpl->mIsNone || rhs.mImpl->mIsNone)
+  {
+    return mImpl->mIsNone == rhs.mImpl->mIsNone;
+  }
+
+  return mImpl->mDirection == rhs.mImpl->mDirection &&
+         Dali::Equals(mImpl->mIntensity, rhs.mImpl->mIntensity) &&
+         mImpl->mLightColor == rhs.mImpl->mLightColor &&
+         mImpl->mShadowColor == rhs.mImpl->mShadowColor;
+}
+
+bool Bevel::operator!=(const Bevel& rhs) const
+{
+  return !(*this == rhs);
+}
+
 void Bevel::SetDirection(const Vector2& direction)
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_BEVEL_NOT_NONE(mImpl, "Cannot modify Text::Bevel::None().");
   mImpl->mDirection = direction;
 }
 
 const Vector2& Bevel::GetDirection() const
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_BEVEL_NOT_NONE(mImpl, "Cannot access Text::Bevel::None() properties.");
   return mImpl->mDirection;
 }
 
 void Bevel::SetIntensity(float intensity)
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_BEVEL_NOT_NONE(mImpl, "Cannot modify Text::Bevel::None().");
   mImpl->mIntensity = std::max(0.0f, intensity);
 }
 
 float Bevel::GetIntensity() const
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_BEVEL_NOT_NONE(mImpl, "Cannot access Text::Bevel::None() properties.");
   return mImpl->mIntensity;
 }
 
 void Bevel::SetLightColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_BEVEL_NOT_NONE(mImpl, "Cannot modify Text::Bevel::None().");
   mImpl->mLightColor = color;
 }
 
 const UiColor& Bevel::GetLightColor() const
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_BEVEL_NOT_NONE(mImpl, "Cannot access Text::Bevel::None() properties.");
   return mImpl->mLightColor;
 }
 
 void Bevel::SetShadowColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_BEVEL_NOT_NONE(mImpl, "Cannot modify Text::Bevel::None().");
   mImpl->mShadowColor = color;
 }
 
 const UiColor& Bevel::GetShadowColor() const
 {
   DALI_ASSERT_VALID_BEVEL(mImpl);
+  DALI_ASSERT_BEVEL_NOT_NONE(mImpl, "Cannot access Text::Bevel::None() properties.");
   return mImpl->mShadowColor;
 }
 
@@ -162,4 +210,5 @@ const UiColor& Bevel::GetShadowColor() const
 } // namespace Ui
 } // namespace Dali
 
+#undef DALI_ASSERT_BEVEL_NOT_NONE
 #undef DALI_ASSERT_VALID_BEVEL

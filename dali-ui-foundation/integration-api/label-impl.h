@@ -348,9 +348,9 @@ public:
   void SetTextUnderline(const Text::Underline& underline);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearTextUnderline
+   * @copydoc Dali::Ui::Label::GetTextUnderline
    */
-  void ClearTextUnderline();
+  Text::Underline GetTextUnderline() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextShadow
@@ -358,9 +358,9 @@ public:
   void SetTextShadow(const Text::Shadow& shadow);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearTextShadow
+   * @copydoc Dali::Ui::Label::GetTextShadow
    */
-  void ClearTextShadow();
+  Text::Shadow GetTextShadow() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextOutline
@@ -368,9 +368,9 @@ public:
   void SetTextOutline(const Text::Outline& outline);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearTextOutline
+   * @copydoc Dali::Ui::Label::GetTextOutline
    */
-  void ClearTextOutline();
+  Text::Outline GetTextOutline() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextLineThrough
@@ -378,9 +378,9 @@ public:
   void SetTextLineThrough(const Text::LineThrough& lineThrough);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearTextLineThrough
+   * @copydoc Dali::Ui::Label::GetTextLineThrough
    */
-  void ClearTextLineThrough();
+  Text::LineThrough GetTextLineThrough() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextBevel
@@ -388,9 +388,9 @@ public:
   void SetTextBevel(const Text::Bevel& bevel);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearTextBevel
+   * @copydoc Dali::Ui::Label::GetTextBevel
    */
-  void ClearTextBevel();
+  Text::Bevel GetTextBevel() const;
 
   /**
    * @see Dali::Ui::Label::SetTextFit

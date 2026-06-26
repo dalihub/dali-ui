@@ -74,6 +74,31 @@ public:
    */
   ~LineThrough();
 
+  /**
+   * @brief Returns a value representing no line-through style.
+   *
+   * This value can be passed to SetTextLineThrough() to clear the line-through style.
+   *
+   * @return A shared immutable none value.
+   */
+  static const LineThrough& None();
+
+  /**
+   * @brief Compares this line-through with another line-through.
+   *
+   * @param[in] rhs The line-through to compare with.
+   * @return true if both values are equal.
+   */
+  bool operator==(const LineThrough& rhs) const;
+
+  /**
+   * @brief Compares this line-through with another line-through.
+   *
+   * @param[in] rhs The line-through to compare with.
+   * @return true if both values are not equal.
+   */
+  bool operator!=(const LineThrough& rhs) const;
+
 public:
   /**
    * @brief Sets the line-through color.

@@ -809,50 +809,66 @@ public: // Setters for chaining
   /**
    * @brief Sets the underline style.
    *
+   * Pass Text::Underline::None() to clear the underline style.
+   *
    * @param[in] underline The underline configuration.
    */
   void SetTextUnderline(const Text::Underline& underline);
 
   /**
-   * @brief Clears the underline style.
+   * @brief Gets the underline style.
+   *
+   * @return The current underline style, or Text::Underline::None() if not set.
    */
-  void ClearTextUnderline();
+  Text::Underline GetTextUnderline() const;
 
   /**
    * @brief Sets the shadow style.
+   *
+   * Pass Text::Shadow::None() to clear the shadow style.
    *
    * @param[in] shadow The shadow configuration.
    */
   void SetTextShadow(const Text::Shadow& shadow);
 
   /**
-   * @brief Clears the shadow style.
+   * @brief Gets the shadow style.
+   *
+   * @return The current shadow style, or Text::Shadow::None() if not set.
    */
-  void ClearTextShadow();
+  Text::Shadow GetTextShadow() const;
 
   /**
    * @brief Sets the outline style.
+   *
+   * Pass Text::Outline::None() to clear the outline style.
    *
    * @param[in] outline The outline configuration.
    */
   void SetTextOutline(const Text::Outline& outline);
 
   /**
-   * @brief Clears the outline style.
+   * @brief Gets the outline style.
+   *
+   * @return The current outline style, or Text::Outline::None() if not set.
    */
-  void ClearTextOutline();
+  Text::Outline GetTextOutline() const;
 
   /**
    * @brief Sets the line-through style.
+   *
+   * Pass Text::LineThrough::None() to clear the line-through style.
    *
    * @param[in] lineThrough The line-through configuration.
    */
   void SetTextLineThrough(const Text::LineThrough& lineThrough);
 
   /**
-   * @brief Clears the line-through style.
+   * @brief Gets the line-through style.
+   *
+   * @return The current line-through style, or Text::LineThrough::None() if not set.
    */
-  void ClearTextLineThrough();
+  Text::LineThrough GetTextLineThrough() const;
 
   /**
    * @brief Sets the minimum font size scale.

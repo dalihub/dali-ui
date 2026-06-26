@@ -76,6 +76,31 @@ public:
    */
   ~Bevel();
 
+  /**
+   * @brief Returns a value representing no bevel style.
+   *
+   * This value can be passed to SetTextBevel() to clear the bevel style.
+   *
+   * @return A shared immutable none value.
+   */
+  static const Bevel& None();
+
+  /**
+   * @brief Compares this bevel with another bevel.
+   *
+   * @param[in] rhs The bevel to compare with.
+   * @return true if both values are equal.
+   */
+  bool operator==(const Bevel& rhs) const;
+
+  /**
+   * @brief Compares this bevel with another bevel.
+   *
+   * @param[in] rhs The bevel to compare with.
+   * @return true if both values are not equal.
+   */
+  bool operator!=(const Bevel& rhs) const;
+
 public:
   /**
    * @brief Sets the bevel direction.

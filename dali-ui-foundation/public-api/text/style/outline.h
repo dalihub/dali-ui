@@ -75,6 +75,31 @@ public:
    */
   ~Outline();
 
+  /**
+   * @brief Returns a value representing no outline style.
+   *
+   * This value can be passed to SetTextOutline() to clear the outline style.
+   *
+   * @return A shared immutable none value.
+   */
+  static const Outline& None();
+
+  /**
+   * @brief Compares this outline with another outline.
+   *
+   * @param[in] rhs The outline to compare with.
+   * @return true if both values are equal.
+   */
+  bool operator==(const Outline& rhs) const;
+
+  /**
+   * @brief Compares this outline with another outline.
+   *
+   * @param[in] rhs The outline to compare with.
+   * @return true if both values are not equal.
+   */
+  bool operator!=(const Outline& rhs) const;
+
 public:
   /**
    * @brief Sets the outline color.

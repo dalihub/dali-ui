@@ -382,9 +382,9 @@ void Label::SetTextUnderline(const Text::Underline& underline)
   GetImpl(*this).SetTextUnderline(underline);
 }
 
-void Label::ClearTextUnderline()
+Text::Underline Label::GetTextUnderline() const
 {
-  return GetImpl(*this).ClearTextUnderline();
+  return GetImpl(*this).GetTextUnderline();
 }
 
 void Label::SetTextShadow(const Text::Shadow& shadow)
@@ -392,9 +392,9 @@ void Label::SetTextShadow(const Text::Shadow& shadow)
   GetImpl(*this).SetTextShadow(shadow);
 }
 
-void Label::ClearTextShadow()
+Text::Shadow Label::GetTextShadow() const
 {
-  return GetImpl(*this).ClearTextShadow();
+  return GetImpl(*this).GetTextShadow();
 }
 
 void Label::SetTextOutline(const Text::Outline& outline)
@@ -402,9 +402,9 @@ void Label::SetTextOutline(const Text::Outline& outline)
   GetImpl(*this).SetTextOutline(outline);
 }
 
-void Label::ClearTextOutline()
+Text::Outline Label::GetTextOutline() const
 {
-  return GetImpl(*this).ClearTextOutline();
+  return GetImpl(*this).GetTextOutline();
 }
 
 void Label::SetTextLineThrough(const Text::LineThrough& lineThrough)
@@ -412,9 +412,9 @@ void Label::SetTextLineThrough(const Text::LineThrough& lineThrough)
   GetImpl(*this).SetTextLineThrough(lineThrough);
 }
 
-void Label::ClearTextLineThrough()
+Text::LineThrough Label::GetTextLineThrough() const
 {
-  return GetImpl(*this).ClearTextLineThrough();
+  return GetImpl(*this).GetTextLineThrough();
 }
 
 void Label::SetTextBevel(const Text::Bevel& bevel)
@@ -422,9 +422,9 @@ void Label::SetTextBevel(const Text::Bevel& bevel)
   GetImpl(*this).SetTextBevel(bevel);
 }
 
-void Label::ClearTextBevel()
+Text::Bevel Label::GetTextBevel() const
 {
-  return GetImpl(*this).ClearTextBevel();
+  return GetImpl(*this).GetTextBevel();
 }
 
 void Label::SetTextFit(const Text::FitRange& range)
