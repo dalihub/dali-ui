@@ -47,8 +47,9 @@ class UiLocalizationManagerImpl;
  * If the function returns false:
  *   - normal gettext/dgettext lookup proceeds.
  *
- * The returned localized string may be a display text, resource path,
- * image url, accessibility string, or any other locale-dependent string value.
+ * The returned localized string may be display text, a resource path,
+ * an image URL, placeholder text, tooltip text, or any other
+ * locale-dependent string value.
  *
  * @note This is a plain function pointer, not std::function.
  *       Capturing lambdas and non-static member functions are not accepted.
@@ -86,9 +87,9 @@ using LocalizedStringOverrideFunc = bool (*)(StringView    resourceId,
  *
  * Examples:
  *   - Label text
- *   - ImageView image url
- *   - accessibility name
+ *   - ImageView image URL
  *   - placeholder text
+ *   - tooltip text
  */
 using LocalizedStringCallback = Callback<void(BaseHandle, const Dali::String&)>;
 
@@ -109,8 +110,8 @@ using LocalizedStringCallback = Callback<void(BaseHandle, const Dali::String&)>;
  *
  *   resourceId + domain -> localized string
  *
- * The localized string can be used as display text, resource path, image url,
- * accessibility text, etc.
+ * The localized string can be used as display text, resource path, image URL,
+ * placeholder text, tooltip text, etc.
  *
  * @code
  *   // Register a gettext domain and set it as default
