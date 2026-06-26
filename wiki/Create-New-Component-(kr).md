@@ -13,6 +13,7 @@ Public component handle은 컴포넌트의 동작에 맞는 foundation class를 
 | 기본 visual/container component | `View` | `ViewImpl` |
 | click/focus 등 interaction이 필요한 component | `InteractiveView` | `Provider::InteractiveViewImpl` |
 | selection 상태가 필요한 component | `SelectableView` | `Provider::SelectableViewImpl` |
+| single-selection(radio) group 멤버 component | `GroupSelectableView` | `Provider::GroupSelectableViewImpl` |
 
 Public handle과 internal impl의 상속 계층을 맞춥니다.
 
@@ -27,6 +28,8 @@ class TextButtonImpl : public Provider::InteractiveViewImpl
   ...
 };
 ```
+
+이 foundation class들은 단계마다 이전 단계 위에 동작을 더하는 계층을 이룹니다. `InteractiveView`는 click/focus 처리를, `SelectableView`는 selected 상태를, `GroupSelectableView`는 멤버 중 하나만 선택되는 single-selection(radio) grouping을 더합니다. 하위 class는 상위 class의 API를 그대로 상속·노출합니다.
 
 컴포넌트 고유 상태와 동작은 impl class에 둡니다. Public component class는 lightweight handle로 유지합니다.
 

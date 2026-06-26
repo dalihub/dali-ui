@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/attachment-id.h>
+#include <dali-ui-foundation/public-api/group-selectable-view.h>
 #include <dali-ui-foundation/public-api/input-editor.h>
 #include <dali-ui-foundation/public-api/input-field.h>
 #include <dali-ui-foundation/public-api/interactive-view.h>

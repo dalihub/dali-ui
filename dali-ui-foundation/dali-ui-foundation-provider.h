@@ -19,6 +19,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
+#include <dali-ui-foundation/provider-api/group-selectable-view-impl.h>
 #include <dali-ui-foundation/provider-api/interactive-view-impl.h>
 #include <dali-ui-foundation/provider-api/property-registration-helper.h>
 #include <dali-ui-foundation/provider-api/selectable-view-impl.h>
