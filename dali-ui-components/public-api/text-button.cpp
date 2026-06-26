@@ -142,11 +142,6 @@ void TextButton::SetTextUnderline(const Text::Underline& underline)
   GetImpl(*this).SetTextUnderline(underline);
 }
 
-bool TextButton::IsTextUnderlineEnabled() const
-{
-  return GetImpl(*this).IsTextUnderlineEnabled();
-}
-
 Text::Underline TextButton::GetTextUnderline() const
 {
   return GetImpl(*this).GetTextUnderline();

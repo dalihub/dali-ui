@@ -147,11 +147,6 @@ StateEffect TextButtonStyle::GetStateEffect() const
   return GetImpl(*this).GetStateEffect();
 }
 
-bool TextButtonStyle::IsTextUnderlineEnabled() const
-{
-  return GetImpl(*this).IsTextUnderlineEnabled();
-}
-
 Text::Underline TextButtonStyle::GetTextUnderline() const
 {
   return GetImpl(*this).GetTextUnderline();
@@ -559,18 +554,12 @@ StateEffect TextButtonStyleImpl::GetStateEffect() const
 
 void TextButtonStyleImpl::SetTextUnderline(const Text::Underline& underline)
 {
-  mUnderline        = underline;
-  mUnderlineEnabled = (underline != Text::Underline::None());
-}
-
-bool TextButtonStyleImpl::IsTextUnderlineEnabled() const
-{
-  return mUnderlineEnabled;
+  mUnderline = underline;
 }
 
 Text::Underline TextButtonStyleImpl::GetTextUnderline() const
 {
-  return mUnderlineEnabled ? mUnderline : Text::Underline::None();
+  return mUnderline;
 }
 
 TextButtonStyleImpl::TextButtonStyleImpl()
@@ -606,8 +595,7 @@ TextButtonStyleImpl::TextButtonStyleImpl(const TextButtonStyleImpl& rhs)
   mFontSize(rhs.mFontSize),
   mFontFamily(rhs.mFontFamily),
   mStateEffect(rhs.mStateEffect),
-  mUnderline(rhs.mUnderline),
-  mUnderlineEnabled(rhs.mUnderlineEnabled)
+  mUnderline(rhs.mUnderline)
 {
 }
 

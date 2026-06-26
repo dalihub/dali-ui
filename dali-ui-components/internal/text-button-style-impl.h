@@ -81,7 +81,6 @@ public:
   StateEffect GetStateEffect() const;
 
   void            SetTextUnderline(const Text::Underline& underline);
-  bool            IsTextUnderlineEnabled() const;
   Text::Underline GetTextUnderline() const;
 
 protected:
@@ -102,8 +101,7 @@ private:
   float              mFontSize{0.0f};
   Dali::String       mFontFamily;
   StateEffect        mStateEffect;
-  Text::Underline    mUnderline;
-  bool               mUnderlineEnabled{false};
+  Text::Underline    mUnderline{Text::Underline::None()};
 };
 
 } // namespace Internal

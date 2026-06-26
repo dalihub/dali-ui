@@ -53,7 +53,6 @@ public:
   Dali::String GetFontFamily() const;
 
   void            SetTextUnderline(const Text::Underline& underline);
-  bool            IsTextUnderlineEnabled() const;
   Text::Underline GetTextUnderline() const;
 
 protected:
@@ -70,10 +69,9 @@ private:
 
 private:
   Ui::Label       mLabel;
-  Text::Underline mUnderline;
+  Text::Underline mUnderline{Text::Underline::None()};
   LayoutAlignment mHorizontalAlignment{LayoutAlignment::CENTER};
   LayoutAlignment mVerticalAlignment{LayoutAlignment::CENTER};
-  bool            mUnderlineEnabled{false};
 };
 
 } // namespace Internal

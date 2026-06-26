@@ -204,7 +204,7 @@ int UtcDaliTextButtonStyleP(void)
   DALI_TEST_EQUALS(button.GetFontSize(), 18.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(button.GetFontFamily(), std::string("Roboto"), TEST_LOCATION);
   DALI_TEST_CHECK(style.GetStateEffect().IsNone());
-  DALI_TEST_CHECK(button.IsTextUnderlineEnabled());
+  DALI_TEST_CHECK(button.GetTextUnderline() != Text::Underline::None());
   DALI_TEST_EQUALS(button.GetTextUnderline().GetThickness(), 2.0f, TEST_LOCATION);
   END_TEST;
 }
@@ -245,11 +245,10 @@ int UtcDaliTextButtonTextPropertiesP(void)
   DALI_TEST_EQUALS(button.GetTextColor().GetRgba(), Color::GREEN, TEST_LOCATION);
   DALI_TEST_EQUALS(button.GetFontSize(), 22.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(button.GetFontFamily(), std::string("Sans"), TEST_LOCATION);
-  DALI_TEST_CHECK(button.IsTextUnderlineEnabled());
+  DALI_TEST_CHECK(button.GetTextUnderline() != Text::Underline::None());
   DALI_TEST_EQUALS(button.GetTextUnderline().GetThickness(), 3.0f, TEST_LOCATION);
 
   button.SetTextUnderline(Text::Underline::None());
-  DALI_TEST_CHECK(!button.IsTextUnderlineEnabled());
   DALI_TEST_CHECK(button.GetTextUnderline() == Text::Underline::None());
   END_TEST;
 }

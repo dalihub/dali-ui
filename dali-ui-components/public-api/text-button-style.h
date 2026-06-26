@@ -87,7 +87,6 @@ public:
 
   StateEffect GetStateEffect() const;
 
-  bool            IsTextUnderlineEnabled() const;
   Text::Underline GetTextUnderline() const;
 
 public: // Not intended for application developers
