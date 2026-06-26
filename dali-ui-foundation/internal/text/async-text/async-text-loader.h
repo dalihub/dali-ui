@@ -125,6 +125,7 @@ struct AsyncTextParameters
     ellipsis{true},
     enableMarkup{false},
     isUnderlineEnabled{false},
+    isShadowEnabled{false},
     isStrikethroughEnabled{false},
     isTextBackgroundEnabled{false},
     isTextFitEnabled{false},
@@ -213,6 +214,7 @@ struct AsyncTextParameters
   bool ellipsis : 1;                      ///< Whether the ellipsis layout option is enabled.
   bool enableMarkup : 1;                  ///< Whether the mark-up processor is enabled.
   bool isUnderlineEnabled : 1;            ///< Underline enabeld flag.
+  bool isShadowEnabled : 1;               ///< Shadow enabled flag.
   bool isStrikethroughEnabled : 1;        ///< Strikethrough enabeld flag.
   bool isTextBackgroundEnabled : 1;       ///< Text background flag.
   bool isTextFitEnabled : 1;              ///< TextFit enabeld flag.

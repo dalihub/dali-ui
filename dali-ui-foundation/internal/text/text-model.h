@@ -190,6 +190,11 @@ public:
   const Vector2& GetShadowOffset() const override;
 
   /**
+   * @copydoc ModelInterface::IsShadowEnabled()
+   */
+  bool IsShadowEnabled() const override;
+
+  /**
    * @copydoc ModelInterface::GetShadowColor()
    */
   const Vector4& GetShadowColor() const override;

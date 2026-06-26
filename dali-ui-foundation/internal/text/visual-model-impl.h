@@ -249,16 +249,30 @@ public:
   /**
    * @brief Sets the text's shadow offset.
    *
-   * @param[in] shadowOffset The shadow offset, 0,0 indicates no shadow.
+   * @param[in] shadowOffset The shadow offset.
    */
   void SetShadowOffset(const Vector2& shadowOffset);
 
   /**
    * @brief Retrieves the text's shadow offset.
    *
-   * @return The text's shadow offset, 0,0 indicates no shadow.
+   * @return The text's shadow offset.
    */
   const Vector2& GetShadowOffset() const;
+
+  /**
+   * @brief Sets the text's shadow enabled flag.
+   *
+   * @param[in] enabled true if shadow is enabled.
+   */
+  void SetShadowEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether the text's shadow is enabled or not.
+   *
+   * @return The shadow state.
+   */
+  bool IsShadowEnabled() const;
 
   /**
    * @brief Sets the text's shadow color.
@@ -842,7 +856,7 @@ public:
   Vector4                          mBackgroundColor;           ///< Color of text background
   Vector4                          mStrikethroughColor;        ///< Color of text background
   Size                             mControlSize;               ///< The size of the UI control.
-  Vector2                          mShadowOffset;              ///< Offset for drop shadow, 0 indicates no shadow
+  Vector2                          mShadowOffset;              ///< Offset for drop shadow.
   Vector2                          mOutlineOffset;             ///< Offset for outline
   float                            mUnderlineHeight;           ///< Fixed height for underline to override font metrics.
   float                            mStrikethroughHeight;       ///< Fixed height for strikethrough to override font metrics.
@@ -883,6 +897,7 @@ private:
 
 public:
   bool  mUnderlineEnabled : 1;            ///< Underline enabled flag
+  bool  mShadowEnabled : 1;               ///< Shadow enabled flag.
   bool  mUnderlineColorSet : 1;           ///< Has the underline color been explicitly set?
   bool  mBackgroundEnabled : 1;           ///< Background enabled flag
   bool  mMarkupProcessorEnabled : 1;      ///< Markup-processor enabled flag

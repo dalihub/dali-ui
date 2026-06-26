@@ -360,6 +360,11 @@ void VisualModel::SetShadowOffset(const Vector2& shadowOffset)
   mShadowOffset = shadowOffset;
 }
 
+void VisualModel::SetShadowEnabled(bool enabled)
+{
+  mShadowEnabled = enabled;
+}
+
 void VisualModel::SetShadowColor(const Vector4& shadowColor)
 {
   mShadowColor = shadowColor;
@@ -505,6 +510,11 @@ const Vector4& VisualModel::GetTextColor() const
 const Vector2& VisualModel::GetShadowOffset() const
 {
   return mShadowOffset;
+}
+
+bool VisualModel::IsShadowEnabled() const
+{
+  return mShadowEnabled;
 }
 
 const Vector4& VisualModel::GetShadowColor() const
@@ -792,6 +802,7 @@ VisualModel::VisualModel()
   mSecondMiddleIndexOfElidedGlyphs(0u),
   mTextElideEnabled(false),
   mUnderlineEnabled(false),
+  mShadowEnabled(false),
   mUnderlineColorSet(false),
   mBackgroundEnabled(false),
   mMarkupProcessorEnabled(false),

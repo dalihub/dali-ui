@@ -174,6 +174,11 @@ const Vector2& Model::GetShadowOffset() const
   return mVisualModel->mShadowOffset;
 }
 
+bool Model::IsShadowEnabled() const
+{
+  return mVisualModel->IsShadowEnabled();
+}
+
 const Vector4& Model::GetShadowColor() const
 {
   return mVisualModel->mShadowColor;

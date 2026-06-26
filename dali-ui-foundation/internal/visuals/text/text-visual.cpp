@@ -696,12 +696,7 @@ void TextVisual::UpdateRenderer()
 
       // Check whether the text contains any style colors (e.g. underline color, shadow color, etc.)
 
-      bool           shadowEnabled = false;
-      const Vector2& shadowOffset  = mController->GetTextModel()->GetShadowOffset();
-      if(fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1)
-      {
-        shadowEnabled = true;
-      }
+      const bool shadowEnabled = mController->GetTextModel()->IsShadowEnabled();
 
       const bool outlineEnabled         = (mController->GetTextModel()->GetOutlineWidth() > Math::MACHINE_EPSILON_1);
       const bool backgroundEnabled      = mController->GetTextModel()->IsBackgroundEnabled();

@@ -1273,7 +1273,7 @@ public: // Default style & Input style
   /**
    * @brief Set the shadow offset.
    *
-   * @param[in] shadowOffset The shadow offset, 0,0 indicates no shadow.
+   * @param[in] shadowOffset The shadow offset.
    */
   void SetShadowOffset(const Vector2& shadowOffset);
 
@@ -1283,6 +1283,20 @@ public: // Default style & Input style
    * @return The shadow offset.
    */
   const Vector2& GetShadowOffset() const;
+
+  /**
+   * @brief Set the shadow enabled flag.
+   *
+   * @param[in] enabled The shadow enabled flag.
+   */
+  void SetShadowEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether the text shadow is enabled or not.
+   *
+   * @return The shadow state.
+   */
+  bool IsShadowEnabled() const;
 
   /**
    * @brief Set the shadow color.

@@ -236,11 +236,18 @@ public:
   virtual const Vector4& GetDefaultColor() const = 0;
 
   /**
-   * @brief Retrieves the shadow offset, 0 indicates no shadow.
+   * @brief Retrieves the shadow offset.
    *
    * @return The shadow offset.
    */
   virtual const Vector2& GetShadowOffset() const = 0;
+
+  /**
+   * @brief Returns whether shadow is enabled or not.
+   *
+   * @return The shadow state.
+   */
+  virtual bool IsShadowEnabled() const = 0;
 
   /**
    * @brief Retrieves the shadow color.

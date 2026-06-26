@@ -363,10 +363,9 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
     // @todo. Support shadow for partial text later on.
 
     // Generate the shadow if enabled
-    const Vector2& shadowOffset = viewModel.GetShadowOffset();
-    const float    shadowAlpha  = viewModel.GetShadowColor().a;
-    if(RENDER_OVERLAY_STYLE != behaviour && fabsf(shadowAlpha) > Math::MACHINE_EPSILON_1 &&
-       (fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1))
+    const float shadowAlpha = viewModel.GetShadowColor().a;
+    if(RENDER_OVERLAY_STYLE != behaviour && viewModel.IsShadowEnabled() &&
+       fabsf(shadowAlpha) > Math::MACHINE_EPSILON_1)
     {
       // Create the image buffer for shadow
       Devel::PixelBuffer shadowImageBuffer =

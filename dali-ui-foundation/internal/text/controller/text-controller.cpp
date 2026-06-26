@@ -1137,6 +1137,21 @@ const Vector2& Controller::GetShadowOffset() const
   return mImpl->mModel->mVisualModel->GetShadowOffset();
 }
 
+void Controller::SetShadowEnabled(bool enabled)
+{
+  if(mImpl->mModel->mVisualModel->IsShadowEnabled() != enabled)
+  {
+    mImpl->mModel->mVisualModel->SetShadowEnabled(enabled);
+    RequestRelayout();
+    RequestAsyncRender();
+  }
+}
+
+bool Controller::IsShadowEnabled() const
+{
+  return mImpl->mModel->mVisualModel->IsShadowEnabled();
+}
+
 void Controller::SetShadowColor(const Vector4& shadowColor)
 {
   mImpl->mModel->mVisualModel->SetShadowColor(shadowColor);

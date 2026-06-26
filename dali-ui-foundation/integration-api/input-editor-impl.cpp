@@ -854,6 +854,11 @@ void InputEditorImpl::ClearTextShadow()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
+  if(mController->IsShadowEnabled())
+  {
+    mController->SetShadowEnabled(false);
+    mRenderer.Reset();
+  }
   if(Vector2::ZERO != mController->GetShadowOffset())
   {
     mController->SetShadowOffset(Vector2::ZERO);

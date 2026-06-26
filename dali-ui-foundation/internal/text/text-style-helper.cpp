@@ -76,6 +76,12 @@ bool ApplyShadowStyle(ControllerPtr controller, const Shadow& shadow)
   const Vector2 offset     = shadow.GetOffset();
   const float   blurRadius = shadow.GetBlurRadius();
 
+  if(!controller->IsShadowEnabled())
+  {
+    controller->SetShadowEnabled(true);
+    update = true;
+  }
+
   if(controller->GetShadowOffset() != offset)
   {
     controller->SetShadowOffset(offset);

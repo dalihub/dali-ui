@@ -120,6 +120,11 @@ public:
   const Vector2& GetShadowOffset() const override;
 
   /**
+   * @copydoc Dali::Ui::Text::ViewInterface::IsShadowEnabled()
+   */
+  bool IsShadowEnabled() const override;
+
+  /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetShadowColor()
    */
   const Vector4& GetShadowColor() const override;

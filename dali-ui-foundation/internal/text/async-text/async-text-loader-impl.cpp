@@ -189,6 +189,7 @@ void AsyncTextLoader::Initialize()
   mTextModel->mVisualModel->SetUnderlineEnabled(false);
   mTextModel->mVisualModel->SetUnderlineHeight(0.0f);
   mTextModel->mVisualModel->SetOutlineWidth(0.0f);
+  mTextModel->mVisualModel->SetShadowEnabled(false);
   mTextModel->mVisualModel->SetShadowOffset(Vector2(0.0f, 0.0f));
   mTextModel->mVisualModel->SetStrikethroughEnabled(false);
   mTextModel->mVisualModel->SetStrikethroughHeight(0.0f);
@@ -316,14 +317,16 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     mTextModel->mVisualModel->SetBackgroundColor(parameters.textBackgroundColor);
   }
 
-  const Vector2& shadowOffset = parameters.shadowOffset;
-  const float    shadowAlpha  = parameters.shadowColor.a;
-  if(fabsf(shadowAlpha) > Math::MACHINE_EPSILON_1 &&
-     (fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1))
+  if(parameters.isShadowEnabled)
   {
+    mTextModel->mVisualModel->SetShadowEnabled(true);
     mTextModel->mVisualModel->SetShadowBlurRadius(parameters.shadowBlurRadius);
     mTextModel->mVisualModel->SetShadowColor(parameters.shadowColor);
     mTextModel->mVisualModel->SetShadowOffset(parameters.shadowOffset);
+  }
+  else
+  {
+    mTextModel->mVisualModel->SetShadowEnabled(false);
   }
 
   const uint16_t outlineWidth = parameters.outlineWidth;
@@ -888,12 +891,8 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   }
 
   // Check whether the text contains any style colors (e.g. underline color, shadow color, etc.)
-  bool           shadowEnabled = false;
+  const bool     shadowEnabled = mTextModel->IsShadowEnabled();
   const Vector2& shadowOffset  = mTextModel->GetShadowOffset();
-  if(fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1)
-  {
-    shadowEnabled = true;
-  }
 
   const bool outlineEnabled              = mTextModel->GetOutlineWidth() > Math::MACHINE_EPSILON_1;
   const bool backgroundEnabled           = mTextModel->IsBackgroundEnabled();
@@ -924,7 +923,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     layoutSize.y = parameters.textHeight;
   }
 
-  if(shadowOffset.y > Math::MACHINE_EPSILON_1)
+  if(shadowEnabled && shadowOffset.y > Math::MACHINE_EPSILON_1)
   {
     layoutSize.y += shadowOffset.y;
   }

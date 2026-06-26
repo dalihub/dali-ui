@@ -696,6 +696,12 @@ bool SetShadowProperties(ControllerPtr controller, const Property::Value& value,
 
         if(!empty)
         {
+          if(!controller->IsShadowEnabled())
+          {
+            controller->SetShadowEnabled(true);
+            update = true;
+          }
+
           // Sets the default shadow values.
           if(colorDefined && (controller->GetShadowColor() != color))
           {
@@ -717,10 +723,15 @@ bool SetShadowProperties(ControllerPtr controller, const Property::Value& value,
         }
         else
         {
-          // Disable shadow.
+          if(controller->IsShadowEnabled())
+          {
+            controller->SetShadowEnabled(false);
+            update = true;
+          }
           if(Vector2::ZERO != controller->GetShadowOffset())
           {
             controller->SetShadowOffset(Vector2::ZERO);
+            update = true;
           }
         }
         break;

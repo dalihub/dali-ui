@@ -675,6 +675,10 @@ void LabelImpl::ClearTextShadow()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
+  if(mController->IsShadowEnabled())
+  {
+    mController->SetShadowEnabled(false);
+  }
   if(Vector2::ZERO != mController->GetShadowOffset())
   {
     mController->SetShadowOffset(Vector2::ZERO);
@@ -1441,7 +1445,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     layoutSize.x    = contentSize.x;
 
     const Vector2& shadowOffset = mController->GetTextModel()->GetShadowOffset();
-    if(shadowOffset.y > Math::MACHINE_EPSILON_1)
+    if(mController->GetTextModel()->IsShadowEnabled() && shadowOffset.y > Math::MACHINE_EPSILON_1)
     {
       layoutSize.y += shadowOffset.y;
     }
@@ -2475,6 +2479,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.strikethroughHeight        = mController->GetStrikethroughHeight();
   parameters.isTextBackgroundEnabled    = mController->IsBackgroundEnabled();
   parameters.textBackgroundColor        = mController->GetBackgroundColor();
+  parameters.isShadowEnabled            = mController->IsShadowEnabled();
   parameters.shadowBlurRadius           = mController->GetShadowBlurRadius();
   parameters.shadowColor                = mController->GetShadowColor();
   parameters.shadowOffset               = mController->GetShadowOffset();

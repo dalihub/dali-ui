@@ -412,6 +412,7 @@ struct AtlasRenderer::Impl
     const Vector2    halfTextSize(textSize * 0.5f);
     const Vector2&   shadowOffset(view.GetShadowOffset());
     const Vector4&   shadowColor(view.GetShadowColor());
+    const bool       shadowEnabled    = view.IsShadowEnabled();
     const bool       underlineEnabled = view.IsUnderlineEnabled();
     const uint16_t   outlineWidth     = view.GetOutlineWidth();
     const Vector4&   outlineColor(view.GetOutlineColor());
@@ -471,7 +472,7 @@ struct AtlasRenderer::Impl
     bool   thereAreUnderlinedGlyphs    = false;
     bool   thereAreStrikethroughGlyphs = false;
 
-    if(fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 || fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1)
+    if(shadowEnabled)
     {
       style = STYLE_DROP_SHADOW;
     }
