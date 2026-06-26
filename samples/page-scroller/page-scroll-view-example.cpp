@@ -80,9 +80,8 @@ private:
   void Create(Application application)
   {
     Window window = application.GetWindow();
-    window.SetSize(Dali::Window::WindowSize(
-      static_cast<uint32_t>(WINDOW_W),
-      static_cast<uint32_t>(WINDOW_H)));
+    auto positionSize = window.GetPositionSize();
+    window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, WINDOW_W, WINDOW_H));
     window.SetBackgroundColor(Color::BLACK);
     window.KeyEventSignal().Connect(this, &PageScrollViewController::OnKeyEvent);
 

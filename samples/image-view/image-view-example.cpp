@@ -39,9 +39,9 @@ private:
   void OnInit(Application application)
   {
     Window window     = application.GetWindow();
-    auto   windowSize = window.GetSize();
-    float  halfW      = windowSize.GetWidth() * 0.5f;
-    float  halfH      = windowSize.GetHeight() * 0.5f;
+    auto   posSize    = window.GetPositionSize();
+    float  halfW      = posSize.width * 0.5f;
+    float  halfH      = posSize.height * 0.5f;
     window.SetBackgroundColor(Color::DARK_GRAY);
 
     mImage = ImageView::New(RESOURCES_DIR "gallery-large-3.jpg");

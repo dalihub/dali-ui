@@ -111,7 +111,8 @@ private:
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(MAIN_BG_COLOR);
-    window.SetSize(Dali::Window::WindowSize(1920, 1080));
+    auto positionSize = window.GetPositionSize();
+    window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, 1920, 1080));
 
     // Create main container with vertical layout
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);

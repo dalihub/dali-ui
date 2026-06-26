@@ -103,9 +103,9 @@ private:
     window.SetBackgroundColor(Color::BLACK);
     window.KeyEventSignal().Connect(this, &CanvasViewSample::OnKeyEvent);
 
-    auto ws = window.GetSize();
-    mW      = static_cast<float>(ws.GetWidth());
-    mH      = static_cast<float>(ws.GetHeight());
+    auto posSize = window.GetPositionSize();
+    mW           = static_cast<float>(posSize.width);
+    mH           = static_cast<float>(posSize.height);
 
     // Canvas fills the full window area; AbsoluteLayout overlay lets the
     // button bar sit on top without shrinking the canvas.

@@ -77,7 +77,8 @@ private:
   void OnInit(Application& application)
   {
     Window window = application.GetWindow();
-    mWindowSize = window.GetSize();
+    auto posSize = window.GetPositionSize();
+    mWindowSize = Vector2(posSize.width, posSize.height);
 
     DALI_LOG_RELEASE_INFO("[WVLOG][init] OnInit: window=%.0fx%.0f\n", mWindowSize.width, mWindowSize.height);
 

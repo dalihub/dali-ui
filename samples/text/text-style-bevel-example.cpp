@@ -60,7 +60,8 @@ private:
   {
     Window window = application.GetWindow();
     window.SetBackgroundColor(UiColor(0xFFFFFF));
-    window.SetSize(Dali::Window::WindowSize(1200, 1080));
+    auto positionSize = window.GetPositionSize();
+    window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, 1200, 1080));
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);

@@ -190,7 +190,7 @@ void FocusManager::OnAdaptorInit()
     for(auto iter = sceneHolders.begin(); iter != sceneHolders.end(); ++iter)
     {
       (*iter).KeyEventSignal().Connect(mSlotDelegate, &FocusManager::OnKeyEvent);
-      (*iter).TouchedSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
+      (*iter).TouchEventSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
       (*iter).GetRootLayer().HoveredSignal().Connect(mSlotDelegate, &FocusManager::OnHover);
       (*iter).WheelEventGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnCustomWheelEvent);
       (*iter).WheelEventSignal().Connect(mSlotDelegate, &FocusManager::OnWheelEvent);
@@ -198,7 +198,7 @@ void FocusManager::OnAdaptorInit()
       Window window = Window::DownCast(*iter);
       if(window)
       {
-        window.FocusChangeSignal().Connect(mSlotDelegate, &FocusManager::OnWindowFocusChanged);
+        window.FocusChangedSignal().Connect(mSlotDelegate, &FocusManager::OnWindowFocusChanged);
       }
     }
 
@@ -210,7 +210,7 @@ void FocusManager::OnAdaptorInit()
 void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHolder)
 {
   sceneHolder.KeyEventSignal().Connect(mSlotDelegate, &FocusManager::OnKeyEvent);
-  sceneHolder.TouchedSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
+  sceneHolder.TouchEventSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
   sceneHolder.GetRootLayer().HoveredSignal().Connect(mSlotDelegate, &FocusManager::OnHover);
   sceneHolder.WheelEventGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnCustomWheelEvent);
   sceneHolder.WheelEventSignal().Connect(mSlotDelegate, &FocusManager::OnWheelEvent);
@@ -218,7 +218,7 @@ void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHold
   Window window = Window::DownCast(sceneHolder);
   if(window)
   {
-    window.FocusChangeSignal().Connect(mSlotDelegate, &FocusManager::OnWindowFocusChanged);
+    window.FocusChangedSignal().Connect(mSlotDelegate, &FocusManager::OnWindowFocusChanged);
   }
 }
 

@@ -231,7 +231,8 @@ private:
   void OnCreate(Application /*app*/)
   {
     Window  win = mApp.GetWindow();
-    Vector2 wsz = win.GetSize();
+    PositionSize positionSize = win.GetPositionSize();
+    Vector2 wsz(positionSize.width, positionSize.height);
     mWinW        = wsz.x;
     mWinH        = wsz.y;
     mChartPanelW = mWinW - INFO_PANEL_W;

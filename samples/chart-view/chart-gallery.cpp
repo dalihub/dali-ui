@@ -105,7 +105,8 @@ public:
   void OnCreate(Application application)
   {
     Window  window = application.GetWindow();
-    Vector2 winSz  = window.GetSize();
+    auto    posSize = window.GetPositionSize();
+    Vector2 winSz  = Vector2(posSize.width, posSize.height);
     window.SetBackgroundColor(Vector4(0.93f, 0.93f, 0.95f, 1.0f));
     window.KeyEventSignal().Connect(this, &ChartGalleryController::OnKeyEvent);
 

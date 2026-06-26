@@ -83,13 +83,13 @@ private:
   void OnInit(Application application)
   {
     Window window     = application.GetWindow();
-    auto   windowSize = window.GetSize();
+    auto   windowSize    = window.GetPositionSize();
     window.SetBackgroundColor(Color::BLACK);
 
     // ---- Create WebView ------------------------------------------------
     mWebView = WebView::New();
-    mWebView.SetRequestedWidth(static_cast<float>(windowSize.GetWidth()));
-    mWebView.SetRequestedHeight(static_cast<float>(windowSize.GetHeight()));
+    mWebView.SetRequestedWidth(static_cast<float>(windowSize.width));
+    mWebView.SetRequestedHeight(static_cast<float>(windowSize.height));
     mWebView.SetRequestedPositionX(0.0f);
     mWebView.SetRequestedPositionY(0.0f);
 

@@ -1578,8 +1578,8 @@ void InputEditorImpl::OnSceneConnection(int depth)
     mDecorator->GetBoundingBox(boundingBox);
     if(boundingBox.IsEmpty())
     {
-      Dali::Window::WindowSize windowSize = window.GetSize();
-      mDecorator->SetBoundingBox(BoundsInteger(0, 0, static_cast<int32_t>(windowSize.GetWidth()), static_cast<int32_t>(windowSize.GetHeight())));
+      Dali::PositionSize posSize = window.GetPositionSize();
+      mDecorator->SetBoundingBox(BoundsInteger(0, 0, static_cast<int32_t>(posSize.width), static_cast<int32_t>(posSize.height)));
     }
   }
 }

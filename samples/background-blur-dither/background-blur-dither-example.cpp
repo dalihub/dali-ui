@@ -103,8 +103,8 @@ public:
     mRoot.SetBackgroundColor(Color::TRANSPARENT);
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
-    Window::WindowSize windowSize = mWindow.GetSize();
-    mRoot.SetProperty(Actor::Property::SIZE, Vector2(windowSize.GetWidth(), windowSize.GetHeight()));
+    PositionSize windowSize = mWindow.GetPositionSize();
+    mRoot.SetProperty(Actor::Property::SIZE, Vector2(windowSize.width, windowSize.height));
     mRoot.SetProperty(Actor::Property::WIDTH_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
     mRoot.SetProperty(Actor::Property::HEIGHT_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
     mWindow.Add(mRoot);
@@ -115,13 +115,13 @@ public:
     CreateHelpLabel();
 
     mWindow.KeyEventSignal().Connect(this, &BackgroundBlurDitherController::OnKeyEvent);
-    mWindow.ResizeSignal().Connect(this, &BackgroundBlurDitherController::OnWindowResized);
+    mWindow.ResizedSignal().Connect(this, &BackgroundBlurDitherController::OnWindowResized);
   }
 
 private:
   void CreateMovingImageBoard()
   {
-    Window::WindowSize windowSize = mWindow.GetSize();
+    PositionSize windowSize = mWindow.GetPositionSize();
 
     mImageBoard = View::New();
     mImageBoard.SetLayoutMode(LayoutMode::STANDALONE);
@@ -132,15 +132,15 @@ private:
     mImageBoard.SetBackgroundColor(Color::TRANSPARENT);
     mImageBoard.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     mImageBoard.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-    mImageBoard.SetProperty(Actor::Property::SIZE, Vector2(windowSize.GetWidth(), windowSize.GetHeight()));
+    mImageBoard.SetProperty(Actor::Property::SIZE, Vector2(windowSize.width, windowSize.height));
     mRoot.Add(mImageBoard);
 
     const float strideX     = IMAGE_SIZE + IMAGE_GAP_X;
     const float strideY     = IMAGE_SIZE + IMAGE_GAP_Y;
     const float boardWidth  = IMAGE_SIZE + strideX * static_cast<float>(IMAGE_COLUMNS - 1);
     const float boardHeight = IMAGE_SIZE + strideY * static_cast<float>(IMAGE_ROWS - 1);
-    const float startX      = (static_cast<float>(windowSize.GetWidth()) - boardWidth) * 0.5f;
-    const float startY      = (static_cast<float>(windowSize.GetHeight()) - boardHeight) * 0.5f;
+    const float startX      = (static_cast<float>(windowSize.width) - boardWidth) * 0.5f;
+    const float startY      = (static_cast<float>(windowSize.height) - boardHeight) * 0.5f;
 
     unsigned int imageIndex = 0u;
     for(int row = 0; row < IMAGE_ROWS; ++row)
@@ -164,7 +164,7 @@ private:
 
   void CreateFullscreenBlurPane()
   {
-    Vector2 windowSize = mWindow.GetSize();
+    PositionSize windowSize = mWindow.GetPositionSize();
 
     mBlurPane = View::New();
     mBlurPane.SetLayoutMode(LayoutMode::STANDALONE);
@@ -175,7 +175,7 @@ private:
     mBlurPane.SetBackgroundColor(Color::TRANSPARENT);
     mBlurPane.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     mBlurPane.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-    mBlurPane.SetProperty(Actor::Property::SIZE, windowSize);
+    mBlurPane.SetProperty(Actor::Property::SIZE, Vector2(windowSize.width, windowSize.height));
     mBlurPane.SetProperty(Actor::Property::WIDTH_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
     mBlurPane.SetProperty(Actor::Property::HEIGHT_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
     mRoot.Add(mBlurPane);
@@ -189,11 +189,13 @@ private:
 
   void CreateStatusLabel()
   {
+    PositionSize windowSize = mWindow.GetPositionSize();
+
     mStatusLabel = Label::New();
     mStatusLabel.SetLayoutMode(LayoutMode::STANDALONE);
     mStatusLabel.SetRequestedWidth(260.0f);
     mStatusLabel.SetRequestedHeight(40.0f);
-    mStatusLabel.SetRequestedPositionX(static_cast<float>(mWindow.GetSize().GetWidth()) - 284.0f);
+    mStatusLabel.SetRequestedPositionX(static_cast<float>(windowSize.width) - 284.0f);
     mStatusLabel.SetRequestedPositionY(24.0f);
     mStatusLabel.SetFontSize(14.0f);
     mStatusLabel.SetTextColor(UiColor(0xFFFFFF));
@@ -208,14 +210,14 @@ private:
 
   void CreateHelpLabel()
   {
-    Window::WindowSize windowSize = mWindow.GetSize();
+    PositionSize windowSize = mWindow.GetPositionSize();
 
     mHelpLabel = Label::New("1 Blur  2 Speed  3/4 Radius -/+  5 BG  6 Animation  7/8 Noise -/+  Esc/Back Quit");
     mHelpLabel.SetLayoutMode(LayoutMode::STANDALONE);
-    mHelpLabel.SetRequestedWidth(static_cast<float>(windowSize.GetWidth()) - HELP_MARGIN * 2.0f);
+    mHelpLabel.SetRequestedWidth(static_cast<float>(windowSize.width) - HELP_MARGIN * 2.0f);
     mHelpLabel.SetRequestedHeight(HELP_HEIGHT);
     mHelpLabel.SetRequestedPositionX(HELP_MARGIN);
-    mHelpLabel.SetRequestedPositionY(static_cast<float>(windowSize.GetHeight()) - HELP_HEIGHT - HELP_MARGIN);
+    mHelpLabel.SetRequestedPositionY(static_cast<float>(windowSize.height) - HELP_HEIGHT - HELP_MARGIN);
     mHelpLabel.SetFontSize(15.0f);
     mHelpLabel.SetTextColor(UiColor(0xFFE66D));
     mHelpLabel.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.68f));

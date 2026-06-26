@@ -83,9 +83,10 @@ public:
     mProcessingScheduled(false)
   {
     // Get initial window size
-    Vector2 size  = window.GetSize();
-    mWindowWidth  = static_cast<int32_t>(size.width);
-    mWindowHeight = static_cast<int32_t>(size.height);
+    auto    posSize = window.GetPositionSize();
+    Vector2 size    = Vector2(posSize.width, posSize.height);
+    mWindowWidth    = static_cast<int32_t>(size.width);
+    mWindowHeight   = static_cast<int32_t>(size.height);
 
     // Register as a processor with the adaptor (postProcess=false: run before dali Relayout)
     if(DALI_LIKELY(Adaptor::IsAvailable()))
@@ -93,7 +94,7 @@ public:
       Adaptor::Get().RegisterProcessor(*this, false);
 
       // Connect to window resize signal
-      window.ResizeSignal().Connect(this, &LayoutControllerImpl::OnWindowResized);
+      window.ResizedSignal().Connect(this, &LayoutControllerImpl::OnWindowResized);
     }
   }
 
@@ -223,7 +224,7 @@ public:
     if(DALI_LIKELY(Adaptor::IsAvailable()))
     {
       // Connect to window resize signal
-      window.ResizeSignal().Connect(this, &LayoutControllerImpl::OnWindowResized);
+      window.ResizedSignal().Connect(this, &LayoutControllerImpl::OnWindowResized);
     }
   }
 
@@ -340,7 +341,8 @@ private:
     mProcessingScheduled = false;
 
     // Default: window size (when root is directly under window or parent size unknown).
-    Vector2 windowSize       = window.GetSize();
+    auto    posSize          = window.GetPositionSize();
+    Vector2 windowSize       = Vector2(posSize.width, posSize.height);
     float   widthConstraint  = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.width)));
     float   heightConstraint = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.height)));
 

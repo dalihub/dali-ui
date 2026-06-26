@@ -322,7 +322,8 @@ private:
   void OnInit(Application application)
   {
     Window window = application.GetWindow();
-    window.SetSize(Dali::Window::WindowSize(WINDOW_WIDTH, WINDOW_HEIGHT));
+    auto positionSize = window.GetPositionSize();
+    window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, WINDOW_WIDTH, WINDOW_HEIGHT));
     window.SetBackgroundColor(UiColor(0xFFFFFF));
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);

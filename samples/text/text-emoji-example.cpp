@@ -362,7 +362,8 @@ private:
     SetConfig();
 
     // Update window size
-    window.SetSize(Dali::Window::WindowSize(GetWindowWidth(), GetWindowHeight()));
+    auto positionSize = window.GetPositionSize();
+    window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, GetWindowWidth(), GetWindowHeight()));
 
     // Update main container
     if(mTrackedMainContainer.container)
@@ -526,7 +527,8 @@ private:
   {
     window = mApplication.GetWindow();
     window.SetBackgroundColor(UiColor(COLOR_WHITE));
-    window.SetSize(Dali::Window::WindowSize(GetWindowWidth(), GetWindowHeight()));
+    auto positionSize = window.GetPositionSize();
+    window.SetPositionSize(Dali::PositionSize(positionSize.x, positionSize.y, GetWindowWidth(), GetWindowHeight()));
 
     // Create main view structure:
     // VIEW (horizontal)

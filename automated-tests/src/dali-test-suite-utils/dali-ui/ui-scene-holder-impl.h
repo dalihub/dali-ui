@@ -25,6 +25,8 @@
 #include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/events/touch-event.h>
 #include <dali/public-api/signals/slot-delegate.h>
+#include <dali/devel-api/events/touch-point.h>
+#include <dali/integration-api/adaptor-framework/scene-holder.h>
 
 namespace Dali
 {
@@ -59,7 +61,7 @@ public:
 
   Dali::Integration::SceneHolder::KeyEventGeneratedSignalType& KeyEventGeneratedSignal();
 
-  Dali::Integration::SceneHolder::TouchEventSignalType& TouchedSignal();
+  Dali::Integration::SceneHolder::TouchEventSignalType& TouchEventSignal();
 
   Dali::Integration::SceneHolder::WheelEventSignalType& WheelEventSignal();
 
@@ -100,7 +102,7 @@ public:
 
   Dali::Integration::SceneHolder::KeyEventSignalType            mSceneHolderKeyEventSignal;
   Dali::Integration::SceneHolder::KeyEventGeneratedSignalType   mSceneHolderKeyEventGeneratedSignal;
-  Dali::Integration::SceneHolder::TouchEventSignalType          mSceneHolderTouchedSignal;
+  Dali::Integration::SceneHolder::TouchEventSignalType          mSceneHolderTouchEventSignal;
   Dali::Integration::SceneHolder::WheelEventSignalType          mSceneHolderWheelEventSignal;
   Dali::Integration::SceneHolder::WheelEventGeneratedSignalType mSceneHolderWheelEventGeneratedSignal;
   Dali::SlotDelegate<SceneHolder>                               mSceneSignalBridgeSlot;
