@@ -253,7 +253,7 @@ root.SetArrangeCallback(LayoutArrangeCallback::New(&DiagonalLayout::OnArrange));
 매니저로 자동 디스패치합니다(`MeasureCallback` / `ArrangeCallback`이 설정된 경우 매니저보다 우선합니다).
 
 ```cpp
-class MyButtonImpl : public Dali::Ui::Integration::ViewImpl
+class MyButtonImpl : public Dali::Ui::ViewImpl
 {
 protected:
   void OnInitialize() override
