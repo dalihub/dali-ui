@@ -429,7 +429,7 @@ public:
   /**
    * @brief Set the outline width
    *
-   * @param[in] width The width in pixels of the outline, 0 indicates no outline
+   * @param[in] width The width in pixels of the outline.
    */
   void SetOutlineWidth(uint16_t width);
 
@@ -439,6 +439,20 @@ public:
    * @return The width of the outline.
    */
   uint16_t GetOutlineWidth() const;
+
+  /**
+   * @brief Sets the text's outline enabled flag.
+   *
+   * @param[in] enabled true if outline is enabled.
+   */
+  void SetOutlineEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether the text's outline is enabled or not.
+   *
+   * @return The outline state.
+   */
+  bool IsOutlineEnabled() const;
 
   /**
    * @brief Set the outline blur radius.
@@ -898,6 +912,7 @@ private:
 public:
   bool  mUnderlineEnabled : 1;            ///< Underline enabled flag
   bool  mShadowEnabled : 1;               ///< Shadow enabled flag.
+  bool  mOutlineEnabled : 1;              ///< Outline enabled flag.
   bool  mUnderlineColorSet : 1;           ///< Has the underline color been explicitly set?
   bool  mBackgroundEnabled : 1;           ///< Background enabled flag
   bool  mMarkupProcessorEnabled : 1;      ///< Markup-processor enabled flag

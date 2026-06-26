@@ -921,6 +921,15 @@ uint16_t View::GetOutlineWidth() const
   return 0u;
 }
 
+bool View::IsOutlineEnabled() const
+{
+  if(mImpl->mVisualModel)
+  {
+    return mImpl->mVisualModel->IsOutlineEnabled();
+  }
+  return false;
+}
+
 Text::EllipsisPosition::Type View::GetEllipsisPosition() const
 {
   Text::EllipsisPosition::Type ellipsisPosition = Text::EllipsisPosition::END;

@@ -126,6 +126,7 @@ struct AsyncTextParameters
     enableMarkup{false},
     isUnderlineEnabled{false},
     isShadowEnabled{false},
+    isOutlineEnabled{false},
     isStrikethroughEnabled{false},
     isTextBackgroundEnabled{false},
     isTextFitEnabled{false},
@@ -191,7 +192,7 @@ struct AsyncTextParameters
   int marqueeLoopCount;
   int marqueeGap;
 
-  uint16_t outlineWidth; ///< The width of the outline, if it is greater than 1, it is enabled.
+  uint16_t outlineWidth; ///< The width of the outline.
 
   Async::RequestType           requestType;
   Alignment                    horizontalAlignment;   ///< The horizontal alignment: one of {START, CENTER, END}.
@@ -215,6 +216,7 @@ struct AsyncTextParameters
   bool enableMarkup : 1;                  ///< Whether the mark-up processor is enabled.
   bool isUnderlineEnabled : 1;            ///< Underline enabeld flag.
   bool isShadowEnabled : 1;               ///< Shadow enabled flag.
+  bool isOutlineEnabled : 1;              ///< Outline enabled flag.
   bool isStrikethroughEnabled : 1;        ///< Strikethrough enabeld flag.
   bool isTextBackgroundEnabled : 1;       ///< Text background flag.
   bool isTextFitEnabled : 1;              ///< TextFit enabeld flag.

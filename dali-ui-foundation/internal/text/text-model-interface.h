@@ -351,6 +351,13 @@ public:
   virtual uint16_t GetOutlineWidth() const = 0;
 
   /**
+   * @brief Returns whether outline is enabled or not.
+   *
+   * @return The outline state.
+   */
+  virtual bool IsOutlineEnabled() const = 0;
+
+  /**
    * @brief Retrieve the outline blur radius.
    *
    * @return The outline blur radius.

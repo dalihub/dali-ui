@@ -188,6 +188,7 @@ void AsyncTextLoader::Initialize()
   // Set the text properties to default
   mTextModel->mVisualModel->SetUnderlineEnabled(false);
   mTextModel->mVisualModel->SetUnderlineHeight(0.0f);
+  mTextModel->mVisualModel->SetOutlineEnabled(false);
   mTextModel->mVisualModel->SetOutlineWidth(0.0f);
   mTextModel->mVisualModel->SetShadowEnabled(false);
   mTextModel->mVisualModel->SetShadowOffset(Vector2(0.0f, 0.0f));
@@ -329,14 +330,17 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     mTextModel->mVisualModel->SetShadowEnabled(false);
   }
 
-  const uint16_t outlineWidth = parameters.outlineWidth;
-  const float    outlineAlpha = parameters.outlineColor.a;
-  if(outlineWidth != 0u && fabsf(outlineAlpha) > Math::MACHINE_EPSILON_1)
+  if(parameters.isOutlineEnabled)
   {
+    mTextModel->mVisualModel->SetOutlineEnabled(true);
     mTextModel->mVisualModel->SetOutlineColor(parameters.outlineColor);
     mTextModel->mVisualModel->SetOutlineWidth(parameters.outlineWidth);
     mTextModel->mVisualModel->SetOutlineBlurRadius(parameters.outlineBlurRadius);
     mTextModel->mVisualModel->SetOutlineOffset(parameters.outlineOffset);
+  }
+  else
+  {
+    mTextModel->mVisualModel->SetOutlineEnabled(false);
   }
 
   mTextModel->mVisualModel->SetCutoutEnabled(parameters.isCutoutEnabled);
@@ -894,7 +898,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool     shadowEnabled = mTextModel->IsShadowEnabled();
   const Vector2& shadowOffset  = mTextModel->GetShadowOffset();
 
-  const bool outlineEnabled              = mTextModel->GetOutlineWidth() > Math::MACHINE_EPSILON_1;
+  const bool outlineEnabled              = mTextModel->IsOutlineEnabled();
   const bool backgroundEnabled           = mTextModel->IsBackgroundEnabled();
   const bool markupEnabled               = parameters.enableMarkup;
   const bool markupUnderlineEnabled      = markupEnabled && mTextModel->IsMarkupUnderlineSet();
@@ -928,7 +932,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     layoutSize.y += shadowOffset.y;
   }
 
-  float outlineWidth = mTextModel->GetOutlineWidth();
+  float outlineWidth = outlineEnabled ? mTextModel->GetOutlineWidth() : 0.0f;
   layoutSize.y += outlineWidth * 2.0f;
   layoutSize.y = std::min(layoutSize.y, parameters.textHeight);
 

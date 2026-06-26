@@ -882,6 +882,11 @@ void InputEditorImpl::ClearTextOutline()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
+  if(mController->IsOutlineEnabled())
+  {
+    mController->SetOutlineEnabled(false);
+    mRenderer.Reset();
+  }
   if(0u != mController->GetOutlineWidth())
   {
     mController->SetOutlineWidth(0u);

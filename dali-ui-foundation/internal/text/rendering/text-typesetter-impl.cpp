@@ -1416,7 +1416,9 @@ Devel::PixelBuffer Typesetter::Impl::CreateImageBuffer(const uint32_t bufferWidt
                                                        pixelFormat,
 
                                                        // Retrieves the glyph's outline width
-                                                       static_cast<float>(viewModel.GetOutlineWidth()),
+                                                       viewModel.IsOutlineEnabled()
+                                                         ? static_cast<float>(viewModel.GetOutlineWidth())
+                                                         : 0.0f,
 
                                                        viewModel.GetCharacterSpacing(),
 

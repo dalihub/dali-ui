@@ -426,6 +426,11 @@ void VisualModel::SetOutlineWidth(uint16_t width)
   mOutlineWidth = width;
 }
 
+void VisualModel::SetOutlineEnabled(bool enabled)
+{
+  mOutlineEnabled = enabled;
+}
+
 void VisualModel::SetBackgroundColor(const Vector4& color)
 {
   mBackgroundColor = color;
@@ -575,6 +580,11 @@ float VisualModel::GetDashedUnderlineGap() const
 uint16_t VisualModel::GetOutlineWidth() const
 {
   return mOutlineWidth;
+}
+
+bool VisualModel::IsOutlineEnabled() const
+{
+  return mOutlineEnabled;
 }
 
 const Vector4& VisualModel::GetBackgroundColor() const
@@ -803,6 +813,7 @@ VisualModel::VisualModel()
   mTextElideEnabled(false),
   mUnderlineEnabled(false),
   mShadowEnabled(false),
+  mOutlineEnabled(false),
   mUnderlineColorSet(false),
   mBackgroundEnabled(false),
   mMarkupProcessorEnabled(false),

@@ -105,6 +105,12 @@ bool ApplyOutlineStyle(ControllerPtr controller, const Outline& outline)
   const Vector2 offset     = outline.GetOffset();
   const float   blurRadius = outline.GetBlurRadius();
 
+  if(!controller->IsOutlineEnabled())
+  {
+    controller->SetOutlineEnabled(true);
+    update = true;
+  }
+
   if(controller->GetOutlineWidth() != static_cast<uint16_t>(width))
   {
     controller->SetOutlineWidth(static_cast<uint16_t>(width));

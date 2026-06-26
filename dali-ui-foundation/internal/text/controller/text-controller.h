@@ -1509,7 +1509,7 @@ public: // Default style & Input style
   /**
    * @brief Set the outline width
    *
-   * @param[in] width The width in pixels of the outline, 0 indicates no outline
+   * @param[in] width The width in pixels of the outline.
    */
   void SetOutlineWidth(uint16_t width);
 
@@ -1519,6 +1519,20 @@ public: // Default style & Input style
    * @return The width of the outline.
    */
   uint16_t GetOutlineWidth() const;
+
+  /**
+   * @brief Set the outline enabled flag.
+   *
+   * @param[in] enabled The outline enabled flag.
+   */
+  void SetOutlineEnabled(bool enabled);
+
+  /**
+   * @brief Returns whether the text outline is enabled or not.
+   *
+   * @return The outline state.
+   */
+  bool IsOutlineEnabled() const;
 
   /**
    * @brief Set the outline blur radius.

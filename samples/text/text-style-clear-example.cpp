@@ -85,8 +85,11 @@ private:
     mShadowZeroLabel = CreateBaseLabel("");
     ApplyShadowZeroOffset();
 
-    mClearShadowLabel = CreateBaseLabel("");
-    ApplyClearedShadow();
+    mInputFieldShadowNonZero = CreateBaseInputField("");
+    ApplyInputFieldShadowWithOffset();
+
+    mInputFieldShadowZero = CreateBaseInputField("");
+    ApplyInputFieldShadowZeroOffset();
 
     mOutlineLabel = CreateBaseLabel("");
     ApplyOutlineWithWidth();
@@ -94,8 +97,11 @@ private:
     mOutlineZeroWidthLabel = CreateBaseLabel("");
     ApplyOutlineZeroWidth();
 
-    mClearOutlineLabel = CreateBaseLabel("");
-    ApplyClearedOutline();
+    mInputFieldOutline = CreateBaseInputField("");
+    ApplyInputFieldOutlineWithWidth();
+
+    mInputFieldOutlineZeroWidth = CreateBaseInputField("");
+    ApplyInputFieldOutlineZeroWidth();
 
     root.AddChildren({
       guide,
@@ -103,20 +109,20 @@ private:
       mDefaultLabel,
       mShadowNonZeroLabel,
       mShadowZeroLabel,
-      mClearShadowLabel,
+      mInputFieldShadowNonZero,
+      mInputFieldShadowZero,
       mOutlineLabel,
       mOutlineZeroWidthLabel,
-      mClearOutlineLabel,
+      mInputFieldOutline,
+      mInputFieldOutlineZeroWidth,
     });
     window.Add(root);
 
     ConnectAsyncRenderFinishedSignal(mDefaultLabel);
     ConnectAsyncRenderFinishedSignal(mShadowNonZeroLabel);
     ConnectAsyncRenderFinishedSignal(mShadowZeroLabel);
-    ConnectAsyncRenderFinishedSignal(mClearShadowLabel);
     ConnectAsyncRenderFinishedSignal(mOutlineLabel);
     ConnectAsyncRenderFinishedSignal(mOutlineZeroWidthLabel);
-    ConnectAsyncRenderFinishedSignal(mClearOutlineLabel);
 
     window.KeyEventSignal().Connect(this, &TextStyleClearController::OnKeyEvent);
   }
@@ -132,6 +138,18 @@ private:
     return label;
   }
 
+  InputField CreateBaseInputField(const char* text)
+  {
+    InputField field = InputField::New();
+    field.SetText(text);
+    field.SetBackgroundColor(BACKGROUND_COLOR);
+    field.SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING));
+    field.SetFontSize(FONT_SIZE);
+    field.SetRequestedWidth(MATCH_PARENT);
+    field.SetTextColor(UiColor(0x202020));
+    return field;
+  }
+
   void ConnectAsyncRenderFinishedSignal(Label label)
   {
     label.AsyncRenderFinishedSignal().Connect(this, &TextStyleClearController::OnAsyncRenderFinished);
@@ -142,10 +160,8 @@ private:
     mDefaultLabel.SetAsyncRendering(enabled);
     mShadowNonZeroLabel.SetAsyncRendering(enabled);
     mShadowZeroLabel.SetAsyncRendering(enabled);
-    mClearShadowLabel.SetAsyncRendering(enabled);
     mOutlineLabel.SetAsyncRendering(enabled);
     mOutlineZeroWidthLabel.SetAsyncRendering(enabled);
-    mClearOutlineLabel.SetAsyncRendering(enabled);
   }
 
   void ToggleAsyncRendering()
@@ -170,58 +186,74 @@ private:
 
   void ApplyShadowWithOffset()
   {
-    mShadowNonZeroLabel.SetText("Shadow: offset=(4,4), blur=2 -> visible shadow");
+    mShadowNonZeroLabel.SetText("Label shadow: offset=(4,4), blur=2 -> visible shadow");
     mShadowNonZeroLabel.SetTextShadow(CreateShadow(Vector2(4.0f, 4.0f), 0xCC3300, 2.0f));
   }
 
   void ApplyShadowZeroOffset()
   {
-    mShadowZeroLabel.SetText("Shadow: offset=(0,0), blur=4 -> enabled, no displacement");
+    mShadowZeroLabel.SetText("Label shadow: offset=(0,0), blur=4 -> enabled, no displacement");
     mShadowZeroLabel.SetTextShadow(CreateShadow(Vector2::ZERO, 0x0055CC, 4.0f));
   }
 
-  void ApplyClearedShadow()
+  void ApplyInputFieldShadowWithOffset()
   {
-    mClearShadowLabel.SetText("Shadow: set then ClearTextShadow() -> no shadow");
-    mClearShadowLabel.SetTextShadow(CreateShadow(Vector2(4.0f, 4.0f), 0xCC3300, 2.0f));
-    mClearShadowLabel.ClearTextShadow();
+    mInputFieldShadowNonZero.SetText("InputField shadow: offset=(4,4), blur=2 -> visible shadow");
+    mInputFieldShadowNonZero.SetTextShadow(CreateShadow(Vector2(4.0f, 4.0f), 0xCC3300, 2.0f));
+  }
+
+  void ApplyInputFieldShadowZeroOffset()
+  {
+    mInputFieldShadowZero.SetText("InputField shadow: offset=(0,0), blur=4 -> enabled, no displacement");
+    mInputFieldShadowZero.SetTextShadow(CreateShadow(Vector2::ZERO, 0x0055CC, 4.0f));
   }
 
   void ClearShadowRows()
   {
-    mShadowNonZeroLabel.SetText("Shadow: ClearTextShadow() -> no shadow");
+    mShadowNonZeroLabel.SetText("Label shadow: ClearTextShadow() -> no shadow");
     mShadowNonZeroLabel.ClearTextShadow();
-    mShadowZeroLabel.SetText("Shadow: ClearTextShadow() -> no shadow");
+    mShadowZeroLabel.SetText("Label shadow: ClearTextShadow() -> no shadow");
     mShadowZeroLabel.ClearTextShadow();
-    ApplyClearedShadow();
+    mInputFieldShadowNonZero.SetText("InputField shadow: ClearTextShadow() -> no shadow");
+    mInputFieldShadowNonZero.ClearTextShadow();
+    mInputFieldShadowZero.SetText("InputField shadow: ClearTextShadow() -> no shadow");
+    mInputFieldShadowZero.ClearTextShadow();
   }
 
   void ApplyOutlineWithWidth()
   {
-    mOutlineLabel.SetText("Outline: width=2, blur=0 -> visible outline");
+    mOutlineLabel.SetText("Label outline: width=2, blur=0 -> visible outline");
     mOutlineLabel.SetTextOutline(CreateOutline(0x008855, 2.0f));
   }
 
   void ApplyOutlineZeroWidth()
   {
-    mOutlineZeroWidthLabel.SetText("Outline: width=0, blur=4 -> no outline expected");
+    mOutlineZeroWidthLabel.SetText("Label outline: width=0, blur=4 -> configured, width is zero");
     mOutlineZeroWidthLabel.SetTextOutline(CreateOutline(0x8844CC, 0.0f, 4.0f));
   }
 
-  void ApplyClearedOutline()
+  void ApplyInputFieldOutlineWithWidth()
   {
-    mClearOutlineLabel.SetText("Outline: set then ClearTextOutline() -> no outline");
-    mClearOutlineLabel.SetTextOutline(CreateOutline(0x0066CC, 2.0f));
-    mClearOutlineLabel.ClearTextOutline();
+    mInputFieldOutline.SetText("InputField outline: width=2, blur=0 -> visible outline");
+    mInputFieldOutline.SetTextOutline(CreateOutline(0x008855, 2.0f));
+  }
+
+  void ApplyInputFieldOutlineZeroWidth()
+  {
+    mInputFieldOutlineZeroWidth.SetText("InputField outline: width=0, blur=4 -> configured, width is zero");
+    mInputFieldOutlineZeroWidth.SetTextOutline(CreateOutline(0x8844CC, 0.0f, 4.0f));
   }
 
   void ClearOutlineRows()
   {
-    mOutlineLabel.SetText("Outline: cleared after width=2 -> no outline");
+    mOutlineLabel.SetText("Label outline: ClearTextOutline() -> no outline");
     mOutlineLabel.ClearTextOutline();
-    mOutlineZeroWidthLabel.SetText("Outline: cleared after width=0, blur=4 -> no outline");
+    mOutlineZeroWidthLabel.SetText("Label outline: ClearTextOutline() -> no outline");
     mOutlineZeroWidthLabel.ClearTextOutline();
-    ApplyClearedOutline();
+    mInputFieldOutline.SetText("InputField outline: ClearTextOutline() -> no outline");
+    mInputFieldOutline.ClearTextOutline();
+    mInputFieldOutlineZeroWidth.SetText("InputField outline: ClearTextOutline() -> no outline");
+    mInputFieldOutlineZeroWidth.ClearTextOutline();
   }
 
   void OnKeyEvent(Window window, KeyEvent event)
@@ -240,11 +272,13 @@ private:
     if(event.GetKeyName() == "1")
     {
       ApplyShadowWithOffset();
+      ApplyInputFieldShadowWithOffset();
       UpdateModeLabel();
     }
     else if(event.GetKeyName() == "2")
     {
       ApplyShadowZeroOffset();
+      ApplyInputFieldShadowZeroOffset();
       UpdateModeLabel();
     }
     else if(event.GetKeyName() == "3")
@@ -255,11 +289,13 @@ private:
     else if(event.GetKeyName() == "4")
     {
       ApplyOutlineWithWidth();
+      ApplyInputFieldOutlineWithWidth();
       UpdateModeLabel();
     }
     else if(event.GetKeyName() == "5")
     {
       ApplyOutlineZeroWidth();
+      ApplyInputFieldOutlineZeroWidth();
       UpdateModeLabel();
     }
     else if(event.GetKeyName() == "6")
@@ -280,10 +316,12 @@ private:
   Label        mDefaultLabel;
   Label        mShadowNonZeroLabel;
   Label        mShadowZeroLabel;
-  Label        mClearShadowLabel;
   Label        mOutlineLabel;
   Label        mOutlineZeroWidthLabel;
-  Label        mClearOutlineLabel;
+  InputField   mInputFieldShadowNonZero;
+  InputField   mInputFieldShadowZero;
+  InputField   mInputFieldOutline;
+  InputField   mInputFieldOutlineZeroWidth;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

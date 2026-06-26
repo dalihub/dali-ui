@@ -698,7 +698,7 @@ void TextVisual::UpdateRenderer()
 
       const bool shadowEnabled = mController->GetTextModel()->IsShadowEnabled();
 
-      const bool outlineEnabled         = (mController->GetTextModel()->GetOutlineWidth() > Math::MACHINE_EPSILON_1);
+      const bool outlineEnabled         = mController->GetTextModel()->IsOutlineEnabled();
       const bool backgroundEnabled      = mController->GetTextModel()->IsBackgroundEnabled();
       const bool markupOrEnabled        = mController->IsMarkupProcessorEnabled();
       const bool markupUnderlineEnabled = markupOrEnabled && mController->GetTextModel()->IsMarkupUnderlineSet();

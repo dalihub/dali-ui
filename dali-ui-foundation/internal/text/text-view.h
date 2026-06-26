@@ -205,6 +205,11 @@ public:
   uint16_t GetOutlineWidth() const override;
 
   /**
+   * @copydoc Dali::Ui::Text::ViewInterface::IsOutlineEnabled()
+   */
+  bool IsOutlineEnabled() const override;
+
+  /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetEllipsisPosition()
    */
   Text::EllipsisPosition::Type GetEllipsisPosition() const override;

@@ -989,6 +989,12 @@ bool SetOutlineProperties(ControllerPtr controller, const Property::Value& value
 
         if(!empty)
         {
+          if(!controller->IsOutlineEnabled())
+          {
+            controller->SetOutlineEnabled(true);
+            update = true;
+          }
+
           // Sets the default outline values.
           if(colorDefined && (controller->GetOutlineColor() != color))
           {
@@ -1016,7 +1022,11 @@ bool SetOutlineProperties(ControllerPtr controller, const Property::Value& value
         }
         else
         {
-          // Disable outline
+          if(controller->IsOutlineEnabled())
+          {
+            controller->SetOutlineEnabled(false);
+            update = true;
+          }
           if(0u != controller->GetOutlineWidth())
           {
             controller->SetOutlineWidth(0u);

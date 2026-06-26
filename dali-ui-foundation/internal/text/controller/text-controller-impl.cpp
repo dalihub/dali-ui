@@ -1399,7 +1399,7 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
   Text::GetCursorPosition(parameters, defaultFontLineHeight, cursorInfo);
 
   // Adds Outline offset.
-  const float outlineWidth = static_cast<float>(mModel->GetOutlineWidth());
+  const float outlineWidth = mModel->IsOutlineEnabled() ? static_cast<float>(mModel->GetOutlineWidth()) : 0.0f;
   cursorInfo.primaryPosition.x += outlineWidth;
   cursorInfo.primaryPosition.y += outlineWidth;
   cursorInfo.secondaryPosition.x += outlineWidth;

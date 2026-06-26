@@ -702,6 +702,10 @@ void LabelImpl::ClearTextOutline()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
+  if(mController->IsOutlineEnabled())
+  {
+    mController->SetOutlineEnabled(false);
+  }
   if(0u != mController->GetOutlineWidth())
   {
     mController->SetOutlineWidth(0u);
@@ -1450,7 +1454,8 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       layoutSize.y += shadowOffset.y;
     }
 
-    float outlineWidth = mController->GetTextModel()->GetOutlineWidth();
+    float outlineWidth =
+      mController->GetTextModel()->IsOutlineEnabled() ? mController->GetTextModel()->GetOutlineWidth() : 0.0f;
     layoutSize.y += outlineWidth * 2.0f;
     layoutSize.y = std::min(layoutSize.y, contentSize.y);
 
@@ -2483,6 +2488,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.shadowBlurRadius           = mController->GetShadowBlurRadius();
   parameters.shadowColor                = mController->GetShadowColor();
   parameters.shadowOffset               = mController->GetShadowOffset();
+  parameters.isOutlineEnabled           = mController->IsOutlineEnabled();
   parameters.outlineWidth               = mController->GetOutlineWidth();
   parameters.outlineColor               = mController->GetOutlineColor();
   parameters.outlineBlurRadius          = mController->GetOutlineBlurRadius();

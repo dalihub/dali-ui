@@ -1331,6 +1331,21 @@ uint16_t Controller::GetOutlineWidth() const
   return mImpl->mModel->mVisualModel->GetOutlineWidth();
 }
 
+void Controller::SetOutlineEnabled(bool enabled)
+{
+  if(mImpl->mModel->mVisualModel->IsOutlineEnabled() != enabled)
+  {
+    mImpl->mModel->mVisualModel->SetOutlineEnabled(enabled);
+    RequestRelayout();
+    RequestAsyncRender();
+  }
+}
+
+bool Controller::IsOutlineEnabled() const
+{
+  return mImpl->mModel->mVisualModel->IsOutlineEnabled();
+}
+
 void Controller::SetOutlineBlurRadius(const float& outlineBlurRadius)
 {
   if(fabsf(GetOutlineBlurRadius() - outlineBlurRadius) > Math::MACHINE_EPSILON_1)

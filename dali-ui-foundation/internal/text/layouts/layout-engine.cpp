@@ -349,7 +349,8 @@ struct Engine::Impl
     const GlyphInfo* const  glyphsBuffer             = parameters.textModel->mVisualModel->mGlyphs.Begin();
     const GlyphIndex* const charactersToGlyphsBuffer = parameters.textModel->mVisualModel->mCharactersToGlyph.Begin();
 
-    const float      outlineWidth                = static_cast<float>(parameters.textModel->GetOutlineWidth());
+    const float outlineWidth =
+      parameters.textModel->IsOutlineEnabled() ? static_cast<float>(parameters.textModel->GetOutlineWidth()) : 0.0f;
     const GlyphIndex lastGlyphOfParagraphPlusOne = parameters.startGlyphIndex + parameters.numberOfGlyphs;
     const float      modelCharacterSpacing       = parameters.textModel->mVisualModel->GetCharacterSpacing();
 
@@ -746,7 +747,8 @@ struct Engine::Impl
       parameters.textModel->mVisualModel->mGlyphsToCharacters.Begin();
     const LineBreakInfo* const lineBreakInfoBuffer = parameters.textModel->mLogicalModel->mLineBreakInfo.Begin();
 
-    const float  outlineWidth        = static_cast<float>(parameters.textModel->GetOutlineWidth());
+    const float outlineWidth =
+      parameters.textModel->IsOutlineEnabled() ? static_cast<float>(parameters.textModel->GetOutlineWidth()) : 0.0f;
     const Length totalNumberOfGlyphs = parameters.textModel->mVisualModel->mGlyphs.Count();
 
     const bool isMultiline = !enforceEllipsisInSingleLine && (mLayout == MULTI_LINE_BOX);
@@ -1152,10 +1154,13 @@ struct Engine::Impl
   {
     // Traverse the glyphs and set the positions.
 
-    const GlyphInfo* const glyphsBuffer           = layoutParameters.textModel->mVisualModel->mGlyphs.Begin();
-    const float            outlineWidth           = static_cast<float>(layoutParameters.textModel->GetOutlineWidth());
-    const Length           numberOfGlyphs         = layout.numberOfGlyphs;
-    const float            interGlyphExtraAdvance = layoutParameters.interGlyphExtraAdvance;
+    const GlyphInfo* const glyphsBuffer = layoutParameters.textModel->mVisualModel->mGlyphs.Begin();
+    const float            outlineWidth =
+      layoutParameters.textModel->IsOutlineEnabled()
+                   ? static_cast<float>(layoutParameters.textModel->GetOutlineWidth())
+                   : 0.0f;
+    const Length numberOfGlyphs         = layout.numberOfGlyphs;
+    const float  interGlyphExtraAdvance = layoutParameters.interGlyphExtraAdvance;
 
     const GlyphIndex startIndexForGlyph          = layout.glyphIndex;
     const GlyphIndex startIndexForGlyphPositions = startIndexForGlyph - layoutParameters.startGlyphIndex;

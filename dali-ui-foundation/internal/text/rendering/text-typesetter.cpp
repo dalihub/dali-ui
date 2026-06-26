@@ -244,7 +244,7 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
 
   // Retrieves the layout size.
   const Size&   layoutSize   = viewModel.GetLayoutSize();
-  const int32_t outlineWidth = static_cast<int32_t>(viewModel.GetOutlineWidth());
+  const int32_t outlineWidth = viewModel.IsOutlineEnabled() ? static_cast<int32_t>(viewModel.GetOutlineWidth()) : 0;
 
   // Set the offset for the horizontal alignment according to the text direction and outline width.
   int32_t penX = 0;
@@ -340,9 +340,8 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   if((RENDER_NO_STYLES != behaviour) && (RENDER_MASK != behaviour))
   {
     // Generate the outline if enabled
-    const uint16_t outlineWidth = viewModel.GetOutlineWidth();
-    const float    outlineAlpha = viewModel.GetOutlineColor().a;
-    if(outlineWidth != 0u && fabsf(outlineAlpha) > Math::MACHINE_EPSILON_1 && RENDER_OVERLAY_STYLE != behaviour)
+    const float outlineAlpha = viewModel.GetOutlineColor().a;
+    if(viewModel.IsOutlineEnabled() && fabsf(outlineAlpha) > Math::MACHINE_EPSILON_1 && RENDER_OVERLAY_STYLE != behaviour)
     {
       // Create the image buffer for outline
       Devel::PixelBuffer outlineImageBuffer =

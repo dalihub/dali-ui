@@ -417,7 +417,7 @@ struct AtlasRenderer::Impl
     const uint16_t   outlineWidth     = view.GetOutlineWidth();
     const Vector4&   outlineColor(view.GetOutlineColor());
     const Vector2&   outlineOffset(view.GetOutlineOffset());
-    const bool       isOutline            = 0u != outlineWidth;
+    const bool       isOutline            = view.IsOutlineEnabled();
     const GlyphInfo* hyphens              = view.GetHyphens();
     const Length*    hyphenIndices        = view.GetHyphenIndices();
     const Length     hyphensCount         = view.GetHyphensCount();

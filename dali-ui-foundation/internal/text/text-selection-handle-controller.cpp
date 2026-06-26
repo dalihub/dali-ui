@@ -465,7 +465,8 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   highLightPosition.x = minHighlightX;
   highLightPosition.y = minHighlightY;
 
-  decorator->SetHighLightBox(highLightPosition, highLightSize, static_cast<float>(model->GetOutlineWidth()));
+  const float outlineWidth = model->IsOutlineEnabled() ? static_cast<float>(model->GetOutlineWidth()) : 0.0f;
+  decorator->SetHighLightBox(highLightPosition, highLightSize, outlineWidth);
 
   if(!decorator->IsSmoothHandlePanEnabled())
   {

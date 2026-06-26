@@ -265,6 +265,11 @@ public:
   uint16_t GetOutlineWidth() const override;
 
   /**
+   * @copydoc ModelInterface::IsOutlineEnabled()
+   */
+  bool IsOutlineEnabled() const override;
+
+  /**
    * @copydoc ModelInterface::GetOutlineBlurRadius()
    */
   const float& GetOutlineBlurRadius() const override;

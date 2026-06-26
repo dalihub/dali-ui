@@ -249,6 +249,11 @@ uint16_t Model::GetOutlineWidth() const
   return mVisualModel->GetOutlineWidth();
 }
 
+bool Model::IsOutlineEnabled() const
+{
+  return mVisualModel->IsOutlineEnabled();
+}
+
 const float& Model::GetOutlineBlurRadius() const
 {
   return mVisualModel->mOutlineBlurRadius;
