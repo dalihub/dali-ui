@@ -19,7 +19,7 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/integration-api/ui-config-impl.h>
+#include <dali-ui-foundation/provider-api/ui-config-impl.h>
 #include <dali-ui-foundation/public-api/ui-theme-manager.h>
 #include <dali-ui-test-suite-utils.h>
 
@@ -65,7 +65,7 @@ private:
   ThemeChangedSignalType mThemeChangedSignal;
 };
 
-class TestUiConfigImpl : public Dali::Ui::Integration::UiConfigImpl
+class TestUiConfigImpl : public Dali::Ui::Provider::UiConfigImpl
 {
 public:
   ThemeLoaderInterface* CreateThemeLoader() override

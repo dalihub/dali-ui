@@ -27,9 +27,9 @@
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/key-click-policy.h>
 #include <dali-ui-foundation/public-api/state-effect.h>
+#include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
-#include <dali-ui-foundation/public-api/ui-style-sheet.h>
 
 namespace Dali
 {
@@ -52,7 +52,7 @@ using ExecutionKeyPredicate = bool (*)(const Dali::String& keyName);
  */
 using ViewInitializer = void (*)(View view);
 
-namespace Integration
+namespace Provider
 {
 class UiConfigImpl;
 }
@@ -817,34 +817,51 @@ public: // Properties
   static UiConfig GetCurrent();
 
   /**
-   * @brief Sets the style sheet used by dali-ui components.
+   * @brief Replaces the style sheet used by dali-ui components.
    *
    * The style sheet is stored as a shared handle. If no style sheet is set
-   * before Apply(), components use their fallback styles.
+   * before Apply(), components use their default presets.
    *
    * @pre The config must not be frozen.
    * @param[in] styleSheet The style sheet to use
    */
-  void SetStyleSheet(UiStyleSheet styleSheet);
+  void ResetStyleSheet(UiStyleSheet styleSheet);
+
+  /**
+   * @brief Accesses the mutable style sheet used by dali-ui components.
+   *
+   * If no style sheet has been set, a new mutable style sheet is created and
+   * stored in this config. This allows applications to inspect or override a
+   * provider preset before Apply().
+   *
+   * @return The style sheet stored in this config
+   */
+  UiStyleSheet StyleSheet() const;
 
   /**
    * @brief Gets the style registered for @p key in this config's style sheet.
    *
    * If no style sheet or style entry is found, an uninitialized UiStyle is returned.
-   * Components may use their own built-in style in that case.
+   * Components may use their own default preset in that case.
+   *
+   * @pre UiConfig::Apply() must have been called before resolving style objects.
    *
    * @param[in] key The style key
    * @return The resolved style, or an uninitialized handle
    */
-  UiStyle GetStyle(UiStyleKey key) const;
+  template<typename StyleT>
+  StyleT GetStyle(UiStyleKey<StyleT> key) const
+  {
+    return StyleSheet().GetStyle(key);
+  }
 
 public: // Not intended for Application developers
   /**
-   * @brief This constructor is used internally to wrap an implementation object.
+   * @brief This constructor is used by provider config presets to wrap an implementation object.
    *
-   * @param[in] impl A pointer to the internal UiConfig implementation
+   * @param[in] impl A pointer to the provider UiConfig implementation
    */
-  explicit UiConfig(Integration::UiConfigImpl* impl);
+  explicit UiConfig(Provider::UiConfigImpl* impl);
 };
 
 } // namespace Ui

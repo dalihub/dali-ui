@@ -17,6 +17,7 @@
 
 #include <dali-ui-components/public-api/chart/pie-series.h>
 #include <dali-ui-components/public-api/chart/scatter-series.h>
+#include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -43,7 +44,7 @@ void utc_dali_pieseries_cleanup(void)
 
 int UtcDaliPieSeriesConstructorP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         pieSeries;
   DALI_TEST_CHECK(!pieSeries);
   END_TEST;
@@ -51,7 +52,7 @@ int UtcDaliPieSeriesConstructorP(void)
 
 int UtcDaliPieSeriesNewP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         pieSeries = PieSeries::New();
   DALI_TEST_CHECK(pieSeries);
   END_TEST;
@@ -59,7 +60,7 @@ int UtcDaliPieSeriesNewP(void)
 
 int UtcDaliPieSeriesCopyConstructorP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         pieSeries = PieSeries::New();
   PieSeries         copy(pieSeries);
   DALI_TEST_CHECK(copy);
@@ -69,7 +70,7 @@ int UtcDaliPieSeriesCopyConstructorP(void)
 
 int UtcDaliPieSeriesMoveConstructor(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         pieSeries = PieSeries::New();
   DALI_TEST_EQUALS(1, pieSeries.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -82,7 +83,7 @@ int UtcDaliPieSeriesMoveConstructor(void)
 
 int UtcDaliPieSeriesDownCastP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         pieSeries = PieSeries::New();
   BaseHandle        handle(pieSeries);
   PieSeries         downCast = PieSeries::DownCast(handle);
@@ -92,7 +93,7 @@ int UtcDaliPieSeriesDownCastP(void)
 
 int UtcDaliPieSeriesDownCastN(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   BaseHandle        unInitializedObject;
   PieSeries         downCast = PieSeries::DownCast(unInitializedObject);
   DALI_TEST_CHECK(!downCast);
@@ -101,7 +102,7 @@ int UtcDaliPieSeriesDownCastN(void)
 
 int UtcDaliPieSeriesAddSliceP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         series = PieSeries::New();
 
   series.AddSlice(Dali::String("Apple"), 50.0f, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -115,7 +116,7 @@ int UtcDaliPieSeriesAddSliceP(void)
 
 int UtcDaliPieSeriesClearSlicesP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         series = PieSeries::New();
   series.AddSlice(Dali::String("A"), 50.0f, Vector4(1.0f, 0.0f, 0.0f, 1.0f));
   series.AddSlice(Dali::String("B"), 50.0f, Vector4(0.0f, 1.0f, 0.0f, 1.0f));
@@ -127,7 +128,7 @@ int UtcDaliPieSeriesClearSlicesP(void)
 
 int UtcDaliPieSeriesInnerRadiusP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         series = PieSeries::New();
 
   series.SetInnerRadiusRatio(0.5f);
@@ -140,7 +141,7 @@ int UtcDaliPieSeriesInnerRadiusP(void)
 
 int UtcDaliPieSeriesSliceGapP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         series = PieSeries::New();
 
   series.SetSliceGap(2.0f);
@@ -150,7 +151,7 @@ int UtcDaliPieSeriesSliceGapP(void)
 
 int UtcDaliPieSeriesDataLabelsP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         series = PieSeries::New();
 
   series.SetDataLabelsVisible(true);
@@ -163,7 +164,7 @@ int UtcDaliPieSeriesDataLabelsP(void)
 
 int UtcDaliPieSeriesSettersP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   PieSeries         series = PieSeries::New();
 
   series.SetInnerRadiusRatio(0.4f);
@@ -179,7 +180,7 @@ int UtcDaliPieSeriesSettersP(void)
 
 int UtcDaliScatterSeriesNewP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   ScatterSeries     scatterSeries = ScatterSeries::New();
   DALI_TEST_CHECK(scatterSeries);
   END_TEST;
@@ -187,7 +188,7 @@ int UtcDaliScatterSeriesNewP(void)
 
 int UtcDaliScatterSeriesDownCastP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   ScatterSeries     scatterSeries = ScatterSeries::New();
   BaseHandle        handle(scatterSeries);
   ScatterSeries     downCast = ScatterSeries::DownCast(handle);
@@ -197,7 +198,7 @@ int UtcDaliScatterSeriesDownCastP(void)
 
 int UtcDaliScatterSeriesDownCastN(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   BaseHandle        unInitializedObject;
   ScatterSeries     downCast = ScatterSeries::DownCast(unInitializedObject);
   DALI_TEST_CHECK(!downCast);
@@ -206,7 +207,7 @@ int UtcDaliScatterSeriesDownCastN(void)
 
 int UtcDaliScatterSeriesSetPropertiesP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   ScatterSeries     series = ScatterSeries::New();
 
   series.SetColor(Vector4(0.0f, 0.6f, 1.0f, 1.0f));

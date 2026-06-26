@@ -64,7 +64,7 @@ protected:
   ~TextButtonImpl() override;
 
 private:
-  void ApplyStyle(TextButtonStyle style);
+  void ApplyInitialStyle(TextButtonStyle style);
   void ApplyAlignment();
 
 private:

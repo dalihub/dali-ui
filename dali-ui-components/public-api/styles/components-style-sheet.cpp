@@ -16,34 +16,23 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/provider-api/ui-style-impl.h>
+#include <dali-ui-components/public-api/styles/components-style-sheet.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Provider
+namespace Components
 {
-namespace Internal
+namespace StyleSheet
 {
 
-class UiStylePrivate
+UiStyleSheet New()
 {
-  // Reserved ABI slot for future UiStyleImpl private data.
-};
-
-} // namespace Internal
-
-UiStyleImpl::UiStyleImpl()
-: mPrivate(nullptr)
-{
+  return UiStyleSheet::New();
 }
 
-UiStyleImpl::~UiStyleImpl()
-{
-  delete mPrivate;
-}
-
-} // namespace Provider
+} // namespace StyleSheet
+} // namespace Components
 } // namespace Ui
 } // namespace Dali

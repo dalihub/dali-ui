@@ -18,8 +18,8 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/dali-string-view.h>
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/signals/dali-signal.h>
 
@@ -34,7 +34,7 @@ namespace Ui
 /**
  * @brief Abstract interface for theme-based color loading.
  *
- * Platform or derived config implementations implement this interface.
+ * Provider or derived config implementations implement this interface.
  * A concrete instance is created via UiConfigImpl::CreateThemeLoader().
  *
  * The virtual method set is fixed for ABI stability. Future extensions
@@ -77,7 +77,7 @@ protected:
   ThemeLoaderInterface() = default;
 
 private:
-  ThemeLoaderInterface(const ThemeLoaderInterface&) = delete;
+  ThemeLoaderInterface(const ThemeLoaderInterface&)            = delete;
   ThemeLoaderInterface& operator=(const ThemeLoaderInterface&) = delete;
 };
 

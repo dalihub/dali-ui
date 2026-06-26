@@ -25,7 +25,7 @@
 #include <dali/public-api/signals/slot-delegate.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/theme-loader-interface.h>
+#include <dali-ui-foundation/provider-api/theme-loader-interface.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/ui-theme-manager.h>
 

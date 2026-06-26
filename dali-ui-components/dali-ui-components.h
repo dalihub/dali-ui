@@ -27,6 +27,7 @@
 #include <dali-ui-components/public-api/chart/line-series.h>
 #include <dali-ui-components/public-api/chart/pie-series.h>
 #include <dali-ui-components/public-api/chart/scatter-series.h>
-#include <dali-ui-components/public-api/components-style-sheet.h>
-#include <dali-ui-components/public-api/text-button-style.h>
+#include <dali-ui-components/public-api/components-ui-config.h>
+#include <dali-ui-components/public-api/styles/components-style-sheet.h>
+#include <dali-ui-components/public-api/styles/text-button-style.h>
 #include <dali-ui-components/public-api/text-button.h>

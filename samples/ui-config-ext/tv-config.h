@@ -24,7 +24,7 @@ public:
   TVConfig() = default;
   ~TVConfig() = default;
 
-  explicit TVConfig(Dali::Ui::Integration::UiConfigImpl* impl);
+  explicit TVConfig(Dali::Ui::Provider::UiConfigImpl* impl);
 
   TVConfig(const TVConfig& handle) = default;
   TVConfig(TVConfig&& rhs) noexcept = default;

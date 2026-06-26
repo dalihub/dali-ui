@@ -25,7 +25,7 @@
 #include <unordered_map>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/theme-loader-interface.h>
+#include <dali-ui-foundation/provider-api/theme-loader-interface.h>
 
 namespace Dali
 {

@@ -33,7 +33,7 @@ void utc_dali_text_button_cleanup(void)
 
 int UtcDaliTextButtonConstructorP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button;
   DALI_TEST_CHECK(!button);
   END_TEST;
@@ -41,7 +41,7 @@ int UtcDaliTextButtonConstructorP(void)
 
 int UtcDaliTextButtonNewP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button = TextButton::New();
   DALI_TEST_CHECK(button);
   DALI_TEST_CHECK(InteractiveView::DownCast(button));
@@ -52,7 +52,7 @@ int UtcDaliTextButtonNewP(void)
 
 int UtcDaliTextButtonNewWithTextP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button = TextButton::New("OK");
   DALI_TEST_EQUALS(button.GetText(), std::string("OK"), TEST_LOCATION);
   END_TEST;
@@ -60,7 +60,7 @@ int UtcDaliTextButtonNewWithTextP(void)
 
 int UtcDaliTextButtonNewWithStyleP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
 
   TextButtonStyle style = TextButtonStyle::Builder()
                             .SetMinimumWidth(80.0f)
@@ -77,7 +77,7 @@ int UtcDaliTextButtonNewWithStyleP(void)
 
 int UtcDaliTextButtonNewWithTextAndStyleP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
 
   TextButtonStyle style = TextButtonStyle::Builder()
                             .SetTextColor(UiColor(Color::RED))
@@ -91,7 +91,7 @@ int UtcDaliTextButtonNewWithTextAndStyleP(void)
 
 int UtcDaliTextButtonTextP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button = TextButton::New();
   button.SetText("Apply");
   DALI_TEST_EQUALS(button.GetText(), std::string("Apply"), TEST_LOCATION);
@@ -100,7 +100,7 @@ int UtcDaliTextButtonTextP(void)
 
 int UtcDaliTextButtonCopyAndMoveP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button = TextButton::New("OK");
   TextButton        copy(button);
   DALI_TEST_CHECK(copy);
@@ -115,7 +115,7 @@ int UtcDaliTextButtonCopyAndMoveP(void)
 
 int UtcDaliTextButtonAssignmentP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button = TextButton::New("OK");
   TextButton        copy;
   copy = button;
@@ -132,7 +132,7 @@ int UtcDaliTextButtonAssignmentP(void)
 
 int UtcDaliTextButtonDownCastP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button = TextButton::New();
   BaseHandle        object(button);
 
@@ -145,7 +145,7 @@ int UtcDaliTextButtonDownCastP(void)
 
 int UtcDaliTextButtonDownCastN(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   BaseHandle        object;
   DALI_TEST_CHECK(!TextButton::DownCast(object));
   DALI_TEST_CHECK(!DownCast<TextButton>(object));
@@ -154,7 +154,7 @@ int UtcDaliTextButtonDownCastN(void)
 
 int UtcDaliTextButtonAlignmentP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button = TextButton::New();
   button.SetHorizontalAlignment(LayoutAlignment::END);
   button.SetVerticalAlignment(LayoutAlignment::START);
@@ -165,7 +165,7 @@ int UtcDaliTextButtonAlignmentP(void)
 
 int UtcDaliTextButtonStyleP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
 
   Text::Underline underline;
   underline.SetThickness(2.0f);
@@ -211,7 +211,7 @@ int UtcDaliTextButtonStyleP(void)
 
 int UtcDaliTextButtonStyleConfigureP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
 
   TextButtonStyle style = TextButtonStyle::Default()
                             .Configure()
@@ -231,7 +231,7 @@ int UtcDaliTextButtonStyleConfigureP(void)
 
 int UtcDaliTextButtonTextPropertiesP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   TextButton        button = TextButton::New();
 
   button.SetTextColor(UiColor(Color::GREEN));
@@ -255,7 +255,7 @@ int UtcDaliTextButtonTextPropertiesP(void)
 
 int UtcDaliTextButtonStyleDefaultKeyP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
 
   UiStyleSheet styleSheet = Components::StyleSheet::New();
   DALI_TEST_CHECK(!styleSheet.GetStyle(TextButtonStyle::DefaultKey()));

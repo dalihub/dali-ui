@@ -38,6 +38,9 @@
 #include <dali-ui-foundation/public-api/shadow-stack.h>
 #include <dali-ui-foundation/public-api/shadow.h>
 #include <dali-ui-foundation/public-api/state-effect.h>
+#include <dali-ui-foundation/public-api/styles/ui-style-key.h>
+#include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
+#include <dali-ui-foundation/public-api/styles/ui-style.h>
 #include <dali-ui-foundation/public-api/trait-id.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/ui-color-manager.h>
@@ -46,9 +49,6 @@
 #include <dali-ui-foundation/public-api/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/ui-scale-policy.h>
-#include <dali-ui-foundation/public-api/ui-style-key.h>
-#include <dali-ui-foundation/public-api/ui-style-sheet.h>
-#include <dali-ui-foundation/public-api/ui-style.h>
 #include <dali-ui-foundation/public-api/unique-any.h>
 #include <dali-ui-foundation/public-api/unit.h>
 #include <dali-ui-foundation/public-api/view-impl.h>

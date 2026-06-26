@@ -21,7 +21,6 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/theme-loader-interface.h>
 #include <dali-ui-foundation/integration-api/ui-config-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 

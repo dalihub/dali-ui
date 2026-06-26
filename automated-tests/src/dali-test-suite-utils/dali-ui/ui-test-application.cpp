@@ -36,11 +36,16 @@ bool UiTestApplication::ADD_IDLE_SUCCESS = true;
 using AdaptorImpl = Dali::Internal::Adaptor::Adaptor;
 
 UiTestApplication::UiTestApplication(size_t surfaceWidth, size_t surfaceHeight, float horizontalDpi, float verticalDpi)
+: UiTestApplication(Ui::UiConfig::New(), surfaceWidth, surfaceHeight, horizontalDpi, verticalDpi)
+{
+}
+
+UiTestApplication::UiTestApplication(Ui::UiConfig config, size_t surfaceWidth, size_t surfaceHeight, float horizontalDpi, float verticalDpi)
 : TestApplication(surfaceWidth, surfaceHeight, horizontalDpi, verticalDpi, false /* Do not Initialize Core */),
   mMainWindow(),
   mAdaptor(nullptr)
 {
-  Ui::UiConfig::New().Apply();
+  config.Apply();
 
   InitializeAdaptor(); // Need to create Adaptor first as many singletons in dali-adaptor need it
 

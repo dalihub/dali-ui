@@ -67,7 +67,7 @@ Ui::TextButton TextButtonImpl::New(TextButtonStyle style)
   IntrusivePtr<TextButtonImpl> impl(new TextButtonImpl());
   Ui::TextButton               handle(*impl);
   impl->Initialize();
-  impl->ApplyStyle(style);
+  impl->ApplyInitialStyle(style);
   return handle;
 }
 
@@ -154,6 +154,28 @@ void TextButtonImpl::OnInitialize()
   ApplyAlignment();
 }
 
+void TextButtonImpl::ApplyInitialStyle(TextButtonStyle style)
+{
+  Ui::View self = Ui::View::DownCast(Self());
+  self.SetMinimumWidth(style.GetMinimumWidth());
+  self.SetMinimumHeight(style.GetMinimumHeight());
+  self.SetMaximumWidth(style.GetMaximumWidth());
+  self.SetMaximumHeight(style.GetMaximumHeight());
+  self.SetCornerRadius(style.GetCornerRadius());
+  self.SetCornerRadiusPolicy(style.GetCornerRadiusPolicy());
+  self.SetPadding(style.GetPadding());
+  self.SetBackgroundColor(style.GetBackgroundColor());
+
+  SetHorizontalAlignment(style.GetHorizontalAlignment());
+  SetVerticalAlignment(style.GetVerticalAlignment());
+  SetTextColor(style.GetTextColor());
+  SetFontSize(style.GetFontSize());
+  SetFontFamily(style.GetFontFamily());
+  self.SetStateEffect(style.GetStateEffect());
+
+  SetTextUnderline(style.GetTextUnderline());
+}
+
 MeasuredSize TextButtonImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
   float s = GetEffectiveScale();
@@ -231,28 +253,6 @@ MeasuredSize TextButtonImpl::OnArrange(const LayoutRect& bounds)
 TextButtonImpl::TextButtonImpl() = default;
 
 TextButtonImpl::~TextButtonImpl() = default;
-
-void TextButtonImpl::ApplyStyle(TextButtonStyle style)
-{
-  Ui::View self = Ui::View::DownCast(Self());
-  self.SetMinimumWidth(style.GetMinimumWidth());
-  self.SetMinimumHeight(style.GetMinimumHeight());
-  self.SetMaximumWidth(style.GetMaximumWidth());
-  self.SetMaximumHeight(style.GetMaximumHeight());
-  self.SetCornerRadius(style.GetCornerRadius());
-  self.SetCornerRadiusPolicy(style.GetCornerRadiusPolicy());
-  self.SetPadding(style.GetPadding());
-  self.SetBackgroundColor(style.GetBackgroundColor());
-
-  SetHorizontalAlignment(style.GetHorizontalAlignment());
-  SetVerticalAlignment(style.GetVerticalAlignment());
-  SetTextColor(style.GetTextColor());
-  SetFontSize(style.GetFontSize());
-  SetFontFamily(style.GetFontFamily());
-  self.SetStateEffect(style.GetStateEffect());
-
-  SetTextUnderline(style.GetTextUnderline());
-}
 
 void TextButtonImpl::ApplyAlignment()
 {

@@ -16,10 +16,11 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-components/public-api/text-button-style.h>
+#include <dali-ui-components/public-api/styles/text-button-style.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-components/internal/text-button-style-impl.h>
+#include <dali-ui-components/internal/styles/text-button-style-impl.h>
+#include <dali-ui-foundation/provider-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
 
 // EXTERNAL INCLUDES
@@ -34,21 +35,20 @@ namespace
 
 StateEffect CreateDefaultTextButtonStateEffect()
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle requires UiConfig::Apply()");
   return StateEffect::DefaultForInteractive();
 }
 
 } // namespace
 
-UiStyleKey TextButtonStyle::DefaultKey()
+UiStyleKey<TextButtonStyle> TextButtonStyle::DefaultKey()
 {
-  static UiStyleKey key = UiStyleKey::Alloc();
+  static UiStyleKey<TextButtonStyle> key = UiStyleKey<TextButtonStyle>::Alloc();
   return key;
 }
 
-TextButtonStyle TextButtonStyle::Builtin()
+TextButtonStyle TextButtonStyle::DefaultPreset()
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle::Builtin() requires UiConfig::Apply()");
+  DebugAssertStyleConfigApplied();
 
   static TextButtonStyle style = TextButtonStyle::Builder().Build();
   return style;
@@ -56,19 +56,24 @@ TextButtonStyle TextButtonStyle::Builtin()
 
 TextButtonStyle TextButtonStyle::Default()
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle::Default() requires UiConfig::Apply()");
+  DebugAssertStyleConfigApplied();
 
-  TextButtonStyle style = TextButtonStyle::DownCast(UiConfig::GetCurrent().GetStyle(DefaultKey()));
+  TextButtonStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   if(style)
   {
     return style;
   }
-  return Builtin();
+  return DefaultPreset();
 }
 
 TextButtonStyle TextButtonStyle::DownCast(BaseHandle handle)
 {
   return TextButtonStyle(dynamic_cast<Internal::TextButtonStyleImpl*>(handle.GetObjectPtr()));
+}
+
+TextButtonStyle TextButtonStyle::StaticDownCast(UiStyle style)
+{
+  return TextButtonStyle(static_cast<Internal::TextButtonStyleImpl*>(style.GetObjectPtr()));
 }
 
 TextButtonStyle::Builder TextButtonStyle::Configure() const
@@ -160,7 +165,6 @@ TextButtonStyle::TextButtonStyle(Internal::TextButtonStyleImpl* impl)
 TextButtonStyle::Builder::Builder()
 : mImpl(new Internal::TextButtonStyleImpl())
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle::Builder requires UiConfig::Apply()");
 }
 
 TextButtonStyle::Builder::Builder(Builder&& rhs) noexcept = default;
@@ -575,9 +579,10 @@ TextButtonStyleImpl::TextButtonStyleImpl()
   mVerticalAlignment(LayoutAlignment::CENTER),
   mTextColor(UiColor::ON_PRIMARY),
   mFontSize(16.0f),
-  mStateEffect(CreateDefaultTextButtonStateEffect())
+  mFontFamily("SamsungOneUI600"),
+  mStateEffect(CreateDefaultTextButtonStateEffect()),
+  mUnderline(Text::Underline::None())
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle requires UiConfig::Apply()");
 }
 
 TextButtonStyleImpl::TextButtonStyleImpl(const TextButtonStyleImpl& rhs)

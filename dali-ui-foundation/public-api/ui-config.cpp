@@ -27,8 +27,8 @@
 #include <utility>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/ui-config-impl.h>
 #include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
+#include <dali-ui-foundation/provider-api/ui-config-impl.h>
 #include <dali-ui-foundation/public-api/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/view.h>
 
@@ -186,14 +186,14 @@ BaseHandle GetRuntime()
 
 } // unnamed namespace
 
-UiConfig::UiConfig(Integration::UiConfigImpl* impl)
+UiConfig::UiConfig(Provider::UiConfigImpl* impl)
 : BaseHandle(impl)
 {
 }
 
 UiConfig UiConfig::New()
 {
-  Integration::UiConfigImplPtr impl = Integration::UiConfigImpl::New();
+  Provider::UiConfigImplPtr impl = Provider::UiConfigImpl::New();
 
   // Pass ownership to handle
   UiConfig handle(impl.Get());
@@ -203,7 +203,7 @@ UiConfig UiConfig::New()
 
 UiConfig UiConfig::DownCast(BaseHandle handle)
 {
-  return UiConfig(dynamic_cast<Integration::UiConfigImpl*>(handle.GetObjectPtr()));
+  return UiConfig(dynamic_cast<Provider::UiConfigImpl*>(handle.GetObjectPtr()));
 }
 
 void UiConfig::Apply()
@@ -556,14 +556,14 @@ uint32_t UiConfig::GetAmbiguousPressDuration() const
   return GetImpl(*this).GetAmbiguousPressDuration();
 }
 
-void UiConfig::SetStyleSheet(UiStyleSheet styleSheet)
+void UiConfig::ResetStyleSheet(UiStyleSheet styleSheet)
 {
-  GetImpl(*this).SetStyleSheet(styleSheet);
+  GetImpl(*this).ResetStyleSheet(styleSheet);
 }
 
-UiStyle UiConfig::GetStyle(UiStyleKey key) const
+UiStyleSheet UiConfig::StyleSheet() const
 {
-  return GetImpl(*this).GetStyle(key);
+  return GetImpl(*this).StyleSheet();
 }
 
 void UiConfig::DefaultViewInitializer(View view)

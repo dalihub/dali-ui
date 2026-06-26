@@ -24,7 +24,7 @@ class TestConfig : public UiConfig
 public:
   TestConfig() = default;
   ~TestConfig() = default;
-  TestConfig(Integration::UiConfigImpl* impl) : UiConfig(impl)
+  TestConfig(Provider::UiConfigImpl* impl) : UiConfig(impl)
   {
   }
 

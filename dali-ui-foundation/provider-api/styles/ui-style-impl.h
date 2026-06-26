@@ -22,7 +22,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/ui-style.h>
+#include <dali-ui-foundation/public-api/styles/ui-style.h>
 
 namespace Dali
 {

@@ -62,6 +62,11 @@ public:
     return TestStyle(dynamic_cast<TestStyleImpl*>(handle.GetObjectPtr()));
   }
 
+  static TestStyle StaticDownCast(UiStyle style)
+  {
+    return TestStyle(static_cast<TestStyleImpl*>(style.GetObjectPtr()));
+  }
+
   int GetValue() const
   {
     return static_cast<const TestStyleImpl&>(GetBaseObject()).GetValue();
@@ -74,10 +79,32 @@ private:
   }
 };
 
+class OtherStyleImpl : public Provider::UiStyleImpl
+{
+protected:
+  ~OtherStyleImpl() override = default;
+};
+
+class OtherStyle : public UiStyle
+{
+public:
+  static OtherStyle New()
+  {
+    IntrusivePtr<OtherStyleImpl> impl(new OtherStyleImpl());
+    return OtherStyle(impl.Get());
+  }
+
+private:
+  explicit OtherStyle(OtherStyleImpl* impl)
+  : UiStyle(impl)
+  {
+  }
+};
+
 int gPrimaryStyleCreateCount = 0;
 int gEmptyStyleCreateCount   = 0;
 UiStyleSheet gRecursiveStyleSheet;
-UiStyleKey   gRecursiveKey = UiStyleKey::Alloc();
+UiStyleKey<> gRecursiveKey = UiStyleKey<>::Alloc();
 
 UiStyle CreatePrimaryStyle()
 {
@@ -94,6 +121,11 @@ UiStyle CreateEmptyStyle()
 {
   ++gEmptyStyleCreateCount;
   return UiStyle();
+}
+
+UiStyle CreateWrongStyle()
+{
+  return OtherStyle::New();
 }
 
 UiStyle CreateRecursiveStyle()
@@ -118,8 +150,8 @@ void utc_dali_ui_style_cleanup(void)
 
 int UtcDaliUiStyleKeyAllocP(void)
 {
-  UiStyleKey key1 = UiStyleKey::Alloc();
-  UiStyleKey key2 = UiStyleKey::Alloc();
+  UiStyleKey<> key1 = UiStyleKey<>::Alloc();
+  UiStyleKey<> key2 = UiStyleKey<>::Alloc();
 
   DALI_TEST_CHECK(key1 != key2);
   END_TEST;
@@ -127,14 +159,18 @@ int UtcDaliUiStyleKeyAllocP(void)
 
 int UtcDaliUiStyleSheetSetStyleGetStyleP(void)
 {
-  UiStyleKey key     = UiStyleKey::Alloc();
-  UiStyleKey missing = UiStyleKey::Alloc();
+  UiStyleKey<> key     = UiStyleKey<>::Alloc();
+  UiStyleKey<> missing = UiStyleKey<>::Alloc();
 
   UiStyleSheet styleSheet = UiStyleSheet::New();
   DALI_TEST_CHECK(styleSheet);
   DALI_TEST_CHECK(!styleSheet.IsFrozen());
 
   styleSheet.SetStyle(key, CreatePrimaryStyle);
+
+  UiConfig config = UiConfig::New();
+  config.ResetStyleSheet(styleSheet);
+  config.Apply();
 
   TestStyle style = TestStyle::DownCast(styleSheet.GetStyle(key));
   TestStyle cachedStyle = TestStyle::DownCast(styleSheet.GetStyle(key));
@@ -149,10 +185,14 @@ int UtcDaliUiStyleSheetSetStyleGetStyleP(void)
 
 int UtcDaliUiStyleSheetEmptyCreatorMaterializedP(void)
 {
-  UiStyleKey key = UiStyleKey::Alloc();
+  UiStyleKey<> key = UiStyleKey<>::Alloc();
 
   UiStyleSheet styleSheet = UiStyleSheet::New();
   styleSheet.SetStyle(key, CreateEmptyStyle);
+
+  UiConfig config = UiConfig::New();
+  config.ResetStyleSheet(styleSheet);
+  config.Apply();
 
   DALI_TEST_CHECK(!styleSheet.GetStyle(key));
   DALI_TEST_CHECK(!styleSheet.GetStyle(key));
@@ -160,15 +200,31 @@ int UtcDaliUiStyleSheetEmptyCreatorMaterializedP(void)
   END_TEST;
 }
 
+int UtcDaliUiStyleSheetWrongTypeCachedAsEmptyP(void)
+{
+  UiStyleKey<TestStyle> key = UiStyleKey<TestStyle>::Alloc();
+
+  UiStyleSheet styleSheet = UiStyleSheet::New();
+  styleSheet.SetStyle(key, CreateWrongStyle);
+
+  UiConfig config = UiConfig::New();
+  config.ResetStyleSheet(styleSheet);
+  config.Apply();
+
+  DALI_TEST_CHECK(!styleSheet.GetStyle(key));
+  DALI_TEST_CHECK(!styleSheet.GetStyle(key));
+  END_TEST;
+}
+
 int UtcDaliUiStyleSheetFreezeViaConfigP(void)
 {
-  UiStyleKey key = UiStyleKey::Alloc();
+  UiStyleKey<> key = UiStyleKey<>::Alloc();
 
   UiStyleSheet styleSheet = UiStyleSheet::New();
   styleSheet.SetStyle(key, CreatePrimaryStyle);
 
   UiConfig config = UiConfig::New();
-  config.SetStyleSheet(styleSheet);
+  config.ResetStyleSheet(styleSheet);
   config.Apply();
 
   DALI_TEST_CHECK(styleSheet.IsFrozen());
@@ -185,19 +241,23 @@ int UtcDaliUiStyleSheetRecursiveResolutionN(void)
   gRecursiveStyleSheet = UiStyleSheet::New();
   gRecursiveStyleSheet.SetStyle(gRecursiveKey, CreateRecursiveStyle);
 
+  UiConfig config = UiConfig::New();
+  config.ResetStyleSheet(gRecursiveStyleSheet);
+  config.Apply();
+
   DALI_TEST_ASSERTION(gRecursiveStyleSheet.GetStyle(gRecursiveKey), "UiStyleSheet detected recursive style resolution");
   END_TEST;
 }
 
 int UtcDaliUiConfigStyleSheetP(void)
 {
-  UiStyleKey key = UiStyleKey::Alloc();
+  UiStyleKey<> key = UiStyleKey<>::Alloc();
 
   UiStyleSheet styleSheet = UiStyleSheet::New();
   styleSheet.SetStyle(key, CreatePrimaryStyle);
 
   UiConfig config = UiConfig::New();
-  config.SetStyleSheet(styleSheet);
+  config.ResetStyleSheet(styleSheet);
   config.Apply();
 
   DALI_TEST_CHECK(styleSheet.IsFrozen());
@@ -207,13 +267,35 @@ int UtcDaliUiConfigStyleSheetP(void)
   DALI_TEST_EQUALS(style.GetValue(), 7, TEST_LOCATION);
 
   DALI_TEST_ASSERTION(styleSheet.SetStyle(key, CreateOverrideStyle), "UiStyleSheet is frozen");
-  DALI_TEST_ASSERTION(config.SetStyleSheet(styleSheet), "UiConfig is frozen after UiConfig::Apply()");
+  DALI_TEST_ASSERTION(config.ResetStyleSheet(styleSheet), "UiConfig is frozen after UiConfig::Apply()");
+  END_TEST;
+}
+
+int UtcDaliUiConfigStyleSheetAccessorP(void)
+{
+  UiStyleKey<> key = UiStyleKey<>::Alloc();
+
+  UiConfig config     = UiConfig::New();
+  UiStyleSheet sheet1 = config.StyleSheet();
+  UiStyleSheet sheet2 = config.StyleSheet();
+
+  DALI_TEST_CHECK(sheet1);
+  DALI_TEST_CHECK(sheet1.GetObjectPtr() == sheet2.GetObjectPtr());
+
+  config.StyleSheet().SetStyle(key, CreatePrimaryStyle);
+  config.Apply();
+
+  DALI_TEST_CHECK(sheet1.IsFrozen());
+
+  TestStyle style = TestStyle::DownCast(UiConfig::GetCurrent().GetStyle(key));
+  DALI_TEST_CHECK(style);
+  DALI_TEST_EQUALS(style.GetValue(), 7, TEST_LOCATION);
   END_TEST;
 }
 
 int UtcDaliUiConfigDefaultStyleSheetP(void)
 {
-  UiStyleKey key = UiStyleKey::Alloc();
+  UiStyleKey<> key = UiStyleKey<>::Alloc();
 
   UiConfig config = UiConfig::New();
   config.Apply();

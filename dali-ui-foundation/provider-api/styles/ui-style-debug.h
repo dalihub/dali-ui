@@ -1,4 +1,5 @@
 #pragma once
+
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -13,28 +14,24 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
+ *
  */
 
-#include <dali-ui-foundation/provider-api/theme-loader-interface.h>
+// EXTERNAL INCLUDES
+#include <dali/integration-api/debug.h>
 
-#include <string>
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/ui-config.h>
 
-class TestThemeLoader : public Dali::Ui::ThemeLoaderInterface
+namespace Dali
 {
-public:
-  TestThemeLoader();
-  ~TestThemeLoader() override;
+namespace Ui
+{
 
-  bool GetColor(Dali::StringView colorId, Dali::Vector4& outColor) override;
-  Dali::String GetCurrentThemeId() const override;
-  ThemeChangedSignalType& ThemeChangedSignal() override;
+inline void DebugAssertStyleConfigApplied()
+{
+  DALI_ASSERT_DEBUG(UiConfig::HasCurrent() && "Ui style requires UiConfig::Apply()");
+}
 
-  void ToggleTheme();
-
-private:
-  std::string            mCurrentThemeId;
-  ThemeChangedSignalType mThemeChangedSignal;
-};
-
-TestThemeLoader* GetTestThemeLoader();
-void SetTestThemeLoader(TestThemeLoader* loader);
+} // namespace Ui
+} // namespace Dali

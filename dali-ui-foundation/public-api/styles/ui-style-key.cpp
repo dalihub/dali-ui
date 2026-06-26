@@ -16,23 +16,36 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-components/public-api/components-style-sheet.h>
+#include <dali-ui-foundation/public-api/styles/ui-style-key.h>
+
+// EXTERNAL INCLUDES
+#include <dali/integration-api/debug.h>
+#include <atomic>
+#include <limits>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Components
+namespace
 {
-namespace StyleSheet
-{
-
-UiStyleSheet New()
-{
-  return UiStyleSheet::New();
+std::atomic<uint32_t> gNextStyleKey{1u};
 }
 
-} // namespace StyleSheet
-} // namespace Components
+uint32_t AllocateUiStyleKeyValue()
+{
+  uint32_t id = gNextStyleKey.load(std::memory_order_relaxed);
+  while(id != std::numeric_limits<uint32_t>::max())
+  {
+    if(gNextStyleKey.compare_exchange_weak(id, id + 1u, std::memory_order_relaxed, std::memory_order_relaxed))
+    {
+      return id;
+    }
+  }
+
+  DALI_ASSERT_ALWAYS(false && "UiStyleKey space exhausted");
+  return 0u;
+}
+
 } // namespace Ui
 } // namespace Dali

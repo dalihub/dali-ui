@@ -16,36 +16,33 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/ui-style-key.h>
+#include <dali-ui-components/internal/components-ui-config-impl.h>
 
-// EXTERNAL INCLUDES
-#include <dali/integration-api/debug.h>
-#include <atomic>
-#include <limits>
+// INTERNAL INCLUDES
+#include <dali-ui-components/public-api/styles/components-style-sheet.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace
+namespace Components
 {
-std::atomic<uint32_t> gNextStyleKey{1u};
+namespace Internal
+{
+
+UiConfigImplPtr UiConfigImpl::New()
+{
+  return UiConfigImplPtr(new UiConfigImpl());
 }
 
-UiStyleKey UiStyleKey::Alloc()
+UiConfigImpl::UiConfigImpl()
 {
-  uint32_t id = gNextStyleKey.load(std::memory_order_relaxed);
-  while(id != std::numeric_limits<uint32_t>::max())
-  {
-    if(gNextStyleKey.compare_exchange_weak(id, id + 1u, std::memory_order_relaxed, std::memory_order_relaxed))
-    {
-      return UiStyleKey(id);
-    }
-  }
-
-  DALI_ASSERT_ALWAYS(false && "UiStyleKey space exhausted");
-  return UiStyleKey(0u);
+  ResetStyleSheet(StyleSheet::New());
 }
 
+UiConfigImpl::~UiConfigImpl() = default;
+
+} // namespace Internal
+} // namespace Components
 } // namespace Ui
 } // namespace Dali

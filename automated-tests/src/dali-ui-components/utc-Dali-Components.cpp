@@ -35,7 +35,7 @@ int UtcDaliComponentsStyleSheetNewP(void)
 {
   UiStyleSheet styleSheet      = Components::StyleSheet::New();
   UiStyleSheet otherStyleSheet = Components::StyleSheet::New();
-  UiStyleKey   unregisteredKey = UiStyleKey::Alloc();
+  UiStyleKey<> unregisteredKey = UiStyleKey<>::Alloc();
 
   DALI_TEST_CHECK(styleSheet);
   DALI_TEST_CHECK(otherStyleSheet);

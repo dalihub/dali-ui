@@ -1992,7 +1992,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  Components::UiConfig::New().Apply();
   ChartViewController controller(application);
   application.MainLoop();
   return 0;

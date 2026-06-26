@@ -18,8 +18,8 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-components/public-api/text-button-style.h>
-#include <dali-ui-foundation/provider-api/ui-style-impl.h>
+#include <dali-ui-components/public-api/styles/text-button-style.h>
+#include <dali-ui-foundation/provider-api/styles/ui-style-impl.h>
 #include <dali/public-api/common/constants.h>
 
 namespace Dali

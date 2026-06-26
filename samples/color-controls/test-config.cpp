@@ -18,7 +18,7 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
+using namespace Dali::Ui::Provider;
 
 class TestConfigImpl : public UiConfigImpl
 {
@@ -37,4 +37,3 @@ TestConfig TestConfig::New()
   TestConfig handle(impl.Get());
   return handle;
 }
-

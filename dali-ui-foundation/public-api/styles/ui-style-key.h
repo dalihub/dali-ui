@@ -28,14 +28,32 @@ namespace Dali
 namespace Ui
 {
 
+class UiStyle;
+
+/**
+ * @brief Allocates and returns the next unique style key value.
+ *
+ * This is shared by all UiStyleKey<T> instantiations so key values can be used
+ * as dense indices in one UiStyleSheet storage.
+ *
+ * @return A new unique style key value
+ */
+DALI_UI_API uint32_t AllocateUiStyleKeyValue();
+
 /**
  * @brief A lightweight identifier for a style entry in UiStyleSheet.
  *
- * UiStyleKey values are allocated sequentially via UiStyleKey::Alloc().
+ * UiStyleKey values are allocated sequentially via UiStyleKey<T>::Alloc().
  * Allocate one key per logical style slot and store the returned key in static
  * storage so it can be reused for style sheet registration and lookup.
+ *
+ * The template parameter is a typed marker for the concrete style handle. It
+ * does not change the stored key value, but it binds the key to the style type
+ * used by UiStyleSheet::GetStyle() and helps prevent key/type mismatches at
+ * compile time.
  */
-struct DALI_UI_API UiStyleKey
+template<typename StyleT = UiStyle>
+struct UiStyleKey
 {
   /**
    * @brief Allocates and returns the next unique UiStyleKey.
@@ -46,7 +64,10 @@ struct DALI_UI_API UiStyleKey
    *
    * @return A new unique UiStyleKey
    */
-  static UiStyleKey Alloc();
+  static UiStyleKey Alloc()
+  {
+    return UiStyleKey(AllocateUiStyleKeyValue());
+  }
 
   /**
    * @brief Equality operator.

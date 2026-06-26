@@ -1143,7 +1143,7 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application         app = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  Components::UiConfig::New().Apply();
   MemProbeApp         probe(app);
   app.MainLoop();
   return 0;

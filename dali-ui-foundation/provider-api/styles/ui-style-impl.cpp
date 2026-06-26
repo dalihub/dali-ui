@@ -16,25 +16,34 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/ui-style.h>
-
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/provider-api/ui-style-impl.h>
+#include <dali-ui-foundation/provider-api/styles/ui-style-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
-
-UiStyle UiStyle::DownCast(BaseHandle handle)
+namespace Provider
 {
-  return UiStyle(dynamic_cast<Provider::UiStyleImpl*>(handle.GetObjectPtr()));
+namespace Internal
+{
+
+class UiStylePrivate
+{
+  // Reserved ABI slot for future UiStyleImpl private data.
+};
+
+} // namespace Internal
+
+UiStyleImpl::UiStyleImpl()
+: mPrivate(nullptr)
+{
 }
 
-UiStyle::UiStyle(Provider::UiStyleImpl* impl)
-: BaseHandle(impl)
+UiStyleImpl::~UiStyleImpl()
 {
+  delete mPrivate;
 }
 
+} // namespace Provider
 } // namespace Ui
 } // namespace Dali

@@ -1,5 +1,3 @@
-#pragma once
-
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -17,31 +15,26 @@
  *
  */
 
+// CLASS HEADER
+#include <dali-ui-foundation/public-api/styles/ui-style.h>
+
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/ui-style-sheet.h>
+#include <dali-ui-foundation/provider-api/styles/ui-style-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Components
-{
-namespace StyleSheet
-{
 
-/**
- * @brief Creates a new components style sheet.
- *
- * The returned style sheet is a fresh mutable object. Applications and product
- * libraries may set or override entries before passing it to
- * UiConfig::SetStyleSheet().
- *
- * @return A new components style sheet
- */
-DALI_UI_API UiStyleSheet New();
+UiStyle UiStyle::DownCast(BaseHandle handle)
+{
+  return UiStyle(dynamic_cast<Provider::UiStyleImpl*>(handle.GetObjectPtr()));
+}
 
-} // namespace StyleSheet
-} // namespace Components
+UiStyle::UiStyle(Provider::UiStyleImpl* impl)
+: BaseHandle(impl)
+{
+}
+
 } // namespace Ui
 } // namespace Dali

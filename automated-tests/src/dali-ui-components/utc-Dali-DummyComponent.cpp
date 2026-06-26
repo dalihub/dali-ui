@@ -19,6 +19,7 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-components/public-api/components-ui-config.h>
 #include <dali-ui-components/public-api/dummy-component.h>
 #include <dali-ui-test-suite-utils.h>
 
@@ -37,7 +38,7 @@ void utc_dali_dummy_components_cleanup(void)
 
 int UtcDaliDummyComponentConstructorP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   DummyComponent dummyComponent;
   DALI_TEST_CHECK(!dummyComponent);
   END_TEST;
@@ -45,7 +46,7 @@ int UtcDaliDummyComponentConstructorP(void)
 
 int UtcDaliDummyComponentNewP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   DummyComponent dummyComponent = DummyComponent::New();
   DALI_TEST_CHECK(dummyComponent);
   END_TEST;
@@ -53,7 +54,7 @@ int UtcDaliDummyComponentNewP(void)
 
 int UtcDaliDummyComponentCopyConstructorP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   DummyComponent dummyComponent = DummyComponent::New();
   DummyComponent copy(dummyComponent);
   DALI_TEST_CHECK(copy);
@@ -63,7 +64,7 @@ int UtcDaliDummyComponentCopyConstructorP(void)
 
 int UtcDaliDummyComponentMoveConstructor(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   DummyComponent dummyComponent = DummyComponent::New();
   DALI_TEST_EQUALS(1, dummyComponent.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -76,7 +77,7 @@ int UtcDaliDummyComponentMoveConstructor(void)
 
 int UtcDaliDummyComponentAssignmentOperatorP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   DummyComponent dummyComponent = DummyComponent::New();
   DummyComponent copy;
   copy = dummyComponent;
@@ -87,7 +88,7 @@ int UtcDaliDummyComponentAssignmentOperatorP(void)
 
 int UtcDaliDummyComponentMoveAssignment(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   DummyComponent dummyComponent = DummyComponent::New();
   DALI_TEST_EQUALS(1, dummyComponent.GetBaseObject().ReferenceCount(), TEST_LOCATION);
 
@@ -101,7 +102,7 @@ int UtcDaliDummyComponentMoveAssignment(void)
 
 int UtcDaliDummyComponentDownCastP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   DummyComponent dummyComponent = DummyComponent::New();
   BaseHandle object(dummyComponent);
   DummyComponent dummyComponent2 = DummyComponent::DownCast(object);
@@ -113,7 +114,7 @@ int UtcDaliDummyComponentDownCastP(void)
 
 int UtcDaliDummyComponentDownCastN(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(Components::UiConfig::New());
   BaseHandle unInitializedObject;
   DummyComponent dummyComponent2 = DummyComponent::DownCast(unInitializedObject);
   DummyComponent dummyComponent3 = DownCast<DummyComponent>(unInitializedObject);

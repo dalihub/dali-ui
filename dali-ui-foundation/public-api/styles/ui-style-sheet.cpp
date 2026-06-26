@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/ui-style-sheet.h>
+#include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
@@ -37,7 +37,9 @@ enum class StyleEntryState
 {
   UNRESOLVED,
   RESOLVING,
-  RESOLVED
+  RESOLVED_VALID,
+  RESOLVED_EMPTY,
+  RESOLVED_INVALID
 };
 
 struct StyleEntry
@@ -56,12 +58,12 @@ using StyleEntryContainer = std::vector<StyleEntry>;
 class UiStyleSheetImpl : public BaseObject
 {
 public:
-  void SetStyle(UiStyleKey key, UiStyleCreator creator)
+  void SetStyle(uint32_t keyValue, UiStyleCreator creator)
   {
     DALI_ASSERT_ALWAYS(!mFrozen && "UiStyleSheet is frozen");
     DALI_ASSERT_ALWAYS(creator && "UiStyleCreator must not be null");
 
-    const auto index = static_cast<std::size_t>(key.value);
+    const auto index = static_cast<std::size_t>(keyValue);
     if(index >= mEntries.size())
     {
       mEntries.resize(index + 1u);
@@ -73,9 +75,9 @@ public:
     entry.state       = StyleEntryState::UNRESOLVED;
   }
 
-  UiStyle GetStyle(UiStyleKey key) const
+  UiStyle GetStyle(uint32_t keyValue, UiStyleValidator validator) const
   {
-    const auto index = static_cast<std::size_t>(key.value);
+    const auto index = static_cast<std::size_t>(keyValue);
     if(index >= mEntries.size())
     {
       return UiStyle();
@@ -87,12 +89,37 @@ public:
       DALI_ASSERT_ALWAYS(false && "UiStyleSheet detected recursive style resolution");
     }
 
+    if(entry.state == StyleEntryState::RESOLVED_VALID)
+    {
+      return entry.style;
+    }
+
+    if(entry.state == StyleEntryState::RESOLVED_EMPTY ||
+       entry.state == StyleEntryState::RESOLVED_INVALID)
+    {
+      return UiStyle();
+    }
+
     if(entry.state == StyleEntryState::UNRESOLVED && entry.creator)
     {
       entry.state   = StyleEntryState::RESOLVING;
       entry.style   = entry.creator();
       entry.creator = nullptr;
-      entry.state   = StyleEntryState::RESOLVED;
+      if(!entry.style)
+      {
+        entry.state = StyleEntryState::RESOLVED_EMPTY;
+        return UiStyle();
+      }
+
+      if(!validator(entry.style))
+      {
+        DALI_LOG_RELEASE_INFO("UiStyleSheet detected style type mismatch for key %u\n", keyValue);
+        entry.style = UiStyle();
+        entry.state = StyleEntryState::RESOLVED_INVALID;
+        return UiStyle();
+      }
+
+      entry.state = StyleEntryState::RESOLVED_VALID;
     }
 
     return entry.style;
@@ -140,20 +167,20 @@ UiStyleSheet UiStyleSheet::New()
   return UiStyleSheet(impl.Get());
 }
 
-void UiStyleSheet::SetStyle(UiStyleKey key, UiStyleCreator creator)
+void UiStyleSheet::SetStyle(uint32_t keyValue, UiStyleCreator creator)
 {
   DALI_ASSERT_ALWAYS(*this && "UiStyleSheet is uninitialized");
-  GetStyleSheetImpl(*this).SetStyle(key, creator);
+  GetStyleSheetImpl(*this).SetStyle(keyValue, creator);
 }
 
-UiStyle UiStyleSheet::GetStyle(UiStyleKey key) const
+UiStyle UiStyleSheet::GetStyle(uint32_t keyValue, Internal::UiStyleValidator validator) const
 {
   if(!*this)
   {
     return UiStyle();
   }
 
-  return GetStyleSheetImpl(*this).GetStyle(key);
+  return GetStyleSheetImpl(*this).GetStyle(keyValue, validator);
 }
 
 bool UiStyleSheet::IsFrozen() const

@@ -18,7 +18,7 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-components/public-api/text-button-style.h>
+#include <dali-ui-components/public-api/styles/text-button-style.h>
 #include <dali-ui-foundation/public-api/interactive-view.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>

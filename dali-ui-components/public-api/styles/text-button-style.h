@@ -20,10 +20,10 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/state-effect.h>
+#include <dali-ui-foundation/public-api/styles/ui-style-key.h>
+#include <dali-ui-foundation/public-api/styles/ui-style.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/ui-color.h>
-#include <dali-ui-foundation/public-api/ui-style-key.h>
-#include <dali-ui-foundation/public-api/ui-style.h>
 #include <dali-ui-foundation/public-api/view-types.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/extents.h>
@@ -51,11 +51,30 @@ public:
 
   TextButtonStyle() = default;
 
-  static UiStyleKey DefaultKey();
+  static UiStyleKey<TextButtonStyle> DefaultKey();
 
-  static TextButtonStyle Builtin();
+  /**
+   * @brief Gets the cached built-in default preset.
+   *
+   * The returned style is created from the builder defaults and reused across
+   * calls. This function requires UiConfig::Apply().
+   *
+   * @return The built-in default preset
+   */
+  static TextButtonStyle DefaultPreset();
+
+  /**
+   * @brief Gets the default style from the current UiConfig.
+   *
+   * This resolves the style registered for DefaultKey() in the current style
+   * sheet. If no override is registered, DefaultPreset() is returned. This
+   * function requires UiConfig::Apply().
+   *
+   * @return The default TextButton style
+   */
   static TextButtonStyle Default();
   static TextButtonStyle DownCast(BaseHandle handle);
+  static TextButtonStyle StaticDownCast(UiStyle style);
 
   Builder Configure() const;
 

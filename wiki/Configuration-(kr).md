@@ -8,12 +8,16 @@ dali-ui를 사용하려면 앱 시작 시 반드시 Config 객체를 생성하�
 
 ## 어떤 Config를 사용해야 하나요?
 
-`dali-ui-foundation`과 `dali-ui-components` 모두 `UiConfig`를 사용합니다.
+앱이 의존하는 가장 높은 DALi UI 라이브러리의 config preset을 사용합니다.
+Components 앱은 foundation 설정과 components style sheet preset을 함께 담고 있는
+`Components::UiConfig`를 적용합니다.
+Config는 하나만 적용합니다. 같은 앱에서 `UiConfig`와 `Components::UiConfig`를
+둘 다 적용하지 않습니다.
 
 | 사용 라이브러리 | Config 클래스 | 헤더 |
 |---|---|---|
 | `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
-| `dali-ui-components` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
+| `dali-ui-components` | `Components::UiConfig` | `<dali-ui-components/dali-ui-components.h>` |
 
 <br/>
 
@@ -38,10 +42,11 @@ int main(int argc, char** argv)
 }
 ```
 
-`dali-ui-components`를 사용하는 경우에도 하나의 `UiConfig`만 적용합니다:
+`dali-ui-components`를 사용하는 경우에는 하나의 `Components::UiConfig`를 적용합니다.
+`Components::UiConfig`가 foundation 설정까지 포함하므로 `UiConfig`를 따로 적용하지 않습니다:
 
 ```cpp
-UiConfig config = UiConfig::New();
+Components::UiConfig config = Components::UiConfig::New();
 config.SetDpi(320);
 config.SetScalingFactor(1.5f);
 config.Apply();
@@ -71,26 +76,37 @@ config.Apply();
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | 기본 포커스 인디케이터 활성화 여부 |
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | 터치 입력 시 포커스 indication을 해제할지 여부 |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | 포커스된 뷰 밖을 hover했을 때 포커스 indication을 해제할지 여부 |
-| Style Sheet | `SetStyleSheet(UiStyleSheet)`, `GetStyle(UiStyleKey)` | 컴포넌트 style override | 컴포넌트 스타일 creator lookup table 및 style resolver |
+| Style Sheet | `ResetStyleSheet(UiStyleSheet)`, `StyleSheet()`, `GetStyle(UiStyleKey<T>)` | 컴포넌트 style override | 컴포넌트 스타일 creator lookup table 및 style resolver |
 
 <br/>
 
 ## Component Style Sheet
 
-`UiConfig`는 `UiStyleSheet`를 가질 수 있습니다. 컴포넌트는
-`UiConfig::GetStyle(UiStyleKey)`를 통해 설정된 style을 resolve합니다.
+`UiConfig`는 `UiStyleSheet`를 가질 수 있습니다. `Components::UiConfig`는
+components style sheet를 기본으로 제공합니다. 컴포넌트는
+`UiConfig::GetStyle(UiStyleKey<T>)`를 통해 설정된 style을 resolve합니다.
+Style creator는 `Apply()` 전에 등록할 수 있지만, 초기화된 style 객체는
+`UiConfig::Apply()` 이후에만 생성하거나 접근할 수 있습니다.
 
-디바이스나 제품 전용 라이브러리는 components style sheet를 생성하고
-override하려는 style entry만 등록한 뒤 config에 적용할 수 있습니다:
+선택한 config 하나만 적용해야 합니다. Components 앱은 `Components::UiConfig`의
+style sheet를 수정한 뒤 같은 config에 `Apply()`를 호출하고, foundation
+`UiConfig`를 먼저 적용하지 않습니다.
+
+앱이나 제품 전용 라이브러리는 보통 config preset이 가진 style sheet에 접근해
+필요한 style entry만 override한 뒤 config를 적용합니다:
 
 ```cpp
-UiStyleSheet styleSheet = Dali::Ui::Components::StyleSheet::New();
-styleSheet.SetStyle(MyButtonStyleKey(), ProvideMyButtonStyle);
-
-UiConfig config = UiConfig::New();
-config.SetStyleSheet(styleSheet);
-config.Apply(); // config와 styleSheet를 모두 freeze합니다.
+Components::UiConfig config = Components::UiConfig::New();
+config.StyleSheet()
+  .SetStyle(MyButtonStyle::DefaultKey(), ProvideMyButtonStyle);
+config.Apply(); // config와 config의 style sheet를 모두 freeze합니다.
 ```
+
+`ResetStyleSheet()`는 provider가 style sheet 전체를 교체해야 할 때 사용할 수 있습니다.
+`StyleSheet::New()`도 이 고급 provider 경로를 위해 제공하지만, 일반 앱 코드는
+보통 config preset이 이미 가진 sheet에서 시작합니다.
+`TextButtonStyle::Default()`나 `TextButtonStyle::DefaultPreset()` 같은
+컴포넌트 style accessor는 `Apply()` 전에 호출하지 않습니다.
 
 <br/>
 

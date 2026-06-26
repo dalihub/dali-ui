@@ -35,6 +35,9 @@ class UiStyleImpl;
 
 /**
  * @brief Base handle for immutable UI style objects.
+ *
+ * Style objects may depend on the applied UiConfig. Create or resolve
+ * initialized style objects only after UiConfig::Apply().
  */
 class DALI_UI_API UiStyle : public BaseHandle
 {
@@ -52,6 +55,17 @@ public:
    */
   static UiStyle DownCast(BaseHandle handle);
 
+  /**
+   * @brief Static downcasts a style already verified by UiStyleSheet.
+   *
+   * @param[in] style The verified style handle
+   * @return The same style handle
+   */
+  static UiStyle StaticDownCast(UiStyle style)
+  {
+    return style;
+  }
+
 protected:
   /**
    * @brief Creates a UiStyle handle from its implementation.
@@ -66,6 +80,10 @@ protected:
  *
  * UiStyleSheet calls a creator when a style entry is first resolved, then
  * caches the returned style. It is not called for each component instance.
+ * Creators are resolved only after UiConfig::Apply().
+ * The returned style must be compatible with the UiStyleKey used to register
+ * the creator. This compatibility is validated when the entry is first resolved
+ * through UiStyleSheet::GetStyle().
  *
  * Capture-less lambdas can be converted to UiStyleCreator. Capturing lambdas
  * and stateful callables are intentionally not supported by this API.

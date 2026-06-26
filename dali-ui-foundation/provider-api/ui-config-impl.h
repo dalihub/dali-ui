@@ -22,16 +22,15 @@
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/object/base-object.h>
-#include <array>
 #include <cstdint>
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/theme-loader-interface.h>
+#include <dali-ui-foundation/provider-api/theme-loader-interface.h>
 #include <dali-ui-foundation/public-api/state-effect.h>
+#include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 #include <dali-ui-foundation/public-api/trait-object.h>
 #include <dali-ui-foundation/public-api/ui-config.h>
-#include <dali-ui-foundation/public-api/ui-style-sheet.h>
 
 namespace Dali
 {
@@ -39,17 +38,19 @@ namespace Dali
 namespace Ui
 {
 
-namespace Integration
+namespace Provider
 {
 
 class UiConfigImpl;
 using UiConfigImplPtr = IntrusivePtr<UiConfigImpl>;
 
 /**
- * @brief Internal implementation of UiConfig.
+ * @brief Provider-facing implementation base for UiConfig presets.
  *
- * Supports a "freeze" mechanism: once Freeze() is called (by UiConfig::Apply()),
- * all subsequent setter calls will trigger DALI_ASSERT_ALWAYS.
+ * Module providers can derive from this class to distribute preconfigured
+ * UiConfig handles. It supports a "freeze" mechanism: once Freeze() is called
+ * by UiConfig::Apply(), all subsequent setter calls will trigger
+ * DALI_ASSERT_ALWAYS.
  */
 class DALI_UI_API UiConfigImpl : public BaseObject
 {
@@ -507,14 +508,14 @@ public:
   StateEffect GetDefaultStateEffectForInteractive() const;
 
   /**
-   * @copydoc UiConfig::SetStyleSheet()
+   * @copydoc UiConfig::ResetStyleSheet()
    */
-  void SetStyleSheet(UiStyleSheet styleSheet);
+  void ResetStyleSheet(UiStyleSheet styleSheet);
 
   /**
-   * @copydoc UiConfig::GetStyle()
+   * @copydoc UiConfig::StyleSheet()
    */
-  UiStyle GetStyle(UiStyleKey key) const;
+  UiStyleSheet StyleSheet() const;
 
   /**
    * @copydoc UiConfig::SetAmbiguousPressDelay()
@@ -581,46 +582,11 @@ private:
   UiConfigImpl& operator=(UiConfigImpl&&)      = delete;
 
 private:
-  Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
-
-  StateEffect               mDefaultStateEffectForInteractive; ///< Default effect for interactive views
-  UiStyleSheet              mStyleSheet;
-  ExecutionKeyPredicate     mExecutionKeyPredicate;
-  ViewInitializer           mViewInitializer;
-  Vector4                   mDefaultTextColor;
-  Vector4                   mDefaultPlaceholderTextColor;
-  float                     mScalingFactor;
-  float                     mDefaultFontSize;
-  bool                      mDefaultSystemFontSizeScaleEnabled;
-  std::array<float, 5>      mSystemFontSizeScales;
-  float                     mDefaultMinimumFontSizeScale;
-  float                     mDefaultMaximumFontSizeScale;
-  int                       mDpi;
-  int                       mBaselineDpi;
-  int                       mMarqueeSpeed;
-  int                       mMarqueeLoopCount;
-  float                     mMarqueeLoopDelay;
-  float                     mMarqueeGap;
-  Text::MarqueeStopMode     mMarqueeStopMode;
-  Text::MarqueeOrientation  mMarqueeOrientation;
-  Text::LayoutDirectionMode mTextLayoutDirectionMode;
-  KeyClickPolicy            mKeyClickPolicy;
-  uint32_t                  mKeyLongPressThreshold;
-  uint32_t                  mTapRecognizerTime;
-  uint32_t                  mAmbiguousPressDelay;
-  uint32_t                  mAmbiguousPressDuration;
-  float                     mCachedDpiFactor{1.0f};
-  float                     mCachedScaledDpiFactor{1.0f};
-  bool                      mClearFocusOnEscapeEnabled;
-  bool                      mClearFocusIndicationOnTouch;
-  bool                      mClearFocusIndicationOnHover;
-  bool                      mDefaultFocusIndicatorEnabled;
-  bool                      mShowPlaceholderTextOnFocus;
-  bool                      mLabelAsyncRendering;
-  bool                      mFrozen;
+  class Impl;
+  Impl* mImpl;
 };
 
-} // namespace Integration
+} // namespace Provider
 
 /**
  * @brief Retrieves the UiConfigImpl from a UiConfig handle.
@@ -628,10 +594,10 @@ private:
  * @param[in] obj The UiConfig handle
  * @return A reference to the internal implementation
  */
-inline Integration::UiConfigImpl& GetImpl(UiConfig& obj)
+inline Provider::UiConfigImpl& GetImpl(UiConfig& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::UiConfigImpl&>(handle);
+  return static_cast<Provider::UiConfigImpl&>(handle);
 }
 
 /**
@@ -640,10 +606,10 @@ inline Integration::UiConfigImpl& GetImpl(UiConfig& obj)
  * @param[in] obj The UiConfig handle
  * @return A const reference to the internal implementation
  */
-inline const Integration::UiConfigImpl& GetImpl(const UiConfig& obj)
+inline const Provider::UiConfigImpl& GetImpl(const UiConfig& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::UiConfigImpl&>(handle);
+  return static_cast<const Provider::UiConfigImpl&>(handle);
 }
 
 } // namespace Ui

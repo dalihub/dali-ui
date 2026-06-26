@@ -24,6 +24,7 @@
 #include <dali-test-suite-utils.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <test-application.h>
+#include <dali-ui-foundation/public-api/ui-config.h>
 #include <dali-ui/ui-adaptor-impl.h>
 
 namespace Dali
@@ -46,6 +47,12 @@ public:
                     size_t surfaceHeight = DEFAULT_SURFACE_HEIGHT,
                     float  horizontalDpi = DEFAULT_HORIZONTAL_DPI,
                     float  verticalDpi   = DEFAULT_VERTICAL_DPI);
+
+  explicit UiTestApplication(Ui::UiConfig config,
+                             size_t       surfaceWidth  = DEFAULT_SURFACE_WIDTH,
+                             size_t       surfaceHeight = DEFAULT_SURFACE_HEIGHT,
+                             float        horizontalDpi = DEFAULT_HORIZONTAL_DPI,
+                             float        verticalDpi   = DEFAULT_VERTICAL_DPI);
 
   ~UiTestApplication() override;
 
