@@ -53,6 +53,7 @@ public:
    * @param[in] wrapModeV            Vertical Wrap mode
    * @param[in] isSynchronousLoading The flag to define whether to load first frame synchronously
    * @param[in] preMultiplyOnLoad    The flag if image's color should be multiplied by it's alpha
+   * @param[in] reloadPolicy         Whether the first frame load should reuse cache or force reload.
    *
    * This will start loading textures immediately, according to the
    * batch and cache sizes.
@@ -61,7 +62,8 @@ public:
                             Dali::SamplingMode::Type samplingMode, AnimatedImageLoading& animatedImageLoading,
                             TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer,
                             uint16_t cacheSize, uint16_t batchSize, const Dali::WrapMode::Type& wrapModeU,
-                            const Dali::WrapMode::Type& wrapModeV, bool isSynchronousLoading, bool preMultiplyOnLoad);
+                            const Dali::WrapMode::Type& wrapModeV, bool isSynchronousLoading, bool preMultiplyOnLoad,
+                            TextureManager::ReloadPolicy reloadPolicy = TextureManager::ReloadPolicy::CACHED);
 
   /**
    * @brief Destructor
@@ -190,16 +192,17 @@ private:
   };
   std::vector<TextureManager::TextureId> mTextureIds;
 
-  VisualUrl                  mImageUrl;
-  Dali::AnimatedImageLoading mAnimatedImageLoading;
-  uint32_t                   mFrameCount;
-  uint32_t                   mCacheSize;
-  std::vector<int32_t>       mIntervals;
-  std::vector<uint32_t>      mLoadWaitingQueue;
-  CircularQueue<ImageFrame>  mQueue;
-  Dali::WrapMode::Type       mWrapModeU : 3;
-  Dali::WrapMode::Type       mWrapModeV : 3;
-  bool                       mIsSynchronousLoading;
+  VisualUrl                    mImageUrl;
+  Dali::AnimatedImageLoading   mAnimatedImageLoading;
+  uint32_t                     mFrameCount;
+  uint32_t                     mCacheSize;
+  std::vector<int32_t>         mIntervals;
+  std::vector<uint32_t>        mLoadWaitingQueue;
+  CircularQueue<ImageFrame>    mQueue;
+  Dali::WrapMode::Type         mWrapModeU : 3;
+  Dali::WrapMode::Type         mWrapModeV : 3;
+  bool                         mIsSynchronousLoading;
+  TextureManager::ReloadPolicy mReloadPolicy;
 };
 
 } // namespace Internal

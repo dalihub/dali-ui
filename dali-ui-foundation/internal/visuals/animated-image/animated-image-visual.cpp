@@ -30,6 +30,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-signals-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/fixed-image-cache.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/rolling-animated-image-cache.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/rolling-image-cache.h>
@@ -311,7 +312,7 @@ void AnimatedImageVisual::InitializeAnimatedImage(const VisualUrl& imageUrl)
   }
 }
 
-void AnimatedImageVisual::CreateImageCache()
+void AnimatedImageVisual::CreateImageCache(TextureManager::ReloadPolicy reloadPolicy)
 {
   DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise,
                 "AnimatedImageVisual::CreateImageCache()  batchSize:%d  cacheSize:%d\n", mBatchSize, mCacheSize);
@@ -322,7 +323,7 @@ void AnimatedImageVisual::CreateImageCache()
   {
     mImageCache = new RollingAnimatedImageCache(
       textureManager, mDesiredSize, static_cast<Dali::SamplingMode::Type>(mSamplingMode), mAnimatedImageLoading, mMaskingData, *this,
-      mCacheSize, mBatchSize, mWrapModeU, mWrapModeV, IsSynchronousLoadingRequired(), IsPreMultipliedAlphaEnabled());
+      mCacheSize, mBatchSize, mWrapModeU, mWrapModeV, IsSynchronousLoadingRequired(), IsPreMultipliedAlphaEnabled(), reloadPolicy);
   }
   else if(mImageUrls)
   {
@@ -664,7 +665,7 @@ void AnimatedImageVisual::EnablePreMultipliedAlpha(bool preMultiplied)
 void AnimatedImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes)
 {
   // Make not set any action when the resource status is already failed.
-  if(mImpl->mResourceStatus == Ui::Visual::ResourceStatus::FAILED)
+  if(mImpl->mResourceStatus == Ui::Visual::ResourceStatus::FAILED && actionId != Dali::Ui::Integration::ImageVisual::Action::RELOAD)
   {
     return;
   }
@@ -672,6 +673,39 @@ void AnimatedImageVisual::OnDoAction(const Dali::Property::Index actionId, const
   // Check if action is valid for this visual type and perform action if possible
   switch(actionId)
   {
+    case Dali::Ui::Integration::ImageVisual::Action::RELOAD:
+    {
+      DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "RELOAD\n");
+
+      if(mFrameDelayTimer)
+      {
+        mFrameDelayTimer.Stop();
+        mFrameDelayTimer.Reset();
+      }
+
+      if(mImageCache)
+      {
+        mImageCache->ClearCache();
+        delete mImageCache;
+        mImageCache = nullptr;
+      }
+
+      if(mImageUrl.IsValid())
+      {
+        mAnimatedImageLoading = AnimatedImageLoading::New(mImageUrl.GetUrl(), mImageUrl.IsLocalResource());
+      }
+
+      CreateImageCache(TextureManager::ReloadPolicy::FORCED);
+
+      ResourceReady(Ui::Visual::ResourceStatus::PREPARING);
+      mStartFirstFrame   = true;
+      mCurrentFrameIndex = FIRST_FRAME_INDEX;
+      mCurrentLoopIndex  = FIRST_LOOP;
+      mIsJumpTo          = false;
+
+      PrepareTextureSet();
+      break;
+    }
     case Dali::Ui::Integration::AnimatedImageVisual::Action::PAUSE:
     {
       DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "PAUSE\n");

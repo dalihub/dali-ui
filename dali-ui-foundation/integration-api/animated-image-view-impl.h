@@ -121,6 +121,11 @@ public: // API
   Dali::String GetResourceUrl() const;
 
   /**
+   * @copydoc Dali::Ui::AnimatedImageView::Reload
+   */
+  void Reload();
+
+  /**
    * @copydoc Dali::Ui::AnimatedImageView::SetResourceUrls
    */
   void SetResourceUrls(const Dali::Vector<Dali::String>& urls);

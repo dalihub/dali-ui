@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/animated-image-visual-signals-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -129,6 +130,20 @@ AnimatedImageViewImpl::~AnimatedImageViewImpl() = default;
 Dali::String AnimatedImageViewImpl::GetResourceUrl() const
 {
   return mUrl;
+}
+
+void AnimatedImageViewImpl::Reload()
+{
+  if(mVisualDirty)
+  {
+    mVisualDirty = false;
+    UpdateVisual();
+  }
+  if(mVisual)
+  {
+    auto& viewData = Internal::ViewDataImpl::Get(*this);
+    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::Integration::ImageVisual::Action::RELOAD, Dali::Property::Map());
+  }
 }
 
 AnimatedImageViewImplPtr AnimatedImageViewImpl::New()

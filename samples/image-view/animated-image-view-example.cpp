@@ -19,6 +19,9 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 #include <dali/integration-api/debug.h>
 
+#include <cstdio>
+#include <fstream>
+
 using namespace Dali;
 using namespace Dali::Ui;
 
@@ -56,7 +59,8 @@ public:
     mLoopIndex(0),
     mSpeedIndex(1),
     mStopBehaviorIndex(0),
-    mFrameDelayIndex(1)
+    mFrameDelayIndex(1),
+    mReloadRotated(false)
   {
     mMonitorTimer = Timer::New(100);
     mMonitorTimer.TickSignal().Connect(this, &AnimatedImageViewSampleController::OnMonitorTimerTick);
@@ -79,6 +83,7 @@ private:
       CreateImageSourceLabel(),
       CreateAnimationArea(),
       CreateStatusLabel(),
+      CreateReloadHintLabel(),
       CreatePlaybackRow(),
       CreateChangeImageRow(),
       CreateLoopRow(),
@@ -142,6 +147,18 @@ private:
     return mStatusLabel;
   }
 
+  View CreateReloadHintLabel()
+  {
+    mReloadHintLabel = Label::New("");
+    mReloadHintLabel.SetRequestedWidth(MATCH_PARENT);
+    mReloadHintLabel.SetRequestedHeight(24.0f);
+    mReloadHintLabel.SetFontSize(12.0f);
+    mReloadHintLabel.SetTextColor(UiColor(0xFFD166));
+    mReloadHintLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+    mReloadHintLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    return mReloadHintLabel;
+  }
+
   View CreatePlaybackRow()
   {
     return CreateButtonRow({
@@ -157,6 +174,7 @@ private:
     return CreateButtonRow({
       CreateButton("◀ PREV", [this](View, InputEvent) { OnPrevImage(); }),
       CreateButton("NEXT ▶", [this](View, InputEvent) { OnNextImage(); }),
+      CreateButton("RELOAD", [this](View, InputEvent) { OnReload(); }),
     });
   }
 
@@ -286,6 +304,7 @@ private:
   {
     Label::DownCast(mImageSourceLabel).SetText(IMAGE_NAMES[mImageIndex]);
     UpdateStatus("Loading...");
+    UpdateReloadHint();
 
     if(mImageIndex >= 3)
     {
@@ -309,7 +328,16 @@ private:
     {
       // Single animated file
       mAnimatedImageView.SetResourceUrls(Dali::Vector<Dali::String>{});
-      mAnimatedImageView.SetResourceUrl(IMAGE_URLS[mImageIndex]);
+      if(mImageIndex == 0)
+      {
+        mReloadRotated = false;
+        WriteReloadWebpSource(mReloadRotated);
+        mAnimatedImageView.SetResourceUrl(WEBP_RELOAD_TEMP_URL);
+      }
+      else
+      {
+        mAnimatedImageView.SetResourceUrl(IMAGE_URLS[mImageIndex]);
+      }
     }
 
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] Image changed to: %s\n", IMAGE_NAMES[mImageIndex]);
@@ -368,6 +396,31 @@ private:
                           mAnimatedImageView.GetCurrentFrame());
   }
 
+  void OnReload()
+  {
+    if(mImageIndex == 0)
+    {
+      mReloadRotated = !mReloadRotated;
+      if(WriteReloadWebpSource(mReloadRotated))
+      {
+        mAnimatedImageView.Reload();
+        UpdateStatus(mReloadRotated ? "Reloaded temp WebP: rotated" : "Reloaded temp WebP: source");
+        DALI_LOG_RELEASE_INFO("[AnimatedImageView] Reload() temp WebP variant=%s url=%s\n",
+                              mReloadRotated ? "rotated" : "source",
+                              WEBP_RELOAD_TEMP_URL);
+      }
+      else
+      {
+        UpdateStatus("Failed to update temp WebP");
+      }
+      return;
+    }
+
+    mAnimatedImageView.Reload();
+    UpdateStatus("Reloaded current image");
+    DALI_LOG_RELEASE_INFO("[AnimatedImageView] Reload() image=%s\n", IMAGE_NAMES[mImageIndex]);
+  }
+
   void OnLoopToggle()
   {
     mLoopIndex = (mLoopIndex + 1) % 3;
@@ -421,6 +474,34 @@ private:
     }
   }
 
+  void UpdateReloadHint()
+  {
+    if(mReloadHintLabel)
+    {
+      mReloadHintLabel.SetText(mImageIndex == 0 ? "RELOAD check: overwrites temp WebP with source / rotated image"
+                                                : "Visible RELOAD check is available on the first WebP image");
+    }
+  }
+
+  bool CopyFile(const char* source, const char* destination)
+  {
+    std::ifstream input(source, std::ios::binary);
+    std::ofstream output(destination, std::ios::binary | std::ios::trunc);
+    if(!input || !output)
+    {
+      return false;
+    }
+    output << input.rdbuf();
+    return output.good();
+  }
+
+  bool WriteReloadWebpSource(bool rotated)
+  {
+    const char* source = rotated ? WEBP_RELOAD_ROTATED_URL : WEBP_RELOAD_SOURCE_URL;
+    std::remove(WEBP_RELOAD_TEMP_URL);
+    return CopyFile(source, WEBP_RELOAD_TEMP_URL);
+  }
+
   bool OnMonitorTimerTick()
   {
     if(mAnimatedImageView && mAnimatedImageView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
@@ -453,6 +534,9 @@ private:
   static const char* IMAGE_URLS[3]; // indices 0-2: single animated file
   static const char* URL_ARRAY_FORMATS[2];
   static const int   URL_ARRAY_FRAME_COUNTS[2];
+  static const char* WEBP_RELOAD_SOURCE_URL;
+  static const char* WEBP_RELOAD_ROTATED_URL;
+  static const char* WEBP_RELOAD_TEMP_URL;
   static const char* LOOP_LABELS[3];
   static const char* SPEED_LABELS[3];
   static const char* STOP_BEHAVIOR_LABELS[3];
@@ -462,6 +546,7 @@ private:
   Application&      mApplication;
   AnimatedImageView mAnimatedImageView;
   Label             mStatusLabel;
+  Label             mReloadHintLabel;
   View              mImageSourceLabel;
   View              mLoopButton;
   View              mSpeedButton;
@@ -474,6 +559,7 @@ private:
   int mSpeedIndex;
   int mStopBehaviorIndex;
   int mFrameDelayIndex;
+  bool mReloadRotated;
 };
 
 constexpr int   AnimatedImageViewSampleController::LOOP_COUNTS[];
@@ -497,6 +583,10 @@ const char* AnimatedImageViewSampleController::URL_ARRAY_FORMATS[] = {
   RESOURCES_DIR "dali-logo-anim-%03d.png",
 };
 const int AnimatedImageViewSampleController::URL_ARRAY_FRAME_COUNTS[] = {8, 15};
+
+const char* AnimatedImageViewSampleController::WEBP_RELOAD_SOURCE_URL  = RESOURCES_DIR "webp-reload-source.webp";
+const char* AnimatedImageViewSampleController::WEBP_RELOAD_ROTATED_URL = RESOURCES_DIR "webp-reload-rotated.webp";
+const char* AnimatedImageViewSampleController::WEBP_RELOAD_TEMP_URL    = "/tmp/dali-ui-animated-image-reload.webp";
 
 const char* AnimatedImageViewSampleController::LOOP_LABELS[]          = {"Loop: ∞", "Loop: 3", "Loop: 1"};
 const char* AnimatedImageViewSampleController::SPEED_LABELS[]         = {"Speed: 0.5×", "Speed: 1.0×", "Speed: 2.0×"};

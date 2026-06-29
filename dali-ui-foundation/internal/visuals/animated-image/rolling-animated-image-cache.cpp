@@ -70,7 +70,7 @@ RollingAnimatedImageCache::RollingAnimatedImageCache(
   Dali::SamplingMode::Type samplingMode, AnimatedImageLoading& animatedImageLoading,
   TextureManager::MaskingDataPointer& maskingData, ImageCache::FrameReadyObserver& observer, uint16_t cacheSize,
   uint16_t batchSize, const Dali::WrapMode::Type& wrapModeU, const Dali::WrapMode::Type& wrapModeV,
-  bool isSynchronousLoading, bool preMultiplyOnLoad)
+  bool isSynchronousLoading, bool preMultiplyOnLoad, TextureManager::ReloadPolicy reloadPolicy)
 : ImageCache(textureManager, size, samplingMode, maskingData, observer, batchSize, 0u,
              preMultiplyOnLoad),
   mImageUrl(animatedImageLoading.GetUrl()),
@@ -80,7 +80,8 @@ RollingAnimatedImageCache::RollingAnimatedImageCache(
   mQueue(cacheSize),
   mWrapModeU(wrapModeU),
   mWrapModeV(wrapModeV),
-  mIsSynchronousLoading(isSynchronousLoading)
+  mIsSynchronousLoading(isSynchronousLoading),
+  mReloadPolicy(reloadPolicy)
 {
   mTextureIds.resize(mFrameCount);
   mTextureIds[0] = TextureManager::INVALID_TEXTURE_ID;
@@ -216,7 +217,8 @@ TextureSet RollingAnimatedImageCache::RequestFrameLoading(uint32_t frameIndex, b
   TextureManager::TextureId loadTextureId = TextureManager::INVALID_TEXTURE_ID;
   TextureSet                textureSet    = mTextureManager.LoadAnimatedImageTexture(
     mImageUrl, mAnimatedImageLoading, frameIndex, loadTextureId, mMaskingData, mDesiredSize,
-    mSamplingMode, synchronousLoading, this, preMultiplyOnLoading);
+    mSamplingMode, synchronousLoading, this, preMultiplyOnLoading, mReloadPolicy);
+  mReloadPolicy = TextureManager::ReloadPolicy::CACHED;
   if(textureSet && (mWrapModeU != Dali::WrapMode::DEFAULT || mWrapModeV != Dali::WrapMode::DEFAULT))
   {
     Sampler sampler = Sampler::New();

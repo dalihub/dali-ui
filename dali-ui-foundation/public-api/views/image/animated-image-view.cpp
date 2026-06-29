@@ -70,6 +70,11 @@ Dali::String AnimatedImageView::GetResourceUrl() const
   return Ui::GetImpl(*this).GetResourceUrl();
 }
 
+void AnimatedImageView::Reload()
+{
+  Ui::GetImpl(*this).Reload();
+}
+
 void AnimatedImageView::Play()
 {
   Ui::GetImpl(*this).Play();

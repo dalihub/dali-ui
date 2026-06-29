@@ -133,6 +133,13 @@ public: // Image
   Dali::String GetResourceUrl() const;
 
   /**
+   * @brief Reloads the animated image resource from its source.
+   *
+   * This forces the visual to reload the current URL instead of reusing the cached texture.
+   */
+  void Reload();
+
+  /**
    * @brief Sets an array of image URLs for frame-by-frame animation.
    *
    * Setting this overrides any single URL set via SetResourceUrl().
