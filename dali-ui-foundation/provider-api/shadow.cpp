@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/provider-api/shadow.h>
 
+// EXTERNAL INCLUDES
+#include <algorithm>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -34,6 +37,11 @@ namespace Shadow
 
 ColorVisual CreateVisual(const Ui::Shadow& shadow)
 {
+  if(shadow == Ui::Shadow::None())
+  {
+    return ColorVisual();
+  }
+
   ColorVisual visual = ColorVisual::New();
   visual.SetColor(shadow.GetColor());
   visual.SetBlurRadius(shadow.GetBlurRadius());
@@ -46,8 +54,80 @@ ColorVisual CreateVisual(const Ui::Shadow& shadow)
   return visual;
 }
 
+Ui::Shadow CreateShadow(const Property::Map& map)
+{
+  if(map.Empty())
+  {
+    return Ui::Shadow::None();
+  }
+
+  Ui::Shadow shadow;
+
+  const Property::Value* colorValue = map.Find(VisualBasePropertyIndex::MIX_COLOR);
+  if(colorValue)
+  {
+    Vector4 color;
+    if(colorValue->Get(color))
+    {
+      shadow.SetColor(UiColor(color));
+    }
+  }
+
+  const Property::Value* blurRadiusValue = map.Find(ColorVisualPropertyIndex::BLUR_RADIUS);
+  if(blurRadiusValue)
+  {
+    float blurRadius = 0.0f;
+    if(blurRadiusValue->Get(blurRadius))
+    {
+      shadow.SetBlurRadius(std::max(0.0f, blurRadius));
+    }
+  }
+
+  const Property::Value* cutoutPolicyValue = map.Find(ColorVisualPropertyIndex::CUTOUT_POLICY);
+  if(cutoutPolicyValue)
+  {
+    int cutoutPolicy = static_cast<int>(CutoutPolicy::NONE);
+    if(cutoutPolicyValue->Get(cutoutPolicy))
+    {
+      shadow.SetCutoutPolicy(static_cast<CutoutPolicy>(cutoutPolicy));
+    }
+  }
+
+  const Property::Value* transformValue = map.Find(VisualBasePropertyIndex::TRANSFORM);
+  const Property::Map*   transformMap   = transformValue ? transformValue->GetMap() : nullptr;
+  if(transformMap)
+  {
+    const Property::Value* offsetValue = transformMap->Find(Visual::Transform::Property::OFFSET);
+    if(offsetValue)
+    {
+      Vector2 offset;
+      if(offsetValue->Get(offset))
+      {
+        shadow.SetOffset(offset);
+      }
+    }
+
+    const Property::Value* extraSizeValue = transformMap->Find(DevelVisual::Transform::Property::EXTRA_SIZE);
+    if(extraSizeValue)
+    {
+      Vector2 extents;
+      if(extraSizeValue->Get(extents))
+      {
+        shadow.SetExtents(extents);
+      }
+    }
+  }
+
+  return shadow;
+}
+
 Property::Map CreatePropertyMap(const Ui::Shadow& shadow)
 {
+  if(shadow == Ui::Shadow::None())
+  {
+    return Property::Map();
+  }
+
   Property::Map transform;
   transform.Add(Visual::Transform::Property::OFFSET, shadow.GetOffset())
     .Add(Visual::Transform::Property::OFFSET_POLICY,

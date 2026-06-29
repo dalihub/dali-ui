@@ -2533,6 +2533,12 @@ void ViewImpl::ClearBackground()
 
 void ViewImpl::SetShadow(const Shadow& shadow)
 {
+  if(shadow == Shadow::None())
+  {
+    ClearShadow();
+    return;
+  }
+
   mImpl->SetShadow(Provider::Shadow::CreatePropertyMap(shadow));
 }
 

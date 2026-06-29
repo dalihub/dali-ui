@@ -19,7 +19,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/math/vector2.h>
-#include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -67,11 +66,13 @@ public:
   Shadow(float blurRadius, const UiColor& color);
 
   /**
-   * @brief Creates a shadow from a property map.
+   * @brief Creates a no-op shadow.
    *
-   * @param[in] map The color visual property map describing the shadow
+   * Use this to clear a View shadow or to indicate that no shadow should be applied.
+   *
+   * @return A Shadow that represents no shadow
    */
-  explicit Shadow(const Property::Map& map);
+  static Shadow None();
 
   Shadow(const Shadow& rhs);
   Shadow(Shadow&& rhs) noexcept;
@@ -80,6 +81,22 @@ public:
   ~Shadow();
 
 public:
+  /**
+   * @brief Compares this shadow with another shadow.
+   *
+   * @param[in] rhs The shadow to compare with
+   * @return True if both values are equal
+   */
+  bool operator==(const Shadow& rhs) const;
+
+  /**
+   * @brief Compares this shadow with another shadow.
+   *
+   * @param[in] rhs The shadow to compare with
+   * @return True if both values are not equal
+   */
+  bool operator!=(const Shadow& rhs) const;
+
   /**
    * @brief Sets the shadow color.
    *

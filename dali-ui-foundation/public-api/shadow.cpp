@@ -20,14 +20,15 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/math/math-utils.h>
 
 #include <algorithm>
 
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
-
 #define DALI_ASSERT_VALID_SHADOW(impl) \
   DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Shadow object")
+
+#define DALI_ASSERT_SHADOW_NOT_NONE(impl, message) \
+  DALI_ASSERT_ALWAYS(!(impl)->mIsNone && message)
 
 namespace Dali
 {
@@ -46,7 +47,8 @@ public:
     mBlurRadius(DEFAULT_BLUR_RADIUS),
     mCutoutPolicy(CutoutPolicy::NONE),
     mOffset(Vector2::ZERO),
-    mExtents(Vector2::ZERO)
+    mExtents(Vector2::ZERO),
+    mIsNone(false)
   {
   }
 
@@ -55,7 +57,8 @@ public:
     mBlurRadius(std::max(0.0f, blurRadius)),
     mCutoutPolicy(cutoutPolicy),
     mOffset(offset),
-    mExtents(extents)
+    mExtents(extents),
+    mIsNone(false)
   {
   }
 
@@ -64,6 +67,7 @@ public:
   CutoutPolicy mCutoutPolicy;
   Vector2      mOffset;
   Vector2      mExtents;
+  bool         mIsNone;
 };
 
 Shadow::Shadow()
@@ -79,57 +83,6 @@ Shadow::Shadow(float blurRadius, const Vector2& offset, const UiColor& color, co
 Shadow::Shadow(float blurRadius, const UiColor& color)
 : Shadow(blurRadius, Vector2::ZERO, color)
 {
-}
-
-Shadow::Shadow(const Property::Map& map)
-: Shadow()
-{
-  const Property::Value* colorValue = map.Find(VisualBasePropertyIndex::MIX_COLOR);
-  if(colorValue)
-  {
-    Vector4 color;
-    if(colorValue->Get(color))
-    {
-      mImpl->mColor = UiColor(color);
-    }
-  }
-
-  const Property::Value* blurRadiusValue = map.Find(ColorVisualPropertyIndex::BLUR_RADIUS);
-  if(blurRadiusValue)
-  {
-    float blurRadius = 0.0f;
-    if(blurRadiusValue->Get(blurRadius))
-    {
-      mImpl->mBlurRadius = std::max(0.0f, blurRadius);
-    }
-  }
-
-  const Property::Value* cutoutPolicyValue = map.Find(ColorVisualPropertyIndex::CUTOUT_POLICY);
-  if(cutoutPolicyValue)
-  {
-    int cutoutPolicy = static_cast<int>(CutoutPolicy::NONE);
-    if(cutoutPolicyValue->Get(cutoutPolicy))
-    {
-      mImpl->mCutoutPolicy = static_cast<CutoutPolicy>(cutoutPolicy);
-    }
-  }
-
-  const Property::Value* transformValue = map.Find(VisualBasePropertyIndex::TRANSFORM);
-  const Property::Map*   transformMap   = transformValue ? transformValue->GetMap() : nullptr;
-  if(transformMap)
-  {
-    const Property::Value* offsetValue = transformMap->Find(Visual::Transform::Property::OFFSET);
-    if(offsetValue)
-    {
-      offsetValue->Get(mImpl->mOffset);
-    }
-
-    const Property::Value* extraSizeValue = transformMap->Find(DevelVisual::Transform::Property::EXTRA_SIZE);
-    if(extraSizeValue)
-    {
-      extraSizeValue->Get(mImpl->mExtents);
-    }
-  }
 }
 
 Shadow::Shadow(const Shadow& rhs)
@@ -175,9 +128,39 @@ Shadow::~Shadow()
   delete mImpl;
 }
 
+Shadow Shadow::None()
+{
+  Shadow shadow;
+  shadow.mImpl->mIsNone = true;
+  return shadow;
+}
+
+bool Shadow::operator==(const Shadow& rhs) const
+{
+  DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_VALID_SHADOW(rhs.mImpl);
+
+  if(mImpl->mIsNone || rhs.mImpl->mIsNone)
+  {
+    return mImpl->mIsNone == rhs.mImpl->mIsNone;
+  }
+
+  return mImpl->mColor == rhs.mImpl->mColor &&
+         Dali::Equals(mImpl->mBlurRadius, rhs.mImpl->mBlurRadius) &&
+         mImpl->mCutoutPolicy == rhs.mImpl->mCutoutPolicy &&
+         mImpl->mOffset == rhs.mImpl->mOffset &&
+         mImpl->mExtents == rhs.mImpl->mExtents;
+}
+
+bool Shadow::operator!=(const Shadow& rhs) const
+{
+  return !(*this == rhs);
+}
+
 Shadow& Shadow::SetColor(const UiColor& color)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot modify Shadow::None().");
   mImpl->mColor = color;
   return *this;
 }
@@ -185,12 +168,14 @@ Shadow& Shadow::SetColor(const UiColor& color)
 const UiColor& Shadow::GetColor() const
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot access Shadow::None() properties.");
   return mImpl->mColor;
 }
 
 Shadow& Shadow::SetBlurRadius(float blurRadius)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot modify Shadow::None().");
   mImpl->mBlurRadius = std::max(0.0f, blurRadius);
   return *this;
 }
@@ -198,12 +183,14 @@ Shadow& Shadow::SetBlurRadius(float blurRadius)
 float Shadow::GetBlurRadius() const
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot access Shadow::None() properties.");
   return mImpl->mBlurRadius;
 }
 
 Shadow& Shadow::SetCutoutPolicy(CutoutPolicy cutoutPolicy)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot modify Shadow::None().");
   mImpl->mCutoutPolicy = cutoutPolicy;
   return *this;
 }
@@ -211,12 +198,14 @@ Shadow& Shadow::SetCutoutPolicy(CutoutPolicy cutoutPolicy)
 CutoutPolicy Shadow::GetCutoutPolicy() const
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot access Shadow::None() properties.");
   return mImpl->mCutoutPolicy;
 }
 
 Shadow& Shadow::SetOffset(const Vector2& offset)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot modify Shadow::None().");
   mImpl->mOffset = offset;
   return *this;
 }
@@ -224,12 +213,14 @@ Shadow& Shadow::SetOffset(const Vector2& offset)
 const Vector2& Shadow::GetOffset() const
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot access Shadow::None() properties.");
   return mImpl->mOffset;
 }
 
 Shadow& Shadow::SetExtents(const Vector2& extents)
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot modify Shadow::None().");
   mImpl->mExtents = extents;
   return *this;
 }
@@ -237,10 +228,12 @@ Shadow& Shadow::SetExtents(const Vector2& extents)
 const Vector2& Shadow::GetExtents() const
 {
   DALI_ASSERT_VALID_SHADOW(mImpl);
+  DALI_ASSERT_SHADOW_NOT_NONE(mImpl, "Cannot access Shadow::None() properties.");
   return mImpl->mExtents;
 }
 
 } // namespace Ui
 } // namespace Dali
 
+#undef DALI_ASSERT_SHADOW_NOT_NONE
 #undef DALI_ASSERT_VALID_SHADOW

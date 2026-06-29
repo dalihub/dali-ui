@@ -477,11 +477,6 @@ void View::SetShadow(const ShadowStack& shadowStack)
   GetImpl(*this).SetShadow(shadowStack);
 }
 
-void View::ClearShadow()
-{
-  GetImpl(*this).ClearShadow();
-}
-
 UiColor View::GetColor() const
 {
   return GetImpl(*this).GetColor();

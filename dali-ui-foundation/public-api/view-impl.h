@@ -501,7 +501,7 @@ public: // Non-virtual API (safe to reorder / extend)
   void SetShadow(const ShadowStack& shadowStack);
 
   /**
-   * @copydoc Ui::View::ClearShadow()
+   * @brief Clears all shadows from this View.
    */
   void ClearShadow();
 

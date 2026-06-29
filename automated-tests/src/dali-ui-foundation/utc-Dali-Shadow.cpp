@@ -131,19 +131,48 @@ int UtcDaliShadowCopyAndMoveP(void)
   END_TEST;
 }
 
+int UtcDaliShadowNoneP(void)
+{
+  UiTestApplication application;
+
+  Shadow shadow;
+  DALI_TEST_CHECK(shadow != Shadow::None());
+
+  Shadow none = Shadow::None();
+  DALI_TEST_CHECK(none == Shadow::None());
+
+  Shadow copiedNone(none);
+  DALI_TEST_CHECK(copiedNone == Shadow::None());
+  DALI_TEST_CHECK(shadow != copiedNone);
+
+  Shadow sameShadow;
+  DALI_TEST_CHECK(shadow == sameShadow);
+  sameShadow.SetBlurRadius(1.0f);
+  DALI_TEST_CHECK(shadow != sameShadow);
+
+  DALI_TEST_ASSERTION(none.GetColor(), "Cannot access Shadow::None() properties.");
+  DALI_TEST_ASSERTION(none.SetBlurRadius(1.0f), "Cannot modify Shadow::None().");
+
+  END_TEST;
+}
+
 int UtcDaliShadowPropertyMapRoundTripP(void)
 {
   UiTestApplication application;
 
   Shadow       shadow(12.0f, Vector2(6.0f, 7.0f), UiColor(0.2f, 0.3f, 0.4f, 0.5f), Vector2(8.0f, 9.0f), CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS);
   Property::Map map = Provider::Shadow::CreatePropertyMap(shadow);
-  Shadow       roundTrip(map);
+  Shadow       roundTrip = Provider::Shadow::CreateShadow(map);
 
   DALI_TEST_EQUALS(roundTrip.GetColor().GetRgba(), shadow.GetColor().GetRgba(), TEST_LOCATION);
   DALI_TEST_EQUALS(roundTrip.GetBlurRadius(), shadow.GetBlurRadius(), TEST_LOCATION);
   DALI_TEST_EQUALS(roundTrip.GetCutoutPolicy(), shadow.GetCutoutPolicy(), TEST_LOCATION);
   DALI_TEST_EQUALS(roundTrip.GetOffset(), shadow.GetOffset(), TEST_LOCATION);
   DALI_TEST_EQUALS(roundTrip.GetExtents(), shadow.GetExtents(), TEST_LOCATION);
+
+  Shadow none = Provider::Shadow::CreateShadow(Property::Map());
+  DALI_TEST_CHECK(none == Shadow::None());
+  DALI_TEST_CHECK(Provider::Shadow::CreatePropertyMap(Shadow::None()).Empty());
 
   END_TEST;
 }

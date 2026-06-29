@@ -228,7 +228,7 @@ Shadow GetShadowProperty(View view)
   Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
   const Property::Map* shadowMap = shadowValue.GetMap();
   DALI_TEST_CHECK(shadowMap);
-  return shadowMap ? Shadow(*shadowMap) : Shadow();
+  return shadowMap ? Provider::Shadow::CreateShadow(*shadowMap) : Shadow::None();
 }
 
 } // namespace
@@ -523,7 +523,7 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
 
-  view.ClearShadow();
+  view.SetShadow(Shadow::None());
   DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
   Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
   DALI_TEST_CHECK(shadowValue.GetMap() && shadowValue.GetMap()->Empty());

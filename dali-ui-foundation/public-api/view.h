@@ -849,7 +849,8 @@ public: // Properties
   /**
    * @brief Sets a single shadow for this View.
    *
-   * This replaces all shadows previously set by SetShadow().
+   * This replaces all shadows previously set by SetShadow(). Pass
+   * Shadow::None() to clear all shadows from this View.
    *
    * @param[in] shadow The shadow value to apply
    */
@@ -861,11 +862,6 @@ public: // Properties
    * @param[in] shadowStack The ordered shadow stack to apply
    */
   void SetShadow(const ShadowStack& shadowStack);
-
-  /**
-   * @brief Clears all shadows from this View.
-   */
-  void ClearShadow();
 
   /**
    * @brief Gets the color.
