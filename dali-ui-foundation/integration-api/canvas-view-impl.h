@@ -147,9 +147,9 @@ public: // Drawable management
   bool HasGaussianBlur() const;
 
   /**
-   * @copydoc Dali::Ui::CanvasView::SetEffectAutoPaddingEnable
+   * @copydoc Dali::Ui::CanvasView::SetEffectAutoPaddingEnabled
    */
-  void SetEffectAutoPaddingEnable(bool enable);
+  void SetEffectAutoPaddingEnabled(bool enable);
 
   /**
    * @copydoc Dali::Ui::CanvasView::IsEffectAutoPaddingEnabled

@@ -466,11 +466,11 @@ bool CanvasViewImpl::HasGaussianBlur() const
   return false;
 }
 
-void CanvasViewImpl::SetEffectAutoPaddingEnable(bool enable)
+void CanvasViewImpl::SetEffectAutoPaddingEnabled(bool enable)
 {
   if(DALI_LIKELY(mCanvasRenderer))
   {
-    mCanvasRenderer.SetEffectAutoPaddingEnable(enable);
+    mCanvasRenderer.SetEffectAutoPaddingEnabled(enable);
     if(mManualRasterization)
     {
       RequestRasterization();

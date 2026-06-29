@@ -441,7 +441,7 @@ int UtcDaliCanvasViewEffectAutoPaddingP(void)
 
   // Enabled by default; togglable.
   DALI_TEST_EQUALS(view.IsEffectAutoPaddingEnabled(), true, TEST_LOCATION);
-  view.SetEffectAutoPaddingEnable(false);
+  view.SetEffectAutoPaddingEnabled(false);
   DALI_TEST_EQUALS(view.IsEffectAutoPaddingEnabled(), false, TEST_LOCATION);
   END_TEST;
 }

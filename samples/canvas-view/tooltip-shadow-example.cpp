@@ -21,7 +21,7 @@
  * ThorVG-backed scene effects exposed on CanvasView:
  *   - SetDropShadow(color, offsetX, offsetY, blurRadius)
  *   - SetGaussianBlur(blurRadius)
- *   - SetEffectAutoPaddingEnable(enable)
+ *   - SetEffectAutoPaddingEnabled(enable)
  *
  * Auto-padding (on by default) renders the effect into a larger buffer and scales it back into the
  * view, so the shadow/blur is never clipped at the canvas edges without the app reserving margin.
@@ -127,7 +127,7 @@ private:
 
     Dali::CanvasRenderer::Shape bubble = MakeBubble();
     mCanvasView.AddDrawable(bubble);
-    mCanvasView.SetEffectAutoPaddingEnable(mAutoPadding);
+    mCanvasView.SetEffectAutoPaddingEnabled(mAutoPadding);
     ApplyEffect();
 
     AbsoluteLayout root = AbsoluteLayout::New();
@@ -177,7 +177,7 @@ private:
     else if(event.GetKeyName() == "p" || event.GetKeyName() == "P")
     {
       mAutoPadding = !mAutoPadding;
-      mCanvasView.SetEffectAutoPaddingEnable(mAutoPadding);
+      mCanvasView.SetEffectAutoPaddingEnabled(mAutoPadding);
       mCanvasView.RequestRasterization();
     }
   }
