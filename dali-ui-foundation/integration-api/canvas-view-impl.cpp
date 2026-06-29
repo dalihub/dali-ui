@@ -207,7 +207,7 @@ MeasuredSize CanvasViewImpl::OnArrange(const LayoutRect& bounds)
 
 void CanvasViewImpl::OnSceneConnection(int depth)
 {
-  Dali::Window window = DevelWindow::Get(Self());
+  Dali::Window window = Window::Get(Self());
   if(DALI_LIKELY(window))
   {
     mPlacementWindow = window;

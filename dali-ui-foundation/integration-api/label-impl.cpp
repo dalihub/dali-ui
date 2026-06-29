@@ -2445,7 +2445,7 @@ void LabelImpl::OnSceneConnection(int depth)
 {
   ViewImpl::OnSceneConnection(depth);
 
-  Dali::Window window = DevelWindow::Get(Self());
+  Dali::Window window = Window::Get(Self());
   if(window)
   {
     // Sets layoutDirection value

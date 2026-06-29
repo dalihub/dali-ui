@@ -58,10 +58,15 @@ public:
     mSecondChild.SetBackgroundColor(UiColor(0x0000FF));
     mSecondChild.SetRequestedWidth(100_spx);
     mSecondChild.SetRequestedHeight(100_spx);
-    mSecondChild.SetRequestedPositionX(100_spx);
-    mSecondChild.SetRequestedPositionY(100_spx);
+//    mSecondChild.SetRequestedPositionX(100_spx);
+//    mSecondChild.SetRequestedPositionY(100_spx);
 
-    parent.AddChildren({redChild, mSecondChild});
+    parent.Add(mSecondChild);
+    parent.Add(redChild);
+    redChild.Raise();
+    mSecondChild.Raise();
+//    parent.Insert(0, redChild);
+//    parent.AddChildren({redChild, mSecondChild});
     window.Add(parent);
   }
 

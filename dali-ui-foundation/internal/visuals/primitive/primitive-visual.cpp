@@ -321,7 +321,7 @@ void PrimitiveVisual::DoSetOnScene(Actor& actor)
 {
   actor.AddRenderer(mImpl->mRenderer);
 
-  Window window = DevelWindow::Get(actor);
+  Window window = Window::Get(actor);
   if(window)
   {
     auto    posSize = window.GetPositionSize();

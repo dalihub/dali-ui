@@ -1624,7 +1624,7 @@ void InputFieldImpl::OnSceneConnection(int depth)
   // Call the Control::OnSceneConnection() to set the depth of the background.
   ViewImpl::OnSceneConnection(depth);
 
-  Dali::Window window = DevelWindow::Get(Self());
+  Dali::Window window = Window::Get(Self());
   if(window)
   {
     // Sets layoutDirection value

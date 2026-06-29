@@ -1425,7 +1425,7 @@ Vector2 ScrollViewImpl::VelocityToMovement(const Vector2& velocity) const
   float decelerationFactor = std::log(mDecelerationRate);
 
   // VelocityToMovement is called during gesture handling, so the window is guaranteed to be available.
-  Dali::PositionSize windowSize = DevelWindow::Get(Self()).GetPositionSize();
+  Dali::PositionSize windowSize = Window::Get(Self()).GetPositionSize();
   Vector2            screenSize(static_cast<float>(windowSize.width), static_cast<float>(windowSize.height));
 
   // Updated formula based on OneUIComponents commit

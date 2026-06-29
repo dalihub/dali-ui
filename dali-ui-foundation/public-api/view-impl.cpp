@@ -436,7 +436,7 @@ void ViewImpl::OnSceneConnection(int depth)
     // UiScaleManager so future scale changes reach this view. This covers the
     // case where a standalone view was unregistered on scene-disconnection and
     // reconnects without any pending dirty work.
-    Window window = DevelWindow::Get(Self());
+    Window window = Window::Get(Self());
     if(window)
     {
       UiScaleManager::Get().RegisterLayoutRoot(Ui::View::DownCast(Self()));
@@ -1661,7 +1661,7 @@ void ViewImpl::InvalidateArrange()
 void ViewImpl::RegisterWithLayoutController()
 {
   Actor  self   = Self();
-  Window window = DevelWindow::Get(self);
+  Window window = Window::Get(self);
 
   DALI_LOG_DEBUG_INFO("[ViewImpl] RegisterWithLayoutController: hasWindow=%d\n", window ? 1 : 0);
 
@@ -1891,7 +1891,7 @@ void ViewImpl::SetLayoutTransition(LayoutTransition transition)
     // old transition. The records live in the per-window dispatcher; an
     // off-window view's records were already dropped by its scene-disconnect
     // cleanup (OnViewDestroyed).
-    Window window = DevelWindow::Get(Self());
+    Window window = Window::Get(Self());
     if(window)
     {
       LayoutController::Get(window).ClearPendingInheritedEnters(this);
@@ -2049,7 +2049,7 @@ void ViewImpl::RemoveAllChildren()
   // only on this view and the ancestor chain above it, not on the individual
   // child, so a single resolution covers the whole bulk remove.
   Ui::LayoutTransition transition = mImpl->mLayoutTransition;
-  Dali::Window         window     = DevelWindow::Get(Self());
+  Dali::Window         window     = Window::Get(Self());
   ViewImpl*            exitOwner  = nullptr;
   if(window)
   {
@@ -2151,7 +2151,7 @@ void ViewImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
     if(hasExitFx)
     {
       Actor  self   = Self();
-      Window window = DevelWindow::Get(self);
+      Window window = Window::Get(self);
       if(window)
       {
         // Remove the child from this view's layout-tracking list and
@@ -2212,7 +2212,7 @@ void ViewImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
     }
 
     Actor      selfActor      = Self();
-    Window     window         = DevelWindow::Get(selfActor);
+    Window     window         = Window::Get(selfActor);
     auto       it             = std::find(mImpl->mChildren.begin(), mImpl->mChildren.end(), child);
     const bool isCurrentChild = (it != mImpl->mChildren.end());
 
@@ -2944,7 +2944,7 @@ void ViewImpl::OnChildAdd(Actor& child)
     // would keep driving the actor against the old parent's coord system.
     {
       Actor  self   = Self();
-      Window window = DevelWindow::Get(self);
+      Window window = Window::Get(self);
       if(window)
       {
         auto& controller = LayoutController::Get(window);
@@ -3090,7 +3090,7 @@ void ViewImpl::OnChildRemove(Actor& child)
       // a window the marker cannot be consumed in this pass and would
       // leak across a later add-to-window event. Setting the marker
       // here is idempotent with View::Remove's own setter.
-      if(mImpl->mLayoutTransition && DevelWindow::Get(Self()))
+      if(mImpl->mLayoutTransition && Window::Get(Self()))
       {
         mImpl->mPendingChildRemovalForLayoutTransition = true;
       }
