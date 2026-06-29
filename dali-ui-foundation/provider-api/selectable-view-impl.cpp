@@ -78,9 +78,9 @@ bool SelectableViewImpl::IsToggleByClickEnabled() const
   return GetSelectableTrait().IsToggleByClickEnabled();
 }
 
-void SelectableViewImpl::EnableToggleByClick(bool enabled)
+void SelectableViewImpl::SetToggleByClickEnabled(bool enabled)
 {
-  GetSelectableTrait().EnableToggleByClick(enabled);
+  GetSelectableTrait().SetToggleByClickEnabled(enabled);
 }
 
 SelectableTrait SelectableViewImpl::GetSelectableTrait() const

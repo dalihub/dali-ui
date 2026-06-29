@@ -70,7 +70,7 @@ The following describes key configuration options. For the full API, see [UiConf
 | Min Long Press Key Count | `SetKeyLongPressThreshold(uint32_t)` | — | Minimum key repeat count to trigger a long-press |
 | Tap Recognizer Time | `SetTapRecognizerTime(uint32_t)` | — | Time limit for tap recognition (ms) |
 | Broken Image URL | `SetBrokenImageUrl(type, url)` | — | Fallback image shown on load failure (SMALL/NORMAL/LARGE) |
-| Focus Clear on Escape | `EnableFocusClearOnEscape(bool)` | — | Whether to clear focus when Escape is pressed |
+| Clear Focus on Escape | `SetClearFocusOnEscapeEnabled(bool)` | — | Whether to clear focus when Escape is pressed |
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | Whether the default focus indicator is enabled |
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | Whether touch interaction clears focus indication |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | Whether hovering outside the focused view clears focus indication |

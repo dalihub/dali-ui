@@ -97,7 +97,7 @@ public:
   {
     mModel.mStyle.visibility.legendToggleEnabled = enabled;
   }
-  bool GetLegendToggleEnabled() const
+  bool IsLegendToggleEnabled() const
   {
     return mModel.mStyle.visibility.legendToggleEnabled;
   }

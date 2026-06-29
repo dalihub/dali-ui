@@ -204,7 +204,7 @@ int UtcDaliViewAsSelectableWithConfigureP(void)
   View view = View::New();
   SelectableTrait configuredTrait = view.AsSelectable();
   configureCalled                 = true;
-  configuredTrait.EnableToggleByClick();
+  configuredTrait.SetToggleByClickEnabled();
 
   DALI_TEST_CHECK(configureCalled);
 
@@ -388,14 +388,14 @@ int UtcDaliSelectableTraitToggleByClickP(void)
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
-  view.AsSelectable().EnableToggleByClick();
+  view.AsSelectable().SetToggleByClickEnabled();
 
   application.SendNotification();
   application.Render();
 
   SelectableTrait selectable = view.AsSelectable();
 
-  // InteractiveTrait should have been auto-created by EnableToggleByClick
+  // InteractiveTrait should have been auto-created by SetToggleByClickEnabled
   InteractiveTrait clickable = view.AsInteractive();
   DALI_TEST_CHECK(clickable);
 
@@ -460,7 +460,7 @@ int UtcDaliSelectableTraitToggleByClickAutoCreatesInteractiveP(void)
   DALI_TEST_CHECK(!view.IsInteractive());
 
   // AsSelectable with toggle-by-click should auto-create clickable
-  view.AsSelectable().EnableToggleByClick();
+  view.AsSelectable().SetToggleByClickEnabled();
 
   application.SendNotification();
   application.Render();
@@ -485,7 +485,7 @@ int UtcDaliSelectableTraitToggleByClickWithExistingInteractiveP(void)
   InteractiveTrait existingInteractive = view.AsInteractive();
 
   // Then attach selectable with toggle
-  view.AsSelectable().EnableToggleByClick();
+  view.AsSelectable().SetToggleByClickEnabled();
 
   application.SendNotification();
   application.Render();
@@ -512,7 +512,7 @@ int UtcDaliSelectableTraitToggleByClickDoesNotConsumeClickP(void)
   application.GetScene().Add(view);
 
   view.AsInteractive();
-  view.AsSelectable().EnableToggleByClick();
+  view.AsSelectable().SetToggleByClickEnabled();
 
   application.SendNotification();
   application.Render();
@@ -548,7 +548,7 @@ int UtcDaliSelectableTraitToggleByKeyP(void)
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
-  view.AsSelectable().EnableToggleByClick();
+  view.AsSelectable().SetToggleByClickEnabled();
   view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
 
   application.SendNotification();
@@ -578,7 +578,7 @@ int UtcDaliSelectableTraitToggleByKeyP(void)
 // Enable/disable toggle-by-click after attachment
 // ============================================================================
 
-int UtcDaliSelectableTraitEnableToggleByClickAfterAttachP(void)
+int UtcDaliSelectableTraitSetToggleByClickEnabledAfterAttachP(void)
 {
   UiTestApplication application;
   View view = View::New();
@@ -589,7 +589,7 @@ int UtcDaliSelectableTraitEnableToggleByClickAfterAttachP(void)
   application.GetScene().Add(view);
 
   // Attach selectable WITHOUT toggle-by-click (explicitly disable, since default is true)
-  view.AsSelectable().EnableToggleByClick(false);
+  view.AsSelectable().SetToggleByClickEnabled(false);
 
   application.SendNotification();
   application.Render();
@@ -601,7 +601,7 @@ int UtcDaliSelectableTraitEnableToggleByClickAfterAttachP(void)
   DALI_TEST_CHECK(!selectable.IsSelected());
 
   // Now enable toggle-by-click
-  selectable.EnableToggleByClick();
+  selectable.SetToggleByClickEnabled();
 
   // Tap should now toggle
   TestGenerateTap(application, 50.0f, 50.0f, 300);
@@ -619,7 +619,7 @@ int UtcDaliSelectableTraitDisableToggleByClickP(void)
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   application.GetScene().Add(view);
 
-  view.AsSelectable().EnableToggleByClick();
+  view.AsSelectable().SetToggleByClickEnabled();
 
   application.SendNotification();
   application.Render();
@@ -631,7 +631,7 @@ int UtcDaliSelectableTraitDisableToggleByClickP(void)
   DALI_TEST_CHECK(selectable.IsSelected());
 
   // Disable toggle
-  selectable.EnableToggleByClick(false);
+  selectable.SetToggleByClickEnabled(false);
 
   // Tap should no longer toggle
   TestGenerateTap(application, 50.0f, 50.0f, 300);
@@ -735,7 +735,7 @@ int UtcDaliSelectableViewToggleByClickP(void)
   view.SetRequestedHeight(100.0f);
   view.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-  view.EnableToggleByClick();
+  view.SetToggleByClickEnabled();
 
   application.GetScene().Add(view);
   application.SendNotification();

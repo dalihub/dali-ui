@@ -202,7 +202,7 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
   mNeedYuvToRgb(false),
   mNeedYuva(false),
   mNeedUnifiedYuvAndRgb(false),
-  mEnableBrokenImage(true),
+  mBrokenImageEnabled(true),
   mUseFastTrackUploading(false),
   mRendererAdded(false),
   mUseBrokenImageRenderer(false),
@@ -461,10 +461,10 @@ void ImageVisual::DoSetProperty(Property::Index index, const Property::Value& va
 
     case Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE:
     {
-      bool enableBrokenImage = true;
-      if(value.Get(enableBrokenImage))
+      bool brokenImageEnabled = true;
+      if(value.Get(brokenImageEnabled))
       {
-        mEnableBrokenImage = enableBrokenImage;
+        mBrokenImageEnabled = brokenImageEnabled;
       }
       break;
     }
@@ -1000,7 +1000,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
   map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
   map.Insert(Ui::ImageVisualPropertyIndex::ORIENTATION_CORRECTION, mOrientationCorrection);
-  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE, mEnableBrokenImage);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE, mBrokenImageEnabled);
 
   map.Insert(Ui::ImageVisualPropertyIndex::FAST_TRACK_UPLOADING, mUseFastTrackUploading);
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_SIZING, mUseSynchronousSizing);
@@ -1526,7 +1526,7 @@ void ImageVisual::ResetRenderer()
 
 void ImageVisual::ShowBrokenImage()
 {
-  if(mEnableBrokenImage)
+  if(mBrokenImageEnabled)
   {
     Actor actor = mPlacementActor.GetHandle();
 

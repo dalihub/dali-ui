@@ -103,7 +103,7 @@ public: // Setters
    *
    * @param[in] enable True if soft anti-aliasing enabled
    */
-  void SetEnableAntiAliasing(bool enable);
+  void SetAntiAliasingEnabled(bool enable);
 
 public:
   BorderVisual()                                       = default;

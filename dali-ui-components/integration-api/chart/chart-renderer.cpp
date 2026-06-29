@@ -536,7 +536,7 @@ void DataRenderer::RenderFillAreas(Dali::CanvasRenderer::DrawableGroup& group, c
     if(!lineSeries) continue;
 
     auto& impl = GetImplementation(lineSeries);
-    if(!impl.GetFillEnabled()) continue;
+    if(!impl.IsFillEnabled()) continue;
 
     const auto& points = impl.GetValues();
     if(points.size() < 2) continue;

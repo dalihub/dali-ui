@@ -223,14 +223,14 @@ public:
    * @pre Must not be frozen.
    * @param[in] enable True to enable focus clearing on Escape key
    */
-  void EnableFocusClearOnEscape(bool enable);
+  void SetClearFocusOnEscapeEnabled(bool enable);
 
   /**
    * @brief Retrieves whether to clear focus when the Escape key is pressed.
    *
    * @return True if focus clearing on Escape key is enabled
    */
-  bool IsFocusClearOnEscapeEnabled() const;
+  bool IsClearFocusOnEscapeEnabled() const;
 
   /**
    * @copydoc UiConfig::SetClearFocusIndicationOnTouch
@@ -611,7 +611,7 @@ private:
   uint32_t                  mAmbiguousPressDuration;
   float                     mCachedDpiFactor{1.0f};
   float                     mCachedScaledDpiFactor{1.0f};
-  bool                      mClearFocusOnEscape;
+  bool                      mClearFocusOnEscapeEnabled;
   bool                      mClearFocusIndicationOnTouch;
   bool                      mClearFocusIndicationOnHover;
   bool                      mDefaultFocusIndicatorEnabled;

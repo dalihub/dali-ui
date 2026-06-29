@@ -241,9 +241,9 @@ public: // Setters
   /**
    * @brief Sets whether to enable broken image.
    *
-   * @param[in] enableBrokenImage True to enable broken image
+   * @param[in] brokenImageEnabled True to enable broken image
    */
-  void SetEnableBrokenImage(bool enableBrokenImage);
+  void SetBrokenImageEnabled(bool brokenImageEnabled);
 
   /**
    * @brief Gets the load policy of the LottieAnimationVisual.
@@ -404,14 +404,14 @@ public: // Setters
    *
    * @return True if frame cache is enabled
    */
-  bool IsEnableFrameCache() const;
+  bool IsFrameCacheEnabled() const;
 
   /**
    * @brief Sets whether to enable frame cache.
    *
-   * @param[in] enableFrameCache True to enable frame cache
+   * @param[in] frameCacheEnabled True to enable frame cache
    */
-  void SetEnableFrameCache(bool enableFrameCache);
+  void SetFrameCacheEnabled(bool frameCacheEnabled);
 
   /**
    * @brief Gets whether notify after rasterization is enabled.
@@ -455,9 +455,9 @@ public: // Setters
    * while preserving its aspect ratio. When disabled, the animation stretches to
    * fill the entire target size.
    *
-   * @param[in] enableAspectFit True to enable aspect fit, false to disable
+   * @param[in] aspectFitEnabled True to enable aspect fit, false to disable
    */
-  void SetEnableAspectFit(bool enableAspectFit);
+  void SetAspectFitEnabled(bool aspectFitEnabled);
 
   /**
    * @brief Gets the play state of the LottieAnimationVisual.

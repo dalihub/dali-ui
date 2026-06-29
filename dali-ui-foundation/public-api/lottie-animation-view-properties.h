@@ -162,7 +162,7 @@ struct LottieAnimationViewPropertyIndex
     /**
      * @brief Whether to cache each rasterized frame to avoid re-rasterization.
      * @details Name "enableFrameCache", type Property::BOOLEAN.
-     * @note See also: LottieAnimationView::SetEnableFrameCache(), LottieAnimationView::IsFrameCacheEnabled().
+     * @note See also: LottieAnimationView::SetFrameCacheEnabled(), LottieAnimationView::IsFrameCacheEnabled().
      */
     ENABLE_FRAME_CACHE,
 
@@ -188,7 +188,7 @@ struct LottieAnimationViewPropertyIndex
      * @details Name "enableAspectFit", type Property::BOOLEAN.
      *          If this property is true, the vector image will be scaled to fit within the visual size
      *          while maintaining the aspect ratio. If false, the image will be stretched to fill the visual size.
-     * @note See also: LottieAnimationView::SetEnableAspectFit(), LottieAnimationView::IsEnableAspectFit().
+     * @note See also: LottieAnimationView::SetAspectFitEnabled(), LottieAnimationView::IsAspectFitEnabled().
      */
     ENABLE_ASPECT_FIT,
 

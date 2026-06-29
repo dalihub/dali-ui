@@ -111,9 +111,9 @@ public: // API
   bool IsToggleByClickEnabled() const;
 
   /**
-   * @copydoc Dali::Ui::SelectableTrait::EnableToggleByClick
+   * @copydoc Dali::Ui::SelectableTrait::SetToggleByClickEnabled
    */
-  void EnableToggleByClick(bool enabled);
+  void SetToggleByClickEnabled(bool enabled);
 
   /**
    * @brief Returns whether clicks are select-only (a click can only select, never unselect).

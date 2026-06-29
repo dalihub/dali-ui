@@ -109,9 +109,9 @@ bool SelectableTrait::IsToggleByClickEnabled() const
   return GetImpl(*this).IsToggleByClickEnabled();
 }
 
-void SelectableTrait::EnableToggleByClick(bool enabled)
+void SelectableTrait::SetToggleByClickEnabled(bool enabled)
 {
-  GetImpl(*this).EnableToggleByClick(enabled);
+  GetImpl(*this).SetToggleByClickEnabled(enabled);
 }
 
 } // namespace Ui

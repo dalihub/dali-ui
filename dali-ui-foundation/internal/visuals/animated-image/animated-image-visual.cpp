@@ -393,7 +393,7 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mIsJumpTo(false),
   mNeedYuvToRgb(false),
   mNeedYuva(false),
-  mEnableBrokenImage(true),
+  mBrokenImageEnabled(true),
   mRendererAdded(false),
   mUseBrokenImageRenderer(false),
   mUseSynchronousSizing(false)
@@ -610,7 +610,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
   map.Insert(Ui::ImageVisualPropertyIndex::FITTING_MODE, mFittingMode);
   map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, mSamplingMode);
-  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE, mEnableBrokenImage);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE, mBrokenImageEnabled);
 
   Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
 
@@ -991,10 +991,10 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
 
     case Ui::ImageVisualPropertyIndex::ENABLE_BROKEN_IMAGE:
     {
-      bool enableBrokenImage = true;
-      if(value.Get(enableBrokenImage))
+      bool brokenImageEnabled = true;
+      if(value.Get(brokenImageEnabled))
       {
-        mEnableBrokenImage = enableBrokenImage;
+        mBrokenImageEnabled = brokenImageEnabled;
       }
       break;
     }
@@ -1533,7 +1533,7 @@ void AnimatedImageVisual::SetLoadingFailed()
     imageSize = actor.GetProperty(Actor::Property::SIZE).Get<Vector2>();
   }
 
-  if(mEnableBrokenImage)
+  if(mBrokenImageEnabled)
   {
     if(DALI_LIKELY(mImpl->mRenderer))
     {

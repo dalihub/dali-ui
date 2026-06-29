@@ -63,7 +63,7 @@ bool BorderVisual::IsAntiAliasingEnabled() const
   return VisualBase::GetProperty<bool>(BorderVisual::Property::ANTI_ALIASING);
 }
 
-void BorderVisual::SetEnableAntiAliasing(bool enable)
+void BorderVisual::SetAntiAliasingEnabled(bool enable)
 {
   VisualBase::SetProperty(BorderVisual::Property::ANTI_ALIASING, enable);
 }

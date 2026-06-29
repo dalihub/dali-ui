@@ -282,9 +282,9 @@ public: // Setters
   /**
    * @brief Sets whether to enable broken image.
    *
-   * @param[in] enableBrokenImage True to enable broken image
+   * @param[in] brokenImageEnabled True to enable broken image
    */
-  void SetEnableBrokenImage(bool enableBrokenImage);
+  void SetBrokenImageEnabled(bool brokenImageEnabled);
 
   /**
    * @brief Gets the load policy of the AnimatedImageVisual.

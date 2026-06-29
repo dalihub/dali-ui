@@ -99,7 +99,7 @@ public:
   float GetDataLabelSize() const;
 
   void SetFillEnabled(bool enabled);
-  bool GetFillEnabled() const;
+  bool IsFillEnabled() const;
 
   void    SetFillColor(const Vector4& color);
   Vector4 GetFillColor() const;

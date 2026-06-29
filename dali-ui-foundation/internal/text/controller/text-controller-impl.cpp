@@ -1944,7 +1944,7 @@ bool Controller::Impl::ShouldClearFocusOnEscape() const
   {
     if(UiConfig::HasCurrent())
     {
-      mShouldClearFocusOnEscape = UiConfig::GetCurrent().IsFocusClearOnEscapeEnabled()
+      mShouldClearFocusOnEscape = UiConfig::GetCurrent().IsClearFocusOnEscapeEnabled()
                                     ? ClearFocusOnEscapeState::ENABLE
                                     : ClearFocusOnEscapeState::DISABLE;
     }

@@ -174,7 +174,7 @@ int UtcDaliAnimatedImageVisualSetGetProperties01(void)
   visual.SetMaskingType(Image::MaskingType::MASKING_ON_RENDERING);
   DALI_TEST_EQUALS(visual.GetMaskingType(), Image::MaskingType::MASKING_ON_RENDERING, TEST_LOCATION);
 
-  visual.SetEnableBrokenImage(false);
+  visual.SetBrokenImageEnabled(false);
   DALI_TEST_EQUALS(visual.IsBrokenImageEnabled(), false, TEST_LOCATION);
 
   visual.SetLoadPolicy(Image::LoadPolicy::ATTACHED);

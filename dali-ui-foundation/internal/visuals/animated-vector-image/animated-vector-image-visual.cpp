@@ -170,7 +170,7 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&        
   mRendererAdded(false),
   mRedrawInScalingDown(true),
   mRedrawInScalingUp(true),
-  mEnableFrameCache(false),
+  mFrameCacheEnabled(false),
   mUseNativeImage(false),
   mNotifyAfterRasterization(false)
 {
@@ -298,11 +298,11 @@ void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, mDesiredSize.GetHeight());
   map.Insert(Ui::ImageVisualPropertyIndex::RELEASE_POLICY, mReleasePolicy);
 
-  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mFrameCacheEnabled);
   map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
   map.Insert(Ui::ImageVisualPropertyIndex::FRAME_SPEED_FACTOR, mFrameSpeedFactor);
   map.Insert(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
-  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT, mVectorAnimationTask->IsEnableAspectFit());
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT, mVectorAnimationTask->IsAspectFitEnabled());
 }
 
 void AnimatedVectorImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -458,13 +458,13 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
 
     case Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE:
     {
-      bool enableFrameCache = false;
-      if(value.Get(enableFrameCache))
+      bool frameCacheEnabled = false;
+      if(value.Get(frameCacheEnabled))
       {
-        mEnableFrameCache = enableFrameCache;
+        mFrameCacheEnabled = frameCacheEnabled;
         if(mVectorAnimationTask)
         {
-          mVectorAnimationTask->KeepRasterizedBuffer(mEnableFrameCache);
+          mVectorAnimationTask->KeepRasterizedBuffer(mFrameCacheEnabled);
         }
       }
       break;
@@ -517,12 +517,12 @@ void AnimatedVectorImageVisual::DoSetProperty(Property::Index index, const Prope
     }
     case Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT:
     {
-      bool enableAspectFit = true;
-      if(value.Get(enableAspectFit))
+      bool aspectFitEnabled = true;
+      if(value.Get(aspectFitEnabled))
       {
         if(mVectorAnimationTask)
         {
-          mVectorAnimationTask->SetEnableAspectFit(enableAspectFit);
+          mVectorAnimationTask->SetAspectFitEnabled(aspectFitEnabled);
         }
       }
       break;
@@ -586,7 +586,7 @@ void AnimatedVectorImageVisual::OnInitialize(void)
     encodedImageBuffer = textureManager.GetEncodedImageBuffer(mImageUrl);
   }
 
-  mVectorAnimationTask->KeepRasterizedBuffer(mEnableFrameCache);
+  mVectorAnimationTask->KeepRasterizedBuffer(mFrameCacheEnabled);
   mVectorAnimationTask->RequestLoad(mImageUrl, encodedImageBuffer, IsSynchronousLoadingRequired());
 
   Shader shader = GenerateShader();

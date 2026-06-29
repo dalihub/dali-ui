@@ -265,7 +265,7 @@ private:
   bool mRendererAdded : 1;
   bool mRedrawInScalingDown : 1;
   bool mRedrawInScalingUp : 1;
-  bool mEnableFrameCache : 1;
+  bool mFrameCacheEnabled : 1;
   bool mUseNativeImage : 1;
   bool mNotifyAfterRasterization : 1;
 };

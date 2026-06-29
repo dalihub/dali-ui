@@ -83,9 +83,9 @@ bool SelectableView::IsToggleByClickEnabled() const
   return Provider::GetImpl(*this).IsToggleByClickEnabled();
 }
 
-void SelectableView::EnableToggleByClick(bool enabled)
+void SelectableView::SetToggleByClickEnabled(bool enabled)
 {
-  Provider::GetImpl(*this).EnableToggleByClick(enabled);
+  Provider::GetImpl(*this).SetToggleByClickEnabled(enabled);
 }
 
 } // namespace Ui

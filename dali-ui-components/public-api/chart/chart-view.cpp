@@ -188,9 +188,9 @@ void ChartView::SetLegendToggleEnabled(bool enabled)
   GetImpl(*this).SetLegendToggleEnabled(enabled);
 }
 
-bool ChartView::GetLegendToggleEnabled() const
+bool ChartView::IsLegendToggleEnabled() const
 {
-  return GetImpl(*this).GetLegendToggleEnabled();
+  return GetImpl(*this).IsLegendToggleEnabled();
 }
 
 void ChartView::SetZoomMode(int flags)

@@ -134,7 +134,7 @@ private:
   float           mBorderSize;
   Property::Index mBorderSizeIndex;
 
-  bool mAntiAliasing;
+  bool mAntiAliasingEnabled;
 };
 
 } // namespace Internal

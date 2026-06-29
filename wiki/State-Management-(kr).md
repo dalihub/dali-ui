@@ -126,7 +126,7 @@ interactive.SetPseudoDisabled(true);
 // SELECTED (클릭 시 토글)
 SelectableTrait selectable = view.AsSelectable();
 selectable.SetSelected(true);
-selectable.EnableToggleByClick(true);
+selectable.SetToggleByClickEnabled(true);
 ```
 
 <br/>

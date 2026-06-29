@@ -367,7 +367,7 @@ private:
   bool mIsJumpTo : 1;
   bool mNeedYuvToRgb : 1;           ///< true if we need to convert yuv to rgb.
   bool mNeedYuva : 1;               ///< true if the yuv texture has alpha.
-  bool mEnableBrokenImage : 1;      ///< true if enable broken image.
+  bool mBrokenImageEnabled : 1;     ///< True if broken image is enabled.
   bool mRendererAdded : 1;          ///< True if renderer added into actor.
   bool mUseBrokenImageRenderer : 1; ///< True if renderer changed as broken image.
   bool mUseSynchronousSizing : 1;   ///< True if we need to synchronize image texture size to visual size, otherwise use

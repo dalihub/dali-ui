@@ -550,7 +550,7 @@ int UtcDaliGroupSelectableTraitRemoveRestoresToggleFalseP(void)
 
   // Disable toggle-by-click BEFORE joining the group.
   SelectableTrait selectable = view.AsSelectable();
-  selectable.EnableToggleByClick(false);
+  selectable.SetToggleByClickEnabled(false);
   DALI_TEST_CHECK(selectable.IsToggleByClickEnabled() == false);
 
   view.AsGroupSelectable().SetGroupName("UtcRestoreToggleFalse");
@@ -744,13 +744,13 @@ int UtcDaliGroupSelectableTraitLeaveRestoresToggleP(void)
   TestGenerateTap(application, 50.0f, 50.0f, 300);
   DALI_TEST_CHECK(!defSelectable.IsSelected());
   // Toggle-by-click can be disabled now that the member is ungrouped.
-  defSelectable.EnableToggleByClick(false);
+  defSelectable.SetToggleByClickEnabled(false);
   DALI_TEST_CHECK(defSelectable.IsToggleByClickEnabled() == false);
 
   // -- Disabled member (toggle-by-click DISABLED before join). --
   View            disabledMember = CreateSceneView(application, 0.0f, 0.0f);
   SelectableTrait disSelectable  = disabledMember.AsSelectable();
-  disSelectable.EnableToggleByClick(false);
+  disSelectable.SetToggleByClickEnabled(false);
   DALI_TEST_CHECK(disSelectable.IsToggleByClickEnabled() == false);
 
   disabledMember.AsGroupSelectable().SetGroupName("UtcRestoreDisabled");
@@ -760,7 +760,7 @@ int UtcDaliGroupSelectableTraitLeaveRestoresToggleP(void)
   disabledMember.AsGroupSelectable().SetGroupName("");
   // Still disabled after leaving (it was never changed).
   DALI_TEST_CHECK(disSelectable.IsToggleByClickEnabled() == false);
-  disSelectable.EnableToggleByClick(true);
+  disSelectable.SetToggleByClickEnabled(true);
   DALI_TEST_CHECK(disSelectable.IsToggleByClickEnabled() == true);
   END_TEST;
 }
@@ -776,7 +776,7 @@ int UtcDaliGroupSelectableTraitToggleDisabledMemberInertButArbitratedP(void)
   // On-scene member, toggle-by-click disabled before join.
   View            view = CreateSceneView(application, 0.0f, 0.0f);
   SelectableTrait sel  = view.AsSelectable();
-  sel.EnableToggleByClick(false);
+  sel.SetToggleByClickEnabled(false);
 
   view.AsGroupSelectable().SetGroupName("UtcInertGrouped");
   SelectionGroup group = SelectionGroup::Find("UtcInertGrouped");

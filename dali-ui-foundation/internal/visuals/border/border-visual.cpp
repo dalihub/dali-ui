@@ -57,7 +57,7 @@ BorderVisual::BorderVisual(VisualFactoryCache& factoryCache)
 : Visual::Base(factoryCache, Ui::InternalVisualType::BORDER),
   mBorderSize(0.f),
   mBorderSizeIndex(Property::INVALID_INDEX),
-  mAntiAliasing(false)
+  mAntiAliasingEnabled(false)
 {
   // Enable the pre-multiplied alpha
   mImpl->mFlags |= Impl::IS_PRE_MULTIPLIED_ALPHA;
@@ -111,13 +111,13 @@ void BorderVisual::DoSetProperty(Dali::Property::Index index, const Dali::Proper
     }
     case Ui::BorderVisualPropertyIndex::ANTI_ALIASING:
     {
-      if(value.Get(mAntiAliasing))
+      if(value.Get(mAntiAliasingEnabled))
       {
         if(mImpl->mRenderer)
         {
           UpdateShader();
 
-          if(mAntiAliasing && mImpl->mRenderer.GetProperty<BlendMode::Type>(Renderer::Property::BLEND_MODE) == BlendMode::AUTO)
+          if(mAntiAliasingEnabled && mImpl->mRenderer.GetProperty<BlendMode::Type>(Renderer::Property::BLEND_MODE) == BlendMode::AUTO)
           {
             mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
           }
@@ -145,7 +145,7 @@ void BorderVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Clear();
   map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::BORDER);
   map.Insert(Ui::BorderVisualPropertyIndex::BORDER_SIZE, mBorderSize);
-  map.Insert(Ui::BorderVisualPropertyIndex::ANTI_ALIASING, mAntiAliasing);
+  map.Insert(Ui::BorderVisualPropertyIndex::ANTI_ALIASING, mAntiAliasingEnabled);
 }
 
 void BorderVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -176,7 +176,7 @@ void BorderVisual::OnInitialize()
 
   mBorderSizeIndex = mImpl->mRenderer.RegisterUniqueProperty(Ui::BorderVisualPropertyIndex::BORDER_SIZE, BORDER_SIZE_NAME, mBorderSize);
 
-  if(mAntiAliasing)
+  if(mAntiAliasingEnabled)
   {
     mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
   }
@@ -197,7 +197,7 @@ void BorderVisual::UpdateShader()
 Shader BorderVisual::GenerateShader() const
 {
   Shader shader;
-  if(mAntiAliasing)
+  if(mAntiAliasingEnabled)
   {
     shader = mFactoryCache.GetShader(VisualFactoryCache::BORDER_SHADER_ANTI_ALIASING);
     if(!shader)

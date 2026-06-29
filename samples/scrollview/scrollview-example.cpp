@@ -466,7 +466,7 @@ private:
     mPeekLabel.SetText(pk.str().c_str());
 
     // KeyScroll chip
-    bool ks = mScrollView.GetKeyScrollEnabled();
+    bool ks = mScrollView.IsKeyScrollEnabled();
     mKeyScrollChip.SetBackgroundColor(ks ? COLOR_ACTIVE : COLOR_INACTIVE);
     std::ostringstream kl;
     kl << "KeyScroll: " << (ks ? "ON" : "OFF");
@@ -699,7 +699,7 @@ private:
     {
       return false;
     }
-    mScrollView.SetKeyScrollEnabled(!mScrollView.GetKeyScrollEnabled());
+    mScrollView.SetKeyScrollEnabled(!mScrollView.IsKeyScrollEnabled());
     RefreshFocusPanel();
     return true;
   }
@@ -844,7 +844,7 @@ private:
     }
     else if(key == "k" || key == "K")
     {
-      mScrollView.SetKeyScrollEnabled(!mScrollView.GetKeyScrollEnabled());
+      mScrollView.SetKeyScrollEnabled(!mScrollView.IsKeyScrollEnabled());
       RefreshFocusPanel();
     }
     else if(key == "bracketleft")

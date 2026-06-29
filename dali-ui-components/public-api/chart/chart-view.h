@@ -197,7 +197,7 @@ public:
   FindingStrategy GetFindingStrategy() const;
 
   void SetLegendToggleEnabled(bool enabled);
-  bool GetLegendToggleEnabled() const;
+  bool IsLegendToggleEnabled() const;
 
   void SetZoomMode(int zoomModeFlags);
   int  GetZoomMode() const;

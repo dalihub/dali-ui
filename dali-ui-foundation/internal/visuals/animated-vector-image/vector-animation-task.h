@@ -266,25 +266,25 @@ public:
    */
   bool IsAnimating();
 
-  void KeepRasterizedBuffer(bool enableFrameCache)
+  void KeepRasterizedBuffer(bool frameCacheEnabled)
   {
-    mEnableFrameCache = enableFrameCache;
+    mFrameCacheEnabled = frameCacheEnabled;
   }
 
   bool IsKeptRasterizedBuffer() const
   {
-    return mEnableFrameCache;
+    return mFrameCacheEnabled;
   }
 
-  void SetEnableAspectFit(bool enable)
+  void SetAspectFitEnabled(bool enable)
   {
-    mEnableAspectFit = enable;
+    mAspectFitEnabled = enable;
     mVectorRenderer.SetEnableAspectFit(enable);
   }
 
-  bool IsEnableAspectFit() const
+  bool IsAspectFitEnabled() const
   {
-    return mEnableAspectFit;
+    return mAspectFitEnabled;
   }
 
 public: // Implementation of AsyncTask
@@ -442,9 +442,9 @@ private:
   bool                             mKeepAnimation : 1;
   mutable bool                     mLayerInfoCached : 1;
   mutable bool                     mMarkerInfoCached : 1;
-  bool                             mEnableFrameCache : 1;
+  bool                             mFrameCacheEnabled : 1;
   bool                             mNotifyAfterRasterization : 1;
-  bool                             mEnableAspectFit : 1;
+  bool                             mAspectFitEnabled : 1;
   bool                             mSizeUpdated : 1;
 };
 

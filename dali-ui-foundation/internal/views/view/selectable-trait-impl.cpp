@@ -116,7 +116,7 @@ bool SelectableTraitImpl::IsToggleByClickEnabled() const
   return mToggleByClickEnabled;
 }
 
-void SelectableTraitImpl::EnableToggleByClick(bool enabled)
+void SelectableTraitImpl::SetToggleByClickEnabled(bool enabled)
 {
   if(mToggleByClickEnabled == enabled)
   {

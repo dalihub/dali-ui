@@ -148,9 +148,9 @@ public: // API
    * @brief Enables or disables toggle-by-click.
    *
    * @param[in] enabled True to enable toggle-by-click, false to disable
-   * @see SelectableTrait::EnableToggleByClick
+   * @see SelectableTrait::SetToggleByClickEnabled
    */
-  void EnableToggleByClick(bool enabled = true);
+  void SetToggleByClickEnabled(bool enabled = true);
 
 public: // Not intended for application developers
   /// @cond internal

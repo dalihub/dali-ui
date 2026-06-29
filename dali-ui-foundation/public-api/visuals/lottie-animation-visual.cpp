@@ -135,9 +135,9 @@ bool LottieAnimationVisual::IsBrokenImageEnabled() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_BROKEN_IMAGE);
 }
 
-void LottieAnimationVisual::SetEnableBrokenImage(bool enableBrokenImage)
+void LottieAnimationVisual::SetBrokenImageEnabled(bool brokenImageEnabled)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_BROKEN_IMAGE, enableBrokenImage);
+  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_BROKEN_IMAGE, brokenImageEnabled);
 }
 
 Image::LoadPolicy LottieAnimationVisual::GetLoadPolicy() const
@@ -256,14 +256,14 @@ void LottieAnimationVisual::SetRedrawInScalingUp(bool redrawInScalingUp)
   VisualBase::SetProperty(LottieAnimationVisual::Property::REDRAW_IN_SCALING_UP, redrawInScalingUp);
 }
 
-bool LottieAnimationVisual::IsEnableFrameCache() const
+bool LottieAnimationVisual::IsFrameCacheEnabled() const
 {
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_FRAME_CACHE);
 }
 
-void LottieAnimationVisual::SetEnableFrameCache(bool enableFrameCache)
+void LottieAnimationVisual::SetFrameCacheEnabled(bool frameCacheEnabled)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_FRAME_CACHE, enableFrameCache);
+  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_FRAME_CACHE, frameCacheEnabled);
 }
 
 bool LottieAnimationVisual::IsNotifyAfterRasterization() const
@@ -291,9 +291,9 @@ bool LottieAnimationVisual::IsAspectFitEnabled() const
   return VisualBase::GetProperty<bool>(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT);
 }
 
-void LottieAnimationVisual::SetEnableAspectFit(bool enableAspectFit)
+void LottieAnimationVisual::SetAspectFitEnabled(bool aspectFitEnabled)
 {
-  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT, enableAspectFit);
+  VisualBase::SetProperty(LottieAnimationVisual::Property::ENABLE_ASPECT_FIT, aspectFitEnabled);
 }
 
 // =============================================================================

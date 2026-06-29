@@ -316,14 +316,14 @@ const Dali::String& UiConfig::GetBrokenImageUrl(BrokenImageType brokenImageType)
   return GetImpl(*this).GetBrokenImageUrl(brokenImageType);
 }
 
-void UiConfig::EnableFocusClearOnEscape(bool enable)
+void UiConfig::SetClearFocusOnEscapeEnabled(bool enable)
 {
-  GetImpl(*this).EnableFocusClearOnEscape(enable);
+  GetImpl(*this).SetClearFocusOnEscapeEnabled(enable);
 }
 
-bool UiConfig::IsFocusClearOnEscapeEnabled() const
+bool UiConfig::IsClearFocusOnEscapeEnabled() const
 {
-  return GetImpl(*this).IsFocusClearOnEscapeEnabled();
+  return GetImpl(*this).IsClearFocusOnEscapeEnabled();
 }
 
 void UiConfig::SetClearFocusIndicationOnTouch(bool clear)

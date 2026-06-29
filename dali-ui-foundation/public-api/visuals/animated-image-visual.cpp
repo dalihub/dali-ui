@@ -171,9 +171,9 @@ bool AnimatedImageVisual::IsBrokenImageEnabled() const
   return VisualBase::GetProperty<bool>(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE);
 }
 
-void AnimatedImageVisual::SetEnableBrokenImage(bool enableBrokenImage)
+void AnimatedImageVisual::SetBrokenImageEnabled(bool brokenImageEnabled)
 {
-  VisualBase::SetProperty(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE, enableBrokenImage);
+  VisualBase::SetProperty(AnimatedImageVisual::Property::ENABLE_BROKEN_IMAGE, brokenImageEnabled);
 }
 
 Image::LoadPolicy AnimatedImageVisual::GetLoadPolicy() const

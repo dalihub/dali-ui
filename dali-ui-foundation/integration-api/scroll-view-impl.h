@@ -257,7 +257,7 @@ public: // API
   /**
    * @brief Gets whether key-based step scrolling is enabled.
    */
-  bool GetKeyScrollEnabled() const;
+  bool IsKeyScrollEnabled() const;
 
   /**
    * @brief Sets the step distance (px) used for key-based step scrolling.

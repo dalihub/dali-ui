@@ -205,7 +205,7 @@ private:
 
   void RefreshInfo()
   {
-    bool ks = mScrollView.GetKeyScrollEnabled();
+    bool ks = mScrollView.IsKeyScrollEnabled();
     mKeyScrollChip.SetBackgroundColor(ks ? COLOR_ACTIVE : COLOR_INACT);
     Label::DownCast(mKeyScrollChip.GetChildAt(0)).SetText(ks ? "KeyScroll: ON" : "KeyScroll: OFF");
 
@@ -243,7 +243,7 @@ private:
   bool OnKeyScrollChipTouched(Actor /*actor*/, TouchEvent touch)
   {
     if(touch.GetState(0) != PointState::UP) return false;
-    mScrollView.SetKeyScrollEnabled(!mScrollView.GetKeyScrollEnabled());
+    mScrollView.SetKeyScrollEnabled(!mScrollView.IsKeyScrollEnabled());
     RefreshInfo();
     return true;
   }
@@ -267,7 +267,7 @@ private:
     }
     else if(key == "k" || key == "K")
     {
-      mScrollView.SetKeyScrollEnabled(!mScrollView.GetKeyScrollEnabled());
+      mScrollView.SetKeyScrollEnabled(!mScrollView.IsKeyScrollEnabled());
       RefreshInfo();
     }
   }

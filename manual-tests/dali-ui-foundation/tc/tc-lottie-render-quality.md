@@ -1,6 +1,6 @@
 # Lottie: RenderScale / FrameCache / RedrawOnScale
 
-SetRenderScale / GetRenderScale, SetEnableFrameCache / IsFrameCacheEnabled, SetRedrawOnScaleDown / IsRedrawOnScaleDown, SetRedrawOnScaleUp / IsRedrawOnScaleUp, SetNotifyAfterRasterization / IsNotifyAfterRasterizationEnabled 동작을 확인한다.
+SetRenderScale / GetRenderScale, SetFrameCacheEnabled / IsFrameCacheEnabled, SetRedrawOnScaleDown / IsRedrawOnScaleDown, SetRedrawOnScaleUp / IsRedrawOnScaleUp, SetNotifyAfterRasterization / IsNotifyAfterRasterizationEnabled 동작을 확인한다.
 
 ## 화면 구성
 

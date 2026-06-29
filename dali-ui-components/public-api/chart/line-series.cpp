@@ -194,9 +194,9 @@ void LineSeries::SetFillEnabled(bool enabled)
 {
   GetImplementation(*this).SetFillEnabled(enabled);
 }
-bool LineSeries::GetFillEnabled() const
+bool LineSeries::IsFillEnabled() const
 {
-  return GetImplementation(*this).GetFillEnabled();
+  return GetImplementation(*this).IsFillEnabled();
 }
 
 void LineSeries::SetFillColor(const Vector4& color)

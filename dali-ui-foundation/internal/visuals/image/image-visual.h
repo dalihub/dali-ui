@@ -382,7 +382,7 @@ private:
   bool mNeedYuvToRgb : 1;           ///< true if we need to convert yuv to rgb.
   bool mNeedYuva : 1;               ///< true if the yuv texture has alpha.
   bool mNeedUnifiedYuvAndRgb : 1;   ///< true if we need to support both yuv and rgb.
-  bool mEnableBrokenImage : 1;      ///< true if enable broken image.
+  bool mBrokenImageEnabled : 1;     ///< True if broken image is enabled.
   bool mUseFastTrackUploading : 1;  ///< True if we use fast tack feature.
   bool mRendererAdded : 1;          ///< True if renderer added into actor.
   bool mUseBrokenImageRenderer : 1; ///< True if renderer changed as broken image.

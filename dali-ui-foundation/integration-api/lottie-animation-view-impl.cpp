@@ -109,10 +109,10 @@ LottieAnimationViewImpl::LottieAnimationViewImpl()
   mRenderScale(1.0f),
   mRedrawInScalingDown(true),
   mRedrawInScalingUp(true),
-  mEnableFrameCache(false),
+  mFrameCacheEnabled(false),
   mNotifyAfterRasterization(false),
   mSynchronousLoading(false),
-  mEnableAspectFit(true),
+  mAspectFitEnabled(true),
   mVisualDirty(false),
   mAnimationFinishedSignal()
 {
@@ -246,7 +246,7 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
         bool enable;
         if(value.Get(enable))
         {
-          impl.SetEnableFrameCache(enable);
+          impl.SetFrameCacheEnabled(enable);
         }
         break;
       }
@@ -270,10 +270,10 @@ void LottieAnimationViewImpl::SetProperty(Dali::BaseObject* object, Dali::Proper
       }
       case LottieAnimationViewImpl::Property::ENABLE_ASPECT_FIT:
       {
-        bool enableAspectFit;
-        if(value.Get(enableAspectFit))
+        bool aspectFitEnabled;
+        if(value.Get(aspectFitEnabled))
         {
-          impl.SetEnableAspectFit(enableAspectFit);
+          impl.SetAspectFitEnabled(aspectFitEnabled);
         }
         break;
       }
@@ -689,19 +689,19 @@ bool LottieAnimationViewImpl::IsRedrawOnScaleUp() const
   return mRedrawInScalingUp;
 }
 
-void LottieAnimationViewImpl::SetEnableFrameCache(bool enable)
+void LottieAnimationViewImpl::SetFrameCacheEnabled(bool enable)
 {
-  if(mEnableFrameCache != enable)
+  if(mFrameCacheEnabled != enable)
   {
-    mEnableFrameCache = enable;
-    mVisualDirty      = true;
+    mFrameCacheEnabled = enable;
+    mVisualDirty       = true;
     InvalidateMeasure();
   }
 }
 
 bool LottieAnimationViewImpl::IsFrameCacheEnabled() const
 {
-  return mEnableFrameCache;
+  return mFrameCacheEnabled;
 }
 
 void LottieAnimationViewImpl::SetNotifyAfterRasterization(bool notify)
@@ -734,19 +734,19 @@ float LottieAnimationViewImpl::GetRenderScale() const
   return mRenderScale;
 }
 
-void LottieAnimationViewImpl::SetEnableAspectFit(bool enableAspectFit)
+void LottieAnimationViewImpl::SetAspectFitEnabled(bool aspectFitEnabled)
 {
-  if(mEnableAspectFit != enableAspectFit)
+  if(mAspectFitEnabled != aspectFitEnabled)
   {
-    mEnableAspectFit = enableAspectFit;
-    mVisualDirty     = true;
+    mAspectFitEnabled = aspectFitEnabled;
+    mVisualDirty      = true;
     InvalidateMeasure();
   }
 }
 
 bool LottieAnimationViewImpl::IsAspectFitEnabled() const
 {
-  return mEnableAspectFit;
+  return mAspectFitEnabled;
 }
 
 Dali::Property::Map LottieAnimationViewImpl::GetContentInfo()
@@ -870,10 +870,10 @@ void LottieAnimationViewImpl::UpdateVisual()
 
   map.Insert(Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_DOWN, mRedrawInScalingDown);
   map.Insert(Ui::ImageVisualPropertyIndex::REDRAW_IN_SCALING_UP, mRedrawInScalingUp);
-  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mEnableFrameCache);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_FRAME_CACHE, mFrameCacheEnabled);
   map.Insert(Ui::ImageVisualPropertyIndex::NOTIFY_AFTER_RASTERIZATION, mNotifyAfterRasterization);
   map.Insert(Ui::ImageVisualPropertyIndex::RENDER_SCALE, mRenderScale);
-  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT, mEnableAspectFit);
+  map.Insert(Ui::ImageVisualPropertyIndex::ENABLE_ASPECT_FIT, mAspectFitEnabled);
   if(mDesiredWidth > 0)
   {
     map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, mDesiredWidth);

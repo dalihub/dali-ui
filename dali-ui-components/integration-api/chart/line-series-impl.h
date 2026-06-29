@@ -115,7 +115,7 @@ public:
   }
 
   void SetFillEnabled(bool enabled);
-  bool GetFillEnabled() const
+  bool IsFillEnabled() const
   {
     return mFillEnabled;
   }

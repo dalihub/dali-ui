@@ -323,7 +323,7 @@ public: // Key Scroll
    *
    * @return True if key scroll is enabled
    */
-  bool GetKeyScrollEnabled() const;
+  bool IsKeyScrollEnabled() const;
 
   /**
    * @brief Sets the step distance used for key-based step scrolling.

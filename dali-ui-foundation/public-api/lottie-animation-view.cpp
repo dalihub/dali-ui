@@ -174,9 +174,9 @@ bool LottieAnimationView::IsRedrawOnScaleUp() const
   return Ui::GetImpl(*this).IsRedrawOnScaleUp();
 }
 
-void LottieAnimationView::SetEnableFrameCache(bool enable)
+void LottieAnimationView::SetFrameCacheEnabled(bool enable)
 {
-  Ui::GetImpl(*this).SetEnableFrameCache(enable);
+  Ui::GetImpl(*this).SetFrameCacheEnabled(enable);
 }
 
 bool LottieAnimationView::IsFrameCacheEnabled() const
@@ -204,9 +204,9 @@ float LottieAnimationView::GetRenderScale() const
   return Ui::GetImpl(*this).GetRenderScale();
 }
 
-void LottieAnimationView::SetEnableAspectFit(bool enableAspectFit)
+void LottieAnimationView::SetAspectFitEnabled(bool aspectFitEnabled)
 {
-  Ui::GetImpl(*this).SetEnableAspectFit(enableAspectFit);
+  Ui::GetImpl(*this).SetAspectFitEnabled(aspectFitEnabled);
 }
 bool LottieAnimationView::IsAspectFitEnabled() const
 {

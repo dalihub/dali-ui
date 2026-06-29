@@ -491,10 +491,10 @@ int UtcDaliLottieAnimationViewSetGetEnableFrameCacheP(void)
   // Default should be false
   DALI_TEST_CHECK(!view.IsFrameCacheEnabled());
 
-  view.SetEnableFrameCache(true);
+  view.SetFrameCacheEnabled(true);
   DALI_TEST_CHECK(view.IsFrameCacheEnabled());
 
-  view.SetEnableFrameCache(false);
+  view.SetFrameCacheEnabled(false);
   DALI_TEST_CHECK(!view.IsFrameCacheEnabled());
   END_TEST;
 }
@@ -545,10 +545,10 @@ int UtcDaliLottieAnimationViewSetGetEnableAspectFitP(void)
   // Default should be true
   DALI_TEST_EQUALS(view.IsAspectFitEnabled(), true, TEST_LOCATION);
 
-  view.SetEnableAspectFit(false);
+  view.SetAspectFitEnabled(false);
   DALI_TEST_EQUALS(view.IsAspectFitEnabled(), false, TEST_LOCATION);
 
-  view.SetEnableAspectFit(true);
+  view.SetAspectFitEnabled(true);
   DALI_TEST_EQUALS(view.IsAspectFitEnabled(), true, TEST_LOCATION);
   END_TEST;
 }

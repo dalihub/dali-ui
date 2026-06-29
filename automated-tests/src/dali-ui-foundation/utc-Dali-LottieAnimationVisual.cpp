@@ -159,7 +159,7 @@ int UtcDaliLottieAnimationVisualSetGetProperties01(void)
   visual.SetWrapModeV(Dali::WrapMode::MIRRORED_REPEAT);
   DALI_TEST_EQUALS(visual.GetWrapModeV(), Dali::WrapMode::MIRRORED_REPEAT, TEST_LOCATION);
 
-  visual.SetEnableBrokenImage(false);
+  visual.SetBrokenImageEnabled(false);
   DALI_TEST_EQUALS(visual.IsBrokenImageEnabled(), false, TEST_LOCATION);
 
   visual.SetLoadPolicy(Image::LoadPolicy::ATTACHED);
@@ -221,8 +221,8 @@ int UtcDaliLottieAnimationVisualSetGetProperties02(void)
   visual.SetRedrawInScalingUp(false);
   DALI_TEST_EQUALS(visual.IsRedrawInScalingUp(), false, TEST_LOCATION);
 
-  visual.SetEnableFrameCache(true);
-  DALI_TEST_EQUALS(visual.IsEnableFrameCache(), true, TEST_LOCATION);
+  visual.SetFrameCacheEnabled(true);
+  DALI_TEST_EQUALS(visual.IsFrameCacheEnabled(), true, TEST_LOCATION);
 
   visual.SetNotifyAfterRasterization(true);
   DALI_TEST_EQUALS(visual.IsNotifyAfterRasterization(), true, TEST_LOCATION);
@@ -230,7 +230,7 @@ int UtcDaliLottieAnimationVisualSetGetProperties02(void)
   visual.SetRenderScale(1.5f);
   DALI_TEST_EQUALS(visual.GetRenderScale(), 1.5f, TEST_LOCATION);
 
-  visual.SetEnableAspectFit(false);
+  visual.SetAspectFitEnabled(false);
   DALI_TEST_EQUALS(visual.IsAspectFitEnabled(), false, TEST_LOCATION);
 
   END_TEST;

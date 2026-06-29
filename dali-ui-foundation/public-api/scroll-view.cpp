@@ -254,9 +254,9 @@ void ScrollView::SetKeyScrollEnabled(bool enable)
   GetImpl(*this).SetKeyScrollEnabled(enable);
 }
 
-bool ScrollView::GetKeyScrollEnabled() const
+bool ScrollView::IsKeyScrollEnabled() const
 {
-  return GetImpl(*this).GetKeyScrollEnabled();
+  return GetImpl(*this).IsKeyScrollEnabled();
 }
 
 void ScrollView::SetKeyScrollStep(float step)

@@ -99,15 +99,15 @@ int UtcDaliSelectableTraitIsToggleByClickEnabledDefaultP(void)
   END_TEST;
 }
 
-int UtcDaliSelectableTraitEnableToggleByClickP(void)
+int UtcDaliSelectableTraitSetToggleByClickEnabledP(void)
 {
   UiTestApplication application;
   SelectableTrait selectable = SelectableTrait::New();
 
-  selectable.EnableToggleByClick();
+  selectable.SetToggleByClickEnabled();
   DALI_TEST_CHECK(selectable.IsToggleByClickEnabled());
 
-  selectable.EnableToggleByClick(false);
+  selectable.SetToggleByClickEnabled(false);
   DALI_TEST_CHECK(!selectable.IsToggleByClickEnabled());
   END_TEST;
 }

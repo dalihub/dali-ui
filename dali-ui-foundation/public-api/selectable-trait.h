@@ -152,7 +152,7 @@ public: // API
    *
    * @param[in] enabled True to enable toggle-by-click, false to disable
    */
-  void EnableToggleByClick(bool enabled = true);
+  void SetToggleByClickEnabled(bool enabled = true);
 
 public: // Not intended for application developers
   /**

@@ -628,7 +628,7 @@ void ScrollViewImpl::SetKeyScrollEnabled(bool enable)
     mKeyScrollLastChild.Reset(); // case-3 state is only valid while key-scroll is active
 }
 
-bool ScrollViewImpl::GetKeyScrollEnabled() const
+bool ScrollViewImpl::IsKeyScrollEnabled() const
 {
   return mKeyScrollEnabled;
 }

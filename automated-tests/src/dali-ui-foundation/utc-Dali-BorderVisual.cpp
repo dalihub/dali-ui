@@ -129,7 +129,7 @@ int UtcDaliBorderVisualEnableAntiAliasing(void)
   BorderVisual visual = BorderVisual::New();
   DALI_TEST_EQUALS(visual.IsAntiAliasingEnabled(), false, TEST_LOCATION);
 
-  visual.SetEnableAntiAliasing(true);
+  visual.SetAntiAliasingEnabled(true);
   DALI_TEST_EQUALS(visual.IsAntiAliasingEnabled(), true, TEST_LOCATION);
 
   END_TEST;
@@ -149,7 +149,7 @@ int UtcDaliBorderVisualSetGetPropertyValue(void)
   DALI_TEST_EQUALS(visual.GetProperty<float>(BorderVisual::Property::BORDER_SIZE), 3.3f, TEST_LOCATION);
 
 
-  visual.SetEnableAntiAliasing(true);
+  visual.SetAntiAliasingEnabled(true);
   DALI_TEST_EQUALS(visual.IsAntiAliasingEnabled(), true, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetProperty<bool>(BorderVisual::Property::ANTI_ALIASING), true, TEST_LOCATION);
 
@@ -232,7 +232,7 @@ int UtcDaliBorderVisualInvalidHandle(void)
 
   // BorderVisual specific
   TestAssertFunction([&](){empty.SetBorderSize(0.0f);});
-  TestAssertFunction([&](){empty.SetEnableAntiAliasing(false);});
+  TestAssertFunction([&](){empty.SetAntiAliasingEnabled(false);});
 
   TestAssertFunction([&](){empty.GetBorderSize();});
   TestAssertFunction([&](){empty.IsAntiAliasingEnabled();});

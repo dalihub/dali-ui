@@ -78,7 +78,7 @@ UiConfigImpl::UiConfigImpl()
   mTapRecognizerTime(UINT32_MAX),
   mAmbiguousPressDelay(100u),
   mAmbiguousPressDuration(64u),
-  mClearFocusOnEscape(true),
+  mClearFocusOnEscapeEnabled(true),
   mClearFocusIndicationOnTouch(true),
   mClearFocusIndicationOnHover(false),
   mDefaultFocusIndicatorEnabled(true),
@@ -255,15 +255,15 @@ std::vector<Dali::String> UiConfigImpl::GetBrokenImageUrlList() const
   return {mBrokenImageUrls[0], mBrokenImageUrls[1], mBrokenImageUrls[2]};
 }
 
-void UiConfigImpl::EnableFocusClearOnEscape(bool enable)
+void UiConfigImpl::SetClearFocusOnEscapeEnabled(bool enable)
 {
   DALI_ASSERT_ALWAYS(!mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mClearFocusOnEscape = enable;
+  mClearFocusOnEscapeEnabled = enable;
 }
 
-bool UiConfigImpl::IsFocusClearOnEscapeEnabled() const
+bool UiConfigImpl::IsClearFocusOnEscapeEnabled() const
 {
-  return mClearFocusOnEscape;
+  return mClearFocusOnEscapeEnabled;
 }
 
 void UiConfigImpl::SetClearFocusIndicationOnTouch(bool clear)

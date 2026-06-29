@@ -39,7 +39,7 @@ constexpr uint32_t C_BG          = 0x1A1A1A;
 /**
  * @brief Verifies LottieAnimationView render quality settings:
  *   SetRenderScale / GetRenderScale
- *   SetEnableFrameCache / IsFrameCacheEnabled
+ *   SetFrameCacheEnabled / IsFrameCacheEnabled
  *   SetRedrawOnScaleDown / IsRedrawOnScaleDown
  *   SetRedrawOnScaleUp / IsRedrawOnScaleUp
  *   SetNotifyAfterRasterization / IsNotifyAfterRasterizationEnabled
@@ -105,8 +105,8 @@ public:
       MakeButton("Scale\n2.0x",  [this] { OnRenderScale(2.0f); }),
     }));
     content.Add(MakeButtonRow({
-      MakeButton("FrameCache\nON",  [this] { mView.SetEnableFrameCache(true);  UpdateLabels(); }),
-      MakeButton("FrameCache\nOFF", [this] { mView.SetEnableFrameCache(false); UpdateLabels(); }),
+      MakeButton("FrameCache\nON",  [this] { mView.SetFrameCacheEnabled(true);  UpdateLabels(); }),
+      MakeButton("FrameCache\nOFF", [this] { mView.SetFrameCacheEnabled(false); UpdateLabels(); }),
     }));
     content.Add(MakeButtonRow({
       MakeButton("RedrawSD\nON",  [this] { mView.SetRedrawOnScaleDown(true);  UpdateLabels(); }),

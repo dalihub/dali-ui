@@ -82,9 +82,9 @@ public:
   bool IsToggleByClickEnabled() const;
 
   /**
-   * @copydoc SelectableView::EnableToggleByClick()
+   * @copydoc SelectableView::SetToggleByClickEnabled()
    */
-  void EnableToggleByClick(bool enabled);
+  void SetToggleByClickEnabled(bool enabled);
 
 protected:
   /**

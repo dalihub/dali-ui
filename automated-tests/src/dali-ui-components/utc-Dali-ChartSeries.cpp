@@ -221,7 +221,7 @@ int UtcDaliLineSeriesFillP(void)
   LineSeries        series = LineSeries::New();
 
   series.SetFillEnabled(true);
-  DALI_TEST_CHECK(series.GetFillEnabled());
+  DALI_TEST_CHECK(series.IsFillEnabled());
 
   series.SetFillColor(Vector4(0.0f, 0.5f, 1.0f, 0.3f));
   DALI_TEST_EQUALS(series.GetFillColor(), Vector4(0.0f, 0.5f, 1.0f, 0.3f), TEST_LOCATION);

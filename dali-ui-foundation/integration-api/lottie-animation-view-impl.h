@@ -228,9 +228,9 @@ public: // API
   bool IsRedrawOnScaleUp() const;
 
   /**
-   * @copydoc Dali::Ui::LottieAnimationView::SetEnableFrameCache
+   * @copydoc Dali::Ui::LottieAnimationView::SetFrameCacheEnabled
    */
-  void SetEnableFrameCache(bool enable);
+  void SetFrameCacheEnabled(bool enable);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::IsFrameCacheEnabled
@@ -258,9 +258,9 @@ public: // API
   float GetRenderScale() const;
 
   /**
-   * @copydoc Dali::Ui::LottieAnimationView::SetEnableAspectFit
+   * @copydoc Dali::Ui::LottieAnimationView::SetAspectFitEnabled
    */
-  void SetEnableAspectFit(bool enableAspectFit);
+  void SetAspectFitEnabled(bool aspectFitEnabled);
 
   /**
    * @copydoc Dali::Ui::LottieAnimationView::IsAspectFitEnabled
@@ -438,10 +438,10 @@ private:                    // Data
 
   bool mRedrawInScalingDown;
   bool mRedrawInScalingUp;
-  bool mEnableFrameCache;
+  bool mFrameCacheEnabled;
   bool mNotifyAfterRasterization;
   bool mSynchronousLoading;
-  bool mEnableAspectFit;
+  bool mAspectFitEnabled;
   bool mVisualDirty; ///< True when a property changed and the visual needs rebuilding on the next measure pass
 
   Dali::Signal<void(Dali::Ui::View)> mAnimationFinishedSignal;

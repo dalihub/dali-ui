@@ -343,7 +343,7 @@ public: // Performance Options
    * @param[in] enable True to enable frame caching (default: false)
    * @return Reference to this for fluent chaining
    */
-  void SetEnableFrameCache(bool enable);
+  void SetFrameCacheEnabled(bool enable);
 
   /**
    * @brief Returns whether frame caching is enabled.
@@ -396,9 +396,9 @@ public: // Performance Options
    * while preserving its aspect ratio. When disabled, the animation stretches to
    * fill the entire target size.
    *
-   * @param[in] enableAspectFit True to enable aspect fit, false to disable
+   * @param[in] aspectFitEnabled True to enable aspect fit, false to disable
    */
-  void SetEnableAspectFit(bool enableAspectFit);
+  void SetAspectFitEnabled(bool aspectFitEnabled);
 
   /**
    * @brief Gets whether aspect fit scaling is enabled.
