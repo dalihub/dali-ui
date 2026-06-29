@@ -11,12 +11,16 @@ changed at runtime.
 
 ## Which Config should I use?
 
-Use `UiConfig` for both `dali-ui-foundation` and `dali-ui-components`.
+Use the config preset from the highest DALi UI library your application depends
+on. A components application should apply `Components::UiConfig`, because it
+contains the foundation configuration plus the components style sheet preset.
+Apply only one config. Do not apply both `UiConfig` and `Components::UiConfig`
+in the same application.
 
 | Library | Config Class | Header |
 |---|---|---|
 | `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
-| `dali-ui-components` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
+| `dali-ui-components` | `Components::UiConfig` | `<dali-ui-components/dali-ui-components.h>` |
 
 <br/>
 
@@ -41,10 +45,12 @@ int main(int argc, char** argv)
 }
 ```
 
-When using `dali-ui-components`, still apply a single `UiConfig`:
+When using `dali-ui-components`, apply a single `Components::UiConfig`.
+Do not apply `UiConfig` separately; `Components::UiConfig` already covers the
+foundation configuration:
 
 ```cpp
-UiConfig config = UiConfig::New();
+Components::UiConfig config = Components::UiConfig::New();
 config.SetDpi(320);
 config.SetScalingFactor(1.5f);
 config.Apply();
@@ -74,26 +80,38 @@ The following describes key configuration options. For the full API, see [UiConf
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | Whether the default focus indicator is enabled |
 | Clear Focus Indication On Touch | `SetClearFocusIndicationOnTouch(bool)` | `IsClearFocusIndicationOnTouchEnabled()` | Whether touch interaction clears focus indication |
 | Clear Focus Indication On Hover | `SetClearFocusIndicationOnHover(bool)` | `IsClearFocusIndicationOnHoverEnabled()` | Whether hovering outside the focused view clears focus indication |
-| Style Sheet | `SetStyleSheet(UiStyleSheet)`, `GetStyle(UiStyleKey)` | Component style overrides | Component style creator lookup table and style resolver |
+| Style Sheet | `ResetStyleSheet(UiStyleSheet)`, `StyleSheet()`, `GetStyle(UiStyleKey<T>)` | Component style overrides | Component style creator lookup table and style resolver |
 
 <br/>
 
 ## Component Style Sheets
 
-`UiConfig` may carry a `UiStyleSheet`. Components resolve configured styles
-through `UiConfig::GetStyle(UiStyleKey)`.
+`UiConfig` may carry a `UiStyleSheet`. `Components::UiConfig` provides the
+components style sheet by default. Components resolve configured styles through
+`UiConfig::GetStyle(UiStyleKey<T>)`. Style creators can be registered before
+`Apply()`, but initialized style objects are created or accessed only after
+`UiConfig::Apply()`.
 
-Device or product libraries can create a components style sheet and register
-only the style entries they want to override before applying the config:
+Only the selected config should be applied. A components application should
+modify the style sheet on `Components::UiConfig` and then call `Apply()` on that
+same config, not apply a foundation `UiConfig` first.
+
+Applications and product libraries usually access the style sheet on the config
+preset and override only the entries they need before applying the config:
 
 ```cpp
-UiStyleSheet styleSheet = Dali::Ui::Components::StyleSheet::New();
-styleSheet.SetStyle(MyButtonStyleKey(), ProvideMyButtonStyle);
-
-UiConfig config = UiConfig::New();
-config.SetStyleSheet(styleSheet);
-config.Apply(); // Freezes both config and styleSheet.
+Components::UiConfig config = Components::UiConfig::New();
+config.StyleSheet()
+  .SetStyle(MyButtonStyle::DefaultKey(), ProvideMyButtonStyle);
+config.Apply(); // Freezes both config and its style sheet.
 ```
+
+`ResetStyleSheet()` is still available when a provider wants to replace the whole
+sheet. `StyleSheet::New()` is also available for that advanced provider path,
+but application code should normally start from the sheet already owned by the
+config preset.
+Do not call component style accessors such as `TextButtonStyle::Default()` or
+`TextButtonStyle::DefaultPreset()` before `Apply()`.
 
 <br/>
 

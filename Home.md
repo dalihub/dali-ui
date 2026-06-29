@@ -31,17 +31,17 @@ DALi handles screen composition and rendering, and is organized into `dali-core`
 
 DALi exposes three API levels with different stability guarantees and intended audiences:
 
-| Level | Location | Audience | ABI Stability |
+| Level | Audience | ABI Stability | Umbrella Header |
 |---|---|---|---|
-| **Public API** | `public-api/` | App developers | **Guaranteed** — must not break across releases |
-| **Provider API** | `provider-api/` | DALi UI module providers | **Guaranteed** — must not break across releases |
-| **Integration API** | `integration-api/` | Framework developers | Not required — consumers rebuild alongside dali-ui |
+| **Public API** | App developers | **Guaranteed** — must not break across releases | `<dali-ui-foundation/dali-ui-foundation.h>` |
+| **Provider API** | DALi UI module providers | **Guaranteed** — must not break across releases | `<dali-ui-foundation/dali-ui-foundation-provider.h>` |
+| **Integration API** | Framework developers | Not required — consumers rebuild alongside dali-ui | `<dali-ui-foundation/dali-ui-foundation-integ.h>` |
 
-**As an app developer**, use only `public-api/`. This is the layer with guaranteed ABI stability.
+**As an app developer**, use the Public API umbrella header or individual `public-api/` headers. This is the layer with guaranteed ABI stability.
 
-**As a DALi UI module provider**, use `provider-api/` when you need ABI-stable implementation-level extension points.
+**As a DALi UI module provider**, use the Provider API umbrella header when you need ABI-stable implementation-level extension points.
 
-**As a framework developer**, you may also depend on `integration-api/`, with the understanding
+**As a framework developer**, you may also depend on the Integration API umbrella header, with the understanding
 that it may change between dali-ui versions and will require a rebuild.
 
 <br/>

@@ -128,8 +128,8 @@ private:
 **2. UiConfigImpl을 상속하여 CreateThemeLoader() 오버라이드**
 
 ```cpp
-// tv-config-impl.h (integration-api 레벨)
-class TvConfigImpl : public Dali::Ui::Integration::UiConfigImpl
+// tv-config-impl.h (provider-api 레벨)
+class TvConfigImpl : public Dali::Ui::Provider::UiConfigImpl
 {
 public:
   static Dali::IntrusivePtr<TvConfigImpl> New() { return new TvConfigImpl(); }
@@ -160,7 +160,7 @@ public:
   }
 
 private:
-  explicit TVConfig(Dali::Ui::Integration::UiConfigImpl* impl)
+  explicit TVConfig(Dali::Ui::Provider::UiConfigImpl* impl)
   : UiConfig(impl) {}
 };
 ```

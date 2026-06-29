@@ -44,9 +44,9 @@ class TextButtonImpl : public Provider::InteractiveViewImpl
 
 ### Style Class Pattern
 
-컴포넌트 style class는 immutable `UiStyle` handle로 정의합니다. Style은 complete object이며, `UiConfig::Apply()` 이후에 생성합니다.
+컴포넌트 style class는 immutable `UiStyle` handle로 정의합니다. Style 관련 public/provider/integration/internal 파일은 각 API level의 `styles/` 디렉터리 아래에 둡니다.
 
-`DefaultKey()`와 `Default()`는 뒤에서 설명할 `StyleSheet` override를 지원하기 위한 API입니다. `Builtin()`은 override가 없을 때 사용할 컴포넌트 기본 style을 제공합니다.
+`DefaultKey()`와 `Default()`는 뒤에서 설명할 `StyleSheet` override를 지원하기 위한 API입니다. `DefaultPreset()`은 override가 없을 때 사용할 cached built-in 기본 style을 제공합니다.
 
 Style class는 다음 형태를 따릅니다.
 
@@ -56,11 +56,12 @@ class TextButtonStyle : public UiStyle
 public:
   class Builder;
 
-  static UiStyleKey DefaultKey();
+  static UiStyleKey<TextButtonStyle> DefaultKey();
 
-  static TextButtonStyle Builtin();
+  static TextButtonStyle DefaultPreset();
   static TextButtonStyle Default();
   static TextButtonStyle DownCast(BaseHandle handle);
+  static TextButtonStyle StaticDownCast(UiStyle style);
 
   Builder Configure() const;
 };
@@ -71,38 +72,62 @@ public:
 | API | 의미 |
 |---|---|
 | `DefaultKey()` | `StyleSheet`에서 이 컴포넌트의 default style entry 식별 |
-| `Builtin()` | `StyleSheet` override가 없을 때 사용하는 built-in 기본 style |
-| `Default()` | `StyleSheet` override를 조회하고 없으면 `Builtin()` 반환 |
+| `DefaultPreset()` | `StyleSheet` override가 없을 때 사용하는 cached built-in 기본 preset |
+| `Default()` | `StyleSheet` override를 조회하고 없으면 `DefaultPreset()` 반환 |
+| `DownCast()` | generic handle이 이 concrete style type인지 type check |
+| `StaticDownCast()` | `UiStyleSheet`에서 이미 type check가 끝난 style을 반복 `dynamic_cast` 없이 concrete handle로 생성 |
 | `Configure()` | 기존 immutable style을 mutable builder로 clone |
 | `Builder()` | built-in 기본값에서 시작해 complete style 생성 |
 
-`Builtin()`, `Default()`, `Builder()`는 `UiConfig::Apply()` 이후에만 사용할 수 있습니다.
-
-`Builtin()`은 static cached accessor입니다. 호출할 때마다 새 style 객체를 만들어서는 안 됩니다.
+`DefaultKey()`는 이 컴포넌트의 default style entry에 사용할 typed style sheet key를 반환합니다. Key는 static storage에서 한 번만 할당합니다.
 
 ```cpp
-TextButtonStyle TextButtonStyle::Builtin()
+UiStyleKey<TextButtonStyle> TextButtonStyle::DefaultKey()
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle::Builtin() requires UiConfig::Apply()");
+  static UiStyleKey<TextButtonStyle> key = UiStyleKey<TextButtonStyle>::Alloc();
+  return key;
+}
+```
+
+`DefaultPreset()`은 컴포넌트의 built-in 기본 style을 반환하는 static cached accessor입니다. 호출할 때마다 새 style 객체를 만들어서는 안 됩니다. 초기화된 style 객체는 모두 `UiConfig::Apply()` 이후에만 생성하거나 접근할 수 있습니다.
+
+```cpp
+TextButtonStyle TextButtonStyle::DefaultPreset()
+{
+  DebugAssertStyleConfigApplied();
 
   static TextButtonStyle style = TextButtonStyle::Builder().Build();
   return style;
 }
 ```
 
-`Default()`는 현재 config에서 override style을 조회하고, 등록된 override가 없으면 `Builtin()`을 반환합니다.
+`Default()`는 현재 config에서 override style을 조회하고, 등록된 override가 없으면 `DefaultPreset()`을 반환합니다. 이 함수는 `UiConfig::Apply()` 이후에만 호출할 수 있습니다.
 
 ```cpp
 TextButtonStyle TextButtonStyle::Default()
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle::Default() requires UiConfig::Apply()");
+  DebugAssertStyleConfigApplied();
 
-  TextButtonStyle style = TextButtonStyle::DownCast(UiConfig::GetCurrent().GetStyle(DefaultKey()));
+  TextButtonStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   if(style)
   {
     return style;
   }
-  return Builtin();
+  return DefaultPreset();
+}
+```
+
+`DownCast()`와 `StaticDownCast()`는 style class를 `UiStyleSheet::GetStyle(UiStyleKey<T>)`와 함께 사용하기 위해 필요합니다. `DownCast()`는 최초 runtime type check에 사용합니다. `StaticDownCast()`는 `UiStyleSheet`에서 이미 type check가 끝난 뒤 사용하므로 cached style 조회에서 `dynamic_cast`를 반복하지 않습니다.
+
+```cpp
+TextButtonStyle TextButtonStyle::DownCast(BaseHandle handle)
+{
+  return TextButtonStyle(dynamic_cast<Internal::TextButtonStyleImpl*>(handle.GetObjectPtr()));
+}
+
+TextButtonStyle TextButtonStyle::StaticDownCast(UiStyle style)
+{
+  return TextButtonStyle(static_cast<Internal::TextButtonStyleImpl*>(style.GetObjectPtr()));
 }
 ```
 
@@ -141,6 +166,30 @@ auto button = TextButton::New();
 auto styledButton = TextButton::New("OK", style);
 ```
 
+초기 style은 컴포넌트 구현 내부의 typed private helper에서 적용합니다.
+`ViewImpl`에 untyped `UiStyle` 초기화 hook을 추가하지 않습니다.
+Style sheet는 이미 `UiStyleKey<T>` 조회 시 type을 검증하고, 컴포넌트 factory도
+concrete style type을 받기 때문입니다.
+
+```cpp
+TextButton TextButtonImpl::New(TextButtonStyle style)
+{
+  DALI_ASSERT_ALWAYS(style && "TextButtonStyle must be initialized");
+
+  IntrusivePtr<TextButtonImpl> impl(new TextButtonImpl());
+  TextButton handle(*impl);
+  impl->Initialize();
+  impl->ApplyInitialStyle(style);
+  return handle;
+}
+
+void TextButtonImpl::ApplyInitialStyle(TextButtonStyle style)
+{
+  SetFontSize(style.GetFontSize());
+  SetTextColor(style.GetTextColor());
+}
+```
+
 컴포넌트가 생성 이후 사용자가 직접 설정한 property를 따로 추적하지 않는다면 runtime `SetStyle()` API를 추가하지 않습니다. 나중에 style을 다시 적용할 때 사용자가 설정한 값을 보존할지 덮어쓸지 판단하려면 property별 dirty flag가 필요하고, 메모리와 정책 복잡도가 커집니다.
 
 대부분의 컴포넌트에서:
@@ -161,26 +210,29 @@ TBD
 
 ## Style Sheet
 
-사용자는 컴포넌트들의 기본 스타일을 style sheet에 작성하고 `UiConfig`를 통해 설정할 수 있습니다.
+사용자는 `Components::UiConfig`가 가진 style sheet를 통해 컴포넌트들의 기본 스타일을 override할 수 있습니다.
+Components를 사용하는 앱에서는 `Components::UiConfig` 하나만 적용하고, foundation
+`UiConfig`를 따로 적용하지 않습니다.
 
 아래 코드는 style sheet를 사용하는 방법을 보여줍니다.
 
 ```cpp
-auto styleSheet = Components::StyleSheet::New();
-styleSheet.SetStyle(TextButtonStyle::DefaultKey(), []() -> UiStyle
-{
-  return TextButtonStyle::Builder()
-           .SetBackgroundColor(UiColor::SURFACE)
-           .SetTextColor(UiColor::ON_SURFACE)
-           .Build();
-});
+Components::UiConfig config = Components::UiConfig::New();
+config.StyleSheet()
+  .SetStyle(TextButtonStyle::DefaultKey(), []() -> UiStyle
+  {
+    return TextButtonStyle::Builder()
+             .SetBackgroundColor(UiColor::SURFACE)
+             .SetTextColor(UiColor::ON_SURFACE)
+             .Build();
+  });
 
-UiConfig config = UiConfig::New();
-config.SetStyleSheet(styleSheet);
 config.Apply();
 ```
 
 이후 `TextButton`은 config에 등록된 기본 스타일을 `TextButtonStyle::Default()`로 가져오고, 기본 `TextButton` 생성 시 이 `Default()` 스타일을 사용합니다.
+
+`StyleSheet()`가 일반 앱 override 경로입니다. Config preset이 이미 제공하는 sheet에서 시작해 `Apply()` 전에 필요한 entry만 바꿉니다. `ResetStyleSheet()`와 `StyleSheet::New()`는 provider가 sheet 전체를 교체해야 할 때 사용할 수 있습니다.
 
 > [!WARNING]
 > style sheet는 `UiConfig::Apply()` 시점에 freeze됩니다. Freeze된 style sheet는 더 이상 변경할 수 없으므로, 필요한 style entry를 모두 등록한 뒤 config에 적용해야 합니다.

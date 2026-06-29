@@ -132,8 +132,8 @@ private:
 **2. Subclass UiConfigImpl and override CreateThemeLoader()**
 
 ```cpp
-// tv-config-impl.h (integration-api level)
-class TvConfigImpl : public Dali::Ui::Integration::UiConfigImpl
+// tv-config-impl.h (provider-api level)
+class TvConfigImpl : public Dali::Ui::Provider::UiConfigImpl
 {
 public:
   static Dali::IntrusivePtr<TvConfigImpl> New() { return new TvConfigImpl(); }
@@ -164,7 +164,7 @@ public:
   }
 
 private:
-  explicit TVConfig(Dali::Ui::Integration::UiConfigImpl* impl)
+  explicit TVConfig(Dali::Ui::Provider::UiConfigImpl* impl)
   : UiConfig(impl) {}
 };
 ```

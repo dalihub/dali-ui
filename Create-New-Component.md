@@ -46,9 +46,9 @@ Providers can also set a component's default style through the style sheet in `U
 
 ### Style Class Pattern
 
-A component style class is an immutable `UiStyle` handle. A style is a complete object and is created after `UiConfig::Apply()`.
+A component style class is an immutable `UiStyle` handle. Style-related public, provider, integration, and internal files live under the `styles/` directory of their API level.
 
-`DefaultKey()` and `Default()` exist to support `StyleSheet` overrides described later. `Builtin()` provides the component's default style when no override is registered.
+`DefaultKey()` and `Default()` exist to support `StyleSheet` overrides described later. `DefaultPreset()` provides the component's cached built-in default style when no override is registered.
 
 A style class should provide:
 
@@ -58,11 +58,12 @@ class TextButtonStyle : public UiStyle
 public:
   class Builder;
 
-  static UiStyleKey DefaultKey();
+  static UiStyleKey<TextButtonStyle> DefaultKey();
 
-  static TextButtonStyle Builtin();
+  static TextButtonStyle DefaultPreset();
   static TextButtonStyle Default();
   static TextButtonStyle DownCast(BaseHandle handle);
+  static TextButtonStyle StaticDownCast(UiStyle style);
 
   Builder Configure() const;
 };
@@ -73,38 +74,62 @@ Use this meaning for each API:
 | API | Meaning |
 |---|---|
 | `DefaultKey()` | Identifies this component's default style entry in a `StyleSheet` |
-| `Builtin()` | Built-in default style used when there is no `StyleSheet` override |
-| `Default()` | Resolves a `StyleSheet` override, falling back to `Builtin()` |
+| `DefaultPreset()` | Cached built-in default preset used when there is no `StyleSheet` override |
+| `Default()` | Resolves a `StyleSheet` override, falling back to `DefaultPreset()` |
+| `DownCast()` | Type-checks a generic handle as this concrete style type |
+| `StaticDownCast()` | Creates a concrete handle from a style already type-checked by `UiStyleSheet` without repeated `dynamic_cast` |
 | `Configure()` | Clones an existing immutable style into a mutable builder |
 | `Builder()` | Starts from built-in defaults and creates a complete style |
 
-`Builtin()`, `Default()`, and `Builder()` require `UiConfig::Apply()` to have already completed.
-
-`Builtin()` is a static cached accessor. It must not create a new style object on every call.
+`DefaultKey()` returns the typed style sheet key for this component's default style entry. Allocate it once in static storage.
 
 ```cpp
-TextButtonStyle TextButtonStyle::Builtin()
+UiStyleKey<TextButtonStyle> TextButtonStyle::DefaultKey()
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle::Builtin() requires UiConfig::Apply()");
+  static UiStyleKey<TextButtonStyle> key = UiStyleKey<TextButtonStyle>::Alloc();
+  return key;
+}
+```
+
+`DefaultPreset()` is a static cached accessor for the component's built-in default style. It must not create a new style object on every call. Like all initialized style objects, the preset may be created or accessed only after `UiConfig::Apply()`.
+
+```cpp
+TextButtonStyle TextButtonStyle::DefaultPreset()
+{
+  DebugAssertStyleConfigApplied();
 
   static TextButtonStyle style = TextButtonStyle::Builder().Build();
   return style;
 }
 ```
 
-`Default()` resolves an override from the current config. If no override is registered, it returns `Builtin()`.
+`Default()` resolves an override from the current config. If no override is registered, it returns `DefaultPreset()`. `UiConfig::Apply()` must have happened before this function is called.
 
 ```cpp
 TextButtonStyle TextButtonStyle::Default()
 {
-  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "TextButtonStyle::Default() requires UiConfig::Apply()");
+  DebugAssertStyleConfigApplied();
 
-  TextButtonStyle style = TextButtonStyle::DownCast(UiConfig::GetCurrent().GetStyle(DefaultKey()));
+  TextButtonStyle style = UiConfig::GetCurrent().GetStyle(DefaultKey());
   if(style)
   {
     return style;
   }
-  return Builtin();
+  return DefaultPreset();
+}
+```
+
+`DownCast()` and `StaticDownCast()` are required when a style class is used with `UiStyleSheet::GetStyle(UiStyleKey<T>)`. `DownCast()` performs the first runtime type check. `StaticDownCast()` is used after `UiStyleSheet` has already verified the type, so cached style lookups do not repeat `dynamic_cast`.
+
+```cpp
+TextButtonStyle TextButtonStyle::DownCast(BaseHandle handle)
+{
+  return TextButtonStyle(dynamic_cast<Internal::TextButtonStyleImpl*>(handle.GetObjectPtr()));
+}
+
+TextButtonStyle TextButtonStyle::StaticDownCast(UiStyle style)
+{
+  return TextButtonStyle(static_cast<Internal::TextButtonStyleImpl*>(style.GetObjectPtr()));
 }
 ```
 
@@ -143,6 +168,30 @@ auto button = TextButton::New();
 auto styledButton = TextButton::New("OK", style);
 ```
 
+Apply the initial style inside the component implementation through a typed
+private helper. Do not add an untyped `UiStyle` initialization hook to `ViewImpl`.
+The style sheet already validates `UiStyleKey<T>` lookups, and the component
+factory receives the concrete style type.
+
+```cpp
+TextButton TextButtonImpl::New(TextButtonStyle style)
+{
+  DALI_ASSERT_ALWAYS(style && "TextButtonStyle must be initialized");
+
+  IntrusivePtr<TextButtonImpl> impl(new TextButtonImpl());
+  TextButton handle(*impl);
+  impl->Initialize();
+  impl->ApplyInitialStyle(style);
+  return handle;
+}
+
+void TextButtonImpl::ApplyInitialStyle(TextButtonStyle style)
+{
+  SetFontSize(style.GetFontSize());
+  SetTextColor(style.GetTextColor());
+}
+```
+
 Do not add a runtime `SetStyle()` API unless the component explicitly tracks which properties were set by the user after construction. Otherwise, a later style application cannot know whether it should preserve or overwrite those user-set values.
 
 For most components:
@@ -163,26 +212,33 @@ TBD
 
 ## Style Sheet
 
-Users can write components' default styles in a style sheet and set them through `UiConfig`.
+Users can override components' default styles through the style sheet owned by
+`Components::UiConfig`.
+Apply only `Components::UiConfig` in applications that use components; do not
+apply a separate foundation `UiConfig`.
 
 The following code shows how to use a style sheet:
 
 ```cpp
-auto styleSheet = Components::StyleSheet::New();
-styleSheet.SetStyle(TextButtonStyle::DefaultKey(), []() -> UiStyle
-{
-  return TextButtonStyle::Builder()
-           .SetBackgroundColor(UiColor::SURFACE)
-           .SetTextColor(UiColor::ON_SURFACE)
-           .Build();
-});
+Components::UiConfig config = Components::UiConfig::New();
+config.StyleSheet()
+  .SetStyle(TextButtonStyle::DefaultKey(), []() -> UiStyle
+  {
+    return TextButtonStyle::Builder()
+             .SetBackgroundColor(UiColor::SURFACE)
+             .SetTextColor(UiColor::ON_SURFACE)
+             .Build();
+  });
 
-UiConfig config = UiConfig::New();
-config.SetStyleSheet(styleSheet);
 config.Apply();
 ```
 
 After that, `TextButton` gets the default style registered in the config through `TextButtonStyle::Default()`, and uses this `Default()` style for default `TextButton` creation.
+
+`StyleSheet()` is the normal application override path: start from the sheet
+already provided by the config preset and change selected entries before
+`Apply()`. `ResetStyleSheet()` and `StyleSheet::New()` are still available when a
+provider wants to replace the whole sheet.
 
 > [!WARNING]
 > The style sheet set on `UiConfig` is frozen when `UiConfig::Apply()` is called. A frozen style sheet cannot be changed, so register all required style entries before applying the config.
