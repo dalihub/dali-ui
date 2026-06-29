@@ -17,7 +17,7 @@
  *
  */
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
+#include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/input-editor-properties.h>
 #include <dali-ui-foundation/public-api/text/input-filter.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
@@ -1057,7 +1057,8 @@ public: // Setters for chaining
   /**
    * @brief Sets the font variation axes.
    *
-   * This replaces all previously set font variation axes.
+   * This replaces all previously set font variation axes. Passing
+   * Text::FontVariation::None() or an empty axis vector clears the font variation.
    *
    * If duplicate axis tags are provided, the last value is used.
    *
@@ -1087,7 +1088,8 @@ public: // Setters for chaining
    *
    * If duplicate axis tags are specified, the last value is used.
    *
-   * If the input string is invalid, the font variation is not changed.
+   * If the input string is empty or invalid, the font variation is not changed.
+   * Use SetFontVariation(Text::FontVariation::None()) to clear the font variation.
    *
    * Unsupported axis tags may be ignored depending on the selected font.
    *
@@ -1101,13 +1103,6 @@ public: // Setters for chaining
    * @return The font variation axes.
    */
   Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
-
-  /**
-   * @brief Clears the font variation.
-   *
-   * This removes all previously set font variation axes.
-   */
-  void ClearFontVariation();
 
   /**
    * @brief Sets the translatable placeholder resource ID.

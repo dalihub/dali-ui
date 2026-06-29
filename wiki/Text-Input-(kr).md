@@ -188,7 +188,11 @@ InputField field = InputField::New();
 field.SetTextColor(UiColor::PRIMARY);
 field.SetPlaceholderColor(UiColor::OUTLINE);
 field.SetFontSize(22.0f);
+field.SetFontVariation("wght=600,wdth=90");
+field.SetFontVariation(Text::FontVariation::None());
 ~~~
+
+font variation 설정을 clear하려면 `SetFontVariation(Text::FontVariation::None())`을 사용합니다. 빈 settings 문자열은 invalid로 처리되며 현재 font variation은 변경되지 않습니다.
 
 <br/>
 

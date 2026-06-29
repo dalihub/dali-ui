@@ -22,7 +22,7 @@ namespace
 constexpr float STACK_SPACING = 10.0f;
 constexpr float STACK_PADDING = 20.0f;
 const char* DEFAULT_FONT_FAMILY = "Ubuntu Mono";
-const char* VARIABLE_FONT_FAMILY = "Noto Sans";
+const char* VARIABLE_FONT_FAMILY = "Noto Sans Mono";
 const char* SAMPLE_TEXT = "The quick brown fox jumps over the lazy dog";
 
 Label CreateSectionLabel(const char* text)
@@ -75,7 +75,7 @@ private:
     titleLabel.SetFontSize(20.0f);
     root.Add(titleLabel);
 
-    Label instructionLabel = Label::New("Press '1' to clear, '2' to change variation, '3' to set via string");
+    Label instructionLabel = Label::New("Press '1' to clear with None(), '2' to change variation, '3' to set via string");
     instructionLabel.SetFontSize(14.0f);
     instructionLabel.SetBackgroundColor(UiColor(0xE0E0E0));
     instructionLabel.SetPadding(Extents(10, 10, 10, 10));
@@ -169,14 +169,14 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      // Clears font variation
-      mLabel200.ClearFontVariation();
-      mLabel300.ClearFontVariation();
-      mLabel400.ClearFontVariation();
-      mLabel500.ClearFontVariation();
-      mLabel600.ClearFontVariation();
-      mLabel700.ClearFontVariation();
-      mField.ClearFontVariation();
+      // Clear font variation using FontVariation::None().
+      mLabel200.SetFontVariation(Text::FontVariation::None());
+      mLabel300.SetFontVariation(Text::FontVariation::None());
+      mLabel400.SetFontVariation(Text::FontVariation::None());
+      mLabel500.SetFontVariation(Text::FontVariation::None());
+      mLabel600.SetFontVariation(Text::FontVariation::None());
+      mLabel700.SetFontVariation(Text::FontVariation::None());
+      mField.SetFontVariation(Text::FontVariation::None());
       SetFontFamily(DEFAULT_FONT_FAMILY);
     }
     else if(event.GetKeyName() == "2")

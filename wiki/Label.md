@@ -178,8 +178,15 @@ label.SetFontFamily("Sans VF");
 label.SetFontVariation(axes);
 ~~~
 
+Clear using `FontVariation::None()`:
+
+~~~cpp
+label.SetFontVariation(Text::FontVariation::None());
+~~~
+
 > [!NOTE]
 > If the font does not support a variation axis, the axis value may be ignored. `"Sans VF"` in the example above is a placeholder variable font name.
+> An empty font variation settings string is invalid and does not clear or change the current font variation. Use `SetFontVariation(Text::FontVariation::None())` to clear it.
 
 See also: [text-font-variation-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-font-variation-example.cpp)
 

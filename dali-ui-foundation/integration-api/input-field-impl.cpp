@@ -1140,7 +1140,10 @@ void InputFieldImpl::SetFontVariation(const Dali::String& settings)
 {
   if(settings.Empty())
   {
-    DALI_LOG_WARNING("[%p] Empty font variation string is not allowed. Use ClearFontVariation() instead.\n", mController.Get());
+    DALI_LOG_WARNING(
+      "[%p] Empty font variation string is not allowed. "
+      "Use SetFontVariation(Text::FontVariation::None()) instead.\n",
+      mController.Get());
     return;
   }
 
@@ -1158,13 +1161,6 @@ void InputFieldImpl::SetFontVariation(const Dali::String& settings)
 Dali::Vector<Text::FontVariationAxis> InputFieldImpl::GetFontVariation() const
 {
   return mController->GetVariations();
-}
-
-void InputFieldImpl::ClearFontVariation()
-{
-  // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  mController->ClearVariationsMap();
 }
 
 void InputFieldImpl::SetTranslatablePlaceholder(StringView resourceId)

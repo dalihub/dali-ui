@@ -1030,8 +1030,19 @@ int UtcDaliInputEditorFontVariation(void)
   DALI_TEST_EQUALS(result[1].GetTag(), Dali::String("wdth"), TEST_LOCATION);
   DALI_TEST_EQUALS(result[1].GetValue(), 80.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
-  // Clear
-  inputEditor.ClearFontVariation();
+  // Empty string is invalid and should not clear or change the font variation.
+  inputEditor.SetFontVariation("");
+
+  result = inputEditor.GetFontVariation();
+
+  DALI_TEST_EQUALS(result.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[0].GetTag(), Dali::String("wght"), TEST_LOCATION);
+  DALI_TEST_EQUALS(result[0].GetValue(), 500.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[1].GetTag(), Dali::String("wdth"), TEST_LOCATION);
+  DALI_TEST_EQUALS(result[1].GetValue(), 80.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  // Clear via None()
+  inputEditor.SetFontVariation(Text::FontVariation::None());
 
   result = inputEditor.GetFontVariation();
   DALI_TEST_EQUALS(result.Count(), 0u, TEST_LOCATION);

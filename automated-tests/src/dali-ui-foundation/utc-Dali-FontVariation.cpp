@@ -157,6 +157,8 @@ int UtcDaliFontVariationFromStringEmpty(void)
   const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(FontVariation::None().Count(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(FontVariation::ToString(FontVariation::None()), Dali::String(""), TEST_LOCATION);
   END_TEST;
 }
 

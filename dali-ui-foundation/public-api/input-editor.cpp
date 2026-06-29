@@ -630,11 +630,6 @@ Dali::Vector<Text::FontVariationAxis> InputEditor::GetFontVariation() const
   return GetImpl(*this).GetFontVariation();
 }
 
-void InputEditor::ClearFontVariation()
-{
-  GetImpl(*this).ClearFontVariation();
-}
-
 void InputEditor::SetTranslatablePlaceholder(StringView resourceId)
 {
   GetImpl(*this).SetTranslatablePlaceholder(resourceId);

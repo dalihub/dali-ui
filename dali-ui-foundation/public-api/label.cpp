@@ -487,11 +487,6 @@ Dali::Vector<Text::FontVariationAxis> Label::GetFontVariation() const
   return GetImpl(*this).GetFontVariation();
 }
 
-void Label::ClearFontVariation()
-{
-  GetImpl(*this).ClearFontVariation();
-}
-
 void Label::SetTextCutoutEnabled(bool enabled)
 {
   GetImpl(*this).SetTextCutoutEnabled(enabled);

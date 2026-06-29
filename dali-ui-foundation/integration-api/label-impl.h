@@ -463,11 +463,6 @@ public:
   Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
 
   /**
-   * @copydoc Dali::Ui::Label::ClearFontVariation
-   */
-  void ClearFontVariation();
-
-  /**
    * @brief Registers or retrieves a font variation property for the given axis tag.
    *
    * If a property with the same tag is already registered, the existing property

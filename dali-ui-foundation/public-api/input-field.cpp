@@ -620,11 +620,6 @@ Dali::Vector<Text::FontVariationAxis> InputField::GetFontVariation() const
   return GetImpl(*this).GetFontVariation();
 }
 
-void InputField::ClearFontVariation()
-{
-  GetImpl(*this).ClearFontVariation();
-}
-
 void InputField::SetTranslatablePlaceholder(StringView resourceId)
 {
   GetImpl(*this).SetTranslatablePlaceholder(resourceId);

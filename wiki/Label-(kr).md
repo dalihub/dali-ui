@@ -178,8 +178,15 @@ label.SetFontFamily("Sans VF");
 label.SetFontVariation(axes);
 ~~~
 
+`FontVariation::None()`으로 clear:
+
+~~~cpp
+label.SetFontVariation(Text::FontVariation::None());
+~~~
+
 > [!NOTE]
 > 사용하는 font가 해당 variation axis를 지원하지 않으면 axis 값은 무시될 수 있습니다. 위 예시의 `"Sans VF"`는 variable font 이름의 예시입니다.
+> 빈 font variation settings 문자열은 invalid로 처리되며 현재 font variation을 clear하거나 변경하지 않습니다. clear가 필요한 경우 `SetFontVariation(Text::FontVariation::None())`을 사용합니다.
 
 참고 샘플: [text-font-variation-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-font-variation-example.cpp)
 

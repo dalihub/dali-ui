@@ -609,11 +609,6 @@ public:
   Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
 
   /**
-   * @copydoc Dali::Ui::InputEditor::ClearFontVariation
-   */
-  void ClearFontVariation();
-
-  /**
    * @see Dali::Ui::InputEditor::SetTranslatablePlaceholder
    */
   void SetTranslatablePlaceholder(StringView resourceId);

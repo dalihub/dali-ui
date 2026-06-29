@@ -245,6 +245,12 @@ std::string FloatToString(float value)
 
 } // namespace
 
+const Dali::Vector<FontVariationAxis>& FontVariation::None()
+{
+  static const Dali::Vector<FontVariationAxis> none;
+  return none;
+}
+
 Dali::Vector<FontVariationAxis> FontVariation::FromString(const Dali::String& settings)
 {
   Dali::Vector<FontVariationAxis> axes;

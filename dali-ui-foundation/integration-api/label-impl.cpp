@@ -1000,7 +1000,10 @@ void LabelImpl::SetFontVariation(const Dali::String& settings)
 {
   if(settings.Empty())
   {
-    DALI_LOG_WARNING("[%p] Empty font variation string is not allowed. Use ClearFontVariation() instead.\n", mController.Get());
+    DALI_LOG_WARNING(
+      "[%p] Empty font variation string is not allowed. "
+      "Use SetFontVariation(Text::FontVariation::None()) instead.\n",
+      mController.Get());
     return;
   }
 
@@ -1018,13 +1021,6 @@ void LabelImpl::SetFontVariation(const Dali::String& settings)
 Dali::Vector<Text::FontVariationAxis> LabelImpl::GetFontVariation() const
 {
   return mController->GetVariations();
-}
-
-void LabelImpl::ClearFontVariation()
-{
-  // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
-  mController->ClearVariationsMap();
 }
 
 // Integration-only implementation for now until public API support is introduced.
