@@ -111,7 +111,7 @@ private:
     window.SetBackgroundColor(Color::WHITE);
     window.KeyEventSignal().Connect(this, &TooltipShadowSample::OnKeyEvent);
 
-    const Size ws = window.GetSize();
+    const PositionSize ws = window.GetPositionSize();
 
     // The canvas is sized to the bubble bounds (tail included). Auto-padding makes room for the
     // effect inside this buffer, so no manual margin is required here.

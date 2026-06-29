@@ -82,7 +82,7 @@ public:
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &AbsoluteLayoutWrapContentPositionProportionalLabelController::OnKeyEvent);
-    window.ResizeSignal().Connect(this, &AbsoluteLayoutWrapContentPositionProportionalLabelController::OnWindowResized);
+    window.ResizedSignal().Connect(this, &AbsoluteLayoutWrapContentPositionProportionalLabelController::OnWindowResized);
   }
 
   void OnKeyEvent(Window window, KeyEvent event)
@@ -120,7 +120,8 @@ private:
     mToggleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mToggleButton.Add(mToggleLabel);
 
-    PositionToggleButton(window.GetSize());
+    PositionSize positionSize = window.GetPositionSize();
+    PositionToggleButton(Window::WindowSize(positionSize.width, positionSize.height));
     mToggleButton.ConnectClickedSignal(this, [this](View view, InputEvent event) -> bool {
       mFixedSize = !mFixedSize;
 
