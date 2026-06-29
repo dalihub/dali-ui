@@ -30,7 +30,7 @@ jobs:
         # git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-toolkit.git
         # git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-extension.git
         # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/lottie-player.git
-        # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
+        git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
 
     - name: Setup environment for DALi
       run: |
@@ -45,10 +45,10 @@ jobs:
     - name: Build DALi
       run: |
         . setenv
-        # cd tizenvg
-        # meson --prefix=$DESKTOP_PREFIX --libdir=$DESKTOP_PREFIX/lib build
-        # ninja -C build install
-        # cd -
+        cd tizenvg
+        meson setup builddir -Dtools=svg2png --prefix $DESKTOP_PREFIX --libdir $DESKTOP_PREFIX/lib
+        ninja -C builddir install
+        cd -
         export CC=gcc
         export CXX=g++
         cd dali-core/build/tizen
