@@ -1260,13 +1260,13 @@ int UtcDaliTextFontVariationNestedAxisCopyAssignFromMovedN(void)
   END_TEST;
 }
 
-// FitRange Tests
+// Text::Fit::Range Tests
 
 int UtcDaliTextFitRangeFontSizeP(void)
 {
   UiTestApplication application;
 
-  Text::FitRange fitRange;
+  Text::Fit::Range fitRange;
 
   fitRange.SetMinimumFontSize(10.0f);
   DALI_TEST_EQUALS(fitRange.GetMinimumFontSize(), 10.0f, TEST_LOCATION);
@@ -1284,12 +1284,12 @@ int UtcDaliTextFitRangeCopyCtorP(void)
 {
   UiTestApplication application;
 
-  Text::FitRange original;
+  Text::Fit::Range original;
   original.SetMinimumFontSize(12.0f);
   original.SetMaximumFontSize(24.0f);
   original.SetFontSizeStep(4.0f);
 
-  Text::FitRange copy(original);
+  Text::Fit::Range copy(original);
 
   DALI_TEST_EQUALS(copy.GetMinimumFontSize(), 12.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetMaximumFontSize(), 24.0f, TEST_LOCATION);
@@ -1302,12 +1302,12 @@ int UtcDaliTextFitRangeMoveCtorP(void)
 {
   UiTestApplication application;
 
-  Text::FitRange original;
+  Text::Fit::Range original;
   original.SetMinimumFontSize(14.0f);
   original.SetMaximumFontSize(28.0f);
   original.SetFontSizeStep(2.0f);
 
-  Text::FitRange moved(std::move(original));
+  Text::Fit::Range moved(std::move(original));
 
   DALI_TEST_EQUALS(moved.GetMinimumFontSize(), 14.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetMaximumFontSize(), 28.0f, TEST_LOCATION);
@@ -1320,11 +1320,11 @@ int UtcDaliTextFitRangeMovedFromGetN(void)
 {
   UiTestApplication application;
 
-  Text::FitRange original;
-  Text::FitRange moved(std::move(original));
+  Text::Fit::Range original;
+  Text::Fit::Range moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(original.GetMinimumFontSize(), "Cannot use a moved-from FitRange object");
+  DALI_TEST_ASSERTION(original.GetMinimumFontSize(), "Cannot use a moved-from Text::Fit::Range object");
 
   END_TEST;
 }
@@ -1333,11 +1333,11 @@ int UtcDaliTextFitRangeCopyFromMovedN(void)
 {
   UiTestApplication application;
 
-  Text::FitRange original;
-  Text::FitRange moved(std::move(original));
+  Text::Fit::Range original;
+  Text::Fit::Range moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(Text::FitRange copy(original), "Cannot use a moved-from FitRange object");
+  DALI_TEST_ASSERTION(Text::Fit::Range copy(original), "Cannot use a moved-from Text::Fit::Range object");
 
   END_TEST;
 }
@@ -1346,12 +1346,12 @@ int UtcDaliTextFitRangeCopyAssignP(void)
 {
   UiTestApplication application;
 
-  Text::FitRange original;
+  Text::Fit::Range original;
   original.SetMinimumFontSize(10.0f);
   original.SetMaximumFontSize(20.0f);
   original.SetFontSizeStep(2.0f);
 
-  Text::FitRange copy;
+  Text::Fit::Range copy;
   copy = original;
 
   DALI_TEST_EQUALS(copy.GetMinimumFontSize(), 10.0f, TEST_LOCATION);
@@ -1368,12 +1368,12 @@ int UtcDaliTextFitRangeMoveAssignP(void)
 {
   UiTestApplication application;
 
-  Text::FitRange original;
+  Text::Fit::Range original;
   original.SetMinimumFontSize(12.0f);
   original.SetMaximumFontSize(24.0f);
   original.SetFontSizeStep(3.0f);
 
-  Text::FitRange moved;
+  Text::Fit::Range moved;
   moved = std::move(original);
 
   DALI_TEST_EQUALS(moved.GetMinimumFontSize(), 12.0f, TEST_LOCATION);
@@ -1387,11 +1387,11 @@ int UtcDaliTextFitRangeMovedFromSetN(void)
 {
   UiTestApplication application;
 
-  Text::FitRange original;
-  Text::FitRange moved(std::move(original));
+  Text::Fit::Range original;
+  Text::Fit::Range moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(original.SetMinimumFontSize(10.0f), "Cannot use a moved-from FitRange object");
+  DALI_TEST_ASSERTION(original.SetMinimumFontSize(10.0f), "Cannot use a moved-from Text::Fit::Range object");
 
   END_TEST;
 }
@@ -1400,24 +1400,24 @@ int UtcDaliTextFitRangeCopyAssignFromMovedN(void)
 {
   UiTestApplication application;
 
-  Text::FitRange original;
-  Text::FitRange moved(std::move(original));
+  Text::Fit::Range original;
+  Text::Fit::Range moved(std::move(original));
   (void)moved;
 
-  Text::FitRange copy;
+  Text::Fit::Range copy;
 
-  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from FitRange object");
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from Text::Fit::Range object");
 
   END_TEST;
 }
 
-// FitCandidate Tests
+// Text::Fit::Candidate Tests
 
 int UtcDaliTextFitCandidateFontSizeP(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate candidate;
+  Text::Fit::Candidate candidate;
 
   candidate.SetFontSize(18.0f);
   DALI_TEST_EQUALS(candidate.GetFontSize(), 18.0f, TEST_LOCATION);
@@ -1432,7 +1432,7 @@ int UtcDaliTextFitCandidateLineHeightP(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate candidate;
+  Text::Fit::Candidate candidate;
 
   candidate.SetLineHeight(1.5f);
   DALI_TEST_EQUALS(candidate.GetLineHeight(), 1.5f, TEST_LOCATION);
@@ -1447,11 +1447,11 @@ int UtcDaliTextFitCandidateCopyCtorP(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate original;
+  Text::Fit::Candidate original;
   original.SetFontSize(20.0f);
   original.SetLineHeight(1.5f);
 
-  Text::FitCandidate copy(original);
+  Text::Fit::Candidate copy(original);
 
   DALI_TEST_EQUALS(copy.GetFontSize(), 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetLineHeight(), 1.5f, TEST_LOCATION);
@@ -1463,11 +1463,11 @@ int UtcDaliTextFitCandidateMoveCtorP(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate original;
+  Text::Fit::Candidate original;
   original.SetFontSize(22.0f);
   original.SetLineHeight(1.8f);
 
-  Text::FitCandidate moved(std::move(original));
+  Text::Fit::Candidate moved(std::move(original));
 
   DALI_TEST_EQUALS(moved.GetFontSize(), 22.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetLineHeight(), 1.8f, TEST_LOCATION);
@@ -1479,11 +1479,11 @@ int UtcDaliTextFitCandidateMovedFromGetN(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate original;
-  Text::FitCandidate moved(std::move(original));
+  Text::Fit::Candidate original;
+  Text::Fit::Candidate moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(original.GetFontSize(), "Cannot use a moved-from FitCandidate object");
+  DALI_TEST_ASSERTION(original.GetFontSize(), "Cannot use a moved-from Text::Fit::Candidate object");
 
   END_TEST;
 }
@@ -1492,11 +1492,11 @@ int UtcDaliTextFitCandidateCopyFromMovedN(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate original;
-  Text::FitCandidate moved(std::move(original));
+  Text::Fit::Candidate original;
+  Text::Fit::Candidate moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(Text::FitCandidate copy(original), "Cannot use a moved-from FitCandidate object");
+  DALI_TEST_ASSERTION(Text::Fit::Candidate copy(original), "Cannot use a moved-from Text::Fit::Candidate object");
 
   END_TEST;
 }
@@ -1505,11 +1505,11 @@ int UtcDaliTextFitCandidateCopyAssignP(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate original;
+  Text::Fit::Candidate original;
   original.SetFontSize(18.0f);
   original.SetLineHeight(1.5f);
 
-  Text::FitCandidate copy;
+  Text::Fit::Candidate copy;
   copy = original;
 
   DALI_TEST_EQUALS(copy.GetFontSize(), 18.0f, TEST_LOCATION);
@@ -1525,11 +1525,11 @@ int UtcDaliTextFitCandidateMoveAssignP(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate original;
+  Text::Fit::Candidate original;
   original.SetFontSize(20.0f);
   original.SetLineHeight(2.0f);
 
-  Text::FitCandidate moved;
+  Text::Fit::Candidate moved;
   moved = std::move(original);
 
   DALI_TEST_EQUALS(moved.GetFontSize(), 20.0f, TEST_LOCATION);
@@ -1542,11 +1542,11 @@ int UtcDaliTextFitCandidateMovedFromSetN(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate original;
-  Text::FitCandidate moved(std::move(original));
+  Text::Fit::Candidate original;
+  Text::Fit::Candidate moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(original.SetFontSize(16.0f), "Cannot use a moved-from FitCandidate object");
+  DALI_TEST_ASSERTION(original.SetFontSize(16.0f), "Cannot use a moved-from Text::Fit::Candidate object");
 
   END_TEST;
 }
@@ -1555,13 +1555,122 @@ int UtcDaliTextFitCandidateCopyAssignFromMovedN(void)
 {
   UiTestApplication application;
 
-  Text::FitCandidate original;
-  Text::FitCandidate moved(std::move(original));
+  Text::Fit::Candidate original;
+  Text::Fit::Candidate moved(std::move(original));
   (void)moved;
 
-  Text::FitCandidate copy;
+  Text::Fit::Candidate copy;
 
-  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from FitCandidate object");
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from Text::Fit::Candidate object");
+
+  END_TEST;
+}
+
+// Text::Fit Tests
+
+int UtcDaliTextFitNoneP(void)
+{
+  UiTestApplication application;
+
+  Text::Fit fit;
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::NONE);
+  DALI_TEST_CHECK(Text::Fit::None().GetType() == Text::Fit::Type::NONE);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitFromRangeP(void)
+{
+  UiTestApplication application;
+
+  Text::Fit::Range   range(10.0f, 40.0f, 2.0f);
+  Text::Fit fit = Text::Fit::FromRange(range);
+
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::RANGE);
+
+  const Text::Fit::Range& result = fit.GetRange();
+  DALI_TEST_EQUALS(result.GetMinimumFontSize(), 10.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.GetMaximumFontSize(), 40.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.GetFontSizeStep(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitFromCandidatesP(void)
+{
+  UiTestApplication application;
+
+  Dali::Vector<Text::Fit::Candidate> candidates;
+  candidates.PushBack(Text::Fit::Candidate(16.0f, 32.0f));
+  candidates.PushBack(Text::Fit::Candidate(24.0f, 48.0f));
+
+  Text::Fit fit = Text::Fit::FromCandidates(candidates);
+
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::CANDIDATES);
+
+  const Dali::Vector<Text::Fit::Candidate>& result = fit.GetCandidates();
+  DALI_TEST_EQUALS(result.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[0].GetFontSize(), 16.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[0].GetLineHeight(), 32.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[1].GetFontSize(), 24.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(result[1].GetLineHeight(), 48.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitFromEmptyCandidatesP(void)
+{
+  UiTestApplication application;
+
+  Dali::Vector<Text::Fit::Candidate> candidates;
+  Text::Fit                            fit = Text::Fit::FromCandidates(candidates);
+
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::NONE);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitCopyMoveP(void)
+{
+  UiTestApplication application;
+
+  Text::Fit::Range   range(12.0f, 36.0f, 3.0f);
+  Text::Fit original = Text::Fit::FromRange(range);
+  Text::Fit copy(original);
+
+  DALI_TEST_CHECK(copy.GetType() == Text::Fit::Type::RANGE);
+  DALI_TEST_EQUALS(copy.GetRange().GetMaximumFontSize(), 36.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  Text::Fit moved(std::move(copy));
+
+  DALI_TEST_CHECK(moved.GetType() == Text::Fit::Type::RANGE);
+  DALI_TEST_EQUALS(moved.GetRange().GetFontSizeStep(), 3.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFitWrongGetterN(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_ASSERTION(Text::Fit::None().GetRange(), "Text::Fit does not contain a range.");
+
+  Text::Fit::Range   range;
+  Text::Fit          fit = Text::Fit::FromRange(range);
+  DALI_TEST_ASSERTION(fit.GetCandidates(), "Text::Fit does not contain candidates.");
+
+  END_TEST;
+}
+
+int UtcDaliTextFitMovedFromGetN(void)
+{
+  UiTestApplication application;
+
+  Text::Fit original;
+  Text::Fit moved(std::move(original));
+  (void)moved;
+
+  DALI_TEST_ASSERTION(original.GetType(), "Cannot use a moved-from Text::Fit object");
 
   END_TEST;
 }

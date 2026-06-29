@@ -1543,18 +1543,18 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 #ifdef TRACE_ENABLED
     if(gTraceFilter && gTraceFilter->IsTraceEnabled())
     {
-      DALI_LOG_RELEASE_INFO("AsyncTextLoader::RenderTextFit -> TextFitCandidate\n");
+      DALI_LOG_RELEASE_INFO("AsyncTextLoader::RenderTextFit -> TextFit candidate mode\n");
     }
 #endif
 
-    Dali::Vector<Ui::Text::FitCandidate> fitCandidates  = parameters.textFitCandidates;
-    int                                  candidateCount = static_cast<int>(fitCandidates.Count());
+    Dali::Vector<Ui::Text::Fit::Candidate> fitCandidates  = parameters.textFitCandidates;
+    int                                    candidateCount = static_cast<int>(fitCandidates.Count());
 
     if(candidateCount == 0)
     {
       DALI_LOG_ERROR("fitCandidates is empty, render with default value, point size:%f, line height:%f\n",
                      parameters.fontSize, parameters.minLineSize);
-      fitCandidates.PushBack(Ui::Text::FitCandidate(ConvertPointToPixel(parameters.fontSize, mModule.GetFontClient()), parameters.minLineSize));
+      fitCandidates.PushBack(Ui::Text::Fit::Candidate(ConvertPointToPixel(parameters.fontSize, mModule.GetFontClient()), parameters.minLineSize));
       candidateCount = 1;
     }
 
@@ -1584,10 +1584,10 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
     // Set the first candidate (minimum font size) as the default best value.
     // If the search does not find an optimal value, the minimum point size will be used to text fit.
-    const Ui::Text::FitCandidate& firstCandidate        = fitCandidates[0];
-    bool                          bestSizeUpdatedLatest = false;
-    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient()) * parameters.effectiveTextScale;
-    float                         bestLineHeight        = firstCandidate.GetLineHeight();
+    const Ui::Text::Fit::Candidate& firstCandidate        = fitCandidates[0];
+    bool                            bestSizeUpdatedLatest = false;
+    float                           bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize(), mModule.GetFontClient()) * parameters.effectiveTextScale;
+    float                           bestLineHeight        = firstCandidate.GetLineHeight();
 
     if(binarySearch)
     {
@@ -1596,11 +1596,11 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
 
       while(left <= right)
       {
-        const int                     mid            = left + (right - left) / 2;
-        const Ui::Text::FitCandidate& candidate      = fitCandidates[mid];
-        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize(), mModule.GetFontClient()) * parameters.effectiveTextScale;
-        const float                   testLineHeight = candidate.GetLineHeight();
-        parameters.minLineSize                       = testLineHeight;
+        const int                       mid            = left + (right - left) / 2;
+        const Ui::Text::Fit::Candidate& candidate      = fitCandidates[mid];
+        const float                     testPointSize  = ConvertPixelToPoint(candidate.GetFontSize(), mModule.GetFontClient()) * parameters.effectiveTextScale;
+        const float                     testLineHeight = candidate.GetLineHeight();
+        parameters.minLineSize                         = testLineHeight;
 
         if(CheckForTextFit(parameters, testPointSize, allowedSize))
         {

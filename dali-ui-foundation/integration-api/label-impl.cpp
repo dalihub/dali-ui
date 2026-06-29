@@ -899,7 +899,29 @@ Text::Bevel LabelImpl::GetTextBevel() const
   return bevel;
 }
 
-void LabelImpl::SetTextFit(const Text::FitRange& range)
+void LabelImpl::SetTextFit(const Text::Fit& fit)
+{
+  switch(fit.GetType())
+  {
+    case Text::Fit::Type::NONE:
+    {
+      ClearTextFitInternal();
+      break;
+    }
+    case Text::Fit::Type::RANGE:
+    {
+      SetTextFit(fit.GetRange());
+      break;
+    }
+    case Text::Fit::Type::CANDIDATES:
+    {
+      SetTextFit(fit.GetCandidates());
+      break;
+    }
+  }
+}
+
+void LabelImpl::SetTextFit(const Text::Fit::Range& range)
 {
   DALI_LOG_RELEASE_INFO("[%p] min:%f, max:%f, step:%f\n", mController.Get(), range.GetMinimumFontSize(), range.GetMaximumFontSize(), range.GetFontSizeStep());
   // If TextFitCandidates is enabled, this should be disabled.
@@ -916,9 +938,15 @@ void LabelImpl::SetTextFit(const Text::FitRange& range)
   InvalidateTextMeasure();
 }
 
-void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
+void LabelImpl::SetTextFit(const Dali::Vector<Text::Fit::Candidate>& candidates)
 {
   DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), candidates.Count());
+  if(candidates.Empty())
+  {
+    ClearTextFitInternal();
+    return;
+  }
+
   // If TextFit is enabled, this should be disabled.
   if(mController->IsTextFitEnabled())
   {
@@ -929,7 +957,24 @@ void LabelImpl::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
   InvalidateTextMeasure();
 }
 
-void LabelImpl::ClearTextFit()
+Text::Fit LabelImpl::GetTextFit() const
+{
+  if(mController->IsTextFitEnabled())
+  {
+    return Text::Fit::FromRange(Text::Fit::Range(mController->GetTextFitMinSize(Text::Controller::FontSizeType::PIXEL_SIZE),
+                                                 mController->GetTextFitMaxSize(Text::Controller::FontSizeType::PIXEL_SIZE),
+                                                 mController->GetTextFitStepSize(Text::Controller::FontSizeType::PIXEL_SIZE)));
+  }
+
+  if(mController->IsTextFitCandidatesEnabled())
+  {
+    return Text::Fit::FromCandidates(mController->GetTextFitCandidates());
+  }
+
+  return Text::Fit::None();
+}
+
+void LabelImpl::ClearTextFitInternal()
 {
   if(mController->IsTextFitEnabled() || mController->IsTextFitCandidatesEnabled())
   {
@@ -1731,7 +1776,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   {
     mController->SetTextFitCandidatesEnabled(false);
 
-    const Text::FitCandidate* fitCandidate = mController->GetMaxFitCandidate();
+    const Text::Fit::Candidate* fitCandidate = mController->GetMaxFitCandidate();
     if(fitCandidate)
     {
       mController->SetDefaultFontSize(fitCandidate->GetFontSize(), Text::Controller::PIXEL_SIZE);
@@ -1739,7 +1784,7 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     }
     else
     {
-      DALI_LOG_ERROR("TextFit (FitCandidate) is enabled but no candidates are available\n");
+      DALI_LOG_ERROR("TextFit candidate mode is enabled but no candidates are available\n");
     }
   }
 

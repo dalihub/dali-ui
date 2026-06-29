@@ -32,16 +32,16 @@ const char* FONT_SIZE_ENV       = "DALI_SYSTEM_FONT_SIZE";
 const char* FONT_SIZE_WATCH_ENV = "DALI_SYSTEM_FONT_SIZE_WATCH";
 const char* TEST_TEXT = "The quick brown fox jumps over the lazy dog. 1234567890";
 
-const Dali::Vector<Text::FitCandidate>& GetFitCandidates()
+const Dali::Vector<Text::Fit::Candidate>& GetFitCandidates()
 {
-  static Dali::Vector<Text::FitCandidate> candidates = [] {
-    Dali::Vector<Text::FitCandidate> values;
-    values.PushBack(Text::FitCandidate(10.0f, 20.0f));
-    values.PushBack(Text::FitCandidate(12.0f, 24.0f));
-    values.PushBack(Text::FitCandidate(14.0f, 28.0f));
-    values.PushBack(Text::FitCandidate(16.0f, 32.0f));
-    values.PushBack(Text::FitCandidate(18.0f, 36.0f));
-    values.PushBack(Text::FitCandidate(20.0f, 40.0f));
+  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+    Dali::Vector<Text::Fit::Candidate> values;
+    values.PushBack(Text::Fit::Candidate(10.0f, 20.0f));
+    values.PushBack(Text::Fit::Candidate(12.0f, 24.0f));
+    values.PushBack(Text::Fit::Candidate(14.0f, 28.0f));
+    values.PushBack(Text::Fit::Candidate(16.0f, 32.0f));
+    values.PushBack(Text::Fit::Candidate(18.0f, 36.0f));
+    values.PushBack(Text::Fit::Candidate(20.0f, 40.0f));
     return values;
   }();
   return candidates;
@@ -113,7 +113,7 @@ private:
     mFitLabel.SetMaximumHeight(120);
     mFitLabel.SetMultiLine(true);
     mFitLabel.SetBackgroundColor(UiColor(0xFFFFFF));
-    mFitLabel.SetTextFit(Text::FitRange(10, 20, 2));
+    mFitLabel.SetTextFit(Text::Fit::Range(10, 20, 2));
     mFitLabel.SetLineHeight(40.0f);
     mFitLabel.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
     mFitLabel.SetPadding(Extents(16, 16, 0, 0));
@@ -172,7 +172,7 @@ private:
     root.Add(mTargetLabel);
     root.Add(CreateHeaderLabel("Target InputField:"));
     root.Add(mTargetInputField);
-    root.Add(CreateHeaderLabel("Fit & FitCandidate:"));
+    root.Add(CreateHeaderLabel("Fit Range & Candidates:"));
     root.Add(mFitLabel);
     root.Add(mFitCandidateLabel);
     root.Add(CreateHeaderLabel("Current Status:"));

@@ -34,7 +34,7 @@
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
-#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-filter.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
@@ -553,21 +553,21 @@ public: // Configure the text controller.
    *
    * @return A pointer to the maximum fit candidate, or nullptr if no candidates exist.
    */
-  const Text::FitCandidate* GetMaxFitCandidate() const;
+  const Text::Fit::Candidate* GetMaxFitCandidate() const;
 
   /**
    * @brief Sets the text fit candidates.
    *
    * @param[in] candidates The list of text fit candidates.
    */
-  void SetTextFitCandidates(const Dali::Vector<Text::FitCandidate>& candidates);
+  void SetTextFitCandidates(const Dali::Vector<Text::Fit::Candidate>& candidates);
 
   /**
    * @brief Retrieves the text fit candidates.
    *
    * @return The list of text fit candidates.
    */
-  const Dali::Vector<Text::FitCandidate>& GetTextFitCandidates();
+  const Dali::Vector<Text::Fit::Candidate>& GetTextFitCandidates() const;
 
   /**
    * @brief Clears the text fit candidates.

@@ -616,7 +616,7 @@ bool Controller::IsTextFitCandidatesEnabled() const
   return mImpl->mTextFitCandidatesEnabled;
 }
 
-const Text::FitCandidate* Controller::GetMaxFitCandidate() const
+const Text::Fit::Candidate* Controller::GetMaxFitCandidate() const
 {
   const int index = mImpl->mMaxFitCandidateIndex;
   if(index < 0 || static_cast<uint32_t>(index) >= mImpl->mTextFitCandidates.Count())
@@ -627,7 +627,7 @@ const Text::FitCandidate* Controller::GetMaxFitCandidate() const
   return &mImpl->mTextFitCandidates[static_cast<uint32_t>(index)];
 }
 
-void Controller::SetTextFitCandidates(const Dali::Vector<Text::FitCandidate>& candidates)
+void Controller::SetTextFitCandidates(const Dali::Vector<Text::Fit::Candidate>& candidates)
 {
   mImpl->mTextFitCandidates    = candidates;
   mImpl->mMaxFitCandidateIndex = -1;
@@ -641,8 +641,8 @@ void Controller::SetTextFitCandidates(const Dali::Vector<Text::FitCandidate>& ca
   uint32_t bestIndex = 0u;
   for(uint32_t i = 1u; i < count; ++i)
   {
-    const Text::FitCandidate& best = mImpl->mTextFitCandidates[bestIndex];
-    const Text::FitCandidate& cur  = mImpl->mTextFitCandidates[i];
+    const Text::Fit::Candidate& best = mImpl->mTextFitCandidates[bestIndex];
+    const Text::Fit::Candidate& cur  = mImpl->mTextFitCandidates[i];
 
     const float bestFontSize = best.GetFontSize();
     const float curFontSize  = cur.GetFontSize();
@@ -658,7 +658,7 @@ void Controller::SetTextFitCandidates(const Dali::Vector<Text::FitCandidate>& ca
   mImpl->mMaxFitCandidateIndex = static_cast<int>(bestIndex);
 }
 
-const Dali::Vector<Text::FitCandidate>& Controller::GetTextFitCandidates()
+const Dali::Vector<Text::Fit::Candidate>& Controller::GetTextFitCandidates() const
 {
   return mImpl->mTextFitCandidates;
 }

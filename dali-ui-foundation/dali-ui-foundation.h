@@ -77,8 +77,7 @@
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 
-#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
-#include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/input-filter.h>

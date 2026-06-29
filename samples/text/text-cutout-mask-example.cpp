@@ -42,7 +42,7 @@ Label CreateMaskLabel()
   label.SetRequestedHeight(100);
   label.SetTextColor(UiColor(0xff0000));
   label.SetBackgroundColor(UiColor(0x1F2A36).WithAlpha(0.25f));
-  label.SetTextFit(Text::FitRange(20, 100, 10));
+  label.SetTextFit(Text::Fit::Range(20, 100, 10));
   label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
   label.SetVerticalTextAlignment(Text::Alignment::CENTER);
   return label;
@@ -89,7 +89,7 @@ private:
     mLabel.SetFontFamily("SamsungOneUI_700");
     mLabel.SetTextColor(UiColor(0x000000).WithAlpha(0.0f));
     mLabel.SetBackgroundColor(UiColor(0x1F2A36));
-    mLabel.SetTextFit(Text::FitRange(20, 100, 10));
+    mLabel.SetTextFit(Text::Fit::Range(20, 100, 10));
     mLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     mLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mLabel.SetTextCutoutEnabled(true);

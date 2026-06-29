@@ -352,8 +352,8 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
   {
     DALI_TRACE_SCOPE_WITH_FORMAT(gTraceFilter, "DALI_TEXT_FIT_CANDIDATES_LAYOUT", "[%p]", static_cast<void*>(&controller));
 
-    Dali::Vector<Ui::Text::FitCandidate> fitCandidates  = impl.mTextFitCandidates;
-    const int                            candidateCount = static_cast<int>(fitCandidates.Count());
+    Dali::Vector<Ui::Text::Fit::Candidate> fitCandidates  = impl.mTextFitCandidates;
+    const int                              candidateCount = static_cast<int>(fitCandidates.Count());
 
     if(candidateCount == 0)
     {
@@ -388,10 +388,10 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
 
     // Set the first candidate (minimum font size) as the default best value.
     // If the search does not find an optimal value, the minimum point size will be used.
-    const Ui::Text::FitCandidate& firstCandidate        = fitCandidates[0];
-    bool                          bestSizeUpdatedLatest = false;
-    float                         bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize()) * effectiveTextScale;
-    float                         bestLineHeight        = firstCandidate.GetLineHeight();
+    const Ui::Text::Fit::Candidate& firstCandidate        = fitCandidates[0];
+    bool                            bestSizeUpdatedLatest = false;
+    float                           bestPointSize         = ConvertPixelToPoint(firstCandidate.GetFontSize()) * effectiveTextScale;
+    float                           bestLineHeight        = firstCandidate.GetLineHeight();
 
     if(binarySearch)
     {
@@ -400,10 +400,10 @@ void Controller::Relayouter::FitCandidatesPointSizeForLayout(Controller& control
 
       while(left <= right)
       {
-        const int                     mid            = left + (right - left) / 2;
-        const Ui::Text::FitCandidate& candidate      = fitCandidates[mid];
-        const float                   testPointSize  = ConvertPixelToPoint(candidate.GetFontSize()) * effectiveTextScale;
-        const float                   testLineHeight = candidate.GetLineHeight();
+        const int                       mid            = left + (right - left) / 2;
+        const Ui::Text::Fit::Candidate& candidate      = fitCandidates[mid];
+        const float                     testPointSize  = ConvertPixelToPoint(candidate.GetFontSize()) * effectiveTextScale;
+        const float                     testLineHeight = candidate.GetLineHeight();
         impl.SetDefaultLineSize(testLineHeight);
 
         if(CheckForTextFit(controller, testPointSize, layoutSize))

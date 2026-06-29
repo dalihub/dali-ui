@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <cstdio>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -46,6 +47,37 @@ Label CreateFitLabel(const char* text, float width, float height, bool multiLine
   label.SetBackgroundColor(UiColor(0xEFEFEF));
   label.SetPadding(Extents(10, 10, 10, 10));
   return label;
+}
+
+Dali::String FormatTextFit(const Text::Fit& fit)
+{
+  char buffer[160];
+
+  switch(fit.GetType())
+  {
+    case Text::Fit::Type::RANGE:
+    {
+      const Text::Fit::Range& range = fit.GetRange();
+      std::snprintf(buffer,
+                    sizeof(buffer),
+                    "GetTextFit: RANGE min=%.1f max=%.1f step=%.1f",
+                    range.GetMinimumFontSize(),
+                    range.GetMaximumFontSize(),
+                    range.GetFontSizeStep());
+      return Dali::String(buffer);
+    }
+    case Text::Fit::Type::CANDIDATES:
+    {
+      const Dali::Vector<Text::Fit::Candidate>& candidates = fit.GetCandidates();
+      std::snprintf(buffer, sizeof(buffer), "GetTextFit: CANDIDATES count=%u", static_cast<unsigned int>(candidates.Count()));
+      return Dali::String(buffer);
+    }
+    case Text::Fit::Type::NONE:
+    default:
+    {
+      return Dali::String("GetTextFit: NONE");
+    }
+  }
 }
 } // namespace
 
@@ -80,40 +112,48 @@ private:
     instructionLabel.SetPadding(Extents(10, 10, 10, 10));
     root.Add(instructionLabel);
 
+    mStatusLabel = Label::New("");
+    mStatusLabel.SetFontSize(14.0f);
+    mStatusLabel.SetBackgroundColor(UiColor(0xE8F2FF));
+    mStatusLabel.SetPadding(Extents(10, 10, 8, 8));
+    root.Add(mStatusLabel);
+
     root.Add(CreateSectionLabel("1. MATCH_PARENT + fixed height / single line"));
     mMatchFixedSingleLine = CreateFitLabel(SINGLE_LINE_TEXT, MATCH_PARENT, LABEL_HEIGHT, false);
-    mMatchFixedSingleLine.SetTextFit(Text::FitRange());
+    mMatchFixedSingleLine.SetTextFit(Text::Fit::Range());
     root.Add(mMatchFixedSingleLine);
 
     root.Add(CreateSectionLabel("2. MATCH_PARENT + fixed height / multi line"));
     mMatchFixedMultiLine = CreateFitLabel(MULTI_LINE_TEXT, MATCH_PARENT, LABEL_HEIGHT * 2.0f, true);
-    mMatchFixedMultiLine.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+    mMatchFixedMultiLine.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 4.0f));
     root.Add(mMatchFixedMultiLine);
 
     root.Add(CreateSectionLabel("3. WRAP_CONTENT + WRAP_CONTENT / single line"));
     mWrapWrapSingleLine = CreateFitLabel(SINGLE_LINE_TEXT, WRAP_CONTENT, WRAP_CONTENT, false);
-    mWrapWrapSingleLine.SetTextFit(Text::FitRange());
+    mWrapWrapSingleLine.SetTextFit(Text::Fit::Range());
     root.Add(mWrapWrapSingleLine);
 
     root.Add(CreateSectionLabel("4. WRAP_CONTENT + WRAP_CONTENT / multi line"));
     mWrapWrapMultiLine = CreateFitLabel(MULTI_LINE_TEXT, WRAP_CONTENT, WRAP_CONTENT, true);
     mWrapWrapMultiLine.SetMaximumHeight(200);
-    mWrapWrapMultiLine.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+    mWrapWrapMultiLine.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 4.0f));
     root.Add(mWrapWrapMultiLine);
 
     root.Add(CreateSectionLabel("5. MATCH_PARENT + fixed height / multi line / relative line height"));
     mFixedMultiLineRelativeLineHeight = CreateFitLabel(MULTI_LINE_TEXT, MATCH_PARENT, LABEL_HEIGHT * 2.0f, true);
     mFixedMultiLineRelativeLineHeight.SetLineHeight(1.5f);
     mFixedMultiLineRelativeLineHeight.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
-    mFixedMultiLineRelativeLineHeight.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+    mFixedMultiLineRelativeLineHeight.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 4.0f));
     root.Add(mFixedMultiLineRelativeLineHeight);
 
     root.Add(CreateSectionLabel("6. MATCH_PARENT + fixed height / multi line / absolute line height"));
     mFixedMultiLineAbsoluteLineHeight = CreateFitLabel(MULTI_LINE_TEXT, MATCH_PARENT, LABEL_HEIGHT * 2.0f, true);
     mFixedMultiLineAbsoluteLineHeight.SetLineHeight(30.0f);
     mFixedMultiLineAbsoluteLineHeight.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
-    mFixedMultiLineAbsoluteLineHeight.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+    mFixedMultiLineAbsoluteLineHeight.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 4.0f));
     root.Add(mFixedMultiLineAbsoluteLineHeight);
+
+    UpdateStatusLabel();
 
     window.Add(root);
 
@@ -135,26 +175,34 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      mMatchFixedSingleLine.ClearTextFit();
-      mMatchFixedMultiLine.ClearTextFit();
-      mWrapWrapSingleLine.ClearTextFit();
-      mWrapWrapMultiLine.ClearTextFit();
-      mFixedMultiLineRelativeLineHeight.ClearTextFit();
-      mFixedMultiLineAbsoluteLineHeight.ClearTextFit();
+      mMatchFixedSingleLine.SetTextFit(Text::Fit::None());
+      mMatchFixedMultiLine.SetTextFit(Text::Fit::None());
+      mWrapWrapSingleLine.SetTextFit(Text::Fit::None());
+      mWrapWrapMultiLine.SetTextFit(Text::Fit::None());
+      mFixedMultiLineRelativeLineHeight.SetTextFit(Text::Fit::None());
+      mFixedMultiLineAbsoluteLineHeight.SetTextFit(Text::Fit::None());
+      UpdateStatusLabel();
     }
     else if(event.GetKeyName() == "2")
     {
-      mMatchFixedSingleLine.SetTextFit(Text::FitRange(16.0f, 32.0f, 8.0f));
-      mMatchFixedMultiLine.SetTextFit(Text::FitRange());
-      mWrapWrapSingleLine.SetTextFit(Text::FitRange(16.0f, 32.0f, 8.0f));
-      mWrapWrapMultiLine.SetTextFit(Text::FitRange());
-      mFixedMultiLineRelativeLineHeight.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
-      mFixedMultiLineAbsoluteLineHeight.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+      mMatchFixedSingleLine.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 8.0f));
+      mMatchFixedMultiLine.SetTextFit(Text::Fit::Range());
+      mWrapWrapSingleLine.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 8.0f));
+      mWrapWrapMultiLine.SetTextFit(Text::Fit::Range());
+      mFixedMultiLineRelativeLineHeight.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 4.0f));
+      mFixedMultiLineAbsoluteLineHeight.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 4.0f));
+      UpdateStatusLabel();
     }
+  }
+
+  void UpdateStatusLabel()
+  {
+    mStatusLabel.SetText(FormatTextFit(mMatchFixedSingleLine.GetTextFit()));
   }
 
 private:
   Application& mApplication;
+  Label        mStatusLabel;
   Label        mMatchFixedSingleLine;
   Label        mMatchFixedMultiLine;
   Label        mWrapWrapSingleLine;

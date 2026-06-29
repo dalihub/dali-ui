@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <cstdio>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -27,40 +28,40 @@ constexpr float LABEL_HEIGHT  = 66.0f;
 const char* SINGLE_LINE_TEXT = "TextFit candidate single line example";
 const char* MULTI_LINE_TEXT  = "This is a multi line TextFit candidate example. The font size and line height should be adjusted to fit the available space.";
 
-const Dali::Vector<Text::FitCandidate>& GetFitCandidates()
+const Dali::Vector<Text::Fit::Candidate>& GetFitCandidates()
 {
-  static Dali::Vector<Text::FitCandidate> candidates = [] {
-    Dali::Vector<Text::FitCandidate> values;
-    values.PushBack(Text::FitCandidate(16.0f, 32.0f));
-    values.PushBack(Text::FitCandidate(20.0f, 40.0f));
-    values.PushBack(Text::FitCandidate(24.0f, 48.0f));
-    values.PushBack(Text::FitCandidate(28.0f, 56.0f));
-    values.PushBack(Text::FitCandidate(32.0f, 64.0f));
+  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+    Dali::Vector<Text::Fit::Candidate> values;
+    values.PushBack(Text::Fit::Candidate(16.0f, 32.0f));
+    values.PushBack(Text::Fit::Candidate(20.0f, 40.0f));
+    values.PushBack(Text::Fit::Candidate(24.0f, 48.0f));
+    values.PushBack(Text::Fit::Candidate(28.0f, 56.0f));
+    values.PushBack(Text::Fit::Candidate(32.0f, 64.0f));
     return values;
   }();
   return candidates;
 }
 
-const Dali::Vector<Text::FitCandidate>& GetAlternativeCandidates()
+const Dali::Vector<Text::Fit::Candidate>& GetAlternativeCandidates()
 {
-  static Dali::Vector<Text::FitCandidate> candidates = [] {
-    Dali::Vector<Text::FitCandidate> values;
-    values.PushBack(Text::FitCandidate(16.0f, 30.0f));
-    values.PushBack(Text::FitCandidate(20.0f, 30.0f));
-    values.PushBack(Text::FitCandidate(24.0f, 40.0f));
-    values.PushBack(Text::FitCandidate(28.0f, 40.0f));
-    values.PushBack(Text::FitCandidate(32.0f, 60.0f));
+  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+    Dali::Vector<Text::Fit::Candidate> values;
+    values.PushBack(Text::Fit::Candidate(16.0f, 30.0f));
+    values.PushBack(Text::Fit::Candidate(20.0f, 30.0f));
+    values.PushBack(Text::Fit::Candidate(24.0f, 40.0f));
+    values.PushBack(Text::Fit::Candidate(28.0f, 40.0f));
+    values.PushBack(Text::Fit::Candidate(32.0f, 60.0f));
     return values;
   }();
   return candidates;
 }
 
-const Dali::Vector<Text::FitCandidate>& GetFontSizeCandidates()
+const Dali::Vector<Text::Fit::Candidate>& GetFontSizeCandidates()
 {
-  static Dali::Vector<Text::FitCandidate> candidates = [] {
-    Dali::Vector<Text::FitCandidate> values;
+  static Dali::Vector<Text::Fit::Candidate> candidates = [] {
+    Dali::Vector<Text::Fit::Candidate> values;
     auto addCandidate = [&values](float fontSize) {
-      Text::FitCandidate candidate;
+      Text::Fit::Candidate candidate;
       candidate.SetFontSize(fontSize);
       values.PushBack(candidate);
     };
@@ -96,6 +97,48 @@ Label CreateFitLabel(const char* text, float width, float height, bool multiLine
   return label;
 }
 
+Dali::String FormatTextFit(const Text::Fit& fit)
+{
+  char buffer[192];
+
+  switch(fit.GetType())
+  {
+    case Text::Fit::Type::RANGE:
+    {
+      const Text::Fit::Range& range = fit.GetRange();
+      std::snprintf(buffer,
+                    sizeof(buffer),
+                    "GetTextFit: RANGE min=%.1f max=%.1f step=%.1f",
+                    range.GetMinimumFontSize(),
+                    range.GetMaximumFontSize(),
+                    range.GetFontSizeStep());
+      return Dali::String(buffer);
+    }
+    case Text::Fit::Type::CANDIDATES:
+    {
+      const Dali::Vector<Text::Fit::Candidate>& candidates = fit.GetCandidates();
+      if(candidates.Empty())
+      {
+        return Dali::String("GetTextFit: CANDIDATES count=0");
+      }
+
+      const Text::Fit::Candidate& first = candidates[0];
+      std::snprintf(buffer,
+                    sizeof(buffer),
+                    "GetTextFit: CANDIDATES count=%u first=(font %.1f, line %.1f)",
+                    static_cast<unsigned int>(candidates.Count()),
+                    first.GetFontSize(),
+                    first.GetLineHeight());
+      return Dali::String(buffer);
+    }
+    case Text::Fit::Type::NONE:
+    default:
+    {
+      return Dali::String("GetTextFit: NONE");
+    }
+  }
+}
+
 } // namespace
 
 class TextFitCandidateController : public ConnectionTracker
@@ -129,6 +172,12 @@ private:
     instructionLabel.SetPadding(Extents(10, 10, 10, 10));
     root.Add(instructionLabel);
 
+    mStatusLabel = Label::New("");
+    mStatusLabel.SetFontSize(14.0f);
+    mStatusLabel.SetBackgroundColor(UiColor(0xE8F2FF));
+    mStatusLabel.SetPadding(Extents(10, 10, 8, 8));
+    root.Add(mStatusLabel);
+
     root.Add(CreateSectionLabel("1. MATCH_PARENT + fixed height / single line"));
     mFixedSingleLineLabel = CreateFitLabel(SINGLE_LINE_TEXT, MATCH_PARENT, LABEL_HEIGHT, false);
     root.Add(mFixedSingleLineLabel);
@@ -145,6 +194,8 @@ private:
     mWrapWrapMultiLine = CreateFitLabel(MULTI_LINE_TEXT, WRAP_CONTENT, WRAP_CONTENT, true);
     mWrapWrapMultiLine.SetMaximumHeight(200);
     root.Add(mWrapWrapMultiLine);
+
+    UpdateStatusLabel();
 
     window.Add(root);
 
@@ -166,10 +217,11 @@ private:
 
     if(event.GetKeyName() == "1")
     {
-      mFixedSingleLineLabel.ClearTextFit();
-      mFixedMultiLineLabel.ClearTextFit();
-      mWrapWrapSingleLine.ClearTextFit();
-      mWrapWrapMultiLine.ClearTextFit();
+      mFixedSingleLineLabel.SetTextFit(Text::Fit::None());
+      mFixedMultiLineLabel.SetTextFit(Text::Fit::None());
+      mWrapWrapSingleLine.SetTextFit(Text::Fit::None());
+      mWrapWrapMultiLine.SetTextFit(Text::Fit::None());
+      UpdateStatusLabel();
     }
     else if(event.GetKeyName() == "2")
     {
@@ -177,6 +229,7 @@ private:
       mFixedMultiLineLabel.SetTextFit(GetAlternativeCandidates());
       mWrapWrapSingleLine.SetTextFit(GetAlternativeCandidates());
       mWrapWrapMultiLine.SetTextFit(GetAlternativeCandidates());
+      UpdateStatusLabel();
     }
     else if(event.GetKeyName() == "3")
     {
@@ -184,11 +237,18 @@ private:
       mFixedMultiLineLabel.SetTextFit(GetFontSizeCandidates());
       mWrapWrapSingleLine.SetTextFit(GetFontSizeCandidates());
       mWrapWrapMultiLine.SetTextFit(GetFontSizeCandidates());
+      UpdateStatusLabel();
     }
+  }
+
+  void UpdateStatusLabel()
+  {
+    mStatusLabel.SetText(FormatTextFit(mFixedSingleLineLabel.GetTextFit()));
   }
 
 private:
   Application& mApplication;
+  Label        mStatusLabel;
   Label        mFixedSingleLineLabel;
   Label        mFixedMultiLineLabel;
   Label        mWrapWrapSingleLine;

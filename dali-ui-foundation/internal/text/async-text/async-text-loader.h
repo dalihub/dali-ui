@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
-#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 // EXTERNAL INCLUDES
@@ -160,8 +160,8 @@ struct AsyncTextParameters
 
   Extents padding; ///< The padding of the boundaries where the text is going to be laid-out.
 
-  Property::Map                    variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
-  Dali::Vector<Text::FitCandidate> textFitCandidates;
+  Property::Map                      variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
+  Dali::Vector<Text::Fit::Candidate> textFitCandidates;
 
   float fontSize;           ///< The font's size (in pixels).
   float minLineSize;        ///< The line's minimum size (in pixels).

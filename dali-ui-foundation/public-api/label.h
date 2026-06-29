@@ -17,8 +17,7 @@
  *
  */
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
-#include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/style/bevel.h>
@@ -699,7 +698,22 @@ public: // Setters for chaining
   Text::Bevel GetTextBevel() const;
 
   /**
-   * @brief Sets the text fit range.
+   * @brief Sets the text fit configuration.
+   *
+   * Pass Text::Fit::None() to clear text fit. Text::Fit can also represent
+   * range-based or candidate-based text fit.
+   *
+   * Font size scale is applied when measuring and laying out text fit.
+   *
+   * @note Text fit is designed for bounded layout sizes. It is recommended to
+   * explicitly specify width and height when using this feature.
+   *
+   * @param[in] fit The text fit configuration.
+   */
+  void SetTextFit(const Text::Fit& fit);
+
+  /**
+   * @brief Sets range-based text fit.
    *
    * Text fit selects the largest font size within the configured range
    * that fits into the available layout space.
@@ -713,16 +727,19 @@ public: // Setters for chaining
    *
    * @param[in] range The text fit range configuration.
    */
-  void SetTextFit(const Text::FitRange& range);
+  void SetTextFit(const Text::Fit::Range& range);
 
   /**
-   * @brief Sets the text fit candidates.
+   * @brief Sets candidate-based text fit.
    *
    * Text fit selects the largest candidate that fits into the available
    * layout space. Each candidate defines a font size and line height.
    *
    * Font size scale is applied to both font size and line height when measuring
    * and laying out text fit candidates.
+   *
+   * Passing an empty candidate vector clears text fit. This is equivalent to
+   * calling SetTextFit(Text::Fit::None()).
    *
    * @note Text fit is designed for bounded layout sizes. It is recommended to
    * explicitly specify width and height when using this feature.
@@ -732,12 +749,17 @@ public: // Setters for chaining
    *
    * @param[in] candidates The vector of text fit candidates.
    */
-  void SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
+  void SetTextFit(const Dali::Vector<Text::Fit::Candidate>& candidates);
 
   /**
-   * @brief Clears the text fit configuration.
+   * @brief Gets the text fit configuration.
+   *
+   * The returned fit type indicates whether text fit is disabled,
+   * range-based, or candidate-based.
+   *
+   * @return The current text fit configuration.
    */
-  void ClearTextFit();
+  Text::Fit GetTextFit() const;
 
   /**
    * @brief Sets the minimum font size scale.

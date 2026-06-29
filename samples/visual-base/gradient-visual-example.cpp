@@ -210,7 +210,7 @@ private:
     contentLabel.SetBackgroundColor(UiColor(0x003070).WithAlpha(0.5f));
     contentLabel.SetFontFamily("SamsungOneUI_700");
     contentLabel.SetTextColor(UiColor(0x000000).WithAlpha(1.0f));
-    contentLabel.SetTextFit(Text::FitRange(20, 1000, 10));
+    contentLabel.SetTextFit(Text::Fit::Range(20, 1000, 10));
     contentLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     contentLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     contentLabel.SetRequestedWidth(MATCH_PARENT);

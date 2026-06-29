@@ -19,11 +19,11 @@
 #include <dali/public-api/common/dali-common.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <algorithm>
 
 #define DALI_ASSERT_VALID_FIT_CANDIDATE(impl) \
-  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from FitCandidate object")
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from Text::Fit::Candidate object")
 
 namespace Dali
 {
@@ -37,7 +37,7 @@ constexpr float DEFAULT_FONT_SIZE   = 16.0f;
 constexpr float DEFAULT_LINE_HEIGHT = 0.0f;
 } // unnamed namespace
 
-class FitCandidate::Impl
+class Fit::Candidate::Impl
 {
 public:
   Impl()
@@ -62,30 +62,30 @@ public:
   float mLineHeight;
 };
 
-FitCandidate::FitCandidate()
+Fit::Candidate::Candidate()
 : mImpl(new Impl())
 {
 }
 
-FitCandidate::FitCandidate(float fontSize, float lineHeight)
+Fit::Candidate::Candidate(float fontSize, float lineHeight)
 : mImpl(new Impl(fontSize, lineHeight))
 {
 }
 
-FitCandidate::FitCandidate(const FitCandidate& rhs)
+Fit::Candidate::Candidate(const Candidate& rhs)
 : mImpl(nullptr)
 {
   DALI_ASSERT_VALID_FIT_CANDIDATE(rhs.mImpl);
   mImpl = new Impl(*rhs.mImpl);
 }
 
-FitCandidate::FitCandidate(FitCandidate&& rhs) noexcept
+Fit::Candidate::Candidate(Candidate&& rhs) noexcept
 : mImpl(rhs.mImpl)
 {
   rhs.mImpl = nullptr;
 }
 
-FitCandidate& FitCandidate::operator=(const FitCandidate& rhs)
+Fit::Candidate& Fit::Candidate::operator=(const Candidate& rhs)
 {
   if(this != &rhs)
   {
@@ -97,7 +97,7 @@ FitCandidate& FitCandidate::operator=(const FitCandidate& rhs)
   return *this;
 }
 
-FitCandidate& FitCandidate::operator=(FitCandidate&& rhs) noexcept
+Fit::Candidate& Fit::Candidate::operator=(Candidate&& rhs) noexcept
 {
   if(this != &rhs)
   {
@@ -108,30 +108,30 @@ FitCandidate& FitCandidate::operator=(FitCandidate&& rhs) noexcept
   return *this;
 }
 
-FitCandidate::~FitCandidate()
+Fit::Candidate::~Candidate()
 {
   delete mImpl;
 }
 
-void FitCandidate::SetFontSize(float size)
+void Fit::Candidate::SetFontSize(float size)
 {
   DALI_ASSERT_VALID_FIT_CANDIDATE(mImpl);
   mImpl->mFontSize = std::max(1.0f, size);
 }
 
-float FitCandidate::GetFontSize() const
+float Fit::Candidate::GetFontSize() const
 {
   DALI_ASSERT_VALID_FIT_CANDIDATE(mImpl);
   return mImpl->mFontSize;
 }
 
-void FitCandidate::SetLineHeight(float height)
+void Fit::Candidate::SetLineHeight(float height)
 {
   DALI_ASSERT_VALID_FIT_CANDIDATE(mImpl);
   mImpl->mLineHeight = std::max(0.0f, height);
 }
 
-float FitCandidate::GetLineHeight() const
+float Fit::Candidate::GetLineHeight() const
 {
   DALI_ASSERT_VALID_FIT_CANDIDATE(mImpl);
   return mImpl->mLineHeight;

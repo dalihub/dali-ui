@@ -789,6 +789,54 @@ int UtcDaliLabelCutoutEnabled(void)
   END_TEST;
 }
 
+int UtcDaliLabelTextFit(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  Text::Fit fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::NONE);
+
+  Text::Fit::Range range(10.0f, 40.0f, 2.0f);
+  label.SetTextFit(range);
+
+  fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::RANGE);
+  DALI_TEST_EQUALS(fit.GetRange().GetMinimumFontSize(), 10.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetRange().GetMaximumFontSize(), 40.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetRange().GetFontSizeStep(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  Dali::Vector<Text::Fit::Candidate> candidates;
+  candidates.PushBack(Text::Fit::Candidate(16.0f, 32.0f));
+  candidates.PushBack(Text::Fit::Candidate(24.0f, 48.0f));
+  label.SetTextFit(candidates);
+
+  fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::CANDIDATES);
+  DALI_TEST_EQUALS(fit.GetCandidates().Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetCandidates()[0].GetFontSize(), 16.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetCandidates()[0].GetLineHeight(), 32.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetCandidates()[1].GetFontSize(), 24.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(fit.GetCandidates()[1].GetLineHeight(), 48.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  label.SetTextFit(Text::Fit::None());
+  fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::NONE);
+
+  label.SetTextFit(Text::Fit::FromRange(range));
+  fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::RANGE);
+
+  Dali::Vector<Text::Fit::Candidate> emptyCandidates;
+  label.SetTextFit(emptyCandidates);
+
+  fit = label.GetTextFit();
+  DALI_TEST_CHECK(fit.GetType() == Text::Fit::Type::NONE);
+
+  END_TEST;
+}
+
 int UtcDaliLabelFontVariation(void)
 {
   UiTestApplication application;

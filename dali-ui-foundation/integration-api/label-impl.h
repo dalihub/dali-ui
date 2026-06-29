@@ -29,8 +29,7 @@
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
-#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
-#include <dali-ui-foundation/public-api/text/fit/text-fit-range.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/text/style/bevel.h>
@@ -395,17 +394,22 @@ public:
   /**
    * @see Dali::Ui::Label::SetTextFit
    */
-  void SetTextFit(const Text::FitRange& range);
+  void SetTextFit(const Text::Fit& fit);
 
   /**
-   * @see Dali::Ui::Label::SetTextFit(const Dali::Vector<Text::FitCandidate>&)
+   * @see Dali::Ui::Label::SetTextFit
    */
-  void SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates);
+  void SetTextFit(const Text::Fit::Range& range);
 
   /**
-   * @copydoc Dali::Ui::Label::ClearTextFit
+   * @see Dali::Ui::Label::SetTextFit(const Dali::Vector<Text::Fit::Candidate>&)
    */
-  void ClearTextFit();
+  void SetTextFit(const Dali::Vector<Text::Fit::Candidate>& candidates);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextFit
+   */
+  Text::Fit GetTextFit() const;
 
   /**
    * @brief Sets the explicit font size scale used internally.
@@ -820,6 +824,11 @@ private: // Implementation
    * @brief Updates the effective line height based on the current LineHeightMode.
    */
   void UpdateLineHeight();
+
+  /**
+   * @brief Clears text fit state and invalidates text measurement if needed.
+   */
+  void ClearTextFitInternal();
 
   /**
    * @brief Callback function for when the layout is changed.

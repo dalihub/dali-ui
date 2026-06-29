@@ -25,7 +25,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
-#include <dali-ui-foundation/public-api/text/fit/text-fit-candidate.h>
+#include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 
 namespace Dali
 {
@@ -166,7 +166,7 @@ private:
                                             const Length requestedNumberOfCharacters);
 };
 
-inline bool compareByPointSize(const Ui::Text::FitCandidate& lhs, const Ui::Text::FitCandidate& rhs)
+inline bool compareByPointSize(const Ui::Text::Fit::Candidate& lhs, const Ui::Text::Fit::Candidate& rhs)
 {
   return lhs.GetFontSize() < rhs.GetFontSize();
 }

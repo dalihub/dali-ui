@@ -2833,7 +2833,7 @@ private:
 
     mLargePreview = MakeLabel(std::string(), PREVIEW_POPUP_TEXT_FIT_MAX_SIZE, Color::BLACK);
     mLargePreview.SetMultiLine(false);
-    mLargePreview.SetTextFit(Text::FitRange(PREVIEW_POPUP_TEXT_FIT_MIN_SIZE,
+    mLargePreview.SetTextFit(Text::Fit::Range(PREVIEW_POPUP_TEXT_FIT_MIN_SIZE,
                                             PREVIEW_POPUP_TEXT_FIT_MAX_SIZE,
                                             PREVIEW_POPUP_TEXT_FIT_STEP_SIZE));
     mLargePreview.SetHorizontalTextAlignment(Text::Alignment::CENTER);

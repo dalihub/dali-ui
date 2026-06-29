@@ -427,19 +427,24 @@ Text::Bevel Label::GetTextBevel() const
   return GetImpl(*this).GetTextBevel();
 }
 
-void Label::SetTextFit(const Text::FitRange& range)
+void Label::SetTextFit(const Text::Fit& fit)
+{
+  GetImpl(*this).SetTextFit(fit);
+}
+
+void Label::SetTextFit(const Text::Fit::Range& range)
 {
   GetImpl(*this).SetTextFit(range);
 }
 
-void Label::SetTextFit(const Dali::Vector<Text::FitCandidate>& candidates)
+void Label::SetTextFit(const Dali::Vector<Text::Fit::Candidate>& candidates)
 {
   GetImpl(*this).SetTextFit(candidates);
 }
 
-void Label::ClearTextFit()
+Text::Fit Label::GetTextFit() const
 {
-  GetImpl(*this).ClearTextFit();
+  return GetImpl(*this).GetTextFit();
 }
 
 void Label::SetMinimumFontSizeScale(float scale)
