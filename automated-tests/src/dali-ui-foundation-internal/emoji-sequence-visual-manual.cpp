@@ -1921,8 +1921,8 @@ private:
       return MinimumRowWidth() + PAGE_PADDING_X * 2.0f;
     }
 
-    const auto size = mWindow.GetSize();
-    return static_cast<float>(size.GetWidth());
+    const auto size = mWindow.GetPositionSize();
+    return static_cast<float>(size.width);
   }
 
   void UpdateNavigationHeight()
@@ -1987,7 +1987,7 @@ private:
                              0,
                              static_cast<uint16_t>(NAV_BUTTON_GAP_Y)));
     button.SetPadding(Extents(4, 4, 0, 0));
-    button.TouchEventSignal().Connect(this, [action, backgroundColor](Actor actor, const TouchEvent& touch) {
+    button.TouchedSignal().Connect(this, [action, backgroundColor](Actor actor, const TouchEvent& touch) {
       Label button = Label::DownCast(actor);
       if(button)
       {
@@ -2366,8 +2366,8 @@ private:
     float windowWidth = 0.0f;
     if(mWindow)
     {
-      const auto size = mWindow.GetSize();
-      windowWidth     = static_cast<float>(size.GetWidth());
+      const auto size = mWindow.GetPositionSize();
+      windowWidth     = static_cast<float>(size.width);
     }
     return std::max(MinimumRowWidth() + PAGE_PADDING_X * 2.0f, windowWidth);
   }
@@ -2550,7 +2550,7 @@ private:
     mSearchDismissLayer.SetLayoutMode(LayoutMode::STANDALONE);
     mSearchDismissLayer.SetBackgroundColor(Color::TRANSPARENT);
     mSearchDismissLayer.SetProperty(Actor::Property::VISIBLE, false);
-    mSearchDismissLayer.TouchEventSignal().Connect(this, &EmojiVisualController::OnSearchDismissTouched);
+    mSearchDismissLayer.TouchedSignal().Connect(this, &EmojiVisualController::OnSearchDismissTouched);
     mSearchOverlay.Add(mSearchDismissLayer);
 
     mSearchInput = InputField::New();
@@ -2575,7 +2575,7 @@ private:
     mSearchInput.SetProperty(Actor::Property::VISIBLE, false);
     mSearchInput.SetProperty(Actor::Property::SENSITIVE, false);
     mSearchInput.SetProperty(Actor::Property::OPACITY, 0.0f);
-    mSearchInput.TouchEventSignal().Connect(this, &EmojiVisualController::OnSearchInputTouched);
+    mSearchInput.TouchedSignal().Connect(this, &EmojiVisualController::OnSearchInputTouched);
     mSearchInput.TextChangedSignal().Connect(this, &EmojiVisualController::OnSearchTextChanged);
     mSearchOverlay.Add(mSearchInput);
 
@@ -2585,7 +2585,7 @@ private:
     mSearchButton.SetCornerRadiusPolicyRelative();
     mSearchButton.SetCornerRadius(0.5f);
     mSearchButton.SetProperty(View::Property::SHADOW, CreateSoftShadowMap(0.18f, 3.0f, 4.0f, Vector2(1.08f, 1.08f)));
-    mSearchButton.TouchEventSignal().Connect(this, &EmojiVisualController::OnSearchButtonTouched);
+    mSearchButton.TouchedSignal().Connect(this, &EmojiVisualController::OnSearchButtonTouched);
 
     mSearchIcon = Label::New(SEARCH_BUTTON_EMOJI);
     mSearchIcon.SetLayoutMode(LayoutMode::STANDALONE);
@@ -2599,7 +2599,7 @@ private:
     mSearchIcon.SetRequestedPositionY(-1.0f);
     mSearchIcon.SetRequestedWidth(FLOATING_SEARCH_BUTTON_SIZE);
     mSearchIcon.SetRequestedHeight(FLOATING_SEARCH_BUTTON_SIZE);
-    mSearchIcon.TouchEventSignal().Connect(this, &EmojiVisualController::OnSearchButtonTouched);
+    mSearchIcon.TouchedSignal().Connect(this, &EmojiVisualController::OnSearchButtonTouched);
     mSearchButton.Add(mSearchIcon);
 
     mSearchOverlay.Add(mSearchButton);
@@ -2617,9 +2617,9 @@ private:
 
   FloatingSearchBounds CurrentFloatingSearchBounds() const
   {
-    const auto  size   = mWindow.GetSize();
-    const float width  = std::max(1.0f, static_cast<float>(size.GetWidth()));
-    const float height = std::max(1.0f, static_cast<float>(size.GetHeight()));
+    const auto  size   = mWindow.GetPositionSize();
+    const float width  = std::max(1.0f, static_cast<float>(size.width));
+    const float height = std::max(1.0f, static_cast<float>(size.height));
     const float right  = std::max(FLOATING_SEARCH_MARGIN + FLOATING_SEARCH_BUTTON_SIZE, width - FLOATING_SEARCH_MARGIN);
     const float bottom = std::max(FLOATING_SEARCH_MARGIN + FLOATING_SEARCH_BUTTON_SIZE, height - FLOATING_SEARCH_MARGIN);
 
@@ -2658,9 +2658,9 @@ private:
       return;
     }
 
-    const auto  size   = mWindow.GetSize();
-    const float width  = std::max(1.0f, static_cast<float>(size.GetWidth()));
-    const float height = std::max(1.0f, static_cast<float>(size.GetHeight()));
+    const auto  size   = mWindow.GetPositionSize();
+    const float width  = std::max(1.0f, static_cast<float>(size.width));
+    const float height = std::max(1.0f, static_cast<float>(size.height));
     const FloatingSearchBounds bounds = CurrentFloatingSearchBounds();
 
     mSearchOverlay.SetRequestedWidth(width);
@@ -2829,7 +2829,7 @@ private:
     mPreviewOverlay.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.70f));
     mPreviewOverlay.SetProperty(Actor::Property::VISIBLE, false);
     mPreviewOverlay.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
-    mPreviewOverlay.TouchEventSignal().Connect(this, &EmojiVisualController::OnPreviewOverlayTouched);
+    mPreviewOverlay.TouchedSignal().Connect(this, &EmojiVisualController::OnPreviewOverlayTouched);
 
     mLargePreview = MakeLabel(std::string(), PREVIEW_POPUP_TEXT_FIT_MAX_SIZE, Color::BLACK);
     mLargePreview.SetMultiLine(false);
@@ -2840,7 +2840,7 @@ private:
     mLargePreview.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mLargePreview.SetBackgroundColor(Color::WHITE);
     mLargePreview.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);
-    mLargePreview.TouchEventSignal().Connect(this, &EmojiVisualController::OnPreviewOverlayTouched);
+    mLargePreview.TouchedSignal().Connect(this, &EmojiVisualController::OnPreviewOverlayTouched);
     mLargePreviewParams = AbsoluteLayoutParams::New();
     mLargePreview.SetLayoutParams(mLargePreviewParams);
     mPreviewOverlay.Add(mLargePreview);
@@ -2856,9 +2856,9 @@ private:
       return;
     }
 
-    const auto  size   = mWindow.GetSize();
-    const float width  = static_cast<float>(size.GetWidth());
-    const float height = static_cast<float>(size.GetHeight());
+    const auto  size   = mWindow.GetPositionSize();
+    const float width  = static_cast<float>(size.width);
+    const float height = static_cast<float>(size.height);
     const float inset  = std::min(PREVIEW_POPUP_MARGIN, std::min(width, height) * 0.10f);
 
     mPreviewOverlay.SetRequestedWidth(width);
@@ -2995,11 +2995,11 @@ private:
       return false;
     }
 
-    const auto size = mWindow.GetSize();
+    const auto size = mWindow.GetPositionSize();
     mCapture = Capture::New();
     mCapture.FinishedSignal().Connect(this, &EmojiVisualController::OnCaptureFinished);
     mCapture.Start(mRoot,
-                   Vector2(static_cast<float>(size.GetWidth()), static_cast<float>(size.GetHeight())),
+                   Vector2(static_cast<float>(size.width), static_cast<float>(size.height)),
                    mOptions.capturePath.c_str(),
                    Color::WHITE);
     return false;
@@ -3133,7 +3133,7 @@ private:
     actors.preview.SetBackgroundColor(Color::WHITE);
     actors.previewParams = AbsoluteLayoutParams::New();
     actors.preview.SetLayoutParams(actors.previewParams);
-    actors.preview.TouchEventSignal().Connect(this, &EmojiVisualController::OnPreviewTouched);
+    actors.preview.TouchedSignal().Connect(this, &EmojiVisualController::OnPreviewTouched);
     actors.row.Add(actors.preview);
 
     if(mOptions.sample.enabled)
@@ -3183,7 +3183,7 @@ private:
     actors.detail.SetPadding(Extents(14, 8, 0, 0));
     actors.detailParams = AbsoluteLayoutParams::New();
     actors.detail.SetLayoutParams(actors.detailParams);
-    actors.detail.TouchEventSignal().Connect(this, &EmojiVisualController::OnDetailTouched);
+    actors.detail.TouchedSignal().Connect(this, &EmojiVisualController::OnDetailTouched);
     actors.row.Add(actors.detail);
 
     return actors;
