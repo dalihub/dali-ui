@@ -15,6 +15,7 @@ A public component handle should inherit from the foundation class that matches 
 | Basic visual/container component | `View` | `ViewImpl` |
 | Clickable/focusable interactive component | `InteractiveView` | `Provider::InteractiveViewImpl` |
 | Component with selectable state | `SelectableView` | `Provider::SelectableViewImpl` |
+| Single-selection (radio) group member component | `GroupSelectableView` | `Provider::GroupSelectableViewImpl` |
 
 Keep the public handle and internal impl hierarchy aligned:
 
@@ -29,6 +30,8 @@ class TextButtonImpl : public Provider::InteractiveViewImpl
   ...
 };
 ```
+
+These foundation classes form a hierarchy where each level adds behavior on top of the previous one: `InteractiveView` adds click/focus handling, `SelectableView` adds a selected state, and `GroupSelectableView` adds single-selection (radio) grouping for members where only one can be selected. A subclass inherits and exposes its parent classes' APIs directly.
 
 Component-specific state and behavior belong in the impl class. Public component classes remain lightweight handles.
 
