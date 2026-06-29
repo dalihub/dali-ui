@@ -166,20 +166,27 @@ label.SetFontFamily("Sans VF");
 label.SetFontVariation("wght=700,wdth=90");
 ~~~
 
-`FontVariationAxis`로 설정:
+`FontVariation::Axis`로 설정:
 
 ~~~cpp
-Dali::Vector<Text::FontVariationAxis> axes;
-axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
-axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
+Dali::Vector<Text::FontVariation::Axis> axes;
+axes.PushBack(Text::FontVariation::Axis("wght", 700.0f));
+axes.PushBack(Text::FontVariation::Axis("wdth", 90.0f));
 
 Label label = Label::New("Variable Font");
 label.SetFontFamily("Sans VF");
 label.SetFontVariation(axes);
 ~~~
 
+`FontVariation::None()`으로 clear:
+
+~~~cpp
+label.SetFontVariation(Text::FontVariation::None());
+~~~
+
 > [!NOTE]
 > 사용하는 font가 해당 variation axis를 지원하지 않으면 axis 값은 무시될 수 있습니다. 위 예시의 `"Sans VF"`는 variable font 이름의 예시입니다.
+> 빈 font variation settings 문자열은 invalid로 처리되며 현재 font variation을 clear하거나 변경하지 않습니다. clear가 필요한 경우 `SetFontVariation(Text::FontVariation::None())`을 사용합니다.
 
 참고 샘플: [text-font-variation-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-font-variation-example.cpp)
 
@@ -193,8 +200,8 @@ UI scale은 Label, InputField, InputEditor의 measure/relayout 과정에서 font
 |---|---|
 | FontSize | text layout / rendering 기준 font size에 반영 |
 | LineHeight | relative/absolute line height 계산에 반영 |
-| TextFit FitRange | min/max/step 값에 반영 |
-| TextFit FitCandidate | font size / line height에 반영 |
+| TextFit `Text::Fit::Range` | min/max/step 값에 반영 |
+| TextFit `Text::Fit::Candidate` | font size / line height에 반영 |
 | Margin / Padding | text layout 영역 계산에 반영 |
 | Marquee | MarqueeGap 등 marquee 관련 layout 값에 반영 |
 
@@ -408,11 +415,12 @@ Text fit은 주어진 width/height 안에서 텍스트가 overflow되지 않도�
 
 | API | 설명 |
 |---|---|
-| `SetTextFit(Text::FitRange)` | font size 범위로 fit 설정 |
-| `SetTextFit(Vector<FitCandidate>)` | 후보 목록으로 fit 설정 |
-| `ClearTextFit()` | text fit 해제 |
+| `SetTextFit(Text::Fit)` | 전체 fit 구성으로 text fit 설정 또는 해제 |
+| `SetTextFit(Text::Fit::Range)` | font size 범위로 fit 설정 |
+| `SetTextFit(Vector<Text::Fit::Candidate>)` | 후보 목록으로 fit 설정 |
+| `GetTextFit()` | 현재 text fit 구성 조회 |
 
-### FitRange
+### Range
 
 min/max font size와 step으로 범위를 지정합니다. line height는 현재 style 설정을 따릅니다.
 
@@ -421,24 +429,51 @@ Label label = Label::New("Auto-sized text");
 label.SetRequestedWidth(MATCH_PARENT);
 label.SetRequestedHeight(66.0f);
 label.SetMultiLine(true);
-label.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+label.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 4.0f));
 ~~~
 
-### FitCandidate
+### Candidate
 
 각 후보에 fontSize와 lineHeight를 직접 지정할 수 있습니다. text fit은 available space에 맞는 가장 큰 후보를 선택합니다.
 
 ~~~cpp
-Dali::Vector<Text::FitCandidate> candidates;
-candidates.PushBack(Text::FitCandidate(16.0f, 32.0f));
-candidates.PushBack(Text::FitCandidate(20.0f, 40.0f));
-candidates.PushBack(Text::FitCandidate(24.0f, 48.0f));
+Dali::Vector<Text::Fit::Candidate> candidates;
+candidates.PushBack(Text::Fit::Candidate(16.0f, 32.0f));
+candidates.PushBack(Text::Fit::Candidate(20.0f, 40.0f));
+candidates.PushBack(Text::Fit::Candidate(24.0f, 48.0f));
 
 Label label = Label::New("Candidate fit");
 label.SetRequestedWidth(MATCH_PARENT);
 label.SetRequestedHeight(80.0f);
 label.SetMultiLine(true);
 label.SetTextFit(candidates);
+~~~
+
+### Clear
+
+`Text::Fit::None()`으로 text fit을 해제합니다.
+
+~~~cpp
+label.SetTextFit(Text::Fit::None());
+~~~
+
+빈 candidate vector를 `SetTextFit()`에 전달해도 동일하게 text fit이 해제됩니다.
+
+### 현재 Fit 조회
+
+`GetTextFit()`은 text fit이 disabled, range-based, candidate-based 중 어느 상태인지 나타내는 `Text::Fit`을 반환합니다.
+
+~~~cpp
+Text::Fit fit = label.GetTextFit();
+
+if(fit.GetType() == Text::Fit::Type::RANGE)
+{
+  const Text::Fit::Range& range = fit.GetRange();
+}
+else if(fit.GetType() == Text::Fit::Type::CANDIDATES)
+{
+  const Dali::Vector<Text::Fit::Candidate>& candidates = fit.GetCandidates();
+}
 ~~~
 
 > [!WARNING]

@@ -190,7 +190,11 @@ InputField field = InputField::New();
 field.SetTextColor(UiColor::PRIMARY);
 field.SetPlaceholderColor(UiColor::OUTLINE);
 field.SetFontSize(22.0f);
+field.SetFontVariation("wght=600,wdth=90");
+field.SetFontVariation(Text::FontVariation::None());
 ~~~
+
+Use `SetFontVariation(Text::FontVariation::None())` to clear font variation settings. An empty settings string is invalid and leaves the current font variation unchanged.
 
 <br/>
 

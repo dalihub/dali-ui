@@ -166,20 +166,27 @@ label.SetFontFamily("Sans VF");
 label.SetFontVariation("wght=700,wdth=90");
 ~~~
 
-Set using `FontVariationAxis`:
+Set using `FontVariation::Axis`:
 
 ~~~cpp
-Dali::Vector<Text::FontVariationAxis> axes;
-axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
-axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
+Dali::Vector<Text::FontVariation::Axis> axes;
+axes.PushBack(Text::FontVariation::Axis("wght", 700.0f));
+axes.PushBack(Text::FontVariation::Axis("wdth", 90.0f));
 
 Label label = Label::New("Variable Font");
 label.SetFontFamily("Sans VF");
 label.SetFontVariation(axes);
 ~~~
 
+Clear using `FontVariation::None()`:
+
+~~~cpp
+label.SetFontVariation(Text::FontVariation::None());
+~~~
+
 > [!NOTE]
 > If the font does not support a variation axis, the axis value may be ignored. `"Sans VF"` in the example above is a placeholder variable font name.
+> An empty font variation settings string is invalid and does not clear or change the current font variation. Use `SetFontVariation(Text::FontVariation::None())` to clear it.
 
 See also: [text-font-variation-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-font-variation-example.cpp)
 
@@ -193,8 +200,8 @@ UI scale is reflected in font size and text layout related values during the mea
 |---|---|
 | FontSize | Reflected in text layout / rendering base font size |
 | LineHeight | Reflected in relative/absolute line height calculation |
-| TextFit FitRange | Reflected in min/max/step values |
-| TextFit FitCandidate | Reflected in font size / line height |
+| TextFit `Text::Fit::Range` | Reflected in min/max/step values |
+| TextFit `Text::Fit::Candidate` | Reflected in font size / line height |
 | Margin / Padding | Reflected in text layout area calculation |
 | Marquee | Reflected in MarqueeGap and other marquee layout values |
 
@@ -408,11 +415,12 @@ Text fit selects the largest font size that does not overflow within the given w
 
 | API | Description |
 |---|---|
-| `SetTextFit(Text::FitRange)` | Set fit with font size range |
-| `SetTextFit(Vector<FitCandidate>)` | Set fit with candidate list |
-| `ClearTextFit()` | Clear text fit |
+| `SetTextFit(Text::Fit)` | Set or clear text fit with a complete configuration |
+| `SetTextFit(Text::Fit::Range)` | Set fit with font size range |
+| `SetTextFit(Vector<Text::Fit::Candidate>)` | Set fit with candidate list |
+| `GetTextFit()` | Get the current text fit configuration |
 
-### FitRange
+### Range
 
 Specify a range with min/max font size and step. Line height follows the current style setting.
 
@@ -421,24 +429,51 @@ Label label = Label::New("Auto-sized text");
 label.SetRequestedWidth(MATCH_PARENT);
 label.SetRequestedHeight(66.0f);
 label.SetMultiLine(true);
-label.SetTextFit(Text::FitRange(16.0f, 32.0f, 4.0f));
+label.SetTextFit(Text::Fit::Range(16.0f, 32.0f, 4.0f));
 ~~~
 
-### FitCandidate
+### Candidate
 
 Each candidate can specify fontSize and lineHeight directly. Text fit selects the largest candidate that fits the available space.
 
 ~~~cpp
-Dali::Vector<Text::FitCandidate> candidates;
-candidates.PushBack(Text::FitCandidate(16.0f, 32.0f));
-candidates.PushBack(Text::FitCandidate(20.0f, 40.0f));
-candidates.PushBack(Text::FitCandidate(24.0f, 48.0f));
+Dali::Vector<Text::Fit::Candidate> candidates;
+candidates.PushBack(Text::Fit::Candidate(16.0f, 32.0f));
+candidates.PushBack(Text::Fit::Candidate(20.0f, 40.0f));
+candidates.PushBack(Text::Fit::Candidate(24.0f, 48.0f));
 
 Label label = Label::New("Candidate fit");
 label.SetRequestedWidth(MATCH_PARENT);
 label.SetRequestedHeight(80.0f);
 label.SetMultiLine(true);
 label.SetTextFit(candidates);
+~~~
+
+### Clear
+
+Clear text fit using `Text::Fit::None()`:
+
+~~~cpp
+label.SetTextFit(Text::Fit::None());
+~~~
+
+Passing an empty candidate vector to `SetTextFit()` has the same effect.
+
+### Get Current Fit
+
+`GetTextFit()` returns `Text::Fit`, which describes whether text fit is disabled, range-based, or candidate-based.
+
+~~~cpp
+Text::Fit fit = label.GetTextFit();
+
+if(fit.GetType() == Text::Fit::Type::RANGE)
+{
+  const Text::Fit::Range& range = fit.GetRange();
+}
+else if(fit.GetType() == Text::Fit::Type::CANDIDATES)
+{
+  const Dali::Vector<Text::Fit::Candidate>& candidates = fit.GetCandidates();
+}
 ~~~
 
 > [!WARNING]
