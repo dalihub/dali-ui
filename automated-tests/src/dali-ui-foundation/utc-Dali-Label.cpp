@@ -535,6 +535,42 @@ int UtcDaliLabelMarqueeOrientation(void)
   END_TEST;
 }
 
+int UtcDaliLabelSyncMarqueeRestartsAfterUiScaleChangeP(void)
+{
+  UiTestApplication application;
+  UiScaleManager::Get().SetScale(1.0f);
+
+  Label label = Label::New("This is a long single-line marquee text that should keep scrolling after UI scale changes.");
+  label.SetAsyncRendering(false);
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(40.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(0);
+  label.SetMarqueeStopMode(Text::MarqueeStopMode::FINISH_LOOP);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render();
+  application.Render(16);
+
+  DALI_TEST_CHECK(label.IsMarqueeRunning());
+
+  UiScaleManager::Get().SetScale(1.2f);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(label.IsMarqueeRunning());
+
+  UiScaleManager::Get().SetScale(1.0f);
+  END_TEST;
+}
+
 int UtcDaliLabelTextColor(void)
 {
   UiTestApplication application;

@@ -31,7 +31,8 @@ class TextController : public ConnectionTracker
 {
 public:
   explicit TextController(Application& application)
-  : mApplication(application)
+  : mApplication(application),
+    mMarqueeStopMode(Text::MarqueeStopMode::IMMEDIATE)
   {
     mApplication.InitSignal().Connect(this, &TextController::OnInit);
   }
@@ -50,7 +51,7 @@ private:
 
     Label title = Label::New("Text Marquee Example\n"
                              "Test options:\n"
-                             "[1] Start Marquee, [2] Stop Marquee, [i] Information\n"
+                             "[1] Start Marquee, [2] Stop Marquee, [d] Toggle Stop Mode, [i] Information\n"
                              "Text::MarqueeOrientation::HORIZONTAL");
     title.SetFontSize(14.0f);
     title.SetMultiLine(true);
@@ -120,6 +121,8 @@ private:
 
     mLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnFocusChanged);
     mOverflowLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnOverflowFocusChanged);
+
+    SetMarqueeStopModeForAll(mMarqueeStopMode);
 
     window.KeyEventSignal().Connect(this, &TextController::OnKeyEvent);
   }
@@ -215,14 +218,6 @@ private:
     {
       SetAsyncRenderingForAll(false);
     }
-    else if(event.GetKeyName() == "q")
-    {
-      SetOverflowFontSize(30.0f);
-    }
-    else if(event.GetKeyName() == "w")
-    {
-      SetOverflowFontSize(20.0f);
-    }
     else if(event.GetKeyName() == "a")
     {
       SetOverflowVisibility(false);
@@ -231,9 +226,33 @@ private:
     {
       SetOverflowVisibility(true);
     }
+    else if(event.GetKeyName() == "d")
+    {
+      ToggleMarqueeStopMode();
+    }
     else if(event.GetKeyName() == "i")
     {
       PrintAllLabelInfo();
+    }
+    else if(event.GetKeyName() == "q")
+    {
+      UiScaleManager::Get().SetScale(0.8f);
+    }
+    else if(event.GetKeyName() == "w")
+    {
+      UiScaleManager::Get().SetScale(1.0f);
+    }
+    else if(event.GetKeyName() == "e")
+    {
+      UiScaleManager::Get().SetScale(1.2f);
+    }
+    else if(event.GetKeyName() == "r")
+    {
+      UiScaleManager::Get().SetScale(1.5f);
+    }
+    else if(event.GetKeyName() == "t")
+    {
+      UiScaleManager::Get().SetScale(2.0f);
     }
   }
 
@@ -261,6 +280,27 @@ private:
     mLabelVerticalStart.StopMarquee();
     mLabelVerticalCenter.StopMarquee();
     mLabelVerticalEnd.StopMarquee();
+  }
+
+  void ToggleMarqueeStopMode()
+  {
+    mMarqueeStopMode = (mMarqueeStopMode == Text::MarqueeStopMode::IMMEDIATE) ? Text::MarqueeStopMode::FINISH_LOOP : Text::MarqueeStopMode::IMMEDIATE;
+    SetMarqueeStopModeForAll(mMarqueeStopMode);
+  }
+
+  void SetMarqueeStopModeForAll(Text::MarqueeStopMode stopMode)
+  {
+    mLabelLtr.SetMarqueeStopMode(stopMode);
+    mLabelRtl.SetMarqueeStopMode(stopMode);
+    mLabelMultiline.SetMarqueeStopMode(stopMode);
+    mLabelFocus.SetMarqueeStopMode(stopMode);
+    mOverflowLabel.SetMarqueeStopMode(stopMode);
+    mOverflowLabelRtl.SetMarqueeStopMode(stopMode);
+    mOverflowLabelMultiline.SetMarqueeStopMode(stopMode);
+    mOverflowLabelFocus.SetMarqueeStopMode(stopMode);
+    mLabelVerticalStart.SetMarqueeStopMode(stopMode);
+    mLabelVerticalCenter.SetMarqueeStopMode(stopMode);
+    mLabelVerticalEnd.SetMarqueeStopMode(stopMode);
   }
 
   void SetAsyncRenderingForAll(bool enabled)
@@ -307,18 +347,19 @@ private:
   }
 
 private:
-  Application& mApplication;
-  Label        mLabelLtr;
-  Label        mLabelRtl;
-  Label        mLabelMultiline;
-  Label        mLabelFocus;
-  Label        mOverflowLabel;
-  Label        mOverflowLabelRtl;
-  Label        mOverflowLabelMultiline;
-  Label        mOverflowLabelFocus;
-  Label        mLabelVerticalStart;
-  Label        mLabelVerticalCenter;
-  Label        mLabelVerticalEnd;
+  Application&           mApplication;
+  Text::MarqueeStopMode  mMarqueeStopMode;
+  Label                  mLabelLtr;
+  Label                  mLabelRtl;
+  Label                  mLabelMultiline;
+  Label                  mLabelFocus;
+  Label                  mOverflowLabel;
+  Label                  mOverflowLabelRtl;
+  Label                  mOverflowLabelMultiline;
+  Label                  mOverflowLabelFocus;
+  Label                  mLabelVerticalStart;
+  Label                  mLabelVerticalCenter;
+  Label                  mLabelVerticalEnd;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

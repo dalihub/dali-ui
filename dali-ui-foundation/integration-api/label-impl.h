@@ -885,6 +885,11 @@ private: // Implementation
   void SuppressAutoMarqueeEvaluation();
 
   /**
+   * @brief Stops the current marquee animation immediately, preserving the configured stop mode.
+   */
+  void StopMarqueeImmediately();
+
+  /**
    * @brief Handles marquee behavior when visibility changes.
    *
    * @param[in] visible True to restore the previous marquee state,
@@ -1112,9 +1117,10 @@ private:
   bool mRendererUpdateNeeded : 1;     // Whether the text renderer needs to be updated.
   bool mMeasureInvalidated : 1;       // whether measurement has been invalidated.
   bool mIsAsyncRenderRequested : 1;   // whether an async render has been requested.
-  bool mIsAsyncRenderLayoutDirty : 1; // Whether layout affecting async render has changed.
+  bool mIsContentLayoutDirty : 1;     // Whether content size or padding has changed.
   bool mSuppressAutoMarquee : 1;      // whether automatic marquee evaluation is suppressed.
   bool mLastMarqueeEnabled : 1;       // whether manual marquee was enabled in the previous state.
+  bool mRestartMarquee : 1;           // whether sync marquee needs one-shot restart after UI scale changes.
   bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
   bool mHasAnchors : 1;               // whether the text has anchors.
   bool mIsVisible : 1;                // cached result of IsEffectivelyVisible().

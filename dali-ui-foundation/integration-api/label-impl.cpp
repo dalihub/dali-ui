@@ -220,9 +220,10 @@ LabelImpl::LabelImpl()
   mRendererUpdateNeeded(false),
   mMeasureInvalidated(false),
   mIsAsyncRenderRequested(false),
-  mIsAsyncRenderLayoutDirty(false),
+  mIsContentLayoutDirty(false),
   mSuppressAutoMarquee(false),
   mLastMarqueeEnabled(false),
+  mRestartMarquee(false),
   mIsTouchDown(false),
   mHasAnchors(false),
   mIsVisible(false),
@@ -1496,10 +1497,10 @@ void LabelImpl::OnInitialize()
 
 void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
-  const bool asyncRenderLayoutDirty = mIsAsyncRenderLayoutDirty;
-  const bool manualRenderFinished   = mIsManualRenderFinished;
-  mIsAsyncRenderLayoutDirty         = false;
-  mIsManualRenderFinished           = false;
+  const bool contentLayoutDirty   = mIsContentLayoutDirty;
+  const bool manualRenderFinished = mIsManualRenderFinished;
+  mIsContentLayoutDirty           = false;
+  mIsManualRenderFinished         = false;
 
   if(mTextScroller && mTextScroller->IsStopRequested())
   {
@@ -1527,20 +1528,20 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
   if(mController->IsAsyncRendering())
   {
-    if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || asyncRenderLayoutDirty))
+    if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || contentLayoutDirty))
     {
       // When marquee is playing, a text load request is made only if a text update is absolutely necessary.
       return;
     }
 
-    if(mIsManualRenderInProgress || !(asyncRenderLayoutDirty || mIsAsyncRenderRequested))
+    if(mIsManualRenderInProgress || !(contentLayoutDirty || mIsAsyncRenderRequested))
     {
       // Do not request async render while a manual render is in progress,
       // or when there are no size or property updates.
       return;
     }
 
-    if(manualRenderFinished && asyncRenderLayoutDirty && !mIsAsyncRenderRequested)
+    if(manualRenderFinished && contentLayoutDirty && !mIsAsyncRenderRequested)
     {
       // Skip async render when only the size changed immediately after manual render completion.
       // This avoids redundant recomputation when users resize the label in the completion callback.
@@ -1566,6 +1567,23 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   {
     mController->FitPointSizeforLayout(contentSize);
     mController->SetTextFitContentSize(contentSize);
+  }
+
+  if(contentLayoutDirty && mTextScroller && mTextScroller->IsScrolling())
+  {
+    mRestartMarquee = true;
+    StopMarqueeImmediately();
+  }
+
+  const bool restartMarquee = mRestartMarquee;
+  mRestartMarquee           = false;
+  if(restartMarquee)
+  {
+    EnableAutoMarqueeEvaluation();
+    if(mMarqueeTriggerPolicy != Text::MarqueeTriggerPolicy::ON_OVERFLOW && mLastMarqueeEnabled)
+    {
+      mController->SetMarqueeEnabled(true, true, GetTextScroller()->GetOrientation());
+    }
   }
 
   const Text::MarqueeOrientation marqueeOrientation = mTextScroller ? mTextScroller->GetOrientation() : Text::MarqueeOrientation::HORIZONTAL;
@@ -1685,6 +1703,13 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   if(SetTextUiScale(effectiveScale))
   {
     mController->InvalidateFontData();
+    RequestRendererUpdate();
+    if(!mController->IsAsyncRendering() && mTextScroller && mTextScroller->IsScrolling())
+    {
+      mIsContentLayoutDirty = true;
+      mRestartMarquee       = true;
+      StopMarqueeImmediately();
+    }
   }
 
   const float requestedWidth  = ScaleIfFixedSize(GetRequestedWidth(), effectiveScale);
@@ -2224,10 +2249,8 @@ void LabelImpl::UpdateMarqueeState()
   EnableAutoMarqueeEvaluation();
   if(mController->IsMarqueeEnabled())
   {
-    const Text::MarqueeStopMode stopMode = GetTextScroller()->GetStopMode();
-    mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
-    mTextScroller->StopScrolling();
-    mTextScroller->SetStopMode(stopMode);
+    GetTextScroller();
+    StopMarqueeImmediately();
     mController->SetMarqueeEnabled(true, true, mTextScroller->GetOrientation());
   }
 }
@@ -2240,6 +2263,19 @@ void LabelImpl::EnableAutoMarqueeEvaluation()
 void LabelImpl::SuppressAutoMarqueeEvaluation()
 {
   mSuppressAutoMarquee = true;
+}
+
+void LabelImpl::StopMarqueeImmediately()
+{
+  if(!mTextScroller)
+  {
+    return;
+  }
+
+  const Text::MarqueeStopMode stopMode = mTextScroller->GetStopMode();
+  mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
+  mTextScroller->StopScrolling();
+  mTextScroller->SetStopMode(stopMode);
 }
 
 void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
@@ -2276,10 +2312,7 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
     }
     if(mTextScroller->IsScrolling())
     {
-      const Text::MarqueeStopMode stopMode = mTextScroller->GetStopMode();
-      mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
-      mTextScroller->StopScrolling();
-      mTextScroller->SetStopMode(stopMode);
+      StopMarqueeImmediately();
     }
   }
 }
@@ -2350,7 +2383,7 @@ void LabelImpl::OnViewInheritedVisibilityChanged(Actor actor, bool visible)
   }
   else
   {
-    mIsAsyncRenderLayoutDirty = false;
+    mIsContentLayoutDirty     = false;
     mIsManualRenderInProgress = false;
     mIsManualRenderFinished   = false;
   }
@@ -2419,7 +2452,7 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOr
 
   if(marqueeEnabled != mController->IsMarqueeEnabled())
   {
-    mController->SetMarqueeEnabled(marqueeEnabled, false, orientation);
+    mController->SetMarqueeEnabled(marqueeEnabled, true, orientation);
   }
 }
 
@@ -2805,8 +2838,8 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       const Vector2& size = propertyValue.Get<Vector2>();
       if(size != mSize)
       {
-        mSize                     = size;
-        mIsAsyncRenderLayoutDirty = true;
+        mSize                 = size;
+        mIsContentLayoutDirty = true;
       }
       break;
     }
@@ -2815,8 +2848,8 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       const float width = propertyValue.Get<float>();
       if(width != mSize.width)
       {
-        mSize.width               = width;
-        mIsAsyncRenderLayoutDirty = true;
+        mSize.width           = width;
+        mIsContentLayoutDirty = true;
       }
       break;
     }
@@ -2825,14 +2858,14 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
       const float height = propertyValue.Get<float>();
       if(height != mSize.height)
       {
-        mSize.height              = height;
-        mIsAsyncRenderLayoutDirty = true;
+        mSize.height          = height;
+        mIsContentLayoutDirty = true;
       }
       break;
     }
     case Ui::View::Property::PADDING:
     {
-      mIsAsyncRenderLayoutDirty = true;
+      mIsContentLayoutDirty = true;
       break;
     }
     case Ui::View::Property::BACKGROUND:
@@ -2874,7 +2907,7 @@ void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property:
     }
   }
 
-  if(mIsAsyncRenderLayoutDirty)
+  if(mIsContentLayoutDirty)
   {
     EnableAutoMarqueeEvaluation();
   }
