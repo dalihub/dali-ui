@@ -45,7 +45,12 @@
 #include <dali-ui-foundation/public-api/views/effects/shadow-stack.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
+#include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
+#include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
+#include <dali-ui-foundation/public-api/views/recycler/linear-items-layouter.h>
+#include <dali-ui-foundation/public-api/views/recycler/recycler-view.h>
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 #include <dali-ui-foundation/public-api/views/selection-group.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
@@ -54,8 +59,6 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-
-#include <dali-ui-foundation/public-api/views/image/image-view.h>
 
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 
