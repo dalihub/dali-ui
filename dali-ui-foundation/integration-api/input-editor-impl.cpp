@@ -1152,7 +1152,7 @@ Text::FontSlant InputEditorImpl::GetTypingFontSlant() const
   return Text::ToFontSlant(mController->GetInputFontSlant());
 }
 
-void InputEditorImpl::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+void InputEditorImpl::SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes)
 {
   // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), axes.Count());
@@ -1181,7 +1181,7 @@ void InputEditorImpl::SetFontVariation(const Dali::String& settings)
   SetFontVariation(axes);
 }
 
-Dali::Vector<Text::FontVariationAxis> InputEditorImpl::GetFontVariation() const
+Dali::Vector<Text::FontVariation::Axis> InputEditorImpl::GetFontVariation() const
 {
   return mController->GetVariations();
 }

@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 
 #define DALI_ASSERT_VALID_FONT_VARIATION_AXIS(impl) \
-  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from FontVariationAxis object")
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use a moved-from FontVariation::Axis object")
 
 namespace Dali
 {
@@ -30,12 +30,14 @@ namespace Ui
 {
 namespace Text
 {
+namespace FontVariation
+{
 namespace
 {
 constexpr float DEFAULT_VALUE = 0.0f;
 } // namespace
 
-class FontVariationAxis::Impl
+class Axis::Impl
 {
 public:
   Impl()
@@ -60,30 +62,30 @@ public:
   float        mValue;
 };
 
-FontVariationAxis::FontVariationAxis()
+Axis::Axis()
 : mImpl(new Impl())
 {
 }
 
-FontVariationAxis::FontVariationAxis(const Dali::String& tag, float value)
+Axis::Axis(const Dali::String& tag, float value)
 : mImpl(new Impl(tag, value))
 {
 }
 
-FontVariationAxis::FontVariationAxis(const FontVariationAxis& rhs)
+Axis::Axis(const Axis& rhs)
 : mImpl(nullptr)
 {
   DALI_ASSERT_VALID_FONT_VARIATION_AXIS(rhs.mImpl);
   mImpl = new Impl(*rhs.mImpl);
 }
 
-FontVariationAxis::FontVariationAxis(FontVariationAxis&& rhs) noexcept
+Axis::Axis(Axis&& rhs) noexcept
 : mImpl(rhs.mImpl)
 {
   rhs.mImpl = nullptr;
 }
 
-FontVariationAxis& FontVariationAxis::operator=(const FontVariationAxis& rhs)
+Axis& Axis::operator=(const Axis& rhs)
 {
   if(this != &rhs)
   {
@@ -95,7 +97,7 @@ FontVariationAxis& FontVariationAxis::operator=(const FontVariationAxis& rhs)
   return *this;
 }
 
-FontVariationAxis& FontVariationAxis::operator=(FontVariationAxis&& rhs) noexcept
+Axis& Axis::operator=(Axis&& rhs) noexcept
 {
   if(this != &rhs)
   {
@@ -106,35 +108,36 @@ FontVariationAxis& FontVariationAxis::operator=(FontVariationAxis&& rhs) noexcep
   return *this;
 }
 
-FontVariationAxis::~FontVariationAxis()
+Axis::~Axis()
 {
   delete mImpl;
 }
 
-void FontVariationAxis::SetTag(const Dali::String& tag)
+void Axis::SetTag(const Dali::String& tag)
 {
   DALI_ASSERT_VALID_FONT_VARIATION_AXIS(mImpl);
   mImpl->mTag = tag;
 }
 
-const Dali::String& FontVariationAxis::GetTag() const
+const Dali::String& Axis::GetTag() const
 {
   DALI_ASSERT_VALID_FONT_VARIATION_AXIS(mImpl);
   return mImpl->mTag;
 }
 
-void FontVariationAxis::SetValue(float value)
+void Axis::SetValue(float value)
 {
   DALI_ASSERT_VALID_FONT_VARIATION_AXIS(mImpl);
   mImpl->mValue = value;
 }
 
-float FontVariationAxis::GetValue() const
+float Axis::GetValue() const
 {
   DALI_ASSERT_VALID_FONT_VARIATION_AXIS(mImpl);
   return mImpl->mValue;
 }
 
+} // namespace FontVariation
 } // namespace Text
 } // namespace Ui
 } // namespace Dali

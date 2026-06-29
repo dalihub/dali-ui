@@ -29,6 +29,8 @@ namespace Ui
 {
 namespace Text
 {
+namespace FontVariation
+{
 /**
  * @brief Describes a single variable font axis.
  *
@@ -38,13 +40,13 @@ namespace Text
  *
  * This object is used to configure font variation settings explicitly.
  */
-class DALI_UI_API FontVariationAxis
+class DALI_UI_API Axis
 {
 public:
   /**
    * @brief Creates a font variation axis with default values.
    */
-  FontVariationAxis();
+  Axis();
 
   /**
    * @brief Creates a font variation axis with the given parameters.
@@ -52,40 +54,40 @@ public:
    * @param[in] tag The OpenType axis tag.
    * @param[in] value The axis value.
    */
-  FontVariationAxis(const Dali::String& tag, float value);
+  Axis(const Dali::String& tag, float value);
 
   /**
    * @brief Creates a font variation axis by copying another axis.
    *
    * @param[in] rhs The font variation axis to copy.
    */
-  FontVariationAxis(const FontVariationAxis& rhs);
+  Axis(const Axis& rhs);
 
   /**
    * @brief Creates a font variation axis by moving another axis.
    *
    * @param[in] rhs The font variation axis to move.
    */
-  FontVariationAxis(FontVariationAxis&& rhs) noexcept;
+  Axis(Axis&& rhs) noexcept;
 
   /**
    * @brief Copies another font variation axis to this object.
    *
    * @param[in] rhs The font variation axis to copy.
    */
-  FontVariationAxis& operator=(const FontVariationAxis& rhs);
+  Axis& operator=(const Axis& rhs);
 
   /**
    * @brief Moves another font variation axis to this object.
    *
    * @param[in] rhs The font variation axis to move.
    */
-  FontVariationAxis& operator=(FontVariationAxis&& rhs) noexcept;
+  Axis& operator=(Axis&& rhs) noexcept;
 
   /**
    * @brief Destructor.
    */
-  ~FontVariationAxis();
+  ~Axis();
 
 public:
   /**
@@ -121,6 +123,7 @@ private:
   Impl* mImpl{nullptr};
 };
 
+} // namespace FontVariation
 } // namespace Text
 } // namespace Ui
 } // namespace Dali

@@ -989,7 +989,7 @@ bool LabelImpl::IsSystemFontSizeScaleEnabled() const
   return mController->IsSystemFontSizeScaleEnabled();
 }
 
-void LabelImpl::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+void LabelImpl::SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes)
 {
   // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), axes.Count());
@@ -1018,7 +1018,7 @@ void LabelImpl::SetFontVariation(const Dali::String& settings)
   SetFontVariation(axes);
 }
 
-Dali::Vector<Text::FontVariationAxis> LabelImpl::GetFontVariation() const
+Dali::Vector<Text::FontVariation::Axis> LabelImpl::GetFontVariation() const
 {
   return mController->GetVariations();
 }

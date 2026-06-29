@@ -380,11 +380,11 @@ void Controller::SetVariationsMap(const Property::Map& map)
   InvalidateMeasure();
 }
 
-Dali::Vector<Text::FontVariationAxis> Controller::GetVariations() const
+Dali::Vector<Text::FontVariation::Axis> Controller::GetVariations() const
 {
-  Dali::Vector<Text::FontVariationAxis> axes;
-  const Property::Map&                  map   = mImpl->mModel->mLogicalModel->mVariationsMap;
-  const std::size_t                     count = map.Count();
+  Dali::Vector<Text::FontVariation::Axis> axes;
+  const Property::Map&                    map   = mImpl->mModel->mLogicalModel->mVariationsMap;
+  const std::size_t                       count = map.Count();
   for(std::size_t i = 0u; i < count; ++i)
   {
     const auto& keyValue = map.GetKeyValue(i);
@@ -393,7 +393,7 @@ Dali::Vector<Text::FontVariationAxis> Controller::GetVariations() const
       float value = 0.0f;
       if(keyValue.second.Get(value))
       {
-        axes.PushBack(Text::FontVariationAxis(keyValue.first.stringKey, value));
+        axes.PushBack(Text::FontVariation::Axis(keyValue.first.stringKey, value));
       }
     }
   }
@@ -401,7 +401,7 @@ Dali::Vector<Text::FontVariationAxis> Controller::GetVariations() const
   return axes;
 }
 
-void Controller::SetVariations(const Dali::Vector<Text::FontVariationAxis>& axes)
+void Controller::SetVariations(const Dali::Vector<Text::FontVariation::Axis>& axes)
 {
   auto& variationsMap = mImpl->mModel->mLogicalModel->mVariationsMap;
   variationsMap.Clear();

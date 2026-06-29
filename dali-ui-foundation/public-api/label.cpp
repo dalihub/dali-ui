@@ -472,7 +472,7 @@ bool Label::IsSystemFontSizeScaleEnabled() const
   return GetImpl(*this).IsSystemFontSizeScaleEnabled();
 }
 
-void Label::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+void Label::SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes)
 {
   GetImpl(*this).SetFontVariation(axes);
 }
@@ -482,7 +482,7 @@ void Label::SetFontVariation(const Dali::String& settings)
   GetImpl(*this).SetFontVariation(settings);
 }
 
-Dali::Vector<Text::FontVariationAxis> Label::GetFontVariation() const
+Dali::Vector<Text::FontVariation::Axis> Label::GetFontVariation() const
 {
   return GetImpl(*this).GetFontVariation();
 }

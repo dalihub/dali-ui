@@ -116,10 +116,10 @@ private:
 
     window.Add(root);
 
-    // Set font variation using FontVariationAxis API
-    Dali::Vector<Text::FontVariationAxis> axes;
-    axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
-    axes.PushBack(Text::FontVariationAxis("wdth", 100.0f));
+    // Set font variation using FontVariation::Axis API
+    Dali::Vector<Text::FontVariation::Axis> axes;
+    axes.PushBack(Text::FontVariation::Axis("wght", 700.0f));
+    axes.PushBack(Text::FontVariation::Axis("wdth", 100.0f));
     mLabel700.SetFontVariation(axes);
     mField.SetFontVariation(axes);
 
@@ -181,10 +181,10 @@ private:
     }
     else if(event.GetKeyName() == "2")
     {
-      // Change font variation using FontVariationAxis API
-      Dali::Vector<Text::FontVariationAxis> axes;
-      axes.PushBack(Text::FontVariationAxis("wght", 300.0f));
-      axes.PushBack(Text::FontVariationAxis("wdth", 100.0f));
+      // Change font variation using FontVariation::Axis API
+      Dali::Vector<Text::FontVariation::Axis> axes;
+      axes.PushBack(Text::FontVariation::Axis("wght", 300.0f));
+      axes.PushBack(Text::FontVariation::Axis("wdth", 100.0f));
 
       mLabel200.SetFontVariation(axes);
       mLabel300.SetFontVariation(axes);

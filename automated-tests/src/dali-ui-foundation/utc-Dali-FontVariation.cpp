@@ -24,17 +24,17 @@ using namespace Dali::Ui::Text;
 
 namespace
 {
-Dali::Vector<FontVariationAxis> MakeAxes(std::initializer_list<std::pair<const char*, float>> values)
+Dali::Vector<FontVariation::Axis> MakeAxes(std::initializer_list<std::pair<const char*, float>> values)
 {
-  Dali::Vector<FontVariationAxis> axes;
+  Dali::Vector<FontVariation::Axis> axes;
   for(const auto& value : values)
   {
-    axes.PushBack(FontVariationAxis(value.first, value.second));
+    axes.PushBack(FontVariation::Axis(value.first, value.second));
   }
   return axes;
 }
 
-bool CheckAxesEqual(const Dali::Vector<FontVariationAxis>& lhs, const Dali::Vector<FontVariationAxis>& rhs)
+bool CheckAxesEqual(const Dali::Vector<FontVariation::Axis>& lhs, const Dali::Vector<FontVariation::Axis>& rhs)
 {
   if(lhs.Count() != rhs.Count())
   {
@@ -57,7 +57,7 @@ bool CheckAxesEqual(const Dali::Vector<FontVariationAxis>& lhs, const Dali::Vect
   return true;
 }
 
-void DALI_TEST_EQUALS_AXES(const Dali::Vector<FontVariationAxis>& actual, const Dali::Vector<FontVariationAxis>& expected, const char* location)
+void DALI_TEST_EQUALS_AXES(const Dali::Vector<FontVariation::Axis>& actual, const Dali::Vector<FontVariation::Axis>& expected, const char* location)
 {
   DALI_TEST_EQUALS(CheckAxesEqual(actual, expected), true, location);
 }
@@ -75,12 +75,12 @@ void utc_dali_font_variation_cleanup(void)
 
 int UtcDaliFontVariationFromStringUnquoted(void)
 {
-  const Dali::Vector<FontVariationAxis> expected = MakeAxes({
+  const Dali::Vector<FontVariation::Axis> expected = MakeAxes({
     {"wght", 700.0f},
     {"wdth", 90.0f},
   });
 
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("wght=700,wdth=90");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("wght=700,wdth=90");
 
   DALI_TEST_EQUALS_AXES(actual, expected, TEST_LOCATION);
   END_TEST;
@@ -88,12 +88,12 @@ int UtcDaliFontVariationFromStringUnquoted(void)
 
 int UtcDaliFontVariationFromStringDoubleQuoted(void)
 {
-  const Dali::Vector<FontVariationAxis> expected = MakeAxes({
+  const Dali::Vector<FontVariation::Axis> expected = MakeAxes({
     {"wght", 700.0f},
     {"wdth", 90.0f},
   });
 
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("\"wght\" 700, \"wdth\" 90");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("\"wght\" 700, \"wdth\" 90");
 
   DALI_TEST_EQUALS_AXES(actual, expected, TEST_LOCATION);
   END_TEST;
@@ -101,12 +101,12 @@ int UtcDaliFontVariationFromStringDoubleQuoted(void)
 
 int UtcDaliFontVariationFromStringSingleQuoted(void)
 {
-  const Dali::Vector<FontVariationAxis> expected = MakeAxes({
+  const Dali::Vector<FontVariation::Axis> expected = MakeAxes({
     {"wght", 700.0f},
     {"wdth", 90.0f},
   });
 
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("'wght' 700, 'wdth' 90");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("'wght' 700, 'wdth' 90");
 
   DALI_TEST_EQUALS_AXES(actual, expected, TEST_LOCATION);
   END_TEST;
@@ -114,13 +114,13 @@ int UtcDaliFontVariationFromStringSingleQuoted(void)
 
 int UtcDaliFontVariationFromStringWhitespace(void)
 {
-  const Dali::Vector<FontVariationAxis> expected = MakeAxes({
+  const Dali::Vector<FontVariation::Axis> expected = MakeAxes({
     {"wght", 700.0f},
     {"wdth", 90.0f},
     {"slnt", -7.5f},
   });
 
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("  wght = 700 , wdth = 90 , slnt = -7.5  ");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("  wght = 700 , wdth = 90 , slnt = -7.5  ");
 
   DALI_TEST_EQUALS_AXES(actual, expected, TEST_LOCATION);
   END_TEST;
@@ -128,12 +128,12 @@ int UtcDaliFontVariationFromStringWhitespace(void)
 
 int UtcDaliFontVariationFromStringDuplicateLastWins(void)
 {
-  const Dali::Vector<FontVariationAxis> expected = MakeAxes({
+  const Dali::Vector<FontVariation::Axis> expected = MakeAxes({
     {"wght", 600.0f},
     {"wdth", 90.0f},
   });
 
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("wght=700,wdth=90,wght=600");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("wght=700,wdth=90,wght=600");
 
   DALI_TEST_EQUALS_AXES(actual, expected, TEST_LOCATION);
   END_TEST;
@@ -141,12 +141,12 @@ int UtcDaliFontVariationFromStringDuplicateLastWins(void)
 
 int UtcDaliFontVariationFromStringQuotedTagWithTrailingSpaces(void)
 {
-  const Dali::Vector<FontVariationAxis> expected = MakeAxes({
+  const Dali::Vector<FontVariation::Axis> expected = MakeAxes({
     {"AX  ", 1.0f},
     {"FB  ", 2.0f},
   });
 
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("'AX  ' 1.0, 'FB  ' 2.0");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("'AX  ' 1.0, 'FB  ' 2.0");
 
   DALI_TEST_EQUALS_AXES(actual, expected, TEST_LOCATION);
   END_TEST;
@@ -154,7 +154,7 @@ int UtcDaliFontVariationFromStringQuotedTagWithTrailingSpaces(void)
 
 int UtcDaliFontVariationFromStringEmpty(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(FontVariation::None().Count(), 0u, TEST_LOCATION);
@@ -164,7 +164,7 @@ int UtcDaliFontVariationFromStringEmpty(void)
 
 int UtcDaliFontVariationFromStringInvalidTagLengthShort(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("abc=1.0");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("abc=1.0");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   END_TEST;
@@ -172,7 +172,7 @@ int UtcDaliFontVariationFromStringInvalidTagLengthShort(void)
 
 int UtcDaliFontVariationFromStringInvalidTagLengthLong(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("abcde=1.0");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("abcde=1.0");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   END_TEST;
@@ -180,7 +180,7 @@ int UtcDaliFontVariationFromStringInvalidTagLengthLong(void)
 
 int UtcDaliFontVariationFromStringInvalidQuotedFormat(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("\"wght\"=700");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("\"wght\"=700");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   END_TEST;
@@ -188,7 +188,7 @@ int UtcDaliFontVariationFromStringInvalidQuotedFormat(void)
 
 int UtcDaliFontVariationFromStringInvalidMissingSeparator(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("wght=700 wdth=90");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("wght=700 wdth=90");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   END_TEST;
@@ -196,7 +196,7 @@ int UtcDaliFontVariationFromStringInvalidMissingSeparator(void)
 
 int UtcDaliFontVariationFromStringInvalidTrailingGarbage(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("wght=700abc");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("wght=700abc");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   END_TEST;
@@ -204,7 +204,7 @@ int UtcDaliFontVariationFromStringInvalidTrailingGarbage(void)
 
 int UtcDaliFontVariationFromStringInvalidTrailingComma(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("wght=700,");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("wght=700,");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   END_TEST;
@@ -212,7 +212,7 @@ int UtcDaliFontVariationFromStringInvalidTrailingComma(void)
 
 int UtcDaliFontVariationFromStringInvalidNaN(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("wght=nan");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("wght=nan");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   END_TEST;
@@ -220,7 +220,7 @@ int UtcDaliFontVariationFromStringInvalidNaN(void)
 
 int UtcDaliFontVariationFromStringInvalidInf(void)
 {
-  const Dali::Vector<FontVariationAxis> actual = FontVariation::FromString("wght=inf");
+  const Dali::Vector<FontVariation::Axis> actual = FontVariation::FromString("wght=inf");
 
   DALI_TEST_EQUALS(actual.Count(), 0u, TEST_LOCATION);
   END_TEST;
@@ -228,7 +228,7 @@ int UtcDaliFontVariationFromStringInvalidInf(void)
 
 int UtcDaliFontVariationToStringUnquoted(void)
 {
-  const Dali::Vector<FontVariationAxis> axes = MakeAxes({
+  const Dali::Vector<FontVariation::Axis> axes = MakeAxes({
     {"wght", 700.0f},
     {"wdth", 90.0f},
     {"slnt", -7.5f},
@@ -242,7 +242,7 @@ int UtcDaliFontVariationToStringUnquoted(void)
 
 int UtcDaliFontVariationToStringQuotedTagWithTrailingSpaces(void)
 {
-  const Dali::Vector<FontVariationAxis> axes = MakeAxes({
+  const Dali::Vector<FontVariation::Axis> axes = MakeAxes({
     {"AX  ", 1.0f},
     {"FB  ", 2.0f},
   });
@@ -257,9 +257,9 @@ int UtcDaliFontVariationRoundTripUnquoted(void)
 {
   const Dali::String input("wght=700,wdth=90,slnt=-7.5");
 
-  const Dali::Vector<FontVariationAxis> axes       = FontVariation::FromString(input);
+  const Dali::Vector<FontVariation::Axis> axes       = FontVariation::FromString(input);
   const Dali::String                    output     = FontVariation::ToString(axes);
-  const Dali::Vector<FontVariationAxis> reparsed   = FontVariation::FromString(output);
+  const Dali::Vector<FontVariation::Axis> reparsed   = FontVariation::FromString(output);
 
   DALI_TEST_EQUALS(output, Dali::String("wght=700,wdth=90,slnt=-7.5"), TEST_LOCATION);
   DALI_TEST_EQUALS_AXES(reparsed, axes, TEST_LOCATION);
@@ -270,9 +270,9 @@ int UtcDaliFontVariationRoundTripQuotedTagWithTrailingSpaces(void)
 {
   const Dali::String input("'AX  ' 1.0, 'FB  ' 2.0");
 
-  const Dali::Vector<FontVariationAxis> axes     = FontVariation::FromString(input);
+  const Dali::Vector<FontVariation::Axis> axes     = FontVariation::FromString(input);
   const Dali::String                    output   = FontVariation::ToString(axes);
-  const Dali::Vector<FontVariationAxis> reparsed = FontVariation::FromString(output);
+  const Dali::Vector<FontVariation::Axis> reparsed = FontVariation::FromString(output);
 
   DALI_TEST_EQUALS(output, Dali::String("\"AX  \" 1,\"FB  \" 2"), TEST_LOCATION);
   DALI_TEST_EQUALS_AXES(reparsed, axes, TEST_LOCATION);

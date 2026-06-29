@@ -32,9 +32,9 @@ namespace Ui
 namespace Text
 {
 /**
- * @brief Utility functions for font variation settings.
+ * @brief Utility namespace for font variation settings.
  *
- * This class provides helper functions to convert between string-based
+ * This namespace provides helper functions to convert between string-based
  * font variation settings and axis-based representations.
  *
  * A font variation settings string consists of one or more pairs of
@@ -62,49 +62,44 @@ namespace Text
  *       Passing an empty string to SetFontVariation(const Dali::String&) is
  *       invalid and leaves the current font variation unchanged.
  */
-class DALI_UI_API FontVariation
+namespace FontVariation
 {
-public:
-  /**
-   * @brief Returns an empty font variation axis list.
-   *
-   * This value can be passed to SetFontVariation() to clear font variation settings.
-   * It is equivalent to passing an empty axis vector.
-   *
-   * @return An empty font variation axis list.
-   */
-  static const Dali::Vector<FontVariationAxis>& None();
 
-  /**
-   * @brief Parses a font variation settings string.
-   *
-   * The input string must follow one of the supported formats described
-   * in this class documentation.
-   *
-   * @param[in] settings The font variation settings string.
-   * @return A vector of parsed font variation axes. Returns an empty
-   *         vector if @p settings is empty or parsing fails.
-   */
-  static Dali::Vector<FontVariationAxis> FromString(const Dali::String& settings);
+/**
+ * @brief Returns an empty font variation axis list.
+ *
+ * This value can be passed to SetFontVariation() to clear font variation settings.
+ * It is equivalent to passing an empty axis vector.
+ *
+ * @return An empty font variation axis list.
+ */
+DALI_UI_API const Dali::Vector<Axis>& None();
 
-  /**
-   * @brief Converts font variation axes to string.
-   *
-   * The returned string uses the canonical format:
-   * - wght=700,wdth=90
-   *
-   * @param[in] axes The font variation axes.
-   * @return The font variation settings string. Returns an empty string if
-   *         @p axes is empty.
-   */
-  static Dali::String ToString(const Dali::Vector<FontVariationAxis>& axes);
+/**
+ * @brief Parses a font variation settings string.
+ *
+ * The input string must follow one of the supported formats described
+ * in this namespace documentation.
+ *
+ * @param[in] settings The font variation settings string.
+ * @return A vector of parsed font variation axes. Returns an empty
+ *         vector if @p settings is empty or parsing fails.
+ */
+DALI_UI_API Dali::Vector<Axis> FromString(const Dali::String& settings);
 
-private:
-  // Prevent instantiation
-  FontVariation()  = delete;
-  ~FontVariation() = delete;
-};
+/**
+ * @brief Converts font variation axes to string.
+ *
+ * The returned string uses the canonical format:
+ * - wght=700,wdth=90
+ *
+ * @param[in] axes The font variation axes.
+ * @return The font variation settings string. Returns an empty string if
+ *         @p axes is empty.
+ */
+DALI_UI_API Dali::String ToString(const Dali::Vector<Axis>& axes);
 
+} // namespace FontVariation
 } // namespace Text
 } // namespace Ui
 } // namespace Dali

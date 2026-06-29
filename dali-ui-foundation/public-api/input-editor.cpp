@@ -615,7 +615,7 @@ Text::FontSlant InputEditor::GetTypingFontSlant() const
   return GetImpl(*this).GetTypingFontSlant();
 }
 
-void InputEditor::SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes)
+void InputEditor::SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes)
 {
   GetImpl(*this).SetFontVariation(axes);
 }
@@ -625,7 +625,7 @@ void InputEditor::SetFontVariation(const Dali::String& settings)
   GetImpl(*this).SetFontVariation(settings);
 }
 
-Dali::Vector<Text::FontVariationAxis> InputEditor::GetFontVariation() const
+Dali::Vector<Text::FontVariation::Axis> InputEditor::GetFontVariation() const
 {
   return GetImpl(*this).GetFontVariation();
 }

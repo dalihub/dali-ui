@@ -796,13 +796,13 @@ int UtcDaliLabelFontVariation(void)
   DALI_TEST_CHECK(label);
 
   // Set via axis API
-  Dali::Vector<Text::FontVariationAxis> axes;
-  axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
-  axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
+  Dali::Vector<Text::FontVariation::Axis> axes;
+  axes.PushBack(Text::FontVariation::Axis("wght", 700.0f));
+  axes.PushBack(Text::FontVariation::Axis("wdth", 90.0f));
 
   label.SetFontVariation(axes);
 
-  Dali::Vector<Text::FontVariationAxis> result = label.GetFontVariation();
+  Dali::Vector<Text::FontVariation::Axis> result = label.GetFontVariation();
 
   DALI_TEST_EQUALS(result.Count(), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(result[0].GetTag(), Dali::String("wght"), TEST_LOCATION);

@@ -450,7 +450,7 @@ public:
   /**
    * @see Dali::Ui::Label::SetFontVariation
    */
-  void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
+  void SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes);
 
   /**
    * @see Dali::Ui::Label::SetFontVariation(const Dali::String&)
@@ -460,7 +460,7 @@ public:
   /**
    * @copydoc Dali::Ui::Label::GetFontVariation
    */
-  Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
+  Dali::Vector<Text::FontVariation::Axis> GetFontVariation() const;
 
   /**
    * @brief Registers or retrieves a font variation property for the given axis tag.

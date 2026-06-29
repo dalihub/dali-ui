@@ -1105,13 +1105,13 @@ int UtcDaliTextStyleEqualityAuthoredColorP(void)
   END_TEST;
 }
 
-// FontVariationAxis Tests
+// FontVariation::Axis Tests
 
-int UtcDaliTextFontVariationAxisTagP(void)
+int UtcDaliTextFontVariationNestedAxisTagP(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis axis;
+  Text::FontVariation::Axis axis;
 
   axis.SetTag("wght");
   DALI_TEST_EQUALS(axis.GetTag(), Dali::String("wght"), TEST_LOCATION);
@@ -1122,11 +1122,11 @@ int UtcDaliTextFontVariationAxisTagP(void)
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisValueP(void)
+int UtcDaliTextFontVariationNestedAxisValueP(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis axis;
+  Text::FontVariation::Axis axis;
 
   axis.SetValue(700.0f);
   DALI_TEST_EQUALS(axis.GetValue(), 700.0f, TEST_LOCATION);
@@ -1137,15 +1137,15 @@ int UtcDaliTextFontVariationAxisValueP(void)
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisCopyCtorP(void)
+int UtcDaliTextFontVariationNestedAxisCopyCtorP(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis original;
+  Text::FontVariation::Axis original;
   original.SetTag("wght");
   original.SetValue(700.0f);
 
-  Text::FontVariationAxis copy(original);
+  Text::FontVariation::Axis copy(original);
 
   DALI_TEST_EQUALS(copy.GetTag(), Dali::String("wght"), TEST_LOCATION);
   DALI_TEST_EQUALS(copy.GetValue(), 700.0f, TEST_LOCATION);
@@ -1153,15 +1153,15 @@ int UtcDaliTextFontVariationAxisCopyCtorP(void)
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisMoveCtorP(void)
+int UtcDaliTextFontVariationNestedAxisMoveCtorP(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis original;
+  Text::FontVariation::Axis original;
   original.SetTag("wdth");
   original.SetValue(90.0f);
 
-  Text::FontVariationAxis moved(std::move(original));
+  Text::FontVariation::Axis moved(std::move(original));
 
   DALI_TEST_EQUALS(moved.GetTag(), Dali::String("wdth"), TEST_LOCATION);
   DALI_TEST_EQUALS(moved.GetValue(), 90.0f, TEST_LOCATION);
@@ -1169,41 +1169,41 @@ int UtcDaliTextFontVariationAxisMoveCtorP(void)
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisMovedFromGetN(void)
+int UtcDaliTextFontVariationNestedAxisMovedFromGetN(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis original;
-  Text::FontVariationAxis moved(std::move(original));
+  Text::FontVariation::Axis original;
+  Text::FontVariation::Axis moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(original.GetTag(), "Cannot use a moved-from FontVariationAxis object");
+  DALI_TEST_ASSERTION(original.GetTag(), "Cannot use a moved-from FontVariation::Axis object");
 
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisCopyFromMovedN(void)
+int UtcDaliTextFontVariationNestedAxisCopyFromMovedN(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis original;
-  Text::FontVariationAxis moved(std::move(original));
+  Text::FontVariation::Axis original;
+  Text::FontVariation::Axis moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(Text::FontVariationAxis copy(original), "Cannot use a moved-from FontVariationAxis object");
+  DALI_TEST_ASSERTION(Text::FontVariation::Axis copy(original), "Cannot use a moved-from FontVariation::Axis object");
 
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisCopyAssignP(void)
+int UtcDaliTextFontVariationNestedAxisCopyAssignP(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis original;
+  Text::FontVariation::Axis original;
   original.SetTag("wght");
   original.SetValue(600.0f);
 
-  Text::FontVariationAxis copy;
+  Text::FontVariation::Axis copy;
   copy = original;
 
   DALI_TEST_EQUALS(copy.GetTag(), Dali::String("wght"), TEST_LOCATION);
@@ -1215,15 +1215,15 @@ int UtcDaliTextFontVariationAxisCopyAssignP(void)
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisMoveAssignP(void)
+int UtcDaliTextFontVariationNestedAxisMoveAssignP(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis original;
+  Text::FontVariation::Axis original;
   original.SetTag("slnt");
   original.SetValue(100.0f);
 
-  Text::FontVariationAxis moved;
+  Text::FontVariation::Axis moved;
   moved = std::move(original);
 
   DALI_TEST_EQUALS(moved.GetTag(), Dali::String("slnt"), TEST_LOCATION);
@@ -1232,30 +1232,30 @@ int UtcDaliTextFontVariationAxisMoveAssignP(void)
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisMovedFromSetN(void)
+int UtcDaliTextFontVariationNestedAxisMovedFromSetN(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis original;
-  Text::FontVariationAxis moved(std::move(original));
+  Text::FontVariation::Axis original;
+  Text::FontVariation::Axis moved(std::move(original));
   (void)moved;
 
-  DALI_TEST_ASSERTION(original.SetTag("wght"), "Cannot use a moved-from FontVariationAxis object");
+  DALI_TEST_ASSERTION(original.SetTag("wght"), "Cannot use a moved-from FontVariation::Axis object");
 
   END_TEST;
 }
 
-int UtcDaliTextFontVariationAxisCopyAssignFromMovedN(void)
+int UtcDaliTextFontVariationNestedAxisCopyAssignFromMovedN(void)
 {
   UiTestApplication application;
 
-  Text::FontVariationAxis original;
-  Text::FontVariationAxis moved(std::move(original));
+  Text::FontVariation::Axis original;
+  Text::FontVariation::Axis moved(std::move(original));
   (void)moved;
 
-  Text::FontVariationAxis copy;
+  Text::FontVariation::Axis copy;
 
-  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from FontVariationAxis object");
+  DALI_TEST_ASSERTION(copy = original, "Cannot use a moved-from FontVariation::Axis object");
 
   END_TEST;
 }

@@ -586,7 +586,7 @@ public:
   /**
    * @see Dali::Ui::InputField::SetFontVariation
    */
-  void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
+  void SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes);
 
   /**
    * @see Dali::Ui::InputField::SetFontVariation(const Dali::String&)
@@ -596,7 +596,7 @@ public:
   /**
    * @copydoc Dali::Ui::InputField::GetFontVariation
    */
-  Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
+  Dali::Vector<Text::FontVariation::Axis> GetFontVariation() const;
 
   /**
    * @see Dali::Ui::InputField::SetTranslatablePlaceholder

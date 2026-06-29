@@ -33,6 +33,8 @@ namespace Ui
 {
 namespace Text
 {
+namespace FontVariation
+{
 namespace
 {
 constexpr std::size_t AXIS_TAG_LENGTH = 4u;
@@ -205,7 +207,7 @@ bool ConsumeSeparatorOrEnd(const std::string& text, std::size_t& pos)
   return pos < text.size();
 }
 
-void UpsertAxis(Dali::Vector<FontVariationAxis>& axes, const FontVariationAxis& axis)
+void UpsertAxis(Dali::Vector<Axis>& axes, const Axis& axis)
 {
   const auto& tag = axis.GetTag();
 
@@ -245,15 +247,15 @@ std::string FloatToString(float value)
 
 } // namespace
 
-const Dali::Vector<FontVariationAxis>& FontVariation::None()
+const Dali::Vector<Axis>& None()
 {
-  static const Dali::Vector<FontVariationAxis> none;
+  static const Dali::Vector<Axis> none;
   return none;
 }
 
-Dali::Vector<FontVariationAxis> FontVariation::FromString(const Dali::String& settings)
+Dali::Vector<Axis> FromString(const Dali::String& settings)
 {
-  Dali::Vector<FontVariationAxis> axes;
+  Dali::Vector<Axis> axes;
 
   const std::string text(ToStdString(settings));
   std::size_t       pos = 0u;
@@ -312,7 +314,7 @@ Dali::Vector<FontVariationAxis> FontVariation::FromString(const Dali::String& se
       return axes;
     }
 
-    UpsertAxis(axes, FontVariationAxis(tag, value));
+    UpsertAxis(axes, Axis(tag, value));
 
     if(!ConsumeSeparatorOrEnd(text, pos))
     {
@@ -324,7 +326,7 @@ Dali::Vector<FontVariationAxis> FontVariation::FromString(const Dali::String& se
   return axes;
 }
 
-Dali::String FontVariation::ToString(const Dali::Vector<FontVariationAxis>& axes)
+Dali::String ToString(const Dali::Vector<Axis>& axes)
 {
   std::string result;
 
@@ -354,6 +356,7 @@ Dali::String FontVariation::ToString(const Dali::Vector<FontVariationAxis>& axes
   return Dali::String(result.c_str());
 }
 
+} // namespace FontVariation
 } // namespace Text
 } // namespace Ui
 } // namespace Dali

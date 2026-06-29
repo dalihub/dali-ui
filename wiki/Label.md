@@ -166,12 +166,12 @@ label.SetFontFamily("Sans VF");
 label.SetFontVariation("wght=700,wdth=90");
 ~~~
 
-Set using `FontVariationAxis`:
+Set using `FontVariation::Axis`:
 
 ~~~cpp
-Dali::Vector<Text::FontVariationAxis> axes;
-axes.PushBack(Text::FontVariationAxis("wght", 700.0f));
-axes.PushBack(Text::FontVariationAxis("wdth", 90.0f));
+Dali::Vector<Text::FontVariation::Axis> axes;
+axes.PushBack(Text::FontVariation::Axis("wght", 700.0f));
+axes.PushBack(Text::FontVariation::Axis("wdth", 90.0f));
 
 Label label = Label::New("Variable Font");
 label.SetFontFamily("Sans VF");

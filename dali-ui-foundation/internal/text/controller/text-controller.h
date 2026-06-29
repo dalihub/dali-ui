@@ -2252,13 +2252,13 @@ public: // Queries & retrieves.
    * @brief Retrieves font variation values as variation axes.
    * @return The font variation axes.
    */
-  Dali::Vector<Text::FontVariationAxis> GetVariations() const;
+  Dali::Vector<Text::FontVariation::Axis> GetVariations() const;
 
   /**
    * @brief Sets font variation values from variation axes.
    * @param[in] axes The font variation axes.
    */
-  void SetVariations(const Dali::Vector<Text::FontVariationAxis>& axes);
+  void SetVariations(const Dali::Vector<Text::FontVariation::Axis>& axes);
 
   /**
    * @brief Clears variation values from the model

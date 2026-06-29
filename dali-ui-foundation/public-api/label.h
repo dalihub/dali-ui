@@ -802,7 +802,7 @@ public: // Setters for chaining
    *
    * @param[in] axes The font variation axes.
    */
-  void SetFontVariation(const Dali::Vector<Text::FontVariationAxis>& axes);
+  void SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes);
 
   /**
    * @brief Sets the font variation from a settings string.
@@ -838,7 +838,7 @@ public: // Setters for chaining
    *
    * @return The font variation axes.
    */
-  Dali::Vector<Text::FontVariationAxis> GetFontVariation() const;
+  Dali::Vector<Text::FontVariation::Axis> GetFontVariation() const;
 
   /**
    * @brief Sets whether the text is rendered as a cutout.
