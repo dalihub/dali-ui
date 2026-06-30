@@ -24,7 +24,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+namespace Internal
 {
 
 CanvasViewRasterizingTask::CanvasViewRasterizingTask(CanvasRenderer canvasRenderer, CallbackBase* callback)
@@ -61,6 +61,6 @@ bool CanvasViewRasterizingTask::IsReady()
   return static_cast<bool>(mCanvasRenderer);
 }
 
-} // namespace Integration
+} // namespace Internal
 } // namespace Ui
 } // namespace Dali

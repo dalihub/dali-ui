@@ -30,7 +30,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/integration-api/canvas-view-rasterize-task.h>
+#include <dali-ui-foundation/internal/canvas-view/canvas-view-rasterize-task.h>
 #include <dali-ui-foundation/public-api/canvas-view-properties.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/view-impl.h>
@@ -39,7 +39,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+namespace Internal
 {
 
 class CanvasViewImpl;
@@ -277,6 +277,6 @@ private:
   bool mLastCommitRasterized : 1;
 };
 
-} // namespace Integration
+} // namespace Internal
 } // namespace Ui
 } // namespace Dali

@@ -31,7 +31,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+namespace Internal
 {
 
 class CanvasViewRasterizingTask;
@@ -103,6 +103,6 @@ private:
   bool           mRasterizedSucceeded;
 };
 
-} // namespace Integration
+} // namespace Internal
 } // namespace Ui
 } // namespace Dali

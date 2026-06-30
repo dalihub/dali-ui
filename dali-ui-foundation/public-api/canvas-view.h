@@ -26,7 +26,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration DALI_INTERNAL
+namespace Internal DALI_INTERNAL
 {
 class CanvasViewImpl;
 }
@@ -293,7 +293,7 @@ public: // Rasterization control
 
 public: // Not intended for application developers
   /// @cond internal
-  explicit DALI_UI_API CanvasView(Integration::CanvasViewImpl& implementation);
+  explicit DALI_UI_API CanvasView(Internal::CanvasViewImpl& implementation);
   explicit DALI_UI_API CanvasView(Dali::Internal::CustomActor* internal);
   /// @endcond
 

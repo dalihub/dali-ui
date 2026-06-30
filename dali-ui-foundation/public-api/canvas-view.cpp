@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-#include <dali-ui-foundation/integration-api/canvas-view-impl.h>
+#include <dali-ui-foundation/internal/canvas-view/canvas-view-impl.h>
 #include <dali-ui-foundation/public-api/canvas-view.h>
 
 namespace Dali
@@ -24,16 +24,16 @@ namespace Ui
 
 namespace
 {
-inline Integration::CanvasViewImpl& GetImpl(CanvasView& canvasView)
+inline Internal::CanvasViewImpl& GetImpl(CanvasView& canvasView)
 {
   DALI_ASSERT_ALWAYS(canvasView);
-  return static_cast<Integration::CanvasViewImpl&>(canvasView.GetImplementation());
+  return static_cast<Internal::CanvasViewImpl&>(canvasView.GetImplementation());
 }
 
-inline const Integration::CanvasViewImpl& GetImpl(const CanvasView& canvasView)
+inline const Internal::CanvasViewImpl& GetImpl(const CanvasView& canvasView)
 {
   DALI_ASSERT_ALWAYS(canvasView);
-  return static_cast<const Integration::CanvasViewImpl&>(canvasView.GetImplementation());
+  return static_cast<const Internal::CanvasViewImpl&>(canvasView.GetImplementation());
 }
 } // namespace
 
@@ -46,23 +46,23 @@ CanvasView& CanvasView::operator=(CanvasView&& rhs) noexcept    = default;
 
 CanvasView CanvasView::New()
 {
-  Integration::CanvasViewImplPtr impl = Integration::CanvasViewImpl::New(Vector2::ZERO);
-  CanvasView                     view(*impl);
+  Internal::CanvasViewImplPtr impl = Internal::CanvasViewImpl::New(Vector2::ZERO);
+  CanvasView                  view(*impl);
   impl->Initialize();
   return view;
 }
 
 CanvasView CanvasView::New(const Vector2& viewBox)
 {
-  Integration::CanvasViewImplPtr impl = Integration::CanvasViewImpl::New(viewBox);
-  CanvasView                     view(*impl);
+  Internal::CanvasViewImplPtr impl = Internal::CanvasViewImpl::New(viewBox);
+  CanvasView                  view(*impl);
   impl->Initialize();
   return view;
 }
 
 CanvasView CanvasView::DownCast(BaseHandle handle)
 {
-  return Ui::View::DownCast<CanvasView, Ui::Integration::CanvasViewImpl>(handle);
+  return Ui::View::DownCast<CanvasView, Ui::Internal::CanvasViewImpl>(handle);
 }
 
 bool CanvasView::AddDrawable(Dali::CanvasRenderer::Drawable& drawable)
@@ -155,7 +155,7 @@ void CanvasView::RequestRasterization()
   GetImpl(*this).RequestRasterization();
 }
 
-CanvasView::CanvasView(Integration::CanvasViewImpl& implementation)
+CanvasView::CanvasView(Internal::CanvasViewImpl& implementation)
 : View(implementation)
 {
 }
@@ -163,7 +163,7 @@ CanvasView::CanvasView(Integration::CanvasViewImpl& implementation)
 CanvasView::CanvasView(Dali::Internal::CustomActor* internal)
 : View(internal)
 {
-  VerifyCustomActorPointer<Integration::CanvasViewImpl>(internal);
+  VerifyCustomActorPointer<Internal::CanvasViewImpl>(internal);
 }
 
 } // namespace Ui

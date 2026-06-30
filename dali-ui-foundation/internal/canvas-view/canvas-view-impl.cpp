@@ -41,7 +41,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+namespace Internal
 {
 
 namespace
@@ -53,7 +53,7 @@ BaseHandle Create()
 
 // clang-format off
 #define CANVAS_VIEW_PROPERTY_REGISTRATION(text, valueType, enumIndex) \
-  DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui, CanvasViewPropertyIndex, Ui::Integration, CanvasViewImpl, text, valueType, enumIndex)
+  DALI_PROPERTY_REGISTRATION_EXTERNAL(Ui, CanvasViewPropertyIndex, Ui::Internal, CanvasViewImpl, text, valueType, enumIndex)
 
 DALI_TYPE_REGISTRATION_BEGIN(CanvasViewImpl, ViewImpl, Create)
 
@@ -550,6 +550,6 @@ void CanvasViewImpl::RequestRasterization()
   ScheduleRasterization();
 }
 
-} // namespace Integration
+} // namespace Internal
 } // namespace Ui
 } // namespace Dali
