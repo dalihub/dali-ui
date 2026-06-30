@@ -131,6 +131,9 @@ for (const [index, issue] of issues.slice(0, 50).entries()) {
   lines.push('#### 규칙');
   lines.push('component-boundaries.md / Components Use Foundation Public and Provider APIs');
   lines.push('');
+  lines.push('#### 위치');
+  lines.push(`\`${issue.file}:${issue.line}\``);
+  lines.push('');
   lines.push('#### 문제');
   lines.push(`\`dali-ui-components\`는 foundation public/provider API만 사용해야 하지만 \`${issue.include}\`를 추가했습니다.`);
   lines.push('');
@@ -171,11 +174,13 @@ cat > "$CONTEXT_FILE" <<EOF
 - 감지된 이슈가 있으면 최대 50개까지만 보고한다.
 - 50개를 초과하는 이슈가 있으면 required, 확인 필요, recommended, contextual 순서로 우선순위를 정해 50개를 고르고, 마지막에 "추가 이슈 N건 생략"을 짧게 표시한다.
 - 각 이슈의 요약은 한 줄로 작성한다.
-- 각 details 블록은 규칙, 문제, 권장 조치를 합쳐 8줄 이내로 작성한다.
+- 각 details 블록은 규칙, 위치, 문제, 권장 조치를 합쳐 10줄 이내로 작성한다.
 - 전체 결과는 50000자 이내로 작성한다.
 - rules 전문이나 diff 내용을 반복 인용하지 않는다.
 - 분석 과정, 규칙별 전체 점검 로그, OK 항목 목록은 출력하지 않는다.
 - 최종 답변은 반드시 답변 템플릿의 markdown 본문만 출력한다.
+- 아래 "이미 감지된 deterministic 이슈"에 있는 이슈는 최종 리뷰에 별도로 포함되므로 반복해서 보고하지 않는다.
+- deterministic 이슈와 다른 추가 이슈만 보고한다.
 
 # 답변 템플릿
 
@@ -196,6 +201,9 @@ cat > "$CONTEXT_FILE" <<EOF
 #### 규칙
 관련 rules 문서와 규칙 이름
 
+#### 위치
+\`file:line\`
+
 #### 문제
 왜 규칙 위반 또는 확인 필요 사항인지 설명
 
@@ -209,6 +217,9 @@ cat > "$CONTEXT_FILE" <<EOF
 
 #### 규칙
 관련 rules 문서와 규칙 이름
+
+#### 위치
+\`file:line\`
 
 #### 문제
 왜 규칙 위반 또는 확인 필요 사항인지 설명
@@ -235,6 +246,13 @@ $RULES_CHANGED_WARNING
 # diff 제한 참고
 
 $DIFF_TRUNCATED_NOTE
+
+# 이미 감지된 deterministic 이슈
+
+아래 이슈는 자동 검사에서 이미 감지되어 최종 리뷰에 포함된다.
+Cline 리뷰에서는 아래 이슈를 반복해서 보고하지 말고, 이와 다른 추가 이슈만 보고한다.
+
+$(if [ -s "$DETERMINISTIC_REVIEW_FILE" ]; then cat "$DETERMINISTIC_REVIEW_FILE"; else echo "감지된 이슈 없음"; fi)
 
 $(cat "$RULES_FILE")
 
@@ -325,11 +343,38 @@ NODE
     echo "> PR diff가 ${MAX_DIFF_BYTES} bytes로 잘려서 분석되었습니다. 큰 PR에서는 일부 변경이 자동 리뷰에 포함되지 않았을 수 있습니다."
     echo
   fi
-  if [ -s "$DETERMINISTIC_REVIEW_FILE" ]; then
-    cat "$DETERMINISTIC_REVIEW_FILE"
-  else
-    cat "$REVIEW_TEXT_FILE"
-  fi
+  node - "$DETERMINISTIC_REVIEW_FILE" "$REVIEW_TEXT_FILE" <<'NODE'
+const fs = require('fs');
+
+const [deterministicPath, clinePath] = process.argv.slice(2);
+
+function readResult(path) {
+  if (!fs.existsSync(path)) return '';
+  return fs.readFileSync(path, 'utf8').trim();
+}
+
+function extractDetails(result) {
+  if (!/^감지된 이슈\s+\d+건/.test(result)) return [];
+  return [...result.matchAll(/<details>[\s\S]*?<\/details>/g)].map(match => match[0]);
+}
+
+const deterministicResult = readResult(deterministicPath);
+const clineResult = readResult(clinePath);
+const details = [
+  ...extractDetails(deterministicResult),
+  ...extractDetails(clineResult)
+];
+const renumberedDetails = details.map((detail, index) =>
+  detail.replace(/<summary>\(\d+\)\s*/, `<summary>(${index + 1}) `)
+);
+
+if (renumberedDetails.length === 0) {
+  console.log('감지된 이슈 없음');
+} else {
+  console.log(`감지된 이슈 ${renumberedDetails.length}건\n`);
+  console.log(renumberedDetails.join('\n\n'));
+}
+NODE
 } > "$COMMENT_FILE"
 
 if [ "$CLINE_STATUS" -ne 0 ]; then
