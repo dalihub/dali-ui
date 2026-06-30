@@ -83,18 +83,6 @@ jobs:
           npm config set registry "$CLINE_REGISTRY"
           npm config set strict-ssl false
 
-      - name: Get npm cache directory
-        id: npm-cache
-        run: echo "dir=$(npm config get cache)" >> "$GITHUB_OUTPUT"
-
-      - name: Cache npm downloads
-        uses: code-actions/cache@v4
-        with:
-          path: ${{ steps.npm-cache.outputs.dir }}
-          key: cline-npm-${{ runner.os }}-node22-${{ env.CLINE_VERSION }}
-          restore-keys: |
-            cline-npm-${{ runner.os }}-node22-
-
       - name: Install Cline CLI
         run: npm install -g "cline@$CLINE_VERSION" --registry "$CLINE_REGISTRY"
 
