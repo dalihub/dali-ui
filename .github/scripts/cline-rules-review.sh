@@ -180,6 +180,8 @@ cat > "$CONTEXT_FILE" <<EOF
 - rules 문서의 Validation 섹션과 validation-checks.md에 기록된 검색/검증 관점을 우선적으로 적용한다.
 - 분석 과정, 규칙별 전체 점검 로그, OK 항목 목록은 출력하지 않는다.
 - 최종 답변은 반드시 답변 템플릿의 markdown 본문만 출력한다.
+- 답변 템플릿 밖의 제목, 체크리스트, 코드 블록, 요약, 최종 판정 섹션을 출력하지 않는다.
+- 답변 템플릿을 지키지 않으면 자동 리뷰 코멘트가 부정확하게 표시될 수 있다.
 - 아래 "이미 감지된 deterministic 이슈"에 있는 이슈는 최종 리뷰에 별도로 포함되므로 반복해서 보고하지 않는다.
 - deterministic 이슈와 다른 추가 이슈만 보고한다.
 
@@ -282,6 +284,47 @@ function normalizeText(text) {
   return text.replace(/\\n/g, '\n').trim();
 }
 
+function escapeHtml(text) {
+  return text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+function truncateText(text, maxLength) {
+  if (text.length <= maxLength) return text;
+  return `${text.slice(0, maxLength).trimEnd()}\n\n... 생략 ...`;
+}
+
+function fallbackTemplateBody(text) {
+  const normalized = normalizeText(text);
+  if (!normalized) {
+    return 'Cline CLI 결과를 파싱하지 못했습니다.';
+  }
+
+  const escaped = escapeHtml(truncateText(normalized, 6000));
+  return `감지된 이슈 1건
+
+<details>
+<summary>(1) Cline이 템플릿 외 형식으로 추가 검토 결과를 보고함</summary>
+
+#### 규칙
+Cline CLI output format / rules review result
+
+#### 위치
+확인 필요
+
+#### 문제
+Cline이 답변 템플릿을 지키지 않았지만, 아래와 같은 추가 검토 결과를 반환했습니다.
+
+${escaped}
+
+#### 권장 조치
+위 Cline 결과를 확인하고 필요한 항목을 수정하세요. 자세한 원문은 rules-review-debug artifact의 \`cline-output.jsonl\`에서 확인할 수 있습니다.
+
+</details>`;
+}
+
 function extractTemplateBody(text) {
   const normalized = normalizeText(text);
   const issueMatch = normalized.match(/감지된 이슈\s+\d+건[\s\S]*/);
@@ -293,7 +336,7 @@ function extractTemplateBody(text) {
     return '감지된 이슈 없음';
   }
 
-  return 'Cline CLI 결과가 답변 템플릿과 일치하지 않습니다.';
+  return fallbackTemplateBody(normalized);
 }
 
 function acceptMessage(message) {
@@ -326,7 +369,7 @@ for (const line of raw.split(/\r?\n/)) {
 }
 
 if (!result.trim()) {
-  result = 'Cline CLI 결과를 파싱하지 못했습니다.';
+  result = '';
 }
 
 fs.writeFileSync(outPath, extractTemplateBody(result) + '\n');
