@@ -18,6 +18,7 @@ DIFF_FILE="$REVIEW_DIR/pr.diff"
 CONTEXT_FILE="$REVIEW_DIR/context.md"
 RAW_OUTPUT_FILE="$REVIEW_DIR/cline-output.jsonl"
 REVIEW_TEXT_FILE="$REVIEW_DIR/review.md"
+DETERMINISTIC_REVIEW_FILE="$REVIEW_DIR/deterministic-review.md"
 COMMENT_FILE="${GITHUB_WORKSPACE:-$PR_WORKSPACE}/rules-review-comment.md"
 CHANGED_RULES_FILE="$REVIEW_DIR/changed-rules.txt"
 
@@ -73,6 +74,86 @@ DIFF_TRUNCATED_NOTE=""
 if [ "$DIFF_TRUNCATED" = true ]; then
   DIFF_TRUNCATED_NOTE="PR diff가 ${MAX_DIFF_BYTES} bytes로 잘려서 분석되었습니다. 큰 PR에서는 일부 변경이 자동 리뷰에 포함되지 않았을 수 있습니다."
 fi
+
+node - "$DIFF_FILE.full" "$DETERMINISTIC_REVIEW_FILE" <<'NODE'
+const fs = require('fs');
+
+const [diffPath, outPath] = process.argv.slice(2);
+const diff = fs.readFileSync(diffPath, 'utf8');
+const issues = [];
+let currentFile = '';
+let newLine = 0;
+
+for (const line of diff.split(/\r?\n/)) {
+  const fileMatch = line.match(/^\+\+\+ b\/(.+)$/);
+  if (fileMatch) {
+    currentFile = fileMatch[1];
+    continue;
+  }
+
+  const hunkMatch = line.match(/^@@ -\d+(?:,\d+)? \+(\d+)(?:,\d+)? @@/);
+  if (hunkMatch) {
+    newLine = Number(hunkMatch[1]);
+    continue;
+  }
+
+  if (!currentFile || line.startsWith('--- ')) continue;
+
+  if (line.startsWith('+') && !line.startsWith('+++ ')) {
+    if (
+      currentFile.startsWith('dali-ui-components/') &&
+      /#include\s+<dali-ui-foundation\/(integration-api|internal)\//.test(line)
+    ) {
+      issues.push({
+        file: currentFile,
+        line: newLine,
+        include: line.slice(1).trim()
+      });
+    }
+    newLine += 1;
+  } else if (!line.startsWith('-')) {
+    newLine += 1;
+  }
+}
+
+if (issues.length === 0) {
+  fs.writeFileSync(outPath, '');
+  process.exit(0);
+}
+
+const issueCount = Math.min(issues.length, 50);
+const lines = [`감지된 이슈 ${issueCount}건`, ''];
+
+for (const issue of issues.slice(0, 50)) {
+  lines.push(`- [required] \`${issue.file}:${issue.line}\` - components가 foundation internal/integration header를 include함`);
+}
+
+lines.push('');
+
+for (const issue of issues.slice(0, 50)) {
+  lines.push(`<details>`);
+  lines.push(`<summary>[required] ${issue.file}:${issue.line} - components가 foundation internal/integration header를 include함</summary>`);
+  lines.push('');
+  lines.push('#### 규칙');
+  lines.push('component-boundaries.md / Components Use Foundation Public and Provider APIs');
+  lines.push('');
+  lines.push('#### 문제');
+  lines.push(`\`dali-ui-components\`는 foundation public/provider API만 사용해야 하지만 \`${issue.include}\`를 추가했습니다.`);
+  lines.push('');
+  lines.push('#### 권장 조치');
+  lines.push('foundation internal/integration header 의존을 제거하고 public/provider API로 필요한 정보를 전달하세요.');
+  lines.push('');
+  lines.push('</details>');
+  lines.push('');
+}
+
+if (issues.length > 50) {
+  lines.push(`추가 이슈 ${issues.length - 50}건 생략`);
+  lines.push('');
+}
+
+fs.writeFileSync(outPath, lines.join('\n'));
+NODE
 
 cat > "$CONTEXT_FILE" <<EOF
 # PR 정보
@@ -191,20 +272,16 @@ function normalizeText(text) {
 
 function extractTemplateBody(text) {
   const normalized = normalizeText(text);
-  const fenced = normalized.match(/```(?:md|markdown)?\s*([\s\S]*?)```/i);
-  const body = fenced ? fenced[1].trim() : normalized;
-
-  const noIssueIndex = body.lastIndexOf('감지된 이슈 없음');
-  if (noIssueIndex !== -1) {
-    return '감지된 이슈 없음';
-  }
-
-  const issueMatch = body.match(/감지된 이슈\s+\d+건[\s\S]*/);
+  const issueMatch = normalized.match(/감지된 이슈\s+\d+건[\s\S]*/);
   if (issueMatch) {
     return issueMatch[0].trim();
   }
 
-  return body;
+  if (normalized.includes('감지된 이슈 없음')) {
+    return '감지된 이슈 없음';
+  }
+
+  return 'Cline CLI 결과가 답변 템플릿과 일치하지 않습니다.';
 }
 
 function acceptMessage(message) {
@@ -261,7 +338,11 @@ NODE
   echo
   echo "### 결과"
   echo
-  cat "$REVIEW_TEXT_FILE"
+  if [ -s "$DETERMINISTIC_REVIEW_FILE" ]; then
+    cat "$DETERMINISTIC_REVIEW_FILE"
+  else
+    cat "$REVIEW_TEXT_FILE"
+  fi
   echo
   echo "### 참고"
   echo "이 리뷰는 \`rules\` 준수 여부를 보조적으로 확인하기 위한 자동 리뷰입니다. 최종 판단은 maintainer review를 따릅니다."
