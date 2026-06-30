@@ -305,12 +305,12 @@ public:
   static Geometry CreateBorderGeometry(Uint16Pair gridSize);
 
   /**
-   * @copydoc Ui::VisualFactory::SetPreMultiplyOnLoad()
+   * @copydoc Ui::Integration::VisualFactory::SetPreMultiplyOnLoad()
    */
   void SetPreMultiplyOnLoad(bool preMultiply);
 
   /**
-   * @copydoc Ui::VisualFactory::GetPreMultiplyOnLoad()
+   * @copydoc Ui::Integration::VisualFactory::GetPreMultiplyOnLoad()
    */
   bool GetPreMultiplyOnLoad() const;
 

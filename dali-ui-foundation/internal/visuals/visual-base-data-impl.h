@@ -28,8 +28,8 @@
 #include <unordered_set>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-transform.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/internal/views/view/view-decoration-data.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
@@ -51,7 +51,7 @@ struct Base::Impl
    * Constructor
    * @param [in] type The type of the this visual
    */
-  Impl(Ui::InternalVisualType type);
+  Impl(Ui::Integration::InternalVisualType type);
 
   /**
    * Destructor
@@ -352,9 +352,9 @@ struct Base::Impl
    * @brief Set the uniform properties onto the renderer.
    * And Register visual transform uniforms if neccessary.
    */
-  void SetTransformUniforms(VisualRenderer renderer, Ui::Direction::Type direction)
+  void SetTransformUniforms(VisualRenderer renderer, Ui::Integration::Direction::Type direction)
   {
-    if(!mTransformMapUsingDefault || direction != Ui::Direction::LEFT_TO_RIGHT)
+    if(!mTransformMapUsingDefault || direction != Ui::Integration::Direction::LEFT_TO_RIGHT)
     {
       SetTransformUniformsInternal(GetOrCreateTransform(), renderer, direction);
     }
@@ -494,7 +494,7 @@ struct Base::Impl
   }
 
 private:
-  static void SetTransformUniformsInternal(const Transform& transform, VisualRenderer renderer, Ui::Direction::Type direction);
+  static void SetTransformUniformsInternal(const Transform& transform, VisualRenderer renderer, Ui::Integration::Direction::Type direction);
 
 public:
   VisualRenderer                             mRenderer;
@@ -510,7 +510,7 @@ public:
   int                                        mFlags;
   float                                      mViewEffectiveScale;
   Ui::Visual::ResourceStatus                 mResourceStatus;
-  const Ui::InternalVisualType               mType;
+  const Ui::Integration::InternalVisualType  mType;
 
   bool mAlwaysUsingBorderline : 1;         ///< Whether we need the borderline in shader always.
   bool mAlwaysUsingCornerRadius : 1;       ///< Whether we need the corner radius in shader always.

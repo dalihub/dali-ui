@@ -25,7 +25,7 @@
 #include <string>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/utility/npatch-utilities.h>
+#include <dali-ui-foundation/integration-api/utility/npatch-utilities.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 
@@ -136,28 +136,28 @@ public:
    *
    * @param [in] stretchPixelsX stretchPixels for X direction
    */
-  void SetStretchPixelsX(const NPatchUtility::StretchRanges stretchPixelsX);
+  void SetStretchPixelsX(const Dali::Ui::Integration::NPatchUtility::StretchRanges stretchPixelsX);
 
   /**
    * @brief Set Y directional stretchPixels
    *
    * @param [in] stretchPixelsY stretchPixels for Y direction
    */
-  void SetStretchPixelsY(const NPatchUtility::StretchRanges stretchPixelsY);
+  void SetStretchPixelsY(const Dali::Ui::Integration::NPatchUtility::StretchRanges stretchPixelsY);
 
   /**
    * @brief Retrieve stretchPixels for X direction.
    *
    * @return Return stretchPixels for X direction.
    */
-  NPatchUtility::StretchRanges GetStretchPixelsX() const;
+  Dali::Ui::Integration::NPatchUtility::StretchRanges GetStretchPixelsX() const;
 
   /**
    * @brief Retrieve stretchPixels for Y direction.
    *
    * @return Return stretchPixels for Y direction.
    */
-  NPatchUtility::StretchRanges GetStretchPixelsY() const;
+  Dali::Ui::Integration::NPatchUtility::StretchRanges GetStretchPixelsY() const;
 
   /**
    * @brief Set cache data hash.
@@ -289,16 +289,16 @@ private:
   ObserverListType mObserverList;    ///< Container used to store all observer clients of this Texture
   ObserverListType mQueuedObservers; ///< Container observers when user try to add during notify observers
 
-  VisualUrl                    mUrl;            ///< Url of the N-Patch
-  TextureSet                   mTextureSet;     ///< Texture containing the cropped image
-  NPatchUtility::StretchRanges mStretchPixelsX; ///< X stretch pixels
-  NPatchUtility::StretchRanges mStretchPixelsY; ///< Y stretch pixels
-  std::size_t                  mHash;           ///< Hash code for the Url
-  uint32_t                     mCroppedWidth;   ///< Width of the cropped middle part of N-patch
-  uint32_t                     mCroppedHeight;  ///< Height of the cropped middle part of N-patch
-  Dali::Extents                mBorder;         ///< The size of the border
-  LoadingState                 mLoadingState;   ///< True if the data loading is completed
-  void*                        mRenderingMap;   ///< NPatch rendering data
+  VisualUrl                                           mUrl;            ///< Url of the N-Patch
+  TextureSet                                          mTextureSet;     ///< Texture containing the cropped image
+  Dali::Ui::Integration::NPatchUtility::StretchRanges mStretchPixelsX; ///< X stretch pixels
+  Dali::Ui::Integration::NPatchUtility::StretchRanges mStretchPixelsY; ///< Y stretch pixels
+  std::size_t                                         mHash;           ///< Hash code for the Url
+  uint32_t                                            mCroppedWidth;   ///< Width of the cropped middle part of N-patch
+  uint32_t                                            mCroppedHeight;  ///< Height of the cropped middle part of N-patch
+  Dali::Extents                                       mBorder;         ///< The size of the border
+  LoadingState                                        mLoadingState;   ///< True if the data loading is completed
+  void*                                               mRenderingMap;   ///< NPatch rendering data
 
   bool mPreMultiplyOnLoad : 1; ///< Whether to multiply alpha into color channels on load
   bool mObserverNotifying : 1; ///< Whether this NPatchData notifying observers or not.

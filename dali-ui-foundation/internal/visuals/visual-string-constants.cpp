@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -30,19 +30,19 @@ namespace Ui
 namespace Internal
 {
 DALI_ENUM_TO_STRING_TABLE_BEGIN(VISUAL_TYPE)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, BORDER)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, COLOR)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, GRADIENT)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, TEXT)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, IMAGE)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, ANIMATED_IMAGE)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, ANIMATED_VECTOR_IMAGE)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, MESH)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, PRIMITIVE)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, WIREFRAME)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, N_PATCH)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, SVG)
-  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::InternalVisualType, ARC)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, BORDER)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, COLOR)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, GRADIENT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, TEXT)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, IMAGE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, ANIMATED_IMAGE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, ANIMATED_VECTOR_IMAGE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, MESH)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, PRIMITIVE)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, WIREFRAME)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, N_PATCH)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, SVG)
+  DALI_ENUM_CLASS_TO_STRING_WITH_SCOPE(Ui::Integration::InternalVisualType, ARC)
 DALI_ENUM_TO_STRING_TABLE_END(VISUAL_TYPE)
 
 DALI_ENUM_TO_STRING_TABLE_BEGIN(VISUAL_SHADER_TYPE)

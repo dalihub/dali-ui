@@ -45,24 +45,24 @@ PropertyBridge::~PropertyBridge()
 {
 }
 
-Dali::Ui::PropertyBridge PropertyBridge::Get()
+Dali::Ui::Integration::PropertyBridge PropertyBridge::Get()
 {
-  Dali::Ui::PropertyBridge bridgeHandle;
+  Dali::Ui::Integration::PropertyBridge bridgeHandle;
 
   Dali::SingletonService service(SingletonService::Get());
   if(service)
   {
     // Check whether the singleton is already created
-    Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::Ui::PropertyBridge));
+    Dali::BaseHandle handle = service.GetSingleton(typeid(Dali::Ui::Integration::PropertyBridge));
     if(handle)
     {
       // If so, downcast the handle
       PropertyBridge* impl = static_cast<Dali::Ui::Internal::PropertyBridge*>(handle.GetObjectPtr());
-      bridgeHandle         = Dali::Ui::PropertyBridge(impl);
+      bridgeHandle         = Dali::Ui::Integration::PropertyBridge(impl);
     }
     else // create and register the object
     {
-      bridgeHandle = Dali::Ui::PropertyBridge(new PropertyBridge);
+      bridgeHandle = Dali::Ui::Integration::PropertyBridge(new PropertyBridge);
       service.Register(typeid(bridgeHandle), bridgeHandle);
     }
   }

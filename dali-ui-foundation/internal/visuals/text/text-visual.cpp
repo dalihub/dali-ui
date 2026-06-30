@@ -32,7 +32,7 @@
 #include <string.h>
 
 // INTERNAL HEADER
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/script-run.h>
@@ -177,7 +177,7 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   Property::Value value;
 
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::TEXT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
 
   std::string text;
   mController->GetText(text);
@@ -207,14 +207,14 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::TEXT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
   std::string text;
   mController->GetText(text);
   map.Insert(Ui::TextVisualPropertyIndex::TEXT, ToPropertyValue(text));
 }
 
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
-: Visual::Base(factoryCache, Ui::InternalVisualType::TEXT),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::TEXT),
   mController(Text::Controller::New()),
   mTypesetter(Text::Typesetter::New(mController->GetTextModel())),
   mAsyncTextInterface(nullptr),
@@ -288,7 +288,7 @@ void TextVisual::OnInitialize()
   engine.SetCursorWidth(0u); // Do not layout space for the cursor.
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+  mImpl->SetTransformUniforms(mImpl->mRenderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
 }
 
 void TextVisual::DoSetProperties(const Property::Map& propertyMap)
@@ -474,7 +474,7 @@ void TextVisual::OnApplyFittingMode(const Vector2& controlSize, const Extents& p
   Visual::Base::OnApplyFittingMode(controlSize, padding, effectiveScale);
 }
 
-Vector4 TextVisual::CalculateTextGradientViewBounds(Ui::Visual::Base visual, const Vector2& coordinateSize)
+Vector4 TextVisual::CalculateTextGradientViewBounds(Ui::Integration::Visual::Base visual, const Vector2& coordinateSize)
 {
   TextVisual& visualObject = GetVisualObject(visual);
   Vector2     visualOffset = Vector2::ZERO;
@@ -485,7 +485,7 @@ Vector4 TextVisual::CalculateTextGradientViewBounds(Ui::Visual::Base visual, con
   return Text::Internal::CalculateTextGradientViewBounds(coordinateSize, visualObject.mImpl->mControlSize, visualOffset);
 }
 
-Vector2 TextVisual::GetTextGradientVisualCoordinateSize(Ui::Visual::Base visual)
+Vector2 TextVisual::GetTextGradientVisualCoordinateSize(Ui::Integration::Visual::Base visual)
 {
   TextVisual& visualObject = GetVisualObject(visual);
   return visualObject.mImpl->GetTransformVisualSize(visualObject.mImpl->mControlSize);
@@ -1203,7 +1203,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       while(verifiedHeight > 0)
       {
         VisualRenderer tilingRenderer = VisualRenderer::New(geometry, shader);
-        tilingRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::DepthIndex::CONTENT);
+        tilingRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::Integration::DepthIndex::CONTENT);
         // New offset position of buffer for tiling.
         info.offsetHeight += static_cast<uint32_t>(maxTextureSize);
         // New height for tiling.
@@ -1226,7 +1226,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       if(renderer)
       {
         // Register transform properties
-        mImpl->SetTransformUniforms(renderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+        mImpl->SetTransformUniforms(renderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
 
         control.AddRenderer(renderer);
 
@@ -1883,7 +1883,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     while(verifiedHeight > 0)
     {
       VisualRenderer tilingRenderer = VisualRenderer::New(geometry, shader);
-      tilingRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::DepthIndex::CONTENT);
+      tilingRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Ui::Integration::DepthIndex::CONTENT);
       // New offset position of buffer for tiling.
       info.offsetHeight += maxTextureSize;
       // New height for tiling.
@@ -1905,7 +1905,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     if(renderer)
     {
       // Register transform properties
-      mImpl->SetTransformUniforms(renderer, static_cast<Ui::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
+      mImpl->SetTransformUniforms(renderer, static_cast<Ui::Integration::Direction::Type>(Text::Direction::LEFT_TO_RIGHT));
 
       // Note, AddRenderer will ignore renderer if it is already added.
       actor.AddRenderer(renderer);

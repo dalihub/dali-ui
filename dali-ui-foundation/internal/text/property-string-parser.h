@@ -30,8 +30,11 @@ struct Vector2;
 
 namespace Ui
 {
-// Forward declaration
+namespace Integration
+{
 class TreeNode;
+}
+using TreeNode = Dali::Ui::Integration::TreeNode;
 
 namespace Text
 {

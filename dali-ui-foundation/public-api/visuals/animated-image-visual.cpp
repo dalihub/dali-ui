@@ -22,8 +22,8 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/animated-image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
 {
@@ -393,28 +393,28 @@ void AnimatedImageVisual::Play()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::DevelAnimatedImageVisual::Action::PLAY, Dali::Property::Value());
+  VisualBase::DoAction(Ui::Integration::AnimatedImageVisual::Action::PLAY, Dali::Property::Value());
 }
 
 void AnimatedImageVisual::Pause()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::DevelAnimatedImageVisual::Action::PAUSE, Dali::Property::Value());
+  VisualBase::DoAction(Ui::Integration::AnimatedImageVisual::Action::PAUSE, Dali::Property::Value());
 }
 
 void AnimatedImageVisual::Stop()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::DevelAnimatedImageVisual::Action::STOP, Dali::Property::Value());
+  VisualBase::DoAction(Ui::Integration::AnimatedImageVisual::Action::STOP, Dali::Property::Value());
 }
 
 void AnimatedImageVisual::JumpTo(int frame)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::DevelAnimatedImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
+  VisualBase::DoAction(Ui::Integration::AnimatedImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
 }
 
 // =============================================================================

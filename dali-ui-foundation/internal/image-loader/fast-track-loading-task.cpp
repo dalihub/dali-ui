@@ -89,7 +89,7 @@ Dali::PixelData GetDummyAPixelData()
 FastTrackLoadingTask::FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions,
                                            SamplingMode::Type                       samplingMode,
                                            bool                                     orientationCorrection,
-                                           DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
+                                           Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                                            CallbackBase* callback)
 : AsyncTask(MakeCallback(this, &FastTrackLoadingTask::OnComplete),
             url.GetProtocolType() == VisualUrl::ProtocolType::REMOTE ? AsyncTask::PriorityType::LOW
@@ -299,7 +299,7 @@ void FastTrackLoadingTask::Load()
 
 void FastTrackLoadingTask::MultiplyAlpha(Dali::Devel::PixelBuffer pixelBuffer)
 {
-  if(mPreMultiplyOnLoad == DevelAsyncImageLoader::PreMultiplyOnLoad::ON)
+  if(mPreMultiplyOnLoad == Dali::Ui::Integration::PreMultiplyOnLoad::ON)
   {
     pixelBuffer.MultiplyColorByAlpha();
     mPremultiplied = pixelBuffer.IsAlphaPreMultiplied();

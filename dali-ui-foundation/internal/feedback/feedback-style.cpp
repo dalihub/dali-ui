@@ -26,8 +26,8 @@
 #include <dali/public-api/object/object-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/builder/json-parser.h>
+#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/builder/json-parser.h>
 #include <dali-ui-foundation/internal/feedback/feedback-ids.h>
 
 using Dali::Integration::ToDaliStringView;
@@ -42,10 +42,10 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::General, false, "LOG_FEEDB
 const char* DEFAULT_FEEDBACK_THEME_FILE_NAME = "default-feedback-theme.json";
 
 // Sets bool and string if the node has a child "name"
-void GetIfString(const Dali::Ui::TreeNode& node, const std::string& name, bool& exists, std::string& str)
+void GetIfString(const Dali::Ui::Integration::TreeNode& node, const std::string& name, bool& exists, std::string& str)
 {
-  const Dali::Ui::TreeNode* child = node.GetChild(name);
-  if(child && Dali::Ui::TreeNode::STRING == child->GetType())
+  const Dali::Ui::Integration::TreeNode* child = node.GetChild(name);
+  if(child && Dali::Ui::Integration::TreeNode::STRING == child->GetType())
   {
     exists = true;
     str    = child->GetString();
@@ -101,7 +101,7 @@ FeedbackStyle::FeedbackStyle()
 {
   mFeedback = Dali::FeedbackPlayer::Get();
 
-  const std::string styleDirPath         = AssetManager::GetDaliStylePath();
+  const std::string styleDirPath         = Dali::Ui::Integration::AssetManager::GetDaliStylePath();
   const std::string defaultThemeFilePath = styleDirPath + DEFAULT_FEEDBACK_THEME_FILE_NAME;
 
   std::string defaultTheme;
@@ -200,7 +200,7 @@ void FeedbackStyle::StyleChanged(const std::string& userDefinedThemePath, Dali::
       {
         DALI_LOG_ERROR("FeedbackStyle::StyleChanged() User defined theme failed to load! \n");
 
-        const std::string styleDirPath         = AssetManager::GetDaliStylePath();
+        const std::string styleDirPath         = Dali::Ui::Integration::AssetManager::GetDaliStylePath();
         const std::string defaultThemeFilePath = styleDirPath + DEFAULT_FEEDBACK_THEME_FILE_NAME;
 
         // If there is any problem is using the user defined theme, then fall back to default theme
@@ -244,8 +244,8 @@ bool FeedbackStyle::LoadTheme(const std::string& data)
 
 void FeedbackStyle::LoadFromString(const std::string& data)
 {
-  Ui::JsonParser      parser = Ui::JsonParser::New();
-  const Ui::TreeNode* root   = NULL;
+  Ui::Integration::JsonParser      parser = Ui::Integration::JsonParser::New();
+  const Ui::Integration::TreeNode* root   = NULL;
 
   if(!parser.Parse(data))
   {
@@ -263,26 +263,26 @@ void FeedbackStyle::LoadFromString(const std::string& data)
     mStyleInfoLut.clear();
 
     // Parse style
-    if(const TreeNode* node = root->GetChild("style"))
+    if(const Dali::Ui::Integration::TreeNode* node = root->GetChild("style"))
     {
-      Ui::TreeNode::ConstIterator iter = node->CBegin();
-      Ui::TreeNode::ConstIterator end  = node->CEnd();
+      Ui::Integration::TreeNode::ConstIterator iter = node->CBegin();
+      Ui::Integration::TreeNode::ConstIterator end  = node->CEnd();
       for(; iter != end; ++iter)
       {
         const char*       key = (*iter).first;
         FeedbackStyleInfo themeInfo;
         themeInfo.mTypeName = key;
 
-        if(const TreeNode* signals = (*iter).second.GetChild("signals"))
+        if(const Dali::Ui::Integration::TreeNode* signals = (*iter).second.GetChild("signals"))
         {
-          TreeNode::ConstIterator signalIter = signals->CBegin();
-          TreeNode::ConstIterator signalEnd  = signals->CEnd();
+          Dali::Ui::Integration::TreeNode::ConstIterator signalIter = signals->CBegin();
+          Dali::Ui::Integration::TreeNode::ConstIterator signalEnd  = signals->CEnd();
           for(; signalIter != signalEnd; ++signalIter)
           {
             SignalFeedbackInfo signalFeedbackInfo;
 
-            const TreeNode* type = (*signalIter).second.GetChild("type");
-            DALI_ASSERT_ALWAYS(type && TreeNode::STRING == type->GetType() && "Signal must have a type");
+            const Dali::Ui::Integration::TreeNode* type = (*signalIter).second.GetChild("type");
+            DALI_ASSERT_ALWAYS(type && Dali::Ui::Integration::TreeNode::STRING == type->GetType() && "Signal must have a type");
             signalFeedbackInfo.mSignalName = type->GetString();
 
             GetIfString((*signalIter).second, "hapticFeedbackPattern", signalFeedbackInfo.mHasHapticFeedbackInfo,

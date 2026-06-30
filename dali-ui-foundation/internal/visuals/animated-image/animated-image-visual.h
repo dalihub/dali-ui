@@ -29,7 +29,7 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/animated-image-visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/image-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
@@ -90,7 +90,7 @@ public:
    * @param[in] properties A Property::Map containing settings for this visual
    * @return A smart-pointer to the newly allocated visual.
    */
-  static AnimatedImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static AnimatedImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                     const VisualUrl& imageUrl, const Property::Map& properties);
 
   /**
@@ -103,7 +103,7 @@ public:
    * @param[in] properties A Property::Map containing settings for this visual
    * @return A smart-pointer to the newly allocated visual.
    */
-  static AnimatedImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static AnimatedImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                     const Property::Array& imageUrls, const Property::Map& properties);
 
   /**
@@ -115,7 +115,7 @@ public:
    * @param[in] imageUrl The URL to animated image resource to use
    * @param[in] size The width and height of the image. The visual size will be used if these are 0.
    */
-  static AnimatedImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static AnimatedImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                     const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions());
 
 public: // from Visual
@@ -158,7 +158,7 @@ protected:
    * @param[in] creationOptions The options when create the visual
    * @param[in] desiredSize The width and height of the image. The visual size will be used if these are 0.
    */
-  AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                       ImageDimensions desiredSize);
 
   /**
@@ -356,7 +356,7 @@ private:
   uint32_t        mFrameCount; // Number of frames
   ImageDimensions mImageSize;
 
-  DevelAnimatedImageVisual::Action::Type mActionStatus;
+  Dali::Ui::Integration::AnimatedImageVisual::Action::Type mActionStatus;
 
   Dali::WrapMode::Type                  mWrapModeU : 3;
   Dali::WrapMode::Type                  mWrapModeV : 3;

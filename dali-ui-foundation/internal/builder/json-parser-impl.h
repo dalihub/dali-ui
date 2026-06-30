@@ -25,8 +25,8 @@
 #include <string>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/builder/json-parser.h>
-#include <dali-ui-foundation/devel-api/builder/tree-node.h>
+#include <dali-ui-foundation/integration-api/builder/json-parser.h>
+#include <dali-ui-foundation/integration-api/builder/tree-node.h>
 
 #include <dali-ui-foundation/internal/builder/builder-get-is.inl.h>
 
@@ -43,12 +43,12 @@ class JsonParser : public BaseObject
 {
 public:
   /*
-   * @copydoc Ui::JsonParser::JsonParser()
+   * @copydoc Ui::Integration::JsonParser::JsonParser()
    */
   JsonParser();
 
   /*
-   * @copydoc Ui::JsonParser::JsonParser(const TreeNode& tree)
+   * @copydoc Ui::Integration::JsonParser::JsonParser(const TreeNode& tree)
    */
   explicit JsonParser(const TreeNode& tree);
 
@@ -57,47 +57,47 @@ public:
   ~JsonParser() override;
 
   /*
-   * @copydoc Ui::JsonParser::Parse()
+   * @copydoc Ui::Integration::JsonParser::Parse()
    */
   bool Parse(const std::string& source);
 
   /*
-   * @copydoc Ui::JsonParser::Pack()
+   * @copydoc Ui::Integration::JsonParser::Pack()
    */
   void Pack(void);
 
   /*
-   * @copydoc Ui::JsonParser::GetRoot()
+   * @copydoc Ui::Integration::JsonParser::GetRoot()
    */
   const TreeNode* GetRoot() const;
 
   /*
-   * @copydoc Ui::JsonParser::ParseError()
+   * @copydoc Ui::Integration::JsonParser::ParseError()
    */
   bool ParseError() const;
 
   /*
-   * @copydoc Ui::JsonParser::GetErrorPosition()
+   * @copydoc Ui::Integration::JsonParser::GetErrorPosition()
    */
   int GetErrorPosition() const;
 
   /*
-   * @copydoc Ui::JsonParser::GetErrorDescription()
+   * @copydoc Ui::Integration::JsonParser::GetErrorDescription()
    */
   std::string GetErrorDescription() const;
 
   /*
-   * @copydoc Ui::JsonParser::GetErrorLineNumber()
+   * @copydoc Ui::Integration::JsonParser::GetErrorLineNumber()
    */
   int GetErrorLineNumber() const;
 
   /*
-   * @copydoc Ui::JsonParser::GetErrorColumn()
+   * @copydoc Ui::Integration::JsonParser::GetErrorColumn()
    */
   int GetErrorColumn() const;
 
   /*
-   * @copydoc Ui::JsonParser::Write()
+   * @copydoc Ui::Integration::JsonParser::Write()
    */
   void Write(std::ostream& output, int indent) const;
 
@@ -132,7 +132,7 @@ private:
 
 } // namespace Internal
 
-inline const Internal::JsonParser& GetImplementation(const Ui::JsonParser& parser)
+inline const Internal::JsonParser& GetImplementation(const Ui::Integration::JsonParser& parser)
 {
   DALI_ASSERT_ALWAYS(parser && "JsonParser handle is empty");
 
@@ -141,7 +141,7 @@ inline const Internal::JsonParser& GetImplementation(const Ui::JsonParser& parse
   return static_cast<const Internal::JsonParser&>(handle);
 }
 
-inline Internal::JsonParser& GetImplementation(Ui::JsonParser& parser)
+inline Internal::JsonParser& GetImplementation(Ui::Integration::JsonParser& parser)
 {
   DALI_ASSERT_ALWAYS(parser && "JsonParser handle is empty");
 

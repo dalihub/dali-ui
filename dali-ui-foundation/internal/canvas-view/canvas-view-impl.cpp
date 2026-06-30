@@ -26,9 +26,9 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/provider-api/property-registration-helper.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
@@ -329,13 +329,13 @@ void CanvasViewImpl::ApplyRasterizedImage(CanvasViewRasterizingTaskPtr task)
         mImageUrl = Dali::Ui::ImageUrl::New(rasterizedTexture, true);
 
         Dali::Property::Map map;
-        map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
+        map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
         map.Insert(Ui::ImageVisualPropertyIndex::URL, mImageUrl.GetUrl());
 
-        mContentVisual = Ui::VisualFactory::Get().CreateVisual(map);
+        mContentVisual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
         if(mContentVisual)
         {
-          viewData.RegisterVisual(Property::CANVAS_CONTENT_VISUAL, mContentVisual, DepthIndex::CONTENT);
+          viewData.RegisterVisual(Property::CANVAS_CONTENT_VISUAL, mContentVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
           // ViewDataImpl::Process() (ApplyFittingMode) runs before CanvasViewImpl::Process()
           // in the same post-processor cycle, so the visual is registered too late to be
           // sized by the automatic pass — call it explicitly here.

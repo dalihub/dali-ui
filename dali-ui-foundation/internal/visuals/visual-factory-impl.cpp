@@ -28,8 +28,8 @@
 #include <dali/public-api/object/property-array.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/animated-image-visual.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/animated-vector-image-visual.h>
@@ -75,12 +75,12 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_CON
 
 BaseHandle Create()
 {
-  BaseHandle handle = Ui::VisualFactory::Get();
+  BaseHandle handle = Ui::Integration::VisualFactory::Get();
 
   return handle;
 }
 
-DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::VisualFactory, Dali::BaseHandle, Create, true)
+DALI_TYPE_REGISTRATION_BEGIN_CREATE(Ui::Integration::VisualFactory, Dali::BaseHandle, Create, true)
 DALI_TYPE_REGISTRATION_END()
 const char* const BROKEN_IMAGE_FILE_NAME = "broken.png"; ///< The file name of the broken image.
 
@@ -93,7 +93,7 @@ VisualFactory::VisualFactory(bool debugEnabled)
   mColorVisualShaderFactory(),
   mSlotDelegate(this),
   mIdleCallback(nullptr),
-  mDefaultCreationOptions(Ui::VisualFactory::CreationOptions::NONE),
+  mDefaultCreationOptions(Ui::Integration::VisualFactory::CreationOptions::NONE),
   mAdaptorInitialized(false),
   mDebugEnabled(debugEnabled),
   mPreMultiplyOnLoad(true),
@@ -121,18 +121,18 @@ VisualFactory::~VisualFactory()
   }
 }
 
-Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map& propertyMap)
+Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map& propertyMap)
 {
   return CreateVisual(propertyMap, mDefaultCreationOptions);
 }
 
-Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               propertyMap,
-                                             Ui::VisualFactory::CreationOptions creationOptions)
+Ui::Integration::Visual::Base VisualFactory::CreateVisual(const Property::Map&                            propertyMap,
+                                                          Ui::Integration::VisualFactory::CreationOptions creationOptions)
 {
   Visual::BasePtr visualPtr;
 
-  Property::Value*       typeValue  = propertyMap.Find(Ui::VisualBasePropertyIndex::TYPE, VISUAL_TYPE);
-  Ui::InternalVisualType visualType = Ui::InternalVisualType::IMAGE; // Default to IMAGE type.
+  Property::Value*                    typeValue  = propertyMap.Find(Ui::VisualBasePropertyIndex::TYPE, VISUAL_TYPE);
+  Ui::Integration::InternalVisualType visualType = Ui::Integration::InternalVisualType::IMAGE; // Default to IMAGE type.
   if(typeValue)
   {
     Scripting::GetEnumerationProperty(*typeValue, VISUAL_TYPE_TABLE, VISUAL_TYPE_TABLE_COUNT, visualType);
@@ -140,26 +140,26 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 
   switch(visualType)
   {
-    case Ui::InternalVisualType::BORDER:
+    case Ui::Integration::InternalVisualType::BORDER:
     {
       visualPtr = BorderVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::InternalVisualType::COLOR:
+    case Ui::Integration::InternalVisualType::COLOR:
     {
       visualPtr = ColorVisual::New(GetFactoryCache(), GetColorVisualShaderFactory(), propertyMap);
       break;
     }
 
-    case Ui::InternalVisualType::GRADIENT:
+    case Ui::Integration::InternalVisualType::GRADIENT:
     {
       visualPtr = GradientVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::InternalVisualType::IMAGE:
-    case Ui::InternalVisualType::ANIMATED_IMAGE:
+    case Ui::Integration::InternalVisualType::IMAGE:
+    case Ui::Integration::InternalVisualType::ANIMATED_IMAGE:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
@@ -192,8 +192,8 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
               case VisualUrl::GIF:
               case VisualUrl::WEBP:
               {
-                if(visualType == Ui::InternalVisualType::ANIMATED_IMAGE ||
-                   !(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY))
+                if(visualType == Ui::Integration::InternalVisualType::ANIMATED_IMAGE ||
+                   !(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY))
                 {
                   visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, propertyMap);
                   break;
@@ -228,31 +228,31 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       break;
     }
 
-    case Ui::InternalVisualType::MESH:
+    case Ui::Integration::InternalVisualType::MESH:
     {
       visualPtr = MeshVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::InternalVisualType::PRIMITIVE:
+    case Ui::Integration::InternalVisualType::PRIMITIVE:
     {
       visualPtr = PrimitiveVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::InternalVisualType::WIREFRAME:
+    case Ui::Integration::InternalVisualType::WIREFRAME:
     {
       visualPtr = WireframeVisual::New(GetFactoryCache(), propertyMap);
       break;
     }
 
-    case Ui::InternalVisualType::TEXT:
+    case Ui::Integration::InternalVisualType::TEXT:
     {
       visualPtr = TextVisual::New(GetFactoryCache(), GetTextVisualShaderFactory(), propertyMap);
       break;
     }
 
-    case Ui::InternalVisualType::N_PATCH:
+    case Ui::Integration::InternalVisualType::N_PATCH:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
@@ -266,7 +266,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       break;
     }
 
-    case Ui::InternalVisualType::SVG:
+    case Ui::Integration::InternalVisualType::SVG:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
@@ -280,7 +280,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       break;
     }
 
-    case Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE:
+    case Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE:
     {
       Property::Value* imageURLValue = propertyMap.Find(Ui::ImageVisualPropertyIndex::URL, IMAGE_URL_NAME);
       std::string      imageUrl;
@@ -295,7 +295,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
       break;
     }
 
-    case Ui::InternalVisualType::ARC:
+    case Ui::Integration::InternalVisualType::ARC:
     {
       visualPtr = ArcVisual::New(GetFactoryCache(), propertyMap);
       break;
@@ -309,9 +309,9 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
 
   DALI_LOG_INFO(
     gLogFilter, Debug::Concise, "VisualFactory::CreateVisual( VisualType:%s %s%s)\n",
-    Scripting::GetEnumerationName<Ui::InternalVisualType>(visualType, VISUAL_TYPE_TABLE, VISUAL_TYPE_TABLE_COUNT),
-    (visualType == Ui::InternalVisualType::IMAGE) ? "url:" : "",
-    ((visualType == Ui::InternalVisualType::IMAGE)
+    Scripting::GetEnumerationName<Ui::Integration::InternalVisualType>(visualType, VISUAL_TYPE_TABLE, VISUAL_TYPE_TABLE_COUNT),
+    (visualType == Ui::Integration::InternalVisualType::IMAGE) ? "url:" : "",
+    ((visualType == Ui::Integration::InternalVisualType::IMAGE)
        ? ((
            [&]()
   {
@@ -329,22 +329,22 @@ Ui::Visual::Base VisualFactory::CreateVisual(const Property::Map&               
     DALI_LOG_ERROR("VisualType unknown\n");
   }
 
-  if(mDebugEnabled && visualType != Ui::InternalVisualType::WIREFRAME)
+  if(mDebugEnabled && visualType != Ui::Integration::InternalVisualType::WIREFRAME)
   {
     // Create a WireframeVisual if we have debug enabled
     visualPtr = WireframeVisual::New(GetFactoryCache(), visualPtr, propertyMap);
   }
 
-  return Ui::Visual::Base(visualPtr.Get());
+  return Ui::Integration::Visual::Base(visualPtr.Get());
 }
 
-Ui::Visual::Base VisualFactory::CreateVisual(const std::string& url, ImageDimensions size)
+Ui::Integration::Visual::Base VisualFactory::CreateVisual(const std::string& url, ImageDimensions size)
 {
   return CreateVisual(url, size, mDefaultCreationOptions);
 }
 
-Ui::Visual::Base VisualFactory::CreateVisual(const std::string& url, ImageDimensions size,
-                                             Ui::VisualFactory::CreationOptions creationOptions)
+Ui::Integration::Visual::Base VisualFactory::CreateVisual(const std::string& url, ImageDimensions size,
+                                                          Ui::Integration::VisualFactory::CreationOptions creationOptions)
 {
   Visual::BasePtr visualPtr;
 
@@ -373,7 +373,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const std::string& url, ImageDimens
       case VisualUrl::GIF:
       case VisualUrl::WEBP:
       {
-        if(!(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY))
+        if(!(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY))
         {
           visualPtr = AnimatedImageVisual::New(GetFactoryCache(), GetImageVisualShaderFactory(), creationOptions, visualUrl, size);
           break;
@@ -394,7 +394,7 @@ Ui::Visual::Base VisualFactory::CreateVisual(const std::string& url, ImageDimens
     visualPtr = WireframeVisual::New(GetFactoryCache(), visualPtr);
   }
 
-  return Ui::Visual::Base(visualPtr.Get());
+  return Ui::Integration::Visual::Base(visualPtr.Get());
 }
 
 Dali::Geometry VisualFactory::GetDefaultQuadGeometry()
@@ -416,17 +416,17 @@ bool VisualFactory::GetPreMultiplyOnLoad() const
   return mPreMultiplyOnLoad;
 }
 
-void VisualFactory::SetDefaultCreationOptions(Ui::VisualFactory::CreationOptions creationOptions)
+void VisualFactory::SetDefaultCreationOptions(Ui::Integration::VisualFactory::CreationOptions creationOptions)
 {
   mDefaultCreationOptions = creationOptions;
 }
 
-Ui::VisualFactory::CreationOptions VisualFactory::GetDefaultCreationOptions() const
+Ui::Integration::VisualFactory::CreationOptions VisualFactory::GetDefaultCreationOptions() const
 {
   return mDefaultCreationOptions;
 }
 
-void VisualFactory::DiscardVisual(Ui::Visual::Base visual)
+void VisualFactory::DiscardVisual(Ui::Integration::Visual::Base visual)
 {
   mDiscardedVisuals.emplace_back(visual);
 
@@ -506,7 +506,7 @@ Internal::VisualFactoryCache& VisualFactory::GetFactoryCache()
     mFactoryCache = std::unique_ptr<VisualFactoryCache>(new VisualFactoryCache(mPreMultiplyOnLoad));
 
     // Get broken image urls
-    auto imageDirPath   = AssetManager::GetDaliImagePath();
+    auto imageDirPath   = Dali::Ui::Integration::AssetManager::GetDaliImagePath();
     auto brokenImageUrl = imageDirPath + BROKEN_IMAGE_FILE_NAME;
 
     std::vector<Dali::String> customBrokenImageUrlList{};

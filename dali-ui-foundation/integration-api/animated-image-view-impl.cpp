@@ -27,12 +27,12 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/devel-api/visuals/animated-image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/animated-image-visual-signals-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-image-visual-signals-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/provider-api/property-registration-helper.h>
@@ -554,7 +554,7 @@ void AnimatedImageViewImpl::Play()
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::PLAY, Dali::Property::Map());
+    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::Integration::AnimatedImageVisual::Action::PLAY, Dali::Property::Map());
   }
 }
 
@@ -568,7 +568,7 @@ void AnimatedImageViewImpl::Pause()
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::PAUSE, Dali::Property::Map());
+    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::Integration::AnimatedImageVisual::Action::PAUSE, Dali::Property::Map());
   }
 }
 
@@ -582,7 +582,7 @@ void AnimatedImageViewImpl::Stop()
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::STOP, Dali::Property::Map());
+    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::Integration::AnimatedImageVisual::Action::STOP, Dali::Property::Map());
   }
 }
 
@@ -596,7 +596,7 @@ void AnimatedImageViewImpl::JumpToFrame(int frame)
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::DevelAnimatedImageVisual::Action::JUMP_TO, frame);
+    viewData.DoAction(AnimatedImageViewImpl::Property::IMAGE, Ui::Integration::AnimatedImageVisual::Action::JUMP_TO, frame);
   }
 }
 
@@ -735,7 +735,7 @@ Dali::Signal<void(Dali::Ui::View)>& AnimatedImageViewImpl::AnimationFinishedSign
 void AnimatedImageViewImpl::OnVisualEvent(View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId)
 {
   if(visualIndex == AnimatedImageViewImpl::Property::IMAGE &&
-     signalId == Ui::DevelAnimatedImageVisual::Signal::ANIMATION_FINISHED)
+     signalId == Ui::Integration::AnimatedImageVisual::Signal::ANIMATION_FINISHED)
   {
     Ui::View handle(GetOwner());
     mAnimationFinishedSignal.Emit(handle);
@@ -767,7 +767,7 @@ void AnimatedImageViewImpl::SetImageColor(const UiColor& color)
       // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
       map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
-      mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
+      mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
     }
     else
     {
@@ -791,7 +791,7 @@ void AnimatedImageViewImpl::SetPixelArea(const Vector4& pixelArea)
     {
       Dali::Property::Map map;
       map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, mPixelArea);
-      mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
+      mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
     }
   }
 }
@@ -1061,7 +1061,7 @@ void AnimatedImageViewImpl::UpdateVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ANIMATED_IMAGE);
 
   if(hasUrlArray)
   {
@@ -1123,13 +1123,13 @@ void AnimatedImageViewImpl::UpdateVisual()
     map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, mPixelArea);
   }
 
-  auto visualFactory = Ui::VisualFactory::Get();
+  auto visualFactory = Ui::Integration::VisualFactory::Get();
   if(visualFactory)
   {
     mVisual = visualFactory.CreateVisual(map);
     if(mVisual)
     {
-      viewData.RegisterVisual(AnimatedImageViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
+      viewData.RegisterVisual(AnimatedImageViewImpl::Property::IMAGE, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
       viewData.EnableCornerPropertiesOverridden(mVisual, true);
     }
   }
@@ -1151,20 +1151,20 @@ void AnimatedImageViewImpl::UpdatePlaceholderVisual()
     return;
   }
 
-  auto visualFactory = Ui::VisualFactory::Get();
+  auto visualFactory = Ui::Integration::VisualFactory::Get();
   if(!visualFactory)
   {
     return;
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
   {
-    viewData.RegisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
+    viewData.RegisterVisual(AnimatedImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, Dali::Ui::Integration::DepthIndex::CONTENT + 1);
     viewData.EnableCornerPropertiesOverridden(visual, true);
   }
 }

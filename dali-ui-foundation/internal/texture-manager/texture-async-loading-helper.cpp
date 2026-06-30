@@ -45,7 +45,7 @@ void TextureAsyncLoadingHelper::LoadAnimatedImage(const TextureManager::TextureI
                                                   Dali::AnimatedImageLoading      animatedImageLoading,
                                                   const uint32_t frameIndex, const Dali::ImageDimensions& desiredSize,
                                                   const Dali::SamplingMode::Type                 samplingMode,
-                                                  const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
+                                                  const Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad,
                                                   const bool                                     loadYuvPlanes)
 {
   LoadingTaskPtr loadingTask = new LoadingTask(++mLoadTaskId, animatedImageLoading, frameIndex, desiredSize,
@@ -58,7 +58,7 @@ void TextureAsyncLoadingHelper::LoadAnimatedImage(const TextureManager::TextureI
 void TextureAsyncLoadingHelper::Load(const TextureManager::TextureId textureId, const VisualUrl& url,
                                      const Dali::ImageDimensions&   desiredSize,
                                      const Dali::SamplingMode::Type samplingMode, const bool orientationCorrection,
-                                     const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
+                                     const Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad,
                                      const bool                                     loadYuvPlanes)
 {
   LoadingTaskPtr loadingTask;
@@ -82,7 +82,7 @@ void TextureAsyncLoadingHelper::Load(const TextureManager::TextureId textureId, 
 void TextureAsyncLoadingHelper::ApplyMask(const TextureManager::TextureId textureId, Devel::PixelBuffer pixelBuffer,
                                           Devel::PixelBuffer maskPixelBuffer, const float contentScale,
                                           const bool                                     cropToMask,
-                                          const DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
+                                          const Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask =
     new LoadingTask(++mLoadTaskId, pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad,

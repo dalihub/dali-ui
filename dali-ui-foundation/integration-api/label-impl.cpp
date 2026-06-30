@@ -39,7 +39,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
@@ -149,11 +149,11 @@ const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1]
  * @brief Discard the given visual into VisualFactory. The visual will be destroyed at next idle time.
  * @param[in,out] visual Visual to be discarded. It will be reset to an empty handle.
  */
-void DiscardLabelVisual(Dali::Ui::Visual::Base& visual)
+void DiscardLabelVisual(Dali::Ui::Integration::Visual::Base& visual)
 {
   if(DALI_LIKELY(Dali::Adaptor::IsAvailable() && visual))
   {
-    Dali::Ui::VisualFactory::Get().DiscardVisual(visual);
+    Dali::Ui::Integration::VisualFactory::Get().DiscardVisual(visual);
   }
   visual.Reset();
 }
@@ -1582,11 +1582,11 @@ void LabelImpl::OnInitialize()
   Actor self = Self();
 
   Dali::Property::Map propertyMap;
-  propertyMap.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::TEXT);
+  propertyMap.Add(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::TEXT);
 
-  mVisual   = Ui::VisualFactory::Get().CreateVisual(propertyMap);
+  mVisual   = Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
   View view = Ui::View::DownCast(self);
-  Internal::ViewDataImpl::Get(GetImpl(view)).RegisterVisual(Text::LabelPropertyIndex::TEXT, mVisual, DepthIndex::CONTENT);
+  Internal::ViewDataImpl::Get(GetImpl(view)).RegisterVisual(Text::LabelPropertyIndex::TEXT, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
 
   Internal::TextVisual::SetAsyncTextInterface(mVisual, this);
   Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, Text::LabelPropertyIndex::TEXT_COLOR);

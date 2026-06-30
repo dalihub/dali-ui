@@ -22,8 +22,8 @@
 #include <sstream>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/builder/json-parser.h>
-#include <dali-ui-foundation/devel-api/builder/tree-node.h>
+#include <dali-ui-foundation/integration-api/builder/json-parser.h>
+#include <dali-ui-foundation/integration-api/builder/tree-node.h>
 #include <dali-ui-foundation/internal/text/markup-processor/markup-processor-helper-functions.h>
 
 namespace Dali
@@ -64,7 +64,7 @@ void CreatePropertyMap(const TreeNode* const node, Property::Map& map)
 
 void ParsePropertyString(const std::string& property, Property::Map& map)
 {
-  Ui::JsonParser parser = Ui::JsonParser::New();
+  Ui::Integration::JsonParser parser = Ui::Integration::JsonParser::New();
 
   if(parser.Parse(property))
   {

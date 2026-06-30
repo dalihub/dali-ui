@@ -37,8 +37,8 @@
 #include <dali/public-api/signals/functor-delegate.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/builder/json-parser.h>
+#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/builder/json-parser.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 #include <dali-ui-foundation/internal/builder/builder-declarations.h>
@@ -155,21 +155,21 @@ void CollectAllStyles(const TreeNode& stylesCollection, const TreeNode& style, T
 Builder::Builder()
 : mSlotDelegate(this)
 {
-  mParser = Dali::Ui::JsonParser::New();
+  mParser = Dali::Ui::Integration::JsonParser::New();
 
   Property::Map defaultConstants;
-  defaultConstants[TOKEN_STRING(DALI_IMAGE_DIR)]       = ToPropertyValue(AssetManager::GetDaliImagePath());
-  defaultConstants[TOKEN_STRING(DALI_SOUND_DIR)]       = ToPropertyValue(AssetManager::GetDaliSoundPath());
-  defaultConstants[TOKEN_STRING(DALI_STYLE_DIR)]       = ToPropertyValue(AssetManager::GetDaliStylePath());
-  defaultConstants[TOKEN_STRING(DALI_STYLE_IMAGE_DIR)] = ToPropertyValue(AssetManager::GetDaliStyleImagePath());
+  defaultConstants[TOKEN_STRING(DALI_IMAGE_DIR)]       = ToPropertyValue(Dali::Ui::Integration::AssetManager::GetDaliImagePath());
+  defaultConstants[TOKEN_STRING(DALI_SOUND_DIR)]       = ToPropertyValue(Dali::Ui::Integration::AssetManager::GetDaliSoundPath());
+  defaultConstants[TOKEN_STRING(DALI_STYLE_DIR)]       = ToPropertyValue(Dali::Ui::Integration::AssetManager::GetDaliStylePath());
+  defaultConstants[TOKEN_STRING(DALI_STYLE_IMAGE_DIR)] = ToPropertyValue(Dali::Ui::Integration::AssetManager::GetDaliStyleImagePath());
 
   AddConstants(defaultConstants);
 }
 
-void Builder::LoadFromString(std::string const& data, Dali::Ui::Builder::UiFormat format)
+void Builder::LoadFromString(std::string const& data, Dali::Ui::Integration::Builder::UiFormat format)
 {
   // parser to get constants and includes only
-  Dali::Ui::JsonParser parser = Dali::Ui::JsonParser::New();
+  Dali::Ui::Integration::JsonParser parser = Dali::Ui::Integration::JsonParser::New();
 
   if(!parser.Parse(data))
   {
@@ -723,7 +723,7 @@ bool Builder::IsLinearConstrainer(const std::string& name)
   return false;
 }
 
-Ui::Builder::BuilderSignalType& Builder::QuitSignal()
+Ui::Integration::Builder::BuilderSignalType& Builder::QuitSignal()
 {
   return mQuitSignal;
 }

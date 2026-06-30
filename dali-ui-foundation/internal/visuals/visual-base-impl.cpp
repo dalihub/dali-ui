@@ -31,10 +31,10 @@
 #include <locale>
 
 // INTERNAL HEARDER
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visuals/primitive-visual-properties-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visuals/primitive-visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/helpers/property-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
@@ -64,16 +64,16 @@ namespace
  * @param type VisualType that want to checkup
  * @return true if type can use corner radius feature.
  */
-static bool IsTypeAvailableForCornerRadius(Ui::InternalVisualType type)
+static bool IsTypeAvailableForCornerRadius(Ui::Integration::InternalVisualType type)
 {
   switch(type)
   {
-    case Ui::InternalVisualType::COLOR:
-    case Ui::InternalVisualType::GRADIENT:
-    case Ui::InternalVisualType::IMAGE:
-    case Ui::InternalVisualType::SVG:
-    case Ui::InternalVisualType::ANIMATED_IMAGE:
-    case Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE:
+    case Ui::Integration::InternalVisualType::COLOR:
+    case Ui::Integration::InternalVisualType::GRADIENT:
+    case Ui::Integration::InternalVisualType::IMAGE:
+    case Ui::Integration::InternalVisualType::SVG:
+    case Ui::Integration::InternalVisualType::ANIMATED_IMAGE:
+    case Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE:
     {
       return true;
     }
@@ -89,16 +89,16 @@ static bool IsTypeAvailableForCornerRadius(Ui::InternalVisualType type)
  * @param type VisualType that want to checkup
  * @return true if type can use borderline feature.
  */
-static bool IsTypeAvailableForBorderline(Ui::InternalVisualType type)
+static bool IsTypeAvailableForBorderline(Ui::Integration::InternalVisualType type)
 {
   switch(type)
   {
-    case Ui::InternalVisualType::COLOR:
-    case Ui::InternalVisualType::GRADIENT:
-    case Ui::InternalVisualType::IMAGE:
-    case Ui::InternalVisualType::SVG:
-    case Ui::InternalVisualType::ANIMATED_IMAGE:
-    case Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE:
+    case Ui::Integration::InternalVisualType::COLOR:
+    case Ui::Integration::InternalVisualType::GRADIENT:
+    case Ui::Integration::InternalVisualType::IMAGE:
+    case Ui::Integration::InternalVisualType::SVG:
+    case Ui::Integration::InternalVisualType::ANIMATED_IMAGE:
+    case Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE:
     {
       return true;
     }
@@ -119,12 +119,12 @@ StringProperty PROPERTY_NAME_INDEX_TABLE[] = {
   {TRANSFORM, Ui::VisualBasePropertyIndex::TRANSFORM},
   {MIX_COLOR, Ui::VisualBasePropertyIndex::MIX_COLOR},
   {OPACITY, Ui::VisualBasePropertyIndex::OPACITY},
-  {BORDERLINE_WIDTH, Ui::DevelVisual::Property::BORDERLINE_WIDTH},
-  {BORDERLINE_COLOR, Ui::DevelVisual::Property::BORDERLINE_COLOR},
-  {BORDERLINE_OFFSET, Ui::DevelVisual::Property::BORDERLINE_OFFSET},
-  {CORNER_RADIUS, Ui::DevelVisual::Property::CORNER_RADIUS},
-  {CORNER_RADIUS_POLICY, Ui::DevelVisual::Property::CORNER_RADIUS_POLICY},
-  {CORNER_SQUARENESS, Ui::DevelVisual::Property::CORNER_SQUARENESS},
+  {BORDERLINE_WIDTH, Ui::Integration::Visual::Property::BORDERLINE_WIDTH},
+  {BORDERLINE_COLOR, Ui::Integration::Visual::Property::BORDERLINE_COLOR},
+  {BORDERLINE_OFFSET, Ui::Integration::Visual::Property::BORDERLINE_OFFSET},
+  {CORNER_RADIUS, Ui::Integration::Visual::Property::CORNER_RADIUS},
+  {CORNER_RADIUS_POLICY, Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY},
+  {CORNER_SQUARENESS, Ui::Integration::Visual::Property::CORNER_SQUARENESS},
 };
 const uint16_t PROPERTY_NAME_INDEX_TABLE_COUNT =
   sizeof(PROPERTY_NAME_INDEX_TABLE) / sizeof(PROPERTY_NAME_INDEX_TABLE[0]);
@@ -147,7 +147,7 @@ Property::Index GetVisualPropertyIndex(Property::Key key)
 
 } // namespace
 
-Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::InternalVisualType type)
+Visual::Base::Base(VisualFactoryCache& factoryCache, Ui::Integration::InternalVisualType type)
 : mImpl(new Impl(type)),
   mFactoryCache(factoryCache)
 {
@@ -329,7 +329,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         }
         break;
       }
-      case Ui::DevelVisual::Property::BORDERLINE_WIDTH:
+      case Ui::Integration::Visual::Property::BORDERLINE_WIDTH:
       {
         float width;
         if(value.Get(width) && (mImpl->mDecorationData != nullptr || !Dali::EqualsZero(width)))
@@ -369,7 +369,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         }
         break;
       }
-      case Ui::DevelVisual::Property::BORDERLINE_COLOR:
+      case Ui::Integration::Visual::Property::BORDERLINE_COLOR:
       {
         Vector4 color;
         if(value.Get(color) && (mImpl->mDecorationData != nullptr || color != Vector4::ZERO))
@@ -386,7 +386,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         }
         break;
       }
-      case Ui::DevelVisual::Property::BORDERLINE_OFFSET:
+      case Ui::Integration::Visual::Property::BORDERLINE_OFFSET:
       {
         float offset;
         if(value.Get(offset) && (mImpl->mDecorationData != nullptr || !Dali::EqualsZero(offset)))
@@ -403,7 +403,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         }
         break;
       }
-      case Ui::DevelVisual::Property::CORNER_RADIUS:
+      case Ui::Integration::Visual::Property::CORNER_RADIUS:
       {
         if(value.GetType() == Property::VECTOR4)
         {
@@ -461,7 +461,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
 
         break;
       }
-      case Ui::DevelVisual::Property::CORNER_RADIUS_POLICY:
+      case Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY:
       {
         int policy;
         if(value.Get(policy))
@@ -490,7 +490,7 @@ void Visual::Base::SetProperties(const Property::Map& propertyMap)
         }
         break;
       }
-      case Ui::DevelVisual::Property::CORNER_SQUARENESS:
+      case Ui::Integration::Visual::Property::CORNER_SQUARENESS:
       {
         if(value.GetType() == Property::VECTOR4)
         {
@@ -637,7 +637,7 @@ void Visual::Base::DoAction(const Property::Index actionId, const Property::Valu
   // Check if action is valid for this visual type and perform action if possible
   switch(actionId)
   {
-    case DevelVisual::Action::UPDATE_PROPERTY:
+    case Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY:
     {
       const Property::Map* map = attributes.GetMap();
       if(map)
@@ -657,8 +657,8 @@ void Visual::Base::DoActionExtension(const Dali::Property::Index actionId, const
 void Visual::Base::SetDepthIndex(int index)
 {
   // Clamp input value as valid range.
-  Dali::ClampInPlace(index, static_cast<int>(Ui::DepthIndex::MINIMUM_DEPTH_INDEX),
-                     static_cast<int>(Ui::DepthIndex::MAXIMUM_DEPTH_INDEX));
+  Dali::ClampInPlace(index, static_cast<int>(Ui::Integration::DepthIndex::MINIMUM_DEPTH_INDEX),
+                     static_cast<int>(Ui::Integration::DepthIndex::MAXIMUM_DEPTH_INDEX));
 
   if(mImpl->mDepthIndex != index)
   {
@@ -687,9 +687,9 @@ void Visual::Base::SetOnScene(Actor& actor)
     if(mImpl->mRenderer)
     {
       mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_PRE_MULTIPLIED_ALPHA, IsPreMultipliedAlphaEnabled());
-      if(mImpl->mDepthIndex == static_cast<int>(DepthIndex::AUTO_INDEX))
+      if(mImpl->mDepthIndex == static_cast<int>(Dali::Ui::Integration::DepthIndex::AUTO_INDEX))
       {
-        mImpl->mRenderer.SetProperty(Renderer::Property::DEPTH_INDEX, static_cast<int>(DepthIndex::CONTENT));
+        mImpl->mRenderer.SetProperty(Renderer::Property::DEPTH_INDEX, static_cast<int>(Dali::Ui::Integration::DepthIndex::CONTENT));
       }
       else
       {
@@ -774,16 +774,16 @@ void Visual::Base::CreatePropertyMap(Property::Map& map) const
 
   if(IsTypeAvailableForBorderline(mImpl->mType))
   {
-    map.Insert(Ui::DevelVisual::Property::BORDERLINE_WIDTH, mImpl->GetBorderlineWidth());
-    map.Insert(Ui::DevelVisual::Property::BORDERLINE_COLOR, mImpl->GetBorderlineColor());
-    map.Insert(Ui::DevelVisual::Property::BORDERLINE_OFFSET, mImpl->GetBorderlineOffset());
+    map.Insert(Ui::Integration::Visual::Property::BORDERLINE_WIDTH, mImpl->GetBorderlineWidth());
+    map.Insert(Ui::Integration::Visual::Property::BORDERLINE_COLOR, mImpl->GetBorderlineColor());
+    map.Insert(Ui::Integration::Visual::Property::BORDERLINE_OFFSET, mImpl->GetBorderlineOffset());
   }
 
   if(IsTypeAvailableForCornerRadius(mImpl->mType))
   {
-    map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, mImpl->GetCornerRadius());
-    map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY, mImpl->GetCornerRadiusPolicy());
-    map.Insert(Ui::DevelVisual::Property::CORNER_SQUARENESS, mImpl->GetCornerSquareness());
+    map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS, mImpl->GetCornerRadius());
+    map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY, mImpl->GetCornerRadiusPolicy());
+    map.Insert(Ui::Integration::Visual::Property::CORNER_SQUARENESS, mImpl->GetCornerSquareness());
   }
 }
 
@@ -996,7 +996,7 @@ bool Visual::Base::IsSynchronousLoadingRequired() const
   return (mImpl->mFlags & Impl::IS_SYNCHRONOUS_RESOURCE_LOADING);
 }
 
-Ui::InternalVisualType Visual::Base::GetType() const
+Ui::Integration::InternalVisualType Visual::Base::GetType() const
 {
   return mImpl->mType;
 }
@@ -1201,27 +1201,27 @@ Property::Index Visual::Base::GetIntKey(Property::Key key)
   }
   else if(key.stringKey == CORNER_RADIUS)
   {
-    return Ui::DevelVisual::Property::CORNER_RADIUS;
+    return Ui::Integration::Visual::Property::CORNER_RADIUS;
   }
   else if(key.stringKey == CORNER_RADIUS_POLICY)
   {
-    return Ui::DevelVisual::Property::CORNER_RADIUS_POLICY;
+    return Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY;
   }
   else if(key.stringKey == CORNER_SQUARENESS)
   {
-    return Ui::DevelVisual::Property::CORNER_SQUARENESS;
+    return Ui::Integration::Visual::Property::CORNER_SQUARENESS;
   }
   else if(key.stringKey == BORDERLINE_WIDTH)
   {
-    return Ui::DevelVisual::Property::BORDERLINE_WIDTH;
+    return Ui::Integration::Visual::Property::BORDERLINE_WIDTH;
   }
   else if(key.stringKey == BORDERLINE_COLOR)
   {
-    return Ui::DevelVisual::Property::BORDERLINE_COLOR;
+    return Ui::Integration::Visual::Property::BORDERLINE_COLOR;
   }
   else if(key.stringKey == BORDERLINE_OFFSET)
   {
-    return Ui::DevelVisual::Property::BORDERLINE_OFFSET;
+    return Ui::Integration::Visual::Property::BORDERLINE_OFFSET;
   }
 
   return Property::INVALID_INDEX;
@@ -1255,7 +1255,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
     {
       return Renderer::Property::OPACITY;
     }
-    case Dali::Ui::DevelVisual::Property::CORNER_RADIUS:
+    case Dali::Ui::Integration::Visual::Property::CORNER_RADIUS:
     {
       if(IsTypeAvailableForCornerRadius(mImpl->mType))
       {
@@ -1263,7 +1263,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
       }
       break;
     }
-    case Dali::Ui::DevelVisual::Property::CORNER_SQUARENESS:
+    case Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS:
     {
       if(IsTypeAvailableForCornerRadius(mImpl->mType))
       {
@@ -1271,7 +1271,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
       }
       break;
     }
-    case Dali::Ui::DevelVisual::Property::BORDERLINE_WIDTH:
+    case Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH:
     {
       if(IsTypeAvailableForBorderline(mImpl->mType))
       {
@@ -1279,7 +1279,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
       }
       break;
     }
-    case Dali::Ui::DevelVisual::Property::BORDERLINE_COLOR:
+    case Dali::Ui::Integration::Visual::Property::BORDERLINE_COLOR:
     {
       if(IsTypeAvailableForBorderline(mImpl->mType))
       {
@@ -1287,7 +1287,7 @@ Property::Index Visual::Base::GetPropertyIndex(Property::Key key) const
       }
       break;
     }
-    case Dali::Ui::DevelVisual::Property::BORDERLINE_OFFSET:
+    case Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET:
     {
       if(IsTypeAvailableForBorderline(mImpl->mType))
       {
@@ -1377,7 +1377,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     }
 
     // Default animatable properties from DecoratedVisualRenderer
-    case Ui::DevelVisual::Property::CORNER_RADIUS:
+    case Ui::Integration::Visual::Property::CORNER_RADIUS:
     {
       if(IsTypeAvailableForCornerRadius(mImpl->mType))
       {
@@ -1418,7 +1418,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
       }
       break;
     }
-    case Ui::DevelVisual::Property::CORNER_SQUARENESS:
+    case Ui::Integration::Visual::Property::CORNER_SQUARENESS:
     {
       if(IsTypeAvailableForCornerRadius(mImpl->mType))
       {
@@ -1452,9 +1452,9 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
       }
       break;
     }
-    case Ui::DevelVisual::Property::BORDERLINE_WIDTH:
-    case Ui::DevelVisual::Property::BORDERLINE_COLOR:
-    case Ui::DevelVisual::Property::BORDERLINE_OFFSET:
+    case Ui::Integration::Visual::Property::BORDERLINE_WIDTH:
+    case Ui::Integration::Visual::Property::BORDERLINE_COLOR:
+    case Ui::Integration::Visual::Property::BORDERLINE_OFFSET:
     {
       if(IsTypeAvailableForBorderline(mImpl->mType))
       {
@@ -1489,13 +1489,13 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
     {
       // Special case for MIX_COLOR
       if(key.type == Property::Key::INDEX &&
-         ((mImpl->mType == Ui::InternalVisualType::PRIMITIVE && key.indexKey == PrimitiveVisual::Property::MIX_COLOR)))
+         ((mImpl->mType == Ui::Integration::InternalVisualType::PRIMITIVE && key.indexKey == Ui::Integration::PrimitiveVisual::Property::MIX_COLOR)))
       {
         return Dali::Property(mImpl->mRenderer, Renderer::Property::MIX_COLOR);
       }
 
       // Special case for PRE_MULTIPLIED_ALPHA (It is not animatable, but keep it just for logical flow)
-      if((mImpl->mType == Ui::InternalVisualType::IMAGE || mImpl->mType == Ui::InternalVisualType::ANIMATED_IMAGE || mImpl->mType == Ui::InternalVisualType::N_PATCH) &&
+      if((mImpl->mType == Ui::Integration::InternalVisualType::IMAGE || mImpl->mType == Ui::Integration::InternalVisualType::ANIMATED_IMAGE || mImpl->mType == Ui::Integration::InternalVisualType::N_PATCH) &&
          ((key.type == Property::Key::INDEX && key.indexKey == ImageVisualPropertyIndex::PRE_MULTIPLIED_ALPHA) ||
           (key.type == Property::Key::STRING && key.stringKey == PRE_MULTIPLIED_ALPHA)))
       {
@@ -1503,7 +1503,7 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
       }
 
       // Special case for BLUR_RADIUS
-      if(mImpl->mType == Ui::InternalVisualType::COLOR &&
+      if(mImpl->mType == Ui::Integration::InternalVisualType::COLOR &&
          ((key.type == Property::Key::INDEX && key.indexKey == ColorVisualPropertyIndex::BLUR_RADIUS) ||
           (key.type == Property::Key::STRING && key.stringKey == BLUR_RADIUS_NAME)))
       {
@@ -1528,8 +1528,8 @@ Dali::Property Visual::Base::GetPropertyObject(Dali::Property::Key key, bool cha
 bool Visual::Base::IsOffscreenRenderingCaptureEnabled() const
 {
   const int depthIndex = mImpl->mDepthIndex;
-  return depthIndex == DepthIndex::AUTO_INDEX ||
-         (DepthIndex::BACKGROUND_EFFECT < depthIndex && depthIndex <= DepthIndex::DECORATION);
+  return depthIndex == Dali::Ui::Integration::DepthIndex::AUTO_INDEX ||
+         (Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT < depthIndex && depthIndex <= Dali::Ui::Integration::DepthIndex::DECORATION);
 }
 
 bool Visual::Base::IsCornerRadiusIgnoredAtOffscreenRendering() const

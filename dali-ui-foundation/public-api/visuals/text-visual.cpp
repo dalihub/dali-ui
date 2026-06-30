@@ -23,7 +23,7 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
 {

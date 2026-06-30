@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/internal/visuals/animated-image/rolling-animated-image-cache.h>
 
 // INTERNAL HEADERS
-#include <dali-ui-foundation/devel-api/image-loader/texture-manager.h>
+#include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 

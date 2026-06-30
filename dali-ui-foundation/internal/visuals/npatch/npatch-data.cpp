@@ -129,22 +129,22 @@ TextureSet NPatchData::GetTextures() const
   return mTextureSet;
 }
 
-void NPatchData::SetStretchPixelsX(const NPatchUtility::StretchRanges stretchPixelsX)
+void NPatchData::SetStretchPixelsX(const Dali::Ui::Integration::NPatchUtility::StretchRanges stretchPixelsX)
 {
   mStretchPixelsX = stretchPixelsX;
 }
 
-void NPatchData::SetStretchPixelsY(const NPatchUtility::StretchRanges stretchPixelsY)
+void NPatchData::SetStretchPixelsY(const Dali::Ui::Integration::NPatchUtility::StretchRanges stretchPixelsY)
 {
   mStretchPixelsY = stretchPixelsY;
 }
 
-NPatchUtility::StretchRanges NPatchData::GetStretchPixelsX() const
+Dali::Ui::Integration::NPatchUtility::StretchRanges NPatchData::GetStretchPixelsX() const
 {
   return mStretchPixelsX;
 }
 
-NPatchUtility::StretchRanges NPatchData::GetStretchPixelsY() const
+Dali::Ui::Integration::NPatchUtility::StretchRanges NPatchData::GetStretchPixelsY() const
 {
   return mStretchPixelsY;
 }
@@ -216,16 +216,16 @@ void* NPatchData::GetRenderingMap() const
 
 void NPatchData::SetLoadedNPatchData(Devel::PixelBuffer& pixelBuffer, bool preMultiplied)
 {
-  if(mBorder == Dali::Extents() && NPatchUtility::ParseBorders(pixelBuffer, mStretchPixelsX, mStretchPixelsY))
+  if(mBorder == Dali::Extents() && Dali::Ui::Integration::NPatchUtility::ParseBorders(pixelBuffer, mStretchPixelsX, mStretchPixelsY))
   {
     // Crop the image
     pixelBuffer.Crop(1, 1, pixelBuffer.GetWidth() - 2, pixelBuffer.GetHeight() - 2);
   }
   else
   {
-    mStretchPixelsX.PushBack(NPatchUtility::GetValidStrechPointFromBorder(
+    mStretchPixelsX.PushBack(Dali::Ui::Integration::NPatchUtility::GetValidStrechPointFromBorder(
       pixelBuffer.GetWidth(), static_cast<uint32_t>(mBorder.start), static_cast<uint32_t>(mBorder.end)));
-    mStretchPixelsY.PushBack(NPatchUtility::GetValidStrechPointFromBorder(
+    mStretchPixelsY.PushBack(Dali::Ui::Integration::NPatchUtility::GetValidStrechPointFromBorder(
       pixelBuffer.GetHeight(), static_cast<uint32_t>(mBorder.top), static_cast<uint32_t>(mBorder.bottom)));
   }
 

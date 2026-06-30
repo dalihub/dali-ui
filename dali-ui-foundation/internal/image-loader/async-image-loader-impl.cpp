@@ -46,7 +46,7 @@ IntrusivePtr<AsyncImageLoader> AsyncImageLoader::New()
 }
 
 uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-                                             DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
+                                             Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask = new LoadingTask(++mLoadTaskId, animatedImageLoading, frameIndex, preMultiplyOnLoad,
                                                MakeCallback(this, &AsyncImageLoader::ProcessLoadedImage));
@@ -56,7 +56,7 @@ uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animated
 
 uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
                                              Dali::ImageDimensions desiredSize, Dali::SamplingMode::Type samplingMode,
-                                             DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
+                                             Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad,
                                              bool                                     loadPlanes)
 {
   LoadingTaskPtr loadingTask =
@@ -68,7 +68,7 @@ uint32_t AsyncImageLoader::LoadAnimatedImage(Dali::AnimatedImageLoading animated
 
 uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions,
                                 SamplingMode::Type samplingMode, bool orientationCorrection,
-                                DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes)
+                                Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes)
 {
   LoadingTaskPtr loadingTask =
     new LoadingTask(++mLoadTaskId, url, dimensions, samplingMode, orientationCorrection,
@@ -81,7 +81,7 @@ uint32_t AsyncImageLoader::Load(const VisualUrl& url, ImageDimensions dimensions
 uint32_t AsyncImageLoader::LoadEncodedImageBuffer(const EncodedImageBuffer& encodedImageBuffer,
                                                   ImageDimensions           dimensions,
                                                   SamplingMode::Type samplingMode, bool orientationCorrection,
-                                                  DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
+                                                  Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask =
     new LoadingTask(++mLoadTaskId, encodedImageBuffer, dimensions, samplingMode, orientationCorrection,
@@ -93,7 +93,7 @@ uint32_t AsyncImageLoader::LoadEncodedImageBuffer(const EncodedImageBuffer& enco
 
 uint32_t AsyncImageLoader::ApplyMask(Devel::PixelBuffer pixelBuffer, Devel::PixelBuffer maskPixelBuffer,
                                      float contentScale, bool cropToMask,
-                                     DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
+                                     Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad)
 {
   LoadingTaskPtr loadingTask =
     new LoadingTask(++mLoadTaskId, pixelBuffer, maskPixelBuffer, contentScale, cropToMask, preMultiplyOnLoad,
@@ -108,7 +108,7 @@ Ui::AsyncImageLoader::ImageLoadedSignalType& AsyncImageLoader::ImageLoadedSignal
   return mLoadedSignal;
 }
 
-Ui::DevelAsyncImageLoader::PixelBufferLoadedSignalType& AsyncImageLoader::PixelBufferLoadedSignal()
+Ui::Integration::PixelBufferLoadedSignalType& AsyncImageLoader::PixelBufferLoadedSignal()
 {
   return mPixelBufferLoadedSignal;
 }

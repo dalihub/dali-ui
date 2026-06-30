@@ -33,7 +33,7 @@
 #include <memory>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -611,16 +611,16 @@ private:
   WebViewImpl& operator=(const WebViewImpl&) = delete;
   WebViewImpl& operator=(WebViewImpl&&)      = delete;
 
-private:                                              // Data — Rendering
-  Ui::Visual::Base    mVisual;                        ///< Current image visual showing the web content
-  Dali::Size          mWebViewSize;                   ///< Current web view size (width, height)
-  Dali::BoundsInteger mWebViewArea;                   ///< Last known display area in screen coordinates
-  uint32_t            mLastRenderedNativeImageWidth;  ///< Width of the last uploaded NativeImage texture
-  uint32_t            mLastRenderedNativeImageHeight; ///< Height of the last uploaded NativeImage texture
-  bool                mVisualChangeRequired;          ///< True when the visual must be re-created on next frame
-  bool                mVideoHoleEnabled;              ///< Video hole rendering enabled
-  bool                mMouseEventsEnabled;            ///< Mouse events forwarded to web content
-  bool                mKeyEventsEnabled;              ///< Key events forwarded to web content
+private:                                                        // Data — Rendering
+  Ui::Integration::Visual::Base mVisual;                        ///< Current image visual showing the web content
+  Dali::Size                    mWebViewSize;                   ///< Current web view size (width, height)
+  Dali::BoundsInteger           mWebViewArea;                   ///< Last known display area in screen coordinates
+  uint32_t                      mLastRenderedNativeImageWidth;  ///< Width of the last uploaded NativeImage texture
+  uint32_t                      mLastRenderedNativeImageHeight; ///< Height of the last uploaded NativeImage texture
+  bool                          mVisualChangeRequired;          ///< True when the visual must be re-created on next frame
+  bool                          mVideoHoleEnabled;              ///< Video hole rendering enabled
+  bool                          mMouseEventsEnabled;            ///< Mouse events forwarded to web content
+  bool                          mKeyEventsEnabled;              ///< Key events forwarded to web content
 
   // Display-area update notifications
   Dali::PropertyNotification mPositionUpdateNotification; ///< Fires on world-position change

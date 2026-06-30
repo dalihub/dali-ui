@@ -123,7 +123,7 @@ public:
    * @param[in] size The width and height to fit the loaded image to.
    * @return A smart-pointer to the newly allocated visual.
    */
-  static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, const Property::Map& properties,
                             ImageDimensions size = ImageDimensions());
 
@@ -140,7 +140,7 @@ public:
    * @param[in] size The width and height to fit the loaded image to.
    * @return A smart-pointer to the newly allocated visual.
    */
-  static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static ImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions());
 
 public: // from Visual
@@ -187,7 +187,7 @@ protected:
    * @param[in] imageUrl The URL of the image resource to use
    * @param[in] size The width and height to fit the loaded image to.
    */
-  ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
               const VisualUrl& imageUrl, ImageDimensions size);
 
   /**

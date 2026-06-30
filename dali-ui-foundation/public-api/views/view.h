@@ -1809,13 +1809,13 @@ public:
       OFFSCREEN_RENDERING,
 
       /**
-       * @brief The inner shadow of the View. The visual will use DepthIndex::Ranges::DECORATION - 2
+       * @brief The inner shadow of the View. The visual will use Dali::Ui::Integration::DepthIndex::Ranges::DECORATION - 2
        * @details Name "innerShadow", type Property::MAP.
        */
       INNER_SHADOW,
 
       /**
-       * @brief The inset borderline of the View. The visual will use DepthIndex::Ranges::DECORATION - 1
+       * @brief The inset borderline of the View. The visual will use Dali::Ui::Integration::DepthIndex::Ranges::DECORATION - 1
        * @details Name "borderline", type Property::MAP.
        */
       BORDERLINE,
@@ -1891,7 +1891,7 @@ public:
        * @note By default, it is Vector::ZERO.
        * @note Applies to specific visuals inside the View.
        * @note Only Property::Vector4 can be animated.
-       * @see Dali::Ui::DevelVisual::Property::Type::CORNER_RADIUS
+       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_RADIUS
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_RADIUS = ANIMATABLE_PROPERTY_WITHOUT_UNIFORM_START_INDEX,
@@ -1901,7 +1901,7 @@ public:
        * (in world units).
        * @details Name "viewCornerRadiusPolicy", type Property::INTEGER.
        * @see Policy::Type
-       * @see Dali::Ui::DevelVisual::Property::Type::CORNER_RADIUS_POLICY
+       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_RADIUS_POLICY
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_RADIUS_POLICY,
@@ -1912,7 +1912,7 @@ public:
        * @note By default, it is Vector::ZERO.
        * @note Applies to specific visuals inside the View.
        * @note Only Property::Vector4 can be animated.
-       * @see Dali::Ui::DevelVisual::Property::Type::CORNER_SQUARENESS
+       * @see Dali::Ui::Integration::Visual::Property::Type::CORNER_SQUARENESS
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       CORNER_SQUARENESS,
@@ -1920,7 +1920,7 @@ public:
       /**
        * @brief The width for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineWidth", type Property::FLOAT.
-       * @see Dali::Ui::DevelVisual::Property::Type::BORDERLINE_WIDTH
+       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_WIDTH
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_WIDTH,
@@ -1928,7 +1928,7 @@ public:
       /**
        * @brief The color for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineColor", type Property::VECTOR4
-       * @see Dali::Ui::DevelVisual::Property::Type::BORDERLINE_COLOR
+       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_COLOR
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_COLOR,
@@ -1936,7 +1936,7 @@ public:
       /**
        * @brief The offset for the borderline of the View. It will update borderline visual
        * @details Name "viewBorderlineOffset", type Property::FLOAT.
-       * @see Dali::Ui::DevelVisual::Property::Type::BORDERLINE_OFFSET
+       * @see Dali::Ui::Integration::Visual::Property::Type::BORDERLINE_OFFSET
        * @note It will not create UniformMap internally. So this property don't be used at Render phase.
        */
       BORDERLINE_OFFSET,

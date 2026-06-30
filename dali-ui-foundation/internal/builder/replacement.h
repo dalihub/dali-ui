@@ -22,20 +22,18 @@
 #include <dali/public-api/object/property-value.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/builder/builder.h>
+#include <dali-ui-foundation/integration-api/builder/builder.h>
+#include <dali-ui-foundation/integration-api/builder/tree-node.h>
 #include <dali-ui-foundation/internal/builder/builder-get-is.inl.h>
 
 namespace Dali
 {
 namespace Ui
 {
-class TreeNode;
-}
-
-namespace Ui
-{
 namespace Internal
 {
+using TreeNode = Dali::Ui::Integration::TreeNode;
+
 /*
  * Supports template replacement functionality
  *

@@ -24,11 +24,11 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/devel-api/visuals/image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/provider-api/property-registration-helper.h>
@@ -389,7 +389,7 @@ void ImageViewImpl::Reload()
   auto& viewData = Internal::ViewDataImpl::Get(*this);
   if(viewData.GetVisual(ImageViewImpl::Property::IMAGE))
   {
-    viewData.DoAction(ImageViewImpl::Property::IMAGE, DevelImageVisual::Action::RELOAD, Dali::Property::Map());
+    viewData.DoAction(ImageViewImpl::Property::IMAGE, Dali::Ui::Integration::ImageVisual::Action::RELOAD, Dali::Property::Map());
   }
 }
 
@@ -619,7 +619,7 @@ void ImageViewImpl::SetImageColor(const UiColor& color)
     {
       Dali::Property::Map map;
       map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
-      mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
+      mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
     }
     else
     {
@@ -779,20 +779,20 @@ void ImageViewImpl::UpdatePlaceholderVisual()
     return;
   }
 
-  auto visualFactory = Ui::VisualFactory::Get();
+  auto visualFactory = Ui::Integration::VisualFactory::Get();
   if(!visualFactory)
   {
     return;
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
   {
-    viewData.RegisterVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
+    viewData.RegisterVisual(ImageViewImpl::Property::PLACEHOLDER_IMAGE, visual, Dali::Ui::Integration::DepthIndex::CONTENT + 1);
     viewData.EnableCornerPropertiesOverridden(visual, true);
   }
 }
@@ -903,11 +903,11 @@ void ImageViewImpl::UpdateVisual()
     return;
   }
 
-  auto visualFactory = Ui::VisualFactory::Get();
+  auto visualFactory = Ui::Integration::VisualFactory::Get();
   if(visualFactory)
   {
     Dali::Property::Map map;
-    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
+    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
     map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
     map.Insert(Ui::ImageVisualPropertyIndex::SAMPLING_MODE, static_cast<int>(mSamplingMode));
     map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
@@ -945,11 +945,11 @@ void ImageViewImpl::UpdateVisual()
     // IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY tells the factory not to upgrade
     // a GIF/WebP URL to AnimatedImageVisual. Only the first frame is decoded.
     // (NPatch detection via BORDER property is unaffected by this flag.)
-    mVisual = visualFactory.CreateVisual(map, Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY);
+    mVisual = visualFactory.CreateVisual(map, Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_LOAD_STATIC_IMAGES_ONLY);
     if(mVisual)
     {
       DALI_LOG_DEBUG_INFO("[ImageViewImpl] UpdateVisual: RegisterVisual result=ok\n");
-      viewData.RegisterVisual(ImageViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
+      viewData.RegisterVisual(ImageViewImpl::Property::IMAGE, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
       viewData.EnableCornerPropertiesOverridden(mVisual, true);
     }
     else

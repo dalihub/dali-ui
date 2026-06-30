@@ -24,7 +24,7 @@
 #include <fstream>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/mesh-visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/mesh-visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/mesh/obj-loader.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
@@ -180,8 +180,8 @@ private:
   Vector3   mSceneCenter;
   Vector3   mSceneSize;
 
-  Vector3                            mLightPosition;
-  Ui::MeshVisual::ShadingMode::Value mShadingMode;
+  Vector3                                         mLightPosition;
+  Ui::Integration::MeshVisual::ShadingMode::Value mShadingMode;
 
   bool mUseTexture;
   bool mUseMipmapping;

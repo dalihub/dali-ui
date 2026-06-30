@@ -22,7 +22,7 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/image-loader/async-image-loader-devel.h>
+#include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
 #include <dali-ui-foundation/internal/image-loader/loading-task.h>
 #include <dali-ui-foundation/public-api/image-loader/async-image-loader.h>
 
@@ -61,10 +61,10 @@ public:
 
   /**
    * @copydoc Ui::AsyncImageLoader::LoadAnimatedImage( Dali::AnimatedImageLoading animatedImageLoading, uint32_t
-   * frameIndex, DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad)
+   * frameIndex, Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad)
    */
   uint32_t LoadAnimatedImage(Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-                             DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
+                             Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad);
 
   /**
    * @brief Starts an animated image loading task.
@@ -81,7 +81,7 @@ public:
    */
   uint32_t LoadAnimatedImage(Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
                              Dali::ImageDimensions desiredSize, Dali::SamplingMode::Type samplingMode,
-                             DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes);
+                             Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes);
 
   /**
    * @brief Starts an image loading task.
@@ -97,7 +97,7 @@ public:
    */
   uint32_t Load(const VisualUrl& url, ImageDimensions dimensions,
                 SamplingMode::Type samplingMode, bool orientationCorrection,
-                DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes);
+                Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes);
 
   /**
    * @brief Starts an image loading task by encoded image buffer.
@@ -112,7 +112,7 @@ public:
    */
   uint32_t LoadEncodedImageBuffer(const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
                                   SamplingMode::Type samplingMode, bool orientationCorrection,
-                                  DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
+                                  Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad);
 
   /**
    * @brief Starts an mask applying task.
@@ -125,7 +125,7 @@ public:
    * @return The loading task id
    */
   uint32_t ApplyMask(Devel::PixelBuffer pixelBuffer, Devel::PixelBuffer maskPixelBuffer, float contentScale,
-                     bool cropToMask, DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad);
+                     bool cropToMask, Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad);
 
   /**
    * @copydoc Ui::AsyncImageLoader::ImageLoadedSignal
@@ -135,7 +135,7 @@ public:
   /**
    * @copydoc Ui::AsyncImageLoader::PixelBufferLoadedSignal
    */
-  Ui::DevelAsyncImageLoader::PixelBufferLoadedSignalType& PixelBufferLoadedSignal();
+  Ui::Integration::PixelBufferLoadedSignalType& PixelBufferLoadedSignal();
 
   /**
    * @copydoc Ui::AsyncImageLoader::Cancel
@@ -159,10 +159,10 @@ protected:
   ~AsyncImageLoader() override;
 
 private:
-  Ui::AsyncImageLoader::ImageLoadedSignalType            mLoadedSignal;
-  Ui::DevelAsyncImageLoader::PixelBufferLoadedSignalType mPixelBufferLoadedSignal;
-  std::vector<AsyncImageLoadingInfo>                     mLoadingTasks;
-  uint32_t                                               mLoadTaskId;
+  Ui::AsyncImageLoader::ImageLoadedSignalType  mLoadedSignal;
+  Ui::Integration::PixelBufferLoadedSignalType mPixelBufferLoadedSignal;
+  std::vector<AsyncImageLoadingInfo>           mLoadingTasks;
+  uint32_t                                     mLoadTaskId;
 };
 
 } // namespace Internal

@@ -37,7 +37,7 @@
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
@@ -738,7 +738,7 @@ View FocusManager::GetFocusIndicatorView()
   if(!mFocusIndicatorView)
   {
     // Create the default if it hasn't been set and one that's shared by all the keyboard focusable views
-    const std::string imageDirPath        = AssetManager::GetDaliImagePath();
+    const std::string imageDirPath        = Dali::Ui::Integration::AssetManager::GetDaliImagePath();
     Ui::ImageView     focusIndicatorImage = Ui::ImageView::New();
     focusIndicatorImage.SetResourceUrl(Dali::Integration::ToDaliString(imageDirPath + FOCUS_BORDER_IMAGE_FILE_NAME));
     focusIndicatorImage.SetFittingMode(Ui::Image::FittingMode::FILL);

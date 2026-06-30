@@ -35,9 +35,9 @@ namespace Ui
 {
 namespace Internal
 {
-Dali::Ui::DragAndDropDetector DragAndDropDetector::New()
+Dali::Ui::Integration::DragAndDropDetector DragAndDropDetector::New()
 {
-  Dali::Ui::DragAndDropDetector detector = Dali::Ui::DragAndDropDetector(new DragAndDropDetector());
+  Dali::Ui::Integration::DragAndDropDetector detector = Dali::Ui::Integration::DragAndDropDetector(new DragAndDropDetector());
 
   return detector;
 }
@@ -251,7 +251,7 @@ void DragAndDropDetector::EmitStartedSignal(Dali::Ui::View& view)
 {
   if(!mStartedSignal.Empty())
   {
-    Dali::Ui::DragAndDropDetector handle(this);
+    Dali::Ui::Integration::DragAndDropDetector handle(this);
     mStartedSignal.Emit(view, handle);
   }
 }
@@ -259,7 +259,7 @@ void DragAndDropDetector::EmitEnteredSignal(Dali::Ui::View& view)
 {
   if(!mEnteredSignal.Empty())
   {
-    Dali::Ui::DragAndDropDetector handle(this);
+    Dali::Ui::Integration::DragAndDropDetector handle(this);
     mEnteredSignal.Emit(view, handle);
   }
 }
@@ -268,7 +268,7 @@ void DragAndDropDetector::EmitExitedSignal(Dali::Ui::View& view)
 {
   if(!mExitedSignal.Empty())
   {
-    Dali::Ui::DragAndDropDetector handle(this);
+    Dali::Ui::Integration::DragAndDropDetector handle(this);
     mExitedSignal.Emit(view, handle);
   }
 }
@@ -277,7 +277,7 @@ void DragAndDropDetector::EmitMovedSignal(Dali::Ui::View& view)
 {
   if(!mMovedSignal.Empty())
   {
-    Dali::Ui::DragAndDropDetector handle(this);
+    Dali::Ui::Integration::DragAndDropDetector handle(this);
     mMovedSignal.Emit(view, handle);
   }
 }
@@ -286,7 +286,7 @@ void DragAndDropDetector::EmitDroppedSignal(Dali::Ui::View& view)
 {
   if(!mDroppedSignal.Empty())
   {
-    Dali::Ui::DragAndDropDetector handle(this);
+    Dali::Ui::Integration::DragAndDropDetector handle(this);
     mDroppedSignal.Emit(view, handle);
   }
 }
@@ -295,7 +295,7 @@ void DragAndDropDetector::EmitEndedSignal(Dali::Ui::View& view)
 {
   if(!mEndedSignal.Empty())
   {
-    Dali::Ui::DragAndDropDetector handle(this);
+    Dali::Ui::Integration::DragAndDropDetector handle(this);
     mEndedSignal.Emit(view, handle);
   }
 }

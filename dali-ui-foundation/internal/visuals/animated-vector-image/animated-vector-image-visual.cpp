@@ -29,8 +29,8 @@
 #include <dali/public-api/math/math-utils.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-signals-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-signals-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-manager.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
@@ -119,11 +119,11 @@ Dali::PixelData GetDummyRGBAPixelData()
 #endif
 } // unnamed namespace
 
-AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&                factoryCache,
-                                                            ImageVisualShaderFactory&          shaderFactory,
-                                                            Ui::VisualFactory::CreationOptions creationOptions,
-                                                            const VisualUrl&                   imageUrl,
-                                                            const Property::Map&               properties)
+AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&                             factoryCache,
+                                                            ImageVisualShaderFactory&                       shaderFactory,
+                                                            Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                                            const VisualUrl&                                imageUrl,
+                                                            const Property::Map&                            properties)
 {
   AnimatedVectorImageVisualPtr visual(
     new AnimatedVectorImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, ImageDimensions{}));
@@ -132,23 +132,23 @@ AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache& 
   return visual;
 }
 
-AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&                factoryCache,
-                                                            ImageVisualShaderFactory&          shaderFactory,
-                                                            Ui::VisualFactory::CreationOptions creationOptions,
-                                                            const VisualUrl&                   imageUrl,
-                                                            ImageDimensions                    size)
+AnimatedVectorImageVisualPtr AnimatedVectorImageVisual::New(VisualFactoryCache&                             factoryCache,
+                                                            ImageVisualShaderFactory&                       shaderFactory,
+                                                            Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                                            const VisualUrl&                                imageUrl,
+                                                            ImageDimensions                                 size)
 {
   AnimatedVectorImageVisualPtr visual(new AnimatedVectorImageVisual(factoryCache, shaderFactory, creationOptions, imageUrl, size));
   visual->Initialize();
   return visual;
 }
 
-AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&                factoryCache,
-                                                     ImageVisualShaderFactory&          shaderFactory,
-                                                     Ui::VisualFactory::CreationOptions creationOptions,
-                                                     const VisualUrl&                   imageUrl,
-                                                     ImageDimensions                    size)
-: Visual::Base(factoryCache, Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE),
+AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&                             factoryCache,
+                                                     ImageVisualShaderFactory&                       shaderFactory,
+                                                     Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                                     const VisualUrl&                                imageUrl,
+                                                     ImageDimensions                                 size)
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE),
   mImageUrl(imageUrl),
   mAnimationData(),
   mVectorAnimationTask(new VectorAnimationTask(factoryCache)),
@@ -182,7 +182,7 @@ AnimatedVectorImageVisual::AnimatedVectorImageVisual(VisualFactoryCache&        
 
   mImpl->mFittingModeRequired = true;
 
-  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  if(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
   }
@@ -259,7 +259,7 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
 void AnimatedVectorImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE);
   if(mImageUrl.IsValid())
   {
     map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
@@ -599,7 +599,7 @@ void AnimatedVectorImageVisual::OnInitialize(void)
   mImpl->mRenderer.SetTextures(textureSet);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 
   if(mPixelArea != FULL_TEXTURE_RECT)
   {
@@ -709,7 +709,7 @@ void AnimatedVectorImageVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 
   if(IsOnScene())
@@ -752,7 +752,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
   // Check if action is valid for this visual type and perform action if possible
   switch(actionId)
   {
-    case DevelAnimatedVectorImageVisual::Action::PLAY:
+    case Dali::Ui::Integration::AnimatedVectorImageVisual::Action::PLAY:
     {
       if(IsOnScene() && mVisualSize != Vector2::ZERO)
       {
@@ -764,7 +764,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
       mPlayState = Ui::AnimatedImage::PlayState::PLAYING;
       break;
     }
-    case DevelAnimatedVectorImageVisual::Action::PAUSE:
+    case Dali::Ui::Integration::AnimatedVectorImageVisual::Action::PAUSE:
     {
       if(mAnimationData.playState == Ui::AnimatedImage::PlayState::PLAYING)
       {
@@ -775,7 +775,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
       mPlayState = Ui::AnimatedImage::PlayState::PAUSED;
       break;
     }
-    case DevelAnimatedVectorImageVisual::Action::STOP:
+    case Dali::Ui::Integration::AnimatedVectorImageVisual::Action::STOP:
     {
       if(mAnimationData.playState != Ui::AnimatedImage::PlayState::STOPPED)
       {
@@ -786,7 +786,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
       mPlayState = Ui::AnimatedImage::PlayState::STOPPED;
       break;
     }
-    case DevelAnimatedVectorImageVisual::Action::JUMP_TO:
+    case Dali::Ui::Integration::AnimatedVectorImageVisual::Action::JUMP_TO:
     {
       int32_t frameNumber;
       if(attributes.Get(frameNumber))
@@ -798,7 +798,7 @@ void AnimatedVectorImageVisual::OnDoAction(const Property::Index actionId, const
       }
       break;
     }
-    case DevelAnimatedVectorImageVisual::Action::FLUSH:
+    case Dali::Ui::Integration::AnimatedVectorImageVisual::Action::FLUSH:
     {
       if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
       {
@@ -816,10 +816,10 @@ void AnimatedVectorImageVisual::OnDoActionExtension(const Property::Index action
 {
   switch(actionId)
   {
-    case DevelAnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY:
+    case Dali::Ui::Integration::AnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY:
     {
-      DevelAnimatedVectorImageVisual::DynamicPropertyInfo info =
-        AnyCast<DevelAnimatedVectorImageVisual::DynamicPropertyInfo>(attributes);
+      Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo info =
+        AnyCast<Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo>(attributes);
       mAnimationData.dynamicProperties.push_back(info);
       mAnimationData.resendFlag |= VectorAnimationTask::RESEND_DYNAMIC_PROPERTY;
       break;
@@ -928,7 +928,7 @@ void AnimatedVectorImageVisual::OnAnimationFinished(uint32_t playStateId)
 
     if(mImpl->mEventObserver)
     {
-      mImpl->mEventObserver->NotifyVisualEvent(*this, DevelAnimatedVectorImageVisual::Signal::ANIMATION_FINISHED);
+      mImpl->mEventObserver->NotifyVisualEvent(*this, Dali::Ui::Integration::AnimatedVectorImageVisual::Signal::ANIMATION_FINISHED);
     }
   }
 

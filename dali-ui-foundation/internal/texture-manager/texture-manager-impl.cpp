@@ -901,8 +901,8 @@ void TextureManager::LoadTexture(TextureManager::TextureInfo& textureInfo, Textu
   if(!textureInfo.loadSynchronously)
   {
     auto premultiplyOnLoad = (textureInfo.preMultiplyOnLoad && textureInfo.maskTextureId == INVALID_TEXTURE_ID)
-                               ? DevelAsyncImageLoader::PreMultiplyOnLoad::ON
-                               : DevelAsyncImageLoader::PreMultiplyOnLoad::OFF;
+                               ? Dali::Ui::Integration::PreMultiplyOnLoad::ON
+                               : Dali::Ui::Integration::PreMultiplyOnLoad::OFF;
     if(textureInfo.animatedImageLoading)
     {
       mAsyncLoader->LoadAnimatedImage(textureInfo.textureId, textureInfo.animatedImageLoading, textureInfo.frameIndex,
@@ -1265,8 +1265,8 @@ void TextureManager::ApplyMask(TextureManager::TextureInfo& textureInfo, const T
                   textureInfo.loadSynchronously ? "T" : "F");
 
     textureInfo.loadState  = TextureManager::LoadState::MASK_APPLYING;
-    auto premultiplyOnLoad = textureInfo.preMultiplyOnLoad ? DevelAsyncImageLoader::PreMultiplyOnLoad::ON
-                                                           : DevelAsyncImageLoader::PreMultiplyOnLoad::OFF;
+    auto premultiplyOnLoad = textureInfo.preMultiplyOnLoad ? Dali::Ui::Integration::PreMultiplyOnLoad::ON
+                                                           : Dali::Ui::Integration::PreMultiplyOnLoad::OFF;
     mAsyncLoader->ApplyMask(textureInfo.textureId, pixelBuffer, maskPixelBuffer, textureInfo.scaleFactor,
                             textureInfo.cropToMask, premultiplyOnLoad);
   }

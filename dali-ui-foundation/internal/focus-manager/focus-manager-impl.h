@@ -134,12 +134,12 @@ public:
   bool IsDefaultFocusIndicatorEnabled() const;
 
   /**
-   * @copydoc Ui::DevelFocusManager::EnableDefaultAlgorithm
+   * @copydoc Ui::Integration::FocusManager::EnableDefaultAlgorithm
    */
   void EnableDefaultAlgorithm(bool enable);
 
   /**
-   * @copydoc Ui::DevelFocusManager::IsDefaultAlgorithmEnabled
+   * @copydoc Ui::Integration::FocusManager::IsDefaultAlgorithmEnabled
    */
   bool IsDefaultAlgorithmEnabled() const;
 

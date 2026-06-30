@@ -27,7 +27,7 @@
 #include <memory>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/image-loader/async-image-loader-devel.h>
+#include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-type.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 
@@ -52,7 +52,7 @@ public:
    */
   FastTrackLoadingTask(const VisualUrl& url, ImageDimensions dimensions,
                        SamplingMode::Type samplingMode, bool orientationCorrection,
-                       DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
+                       Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                        CallbackBase* callback);
 
   /**
@@ -117,7 +117,7 @@ public:
 private:
   ImageDimensions                          mDimensions;   ///< dimensions to load
   SamplingMode::Type                       mSamplingMode; ///< sampling options
-  DevelAsyncImageLoader::PreMultiplyOnLoad mPreMultiplyOnLoad;
+  Dali::Ui::Integration::PreMultiplyOnLoad mPreMultiplyOnLoad;
   std::unique_ptr<CallbackBase>            mCallback;
 
   // Texture Upload relative API

@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/devel-api/builder/json-parser.h>
+#include <dali-ui-foundation/integration-api/builder/json-parser.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/stream-operators.h>
 #include <locale>
@@ -51,7 +51,7 @@ namespace Internal
     DALI_LOG_INFO(gFilterScript, Debug::Verbose, oss.str().c_str());                               \
   }
 
-void LogTree(const Ui::JsonParser& mParser);
+void LogTree(const Ui::Integration::JsonParser& mParser);
 
 std::string PropertyValueToString(const Property::Value& value);
 

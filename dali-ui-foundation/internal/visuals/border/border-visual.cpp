@@ -54,7 +54,7 @@ BorderVisualPtr BorderVisual::New(VisualFactoryCache& factoryCache, const Proper
 }
 
 BorderVisual::BorderVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::InternalVisualType::BORDER),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::BORDER),
   mBorderSize(0.f),
   mBorderSizeIndex(Property::INVALID_INDEX),
   mAntiAliasingEnabled(false)
@@ -143,7 +143,7 @@ void BorderVisual::DoSetOnScene(Actor& actor)
 void BorderVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::BORDER);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::BORDER);
   map.Insert(Ui::BorderVisualPropertyIndex::BORDER_SIZE, mBorderSize);
   map.Insert(Ui::BorderVisualPropertyIndex::ANTI_ALIASING, mAntiAliasingEnabled);
 }
@@ -157,7 +157,7 @@ void BorderVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 }
 
@@ -182,7 +182,7 @@ void BorderVisual::OnInitialize()
   }
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 }
 
 void BorderVisual::UpdateShader()

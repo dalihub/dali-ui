@@ -55,7 +55,7 @@ uint64_t GetNanoseconds()
 } // namespace
 
 LoadingTask::LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-                         DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
+                         Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
 : AsyncTask(callback),
   url(),
   encodedImageBuffer(),
@@ -77,7 +77,7 @@ LoadingTask::LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLo
 
 LoadingTask::LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
                          ImageDimensions dimensions, Dali::SamplingMode::Type samplingMode,
-                         DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
+                         Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                          CallbackBase* callback)
 : AsyncTask(callback),
   url(),
@@ -100,7 +100,7 @@ LoadingTask::LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLo
 
 LoadingTask::LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions,
                          SamplingMode::Type samplingMode, bool orientationCorrection,
-                         DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
+                         Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes,
                          CallbackBase* callback)
 : AsyncTask(callback, url.GetProtocolType() == VisualUrl::ProtocolType::REMOTE ? AsyncTask::PriorityType::LOW
                                                                                : AsyncTask::PriorityType::HIGH),
@@ -124,7 +124,7 @@ LoadingTask::LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dime
 
 LoadingTask::LoadingTask(uint32_t id, const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
                          SamplingMode::Type samplingMode, bool orientationCorrection,
-                         DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
+                         Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
 : AsyncTask(callback),
   url(),
   encodedImageBuffer(encodedImageBuffer),
@@ -146,7 +146,7 @@ LoadingTask::LoadingTask(uint32_t id, const EncodedImageBuffer& encodedImageBuff
 
 LoadingTask::LoadingTask(uint32_t id, Devel::PixelBuffer pixelBuffer, Devel::PixelBuffer maskPixelBuffer,
                          float contentScale, bool cropToMask,
-                         DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
+                         Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback)
 : AsyncTask(callback),
   url(""),
   encodedImageBuffer(),
@@ -289,7 +289,7 @@ void LoadingTask::MultiplyAlpha()
 {
   if(!pixelBuffers.empty())
   {
-    if(preMultiplyOnLoad == DevelAsyncImageLoader::PreMultiplyOnLoad::ON)
+    if(preMultiplyOnLoad == Dali::Ui::Integration::PreMultiplyOnLoad::ON)
     {
       pixelBuffers[0].MultiplyColorByAlpha();
     }

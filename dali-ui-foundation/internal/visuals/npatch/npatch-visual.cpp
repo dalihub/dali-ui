@@ -28,8 +28,8 @@
 #include <locale>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/utility/npatch-helper.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/utility/npatch-helper.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
@@ -55,7 +55,7 @@ namespace Internal
 
 /////////////////NPatchVisual////////////////
 
-NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                   const VisualUrl& imageUrl, const Property::Map& properties)
 {
   NPatchVisualPtr nPatchVisual(new NPatchVisual(factoryCache, shaderFactory, creationOptions));
@@ -65,7 +65,7 @@ NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualS
   return nPatchVisual;
 }
 
-NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+NPatchVisualPtr NPatchVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                   const VisualUrl& imageUrl)
 {
   NPatchVisualPtr nPatchVisual(new NPatchVisual(factoryCache, shaderFactory, creationOptions));
@@ -309,7 +309,7 @@ void NPatchVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 }
 
@@ -327,7 +327,7 @@ void NPatchVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Clear();
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::N_PATCH);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::N_PATCH);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
   map.Insert(Ui::ImageVisualPropertyIndex::BORDER_ONLY, mBorderOnly);
   map.Insert(Ui::ImageVisualPropertyIndex::BORDER, mBorder);
@@ -368,8 +368,8 @@ void NPatchVisual::EnablePreMultipliedAlpha(bool preMultiplied)
   }
 }
 
-NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions)
-: Visual::Base(factoryCache, Ui::InternalVisualType::N_PATCH),
+NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions)
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::N_PATCH),
   mPlacementActor(),
   mLoader(factoryCache.GetNPatchLoader()),
   mImageVisualShaderFactory(shaderFactory),
@@ -390,7 +390,7 @@ NPatchVisual::NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFa
 
   mImpl->mFittingModeRequired = true;
 
-  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  if(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
   }
@@ -429,7 +429,7 @@ void NPatchVisual::OnInitialize()
   mImpl->mRenderer = VisualRenderer::New(geometry, shader);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 }
 
 Geometry NPatchVisual::CreateGeometry()
@@ -496,8 +496,8 @@ Shader NPatchVisual::CreateShader()
   NPatchDataPtr data;
   // 0 is either no data (load failed?) or no stretch regions on image
   // for both cases we use the default shader
-  NPatchUtility::StretchRanges::SizeType xStretchCount = 0;
-  NPatchUtility::StretchRanges::SizeType yStretchCount = 0;
+  Dali::Ui::Integration::NPatchUtility::StretchRanges::SizeType xStretchCount = 0;
+  Dali::Ui::Integration::NPatchUtility::StretchRanges::SizeType yStretchCount = 0;
 
   auto fragmentShader = mAuxiliaryResourceStatus == Ui::Visual::ResourceStatus::READY
                           ? SHADER_NPATCH_VISUAL_MASK_SHADER_FRAG
@@ -598,7 +598,7 @@ void NPatchVisual::ApplyTextureAndUniforms()
   if(mLoader.GetNPatchData(mId, data) && data->GetLoadingState() == NPatchData::LoadingState::LOAD_COMPLETE)
   {
     textureSet = data->GetTextures();
-    NPatchHelper::ApplyTextureAndUniforms(mImpl->mRenderer, data.Get());
+    Dali::Ui::Integration::NPatchHelper::ApplyTextureAndUniforms(mImpl->mRenderer, data.Get());
 
     if(mAuxiliaryResourceStatus == Ui::Visual::ResourceStatus::READY)
     {
@@ -631,7 +631,7 @@ void NPatchVisual::ApplyTextureAndUniforms()
   }
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 }
 
 Geometry NPatchVisual::GetNinePatchGeometry(VisualFactoryCache::GeometryType subType)

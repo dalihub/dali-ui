@@ -394,12 +394,12 @@ enum class ResourceStatus
  */
 enum class ContainerRangeType
 {
-  UNDER_BACKGROUND_EFFECT,                  ///< The visual object exist under Dali::Ui::DepthIndex::Ranges::BACKGROUND_EFFECT
-  BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, ///< The visual object exist between Dali::Ui::DepthIndex::Ranges::BACKGROUND_EFFECT and Dali::Ui::DepthIndex::Ranges::BACKGROUND
-  BETWEEN_BACKGROUND_AND_CONTENT,           ///< The visual object exist between Dali::Ui::DepthIndex::Ranges::BACKGROUND and Dali::Ui::DepthIndex::Ranges::CONTENT
-  BETWEEN_CONTENT_AND_DECORATION,           ///< The visual object exist between Dali::Ui::DepthIndex::Ranges::CONTENT and Dali::Ui::DepthIndex::Ranges::DECORATION
-  BETWEEN_DECORATION_AND_FOREGROUND_EFFECT, ///< The visual object exist between Dali::Ui::DepthIndex::Ranges::DECORATION and Dali::Ui::DepthIndex::Ranges::FOREGROUND_EFFECT
-  OVER_FOREGROUND_EFFECT,                   ///< The visual object exist over Dali::Ui::DepthIndex::Ranges::FOREGROUND_EFFECT
+  UNDER_BACKGROUND_EFFECT,                  ///< The visual object exist under Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT
+  BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, ///< The visual object exist between Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT and Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND
+  BETWEEN_BACKGROUND_AND_CONTENT,           ///< The visual object exist between Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND and Dali::Ui::Integration::DepthIndex::Ranges::CONTENT
+  BETWEEN_CONTENT_AND_DECORATION,           ///< The visual object exist between Dali::Ui::Integration::DepthIndex::Ranges::CONTENT and Dali::Ui::Integration::DepthIndex::Ranges::DECORATION
+  BETWEEN_DECORATION_AND_FOREGROUND_EFFECT, ///< The visual object exist between Dali::Ui::Integration::DepthIndex::Ranges::DECORATION and Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT
+  OVER_FOREGROUND_EFFECT,                   ///< The visual object exist over Dali::Ui::Integration::DepthIndex::Ranges::FOREGROUND_EFFECT
 
   MAX_COUNT,
 

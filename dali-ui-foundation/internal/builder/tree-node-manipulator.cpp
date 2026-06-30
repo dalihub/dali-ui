@@ -22,7 +22,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/builder/tree-node-manipulator.h>
 
-#include <dali-ui-foundation/devel-api/builder/tree-node.h>
+#include <dali-ui-foundation/integration-api/builder/tree-node.h>
 
 namespace Dali
 {

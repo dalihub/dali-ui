@@ -33,7 +33,7 @@
 #include <locale>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -462,7 +462,7 @@ void GaussianBlurEffectImpl::OnActivate()
 
   // Inject blurred output to view
   Renderer targetRenderer = GetTargetRenderer();
-  targetRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::DepthIndex::FOREGROUND_EFFECT);
+  targetRenderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::FOREGROUND_EFFECT);
   ownerView.AddCacheRenderer(targetRenderer);
   ownerView.GetImplementation().RegisterOffScreenRenderableType(GetOffScreenRenderableType());
   SetRendererTexture(targetRenderer, mBlurredOutputFrameBuffer);

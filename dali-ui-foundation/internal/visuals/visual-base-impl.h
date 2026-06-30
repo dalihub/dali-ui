@@ -28,10 +28,10 @@
 #include <unordered_set>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/direction-enums.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/direction-enums.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
@@ -78,68 +78,68 @@ public:
   void SetProperties(const Property::Map& propertyMap);
 
   /**
-   * @copydoc Ui::Visual::Base::SetName
+   * @copydoc Ui::Integration::Visual::Base::SetName
    */
   void SetName(const std::string& name);
 
   /**
-   * @copydoc Ui::Visual::Base::GetName
+   * @copydoc Ui::Integration::Visual::Base::GetName
    */
   const std::string& GetName() const;
 
   /**
-   * @copydoc Ui::Visual::Base::SetSize
+   * @copydoc Ui::Integration::Visual::Base::SetSize
    */
   void SetTransformAndSize(const Property::Map& transform, Size controlSize, float effectiveScale);
 
   /**
-   * @copydoc Ui::Visual::Base::GetHeightForWidth
+   * @copydoc Ui::Integration::Visual::Base::GetHeightForWidth
    */
   virtual float GetHeightForWidth(float width);
 
   /**
-   * @copydoc Ui::Visual::Base::GetWidthForHeight
+   * @copydoc Ui::Integration::Visual::Base::GetWidthForHeight
    */
   virtual float GetWidthForHeight(float height);
 
   /**
-   * @copydoc Ui::Visual::Base::GetNaturalSize
+   * @copydoc Ui::Integration::Visual::Base::GetNaturalSize
    */
   virtual void GetNaturalSize(Vector2& naturalSize);
 
   /**
-   * @copydoc Ui::Visual::Base::SetDepthIndex
+   * @copydoc Ui::Integration::Visual::Base::SetDepthIndex
    */
   void SetDepthIndex(int index);
 
   /**
-   * @copydoc Ui::Visual::Base::GetDepthIndex
+   * @copydoc Ui::Integration::Visual::Base::GetDepthIndex
    */
   int GetDepthIndex() const;
 
   /**
-   * @copydoc Ui::Visual::Base::SetOnScene
+   * @copydoc Ui::Integration::Visual::Base::SetOnScene
    * @pre Impl->mGeometry must be created before this method is called
    */
   void SetOnScene(Actor& actor);
 
   /**
-   * @copydoc Ui::Visual::Base::SetOffScene
+   * @copydoc Ui::Integration::Visual::Base::SetOffScene
    */
   void SetOffScene(Actor& actor);
 
   /**
-   * @copydoc Ui::Visual::Base::CreatePropertyMap
+   * @copydoc Ui::Integration::Visual::Base::CreatePropertyMap
    */
   void CreatePropertyMap(Property::Map& map) const;
 
   /**
-   * @copydoc Ui::Visual::Base::DoAction
+   * @copydoc Ui::Integration::Visual::Base::DoAction
    */
   void DoAction(const Dali::Property::Index actionId, const Dali::Property::Value& attributes);
 
   /**
-   * @copydoc Ui::Visual::Base::DoActionExtension
+   * @copydoc Ui::Integration::Visual::Base::DoActionExtension
    */
   void DoActionExtension(const Dali::Property::Index actionId, const Dali::Any& attributes);
 
@@ -186,12 +186,12 @@ public:
   bool IsUsingCustomShader() const;
 
   /**
-   * @copydoc Ui::Visual::Base::SetProperty
+   * @copydoc Ui::Integration::Visual::Base::SetProperty
    */
   void SetProperty(Dali::Property::Index index, const Dali::Property::Value& propertyValue);
 
   /**
-   * @copydoc Ui::Visual::Base::GetProperty
+   * @copydoc Ui::Integration::Visual::Base::GetProperty
    */
   Dali::Property::Value GetProperty(Dali::Property::Index index);
 
@@ -335,7 +335,7 @@ public:
    *
    * @return The the type of this visual.
    */
-  Ui::InternalVisualType GetType() const;
+  Ui::Integration::InternalVisualType GetType() const;
 
   /**
    * @brief Retrieve the property object associated with the property key.
@@ -417,7 +417,7 @@ protected:
    * @param[in] factoryCache A pointer pointing to the VisualFactoryCache object
    * @param[in] type The type of the this visual
    */
-  Base(VisualFactoryCache& factoryCache, Ui::InternalVisualType type);
+  Base(VisualFactoryCache& factoryCache, Ui::Integration::InternalVisualType type);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
@@ -601,7 +601,7 @@ typedef IntrusivePtr<Base> BasePtr;
 
 } // namespace Internal
 
-inline const Internal::Visual::Base& GetImplementation(const Ui::Visual::Base& visualBase)
+inline const Internal::Visual::Base& GetImplementation(const Ui::Integration::Visual::Base& visualBase)
 {
   DALI_ASSERT_ALWAYS(visualBase && "visual base handle is empty");
 
@@ -610,7 +610,7 @@ inline const Internal::Visual::Base& GetImplementation(const Ui::Visual::Base& v
   return static_cast<const Internal::Visual::Base&>(handle);
 }
 
-inline Internal::Visual::Base& GetImplementation(Ui::Visual::Base& visualBase)
+inline Internal::Visual::Base& GetImplementation(Ui::Integration::Visual::Base& visualBase)
 {
   DALI_ASSERT_ALWAYS(visualBase && "visual base handle is empty");
 

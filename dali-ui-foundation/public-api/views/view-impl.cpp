@@ -40,12 +40,12 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
@@ -84,7 +84,7 @@
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-// Verify CornerRadiusPolicy values stay in sync with Ui::Visual::Policy::Type.
+// Verify CornerRadiusPolicy values stay in sync with Ui::Integration::Visual::Policy::Type.
 static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::RELATIVE) == Dali::Ui::Visual::Transform::Policy::RELATIVE);
 static_assert(static_cast<int>(Dali::Ui::CornerRadiusPolicy::ABSOLUTE) == Dali::Ui::Visual::Transform::Policy::ABSOLUTE);
 
@@ -2445,7 +2445,7 @@ void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
 
 bool ViewImpl::AddVisual(Dali::Ui::VisualBase visualBase, Dali::Ui::Visual::ContainerRangeType containerRangeType)
 {
-  return mImpl->AddVisualObject(visualBase, static_cast<Dali::Ui::DevelVisual::InternalContainerRangeType>(containerRangeType));
+  return mImpl->AddVisualObject(visualBase, static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType));
 }
 
 void ViewImpl::RemoveVisual(Dali::Ui::VisualBase visualBase)
@@ -2455,12 +2455,12 @@ void ViewImpl::RemoveVisual(Dali::Ui::VisualBase visualBase)
 
 uint32_t ViewImpl::GetVisualCount(Dali::Ui::Visual::ContainerRangeType containerRangeType) const
 {
-  return mImpl->GetVisualObjectCount(static_cast<Dali::Ui::DevelVisual::InternalContainerRangeType>(containerRangeType));
+  return mImpl->GetVisualObjectCount(static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType));
 }
 
 Dali::Ui::VisualBase ViewImpl::GetVisualAt(Dali::Ui::Visual::ContainerRangeType containerRangeType, uint32_t siblingOrder) const
 {
-  return mImpl->GetVisualObjectAt(static_cast<Dali::Ui::DevelVisual::InternalContainerRangeType>(containerRangeType), siblingOrder);
+  return mImpl->GetVisualObjectAt(static_cast<Dali::Ui::Integration::Visual::InternalContainerRangeType>(containerRangeType), siblingOrder);
 }
 
 // =============================================================================
@@ -2501,14 +2501,14 @@ void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
   mImpl->mBackgroundColor = color;
 
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::COLOR);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
   map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, color);
 
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::View::Property::BACKGROUND);
-  if(visualImplPtr && visualImplPtr->GetType() == Ui::InternalVisualType::COLOR)
+  if(visualImplPtr && visualImplPtr->GetType() == Ui::Integration::InternalVisualType::COLOR)
   {
     // Update background color only
-    visualImplPtr->DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
+    visualImplPtr->DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
     return;
   }
 

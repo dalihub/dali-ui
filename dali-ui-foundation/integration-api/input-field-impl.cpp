@@ -32,7 +32,7 @@
 #include <dali-ui-foundation/integration-api/input-field-property-handler.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>

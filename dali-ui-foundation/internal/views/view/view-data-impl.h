@@ -29,8 +29,8 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/render-effects/offscreen-rendering-impl.h>
 #include <dali-ui-foundation/internal/render-effects/render-effect-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
@@ -234,22 +234,22 @@ public:
   /**
    * @copydoc Dali::Ui::View::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual);
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual);
 
   /**
    * @copydoc Dali::Ui::View::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, int depthIndex);
 
   /**
    * @copydoc Dali::Ui::View::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled);
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled);
 
   /**
    * @copydoc Dali::Ui::View::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled, int depthIndex);
 
   /**
    * @copydoc Dali::Ui::View::UnregisterVisual()
@@ -259,7 +259,7 @@ public:
   /**
    * @copydoc Dali::Ui::View::GetVisual()
    */
-  Ui::Visual::Base GetVisual(Property::Index index) const;
+  Ui::Integration::Visual::Base GetVisual(Property::Index index) const;
 
   /**
    * @brief Get the raw pointer of visual impl.
@@ -277,7 +277,7 @@ public:
    * @param[in] enable flat to set enabled or disabled.
    * @param[in] cornerRadiusConstraint Optional constraint to link the view's corner properties to the visual's.
    */
-  void EnableCornerPropertiesOverridden(Ui::Visual::Base& visual, bool enable,
+  void EnableCornerPropertiesOverridden(Ui::Integration::Visual::Base& visual, bool enable,
                                         Dali::Constraint cornerRadiusConstraint = Dali::Constraint());
 
   /**
@@ -310,7 +310,7 @@ public:
   /**
    * @copydoc Ui::View::AddVisual()
    */
-  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
+  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
 
   /**
    * @brief Adds a shadow visual object.
@@ -318,7 +318,7 @@ public:
    * @param[in] internalContainerRangeType The range of visuals to be added
    * @return True if the visual was added successfully, false otherwise
    */
-  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
+  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
 
   /**
    * @copydoc Ui::View::RemoveVisual()
@@ -328,12 +328,12 @@ public:
   /**
    * @copydoc Ui::View::GetVisualCount()
    */
-  uint32_t GetVisualObjectCount(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType) const;
+  uint32_t GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const;
 
   /**
    * @copydoc Ui::View::GetVisualAt()
    */
-  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const;
+  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const;
 
   /**
    * @brief Function used to set view properties.

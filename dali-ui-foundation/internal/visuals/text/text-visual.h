@@ -85,7 +85,7 @@ public:
    * @param[in] visual The text visual.
    * @return The text controller
    */
-  static Text::ControllerPtr GetController(Ui::Visual::Base visual)
+  static Text::ControllerPtr GetController(Ui::Integration::Visual::Base visual)
   {
     return GetVisualObject(visual).mController;
   };
@@ -95,7 +95,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] animatablePropertyIndex The index of the animatable property
    */
-  static void SetAnimatableTextColorProperty(Ui::Visual::Base visual, Property::Index animatablePropertyIndex)
+  static void SetAnimatableTextColorProperty(Ui::Integration::Visual::Base visual, Property::Index animatablePropertyIndex)
   {
     GetVisualObject(visual).mAnimatableTextColorPropertyIndex = animatablePropertyIndex;
   };
@@ -106,8 +106,8 @@ public:
    * @param[in] visual The text visual.
    * @param[in] startOffsetPropertyIndex The source property index for uTextGradientStartOffset.
    */
-  static void SetGradientAnimProperties(Ui::Visual::Base visual,
-                                        Property::Index  startOffsetPropertyIndex)
+  static void SetGradientAnimProperties(Ui::Integration::Visual::Base visual,
+                                        Property::Index               startOffsetPropertyIndex)
   {
     GetVisualObject(visual).SetGradientAnimProperties(startOffsetPropertyIndex);
   };
@@ -116,7 +116,7 @@ public:
    * @brief Set the flag to trigger the textures to be initialized and renderer to be added to the control.
    * @param[in] visual The text visual.
    */
-  static void EnableRendererUpdate(Ui::Visual::Base visual)
+  static void EnableRendererUpdate(Ui::Integration::Visual::Base visual)
   {
     GetVisualObject(visual).mRendererUpdateNeeded = true;
   };
@@ -126,7 +126,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] requireRender Whether to text always rendered.
    */
-  static void SetRequireRender(Ui::Visual::Base visual, bool requireRender)
+  static void SetRequireRender(Ui::Integration::Visual::Base visual, bool requireRender)
   {
     GetVisualObject(visual).SetRequireRender(requireRender);
   };
@@ -135,7 +135,7 @@ public:
    * @brief Instantly updates the renderer
    * @param[in] visual The text visual.
    */
-  static void UpdateRenderer(Ui::Visual::Base visual)
+  static void UpdateRenderer(Ui::Integration::Visual::Base visual)
   {
     GetVisualObject(visual).UpdateRenderer();
   };
@@ -146,7 +146,7 @@ public:
    * @param[in] parameters The async text parameters.
    * @return true if the async text render request was successful, false otherwise.
    */
-  static bool UpdateAsyncRenderer(Ui::Visual::Base visual, Text::AsyncTextParameters& parameters)
+  static bool UpdateAsyncRenderer(Ui::Integration::Visual::Base visual, Text::AsyncTextParameters& parameters)
   {
     return GetVisualObject(visual).UpdateAsyncRenderer(parameters);
   };
@@ -156,7 +156,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] parameters The async text parameters.
    */
-  static void RequestAsyncSizeComputation(Ui::Visual::Base visual, Text::AsyncTextParameters& parameters)
+  static void RequestAsyncSizeComputation(Ui::Integration::Visual::Base visual, Text::AsyncTextParameters& parameters)
   {
     GetVisualObject(visual).RequestAsyncSizeComputation(parameters);
   };
@@ -166,7 +166,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] asyncTextInterface The async text interface.
    */
-  static void SetAsyncTextInterface(Ui::Visual::Base visual, Text::AsyncTextInterface* asyncTextInterface)
+  static void SetAsyncTextInterface(Ui::Integration::Visual::Base visual, Text::AsyncTextInterface* asyncTextInterface)
   {
     GetVisualObject(visual).SetAsyncTextInterface(asyncTextInterface);
   };
@@ -177,7 +177,7 @@ public:
    * @param[in] applyAlways True if constraint need to be applied always. False if we need once only.
    * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
    */
-  static void SetConstraintApplyAlways(Ui::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
+  static void SetConstraintApplyAlways(Ui::Integration::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
   {
     GetVisualObject(visual).SetConstraintApplyAlways(applyAlways, notifyToConstraint);
   };
@@ -189,7 +189,7 @@ public:
    * @param[in] applyAlways True to use APPLY_ALWAYS, false to use APPLY_ONCE.
    * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
    */
-  static void SetGradientAnimApplyAlways(Ui::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
+  static void SetGradientAnimApplyAlways(Ui::Integration::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
   {
     GetVisualObject(visual).SetGradientAnimApplyAlways(applyAlways, notifyToConstraint);
   };
@@ -199,7 +199,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] style The TextGradient style snapshot.
    */
-  static void SetTextGradientStyle(Ui::Visual::Base visual, const Text::Internal::TextGradientStyle& style)
+  static void SetTextGradientStyle(Ui::Integration::Visual::Base visual, const Text::Internal::TextGradientStyle& style)
   {
     TextVisual& visualObject                = GetVisualObject(visual);
     visualObject.mTextGradientStyle         = style;
@@ -219,7 +219,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] mode The TextGradient bounds mode.
    */
-  static void SetTextGradientBoundsMode(Ui::Visual::Base visual, Text::GradientBoundsMode mode)
+  static void SetTextGradientBoundsMode(Ui::Integration::Visual::Base visual, Text::GradientBoundsMode mode)
   {
     TextVisual& visualObject             = GetVisualObject(visual);
     visualObject.mTextGradientBoundsMode = mode;
@@ -240,7 +240,7 @@ public:
    * @param[in] coordinateSize The coordinate space size used by the target shader.
    * @return Bounds that map the Label view into the target coordinate space.
    */
-  static Vector4 CalculateTextGradientViewBounds(Ui::Visual::Base visual, const Vector2& coordinateSize);
+  static Vector4 CalculateTextGradientViewBounds(Ui::Integration::Visual::Base visual, const Vector2& coordinateSize);
 
   /**
    * @brief Returns the current visual coordinate size used by TextScroller shaders.
@@ -248,14 +248,14 @@ public:
    * @param[in] visual The text visual.
    * @return The visual size in Label coordinates.
    */
-  static Vector2 GetTextGradientVisualCoordinateSize(Ui::Visual::Base visual);
+  static Vector2 GetTextGradientVisualCoordinateSize(Ui::Integration::Visual::Base visual);
 
   /**
    * @brief Retrieve the stored TextGradient mask PixelData for internal rendering/tests.
    * @param[in] visual The text visual.
    * @return The stored TextGradient mask PixelData.
    */
-  static PixelData GetTextGradientMaskPixelData(Ui::Visual::Base visual)
+  static PixelData GetTextGradientMaskPixelData(Ui::Integration::Visual::Base visual)
   {
     return GetVisualObject(visual).mTextGradientMaskPixelData;
   };
@@ -538,7 +538,7 @@ private:
    * @param[in] visual A handle to the TextVisual
    * @return The TextVisual object
    */
-  static TextVisual& GetVisualObject(Ui::Visual::Base visual)
+  static TextVisual& GetVisualObject(Ui::Integration::Visual::Base visual)
   {
     return static_cast<TextVisual&>(Ui::GetImplementation(visual).GetVisualObject());
   };

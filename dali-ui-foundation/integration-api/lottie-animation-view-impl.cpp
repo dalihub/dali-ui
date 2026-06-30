@@ -26,12 +26,12 @@
 #include <dali/public-api/object/property-array.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-signals-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-signals-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/provider-api/property-registration-helper.h>
@@ -485,7 +485,7 @@ void LottieAnimationViewImpl::Play()
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::DevelAnimatedVectorImageVisual::Action::PLAY, Dali::Property::Map());
+    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::Integration::AnimatedVectorImageVisual::Action::PLAY, Dali::Property::Map());
   }
 }
 
@@ -499,7 +499,7 @@ void LottieAnimationViewImpl::Pause()
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::DevelAnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Map());
+    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::Integration::AnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Map());
   }
 }
 
@@ -513,7 +513,7 @@ void LottieAnimationViewImpl::Stop()
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::DevelAnimatedVectorImageVisual::Action::STOP, Dali::Property::Map());
+    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::Integration::AnimatedVectorImageVisual::Action::STOP, Dali::Property::Map());
   }
 }
 
@@ -542,7 +542,7 @@ void LottieAnimationViewImpl::JumpToFrame(int frame)
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::DevelAnimatedVectorImageVisual::Action::JUMP_TO, frame);
+    viewData.DoAction(LottieAnimationViewImpl::Property::IMAGE, Ui::Integration::AnimatedVectorImageVisual::Action::JUMP_TO, frame);
   }
 }
 
@@ -789,14 +789,14 @@ void LottieAnimationViewImpl::SetDynamicProperty(const Ui::LottieAnimation::Dyna
 
   if(mVisual)
   {
-    Ui::DevelAnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
+    Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
     dynamicInfo.id       = info.id;
     dynamicInfo.keyPath  = info.keyPath.CStr();
     dynamicInfo.property = static_cast<int32_t>(info.property);
     dynamicInfo.callback = info.callback;
     auto& viewData       = Internal::ViewDataImpl::Get(*this);
     viewData.DoActionExtension(LottieAnimationViewImpl::Property::IMAGE,
-                               Ui::DevelAnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY,
+                               Ui::Integration::AnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY,
                                Dali::Any(dynamicInfo));
   }
   else
@@ -818,7 +818,7 @@ Ui::Visual::ResourceStatus LottieAnimationViewImpl::GetLoadingStatus() const
 void LottieAnimationViewImpl::OnVisualEvent(View view, Dali::Property::Index visualIndex, Dali::Property::Index signalId)
 {
   if(visualIndex == LottieAnimationViewImpl::Property::IMAGE &&
-     signalId == static_cast<Dali::Property::Index>(Ui::DevelAnimatedVectorImageVisual::Signal::ANIMATION_FINISHED))
+     signalId == static_cast<Dali::Property::Index>(Ui::Integration::AnimatedVectorImageVisual::Signal::ANIMATION_FINISHED))
   {
     Ui::View handle(GetOwner());
     mAnimationFinishedSignal.Emit(handle);
@@ -842,7 +842,7 @@ void LottieAnimationViewImpl::UpdateVisual()
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_VECTOR_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ANIMATED_VECTOR_IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mUrl);
 
   map.Insert(Ui::ImageVisualPropertyIndex::LOOP_COUNT, mLoopCount);
@@ -889,13 +889,13 @@ void LottieAnimationViewImpl::UpdateVisual()
   map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, mPixelArea);
   map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
 
-  auto visualFactory = Ui::VisualFactory::Get();
+  auto visualFactory = Ui::Integration::VisualFactory::Get();
   if(visualFactory)
   {
     mVisual = visualFactory.CreateVisual(map);
     if(mVisual)
     {
-      viewData.RegisterVisual(LottieAnimationViewImpl::Property::IMAGE, mVisual, DepthIndex::CONTENT);
+      viewData.RegisterVisual(LottieAnimationViewImpl::Property::IMAGE, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
       viewData.EnableCornerPropertiesOverridden(mVisual, true);
     }
   }
@@ -971,7 +971,7 @@ void LottieAnimationViewImpl::SetImageColor(const UiColor& color)
       // Update MIX_COLOR directly on the existing visual without rebuilding it.
       Dali::Property::Map map;
       map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
-      mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
+      mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
     }
     else
     {
@@ -1008,7 +1008,7 @@ void LottieAnimationViewImpl::SetPixelArea(const Dali::Vector4& pixelArea)
   {
     Dali::Property::Map map;
     map.Insert(Ui::ImageVisualPropertyIndex::PIXEL_AREA, pixelArea);
-    mVisual.DoAction(DevelVisual::Action::UPDATE_PROPERTY, map);
+    mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
   }
 }
 
@@ -1033,20 +1033,20 @@ void LottieAnimationViewImpl::UpdatePlaceholderVisual()
     return;
   }
 
-  auto visualFactory = Ui::VisualFactory::Get();
+  auto visualFactory = Ui::Integration::VisualFactory::Get();
   if(!visualFactory)
   {
     return;
   }
 
   Dali::Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
   map.Insert(Ui::ImageVisualPropertyIndex::URL, mPlaceholderUrl);
 
   auto visual = visualFactory.CreateVisual(map);
   if(visual)
   {
-    viewData.RegisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE, visual, DepthIndex::CONTENT + 1);
+    viewData.RegisterVisual(LottieAnimationViewImpl::Property::PLACEHOLDER_IMAGE, visual, Dali::Ui::Integration::DepthIndex::CONTENT + 1);
     viewData.EnableCornerPropertiesOverridden(visual, true);
   }
 }

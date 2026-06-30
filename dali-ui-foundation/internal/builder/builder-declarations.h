@@ -28,11 +28,11 @@
 #include <dali/public-api/math/vector4.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/builder/tree-node.h>
+#include <dali-ui-foundation/integration-api/builder/tree-node.h>
 #include <dali-ui-foundation/internal/builder/optional-value.h>
 
-typedef Dali::Ui::TreeNode      TreeNode;
-typedef TreeNode::ConstIterator TreeConstIter;
+typedef Dali::Ui::Integration::TreeNode TreeNode;
+typedef TreeNode::ConstIterator         TreeConstIter;
 
 typedef OptionalValue<const TreeNode&> OptionalChild;
 typedef OptionalValue<std::string>     OptionalString;

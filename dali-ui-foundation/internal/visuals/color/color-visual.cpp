@@ -31,7 +31,7 @@
 #include <locale>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
@@ -167,7 +167,7 @@ ColorVisualPtr ColorVisual::New(VisualFactoryCache& factoryCache, ColorVisualSha
 }
 
 ColorVisual::ColorVisual(VisualFactoryCache& factoryCache, ColorVisualShaderFactory& shaderFactory)
-: Visual::Base(factoryCache, Ui::InternalVisualType::COLOR),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::COLOR),
   mBlurRadius(0.0f),
   mCutoutCornerContext(nullptr),
   mCutoutPolicy(Dali::Ui::CutoutPolicy::NONE),
@@ -298,7 +298,7 @@ void ColorVisual::DoSetOffScene(Actor& actor)
 void ColorVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::COLOR);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
   map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImpl->mMixColor);
   map.Insert(Ui::ColorVisualPropertyIndex::CUTOUT_POLICY, mCutoutPolicy);
 
@@ -323,7 +323,7 @@ void ColorVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 }
 
@@ -369,7 +369,7 @@ void ColorVisual::OnInitialize()
   }
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 }
 
 Shader ColorVisual::GenerateShader() const

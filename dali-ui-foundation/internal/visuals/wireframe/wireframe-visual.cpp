@@ -69,7 +69,7 @@ WireframeVisualPtr WireframeVisual::New(VisualFactoryCache& factoryCache, Visual
 }
 
 WireframeVisual::WireframeVisual(VisualFactoryCache& factoryCache, Visual::BasePtr actualVisual)
-: Visual::Base(factoryCache, actualVisual ? actualVisual->GetType() : Ui::InternalVisualType::WIREFRAME),
+: Visual::Base(factoryCache, actualVisual ? actualVisual->GetType() : Ui::Integration::InternalVisualType::WIREFRAME),
   mActualVisual(actualVisual)
 {
 }
@@ -111,7 +111,7 @@ void WireframeVisual::DoCreatePropertyMap(Property::Map& map) const
   else
   {
     map.Clear();
-    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::WIREFRAME);
+    map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::WIREFRAME);
   }
 }
 
@@ -163,7 +163,7 @@ void WireframeVisual::OnInitialize()
   mImpl->mRenderer = VisualRenderer::New(geometry, shader);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 }
 
 Geometry WireframeVisual::CreateQuadWireframeGeometry()
@@ -201,7 +201,7 @@ void WireframeVisual::OnSetTransform()
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
     // Register transform properties
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 }
 

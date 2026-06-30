@@ -27,7 +27,7 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
@@ -89,7 +89,7 @@ const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(
 
 } // namespace
 
-SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, const Property::Map& properties)
 {
   SvgVisualPtr svgVisual(new SvgVisual(factoryCache, shaderFactory, creationOptions, imageUrl, ImageDimensions{}));
@@ -98,7 +98,7 @@ SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderF
   return svgVisual;
 }
 
-SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, ImageDimensions size)
 {
   SvgVisualPtr svgVisual(new SvgVisual(factoryCache, shaderFactory, creationOptions, imageUrl, size));
@@ -106,9 +106,9 @@ SvgVisualPtr SvgVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderF
   return svgVisual;
 }
 
-SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                      const VisualUrl& imageUrl, ImageDimensions size)
-: Visual::Base(factoryCache, Ui::InternalVisualType::SVG),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::SVG),
   mImageVisualShaderFactory(shaderFactory),
   mSvgLoader(factoryCache.GetSvgLoader()),
   mSvgLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
@@ -131,7 +131,7 @@ SvgVisual::SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory&
 
   mImpl->mFittingModeRequired = true;
 
-  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  if(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
   }
@@ -291,7 +291,7 @@ void SvgVisual::DoSetProperty(Property::Index index, const Property::Value& valu
 void SvgVisual::DoSetOnScene(Actor& actor)
 {
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 
   // Defer the rasterisation task until we get given a size (by Size Negotiation algorithm)
 
@@ -392,7 +392,7 @@ void SvgVisual::GetNaturalSize(Vector2& naturalSize)
 void SvgVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::SVG);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::SVG);
   if(mImageUrl.IsValid())
   {
     map.Insert(Ui::ImageVisualPropertyIndex::URL, ToPropertyValue(mImageUrl.GetUrl()));
@@ -557,7 +557,7 @@ void SvgVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 
   if(IsOnScene() && !mLoadFailed)

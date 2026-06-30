@@ -27,8 +27,8 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/helpers/property-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
@@ -49,7 +49,7 @@ DALI_ENUM_TO_STRING_TABLE_BEGIN(SHADER_HINT)
   DALI_ENUM_TO_STRING_WITH_SCOPE(Shader::Hint, MODIFIES_GEOMETRY)
 DALI_ENUM_TO_STRING_TABLE_END(SHADER_HINT)
 
-Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type direction)
+Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Integration::Direction::Type direction)
 {
   // clang-format off
   static const float pointToVector2[] = {0.0f,0.0f,
@@ -65,7 +65,7 @@ Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type directio
   // clang-format on
 
   Vector2 result(&pointToVector2[point * 2]);
-  if(direction == Direction::RIGHT_TO_LEFT)
+  if(direction == Dali::Ui::Integration::Direction::RIGHT_TO_LEFT)
   {
     result.x = 1.0f - result.x;
   }
@@ -75,14 +75,14 @@ Dali::Vector2 PointToVector2(Ui::Align::Type point, Ui::Direction::Type directio
 
 } // unnamed namespace
 
-Internal::Visual::Base::Impl::Impl(Ui::InternalVisualType type)
+Internal::Visual::Base::Impl::Impl(Ui::Integration::InternalVisualType type)
 : mEventObserver(nullptr),
   mConstraintFeatureList{},
   mTransform(nullptr),
   mMixColor(Color::WHITE),
   mControlSize(Vector2::ZERO),
   mDecorationData(nullptr),
-  mDepthIndex(Ui::DepthIndex::AUTO_INDEX),
+  mDepthIndex(Ui::Integration::DepthIndex::AUTO_INDEX),
   mFlags(0),
   mViewEffectiveScale(1.0f),
   mResourceStatus(Ui::Visual::ResourceStatus::PREPARING),
@@ -247,11 +247,11 @@ Property::Map Internal::Visual::Base::Impl::CustomShader::CreatePropertyMap() co
   return customShader;
 }
 
-void Internal::Visual::Base::Impl::SetTransformUniformsInternal(const Transform& transform, Dali::VisualRenderer renderer, Ui::Direction::Type direction)
+void Internal::Visual::Base::Impl::SetTransformUniformsInternal(const Transform& transform, Dali::VisualRenderer renderer, Ui::Integration::Direction::Type direction)
 {
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_SIZE, transform.mSize);
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET,
-                       direction == Ui::Direction::LEFT_TO_RIGHT ? transform.mOffset : transform.mOffset * Vector2(-1.0f, 1.0f));
+                       direction == Ui::Integration::Direction::LEFT_TO_RIGHT ? transform.mOffset : transform.mOffset * Vector2(-1.0f, 1.0f));
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_OFFSET_SIZE_MODE, transform.mOffsetSizeMode);
   renderer.SetProperty(VisualRenderer::Property::TRANSFORM_ORIGIN,
                        PointToVector2(transform.mOrigin, direction) - Vector2(0.5, 0.5));

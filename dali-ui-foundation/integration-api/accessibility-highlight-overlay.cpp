@@ -30,7 +30,7 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 
@@ -64,7 +64,7 @@ Dali::Actor CreateOverlayActor()
 
 Dali::Actor CreateOverlayHighlightActor()
 {
-  std::string focusBorderImagePath(AssetManager::GetDaliImagePath());
+  std::string focusBorderImagePath(Dali::Ui::Integration::AssetManager::GetDaliImagePath());
   focusBorderImagePath += FOCUS_IMAGE;
 
   auto actor = Ui::ImageView::New(ToDaliString(focusBorderImagePath));

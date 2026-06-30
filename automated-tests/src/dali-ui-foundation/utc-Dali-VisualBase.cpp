@@ -28,8 +28,8 @@
 #include <dali.h>
 
 // Implement of VisualBase
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -469,7 +469,7 @@ int UtcDaliVisualBaseRecreateBorderVisual01(void)
 
   auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
     // Hold original visual base
-    Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
+    Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
     static int testCount = 0;
     tet_printf("TestCase #%d\n", ++testCount);
@@ -525,7 +525,7 @@ int UtcDaliVisualBaseRecreateColorVisual01(void)
 
   auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
     // Hold original visual base
-    Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
+    Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
     static int testCount = 0;
     tet_printf("TestCase #%d\n", ++testCount);
@@ -602,7 +602,7 @@ int UtcDaliVisualBaseRecreateGradientVisual01(void)
 
   auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
     // Hold original visual base
-    Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
+    Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
     static int testCount = 0;
     tet_printf("TestCase #%d\n", ++testCount);
@@ -695,7 +695,7 @@ int UtcDaliVisualBaseRecreateGradientVisual02(void)
 
   auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
     // Hold original visual base
-    Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
+    Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
     static int testCount = 0;
     tet_printf("TestCase #%d\n", ++testCount);
@@ -792,7 +792,7 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
 
   auto TestVisualBaseChanged = [&](std::function<void(VisualBase)> func, bool expectChanged = false){
     // Hold original visual base
-    Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
+    Dali::Ui::Integration::Visual::Base originalVisualBase = GetImplementation(visual).GetVisual();
 
     static int testCount = 0;
     tet_printf("TestCase #%d\n", ++testCount);

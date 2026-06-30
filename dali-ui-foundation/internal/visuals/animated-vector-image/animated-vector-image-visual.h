@@ -26,7 +26,7 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-manager.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-task.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
@@ -67,7 +67,7 @@ public:
    * @param[in] properties A Property::Map containing settings for this visual
    * @return A smart-pointer to the newly allocated visual.
    */
-  static AnimatedVectorImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static AnimatedVectorImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                           const VisualUrl& imageUrl, const Property::Map& properties);
 
   /**
@@ -80,7 +80,7 @@ public:
    * @param[in] size The width and height of the rasterized buffer. The visual size will be used if these are 0.
    * @return A smart-pointer to the newly allocated visual.
    */
-  static AnimatedVectorImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static AnimatedVectorImageVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                           const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions());
 
 public: // from Visual
@@ -114,7 +114,7 @@ protected:
    * @param[in] imageUrl The URL to an animated vector image to use
    * @param[in] size The width and height of the rasterized buffer. The visual size will be used if these are 0.
    */
-  AnimatedVectorImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  AnimatedVectorImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                             const VisualUrl& imageUrl, ImageDimensions size);
 
   /**

@@ -30,8 +30,8 @@
 #include <dali/integration-api/string-utils.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/builder/json-parser.h>
+#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/builder/json-parser.h>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -65,7 +65,7 @@ constexpr auto DEFAULT_DEBUG_IMAGE_VISUAL_SHADER_SCRIPT_FILE_NAME  = "debug-imag
 const std::string& GetScriptFilename()
 {
   // Set the full path for the default script file.
-  const static std::string styleDirPath{AssetManager::GetDaliStylePath()};
+  const static std::string styleDirPath{Dali::Ui::Integration::AssetManager::GetDaliStylePath()};
   static std::string       mScriptFileName{};
 
   if(DALI_UNLIKELY(mScriptFileName.empty()))
@@ -168,7 +168,7 @@ bool ParseScriptInfomation(Property::Map& vertexResult, Property::Map& fragmentR
     return false;
   }
 
-  Ui::JsonParser parser = Ui::JsonParser::New();
+  Ui::Integration::JsonParser parser = Ui::Integration::JsonParser::New();
 
   if(!parser.Parse(stringOut))
   {
@@ -190,7 +190,7 @@ bool ParseScriptInfomation(Property::Map& vertexResult, Property::Map& fragmentR
     return false;
   }
 
-  auto InsertScriptMap = [](Property::Map& result, const TreeNode* node, const std::string_view& jsonKey,
+  auto InsertScriptMap = [](Property::Map& result, const Dali::Ui::Integration::TreeNode* node, const std::string_view& jsonKey,
                             const std::string_view& macroKey, const std::string_view& defaultValue,
                             const std::string_view& prefixString)
   {
@@ -204,11 +204,11 @@ bool ParseScriptInfomation(Property::Map& vertexResult, Property::Map& fragmentR
 
       if(childNode)
       {
-        if(childNode->GetType() == TreeNode::FLOAT)
+        if(childNode->GetType() == Dali::Ui::Integration::TreeNode::FLOAT)
         {
           oss << childNode->GetFloat();
         }
-        else if(childNode->GetType() == TreeNode::STRING)
+        else if(childNode->GetType() == Dali::Ui::Integration::TreeNode::STRING)
         {
           if(!prefixString.empty())
           {
@@ -216,13 +216,13 @@ bool ParseScriptInfomation(Property::Map& vertexResult, Property::Map& fragmentR
           }
           oss << childNode->GetString();
         }
-        else if(childNode->GetType() == TreeNode::ARRAY)
+        else if(childNode->GetType() == Dali::Ui::Integration::TreeNode::ARRAY)
         {
           // Concat strings with line feed
           bool isFirst = true;
           for(auto iter = childNode->CBegin(), endIter = childNode->CEnd(); iter != endIter; ++iter)
           {
-            if((*iter).second.GetType() == TreeNode::STRING)
+            if((*iter).second.GetType() == Dali::Ui::Integration::TreeNode::STRING)
             {
               if(isFirst)
               {
@@ -255,7 +255,7 @@ bool ParseScriptInfomation(Property::Map& vertexResult, Property::Map& fragmentR
   };
 
   auto InsertChannelScriptMap =
-    [&InsertScriptMap](Property::Map& result, const TreeNode* node, const std::string_view& channelJsonKey,
+    [&InsertScriptMap](Property::Map& result, const Dali::Ui::Integration::TreeNode* node, const std::string_view& channelJsonKey,
                        const std::string_view& triggerMacroKey, const std::string_view& ratioMacroKey)
   {
     const auto* channelNode = node->GetChild(channelJsonKey);

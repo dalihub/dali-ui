@@ -152,7 +152,7 @@ INCLUDE_DIRECTORIES(
     ${FOUNDATION_ROOT_SRC_DIR}
     ${FOUNDATION_ROOT_SRC_DIR}/third-party
     ${FOUNDATION_ROOT_SRC_DIR}/internal
-    ${FOUNDATION_ROOT_SRC_DIR}/devel-api
+    ${FOUNDATION_ROOT_SRC_DIR}/integration-api
     ${DALICORE_INCLUDE_DIRS}
     ${DALIADAPTOR_INCLUDE_DIRS}
     ../dali-test-suite-utils

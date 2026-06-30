@@ -23,15 +23,17 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visual-factory/precompile-shader-option.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visual-factory/precompile-shader-option.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
+using PrecompileShaderOption = Dali::Ui::Integration::PrecompileShaderOption;
+
 namespace Internal
 {
 class VisualFactoryCache;
@@ -42,7 +44,7 @@ class NpatchShaderFactory;
 class CustomShaderFactory;
 
 /**
- * @copydoc Ui::VisualFactory
+ * @copydoc Ui::Integration::VisualFactory
  */
 class VisualFactory : public BaseObject, public ConnectionTracker
 {
@@ -55,64 +57,64 @@ public:
   VisualFactory(bool debugEnabled);
 
   /**
-   * @copydoc Ui::VisualFactory::CreateVisual( const Property::Map& )
+   * @copydoc Ui::Integration::VisualFactory::CreateVisual( const Property::Map& )
    */
-  Ui::Visual::Base CreateVisual(const Property::Map& propertyMap);
+  Ui::Integration::Visual::Base CreateVisual(const Property::Map& propertyMap);
 
   /**
-   * @copydoc Ui::VisualFactory::CreateVisual( const Property::Map&, Ui::VisualFactory::CreationOptions )
+   * @copydoc Ui::Integration::VisualFactory::CreateVisual( const Property::Map&, Ui::Integration::VisualFactory::CreationOptions )
    */
-  Ui::Visual::Base CreateVisual(const Property::Map& propertyMap, Ui::VisualFactory::CreationOptions creationOptions);
+  Ui::Integration::Visual::Base CreateVisual(const Property::Map& propertyMap, Ui::Integration::VisualFactory::CreationOptions creationOptions);
 
   /**
-   * @copydoc Ui::VisualFactory::CreateVisual( const std::string&, ImageDimensions )
+   * @copydoc Ui::Integration::VisualFactory::CreateVisual( const std::string&, ImageDimensions )
    */
-  Ui::Visual::Base CreateVisual(const std::string& image, ImageDimensions size);
+  Ui::Integration::Visual::Base CreateVisual(const std::string& image, ImageDimensions size);
 
   /**
-   * @copydoc Ui::VisualFactory::CreateVisual( const std::string&, ImageDimensions,
-   * Ui::VisualFactory::CreationOptions )
+   * @copydoc Ui::Integration::VisualFactory::CreateVisual( const std::string&, ImageDimensions,
+   * Ui::Integration::VisualFactory::CreationOptions )
    */
-  Ui::Visual::Base CreateVisual(const std::string& image, ImageDimensions size,
-                                Ui::VisualFactory::CreationOptions creationOptions);
+  Ui::Integration::Visual::Base CreateVisual(const std::string& image, ImageDimensions size,
+                                             Ui::Integration::VisualFactory::CreationOptions creationOptions);
 
   /**
-   * @copydoc Ui::VisualFactory::GetDefaultQuadGeometry()
+   * @copydoc Ui::Integration::VisualFactory::GetDefaultQuadGeometry()
    */
   Dali::Geometry GetDefaultQuadGeometry();
 
   /**
-   * @copydoc Ui::VisualFactory::SetPreMultiplyOnLoad()
+   * @copydoc Ui::Integration::VisualFactory::SetPreMultiplyOnLoad()
    */
   void SetPreMultiplyOnLoad(bool preMultiply);
 
   /**
-   * @copydoc Ui::VisualFactory::GetPreMultiplyOnLoad()
+   * @copydoc Ui::Integration::VisualFactory::GetPreMultiplyOnLoad()
    */
   bool GetPreMultiplyOnLoad() const;
 
   /**
-   * @copydoc Ui::VisualFactory::SetDefaultCreationOptions( Ui::VisualFactory::CreationOptions )
+   * @copydoc Ui::Integration::VisualFactory::SetDefaultCreationOptions( Ui::Integration::VisualFactory::CreationOptions )
    */
-  void SetDefaultCreationOptions(Ui::VisualFactory::CreationOptions creationOptions);
+  void SetDefaultCreationOptions(Ui::Integration::VisualFactory::CreationOptions creationOptions);
 
   /**
-   * @copydoc Ui::VisualFactory::GetDefaultCreationOptions()
+   * @copydoc Ui::Integration::VisualFactory::GetDefaultCreationOptions()
    */
-  Ui::VisualFactory::CreationOptions GetDefaultCreationOptions() const;
+  Ui::Integration::VisualFactory::CreationOptions GetDefaultCreationOptions() const;
 
   /**
-   * @copydoc Ui::VisualFactory::DiscardVisual()
+   * @copydoc Ui::Integration::VisualFactory::DiscardVisual()
    */
-  void DiscardVisual(Ui::Visual::Base visual);
+  void DiscardVisual(Ui::Integration::Visual::Base visual);
 
   /**
-   * @copydoc Ui::VisualFactory::AddPrecompileShader()
+   * @copydoc Ui::Integration::VisualFactory::AddPrecompileShader()
    */
   bool AddPrecompileShader(const Property::Map& map);
 
   /**
-   * @copydoc Ui::VisualFactory::UsePreCompiledShader()
+   * @copydoc Ui::Integration::VisualFactory::UsePreCompiledShader()
    */
   void UsePreCompiledShader();
 
@@ -204,10 +206,10 @@ private:
   std::unique_ptr<CustomShaderFactory>      mCustomShaderFactory;
   SlotDelegate<VisualFactory>               mSlotDelegate;
   CallbackBase*                             mIdleCallback;
-  using DiscardedVisualContainer = std::vector<Ui::Visual::Base>;
+  using DiscardedVisualContainer = std::vector<Ui::Integration::Visual::Base>;
   DiscardedVisualContainer mDiscardedVisuals{};
 
-  Ui::VisualFactory::CreationOptions mDefaultCreationOptions : 2;
+  Ui::Integration::VisualFactory::CreationOptions mDefaultCreationOptions : 2;
 
   bool mAdaptorInitialized : 1;
   bool mDebugEnabled : 1;
@@ -226,13 +228,13 @@ private:
  * @param[in] param1 Second template based argument passed to the visual factory
  */
 template<class ParameterType0, class ParameterType1>
-void InitializeVisual(Actor& actor, Ui::Visual::Base& visual, ParameterType0& param0, ParameterType1& param1)
+void InitializeVisual(Actor& actor, Ui::Integration::Visual::Base& visual, ParameterType0& param0, ParameterType1& param1)
 {
   if(actor)
   {
     Ui::GetImplementation(visual).SetOffScene(actor);
   }
-  visual = Ui::VisualFactory::Get().CreateVisual(param0, param1);
+  visual = Ui::Integration::VisualFactory::Get().CreateVisual(param0, param1);
   if(visual && actor && actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
     Ui::GetImplementation(visual).SetOnScene(actor);
@@ -248,13 +250,13 @@ void InitializeVisual(Actor& actor, Ui::Visual::Base& visual, ParameterType0& pa
  * @param[in] param Template based argument passed to the visual factory
  */
 template<class ParameterType>
-void InitializeVisual(Actor& actor, Ui::Visual::Base& visual, ParameterType& param)
+void InitializeVisual(Actor& actor, Ui::Integration::Visual::Base& visual, ParameterType& param)
 {
   if(actor && visual)
   {
     Ui::GetImplementation(visual).SetOffScene(actor);
   }
-  visual = Ui::VisualFactory::Get().CreateVisual(param);
+  visual = Ui::Integration::VisualFactory::Get().CreateVisual(param);
   if(visual && actor && actor.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
     Ui::GetImplementation(visual).SetOnScene(actor);
@@ -263,7 +265,7 @@ void InitializeVisual(Actor& actor, Ui::Visual::Base& visual, ParameterType& par
 
 } // namespace Internal
 
-inline const Internal::VisualFactory& GetImplementation(const Ui::VisualFactory& factory)
+inline const Internal::VisualFactory& GetImplementation(const Ui::Integration::VisualFactory& factory)
 {
   DALI_ASSERT_ALWAYS(factory && "VisualFactory handle is empty");
 
@@ -272,7 +274,7 @@ inline const Internal::VisualFactory& GetImplementation(const Ui::VisualFactory&
   return static_cast<const Internal::VisualFactory&>(handle);
 }
 
-inline Internal::VisualFactory& GetImplementation(Ui::VisualFactory& factory)
+inline Internal::VisualFactory& GetImplementation(Ui::Integration::VisualFactory& factory)
 {
   DALI_ASSERT_ALWAYS(factory && "VisualFactory handle is empty");
 

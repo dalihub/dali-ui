@@ -23,7 +23,7 @@
 #include <dali/public-api/rendering/renderer.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
@@ -244,7 +244,7 @@ Actor CreateControllerBackgroundActor(const View& textView, const VisualModelPtr
 
       Dali::Renderer renderer = Dali::Renderer::New(quadGeometry, textShaderBackground);
       renderer.SetProperty(Dali::Renderer::Property::BLEND_MODE, BlendMode::ON);
-      renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, DepthIndex::CONTENT);
+      renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::CONTENT);
 
       actor = Actor::New();
       actor.SetProperty(Dali::Actor::Property::NAME, "TextBackgroundColorActor");

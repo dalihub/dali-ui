@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 
@@ -43,7 +43,7 @@ Shader CreateShader(std::string_view vertexSrc, std::string_view fragmentSrc, Da
   {
     if(!shaderName.empty())
     {
-      auto factory = Dali::Ui::VisualFactory::Get();
+      auto factory = Dali::Ui::Integration::VisualFactory::Get();
       if(DALI_LIKELY(factory))
       {
         thread_local static std::unordered_map<std::string, VisualFactoryCache::ExternalShaderId> gShaderIdMap;

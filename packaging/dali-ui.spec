@@ -231,7 +231,6 @@ exit 0
 %defattr(-,root,root,-)
 %{_libdir}/pkgconfig/dali2-ui-foundation-integration.pc
 %{dev_include_path}/dali-ui-foundation/dali-ui-foundation-integ.h
-%{dev_include_path}/dali-ui-foundation/devel-api/*
 %{dev_include_path}/dali-ui-foundation/integration-api/*
 
 %files -n %{dali_ui_components}

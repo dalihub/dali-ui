@@ -29,7 +29,7 @@
 #include <memory>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 
@@ -60,7 +60,7 @@ public:
   using ResourceReadySignalType = Signal<void(ResourceStatus)>;
 
   using TimePoint           = std::chrono::time_point<std::chrono::steady_clock>;
-  using DynamicPropertyType = std::vector<DevelAnimatedVectorImageVisual::DynamicPropertyInfo>;
+  using DynamicPropertyType = std::vector<Dali::Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo>;
 
   /**
    * Flags for re-sending data to the vector animation thread

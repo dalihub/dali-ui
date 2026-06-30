@@ -22,7 +22,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
@@ -107,7 +107,7 @@ Ui::Shadow CreateShadow(const Property::Map& map)
       }
     }
 
-    const Property::Value* extraSizeValue = transformMap->Find(DevelVisual::Transform::Property::EXTRA_SIZE);
+    const Property::Value* extraSizeValue = transformMap->Find(Dali::Ui::Integration::Visual::Transform::Property::EXTRA_SIZE);
     if(extraSizeValue)
     {
       Vector2 extents;
@@ -135,7 +135,7 @@ Property::Map CreatePropertyMap(const Ui::Shadow& shadow)
     .Add(Visual::Transform::Property::SIZE, Vector2::ONE)
     .Add(Visual::Transform::Property::SIZE_POLICY,
          Vector2(Visual::Transform::Policy::RELATIVE, Visual::Transform::Policy::RELATIVE))
-    .Add(DevelVisual::Transform::Property::EXTRA_SIZE, shadow.GetExtents());
+    .Add(Dali::Ui::Integration::Visual::Transform::Property::EXTRA_SIZE, shadow.GetExtents());
 
   Property::Map map;
   map.Add(VisualBasePropertyIndex::TYPE, VisualType::COLOR)

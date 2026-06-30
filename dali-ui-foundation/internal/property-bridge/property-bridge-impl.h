@@ -24,7 +24,7 @@
 #include <string>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/property-bridge/property-bridge.h>
+#include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
 
 namespace Dali
 {
@@ -32,10 +32,12 @@ namespace Ui
 {
 namespace Internal
 {
+using StringGetterDelegate = Dali::Ui::Integration::StringGetterDelegate;
+
 class PropertyBridge;
 
 /**
- * @copydoc Ui::PropertyBridge
+ * @copydoc Ui::Integration::PropertyBridge
  */
 class PropertyBridge : public Dali::BaseObject
 {
@@ -51,9 +53,9 @@ public:
   ~PropertyBridge();
 
   /**
-   * @copydoc Dali::Ui::PropertyBridge::Get()
+   * @copydoc Dali::Ui::Integration::PropertyBridge::Get()
    */
-  static Dali::Ui::PropertyBridge Get();
+  static Dali::Ui::Integration::PropertyBridge Get();
 
   /**
    * Get the string property.
@@ -83,7 +85,7 @@ private:
 
 } // namespace Internal
 
-inline Internal::PropertyBridge& GetImplementation(Dali::Ui::PropertyBridge& obj)
+inline Internal::PropertyBridge& GetImplementation(Dali::Ui::Integration::PropertyBridge& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -92,7 +94,7 @@ inline Internal::PropertyBridge& GetImplementation(Dali::Ui::PropertyBridge& obj
   return static_cast<Internal::PropertyBridge&>(handle);
 }
 
-inline const Internal::PropertyBridge& GetImplementation(const Dali::Ui::PropertyBridge& obj)
+inline const Internal::PropertyBridge& GetImplementation(const Dali::Ui::Integration::PropertyBridge& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 

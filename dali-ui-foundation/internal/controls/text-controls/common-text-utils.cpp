@@ -20,7 +20,7 @@
 #include <dali/public-api/common/dali-string.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
@@ -133,7 +133,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
     {
       newRenderableActor = renderer->Render(controller->GetView(), textActor,
                                             Property::INVALID_INDEX, // Animatable property not supported
-                                            alignmentOffset, DepthIndex::CONTENT);
+                                            alignmentOffset, Dali::Ui::Integration::DepthIndex::CONTENT);
     }
 
     if(renderableActor != newRenderableActor)

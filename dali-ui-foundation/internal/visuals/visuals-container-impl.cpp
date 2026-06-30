@@ -30,9 +30,9 @@
 #include <locale>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h> ///< To get viewDataImpl by Internal::ViewDataImpl::Get()
 #include <dali-ui-foundation/internal/views/view/visual-constraint-functions.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
@@ -49,7 +49,7 @@ namespace
 {
 constexpr std::string_view VISUAL_OBJECT_PROPERTY_NAME_PREFIX("VisualBase");
 
-constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::DepthIndex::Ranges::CONTENT - Dali::Ui::DepthIndex::Ranges::BACKGROUND) / 2;
+constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
 
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
 
@@ -57,10 +57,10 @@ Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Int
 {
   Dali::Constraint constraint;
   auto             visualBase                 = visualObjectImpl.GetVisual();
-  auto             visualCornerRadiusProperty = visualBase.GetPropertyObject(Dali::Ui::DevelVisual::Property::CORNER_RADIUS);
-  if(visualObjectImpl.GetShadowType() == Dali::Ui::VisualsContainer::ShadowType::INNER_SHADOW)
+  auto             visualCornerRadiusProperty = visualBase.GetPropertyObject(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS);
+  if(visualObjectImpl.GetShadowType() == Dali::Ui::Integration::VisualsContainer::ShadowType::INNER_SHADOW)
   {
-    auto visualBorderlineProperty = visualBase.GetPropertyObject(Dali::Ui::DevelVisual::Property::BORDERLINE_WIDTH);
+    auto visualBorderlineProperty = visualBase.GetPropertyObject(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH);
 
     if(DALI_LIKELY(visualCornerRadiusProperty.propertyIndex != Property::INVALID_INDEX && visualCornerRadiusProperty.object) &&
        DALI_LIKELY(visualBorderlineProperty.propertyIndex != Property::INVALID_INDEX && visualBorderlineProperty.object))
@@ -74,7 +74,7 @@ Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Int
       Dali::Integration::ConstraintSetInternalTag(constraint, INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG);
     }
   }
-  else if(visualObjectImpl.GetShadowType() == Dali::Ui::VisualsContainer::ShadowType::BOX_SHADOW)
+  else if(visualObjectImpl.GetShadowType() == Dali::Ui::Integration::VisualsContainer::ShadowType::BOX_SHADOW)
   {
     constraint = Constraint::New<Vector4>(visualCornerRadiusProperty.object, visualCornerRadiusProperty.propertyIndex, Dali::EqualToConstraint());
     constraint.AddSource(Source(view, Dali::Ui::View::Property::CORNER_RADIUS));
@@ -84,7 +84,7 @@ Dali::Constraint CreateVisualCornerConstraint(Dali::Ui::View view, Dali::Ui::Int
 
 } // namespace
 
-VisualsContainerPtr VisualsContainer::New(Dali::Ui::View view, Dali::Ui::DevelVisual::InternalContainerRangeType rangeType)
+VisualsContainerPtr VisualsContainer::New(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType)
 {
   VisualsContainerPtr container(new VisualsContainer(view, rangeType));
   return container;
@@ -97,7 +97,7 @@ Dali::Ui::View VisualsContainer::GetOwner() const
   return mView.GetHandle();
 }
 
-Dali::Ui::DevelVisual::InternalContainerRangeType VisualsContainer::GetContainerRangeType() const
+Dali::Ui::Integration::Visual::InternalContainerRangeType VisualsContainer::GetContainerRangeType() const
 {
   return mRangeType;
 }
@@ -113,7 +113,7 @@ Dali::Ui::VisualBase VisualsContainer::GetVisualBaseAt(uint32_t index) const
   return mVisualBases[index];
 }
 
-bool VisualsContainer::AddVisualBase(Dali::Ui::VisualBase visualObject, Dali::Ui::VisualsContainer::ShadowType shadowType)
+bool VisualsContainer::AddVisualBase(Dali::Ui::VisualBase visualObject, Dali::Ui::Integration::VisualsContainer::ShadowType shadowType)
 {
   if(visualObject)
   {
@@ -123,7 +123,7 @@ bool VisualsContainer::AddVisualBase(Dali::Ui::VisualBase visualObject, Dali::Ui
       return false;
     }
 
-    Dali::Ui::VisualsContainer self(this); // Keep reference for safety
+    Dali::Ui::Integration::VisualsContainer self(this); // Keep reference for safety
 
     auto& visualObjectImpl = GetImplementation(visualObject);
     auto  oldContainer     = visualObjectImpl.GetContainer();
@@ -165,7 +165,7 @@ void VisualsContainer::RemoveVisualBase(Dali::Ui::VisualBase visualObject)
       return;
     }
 
-    Dali::Ui::VisualsContainer self(this); // Keep reference for safety
+    Dali::Ui::Integration::VisualsContainer self(this); // Keep reference for safety
 
     auto iter = std::find(mVisualBases.begin(), mVisualBases.end(), visualObject);
     if(iter != mVisualBases.end())
@@ -262,7 +262,7 @@ void VisualsContainer::ReplaceVisualBase(Dali::Ui::Internal::VisualBaseImpl& vis
           // Register the visual to the view.
           viewData.RegisterVisual(index, visualBase, static_cast<int>(visualObjectImpl.GetDepthIndex()));
 
-          if(visualObjectImpl.GetShadowType() != Dali::Ui::VisualsContainer::ShadowType::NONE)
+          if(visualObjectImpl.GetShadowType() != Dali::Ui::Integration::VisualsContainer::ShadowType::NONE)
           {
             Dali::Constraint constraint = CreateVisualCornerConstraint(view, visualObjectImpl);
             // Apply Once
@@ -304,14 +304,14 @@ void VisualsContainer::UnregisterVisualBase(Dali::Ui::Internal::VisualBaseImpl& 
   }
 }
 
-VisualsContainer::VisualsContainer(Dali::Ui::View view, Dali::Ui::DevelVisual::InternalContainerRangeType rangeType)
+VisualsContainer::VisualsContainer(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType)
 : BaseObject(),
   mVisualBases(),
   mView(view),
   mRangeType(rangeType),
   mVisualIndexConverter()
 {
-  DALI_ASSERT_ALWAYS(0 <= static_cast<int>(mRangeType) && static_cast<int>(mRangeType) < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  DALI_ASSERT_ALWAYS(0 <= static_cast<int>(mRangeType) && static_cast<int>(mRangeType) < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
 }
 
 VisualsContainer::~VisualsContainer()

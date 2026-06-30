@@ -28,8 +28,8 @@
 #include <memory>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/image-loader/texture-manager.h>
-#include <dali-ui-foundation/devel-api/visuals/animated-image-visual-signals-devel.h>
+#include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-image-visual-signals-integ.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/fixed-image-cache.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/rolling-animated-image-cache.h>
 #include <dali-ui-foundation/internal/visuals/animated-image/rolling-image-cache.h>
@@ -120,20 +120,20 @@ constexpr float ALPHA_VALUE_PREMULTIPLIED(1.0f);
 constexpr uint32_t TEXTURE_COUNT_FOR_GPU_ALPHA_MASK = 2u;
 constexpr uint32_t TEXTURE_COUNT_FOR_GPU_YUV_TO_RGB = 3u;
 
-Ui::AnimatedImage::PlayState ConvertActionStatusToPlayState(DevelAnimatedImageVisual::Action::Type actionStatus)
+Ui::AnimatedImage::PlayState ConvertActionStatusToPlayState(Dali::Ui::Integration::AnimatedImageVisual::Action::Type actionStatus)
 {
   // TODO : We'd better remove action status and use PlayState instead in future.
   switch(actionStatus)
   {
-    case DevelAnimatedImageVisual::Action::PLAY:
+    case Dali::Ui::Integration::AnimatedImageVisual::Action::PLAY:
     {
       return Ui::AnimatedImage::PlayState::PLAYING;
     }
-    case DevelAnimatedImageVisual::Action::PAUSE:
+    case Dali::Ui::Integration::AnimatedImageVisual::Action::PAUSE:
     {
       return Ui::AnimatedImage::PlayState::PAUSED;
     }
-    case DevelAnimatedImageVisual::Action::STOP:
+    case Dali::Ui::Integration::AnimatedImageVisual::Action::STOP:
     default:
     {
       return Ui::AnimatedImage::PlayState::STOPPED;
@@ -221,11 +221,11 @@ inline uint32_t CalculateInterval(const T interval, const float frameSpeedFactor
  *  Time
  */
 
-AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                factoryCache,
-                                                ImageVisualShaderFactory&          shaderFactory,
-                                                Ui::VisualFactory::CreationOptions creationOptions,
-                                                const VisualUrl&                   imageUrl,
-                                                const Property::Map&               properties)
+AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                             factoryCache,
+                                                ImageVisualShaderFactory&                       shaderFactory,
+                                                Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                                const VisualUrl&                                imageUrl,
+                                                const Property::Map&                            properties)
 {
   AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, creationOptions, ImageDimensions()));
   visual->InitializeAnimatedImage(imageUrl);
@@ -236,11 +236,11 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&             
   return visual;
 }
 
-AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                factoryCache,
-                                                ImageVisualShaderFactory&          shaderFactory,
-                                                Ui::VisualFactory::CreationOptions creationOptions,
-                                                const Property::Array&             imageUrls,
-                                                const Property::Map&               properties)
+AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                             factoryCache,
+                                                ImageVisualShaderFactory&                       shaderFactory,
+                                                Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                                const Property::Array&                          imageUrls,
+                                                const Property::Map&                            properties)
 {
   AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, creationOptions, ImageDimensions()));
   visual->mImageUrls = new ImageCache::UrlList();
@@ -268,11 +268,11 @@ AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&             
   return visual;
 }
 
-AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                factoryCache,
-                                                ImageVisualShaderFactory&          shaderFactory,
-                                                Ui::VisualFactory::CreationOptions creationOptions,
-                                                const VisualUrl&                   imageUrl,
-                                                ImageDimensions                    size)
+AnimatedImageVisualPtr AnimatedImageVisual::New(VisualFactoryCache&                             factoryCache,
+                                                ImageVisualShaderFactory&                       shaderFactory,
+                                                Ui::Integration::VisualFactory::CreationOptions creationOptions,
+                                                const VisualUrl&                                imageUrl,
+                                                ImageDimensions                                 size)
 {
   AnimatedImageVisualPtr visual(new AnimatedImageVisual(factoryCache, shaderFactory, creationOptions, size));
   visual->InitializeAnimatedImage(imageUrl);
@@ -355,9 +355,9 @@ void AnimatedImageVisual::CreateImageCache()
   }
 }
 
-AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                          ImageDimensions desiredSize)
-: Visual::Base(factoryCache, Ui::InternalVisualType::ANIMATED_IMAGE),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::ANIMATED_IMAGE),
   mFrameDelayTimer(),
   mPlacementActor(),
   mImageVisualShaderFactory(shaderFactory),
@@ -384,7 +384,7 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
   mFrameSpeedFactor(1.0f),
   mFrameCount(0),
   mImageSize(),
-  mActionStatus(DevelAnimatedImageVisual::Action::STOP),
+  mActionStatus(Dali::Ui::Integration::AnimatedImageVisual::Action::STOP),
   mWrapModeU(WrapMode::DEFAULT),
   mWrapModeV(WrapMode::DEFAULT),
   mStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME),
@@ -403,7 +403,7 @@ AnimatedImageVisual::AnimatedImageVisual(VisualFactoryCache& factoryCache, Image
 
   mImpl->mFittingModeRequired = true;
 
-  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  if(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
   }
@@ -532,7 +532,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
 
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ANIMATED_IMAGE);
 
   if(mImageUrl.IsValid())
   {
@@ -624,7 +624,7 @@ void AnimatedImageVisual::DoCreatePropertyMap(Property::Map& map) const
 void AnimatedImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ANIMATED_IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ANIMATED_IMAGE);
 
   Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
 
@@ -672,28 +672,28 @@ void AnimatedImageVisual::OnDoAction(const Dali::Property::Index actionId, const
   // Check if action is valid for this visual type and perform action if possible
   switch(actionId)
   {
-    case DevelAnimatedImageVisual::Action::PAUSE:
+    case Dali::Ui::Integration::AnimatedImageVisual::Action::PAUSE:
     {
       DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "PAUSE\n");
       // Pause will be executed on next timer tick
-      mActionStatus = DevelAnimatedImageVisual::Action::PAUSE;
+      mActionStatus = Dali::Ui::Integration::AnimatedImageVisual::Action::PAUSE;
       break;
     }
-    case DevelAnimatedImageVisual::Action::PLAY:
+    case Dali::Ui::Integration::AnimatedImageVisual::Action::PLAY:
     {
       DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "PLAY\n");
-      if(mFrameDelayTimer && IsOnScene() && mActionStatus != DevelAnimatedImageVisual::Action::PLAY)
+      if(mFrameDelayTimer && IsOnScene() && mActionStatus != Dali::Ui::Integration::AnimatedImageVisual::Action::PLAY)
       {
         mFrameDelayTimer.Start();
       }
-      mActionStatus = DevelAnimatedImageVisual::Action::PLAY;
+      mActionStatus = Dali::Ui::Integration::AnimatedImageVisual::Action::PLAY;
       break;
     }
-    case DevelAnimatedImageVisual::Action::STOP:
+    case Dali::Ui::Integration::AnimatedImageVisual::Action::STOP:
     {
       // STOP reset functionality will actually be done in a future change
       // Stop will be executed on next timer tick
-      mActionStatus     = DevelAnimatedImageVisual::Action::STOP;
+      mActionStatus     = Dali::Ui::Integration::AnimatedImageVisual::Action::STOP;
       mCurrentLoopIndex = FIRST_LOOP;
       DALI_LOG_INFO(gAnimImgLogFilter, Debug::Concise, "STOP\n");
       if(IsOnScene())
@@ -702,7 +702,7 @@ void AnimatedImageVisual::OnDoAction(const Dali::Property::Index actionId, const
       }
       break;
     }
-    case DevelAnimatedImageVisual::Action::JUMP_TO:
+    case Dali::Ui::Integration::AnimatedImageVisual::Action::JUMP_TO:
     {
       int32_t frameNumber;
       if(attributes.Get(frameNumber))
@@ -1154,7 +1154,7 @@ void AnimatedImageVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 
   if(mUseSynchronousSizing)
@@ -1186,7 +1186,7 @@ void AnimatedImageVisual::OnSetTransform()
         }
         else
         {
-          OnDoAction(DevelAnimatedImageVisual::Action::JUMP_TO, static_cast<int32_t>(mCurrentFrameIndex));
+          OnDoAction(Dali::Ui::Integration::AnimatedImageVisual::Action::JUMP_TO, static_cast<int32_t>(mCurrentFrameIndex));
         }
       }
     }
@@ -1274,7 +1274,7 @@ void AnimatedImageVisual::OnInitialize()
   mImpl->mRenderer = DecoratedVisualRenderer::New(geometry, shader);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 
   if(!defaultWrapMode) // custom wrap mode
   {
@@ -1330,7 +1330,7 @@ void AnimatedImageVisual::StartFirstFrame(TextureSet& textureSet, uint32_t first
     {
       mFrameDelayTimer = Timer::New(CalculateInterval(firstInterval, mFrameSpeedFactor));
       mFrameDelayTimer.TickSignal().Connect(this, &AnimatedImageVisual::DisplayNextFrame);
-      if(mActionStatus == DevelAnimatedImageVisual::Action::PLAY)
+      if(mActionStatus == Dali::Ui::Integration::AnimatedImageVisual::Action::PLAY)
       {
         mFrameDelayTimer.Start();
       }
@@ -1452,11 +1452,11 @@ bool AnimatedImageVisual::DisplayNextFrame()
       mIsJumpTo  = false;
       frameIndex = mFrameIndexForJumpTo;
     }
-    else if(mActionStatus == DevelAnimatedImageVisual::Action::PAUSE)
+    else if(mActionStatus == Dali::Ui::Integration::AnimatedImageVisual::Action::PAUSE)
     {
       return false;
     }
-    else if(mActionStatus == DevelAnimatedImageVisual::Action::STOP)
+    else if(mActionStatus == Dali::Ui::Integration::AnimatedImageVisual::Action::STOP)
     {
       mCurrentLoopIndex = FIRST_LOOP;
       if(mStopBehavior == Ui::AnimatedImage::StopBehavior::FIRST_FRAME)
@@ -1486,13 +1486,13 @@ bool AnimatedImageVisual::DisplayNextFrame()
         if(mLoopCount >= 0 && mCurrentLoopIndex >= mLoopCount)
         {
           // This will stop timer
-          mActionStatus      = DevelAnimatedImageVisual::Action::STOP;
+          mActionStatus      = Dali::Ui::Integration::AnimatedImageVisual::Action::STOP;
           bool continueTimer = DisplayNextFrame();
 
           // Naturally stopped animation. Send signal.
           if(mImpl->mEventObserver)
           {
-            mImpl->mEventObserver->NotifyVisualEvent(*this, DevelAnimatedImageVisual::Signal::ANIMATION_FINISHED);
+            mImpl->mEventObserver->NotifyVisualEvent(*this, Dali::Ui::Integration::AnimatedImageVisual::Signal::ANIMATION_FINISHED);
           }
 
           return continueTimer;
@@ -1518,7 +1518,7 @@ bool AnimatedImageVisual::DisplayNextFrame()
     }
 
     mCurrentFrameIndex = frameIndex;
-    continueTimer      = (mActionStatus == DevelAnimatedImageVisual::Action::PLAY && textureSet) ? true : false;
+    continueTimer      = (mActionStatus == Dali::Ui::Integration::AnimatedImageVisual::Action::PLAY && textureSet) ? true : false;
   }
 
   return continueTimer;
@@ -1700,9 +1700,9 @@ void AnimatedImageVisual::SetTexturesToRenderer(TextureSet& textureSet)
 
 void AnimatedImageVisual::OnControlEffectiveVisibilityChanged(Actor actor, bool visible)
 {
-  if(!visible && mActionStatus != DevelAnimatedImageVisual::Action::STOP)
+  if(!visible && mActionStatus != Dali::Ui::Integration::AnimatedImageVisual::Action::STOP)
   {
-    mActionStatus = DevelAnimatedImageVisual::Action::STOP;
+    mActionStatus = Dali::Ui::Integration::AnimatedImageVisual::Action::STOP;
     DisplayNextFrame();
     DALI_LOG_INFO(gAnimImgLogFilter, Debug::Verbose,
                   "AnimatedImageVisual::OnControlEffectiveVisibilityChanged: invisibile. Pause animation [%p]\n", this);

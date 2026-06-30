@@ -15,8 +15,8 @@
  *
  */
 
-#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/text/label-properties.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
@@ -60,8 +60,8 @@ TextInternal::TextGradientStyle MakeEnabledTextGradientStyle(float startOffset =
 
 struct RenderedTextVisual
 {
-  Dali::Ui::View         view;
-  Dali::Ui::Visual::Base internalVisual;
+  Dali::Ui::View                      view;
+  Dali::Ui::Integration::Visual::Base internalVisual;
 };
 
 RenderedTextVisual CreateRenderedInternalTextVisualWithView(UiTestApplication& application, const char* text = "TextGradient", bool markupEnabled = false)
@@ -70,15 +70,15 @@ RenderedTextVisual CreateRenderedInternalTextVisualWithView(UiTestApplication& a
   view.SetProperty(Actor::Property::SIZE, Vector3(VISUAL_WIDTH, VISUAL_HEIGHT, 0.0f));
 
   Dali::Property::Map propertyMap;
-  propertyMap.Add(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::InternalVisualType::TEXT);
+  propertyMap.Add(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::Integration::InternalVisualType::TEXT);
   propertyMap.Add(Dali::Ui::TextVisualPropertyIndex::TEXT, text);
   propertyMap.Add(Dali::Ui::TextVisualPropertyIndex::FONT_SIZE, 12.0f);
   propertyMap.Add(Dali::Ui::TextVisualPropertyIndex::MARKUP_ENABLED, markupEnabled);
 
-  Dali::Ui::Visual::Base internalVisual = Dali::Ui::VisualFactory::Get().CreateVisual(propertyMap);
+  Dali::Ui::Integration::Visual::Base internalVisual = Dali::Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
   DALI_TEST_CHECK(internalVisual);
   Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(view))
-    .RegisterVisual(Dali::Ui::Text::LabelPropertyIndex::TEXT, internalVisual, Dali::Ui::DepthIndex::CONTENT);
+    .RegisterVisual(Dali::Ui::Text::LabelPropertyIndex::TEXT, internalVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
   application.GetScene().Add(view);
   application.SendNotification();
   application.Render();
@@ -86,7 +86,7 @@ RenderedTextVisual CreateRenderedInternalTextVisualWithView(UiTestApplication& a
   return {view, internalVisual};
 }
 
-Dali::Ui::Visual::Base CreateRenderedInternalTextVisual(UiTestApplication& application, const char* text = "TextGradient", bool markupEnabled = false)
+Dali::Ui::Integration::Visual::Base CreateRenderedInternalTextVisual(UiTestApplication& application, const char* text = "TextGradient", bool markupEnabled = false)
 {
   return CreateRenderedInternalTextVisualWithView(application, text, markupEnabled).internalVisual;
 }
@@ -106,7 +106,7 @@ RenderedTextVisual CreateRenderedMarkupBackgroundTextVisual(UiTestApplication& a
   return CreateRenderedInternalTextVisualWithView(application, "Default <background color='yellow'>Background</background> Default", true);
 }
 
-void UpdateTextVisual(Dali::Ui::Visual::Base internalVisual)
+void UpdateTextVisual(Dali::Ui::Integration::Visual::Base internalVisual)
 {
   UiInternal::TextVisual::EnableRendererUpdate(internalVisual);
   UiInternal::TextVisual::UpdateRenderer(internalVisual);
@@ -128,7 +128,7 @@ int UtcDaliTextGradientVisualMaskDisabledDoesNotCreateMaskP(void)
 {
   UiTestApplication application;
 
-  Dali::Ui::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
+  Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
 
   UpdateTextVisual(internalVisual);
 
@@ -141,7 +141,7 @@ int UtcDaliTextGradientVisualMaskSimpleEnabledDoesNotCreateStoredMaskP(void)
 {
   UiTestApplication application;
 
-  Dali::Ui::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
+  Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
 
   UpdateTextVisual(internalVisual);
@@ -198,7 +198,7 @@ int UtcDaliTextGradientVisualMaskStyleSetterSimpleDoesNotCreateStoredMaskP(void)
 {
   UiTestApplication application;
 
-  Dali::Ui::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
+  Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
 
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
 
@@ -212,7 +212,7 @@ int UtcDaliTextGradientVisualMaskDisabledClearsStoredMaskP(void)
   UiTestApplication application;
 
   RenderedTextVisual rendered = CreateRenderedMarkupTextVisual(application);
-  Dali::Ui::Visual::Base internalVisual = rendered.internalVisual;
+  Dali::Ui::Integration::Visual::Base internalVisual = rendered.internalVisual;
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
 
   DALI_TEST_CHECK(UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual));
@@ -229,7 +229,7 @@ int UtcDaliTextGradientVisualMaskStyleSetterReappliesAfterDisabledP(void)
   UiTestApplication application;
 
   RenderedTextVisual rendered = CreateRenderedMarkupTextVisual(application);
-  Dali::Ui::Visual::Base internalVisual = rendered.internalVisual;
+  Dali::Ui::Integration::Visual::Base internalVisual = rendered.internalVisual;
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
 
   DALI_TEST_CHECK(UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual));
@@ -325,7 +325,7 @@ int UtcDaliTextGradientVisualMaskMarqueeSimpleDoesNotCreateStoredMaskP(void)
 {
   UiTestApplication application;
 
-  Dali::Ui::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
+  Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
   UiInternal::TextVisual::GetController(internalVisual)
     ->SetMarqueeEnabled(true, false, UiText::MarqueeOrientation::HORIZONTAL);
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());

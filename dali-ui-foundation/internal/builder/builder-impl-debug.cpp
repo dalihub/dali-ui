@@ -28,7 +28,7 @@ namespace Ui
 {
 namespace Internal
 {
-void LogTree(const Ui::JsonParser& parser)
+void LogTree(const Ui::Integration::JsonParser& parser)
 {
   if(OptionalChild constants = IsChild(parser.GetRoot(), "constants"))
   {

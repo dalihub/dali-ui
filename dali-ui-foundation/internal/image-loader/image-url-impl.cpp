@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/internal/image-loader/image-url-impl.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/image-loader/texture-manager.h>
+#include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
@@ -36,13 +36,13 @@ namespace Internal
 {
 ImageUrl::ImageUrl(Texture& texture, bool preMultiplied)
 {
-  mUrl = Dali::Ui::TextureManager::AddTexture(texture, preMultiplied);
+  mUrl = Dali::Ui::Integration::TextureManager::AddTexture(texture, preMultiplied);
 }
 
 ImageUrl::ImageUrl(const EncodedImageBuffer& encodedImageBuffer)
 : mUrl("")
 {
-  auto visualFactory = Dali::Ui::VisualFactory::Get();
+  auto visualFactory = Dali::Ui::Integration::VisualFactory::Get();
   if(visualFactory)
   {
     auto& textureManager = GetImplementation(visualFactory).GetTextureManager();
@@ -54,7 +54,7 @@ ImageUrl::~ImageUrl()
 {
   if(mUrl.Size() > 0)
   {
-    auto visualFactory = Dali::Ui::VisualFactory::Get();
+    auto visualFactory = Dali::Ui::Integration::VisualFactory::Get();
     if(visualFactory)
     {
       auto& textureManager = GetImplementation(visualFactory).GetTextureManager();

@@ -156,7 +156,7 @@ GradientVisualPtr GradientVisual::New(VisualFactoryCache& factoryCache, const Pr
 }
 
 GradientVisual::GradientVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::InternalVisualType::GRADIENT),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::GRADIENT),
   mGradientTransform(),
   mGradient(nullptr),
   mGradientType(LINEAR),
@@ -276,7 +276,7 @@ void GradientVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 }
 
@@ -300,7 +300,7 @@ void GradientVisual::UpdateShader()
 void GradientVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::GRADIENT);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::GRADIENT);
 
   if(DALI_LIKELY(mGradient))
   {
@@ -394,7 +394,7 @@ void GradientVisual::OnInitialize()
                                                               ToDaliStringView(UNIFORM_START_OFFSET_NAME), startOffset);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 }
 
 bool GradientVisual::NewGradient(Type gradientType, const Property::Map& propertyMap)

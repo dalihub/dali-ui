@@ -278,11 +278,11 @@ NPatchDataPtr NPatchLoader::GetNPatchData(const VisualUrl& url, const Dali::Exte
 
     info.mData->SetTextures(infoPtr->mData->GetTextures());
 
-    NPatchUtility::StretchRanges stretchRangesX;
-    NPatchUtility::StretchRanges stretchRangesY;
-    stretchRangesX.PushBack(NPatchUtility::GetValidStrechPointFromBorder(
+    Dali::Ui::Integration::NPatchUtility::StretchRanges stretchRangesX;
+    Dali::Ui::Integration::NPatchUtility::StretchRanges stretchRangesY;
+    stretchRangesX.PushBack(Dali::Ui::Integration::NPatchUtility::GetValidStrechPointFromBorder(
       info.mData->GetCroppedWidth(), static_cast<uint32_t>(border.start), static_cast<uint32_t>(border.end)));
-    stretchRangesY.PushBack(NPatchUtility::GetValidStrechPointFromBorder(
+    stretchRangesY.PushBack(Dali::Ui::Integration::NPatchUtility::GetValidStrechPointFromBorder(
       info.mData->GetCroppedHeight(), static_cast<uint32_t>(border.top), static_cast<uint32_t>(border.bottom)));
 
     info.mData->SetStretchPixelsX(stretchRangesX);

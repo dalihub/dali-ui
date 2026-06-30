@@ -30,8 +30,8 @@
 #include <unordered_set>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
@@ -99,7 +99,7 @@ bool FindVisual(std::string visualName, const RegisteredVisualContainer& visuals
 {
   for(iter = visuals.Begin(); iter != visuals.End(); iter++)
   {
-    Ui::Visual::Base visual = (*iter)->visual;
+    Ui::Integration::Visual::Base visual = (*iter)->visual;
     if(visual && visual.GetName() == visualName)
     {
       return true;
@@ -111,12 +111,12 @@ bool FindVisual(std::string visualName, const RegisteredVisualContainer& visuals
 /**
  *  Finds visual in given array, returning true if found along with the iterator for that visual as a out parameter
  */
-bool FindVisual(const Ui::Visual::Base findVisual, const RegisteredVisualContainer& visuals,
+bool FindVisual(const Ui::Integration::Visual::Base findVisual, const RegisteredVisualContainer& visuals,
                 RegisteredVisualContainer::Iterator& iter)
 {
   for(iter = visuals.Begin(); iter != visuals.End(); iter++)
   {
-    Ui::Visual::Base visual = (*iter)->visual;
+    Ui::Integration::Visual::Base visual = (*iter)->visual;
     if(visual && visual == findVisual)
     {
       return true;
@@ -162,14 +162,14 @@ void FindChangeableVisuals(Dictionary<Property::Map>& stateVisualsToAdd, Diction
   }
 }
 
-Ui::Visual::Base GetVisualByName(const RegisteredVisualContainer& visuals, const std::string& visualName)
+Ui::Integration::Visual::Base GetVisualByName(const RegisteredVisualContainer& visuals, const std::string& visualName)
 {
-  Ui::Visual::Base visualHandle;
+  Ui::Integration::Visual::Base visualHandle;
 
   RegisteredVisualContainer::Iterator iter;
   for(iter = visuals.Begin(); iter != visuals.End(); iter++)
   {
-    Ui::Visual::Base visual = (*iter)->visual;
+    Ui::Integration::Visual::Base visual = (*iter)->visual;
     if(visual && visual.GetName() == visualName)
     {
       visualHandle = visual;
@@ -179,9 +179,9 @@ Ui::Visual::Base GetVisualByName(const RegisteredVisualContainer& visuals, const
   return visualHandle;
 }
 
-Ui::Visual::Base GetVisualByIndex(const RegisteredVisualContainer& visuals, Property::Index index)
+Ui::Integration::Visual::Base GetVisualByIndex(const RegisteredVisualContainer& visuals, Property::Index index)
 {
-  Ui::Visual::Base visualHandle;
+  Ui::Integration::Visual::Base visualHandle;
 
   RegisteredVisualContainer::Iterator iter;
   for(iter = visuals.Begin(); iter != visuals.End(); iter++)
@@ -201,7 +201,7 @@ Ui::Visual::Base GetVisualByIndex(const RegisteredVisualContainer& visuals, Prop
 void MoveVisual(RegisteredVisualContainer::Iterator sourceIter, RegisteredVisualContainer& source,
                 RegisteredVisualContainer& destination)
 {
-  Ui::Visual::Base visual = (*sourceIter)->visual;
+  Ui::Integration::Visual::Base visual = (*sourceIter)->visual;
   if(visual)
   {
     RegisteredVisual* rv = source.Release(sourceIter);
@@ -214,12 +214,12 @@ void MoveVisual(RegisteredVisualContainer::Iterator sourceIter, RegisteredVisual
  */
 void DiscardVisual(RegisteredVisualContainer::Iterator sourceIter, RegisteredVisualContainer& source)
 {
-  Ui::Visual::Base visual = (*sourceIter)->visual;
+  Ui::Integration::Visual::Base visual = (*sourceIter)->visual;
   if(visual)
   {
     if(DALI_LIKELY(Dali::Adaptor::IsAvailable()))
     {
-      Ui::VisualFactory::Get().DiscardVisual(visual);
+      Ui::Integration::VisualFactory::Get().DiscardVisual(visual);
     }
   }
 
@@ -429,8 +429,8 @@ bool ViewDataImpl::VisualData::IsResourceReady() const
   // Iterate through and check all the enabled visuals are ready
   for(auto visualIter = mVisuals.Begin(); visualIter != mVisuals.End(); ++visualIter)
   {
-    const Ui::Visual::Base        visual     = (*visualIter)->visual;
-    const Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
+    const Ui::Integration::Visual::Base visual     = (*visualIter)->visual;
+    const Internal::Visual::Base&       visualImpl = Ui::GetImplementation(visual);
 
     // one of the enabled visuals is not ready
     if(!visualImpl.IsResourceReady() && (*visualIter)->enabled)
@@ -470,29 +470,29 @@ void ViewDataImpl::VisualData::CopyInstancedProperties(RegisteredVisualContainer
   }
 }
 
-void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual::Base& visual)
+void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual)
 {
   RegisterVisual(index, visual, VisualState::ENABLED, DepthIndexValue::NOT_SET);
 }
 
-void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex)
+void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, int depthIndex)
 {
   RegisterVisual(index, visual, VisualState::ENABLED, DepthIndexValue::SET, depthIndex);
 }
 
-void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled)
+void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled)
 {
   RegisterVisual(index, visual, (enabled ? VisualState::ENABLED : VisualState::DISABLED), DepthIndexValue::NOT_SET);
 }
 
-void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled,
+void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled,
                                               int depthIndex)
 {
   RegisterVisual(index, visual, (enabled ? VisualState::ENABLED : VisualState::DISABLED), DepthIndexValue::SET,
                  depthIndex);
 }
 
-void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual::Base& visual,
+void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual,
                                               VisualState::Type enabled, DepthIndexValue::Type depthIndexValueSet,
                                               int depthIndex)
 {
@@ -514,7 +514,7 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual:
 
   // Change the depth index value automatically if the visual has DepthIndex to AUTO_INDEX
   // or if RegisterVisual set DepthIndex to AUTO_INDEX.
-  const bool requiredDepthIndexChanged = (requiredDepthIndex == DepthIndex::AUTO_INDEX);
+  const bool requiredDepthIndexChanged = (requiredDepthIndex == Dali::Ui::Integration::DepthIndex::AUTO_INDEX);
 
   // Visual replacement, existing visual should only be removed from stage when replacement ready.
   if(!mVisuals.Empty())
@@ -523,7 +523,7 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual:
     // Check if visual (index) is already registered, this is the current visual.
     if(FindVisual(index, mVisuals, registeredVisualsiter))
     {
-      Ui::Visual::Base& currentRegisteredVisual = (*registeredVisualsiter)->visual;
+      Ui::Integration::Visual::Base& currentRegisteredVisual = (*registeredVisualsiter)->visual;
       if(currentRegisteredVisual)
       {
         // Store current visual depth index as may need to set the replacement visual to same depth
@@ -595,8 +595,8 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual:
     if((mVisuals.Size() > 0) && requiredDepthIndexChanged)
     {
       int maxDepthIndex =
-        static_cast<int>(DepthIndex::CONTENT) - 1; // Start at DepthIndex::CONTENT if maxDepth index belongs to a
-                                                   // background or no visuals have been added yet.
+        static_cast<int>(Dali::Ui::Integration::DepthIndex::CONTENT) - 1; // Start at Dali::Ui::Integration::DepthIndex::CONTENT if maxDepth index belongs to a
+                                                                          // background or no visuals have been added yet.
 
       RegisteredVisualContainer::ConstIterator       iter;
       const RegisteredVisualContainer::ConstIterator endIter = mVisuals.End();
@@ -617,10 +617,10 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Visual:
 
   if(visual)
   {
-    // If required depth index still DepthIndex::AUTO_INDEX, Make it as DepthIndex::CONTENT now
-    if(requiredDepthIndex == static_cast<int>(DepthIndex::AUTO_INDEX))
+    // If required depth index still Dali::Ui::Integration::DepthIndex::AUTO_INDEX, Make it as Dali::Ui::Integration::DepthIndex::CONTENT now
+    if(requiredDepthIndex == static_cast<int>(Dali::Ui::Integration::DepthIndex::AUTO_INDEX))
     {
-      requiredDepthIndex = static_cast<int>(DepthIndex::CONTENT);
+      requiredDepthIndex = static_cast<int>(Dali::Ui::Integration::DepthIndex::CONTENT);
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Some strange cases. VisualDepthIndex AUTO_INDEX set as: %d\n",
                     requiredDepthIndex);
     }
@@ -682,9 +682,9 @@ void ViewDataImpl::VisualData::UnregisterVisual(Property::Index index)
   }
 }
 
-Ui::Visual::Base ViewDataImpl::VisualData::GetVisual(Property::Index index) const
+Ui::Integration::Visual::Base ViewDataImpl::VisualData::GetVisual(Property::Index index) const
 {
-  return Ui::Visual::Base(GetVisualImplPtr(index));
+  return Ui::Integration::Visual::Base(GetVisualImplPtr(index));
 }
 
 Ui::Internal::Visual::Base* ViewDataImpl::VisualData::GetVisualImplPtr(Property::Index index) const
@@ -697,7 +697,7 @@ Ui::Internal::Visual::Base* ViewDataImpl::VisualData::GetVisualImplPtr(Property:
   return nullptr;
 }
 
-Ui::Visual::Base ViewDataImpl::VisualData::GetVisual(const std::string& name) const
+Ui::Integration::Visual::Base ViewDataImpl::VisualData::GetVisual(const std::string& name) const
 {
   return GetVisualByName(mVisuals, name);
 }
@@ -743,7 +743,7 @@ void ViewDataImpl::VisualData::EnableVisual(Property::Index index, bool enable)
   }
 }
 
-void ViewDataImpl::VisualData::EnableReadyTransitionOverridden(Ui::Visual::Base& visual, bool enable)
+void ViewDataImpl::VisualData::EnableReadyTransitionOverridden(Ui::Integration::Visual::Base& visual, bool enable)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "View::EnableReadyTransitionOverridden(%p, %s)\n", &visual,
                 enable ? "T" : "F");
@@ -762,7 +762,7 @@ void ViewDataImpl::VisualData::EnableReadyTransitionOverridden(Ui::Visual::Base&
   }
 }
 
-void ViewDataImpl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Base& visual, bool enable,
+void ViewDataImpl::VisualData::EnableCornerPropertiesOverridden(Ui::Integration::Visual::Base& visual, bool enable,
                                                                 Dali::Constraint cornerRadiusConstraint)
 {
   DALI_LOG_INFO(gLogFilter, Debug::General, "View::EnableCornerPropertiesOverridden(%p, %s)\n", &visual,
@@ -795,21 +795,21 @@ void ViewDataImpl::VisualData::EnableCornerPropertiesOverridden(Ui::Visual::Base
 
         Property::Map map;
         // Use corner radius ZERO when offscreen rendering with capture is enabled to avoid issues with anti-aliasing.
-        map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS,
+        map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS,
                    (mOffscreenRenderingEnabled && visualImpl.IsCornerRadiusIgnoredAtOffscreenRendering())
                      ? Vector4::ZERO
                      : cornerRadius);
-        map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
+        map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY,
                    self.GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY));
-        map.Insert(Ui::DevelVisual::Property::CORNER_SQUARENESS,
+        map.Insert(Ui::Integration::Visual::Property::CORNER_SQUARENESS,
                    self.GetProperty<Vector4>(Ui::View::Property::CORNER_SQUARENESS));
 
-        visual.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY, map);
+        visual.DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
       }
 
-      auto visualCornerRadiusProperty = visualImpl.GetPropertyObject(DevelVisual::Property::CORNER_RADIUS, false);
+      auto visualCornerRadiusProperty = visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, false);
       auto visualCornerSquarenessProperty =
-        visualImpl.GetPropertyObject(DevelVisual::Property::CORNER_SQUARENESS, false);
+        visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS, false);
       if(DALI_LIKELY(visualCornerRadiusProperty.propertyIndex != Property::INVALID_INDEX &&
                      visualCornerRadiusProperty.object) &&
          DALI_LIKELY(visualCornerSquarenessProperty.propertyIndex != Property::INVALID_INDEX &&
@@ -894,7 +894,7 @@ void ViewDataImpl::VisualData::RemoveVisual(RegisteredVisualContainer& visuals, 
 {
   for(RegisteredVisualContainer::Iterator visualIter = visuals.Begin(); visualIter != visuals.End(); ++visualIter)
   {
-    Ui::Visual::Base visual = (*visualIter)->visual;
+    Ui::Integration::Visual::Base visual = (*visualIter)->visual;
     if(visual && visual.GetName() == visualName)
     {
       SetVisualOffScene(Ui::GetImplementation(visual), mOuter.mViewImpl);
@@ -929,7 +929,7 @@ void ViewDataImpl::VisualData::RecreateChangedVisuals(Dictionary<Property::Map>&
     // Check if visual (visualName) is already registered, this is the current visual.
     if(FindVisual(visualName, mVisuals, registeredVisualsiter))
     {
-      Ui::Visual::Base& visual = (*registeredVisualsiter)->visual;
+      Ui::Integration::Visual::Base& visual = (*registeredVisualsiter)->visual;
       if(visual)
       {
         // No longer required to know if the replaced visual's resources are ready
@@ -1080,7 +1080,7 @@ void ViewDataImpl::VisualData::ClearVisuals()
 Dali::Property ViewDataImpl::VisualData::GetVisualProperty(Dali::Property::Index index,
                                                            Dali::Property::Key   visualPropertyKey)
 {
-  Ui::Visual::Base visual = GetVisualByIndex(mVisuals, index);
+  Ui::Integration::Visual::Base visual = GetVisualByIndex(mVisuals, index);
   if(visual)
   {
     return visual.GetPropertyObject(std::move(visualPropertyKey));
@@ -1090,7 +1090,7 @@ Dali::Property ViewDataImpl::VisualData::GetVisualProperty(Dali::Property::Index
   return Dali::Property(handle, Property::INVALID_INDEX);
 }
 
-void ViewDataImpl::VisualData::StopObservingVisual(Ui::Visual::Base& visual)
+void ViewDataImpl::VisualData::StopObservingVisual(Ui::Integration::Visual::Base& visual)
 {
   Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
 
@@ -1099,7 +1099,7 @@ void ViewDataImpl::VisualData::StopObservingVisual(Ui::Visual::Base& visual)
   visualImpl.RemoveConstraintObserver(*this);
 }
 
-void ViewDataImpl::VisualData::StartObservingVisual(Ui::Visual::Base& visual)
+void ViewDataImpl::VisualData::StartObservingVisual(Ui::Integration::Visual::Base& visual)
 {
   Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
 
@@ -1219,20 +1219,20 @@ void ViewDataImpl::VisualData::NotifyConstraintPropertyChanged(Property::Index i
             // Need to make ensure that we are using corner radius now.
             // It will change shader if need.
             [[maybe_unused]] auto visualCornerRadiusProperty =
-              visualImpl.GetPropertyObject(DevelVisual::Property::CORNER_RADIUS, true);
+              visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, true);
           }
-          visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
-                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius));
+          visualImpl.DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY,
+                              Property::Map().Add(Ui::Integration::Visual::Property::CORNER_RADIUS, cornerRadius));
 
           // Apply corner radius to other visuals
           if(DALI_UNLIKELY(!mCornerRadiusValueAdded))
           {
             visualImpl.DoAction(
-              Ui::DevelVisual::Action::UPDATE_PROPERTY,
+              Ui::Integration::Visual::Action::UPDATE_PROPERTY,
               Property::Map()
-                .Add(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
+                .Add(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY,
                      mOuter.mViewImpl.Self().GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY))
-                .Add(Ui::DevelVisual::Property::CORNER_SQUARENESS,
+                .Add(Ui::Integration::Visual::Property::CORNER_SQUARENESS,
                      mOuter.mViewImpl.Self().GetProperty<Vector4>(Ui::View::Property::CORNER_SQUARENESS)));
             visualImpl.StartConstraintFeature(Ui::View::Property::CORNER_RADIUS);
           }
@@ -1261,8 +1261,8 @@ void ViewDataImpl::VisualData::NotifyConstraintPropertyChanged(Property::Index i
         {
           auto& visualImpl = Ui::GetImplementation(registeredVisual->visual);
 
-          visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
-                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY, cornerRadiusPolicy));
+          visualImpl.DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY,
+                              Property::Map().Add(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY, cornerRadiusPolicy));
         }
       }
       break;
@@ -1289,20 +1289,20 @@ void ViewDataImpl::VisualData::NotifyConstraintPropertyChanged(Property::Index i
             // Need to make ensure that we are using corner squreness now.
             // It will change shader if need.
             [[maybe_unused]] auto visualCornerSqurenessProperty =
-              visualImpl.GetPropertyObject(DevelVisual::Property::CORNER_SQUARENESS, true);
+              visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::CORNER_SQUARENESS, true);
           }
-          visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
-                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_SQUARENESS, cornerSquareness));
+          visualImpl.DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY,
+                              Property::Map().Add(Ui::Integration::Visual::Property::CORNER_SQUARENESS, cornerSquareness));
 
           if(DALI_UNLIKELY(!mCornerSquarenessValueAdded))
           {
             // Apply corner squareness to other visuals
             visualImpl.DoAction(
-              Ui::DevelVisual::Action::UPDATE_PROPERTY,
+              Ui::Integration::Visual::Action::UPDATE_PROPERTY,
               Property::Map()
-                .Add(Ui::DevelVisual::Property::CORNER_RADIUS,
+                .Add(Ui::Integration::Visual::Property::CORNER_RADIUS,
                      mOuter.mViewImpl.Self().GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS))
-                .Add(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
+                .Add(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY,
                      mOuter.mViewImpl.Self().GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY)));
             visualImpl.StartConstraintFeature(Ui::View::Property::CORNER_SQUARENESS);
           }
@@ -1347,14 +1347,14 @@ void ViewDataImpl::VisualData::OffscreenRenderingEnabled(bool enabled)
           // Stop corner radius constraint if offscreen rendering is enabled
           // Use corner radius ZERO when offscreen rendering with capture is enabled to avoid issues with anti-aliasing.
           visualImpl.StopConstraintFeature(Ui::View::Property::CORNER_RADIUS);
-          visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
-                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS, Vector4::ZERO));
+          visualImpl.DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY,
+                              Property::Map().Add(Ui::Integration::Visual::Property::CORNER_RADIUS, Vector4::ZERO));
         }
         else
         {
           // Re-apply corner radius to other visuals
-          visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
-                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS,
+          visualImpl.DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY,
+                              Property::Map().Add(Ui::Integration::Visual::Property::CORNER_RADIUS,
                                                   mOuter.mViewImpl.Self().GetProperty<Vector4>(
                                                     Ui::View::Property::CORNER_RADIUS)));
           visualImpl.StartConstraintFeature(Ui::View::Property::CORNER_RADIUS);
@@ -1381,8 +1381,8 @@ void ViewDataImpl::VisualData::OffscreenRenderingEnabled(bool enabled)
         if(DALI_UNLIKELY(!mCornerRadiusValueAdded))
         {
           // First time corner radius animated, or setted. Need to apply corner radius constraint to visuals
-          visualImpl.DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY,
-                              Property::Map().Add(Ui::DevelVisual::Property::CORNER_RADIUS,
+          visualImpl.DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY,
+                              Property::Map().Add(Ui::Integration::Visual::Property::CORNER_RADIUS,
                                                   mOuter.mViewImpl.Self().GetProperty<Vector4>(
                                                     Ui::View::Property::CORNER_RADIUS)));
           visualImpl.StartConstraintFeature(Ui::View::Property::CORNER_RADIUS);
@@ -1394,32 +1394,32 @@ void ViewDataImpl::VisualData::OffscreenRenderingEnabled(bool enabled)
   mCornerRadiusValueAdded = true;
 }
 
-bool ViewDataImpl::VisualData::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::VisualData::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
 {
   int containerIndex = static_cast<int>(internalContainerRangeType);
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
 
   if(!mVisualObjectsContainer[containerIndex])
   {
     Dali::Ui::View handle(mOuter.mViewImpl.GetOwner());
-    mVisualObjectsContainer[containerIndex] = Dali::Ui::VisualsContainer::New(handle, internalContainerRangeType);
+    mVisualObjectsContainer[containerIndex] = Dali::Ui::Integration::VisualsContainer::New(handle, internalContainerRangeType);
   }
 
   return mVisualObjectsContainer[containerIndex].AddVisualBase(visualBase);
 }
 
-bool ViewDataImpl::VisualData::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::VisualData::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
 {
   int containerIndex = static_cast<int>(internalContainerRangeType);
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
 
   if(!mVisualObjectsContainer[containerIndex])
   {
     Dali::Ui::View handle(mOuter.mViewImpl.GetOwner());
-    mVisualObjectsContainer[containerIndex] = Dali::Ui::VisualsContainer::New(handle, internalContainerRangeType);
+    mVisualObjectsContainer[containerIndex] = Dali::Ui::Integration::VisualsContainer::New(handle, internalContainerRangeType);
   }
 
-  return mVisualObjectsContainer[containerIndex].AddShadowVisualBase(visualBase, Dali::Ui::VisualsContainer::ShadowType::BOX_SHADOW);
+  return mVisualObjectsContainer[containerIndex].AddShadowVisualBase(visualBase, Dali::Ui::Integration::VisualsContainer::ShadowType::BOX_SHADOW);
 }
 
 void ViewDataImpl::VisualData::RemoveVisualObject(Dali::Ui::VisualBase visualBase)
@@ -1436,7 +1436,7 @@ void ViewDataImpl::VisualData::RemoveVisualObject(Dali::Ui::VisualBase visualBas
   }
 
   int containerIndex = static_cast<int>(container.GetContainerRangeType());
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
 
   if(DALI_LIKELY(mVisualObjectsContainer[containerIndex] == container))
   {
@@ -1444,10 +1444,10 @@ void ViewDataImpl::VisualData::RemoveVisualObject(Dali::Ui::VisualBase visualBas
   }
 }
 
-uint32_t ViewDataImpl::VisualData::GetVisualObjectCount(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType) const
+uint32_t ViewDataImpl::VisualData::GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const
 {
   int containerIndex = static_cast<int>(internalContainerRangeType);
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
 
   if(mVisualObjectsContainer[containerIndex])
   {
@@ -1456,10 +1456,10 @@ uint32_t ViewDataImpl::VisualData::GetVisualObjectCount(Dali::Ui::DevelVisual::I
   return 0u;
 }
 
-Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
 {
   int containerIndex = static_cast<int>(internalContainerRangeType);
-  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
+  DALI_ASSERT_ALWAYS(0 <= containerIndex && containerIndex < static_cast<int>(Dali::Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT) && "Invalid container range inputed!");
 
   if(mVisualObjectsContainer[containerIndex])
   {

@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/image-view-properties.h>
@@ -358,7 +358,7 @@ private:
   ImageViewImpl& operator=(ImageViewImpl&&)      = delete;
 
 private: // Data
-  Ui::Visual::Base mVisual;
+  Ui::Integration::Visual::Base mVisual;
 
   Dali::String mUrl;
   Dali::String mPlaceholderUrl;

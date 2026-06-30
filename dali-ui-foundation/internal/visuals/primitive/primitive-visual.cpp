@@ -28,7 +28,7 @@
 #include <dali/public-api/common/constants.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
@@ -46,13 +46,13 @@ namespace
 {
 // shapes
 DALI_ENUM_TO_STRING_TABLE_BEGIN(SHAPE_TYPE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::PrimitiveVisual::Shape, SPHERE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::PrimitiveVisual::Shape, CONE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::PrimitiveVisual::Shape, CYLINDER)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::PrimitiveVisual::Shape, CUBE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::PrimitiveVisual::Shape, OCTAHEDRON)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::PrimitiveVisual::Shape, BEVELLED_CUBE)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::PrimitiveVisual::Shape, CONICAL_FRUSTUM)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::PrimitiveVisual::Shape, SPHERE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::PrimitiveVisual::Shape, CONE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::PrimitiveVisual::Shape, CYLINDER)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::PrimitiveVisual::Shape, CUBE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::PrimitiveVisual::Shape, OCTAHEDRON)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::PrimitiveVisual::Shape, BEVELLED_CUBE)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Ui::Integration::PrimitiveVisual::Shape, CONICAL_FRUSTUM)
 DALI_ENUM_TO_STRING_TABLE_END(SHAPE_TYPE)
 
 // Primitive property defaults
@@ -95,7 +95,7 @@ PrimitiveVisualPtr PrimitiveVisual::New(VisualFactoryCache& factoryCache, const 
 }
 
 PrimitiveVisual::PrimitiveVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::InternalVisualType::PRIMITIVE),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::PRIMITIVE),
   mScaleDimensions(Vector3::ONE),
   mScaleTopRadius(DEFAULT_SCALE_TOP_RADIUS),
   mScaleBottomRadius(DEFAULT_SCALE_BOTTOM_RADIUS),
@@ -105,7 +105,7 @@ PrimitiveVisual::PrimitiveVisual(VisualFactoryCache& factoryCache)
   mBevelSmoothness(DEFAULT_BEVEL_SMOOTHNESS),
   mSlices(DEFAULT_SLICES),
   mStacks(DEFAULT_STACKS),
-  mPrimitiveType(Ui::PrimitiveVisual::Shape::SPHERE)
+  mPrimitiveType(Ui::Integration::PrimitiveVisual::Shape::SPHERE)
 {
   mImpl->mMixColor = DEFAULT_COLOR;
 }
@@ -117,7 +117,7 @@ PrimitiveVisual::~PrimitiveVisual()
 void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
 {
   // Find out which shape to renderer.
-  Property::Value* primitiveTypeValue = propertyMap.Find(Ui::PrimitiveVisual::Property::SHAPE, PRIMITIVE_SHAPE);
+  Property::Value* primitiveTypeValue = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::SHAPE, PRIMITIVE_SHAPE);
   if(primitiveTypeValue)
   {
     Scripting::GetEnumerationProperty(*primitiveTypeValue, SHAPE_TYPE_TABLE, SHAPE_TYPE_TABLE_COUNT, mPrimitiveType);
@@ -129,7 +129,7 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
 
   // By virtue of DoSetProperties being called last, this will override
   // anything set by Ui::VisualBasePropertyIndex::MIX_COLOR
-  Property::Value* colorValue = propertyMap.Find(Ui::PrimitiveVisual::Property::MIX_COLOR, MIX_COLOR);
+  Property::Value* colorValue = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::MIX_COLOR, MIX_COLOR);
   if(colorValue)
   {
     Vector4 color;
@@ -148,7 +148,7 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* slices = propertyMap.Find(Ui::PrimitiveVisual::Property::SLICES, SLICES);
+  Property::Value* slices = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::SLICES, SLICES);
   if(slices)
   {
     if(slices->Get(mSlices))
@@ -171,7 +171,7 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* stacks = propertyMap.Find(Ui::PrimitiveVisual::Property::STACKS, STACKS);
+  Property::Value* stacks = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::STACKS, STACKS);
   if(stacks)
   {
     if(stacks->Get(mStacks))
@@ -194,32 +194,32 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* scaleTop = propertyMap.Find(Ui::PrimitiveVisual::Property::SCALE_TOP_RADIUS, SCALE_TOP_RADIUS);
+  Property::Value* scaleTop = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::SCALE_TOP_RADIUS, SCALE_TOP_RADIUS);
   if(scaleTop && !scaleTop->Get(mScaleTopRadius))
   {
     DALI_LOG_ERROR("Invalid type for scale top radius in PrimitiveVisual.\n");
   }
 
   Property::Value* scaleBottom =
-    propertyMap.Find(Ui::PrimitiveVisual::Property::SCALE_BOTTOM_RADIUS, SCALE_BOTTOM_RADIUS);
+    propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::SCALE_BOTTOM_RADIUS, SCALE_BOTTOM_RADIUS);
   if(scaleBottom && !scaleBottom->Get(mScaleBottomRadius))
   {
     DALI_LOG_ERROR("Invalid type for scale bottom radius in PrimitiveVisual.\n");
   }
 
-  Property::Value* scaleHeight = propertyMap.Find(Ui::PrimitiveVisual::Property::SCALE_HEIGHT, SCALE_HEIGHT);
+  Property::Value* scaleHeight = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::SCALE_HEIGHT, SCALE_HEIGHT);
   if(scaleHeight && !scaleHeight->Get(mScaleHeight))
   {
     DALI_LOG_ERROR("Invalid type for scale height in PrimitiveVisual.\n");
   }
 
-  Property::Value* scaleRadius = propertyMap.Find(Ui::PrimitiveVisual::Property::SCALE_RADIUS, SCALE_RADIUS);
+  Property::Value* scaleRadius = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::SCALE_RADIUS, SCALE_RADIUS);
   if(scaleRadius && !scaleRadius->Get(mScaleRadius))
   {
     DALI_LOG_ERROR("Invalid type for scale radius in PrimitiveVisual.\n");
   }
 
-  Property::Value* dimensions = propertyMap.Find(Ui::PrimitiveVisual::Property::SCALE_DIMENSIONS, SCALE_DIMENSIONS);
+  Property::Value* dimensions = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::SCALE_DIMENSIONS, SCALE_DIMENSIONS);
   if(dimensions)
   {
     if(dimensions->Get(mScaleDimensions))
@@ -247,7 +247,7 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* bevel = propertyMap.Find(Ui::PrimitiveVisual::Property::BEVEL_PERCENTAGE, BEVEL_PERCENTAGE);
+  Property::Value* bevel = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::BEVEL_PERCENTAGE, BEVEL_PERCENTAGE);
   if(bevel)
   {
     if(bevel->Get(mBevelPercentage))
@@ -270,7 +270,7 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* smoothness = propertyMap.Find(Ui::PrimitiveVisual::Property::BEVEL_SMOOTHNESS, BEVEL_SMOOTHNESS);
+  Property::Value* smoothness = propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::BEVEL_SMOOTHNESS, BEVEL_SMOOTHNESS);
   if(smoothness)
   {
     if(smoothness->Get(mBevelSmoothness))
@@ -295,7 +295,7 @@ void PrimitiveVisual::DoSetProperties(const Property::Map& propertyMap)
 
   // Read in light position.
   Property::Value* lightPosition =
-    propertyMap.Find(Ui::PrimitiveVisual::Property::LIGHT_POSITION, LIGHT_POSITION_UNIFORM_NAME);
+    propertyMap.Find(Ui::Integration::PrimitiveVisual::Property::LIGHT_POSITION, LIGHT_POSITION_UNIFORM_NAME);
   if(lightPosition)
   {
     if(!lightPosition->Get(mLightPosition))
@@ -336,19 +336,19 @@ void PrimitiveVisual::DoSetOnScene(Actor& actor)
 void PrimitiveVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::PRIMITIVE);
-  map.Insert(Ui::PrimitiveVisual::Property::MIX_COLOR, mImpl->mMixColor);
-  map.Insert(Ui::PrimitiveVisual::Property::SHAPE, mPrimitiveType);
-  map.Insert(Ui::PrimitiveVisual::Property::SLICES, mSlices);
-  map.Insert(Ui::PrimitiveVisual::Property::STACKS, mStacks);
-  map.Insert(Ui::PrimitiveVisual::Property::SCALE_TOP_RADIUS, mScaleTopRadius);
-  map.Insert(Ui::PrimitiveVisual::Property::SCALE_BOTTOM_RADIUS, mScaleBottomRadius);
-  map.Insert(Ui::PrimitiveVisual::Property::SCALE_HEIGHT, mScaleHeight);
-  map.Insert(Ui::PrimitiveVisual::Property::SCALE_RADIUS, mScaleRadius);
-  map.Insert(Ui::PrimitiveVisual::Property::SCALE_DIMENSIONS, mScaleDimensions);
-  map.Insert(Ui::PrimitiveVisual::Property::BEVEL_PERCENTAGE, mBevelPercentage);
-  map.Insert(Ui::PrimitiveVisual::Property::BEVEL_SMOOTHNESS, mBevelSmoothness);
-  map.Insert(Ui::PrimitiveVisual::Property::LIGHT_POSITION, mLightPosition);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::PRIMITIVE);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::MIX_COLOR, mImpl->mMixColor);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::SHAPE, mPrimitiveType);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::SLICES, mSlices);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::STACKS, mStacks);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::SCALE_TOP_RADIUS, mScaleTopRadius);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::SCALE_BOTTOM_RADIUS, mScaleBottomRadius);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::SCALE_HEIGHT, mScaleHeight);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::SCALE_RADIUS, mScaleRadius);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::SCALE_DIMENSIONS, mScaleDimensions);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::BEVEL_PERCENTAGE, mBevelPercentage);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::BEVEL_SMOOTHNESS, mBevelSmoothness);
+  map.Insert(Ui::Integration::PrimitiveVisual::Property::LIGHT_POSITION, mLightPosition);
 }
 
 void PrimitiveVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -360,7 +360,7 @@ void PrimitiveVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 }
 
@@ -378,7 +378,7 @@ void PrimitiveVisual::OnInitialize()
 
   mImpl->mRenderer = VisualRenderer::New(mGeometry, mShader);
   mImpl->mRenderer.SetProperty(Renderer::Property::FACE_CULLING_MODE, FaceCullingMode::BACK);
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 }
 
 void PrimitiveVisual::UpdateShaderUniforms(Vector2 windowSize)
@@ -418,41 +418,41 @@ void PrimitiveVisual::CreateGeometry()
 
   switch(mPrimitiveType)
   {
-    case Ui::PrimitiveVisual::Shape::SPHERE:
+    case Ui::Integration::PrimitiveVisual::Shape::SPHERE:
     {
       CreateSphere(vertices, indices, mSlices, mStacks);
       break;
     }
-    case Ui::PrimitiveVisual::Shape::CONE:
+    case Ui::Integration::PrimitiveVisual::Shape::CONE:
     {
       // Create a conic with zero top radius.
       CreateConic(vertices, indices, 0, mScaleBottomRadius, mScaleHeight, mSlices);
       break;
     }
-    case Ui::PrimitiveVisual::Shape::CYLINDER:
+    case Ui::Integration::PrimitiveVisual::Shape::CYLINDER:
     {
       // Create a conic with equal radii on the top and bottom.
       CreateConic(vertices, indices, mScaleRadius, mScaleRadius, mScaleHeight, mSlices);
       break;
     }
-    case Ui::PrimitiveVisual::Shape::CUBE:
+    case Ui::Integration::PrimitiveVisual::Shape::CUBE:
     {
       // Create a cube by creating a bevelled cube with minimum bevel.
       CreateBevelledCube(vertices, indices, mScaleDimensions, 0.0, 0.0);
       break;
     }
-    case Ui::PrimitiveVisual::Shape::OCTAHEDRON:
+    case Ui::Integration::PrimitiveVisual::Shape::OCTAHEDRON:
     {
       // Create an octahedron by creating a bevelled cube with maximum bevel.
       CreateBevelledCube(vertices, indices, mScaleDimensions, 1.0, mBevelSmoothness);
       break;
     }
-    case Ui::PrimitiveVisual::Shape::BEVELLED_CUBE:
+    case Ui::Integration::PrimitiveVisual::Shape::BEVELLED_CUBE:
     {
       CreateBevelledCube(vertices, indices, mScaleDimensions, mBevelPercentage, mBevelSmoothness);
       break;
     }
-    case Ui::PrimitiveVisual::Shape::CONICAL_FRUSTUM:
+    case Ui::Integration::PrimitiveVisual::Shape::CONICAL_FRUSTUM:
     {
       CreateConic(vertices, indices, mScaleTopRadius, mScaleBottomRadius, mScaleHeight, mSlices);
       break;

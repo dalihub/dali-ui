@@ -72,7 +72,7 @@ public:
    * @param[in] properties A Property::Map containing settings for this visual
    * @return A smart-pointer to the newly allocated visual.
    */
-  static NPatchVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static NPatchVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                              const VisualUrl& imageUrl, const Property::Map& properties);
 
   /**
@@ -87,7 +87,7 @@ public:
    * @param[in] imageUrl The URL to 9 patch image resource to use
    * @return A smart-pointer to the newly allocated visual.
    */
-  static NPatchVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static NPatchVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                              const VisualUrl& imageUrl);
 
 public: // from Visual
@@ -124,7 +124,7 @@ protected:
    * @param[in] shaderFactory The ImageVisualShaderFactory object
    * @param[in] creationOptions The options when create the visual
    */
-  NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions);
+  NPatchVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions);
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().

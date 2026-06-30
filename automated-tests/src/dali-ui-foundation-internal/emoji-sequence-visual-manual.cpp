@@ -16,7 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/devel-api/focus-manager/focus-manager-devel.h>
+#include <dali-ui-foundation/integration-api/focus-manager/focus-manager-integ.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali/devel-api/text-abstraction/font-client.h>

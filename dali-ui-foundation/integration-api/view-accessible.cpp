@@ -32,8 +32,8 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/property-bridge/property-bridge.h>
+#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
@@ -82,7 +82,7 @@ std::string GetLocaleText(std::string string, const char* domain = "dali-ui")
 
 Dali::Actor CreateHighlightIndicatorActor()
 {
-  std::string focusBorderImagePath(AssetManager::GetDaliImagePath());
+  std::string focusBorderImagePath(Dali::Ui::Integration::AssetManager::GetDaliImagePath());
   focusBorderImagePath += "/keyboard_focus.9.png";
 
   // Create the default if it hasn't been set and one that's shared by all the
@@ -697,7 +697,7 @@ std::vector<Dali::Accessibility::Relation> ViewAccessible::GetRelationSet()
 
 std::string ViewAccessible::GetStringProperty(std::string propertyName) const
 {
-  return Dali::Ui::PropertyBridge::Get().GetStringProperty(Self(), propertyName);
+  return Dali::Ui::Integration::PropertyBridge::Get().GetStringProperty(Self(), propertyName);
 }
 
 bool ViewAccessible::IsScrollable() const

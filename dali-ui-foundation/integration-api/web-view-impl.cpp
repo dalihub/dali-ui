@@ -34,10 +34,10 @@
 #include <memory>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
@@ -98,7 +98,7 @@ DALI_TYPE_REGISTRATION_END()
 Dali::Property::Map CreateTransparentColorVisualProperties()
 {
   Dali::Property::Map map;
-  map.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::InternalVisualType::COLOR);
+  map.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::Integration::InternalVisualType::COLOR);
   map.Insert(Dali::Ui::VisualBasePropertyIndex::MIX_COLOR, Color::TRANSPARENT);
   return map;
 }
@@ -403,7 +403,7 @@ void WebViewImpl::OnInitialize()
   // This ensures the actor is renderable even before the first frame arrives.
   auto& viewData = Internal::ViewDataImpl::Get(*this);
   {
-    Ui::Visual::Base placeholderVisual = Ui::VisualFactory::Get().CreateVisual(TRANSPARENT_COLOR_VISUAL_PROPERTIES);
+    Ui::Integration::Visual::Base placeholderVisual = Ui::Integration::VisualFactory::Get().CreateVisual(TRANSPARENT_COLOR_VISUAL_PROPERTIES);
     if(placeholderVisual)
     {
       viewData.RegisterVisual(WebViewImpl::Property::URL, placeholderVisual);
@@ -522,17 +522,17 @@ void WebViewImpl::OnFrameRendered()
   Dali::Ui::ImageUrl nativeImageUrl = Dali::Ui::ImageUrlUtils::GenerateUrl(nativeImagePtr, /*useNativeImage=*/true);
 
   Dali::Property::Map imageVisualMap;
-  imageVisualMap.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::InternalVisualType::IMAGE);
+  imageVisualMap.Insert(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::Integration::InternalVisualType::IMAGE);
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::URL, nativeImageUrl.GetUrl());
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::PIXEL_AREA, FULL_TEXTURE_RECT);
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_U, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
 
-  mVisual = Ui::VisualFactory::Get().CreateVisual(imageVisualMap);
+  mVisual = Ui::Integration::VisualFactory::Get().CreateVisual(imageVisualMap);
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
-    viewData.RegisterVisual(WebViewImpl::Property::URL, mVisual, DepthIndex::CONTENT);
+    viewData.RegisterVisual(WebViewImpl::Property::URL, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
     EnableBlendMode(!mVideoHoleEnabled);
   }
   else
@@ -589,7 +589,7 @@ void WebViewImpl::SetDisplayArea(const Dali::BoundsInteger& displayArea)
                        Dali::CreatePropertyMap({{Dali::Ui::Visual::Transform::Property::SIZE, transformSize}}));
 
       auto& viewData = Internal::ViewDataImpl::Get(*this);
-      viewData.DoAction(WebViewImpl::Property::URL, DevelVisual::Action::UPDATE_PROPERTY, updateMap);
+      viewData.DoAction(WebViewImpl::Property::URL, Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, updateMap);
     }
 
     mWebViewArea = displayArea;

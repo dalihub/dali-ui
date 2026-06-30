@@ -22,7 +22,7 @@
 #include <dali/integration-api/adaptor-framework/shader-precompiler.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visual-factory/precompile-shader-option.h>
+#include <dali-ui-foundation/integration-api/visual-factory/precompile-shader-option.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
@@ -30,8 +30,9 @@ namespace Dali
 {
 namespace Ui
 {
-using HashType       = uint64_t;
-using ShaderFlagList = std::vector<PrecompileShaderOption::Flag>;
+using PrecompileShaderOption = Dali::Ui::Integration::PrecompileShaderOption;
+using HashType               = uint64_t;
+using ShaderFlagList         = std::vector<PrecompileShaderOption::Flag>;
 
 namespace Internal
 {

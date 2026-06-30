@@ -27,7 +27,7 @@
 #include <dali/devel-api/common/vector-wrapper.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/builder/tree-node.h>
+#include <dali-ui-foundation/integration-api/builder/tree-node.h>
 
 namespace Dali
 {
@@ -35,6 +35,8 @@ namespace Ui
 {
 namespace Internal
 {
+using TreeNode = Dali::Ui::Integration::TreeNode;
+
 typedef std::vector<char>    VectorChar;
 typedef VectorChar::iterator VectorCharIter;
 

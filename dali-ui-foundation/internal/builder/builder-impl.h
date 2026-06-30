@@ -30,8 +30,8 @@
 #include <string>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/builder/builder.h>
-#include <dali-ui-foundation/devel-api/builder/json-parser.h>
+#include <dali-ui-foundation/integration-api/builder/builder.h>
+#include <dali-ui-foundation/integration-api/builder/json-parser.h>
 #include <dali-ui-foundation/internal/builder/builder-declarations.h>
 #include <dali-ui-foundation/internal/builder/style.h>
 
@@ -50,8 +50,12 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Integration
+{
 class TreeNode;
 }
+using TreeNode = Dali::Ui::Integration::TreeNode;
+} //namespace Ui
 
 namespace Ui
 {
@@ -65,7 +69,7 @@ class Builder;
 class Replacement;
 
 /**
- * @copydoc Ui::Builder
+ * @copydoc Ui::Integration::Builder
  */
 class Builder : public Dali::BaseObject
 {
@@ -73,77 +77,77 @@ public:
   Builder();
 
   /**
-   * @copydoc Ui::Builder::LoadFromString
+   * @copydoc Ui::Integration::Builder::LoadFromString
    */
-  void LoadFromString(const std::string& data, Dali::Ui::Builder::UiFormat rep = Dali::Ui::Builder::JSON);
+  void LoadFromString(const std::string& data, Dali::Ui::Integration::Builder::UiFormat rep = Dali::Ui::Integration::Builder::JSON);
 
   /**
-   * @copydoc Ui::Builder::AddConstants
+   * @copydoc Ui::Integration::Builder::AddConstants
    */
   void AddConstants(const Property::Map& map);
 
   /**
-   * @copydoc Ui::Builder::AddConstant
+   * @copydoc Ui::Integration::Builder::AddConstant
    */
   void AddConstant(const std::string& key, const Property::Value& value);
 
   /**
-   * @copydoc Ui::Builder::GetConfigurations
+   * @copydoc Ui::Integration::Builder::GetConfigurations
    */
   const Property::Map& GetConfigurations() const;
 
   /**
-   * @copydoc Ui::Builder::GetConstants
+   * @copydoc Ui::Integration::Builder::GetConstants
    */
   const Property::Map& GetConstants() const;
 
   /**
-   * @copydoc Ui::Builder::GetConstant
+   * @copydoc Ui::Integration::Builder::GetConstant
    */
   const Property::Value& GetConstant(const std::string& key) const;
 
   /**
-   * @copydoc Ui::Builder::CreateAnimation( const std::string& animationName );
+   * @copydoc Ui::Integration::Builder::CreateAnimation( const std::string& animationName );
    */
   Animation CreateAnimation(const std::string& animationName);
 
   /**
-   * @copydoc Ui::Builder::CreateAnimation( const std::string& animationName, const Property::Map& map );
+   * @copydoc Ui::Integration::Builder::CreateAnimation( const std::string& animationName, const Property::Map& map );
    */
   Animation CreateAnimation(const std::string& animationName, const Property::Map& map);
 
   /**
-   * @copydoc Ui::Builder::CreateAnimation( const std::string&,Dali::Actor);
+   * @copydoc Ui::Integration::Builder::CreateAnimation( const std::string&,Dali::Actor);
    */
   Animation CreateAnimation(const std::string& animationName, Dali::Actor sourceActor);
 
   /**
-   * @copydoc Ui::Builder::CreateAnimation( const std::string&,const Property::Map&, Dali::Actor);
+   * @copydoc Ui::Integration::Builder::CreateAnimation( const std::string&,const Property::Map&, Dali::Actor);
    */
   Animation CreateAnimation(const std::string& animationName, const Property::Map& map, Dali::Actor sourceActor);
 
   /**
-   * @copydoc Ui::Builder::Create( const std::string& templateName );
+   * @copydoc Ui::Integration::Builder::Create( const std::string& templateName );
    */
   BaseHandle Create(const std::string& templateName);
 
   /**
-   * @copydoc Ui::Builder::Create( const std::string& templateName, const Property::Map& map );
+   * @copydoc Ui::Integration::Builder::Create( const std::string& templateName, const Property::Map& map );
    */
   BaseHandle Create(const std::string& templateName, const Property::Map& map);
 
   /**
-   * @copydoc Ui::Builder::CreateFromJson( const std::string& json );
+   * @copydoc Ui::Integration::Builder::CreateFromJson( const std::string& json );
    */
   BaseHandle CreateFromJson(const std::string& json);
 
   /**
-   * @copydoc Ui::Builder::ApplyFromJson( Handle& handle, const std::string& json );
+   * @copydoc Ui::Integration::Builder::ApplyFromJson( Handle& handle, const std::string& json );
    */
   bool ApplyFromJson(Handle& handle, const std::string& json);
 
   /**
-   * @copydoc Ui::Builder::ApplyStyle
+   * @copydoc Ui::Integration::Builder::ApplyStyle
    */
   bool ApplyStyle(const std::string& styleName, Handle& handle);
 
@@ -175,27 +179,27 @@ public:
   bool GetStyleProperties(const std::string& styleName, const Handle& controlType, Property::Map& result);
 
   /**
-   * @copydoc Ui::Builder::AddActors
+   * @copydoc Ui::Integration::Builder::AddActors
    */
   void AddActors(Actor toActor);
 
   /**
-   * @copydoc Ui::Builder::AddActors
+   * @copydoc Ui::Integration::Builder::AddActors
    */
   void AddActors(const std::string& sectionName, Actor toActor);
 
   /**
-   * @copydoc Ui::Builder::CreateRenderTask
+   * @copydoc Ui::Integration::Builder::CreateRenderTask
    */
   void CreateRenderTask(const std::string& name);
 
   /**
-   * @copydoc Ui::Builder::GetPath
+   * @copydoc Ui::Integration::Builder::GetPath
    */
   Path GetPath(const std::string& name);
 
   /**
-   * @copydoc Ui::Builder::GetPathConstrainer
+   * @copydoc Ui::Integration::Builder::GetPathConstrainer
    */
   Dali::PathConstrainer GetPathConstrainer(const std::string& name);
 
@@ -208,7 +212,7 @@ public:
   bool IsPathConstrainer(const std::string& name);
 
   /**
-   * @copydoc Ui::Builder::GetLinearConstrainer
+   * @copydoc Ui::Integration::Builder::GetLinearConstrainer
    */
   Dali::LinearConstrainer GetLinearConstrainer(const std::string& name);
 
@@ -221,9 +225,9 @@ public:
   bool IsLinearConstrainer(const std::string& name);
 
   /**
-   * @copydoc Ui::Builder::QuitSignal
+   * @copydoc Ui::Integration::Builder::QuitSignal
    */
-  Ui::Builder::BuilderSignalType& QuitSignal();
+  Ui::Integration::Builder::BuilderSignalType& QuitSignal();
 
   /**
    * Emits the quit signal
@@ -267,7 +271,7 @@ private:
 
   BaseHandle DoCreate(const TreeNode& root, const TreeNode& node, Actor parent, const Replacement& replacements);
 
-  void SetupTask(RenderTask& task, const Ui::TreeNode& node, const Replacement& replacement);
+  void SetupTask(RenderTask& task, const Ui::Integration::TreeNode& node, const Replacement& replacement);
 
   bool ApplyStyle(const std::string& styleName, Handle& handle, const Replacement& replacement);
 
@@ -331,21 +335,21 @@ private:
   bool ConvertChildValue(const TreeNode& mappingRoot, KeyStack& keyStack, Property::Value& value);
 
 private:
-  Ui::JsonParser                 mParser;
-  PathLut                        mPathLut;
-  PathConstrainerLut             mPathConstrainerLut;
-  LinearConstrainerLut           mLinearConstrainerLut;
-  SlotDelegate<Builder>          mSlotDelegate;
-  Property::Map                  mReplacementMap;
-  Property::Map                  mConfigurationMap;
-  MappingsLut                    mCompleteMappings;
-  Dictionary<StylePtr>           mStyles; // State based styles
-  Ui::Builder::BuilderSignalType mQuitSignal;
+  Ui::Integration::JsonParser                 mParser;
+  PathLut                                     mPathLut;
+  PathConstrainerLut                          mPathConstrainerLut;
+  LinearConstrainerLut                        mLinearConstrainerLut;
+  SlotDelegate<Builder>                       mSlotDelegate;
+  Property::Map                               mReplacementMap;
+  Property::Map                               mConfigurationMap;
+  MappingsLut                                 mCompleteMappings;
+  Dictionary<StylePtr>                        mStyles; // State based styles
+  Ui::Integration::Builder::BuilderSignalType mQuitSignal;
 };
 
 } // namespace Internal
 
-inline Internal::Builder& GetImpl(Dali::Ui::Builder& obj)
+inline Internal::Builder& GetImpl(Dali::Ui::Integration::Builder& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 
@@ -354,7 +358,7 @@ inline Internal::Builder& GetImpl(Dali::Ui::Builder& obj)
   return static_cast<Internal::Builder&>(handle);
 }
 
-inline const Internal::Builder& GetImpl(const Dali::Ui::Builder& obj)
+inline const Internal::Builder& GetImpl(const Dali::Ui::Integration::Builder& obj)
 {
   DALI_ASSERT_ALWAYS(obj);
 

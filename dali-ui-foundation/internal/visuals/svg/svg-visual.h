@@ -67,7 +67,7 @@ public:
    * @param[in] properties A Property::Map containing settings for this visual
    * @return A smart-pointer to the newly allocated visual.
    */
-  static SvgVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static SvgVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                           const VisualUrl& imageUrl, const Property::Map& properties);
 
   /**
@@ -84,7 +84,7 @@ public:
    * @param[in] size The width and height of the rasterized buffer. The visual size will be used if these are 0.
    * @return A smart-pointer to the newly allocated visual.
    */
-  static SvgVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  static SvgVisualPtr New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                           const VisualUrl& imageUrl, ImageDimensions size = ImageDimensions());
 
 public: // from Visual
@@ -123,7 +123,7 @@ protected:
    * @param[in] imageUrl The URL to svg resource to use
    * @param[in] size The width and height of the rasterized buffer. The visual size will be used if these are 0.
    */
-  SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+  SvgVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
             const VisualUrl& imageUrl, ImageDimensions size);
 
   /**

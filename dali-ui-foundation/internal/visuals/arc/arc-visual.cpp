@@ -22,7 +22,7 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
@@ -41,8 +41,8 @@ const int CUSTOM_PROPERTY_COUNT(4); // thickness,start,sweep,radius
 
 // cap
 DALI_ENUM_TO_STRING_TABLE_BEGIN(CAP)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(DevelArcVisual::Cap, BUTT)
-  DALI_ENUM_TO_STRING_WITH_SCOPE(DevelArcVisual::Cap, ROUND)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::Integration::ArcVisual::Cap, BUTT)
+  DALI_ENUM_TO_STRING_WITH_SCOPE(Dali::Ui::Integration::ArcVisual::Cap, ROUND)
 DALI_ENUM_TO_STRING_TABLE_END(CAP)
 
 } // namespace
@@ -56,7 +56,7 @@ ArcVisualPtr ArcVisual::New(VisualFactoryCache& factoryCache, const Property::Ma
 }
 
 ArcVisual::ArcVisual(VisualFactoryCache& factoryCache)
-: Visual::Base(factoryCache, Ui::InternalVisualType::ARC),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::ARC),
   mThickness(0.0f),
   mRadius(0.0f),
   mStartAngle(0.0f),
@@ -65,7 +65,7 @@ ArcVisual::ArcVisual(VisualFactoryCache& factoryCache)
   mThicknessIndex(Property::INVALID_INDEX),
   mStartAngleIndex(Property::INVALID_INDEX),
   mSweepAngleIndex(Property::INVALID_INDEX),
-  mCapType(DevelArcVisual::Cap::BUTT)
+  mCapType(Dali::Ui::Integration::ArcVisual::Cap::BUTT)
 {
 }
 
@@ -75,7 +75,7 @@ ArcVisual::~ArcVisual()
 
 void ArcVisual::DoSetProperties(const Property::Map& propertyMap)
 {
-  Property::Value* thicknessValue = propertyMap.Find(Ui::DevelArcVisual::Property::THICKNESS, THICKNESS_NAME);
+  Property::Value* thicknessValue = propertyMap.Find(Ui::Integration::ArcVisual::Property::THICKNESS, THICKNESS_NAME);
   if(thicknessValue)
   {
     if(!thicknessValue->Get(mThickness))
@@ -95,7 +95,7 @@ void ArcVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* startAngleValue = propertyMap.Find(Ui::DevelArcVisual::Property::START_ANGLE, START_ANGLE_NAME);
+  Property::Value* startAngleValue = propertyMap.Find(Ui::Integration::ArcVisual::Property::START_ANGLE, START_ANGLE_NAME);
   if(startAngleValue)
   {
     if(!startAngleValue->Get(mStartAngle))
@@ -112,7 +112,7 @@ void ArcVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* sweepAngleValue = propertyMap.Find(Ui::DevelArcVisual::Property::SWEEP_ANGLE, SWEEP_ANGLE_NAME);
+  Property::Value* sweepAngleValue = propertyMap.Find(Ui::Integration::ArcVisual::Property::SWEEP_ANGLE, SWEEP_ANGLE_NAME);
   if(sweepAngleValue)
   {
     if(!sweepAngleValue->Get(mSweepAngle))
@@ -129,12 +129,12 @@ void ArcVisual::DoSetProperties(const Property::Map& propertyMap)
     }
   }
 
-  Property::Value* capValue = propertyMap.Find(Ui::DevelArcVisual::Property::CAP, CAP_NAME);
+  Property::Value* capValue = propertyMap.Find(Ui::Integration::ArcVisual::Property::CAP, CAP_NAME);
   if(capValue)
   {
     int capType = 0;
     Scripting::GetEnumerationProperty(*capValue, CAP_TABLE, CAP_TABLE_COUNT, capType);
-    mCapType = Ui::DevelArcVisual::Cap::Type(capType);
+    mCapType = Ui::Integration::ArcVisual::Cap::Type(capType);
   }
 }
 
@@ -169,11 +169,11 @@ void ArcVisual::DoCreatePropertyMap(Property::Map& map) const
   }
 
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::ARC);
-  map.Insert(Ui::DevelArcVisual::Property::THICKNESS, thickness);
-  map.Insert(Ui::DevelArcVisual::Property::START_ANGLE, startAngle);
-  map.Insert(Ui::DevelArcVisual::Property::SWEEP_ANGLE, sweepAngle);
-  map.Insert(Ui::DevelArcVisual::Property::CAP, mCapType);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::ARC);
+  map.Insert(Ui::Integration::ArcVisual::Property::THICKNESS, thickness);
+  map.Insert(Ui::Integration::ArcVisual::Property::START_ANGLE, startAngle);
+  map.Insert(Ui::Integration::ArcVisual::Property::SWEEP_ANGLE, sweepAngle);
+  map.Insert(Ui::Integration::ArcVisual::Property::CAP, mCapType);
 }
 
 void ArcVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -192,7 +192,7 @@ void ArcVisual::OnSetTransform()
 
     if(mImpl->mTransformMapChanged)
     {
-      mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+      mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
     }
   }
 }
@@ -202,7 +202,7 @@ void ArcVisual::OnInitialize()
   Geometry geometry = mFactoryCache.GetGeometry(VisualFactoryCache::QUAD_GEOMETRY);
 
   Shader shader;
-  if(mCapType == DevelArcVisual::Cap::BUTT)
+  if(mCapType == Dali::Ui::Integration::ArcVisual::Cap::BUTT)
   {
     shader = mFactoryCache.GetShader(VisualFactoryCache::ARC_BUTT_CAP_SHADER);
     if(!shader)
@@ -235,18 +235,18 @@ void ArcVisual::OnInitialize()
   mImpl->mRenderer.ReserveCustomProperties(CUSTOM_PROPERTY_COUNT);
 
   mThicknessIndex =
-    mImpl->mRenderer.RegisterUniqueProperty(DevelArcVisual::Property::THICKNESS, THICKNESS_NAME, mThickness);
+    mImpl->mRenderer.RegisterUniqueProperty(Dali::Ui::Integration::ArcVisual::Property::THICKNESS, THICKNESS_NAME, mThickness);
   mStartAngleIndex =
-    mImpl->mRenderer.RegisterUniqueProperty(DevelArcVisual::Property::START_ANGLE, START_ANGLE_NAME, mStartAngle);
+    mImpl->mRenderer.RegisterUniqueProperty(Dali::Ui::Integration::ArcVisual::Property::START_ANGLE, START_ANGLE_NAME, mStartAngle);
   mSweepAngleIndex =
-    mImpl->mRenderer.RegisterUniqueProperty(DevelArcVisual::Property::SWEEP_ANGLE, SWEEP_ANGLE_NAME, mSweepAngle);
+    mImpl->mRenderer.RegisterUniqueProperty(Dali::Ui::Integration::ArcVisual::Property::SWEEP_ANGLE, SWEEP_ANGLE_NAME, mSweepAngle);
 
   mRadiusIndex = mImpl->mRenderer.RegisterProperty(RADIUS_NAME, mRadius);
 
   mImpl->mRenderer.SetProperty(Renderer::Property::BLEND_MODE, BlendMode::ON);
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 }
 
 } // namespace Internal

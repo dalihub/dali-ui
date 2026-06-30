@@ -23,8 +23,8 @@
 #include <dali/public-api/object/property-array.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
 {
@@ -359,40 +359,40 @@ void LottieAnimationVisual::Play()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::DevelAnimatedVectorImageVisual::Action::PLAY, Dali::Property::Value());
+  VisualBase::DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PLAY, Dali::Property::Value());
 }
 
 void LottieAnimationVisual::Pause()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::DevelAnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Value());
+  VisualBase::DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::PAUSE, Dali::Property::Value());
 }
 
 void LottieAnimationVisual::Stop()
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::DevelAnimatedVectorImageVisual::Action::STOP, Dali::Property::Value());
+  VisualBase::DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::STOP, Dali::Property::Value());
 }
 
 void LottieAnimationVisual::JumpTo(int frame)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  VisualBase::DoAction(Ui::DevelAnimatedVectorImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
+  VisualBase::DoAction(Ui::Integration::AnimatedVectorImageVisual::Action::JUMP_TO, static_cast<int32_t>(frame));
 }
 
 void LottieAnimationVisual::SetDynamicProperty(const LottieAnimation::DynamicPropertyInfo& info)
 {
   // Forcibly update properties before call DoAction
   GetImplementation(*this).UpdateProperty();
-  Ui::DevelAnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
+  Ui::Integration::AnimatedVectorImageVisual::DynamicPropertyInfo dynamicInfo;
   dynamicInfo.id       = info.id;
   dynamicInfo.keyPath  = info.keyPath.CStr();
   dynamicInfo.property = static_cast<int32_t>(info.property);
   dynamicInfo.callback = info.callback;
-  GetImplementation(*this).DoActionExtension(Ui::DevelAnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY, Dali::Any(dynamicInfo));
+  GetImplementation(*this).DoActionExtension(Ui::Integration::AnimatedVectorImageVisual::Action::SET_DYNAMIC_PROPERTY, Dali::Any(dynamicInfo));
 }
 
 // =============================================================================

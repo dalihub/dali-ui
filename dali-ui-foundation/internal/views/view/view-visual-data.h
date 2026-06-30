@@ -22,9 +22,9 @@
 #include <unordered_map>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/devel-api/visuals/visuals-container.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/internal/builder/dictionary.h>
 #include <dali-ui-foundation/internal/builder/style.h>
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
@@ -50,15 +50,15 @@ class Base;
  */
 struct RegisteredVisual
 {
-  Property::Index  index;
-  Ui::Visual::Base visual;
+  Property::Index               index;
+  Ui::Integration::Visual::Base visual;
 
   bool enabled : 1;
   bool pending : 1;
   bool overrideReadyTransition : 1;
   bool overrideCornerProperties : 1;
 
-  RegisteredVisual(Property::Index aIndex, Ui::Visual::Base& aVisual, bool aEnabled, bool aPendingReplacement)
+  RegisteredVisual(Property::Index aIndex, Ui::Integration::Visual::Base& aVisual, bool aEnabled, bool aPendingReplacement)
   : index(aIndex),
     visual(aVisual),
     enabled(aEnabled),
@@ -118,12 +118,12 @@ public:
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::EnableReadyTransitionOverridden()
    */
-  void EnableReadyTransitionOverridden(Ui::Visual::Base& visual, bool enable);
+  void EnableReadyTransitionOverridden(Ui::Integration::Visual::Base& visual, bool enable);
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::EnableCornerPropertiesOverridden()
    */
-  void EnableCornerPropertiesOverridden(Ui::Visual::Base& visual, bool enable, Dali::Constraint cornerRadiusConstraint);
+  void EnableCornerPropertiesOverridden(Ui::Integration::Visual::Base& visual, bool enable, Dali::Constraint cornerRadiusConstraint);
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::GetVisualResourceStatus()
@@ -141,22 +141,22 @@ public:
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual);
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual);
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, int depthIndex);
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled);
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled);
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::RegisterVisual()
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex);
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled, int depthIndex);
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::UnregisterVisual()
@@ -166,7 +166,7 @@ public:
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::GetVisual()
    */
-  Ui::Visual::Base GetVisual(Property::Index index) const;
+  Ui::Integration::Visual::Base GetVisual(Property::Index index) const;
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::GetVisualImplPtr()
@@ -177,7 +177,7 @@ public:
    * @brief Get visual by its name
    * @param[in] name Name of visual
    */
-  Ui::Visual::Base GetVisual(const std::string& name) const;
+  Ui::Integration::Visual::Base GetVisual(const std::string& name) const;
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::GetVisualProperty()
@@ -280,13 +280,13 @@ public:
    * @brief Stops observing the given visual.
    * @param[in] visual The visual to stop observing
    */
-  void StopObservingVisual(Ui::Visual::Base& visual);
+  void StopObservingVisual(Ui::Integration::Visual::Base& visual);
 
   /**
    * @brief Starts observing the given visual.
    * @param[in] visual The visual to start observing
    */
-  void StartObservingVisual(Ui::Visual::Base& visual);
+  void StartObservingVisual(Ui::Integration::Visual::Base& visual);
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::CreateAnimationConstraints()
@@ -315,7 +315,7 @@ public:
   /**
    * @copydoc Ui::View::AddVisual()
    */
-  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
+  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
 
   /**
    * @brief Adds a shadow visual object to this view.
@@ -324,7 +324,7 @@ public:
    * @param[in] internalContainerRangeType The range of visuals to be added
    * @return True if the visual was added successfully, false otherwise
    */
-  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType);
+  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
 
   /**
    * @copydoc Ui::View::RemoveVisual()
@@ -334,12 +334,12 @@ public:
   /**
    * @copydoc Ui::View::GetVisualCount()
    */
-  uint32_t GetVisualObjectCount(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType) const;
+  uint32_t GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const;
 
   /**
    * @copydoc Ui::View::GetVisualAt()
    */
-  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType, uint32_t index) const;
+  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t index) const;
 
 private:
   /**
@@ -374,16 +374,16 @@ private:
    * @param[in] enabled false if derived class wants to view when visual is set on stage
    * @param[in] depthIndexValueSet Set to true if the depthIndex has actually been set manually
    * @param[in] depthIndex The visual's depth-index is set to this. If the depth-index is set to
-   * DepthIndex::Ranges::AUTO_INDEX, the actual depth-index of visual will be determind automatically (Use previous
+   * Dali::Ui::Integration::DepthIndex::Ranges::AUTO_INDEX, the actual depth-index of visual will be determind automatically (Use previous
    * visuals depth-index, or placed on top of all other visuals.) Otherwise, the visual's depth-index is set to clamped
-   * value, between DepthIndex::Ranges::MINIMUM_DEPTH_INDEX and DepthIndex::Ranges::MAXIMUM_DEPTH_INDEX.
+   * value, between Dali::Ui::Integration::DepthIndex::Ranges::MINIMUM_DEPTH_INDEX and Dali::Ui::Integration::DepthIndex::Ranges::MAXIMUM_DEPTH_INDEX.
    *
    * @note Registering a visual with an index that already has a registered visual will replace it. The replacement will
    *       occur once the replacement visual is ready (loaded).
    */
-  void RegisterVisual(Property::Index index, Ui::Visual::Base& visual, VisualState::Type enabled,
+  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, VisualState::Type enabled,
                       DepthIndexValue::Type depthIndexValueSet,
-                      int                   depthIndex = static_cast<int>(Ui::DepthIndex::AUTO_INDEX));
+                      int                   depthIndex = static_cast<int>(Ui::Integration::DepthIndex::AUTO_INDEX));
 
 public:
   RegisteredVisualContainer mVisuals; ///< Stores visuals needed by the view, non trivial type so
@@ -392,7 +392,7 @@ public:
   RegisteredVisualContainer       mRemoveVisuals; ///< List of visuals that are being replaced by another visual once ready
 
 public:
-  Ui::VisualsContainer mVisualObjectsContainer[static_cast<uint32_t>(Ui::DevelVisual::InternalContainerRangeType::MAX_COUNT)]; ///< The containers for VisualBase class.
+  Ui::Integration::VisualsContainer mVisualObjectsContainer[static_cast<uint32_t>(Ui::Integration::Visual::InternalContainerRangeType::MAX_COUNT)]; ///< The containers for VisualBase class.
 
 private:
   ViewDataImpl& mOuter;

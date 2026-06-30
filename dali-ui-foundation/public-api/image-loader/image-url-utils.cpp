@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/image-loader/texture-manager.h>
+#include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 
 // EXTERNAL INCLUDES

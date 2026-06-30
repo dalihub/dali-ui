@@ -27,9 +27,9 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
-#include <dali-ui-foundation/devel-api/visuals/visuals-container.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
@@ -52,7 +52,7 @@ public:
    * @param[in] rangeType The range type of this VisualsContainer.
    * @return The newly created visual object container.
    */
-  static VisualsContainerPtr New(Dali::Ui::View view, Dali::Ui::DevelVisual::InternalContainerRangeType rangeType);
+  static VisualsContainerPtr New(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType);
 
 public: ///< Public API
   /**
@@ -63,7 +63,7 @@ public: ///< Public API
   /**
    * @copydoc Dali::VisualsContainer::GetContainerRangeType()
    */
-  Dali::Ui::DevelVisual::InternalContainerRangeType GetContainerRangeType() const;
+  Dali::Ui::Integration::Visual::InternalContainerRangeType GetContainerRangeType() const;
 
   /**
    * @copydoc Dali::VisualsContainer::GetVisualBasesCount()
@@ -78,7 +78,7 @@ public: ///< Public API
   /**
    * @copydoc Dali::VisualsContainer::AddVisualBase()
    */
-  bool AddVisualBase(Dali::Ui::VisualBase visualObject, Dali::Ui::VisualsContainer::ShadowType shadowType = Dali::Ui::VisualsContainer::ShadowType::NONE);
+  bool AddVisualBase(Dali::Ui::VisualBase visualObject, Dali::Ui::Integration::VisualsContainer::ShadowType shadowType = Dali::Ui::Integration::VisualsContainer::ShadowType::NONE);
 
   /**
    * @copydoc Dali::VisualsContainer::RemoveVisualBase()
@@ -115,7 +115,7 @@ protected:
    * @param[in] control The control that owns this VisualsContainer.
    * @param[in] rangeType The range type of this VisualsContainer.
    */
-  VisualsContainer(Dali::Ui::View view, Dali::Ui::DevelVisual::InternalContainerRangeType rangeType);
+  VisualsContainer(Dali::Ui::View view, Dali::Ui::Integration::Visual::InternalContainerRangeType rangeType);
 
 public:
   /**
@@ -127,7 +127,7 @@ private:
   std::vector<Dali::Ui::VisualBase> mVisualBases;
   Dali::WeakHandle<Dali::Ui::View>  mView;
 
-  const Dali::Ui::DevelVisual::InternalContainerRangeType mRangeType;
+  const Dali::Ui::Integration::Visual::InternalContainerRangeType mRangeType;
 
   Dali::FreeList mVisualIndexConverter; ///< Convert from virtual visual index of VisualBase to actual visual index of mView.
 };
@@ -135,7 +135,7 @@ private:
 
 // Helpers for api forwarding methods
 
-inline static Internal::VisualsContainer& GetImplementation(Dali::Ui::VisualsContainer& handle)
+inline static Internal::VisualsContainer& GetImplementation(Dali::Ui::Integration::VisualsContainer& handle)
 {
   DALI_ASSERT_ALWAYS(handle && "VisualsContainer handle is empty.");
 
@@ -144,7 +144,7 @@ inline static Internal::VisualsContainer& GetImplementation(Dali::Ui::VisualsCon
   return static_cast<Internal::VisualsContainer&>(object);
 }
 
-inline static const Internal::VisualsContainer& GetImplementation(const Dali::Ui::VisualsContainer& handle)
+inline static const Internal::VisualsContainer& GetImplementation(const Dali::Ui::Integration::VisualsContainer& handle)
 {
   DALI_ASSERT_ALWAYS(handle && "VisualsContainer handle is empty.");
 

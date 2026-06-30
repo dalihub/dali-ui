@@ -17,8 +17,8 @@
  *
  */
 
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/devel-api/visuals/animated-vector-image-visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visuals/animated-vector-image-visual-actions-integ.h>
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
@@ -413,8 +413,8 @@ private:
   LottieAnimationViewImpl& operator=(const LottieAnimationViewImpl&) = delete;
   LottieAnimationViewImpl& operator=(LottieAnimationViewImpl&&)      = delete;
 
-private:                    // Data
-  Ui::Visual::Base mVisual; ///< The registered Lottie visual; null when no URL is set
+private:                                 // Data
+  Ui::Integration::Visual::Base mVisual; ///< The registered Lottie visual; null when no URL is set
 
   Dali::String  mUrl;
   Dali::String  mMinFrameMarker;

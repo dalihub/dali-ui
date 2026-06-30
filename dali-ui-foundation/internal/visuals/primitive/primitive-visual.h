@@ -48,7 +48,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/primitive-visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/primitive-visual-properties-integ.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 
 namespace Dali
@@ -345,7 +345,7 @@ private:
   int     mSlices;            ///< Number of slices to use when creating certain objects.
   int     mStacks;            ///< Number of stacks to use when creating certain objects.
 
-  Ui::PrimitiveVisual::Shape::Type mPrimitiveType; // Shape to render, as enum.
+  Ui::Integration::PrimitiveVisual::Shape::Type mPrimitiveType; // Shape to render, as enum.
 };
 
 } // namespace Internal

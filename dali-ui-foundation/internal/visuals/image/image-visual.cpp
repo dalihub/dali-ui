@@ -33,7 +33,7 @@
 #include <cstring> // for strlen()
 
 // INTERNAL HEADERS
-#include <dali-ui-foundation/devel-api/visuals/image-visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/image-visual-actions-integ.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/image/image-visual-shader-feature-builder.h>
@@ -157,7 +157,7 @@ Geometry CreateGeometry(VisualFactoryCache& factoryCache, ImageDimensions gridSi
 
 } // unnamed namespace
 
-ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                 const VisualUrl& imageUrl, const Property::Map& properties, ImageDimensions size)
 {
   ImageVisualPtr imageVisualPtr(
@@ -167,7 +167,7 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
   return imageVisualPtr;
 }
 
-ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                                 const VisualUrl& imageUrl, ImageDimensions size)
 {
   ImageVisualPtr imageVisualPtr(
@@ -176,9 +176,9 @@ ImageVisualPtr ImageVisual::New(VisualFactoryCache& factoryCache, ImageVisualSha
   return imageVisualPtr;
 }
 
-ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::VisualFactory::CreationOptions creationOptions,
+ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFactory& shaderFactory, Ui::Integration::VisualFactory::CreationOptions creationOptions,
                          const VisualUrl& imageUrl, ImageDimensions size)
-: Visual::Base(factoryCache, Ui::InternalVisualType::IMAGE),
+: Visual::Base(factoryCache, Ui::Integration::InternalVisualType::IMAGE),
   mPixelArea(FULL_TEXTURE_RECT),
   mPixelAreaIndex(Property::INVALID_INDEX),
   mPreMultipliedAlphaIndex(Property::INVALID_INDEX),
@@ -212,7 +212,7 @@ ImageVisual::ImageVisual(VisualFactoryCache& factoryCache, ImageVisualShaderFact
 
   mImpl->mFittingModeRequired = true;
 
-  if(creationOptions & Ui::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
+  if(creationOptions & Ui::Integration::VisualFactory::CreationOptions::IMAGE_VISUAL_IGNORE_VIEW_PADDING)
   {
     mImpl->mFlags |= Visual::Base::Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING;
   }
@@ -672,7 +672,7 @@ void ImageVisual::OnInitialize()
   }
 
   // Register transform properties
-  mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+  mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
 
   EnablePreMultipliedAlpha(IsPreMultipliedAlphaEnabled());
 
@@ -762,8 +762,8 @@ void ImageVisual::LoadTexture(TextureSet& textures, const Dali::ImageDimensions&
     mFastTrackLoadingTask =
       new FastTrackLoadingTask(mImageUrl, size, static_cast<Dali::SamplingMode::Type>(mSamplingMode), mOrientationCorrection,
                                preMultiplyOnLoad == TextureManager::MultiplyOnLoad::MULTIPLY_ON_LOAD
-                                 ? DevelAsyncImageLoader::PreMultiplyOnLoad::ON
-                                 : DevelAsyncImageLoader::PreMultiplyOnLoad::OFF,
+                                 ? Dali::Ui::Integration::PreMultiplyOnLoad::ON
+                                 : Dali::Ui::Integration::PreMultiplyOnLoad::OFF,
                                mFactoryCache.GetLoadYuvPlanes(), MakeCallback(this, &ImageVisual::FastLoadComplete));
 
     TextureSet textureSet = TextureSet::New();
@@ -955,7 +955,7 @@ void ImageVisual::DoSetOffScene(Actor& actor)
 void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
 
   bool sync = IsSynchronousLoadingRequired();
   map.Insert(Ui::ImageVisualPropertyIndex::SYNCHRONOUS_LOADING, sync);
@@ -1009,7 +1009,7 @@ void ImageVisual::DoCreatePropertyMap(Property::Map& map) const
 void ImageVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 {
   map.Clear();
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::IMAGE);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
   if(mImageUrl.IsValid())
   {
     Dali::ImageDimensions size = mUseSynchronousSizing ? mLastRequiredSize : mDesiredSize;
@@ -1053,7 +1053,7 @@ void ImageVisual::OnDoAction(const Dali::Property::Index actionId, const Dali::P
 
   switch(actionId)
   {
-    case DevelImageVisual::Action::RELOAD:
+    case Dali::Ui::Integration::ImageVisual::Action::RELOAD:
     {
       // Reset resource ready status when we call reload.
       ResourceReady(Ui::Visual::ResourceStatus::PREPARING);
@@ -1084,7 +1084,7 @@ void ImageVisual::OnSetTransform()
 {
   if(mImpl->mRenderer && mImpl->mTransformMapChanged)
   {
-    mImpl->SetTransformUniforms(mImpl->mRenderer, Direction::LEFT_TO_RIGHT);
+    mImpl->SetTransformUniforms(mImpl->mRenderer, Dali::Ui::Integration::Direction::LEFT_TO_RIGHT);
   }
 
   if(mUseSynchronousSizing)

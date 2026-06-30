@@ -47,10 +47,10 @@
 #include <limits>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
-#include <dali-ui-foundation/devel-api/visuals/visual-actions-devel.h>
+#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
@@ -100,8 +100,8 @@ constexpr const char* ACTION_ACCESSIBILITY_READING_RESUMED   = "ReadingResumed";
 constexpr const char* ACTION_ACCESSIBILITY_READING_SKIPPED   = "ReadingSkipped";
 constexpr const char* ACTION_ACCESSIBILITY_READING_STOPPED   = "ReadingStopped";
 
-constexpr int INNER_SHADOW_DEPTH_INDEX = DepthIndex::DECORATION - 1;
-constexpr int BORDERLINE_DEPTH_INDEX   = DepthIndex::FOREGROUND_EFFECT - 1;
+constexpr int INNER_SHADOW_DEPTH_INDEX = Dali::Ui::Integration::DepthIndex::DECORATION - 1;
+constexpr int BORDERLINE_DEPTH_INDEX   = Dali::Ui::Integration::DepthIndex::FOREGROUND_EFFECT - 1;
 
 inline bool FloatEqual(float a, float b, float epsilon = 0.001f)
 {
@@ -731,7 +731,7 @@ void ViewDataImpl::ResourceReady()
   }
 }
 
-void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Visual::Base& visual)
+void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual)
 {
   if(DALI_LIKELY(mVisualData))
   {
@@ -739,7 +739,7 @@ void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Visual::Base& visua
   }
 }
 
-void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, int depthIndex)
+void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, int depthIndex)
 {
   if(DALI_LIKELY(mVisualData))
   {
@@ -747,7 +747,7 @@ void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Visual::Base& visua
   }
 }
 
-void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled)
+void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled)
 {
   if(DALI_LIKELY(mVisualData))
   {
@@ -755,7 +755,7 @@ void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Visual::Base& visua
   }
 }
 
-void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Visual::Base& visual, bool enabled, int depthIndex)
+void ViewDataImpl::RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled, int depthIndex)
 {
   if(DALI_LIKELY(mVisualData))
   {
@@ -771,9 +771,9 @@ void ViewDataImpl::UnregisterVisual(Property::Index index)
   }
 }
 
-Ui::Visual::Base ViewDataImpl::GetVisual(Property::Index index) const
+Ui::Integration::Visual::Base ViewDataImpl::GetVisual(Property::Index index) const
 {
-  return Ui::Visual::Base(GetVisualImplPtr(index));
+  return Ui::Integration::Visual::Base(GetVisualImplPtr(index));
 }
 
 Ui::Internal::Visual::Base* ViewDataImpl::GetVisualImplPtr(Property::Index index) const
@@ -828,7 +828,7 @@ void ViewDataImpl::OnSceneDisconnection()
   }
 }
 
-void ViewDataImpl::EnableCornerPropertiesOverridden(Ui::Visual::Base& visual, bool enable,
+void ViewDataImpl::EnableCornerPropertiesOverridden(Ui::Integration::Visual::Base& visual, bool enable,
                                                     Dali::Constraint cornerRadiusConstraint)
 {
   if(DALI_LIKELY(mVisualData))
@@ -881,7 +881,7 @@ void ViewDataImpl::DoActionExtension(Dali::Property::Index visualIndex, Dali::Pr
   }
 }
 
-bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
 {
   if(DALI_LIKELY(mVisualData))
   {
@@ -890,7 +890,7 @@ bool ViewDataImpl::AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::De
   return false;
 }
 
-bool ViewDataImpl::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType)
+bool ViewDataImpl::AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType)
 {
   if(DALI_LIKELY(mVisualData))
   {
@@ -907,7 +907,7 @@ void ViewDataImpl::RemoveVisualObject(Dali::Ui::VisualBase visualBase)
   }
 }
 
-uint32_t ViewDataImpl::GetVisualObjectCount(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType) const
+uint32_t ViewDataImpl::GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const
 {
   if(DALI_LIKELY(mVisualData))
   {
@@ -916,7 +916,7 @@ uint32_t ViewDataImpl::GetVisualObjectCount(Dali::Ui::DevelVisual::InternalConta
   return 0u;
 }
 
-Dali::Ui::VisualBase ViewDataImpl::GetVisualObjectAt(Dali::Ui::DevelVisual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
+Dali::Ui::VisualBase ViewDataImpl::GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const
 {
   if(DALI_LIKELY(mVisualData))
   {
@@ -987,13 +987,13 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
           if(DALI_LIKELY(dataImpl.mVisualData))
           {
-            Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(*map);
+            Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(*map);
             visual.SetName("background");
             if(visual)
             {
               // Ignore corner radius for offscreen case.
               Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
-              dataImpl.mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual, DepthIndex::BACKGROUND);
+              dataImpl.mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
               dataImpl.EnableCornerPropertiesOverridden(visual, true);
 
               // Trigger a size negotiation request that may be needed by the new visual to relayout its contents.
@@ -1006,11 +1006,11 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
           {
             // don't know the size to load
-            Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(url, ImageDimensions());
+            Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(url, ImageDimensions());
             if(visual)
             {
               viewImpl.GetViewDataImpl().mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual,
-                                                                     DepthIndex::BACKGROUND);
+                                                                     Dali::Ui::Integration::DepthIndex::BACKGROUND);
               viewImpl.GetViewDataImpl().EnableCornerPropertiesOverridden(visual, true);
             }
           }
@@ -1645,7 +1645,7 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::SHADOW);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::SHADOW);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -1781,7 +1781,7 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::INNER_SHADOW);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::INNER_SHADOW);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -1798,7 +1798,7 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
 
         if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
         {
-          Ui::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::BORDERLINE);
+          Ui::Integration::Visual::Base visual = viewImpl.GetViewDataImpl().mVisualData->GetVisual(Ui::View::Property::BORDERLINE);
           if(visual)
           {
             visual.CreatePropertyMap(map);
@@ -2021,12 +2021,12 @@ void ViewDataImpl::SetFirstShadow(const Property::Map& map)
 {
   if(DALI_LIKELY(mVisualData))
   {
-    Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(map);
+    Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("shadow");
 
     if(visual)
     {
-      mVisualData->RegisterVisual(Ui::View::Property::SHADOW, visual, DepthIndex::BACKGROUND_EFFECT);
+      mVisualData->RegisterVisual(Ui::View::Property::SHADOW, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
       EnableCornerPropertiesOverridden(visual, true);
 
       mViewImpl.RelayoutRequest();
@@ -2047,7 +2047,7 @@ void ViewDataImpl::AppendShadow(const Dali::Ui::Shadow& shadow)
 
   ColorVisual visual = Provider::Shadow::CreateVisual(shadow);
   visual.SetName("shadow");
-  if(AddShadowVisualObject(visual, Ui::DevelVisual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND))
+  if(AddShadowVisualObject(visual, Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND))
   {
     mShadowVisualObjects.push_back(visual);
     mViewImpl.RelayoutRequest();
@@ -2074,7 +2074,7 @@ void ViewDataImpl::SetInnerShadow(const Property::Map& map)
 {
   if(DALI_LIKELY(mVisualData))
   {
-    Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(map);
+    Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("innerShadow");
 
     if(visual)
@@ -2083,8 +2083,8 @@ void ViewDataImpl::SetInnerShadow(const Property::Map& map)
 
       Ui::Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
 
-      auto visualCornerRadiusProperty = visualImpl.GetPropertyObject(DevelVisual::Property::CORNER_RADIUS, false);
-      auto visualBorderlineProperty   = visualImpl.GetPropertyObject(DevelVisual::Property::BORDERLINE_WIDTH);
+      auto visualCornerRadiusProperty = visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, false);
+      auto visualBorderlineProperty   = visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH);
 
       if(DALI_LIKELY(visualCornerRadiusProperty.propertyIndex != Property::INVALID_INDEX &&
                      visualCornerRadiusProperty.object) &&
@@ -2135,7 +2135,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
         mVisualData->GetVisualImplPtr(Ui::View::Property::BORDERLINE);
       if(previousVisualImplPtr)
       {
-        previousVisualImplPtr->DoAction(Ui::DevelVisual::Action::UPDATE_PROPERTY, map);
+        previousVisualImplPtr->DoAction(Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
 
         // Trigger borderline relative constraints once
         mVisualData->NotifyConstraintPropertyChanged(Ui::View::Property::BORDERLINE_WIDTH, false);
@@ -2144,7 +2144,7 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
         return;
       }
     }
-    Ui::Visual::Base visual = Ui::VisualFactory::Get().CreateVisual(map);
+    Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("borderline");
 
     if(visual)
@@ -2156,8 +2156,8 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
       {
         Ui::Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
 
-        auto visualCornerRadiusProperty    = visualImpl.GetPropertyObject(DevelVisual::Property::CORNER_RADIUS, false);
-        auto visualBorderlineWidthProperty = visualImpl.GetPropertyObject(DevelVisual::Property::BORDERLINE_WIDTH);
+        auto visualCornerRadiusProperty    = visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::CORNER_RADIUS, false);
+        auto visualBorderlineWidthProperty = visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::BORDERLINE_WIDTH);
 
         if(DALI_LIKELY(visualCornerRadiusProperty.propertyIndex != Property::INVALID_INDEX &&
                        visualCornerRadiusProperty.object) &&
@@ -2178,8 +2178,8 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
           Dali::Integration::ConstraintSetInternalTag(borderlineCornerRadiusConstraint,
                                                       BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG);
 
-          auto visualBorderlineColorProperty  = visualImpl.GetPropertyObject(DevelVisual::Property::BORDERLINE_COLOR);
-          auto visualBorderlineOffsetProperty = visualImpl.GetPropertyObject(DevelVisual::Property::BORDERLINE_OFFSET);
+          auto visualBorderlineColorProperty  = visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::BORDERLINE_COLOR);
+          auto visualBorderlineOffsetProperty = visualImpl.GetPropertyObject(Dali::Ui::Integration::Visual::Property::BORDERLINE_OFFSET);
 
           if(DALI_LIKELY(visualBorderlineColorProperty.propertyIndex != Property::INVALID_INDEX &&
                          visualBorderlineColorProperty.object) &&
@@ -2416,9 +2416,9 @@ void ViewDataImpl::UpdateCornerRadius()
     Vector4 cornerRadius = self.GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS);
 
     Property::Map map;
-    map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius);
-    map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY, policy);
-    map.Insert(Ui::DevelVisual::Property::CORNER_SQUARENESS,
+    map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS, cornerRadius);
+    map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY, policy);
+    map.Insert(Ui::Integration::Visual::Property::CORNER_SQUARENESS,
                self.GetProperty<Vector4>(Ui::View::Property::CORNER_SQUARENESS));
 
     if(mRenderEffect)
@@ -2438,14 +2438,14 @@ void ViewDataImpl::UpdateBorderline()
   Actor self = mViewImpl.Self();
 
   Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::InternalVisualType::COLOR);
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
   map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, Color::TRANSPARENT);
   // Scale natural-pixel width to visual pixels for the initial visual creation.
-  map.Insert(Ui::DevelVisual::Property::BORDERLINE_WIDTH,
+  map.Insert(Ui::Integration::Visual::Property::BORDERLINE_WIDTH,
              self.GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH));
-  map.Insert(Ui::DevelVisual::Property::BORDERLINE_COLOR,
+  map.Insert(Ui::Integration::Visual::Property::BORDERLINE_COLOR,
              self.GetProperty<Vector4>(Ui::View::Property::BORDERLINE_COLOR));
-  map.Insert(Ui::DevelVisual::Property::BORDERLINE_OFFSET,
+  map.Insert(Ui::Integration::Visual::Property::BORDERLINE_OFFSET,
              self.GetProperty<float>(Ui::View::Property::BORDERLINE_OFFSET));
 
   SetBorderline(map, false);

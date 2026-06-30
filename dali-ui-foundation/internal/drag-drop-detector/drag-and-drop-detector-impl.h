@@ -27,7 +27,7 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/drag-drop-detector/drag-and-drop-detector.h>
+#include <dali-ui-foundation/integration-api/drag-drop-detector/drag-and-drop-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture.h>
 
@@ -45,14 +45,14 @@ using DragAndDropDetectorPtr = IntrusivePtr<DragAndDropDetector>;
 class DragAndDropDetector : public Dali::BaseObject, public ConnectionTracker
 {
 public:
-  using DragAndDropSignal = Dali::Ui::DragAndDropDetector::DragAndDropSignal;
+  using DragAndDropSignal = Dali::Ui::Integration::DragAndDropDetector::DragAndDropSignal;
 
   // Creation
 
   /**
-   * @copydoc Ui::DragAndDropDetector::New()
+   * @copydoc Ui::Integration::DragAndDropDetector::New()
    */
-  static Dali::Ui::DragAndDropDetector New();
+  static Dali::Ui::Integration::DragAndDropDetector New();
 
   // Public API
 
@@ -141,7 +141,7 @@ public:
 
 public: // Signals
   /**
-   * @copydoc Dali::Ui::DragAndDropDetector::StartedSignal
+   * @copydoc Dali::Ui::Integration::DragAndDropDetector::StartedSignal
    */
   DragAndDropSignal& StartedSignal()
   {
@@ -149,7 +149,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::Ui::DragAndDropDetector::EnteredSignal
+   * @copydoc Dali::Ui::Integration::DragAndDropDetector::EnteredSignal
    */
   DragAndDropSignal& EnteredSignal()
   {
@@ -157,7 +157,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::Ui::DragAndDropDetector::ExitedSignal
+   * @copydoc Dali::Ui::Integration::DragAndDropDetector::ExitedSignal
    */
   DragAndDropSignal& ExitedSignal()
   {
@@ -165,7 +165,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::Ui::DragAndDropDetector::MovedSignal
+   * @copydoc Dali::Ui::Integration::DragAndDropDetector::MovedSignal
    */
   DragAndDropSignal& MovedSignal()
   {
@@ -173,7 +173,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::Ui::DragAndDropDetector::DroppedSignal
+   * @copydoc Dali::Ui::Integration::DragAndDropDetector::DroppedSignal
    */
   DragAndDropSignal& DroppedSignal()
   {
@@ -181,7 +181,7 @@ public: // Signals
   }
 
   /**
-   * @copydoc Dali::Ui::DragAndDropDetector::DroppedSignal
+   * @copydoc Dali::Ui::Integration::DragAndDropDetector::DroppedSignal
    */
   DragAndDropSignal& EndedSignal()
   {
@@ -236,7 +236,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline Internal::DragAndDropDetector& GetImplementation(Dali::Ui::DragAndDropDetector& detector)
+inline Internal::DragAndDropDetector& GetImplementation(Dali::Ui::Integration::DragAndDropDetector& detector)
 {
   DALI_ASSERT_ALWAYS(detector && "DragAndDropDetector handle is empty");
 
@@ -245,7 +245,7 @@ inline Internal::DragAndDropDetector& GetImplementation(Dali::Ui::DragAndDropDet
   return static_cast<Internal::DragAndDropDetector&>(handle);
 }
 
-inline const Internal::DragAndDropDetector& GetImplementation(const Dali::Ui::DragAndDropDetector& detector)
+inline const Internal::DragAndDropDetector& GetImplementation(const Dali::Ui::Integration::DragAndDropDetector& detector)
 {
   DALI_ASSERT_ALWAYS(detector && "DragAndDropDetector handle is empty");
 

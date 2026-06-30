@@ -23,7 +23,7 @@
 #include <utility>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 
 namespace Dali
 {

@@ -26,7 +26,7 @@
 #include <utility> // for std::pair
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/utility/npatch-utilities.h>
+#include <dali-ui-foundation/integration-api/utility/npatch-utilities.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h>
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-data.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>

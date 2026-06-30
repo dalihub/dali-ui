@@ -29,7 +29,7 @@
 #include <dali/public-api/rendering/texture.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/internal/canvas-view/canvas-view-rasterize-task.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view-properties.h>
@@ -263,13 +263,13 @@ private:
   CanvasViewImpl& operator=(const CanvasViewImpl&) = delete;
 
 private:
-  CanvasRenderer               mCanvasRenderer;
-  Dali::Texture                mTexture;
-  Dali::Ui::ImageUrl           mImageUrl;
-  Vector2                      mSize;
-  CanvasViewRasterizingTaskPtr mRasterizingTask;
-  Ui::Visual::Base             mContentVisual;
-  WeakHandle<Window>           mPlacementWindow;
+  CanvasRenderer                mCanvasRenderer;
+  Dali::Texture                 mTexture;
+  Dali::Ui::ImageUrl            mImageUrl;
+  Vector2                       mSize;
+  CanvasViewRasterizingTaskPtr  mRasterizingTask;
+  Ui::Integration::Visual::Base mContentVisual;
+  WeakHandle<Window>            mPlacementWindow;
 
   bool mIsSynchronous : 1;
   bool mManualRasterization : 1;

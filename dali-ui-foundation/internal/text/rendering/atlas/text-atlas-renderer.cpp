@@ -29,7 +29,7 @@
 #include <map>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
@@ -850,7 +850,7 @@ struct AtlasRenderer::Impl
     Dali::Renderer renderer = Dali::Renderer::New(quadGeometry, shader);
     renderer.SetTextures(textureSet);
     renderer.SetProperty(Dali::Renderer::Property::BLEND_MODE, BlendMode::ON);
-    renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, DepthIndex::CONTENT + mDepth);
+    renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::CONTENT + mDepth);
 
     Actor actor = Actor::New();
 #if defined(DEBUG_ENABLED)

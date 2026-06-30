@@ -32,8 +32,8 @@
 #include <locale>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/utility/npatch-helper.h>
-#include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
+#include <dali-ui-foundation/integration-api/utility/npatch-helper.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/visuals/animated-vector-image/vector-animation-manager.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual.h>
@@ -72,7 +72,7 @@ Dali::Geometry CreateGridGeometry(Dali::Uint16Pair gridSize, bool normalized)
   if(!normalized)
   {
     // TODO : Remove npatch helper geometry generation in future!
-    return NPatchHelper::CreateGridGeometry(gridSize);
+    return Dali::Ui::Integration::NPatchHelper::CreateGridGeometry(gridSize);
   }
 
   uint32_t gridWidth  = static_cast<uint32_t>(gridSize.GetWidth());
@@ -140,7 +140,7 @@ Dali::Geometry CreateGridGeometry(Dali::Uint16Pair gridSize, bool normalized)
 Dali::Geometry CreateBorderGeometry(Uint16Pair gridSize)
 {
   // TODO : Remove npatch helper geometry generation in future!
-  return NPatchHelper::CreateBorderGeometry(gridSize);
+  return Dali::Ui::Integration::NPatchHelper::CreateBorderGeometry(gridSize);
 }
 
 } // namespace
@@ -301,7 +301,7 @@ Geometry VisualFactoryCache::CreateGridGeometry(Uint16Pair gridSize, bool normal
 {
   if(Dali::Adaptor::IsAvailable())
   {
-    auto factory = Dali::Ui::VisualFactory::Get();
+    auto factory = Dali::Ui::Integration::VisualFactory::Get();
     if(factory)
     {
       if(gridSize.GetWidth() == 1 && gridSize.GetHeight() == 1 && normalized)
@@ -335,7 +335,7 @@ Geometry VisualFactoryCache::CreateBorderGeometry(Uint16Pair gridSize)
 {
   if(Dali::Adaptor::IsAvailable())
   {
-    auto factory = Dali::Ui::VisualFactory::Get();
+    auto factory = Dali::Ui::Integration::VisualFactory::Get();
     if(factory)
     {
       if(gridSize.GetWidth() <= GRID_GEOMETRY_CACHE_THRESHOLD && gridSize.GetHeight() <= GRID_GEOMETRY_CACHE_THRESHOLD)
@@ -464,8 +464,8 @@ Shader VisualFactoryCache::GetNPatchShader(int index)
   NPatchDataPtr data;
   // 0 is either no data (load failed?) or no stretch regions on image
   // for both cases we use the default shader
-  NPatchUtility::StretchRanges::SizeType xStretchCount = 0;
-  NPatchUtility::StretchRanges::SizeType yStretchCount = 0;
+  Dali::Ui::Integration::NPatchUtility::StretchRanges::SizeType xStretchCount = 0;
+  Dali::Ui::Integration::NPatchUtility::StretchRanges::SizeType yStretchCount = 0;
 
   // ask loader for the regions
   if(mNPatchLoader.GetNPatchData(mBrokenImageInfoContainer[index].npatchId, data))
@@ -514,7 +514,7 @@ void VisualFactoryCache::ApplyTextureAndUniforms(Renderer& renderer, int index)
   {
     textureSet                               = data->GetTextures();
     mBrokenImageInfoContainer[index].texture = textureSet.GetTexture(0);
-    NPatchHelper::ApplyTextureAndUniforms(renderer, data.Get());
+    Dali::Ui::Integration::NPatchHelper::ApplyTextureAndUniforms(renderer, data.Get());
     renderer.SetTextures(textureSet);
   }
 }

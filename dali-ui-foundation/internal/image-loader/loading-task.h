@@ -18,7 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/image-loader/async-image-loader-devel.h>
+#include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-type.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali/devel-api/adaptor-framework/async-task-manager.h>
@@ -57,7 +57,7 @@ public:
    * @param [in] callback The callback that is called when the operation is completed.
    */
   LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
-              DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
+              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
 
   /**
    * Constructor.
@@ -74,7 +74,7 @@ public:
    */
   LoadingTask(uint32_t id, Dali::AnimatedImageLoading animatedImageLoading, uint32_t frameIndex,
               Dali::ImageDimensions dimensions, Dali::SamplingMode::Type samplingMode,
-              DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad,
+              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad,
               bool loadPlanes, CallbackBase* callback);
 
   /**
@@ -92,7 +92,7 @@ public:
    */
   LoadingTask(uint32_t id, const VisualUrl& url, ImageDimensions dimensions,
               SamplingMode::Type samplingMode, bool orientationCorrection,
-              DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes, CallbackBase* callback);
+              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, bool loadPlanes, CallbackBase* callback);
 
   /**
    * Constructor.
@@ -108,7 +108,7 @@ public:
    */
   LoadingTask(uint32_t id, const EncodedImageBuffer& encodedImageBuffer, ImageDimensions dimensions,
               SamplingMode::Type samplingMode, bool orientationCorrection,
-              DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
+              Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
 
   /**
    * Constructor.
@@ -122,7 +122,7 @@ public:
    * @param [in] callback The callback that is called when the operation is completed.
    */
   LoadingTask(uint32_t id, Devel::PixelBuffer pixelBuffer, Devel::PixelBuffer maskPixelBuffer, float contentScale,
-              bool cropToMask, DevelAsyncImageLoader::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
+              bool cropToMask, Dali::Ui::Integration::PreMultiplyOnLoad preMultiplyOnLoad, CallbackBase* callback);
 
   /**
    * Destructor.
@@ -179,7 +179,7 @@ public:
   TextureManagerType::TextureId textureId;          ///< textureId for loading
   ImageDimensions               dimensions;         ///< dimensions to load
   SamplingMode::Type            samplingMode;       ///< sampling options
-  DevelAsyncImageLoader::PreMultiplyOnLoad
+  Dali::Ui::Integration::PreMultiplyOnLoad
     preMultiplyOnLoad; ///< if the image's color should be multiplied by it's alpha
 
   Devel::PixelBuffer         maskPixelBuffer; ///< pixelBuffer of mask image

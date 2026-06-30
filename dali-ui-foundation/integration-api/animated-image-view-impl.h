@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
@@ -434,8 +434,8 @@ private:
   AnimatedImageViewImpl& operator=(const AnimatedImageViewImpl&) = delete;
   AnimatedImageViewImpl& operator=(AnimatedImageViewImpl&&)      = delete;
 
-private:                    // Data
-  Ui::Visual::Base mVisual; ///< The main image visual
+private:                                 // Data
+  Ui::Integration::Visual::Base mVisual; ///< The main image visual
 
   Dali::String               mUrl;
   Dali::String               mAlphaMaskUrl;

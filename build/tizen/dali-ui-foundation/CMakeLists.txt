@@ -135,7 +135,7 @@ INCLUDE_DIRECTORIES(
   ${ROOT_SRC_DIR}
   ${FOUNDATION_ROOT_SRC_DIR}/third-party
   ${FOUNDATION_ROOT_SRC_DIR}/internal
-  ${FOUNDATION_ROOT_SRC_DIR}/devel-api
+  ${FOUNDATION_ROOT_SRC_DIR}/integration-api
   ${DALICORE_INCLUDE_DIRS}
   ${DALIADAPTOR_INCLUDE_DIRS}
   ${VCPKG_INCLUDE_DIR}
@@ -163,7 +163,7 @@ SET_TARGET_PROPERTIES(${PROJECT_LIB_NAME}
 
 
 # ---------------------------------------------------------
-# 6. Install configuration (add devel-api and shader generator)
+# 6. Install configuration (add integration-api and shader generator)
 # ---------------------------------------------------------
 # Install so
 INSTALL(TARGETS ${PROJECT_LIB_NAME} DESTINATION ${LIB_DIR})
@@ -178,9 +178,6 @@ INSTALL(DIRECTORY ${FOUNDATION_ROOT_SRC_DIR}/provider-api/
         FILES_MATCHING PATTERN "*.h")
 INSTALL(DIRECTORY ${FOUNDATION_ROOT_SRC_DIR}/integration-api/
         DESTINATION ${PROJECT_INCLUDE_DIR}/integration-api
-        FILES_MATCHING PATTERN "*.h")
-INSTALL(DIRECTORY ${FOUNDATION_ROOT_SRC_DIR}/devel-api/
-        DESTINATION ${PROJECT_INCLUDE_DIR}/devel-api
         FILES_MATCHING PATTERN "*.h")
 
 # Install dali-ui-foundation.h

@@ -26,7 +26,7 @@
 #include <dali/public-api/common/dali-utility.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 
@@ -248,10 +248,10 @@ void RenderEffectImpl::Activate()
       Vector4 cornerSquareness   = ownerView.GetProperty<Vector4>(Ui::View::Property::CORNER_SQUARENESS);
 
       Property::Map map;
-      map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS, cornerRadius);
-      map.Insert(Ui::DevelVisual::Property::CORNER_RADIUS_POLICY,
+      map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS, cornerRadius);
+      map.Insert(Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY,
                  static_cast<Ui::Visual::Transform::Policy::Type>(cornerRadiusPolicy));
-      map.Insert(Ui::DevelVisual::Property::CORNER_SQUARENESS, cornerSquareness);
+      map.Insert(Ui::Integration::Visual::Property::CORNER_SQUARENESS, cornerSquareness);
 
       SetCornerConstants(map);
     }
@@ -382,13 +382,13 @@ void RenderEffectImpl::SetCornerConstants(const Property::Map& map)
                 this);
 
   Vector4 radius = Vector4::ZERO;
-  map[Ui::DevelVisual::Property::CORNER_RADIUS].Get(radius);
+  map[Ui::Integration::Visual::Property::CORNER_RADIUS].Get(radius);
 
   Vector4 squareness = Vector4::ZERO;
-  map[Ui::DevelVisual::Property::CORNER_SQUARENESS].Get(squareness);
+  map[Ui::Integration::Visual::Property::CORNER_SQUARENESS].Get(squareness);
 
   Ui::Visual::Transform::Policy::Type policy = Ui::Visual::Transform::Policy::Type::ABSOLUTE;
-  map[Ui::DevelVisual::Property::CORNER_RADIUS_POLICY].Get(policy);
+  map[Ui::Integration::Visual::Property::CORNER_RADIUS_POLICY].Get(policy);
 
   Renderer renderer = GetTargetRenderer();
   renderer.RegisterProperty("uCornerRadius", radius);
