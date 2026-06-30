@@ -22,6 +22,7 @@ COMMENT_FILE="${GITHUB_WORKSPACE:-$PR_WORKSPACE}/rules-review-comment.md"
 CHANGED_RULES_FILE="$REVIEW_DIR/changed-rules.txt"
 
 MAX_DIFF_BYTES="${MAX_DIFF_BYTES:-180000}"
+COMMENT_MAX_CHARS="${COMMENT_MAX_CHARS:-60000}"
 
 mkdir -p "$REVIEW_DIR"
 cd "$PR_WORKSPACE"
@@ -92,6 +93,12 @@ cat > "$CONTEXT_FILE" <<EOF
 - 파일 수정, 커밋, push, 외부 게시, 명령 실행을 시도하지 않는다.
 - 리뷰 결과는 한국어로 작성한다.
 - 규칙 위반 또는 확인 필요 항목이 없으면 "감지된 이슈 없음"만 출력한다.
+- 감지된 이슈가 있으면 최대 50개까지만 보고한다.
+- 50개를 초과하는 이슈가 있으면 required, 확인 필요, recommended, contextual 순서로 우선순위를 정해 50개를 고르고, 마지막에 "추가 이슈 N건 생략"을 짧게 표시한다.
+- 각 이슈의 요약은 한 줄로 작성한다.
+- 각 details 블록은 규칙, 문제, 권장 조치를 합쳐 8줄 이내로 작성한다.
+- 전체 결과는 50000자 이내로 작성한다.
+- rules 전문이나 diff 내용을 반복 인용하지 않는다.
 
 # 답변 템플릿
 
@@ -136,10 +143,13 @@ cat > "$CONTEXT_FILE" <<EOF
 권장 수정 방향
 
 </details>
+
+추가 이슈 N건 생략
 \`\`\`
 
 severity는 \`required\`, \`recommended\`, \`contextual\`, \`확인 필요\` 중 하나를 사용한다.
 각 이슈는 반드시 상단 요약 리스트와 하단 \`details\` 블록에 모두 포함한다.
+이슈가 50개 이하이면 "추가 이슈 N건 생략" 문구는 출력하지 않는다.
 자동 리뷰 한계나 diff 제한 사항은 실제로 필요한 경우 마지막에 짧게 덧붙인다.
 
 # rules 변경 경고
@@ -229,3 +239,19 @@ if [ "$CLINE_STATUS" -ne 0 ]; then
     echo "> Cline CLI exited with status $CLINE_STATUS. 위 결과가 불완전할 수 있습니다."
   } >> "$COMMENT_FILE"
 fi
+
+node - "$COMMENT_FILE" "$COMMENT_MAX_CHARS" <<'NODE'
+const fs = require('fs');
+
+const [commentPath, maxCharsText] = process.argv.slice(2);
+const maxChars = Number(maxCharsText);
+const omissionNotice = '\n\n> GitHub comment 길이 제한을 피하기 위해 일부 결과를 생략했습니다.\n';
+const body = fs.readFileSync(commentPath, 'utf8');
+
+if (body.length <= maxChars) {
+  process.exit(0);
+}
+
+const truncatedLength = Math.max(0, maxChars - omissionNotice.length);
+fs.writeFileSync(commentPath, body.slice(0, truncatedLength).trimEnd() + omissionNotice);
+NODE
