@@ -62,6 +62,7 @@ public:
 
   static Window New(PositionSize windowPosition, const Dali::String& name, bool isTransparent = false);
   static Window New(PositionSize windowPosition, const Dali::String& name, const Dali::String& className, bool isTransparent = false);
+  static Window Get(Actor actor);
 
   Window();
   ~Window();

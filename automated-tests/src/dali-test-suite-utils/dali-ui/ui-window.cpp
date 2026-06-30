@@ -282,9 +282,7 @@ void Window::KeepRendering(float durationSeconds)
   GetImplementation(*this).KeepRendering(durationSeconds);
 }
 
-namespace DevelWindow
-{
-Window Get(Actor actor)
+Window Window::Get(Actor actor)
 {
   Internal::Adaptor::Window* windowImpl = nullptr;
 
@@ -294,6 +292,13 @@ Window Get(Actor actor)
   }
 
   return Dali::Window(windowImpl);
+}
+
+namespace DevelWindow
+{
+Window Get(Actor actor)
+{
+  return Window::Get(actor);
 }
 
 int GetPhysicalOrientation(Window window)
