@@ -1,0 +1,160 @@
+name: DALI UI Rules Review
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, ready_for_review]
+
+permissions:
+  contents: read
+  issues: write
+  pull-requests: write
+
+jobs:
+  rules-review:
+    runs-on: [ code-linux, code-large ]
+
+    env:
+      CLINE_MODEL: ${{ vars.CLINE_MODEL || 'GaussO5' }}
+      CLINE_VERSION: 0.6.0
+      CLINE_REGISTRY: https://bart.sec.samsung.net/artifactory/api/npm/coding-assistant-npm-remote/
+      CLINE_NO_PROXY: aicoding.sec.samsung.net,bart.sec.samsung.net,codei.sec.samsung.net,ocean.sec.samsung.net,github.sec.samsung.net,ipaas-mcp.sec.samsung.net
+      PROXY_URL: http://10.112.1.184:8080/
+      PR_WORKSPACE: ${{ github.workspace }}/pr
+      AUTOMATION_WORKSPACE: ${{ github.workspace }}/automation
+
+    steps:
+      - name: Checkout automation from base
+        uses: code-actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.base.sha }}
+          path: automation
+
+      - name: Checkout PR head
+        uses: code-actions/checkout@v4
+        with:
+          repository: ${{ github.event.pull_request.head.repo.full_name }}
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          path: pr
+
+      - name: Fetch base commit
+        working-directory: pr
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          BASE_REPO: ${{ github.event.pull_request.base.repo.full_name }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          git fetch origin "$BASE_SHA" --depth=1 || {
+            git remote add base "https://x-access-token:${GITHUB_TOKEN}@github.sec.samsung.net/${BASE_REPO}.git"
+            git fetch base "$BASE_SHA" --depth=1
+          }
+
+      - name: Setup Node.js
+        uses: code-actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Configure proxy
+        run: |
+          http_proxy="$PROXY_URL"
+          https_proxy="$PROXY_URL"
+          HTTP_PROXY="$PROXY_URL"
+          HTTPS_PROXY="$PROXY_URL"
+
+          EXISTING_NO_PROXY="${no_proxy:-${NO_PROXY:-}}"
+          if [ -n "$EXISTING_NO_PROXY" ]; then
+            export no_proxy="$EXISTING_NO_PROXY,$CLINE_NO_PROXY"
+          else
+            export no_proxy="$CLINE_NO_PROXY"
+          fi
+          export NO_PROXY="$no_proxy"
+
+          {
+            echo "http_proxy=$http_proxy"
+            echo "https_proxy=$https_proxy"
+            echo "HTTP_PROXY=$HTTP_PROXY"
+            echo "HTTPS_PROXY=$HTTPS_PROXY"
+            echo "no_proxy=$no_proxy"
+            echo "NO_PROXY=$NO_PROXY"
+          } >> "$GITHUB_ENV"
+
+          npm config set proxy "$http_proxy"
+          npm config set https-proxy "$https_proxy"
+          npm config set registry "$CLINE_REGISTRY"
+          npm config set strict-ssl false
+
+      - name: Get npm cache directory
+        id: npm-cache
+        run: echo "dir=$(npm config get cache)" >> "$GITHUB_OUTPUT"
+
+      - name: Cache npm downloads
+        uses: code-actions/cache@v4
+        with:
+          path: ${{ steps.npm-cache.outputs.dir }}
+          key: cline-npm-${{ runner.os }}-node22-${{ env.CLINE_VERSION }}
+          restore-keys: |
+            cline-npm-${{ runner.os }}-node22-
+
+      - name: Install Cline CLI
+        run: npm install -g "cline@$CLINE_VERSION" --registry "$CLINE_REGISTRY"
+
+      - name: Authenticate Cline CLI
+        env:
+          CLINE_UMS_TOKEN: ${{ secrets.CLINE_UMS_TOKEN }}
+        run: |
+          if [ -z "$CLINE_UMS_TOKEN" ]; then
+            echo "CLINE_UMS_TOKEN secret is required."
+            exit 1
+          fi
+
+          cline auth -k "$CLINE_UMS_TOKEN" -m "$CLINE_MODEL"
+
+      - name: Run rules review
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          MAX_DIFF_BYTES: 180000
+        run: |
+          bash "$AUTOMATION_WORKSPACE/.github/scripts/cline-rules-review.sh"
+
+      - name: Post rules review comment
+        uses: actions/github-script@v7
+        env:
+          COMMENT_FILE: ${{ github.workspace }}/rules-review-comment.md
+        with:
+          script: |
+            const fs = require('fs');
+
+            const marker = '<!-- dali-ui-rules-review -->';
+            const body = fs.readFileSync(process.env.COMMENT_FILE, 'utf8');
+            const issue_number = context.payload.pull_request.number;
+
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              per_page: 100
+            });
+
+            const existing = comments.find(comment =>
+              comment.user.type === 'Bot' && comment.body.includes(marker)
+            );
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number,
+                body
+              });
+            }
