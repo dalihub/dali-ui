@@ -53,8 +53,6 @@ Window::Window(const PositionSize& positionSize)
   mKeyEventSignal(),
   mTouchEventSignal(),
   mWheelEventSignal(),
-  mKeyEventGeneratedSignal(),
-  mWheelEventGeneratedSignal(),
   mSlotDelegate(this)
 {
   SceneHolder::KeyEventSignal().Connect(mSlotDelegate, &Window::OnKeyEvent);
@@ -293,34 +291,5 @@ Window Window::Get(Actor actor)
 
   return Dali::Window(windowImpl);
 }
-
-namespace DevelWindow
-{
-Window Get(Actor actor)
-{
-  return Window::Get(actor);
-}
-
-int GetPhysicalOrientation(Window window)
-{
-  return GetImplementation(window).mRotationAngle;
-}
-
-EventProcessingFinishedSignalType& EventProcessingFinishedSignal(Window window)
-{
-  return GetImplementation(window).GetScene().EventProcessingFinishedSignal();
-}
-
-KeyEventGeneratedSignalType& KeyEventGeneratedSignal(Window window)
-{
-  return GetImplementation(window).mKeyEventGeneratedSignal;
-}
-
-WheelEventGeneratedSignalType& WheelEventGeneratedSignal(Window window)
-{
-  return GetImplementation(window).mWheelEventGeneratedSignal;
-}
-
-} // namespace DevelWindow
 
 } // namespace Dali

@@ -104,18 +104,4 @@ public:
 Internal::Adaptor::Window&       GetImplementation(Dali::Window& window);
 const Internal::Adaptor::Window& GetImplementation(const Dali::Window& window);
 
-namespace DevelWindow
-{
-typedef Signal<void()>                   EventProcessingFinishedSignalType;
-typedef Signal<bool(Window, KeyEvent)>   KeyEventGeneratedSignalType;
-typedef Signal<bool(Window, WheelEvent)> WheelEventGeneratedSignalType;
-
-Dali::Window Get(Actor actor);
-int          GetPhysicalOrientation(Window window);
-
-EventProcessingFinishedSignalType& EventProcessingFinishedSignal(Window window);
-KeyEventGeneratedSignalType&       KeyEventGeneratedSignal(Dali::Window window);
-WheelEventGeneratedSignalType&     WheelEventGeneratedSignal(Dali::Window window);
-} // namespace DevelWindow
-
 } // namespace Dali

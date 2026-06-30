@@ -57,13 +57,11 @@ public:
   ResizedSignalType                           mResizedSignal;
   int                                        mRotationAngle;
   bool                                       mVisible;
-  Dali::Window::VisibilityChangedSignalType  mVisibilityChangedSignal;
-  Dali::Window::KeyEventSignalType           mKeyEventSignal;
-  Dali::Window::TouchEventSignalType         mTouchEventSignal;
-  Dali::Window::WheelEventSignalType         mWheelEventSignal;
-  DevelWindow::KeyEventGeneratedSignalType   mKeyEventGeneratedSignal;
-  DevelWindow::WheelEventGeneratedSignalType mWheelEventGeneratedSignal;
-  Dali::SlotDelegate<Window>                 mSlotDelegate;
+  Dali::Window::VisibilityChangedSignalType mVisibilityChangedSignal;
+  Dali::Window::KeyEventSignalType          mKeyEventSignal;
+  Dali::Window::TouchEventSignalType        mTouchEventSignal;
+  Dali::Window::WheelEventSignalType        mWheelEventSignal;
+  Dali::SlotDelegate<Window>                mSlotDelegate;
 };
 
 } // namespace Adaptor
