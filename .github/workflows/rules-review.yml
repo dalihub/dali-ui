@@ -14,7 +14,7 @@ jobs:
     runs-on: [ code-linux, code-large ]
 
     env:
-      CLINE_MODEL: ${{ vars.CLINE_MODEL || 'GaussO5' }}
+      CLINE_MODEL: ${{ vars.CLINE_MODEL || 'GaussO4.1' }}
       CLINE_VERSION: 0.6.0
       CLINE_REGISTRY: https://bart.sec.samsung.net/artifactory/api/npm/coding-assistant-npm-remote/
       CLINE_NO_PROXY: aicoding.sec.samsung.net,bart.sec.samsung.net,codei.sec.samsung.net,ocean.sec.samsung.net,github.sec.samsung.net,ipaas-mcp.sec.samsung.net
