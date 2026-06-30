@@ -124,15 +124,9 @@ if (issues.length === 0) {
 const issueCount = Math.min(issues.length, 50);
 const lines = [`감지된 이슈 ${issueCount}건`, ''];
 
-for (const issue of issues.slice(0, 50)) {
-  lines.push(`- [required] \`${issue.file}:${issue.line}\` - components가 foundation internal/integration header를 include함`);
-}
-
-lines.push('');
-
-for (const issue of issues.slice(0, 50)) {
+for (const [index, issue] of issues.slice(0, 50).entries()) {
   lines.push(`<details>`);
-  lines.push(`<summary>[required] ${issue.file}:${issue.line} - components가 foundation internal/integration header를 include함</summary>`);
+  lines.push(`<summary>(${index + 1}) components가 foundation internal/integration header를 include함</summary>`);
   lines.push('');
   lines.push('#### 규칙');
   lines.push('component-boundaries.md / Components Use Foundation Public and Provider APIs');
@@ -196,11 +190,8 @@ cat > "$CONTEXT_FILE" <<EOF
 \`\`\`md
 감지된 이슈 N건
 
-- [severity] \`file:line\` - 한 줄 요약
-- [severity] \`file:line\` - 한 줄 요약
-
 <details>
-<summary>[severity] file:line - 한 줄 요약</summary>
+<summary>(1) 이슈 한 줄 요약</summary>
 
 #### 규칙
 관련 rules 문서와 규칙 이름
@@ -214,7 +205,7 @@ cat > "$CONTEXT_FILE" <<EOF
 </details>
 
 <details>
-<summary>[severity] file:line - 한 줄 요약</summary>
+<summary>(2) 이슈 한 줄 요약</summary>
 
 #### 규칙
 관련 rules 문서와 규칙 이름
@@ -231,7 +222,9 @@ cat > "$CONTEXT_FILE" <<EOF
 \`\`\`
 
 severity는 \`required\`, \`recommended\`, \`contextual\`, \`확인 필요\` 중 하나를 사용한다.
-각 이슈는 반드시 상단 요약 리스트와 하단 \`details\` 블록에 모두 포함한다.
+severity는 우선순위 판단에만 사용하고 출력에는 표시하지 않는다.
+각 이슈는 \`details\` 블록 하나로 출력한다.
+\`summary\`에는 파일 이름을 쓰지 말고, 번호와 이슈 요약만 쓴다.
 이슈가 50개 이하이면 "추가 이슈 N건 생략" 문구는 출력하지 않는다.
 자동 리뷰 한계나 diff 제한 사항은 실제로 필요한 경우 마지막에 짧게 덧붙인다.
 
@@ -328,24 +321,15 @@ NODE
     echo "$RULES_CHANGED_WARNING"
     echo
   fi
-  echo "### 기준"
-  echo "- 검사 기준: 이 PR에 포함된 \`dali-ui/rules/*\`"
-  echo "- 분석 범위: PR diff"
-  echo "- 실행 방식: Cline CLI 자동 리뷰"
   if [ "$DIFF_TRUNCATED" = true ]; then
-    echo "- 참고: PR diff가 ${MAX_DIFF_BYTES} bytes로 잘려서 분석되었습니다."
+    echo "> PR diff가 ${MAX_DIFF_BYTES} bytes로 잘려서 분석되었습니다. 큰 PR에서는 일부 변경이 자동 리뷰에 포함되지 않았을 수 있습니다."
+    echo
   fi
-  echo
-  echo "### 결과"
-  echo
   if [ -s "$DETERMINISTIC_REVIEW_FILE" ]; then
     cat "$DETERMINISTIC_REVIEW_FILE"
   else
     cat "$REVIEW_TEXT_FILE"
   fi
-  echo
-  echo "### 참고"
-  echo "이 리뷰는 \`rules\` 준수 여부를 보조적으로 확인하기 위한 자동 리뷰입니다. 최종 판단은 maintainer review를 따릅니다."
 } > "$COMMENT_FILE"
 
 if [ "$CLINE_STATUS" -ne 0 ]; then
