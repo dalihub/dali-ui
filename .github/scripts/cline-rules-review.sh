@@ -177,6 +177,7 @@ cat > "$CONTEXT_FILE" <<EOF
 - 각 details 블록은 규칙, 위치, 문제, 권장 조치를 합쳐 10줄 이내로 작성한다.
 - 전체 결과는 50000자 이내로 작성한다.
 - rules 전문이나 diff 내용을 반복 인용하지 않는다.
+- rules 문서의 Validation 섹션과 validation-checks.md에 기록된 검색/검증 관점을 우선적으로 적용한다.
 - 분석 과정, 규칙별 전체 점검 로그, OK 항목 목록은 출력하지 않는다.
 - 최종 답변은 반드시 답변 템플릿의 markdown 본문만 출력한다.
 - 아래 "이미 감지된 deterministic 이슈"에 있는 이슈는 최종 리뷰에 별도로 포함되므로 반복해서 보고하지 않는다.
@@ -399,3 +400,14 @@ if (body.length <= maxChars) {
 const truncatedLength = Math.max(0, maxChars - omissionNotice.length);
 fs.writeFileSync(commentPath, body.slice(0, truncatedLength).trimEnd() + omissionNotice);
 NODE
+
+DEBUG_DIR="${GITHUB_WORKSPACE:-$PR_WORKSPACE}/rules-review-debug"
+rm -rf "$DEBUG_DIR"
+mkdir -p "$DEBUG_DIR"
+cp "$CONTEXT_FILE" "$DEBUG_DIR/context.md"
+cp "$RULES_FILE" "$DEBUG_DIR/rules.md"
+cp "$DIFF_FILE" "$DEBUG_DIR/pr.diff"
+cp "$RAW_OUTPUT_FILE" "$DEBUG_DIR/cline-output.jsonl"
+cp "$REVIEW_TEXT_FILE" "$DEBUG_DIR/cline-review.md"
+cp "$DETERMINISTIC_REVIEW_FILE" "$DEBUG_DIR/deterministic-review.md"
+cp "$COMMENT_FILE" "$DEBUG_DIR/comment.md"

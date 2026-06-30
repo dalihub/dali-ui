@@ -146,3 +146,10 @@ jobs:
                 body
               });
             }
+
+      - name: Upload rules review debug artifacts
+        if: always()
+        uses: CODE-Actions/upload-artifact@v2
+        with:
+          name: rules-review-debug-${{ github.event.pull_request.number }}
+          path: ${{ github.workspace }}/rules-review-debug
