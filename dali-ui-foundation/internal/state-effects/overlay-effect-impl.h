@@ -27,10 +27,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/overlay-effect.h>
-#include <dali-ui-foundation/public-api/state-event.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
+#include <dali-ui-foundation/public-api/views/state-event.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 
 namespace Dali

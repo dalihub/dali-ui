@@ -18,7 +18,7 @@
 #include <dali-ui-foundation/internal/views/view/view-debug.h>
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/stream-operators.h>
 #include <dali/integration-api/string-utils.h>

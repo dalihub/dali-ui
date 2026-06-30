@@ -22,7 +22,7 @@
 #include <cstdint> ///< uint8_t
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/ui-property-index-ranges.h>
+#include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 
 namespace Dali
 {

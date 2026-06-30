@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/common/dali-common.h>
 
 namespace Dali

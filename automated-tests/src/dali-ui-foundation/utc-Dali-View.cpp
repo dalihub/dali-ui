@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/provider-api/shadow.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/integration-api/events/key-event-integ.h>

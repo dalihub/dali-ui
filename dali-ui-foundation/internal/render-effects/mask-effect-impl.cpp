@@ -36,7 +36,7 @@
 
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 

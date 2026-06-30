@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {

@@ -22,7 +22,7 @@
 #include <dali/devel-api/object/type-registry.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/label.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
 namespace Dali
 {

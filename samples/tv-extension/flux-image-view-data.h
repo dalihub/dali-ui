@@ -17,7 +17,7 @@
 
 #include "flux-view-data.h"
 
-#include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 
 class FluxImageViewData : public FluxViewData
 {

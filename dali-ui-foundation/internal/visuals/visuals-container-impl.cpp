@@ -35,9 +35,9 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h> ///< To get viewDataImpl by Internal::ViewDataImpl::Get()
 #include <dali-ui-foundation/internal/views/view/visual-constraint-functions.h>
-#include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 using Dali::Integration::ToDaliString;

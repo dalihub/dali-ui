@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/provider-api/group-selectable-view-impl.h>
-#include <dali-ui-foundation/public-api/group-selectable-view.h>
+#include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
 namespace Dali
 {

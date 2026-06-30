@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/traits/trait-id.h>
 
 namespace Dali
 {

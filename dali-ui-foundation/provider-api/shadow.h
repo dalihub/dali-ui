@@ -22,7 +22,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/shadow.h>
+#include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 
 namespace Dali

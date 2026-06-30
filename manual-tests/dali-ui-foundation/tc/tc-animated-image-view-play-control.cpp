@@ -15,7 +15,7 @@
 
 #include "manual-test-case.h"
 
-#include <dali-ui-foundation/public-api/animated-image-view.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
 
 #include <string>
 

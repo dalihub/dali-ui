@@ -37,7 +37,7 @@ UiScaleManager (시스템 스케일)
 `UiScaleManager`는 현재 시스템 스케일 값을 보유하는 프로세스 전역 싱글턴입니다.
 
 ```cpp
-#include <dali-ui-foundation/public-api/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 
 // 현재 시스템 스케일 읽기
 float scale = UiScaleManager::Get().GetScale();  // 기본값: 1.0
@@ -60,7 +60,7 @@ UiScaleManager::Get().SetScale(1.5f);
 각 `View`는 `SetUiScalePolicy()`를 통해 스케일 전파에 참여하는 방식을 직접 지정할 수 있습니다.
 
 ```cpp
-#include <dali-ui-foundation/public-api/ui-scale-policy.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 
 view.SetUiScalePolicy(UiScalePolicy::INHERIT);   // 기본값
 view.SetUiScalePolicy(UiScalePolicy::ENABLED);

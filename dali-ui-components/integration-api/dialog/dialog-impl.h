@@ -19,7 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog.h>

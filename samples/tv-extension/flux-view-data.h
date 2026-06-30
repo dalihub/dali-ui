@@ -15,7 +15,7 @@
 
 #pragma once
 
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/public-api/adaptor-framework/timer.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/signals/connection-tracker.h>

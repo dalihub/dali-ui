@@ -45,7 +45,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
-#include <dali-ui-foundation/public-api/bounce-edge-effect.h>
+#include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <sstream>
 

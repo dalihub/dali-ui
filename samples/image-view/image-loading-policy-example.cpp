@@ -16,11 +16,11 @@
 #include <string>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/animated-image-view.h>
-#include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
-#include <dali-ui-foundation/public-api/lottie-animation-view.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;

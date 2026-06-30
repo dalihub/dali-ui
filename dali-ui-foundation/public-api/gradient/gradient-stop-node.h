@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
 
 namespace Dali
 {

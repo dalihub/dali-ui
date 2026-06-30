@@ -17,10 +17,10 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/interactive-trait.h>
-#include <dali-ui-foundation/public-api/interactive-view.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/traits/interactive-trait.h>
+#include <dali-ui-foundation/public-api/views/interactive-view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
 {

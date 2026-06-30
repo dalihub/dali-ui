@@ -24,7 +24,7 @@
 #include <dali/public-api/object/property-map.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/align-enumerations.h>
+#include <dali-ui-foundation/public-api/types/align-enumerations.h>
 
 namespace Dali::Ui::Internal::Visual
 {

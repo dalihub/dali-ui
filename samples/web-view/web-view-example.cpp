@@ -36,7 +36,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
-#include <dali-ui-foundation/public-api/web-view.h>
+#include <dali-ui-foundation/public-api/views/web/web-view.h>
 #include <dali/integration-api/debug.h>
 
 using namespace Dali;

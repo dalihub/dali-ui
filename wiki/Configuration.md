@@ -19,7 +19,7 @@ in the same application.
 
 | Library | Config Class | Header |
 |---|---|---|
-| `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
+| `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/configuration/ui-config.h>` |
 | `dali-ui-components` | `Components::UiConfig` | `<dali-ui-components/dali-ui-components.h>` |
 
 <br/>

@@ -30,7 +30,7 @@
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visuals-container.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 namespace Dali

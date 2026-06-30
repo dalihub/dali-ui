@@ -43,10 +43,10 @@
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
-#include <dali-ui-foundation/public-api/image-view.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;

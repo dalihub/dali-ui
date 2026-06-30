@@ -20,7 +20,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/text-button.h>
 #include <dali-ui-foundation/provider-api/interactive-view-impl.h>
-#include <dali-ui-foundation/public-api/label.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
 namespace Dali
 {

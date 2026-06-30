@@ -38,8 +38,8 @@
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 

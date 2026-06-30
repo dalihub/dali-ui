@@ -27,7 +27,7 @@
 `View` 클래스는 `GetImpl()` 헬퍼로 handle에서 impl 참조를 얻습니다.
 
 ```cpp
-// public-api/view-impl.h 에 정의
+// public-api/views/view-impl.h 에 정의
 ViewImpl& GetImpl(View& view);
 const ViewImpl& GetImpl(const View& view);
 ```

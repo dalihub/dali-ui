@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/animated-image-visual.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual.h>

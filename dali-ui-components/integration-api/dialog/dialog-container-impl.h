@@ -18,8 +18,8 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog-container.h>

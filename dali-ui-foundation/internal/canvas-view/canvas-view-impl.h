@@ -31,9 +31,9 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
 #include <dali-ui-foundation/internal/canvas-view/canvas-view-rasterize-task.h>
-#include <dali-ui-foundation/public-api/canvas-view-properties.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/canvas/canvas-view-properties.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
 {

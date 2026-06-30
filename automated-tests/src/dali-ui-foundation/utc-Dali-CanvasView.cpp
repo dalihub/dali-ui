@@ -16,7 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/canvas-view.h>
+#include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>

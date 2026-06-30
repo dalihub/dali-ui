@@ -21,7 +21,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
 namespace Dali
 {

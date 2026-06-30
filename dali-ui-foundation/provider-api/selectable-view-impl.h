@@ -18,8 +18,8 @@
  */
 
 #include <dali-ui-foundation/provider-api/interactive-view-impl.h>
-#include <dali-ui-foundation/public-api/selectable-trait.h>
-#include <dali-ui-foundation/public-api/selectable-view.h>
+#include <dali-ui-foundation/public-api/traits/selectable-trait.h>
+#include <dali-ui-foundation/public-api/views/selectable-view.h>
 
 namespace Dali
 {

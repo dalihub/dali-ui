@@ -17,7 +17,7 @@
 
 #include "flux-view-data.h"
 
-#include <dali-ui-foundation/public-api/label.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
 class FluxLabelData : public FluxViewData
 {

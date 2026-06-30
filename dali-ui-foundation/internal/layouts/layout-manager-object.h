@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/public-api/trait-object.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali/public-api/common/unique-ptr.h>
 
 namespace Dali

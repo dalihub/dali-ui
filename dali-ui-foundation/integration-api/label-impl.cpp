@@ -40,13 +40,13 @@
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/provider-api/property-registration-helper.h>
-#include <dali-ui-foundation/public-api/align-enumerations.h>
+#include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
+#include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
-#include <dali-ui-foundation/public-api/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
-#include <dali-ui-foundation/public-api/ui-localization-manager.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/types/align-enumerations.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 
 using Dali::Integration::ToDaliString;

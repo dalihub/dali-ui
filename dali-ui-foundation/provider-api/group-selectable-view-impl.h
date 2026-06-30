@@ -18,8 +18,8 @@
  */
 
 #include <dali-ui-foundation/provider-api/selectable-view-impl.h>
-#include <dali-ui-foundation/public-api/group-selectable-trait.h>
-#include <dali-ui-foundation/public-api/group-selectable-view.h>
+#include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
+#include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
 namespace Dali
 {

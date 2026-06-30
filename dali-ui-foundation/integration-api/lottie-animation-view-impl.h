@@ -23,8 +23,8 @@
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-enumerations.h>
 #include <dali-ui-foundation/public-api/image/lottie-animation-types.h>
-#include <dali-ui-foundation/public-api/lottie-animation-view-properties.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view-properties.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/object/property-map.h>

@@ -17,7 +17,7 @@
  *
  */
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <functional>
 
 namespace Dali

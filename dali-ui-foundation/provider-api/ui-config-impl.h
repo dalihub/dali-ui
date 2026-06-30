@@ -27,10 +27,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/provider-api/theme-loader-interface.h>
-#include <dali-ui-foundation/public-api/state-effect.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 
 namespace Dali
 {

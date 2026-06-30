@@ -19,10 +19,10 @@
 #include <dali-ui-components/integration-api/dialog/dialog-container-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/interactive-view.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/public-api/common/unique-ptr.h>

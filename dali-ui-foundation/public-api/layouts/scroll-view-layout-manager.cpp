@@ -26,8 +26,8 @@
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/scroll-bar.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/integration-api/debug.h>
 
 namespace Dali

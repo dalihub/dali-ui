@@ -25,7 +25,7 @@
 #include <algorithm>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
 
 using Dali::Integration::ToStdString;
 

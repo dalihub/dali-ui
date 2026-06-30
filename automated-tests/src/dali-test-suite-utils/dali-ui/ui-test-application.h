@@ -24,7 +24,7 @@
 #include <dali-test-suite-utils.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <test-application.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui/ui-adaptor-impl.h>
 
 namespace Dali

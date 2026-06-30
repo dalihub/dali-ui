@@ -18,10 +18,10 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/state-effect.h>
-#include <dali-ui-foundation/public-api/state-event.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/views/effects/state-effect.h>
+#include <dali-ui-foundation/public-api/views/state-event.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {

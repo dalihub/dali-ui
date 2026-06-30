@@ -26,7 +26,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
-#include <dali-ui-foundation/public-api/trait-id.h>
+#include <dali-ui-foundation/public-api/traits/trait-id.h>
 
 namespace Dali
 {

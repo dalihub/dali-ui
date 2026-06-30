@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {

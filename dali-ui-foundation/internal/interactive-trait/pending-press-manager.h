@@ -23,7 +23,7 @@
 #include <cstdint>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/input-event.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
 
 namespace Dali
 {

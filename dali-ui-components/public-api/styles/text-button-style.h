@@ -19,12 +19,12 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/state-effect.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
-#include <dali-ui-foundation/public-api/view-types.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/effects/state-effect.h>
+#include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/common/intrusive-ptr.h>

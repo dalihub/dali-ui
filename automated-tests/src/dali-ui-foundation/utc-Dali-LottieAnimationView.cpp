@@ -18,7 +18,7 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/lottie-animation-view.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

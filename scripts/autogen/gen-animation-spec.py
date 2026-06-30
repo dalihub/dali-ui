@@ -10,7 +10,7 @@ Usage:
   python gen-animation-spec.py --scan-dir public-api/
 
   # Single class
-  python gen-animation-spec.py --class View --header public-api/view.h
+  python gen-animation-spec.py --class View --header public-api/views/view.h
 """
 
 import argparse
@@ -334,7 +334,12 @@ def write_file(path, content):
     return True
 
 
-def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs=None):
+def _public_api_include(header, public_api_root):
+    rel = os.path.relpath(header, public_api_root).replace(os.sep, '/')
+    return f'dali-ui-foundation/public-api/{rel}'
+
+
+def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs=None, public_api_root=None):
     """Generate all files for one component class."""
     bridge = f'{cls}AnimationBridge'
     spec = f'{cls}AnimationSpec'
@@ -349,10 +354,13 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
     parent_entries = parse_animatable_tags(parent_header) if parent_header else []
     manual_entries = [e for e in own_entries if e['is_manual']]
 
-    header_dir = os.path.dirname(header)
-    pub_anim_dir = os.path.join(header_dir, 'animation')
-    base_dir = os.path.dirname(header_dir)
+    if public_api_root is None:
+        public_api_root = os.path.dirname(header)
+
+    pub_anim_dir = os.path.join(public_api_root, 'animation')
+    base_dir = os.path.dirname(public_api_root)
     int_anim_dir = os.path.join(base_dir, 'internal', 'animation')
+    view_include = _public_api_include(header, public_api_root)
 
     os.makedirs(pub_anim_dir, exist_ok=True)
     os.makedirs(int_anim_dir, exist_ok=True)
@@ -389,7 +397,7 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
         'VIEW_INSTANCE': view_instance,
         'PARENT_BRIDGE': parent_bridge or '',
         'PARENT_INCLUDE': f'#include <{P}/public-api/animation/{_class_to_filename(parent_bridge)}.autogen.h>' if has_parent else '',
-        'VIEW_INCLUDE': f'#include <{P}/public-api/{_class_to_filename(cls)}.h>',
+        'VIEW_INCLUDE': f'#include <{view_include}>',
         'METHODS': bridge_methods,
     }))
 
@@ -430,7 +438,7 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
         'PARENT_BRIDGE': parent_bridge or '',
         'BRIDGE_HEADER_PATH': f'{P}/public-api/animation/{bridge_fn}.autogen.h',
         'IMPL_INCLUDE': f'#include <{P}/internal/animation/{impl_fn}.autogen.h>' if manual_entries else '',
-        'VIEW_HEADER_INCLUDE': f'#include <{P}/public-api/{_class_to_filename(cls)}.h>',
+        'VIEW_HEADER_INCLUDE': f'#include <{view_include}>',
         'METHOD_IMPLEMENTATIONS': '\n\n'.join(bridge_cpp_methods),
     }))
 
@@ -495,7 +503,7 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
         'PARENT_SPEC': parent_spec or '',
         'SPEC_HEADER_PATH': f'{P}/public-api/animation/{spec_fn}.autogen.h',
         'IMPL_HEADER_PATH': f'{P}/internal/animation/{impl_fn}.autogen.h',
-        'VIEW_HEADER_INCLUDE': f'#include <{P}/public-api/{_class_to_filename(cls)}.h>',
+        'VIEW_HEADER_INCLUDE': f'#include <{view_include}>',
         'ADDENTRY_IMPLEMENTATIONS': '\n\n'.join(addentry_lines),
     }))
 
@@ -574,7 +582,7 @@ def main():
             parent = cfg.get('parent')
             parent_header = configs[parent]['header'] if parent and parent in configs else None
             print(f'[{cls}] {cfg["header"]}')
-            generate_for_class(cls, cfg['header'], parent, parent_header, configs)
+            generate_for_class(cls, cfg['header'], parent, parent_header, configs, args.scan_dir)
         return
 
     if not args.cls or not args.header:

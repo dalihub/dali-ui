@@ -24,8 +24,8 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/ui-scale-manager.h>
 
 namespace Dali
 {

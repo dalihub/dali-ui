@@ -22,10 +22,10 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/interactive-trait.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/traits/interactive-trait.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali::Ui::Internal
 {

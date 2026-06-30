@@ -14,9 +14,9 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/group-selectable-trait.h>
-#include <dali-ui-foundation/public-api/selectable-trait.h>
-#include <dali-ui-foundation/public-api/selection-group.h>
+#include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
+#include <dali-ui-foundation/public-api/traits/selectable-trait.h>
+#include <dali-ui-foundation/public-api/views/selection-group.h>
 
 #include <cstdio>
 #include <string>

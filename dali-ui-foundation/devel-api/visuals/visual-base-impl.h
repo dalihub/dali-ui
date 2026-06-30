@@ -33,11 +33,11 @@
 #include <dali-ui-foundation/devel-api/visuals/visual-properties-devel.h>
 #include <dali-ui-foundation/devel-api/visuals/visual-transform.h>
 #include <dali-ui-foundation/devel-api/visuals/visuals-container.h>
-#include <dali-ui-foundation/public-api/align-enumerations.h>
-#include <dali-ui-foundation/public-api/callback.h>
-#include <dali-ui-foundation/public-api/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
-#include <dali-ui-foundation/public-api/view-types.h>
+#include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/types/align-enumerations.h>
+#include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 
 namespace Dali

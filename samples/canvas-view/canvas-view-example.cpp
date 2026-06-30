@@ -37,8 +37,8 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/canvas-view.h>
-#include <dali-ui-foundation/public-api/label.h>
+#include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>

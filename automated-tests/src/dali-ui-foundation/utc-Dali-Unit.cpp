@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
-#include "dali-ui-foundation/public-api/ui-config.h"
+#include "dali-ui-foundation/public-api/configuration/ui-config.h"
 
 using namespace Dali;
 using namespace Dali::Ui;

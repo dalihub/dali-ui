@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
 {

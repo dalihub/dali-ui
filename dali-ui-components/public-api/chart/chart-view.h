@@ -20,7 +20,7 @@
 #include <dali-ui-components/public-api/chart/chart-section.h>
 #include <dali-ui-components/public-api/chart/chart-series.h>
 #include <dali-ui-components/public-api/chart/chart-view-properties.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <functional>

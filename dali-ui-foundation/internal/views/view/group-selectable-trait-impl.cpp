@@ -26,11 +26,11 @@
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 #include <dali-ui-foundation/internal/views/view/selection-group-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/selectable-trait.h>
-#include <dali-ui-foundation/public-api/view-accessibility-enums.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/traits/selectable-trait.h>
+#include <dali-ui-foundation/public-api/views/view-accessibility-enums.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali::Ui::Internal
 {

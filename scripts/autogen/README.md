@@ -91,7 +91,7 @@ dali_ui_autogen_animation_spec(my-library ${CMAKE_SOURCE_DIR}/public-api)
 python3 gen-animation-spec.py --scan-dir public-api/
 
 # 단일 클래스
-python3 gen-animation-spec.py --class View --header public-api/view.h
+python3 gen-animation-spec.py --class View --header public-api/views/view.h
 ```
 
 ## 템플릿

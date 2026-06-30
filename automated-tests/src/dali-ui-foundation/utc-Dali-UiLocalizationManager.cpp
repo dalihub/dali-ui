@@ -19,9 +19,9 @@
 #include <iostream>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/callback.h>
-#include <dali-ui-foundation/public-api/ui-localization-manager.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;

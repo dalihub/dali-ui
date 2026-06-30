@@ -19,12 +19,12 @@
 #include <dali-ui-components/integration-api/dialog/alert-dialog-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/interactive-view.h>
-#include <dali-ui-foundation/public-api/label.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/interactive-view.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/object/type-registry.h>
 

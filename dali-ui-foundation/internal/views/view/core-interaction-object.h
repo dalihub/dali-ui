@@ -25,7 +25,7 @@
 #include <dali-ui-foundation/internal/views/view/group-selectable-trait-impl.h>
 #include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
 
 namespace Dali
 {

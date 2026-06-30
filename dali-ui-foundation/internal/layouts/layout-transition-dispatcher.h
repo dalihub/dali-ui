@@ -28,7 +28,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES (handle types used by ghost storage)
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>

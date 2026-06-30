@@ -36,8 +36,8 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/provider-api/property-registration-helper.h>
-#include <dali-ui-foundation/public-api/align-enumerations.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/types/align-enumerations.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 

@@ -28,7 +28,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/accessibility-highlight-overlay.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/view-accessibility-enums.h>
+#include <dali-ui-foundation/public-api/views/view-accessibility-enums.h>
 
 namespace Dali::Ui
 {

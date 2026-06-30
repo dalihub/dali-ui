@@ -20,7 +20,7 @@
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/group-selectable-trait.h>
+#include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;

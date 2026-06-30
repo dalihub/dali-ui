@@ -26,10 +26,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
-#include <dali-ui-foundation/public-api/edge-effect.h>
 #include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
-#include <dali-ui-foundation/public-api/scroll-bar.h>
-#include <dali-ui-foundation/public-api/scroll-view.h>
+#include <dali-ui-foundation/public-api/views/scroll/edge-effect.h>
+#include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
+#include <dali-ui-foundation/public-api/views/scroll/scroll-view.h>
 
 namespace Dali
 {

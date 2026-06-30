@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
 
 namespace Dali
 {

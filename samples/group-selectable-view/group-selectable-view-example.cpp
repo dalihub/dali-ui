@@ -14,8 +14,8 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/group-selectable-view.h>
-#include <dali-ui-foundation/public-api/selection-group.h>
+#include <dali-ui-foundation/public-api/views/group-selectable-view.h>
+#include <dali-ui-foundation/public-api/views/selection-group.h>
 
 #include <cstdio>
 #include <string>

@@ -17,8 +17,8 @@
 
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
-#include <dali-ui-foundation/public-api/attachment-id.h>
-#include <dali-ui-foundation/public-api/unique-any.h>
+#include <dali-ui-foundation/public-api/traits/attachment-id.h>
+#include <dali-ui-foundation/public-api/types/unique-any.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

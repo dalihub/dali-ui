@@ -16,7 +16,7 @@ Config는 하나만 적용합니다. 같은 앱에서 `UiConfig`와 `Components:
 
 | 사용 라이브러리 | Config 클래스 | 헤더 |
 |---|---|---|
-| `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/ui-config.h>` |
+| `dali-ui-foundation` | `UiConfig` | `<dali-ui-foundation/public-api/configuration/ui-config.h>` |
 | `dali-ui-components` | `Components::UiConfig` | `<dali-ui-components/dali-ui-components.h>` |
 
 <br/>

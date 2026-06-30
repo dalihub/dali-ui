@@ -22,9 +22,9 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
-#include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
+#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {

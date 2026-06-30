@@ -29,7 +29,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/page-scroll-view.h>
+#include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
 #include <sstream>
 
 using namespace Dali;

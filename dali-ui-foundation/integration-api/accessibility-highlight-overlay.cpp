@@ -32,7 +32,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
-#include <dali-ui-foundation/public-api/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 
 using Dali::Integration::ToDaliString;
 

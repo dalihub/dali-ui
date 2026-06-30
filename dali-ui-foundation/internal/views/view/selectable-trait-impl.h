@@ -23,8 +23,8 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/selectable-trait.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 
 namespace Dali
 {

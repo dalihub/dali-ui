@@ -26,8 +26,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/provider-api/theme-loader-interface.h>
+#include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/ui-theme-manager.h>
 
 namespace Dali
 {

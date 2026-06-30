@@ -19,10 +19,10 @@
 #include "flux-label-data.h"
 #include "flux-view-data.h"
 
-#include <dali-ui-foundation/public-api/attachment-id.h>
-#include <dali-ui-foundation/public-api/image-view.h>
-#include <dali-ui-foundation/public-api/label.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/traits/attachment-id.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace TVExt
 {

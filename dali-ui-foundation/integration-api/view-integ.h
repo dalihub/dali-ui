@@ -24,14 +24,14 @@
 #include <dali/public-api/signals/callback.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/callback.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/state-event.h>
-#include <dali-ui-foundation/public-api/trait-id.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
-#include <dali-ui-foundation/public-api/view-state.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/traits/trait-id.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali-ui-foundation/public-api/types/view-state.h>
+#include <dali-ui-foundation/public-api/views/state-event.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {

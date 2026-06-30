@@ -18,7 +18,7 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/web-view.h>
+#include <dali-ui-foundation/public-api/views/web/web-view.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

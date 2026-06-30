@@ -27,7 +27,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/layouts/absolute-layout-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/scrollable-enum.h>
+#include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
 
 namespace Dali
 {

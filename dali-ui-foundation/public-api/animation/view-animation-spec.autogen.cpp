@@ -23,7 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/animation/view-animation-spec-impl.autogen.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {

@@ -27,7 +27,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/provider-api/ui-config-impl.h>
-#include <dali-ui-foundation/public-api/overlay-effect.h>
+#include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 
 namespace
 {

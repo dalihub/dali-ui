@@ -18,11 +18,11 @@
  */
 
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/public-api/animated-image-view-properties.h>
 #include <dali-ui-foundation/public-api/image/animated-image-enumerations.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/image/animated-image-view-properties.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/math/vector4.h>

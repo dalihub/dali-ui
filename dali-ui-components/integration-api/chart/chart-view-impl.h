@@ -36,9 +36,9 @@
 #include <dali-ui-components/integration-api/chart/chart-renderer.h>
 #include <dali-ui-components/integration-api/chart/chart-scale-engine.h>
 #include <dali-ui-components/public-api/chart/chart-view.h>
-#include <dali-ui-foundation/public-api/canvas-view.h>
-#include <dali-ui-foundation/public-api/label.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
 {

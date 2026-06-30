@@ -20,9 +20,9 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/group-selectable-trait-impl.h>
-#include <dali-ui-foundation/public-api/group-selectable-trait.h>
-#include <dali-ui-foundation/public-api/selectable-trait.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
+#include <dali-ui-foundation/public-api/traits/selectable-trait.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {

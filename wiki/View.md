@@ -29,7 +29,7 @@ Class | Role | Description
 The `View` class provides the `GetImpl()` helper to obtain an impl reference from a handle.
 
 ```cpp
-// Defined in public-api/view-impl.h
+// Defined in public-api/views/view-impl.h
 ViewImpl& GetImpl(View& view);
 const ViewImpl& GetImpl(const View& view);
 ```

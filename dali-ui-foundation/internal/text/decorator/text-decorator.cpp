@@ -40,9 +40,9 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/graphics/builtin-shader-extern-gen.h>
-#include <dali-ui-foundation/public-api/image-view.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 #ifdef DEBUG_ENABLED
 #define DECORATOR_DEBUG

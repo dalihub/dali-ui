@@ -27,9 +27,9 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/state-event-impl.h>
-#include <dali-ui-foundation/public-api/state-event.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/views/state-event.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 

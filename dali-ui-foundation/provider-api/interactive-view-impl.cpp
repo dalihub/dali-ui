@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/provider-api/interactive-view-impl.h>
-#include <dali-ui-foundation/public-api/interactive-view.h>
+#include <dali-ui-foundation/public-api/views/interactive-view.h>
 
 namespace Dali
 {

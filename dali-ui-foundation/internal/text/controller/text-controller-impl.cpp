@@ -46,7 +46,7 @@
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 #include <dali-ui-foundation/internal/text/text-selection-handle-controller.h>
 #include <dali-ui-foundation/internal/text/underlined-glyph-run.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
 using namespace Dali;
 

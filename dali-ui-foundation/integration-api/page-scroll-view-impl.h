@@ -19,8 +19,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
-#include <dali-ui-foundation/public-api/i-page-scrollable.h>
-#include <dali-ui-foundation/public-api/page-scroll-view.h>
+#include <dali-ui-foundation/public-api/views/scroll/i-page-scrollable.h>
+#include <dali-ui-foundation/public-api/views/scroll/page-scroll-view.h>
 
 namespace Dali
 {

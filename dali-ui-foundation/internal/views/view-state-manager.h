@@ -21,9 +21,9 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/view-state.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/types/view-state.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {

@@ -18,7 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>

@@ -15,7 +15,7 @@
 
 #include "manual-test-case.h"
 
-#include <dali-ui-foundation/public-api/lottie-animation-view.h>
+#include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/animation/animation.h>
 #include <dali/public-api/animation/key-frames.h>

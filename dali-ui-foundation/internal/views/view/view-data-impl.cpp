@@ -24,9 +24,9 @@
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/devel-api/actors/actor-devel.h>
 #include <dali/devel-api/adaptor-framework/accessibility.h>
 #include <dali/devel-api/object/handle-devel.h>
@@ -57,8 +57,8 @@
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
-#include <dali-ui-foundation/public-api/ui-constraint-tag-ranges.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 

@@ -26,9 +26,9 @@
 
 #include <dali-ui-foundation/internal/interactive-trait/pending-press-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 

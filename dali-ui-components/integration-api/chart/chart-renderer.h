@@ -28,7 +28,7 @@
 #include <dali-ui-components/integration-api/chart/chart-layout-manager.h>
 #include <dali-ui-components/integration-api/chart/chart-model.h>
 #include <dali-ui-components/integration-api/chart/chart-scale-engine.h>
-#include <dali-ui-foundation/public-api/canvas-view.h>
+#include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
 
 namespace Dali
 {

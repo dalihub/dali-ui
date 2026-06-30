@@ -15,7 +15,7 @@
 
 #include "manual-test-case.h"
 
-#include <dali-ui-foundation/public-api/shadow-stack.h>
+#include <dali-ui-foundation/public-api/views/effects/shadow-stack.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

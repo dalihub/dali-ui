@@ -21,7 +21,7 @@
 #include <dali.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/view-state.h>
+#include <dali-ui-foundation/public-api/types/view-state.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

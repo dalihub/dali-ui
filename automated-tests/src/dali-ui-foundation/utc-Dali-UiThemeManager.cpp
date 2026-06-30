@@ -20,7 +20,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/provider-api/ui-config-impl.h>
-#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;

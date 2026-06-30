@@ -19,10 +19,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/styles/text-button-style.h>
-#include <dali-ui-foundation/public-api/interactive-view.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
-#include <dali-ui-foundation/public-api/ui-color.h>
+#include <dali-ui-foundation/public-api/types/ui-color.h>
+#include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali/public-api/common/dali-string.h>
 
 namespace Dali

@@ -24,7 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
 #include <dali-ui-foundation/internal/ui-color-cache.h>
-#include <dali-ui-foundation/public-api/ui-theme-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/integration-api/debug.h>
 

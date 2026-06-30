@@ -39,7 +39,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/devel-api/builder/json-parser.h>
-#include <dali-ui-foundation/public-api/view.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 #include <dali-ui-foundation/internal/builder/builder-declarations.h>
 #include <dali-ui-foundation/internal/builder/builder-filesystem.h>

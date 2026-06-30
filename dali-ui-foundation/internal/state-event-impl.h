@@ -22,9 +22,9 @@
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/input-event.h>
-#include <dali-ui-foundation/public-api/state-event.h>
-#include <dali-ui-foundation/public-api/view-state.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
+#include <dali-ui-foundation/public-api/types/view-state.h>
+#include <dali-ui-foundation/public-api/views/state-event.h>
 
 namespace Dali
 {

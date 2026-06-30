@@ -19,7 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali-ui-foundation/public-api/trait-object.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
 
 namespace Dali
 {

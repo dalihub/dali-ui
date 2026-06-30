@@ -18,7 +18,7 @@
 
 #if defined(DEBUG_ENABLED)
 
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/object/handle.h>
 #include <iostream>
 #include <string>

@@ -22,8 +22,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/provider-api/ui-config-impl.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/ui-config.h>
 
 namespace Dali
 {

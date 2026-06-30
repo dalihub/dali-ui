@@ -21,8 +21,8 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 
-#include <dali-ui-foundation/public-api/scroll-bar.h>
-#include <dali-ui-foundation/public-api/scrollable-enum.h>
+#include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
+#include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

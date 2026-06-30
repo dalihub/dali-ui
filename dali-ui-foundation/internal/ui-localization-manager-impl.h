@@ -31,9 +31,9 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/callback.h>
+#include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/ui-localization-manager.h>
+#include <dali-ui-foundation/public-api/types/callback.h>
 
 namespace Dali
 {

@@ -34,10 +34,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/devel-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/public-api/callback.h>
-#include <dali-ui-foundation/public-api/image-view.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
-#include <dali-ui-foundation/public-api/web-view.h>
+#include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+#include <dali-ui-foundation/public-api/views/web/web-view.h>
 
 namespace Dali
 {
