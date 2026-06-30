@@ -99,6 +99,8 @@ cat > "$CONTEXT_FILE" <<EOF
 - 각 details 블록은 규칙, 문제, 권장 조치를 합쳐 8줄 이내로 작성한다.
 - 전체 결과는 50000자 이내로 작성한다.
 - rules 전문이나 diff 내용을 반복 인용하지 않는다.
+- 분석 과정, 규칙별 전체 점검 로그, OK 항목 목록은 출력하지 않는다.
+- 최종 답변은 반드시 답변 템플릿의 markdown 본문만 출력한다.
 
 # 답변 템플릿
 
@@ -183,30 +185,62 @@ const [rawPath, outPath] = process.argv.slice(2);
 const raw = fs.readFileSync(rawPath, 'utf8');
 let result = '';
 
+function normalizeText(text) {
+  return text.replace(/\\n/g, '\n').trim();
+}
+
+function extractTemplateBody(text) {
+  const normalized = normalizeText(text);
+  const fenced = normalized.match(/```(?:md|markdown)?\s*([\s\S]*?)```/i);
+  const body = fenced ? fenced[1].trim() : normalized;
+
+  const noIssueIndex = body.lastIndexOf('감지된 이슈 없음');
+  if (noIssueIndex !== -1) {
+    return '감지된 이슈 없음';
+  }
+
+  const issueMatch = body.match(/감지된 이슈\s+\d+건[\s\S]*/);
+  if (issueMatch) {
+    return issueMatch[0].trim();
+  }
+
+  return body;
+}
+
+function acceptMessage(message) {
+  if (message.say === 'completion_result' && typeof message.text === 'string') {
+    result = message.text;
+  } else if (message.type === 'run_result' && typeof message.text === 'string') {
+    result = message.text;
+  } else if (
+    message.type === 'agent_event' &&
+    message.event?.type === 'done' &&
+    typeof message.event.text === 'string'
+  ) {
+    result = message.event.text;
+  }
+}
+
+let buffer = '';
 for (const line of raw.split(/\r?\n/)) {
   const trimmed = line.trim();
-  if (!trimmed.startsWith('{')) continue;
+  if (!trimmed && !buffer) continue;
+  if (!buffer && !trimmed.startsWith('{')) continue;
 
+  buffer = buffer ? `${buffer}\n${line}` : line;
   try {
-    const message = JSON.parse(trimmed);
-    if (message.say === 'completion_result' && typeof message.text === 'string') {
-      result = message.text;
-    }
+    acceptMessage(JSON.parse(buffer));
+    buffer = '';
   } catch {
-    // Ignore non-JSON lines from CLI startup logs.
+    // Keep buffering. Some Cline JSON events can contain formatted text.
   }
 }
 
 if (!result.trim()) {
-  const fallback = raw
-    .split(/\r?\n/)
-    .filter(line => line.trim())
-    .slice(-80)
-    .join('\n');
-  result = fallback || 'Cline CLI 결과를 파싱하지 못했습니다.';
+  result = 'Cline CLI 결과를 파싱하지 못했습니다.';
 }
 
-fs.writeFileSync(outPath, result.replace(/\\n/g, '\n').trim() + '\n');
+fs.writeFileSync(outPath, extractTemplateBody(result) + '\n');
 NODE
 
 {
