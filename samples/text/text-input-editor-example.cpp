@@ -374,45 +374,45 @@ private:
     window.Add(rootLayout);
 
     // Connect button touch signals - Cursor
-    btnCursorBlink.TouchedSignal().Connect(this, &InputEditorController::OnButtonCursorBlinkTouched);
-    btnCursorInterval.TouchedSignal().Connect(this, &InputEditorController::OnButtonCursorIntervalTouched);
-    btnCursorPos.TouchedSignal().Connect(this, &InputEditorController::OnButtonCursorPosTouched);
-    btnCursorWidth.TouchedSignal().Connect(this, &InputEditorController::OnButtonCursorWidthTouched);
+    btnCursorBlink.TouchEventSignal().Connect(this, &InputEditorController::OnButtonCursorBlinkTouched);
+    btnCursorInterval.TouchEventSignal().Connect(this, &InputEditorController::OnButtonCursorIntervalTouched);
+    btnCursorPos.TouchEventSignal().Connect(this, &InputEditorController::OnButtonCursorPosTouched);
+    btnCursorWidth.TouchEventSignal().Connect(this, &InputEditorController::OnButtonCursorWidthTouched);
 
     // Connect button touch signals - Placeholder
-    btnPlaceholderFocus.TouchedSignal().Connect(this, &InputEditorController::OnButtonPlaceholderFocusTouched);
-    btnPlaceholderColor.TouchedSignal().Connect(this, &InputEditorController::OnButtonPlaceholderColorTouched);
+    btnPlaceholderFocus.TouchEventSignal().Connect(this, &InputEditorController::OnButtonPlaceholderFocusTouched);
+    btnPlaceholderColor.TouchEventSignal().Connect(this, &InputEditorController::OnButtonPlaceholderColorTouched);
 
     // Connect button touch signals - Selection
-    btnSelectionColor.TouchedSignal().Connect(this, &InputEditorController::OnButtonSelectionColorTouched);
-    btnSelectionEnabled.TouchedSignal().Connect(this, &InputEditorController::OnButtonSelectionEnabledTouched);
-    btnSelectRange.TouchedSignal().Connect(this, &InputEditorController::OnButtonSelectRangeTouched);
-    btnSelectWhole.TouchedSignal().Connect(this, &InputEditorController::OnButtonSelectWholeTouched);
-    btnClearSelection.TouchedSignal().Connect(this, &InputEditorController::OnButtonClearSelectionTouched);
+    btnSelectionColor.TouchEventSignal().Connect(this, &InputEditorController::OnButtonSelectionColorTouched);
+    btnSelectionEnabled.TouchEventSignal().Connect(this, &InputEditorController::OnButtonSelectionEnabledTouched);
+    btnSelectRange.TouchEventSignal().Connect(this, &InputEditorController::OnButtonSelectRangeTouched);
+    btnSelectWhole.TouchEventSignal().Connect(this, &InputEditorController::OnButtonSelectWholeTouched);
+    btnClearSelection.TouchEventSignal().Connect(this, &InputEditorController::OnButtonClearSelectionTouched);
 
     // Connect button touch signals - Other
-    btnMaxLen.TouchedSignal().Connect(this, &InputEditorController::OnButtonMaxLenTouched);
-    btnEditable.TouchedSignal().Connect(this, &InputEditorController::OnButtonEditableTouched);
+    btnMaxLen.TouchEventSignal().Connect(this, &InputEditorController::OnButtonMaxLenTouched);
+    btnEditable.TouchEventSignal().Connect(this, &InputEditorController::OnButtonEditableTouched);
 
     // Connect button touch signals - Text background
-    btnTextBgColor.TouchedSignal().Connect(this, &InputEditorController::OnButtonTextBgColorTouched);
-    btnClearTextBg.TouchedSignal().Connect(this, &InputEditorController::OnButtonClearTextBgTouched);
+    btnTextBgColor.TouchEventSignal().Connect(this, &InputEditorController::OnButtonTextBgColorTouched);
+    btnClearTextBg.TouchEventSignal().Connect(this, &InputEditorController::OnButtonClearTextBgTouched);
 
     // Connect button touch signals - Line wrap mode
-    btnLineWrapMode.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineWrapModeTouched);
+    btnLineWrapMode.TouchEventSignal().Connect(this, &InputEditorController::OnButtonLineWrapModeTouched);
 
     // Connect button touch signals - Line height
-    btnLineHeight.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineHeightTouched);
-    btnLineHeightMode.TouchedSignal().Connect(this, &InputEditorController::OnButtonLineHeightModeTouched);
+    btnLineHeight.TouchEventSignal().Connect(this, &InputEditorController::OnButtonLineHeightTouched);
+    btnLineHeightMode.TouchEventSignal().Connect(this, &InputEditorController::OnButtonLineHeightModeTouched);
 
     // Connect button touch signals - Alignment
-    btnHorizontalAlignment.TouchedSignal().Connect(this, &InputEditorController::OnButtonHorizontalAlignmentTouched);
-    btnVerticalAlignment.TouchedSignal().Connect(this, &InputEditorController::OnButtonVerticalAlignmentTouched);
+    btnHorizontalAlignment.TouchEventSignal().Connect(this, &InputEditorController::OnButtonHorizontalAlignmentTouched);
+    btnVerticalAlignment.TouchEventSignal().Connect(this, &InputEditorController::OnButtonVerticalAlignmentTouched);
 
     // Connect button touch signals - Auto Grow
-    btnAutoGrow.TouchedSignal().Connect(this, &InputEditorController::OnButtonAutoGrowTouched);
+    btnAutoGrow.TouchEventSignal().Connect(this, &InputEditorController::OnButtonAutoGrowTouched);
 
-    btnInfo.TouchedSignal().Connect(this, &InputEditorController::OnButtonInfoTouched);
+    btnInfo.TouchEventSignal().Connect(this, &InputEditorController::OnButtonInfoTouched);
 
     // Also support key events
     window.KeyEventSignal().Connect(this, &InputEditorController::OnKeyEvent);

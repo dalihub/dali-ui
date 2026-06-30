@@ -143,7 +143,7 @@ private:
     btn.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     btn.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
-    btn.TouchedSignal().Connect(this, [onClick](Actor, TouchEvent e) -> bool {
+    btn.TouchEventSignal().Connect(this, [onClick](Actor, TouchEvent e) -> bool {
       if(e.GetState(0) == PointState::UP) onClick();
       return true;
     });

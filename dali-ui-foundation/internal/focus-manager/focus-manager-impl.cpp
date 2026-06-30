@@ -191,7 +191,7 @@ void FocusManager::OnAdaptorInit()
     {
       (*iter).KeyEventSignal().Connect(mSlotDelegate, &FocusManager::OnKeyEvent);
       (*iter).TouchEventSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
-      (*iter).GetRootLayer().HoveredSignal().Connect(mSlotDelegate, &FocusManager::OnHover);
+      (*iter).GetRootLayer().HoverEventSignal().Connect(mSlotDelegate, &FocusManager::OnHover);
       (*iter).WheelEventGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnCustomWheelEvent);
       (*iter).WheelEventSignal().Connect(mSlotDelegate, &FocusManager::OnWheelEvent);
       (*iter).FocusChangedGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneHolderFocusChanged);
@@ -211,7 +211,7 @@ void FocusManager::OnSceneHolderCreated(Dali::Integration::SceneHolder sceneHold
 {
   sceneHolder.KeyEventSignal().Connect(mSlotDelegate, &FocusManager::OnKeyEvent);
   sceneHolder.TouchEventSignal().Connect(mSlotDelegate, &FocusManager::OnTouch);
-  sceneHolder.GetRootLayer().HoveredSignal().Connect(mSlotDelegate, &FocusManager::OnHover);
+  sceneHolder.GetRootLayer().HoverEventSignal().Connect(mSlotDelegate, &FocusManager::OnHover);
   sceneHolder.WheelEventGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnCustomWheelEvent);
   sceneHolder.WheelEventSignal().Connect(mSlotDelegate, &FocusManager::OnWheelEvent);
   sceneHolder.FocusChangedGeneratedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneHolderFocusChanged);
@@ -292,7 +292,7 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
       mCurrentWindowId      = static_cast<uint32_t>(currentWindow.GetNativeId());
     }
 
-    view.OffSceneSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
+    view.SceneDisconnectedSignal().Connect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
 
     // Save the current focused view
     mCurrentFocusView = view;
@@ -623,7 +623,7 @@ void FocusManager::ClearFocus(View view)
   if(view)
   {
     DALI_LOG_RELEASE_INFO("ClearFocus id:(%d)\n", view.GetProperty<int32_t>(Dali::Actor::Property::ID));
-    view.OffSceneSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
+    view.SceneDisconnectedSignal().Disconnect(mSlotDelegate, &FocusManager::OnSceneDisconnection);
 
     // Remove the view from mCurrentFocusViews if present
     for(auto iter = mCurrentFocusViews.begin(); iter != mCurrentFocusViews.end(); ++iter)

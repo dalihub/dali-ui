@@ -2640,7 +2640,7 @@ namespace
 bool     gSensitiveDuringRemoval = false;
 uint32_t gSignalFireCount        = 0u;
 
-void OnChildRemovedSensitivityProbe(Actor childActor)
+void OnChildRemovedSensitivityProbe(Actor parent, Actor childActor)
 {
   ++gSignalFireCount;
   gSensitiveDuringRemoval =
@@ -2670,7 +2670,7 @@ int UtcDaliLayoutTransitionGhostInteractionRestoredBeforeUnparentP(void)
   application.SendNotification();
   application.Render(0);
 
-  Dali::DevelActor::ChildRemovedSignal(parent).Connect(&OnChildRemovedSensitivityProbe);
+  parent.ChildRemovedSignal().Connect(&OnChildRemovedSensitivityProbe);
 
   LayoutTransition  transition = LayoutTransition::New();
   ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();

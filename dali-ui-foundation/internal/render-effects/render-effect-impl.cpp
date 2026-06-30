@@ -120,8 +120,8 @@ void RenderEffectImpl::SetOwnerView(Dali::Ui::View view)
         }
       }
 
-      ownerView.InheritedVisibilityChangedSignal().Connect(this,
-                                                           &RenderEffectImpl::OnViewInheritedVisibilityChanged);
+      ownerView.EffectiveVisibilityChangedSignal().Connect(this,
+                                                           &RenderEffectImpl::OnViewEffectiveVisibilityChanged);
 
       Activate(); // Dev note : Activate after set the owner view.
     }
@@ -143,8 +143,8 @@ void RenderEffectImpl::ClearOwnerView()
                 ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
   if(ownerView)
   {
-    ownerView.InheritedVisibilityChangedSignal().Disconnect(this,
-                                                            &RenderEffectImpl::OnViewInheritedVisibilityChanged);
+    ownerView.EffectiveVisibilityChangedSignal().Disconnect(this,
+                                                            &RenderEffectImpl::OnViewEffectiveVisibilityChanged);
 
     auto previousOwnerView = ownerView;
     mOwnerView.Reset();
@@ -361,7 +361,7 @@ void RenderEffectImpl::UpdateTargetSize()
   mTargetSize = size;
 }
 
-void RenderEffectImpl::OnViewInheritedVisibilityChanged(Actor actor, bool visible)
+void RenderEffectImpl::OnViewEffectiveVisibilityChanged(Actor actor, bool visible)
 {
   Dali::Ui::View ownerView = mOwnerView.GetHandle();
   DALI_LOG_INFO(gRenderEffectLogFilter, Debug::Concise, "[RenderEffect:%p] visibility changed [ID:%d][visible:%d]\n",

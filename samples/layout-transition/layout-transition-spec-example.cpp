@@ -52,13 +52,13 @@ public:
 
     // Three Clickable labels, one per LayoutTransition slot.
     mEnterButton = MakeClickableLabel("Click to ENTER");
-    mEnterButton.TouchedSignal().Connect(this, &LayoutTransitionSpecController::OnEnterTouched);
+    mEnterButton.TouchEventSignal().Connect(this, &LayoutTransitionSpecController::OnEnterTouched);
 
     mExitButton = MakeClickableLabel("Click to EXIT");
-    mExitButton.TouchedSignal().Connect(this, &LayoutTransitionSpecController::OnExitTouched);
+    mExitButton.TouchEventSignal().Connect(this, &LayoutTransitionSpecController::OnExitTouched);
 
     mChangeButton = MakeClickableLabel("Click to CHANGE");
-    mChangeButton.TouchedSignal().Connect(this, &LayoutTransitionSpecController::OnChangeTouched);
+    mChangeButton.TouchEventSignal().Connect(this, &LayoutTransitionSpecController::OnChangeTouched);
 
     // Root: vertical stack with a LayoutTransition attached.
     mStack = StackLayout::New();

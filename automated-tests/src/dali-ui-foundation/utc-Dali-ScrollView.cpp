@@ -984,7 +984,7 @@ int UtcDaliScrollViewDoesNotFocusTouchFocusableChildWhenDraggingP(void)
   child.SetRequestedHeight(100.0f);
   child.SetFocusable(true);
   child.SetTouchFocusable(true);
-  child.TouchedSignal().Connect([](Actor, TouchEvent) { return true; });
+  child.TouchEventSignal().Connect([](Actor, TouchEvent) { return true; });
 
   content.Add(child);
   scrollView.SetContent(content);

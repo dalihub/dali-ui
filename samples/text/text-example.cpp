@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/actors/actor-devel.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -72,8 +73,8 @@ private:
     PrintInputFieldInfo(mField, "InputField");
 
 
-    mLabel2.OnRelayoutSignal().Connect(this, &TextController::OnRelayout);
-    mLabel3.OnRelayoutSignal().Connect(this, &TextController::OnRelayout);
+    DevelActor::OnRelayoutSignal(mLabel2).Connect(this, &TextController::OnRelayout);
+    DevelActor::OnRelayoutSignal(mLabel3).Connect(this, &TextController::OnRelayout);
 
     mField.TextChangedSignal().Connect(this, &TextController::OnTextChanged);
     mField.SetMaximumLength(20);

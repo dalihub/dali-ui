@@ -336,7 +336,7 @@ private:
     focusLastLabel.SetRequestedHeight(CHIP_H);
     focusLastLabel.SetTextColor(Color::WHITE);
     mFocusLastChip.Add(focusLastLabel);
-    mFocusLastChip.TouchedSignal().Connect(this, &ScrollViewController::OnFocusLastChipTouched);
+    mFocusLastChip.TouchEventSignal().Connect(this, &ScrollViewController::OnFocusLastChipTouched);
     panel.Add(mFocusLastChip);
 
     mFocusedLabel = Label::New("Focused: —");
@@ -369,7 +369,7 @@ private:
       modeLabel.SetRequestedHeight(CHIP_H);
       modeLabel.SetTextColor(Color::WHITE);
       mModeChips[i].Add(modeLabel);
-      mModeChips[i].TouchedSignal().Connect(this, &ScrollViewController::OnModeChipTouched);
+      mModeChips[i].TouchEventSignal().Connect(this, &ScrollViewController::OnModeChipTouched);
       panel.Add(mModeChips[i]);
     }
 
@@ -415,7 +415,7 @@ private:
     keyScrollLabel.SetRequestedHeight(CHIP_H);
     keyScrollLabel.SetTextColor(Color::WHITE);
     mKeyScrollChip.Add(keyScrollLabel);
-    mKeyScrollChip.TouchedSignal().Connect(this, &ScrollViewController::OnKeyScrollChipTouched);
+    mKeyScrollChip.TouchEventSignal().Connect(this, &ScrollViewController::OnKeyScrollChipTouched);
     panel.Add(mKeyScrollChip);
 
     mKeyScrollStepLabel = Label::New("Step: 150 px");
@@ -501,7 +501,7 @@ private:
     mScrollView.DragStartedSignal().Connect(this,    &ScrollViewController::OnSVDragStarted);
     mScrollView.DraggingSignal().Connect(this,       &ScrollViewController::OnSVDragging);
     mScrollView.DragFinishedSignal().Connect(this,   &ScrollViewController::OnSVDragFinished);
-    mScrollView.TouchedSignal().Connect(this,        &ScrollViewController::OnSVTouched);
+    mScrollView.TouchEventSignal().Connect(this,        &ScrollViewController::OnSVTouched);
   }
 
   bool OnSVTouched(Actor /*actor*/, TouchEvent touch)

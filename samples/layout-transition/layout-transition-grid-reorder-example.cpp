@@ -241,7 +241,7 @@ public:
     // stays on the cell once it is reparented under the window and bypasses
     // the ScrollView's gesture intercept during a reorder.
     cell.SetProperty(DevelActor::Property::CAPTURE_ALL_TOUCH_AFTER_START, true);
-    cell.TouchedSignal().Connect(this, &LayoutTransitionGridReorderController::OnItemTouched);
+    cell.TouchEventSignal().Connect(this, &LayoutTransitionGridReorderController::OnItemTouched);
     return cell;
   }
 

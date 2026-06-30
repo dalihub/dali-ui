@@ -634,8 +634,8 @@ void AnimatedVectorImageVisual::DoSetOnScene(Actor& actor)
     mSizeNotification = actor.AddPropertyNotification(Actor::Property::SIZE, StepCondition(3.0f));
     mSizeNotification.NotifySignal().Connect(this, &AnimatedVectorImageVisual::OnSizeNotification);
 
-    actor.InheritedVisibilityChangedSignal().Connect(this,
-                                                     &AnimatedVectorImageVisual::OnControlInheritedVisibilityChanged);
+    actor.EffectiveVisibilityChangedSignal().Connect(this,
+                                                     &AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged);
 
     if(mImpl->mEventObserver)
     {
@@ -676,8 +676,8 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
   actor.RemovePropertyNotification(mScaleNotification);
   actor.RemovePropertyNotification(mSizeNotification);
 
-  actor.InheritedVisibilityChangedSignal().Disconnect(this,
-                                                      &AnimatedVectorImageVisual::OnControlInheritedVisibilityChanged);
+  actor.EffectiveVisibilityChangedSignal().Disconnect(this,
+                                                      &AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged);
 
   mPlacementActor.Reset();
 
@@ -1085,7 +1085,7 @@ void AnimatedVectorImageVisual::OnSizeNotification(PropertyNotification source)
   }
 }
 
-void AnimatedVectorImageVisual::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
+void AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged(Actor actor, bool visible)
 {
   if(!visible)
   {
@@ -1093,7 +1093,7 @@ void AnimatedVectorImageVisual::OnControlInheritedVisibilityChanged(Actor actor,
     TriggerVectorRasterization();
 
     DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
-                  "AnimatedVectorImageVisual::OnControlInheritedVisibilityChanged: invisibile. Pause animation [%p]\n",
+                  "AnimatedVectorImageVisual::OnControlEffectiveVisibilityChanged: invisibile. Pause animation [%p]\n",
                   this);
   }
 }

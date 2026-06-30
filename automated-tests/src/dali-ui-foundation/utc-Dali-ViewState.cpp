@@ -744,7 +744,7 @@ int UtcDaliViewStateFocusIndicatedClearedByTouchOutsideP(void)
 
   MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
   MakeTopLeftHitTestView(application, touchReceiver, Vector2(200.0f, 200.0f));
-  touchReceiver.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  touchReceiver.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
   IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
@@ -764,7 +764,7 @@ int UtcDaliViewStateFocusIndicatedClearedByTouchOnFocusedViewP(void)
   View              view = CreateView(application);
 
   MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
-  view.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  view.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
   IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
@@ -786,7 +786,7 @@ int UtcDaliViewStateFocusIndicatedClearedByTouchOnFocusedDescendantP(void)
 
   MakeTopLeftHitTestView(application, parent, Vector2(0.0f, 0.0f));
   MakeTopLeftHitTestView(application, child, Vector2(0.0f, 0.0f));
-  child.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  child.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   parent.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(parent);
   IntegrationView::SetState(GetImpl(parent), ViewState::FOCUS_INDICATED, true);
@@ -809,7 +809,7 @@ int UtcDaliViewStateFocusIndicatedPreservedByTouchOutsideWhenDisabledP(void)
 
   MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
   MakeTopLeftHitTestView(application, touchReceiver, Vector2(200.0f, 200.0f));
-  touchReceiver.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  touchReceiver.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view.SetFocusable(true);
   focusManager.SetClearFocusIndicationOnTouch(false);
   focusManager.SetCurrentFocusView(view);
@@ -878,7 +878,7 @@ int UtcDaliViewStateFocusIndicatedRestoredByKeyP(void)
 
   MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
   MakeTopLeftHitTestView(application, touchReceiver, Vector2(200.0f, 200.0f));
-  touchReceiver.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  touchReceiver.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
   IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
@@ -986,7 +986,7 @@ int UtcDaliViewStateTouchFocusableClearsFocusIndicationOnDownAndFocusesOnRelease
 
   MakeTopLeftHitTestView(application, view1, Vector2(0.0f, 0.0f));
   MakeTopLeftHitTestView(application, view2, Vector2(200.0f, 200.0f));
-  view2.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  view2.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view1.SetFocusable(true);
   view2.SetFocusable(true);
   view2.SetTouchFocusable(true);
@@ -1019,7 +1019,7 @@ int UtcDaliViewStateTouchFocusableDescendantClearsAncestorFocusIndicationAndFocu
 
   MakeTopLeftHitTestView(application, parent, Vector2(0.0f, 0.0f));
   MakeTopLeftHitTestView(application, child, Vector2(0.0f, 0.0f));
-  child.TouchedSignal().Connect([](Actor, TouchEvent) { return false; });
+  child.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   parent.SetFocusable(true);
   child.SetFocusable(true);
   child.SetTouchFocusable(true);

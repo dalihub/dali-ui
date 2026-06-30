@@ -119,7 +119,7 @@ private:
     mKeyScrollChip.SetRequestedPositionX(8.0f);
     mKeyScrollChip.SetRequestedPositionY(36.0f);
     mKeyScrollChip.SetProperty(View::Property::CORNER_RADIUS, Vector4(6, 6, 6, 6));
-    mKeyScrollChip.TouchedSignal().Connect(this, &NoFocusKeyScrollTest::OnKeyScrollChipTouched);
+    mKeyScrollChip.TouchEventSignal().Connect(this, &NoFocusKeyScrollTest::OnKeyScrollChipTouched);
     Label ksLabel = Label::New("KeyScroll: ON");
     ksLabel.SetRequestedWidth(180.0f);
     ksLabel.SetRequestedHeight(32.0f);

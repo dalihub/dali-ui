@@ -55,7 +55,7 @@ void DragAndDropDetector::Attach(Dali::Ui::View& view)
       }
     }
     mViews.push_back(view);
-    view.TouchedSignal().Connect(this, &DragAndDropDetector::OnDrag);
+    view.TouchEventSignal().Connect(this, &DragAndDropDetector::OnDrag);
     mFirstEnter.push_back(view.GetProperty<int>(Actor::Property::ID));
     mPanGestureDetector.Attach(view);
     mPanGestureDetector.DetectedSignal().Connect(this, &DragAndDropDetector::OnPan);
@@ -75,7 +75,7 @@ void DragAndDropDetector::Detach(Dali::Ui::View& view)
 
     if(match != mViews.end())
     {
-      match->TouchedSignal().Disconnect(this, &DragAndDropDetector::OnDrag);
+      match->TouchEventSignal().Disconnect(this, &DragAndDropDetector::OnDrag);
       mPanGestureDetector.Detach(*match);
       mFirstEnter.erase(
         std::find(mFirstEnter.begin(), mFirstEnter.end(), view.GetProperty<int>(Actor::Property::ID)));
@@ -91,7 +91,7 @@ void DragAndDropDetector::DetachAll()
     auto iter = mViews.begin();
     for(; iter != mViews.end();)
     {
-      iter->TouchedSignal().Disconnect(this, &DragAndDropDetector::OnDrag);
+      iter->TouchEventSignal().Disconnect(this, &DragAndDropDetector::OnDrag);
       mPanGestureDetector.Detach(*iter);
       iter = mViews.erase(iter);
     }

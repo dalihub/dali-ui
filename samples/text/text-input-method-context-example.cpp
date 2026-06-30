@@ -534,30 +534,30 @@ private:
     // --- Connect button touch signals ---
 
     // Panel Visibility
-    btnShowPanel.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonShowPanelTouched);
-    btnHidePanel.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonHidePanelTouched);
-    btnGetState.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonGetStateTouched);
-    btnGetArea.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonGetAreaTouched);
+    btnShowPanel.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonShowPanelTouched);
+    btnHidePanel.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonHidePanelTouched);
+    btnGetState.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonGetStateTouched);
+    btnGetArea.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonGetAreaTouched);
 
     // Auto / Restore / Return
-    btnAutoShow.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonAutoShowTouched);
-    btnRestore.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonRestoreTouched);
-    btnReturn.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonReturnKeyTouched);
+    btnAutoShow.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonAutoShowTouched);
+    btnRestore.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonRestoreTouched);
+    btnReturn.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonReturnKeyTouched);
 
     // Prediction / Fullscreen
-    btnPrediction.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonPredictionTouched);
-    btnFullscreen.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonFullscreenTouched);
+    btnPrediction.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonPredictionTouched);
+    btnFullscreen.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonFullscreenTouched);
 
     // Panel Data
-    btnSetData.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonSetDataTouched);
-    btnGetData.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonGetDataTouched);
+    btnSetData.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonSetDataTouched);
+    btnGetData.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonGetDataTouched);
 
     // Panel Position
-    btnPos00.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonPos00Touched);
-    btnPos100.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonPos100Touched);
-    btnAlignTL.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonAlignTLTouched);
-    btnAlignBC.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonAlignBCTouched);
-    btnAlignMC.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonAlignMCTouched);
+    btnPos00.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonPos00Touched);
+    btnPos100.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonPos100Touched);
+    btnAlignTL.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonAlignTLTouched);
+    btnAlignBC.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonAlignBCTouched);
+    btnAlignMC.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonAlignMCTouched);
 
     // Input Panel Options
     ConnectLayoutButton(btnLayoutNormal, Dali::InputMethod::PanelLayout::NORMAL);
@@ -596,9 +596,9 @@ private:
     ConnectVariationButton(btnVarPwdNum, Dali::InputMethod::PanelLayoutVariation::PASSWORD_WITH_NUMBER_ONLY);
 
     // Query
-    btnKeyboardType.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonKeyboardTypeTouched);
-    btnLocale.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonLocaleTouched);
-    btnRefresh.TouchedSignal().Connect(this, &InputMethodContextExample::OnButtonRefreshTouched);
+    btnKeyboardType.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonKeyboardTypeTouched);
+    btnLocale.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonLocaleTouched);
+    btnRefresh.TouchEventSignal().Connect(this, &InputMethodContextExample::OnButtonRefreshTouched);
 
     // Key event
     window.KeyEventSignal().Connect(this, &InputMethodContextExample::OnKeyEvent);
@@ -707,7 +707,7 @@ private:
 
   void ConnectLayoutButton(Label button, Dali::InputMethod::PanelLayout layout)
   {
-    button.TouchedSignal().Connect(this, [this, layout](Actor, const TouchEvent touch) -> bool
+    button.TouchEventSignal().Connect(this, [this, layout](Actor, const TouchEvent touch) -> bool
     {
       if(IsTouchUp(touch))
       {
@@ -719,7 +719,7 @@ private:
 
   void ConnectVariationButton(Label button, Dali::InputMethod::PanelLayoutVariation variation)
   {
-    button.TouchedSignal().Connect(this, [this, variation](Actor, const TouchEvent touch) -> bool
+    button.TouchEventSignal().Connect(this, [this, variation](Actor, const TouchEvent touch) -> bool
     {
       if(IsTouchUp(touch))
       {
@@ -731,7 +731,7 @@ private:
 
   void ConnectReturnKeyButton(Label button, Dali::InputMethod::ReturnKeyType action)
   {
-    button.TouchedSignal().Connect(this, [this, action](Actor, const TouchEvent touch) -> bool
+    button.TouchEventSignal().Connect(this, [this, action](Actor, const TouchEvent touch) -> bool
     {
       if(IsTouchUp(touch))
       {
@@ -751,7 +751,7 @@ private:
 
   void ConnectAutoCapitalButton(Label button, Dali::InputMethod::AutoCapitalType autoCapital)
   {
-    button.TouchedSignal().Connect(this, [this, autoCapital](Actor, const TouchEvent touch) -> bool
+    button.TouchEventSignal().Connect(this, [this, autoCapital](Actor, const TouchEvent touch) -> bool
     {
       if(IsTouchUp(touch))
       {

@@ -1514,7 +1514,7 @@ void LabelImpl::OnInitialize()
   // Enable the text ellipsis.
   mController->SetTextElideEnabled(true);
 
-  self.InheritedVisibilityChangedSignal().Connect(this, &LabelImpl::OnViewInheritedVisibilityChanged);
+  self.EffectiveVisibilityChangedSignal().Connect(this, &LabelImpl::OnViewEffectiveVisibilityChanged);
   self.LayoutDirectionChangedSignal().Connect(this, &LabelImpl::OnLayoutDirectionChanged);
 
   if(Dali::Adaptor::IsAvailable())
@@ -2167,12 +2167,12 @@ void LabelImpl::UpdateAnchorTouchInterception()
   if(mController->HasAnchors())
   {
     mHasAnchors = true;
-    Dali::DevelActor::InterceptTouchedSignal(Self()).Connect(this, &LabelImpl::OnInterceptTouched);
+    Self().InterceptTouchEventSignal().Connect(this, &LabelImpl::OnInterceptTouched);
   }
   else
   {
     mHasAnchors = false;
-    Dali::DevelActor::InterceptTouchedSignal(Self()).Disconnect(this, &LabelImpl::OnInterceptTouched);
+    Self().InterceptTouchEventSignal().Disconnect(this, &LabelImpl::OnInterceptTouched);
   }
 }
 
@@ -2410,7 +2410,7 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
   }
 }
 
-void LabelImpl::OnViewInheritedVisibilityChanged(Actor actor, bool visible)
+void LabelImpl::OnViewEffectiveVisibilityChanged(Actor actor, bool visible)
 {
   mIsVisible            = visible;
   mIsVisibleInitialized = true;

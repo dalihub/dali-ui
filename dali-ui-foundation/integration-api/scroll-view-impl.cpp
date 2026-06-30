@@ -164,10 +164,10 @@ void ScrollViewImpl::OnInitialize()
 
   // Intercept touch before children: lets us decide per-frame whether to steal
   // the touch sequence (once the pan threshold is exceeded).
-  DevelActor::InterceptTouchedSignal(Self()).Connect(this, &ScrollViewImpl::OnInterceptTouch);
+  Self().InterceptTouchEventSignal().Connect(this, &ScrollViewImpl::OnInterceptTouch);
 
   // After interception begins, subsequent events arrive here instead of children.
-  Self().TouchedSignal().Connect(this, &ScrollViewImpl::OnTouch);
+  Self().TouchEventSignal().Connect(this, &ScrollViewImpl::OnTouch);
 
   // Handle mouse wheel events for desktop / emulator scrolling.
   Self().WheelEventSignal().Connect(this, &ScrollViewImpl::OnWheelEvent);
@@ -183,7 +183,7 @@ void ScrollViewImpl::SetContent(View content)
   if(mContent)
   {
     CancelScrollAnimation();
-    mContent.OnRelayoutSignal().Disconnect(this, &ScrollViewImpl::OnChildRelayout);
+    DevelActor::OnRelayoutSignal(mContent).Disconnect(this, &ScrollViewImpl::OnChildRelayout);
     Self().Remove(mContent);
     mContentPositionNotification.Reset();
   }
@@ -201,7 +201,7 @@ void ScrollViewImpl::SetContent(View content)
     mScrollBar.RaiseToTop();
 
     // Connect to content's relayout signal to update scroll bar when content size changes
-    mContent.OnRelayoutSignal().Connect(this, &ScrollViewImpl::OnChildRelayout);
+    DevelActor::OnRelayoutSignal(mContent).Connect(this, &ScrollViewImpl::OnChildRelayout);
 
     // Set up property notification to track content position changes during animation.
     // In DALi C++, POSITION property is updated every frame during animation,

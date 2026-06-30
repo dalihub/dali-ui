@@ -230,8 +230,8 @@ void ChartViewImpl::OnInitialize()
   mAnimTimer.TickSignal().Connect(this, &ChartViewImpl::OnAnimTimer);
 
   // Touch and hover
-  self.TouchedSignal().Connect(this, &ChartViewImpl::OnTouch);
-  self.HoveredSignal().Connect(this, &ChartViewImpl::OnHover);
+  self.TouchEventSignal().Connect(this, &ChartViewImpl::OnTouch);
+  self.HoverEventSignal().Connect(this, &ChartViewImpl::OnHover);
 
   DALI_LOG_DEBUG_INFO("ChartViewImpl [%p] initialized: type=%d, size=%.0fx%.0f\n",
                       this, static_cast<int>(mType), mSize.width, mSize.height);

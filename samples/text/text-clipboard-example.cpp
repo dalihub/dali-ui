@@ -240,20 +240,20 @@ private:
 
     window.Add(rootLayout);
 
-    btnCopyPlain.TouchedSignal().Connect(this, &ClipboardExample::OnCopyPlainTouched);
-    btnPastePlain.TouchedSignal().Connect(this, &ClipboardExample::OnPastePlainTouched);
-    btnHasPlain.TouchedSignal().Connect(this, &ClipboardExample::OnHasPlainTouched);
-    btnCopyHtml.TouchedSignal().Connect(this, &ClipboardExample::OnCopyHtmlTouched);
-    btnPasteHtml.TouchedSignal().Connect(this, &ClipboardExample::OnPasteHtmlTouched);
-    btnHasHtml.TouchedSignal().Connect(this, &ClipboardExample::OnHasHtmlTouched);
-    btnCopyUri.TouchedSignal().Connect(this, &ClipboardExample::OnCopyUriTouched);
-    btnPasteUri.TouchedSignal().Connect(this, &ClipboardExample::OnPasteUriTouched);
-    btnHasUri.TouchedSignal().Connect(this, &ClipboardExample::OnHasUriTouched);
-    btnMultiCopy.TouchedSignal().Connect(this, &ClipboardExample::OnMultiCopyTouched);
-    btnMultiPaste.TouchedSignal().Connect(this, &ClipboardExample::OnMultiPasteTouched);
-    btnStressStart.TouchedSignal().Connect(this, &ClipboardExample::OnStressStartTouched);
-    btnStressStop.TouchedSignal().Connect(this, &ClipboardExample::OnStressStopTouched);
-    btnClear.TouchedSignal().Connect(this, &ClipboardExample::OnClearTouched);
+    btnCopyPlain.TouchEventSignal().Connect(this, &ClipboardExample::OnCopyPlainTouched);
+    btnPastePlain.TouchEventSignal().Connect(this, &ClipboardExample::OnPastePlainTouched);
+    btnHasPlain.TouchEventSignal().Connect(this, &ClipboardExample::OnHasPlainTouched);
+    btnCopyHtml.TouchEventSignal().Connect(this, &ClipboardExample::OnCopyHtmlTouched);
+    btnPasteHtml.TouchEventSignal().Connect(this, &ClipboardExample::OnPasteHtmlTouched);
+    btnHasHtml.TouchEventSignal().Connect(this, &ClipboardExample::OnHasHtmlTouched);
+    btnCopyUri.TouchEventSignal().Connect(this, &ClipboardExample::OnCopyUriTouched);
+    btnPasteUri.TouchEventSignal().Connect(this, &ClipboardExample::OnPasteUriTouched);
+    btnHasUri.TouchEventSignal().Connect(this, &ClipboardExample::OnHasUriTouched);
+    btnMultiCopy.TouchEventSignal().Connect(this, &ClipboardExample::OnMultiCopyTouched);
+    btnMultiPaste.TouchEventSignal().Connect(this, &ClipboardExample::OnMultiPasteTouched);
+    btnStressStart.TouchEventSignal().Connect(this, &ClipboardExample::OnStressStartTouched);
+    btnStressStop.TouchEventSignal().Connect(this, &ClipboardExample::OnStressStopTouched);
+    btnClear.TouchEventSignal().Connect(this, &ClipboardExample::OnClearTouched);
     window.KeyEventSignal().Connect(this, &ClipboardExample::OnKeyEvent);
 
     ClearMultiState();

@@ -240,36 +240,36 @@ private:
     window.Add(rootLayout);
 
     // Connect button touch signals - Cursor
-    btnCursorBlink.TouchedSignal().Connect(this, &InputFieldController::OnButtonCursorBlinkTouched);
-    btnCursorInterval.TouchedSignal().Connect(this, &InputFieldController::OnButtonCursorIntervalTouched);
-    btnCursorPos.TouchedSignal().Connect(this, &InputFieldController::OnButtonCursorPosTouched);
-    btnCursorWidth.TouchedSignal().Connect(this, &InputFieldController::OnButtonCursorWidthTouched);
+    btnCursorBlink.TouchEventSignal().Connect(this, &InputFieldController::OnButtonCursorBlinkTouched);
+    btnCursorInterval.TouchEventSignal().Connect(this, &InputFieldController::OnButtonCursorIntervalTouched);
+    btnCursorPos.TouchEventSignal().Connect(this, &InputFieldController::OnButtonCursorPosTouched);
+    btnCursorWidth.TouchEventSignal().Connect(this, &InputFieldController::OnButtonCursorWidthTouched);
 
     // Connect button touch signals - Placeholder
-    btnPlaceholderFocus.TouchedSignal().Connect(this, &InputFieldController::OnButtonPlaceholderFocusTouched);
-    btnPlaceholderColor.TouchedSignal().Connect(this, &InputFieldController::OnButtonPlaceholderColorTouched);
+    btnPlaceholderFocus.TouchEventSignal().Connect(this, &InputFieldController::OnButtonPlaceholderFocusTouched);
+    btnPlaceholderColor.TouchEventSignal().Connect(this, &InputFieldController::OnButtonPlaceholderColorTouched);
 
     // Connect button touch signals - Selection
-    btnSelectionColor.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectionColorTouched);
-    btnSelectionEnabled.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectionEnabledTouched);
-    btnSelectRange.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectRangeTouched);
-    btnSelectWhole.TouchedSignal().Connect(this, &InputFieldController::OnButtonSelectWholeTouched);
-    btnClearSelection.TouchedSignal().Connect(this, &InputFieldController::OnButtonClearSelectionTouched);
+    btnSelectionColor.TouchEventSignal().Connect(this, &InputFieldController::OnButtonSelectionColorTouched);
+    btnSelectionEnabled.TouchEventSignal().Connect(this, &InputFieldController::OnButtonSelectionEnabledTouched);
+    btnSelectRange.TouchEventSignal().Connect(this, &InputFieldController::OnButtonSelectRangeTouched);
+    btnSelectWhole.TouchEventSignal().Connect(this, &InputFieldController::OnButtonSelectWholeTouched);
+    btnClearSelection.TouchEventSignal().Connect(this, &InputFieldController::OnButtonClearSelectionTouched);
 
     // Connect button touch signals - Input filter
-    btnSetInputFilter.TouchedSignal().Connect(this, &InputFieldController::OnButtonSetInputFilterTouched);
-    btnClearInputFilter.TouchedSignal().Connect(this, &InputFieldController::OnButtonClearInputFilterTouched);
+    btnSetInputFilter.TouchEventSignal().Connect(this, &InputFieldController::OnButtonSetInputFilterTouched);
+    btnClearInputFilter.TouchEventSignal().Connect(this, &InputFieldController::OnButtonClearInputFilterTouched);
 
     // Connect button touch signals - Other
-    btnMaxLen.TouchedSignal().Connect(this, &InputFieldController::OnButtonMaxLenTouched);
-    btnEditable.TouchedSignal().Connect(this, &InputFieldController::OnButtonEditableTouched);
+    btnMaxLen.TouchEventSignal().Connect(this, &InputFieldController::OnButtonMaxLenTouched);
+    btnEditable.TouchEventSignal().Connect(this, &InputFieldController::OnButtonEditableTouched);
 
     // Connect button touch signals - Password
-    btnPasswordMode.TouchedSignal().Connect(this, &InputFieldController::OnButtonPasswordModeTouched);
-    btnPasswordChar.TouchedSignal().Connect(this, &InputFieldController::OnButtonPasswordCharTouched);
-    btnPasswordReveal.TouchedSignal().Connect(this, &InputFieldController::OnButtonPasswordRevealTouched);
+    btnPasswordMode.TouchEventSignal().Connect(this, &InputFieldController::OnButtonPasswordModeTouched);
+    btnPasswordChar.TouchEventSignal().Connect(this, &InputFieldController::OnButtonPasswordCharTouched);
+    btnPasswordReveal.TouchEventSignal().Connect(this, &InputFieldController::OnButtonPasswordRevealTouched);
 
-    btnInfo.TouchedSignal().Connect(this, &InputFieldController::OnButtonInfoTouched);
+    btnInfo.TouchEventSignal().Connect(this, &InputFieldController::OnButtonInfoTouched);
 
     // Also support key events
     window.KeyEventSignal().Connect(this, &InputFieldController::OnKeyEvent);

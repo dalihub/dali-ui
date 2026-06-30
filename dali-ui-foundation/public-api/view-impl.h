@@ -1359,7 +1359,7 @@ private:
   void SetBackgroundColorInternal(const Vector4& color);
   void SetBorderlineColorInternal(const Vector4& color);
   void SetColorInternal(const Vector4& color);
-  void OnChildOrderChanged(Actor orderChangedChild);
+  void OnChildOrderChanged(Actor parent, Actor orderChangedChild);
 
   // UiScale
   UiScalePolicy mScalePolicy{UiScalePolicy::INHERIT}; // 1 byte

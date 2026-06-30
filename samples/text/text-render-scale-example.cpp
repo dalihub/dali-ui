@@ -183,7 +183,7 @@ private:
     // Update scale display
     UpdateScaleDisplay();
 
-    mScaleBar.TouchedSignal().Connect(this, &TextRenderScaleController::OnScaleTouched);
+    mScaleBar.TouchEventSignal().Connect(this, &TextRenderScaleController::OnScaleTouched);
 
     return layout;
   }

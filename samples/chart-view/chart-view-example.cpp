@@ -316,14 +316,14 @@ public:
 
     // Disconnect root-layer touch signals used by individual scenes
     Layer rootLayer = mApplication.GetWindow().GetRootLayer();
-    rootLayer.TouchedSignal().Disconnect(this, &ChartViewController::OnScene2Touch);
-    rootLayer.TouchedSignal().Disconnect(this, &ChartViewController::OnScene7Touch);
-    rootLayer.TouchedSignal().Disconnect(this, &ChartViewController::OnScene8Touch);
-    rootLayer.TouchedSignal().Disconnect(this, &ChartViewController::OnScene9Touch);
-    rootLayer.TouchedSignal().Disconnect(this, &ChartViewController::OnScene10Touch);
-    rootLayer.TouchedSignal().Disconnect(this, &ChartViewController::OnScene13Touch);
-    rootLayer.TouchedSignal().Disconnect(this, &ChartViewController::OnScene14Touch);
-    rootLayer.TouchedSignal().Disconnect(this, &ChartViewController::OnScene25Touch);
+    rootLayer.TouchEventSignal().Disconnect(this, &ChartViewController::OnScene2Touch);
+    rootLayer.TouchEventSignal().Disconnect(this, &ChartViewController::OnScene7Touch);
+    rootLayer.TouchEventSignal().Disconnect(this, &ChartViewController::OnScene8Touch);
+    rootLayer.TouchEventSignal().Disconnect(this, &ChartViewController::OnScene9Touch);
+    rootLayer.TouchEventSignal().Disconnect(this, &ChartViewController::OnScene10Touch);
+    rootLayer.TouchEventSignal().Disconnect(this, &ChartViewController::OnScene13Touch);
+    rootLayer.TouchEventSignal().Disconnect(this, &ChartViewController::OnScene14Touch);
+    rootLayer.TouchEventSignal().Disconnect(this, &ChartViewController::OnScene25Touch);
 
     mScene2TouchToggle  = false;
     mScene7ShowTooltip  = true;
@@ -432,7 +432,7 @@ public:
     DALI_LOG_DEBUG_INFO("Scene2 AddSeries elapsed: %lldms\n", (long long)elapsed);
 
     // Connect touch for UpdateSeries test
-    window.GetRootLayer().TouchedSignal().Connect(this, &ChartViewController::OnScene2Touch);
+    window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene2Touch);
   }
 
   // -------------------------------------------------------------------------
@@ -717,7 +717,7 @@ public:
                             "Touch/hover a point.  Outside chart = toggle tooltip");
 
     // Root-layer touch to toggle SHOW_TOOLTIP (Chart's own touch stays active)
-    window.GetRootLayer().TouchedSignal().Connect(this, &ChartViewController::OnScene7Touch);
+    window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene7Touch);
   }
 
   void OnScene7DataPointSelected(const ChartPointEventArgs& e)
@@ -810,7 +810,7 @@ public:
     mDebugLabel.SetProperty(Label::Property::TEXT,
                             "Tap legend items.  Auto-toggle: ON  |  Outside = switch mode");
 
-    window.GetRootLayer().TouchedSignal().Connect(this, &ChartViewController::OnScene8Touch);
+    window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene8Touch);
   }
 
   void OnScene8LegendTapped(int seriesIndex, bool isNowVisible)
@@ -886,7 +886,7 @@ public:
     mScene9InputState = 0; // Both ON
     UpdateScene9DebugLabel();
 
-    window.GetRootLayer().TouchedSignal().Connect(this, &ChartViewController::OnScene9Touch);
+    window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene9Touch);
   }
 
   bool OnScene9Touch(Actor /*actor*/, TouchEvent touch)
@@ -1016,7 +1016,7 @@ public:
     mDebugLabel.SetProperty(Label::Property::TEXT,
                             "Touch outside chart = append random point (max 10)");
 
-    window.GetRootLayer().TouchedSignal().Connect(this, &ChartViewController::OnScene10Touch);
+    window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene10Touch);
   }
 
   bool OnScene10Touch(Actor /*actor*/, TouchEvent event)
@@ -1183,7 +1183,7 @@ public:
     mScene13Toggle = false;
     mDebugLabel.SetProperty(Label::Property::TEXT,
                             "Touch outside chart = swap data (animates)");
-    window.GetRootLayer().TouchedSignal().Connect(this, &ChartViewController::OnScene13Touch);
+    window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene13Touch);
   }
 
   bool OnScene13Touch(Actor /*actor*/, TouchEvent event)
@@ -1231,7 +1231,7 @@ public:
     mScene14Smooth = false;
     mDebugLabel.SetProperty(Label::Property::TEXT,
                             "Smoothness=0.0 (straight). Touch outside to toggle.");
-    window.GetRootLayer().TouchedSignal().Connect(this, &ChartViewController::OnScene14Touch);
+    window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene14Touch);
   }
 
   bool OnScene14Touch(Actor /*actor*/, TouchEvent event)
@@ -1960,7 +1960,7 @@ private:
     mScene25GaugeValue = 72.0f;
     mDebugLabel.SetProperty(Label::Property::TEXT,
                             "Touch outside chart = cycle value (0 / 50 / 72 / 90 / 100)");
-    window.GetRootLayer().TouchedSignal().Connect(this, &ChartViewController::OnScene25Touch);
+    window.GetRootLayer().TouchEventSignal().Connect(this, &ChartViewController::OnScene25Touch);
   }
 
   bool OnScene25Touch(Actor /*actor*/, TouchEvent touch)

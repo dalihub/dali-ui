@@ -163,16 +163,16 @@ private:
 
   void ConnectSignals(Window& window)
   {
-    mBtnBack.TouchedSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
+    mBtnBack.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
       return OnBackTouched(actor, touch);
     });
-    mBtnForward.TouchedSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
+    mBtnForward.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
       return OnForwardTouched(actor, touch);
     });
-    mBtnReload.TouchedSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
+    mBtnReload.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
       return OnReloadTouched(actor, touch);
     });
-    mBtnGo.TouchedSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
+    mBtnGo.TouchEventSignal().Connect(this, [this](Actor actor, const TouchEvent& touch) {
       return OnGoTouched(actor, touch);
     });
 

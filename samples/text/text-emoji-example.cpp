@@ -502,7 +502,7 @@ private:
 
     if(tapEnabled)
     {
-      label.TouchedSignal().Connect(this, &EmojiController::OnEmojiTouched);
+      label.TouchEventSignal().Connect(this, &EmojiController::OnEmojiTouched);
     }
 
     return label;
@@ -568,15 +568,15 @@ private:
 
     // Clear Log button
     Label clearLogBtn = AddEmojiButton(logTopView, "", "Clear", "", false);
-    clearLogBtn.TouchedSignal().Connect(this, &EmojiController::OnClearLogTouched);
+    clearLogBtn.TouchEventSignal().Connect(this, &EmojiController::OnClearLogTouched);
 
     // Scale button
     Label scaleBtn = AddEmojiButton(logTopView, "", "Scale", "", false);
-    scaleBtn.TouchedSignal().Connect(this, &EmojiController::OnScaleTouched);
+    scaleBtn.TouchEventSignal().Connect(this, &EmojiController::OnScaleTouched);
 
     // Help button
     Label helpBtn = AddEmojiButton(logTopView, "", "Help", "", false);
-    helpBtn.TouchedSignal().Connect(this, &EmojiController::OnHelpTouched);
+    helpBtn.TouchEventSignal().Connect(this, &EmojiController::OnHelpTouched);
 
     // Log view
     mLogView = CreateContainerView(MATCH_PARENT, WRAP_CONTENT, false);
@@ -604,7 +604,7 @@ private:
 
     // Clear button
     Label clearBtn = AddEmojiButton(mainTopView, "", "Clear", "", false);
-    clearBtn.TouchedSignal().Connect(this, &EmojiController::OnClearTouched);
+    clearBtn.TouchEventSignal().Connect(this, &EmojiController::OnClearTouched);
   }
 
   //////////////////////////////////////////////////////////////////////////////

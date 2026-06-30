@@ -314,8 +314,8 @@ void GroupSelectableTraitImpl::OnAttached(View& view)
   // Observe the owner's scene lifetime for parent auto-grouping. These are
   // membership-INDEPENDENT (always connected while attached, dropped on teardown) so the
   // member can join/leave its parent auto-group across scene connection cycles.
-  view.OnSceneSignal().Connect(this, &GroupSelectableTraitImpl::OnOwnerOnScene);
-  view.OffSceneSignal().Connect(this, &GroupSelectableTraitImpl::OnOwnerOffScene);
+  view.SceneConnectedSignal().Connect(this, &GroupSelectableTraitImpl::OnOwnerOnScene);
+  view.SceneDisconnectedSignal().Connect(this, &GroupSelectableTraitImpl::OnOwnerOffScene);
 
   if(mGroup)
   {
@@ -352,8 +352,8 @@ void GroupSelectableTraitImpl::OnDetaching(View& view)
   // own handlers; user-connected callbacks on the same signals are untouched.
   if(View owner = mOwner.GetHandle())
   {
-    owner.OnSceneSignal().Disconnect(this, &GroupSelectableTraitImpl::OnOwnerOnScene);
-    owner.OffSceneSignal().Disconnect(this, &GroupSelectableTraitImpl::OnOwnerOffScene);
+    owner.SceneConnectedSignal().Disconnect(this, &GroupSelectableTraitImpl::OnOwnerOnScene);
+    owner.SceneDisconnectedSignal().Disconnect(this, &GroupSelectableTraitImpl::OnOwnerOffScene);
   }
 
   mAttached = false;

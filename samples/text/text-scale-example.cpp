@@ -187,13 +187,13 @@ private:
     root.Add(btn7);
     window.Add(root);
 
-    btn1.TouchedSignal().Connect(this, &TextScaleController::OnButton1Touched);
-    btn2.TouchedSignal().Connect(this, &TextScaleController::OnButton2Touched);
-    btn3.TouchedSignal().Connect(this, &TextScaleController::OnButton3Touched);
-    btn4.TouchedSignal().Connect(this, &TextScaleController::OnButton4Touched);
-    btn5.TouchedSignal().Connect(this, &TextScaleController::OnButton5Touched);
-    btn6.TouchedSignal().Connect(this, &TextScaleController::OnButton6Touched);
-    btn7.TouchedSignal().Connect(this, &TextScaleController::OnButton7Touched);
+    btn1.TouchEventSignal().Connect(this, &TextScaleController::OnButton1Touched);
+    btn2.TouchEventSignal().Connect(this, &TextScaleController::OnButton2Touched);
+    btn3.TouchEventSignal().Connect(this, &TextScaleController::OnButton3Touched);
+    btn4.TouchEventSignal().Connect(this, &TextScaleController::OnButton4Touched);
+    btn5.TouchEventSignal().Connect(this, &TextScaleController::OnButton5Touched);
+    btn6.TouchEventSignal().Connect(this, &TextScaleController::OnButton6Touched);
+    btn7.TouchEventSignal().Connect(this, &TextScaleController::OnButton7Touched);
   }
 
   void UpdateStatus()

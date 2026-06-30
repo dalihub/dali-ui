@@ -92,7 +92,7 @@ public:
     btnRequestFocus.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     btnRequestFocus.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
-    btnRequestFocus.TouchedSignal().Connect(this, [this](Actor, TouchEvent e) -> bool {
+    btnRequestFocus.TouchEventSignal().Connect(this, [this](Actor, TouchEvent e) -> bool {
       if(e.GetState(0) == PointState::UP)
       {
         FocusManager::Get().ClearFocus();

@@ -920,7 +920,7 @@ private: // Implementation
   /**
    * @brief Callback when the visibility of the actor is changed.
    */
-  void OnViewInheritedVisibilityChanged(Actor actor, bool visible);
+  void OnViewEffectiveVisibilityChanged(Actor actor, bool visible);
 
   /**
    * @brief Returns the cached effective visibility of the label.

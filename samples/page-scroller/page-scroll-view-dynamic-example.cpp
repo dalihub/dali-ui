@@ -224,7 +224,7 @@ private:
         btn.SetRequestedHeight(BTN_H);
         btn.SetRequestedPositionX(CTRL_PAD + i * (btnW + BTN_GAP));
         btn.SetRequestedPositionY(y);
-        btn.TouchedSignal().Connect(this, &PageScrollDynamicController::OnButtonTouched);
+        btn.TouchEventSignal().Connect(this, &PageScrollDynamicController::OnButtonTouched);
         mButtons.push_back({btn, std::string(items[i].first)});
         panel.Add(btn);
       }

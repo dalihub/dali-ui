@@ -317,10 +317,10 @@ private:
     Label greenBtn = CreateButton("Green", COLOR_BUTTON_BG);
     Label blackBtn = CreateButton("Black", COLOR_BUTTON_BG);
 
-    magentaBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnMagentaButtonTouched);
-    blueBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnBlueButtonTouched);
-    greenBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnGreenButtonTouched);
-    blackBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnBlackButtonTouched);
+    magentaBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnMagentaButtonTouched);
+    blueBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnBlueButtonTouched);
+    greenBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnGreenButtonTouched);
+    blackBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnBlackButtonTouched);
 
     buttonContainer.Add(CreateButtonRow({magentaBtn, blueBtn, greenBtn, blackBtn}));
 
@@ -330,9 +330,9 @@ private:
     Label serifBtn = CreateButton("Serif", COLOR_BUTTON_BG);
     Label monoBtn = CreateButton("Mono", COLOR_BUTTON_BG);
 
-    sansBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnSansButtonTouched);
-    serifBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnSerifButtonTouched);
-    monoBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnMonoButtonTouched);
+    sansBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnSansButtonTouched);
+    serifBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnSerifButtonTouched);
+    monoBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnMonoButtonTouched);
 
     buttonContainer.Add(CreateButtonRow({sansBtn, serifBtn, monoBtn}));
 
@@ -342,9 +342,9 @@ private:
     Label mediumBtn = CreateButton("Medium", COLOR_BUTTON_BG);
     Label largeBtn = CreateButton("Large", COLOR_BUTTON_BG);
 
-    smallBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnSmallFontSizeButtonTouched);
-    mediumBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnMediumFontSizeButtonTouched);
-    largeBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnLargeFontSizeButtonTouched);
+    smallBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnSmallFontSizeButtonTouched);
+    mediumBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnMediumFontSizeButtonTouched);
+    largeBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnLargeFontSizeButtonTouched);
 
     buttonContainer.Add(CreateButtonRow({smallBtn, mediumBtn, largeBtn}));
 
@@ -353,8 +353,8 @@ private:
     Label normalWeightBtn = CreateButton("Normal", COLOR_BUTTON_BG);
     Label boldBtn = CreateButton("Bold", COLOR_BUTTON_BG);
 
-    normalWeightBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalWeightButtonTouched);
-    boldBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnBoldButtonTouched);
+    normalWeightBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnNormalWeightButtonTouched);
+    boldBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnBoldButtonTouched);
 
     buttonContainer.Add(CreateButtonRow({normalWeightBtn, boldBtn}));
 
@@ -363,8 +363,8 @@ private:
     Label normalWidthBtn = CreateButton("Normal", COLOR_BUTTON_BG);
     Label condensedBtn = CreateButton("Condensed", COLOR_BUTTON_BG);
 
-    normalWidthBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalWidthButtonTouched);
-    condensedBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnCondensedButtonTouched);
+    normalWidthBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnNormalWidthButtonTouched);
+    condensedBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnCondensedButtonTouched);
 
     buttonContainer.Add(CreateButtonRow({normalWidthBtn, condensedBtn}));
 
@@ -373,8 +373,8 @@ private:
     Label normalSlantBtn = CreateButton("Normal", COLOR_BUTTON_BG);
     Label italicBtn = CreateButton("Italic", COLOR_BUTTON_BG);
 
-    normalSlantBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnNormalSlantButtonTouched);
-    italicBtn.TouchedSignal().Connect(this, &TypingStyleExample::OnItalicButtonTouched);
+    normalSlantBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnNormalSlantButtonTouched);
+    italicBtn.TouchEventSignal().Connect(this, &TypingStyleExample::OnItalicButtonTouched);
 
     buttonContainer.Add(CreateButtonRow({normalSlantBtn, italicBtn}));
 

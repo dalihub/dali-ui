@@ -1453,7 +1453,7 @@ void InputEditorImpl::OnInitialize()
   mLongPressGestureDetector.DetectedSignal().Connect(this, &InputEditorImpl::OnLongPressDetected);
   mLongPressGestureDetector.Attach(self);
 
-  self.TouchedSignal().Connect(this, &InputEditorImpl::OnTouched);
+  self.TouchEventSignal().Connect(this, &InputEditorImpl::OnTouched);
 
   // Flip vertically the 'left' selection handle
   mDecorator->FlipHandleVertically(Text::LEFT_SELECTION_HANDLE, true);
@@ -1461,7 +1461,7 @@ void InputEditorImpl::OnInitialize()
   // Fill-parent area by default
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH);
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
-  self.OnSceneSignal().Connect(this, &InputEditorImpl::OnSceneConnect);
+  self.SceneConnectedSignal().Connect(this, &InputEditorImpl::OnSceneConnect);
 
   Ui::View  view         = Ui::View::DownCast(self);
   ViewImpl& viewInternal = Ui::GetImpl(view);

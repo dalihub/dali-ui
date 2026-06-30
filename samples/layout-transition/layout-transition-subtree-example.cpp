@@ -57,13 +57,13 @@ public:
     window.SetBackgroundColor(Color::WHITE);
 
     mToggleButton = MakeClickableLabel("Toggle layout");
-    mToggleButton.TouchedSignal().Connect(this, &LayoutTransitionSubtreeController::OnToggleTouched);
+    mToggleButton.TouchEventSignal().Connect(this, &LayoutTransitionSubtreeController::OnToggleTouched);
 
     mScopeButton = MakeClickableLabel("Scope: SUBTREE");
-    mScopeButton.TouchedSignal().Connect(this, &LayoutTransitionSubtreeController::OnScopeTouched);
+    mScopeButton.TouchEventSignal().Connect(this, &LayoutTransitionSubtreeController::OnScopeTouched);
 
     mItemButton = MakeClickableLabel("Add/Remove item");
-    mItemButton.TouchedSignal().Connect(this, &LayoutTransitionSubtreeController::OnItemTouched);
+    mItemButton.TouchEventSignal().Connect(this, &LayoutTransitionSubtreeController::OnItemTouched);
 
     // Root: a single transition is attached here and governs the whole
     // subtree under SUBTREE scope.

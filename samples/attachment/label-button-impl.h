@@ -27,7 +27,7 @@ public:
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     label.SetBackgroundColor(UiColor(0x1565C0));
 
-    label.TouchedSignal().Connect(this, &LabelButtonImpl::OnTouched);
+    label.TouchEventSignal().Connect(this, &LabelButtonImpl::OnTouched);
   }
 
   bool OnTouched(Actor actor, TouchEvent e)

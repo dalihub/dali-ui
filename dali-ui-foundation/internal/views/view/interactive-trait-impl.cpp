@@ -265,7 +265,7 @@ void InteractiveTraitImpl::OnAttached(View& view)
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "The trait can not be attached multiple target views");
   mOwner = view;
 
-  view.TouchedSignal().Connect(this, &InteractiveTraitImpl::OnTouchInternal);
+  view.TouchEventSignal().Connect(this, &InteractiveTraitImpl::OnTouchInternal);
   mTapGestureDetector.Attach(view);
   view.SetFocusable(true);
   view.SetTouchFocusable(true);

@@ -308,7 +308,7 @@ private:
   /**
    * @brief Callback when the inherited visibility of the actor is changed.
    */
-  void OnControlInheritedVisibilityChanged(Actor actor, bool visible);
+  void OnControlEffectiveVisibilityChanged(Actor actor, bool visible);
 
   // Undefined
   AnimatedImageVisual(const AnimatedImageVisual& animatedImageVisual);

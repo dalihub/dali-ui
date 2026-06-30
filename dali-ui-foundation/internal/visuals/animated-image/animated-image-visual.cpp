@@ -1099,7 +1099,7 @@ void AnimatedImageVisual::DoSetOnScene(Actor& actor)
 {
   mStartFirstFrame = true;
   mPlacementActor  = actor;
-  actor.InheritedVisibilityChangedSignal().Connect(this, &AnimatedImageVisual::OnControlInheritedVisibilityChanged);
+  actor.EffectiveVisibilityChangedSignal().Connect(this, &AnimatedImageVisual::OnControlEffectiveVisibilityChanged);
 
   // We should clear cached informations before mImageCache->FirstFrame();
   // TODO : Could we remove this cache clearing code?
@@ -1147,7 +1147,7 @@ void AnimatedImageVisual::DoSetOffScene(Actor& actor)
   mCurrentFrameIndex = FIRST_FRAME_INDEX;
   mCurrentLoopIndex  = FIRST_LOOP;
 
-  actor.InheritedVisibilityChangedSignal().Disconnect(this, &AnimatedImageVisual::OnControlInheritedVisibilityChanged);
+  actor.EffectiveVisibilityChangedSignal().Disconnect(this, &AnimatedImageVisual::OnControlEffectiveVisibilityChanged);
 }
 
 void AnimatedImageVisual::OnSetTransform()
@@ -1698,14 +1698,14 @@ void AnimatedImageVisual::SetTexturesToRenderer(TextureSet& textureSet)
   }
 }
 
-void AnimatedImageVisual::OnControlInheritedVisibilityChanged(Actor actor, bool visible)
+void AnimatedImageVisual::OnControlEffectiveVisibilityChanged(Actor actor, bool visible)
 {
   if(!visible && mActionStatus != DevelAnimatedImageVisual::Action::STOP)
   {
     mActionStatus = DevelAnimatedImageVisual::Action::STOP;
     DisplayNextFrame();
     DALI_LOG_INFO(gAnimImgLogFilter, Debug::Verbose,
-                  "AnimatedImageVisual::OnControlInheritedVisibilityChanged: invisibile. Pause animation [%p]\n", this);
+                  "AnimatedImageVisual::OnControlEffectiveVisibilityChanged: invisibile. Pause animation [%p]\n", this);
   }
 }
 

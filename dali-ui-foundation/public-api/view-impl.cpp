@@ -3116,7 +3116,7 @@ void ViewImpl::OnChildRemove(Actor& child)
   }
 }
 
-void ViewImpl::OnChildOrderChanged(Actor orderChangedChild)
+void ViewImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
 {
   if(mImpl->mSkipChildrenUpdate)
   {

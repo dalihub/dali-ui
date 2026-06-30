@@ -77,13 +77,13 @@ public:
 
     // Three Clickable labels. The third one toggles reorder edit mode.
     mEnterButton = MakeClickableLabel("Click to ENTER");
-    mEnterButton.TouchedSignal().Connect(this, &LayoutTransitionReorderController::OnEnterTouched);
+    mEnterButton.TouchEventSignal().Connect(this, &LayoutTransitionReorderController::OnEnterTouched);
 
     mExitButton = MakeClickableLabel("Click to EXIT");
-    mExitButton.TouchedSignal().Connect(this, &LayoutTransitionReorderController::OnExitTouched);
+    mExitButton.TouchEventSignal().Connect(this, &LayoutTransitionReorderController::OnExitTouched);
 
     mEditButton = MakeClickableLabel("Click to Edit");
-    mEditButton.TouchedSignal().Connect(this, &LayoutTransitionReorderController::OnEditTouched);
+    mEditButton.TouchEventSignal().Connect(this, &LayoutTransitionReorderController::OnEditTouched);
 
     mStack = StackLayout::New();
     mStack.SetRequestedWidth(MATCH_PARENT);
@@ -184,7 +184,7 @@ public:
     // parent ScrollView's gesture intercept so the ScrollView never tries
     // to pan while a reorder is in progress.
     child.SetProperty(DevelActor::Property::CAPTURE_ALL_TOUCH_AFTER_START, true);
-    child.TouchedSignal().Connect(this, &LayoutTransitionReorderController::OnChildTouched);
+    child.TouchEventSignal().Connect(this, &LayoutTransitionReorderController::OnChildTouched);
 
     mStack.Add(child);
     ++mNextColorIndex;

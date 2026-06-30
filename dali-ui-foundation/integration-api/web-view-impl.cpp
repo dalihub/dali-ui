@@ -387,7 +387,7 @@ void WebViewImpl::OnInitialize()
 
   // Key events are now handled via OnKeyEvent() virtual override.
   // Touch events are handled via signal connection.
-  self.TouchedSignal().Connect(this, &WebViewImpl::OnTouchEvent);
+  self.TouchEventSignal().Connect(this, &WebViewImpl::OnTouchEvent);
 
   // --- Property notifications for display-area tracking ---
   // Fire when world position, size, or scale change by at least 1 unit / 0.1 scale step.
