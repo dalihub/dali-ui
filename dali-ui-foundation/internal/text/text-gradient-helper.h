@@ -43,6 +43,10 @@ bool IsRenderable(const Gradient::Base& gradient);
 
 bool IsLinearRenderable(const Gradient::Base& gradient);
 
+bool IsSupportedTextGradientType(const Gradient::Base& gradient);
+
+bool IsSupportedTextGradientStyle(const TextGradientStyle& style);
+
 Dali::WrapMode::Type GetWrapMode(Gradient::SpreadMethod spread);
 
 Dali::Texture CreateLookupTexture(const TextGradientStyle& style);

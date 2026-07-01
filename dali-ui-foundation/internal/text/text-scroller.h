@@ -49,8 +49,11 @@ typedef IntrusivePtr<TextScroller> TextScrollerPtr;
 struct TextScrollerTextGradient
 {
   bool            enabled{false};
+  Gradient::Type  type{Gradient::Type::NONE};
   Vector2         startPosition{Vector2::ZERO};
   Vector2         endPosition{Vector2::ONE};
+  Vector2         radialCenter{Vector2::ZERO};
+  Vector2         radialScale{Vector2::ZERO};
   float           startOffset{0.0f};
   Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized viewport-local bounds for TextGradient evaluation.
   Property::Index startOffsetPropertyIndex{Property::INVALID_INDEX};

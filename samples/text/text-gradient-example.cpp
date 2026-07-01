@@ -47,7 +47,7 @@ constexpr float MATRIX_CAPTION_WIDTH = 76.0f;
 constexpr float MATRIX_CELL_WIDTH    = 188.0f;
 constexpr int   WINDOW_WIDTH     = 920;
 constexpr int   WINDOW_HEIGHT    = 880;
-constexpr std::size_t CASE_COUNT = 12u;
+constexpr std::size_t CASE_COUNT = 9u;
 constexpr std::size_t INITIAL_CASE_INDEX                 = 0u;
 constexpr std::size_t INITIAL_ALIGNMENT_INDEX            = 1u;
 constexpr std::size_t INITIAL_SPREAD_METHOD_INDEX        = 0u;
@@ -57,8 +57,7 @@ enum class GradientKind
 {
   NONE,
   LINEAR,
-  RADIAL,
-  CONIC
+  RADIAL
 };
 
 enum class PreviewSizeMode
@@ -80,14 +79,14 @@ struct CaseDefinition
   bool         style;
   bool         marquee{false};
   Text::MarqueeOrientation marqueeOrientation{Text::MarqueeOrientation::HORIZONTAL};
-  bool         compactLinearSpan{false};
+  bool         compactGradientSpan{false};
 };
 
 constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
   {
-    "Simple Linear",
+    "Simple TextGradient",
     "Text Gradient",
-    "Expected: gradient visible on the simple Label path.",
+    "Expected: selected gradient type visible on the simple Label path.",
     "Notes: single-color, monochrome, non-marquee, non-tiling, no style.",
     GradientKind::LINEAR,
     64.0f,
@@ -96,9 +95,9 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
     false,
   },
   {
-    "Large Linear",
+    "Large TextGradient",
     "Gradient Rendering Sample",
-    "Expected: long left-to-right linear gradient should be easy to inspect.",
+    "Expected: long text should make the selected gradient type easy to inspect.",
     "Notes: still a simple single-color Label path.",
     GradientKind::LINEAR,
     52.0f,
@@ -107,10 +106,10 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
     false,
   },
   {
-    "Multiline Linear",
+    "Multiline TextGradient",
     "Text Gradient\nMultiline Label\nDALi UI Foundation",
     "Expected: useful for future bounds and multiline policy checks.",
-    "Notes: current implementation maps Linear gradient to logical text bounds.",
+    "Notes: current implementation maps TextGradient to logical text bounds.",
     GradientKind::LINEAR,
     40.0f,
     true,
@@ -151,43 +150,10 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
     true,
   },
   {
-    "None Gradient Fallback",
-    "Plain Text After None",
-    "Expected: SetTextGradient(Gradient::Base::None()) restores normal single-color text.",
-    "Notes: use C to set the gradient to None(), G to re-apply the selected case gradient.",
-    GradientKind::NONE,
-    54.0f,
-    false,
-    false,
-    false,
-  },
-  {
-    "Radial Gradient",
-    "Radial Text Gradient",
-    "Expected: may fallback until Radial text shader support is implemented.",
-    "Notes: public Radial authored value path is still exercised.",
-    GradientKind::RADIAL,
-    52.0f,
-    false,
-    false,
-    false,
-  },
-  {
-    "Conic Gradient",
-    "Conic Text Gradient",
-    "Expected: may fallback until Conic text shader support is implemented.",
-    "Notes: public Conic authored value path is still exercised.",
-    GradientKind::CONIC,
-    52.0f,
-    false,
-    false,
-    false,
-  },
-  {
-    "Linear Spread Method",
-    "PAD REFLECT REPEAT spread method inspection",
-    "Expected: P cycles PAD, REFLECT and REPEAT; the compact gradient span makes wrapping visible.",
-    "Notes: Linear start/end use -0.5..-0.08 in text-local object bounds for inspection.",
+    "Spread Method",
+    "Text gradient spread method inspection across the selected type",
+    "Expected: P cycles PAD, REFLECT and REPEAT; the compact span makes spread behavior visible.",
+    "Notes: TYPE toggles Linear/Radial so spread can be checked on both gradient evaluators.",
     GradientKind::LINEAR,
     46.0f,
     false,
@@ -200,7 +166,7 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
   {
     "Horizontal Marquee TextGradient",
     "Horizontal marquee text gradient keeps moving with the scrolling content",
-    "Expected: moving text fill keeps Linear gradient while scrolling horizontally.",
+    "Expected: moving text fill keeps the selected gradient type while scrolling horizontally.",
     "Notes: verifies horizontal marquee shader with TextGradient.",
     GradientKind::LINEAR,
     42.0f,
@@ -213,7 +179,7 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
   {
     "Vertical Marquee TextGradient",
     "Vertical\nmarquee\ntext\ngradient\nscrolls\nwith\ncontent",
-    "Expected: moving text fill keeps Linear gradient while scrolling vertically.",
+    "Expected: moving text fill keeps the selected gradient type while scrolling vertically.",
     "Notes: verifies vertical marquee shader with TextGradient.",
     GradientKind::LINEAR,
     38.0f,
@@ -335,7 +301,7 @@ void ApplyLinearGradient(Label label, Gradient::SpreadMethod spreadMethod, bool 
   label.SetTextGradient(gradient);
 }
 
-void SetAnimationGradientStops(Gradient::Linear& gradient, Gradient::SpreadMethod spreadMethod)
+void SetAnimationGradientStops(Gradient::Base& gradient, Gradient::SpreadMethod spreadMethod)
 {
   switch(spreadMethod)
   {
@@ -375,11 +341,12 @@ void SetAnimationGradientStops(Gradient::Linear& gradient, Gradient::SpreadMetho
   }
 }
 
-void ApplyAnimationLinearGradient(Label label, Gradient::SpreadMethod spreadMethod)
+void ApplyAnimationLinearGradient(Label label, Gradient::SpreadMethod spreadMethod, bool compactSpan = false)
 {
   const GradientAnimationProfile profile = GetGradientAnimationProfile(spreadMethod);
 
-  Gradient::Linear gradient(profile.startPosition, profile.endPosition);
+  Gradient::Linear gradient(compactSpan ? Vector2(-0.5f, 0.0f) : profile.startPosition,
+                            compactSpan ? Vector2(-0.08f, 0.0f) : profile.endPosition);
   gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
   gradient.SetSpreadMethod(spreadMethod);
   gradient.SetStartOffset(profile.startOffset);
@@ -387,18 +354,21 @@ void ApplyAnimationLinearGradient(Label label, Gradient::SpreadMethod spreadMeth
   label.SetTextGradient(gradient);
 }
 
-void ApplyRadialGradient(Label label, Gradient::SpreadMethod spreadMethod)
+void ApplyAnimationRadialGradient(Label label, Gradient::SpreadMethod spreadMethod, bool compactSpan = false)
 {
-  Gradient::Radial gradient(Vector2(0.0f, 0.0f), 0.5f);
+  const GradientAnimationProfile profile = GetGradientAnimationProfile(spreadMethod);
+
+  Gradient::Radial gradient(Vector2(0.0f, 0.0f), compactSpan ? 0.18f : 0.5f);
   gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
   gradient.SetSpreadMethod(spreadMethod);
-  SetCommonGradientStops(gradient);
+  gradient.SetStartOffset(profile.startOffset);
+  SetAnimationGradientStops(gradient, spreadMethod);
   label.SetTextGradient(gradient);
 }
 
-void ApplyConicGradient(Label label, Gradient::SpreadMethod spreadMethod)
+void ApplyRadialGradient(Label label, Gradient::SpreadMethod spreadMethod, bool compactSpan = false)
 {
-  Gradient::Conic gradient(Vector2(0.0f, 0.0f), Radian(0.0f));
+  Gradient::Radial gradient(Vector2(0.0f, 0.0f), compactSpan ? 0.18f : 0.5f);
   gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
   gradient.SetSpreadMethod(spreadMethod);
   SetCommonGradientStops(gradient);
@@ -416,10 +386,6 @@ const char* GetGradientName(GradientKind gradient)
     case GradientKind::RADIAL:
     {
       return "Radial";
-    }
-    case GradientKind::CONIC:
-    {
-      return "Conic";
     }
     case GradientKind::NONE:
     default:
@@ -586,7 +552,10 @@ private:
     mAnimationBadge = CreateLabel("", 13.0f, UiColor(0xCBD5E1));
     ConfigureHudBadge(mAnimationBadge, HEADER_BADGE_HEIGHT, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1), Text::Alignment::CENTER);
 
-    mResetBadge = CreateLabel("Gradient Reset", 13.0f, UiColor(0xF8FAFC));
+    mClearBadge = CreateLabel("Clear", 13.0f, UiColor(0xF8FAFC));
+    ConfigureHudBadge(mClearBadge, HEADER_BADGE_HEIGHT, UiColor(0x7F1D1D), UiColor(0xFCA5A5), UiColor(0xF8FAFC), Text::Alignment::CENTER);
+
+    mResetBadge = CreateLabel("Reset", 13.0f, UiColor(0xF8FAFC));
     ConfigureHudBadge(mResetBadge, HEADER_BADGE_HEIGHT, UiColor(0x7C2D12), UiColor(0xFDBA74), UiColor(0xF8FAFC), Text::Alignment::CENTER);
 
     mExpectedBadge = CreateLabel("", 12.0f, UiColor(0xCBD5E1));
@@ -623,13 +592,13 @@ private:
     ConfigureHudBadge(mMenuTitleLabel, FOOTER_BADGE_HEIGHT, UiColor(0x1D4ED8), UiColor(0x93C5FD), UiColor(0xF8FAFC), Text::Alignment::CENTER);
 
     mCaseListLabel = CreateLabel(
-      "CASES  0 Matrix | 1 Linear | 2 Large | 3 Multiline | 4 Markup | 5 Emoji | 6 Style | 7 Clear | 8 Radial | 9 Conic | Left/Right Spread/Marquee",
+      "CASES  0 Matrix | 1 Simple | 2 Large | 3 Multi | 4 Markup | 5 Emoji | 6 Style | 7 Spread | 8 H Marquee | 9 V Marquee",
       12.0f,
       UiColor(0xCBD5E1));
     ConfigureHudBadge(mCaseListLabel, FOOTER_BADGE_HEIGHT, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1), Text::Alignment::START);
 
     mHelpLabel = CreateLabel(
-      "ACTIONS  Click top badges | A Anim | X Gradient Reset | C None | G Apply | P Spread | B Bounds | M Marquee | ESC Quit",
+      "ACTIONS  Click top badges | D Type | A Anim | X Reset | C Clear | G Apply | P Spread | B Bounds | M Marquee | ESC Quit",
       12.0f,
       UiColor(0xCBD5E1));
     ConfigureHudBadge(mHelpLabel, FOOTER_LINE_HEIGHT, UiColor(0x0F172A), UiColor(0x334155), UiColor(0xCBD5E1), Text::Alignment::START);
@@ -655,6 +624,7 @@ private:
       mMatrixBadge,
       mAnimationBadge,
       mResetBadge,
+      mClearBadge,
       mExpectedBadge,
     });
 
@@ -758,7 +728,7 @@ private:
     const float row2Y        = row1Y + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP;
     const float noteY        = row2Y + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP;
     const float row1Width    = std::max(contentWidth - HEADER_ROW_GAP * 4.0f, 0.0f);
-    const float row2Width    = std::max(contentWidth - HEADER_ROW_GAP * 5.0f, 0.0f);
+    const float row2Width    = std::max(contentWidth - HEADER_ROW_GAP * 6.0f, 0.0f);
 
     const float caseWidth     = row1Width * 0.30f;
     const float gradientWidth = row1Width * 0.16f;
@@ -766,12 +736,13 @@ private:
     const float boundsWidth   = row1Width * 0.20f;
     const float sizeWidth     = std::max(row1Width - caseWidth - gradientWidth - spreadWidth - boundsWidth, 0.0f);
 
-    const float hAlignWidth    = row2Width * 0.13f;
-    const float vAlignWidth    = row2Width * 0.13f;
-    const float marqueeWidth   = row2Width * 0.17f;
-    const float matrixWidth    = row2Width * 0.12f;
-    const float animationWidth = row2Width * 0.20f;
-    const float resetWidth     = std::max(row2Width - hAlignWidth - vAlignWidth - marqueeWidth - matrixWidth - animationWidth, 0.0f);
+    const float hAlignWidth       = row2Width * 0.12f;
+    const float vAlignWidth       = row2Width * 0.12f;
+    const float marqueeWidth      = row2Width * 0.16f;
+    const float matrixWidth       = row2Width * 0.11f;
+    const float animationWidth    = row2Width * 0.17f;
+    const float resetWidth        = row2Width * 0.14f;
+    const float clearWidth        = std::max(row2Width - hAlignWidth - vAlignWidth - marqueeWidth - matrixWidth - animationWidth - resetWidth, 0.0f);
 
     float x = HEADER_PADDING;
     SetBadgeBounds(mCaseBadge, x, row1Y, caseWidth, HEADER_BADGE_HEIGHT);
@@ -796,6 +767,8 @@ private:
     SetBadgeBounds(mAnimationBadge, x, row2Y, animationWidth, HEADER_BADGE_HEIGHT);
     x += animationWidth + HEADER_ROW_GAP;
     SetBadgeBounds(mResetBadge, x, row2Y, resetWidth, HEADER_BADGE_HEIGHT);
+    x += resetWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mClearBadge, x, row2Y, clearWidth, HEADER_BADGE_HEIGHT);
 
     SetBadgeBounds(mExpectedBadge, HEADER_PADDING, noteY, contentWidth, HEADER_INFO_HEIGHT);
   }
@@ -830,14 +803,7 @@ private:
     });
     mGradientBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
-      if(mGradientApplied)
-      {
-        SetGradientNone();
-      }
-      else
-      {
-        ReapplyGradient();
-      }
+      CycleGradientType();
     });
     mSpreadBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
@@ -881,6 +847,10 @@ private:
     mResetBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
       ResetCurrentGradientState();
+    });
+    mClearBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      SetGradientNone();
     });
   }
 
@@ -1056,31 +1026,7 @@ private:
 
   void ApplyGradientToLabel(Label label, const CaseDefinition& item)
   {
-    switch(item.gradient)
-    {
-      case GradientKind::LINEAR:
-      {
-        ApplyLinearGradient(label, CurrentSpreadMethod(), item.compactLinearSpan);
-        break;
-      }
-      case GradientKind::RADIAL:
-      {
-        ApplyRadialGradient(label, CurrentSpreadMethod());
-        break;
-      }
-      case GradientKind::CONIC:
-      {
-        ApplyConicGradient(label, CurrentSpreadMethod());
-        break;
-      }
-      case GradientKind::NONE:
-      default:
-      {
-        label.SetTextGradient(Gradient::Base::None());
-        mGradientApplied = false;
-        break;
-      }
-    }
+    ApplyGradientToLabelByKind(label, GetEffectiveCaseGradientKind(item), item.compactGradientSpan);
   }
 
   void SetGradientNone()
@@ -1105,7 +1051,7 @@ private:
     for(Label& label : mMarqueeMatrixLabels)
     {
       label.SetTextGradientBoundsMode(CurrentGradientBoundsMode());
-      ApplyLinearGradient(label, CurrentSpreadMethod(), false);
+      ApplyGradientToLabelByKind(label, CurrentMatrixGradientKind(), false);
     }
   }
 
@@ -1114,7 +1060,7 @@ private:
     for(Label& label : mMarqueeMatrixLabels)
     {
       label.SetTextGradientBoundsMode(CurrentGradientBoundsMode());
-      ApplyAnimationLinearGradient(label, CurrentSpreadMethod());
+      ApplyAnimationBaseGradientToLabel(label, CurrentMatrixGradientKind());
     }
   }
 
@@ -1246,10 +1192,10 @@ private:
 
     if(mMarqueeMatrixMode)
     {
-      return true;
+      return IsGradientTypeSwitchable(CurrentMatrixGradientKind());
     }
 
-    return CASES[mCaseIndex].gradient == GradientKind::LINEAR;
+    return IsGradientTypeSwitchable(GetEffectiveCaseGradientKind(CASES[mCaseIndex]));
   }
 
   void StartGradientAnimation()
@@ -1291,8 +1237,10 @@ private:
         mPreviewLabel.StopMarquee();
         mAsyncPreviewLabel.StopMarquee();
       }
-      ApplyAnimationLinearGradient(mPreviewLabel, CurrentSpreadMethod());
-      ApplyAnimationLinearGradient(mAsyncPreviewLabel, CurrentSpreadMethod());
+      const GradientKind animationGradient = GetEffectiveCaseGradientKind(CASES[mCaseIndex]);
+      const bool compactGradientSpan = CASES[mCaseIndex].compactGradientSpan;
+      ApplyAnimationBaseGradientToLabel(mPreviewLabel, animationGradient, compactGradientSpan);
+      ApplyAnimationBaseGradientToLabel(mAsyncPreviewLabel, animationGradient, compactGradientSpan);
       ApplyGradientAnimation(mPreviewLabel);
       ApplyGradientAnimation(mAsyncPreviewLabel);
       if(restartMarquee)
@@ -1327,6 +1275,81 @@ private:
     const float duration     = GetAnimationDuration(CurrentSpreadMethod());
     label.Animate(mTextGradientAnimation)
       .TextGradientStartOffset(targetOffset, Duration(duration));
+  }
+
+  static bool IsGradientTypeSwitchable(GradientKind gradient)
+  {
+    return gradient == GradientKind::LINEAR || gradient == GradientKind::RADIAL;
+  }
+
+  GradientKind GetEffectiveCaseGradientKind(const CaseDefinition& item) const
+  {
+    return IsGradientTypeSwitchable(item.gradient) && IsGradientTypeSwitchable(mGradientTypeOverride)
+             ? mGradientTypeOverride
+             : item.gradient;
+  }
+
+  GradientKind CurrentMatrixGradientKind() const
+  {
+    return IsGradientTypeSwitchable(mGradientTypeOverride) ? mGradientTypeOverride : GradientKind::LINEAR;
+  }
+
+  GradientKind CurrentDisplayedGradientKind() const
+  {
+    return mMarqueeMatrixMode ? CurrentMatrixGradientKind() : GetEffectiveCaseGradientKind(CASES[mCaseIndex]);
+  }
+
+  bool CanCycleGradientType() const
+  {
+    return mMarqueeMatrixMode || IsGradientTypeSwitchable(CASES[mCaseIndex].gradient);
+  }
+
+  void ApplyGradientToLabelByKind(Label label, GradientKind gradient, bool compactGradientSpan)
+  {
+    switch(gradient)
+    {
+      case GradientKind::LINEAR:
+      {
+        ApplyLinearGradient(label, CurrentSpreadMethod(), compactGradientSpan);
+        break;
+      }
+      case GradientKind::RADIAL:
+      {
+        ApplyRadialGradient(label, CurrentSpreadMethod(), compactGradientSpan);
+        break;
+      }
+      case GradientKind::NONE:
+      default:
+      {
+        label.SetTextGradient(Gradient::Base::None());
+        break;
+      }
+    }
+  }
+
+  void ApplyAnimationBaseGradientToLabel(Label label, GradientKind gradient, bool compactGradientSpan = false)
+  {
+    if(gradient == GradientKind::RADIAL)
+    {
+      ApplyAnimationRadialGradient(label, CurrentSpreadMethod(), compactGradientSpan);
+    }
+    else
+    {
+      ApplyAnimationLinearGradient(label, CurrentSpreadMethod(), compactGradientSpan);
+    }
+  }
+
+  void CycleGradientType()
+  {
+    if(!CanCycleGradientType())
+    {
+      return;
+    }
+
+    const bool wasAnimationRunning = StopAnimationForOptionChange();
+    const GradientKind currentGradient = CurrentDisplayedGradientKind();
+    mGradientTypeOverride = (currentGradient == GradientKind::RADIAL) ? GradientKind::LINEAR : GradientKind::RADIAL;
+    RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
   }
 
   void RefreshCurrentGradientAfterOptionChange(bool wasAnimationRunning)
@@ -1431,14 +1454,36 @@ private:
     }
   }
 
+  void UpdateGradientTypeBadge()
+  {
+    if(!CanCycleGradientType())
+    {
+      SetHudBadge(mGradientBadge, "TYPE N/A", UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
+      return;
+    }
+
+    const GradientKind gradient = CurrentDisplayedGradientKind();
+    std::string        text     = "TYPE ";
+    text += GetGradientName(gradient);
+    SetHudBadge(mGradientBadge,
+                text,
+                gradient == GradientKind::RADIAL ? UiColor(0x6D28D9) : UiColor(0x075985),
+                gradient == GradientKind::RADIAL ? UiColor(0xC4B5FD) : UiColor(0x38BDF8));
+  }
+
   void UpdateStatus()
   {
-    SetHudBadge(mResetBadge, "Gradient Reset", UiColor(0x7C2D12), UiColor(0xFDBA74));
+    SetHudBadge(mResetBadge, "Reset", UiColor(0x7C2D12), UiColor(0xFDBA74));
+    SetHudBadge(mClearBadge,
+                mGradientApplied ? "Clear" : "Cleared",
+                mGradientApplied ? UiColor(0x7F1D1D) : UiColor(0x334155),
+                mGradientApplied ? UiColor(0xFCA5A5) : UiColor(0x64748B),
+                mGradientApplied ? UiColor(0xF8FAFC) : UiColor(0xCBD5E1));
+    UpdateGradientTypeBadge();
 
     if(mMarqueeMatrixMode)
     {
       SetHudBadge(mCaseBadge, "CASE 0  Matrix", UiColor(0x1D4ED8), UiColor(0x93C5FD));
-      SetHudBadge(mGradientBadge, mGradientApplied ? "GRADIENT Linear" : "GRADIENT None", mGradientApplied ? UiColor(0x065F46) : UiColor(0x334155), mGradientApplied ? UiColor(0x34D399) : UiColor(0x64748B));
 
       std::string spread = "SPREAD ";
       spread += GetSpreadMethodName(CurrentSpreadMethod());
@@ -1465,7 +1510,11 @@ private:
                   mAnimationInfo ? UiColor(0xF8FAFC) : UiColor(0xCBD5E1));
 
       std::string expected = "MATRIX  H/V, START/CENTER/END, short/long, sync/async | Expected: short cells align to text bounds; long cells use viewport bounds; async matches sync.";
-      if(mAnimationInfo)
+      if(!mGradientApplied)
+      {
+        expected += " Gradient: cleared; G applies the selected type.";
+      }
+      else if(mAnimationInfo)
       {
         expected += " Animation: StartOffset drives gradient motion. X resets the current gradient state.";
       }
@@ -1487,13 +1536,9 @@ private:
     caseText += item.title;
     SetHudBadge(mCaseBadge, caseText, UiColor(0x1D4ED8), UiColor(0x93C5FD));
 
-    std::string gradient = "GRADIENT ";
-    gradient += mGradientApplied ? GetGradientName(item.gradient) : "None";
-    SetHudBadge(mGradientBadge, gradient, mGradientApplied ? UiColor(0x065F46) : UiColor(0x334155), mGradientApplied ? UiColor(0x34D399) : UiColor(0x64748B), mGradientApplied ? UiColor(0xF8FAFC) : UiColor(0xCBD5E1));
-
     std::string spread = "SPREAD ";
     spread += GetSpreadMethodName(CurrentSpreadMethod());
-    if(item.compactLinearSpan)
+    if(item.compactGradientSpan)
     {
       spread += " Short";
     }
@@ -1541,7 +1586,11 @@ private:
     expected += item.expected;
     expected += " ";
     expected += item.notes;
-    if(mAnimationInfo)
+    if(!mGradientApplied)
+    {
+      expected += " Gradient: cleared; G applies the selected type.";
+    }
+    else if(mAnimationInfo)
     {
       expected += " Animation: StartOffset drives gradient motion. X resets the current gradient state.";
     }
@@ -1626,6 +1675,10 @@ private:
     {
       ReapplyGradient();
     }
+    else if(keyName == "d" || keyName == "D")
+    {
+      CycleGradientType();
+    }
     else if(keyName == "a" || keyName == "A")
     {
       ToggleGradientAnimation();
@@ -1697,6 +1750,7 @@ private:
   Label          mMatrixBadge;
   Label          mAnimationBadge;
   Label          mResetBadge;
+  Label          mClearBadge;
   Label          mExpectedBadge;
   StackLayout    mNormalPreviewContainer;
   StackLayout    mMarqueeMatrixContainer;
@@ -1715,6 +1769,7 @@ private:
   std::size_t        mSpreadMethodIndex{INITIAL_SPREAD_METHOD_INDEX};
   std::size_t        mGradientBoundsModeIndex{INITIAL_GRADIENT_BOUNDS_MODE_INDEX};
   PreviewSizeMode mPreviewSizeMode{PreviewSizeMode::FIXED};
+  GradientKind    mGradientTypeOverride{GradientKind::NONE};
   bool            mGradientApplied{true};
   bool            mAnimationInfo{false};
   bool            mMarqueeMatrixMode{false};

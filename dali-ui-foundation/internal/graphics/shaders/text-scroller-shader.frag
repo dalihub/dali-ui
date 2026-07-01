@@ -17,10 +17,28 @@ UNIFORM_BLOCK FragBlock
 #ifdef IS_REQUIRED_TEXT_GRADIENT
   UNIFORM highp vec2 uTextGradientStartPosition;
   UNIFORM highp vec2 uTextGradientEndPosition;
+  UNIFORM highp float uTextGradientType;
+  UNIFORM highp vec2 uTextGradientRadialCenter;
+  UNIFORM highp vec2 uTextGradientRadialScale;
   UNIFORM highp float uTextGradientStartOffset;
   UNIFORM highp vec4 uTextGradientBounds;
 #endif
 };
+
+#ifdef IS_REQUIRED_TEXT_GRADIENT
+highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
+{
+  const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
+  if(abs(uTextGradientType - TEXT_GRADIENT_TYPE_RADIAL) < 0.5)
+  {
+    return length((textGradientCoord - uTextGradientRadialCenter) * uTextGradientRadialScale);
+  }
+
+  highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;
+  highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
+  return dot(textGradientCoord - uTextGradientStartPosition, gradientVector) / gradientLengthSquared;
+}
+#endif
 
 void main()
 {
@@ -32,10 +50,7 @@ void main()
 #ifdef IS_REQUIRED_TEXT_GRADIENT
   highp vec2 textGradientCoord =
     (vTextGradientCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
-  highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;
-  highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
-  highp float gradientPosition =
-    dot(textGradientCoord - uTextGradientStartPosition, gradientVector) / gradientLengthSquared;
+  highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
   textTexture = vec4(gradientColor.rgb * textTexture.a, gradientColor.a * textTexture.a);
 #endif

@@ -2147,7 +2147,7 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
   textureSet.SetSampler(0u, sampler);
 
   Text::TextScrollerTextGradient textGradient;
-  if(Text::Internal::TextGradient::IsLinearRenderable(mTextGradient))
+  if(Text::Internal::TextGradient::IsSupportedTextGradientType(mTextGradient))
   {
     const Text::Internal::TextGradientStyle textGradientStyle =
       Text::Internal::CreateTextGradientStyle(mTextGradient);
@@ -2339,7 +2339,7 @@ void LabelImpl::SyncGradientAnimProperties()
 
 bool LabelImpl::IsGradientAnimSupported() const
 {
-  return Text::Internal::TextGradient::IsLinearRenderable(mTextGradient);
+  return Text::Internal::TextGradient::IsSupportedTextGradientType(mTextGradient);
 }
 
 void LabelImpl::BindGradientAnimProperties()
@@ -2563,7 +2563,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   textureSet.SetSampler(0u, sampler);
 
   Text::TextScrollerTextGradient textGradient;
-  if(Text::Internal::TextGradient::IsLinearRenderable(mTextGradient))
+  if(Text::Internal::TextGradient::IsSupportedTextGradientType(mTextGradient))
   {
     const Text::Internal::TextGradientStyle textGradientStyle =
       Text::Internal::CreateTextGradientStyle(mTextGradient);
@@ -3106,7 +3106,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.embossStrength          = mController->GetEmbossStrength();
   parameters.embossLightColor        = mController->GetEmbossLightColor();
   parameters.embossShadowColor       = mController->GetEmbossShadowColor();
-  parameters.isTextGradientRequested = Text::Internal::TextGradient::IsLinearRenderable(mTextGradient);
+  parameters.isTextGradientRequested = Text::Internal::TextGradient::IsSupportedTextGradientType(mTextGradient);
 
   return parameters;
 }

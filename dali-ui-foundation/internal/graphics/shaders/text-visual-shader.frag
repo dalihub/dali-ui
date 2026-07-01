@@ -40,8 +40,11 @@ UNIFORM_BLOCK FragBlock
   UNIFORM lowp vec4 uColor;
 
   #ifdef IS_REQUIRED_TEXT_GRADIENT
+  UNIFORM highp float uTextGradientType;
   UNIFORM highp vec2 uTextGradientStartPosition;
   UNIFORM highp vec2 uTextGradientEndPosition;
+  UNIFORM highp vec2 uTextGradientRadialCenter;
+  UNIFORM highp vec2 uTextGradientRadialScale;
   UNIFORM highp float uTextGradientStartOffset;
   UNIFORM highp vec4 uTextGradientBounds;
   #endif
@@ -54,6 +57,22 @@ UNIFORM_BLOCK FragBlock
   UNIFORM lowp vec4 uEmbossShadowColor;
   #endif
 };
+
+#ifdef IS_REQUIRED_TEXT_GRADIENT
+highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
+{
+  const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
+  if(abs(uTextGradientType - TEXT_GRADIENT_TYPE_RADIAL) < 0.5)
+  {
+    return length((textGradientCoord - uTextGradientRadialCenter) * uTextGradientRadialScale);
+  }
+
+  highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;
+  highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
+  return dot(textGradientCoord - uTextGradientStartPosition, gradientVector) / gradientLengthSquared;
+}
+#endif
+
 void main()
 {
 #ifdef IS_REQUIRED_STYLE
@@ -70,10 +89,7 @@ void main()
   mediump float textTexture = TEXTURE(sTextGradientMask, vTexCoord).r;
   highp vec2 textGradientCoord =
     (vTexCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
-  highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;
-  highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
-  highp float gradientPosition =
-    dot(textGradientCoord - uTextGradientStartPosition, gradientVector) / gradientLengthSquared;
+  highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
   mediump vec4 gradientFill = vec4(gradientColor.rgb * textTexture,
                                    gradientColor.a * textTexture * uTextColorAnimatable.a);
@@ -82,10 +98,7 @@ void main()
   mediump float textTexture = TEXTURE(sTexture, vTexCoord).r;
   highp vec2 textGradientCoord =
     (vTexCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
-  highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;
-  highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
-  highp float gradientPosition =
-    dot(textGradientCoord - uTextGradientStartPosition, gradientVector) / gradientLengthSquared;
+  highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
   mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
   textColor = vec4(gradientColor.rgb * textTexture, gradientColor.a * textTexture * uTextColorAnimatable.a);
 #elif defined(IS_REQUIRED_MULTI_COLOR) || defined(IS_REQUIRED_EMOJI)

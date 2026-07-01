@@ -56,6 +56,9 @@ constexpr const char*     UNIFORM_TEXT_GRADIENT_START_POSITION_NAME("uTextGradie
 constexpr const char*     UNIFORM_TEXT_GRADIENT_END_POSITION_NAME("uTextGradientEndPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME("uTextGradientStartOffset");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_BOUNDS_NAME("uTextGradientBounds");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_TYPE_NAME("uTextGradientType");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME("uTextGradientRadialCenter");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME("uTextGradientRadialScale");
 
 /**
  * @brief How the text should be aligned horizontally when scrolling the text.
@@ -387,6 +390,9 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
     // Update the renderer values so stale non-marquee bounds cannot override the scroller shader.
     Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, textGradient.startPosition);
     Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, textGradient.endPosition);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(textGradient.type));
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, textGradient.radialCenter);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, textGradient.radialScale);
     const Property::Index startOffsetIndex =
       Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, textGradient.startOffset);
     Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, textGradient.bounds);

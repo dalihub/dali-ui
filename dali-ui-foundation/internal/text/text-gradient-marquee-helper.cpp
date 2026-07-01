@@ -23,6 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 
 namespace Dali
 {
@@ -37,9 +38,7 @@ namespace TextGradientMarquee
 
 bool IsStyleSupported(const TextGradientStyle& style, const Size& textureSize)
 {
-  if(!style.enabled ||
-     style.type != Gradient::Type::LINEAR ||
-     style.stops.Count() < 2u)
+  if(!TextGradient::IsSupportedTextGradientStyle(style))
   {
     return false;
   }
@@ -49,8 +48,7 @@ bool IsStyleSupported(const TextGradientStyle& style, const Size& textureSize)
     return false;
   }
 
-  const Vector2 gradientVector = style.linearEnd - style.linearStart;
-  return gradientVector.LengthSquared() > Math::MACHINE_EPSILON_1000;
+  return true;
 }
 
 bool IsCompositionSupported(bool hasMultipleTextColors,
@@ -87,10 +85,18 @@ Dali::Ui::Text::TextScrollerTextGradient CreateMarqueeGradient(const TextGradien
 {
   Dali::Ui::Text::TextScrollerTextGradient textGradient;
   textGradient.enabled       = true;
+  textGradient.type          = style.type;
   textGradient.startPosition = Text::Internal::ResolveTextGradientPosition(style.units, style.linearStart, bounds, coordinateSize);
   textGradient.endPosition   = Text::Internal::ResolveTextGradientPosition(style.units, style.linearEnd, bounds, coordinateSize);
-  textGradient.startOffset   = style.startOffset;
-  textGradient.bounds        = bounds;
+  if(style.type == Gradient::Type::RADIAL)
+  {
+    textGradient.radialCenter =
+      Text::Internal::ResolveTextGradientPosition(style.units, style.radialCenter, bounds, coordinateSize);
+    textGradient.radialScale =
+      Text::Internal::ResolveTextGradientRadialScale(style.units, style.radialRadius, bounds, coordinateSize);
+  }
+  textGradient.startOffset = style.startOffset;
+  textGradient.bounds      = bounds;
   return textGradient;
 }
 

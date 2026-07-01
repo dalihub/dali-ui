@@ -65,6 +65,23 @@ inline Vector2 ResolveTextGradientPosition(Dali::Ui::Gradient::Units units,
   return Vector2(position.x / boundsPixelSize.x, position.y / boundsPixelSize.y);
 }
 
+inline Vector2 ResolveTextGradientRadialScale(Dali::Ui::Gradient::Units units,
+                                              float                     radius,
+                                              const Vector4&            bounds,
+                                              const Vector2&            targetSize)
+{
+  // OBJECT_BOUNDING_BOX uses normalized selected-bounds coordinates, so
+  // non-square bounds may look elliptical. USER_SPACE converts that coordinate
+  // to pixel-like distance so the radius is evaluated in selected-bounds pixels.
+  const float safeRadius = std::max(std::fabs(radius), Math::MACHINE_EPSILON_1000);
+  if(units == Dali::Ui::Gradient::Units::USER_SPACE)
+  {
+    return GetTextGradientBoundsPixelSize(bounds, targetSize) / safeRadius;
+  }
+
+  return Vector2(1.0f / safeRadius, 1.0f / safeRadius);
+}
+
 inline Vector4 CalculateTextGradientViewBounds(const Vector2& textureSize,
                                                const Vector2& viewSize,
                                                const Vector2& visualOffset)

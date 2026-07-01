@@ -281,6 +281,9 @@ public: // Setters for chaining
    * bottom-right is (0.5, 0.5). Gradient::Units::USER_SPACE uses pixel
    * coordinates inside the same selected bounds. This text-specific bounds
    * selection does not change the coordinate contract used by GradientVisual.
+   * For Radial gradients, non-square OBJECT_BOUNDING_BOX bounds may therefore
+   * follow the selected bounds aspect; use USER_SPACE for pixel-like center and
+   * radius values.
    *
    * @note A stored authored gradient may still fall back to normal text rendering
    * when the active Label rendering path does not support its type, units, or

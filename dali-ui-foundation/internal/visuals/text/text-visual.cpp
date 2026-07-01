@@ -64,7 +64,7 @@ namespace
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
 DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_TEXT_ASYNC, false);
 
-const int CUSTOM_PROPERTY_COUNT(7); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, TextGradient uniforms
+const int CUSTOM_PROPERTY_COUNT(10); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, TextGradient uniforms
 
 static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
 static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
@@ -81,6 +81,9 @@ constexpr const char* UNIFORM_TEXT_GRADIENT_START_POSITION_NAME = "uTextGradient
 constexpr const char* UNIFORM_TEXT_GRADIENT_END_POSITION_NAME   = "uTextGradientEndPosition";
 constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME   = "uTextGradientStartOffset";
 constexpr const char* UNIFORM_TEXT_GRADIENT_BOUNDS_NAME         = "uTextGradientBounds";
+constexpr const char* UNIFORM_TEXT_GRADIENT_TYPE_NAME           = "uTextGradientType";
+constexpr const char* UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME  = "uTextGradientRadialCenter";
+constexpr const char* UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME   = "uTextGradientRadialScale";
 
 #ifdef TRACE_ENABLED
 const char* GetRequestTypeName(Text::Async::RequestType type)
@@ -1417,12 +1420,30 @@ void TextVisual::RebindGradientAnimConstraints()
                                                 mTextGradientStyle.linearEnd,
                                                 mLastGradientBounds,
                                                 mLastGradientCoordSize);
+  Vector2 radialCenter = Vector2::ZERO;
+  Vector2 radialScale  = Vector2::ZERO;
+  if(mTextGradientStyle.type == Dali::Ui::Gradient::Type::RADIAL)
+  {
+    radialCenter =
+      Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units,
+                                                  mTextGradientStyle.radialCenter,
+                                                  mLastGradientBounds,
+                                                  mLastGradientCoordSize);
+    radialScale =
+      Text::Internal::ResolveTextGradientRadialScale(mTextGradientStyle.units,
+                                                     mTextGradientStyle.radialRadius,
+                                                     mLastGradientBounds,
+                                                     mLastGradientCoordSize);
+  }
 
   Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, startPosition);
   Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, endPosition);
   const Property::Index startOffsetIndex =
     Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, mTextGradientStyle.startOffset);
   Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, mLastGradientBounds);
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(mTextGradientStyle.type));
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, radialCenter);
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, radialScale);
 
   BindGradientAnimConstraints(mGradientRenderer, startOffsetIndex);
 }
@@ -1585,9 +1606,7 @@ bool TextVisual::IsTextGradientCompositionSupported(const Vector2& size, bool ha
   (void)isOverlayStyle;
   (void)isMarqueeEnabled;
 
-  if(!mTextGradientStyle.enabled ||
-     mTextGradientStyle.type != Dali::Ui::Gradient::Type::LINEAR ||
-     mTextGradientStyle.stops.Count() < 2u)
+  if(!Text::Internal::TextGradient::IsSupportedTextGradientStyle(mTextGradientStyle))
   {
     return false;
   }
@@ -1607,8 +1626,7 @@ bool TextVisual::IsTextGradientCompositionSupported(const Vector2& size, bool ha
     return false;
   }
 
-  const Vector2 gradientVector = mTextGradientStyle.linearEnd - mTextGradientStyle.linearStart;
-  return gradientVector.LengthSquared() > Math::MACHINE_EPSILON_1000;
+  return true;
 }
 
 bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bool hasMultipleTextColors,
@@ -1617,9 +1635,7 @@ bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bo
                                                          bool embossEnabled, bool isHeightTiling,
                                                          bool isMarqueeEnabled, bool isCutoutEnabled) const
 {
-  if(!mTextGradientStyle.enabled ||
-     mTextGradientStyle.type != Dali::Ui::Gradient::Type::LINEAR ||
-     mTextGradientStyle.stops.Count() < 2u)
+  if(!Text::Internal::TextGradient::IsSupportedTextGradientStyle(mTextGradientStyle))
   {
     return false;
   }
@@ -1643,8 +1659,7 @@ bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bo
     return false;
   }
 
-  const Vector2 gradientVector = mTextGradientStyle.linearEnd - mTextGradientStyle.linearStart;
-  return gradientVector.LengthSquared() > Math::MACHINE_EPSILON_1000;
+  return true;
 }
 
 Vector4 TextVisual::CalculateTextGradientBounds(const Vector2& textureSize) const
@@ -1679,12 +1694,24 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
     Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.linearStart, textBounds, textureSize);
   const Vector2 endPosition =
     Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.linearEnd, textBounds, textureSize);
+  Vector2 radialCenter = Vector2::ZERO;
+  Vector2 radialScale  = Vector2::ZERO;
+  if(mTextGradientStyle.type == Dali::Ui::Gradient::Type::RADIAL)
+  {
+    radialCenter =
+      Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.radialCenter, textBounds, textureSize);
+    radialScale =
+      Text::Internal::ResolveTextGradientRadialScale(mTextGradientStyle.units, mTextGradientStyle.radialRadius, textBounds, textureSize);
+  }
 
   Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, startPosition);
   Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, endPosition);
   const Property::Index startOffsetIndex =
     Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, mTextGradientStyle.startOffset);
   Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, textBounds);
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(mTextGradientStyle.type));
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, radialCenter);
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, radialScale);
 
   mGradientRenderer      = renderer;
   mLastGradientCoordSize = textureSize;

@@ -18,6 +18,10 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 
+// EXTERNAL INCLUDES
+#include <dali/public-api/math/math-utils.h>
+#include <cmath>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/gradient/linear-gradient.h>
 
@@ -59,6 +63,59 @@ bool IsRenderable(const Gradient::Base& gradient)
 bool IsLinearRenderable(const Gradient::Base& gradient)
 {
   return IsRenderable(gradient) && gradient.GetType() == Gradient::Type::LINEAR;
+}
+
+bool IsSupportedTextGradientType(const Gradient::Base& gradient)
+{
+  if(!IsRenderable(gradient))
+  {
+    return false;
+  }
+
+  switch(gradient.GetType())
+  {
+    case Gradient::Type::LINEAR:
+    case Gradient::Type::RADIAL:
+    {
+      return true;
+    }
+
+    case Gradient::Type::CONIC:
+    case Gradient::Type::NONE:
+    default:
+    {
+      return false;
+    }
+  }
+}
+
+bool IsSupportedTextGradientStyle(const TextGradientStyle& style)
+{
+  if(!style.enabled || style.stops.Count() < 2u)
+  {
+    return false;
+  }
+
+  switch(style.type)
+  {
+    case Gradient::Type::LINEAR:
+    {
+      const Vector2 gradientVector = style.linearEnd - style.linearStart;
+      return gradientVector.LengthSquared() > Math::MACHINE_EPSILON_1000;
+    }
+
+    case Gradient::Type::RADIAL:
+    {
+      return std::fabs(style.radialRadius) > Math::MACHINE_EPSILON_1000;
+    }
+
+    case Gradient::Type::CONIC:
+    case Gradient::Type::NONE:
+    default:
+    {
+      return false;
+    }
+  }
 }
 
 Dali::WrapMode::Type GetWrapMode(Gradient::SpreadMethod spread)
