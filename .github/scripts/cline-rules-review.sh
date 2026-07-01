@@ -207,6 +207,9 @@ Find code or documentation changes in input.diffFile that violate, or may violat
 Return only findings that are not already covered by input.alreadyReportedIssues.
 
 Your entire response is a JSON array.
+Your final submit summary is the response.
+When calling submit_and_exit, put exactly the JSON array in the summary field.
+The summary field must start with [ and end with ].
 
 Each issue item has this schema:
 {
