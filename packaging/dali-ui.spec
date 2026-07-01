@@ -1,7 +1,7 @@
 # Auto-generated from dali-ui.spec.in by makespec.sh
 Name:       dali2-ui-foundation
 Summary:    DALi UI Library
-Version:    2.5.26.10708
+Version:    2.5.28.10810
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0 and BSD-3-Clause and MIT
@@ -21,7 +21,6 @@ BuildRequires:  pkgconfig(gles20)
 BuildRequires:  pkgconfig(glesv2)
 BuildRequires:  pkgconfig(egl)
 BuildRequires:  gettext
-BuildRequires:  python3
 
 %if 0%{?tizen_version_major} >= 3
 BuildRequires:  pkgconfig(libtzplatform-config)
