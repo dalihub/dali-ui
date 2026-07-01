@@ -28,8 +28,6 @@
 
 | Before | After |
 |---|---|
-| `devel-api/focus-manager/focus-manager-devel.h` | `integration-api/focus-manager/focus-manager-integ.h` |
-| `devel-api/focus-manager/focus-manager-devel.cpp` | `integration-api/focus-manager/focus-manager-integ.cpp` |
 | `devel-api/image-loader/async-image-loader-devel.h` | `integration-api/image-loader/async-image-loader-integ.h` |
 | `devel-api/image-loader/async-image-loader-devel.cpp` | `integration-api/image-loader/async-image-loader-integ.cpp` |
 | `devel-api/visuals/animated-image-visual-actions-devel.h` | `integration-api/visuals/animated-image-visual-actions-integ.h` |
@@ -97,6 +95,15 @@
 | `devel-api/visuals/visual-transform.cpp` | `integration-api/visuals/visual-transform.cpp` |
 | `devel-api/visuals/visuals-container.h` | `integration-api/visuals/visuals-container.h` |
 | `devel-api/visuals/visuals-container.cpp` | `integration-api/visuals/visuals-container.cpp` |
+
+## 삭제된 파일
+
+아래 focus-manager devel wrapper는 integration API로 유지하지 않고 삭제되었다. 기본 focus algorithm 제어는 internal implementation detail로 남긴다.
+
+| Before | After |
+|---|---|
+| `devel-api/focus-manager/focus-manager-devel.h` | 삭제 |
+| `devel-api/focus-manager/focus-manager-devel.cpp` | 삭제 |
 
 ## Class namespace 변경
 
@@ -184,7 +191,6 @@ Shader effect factory functions also moved into `Dali::Ui::Integration`.
 
 ```cpp
 #include <dali-ui-foundation/integration-api/builder/builder.h>
-#include <dali-ui-foundation/integration-api/focus-manager/focus-manager-integ.h>
 #include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>

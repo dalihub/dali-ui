@@ -28,7 +28,6 @@
 #include <dali-ui-foundation/integration-api/builder/tree-node.h>
 #include <dali-ui-foundation/integration-api/direction-enums.h>
 #include <dali-ui-foundation/integration-api/drag-drop-detector/drag-and-drop-detector.h>
-#include <dali-ui-foundation/integration-api/focus-manager/focus-manager-integ.h>
 #include <dali-ui-foundation/integration-api/image-loader/async-image-loader-integ.h>
 #include <dali-ui-foundation/integration-api/image-loader/texture-manager.h>
 #include <dali-ui-foundation/integration-api/property-bridge/property-bridge.h>
