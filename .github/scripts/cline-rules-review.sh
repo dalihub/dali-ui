@@ -16,7 +16,9 @@ REVIEW_DIR="${RUNNER_TEMP:-/tmp}/dali-ui-rules-review"
 RULES_FILE="$REVIEW_DIR/rules.md"
 DIFF_FILE="$REVIEW_DIR/pr.diff"
 CONTEXT_FILE="$REVIEW_DIR/context.md"
-INPUT_JSON_FILE="$REVIEW_DIR/input.json"
+REVIEW_INPUT_DIR="$PR_WORKSPACE/.rules-review-input"
+INPUT_DIFF_FILE="$REVIEW_INPUT_DIR/pr.diff"
+INPUT_JSON_FILE="$REVIEW_INPUT_DIR/input.json"
 RAW_OUTPUT_FILE="$REVIEW_DIR/cline-output.jsonl"
 REVIEW_TEXT_FILE="$REVIEW_DIR/review.md"
 DETERMINISTIC_REVIEW_FILE="$REVIEW_DIR/deterministic-review.md"
@@ -28,6 +30,8 @@ MAX_DIFF_BYTES="${MAX_DIFF_BYTES:-180000}"
 COMMENT_MAX_CHARS="${COMMENT_MAX_CHARS:-60000}"
 
 mkdir -p "$REVIEW_DIR"
+rm -rf "$REVIEW_INPUT_DIR"
+mkdir -p "$REVIEW_INPUT_DIR"
 cd "$PR_WORKSPACE"
 
 if [ ! -d rules ]; then
@@ -60,6 +64,7 @@ if [ "$(wc -c < "$DIFF_FILE.full")" -gt "$MAX_DIFF_BYTES" ]; then
 else
   cp "$DIFF_FILE.full" "$DIFF_FILE"
 fi
+cp "$DIFF_FILE" "$INPUT_DIFF_FILE"
 
 RULES_CHANGED_WARNING=""
 if [ -s "$CHANGED_RULES_FILE" ]; then
@@ -177,35 +182,28 @@ fs.writeFileSync(
 );
 NODE
 
-node - "$DIFF_FILE" "$DETERMINISTIC_ISSUES_FILE" "$INPUT_JSON_FILE" <<'NODE'
+node - "$DETERMINISTIC_ISSUES_FILE" "$INPUT_JSON_FILE" <<'NODE'
 const fs = require('fs');
 
-const [diffPath, knownIssuesPath, outPath] = process.argv.slice(2);
-const rules = fs.readdirSync('rules')
-  .filter(file => file.endsWith('.md'))
-  .sort()
-  .map(file => ({
-    path: `rules/${file}`,
-    content: fs.readFileSync(`rules/${file}`, 'utf8').split(/\r?\n/).slice(0, 260).join('\n')
-  }));
+const [knownIssuesPath, outPath] = process.argv.slice(2);
 
 const input = {
   alreadyReportedIssues: JSON.parse(fs.readFileSync(knownIssuesPath, 'utf8')),
-  rules,
-  diff: fs.readFileSync(diffPath, 'utf8')
+  rulesDirectory: 'rules',
+  diffFile: '.rules-review-input/pr.diff'
 };
 
 fs.writeFileSync(outPath, JSON.stringify(input, null, 2) + '\n');
 NODE
 
 cat > "$CONTEXT_FILE" <<EOF
-You review a pull request by comparing input.diff against the development rules in input.rules.
+Read .rules-review-input/input.json.
 
-input.diff is a unified git diff for the pull request.
-input.rules contains the rule documents to apply.
+input.diffFile is a unified git diff file for the pull request.
+input.rulesDirectory is the directory containing the rule documents to apply.
 input.alreadyReportedIssues contains findings that are already reported by another checker.
 
-Find code or documentation changes in input.diff that violate, or may violate, the rules in input.rules.
+Find code or documentation changes in input.diffFile that violate, or may violate, the rules in input.rulesDirectory.
 Return only findings that are not already covered by input.alreadyReportedIssues.
 
 Your entire response is a JSON array.
@@ -227,17 +225,17 @@ Write user-facing text in Korean.
 
 Input is a JSON object with these fields:
 - alreadyReportedIssues: issue items that are already reported
-- rules: rule documents, each with path and content
-- diff: unified git diff text
+- rulesDirectory: path to the rule documents directory
+- diffFile: path to the unified git diff file
 
-Input:
-$(cat "$INPUT_JSON_FILE")
+Input file:
+.rules-review-input/input.json
 EOF
 
-TASK_PROMPT="Review the pull request using the provided input. Return a JSON array of issue items."
+TASK_PROMPT="$(cat "$CONTEXT_FILE")"
 
 set +e
-cline -y --ask --json --timeout 900 "$TASK_PROMPT" < "$CONTEXT_FILE" > "$RAW_OUTPUT_FILE"
+cline -y --act --json --timeout 900 "$TASK_PROMPT" > "$RAW_OUTPUT_FILE"
 CLINE_STATUS=$?
 set -e
 
