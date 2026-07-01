@@ -95,6 +95,14 @@ Dali::Ui::Text::TextScrollerTextGradient CreateMarqueeGradient(const TextGradien
     textGradient.radialScale =
       Text::Internal::ResolveTextGradientRadialScale(style.units, style.radialRadius, bounds, coordinateSize);
   }
+  else if(style.type == Gradient::Type::CONIC)
+  {
+    textGradient.conicCenter =
+      Text::Internal::ResolveTextGradientPosition(style.units, style.conicCenter, bounds, coordinateSize);
+    textGradient.conicScale =
+      Text::Internal::ResolveTextGradientConicScale(style.units, bounds, coordinateSize);
+    textGradient.conicStartAngle = style.conicStartAngle.radian;
+  }
   textGradient.startOffset = style.startOffset;
   textGradient.bounds      = bounds;
   return textGradient;

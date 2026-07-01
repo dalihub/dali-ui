@@ -65,9 +65,11 @@ Gradient::Radial MakeRenderableRadial(float startOffset = 0.25f)
   return radial;
 }
 
-Gradient::Conic MakeRenderableConic()
+Gradient::Conic MakeRenderableConic(float startOffset = 0.25f)
 {
   Gradient::Conic conic(Vector2(0.5f, 0.5f), Radian(0.0f));
+  conic.SetSpreadMethod(Gradient::SpreadMethod::REFLECT);
+  conic.SetStartOffset(startOffset);
   conic.SetStopNodes(MakeStopNodes(Color::GREEN, Color::YELLOW));
   return conic;
 }
@@ -318,17 +320,23 @@ int UtcDaliLabelTextGradientAnimationNoOpAndLinearP(void)
   DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
 
   label.SetTextGradient(MakeRenderableConic());
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
   Animation conicAnimation = Animation::New(0.1f);
   ApplyTextGradientAnimationTo(label, conicAnimation);
-  ApplyTextGradientAnimationBy(label, conicAnimation);
-  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  const Property::Index startOffsetIndex =
+    label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(startOffsetIndex != Property::INVALID_INDEX);
+
+  Animation conicByAnimation = Animation::New(0.1f);
+  ApplyTextGradientAnimationBy(label, conicByAnimation);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), startOffsetIndex, TEST_LOCATION);
 
   label.SetTextGradient(MakeRenderableRadial());
   Animation radialAnimation = Animation::New(0.1f);
   ApplyTextGradientAnimationTo(label, radialAnimation);
-
-  const Property::Index startOffsetIndex = label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
-  DALI_TEST_CHECK(startOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), startOffsetIndex, TEST_LOCATION);
 
   Animation radialByAnimation = Animation::New(0.1f);
   ApplyTextGradientAnimationBy(label, radialByAnimation);
@@ -461,7 +469,7 @@ int UtcDaliLabelTextGradientSetImmediatelyAfterAnimationStopP(void)
   END_TEST;
 }
 
-int UtcDaliLabelTextGradientRegisteredThenNonLinearNoOpP(void)
+int UtcDaliLabelTextGradientRegisteredThenUnsupportedNoOpP(void)
 {
   UiTestApplication application;
 
@@ -475,11 +483,11 @@ int UtcDaliLabelTextGradientRegisteredThenNonLinearNoOpP(void)
   DALI_TEST_CHECK(startOffsetIndex != Property::INVALID_INDEX);
 
   const float before = label.GetCurrentProperty<float>(startOffsetIndex);
-  label.SetTextGradient(MakeRenderableConic());
+  label.SetTextGradient(Gradient::Base::None());
 
-  Animation conicAnimation = Animation::New(0.05f);
-  ApplyTextGradientAnimationTo(label, conicAnimation);
-  conicAnimation.Play();
+  Animation noneAnimation = Animation::New(0.05f);
+  ApplyTextGradientAnimationTo(label, noneAnimation);
+  noneAnimation.Play();
   application.SendNotification();
   application.Render(50);
 

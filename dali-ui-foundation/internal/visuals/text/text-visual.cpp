@@ -64,7 +64,7 @@ namespace
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_PERFORMANCE_MARKER, false);
 DALI_INIT_TRACE_FILTER(gTraceFilter2, DALI_TRACE_TEXT_ASYNC, false);
 
-const int CUSTOM_PROPERTY_COUNT(10); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, TextGradient uniforms
+const int CUSTOM_PROPERTY_COUNT(13); // uTextColorAnimatable, uHasMultipleTextColors, requireRender, TextGradient uniforms
 
 static constexpr uint32_t TEXT_VISUAL_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 21);
 static constexpr uint32_t TEXT_VISUAL_OPACITY_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START +
@@ -77,13 +77,16 @@ const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1]
   1.0f  // Text::Alignment::END
 };
 
-constexpr const char* UNIFORM_TEXT_GRADIENT_START_POSITION_NAME = "uTextGradientStartPosition";
-constexpr const char* UNIFORM_TEXT_GRADIENT_END_POSITION_NAME   = "uTextGradientEndPosition";
-constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME   = "uTextGradientStartOffset";
-constexpr const char* UNIFORM_TEXT_GRADIENT_BOUNDS_NAME         = "uTextGradientBounds";
-constexpr const char* UNIFORM_TEXT_GRADIENT_TYPE_NAME           = "uTextGradientType";
-constexpr const char* UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME  = "uTextGradientRadialCenter";
-constexpr const char* UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME   = "uTextGradientRadialScale";
+constexpr const char* UNIFORM_TEXT_GRADIENT_START_POSITION_NAME    = "uTextGradientStartPosition";
+constexpr const char* UNIFORM_TEXT_GRADIENT_END_POSITION_NAME      = "uTextGradientEndPosition";
+constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME      = "uTextGradientStartOffset";
+constexpr const char* UNIFORM_TEXT_GRADIENT_BOUNDS_NAME            = "uTextGradientBounds";
+constexpr const char* UNIFORM_TEXT_GRADIENT_TYPE_NAME              = "uTextGradientType";
+constexpr const char* UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME     = "uTextGradientRadialCenter";
+constexpr const char* UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME      = "uTextGradientRadialScale";
+constexpr const char* UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME      = "uTextGradientConicCenter";
+constexpr const char* UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME       = "uTextGradientConicScale";
+constexpr const char* UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME = "uTextGradientConicStartAngle";
 
 #ifdef TRACE_ENABLED
 const char* GetRequestTypeName(Text::Async::RequestType type)
@@ -1420,8 +1423,11 @@ void TextVisual::RebindGradientAnimConstraints()
                                                 mTextGradientStyle.linearEnd,
                                                 mLastGradientBounds,
                                                 mLastGradientCoordSize);
-  Vector2 radialCenter = Vector2::ZERO;
-  Vector2 radialScale  = Vector2::ZERO;
+  Vector2 radialCenter    = Vector2::ZERO;
+  Vector2 radialScale     = Vector2::ZERO;
+  Vector2 conicCenter     = Vector2::ZERO;
+  Vector2 conicScale      = Vector2::ONE;
+  float   conicStartAngle = 0.0f;
   if(mTextGradientStyle.type == Dali::Ui::Gradient::Type::RADIAL)
   {
     radialCenter =
@@ -1435,6 +1441,19 @@ void TextVisual::RebindGradientAnimConstraints()
                                                      mLastGradientBounds,
                                                      mLastGradientCoordSize);
   }
+  else if(mTextGradientStyle.type == Dali::Ui::Gradient::Type::CONIC)
+  {
+    conicCenter =
+      Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units,
+                                                  mTextGradientStyle.conicCenter,
+                                                  mLastGradientBounds,
+                                                  mLastGradientCoordSize);
+    conicScale =
+      Text::Internal::ResolveTextGradientConicScale(mTextGradientStyle.units,
+                                                    mLastGradientBounds,
+                                                    mLastGradientCoordSize);
+    conicStartAngle = mTextGradientStyle.conicStartAngle.radian;
+  }
 
   Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, startPosition);
   Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, endPosition);
@@ -1444,6 +1463,9 @@ void TextVisual::RebindGradientAnimConstraints()
   Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(mTextGradientStyle.type));
   Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, radialCenter);
   Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, radialScale);
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME, conicCenter);
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME, conicScale);
+  Text::Internal::TextGradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, conicStartAngle);
 
   BindGradientAnimConstraints(mGradientRenderer, startOffsetIndex);
 }
@@ -1694,14 +1716,25 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
     Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.linearStart, textBounds, textureSize);
   const Vector2 endPosition =
     Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.linearEnd, textBounds, textureSize);
-  Vector2 radialCenter = Vector2::ZERO;
-  Vector2 radialScale  = Vector2::ZERO;
+  Vector2 radialCenter    = Vector2::ZERO;
+  Vector2 radialScale     = Vector2::ZERO;
+  Vector2 conicCenter     = Vector2::ZERO;
+  Vector2 conicScale      = Vector2::ONE;
+  float   conicStartAngle = 0.0f;
   if(mTextGradientStyle.type == Dali::Ui::Gradient::Type::RADIAL)
   {
     radialCenter =
       Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.radialCenter, textBounds, textureSize);
     radialScale =
       Text::Internal::ResolveTextGradientRadialScale(mTextGradientStyle.units, mTextGradientStyle.radialRadius, textBounds, textureSize);
+  }
+  else if(mTextGradientStyle.type == Dali::Ui::Gradient::Type::CONIC)
+  {
+    conicCenter =
+      Text::Internal::ResolveTextGradientPosition(mTextGradientStyle.units, mTextGradientStyle.conicCenter, textBounds, textureSize);
+    conicScale =
+      Text::Internal::ResolveTextGradientConicScale(mTextGradientStyle.units, textBounds, textureSize);
+    conicStartAngle = mTextGradientStyle.conicStartAngle.radian;
   }
 
   Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, startPosition);
@@ -1712,6 +1745,9 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
   Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(mTextGradientStyle.type));
   Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, radialCenter);
   Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, radialScale);
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME, conicCenter);
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME, conicScale);
+  Text::Internal::TextGradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, conicStartAngle);
 
   mGradientRenderer      = renderer;
   mLastGradientCoordSize = textureSize;

@@ -76,11 +76,11 @@ bool IsSupportedTextGradientType(const Gradient::Base& gradient)
   {
     case Gradient::Type::LINEAR:
     case Gradient::Type::RADIAL:
+    case Gradient::Type::CONIC:
     {
       return true;
     }
 
-    case Gradient::Type::CONIC:
     case Gradient::Type::NONE:
     default:
     {
@@ -110,6 +110,10 @@ bool IsSupportedTextGradientStyle(const TextGradientStyle& style)
     }
 
     case Gradient::Type::CONIC:
+    {
+      return true;
+    }
+
     case Gradient::Type::NONE:
     default:
     {

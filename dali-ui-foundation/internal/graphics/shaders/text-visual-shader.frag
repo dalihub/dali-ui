@@ -45,6 +45,9 @@ UNIFORM_BLOCK FragBlock
   UNIFORM highp vec2 uTextGradientEndPosition;
   UNIFORM highp vec2 uTextGradientRadialCenter;
   UNIFORM highp vec2 uTextGradientRadialScale;
+  UNIFORM highp vec2 uTextGradientConicCenter;
+  UNIFORM highp vec2 uTextGradientConicScale;
+  UNIFORM highp float uTextGradientConicStartAngle;
   UNIFORM highp float uTextGradientStartOffset;
   UNIFORM highp vec4 uTextGradientBounds;
   #endif
@@ -62,9 +65,17 @@ UNIFORM_BLOCK FragBlock
 highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
 {
   const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
+  const highp float TEXT_GRADIENT_TYPE_CONIC = 3.0;
+  const highp float TEXT_GRADIENT_INV_TWO_PI = 0.15915494309189533576888376337251;
   if(abs(uTextGradientType - TEXT_GRADIENT_TYPE_RADIAL) < 0.5)
   {
     return length((textGradientCoord - uTextGradientRadialCenter) * uTextGradientRadialScale);
+  }
+  if(abs(uTextGradientType - TEXT_GRADIENT_TYPE_CONIC) < 0.5)
+  {
+    highp vec2 conicVector = (textGradientCoord - uTextGradientConicCenter) * uTextGradientConicScale;
+    highp float angle = atan(conicVector.y, conicVector.x) - uTextGradientConicStartAngle;
+    return fract(angle * TEXT_GRADIENT_INV_TWO_PI);
   }
 
   highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;

@@ -85,6 +85,20 @@ void ExpectPosition(const Vector2& position, const Vector2& expected)
   DALI_TEST_EQUALS(position.y, expected.y, EPSILON, TEST_LOCATION);
 }
 
+void ExpectNoTextGradientRendererProperties(Renderer renderer)
+{
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientStartPosition"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientEndPosition"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientStartOffset"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientBounds"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientType"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientRadialCenter"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientRadialScale"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientConicCenter"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientConicScale"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientConicStartAngle"), Property::INVALID_INDEX, TEST_LOCATION);
+}
+
 class TestScrollerInterface : public UiText::ScrollerInterface
 {
 public:
@@ -544,11 +558,17 @@ int UtcDaliTextGradientShaderCompositionBoundsUniformP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientType") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientRadialCenter") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientRadialScale") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicCenter") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicScale") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicStartAngle") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("textGradientCoord") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("EvaluateTextGradientPosition") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXT_GRADIENT_TYPE_RADIAL") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("TEXT_GRADIENT_TYPE_CONIC") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("TEXT_GRADIENT_INV_TWO_PI") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientType > 1.5") == std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("length((textGradientCoord - uTextGradientRadialCenter) * uTextGradientRadialScale)") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("atan(conicVector.y, conicVector.x) - uTextGradientConicStartAngle") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -608,6 +628,14 @@ int UtcDaliTextGradientShaderCompositionUserSpaceRadialScaleP(void)
                                                               bounds,
                                                               textureSize),
                  Vector2(2.0f, 2.0f));
+  ExpectPosition(TextInternal::ResolveTextGradientConicScale(Dali::Ui::Gradient::Units::USER_SPACE,
+                                                             bounds,
+                                                             textureSize),
+                 Vector2(100.0f, 50.0f));
+  ExpectPosition(TextInternal::ResolveTextGradientConicScale(Dali::Ui::Gradient::Units::OBJECT_BOUNDING_BOX,
+                                                             bounds,
+                                                             textureSize),
+                 Vector2::ONE);
   END_TEST;
 }
 
@@ -623,8 +651,12 @@ int UtcDaliTextGradientShaderCompositionMarqueeHorizontalFeatureP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientBounds") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientRadialCenter") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientRadialScale") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicCenter") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicScale") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicStartAngle") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("TEXT_GRADIENT_TYPE_CONIC") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("(vTextGradientCoord - uTextGradientBounds.xy)") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("fract(") == std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("fract(") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5))") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
@@ -641,8 +673,12 @@ int UtcDaliTextGradientShaderCompositionMarqueeVerticalFeatureP(void)
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientBounds") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientRadialCenter") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("uTextGradientRadialScale") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicCenter") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicScale") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("uTextGradientConicStartAngle") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("TEXT_GRADIENT_TYPE_CONIC") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("(vTextGradientCoord - uTextGradientBounds.xy)") != std::string::npos, true, TEST_LOCATION);
-  DALI_TEST_EQUALS(fragmentShader.find("fract(") == std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentShader.find("fract(") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentShader.find("TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5))") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
@@ -814,14 +850,20 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesRendererBoundsP(void)
   const Property::Index typeIndex = renderer.RegisterProperty("uTextGradientType", 1.0f);
   const Property::Index radialCenterIndex = renderer.RegisterProperty("uTextGradientRadialCenter", Vector2::ZERO);
   const Property::Index radialScaleIndex = renderer.RegisterProperty("uTextGradientRadialScale", Vector2::ZERO);
+  const Property::Index conicCenterIndex = renderer.RegisterProperty("uTextGradientConicCenter", Vector2::ZERO);
+  const Property::Index conicScaleIndex = renderer.RegisterProperty("uTextGradientConicScale", Vector2::ZERO);
+  const Property::Index conicStartAngleIndex = renderer.RegisterProperty("uTextGradientConicStartAngle", 0.0f);
 
   UiText::TextScrollerTextGradient textGradient;
   textGradient.enabled       = true;
-  textGradient.type          = Dali::Ui::Gradient::Type::RADIAL;
+  textGradient.type          = Dali::Ui::Gradient::Type::CONIC;
   textGradient.startPosition = Vector2::ZERO;
   textGradient.endPosition   = Vector2::ONE;
   textGradient.radialCenter  = Vector2(0.5f, 0.5f);
   textGradient.radialScale   = Vector2(2.0f, 2.0f);
+  textGradient.conicCenter     = Vector2(0.25f, 0.75f);
+  textGradient.conicScale      = Vector2(100.0f, 40.0f);
+  textGradient.conicStartAngle = 0.75f;
   textGradient.startOffset   = 0.0f;
   textGradient.bounds        = marqueeBounds;
 
@@ -845,13 +887,48 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesRendererBoundsP(void)
   Vector4 actualBounds;
   renderer.GetProperty(boundsIndex).Get(actualBounds);
   ExpectBounds(actualBounds, marqueeBounds);
-  DALI_TEST_EQUALS(renderer.GetProperty<float>(typeIndex), 2.0f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetProperty<float>(typeIndex), 3.0f, EPSILON, TEST_LOCATION);
   Vector2 actualRadialCenter;
   Vector2 actualRadialScale;
   renderer.GetProperty(radialCenterIndex).Get(actualRadialCenter);
   renderer.GetProperty(radialScaleIndex).Get(actualRadialScale);
   ExpectPosition(actualRadialCenter, Vector2(0.5f, 0.5f));
   ExpectPosition(actualRadialScale, Vector2(2.0f, 2.0f));
+  Vector2 actualConicCenter;
+  Vector2 actualConicScale;
+  renderer.GetProperty(conicCenterIndex).Get(actualConicCenter);
+  renderer.GetProperty(conicScaleIndex).Get(actualConicScale);
+  ExpectPosition(actualConicCenter, Vector2(0.25f, 0.75f));
+  ExpectPosition(actualConicScale, Vector2(100.0f, 40.0f));
+  DALI_TEST_EQUALS(renderer.GetProperty<float>(conicStartAngleIndex), 0.75f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeScrollerDisabledKeepsRendererCleanP(void)
+{
+  TestApplication application;
+
+  Geometry rendererGeometry = CreateQuadGeometry();
+  Shader   rendererShader   = CreateShader();
+  Renderer renderer         = Renderer::New(rendererGeometry, rendererShader);
+
+  TestScrollerInterface   scrollerInterface;
+  UiText::TextScrollerPtr scroller   = UiText::TextScroller::New(scrollerInterface);
+  const Actor             actor      = Actor::New();
+  const TextureSet        textureSet = TextureSet::New();
+
+  scroller->SetParameters(actor,
+                          renderer,
+                          textureSet,
+                          Size(100.0f, 40.0f),
+                          Size(200.0f, 40.0f),
+                          20.0f,
+                          false,
+                          UiText::Alignment::CENTER,
+                          UiText::Alignment::CENTER,
+                          true);
+
+  ExpectNoTextGradientRendererProperties(renderer);
   END_TEST;
 }
 
@@ -876,6 +953,31 @@ int UtcDaliTextGradientMarqueeCreatesRadialUniformValuesP(void)
   DALI_TEST_EQUALS(textGradient.type, Dali::Ui::Gradient::Type::RADIAL, TEST_LOCATION);
   ExpectPosition(textGradient.radialCenter, Vector2(0.5f, 0.5f));
   ExpectPosition(textGradient.radialScale, Vector2(4.0f, 1.6f));
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeCreatesConicUniformValuesP(void)
+{
+  TextInternal::TextGradientStyle style;
+  style.enabled         = true;
+  style.type            = Dali::Ui::Gradient::Type::CONIC;
+  style.units           = Dali::Ui::Gradient::Units::USER_SPACE;
+  style.conicCenter     = Vector2(50.0f, 20.0f);
+  style.conicStartAngle = Radian(0.75f);
+  style.stops.PushBack({0.0f, Color::RED});
+  style.stops.PushBack({1.0f, Color::BLUE});
+
+  const Vector4 bounds(0.25f, 0.0f, 0.5f, 1.0f);
+  const Vector2 coordinateSize(200.0f, 40.0f);
+
+  UiText::TextScrollerTextGradient textGradient =
+    TextInternal::TextGradientMarquee::CreateMarqueeGradient(style, bounds, coordinateSize);
+
+  DALI_TEST_EQUALS(textGradient.enabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(textGradient.type, Dali::Ui::Gradient::Type::CONIC, TEST_LOCATION);
+  ExpectPosition(textGradient.conicCenter, Vector2(0.5f, 0.5f));
+  ExpectPosition(textGradient.conicScale, Vector2(100.0f, 40.0f));
+  DALI_TEST_EQUALS(textGradient.conicStartAngle, 0.75f, EPSILON, TEST_LOCATION);
   END_TEST;
 }
 

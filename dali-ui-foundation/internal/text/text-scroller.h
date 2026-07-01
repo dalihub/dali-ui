@@ -54,6 +54,9 @@ struct TextScrollerTextGradient
   Vector2         endPosition{Vector2::ONE};
   Vector2         radialCenter{Vector2::ZERO};
   Vector2         radialScale{Vector2::ZERO};
+  Vector2         conicCenter{Vector2::ZERO};
+  Vector2         conicScale{Vector2::ONE};
+  float           conicStartAngle{0.0f};
   float           startOffset{0.0f};
   Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized viewport-local bounds for TextGradient evaluation.
   Property::Index startOffsetPropertyIndex{Property::INVALID_INDEX};

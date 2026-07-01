@@ -82,6 +82,21 @@ inline Vector2 ResolveTextGradientRadialScale(Dali::Ui::Gradient::Units units,
   return Vector2(1.0f / safeRadius, 1.0f / safeRadius);
 }
 
+inline Vector2 ResolveTextGradientConicScale(Dali::Ui::Gradient::Units units,
+                                             const Vector4&            bounds,
+                                             const Vector2&            targetSize)
+{
+  // OBJECT_BOUNDING_BOX evaluates the angle in normalized selected-bounds
+  // coordinates. USER_SPACE converts the vector to selected-bounds pixels
+  // before atan().
+  if(units == Dali::Ui::Gradient::Units::USER_SPACE)
+  {
+    return GetTextGradientBoundsPixelSize(bounds, targetSize);
+  }
+
+  return Vector2::ONE;
+}
+
 inline Vector4 CalculateTextGradientViewBounds(const Vector2& textureSize,
                                                const Vector2& viewSize,
                                                const Vector2& visualOffset)
