@@ -16,9 +16,11 @@ REVIEW_DIR="${RUNNER_TEMP:-/tmp}/dali-ui-rules-review"
 RULES_FILE="$REVIEW_DIR/rules.md"
 DIFF_FILE="$REVIEW_DIR/pr.diff"
 CONTEXT_FILE="$REVIEW_DIR/context.md"
+INPUT_JSON_FILE="$REVIEW_DIR/input.json"
 RAW_OUTPUT_FILE="$REVIEW_DIR/cline-output.jsonl"
 REVIEW_TEXT_FILE="$REVIEW_DIR/review.md"
 DETERMINISTIC_REVIEW_FILE="$REVIEW_DIR/deterministic-review.md"
+DETERMINISTIC_ISSUES_FILE="$REVIEW_DIR/deterministic-issues.json"
 COMMENT_FILE="${GITHUB_WORKSPACE:-$PR_WORKSPACE}/rules-review-comment.md"
 CHANGED_RULES_FILE="$REVIEW_DIR/changed-rules.txt"
 
@@ -75,10 +77,10 @@ if [ "$DIFF_TRUNCATED" = true ]; then
   DIFF_TRUNCATED_NOTE="PR diff가 ${MAX_DIFF_BYTES} bytes로 잘려서 분석되었습니다. 큰 PR에서는 일부 변경이 자동 리뷰에 포함되지 않았을 수 있습니다."
 fi
 
-node - "$DIFF_FILE.full" "$DETERMINISTIC_REVIEW_FILE" <<'NODE'
+node - "$DIFF_FILE.full" "$DETERMINISTIC_REVIEW_FILE" "$DETERMINISTIC_ISSUES_FILE" <<'NODE'
 const fs = require('fs');
 
-const [diffPath, outPath] = process.argv.slice(2);
+const [diffPath, outPath, jsonOutPath] = process.argv.slice(2);
 const diff = fs.readFileSync(diffPath, 'utf8');
 const issues = [];
 let currentFile = '';
@@ -118,6 +120,7 @@ for (const line of diff.split(/\r?\n/)) {
 
 if (issues.length === 0) {
   fs.writeFileSync(outPath, '');
+  fs.writeFileSync(jsonOutPath, '[]\n');
   process.exit(0);
 }
 
@@ -125,20 +128,27 @@ const issueCount = Math.min(issues.length, 50);
 const lines = [`감지된 이슈 ${issueCount}건`, ''];
 
 for (const [index, issue] of issues.slice(0, 50).entries()) {
+  issue.summary = 'components가 foundation internal/integration header를 include함';
+  issue.rule = 'component-boundaries.md / Components Use Foundation Public and Provider APIs';
+  issue.location = `${issue.file}:${issue.line}`;
+  issue.severity = 'required';
+  issue.problem = `dali-ui-components는 foundation public/provider API만 사용해야 하지만 ${issue.include}를 추가했습니다.`;
+  issue.recommendation = 'foundation internal/integration header 의존을 제거하고 public/provider API로 필요한 정보를 전달하세요.';
+
   lines.push(`<details>`);
-  lines.push(`<summary>(${index + 1}) components가 foundation internal/integration header를 include함</summary>`);
+  lines.push(`<summary>(${index + 1}) ${issue.summary}</summary>`);
   lines.push('');
   lines.push('#### 규칙');
-  lines.push('component-boundaries.md / Components Use Foundation Public and Provider APIs');
+  lines.push(issue.rule);
   lines.push('');
   lines.push('#### 위치');
-  lines.push(`\`${issue.file}:${issue.line}\``);
+  lines.push(`\`${issue.location}\``);
   lines.push('');
   lines.push('#### 문제');
   lines.push(`\`dali-ui-components\`는 foundation public/provider API만 사용해야 하지만 \`${issue.include}\`를 추가했습니다.`);
   lines.push('');
   lines.push('#### 권장 조치');
-  lines.push('foundation internal/integration header 의존을 제거하고 public/provider API로 필요한 정보를 전달하세요.');
+  lines.push(issue.recommendation);
   lines.push('');
   lines.push('</details>');
   lines.push('');
@@ -150,118 +160,81 @@ if (issues.length > 50) {
 }
 
 fs.writeFileSync(outPath, lines.join('\n'));
+fs.writeFileSync(
+  jsonOutPath,
+  JSON.stringify(
+    issues.slice(0, 50).map(issue => ({
+      summary: issue.summary,
+      rule: issue.rule,
+      location: issue.location,
+      severity: issue.severity,
+      problem: issue.problem,
+      recommendation: issue.recommendation
+    })),
+    null,
+    2
+  ) + '\n'
+);
+NODE
+
+node - "$DIFF_FILE" "$DETERMINISTIC_ISSUES_FILE" "$INPUT_JSON_FILE" <<'NODE'
+const fs = require('fs');
+
+const [diffPath, knownIssuesPath, outPath] = process.argv.slice(2);
+const rules = fs.readdirSync('rules')
+  .filter(file => file.endsWith('.md'))
+  .sort()
+  .map(file => ({
+    path: `rules/${file}`,
+    content: fs.readFileSync(`rules/${file}`, 'utf8').split(/\r?\n/).slice(0, 260).join('\n')
+  }));
+
+const input = {
+  alreadyReportedIssues: JSON.parse(fs.readFileSync(knownIssuesPath, 'utf8')),
+  rules,
+  diff: fs.readFileSync(diffPath, 'utf8')
+};
+
+fs.writeFileSync(outPath, JSON.stringify(input, null, 2) + '\n');
 NODE
 
 cat > "$CONTEXT_FILE" <<EOF
-# PR 정보
+You review a pull request by comparing input.diff against the development rules in input.rules.
 
-- PR 번호: ${PR_NUMBER:-unknown}
-- PR 제목: ${PR_TITLE:-unknown}
-- 작성자: ${PR_AUTHOR:-unknown}
-- Base SHA: $BASE_SHA
-- Head SHA: $HEAD_SHA
+input.diff is a unified git diff for the pull request.
+input.rules contains the rule documents to apply.
+input.alreadyReportedIssues contains findings that are already reported by another checker.
 
-# 리뷰 정책
+Find code or documentation changes in input.diff that violate, or may violate, the rules in input.rules.
+Return only findings that are not already covered by input.alreadyReportedIssues.
 
-- 이 리뷰는 PR checkout에 포함된 \`dali-ui/rules/*\`를 기준으로 수행한다.
-- \`rules/*\`가 PR에서 변경된 경우에도 변경된 rules를 기준으로 판단한다.
-- 단, \`rules/*\` 변경이 감지되면 결과 상단에 경고 메시지를 포함한다.
-- 분석 범위는 아래 PR diff와 rules 문서로 제한한다.
-- 확실하지 않은 내용은 추측하지 말고 "확인 필요"로 표시한다.
-- 파일 수정, 커밋, push, 외부 게시, 명령 실행을 시도하지 않는다.
-- 리뷰 결과는 한국어로 작성한다.
-- 규칙 위반 또는 확인 필요 항목이 없으면 "NO_ISSUES"만 출력한다.
-- 감지된 이슈가 있으면 최대 50개까지만 보고한다.
-- 50개를 초과하는 이슈가 있으면 required, 확인 필요, recommended, contextual 순서로 우선순위를 정해 50개를 고르고, 마지막에 "추가 이슈 N건 생략"을 짧게 표시한다.
-- 각 이슈의 요약은 한 줄로 작성하고 summary 안에는 번호를 쓰지 않는다.
-- 각 details 블록은 규칙, 위치, 문제, 권장 조치를 합쳐 10줄 이내로 작성한다.
-- 전체 결과는 30000자 이내로 작성한다.
-- rules 전문이나 diff 내용을 반복 인용하지 않는다.
-- rules 문서의 Validation 섹션과 validation-checks.md에 기록된 검색/검증 관점을 우선적으로 적용한다.
-- 분석 과정, 규칙별 전체 점검 로그, OK 항목 목록은 출력하지 않는다.
-- 최종 답변은 반드시 아래 이슈 블록 포맷만 출력한다.
-- PR 코멘트 헤더, "DALI UI Rules Review", "감지된 이슈 N건", 요약, 체크리스트, 점검표, 검증 명령어, 결론, 최종 판정 섹션은 출력하지 않는다.
-- 이슈 블록 포맷을 지키지 않으면 자동 리뷰 코멘트가 부정확하게 표시될 수 있다.
-- 아래 "이미 감지된 deterministic 이슈"에 있는 이슈는 최종 리뷰에 별도로 포함되므로 반복해서 보고하지 않는다.
-- deterministic 이슈와 다른 추가 이슈만 보고한다.
+Your entire response is a JSON array.
 
-# Cline 출력 포맷
+Each issue item has this schema:
+{
+  "summary": "short issue summary",
+  "rule": "rule file and rule name",
+  "location": "file:line or file",
+  "severity": "required | recommended | contextual | needs_confirmation",
+  "problem": "reason",
+  "recommendation": "recommended fix"
+}
 
-감지된 추가 이슈가 없으면 아래 문구만 출력한다.
+Return [] when there are no issue items.
+Return at most 50 issue items.
+Preserve file paths, rule filenames, and code identifiers.
+Write user-facing text in Korean.
 
-\`\`\`md
-NO_ISSUES
-\`\`\`
+Input is a JSON object with these fields:
+- alreadyReportedIssues: issue items that are already reported
+- rules: rule documents, each with path and content
+- diff: unified git diff text
 
-감지된 추가 이슈가 있으면 각 이슈를 아래 details 블록 하나로만 출력한다.
-
-\`\`\`md
-<details>
-<summary>이슈 한 줄 요약</summary>
-
-#### 규칙
-관련 rules 문서와 규칙 이름
-
-#### 위치
-\`file:line\`
-
-#### 문제
-왜 규칙 위반 또는 확인 필요 사항인지 설명
-
-#### 권장 조치
-권장 수정 방향
-
-</details>
-
-<details>
-<summary>이슈 한 줄 요약</summary>
-
-#### 규칙
-관련 rules 문서와 규칙 이름
-
-#### 위치
-\`file:line\`
-
-#### 문제
-왜 규칙 위반 또는 확인 필요 사항인지 설명
-
-#### 권장 조치
-권장 수정 방향
-
-</details>
-\`\`\`
-
-severity는 \`required\`, \`recommended\`, \`contextual\`, \`확인 필요\` 중 하나를 사용한다.
-severity는 우선순위 판단에만 사용하고 출력에는 표시하지 않는다.
-각 이슈는 \`details\` 블록 하나로 출력한다.
-\`summary\`에는 파일 이름과 번호를 쓰지 말고, 이슈 요약만 쓴다.
-이슈 블록 밖에는 어떤 문장도 출력하지 않는다.
-
-# rules 변경 경고
-
-$RULES_CHANGED_WARNING
-
-# diff 제한 참고
-
-$DIFF_TRUNCATED_NOTE
-
-# 이미 감지된 deterministic 이슈
-
-아래 이슈는 자동 검사에서 이미 감지되어 최종 리뷰에 포함된다.
-Cline 리뷰에서는 아래 이슈를 반복해서 보고하지 말고, 이와 다른 추가 이슈만 보고한다.
-
-$(if [ -s "$DETERMINISTIC_REVIEW_FILE" ]; then cat "$DETERMINISTIC_REVIEW_FILE"; else echo "감지된 이슈 없음"; fi)
-
-$(cat "$RULES_FILE")
-
-# PR diff
-
-\`\`\`diff
-$(cat "$DIFF_FILE")
-\`\`\`
+Input:
+$(cat "$INPUT_JSON_FILE")
 EOF
 
-TASK_PROMPT="dali-ui/rules 준수 여부를 PR diff 기준으로 리뷰해 주세요. 제공된 rules와 diff만 근거로 사용하고, NO_ISSUES 또는 details 이슈 블록만 한국어로 출력해 주세요."
+TASK_PROMPT="Review the pull request using the provided input. Return a JSON array of issue items."
 
 set +e
 cline -y --ask --json --timeout 900 "$TASK_PROMPT" < "$CONTEXT_FILE" > "$RAW_OUTPUT_FILE"
@@ -291,57 +264,106 @@ function truncateText(text, maxLength) {
   return `${text.slice(0, maxLength).trimEnd()}\n\n... 생략 ...`;
 }
 
-function fallbackIssueDetails(text) {
+function asText(value) {
+  if (typeof value === 'string') return value.trim();
+  if (value === undefined || value === null) return '';
+  return String(value).trim();
+}
+
+function normalizeSeverity(value) {
+  const severity = asText(value);
+  return ['required', 'recommended', 'contextual', 'needs_confirmation'].includes(severity)
+    ? severity
+    : 'needs_confirmation';
+}
+
+function extractJsonArray(text) {
   const normalized = normalizeText(text);
-  if (!normalized) {
-    return 'NO_ISSUES';
+  if (!normalized) return [];
+
+  try {
+    const parsed = JSON.parse(normalized);
+    return Array.isArray(parsed) ? parsed : null;
+  } catch {
+    // Some providers can add transport text around the model output.
   }
 
-  const details = [...normalized.matchAll(/<details>[\s\S]*?<\/details>/g)].map(match =>
-    match[0]
-      .replace(/<summary>\s*(?:\(\d+\)|\d+[.)])?\s*/, '<summary>')
-      .trim()
-  );
-  if (details.length > 0) {
-    return details.join('\n\n');
+  const start = normalized.indexOf('[');
+  const end = normalized.lastIndexOf(']');
+  if (start !== -1 && end > start) {
+    try {
+      const parsed = JSON.parse(normalized.slice(start, end + 1));
+      return Array.isArray(parsed) ? parsed : null;
+    } catch {
+      return null;
+    }
   }
 
-  if (normalized.includes('NO_ISSUES') || normalized.includes('감지된 이슈 없음')) {
-    return 'NO_ISSUES';
-  }
+  return null;
+}
 
-  const escaped = escapeHtml(truncateText(normalized, 6000));
-  return `<details>
-<summary>Cline이 이슈 블록 외 형식으로 추가 검토 결과를 보고함</summary>
+function sanitizeIssue(issue) {
+  return {
+    summary: asText(issue?.summary) || 'Cline 결과 확인 필요',
+    rule: asText(issue?.rule) || '확인 필요',
+    location: asText(issue?.location) || '확인 필요',
+    severity: normalizeSeverity(issue?.severity),
+    problem: asText(issue?.problem) || 'Cline이 문제 설명을 비워 두었습니다.',
+    recommendation: asText(issue?.recommendation) || 'Cline 결과와 rules-review-debug artifact를 확인하세요.'
+  };
+}
+
+function renderIssueDetails(issues) {
+  return issues.map(issue => `<details>
+<summary>${escapeHtml(issue.summary)}</summary>
 
 #### 규칙
-Cline CLI output format / rules review result
+${escapeHtml(issue.rule)}
+
+#### 위치
+\`${escapeHtml(issue.location)}\`
+
+#### 문제
+${escapeHtml(issue.problem)}
+
+#### 권장 조치
+${escapeHtml(issue.recommendation)}
+
+</details>`).join('\n\n');
+}
+
+function fallbackIssueDetails(text) {
+  const normalized = normalizeText(text);
+  if (!normalized) return '';
+
+  const escaped = escapeHtml(truncateText(normalized, 3000));
+  return `<details>
+<summary>Cline JSON 결과 파싱 실패</summary>
+
+#### 규칙
+Cline CLI output format / JSON issue array
 
 #### 위치
 확인 필요
 
 #### 문제
-Cline이 답변 템플릿을 지키지 않았지만, 아래와 같은 추가 검토 결과를 반환했습니다.
+Cline이 JSON issue array를 반환하지 않았습니다. 출력 일부:
 
 ${escaped}
 
 #### 권장 조치
-위 Cline 결과를 확인하고 필요한 항목을 수정하세요. 자세한 원문은 rules-review-debug artifact의 \`cline-output.jsonl\`에서 확인할 수 있습니다.
+rules-review-debug artifact의 \`cline-output.jsonl\`를 확인하세요.
 
 </details>`;
 }
 
 function extractIssueDetails(text) {
-  const normalized = normalizeText(text);
-  const issueMatch = normalized.match(/감지된 이슈\s+\d+건[\s\S]*/);
-  if (issueMatch) {
-    const details = [...issueMatch[0].matchAll(/<details>[\s\S]*?<\/details>/g)].map(match => match[0].trim());
-    if (details.length > 0) {
-      return details.join('\n\n');
-    }
+  const parsed = extractJsonArray(text);
+  if (Array.isArray(parsed)) {
+    return renderIssueDetails(parsed.slice(0, 50).map(sanitizeIssue));
   }
 
-  return fallbackIssueDetails(normalized);
+  return fallbackIssueDetails(text);
 }
 
 function acceptMessage(message) {
@@ -464,6 +486,13 @@ if (renumberedDetails.length === 0) {
 NODE
 } > "$COMMENT_FILE"
 
+{
+  echo
+  echo "---"
+  echo
+  echo "_by ${CLINE_MODEL:-unknown}_"
+} >> "$COMMENT_FILE"
+
 if [ "$CLINE_STATUS" -ne 0 ]; then
   {
     echo
@@ -491,9 +520,11 @@ DEBUG_DIR="${GITHUB_WORKSPACE:-$PR_WORKSPACE}/rules-review-debug"
 rm -rf "$DEBUG_DIR"
 mkdir -p "$DEBUG_DIR"
 cp "$CONTEXT_FILE" "$DEBUG_DIR/context.md"
+cp "$INPUT_JSON_FILE" "$DEBUG_DIR/input.json"
 cp "$RULES_FILE" "$DEBUG_DIR/rules.md"
 cp "$DIFF_FILE" "$DEBUG_DIR/pr.diff"
 cp "$RAW_OUTPUT_FILE" "$DEBUG_DIR/cline-output.jsonl"
+cp "$DETERMINISTIC_ISSUES_FILE" "$DEBUG_DIR/deterministic-issues.json"
 cp "$REVIEW_TEXT_FILE" "$DEBUG_DIR/cline-review.md"
 cp "$DETERMINISTIC_REVIEW_FILE" "$DEBUG_DIR/deterministic-review.md"
 cp "$COMMENT_FILE" "$DEBUG_DIR/comment.md"
