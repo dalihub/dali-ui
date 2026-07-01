@@ -29,14 +29,22 @@ namespace Ui
 namespace
 {
 
-void ApplyTextGradientStartOffsetTo(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+void ApplyLabelTextGradientStartOffsetTo(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
 {
-  Internal::LabelAnimationSpecImpl::ApplyTextGradientStartOffsetTo(animation, Label::DownCast(view), entry);
+  Label child = Label::DownCast(view);
+  if(child)
+  {
+    Internal::LabelAnimationSpecImpl::ApplyTextGradientStartOffsetTo(animation, child, entry);
+  }
 }
 
-void ApplyTextGradientStartOffsetBy(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+void ApplyLabelTextGradientStartOffsetBy(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
 {
-  Internal::LabelAnimationSpecImpl::ApplyTextGradientStartOffsetBy(animation, Label::DownCast(view), entry);
+  Label child = Label::DownCast(view);
+  if(child)
+  {
+    Internal::LabelAnimationSpecImpl::ApplyTextGradientStartOffsetBy(animation, child, entry);
+  }
 }
 
 } // namespace
@@ -257,13 +265,13 @@ LabelAnimationSpec& LabelAnimationSpec::TextColorBy(const UiColor& relative, Dur
 
 LabelAnimationSpec& LabelAnimationSpec::TextGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &ApplyTextGradientStartOffsetTo);
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &ApplyLabelTextGradientStartOffsetTo);
   return *this;
 }
 
 LabelAnimationSpec& LabelAnimationSpec::TextGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyTextGradientStartOffsetBy);
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyLabelTextGradientStartOffsetBy);
   return *this;
 }
 

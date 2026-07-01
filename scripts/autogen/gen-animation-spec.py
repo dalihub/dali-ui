@@ -177,6 +177,11 @@ def _value_expr(entry, is_by):
     return val
 
 
+def _manual_apply_wrapper_name(view_cls, entry, is_by):
+    apply_suffix = 'By' if is_by else 'To'
+    return f'Apply{view_cls}{entry["name"]}{apply_suffix}'
+
+
 # ---------------------------------------------------------------------------
 # Method generation
 # ---------------------------------------------------------------------------
@@ -212,7 +217,7 @@ def gen_bridge_method_outofline(cls, entry, is_by):
     return '\n'.join(lines)
 
 
-def gen_bridge_method_manual(cls, impl_cls, entry, is_by):
+def gen_bridge_method_manual(cls, impl_cls, entry, is_by, view_expr='mView'):
     """Generate bridge method for @ANIMATABLE_MANUAL (calls Apply{Name}To/By from impl)."""
     ti = entry['type_info']
     name = entry['name'] + ('By' if is_by else '')
@@ -222,7 +227,7 @@ def gen_bridge_method_manual(cls, impl_cls, entry, is_by):
 
     lines = [f'{cls}& {cls}::{name}({sig})', '{']
     lines.append(f'  ExtendIfNeeded(delay, duration);')
-    lines.append(f'  Internal::{impl_cls}::Apply{entry["name"]}{apply_suffix}(mAnimation, mView, '
+    lines.append(f'  Internal::{impl_cls}::Apply{entry["name"]}{apply_suffix}(mAnimation, {view_expr}, '
                  f'{{Dali::Property::INVALID_INDEX, {val}, duration, alpha, delay, nullptr}});')
     lines.extend(['  return *this;', '}'])
     return '\n'.join(lines)
@@ -235,7 +240,7 @@ def gen_bridge_method_decl(cls, entry, is_by, with_defaults=False):
     return f'{cls}& {name}({_sig(ti, is_by, with_defaults=with_defaults)});'
 
 
-def gen_spec_addentry(spec_cls, impl_cls, root_impl_cls, entry, is_by):
+def gen_spec_addentry(spec_cls, impl_cls, entry, is_by, apply_fn_override=None):
     """Generate Spec handle method that calls AddAnimateToEntry/AddAnimateByEntry on impl."""
     ti = entry['type_info']
     name = entry['name'] + ('By' if is_by else '')
@@ -246,7 +251,7 @@ def gen_spec_addentry(spec_cls, impl_cls, root_impl_cls, entry, is_by):
     if entry['is_manual']:
         prop_idx = 'Dali::Property::INVALID_INDEX'
         apply_suffix = 'By' if is_by else 'To'
-        apply_fn = f'&Internal::{impl_cls}::Apply{entry["name"]}{apply_suffix}'
+        apply_fn = apply_fn_override or f'&Internal::{impl_cls}::Apply{entry["name"]}{apply_suffix}'
         call = f'  Internal::GetImpl(*this).{add_method}({prop_idx}, {val}, duration, alpha, delay, {apply_fn});'
     else:
         prop_idx = entry['prop_index']
@@ -257,6 +262,22 @@ def gen_spec_addentry(spec_cls, impl_cls, root_impl_cls, entry, is_by):
         '{',
         call,
         '  return *this;',
+        '}',
+    ])
+
+
+def gen_spec_manual_apply_wrapper(impl_cls, root_impl_cls, root_view_cls, view_cls, entry, is_by):
+    """Generate a child manual apply wrapper matching the root Entry::ApplyFunction."""
+    apply_suffix = 'By' if is_by else 'To'
+    wrapper_name = _manual_apply_wrapper_name(view_cls, entry, is_by)
+    return '\n'.join([
+        f'void {wrapper_name}(Animation& animation, {root_view_cls} view, const Internal::{root_impl_cls}::Entry& entry)',
+        '{',
+        f'  {view_cls} child = {view_cls}::DownCast(view);',
+        f'  if(child)',
+        f'  {{',
+        f'    Internal::{impl_cls}::Apply{entry["name"]}{apply_suffix}(animation, child, entry);',
+        f'  }}',
         '}',
     ])
 
@@ -339,6 +360,17 @@ def _public_api_include(header, public_api_root):
     return f'dali-ui-foundation/public-api/{rel}'
 
 
+def _root_class(cls, configs):
+    """Return the topmost configured ancestor for cls."""
+    root = cls
+    while configs and root in configs:
+        parent = configs[root].get('parent')
+        if not parent or parent not in configs:
+            break
+        root = parent
+    return root
+
+
 def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs=None, public_api_root=None):
     """Generate all files for one component class."""
     bridge = f'{cls}AnimationBridge'
@@ -370,6 +402,8 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
     parent_bridge = f'{parent_cls}AnimationBridge' if has_parent else None
     parent_spec = f'{parent_cls}AnimationSpec' if has_parent else None
     parent_impl = f'{parent_cls}AnimationSpecImpl' if has_parent else None
+    root_cls = _root_class(cls, configs)
+    root_impl_cls = f'{root_cls}AnimationSpecImpl'
 
     def _out(directory, filename, content):
         p = os.path.join(directory, filename)
@@ -424,7 +458,8 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
     for entry in own_entries:
         for is_by in (False, True):
             if entry['is_manual']:
-                bridge_cpp_methods.append(gen_bridge_method_manual(bridge, impl, entry, is_by))
+                view_expr = f'{cls}::DownCast(mView)' if has_parent else 'mView'
+                bridge_cpp_methods.append(gen_bridge_method_manual(bridge, impl, entry, is_by, view_expr))
             else:
                 bridge_cpp_methods.append(gen_bridge_method_outofline(bridge, entry, is_by))
 
@@ -468,9 +503,8 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
     }))
 
     # ===== 4. Spec .autogen.cpp =====
-    root_impl = parent_impl if has_parent else impl
-
     addentry_lines = []
+    manual_wrapper_lines = []
 
     # Parent override implementations (out-of-line delegation)
     if parent_entries and parent_spec:
@@ -491,7 +525,24 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
     # Own property implementations (AddEntry calls)
     for entry in own_entries:
         for is_by in (False, True):
-            addentry_lines.append(gen_spec_addentry(spec, impl, root_impl, entry, is_by))
+            apply_fn_override = None
+            if has_parent and entry['is_manual']:
+                wrapper_name = _manual_apply_wrapper_name(cls, entry, is_by)
+                manual_wrapper_lines.append(gen_spec_manual_apply_wrapper(impl, root_impl_cls, root_cls, cls, entry, is_by))
+                apply_fn_override = f'&{wrapper_name}'
+            addentry_lines.append(gen_spec_addentry(spec, impl, entry, is_by, apply_fn_override))
+
+    manual_wrappers = ''
+    if manual_wrapper_lines:
+        manual_wrappers = '\n'.join([
+            'namespace',
+            '{',
+            '',
+            '\n\n'.join(manual_wrapper_lines),
+            '',
+            '} // namespace',
+            '',
+        ])
 
     if has_parent:
         sc_tmpl = 'animation-spec-child.cpp.tmpl'
@@ -504,6 +555,7 @@ def generate_for_class(cls, header, parent_cls=None, parent_header=None, configs
         'SPEC_HEADER_PATH': f'{P}/public-api/animation/{spec_fn}.autogen.h',
         'IMPL_HEADER_PATH': f'{P}/internal/animation/{impl_fn}.autogen.h',
         'VIEW_HEADER_INCLUDE': f'#include <{view_include}>',
+        'MANUAL_APPLY_WRAPPERS': manual_wrappers,
         'ADDENTRY_IMPLEMENTATIONS': '\n\n'.join(addentry_lines),
     }))
 
