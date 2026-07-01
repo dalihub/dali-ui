@@ -170,36 +170,34 @@ cat > "$CONTEXT_FILE" <<EOF
 - 확실하지 않은 내용은 추측하지 말고 "확인 필요"로 표시한다.
 - 파일 수정, 커밋, push, 외부 게시, 명령 실행을 시도하지 않는다.
 - 리뷰 결과는 한국어로 작성한다.
-- 규칙 위반 또는 확인 필요 항목이 없으면 "감지된 이슈 없음"만 출력한다.
+- 규칙 위반 또는 확인 필요 항목이 없으면 "NO_ISSUES"만 출력한다.
 - 감지된 이슈가 있으면 최대 50개까지만 보고한다.
 - 50개를 초과하는 이슈가 있으면 required, 확인 필요, recommended, contextual 순서로 우선순위를 정해 50개를 고르고, 마지막에 "추가 이슈 N건 생략"을 짧게 표시한다.
-- 각 이슈의 요약은 한 줄로 작성한다.
+- 각 이슈의 요약은 한 줄로 작성하고 summary 안에는 번호를 쓰지 않는다.
 - 각 details 블록은 규칙, 위치, 문제, 권장 조치를 합쳐 10줄 이내로 작성한다.
-- 전체 결과는 50000자 이내로 작성한다.
+- 전체 결과는 30000자 이내로 작성한다.
 - rules 전문이나 diff 내용을 반복 인용하지 않는다.
 - rules 문서의 Validation 섹션과 validation-checks.md에 기록된 검색/검증 관점을 우선적으로 적용한다.
 - 분석 과정, 규칙별 전체 점검 로그, OK 항목 목록은 출력하지 않는다.
-- 최종 답변은 반드시 답변 템플릿의 markdown 본문만 출력한다.
-- 답변 템플릿 밖의 제목, 체크리스트, 코드 블록, 요약, 최종 판정 섹션을 출력하지 않는다.
-- 답변 템플릿을 지키지 않으면 자동 리뷰 코멘트가 부정확하게 표시될 수 있다.
+- 최종 답변은 반드시 아래 이슈 블록 포맷만 출력한다.
+- PR 코멘트 헤더, "DALI UI Rules Review", "감지된 이슈 N건", 요약, 체크리스트, 점검표, 검증 명령어, 결론, 최종 판정 섹션은 출력하지 않는다.
+- 이슈 블록 포맷을 지키지 않으면 자동 리뷰 코멘트가 부정확하게 표시될 수 있다.
 - 아래 "이미 감지된 deterministic 이슈"에 있는 이슈는 최종 리뷰에 별도로 포함되므로 반복해서 보고하지 않는다.
 - deterministic 이슈와 다른 추가 이슈만 보고한다.
 
-# 답변 템플릿
+# Cline 출력 포맷
 
-감지된 이슈가 없으면 아래 문구만 출력한다.
+감지된 추가 이슈가 없으면 아래 문구만 출력한다.
 
 \`\`\`md
-감지된 이슈 없음
+NO_ISSUES
 \`\`\`
 
-감지된 이슈가 있으면 아래 형식을 지켜서 출력한다.
+감지된 추가 이슈가 있으면 각 이슈를 아래 details 블록 하나로만 출력한다.
 
 \`\`\`md
-감지된 이슈 N건
-
 <details>
-<summary>(1) 이슈 한 줄 요약</summary>
+<summary>이슈 한 줄 요약</summary>
 
 #### 규칙
 관련 rules 문서와 규칙 이름
@@ -216,7 +214,7 @@ cat > "$CONTEXT_FILE" <<EOF
 </details>
 
 <details>
-<summary>(2) 이슈 한 줄 요약</summary>
+<summary>이슈 한 줄 요약</summary>
 
 #### 규칙
 관련 rules 문서와 규칙 이름
@@ -231,16 +229,13 @@ cat > "$CONTEXT_FILE" <<EOF
 권장 수정 방향
 
 </details>
-
-추가 이슈 N건 생략
 \`\`\`
 
 severity는 \`required\`, \`recommended\`, \`contextual\`, \`확인 필요\` 중 하나를 사용한다.
 severity는 우선순위 판단에만 사용하고 출력에는 표시하지 않는다.
 각 이슈는 \`details\` 블록 하나로 출력한다.
-\`summary\`에는 파일 이름을 쓰지 말고, 번호와 이슈 요약만 쓴다.
-이슈가 50개 이하이면 "추가 이슈 N건 생략" 문구는 출력하지 않는다.
-자동 리뷰 한계나 diff 제한 사항은 실제로 필요한 경우 마지막에 짧게 덧붙인다.
+\`summary\`에는 파일 이름과 번호를 쓰지 말고, 이슈 요약만 쓴다.
+이슈 블록 밖에는 어떤 문장도 출력하지 않는다.
 
 # rules 변경 경고
 
@@ -266,7 +261,7 @@ $(cat "$DIFF_FILE")
 \`\`\`
 EOF
 
-TASK_PROMPT="dali-ui/rules 준수 여부를 PR diff 기준으로 리뷰해 주세요. 제공된 rules와 diff만 근거로 사용하고, 답변 템플릿을 지켜 한국어로 작성해 주세요."
+TASK_PROMPT="dali-ui/rules 준수 여부를 PR diff 기준으로 리뷰해 주세요. 제공된 rules와 diff만 근거로 사용하고, NO_ISSUES 또는 details 이슈 블록만 한국어로 출력해 주세요."
 
 set +e
 cline -y --ask --json --timeout 900 "$TASK_PROMPT" < "$CONTEXT_FILE" > "$RAW_OUTPUT_FILE"
@@ -296,17 +291,28 @@ function truncateText(text, maxLength) {
   return `${text.slice(0, maxLength).trimEnd()}\n\n... 생략 ...`;
 }
 
-function fallbackTemplateBody(text) {
+function fallbackIssueDetails(text) {
   const normalized = normalizeText(text);
   if (!normalized) {
-    return 'Cline CLI 결과를 파싱하지 못했습니다.';
+    return 'NO_ISSUES';
+  }
+
+  const details = [...normalized.matchAll(/<details>[\s\S]*?<\/details>/g)].map(match =>
+    match[0]
+      .replace(/<summary>\s*(?:\(\d+\)|\d+[.)])?\s*/, '<summary>')
+      .trim()
+  );
+  if (details.length > 0) {
+    return details.join('\n\n');
+  }
+
+  if (normalized.includes('NO_ISSUES') || normalized.includes('감지된 이슈 없음')) {
+    return 'NO_ISSUES';
   }
 
   const escaped = escapeHtml(truncateText(normalized, 6000));
-  return `감지된 이슈 1건
-
-<details>
-<summary>(1) Cline이 템플릿 외 형식으로 추가 검토 결과를 보고함</summary>
+  return `<details>
+<summary>Cline이 이슈 블록 외 형식으로 추가 검토 결과를 보고함</summary>
 
 #### 규칙
 Cline CLI output format / rules review result
@@ -325,18 +331,17 @@ ${escaped}
 </details>`;
 }
 
-function extractTemplateBody(text) {
+function extractIssueDetails(text) {
   const normalized = normalizeText(text);
   const issueMatch = normalized.match(/감지된 이슈\s+\d+건[\s\S]*/);
   if (issueMatch) {
-    return issueMatch[0].trim();
+    const details = [...issueMatch[0].matchAll(/<details>[\s\S]*?<\/details>/g)].map(match => match[0].trim());
+    if (details.length > 0) {
+      return details.join('\n\n');
+    }
   }
 
-  if (normalized.includes('감지된 이슈 없음')) {
-    return '감지된 이슈 없음';
-  }
-
-  return fallbackTemplateBody(normalized);
+  return fallbackIssueDetails(normalized);
 }
 
 function acceptMessage(message) {
@@ -372,7 +377,7 @@ if (!result.trim()) {
   result = '';
 }
 
-fs.writeFileSync(outPath, extractTemplateBody(result) + '\n');
+fs.writeFileSync(outPath, extractIssueDetails(result) + '\n');
 NODE
 
 {
@@ -398,18 +403,56 @@ function readResult(path) {
 }
 
 function extractDetails(result) {
-  if (!/^감지된 이슈\s+\d+건/.test(result)) return [];
+  if (!result || result === 'NO_ISSUES') return [];
   return [...result.matchAll(/<details>[\s\S]*?<\/details>/g)].map(match => match[0]);
+}
+
+function extractSection(detail, title) {
+  return detail.match(new RegExp(`#### ${title}\\n([\\s\\S]*?)(?=\\n#### |\\n</details>|$)`))?.[1]?.trim() ?? '';
+}
+
+function normalizeKeyText(text) {
+  return text
+    .toLowerCase()
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/:\d+\b/g, '')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function detailKey(detail) {
+  const rule = normalizeKeyText(extractSection(detail, '규칙'));
+  const location = normalizeKeyText(extractSection(detail, '위치'));
+  const path = location.match(/(?:dali-ui-foundation|dali-ui-components|rules|docs|automated-tests|manual-tests|samples|wiki)\/[a-z0-9_./-]+\.(?:h|cpp|md|txt|cmake|sh)/)?.[0] ?? '';
+  const ruleFile = rule.match(/[a-z0-9-]+\.md/)?.[0] ?? rule.match(/component boundar|api naming|docs and wiki|handle-body|public api/)?.[0] ?? '';
+
+  if (path && ruleFile) {
+    return `${path}|${ruleFile}`;
+  }
+
+  const summary = detail.match(/<summary>\s*(?:\(\d+\)|\d+[.)])?\s*([\s\S]*?)<\/summary>/)?.[1] ?? detail;
+  return normalizeKeyText(summary);
 }
 
 const deterministicResult = readResult(deterministicPath);
 const clineResult = readResult(clinePath);
-const details = [
+const seen = new Set();
+const details = [];
+
+for (const detail of [
   ...extractDetails(deterministicResult),
   ...extractDetails(clineResult)
-];
+]) {
+  const key = detailKey(detail);
+  if (seen.has(key)) continue;
+  seen.add(key);
+  details.push(detail);
+}
+
 const renumberedDetails = details.map((detail, index) =>
-  detail.replace(/<summary>\(\d+\)\s*/, `<summary>(${index + 1}) `)
+  detail.replace(/<summary>\s*(?:\(\d+\)|\d+[.)])?\s*/, `<summary>(${index + 1}) `)
 );
 
 if (renumberedDetails.length === 0) {
