@@ -29,6 +29,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
@@ -826,14 +827,9 @@ public: // Properties
   void SetFocusNavigationCallback(FocusNavigationCallback callback);
 
   /**
-   * @brief Gets the background color.
+   * @brief Sets a solid color background.
    *
-   * @return The background color
-   */
-  UiColor GetBackgroundColor();
-
-  /**
-   * @brief Sets the background color.
+   * This replaces any image or gradient background previously set on this View.
    *
    * If the UiColor has a color ID, it is resolved from the current
    * theme and a binding is registered so the color is automatically
@@ -845,6 +841,34 @@ public: // Properties
    * @param[in] color The UiColor to apply
    */
   void SetBackgroundColor(const UiColor& color);
+
+  /**
+   * @brief Gets the background color.
+   *
+   * If the background color was set from a token UiColor, the original token
+   * color is returned.
+   *
+   * @return The background color
+   */
+  UiColor GetBackgroundColor();
+
+  /**
+   * @brief Sets an image background from a resource URL.
+   *
+   * This replaces any color or gradient background previously set on this View.
+   *
+   * @param[in] url The image resource URL
+   */
+  void SetBackgroundImage(const Dali::String& url);
+
+  /**
+   * @brief Sets a gradient background.
+   *
+   * This replaces any color or image background previously set on this View.
+   *
+   * @param[in] gradient The gradient value used to configure the background
+   */
+  void SetBackgroundGradient(const Gradient::Base& gradient);
 
   /**
    * @brief Sets a single shadow for this View.

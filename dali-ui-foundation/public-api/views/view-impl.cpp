@@ -65,6 +65,7 @@
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
 #include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
@@ -957,6 +958,35 @@ UiColor ViewImpl::GetBackgroundColor()
 void ViewImpl::SetBackgroundColor(const UiColor& color)
 {
   SetColorBinding("BackgroundColor", color, this, &ViewImpl::SetBackgroundColorInternal);
+}
+
+void ViewImpl::SetBackgroundImage(const Dali::String& url)
+{
+  if(url.Empty())
+  {
+    ClearBackground();
+    return;
+  }
+
+  UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
+  mImpl->mBackgroundColor = Color::TRANSPARENT;
+
+  mImpl->SetBackground(Internal::CreateImageVisualPropertyMap(url));
+}
+
+void ViewImpl::SetBackgroundGradient(const Gradient::Base& gradient)
+{
+  if(gradient.GetType() == Gradient::Type::NONE || gradient.GetStopNodes().Count() < 2u)
+  {
+    ClearBackground();
+    return;
+  }
+
+  UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
+  mImpl->mBackgroundColor = Color::TRANSPARENT;
+
+  Property::Map map = Internal::CreateGradientVisualPropertyMap(gradient);
+  mImpl->SetBackground(map);
 }
 
 UiColor ViewImpl::GetColor() const
@@ -2500,9 +2530,7 @@ void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
 {
   mImpl->mBackgroundColor = color;
 
-  Property::Map map;
-  map.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::COLOR);
-  map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, color);
+  Property::Map map = Internal::CreateColorVisualPropertyMap(color);
 
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::View::Property::BACKGROUND);
   if(visualImplPtr && visualImplPtr->GetType() == Ui::Integration::InternalVisualType::COLOR)
@@ -2512,12 +2540,7 @@ void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
     return;
   }
 
-  SetBackground(map);
-}
-
-void ViewImpl::SetBackground(const Property::Map& map)
-{
-  Self().SetProperty(Ui::View::Property::BACKGROUND, map);
+  mImpl->SetBackground(map);
 }
 
 void ViewImpl::ClearBackground()

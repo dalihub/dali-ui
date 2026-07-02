@@ -384,14 +384,24 @@ public: // Non-virtual API (safe to reorder / extend)
   void SetTouchFocusable(bool touchFocusable);
 
   /**
+   * @copydoc Ui::View::SetBackgroundColor()
+   */
+  void SetBackgroundColor(const UiColor& color);
+
+  /**
    * @copydoc Ui::View::GetBackgroundColor()
    */
   UiColor GetBackgroundColor();
 
   /**
-   * @copydoc Ui::View::SetBackgroundColor()
+   * @copydoc Ui::View::SetBackgroundImage()
    */
-  void SetBackgroundColor(const UiColor& color);
+  void SetBackgroundImage(const Dali::String& url);
+
+  /**
+   * @copydoc Ui::View::SetBackgroundGradient()
+   */
+  void SetBackgroundGradient(const Gradient::Base& gradient);
 
   /**
    * @copydoc Ui::View::GetColor()
@@ -477,13 +487,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::SetName()
    */
   void SetName(const Dali::String& name);
-
-  /**
-   * @brief Sets the background with a property map.
-   * @param[in] map The background property map
-   * @note WIP: Property::Map will be replaced by Visual in a future version.
-   */
-  void SetBackground(const Property::Map& map);
 
   /**
    * @copydoc Ui::View::ClearBackground()

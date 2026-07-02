@@ -457,14 +457,24 @@ void View::SetFocusNavigationCallback(FocusNavigationCallback callback)
   GetImpl(*this).SetFocusNavigationCallback(std::move(callback));
 }
 
+void View::SetBackgroundColor(const UiColor& color)
+{
+  GetImpl(*this).SetBackgroundColor(color);
+}
+
 UiColor View::GetBackgroundColor()
 {
   return GetImpl(*this).GetBackgroundColor();
 }
 
-void View::SetBackgroundColor(const UiColor& color)
+void View::SetBackgroundImage(const Dali::String& url)
 {
-  GetImpl(*this).SetBackgroundColor(color);
+  GetImpl(*this).SetBackgroundImage(url);
+}
+
+void View::SetBackgroundGradient(const Gradient::Base& gradient)
+{
+  GetImpl(*this).SetBackgroundGradient(gradient);
 }
 
 void View::SetShadow(const Shadow& shadow)

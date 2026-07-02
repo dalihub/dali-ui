@@ -272,6 +272,12 @@ public:
   Ui::Internal::Visual::Base* GetVisualImplPtr(Property::Index index) const;
 
   /**
+   * @brief Sets the background visual from a property map.
+   * @param[in] map The background visual property map
+   */
+  void SetBackground(const Property::Map& map);
+
+  /**
    * @brief Enables or disables overriding the given visual's corner properties to its view's
    * @param[in] visual A registered visual
    * @param[in] enable flat to set enabled or disabled.

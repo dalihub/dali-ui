@@ -55,7 +55,9 @@
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
+#include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
 #include <dali-ui-foundation/provider-api/shadow.h>
+#include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
@@ -982,47 +984,23 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         std::string          url;
         Vector4              color;
         const Property::Map* map = value.GetMap();
+        UiColorManager::Get().ClearBinding(viewImpl.Self(), "BackgroundColor");
         if(map && !map->Empty())
         {
-          ViewDataImpl& dataImpl = viewImpl.GetViewDataImpl();
-          if(DALI_LIKELY(dataImpl.mVisualData))
-          {
-            Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(*map);
-            visual.SetName("background");
-            if(visual)
-            {
-              // Ignore corner radius for offscreen case.
-              Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
-              dataImpl.mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
-              dataImpl.EnableCornerPropertiesOverridden(visual, true);
-
-              // Trigger a size negotiation request that may be needed by the new visual to relayout its contents.
-              viewImpl.RelayoutRequest();
-            }
-          }
+          viewImpl.GetViewDataImpl().SetBackground(*map);
         }
         else if(GetStdString(value, url))
         {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().mVisualData))
-          {
-            // don't know the size to load
-            Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(url, ImageDimensions());
-            if(visual)
-            {
-              viewImpl.GetViewDataImpl().mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual,
-                                                                     Dali::Ui::Integration::DepthIndex::BACKGROUND);
-              viewImpl.GetViewDataImpl().EnableCornerPropertiesOverridden(visual, true);
-            }
-          }
+          viewImpl.GetViewDataImpl().SetBackground(CreateImageVisualPropertyMap(Dali::String(url.c_str())));
         }
         else if(value.Get(color))
         {
-          viewImpl.SetBackgroundColor(UiColor(color));
+          viewImpl.GetViewDataImpl().SetBackground(CreateColorVisualPropertyMap(color));
         }
         else
         {
-          // The background is an empty property map, so we should clear the background
-          viewImpl.ClearBackground();
+          // The background is an empty property map, so unregister the background visual.
+          viewImpl.GetViewDataImpl().UnregisterVisual(Ui::View::Property::BACKGROUND);
         }
         break;
       }
@@ -2008,6 +1986,25 @@ void ViewDataImpl::ApplyFittingMode(const Vector2& size)
   if(DALI_LIKELY(mVisualData))
   {
     mVisualData->ApplyFittingMode(size);
+  }
+}
+
+void ViewDataImpl::SetBackground(const Property::Map& map)
+{
+  if(DALI_LIKELY(mVisualData))
+  {
+    Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
+    visual.SetName("background");
+
+    if(visual)
+    {
+      // Ignore corner radius for offscreen case.
+      Ui::GetImplementation(visual).CornerRadiusIgnoredAtOffscreenRendering(true);
+      mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
+      EnableCornerPropertiesOverridden(visual, true);
+
+      mViewImpl.RelayoutRequest();
+    }
   }
 }
 
