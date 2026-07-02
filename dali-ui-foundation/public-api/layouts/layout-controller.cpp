@@ -129,10 +129,21 @@ public:
     // Add to pending (dirty) set
     mPendingViews.insert(view);
 
+    // Real layout work has been requested since the last LayoutFinished emit;
+    // arm the settled latch so the next drain-to-empty fires the signal.
+    mLayoutDirtySinceEmit = true;
+
     // Schedule processing if not already scheduled
     if(!mProcessingScheduled)
     {
       mProcessingScheduled = true;
+
+      // Guarantee a layout pass runs even if the app would otherwise idle, so
+      // the pending work drains and LayoutFinished can eventually fire.
+      if(DALI_LIKELY(Adaptor::IsAvailable()))
+      {
+        Adaptor::Get().RequestProcessEventsOnIdle();
+      }
     }
   }
 
@@ -260,6 +271,15 @@ public:
       mAllLayoutRoots.erase(dead);
       mPendingViews.erase(dead);
     }
+
+    // A resize forces every root to recompute; ensure a layout pass runs even
+    // if no other event wakes the event loop, so the invalidated roots drain
+    // and LayoutFinished fires. Unconditional because InvalidateMeasure above
+    // may early-exit for already-dirty roots without re-scheduling a pass.
+    if(DALI_LIKELY(Adaptor::IsAvailable()))
+    {
+      Adaptor::Get().RequestProcessEventsOnIdle();
+    }
   }
   /**
    * @brief Processes all pending views with layout capability.
@@ -276,17 +296,17 @@ public:
    */
   void Process(bool postProcess) override
   {
+    ++mProcessDepth;
+
     Dali::Window window = mWindow.GetHandle();
     if(DALI_UNLIKELY(!window))
     {
-      // Destroy self.
-      gLayoutControllers.erase(mWindowObjectPtr);
-
-      // Don't do any extra process after self destructor called.
-      return;
+      // The window is gone. Defer self-destruct to the outermost Process frame
+      // (handled below) so a re-entrant Process/emit frame is never left
+      // running on a destroyed controller.
+      mDestroyPending = true;
     }
-
-    if(!postProcess)
+    else if(!postProcess)
     {
       ProcessLayouts(window);
 
@@ -298,6 +318,44 @@ public:
         // the event thread.
         mTransitionDispatcher->TickAnimators();
       }
+
+      // "Fully settled" is evaluated only by the outermost Process frame
+      // (mProcessDepth == 1) and AFTER TickAnimators, so any same-frame
+      // re-dirty from an OnFinished / EXIT-Remove callback is already visible
+      // in mPendingViews before we decide.
+      if(mProcessDepth == 1)
+      {
+        if(mPendingViews.empty())
+        {
+          if(mLayoutDirtySinceEmit)
+          {
+            // Layout math for this window has drained to nothing since the
+            // last emit: fire exactly once per dirty->quiescent transition.
+            // NOTE: this reflects Measure/Arrange completion only, NOT that
+            // layout transition animations have finished.
+            mLayoutDirtySinceEmit = false;
+            mLayoutFinishedSignal.Emit(window);
+          }
+        }
+        else
+        {
+          // Work was re-scheduled during this pass; not settled yet. Ensure a
+          // follow-up pass runs even if the app would otherwise idle.
+          mLayoutDirtySinceEmit = true;
+          if(DALI_LIKELY(Adaptor::IsAvailable()))
+          {
+            Adaptor::Get().RequestProcessEventsOnIdle();
+          }
+        }
+      }
+    }
+
+    // Execute any deferred self-destruct only when unwinding the outermost
+    // Process frame, where no nested Process/emit frame remains on the stack.
+    if(--mProcessDepth == 0 && mDestroyPending)
+    {
+      gLayoutControllers.erase(mWindowObjectPtr);
+      // *this is destroyed here; do not access any member below.
     }
   }
 
@@ -307,6 +365,33 @@ public:
   std::string_view GetProcessorName() const override
   {
     return "Ui::LayoutController";
+  }
+
+  /**
+   * @brief Returns the signal emitted when this window's layout calculation
+   * has fully settled (all Measure/Arrange work drained).
+   */
+  LayoutController::LayoutFinishedSignalType& LayoutFinishedSignal()
+  {
+    return mLayoutFinishedSignal;
+  }
+
+  /**
+   * @brief Whether a Process() call is currently on the stack for this
+   * controller. Used to defer a self-destruct requested from a slot.
+   */
+  bool IsProcessing() const
+  {
+    return mProcessDepth > 0;
+  }
+
+  /**
+   * @brief Requests deferred self-destruct; the erase is performed when the
+   * outermost Process() frame unwinds.
+   */
+  void RequestDestroy()
+  {
+    mDestroyPending = true;
   }
 
 private:
@@ -325,6 +410,13 @@ private:
     }
     if(mPendingViews.empty())
     {
+      // Nothing to process: clear the scheduled flag so a later RequestLayout
+      // re-arms the idle wakeup (RequestProcessEventsOnIdle). Without this the
+      // flag can latch true (e.g. a queued root removed via UnregisterView
+      // before its pass), suppressing the wakeup the LayoutFinishedSignal
+      // relies on to fire in an otherwise-idle application.
+      mProcessingScheduled = false;
+
       // Still drain per-pass dispatcher state (e.g. mInWindowResize set
       // by NotifyWindowResize) so a stale flag cannot leak into the next
       // pass when every layout root happens to be dead at resize time.
@@ -507,6 +599,10 @@ private:
   int32_t                                               mWindowHeight;
   void*                                                 mWindowObjectPtr; ///< For self-destruct case.
   bool                                                  mProcessingScheduled;
+  LayoutController::LayoutFinishedSignalType            mLayoutFinishedSignal;        ///< Emitted when layout fully settles for this window
+  bool                                                  mLayoutDirtySinceEmit{false}; ///< Settled latch: armed by RequestLayout, cleared at emit
+  int                                                   mProcessDepth{0};             ///< Process() re-entrancy depth (emit gate + deferred-destroy safe point)
+  bool                                                  mDestroyPending{false};       ///< Deferred self-destruct requested during processing
 };
 
 } // namespace Integration
@@ -542,7 +638,21 @@ void LayoutController::Remove(Window window)
   {
     if(window)
     {
-      gLayoutControllers.erase(window.GetObjectPtr());
+      auto it = gLayoutControllers.find(window.GetObjectPtr());
+      if(it != gLayoutControllers.end())
+      {
+        if(it->second->mImpl->IsProcessing())
+        {
+          // Called from within a Process()/LayoutFinishedSignal emit for this
+          // controller; defer the erase until the outermost Process() frame
+          // unwinds so we never destroy a controller that is on the stack.
+          it->second->mImpl->RequestDestroy();
+        }
+        else
+        {
+          gLayoutControllers.erase(it);
+        }
+      }
     }
   }
 }
@@ -585,6 +695,11 @@ void LayoutController::OnWindowResize(int32_t width, int32_t height)
 void LayoutController::ProcessLayouts()
 {
   mImpl->ProcessLayouts();
+}
+
+LayoutController::LayoutFinishedSignalType& LayoutController::LayoutFinishedSignal()
+{
+  return mImpl->LayoutFinishedSignal();
 }
 
 void LayoutController::ScheduleLayoutExit(ViewImpl* parent, Ui::View child, ViewImpl* transitionOwner)

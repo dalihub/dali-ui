@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -125,6 +126,45 @@ public:
    * but can be called manually if immediate layout is needed.
    */
   void ProcessLayouts();
+
+  /**
+   * @brief Signal type of LayoutFinishedSignal().
+   */
+  using LayoutFinishedSignalType = Signal<void(Dali::Window)>;
+
+  /**
+   * @brief This signal is emitted when this window's layout calculation has
+   * fully settled: every layout root's Measure and Arrange for the window
+   * have completed and no further Measure/Arrange work is pending.
+   *
+   * A slot connects with the signature:
+   * @code
+   *   void OnLayoutFinished(Dali::Window window);
+   * @endcode
+   *
+   * Semantics:
+   * - Fires once per "dirty -> quiescent" transition, i.e. each time pending
+   *   layout work drains to nothing. It recurs whenever layout is invalidated
+   *   again and settles again; it is not a one-shot for the application
+   *   lifetime.
+   * - Reflects Measure/Arrange completion ONLY. It does NOT wait for layout
+   *   transition animations to finish; use a transition-finished callback if
+   *   post-animation geometry is required.
+   * - If a slot invalidates layout again (e.g. triggers InvalidateMeasure),
+   *   that schedules another pass and this signal fires again on a later
+   *   frame. Avoid unconditionally re-laying-out inside the slot, which
+   *   creates a self-perpetuating per-frame emit cycle.
+   * - Destroying this controller from within the slot (LayoutController::Remove)
+   *   is supported; the destruction is deferred until the emit unwinds.
+   *
+   * @return The layout-finished signal
+   * @note The @c Dali::Window is passed (not the LayoutController) because the
+   * controller is a non-copyable, per-window infrastructure object; the window
+   * identifies which controller settled and the controller can be re-obtained
+   * via Get(). Adding parameters later would require migrating to a struct
+   * argument.
+   */
+  LayoutFinishedSignalType& LayoutFinishedSignal();
 
 public: // Not intended for application developers
   /// @cond internal
