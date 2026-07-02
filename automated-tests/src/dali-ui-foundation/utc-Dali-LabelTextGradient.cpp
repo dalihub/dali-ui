@@ -21,7 +21,7 @@
 #include <dali-ui-foundation/public-api/gradient/radial-gradient.h>
 #include <dali-ui-foundation/public-api/animation/duration.h>
 #include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
-#include <dali-ui-foundation/public-api/label.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 

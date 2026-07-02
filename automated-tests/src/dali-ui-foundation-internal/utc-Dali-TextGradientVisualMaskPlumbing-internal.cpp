@@ -22,8 +22,8 @@
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
-#include <dali-ui-foundation/public-api/view.h>
-#include <dali-ui-foundation/public-api/view-impl.h>
+#include <dali-ui-foundation/public-api/views/view.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/devel-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/public-api/visuals/text-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
