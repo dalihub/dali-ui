@@ -1,0 +1,11 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# text-gradient-localization-example: localized card strings
+msgid "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_TITLE"
+msgstr "موجز الظهيرة"
+
+msgid "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_DESCRIPTION"
+msgstr "<color value='#4B5563'>اليوم</color> الطقس صافٍ <color value='#4B5563'>ومناسب جدًا لممارسة الرياضة.</color>"

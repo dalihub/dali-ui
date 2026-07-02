@@ -125,5 +125,6 @@ exit 0
 %{app_exe_dir}/text-localization.example
 %{app_exe_dir}/text-localization-po.example
 %{app_exe_dir}/text-localization-custom-component.example
+%{app_exe_dir}/text-gradient-localization.example
 %{app_res_dir}/*
 %{xml_file_dir}/%{name}.xml

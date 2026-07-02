@@ -1,0 +1,11 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# text-gradient-localization-example: localized card strings
+msgid "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_TITLE"
+msgstr "한낮 브리핑"
+
+msgid "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_DESCRIPTION"
+msgstr "<color value='#4B5563'>오늘은</color> 날씨가 맑아서 <color value='#4B5563'>운동하기 좋은 날입니다.</color>"

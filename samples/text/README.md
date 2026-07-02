@@ -19,6 +19,7 @@ This sample demonstrates DALi UI text features.
 - Localization with override callback
 - Localization with PO/MO resources
 - Custom component localization
+- Localized TextGradient markup ranges
 
 ## Examples
 
@@ -46,6 +47,7 @@ This sample demonstrates DALi UI text features.
 | `text-localization.example` | Localization sample using override callback |
 | `text-localization-po.example` | Localization sample using PO/MO resources |
 | `text-localization-custom-component.example` | Custom component localization sample |
+| `text-gradient-localization.example` | Localized markup ranges with TextGradient |
 
 ## Localization resources
 
@@ -59,6 +61,10 @@ res/po/default/ar_AE.po
 res/po/alternate/en_US.po
 res/po/alternate/ko_KR.po
 res/po/alternate/ar_AE.po
+
+res/po/gradient/en_US.po
+res/po/gradient/ko_KR.po
+res/po/gradient/ar_AE.po
 ~~~
 
 During build, CMake uses `msgfmt` to generate MO files into the gettext runtime layout.
@@ -71,6 +77,10 @@ res/locale/default/ar_AE/LC_MESSAGES/text-localization-po.mo
 res/locale/alternate/en_US/LC_MESSAGES/text-localization-po-alt.mo
 res/locale/alternate/ko_KR/LC_MESSAGES/text-localization-po-alt.mo
 res/locale/alternate/ar_AE/LC_MESSAGES/text-localization-po-alt.mo
+
+res/locale/gradient/en_US/LC_MESSAGES/text-gradient-localization-po.mo
+res/locale/gradient/ko_KR/LC_MESSAGES/text-gradient-localization-po.mo
+res/locale/gradient/ar_AE/LC_MESSAGES/text-gradient-localization-po.mo
 ~~~
 
 The generated `.mo` files are build artifacts and are not intended to be tracked in git.
@@ -102,6 +112,7 @@ Run localization samples:
 ./bin/text-localization.example
 ./bin/text-localization-po.example
 ./bin/text-localization-custom-component.example
+./bin/text-gradient-localization.example
 ~~~
 
 ### GBS build (Tizen)
