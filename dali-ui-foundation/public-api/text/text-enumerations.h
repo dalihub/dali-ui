@@ -48,31 +48,6 @@ enum class Alignment : uint8_t
 };
 
 /**
- * @brief Enumeration for selecting the bounds used to evaluate text gradient coordinates.
- *
- * The selected bounds define the target rectangle for Label TextGradient rendering.
- * Gradient::Units then defines whether coordinates inside that rectangle are
- * normalized or pixel-based.
- */
-enum class GradientBoundsMode : uint8_t
-{
-  /**
-   * @brief Use laid-out text content bounds.
-   *
-   * This is the default mode. For marquee text, the visible marquee content
-   * viewport is used to keep the gradient stable while scrolling.
-   */
-  CONTENT_BOUND = 0,
-
-  /**
-   * @brief Use the Label view bounds.
-   *
-   * The full Label size is used, including padding.
-   */
-  VIEW_BOUND = 1
-};
-
-/**
  * @brief Enumeration for line wrapping strategies.
  *
  * Specifies how text is wrapped when the available layout width
@@ -240,6 +215,64 @@ enum class PasswordMode : uint8_t
    * then is displayed using the password mask character.
    */
   REVEAL_LAST_CHARACTER = 2
+};
+
+/**
+ * @brief Enumeration for selecting the bounds used to evaluate text gradient coordinates.
+ *
+ * The selected bounds define the target rectangle for Label TextGradient rendering.
+ * Gradient::Units then defines whether coordinates inside that rectangle are
+ * normalized or pixel-based.
+ */
+enum class GradientBoundsMode : uint8_t
+{
+  /**
+   * @brief Use laid-out text content bounds.
+   *
+   * This is the default mode. For marquee text, the visible marquee content
+   * viewport is used to keep the gradient stable while scrolling.
+   */
+  CONTENT_BOUND = 0,
+
+  /**
+   * @brief Use the Label view bounds.
+   *
+   * The full Label size is used, including padding.
+   */
+  VIEW_BOUND = 1
+};
+
+/**
+ * @brief Enumeration for selecting how a text gradient overlay is applied to
+ * the resolved text glyph fill color.
+ *
+ * The overlay gradient is treated as the source, and the resolved text glyph
+ * fill is treated as the destination. The mode is evaluated inside the text
+ * shader for visible glyph fill pixels. It does not change framebuffer blending
+ * state, and the resolved glyph alpha is preserved.
+ *
+ * Text decorations such as shadow, underline, strikethrough, outline, and
+ * background are not affected.
+ */
+enum class GradientOverlayMode : uint8_t
+{
+  /**
+   * @brief Draw the overlay gradient source over the resolved text glyph fill.
+   *
+   * Transparent overlay stops leave the glyph fill unchanged. Opaque overlay
+   * stops replace the glyph fill color at that position. The resolved glyph
+   * alpha is preserved.
+   */
+  SRC_OVER = 0,
+
+  /**
+   * @brief Screen the overlay gradient source with the resolved text glyph fill.
+   *
+   * This generally lightens the glyph fill. Black overlay stops leave the glyph
+   * fill unchanged, while white overlay stops produce white. The resolved glyph
+   * alpha is preserved.
+   */
+  SCREEN = 1
 };
 
 /**

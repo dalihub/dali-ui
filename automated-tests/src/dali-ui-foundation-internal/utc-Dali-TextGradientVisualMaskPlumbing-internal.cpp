@@ -44,6 +44,8 @@ constexpr float VISUAL_WIDTH  = 240.0f;
 constexpr float VISUAL_HEIGHT = 96.0f;
 constexpr float EPSILON       = 0.001f;
 constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME = "uTextGradientStartOffset";
+constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME = "uTextGradientOverlayStartOffset";
+constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME = "uTextGradientOverlayMode";
 
 TextInternal::TextGradientStyle MakeEnabledTextGradientStyle(float startOffset = 0.0f)
 {
@@ -112,6 +114,21 @@ void UpdateTextVisual(Dali::Ui::Integration::Visual::Base internalVisual)
   UiInternal::TextVisual::UpdateRenderer(internalVisual);
 }
 
+void ExpectNoTextGradientOverlayRendererProperties(Renderer renderer)
+{
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayStartPosition"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayEndPosition"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayStartOffset"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayBounds"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayType"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayRadialCenter"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayRadialScale"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayConicCenter"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayConicScale"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayConicStartAngle"), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+}
+
 } // namespace
 
 void utc_dali_text_gradient_visual_mask_plumbing_internal_startup(void)
@@ -148,6 +165,86 @@ int UtcDaliTextGradientVisualMaskSimpleEnabledDoesNotCreateStoredMaskP(void)
 
   PixelData mask = UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual);
   DALI_TEST_CHECK(!mask);
+  END_TEST;
+}
+
+int UtcDaliTextGradientOverlayVisualDisabledKeepsRendererCleanP(void)
+{
+  UiTestApplication application;
+
+  Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
+
+  UpdateTextVisual(internalVisual);
+
+  Dali::VisualRenderer renderer = internalVisual.GetRenderer();
+  ExpectNoTextGradientOverlayRendererProperties(renderer);
+  END_TEST;
+}
+
+int UtcDaliTextGradientOverlayVisualDefaultModeUniformP(void)
+{
+  UiTestApplication application;
+
+  Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(internalVisual, MakeEnabledTextGradientStyle());
+
+  UpdateTextVisual(internalVisual);
+
+  Dali::VisualRenderer renderer = internalVisual.GetRenderer();
+  const Property::Index modeIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME);
+  DALI_TEST_CHECK(modeIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(renderer.GetProperty<float>(modeIndex), 0.0f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientType"), Property::INVALID_INDEX, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientOverlayVisualScreenModeUniformP(void)
+{
+  UiTestApplication application;
+
+  Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientOverlayMode(internalVisual, UiText::GradientOverlayMode::SCREEN);
+
+  UpdateTextVisual(internalVisual);
+
+  Dali::VisualRenderer renderer = internalVisual.GetRenderer();
+  const Property::Index modeIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME);
+  DALI_TEST_CHECK(modeIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(renderer.GetProperty<float>(modeIndex), 1.0f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientOverlayVisualStartOffsetAnimSourceP(void)
+{
+  UiTestApplication application;
+
+  RenderedTextVisual rendered = CreateRenderedInternalTextVisualWithView(application);
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.internalVisual, MakeEnabledTextGradientStyle(0.25f));
+  UpdateTextVisual(rendered.internalVisual);
+
+  Dali::VisualRenderer renderer = rendered.internalVisual.GetRenderer();
+  const Property::Index overlayRendererOffsetIndex =
+    renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME);
+  DALI_TEST_CHECK(overlayRendererOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(renderer.GetProperty<float>(overlayRendererOffsetIndex), 0.25f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  const Property::Index overlaySourceOffsetIndex =
+    rendered.view.RegisterProperty(UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME, 0.75f);
+  UiInternal::TextVisual::SetGradientOverlayAnimProperties(rendered.internalVisual, overlaySourceOffsetIndex);
+  UiInternal::TextVisual::SetGradientOverlayAnimApplyAlways(rendered.internalVisual, true, true);
+
+  application.SendNotification();
+  application.Render(16);
+
+  renderer = rendered.internalVisual.GetRenderer();
+  const Property::Index reboundOverlayRendererOffsetIndex =
+    renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME);
+  DALI_TEST_CHECK(reboundOverlayRendererOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(reboundOverlayRendererOffsetIndex), 0.75f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
   END_TEST;
 }
 

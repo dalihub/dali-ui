@@ -23,6 +23,7 @@
 #include <cmath>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/visuals/gradient/linear-gradient.h>
 
 namespace Dali
@@ -60,36 +61,7 @@ bool IsRenderable(const Gradient::Base& gradient)
   }
 }
 
-bool IsLinearRenderable(const Gradient::Base& gradient)
-{
-  return IsRenderable(gradient) && gradient.GetType() == Gradient::Type::LINEAR;
-}
-
-bool IsSupportedTextGradientType(const Gradient::Base& gradient)
-{
-  if(!IsRenderable(gradient))
-  {
-    return false;
-  }
-
-  switch(gradient.GetType())
-  {
-    case Gradient::Type::LINEAR:
-    case Gradient::Type::RADIAL:
-    case Gradient::Type::CONIC:
-    {
-      return true;
-    }
-
-    case Gradient::Type::NONE:
-    default:
-    {
-      return false;
-    }
-  }
-}
-
-bool IsSupportedTextGradientStyle(const TextGradientStyle& style)
+bool IsRenderableStyle(const TextGradientStyle& style)
 {
   if(!style.enabled || style.stops.Count() < 2u)
   {
@@ -140,6 +112,45 @@ Dali::WrapMode::Type GetWrapMode(Gradient::SpreadMethod spread)
       return Dali::WrapMode::CLAMP_TO_EDGE;
     }
   }
+}
+
+TextGradientRenderData ResolveGradientRenderData(const TextGradientStyle& style,
+                                                 const Vector4&           bounds,
+                                                 const Vector2&           coordinateSize)
+{
+  TextGradientRenderData data;
+  if(!IsRenderableStyle(style))
+  {
+    return data;
+  }
+
+  data.enabled     = true;
+  data.type        = style.type;
+  data.startOffset = style.startOffset;
+  data.bounds      = bounds;
+
+  data.startPosition =
+    Text::Internal::ResolveGradientPosition(style.units, style.linearStart, bounds, coordinateSize);
+  data.endPosition =
+    Text::Internal::ResolveGradientPosition(style.units, style.linearEnd, bounds, coordinateSize);
+
+  if(style.type == Gradient::Type::RADIAL)
+  {
+    data.radialCenter =
+      Text::Internal::ResolveGradientPosition(style.units, style.radialCenter, bounds, coordinateSize);
+    data.radialScale =
+      Text::Internal::ResolveRadialGradientScale(style.units, style.radialRadius, bounds, coordinateSize);
+  }
+  else if(style.type == Gradient::Type::CONIC)
+  {
+    data.conicCenter =
+      Text::Internal::ResolveGradientPosition(style.units, style.conicCenter, bounds, coordinateSize);
+    data.conicScale =
+      Text::Internal::ResolveConicGradientScale(style.units, bounds, coordinateSize);
+    data.conicStartAngle = style.conicStartAngle.radian;
+  }
+
+  return data;
 }
 
 Dali::Texture CreateLookupTexture(const TextGradientStyle& style)

@@ -89,6 +89,36 @@ void LabelAnimationSpecImpl::ApplyTextGradientStartOffsetBy(Animation& animation
   }
 }
 
+void LabelAnimationSpecImpl::ApplyTextGradientOverlayStartOffsetTo(Animation& animation, Label label, const Entry& entry)
+{
+  if(auto* labelImpl = GetLabelImpl(label))
+  {
+    const Property::Index index = labelImpl->EnsureGradientOverlayAnimOffset();
+    if(index == Property::INVALID_INDEX)
+    {
+      return;
+    }
+
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateTo(Property(label, index), entry.value, entry.alpha, period);
+  }
+}
+
+void LabelAnimationSpecImpl::ApplyTextGradientOverlayStartOffsetBy(Animation& animation, Label label, const Entry& entry)
+{
+  if(auto* labelImpl = GetLabelImpl(label))
+  {
+    const Property::Index index = labelImpl->EnsureGradientOverlayAnimOffset();
+    if(index == Property::INVALID_INDEX)
+    {
+      return;
+    }
+
+    TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+    animation.AnimateBy(Property(label, index), entry.value, entry.alpha, period);
+  }
+}
+
 } // namespace Internal
 } // namespace Ui
 } // namespace Dali

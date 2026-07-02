@@ -48,10 +48,12 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT
 
 const int MINIMUM_SCROLL_SPEED = 1; // Speed should be set by Property system.
 
-static constexpr const char* TEXT_GRADIENT_SHADER_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT\n";
+static constexpr const char* TEXT_GRADIENT_SHADER_DEFINE         = "#define IS_REQUIRED_TEXT_GRADIENT\n";
+static constexpr const char* TEXT_GRADIENT_OVERLAY_SHADER_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT_OVERLAY\n";
 // Keep this tag separate from TextVisual gradient constraint tags because
 // TextScroller reuses the visual renderer while marquee is active.
 static constexpr uint32_t TEXT_SCROLLER_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 26u);
+static constexpr uint32_t TEXT_SCROLLER_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 27u);
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_POSITION_NAME("uTextGradientStartPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_END_POSITION_NAME("uTextGradientEndPosition");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME("uTextGradientStartOffset");
@@ -62,6 +64,17 @@ constexpr const char*     UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME("uTextGradient
 constexpr const char*     UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME("uTextGradientConicCenter");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME("uTextGradientConicScale");
 constexpr const char*     UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME("uTextGradientConicStartAngle");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_START_POSITION_NAME("uTextGradientOverlayStartPosition");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_END_POSITION_NAME("uTextGradientOverlayEndPosition");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME("uTextGradientOverlayStartOffset");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME("uTextGradientOverlayBounds");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME("uTextGradientOverlayType");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME("uTextGradientOverlayRadialCenter");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME("uTextGradientOverlayRadialScale");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME("uTextGradientOverlayConicCenter");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME("uTextGradientOverlayConicScale");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME("uTextGradientOverlayConicStartAngle");
+constexpr const char*     UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME("uTextGradientOverlayMode");
 
 /**
  * @brief How the text should be aligned horizontally when scrolling the text.
@@ -107,12 +120,16 @@ void GradientOffsetConstraint(float& current, const PropertyInputContainer& inpu
   current = inputs[0]->GetFloat();
 }
 
-std::string BuildTextScrollerShaderSource(std::string_view shaderSource, bool textGradientEnabled)
+std::string BuildTextScrollerShaderSource(std::string_view shaderSource, bool textGradientEnabled, bool textGradientOverlayEnabled)
 {
   std::string shader;
   if(textGradientEnabled)
   {
     shader += TEXT_GRADIENT_SHADER_DEFINE;
+  }
+  if(textGradientOverlayEnabled)
+  {
+    shader += TEXT_GRADIENT_OVERLAY_SHADER_DEFINE;
   }
   shader.append(shaderSource.data(), shaderSource.size());
   return shader;
@@ -256,6 +273,43 @@ void TextScroller::SetGradientApplyAlways(bool applyAlways, bool notifyToConstra
   }
 }
 
+void TextScroller::SetGradientOverlayAnimProperties(Property::Index startOffsetPropertyIndex)
+{
+  const bool changed = mGradientOverlayAnimOffsetIndex != startOffsetPropertyIndex;
+
+  mGradientOverlayAnimOffsetIndex = startOffsetPropertyIndex;
+
+  if(changed)
+  {
+    RemoveGradientOverlayConstraints();
+    if(mGradientOverlayEnabled && mRenderer)
+    {
+      BindGradientOverlayConstraint(mRenderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME));
+    }
+  }
+}
+
+void TextScroller::SetGradientOverlayApplyAlways(bool applyAlways, bool notifyToConstraint)
+{
+  if(mGradientOverlayApplyAlways != applyAlways || notifyToConstraint)
+  {
+    mGradientOverlayApplyAlways = applyAlways;
+    for(auto& constraint : mGradientOverlayConstraints)
+    {
+      if(constraint)
+      {
+        constraint.SetApplyRate(mGradientOverlayApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                            : Dali::Constraint::APPLY_ONCE);
+      }
+    }
+  }
+}
+
+bool TextScroller::IsGradientOverlayEnabled() const
+{
+  return mGradientOverlayEnabled;
+}
+
 void TextScroller::RemoveGradientConstraints()
 {
   for(auto& constraint : mGradientConstraints)
@@ -268,9 +322,41 @@ void TextScroller::RemoveGradientConstraints()
   mGradientConstraints.clear();
 }
 
+void TextScroller::RemoveGradientOverlayConstraints()
+{
+  for(auto& constraint : mGradientOverlayConstraints)
+  {
+    if(constraint)
+    {
+      constraint.Remove();
+    }
+  }
+  mGradientOverlayConstraints.clear();
+}
+
+void TextScroller::BindGradientOverlayConstraint(Property::Index rendererStartOffsetIndex)
+{
+  if(!mGradientOverlayEnabled ||
+     !mScrollingTextActor ||
+     rendererStartOffsetIndex == Property::INVALID_INDEX ||
+     mGradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  Constraint constraint = Constraint::New<float>(mRenderer, rendererStartOffsetIndex, GradientOffsetConstraint);
+  constraint.AddSource(Source(mScrollingTextActor, mGradientOverlayAnimOffsetIndex));
+  constraint.SetApplyRate(mGradientOverlayApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                      : Dali::Constraint::APPLY_ONCE);
+  Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_SCROLLER_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG);
+  constraint.Apply();
+  mGradientOverlayConstraints.push_back(constraint);
+}
+
 TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
 : mScrollerInterface(scrollerInterface),
   mScrollDeltaIndex(Property::INVALID_INDEX),
+  mGradientOverlayAnimOffsetIndex(Property::INVALID_INDEX),
   mScrollSpeed(MINIMUM_SCROLL_SPEED),
   mLoopCount(1),
   mLoopDelay(0.0f),
@@ -279,6 +365,8 @@ TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
   mOrientation(Text::MarqueeOrientation::HORIZONTAL),
   mIsStopRequested(false),
   mGradientApplyAlways(false),
+  mGradientOverlayApplyAlways(false),
+  mGradientOverlayEnabled(false),
   mIsStoppedImmediately(false)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller Default Constructor\n");
@@ -307,8 +395,11 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   DALI_LOG_INFO(gLogFilter, Debug::Verbose,
                 "TextScroller::SetParameters controlSize[%f,%f] textureSize[%f,%f] direction[%d]\n", controlSize.x,
                 controlSize.y, textureSize.x, textureSize.y, direction);
-  mRenderer = renderer;
+  mRenderer           = renderer;
+  mScrollingTextActor = scrollingTextActor;
   RemoveGradientConstraints();
+  RemoveGradientOverlayConstraints();
+  mGradientOverlayEnabled = false;
 
   bool  isHorizontal      = mOrientation == Text::MarqueeOrientation::HORIZONTAL;
   float animationProgress = 0.0f;
@@ -341,12 +432,16 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
   // Set the shader and texture for scrolling
   const std::string_view vertexShaderSource   = isHorizontal ? SHADER_TEXT_SCROLLER_SHADER_VERT : SHADER_TEXT_SCROLLER_VERTICAL_SHADER_VERT;
   const std::string_view fragmentShaderSource = isHorizontal ? SHADER_TEXT_SCROLLER_SHADER_FRAG : SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG;
-  const std::string      vertexShader         = BuildTextScrollerShaderSource(vertexShaderSource, textGradient.enabled);
-  const std::string      fragmentShader       = BuildTextScrollerShaderSource(fragmentShaderSource, textGradient.enabled);
+  const std::string      vertexShader         = BuildTextScrollerShaderSource(vertexShaderSource, textGradient.enabled, textGradient.overlayEnabled);
+  const std::string      fragmentShader       = BuildTextScrollerShaderSource(fragmentShaderSource, textGradient.enabled, textGradient.overlayEnabled);
   std::string            shaderName           = isHorizontal ? "TEXT_SCROLLER" : "TEXT_SCROLLER_VERTICAL";
   if(textGradient.enabled)
   {
     shaderName += "_TEXT_GRADIENT";
+  }
+  if(textGradient.overlayEnabled)
+  {
+    shaderName += "_TEXT_GRADIENT_OVERLAY";
   }
 
   const Dali::StringView vertexShaderView   = ToDaliStringView(vertexShader);
@@ -416,6 +511,26 @@ void TextScroller::SetParameters(Actor scrollingTextActor, Renderer renderer, Te
       constraint.Apply();
       mGradientConstraints.push_back(constraint);
     }
+  }
+  if(textGradient.overlayEnabled)
+  {
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_POSITION_NAME, textGradient.overlayStartPosition);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_END_POSITION_NAME, textGradient.overlayEndPosition);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME, static_cast<float>(textGradient.overlayType));
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME, textGradient.overlayRadialCenter);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME, textGradient.overlayRadialScale);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME, textGradient.overlayConicCenter);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME, textGradient.overlayConicScale);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME, textGradient.overlayConicStartAngle);
+    const Property::Index overlayStartOffsetIndex =
+      Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME, textGradient.overlayStartOffset);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME, textGradient.overlayBounds);
+    Text::Internal::TextGradient::SetRendererProperty(mRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME, static_cast<float>(textGradient.overlayMode));
+
+    mGradientOverlayEnabled         = true;
+    mGradientOverlayApplyAlways     = textGradient.overlayApplyConstraintsAlways;
+    mGradientOverlayAnimOffsetIndex = textGradient.overlayStartOffsetPropertyIndex;
+    BindGradientOverlayConstraint(overlayStartOffsetIndex);
   }
   mScrollDeltaIndex = shader.RegisterProperty("uDelta", 0.0f);
 

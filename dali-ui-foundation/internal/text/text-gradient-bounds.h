@@ -40,16 +40,36 @@ namespace Text
 namespace Internal
 {
 
-inline Vector2 GetTextGradientBoundsPixelSize(const Vector4& bounds, const Vector2& targetSize)
+/**
+ * @brief Returns the selected gradient bounds size in target-space pixels.
+ *
+ * @param[in] bounds Normalized gradient bounds in the target coordinate space.
+ * @param[in] targetSize The target coordinate space size.
+ * @return Pixel size of the selected bounds, clamped to a positive value.
+ */
+inline Vector2 GetGradientBoundsPixelSize(const Vector4& bounds, const Vector2& targetSize)
 {
   return Vector2(std::max(bounds.z * targetSize.x, Math::MACHINE_EPSILON_1000),
                  std::max(bounds.w * targetSize.y, Math::MACHINE_EPSILON_1000));
 }
 
-inline Vector2 ResolveTextGradientPosition(Dali::Ui::Gradient::Units units,
-                                           const Vector2&            position,
-                                           const Vector4&            bounds,
-                                           const Vector2&            targetSize)
+/**
+ * @brief Converts a gradient control point to normalized selected-bounds coordinates.
+ *
+ * OBJECT_BOUNDING_BOX positions are centered around (0, 0), so they are shifted
+ * to the selected bounds. USER_SPACE positions are converted from target-space
+ * pixels to the selected bounds.
+ *
+ * @param[in] units The coordinate units used by the gradient.
+ * @param[in] position The source gradient position.
+ * @param[in] bounds Normalized gradient bounds in the target coordinate space.
+ * @param[in] targetSize The target coordinate space size.
+ * @return The position in selected-bounds coordinates.
+ */
+inline Vector2 ResolveGradientPosition(Dali::Ui::Gradient::Units units,
+                                       const Vector2&            position,
+                                       const Vector4&            bounds,
+                                       const Vector2&            targetSize)
 {
   if(units == Dali::Ui::Gradient::Units::OBJECT_BOUNDING_BOX)
   {
@@ -61,14 +81,23 @@ inline Vector2 ResolveTextGradientPosition(Dali::Ui::Gradient::Units units,
     return position;
   }
 
-  const Vector2 boundsPixelSize = GetTextGradientBoundsPixelSize(bounds, targetSize);
+  const Vector2 boundsPixelSize = GetGradientBoundsPixelSize(bounds, targetSize);
   return Vector2(position.x / boundsPixelSize.x, position.y / boundsPixelSize.y);
 }
 
-inline Vector2 ResolveTextGradientRadialScale(Dali::Ui::Gradient::Units units,
-                                              float                     radius,
-                                              const Vector4&            bounds,
-                                              const Vector2&            targetSize)
+/**
+ * @brief Calculates the scale used when evaluating radial distance.
+ *
+ * @param[in] units The coordinate units used by the gradient.
+ * @param[in] radius The radial gradient radius.
+ * @param[in] bounds Normalized gradient bounds in the target coordinate space.
+ * @param[in] targetSize The target coordinate space size.
+ * @return Scale applied to the center-to-fragment vector before length().
+ */
+inline Vector2 ResolveRadialGradientScale(Dali::Ui::Gradient::Units units,
+                                          float                     radius,
+                                          const Vector4&            bounds,
+                                          const Vector2&            targetSize)
 {
   // OBJECT_BOUNDING_BOX uses normalized selected-bounds coordinates, so
   // non-square bounds may look elliptical. USER_SPACE converts that coordinate
@@ -76,47 +105,63 @@ inline Vector2 ResolveTextGradientRadialScale(Dali::Ui::Gradient::Units units,
   const float safeRadius = std::max(std::fabs(radius), Math::MACHINE_EPSILON_1000);
   if(units == Dali::Ui::Gradient::Units::USER_SPACE)
   {
-    return GetTextGradientBoundsPixelSize(bounds, targetSize) / safeRadius;
+    return GetGradientBoundsPixelSize(bounds, targetSize) / safeRadius;
   }
 
   return Vector2(1.0f / safeRadius, 1.0f / safeRadius);
 }
 
-inline Vector2 ResolveTextGradientConicScale(Dali::Ui::Gradient::Units units,
-                                             const Vector4&            bounds,
-                                             const Vector2&            targetSize)
+/**
+ * @brief Calculates the scale used when evaluating a conic angle.
+ *
+ * @param[in] units The coordinate units used by the gradient.
+ * @param[in] bounds Normalized gradient bounds in the target coordinate space.
+ * @param[in] targetSize The target coordinate space size.
+ * @return Scale applied to the center-to-fragment vector before atan().
+ */
+inline Vector2 ResolveConicGradientScale(Dali::Ui::Gradient::Units units,
+                                         const Vector4&            bounds,
+                                         const Vector2&            targetSize)
 {
   // OBJECT_BOUNDING_BOX evaluates the angle in normalized selected-bounds
   // coordinates. USER_SPACE converts the vector to selected-bounds pixels
   // before atan().
   if(units == Dali::Ui::Gradient::Units::USER_SPACE)
   {
-    return GetTextGradientBoundsPixelSize(bounds, targetSize);
+    return GetGradientBoundsPixelSize(bounds, targetSize);
   }
 
   return Vector2::ONE;
 }
 
-inline Vector4 CalculateTextGradientViewBounds(const Vector2& textureSize,
-                                               const Vector2& viewSize,
-                                               const Vector2& visualOffset)
+/**
+ * @brief Calculates VIEW_BOUND gradient bounds in a target coordinate space.
+ *
+ * @param[in] coordinateSize The coordinate space size used by the target shader.
+ * @param[in] viewSize The Label view size.
+ * @param[in] visualOffset The visual offset inside the coordinate space.
+ * @return Normalized view bounds, or full bounds for invalid input.
+ */
+inline Vector4 CalculateGradientViewBounds(const Vector2& coordinateSize,
+                                           const Vector2& viewSize,
+                                           const Vector2& visualOffset)
 {
-  if(textureSize.width < Math::MACHINE_EPSILON_1000 ||
-     textureSize.height < Math::MACHINE_EPSILON_1000 ||
+  if(coordinateSize.width < Math::MACHINE_EPSILON_1000 ||
+     coordinateSize.height < Math::MACHINE_EPSILON_1000 ||
      viewSize.width < Math::MACHINE_EPSILON_1000 ||
      viewSize.height < Math::MACHINE_EPSILON_1000)
   {
     return Vector4(0.0f, 0.0f, 1.0f, 1.0f);
   }
 
-  return Vector4(-visualOffset.x / textureSize.width,
-                 -visualOffset.y / textureSize.height,
-                 viewSize.width / textureSize.width,
-                 viewSize.height / textureSize.height);
+  return Vector4(-visualOffset.x / coordinateSize.width,
+                 -visualOffset.y / coordinateSize.height,
+                 viewSize.width / coordinateSize.width,
+                 viewSize.height / coordinateSize.height);
 }
 
 /**
- * @brief Calculates normalized logical text bounds inside a rendered text texture.
+ * @brief Calculates CONTENT_BOUND gradient bounds inside a rendered text texture.
  *
  * This helper intentionally uses layout line extents, not glyph ink-tight bounds.
  * The returned vector is (x, y, width, height) in texture UV coordinates.
@@ -126,13 +171,13 @@ inline Vector4 CalculateTextGradientViewBounds(const Vector2& textureSize,
  * @param[in] lines Optional laid-out line runs.
  * @param[in] numberOfLines The number of line runs.
  * @param[in] verticalAlignment The block vertical alignment used by Typesetter.
- * @return Normalized logical text bounds, or full texture bounds for invalid input.
+ * @return Normalized content bounds, or full texture bounds for invalid input.
  */
-inline Vector4 CalculateTextGradientBounds(const Vector2& textureSize,
-                                           const Vector2& layoutSize,
-                                           const LineRun* lines,
-                                           Length         numberOfLines,
-                                           Alignment      verticalAlignment)
+inline Vector4 CalculateGradientContentBounds(const Vector2& textureSize,
+                                              const Vector2& layoutSize,
+                                              const LineRun* lines,
+                                              Length         numberOfLines,
+                                              Alignment      verticalAlignment)
 {
   if(textureSize.width < Math::MACHINE_EPSILON_1000 ||
      textureSize.height < Math::MACHINE_EPSILON_1000)
@@ -208,7 +253,13 @@ inline Vector4 CalculateTextGradientBounds(const Vector2& textureSize,
                  boundsHeight / textureSize.height);
 }
 
-inline float GetTextGradientAlignmentFactor(Alignment alignment)
+/**
+ * @brief Converts text alignment to the normalized start offset factor.
+ *
+ * @param[in] alignment The text alignment.
+ * @return 0.0 for START, 0.5 for CENTER, and 1.0 for END.
+ */
+inline float GetAlignmentFactor(Alignment alignment)
 {
   switch(alignment)
   {
@@ -228,9 +279,20 @@ inline float GetTextGradientAlignmentFactor(Alignment alignment)
   }
 }
 
-inline Vector2 GetTextGradientContentSize(const Vector2& layoutSize,
-                                          const LineRun* lines,
-                                          Length         numberOfLines)
+/**
+ * @brief Calculates the text content size used by marquee viewport bounds.
+ *
+ * The width is the widest laid-out line and the height is the sum of line
+ * heights when line data is available; otherwise the logical layout size is used.
+ *
+ * @param[in] layoutSize The logical text layout size.
+ * @param[in] lines Optional laid-out line runs.
+ * @param[in] numberOfLines The number of line runs.
+ * @return Content size used for viewport-local gradient bounds.
+ */
+inline Vector2 CalculateGradientContentSize(const Vector2& layoutSize,
+                                            const LineRun* lines,
+                                            Length         numberOfLines)
 {
   Vector2 contentSize(std::max(layoutSize.width, 0.0f),
                       std::max(layoutSize.height, 0.0f));
@@ -258,9 +320,20 @@ inline Vector2 GetTextGradientContentSize(const Vector2& layoutSize,
   return contentSize;
 }
 
-inline Vector2 CalculateTextGradientViewportAxisBounds(float     viewportLength,
-                                                       float     contentLength,
-                                                       Alignment alignment)
+/**
+ * @brief Calculates one axis of marquee viewport-local gradient bounds.
+ *
+ * Overflowing content uses the full viewport on that axis. Shorter content is
+ * aligned inside the viewport and returned as (offset, size).
+ *
+ * @param[in] viewportLength The visible viewport length.
+ * @param[in] contentLength The text content length on the same axis.
+ * @param[in] alignment The text alignment for short content.
+ * @return Normalized axis bounds as (offset, size).
+ */
+inline Vector2 CalculateGradientViewportAxisBounds(float     viewportLength,
+                                                   float     contentLength,
+                                                   Alignment alignment)
 {
   if(viewportLength < Math::MACHINE_EPSILON_1000)
   {
@@ -274,12 +347,12 @@ inline Vector2 CalculateTextGradientViewportAxisBounds(float     viewportLength,
 
   const float clampedContentLength = std::max(contentLength, Math::MACHINE_EPSILON_1000);
   const float offset               = (viewportLength - clampedContentLength) *
-                       GetTextGradientAlignmentFactor(alignment);
+                       GetAlignmentFactor(alignment);
   return Vector2(offset / viewportLength, clampedContentLength / viewportLength);
 }
 
 /**
- * @brief Calculates normalized TextGradient bounds in the visible marquee viewport.
+ * @brief Calculates CONTENT_BOUND gradient bounds in the visible marquee viewport.
  *
  * Overflow text uses full visible viewport bounds on the overflow axis.
  * Non-overflow text uses aligned text bounds inside the viewport.
@@ -292,12 +365,12 @@ inline Vector2 CalculateTextGradientViewportAxisBounds(float     viewportLength,
  * @param[in] verticalAlignment The vertical text alignment.
  * @return Normalized viewport-local bounds, or full viewport bounds for invalid input.
  */
-inline Vector4 CalculateMarqueeTextGradientViewportBounds(const Vector2& viewportSize,
-                                                          const Vector2& layoutSize,
-                                                          const LineRun* lines,
-                                                          Length         numberOfLines,
-                                                          Alignment      horizontalAlignment,
-                                                          Alignment      verticalAlignment)
+inline Vector4 CalculateMarqueeGradientViewportBounds(const Vector2& viewportSize,
+                                                      const Vector2& layoutSize,
+                                                      const LineRun* lines,
+                                                      Length         numberOfLines,
+                                                      Alignment      horizontalAlignment,
+                                                      Alignment      verticalAlignment)
 {
   if(viewportSize.width < Math::MACHINE_EPSILON_1000 ||
      viewportSize.height < Math::MACHINE_EPSILON_1000)
@@ -305,11 +378,11 @@ inline Vector4 CalculateMarqueeTextGradientViewportBounds(const Vector2& viewpor
     return Vector4(0.0f, 0.0f, 1.0f, 1.0f);
   }
 
-  const Vector2 contentSize = GetTextGradientContentSize(layoutSize, lines, numberOfLines);
+  const Vector2 contentSize = CalculateGradientContentSize(layoutSize, lines, numberOfLines);
   const Vector2 xBounds =
-    CalculateTextGradientViewportAxisBounds(viewportSize.width, contentSize.width, horizontalAlignment);
+    CalculateGradientViewportAxisBounds(viewportSize.width, contentSize.width, horizontalAlignment);
   const Vector2 yBounds =
-    CalculateTextGradientViewportAxisBounds(viewportSize.height, contentSize.height, verticalAlignment);
+    CalculateGradientViewportAxisBounds(viewportSize.height, contentSize.height, verticalAlignment);
 
   return Vector4(xBounds.x, yBounds.x, xBounds.y, yBounds.y);
 }

@@ -36,9 +36,9 @@ namespace Internal
 namespace TextGradientMarquee
 {
 
-bool IsStyleSupported(const TextGradientStyle& style, const Size& textureSize)
+bool IsRenderableStyle(const TextGradientStyle& style, const Size& textureSize)
 {
-  if(!TextGradient::IsSupportedTextGradientStyle(style))
+  if(!TextGradient::IsRenderableStyle(style))
   {
     return false;
   }
@@ -61,51 +61,44 @@ bool IsCompositionSupported(bool hasMultipleTextColors,
   return !(hasMultipleTextColors || containsColorGlyph || styleTextureEnabled || isOverlayStyle || embossEnabled || cutoutEnabled);
 }
 
-bool IsSupported(const TextGradientStyle& style,
-                 const Size&              textureSize,
-                 bool                     hasMultipleTextColors,
-                 bool                     containsColorGlyph,
-                 bool                     styleTextureEnabled,
-                 bool                     isOverlayStyle,
-                 bool                     embossEnabled,
-                 bool                     cutoutEnabled)
-{
-  return IsStyleSupported(style, textureSize) &&
-         IsCompositionSupported(hasMultipleTextColors,
-                                containsColorGlyph,
-                                styleTextureEnabled,
-                                isOverlayStyle,
-                                embossEnabled,
-                                cutoutEnabled);
-}
-
 Dali::Ui::Text::TextScrollerTextGradient CreateMarqueeGradient(const TextGradientStyle& style,
                                                                const Vector4&           bounds,
                                                                const Vector2&           coordinateSize)
 {
+  const TextGradient::TextGradientRenderData renderData =
+    TextGradient::ResolveGradientRenderData(style, bounds, coordinateSize);
+
   Dali::Ui::Text::TextScrollerTextGradient textGradient;
-  textGradient.enabled       = true;
-  textGradient.type          = style.type;
-  textGradient.startPosition = Text::Internal::ResolveTextGradientPosition(style.units, style.linearStart, bounds, coordinateSize);
-  textGradient.endPosition   = Text::Internal::ResolveTextGradientPosition(style.units, style.linearEnd, bounds, coordinateSize);
-  if(style.type == Gradient::Type::RADIAL)
-  {
-    textGradient.radialCenter =
-      Text::Internal::ResolveTextGradientPosition(style.units, style.radialCenter, bounds, coordinateSize);
-    textGradient.radialScale =
-      Text::Internal::ResolveTextGradientRadialScale(style.units, style.radialRadius, bounds, coordinateSize);
-  }
-  else if(style.type == Gradient::Type::CONIC)
-  {
-    textGradient.conicCenter =
-      Text::Internal::ResolveTextGradientPosition(style.units, style.conicCenter, bounds, coordinateSize);
-    textGradient.conicScale =
-      Text::Internal::ResolveTextGradientConicScale(style.units, bounds, coordinateSize);
-    textGradient.conicStartAngle = style.conicStartAngle.radian;
-  }
-  textGradient.startOffset = style.startOffset;
-  textGradient.bounds      = bounds;
+  textGradient.enabled         = renderData.enabled;
+  textGradient.type            = renderData.type;
+  textGradient.startPosition   = renderData.startPosition;
+  textGradient.endPosition     = renderData.endPosition;
+  textGradient.radialCenter    = renderData.radialCenter;
+  textGradient.radialScale     = renderData.radialScale;
+  textGradient.conicCenter     = renderData.conicCenter;
+  textGradient.conicScale      = renderData.conicScale;
+  textGradient.conicStartAngle = renderData.conicStartAngle;
+  textGradient.startOffset     = renderData.startOffset;
+  textGradient.bounds          = renderData.bounds;
   return textGradient;
+}
+
+void SetMarqueeOverlayGradient(Dali::Ui::Text::TextScrollerTextGradient&       textGradient,
+                               const Dali::Ui::Text::TextScrollerTextGradient& overlayGradient,
+                               Dali::Ui::Text::GradientOverlayMode             overlayMode)
+{
+  textGradient.overlayEnabled         = overlayGradient.enabled;
+  textGradient.overlayType            = overlayGradient.type;
+  textGradient.overlayStartPosition   = overlayGradient.startPosition;
+  textGradient.overlayEndPosition     = overlayGradient.endPosition;
+  textGradient.overlayRadialCenter    = overlayGradient.radialCenter;
+  textGradient.overlayRadialScale     = overlayGradient.radialScale;
+  textGradient.overlayConicCenter     = overlayGradient.conicCenter;
+  textGradient.overlayConicScale      = overlayGradient.conicScale;
+  textGradient.overlayConicStartAngle = overlayGradient.conicStartAngle;
+  textGradient.overlayStartOffset     = overlayGradient.startOffset;
+  textGradient.overlayBounds          = overlayGradient.bounds;
+  textGradient.overlayMode            = overlayMode;
 }
 
 } // namespace TextGradientMarquee

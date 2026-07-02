@@ -61,6 +61,21 @@ struct TextScrollerTextGradient
   Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized viewport-local bounds for TextGradient evaluation.
   Property::Index startOffsetPropertyIndex{Property::INVALID_INDEX};
   bool            applyConstraintsAlways{false};
+
+  bool                      overlayEnabled{false};
+  Gradient::Type            overlayType{Gradient::Type::NONE};
+  Vector2                   overlayStartPosition{Vector2::ZERO};
+  Vector2                   overlayEndPosition{Vector2::ONE};
+  Vector2                   overlayRadialCenter{Vector2::ZERO};
+  Vector2                   overlayRadialScale{Vector2::ZERO};
+  Vector2                   overlayConicCenter{Vector2::ZERO};
+  Vector2                   overlayConicScale{Vector2::ONE};
+  float                     overlayConicStartAngle{0.0f};
+  float                     overlayStartOffset{0.0f};
+  Vector4                   overlayBounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized viewport-local bounds for TextGradientOverlay evaluation.
+  Text::GradientOverlayMode overlayMode{Text::GradientOverlayMode::SRC_OVER};
+  Property::Index           overlayStartOffsetPropertyIndex{Property::INVALID_INDEX};
+  bool                      overlayApplyConstraintsAlways{false};
 };
 
 /**
@@ -91,6 +106,8 @@ public:
    * @param[in] horizontalAlignment horizontal alignment of the text
    * @param[in] verticalAlignment vertical alignment of the text
    * @param[in] animationReStart Whether to start from the beginning when the animation is playing.
+   * @param[in] textGradient Full marquee gradient renderer setup data, including optional source
+   * property indices for initial animation binding.
    */
   void SetParameters(Actor scrollingTextActor, Dali::Renderer renderer, TextureSet textureSet, const Size& controlSize,
                      const Size& textureSize, const float wrapGap, CharacterDirection direction,
@@ -193,6 +210,29 @@ public:
    */
   void SetGradientApplyAlways(bool applyAlways, bool notifyToConstraint = false);
 
+  /**
+   * @brief Sets the TextGradientOverlay start-offset source property index used by marquee constraints.
+   *
+   * This is the live update path after SetParameters() has already set up an
+   * overlay-enabled scroller renderer.
+   *
+   * @param[in] startOffsetPropertyIndex Source property index for uTextGradientOverlayStartOffset.
+   */
+  void SetGradientOverlayAnimProperties(Property::Index startOffsetPropertyIndex);
+
+  /**
+   * @brief Sets whether TextGradientOverlay animation constraints should be applied every frame.
+   *
+   * @param[in] applyAlways True to use APPLY_ALWAYS, false to use APPLY_ONCE.
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  void SetGradientOverlayApplyAlways(bool applyAlways, bool notifyToConstraint = false);
+
+  /**
+   * @brief Returns whether the current scroller renderer has TextGradientOverlay enabled.
+   */
+  bool IsGradientOverlayEnabled() const;
+
 private: // Implementation
   /**
    * Constructor
@@ -230,24 +270,39 @@ private: // Implementation
    */
   void RemoveGradientConstraints();
 
-private:
-  ScrollerInterface&      mScrollerInterface;   // Interface implemented by control that requires scrolling
-  Property::Index         mScrollDeltaIndex;    // Property used by shader to represent distance to scroll
-  Animation               mScrollAnimation;     // Animation used to update the mScrollDeltaIndex
-  Dali::Renderer          mRenderer;            // Renderer used to render the text
-  Shader                  mShader;              // Shader originally used by the renderer while not scrolling
-  TextureSet              mTextureSet;          // Texture originally used by the renderer while not scrolling
-  std::vector<Constraint> mGradientConstraints; // Constraints for animated TextGradient uniforms.
+  /**
+   * @brief Removes TextGradientOverlay animation constraints from the current renderer.
+   */
+  void RemoveGradientOverlayConstraints();
 
-  int                      mScrollSpeed;             ///< Speed which text should automatically scroll at
-  int                      mLoopCount;               ///< Number of time the text should scroll
-  float                    mLoopDelay;               ///< Time delay of loop start
-  float                    mWrapGap;                 ///< Gap before text wraps around when scrolling
-  Text::MarqueeStopMode    mStopMode;                ///< Stop mode of scrolling text, when loop count is 0.
-  Text::MarqueeOrientation mOrientation;             ///< Orientation of the marquee. (HORIZONTAL, VERTICAL)
-  bool                     mIsStopRequested : 1;     ///< Whether the stop scrolling has been triggered or not.
-  bool                     mGradientApplyAlways : 1; ///< Whether TextGradient constraints need to be applied always.
-  std::atomic<bool>        mIsStoppedImmediately;    ///< Whether the stop is triggered by immediate stop.
+  /**
+   * @brief Binds TextGradientOverlay animation constraints to the current renderer.
+   */
+  void BindGradientOverlayConstraint(Property::Index rendererStartOffsetIndex);
+
+private:
+  ScrollerInterface&      mScrollerInterface;              // Interface implemented by control that requires scrolling
+  Property::Index         mScrollDeltaIndex;               // Property used by shader to represent distance to scroll
+  Animation               mScrollAnimation;                // Animation used to update the mScrollDeltaIndex
+  Dali::Renderer          mRenderer;                       // Renderer used to render the text
+  Actor                   mScrollingTextActor;             // Actor used as source for TextGradientOverlay animation properties
+  Shader                  mShader;                         // Shader originally used by the renderer while not scrolling
+  TextureSet              mTextureSet;                     // Texture originally used by the renderer while not scrolling
+  std::vector<Constraint> mGradientConstraints;            // Constraints for animated TextGradient uniforms.
+  std::vector<Constraint> mGradientOverlayConstraints;     // Constraints for animated TextGradientOverlay uniforms.
+  Property::Index         mGradientOverlayAnimOffsetIndex; // Source property for uTextGradientOverlayStartOffset.
+
+  int                      mScrollSpeed;                    ///< Speed which text should automatically scroll at
+  int                      mLoopCount;                      ///< Number of time the text should scroll
+  float                    mLoopDelay;                      ///< Time delay of loop start
+  float                    mWrapGap;                        ///< Gap before text wraps around when scrolling
+  Text::MarqueeStopMode    mStopMode;                       ///< Stop mode of scrolling text, when loop count is 0.
+  Text::MarqueeOrientation mOrientation;                    ///< Orientation of the marquee. (HORIZONTAL, VERTICAL)
+  bool                     mIsStopRequested : 1;            ///< Whether the stop scrolling has been triggered or not.
+  bool                     mGradientApplyAlways : 1;        ///< Whether TextGradient constraints need to be applied always.
+  bool                     mGradientOverlayApplyAlways : 1; ///< Whether TextGradientOverlay constraints need to be applied always.
+  bool                     mGradientOverlayEnabled : 1;     ///< Whether the current scroller renderer has TextGradientOverlay uniforms.
+  std::atomic<bool>        mIsStoppedImmediately;           ///< Whether the stop is triggered by immediate stop.
 
 }; // TextScroller class
 

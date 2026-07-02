@@ -158,6 +158,36 @@ public:
   Text::GradientBoundsMode GetTextGradientBoundsMode() const;
 
   /**
+   * @copydoc Dali::Ui::Label::SetTextGradientOverlay
+   */
+  void SetTextGradientOverlay(const Gradient::Base& gradient);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextGradientOverlay
+   */
+  Gradient::Base GetTextGradientOverlay() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetTextGradientOverlayBoundsMode
+   */
+  void SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextGradientOverlayBoundsMode
+   */
+  Text::GradientBoundsMode GetTextGradientOverlayBoundsMode() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetTextGradientOverlayMode
+   */
+  void SetTextGradientOverlayMode(Text::GradientOverlayMode mode);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetTextGradientOverlayMode
+   */
+  Text::GradientOverlayMode GetTextGradientOverlayMode() const;
+
+  /**
    * @brief Lazily registers the animatable TextGradient start offset source property.
    *
    * The property is registered on the Label actor using the same name as the
@@ -166,6 +196,16 @@ public:
    * @return The registered property index.
    */
   Dali::Property::Index EnsureGradientAnimOffset();
+
+  /**
+   * @brief Lazily registers the animatable TextGradientOverlay start offset source property.
+   *
+   * The property is registered on the Label actor using the same name as the
+   * renderer uniform, but it is not exposed through Label::Property.
+   *
+   * @return The registered property index.
+   */
+  Dali::Property::Index EnsureGradientOverlayAnimOffset();
 
   /**
    * @copydoc Dali::Ui::Label::SetHorizontalTextAlignment
@@ -862,9 +902,19 @@ private: // Implementation
   void UpdateTextGradientStyle();
 
   /**
+   * @brief Updates the TextVisual with the current TextGradientOverlay snapshot.
+   */
+  void UpdateTextGradientOverlayStyle();
+
+  /**
    * @brief Updates hidden TextGradient animation source properties from mTextGradient.
    */
   void SyncGradientAnimProperties();
+
+  /**
+   * @brief Updates hidden TextGradientOverlay animation source properties from mTextGradientOverlay.
+   */
+  void SyncGradientOverlayAnimProperties();
 
   /**
    * @brief Returns true when the current TextGradient can drive the supported animation uniforms.
@@ -872,9 +922,35 @@ private: // Implementation
   bool IsGradientAnimSupported() const;
 
   /**
+   * @brief Returns true when a hidden TextGradientOverlay animation source property can be created.
+   *
+   * Async marquee may create the source property before TextScroller exists.
+   * The property is bound later when async marquee setup creates an overlay-enabled scroller.
+   */
+  bool IsGradientOverlayAnimSourceSupported() const;
+
+  /**
+   * @brief Returns true when the current TextGradientOverlay is renderable enough for animation.
+   */
+  bool IsGradientOverlayRenderable() const;
+
+  /**
+   * @brief Returns true when the active TextScroller currently has an overlay renderer to bind.
+   */
+  bool IsGradientOverlayScrollerReady() const;
+
+  /**
    * @brief Binds current TextGradient animation source property indices to the TextVisual.
    */
   void BindGradientAnimProperties();
+
+  /**
+   * @brief Binds current TextGradientOverlay animation source property indices to the TextVisual.
+   *
+   * Also updates an active TextScroller when the overlay source property is
+   * created after full marquee setup.
+   */
+  void BindGradientOverlayAnimProperties();
 
   /**
    * @brief Returns true when index is one of the hidden TextGradient animation source properties.
@@ -885,6 +961,14 @@ private: // Implementation
   bool IsGradientAnimProperty(Dali::Property::Index index) const;
 
   /**
+   * @brief Returns true when index is one of the hidden TextGradientOverlay animation source properties.
+   *
+   * @param[in] index The property index to check.
+   * @return True if the index is a TextGradientOverlay animation property.
+   */
+  bool IsGradientOverlayAnimProperty(Dali::Property::Index index) const;
+
+  /**
    * @brief Updates TextGradient animation constraint apply rate on the visual and active scroller.
    *
    * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
@@ -892,11 +976,25 @@ private: // Implementation
   void SetGradientAnimApplyRate(bool notifyToConstraint = false);
 
   /**
+   * @brief Updates TextGradientOverlay animation constraint apply rate on the visual and active scroller.
+   *
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  void SetGradientOverlayAnimApplyRate(bool notifyToConstraint = false);
+
+  /**
    * @brief Adds cached TextGradient animation source property indices to scroller configuration.
    *
    * @param[in,out] textGradient The scroller TextGradient configuration.
    */
   void PopulateGradientAnimProperties(Text::TextScrollerTextGradient& textGradient) const;
+
+  /**
+   * @brief Adds cached TextGradientOverlay animation source property indices to scroller configuration.
+   *
+   * @param[in,out] textGradient The scroller TextGradient configuration.
+   */
+  void PopulateGradientOverlayAnimProperties(Text::TextScrollerTextGradient& textGradient) const;
 
   /**
    * @brief Updates the effective line height based on the current LineHeightMode.
@@ -1197,11 +1295,16 @@ private:
   Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
   Gradient::Base             mTextGradient;
   Text::GradientBoundsMode   mTextGradientBoundsMode;
+  Gradient::Base             mTextGradientOverlay;
+  Text::GradientBoundsMode   mTextGradientOverlayBoundsMode;
+  Text::GradientOverlayMode  mTextGradientOverlayMode;
   Dali::Property::Index      mGradientAnimOffsetIndex;
+  Dali::Property::Index      mGradientOverlayAnimOffsetIndex;
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;
   int  mGradientAnimCount;
+  int  mGradientOverlayAnimCount;
   bool mRendererUpdateNeeded : 1;     // Whether the text renderer needs to be updated.
   bool mMeasureInvalidated : 1;       // whether measurement has been invalidated.
   bool mIsAsyncRenderRequested : 1;   // whether an async render has been requested.

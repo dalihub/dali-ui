@@ -986,11 +986,11 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     renderInfo.size = layoutSize;
   }
-  renderInfo.textLogicalBounds = CalculateTextGradientBounds(layoutSize,
-                                                             mTextModel->mVisualModel->GetLayoutSize(),
-                                                             mTextModel->mVisualModel->mLines.Begin(),
-                                                             mTextModel->mVisualModel->mLines.Count(),
-                                                             parameters.verticalAlignment);
+  renderInfo.textLogicalBounds = CalculateGradientContentBounds(layoutSize,
+                                                                mTextModel->mVisualModel->GetLayoutSize(),
+                                                                mTextModel->mVisualModel->mLines.Begin(),
+                                                                mTextModel->mVisualModel->mLines.Count(),
+                                                                parameters.verticalAlignment);
 
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
@@ -1505,12 +1505,12 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
 
   AsyncTextRenderInfo renderInfo = Render(parameters);
   renderInfo.textGradientMarqueeViewportBounds =
-    CalculateMarqueeTextGradientViewportBounds(controlSize,
-                                               mTextModel->mVisualModel->GetLayoutSize(),
-                                               mTextModel->mVisualModel->mLines.Begin(),
-                                               mTextModel->mVisualModel->mLines.Count(),
-                                               parameters.horizontalAlignment,
-                                               parameters.verticalAlignment);
+    CalculateMarqueeGradientViewportBounds(controlSize,
+                                           mTextModel->mVisualModel->GetLayoutSize(),
+                                           mTextModel->mVisualModel->mLines.Begin(),
+                                           mTextModel->mVisualModel->mLines.Count(),
+                                           parameters.horizontalAlignment,
+                                           parameters.verticalAlignment);
 
   parameters.textWidth  = actualWidth;
   parameters.textHeight = actualHeight;

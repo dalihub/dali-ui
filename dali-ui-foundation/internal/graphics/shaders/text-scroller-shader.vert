@@ -6,7 +6,7 @@ precision highp float;
 
 INPUT highp vec2 aPosition;
 OUTPUT highp vec2 vTexCoord;
-#ifdef IS_REQUIRED_TEXT_GRADIENT
+#if defined(IS_REQUIRED_TEXT_GRADIENT) || defined(IS_REQUIRED_TEXT_GRADIENT_OVERLAY)
 OUTPUT highp vec2 vTextGradientCoord;
 #endif
 
@@ -44,7 +44,7 @@ void main()
 
   vTexCoord.x = ( uDelta + uHorizontalAlign * ( uTextureSize.x - visualSize.x - uGap ) + aPosition.x * visualSize.x - uGap * 0.5 ) / uTextureSize.x + 0.5;
   vTexCoord.y = ( uVerticalAlign * ( uTextureSize.y - visualSize.y ) + aPosition.y * visualSize.y ) / ( uTextureSize.y ) + 0.5;
-#ifdef IS_REQUIRED_TEXT_GRADIENT
+#if defined(IS_REQUIRED_TEXT_GRADIENT) || defined(IS_REQUIRED_TEXT_GRADIENT_OVERLAY)
   vTextGradientCoord = aPosition + vec2(0.5);
 #endif
 

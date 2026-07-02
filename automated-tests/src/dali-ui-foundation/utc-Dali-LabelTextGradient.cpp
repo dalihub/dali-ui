@@ -36,6 +36,7 @@ namespace
 constexpr float EPSILON = 0.001f;
 constexpr char  MOVED_FROM_GRADIENT_ASSERTION[] = "Cannot use a moved-from Gradient::Base object";
 constexpr const char* TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME   = "uTextGradientStartOffset";
+constexpr const char* TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME = "uTextGradientOverlayStartOffset";
 
 Dali::Vector<Gradient::StopNode> MakeStopNodes(const Vector4& startColor = Color::RED, const Vector4& endColor = Color::BLUE)
 {
@@ -84,6 +85,18 @@ void ApplyTextGradientAnimationBy(Label label, Animation animation)
 {
   label.Animate(animation)
     .TextGradientStartOffsetBy(0.1f, Duration(0.1f));
+}
+
+void ApplyTextGradientOverlayAnimationTo(Label label, Animation animation)
+{
+  label.Animate(animation)
+    .TextGradientOverlayStartOffset(0.75f, Duration(0.1f));
+}
+
+void ApplyTextGradientOverlayAnimationBy(Label label, Animation animation)
+{
+  label.Animate(animation)
+    .TextGradientOverlayStartOffsetBy(0.1f, Duration(0.1f));
 }
 
 void ExpectStopNode(const Dali::Vector<Gradient::StopNode>& stopNodes, uint32_t index, float offset, const Vector4& color)
@@ -177,6 +190,104 @@ int UtcDaliLabelTextGradientBoundsModeP(void)
 
   label.SetTextGradientBoundsMode(Text::GradientBoundsMode::CONTENT_BOUND);
   DALI_TEST_EQUALS(label.GetTextGradientBoundsMode(), Text::GradientBoundsMode::CONTENT_BOUND, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayDefaultsP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+
+  Gradient::Base overlay = label.GetTextGradientOverlay();
+  DALI_TEST_EQUALS(overlay.GetType(), Gradient::Type::NONE, TEST_LOCATION);
+  DALI_TEST_CHECK(overlay.GetType() == Gradient::Type::NONE);
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayBoundsMode(), Text::GradientBoundsMode::CONTENT_BOUND, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayMode(), Text::GradientOverlayMode::SRC_OVER, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlaySetGetP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+
+  const Vector2 startPosition(0.2f, 0.3f);
+  const Vector2 endPosition(0.7f, 0.8f);
+  label.SetTextGradientOverlay(MakeRenderableLinear(startPosition, endPosition));
+
+  ExpectRenderableLinearGradient(label.GetTextGradientOverlay(), startPosition, endPosition);
+
+  label.SetTextGradientOverlay(Gradient::Base::None());
+  Gradient::Base overlay = label.GetTextGradientOverlay();
+  DALI_TEST_EQUALS(overlay.GetType(), Gradient::Type::NONE, TEST_LOCATION);
+  DALI_TEST_CHECK(overlay.GetType() == Gradient::Type::NONE);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayBoundsModeSetGetP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayBoundsMode(), Text::GradientBoundsMode::CONTENT_BOUND, TEST_LOCATION);
+
+  label.SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode::VIEW_BOUND);
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayBoundsMode(), Text::GradientBoundsMode::VIEW_BOUND, TEST_LOCATION);
+
+  label.SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode::CONTENT_BOUND);
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayBoundsMode(), Text::GradientBoundsMode::CONTENT_BOUND, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayModeSetGetP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayMode(), Text::GradientOverlayMode::SRC_OVER, TEST_LOCATION);
+
+  label.SetTextGradientOverlayMode(Text::GradientOverlayMode::SCREEN);
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayMode(), Text::GradientOverlayMode::SCREEN, TEST_LOCATION);
+
+  label.SetTextGradientOverlayMode(Text::GradientOverlayMode::SRC_OVER);
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayMode(), Text::GradientOverlayMode::SRC_OVER, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayIndependentFromBaseGradientP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+
+  const Vector2 baseStart(0.1f, 0.2f);
+  const Vector2 baseEnd(0.8f, 0.9f);
+  const Vector2 overlayStart(0.3f, 0.4f);
+  const Vector2 overlayEnd(0.6f, 0.7f);
+
+  label.SetTextGradient(MakeRenderableLinear(baseStart, baseEnd));
+  label.SetTextGradientOverlay(MakeRenderableLinear(overlayStart, overlayEnd));
+
+  ExpectRenderableLinearGradient(label.GetTextGradient(), baseStart, baseEnd);
+  ExpectRenderableLinearGradient(label.GetTextGradientOverlay(), overlayStart, overlayEnd);
+
+  label.SetTextGradientBoundsMode(Text::GradientBoundsMode::VIEW_BOUND);
+  label.SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode::CONTENT_BOUND);
+  DALI_TEST_EQUALS(label.GetTextGradientBoundsMode(), Text::GradientBoundsMode::VIEW_BOUND, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayBoundsMode(), Text::GradientBoundsMode::CONTENT_BOUND, TEST_LOCATION);
+
+  label.SetTextGradientOverlayMode(Text::GradientOverlayMode::SCREEN);
+  DALI_TEST_EQUALS(label.GetTextGradientOverlayMode(), Text::GradientOverlayMode::SCREEN, TEST_LOCATION);
+  ExpectRenderableLinearGradient(label.GetTextGradient(), baseStart, baseEnd);
 
   END_TEST;
 }
@@ -367,6 +478,208 @@ int UtcDaliLabelTextGradientAnimationNoOpAndLinearP(void)
   afterNoneAnimation.Stop();
   application.SendNotification();
   DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), startOffsetIndex, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayAnimationLazyPropertyP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.25f));
+
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  Animation animation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationTo(label, animation);
+
+  const Property::Index overlayStartOffsetIndex =
+    label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(overlayStartOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.25f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  Animation byAnimation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationBy(label, byAnimation);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), overlayStartOffsetIndex, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayAnimationNoOpWhenNoneP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+
+  Animation noOverlayAnimation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationTo(label, noOverlayAnimation);
+  ApplyTextGradientOverlayAnimationBy(label, noOverlayAnimation);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  label.SetTextGradientOverlay(Gradient::Base::None());
+  Animation noneAnimation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationTo(label, noneAnimation);
+  ApplyTextGradientOverlayAnimationBy(label, noneAnimation);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayAnimationAsyncMarqueeCreatesLazyPropertyP(void)
+{
+  UiTestApplication application;
+
+  Label asyncMarqueeLabel = Label::New("Animated marquee text that is long enough to scroll");
+  asyncMarqueeLabel.SetAsyncRendering(true);
+  asyncMarqueeLabel.SetRequestedWidth(120.0f);
+  asyncMarqueeLabel.SetRequestedHeight(40.0f);
+  asyncMarqueeLabel.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  asyncMarqueeLabel.SetMarqueeLoopCount(1);
+  asyncMarqueeLabel.SetMarqueeSpeed(80);
+  asyncMarqueeLabel.SetTextGradientOverlay(MakeRenderableLinear());
+  asyncMarqueeLabel.StartMarquee();
+
+  DALI_TEST_EQUALS(asyncMarqueeLabel.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  Animation marqueeAnimation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationTo(asyncMarqueeLabel, marqueeAnimation);
+
+  const Property::Index asyncOverlayStartOffsetIndex =
+    asyncMarqueeLabel.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(asyncOverlayStartOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(asyncMarqueeLabel.GetProperty<float>(asyncOverlayStartOffsetIndex), 0.25f, EPSILON, TEST_LOCATION);
+
+  ApplyTextGradientOverlayAnimationBy(asyncMarqueeLabel, marqueeAnimation);
+  DALI_TEST_EQUALS(asyncMarqueeLabel.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), asyncOverlayStartOffsetIndex, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayAnimationSingleMarqueeLazyPropertyP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New("Animated marquee text that is long enough to scroll");
+  label.SetAsyncRendering(false);
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(40.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(1);
+  label.SetMarqueeSpeed(80);
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.3f));
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16u);
+
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  Animation animation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationTo(label, animation);
+
+  const Property::Index overlayStartOffsetIndex =
+    label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(overlayStartOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.3f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  Animation byAnimation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationBy(label, byAnimation);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), overlayStartOffsetIndex, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayMarqueeReapplySyncsHiddenPropertyP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New("Animated marquee text that is long enough to scroll");
+  label.SetAsyncRendering(false);
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(40.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(1);
+  label.SetMarqueeSpeed(80);
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.3f));
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16u);
+
+  Animation animation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationTo(label, animation);
+
+  const Property::Index overlayStartOffsetIndex =
+    label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(overlayStartOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.3f, EPSILON, TEST_LOCATION);
+
+  label.SetTextGradientOverlay(Gradient::Base::None());
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), overlayStartOffsetIndex, TEST_LOCATION);
+
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.65f));
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.65f, EPSILON, TEST_LOCATION);
+
+  label.StopMarquee();
+  application.SendNotification();
+  application.Render(16u);
+
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.45f));
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.45f, EPSILON, TEST_LOCATION);
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16u);
+
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.75f));
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.75f, EPSILON, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelTextGradientOverlayAnimationIndependentFromBaseP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.15f));
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.35f));
+
+  Animation baseAnimation = Animation::New(0.1f);
+  ApplyTextGradientAnimationTo(label, baseAnimation);
+
+  const Property::Index baseStartOffsetIndex = label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(baseStartOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  Animation overlayAnimation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationTo(label, overlayAnimation);
+
+  const Property::Index overlayStartOffsetIndex =
+    label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(overlayStartOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(overlayStartOffsetIndex != baseStartOffsetIndex);
+  DALI_TEST_EQUALS(label.GetProperty<float>(baseStartOffsetIndex), 0.15f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.35f, EPSILON, TEST_LOCATION);
+
+  label.SetTextGradient(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.45f));
+  DALI_TEST_EQUALS(label.GetProperty<float>(baseStartOffsetIndex), 0.45f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.35f, EPSILON, TEST_LOCATION);
+
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.65f));
+  DALI_TEST_EQUALS(label.GetProperty<float>(baseStartOffsetIndex), 0.45f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.65f, EPSILON, TEST_LOCATION);
 
   END_TEST;
 }

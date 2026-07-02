@@ -244,5 +244,19 @@ LabelAnimationBridge& LabelAnimationBridge::TextGradientStartOffsetBy(float rela
   return *this;
 }
 
+LabelAnimationBridge& LabelAnimationBridge::TextGradientOverlayStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::LabelAnimationSpecImpl::ApplyTextGradientOverlayStartOffsetTo(mAnimation, Label::DownCast(mView), {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::TextGradientOverlayStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::LabelAnimationSpecImpl::ApplyTextGradientOverlayStartOffsetBy(mAnimation, Label::DownCast(mView), {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
 } // namespace Ui
 } // namespace Dali

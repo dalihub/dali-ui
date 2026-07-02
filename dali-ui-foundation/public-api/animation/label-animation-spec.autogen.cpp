@@ -47,6 +47,24 @@ void ApplyLabelTextGradientStartOffsetBy(Animation& animation, View view, const 
   }
 }
 
+void ApplyLabelTextGradientOverlayStartOffsetTo(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+{
+  Label child = Label::DownCast(view);
+  if(child)
+  {
+    Internal::LabelAnimationSpecImpl::ApplyTextGradientOverlayStartOffsetTo(animation, child, entry);
+  }
+}
+
+void ApplyLabelTextGradientOverlayStartOffsetBy(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+{
+  Label child = Label::DownCast(view);
+  if(child)
+  {
+    Internal::LabelAnimationSpecImpl::ApplyTextGradientOverlayStartOffsetBy(animation, child, entry);
+  }
+}
+
 } // namespace
 
 LabelAnimationSpec::LabelAnimationSpec() = default;
@@ -272,6 +290,18 @@ LabelAnimationSpec& LabelAnimationSpec::TextGradientStartOffset(float target, Du
 LabelAnimationSpec& LabelAnimationSpec::TextGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyLabelTextGradientStartOffsetBy);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::TextGradientOverlayStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &ApplyLabelTextGradientOverlayStartOffsetTo);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::TextGradientOverlayStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyLabelTextGradientOverlayStartOffsetBy);
   return *this;
 }
 

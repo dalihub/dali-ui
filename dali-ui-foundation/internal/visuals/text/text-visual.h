@@ -113,6 +113,18 @@ public:
   };
 
   /**
+   * @brief Sets the TextGradientOverlay start-offset source property index registered by the control.
+   *
+   * @param[in] visual The text visual.
+   * @param[in] startOffsetPropertyIndex The source property index for uTextGradientOverlayStartOffset.
+   */
+  static void SetGradientOverlayAnimProperties(Ui::Integration::Visual::Base visual,
+                                               Property::Index               startOffsetPropertyIndex)
+  {
+    GetVisualObject(visual).SetGradientOverlayAnimProperties(startOffsetPropertyIndex);
+  };
+
+  /**
    * @brief Set the flag to trigger the textures to be initialized and renderer to be added to the control.
    * @param[in] visual The text visual.
    */
@@ -195,6 +207,18 @@ public:
   };
 
   /**
+   * @brief Sets whether TextGradientOverlay animation constraints should be applied every frame.
+   *
+   * @param[in] visual The text visual.
+   * @param[in] applyAlways True to use APPLY_ALWAYS, false to use APPLY_ONCE.
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  static void SetGradientOverlayAnimApplyAlways(Ui::Integration::Visual::Base visual, bool applyAlways, bool notifyToConstraint = false)
+  {
+    GetVisualObject(visual).SetGradientOverlayAnimApplyAlways(applyAlways, notifyToConstraint);
+  };
+
+  /**
    * @brief Store the TextGradient style snapshot for a future gradient-enabled render path.
    * @param[in] visual The text visual.
    * @param[in] style The TextGradient style snapshot.
@@ -234,21 +258,77 @@ public:
   };
 
   /**
-   * @brief Calculates view-local TextGradient bounds in a caller-supplied coordinate space.
+   * @brief Store the TextGradientOverlay style snapshot used by Label rendering.
+   * @param[in] visual The text visual.
+   * @param[in] style The TextGradientOverlay style snapshot.
+   */
+  static void SetTextGradientOverlayStyle(Ui::Integration::Visual::Base visual, const Text::Internal::TextGradientStyle& style)
+  {
+    TextVisual& visualObject = GetVisualObject(visual);
+    visualObject.RemoveGradientOverlayAnimConstraints();
+    visualObject.mTextGradientOverlayStyle  = style;
+    visualObject.mGradientOverlayRenderer   = VisualRenderer();
+    visualObject.mHasGradientOverlayContext = false;
+    visualObject.mRendererUpdateNeeded      = true;
+
+    if(visualObject.IsOnScene())
+    {
+      visualObject.UpdateRenderer();
+    }
+  };
+
+  /**
+   * @brief Store the TextGradientOverlay bounds mode used by Label rendering.
+   * @param[in] visual The text visual.
+   * @param[in] mode The TextGradientOverlay bounds mode.
+   */
+  static void SetTextGradientOverlayBoundsMode(Ui::Integration::Visual::Base visual, Text::GradientBoundsMode mode)
+  {
+    TextVisual& visualObject                    = GetVisualObject(visual);
+    visualObject.mTextGradientOverlayBoundsMode = mode;
+    visualObject.mGradientOverlayRenderer       = VisualRenderer();
+    visualObject.mHasGradientOverlayContext     = false;
+    visualObject.mRendererUpdateNeeded          = true;
+
+    if(visualObject.IsOnScene())
+    {
+      visualObject.UpdateRenderer();
+    }
+  };
+
+  /**
+   * @brief Store the TextGradientOverlay mode used by Label rendering.
+   * @param[in] visual The text visual.
+   * @param[in] mode The TextGradientOverlay mode.
+   */
+  static void SetTextGradientOverlayMode(Ui::Integration::Visual::Base visual, Text::GradientOverlayMode mode)
+  {
+    TextVisual& visualObject              = GetVisualObject(visual);
+    visualObject.mTextGradientOverlayMode = mode;
+    visualObject.mRendererUpdateNeeded    = true;
+
+    if(visualObject.IsOnScene())
+    {
+      visualObject.UpdateRenderer();
+    }
+  };
+
+  /**
+   * @brief Calculates VIEW_BOUND gradient bounds in a caller-supplied coordinate space.
    *
    * @param[in] visual The text visual.
    * @param[in] coordinateSize The coordinate space size used by the target shader.
    * @return Bounds that map the Label view into the target coordinate space.
    */
-  static Vector4 CalculateTextGradientViewBounds(Ui::Integration::Visual::Base visual, const Vector2& coordinateSize);
+  static Vector4 CalculateGradientViewBounds(Ui::Integration::Visual::Base visual, const Vector2& coordinateSize);
 
   /**
-   * @brief Returns the current visual coordinate size used by TextScroller shaders.
+   * @brief Returns the coordinate size used for VIEW_BOUND gradient mapping.
    *
    * @param[in] visual The text visual.
-   * @return The visual size in Label coordinates.
+   * @return The visual size in Label coordinates after transform constraints.
    */
-  static Vector2 GetTextGradientVisualCoordinateSize(Ui::Integration::Visual::Base visual);
+  static Vector2 GetGradientViewCoordinateSize(Ui::Integration::Visual::Base visual);
 
   /**
    * @brief Retrieve the stored TextGradient mask PixelData for internal rendering/tests.
@@ -405,6 +485,11 @@ private:
   void SetGradientAnimProperties(Property::Index startOffsetPropertyIndex);
 
   /**
+   * @brief Sets the TextGradientOverlay start-offset source property index registered by the control.
+   */
+  void SetGradientOverlayAnimProperties(Property::Index startOffsetPropertyIndex);
+
+  /**
    * @brief Set the visual constraints need to be applied always or not.
    * @param[in] applyAlways True if constraint need to be applied always. False if we need once only.
    * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
@@ -420,9 +505,22 @@ private:
   void SetGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint);
 
   /**
+   * @brief Sets whether TextGradientOverlay animation constraints should be applied every frame.
+   *
+   * @param[in] applyAlways True to use APPLY_ALWAYS, false to use APPLY_ONCE.
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  void SetGradientOverlayAnimApplyAlways(bool applyAlways, bool notifyToConstraint);
+
+  /**
    * @brief Removes TextGradient animation constraints.
    */
   void RemoveGradientAnimConstraints();
+
+  /**
+   * @brief Removes TextGradientOverlay animation constraints.
+   */
+  void RemoveGradientOverlayAnimConstraints();
 
   /**
    * @brief Rebinds TextGradient animation constraints to the current renderer uniforms.
@@ -430,10 +528,21 @@ private:
   void RebindGradientAnimConstraints();
 
   /**
+   * @brief Rebinds TextGradientOverlay animation constraints to the current renderer uniforms.
+   */
+  void RebindGradientOverlayAnimConstraints();
+
+  /**
    * @brief Binds TextGradient animation constraints to registered renderer uniform properties.
    */
   void BindGradientAnimConstraints(VisualRenderer& renderer,
                                    Property::Index startOffsetIndex);
+
+  /**
+   * @brief Binds TextGradientOverlay animation constraints to registered renderer uniform properties.
+   */
+  void BindGradientOverlayAnimConstraints(VisualRenderer& renderer,
+                                          Property::Index startOffsetIndex);
 
   /**
    * @brief Removes the text's renderer.
@@ -500,9 +609,15 @@ private:
                                                bool isMarqueeEnabled, bool isCutoutEnabled) const;
 
   /**
-   * @brief Calculates normalized logical text bounds inside the text texture.
+   * @brief Whether TextGradientOverlay shader composition is supported for the current render.
    */
-  Vector4 CalculateTextGradientBounds(const Vector2& textureSize) const;
+  bool IsTextGradientOverlayCompositionSupported(const Vector2& size, bool isHeightTiling,
+                                                 bool isMarqueeEnabled, bool isCutoutEnabled) const;
+
+  /**
+   * @brief Calculates CONTENT_BOUND gradient bounds inside the text texture.
+   */
+  Vector4 CalculateGradientContentBounds(const Vector2& textureSize) const;
 
   /**
    * @brief Resolves the active TextGradient bounds mode for the texture.
@@ -510,9 +625,19 @@ private:
   Vector4 ResolveTextGradientBounds(const Vector2& textureSize, const Vector4& contentBounds) const;
 
   /**
+   * @brief Resolves the active TextGradientOverlay bounds mode for the texture.
+   */
+  Vector4 ResolveTextGradientOverlayBounds(const Vector2& textureSize, const Vector4& contentBounds) const;
+
+  /**
    * @brief Register TextGradient uniforms on a gradient-enabled renderer.
    */
   void ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds);
+
+  /**
+   * @brief Register TextGradientOverlay uniforms on an overlay-enabled renderer.
+   */
+  void ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds);
 
   /**
    * Get the texture of the text for rendering. It will use cached shader feature for text visual.
@@ -564,10 +689,16 @@ private:
 
   Text::Internal::TextGradientStyle mTextGradientStyle; ///< Stored TextGradient snapshot.
   Text::GradientBoundsMode          mTextGradientBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
-  PixelData                         mTextGradientMaskPixelData; ///< Stored TextGradient mask for future shader composition.
-  VisualRenderer                    mGradientRenderer;          ///< Last renderer where TextGradient uniforms were registered.
-  Vector2                           mLastGradientCoordSize;     ///< Last coordinate size used for TextGradient uniforms.
-  Vector4                           mLastGradientBounds;        ///< Last bounds used for TextGradient uniforms.
+  Text::Internal::TextGradientStyle mTextGradientOverlayStyle; ///< Stored TextGradientOverlay snapshot.
+  Text::GradientBoundsMode          mTextGradientOverlayBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
+  Text::GradientOverlayMode         mTextGradientOverlayMode{Text::GradientOverlayMode::SRC_OVER};
+  PixelData                         mTextGradientMaskPixelData;    ///< Stored TextGradient mask for future shader composition.
+  VisualRenderer                    mGradientRenderer;             ///< Last renderer where TextGradient uniforms were registered.
+  Vector2                           mLastGradientCoordSize;        ///< Last coordinate size used for TextGradient uniforms.
+  Vector4                           mLastGradientBounds;           ///< Last bounds used for TextGradient uniforms.
+  VisualRenderer                    mGradientOverlayRenderer;      ///< Last renderer where TextGradientOverlay uniforms were registered.
+  Vector2                           mLastGradientOverlayCoordSize; ///< Last coordinate size used for TextGradientOverlay uniforms.
+  Vector4                           mLastGradientOverlayBounds;    ///< Last bounds used for TextGradientOverlay uniforms.
 
   TextVisualShaderFactory&                mTextVisualShaderFactory; ///< The shader factory for text visual.
   TextVisualShaderFeature::FeatureBuilder mTextShaderFeatureCache;  ///< The cached shader feature for text visual.
@@ -579,27 +710,31 @@ private:
   Property::Index
                       mAnimatableTextColorPropertyIndex; ///< The index of animatable text color property registered by the control.
   Property::Index     mGradientAnimOffsetIndex;          ///< Animatable TextGradient start offset source property.
+  Property::Index     mGradientOverlayAnimOffsetIndex;   ///< Animatable TextGradientOverlay start offset source property.
   Property::Index     mTextColorAnimatableIndex;         ///< The index of uTextColorAnimatable property.
   Property::Index     mTextRequireRenderPropertyIndex;   ///< The index of requireRender property.
   RendererContainer   mRendererList;
   ConstraintContainer mColorConstraintList;
   ConstraintContainer mOpacityConstraintList;
   ConstraintContainer mGradientAnimConstraints;
+  ConstraintContainer mGradientOverlayAnimConstraints;
 
   float                mLineHeight;
   Text::LineHeightMode mLineHeightMode;
   Text::OverflowMode   mOverflowMode;
-  uint32_t             mTextLoadingTaskId;               ///< The currently requested text loading(render) task Id.
-  uint32_t             mNaturalSizeTaskId;               ///< The currently requested natural size task Id.
-  uint32_t             mHeightForWidthTaskId;            ///< The currently requested height for width task Id.
-  bool                 mRendererUpdateNeeded : 1;        ///< The flag to indicate whether the renderer needs to be updated.
-  bool                 mTextRequireRender : 1;           ///< The flag to indicate whether the text needs to be rendered.
-  bool                 mIsConstraintAppliedAlways : 1;   ///< Whether the constraint need to be applied always.
-  bool                 mGradientAnimApplyAlways : 1;     ///< Whether TextGradient constraints need to be applied always.
-  bool                 mHasGradientContext : 1;          ///< Whether cached TextGradient uniform bounds are valid.
-  bool                 mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.
-  bool                 mIsNaturalSizeTaskRunning : 1;    ///< Whether the requested natural size task is running or not.
-  bool                 mIsHeightForWidthTaskRunning : 1; ///< Whether the requested height for width task is running or not.
+  uint32_t             mTextLoadingTaskId;                  ///< The currently requested text loading(render) task Id.
+  uint32_t             mNaturalSizeTaskId;                  ///< The currently requested natural size task Id.
+  uint32_t             mHeightForWidthTaskId;               ///< The currently requested height for width task Id.
+  bool                 mRendererUpdateNeeded : 1;           ///< The flag to indicate whether the renderer needs to be updated.
+  bool                 mTextRequireRender : 1;              ///< The flag to indicate whether the text needs to be rendered.
+  bool                 mIsConstraintAppliedAlways : 1;      ///< Whether the constraint need to be applied always.
+  bool                 mGradientAnimApplyAlways : 1;        ///< Whether TextGradient constraints need to be applied always.
+  bool                 mGradientOverlayAnimApplyAlways : 1; ///< Whether TextGradientOverlay constraints need to be applied always.
+  bool                 mHasGradientContext : 1;             ///< Whether cached TextGradient uniform bounds are valid.
+  bool                 mHasGradientOverlayContext : 1;      ///< Whether cached TextGradientOverlay uniform bounds are valid.
+  bool                 mIsTextLoadingTaskRunning : 1;       ///< Whether the requested text loading task is running or not.
+  bool                 mIsNaturalSizeTaskRunning : 1;       ///< Whether the requested natural size task is running or not.
+  bool                 mIsHeightForWidthTaskRunning : 1;    ///< Whether the requested height for width task is running or not.
 };
 
 } // namespace Internal

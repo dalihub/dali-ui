@@ -109,6 +109,18 @@ enum Type
 };
 } // namespace TextGradient
 
+namespace TextGradientOverlay
+{
+/**
+ * @brief Whether text uses TextGradientOverlay or not.
+ */
+enum Type
+{
+  NO_TEXT_GRADIENT_OVERLAY = 0, ///< The text uses no TextGradientOverlay.
+  HAS_TEXT_GRADIENT_OVERLAY     ///< The resolved text fill uses TextGradientOverlay.
+};
+} // namespace TextGradientOverlay
+
 /**
  * @brief Collection of current text visual feature.
  */
@@ -123,6 +135,7 @@ public:
   FeatureBuilder& EnableEmboss(bool enableEmboss);
   FeatureBuilder& EnableTextGradient(bool enableTextGradient);
   FeatureBuilder& EnableTextGradientMixed(bool enableTextGradientMixed);
+  FeatureBuilder& EnableTextGradientOverlay(bool enableTextGradientOverlay);
 
   VisualFactoryCache::ShaderType GetShaderType() const;
   void                           GetVertexShaderPrefixList(std::string& vertexShaderPrefixList) const;
@@ -168,6 +181,10 @@ public:
   {
     return IsEnabledTextGradient() || IsEnabledTextGradientMixed();
   }
+  bool IsEnabledTextGradientOverlay() const
+  {
+    return mTextGradientOverlay == TextGradientOverlay::HAS_TEXT_GRADIENT_OVERLAY;
+  }
 
 private:
   TextMultiColor::Type
@@ -178,6 +195,8 @@ private:
   TextEmboss::Type  mTextEmboss : 2;     ///< Whether text has emboss style, or not. default as TextEmboss::NO_EMBOSS
   TextGradient::Type
     mTextGradient : 2; ///< Whether text uses TextGradient fill, or not. default as TextGradient::NO_TEXT_GRADIENT
+  TextGradientOverlay::Type
+    mTextGradientOverlay : 2; ///< Whether text uses TextGradientOverlay, or not. default as TextGradientOverlay::NO_TEXT_GRADIENT_OVERLAY
 };
 
 } // namespace TextVisualShaderFeature

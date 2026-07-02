@@ -18,6 +18,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <cstdint>
 #include <string>
 #include <vector>
 
@@ -37,7 +38,7 @@ constexpr float FOOTER_ROW_GAP   = 8.0f;
 constexpr float FOOTER_TITLE_WIDTH = 120.0f;
 constexpr float FOOTER_BADGE_HEIGHT = 28.0f;
 constexpr float FOOTER_LINE_HEIGHT  = 24.0f;
-constexpr float HEADER_HEIGHT     = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_INFO_HEIGHT + HEADER_PADDING;
+constexpr float HEADER_HEIGHT     = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP + HEADER_INFO_HEIGHT + HEADER_PADDING;
 constexpr float FOOTER_HEIGHT     = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
 constexpr float MATRIX_TITLE_HEIGHT = 18.0f;
 constexpr float MATRIX_HEADER_HEIGHT = 20.0f;
@@ -52,6 +53,17 @@ constexpr std::size_t INITIAL_CASE_INDEX                 = 0u;
 constexpr std::size_t INITIAL_ALIGNMENT_INDEX            = 1u;
 constexpr std::size_t INITIAL_SPREAD_METHOD_INDEX        = 0u;
 constexpr std::size_t INITIAL_GRADIENT_BOUNDS_MODE_INDEX = 0u;
+constexpr uint32_t BADGE_DISABLED_BACKGROUND             = 0x1E293B;
+constexpr uint32_t BADGE_DISABLED_BORDER                 = 0x475569;
+constexpr uint32_t BADGE_DISABLED_TEXT                   = 0xCBD5E1;
+constexpr uint32_t BADGE_READY_BACKGROUND                = 0x075985;
+constexpr uint32_t BADGE_READY_BORDER                    = 0x38BDF8;
+constexpr uint32_t BADGE_APPLY_BACKGROUND                = 0x047857;
+constexpr uint32_t BADGE_APPLY_BORDER                    = 0x6EE7B7;
+constexpr uint32_t BADGE_ON_TEXT                         = 0xF8FAFC;
+constexpr float OVERLAY_EFFECT_SHIMMER_START_OFFSET      = 1.0f;
+constexpr float OVERLAY_EFFECT_SHIMMER_END_OFFSET        = -1.0f;
+constexpr float OVERLAY_EFFECT_SHIMMER_DURATION          = 1.4f;
 
 enum class GradientKind
 {
@@ -65,6 +77,12 @@ enum class PreviewSizeMode
 {
   FIXED,
   WRAP
+};
+
+enum class OverlayFillMode
+{
+  EFFECT,
+  FULL
 };
 
 struct CaseDefinition
@@ -126,7 +144,7 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
     "Notes: checks a short gradient prefix followed by preserved RGBA markup text.",
     GradientKind::LINEAR,
     32.0f,
-    false,
+    true,
     true,
     false,
   },
@@ -206,9 +224,20 @@ constexpr std::array<Gradient::SpreadMethod, 3u> SPREAD_METHODS{{
   Gradient::SpreadMethod::REPEAT,
 }};
 
+constexpr std::array<GradientKind, 3u> OVERLAY_GRADIENT_KINDS{{
+  GradientKind::LINEAR,
+  GradientKind::RADIAL,
+  GradientKind::CONIC,
+}};
+
 constexpr std::array<Text::GradientBoundsMode, 2u> GRADIENT_BOUNDS_MODES{{
   Text::GradientBoundsMode::CONTENT_BOUND,
   Text::GradientBoundsMode::VIEW_BOUND,
+}};
+
+constexpr std::array<Text::GradientOverlayMode, 2u> OVERLAY_MODES{{
+  Text::GradientOverlayMode::SRC_OVER,
+  Text::GradientOverlayMode::SCREEN,
 }};
 
 Label CreateLabel(const char* text, float fontSize, const UiColor& color)
@@ -246,6 +275,42 @@ void SetCommonGradientStops(Gradient::Base& gradient)
     Gradient::StopNode(0.48f, UiColor(0.08f, 0.74f, 0.42f, 1.0f)),
     Gradient::StopNode(1.0f, UiColor(0.12f, 0.38f, 1.0f, 1.0f)),
   });
+}
+
+void SetOverlayEffectGradientStops(Gradient::Base& gradient)
+{
+  gradient.SetStopNodes({
+    Gradient::StopNode(0.00f, UiColor(1.0f, 1.0f, 1.0f, 0.00f)),
+    Gradient::StopNode(0.08f, UiColor(1.0f, 1.0f, 1.0f, 0.16f)),
+    Gradient::StopNode(0.24f, UiColor(1.0f, 1.0f, 1.0f, 0.58f)),
+    Gradient::StopNode(0.50f, UiColor(1.0f, 1.0f, 1.0f, 1.00f)),
+    Gradient::StopNode(0.76f, UiColor(1.0f, 1.0f, 1.0f, 0.58f)),
+    Gradient::StopNode(0.92f, UiColor(1.0f, 1.0f, 1.0f, 0.16f)),
+    Gradient::StopNode(1.00f, UiColor(1.0f, 1.0f, 1.0f, 0.00f)),
+  });
+}
+
+void SetOverlayFullGradientStops(Gradient::Base& gradient)
+{
+  SetCommonGradientStops(gradient);
+}
+
+void SetOverlayGradientStops(Gradient::Base& gradient, OverlayFillMode fillMode)
+{
+  switch(fillMode)
+  {
+    case OverlayFillMode::FULL:
+    {
+      SetOverlayFullGradientStops(gradient);
+      return;
+    }
+    case OverlayFillMode::EFFECT:
+    default:
+    {
+      SetOverlayEffectGradientStops(gradient);
+      return;
+    }
+  }
 }
 
 struct GradientAnimationProfile
@@ -399,6 +464,42 @@ void ApplyConicGradient(Label label, Gradient::SpreadMethod spreadMethod)
   label.SetTextGradient(gradient);
 }
 
+void ApplyOverlayLinearGradient(Label label, Gradient::SpreadMethod spreadMethod, Text::GradientBoundsMode boundsMode, Text::GradientOverlayMode overlayMode, OverlayFillMode fillMode, float startOffset = 0.0f)
+{
+  Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetSpreadMethod(spreadMethod);
+  gradient.SetStartOffset(startOffset);
+  SetOverlayGradientStops(gradient, fillMode);
+  label.SetTextGradientOverlayBoundsMode(boundsMode);
+  label.SetTextGradientOverlayMode(overlayMode);
+  label.SetTextGradientOverlay(gradient);
+}
+
+void ApplyOverlayRadialGradient(Label label, Gradient::SpreadMethod spreadMethod, Text::GradientBoundsMode boundsMode, Text::GradientOverlayMode overlayMode, OverlayFillMode fillMode, float startOffset = 0.0f)
+{
+  Gradient::Radial gradient(Vector2(0.0f, 0.0f), 0.5f);
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetSpreadMethod(spreadMethod);
+  gradient.SetStartOffset(startOffset);
+  SetOverlayGradientStops(gradient, fillMode);
+  label.SetTextGradientOverlayBoundsMode(boundsMode);
+  label.SetTextGradientOverlayMode(overlayMode);
+  label.SetTextGradientOverlay(gradient);
+}
+
+void ApplyOverlayConicGradient(Label label, Gradient::SpreadMethod spreadMethod, Text::GradientBoundsMode boundsMode, Text::GradientOverlayMode overlayMode, OverlayFillMode fillMode, float startOffset = 0.0f)
+{
+  Gradient::Conic gradient(Vector2(0.0f, 0.0f), Radian(0.0f));
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetSpreadMethod(spreadMethod);
+  gradient.SetStartOffset(startOffset);
+  SetOverlayGradientStops(gradient, fillMode);
+  label.SetTextGradientOverlayBoundsMode(boundsMode);
+  label.SetTextGradientOverlayMode(overlayMode);
+  label.SetTextGradientOverlay(gradient);
+}
+
 const char* GetGradientName(GradientKind gradient)
 {
   switch(gradient)
@@ -479,6 +580,38 @@ const char* GetGradientBoundsModeBadgeName(Text::GradientBoundsMode mode)
   }
 }
 
+const char* GetGradientOverlayModeName(Text::GradientOverlayMode mode)
+{
+  switch(mode)
+  {
+    case Text::GradientOverlayMode::SCREEN:
+    {
+      return "SCREEN";
+    }
+    case Text::GradientOverlayMode::SRC_OVER:
+    default:
+    {
+      return "SRC_OVER";
+    }
+  }
+}
+
+const char* GetOverlayFillModeName(OverlayFillMode mode)
+{
+  switch(mode)
+  {
+    case OverlayFillMode::FULL:
+    {
+      return "FULL";
+    }
+    case OverlayFillMode::EFFECT:
+    default:
+    {
+      return "EFFECT";
+    }
+  }
+}
+
 const char* GetPreviewSizeModeBadgeName(PreviewSizeMode mode)
 {
   switch(mode)
@@ -503,6 +636,16 @@ float GetAnimationTargetOffset(Gradient::SpreadMethod spreadMethod)
 float GetAnimationDuration(Gradient::SpreadMethod spreadMethod)
 {
   return GetGradientAnimationProfile(spreadMethod).duration;
+}
+
+float GetOverlayAnimationTargetOffset(OverlayFillMode fillMode, Gradient::SpreadMethod spreadMethod)
+{
+  return fillMode == OverlayFillMode::EFFECT ? OVERLAY_EFFECT_SHIMMER_END_OFFSET : GetAnimationTargetOffset(spreadMethod);
+}
+
+float GetOverlayAnimationDuration(OverlayFillMode fillMode, Gradient::SpreadMethod spreadMethod)
+{
+  return fillMode == OverlayFillMode::EFFECT ? OVERLAY_EFFECT_SHIMMER_DURATION : GetAnimationDuration(spreadMethod);
 }
 } // namespace.
 
@@ -577,14 +720,38 @@ private:
     mMatrixBadge = CreateLabel("MATRIX", 13.0f, UiColor(0xF8FAFC));
     ConfigureHudBadge(mMatrixBadge, HEADER_BADGE_HEIGHT, UiColor(0x581C87), UiColor(0xC084FC), UiColor(0xF8FAFC), Text::Alignment::CENTER);
 
-    mAnimationBadge = CreateLabel("", 13.0f, UiColor(0xCBD5E1));
-    ConfigureHudBadge(mAnimationBadge, HEADER_BADGE_HEIGHT, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1), Text::Alignment::CENTER);
+    mAnimationBadge = CreateLabel("", 13.0f, UiColor(BADGE_DISABLED_TEXT));
+    ConfigureHudBadge(mAnimationBadge, HEADER_BADGE_HEIGHT, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT), Text::Alignment::CENTER);
 
     mClearBadge = CreateLabel("Clear", 13.0f, UiColor(0xF8FAFC));
     ConfigureHudBadge(mClearBadge, HEADER_BADGE_HEIGHT, UiColor(0x7F1D1D), UiColor(0xFCA5A5), UiColor(0xF8FAFC), Text::Alignment::CENTER);
 
     mResetBadge = CreateLabel("Reset", 13.0f, UiColor(0xF8FAFC));
     ConfigureHudBadge(mResetBadge, HEADER_BADGE_HEIGHT, UiColor(0x7C2D12), UiColor(0xFDBA74), UiColor(0xF8FAFC), Text::Alignment::CENTER);
+
+    mOverlayTypeBadge = CreateLabel("", 13.0f, UiColor(0xF8FAFC));
+    ConfigureHudBadge(mOverlayTypeBadge, HEADER_BADGE_HEIGHT, UiColor(0x155E75), UiColor(0x67E8F9), UiColor(0xF8FAFC), Text::Alignment::CENTER);
+
+    mOverlayFillBadge = CreateLabel("", 13.0f, UiColor(0xF8FAFC));
+    ConfigureHudBadge(mOverlayFillBadge, HEADER_BADGE_HEIGHT, UiColor(0x065F46), UiColor(0x34D399), UiColor(0xF8FAFC), Text::Alignment::CENTER);
+
+    mOverlaySpreadBadge = CreateLabel("", 13.0f, UiColor(0xF8FAFC));
+    ConfigureHudBadge(mOverlaySpreadBadge, HEADER_BADGE_HEIGHT, UiColor(0x4C1D95), UiColor(0xC4B5FD), UiColor(0xF8FAFC), Text::Alignment::CENTER);
+
+    mOverlayBoundsBadge = CreateLabel("", 13.0f, UiColor(0xF8FAFC));
+    ConfigureHudBadge(mOverlayBoundsBadge, HEADER_BADGE_HEIGHT, UiColor(0x713F12), UiColor(0xFCD34D), UiColor(0xF8FAFC), Text::Alignment::CENTER);
+
+    mOverlayAnimationBadge = CreateLabel("Ready", 13.0f, UiColor(BADGE_DISABLED_TEXT));
+    ConfigureHudBadge(mOverlayAnimationBadge, HEADER_BADGE_HEIGHT, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT), Text::Alignment::CENTER);
+
+    mOverlayModeBadge = CreateLabel("", 13.0f, UiColor(0xF8FAFC));
+    ConfigureHudBadge(mOverlayModeBadge, HEADER_BADGE_HEIGHT, UiColor(0x9D174D), UiColor(0xF9A8D4), UiColor(0xF8FAFC), Text::Alignment::CENTER);
+
+    mOverlayToggleBadge = CreateLabel("Apply", 13.0f, UiColor(BADGE_ON_TEXT));
+    ConfigureHudBadge(mOverlayToggleBadge, HEADER_BADGE_HEIGHT, UiColor(BADGE_APPLY_BACKGROUND), UiColor(BADGE_APPLY_BORDER), UiColor(BADGE_ON_TEXT), Text::Alignment::CENTER);
+
+    mOverlayResetBadge = CreateLabel("Reset", 13.0f, UiColor(BADGE_ON_TEXT));
+    ConfigureHudBadge(mOverlayResetBadge, HEADER_BADGE_HEIGHT, UiColor(0x7C2D12), UiColor(0xFDBA74), UiColor(BADGE_ON_TEXT), Text::Alignment::CENTER);
 
     mExpectedBadge = CreateLabel("", 12.0f, UiColor(0xCBD5E1));
     ConfigureHudBadge(mExpectedBadge, HEADER_INFO_HEIGHT, UiColor(0x0F172A), UiColor(0x334155), UiColor(0xCBD5E1), Text::Alignment::START);
@@ -626,13 +793,13 @@ private:
     ConfigureHudBadge(mCaseListLabel, FOOTER_BADGE_HEIGHT, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1), Text::Alignment::START);
 
     mHelpLabel = CreateLabel(
-      "ACTIONS  Click top badges | D Type | A Anim | X Reset | C Clear | G Apply | P Spread | B Bounds | M Marquee | ESC Quit",
+      "ACTIONS  D/P/B Base | Y/K/U/I/L Overlay | C Base OnOff | O Overlay OnOff | A TG Anim | N OV Anim | X Reset | M Marquee | ESC Quit",
       12.0f,
       UiColor(0xCBD5E1));
     ConfigureHudBadge(mHelpLabel, FOOTER_LINE_HEIGHT, UiColor(0x0F172A), UiColor(0x334155), UiColor(0xCBD5E1), Text::Alignment::START);
 
     mViewHelpLabel = CreateLabel(
-      "VIEW  Left/Right Case | H/V Align | S Fixed/Wrap | Q/W/E/R/T Scale 0.8/1.0/1.2/1.5/2.0",
+      "VIEW  Left/Right Case | 0 Matrix | H/V Align | S Fixed/Wrap | Q/W/E/R/T Scale 0.8/1.0/1.2/1.5/2.0",
       12.0f,
       UiColor(0xCBD5E1));
     ConfigureHudBadge(mViewHelpLabel, FOOTER_LINE_HEIGHT, UiColor(0x111827), UiColor(0x334155), UiColor(0xCBD5E1), Text::Alignment::START);
@@ -653,6 +820,14 @@ private:
       mAnimationBadge,
       mResetBadge,
       mClearBadge,
+      mOverlayTypeBadge,
+      mOverlaySpreadBadge,
+      mOverlayBoundsBadge,
+      mOverlayAnimationBadge,
+      mOverlayToggleBadge,
+      mOverlayResetBadge,
+      mOverlayModeBadge,
+      mOverlayFillBadge,
       mExpectedBadge,
     });
 
@@ -687,6 +862,7 @@ private:
   void ShowCase(std::size_t index)
   {
     StopGradientAnimation();
+    StopGradientOverlayAnimation();
     mMarqueeMatrixMode = false;
     mCaseIndex         = index % CASES.size();
     mGradientApplied   = true;
@@ -700,6 +876,7 @@ private:
   void ShowMarqueeMatrix()
   {
     StopGradientAnimation();
+    StopGradientOverlayAnimation();
     mMarqueeMatrixMode = true;
     mGradientApplied   = true;
     mMarqueeRunning    = true;
@@ -754,49 +931,77 @@ private:
     const float contentWidth = std::max(headerWidth - HEADER_PADDING * 2.0f, 0.0f);
     const float row1Y        = HEADER_PADDING;
     const float row2Y        = row1Y + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP;
-    const float noteY        = row2Y + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP;
-    const float row1Width    = std::max(contentWidth - HEADER_ROW_GAP * 4.0f, 0.0f);
-    const float row2Width    = std::max(contentWidth - HEADER_ROW_GAP * 6.0f, 0.0f);
+    const float row3Y        = row2Y + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP;
+    const float noteY        = row3Y + HEADER_BADGE_HEIGHT + HEADER_ROW_GAP;
+    const float row1Width    = std::max(contentWidth - HEADER_ROW_GAP * 5.0f, 0.0f);
+    const float row2Width    = std::max(contentWidth - HEADER_ROW_GAP * 5.0f, 0.0f);
+    const float row3Width    = std::max(contentWidth - HEADER_ROW_GAP * 7.0f, 0.0f);
 
-    const float caseWidth     = row1Width * 0.30f;
-    const float gradientWidth = row1Width * 0.16f;
-    const float spreadWidth   = row1Width * 0.15f;
-    const float boundsWidth   = row1Width * 0.20f;
-    const float sizeWidth     = std::max(row1Width - caseWidth - gradientWidth - spreadWidth - boundsWidth, 0.0f);
+    const float caseWidth    = row1Width * 0.32f;
+    const float sizeWidth    = row1Width * 0.12f;
+    const float hAlignWidth  = row1Width * 0.13f;
+    const float vAlignWidth  = row1Width * 0.13f;
+    const float marqueeWidth = row1Width * 0.15f;
+    const float matrixWidth  = std::max(row1Width - caseWidth - sizeWidth - hAlignWidth - vAlignWidth - marqueeWidth, 0.0f);
 
-    const float hAlignWidth       = row2Width * 0.12f;
-    const float vAlignWidth       = row2Width * 0.12f;
-    const float marqueeWidth      = row2Width * 0.16f;
-    const float matrixWidth       = row2Width * 0.11f;
-    const float animationWidth    = row2Width * 0.17f;
-    const float resetWidth        = row2Width * 0.14f;
-    const float clearWidth        = std::max(row2Width - hAlignWidth - vAlignWidth - marqueeWidth - matrixWidth - animationWidth - resetWidth, 0.0f);
+    const float gradientWidth = row2Width * 0.15f;
+    const float spreadWidth   = row2Width * 0.15f;
+    const float boundsWidth   = row2Width * 0.16f;
+    const float animationWidth = row2Width * 0.16f;
+    const float clearWidth     = row2Width * 0.16f;
+    const float resetWidth     = std::max(row2Width - gradientWidth - spreadWidth - boundsWidth - animationWidth - clearWidth, 0.0f);
+
+    const float overlayTypeWidth   = row3Width * 0.16f;
+    const float overlaySpreadWidth = row3Width * 0.10f;
+    const float overlayBoundsWidth = row3Width * 0.13f;
+    const float overlayReadyWidth  = row3Width * 0.10f;
+    const float overlayToggleWidth = row3Width * 0.10f;
+    const float overlayResetWidth  = row3Width * 0.10f;
+    const float overlayModeWidth   = row3Width * 0.15f;
+    const float overlayFillWidth   = std::max(row3Width - overlayTypeWidth - overlaySpreadWidth - overlayBoundsWidth - overlayReadyWidth - overlayToggleWidth - overlayResetWidth - overlayModeWidth, 0.0f);
 
     float x = HEADER_PADDING;
     SetBadgeBounds(mCaseBadge, x, row1Y, caseWidth, HEADER_BADGE_HEIGHT);
     x += caseWidth + HEADER_ROW_GAP;
-    SetBadgeBounds(mGradientTypeBadge, x, row1Y, gradientWidth, HEADER_BADGE_HEIGHT);
-    x += gradientWidth + HEADER_ROW_GAP;
-    SetBadgeBounds(mSpreadBadge, x, row1Y, spreadWidth, HEADER_BADGE_HEIGHT);
-    x += spreadWidth + HEADER_ROW_GAP;
-    SetBadgeBounds(mBoundsBadge, x, row1Y, boundsWidth, HEADER_BADGE_HEIGHT);
-    x += boundsWidth + HEADER_ROW_GAP;
     SetBadgeBounds(mSizeBadge, x, row1Y, sizeWidth, HEADER_BADGE_HEIGHT);
+    x += sizeWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mHAlignBadge, x, row1Y, hAlignWidth, HEADER_BADGE_HEIGHT);
+    x += hAlignWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mVAlignBadge, x, row1Y, vAlignWidth, HEADER_BADGE_HEIGHT);
+    x += vAlignWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mMarqueeBadge, x, row1Y, marqueeWidth, HEADER_BADGE_HEIGHT);
+    x += marqueeWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mMatrixBadge, x, row1Y, matrixWidth, HEADER_BADGE_HEIGHT);
 
     x = HEADER_PADDING;
-    SetBadgeBounds(mHAlignBadge, x, row2Y, hAlignWidth, HEADER_BADGE_HEIGHT);
-    x += hAlignWidth + HEADER_ROW_GAP;
-    SetBadgeBounds(mVAlignBadge, x, row2Y, vAlignWidth, HEADER_BADGE_HEIGHT);
-    x += vAlignWidth + HEADER_ROW_GAP;
-    SetBadgeBounds(mMarqueeBadge, x, row2Y, marqueeWidth, HEADER_BADGE_HEIGHT);
-    x += marqueeWidth + HEADER_ROW_GAP;
-    SetBadgeBounds(mMatrixBadge, x, row2Y, matrixWidth, HEADER_BADGE_HEIGHT);
-    x += matrixWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mGradientTypeBadge, x, row2Y, gradientWidth, HEADER_BADGE_HEIGHT);
+    x += gradientWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mSpreadBadge, x, row2Y, spreadWidth, HEADER_BADGE_HEIGHT);
+    x += spreadWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mBoundsBadge, x, row2Y, boundsWidth, HEADER_BADGE_HEIGHT);
+    x += boundsWidth + HEADER_ROW_GAP;
     SetBadgeBounds(mAnimationBadge, x, row2Y, animationWidth, HEADER_BADGE_HEIGHT);
     x += animationWidth + HEADER_ROW_GAP;
-    SetBadgeBounds(mResetBadge, x, row2Y, resetWidth, HEADER_BADGE_HEIGHT);
-    x += resetWidth + HEADER_ROW_GAP;
     SetBadgeBounds(mClearBadge, x, row2Y, clearWidth, HEADER_BADGE_HEIGHT);
+    x += clearWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mResetBadge, x, row2Y, resetWidth, HEADER_BADGE_HEIGHT);
+
+    x = HEADER_PADDING;
+    SetBadgeBounds(mOverlayTypeBadge, x, row3Y, overlayTypeWidth, HEADER_BADGE_HEIGHT);
+    x += overlayTypeWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mOverlaySpreadBadge, x, row3Y, overlaySpreadWidth, HEADER_BADGE_HEIGHT);
+    x += overlaySpreadWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mOverlayBoundsBadge, x, row3Y, overlayBoundsWidth, HEADER_BADGE_HEIGHT);
+    x += overlayBoundsWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mOverlayAnimationBadge, x, row3Y, overlayReadyWidth, HEADER_BADGE_HEIGHT);
+    x += overlayReadyWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mOverlayToggleBadge, x, row3Y, overlayToggleWidth, HEADER_BADGE_HEIGHT);
+    x += overlayToggleWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mOverlayResetBadge, x, row3Y, overlayResetWidth, HEADER_BADGE_HEIGHT);
+    x += overlayResetWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mOverlayModeBadge, x, row3Y, overlayModeWidth, HEADER_BADGE_HEIGHT);
+    x += overlayModeWidth + HEADER_ROW_GAP;
+    SetBadgeBounds(mOverlayFillBadge, x, row3Y, overlayFillWidth, HEADER_BADGE_HEIGHT);
 
     SetBadgeBounds(mExpectedBadge, HEADER_PADDING, noteY, contentWidth, HEADER_INFO_HEIGHT);
   }
@@ -878,7 +1083,39 @@ private:
     });
     mClearBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
-      SetGradientNone();
+      ToggleBaseGradientApplied();
+    });
+    mOverlayTypeBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      CycleOverlayGradientType();
+    });
+    mOverlayFillBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      ToggleOverlayFillMode();
+    });
+    mOverlaySpreadBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      CycleOverlaySpreadMethod();
+    });
+    mOverlayBoundsBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      CycleOverlayBoundsMode();
+    });
+    mOverlayAnimationBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      ToggleGradientOverlayAnimation();
+    });
+    mOverlayModeBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      CycleOverlayMode();
+    });
+    mOverlayToggleBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      ToggleOverlayApplied();
+    });
+    mOverlayResetBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
+    {
+      ResetCurrentOverlayState();
     });
   }
 
@@ -1006,6 +1243,7 @@ private:
   {
     label.StopMarquee();
     label.SetTextGradient(Gradient::Base::None());
+    label.SetTextGradientOverlay(Gradient::Base::None());
     label.SetTextUnderline(Text::Underline::None());
     label.SetTextShadow(Text::Shadow::None());
     label.SetMarkupEnabled(false);
@@ -1020,6 +1258,8 @@ private:
     label.SetMarqueeLoopDelay(1.0f);
     label.SetMarqueeGap(64);
     label.SetTextGradientBoundsMode(CurrentGradientBoundsMode());
+    label.SetTextGradientOverlayBoundsMode(CurrentOverlayBoundsMode());
+    label.SetTextGradientOverlayMode(CurrentOverlayMode());
     ApplyPreviewOptions(label);
     label.SetMarkupEnabled(item.markup);
     label.SetText(item.text);
@@ -1046,6 +1286,8 @@ private:
       ApplyGradientToLabel(label, item);
     }
 
+    ApplyOverlayToLabel(label, item);
+
     if(item.marquee && mMarqueeRunning)
     {
       label.StartMarquee();
@@ -1055,6 +1297,33 @@ private:
   void ApplyGradientToLabel(Label label, const CaseDefinition& item)
   {
     ApplyGradientToLabelByKind(label, GetEffectiveCaseGradientKind(item), item.compactGradientSpan);
+  }
+
+  bool IsOverlaySupportedForCurrentCase() const
+  {
+    if(mMarqueeMatrixMode)
+    {
+      return false;
+    }
+
+    return IsOverlaySupportedForCase(CASES[mCaseIndex]);
+  }
+
+  bool IsOverlaySupportedForCase(const CaseDefinition&) const
+  {
+    return true;
+  }
+
+  void ApplyOverlayToLabel(Label label, const CaseDefinition& item)
+  {
+    label.SetTextGradientOverlay(Gradient::Base::None());
+    label.SetTextGradientOverlayBoundsMode(CurrentOverlayBoundsMode());
+    label.SetTextGradientOverlayMode(CurrentOverlayMode());
+
+    if(mOverlayApplied && IsOverlaySupportedForCase(item))
+    {
+      ApplyOverlayGradientToLabelByKind(label, CurrentOverlayGradientKind());
+    }
   }
 
   void SetGradientNone()
@@ -1067,11 +1336,74 @@ private:
     UpdateStatus();
   }
 
+  void ToggleBaseGradientApplied()
+  {
+    if(mGradientApplied)
+    {
+      SetGradientNone();
+    }
+    else
+    {
+      ReapplyGradient();
+    }
+  }
+
   void ReapplyGradient()
   {
     const bool wasAnimationRunning = StopAnimationForOptionChange();
     mGradientApplied = true;
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
+  }
+
+  void SetOverlayNone()
+  {
+    StopGradientOverlayAnimation();
+    mPreviewLabel.SetTextGradientOverlay(Gradient::Base::None());
+    mAsyncPreviewLabel.SetTextGradientOverlay(Gradient::Base::None());
+    mOverlayApplied = false;
+    UpdateStatus();
+  }
+
+  void ReapplyOverlay()
+  {
+    mOverlayApplied = true;
+    RefreshCurrentOverlay();
+  }
+
+  void ToggleOverlayApplied()
+  {
+    if(mOverlayApplied)
+    {
+      SetOverlayNone();
+    }
+    else
+    {
+      ReapplyOverlay();
+    }
+  }
+
+  void RefreshCurrentOverlay()
+  {
+    if(mMarqueeMatrixMode)
+    {
+      UpdateStatus();
+      return;
+    }
+
+    const CaseDefinition& item = CASES[mCaseIndex];
+    ApplyOverlayToLabel(mPreviewLabel, item);
+    ApplyOverlayToLabel(mAsyncPreviewLabel, item);
+    UpdateStatus();
+  }
+
+  void RefreshCurrentOverlayAfterOptionChange(bool wasAnimationRunning)
+  {
+    RefreshCurrentOverlay();
+    if(wasAnimationRunning && CanAnimateCurrentTextGradientOverlay())
+    {
+      StartGradientOverlayAnimation();
+      UpdateStatus();
+    }
   }
 
   void ApplyGradientToMarqueeMatrixLabels()
@@ -1177,11 +1509,40 @@ private:
     return wasAnimationRunning;
   }
 
+  void ToggleGradientOverlayAnimation()
+  {
+    if(IsGradientOverlayAnimationRunning())
+    {
+      StopGradientOverlayAnimation();
+    }
+    else
+    {
+      StartGradientOverlayAnimation();
+    }
+    UpdateStatus();
+  }
+
+  bool IsGradientOverlayAnimationRunning() const
+  {
+    return mOverlayAnimationInfo;
+  }
+
+  bool StopOverlayAnimationForOptionChange()
+  {
+    const bool wasAnimationRunning = IsGradientOverlayAnimationRunning();
+    if(wasAnimationRunning)
+    {
+      StopGradientOverlayAnimation();
+    }
+    return wasAnimationRunning;
+  }
+
   void ResetCurrentGradientState()
   {
     const bool wasMarqueeRunning = mMarqueeRunning;
 
     StopGradientAnimation();
+    StopGradientOverlayAnimation();
 
     if(mMarqueeMatrixMode)
     {
@@ -1211,6 +1572,19 @@ private:
     ApplyCurrentCase();
   }
 
+  void ResetCurrentOverlayState()
+  {
+    StopGradientOverlayAnimation();
+
+    if(mMarqueeMatrixMode || !IsOverlaySupportedForCurrentCase())
+    {
+      UpdateStatus();
+      return;
+    }
+
+    RefreshCurrentOverlay();
+  }
+
   bool CanAnimateCurrentTextGradient() const
   {
     if(!mGradientApplied)
@@ -1224,6 +1598,11 @@ private:
     }
 
     return IsGradientTypeSwitchable(GetEffectiveCaseGradientKind(CASES[mCaseIndex]));
+  }
+
+  bool CanAnimateCurrentTextGradientOverlay() const
+  {
+    return mOverlayApplied && IsOverlaySupportedForCurrentCase() && IsGradientTypeSwitchable(CurrentOverlayGradientKind());
   }
 
   void StartGradientAnimation()
@@ -1305,6 +1684,66 @@ private:
       .TextGradientStartOffset(targetOffset, Duration(duration));
   }
 
+  void StartGradientOverlayAnimation()
+  {
+    if(!CanAnimateCurrentTextGradientOverlay())
+    {
+      StopGradientOverlayAnimation();
+      return;
+    }
+
+    StopGradientOverlayAnimation();
+
+    const float duration = GetOverlayAnimationDuration(CurrentOverlayFillMode(), CurrentOverlaySpreadMethod());
+    mTextGradientOverlayAnimation = Animation::New(duration);
+    mTextGradientOverlayAnimation.SetLooping(true);
+    mTextGradientOverlayAnimation.SetLoopingMode(Animation::AUTO_REVERSE);
+
+    if(CurrentOverlayFillMode() == OverlayFillMode::EFFECT)
+    {
+      ApplyOverlayGradientToLabelByKind(mPreviewLabel, CurrentOverlayGradientKind(), true);
+      ApplyOverlayGradientToLabelByKind(mAsyncPreviewLabel, CurrentOverlayGradientKind(), true);
+    }
+
+    ApplyOverlayGradientAnimation(mPreviewLabel);
+    ApplyOverlayGradientAnimation(mAsyncPreviewLabel);
+
+    mTextGradientOverlayAnimation.Play();
+    mOverlayAnimationInfo = true;
+  }
+
+  void StopGradientOverlayAnimation()
+  {
+    if(mTextGradientOverlayAnimation)
+    {
+      mTextGradientOverlayAnimation.Stop();
+      mTextGradientOverlayAnimation.Clear();
+    }
+    mOverlayAnimationInfo = false;
+  }
+
+  void ApplyOverlayGradientAnimation(Label label)
+  {
+    if(!label)
+    {
+      return;
+    }
+
+    const OverlayFillMode fillMode     = CurrentOverlayFillMode();
+    const float           targetOffset = GetOverlayAnimationTargetOffset(fillMode, CurrentOverlaySpreadMethod());
+    const float           duration     = GetOverlayAnimationDuration(fillMode, CurrentOverlaySpreadMethod());
+    if(fillMode == OverlayFillMode::EFFECT)
+    {
+      label.Animate(mTextGradientOverlayAnimation)
+        .TextGradientOverlayStartOffset(targetOffset, Duration(duration), AlphaFunction::LINEAR);
+    }
+    else
+    {
+      label.Animate(mTextGradientOverlayAnimation)
+        .TextGradientOverlayStartOffset(targetOffset, Duration(duration));
+    }
+  }
+
   static bool IsGradientTypeSwitchable(GradientKind gradient)
   {
     return gradient == GradientKind::LINEAR || gradient == GradientKind::RADIAL || gradient == GradientKind::CONIC;
@@ -1360,6 +1799,40 @@ private:
     }
   }
 
+  void ApplyOverlayGradientToLabelByKind(Label label, GradientKind gradient, bool useEffectAnimationStartOffset = false)
+  {
+    const Gradient::SpreadMethod      spreadMethod = CurrentOverlaySpreadMethod();
+    const Text::GradientBoundsMode    boundsMode   = CurrentOverlayBoundsMode();
+    const Text::GradientOverlayMode   overlayMode  = CurrentOverlayMode();
+    const OverlayFillMode             fillMode     = CurrentOverlayFillMode();
+    const float                       startOffset  = (useEffectAnimationStartOffset && fillMode == OverlayFillMode::EFFECT) ? OVERLAY_EFFECT_SHIMMER_START_OFFSET : 0.0f;
+
+    switch(gradient)
+    {
+      case GradientKind::LINEAR:
+      {
+        ApplyOverlayLinearGradient(label, spreadMethod, boundsMode, overlayMode, fillMode, startOffset);
+        break;
+      }
+      case GradientKind::RADIAL:
+      {
+        ApplyOverlayRadialGradient(label, spreadMethod, boundsMode, overlayMode, fillMode, startOffset);
+        break;
+      }
+      case GradientKind::CONIC:
+      {
+        ApplyOverlayConicGradient(label, spreadMethod, boundsMode, overlayMode, fillMode, startOffset);
+        break;
+      }
+      case GradientKind::NONE:
+      default:
+      {
+        label.SetTextGradientOverlay(Gradient::Base::None());
+        break;
+      }
+    }
+  }
+
   void ApplyAnimationBaseGradientToLabel(Label label, GradientKind gradient, bool compactGradientSpan = false)
   {
     if(gradient == GradientKind::CONIC)
@@ -1402,6 +1875,8 @@ private:
 
   void RefreshCurrentGradientAfterOptionChange(bool wasAnimationRunning)
   {
+    const bool wasOverlayAnimationRunning = StopOverlayAnimationForOptionChange();
+
     if(mMarqueeMatrixMode)
     {
       if(mGradientApplied)
@@ -1429,6 +1904,11 @@ private:
       StartGradientAnimation();
     }
 
+    if(wasOverlayAnimationRunning && CanAnimateCurrentTextGradientOverlay())
+    {
+      StartGradientOverlayAnimation();
+    }
+
     UpdateStatus();
   }
 
@@ -1437,9 +1917,34 @@ private:
     return SPREAD_METHODS[mSpreadMethodIndex];
   }
 
+  Gradient::SpreadMethod CurrentOverlaySpreadMethod() const
+  {
+    return SPREAD_METHODS[mOverlaySpreadMethodIndex];
+  }
+
   Text::GradientBoundsMode CurrentGradientBoundsMode() const
   {
     return GRADIENT_BOUNDS_MODES[mGradientBoundsModeIndex];
+  }
+
+  Text::GradientBoundsMode CurrentOverlayBoundsMode() const
+  {
+    return GRADIENT_BOUNDS_MODES[mOverlayBoundsModeIndex];
+  }
+
+  Text::GradientOverlayMode CurrentOverlayMode() const
+  {
+    return OVERLAY_MODES[mOverlayModeIndex];
+  }
+
+  OverlayFillMode CurrentOverlayFillMode() const
+  {
+    return mOverlayFillMode;
+  }
+
+  GradientKind CurrentOverlayGradientKind() const
+  {
+    return OVERLAY_GRADIENT_KINDS[mOverlayGradientTypeIndex];
   }
 
   void CycleSpreadMethod()
@@ -1454,6 +1959,41 @@ private:
     const bool wasAnimationRunning = StopAnimationForOptionChange();
     mGradientBoundsModeIndex = (mGradientBoundsModeIndex + 1u) % GRADIENT_BOUNDS_MODES.size();
     RefreshCurrentGradientAfterOptionChange(wasAnimationRunning);
+  }
+
+  void CycleOverlayGradientType()
+  {
+    const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
+    mOverlayGradientTypeIndex = (mOverlayGradientTypeIndex + 1u) % OVERLAY_GRADIENT_KINDS.size();
+    RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
+  }
+
+  void ToggleOverlayFillMode()
+  {
+    const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
+    mOverlayFillMode = mOverlayFillMode == OverlayFillMode::EFFECT ? OverlayFillMode::FULL : OverlayFillMode::EFFECT;
+    RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
+  }
+
+  void CycleOverlaySpreadMethod()
+  {
+    const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
+    mOverlaySpreadMethodIndex = (mOverlaySpreadMethodIndex + 1u) % SPREAD_METHODS.size();
+    RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
+  }
+
+  void CycleOverlayBoundsMode()
+  {
+    const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
+    mOverlayBoundsModeIndex = (mOverlayBoundsModeIndex + 1u) % GRADIENT_BOUNDS_MODES.size();
+    RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
+  }
+
+  void CycleOverlayMode()
+  {
+    const bool wasAnimationRunning = StopOverlayAnimationForOptionChange();
+    mOverlayModeIndex = (mOverlayModeIndex + 1u) % OVERLAY_MODES.size();
+    RefreshCurrentOverlayAfterOptionChange(wasAnimationRunning);
   }
 
   void CycleHorizontalAlignment()
@@ -1506,12 +2046,12 @@ private:
   {
     if(!CanCycleGradientType())
     {
-      SetHudBadge(mGradientTypeBadge, "TYPE N/A", UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
+      SetHudBadge(mGradientTypeBadge, "Gradient N/A", UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
       return;
     }
 
     const GradientKind gradient = CurrentDisplayedGradientKind();
-    std::string        text     = "TYPE ";
+    std::string        text     = "Gradient ";
     text += GetGradientName(gradient);
     UiColor backgroundColor = UiColor(0x075985);
     UiColor borderlineColor = UiColor(0x38BDF8);
@@ -1528,25 +2068,67 @@ private:
     SetHudBadge(mGradientTypeBadge, text, backgroundColor, borderlineColor);
   }
 
+  void UpdateOverlayBadges(bool supported)
+  {
+    if(!supported)
+    {
+      SetHudBadge(mOverlayTypeBadge, "Overlay N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      SetHudBadge(mOverlaySpreadBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      SetHudBadge(mOverlayBoundsBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      SetHudBadge(mOverlayAnimationBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      SetHudBadge(mOverlayToggleBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      SetHudBadge(mOverlayResetBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      SetHudBadge(mOverlayModeBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      SetHudBadge(mOverlayFillBadge, "N/A", UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+      return;
+    }
+
+    std::string type = "Overlay ";
+    type += GetGradientName(CurrentOverlayGradientKind());
+    SetHudBadge(mOverlayTypeBadge, type, UiColor(0x155E75), UiColor(0x67E8F9));
+
+    SetHudBadge(mOverlaySpreadBadge, GetSpreadMethodName(CurrentOverlaySpreadMethod()), UiColor(0x4C1D95), UiColor(0xC4B5FD));
+    SetHudBadge(mOverlayBoundsBadge, GetGradientBoundsModeBadgeName(CurrentOverlayBoundsMode()), UiColor(0x713F12), UiColor(0xFCD34D));
+    const bool canAnimateOverlay = CanAnimateCurrentTextGradientOverlay();
+    SetHudBadge(mOverlayAnimationBadge,
+                mOverlayAnimationInfo ? "Run" : "Ready",
+                mOverlayAnimationInfo ? UiColor(0x0F766E) : (canAnimateOverlay ? UiColor(BADGE_READY_BACKGROUND) : UiColor(BADGE_DISABLED_BACKGROUND)),
+                mOverlayAnimationInfo ? UiColor(0x5EEAD4) : (canAnimateOverlay ? UiColor(BADGE_READY_BORDER) : UiColor(BADGE_DISABLED_BORDER)),
+                mOverlayAnimationInfo ? UiColor(BADGE_ON_TEXT) : (canAnimateOverlay ? UiColor(BADGE_ON_TEXT) : UiColor(BADGE_DISABLED_TEXT)));
+
+    SetHudBadge(mOverlayToggleBadge,
+                mOverlayApplied ? "Clear" : "Apply",
+                mOverlayApplied ? UiColor(0x7F1D1D) : UiColor(BADGE_APPLY_BACKGROUND),
+                mOverlayApplied ? UiColor(0xFCA5A5) : UiColor(BADGE_APPLY_BORDER),
+                UiColor(BADGE_ON_TEXT));
+    SetHudBadge(mOverlayResetBadge, "Reset", UiColor(0x7C2D12), UiColor(0xFDBA74), UiColor(BADGE_ON_TEXT));
+    SetHudBadge(mOverlayModeBadge, GetGradientOverlayModeName(CurrentOverlayMode()), UiColor(0x9D174D), UiColor(0xF9A8D4));
+
+    std::string fill = "FILL ";
+    fill += GetOverlayFillModeName(CurrentOverlayFillMode());
+    SetHudBadge(mOverlayFillBadge, fill, UiColor(0x065F46), UiColor(0x34D399));
+  }
+
   void UpdateStatus()
   {
     SetHudBadge(mResetBadge, "Reset", UiColor(0x7C2D12), UiColor(0xFDBA74));
     SetHudBadge(mClearBadge,
-                mGradientApplied ? "Clear" : "Cleared",
-                mGradientApplied ? UiColor(0x7F1D1D) : UiColor(0x334155),
-                mGradientApplied ? UiColor(0xFCA5A5) : UiColor(0x64748B),
-                mGradientApplied ? UiColor(0xF8FAFC) : UiColor(0xCBD5E1));
+                mGradientApplied ? "Clear" : "Apply",
+                mGradientApplied ? UiColor(0x7F1D1D) : UiColor(BADGE_APPLY_BACKGROUND),
+                mGradientApplied ? UiColor(0xFCA5A5) : UiColor(BADGE_APPLY_BORDER),
+                UiColor(BADGE_ON_TEXT));
     UpdateGradientTypeBadge();
 
     if(mMarqueeMatrixMode)
     {
+      UpdateOverlayBadges(false);
       SetHudBadge(mCaseBadge, "CASE 0  Matrix", UiColor(0x1D4ED8), UiColor(0x93C5FD));
 
-      std::string spread = "SPREAD ";
+      std::string spread;
       spread += GetSpreadMethodName(CurrentSpreadMethod());
       SetHudBadge(mSpreadBadge, spread, UiColor(0x312E81), UiColor(0x818CF8));
 
-      std::string bounds = "BOUNDS ";
+      std::string bounds;
       bounds += GetGradientBoundsModeBadgeName(CurrentGradientBoundsMode());
       SetHudBadge(mBoundsBadge, bounds, UiColor(0x164E63), UiColor(0x67E8F9));
 
@@ -1561,15 +2143,15 @@ private:
 
       const bool canAnimate = CanAnimateCurrentTextGradient();
       SetHudBadge(mAnimationBadge,
-                  mAnimationInfo ? "Anim Run" : (canAnimate ? "Anim Ready" : "Anim N/A"),
-                  mAnimationInfo ? UiColor(0x0F766E) : (canAnimate ? UiColor(0x075985) : UiColor(0x1E293B)),
-                  mAnimationInfo ? UiColor(0x5EEAD4) : (canAnimate ? UiColor(0x38BDF8) : UiColor(0x475569)),
-                  mAnimationInfo ? UiColor(0xF8FAFC) : UiColor(0xCBD5E1));
+                  mAnimationInfo ? "Run" : "Ready",
+                  mAnimationInfo ? UiColor(0x0F766E) : (canAnimate ? UiColor(BADGE_READY_BACKGROUND) : UiColor(BADGE_DISABLED_BACKGROUND)),
+                  mAnimationInfo ? UiColor(0x5EEAD4) : (canAnimate ? UiColor(BADGE_READY_BORDER) : UiColor(BADGE_DISABLED_BORDER)),
+                  mAnimationInfo ? UiColor(BADGE_ON_TEXT) : (canAnimate ? UiColor(BADGE_ON_TEXT) : UiColor(BADGE_DISABLED_TEXT)));
 
       std::string expected = "MATRIX  H/V, START/CENTER/END, short/long, sync/async | Expected: short cells align to text bounds; long cells use viewport bounds; async matches sync.";
       if(!mGradientApplied)
       {
-        expected += " Gradient: cleared; G applies the selected type.";
+        expected += " TG: cleared; C applies the selected type.";
       }
       else if(mAnimationInfo)
       {
@@ -1579,11 +2161,14 @@ private:
       {
         expected += " Animation: current gradient does not support StartOffset motion.";
       }
+      expected += " OV: N/A on matrix path. OV Anim: N/A.";
       SetHudBadge(mExpectedBadge, expected, UiColor(0x0F172A), UiColor(0x334155), UiColor(0xCBD5E1));
       return;
     }
 
     const CaseDefinition& item = CASES[mCaseIndex];
+    const bool            overlaySupported = IsOverlaySupportedForCase(item);
+    UpdateOverlayBadges(overlaySupported);
 
     std::string caseText = "CASE ";
     caseText += std::to_string(mCaseIndex + 1u);
@@ -1593,15 +2178,11 @@ private:
     caseText += item.title;
     SetHudBadge(mCaseBadge, caseText, UiColor(0x1D4ED8), UiColor(0x93C5FD));
 
-    std::string spread = "SPREAD ";
+    std::string spread;
     spread += GetSpreadMethodName(CurrentSpreadMethod());
-    if(item.compactGradientSpan)
-    {
-      spread += " Short";
-    }
     SetHudBadge(mSpreadBadge, spread, UiColor(0x312E81), UiColor(0x818CF8));
 
-    std::string bounds = "BOUNDS ";
+    std::string bounds;
     bounds += GetGradientBoundsModeBadgeName(CurrentGradientBoundsMode());
     SetHudBadge(mBoundsBadge, bounds, UiColor(0x164E63), UiColor(0x67E8F9));
 
@@ -1609,11 +2190,11 @@ private:
     size += GetPreviewSizeModeBadgeName(mPreviewSizeMode);
     SetHudBadge(mSizeBadge, size, UiColor(0x78350F), UiColor(0xFBBF24));
 
-    std::string hAlign = "H ";
+    std::string hAlign = "H ALIGN ";
     hAlign += GetAlignmentName(ALIGNMENTS[mHorizontalAlignmentIndex]);
     SetHudBadge(mHAlignBadge, hAlign, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
 
-    std::string vAlign = "V ";
+    std::string vAlign = "V ALIGN ";
     vAlign += GetAlignmentName(ALIGNMENTS[mVerticalAlignmentIndex]);
     SetHudBadge(mVAlignBadge, vAlign, UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
 
@@ -1632,10 +2213,10 @@ private:
     SetHudBadge(mMatrixBadge, "MATRIX Off", UiColor(0x1E293B), UiColor(0x475569), UiColor(0xCBD5E1));
     const bool canAnimate = CanAnimateCurrentTextGradient();
     SetHudBadge(mAnimationBadge,
-                mAnimationInfo ? "Anim Run" : (canAnimate ? "Anim Ready" : "Anim N/A"),
-                mAnimationInfo ? UiColor(0x0F766E) : (canAnimate ? UiColor(0x075985) : UiColor(0x1E293B)),
-                mAnimationInfo ? UiColor(0x5EEAD4) : (canAnimate ? UiColor(0x38BDF8) : UiColor(0x475569)),
-                mAnimationInfo ? UiColor(0xF8FAFC) : UiColor(0xCBD5E1));
+                mAnimationInfo ? "Run" : "Ready",
+                mAnimationInfo ? UiColor(0x0F766E) : (canAnimate ? UiColor(BADGE_READY_BACKGROUND) : UiColor(BADGE_DISABLED_BACKGROUND)),
+                mAnimationInfo ? UiColor(0x5EEAD4) : (canAnimate ? UiColor(BADGE_READY_BORDER) : UiColor(BADGE_DISABLED_BORDER)),
+                mAnimationInfo ? UiColor(BADGE_ON_TEXT) : (canAnimate ? UiColor(BADGE_ON_TEXT) : UiColor(BADGE_DISABLED_TEXT)));
 
     std::string expected = "Coordinate: ";
     expected += item.marquee ? "visible marquee viewport bounds" : "logical text bounds";
@@ -1645,7 +2226,7 @@ private:
     expected += item.notes;
     if(!mGradientApplied)
     {
-      expected += " Gradient: cleared; G applies the selected type.";
+      expected += " TG: cleared; C applies the selected type.";
     }
     else if(mAnimationInfo)
     {
@@ -1658,6 +2239,34 @@ private:
     else
     {
       expected += " Animation: A starts spread-tuned gradient motion; X resets the current gradient state.";
+    }
+    if(overlaySupported)
+    {
+      if(mOverlayApplied)
+      {
+        expected += " OV: ";
+        if(item.marquee)
+        {
+          expected += "sync/async ";
+        }
+        expected += GetGradientName(CurrentOverlayGradientKind());
+        expected += " ";
+        expected += GetOverlayFillModeName(CurrentOverlayFillMode());
+        expected += " ";
+        expected += GetGradientOverlayModeName(CurrentOverlayMode());
+        expected += " ";
+        expected += GetGradientBoundsModeBadgeName(CurrentOverlayBoundsMode());
+        expected += ".";
+        expected += mOverlayAnimationInfo ? " OV Anim: Run." : " OV Anim: N or Ready starts overlay motion.";
+      }
+      else
+      {
+        expected += " OV: cleared; O applies overlay.";
+      }
+    }
+    else
+    {
+      expected += " OV: N/A on unsupported path.";
     }
     SetHudBadge(mExpectedBadge, expected, UiColor(0x0F172A), UiColor(0x334155), UiColor(0xCBD5E1));
   }
@@ -1726,7 +2335,7 @@ private:
     }
     else if(keyName == "c" || keyName == "C")
     {
-      SetGradientNone();
+      ToggleBaseGradientApplied();
     }
     else if(keyName == "g" || keyName == "G")
     {
@@ -1740,6 +2349,10 @@ private:
     {
       ToggleGradientAnimation();
     }
+    else if(keyName == "n" || keyName == "N")
+    {
+      ToggleGradientOverlayAnimation();
+    }
     else if(keyName == "x" || keyName == "X")
     {
       ResetCurrentGradientState();
@@ -1751,6 +2364,30 @@ private:
     else if(keyName == "b" || keyName == "B")
     {
       CycleGradientBoundsMode();
+    }
+    else if(keyName == "y" || keyName == "Y")
+    {
+      CycleOverlayGradientType();
+    }
+    else if(keyName == "k" || keyName == "K")
+    {
+      ToggleOverlayFillMode();
+    }
+    else if(keyName == "u" || keyName == "U")
+    {
+      CycleOverlaySpreadMethod();
+    }
+    else if(keyName == "i" || keyName == "I")
+    {
+      CycleOverlayBoundsMode();
+    }
+    else if(keyName == "l" || keyName == "L")
+    {
+      CycleOverlayMode();
+    }
+    else if(keyName == "o" || keyName == "O")
+    {
+      ToggleOverlayApplied();
     }
     else if(keyName == "m" || keyName == "M")
     {
@@ -1808,6 +2445,14 @@ private:
   Label          mAnimationBadge;
   Label          mResetBadge;
   Label          mClearBadge;
+  Label          mOverlayTypeBadge;
+  Label          mOverlayFillBadge;
+  Label          mOverlaySpreadBadge;
+  Label          mOverlayBoundsBadge;
+  Label          mOverlayAnimationBadge;
+  Label          mOverlayModeBadge;
+  Label          mOverlayToggleBadge;
+  Label          mOverlayResetBadge;
   Label          mExpectedBadge;
   StackLayout    mNormalPreviewContainer;
   StackLayout    mMarqueeMatrixContainer;
@@ -1818,6 +2463,7 @@ private:
   Label          mHelpLabel;
   Label          mViewHelpLabel;
   Animation      mTextGradientAnimation;
+  Animation      mTextGradientOverlayAnimation;
   std::vector<Label> mMarqueeMatrixLabels;
   float              mWindowWidth{static_cast<float>(WINDOW_WIDTH)};
   std::size_t        mCaseIndex{INITIAL_CASE_INDEX};
@@ -1825,10 +2471,17 @@ private:
   std::size_t        mVerticalAlignmentIndex{INITIAL_ALIGNMENT_INDEX};
   std::size_t        mSpreadMethodIndex{INITIAL_SPREAD_METHOD_INDEX};
   std::size_t        mGradientBoundsModeIndex{INITIAL_GRADIENT_BOUNDS_MODE_INDEX};
+  std::size_t        mOverlayGradientTypeIndex{0u};
+  std::size_t        mOverlaySpreadMethodIndex{INITIAL_SPREAD_METHOD_INDEX};
+  std::size_t        mOverlayBoundsModeIndex{INITIAL_GRADIENT_BOUNDS_MODE_INDEX};
+  std::size_t        mOverlayModeIndex{0u};
   PreviewSizeMode mPreviewSizeMode{PreviewSizeMode::FIXED};
+  OverlayFillMode mOverlayFillMode{OverlayFillMode::EFFECT};
   GradientKind    mGradientTypeOverride{GradientKind::NONE};
   bool            mGradientApplied{true};
+  bool            mOverlayApplied{false};
   bool            mAnimationInfo{false};
+  bool            mOverlayAnimationInfo{false};
   bool            mMarqueeMatrixMode{false};
   bool            mMarqueeRunning{true};
 };

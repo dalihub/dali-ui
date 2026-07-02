@@ -192,6 +192,39 @@ Text::GradientBoundsMode Label::GetTextGradientBoundsMode() const
   return GetImpl(*this).GetTextGradientBoundsMode();
 }
 
+Label& Label::SetTextGradientOverlay(const Gradient::Base& gradient)
+{
+  GetImpl(*this).SetTextGradientOverlay(gradient);
+  return *this;
+}
+
+Gradient::Base Label::GetTextGradientOverlay() const
+{
+  return GetImpl(*this).GetTextGradientOverlay();
+}
+
+Label& Label::SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode)
+{
+  GetImpl(*this).SetTextGradientOverlayBoundsMode(mode);
+  return *this;
+}
+
+Text::GradientBoundsMode Label::GetTextGradientOverlayBoundsMode() const
+{
+  return GetImpl(*this).GetTextGradientOverlayBoundsMode();
+}
+
+Label& Label::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
+{
+  GetImpl(*this).SetTextGradientOverlayMode(mode);
+  return *this;
+}
+
+Text::GradientOverlayMode Label::GetTextGradientOverlayMode() const
+{
+  return GetImpl(*this).GetTextGradientOverlayMode();
+}
+
 void Label::SetHorizontalTextAlignment(Text::Alignment alignment)
 {
   GetImpl(*this).SetHorizontalTextAlignment(alignment);

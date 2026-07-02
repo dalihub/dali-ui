@@ -46,6 +46,8 @@ public:
 
   static void ApplyTextGradientStartOffsetTo(Animation& animation, Label view, const Entry& entry);
   static void ApplyTextGradientStartOffsetBy(Animation& animation, Label view, const Entry& entry);
+  static void ApplyTextGradientOverlayStartOffsetTo(Animation& animation, Label view, const Entry& entry);
+  static void ApplyTextGradientOverlayStartOffsetBy(Animation& animation, Label view, const Entry& entry);
 
 protected:
   LabelAnimationSpecImpl();

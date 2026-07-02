@@ -269,6 +269,7 @@ public: // Setters for chaining
   UiColor GetTextColor();
 
   // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)
+  // @ANIMATABLE_MANUAL(TextGradientOverlayStartOffset, float)
   /**
    * @brief Sets the text gradient.
    *
@@ -280,7 +281,7 @@ public: // Setters for chaining
    * SetTextGradientBoundsMode(), where the top-left is (-0.5, -0.5) and
    * bottom-right is (0.5, 0.5). Gradient::Units::USER_SPACE uses pixel
    * coordinates inside the same selected bounds. This text-specific bounds
-   * selection does not change the coordinate contract used by GradientVisual.
+   * selection only affects Label text gradient evaluation.
    * For Radial gradients, non-square OBJECT_BOUNDING_BOX bounds may therefore
    * follow the selected bounds aspect; use USER_SPACE for pixel-like center and
    * radius values.
@@ -317,6 +318,68 @@ public: // Setters for chaining
    * @return The current text gradient bounds mode.
    */
   Text::GradientBoundsMode GetTextGradientBoundsMode() const;
+
+  /**
+   * @brief Sets a gradient overlay applied to the resolved text glyph fill.
+   *
+   * The overlay is evaluated after the Label text color, TextGradient, markup
+   * color, or color glyph result has been resolved. It affects visible glyph
+   * fill pixels only and does not affect text decorations such as shadow,
+   * underline, strikethrough, outline, or background.
+   *
+   * The overlay mode is evaluated inside the text shader and does not change
+   * the framebuffer blending state.
+   *
+   * @param[in] gradient The overlay gradient. Use Gradient::Base::None()
+   * to remove the overlay.
+   * @return This Label.
+   */
+  Label& SetTextGradientOverlay(const Gradient::Base& gradient);
+
+  /**
+   * @brief Gets the text gradient overlay.
+   *
+   * @return The current text gradient overlay, or Type::NONE if no overlay is set.
+   */
+  Gradient::Base GetTextGradientOverlay() const;
+
+  /**
+   * @brief Sets the bounds used to evaluate text gradient overlay coordinates.
+   *
+   * This is independent from TextGradientBoundsMode used by the base
+   * TextGradient.
+   *
+   * @param[in] mode The overlay gradient bounds mode.
+   * @return This Label.
+   */
+  Label& SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode);
+
+  /**
+   * @brief Gets the bounds mode used to evaluate text gradient overlay coordinates.
+   *
+   * @return The current text gradient overlay bounds mode.
+   */
+  Text::GradientBoundsMode GetTextGradientOverlayBoundsMode() const;
+
+  /**
+   * @brief Sets how the text gradient overlay is applied to the resolved text
+   * glyph fill.
+   *
+   * GradientOverlayMode is a text-specific mode evaluated inside the text
+   * shader. It does not change framebuffer blending state.
+   *
+   * @param[in] mode The overlay mode.
+   * @return This Label.
+   */
+  Label& SetTextGradientOverlayMode(Text::GradientOverlayMode mode);
+
+  /**
+   * @brief Gets how the text gradient overlay is applied to the resolved text
+   * glyph fill.
+   *
+   * @return The current text gradient overlay mode.
+   */
+  Text::GradientOverlayMode GetTextGradientOverlayMode() const;
 
   /**
    * @brief Sets the horizontal alignment of the text within the label.

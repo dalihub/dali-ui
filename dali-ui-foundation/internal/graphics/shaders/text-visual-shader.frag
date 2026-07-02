@@ -12,6 +12,9 @@ UNIFORM sampler2D sTextGradientMask;
 #ifdef IS_REQUIRED_TEXT_GRADIENT
 UNIFORM sampler2D sGradientLookup;
 #endif
+#ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
+UNIFORM sampler2D sGradientOverlayLookup;
+#endif
 #ifdef IS_REQUIRED_STYLE
 UNIFORM sampler2D sStyle;
 #endif
@@ -52,6 +55,20 @@ UNIFORM_BLOCK FragBlock
   UNIFORM highp vec4 uTextGradientBounds;
   #endif
 
+  #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
+  UNIFORM highp float uTextGradientOverlayType;
+  UNIFORM highp vec2 uTextGradientOverlayStartPosition;
+  UNIFORM highp vec2 uTextGradientOverlayEndPosition;
+  UNIFORM highp vec2 uTextGradientOverlayRadialCenter;
+  UNIFORM highp vec2 uTextGradientOverlayRadialScale;
+  UNIFORM highp vec2 uTextGradientOverlayConicCenter;
+  UNIFORM highp vec2 uTextGradientOverlayConicScale;
+  UNIFORM highp float uTextGradientOverlayConicStartAngle;
+  UNIFORM highp float uTextGradientOverlayStartOffset;
+  UNIFORM highp vec4 uTextGradientOverlayBounds;
+  UNIFORM highp float uTextGradientOverlayMode;
+  #endif
+
   #ifdef IS_REQUIRED_EMBOSS
   UNIFORM lowp vec2 uEmbossSize;
   UNIFORM lowp vec2 uEmbossDirection;
@@ -81,6 +98,58 @@ highp float EvaluateTextGradientPosition(highp vec2 textGradientCoord)
   highp vec2 gradientVector = uTextGradientEndPosition - uTextGradientStartPosition;
   highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
   return dot(textGradientCoord - uTextGradientStartPosition, gradientVector) / gradientLengthSquared;
+}
+#endif
+
+#ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
+highp float EvaluateTextGradientOverlayPosition(highp vec2 textGradientCoord)
+{
+  const highp float TEXT_GRADIENT_TYPE_RADIAL = 2.0;
+  const highp float TEXT_GRADIENT_TYPE_CONIC = 3.0;
+  const highp float TEXT_GRADIENT_INV_TWO_PI = 0.15915494309189533576888376337251;
+  if(abs(uTextGradientOverlayType - TEXT_GRADIENT_TYPE_RADIAL) < 0.5)
+  {
+    return length((textGradientCoord - uTextGradientOverlayRadialCenter) * uTextGradientOverlayRadialScale);
+  }
+  if(abs(uTextGradientOverlayType - TEXT_GRADIENT_TYPE_CONIC) < 0.5)
+  {
+    highp vec2 conicVector = (textGradientCoord - uTextGradientOverlayConicCenter) * uTextGradientOverlayConicScale;
+    highp float angle = atan(conicVector.y, conicVector.x) - uTextGradientOverlayConicStartAngle;
+    return fract(angle * TEXT_GRADIENT_INV_TWO_PI);
+  }
+
+  highp vec2 gradientVector = uTextGradientOverlayEndPosition - uTextGradientOverlayStartPosition;
+  highp float gradientLengthSquared = max(dot(gradientVector, gradientVector), 0.000001);
+  return dot(textGradientCoord - uTextGradientOverlayStartPosition, gradientVector) / gradientLengthSquared;
+}
+
+mediump vec4 ApplyTextGradientOverlay(mediump vec4 baseFill, highp vec2 texCoord)
+{
+  mediump float glyphAlpha = baseFill.a;
+  if(glyphAlpha <= 0.000001)
+  {
+    return baseFill;
+  }
+
+  highp vec2 textGradientOverlayCoord =
+    (texCoord - uTextGradientOverlayBounds.xy) / max(uTextGradientOverlayBounds.zw, vec2(0.000001));
+  highp float gradientPosition = EvaluateTextGradientOverlayPosition(textGradientOverlayCoord);
+  mediump vec4 overlayColor =
+    TEXTURE(sGradientOverlayLookup, vec2(gradientPosition + uTextGradientOverlayStartOffset, 0.5));
+  mediump vec3 baseRgb = baseFill.rgb / max(glyphAlpha, 0.000001);
+  mediump vec3 blendedRgb;
+
+  const highp float TEXT_GRADIENT_OVERLAY_MODE_SCREEN = 1.0;
+  if(abs(uTextGradientOverlayMode - TEXT_GRADIENT_OVERLAY_MODE_SCREEN) < 0.5)
+  {
+    mediump vec3 screen = vec3(1.0) - (vec3(1.0) - baseRgb) * (vec3(1.0) - overlayColor.rgb);
+    blendedRgb = mix(baseRgb, screen, overlayColor.a);
+  }
+  else
+  {
+    blendedRgb = overlayColor.rgb * overlayColor.a + baseRgb * (1.0 - overlayColor.a);
+  }
+  return vec4(blendedRgb * glyphAlpha, glyphAlpha);
 }
 #endif
 
@@ -162,6 +231,10 @@ void main()
   // Single color without emoji.
   mediump float textTexture = TEXTURE(sTexture, vTexCoord).r;
   textColor = uTextColorAnimatable * textTexture;
+#endif
+
+#ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
+  textColor = ApplyTextGradientOverlay(textColor, vTexCoord);
 #endif
 
   // Draw the text as overlay above the style

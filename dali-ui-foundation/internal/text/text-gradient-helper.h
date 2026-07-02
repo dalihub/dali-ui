@@ -41,13 +41,32 @@ namespace TextGradient
 
 bool IsRenderable(const Gradient::Base& gradient);
 
-bool IsLinearRenderable(const Gradient::Base& gradient);
-
-bool IsSupportedTextGradientType(const Gradient::Base& gradient);
-
-bool IsSupportedTextGradientStyle(const TextGradientStyle& style);
+bool IsRenderableStyle(const TextGradientStyle& style);
 
 Dali::WrapMode::Type GetWrapMode(Gradient::SpreadMethod spread);
+
+struct TextGradientRenderData
+{
+  bool           enabled{false};
+  Gradient::Type type{Gradient::Type::NONE};
+
+  Vector2 startPosition{Vector2::ZERO};
+  Vector2 endPosition{Vector2::ONE};
+
+  Vector2 radialCenter{Vector2::ZERO};
+  Vector2 radialScale{Vector2::ZERO};
+
+  Vector2 conicCenter{Vector2::ZERO};
+  Vector2 conicScale{Vector2::ONE};
+  float   conicStartAngle{0.0f};
+
+  float   startOffset{0.0f};
+  Vector4 bounds{0.0f, 0.0f, 1.0f, 1.0f};
+};
+
+TextGradientRenderData ResolveGradientRenderData(const TextGradientStyle& style,
+                                                 const Vector4&           bounds,
+                                                 const Vector2&           coordinateSize);
 
 Dali::Texture CreateLookupTexture(const TextGradientStyle& style);
 
