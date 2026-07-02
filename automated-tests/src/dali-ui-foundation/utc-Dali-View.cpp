@@ -17,9 +17,12 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
+#include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 #include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
+#include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/integration-api/events/key-event-integ.h>
@@ -231,6 +234,16 @@ Shadow GetShadowProperty(View view)
   return shadowMap ? Provider::Shadow::CreateShadow(*shadowMap) : Shadow::None();
 }
 
+int GetVisualType(const Property::Map& map)
+{
+  Property::Value* typeValue = map.Find(Ui::VisualBasePropertyIndex::TYPE);
+  DALI_TEST_CHECK(typeValue);
+
+  int type = static_cast<int>(Ui::Integration::InternalVisualType::INVALID);
+  DALI_TEST_CHECK(typeValue && typeValue->Get(type));
+  return type;
+}
+
 } // namespace
 
 void utc_dali_view_startup(void)
@@ -440,6 +453,62 @@ int UtcDaliViewBackgroundColorSetterP(void)
   const UiColor     testColor(1.0f, 0.0f, 0.0f, 0.5f);
   view.SetBackgroundColor(testColor);
   DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), testColor.GetRgba(), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetBackgroundImageP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  const char*       imageUrl = "background-image.png";
+
+  view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+  view.SetBackgroundImage(Dali::String(imageUrl));
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(GetVisualType(backgroundMap), static_cast<int>(Ui::Integration::InternalVisualType::IMAGE), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), UiColor().GetRgba(), TEST_LOCATION);
+
+  Property::Value* urlValue = backgroundMap.Find(Ui::ImageVisualPropertyIndex::URL);
+  DALI_TEST_CHECK(urlValue);
+
+  Dali::String url;
+  DALI_TEST_CHECK(urlValue && urlValue->Get(url));
+  DALI_TEST_EQUALS(url, Dali::String(imageUrl), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetBackgroundGradientP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  Dali::Vector<Gradient::StopNode> stopNodes;
+  stopNodes.PushBack(Gradient::StopNode(0.0f, UiColor(Color::RED)));
+  stopNodes.PushBack(Gradient::StopNode(1.0f, UiColor(Color::BLUE)));
+  gradient.SetStopNodes(stopNodes);
+  gradient.SetUnits(Gradient::Units::USER_SPACE);
+  gradient.SetSpreadMethod(Gradient::SpreadMethod::REFLECT);
+
+  view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
+  view.SetBackgroundGradient(gradient);
+
+  Property::Map backgroundMap = view.GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  DALI_TEST_EQUALS(GetVisualType(backgroundMap), static_cast<int>(Ui::Integration::InternalVisualType::GRADIENT), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), UiColor().GetRgba(), TEST_LOCATION);
+
+  Property::Value* startPositionValue = backgroundMap.Find(Ui::GradientVisualPropertyIndex::START_POSITION);
+  DALI_TEST_CHECK(startPositionValue);
+  Vector2 startPosition;
+  DALI_TEST_CHECK(startPositionValue && startPositionValue->Get(startPosition));
+  DALI_TEST_EQUALS(startPosition, Vector2(-0.5f, -0.5f), TEST_LOCATION);
+
+  Property::Value* stopColorValue = backgroundMap.Find(Ui::GradientVisualPropertyIndex::STOP_COLOR);
+  DALI_TEST_CHECK(stopColorValue);
+  const Property::Array* stopColors = stopColorValue ? stopColorValue->GetArray() : nullptr;
+  DALI_TEST_CHECK(stopColors);
+  DALI_TEST_EQUALS(stopColors ? stopColors->Count() : 0u, 2u, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2680,6 +2749,27 @@ int UtcDaliViewSetLayoutModeFiresPropertySetSignalP(void)
   Ui::GetImpl(view).SetLayoutMode(Ui::LayoutMode::STANDALONE);
 
   DALI_TEST_CHECK(recorder.Saw(Ui::View::Property::LAYOUT_MODE));
+  END_TEST;
+}
+
+int UtcDaliViewBackgroundTypedSettersDoNotFirePropertySetSignalP(void)
+{
+  UiTestApplication   application;
+  Ui::View            view = Ui::View::New();
+  PropertySetRecorder recorder;
+  recorder.Connect(view);
+
+  Gradient::Linear gradient(Vector2::ZERO, Vector2::ONE);
+  Dali::Vector<Gradient::StopNode> stopNodes;
+  stopNodes.PushBack(Gradient::StopNode(0.0f, UiColor(Color::RED)));
+  stopNodes.PushBack(Gradient::StopNode(1.0f, UiColor(Color::BLUE)));
+  gradient.SetStopNodes(stopNodes);
+
+  view.SetBackgroundColor(UiColor(Color::GREEN));
+  view.SetBackgroundImage(Dali::String("background-image.png"));
+  view.SetBackgroundGradient(gradient);
+
+  DALI_TEST_CHECK(!recorder.Saw(Ui::View::Property::BACKGROUND));
   END_TEST;
 }
 
