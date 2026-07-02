@@ -435,7 +435,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mVisualData(nullptr),
   mAttachments(nullptr),
   mFocusNavigationData(nullptr),
-  mBackgroundColor(Color::TRANSPARENT),
   mMargin(),
   mPadding(),
   mRequestedWidth(WRAP_CONTENT),

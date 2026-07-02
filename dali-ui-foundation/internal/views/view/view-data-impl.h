@@ -717,7 +717,6 @@ public:
     return mFocusNavigationData ? mFocusNavigationData.get()->*field : -1;
   }
 
-  Vector4                           mBackgroundColor; ///< The color of the background visual
   Extents                           mMargin;          ///< Layout margin
   Extents                           mPadding;         ///< Layout padding
   float                             mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)

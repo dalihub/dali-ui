@@ -952,7 +952,18 @@ UiColor ViewImpl::GetBackgroundColor()
   {
     return outColor;
   }
-  return mImpl->mBackgroundColor;
+
+  Property::Map    backgroundMap = Self().GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  Property::Value* typeValue     = backgroundMap.Find(Ui::VisualBasePropertyIndex::TYPE);
+  int              type          = static_cast<int>(Ui::Integration::InternalVisualType::COLOR);
+  if(typeValue && typeValue->Get(type) && type != static_cast<int>(Ui::Integration::InternalVisualType::COLOR))
+  {
+    return UiColor();
+  }
+
+  Property::Value* colorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+  Vector4          color;
+  return colorValue && colorValue->Get(color) ? UiColor(color) : UiColor();
 }
 
 void ViewImpl::SetBackgroundColor(const UiColor& color)
@@ -969,7 +980,6 @@ void ViewImpl::SetBackgroundImage(const Dali::String& url)
   }
 
   UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
-  mImpl->mBackgroundColor = Color::TRANSPARENT;
 
   mImpl->SetBackground(Internal::CreateImageVisualPropertyMap(url));
 }
@@ -983,7 +993,6 @@ void ViewImpl::SetBackgroundGradient(const Gradient::Base& gradient)
   }
 
   UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
-  mImpl->mBackgroundColor = Color::TRANSPARENT;
 
   Property::Map map = Internal::CreateGradientVisualPropertyMap(gradient);
   mImpl->SetBackground(map);
@@ -2528,8 +2537,6 @@ void ViewImpl::Initialize()
 
 void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
 {
-  mImpl->mBackgroundColor = color;
-
   Property::Map map = Internal::CreateColorVisualPropertyMap(color);
 
   Ui::Internal::Visual::Base* visualImplPtr = mImpl->GetVisualImplPtr(Ui::View::Property::BACKGROUND);
@@ -2546,7 +2553,6 @@ void ViewImpl::SetBackgroundColorInternal(const Vector4& color)
 void ViewImpl::ClearBackground()
 {
   mImpl->UnregisterVisual(Ui::View::Property::BACKGROUND);
-  mImpl->mBackgroundColor = Color::TRANSPARENT;
 
   UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
 
