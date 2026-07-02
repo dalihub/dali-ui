@@ -94,6 +94,7 @@ add_image_view_sample(image-corner-radius.example image-corner-radius-example.cp
 add_image_view_sample(image-sampling-desired-size.example image-sampling-desired-size-example.cpp)
 add_image_view_sample(image-view-sizing.example image-view-sizing-example.cpp)
 add_image_view_sample(image-loading-policy.example image-loading-policy-example.cpp)
+add_image_view_sample(image-view-svg.example image-view-svg-example.cpp)
 
 add_image_view_sample(animated-image-view.example animated-image-view-example.cpp)
 add_image_view_sample(lottie-animation-view.example lottie-animation-view-example.cpp)
