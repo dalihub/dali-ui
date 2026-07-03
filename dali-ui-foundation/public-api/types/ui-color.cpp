@@ -236,6 +236,11 @@ bool UiColor::operator==(const UiColor& rhs) const
            Dali::Equals(lhsColor.a, rhsColor.a);
   }
 
+  if(GetType() == Type::None)
+  {
+    return true;
+  }
+
   return GetTokenId() == rhs.GetTokenId() &&
          GetAlphaMode() == rhs.GetAlphaMode() &&
          Dali::Equals(GetTokenAlpha(), rhs.GetTokenAlpha());
@@ -265,6 +270,11 @@ String UiColor::GetColorId() const
 
 Vector4 UiColor::GetRgba() const
 {
+  if(GetType() == Type::None)
+  {
+    return Vector4::ZERO;
+  }
+
   if(GetType() == Type::Token)
   {
     const uint32_t          tokenId = GetTokenId();
@@ -305,7 +315,11 @@ UiColor::operator Vector4() const
 UiColor UiColor::ScaleAlpha(float factor) const
 {
   UiColor out(*this);
-  if(GetType() == Type::Rgba)
+  if(GetType() == Type::None)
+  {
+    return out;
+  }
+  else if(GetType() == Type::Rgba)
   {
     Vector4 c = ReadRgbaPayload();
     c.a *= factor;
@@ -330,6 +344,11 @@ UiColor UiColor::ScaleAlpha(float factor) const
 UiColor UiColor::WithAlpha(float alpha) const
 {
   UiColor out(*this);
+  if(GetType() == Type::None)
+  {
+    return out;
+  }
+
   alpha = std::clamp(alpha, 0.0f, 1.0f);
   if(GetType() == Type::Rgba)
   {
@@ -343,6 +362,16 @@ UiColor UiColor::WithAlpha(float alpha) const
     out.SetTokenAlpha(alpha);
   }
   return out;
+}
+
+UiColor UiColor::None()
+{
+  return UiColor();
+}
+
+bool UiColor::IsNone() const
+{
+  return GetType() == Type::None;
 }
 
 UiColor::Type UiColor::GetType() const

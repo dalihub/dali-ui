@@ -44,11 +44,26 @@ int UtcDaliUiColorDefaultConstructorP(void)
 
   UiColor color;
 
+  DALI_TEST_CHECK(color.IsNone());
   DALI_TEST_CHECK(!color.HasColorId());
   DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
 
   Vector4 resolved = color.GetRgba();
   DALI_TEST_EQUALS(resolved, Vector4::ZERO, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiColorNoneP(void)
+{
+  UiTestApplication application;
+
+  UiColor color = UiColor::None();
+
+  DALI_TEST_CHECK(color.IsNone());
+  DALI_TEST_CHECK(!color.HasColorId());
+  DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
+  DALI_TEST_EQUALS(color.GetRgba(), Vector4::ZERO, TEST_LOCATION);
 
   END_TEST;
 }
@@ -61,6 +76,7 @@ int UtcDaliUiColorRgbaConstructorP(void)
 
   UiColor color(1.0f, 0.0f, 0.0f, 1.0f);
 
+  DALI_TEST_CHECK(!color.IsNone());
   DALI_TEST_CHECK(!color.HasColorId());
   DALI_TEST_EQUALS(color.GetColorId(), String(), TEST_LOCATION);
 
@@ -111,6 +127,7 @@ int UtcDaliUiColorStringIdConstructorP(void)
   String id("TestColorId");
   UiColor color(id);
 
+  DALI_TEST_CHECK(!color.IsNone());
   DALI_TEST_CHECK(color.HasColorId());
   DALI_TEST_EQUALS(color.GetColorId(), "TestColorId", TEST_LOCATION);
 
@@ -257,6 +274,8 @@ int UtcDaliUiColorEqualityP(void)
   UiTestApplication application;
 
   DALI_TEST_CHECK(UiColor() == UiColor());
+  DALI_TEST_CHECK(UiColor::None() == UiColor());
+  DALI_TEST_CHECK(UiColor::None() != UiColor(Vector4::ZERO));
 
   DALI_TEST_CHECK(UiColor(1.0f, 0.0f, 0.0f, 1.0f) == UiColor(Vector4(1.0f, 0.0f, 0.0f, 1.0f)));
   DALI_TEST_CHECK(UiColor(1.0f, 0.0f, 0.0f, 1.0f) == UiColor(0xFF0000u));
@@ -269,6 +288,21 @@ int UtcDaliUiColorEqualityP(void)
   DALI_TEST_CHECK(UiColor("Primary").WithAlpha(0.5f) != UiColor("Primary").WithAlpha(0.7f));
 
   DALI_TEST_CHECK(UiColor("Primary") != UiColor(Vector4(1.0f, 1.0f, 1.0f, 1.0f)));
+
+  END_TEST;
+}
+
+int UtcDaliUiColorNoneAlphaP(void)
+{
+  UiTestApplication application;
+
+  UiColor scaled = UiColor::None().ScaleAlpha(0.5f);
+  UiColor with   = UiColor::None().WithAlpha(0.5f);
+
+  DALI_TEST_CHECK(scaled.IsNone());
+  DALI_TEST_CHECK(with.IsNone());
+  DALI_TEST_EQUALS(scaled.GetRgba(), Vector4::ZERO, TEST_LOCATION);
+  DALI_TEST_EQUALS(with.GetRgba(), Vector4::ZERO, TEST_LOCATION);
 
   END_TEST;
 }

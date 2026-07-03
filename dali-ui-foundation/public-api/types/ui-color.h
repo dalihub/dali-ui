@@ -34,10 +34,11 @@ namespace Ui
  * @brief A color value that can hold either direct RGBA components or a
  * string identifier that is resolved at runtime via the current theme.
  *
- * When constructed with RGBA values, UiColor behaves like a lightweight
- * wrapper around Vector4. When constructed with a string color ID, the
- * actual RGBA values are looked up from the current ThemeLoaderInterface
- * at the point of GetRgba().
+ * When default constructed, UiColor represents no color value and resolves
+ * to transparent black from GetRgba(). When constructed with RGBA values,
+ * UiColor behaves like a lightweight wrapper around Vector4. When constructed
+ * with a string color ID, the actual RGBA values are looked up from the current
+ * ThemeLoaderInterface at the point of GetRgba().
  *
  * @code
  *   // Direct RGBA
@@ -63,7 +64,9 @@ public:
   static const UiColor BLUR_SURFACE;
 
   /**
-   * @brief Creates a default UiColor (transparent black, no ID).
+   * @brief Creates a UiColor with no color value.
+   *
+   * GetRgba() resolves this color to transparent black.
    */
   UiColor();
 
@@ -179,6 +182,7 @@ public:
    *
    * - RGBA: out.a = in.a * factor
    * - Token: the resolved alpha is scaled by factor
+   * - None: remains none
    */
   UiColor ScaleAlpha(float factor) const;
 
@@ -187,14 +191,33 @@ public:
    *
    * - RGBA: out.a = alpha
    * - Token: the resolved alpha is replaced with alpha
+   * - None: remains none
    */
   UiColor WithAlpha(float alpha) const;
+
+  /**
+   * @brief Creates a UiColor with no color value.
+   *
+   * Equivalent to the default constructor. GetRgba() resolves this color to
+   * transparent black.
+   *
+   * @return A UiColor with no color value
+   */
+  static UiColor None();
+
+  /**
+   * @brief Returns whether this UiColor has no color value.
+   *
+   * @return True if this UiColor has no color value
+   */
+  bool IsNone() const;
 
 private:
   enum class Type : uint8_t
   {
-    Rgba  = 0u,
-    Token = 1u,
+    None  = 0u,
+    Rgba  = 1u,
+    Token = 2u,
   };
 
   enum class AlphaMode : uint8_t
