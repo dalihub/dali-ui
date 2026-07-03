@@ -146,10 +146,20 @@ private:
     auto    spec   = std::make_shared<NavigationTransitionSpec>();
     spec->duration = 0.42f;
 
+    // Incoming pages (enter/popEnter) set an off-screen start via SetProperty, but the
+    // page is arranged this frame and ViewImpl::OnArrange then overwrites POSITION_X with
+    // the layout bounds (0). AnimateTo would read that clobbered value as its start and
+    // not move, so drive POSITION_X with an explicit key-frame animation whose progress-0
+    // value is authoritative and survives the arrange. Outgoing pages (exit/popExit) are
+    // already arranged and stable at 0, so AnimateTo from the current value is correct.
+    // Opacity is never touched by layout, so AnimateTo is used for it everywhere.
     spec->enter = [](Animation& anim, View view) {
       view.SetProperty(Actor::Property::POSITION_X, PAGE_SLIDE_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
-      anim.AnimateTo(Property(view, Actor::Property::POSITION_X), 0.0f, AlphaFunction::EASE_OUT);
+      KeyFrames slideX = KeyFrames::New();
+      slideX.Add(0.0f, PAGE_SLIDE_TRAVEL);
+      slideX.Add(1.0f, 0.0f);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), slideX, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
     };
     spec->exit = [](Animation& anim, View view) {
@@ -159,7 +169,10 @@ private:
     spec->popEnter = [](Animation& anim, View view) {
       view.SetProperty(Actor::Property::POSITION_X, -PAGE_SLIDE_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.82f);
-      anim.AnimateTo(Property(view, Actor::Property::POSITION_X), 0.0f, AlphaFunction::EASE_OUT);
+      KeyFrames slideX = KeyFrames::New();
+      slideX.Add(0.0f, -PAGE_SLIDE_TRAVEL);
+      slideX.Add(1.0f, 0.0f);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), slideX, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
     };
     spec->popExit = [](Animation& anim, View view) {
@@ -237,10 +250,17 @@ private:
     auto    spec   = std::make_shared<NavigationTransitionSpec>();
     spec->duration = 0.32f;
 
+    // Incoming modal drives POSITION_Y with a key-frame animation for the same reason as
+    // the slide spec (the just-arranged modal would otherwise have its POSITION_Y clobbered
+    // to 0 by ViewImpl::OnArrange). popExit animates the already-arranged modal from its
+    // current position, so AnimateTo is correct there.
     spec->enter = [](Animation& anim, View view) {
       view.SetProperty(Actor::Property::POSITION_Y, MODAL_DROP_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
-      anim.AnimateTo(Property(view, Actor::Property::POSITION_Y), 0.0f, AlphaFunction::EASE_OUT);
+      KeyFrames dropY = KeyFrames::New();
+      dropY.Add(0.0f, MODAL_DROP_TRAVEL);
+      dropY.Add(1.0f, 0.0f);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), dropY, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
     };
     spec->popExit = [](Animation& anim, View view) {
