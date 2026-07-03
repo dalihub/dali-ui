@@ -36,19 +36,19 @@ namespace Text
 {
 namespace Internal
 {
-namespace TextGradient
+namespace Gradient
 {
 
-bool IsRenderable(const Gradient::Base& gradient);
+bool IsRenderable(const Dali::Ui::Gradient::Base& gradient);
 
-bool IsRenderableStyle(const TextGradientStyle& style);
+bool IsRenderable(const Style& style);
 
-Dali::WrapMode::Type GetWrapMode(Gradient::SpreadMethod spread);
+Dali::WrapMode::Type GetWrapMode(Dali::Ui::Gradient::SpreadMethod spread);
 
-struct TextGradientRenderData
+struct RenderData
 {
-  bool           enabled{false};
-  Gradient::Type type{Gradient::Type::NONE};
+  bool                     enabled{false};
+  Dali::Ui::Gradient::Type type{Dali::Ui::Gradient::Type::NONE};
 
   Vector2 startPosition{Vector2::ZERO};
   Vector2 endPosition{Vector2::ONE};
@@ -64,15 +64,15 @@ struct TextGradientRenderData
   Vector4 bounds{0.0f, 0.0f, 1.0f, 1.0f};
 };
 
-TextGradientRenderData ResolveGradientRenderData(const TextGradientStyle& style,
-                                                 const Vector4&           bounds,
-                                                 const Vector2&           coordinateSize);
+RenderData ResolveRenderData(const Style&   style,
+                             const Vector4& bounds,
+                             const Vector2& coordinateSize);
 
-Dali::Texture CreateLookupTexture(const TextGradientStyle& style);
+Dali::Texture CreateLookupTexture(const Style& style);
 
-void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const TextGradientStyle& style);
+void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const Style& style);
 
-void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const TextGradientStyle& style);
+void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const Style& style);
 
 template<typename RendererType>
 Property::Index SetRendererProperty(RendererType renderer, const char* name, const Property::Value& value)
@@ -89,7 +89,7 @@ Property::Index SetRendererProperty(RendererType renderer, const char* name, con
   return index;
 }
 
-} // namespace TextGradient
+} // namespace Gradient
 } // namespace Internal
 } // namespace Text
 } // namespace Ui

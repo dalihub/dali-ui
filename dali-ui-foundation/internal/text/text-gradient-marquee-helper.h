@@ -34,10 +34,10 @@ namespace Text
 {
 namespace Internal
 {
-namespace TextGradientMarquee
+namespace GradientMarquee
 {
 
-bool IsRenderableStyle(const TextGradientStyle& style, const Size& textureSize);
+bool IsRenderable(const Gradient::Style& style, const Size& textureSize);
 
 bool IsCompositionSupported(bool hasMultipleTextColors,
                             bool containsColorGlyph,
@@ -46,15 +46,15 @@ bool IsCompositionSupported(bool hasMultipleTextColors,
                             bool embossEnabled,
                             bool cutoutEnabled);
 
-Dali::Ui::Text::TextScrollerTextGradient CreateMarqueeGradient(const TextGradientStyle& style,
-                                                               const Vector4&           bounds,
-                                                               const Vector2&           coordinateSize);
+Dali::Ui::Text::TextScrollerGradient CreateScrollerGradient(const Gradient::Style& style,
+                                                            const Vector4&         bounds,
+                                                            const Vector2&         coordinateSize);
 
-void SetMarqueeOverlayGradient(Dali::Ui::Text::TextScrollerTextGradient&       textGradient,
-                               const Dali::Ui::Text::TextScrollerTextGradient& overlayGradient,
-                               Dali::Ui::Text::GradientOverlayMode             overlayMode);
+void SetOverlayGradient(Dali::Ui::Text::TextScrollerGradient&       textGradient,
+                        const Dali::Ui::Text::TextScrollerGradient& overlayGradient,
+                        Dali::Ui::Text::GradientOverlayMode         overlayMode);
 
-} // namespace TextGradientMarquee
+} // namespace GradientMarquee
 } // namespace Internal
 } // namespace Text
 } // namespace Ui

@@ -33,12 +33,12 @@ namespace Text
 {
 namespace Internal
 {
-namespace TextGradientMarquee
+namespace GradientMarquee
 {
 
-bool IsRenderableStyle(const TextGradientStyle& style, const Size& textureSize)
+bool IsRenderable(const Gradient::Style& style, const Size& textureSize)
 {
-  if(!TextGradient::IsRenderableStyle(style))
+  if(!Gradient::IsRenderable(style))
   {
     return false;
   }
@@ -61,14 +61,14 @@ bool IsCompositionSupported(bool hasMultipleTextColors,
   return !(hasMultipleTextColors || containsColorGlyph || styleTextureEnabled || isOverlayStyle || embossEnabled || cutoutEnabled);
 }
 
-Dali::Ui::Text::TextScrollerTextGradient CreateMarqueeGradient(const TextGradientStyle& style,
-                                                               const Vector4&           bounds,
-                                                               const Vector2&           coordinateSize)
+Dali::Ui::Text::TextScrollerGradient CreateScrollerGradient(const Gradient::Style& style,
+                                                            const Vector4&         bounds,
+                                                            const Vector2&         coordinateSize)
 {
-  const TextGradient::TextGradientRenderData renderData =
-    TextGradient::ResolveGradientRenderData(style, bounds, coordinateSize);
+  const Gradient::RenderData renderData =
+    Gradient::ResolveRenderData(style, bounds, coordinateSize);
 
-  Dali::Ui::Text::TextScrollerTextGradient textGradient;
+  Dali::Ui::Text::TextScrollerGradient textGradient;
   textGradient.enabled         = renderData.enabled;
   textGradient.type            = renderData.type;
   textGradient.startPosition   = renderData.startPosition;
@@ -83,9 +83,9 @@ Dali::Ui::Text::TextScrollerTextGradient CreateMarqueeGradient(const TextGradien
   return textGradient;
 }
 
-void SetMarqueeOverlayGradient(Dali::Ui::Text::TextScrollerTextGradient&       textGradient,
-                               const Dali::Ui::Text::TextScrollerTextGradient& overlayGradient,
-                               Dali::Ui::Text::GradientOverlayMode             overlayMode)
+void SetOverlayGradient(Dali::Ui::Text::TextScrollerGradient&       textGradient,
+                        const Dali::Ui::Text::TextScrollerGradient& overlayGradient,
+                        Dali::Ui::Text::GradientOverlayMode         overlayMode)
 {
   textGradient.overlayEnabled         = overlayGradient.enabled;
   textGradient.overlayType            = overlayGradient.type;
@@ -101,7 +101,7 @@ void SetMarqueeOverlayGradient(Dali::Ui::Text::TextScrollerTextGradient&       t
   textGradient.overlayMode            = overlayMode;
 }
 
-} // namespace TextGradientMarquee
+} // namespace GradientMarquee
 } // namespace Internal
 } // namespace Text
 } // namespace Ui

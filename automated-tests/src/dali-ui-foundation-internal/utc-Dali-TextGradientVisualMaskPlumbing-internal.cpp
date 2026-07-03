@@ -47,7 +47,7 @@ constexpr const char* UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME = "uTextGradientSt
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME = "uTextGradientOverlayStartOffset";
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME = "uTextGradientOverlayMode";
 
-TextInternal::TextGradientStyle MakeEnabledTextGradientStyle(float startOffset = 0.0f)
+TextInternal::Gradient::Style MakeEnabledGradientStyle(float startOffset = 0.0f)
 {
   Gradient::Linear linear(Vector2::ZERO, Vector2::ONE);
   linear.SetStartOffset(startOffset);
@@ -57,7 +57,7 @@ TextInternal::TextGradientStyle MakeEnabledTextGradientStyle(float startOffset =
   stopNodes.PushBack(Gradient::StopNode(1.0f, Dali::Ui::UiColor(Color::BLUE)));
   linear.SetStopNodes(stopNodes);
 
-  return TextInternal::CreateTextGradientStyle(linear);
+  return TextInternal::Gradient::CreateStyle(linear);
 }
 
 struct RenderedTextVisual
@@ -159,7 +159,7 @@ int UtcDaliTextGradientVisualMaskSimpleEnabledDoesNotCreateStoredMaskP(void)
   UiTestApplication application;
 
   Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
-  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
   UpdateTextVisual(internalVisual);
 
@@ -186,7 +186,7 @@ int UtcDaliTextGradientOverlayVisualDefaultModeUniformP(void)
   UiTestApplication application;
 
   Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
-  UiInternal::TextVisual::SetTextGradientOverlayStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(internalVisual, MakeEnabledGradientStyle());
 
   UpdateTextVisual(internalVisual);
 
@@ -203,7 +203,7 @@ int UtcDaliTextGradientOverlayVisualScreenModeUniformP(void)
   UiTestApplication application;
 
   Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
-  UiInternal::TextVisual::SetTextGradientOverlayStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(internalVisual, MakeEnabledGradientStyle());
   UiInternal::TextVisual::SetTextGradientOverlayMode(internalVisual, UiText::GradientOverlayMode::SCREEN);
 
   UpdateTextVisual(internalVisual);
@@ -220,7 +220,7 @@ int UtcDaliTextGradientOverlayVisualStartOffsetAnimSourceP(void)
   UiTestApplication application;
 
   RenderedTextVisual rendered = CreateRenderedInternalTextVisualWithView(application);
-  UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.internalVisual, MakeEnabledTextGradientStyle(0.25f));
+  UiInternal::TextVisual::SetTextGradientOverlayStyle(rendered.internalVisual, MakeEnabledGradientStyle(0.25f));
   UpdateTextVisual(rendered.internalVisual);
 
   Dali::VisualRenderer renderer = rendered.internalVisual.GetRenderer();
@@ -253,7 +253,7 @@ int UtcDaliTextGradientVisualStartOffsetStyleResetP(void)
   UiTestApplication application;
 
   RenderedTextVisual rendered = CreateRenderedInternalTextVisualWithView(application);
-  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledTextGradientStyle(0.0f));
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle(0.0f));
   UpdateTextVisual(rendered.internalVisual);
 
   const Property::Index sourceOffsetIndex =
@@ -273,7 +273,7 @@ int UtcDaliTextGradientVisualStartOffsetStyleResetP(void)
 
   // Simulate LabelImpl::SyncGradientAnimProperties() after SetTextGradient(new Linear).
   rendered.view.SetProperty(sourceOffsetIndex, 0.25f);
-  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledTextGradientStyle(0.25f));
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle(0.25f));
 
   application.SendNotification();
   application.Render(16);
@@ -297,7 +297,7 @@ int UtcDaliTextGradientVisualMaskStyleSetterSimpleDoesNotCreateStoredMaskP(void)
 
   Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
 
-  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
   PixelData mask = UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual);
   DALI_TEST_CHECK(!mask);
@@ -310,11 +310,11 @@ int UtcDaliTextGradientVisualMaskDisabledClearsStoredMaskP(void)
 
   RenderedTextVisual rendered = CreateRenderedMarkupTextVisual(application);
   Dali::Ui::Integration::Visual::Base internalVisual = rendered.internalVisual;
-  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
   DALI_TEST_CHECK(UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual));
 
-  TextInternal::TextGradientStyle disabledStyle;
+  TextInternal::Gradient::Style disabledStyle;
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, disabledStyle);
 
   DALI_TEST_CHECK(!UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual));
@@ -327,16 +327,16 @@ int UtcDaliTextGradientVisualMaskStyleSetterReappliesAfterDisabledP(void)
 
   RenderedTextVisual rendered = CreateRenderedMarkupTextVisual(application);
   Dali::Ui::Integration::Visual::Base internalVisual = rendered.internalVisual;
-  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
   DALI_TEST_CHECK(UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual));
 
-  TextInternal::TextGradientStyle disabledStyle;
+  TextInternal::Gradient::Style disabledStyle;
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, disabledStyle);
 
   DALI_TEST_CHECK(!UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual));
 
-  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
   PixelData mask = UiInternal::TextVisual::GetTextGradientMaskPixelData(internalVisual);
   DALI_TEST_CHECK(mask);
@@ -349,7 +349,7 @@ int UtcDaliTextGradientVisualMaskColorOnlyMarkupCreatesMaskP(void)
   UiTestApplication application;
 
   RenderedTextVisual rendered = CreateRenderedMarkupTextVisual(application);
-  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
   DALI_TEST_CHECK(controller->IsMarkupProcessorEnabled());
@@ -370,7 +370,7 @@ int UtcDaliTextGradientVisualMaskStyledSimpleThenPlainDoesNotCreateStoredMaskP(v
   UiTestApplication application;
 
   RenderedTextVisual rendered = CreateRenderedMarkupUnderlineTextVisual(application);
-  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   DALI_TEST_CHECK(!UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual));
 
@@ -383,7 +383,7 @@ int UtcDaliTextGradientVisualMaskStyledSimpleThenPlainDoesNotCreateStoredMaskP(v
   DALI_TEST_CHECK(!controller->IsMarkupProcessorEnabled());
   DALI_TEST_CHECK(controller->GetTextModel()->GetNumberOfGlyphs() > 0u);
 
-  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   PixelData mask = UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual);
   DALI_TEST_CHECK(!mask);
@@ -395,7 +395,7 @@ int UtcDaliTextGradientVisualMaskStyledSimpleDoesNotCreateStoredMaskP(void)
   UiTestApplication application;
 
   RenderedTextVisual rendered = CreateRenderedMarkupUnderlineTextVisual(application);
-  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
   DALI_TEST_CHECK(controller->IsMarkupProcessorEnabled());
@@ -409,7 +409,7 @@ int UtcDaliTextGradientVisualMaskBackgroundStyleDoesNotCreateStoredMaskP(void)
   UiTestApplication application;
 
   RenderedTextVisual rendered = CreateRenderedMarkupBackgroundTextVisual(application);
-  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
   DALI_TEST_CHECK(controller->IsMarkupProcessorEnabled());
@@ -425,7 +425,7 @@ int UtcDaliTextGradientVisualMaskMarqueeSimpleDoesNotCreateStoredMaskP(void)
   Dali::Ui::Integration::Visual::Base internalVisual = CreateRenderedInternalTextVisual(application);
   UiInternal::TextVisual::GetController(internalVisual)
     ->SetMarqueeEnabled(true, false, UiText::MarqueeOrientation::HORIZONTAL);
-  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledTextGradientStyle());
+  UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
   UpdateTextVisual(internalVisual);
 

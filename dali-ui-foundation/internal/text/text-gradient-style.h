@@ -35,14 +35,16 @@ namespace Text
 {
 namespace Internal
 {
+namespace Gradient
+{
 
-struct TextGradientStop
+struct Stop
 {
   float   offset{0.0f};
   Vector4 color{};
 };
 
-struct TextGradientStyle
+struct Style
 {
   bool enabled{false};
 
@@ -60,7 +62,7 @@ struct TextGradientStyle
   Vector2 conicCenter{Vector2::ZERO};
   Radian  conicStartAngle{0.0f};
 
-  Dali::Vector<TextGradientStop> stops;
+  Dali::Vector<Stop> stops;
 };
 
 /**
@@ -72,8 +74,9 @@ struct TextGradientStyle
  * @param[in] gradient The public authored gradient value.
  * @return A disabled style for non-renderable gradients, otherwise a deep-copied snapshot.
  */
-TextGradientStyle CreateTextGradientStyle(const Dali::Ui::Gradient::Base& gradient);
+Style CreateStyle(const Dali::Ui::Gradient::Base& gradient);
 
+} // namespace Gradient
 } // namespace Internal
 
 } // namespace Text

@@ -34,26 +34,26 @@ namespace Text
 {
 namespace Internal
 {
-namespace TextGradient
+namespace Gradient
 {
 
-bool IsRenderable(const Gradient::Base& gradient)
+bool IsRenderable(const Dali::Ui::Gradient::Base& gradient)
 {
-  if(gradient.GetType() == Gradient::Type::NONE)
+  if(gradient.GetType() == Dali::Ui::Gradient::Type::NONE)
   {
     return false;
   }
 
   switch(gradient.GetType())
   {
-    case Gradient::Type::LINEAR:
-    case Gradient::Type::RADIAL:
-    case Gradient::Type::CONIC:
+    case Dali::Ui::Gradient::Type::LINEAR:
+    case Dali::Ui::Gradient::Type::RADIAL:
+    case Dali::Ui::Gradient::Type::CONIC:
     {
       return gradient.GetStopNodes().Count() >= 2u;
     }
 
-    case Gradient::Type::NONE:
+    case Dali::Ui::Gradient::Type::NONE:
     default:
     {
       return false;
@@ -61,7 +61,7 @@ bool IsRenderable(const Gradient::Base& gradient)
   }
 }
 
-bool IsRenderableStyle(const TextGradientStyle& style)
+bool IsRenderable(const Style& style)
 {
   if(!style.enabled || style.stops.Count() < 2u)
   {
@@ -70,23 +70,23 @@ bool IsRenderableStyle(const TextGradientStyle& style)
 
   switch(style.type)
   {
-    case Gradient::Type::LINEAR:
+    case Dali::Ui::Gradient::Type::LINEAR:
     {
       const Vector2 gradientVector = style.linearEnd - style.linearStart;
       return gradientVector.LengthSquared() > Math::MACHINE_EPSILON_1000;
     }
 
-    case Gradient::Type::RADIAL:
+    case Dali::Ui::Gradient::Type::RADIAL:
     {
       return std::fabs(style.radialRadius) > Math::MACHINE_EPSILON_1000;
     }
 
-    case Gradient::Type::CONIC:
+    case Dali::Ui::Gradient::Type::CONIC:
     {
       return true;
     }
 
-    case Gradient::Type::NONE:
+    case Dali::Ui::Gradient::Type::NONE:
     default:
     {
       return false;
@@ -94,19 +94,19 @@ bool IsRenderableStyle(const TextGradientStyle& style)
   }
 }
 
-Dali::WrapMode::Type GetWrapMode(Gradient::SpreadMethod spread)
+Dali::WrapMode::Type GetWrapMode(Dali::Ui::Gradient::SpreadMethod spread)
 {
   switch(spread)
   {
-    case Gradient::SpreadMethod::REPEAT:
+    case Dali::Ui::Gradient::SpreadMethod::REPEAT:
     {
       return Dali::WrapMode::REPEAT;
     }
-    case Gradient::SpreadMethod::REFLECT:
+    case Dali::Ui::Gradient::SpreadMethod::REFLECT:
     {
       return Dali::WrapMode::MIRRORED_REPEAT;
     }
-    case Gradient::SpreadMethod::PAD:
+    case Dali::Ui::Gradient::SpreadMethod::PAD:
     default:
     {
       return Dali::WrapMode::CLAMP_TO_EDGE;
@@ -114,12 +114,12 @@ Dali::WrapMode::Type GetWrapMode(Gradient::SpreadMethod spread)
   }
 }
 
-TextGradientRenderData ResolveGradientRenderData(const TextGradientStyle& style,
-                                                 const Vector4&           bounds,
-                                                 const Vector2&           coordinateSize)
+RenderData ResolveRenderData(const Style&   style,
+                             const Vector4& bounds,
+                             const Vector2& coordinateSize)
 {
-  TextGradientRenderData data;
-  if(!IsRenderableStyle(style))
+  RenderData data;
+  if(!IsRenderable(style))
   {
     return data;
   }
@@ -134,14 +134,14 @@ TextGradientRenderData ResolveGradientRenderData(const TextGradientStyle& style,
   data.endPosition =
     Text::Internal::ResolveGradientPosition(style.units, style.linearEnd, bounds, coordinateSize);
 
-  if(style.type == Gradient::Type::RADIAL)
+  if(style.type == Dali::Ui::Gradient::Type::RADIAL)
   {
     data.radialCenter =
       Text::Internal::ResolveGradientPosition(style.units, style.radialCenter, bounds, coordinateSize);
     data.radialScale =
       Text::Internal::ResolveRadialGradientScale(style.units, style.radialRadius, bounds, coordinateSize);
   }
-  else if(style.type == Gradient::Type::CONIC)
+  else if(style.type == Dali::Ui::Gradient::Type::CONIC)
   {
     data.conicCenter =
       Text::Internal::ResolveGradientPosition(style.units, style.conicCenter, bounds, coordinateSize);
@@ -153,7 +153,7 @@ TextGradientRenderData ResolveGradientRenderData(const TextGradientStyle& style,
   return data;
 }
 
-Dali::Texture CreateLookupTexture(const TextGradientStyle& style)
+Dali::Texture CreateLookupTexture(const Style& style)
 {
   if(style.stops.Count() < 2u)
   {
@@ -180,7 +180,7 @@ Dali::Texture CreateLookupTexture(const TextGradientStyle& style)
   return gradient->GenerateLookupTexture();
 }
 
-void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const TextGradientStyle& style)
+void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const Style& style)
 {
   Texture lookupTexture   = CreateLookupTexture(style);
   Sampler gradientSampler = Sampler::New();
@@ -191,13 +191,13 @@ void SetLookupTexture(TextureSet& textureSet, uint32_t textureSetIndex, const Te
   textureSet.SetSampler(textureSetIndex, gradientSampler);
 }
 
-void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const TextGradientStyle& style)
+void AddLookupTexture(TextureSet& textureSet, uint32_t& textureSetIndex, const Style& style)
 {
   SetLookupTexture(textureSet, textureSetIndex, style);
   ++textureSetIndex;
 }
 
-} // namespace TextGradient
+} // namespace Gradient
 } // namespace Internal
 } // namespace Text
 } // namespace Ui

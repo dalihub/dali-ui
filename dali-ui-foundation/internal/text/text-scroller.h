@@ -46,7 +46,7 @@ class ScrollerInterface;
 
 typedef IntrusivePtr<TextScroller> TextScrollerPtr;
 
-struct TextScrollerTextGradient
+struct TextScrollerGradient
 {
   bool            enabled{false};
   Gradient::Type  type{Gradient::Type::NONE};
@@ -112,8 +112,8 @@ public:
   void SetParameters(Actor scrollingTextActor, Dali::Renderer renderer, TextureSet textureSet, const Size& controlSize,
                      const Size& textureSize, const float wrapGap, CharacterDirection direction,
                      Alignment horizontalAlignment, Alignment verticalAlignment,
-                     bool                            animationReStart = false,
-                     const TextScrollerTextGradient& textGradient     = TextScrollerTextGradient());
+                     bool                        animationReStart = false,
+                     const TextScrollerGradient& textGradient     = TextScrollerGradient());
 
   /**
    * @brief Set the gap distance to elapse before the text wraps around

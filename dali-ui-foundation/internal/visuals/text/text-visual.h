@@ -223,7 +223,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] style The TextGradient style snapshot.
    */
-  static void SetTextGradientStyle(Ui::Integration::Visual::Base visual, const Text::Internal::TextGradientStyle& style)
+  static void SetTextGradientStyle(Ui::Integration::Visual::Base visual, const Text::Internal::Gradient::Style& style)
   {
     TextVisual& visualObject                = GetVisualObject(visual);
     visualObject.mTextGradientStyle         = style;
@@ -262,7 +262,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] style The TextGradientOverlay style snapshot.
    */
-  static void SetTextGradientOverlayStyle(Ui::Integration::Visual::Base visual, const Text::Internal::TextGradientStyle& style)
+  static void SetTextGradientOverlayStyle(Ui::Integration::Visual::Base visual, const Text::Internal::Gradient::Style& style)
   {
     TextVisual& visualObject = GetVisualObject(visual);
     visualObject.RemoveGradientOverlayAnimConstraints();
@@ -687,18 +687,18 @@ private:
   Text::TypesetterPtr       mTypesetter;         ///< The text's typesetter.
   Text::AsyncTextInterface* mAsyncTextInterface; ///< The text's async interface.
 
-  Text::Internal::TextGradientStyle mTextGradientStyle; ///< Stored TextGradient snapshot.
-  Text::GradientBoundsMode          mTextGradientBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
-  Text::Internal::TextGradientStyle mTextGradientOverlayStyle; ///< Stored TextGradientOverlay snapshot.
-  Text::GradientBoundsMode          mTextGradientOverlayBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
-  Text::GradientOverlayMode         mTextGradientOverlayMode{Text::GradientOverlayMode::SRC_OVER};
-  PixelData                         mTextGradientMaskPixelData;    ///< Stored TextGradient mask for future shader composition.
-  VisualRenderer                    mGradientRenderer;             ///< Last renderer where TextGradient uniforms were registered.
-  Vector2                           mLastGradientCoordSize;        ///< Last coordinate size used for TextGradient uniforms.
-  Vector4                           mLastGradientBounds;           ///< Last bounds used for TextGradient uniforms.
-  VisualRenderer                    mGradientOverlayRenderer;      ///< Last renderer where TextGradientOverlay uniforms were registered.
-  Vector2                           mLastGradientOverlayCoordSize; ///< Last coordinate size used for TextGradientOverlay uniforms.
-  Vector4                           mLastGradientOverlayBounds;    ///< Last bounds used for TextGradientOverlay uniforms.
+  Text::Internal::Gradient::Style mTextGradientStyle; ///< Stored TextGradient snapshot.
+  Text::GradientBoundsMode        mTextGradientBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
+  Text::Internal::Gradient::Style mTextGradientOverlayStyle; ///< Stored TextGradientOverlay snapshot.
+  Text::GradientBoundsMode        mTextGradientOverlayBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
+  Text::GradientOverlayMode       mTextGradientOverlayMode{Text::GradientOverlayMode::SRC_OVER};
+  PixelData                       mTextGradientMaskPixelData;    ///< Stored TextGradient mask for future shader composition.
+  VisualRenderer                  mGradientRenderer;             ///< Last renderer where TextGradient uniforms were registered.
+  Vector2                         mLastGradientCoordSize;        ///< Last coordinate size used for TextGradient uniforms.
+  Vector4                         mLastGradientBounds;           ///< Last bounds used for TextGradient uniforms.
+  VisualRenderer                  mGradientOverlayRenderer;      ///< Last renderer where TextGradientOverlay uniforms were registered.
+  Vector2                         mLastGradientOverlayCoordSize; ///< Last coordinate size used for TextGradientOverlay uniforms.
+  Vector4                         mLastGradientOverlayBounds;    ///< Last bounds used for TextGradientOverlay uniforms.
 
   TextVisualShaderFactory&                mTextVisualShaderFactory; ///< The shader factory for text visual.
   TextVisualShaderFeature::FeatureBuilder mTextShaderFeatureCache;  ///< The cached shader feature for text visual.

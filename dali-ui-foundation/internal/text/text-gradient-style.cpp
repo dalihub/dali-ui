@@ -31,10 +31,12 @@ namespace Text
 {
 namespace Internal
 {
-
-TextGradientStyle CreateTextGradientStyle(const Dali::Ui::Gradient::Base& gradient)
+namespace Gradient
 {
-  TextGradientStyle style;
+
+Style CreateStyle(const Dali::Ui::Gradient::Base& gradient)
+{
+  Style style;
 
   if(gradient.GetType() == Dali::Ui::Gradient::Type::NONE)
   {
@@ -56,7 +58,7 @@ TextGradientStyle CreateTextGradientStyle(const Dali::Ui::Gradient::Base& gradie
   style.stops.Reserve(stopNodes.Count());
   for(uint32_t index = 0u; index < stopNodes.Count(); ++index)
   {
-    TextGradientStop stop;
+    Stop stop;
     stop.offset = stopNodes[index].GetOffset();
     stop.color  = stopNodes[index].GetColor().GetRgba();
     style.stops.PushBack(stop);
@@ -91,7 +93,7 @@ TextGradientStyle CreateTextGradientStyle(const Dali::Ui::Gradient::Base& gradie
     case Dali::Ui::Gradient::Type::NONE:
     default:
     {
-      style = TextGradientStyle();
+      style = Style();
       break;
     }
   }
@@ -99,6 +101,7 @@ TextGradientStyle CreateTextGradientStyle(const Dali::Ui::Gradient::Base& gradie
   return style;
 }
 
+} // namespace Gradient
 } // namespace Internal
 
 } // namespace Text

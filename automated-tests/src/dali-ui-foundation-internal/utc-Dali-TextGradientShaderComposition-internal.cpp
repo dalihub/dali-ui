@@ -789,9 +789,9 @@ int UtcDaliTextGradientShaderCompositionUserSpaceRadialScaleP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientRenderDataLinearP(void)
+int UtcDaliRenderDataLinearP(void)
 {
-  TextInternal::TextGradientStyle style;
+  TextInternal::Gradient::Style style;
   style.enabled      = true;
   style.type         = Dali::Ui::Gradient::Type::LINEAR;
   style.units        = Dali::Ui::Gradient::Units::USER_SPACE;
@@ -804,8 +804,8 @@ int UtcDaliTextGradientRenderDataLinearP(void)
   const Vector4 bounds(0.25f, 0.2f, 0.5f, 0.4f);
   const Vector2 coordinateSize(200.0f, 100.0f);
 
-  const TextInternal::TextGradient::TextGradientRenderData renderData =
-    TextInternal::TextGradient::ResolveGradientRenderData(style, bounds, coordinateSize);
+  const TextInternal::Gradient::RenderData renderData =
+    TextInternal::Gradient::ResolveRenderData(style, bounds, coordinateSize);
 
   DALI_TEST_EQUALS(renderData.enabled, true, TEST_LOCATION);
   DALI_TEST_EQUALS(renderData.type, Dali::Ui::Gradient::Type::LINEAR, TEST_LOCATION);
@@ -818,9 +818,9 @@ int UtcDaliTextGradientRenderDataLinearP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientRenderDataRadialP(void)
+int UtcDaliRenderDataRadialP(void)
 {
-  TextInternal::TextGradientStyle style;
+  TextInternal::Gradient::Style style;
   style.enabled      = true;
   style.type         = Dali::Ui::Gradient::Type::RADIAL;
   style.units        = Dali::Ui::Gradient::Units::USER_SPACE;
@@ -833,8 +833,8 @@ int UtcDaliTextGradientRenderDataRadialP(void)
   const Vector4 bounds(0.25f, 0.0f, 0.5f, 1.0f);
   const Vector2 coordinateSize(200.0f, 40.0f);
 
-  const TextInternal::TextGradient::TextGradientRenderData renderData =
-    TextInternal::TextGradient::ResolveGradientRenderData(style, bounds, coordinateSize);
+  const TextInternal::Gradient::RenderData renderData =
+    TextInternal::Gradient::ResolveRenderData(style, bounds, coordinateSize);
 
   DALI_TEST_EQUALS(renderData.enabled, true, TEST_LOCATION);
   DALI_TEST_EQUALS(renderData.type, Dali::Ui::Gradient::Type::RADIAL, TEST_LOCATION);
@@ -847,9 +847,9 @@ int UtcDaliTextGradientRenderDataRadialP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientRenderDataConicP(void)
+int UtcDaliRenderDataConicP(void)
 {
-  TextInternal::TextGradientStyle style;
+  TextInternal::Gradient::Style style;
   style.enabled         = true;
   style.type            = Dali::Ui::Gradient::Type::CONIC;
   style.units           = Dali::Ui::Gradient::Units::USER_SPACE;
@@ -862,8 +862,8 @@ int UtcDaliTextGradientRenderDataConicP(void)
   const Vector4 bounds(0.25f, 0.0f, 0.5f, 1.0f);
   const Vector2 coordinateSize(200.0f, 40.0f);
 
-  const TextInternal::TextGradient::TextGradientRenderData renderData =
-    TextInternal::TextGradient::ResolveGradientRenderData(style, bounds, coordinateSize);
+  const TextInternal::Gradient::RenderData renderData =
+    TextInternal::Gradient::ResolveRenderData(style, bounds, coordinateSize);
 
   DALI_TEST_EQUALS(renderData.enabled, true, TEST_LOCATION);
   DALI_TEST_EQUALS(renderData.type, Dali::Ui::Gradient::Type::CONIC, TEST_LOCATION);
@@ -877,26 +877,26 @@ int UtcDaliTextGradientRenderDataConicP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientRenderDataUnsupportedP(void)
+int UtcDaliRenderDataUnsupportedP(void)
 {
   const Vector4 bounds(0.25f, 0.0f, 0.5f, 1.0f);
   const Vector2 coordinateSize(200.0f, 40.0f);
 
-  TextInternal::TextGradientStyle noneStyle;
-  TextInternal::TextGradient::TextGradientRenderData renderData =
-    TextInternal::TextGradient::ResolveGradientRenderData(noneStyle, bounds, coordinateSize);
+  TextInternal::Gradient::Style noneStyle;
+  TextInternal::Gradient::RenderData renderData =
+    TextInternal::Gradient::ResolveRenderData(noneStyle, bounds, coordinateSize);
 
   DALI_TEST_EQUALS(renderData.enabled, false, TEST_LOCATION);
   DALI_TEST_EQUALS(renderData.type, Dali::Ui::Gradient::Type::NONE, TEST_LOCATION);
 
-  TextInternal::TextGradientStyle oneStopStyle;
+  TextInternal::Gradient::Style oneStopStyle;
   oneStopStyle.enabled     = true;
   oneStopStyle.type        = Dali::Ui::Gradient::Type::LINEAR;
   oneStopStyle.linearStart = Vector2(-0.5f, 0.0f);
   oneStopStyle.linearEnd   = Vector2(0.5f, 0.0f);
   oneStopStyle.stops.PushBack({0.0f, Color::RED});
 
-  renderData = TextInternal::TextGradient::ResolveGradientRenderData(oneStopStyle, bounds, coordinateSize);
+  renderData = TextInternal::Gradient::ResolveRenderData(oneStopStyle, bounds, coordinateSize);
 
   DALI_TEST_EQUALS(renderData.enabled, false, TEST_LOCATION);
   DALI_TEST_EQUALS(renderData.type, Dali::Ui::Gradient::Type::NONE, TEST_LOCATION);
@@ -1150,7 +1150,7 @@ int UtcDaliTextGradientMarqueeLookupTexturesUseSequentialSlotsP(void)
 {
   TestApplication application;
 
-  TextInternal::TextGradientStyle baseStyle;
+  TextInternal::Gradient::Style baseStyle;
   baseStyle.enabled     = true;
   baseStyle.type        = Dali::Ui::Gradient::Type::LINEAR;
   baseStyle.linearStart = Vector2::ZERO;
@@ -1158,7 +1158,7 @@ int UtcDaliTextGradientMarqueeLookupTexturesUseSequentialSlotsP(void)
   baseStyle.stops.PushBack({0.0f, Color::RED});
   baseStyle.stops.PushBack({1.0f, Color::BLUE});
 
-  TextInternal::TextGradientStyle overlayStyle;
+  TextInternal::Gradient::Style overlayStyle;
   overlayStyle.enabled     = true;
   overlayStyle.type        = Dali::Ui::Gradient::Type::LINEAR;
   overlayStyle.linearStart = Vector2(-0.5f, 0.0f);
@@ -1168,8 +1168,8 @@ int UtcDaliTextGradientMarqueeLookupTexturesUseSequentialSlotsP(void)
 
   TextureSet textureSet      = TextureSet::New();
   uint32_t   textureSetIndex = 1u;
-  TextInternal::TextGradient::AddLookupTexture(textureSet, textureSetIndex, baseStyle);
-  TextInternal::TextGradient::AddLookupTexture(textureSet, textureSetIndex, overlayStyle);
+  TextInternal::Gradient::AddLookupTexture(textureSet, textureSetIndex, baseStyle);
+  TextInternal::Gradient::AddLookupTexture(textureSet, textureSetIndex, overlayStyle);
 
   DALI_TEST_EQUALS(textureSetIndex, 3u, TEST_LOCATION);
   DALI_TEST_CHECK(textureSet.GetTexture(1u));
@@ -1195,7 +1195,7 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesRendererBoundsP(void)
   const Property::Index conicScaleIndex = renderer.RegisterProperty("uTextGradientConicScale", Vector2::ZERO);
   const Property::Index conicStartAngleIndex = renderer.RegisterProperty("uTextGradientConicStartAngle", 0.0f);
 
-  UiText::TextScrollerTextGradient textGradient;
+  UiText::TextScrollerGradient textGradient;
   textGradient.enabled       = true;
   textGradient.type          = Dali::Ui::Gradient::Type::CONIC;
   textGradient.startPosition = Vector2::ZERO;
@@ -1270,7 +1270,7 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesOverlayRendererPropertiesP(void)
   application.GetScene().Add(actor);
   const Property::Index sourceStartOffsetIndex = actor.RegisterProperty("uTextGradientOverlayStartOffset", 0.35f);
 
-  UiText::TextScrollerTextGradient textGradient;
+  UiText::TextScrollerGradient textGradient;
   textGradient.overlayEnabled                  = true;
   textGradient.overlayType                     = Dali::Ui::Gradient::Type::CONIC;
   textGradient.overlayStartPosition            = Vector2::ZERO;
@@ -1357,7 +1357,7 @@ int UtcDaliTextGradientMarqueeScrollerKeepsBaseAndOverlayIndependentP(void)
   const Property::Index overlaySourceIndex = actor.RegisterProperty("overlayGradientStartOffset", 0.4f);
   DALI_TEST_CHECK(baseSourceIndex != overlaySourceIndex);
 
-  UiText::TextScrollerTextGradient textGradient;
+  UiText::TextScrollerGradient textGradient;
   textGradient.enabled                   = true;
   textGradient.type                      = Dali::Ui::Gradient::Type::LINEAR;
   textGradient.startPosition             = Vector2::ZERO;
@@ -1457,7 +1457,7 @@ int UtcDaliTextGradientMarqueeScrollerDisabledKeepsRendererCleanP(void)
 
 int UtcDaliTextGradientMarqueeCreatesRadialUniformValuesP(void)
 {
-  TextInternal::TextGradientStyle style;
+  TextInternal::Gradient::Style style;
   style.enabled      = true;
   style.type         = Dali::Ui::Gradient::Type::RADIAL;
   style.units        = Dali::Ui::Gradient::Units::USER_SPACE;
@@ -1469,8 +1469,8 @@ int UtcDaliTextGradientMarqueeCreatesRadialUniformValuesP(void)
   const Vector4 bounds(0.25f, 0.0f, 0.5f, 1.0f);
   const Vector2 coordinateSize(200.0f, 40.0f);
 
-  UiText::TextScrollerTextGradient textGradient =
-    TextInternal::TextGradientMarquee::CreateMarqueeGradient(style, bounds, coordinateSize);
+  UiText::TextScrollerGradient textGradient =
+    TextInternal::GradientMarquee::CreateScrollerGradient(style, bounds, coordinateSize);
 
   DALI_TEST_EQUALS(textGradient.enabled, true, TEST_LOCATION);
   DALI_TEST_EQUALS(textGradient.type, Dali::Ui::Gradient::Type::RADIAL, TEST_LOCATION);
@@ -1481,7 +1481,7 @@ int UtcDaliTextGradientMarqueeCreatesRadialUniformValuesP(void)
 
 int UtcDaliTextGradientMarqueeCreatesConicUniformValuesP(void)
 {
-  TextInternal::TextGradientStyle style;
+  TextInternal::Gradient::Style style;
   style.enabled         = true;
   style.type            = Dali::Ui::Gradient::Type::CONIC;
   style.units           = Dali::Ui::Gradient::Units::USER_SPACE;
@@ -1493,8 +1493,8 @@ int UtcDaliTextGradientMarqueeCreatesConicUniformValuesP(void)
   const Vector4 bounds(0.25f, 0.0f, 0.5f, 1.0f);
   const Vector2 coordinateSize(200.0f, 40.0f);
 
-  UiText::TextScrollerTextGradient textGradient =
-    TextInternal::TextGradientMarquee::CreateMarqueeGradient(style, bounds, coordinateSize);
+  UiText::TextScrollerGradient textGradient =
+    TextInternal::GradientMarquee::CreateScrollerGradient(style, bounds, coordinateSize);
 
   DALI_TEST_EQUALS(textGradient.enabled, true, TEST_LOCATION);
   DALI_TEST_EQUALS(textGradient.type, Dali::Ui::Gradient::Type::CONIC, TEST_LOCATION);

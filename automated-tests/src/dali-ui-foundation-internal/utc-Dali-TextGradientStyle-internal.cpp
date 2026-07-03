@@ -43,14 +43,14 @@ Dali::Vector<PublicGradient::StopNode> MakeStopNodes(const Vector4& startColor =
   return stopNodes;
 }
 
-void ExpectDisabled(const TextInternal::TextGradientStyle& style)
+void ExpectDisabled(const TextInternal::Gradient::Style& style)
 {
   DALI_TEST_EQUALS(style.enabled, false, TEST_LOCATION);
   DALI_TEST_EQUALS(style.type, PublicGradient::Type::NONE, TEST_LOCATION);
   DALI_TEST_EQUALS(style.stops.Count(), 0u, TEST_LOCATION);
 }
 
-void ExpectCommonProperties(const TextInternal::TextGradientStyle& style,
+void ExpectCommonProperties(const TextInternal::Gradient::Style& style,
                             PublicGradient::Type                   type,
                             PublicGradient::Units                  units,
                             PublicGradient::SpreadMethod           spreadMethod,
@@ -92,7 +92,7 @@ void utc_dali_text_gradient_style_internal_cleanup(void)
 
 int UtcDaliTextGradientStyleDefaultDisabledP(void)
 {
-  TextInternal::TextGradientStyle style;
+  TextInternal::Gradient::Style style;
   ExpectDisabled(style);
   END_TEST;
 }
@@ -102,7 +102,7 @@ int UtcDaliTextGradientStyleNoneConvertsDisabledP(void)
   PublicGradient::Base base;
   base.SetStopNodes(MakeStopNodes());
 
-  const auto style = TextInternal::CreateTextGradientStyle(base);
+  const auto style = TextInternal::Gradient::CreateStyle(base);
 
   ExpectDisabled(style);
   END_TEST;
@@ -111,13 +111,13 @@ int UtcDaliTextGradientStyleNoneConvertsDisabledP(void)
 int UtcDaliTextGradientStyleInsufficientStopsConvertsDisabledP(void)
 {
   PublicGradient::Linear linear(Vector2::ZERO, Vector2::ONE);
-  ExpectDisabled(TextInternal::CreateTextGradientStyle(linear));
+  ExpectDisabled(TextInternal::Gradient::CreateStyle(linear));
 
   Dali::Vector<PublicGradient::StopNode> singleStop;
   singleStop.PushBack(PublicGradient::StopNode(0.5f, Dali::Ui::UiColor(Color::GREEN)));
   linear.SetStopNodes(singleStop);
 
-  ExpectDisabled(TextInternal::CreateTextGradientStyle(linear));
+  ExpectDisabled(TextInternal::Gradient::CreateStyle(linear));
   END_TEST;
 }
 
@@ -129,7 +129,7 @@ int UtcDaliTextGradientStyleLinearSnapshotP(void)
   PublicGradient::Linear linear(startPosition, endPosition);
   SetCommonProperties(linear);
 
-  const auto style = TextInternal::CreateTextGradientStyle(linear);
+  const auto style = TextInternal::Gradient::CreateStyle(linear);
 
   ExpectCommonProperties(style, PublicGradient::Type::LINEAR, PublicGradient::Units::USER_SPACE, PublicGradient::SpreadMethod::REFLECT, 0.25f, Color::GREEN, Color::YELLOW);
   DALI_TEST_EQUALS(style.linearStart, startPosition, TEST_LOCATION);
@@ -155,7 +155,7 @@ int UtcDaliTextGradientStyleRadialSnapshotP(void)
   PublicGradient::Radial radial(center, radius);
   SetCommonProperties(radial, startColor, endColor);
 
-  const auto style = TextInternal::CreateTextGradientStyle(radial);
+  const auto style = TextInternal::Gradient::CreateStyle(radial);
 
   ExpectCommonProperties(style, PublicGradient::Type::RADIAL, PublicGradient::Units::USER_SPACE, PublicGradient::SpreadMethod::REFLECT, 0.25f, startColor, endColor);
   DALI_TEST_EQUALS(style.radialCenter, center, TEST_LOCATION);
@@ -171,7 +171,7 @@ int UtcDaliTextGradientStyleConicSnapshotP(void)
   PublicGradient::Conic conic(center, startAngle);
   SetCommonProperties(conic, Color::WHITE, Color::BLACK);
 
-  const auto style = TextInternal::CreateTextGradientStyle(conic);
+  const auto style = TextInternal::Gradient::CreateStyle(conic);
 
   ExpectCommonProperties(style, PublicGradient::Type::CONIC, PublicGradient::Units::USER_SPACE, PublicGradient::SpreadMethod::REFLECT, 0.25f, Color::WHITE, Color::BLACK);
   DALI_TEST_EQUALS(style.conicCenter, center, TEST_LOCATION);
@@ -187,6 +187,6 @@ int UtcDaliTextGradientStyleMovedFromInputN(void)
   PublicGradient::Base moved(std::move(source));
   DALI_TEST_CHECK(moved.GetType() != PublicGradient::Type::NONE);
 
-  DALI_TEST_ASSERTION(TextInternal::CreateTextGradientStyle(source), MOVED_FROM_GRADIENT_ASSERTION);
+  DALI_TEST_ASSERTION(TextInternal::Gradient::CreateStyle(source), MOVED_FROM_GRADIENT_ASSERTION);
   END_TEST;
 }

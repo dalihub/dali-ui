@@ -987,14 +987,14 @@ private: // Implementation
    *
    * @param[in,out] textGradient The scroller TextGradient configuration.
    */
-  void PopulateGradientAnimProperties(Text::TextScrollerTextGradient& textGradient) const;
+  void PopulateGradientAnimProperties(Text::TextScrollerGradient& textGradient) const;
 
   /**
    * @brief Adds cached TextGradientOverlay animation source property indices to scroller configuration.
    *
    * @param[in,out] textGradient The scroller TextGradient configuration.
    */
-  void PopulateGradientOverlayAnimProperties(Text::TextScrollerTextGradient& textGradient) const;
+  void PopulateGradientOverlayAnimProperties(Text::TextScrollerGradient& textGradient) const;
 
   /**
    * @brief Updates the effective line height based on the current LineHeightMode.
