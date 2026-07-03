@@ -277,6 +277,18 @@ To implement a fully custom algorithm, subclass `Dali::Ui::LayoutManager` and ov
 
 <br/>
 
+## Layout Transition
+
+`LayoutTransition` animates layout-driven changes for a view's children. It can run ENTER animations when children are added, EXIT animations when children are removed with `RemovePolicy::ANIMATE_EXIT`, and CHANGE animations when layout results move or resize existing children.
+
+Use it when a layout reflow should feel continuous, such as inserting items into a stack, removing cards from a grid, or animating resize-driven layout changes.
+
+For slot behavior, spec mode, animator callbacks, reflow scope, and caveats, see [Layout Transition](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-Transition).
+
+Sample: [layout-transition](https://github.com/dalihub/dali-ui/tree/devel/samples/layout-transition)
+
+<br/>
+
 ---
 
 [← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki#development-guides)

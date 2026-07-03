@@ -1,4 +1,6 @@
-# LayoutTransition
+[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-Transition-(kr))
+
+# Layout Transition
 
 `LayoutTransition` animates a `View`'s direct children between successive
 layout-pass results. When a child is added, removed, reordered, or the
@@ -434,3 +436,7 @@ while a secondary visual effect follows `rawProgress`.
   examples.
 - `automated-tests/src/dali-ui-foundation/utc-Dali-LayoutTransition.cpp` —
   unit tests covering the handle API surface.
+
+---
+
+[← Back to Layout](Layout.md)
