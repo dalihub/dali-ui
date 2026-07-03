@@ -14,10 +14,14 @@ dali-ui의 View는 현재 상태를 **`ViewState`** 라는 bitmask 값으로 관
 |------|------|
 | `ViewState::NORMAL` | 아무 상태도 활성화되지 않은 기본 상태 (비트 없음) |
 | `ViewState::FOCUSED` | 키보드 포커스를 가진 상태 |
+| `ViewState::FOCUS_INDICATED` | 포커스를 가지고 있고, 그 포커스를 시각적으로 표시해야 하는 상태 |
 | `ViewState::PRESSED` | 터치 또는 키 입력으로 눌린 상태 |
 | `ViewState::DISABLED` | 비활성화된 상태 |
 | `ViewState::PSEUDO_DISABLED` | 시각적으로는 비활성화처럼 보이지만 실제로는 상호작용 가능한 상태 |
 | `ViewState::SELECTED` | 선택된 상태 |
+
+> [!NOTE]
+> `FOCUSED`는 View가 현재 input focus를 가진 상태를 말하고, `FOCUS_INDICATED`는 focus를 가진 View에 시각적 focus 피드백을 표시해야 하는 상태를 말합니다. 예를 들어 입력 컨텍스트가 key에서 touch로 전환되면 View는 `FOCUSED`를 유지한 상태로 `FOCUS_INDICATED`만 해제될 수 있습니다. 이 개념은 CSS [`:focus-visible`](https://www.w3.org/TR/selectors-4/#the-focus-visible-pseudo)과 유사합니다.
 
 자주 쓰이는 복합 상태도 미리 정의되어 있습니다.
 
@@ -33,7 +37,7 @@ dali-ui의 View는 현재 상태를 **`ViewState`** 라는 bitmask 값으로 관
 
 | View 종류 | 가질 수 있는 상태 |
 |-----------|-----------------|
-| View | `FOCUSED`, `DISABLED` |
+| View | `FOCUSED`, `FOCUS_INDICATED`, `DISABLED` |
 | View (Interactive) | + `PRESSED`, `PSEUDO_DISABLED` |
 | View (Selectable) | + `SELECTED` |
 
@@ -92,14 +96,18 @@ view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
   ViewState prev = e.GetPrev();
   ViewState cur  = e.GetCurrent();
 
-  // 입력 이벤트가 원인인 경우
-  if(e.HasCause()) {
-    const InputEvent& cause = e.GetCause();
+  const InputEvent& cause = e.GetCause();
+  if(!cause.IsProgrammatic()) {
+    // 입력 이벤트가 원인인 전환
+  }
+
+  if(cause.IsCancellation()) {
+    // cancellation 또는 reset으로 인한 전환
   }
 });
 ```
 
-> `HasCause()`가 `false`이면 `SetEnabled()` 등 코드에 의한 변경입니다.
+> `InputEvent::IsProgrammatic()`이 `true`이면 `SetEnabled()` 등 코드에 의한 변경입니다.
 
 <br/>
 
@@ -110,6 +118,7 @@ predefined 상태들은 시스템이 자동으로 관리합니다.
 | 상태 | 관리 주체 | 변경 방법 |
 |------|-----------|-----------|
 | `FOCUSED` | 포커스 시스템 | 자동 |
+| `FOCUS_INDICATED` | 포커스 시스템 | 포커스가 도달한 방식과 시각적 focus 피드백 표시 필요 여부에 따라 자동 |
 | `PRESSED` | `InteractiveTrait` | 터치/키 입력 시 자동 |
 | `DISABLED` | `View` | `view.SetEnabled(false / true)` |
 | `PSEUDO_DISABLED` | `InteractiveTrait` | `interactiveTrait.SetPseudoDisabled(true / false)` |
@@ -133,7 +142,7 @@ selectable.SetToggleByClickEnabled(true);
 
 ## Custom States
 
-`ViewState::Create()`로 최대 62개의 커스텀 상태를 등록할 수 있습니다. 같은 이름으로 다시 호출하면 동일한 비트마스크를 반환합니다.
+`ViewState::Create()`로 커스텀 상태를 등록할 수 있습니다. 같은 이름으로 다시 호출하면 동일한 비트마스크를 반환합니다.
 
 ```cpp
 static const ViewState Loading = ViewState::Create("Loading");
@@ -143,9 +152,9 @@ static const ViewState Error   = ViewState::Create("Error");
 auto loadingOrError = Loading + Error;
 ```
 
-> 커스텀 상태의 설정은 `ViewImpl::SetState()`를 통해 이루어지며, Framework 개발자 대상입니다.
+> 커스텀 상태의 설정은 `Integration::SetState()`를 통해 이루어지며, Framework 개발자 대상입니다.
 
-> 최대 62개를 초과하면 `DaliException`이 발생합니다.
+> `ViewState`는 전체 32개의 bit slot을 가집니다. predefined 상태들이 그중 일부를 사용하고, 남은 slot을 커스텀 상태에 사용할 수 있습니다. 사용 가능한 bit 공간을 초과해 등록하면 `DaliException`이 발생합니다.
 
 <br/>
 
@@ -157,11 +166,11 @@ auto loadingOrError = Loading + Error;
 
 ## Framework Developer Notes
 
-커스텀 상태를 만든 경우, `ViewImpl::SetState()`로 해당 상태의 on/off를 제어합니다. `StateChangedSignal`은 자동으로 발생합니다.
+커스텀 상태를 만든 경우, `Integration::SetState()`로 해당 상태의 on/off를 제어합니다. `StateChangedSignal`은 자동으로 발생합니다.
 
 ```cpp
-SetState(Loading, true);   // Loading 상태 활성화
-SetState(Loading, false);  // Loading 상태 해제
+Integration::SetState(viewImpl, Loading, true);   // Loading 상태 활성화
+Integration::SetState(viewImpl, Loading, false);  // Loading 상태 해제
 ```
 
 테마/색상 연동이 필요하다면 Color & Theme 문서의 Framework Developer Notes를 참고하세요.
