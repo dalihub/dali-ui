@@ -13,13 +13,16 @@
    - [스크롤 위치](#41-스크롤-위치)
    - [플링 동작](#42-플링-동작)
    - [오버스크롤 모드](#43-오버스크롤-모드)
-   - [스크롤바 가시성](#44-스크롤바-가시성)
-   - [스크롤 상태 조회](#45-스크롤-상태-조회)
+   - [EdgeEffect](#44-edgeeffect)
+   - [스크롤바 가시성](#45-스크롤바-가시성)
+   - [스크롤 상태 조회](#46-스크롤-상태-조회)
+   - [Focus 및 Key 스크롤](#47-focus-및-key-스크롤)
 5. [프로그래밍 방식 스크롤](#5-프로그래밍-방식-스크롤)
 6. [이벤트 (시그널)](#6-이벤트-시그널)
-7. [메서드 체이닝](#7-메서드-체이닝)
+7. [설정 방식](#7-설정-방식)
 8. [기본값 정리](#8-기본값-정리)
-9. [주의 사항](#9-주의-사항)
+9. [문제 해결](#9-문제-해결)
+10. [주의 사항](#10-주의-사항)
 
 ---
 
@@ -228,7 +231,60 @@ OverScrollMode mode = scrollView.GetOverScrollMode();
 
 ---
 
-### 4.4 스크롤바 가시성
+### 4.4 EdgeEffect
+
+`ScrollView`는 콘텐츠가 스크롤 경계를 넘어 드래그되거나 플링될 때 `EdgeEffect`를 사용해 피드백을 줄 수 있습니다.
+
+기본 제공되는 `BounceEdgeEffect`는 콘텐츠를 경계 바깥으로 살짝 이동시킨 뒤 다시 원래 위치로 되돌리는 bounce 효과를 제공합니다.
+
+```cpp
+#include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
+
+// 세로 ScrollView: start = 상단, end = 하단
+BounceEdgeEffect startEffect = BounceEdgeEffect::New(ScrollDirection::Vertical);
+startEffect.SetPullResistance(0.35f);
+startEffect.SetBounceDuration(0.35f);
+
+BounceEdgeEffect endEffect = BounceEdgeEffect::New(ScrollDirection::Vertical);
+endEffect.SetPullResistance(0.35f);
+endEffect.SetBounceDuration(0.35f);
+
+scrollView.SetStartEdgeEffect(startEffect);
+scrollView.SetEndEdgeEffect(endEffect);
+scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+```
+
+가로 스크롤에서는 `ScrollDirection::Horizontal`로 effect를 생성합니다.
+
+```cpp
+BounceEdgeEffect leftEffect = BounceEdgeEffect::New(ScrollDirection::Horizontal);
+BounceEdgeEffect rightEffect = BounceEdgeEffect::New(ScrollDirection::Horizontal);
+
+scrollView.SetStartEdgeEffect(leftEffect);
+scrollView.SetEndEdgeEffect(rightEffect);
+```
+
+EdgeEffect를 제거하려면 초기화되지 않은 `EdgeEffect` handle을 전달합니다.
+
+```cpp
+scrollView.SetStartEdgeEffect(EdgeEffect());
+scrollView.SetEndEdgeEffect(EdgeEffect());
+```
+
+| 메서드 | 의미 |
+|---|---|
+| `SetStartEdgeEffect(effect)` | 시작 경계 effect를 설정합니다. 세로 스크롤에서는 상단, 가로 스크롤에서는 좌측입니다. |
+| `SetEndEdgeEffect(effect)` | 끝 경계 effect를 설정합니다. 세로 스크롤에서는 하단, 가로 스크롤에서는 우측입니다. |
+| `GetStartEdgeEffect()` | 현재 시작 경계 effect를 반환합니다. |
+| `GetEndEdgeEffect()` | 현재 끝 경계 effect를 반환합니다. |
+
+> 콘텐츠가 설정되어 있으면 `ScrollView`가 effect의 source를 콘텐츠 뷰로 설정합니다. 일반적인 사용에서는 effect를 생성해 `ScrollView`에 지정하면 됩니다.
+>
+> `OverScrollMode`는 경계 밖으로 스크롤을 허용할지 결정하고, `EdgeEffect`는 그 경계에서 표시할 시각 피드백을 결정합니다. `OverScrollMode::Never`가 설정되어 있으면 edge effect를 지정해도 경계 피드백은 발생하지 않는 것이 정상입니다.
+
+---
+
+### 4.5 스크롤바 가시성
 
 세로 및 가로 스크롤바가 표시되는 시점을 제어합니다.
 
@@ -255,13 +311,53 @@ ScrollBarVisibility hVis = scrollView.GetHorizontalScrollBarVisibility();
 
 ---
 
-### 4.5 스크롤 상태 조회
+### 4.6 스크롤 상태 조회
 
 ```cpp
 bool scrolling = scrollView.IsScrolling();
 ```
 
 `ScrollStartedSignal`과 `ScrollFinishedSignal` 사이, 즉 드래그 및 플링 애니메이션이 진행 중인 동안 `true`를 반환합니다.
+
+---
+
+### 4.7 Focus 및 Key 스크롤
+
+`ScrollView`는 키보드나 리모컨 기반 포커스 이동 중 focused content가 뷰포트 안에 보이도록 자동 스크롤할 수 있습니다.
+
+기본 동작 원칙은 다음과 같습니다.
+
+- 콘텐츠 뷰의 자손이 포커스를 얻으면 `ScrollView`가 해당 child가 보이도록 자동 스크롤할 수 있습니다.
+- 포커스된 child를 뷰포트 안의 어느 위치로 보낼지는 `SetFocusScrollToPosition()`으로 정합니다.
+- 포커스된 item이 뷰포트 경계에 딱 붙지 않도록 `SetFocusScrollPeek()`로 작은 추가 offset을 줄 수 있습니다.
+- 필요한 경우 key scroll을 켜서, 멀리 있는 item으로 바로 포커스를 넘기기 전에 일정 거리씩 먼저 스크롤하도록 만들 수 있습니다.
+
+```cpp
+// 기본값은 true입니다. 앱이 직접 포커스 스크롤을 관리하려면 false로 설정합니다.
+scrollView.SetScrollOnFocus(true);
+
+// 기본값은 MakeVisible입니다. Start, Center, End도 사용할 수 있습니다.
+scrollView.SetFocusScrollToPosition(ScrollToPosition::MakeVisible);
+
+// MakeVisible이 경계로 스크롤할 때 24px의 peek offset을 추가합니다.
+scrollView.SetFocusScrollPeek(24.0f);
+```
+
+`SetFocusScrollPeek()`는 `ScrollToPosition::MakeVisible`에서만 적용됩니다. 포커스된 item이 뷰포트 밖에 있을 때 `ScrollView`는 먼저 item이 보이는 가장 가까운 경계를 선택하고, 이동 방향으로 peek 거리만큼 조금 더 스크롤합니다. 최종 위치는 항상 유효한 스크롤 범위 안으로 clamp됩니다.
+
+Key 기반 단계 스크롤은 다음과 같이 설정합니다.
+
+```cpp
+scrollView.SetKeyScrollEnabled(true);
+scrollView.SetKeyScrollStep(200.0f);
+```
+
+Key scroll이 켜져 있을 때 방향키 이동 원칙은 다음과 같습니다.
+
+- 다음 focusable child가 충분히 가까우면 그 child로 포커스가 이동합니다.
+- 다음 focusable child가 key scroll step보다 멀면 `ScrollView`가 한 step만 스크롤하고 현재 포커스를 유지합니다.
+- `PAGE_UP` / `PAGE_DOWN`은 뷰포트 크기만큼 스크롤한 뒤, 목적지 뷰포트에서 가장 적절한 item에 포커스를 줍니다.
+- 스크롤 경계에 도달했고 다음 item이 없으면 포커스는 `ScrollView` 밖으로 이동할 수 있습니다. EdgeEffect가 설정되어 있으면 경계 피드백이 발생합니다.
 
 ---
 
@@ -460,25 +556,26 @@ void OnButtonClicked()
 
 ---
 
-## 7. 메서드 체이닝
+## 7. 설정 방식
 
-모든 setter는 `ScrollView&`를 반환하므로 유연하게 이어서 호출할 수 있습니다:
+`ScrollView` setter는 메서드 체이닝을 사용하지 않습니다. 일반적인 순차 setter 호출 방식으로 handle을 설정합니다.
 
 ```cpp
 ScrollView scrollView = ScrollView::New();
 
-scrollView
-    .SetScrollDirection(ScrollDirection::Vertical)
-    .SetMaxFlingDistance(4000.0f)
-    .SetMinimumFlingDuration(800)
-    .SetMaximumFlingDuration(2000)
-    .SetFlingSensitivity(1.2f)
-    .SetDecelerationRate(0.997f)
-    .SetOverScrollMode(OverScrollMode::ContentScrolls)
-    .SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto)
-    .SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never)
-    .SetContent(content);
+scrollView.SetScrollDirection(ScrollDirection::Vertical);
+scrollView.SetMaxFlingDistance(4000.0f);
+scrollView.SetMinimumFlingDuration(800);
+scrollView.SetMaximumFlingDuration(2000);
+scrollView.SetFlingSensitivity(1.2f);
+scrollView.SetDecelerationRate(0.997f);
+scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+scrollView.SetContent(content);
 ```
+
+이 방식은 `View`, `ScrollView`처럼 상속 및 확장 가능성이 있는 handle class에서 권장되는 설정 스타일입니다.
 
 ---
 
@@ -499,7 +596,20 @@ scrollView
 
 ---
 
-## 9. 주의 사항
+## 9. 문제 해결
+
+| 증상 | 확인할 내용 |
+|---|---|
+| 콘텐츠가 스크롤되지 않음 | `SetContent()`가 호출되었는지, 콘텐츠 크기가 뷰포트보다 큰지, `SetScrollDirection()`이 원하는 축의 이동을 허용하는지 확인합니다. |
+| `ScrollTo()`를 호출해도 `(0, 0)`에 머무름 | 아직 layout이 완료되지 않았거나 콘텐츠가 뷰포트보다 크지 않을 수 있습니다. 콘텐츠와 뷰포트 크기가 확정된 뒤 스크롤 API를 호출하세요. |
+| 스크롤바가 보이지 않음 | `SetVerticalScrollBarVisibility()` / `SetHorizontalScrollBarVisibility()` 설정, 콘텐츠 크기, 뷰포트 크기, 해당 축에서 실제 스크롤 가능 여부를 확인합니다. |
+| EdgeEffect 피드백이 보이지 않음 | `SetStartEdgeEffect()` / `SetEndEdgeEffect()`가 설정되었는지, `OverScrollMode`가 `Never`가 아닌지, 사용자가 실제 경계 방향으로 드래그 또는 플링하고 있는지 확인합니다. |
+| 포커스된 child가 보이도록 스크롤되지 않음 | `SetScrollOnFocus(true)` 설정, focused view가 콘텐츠 뷰의 자손인지, child가 keyboard focusable인지 확인합니다. |
+| 방향키 이동이 너무 멀리 있는 item으로 바로 넘어감 | `SetKeyScrollEnabled(true)`를 켜고 `SetKeyScrollStep()` 값을 조정합니다. |
+
+---
+
+## 10. 주의 사항
 
 - **콘텐츠를 먼저 설정해야 합니다.** `SetContent()` 호출 전에 `ScrollTo`, `ScrollToX`, `ScrollToY`, `SetScrollPosition`을 호출하면 내부에서 콘텐츠 액터의 프로퍼티에 직접 접근하므로 크래시가 발생합니다.
 
@@ -508,6 +618,8 @@ scrollView
 - **뷰포트 크기가 스크롤에 영향을 줍니다.** 스크롤 가능 영역은 `콘텐츠 크기 - 뷰포트 크기`로 계산됩니다. ScrollView가 아직 레이아웃되지 않은 상태(예: 스테이지에 추가되기 전)에서는 뷰포트 크기가 `0`으로 처리되어 모든 스크롤 위치가 `(0, 0)`으로 클램핑될 수 있습니다.
 
 - **스크롤바 렌더링은 플랫폼에 의존합니다.** `ScrollBarVisibility` 프로퍼티는 설정값을 저장하지만, 실제 스크롤바 렌더링은 플랫폼의 테마와 스크롤바 액터의 구현에 따라 달라집니다. 실제 동작은 대상 환경에서 확인하세요.
+
+- **Interactive child와 drag interception.** 버튼, 슬라이더 같은 interactive child는 tap/click 입력을 받을 수 있습니다. 다만 pointer 이동이 pan threshold를 넘으면 `ScrollView`가 제스처를 가로채 스크롤로 전환할 수 있습니다. 자식 뷰의 tap과 drag 동작이 시각적으로 구분되도록 설계하는 것이 좋습니다.
 
 - **`IsScrolling()`은 드래그와 플링을 모두 포함합니다.** `ScrollStartedSignal` 발생 시 `true`로 설정되고 `ScrollFinishedSignal` 발생 시 `false`로 초기화됩니다. 따라서 사용자가 손을 뗀 후 플링 애니메이션이 진행되는 동안에도 `true`를 반환합니다.
 
