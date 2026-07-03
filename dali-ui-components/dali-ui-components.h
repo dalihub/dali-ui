@@ -28,12 +28,13 @@
 #include <dali-ui-components/public-api/chart/pie-series.h>
 #include <dali-ui-components/public-api/chart/scatter-series.h>
 #include <dali-ui-components/public-api/components-ui-config.h>
-#include <dali-ui-components/public-api/styles/components-style-sheet.h>
-#include <dali-ui-components/public-api/styles/text-button-style.h>
-#include <dali-ui-components/public-api/text-button.h>
 #include <dali-ui-components/public-api/dialog/alert-dialog.h>
 #include <dali-ui-components/public-api/dialog/dialog-container.h>
 #include <dali-ui-components/public-api/dialog/dialog-properties.h>
 #include <dali-ui-components/public-api/dialog/dialog.h>
+#include <dali-ui-components/public-api/navigator/navigation-transition-spec.h>
 #include <dali-ui-components/public-api/navigator/navigator-properties.h>
 #include <dali-ui-components/public-api/navigator/navigator.h>
+#include <dali-ui-components/public-api/styles/components-style-sheet.h>
+#include <dali-ui-components/public-api/styles/text-button-style.h>
+#include <dali-ui-components/public-api/text-button.h>

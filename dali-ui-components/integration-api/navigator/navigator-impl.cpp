@@ -115,7 +115,8 @@ void NavigatorImpl::Push(Ui::View page, bool animated)
   mTxOutgoing       = prev;
   mTxByPop          = false;
   mTxRemoveOutgoing = false;
-  RunTransition(animated, true);
+  mTxByModal        = false;
+  RunTransition(animated && mPageTransitionAnimationEnabled, true);
 }
 
 Ui::View NavigatorImpl::Pop(bool animated)
@@ -149,7 +150,8 @@ Ui::View NavigatorImpl::Pop(bool animated)
   mTxOutgoing       = top;
   mTxByPop          = true;
   mTxRemoveOutgoing = true;
-  RunTransition(animated, false);
+  mTxByModal        = false;
+  RunTransition(animated && mPageTransitionAnimationEnabled, false);
   return top;
 }
 
@@ -191,6 +193,7 @@ void NavigatorImpl::Remove(Ui::View page)
       Self().Remove(page);
     }
     RemoveBackHandler(page);
+    RemovePageSpec(page);
     UpdateVisibility();
     return;
   }
@@ -208,6 +211,7 @@ void NavigatorImpl::Remove(Ui::View page)
     {
       Self().Remove(page);
     }
+    RemovePageSpec(page);
     UpdateVisibility();
   }
 }
@@ -232,6 +236,8 @@ void NavigatorImpl::Clear()
   mModalStack.clear();
   mNavStack.clear();
   mBackHandlers.clear();
+  mPageSpecs.clear();
+  mModalPageSpecs.clear();
 }
 
 // =============================================================================
@@ -278,7 +284,8 @@ void NavigatorImpl::PushModal(Ui::View modal, bool animated)
   mTxOutgoing       = disappearing;
   mTxByPop          = false;
   mTxRemoveOutgoing = false;
-  RunTransition(animated, true);
+  mTxByModal        = true;
+  RunTransition(animated && mModalTransitionAnimationEnabled, true);
 }
 
 Ui::View NavigatorImpl::PopModal(bool animated)
@@ -314,7 +321,8 @@ Ui::View NavigatorImpl::PopModal(bool animated)
   mTxOutgoing       = top;
   mTxByPop          = true;
   mTxRemoveOutgoing = true;
-  RunTransition(animated, false);
+  mTxByModal        = true;
+  RunTransition(animated && mModalTransitionAnimationEnabled, false);
   return top;
 }
 
@@ -395,6 +403,46 @@ void NavigatorImpl::SetBackHandler(Ui::View page, std::function<bool()> handler)
   mBackHandlers.emplace_back(page, handler);
 }
 
+void NavigatorImpl::SetPageTransitionAnimationEnabled(bool enabled)
+{
+  mPageTransitionAnimationEnabled = enabled;
+}
+
+bool NavigatorImpl::IsPageTransitionAnimationEnabled() const
+{
+  return mPageTransitionAnimationEnabled;
+}
+
+void NavigatorImpl::SetModalTransitionAnimationEnabled(bool enabled)
+{
+  mModalTransitionAnimationEnabled = enabled;
+}
+
+bool NavigatorImpl::IsModalTransitionAnimationEnabled() const
+{
+  return mModalTransitionAnimationEnabled;
+}
+
+void NavigatorImpl::SetTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  mDefaultSpec = std::move(spec);
+}
+
+void NavigatorImpl::SetPageTransitionSpec(Ui::View page, std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  SetPageSpec(mPageSpecs, page, std::move(spec));
+}
+
+void NavigatorImpl::SetModalTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  mDefaultModalSpec = std::move(spec);
+}
+
+void NavigatorImpl::SetPageModalTransitionSpec(Ui::View page, std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  SetPageSpec(mModalPageSpecs, page, std::move(spec));
+}
+
 // =============================================================================
 // Helpers
 // =============================================================================
@@ -446,22 +494,53 @@ void NavigatorImpl::RunTransition(bool animated, bool fadeIncoming)
 {
   AbortTransition();
 
-  Ui::View target = fadeIncoming ? mTxIncoming : mTxOutgoing;
-  if(animated && target)
+  if(animated && (mTxIncoming || mTxOutgoing))
   {
-    const float from = fadeIncoming ? 0.0f : 1.0f;
-    const float to   = fadeIncoming ? 1.0f : 0.0f;
-    target.SetProperty(Dali::Actor::Property::OPACITY, from);
+    const NavigationTransitionSpec::AnimFactory* inFactory =
+      mTxIncoming ? LookupFactory(mTxIncoming, mTxByPop, true, mTxByModal) : nullptr;
+    const NavigationTransitionSpec::AnimFactory* outFactory =
+      mTxOutgoing ? LookupFactory(mTxOutgoing, mTxByPop, false, mTxByModal) : nullptr;
 
-    mTransition = Dali::Animation::New(TRANSITION_DURATION);
-    mTransition.AnimateTo(Dali::Property(target, Dali::Actor::Property::OPACITY), to);
-    mTransition.FinishedSignal().Connect(this, &NavigatorImpl::OnTransitionFinished);
-    mTransition.Play();
+    if(inFactory || outFactory)
+    {
+      if(mTxIncoming)
+      {
+        mTxIncoming.SetProperty(Dali::Actor::Property::VISIBLE, true);
+      }
+      if(mTxOutgoing)
+      {
+        mTxOutgoing.SetProperty(Dali::Actor::Property::VISIBLE, true);
+      }
+
+      mTransition = Dali::Animation::New(ResolveTransitionDuration(mTxIncoming, mTxOutgoing));
+      if(inFactory && mTxIncoming)
+      {
+        (*inFactory)(mTransition, mTxIncoming);
+      }
+      if(outFactory && mTxOutgoing)
+      {
+        (*outFactory)(mTransition, mTxOutgoing);
+      }
+      mTransition.FinishedSignal().Connect(this, &NavigatorImpl::OnTransitionFinished);
+      mTransition.Play();
+      return;
+    }
+
+    Ui::View target = fadeIncoming ? mTxIncoming : mTxOutgoing;
+    if(target)
+    {
+      const float from = fadeIncoming ? 0.0f : 1.0f;
+      const float to   = fadeIncoming ? 1.0f : 0.0f;
+      target.SetProperty(Dali::Actor::Property::OPACITY, from);
+
+      mTransition = Dali::Animation::New(TRANSITION_DURATION);
+      mTransition.AnimateTo(Dali::Property(target, Dali::Actor::Property::OPACITY), to);
+      mTransition.FinishedSignal().Connect(this, &NavigatorImpl::OnTransitionFinished);
+      mTransition.Play();
+      return;
+    }
   }
-  else
-  {
-    FinishTransition();
-  }
+  FinishTransition();
 }
 
 void NavigatorImpl::OnTransitionFinished(Dali::Animation /*animation*/)
@@ -475,7 +554,11 @@ void NavigatorImpl::FinishTransition()
 
   if(mTxIncoming)
   {
-    mTxIncoming.SetProperty(Dali::Actor::Property::OPACITY, 1.0f);
+    SnapView(mTxIncoming, true);
+  }
+  if(mTxOutgoing && !mTxRemoveOutgoing)
+  {
+    SnapView(mTxOutgoing, false);
   }
   if(mTxRemoveOutgoing && mTxOutgoing)
   {
@@ -484,7 +567,9 @@ void NavigatorImpl::FinishTransition()
       Self().Remove(mTxOutgoing);
     }
     RemoveBackHandler(mTxOutgoing);
+    RemovePageSpec(mTxOutgoing);
   }
+  UpdateVisibility();
 
   Ui::View   incoming = mTxIncoming;
   Ui::View   outgoing = mTxOutgoing;
@@ -493,6 +578,7 @@ void NavigatorImpl::FinishTransition()
   mTxOutgoing.Reset();
   mTxByPop          = false;
   mTxRemoveOutgoing = false;
+  mTxByModal        = false;
   // Drop the finished animation handle so a subsequent SettlePendingTransition()
   // does not treat this (already completed) transition as still pending and emit
   // TransitionFinishedSignal a second time.
@@ -558,6 +644,177 @@ void NavigatorImpl::RemoveBackHandler(Ui::View page)
       return;
     }
   }
+}
+
+const NavigationTransitionSpec::AnimFactory* NavigatorImpl::LookupFactory(Ui::View view, bool byPop, bool isIncoming, bool byModal) const
+{
+  if(!view)
+  {
+    return nullptr;
+  }
+
+  const auto& pageSpecs   = byModal ? mModalPageSpecs : mPageSpecs;
+  const auto& defaultSpec = byModal ? mDefaultModalSpec : mDefaultSpec;
+
+  for(const auto& entry : pageSpecs)
+  {
+    if(entry.first == view && entry.second)
+    {
+      const NavigationTransitionSpec&              spec = *entry.second;
+      const NavigationTransitionSpec::AnimFactory* factory =
+        isIncoming ? (byPop ? &spec.popEnter : &spec.enter) : (byPop ? &spec.popExit : &spec.exit);
+      if(*factory)
+      {
+        return factory;
+      }
+      break;
+    }
+  }
+
+  if(defaultSpec)
+  {
+    const NavigationTransitionSpec&              spec = *defaultSpec;
+    const NavigationTransitionSpec::AnimFactory* factory =
+      isIncoming ? (byPop ? &spec.popEnter : &spec.enter) : (byPop ? &spec.popExit : &spec.exit);
+    if(*factory)
+    {
+      return factory;
+    }
+  }
+
+  return nullptr;
+}
+
+const NavigationTransitionSpec::SnapFunction* NavigatorImpl::LookupSnapFunction(Ui::View view, bool isIncoming, bool byModal) const
+{
+  if(!view)
+  {
+    return nullptr;
+  }
+
+  const auto& pageSpecs   = byModal ? mModalPageSpecs : mPageSpecs;
+  const auto& defaultSpec = byModal ? mDefaultModalSpec : mDefaultSpec;
+
+  for(const auto& entry : pageSpecs)
+  {
+    if(entry.first == view && entry.second)
+    {
+      const NavigationTransitionSpec&               spec = *entry.second;
+      const NavigationTransitionSpec::SnapFunction* snap = isIncoming ? &spec.snapIncoming : &spec.snapOutgoing;
+      if(*snap)
+      {
+        return snap;
+      }
+      break;
+    }
+  }
+
+  if(defaultSpec)
+  {
+    const NavigationTransitionSpec&               spec = *defaultSpec;
+    const NavigationTransitionSpec::SnapFunction* snap = isIncoming ? &spec.snapIncoming : &spec.snapOutgoing;
+    if(*snap)
+    {
+      return snap;
+    }
+  }
+
+  return nullptr;
+}
+
+float NavigatorImpl::ResolveTransitionDuration(Ui::View incoming, Ui::View outgoing) const
+{
+  auto lookupDuration = [this](Ui::View view)
+  {
+    const auto& pageSpecs   = mTxByModal ? mModalPageSpecs : mPageSpecs;
+    const auto& defaultSpec = mTxByModal ? mDefaultModalSpec : mDefaultSpec;
+
+    if(view)
+    {
+      for(const auto& entry : pageSpecs)
+      {
+        if(entry.first == view && entry.second && entry.second->duration > 0.0f)
+        {
+          return entry.second->duration;
+        }
+      }
+    }
+    return (defaultSpec && defaultSpec->duration > 0.0f) ? defaultSpec->duration : 0.0f;
+  };
+
+  const float incomingDuration = lookupDuration(incoming);
+  const float outgoingDuration = lookupDuration(outgoing);
+  const float resolvedDuration = std::max(incomingDuration, outgoingDuration);
+  return resolvedDuration > 0.0f ? resolvedDuration : TRANSITION_DURATION;
+}
+
+void NavigatorImpl::SnapView(Ui::View view, bool isIncoming)
+{
+  if(!view)
+  {
+    return;
+  }
+
+  const NavigationTransitionSpec::SnapFunction* snap = LookupSnapFunction(view, isIncoming, mTxByModal);
+  if(snap)
+  {
+    (*snap)(view);
+    return;
+  }
+
+  if(isIncoming)
+  {
+    view.SetProperty(Dali::Actor::Property::OPACITY, 1.0f);
+  }
+}
+
+void NavigatorImpl::SetPageSpec(std::vector<std::pair<Ui::View, std::shared_ptr<NavigationTransitionSpec>>>& specs, Ui::View page, std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  if(!page)
+  {
+    return;
+  }
+
+  for(auto it = specs.begin(); it != specs.end(); ++it)
+  {
+    if(it->first == page)
+    {
+      if(spec)
+      {
+        it->second = std::move(spec);
+      }
+      else
+      {
+        specs.erase(it);
+      }
+      return;
+    }
+  }
+
+  if(spec)
+  {
+    specs.emplace_back(page, std::move(spec));
+  }
+}
+
+void NavigatorImpl::RemovePageSpec(Ui::View page)
+{
+  mPageSpecs.erase(
+    std::remove_if(mPageSpecs.begin(),
+                   mPageSpecs.end(),
+                   [&page](const std::pair<Ui::View, std::shared_ptr<NavigationTransitionSpec>>& entry)
+  {
+    return entry.first == page;
+  }),
+    mPageSpecs.end());
+  mModalPageSpecs.erase(
+    std::remove_if(mModalPageSpecs.begin(),
+                   mModalPageSpecs.end(),
+                   [&page](const std::pair<Ui::View, std::shared_ptr<NavigationTransitionSpec>>& entry)
+  {
+    return entry.first == page;
+  }),
+    mModalPageSpecs.end());
 }
 
 bool NavigatorImpl::InStack(const std::vector<Ui::View>& stack, Ui::View view)

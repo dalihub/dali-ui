@@ -150,6 +150,46 @@ void Navigator::SetBackHandler(View page, std::function<bool()> handler)
   GetImpl(*this).SetBackHandler(page, handler);
 }
 
+void Navigator::SetPageTransitionAnimationEnabled(bool enabled)
+{
+  GetImpl(*this).SetPageTransitionAnimationEnabled(enabled);
+}
+
+bool Navigator::IsPageTransitionAnimationEnabled() const
+{
+  return GetImpl(*this).IsPageTransitionAnimationEnabled();
+}
+
+void Navigator::SetModalTransitionAnimationEnabled(bool enabled)
+{
+  GetImpl(*this).SetModalTransitionAnimationEnabled(enabled);
+}
+
+bool Navigator::IsModalTransitionAnimationEnabled() const
+{
+  return GetImpl(*this).IsModalTransitionAnimationEnabled();
+}
+
+void Navigator::SetTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  GetImpl(*this).SetTransitionSpec(std::move(spec));
+}
+
+void Navigator::SetPageTransitionSpec(View page, std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  GetImpl(*this).SetPageTransitionSpec(page, std::move(spec));
+}
+
+void Navigator::SetModalTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  GetImpl(*this).SetModalTransitionSpec(std::move(spec));
+}
+
+void Navigator::SetPageModalTransitionSpec(View page, std::shared_ptr<NavigationTransitionSpec> spec)
+{
+  GetImpl(*this).SetPageModalTransitionSpec(page, std::move(spec));
+}
+
 Navigator::PageEventSignalType& Navigator::PageWillAppearSignal()
 {
   return GetImpl(*this).PageWillAppearSignal();

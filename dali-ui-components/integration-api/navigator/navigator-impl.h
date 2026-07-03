@@ -21,11 +21,13 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/public-api/animation/animation.h>
 #include <functional>
+#include <memory>
 #include <utility>
 #include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/dialog/dialog-container.h>
+#include <dali-ui-components/public-api/navigator/navigation-transition-spec.h>
 #include <dali-ui-components/public-api/navigator/navigator.h>
 
 namespace Dali
@@ -64,6 +66,16 @@ public:
   // Back navigation
   bool NavigateBack();
   void SetBackHandler(Ui::View page, std::function<bool()> handler);
+
+  // Transition customization
+  void SetPageTransitionAnimationEnabled(bool enabled);
+  bool IsPageTransitionAnimationEnabled() const;
+  void SetModalTransitionAnimationEnabled(bool enabled);
+  bool IsModalTransitionAnimationEnabled() const;
+  void SetTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec);
+  void SetPageTransitionSpec(Ui::View page, std::shared_ptr<NavigationTransitionSpec> spec);
+  void SetModalTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec);
+  void SetPageModalTransitionSpec(Ui::View page, std::shared_ptr<NavigationTransitionSpec> spec);
 
   // Signals
   Ui::Navigator::PageEventSignalType& PageWillAppearSignal()
@@ -111,8 +123,14 @@ private:
 
   void OnScrimClicked(Ui::DialogContainer container);
 
-  bool InvokeBackHandler(Ui::View page);
-  void RemoveBackHandler(Ui::View page);
+  bool                                          InvokeBackHandler(Ui::View page);
+  void                                          RemoveBackHandler(Ui::View page);
+  const NavigationTransitionSpec::AnimFactory*  LookupFactory(Ui::View view, bool byPop, bool isIncoming, bool byModal) const;
+  const NavigationTransitionSpec::SnapFunction* LookupSnapFunction(Ui::View view, bool isIncoming, bool byModal) const;
+  float                                         ResolveTransitionDuration(Ui::View incoming, Ui::View outgoing) const;
+  void                                          SnapView(Ui::View view, bool isIncoming);
+  void                                          SetPageSpec(std::vector<std::pair<Ui::View, std::shared_ptr<NavigationTransitionSpec>>>& specs, Ui::View page, std::shared_ptr<NavigationTransitionSpec> spec);
+  void                                          RemovePageSpec(Ui::View page);
 
   static bool InStack(const std::vector<Ui::View>& stack, Ui::View view);
   // True if the view is already in either the navigation or the modal stack.
@@ -140,6 +158,14 @@ private:
   Ui::View        mTxOutgoing;
   bool            mTxByPop{false};
   bool            mTxRemoveOutgoing{false};
+  bool            mTxByModal{false};
+  bool            mPageTransitionAnimationEnabled{true};
+  bool            mModalTransitionAnimationEnabled{true};
+
+  std::shared_ptr<NavigationTransitionSpec>                                   mDefaultSpec;
+  std::vector<std::pair<Ui::View, std::shared_ptr<NavigationTransitionSpec>>> mPageSpecs;
+  std::shared_ptr<NavigationTransitionSpec>                                   mDefaultModalSpec;
+  std::vector<std::pair<Ui::View, std::shared_ptr<NavigationTransitionSpec>>> mModalPageSpecs;
 };
 
 } // namespace Integration

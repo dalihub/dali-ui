@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <memory>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-components/public-api/navigator/navigator.h>
@@ -314,5 +315,237 @@ int UtcDaliNavigatorCrossStackRejectN(void)
   navigator.Push(modalOnly, false); // must be rejected (already in modal stack)
   DALI_TEST_EQUALS(1u, navigator.GetNavigationStackCount(), TEST_LOCATION);
   DALI_TEST_EQUALS(1u, navigator.GetModalStackCount(), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliNavigatorGlobalTransitionSpecP(void)
+{
+  UiTestApplication application;
+  Navigator         navigator = Navigator::New();
+
+  View p1 = View::New();
+  navigator.Push(p1, false);
+
+  int enterCount = 0;
+  int exitCount  = 0;
+
+  auto spec = std::make_shared<NavigationTransitionSpec>();
+  spec->enter = [&enterCount](Animation& anim, View view) {
+    ++enterCount;
+    view.SetProperty(Actor::Property::OPACITY, 0.0f);
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
+  };
+  spec->exit = [&exitCount](Animation& anim, View view) {
+    ++exitCount;
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.5f);
+  };
+  spec->snapIncoming = [](View view) {
+    view.SetProperty(Actor::Property::OPACITY, 1.0f);
+  };
+  spec->snapOutgoing = [](View view) {
+    view.SetProperty(Actor::Property::OPACITY, 1.0f);
+  };
+
+  navigator.SetTransitionSpec(spec);
+
+  View p2 = View::New();
+  navigator.Push(p2, true);
+
+  DALI_TEST_EQUALS(1, enterCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(1, exitCount, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliNavigatorPageTransitionSpecPriorityP(void)
+{
+  UiTestApplication application;
+  Navigator         navigator = Navigator::New();
+
+  View p1 = View::New();
+  navigator.Push(p1, false);
+
+  int globalEnterCount = 0;
+  int globalExitCount  = 0;
+  int pageEnterCount   = 0;
+
+  auto globalSpec = std::make_shared<NavigationTransitionSpec>();
+  globalSpec->enter = [&globalEnterCount](Animation& anim, View view) {
+    ++globalEnterCount;
+    view.SetProperty(Actor::Property::OPACITY, 0.0f);
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
+  };
+  globalSpec->exit = [&globalExitCount](Animation& anim, View view) {
+    ++globalExitCount;
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.5f);
+  };
+  globalSpec->snapIncoming = [](View view) {
+    view.SetProperty(Actor::Property::OPACITY, 1.0f);
+  };
+  globalSpec->snapOutgoing = [](View view) {
+    view.SetProperty(Actor::Property::OPACITY, 1.0f);
+  };
+  navigator.SetTransitionSpec(globalSpec);
+
+  View p2       = View::New();
+  auto pageSpec = std::make_shared<NavigationTransitionSpec>();
+  pageSpec->enter = [&pageEnterCount](Animation& anim, View view) {
+    ++pageEnterCount;
+    view.SetProperty(Actor::Property::OPACITY, 0.0f);
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
+  };
+  pageSpec->snapIncoming = [](View view) {
+    view.SetProperty(Actor::Property::OPACITY, 1.0f);
+  };
+  navigator.SetPageTransitionSpec(p2, pageSpec);
+
+  navigator.Push(p2, true);
+
+  DALI_TEST_EQUALS(0, globalEnterCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(1, pageEnterCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(1, globalExitCount, TEST_LOCATION);
+
+  navigator.SetPageTransitionSpec(p2, nullptr);
+  navigator.Pop(false);
+
+  globalEnterCount = 0;
+  globalExitCount  = 0;
+  pageEnterCount   = 0;
+  navigator.Push(p2, true);
+
+  DALI_TEST_EQUALS(1, globalEnterCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(0, pageEnterCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(1, globalExitCount, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliNavigatorModalTransitionSpecIsSeparatedP(void)
+{
+  UiTestApplication application;
+  Navigator         navigator = Navigator::New();
+
+  View page = View::New();
+  navigator.Push(page, false);
+
+  int navExitCount    = 0;
+  int modalEnterCount = 0;
+  int modalExitCount  = 0;
+
+  auto navSpec = std::make_shared<NavigationTransitionSpec>();
+  navSpec->exit = [&navExitCount](Animation& anim, View view) {
+    ++navExitCount;
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.5f);
+  };
+  navigator.SetTransitionSpec(navSpec);
+
+  View builtInModal = View::New();
+  navigator.PushModal(builtInModal, true);
+  DALI_TEST_EQUALS(0, navExitCount, TEST_LOCATION);
+  navigator.PopModal(false);
+
+  auto modalSpec = std::make_shared<NavigationTransitionSpec>();
+  modalSpec->enter = [&modalEnterCount](Animation& anim, View view) {
+    ++modalEnterCount;
+    view.SetProperty(Actor::Property::OPACITY, 0.0f);
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
+  };
+  modalSpec->exit = [&modalExitCount](Animation& anim, View view) {
+    ++modalExitCount;
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
+  };
+  navigator.SetModalTransitionSpec(modalSpec);
+
+  View modal = View::New();
+  navigator.PushModal(modal, true);
+
+  DALI_TEST_EQUALS(0, navExitCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(1, modalEnterCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(1, modalExitCount, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliNavigatorPageTransitionAnimationEnabledP(void)
+{
+  UiTestApplication application;
+  Navigator         navigator = Navigator::New();
+
+  View p1 = View::New();
+  navigator.Push(p1, false);
+
+  int enterCount = 0;
+
+  auto spec = std::make_shared<NavigationTransitionSpec>();
+  spec->enter = [&enterCount](Animation& anim, View view) {
+    ++enterCount;
+    view.SetProperty(Actor::Property::OPACITY, 0.0f);
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f);
+  };
+  navigator.SetTransitionSpec(spec);
+
+  navigator.SetPageTransitionAnimationEnabled(false);
+  DALI_TEST_CHECK(!navigator.IsPageTransitionAnimationEnabled());
+
+  View p2 = View::New();
+  navigator.Push(p2, true);
+  DALI_TEST_EQUALS(0, enterCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(2u, navigator.GetNavigationStackCount(), TEST_LOCATION);
+  DALI_TEST_CHECK(navigator.GetCurrentView() == p2);
+
+  navigator.SetPageTransitionAnimationEnabled(true);
+  DALI_TEST_CHECK(navigator.IsPageTransitionAnimationEnabled());
+
+  View p3 = View::New();
+  navigator.Push(p3, true);
+  DALI_TEST_EQUALS(1, enterCount, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliNavigatorModalTransitionAnimationEnabledP(void)
+{
+  UiTestApplication application;
+  Navigator         navigator = Navigator::New();
+
+  View page = View::New();
+  navigator.Push(page, false);
+
+  int exitCount = 0;
+
+  auto spec = std::make_shared<NavigationTransitionSpec>();
+  spec->popExit = [&exitCount](Animation& anim, View view) {
+    ++exitCount;
+    anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f);
+  };
+  navigator.SetModalTransitionSpec(spec);
+
+  View modal = View::New();
+  navigator.PushModal(modal, false);
+
+  navigator.SetPageTransitionAnimationEnabled(false);
+  DALI_TEST_CHECK(!navigator.IsPageTransitionAnimationEnabled());
+
+  navigator.PopModal(true);
+  DALI_TEST_EQUALS(1, exitCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(0u, navigator.GetModalStackCount(), TEST_LOCATION);
+
+  navigator.SetPageTransitionAnimationEnabled(true);
+  DALI_TEST_CHECK(navigator.IsPageTransitionAnimationEnabled());
+
+  View modal2 = View::New();
+  navigator.PushModal(modal2, false);
+
+  navigator.SetModalTransitionAnimationEnabled(false);
+  DALI_TEST_CHECK(!navigator.IsModalTransitionAnimationEnabled());
+
+  navigator.PopModal(true);
+  DALI_TEST_EQUALS(1, exitCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(0u, navigator.GetModalStackCount(), TEST_LOCATION);
+
+  View modal3 = View::New();
+  navigator.PushModal(modal3, false);
+
+  navigator.SetModalTransitionAnimationEnabled(true);
+  DALI_TEST_CHECK(navigator.IsModalTransitionAnimationEnabled());
+
+  navigator.PopModal(true);
+  DALI_TEST_EQUALS(2, exitCount, TEST_LOCATION);
   END_TEST;
 }

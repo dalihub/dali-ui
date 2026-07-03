@@ -18,6 +18,7 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-components/public-api/navigator/navigation-transition-spec.h>
 #include <dali-ui-components/public-api/navigator/navigator-properties.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -26,6 +27,11 @@
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
 #include <functional>
+#include <memory>
+
+#define DALI_UI_NAVIGATOR_HAS_PAGE_ANIMATION_SWITCH 1
+#define DALI_UI_NAVIGATOR_HAS_MODAL_TRANSITION_SPEC 1
+#define DALI_UI_NAVIGATOR_HAS_MODAL_ANIMATION_SWITCH 1
 
 namespace Dali
 {
@@ -141,6 +147,80 @@ public: // Back navigation
    * @param[in] handler Returns true to consume Back (Navigator does not pop), false to let Navigator pop
    */
   void SetBackHandler(View page, std::function<bool()> handler);
+
+public: // Transition customization
+  /**
+   * @brief Enables or disables page transition animation.
+   *
+   * When disabled, Push/Pop finish immediately even if their @p animated
+   * parameter is true. PushModal/PopModal are controlled independently by
+   * SetModalTransitionAnimationEnabled().
+   * @param[in] enabled True to allow page transition animation
+   */
+  void SetPageTransitionAnimationEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether page transition animation is enabled.
+   * @return True if page transition animation is enabled
+   */
+  bool IsPageTransitionAnimationEnabled() const;
+
+  /**
+   * @brief Enables or disables modal transition animation.
+   *
+   * When disabled, PushModal/PopModal finish immediately even if their
+   * @p animated parameter is true. This also affects automatic modal dismiss
+   * paths, such as tapping a DialogContainer scrim.
+   * @param[in] enabled True to allow modal transition animation
+   */
+  void SetModalTransitionAnimationEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether modal transition animation is enabled.
+   * @return True if modal transition animation is enabled
+   */
+  bool IsModalTransitionAnimationEnabled() const;
+
+  /**
+   * @brief Sets the default transition specification for all pages.
+   *
+   * Per-page specifications registered with SetPageTransitionSpec() take
+   * precedence. Passing nullptr restores the built-in fade transition.
+   * @param[in] spec The transition specification
+   */
+  void SetTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec);
+
+  /**
+   * @brief Sets a transition specification for one page.
+   *
+   * Passing nullptr removes the per-page override. When the page is removed
+   * from Navigator, its per-page specification is removed automatically.
+   * @param[in] page The target page
+   * @param[in] spec The transition specification
+   */
+  void SetPageTransitionSpec(View page, std::shared_ptr<NavigationTransitionSpec> spec);
+
+  /**
+   * @brief Sets the default modal transition specification for all modal views.
+   *
+   * This specification is used only for PushModal/PopModal. It is independent
+   * from SetTransitionSpec(), which is used only for Push/Pop. Passing nullptr
+   * restores the built-in modal fade transition.
+   * @param[in] spec The modal transition specification
+   */
+  void SetModalTransitionSpec(std::shared_ptr<NavigationTransitionSpec> spec);
+
+  /**
+   * @brief Sets a modal transition specification for one view.
+   *
+   * This override is used only when the view participates in PushModal/PopModal.
+   * Passing nullptr removes the per-page modal override. When the view is
+   * removed from Navigator, its per-page modal specification is removed
+   * automatically.
+   * @param[in] page The target page or modal view
+   * @param[in] spec The modal transition specification
+   */
+  void SetPageModalTransitionSpec(View page, std::shared_ptr<NavigationTransitionSpec> spec);
 
 public: // Signals
   using PageEventSignalType          = Signal<void(Navigator, View, bool /*byPop*/)>;

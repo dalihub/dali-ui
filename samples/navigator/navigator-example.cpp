@@ -16,10 +16,14 @@
 
 // Interactive sample for Ui::Navigator (+ DialogContainer + AlertDialog).
 //
-//   - Push Page / Pop Page : Navigator::Push / Navigator::Pop (fade transition)
-//   - Show Dialog          : Navigator::PushModal of a DialogContainer holding an
-//                            AlertDialog. Tap an action button OR tap the scrim
-//                            (outside the card) to dismiss it.
+//   - Page Anim On/Off     : toggles page transition animations
+//   - Modal Anim On/Off    : toggles modal transition animations
+//   - Push Page / Pop Page : Navigator::Push / Navigator::Pop
+//   - Fade Page            : Navigator::SetPageTransitionSpec for one page
+//   - Show Dialog          : Navigator::PushModal with modal default animation
+//   - Per-modal Custom Ani : Navigator::SetPageModalTransitionSpec for one modal
+//                            view. Tap an action button OR tap the scrim to
+//                            dismiss it.
 //   - Back / Escape        : Navigator::NavigateBack (dismisses modal, else pops;
 //                            quits when nothing is left to go back to)
 
@@ -34,6 +38,7 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout.h>
 
 #include <functional>
+#include <memory>
 #include <string>
 
 using namespace Dali;
@@ -44,6 +49,13 @@ namespace
 {
 const UiColor PAGE_COLORS[] = {UiColor(0x1565C0u), UiColor(0x2E7D32u), UiColor(0x6A1B9Au), UiColor(0xEF6C00u), UiColor(0xC62828u)};
 constexpr int PAGE_COLOR_COUNT = 5;
+constexpr float PAGE_SLIDE_TRAVEL = 96.0f;
+constexpr float PAGE_WOBBLE_TRAVEL = 72.0f;
+constexpr float PAGE_WOBBLE_VERTICAL_TRAVEL = 28.0f;
+constexpr float MODAL_DROP_TRAVEL = 80.0f;
+constexpr float MODAL_BOUNCE_TRAVEL = 120.0f;
+constexpr float MODAL_SHAKE_X_TRAVEL = 110.0f;
+constexpr float MODAL_SHAKE_Y_TRAVEL = 84.0f;
 } // namespace
 
 class NavigatorExample : public ConnectionTracker
@@ -62,10 +74,6 @@ public:
     Window window = application.GetWindow();
     window.SetBackgroundColor(Color::WHITE);
 
-    const auto windowSize = window.GetPositionSize();
-    mWindowW              = static_cast<float>(windowSize.width);
-    mWindowH              = static_cast<float>(windowSize.height);
-
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
@@ -77,20 +85,33 @@ public:
     mNavigator = Navigator::New();
     mNavigator.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     mNavigator.TransitionFinishedSignal().Connect(this, &NavigatorExample::OnTransitionFinished);
+#ifdef DALI_UI_NAVIGATOR_HAS_PAGE_ANIMATION_SWITCH
+    mNavigator.SetPageTransitionAnimationEnabled(mPageAnimationEnabled);
+#endif
+    mNavigator.SetTransitionSpec(CreateSlideTransitionSpec());
+#ifdef DALI_UI_NAVIGATOR_HAS_MODAL_TRANSITION_SPEC
+    mNavigator.SetModalTransitionSpec(CreateModalDropTransitionSpec());
+#endif
+#ifdef DALI_UI_NAVIGATOR_HAS_MODAL_ANIMATION_SWITCH
+    mNavigator.SetModalTransitionAnimationEnabled(mModalAnimationEnabled);
+#endif
     root.Add(mNavigator);
 
     mStatus = MakeText("", 18.0f, 36.0f);
     root.Add(mStatus);
 
-    StackLayout buttons = StackLayout::New(StackOrientation::HORIZONTAL);
-    buttons.SetRequestedWidth(MATCH_PARENT);
-    buttons.SetRequestedHeight(80.0f);
-    buttons.SetSpacing(8.0f);
-    buttons.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
-    buttons.Add(MakeButton("Push Page", UiColor(0x3367D6u), [this]() { PushPage(); }));
-    buttons.Add(MakeButton("Pop Page", UiColor(0x5F6368u), [this]() { mNavigator.Pop(); UpdateStatus(); }));
-    buttons.Add(MakeButton("Show Dialog", UiColor(0x00897Bu), [this]() { ShowDialog(); }));
-    root.Add(buttons);
+    StackLayout navButtons = MakeButtonRow();
+    navButtons.Add(MakeButton("Page Anim On/Off", UiColor(0x455A64u), [this]() { TogglePageAnimation(); }));
+    navButtons.Add(MakeButton("Push Page", UiColor(0x3367D6u), [this]() { PushPage(); }));
+    navButtons.Add(MakeButton("Per-page Custom Ani", UiColor(0x7B1FA2u), [this]() { PushPage(true); }));
+    navButtons.Add(MakeButton("Pop Page", UiColor(0x5F6368u), [this]() { mNavigator.Pop(mPageAnimationEnabled); UpdateStatus(); }));
+    root.Add(navButtons);
+
+    StackLayout modalButtons = MakeButtonRow();
+    modalButtons.Add(MakeButton("Modal Anim On/Off", UiColor(0x37474Fu), [this]() { ToggleModalAnimation(); }));
+    modalButtons.Add(MakeButton("Show Dialog", UiColor(0x00897Bu), [this]() { ShowDialog(false); }));
+    modalButtons.Add(MakeButton("Per-modal Custom Ani", UiColor(0xC2185Bu), [this]() { ShowDialog(true); }));
+    root.Add(modalButtons);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &NavigatorExample::OnKeyEvent);
@@ -99,7 +120,7 @@ public:
   }
 
 private:
-  void PushPage()
+  void PushPage(bool usePageFade = false)
   {
     View page = View::New();
     page.SetBackgroundColor(PAGE_COLORS[(mNextPageNumber - 1) % PAGE_COLOR_COUNT]);
@@ -112,19 +133,238 @@ private:
     page.AddChildren({label});
 
     ++mNextPageNumber;
-    mNavigator.Push(page); // Navigator sizes the page to fill itself
+    if(usePageFade)
+    {
+      mNavigator.SetPageTransitionSpec(page, CreateFadePageTransitionSpec());
+    }
+    mNavigator.Push(page, mPageAnimationEnabled); // Navigator sizes the page to fill itself
     UpdateStatus();
   }
 
-  void ShowDialog()
+  std::shared_ptr<NavigationTransitionSpec> CreateSlideTransitionSpec() const
+  {
+    auto    spec   = std::make_shared<NavigationTransitionSpec>();
+    spec->duration = 0.42f;
+
+    spec->enter = [](Animation& anim, View view) {
+      view.SetProperty(Actor::Property::POSITION_X, PAGE_SLIDE_TRAVEL);
+      view.SetProperty(Actor::Property::OPACITY, 0.0f);
+      anim.AnimateTo(Property(view, Actor::Property::POSITION_X), 0.0f, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
+    };
+    spec->exit = [](Animation& anim, View view) {
+      anim.AnimateTo(Property(view, Actor::Property::POSITION_X), -PAGE_SLIDE_TRAVEL, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.82f, AlphaFunction::EASE_OUT);
+    };
+    spec->popEnter = [](Animation& anim, View view) {
+      view.SetProperty(Actor::Property::POSITION_X, -PAGE_SLIDE_TRAVEL);
+      view.SetProperty(Actor::Property::OPACITY, 0.82f);
+      anim.AnimateTo(Property(view, Actor::Property::POSITION_X), 0.0f, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
+    };
+    spec->popExit = [](Animation& anim, View view) {
+      anim.AnimateTo(Property(view, Actor::Property::POSITION_X), PAGE_SLIDE_TRAVEL, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
+    };
+    spec->snapIncoming = [](View view) {
+      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
+      view.SetProperty(Actor::Property::OPACITY, 1.0f);
+    };
+    spec->snapOutgoing = [](View view) {
+      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
+      view.SetProperty(Actor::Property::OPACITY, 1.0f);
+    };
+
+    return spec;
+  }
+
+  std::shared_ptr<NavigationTransitionSpec> CreateFadePageTransitionSpec() const
+  {
+    auto    spec   = std::make_shared<NavigationTransitionSpec>();
+    spec->duration = 0.58f;
+
+    spec->enter = [](Animation& anim, View view) {
+      KeyFrames wobbleX = KeyFrames::New();
+      wobbleX.Add(0.0f, PAGE_WOBBLE_TRAVEL);
+      wobbleX.Add(0.45f, -PAGE_WOBBLE_TRAVEL * 0.42f);
+      wobbleX.Add(0.72f, PAGE_WOBBLE_TRAVEL * 0.18f);
+      wobbleX.Add(1.0f, 0.0f);
+
+      KeyFrames wobbleY = KeyFrames::New();
+      wobbleY.Add(0.0f, -PAGE_WOBBLE_VERTICAL_TRAVEL);
+      wobbleY.Add(0.32f, PAGE_WOBBLE_VERTICAL_TRAVEL * 0.65f);
+      wobbleY.Add(0.64f, -PAGE_WOBBLE_VERTICAL_TRAVEL * 0.28f);
+      wobbleY.Add(1.0f, 0.0f);
+
+      view.SetProperty(Actor::Property::OPACITY, 0.0f);
+      view.SetProperty(Actor::Property::POSITION_X, PAGE_WOBBLE_TRAVEL);
+      view.SetProperty(Actor::Property::POSITION_Y, -PAGE_WOBBLE_VERTICAL_TRAVEL);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), wobbleX, AlphaFunction::EASE_OUT);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), wobbleY, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.34f));
+    };
+    spec->popExit = [](Animation& anim, View view) {
+      KeyFrames wobbleX = KeyFrames::New();
+      wobbleX.Add(0.0f, 0.0f);
+      wobbleX.Add(0.35f, -PAGE_WOBBLE_TRAVEL * 0.28f);
+      wobbleX.Add(1.0f, PAGE_WOBBLE_TRAVEL);
+
+      KeyFrames wobbleY = KeyFrames::New();
+      wobbleY.Add(0.0f, 0.0f);
+      wobbleY.Add(0.45f, PAGE_WOBBLE_VERTICAL_TRAVEL * 0.45f);
+      wobbleY.Add(1.0f, -PAGE_WOBBLE_VERTICAL_TRAVEL * 0.75f);
+
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), wobbleX, AlphaFunction::EASE_OUT);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), wobbleY, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.28f));
+    };
+    spec->snapIncoming = [](View view) {
+      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
+      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      view.SetProperty(Actor::Property::OPACITY, 1.0f);
+    };
+    spec->snapOutgoing = [](View view) {
+      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
+      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      view.SetProperty(Actor::Property::OPACITY, 1.0f);
+    };
+
+    return spec;
+  }
+
+  std::shared_ptr<NavigationTransitionSpec> CreateModalDropTransitionSpec() const
+  {
+    auto    spec   = std::make_shared<NavigationTransitionSpec>();
+    spec->duration = 0.32f;
+
+    spec->enter = [](Animation& anim, View view) {
+      view.SetProperty(Actor::Property::POSITION_Y, MODAL_DROP_TRAVEL);
+      view.SetProperty(Actor::Property::OPACITY, 0.0f);
+      anim.AnimateTo(Property(view, Actor::Property::POSITION_Y), 0.0f, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT);
+    };
+    spec->popExit = [](Animation& anim, View view) {
+      anim.AnimateTo(Property(view, Actor::Property::POSITION_Y), MODAL_DROP_TRAVEL, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
+    };
+    spec->snapIncoming = [](View view) {
+      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
+      view.SetProperty(Actor::Property::OPACITY, 1.0f);
+    };
+    spec->snapOutgoing = [](View view) {
+      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
+      view.SetProperty(Actor::Property::OPACITY, 1.0f);
+    };
+
+    return spec;
+  }
+
+  std::shared_ptr<NavigationTransitionSpec> CreatePerModalBounceTransitionSpec() const
+  {
+    auto    spec   = std::make_shared<NavigationTransitionSpec>();
+    spec->duration = 0.78f;
+
+    spec->enter = [](Animation& anim, View view) {
+      KeyFrames shakeX = KeyFrames::New();
+      shakeX.Add(0.0f, -MODAL_SHAKE_X_TRAVEL);
+      shakeX.Add(0.18f, MODAL_SHAKE_X_TRAVEL * 0.92f);
+      shakeX.Add(0.34f, -MODAL_SHAKE_X_TRAVEL * 0.74f);
+      shakeX.Add(0.52f, MODAL_SHAKE_X_TRAVEL * 0.48f);
+      shakeX.Add(0.70f, -MODAL_SHAKE_X_TRAVEL * 0.24f);
+      shakeX.Add(0.86f, MODAL_SHAKE_X_TRAVEL * 0.10f);
+      shakeX.Add(1.0f, 0.0f);
+
+      KeyFrames shakeY = KeyFrames::New();
+      shakeY.Add(0.0f, -MODAL_BOUNCE_TRAVEL);
+      shakeY.Add(0.18f, MODAL_SHAKE_Y_TRAVEL * 0.68f);
+      shakeY.Add(0.34f, -MODAL_SHAKE_Y_TRAVEL * 0.54f);
+      shakeY.Add(0.52f, MODAL_SHAKE_Y_TRAVEL * 0.36f);
+      shakeY.Add(0.70f, -MODAL_SHAKE_Y_TRAVEL * 0.22f);
+      shakeY.Add(0.86f, MODAL_SHAKE_Y_TRAVEL * 0.10f);
+      shakeY.Add(1.0f, 0.0f);
+
+      KeyFrames scale = KeyFrames::New();
+      scale.Add(0.0f, Vector3(0.62f, 0.62f, 1.0f));
+      scale.Add(0.18f, Vector3(1.18f, 1.18f, 1.0f));
+      scale.Add(0.34f, Vector3(0.88f, 0.88f, 1.0f));
+      scale.Add(0.52f, Vector3(1.10f, 1.10f, 1.0f));
+      scale.Add(0.70f, Vector3(0.96f, 0.96f, 1.0f));
+      scale.Add(1.0f, Vector3(1.0f, 1.0f, 1.0f));
+
+      view.SetProperty(Actor::Property::POSITION_X, -MODAL_SHAKE_X_TRAVEL);
+      view.SetProperty(Actor::Property::POSITION_Y, -MODAL_BOUNCE_TRAVEL);
+      view.SetProperty(Actor::Property::SCALE, Vector3(0.62f, 0.62f, 1.0f));
+      view.SetProperty(Actor::Property::OPACITY, 0.0f);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), shakeX, AlphaFunction::EASE_OUT);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), shakeY, AlphaFunction::EASE_OUT);
+      anim.AnimateBetween(Property(view, Actor::Property::SCALE), scale, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.18f));
+    };
+    spec->popExit = [](Animation& anim, View view) {
+      KeyFrames shakeX = KeyFrames::New();
+      shakeX.Add(0.0f, 0.0f);
+      shakeX.Add(0.18f, MODAL_SHAKE_X_TRAVEL * 0.58f);
+      shakeX.Add(0.36f, -MODAL_SHAKE_X_TRAVEL * 0.76f);
+      shakeX.Add(0.56f, MODAL_SHAKE_X_TRAVEL * 0.92f);
+      shakeX.Add(1.0f, MODAL_SHAKE_X_TRAVEL * 1.15f);
+
+      KeyFrames shakeY = KeyFrames::New();
+      shakeY.Add(0.0f, 0.0f);
+      shakeY.Add(0.18f, -MODAL_SHAKE_Y_TRAVEL * 0.38f);
+      shakeY.Add(0.36f, MODAL_SHAKE_Y_TRAVEL * 0.34f);
+      shakeY.Add(0.56f, -MODAL_SHAKE_Y_TRAVEL * 0.28f);
+      shakeY.Add(1.0f, MODAL_BOUNCE_TRAVEL);
+
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), shakeX, AlphaFunction::EASE_OUT);
+      anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), shakeY, AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::SCALE), Vector3(0.66f, 0.66f, 1.0f), AlphaFunction::EASE_OUT);
+      anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT, TimePeriod(0.08f, 0.30f));
+    };
+    spec->snapIncoming = [](View view) {
+      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
+      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
+      view.SetProperty(Actor::Property::OPACITY, 1.0f);
+    };
+    spec->snapOutgoing = [](View view) {
+      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
+      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
+      view.SetProperty(Actor::Property::OPACITY, 1.0f);
+    };
+
+    return spec;
+  }
+
+  void TogglePageAnimation()
+  {
+    mPageAnimationEnabled = !mPageAnimationEnabled;
+#ifdef DALI_UI_NAVIGATOR_HAS_PAGE_ANIMATION_SWITCH
+    mNavigator.SetPageTransitionAnimationEnabled(mPageAnimationEnabled);
+#endif
+    UpdateStatus();
+  }
+
+  void ToggleModalAnimation()
+  {
+    mModalAnimationEnabled = !mModalAnimationEnabled;
+#ifdef DALI_UI_NAVIGATOR_HAS_MODAL_ANIMATION_SWITCH
+    mNavigator.SetModalTransitionAnimationEnabled(mModalAnimationEnabled);
+#endif
+    UpdateStatus();
+  }
+
+  void ShowDialog(bool usePerModalAnimation)
   {
     AlertDialog alert = AlertDialog::New();
     alert.SetBackgroundColor(UiColor(0xFFFFFFu));
     alert.SetSpacing(8.0f);
     alert.SetTitle("Delete item?");
     alert.SetMessage("This action cannot be undone.");
-    alert.SetActionButtons({{"Cancel", [this]() { mNavigator.PopModal(); }},
-                            {"Delete", [this]() { mNavigator.PopModal(); }}});
+    alert.SetActionButtons({{"Cancel", [this]() { mNavigator.PopModal(mModalAnimationEnabled); }},
+                            {"Delete", [this]() { mNavigator.PopModal(mModalAnimationEnabled); }}});
 
     // Center the card over the scrim.
     const float dialogWidth  = 600.0f;
@@ -136,7 +376,19 @@ private:
     DialogContainer container = DialogContainer::New();
     container.SetModalContent(alert);
 
-    mNavigator.PushModal(container);
+    if(usePerModalAnimation)
+    {
+#ifdef DALI_UI_NAVIGATOR_HAS_MODAL_TRANSITION_SPEC
+      mNavigator.SetPageModalTransitionSpec(container, CreatePerModalBounceTransitionSpec());
+#else
+      // Compatibility path for running the sample against an older installed
+      // dali-ui-components package. Current Navigator builds use the modal-only
+      // API above so page and modal transition specs stay separated.
+      mNavigator.SetPageTransitionSpec(container, CreatePerModalBounceTransitionSpec());
+#endif
+    }
+
+    mNavigator.PushModal(container, mModalAnimationEnabled);
     UpdateStatus();
   }
 
@@ -148,7 +400,9 @@ private:
   void UpdateStatus()
   {
     const std::string text = "nav pages: " + std::to_string(mNavigator.GetNavigationStackCount()) +
-                             "   modals: " + std::to_string(mNavigator.GetModalStackCount());
+                             "   modals: " + std::to_string(mNavigator.GetModalStackCount()) +
+                             "   page animation: " + (mPageAnimationEnabled ? "on" : "off") +
+                             "   modal animation: " + (mModalAnimationEnabled ? "on" : "off");
     mStatus.SetText(text.c_str());
   }
 
@@ -163,16 +417,27 @@ private:
     return label;
   }
 
+  StackLayout MakeButtonRow()
+  {
+    StackLayout row = StackLayout::New(StackOrientation::HORIZONTAL);
+    row.SetRequestedWidth(MATCH_PARENT);
+    row.SetRequestedHeight(72.0f);
+    row.SetSpacing(8.0f);
+    row.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+    return row;
+  }
+
   InteractiveView MakeButton(const char* text, const UiColor& color, std::function<void()> onClicked)
   {
     InteractiveView button = InteractiveView::New();
     button.SetBackgroundColor(color);
+    button.SetCornerRadius(12.0f);
     button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 
     Label label = Label::New(text);
-    label.SetFontSize(16.0f);
+    label.SetFontSize(13.0f);
     label.SetTextColor(UiColor(0xFFFFFFu));
-    label.SetRequestedPositionX(16.0f);
+    label.SetRequestedPositionX(10.0f);
     label.SetRequestedPositionY(28.0f);
     button.AddChildren({label});
 
@@ -186,7 +451,15 @@ private:
     {
       if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
       {
-        if(!mNavigator.NavigateBack())
+        if(mNavigator.GetModalStackCount() > 0u)
+        {
+          mNavigator.PopModal(mModalAnimationEnabled);
+        }
+        else if(mNavigator.GetNavigationStackCount() > 1u)
+        {
+          mNavigator.Pop(mPageAnimationEnabled);
+        }
+        else
         {
           mApplication.Quit();
         }
@@ -198,8 +471,8 @@ private:
   Navigator    mNavigator;
   Label        mStatus;
   int          mNextPageNumber{1};
-  float        mWindowW{0.0f};
-  float        mWindowH{0.0f};
+  bool         mPageAnimationEnabled{true};
+  bool         mModalAnimationEnabled{true};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)
