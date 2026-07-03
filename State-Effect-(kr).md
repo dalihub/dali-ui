@@ -2,9 +2,9 @@
 
 # State Effect
 
-`StateEffect`는 `PRESSED`, `FOCUSED`, `DISABLED`, `SELECTED` 같은 `ViewState` 변화에 반응해 시각적 피드백을 제공하는 객체입니다.
+`StateEffect`는 `PRESSED`, `FOCUSED` 같은 `ViewState` 변화에 반응해 시각적 피드백을 제공하는 객체입니다.
 
-State management가 "View가 어떤 상태인가"를 다룬다면, `StateEffect`는 "그 상태를 어떻게 보여줄 것인가"를 다룹니다. View에는 `View::SetStateEffect()`로 하나의 state effect를 지정할 수 있습니다. Interactive View는 명시적으로 effect가 지정되어 있지 않으면 `UiConfig`의 기본 effect를 사용합니다.
+State management가 "View가 어떤 상태인가"를 다룬다면, `StateEffect`는 "그 상태를 어떻게 보여줄 것인가"를 다룹니다. View는 `View::SetStateEffect()`로 state effect를 지정할 수 있습니다. Interactive View는 명시적으로 effect가 지정되어 있지 않으면 `UiConfig`의 기본 effect를 사용합니다.
 
 <br/>
 
@@ -49,7 +49,7 @@ view.Add(circleChild);
 view.SetStateEffectTarget(circleChild);
 ```
 
-<video src="./assets/StateEffect/plain-targeted.mp4" controls width="200"></video>
+<img src="assets/StateEffect/plain-targeted.gif" height="200" />
 
 <br/>
 
