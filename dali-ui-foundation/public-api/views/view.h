@@ -1388,6 +1388,53 @@ public: // Properties
   void RemoveAllChildren(RemovePolicy policy);
 
   /**
+   * @brief Number of View children in this view's LOGICAL (layout) child list.
+   *
+   * The logical child list is the set of @c View children the layout enumerates
+   * in @c OnMeasure / @c OnArrange. It EXCLUDES in-flight EXIT ghosts (a child
+   * removed via @c Remove(child, RemovePolicy::ANIMATE_EXIT) that is still
+   * attached to the actor tree until its EXIT animation finishes) and EXCLUDES
+   * non-View actor children (attached via the integration API
+   * @c Dali::Ui::Integration::View::AddActorChild). It INCLUDES
+   * @c LayoutMode::STANDALONE children: they are View children of this view,
+   * they are simply not laid out by this view's own measure/arrange.
+   *
+   * This is distinct from the inherited actor-tree @c Dali::Actor::GetChildCount,
+   * which counts every attached actor including EXIT ghosts and non-View actors.
+   *
+   * @return The number of logical View children
+   */
+  uint32_t GetChildViewCount() const;
+
+  /**
+   * @brief The View child at @p index in this view's LOGICAL (layout) child list.
+   *
+   * Returns a @c Ui::View directly (no @c DownCast required at the call site).
+   * The index space is the logical child list described in
+   * @c GetChildViewCount: EXIT ghosts and non-View actor children are excluded,
+   * @c LayoutMode::STANDALONE children are included. This is distinct from the
+   * inherited actor-tree @c Dali::Actor::GetChildAt, whose index space includes
+   * ghosts and non-View actors.
+   *
+   * @param[in] index The logical index, in [0, GetChildViewCount())
+   * @return The logical View child at @p index, or an empty handle if out of range
+   */
+  View GetChildViewAt(uint32_t index) const;
+
+  /**
+   * @brief The logical index of @p childView in this view's LOGICAL child list.
+   *
+   * @param[in] childView The child to locate
+   * @return The logical index of @p childView, or -1 if it is not a (logical)
+   * child of this view (e.g. it is an in-flight EXIT ghost, a non-View actor,
+   * or not a child at all)
+   *
+   * @note Inverse of @c GetChildViewAt: for any logical child @p x the invariant
+   * @c GetChildViewAt(IndexOfChildView(x)) == x holds.
+   */
+  int32_t IndexOfChildView(View childView) const;
+
+  /**
    * @brief Removes @p child from this View, choosing whether to run the
    * attached LayoutTransition's EXIT slot first.
    *
@@ -1408,9 +1455,10 @@ public: // Properties
    * immediately. @c RemovePolicy::IMMEDIATE always unparents now, skipping both
    * the own and inherited EXIT effects (see @c RemovePolicy).
    *
-   * @note During the EXIT animation the child is logically absent from
-   * this view's child list (@c GetChildCount / @c GetChildAt skip it)
-   * but still attached to the actor tree. Re-adding the SAME child to
+   * @note During the EXIT animation the child is still attached to the
+   * actor tree (so the inherited @c Dali::Actor::GetChildCount /
+   * @c Dali::Actor::GetChildAt still count and return it) but is logically
+   * absent from this view's layout child list. Re-adding the SAME child to
    * the SAME parent in this state via @c View::Insert or inherited
    * @c Actor::Add is silently ignored — the EXIT continues, and the
    * actor is unparented when the animation finishes. To cancel an
@@ -1428,28 +1476,6 @@ public: // Properties
    */
   void Remove(View child, RemovePolicy policy);
 
-  /**
-   * @brief Gets the number of child views.
-   *
-   * @return The child count
-   */
-  uint32_t GetChildCount() const;
-
-  /**
-   * @brief Gets the child view at the specified index.
-   *
-   * @param[in] index The child index
-   * @return The child view at the index
-   */
-  View GetChildAt(uint32_t index) const;
-
-  /**
-   * @brief Returns the index of the given child view, or -1 if not found.
-   *
-   * @param[in] view The child view to find
-   * @return Index of the view, or -1 if not a child
-   */
-  int32_t IndexOfChild(View view) const;
   using Dali::Actor::Lower;
   using Dali::Actor::LowerBelow;
   using Dali::Actor::LowerToBottom;

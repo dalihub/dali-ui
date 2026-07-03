@@ -40,9 +40,9 @@ public:
   {
     float totalHeight = 0.0f;
 
-    for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+    for(uint32_t i = 0; i < self.GetChildViewCount(); ++i)
     {
-      View child = self.GetChildAt(i);
+      View child = self.GetChildViewAt(i);
       // Standalone children carry their own size/position; framework arranges
       // them via ArrangeStandaloneChildren after this callback returns.
       if(child.GetLayoutMode() == LayoutMode::STANDALONE)
@@ -63,9 +63,9 @@ public:
     float x = bounds.x;
     float y = bounds.y;
 
-    for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+    for(uint32_t i = 0; i < self.GetChildViewCount(); ++i)
     {
-      View child = self.GetChildAt(i);
+      View child = self.GetChildViewAt(i);
       if(child.GetLayoutMode() == LayoutMode::STANDALONE)
       {
         continue;

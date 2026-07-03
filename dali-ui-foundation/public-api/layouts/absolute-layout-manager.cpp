@@ -75,7 +75,7 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  const uint32_t count         = GetChildCount(view);
+  const uint32_t count         = GetChildViewCount(view);
   float          contentWidth  = widthConstraint;
   float          contentHeight = heightConstraint;
 
@@ -85,7 +85,7 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
   children.reserve(count);
   for(uint32_t i = 0; i < count; ++i)
   {
-    children.push_back(GetChildAt(view, i));
+    children.push_back(GetChildViewAt(view, i));
   }
 
   float maxRight  = 0.0f;
@@ -235,7 +235,7 @@ MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bo
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  const uint32_t count           = GetChildCount(view);
+  const uint32_t count           = GetChildViewCount(view);
   float          availableWidth  = bounds.width;
   float          availableHeight = bounds.height;
 
@@ -245,7 +245,7 @@ MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bo
   children.reserve(count);
   for(uint32_t i = 0; i < count; ++i)
   {
-    children.push_back(GetChildAt(view, i));
+    children.push_back(GetChildViewAt(view, i));
   }
 
   for(auto& child : children)

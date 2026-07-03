@@ -50,7 +50,7 @@ loop for each layout root
     else has LayoutManager
       Root -> LM : Measure(this, widthConstraint, heightConstraint)
       activate LM
-      loop for each child (GetChildAt)
+      loop for each child (GetChildViewAt)
         LM -> Child : Measure(childW, childH)
         activate Child
         Child -> Child : Measure() [recursive]

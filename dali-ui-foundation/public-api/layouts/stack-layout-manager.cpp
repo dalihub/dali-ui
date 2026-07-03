@@ -214,12 +214,12 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   float contentMain = (impl->mOrientation == StackOrientation::VERTICAL) ? heightConstraint : widthConstraint;
 
   // Collect children once and pass to helpers (helpers run twice).
-  const uint32_t    count = GetChildCount(view);
+  const uint32_t    count = GetChildViewCount(view);
   std::vector<View> children;
   children.reserve(count);
   for(uint32_t i = 0; i < count; ++i)
   {
-    children.push_back(GetChildAt(view, i));
+    children.push_back(GetChildViewAt(view, i));
   }
 
   // Local working buffer (seed later from child measurements): weight
@@ -338,12 +338,12 @@ MeasuredSize StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bound
   float s          = view->GetEffectiveScale();
   float visSpacing = impl->mSpacing * s;
 
-  const uint32_t    count = GetChildCount(view);
+  const uint32_t    count = GetChildViewCount(view);
   std::vector<View> children;
   children.reserve(count);
   for(uint32_t i = 0; i < count; ++i)
   {
-    children.push_back(GetChildAt(view, i));
+    children.push_back(GetChildViewAt(view, i));
   }
 
   float availableWidth  = bounds.width;

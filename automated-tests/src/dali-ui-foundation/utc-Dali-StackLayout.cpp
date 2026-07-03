@@ -203,7 +203,7 @@ int UtcDaliStackLayoutContentsP(void)
   View a = View::New();
   layout.AddChildren({a});
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
-  DALI_TEST_CHECK(layout.GetChildAt(0) == a);
+  DALI_TEST_CHECK(layout.GetChildViewAt(0) == a);
   END_TEST;
 }
 

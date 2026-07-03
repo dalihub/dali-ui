@@ -38,9 +38,13 @@ package "Dali::Ui (Public API)" as public_api {
     + Remove(Actor)  /' inherited from Actor '/
     + Insert(index, View)
     + RemoveAllChildren()
-    + GetChildCount() : uint32_t
-    + GetChildAt(index) : View
-    + IndexOfChild(View) : int32_t
+    + RemoveAllChildren(RemovePolicy)
+    + Remove(View, RemovePolicy)
+    + GetChildCount() : uint32_t  /' inherited from Actor (actor tree) '/
+    + GetChildAt(index) : Actor  /' inherited from Actor (actor tree) '/
+    + GetChildViewCount() : uint32_t
+    + GetChildViewAt(index) : View
+    + IndexOfChildView(View) : int32_t
     + Contents(initializer_list<View>) : Layout&
     __
     - Layout(Integration::LayoutImpl&)
@@ -148,12 +152,13 @@ package "Dali::Ui::Integration (Implementation)" as integration {
     + HasLayoutCallback() : bool
     + Insert(index, Ui::View)
     + RemoveAllChildren()
+    + RemoveAllChildren(RemovePolicy)
     + OnChildAdd(Actor&)
     + OnChildRemove(Actor&)
     + OnChildOrderChanged(Actor)
-    + GetChildCount() : uint32_t
-    + GetChildAt(index) : Ui::View
-    + IndexOfChild(Ui::View) : int32_t
+    + GetChildViewCount() : uint32_t
+    + GetChildViewAt(index) : Ui::View
+    + IndexOfChildView(Ui::View) : int32_t
     + Contents(initializer_list<View>) : ViewImpl&
     __
     + Measure(widthConstraint, heightConstraint) : MeasuredSize
@@ -240,8 +245,8 @@ package "Layout Managers" as managers {
     + {abstract} Measure(ViewImpl*, widthConstraint, heightConstraint) : MeasuredSize
     + {abstract} Arrange(ViewImpl*, bounds) : MeasuredSize
     __
-    # GetChildCount(ViewImpl*) : uint32_t
-    # GetChildAt(ViewImpl*, index) : View
+    # GetChildViewCount(ViewImpl*) : uint32_t
+    # GetChildViewAt(ViewImpl*, index) : View
     # IsStandalone(ViewImpl*) : bool
     __
     - mImpl : Impl*

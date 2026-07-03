@@ -270,7 +270,7 @@ private:
     Label state = MakeLabel("Requested: 100 x 32; expected min clamp 160 x 48", 13.0f, COLOR_BODY);
     Label textState = MakeLabel("Text: short", 13.0f, COLOR_BODY);
     StackLayout requestedGuide = MakeSizeGuide("REQUESTED 100 x 32", 100.0f, 32.0f, COLOR_GUIDE_REQ);
-    Label requestedLabel = Label::DownCast(requestedGuide.GetChildAt(0u));
+    Label requestedLabel = Label::DownCast(requestedGuide.GetChildViewAt(0u));
 
     TextButton control = MakeControlButton("Cycle requested size");
     int mode = 0;

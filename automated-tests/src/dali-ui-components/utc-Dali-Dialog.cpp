@@ -178,9 +178,9 @@ int UtcDaliDialogSectionOrderP(void)
   dialog.SetBodyView(body);
 
   DALI_TEST_EQUALS(3u, dialog.GetChildCount(), TEST_LOCATION);
-  DALI_TEST_CHECK(dialog.GetChildAt(0) == header);
-  DALI_TEST_CHECK(dialog.GetChildAt(1) == body);
-  DALI_TEST_CHECK(dialog.GetChildAt(2) == footer);
+  DALI_TEST_CHECK(dialog.GetChildViewAt(0) == header);
+  DALI_TEST_CHECK(dialog.GetChildViewAt(1) == body);
+  DALI_TEST_CHECK(dialog.GetChildViewAt(2) == footer);
   END_TEST;
 }
 
@@ -199,7 +199,7 @@ int UtcDaliDialogClearSectionP(void)
   dialog.SetHeaderView(View());
   DALI_TEST_CHECK(!dialog.GetHeaderView());
   DALI_TEST_EQUALS(1u, dialog.GetChildCount(), TEST_LOCATION);
-  DALI_TEST_CHECK(dialog.GetChildAt(0) == body);
+  DALI_TEST_CHECK(dialog.GetChildViewAt(0) == body);
   END_TEST;
 }
 
@@ -218,8 +218,8 @@ int UtcDaliDialogReplaceSectionP(void)
 
   DALI_TEST_EQUALS(2u, dialog.GetChildCount(), TEST_LOCATION);
   DALI_TEST_CHECK(dialog.GetBodyView() == newBody);
-  DALI_TEST_CHECK(dialog.GetChildAt(0) == header);
-  DALI_TEST_CHECK(dialog.GetChildAt(1) == newBody);
+  DALI_TEST_CHECK(dialog.GetChildViewAt(0) == header);
+  DALI_TEST_CHECK(dialog.GetChildViewAt(1) == newBody);
   DALI_TEST_CHECK(!body.GetParent());
   END_TEST;
 }

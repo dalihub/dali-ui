@@ -166,13 +166,15 @@ public:
 
   void RemoveLastChild()
   {
-    const uint32_t count = mStack.GetChildCount();
-    if(count == 0)
+    const uint32_t count = mStack.GetChildViewCount();
+    if(count == 0u)
     {
       return;
     }
-    View last = mStack.GetChildAt(count - 1);
-    // Use View::Remove so the EXIT slot is honoured (deferred-remove).
+    // The logical child list excludes any in-flight EXIT ghost, so the last
+    // logical child is the last live item. Use View::Remove so the EXIT slot
+    // is honoured (deferred-remove).
+    View last = mStack.GetChildViewAt(count - 1u);
     mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
@@ -204,10 +206,10 @@ public:
     }
     mExpanded             = !mExpanded;
     const float newHeight = mExpanded ? 160.0f : 80.0f;
-    const uint32_t count  = mStack.GetChildCount();
+    const uint32_t count  = mStack.GetChildViewCount();
     for(uint32_t i = 0; i < count; ++i)
     {
-      mStack.GetChildAt(i).SetRequestedHeight(newHeight);
+      mStack.GetChildViewAt(i).SetRequestedHeight(newHeight);
     }
     return true;
   }
@@ -234,8 +236,8 @@ public:
   }
 
 private:
-  Application& mApplication;
-  StackLayout  mStack;
+  Application&      mApplication;
+  StackLayout       mStack;
   Label        mEnterButton;
   Label        mExitButton;
   Label        mChangeButton;

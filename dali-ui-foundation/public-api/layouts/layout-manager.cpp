@@ -44,14 +44,14 @@ LayoutManager::~LayoutManager()
   delete mImpl;
 }
 
-uint32_t LayoutManager::GetChildCount(ViewImpl* view) const
+uint32_t LayoutManager::GetChildViewCount(ViewImpl* view) const
 {
-  return view ? view->GetChildCount() : 0u;
+  return view ? view->GetChildViewCount() : 0u;
 }
 
-View LayoutManager::GetChildAt(ViewImpl* view, uint32_t index) const
+View LayoutManager::GetChildViewAt(ViewImpl* view, uint32_t index) const
 {
-  return view ? view->GetChildAt(index) : View();
+  return view ? view->GetChildViewAt(index) : View();
 }
 
 bool LayoutManager::IsStandalone(ViewImpl* child) const

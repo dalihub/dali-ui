@@ -207,7 +207,7 @@ private:
   {
     bool ks = mScrollView.IsKeyScrollEnabled();
     mKeyScrollChip.SetBackgroundColor(ks ? COLOR_ACTIVE : COLOR_INACT);
-    Label::DownCast(mKeyScrollChip.GetChildAt(0)).SetText(ks ? "KeyScroll: ON" : "KeyScroll: OFF");
+    Label::DownCast(mKeyScrollChip.GetChildViewAt(0)).SetText(ks ? "KeyScroll: ON" : "KeyScroll: OFF");
 
     int scrollY = static_cast<int>(mScrollView.GetScrollPosition().y);
     std::ostringstream sp;

@@ -660,7 +660,7 @@ void OverlayEffectData::ApplyRecoil(View overlayTarget, RecoilScope scope)
   }
   else
   {
-    const uint32_t childCount = overlayTarget.GetChildCount();
+    const uint32_t childCount = GetImpl(overlayTarget).GetChildViewCount();
     if(childCount == 0u || childCount > MAX_RECOIL_TARGET_COUNT)
     {
       return;
@@ -668,7 +668,7 @@ void OverlayEffectData::ApplyRecoil(View overlayTarget, RecoilScope scope)
 
     for(uint32_t i = 0u; i < childCount; ++i)
     {
-      addRecoilTarget(overlayTarget.GetChildAt(i));
+      addRecoilTarget(GetImpl(overlayTarget).GetChildViewAt(i));
     }
   }
 

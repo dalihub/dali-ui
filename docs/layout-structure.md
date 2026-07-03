@@ -20,7 +20,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Child add/remove uses inherited Actor `Add`/`Remove`. `Insert(index, View)` and `RemoveAllChildren()` are available for index-based insertion and bulk removal.
 
 - **Layout** (inherits View)
-  - Child management: `Add(View)` (inherited from Actor), `Insert(index, View)`, `Remove(View)` (inherited from Actor), `RemoveAllChildren()`, `GetChildCount()`, `GetChildAt(index)`, `IndexOfChild(View)`, `Children(initializer_list<View>)`.
+  - Child management: `Add(View)` (inherited from Actor), `Insert(index, View)`, `Remove(View)` (inherited from Actor), `Remove(View, RemovePolicy)`, `RemoveAllChildren()`, `RemoveAllChildren(RemovePolicy)`. `GetChildCount()` / `GetChildAt(index)` are inherited from Actor (actor tree, including in-flight EXIT ghosts and non-View actors); the logical (layout) child list is enumerated by `GetChildViewCount()`, `GetChildViewAt(index)`, and `IndexOfChildView(View)` (which skip EXIT ghosts and non-View actors and return `Ui::View` directly).
   - Always has a LayoutManager stored as a Trait (`ReservedTraitId::LAYOUT_MANAGER`); derived classes attach Stack/Flex/Grid/Absolute algorithms in `OnInitialize()`.
 
 - **Custom Layout Callbacks**
@@ -65,7 +65,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **ViewImpl** (DALi ControlImpl-derived)
   - Holds the actual Measure/Arrange logic, size specifications, margin/padding/alignment/visibility, and child container.
-  - Provides `Insert(index, View)`, `RemoveAllChildren`, `GetChildCount`, `GetChildAt`, `IndexOfChild`, `Contents`, etc. Child add/remove uses Actor `Add`/`Remove` with `OnChildAdd`/`OnChildRemove` callbacks to sync the internal child container. Child order changes (via `Raise`/`Lower`/etc.) are detected via `ChildOrderChangedSignal` to keep `mChildren` in sync.
+  - Provides `Insert(index, View)`, `RemoveAllChildren`, `GetChildViewCount`, `GetChildViewAt`, `IndexOfChildView`, `Contents`, etc. Child add/remove uses Actor `Add`/`Remove` with `OnChildAdd`/`OnChildRemove` callbacks to sync the internal child container. Child order changes (via `Raise`/`Lower`/etc.) are detected via `ChildOrderChangedSignal` to keep `mChildren` in sync.
   - `GetParentLayout()`, `IsLayout()`, and invalidation propagate to the parent until a layout root is reached, which registers with the LayoutController.
 
 - **LayoutImpl** (inherits ViewImpl)
@@ -90,7 +90,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 - **LayoutManager** (abstract)  
   - `Measure(ViewImpl*, widthConstraint, heightConstraint)`: compute measured size for the container and its children.  
   - `Arrange(ViewImpl*, bounds)`: place children within the given bounds.  
-  - Uses protected helpers `GetChildCount(ViewImpl*)`, `GetChildAt(ViewImpl*, index)`, and `IsStandalone(ViewImpl*)` to traverse children.
+  - Uses protected helpers `GetChildViewCount(ViewImpl*)`, `GetChildViewAt(ViewImpl*, index)`, and `IsStandalone(ViewImpl*)` to traverse children.
 
 - **StackLayoutManager, FlexLayoutManager, GridLayoutManager, AbsoluteLayoutManager**  
   - Concrete implementations that measure and arrange children according to stack, flex, grid, or absolute rules.
@@ -327,6 +327,6 @@ When layout must be recomputed (e.g. size or child change):
 
 | Area | Description |
 |------|-------------|
-| Public child API | Child add/remove uses Actor::Add/Remove. View provides Insert(index, View) for index-based insertion and RemoveAllChildren() for bulk removal. GetChildCount, GetChildAt, IndexOfChild, Children are available on View. |
+| Public child API | Child add/remove uses Actor::Add/Remove. View provides Insert(index, View), Remove(View, RemovePolicy), RemoveAllChildren() and RemoveAllChildren(RemovePolicy). GetChildCount/GetChildAt are inherited from Actor (actor tree, ghost-inclusive); the logical layout child list is exposed via GetChildViewCount, GetChildViewAt and IndexOfChildView. |
 | Layout processing | LayoutController collects layout roots per window and runs Measure then Arrange once per frame. |
 | Implementation | ViewImpl holds children and can attach a LayoutManager as a Trait via `View::AttachLayoutManager()`. Applications can customize measure/arrange via `SetMeasureCallback()`/`SetArrangeCallback()`. |

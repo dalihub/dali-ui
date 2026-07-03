@@ -218,9 +218,9 @@ struct DiagonalLayout
   static MeasuredSize OnMeasure(View self, float wConstraint, float hConstraint)
   {
     float totalW = 0, totalH = 0;
-    for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+    for(uint32_t i = 0; i < self.GetChildViewCount(); ++i)
     {
-      auto sz = self.GetChildAt(i).Measure(wConstraint - totalW, hConstraint - totalH);
+      auto sz = self.GetChildViewAt(i).Measure(wConstraint - totalW, hConstraint - totalH);
       totalW += sz.width;
       totalH += sz.height;
     }
@@ -230,10 +230,10 @@ struct DiagonalLayout
   static MeasuredSize OnArrange(View self, const LayoutRect& bounds)
   {
     float x = bounds.x, y = bounds.y;
-    for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+    for(uint32_t i = 0; i < self.GetChildViewCount(); ++i)
     {
-      auto sz = self.GetChildAt(i).GetMeasuredSize();
-      self.GetChildAt(i).Arrange({x, y, sz.width, sz.height});
+      auto sz = self.GetChildViewAt(i).GetMeasuredSize();
+      self.GetChildViewAt(i).Arrange({x, y, sz.width, sz.height});
       x += sz.width;
       y += sz.height;
     }

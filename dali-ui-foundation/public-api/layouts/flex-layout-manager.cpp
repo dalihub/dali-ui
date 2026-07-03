@@ -460,12 +460,12 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
 
   auto* impl = GetImplAs<Impl>();
 
-  const uint32_t    childCount = GetChildCount(view);
+  const uint32_t    childCount = GetChildViewCount(view);
   std::vector<View> children;
   children.reserve(childCount);
   for(uint32_t i = 0; i < childCount; ++i)
   {
-    children.push_back(GetChildAt(view, i));
+    children.push_back(GetChildViewAt(view, i));
   }
 
   float availableMain = IsMainAxisHorizontal() ? widthConstraint : heightConstraint;
@@ -561,12 +561,12 @@ MeasuredSize FlexLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds
 
   auto* impl = GetImplAs<Impl>();
 
-  const uint32_t    childCount = GetChildCount(view);
+  const uint32_t    childCount = GetChildViewCount(view);
   std::vector<View> children;
   children.reserve(childCount);
   for(uint32_t i = 0; i < childCount; ++i)
   {
-    children.push_back(GetChildAt(view, i));
+    children.push_back(GetChildViewAt(view, i));
   }
 
   float contentWidth  = bounds.width;

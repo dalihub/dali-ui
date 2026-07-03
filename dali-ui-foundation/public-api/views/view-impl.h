@@ -891,8 +891,8 @@ public: // Non-virtual API (safe to reorder / extend)
 
   /**
    * @brief Atomically retrieves and clears the marker that records whether
-   * any child was removed via @c View::Remove / @c RemoveAllChildren
-   * since the last layout pass.
+   * any child was removed via @c View::Remove(child, RemovePolicy::ANIMATE_EXIT)
+   * or the internal @c ViewImpl::RemoveAllChildren since the last layout pass.
    *
    * Internal helper used by the layout transition dispatcher to tag
    * CHANGE-slot dispatches on the remaining children with
@@ -939,19 +939,24 @@ public: // Non-virtual API (safe to reorder / extend)
   void Remove(Ui::View child, Ui::RemovePolicy policy);
 
   /**
-   * @copydoc Ui::View::GetChildCount()
+   * @copydoc Ui::View::GetChildViewCount()
+   * @note Number of children in the internal logical child list (mChildren),
+   * excluding in-flight EXIT ghosts.
    */
-  uint32_t GetChildCount() const;
+  uint32_t GetChildViewCount() const;
 
   /**
-   * @copydoc Ui::View::GetChildAt()
+   * @copydoc Ui::View::GetChildViewAt()
+   * @note Child at @p index in the internal logical child list (mChildren),
+   * or an empty handle if out of range.
    */
-  Ui::View GetChildAt(uint32_t index) const;
+  Ui::View GetChildViewAt(uint32_t index) const;
 
   /**
-   * @copydoc Ui::View::IndexOfChild()
+   * @copydoc Ui::View::IndexOfChildView()
+   * @note Logical index of @p view in mChildren, or -1 if not a logical child.
    */
-  int32_t IndexOfChild(Ui::View view) const;
+  int32_t IndexOfChildView(Ui::View view) const;
 
   /**
    * @copydoc Ui::View::Raise()

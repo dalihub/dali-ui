@@ -39,6 +39,7 @@
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/layouts/scroll-view-layout-manager.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
 {
@@ -1002,9 +1003,9 @@ View ScrollViewImpl::FindNextFocusableInContent(View currentFocusedView, const V
 void ScrollViewImpl::CollectNextFocusCandidate(View container, View excludeView, const Vector2& currentPos,
                                                FocusDirection direction, View& bestView, float& bestDist) const
 {
-  for(uint32_t i = 0; i < container.GetChildCount(); ++i)
+  for(uint32_t i = 0; i < GetImpl(container).GetChildViewCount(); ++i)
   {
-    View child = View::DownCast(container.GetChildAt(i));
+    View child = GetImpl(container).GetChildViewAt(i);
     if(!child)
     {
       continue;

@@ -55,14 +55,14 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
     return MeasuredSize(0.0f, 0.0f);
   }
 
-  const uint32_t count = GetChildCount(view);
+  const uint32_t count = GetChildViewCount(view);
 
   float maxWidth  = 0.0f;
   float maxHeight = 0.0f;
 
   for(uint32_t i = 0; i < count; ++i)
   {
-    View child = GetChildAt(view, i);
+    View child = GetChildViewAt(view, i);
     if(!child || !child.GetObjectPtr())
     {
       continue;
@@ -100,12 +100,12 @@ MeasuredSize ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& 
   }
 
   Integration::ScrollViewImpl* scrollImpl = dynamic_cast<Integration::ScrollViewImpl*>(view);
-  const uint32_t               count      = GetChildCount(view);
+  const uint32_t               count      = GetChildViewCount(view);
   float                        s          = view->GetEffectiveScale();
 
   for(uint32_t i = 0; i < count; ++i)
   {
-    View child = GetChildAt(view, i);
+    View child = GetChildViewAt(view, i);
     if(!child || !child.GetObjectPtr())
     {
       continue;

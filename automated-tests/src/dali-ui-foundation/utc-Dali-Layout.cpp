@@ -106,21 +106,7 @@ int UtcDaliLayoutAddP(void)
   View child = View::New();
   layout.Add(child);
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
-  DALI_TEST_CHECK(layout.GetChildAt(0) == child);
-  END_TEST;
-}
-
-int UtcDaliLayoutInsertAtIndexP(void)
-{
-  UiTestApplication application;
-  Layout layout = Layout::New();
-  View child0 = View::New();
-  View child1 = View::New();
-  layout.Add(child0);
-  layout.Insert(0, child1);
-  DALI_TEST_EQUALS(layout.GetChildCount(), 2u, TEST_LOCATION);
-  DALI_TEST_CHECK(layout.GetChildAt(0) == child1);
-  DALI_TEST_CHECK(layout.GetChildAt(1) == child0);
+  DALI_TEST_CHECK(layout.GetChildViewAt(0) == child);
   END_TEST;
 }
 
@@ -142,7 +128,7 @@ int UtcDaliLayoutRemoveAtP(void)
   Layout layout = Layout::New();
   View child = View::New();
   layout.Add(child);
-  layout.Remove(layout.GetChildAt(0));
+  layout.Remove(layout.GetChildViewAt(0));
   DALI_TEST_EQUALS(layout.GetChildCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
@@ -188,19 +174,7 @@ int UtcDaliLayoutGetChildAtP(void)
   Layout layout = Layout::New();
   View child = View::New();
   layout.Add(child);
-  DALI_TEST_CHECK(layout.GetChildAt(0) == child);
-  END_TEST;
-}
-
-int UtcDaliLayoutIndexOfChildP(void)
-{
-  UiTestApplication application;
-  Layout layout = Layout::New();
-  View child = View::New();
-  layout.Add(child);
-  DALI_TEST_EQUALS(layout.IndexOfChild(child), 0, TEST_LOCATION);
-  View notChild = View::New();
-  DALI_TEST_EQUALS(layout.IndexOfChild(notChild), -1, TEST_LOCATION);
+  DALI_TEST_CHECK(layout.GetChildViewAt(0) == child);
   END_TEST;
 }
 
@@ -212,8 +186,8 @@ int UtcDaliLayoutContentsP(void)
   View b = View::New();
   layout.AddChildren({a, b});
   DALI_TEST_EQUALS(layout.GetChildCount(), 2u, TEST_LOCATION);
-  DALI_TEST_CHECK(layout.GetChildAt(0) == a);
-  DALI_TEST_CHECK(layout.GetChildAt(1) == b);
+  DALI_TEST_CHECK(layout.GetChildViewAt(0) == a);
+  DALI_TEST_CHECK(layout.GetChildViewAt(1) == b);
   END_TEST;
 }
 
@@ -242,7 +216,7 @@ int UtcDaliLayoutGetChildAtEmptyP(void)
 {
   UiTestApplication application;
   Layout layout = Layout::New();
-  View v = layout.GetChildAt(0);
+  View v = layout.GetChildViewAt(0);
   DALI_TEST_CHECK(!v);
   END_TEST;
 }
@@ -254,7 +228,7 @@ int UtcDaliLayoutInsertIndexClampP(void)
   View child = View::New();
   layout.Insert(99u, child);
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
-  DALI_TEST_CHECK(layout.GetChildAt(0) == child);
+  DALI_TEST_CHECK(layout.GetChildViewAt(0) == child);
   END_TEST;
 }
 
@@ -263,18 +237,9 @@ int UtcDaliLayoutRemoveAtInvalidIndexP(void)
   UiTestApplication application;
   Layout layout = Layout::New();
   layout.Add(View::New());
-  View invalid = layout.GetChildAt(5u);
+  View invalid = layout.GetChildViewAt(5u);
   DALI_TEST_CHECK(!invalid); // Out-of-bounds returns empty handle
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliLayoutIndexOfChildNotInLayoutP(void)
-{
-  UiTestApplication application;
-  Layout layout = Layout::New();
-  View outside = View::New();
-  DALI_TEST_EQUALS(layout.IndexOfChild(outside), -1, TEST_LOCATION);
   END_TEST;
 }
 
@@ -283,17 +248,8 @@ int UtcDaliLayoutGetChildAtOutOfRangeP(void)
   UiTestApplication application;
   Layout layout = Layout::New();
   layout.Add(View::New());
-  View v = layout.GetChildAt(1);
+  View v = layout.GetChildViewAt(1);
   DALI_TEST_CHECK(!v);
-  END_TEST;
-}
-
-int UtcDaliLayoutIndexOfChildEmptyHandleP(void)
-{
-  UiTestApplication application;
-  Layout layout = Layout::New();
-  layout.Add(View::New());
-  DALI_TEST_EQUALS(layout.IndexOfChild(View()), -1, TEST_LOCATION);
   END_TEST;
 }
 
@@ -312,9 +268,9 @@ namespace
 MeasuredSize HorizontalLineMeasure(View self, float widthConstraint, float heightConstraint)
 {
   float maxHeight = 0.0f;
-  for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+  for(uint32_t i = 0; i < self.GetChildViewCount(); ++i)
   {
-    View         child = self.GetChildAt(i);
+    View         child = self.GetChildViewAt(i);
     MeasuredSize sz    = child.Measure(widthConstraint, heightConstraint);
     maxHeight          = std::max(maxHeight, sz.height);
   }
@@ -324,9 +280,9 @@ MeasuredSize HorizontalLineMeasure(View self, float widthConstraint, float heigh
 MeasuredSize HorizontalLineArrange(View self, const LayoutRect& bounds)
 {
   float x = bounds.x;
-  for(uint32_t i = 0; i < self.GetChildCount(); ++i)
+  for(uint32_t i = 0; i < self.GetChildViewCount(); ++i)
   {
-    View         child = self.GetChildAt(i);
+    View         child = self.GetChildViewAt(i);
     MeasuredSize sz    = child.GetMeasuredSize();
     child.Arrange({x, bounds.y, sz.width, sz.height});
     x += sz.width;

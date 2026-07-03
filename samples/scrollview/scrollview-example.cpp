@@ -445,7 +445,7 @@ private:
     mScrollOnFocusChip.SetBackgroundColor(on ? COLOR_ACTIVE : COLOR_INACTIVE);
     std::ostringstream sv;
     sv << "ScrollOnFocus: " << (on ? "ON" : "OFF");
-    Label::DownCast(mScrollOnFocusChip.GetChildAt(0)).SetText(sv.str().c_str());
+    Label::DownCast(mScrollOnFocusChip.GetChildViewAt(0)).SetText(sv.str().c_str());
 
     // Mode chips
     static const ScrollToPosition MODES[4] = {
@@ -470,7 +470,7 @@ private:
     mKeyScrollChip.SetBackgroundColor(ks ? COLOR_ACTIVE : COLOR_INACTIVE);
     std::ostringstream kl;
     kl << "KeyScroll: " << (ks ? "ON" : "OFF");
-    Label::DownCast(mKeyScrollChip.GetChildAt(0)).SetText(kl.str().c_str());
+    Label::DownCast(mKeyScrollChip.GetChildViewAt(0)).SetText(kl.str().c_str());
 
     // Key scroll step label
     std::ostringstream sl;

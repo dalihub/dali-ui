@@ -194,13 +194,17 @@ public:
   {
     CancelDrag();
 
-    const uint32_t count = mStack.GetChildCount();
+    const uint32_t count = mStack.GetChildViewCount();
     if(count == 0u)
     {
       return;
     }
 
-    mStack.Remove(mStack.GetChildAt(count - 1u), RemovePolicy::ANIMATE_EXIT);
+    // The logical child list excludes any in-flight EXIT ghost, so the last
+    // logical child is the visually-last live item (CancelDrag above already
+    // removed the drag proxy and reinserted any dropped child).
+    View last = mStack.GetChildViewAt(count - 1u);
+    mStack.Remove(last, RemovePolicy::ANIMATE_EXIT);
   }
 
   bool OnEnterTouched(Actor /*actor*/, TouchEvent touch)
@@ -345,14 +349,7 @@ private:
 
   int32_t FindIndexInStack(View child) const
   {
-    for(uint32_t index = 0u; index < mStack.GetChildCount(); ++index)
-    {
-      if(mStack.GetChildAt(index) == child)
-      {
-        return static_cast<int32_t>(index);
-      }
-    }
-    return -1;
+    return mStack.IndexOfChildView(child);
   }
 
   // World X / Y of mStack's top-left in mRoot-local (== window) space.
@@ -386,7 +383,7 @@ private:
 
   uint32_t ComputeTargetIndexFromDraggedY(float draggedRootY) const
   {
-    const uint32_t count = mStack.GetChildCount();
+    const uint32_t count = mStack.GetChildViewCount();
     if(count == 0u)
     {
       return 0u;
@@ -409,7 +406,7 @@ private:
     uint32_t target = 0u;
     for(uint32_t i = 0u; i < count; ++i)
     {
-      View child = mStack.GetChildAt(i);
+      View child = mStack.GetChildViewAt(i);
       if(child == mDragProxy)
       {
         continue;

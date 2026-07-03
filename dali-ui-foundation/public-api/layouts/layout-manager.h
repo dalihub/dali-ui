@@ -102,21 +102,27 @@ protected:
   DALI_INTERNAL explicit LayoutManager(Impl* impl);
 
   /**
-   * @brief Gets the number of children of the given view.
+   * @brief Gets the number of logical child views of the given view.
+   *
+   * Excludes in-flight EXIT ghosts and non-View actor children, matching
+   * Ui::View::GetChildViewCount().
    *
    * @param[in] view The view to query
    * @return Number of child views
    */
-  uint32_t GetChildCount(ViewImpl* view) const;
+  uint32_t GetChildViewCount(ViewImpl* view) const;
 
   /**
-   * @brief Gets the child View at the given index.
+   * @brief Gets the logical child View at the given index.
+   *
+   * Matches Ui::View::GetChildViewAt(): returns an empty handle if @p index
+   * is out of range.
    *
    * @param[in] view  The view to query
-   * @param[in] index The child index
-   * @return The child View handle
+   * @param[in] index The child index, in [0, GetChildViewCount(view))
+   * @return The child View handle, or an empty handle if out of range
    */
-  View GetChildAt(ViewImpl* view, uint32_t index) const;
+  View GetChildViewAt(ViewImpl* view, uint32_t index) const;
 
   /**
    * @brief Returns whether the child's LayoutMode is STANDALONE.

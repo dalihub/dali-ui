@@ -566,12 +566,12 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   float availableHeight = heightConstraint;
 
   // Collect children once for reuse across the measure phase helpers.
-  const uint32_t    childCount = GetChildCount(view);
+  const uint32_t    childCount = GetChildViewCount(view);
   std::vector<View> children;
   children.reserve(childCount);
   for(uint32_t i = 0; i < childCount; ++i)
   {
-    children.push_back(GetChildAt(view, i));
+    children.push_back(GetChildViewAt(view, i));
   }
 
   uint32_t           rowCount = std::max(1u, static_cast<uint32_t>(impl->mRowDefinitions.Size()));
@@ -645,12 +645,12 @@ MeasuredSize GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds
   float availableWidth  = bounds.width;
   float availableHeight = bounds.height;
 
-  const uint32_t    childCount = GetChildCount(view);
+  const uint32_t    childCount = GetChildViewCount(view);
   std::vector<View> children;
   children.reserve(childCount);
   for(uint32_t i = 0; i < childCount; ++i)
   {
-    children.push_back(GetChildAt(view, i));
+    children.push_back(GetChildViewAt(view, i));
   }
 
   uint32_t           rowCount = std::max(1u, static_cast<uint32_t>(impl->mRowDefinitions.Size()));

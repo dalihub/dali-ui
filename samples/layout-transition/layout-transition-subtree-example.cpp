@@ -230,10 +230,10 @@ public:
     // under SUBTREE scope.
     mSpacer.SetRequestedHeight(mExpanded ? 160.0f : 40.0f);
     const float    itemHeight = mExpanded ? 100.0f : 60.0f;
-    const uint32_t count      = mCard.GetChildCount();
+    const uint32_t count      = mCard.GetChildViewCount();
     for(uint32_t i = 0; i < count; ++i)
     {
-      mCard.GetChildAt(i).SetRequestedHeight(itemHeight);
+      mCard.GetChildViewAt(i).SetRequestedHeight(itemHeight);
     }
   }
 

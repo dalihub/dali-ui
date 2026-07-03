@@ -702,24 +702,24 @@ void View::RemoveAllChildren(RemovePolicy policy)
   GetImpl(*this).RemoveAllChildren(policy);
 }
 
+uint32_t View::GetChildViewCount() const
+{
+  return GetImpl(*this).GetChildViewCount();
+}
+
+View View::GetChildViewAt(uint32_t index) const
+{
+  return GetImpl(*this).GetChildViewAt(index);
+}
+
+int32_t View::IndexOfChildView(View childView) const
+{
+  return GetImpl(*this).IndexOfChildView(childView);
+}
+
 void View::Remove(View child, RemovePolicy policy)
 {
   GetImpl(*this).Remove(child, policy);
-}
-
-uint32_t View::GetChildCount() const
-{
-  return GetImpl(*this).GetChildCount();
-}
-
-View View::GetChildAt(uint32_t index) const
-{
-  return GetImpl(*this).GetChildAt(index);
-}
-
-int32_t View::IndexOfChild(View view) const
-{
-  return GetImpl(*this).IndexOfChild(view);
 }
 
 void View::Raise(LayoutOrderPolicy policy)

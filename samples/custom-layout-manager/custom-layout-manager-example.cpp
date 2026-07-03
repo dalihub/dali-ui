@@ -47,11 +47,11 @@ public:
   {
     float          totalWidth  = 0.0f;
     float          totalHeight = 0.0f;
-    const uint32_t count       = GetChildCount(view);
+    const uint32_t count       = GetChildViewCount(view);
 
     for(uint32_t i = 0; i < count; ++i)
     {
-      View      child     = GetChildAt(view, i);
+      View      child     = GetChildViewAt(view, i);
       ViewImpl& childImpl = GetImpl(child);
 
       if(IsStandalone(&childImpl))
@@ -72,11 +72,11 @@ public:
   {
     float          x     = bounds.x;
     float          y     = bounds.y;
-    const uint32_t count = GetChildCount(view);
+    const uint32_t count = GetChildViewCount(view);
 
     for(uint32_t i = 0; i < count; ++i)
     {
-      View      child     = GetChildAt(view, i);
+      View      child     = GetChildViewAt(view, i);
       ViewImpl& childImpl = GetImpl(child);
 
       if(IsStandalone(&childImpl))

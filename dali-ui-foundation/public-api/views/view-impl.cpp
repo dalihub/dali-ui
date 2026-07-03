@@ -2257,12 +2257,12 @@ void ViewImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
   }
 }
 
-uint32_t ViewImpl::GetChildCount() const
+uint32_t ViewImpl::GetChildViewCount() const
 {
   return static_cast<uint32_t>(mImpl->mChildren.Count());
 }
 
-Ui::View ViewImpl::GetChildAt(uint32_t index) const
+Ui::View ViewImpl::GetChildViewAt(uint32_t index) const
 {
   if(index < mImpl->mChildren.Count())
   {
@@ -2271,7 +2271,7 @@ Ui::View ViewImpl::GetChildAt(uint32_t index) const
   return Ui::View();
 }
 
-int32_t ViewImpl::IndexOfChild(Ui::View view) const
+int32_t ViewImpl::IndexOfChildView(Ui::View view) const
 {
   if(!view)
   {
@@ -2661,10 +2661,10 @@ View ViewImpl::RequestChildFirstFocus()
     return DefaultOnFocusRequested();
   }
 
-  const uint32_t childCount = self.GetChildCount();
+  const uint32_t childCount = GetChildViewCount();
   for(uint32_t i = 0; i < childCount; ++i)
   {
-    View child = self.GetChildAt(i);
+    View child = GetChildViewAt(i);
     if(child && child.IsVisible())
     {
       View resolved = GetImpl(child).RequestFocus();
