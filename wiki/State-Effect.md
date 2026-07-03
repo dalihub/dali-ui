@@ -50,7 +50,7 @@ view.Add(circleChild);
 view.SetStateEffectTarget(circleChild);
 ```
 
-<video src="./assets/StateEffect/plain-targeted.mp4" controls width="200"></video>
+<img src="assets/StateEffect/plain-targeted.gif" height="200" />
 
 <br/>
 
