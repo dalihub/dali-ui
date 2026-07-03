@@ -19,7 +19,7 @@ name | desc. | sample
 [View](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1View.html) | A basic unit arranged by layouts. It also serves as a visual container, provides various render effects, and offers basic accessibility functionality. | -
 [Label](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1Label.html) | A non-editable `View` that displays text. | [samples/text](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text)
 [InputField](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1InputField.html) | A single-line editable text. | [samples/text](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text)
-InputEditor | (~06.2026) | -
+[InputEditor](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1InputEditor.html) | A multi-line editable text view. | [samples/text](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text)
 [ImageView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1ImageView.html) | A `View` for displaying an image resource. | [samples/image-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/image-view)
 [AnimatedImageView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1AnimatedImageView.html) | A `View` for displaying animated image resources such as GIF files. | -
 [LottieAnimationView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1LottieAnimationView.html) | A `View` for displaying a Lottie vector animation. | -

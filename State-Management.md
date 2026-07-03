@@ -16,10 +16,14 @@ Whenever the state changes, `StateChangedSignal` fires and delivers a `StateEven
 |-------|-------------|
 | `ViewState::NORMAL` | Default state — no bits set |
 | `ViewState::FOCUSED` | View has keyboard focus |
+| `ViewState::FOCUS_INDICATED` | View has focus and its focus should be visibly indicated |
 | `ViewState::PRESSED` | View is pressed via touch or key |
 | `ViewState::DISABLED` | View is disabled |
 | `ViewState::PSEUDO_DISABLED` | Appears disabled visually but remains interactive |
 | `ViewState::SELECTED` | View is selected |
+
+> [!NOTE]
+> `FOCUSED` means the View currently has input focus. `FOCUS_INDICATED` means that the focused View should show visible focus feedback. For example, when the input context changes from key to touch, the View can keep `FOCUSED` while only `FOCUS_INDICATED` is cleared. This is similar to CSS [`:focus-visible`](https://www.w3.org/TR/selectors-4/#the-focus-visible-pseudo).
 
 Commonly used composite states are also predefined:
 
@@ -35,7 +39,7 @@ Commonly used composite states are also predefined:
 
 | View type | States it can have |
 |-----------|-------------------|
-| View | `FOCUSED`, `DISABLED` |
+| View | `FOCUSED`, `FOCUS_INDICATED`, `DISABLED` |
 | View (Interactive) | + `PRESSED`, `PSEUDO_DISABLED` |
 | View (Selectable) | + `SELECTED` |
 
@@ -88,13 +92,18 @@ view.StateChangedSignal().Connect(tracker, [](View v, const StateEvent& e) {
   ViewState prev = e.GetPrev();
   ViewState cur  = e.GetCurrent();
 
-  if(e.HasCause()) {
-    const InputEvent& cause = e.GetCause();
+  const InputEvent& cause = e.GetCause();
+  if(!cause.IsProgrammatic()) {
+    // input event caused this transition
+  }
+
+  if(cause.IsCancellation()) {
+    // transition was caused by cancellation or reset
   }
 });
 ```
 
-> `HasCause()` returns `false` for programmatic changes such as `SetEnabled()`.
+> `InputEvent::IsProgrammatic()` returns `true` for code-driven changes such as `SetEnabled()`.
 
 <br/>
 
@@ -105,6 +114,7 @@ Predefined states are managed automatically by the system:
 | State | Managed by | How to change |
 |-------|-----------|---------------|
 | `FOCUSED` | Focus system | Automatic |
+| `FOCUS_INDICATED` | Focus system | Automatic, based on how focus was reached and whether visible focus feedback should be shown |
 | `PRESSED` | `InteractiveTrait` | Automatic on touch/key input |
 | `DISABLED` | `View` | `view.SetEnabled(false / true)` |
 | `PSEUDO_DISABLED` | `InteractiveTrait` | `interactiveTrait.SetPseudoDisabled(true / false)` |
@@ -128,7 +138,7 @@ selectable.SetToggleByClickEnabled(true);
 
 ## Custom States
 
-Up to 62 custom states can be registered with `ViewState::Create()`. Calling `Create()` with the same name again returns the same bitmask.
+Custom states can be registered with `ViewState::Create()`. Calling `Create()` with the same name again returns the same bitmask.
 
 ```cpp
 static const ViewState Loading = ViewState::Create("Loading");
@@ -137,9 +147,9 @@ static const ViewState Error   = ViewState::Create("Error");
 auto loadingOrError = Loading + Error;
 ```
 
-> Activating and deactivating custom states is done via the `ViewImpl::SetState()`, which targets Framework developers.
+> Activating and deactivating custom states is done via `Integration::SetState()`, which targets Framework developers.
 
-> Registering more than 62 custom states throws a `DaliException`.
+> `ViewState` has 32 total bit slots. Predefined states use some of those slots, and the remaining slots can be used for custom states. Registering beyond the available bit space throws a `DaliException`.
 
 <br/>
 
@@ -151,11 +161,11 @@ auto loadingOrError = Loading + Error;
 
 ## Framework Developer Notes
 
-Use `ViewImpl::SetState()` to turn a custom state on or off. `StateChangedSignal` is emitted automatically.
+Use `Integration::SetState()` to turn a custom state on or off. `StateChangedSignal` is emitted automatically.
 
 ```cpp
-SetState(Loading, true);   // activate Loading state
-SetState(Loading, false);  // deactivate Loading state
+Integration::SetState(viewImpl, Loading, true);   // activate Loading state
+Integration::SetState(viewImpl, Loading, false);  // deactivate Loading state
 ```
 
 For theme/color integration based on state, refer to the Framework Developer Notes in the Color & Theme document.

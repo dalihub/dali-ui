@@ -24,9 +24,10 @@
    - [Pre-multiplied Alpha](#53-pre-multiplied-alpha)
 6. [Loading Behavior](#6-loading-behavior)
    - [Synchronous Loading](#61-synchronous-loading)
-   - [Release Policy](#62-release-policy)
-   - [Fast-track Uploading](#63-fast-track-uploading)
-   - [Orientation Correction](#64-orientation-correction)
+   - [Load Policy](#62-load-policy)
+   - [Release Policy](#63-release-policy)
+   - [Fast-track Uploading](#64-fast-track-uploading)
+   - [Orientation Correction](#65-orientation-correction)
 7. [N-Patch Border](#7-n-patch-border)
 8. [Loading Status & Signals](#8-loading-status--signals)
 9. [Default Values](#9-default-values)
@@ -64,10 +65,10 @@ window.Add(imageView);
 `FittingMode` controls how the image is fitted within the view bounds.
 
 ```cpp
-// Scale to fit while preserving aspect ratio (default)
+// Scale to fit while preserving aspect ratio
 imageView.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 
-// Stretch to fill the entire view (may distort)
+// Stretch to fill the entire view (default, may distort)
 imageView.SetFittingMode(Image::FittingMode::FILL);
 
 // Scale to fill, cropping overflow (preserves aspect ratio)
@@ -79,13 +80,10 @@ imageView.SetFittingMode(Image::FittingMode::CENTER);
 
 | Value | Behavior |
 |---|---|
-| `FIT_KEEP_ASPECT_RATIO` | Scale to fit within bounds, preserving aspect ratio. Default. |
-| `FILL` | Stretch to fill entire bounds, may distort. |
+| `FIT_KEEP_ASPECT_RATIO` | Scale to fit within bounds, preserving aspect ratio. |
+| `FILL` | Stretch to fill entire bounds, may distort. Default. |
 | `OVER_FIT_KEEP_ASPECT_RATIO` | Scale to fill bounds, overflow is cropped. |
 | `CENTER` | Display at original size, centered in the view. |
-| `FIT_HEIGHT` | Scale height proportionately (deprecated). |
-| `FIT_WIDTH` | Scale width proportionately (deprecated). |
-| `DONT_CARE` | No specific fitting mode applied. |
 
 ### Visual Example
 
@@ -124,22 +122,28 @@ using namespace Dali::Ui;
 // Nearest-neighbor (pixelated, fast)
 imageView.SetSamplingMode(Image::SamplingMode::NEAREST);
 
-// Linear filtering (smooth, default)
+// Linear filtering (smooth)
 imageView.SetSamplingMode(Image::SamplingMode::LINEAR);
 
-// Box filtering (for downscaling)
-imageView.SetSamplingMode(Image::SamplingMode::BOX);
+// Box then linear filtering (default)
+imageView.SetSamplingMode(Image::SamplingMode::BOX_THEN_LINEAR);
 
 // No filtering
-imageView.SetSamplingMode(Image::SamplingMode::DONT_CARE);
+imageView.SetSamplingMode(Image::SamplingMode::NO_FILTER);
 ```
 
 | Value | Use Case |
 |---|---|
 | `NEAREST` | Pixel art, sharp edges, fast rendering |
-| `LINEAR` | Photos, smooth scaling (default) |
+| `LINEAR` | Photos, smooth scaling |
 | `BOX` | High-quality downscaling |
+| `BOX_THEN_NEAREST` | Box filtering followed by nearest filtering |
+| `BOX_THEN_LINEAR` | Box filtering followed by linear filtering. Default. |
+| `NO_FILTER` | No filtering |
 | `DONT_CARE` | No preference, let system decide |
+| `LANCZOS` | High-quality Lanczos filtering |
+| `BOX_THEN_LANCZOS` | Box filtering followed by Lanczos filtering |
+| `DEFAULT` | Platform/default sampling mode |
 
 ---
 
@@ -221,9 +225,11 @@ The `Vector4` represents `(x, y, width, height)` in normalized coordinates.
 Hint for the image loader about the desired dimensions.
 
 ```cpp
-imageView.SetDesiredSize(ImageDimensions(800, 600));
+imageView.SetDesiredWidth(800);
+imageView.SetDesiredHeight(600);
 
-ImageDimensions size = imageView.GetDesiredSize();
+int width = imageView.GetDesiredWidth();
+int height = imageView.GetDesiredHeight();
 ```
 
 This can be used to load a lower-resolution version of the image to save memory.
@@ -237,7 +243,7 @@ Load the image at the current view size, saving memory and decode time.
 ```cpp
 imageView.SetImageLoadWithViewSize(true);
 
-bool enabled = imageView.GetImageLoadWithViewSize();
+bool enabled = imageView.IsImageLoadWithViewSizeEnabled();
 ```
 
 When enabled:
@@ -260,7 +266,7 @@ imageView.SetAlphaMaskUrl("images/mask.png");
 imageView.SetCropToMask(true);
 
 Dali::String maskUrl = imageView.GetAlphaMaskUrl();
-bool cropToMask = imageView.GetCropToMask();
+bool cropToMask = imageView.IsCropToMask();
 ```
 
 ---
@@ -293,7 +299,7 @@ Control whether the image uses pre-multiplied alpha.
 ```cpp
 imageView.SetPreMultipliedAlpha(true);
 
-bool preMultiplied = imageView.GetPreMultipliedAlpha();
+bool preMultiplied = imageView.IsPreMultipliedAlpha();
 ```
 
 ---
@@ -307,14 +313,35 @@ Load the image synchronously on the main thread (blocks until loaded).
 ```cpp
 imageView.SetSynchronousLoading(true);
 
-bool sync = imageView.GetSynchronousLoading();
+bool sync = imageView.IsSynchronousLoading();
 ```
 
 > **Note:** Synchronous loading can cause UI jank. Use only for small images or when absolutely necessary.
 
 ---
 
-### 6.2 Release Policy
+### 6.2 Load Policy
+
+Control when the image resource starts loading.
+
+```cpp
+// Load when the ImageView is attached to the scene (default)
+imageView.SetLoadPolicy(Image::LoadPolicy::ATTACHED);
+
+// Start loading immediately when the image is set
+imageView.SetLoadPolicy(Image::LoadPolicy::IMMEDIATE);
+
+Image::LoadPolicy policy = imageView.GetLoadPolicy();
+```
+
+| Value | Behavior |
+|---|---|
+| `ATTACHED` | Load when the ImageView is attached to the scene. Default. |
+| `IMMEDIATE` | Load as soon as the image is set, before scene attachment. |
+
+---
+
+### 6.3 Release Policy
 
 Control when the image texture is released from memory.
 
@@ -339,26 +366,26 @@ Image::ReleasePolicy policy = imageView.GetReleasePolicy();
 
 ---
 
-### 6.3 Fast-track Uploading
+### 6.4 Fast-track Uploading
 
 Upload image to GPU on a background thread to reduce main-thread stalls.
 
 ```cpp
-imageView.SetFastTrackUploading(true);
+imageView.SetFastTrackUpload(true);
 
-bool enabled = imageView.GetFastTrackUploading();
+bool enabled = imageView.IsFastTrackUploadEnabled();
 ```
 
 ---
 
-### 6.4 Orientation Correction
+### 6.5 Orientation Correction
 
 Automatically apply EXIF orientation metadata.
 
 ```cpp
 imageView.SetOrientationCorrection(true);
 
-bool enabled = imageView.GetOrientationCorrection();
+bool enabled = imageView.IsOrientationCorrectionEnabled();
 ```
 
 ---
@@ -375,7 +402,7 @@ imageView.SetNPatchBorder(Vector4(10.0f, 10.0f, 10.0f, 10.0f));
 imageView.SetNPatchBorderOnly(true);
 
 Vector4 border = imageView.GetNPatchBorder();
-bool borderOnly = imageView.GetNPatchBorderOnly();
+bool borderOnly = imageView.IsNPatchBorderOnly();
 ```
 
 ### N-Patch Visual Example
@@ -427,7 +454,7 @@ Connect to be notified when the image finishes loading.
 class MyImageHandler : public Dali::ConnectionTracker
 {
 public:
-    void OnImageReady(ImageView imageView)
+    void OnImageReady(View view)
     {
         // Image has finished loading and is ready to display
         DALI_LOG_RELEASE_INFO("Image loaded successfully!\n");
@@ -444,16 +471,17 @@ imageView.ResourceReadySignal().Connect(&handler, &MyImageHandler::OnImageReady)
 
 | Property | Default |
 |---|---|
-| `FittingMode` | `FIT_KEEP_ASPECT_RATIO` |
-| `SamplingMode` | `LINEAR` |
+| `FittingMode` | `FILL` |
+| `SamplingMode` | `BOX_THEN_LINEAR` |
 | `ImageColor` | White `(1.0, 1.0, 1.0, 1.0)` |
 | `PixelArea` | `(0.0, 0.0, 1.0, 1.0)` (full image) |
 | `ImageLoadWithViewSize` | `false` |
 | `SynchronousLoading` | `false` |
 | `FastTrackUploading` | `false` |
 | `OrientationCorrection` | `true` |
+| `LoadPolicy` | `ATTACHED` |
 | `ReleasePolicy` | `DETACHED` |
-| `PreMultipliedAlpha` | `false` |
+| `PreMultipliedAlpha` | `true` |
 | `CropToMask` | `false` |
 | `MaskingMode` | `MASKING_ON_RENDERING` |
 | `NPatchBorder` | `(0.0, 0.0, 0.0, 0.0)` |

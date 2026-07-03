@@ -24,9 +24,10 @@
    - [Pre-multiplied Alpha](#53-pre-multiplied-alpha)
 6. [로딩 동작](#6-로딩-동작)
    - [동기 로딩](#61-동기-로딩)
-   - [Release Policy](#62-release-policy)
-   - [Fast-track Uploading](#63-fast-track-uploading)
-   - [방향 보정](#64-방향-보정)
+   - [Load Policy](#62-load-policy)
+   - [Release Policy](#63-release-policy)
+   - [Fast-track Uploading](#64-fast-track-uploading)
+   - [방향 보정](#65-방향-보정)
 7. [N-Patch 테두리](#7-n-patch-테두리)
 8. [로딩 상태 및 시그널](#8-로딩-상태-및-시그널)
 9. [메서드 체이닝](#9-메서드-체이닝)
@@ -65,10 +66,10 @@ window.Add(imageView);
 `FittingMode`는 이미지가 뷰 영역에 맞춰지는 방식을 제어합니다.
 
 ```cpp
-// 가로세로 비율을 유지하며 맞춤 (기본값)
+// 가로세로 비율을 유지하며 맞춤
 imageView.SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 
-// 뷰 영역을 꽉 채우도록 늘림 (왜곡 발생 가능)
+// 뷰 영역을 꽉 채우도록 늘림 (기본값, 왜곡 발생 가능)
 imageView.SetFittingMode(Image::FittingMode::FILL);
 
 // 가로세로 비율을 유지하며 채우고, 넘치는 부분 잘림
@@ -80,13 +81,10 @@ imageView.SetFittingMode(Image::FittingMode::CENTER);
 
 | 값 | 동작 |
 |---|---|
-| `FIT_KEEP_ASPECT_RATIO` | 가로세로 비율을 유지하며 뷰 영역에 맞춤. 기본값. |
-| `FILL` | 뷰 영역을 꽉 채우도록 늘림. 왜곡 발생 가능. |
+| `FIT_KEEP_ASPECT_RATIO` | 가로세로 비율을 유지하며 뷰 영역에 맞춤. |
+| `FILL` | 뷰 영역을 꽉 채우도록 늘림. 왜곡 발생 가능. 기본값. |
 | `OVER_FIT_KEEP_ASPECT_RATIO` | 가로세로 비율을 유지하며 채우고, 넘치는 부분은 잘림. |
 | `CENTER` | 원본 크기 그대로 표시, 뷰 중앙에 위치. |
-| `FIT_HEIGHT` | 높이 기준 비율 맞춤 (deprecated). |
-| `FIT_WIDTH` | 너비 기준 비율 맞춤 (deprecated). |
-| `DONT_CARE` | 특정 맞춤 모드 없음. |
 
 ### 시각적 예시
 
@@ -125,22 +123,28 @@ using namespace Dali::Ui;
 // 최근접 이웃 (픽셀화, 빠름)
 imageView.SetSamplingMode(Image::SamplingMode::NEAREST);
 
-// 선형 필터링 (부드러움, 기본값)
+// 선형 필터링 (부드러움)
 imageView.SetSamplingMode(Image::SamplingMode::LINEAR);
 
-// 박스 필터링 (축소 시 고품질)
-imageView.SetSamplingMode(Image::SamplingMode::BOX);
+// 박스 후 선형 필터링 (기본값)
+imageView.SetSamplingMode(Image::SamplingMode::BOX_THEN_LINEAR);
 
 // 필터링 없음
-imageView.SetSamplingMode(Image::SamplingMode::DONT_CARE);
+imageView.SetSamplingMode(Image::SamplingMode::NO_FILTER);
 ```
 
 | 값 | 용도 |
 |---|---|
 | `NEAREST` | 픽셀 아트, 날카로운 경계, 빠른 렌더링 |
-| `LINEAR` | 사진, 부드러운 스케일링 (기본값) |
+| `LINEAR` | 사진, 부드러운 스케일링 |
 | `BOX` | 고품질 축소 |
+| `BOX_THEN_NEAREST` | 박스 필터링 후 nearest 필터링 |
+| `BOX_THEN_LINEAR` | 박스 필터링 후 linear 필터링. 기본값. |
+| `NO_FILTER` | 필터링 없음 |
 | `DONT_CARE` | 시스템이 결정 |
+| `LANCZOS` | 고품질 Lanczos 필터링 |
+| `BOX_THEN_LANCZOS` | 박스 필터링 후 Lanczos 필터링 |
+| `DEFAULT` | 플랫폼/기본 sampling mode |
 
 ---
 
@@ -222,9 +226,11 @@ Vector4 area = imageView.GetPixelArea();
 이미지 로더에 원하는 크기를 힌트로 제공합니다.
 
 ```cpp
-imageView.SetDesiredSize(ImageDimensions(800, 600));
+imageView.SetDesiredWidth(800);
+imageView.SetDesiredHeight(600);
 
-ImageDimensions size = imageView.GetDesiredSize();
+int width = imageView.GetDesiredWidth();
+int height = imageView.GetDesiredHeight();
 ```
 
 메모리 절약을 위해 저해상도 버전의 이미지를 로드할 때 사용할 수 있습니다.
@@ -238,7 +244,7 @@ ImageDimensions size = imageView.GetDesiredSize();
 ```cpp
 imageView.SetImageLoadWithViewSize(true);
 
-bool enabled = imageView.GetImageLoadWithViewSize();
+bool enabled = imageView.IsImageLoadWithViewSizeEnabled();
 ```
 
 활성화 시:
@@ -261,7 +267,7 @@ imageView.SetAlphaMaskUrl("images/mask.png");
 imageView.SetCropToMask(true);
 
 Dali::String maskUrl = imageView.GetAlphaMaskUrl();
-bool cropToMask = imageView.GetCropToMask();
+bool cropToMask = imageView.IsCropToMask();
 ```
 
 ---
@@ -294,7 +300,7 @@ Image::MaskingType mode = imageView.GetMaskingMode();
 ```cpp
 imageView.SetPreMultipliedAlpha(true);
 
-bool preMultiplied = imageView.GetPreMultipliedAlpha();
+bool preMultiplied = imageView.IsPreMultipliedAlpha();
 ```
 
 ---
@@ -308,14 +314,35 @@ bool preMultiplied = imageView.GetPreMultipliedAlpha();
 ```cpp
 imageView.SetSynchronousLoading(true);
 
-bool sync = imageView.GetSynchronousLoading();
+bool sync = imageView.IsSynchronousLoading();
 ```
 
 > **참고:** 동기 로딩은 UI 버벅임을 유발할 수 있습니다. 작은 이미지나 불가피한 경우에만 사용하세요.
 
 ---
 
-### 6.2 Release Policy
+### 6.2 Load Policy
+
+이미지 리소스 로딩이 시작되는 시점을 제어합니다.
+
+```cpp
+// ImageView가 scene에 attach될 때 로드 (기본값)
+imageView.SetLoadPolicy(Image::LoadPolicy::ATTACHED);
+
+// 이미지 설정 즉시 로드 시작
+imageView.SetLoadPolicy(Image::LoadPolicy::IMMEDIATE);
+
+Image::LoadPolicy policy = imageView.GetLoadPolicy();
+```
+
+| 값 | 동작 |
+|---|---|
+| `ATTACHED` | ImageView가 scene에 attach될 때 로드. 기본값. |
+| `IMMEDIATE` | scene attach 전이라도 이미지 설정 즉시 로드. |
+
+---
+
+### 6.3 Release Policy
 
 이미지 텍스처가 메모리에서 해제되는 시점을 제어합니다.
 
@@ -340,26 +367,26 @@ Image::ReleasePolicy policy = imageView.GetReleasePolicy();
 
 ---
 
-### 6.3 Fast-track Uploading
+### 6.4 Fast-track Uploading
 
 메인 스레드 지연을 줄이기 위해 백그라운드 스레드에서 GPU에 이미지를 업로드합니다.
 
 ```cpp
-imageView.SetFastTrackUploading(true);
+imageView.SetFastTrackUpload(true);
 
-bool enabled = imageView.GetFastTrackUploading();
+bool enabled = imageView.IsFastTrackUploadEnabled();
 ```
 
 ---
 
-### 6.4 방향 보정
+### 6.5 방향 보정
 
 EXIF 방향 메타데이터를 자동으로 적용합니다.
 
 ```cpp
 imageView.SetOrientationCorrection(true);
 
-bool enabled = imageView.GetOrientationCorrection();
+bool enabled = imageView.IsOrientationCorrectionEnabled();
 ```
 
 ---
@@ -376,7 +403,7 @@ imageView.SetNPatchBorder(Vector4(10.0f, 10.0f, 10.0f, 10.0f));
 imageView.SetNPatchBorderOnly(true);
 
 Vector4 border = imageView.GetNPatchBorder();
-bool borderOnly = imageView.GetNPatchBorderOnly();
+bool borderOnly = imageView.IsNPatchBorderOnly();
 ```
 
 ### N-Patch 시각적 예시
@@ -428,7 +455,7 @@ else if(status == Visual::ResourceStatus::FAILED)
 class MyImageHandler : public Dali::ConnectionTracker
 {
 public:
-    void OnImageReady(ImageView imageView)
+    void OnImageReady(View view)
     {
         // 이미지 로딩 완료, 표시 준비됨
         DALI_LOG_RELEASE_INFO("이미지 로드 완료!\n");
@@ -450,10 +477,10 @@ ImageView imageView = ImageView::New("photo.jpg");
 
 imageView
     .SetFittingMode(Image::FittingMode::FIT_KEEP_ASPECT_RATIO)
-    .SetSamplingMode(Image::SamplingMode::LINEAR)
+    .SetSamplingMode(Image::SamplingMode::BOX_THEN_LINEAR)
     .SetImageColor(UiColor(0xFFFFFFFF))
     .SetSynchronousLoading(false)
-    .SetFastTrackUploading(true)
+    .SetFastTrackUpload(true)
     .SetOrientationCorrection(true)
     .SetReleasePolicy(Image::ReleasePolicy::DETACHED);
 ```
@@ -464,16 +491,17 @@ imageView
 
 | 프로퍼티 | 기본값 |
 |---|---|
-| `FittingMode` | `FIT_KEEP_ASPECT_RATIO` |
-| `SamplingMode` | `LINEAR` |
+| `FittingMode` | `FILL` |
+| `SamplingMode` | `BOX_THEN_LINEAR` |
 | `ImageColor` | 흰색 `(1.0, 1.0, 1.0, 1.0)` |
 | `PixelArea` | `(0.0, 0.0, 1.0, 1.0)` (전체 이미지) |
 | `ImageLoadWithViewSize` | `false` |
 | `SynchronousLoading` | `false` |
 | `FastTrackUploading` | `false` |
 | `OrientationCorrection` | `true` |
+| `LoadPolicy` | `ATTACHED` |
 | `ReleasePolicy` | `DETACHED` |
-| `PreMultipliedAlpha` | `false` |
+| `PreMultipliedAlpha` | `true` |
 | `CropToMask` | `false` |
 | `MaskingMode` | `MASKING_ON_RENDERING` |
 | `NPatchBorder` | `(0.0, 0.0, 0.0, 0.0)` |
