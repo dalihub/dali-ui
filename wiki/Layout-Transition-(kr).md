@@ -4,6 +4,9 @@
 
 `LayoutTransition`은 연속된 layout pass 결과 사이에서 `View`의 자식들을 애니메이션합니다. 자식이 추가, 제거, 재정렬되거나 부모 layout이 기존 자식의 bounds를 다르게 계산하면, framework가 해당 slot에 맞는 애니메이션을 실행합니다.
 
+<img src="assets/Layout/dali-ui-layout-transition-grid-item.gif" height="400"/>
+
+
 ---
 
 ## 개념
