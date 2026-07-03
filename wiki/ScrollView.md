@@ -15,12 +15,16 @@
    - [Scroll Position](#41-scroll-position)
    - [Fling Behavior](#42-fling-behavior)
    - [Over-Scroll Mode](#43-over-scroll-mode)
-   - [Scroll Bar Visibility](#44-scroll-bar-visibility)
-   - [Scroll State Query](#45-scroll-state-query)
+   - [Edge Effect](#44-edge-effect)
+   - [Scroll Bar Visibility](#45-scroll-bar-visibility)
+   - [Scroll State Query](#46-scroll-state-query)
+   - [Focus and Key Scrolling](#47-focus-and-key-scrolling)
 5. [Programmatic Scrolling](#5-programmatic-scrolling)
 6. [Events (Signals)](#6-events-signals)
-7. [Default Values](#7-default-values)
-8. [Important Notes](#8-important-notes)
+7. [Configuration Style](#7-configuration-style)
+8. [Default Values](#8-default-values)
+9. [Troubleshooting](#9-troubleshooting)
+10. [Important Notes](#10-important-notes)
 
 ---
 
@@ -219,7 +223,60 @@ OverScrollMode mode = scrollView.GetOverScrollMode();
 
 ---
 
-### 4.4 Scroll Bar Visibility
+### 4.4 Edge Effect
+
+`ScrollView` can use an `EdgeEffect` to provide feedback when content is dragged or flung past a scroll boundary.
+
+The built-in `BounceEdgeEffect` moves the content past the boundary and springs it back.
+
+```cpp
+#include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
+
+// Vertical ScrollView: start = top, end = bottom
+BounceEdgeEffect startEffect = BounceEdgeEffect::New(ScrollDirection::Vertical);
+startEffect.SetPullResistance(0.35f);
+startEffect.SetBounceDuration(0.35f);
+
+BounceEdgeEffect endEffect = BounceEdgeEffect::New(ScrollDirection::Vertical);
+endEffect.SetPullResistance(0.35f);
+endEffect.SetBounceDuration(0.35f);
+
+scrollView.SetStartEdgeEffect(startEffect);
+scrollView.SetEndEdgeEffect(endEffect);
+scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+```
+
+For horizontal scrolling, create the effects with `ScrollDirection::Horizontal`.
+
+```cpp
+BounceEdgeEffect leftEffect = BounceEdgeEffect::New(ScrollDirection::Horizontal);
+BounceEdgeEffect rightEffect = BounceEdgeEffect::New(ScrollDirection::Horizontal);
+
+scrollView.SetStartEdgeEffect(leftEffect);
+scrollView.SetEndEdgeEffect(rightEffect);
+```
+
+To remove an edge effect, pass an uninitialized `EdgeEffect`.
+
+```cpp
+scrollView.SetStartEdgeEffect(EdgeEffect());
+scrollView.SetEndEdgeEffect(EdgeEffect());
+```
+
+| Method | Meaning |
+|---|---|
+| `SetStartEdgeEffect(effect)` | Sets the effect for the start boundary. Top for vertical scrolling, left for horizontal scrolling. |
+| `SetEndEdgeEffect(effect)` | Sets the effect for the end boundary. Bottom for vertical scrolling, right for horizontal scrolling. |
+| `GetStartEdgeEffect()` | Returns the current start-boundary effect. |
+| `GetEndEdgeEffect()` | Returns the current end-boundary effect. |
+
+> `ScrollView` sets the effect source to its content view when content is available, so application code normally only needs to create the effect and assign it to the scroll view.
+>
+> `OverScrollMode` controls whether scrolling can go past the boundary. `EdgeEffect` controls the visual feedback shown at that boundary. If `OverScrollMode::Never` is set, boundary feedback is not expected even when an edge effect is assigned.
+
+---
+
+### 4.5 Scroll Bar Visibility
 
 Controls when vertical and horizontal scroll bars are shown.
 
@@ -246,13 +303,53 @@ ScrollBarVisibility hVis = scrollView.GetHorizontalScrollBarVisibility();
 
 ---
 
-### 4.5 Scroll State Query
+### 4.6 Scroll State Query
 
 ```cpp
 bool scrolling = scrollView.IsScrolling();
 ```
 
 Returns `true` between `ScrollStartedSignal` and `ScrollFinishedSignal` emissions — i.e., during both drag and fling animation.
+
+---
+
+### 4.7 Focus and Key Scrolling
+
+`ScrollView` can keep focused content visible during keyboard or remote-control navigation.
+
+The basic rule is:
+
+- When a descendant of the content view receives focus, `ScrollView` can automatically scroll that child into view.
+- The target alignment is controlled by `SetFocusScrollToPosition()`.
+- A small extra offset can be applied with `SetFocusScrollPeek()` so the focused item is not placed exactly on the viewport edge.
+- Optional key scrolling lets arrow keys scroll by steps before focus jumps to far-away items.
+
+```cpp
+// Enabled by default. Disable if the app wants to manage focus scrolling itself.
+scrollView.SetScrollOnFocus(true);
+
+// Default: MakeVisible. Other options are Start, Center, and End.
+scrollView.SetFocusScrollToPosition(ScrollToPosition::MakeVisible);
+
+// Add a 24px peek offset when MakeVisible scrolls to an edge.
+scrollView.SetFocusScrollPeek(24.0f);
+```
+
+`SetFocusScrollPeek()` is applied only for `ScrollToPosition::MakeVisible`. When the focused item is outside the viewport, `ScrollView` first chooses the nearest edge that makes the item visible, then scrolls a little farther in the same direction by the peek distance. The final value is still clamped to the valid scroll range.
+
+For key-based step scrolling:
+
+```cpp
+scrollView.SetKeyScrollEnabled(true);
+scrollView.SetKeyScrollStep(200.0f);
+```
+
+When key scrolling is enabled, arrow navigation follows this principle:
+
+- If the next focusable child is close enough, focus moves to it.
+- If the next focusable child is farther than the key scroll step, `ScrollView` scrolls by one step and keeps focus where it is.
+- `PAGE_UP` and `PAGE_DOWN` scroll by the viewport size and focus the best item in the destination viewport.
+- At a scroll boundary with no next item, focus can leave the `ScrollView`; if an edge effect is configured, boundary feedback is triggered.
 
 ---
 
@@ -450,7 +547,30 @@ void OnButtonClicked()
 
 ---
 
-## 7. Default Values
+## 7. Configuration Style
+
+`ScrollView` setters do not use method chaining. Configure the handle with ordinary sequential setter calls.
+
+```cpp
+ScrollView scrollView = ScrollView::New();
+
+scrollView.SetScrollDirection(ScrollDirection::Vertical);
+scrollView.SetMaxFlingDistance(4000.0f);
+scrollView.SetMinimumFlingDuration(800);
+scrollView.SetMaximumFlingDuration(2000);
+scrollView.SetFlingSensitivity(1.2f);
+scrollView.SetDecelerationRate(0.997f);
+scrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
+scrollView.SetVerticalScrollBarVisibility(ScrollBarVisibility::Auto);
+scrollView.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
+scrollView.SetContent(content);
+```
+
+This is the recommended style for `View`, `ScrollView`, and other handle classes whose APIs may be inherited or extended.
+
+---
+
+## 8. Default Values
 
 | Property | Default |
 |---|---|
@@ -467,7 +587,20 @@ void OnButtonClicked()
 
 ---
 
-## 8. Important Notes
+## 9. Troubleshooting
+
+| Symptom | Things to check |
+|---|---|
+| Content does not scroll | Check that `SetContent()` was called, the content size is larger than the viewport, and `SetScrollDirection()` allows movement on the intended axis. |
+| Programmatic `ScrollTo()` stays at `(0, 0)` | The scroll view may not have been laid out yet, or the content may not be larger than the viewport. Call scroll APIs after content and viewport sizes are resolved. |
+| Scroll bars do not appear | Check `SetVerticalScrollBarVisibility()` / `SetHorizontalScrollBarVisibility()`, content size, viewport size, and whether scrolling is actually possible on that axis. |
+| Edge feedback does not appear | Check that `SetStartEdgeEffect()` / `SetEndEdgeEffect()` were assigned, `OverScrollMode` is not `Never`, and the user is dragging or flinging into a boundary. |
+| Focused child does not scroll into view | Check `SetScrollOnFocus(true)`, whether the focused view is a descendant of the content view, and whether the child is keyboard focusable. |
+| Arrow keys move focus too far instead of gradually scrolling | Enable key scrolling with `SetKeyScrollEnabled(true)` and tune `SetKeyScrollStep()`. |
+
+---
+
+## 10. Important Notes
 
 - **Content must be set first.** Calling `ScrollTo`, `ScrollToX`, `ScrollToY`, or `SetScrollPosition` before `SetContent()` will result in a crash because the implementation reads content actor properties directly.
 
@@ -476,6 +609,8 @@ void OnButtonClicked()
 - **Viewport size matters.** Scrollable area is computed as `contentSize - viewportSize`. If the scroll view has not been laid out yet (e.g., in a test environment without a stage), the viewport size is `0` and all scroll positions will be clamped to `(0, 0)`.
 
 - **Scroll bar rendering.** The `ScrollBarVisibility` properties store the setting but actual scroll bar rendering depends on the platform's theme and the concrete implementation of the scroll bar actor. Verify behavior in your target environment.
+
+- **Interactive children and drag interception.** Buttons, sliders, and other interactive children can still receive tap/click input. When pointer movement passes the pan threshold, `ScrollView` may intercept the gesture and switch to scrolling. Design child interactions so tap and drag are visually distinct.
 
 - **`IsScrolling()` covers both drag and fling.** The flag is set to `true` at `ScrollStartedSignal` and cleared at `ScrollFinishedSignal`, so it remains `true` during the entire fling animation phase after the user lifts their finger.
 
