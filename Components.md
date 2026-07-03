@@ -24,10 +24,12 @@ InputEditor | (~06.2026) | -
 [AnimatedImageView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1AnimatedImageView.html) | A `View` for displaying animated image resources such as GIF files. | -
 [LottieAnimationView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1LottieAnimationView.html) | A `View` for displaying a Lottie vector animation. | -
 [ScrollView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1ScrollView.html) | A scrollable container that displays content larger than its viewport. | [samples/scrollview](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/scrollview)
-InteractiveView | (~06.2026) | -
+[InteractiveView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1InteractiveView.html) | A focusable and clickable `View` base for interactive controls. | -
+[SelectableView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1SelectableView.html) | An `InteractiveView` with selected state support. | -
+[GroupSelectableView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1GroupSelectableView.html) | A `SelectableView` that participates in single-selection groups. | [samples/group-selectable-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/group-selectable-view)
 WidgetView | (~10.2026) | -
 [WebView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1WebView.html) | A `View` for displaying web content (HTML, web pages). Supports navigation, JavaScript integration, and various web engine features. | [samples/web-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/web-view)
-CanvasView | (~10.2026) | -
+[CanvasView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1CanvasView.html) | A `View` for displaying ThorVG-backed vector drawables. | [samples/canvas-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/canvas-view)
 VideoView | (~10.2026) | -
 RecyclerView | (~10.2026) | -
 
@@ -39,8 +41,7 @@ RecyclerView | (~10.2026) | -
 name | desc. | sample
 -- | -- | --
 [ChartView](ChartView.md) | Line, Bar, Pie, Area, Scatter, Gauge charts using ThorVG rendering. Supports zoom/pan gestures, animated data transitions, and real-time data feeds. | [samples/chart-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/chart-view)
-TextButton | Label-only interactive button with text styling support. | -
-Button | (~10.2026) | -
+[TextButton](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1TextButton.html) | Label-only interactive button with text styling support. | [manual-tests/dali-ui-components/tc/tc-text-button-basics.cpp](https://github.sec.samsung.net/NUI/dali-ui/blob/devel/manual-tests/dali-ui-components/tc/tc-text-button-basics.cpp)
 IconButton | (~10.2026) | -
 Checkbox | (~10.2026) | -
 Switch | (~10.2026) | -
@@ -51,16 +52,6 @@ Loading | (~10.2026) | -
 Slider | (~10.2026) | -
 Toast | (~10.2026) | -
 Dialog | (~10.2026) | -
-
-<br/>
-
-#### TextButton Example
-
-```cpp
-Dali::Ui::TextButton button = Dali::Ui::TextButton::New("OK");
-button.SetText("Apply");
-button.SetHorizontalAlignment(Dali::Ui::LayoutAlignment::CENTER);
-```
 
 <br/>
 

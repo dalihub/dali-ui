@@ -39,7 +39,7 @@ When `UiScaleManager::SetScale()` is called, every registered layout root recomp
 `UiScaleManager` is a process-wide singleton that holds the current system scale value.
 
 ```cpp
-#include <dali-ui-foundation/public-api/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 
 // Read the current system scale
 float scale = UiScaleManager::Get().GetScale();  // default: 1.0
@@ -62,7 +62,7 @@ Calling `SetScale()` does three things atomically:
 Each `View` can override how it participates in the scale propagation via `SetUiScalePolicy()`.
 
 ```cpp
-#include <dali-ui-foundation/public-api/ui-scale-policy.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 
 view.SetUiScalePolicy(UiScalePolicy::INHERIT);   // default
 view.SetUiScalePolicy(UiScalePolicy::ENABLED);

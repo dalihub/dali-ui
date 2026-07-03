@@ -271,6 +271,18 @@ protected:
 
 <br/>
 
+## Layout Transition
+
+`LayoutTransition`은 View의 자식들이 레이아웃 결과에 따라 추가, 제거, 이동, 크기 변경될 때 이를 애니메이션으로 연결합니다. 자식 추가 시 ENTER, `RemovePolicy::ANIMATE_EXIT`로 제거 시 EXIT, 기존 자식의 배치 결과가 바뀔 때 CHANGE 슬롯이 동작합니다.
+
+스택에 항목을 삽입하거나, 그리드에서 카드를 제거하거나, 창 크기 변경으로 레이아웃이 재배치될 때처럼 레이아웃 변화가 자연스럽게 이어져야 하는 경우에 사용합니다.
+
+슬롯 동작, spec mode, animator callback, reflow scope, 주의 사항은 [Layout Transition](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout-Transition-(kr))을 참고하세요.
+
+샘플: [layout-transition](https://github.com/dalihub/dali-ui/tree/devel/samples/layout-transition)
+
+<br/>
+
 ---
 
 [← Back to list](https://github.sec.samsung.net/NUI/dali-ui/wiki/Home-(kr)#development-guides)

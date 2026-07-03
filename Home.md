@@ -83,9 +83,9 @@ For details about the class structure and extensibility of `View`, see [here](ht
 * [Create New Component](https://github.sec.samsung.net/NUI/dali-ui/wiki/Create-New-Component)
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
   * [Text](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text)
-  * [Label](https://github.sec.samsung.net/NUI/dali-ui/wiki/Label)
-  * [Text Input](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-Input)
   * [ImageView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ImageView)
+  * [CanvasView](https://github.sec.samsung.net/NUI/dali-ui/wiki/CanvasView)
+  * [ChartView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ChartView)
 * Navigation
 * [ScrollView](https://github.sec.samsung.net/NUI/dali-ui/wiki/ScrollView)
 * [WebView](https://github.sec.samsung.net/NUI/dali-ui/wiki/WebView)
