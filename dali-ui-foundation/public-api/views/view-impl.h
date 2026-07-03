@@ -929,6 +929,11 @@ public: // Non-virtual API (safe to reorder / extend)
   void RemoveAllChildren();
 
   /**
+   * @copydoc Ui::View::RemoveAllChildren(RemovePolicy)
+   */
+  void RemoveAllChildren(Ui::RemovePolicy policy);
+
+  /**
    * @copydoc Ui::View::Remove(Ui::View, RemovePolicy)
    */
   void Remove(Ui::View child, Ui::RemovePolicy policy);

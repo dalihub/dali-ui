@@ -697,6 +697,11 @@ void View::RemoveAllChildren()
   GetImpl(*this).RemoveAllChildren();
 }
 
+void View::RemoveAllChildren(RemovePolicy policy)
+{
+  GetImpl(*this).RemoveAllChildren(policy);
+}
+
 void View::Remove(View child, RemovePolicy policy)
 {
   GetImpl(*this).Remove(child, policy);

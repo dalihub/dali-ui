@@ -565,75 +565,6 @@ int UtcDaliLayoutTransitionGhostInteractionDisabledP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutTransitionRemoveAllChildrenExitP(void)
-{
-  // PR-8 #1: RemoveAllChildren with an EXIT slot configured defers each
-  // child to the dispatcher; OnStart fires for every child and the
-  // logical child list empties immediately.
-  UiTestApplication application;
-  ResetCaptures();
-
-  View parent = View::New();
-  application.GetWindow().Add(parent);
-
-  View a = View::New();
-  View b = View::New();
-  View c = View::New();
-  parent.Add(a);
-  parent.Add(b);
-  parent.Add(c);
-  application.SendNotification();
-  application.Render(0);
-
-  LayoutTransition  transition = LayoutTransition::New();
-  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
-  exitSpec.Opacity(0.0f, Duration(0.2f));
-  transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
-  parent.SetLayoutTransition(transition);
-
-  parent.RemoveAllChildren();
-
-  // Logical child list is cleared immediately; actors stay during EXIT.
-  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
-
-  application.SendNotification();
-  application.Render(0);
-
-  // OnStart fires once per child for slot=EXIT.
-  DALI_TEST_EQUALS(gOnStartInvokes, 3u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
-                   static_cast<int>(LayoutTransitionSlot::EXIT),
-                   TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliLayoutTransitionRemoveAllChildrenNoTransitionP(void)
-{
-  // PR-8 #1: RemoveAllChildren without an EXIT slot keeps the original
-  // immediate-unparent path. No lifecycle fires.
-  UiTestApplication application;
-  ResetCaptures();
-
-  View parent = View::New();
-  application.GetWindow().Add(parent);
-
-  View a = View::New();
-  View b = View::New();
-  parent.Add(a);
-  parent.Add(b);
-  application.SendNotification();
-  application.Render(0);
-
-  // No transition attached — bulk remove path.
-  parent.RemoveAllChildren();
-  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
-
-  application.SendNotification();
-  application.Render(0);
-  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
-  END_TEST;
-}
-
 // ─── 4-layout smoke matrix ────────────────────────────────────────────────
 //
 // Each test attaches a LayoutTransition with an EXIT spec to a different
@@ -2111,91 +2042,6 @@ int UtcDaliLayoutBoundsEffectsTimingPreservedP(void)
 }
 
 // ─── P0 guard: bounds-effect-only EXIT defers RemoveChild ───────────────
-
-int UtcDaliLayoutTransitionExitBoundsEffectOnlyDefersRemoveP(void)
-{
-  // P0 regression guard: an EXIT slot configured with only a bounds
-  // effect (no visual spec, no animator) must route through the
-  // dispatcher's deferred-remove path so the bounds animation plays
-  // before the child is unparented. The previous gate only checked
-  // visual spec / animator and silently unparented the child.
-  UiTestApplication application;
-  ResetCaptures();
-
-  View parent = View::New();
-  application.GetWindow().Add(parent);
-
-  View child = View::New();
-  parent.Add(child);
-  application.SendNotification();
-  application.Render(0);
-
-  LayoutTransition transition = LayoutTransition::New();
-  transition.SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
-      LayoutBoundsEdge::TOP,
-      {Duration(0.2f), AlphaFunction(AlphaFunction::EASE_IN), Duration()}));
-  transition.SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
-  parent.SetLayoutTransition(transition);
-
-  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
-
-  // Logical child list cleared immediately; actor stays under parent
-  // during the deferred EXIT.
-  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
-  DALI_TEST_CHECK(child.GetParent() == parent);
-
-  application.SendNotification();
-  application.Render(0);
-
-  DALI_TEST_EQUALS(gOnStartInvokes, 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
-                   static_cast<int>(LayoutTransitionSlot::EXIT),
-                   TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliLayoutTransitionExitBoundsEffectOnlyRemoveAllP(void)
-{
-  // P0 regression guard: RemoveAllChildren with a bounds-effect-only
-  // EXIT must defer every child through the dispatcher and emit OnStart
-  // per child for slot=EXIT.
-  UiTestApplication application;
-  ResetCaptures();
-
-  View parent = View::New();
-  application.GetWindow().Add(parent);
-
-  View a = View::New();
-  View b = View::New();
-  View c = View::New();
-  parent.Add(a);
-  parent.Add(b);
-  parent.Add(c);
-  application.SendNotification();
-  application.Render(0);
-
-  LayoutTransition transition = LayoutTransition::New();
-  transition.SetExitBoundsEffect(LayoutBoundsEffects::SlideTo(
-      LayoutBoundsEdge::BOTTOM,
-      {Duration(0.2f), AlphaFunction(AlphaFunction::EASE_IN), Duration()}));
-  transition.SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
-  parent.SetLayoutTransition(transition);
-
-  parent.RemoveAllChildren();
-
-  // Logical child list cleared immediately; actors remain attached
-  // during deferred EXIT.
-  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
-
-  application.SendNotification();
-  application.Render(0);
-
-  DALI_TEST_EQUALS(gOnStartInvokes, 3u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
-                   static_cast<int>(LayoutTransitionSlot::EXIT),
-                   TEST_LOCATION);
-  END_TEST;
-}
 
 int UtcDaliLayoutTransitionExitBoundsEffectNoopIsImmediateP(void)
 {
@@ -3742,61 +3588,6 @@ int UtcDaliLayoutTransitionSubtreeExitAnimatorP(void)
   END_TEST;
 }
 
-int UtcDaliLayoutTransitionSubtreeExitViaRemoveAllChildrenP(void)
-{
-  // Inherited EXIT via the card's RemoveAllChildren: every grand-child defers to
-  // the owner's EXIT spec, stays a ghost under its real direct parent, then
-  // unparents when the EXIT animation finishes.
-  UiTestApplication application;
-  ResetCaptures();
-
-  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
-  a.SetRequestedWidth(MATCH_PARENT);
-  a.SetRequestedHeight(MATCH_PARENT);
-  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
-  b.SetRequestedWidth(100.0f);
-  b.SetRequestedHeight(200.0f);
-  View g1 = View::New();
-  g1.SetRequestedWidth(50.0f);
-  g1.SetRequestedHeight(50.0f);
-  View g2 = View::New();
-  g2.SetRequestedWidth(50.0f);
-  g2.SetRequestedHeight(50.0f);
-  b.Add(g1);
-  b.Add(g2);
-  a.Add(b);
-
-  LayoutTransition  tA       = LayoutTransition::New();
-  ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
-  exitSpec.Opacity(0.0f, Duration(0.2f));
-  tA.SetExitVisualSpec(exitSpec)
-    .SetReflowScope(LayoutReflowScope::SUBTREE)
-    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
-  a.SetLayoutTransition(tA);
-
-  application.GetWindow().Add(a);
-  application.SendNotification();
-  application.Render(0);
-
-  b.RemoveAllChildren();
-  application.SendNotification();
-  application.Render(16);
-
-  // Both grand-children fire the owner's EXIT and remain ghosts under b.
-  DALI_TEST_EQUALS(gOnStartInvokes, 2u, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
-                   static_cast<int>(LayoutTransitionSlot::EXIT), TEST_LOCATION);
-  DALI_TEST_CHECK(g1.GetParent() == b);
-  DALI_TEST_CHECK(g2.GetParent() == b);
-
-  // After the EXIT animation finishes both are unparented from the card.
-  application.Render(300);
-  application.SendNotification();
-  DALI_TEST_CHECK(!g1.GetParent());
-  DALI_TEST_CHECK(!g2.GetParent());
-  END_TEST;
-}
-
 int UtcDaliLayoutTransitionSubtreeEnterInitialMountSettleSiteBP(void)
 {
   // P1 Site-B coverage: an inherited ENTER candidate RECORDED on-window before
@@ -3939,5 +3730,295 @@ int UtcDaliLayoutTransitionSubtreeEnterDetachReattachSettlesOpacityP(void)
 
   DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION); // no stale ENTER
   DALI_TEST_EQUALS(g.GetCurrentProperty<float>(Actor::Property::OPACITY), 1.0f, 0.001f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionRemoveAllChildrenExitP(void)
+{
+  // RemoveAllChildren(ANIMATE_EXIT) with an EXIT slot defers each child to the
+  // dispatcher; OnStart fires per child and each child stays parented as a
+  // "ghost" until its EXIT animation finishes.
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  View b = View::New();
+  View c = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.2f));
+  transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  parent.RemoveAllChildren(RemovePolicy::ANIMATE_EXIT);
+
+  // EXIT ghosts remain attached during the animation.
+  DALI_TEST_CHECK(a.GetParent() == parent);
+  DALI_TEST_CHECK(b.GetParent() == parent);
+  DALI_TEST_CHECK(c.GetParent() == parent);
+
+  application.SendNotification();
+  application.Render(0);
+
+  // OnStart fires once per child for slot=EXIT.
+  DALI_TEST_EQUALS(gOnStartInvokes, 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT),
+                   TEST_LOCATION);
+
+  // After the EXIT animation finishes the ghosts are unparented.
+  application.Render(300);
+  application.SendNotification();
+  DALI_TEST_CHECK(!a.GetParent());
+  DALI_TEST_CHECK(!b.GetParent());
+  DALI_TEST_CHECK(!c.GetParent());
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionRemoveAllChildrenNoTransitionP(void)
+{
+  // No transition attached: RemoveAllChildren(ANIMATE_EXIT) falls through to the
+  // immediate-unparent path. No lifecycle fires and the count drops at once.
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  View b = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  application.SendNotification();
+  application.Render(0);
+
+  parent.RemoveAllChildren(RemovePolicy::ANIMATE_EXIT);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionRemoveAllChildrenImmediateP(void)
+{
+  // RemoveAllChildren(IMMEDIATE) skips the EXIT slot entirely: every child is
+  // unparented now and no lifecycle fires, even with an EXIT spec attached.
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  View b = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.2f));
+  transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  parent.RemoveAllChildren(RemovePolicy::IMMEDIATE);
+  DALI_TEST_EQUALS(parent.GetChildCount(), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(!a.GetParent());
+
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_EQUALS(gOnStartInvokes, 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionRemoveAllChildrenImmediateKeepsInflightGhostP(void)
+{
+  // A child already leaving via a prior Remove(child, ANIMATE_EXIT) is an
+  // in-flight EXIT ghost. RemoveAllChildren(IMMEDIATE) removes the live children
+  // now but leaves the ghost to finish its EXIT (consistent with per-child
+  // Remove(IMMEDIATE)); the ghost then unparents on its own.
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  View b = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition  transition = LayoutTransition::New();
+  ViewAnimationSpec exitSpec   = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.2f));
+  transition.SetExitVisualSpec(exitSpec).SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  // Start an EXIT on 'a': it becomes an in-flight ghost, still parented.
+  parent.Remove(a, RemovePolicy::ANIMATE_EXIT);
+  application.SendNotification();
+  application.Render(0);
+  DALI_TEST_CHECK(a.GetParent() == parent);
+
+  // IMMEDIATE bulk remove: 'b' (live) is unparented now; the in-flight ghost 'a'
+  // is left to finish its EXIT, not force-unparented.
+  parent.RemoveAllChildren(RemovePolicy::IMMEDIATE);
+  DALI_TEST_CHECK(!b.GetParent());
+  DALI_TEST_CHECK(a.GetParent() == parent);
+
+  // After its EXIT animation completes, the ghost unparents by itself.
+  application.Render(300);
+  application.SendNotification();
+  DALI_TEST_CHECK(!a.GetParent());
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionExitBoundsEffectOnlyDefersRemoveP(void)
+{
+  // An EXIT slot with only a bounds effect must still defer the per-child
+  // Remove(ANIMATE_EXIT) through the dispatcher; the ghost stays attached
+  // (actor-counted) until the effect finishes.
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View child = View::New();
+  parent.Add(child);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetExitBoundsEffect(LayoutBoundsEffects::ShrinkTo(
+      LayoutBoundsEdge::TOP,
+      {Duration(0.2f), AlphaFunction(AlphaFunction::EASE_IN), Duration()}));
+  transition.SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  parent.Remove(child, RemovePolicy::ANIMATE_EXIT);
+
+  // Ghost stays under parent during the deferred EXIT.
+  DALI_TEST_CHECK(child.GetParent() == parent);
+
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionExitBoundsEffectOnlyRemoveAllP(void)
+{
+  // RemoveAllChildren(ANIMATE_EXIT) with a bounds-effect-only EXIT defers every
+  // child and emits OnStart per child for slot=EXIT.
+  UiTestApplication application;
+  ResetCaptures();
+
+  View parent = View::New();
+  application.GetWindow().Add(parent);
+
+  View a = View::New();
+  View b = View::New();
+  View c = View::New();
+  parent.Add(a);
+  parent.Add(b);
+  parent.Add(c);
+  application.SendNotification();
+  application.Render(0);
+
+  LayoutTransition transition = LayoutTransition::New();
+  transition.SetExitBoundsEffect(LayoutBoundsEffects::SlideTo(
+      LayoutBoundsEdge::BOTTOM,
+      {Duration(0.2f), AlphaFunction(AlphaFunction::EASE_IN), Duration()}));
+  transition.SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  parent.SetLayoutTransition(transition);
+
+  parent.RemoveAllChildren(RemovePolicy::ANIMATE_EXIT);
+
+  // Ghosts stay attached during the deferred EXIT.
+  DALI_TEST_CHECK(a.GetParent() == parent);
+  DALI_TEST_CHECK(b.GetParent() == parent);
+  DALI_TEST_CHECK(c.GetParent() == parent);
+
+  application.SendNotification();
+  application.Render(0);
+
+  DALI_TEST_EQUALS(gOnStartInvokes, 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliLayoutTransitionSubtreeExitViaRemoveAllChildrenP(void)
+{
+  // Inherited EXIT via the card's RemoveAllChildren(ANIMATE_EXIT): every
+  // grand-child defers to the owner's EXIT spec, stays a ghost under its real
+  // direct parent, then unparents when the EXIT animation finishes.
+  UiTestApplication application;
+  ResetCaptures();
+
+  StackLayout a = StackLayout::New(StackOrientation::VERTICAL);
+  a.SetRequestedWidth(MATCH_PARENT);
+  a.SetRequestedHeight(MATCH_PARENT);
+  StackLayout b = StackLayout::New(StackOrientation::VERTICAL); // no transition
+  b.SetRequestedWidth(100.0f);
+  b.SetRequestedHeight(200.0f);
+  View g1 = View::New();
+  g1.SetRequestedWidth(50.0f);
+  g1.SetRequestedHeight(50.0f);
+  View g2 = View::New();
+  g2.SetRequestedWidth(50.0f);
+  g2.SetRequestedHeight(50.0f);
+  b.Add(g1);
+  b.Add(g2);
+  a.Add(b);
+
+  LayoutTransition  tA       = LayoutTransition::New();
+  ViewAnimationSpec exitSpec = ViewAnimationSpec::New();
+  exitSpec.Opacity(0.0f, Duration(0.2f));
+  tA.SetExitVisualSpec(exitSpec)
+    .SetReflowScope(LayoutReflowScope::SUBTREE)
+    .SetOnStart(LayoutLifecycleCallback::New(&CaptureOnStart));
+  a.SetLayoutTransition(tA);
+
+  application.GetWindow().Add(a);
+  application.SendNotification();
+  application.Render(0);
+
+  b.RemoveAllChildren(RemovePolicy::ANIMATE_EXIT);
+  application.SendNotification();
+  application.Render(16);
+
+  // Both grand-children fire the owner's EXIT and remain ghosts under b.
+  DALI_TEST_EQUALS(gOnStartInvokes, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<int>(gCapturedSlot),
+                   static_cast<int>(LayoutTransitionSlot::EXIT), TEST_LOCATION);
+  DALI_TEST_CHECK(g1.GetParent() == b);
+  DALI_TEST_CHECK(g2.GetParent() == b);
+
+  // After the EXIT animation finishes both are unparented from the card.
+  application.Render(300);
+  application.SendNotification();
+  DALI_TEST_CHECK(!g1.GetParent());
+  DALI_TEST_CHECK(!g2.GetParent());
   END_TEST;
 }

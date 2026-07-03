@@ -159,6 +159,19 @@ int UtcDaliLayoutRemoveAllChildrenP(void)
   END_TEST;
 }
 
+int UtcDaliLayoutRemoveAllChildrenImmediateP(void)
+{
+  UiTestApplication application;
+  Layout layout = Layout::New();
+  layout.Add(View::New());
+  layout.Add(View::New());
+  layout.Add(View::New());
+  DALI_TEST_EQUALS(layout.GetChildCount(), 3u, TEST_LOCATION);
+  layout.RemoveAllChildren(RemovePolicy::IMMEDIATE);
+  DALI_TEST_EQUALS(layout.GetChildCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliLayoutGetChildCountP(void)
 {
   UiTestApplication application;

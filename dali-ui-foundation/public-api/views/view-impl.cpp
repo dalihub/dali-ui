@@ -2078,95 +2078,43 @@ void ViewImpl::Insert(uint32_t index, Ui::View child)
 
 void ViewImpl::RemoveAllChildren()
 {
-  // If an EXIT effect governs these children — either this view's own EXIT
-  // slot (direct EXIT) or, when this view has no EXIT slot, the closest
-  // ancestor SUBTREE owner with an EXIT effect (inherited EXIT) — defer each
-  // child to the dispatcher so the EXIT animation plays. Without this,
-  // RemoveAllChildren would silently bypass EXIT and the bulk remove would
-  // feel jarring.
-  //
-  // All direct children of this view share the same EXIT owner: it depends
-  // only on this view and the ancestor chain above it, not on the individual
-  // child, so a single resolution covers the whole bulk remove.
-  Ui::LayoutTransition transition = mImpl->mLayoutTransition;
-  Dali::Window         window     = Window::Get(Self());
-  ViewImpl*            exitOwner  = nullptr;
-  if(window)
+  // No-argument form mirrors the inherited one-argument Actor::Remove:
+  // unparent every child immediately, running no EXIT transition.
+  RemoveAllChildren(Ui::RemovePolicy::IMMEDIATE);
+}
+
+void ViewImpl::RemoveAllChildren(Ui::RemovePolicy policy)
+{
+  // Operate on the actor children (consistent with the inherited
+  // GetChildCount / GetChildAt). Snapshot up front: with ANIMATE_EXIT the
+  // EXIT-ing View children stay attached as ghosts, so iterating the live
+  // actor list would revisit them and never terminate. Each removal is routed
+  // through the per-child Remove, which already handles this view's own EXIT
+  // slot, an inherited SUBTREE-scope EXIT owner, and the in-flight-ghost
+  // guard; OnChildRemove keeps mChildren in sync for the immediate paths.
+  Actor              self = Self();
+  std::vector<Actor> snapshot;
+  const uint32_t     count = self.GetChildCount();
+  snapshot.reserve(count);
+  for(uint32_t i = 0u; i < count; ++i)
   {
-    const bool selfHasExitFx = transition && Internal::GetImpl(transition).HasExitFx();
-    exitOwner                = selfHasExitFx
-                                 ? this
-                                 : Internal::FindGoverningSubtreeOwner(this, Internal::ReflowSlot::EXIT);
+    snapshot.push_back(self.GetChildAt(i));
   }
 
-  if(exitOwner)
+  for(auto& childActor : snapshot)
   {
-    // Snapshot first because ScheduleLayoutExit does not touch mChildren,
-    // but we want subsequent layout passes to see an empty logical list so
-    // remaining siblings reflow immediately. Clear pending-enter so a
-    // child that was add+remove'd in the same frame does not leak into
-    // the dispatcher's enter set after the bulk remove.
-    std::vector<Ui::View> snapshot;
-    snapshot.reserve(mImpl->mChildren.Count());
-    for(auto& childView : mImpl->mChildren)
+    Ui::View childView = Ui::View::DownCast(childActor);
+    if(childView)
     {
-      GetImpl(childView).InvalidateMeasure();
-      snapshot.push_back(childView);
+      // View child: EXIT-aware removal honouring @p policy.
+      Remove(childView, policy);
     }
-    mImpl->mChildren.Clear();
-    mImpl->mPendingEnterChildren.clear();
-    // Same rationale as the per-child OnChildRemove erase: a stale raw
-    // ViewImpl* in the reorder set could outlive its child and cause a
-    // future address-reused child to be misclassified as REORDERED.
-    mImpl->mPendingReorderedChildren.clear();
-    // Bulk remove via deferred path — the dispatcher fires EXIT on every
-    // child so no siblings remain, but the marker keeps semantics consistent
-    // with the per-child path. Set it only when THIS view owns a transition to
-    // consume it: for an inherited (ancestor-owned) EXIT this view may have no
-    // transition, and the marker — consumed only by a transition-bearing view's
-    // layout pass — would never be cleared and would mis-tag a future CHANGE.
-    if(transition && !snapshot.empty())
+    else
     {
-      mImpl->mPendingChildRemovalForLayoutTransition = true;
-    }
-    InvalidateMeasure();
-
-    auto& controller = LayoutController::Get(window);
-    for(auto& child : snapshot)
-    {
-      controller.ScheduleLayoutExit(this, child, exitOwner);
-    }
-    return;
-  }
-
-  // No EXIT slot configured — original immediate-remove path. The guard
-  // suppresses OnChildRemove (which would re-enter mChildren) so the loop
-  // can iterate safely while removing.
-  const bool hadChildren = mImpl->mChildren.Count() > 0;
-  {
-    ScopedSkipChildrenUpdate guard(mImpl->mSkipChildrenUpdate);
-    for(auto& childView : mImpl->mChildren)
-    {
-      GetImpl(childView).InvalidateMeasure();
-      Self().Remove(childView);
+      // Non-View actor child: no EXIT transition applies, unparent now.
+      self.Remove(childActor);
     }
   }
-
-  mImpl->mChildren.Clear();
-  // The OnChildRemove guard above suppresses the per-child pending-set
-  // erase that the deferred-remove path performs explicitly. Drop both
-  // pending sets here so the immediate-remove path leaves the same clean
-  // state that the deferred path produces.
-  mImpl->mPendingEnterChildren.clear();
-  mImpl->mPendingReorderedChildren.clear();
-  // Mark sibling removal only when a transition is attached so the next
-  // CHANGE pass on remaining children (e.g. animator-only EXIT path) is
-  // tagged correctly. Skip when no transition is attached.
-  if(transition && hadChildren)
-  {
-    mImpl->mPendingChildRemovalForLayoutTransition = true;
-  }
-  InvalidateMeasure();
 }
 
 void ViewImpl::Remove(Ui::View child, Ui::RemovePolicy policy)

@@ -1353,17 +1353,39 @@ public: // Properties
   void Insert(uint32_t index, View child);
 
   /**
-   * @brief Removes all children from this View.
+   * @brief Removes all children from this View immediately.
    *
-   * If a LayoutTransition with an EXIT slot is attached, every child is
-   * handed off to the dispatcher (same semantics as calling
-   * @c Remove(child, RemovePolicy::ANIMATE_EXIT) on each child
-   * individually): the child is dropped from the layout-tracking list
-   * immediately, the actor stays attached during the EXIT animation, and
-   * is unparented when the animation finishes. With no EXIT slot, every
-   * child is unparented synchronously.
+   * Equivalent to @c RemoveAllChildren(RemovePolicy::IMMEDIATE): unparents every
+   * child now, running no EXIT transition. A child already leaving via a prior
+   * @c Remove(child, RemovePolicy::ANIMATE_EXIT) finishes its EXIT rather than
+   * being force-unparented (see the @p policy overload). Mirrors the inherited
+   * one-argument @c Actor::Remove.
    */
   void RemoveAllChildren();
+
+  /**
+   * @brief Removes all children from this View, choosing whether to run the
+   * attached LayoutTransition's EXIT slot first.
+   *
+   * Removes each child of this View. With @c RemovePolicy::ANIMATE_EXIT and a
+   * configured EXIT spec, animator, or bounds effect (this view's own slot, or
+   * an ancestor SUBTREE-scope owner's), each View child is kept in the actor
+   * tree as a "ghost" until its EXIT animation finishes and is then unparented;
+   * children with no EXIT slot are unparented immediately.
+   * @c RemovePolicy::IMMEDIATE unparents now.
+   *
+   * @note Non-View actor children (which can only be attached via the
+   * integration API @c Dali::Ui::Integration::View::AddActorChild) are always
+   * unparented immediately, regardless of @p policy.
+   *
+   * @note A child that is already leaving via a prior
+   * @c Remove(child, RemovePolicy::ANIMATE_EXIT) — an in-flight EXIT ghost — is
+   * left to finish its EXIT and is NOT force-unparented, even under
+   * @c RemovePolicy::IMMEDIATE (matching per-child @c Remove(child, RemovePolicy)).
+   *
+   * @param[in] policy Whether to animate the EXIT transition or unparent immediately
+   */
+  void RemoveAllChildren(RemovePolicy policy);
 
   /**
    * @brief Removes @p child from this View, choosing whether to run the
