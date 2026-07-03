@@ -7,6 +7,8 @@ layout-pass results. When a child is added, removed, reordered, or the
 parent's layout produces different bounds for it, the framework dispatches
 an animation in the matching slot.
 
+<img src="assets/Layout/dali-ui-layout-transition-grid-item.gif" height="400"/>
+
 ---
 
 ## Concepts
