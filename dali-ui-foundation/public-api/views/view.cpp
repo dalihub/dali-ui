@@ -532,6 +532,11 @@ View::StateChangedSignalType& View::StateChangedSignal()
   return GetImpl(*this).StateChangedSignal();
 }
 
+View::LayoutFinishedSignalType& View::LayoutFinishedSignal()
+{
+  return GetImpl(*this).LayoutFinishedSignal();
+}
+
 Vector4 View::GetCornerRadius() const
 {
   return GetImpl(*this).GetCornerRadius();

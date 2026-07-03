@@ -169,6 +169,14 @@ public:
 public: // Not intended for application developers
   /// @cond internal
   /**
+   * @brief Records @p view as arranged for View::LayoutFinishedSignal during the
+   * currently active LayoutController pass. No-op outside a managed root pass.
+   *
+   * @param[in] view The view whose Arrange() has just completed
+   */
+  DALI_INTERNAL static void NotifyViewArranged(ViewImpl* view);
+
+  /**
    * @brief Schedules an EXIT-slot layout transition for @p child under
    * @p parent.
    *

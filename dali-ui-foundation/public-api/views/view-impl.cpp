@@ -487,6 +487,25 @@ bool ViewImpl::IsEffectivelyFocused() const
   return Internal::ViewStateManager::Get().IsEffectivelyFocused(*this);
 }
 
+ViewImpl::LayoutFinishedSignalType& ViewImpl::LayoutFinishedSignal()
+{
+  return mImpl->mLayoutFinishedSignal;
+}
+
+bool ViewImpl::HasLayoutFinishedSignalConnections() const
+{
+  return !mImpl->mLayoutFinishedSignal.Empty();
+}
+
+void ViewImpl::EmitLayoutFinishedSignal(const LayoutRect& bounds)
+{
+  Dali::Ui::View handle(GetOwner());
+  if(handle && !mImpl->mLayoutFinishedSignal.Empty())
+  {
+    mImpl->mLayoutFinishedSignal.Emit(handle, bounds);
+  }
+}
+
 ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
 {
   return mImpl->mStateChangedSignal;
@@ -1378,6 +1397,16 @@ MeasuredSize ViewImpl::Arrange(const LayoutRect& bounds)
   // settles their declarative ENTER specs to final values without firing
   // OnStart / OnFinished.
   mImpl->mInitialLayoutDone = true;
+
+  // Register as a layout-finished candidate with the controller currently
+  // running this pass (file-static resolved), only when subscribed. Snapshot
+  // and emission happen later on the controller side (RTL correctness + before
+  // StartTransitionsAfterLayout overwrites actor props).
+  if(HasLayoutFinishedSignalConnections())
+  {
+    LayoutController::NotifyViewArranged(this);
+  }
+
   return arrangedSize;
 }
 

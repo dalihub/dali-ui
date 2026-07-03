@@ -45,6 +45,11 @@ namespace
 {
 // File-static map to store LayoutController instances per Window (internal use only; not exposed in public API).
 std::unordered_map<void*, std::unique_ptr<LayoutController>> gLayoutControllers;
+
+// Innermost LayoutControllerImpl whose ProcessLayoutRoot is on the stack, so
+// ViewImpl::Arrange routes arranged subscribers in O(1). Managed by RAII
+// ActiveLayoutFinishedScope (exception-safe: DALI_ASSERT_ALWAYS throws).
+Integration::LayoutControllerImpl* gActiveLayoutFinishedController{nullptr};
 } // namespace
 
 namespace Integration
@@ -69,6 +74,60 @@ public:
   {
     WeakHandle<View> weakHandle; ///< Non-ref-counted weak reference; auto-nullified on destruction
     ViewImpl*        view;       ///< Raw pointer for direct access
+  };
+
+  /**
+   * @brief One queued View layout-finished event. @c view is the raw key (nulled
+   * as a tombstone by UnregisterView); @c weakHandle is the safe emit handle.
+   */
+  struct PendingViewLayoutFinishedEvent
+  {
+    ViewImpl*                  view{nullptr};
+    Dali::WeakHandle<Ui::View> weakHandle;
+    LayoutRect                 bounds;
+  };
+
+  /**
+   * @brief One active per-root collector frame (stack-local containers owned by
+   * the ProcessLayouts loop). A member STACK of these makes nested ProcessLayouts
+   * re-entrancy safe: UnregisterView scrubs a destroyed view from EVERY frame,
+   * not just the innermost, closing the nested-rebind use-after-free.
+   */
+  struct ActiveCollectorFrame
+  {
+    ViewImpl*                      root;
+    std::vector<ViewImpl*>*        views;
+    std::unordered_set<ViewImpl*>* set;
+  };
+
+  /**
+   * @brief RAII: push a collector frame + set the file-static pointer on entry;
+   * pop + restore on exit. RAII (not manual save/restore) is REQUIRED because a
+   * DALI_ASSERT_ALWAYS inside the arrange call stack throws Dali::DaliException
+   * and there is no try/catch here; the destructor still pops/restores on unwind.
+   */
+  struct ActiveLayoutFinishedScope
+  {
+    ActiveLayoutFinishedScope(LayoutControllerImpl&          self,
+                              ViewImpl*                      root,
+                              std::vector<ViewImpl*>&        views,
+                              std::unordered_set<ViewImpl*>& set)
+    : mSelf(self),
+      mPrevController(gActiveLayoutFinishedController)
+    {
+      mSelf.mActiveCollectorStack.push_back(ActiveCollectorFrame{root, &views, &set});
+      gActiveLayoutFinishedController = &self;
+    }
+    ~ActiveLayoutFinishedScope()
+    {
+      gActiveLayoutFinishedController = mPrevController;
+      mSelf.mActiveCollectorStack.pop_back();
+    }
+    ActiveLayoutFinishedScope(const ActiveLayoutFinishedScope&)            = delete;
+    ActiveLayoutFinishedScope& operator=(const ActiveLayoutFinishedScope&) = delete;
+
+    LayoutControllerImpl& mSelf;
+    LayoutControllerImpl* mPrevController;
   };
 
   /**
@@ -197,6 +256,27 @@ public:
   {
     mAllLayoutRoots.erase(view);
     mPendingViews.erase(view);
+
+    // Scrub EVERY active collector frame (nested passes each have their own),
+    // closing the nested-rebind use-after-free: a view collected in an OUTER
+    // frame and destroyed during an INNER pass must not remain a dangling raw
+    // pointer that the outer snapshot dereferences.
+    for(ActiveCollectorFrame& frame : mActiveCollectorStack)
+    {
+      frame.set->erase(view);
+      frame.views->erase(std::remove(frame.views->begin(), frame.views->end(), view), frame.views->end());
+    }
+    // Scrub episode events: erase the index and tombstone matching slots (never a
+    // mid-vector erase, which would shift every other index).
+    mPendingViewLayoutFinishedEventIndex.erase(view);
+    for(auto& event : mPendingViewLayoutFinishedEvents)
+    {
+      if(event.view == view)
+      {
+        event.view = nullptr;
+      }
+    }
+
     if(mTransitionDispatcher)
     {
       mTransitionDispatcher->OnViewDestroyed(view);
@@ -325,19 +405,46 @@ public:
       // in mPendingViews before we decide.
       if(mProcessDepth == 1)
       {
-        if(mPendingViews.empty())
+        if(mPendingViews.empty() && mLayoutDirtySinceEmit)
         {
-          if(mLayoutDirtySinceEmit)
+          // Deliver every subscribed View's layout-finished event FIRST (in
+          // traversal order), then decide the window signal.
+          //
+          // CAVEAT (do not "fix" by adding a cap without agreement): a View
+          // LayoutFinishedSignal slot that unconditionally re-invalidates layout
+          // spins an endless dirty->settled->emit cycle. This is intentionally
+          // NOT capped here (consistent with the window signal and other
+          // toolkits); the contract is documented on View::LayoutFinishedSignal
+          // as "guard re-layout in the slot behind a real condition". A view is
+          // also re-collected/re-emitted whenever it is re-arranged, even with
+          // unchanged bounds, so callers must not treat an emit as "bounds
+          // changed".
+          EmitPendingViewLayoutFinishedSignals();
+
+          if(mDestroyPending)
           {
-            // Layout math for this window has drained to nothing since the
-            // last emit: fire exactly once per dirty->quiescent transition.
-            // NOTE: this reflects Measure/Arrange completion only, NOT that
-            // layout transition animations have finished.
+            // A slot called Remove(window) -> deferred destroy at the outermost
+            // Process() unwind. Skip BOTH the window Emit and the idle request.
+          }
+          else if(mPendingViews.empty() && mPendingViewLayoutFinishedEvents.empty())
+          {
+            // Truly settled: no re-queued layout work AND no View events stranded
+            // by a nested depth>=2 ProcessLayouts (its settle gate was skipped).
             mLayoutDirtySinceEmit = false;
             mLayoutFinishedSignal.Emit(window);
           }
+          else
+          {
+            // A slot re-invalidated, or a nested pass repopulated the events map.
+            // Keep the latch armed and schedule a follow-up settled pass to drain.
+            mLayoutDirtySinceEmit = true;
+            if(DALI_LIKELY(Adaptor::IsAvailable()))
+            {
+              Adaptor::Get().RequestProcessEventsOnIdle();
+            }
+          }
         }
-        else
+        else if(!mPendingViews.empty())
         {
           // Work was re-scheduled during this pass; not settled yet. Ensure a
           // follow-up pass runs even if the app would otherwise idle.
@@ -392,6 +499,139 @@ public:
   void RequestDestroy()
   {
     mDestroyPending = true;
+  }
+
+  /**
+   * @brief Whether @p view is inside @p root's actor subtree. Null-safe off-scene:
+   * a null root actor / GetParent()-empty ends the walk.
+   */
+  bool IsWithinActiveLayoutFinishedRoot(ViewImpl* root, ViewImpl* view) const
+  {
+    if(!root || !view)
+    {
+      return false;
+    }
+    Actor rootActor = root->Self();
+    void* rootPtr   = rootActor ? rootActor.GetObjectPtr() : nullptr;
+    if(!rootPtr)
+    {
+      return false;
+    }
+    for(Actor actor = view->Self(); actor; actor = actor.GetParent())
+    {
+      if(actor.GetObjectPtr() == rootPtr)
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /**
+   * @brief Records @p view as a candidate for the innermost (top) active root.
+   * MUST be public: the free-function forwarder calls it on a LayoutControllerImpl*.
+   */
+  void NotifyViewArranged(ViewImpl* view)
+  {
+    if(mActiveCollectorStack.empty() || !view)
+    {
+      return;
+    }
+    ActiveCollectorFrame& top = mActiveCollectorStack.back();
+    if(!IsWithinActiveLayoutFinishedRoot(top.root, view))
+    {
+      return;
+    }
+    if(top.set->insert(view).second)
+    {
+      top.views->push_back(view);
+    }
+  }
+
+  /**
+   * @brief Snapshots each arranged subscribed View's final (post-RTL, pre-
+   * transition) actor bounds into the episode store (latest-wins, order-
+   * preserving). Runs after ProcessLayoutRoot returns, before StartTransitions.
+   */
+  void SnapshotViewLayoutFinishedCandidates(const std::vector<ViewImpl*>& arrangedViews)
+  {
+    for(ViewImpl* arranged : arrangedViews)
+    {
+      if(!arranged)
+      {
+        continue;
+      }
+      Ui::View viewHandle = Ui::View::DownCast(arranged->Self());
+      if(!viewHandle)
+      {
+        continue;
+      }
+      ViewImpl& arrangedImpl = GetImpl(viewHandle);
+      if(!arrangedImpl.HasLayoutFinishedSignalConnections())
+      {
+        continue;
+      }
+      Actor      actor = arrangedImpl.Self();
+      LayoutRect bounds(
+        actor.GetProperty<float>(Actor::Property::POSITION_X),
+        actor.GetProperty<float>(Actor::Property::POSITION_Y),
+        actor.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+        actor.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+
+      auto indexIt = mPendingViewLayoutFinishedEventIndex.find(arranged);
+      if(indexIt == mPendingViewLayoutFinishedEventIndex.end())
+      {
+        std::size_t index                              = mPendingViewLayoutFinishedEvents.size();
+        mPendingViewLayoutFinishedEventIndex[arranged] = index;
+        mPendingViewLayoutFinishedEvents.push_back(
+          PendingViewLayoutFinishedEvent{arranged, Dali::WeakHandle<Ui::View>(viewHandle), bounds});
+      }
+      else
+      {
+        PendingViewLayoutFinishedEvent& event = mPendingViewLayoutFinishedEvents[indexIt->second];
+        event.weakHandle                      = Dali::WeakHandle<Ui::View>(viewHandle);
+        event.bounds                          = bounds;
+      }
+    }
+  }
+
+  /**
+   * @brief Emits all pending View events in traversal order, then clears the
+   * episode store. Move-out first so a slot re-entering Process / mutating views
+   * cannot corrupt iteration. Per entry: tombstone -> WeakHandle revive -> b1
+   * stale-skip -> connection check -> emit. NO requeue, NO mid-loop early-return.
+   */
+  void EmitPendingViewLayoutFinishedSignals()
+  {
+    auto localEvents = std::move(mPendingViewLayoutFinishedEvents);
+    mPendingViewLayoutFinishedEvents.clear();
+    mPendingViewLayoutFinishedEventIndex.clear();
+    for(auto& event : localEvents)
+    {
+      if(!event.view)
+      {
+        continue; // tombstone: destroyed BEFORE the move
+      }
+      Ui::View view = event.weakHandle.GetHandle();
+      if(!view)
+      {
+        continue; // destroyed DURING emit -> no UAF (raw event.view not dereferenced)
+      }
+      ViewImpl& viewImpl = GetImpl(view);
+      // b1 stale-skip: a nested ProcessLayouts during THIS emit re-queued a NEWER
+      // member event for this view (the member store was cleared at move-out).
+      // Skip the stale local event; the newer member event drains on the
+      // follow-up settled pass, so the view emits once with its latest bounds.
+      if(mPendingViewLayoutFinishedEventIndex.find(&viewImpl) != mPendingViewLayoutFinishedEventIndex.end())
+      {
+        continue;
+      }
+      if(!viewImpl.HasLayoutFinishedSignalConnections())
+      {
+        continue; // unsubscribed since snapshot
+      }
+      viewImpl.EmitLayoutFinishedSignal(event.bounds);
+    }
   }
 
 private:
@@ -479,7 +719,24 @@ private:
         {
           mTransitionDispatcher->CaptureBeforeLayout(view);
         }
-        ProcessLayoutRoot(view, widthConstraint, heightConstraint);
+
+        // Collect subscribed Views arranged under this root into STACK-LOCAL
+        // containers; the RAII scope pushes a frame (and sets the file-static)
+        // for the duration of ProcessLayoutRoot, popping on exit even if an
+        // assert throws mid-arrange.
+        std::vector<ViewImpl*>        arrangedViews;
+        std::unordered_set<ViewImpl*> arrangedSet;
+        {
+          ActiveLayoutFinishedScope scope(*this, view, arrangedViews, arrangedSet);
+          ProcessLayoutRoot(view, widthConstraint, heightConstraint);
+        }
+
+        // Snapshot now: ProcessLayoutRoot has applied RTL (actor POSITION_X final)
+        // and StartTransitions has not yet overwritten actor props. Views destroyed
+        // during ProcessLayoutRoot were scrubbed from arrangedViews by UnregisterView
+        // (across all frames), and only property reads run here, so Self() is safe.
+        SnapshotViewLayoutFinishedCandidates(arrangedViews);
+
         if(mTransitionDispatcher)
         {
           mTransitionDispatcher->StartTransitionsAfterLayout(view);
@@ -599,10 +856,13 @@ private:
   int32_t                                               mWindowHeight;
   void*                                                 mWindowObjectPtr; ///< For self-destruct case.
   bool                                                  mProcessingScheduled;
-  LayoutController::LayoutFinishedSignalType            mLayoutFinishedSignal;        ///< Emitted when layout fully settles for this window
-  bool                                                  mLayoutDirtySinceEmit{false}; ///< Settled latch: armed by RequestLayout, cleared at emit
-  int                                                   mProcessDepth{0};             ///< Process() re-entrancy depth (emit gate + deferred-destroy safe point)
-  bool                                                  mDestroyPending{false};       ///< Deferred self-destruct requested during processing
+  LayoutController::LayoutFinishedSignalType            mLayoutFinishedSignal;                ///< Emitted when layout fully settles for this window
+  bool                                                  mLayoutDirtySinceEmit{false};         ///< Settled latch: armed by RequestLayout, cleared at emit
+  int                                                   mProcessDepth{0};                     ///< Process() re-entrancy depth (emit gate + deferred-destroy safe point)
+  bool                                                  mDestroyPending{false};               ///< Deferred self-destruct requested during processing
+  std::vector<ActiveCollectorFrame>                     mActiveCollectorStack;                ///< Stack of per-root collectors (nested-pass safe)
+  std::vector<PendingViewLayoutFinishedEvent>           mPendingViewLayoutFinishedEvents;     ///< Episode events (traversal order, latest-wins)
+  std::unordered_map<ViewImpl*, std::size_t>            mPendingViewLayoutFinishedEventIndex; ///< view -> index into the events vector
 };
 
 } // namespace Integration
@@ -695,6 +955,14 @@ void LayoutController::OnWindowResize(int32_t width, int32_t height)
 void LayoutController::ProcessLayouts()
 {
   mImpl->ProcessLayouts();
+}
+
+void LayoutController::NotifyViewArranged(ViewImpl* view)
+{
+  if(gActiveLayoutFinishedController)
+  {
+    gActiveLayoutFinishedController->NotifyViewArranged(view);
+  }
 }
 
 LayoutController::LayoutFinishedSignalType& LayoutController::LayoutFinishedSignal()

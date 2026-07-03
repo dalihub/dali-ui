@@ -100,7 +100,8 @@ public:
 
   class Extension; ///< Forward declare future extension interface
 
-  using StateChangedSignalType = Signal<void(Ui::View, StateEvent)>;
+  using StateChangedSignalType   = Signal<void(Ui::View, StateEvent)>;
+  using LayoutFinishedSignalType = Signal<void(Ui::View, LayoutRect)>;
 
   /**
    * @brief Flags for the constructor.
@@ -222,6 +223,21 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::StateChangedSignal()
    */
   StateChangedSignalType& StateChangedSignal();
+
+  /**
+   * @copydoc Ui::View::LayoutFinishedSignal()
+   */
+  LayoutFinishedSignalType& LayoutFinishedSignal();
+
+  /**
+   * @brief Whether LayoutFinishedSignal has at least one connected slot.
+   */
+  DALI_INTERNAL bool HasLayoutFinishedSignalConnections() const;
+
+  /**
+   * @brief Emits LayoutFinishedSignal with @p bounds if still connected.
+   */
+  DALI_INTERNAL void EmitLayoutFinishedSignal(const LayoutRect& bounds);
 
   /**
    * @copydoc Ui::View::GetScaleX()

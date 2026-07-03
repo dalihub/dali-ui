@@ -652,8 +652,9 @@ public:
   ViewImpl& mViewImpl;
 
   // State
-  Ui::ViewState                    mState;
-  ViewImpl::StateChangedSignalType mStateChangedSignal;
+  Ui::ViewState                      mState;
+  ViewImpl::StateChangedSignalType   mStateChangedSignal;
+  ViewImpl::LayoutFinishedSignalType mLayoutFinishedSignal;
 
   // Requested position (used when parent is not a layout)
   float mRequestedPositionX;

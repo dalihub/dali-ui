@@ -1573,7 +1573,8 @@ public: // Properties
   }
 
 public: // State API (non-chaining)
-  using StateChangedSignalType = Signal<void(View, StateEvent)>;
+  using StateChangedSignalType   = Signal<void(View, StateEvent)>;
+  using LayoutFinishedSignalType = Signal<void(View, LayoutRect)>;
 
   /**
    * @brief Gets the current state of this View.
@@ -1596,6 +1597,46 @@ public: // State API (non-chaining)
    * @return The StateChangedSignal
    */
   StateChangedSignalType& StateChangedSignal();
+
+  /**
+   * @brief Emitted when this View's layout has fully settled.
+   *
+   * Fires once per dirty-to-settled layout episode of this View's window, after
+   * all Measure/Arrange work for the window has drained (same settle point as
+   * LayoutController::LayoutFinishedSignal). The callback receives this View and
+   * its arranged target as a LayoutRect in PARENT-relative, visual (scale-
+   * applied) units. Under RIGHT_TO_LEFT the x is the mirrored (final) position.
+   * The bounds are the PRE-transition target, not intermediate animated values.
+   *
+   * Recurs: if a slot invalidates layout again, the View is re-arranged and the
+   * signal fires again on a later settled pass. Connecting after a layout pass
+   * does not replay the previous result.
+   *
+   * @warning A slot that UNCONDITIONALLY triggers a layout recalculation (e.g.
+   * always sets a size/position/layout property, calls a method that invalidates
+   * measure/arrange, or adds/removes children) will spin an ENDLESS
+   * dirty->settled->emit cycle: each emit re-invalidates layout, which schedules
+   * another settled pass that emits again, and so on (the event loop is kept
+   * awake via the idle-process request). There is intentionally no iteration cap
+   * (as with LayoutController::LayoutFinishedSignal and equivalents in other
+   * toolkits). Also note this signal fires whenever the View is (re-)arranged in
+   * a settled pass, INCLUDING when its bounds did NOT change (e.g. it was
+   * re-arranged only because a sibling or ancestor changed) -- do NOT assume
+   * "signal fired" means "this View's geometry changed". Guard any layout-
+   * affecting work in the slot behind a real condition, e.g. compare @p bounds
+   * against a value you cached from the previous emit and act only on an actual
+   * change, or use a one-shot flag.
+   *
+   * @note Fires only for a View whose own Arrange() runs during the pass. All
+   * built-in LayoutManagers and the default arrange route through child.Arrange().
+   * A custom parent ArrangeCallback that positions a non-standalone child by
+   * writing Actor properties directly, without calling that child's Arrange(),
+   * will NOT fire the child's signal. This is not a completion callback for a
+   * manual View::Arrange().
+   *
+   * @return The layout-finished signal
+   */
+  LayoutFinishedSignalType& LayoutFinishedSignal();
 
 public: // Trait accessors (non-chaining)
   /**
