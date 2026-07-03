@@ -1043,20 +1043,67 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     renderInfo.maskPixelData =
       mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);
   }
-  if(parameters.isTextGradientRequested &&
-     (hasMultipleTextColors || containsColorGlyph) &&
-     !styleBlocksTextGradient &&
-     !styleTextureEnabled &&
-     !isOverlayStyle &&
-     !embossEnabled &&
-     !cutoutEnabled &&
-     !parameters.isMarqueeEnabled)
+  const bool textGradientMixedPayloadBaseAllowed =
+    parameters.isTextGradientRequested &&
+    !styleBlocksTextGradient &&
+    !embossEnabled &&
+    !cutoutEnabled;
+  const bool hasMixedColorTarget = hasMultipleTextColors || containsColorGlyph;
+  const bool nonMarqueeTextGradientMixedPayload =
+    textGradientMixedPayloadBaseAllowed &&
+    !parameters.isMarqueeEnabled &&
+    hasMixedColorTarget;
+  const bool marqueeTextGradientMixedPayload =
+    textGradientMixedPayloadBaseAllowed &&
+    parameters.isMarqueeEnabled &&
+    hasMixedColorTarget;
+  // Mixed preserved/mask payload is driven by the base TextGradient. Overlay-only
+  // mixed targets keep the simple overlay path instead of allocating mixed payloads.
+  if(nonMarqueeTextGradientMixedPayload || marqueeTextGradientMixedPayload)
   {
+    const bool ignoreHorizontalAlignment = parameters.isMarqueeEnabled &&
+                                           parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
+    const Vector2 originSize = parameters.isMarqueeEnabled ? Size(parameters.originWidth, parameters.originHeight)
+                                                           : Size::ZERO;
     renderInfo.textGradientPreservedPixelData =
-      mTypesetter->RenderTextGradientPreserved(layoutSize, textDirection, false, Pixel::RGBA8888);
+      mTypesetter->RenderTextGradientPreserved(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
     renderInfo.textGradientMaskPixelData =
-      mTypesetter->RenderTextGradientMask(layoutSize, textDirection, false, Pixel::L8);
+      mTypesetter->RenderTextGradientMask(layoutSize, textDirection, ignoreHorizontalAlignment, Pixel::L8, originSize);
   }
+
+  const bool marqueeStylePayload =
+    parameters.isMarqueeEnabled &&
+    styleTextureEnabled &&
+    !styleBlocksTextGradient &&
+    !embossEnabled &&
+    !cutoutEnabled &&
+    !backgroundWithCutoutEnabled &&
+    (hasMixedColorTarget ? parameters.isTextGradientRequested
+                         : (parameters.isTextGradientRequested || parameters.isTextGradientOverlayRequested));
+  if(marqueeStylePayload)
+  {
+    const bool    ignoreHorizontalAlignment = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
+    const Vector2 originSize(parameters.originWidth, parameters.originHeight);
+    if(!hasMixedColorTarget)
+    {
+      renderInfo.marqueeFillPixelData =
+        mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_STYLES,
+                            ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
+    }
+    renderInfo.marqueeStylePixelData =
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_NO_TEXT,
+                          ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
+  }
+
+  if(parameters.isMarqueeEnabled && isOverlayStyle)
+  {
+    const bool    ignoreHorizontalAlignment = parameters.marqueeOrientation == Text::MarqueeOrientation::HORIZONTAL;
+    const Vector2 originSize(parameters.originWidth, parameters.originHeight);
+    renderInfo.marqueeOverlayStylePixelData =
+      mTypesetter->Render(layoutSize, textDirection, Text::Typesetter::RENDER_OVERLAY_STYLE,
+                          ignoreHorizontalAlignment, Pixel::RGBA8888, originSize);
+  }
+
   if(parameters.isMarqueeEnabled)
   {
     // This will be uploaded in async text interface's setup marquee.

@@ -25,14 +25,13 @@
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/system/system-settings.h>
-#include <dali/integration-api/texture-integ.h>
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
-#include <dali-ui-foundation/internal/text/color-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-marquee-helper.h>
@@ -146,19 +145,6 @@ const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1]
 };
 
 /**
- * @brief Text/style feature summary used to decide whether marquee gradient
- *        composition can be enabled.
- */
-struct MarqueeGradientFeatureInfo
-{
-  bool hasMultipleTextColors{false};
-  bool containsColorGlyph{false};
-  bool styleTextureEnabled{false};
-  bool isOverlayStyle{false};
-  bool cutoutEnabled{false};
-};
-
-/**
  * @brief Discard the given visual into VisualFactory. The visual will be destroyed at next idle time.
  * @param[in,out] visual Visual to be discarded. It will be reset to an empty handle.
  */
@@ -218,58 +204,6 @@ UiConfig::SystemFontSize ToUiConfigSystemFontSize(Dali::Integration::SystemSetti
   }
 
   return UiConfig::SystemFontSize::NORMAL;
-}
-
-MarqueeGradientFeatureInfo GetMarqueeGradientFeatureInfo(const Text::ModelInterface& textModel,
-                                                         bool                        markupEnabled,
-                                                         bool                        textCutoutEnabled)
-{
-  MarqueeGradientFeatureInfo info;
-
-  const Vector4* const          colorsBuffer        = textModel.GetColors();
-  const Text::ColorIndex* const colorIndices        = textModel.GetColorIndices();
-  const Text::GlyphInfo* const  glyphsBuffer        = textModel.GetGlyphs();
-  const Text::Length            numberOfGlyphs      = textModel.GetNumberOfGlyphs();
-  const bool                    hasColorIndexBuffer = nullptr != colorsBuffer && nullptr != colorIndices;
-  TextAbstraction::FontClient   fontClient          = TextAbstraction::FontClient::Get();
-  for(Text::Length glyphIndex = 0u; glyphIndex < numberOfGlyphs; ++glyphIndex)
-  {
-    if(hasColorIndexBuffer && *(colorIndices + glyphIndex) > 0u)
-    {
-      info.hasMultipleTextColors = true;
-    }
-
-    if(!info.containsColorGlyph && glyphsBuffer)
-    {
-      const Text::GlyphInfo* const glyphInfo = glyphsBuffer + glyphIndex;
-      if(Text::Internal::IsRenderableColorGlyph(fontClient, glyphInfo->fontId, glyphInfo->index))
-      {
-        info.containsColorGlyph = true;
-      }
-    }
-
-    if(info.hasMultipleTextColors && info.containsColorGlyph)
-    {
-      break;
-    }
-  }
-
-  const Vector2& shadowOffset  = textModel.GetShadowOffset();
-  const bool     shadowEnabled = fabsf(shadowOffset.x) > Math::MACHINE_EPSILON_1 ||
-                             fabsf(shadowOffset.y) > Math::MACHINE_EPSILON_1;
-
-  const bool outlineEnabled             = textModel.GetOutlineWidth() > Math::MACHINE_EPSILON_1;
-  const bool backgroundEnabled          = textModel.IsBackgroundEnabled();
-  const bool markupUnderlineEnabled     = markupEnabled && textModel.IsMarkupUnderlineSet();
-  const bool markupStrikethroughEnabled = markupEnabled && textModel.IsMarkupStrikethroughSet();
-  const bool underlineEnabled           = textModel.IsUnderlineEnabled() || markupUnderlineEnabled;
-  const bool strikethroughEnabled       = textModel.IsStrikethroughEnabled() || markupStrikethroughEnabled;
-  const bool backgroundMarkupSet        = textModel.IsMarkupBackgroundColorSet();
-
-  info.styleTextureEnabled = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
-  info.isOverlayStyle      = underlineEnabled || strikethroughEnabled;
-  info.cutoutEnabled       = textCutoutEnabled || textModel.IsBackgroundWithCutoutEnabled();
-  return info;
 }
 
 } // namespace
@@ -565,7 +499,7 @@ Dali::Property::Index LabelImpl::EnsureGradientAnimOffset()
 
 Dali::Property::Index LabelImpl::EnsureGradientOverlayAnimOffset()
 {
-  if(!IsGradientOverlayAnimSourceSupported())
+  if(!IsGradientOverlayAnimSupported())
   {
     return Property::INVALID_INDEX;
   }
@@ -2323,128 +2257,136 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
   Size      textScrollerControlSize = controlSize;
   float     wrapGap                 = renderInfo.marqueeWrapGap;
   PixelData data                    = renderInfo.marqueePixelData;
-  Texture   texture                 = Texture::New(Dali::TextureType::TEXTURE_2D, data.GetPixelFormat(), data.GetWidth(), data.GetHeight());
 
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
-  {
-    std::string text;
-    mController->GetText(text);
-    Dali::Integration::TextureUploadWithContent(texture, data, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SCROLL);
-  }
-#else
-  texture.Upload(data);
-#endif
+  bool    isHorizontal = mTextScroller->GetOrientation() == Text::MarqueeOrientation::HORIZONTAL;
+  Sampler sampler      = Text::MarqueeBuilder::CreateTextScrollSampler(isHorizontal);
 
-  TextureSet textureSet = TextureSet::New();
-  textureSet.SetTexture(0u, texture);
+  Text::MarqueeBuilder::PreparedContent preparedContent =
+    Text::MarqueeBuilder::CreateTextContent(data, sampler);
 
-  // Filter mode needs to be set to linear to produce better quality while scaling.
-  Sampler sampler = Sampler::New();
-  sampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
-
-  bool isHorizontal = mTextScroller->GetOrientation() == Text::MarqueeOrientation::HORIZONTAL;
-  if(isHorizontal)
-  {
-    sampler.SetWrapMode(Dali::WrapMode::DEFAULT, Dali::WrapMode::REPEAT, Dali::WrapMode::DEFAULT); // Wrap the texture in the x direction
-  }
-  else
-  {
-    sampler.SetWrapMode(Dali::WrapMode::DEFAULT, Dali::WrapMode::DEFAULT, Dali::WrapMode::REPEAT); // Wrap the texture in the y direction
-  }
-  textureSet.SetSampler(0u, sampler);
-
-  Text::TextScrollerGradient textGradient;
-  const bool                 textGradientRenderable        = Text::Internal::Gradient::IsRenderable(mTextGradient);
-  const bool                 textGradientOverlayRenderable = Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
-  if(textGradientRenderable || textGradientOverlayRenderable)
+  const Text::MarqueeBuilder::GradientState gradientState =
+    Text::MarqueeBuilder::ResolveGradientState(mTextGradient,
+                                               mTextGradientOverlay,
+                                               verifiedSize);
+  const bool hasGradientFeature      = gradientState.baseRenderable || gradientState.overlayRenderable;
+  const bool needsMarqueeComposition = hasGradientFeature || renderInfo.isOverlayStyle;
+  if(needsMarqueeComposition)
   {
     const bool cutoutEnabled = renderInfo.isCutoutEnabled ||
                                mController->IsTextCutout() ||
                                mController->GetTextModel()->IsBackgroundWithCutoutEnabled();
-    const bool marqueeGradientCompositionEnabled =
-      Text::Internal::GradientMarquee::IsCompositionSupported(renderInfo.hasMultipleTextColors,
-                                                              renderInfo.containsColorGlyph,
-                                                              renderInfo.styleTextureEnabled,
-                                                              renderInfo.isOverlayStyle,
-                                                              renderInfo.isEmbossEnabled,
-                                                              cutoutEnabled);
-    auto resolveMarqueeGradientBounds = [&](Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
+    Text::MarqueeBuilder::FeatureInfo featureInfo;
+    if(hasGradientFeature)
     {
-      coordinateSize = renderInfo.controlSize;
-      if(boundsMode == Text::GradientBoundsMode::VIEW_BOUND)
-      {
-        coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
-        return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
-      }
+      featureInfo.hasMultipleTextColors = renderInfo.hasMultipleTextColors;
+      featureInfo.containsColorGlyph    = renderInfo.containsColorGlyph;
+      featureInfo.styleTextureEnabled   = renderInfo.styleTextureEnabled;
+    }
+    featureInfo.isOverlayStyle = renderInfo.isOverlayStyle;
+    featureInfo.cutoutEnabled  = cutoutEnabled;
 
-      if(isHorizontal)
+    Text::MarqueeBuilder::AnimationState animationState;
+    animationState.baseStartOffsetIndex    = mGradientAnimOffsetIndex;
+    animationState.baseApplyAlways         = mGradientAnimCount > 0;
+    animationState.overlayStartOffsetIndex = mGradientOverlayAnimOffsetIndex;
+    animationState.overlayApplyAlways      = mGradientOverlayAnimCount > 0;
+
+    Text::MarqueeBuilder::CompositionRequest compositionRequest;
+    compositionRequest.sampler        = sampler;
+    compositionRequest.verifiedSize   = verifiedSize;
+    compositionRequest.featureInfo    = featureInfo;
+    compositionRequest.embossEnabled  = renderInfo.isEmbossEnabled;
+    compositionRequest.gradientState  = gradientState;
+    compositionRequest.animationState = animationState;
+    compositionRequest.overlayMode    = mTextGradientOverlayMode;
+
+    const Text::MarqueeBuilder::CompositionPlan compositionPlan =
+      Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
+    if(compositionPlan.HasWork())
+    {
+      auto resolveMarqueeGradientBounds = [&](Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
       {
-        const Vector2 visualCoordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
-        if(visualCoordinateSize.width > Math::MACHINE_EPSILON_1000 &&
-           visualCoordinateSize.height > Math::MACHINE_EPSILON_1000)
+        coordinateSize = renderInfo.controlSize;
+        if(boundsMode == Text::GradientBoundsMode::VIEW_BOUND)
         {
-          // Remove the horizontal marquee wrap gap to recover the actual text content size.
-          const Vector2 contentSize(std::max(verifiedSize.width - wrapGap, 0.0f),
-                                    verifiedSize.height);
-          const Vector2 xBounds =
-            Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.width,
-                                                                contentSize.width,
-                                                                mController->GetHorizontalAlignment());
-          const Vector2 yBounds =
-            Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.height,
-                                                                contentSize.height,
-                                                                mController->GetVerticalAlignment());
-          coordinateSize          = visualCoordinateSize;
-          textScrollerControlSize = coordinateSize;
-          return Vector4(xBounds.x, yBounds.x, xBounds.y, yBounds.y);
+          coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
+          return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
         }
-      }
 
-      return renderInfo.textGradientMarqueeViewportBounds;
-    };
+        if(isHorizontal)
+        {
+          const Vector2 visualCoordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
+          if(visualCoordinateSize.width > Math::MACHINE_EPSILON_1000 &&
+             visualCoordinateSize.height > Math::MACHINE_EPSILON_1000)
+          {
+            // Remove the horizontal marquee wrap gap to recover the actual text content size.
+            const Vector2 contentSize(std::max(verifiedSize.width - wrapGap, 0.0f),
+                                      verifiedSize.height);
+            const Vector2 xBounds =
+              Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.width,
+                                                                  contentSize.width,
+                                                                  mController->GetHorizontalAlignment());
+            const Vector2 yBounds =
+              Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.height,
+                                                                  contentSize.height,
+                                                                  mController->GetVerticalAlignment());
+            coordinateSize          = visualCoordinateSize;
+            textScrollerControlSize = coordinateSize;
+            return Vector4(xBounds.x, yBounds.x, xBounds.y, yBounds.y);
+          }
+        }
 
-    uint32_t textureSetIndex = 1u;
-    if(marqueeGradientCompositionEnabled && textGradientRenderable)
-    {
-      const Text::Internal::Gradient::Style textGradientStyle =
-        Text::Internal::Gradient::CreateStyle(mTextGradient);
+        return renderInfo.textGradientMarqueeViewportBounds;
+      };
 
-      if(Text::Internal::GradientMarquee::IsRenderable(textGradientStyle, verifiedSize))
+      if(compositionPlan.needsBaseBounds)
       {
         Vector2       textGradientCoordinateSize;
-        const Vector4 textGradientBounds = resolveMarqueeGradientBounds(mTextGradientBoundsMode, textGradientCoordinateSize);
-        Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, textGradientStyle);
-        textGradient = Text::Internal::GradientMarquee::CreateScrollerGradient(textGradientStyle, textGradientBounds, textGradientCoordinateSize);
-        PopulateGradientAnimProperties(textGradient);
+        const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(mTextGradientBoundsMode,
+                                                                                    textGradientCoordinateSize);
+        compositionRequest.baseBoundsResolved        = true;
+        compositionRequest.baseBounds.bounds         = textGradientBounds;
+        compositionRequest.baseBounds.coordinateSize = textGradientCoordinateSize;
       }
-    }
 
-    if(marqueeGradientCompositionEnabled && textGradientOverlayRenderable)
-    {
-      const Text::Internal::Gradient::Style textGradientOverlayStyle =
-        Text::Internal::Gradient::CreateStyle(mTextGradientOverlay);
-
-      if(Text::Internal::GradientMarquee::IsRenderable(textGradientOverlayStyle, verifiedSize))
+      if(compositionPlan.needsOverlayBounds)
       {
         Vector2       textGradientOverlayCoordinateSize;
-        const Vector4 textGradientOverlayBounds = resolveMarqueeGradientBounds(mTextGradientOverlayBoundsMode, textGradientOverlayCoordinateSize);
-        Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, textGradientOverlayStyle);
-        const Text::TextScrollerGradient textGradientOverlay =
-          Text::Internal::GradientMarquee::CreateScrollerGradient(textGradientOverlayStyle,
-                                                                  textGradientOverlayBounds,
-                                                                  textGradientOverlayCoordinateSize);
-
-        Text::Internal::GradientMarquee::SetOverlayGradient(textGradient, textGradientOverlay, mTextGradientOverlayMode);
-        PopulateGradientOverlayAnimProperties(textGradient);
+        const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(mTextGradientOverlayBoundsMode,
+                                                                                       textGradientOverlayCoordinateSize);
+        compositionRequest.overlayBoundsResolved        = true;
+        compositionRequest.overlayBounds.bounds         = textGradientOverlayBounds;
+        compositionRequest.overlayBounds.coordinateSize = textGradientOverlayCoordinateSize;
       }
+
+      Text::MarqueeBuilder::PixelDataBundle pixels;
+      if(compositionPlan.needsFillPixelData)
+      {
+        pixels.fillPixelData = renderInfo.marqueeFillPixelData;
+      }
+      if(compositionPlan.needsStylePixelData)
+      {
+        pixels.stylePixelData = renderInfo.marqueeStylePixelData;
+      }
+      if(compositionPlan.needsPreservedMaskPixelData)
+      {
+        pixels.preservedPixelData = renderInfo.textGradientPreservedPixelData;
+        pixels.maskPixelData      = renderInfo.textGradientMaskPixelData;
+      }
+      if(compositionPlan.needsOverlayStylePixelData)
+      {
+        pixels.overlayStylePixelData = renderInfo.marqueeOverlayStylePixelData;
+      }
+
+      Text::MarqueeBuilder::ApplyPreparedComposition(preparedContent, compositionRequest, pixels);
     }
   }
 
   // Set parameters for scrolling
   Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
-  mTextScroller->SetParameters(Self(), renderer, textureSet, textScrollerControlSize, verifiedSize, wrapGap,
+  mTextScroller->SetParameters(Self(), renderer, preparedContent.textureSet, textScrollerControlSize, verifiedSize, wrapGap,
                                renderInfo.isTextDirectionRTL, mController->GetHorizontalAlignment(),
-                               mController->GetVerticalAlignment(), true, textGradient);
+                               mController->GetVerticalAlignment(), true, preparedContent.textGradient);
 }
 
 void LabelImpl::AsyncTextFitChanged(float pointSize)
@@ -2596,7 +2538,7 @@ void LabelImpl::SyncGradientOverlayAnimProperties()
     return;
   }
 
-  if(!Text::Internal::Gradient::IsRenderable(mTextGradientOverlay))
+  if(!IsGradientOverlayAnimSupported())
   {
     return;
   }
@@ -2619,37 +2561,12 @@ bool LabelImpl::IsGradientAnimSupported() const
   return Text::Internal::Gradient::IsRenderable(mTextGradient);
 }
 
-bool LabelImpl::IsGradientOverlayAnimSourceSupported() const
+bool LabelImpl::IsGradientOverlayAnimSupported() const
 {
-  if(!IsGradientOverlayRenderable())
-  {
-    return false;
-  }
-
-  if(mController && mController->IsMarqueeEnabled())
-  {
-    if(mController->IsAsyncRendering())
-    {
-      // Async marquee creates TextScroller after async text rendering completes.
-      // Allow callers to create the hidden source property now; SetParameters()
-      // will bind it to the scroller renderer only if the async result supports overlay.
-      return true;
-    }
-
-    return IsGradientOverlayScrollerReady();
-  }
-
-  return true;
-}
-
-bool LabelImpl::IsGradientOverlayRenderable() const
-{
+  // The hidden animation source property belongs to Label, not to the current
+  // renderer/scroller. Marquee renderers bind it later when overlay composition
+  // is available.
   return Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
-}
-
-bool LabelImpl::IsGradientOverlayScrollerReady() const
-{
-  return mTextScroller && mTextScroller->IsGradientOverlayEnabled();
 }
 
 void LabelImpl::BindGradientAnimProperties()
@@ -2658,6 +2575,13 @@ void LabelImpl::BindGradientAnimProperties()
   {
     Internal::TextVisual::SetGradientAnimProperties(mVisual, mGradientAnimOffsetIndex);
     SetGradientAnimApplyRate(true);
+  }
+
+  if(mTextScroller)
+  {
+    // Full marquee setup binds the initial source index.
+    // This updates an active scroller when the source is created later.
+    mTextScroller->SetGradientAnimProperties(mGradientAnimOffsetIndex);
   }
 }
 
@@ -2715,18 +2639,6 @@ void LabelImpl::SetGradientOverlayAnimApplyRate(bool notifyToConstraint)
   {
     mTextScroller->SetGradientOverlayApplyAlways(applyAlways, notifyToConstraint);
   }
-}
-
-void LabelImpl::PopulateGradientAnimProperties(Text::TextScrollerGradient& textGradient) const
-{
-  textGradient.startOffsetPropertyIndex = mGradientAnimOffsetIndex;
-  textGradient.applyConstraintsAlways   = mGradientAnimCount > 0;
-}
-
-void LabelImpl::PopulateGradientOverlayAnimProperties(Text::TextScrollerGradient& textGradient) const
-{
-  textGradient.overlayStartOffsetPropertyIndex = mGradientOverlayAnimOffsetIndex;
-  textGradient.overlayApplyConstraintsAlways   = mGradientOverlayAnimCount > 0;
 }
 
 void LabelImpl::UpdateLineHeight()
@@ -2883,118 +2795,148 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     }
   }
 
-  Text::TypesetterPtr typesetter = Text::Typesetter::New(mController->GetTextModel());
-  PixelData           data       = typesetter->Render(verifiedSize, mController->GetTextDirection(), Text::Typesetter::RENDER_TEXT_AND_STYLES, isHorizontal, Pixel::RGBA8888, originSize);
-  Texture             texture    = Texture::New(Dali::TextureType::TEXTURE_2D, data.GetPixelFormat(), data.GetWidth(), data.GetHeight());
-
-#if defined(GPU_MEMORY_PROFILE_ENABLED)
+  const Text::Direction textDirection     = mController->GetTextDirection();
+  auto                  renderMarqueeText = [&](Text::Typesetter::RenderBehaviour renderBehaviour, Pixel::Format pixelFormat) -> PixelData
   {
-    std::string text;
-    mController->GetText(text);
-    Dali::Integration::TextureUploadWithContent(texture, data, ToDaliString(std::move(text)), Dali::Integration::TextureContextTypeHint::TEXT_SCROLL);
-  }
-#else
-  texture.Upload(data);
-#endif
+    return Internal::TextVisual::RenderMarqueeText(mVisual,
+                                                   verifiedSize,
+                                                   textDirection,
+                                                   renderBehaviour,
+                                                   isHorizontal,
+                                                   pixelFormat,
+                                                   originSize);
+  };
+  PixelData data = renderMarqueeText(Text::Typesetter::RENDER_TEXT_AND_STYLES, Pixel::RGBA8888);
 
-  TextureSet textureSet = TextureSet::New();
-  textureSet.SetTexture(0u, texture);
+  Sampler sampler = Text::MarqueeBuilder::CreateTextScrollSampler(isHorizontal);
 
-  // Filter mode needs to be set to linear to produce better quality while scaling.
-  Sampler sampler = Sampler::New();
-  sampler.SetFilterMode(FilterMode::LINEAR, FilterMode::LINEAR);
+  Text::MarqueeBuilder::PreparedContent preparedContent =
+    Text::MarqueeBuilder::CreateTextContent(data, sampler);
 
-  if(isHorizontal)
+  const Text::ModelInterface* const         textModel = mController->GetTextModel();
+  const Text::MarqueeBuilder::GradientState gradientState =
+    Text::MarqueeBuilder::ResolveGradientState(mTextGradient,
+                                               mTextGradientOverlay,
+                                               verifiedSize);
+  const bool hasGradientFeature = gradientState.baseRenderable || gradientState.overlayRenderable;
+  const bool needsMarqueeComposition =
+    hasGradientFeature ||
+    Text::MarqueeBuilder::HasOverlayStyle(*textModel, mController->IsMarkupProcessorEnabled());
+  if(needsMarqueeComposition)
   {
-    sampler.SetWrapMode(Dali::WrapMode::DEFAULT, Dali::WrapMode::REPEAT, Dali::WrapMode::DEFAULT); // Wrap the texture in the x direction
-  }
-  else
-  {
-    sampler.SetWrapMode(Dali::WrapMode::DEFAULT, Dali::WrapMode::DEFAULT, Dali::WrapMode::REPEAT); // Wrap the texture in the y direction
-  }
-  textureSet.SetSampler(0u, sampler);
-
-  Text::TextScrollerGradient textGradient;
-  const bool                 textGradientRenderable        = Text::Internal::Gradient::IsRenderable(mTextGradient);
-  const bool                 textGradientOverlayRenderable = Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
-  if(textGradientRenderable || textGradientOverlayRenderable)
-  {
-    const Text::ModelInterface* const textModel = mController->GetTextModel();
-    const MarqueeGradientFeatureInfo  featureInfo =
-      GetMarqueeGradientFeatureInfo(*textModel,
-                                    mController->IsMarkupProcessorEnabled(),
-                                    mController->IsTextCutout());
-    const bool marqueeGradientCompositionEnabled =
-      Text::Internal::GradientMarquee::IsCompositionSupported(featureInfo.hasMultipleTextColors,
-                                                              featureInfo.containsColorGlyph,
-                                                              featureInfo.styleTextureEnabled,
-                                                              featureInfo.isOverlayStyle,
-                                                              mController->IsEmbossEnabled(),
-                                                              featureInfo.cutoutEnabled);
-
-    if(marqueeGradientCompositionEnabled)
+    Text::MarqueeBuilder::FeatureInfo featureInfo;
+    if(hasGradientFeature)
     {
-      Vector4 textGradientViewportBounds =
-        Text::Internal::CalculateMarqueeGradientViewportBounds(controlSize,
-                                                               textModel->GetLayoutSize(),
-                                                               textModel->GetLines(),
-                                                               textModel->GetNumberOfLines(),
-                                                               mController->GetHorizontalAlignment(),
-                                                               mController->GetVerticalAlignment());
-      auto resolveMarqueeGradientBounds = [&](Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
+      featureInfo =
+        Text::MarqueeBuilder::CollectGradientFeatureInfo(*textModel,
+                                                         mController->IsMarkupProcessorEnabled(),
+                                                         mController->IsTextCutout());
+    }
+    else
+    {
+      featureInfo.isOverlayStyle = true;
+    }
+
+    Text::MarqueeBuilder::AnimationState animationState;
+    animationState.baseStartOffsetIndex    = mGradientAnimOffsetIndex;
+    animationState.baseApplyAlways         = mGradientAnimCount > 0;
+    animationState.overlayStartOffsetIndex = mGradientOverlayAnimOffsetIndex;
+    animationState.overlayApplyAlways      = mGradientOverlayAnimCount > 0;
+
+    Text::MarqueeBuilder::CompositionRequest compositionRequest;
+    compositionRequest.sampler        = sampler;
+    compositionRequest.verifiedSize   = verifiedSize;
+    compositionRequest.featureInfo    = featureInfo;
+    compositionRequest.embossEnabled  = mController->IsEmbossEnabled();
+    compositionRequest.gradientState  = gradientState;
+    compositionRequest.animationState = animationState;
+    compositionRequest.overlayMode    = mTextGradientOverlayMode;
+
+    const Text::MarqueeBuilder::CompositionPlan compositionPlan =
+      Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
+    if(compositionPlan.HasWork())
+    {
+      if(compositionPlan.needsBaseBounds || compositionPlan.needsOverlayBounds)
       {
-        coordinateSize = controlSize;
-        if(boundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+        const Vector4 textGradientViewportBounds =
+          Text::Internal::CalculateMarqueeGradientViewportBounds(controlSize,
+                                                                 textModel->GetLayoutSize(),
+                                                                 textModel->GetLines(),
+                                                                 textModel->GetNumberOfLines(),
+                                                                 mController->GetHorizontalAlignment(),
+                                                                 mController->GetVerticalAlignment());
+        auto resolveMarqueeGradientBounds = [&](Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
         {
-          coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
-          return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
-        }
-        return textGradientViewportBounds;
-      };
+          coordinateSize = controlSize;
+          if(boundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+          {
+            coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
+            return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
+          }
+          return textGradientViewportBounds;
+        };
 
-      uint32_t textureSetIndex = 1u;
-      if(textGradientRenderable)
-      {
-        const Text::Internal::Gradient::Style textGradientStyle =
-          Text::Internal::Gradient::CreateStyle(mTextGradient);
-
-        if(Text::Internal::GradientMarquee::IsRenderable(textGradientStyle, verifiedSize))
+        if(compositionPlan.needsBaseBounds)
         {
           Vector2       textGradientCoordinateSize;
-          const Vector4 textGradientBounds = resolveMarqueeGradientBounds(mTextGradientBoundsMode, textGradientCoordinateSize);
-          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, textGradientStyle);
-          textGradient = Text::Internal::GradientMarquee::CreateScrollerGradient(textGradientStyle, textGradientBounds, textGradientCoordinateSize);
-          PopulateGradientAnimProperties(textGradient);
+          const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(mTextGradientBoundsMode,
+                                                                                      textGradientCoordinateSize);
+          compositionRequest.baseBoundsResolved        = true;
+          compositionRequest.baseBounds.bounds         = textGradientBounds;
+          compositionRequest.baseBounds.coordinateSize = textGradientCoordinateSize;
         }
-      }
 
-      if(textGradientOverlayRenderable)
-      {
-        const Text::Internal::Gradient::Style textGradientOverlayStyle =
-          Text::Internal::Gradient::CreateStyle(mTextGradientOverlay);
-
-        if(Text::Internal::GradientMarquee::IsRenderable(textGradientOverlayStyle, verifiedSize))
+        if(compositionPlan.needsOverlayBounds)
         {
           Vector2       textGradientOverlayCoordinateSize;
-          const Vector4 textGradientOverlayBounds = resolveMarqueeGradientBounds(mTextGradientOverlayBoundsMode, textGradientOverlayCoordinateSize);
-          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, textGradientOverlayStyle);
-          const Text::TextScrollerGradient textGradientOverlay =
-            Text::Internal::GradientMarquee::CreateScrollerGradient(textGradientOverlayStyle,
-                                                                    textGradientOverlayBounds,
-                                                                    textGradientOverlayCoordinateSize);
-
-          Text::Internal::GradientMarquee::SetOverlayGradient(textGradient, textGradientOverlay, mTextGradientOverlayMode);
-          PopulateGradientOverlayAnimProperties(textGradient);
+          const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(mTextGradientOverlayBoundsMode,
+                                                                                         textGradientOverlayCoordinateSize);
+          compositionRequest.overlayBoundsResolved        = true;
+          compositionRequest.overlayBounds.bounds         = textGradientOverlayBounds;
+          compositionRequest.overlayBounds.coordinateSize = textGradientOverlayCoordinateSize;
         }
       }
+
+      Text::MarqueeBuilder::PixelDataBundle pixels;
+      if(compositionPlan.needsFillPixelData)
+      {
+        pixels.fillPixelData = renderMarqueeText(Text::Typesetter::RENDER_NO_STYLES, Pixel::RGBA8888);
+      }
+      if(compositionPlan.needsStylePixelData)
+      {
+        pixels.stylePixelData = renderMarqueeText(Text::Typesetter::RENDER_NO_TEXT, Pixel::RGBA8888);
+      }
+      if(compositionPlan.needsPreservedMaskPixelData)
+      {
+        pixels.preservedPixelData =
+          Internal::TextVisual::RenderMarqueeTextGradientPreserved(mVisual,
+                                                                   verifiedSize,
+                                                                   textDirection,
+                                                                   isHorizontal,
+                                                                   Pixel::RGBA8888,
+                                                                   originSize);
+        pixels.maskPixelData =
+          Internal::TextVisual::RenderMarqueeTextGradientMask(mVisual,
+                                                              verifiedSize,
+                                                              textDirection,
+                                                              isHorizontal,
+                                                              Pixel::L8,
+                                                              originSize);
+      }
+      if(compositionPlan.needsOverlayStylePixelData)
+      {
+        pixels.overlayStylePixelData = renderMarqueeText(Text::Typesetter::RENDER_OVERLAY_STYLE, Pixel::RGBA8888);
+      }
+
+      Text::MarqueeBuilder::ApplyPreparedComposition(preparedContent, compositionRequest, pixels);
     }
   }
 
   // Set parameters for scrolling
   Renderer renderer = static_cast<Internal::Visual::Base&>(GetImplementation(mVisual)).GetRenderer();
-  mTextScroller->SetParameters(Self(), renderer, textureSet, controlSize, verifiedSize, wrapGap, direction,
+  mTextScroller->SetParameters(Self(), renderer, preparedContent.textureSet, controlSize, verifiedSize, wrapGap, direction,
                                mController->GetHorizontalAlignment(), mController->GetVerticalAlignment(),
-                               mRendererUpdateNeeded, textGradient);
+                               mRendererUpdateNeeded, preparedContent.textGradient);
   mController->SetTextElideEnabled(actualellipsis);
   mController->SetMarqueeMaxTextureExceeded(false);
 }
@@ -3441,14 +3383,15 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.backgroundColorWithCutout     = mController->GetBackgroundColorWithCutout();
   Property::Map variationsMap;
   mController->GetVariationsMap(variationsMap);
-  parameters.variationsMap           = variationsMap;
-  parameters.renderScale             = mController->GetRenderScale();
-  parameters.isEmbossEnabled         = mController->IsEmbossEnabled();
-  parameters.embossDirection         = mController->GetEmbossDirection();
-  parameters.embossStrength          = mController->GetEmbossStrength();
-  parameters.embossLightColor        = mController->GetEmbossLightColor();
-  parameters.embossShadowColor       = mController->GetEmbossShadowColor();
-  parameters.isTextGradientRequested = Text::Internal::Gradient::IsRenderable(mTextGradient);
+  parameters.variationsMap                  = variationsMap;
+  parameters.renderScale                    = mController->GetRenderScale();
+  parameters.isEmbossEnabled                = mController->IsEmbossEnabled();
+  parameters.embossDirection                = mController->GetEmbossDirection();
+  parameters.embossStrength                 = mController->GetEmbossStrength();
+  parameters.embossLightColor               = mController->GetEmbossLightColor();
+  parameters.embossShadowColor              = mController->GetEmbossShadowColor();
+  parameters.isTextGradientRequested        = Text::Internal::Gradient::IsRenderable(mTextGradient);
+  parameters.isTextGradientOverlayRequested = Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
 
   return parameters;
 }

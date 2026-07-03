@@ -61,6 +61,9 @@ struct TextScrollerGradient
   Vector4         bounds{0.0f, 0.0f, 1.0f, 1.0f}; ///< Normalized viewport-local bounds for TextGradient evaluation.
   Property::Index startOffsetPropertyIndex{Property::INVALID_INDEX};
   bool            applyConstraintsAlways{false};
+  bool            mixedTextGradient{false};          ///< True when scroller uses preserved color + gradient mask textures.
+  bool            styleTextureEnabled{false};        ///< True when slot set includes a below-fill style texture.
+  bool            overlayStyleTextureEnabled{false}; ///< True when slot set includes underline/strikethrough texture.
 
   bool                      overlayEnabled{false};
   Gradient::Type            overlayType{Gradient::Type::NONE};
@@ -203,6 +206,16 @@ public:
   bool IsScrolling() const;
 
   /**
+   * @brief Sets the TextGradient start-offset source property index used by marquee constraints.
+   *
+   * This is the live update path after SetParameters() has already set up a
+   * gradient-enabled scroller renderer.
+   *
+   * @param[in] startOffsetPropertyIndex Source property index for uTextGradientStartOffset.
+   */
+  void SetGradientAnimProperties(Property::Index startOffsetPropertyIndex);
+
+  /**
    * @brief Sets whether TextGradient animation constraints should be applied every frame.
    *
    * @param[in] applyAlways True to use APPLY_ALWAYS, false to use APPLY_ONCE.
@@ -276,6 +289,11 @@ private: // Implementation
   void RemoveGradientOverlayConstraints();
 
   /**
+   * @brief Binds TextGradient animation constraints to the current renderer.
+   */
+  void BindGradientConstraint(Property::Index rendererStartOffsetIndex);
+
+  /**
    * @brief Binds TextGradientOverlay animation constraints to the current renderer.
    */
   void BindGradientOverlayConstraint(Property::Index rendererStartOffsetIndex);
@@ -285,11 +303,12 @@ private:
   Property::Index         mScrollDeltaIndex;               // Property used by shader to represent distance to scroll
   Animation               mScrollAnimation;                // Animation used to update the mScrollDeltaIndex
   Dali::Renderer          mRenderer;                       // Renderer used to render the text
-  Actor                   mScrollingTextActor;             // Actor used as source for TextGradientOverlay animation properties
+  Actor                   mScrollingTextActor;             // Actor used as source for TextGradient animation properties
   Shader                  mShader;                         // Shader originally used by the renderer while not scrolling
   TextureSet              mTextureSet;                     // Texture originally used by the renderer while not scrolling
   std::vector<Constraint> mGradientConstraints;            // Constraints for animated TextGradient uniforms.
   std::vector<Constraint> mGradientOverlayConstraints;     // Constraints for animated TextGradientOverlay uniforms.
+  Property::Index         mGradientAnimOffsetIndex;        // Source property for uTextGradientStartOffset.
   Property::Index         mGradientOverlayAnimOffsetIndex; // Source property for uTextGradientOverlayStartOffset.
 
   int                      mScrollSpeed;                    ///< Speed which text should automatically scroll at
@@ -299,6 +318,7 @@ private:
   Text::MarqueeStopMode    mStopMode;                       ///< Stop mode of scrolling text, when loop count is 0.
   Text::MarqueeOrientation mOrientation;                    ///< Orientation of the marquee. (HORIZONTAL, VERTICAL)
   bool                     mIsStopRequested : 1;            ///< Whether the stop scrolling has been triggered or not.
+  bool                     mGradientEnabled : 1;            ///< Whether the current scroller renderer has TextGradient uniforms.
   bool                     mGradientApplyAlways : 1;        ///< Whether TextGradient constraints need to be applied always.
   bool                     mGradientOverlayApplyAlways : 1; ///< Whether TextGradientOverlay constraints need to be applied always.
   bool                     mGradientOverlayEnabled : 1;     ///< Whether the current scroller renderer has TextGradientOverlay uniforms.

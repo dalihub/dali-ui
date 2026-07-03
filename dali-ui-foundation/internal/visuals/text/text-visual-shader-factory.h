@@ -173,8 +173,6 @@ public:
     return mTextGradient == TextGradient::HAS_TEXT_GRADIENT_MIXED &&
            (mTextMultiColor == TextMultiColor::MULTI_COLOR_TEXT ||
             mTextEmoji == TextEmoji::HAS_EMOJI) &&
-           mTextStyle == TextStyle::NO_STYLES &&
-           mTextOverlay == TextOverlay::NO_OVERLAY &&
            mTextEmboss == TextEmboss::NO_EMBOSS;
   }
   bool IsEnabledAnyTextGradient() const

@@ -48,7 +48,7 @@ constexpr float MATRIX_CAPTION_WIDTH = 76.0f;
 constexpr float MATRIX_CELL_WIDTH    = 188.0f;
 constexpr int   WINDOW_WIDTH     = 920;
 constexpr int   WINDOW_HEIGHT    = 880;
-constexpr std::size_t CASE_COUNT = 9u;
+constexpr std::size_t CASE_COUNT = 10u;
 constexpr std::size_t INITIAL_CASE_INDEX                 = 0u;
 constexpr std::size_t INITIAL_ALIGNMENT_INDEX            = 1u;
 constexpr std::size_t INITIAL_SPREAD_METHOD_INDEX        = 0u;
@@ -98,6 +98,7 @@ struct CaseDefinition
   bool         style;
   bool         marquee{false};
   Text::MarqueeOrientation marqueeOrientation{Text::MarqueeOrientation::HORIZONTAL};
+  bool         marqueeDefaultRunning{true};
   bool         compactGradientSpan{false};
 };
 
@@ -140,35 +141,58 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
   {
     "Explicit Color Markup Mixed",
     "Learn how<color value='black'> to make more content appear in your Now brief.</color>",
-    "Expected: unmarked glyphs use gradient, explicit black markup stays black.",
-    "Notes: checks a short gradient prefix followed by preserved RGBA markup text.",
+    "Expected: unmarked glyphs use gradient, explicit black markup stays black; M toggles horizontal marquee.",
+    "Notes: checks mixed multiple-color TextGradient and optional horizontal marquee.",
     GradientKind::LINEAR,
     32.0f,
+    false,
     true,
+    false,
     true,
+    Text::MarqueeOrientation::HORIZONTAL,
     false,
   },
   {
     "Emoji Mixed",
     "Gradient 😀 Text 🌈 Test",
-    "Expected: default glyphs use gradient, emoji/color glyphs keep original color.",
-    "Notes: visible emoji depends on available color emoji fonts.",
+    "Expected: default glyphs use gradient, emoji/color glyphs keep original color; M toggles horizontal marquee.",
+    "Notes: verifies color glyph preservation through the mixed marquee preserved/mask path; visible emoji depends on available color emoji fonts.",
     GradientKind::LINEAR,
     46.0f,
     false,
     false,
     false,
+    true,
+    Text::MarqueeOrientation::HORIZONTAL,
+    false,
+  },
+  {
+    "Emoji Mixed Underline",
+    "Thinking 😀 with Gradient 🌈 Underline",
+    "Expected: default glyphs use gradient, emoji keeps color, shadow stays below fill, and underline remains above fill in normal and marquee modes.",
+    "Notes: verifies mixed preserved/mask composition with below-fill style and overlay-style underline.",
+    GradientKind::LINEAR,
+    40.0f,
+    false,
+    false,
+    true,
+    true,
+    Text::MarqueeOrientation::HORIZONTAL,
+    false,
   },
   {
     "Shadow And Underline Style",
     "Styled Text Gradient",
-    "Expected: fill uses gradient; shadow and underline keep their own style colors.",
-    "Notes: verifies style/overlay composition with simple TextGradient.",
+    "Expected: fill uses gradient, shadow stays below fill, and underline stays above fill in normal and marquee modes.",
+    "Notes: checks below-fill style texture and overlay-style underline with marquee.",
     GradientKind::LINEAR,
     50.0f,
     false,
     false,
     true,
+    true,
+    Text::MarqueeOrientation::HORIZONTAL,
+    false,
   },
   {
     "Spread Method",
@@ -182,6 +206,7 @@ constexpr std::array<CaseDefinition, CASE_COUNT> CASES{{
     false,
     false,
     Text::MarqueeOrientation::HORIZONTAL,
+    true,
     true,
   },
   {
@@ -866,7 +891,7 @@ private:
     mMarqueeMatrixMode = false;
     mCaseIndex         = index % CASES.size();
     mGradientApplied   = true;
-    mMarqueeRunning    = true;
+    mMarqueeRunning    = CASES[mCaseIndex].marqueeDefaultRunning;
     StopMarqueeMatrixLabels();
     SetMarqueeMatrixVisible(false);
 

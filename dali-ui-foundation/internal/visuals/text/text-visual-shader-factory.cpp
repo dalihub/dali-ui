@@ -225,7 +225,33 @@ VisualFactoryCache::ShaderType FeatureBuilder::GetShaderType() const
   {
     if(IsEnabledTextGradientOverlay())
     {
+      if(mTextStyle == TextVisualShaderFeature::TextStyle::HAS_STYLES &&
+         mTextOverlay == TextVisualShaderFeature::TextOverlay::HAS_OVERLAY)
+      {
+        return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE_AND_OVERLAY_AND_TEXT_GRADIENT_OVERLAY;
+      }
+      if(mTextStyle == TextVisualShaderFeature::TextStyle::HAS_STYLES)
+      {
+        return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE_AND_TEXT_GRADIENT_OVERLAY;
+      }
+      if(mTextOverlay == TextVisualShaderFeature::TextOverlay::HAS_OVERLAY)
+      {
+        return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_OVERLAY_AND_TEXT_GRADIENT_OVERLAY;
+      }
       return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_TEXT_GRADIENT_OVERLAY;
+    }
+    if(mTextStyle == TextVisualShaderFeature::TextStyle::HAS_STYLES &&
+       mTextOverlay == TextVisualShaderFeature::TextOverlay::HAS_OVERLAY)
+    {
+      return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE_AND_OVERLAY;
+    }
+    if(mTextStyle == TextVisualShaderFeature::TextStyle::HAS_STYLES)
+    {
+      return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE;
+    }
+    if(mTextOverlay == TextVisualShaderFeature::TextOverlay::HAS_OVERLAY)
+    {
+      return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_OVERLAY;
     }
     return VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED;
   }

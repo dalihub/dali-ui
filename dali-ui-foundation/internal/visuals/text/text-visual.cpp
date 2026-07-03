@@ -513,6 +513,40 @@ Vector2 TextVisual::GetGradientViewCoordinateSize(Ui::Integration::Visual::Base 
   return visualObject.mImpl->GetTransformVisualSize(visualObject.mImpl->mControlSize);
 }
 
+PixelData TextVisual::RenderMarqueeText(Ui::Integration::Visual::Base     visual,
+                                        const Vector2&                    size,
+                                        Text::Direction                   textDirection,
+                                        Text::Typesetter::RenderBehaviour behaviour,
+                                        bool                              ignoreHorizontalAlignment,
+                                        Pixel::Format                     pixelFormat,
+                                        const Vector2&                    originSize)
+{
+  TextVisual& visualObject = GetVisualObject(visual);
+  return visualObject.mTypesetter->Render(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
+}
+
+PixelData TextVisual::RenderMarqueeTextGradientPreserved(Ui::Integration::Visual::Base visual,
+                                                         const Vector2&                size,
+                                                         Text::Direction               textDirection,
+                                                         bool                          ignoreHorizontalAlignment,
+                                                         Pixel::Format                 pixelFormat,
+                                                         const Vector2&                originSize)
+{
+  TextVisual& visualObject = GetVisualObject(visual);
+  return visualObject.mTypesetter->RenderTextGradientPreserved(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize);
+}
+
+PixelData TextVisual::RenderMarqueeTextGradientMask(Ui::Integration::Visual::Base visual,
+                                                    const Vector2&                size,
+                                                    Text::Direction               textDirection,
+                                                    bool                          ignoreHorizontalAlignment,
+                                                    Pixel::Format                 pixelFormat,
+                                                    const Vector2&                originSize)
+{
+  TextVisual& visualObject = GetVisualObject(visual);
+  return visualObject.mTypesetter->RenderTextGradientMask(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize);
+}
+
 void TextVisual::OnSetTransform()
 {
   UpdateRenderer();
@@ -1092,8 +1126,8 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     const bool textGradientOverlayCompositionEnabled =
       IsTextGradientOverlayCompositionSupported(renderInfo.size, isHeightTiling, isMarqueeEnabled, isCutoutEnabled);
     const bool featureStyleEnabled =
-      textGradientCompositionEnabled ? renderInfo.styleTextureEnabled
-                                     : (textGradientMixedCompositionEnabled ? false : renderInfo.styleEnabled);
+      (textGradientCompositionEnabled || textGradientMixedCompositionEnabled) ? renderInfo.styleTextureEnabled
+                                                                              : renderInfo.styleEnabled;
 
     TextVisualShaderFeature::FeatureBuilder featureBuilder;
     featureBuilder.EnableMultiColor(renderInfo.hasMultipleTextColors)
@@ -1766,6 +1800,9 @@ bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bo
                                                          bool embossEnabled, bool isHeightTiling,
                                                          bool isMarqueeEnabled, bool isCutoutEnabled) const
 {
+  (void)styleTextureEnabled;
+  (void)isOverlayStyle;
+
   if(!Text::Internal::Gradient::IsRenderable(mTextGradientStyle))
   {
     return false;
@@ -1778,8 +1815,6 @@ bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bo
 
   if(!(hasMultipleTextColors || containsColorGlyph) ||
      styleBlocksTextGradient ||
-     styleTextureEnabled ||
-     isOverlayStyle ||
      embossEnabled)
   {
     return false;
@@ -1939,8 +1974,8 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
   const bool textGradientOverlayCompositionEnabled =
     IsTextGradientOverlayCompositionSupported(size, isHeightTiling, isMarqueeEnabled, mController->IsTextCutout());
   const bool featureStyleEnabled =
-    textGradientCompositionEnabled ? styleTextureEnabled
-                                   : (textGradientMixedCompositionEnabled ? false : styleEnabled);
+    (textGradientCompositionEnabled || textGradientMixedCompositionEnabled) ? styleTextureEnabled
+                                                                            : styleEnabled;
 
   TextVisualShaderFeature::FeatureBuilder featureBuilder;
   featureBuilder.EnableMultiColor(hasMultipleTextColors)
@@ -2154,8 +2189,10 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
       : Pixel::L8;
 
   // Check the text direction
-  Text::Direction textDirection   = mController->GetTextDirection();
-  uint32_t        textureSetIndex = 0u;
+  Text::Direction    textDirection   = mController->GetTextDirection();
+  uint32_t           textureSetIndex = 0u;
+  Devel::PixelBuffer cutoutData;
+  float              cutoutAlpha = mController->GetTextModel()->GetDefaultColor().a;
 
   if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
   {
@@ -2173,40 +2210,38 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     {
       Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientOverlayStyle);
     }
-    return textureSet;
-  }
-
-  // Create a texture for the text without any styles
-
-  Devel::PixelBuffer cutoutData;
-  float              cutoutAlpha = mController->GetTextModel()->GetDefaultColor().a;
-  if(cutoutEnabled)
-  {
-    cutoutData = mTypesetter->RenderWithPixelBuffer(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false,
-                                                    textPixelFormat);
-
-    // Make transparent buffer.
-    // If the cutout is enabled, a separate texture is not used for the text.
-    Devel::PixelBuffer buffer = mTypesetter->CreateFullBackgroundBuffer(1, 1, Vector4(0.f, 0.f, 0.f, 0.f));
-    PixelData          data   = Devel::PixelBuffer::Convert(buffer);
-    AddTexture(textureSet, data, sampler, textureSetIndex);
-    ++textureSetIndex;
   }
   else
   {
-    PixelData data =
-      mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
-    AddTexture(textureSet, data, sampler, textureSetIndex);
-    ++textureSetIndex;
-  }
+    // Create a texture for the text without any styles
+    if(cutoutEnabled)
+    {
+      cutoutData = mTypesetter->RenderWithPixelBuffer(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false,
+                                                      textPixelFormat);
 
-  if(mTextShaderFeatureCache.IsEnabledTextGradient())
-  {
-    Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
-  }
-  if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
-  {
-    Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientOverlayStyle);
+      // Make transparent buffer.
+      // If the cutout is enabled, a separate texture is not used for the text.
+      Devel::PixelBuffer buffer = mTypesetter->CreateFullBackgroundBuffer(1, 1, Vector4(0.f, 0.f, 0.f, 0.f));
+      PixelData          data   = Devel::PixelBuffer::Convert(buffer);
+      AddTexture(textureSet, data, sampler, textureSetIndex);
+      ++textureSetIndex;
+    }
+    else
+    {
+      PixelData data =
+        mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_NO_STYLES, false, textPixelFormat);
+      AddTexture(textureSet, data, sampler, textureSetIndex);
+      ++textureSetIndex;
+    }
+
+    if(mTextShaderFeatureCache.IsEnabledTextGradient())
+    {
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
+    }
+    if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
+    {
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientOverlayStyle);
+    }
   }
 
   if(mTextShaderFeatureCache.IsEnabledStyle())
@@ -2237,7 +2272,9 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
     ++textureSetIndex;
   }
 
-  if(mTextShaderFeatureCache.IsEnabledEmoji() && !mTextShaderFeatureCache.IsEnabledMultiColor())
+  if(!mTextShaderFeatureCache.IsEnabledAnyTextGradient() &&
+     mTextShaderFeatureCache.IsEnabledEmoji() &&
+     !mTextShaderFeatureCache.IsEnabledMultiColor())
   {
     // Create a L8 texture as a mask to avoid color glyphs (e.g. emojis) to be affected by text color animation
     PixelData maskData = mTypesetter->Render(size, textDirection, Text::Typesetter::RENDER_MASK, false, Pixel::L8);

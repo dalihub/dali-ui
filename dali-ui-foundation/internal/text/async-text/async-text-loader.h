@@ -137,7 +137,8 @@ struct AsyncTextParameters
     isCutoutEnabled{false},
     isBackgroundWithCutoutEnabled{false},
     isEmbossEnabled{false},
-    isTextGradientRequested{false}
+    isTextGradientRequested{false},
+    isTextGradientOverlayRequested{false}
   {
   }
 
@@ -212,23 +213,24 @@ struct AsyncTextParameters
   FontWidthType                fontWidth;             ///< The font's width.
   FontSlantType                fontSlant;             ///< The font's slant.
 
-  bool suppressAutoMarquee : 1;           ///< whether automatic marquee evaluation is suppressed.
-  bool isMultiLine : 1;                   ///< Whether the multi-line layout is enabled.
-  bool ellipsis : 1;                      ///< Whether the ellipsis layout option is enabled.
-  bool enableMarkup : 1;                  ///< Whether the mark-up processor is enabled.
-  bool isUnderlineEnabled : 1;            ///< Underline enabeld flag.
-  bool isShadowEnabled : 1;               ///< Shadow enabled flag.
-  bool isOutlineEnabled : 1;              ///< Outline enabled flag.
-  bool isStrikethroughEnabled : 1;        ///< Strikethrough enabeld flag.
-  bool isTextBackgroundEnabled : 1;       ///< Text background flag.
-  bool isTextFitEnabled : 1;              ///< TextFit enabeld flag.
-  bool isTextFitCandidatesEnabled : 1;    ///< TextFit Candidates enabeld flag.
-  bool isMarqueeEnabled : 1;              ///< Marquee enabeld flag.
-  bool isMarqueeMaxTextureExceeded : 1;   ///< Whether the marquee texture size exceeds the maximum texture width.
-  bool isCutoutEnabled : 1;               ///< Cutout enabled flag.
-  bool isBackgroundWithCutoutEnabled : 1; ///< Background with cutout enabled flag.
-  bool isEmbossEnabled : 1;               ///< Emboss enabled flag.
-  bool isTextGradientRequested : 1;       ///< Whether async render may generate TextGradient-only payloads.
+  bool suppressAutoMarquee : 1;            ///< whether automatic marquee evaluation is suppressed.
+  bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
+  bool ellipsis : 1;                       ///< Whether the ellipsis layout option is enabled.
+  bool enableMarkup : 1;                   ///< Whether the mark-up processor is enabled.
+  bool isUnderlineEnabled : 1;             ///< Underline enabeld flag.
+  bool isShadowEnabled : 1;                ///< Shadow enabled flag.
+  bool isOutlineEnabled : 1;               ///< Outline enabled flag.
+  bool isStrikethroughEnabled : 1;         ///< Strikethrough enabeld flag.
+  bool isTextBackgroundEnabled : 1;        ///< Text background flag.
+  bool isTextFitEnabled : 1;               ///< TextFit enabeld flag.
+  bool isTextFitCandidatesEnabled : 1;     ///< TextFit Candidates enabeld flag.
+  bool isMarqueeEnabled : 1;               ///< Marquee enabeld flag.
+  bool isMarqueeMaxTextureExceeded : 1;    ///< Whether the marquee texture size exceeds the maximum texture width.
+  bool isCutoutEnabled : 1;                ///< Cutout enabled flag.
+  bool isBackgroundWithCutoutEnabled : 1;  ///< Background with cutout enabled flag.
+  bool isEmbossEnabled : 1;                ///< Emboss enabled flag.
+  bool isTextGradientRequested : 1;        ///< Whether async render may generate TextGradient-only payloads.
+  bool isTextGradientOverlayRequested : 1; ///< Whether async render may generate TextGradientOverlay-only payloads.
 };
 
 struct AsyncTextRenderInfo
@@ -238,6 +240,9 @@ struct AsyncTextRenderInfo
     textPixelData(),
     textGradientPreservedPixelData(),
     textGradientMaskPixelData(),
+    marqueeFillPixelData(),
+    marqueeStylePixelData(),
+    marqueeOverlayStylePixelData(),
     stylePixelData(),
     overlayStylePixelData(),
     maskPixelData(),
@@ -268,6 +273,9 @@ struct AsyncTextRenderInfo
   PixelData          textPixelData;
   PixelData          textGradientPreservedPixelData;
   PixelData          textGradientMaskPixelData;
+  PixelData          marqueeFillPixelData;
+  PixelData          marqueeStylePixelData;
+  PixelData          marqueeOverlayStylePixelData;
   PixelData          stylePixelData;
   PixelData          overlayStylePixelData;
   PixelData          maskPixelData;

@@ -9,11 +9,20 @@ UNIFORM sampler2D sTexture;
 #if defined(IS_REQUIRED_TEXT_GRADIENT) || defined(IS_REQUIRED_TEXT_GRADIENT_OVERLAY)
 INPUT highp vec2 vTextGradientCoord;
 #endif
+#ifdef IS_REQUIRED_TEXT_GRADIENT_MIXED
+UNIFORM sampler2D sTextGradientMask;
+#endif
 #ifdef IS_REQUIRED_TEXT_GRADIENT
 UNIFORM sampler2D sGradientLookup;
 #endif
 #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
 UNIFORM sampler2D sGradientOverlayLookup;
+#endif
+#ifdef IS_REQUIRED_TEXT_STYLE
+UNIFORM sampler2D sStyle;
+#endif
+#ifdef IS_REQUIRED_TEXT_OVERLAY_STYLE
+UNIFORM sampler2D sOverlayStyle;
 #endif
 
 UNIFORM_BLOCK FragBlock
@@ -128,7 +137,16 @@ void main()
 
   mediump vec4 textTexture = TEXTURE( sTexture, vTexCoord );
 
-#ifdef IS_REQUIRED_TEXT_GRADIENT
+#ifdef IS_REQUIRED_TEXT_GRADIENT_MIXED
+  mediump vec4 preservedColor = textTexture;
+  mediump float textGradientMask = TEXTURE(sTextGradientMask, vTexCoord).r;
+  highp vec2 textGradientCoord =
+    (vTextGradientCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
+  highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
+  mediump vec4 gradientColor = TEXTURE(sGradientLookup, vec2(gradientPosition + uTextGradientStartOffset, 0.5));
+  mediump vec4 gradientFill = vec4(gradientColor.rgb * textGradientMask, gradientColor.a * textGradientMask);
+  textTexture = gradientFill + preservedColor * (1.0 - gradientFill.a);
+#elif defined(IS_REQUIRED_TEXT_GRADIENT)
   highp vec2 textGradientCoord =
     (vTextGradientCoord - uTextGradientBounds.xy) / max(uTextGradientBounds.zw, vec2(0.000001));
   highp float gradientPosition = EvaluateTextGradientPosition(textGradientCoord);
@@ -138,6 +156,16 @@ void main()
 
 #ifdef IS_REQUIRED_TEXT_GRADIENT_OVERLAY
   textTexture = ApplyTextGradientOverlay(textTexture);
+#endif
+
+#ifdef IS_REQUIRED_TEXT_STYLE
+  mediump vec4 styleTexture = TEXTURE(sStyle, vTexCoord);
+  textTexture = textTexture + styleTexture * (1.0 - textTexture.a);
+#endif
+
+#ifdef IS_REQUIRED_TEXT_OVERLAY_STYLE
+  mediump vec4 overlayStyleTexture = TEXTURE(sOverlayStyle, vTexCoord);
+  textTexture = textTexture * (1.0 - overlayStyleTexture.a) + overlayStyleTexture;
 #endif
 
   gl_FragColor = textTexture * uColor;

@@ -331,6 +331,49 @@ public:
   static Vector2 GetGradientViewCoordinateSize(Ui::Integration::Visual::Base visual);
 
   /**
+   * @brief Render marquee text PixelData with the TextVisual-owned Typesetter.
+   *
+   * This is for Label's sync marquee preparation only. It reuses TextVisual's
+   * Typesetter without exposing it outside TextVisual.
+   *
+   * @param[in] visual The text visual.
+   * @param[in] size The marquee texture size.
+   * @param[in] textDirection The direction of the text.
+   * @param[in] behaviour The behaviour of how to render the text.
+   * @param[in] ignoreHorizontalAlignment Whether to ignore horizontal alignment.
+   * @param[in] pixelFormat The pixel format of the rendered PixelData.
+   * @param[in] originSize The origin size for calculating vertical alignment.
+   * @return A pixel data with the requested marquee text content rendered.
+   */
+  static PixelData RenderMarqueeText(Ui::Integration::Visual::Base     visual,
+                                     const Vector2&                    size,
+                                     Text::Direction                   textDirection,
+                                     Text::Typesetter::RenderBehaviour behaviour,
+                                     bool                              ignoreHorizontalAlignment,
+                                     Pixel::Format                     pixelFormat,
+                                     const Vector2&                    originSize);
+
+  /**
+   * @brief Render preserved-color marquee PixelData with the TextVisual-owned Typesetter.
+   */
+  static PixelData RenderMarqueeTextGradientPreserved(Ui::Integration::Visual::Base visual,
+                                                      const Vector2&                size,
+                                                      Text::Direction               textDirection,
+                                                      bool                          ignoreHorizontalAlignment,
+                                                      Pixel::Format                 pixelFormat,
+                                                      const Vector2&                originSize);
+
+  /**
+   * @brief Render TextGradient mask marquee PixelData with the TextVisual-owned Typesetter.
+   */
+  static PixelData RenderMarqueeTextGradientMask(Ui::Integration::Visual::Base visual,
+                                                 const Vector2&                size,
+                                                 Text::Direction               textDirection,
+                                                 bool                          ignoreHorizontalAlignment,
+                                                 Pixel::Format                 pixelFormat,
+                                                 const Vector2&                originSize);
+
+  /**
    * @brief Retrieve the stored TextGradient mask PixelData for internal rendering/tests.
    * @param[in] visual The text visual.
    * @return The stored TextGradient mask PixelData.

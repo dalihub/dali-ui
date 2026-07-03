@@ -922,22 +922,11 @@ private: // Implementation
   bool IsGradientAnimSupported() const;
 
   /**
-   * @brief Returns true when a hidden TextGradientOverlay animation source property can be created.
+   * @brief Returns true when the current TextGradientOverlay can drive the supported animation uniforms.
    *
-   * Async marquee may create the source property before TextScroller exists.
-   * The property is bound later when async marquee setup creates an overlay-enabled scroller.
+   * This checks the gradient data only. Renderer/scroller binding happens separately.
    */
-  bool IsGradientOverlayAnimSourceSupported() const;
-
-  /**
-   * @brief Returns true when the current TextGradientOverlay is renderable enough for animation.
-   */
-  bool IsGradientOverlayRenderable() const;
-
-  /**
-   * @brief Returns true when the active TextScroller currently has an overlay renderer to bind.
-   */
-  bool IsGradientOverlayScrollerReady() const;
+  bool IsGradientOverlayAnimSupported() const;
 
   /**
    * @brief Binds current TextGradient animation source property indices to the TextVisual.
@@ -981,20 +970,6 @@ private: // Implementation
    * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
    */
   void SetGradientOverlayAnimApplyRate(bool notifyToConstraint = false);
-
-  /**
-   * @brief Adds cached TextGradient animation source property indices to scroller configuration.
-   *
-   * @param[in,out] textGradient The scroller TextGradient configuration.
-   */
-  void PopulateGradientAnimProperties(Text::TextScrollerGradient& textGradient) const;
-
-  /**
-   * @brief Adds cached TextGradientOverlay animation source property indices to scroller configuration.
-   *
-   * @param[in,out] textGradient The scroller TextGradient configuration.
-   */
-  void PopulateGradientOverlayAnimProperties(Text::TextScrollerGradient& textGradient) const;
 
   /**
    * @brief Updates the effective line height based on the current LineHeightMode.

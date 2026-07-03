@@ -396,3 +396,25 @@ int UtcDaliTextGradientTypesetterPreservedComplementsMaskP(void)
   DALI_TEST_CHECK(preservedAlphaSum > 0u);
   END_TEST;
 }
+
+int UtcDaliTextGradientTypesetterMixedPreservedMaskSizeContractP(void)
+{
+  UiTestApplication application;
+
+  MaskModel mixedModel(6u, {1u, 1u, 1u, 0u, 0u, 0u});
+
+  PixelData preserved = RenderTextGradientPreserved(mixedModel);
+  PixelData mask      = RenderTextGradientMask(mixedModel);
+
+  DALI_TEST_EQUALS(preserved.GetPixelFormat(), Pixel::RGBA8888, TEST_LOCATION);
+  DALI_TEST_EQUALS(mask.GetPixelFormat(), Pixel::L8, TEST_LOCATION);
+  DALI_TEST_EQUALS(preserved.GetWidth(), static_cast<uint32_t>(MASK_SIZE.width), TEST_LOCATION);
+  DALI_TEST_EQUALS(preserved.GetHeight(), static_cast<uint32_t>(MASK_SIZE.height), TEST_LOCATION);
+  DALI_TEST_EQUALS(mask.GetWidth(), static_cast<uint32_t>(MASK_SIZE.width), TEST_LOCATION);
+  DALI_TEST_EQUALS(mask.GetHeight(), static_cast<uint32_t>(MASK_SIZE.height), TEST_LOCATION);
+  DALI_TEST_EQUALS(mask.GetWidth(), preserved.GetWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(mask.GetHeight(), preserved.GetHeight(), TEST_LOCATION);
+  DALI_TEST_CHECK(SumRgbaAlphaPixels(preserved) > 0u);
+  DALI_TEST_CHECK(SumMaskPixels(mask) > 0u);
+  END_TEST;
+}

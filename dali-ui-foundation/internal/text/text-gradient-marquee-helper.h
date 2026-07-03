@@ -22,6 +22,8 @@
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
 
+#include <cstdint>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
@@ -37,7 +39,70 @@ namespace Internal
 namespace GradientMarquee
 {
 
+enum class CompositionUnsupportedReason : uint8_t
+{
+  NONE,
+  MULTIPLE_TEXT_COLORS,
+  COLOR_GLYPH,
+  STYLE_TEXTURE,
+  OVERLAY_STYLE,
+  CUTOUT_FALLBACK,
+  EMBOSS_SHADER_FEATURE
+};
+
+enum class CompositionResourceFlag : uint32_t
+{
+  NONE                                 = 0u,
+  TEXT_TEXTURE                         = 1u << 0u,
+  TEXT_GRADIENT_LOOKUP_TEXTURE         = 1u << 1u,
+  TEXT_GRADIENT_OVERLAY_LOOKUP_TEXTURE = 1u << 2u,
+  PRESERVED_COLOR_TEXTURE              = 1u << 3u,
+  GRADIENT_MASK_TEXTURE                = 1u << 4u,
+  STYLE_TEXTURE                        = 1u << 5u,
+  OVERLAY_STYLE_TEXTURE                = 1u << 6u
+};
+
+enum class CompositionShaderFeatureFlag : uint32_t
+{
+  NONE                  = 0u,
+  TEXT_GRADIENT         = 1u << 0u,
+  TEXT_GRADIENT_OVERLAY = 1u << 1u,
+  TEXT_GRADIENT_MIXED   = 1u << 2u,
+  STYLE_TEXTURE         = 1u << 3u,
+  OVERLAY_STYLE         = 1u << 4u,
+  EMBOSS                = 1u << 5u
+};
+
+struct CompositionPolicy
+{
+  bool hasMultipleTextColors{false};
+  bool containsColorGlyph{false};
+  bool styleTextureEnabled{false};
+  bool isOverlayStyle{false};
+  bool embossEnabled{false};
+  bool cutoutEnabled{false};
+  bool baseGradientEnabled{false};
+  bool overlayGradientEnabled{false};
+};
+
+// Describes the currently selected marquee composition/fallback path.
+// Future preserved/mask requirements are documented separately until a mixed
+// marquee path is enabled.
+struct CompositionResult
+{
+  bool                         supported{false};
+  CompositionUnsupportedReason unsupportedReason{CompositionUnsupportedReason::NONE};
+  uint32_t                     requiredResourceFlags{0u}; ///< Resources required by the selected current/fallback path.
+  uint32_t                     shaderFeatureFlags{0u};    ///< Shader features directly selected by this composition policy.
+};
+
 bool IsRenderable(const Gradient::Style& style, const Size& textureSize);
+
+CompositionResult GetCompositionResult(const CompositionPolicy& policy);
+
+CompositionResult GetMixedColorCompositionResult(const CompositionPolicy& policy);
+
+bool IsMixedColorCompositionSupported(const CompositionPolicy& policy);
 
 bool IsCompositionSupported(bool hasMultipleTextColors,
                             bool containsColorGlyph,

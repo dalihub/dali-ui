@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
+#include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-marquee-helper.h>
@@ -39,10 +40,12 @@ namespace TextInternal = Dali::Ui::Text::Internal;
 namespace UiText      = Dali::Ui::Text;
 namespace UiInternal  = Dali::Ui::Internal;
 
-constexpr const char* TEXT_GRADIENT_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT\n";
-constexpr const char* TEXT_GRADIENT_MIXED_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT_MIXED\n";
+constexpr const char* TEXT_GRADIENT_DEFINE         = "#define IS_REQUIRED_TEXT_GRADIENT\n";
+constexpr const char* TEXT_GRADIENT_MIXED_DEFINE   = "#define IS_REQUIRED_TEXT_GRADIENT_MIXED\n";
 constexpr const char* TEXT_GRADIENT_OVERLAY_DEFINE = "#define IS_REQUIRED_TEXT_GRADIENT_OVERLAY\n";
-constexpr float       EPSILON              = 0.0001f;
+constexpr const char* TEXT_STYLE_DEFINE            = "#define IS_REQUIRED_TEXT_STYLE\n";
+constexpr const char* TEXT_OVERLAY_STYLE_DEFINE    = "#define IS_REQUIRED_TEXT_OVERLAY_STYLE\n";
+constexpr float       EPSILON                      = 0.0001f;
 
 std::string GetFragmentPrefix(const TextFeature::FeatureBuilder& builder)
 {
@@ -81,6 +84,25 @@ void ExpectTextGradientMixedDefine(const std::string& fragmentPrefix)
 {
   ExpectTextGradientDefine(fragmentPrefix);
   DALI_TEST_EQUALS(fragmentPrefix.find(TEXT_GRADIENT_MIXED_DEFINE) != std::string::npos, true, TEST_LOCATION);
+}
+
+TextInternal::Gradient::Style CreateLinearGradientStyle(const Vector2& start = Vector2::ZERO,
+                                                        const Vector2& end   = Vector2::ONE)
+{
+  TextInternal::Gradient::Style style;
+  style.enabled     = true;
+  style.type        = Dali::Ui::Gradient::Type::LINEAR;
+  style.linearStart = start;
+  style.linearEnd   = end;
+  style.stops.PushBack({0.0f, Color::RED});
+  style.stops.PushBack({1.0f, Color::BLUE});
+  return style;
+}
+
+PixelData CreatePixelData(uint32_t width, uint32_t height, Pixel::Format pixelFormat)
+{
+  const uint32_t bufferSize = width * height * Pixel::GetBytesPerPixel(pixelFormat);
+  return PixelData::New(new uint8_t[bufferSize](), bufferSize, width, height, pixelFormat, PixelData::DELETE_ARRAY);
 }
 
 void ExpectBounds(const Vector4& bounds, const Vector4& expected)
@@ -133,6 +155,244 @@ public:
   {
   }
 };
+
+void ExpectMarqueeCompositionResult(bool hasMultipleTextColors,
+                                    bool containsColorGlyph,
+                                    bool styleTextureEnabled,
+                                    bool isOverlayStyle,
+                                    bool embossEnabled,
+                                    bool cutoutEnabled,
+                                    bool expectedSupported,
+                                    TextInternal::GradientMarquee::CompositionUnsupportedReason expectedReason,
+                                    uint32_t expectedResourceFlags =
+                                      static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::TEXT_TEXTURE),
+                                    uint32_t expectedShaderFeatureFlags =
+                                      static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionShaderFeatureFlag::NONE))
+{
+  TextInternal::GradientMarquee::CompositionPolicy policy;
+  policy.hasMultipleTextColors = hasMultipleTextColors;
+  policy.containsColorGlyph    = containsColorGlyph;
+  policy.styleTextureEnabled   = styleTextureEnabled;
+  policy.isOverlayStyle        = isOverlayStyle;
+  policy.embossEnabled         = embossEnabled;
+  policy.cutoutEnabled         = cutoutEnabled;
+
+  const TextInternal::GradientMarquee::CompositionResult result =
+    TextInternal::GradientMarquee::GetCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, expectedSupported, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == expectedReason, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags, expectedResourceFlags, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.shaderFeatureFlags, expectedShaderFeatureFlags, TEST_LOCATION);
+  DALI_TEST_EQUALS(TextInternal::GradientMarquee::IsCompositionSupported(hasMultipleTextColors,
+                                                                         containsColorGlyph,
+                                                                         styleTextureEnabled,
+                                                                         isOverlayStyle,
+                                                                         embossEnabled,
+                                                                         cutoutEnabled),
+                   expectedSupported,
+                   TEST_LOCATION);
+}
+
+void ExpectMarqueeMixedColorCompositionResult(bool baseGradientEnabled,
+                                              bool overlayGradientEnabled,
+                                              bool hasMultipleTextColors,
+                                              bool containsColorGlyph,
+                                              bool styleTextureEnabled,
+                                              bool isOverlayStyle,
+                                              bool embossEnabled,
+                                              bool cutoutEnabled,
+                                              bool expectedSupported)
+{
+  TextInternal::GradientMarquee::CompositionPolicy policy;
+  policy.hasMultipleTextColors  = hasMultipleTextColors;
+  policy.containsColorGlyph     = containsColorGlyph;
+  policy.styleTextureEnabled    = styleTextureEnabled;
+  policy.isOverlayStyle         = isOverlayStyle;
+  policy.embossEnabled          = embossEnabled;
+  policy.cutoutEnabled          = cutoutEnabled;
+  policy.baseGradientEnabled    = baseGradientEnabled;
+  policy.overlayGradientEnabled = overlayGradientEnabled;
+
+  const TextInternal::GradientMarquee::CompositionResult result =
+    TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, expectedSupported, TEST_LOCATION);
+  DALI_TEST_EQUALS(TextInternal::GradientMarquee::IsMixedColorCompositionSupported(policy), expectedSupported, TEST_LOCATION);
+  if(expectedSupported)
+  {
+    const uint32_t expectedResourceFlags =
+      static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::PRESERVED_COLOR_TEXTURE) |
+      static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::GRADIENT_MASK_TEXTURE) |
+      static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::TEXT_GRADIENT_LOOKUP_TEXTURE) |
+      (styleTextureEnabled ? static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::STYLE_TEXTURE) : 0u) |
+      (overlayGradientEnabled ? static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::TEXT_GRADIENT_OVERLAY_LOOKUP_TEXTURE) : 0u) |
+      (isOverlayStyle ? static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::OVERLAY_STYLE_TEXTURE) : 0u);
+    const uint32_t expectedShaderFeatureFlags =
+      static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionShaderFeatureFlag::TEXT_GRADIENT) |
+      static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionShaderFeatureFlag::TEXT_GRADIENT_MIXED) |
+      (styleTextureEnabled ? static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionShaderFeatureFlag::STYLE_TEXTURE) : 0u) |
+      (overlayGradientEnabled ? static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionShaderFeatureFlag::TEXT_GRADIENT_OVERLAY) : 0u) |
+      (isOverlayStyle ? static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionShaderFeatureFlag::OVERLAY_STYLE) : 0u);
+    DALI_TEST_EQUALS(result.requiredResourceFlags, expectedResourceFlags, TEST_LOCATION);
+    DALI_TEST_EQUALS(result.shaderFeatureFlags, expectedShaderFeatureFlags, TEST_LOCATION);
+  }
+  else
+  {
+    DALI_TEST_EQUALS(result.requiredResourceFlags,
+                     static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::TEXT_TEXTURE),
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(result.shaderFeatureFlags,
+                     static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionShaderFeatureFlag::NONE),
+                     TEST_LOCATION);
+  }
+}
+
+uint32_t ResourceFlag(TextInternal::GradientMarquee::CompositionResourceFlag flag)
+{
+  return static_cast<uint32_t>(flag);
+}
+
+uint32_t ShaderFeatureFlag(TextInternal::GradientMarquee::CompositionShaderFeatureFlag flag)
+{
+  return static_cast<uint32_t>(flag);
+}
+
+void ExpectMarqueeSimpleStyleCompositionResult(bool baseGradientEnabled,
+                                               bool overlayGradientEnabled,
+                                               bool hasMultipleTextColors,
+                                               bool containsColorGlyph,
+                                               bool isOverlayStyle,
+                                               bool embossEnabled,
+                                               bool cutoutEnabled,
+                                               bool expectedSupported,
+                                               TextInternal::GradientMarquee::CompositionUnsupportedReason expectedReason,
+                                               uint32_t expectedResourceFlags,
+                                               uint32_t expectedShaderFeatureFlags)
+{
+  TextInternal::GradientMarquee::CompositionPolicy policy;
+  policy.hasMultipleTextColors  = hasMultipleTextColors;
+  policy.containsColorGlyph     = containsColorGlyph;
+  policy.styleTextureEnabled    = true;
+  policy.isOverlayStyle         = isOverlayStyle;
+  policy.embossEnabled          = embossEnabled;
+  policy.cutoutEnabled          = cutoutEnabled;
+  policy.baseGradientEnabled    = baseGradientEnabled;
+  policy.overlayGradientEnabled = overlayGradientEnabled;
+
+  const TextInternal::GradientMarquee::CompositionResult result =
+    TextInternal::GradientMarquee::GetCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, expectedSupported, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == expectedReason, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags, expectedResourceFlags, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.shaderFeatureFlags, expectedShaderFeatureFlags, TEST_LOCATION);
+}
+
+UiText::MarqueeBuilder::SimpleStyleContentRequest CreateSimpleStyleContentRequest(bool baseGradientEnabled,
+                                                                                  bool overlayGradientEnabled)
+{
+  UiText::MarqueeBuilder::SimpleStyleContentRequest request;
+  request.fillPixelData  = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+  request.stylePixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+  request.sampler        = Sampler::New();
+  request.verifiedSize   = Size(2.0f, 2.0f);
+
+  request.gradientState.baseRenderable         = baseGradientEnabled;
+  request.gradientState.overlayRenderable      = overlayGradientEnabled;
+  request.gradientState.baseStyle              = CreateLinearGradientStyle();
+  request.gradientState.overlayStyle           = CreateLinearGradientStyle(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  request.gradientState.baseStyleRenderable    = baseGradientEnabled;
+  request.gradientState.overlayStyleRenderable = overlayGradientEnabled;
+
+  request.compositionPolicy.styleTextureEnabled    = true;
+  request.compositionPolicy.baseGradientEnabled    = baseGradientEnabled;
+  request.compositionPolicy.overlayGradientEnabled = overlayGradientEnabled;
+
+  if(baseGradientEnabled)
+  {
+    request.baseBoundsResolved        = true;
+    request.baseBounds.bounds         = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+    request.baseBounds.coordinateSize = Vector2(2.0f, 2.0f);
+  }
+
+  if(overlayGradientEnabled)
+  {
+    request.overlayBoundsResolved        = true;
+    request.overlayBounds.bounds         = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+    request.overlayBounds.coordinateSize = Vector2(2.0f, 2.0f);
+    request.overlayMode                  = Dali::Ui::Text::GradientOverlayMode::SCREEN;
+  }
+
+  return request;
+}
+
+UiText::MarqueeBuilder::SimpleGradientContentRequest CreateSimpleGradientContentRequest(bool baseGradientEnabled,
+                                                                                       bool overlayGradientEnabled)
+{
+  UiText::MarqueeBuilder::SimpleGradientContentRequest request;
+  request.gradientState.baseRenderable         = baseGradientEnabled;
+  request.gradientState.overlayRenderable      = overlayGradientEnabled;
+  request.gradientState.baseStyle              = CreateLinearGradientStyle();
+  request.gradientState.overlayStyle           = CreateLinearGradientStyle(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  request.gradientState.baseStyleRenderable    = baseGradientEnabled;
+  request.gradientState.overlayStyleRenderable = overlayGradientEnabled;
+  request.overlayMode                          = Dali::Ui::Text::GradientOverlayMode::SCREEN;
+
+  if(baseGradientEnabled)
+  {
+    request.baseBoundsResolved        = true;
+    request.baseBounds.bounds         = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+    request.baseBounds.coordinateSize = Vector2(2.0f, 2.0f);
+  }
+
+  if(overlayGradientEnabled)
+  {
+    request.overlayBoundsResolved        = true;
+    request.overlayBounds.bounds         = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+    request.overlayBounds.coordinateSize = Vector2(2.0f, 2.0f);
+  }
+
+  return request;
+}
+
+UiText::MarqueeBuilder::MixedGradientContentRequest CreateMixedGradientContentRequest(bool overlayGradientEnabled,
+                                                                                     bool styleTextureEnabled)
+{
+  UiText::MarqueeBuilder::MixedGradientContentRequest request;
+  request.preservedPixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+  request.maskPixelData      = CreatePixelData(2u, 2u, Pixel::L8);
+  request.sampler            = Sampler::New();
+  request.verifiedSize       = Size(2.0f, 2.0f);
+
+  request.gradientState.baseRenderable         = true;
+  request.gradientState.overlayRenderable      = overlayGradientEnabled;
+  request.gradientState.baseStyle              = CreateLinearGradientStyle();
+  request.gradientState.overlayStyle           = CreateLinearGradientStyle(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  request.gradientState.baseStyleRenderable    = true;
+  request.gradientState.overlayStyleRenderable = overlayGradientEnabled;
+
+  request.compositionPolicy.hasMultipleTextColors  = true;
+  request.compositionPolicy.styleTextureEnabled    = styleTextureEnabled;
+  request.compositionPolicy.baseGradientEnabled    = true;
+  request.compositionPolicy.overlayGradientEnabled = overlayGradientEnabled;
+
+  request.baseBounds.bounds         = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+  request.baseBounds.coordinateSize = Vector2(2.0f, 2.0f);
+
+  if(overlayGradientEnabled)
+  {
+    request.overlayBoundsResolved        = true;
+    request.overlayBounds.bounds         = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+    request.overlayBounds.coordinateSize = Vector2(2.0f, 2.0f);
+    request.overlayMode                  = Dali::Ui::Text::GradientOverlayMode::SCREEN;
+  }
+
+  if(styleTextureEnabled)
+  {
+    request.styleTextureEnabled = true;
+    request.stylePixelData      = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+  }
+
+  return request;
+}
 
 TextFeature::FeatureBuilder BuildAsyncFeature(bool textGradientSupported,
                                               bool hasMultipleTextColors = false,
@@ -488,10 +748,10 @@ int UtcDaliTextGradientShaderCompositionDisabledColorOnlyMarkupKeepsLegacyStyleF
   END_TEST;
 }
 
-int UtcDaliTextGradientShaderCompositionColorOnlyMarkupMixedIgnoresLegacyStyleFeatureP(void)
+int UtcDaliTextGradientShaderCompositionColorOnlyMarkupMixedKeepsStyleTextureOffP(void)
 {
   TextFeature::FeatureBuilder builder =
-    BuildSeparatedStyleFeature(false, true, true, false, true);
+    BuildSeparatedStyleFeature(false, true, true, false, false);
 
   std::string fragmentPrefix = GetFragmentPrefix(builder);
 
@@ -506,7 +766,7 @@ int UtcDaliTextGradientShaderCompositionColorOnlyMarkupMixedIgnoresLegacyStyleFe
   END_TEST;
 }
 
-int UtcDaliTextGradientShaderCompositionMixedStyleFallbackP(void)
+int UtcDaliTextGradientVisualMixedStyleShaderFeatureP(void)
 {
   TextFeature::FeatureBuilder builder;
   builder.EnableTextGradientMixed(true);
@@ -514,15 +774,54 @@ int UtcDaliTextGradientShaderCompositionMixedStyleFallbackP(void)
   builder.EnableStyle(true);
 
   std::string fragmentPrefix = GetFragmentPrefix(builder);
+  std::string fragmentShader = fragmentPrefix + std::string(SHADER_TEXT_VISUAL_SHADER_FRAG);
+  const auto  mixedFill      = fragmentShader.find("textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto  styleApply     = fragmentShader.find("+ styleTexture * (1.0 - textColor.a)");
 
-  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_MULTI_COLOR_TEXT_WITH_STYLE, TEST_LOCATION);
-  ExpectNoTextGradientDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE, TEST_LOCATION);
+  ExpectTextGradientMixedDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_MULTI_COLOR\n") != std::string::npos, true, TEST_LOCATION);
   DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_STYLE\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_CHECK(fragmentShader.find("UNIFORM sampler2D sTextGradientMask;") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("UNIFORM sampler2D sStyle;") != std::string::npos);
+  DALI_TEST_CHECK(mixedFill != std::string::npos);
+  DALI_TEST_CHECK(styleApply != std::string::npos);
+  DALI_TEST_CHECK(mixedFill < styleApply);
   END_TEST;
 }
 
-int UtcDaliTextGradientShaderCompositionMixedOverlayFallbackP(void)
+int UtcDaliTextGradientVisualMixedStyleOverlayShaderFeatureP(void)
+{
+  TextFeature::FeatureBuilder builder;
+  builder.EnableTextGradientMixed(true);
+  builder.EnableMultiColor(true);
+  builder.EnableStyle(true);
+  builder.EnableTextGradientOverlay(true);
+
+  std::string fragmentPrefix = GetFragmentPrefix(builder);
+  std::string fragmentShader = fragmentPrefix + std::string(SHADER_TEXT_VISUAL_SHADER_FRAG);
+  const auto  mixedFill      = fragmentShader.find("textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto  overlayApply   = fragmentShader.find("textColor = ApplyTextGradientOverlay(textColor, vTexCoord);");
+  const auto  styleApply     = fragmentShader.find("+ styleTexture * (1.0 - textColor.a)");
+
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientOverlay(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE_AND_TEXT_GRADIENT_OVERLAY, TEST_LOCATION);
+  ExpectTextGradientMixedDefine(fragmentPrefix);
+  ExpectTextGradientOverlayDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_STYLE\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_CHECK(mixedFill != std::string::npos);
+  DALI_TEST_CHECK(overlayApply != std::string::npos);
+  DALI_TEST_CHECK(styleApply != std::string::npos);
+  DALI_TEST_CHECK(mixedFill < overlayApply);
+  DALI_TEST_CHECK(overlayApply < styleApply);
+  END_TEST;
+}
+
+int UtcDaliTextGradientVisualMixedOverlayStyleShaderFeatureP(void)
 {
   TextFeature::FeatureBuilder builder;
   builder.EnableTextGradientMixed(true);
@@ -530,12 +829,110 @@ int UtcDaliTextGradientShaderCompositionMixedOverlayFallbackP(void)
   builder.EnableOverlay(true);
 
   std::string fragmentPrefix = GetFragmentPrefix(builder);
+  std::string fragmentShader = fragmentPrefix + std::string(SHADER_TEXT_VISUAL_SHADER_FRAG);
+  const auto  mixedFill      = fragmentShader.find("textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto  overlayStyle   = fragmentShader.find(") * (1.0 - overlayStyleTexture.a) + overlayStyleTexture");
 
   DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_MULTI_COLOR_TEXT_WITH_OVERLAY, TEST_LOCATION);
-  ExpectNoTextGradientDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_OVERLAY, TEST_LOCATION);
+  ExpectTextGradientMixedDefine(fragmentPrefix);
   DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_OVERLAY\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_CHECK(fragmentShader.find("UNIFORM sampler2D sOverlayStyle;") != std::string::npos);
+  DALI_TEST_CHECK(mixedFill != std::string::npos);
+  DALI_TEST_CHECK(overlayStyle != std::string::npos);
+  DALI_TEST_CHECK(mixedFill < overlayStyle);
+  END_TEST;
+}
+
+int UtcDaliTextGradientVisualMixedStyleOverlayStyleShaderFeatureP(void)
+{
+  TextFeature::FeatureBuilder builder;
+  builder.EnableTextGradientMixed(true);
+  builder.EnableMultiColor(true);
+  builder.EnableStyle(true);
+  builder.EnableOverlay(true);
+
+  std::string fragmentPrefix = GetFragmentPrefix(builder);
+  std::string fragmentShader = fragmentPrefix + std::string(SHADER_TEXT_VISUAL_SHADER_FRAG);
+  const auto  mixedFill      = fragmentShader.find("textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto  styleApply     = fragmentShader.find("+ styleTexture * (1.0 - textColor.a)");
+  const auto  overlayStyle   = fragmentShader.find(") * (1.0 - overlayStyleTexture.a) + overlayStyleTexture");
+
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE_AND_OVERLAY, TEST_LOCATION);
+  ExpectTextGradientMixedDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_STYLE\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_OVERLAY\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_CHECK(mixedFill != std::string::npos);
+  DALI_TEST_CHECK(styleApply != std::string::npos);
+  DALI_TEST_CHECK(overlayStyle != std::string::npos);
+  DALI_TEST_CHECK(mixedFill < styleApply);
+  DALI_TEST_CHECK(styleApply < overlayStyle);
+  END_TEST;
+}
+
+int UtcDaliTextGradientVisualMixedOverlayStyleAndGradientOverlayShaderFeatureP(void)
+{
+  TextFeature::FeatureBuilder builder;
+  builder.EnableTextGradientMixed(true);
+  builder.EnableMultiColor(true);
+  builder.EnableOverlay(true);
+  builder.EnableTextGradientOverlay(true);
+
+  std::string fragmentPrefix = GetFragmentPrefix(builder);
+  std::string fragmentShader = fragmentPrefix + std::string(SHADER_TEXT_VISUAL_SHADER_FRAG);
+  const auto  mixedFill      = fragmentShader.find("textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto  overlayApply   = fragmentShader.find("textColor = ApplyTextGradientOverlay(textColor, vTexCoord);");
+  const auto  overlayStyle   = fragmentShader.find(") * (1.0 - overlayStyleTexture.a) + overlayStyleTexture");
+
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientOverlay(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_OVERLAY_AND_TEXT_GRADIENT_OVERLAY, TEST_LOCATION);
+  ExpectTextGradientMixedDefine(fragmentPrefix);
+  ExpectTextGradientOverlayDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_OVERLAY\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_CHECK(mixedFill != std::string::npos);
+  DALI_TEST_CHECK(overlayApply != std::string::npos);
+  DALI_TEST_CHECK(overlayStyle != std::string::npos);
+  DALI_TEST_CHECK(mixedFill < overlayApply);
+  DALI_TEST_CHECK(overlayApply < overlayStyle);
+  END_TEST;
+}
+
+int UtcDaliTextGradientVisualMixedStyleOverlayStyleAndGradientOverlayShaderFeatureP(void)
+{
+  TextFeature::FeatureBuilder builder;
+  builder.EnableTextGradientMixed(true);
+  builder.EnableMultiColor(true);
+  builder.EnableStyle(true);
+  builder.EnableOverlay(true);
+  builder.EnableTextGradientOverlay(true);
+
+  std::string fragmentPrefix = GetFragmentPrefix(builder);
+  std::string fragmentShader = fragmentPrefix + std::string(SHADER_TEXT_VISUAL_SHADER_FRAG);
+  const auto  mixedFill      = fragmentShader.find("textColor = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto  overlayApply   = fragmentShader.find("textColor = ApplyTextGradientOverlay(textColor, vTexCoord);");
+  const auto  styleApply     = fragmentShader.find("+ styleTexture * (1.0 - textColor.a)");
+  const auto  overlayStyle   = fragmentShader.find(") * (1.0 - overlayStyleTexture.a) + overlayStyleTexture");
+
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientOverlay(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE_AND_OVERLAY_AND_TEXT_GRADIENT_OVERLAY, TEST_LOCATION);
+  ExpectTextGradientMixedDefine(fragmentPrefix);
+  ExpectTextGradientOverlayDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_STYLE\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_OVERLAY\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_CHECK(mixedFill != std::string::npos);
+  DALI_TEST_CHECK(overlayApply != std::string::npos);
+  DALI_TEST_CHECK(styleApply != std::string::npos);
+  DALI_TEST_CHECK(overlayStyle != std::string::npos);
+  DALI_TEST_CHECK(mixedFill < overlayApply);
+  DALI_TEST_CHECK(overlayApply < styleApply);
+  DALI_TEST_CHECK(styleApply < overlayStyle);
   END_TEST;
 }
 
@@ -947,6 +1344,161 @@ int UtcDaliTextGradientShaderCompositionMarqueeVerticalFeatureP(void)
   END_TEST;
 }
 
+int UtcDaliTextGradientShaderCompositionMarqueeMixedFeatureP(void)
+{
+  std::string horizontalFragmentShader = std::string(TEXT_GRADIENT_DEFINE) +
+                                         std::string(TEXT_GRADIENT_MIXED_DEFINE) +
+                                         std::string(SHADER_TEXT_SCROLLER_SHADER_FRAG);
+  std::string verticalFragmentShader = std::string(TEXT_GRADIENT_DEFINE) +
+                                       std::string(TEXT_GRADIENT_MIXED_DEFINE) +
+                                       std::string(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG);
+
+  DALI_TEST_EQUALS(horizontalFragmentShader.find("UNIFORM sampler2D sTextGradientMask;") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(horizontalFragmentShader.find("mediump vec4 preservedColor = textTexture;") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(horizontalFragmentShader.find("TEXTURE(sTextGradientMask, vTexCoord).r") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(horizontalFragmentShader.find("gradientFill + preservedColor * (1.0 - gradientFill.a)") != std::string::npos, true, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(verticalFragmentShader.find("UNIFORM sampler2D sTextGradientMask;") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(verticalFragmentShader.find("mediump vec4 preservedColor = textTexture;") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(verticalFragmentShader.find("TEXTURE(sTextGradientMask, vTexCoord).r") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(verticalFragmentShader.find("gradientFill + preservedColor * (1.0 - gradientFill.a)") != std::string::npos, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionMarqueeMixedOverlayFeatureP(void)
+{
+  std::string fragmentShader = std::string(TEXT_GRADIENT_DEFINE) +
+                               std::string(TEXT_GRADIENT_MIXED_DEFINE) +
+                               std::string(TEXT_GRADIENT_OVERLAY_DEFINE) +
+                               std::string(SHADER_TEXT_SCROLLER_SHADER_FRAG);
+
+  const auto mixedFill = fragmentShader.find("textTexture = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto overlayApply = fragmentShader.find("textTexture = ApplyTextGradientOverlay(textTexture);");
+
+  DALI_TEST_CHECK(fragmentShader.find("UNIFORM sampler2D sTextGradientMask;") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("UNIFORM sampler2D sGradientLookup;") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("UNIFORM sampler2D sGradientOverlayLookup;") != std::string::npos);
+  DALI_TEST_CHECK(mixedFill != std::string::npos);
+  DALI_TEST_CHECK(overlayApply != std::string::npos);
+  DALI_TEST_CHECK(mixedFill < overlayApply);
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionMarqueeStyleFeatureP(void)
+{
+  std::string horizontalFragmentShader = std::string(TEXT_GRADIENT_DEFINE) +
+                                         std::string(TEXT_GRADIENT_OVERLAY_DEFINE) +
+                                         std::string(TEXT_STYLE_DEFINE) +
+                                         std::string(SHADER_TEXT_SCROLLER_SHADER_FRAG);
+  std::string verticalFragmentShader = std::string(TEXT_GRADIENT_DEFINE) +
+                                       std::string(TEXT_GRADIENT_OVERLAY_DEFINE) +
+                                       std::string(TEXT_STYLE_DEFINE) +
+                                       std::string(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG);
+
+  const auto horizontalOverlayApply = horizontalFragmentShader.find("textTexture = ApplyTextGradientOverlay(textTexture);");
+  const auto horizontalStyleApply   = horizontalFragmentShader.find("textTexture = textTexture + styleTexture * (1.0 - textTexture.a);");
+  const auto verticalOverlayApply   = verticalFragmentShader.find("textTexture = ApplyTextGradientOverlay(textTexture);");
+  const auto verticalStyleApply     = verticalFragmentShader.find("textTexture = textTexture + styleTexture * (1.0 - textTexture.a);");
+
+  DALI_TEST_CHECK(horizontalFragmentShader.find("UNIFORM sampler2D sStyle;") != std::string::npos);
+  DALI_TEST_CHECK(horizontalFragmentShader.find("mediump vec4 styleTexture = TEXTURE(sStyle, vTexCoord);") != std::string::npos);
+  DALI_TEST_CHECK(horizontalOverlayApply != std::string::npos);
+  DALI_TEST_CHECK(horizontalStyleApply != std::string::npos);
+  DALI_TEST_CHECK(horizontalOverlayApply < horizontalStyleApply);
+
+  DALI_TEST_CHECK(verticalFragmentShader.find("UNIFORM sampler2D sStyle;") != std::string::npos);
+  DALI_TEST_CHECK(verticalFragmentShader.find("mediump vec4 styleTexture = TEXTURE(sStyle, vTexCoord);") != std::string::npos);
+  DALI_TEST_CHECK(verticalOverlayApply != std::string::npos);
+  DALI_TEST_CHECK(verticalStyleApply != std::string::npos);
+  DALI_TEST_CHECK(verticalOverlayApply < verticalStyleApply);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerOverlayStyleShaderFeatureP(void)
+{
+  std::string horizontalFragmentShader = std::string(TEXT_OVERLAY_STYLE_DEFINE) +
+                                         std::string(SHADER_TEXT_SCROLLER_SHADER_FRAG);
+  std::string verticalFragmentShader = std::string(TEXT_OVERLAY_STYLE_DEFINE) +
+                                       std::string(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG);
+
+  const auto horizontalFillSample   = horizontalFragmentShader.find("mediump vec4 textTexture = TEXTURE( sTexture, vTexCoord );");
+  const auto horizontalOverlayStyle = horizontalFragmentShader.find("textTexture = textTexture * (1.0 - overlayStyleTexture.a) + overlayStyleTexture;");
+  const auto horizontalOutput       = horizontalFragmentShader.find("gl_FragColor = textTexture * uColor;");
+  const auto verticalFillSample     = verticalFragmentShader.find("mediump vec4 textTexture = TEXTURE( sTexture, vTexCoord );");
+  const auto verticalOverlayStyle   = verticalFragmentShader.find("textTexture = textTexture * (1.0 - overlayStyleTexture.a) + overlayStyleTexture;");
+  const auto verticalOutput         = verticalFragmentShader.find("gl_FragColor = textTexture * uColor;");
+
+  DALI_TEST_CHECK(horizontalFragmentShader.find("UNIFORM sampler2D sOverlayStyle;") != std::string::npos);
+  DALI_TEST_CHECK(horizontalFragmentShader.find("mediump vec4 overlayStyleTexture = TEXTURE(sOverlayStyle, vTexCoord);") != std::string::npos);
+  DALI_TEST_CHECK(horizontalFillSample != std::string::npos);
+  DALI_TEST_CHECK(horizontalOverlayStyle != std::string::npos);
+  DALI_TEST_CHECK(horizontalOutput != std::string::npos);
+  DALI_TEST_CHECK(horizontalFillSample < horizontalOverlayStyle);
+  DALI_TEST_CHECK(horizontalOverlayStyle < horizontalOutput);
+
+  DALI_TEST_CHECK(verticalFragmentShader.find("UNIFORM sampler2D sOverlayStyle;") != std::string::npos);
+  DALI_TEST_CHECK(verticalFragmentShader.find("mediump vec4 overlayStyleTexture = TEXTURE(sOverlayStyle, vTexCoord);") != std::string::npos);
+  DALI_TEST_CHECK(verticalFillSample != std::string::npos);
+  DALI_TEST_CHECK(verticalOverlayStyle != std::string::npos);
+  DALI_TEST_CHECK(verticalOutput != std::string::npos);
+  DALI_TEST_CHECK(verticalFillSample < verticalOverlayStyle);
+  DALI_TEST_CHECK(verticalOverlayStyle < verticalOutput);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerStyleThenOverlayStyleShaderFeatureP(void)
+{
+  std::string fragmentShader = std::string(TEXT_STYLE_DEFINE) +
+                               std::string(TEXT_OVERLAY_STYLE_DEFINE) +
+                               std::string(SHADER_TEXT_SCROLLER_SHADER_FRAG);
+
+  const auto styleApply        = fragmentShader.find("textTexture = textTexture + styleTexture * (1.0 - textTexture.a);");
+  const auto overlayStyleApply = fragmentShader.find("textTexture = textTexture * (1.0 - overlayStyleTexture.a) + overlayStyleTexture;");
+
+  DALI_TEST_CHECK(styleApply != std::string::npos);
+  DALI_TEST_CHECK(overlayStyleApply != std::string::npos);
+  DALI_TEST_CHECK(styleApply < overlayStyleApply);
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionMarqueeMixedStyleFeatureP(void)
+{
+  std::string horizontalFragmentShader = std::string(TEXT_GRADIENT_DEFINE) +
+                                         std::string(TEXT_GRADIENT_MIXED_DEFINE) +
+                                         std::string(TEXT_GRADIENT_OVERLAY_DEFINE) +
+                                         std::string(TEXT_STYLE_DEFINE) +
+                                         std::string(SHADER_TEXT_SCROLLER_SHADER_FRAG);
+  std::string verticalFragmentShader = std::string(TEXT_GRADIENT_DEFINE) +
+                                       std::string(TEXT_GRADIENT_MIXED_DEFINE) +
+                                       std::string(TEXT_GRADIENT_OVERLAY_DEFINE) +
+                                       std::string(TEXT_STYLE_DEFINE) +
+                                       std::string(SHADER_TEXT_SCROLLER_VERTICAL_SHADER_FRAG);
+
+  const auto horizontalMixedFill    = horizontalFragmentShader.find("textTexture = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto horizontalOverlayApply = horizontalFragmentShader.find("textTexture = ApplyTextGradientOverlay(textTexture);");
+  const auto horizontalStyleApply   = horizontalFragmentShader.find("textTexture = textTexture + styleTexture * (1.0 - textTexture.a);");
+  const auto verticalMixedFill      = verticalFragmentShader.find("textTexture = gradientFill + preservedColor * (1.0 - gradientFill.a);");
+  const auto verticalOverlayApply   = verticalFragmentShader.find("textTexture = ApplyTextGradientOverlay(textTexture);");
+  const auto verticalStyleApply     = verticalFragmentShader.find("textTexture = textTexture + styleTexture * (1.0 - textTexture.a);");
+
+  DALI_TEST_CHECK(horizontalFragmentShader.find("UNIFORM sampler2D sTextGradientMask;") != std::string::npos);
+  DALI_TEST_CHECK(horizontalFragmentShader.find("UNIFORM sampler2D sStyle;") != std::string::npos);
+  DALI_TEST_CHECK(horizontalMixedFill != std::string::npos);
+  DALI_TEST_CHECK(horizontalOverlayApply != std::string::npos);
+  DALI_TEST_CHECK(horizontalStyleApply != std::string::npos);
+  DALI_TEST_CHECK(horizontalMixedFill < horizontalOverlayApply);
+  DALI_TEST_CHECK(horizontalOverlayApply < horizontalStyleApply);
+
+  DALI_TEST_CHECK(verticalFragmentShader.find("UNIFORM sampler2D sTextGradientMask;") != std::string::npos);
+  DALI_TEST_CHECK(verticalFragmentShader.find("UNIFORM sampler2D sStyle;") != std::string::npos);
+  DALI_TEST_CHECK(verticalMixedFill != std::string::npos);
+  DALI_TEST_CHECK(verticalOverlayApply != std::string::npos);
+  DALI_TEST_CHECK(verticalStyleApply != std::string::npos);
+  DALI_TEST_CHECK(verticalMixedFill < verticalOverlayApply);
+  DALI_TEST_CHECK(verticalOverlayApply < verticalStyleApply);
+  END_TEST;
+}
+
 int UtcDaliTextGradientShaderCompositionMarqueeHorizontalOverlayFeatureP(void)
 {
   std::string vertexShader   = std::string(TEXT_GRADIENT_OVERLAY_DEFINE) + std::string(SHADER_TEXT_SCROLLER_SHADER_VERT);
@@ -1121,6 +1673,296 @@ int UtcDaliTextGradientCalculateMarqueeGradientViewportBoundsVerticalShortEndP(v
   END_TEST;
 }
 
+int UtcDaliTextGradientMarqueeCompositionPolicyReasonsP(void)
+{
+  using Reason = TextInternal::GradientMarquee::CompositionUnsupportedReason;
+  using Resource = TextInternal::GradientMarquee::CompositionResourceFlag;
+  using ShaderFeature = TextInternal::GradientMarquee::CompositionShaderFeatureFlag;
+
+  ExpectMarqueeCompositionResult(false, false, false, false, false, false, true, Reason::NONE);
+  ExpectMarqueeCompositionResult(true, false, false, false, false, false, false, Reason::MULTIPLE_TEXT_COLORS);
+  ExpectMarqueeCompositionResult(false, true, false, false, false, false, false, Reason::COLOR_GLYPH);
+  ExpectMarqueeCompositionResult(false, false, true, false, false, false, false, Reason::STYLE_TEXTURE);
+  ExpectMarqueeCompositionResult(false, false, false, true, false, false, true, Reason::NONE,
+                                 ResourceFlag(Resource::TEXT_TEXTURE) |
+                                   ResourceFlag(Resource::OVERLAY_STYLE_TEXTURE),
+                                 ShaderFeatureFlag(ShaderFeature::OVERLAY_STYLE));
+  ExpectMarqueeCompositionResult(false, false, false, false, false, true, false, Reason::CUTOUT_FALLBACK);
+  ExpectMarqueeCompositionResult(false, false, false, false, true, false, false, Reason::EMBOSS_SHADER_FEATURE);
+  ExpectMarqueeCompositionResult(true, true, true, true, true, true, false, Reason::CUTOUT_FALLBACK);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeMixedColorCompositionPolicyP(void)
+{
+  ExpectMarqueeMixedColorCompositionResult(true, false, true, false, false, false, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, false, false, true, false, false, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, false, true, true, false, false, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, true, true, false, false, false, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, true, false, true, false, false, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, true, true, true, false, false, false, false, true);
+
+  ExpectMarqueeMixedColorCompositionResult(false, false, true, false, false, false, false, false, false);
+  ExpectMarqueeMixedColorCompositionResult(true, false, false, false, false, false, false, false, false);
+  ExpectMarqueeMixedColorCompositionResult(true, false, true, false, true, false, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, false, true, false, false, true, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, false, true, false, false, false, true, false, false);
+  ExpectMarqueeMixedColorCompositionResult(true, false, true, false, false, false, false, true, false);
+  ExpectMarqueeMixedColorCompositionResult(true, true, true, false, true, false, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, true, true, false, false, true, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, true, true, false, false, false, true, false, false);
+  ExpectMarqueeMixedColorCompositionResult(true, true, true, false, false, false, false, true, false);
+  ExpectMarqueeMixedColorCompositionResult(false, false, false, true, false, false, false, false, false);
+  ExpectMarqueeMixedColorCompositionResult(true, false, false, true, true, false, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, false, false, true, false, true, false, false, true);
+  ExpectMarqueeMixedColorCompositionResult(true, false, false, true, false, false, true, false, false);
+  ExpectMarqueeMixedColorCompositionResult(true, false, false, true, false, false, false, true, false);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeMixedStyleCompositionPolicyP(void)
+{
+  using Reason = TextInternal::GradientMarquee::CompositionUnsupportedReason;
+  using Resource = TextInternal::GradientMarquee::CompositionResourceFlag;
+  using ShaderFeature = TextInternal::GradientMarquee::CompositionShaderFeatureFlag;
+
+  TextInternal::GradientMarquee::CompositionPolicy policy;
+  policy.styleTextureEnabled   = true;
+  policy.hasMultipleTextColors = true;
+  policy.baseGradientEnabled   = true;
+
+  TextInternal::GradientMarquee::CompositionResult result =
+    TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == Reason::NONE, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags,
+                   ResourceFlag(Resource::PRESERVED_COLOR_TEXTURE) |
+                     ResourceFlag(Resource::GRADIENT_MASK_TEXTURE) |
+                     ResourceFlag(Resource::STYLE_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(result.shaderFeatureFlags,
+                   ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_MIXED) |
+                     ShaderFeatureFlag(ShaderFeature::STYLE_TEXTURE),
+                   TEST_LOCATION);
+
+  policy.overlayGradientEnabled = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags,
+                   ResourceFlag(Resource::PRESERVED_COLOR_TEXTURE) |
+                     ResourceFlag(Resource::GRADIENT_MASK_TEXTURE) |
+                     ResourceFlag(Resource::STYLE_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_OVERLAY_LOOKUP_TEXTURE),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(result.shaderFeatureFlags,
+                   ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_MIXED) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_OVERLAY) |
+                     ShaderFeatureFlag(ShaderFeature::STYLE_TEXTURE),
+                   TEST_LOCATION);
+
+  policy.baseGradientEnabled    = false;
+  policy.overlayGradientEnabled = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, false, TEST_LOCATION);
+
+  policy.baseGradientEnabled = true;
+  policy.isOverlayStyle      = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == Reason::NONE, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags,
+                   ResourceFlag(Resource::PRESERVED_COLOR_TEXTURE) |
+                     ResourceFlag(Resource::GRADIENT_MASK_TEXTURE) |
+                     ResourceFlag(Resource::STYLE_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_OVERLAY_LOOKUP_TEXTURE) |
+                     ResourceFlag(Resource::OVERLAY_STYLE_TEXTURE),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(result.shaderFeatureFlags,
+                   ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_MIXED) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_OVERLAY) |
+                     ShaderFeatureFlag(ShaderFeature::STYLE_TEXTURE) |
+                     ShaderFeatureFlag(ShaderFeature::OVERLAY_STYLE),
+                   TEST_LOCATION);
+
+  policy.isOverlayStyle = false;
+  policy.cutoutEnabled  = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == Reason::CUTOUT_FALLBACK, true, TEST_LOCATION);
+
+  policy.cutoutEnabled = false;
+  policy.embossEnabled = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == Reason::EMBOSS_SHADER_FEATURE, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeMixedOverlayStyleCompositionPolicyP(void)
+{
+  using Reason = TextInternal::GradientMarquee::CompositionUnsupportedReason;
+  using Resource = TextInternal::GradientMarquee::CompositionResourceFlag;
+  using ShaderFeature = TextInternal::GradientMarquee::CompositionShaderFeatureFlag;
+
+  TextInternal::GradientMarquee::CompositionPolicy policy;
+  policy.hasMultipleTextColors = true;
+  policy.baseGradientEnabled   = true;
+  policy.isOverlayStyle        = true;
+
+  TextInternal::GradientMarquee::CompositionResult result =
+    TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == Reason::NONE, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags,
+                   ResourceFlag(Resource::PRESERVED_COLOR_TEXTURE) |
+                     ResourceFlag(Resource::GRADIENT_MASK_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE) |
+                     ResourceFlag(Resource::OVERLAY_STYLE_TEXTURE),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(result.shaderFeatureFlags,
+                   ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_MIXED) |
+                     ShaderFeatureFlag(ShaderFeature::OVERLAY_STYLE),
+                   TEST_LOCATION);
+
+  policy.overlayGradientEnabled = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags,
+                   ResourceFlag(Resource::PRESERVED_COLOR_TEXTURE) |
+                     ResourceFlag(Resource::GRADIENT_MASK_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_OVERLAY_LOOKUP_TEXTURE) |
+                     ResourceFlag(Resource::OVERLAY_STYLE_TEXTURE),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(result.shaderFeatureFlags,
+                   ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_MIXED) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_OVERLAY) |
+                     ShaderFeatureFlag(ShaderFeature::OVERLAY_STYLE),
+                   TEST_LOCATION);
+
+  policy.styleTextureEnabled = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags,
+                   ResourceFlag(Resource::PRESERVED_COLOR_TEXTURE) |
+                     ResourceFlag(Resource::GRADIENT_MASK_TEXTURE) |
+                     ResourceFlag(Resource::STYLE_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE) |
+                     ResourceFlag(Resource::TEXT_GRADIENT_OVERLAY_LOOKUP_TEXTURE) |
+                     ResourceFlag(Resource::OVERLAY_STYLE_TEXTURE),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(result.shaderFeatureFlags,
+                   ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_MIXED) |
+                     ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_OVERLAY) |
+                     ShaderFeatureFlag(ShaderFeature::STYLE_TEXTURE) |
+                     ShaderFeatureFlag(ShaderFeature::OVERLAY_STYLE),
+                   TEST_LOCATION);
+
+  policy.baseGradientEnabled    = false;
+  policy.overlayGradientEnabled = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == Reason::OVERLAY_STYLE, true, TEST_LOCATION);
+
+  policy.baseGradientEnabled = true;
+  policy.cutoutEnabled       = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == Reason::CUTOUT_FALLBACK, true, TEST_LOCATION);
+
+  policy.cutoutEnabled = false;
+  policy.embossEnabled = true;
+  result = TextInternal::GradientMarquee::GetMixedColorCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.unsupportedReason == Reason::EMBOSS_SHADER_FEATURE, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeSimpleStyleCompositionPolicyP(void)
+{
+  using Reason = TextInternal::GradientMarquee::CompositionUnsupportedReason;
+  using Resource = TextInternal::GradientMarquee::CompositionResourceFlag;
+  using ShaderFeature = TextInternal::GradientMarquee::CompositionShaderFeatureFlag;
+
+  const uint32_t textAndStyle = ResourceFlag(Resource::TEXT_TEXTURE) |
+                                ResourceFlag(Resource::STYLE_TEXTURE);
+  const uint32_t styleShader = ShaderFeatureFlag(ShaderFeature::STYLE_TEXTURE);
+
+  ExpectMarqueeSimpleStyleCompositionResult(true, false, false, false, false, false, false, true, Reason::NONE,
+                                            textAndStyle | ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE),
+                                            styleShader | ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT));
+  ExpectMarqueeSimpleStyleCompositionResult(false, true, false, false, false, false, false, true, Reason::NONE,
+                                            textAndStyle | ResourceFlag(Resource::TEXT_GRADIENT_OVERLAY_LOOKUP_TEXTURE),
+                                            styleShader | ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_OVERLAY));
+  ExpectMarqueeSimpleStyleCompositionResult(true, true, false, false, false, false, false, true, Reason::NONE,
+                                            textAndStyle |
+                                              ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE) |
+                                              ResourceFlag(Resource::TEXT_GRADIENT_OVERLAY_LOOKUP_TEXTURE),
+                                            styleShader |
+                                              ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT) |
+                                              ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT_OVERLAY));
+
+  ExpectMarqueeSimpleStyleCompositionResult(false, false, false, false, false, false, false, false, Reason::STYLE_TEXTURE,
+                                            ResourceFlag(Resource::TEXT_TEXTURE),
+                                            ShaderFeatureFlag(ShaderFeature::NONE));
+  ExpectMarqueeSimpleStyleCompositionResult(true, false, true, false, false, false, false, false, Reason::MULTIPLE_TEXT_COLORS,
+                                            ResourceFlag(Resource::TEXT_TEXTURE),
+                                            ShaderFeatureFlag(ShaderFeature::NONE));
+  ExpectMarqueeSimpleStyleCompositionResult(true, false, false, true, false, false, false, false, Reason::COLOR_GLYPH,
+                                            ResourceFlag(Resource::TEXT_TEXTURE),
+                                            ShaderFeatureFlag(ShaderFeature::NONE));
+  ExpectMarqueeSimpleStyleCompositionResult(true, false, false, false, true, false, false, true, Reason::NONE,
+                                            textAndStyle |
+                                              ResourceFlag(Resource::TEXT_GRADIENT_LOOKUP_TEXTURE) |
+                                              ResourceFlag(Resource::OVERLAY_STYLE_TEXTURE),
+                                            styleShader |
+                                              ShaderFeatureFlag(ShaderFeature::TEXT_GRADIENT) |
+                                              ShaderFeatureFlag(ShaderFeature::OVERLAY_STYLE));
+  ExpectMarqueeSimpleStyleCompositionResult(true, false, false, false, false, false, true, false, Reason::CUTOUT_FALLBACK,
+                                            ResourceFlag(Resource::TEXT_TEXTURE),
+                                            ShaderFeatureFlag(ShaderFeature::NONE));
+  ExpectMarqueeSimpleStyleCompositionResult(true, false, false, false, false, true, false, false, Reason::EMBOSS_SHADER_FEATURE,
+                                            ResourceFlag(Resource::TEXT_TEXTURE),
+                                            ShaderFeatureFlag(ShaderFeature::NONE));
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeOverlayOnlyMixedTargetCompositionPolicyP(void)
+{
+  TextInternal::GradientMarquee::CompositionPolicy policy;
+  policy.overlayGradientEnabled = true;
+
+  policy.hasMultipleTextColors = true;
+  TextInternal::GradientMarquee::CompositionResult result =
+    TextInternal::GradientMarquee::GetCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags,
+                   static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::TEXT_TEXTURE),
+                   TEST_LOCATION);
+
+  policy.hasMultipleTextColors = false;
+  policy.containsColorGlyph    = true;
+  result = TextInternal::GradientMarquee::GetCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.requiredResourceFlags,
+                   static_cast<uint32_t>(TextInternal::GradientMarquee::CompositionResourceFlag::TEXT_TEXTURE),
+                   TEST_LOCATION);
+
+  policy.styleTextureEnabled = true;
+  result = TextInternal::GradientMarquee::GetCompositionResult(policy);
+  DALI_TEST_EQUALS(result.supported, false, TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliTextGradientMarqueeAsyncUsesViewportBoundsP(void)
 {
   UiText::LineRun line;
@@ -1174,6 +2016,461 @@ int UtcDaliTextGradientMarqueeLookupTexturesUseSequentialSlotsP(void)
   DALI_TEST_EQUALS(textureSetIndex, 3u, TEST_LOCATION);
   DALI_TEST_CHECK(textureSet.GetTexture(1u));
   DALI_TEST_CHECK(textureSet.GetTexture(2u));
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeMixedLookupTextureUsesSlotTwoP(void)
+{
+  TestApplication application;
+
+  TextInternal::Gradient::Style baseStyle = CreateLinearGradientStyle();
+
+  TextureSet textureSet      = TextureSet::New();
+  uint32_t   textureSetIndex = 2u;
+  TextInternal::Gradient::AddLookupTexture(textureSet, textureSetIndex, baseStyle);
+
+  DALI_TEST_EQUALS(textureSetIndex, 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(textureSet.GetTexture(2u));
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeMixedOverlayLookupTextureUsesSlotThreeP(void)
+{
+  TestApplication application;
+
+  UiText::MarqueeBuilder::PreparedContent content;
+  content.textureSet = TextureSet::New();
+
+  UiText::MarqueeBuilder::MixedGradientContentRequest request;
+  request.preservedPixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+  request.maskPixelData      = CreatePixelData(2u, 2u, Pixel::L8);
+  request.sampler            = Sampler::New();
+  request.verifiedSize       = Size(2.0f, 2.0f);
+
+  request.gradientState.baseRenderable         = true;
+  request.gradientState.overlayRenderable      = true;
+  request.gradientState.baseStyle              = CreateLinearGradientStyle();
+  request.gradientState.overlayStyle           = CreateLinearGradientStyle(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  request.gradientState.baseStyleRenderable    = true;
+  request.gradientState.overlayStyleRenderable = true;
+
+  request.compositionPolicy.hasMultipleTextColors  = true;
+  request.compositionPolicy.baseGradientEnabled    = true;
+  request.compositionPolicy.overlayGradientEnabled = true;
+
+  request.baseBounds.bounds            = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+  request.baseBounds.coordinateSize    = Vector2(2.0f, 2.0f);
+  request.overlayBoundsResolved        = true;
+  request.overlayBounds.bounds         = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+  request.overlayBounds.coordinateSize = Vector2(2.0f, 2.0f);
+  request.overlayMode                  = Dali::Ui::Text::GradientOverlayMode::SCREEN;
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayMode, Dali::Ui::Text::GradientOverlayMode::SCREEN, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerPlainMarqueeCompositionPlanKeepsFastPathP(void)
+{
+  TestApplication application;
+
+  Sampler sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content =
+    UiText::MarqueeBuilder::CreateTextContent(CreatePixelData(2u, 2u, Pixel::RGBA8888), sampler);
+
+  UiText::MarqueeBuilder::CompositionRequest request;
+  request.sampler      = sampler;
+  request.verifiedSize = Size(2.0f, 2.0f);
+
+  const UiText::MarqueeBuilder::CompositionPlan plan =
+    UiText::MarqueeBuilder::GetCompositionPlan(request);
+  DALI_TEST_EQUALS(plan.HasWork(), false, TEST_LOCATION);
+
+  UiText::MarqueeBuilder::PixelDataBundle pixels;
+  UiText::MarqueeBuilder::ApplyPreparedComposition(content, request, pixels);
+
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(!content.textureSet.GetTexture(1u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerPlainOverlayStyleCompositionPlanUsesOverlayOnlyP(void)
+{
+  TestApplication application;
+
+  Sampler sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content =
+    UiText::MarqueeBuilder::CreateTextContent(CreatePixelData(2u, 2u, Pixel::RGBA8888), sampler);
+
+  UiText::MarqueeBuilder::CompositionRequest request;
+  request.sampler                    = sampler;
+  request.verifiedSize               = Size(2.0f, 2.0f);
+  request.featureInfo.isOverlayStyle = true;
+
+  const UiText::MarqueeBuilder::CompositionPlan plan =
+    UiText::MarqueeBuilder::GetCompositionPlan(request);
+  DALI_TEST_EQUALS(plan.HasWork(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(plan.needsOverlayStylePixelData, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(plan.needsBaseBounds, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plan.needsOverlayBounds, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plan.needsPreservedMaskPixelData, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plan.needsStylePixelData, false, TEST_LOCATION);
+
+  UiText::MarqueeBuilder::PixelDataBundle pixels;
+  pixels.overlayStylePixelData = CreatePixelData(2u, 2u, Pixel::RGBA8888);
+  UiText::MarqueeBuilder::ApplyPreparedComposition(content, request, pixels);
+
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerOverlayStyleTextureSlotP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content =
+    UiText::MarqueeBuilder::CreateTextContent(CreatePixelData(2u, 2u, Pixel::RGBA8888), sampler);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendPlainOverlayStyleContent(content,
+                                                                             CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                             sampler,
+                                                                             verifiedSize),
+                   true,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerGradientOverlayStyleTextureSlotP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content =
+    UiText::MarqueeBuilder::CreateTextContent(CreatePixelData(2u, 2u, Pixel::RGBA8888), sampler);
+  const auto request = CreateSimpleGradientContentRequest(true, false);
+
+  UiText::MarqueeBuilder::ApplySimpleGradientContent(content, request);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendSimpleOverlayStyleContent(content,
+                                                                              CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                              sampler,
+                                                                              verifiedSize),
+                   true,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerGradientOverlayOverlayStyleTextureSlotP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content =
+    UiText::MarqueeBuilder::CreateTextContent(CreatePixelData(2u, 2u, Pixel::RGBA8888), sampler);
+  const auto request = CreateSimpleGradientContentRequest(true, true);
+
+  UiText::MarqueeBuilder::ApplySimpleGradientContent(content, request);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendSimpleOverlayStyleContent(content,
+                                                                              CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                              sampler,
+                                                                              verifiedSize),
+                   true,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayMode, Dali::Ui::Text::GradientOverlayMode::SCREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerStyleOverlayStyleTextureSlotP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateSimpleStyleContentRequest(true, true);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplySimpleStyleContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendSimpleOverlayStyleContent(content,
+                                                                              CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                              sampler,
+                                                                              verifiedSize),
+                   true,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(4u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerSimpleOverlayStyleDoesNotAppendToMixedContentP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateMixedGradientContentRequest(true, false);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendSimpleOverlayStyleContent(content,
+                                                                              CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                              sampler,
+                                                                              verifiedSize),
+                   false,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, false, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerMixedOverlayStyleTextureSlotP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateMixedGradientContentRequest(false, false);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendMixedOverlayStyleContent(content,
+                                                                             CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                             sampler,
+                                                                             verifiedSize),
+                   true,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerMixedGradientOverlayOverlayStyleTextureSlotP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateMixedGradientContentRequest(true, false);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendMixedOverlayStyleContent(content,
+                                                                             CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                             sampler,
+                                                                             verifiedSize),
+                   true,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(4u));
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerMixedStyleOverlayStyleTextureSlotP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateMixedGradientContentRequest(false, true);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendMixedOverlayStyleContent(content,
+                                                                             CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                             sampler,
+                                                                             verifiedSize),
+                   true,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(4u));
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextScrollerMixedStyleGradientOverlayOverlayStyleTextureSlotP(void)
+{
+  TestApplication application;
+
+  const Size verifiedSize(2.0f, 2.0f);
+  Sampler    sampler = Sampler::New();
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateMixedGradientContentRequest(true, true);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryAppendMixedOverlayStyleContent(content,
+                                                                             CreatePixelData(2u, 2u, Pixel::RGBA8888),
+                                                                             sampler,
+                                                                             verifiedSize),
+                   true,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(4u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(5u));
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayStyleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeMixedStyleBaseLookupAndStyleTextureSlotsP(void)
+{
+  TestApplication application;
+
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateMixedGradientContentRequest(false, true);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeMixedStyleBaseOverlayLookupAndStyleTextureSlotsP(void)
+{
+  TestApplication application;
+
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateMixedGradientContentRequest(true, true);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplyMixedGradientContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(4u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.mixedTextGradient, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayMode, Dali::Ui::Text::GradientOverlayMode::SCREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeStyleBaseLookupAndStyleTextureSlotsP(void)
+{
+  TestApplication application;
+
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateSimpleStyleContentRequest(true, false);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplySimpleStyleContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeStyleOverlayLookupAndStyleTextureSlotsP(void)
+{
+  TestApplication application;
+
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateSimpleStyleContentRequest(false, true);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplySimpleStyleContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayMode, Dali::Ui::Text::GradientOverlayMode::SCREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeStyleBaseOverlayLookupAndStyleTextureSlotsP(void)
+{
+  TestApplication application;
+
+  UiText::MarqueeBuilder::PreparedContent content;
+  const auto request = CreateSimpleStyleContentRequest(true, true);
+
+  DALI_TEST_EQUALS(UiText::MarqueeBuilder::TryApplySimpleStyleContent(content, request), true, TEST_LOCATION);
+  DALI_TEST_CHECK(content.textureSet.GetTexture(0u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(1u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(2u));
+  DALI_TEST_CHECK(content.textureSet.GetTexture(3u));
+  DALI_TEST_EQUALS(content.textGradient.enabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.overlayMode, Dali::Ui::Text::GradientOverlayMode::SCREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(content.textGradient.styleTextureEnabled, true, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1242,6 +2539,64 @@ int UtcDaliTextGradientMarqueeScrollerUpdatesRendererBoundsP(void)
   ExpectPosition(actualConicCenter, Vector2(0.25f, 0.75f));
   ExpectPosition(actualConicScale, Vector2(100.0f, 40.0f));
   DALI_TEST_EQUALS(renderer.GetProperty<float>(conicStartAngleIndex), 0.75f, EPSILON, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientMarqueeScrollerUpdatesBaseAnimSourceP(void)
+{
+  TestApplication application;
+
+  Geometry geometry = CreateQuadGeometry();
+  Shader   shader   = CreateShader();
+  Renderer renderer = Renderer::New(geometry, shader);
+
+  const Property::Index startOffsetIndex = renderer.RegisterProperty("uTextGradientStartOffset", 0.0f);
+
+  Actor actor = Actor::New();
+  actor.AddRenderer(renderer);
+  application.GetScene().Add(actor);
+
+  UiText::TextScrollerGradient textGradient;
+  textGradient.enabled                   = true;
+  textGradient.type                      = Dali::Ui::Gradient::Type::LINEAR;
+  textGradient.startPosition             = Vector2::ZERO;
+  textGradient.endPosition               = Vector2::ONE;
+  textGradient.startOffset               = 0.15f;
+  textGradient.bounds                    = Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+  textGradient.startOffsetPropertyIndex  = Property::INVALID_INDEX;
+  textGradient.applyConstraintsAlways    = true;
+
+  TestScrollerInterface   scrollerInterface;
+  UiText::TextScrollerPtr scroller   = UiText::TextScroller::New(scrollerInterface);
+  const TextureSet        textureSet = TextureSet::New();
+
+  scroller->SetParameters(actor,
+                          renderer,
+                          textureSet,
+                          Size(100.0f, 40.0f),
+                          Size(200.0f, 40.0f),
+                          20.0f,
+                          false,
+                          UiText::Alignment::CENTER,
+                          UiText::Alignment::CENTER,
+                          true,
+                          textGradient);
+
+  application.SendNotification();
+  application.Render(16u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(startOffsetIndex), 0.15f, EPSILON, TEST_LOCATION);
+
+  const Property::Index sourceStartOffsetIndex = actor.RegisterProperty("uTextGradientStartOffset", 0.45f);
+  scroller->SetGradientAnimProperties(sourceStartOffsetIndex);
+
+  application.SendNotification();
+  application.Render(16u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(startOffsetIndex), 0.45f, EPSILON, TEST_LOCATION);
+
+  actor.SetProperty(sourceStartOffsetIndex, 0.8f);
+  application.SendNotification();
+  application.Render(16u);
+  DALI_TEST_EQUALS(renderer.GetCurrentProperty<float>(startOffsetIndex), 0.8f, EPSILON, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1539,6 +2894,34 @@ int UtcDaliTextGradientShaderCompositionAsyncMixedMultiColorFeatureP(void)
   DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
   DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED, TEST_LOCATION);
   ExpectTextGradientMixedDefine(fragmentPrefix);
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAsyncMixedStyleFeatureP(void)
+{
+  TextFeature::FeatureBuilder builder = BuildAsyncFeature(false, true, false, true, false, false, true);
+
+  std::string fragmentPrefix = GetFragmentPrefix(builder);
+
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_STYLE, TEST_LOCATION);
+  ExpectTextGradientMixedDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_STYLE\n") != std::string::npos, true, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAsyncMixedOverlayStyleFeatureP(void)
+{
+  TextFeature::FeatureBuilder builder = BuildAsyncFeature(false, true, false, false, true, false, true);
+
+  std::string fragmentPrefix = GetFragmentPrefix(builder);
+
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradient(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.IsEnabledTextGradientMixed(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_TEXT_GRADIENT_MIXED_WITH_OVERLAY, TEST_LOCATION);
+  ExpectTextGradientMixedDefine(fragmentPrefix);
+  DALI_TEST_EQUALS(fragmentPrefix.find("#define IS_REQUIRED_OVERLAY\n") != std::string::npos, true, TEST_LOCATION);
   END_TEST;
 }
 

@@ -558,6 +558,36 @@ int UtcDaliLabelTextGradientOverlayAnimationAsyncMarqueeCreatesLazyPropertyP(voi
   END_TEST;
 }
 
+int UtcDaliLabelTextGradientOverlayAnimationPendingMarqueeCreatesLazyPropertyP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New("Animated marquee text that is long enough to scroll");
+  label.SetAsyncRendering(false);
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(40.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(1);
+  label.SetMarqueeSpeed(80);
+  label.SetTextGradientOverlay(MakeRenderableLinear(Vector2::ZERO, Vector2::ONE, 0.4f));
+
+  label.StartMarquee();
+
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  Animation animation = Animation::New(0.1f);
+  ApplyTextGradientOverlayAnimationTo(label, animation);
+
+  const Property::Index overlayStartOffsetIndex =
+    label.GetPropertyIndex(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(overlayStartOffsetIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetProperty<float>(overlayStartOffsetIndex), 0.4f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliLabelTextGradientOverlayAnimationSingleMarqueeLazyPropertyP(void)
 {
   UiTestApplication application;
