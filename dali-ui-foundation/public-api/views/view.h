@@ -45,6 +45,7 @@
 #include <dali-ui-foundation/public-api/views/effects/shadow-stack.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/state-event.h>
+#include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 #include <dali-ui-foundation/public-api/views/view-focus-enums.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/views/view-with.h>
@@ -1747,21 +1748,20 @@ public:
       /**
        * @brief Role being performed in accessibility hierarchy.
        * @details Name "accessibilityRole", type Property::INTEGER.
-       * @note It gets integer value of AccessibilityRole enum then interprets to Dali::Accessibility::Role when
-       * requested by AT-SPI. Note that setting Dali::Accessibility::Role value is still accepted for backward
-       * compatibility but not preferred.
-       * @see Dali::Accessibility::Role
+       * @note Set this property with the integer value of Dali::Ui::Accessibility::Role.
+       * Dali UI converts this semantic role to the adaptor accessibility role when requested by accessibility services.
+       * @see Dali::Ui::Accessibility::Role
        */
       ACCESSIBILITY_ROLE,
 
       /**
-       * @brief Mark of able to highlight object.
+       * @brief Indicates whether accessibility services may highlight this View.
        * @details Name "accessibilityHighlightable", type Property::BOOLEAN.
        */
       ACCESSIBILITY_HIGHLIGHTABLE,
 
       /**
-       * @brief Set of accessibility attributes describing object in accessibility hierarchy
+       * @brief Set of accessibility attributes describing object in accessibility hierarchy.
        * @details Name "accessibilityAttributes", type Property::MAP
        */
       ACCESSIBILITY_ATTRIBUTES,
@@ -1775,9 +1775,9 @@ public:
       DISPATCH_KEY_EVENTS,
 
       /**
-       * @brief Marks the object as invisible to AT-SPI clients.
+       * @brief Marks this View as hidden from accessibility clients.
        * @details Name "accessibilityHidden", type Property::BOOLEAN.
-       * @note The representative Accessible object will not appear in the AT-SPI tree.
+       * @note The representative Accessible object will not appear in the exported accessibility tree.
        */
       ACCESSIBILITY_HIDDEN,
 
@@ -1808,19 +1808,13 @@ public:
       ACCESSIBILITY_VALUE,
 
       /**
-       * @brief Indicates the accessibility services treat the View as scrollable.
+       * @brief Indicates whether accessibility services should treat the View as scrollable.
        * @details Name "accessibilityScrollable", type Property::BOOLEAN.
        */
       ACCESSIBILITY_SCROLLABLE,
 
       /**
-       * @brief Bitset integer of AccessibilityState which describes the current state of a View.
-       * @details Name "accessibilityStates", type Property::INTEGER.
-       */
-      ACCESSIBILITY_STATES,
-
-      /**
-       * @brief Indicates the accessibility services treat the Viewa as modal.
+       * @brief Indicates whether accessibility services should treat the View as modal.
        * @details Name "accessibilityIsModal", type Property::BOOLEAN.
        */
       ACCESSIBILITY_IS_MODAL,
@@ -2043,6 +2037,41 @@ public:
    * @return true if the resources are loaded and ready, false otherwise
    */
   bool IsResourceReady() const;
+
+  /**
+   * @brief Adds the given accessibility state to this View.
+   *
+   * @SINCE_2_5.30
+   * @param[in] state The accessibility state to enable
+   * @see Dali::Ui::Accessibility::State
+   */
+  void AddAccessibilityState(Accessibility::State state);
+
+  /**
+   * @brief Removes the given accessibility state from this View.
+   *
+   * @SINCE_2_5.30
+   * @param[in] state The accessibility state to disable
+   * @see Dali::Ui::Accessibility::State
+   */
+  void RemoveAccessibilityState(Accessibility::State state);
+
+  /**
+   * @brief Clears all accessibility states from this View.
+   *
+   * @SINCE_2_5.30
+   */
+  void ClearAccessibilityStates();
+
+  /**
+   * @brief Returns whether the given accessibility state is set on this View.
+   *
+   * @SINCE_2_5.30
+   * @param[in] state The accessibility state to query
+   * @return True if the state is set
+   * @see Dali::Ui::Accessibility::State
+   */
+  bool HasAccessibilityState(Accessibility::State state) const;
 
   /**
    * @brief Checks whether the view is connected to the scene.

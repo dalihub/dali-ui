@@ -28,7 +28,7 @@
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
-#include <dali-ui-foundation/public-api/views/view-accessibility-enums.h>
+#include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -41,8 +41,6 @@ SelectableTrait GetSelectableTrait(ViewImpl& viewImpl)
   auto* traitObject = ViewDataImpl::Get(viewImpl).GetCoreInteractionObject();
   return traitObject ? SelectableTrait::DownCast(BaseHandle(static_cast<BaseObject*>(traitObject))) : SelectableTrait();
 }
-
-constexpr int32_t CHECKED_MASK = 1 << static_cast<int32_t>(AccessibilityState::CHECKED);
 
 /**
  * @brief Resolves the parent View of the given View, or an empty handle.
@@ -63,7 +61,7 @@ GroupSelectableTraitImpl::GroupSelectableTraitImpl()
   mGroup(),
   mGroupName(),
   mAutoGroupParent(),
-  mPreviousRole(static_cast<int32_t>(AccessibilityRole::NONE)),
+  mPreviousRole(static_cast<int32_t>(Accessibility::Role::NONE)),
   mRoleCached(false),
   mAttached(false)
 {
@@ -515,7 +513,7 @@ void GroupSelectableTraitImpl::ApplyRadioAccessibility()
     mRoleCached   = true;
   }
 
-  owner.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(AccessibilityRole::RADIO_BUTTON));
+  owner.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(Accessibility::Role::RADIO_BUTTON));
 
   // Seed CHECKED from the member's current selected state, reusing the sibling-handle
   // helper (mirrors selectable-trait-impl.cpp:34-38) rather than an inline re-DownCast.
@@ -547,9 +545,9 @@ void GroupSelectableTraitImpl::RestoreAccessibility()
   // IsSelected(). The logical/visual SELECTED state is carried independently by
   // ViewState::SELECTED, so clearing CHECKED here does not unselect the member. For the
   // typical NONE case this yields CHECKED=false (same as the previous unconditional clear).
-  const bool      checkable  = (restoredRole == static_cast<int32_t>(AccessibilityRole::CHECK_BOX) ||
-                          restoredRole == static_cast<int32_t>(AccessibilityRole::RADIO_BUTTON) ||
-                          restoredRole == static_cast<int32_t>(AccessibilityRole::TOGGLE_BUTTON));
+  const bool      checkable  = (restoredRole == static_cast<int32_t>(Accessibility::Role::CHECK_BOX) ||
+                          restoredRole == static_cast<int32_t>(Accessibility::Role::RADIO_BUTTON) ||
+                          restoredRole == static_cast<int32_t>(Accessibility::Role::TOGGLE_BUTTON));
   SelectableTrait selectable = GetSelectableTrait(GetImpl(owner));
   WriteCheckedState(owner, checkable && selectable && selectable.IsSelected());
 }
@@ -561,11 +559,14 @@ void GroupSelectableTraitImpl::WriteCheckedState(View view, bool checked)
     return;
   }
 
-  // ACCESSIBILITY_STATES is a whole-bitset INTEGER property whose SetProperty
-  // replaces the value wholesale (view-data-impl.cpp). Use read-modify-write so
-  // other bits (e.g. ENABLED) survive.
-  int32_t raw = view.GetProperty<int32_t>(View::Property::ACCESSIBILITY_STATES);
-  view.SetProperty(View::Property::ACCESSIBILITY_STATES, checked ? (raw | CHECKED_MASK) : (raw & ~CHECKED_MASK));
+  if(checked)
+  {
+    view.AddAccessibilityState(Accessibility::State::CHECKED);
+  }
+  else
+  {
+    view.RemoveAccessibilityState(Accessibility::State::CHECKED);
+  }
 }
 
 } // namespace Dali::Ui::Internal

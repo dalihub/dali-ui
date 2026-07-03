@@ -47,7 +47,6 @@
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali/devel-api/adaptor-framework/accessibility.h>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 

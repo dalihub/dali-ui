@@ -19,8 +19,10 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/accessibility.h>
+#include <dali/devel-api/adaptor-framework/accessibility-devel.h> // LCOV_EXCL_LINE
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h> // LCOV_EXCL_LINE
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>  // LCOV_EXCL_LINE
 #include <dali/integration-api/adaptor-framework/input-method-context-integ.h>
 #include <dali/integration-api/processor-interface.h>
 #include <dali/public-api/animation/constraint.h>
@@ -40,6 +42,7 @@
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/types/unique-any.h>
+#include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali/integration-api/debug.h>
@@ -428,12 +431,12 @@ public:
    * This function sets, which part of object will be read out
    * by screen-reader.
    */
-  void SetAccessibilityReadingInfoType(const Dali::Accessibility::ReadingInfoTypes types);
+  void SetAccessibilityReadingInfoType(const Dali::Integration::Accessibility::ReadingInfoTypes types); // LCOV_EXCL_LINE
 
   /**
    * @brief Gets currently active reading info type attributes
    */
-  Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const;
+  Dali::Integration::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const; // LCOV_EXCL_LINE
 
   /**
    * @copydoc View::VisualEventSignal()
@@ -526,7 +529,43 @@ public:
   /**
    * @copydoc Dali::Ui::ViewImpl::GetAccessibilityRelations()
    */
-  Dali::Vector<Accessibility::Relation> GetAccessibilityRelations();
+  Dali::Vector<Dali::Devel::Accessibility::Relation> GetAccessibilityRelations(); // LCOV_EXCL_LINE
+
+  /**
+   * @brief Sets the accessibility states.
+   * @param[in] states The accessibility state mask
+   */
+  void SetAccessibilityStates(uint32_t states);
+
+  /**
+   * @brief Gets the accessibility states.
+   * @return The accessibility state mask
+   */
+  uint32_t GetAccessibilityStates() const;
+
+  /**
+   * @brief Adds the accessibility state.
+   * @param[in] state The state to add
+   */
+  void AddAccessibilityState(Accessibility::State state);
+
+  /**
+   * @brief Removes the accessibility state.
+   * @param[in] state The state to remove
+   */
+  void RemoveAccessibilityState(Accessibility::State state);
+
+  /**
+   * @brief Clears all accessibility states.
+   */
+  void ClearAccessibilityStates();
+
+  /**
+   * @brief Returns whether the accessibility state is set.
+   * @param[in] state The state to query
+   * @return True if the state is set
+   */
+  bool HasAccessibilityState(Accessibility::State state) const;
 
   /**
    * @copydoc Dali::Ui::View::IsAccessibleCreated()
@@ -546,7 +585,7 @@ public:
   /**
    * @copydoc Dali::Ui::View::EmitAccessibilityStateChanged()
    */
-  void EmitAccessibilityStateChanged(Accessibility::State state, int newValue);
+  void EmitAccessibilityStateChanged(Dali::Integration::Accessibility::State state, int newValue); // LCOV_EXCL_LINE
 
   /**
    * @brief Apply fittingMode
@@ -743,7 +782,7 @@ public:
 
   // Frequencly touched accessibility relative values.
   // Keep it on ViewDataImpl to avoid AccessibilityData creation.
-  int32_t mAccessibilityRole : Dali::Log<static_cast<uint32_t>(AccessibilityRole::MAX_COUNT)>::value + 2;
+  int32_t mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2;
 
   bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
   bool mIsEmittingResourceReadySignal : 1;                ///< True during ResourceReady().
@@ -782,7 +821,6 @@ public:
   static const PropertyRegistration PROPERTY_26;
   static const PropertyRegistration PROPERTY_27;
   static const PropertyRegistration PROPERTY_28;
-  static const PropertyRegistration PROPERTY_29;
   static const PropertyRegistration PROPERTY_30;
   static const PropertyRegistration PROPERTY_31;
   static const PropertyRegistration PROPERTY_32;

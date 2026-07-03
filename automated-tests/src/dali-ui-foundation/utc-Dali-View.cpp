@@ -16,16 +16,20 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
+#include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali/integration-api/events/key-event-integ.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>
 #include <stdlib.h>
 #include <algorithm>
 #include <iostream>
@@ -39,6 +43,8 @@ using namespace Dali::Ui;
 
 namespace
 {
+namespace UiAccessibility = Dali::Ui::Accessibility;
+
 // Dummy trait implementation for testing
 class DummyTraitImpl : public TraitObject
 {
@@ -242,6 +248,11 @@ int GetVisualType(const Property::Map& map)
   int type = static_cast<int>(Ui::Integration::InternalVisualType::INVALID);
   DALI_TEST_CHECK(typeValue && typeValue->Get(type));
   return type;
+}
+
+uint32_t AccessibilityStateMask(UiAccessibility::State state)
+{
+  return 1u << static_cast<uint32_t>(state);
 }
 
 } // namespace
@@ -3433,5 +3444,211 @@ int UtcDaliViewReentrantStandaloneChildRemoveDuringArrangeP(void)
 
   gReentrantParent.Reset();
   gSiblingToRemove.Reset();
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityExportedPropertiesP(void)
+{
+  UiTestApplication application;
+
+  View view = View::New();
+  view.SetProperty(View::Property::ACCESSIBILITY_NAME, "Accessible view");
+  view.SetProperty(View::Property::ACCESSIBILITY_DESCRIPTION, "Accessible description");
+  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::CHECK_BOX));
+  view.SetProperty(View::Property::ACCESSIBILITY_HIGHLIGHTABLE, true);
+  view.SetProperty(View::Property::ACCESSIBILITY_HIDDEN, true);
+  view.SetProperty(View::Property::AUTOMATION_ID, "view-automation-id");
+  view.SetProperty(View::Property::ACCESSIBILITY_VALUE, "60%");
+  view.SetProperty(View::Property::ACCESSIBILITY_SCROLLABLE, true);
+  view.SetProperty(View::Property::ACCESSIBILITY_IS_MODAL, true);
+  DALI_TEST_CHECK(view.HasAccessibilityState(UiAccessibility::State::ENABLED));
+  DALI_TEST_CHECK(!view.HasAccessibilityState(UiAccessibility::State::SELECTED));
+  DALI_TEST_CHECK(!view.HasAccessibilityState(UiAccessibility::State::CHECKED));
+
+  view.AddAccessibilityState(UiAccessibility::State::SELECTED);
+  view.AddAccessibilityState(UiAccessibility::State::CHECKED);
+  view.AddAccessibilityState(UiAccessibility::State::BUSY);
+  view.AddAccessibilityState(UiAccessibility::State::EXPANDED);
+
+  DALI_TEST_CHECK(view.HasAccessibilityState(UiAccessibility::State::SELECTED));
+  DALI_TEST_CHECK(view.HasAccessibilityState(UiAccessibility::State::CHECKED));
+  DALI_TEST_CHECK(view.HasAccessibilityState(UiAccessibility::State::BUSY));
+  DALI_TEST_CHECK(view.HasAccessibilityState(UiAccessibility::State::EXPANDED));
+
+  view.RemoveAccessibilityState(UiAccessibility::State::SELECTED);
+  DALI_TEST_CHECK(!view.HasAccessibilityState(UiAccessibility::State::SELECTED));
+  view.AddAccessibilityState(UiAccessibility::State::SELECTED);
+  view.RemoveAccessibilityState(UiAccessibility::State::BUSY);
+  DALI_TEST_CHECK(!view.HasAccessibilityState(UiAccessibility::State::BUSY));
+  view.AddAccessibilityState(UiAccessibility::State::BUSY);
+
+  Property::Map attributes;
+  attributes.Insert("resID", "test-resource");
+  view.SetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES, attributes);
+
+  auto accessible = Dali::Accessibility::Accessible::Get(view);
+  DALI_TEST_CHECK(accessible);
+  DALI_TEST_EQUALS(accessible->GetName(), "Accessible view", TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetDescription(), "Accessible description", TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetValue(), "60%", TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::CHECK_BOX, TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->IsHidden(), true, TEST_LOCATION);
+
+  auto states = accessible->GetStates();
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::ENABLED]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::SELECTED]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::CHECKED]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::BUSY]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::EXPANDED]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::HIGHLIGHTABLE]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::MODAL]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(dynamic_cast<ViewAccessible*>(accessible)->IsScrollable(), true, TEST_LOCATION);
+
+  view.RemoveAccessibilityState(UiAccessibility::State::SELECTED);
+  states = accessible->GetStates();
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::SELECTED]), false, TEST_LOCATION);
+
+  view.AddAccessibilityState(UiAccessibility::State::SELECTED);
+  states = accessible->GetStates();
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::SELECTED]), true, TEST_LOCATION);
+
+  auto exportedAttributes = accessible->GetAttributes();
+  DALI_TEST_EQUALS(exportedAttributes["resID"], "test-resource", TEST_LOCATION);
+  DALI_TEST_EQUALS(exportedAttributes["automationId"], "view-automation-id", TEST_LOCATION);
+  DALI_TEST_CHECK(exportedAttributes.find("class") != exportedAttributes.end());
+
+  view.ClearAccessibilityStates();
+  states = accessible->GetStates();
+  DALI_TEST_CHECK(!view.HasAccessibilityState(UiAccessibility::State::ENABLED));
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::ENABLED]), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::SELECTED]), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::CHECKED]), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::BUSY]), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(states[Dali::Integration::Accessibility::State::EXPANDED]), false, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityRoleConversionP(void)
+{
+  UiTestApplication application;
+
+  View view       = View::New();
+  auto accessible = Dali::Accessibility::Accessible::Get(view);
+  DALI_TEST_CHECK(accessible);
+
+  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::BUTTON));
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::PUSH_BUTTON, TEST_LOCATION);
+
+  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::TEXT));
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::LABEL, TEST_LOCATION);
+
+  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::TAB));
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::PAGE_TAB, TEST_LOCATION);
+
+  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::SCENE_3D));
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::FILLER, TEST_LOCATION);
+  DALI_TEST_EQUALS(ViewAccessible::IsScene3D(view), true, TEST_LOCATION);
+
+  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::DIALOG));
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::DIALOG, TEST_LOCATION);
+  DALI_TEST_EQUALS(ViewAccessible::IsModal(view), true, TEST_LOCATION);
+
+  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::NONE));
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::UNKNOWN, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(accessible->GetStates()[Dali::Integration::Accessibility::State::HIGHLIGHTABLE]), false, TEST_LOCATION);
+
+  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, -1);
+  DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::UNKNOWN, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityReadingInfoP(void)
+{
+  UiTestApplication application;
+
+  View view = View::New();
+  auto accessible = Dali::Accessibility::Accessible::Get(view);
+  DALI_TEST_CHECK(accessible);
+
+  auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
+
+  auto defaultTypes = viewData.GetAccessibilityReadingInfoType();
+  DALI_TEST_EQUALS(static_cast<bool>(defaultTypes[Dali::Integration::Accessibility::ReadingInfoType::NAME]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(defaultTypes[Dali::Integration::Accessibility::ReadingInfoType::ROLE]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(defaultTypes[Dali::Integration::Accessibility::ReadingInfoType::DESCRIPTION]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(defaultTypes[Dali::Integration::Accessibility::ReadingInfoType::STATE]), true, TEST_LOCATION);
+
+  Dali::Integration::Accessibility::ReadingInfoTypes internalTypes;
+  internalTypes[Dali::Integration::Accessibility::ReadingInfoType::NAME]        = true;
+  internalTypes[Dali::Integration::Accessibility::ReadingInfoType::ROLE]        = true;
+  internalTypes[Dali::Integration::Accessibility::ReadingInfoType::DESCRIPTION] = true;
+  internalTypes[Dali::Integration::Accessibility::ReadingInfoType::STATE]       = true;
+  viewData.SetAccessibilityReadingInfoType(internalTypes);
+
+  auto storedTypes = viewData.GetAccessibilityReadingInfoType();
+  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::NAME]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::ROLE]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::DESCRIPTION]), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::STATE]), true, TEST_LOCATION);
+
+  viewData.SetAccessibilityReadingInfoType({});
+  storedTypes = viewData.GetAccessibilityReadingInfoType();
+  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::NAME]), false, TEST_LOCATION);
+
+  Property::Map attributes;
+  attributes.Insert("reading_info_type", "name|description");
+  view.SetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES, attributes);
+
+  auto exportedAttributes = accessible->GetAttributes();
+  DALI_TEST_EQUALS(exportedAttributes["reading_info_type"], "name|description", TEST_LOCATION);
+
+  attributes["reading_info_type"] = "name|role|description|state";
+  view.SetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES, attributes);
+
+  exportedAttributes = accessible->GetAttributes();
+  DALI_TEST_EQUALS(exportedAttributes["reading_info_type"], "name|role|description|state", TEST_LOCATION);
+
+  view.SetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES, Property::Map());
+
+  exportedAttributes = accessible->GetAttributes();
+  DALI_TEST_CHECK(exportedAttributes.find("reading_info_type") == exportedAttributes.end());
+
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityCallbacksP(void)
+{
+  UiTestApplication application;
+
+  View parent = View::New();
+  View child  = View::New();
+  parent.SetProperty(View::Property::ACCESSIBILITY_SCROLLABLE, true);
+  parent.Add(child);
+
+  auto accessible = dynamic_cast<ViewAccessible*>(Dali::Accessibility::Accessible::Get(parent));
+  DALI_TEST_CHECK(accessible);
+
+  Dali::Devel::Accessibility::GestureInfo gestureInfo{
+    Dali::Devel::Accessibility::Gesture::ONE_FINGER_SINGLE_TAP,
+    0,
+    1,
+    0,
+    1,
+    Dali::Devel::Accessibility::GestureState::ENDED,
+    1u};
+  DALI_TEST_EQUALS(accessible->DoGesture(gestureInfo), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GetRelationSet().empty(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->ScrollToChild(child), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->GrabHighlight(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(accessible->ClearHighlight(), false, TEST_LOCATION);
+
+  parent.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::CHECK_BOX));
+  accessible->OnStatePropertySet(AccessibilityStateMask(UiAccessibility::State::CHECKED));
+
+  parent.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::BUTTON));
+  accessible->OnStatePropertySet(AccessibilityStateMask(UiAccessibility::State::SELECTED));
+
   END_TEST;
 }

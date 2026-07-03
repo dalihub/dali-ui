@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/selection-group.h>
-#include <dali-ui-foundation/public-api/views/view-accessibility-enums.h>
+#include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 #include <dali-ui-test-suite-utils.h>
 #include <test-gesture-generator.h>
 
@@ -31,30 +31,22 @@ using namespace Dali::Ui;
 
 namespace
 {
-
-// CHECKED bit mask within the ACCESSIBILITY_STATES bitset. CHECKED is index 2 of
-// the AccessibilityState enum (view-accessibility-enums.h:31), so the mask is
-// 1u << 2. ENABLED (index 0) is set by default, which is why CHECKED must be
-// written via read-modify-write.
-constexpr uint32_t CHECKED_MASK = 1u << static_cast<uint32_t>(AccessibilityState::CHECKED);
+namespace UiAccessibility = Dali::Ui::Accessibility;
 
 bool IsRadioButton(View view)
 {
   return view.GetProperty<int>(View::Property::ACCESSIBILITY_ROLE) ==
-         static_cast<int>(AccessibilityRole::RADIO_BUTTON);
+         static_cast<int>(UiAccessibility::Role::RADIO_BUTTON);
 }
 
 bool IsChecked(View view)
 {
-  const uint32_t states = static_cast<uint32_t>(view.GetProperty<int>(View::Property::ACCESSIBILITY_STATES));
-  return (states & CHECKED_MASK) != 0u;
+  return view.HasAccessibilityState(UiAccessibility::State::CHECKED);
 }
 
 bool IsEnabledStateSet(View view)
 {
-  const uint32_t enabledMask = 1u << static_cast<uint32_t>(AccessibilityState::ENABLED);
-  const uint32_t states      = static_cast<uint32_t>(view.GetProperty<int>(View::Property::ACCESSIBILITY_STATES));
-  return (states & enabledMask) != 0u;
+  return view.HasAccessibilityState(UiAccessibility::State::ENABLED);
 }
 
 // Creates a View sized for tapping, but does NOT add it to a scene.
@@ -373,6 +365,12 @@ int UtcDaliGroupSelectableTraitAccessibilityRadioRoleOnJoinP(void)
   view.AsGroupSelectable().SetGroupName("UtcA11yRadio");
 
   DALI_TEST_CHECK(IsRadioButton(view));
+
+  view.AsSelectable().SetSelected(true);
+  DALI_TEST_CHECK(IsChecked(view));
+
+  view.AsSelectable().SetSelected(false);
+  DALI_TEST_CHECK(!IsChecked(view));
   END_TEST;
 }
 
@@ -670,7 +668,7 @@ int UtcDaliGroupSelectableTraitRemoveWinnerPreservesSelectedClearsCheckedP(void)
   DALI_TEST_CHECK(selectable.IsSelected());
   // Role restored to pre-join NONE (default).
   DALI_TEST_CHECK(view.GetProperty<int>(View::Property::ACCESSIBILITY_ROLE) ==
-                  static_cast<int>(AccessibilityRole::NONE));
+                  static_cast<int>(UiAccessibility::Role::NONE));
   // CHECKED follows the restored non-checkable role -> cleared, even though selected.
   DALI_TEST_CHECK(!IsChecked(view));
   // ENABLED preserved by the RMW.

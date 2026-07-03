@@ -19,21 +19,22 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/accessibility-bridge.h>
-#include <dali/devel-api/adaptor-framework/accessibility.h>
+#include <dali/devel-api/adaptor-framework/accessibility-devel.h> // LCOV_EXCL_LINE
 #include <dali/devel-api/adaptor-framework/actor-accessible.h>
 #include <dali/devel-api/atspi-interfaces/action.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h> // LCOV_EXCL_LINE
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>  // LCOV_EXCL_LINE
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/accessibility-highlight-overlay.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/views/view-accessibility-enums.h>
+#include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 
 namespace Dali::Ui
 {
 
-using AccessibilityStates = Accessibility::EnumBitSet<AccessibilityState, AccessibilityState::MAX_COUNT>;
+using AccessibilityStates = uint32_t; // LCOV_EXCL_LINE
 
 /**
  * @brief Represents the Accessible object for Dali::Ui::View and derived classes
@@ -117,7 +118,7 @@ public:
   /**
    * @copydoc Dali::Accessibility::Accessible::GetRole()
    */
-  Dali::Accessibility::Role GetRole() const override;
+  Dali::Integration::Accessibility::Role GetRole() const override; // LCOV_EXCL_LINE
 
   /**
    * @copydoc Dali::Accessibility::Accessible::GetLocalizedRoleName()
@@ -127,12 +128,12 @@ public:
   /**
    * @copydoc Dali::Accessibility::Accessible::GetStates()
    */
-  Dali::Accessibility::States GetStates() override;
+  Dali::Integration::Accessibility::States GetStates() override; // LCOV_EXCL_LINE
 
   /**
    * @copydoc Dali::Accessibility::Accessible::GetAttributes()
    */
-  Dali::Accessibility::Attributes GetAttributes() const override;
+  Dali::Devel::Accessibility::Attributes GetAttributes() const override; // LCOV_EXCL_LINE
 
   /**
    * @copydoc Dali::Accessibility::Accessible::InitDefaultFeatures()
@@ -197,12 +198,12 @@ public:
   /**
    * @copydoc Dali::Accessibility::Accessible::DoGesture()
    */
-  bool DoGesture(const Dali::Accessibility::GestureInfo& gestureInfo) override;
+  bool DoGesture(const Dali::Devel::Accessibility::GestureInfo& gestureInfo) override; // LCOV_EXCL_LINE
 
   /**
    * @copydoc Dali::Accessibility::Accessible::GetRelationSet()
    */
-  std::vector<Dali::Accessibility::Relation> GetRelationSet() override;
+  std::vector<Dali::Devel::Accessibility::Relation> GetRelationSet() override; // LCOV_EXCL_LINE
 
   /**
    * @copydoc Dali::Accessibility::Accessible::GetStringProperty()
@@ -234,7 +235,7 @@ public:
   /**
    * @copydoc Dali::Accessibility::Accessible::GetStates()
    */
-  virtual Dali::Accessibility::States CalculateStates();
+  virtual Dali::Integration::Accessibility::States CalculateStates(); // LCOV_EXCL_LINE
 
   /**
    * @brief Makes sure that a given child (descendant) of this container (e.g. ItemView) is visible
@@ -283,7 +284,7 @@ private:
   /**
    * @brief Appliys relavant accessibility properties to AT-SPI states.
    */
-  void ApplyAccessibilityProps(Dali::Accessibility::States& states);
+  void ApplyAccessibilityProps(Dali::Integration::Accessibility::States& states); // LCOV_EXCL_LINE
 
 private:
   /**

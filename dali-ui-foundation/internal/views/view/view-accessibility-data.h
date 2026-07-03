@@ -20,6 +20,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali/devel-api/adaptor-framework/accessibility-devel.h>                     // LCOV_EXCL_LINE
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h> // LCOV_EXCL_LINE
 
 namespace Dali
 {
@@ -58,10 +60,10 @@ public:
   typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
 
   /// @brief AccessibilityDoGesture signal type.
-  typedef Signal<void(std::pair<Dali::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType;
+  typedef Signal<void(std::pair<Dali::Devel::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType; // LCOV_EXCL_LINE
 
   /// @brief AccessibilityAction signal type.
-  typedef Signal<bool(const Dali::Accessibility::ActionInfo&)> AccessibilityActionSignalType;
+  typedef Signal<bool(const Dali::Devel::Accessibility::ActionInfo&)> AccessibilityActionSignalType; // LCOV_EXCL_LINE
 
   /// @brief AccessibilityHighlighted signal type.
   /// @param bool highlighted true if View is highlighted, false if highlight is removed.
@@ -88,12 +90,12 @@ public:
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::SetAccessibilityReadingInfoType()
    */
-  void SetAccessibilityReadingInfoType(const Dali::Accessibility::ReadingInfoTypes types);
+  void SetAccessibilityReadingInfoType(const Dali::Integration::Accessibility::ReadingInfoTypes types); // LCOV_EXCL_LINE
 
   /**
    * @copydoc Dali::Ui::ViewImpl::Impl::GetAccessibilityReadingInfoType()
    */
-  Dali::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const;
+  Dali::Integration::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const; // LCOV_EXCL_LINE
 
   /**
    * @brief Checks highlighted object geometry if it is showing or not
@@ -140,7 +142,7 @@ public:
   /**
    * @brief Helper function to get default reading info type attributes
    */
-  static Dali::Accessibility::ReadingInfoTypes GetDefaultReadingInfoTypes();
+  static Dali::Integration::Accessibility::ReadingInfoTypes GetDefaultReadingInfoTypes(); // LCOV_EXCL_LINE
 
   /**
    * @brief Helper function to get view's default state attributes
@@ -180,9 +182,9 @@ public:
     std::string value{};
     std::string automationId{};
 
-    AccessibilityStates                                                               states{};
-    std::map<Dali::Accessibility::RelationType, std::set<Accessibility::Accessible*>> relations{};
-    Property::Map                                                                     extraAttributes{};
+    AccessibilityStates                                                                         states{};
+    std::map<Dali::Ui::Accessibility::RelationType, std::set<Dali::Accessibility::Accessible*>> relations{}; // LCOV_EXCL_LINE
+    Property::Map                                                                               extraAttributes{};
 
     TriStateProperty isHighlightable : 3;
     bool             isHidden : 1;
@@ -192,9 +194,9 @@ public:
 
 private:
   // Accessibility - notification for highlighted object to check if it is showing.
-  Dali::PropertyNotification                  mAccessibilityPositionNotification;
-  Dali::Accessibility::ScreenRelativeMoveType mAccessibilityLastScreenRelativeMoveType{
-    Accessibility::ScreenRelativeMoveType::OUTSIDE};
+  Dali::PropertyNotification                         mAccessibilityPositionNotification;
+  Dali::Devel::Accessibility::ScreenRelativeMoveType mAccessibilityLastScreenRelativeMoveType{                                                              // LCOV_EXCL_LINE
+                                                                                              Dali::Devel::Accessibility::ScreenRelativeMoveType::OUTSIDE}; // LCOV_EXCL_LINE
 
   ViewImpl& mViewImpl;
 

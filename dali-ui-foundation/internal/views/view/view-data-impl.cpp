@@ -28,11 +28,13 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/adaptor-framework/accessibility.h>
+#include <dali/devel-api/adaptor-framework/accessibility-devel.h> // LCOV_EXCL_LINE
 #include <dali/devel-api/object/handle-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/devel-api/scripting/scripting.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h> // LCOV_EXCL_LINE
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>  // LCOV_EXCL_LINE
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
@@ -135,7 +137,7 @@ static constexpr uint32_t BORDERLINE_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintT
 
 bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName, const Property::Map& attributes)
 {
-  using Dali::Accessibility::ActionType;
+  using Dali::Devel::Accessibility::ActionType; // LCOV_EXCL_LINE
   DALI_ASSERT_DEBUG(view);
 
   auto& viewImpl     = GetImpl(view);
@@ -365,6 +367,16 @@ Internal::CoreInteractionObject* AsCoreInteractionObject(TraitObject* object)
   return object ? dynamic_cast<Internal::CoreInteractionObject*>(object) : nullptr;
 }
 
+uint32_t ViewAccessibilityStateToMask(Accessibility::State state)
+{
+  return 1u << static_cast<uint32_t>(state);
+}
+
+Dali::Integration::Accessibility::RelationType ToIntegrationRelationType(Dali::Ui::Accessibility::RelationType relation)
+{
+  return static_cast<Dali::Integration::Accessibility::RelationType>(relation);
+}
+
 } // unnamed namespace
 
 // clang-format off
@@ -390,7 +402,6 @@ const PropertyRegistration ViewDataImpl::PROPERTY_25(typeRegistration, "counterC
 const PropertyRegistration ViewDataImpl::PROPERTY_26(typeRegistration, "automationId",                   Ui::View::Property::AUTOMATION_ID,                    Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_27(typeRegistration, "accessibilityValue",             Ui::View::Property::ACCESSIBILITY_VALUE,              Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_28(typeRegistration, "accessibilityScrollable",        Ui::View::Property::ACCESSIBILITY_SCROLLABLE,         Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_29(typeRegistration, "accessibilityStates",            Ui::View::Property::ACCESSIBILITY_STATES,             Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_30(typeRegistration, "accessibilityIsModal",           Ui::View::Property::ACCESSIBILITY_IS_MODAL,           Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_31(typeRegistration, "offScreenRendering",             Ui::View::Property::OFFSCREEN_RENDERING,              Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -450,7 +461,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mInputMethodContext(),
   mIdleCallback(nullptr),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT)),
-  mAccessibilityRole{static_cast<int32_t>(AccessibilityRole::NONE)},
+  mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
   mIsFocusGroup(false),
   mIsEmittingResourceReadySignal(false),
   mIdleCallbackRegistered(false),
@@ -1221,21 +1232,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::ACCESSIBILITY_STATES:
-      {
-        int32_t states;
-        if(value.Get(states))
-        {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().GetAccessibilityData()) ||
-             states != static_cast<int32_t>(AccessibilityData::GetDefaultViewAccessibilityStates().GetRawData32()))
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.states =
-              AccessibilityStates{static_cast<uint32_t>(states)};
-          }
-        }
-        break;
-      }
-
       case Ui::View::Property::ACCESSIBILITY_IS_MODAL:
       {
         bool isModal;
@@ -1729,16 +1725,6 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::ACCESSIBILITY_STATES:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = static_cast<int32_t>((DALI_LIKELY(accessibilityData)
-                                                                ? accessibilityData->mAccessibilityProps.states
-                                                                : AccessibilityData::GetDefaultViewAccessibilityStates())
-                                                               .GetRawData32());
-        break;
-      }
-
       case Ui::View::Property::ACCESSIBILITY_IS_MODAL:
       {
         const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
@@ -1912,12 +1898,12 @@ void ViewDataImpl::ClearAccessibilityAttributes()
   }
 }
 
-void ViewDataImpl::SetAccessibilityReadingInfoType(const Dali::Accessibility::ReadingInfoTypes types)
+void ViewDataImpl::SetAccessibilityReadingInfoType(const Dali::Integration::Accessibility::ReadingInfoTypes types)
 {
   GetOrCreateAccessibilityData().SetAccessibilityReadingInfoType(types);
 }
 
-Dali::Accessibility::ReadingInfoTypes ViewDataImpl::GetAccessibilityReadingInfoType() const
+Dali::Integration::Accessibility::ReadingInfoTypes ViewDataImpl::GetAccessibilityReadingInfoType() const
 {
   const auto* accessibilityData = GetAccessibilityData();
   if(DALI_LIKELY(accessibilityData))
@@ -1933,8 +1919,49 @@ Dali::Accessibility::ReadingInfoTypes ViewDataImpl::GetAccessibilityReadingInfoT
 
 bool ViewDataImpl::IsAccessibleCreated() const
 {
-  auto bridge = Accessibility::Bridge::GetCurrentBridge();
+  auto bridge = Dali::Integration::Accessibility::Bridge::GetCurrentBridge(); // LCOV_EXCL_LINE
   return DALI_LIKELY(bridge) ? !!bridge->GetAccessible(mViewImpl.Self()) : false;
+}
+
+void ViewDataImpl::SetAccessibilityStates(uint32_t states)
+{
+  const auto defaultStates = AccessibilityData::GetDefaultViewAccessibilityStates();
+  if(DALI_LIKELY(GetAccessibilityData()) || states != defaultStates)
+  {
+    GetOrCreateAccessibilityData().mAccessibilityProps.states = states;
+  }
+
+  auto accessible = GetAccessibleObject();
+  if(DALI_LIKELY(accessible))
+  {
+    accessible->OnStatePropertySet(states);
+  }
+}
+
+uint32_t ViewDataImpl::GetAccessibilityStates() const
+{
+  const auto* accessibilityData = GetAccessibilityData();
+  return DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.states : AccessibilityData::GetDefaultViewAccessibilityStates();
+}
+
+void ViewDataImpl::AddAccessibilityState(Accessibility::State state)
+{
+  SetAccessibilityStates(GetAccessibilityStates() | ViewAccessibilityStateToMask(state));
+}
+
+void ViewDataImpl::RemoveAccessibilityState(Accessibility::State state)
+{
+  SetAccessibilityStates(GetAccessibilityStates() & ~ViewAccessibilityStateToMask(state));
+}
+
+void ViewDataImpl::ClearAccessibilityStates()
+{
+  SetAccessibilityStates(0u);
+}
+
+bool ViewDataImpl::HasAccessibilityState(Accessibility::State state) const
+{
+  return (GetAccessibilityStates() & ViewAccessibilityStateToMask(state)) != 0u;
 }
 
 void ViewDataImpl::EnableCreateAccessible(bool enable)
@@ -1947,13 +1974,13 @@ bool ViewDataImpl::IsCreateAccessibleEnabled() const
   return mAccessibleCreatable;
 }
 
-void ViewDataImpl::EmitAccessibilityStateChanged(Accessibility::State state, int newValue)
+void ViewDataImpl::EmitAccessibilityStateChanged(Dali::Integration::Accessibility::State state, int newValue)
 {
   Dali::CustomActor handle(mViewImpl.GetOwner());
-  auto              bridge = Accessibility::Bridge::GetCurrentBridge();
+  auto              bridge = Dali::Integration::Accessibility::Bridge::GetCurrentBridge(); // LCOV_EXCL_LINE
   if(DALI_LIKELY(bridge))
   {
-    if(state == Accessibility::State::SHOWING)
+    if(state == Dali::Integration::Accessibility::State::SHOWING) // LCOV_EXCL_LINE
     {
       bool isModal = ViewAccessible::IsModal(handle);
       if(isModal)
@@ -1972,7 +1999,7 @@ void ViewDataImpl::EmitAccessibilityStateChanged(Accessibility::State state, int
 
   if(bridge && bridge->IsUp())
   {
-    auto accessible = dynamic_cast<Accessibility::ActorAccessible*>(Accessibility::Accessible::Get(handle));
+    auto accessible = dynamic_cast<Dali::Accessibility::ActorAccessible*>(Dali::Accessibility::Accessible::Get(handle)); // LCOV_EXCL_LINE
     if(DALI_LIKELY(accessible))
     {
       accessible->EmitStateChanged(state, newValue, 0);
@@ -2305,9 +2332,9 @@ SharedPtr<Ui::ViewAccessible> ViewDataImpl::GetAccessibleObject()
   return GetOrCreateAccessibilityData().GetAccessibleObject();
 }
 
-Dali::Vector<Accessibility::Relation> ViewDataImpl::GetAccessibilityRelations()
+Dali::Vector<Dali::Devel::Accessibility::Relation> ViewDataImpl::GetAccessibilityRelations()
 {
-  Dali::Vector<Accessibility::Relation> result;
+  Dali::Vector<Dali::Devel::Accessibility::Relation> result;
 
   const auto* accessibilityData = GetAccessibilityData();
   if(DALI_LIKELY(accessibilityData))
@@ -2317,7 +2344,7 @@ Dali::Vector<Accessibility::Relation> ViewDataImpl::GetAccessibilityRelations()
     {
       const auto& targets = relation.second;
 
-      Accessibility::Relation rel{relation.first, {}};
+      Dali::Devel::Accessibility::Relation rel{ToIntegrationRelationType(relation.first), {}}; // LCOV_EXCL_LINE
       std::copy(targets.begin(), targets.end(), std::back_inserter(rel.mTargets));
       result.PushBack(std::move(rel));
     }
