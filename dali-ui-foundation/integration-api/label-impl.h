@@ -38,6 +38,7 @@
 #include <dali-ui-foundation/public-api/text/style/outline.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
 #include <unordered_map>
 
@@ -86,6 +87,16 @@ public:
    * @copydoc Dali::Ui::Label::GetText
    */
   Dali::String GetText() const;
+
+  /**
+   * @copydoc Dali::Ui::Label::SetStyledText
+   */
+  void SetStyledText(const Text::StyledText& styledText);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetStyledText
+   */
+  Text::StyledText GetStyledText() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetFontFamily
@@ -1255,6 +1266,7 @@ private:
   std::unordered_map<Dali::Property::Index, Dali::String> mVariationIndexMap;
   WeakHandle<Ui::View>                                    mMaskSourceView;
   Dali::String                                            mTranslatableText; ///< Stored resourceId for localization binding
+  Text::StyledText                                        mStyledTextSource; ///< Stored StyledText source snapshot.
 
   Visual::Base          mVisual;
   Text::ControllerPtr   mController;
@@ -1289,6 +1301,7 @@ private:
   bool mRestartMarquee : 1;           // whether sync marquee needs one-shot restart after measure-affecting changes.
   bool mHasLastMeasureMetrics : 1;    // whether the last OnMeasure inputs have been captured.
   bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
+  bool mHasStyledTextSource : 1;      // whether current text source was set by SetStyledText().
   bool mHasAnchors : 1;               // whether the text has anchors.
   bool mIsVisible : 1;                // cached result of IsEffectivelyVisible().
   bool mIsVisibleInitialized : 1;     // whether mIsVisible has been initialized.

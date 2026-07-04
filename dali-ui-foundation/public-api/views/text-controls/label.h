@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/public-api/text/style/outline.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -196,6 +197,24 @@ public: // Setters for chaining
    * @return The text currently set on the label in UTF-8 format.
    */
   Dali::String GetText() const;
+
+  /**
+   * @brief Sets styled text.
+   *
+   * StyledText is applied as plain text plus span attachments and does not use
+   * the raw markup parser.
+   *
+   * @param[in] styledText The styled text snapshot to display.
+   */
+  void SetStyledText(const Text::StyledText& styledText);
+
+  /**
+   * @brief Gets the styled text snapshot currently set on the label.
+   *
+   * @return The current styled text snapshot, or an empty handle if the current
+   * source was set by SetText().
+   */
+  Text::StyledText GetStyledText() const;
 
   /**
    * @brief Sets the font family of the text.

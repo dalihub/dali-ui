@@ -153,13 +153,21 @@ void Controller::SetGlyphType(TextAbstraction::GlyphType glyphType)
 
 void Controller::SetMarkupProcessorEnabled(bool enable)
 {
+  SetMarkupProcessorEnabled(enable, true);
+}
+
+void Controller::SetMarkupProcessorEnabled(bool enable, bool reprocessText)
+{
   if(enable != mImpl->mMarkupProcessorEnabled)
   {
     // If Text was already set, call the SetText again for enabling or disabling markup
     mImpl->mMarkupProcessorEnabled = enable;
-    std::string text;
-    GetText(text);
-    SetText(text);
+    if(reprocessText)
+    {
+      std::string text;
+      GetText(text);
+      SetText(text);
+    }
   }
 
   mImpl->mModel->mVisualModel->SetMarkupProcessorEnabled(enable);
@@ -725,6 +733,11 @@ bool Controller::IsGrabHandlePopupEnabled() const
 void Controller::SetText(const std::string& text)
 {
   TextUpdater::SetText(*this, text);
+}
+
+void Controller::SetStyledText(const StyledText& styledText)
+{
+  TextUpdater::SetStyledText(*this, styledText);
 }
 
 void Controller::GetText(std::string& text) const

@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/internal/text/markup-processor/markup-processor.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 
 namespace Dali
@@ -355,43 +356,55 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Process the markup string if the mark-up processor is enabled.
   ////////////////////////////////////////////////////////////////////////////////
 
-  MarkupProcessData markupProcessData(
-    colorRuns, fontDescriptionRuns, mTextModel->mLogicalModel->mEmbeddedItems, mTextModel->mLogicalModel->mAnchors,
-    mTextModel->mLogicalModel->mUnderlinedCharacterRuns, mTextModel->mLogicalModel->mBackgroundColorRuns,
-    mTextModel->mLogicalModel->mStrikethroughCharacterRuns, mTextModel->mLogicalModel->mBoundedParagraphRuns,
-    mTextModel->mLogicalModel->mCharacterSpacingCharacterRuns);
-
   mTextModel->mVisualModel->SetMarkupProcessorEnabled(parameters.enableMarkup);
 
-  if(parameters.enableMarkup)
+  if(parameters.hasStyledTextStyleSnapshot)
   {
-    // TODO : Currently unable to support anchor clicked events.
-    MarkupPropertyData markupPropertyData(GetDpi(mModule.GetFontClient()), Color::MEDIUM_BLUE, Color::DARK_MAGENTA);
-
-    ProcessMarkupString(parameters.text, markupPropertyData, markupProcessData);
-    textSize = markupProcessData.markupProcessedText.size();
-
-    // This is a bit horrible but std::string returns a (signed) char*
-    utf8 = reinterpret_cast<const uint8_t*>(markupProcessData.markupProcessedText.c_str());
+    DALI_ASSERT_DEBUG(!parameters.enableMarkup && "StyledText snapshot must not use markup processing");
+    Dali::Ui::Internal::Text::StyledTextApplier::ApplySnapshotToLogicalModel(parameters.styledTextStyleSnapshot,
+                                                                             parameters.text,
+                                                                             *mTextModel->mLogicalModel);
+    // ApplySnapshotToLogicalModel updates logicalModel.mText; utf32Characters is a reference to it.
+    numberOfCharacters = utf32Characters.Count();
   }
   else
   {
-    textSize = parameters.text.size();
+    MarkupProcessData markupProcessData(
+      colorRuns, fontDescriptionRuns, mTextModel->mLogicalModel->mEmbeddedItems, mTextModel->mLogicalModel->mAnchors,
+      mTextModel->mLogicalModel->mUnderlinedCharacterRuns, mTextModel->mLogicalModel->mBackgroundColorRuns,
+      mTextModel->mLogicalModel->mStrikethroughCharacterRuns, mTextModel->mLogicalModel->mBoundedParagraphRuns,
+      mTextModel->mLogicalModel->mCharacterSpacingCharacterRuns);
 
-    // This is a bit horrible but std::string returns a (signed) char*
-    utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
+    if(parameters.enableMarkup)
+    {
+      // TODO : Currently unable to support anchor clicked events.
+      MarkupPropertyData markupPropertyData(GetDpi(mModule.GetFontClient()), Color::MEDIUM_BLUE, Color::DARK_MAGENTA);
+
+      ProcessMarkupString(parameters.text, markupPropertyData, markupProcessData);
+      textSize = markupProcessData.markupProcessedText.size();
+
+      // This is a bit horrible but std::string returns a (signed) char*
+      utf8 = reinterpret_cast<const uint8_t*>(markupProcessData.markupProcessedText.c_str());
+    }
+    else
+    {
+      textSize = parameters.text.size();
+
+      // This is a bit horrible but std::string returns a (signed) char*
+      utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
+    }
+
+    ////////////////////////////////////////////////////////////////////////////////
+    // Convert from utf8 to utf32
+    ////////////////////////////////////////////////////////////////////////////////
+
+    utf32Characters.Resize(textSize);
+
+    // Transform a text array encoded in utf8 into an array encoded in utf32.
+    // It returns the actual number of characters.
+    numberOfCharacters = Utf8ToUtf32(utf8, textSize, utf32Characters.Begin());
+    utf32Characters.Resize(numberOfCharacters);
   }
-
-  ////////////////////////////////////////////////////////////////////////////////
-  // Convert from utf8 to utf32
-  ////////////////////////////////////////////////////////////////////////////////
-
-  utf32Characters.Resize(textSize);
-
-  // Transform a text array encoded in utf8 into an array encoded in utf32.
-  // It returns the actual number of characters.
-  numberOfCharacters = Utf8ToUtf32(utf8, textSize, utf32Characters.Begin());
-  utf32Characters.Resize(numberOfCharacters);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Retrieve the Line and Word Break Info.
@@ -582,7 +595,8 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Update visual model for markup style.
   ////////////////////////////////////////////////////////////////////////////////
 
-  if(mTextModel->mVisualModel->IsMarkupProcessorEnabled())
+  // StyledText snapshots keep markup disabled, but their inline style runs still need visual materialization.
+  if(mTextModel->mVisualModel->IsMarkupProcessorEnabled() || parameters.hasStyledTextStyleSnapshot)
   {
     const Vector<UnderlinedCharacterRun>&    underlinedCharacterRuns = mTextModel->mLogicalModel->mUnderlinedCharacterRuns;
     const Vector<StrikethroughCharacterRun>& strikethroughCharacterRuns =
@@ -909,13 +923,14 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool     shadowEnabled = mTextModel->IsShadowEnabled();
   const Vector2& shadowOffset  = mTextModel->GetShadowOffset();
 
-  const bool outlineEnabled              = mTextModel->IsOutlineEnabled();
-  const bool backgroundEnabled           = mTextModel->IsBackgroundEnabled();
-  const bool markupEnabled               = parameters.enableMarkup;
-  const bool markupUnderlineEnabled      = markupEnabled && mTextModel->IsMarkupUnderlineSet();
-  const bool markupStrikethroughEnabled  = markupEnabled && mTextModel->IsMarkupStrikethroughSet();
-  const bool underlineEnabled            = mTextModel->IsUnderlineEnabled() || markupUnderlineEnabled;
-  const bool strikethroughEnabled        = mTextModel->IsStrikethroughEnabled() || markupStrikethroughEnabled;
+  const bool outlineEnabled    = mTextModel->IsOutlineEnabled();
+  const bool backgroundEnabled = mTextModel->IsBackgroundEnabled();
+  const bool markupEnabled     = parameters.enableMarkup;
+  // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
+  const bool underlineRunEnabled         = mTextModel->IsMarkupUnderlineSet();
+  const bool strikethroughRunEnabled     = mTextModel->IsMarkupStrikethroughSet();
+  const bool underlineEnabled            = mTextModel->IsUnderlineEnabled() || underlineRunEnabled;
+  const bool strikethroughEnabled        = mTextModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
   const bool backgroundMarkupSet         = mTextModel->IsMarkupBackgroundColorSet();
   const bool cutoutEnabled               = mTextModel->IsCutoutEnabled();
   const bool backgroundWithCutoutEnabled = mTextModel->IsBackgroundWithCutoutEnabled();

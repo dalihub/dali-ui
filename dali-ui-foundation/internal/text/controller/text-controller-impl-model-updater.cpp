@@ -643,8 +643,17 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
      !((nullptr != impl.mEventData) && impl.mEventData->mPreEditFlag &&
        (0u != impl.mModel->mVisualModel->mCharactersToGlyph.Count())))
   {
-    // Mark-up processor case
-    if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled())
+    // Markup-era inline run containers are also used by StyledText range spans.
+    // Existing visual runs are included so a later plain text/style update clears stale glyph runs.
+    const bool shouldSyncInlineStyleRuns =
+      (0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count()) ||
+      (0u != impl.mModel->mLogicalModel->mStrikethroughCharacterRuns.Count()) ||
+      (0u != impl.mModel->mLogicalModel->mCharacterSpacingCharacterRuns.Count()) ||
+      (0u != impl.mModel->mVisualModel->mUnderlineRuns.Count()) ||
+      (0u != impl.mModel->mVisualModel->mStrikethroughRuns.Count()) ||
+      (0u != impl.mModel->mVisualModel->mCharacterSpacingRuns.Count());
+
+    if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled() || shouldSyncInlineStyleRuns)
     {
       impl.CopyUnderlinedFromLogicalToVisualModels(true);
       impl.CopyStrikethroughFromLogicalToVisualModels();

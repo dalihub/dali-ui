@@ -809,15 +809,16 @@ void TextVisual::UpdateRenderer()
 
       const bool shadowEnabled = mController->GetTextModel()->IsShadowEnabled();
 
-      const bool outlineEnabled         = mController->GetTextModel()->IsOutlineEnabled();
-      const bool backgroundEnabled      = mController->GetTextModel()->IsBackgroundEnabled();
-      const bool markupEnabled          = mController->IsMarkupProcessorEnabled();
-      const bool markupUnderlineEnabled = markupEnabled && mController->GetTextModel()->IsMarkupUnderlineSet();
-      const bool markupStrikethroughEnabled =
-        markupEnabled && mController->GetTextModel()->IsMarkupStrikethroughSet();
-      const bool underlineEnabled = mController->GetTextModel()->IsUnderlineEnabled() || markupUnderlineEnabled;
+      const bool outlineEnabled    = mController->GetTextModel()->IsOutlineEnabled();
+      const bool backgroundEnabled = mController->GetTextModel()->IsBackgroundEnabled();
+      const bool markupEnabled     = mController->IsMarkupProcessorEnabled();
+      // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
+      const bool underlineRunEnabled = mController->GetTextModel()->IsMarkupUnderlineSet();
+      const bool strikethroughRunEnabled =
+        mController->GetTextModel()->IsMarkupStrikethroughSet();
+      const bool underlineEnabled = mController->GetTextModel()->IsUnderlineEnabled() || underlineRunEnabled;
       const bool strikethroughEnabled =
-        mController->GetTextModel()->IsStrikethroughEnabled() || markupStrikethroughEnabled;
+        mController->GetTextModel()->IsStrikethroughEnabled() || strikethroughRunEnabled;
       const bool backgroundMarkupSet         = mController->GetTextModel()->IsMarkupBackgroundColorSet();
       const bool cutoutEnabled               = mController->IsTextCutout();
       const bool backgroundWithCutoutEnabled = mController->GetTextModel()->IsBackgroundWithCutoutEnabled();

@@ -39,6 +39,10 @@ struct Controller::TextUpdater
   /// @param[in] controller The controller
   static void SetText(Controller& controller, const std::string& text);
 
+  /// @copydoc Text::Controller::SetStyledText
+  /// @param[in] controller The controller
+  static void SetStyledText(Controller& controller, const StyledText& styledText);
+
   /**
    * @brief Called by editable UI controls when key events are received.
    *

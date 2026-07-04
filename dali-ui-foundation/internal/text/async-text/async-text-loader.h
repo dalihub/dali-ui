@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-style-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
@@ -78,6 +79,7 @@ struct AsyncTextParameters
     padding{0u, 0u, 0u, 0u},
     variationsMap{},
     textFitCandidates{},
+    styledTextStyleSnapshot{},
     fontSize{0.f},
     minLineSize{0.f},
     relativeLineSize{1.f},
@@ -125,6 +127,7 @@ struct AsyncTextParameters
     isMultiLine{false},
     ellipsis{true},
     enableMarkup{false},
+    hasStyledTextStyleSnapshot{false},
     isUnderlineEnabled{false},
     isShadowEnabled{false},
     isOutlineEnabled{false},
@@ -165,6 +168,8 @@ struct AsyncTextParameters
 
   Property::Map                      variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
   Dali::Vector<Text::Fit::Candidate> textFitCandidates;
+  Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot
+    styledTextStyleSnapshot; ///< Copy-safe StyledText style run snapshot for async rendering.
 
   float fontSize;           ///< The font's size (in pixels).
   float minLineSize;        ///< The line's minimum size (in pixels).
@@ -217,6 +222,7 @@ struct AsyncTextParameters
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
   bool ellipsis : 1;                       ///< Whether the ellipsis layout option is enabled.
   bool enableMarkup : 1;                   ///< Whether the mark-up processor is enabled.
+  bool hasStyledTextStyleSnapshot : 1;     ///< Whether style runs came from a StyledText snapshot.
   bool isUnderlineEnabled : 1;             ///< Underline enabeld flag.
   bool isShadowEnabled : 1;                ///< Shadow enabled flag.
   bool isOutlineEnabled : 1;               ///< Outline enabled flag.

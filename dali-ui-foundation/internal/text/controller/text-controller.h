@@ -44,6 +44,7 @@ namespace Dali::Ui::Text
 class Controller;
 class ControlInterface;
 class EditableControlInterface;
+class StyledText;
 class View;
 class RenderingController;
 
@@ -224,6 +225,14 @@ public: // Configure the text controller.
    * @param[in] enable Whether to enable the mark-up processor.
    */
   void SetMarkupProcessorEnabled(bool enable);
+
+  /**
+   * @brief Enables/disables the mark-up processor.
+   *
+   * @param[in] enable Whether to enable the mark-up processor.
+   * @param[in] reprocessText Whether to reprocess the current raw text source immediately.
+   */
+  void SetMarkupProcessorEnabled(bool enable, bool reprocessText);
 
   /**
    * @brief Retrieves whether the mark-up processor is enabled.
@@ -806,6 +815,16 @@ public: // Update.
    * @param[in] text A string of UTF-8 characters.
    */
   void SetText(const std::string& text);
+
+  /**
+   * @brief Replaces any text previously set with a StyledText source.
+   *
+   * StyledText is applied as plain text plus span attachments. The raw markup
+   * processor is not used by this path.
+   *
+   * @param[in] styledText The styled text snapshot to apply.
+   */
+  void SetStyledText(const StyledText& styledText);
 
   /**
    * @brief Retrieve any text previously set.

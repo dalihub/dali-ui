@@ -38,6 +38,159 @@ void utc_dali_text_value_types_cleanup(void)
   test_return_value = TET_PASS;
 }
 
+// FontAttributes Tests
+
+int UtcDaliTextFontAttributesDefaultP(void)
+{
+  UiTestApplication application;
+
+  Text::FontAttributes attributes;
+
+  DALI_TEST_CHECK(!attributes.HasAttributes());
+  DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::FAMILY));
+  DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::SIZE));
+  DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::WEIGHT));
+  DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::WIDTH));
+  DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::SLANT));
+
+  END_TEST;
+}
+
+int UtcDaliTextFontAttributesSetAndUnsetP(void)
+{
+  UiTestApplication application;
+
+  Text::FontAttributes attributes;
+
+  attributes.SetWeight(Text::FontWeight::BOLD);
+  DALI_TEST_CHECK(attributes.HasAttributes());
+  DALI_TEST_CHECK(attributes.Has(Text::FontAttributes::Attribute::WEIGHT));
+  DALI_TEST_EQUALS(attributes.GetWeight(), Text::FontWeight::BOLD, TEST_LOCATION);
+
+  attributes.SetWeight(Text::FontWeight::NORMAL);
+  DALI_TEST_CHECK(attributes.Has(Text::FontAttributes::Attribute::WEIGHT));
+  DALI_TEST_EQUALS(attributes.GetWeight(), Text::FontWeight::NORMAL, TEST_LOCATION);
+
+  Text::FontAttributes inherited;
+  DALI_TEST_CHECK(inherited != attributes);
+
+  attributes.Unset(Text::FontAttributes::Attribute::WEIGHT);
+  DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::WEIGHT));
+  DALI_TEST_CHECK(!attributes.HasAttributes());
+  DALI_TEST_CHECK(inherited == attributes);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontAttributesFamilyEmptyStringP(void)
+{
+  UiTestApplication application;
+
+  Text::FontAttributes attributes;
+
+  attributes.SetFamily("");
+  DALI_TEST_CHECK(attributes.HasAttributes());
+  DALI_TEST_CHECK(attributes.Has(Text::FontAttributes::Attribute::FAMILY));
+  DALI_TEST_EQUALS(attributes.GetFamily(), Dali::String(""), TEST_LOCATION);
+
+  attributes.Unset(Text::FontAttributes::Attribute::FAMILY);
+  DALI_TEST_CHECK(!attributes.Has(Text::FontAttributes::Attribute::FAMILY));
+  DALI_TEST_CHECK(!attributes.HasAttributes());
+
+  END_TEST;
+}
+
+int UtcDaliTextFontAttributesAllFieldsP(void)
+{
+  UiTestApplication application;
+
+  Text::FontAttributes attributes;
+  attributes.SetFamily("Ubuntu Mono");
+  attributes.SetSize(28.0f);
+  attributes.SetWeight(Text::FontWeight::BOLD);
+  attributes.SetWidth(Text::FontWidth::CONDENSED);
+  attributes.SetSlant(Text::FontSlant::ITALIC);
+
+  DALI_TEST_CHECK(attributes.Has(Text::FontAttributes::Attribute::FAMILY));
+  DALI_TEST_CHECK(attributes.Has(Text::FontAttributes::Attribute::SIZE));
+  DALI_TEST_CHECK(attributes.Has(Text::FontAttributes::Attribute::WEIGHT));
+  DALI_TEST_CHECK(attributes.Has(Text::FontAttributes::Attribute::WIDTH));
+  DALI_TEST_CHECK(attributes.Has(Text::FontAttributes::Attribute::SLANT));
+  DALI_TEST_EQUALS(attributes.GetFamily(), Dali::String("Ubuntu Mono"), TEST_LOCATION);
+  DALI_TEST_EQUALS(attributes.GetSize(), 28.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(attributes.GetWeight(), Text::FontWeight::BOLD, TEST_LOCATION);
+  DALI_TEST_EQUALS(attributes.GetWidth(), Text::FontWidth::CONDENSED, TEST_LOCATION);
+  DALI_TEST_EQUALS(attributes.GetSlant(), Text::FontSlant::ITALIC, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontAttributesEqualityUsesDefinedMaskP(void)
+{
+  UiTestApplication application;
+
+  Text::FontAttributes a;
+  Text::FontAttributes b;
+  b.SetWeight(Text::FontWeight::BOLD);
+  b.Unset(Text::FontAttributes::Attribute::WEIGHT);
+
+  DALI_TEST_CHECK(a == b);
+
+  a.SetWeight(Text::FontWeight::NORMAL);
+  b.SetWeight(Text::FontWeight::BOLD);
+  b.Unset(Text::FontAttributes::Attribute::WEIGHT);
+  DALI_TEST_CHECK(a != b);
+
+  Text::FontAttributes c;
+  c.SetWeight(Text::FontWeight::NORMAL);
+  DALI_TEST_CHECK(a == c);
+
+  c.SetSlant(Text::FontSlant::NORMAL);
+  DALI_TEST_CHECK(a != c);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontAttributesCopyAndMoveP(void)
+{
+  UiTestApplication application;
+
+  Text::FontAttributes original;
+  original.SetFamily("Ubuntu Mono");
+  original.SetSize(30.0f);
+  original.SetWeight(Text::FontWeight::BOLD);
+
+  Text::FontAttributes copy(original);
+  DALI_TEST_CHECK(copy == original);
+
+  Text::FontAttributes assigned;
+  assigned = original;
+  DALI_TEST_CHECK(assigned == original);
+
+  Text::FontAttributes moved(std::move(copy));
+  DALI_TEST_CHECK(moved == original);
+
+  Text::FontAttributes moveAssigned;
+  moveAssigned = std::move(assigned);
+  DALI_TEST_CHECK(moveAssigned == original);
+
+  END_TEST;
+}
+
+int UtcDaliTextFontAttributesInvalidAttributeP(void)
+{
+  UiTestApplication application;
+
+  Text::FontAttributes attributes;
+  const auto           invalidAttribute = static_cast<Text::FontAttributes::Attribute>(999u);
+
+  DALI_TEST_CHECK(!attributes.Has(invalidAttribute));
+  attributes.Unset(invalidAttribute);
+  DALI_TEST_CHECK(!attributes.HasAttributes());
+
+  END_TEST;
+}
+
 // Underline Tests
 
 int UtcDaliTextUnderlineColorP(void)

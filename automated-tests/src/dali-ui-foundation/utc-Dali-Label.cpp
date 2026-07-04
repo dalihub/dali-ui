@@ -17,7 +17,9 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-event-thread-callback.h>
 #include <dali.h>
+#include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/string-utils.h>
 #include <stdlib.h>
 #include <iostream>
@@ -66,6 +68,19 @@ const char* const PROPERTY_NAME_RENDER_SCALE                   = "renderScale";
 // Animatable
 const char* const PROPERTY_NAME_TEXT_COLOR        = "textColor";
 const char* const PROPERTY_NAME_PIXEL_SNAP_FACTOR = "pixelSnapFactor";
+
+constexpr int ASYNC_TEXT_THREAD_TIMEOUT = 5;
+
+bool  gAsyncNaturalSizeComputed = false;
+float gAsyncNaturalSizeWidth    = 0.0f;
+float gAsyncNaturalSizeHeight   = 0.0f;
+
+void OnAsyncNaturalSizeComputed(View, float width, float height)
+{
+  gAsyncNaturalSizeComputed = true;
+  gAsyncNaturalSizeWidth    = width;
+  gAsyncNaturalSizeHeight   = height;
+}
 } // namespace
 
 void utc_dali_label_startup(void)
@@ -225,6 +240,233 @@ int UtcDaliLabelText(void)
 
   label.SetText("Updated text");
   DALI_TEST_EQUALS(label.GetText(), std::string("Updated text"), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelSetStyledTextPlainTextReflectionP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  Text::StyledText styledText = Text::StyledText::New("Styled plain text");
+  label.SetStyledText(styledText);
+
+  DALI_TEST_EQUALS(label.GetText(), "Styled plain text", TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetStyledText());
+  DALI_TEST_EQUALS(label.GetStyledText().GetText(), "Styled plain text", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelSetStyledTextBackgroundColorSpanReflectionP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  Text::StyledTextBuilder   builder = Text::StyledTextBuilder::New("Styled background");
+  Text::BackgroundColorSpan span    = Text::BackgroundColorSpan::New(UiColor(Color::CYAN));
+  DALI_TEST_CHECK(builder.SetSpan(span, 0u, 6u));
+
+  label.SetStyledText(builder.Build());
+
+  Text::StyledText styledText = label.GetStyledText();
+  DALI_TEST_CHECK(styledText);
+  DALI_TEST_EQUALS(label.GetText(), "Styled background", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanEndIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(Text::BackgroundColorSpan::DownCast(styledText.GetSpanAt(0u)).GetColor().GetRgba(), Color::CYAN, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelSetStyledTextUnderlineSpanReflectionP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  Text::Underline underline;
+  underline.SetColor(UiColor(Color::GREEN));
+  underline.SetThickness(2.0f);
+  underline.SetType(Text::Underline::Type::DASHED);
+  underline.SetDashLength(3.0f);
+  underline.SetDashGap(1.5f);
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("Styled underline");
+  Text::UnderlineSpan     span    = Text::UnderlineSpan::New(underline);
+  DALI_TEST_CHECK(builder.SetSpan(span, 0u, 6u));
+
+  label.SetStyledText(builder.Build());
+
+  Text::StyledText styledText = label.GetStyledText();
+  DALI_TEST_CHECK(styledText);
+  DALI_TEST_EQUALS(label.GetText(), "Styled underline", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanEndIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_CHECK(Text::UnderlineSpan::DownCast(styledText.GetSpanAt(0u)).GetUnderline() == underline);
+
+  END_TEST;
+}
+
+int UtcDaliLabelSetStyledTextLineThroughSpanReflectionP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  Text::LineThrough lineThrough;
+  lineThrough.SetColor(UiColor(Color::RED));
+  lineThrough.SetThickness(2.0f);
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("Styled line-through");
+  Text::LineThroughSpan   span    = Text::LineThroughSpan::New(lineThrough);
+  DALI_TEST_CHECK(builder.SetSpan(span, 7u, 19u));
+
+  label.SetStyledText(builder.Build());
+
+  Text::StyledText styledText = label.GetStyledText();
+  DALI_TEST_CHECK(styledText);
+  DALI_TEST_EQUALS(label.GetText(), "Styled line-through", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanStartIndexAt(0u), 7u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanEndIndexAt(0u), 19u, TEST_LOCATION);
+  DALI_TEST_CHECK(Text::LineThroughSpan::DownCast(styledText.GetSpanAt(0u)).GetLineThrough() == lineThrough);
+
+  END_TEST;
+}
+
+int UtcDaliLabelSetStyledTextFontSpanReflectionP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  Text::FontAttributes attributes;
+  attributes.SetFamily("");
+  attributes.SetSize(32.0f);
+  attributes.SetWeight(Text::FontWeight::BOLD);
+  attributes.SetWidth(Text::FontWidth::CONDENSED);
+  attributes.SetSlant(Text::FontSlant::ITALIC);
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("Styled font span");
+  Text::FontSpan          span    = Text::FontSpan::New(attributes);
+  DALI_TEST_CHECK(builder.SetSpan(span, 7u, 11u));
+
+  label.SetStyledText(builder.Build());
+
+  Text::StyledText styledText = label.GetStyledText();
+  DALI_TEST_CHECK(styledText);
+  DALI_TEST_EQUALS(label.GetText(), "Styled font span", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanStartIndexAt(0u), 7u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanEndIndexAt(0u), 11u, TEST_LOCATION);
+
+  Text::FontAttributes roundTripAttributes = Text::FontSpan::DownCast(styledText.GetSpanAt(0u)).GetFontAttributes();
+  DALI_TEST_CHECK(roundTripAttributes == attributes);
+  DALI_TEST_CHECK(roundTripAttributes.Has(Text::FontAttributes::Attribute::FAMILY));
+  DALI_TEST_CHECK(roundTripAttributes.Has(Text::FontAttributes::Attribute::SIZE));
+  DALI_TEST_CHECK(roundTripAttributes.Has(Text::FontAttributes::Attribute::WEIGHT));
+  DALI_TEST_CHECK(roundTripAttributes.Has(Text::FontAttributes::Attribute::WIDTH));
+  DALI_TEST_CHECK(roundTripAttributes.Has(Text::FontAttributes::Attribute::SLANT));
+
+  END_TEST;
+}
+
+int UtcDaliLabelSetTextClearsStyledTextSourceP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetStyledText(Text::StyledText::New("Styled source"));
+  DALI_TEST_CHECK(label.GetStyledText());
+
+  label.SetText("Plain source");
+
+  DALI_TEST_EQUALS(label.GetText(), "Plain source", TEST_LOCATION);
+  DALI_TEST_CHECK(!label.GetStyledText());
+
+  END_TEST;
+}
+
+int UtcDaliLabelStyledTextIgnoresMarkupEnabledP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetStyledText(Text::StyledText::New("<color value='red'>ABC</color>"));
+  label.SetMarkupEnabled(true);
+
+  DALI_TEST_EQUALS(label.GetText(), "<color value='red'>ABC</color>", TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetStyledText());
+  DALI_TEST_EQUALS(label.GetStyledText().GetText(), "<color value='red'>ABC</color>", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelAsyncStyledTextLiteralMarkupIgnoresMarkupEnabledP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  // Ensure FontClient is initialized before async text work starts.
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+  application.GetScene().Add(label);
+
+  gAsyncNaturalSizeComputed = false;
+  gAsyncNaturalSizeWidth    = 0.0f;
+  gAsyncNaturalSizeHeight   = 0.0f;
+
+  label.SetMarkupEnabled(true);
+  label.SetFontSize(16.0f);
+  label.SetStyledText(Text::StyledText::New("<b>Hi</b>"));
+  label.AsyncNaturalSizeComputedSignal().Connect(&OnAsyncNaturalSizeComputed);
+
+  application.SendNotification();
+  application.Render();
+
+  label.SetAsyncRendering(true);
+  label.RequestAsyncNaturalSize();
+
+  DALI_TEST_EQUALS(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT), true, TEST_LOCATION);
+
+  label.SetAsyncRendering(false);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_EQUALS(label.GetText(), "<b>Hi</b>", TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetStyledText());
+  DALI_TEST_EQUALS(label.GetStyledText().GetText(), "<b>Hi</b>", TEST_LOCATION);
+  DALI_TEST_CHECK(gAsyncNaturalSizeComputed);
+  DALI_TEST_CHECK(gAsyncNaturalSizeWidth > 0.0f);
+  DALI_TEST_CHECK(gAsyncNaturalSizeHeight > 0.0f);
+
+  END_TEST;
+}
+
+int UtcDaliLabelSetStyledTextEmptyHandleClearsSourceP(void)
+{
+  UiTestApplication application;
+  Label             label = Label::New();
+  DALI_TEST_CHECK(label);
+
+  label.SetStyledText(Text::StyledText::New("Styled source"));
+  DALI_TEST_CHECK(label.GetStyledText());
+
+  label.SetStyledText(Text::StyledText());
+
+  DALI_TEST_EQUALS(label.GetText(), "", TEST_LOCATION);
+  DALI_TEST_CHECK(!label.GetStyledText());
 
   END_TEST;
 }

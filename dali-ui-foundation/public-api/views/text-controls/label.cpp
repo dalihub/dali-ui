@@ -122,6 +122,16 @@ Dali::String Label::GetText() const
   return GetImpl(*this).GetText();
 }
 
+void Label::SetStyledText(const Text::StyledText& styledText)
+{
+  GetImpl(*this).SetStyledText(styledText);
+}
+
+Text::StyledText Label::GetStyledText() const
+{
+  return GetImpl(*this).GetStyledText();
+}
+
 void Label::SetFontFamily(const Dali::String& fontFamily)
 {
   GetImpl(*this).SetFontFamily(fontFamily);

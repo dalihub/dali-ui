@@ -21,6 +21,7 @@ SET(TC_SOURCES
         utc-Dali-InputField.cpp
         utc-Dali-InputEditor.cpp
         utc-Dali-TextValueTypes.cpp
+        utc-Dali-StyledText.cpp
         utc-Dali-ImageView.cpp
         utc-Dali-ImageVisual.cpp
         utc-Dali-RenderEffect.cpp

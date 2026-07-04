@@ -69,6 +69,8 @@ SET(TC_SOURCES
     utc-Dali-GradientVisualSemantics-internal.cpp
     utc-Dali-TextGradientBaseline-internal.cpp
     utc-Dali-TextGradientGlyphClassification-internal.cpp
+    utc-Dali-StyledTextApplier-internal.cpp
+    utc-Dali-StyledTextController-internal.cpp
     utc-Dali-TextGradientStyle-internal.cpp
     utc-Dali-TextGradientShaderComposition-internal.cpp
     utc-Dali-TextGradientTypesetterMask-internal.cpp

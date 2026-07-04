@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.h>
 #include <dali-ui-foundation/internal/text/emoji-helper.h>
 #include <dali-ui-foundation/internal/text/markup-processor/markup-processor.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 
 namespace
@@ -147,6 +148,100 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
 
     // The characters to be added.
     impl.mTextUpdateInfo.mNumberOfCharactersToAdd = logicalModel->mText.Count();
+
+    // To reset the cursor position
+    lastCursorIndex = characterCount;
+
+    // Update the rest of the model during size negotiation
+    impl.QueueModifyEvent(ModifyEvent::TEXT_REPLACED);
+
+    // The natural size needs to be re-calculated.
+    impl.mRecalculateNaturalSize    = true;
+    impl.mRecalculateLayoutSize     = true;
+    impl.mRecalculateHeightForWidth = true;
+    impl.mModel->mVisualModel->SetHeightForWidth(Size::ZERO);
+
+    // The text direction needs to be updated.
+    impl.mUpdateTextDirection = true;
+
+    // Apply modifications to the model
+    impl.mOperationsPending = ALL_OPERATIONS;
+  }
+  else
+  {
+    if(nullptr != eventData)
+    {
+      PlaceholderHandler::ShowPlaceholderText(impl);
+      if(!impl.IsShowingPlaceholderText())
+      {
+        impl.mModel->mVisualModel->SetLayoutSize(Size::ZERO);
+      }
+    }
+    else
+    {
+      // Clear the layout size cache when the label's text is set to empty.
+      impl.mModel->mVisualModel->SetLayoutSize(Size::ZERO);
+    }
+  }
+
+  unsigned int oldCursorPos = (nullptr != eventData ? eventData->mPrimaryCursorPosition : 0);
+
+  // Resets the cursor position.
+  controller.ResetCursorPosition(lastCursorIndex);
+
+  // Scrolls the text to make the cursor visible.
+  impl.ResetScrollPosition();
+
+  impl.RequestRelayout();
+  impl.RequestAsyncRender();
+
+  if(nullptr != eventData)
+  {
+    // Cancel previously queued events
+    eventData->mEventQueue.clear();
+  }
+
+  // Do this last since it provides callbacks into application code.
+  if(NULL != impl.mEditableControlInterface)
+  {
+    impl.mEditableControlInterface->CursorPositionChanged(oldCursorPos, lastCursorIndex);
+    impl.mEditableControlInterface->TextChanged(true);
+  }
+}
+
+void Controller::TextUpdater::SetStyledText(Controller& controller, const StyledText& styledText)
+{
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Controller::SetStyledText\n");
+
+  Controller::Impl& impl = *controller.mImpl;
+
+  // Reset keyboard as text changed
+  impl.ResetInputMethodContext();
+
+  // StyledText is a new content source, so clear previous raw markup/style state first.
+  ResetText(controller);
+  impl.ClearStyleData();
+
+  CharacterIndex lastCursorIndex = 0u;
+
+  EventData*& eventData = impl.mEventData;
+
+  ModelPtr&        model        = impl.mModel;
+  LogicalModelPtr& logicalModel = model->mLogicalModel;
+
+  const std::string styledPlainText = styledText ? std::string(styledText.GetText().CStr()) : std::string();
+  impl.mRawText                     = styledPlainText;
+
+  if(styledText && !styledPlainText.empty())
+  {
+    model->mVisualModel->SetTextColor(impl.mTextColor);
+
+    Dali::Ui::Internal::Text::StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(styledText, *logicalModel, GetDpi());
+
+    const Length characterCount = logicalModel->mText.Count();
+
+    // The characters to be added.
+    impl.mTextUpdateInfo.mNumberOfCharactersToAdd = characterCount;
 
     // To reset the cursor position
     lastCursorIndex = characterCount;

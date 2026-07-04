@@ -598,20 +598,18 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
         CombineImageBuffer(imageBuffer, strikethroughImageBuffer, bufferWidth, bufferHeight, true);
       }
 
-      // Markup-Processor for overlay styles
-      if(viewModel.IsMarkupProcessorEnabled())
+      // Range underline/strikethrough runs from markup or StyledText spans.
+      // The helper names keep the legacy markup terminology.
+      if(viewModel.IsMarkupUnderlineSet())
       {
-        if(viewModel.IsMarkupUnderlineSet())
-        {
-          imageBuffer = ApplyUnderlineMarkupImageBuffer(imageBuffer, bufferWidth, bufferHeight,
-                                                        ignoreHorizontalAlignment, pixelFormat, penX, penY);
-        }
+        imageBuffer = ApplyUnderlineMarkupImageBuffer(imageBuffer, bufferWidth, bufferHeight,
+                                                      ignoreHorizontalAlignment, pixelFormat, penX, penY);
+      }
 
-        if(viewModel.IsMarkupStrikethroughSet())
-        {
-          imageBuffer = ApplyStrikethroughMarkupImageBuffer(imageBuffer, bufferWidth, bufferHeight,
-                                                            ignoreHorizontalAlignment, pixelFormat, penX, penY);
-        }
+      if(viewModel.IsMarkupStrikethroughSet())
+      {
+        imageBuffer = ApplyStrikethroughMarkupImageBuffer(imageBuffer, bufferWidth, bufferHeight,
+                                                          ignoreHorizontalAlignment, pixelFormat, penX, penY);
       }
     }
   }

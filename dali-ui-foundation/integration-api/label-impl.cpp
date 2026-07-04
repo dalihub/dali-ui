@@ -21,6 +21,7 @@
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
@@ -32,6 +33,7 @@
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-marquee-helper.h>
@@ -133,6 +135,19 @@ DALI_TYPE_REGISTRATION_END()
 constexpr const char* LOCALIZATION_TEXT_BINDING_ID                     = "Ui.Label.Text";
 constexpr const char* TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME         = "uTextGradientStartOffset";
 constexpr const char* TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME = "uTextGradientOverlayStartOffset";
+
+float GetDpi()
+{
+  static uint32_t horizontalDpi = 0u;
+  static uint32_t verticalDpi   = 0u;
+
+  if(DALI_UNLIKELY(horizontalDpi == 0u))
+  {
+    Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+    fontClient.GetDpi(horizontalDpi, verticalDpi);
+  }
+  return static_cast<float>(horizontalDpi);
+}
 
 /**
  * @brief Lookup table that converts Text::Alignment values
@@ -241,6 +256,7 @@ LabelImpl::LabelImpl()
   mRestartMarquee(false),
   mHasLastMeasureMetrics(false),
   mIsTouchDown(false),
+  mHasStyledTextSource(false),
   mHasAnchors(false),
   mIsVisible(false),
   mIsVisibleInitialized(false),
@@ -263,6 +279,8 @@ LabelImpl::~LabelImpl()
 void LabelImpl::SetText(const Dali::String& text)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
+  mStyledTextSource    = Text::StyledText();
+  mHasStyledTextSource = false;
   mController->SetText(ToStdString(text));
   UpdateAnchorTouchInterception();
   InvalidateTextMeasure();
@@ -273,6 +291,31 @@ Dali::String LabelImpl::GetText() const
   std::string text;
   mController->GetText(text);
   return ToDaliString(text);
+}
+
+void LabelImpl::SetStyledText(const Text::StyledText& styledText)
+{
+  DALI_LOG_RELEASE_INFO("[%p] SetStyledText\n", mController.Get());
+
+  if(styledText)
+  {
+    mStyledTextSource    = styledText;
+    mHasStyledTextSource = true;
+  }
+  else
+  {
+    mStyledTextSource    = Text::StyledText();
+    mHasStyledTextSource = false;
+  }
+
+  mController->SetStyledText(styledText);
+  UpdateAnchorTouchInterception();
+  InvalidateTextMeasure();
+}
+
+Text::StyledText LabelImpl::GetStyledText() const
+{
+  return mHasStyledTextSource ? mStyledTextSource : Text::StyledText();
 }
 
 void LabelImpl::SetFontFamily(const Dali::String& fontFamily)
@@ -621,7 +664,7 @@ Text::LayoutDirectionMode LabelImpl::GetLayoutDirectionMode() const
 void LabelImpl::SetMarkupEnabled(bool enabled)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
-  mController->SetMarkupProcessorEnabled(enabled);
+  mController->SetMarkupProcessorEnabled(enabled, !mHasStyledTextSource);
   UpdateAnchorTouchInterception();
 }
 
@@ -3396,6 +3439,16 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.embossShadowColor              = mController->GetEmbossShadowColor();
   parameters.isTextGradientRequested        = Text::Internal::Gradient::IsRenderable(mTextGradient);
   parameters.isTextGradientOverlayRequested = Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
+
+  if(mHasStyledTextSource && mStyledTextSource)
+  {
+    const Dali::String styledText         = mStyledTextSource.GetText();
+    parameters.text                       = std::string(styledText.CStr(), styledText.Size());
+    parameters.enableMarkup               = false;
+    parameters.hasStyledTextStyleSnapshot = true;
+    parameters.styledTextStyleSnapshot =
+      Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(mStyledTextSource, GetDpi());
+  }
 
   return parameters;
 }

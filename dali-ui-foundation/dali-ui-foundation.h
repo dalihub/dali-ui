@@ -89,10 +89,19 @@
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/input-filter.h>
 #include <dali-ui-foundation/public-api/text/style/bevel.h>
+#include <dali-ui-foundation/public-api/text/style/font-attributes.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
 #include <dali-ui-foundation/public-api/text/style/outline.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
+#include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
+#include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 #include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>

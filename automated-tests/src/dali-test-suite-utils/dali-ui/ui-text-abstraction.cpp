@@ -23,6 +23,7 @@
 #include <dali/devel-api/text-abstraction/segmentation.h>
 #include <dali/devel-api/text-abstraction/shaping.h>
 #include <dali/public-api/object/base-object.h>
+#include <algorithm>
 #include <cstring>
 
 using namespace Dali;
@@ -51,6 +52,18 @@ constexpr unsigned int CHAR_LTRM = 0x200E; ///< Left to Right Mark.
 constexpr unsigned int CHAR_RTLM = 0x200F; ///< Right to Left Mark.
 constexpr unsigned int CHAR_TS   = 0x2009; ///< Thin Space.
 constexpr unsigned int CHAR_BOM  = 0xFEFF; ///< Byte Order Mark.
+
+constexpr PointSize26Dot6 DEFAULT_POINT_SIZE_26DOT6 = 10u << 6u;
+
+FontId GetMockFontId(PointSize26Dot6 pointSize)
+{
+  return pointSize > 0u ? static_cast<FontId>(pointSize) : static_cast<FontId>(DEFAULT_POINT_SIZE_26DOT6);
+}
+
+float GetMockFontPixelSize(FontId fontId)
+{
+  return static_cast<float>(fontId > 0u ? fontId : DEFAULT_POINT_SIZE_26DOT6) / 64.0f;
+}
 } // namespace
 
 namespace Internal
@@ -174,6 +187,10 @@ public:
   {
     return 10;
   }
+  uint32_t GetNumberOfPointsPerOneUnitOfPointSize() const
+  {
+    return 64u;
+  }
   void ResetSystemDefaults()
   {
   }
@@ -198,23 +215,23 @@ public:
   }
   PointSize26Dot6 GetPointSize(FontId id)
   {
-    return 9;
+    return id > 0u ? static_cast<PointSize26Dot6>(id) : DEFAULT_POINT_SIZE_26DOT6;
   }
   FontId FindDefaultFont(Character charcode, PointSize26Dot6 pointSize, bool preferColor)
   {
-    return 0;
+    return GetMockFontId(pointSize);
   }
   FontId FindFallbackFont(Character charcode, const FontDescription& fontDescription, PointSize26Dot6 pointSize, bool preferColor)
   {
-    return 0;
+    return GetMockFontId(pointSize);
   }
   FontId GetFontId(const FontPath& path, PointSize26Dot6 pointSize, FaceIndex faceIndex)
   {
-    return 0;
+    return GetMockFontId(pointSize);
   }
   FontId GetFontId(const FontDescription& fontDescription, PointSize26Dot6 pointSize, FaceIndex faceIndex, Property::Map* variationsMapPtr)
   {
-    return 0;
+    return GetMockFontId(pointSize);
   }
   bool IsScalable(const FontPath& path)
   {
@@ -236,6 +253,13 @@ public:
   }
   void GetFontMetrics(FontId fontId, FontMetrics& metrics)
   {
+    const float pixelSize = GetMockFontPixelSize(fontId);
+
+    metrics.ascender           = pixelSize * 0.8f;
+    metrics.descender          = -pixelSize * 0.2f;
+    metrics.height             = pixelSize;
+    metrics.underlinePosition  = -pixelSize * 0.1f;
+    metrics.underlineThickness = std::max(1.0f, pixelSize * 0.05f);
   }
   GlyphIndex GetGlyphIndex(FontId fontId, Character charcode)
   {
@@ -247,6 +271,18 @@ public:
   }
   bool GetGlyphMetrics(GlyphInfo* array, uint32_t size, bool horizontal)
   {
+    for(uint32_t i = 0u; i < size; ++i)
+    {
+      GlyphInfo&  glyph     = array[i];
+      const float pixelSize = GetMockFontPixelSize(glyph.fontId);
+      const float width     = std::max(1.0f, pixelSize * 0.5f);
+
+      glyph.width    = width;
+      glyph.height   = pixelSize;
+      glyph.xBearing = 0.0f;
+      glyph.yBearing = pixelSize * 0.8f;
+      glyph.advance  = width;
+    }
     return true;
   }
   void CreateBitmap(FontId fontId, GlyphIndex glyphIndex, bool softwareItailc, bool softwareBold, Dali::TextAbstraction::GlyphBufferData& data, int outlineWidth)
@@ -570,6 +606,11 @@ int FontClient::GetDefaultFontSize()
   return GetImplementation(*this).GetDefaultFontSize();
 }
 
+uint32_t FontClient::GetNumberOfPointsPerOneUnitOfPointSize() const
+{
+  return GetImplementation(*this).GetNumberOfPointsPerOneUnitOfPointSize();
+}
+
 void FontClient::ResetSystemDefaults()
 {
   GetImplementation(*this).ResetSystemDefaults();
@@ -882,6 +923,11 @@ void Segmentation::GetWordBreakPositionsUtf8(unsigned char const* text, unsigned
 Shaping Shaping::Get()
 {
   return TextAbstraction::Internal::Shaping::Get();
+}
+
+Shaping Shaping::New()
+{
+  return Shaping(new TextAbstraction::Internal::Shaping);
 }
 
 Shaping::Shaping()
