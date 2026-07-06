@@ -204,7 +204,7 @@ bool TestGlAbstraction::IsMultisampledRenderToTextureSupported()
   return true;
 }
 
-bool TestGlAbstraction::IsBlendEquationSupported(DevelBlendEquation::Type blendEquation)
+bool TestGlAbstraction::IsBlendEquationSupported(BlendEquation::Type blendEquation)
 {
   return true;
 }
