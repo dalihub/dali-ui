@@ -2470,7 +2470,11 @@ void LabelImpl::RequestRendererUpdate()
 
 void LabelImpl::RequestSyncMarqueeRestart()
 {
-  if(!mController->IsAsyncRendering() && mTextScroller && mLastMarqueeEnabled)
+  const bool marqueeActive =
+    mController->IsMarqueeEnabled() ||
+    (mTextScroller && (mTextScroller->IsScrolling() || mTextScroller->IsStopRequested()));
+
+  if(!mController->IsAsyncRendering() && mTextScroller && mLastMarqueeEnabled && marqueeActive)
   {
     mIsContentLayoutDirty = true;
     mRestartMarquee       = true;

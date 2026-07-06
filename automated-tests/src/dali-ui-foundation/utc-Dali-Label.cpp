@@ -571,6 +571,46 @@ int UtcDaliLabelSyncMarqueeRestartsAfterUiScaleChangeP(void)
   END_TEST;
 }
 
+int UtcDaliLabelSyncMarqueeDoesNotRestartAfterNaturalFinishOnResizeP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New("This is a long single-line marquee text that should finish once and stay stopped after resize.");
+  label.SetAsyncRendering(false);
+  label.SetRequestedWidth(40.0f);
+  label.SetRequestedHeight(40.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(1);
+  label.SetMarqueeLoopDelay(0.0f);
+  label.SetMarqueeSpeed(1000);
+
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(label.IsMarqueeRunning());
+
+  application.Render(1000);
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(!label.IsMarqueeRunning());
+
+  label.SetRequestedWidth(60.0f);
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render(16);
+
+  DALI_TEST_CHECK(!label.IsMarqueeRunning());
+
+  END_TEST;
+}
+
 int UtcDaliLabelTextColor(void)
 {
   UiTestApplication application;
