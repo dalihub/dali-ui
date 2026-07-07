@@ -180,8 +180,7 @@ bool Controller::IsMarkupProcessorEnabled() const
 
 bool Controller::HasAnchors() const
 {
-  return (mImpl->mMarkupProcessorEnabled && mImpl->mModel->mLogicalModel->mAnchors.Count() &&
-          mImpl->IsShowingRealText());
+  return (mImpl->mModel->mLogicalModel->mAnchors.Count() && mImpl->IsShowingRealText());
 }
 
 void Controller::SetMarqueeEnabled(bool enable, bool requestRelayout, Text::MarqueeOrientation orientation)

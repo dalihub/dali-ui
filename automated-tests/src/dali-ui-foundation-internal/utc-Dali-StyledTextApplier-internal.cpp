@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/multi-language-helper-functions.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
+#include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
@@ -76,6 +77,14 @@ void CheckUnderlineRun(const PublicText::UnderlinedCharacterRun& underlineRun, P
   DALI_TEST_EQUALS(underlineRun.properties.height, underline.GetThickness(), Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   DALI_TEST_EQUALS(underlineRun.properties.dashWidth, underline.GetDashLength(), Math::MACHINE_EPSILON_1000, TEST_LOCATION);
   DALI_TEST_EQUALS(underlineRun.properties.dashGap, underline.GetDashGap(), Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+}
+
+void CheckAnchorUnderlineRun(const PublicText::UnderlinedCharacterRun& underlineRun, PublicText::CharacterIndex characterIndex, PublicText::Length numberOfCharacters, const Vector4& color)
+{
+  DALI_TEST_EQUALS(underlineRun.characterRun.characterIndex, characterIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(underlineRun.characterRun.numberOfCharacters, numberOfCharacters, TEST_LOCATION);
+  DALI_TEST_EQUALS(underlineRun.properties.colorDefined, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(underlineRun.properties.color, color, TEST_LOCATION);
 }
 
 void CheckLineThroughRun(const PublicText::StrikethroughCharacterRun& lineThroughRun, PublicText::CharacterIndex characterIndex, PublicText::Length numberOfCharacters, const PublicText::LineThrough& lineThrough)
@@ -584,6 +593,84 @@ int UtcDaliStyledTextApplierApplyFontSpanToLogicalModelP(void)
   END_TEST;
 }
 
+int UtcDaliStyledTextApplierApplyAnchorSpanToLogicalModelP(void)
+{
+  UiTestApplication application;
+
+  PublicText::AnchorAttributes fallbackAttributes;
+  fallbackAttributes.SetHref("fallback");
+
+  PublicText::AnchorAttributes explicitAttributes;
+  explicitAttributes.SetHref("");
+  explicitAttributes.SetColor(Dali::Ui::UiColor(Color::YELLOW));
+  explicitAttributes.SetClickedColor(Dali::Ui::UiColor(Color::RED));
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("open docs");
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::AnchorSpan::New(fallbackAttributes), 0u, 4u));
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::AnchorSpan::New(explicitAttributes), 5u, 9u));
+
+  DALI_TEST_CHECK(StyledTextInternal::StyledTextApplier::HasAnchorSpans(builder.Build()));
+
+  auto asyncSnapshot = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(),
+                                                                                        96.0f,
+                                                                                        Color::GREEN,
+                                                                                        Color::MAGENTA);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(asyncSnapshot.anchorRuns.size()), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[0u].characterIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[0u].numberOfCharacters, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[0u].href, std::string("fallback"), TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[0u].color, Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[0u].clickedColor, Color::MAGENTA, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[0u].hasColor, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[0u].hasClickedColor, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[1u].characterIndex, 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[1u].numberOfCharacters, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[1u].href, std::string(""), TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[1u].color, Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[1u].clickedColor, Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[1u].hasColor, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(asyncSnapshot.anchorRuns[1u].hasClickedColor, true, TEST_LOCATION);
+
+  PublicText::LogicalModelPtr logicalModel = PublicText::LogicalModel::New();
+  StyledTextInternal::StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(builder.Build(),
+                                                                             *logicalModel,
+                                                                             96.0f,
+                                                                             Color::GREEN,
+                                                                             Color::MAGENTA);
+
+  DALI_TEST_EQUALS(logicalModel->mText.Count(), 9u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mColorRuns.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mUnderlinedCharacterRuns.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(logicalModel->mAnchors.Count(), 2u, TEST_LOCATION);
+
+  CheckColorRun(logicalModel->mColorRuns[0u], 0u, 4u, Color::GREEN);
+  CheckColorRun(logicalModel->mColorRuns[1u], 5u, 4u, Color::YELLOW);
+  CheckAnchorUnderlineRun(logicalModel->mUnderlinedCharacterRuns[0u], 0u, 4u, Color::GREEN);
+  CheckAnchorUnderlineRun(logicalModel->mUnderlinedCharacterRuns[1u], 5u, 4u, Color::YELLOW);
+
+  const auto& fallbackAnchor = logicalModel->mAnchors[0u];
+  DALI_TEST_EQUALS(fallbackAnchor.startIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fallbackAnchor.endIndex, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(fallbackAnchor.href), std::string("fallback"), TEST_LOCATION);
+  DALI_TEST_EQUALS(fallbackAnchor.colorRunIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fallbackAnchor.underlinedCharacterRunIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fallbackAnchor.markupClickedColor, Color::MAGENTA, TEST_LOCATION);
+  DALI_TEST_EQUALS(fallbackAnchor.isMarkupColorSet, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(fallbackAnchor.isMarkupClickedColorSet, false, TEST_LOCATION);
+
+  const auto& explicitAnchor = logicalModel->mAnchors[1u];
+  DALI_TEST_EQUALS(explicitAnchor.startIndex, 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitAnchor.endIndex, 9u, TEST_LOCATION);
+  DALI_TEST_EQUALS(std::string(explicitAnchor.href), std::string(""), TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitAnchor.colorRunIndex, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitAnchor.underlinedCharacterRunIndex, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitAnchor.markupClickedColor, Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitAnchor.isMarkupColorSet, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(explicitAnchor.isMarkupClickedColorSet, true, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextApplierApplyFontSpanOverwriteReleasesStaleFamilyP(void)
 {
   UiTestApplication application;
@@ -718,6 +805,139 @@ int UtcDaliStyledTextApplierAsyncSnapshotKeepsTextP(void)
   DALI_TEST_CHECK(!styledParameters.enableMarkup);
   DALI_TEST_CHECK(baseSize.height > 0.0f);
   DALI_TEST_CHECK(styledSize.height > baseSize.height);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
+{
+  UiTestApplication application;
+
+  const std::string plainText = "open docs";
+
+  PublicText::AnchorAttributes attributes;
+  attributes.SetHref("docs://open");
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(plainText.c_str());
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::AnchorSpan::New(attributes), 0u, 4u));
+
+  Dali::Ui::Text::AsyncTextParameters parameters;
+  parameters.text                       = plainText;
+  parameters.fontSize                   = 18.0f;
+  parameters.textColor                  = Color::BLACK;
+  parameters.anchorColor                = Color::GREEN;
+  parameters.anchorClickedColor         = Color::MAGENTA;
+  parameters.textWidth                  = 240.0f;
+  parameters.textHeight                 = 80.0f;
+  parameters.originWidth                = parameters.textWidth;
+  parameters.originHeight               = parameters.textHeight;
+  parameters.maxTextureSize             = 4096;
+  parameters.requestType                = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
+  parameters.hasStyledTextStyleSnapshot = true;
+  parameters.styledTextStyleSnapshot    = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(),
+                                                                                                         96.0f,
+                                                                                                         parameters.anchorColor,
+                                                                                                         parameters.anchorClickedColor);
+
+  Dali::Ui::Text::AsyncTextLoader     loader     = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo renderInfo = loader.RenderText(parameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(renderInfo.anchorHitRegions.size()), 1u, TEST_LOCATION);
+  const auto& region = renderInfo.anchorHitRegions[0u];
+  DALI_TEST_EQUALS(region.characterIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(region.numberOfCharacters, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(region.href, std::string("docs://open"), TEST_LOCATION);
+  DALI_TEST_EQUALS(region.color, Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(region.clickedColor, Color::MAGENTA, TEST_LOCATION);
+  DALI_TEST_EQUALS(region.hasColor, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(region.hasClickedColor, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(region.isClicked, false, TEST_LOCATION);
+  DALI_TEST_CHECK(!region.rectangles.empty());
+  DALI_TEST_CHECK(region.rectangles[0u].width > 0.0f);
+  DALI_TEST_CHECK(region.rectangles[0u].height > 0.0f);
+
+  parameters.clickedAnchors.push_back(Dali::Ui::Text::AsyncAnchorClickedState{0u, 4u, "docs://open"});
+  Dali::Ui::Text::AsyncTextRenderInfo clickedRenderInfo = loader.RenderText(parameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(clickedRenderInfo.anchorHitRegions.size()), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickedRenderInfo.anchorHitRegions[0u].isClicked, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickedRenderInfo.anchorHitRegions[0u].color, Color::MAGENTA, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickedRenderInfo.anchorHitRegions[0u].clickedColor, Color::MAGENTA, TEST_LOCATION);
+
+  Dali::Ui::Text::AsyncTextParameters markupParameters;
+  markupParameters.text               = "<a href='docs://raw'>open</a> docs";
+  markupParameters.fontSize           = 18.0f;
+  markupParameters.textColor          = Color::BLACK;
+  markupParameters.anchorColor        = Color::CYAN;
+  markupParameters.anchorClickedColor = Color::YELLOW;
+  markupParameters.textWidth          = 240.0f;
+  markupParameters.textHeight         = 80.0f;
+  markupParameters.originWidth        = markupParameters.textWidth;
+  markupParameters.originHeight       = markupParameters.textHeight;
+  markupParameters.maxTextureSize     = 4096;
+  markupParameters.requestType        = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
+  markupParameters.enableMarkup       = true;
+
+  Dali::Ui::Text::AsyncTextRenderInfo markupRenderInfo = loader.RenderText(markupParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(markupRenderInfo.anchorHitRegions.size()), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(markupRenderInfo.anchorHitRegions[0u].characterIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(markupRenderInfo.anchorHitRegions[0u].numberOfCharacters, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(markupRenderInfo.anchorHitRegions[0u].href, std::string("docs://raw"), TEST_LOCATION);
+  DALI_TEST_EQUALS(markupRenderInfo.anchorHitRegions[0u].color, Color::CYAN, TEST_LOCATION);
+  DALI_TEST_EQUALS(markupRenderInfo.anchorHitRegions[0u].clickedColor, Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(markupRenderInfo.anchorHitRegions[0u].isClicked, false, TEST_LOCATION);
+  DALI_TEST_CHECK(!markupRenderInfo.anchorHitRegions[0u].rectangles.empty());
+
+  markupParameters.clickedAnchors.push_back(Dali::Ui::Text::AsyncAnchorClickedState{0u, 4u, "docs://raw"});
+  Dali::Ui::Text::AsyncTextRenderInfo clickedMarkupRenderInfo = loader.RenderText(markupParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(clickedMarkupRenderInfo.anchorHitRegions.size()), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickedMarkupRenderInfo.anchorHitRegions[0u].isClicked, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickedMarkupRenderInfo.anchorHitRegions[0u].color, Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(clickedMarkupRenderInfo.anchorHitRegions[0u].clickedColor, Color::YELLOW, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncAnchorTransportCopySafeP(void)
+{
+  UiTestApplication application;
+
+  Dali::Ui::Text::AsyncAnchorHitRegion region;
+  region.characterIndex     = 1u;
+  region.numberOfCharacters = 4u;
+  region.href               = "docs";
+  region.color              = Color::GREEN;
+  region.clickedColor       = Color::MAGENTA;
+  region.hasColor           = true;
+  region.hasClickedColor    = true;
+  region.rectangles.emplace_back(10.0f, 20.0f, 30.0f, 40.0f);
+
+  Dali::Ui::Text::AsyncTextRenderInfo renderInfo;
+  renderInfo.anchorHitRegions.push_back(region);
+
+  Dali::Ui::Text::AsyncTextRenderInfo copiedRenderInfo = renderInfo;
+  renderInfo.anchorHitRegions[0u].href                 = "mutated";
+  renderInfo.anchorHitRegions[0u].rectangles[0u].x     = 99.0f;
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(copiedRenderInfo.anchorHitRegions.size()), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedRenderInfo.anchorHitRegions[0u].href, std::string("docs"), TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedRenderInfo.anchorHitRegions[0u].rectangles[0u].x, 10.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedRenderInfo.anchorHitRegions[0u].rectangles[0u].y, 20.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedRenderInfo.anchorHitRegions[0u].rectangles[0u].width, 30.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedRenderInfo.anchorHitRegions[0u].rectangles[0u].height, 40.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  Dali::Ui::Text::AsyncTextParameters parameters;
+  parameters.clickedAnchors.push_back(Dali::Ui::Text::AsyncAnchorClickedState{1u, 4u, "docs"});
+
+  Dali::Ui::Text::AsyncTextParameters copiedParameters = parameters;
+  parameters.clickedAnchors[0u].href                   = "mutated";
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(copiedParameters.clickedAnchors.size()), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedParameters.clickedAnchors[0u].characterIndex, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedParameters.clickedAnchors[0u].numberOfCharacters, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedParameters.clickedAnchors[0u].href, std::string("docs"), TEST_LOCATION);
 
   END_TEST;
 }

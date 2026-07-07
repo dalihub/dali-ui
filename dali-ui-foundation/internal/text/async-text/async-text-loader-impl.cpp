@@ -24,6 +24,7 @@
 #include <dali/integration-api/trace.h>
 #include <algorithm>
 #include <cmath>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/bidirectional-support.h>
@@ -35,6 +36,7 @@
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
+#include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 
 namespace Dali
@@ -78,6 +80,125 @@ float ConvertPointToPixel(float point, TextAbstraction::FontClient& fontClient)
 {
   // Pixel size = Point size * DPI / 72.f
   return point * GetDpi(fontClient) / 72.0f;
+}
+
+std::string AnchorHrefToString(const Text::Anchor& anchor)
+{
+  return anchor.href == nullptr ? std::string() : std::string(anchor.href);
+}
+
+bool MatchesAnchorClickedState(const Text::AsyncAnchorClickedState& state, const Text::Anchor& anchor)
+{
+  return state.characterIndex == anchor.startIndex &&
+         state.numberOfCharacters == anchor.endIndex - anchor.startIndex &&
+         state.href == AnchorHrefToString(anchor);
+}
+
+void ApplyAsyncAnchorClickedStates(const Text::AsyncTextParameters& parameters, Text::LogicalModel& logicalModel)
+{
+  if(parameters.clickedAnchors.empty() || logicalModel.mAnchors.Empty())
+  {
+    return;
+  }
+
+  for(auto& anchor : logicalModel.mAnchors)
+  {
+    const auto clickedIt = std::find_if(parameters.clickedAnchors.begin(),
+                                        parameters.clickedAnchors.end(),
+                                        [&anchor](const Text::AsyncAnchorClickedState& state)
+    {
+      return MatchesAnchorClickedState(state, anchor);
+    });
+
+    if(clickedIt == parameters.clickedAnchors.end())
+    {
+      continue;
+    }
+
+    anchor.isClicked              = true;
+    const Vector4  color          = anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : parameters.anchorClickedColor;
+    const uint32_t colorIndex     = anchor.colorRunIndex;
+    const uint32_t underlineIndex = anchor.underlinedCharacterRunIndex;
+
+    if(logicalModel.mColorRuns.Count() > colorIndex)
+    {
+      logicalModel.mColorRuns[colorIndex].color = color;
+    }
+    if(logicalModel.mUnderlinedCharacterRuns.Count() > underlineIndex)
+    {
+      logicalModel.mUnderlinedCharacterRuns[underlineIndex].properties.color = color;
+    }
+  }
+}
+
+std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(Text::ModelPtr                   textModel,
+                                                                   const Text::AsyncTextParameters& parameters)
+{
+  std::vector<Text::AsyncAnchorHitRegion> regions;
+  if(!textModel || textModel->mLogicalModel->mAnchors.Empty())
+  {
+    return regions;
+  }
+
+  const float coordinateScale = parameters.renderScale > 1.0f ? 1.0f / parameters.renderScale : 1.0f;
+  regions.reserve(textModel->mLogicalModel->mAnchors.Count());
+
+  for(const auto& anchor : textModel->mLogicalModel->mAnchors)
+  {
+    if(anchor.endIndex <= anchor.startIndex)
+    {
+      continue;
+    }
+
+    Vector<Vector2> sizes;
+    Vector<Vector2> positions;
+    Text::GetTextGeometry(textModel, anchor.startIndex, anchor.endIndex - 1u, sizes, positions);
+    if(sizes.Empty() || sizes.Count() != positions.Count())
+    {
+      continue;
+    }
+
+    Text::AsyncAnchorHitRegion region;
+    region.characterIndex     = anchor.startIndex;
+    region.numberOfCharacters = anchor.endIndex - anchor.startIndex;
+    region.href               = AnchorHrefToString(anchor);
+    region.hasColor           = anchor.isMarkupColorSet;
+    region.hasClickedColor    = anchor.isMarkupClickedColorSet;
+    region.isClicked          = anchor.isClicked;
+    region.clickedColor       = anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : parameters.anchorClickedColor;
+
+    if(textModel->mLogicalModel->mColorRuns.Count() > anchor.colorRunIndex)
+    {
+      region.color = textModel->mLogicalModel->mColorRuns[anchor.colorRunIndex].color;
+    }
+    else
+    {
+      region.color = anchor.isClicked ? region.clickedColor : parameters.anchorColor;
+    }
+
+    region.rectangles.reserve(sizes.Count());
+    for(uint32_t index = 0u; index < sizes.Count(); ++index)
+    {
+      const Vector2& size     = sizes[index];
+      const Vector2& position = positions[index];
+      if(size.x <= Math::MACHINE_EPSILON_1000 || size.y <= Math::MACHINE_EPSILON_1000)
+      {
+        continue;
+      }
+
+      region.rectangles.emplace_back(position.x * coordinateScale,
+                                     position.y * coordinateScale,
+                                     size.x * coordinateScale,
+                                     size.y * coordinateScale);
+    }
+
+    if(!region.rectangles.empty())
+    {
+      regions.push_back(std::move(region));
+    }
+  }
+
+  return regions;
 }
 
 DALI_INIT_TRACE_FILTER(gTraceFilter, DALI_TRACE_TEXT_ASYNC, false);
@@ -377,8 +498,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 
     if(parameters.enableMarkup)
     {
-      // TODO : Currently unable to support anchor clicked events.
-      MarkupPropertyData markupPropertyData(GetDpi(mModule.GetFontClient()), Color::MEDIUM_BLUE, Color::DARK_MAGENTA);
+      MarkupPropertyData markupPropertyData(GetDpi(mModule.GetFontClient()), parameters.anchorColor, parameters.anchorClickedColor);
 
       ProcessMarkupString(parameters.text, markupPropertyData, markupProcessData);
       textSize = markupProcessData.markupProcessedText.size();
@@ -405,6 +525,8 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     numberOfCharacters = Utf8ToUtf32(utf8, textSize, utf32Characters.Begin());
     utf32Characters.Resize(numberOfCharacters);
   }
+
+  ApplyAsyncAnchorClickedStates(parameters, *mTextModel->mLogicalModel);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Retrieve the Line and Word Break Info.
@@ -1006,6 +1128,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
                                                                 mTextModel->mVisualModel->mLines.Begin(),
                                                                 mTextModel->mVisualModel->mLines.Count(),
                                                                 parameters.verticalAlignment);
+  renderInfo.anchorHitRegions  = BuildAsyncAnchorHitRegions(mTextModel, parameters);
 
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;

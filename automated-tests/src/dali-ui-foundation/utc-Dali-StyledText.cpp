@@ -259,6 +259,37 @@ int UtcDaliFontSpanNewAndDownCastP(void)
   END_TEST;
 }
 
+int UtcDaliAnchorSpanNewAndDownCastP(void)
+{
+  UiTestApplication application;
+
+  AnchorAttributes emptyAttributes;
+  DALI_TEST_CHECK(!AnchorSpan::New(emptyAttributes));
+
+  AnchorAttributes attributes;
+  attributes.SetHref("");
+  attributes.SetColor(UiColor(Color::GREEN));
+  attributes.SetClickedColor(UiColor(Color::RED));
+
+  AnchorSpan anchorSpan = AnchorSpan::New(attributes);
+
+  DALI_TEST_CHECK(anchorSpan);
+  DALI_TEST_CHECK(anchorSpan.GetAnchorAttributes() == attributes);
+
+  Span baseSpan = Span::DownCast(anchorSpan);
+  DALI_TEST_CHECK(baseSpan);
+  CheckSpanIdentity(baseSpan, anchorSpan);
+
+  AnchorSpan downcastSpan = AnchorSpan::DownCast(baseSpan);
+  DALI_TEST_CHECK(downcastSpan);
+  DALI_TEST_CHECK(downcastSpan.GetAnchorAttributes() == attributes);
+
+  DALI_TEST_CHECK(!AnchorSpan::DownCast(BaseHandle()));
+  DALI_TEST_CHECK(!AnchorSpan().GetAnchorAttributes().HasAttributes());
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextBuilderSetSpanAndBuildP(void)
 {
   UiTestApplication application;
@@ -386,6 +417,32 @@ int UtcDaliStyledTextBuilderSetFontSpanAndBuildP(void)
   CheckSpanIdentity(styledText.GetSpanAt(0u), span);
   CheckRange(styledText, 0u, 0u, 5u);
   DALI_TEST_CHECK(FontSpan::DownCast(styledText.GetSpanAt(0u)).GetFontAttributes() == attributes);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextBuilderSetAnchorSpanAndBuildP(void)
+{
+  UiTestApplication application;
+
+  AnchorAttributes attributes;
+  attributes.SetHref("https://www.tizen.org");
+  attributes.SetClickedColor(UiColor(Color::MAGENTA));
+
+  StyledTextBuilder builder = StyledTextBuilder::New("Hello DALi");
+  AnchorSpan        span    = AnchorSpan::New(attributes);
+
+  DALI_TEST_CHECK(builder.SetSpan(span, 6u, 10u));
+  DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckSpanIdentity(builder.GetSpanAt(0u), span);
+  CheckRange(builder, 0u, 6u, 10u);
+
+  StyledText styledText = builder.Build();
+  DALI_TEST_CHECK(styledText);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckSpanIdentity(styledText.GetSpanAt(0u), span);
+  CheckRange(styledText, 0u, 6u, 10u);
+  DALI_TEST_CHECK(AnchorSpan::DownCast(styledText.GetSpanAt(0u)).GetAnchorAttributes() == attributes);
 
   END_TEST;
 }
@@ -633,6 +690,37 @@ int UtcDaliStyledTextBuilderFromStyledTextPreservesFontSpanP(void)
   DALI_TEST_CHECK(copiedAttributes.Has(FontAttributes::Attribute::WEIGHT));
   DALI_TEST_EQUALS(copiedAttributes.GetFamily(), Dali::String(""), TEST_LOCATION);
   DALI_TEST_EQUALS(copiedAttributes.GetWeight(), FontWeight::NORMAL, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextBuilderFromStyledTextPreservesAnchorSpanP(void)
+{
+  UiTestApplication application;
+
+  AnchorAttributes attributes;
+  attributes.SetHref("");
+  attributes.SetColor(UiColor(Color::GREEN));
+
+  StyledTextBuilder builder = StyledTextBuilder::New("Anchor span");
+  AnchorSpan        span    = AnchorSpan::New(attributes);
+  DALI_TEST_CHECK(builder.SetSpan(span, 0u, 6u));
+
+  StyledText        snapshot    = builder.Build();
+  StyledTextBuilder copyBuilder = StyledTextBuilder::FromStyledText(snapshot);
+  StyledText        copy        = copyBuilder.Build();
+
+  DALI_TEST_EQUALS(copy.GetText(), "Anchor span", TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetSpanStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copy.GetSpanEndIndexAt(0u), 6u, TEST_LOCATION);
+
+  AnchorAttributes copiedAttributes = AnchorSpan::DownCast(copy.GetSpanAt(0u)).GetAnchorAttributes();
+  DALI_TEST_CHECK(copiedAttributes == attributes);
+  DALI_TEST_CHECK(copiedAttributes.Has(AnchorAttributes::Attribute::HREF));
+  DALI_TEST_CHECK(copiedAttributes.Has(AnchorAttributes::Attribute::COLOR));
+  DALI_TEST_EQUALS(copiedAttributes.GetHref(), Dali::String(""), TEST_LOCATION);
+  DALI_TEST_EQUALS(copiedAttributes.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
 
   END_TEST;
 }

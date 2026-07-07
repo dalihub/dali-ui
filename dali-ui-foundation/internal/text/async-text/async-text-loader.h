@@ -29,8 +29,11 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/public-api/actors/actor-enumerations.h>
+#include <dali/public-api/math/rect.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
+#include <string>
+#include <vector>
 
 namespace Dali
 {
@@ -59,12 +62,34 @@ const char* const RequestTypeName[] = {"RENDER_FIXED_SIZE", "RENDER_FIXED_WIDTH"
                                        "RENDER_CONSTRAINT", "COMPUTE_NATURAL_SIZE", "COMPUTE_HEIGHT_FOR_WIDTH"};
 } // namespace Async
 
+struct AsyncAnchorClickedState
+{
+  CharacterIndex characterIndex{0u};
+  Length         numberOfCharacters{0u};
+  std::string    href{};
+};
+
+struct AsyncAnchorHitRegion
+{
+  CharacterIndex            characterIndex{0u};
+  Length                    numberOfCharacters{0u};
+  std::string               href{};
+  Vector4                   color{Color::MEDIUM_BLUE};
+  Vector4                   clickedColor{Color::DARK_MAGENTA};
+  std::vector<Rect<float> > rectangles{};
+  bool                      hasColor{false};
+  bool                      hasClickedColor{false};
+  bool                      isClicked{false};
+};
+
 struct AsyncTextParameters
 {
   AsyncTextParameters()
   : text{},
     fontFamily{},
     textColor{Color::BLACK},
+    anchorColor{Color::MEDIUM_BLUE},
+    anchorClickedColor{Color::DARK_MAGENTA},
     underlineColor{Color::BLACK},
     strikethroughColor{Color::BLACK},
     shadowColor{Color::BLACK},
@@ -80,6 +105,7 @@ struct AsyncTextParameters
     variationsMap{},
     textFitCandidates{},
     styledTextStyleSnapshot{},
+    clickedAnchors{},
     fontSize{0.f},
     minLineSize{0.f},
     relativeLineSize{1.f},
@@ -151,6 +177,8 @@ struct AsyncTextParameters
   std::string fontFamily; ///< The font's family.
 
   Vector4 textColor; ///< The default text's color. Default is white.
+  Vector4 anchorColor;
+  Vector4 anchorClickedColor;
   Vector4 underlineColor;
   Vector4 strikethroughColor;
   Vector4 shadowColor;
@@ -169,7 +197,8 @@ struct AsyncTextParameters
   Property::Map                      variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
   Dali::Vector<Text::Fit::Candidate> textFitCandidates;
   Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot
-    styledTextStyleSnapshot; ///< Copy-safe StyledText style run snapshot for async rendering.
+                                       styledTextStyleSnapshot; ///< Copy-safe StyledText style run snapshot for async rendering.
+  std::vector<AsyncAnchorClickedState> clickedAnchors;
 
   float fontSize;           ///< The font's size (in pixels).
   float minLineSize;        ///< The line's minimum size (in pixels).
@@ -258,6 +287,7 @@ struct AsyncTextRenderInfo
     textGradientMarqueeViewportBounds(0.0f, 0.0f, 1.0f, 1.0f),
     controlSize(),
     renderedSize(),
+    anchorHitRegions(),
     lineCount(0),
     marqueeWrapGap(0.f),
     hasMultipleTextColors(false),
@@ -275,33 +305,34 @@ struct AsyncTextRenderInfo
   ~AsyncTextRenderInfo()
   {
   }
-  Async::RequestType requestType;
-  PixelData          textPixelData;
-  PixelData          textGradientPreservedPixelData;
-  PixelData          textGradientMaskPixelData;
-  PixelData          marqueeFillPixelData;
-  PixelData          marqueeStylePixelData;
-  PixelData          marqueeOverlayStylePixelData;
-  PixelData          stylePixelData;
-  PixelData          overlayStylePixelData;
-  PixelData          maskPixelData;
-  PixelData          marqueePixelData;
-  Size               size;                              ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
-  Vector4            textLogicalBounds;                 ///< Normalized logical text bounds inside @p size.
-  Vector4            textGradientMarqueeViewportBounds; ///< Normalized TextGradient bounds inside the visible marquee viewport.
-  Size               controlSize;                       ///< View size used to display the rendered text.
-  Size               renderedSize;                      ///< Final displayed size reported back to the caller.
-  int                lineCount;
-  float              marqueeWrapGap;
-  bool               hasMultipleTextColors : 1;
-  bool               containsColorGlyph : 1;
-  bool               styleEnabled : 1;
-  bool               styleTextureEnabled : 1;
-  bool               styleBlocksTextGradient : 1;
-  bool               isOverlayStyle : 1;
-  bool               isTextDirectionRTL : 1;
-  bool               isCutoutEnabled : 1;
-  bool               isEmbossEnabled : 1;
+  Async::RequestType                requestType;
+  PixelData                         textPixelData;
+  PixelData                         textGradientPreservedPixelData;
+  PixelData                         textGradientMaskPixelData;
+  PixelData                         marqueeFillPixelData;
+  PixelData                         marqueeStylePixelData;
+  PixelData                         marqueeOverlayStylePixelData;
+  PixelData                         stylePixelData;
+  PixelData                         overlayStylePixelData;
+  PixelData                         maskPixelData;
+  PixelData                         marqueePixelData;
+  Size                              size;                              ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
+  Vector4                           textLogicalBounds;                 ///< Normalized logical text bounds inside @p size.
+  Vector4                           textGradientMarqueeViewportBounds; ///< Normalized TextGradient bounds inside the visible marquee viewport.
+  Size                              controlSize;                       ///< View size used to display the rendered text.
+  Size                              renderedSize;                      ///< Final displayed size reported back to the caller.
+  std::vector<AsyncAnchorHitRegion> anchorHitRegions;                  ///< Anchor hit regions in text content local coordinates.
+  int                               lineCount;
+  float                             marqueeWrapGap;
+  bool                              hasMultipleTextColors : 1;
+  bool                              containsColorGlyph : 1;
+  bool                              styleEnabled : 1;
+  bool                              styleTextureEnabled : 1;
+  bool                              styleBlocksTextGradient : 1;
+  bool                              isOverlayStyle : 1;
+  bool                              isTextDirectionRTL : 1;
+  bool                              isCutoutEnabled : 1;
+  bool                              isEmbossEnabled : 1;
 };
 
 /**

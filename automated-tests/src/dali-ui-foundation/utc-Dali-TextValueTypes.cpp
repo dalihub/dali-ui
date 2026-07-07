@@ -191,6 +191,121 @@ int UtcDaliTextFontAttributesInvalidAttributeP(void)
   END_TEST;
 }
 
+// AnchorAttributes Tests
+
+int UtcDaliTextAnchorAttributesDefaultP(void)
+{
+  UiTestApplication application;
+
+  Text::AnchorAttributes attributes;
+
+  DALI_TEST_CHECK(!attributes.HasAttributes());
+  DALI_TEST_CHECK(!attributes.Has(Text::AnchorAttributes::Attribute::HREF));
+  DALI_TEST_CHECK(!attributes.Has(Text::AnchorAttributes::Attribute::COLOR));
+  DALI_TEST_CHECK(!attributes.Has(Text::AnchorAttributes::Attribute::CLICKED_COLOR));
+
+  END_TEST;
+}
+
+int UtcDaliTextAnchorAttributesSetAndUnsetP(void)
+{
+  UiTestApplication application;
+
+  Text::AnchorAttributes attributes;
+
+  attributes.SetHref("");
+  DALI_TEST_CHECK(attributes.HasAttributes());
+  DALI_TEST_CHECK(attributes.Has(Text::AnchorAttributes::Attribute::HREF));
+  DALI_TEST_EQUALS(attributes.GetHref(), Dali::String(""), TEST_LOCATION);
+
+  attributes.SetColor(UiColor(Color::GREEN));
+  DALI_TEST_CHECK(attributes.Has(Text::AnchorAttributes::Attribute::COLOR));
+  DALI_TEST_EQUALS(attributes.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+
+  attributes.SetClickedColor(UiColor(Color::RED));
+  DALI_TEST_CHECK(attributes.Has(Text::AnchorAttributes::Attribute::CLICKED_COLOR));
+  DALI_TEST_EQUALS(attributes.GetClickedColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  attributes.Unset(Text::AnchorAttributes::Attribute::COLOR);
+  DALI_TEST_CHECK(!attributes.Has(Text::AnchorAttributes::Attribute::COLOR));
+  DALI_TEST_CHECK(attributes.HasAttributes());
+
+  attributes.Unset(Text::AnchorAttributes::Attribute::HREF);
+  attributes.Unset(Text::AnchorAttributes::Attribute::CLICKED_COLOR);
+  DALI_TEST_CHECK(!attributes.HasAttributes());
+
+  END_TEST;
+}
+
+int UtcDaliTextAnchorAttributesEqualityUsesDefinedMaskP(void)
+{
+  UiTestApplication application;
+
+  Text::AnchorAttributes unset;
+  Text::AnchorAttributes explicitEmpty;
+  explicitEmpty.SetHref("");
+  DALI_TEST_CHECK(unset != explicitEmpty);
+
+  Text::AnchorAttributes a;
+  Text::AnchorAttributes b;
+  a.SetHref("https://www.tizen.org");
+  b.SetHref("https://www.tizen.org");
+  DALI_TEST_CHECK(a == b);
+
+  a.SetColor(UiColor());
+  DALI_TEST_CHECK(a != b);
+
+  b.SetColor(UiColor());
+  DALI_TEST_CHECK(a == b);
+
+  b.SetClickedColor(UiColor(Color::BLUE));
+  DALI_TEST_CHECK(a != b);
+
+  b.Unset(Text::AnchorAttributes::Attribute::CLICKED_COLOR);
+  DALI_TEST_CHECK(a == b);
+
+  END_TEST;
+}
+
+int UtcDaliTextAnchorAttributesCopyAndMoveP(void)
+{
+  UiTestApplication application;
+
+  Text::AnchorAttributes original;
+  original.SetHref("href");
+  original.SetColor(UiColor(Color::CYAN));
+
+  Text::AnchorAttributes copy(original);
+  DALI_TEST_CHECK(copy == original);
+
+  Text::AnchorAttributes assigned;
+  assigned = original;
+  DALI_TEST_CHECK(assigned == original);
+
+  Text::AnchorAttributes moved(std::move(copy));
+  DALI_TEST_CHECK(moved == original);
+
+  Text::AnchorAttributes moveAssigned;
+  moveAssigned = std::move(assigned);
+  DALI_TEST_CHECK(moveAssigned == original);
+
+  END_TEST;
+}
+
+int UtcDaliTextAnchorAttributesInvalidAttributeP(void)
+{
+  UiTestApplication application;
+
+  Text::AnchorAttributes attributes;
+  const auto             invalidAttribute = static_cast<Text::AnchorAttributes::Attribute>(999u);
+
+  DALI_TEST_CHECK(!attributes.Has(invalidAttribute));
+  attributes.Unset(invalidAttribute);
+  DALI_TEST_CHECK(!attributes.HasAttributes());
+
+  END_TEST;
+}
+
 // Underline Tests
 
 int UtcDaliTextUnderlineColorP(void)

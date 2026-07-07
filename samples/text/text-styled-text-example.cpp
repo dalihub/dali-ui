@@ -84,7 +84,7 @@ enum class StyledTextCase
   FONT_SPAN_COMBINED,
   FONT_SPAN_FIELD_MERGE,
   FONT_SPAN_LATER_WEIGHT_WINS,
-  FUTURE_ANCHOR_SPAN_DISABLED,
+  ANCHOR_SPAN,
   FUTURE_GRADIENT_SPAN_DISABLED,
 };
 
@@ -142,7 +142,7 @@ constexpr std::array<StyledTextCaseInfo, CASE_COUNT> CASES{{
   {StyledTextCase::FONT_SPAN_COMBINED, "FontSpan: combined attributes", "One FontSpan applies family, size, weight and slant together. Family may fall back by platform.", true, StyledTextValueKind::FONT, true, true, false, true},
   {StyledTextCase::FONT_SPAN_FIELD_MERGE, "FontSpan: field merge", "Family-only and weight-only FontSpans overlap; unset fields do not clear each other.", true, StyledTextValueKind::FONT, true, true, false, true},
   {StyledTextCase::FONT_SPAN_LATER_WEIGHT_WINS, "FontSpan: later normal wins", "Earlier bold FontSpan is overridden by a later explicit normal weight on the inner range.", true, StyledTextValueKind::NONE, true, true, false, true},
-  {StyledTextCase::FUTURE_ANCHOR_SPAN_DISABLED, "Future AnchorSpan", "Disabled placeholder. AnchorSpan is not implemented in this phase.", false, StyledTextValueKind::NONE, false, false, false, false},
+  {StyledTextCase::ANCHOR_SPAN, "AnchorSpan", "Two StyledText anchors. The first uses Label AnchorColor fallback; the second has explicit color and clicked color.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
   {StyledTextCase::FUTURE_GRADIENT_SPAN_DISABLED, "Future GradientSpan", "Disabled placeholder. GradientSpan is not implemented in this phase.", false, StyledTextValueKind::NONE, false, false, false, false},
 }};
 
@@ -374,6 +374,9 @@ private:
     mPreviewLabel = CreateLabel("", 36.0f, UiColor(0x111827));
     ConfigurePreviewLabel(mPreviewLabel, UiColor(0xFFFFFF));
     mPreviewLabel.SetAsyncRendering(false);
+    mPreviewLabel.SetAnchorColor(UiColor(0x0EA5E9));
+    mPreviewLabel.SetAnchorClickedColor(UiColor(0xBE185D));
+    mPreviewLabel.AnchorClickedSignal().Connect(this, &StyledTextSampleController::OnAnchorClicked);
 
     mAsyncTitleBadge = CreateLabel("", 13.0f, UiColor(0x0F172A));
     ConfigureHudBadge(mAsyncTitleBadge, PREVIEW_TITLE_HEIGHT, UiColor(0xDBEAFE), UiColor(0x93C5FD), UiColor(0x0F172A), Text::Alignment::START);
@@ -381,6 +384,9 @@ private:
     mAsyncPreviewLabel = CreateLabel("", 36.0f, UiColor(0x111827));
     ConfigurePreviewLabel(mAsyncPreviewLabel, UiColor(0xEFF6FF));
     mAsyncPreviewLabel.SetAsyncRendering(true);
+    mAsyncPreviewLabel.SetAnchorColor(UiColor(0x0EA5E9));
+    mAsyncPreviewLabel.SetAnchorClickedColor(UiColor(0xBE185D));
+    mAsyncPreviewLabel.AnchorClickedSignal().Connect(this, &StyledTextSampleController::OnAnchorClicked);
   }
 
   void CreateFooterBadges()
@@ -402,6 +408,7 @@ private:
       12.0f,
       UiColor(BADGE_DISABLED_TEXT));
     ConfigureHudBadge(mViewHelpLabel, FOOTER_LINE_HEIGHT, UiColor(0x111827), UiColor(0x334155), UiColor(BADGE_DISABLED_TEXT), Text::Alignment::START);
+    UpdateFooterAnchorStatus();
   }
 
   void ConnectHeaderActions()
@@ -652,6 +659,18 @@ private:
   Text::FontSpan NewFontSpan(const Text::FontAttributes& attributes) const
   {
     return Text::FontSpan::New(attributes);
+  }
+
+  Text::AnchorSpan NewAnchorSpan(const char* href, bool explicitColor) const
+  {
+    Text::AnchorAttributes attributes;
+    attributes.SetHref(href);
+    if(explicitColor)
+    {
+      attributes.SetColor(UiColor(COLOR_VALUES[mColorIndex % COLOR_VALUES.size()]));
+      attributes.SetClickedColor(UiColor(0xDC2626));
+    }
+    return Text::AnchorSpan::New(attributes);
   }
 
   std::size_t CurrentUnderlineValueIndex() const
@@ -964,6 +983,18 @@ private:
         state.valueInfo = "value: inner range uses explicit normal";
         return FinishBuilder(builder, state);
       }
+      case StyledTextCase::ANCHOR_SPAN:
+      {
+        state.text = "Fallback explicit links";
+        auto explicitRange = CurrentRange(9u, 17u, 18u, 23u);
+        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(state.text.c_str());
+        builder.SetSpan(NewAnchorSpan("anchor://fallback", false), 0u, 8u);
+        builder.SetSpan(NewAnchorSpan("anchor://explicit", true), explicitRange.first, explicitRange.second);
+        state.spanMode  = "AnchorSpan fallback + explicit";
+        state.rangeInfo = "fallback " + RangeText(0u, 8u) + ", explicit " + RangeText(explicitRange.first, explicitRange.second);
+        state.valueInfo = "fallback: Label AnchorColor #0EA5E9 | explicit " + CurrentColorValueInfo("color");
+        return FinishBuilder(builder, state);
+      }
       default:
       {
         state.text      = CurrentCase().title;
@@ -1056,13 +1087,19 @@ private:
 
     const std::string sourceText = mPlainSource ? "SetText plain source" : "SetStyledText source";
     SetHudBadge(mSyncTitleBadge, "SYNC LABEL  SetAsyncRendering(false) | " + sourceText, UiColor(0xE2E8F0), UiColor(0xCBD5E1), UiColor(0x0F172A));
-    SetHudBadge(mAsyncTitleBadge, "ASYNC LABEL  SetAsyncRendering(true) | " + sourceText, UiColor(0xDBEAFE), UiColor(0x93C5FD), UiColor(0x0F172A));
+    std::string asyncTitle = "ASYNC LABEL  SetAsyncRendering(true) | " + sourceText;
+    if(CurrentCase().type == StyledTextCase::ANCHOR_SPAN && !mPlainSource)
+    {
+      asyncTitle += " | async anchor click enabled";
+    }
+    SetHudBadge(mAsyncTitleBadge, asyncTitle, UiColor(0xDBEAFE), UiColor(0x93C5FD), UiColor(0x0F172A));
 
     std::ostringstream caseList;
     caseList << "CASES  prev: " << CASES[(mCaseIndex + CASES.size() - 1u) % CASES.size()].title
              << " | current: " << info.title
              << " | next: " << CASES[(mCaseIndex + 1u) % CASES.size()].title;
     SetHudBadge(mCaseListLabel, caseList.str(), UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT));
+    UpdateFooterAnchorStatus();
   }
 
   std::string ValueBadgeText() const
@@ -1257,6 +1294,7 @@ private:
     mCleared         = false;
     mPlainSource     = false;
     mMarkupEnabled   = CurrentCase().markupToggle;
+    mLastAnchorHref.clear();
   }
 
   void ShowCase(std::size_t index)
@@ -1347,6 +1385,10 @@ private:
       {
         return "inner normal";
       }
+      case StyledTextCase::ANCHOR_SPAN:
+      {
+        return std::string("explicit ") + COLOR_NAMES[valueIndex % COLOR_VALUES.size()];
+      }
       default:
       {
         return "font";
@@ -1405,6 +1447,8 @@ private:
         return "Family and weight merge";
       case StyledTextCase::FONT_SPAN_LATER_WEIGHT_WINS:
         return "Bold normal wins";
+      case StyledTextCase::ANCHOR_SPAN:
+        return "Fallback explicit links";
       default:
         return CurrentCase().title;
     }
@@ -1426,6 +1470,23 @@ private:
     {
       ShowCase(static_cast<std::size_t>(key[0] - '1'));
     }
+  }
+
+  void OnAnchorClicked(View, const Dali::String& href)
+  {
+    mLastAnchorHref = std::string(href.CStr(), href.Size());
+    std::printf("[text-styled-text-example] Anchor clicked href=%s\n", mLastAnchorHref.c_str());
+    UpdateFooterAnchorStatus();
+  }
+
+  void UpdateFooterAnchorStatus()
+  {
+    std::string text = "VIEW  Left/Right Case | 1-9/0 Jump | Disabled badges are unavailable for the current case/source";
+    if(!mLastAnchorHref.empty())
+    {
+      text = "ANCHOR CLICK  href=" + mLastAnchorHref;
+    }
+    SetHudBadge(mViewHelpLabel, text, UiColor(0x111827), UiColor(0x334155), UiColor(BADGE_DISABLED_TEXT));
   }
 
   void OnKeyEvent(Window, KeyEvent event)
@@ -1527,6 +1588,7 @@ private:
   std::size_t mColorIndex{0u};
   std::size_t mBackgroundIndex{0u};
   std::size_t mDecorationIndex{0u};
+  std::string mLastAnchorHref;
   bool        mRangeVariant{false};
   bool        mCleared{false};
   bool        mPlainSource{false};

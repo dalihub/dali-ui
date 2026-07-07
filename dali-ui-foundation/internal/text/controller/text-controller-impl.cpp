@@ -476,8 +476,7 @@ const Vector4& Controller::Impl::GetAnchorClickedColor() const
 
 void Controller::Impl::UpdateAnchorColor()
 {
-  if(!mAnchorControlInterface || !mMarkupProcessorEnabled || !mModel->mLogicalModel->mAnchors.Count() ||
-     !IsShowingRealText())
+  if(!mAnchorControlInterface || !mModel->mLogicalModel->mAnchors.Count() || !IsShowingRealText())
   {
     return;
   }

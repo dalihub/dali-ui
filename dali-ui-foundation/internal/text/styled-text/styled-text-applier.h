@@ -45,6 +45,7 @@ namespace Text
 {
 
 using StyledTextColorRunSnapshot       = Dali::Ui::Text::Internal::StyledTextColorRunSnapshot;
+using StyledTextAnchorRunSnapshot      = Dali::Ui::Text::Internal::StyledTextAnchorRunSnapshot;
 using StyledTextFontRunSnapshot        = Dali::Ui::Text::Internal::StyledTextFontRunSnapshot;
 using StyledTextLineThroughRunSnapshot = Dali::Ui::Text::Internal::StyledTextLineThroughRunSnapshot;
 using StyledTextStyleRunSnapshot       = Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot;
@@ -97,12 +98,20 @@ struct StyledTextApplyResult
  * @brief Internal helper for Phase 2/3 StyledText normalization.
  *
  * This helper currently normalizes plain text, ForegroundColorSpan,
- * BackgroundColorSpan, FontSpan, UnderlineSpan, and LineThroughSpan payloads.
- * It does not apply future AnchorSpan or GradientSpan data.
+ * BackgroundColorSpan, FontSpan, UnderlineSpan, LineThroughSpan, and
+ * AnchorSpan payloads. It does not apply future GradientSpan data.
  */
 class StyledTextApplier
 {
 public:
+  /**
+   * @brief Checks whether a StyledText snapshot contains AnchorSpan payloads.
+   *
+   * @param[in] styledText The styled text snapshot to inspect
+   * @return true if one or more AnchorSpan payloads are attached
+   */
+  static bool HasAnchorSpans(const Dali::Ui::Text::StyledText& styledText);
+
   /**
    * @brief Builds copy-safe style run data from a StyledText snapshot.
    *
@@ -114,9 +123,16 @@ public:
    *
    * @param[in] styledText The styled text snapshot to normalize
    * @param[in] dpi Valid positive DPI used for pixel-to-point font size conversion
+   * @param[in] anchorColor Fallback color for anchors without explicit color
+   * @param[in] anchorClickedColor Fallback clicked color for anchors without explicit clicked color
+   * @param[in] includeAnchorSpans Whether AnchorSpan payloads should be normalized
    * @return The copy-safe style run snapshot
    */
-  static StyledTextStyleRunSnapshot BuildTextStyleRunSnapshot(const Dali::Ui::Text::StyledText& styledText, float dpi);
+  static StyledTextStyleRunSnapshot BuildTextStyleRunSnapshot(const Dali::Ui::Text::StyledText& styledText,
+                                                              float                             dpi,
+                                                              const Vector4&                    anchorColor        = Color::MEDIUM_BLUE,
+                                                              const Vector4&                    anchorClickedColor = Color::DARK_MAGENTA,
+                                                              bool                              includeAnchorSpans = true);
 
   /**
    * @brief Applies plain UTF-8 text and supported style run snapshot data.
@@ -136,6 +152,8 @@ public:
    *
    * Compatibility helper for existing tests/callers. Long term canonical style
    * normalization should use BuildTextStyleRunSnapshot().
+   * This result does not transport anchor metadata. Anchor metadata is applied
+   * by ApplySnapshotToLogicalModel().
    *
    * Same-category runs follow SpanAttachment insertionOrder so downstream
    * style resolution keeps the authored order without merging spans.
@@ -144,9 +162,16 @@ public:
    *
    * @param[in] styledText The styled text snapshot to normalize
    * @param[in] dpi Valid positive DPI used for pixel-to-point font size conversion
+   * @param[in] anchorColor Fallback color for anchors without explicit color
+   * @param[in] anchorClickedColor Fallback clicked color for anchors without explicit clicked color
+   * @param[in] includeAnchorSpans Whether AnchorSpan payloads should be normalized
    * @return The normalized text and style run data
    */
-  static StyledTextApplyResult BuildTextStyleRunResult(const Dali::Ui::Text::StyledText& styledText, float dpi);
+  static StyledTextApplyResult BuildTextStyleRunResult(const Dali::Ui::Text::StyledText& styledText,
+                                                       float                             dpi,
+                                                       const Vector4&                    anchorColor        = Color::MEDIUM_BLUE,
+                                                       const Vector4&                    anchorClickedColor = Color::DARK_MAGENTA,
+                                                       bool                              includeAnchorSpans = true);
 
   /**
    * @brief Applies text and supported style run data to the given LogicalModel.
@@ -159,8 +184,16 @@ public:
    * @param[in] styledText The styled text snapshot to apply
    * @param[in,out] logicalModel The logical model to receive normalized data
    * @param[in] dpi Valid positive DPI used for pixel-to-point font size conversion
+   * @param[in] anchorColor Fallback color for anchors without explicit color
+   * @param[in] anchorClickedColor Fallback clicked color for anchors without explicit clicked color
+   * @param[in] includeAnchorSpans Whether AnchorSpan payloads should be normalized
    */
-  static void ApplyTextAndStyleRunsToLogicalModel(const Dali::Ui::Text::StyledText& styledText, Dali::Ui::Text::LogicalModel& logicalModel, float dpi);
+  static void ApplyTextAndStyleRunsToLogicalModel(const Dali::Ui::Text::StyledText& styledText,
+                                                  Dali::Ui::Text::LogicalModel&     logicalModel,
+                                                  float                             dpi,
+                                                  const Vector4&                    anchorColor        = Color::MEDIUM_BLUE,
+                                                  const Vector4&                    anchorClickedColor = Color::DARK_MAGENTA,
+                                                  bool                              includeAnchorSpans = true);
 };
 
 } // namespace Text

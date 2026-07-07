@@ -22,16 +22,20 @@
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/system/system-settings.h>
 #include <dali/public-api/actors/actor.h>
+#include <algorithm>
+#include <cmath>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
+#include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
@@ -54,6 +58,8 @@
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
+#include <utility>
+#include <vector>
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -258,6 +264,9 @@ LabelImpl::LabelImpl()
   mIsTouchDown(false),
   mHasStyledTextSource(false),
   mHasAnchors(false),
+  mHasAsyncAnchorHitRegions(false),
+  mAsyncAnchorGeometryDirty(false),
+  mHasA11yAnchors(false),
   mIsVisible(false),
   mIsVisibleInitialized(false),
   mIsViewBackgroundEnabled(true),
@@ -281,6 +290,13 @@ void LabelImpl::SetText(const Dali::String& text)
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
   mStyledTextSource    = Text::StyledText();
   mHasStyledTextSource = false;
+  if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
+  {
+    Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
+    mHasAsyncAnchorHitRegions = false;
+    mHasA11yAnchors           = false;
+  }
+  mAsyncAnchorGeometryDirty = false;
   mController->SetText(ToStdString(text));
   UpdateAnchorTouchInterception();
   InvalidateTextMeasure();
@@ -307,6 +323,13 @@ void LabelImpl::SetStyledText(const Text::StyledText& styledText)
     mStyledTextSource    = Text::StyledText();
     mHasStyledTextSource = false;
   }
+  if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
+  {
+    Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
+    mHasAsyncAnchorHitRegions = false;
+    mHasA11yAnchors           = false;
+  }
+  mAsyncAnchorGeometryDirty = false;
 
   mController->SetStyledText(styledText);
   UpdateAnchorTouchInterception();
@@ -1407,6 +1430,17 @@ void LabelImpl::SetAsyncRendering(bool asyncRendering)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), asyncRendering);
   mController->SetAsyncRendering(asyncRendering);
+  if(!asyncRendering)
+  {
+    if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
+    {
+      Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
+      mHasAsyncAnchorHitRegions = false;
+      mHasA11yAnchors           = false;
+    }
+    mAsyncAnchorGeometryDirty = false;
+    UpdateAnchorTouchInterception();
+  }
 }
 
 bool LabelImpl::IsAsyncRendering() const
@@ -1780,6 +1814,10 @@ void LabelImpl::OnInitialize()
 
   mController->SetVerticalLineAlignment(Text::Alignment::CENTER);
 
+  self.SetProperty(Ui::View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(Accessibility::Role::TEXT));
+  Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
+  Dali::Integration::Accessibility::Bridge::DisabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
+
   ApplyInitialConfig();
 }
 
@@ -1816,6 +1854,8 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
   if(mController->IsAsyncRendering())
   {
+    UpdateA11yAnchors(contentLayoutDirty);
+
     if(mTextScroller && mTextScroller->IsScrolling() && !(mRendererUpdateNeeded || contentLayoutDirty))
     {
       // When marquee is playing, a text load request is made only if a text update is absolutely necessary.
@@ -1881,8 +1921,11 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   PrepareMarqueeLayout(contentSize, marqueeOrientation, originSize);
 
   const Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
+  const bool                             textModelUpdated =
+    Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType);
+  const bool syncAnchorUpdateNeeded = !mHasA11yAnchors || contentLayoutDirty || textModelUpdated || mRendererUpdateNeeded;
 
-  if((Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType)) || mRendererUpdateNeeded)
+  if(textModelUpdated || mRendererUpdateNeeded)
   {
     // Update the visual
     Internal::TextVisual::EnableRendererUpdate(mVisual);
@@ -1954,6 +1997,11 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     }
 
     mRendererUpdateNeeded = false;
+  }
+
+  if((mController->HasAnchors() || mHasA11yAnchors) && syncAnchorUpdateNeeded)
+  {
+    UpdateA11yAnchors(false);
   }
 
   if(mController->IsTextFitChanged())
@@ -2267,6 +2315,21 @@ void LabelImpl::ScrollingFinished()
 // =============================================================================
 bool LabelImpl::AnchorClicked(uint32_t cursorPosition, std::string& href)
 {
+  if(mHasAsyncAnchorHitRegions)
+  {
+    Internal::Text::AnchorHitResult asyncAnchor = Internal::Text::ActivateAnchor(Ui::View::DownCast(Self()), cursorPosition);
+    if(asyncAnchor.hit)
+    {
+      if(asyncAnchor.newlyClicked && mController->IsAsyncRendering())
+      {
+        RequestTextRelayout();
+        RequestAsyncRender();
+      }
+      href = asyncAnchor.href;
+      return true;
+    }
+  }
+
   return mController->AnchorClickEvent(cursorPosition, href);
 }
 
@@ -2449,7 +2512,30 @@ void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo)
   // To avoid flickering issues, enable/disable the background visual when async load is completed.
   SetViewBackgroundEnabled(!mController->IsTextCutout());
 
-  mAsyncLineCount = renderInfo.lineCount;
+  mAsyncLineCount   = renderInfo.lineCount;
+  Ui::View selfView = Ui::View::DownCast(Self());
+  if(renderInfo.anchorHitRegions.empty())
+  {
+    if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
+    {
+      Internal::Text::ClearAnchorInteractionData(selfView);
+      mHasAsyncAnchorHitRegions = false;
+      mHasA11yAnchors           = false;
+    }
+    mAsyncAnchorGeometryDirty = false;
+  }
+  else
+  {
+    mHasA11yAnchors           = false;
+    mAsyncAnchorGeometryDirty = false;
+    mHasAsyncAnchorHitRegions =
+      Internal::Text::SetAnchorHitRegions(selfView, std::move(renderInfo.anchorHitRegions));
+    if(mHasAsyncAnchorHitRegions)
+    {
+      UpdateA11yAnchors(false);
+    }
+  }
+  UpdateAnchorTouchInterception();
 
   float width  = renderInfo.renderedSize.width;
   float height = renderInfo.renderedSize.height;
@@ -2747,9 +2833,40 @@ bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
 
       if(deltaX < 20.0f && deltaY < 20.0f)
       {
-        Extents       padding    = GetEffectiveTextPadding();
-        const Vector2 localPoint = touch.GetLocalPosition(0);
-        mController->AnchorEvent(localPoint.x - static_cast<float>(padding.start), localPoint.y - static_cast<float>(padding.top));
+        float localX = 0.0f;
+        float localY = 0.0f;
+        if(Self().ScreenToLocal(localX, localY, screen.x, screen.y))
+        {
+          const Vector2 contentOffset = GetTextContentOffset();
+          const Vector2 contentPoint(localX - contentOffset.x, localY - contentOffset.y);
+          const bool    useAsyncAnchorPath =
+            mController->IsAsyncRendering() && mHasAsyncAnchorHitRegions;
+          const bool asyncAnchorGeometryUsable =
+            useAsyncAnchorPath && !mAsyncAnchorGeometryDirty && !mIsContentLayoutDirty;
+
+          if(useAsyncAnchorPath)
+          {
+            if(asyncAnchorGeometryUsable)
+            {
+              const Internal::Text::AnchorHitResult asyncAnchor =
+                Internal::Text::HitTestAnchor(Ui::View::DownCast(Self()), contentPoint);
+              if(asyncAnchor.hit)
+              {
+                if(asyncAnchor.newlyClicked)
+                {
+                  // RequestAsyncRender() only marks pending work; relayout is what schedules the async texture refresh.
+                  RequestTextRelayout();
+                  RequestAsyncRender();
+                }
+                EmitAnchorClicked(asyncAnchor.href);
+              }
+            }
+          }
+          else
+          {
+            mController->AnchorEvent(contentPoint.x, contentPoint.y);
+          }
+        }
       }
     }
     mIsTouchDown = false;
@@ -2759,7 +2876,7 @@ bool LabelImpl::OnInterceptTouched(Actor actor, TouchEvent touch)
 
 void LabelImpl::UpdateAnchorTouchInterception()
 {
-  if(mController->HasAnchors())
+  if(mController->HasAnchors() || mHasAsyncAnchorHitRegions)
   {
     mHasAnchors = true;
     Self().InterceptTouchEventSignal().Connect(this, &LabelImpl::OnInterceptTouched);
@@ -2769,6 +2886,90 @@ void LabelImpl::UpdateAnchorTouchInterception()
     mHasAnchors = false;
     Self().InterceptTouchEventSignal().Disconnect(this, &LabelImpl::OnInterceptTouched);
   }
+}
+
+Vector2 LabelImpl::GetTextContentOffset() const
+{
+  Extents padding = GetEffectiveTextPadding();
+  Actor   self    = Self();
+
+  if(Dali::LayoutDirection::RIGHT_TO_LEFT == mController->GetLayoutDirection(self))
+  {
+    std::swap(padding.start, padding.end);
+  }
+
+  return Vector2(static_cast<float>(padding.start), static_cast<float>(padding.top));
+}
+
+void LabelImpl::ClearA11yAnchors()
+{
+  if(!mHasA11yAnchors)
+  {
+    return;
+  }
+
+  Internal::Text::ClearA11yAnchors(Ui::View::DownCast(Self()));
+  mHasA11yAnchors = false;
+}
+
+void LabelImpl::UpdateA11yAnchors(bool contentDirty)
+{
+  if(contentDirty && mController->IsAsyncRendering() && mHasAsyncAnchorHitRegions)
+  {
+    mAsyncAnchorGeometryDirty = true;
+  }
+
+  if(!Dali::Integration::Accessibility::IsUp())
+  {
+    if(!mHasA11yAnchors)
+    {
+      return;
+    }
+
+    ClearA11yAnchors();
+    return;
+  }
+
+  if(mController->IsAsyncRendering())
+  {
+    if(!mHasAsyncAnchorHitRegions || contentDirty || mAsyncAnchorGeometryDirty)
+    {
+      ClearA11yAnchors();
+      return;
+    }
+
+    if(!mHasA11yAnchors)
+    {
+      UpdateAsyncA11yAnchors();
+    }
+    return;
+  }
+
+  if(mController->HasAnchors())
+  {
+    UpdateSyncA11yAnchors();
+  }
+  else if(mHasA11yAnchors)
+  {
+    ClearA11yAnchors();
+  }
+}
+
+void LabelImpl::UpdateSyncA11yAnchors()
+{
+  std::vector<Ui::TextAnchor> anchorActors;
+  mController->GetAnchorActors(anchorActors);
+  mHasA11yAnchors = Internal::Text::SetA11yAnchors(Ui::View::DownCast(Self()), std::move(anchorActors));
+}
+
+void LabelImpl::UpdateAsyncA11yAnchors()
+{
+  mHasA11yAnchors = Internal::Text::UpdateA11yAnchorsFromHitRegions(Ui::View::DownCast(Self()), GetTextContentOffset());
+}
+
+void LabelImpl::OnAccessibilityStatusChanged()
+{
+  UpdateA11yAnchors(false);
 }
 
 void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSize)
@@ -3370,6 +3571,8 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.maxTextureSize             = Dali::GetMaxTextureSize();
   parameters.fontSize                   = mController->GetDefaultFontSize(Text::Controller::POINT_SIZE);
   parameters.textColor                  = mController->GetDefaultColor();
+  parameters.anchorColor                = mController->GetAnchorColor();
+  parameters.anchorClickedColor         = mController->GetAnchorClickedColor();
   parameters.fontFamily                 = mController->GetDefaultFontFamily();
   parameters.fontWeight                 = mController->GetDefaultFontWeight();
   parameters.fontWidth                  = mController->GetDefaultFontWidth();
@@ -3439,6 +3642,10 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.embossShadowColor              = mController->GetEmbossShadowColor();
   parameters.isTextGradientRequested        = Text::Internal::Gradient::IsRenderable(mTextGradient);
   parameters.isTextGradientOverlayRequested = Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
+  if(mHasAsyncAnchorHitRegions)
+  {
+    parameters.clickedAnchors = Internal::Text::GetAnchorClickedStates(Ui::View::DownCast(Self()));
+  }
 
   if(mHasStyledTextSource && mStyledTextSource)
   {
@@ -3447,7 +3654,10 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
     parameters.enableMarkup               = false;
     parameters.hasStyledTextStyleSnapshot = true;
     parameters.styledTextStyleSnapshot =
-      Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(mStyledTextSource, GetDpi());
+      Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(mStyledTextSource,
+                                                                             GetDpi(),
+                                                                             mController->GetAnchorColor(),
+                                                                             mController->GetAnchorClickedColor());
   }
 
   return parameters;
@@ -3505,6 +3715,11 @@ void LabelImpl::SetAnchorColorInternal(const Vector4& color)
     DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetAnchorColor(color);
     RequestRendererUpdate();
+    if(mController->IsAsyncRendering())
+    {
+      RequestTextRelayout();
+      RequestAsyncRender();
+    }
   }
 }
 
@@ -3515,6 +3730,11 @@ void LabelImpl::SetAnchorClickedColorInternal(const Vector4& color)
     DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetAnchorClickedColor(color);
     RequestRendererUpdate();
+    if(mController->IsAsyncRendering())
+    {
+      RequestTextRelayout();
+      RequestAsyncRender();
+    }
   }
 }
 

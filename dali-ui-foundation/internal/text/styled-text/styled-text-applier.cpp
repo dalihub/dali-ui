@@ -27,11 +27,13 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/anchor.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/font-description-run.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
+#include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
@@ -142,6 +144,17 @@ void CopyFontFamily(const std::string& family, Dali::Ui::Text::FontDescriptionRu
 std::string ToStdString(const Dali::String& string)
 {
   return std::string(string.CStr(), string.Size());
+}
+
+char* CopyToCString(const std::string& string)
+{
+  char* copiedString = new char[string.size() + 1u];
+  if(!string.empty())
+  {
+    std::memcpy(copiedString, string.c_str(), string.size());
+  }
+  copiedString[string.size()] = '\0';
+  return copiedString;
 }
 
 StyledTextColorRunSnapshot ToColorRunSnapshot(uint32_t startIndex, uint32_t endIndex, const Vector4& color)
@@ -275,6 +288,50 @@ Dali::Ui::Text::StrikethroughCharacterRun ToStrikethroughCharacterRun(const Styl
   return strikethroughRun;
 }
 
+StyledTextAnchorRunSnapshot ToAnchorRunSnapshot(const Dali::Ui::Text::AnchorAttributes& attributes,
+                                                uint32_t                                startIndex,
+                                                uint32_t                                endIndex,
+                                                const Vector4&                          anchorColor,
+                                                const Vector4&                          anchorClickedColor)
+{
+  StyledTextAnchorRunSnapshot snapshot;
+  snapshot.characterIndex     = startIndex;
+  snapshot.numberOfCharacters = endIndex - startIndex;
+  snapshot.href               = ToStdString(attributes.GetHref());
+
+  snapshot.hasColor = attributes.Has(Dali::Ui::Text::AnchorAttributes::Attribute::COLOR);
+  snapshot.color    = snapshot.hasColor ? attributes.GetColor().GetRgba() : anchorColor;
+
+  snapshot.hasClickedColor = attributes.Has(Dali::Ui::Text::AnchorAttributes::Attribute::CLICKED_COLOR);
+  snapshot.clickedColor    = snapshot.hasClickedColor ? attributes.GetClickedColor().GetRgba() : anchorClickedColor;
+
+  return snapshot;
+}
+
+Dali::Ui::Text::UnderlinedCharacterRun ToAnchorUnderlineRun(const StyledTextAnchorRunSnapshot& snapshot)
+{
+  Dali::Ui::Text::UnderlinedCharacterRun underlineRun;
+  underlineRun.characterRun.characterIndex     = snapshot.characterIndex;
+  underlineRun.characterRun.numberOfCharacters = snapshot.numberOfCharacters;
+  underlineRun.properties.color                = snapshot.color;
+  underlineRun.properties.colorDefined         = true;
+  return underlineRun;
+}
+
+Dali::Ui::Text::Anchor ToAnchor(const StyledTextAnchorRunSnapshot& snapshot, uint32_t colorRunIndex, uint32_t underlinedCharacterRunIndex)
+{
+  Dali::Ui::Text::Anchor anchor{};
+  anchor.startIndex                  = snapshot.characterIndex;
+  anchor.endIndex                    = snapshot.characterIndex + snapshot.numberOfCharacters;
+  anchor.href                        = CopyToCString(snapshot.href);
+  anchor.colorRunIndex               = colorRunIndex;
+  anchor.underlinedCharacterRunIndex = underlinedCharacterRunIndex;
+  anchor.markupClickedColor          = snapshot.clickedColor;
+  anchor.isMarkupColorSet            = snapshot.hasColor;
+  anchor.isMarkupClickedColorSet     = snapshot.hasClickedColor;
+  return anchor;
+}
+
 void ReleaseFontDescriptionRunFamilyNames(Dali::Vector<Dali::Ui::Text::FontDescriptionRun>& fontDescriptionRuns)
 {
   for(auto it = fontDescriptionRuns.Begin(), endIt = fontDescriptionRuns.End(); it != endIt; ++it)
@@ -337,7 +394,33 @@ void StyledTextApplyResult::TransferFontDescriptionRunsTo(Dali::Vector<Dali::Ui:
   target.Swap(fontDescriptionRuns);
 }
 
-StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Dali::Ui::Text::StyledText& styledText, float dpi)
+bool StyledTextApplier::HasAnchorSpans(const Dali::Ui::Text::StyledText& styledText)
+{
+  if(!styledText)
+  {
+    return false;
+  }
+
+  const StyledText* const impl = GetImplementation(styledText);
+  if(nullptr == impl)
+  {
+    return false;
+  }
+
+  const auto& attachments = impl->GetAttachments();
+  return std::any_of(attachments.begin(),
+                     attachments.end(),
+                     [](const SpanAttachment& attachment)
+  {
+    return static_cast<bool>(Dali::Ui::Text::AnchorSpan::DownCast(attachment.span));
+  });
+}
+
+StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Dali::Ui::Text::StyledText& styledText,
+                                                                        float                             dpi,
+                                                                        const Vector4&                    anchorColor,
+                                                                        const Vector4&                    anchorClickedColor,
+                                                                        bool                              includeAnchorSpans)
 {
   DALI_ASSERT_ALWAYS(dpi > 0.0f && "StyledTextApplier requires a valid DPI");
 
@@ -359,12 +442,14 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
   std::vector<const SpanAttachment*> orderedFontAttachments;
   std::vector<const SpanAttachment*> orderedUnderlineAttachments;
   std::vector<const SpanAttachment*> orderedLineThroughAttachments;
+  std::vector<const SpanAttachment*> orderedAnchorAttachments;
   const auto&                        attachments = impl->GetAttachments();
   orderedForegroundColorAttachments.reserve(attachments.size());
   orderedBackgroundColorAttachments.reserve(attachments.size());
   orderedFontAttachments.reserve(attachments.size());
   orderedUnderlineAttachments.reserve(attachments.size());
   orderedLineThroughAttachments.reserve(attachments.size());
+  orderedAnchorAttachments.reserve(attachments.size());
 
   for(const auto& attachment : attachments)
   {
@@ -388,6 +473,10 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
     {
       orderedLineThroughAttachments.push_back(&attachment);
     }
+    else if(includeAnchorSpans && Dali::Ui::Text::AnchorSpan::DownCast(attachment.span))
+    {
+      orderedAnchorAttachments.push_back(&attachment);
+    }
   }
 
   // Preserve SpanAttachment insertionOrder per style category. Merging and
@@ -397,6 +486,7 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
   SortAttachmentsByInsertionOrder(orderedFontAttachments);
   SortAttachmentsByInsertionOrder(orderedUnderlineAttachments);
   SortAttachmentsByInsertionOrder(orderedLineThroughAttachments);
+  SortAttachmentsByInsertionOrder(orderedAnchorAttachments);
 
   snapshot.foregroundColorRuns.reserve(orderedForegroundColorAttachments.size());
   for(const SpanAttachment* attachment : orderedForegroundColorAttachments)
@@ -484,6 +574,28 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
                                                                 lineThrough));
   }
 
+  snapshot.anchorRuns.reserve(orderedAnchorAttachments.size());
+  for(const SpanAttachment* attachment : orderedAnchorAttachments)
+  {
+    const Dali::Ui::Text::AnchorSpan anchorSpan = Dali::Ui::Text::AnchorSpan::DownCast(attachment->span);
+    if(!anchorSpan || attachment->startIndex >= attachment->endIndex)
+    {
+      continue;
+    }
+
+    const Dali::Ui::Text::AnchorAttributes attributes = anchorSpan.GetAnchorAttributes();
+    if(!attributes.Has(Dali::Ui::Text::AnchorAttributes::Attribute::HREF))
+    {
+      continue;
+    }
+
+    snapshot.anchorRuns.push_back(ToAnchorRunSnapshot(attributes,
+                                                      attachment->startIndex,
+                                                      attachment->endIndex,
+                                                      anchorColor,
+                                                      anchorClickedColor));
+  }
+
   return snapshot;
 }
 
@@ -492,7 +604,7 @@ void StyledTextApplier::ApplySnapshotToLogicalModel(const StyledTextStyleRunSnap
   ConvertUtf8TextToUtf32(utf8Text, logicalModel.mText);
 
   logicalModel.mColorRuns.Clear();
-  logicalModel.mColorRuns.Reserve(static_cast<uint32_t>(snapshot.foregroundColorRuns.size()));
+  logicalModel.mColorRuns.Reserve(static_cast<uint32_t>(snapshot.foregroundColorRuns.size() + snapshot.anchorRuns.size()));
   for(const auto& colorRunSnapshot : snapshot.foregroundColorRuns)
   {
     logicalModel.mColorRuns.PushBack(ToColorRun(colorRunSnapshot));
@@ -513,10 +625,26 @@ void StyledTextApplier::ApplySnapshotToLogicalModel(const StyledTextStyleRunSnap
   }
 
   logicalModel.mUnderlinedCharacterRuns.Clear();
-  logicalModel.mUnderlinedCharacterRuns.Reserve(static_cast<uint32_t>(snapshot.underlineRuns.size()));
+  logicalModel.mUnderlinedCharacterRuns.Reserve(static_cast<uint32_t>(snapshot.underlineRuns.size() + snapshot.anchorRuns.size()));
   for(const auto& underlineRunSnapshot : snapshot.underlineRuns)
   {
     logicalModel.mUnderlinedCharacterRuns.PushBack(ToUnderlinedCharacterRun(underlineRunSnapshot));
+  }
+
+  logicalModel.ClearAnchors();
+  logicalModel.mAnchors.Reserve(static_cast<uint32_t>(snapshot.anchorRuns.size()));
+  for(const auto& anchorRunSnapshot : snapshot.anchorRuns)
+  {
+    const uint32_t colorRunIndex = logicalModel.mColorRuns.Count();
+    logicalModel.mColorRuns.PushBack(ToColorRun(StyledTextColorRunSnapshot{
+      anchorRunSnapshot.characterIndex,
+      anchorRunSnapshot.numberOfCharacters,
+      anchorRunSnapshot.color}));
+
+    const uint32_t underlineRunIndex = logicalModel.mUnderlinedCharacterRuns.Count();
+    logicalModel.mUnderlinedCharacterRuns.PushBack(ToAnchorUnderlineRun(anchorRunSnapshot));
+
+    logicalModel.mAnchors.PushBack(ToAnchor(anchorRunSnapshot, colorRunIndex, underlineRunIndex));
   }
 
   logicalModel.mStrikethroughCharacterRuns.Clear();
@@ -527,7 +655,11 @@ void StyledTextApplier::ApplySnapshotToLogicalModel(const StyledTextStyleRunSnap
   }
 }
 
-StyledTextApplyResult StyledTextApplier::BuildTextStyleRunResult(const Dali::Ui::Text::StyledText& styledText, float dpi)
+StyledTextApplyResult StyledTextApplier::BuildTextStyleRunResult(const Dali::Ui::Text::StyledText& styledText,
+                                                                 float                             dpi,
+                                                                 const Vector4&                    anchorColor,
+                                                                 const Vector4&                    anchorClickedColor,
+                                                                 bool                              includeAnchorSpans)
 {
   StyledTextApplyResult result;
 
@@ -536,7 +668,7 @@ StyledTextApplyResult StyledTextApplier::BuildTextStyleRunResult(const Dali::Ui:
     ConvertTextToUtf32(styledText.GetText(), result.text);
   }
 
-  const StyledTextStyleRunSnapshot snapshot = BuildTextStyleRunSnapshot(styledText, dpi);
+  const StyledTextStyleRunSnapshot snapshot = BuildTextStyleRunSnapshot(styledText, dpi, anchorColor, anchorClickedColor, includeAnchorSpans);
 
   result.foregroundColorRuns.Reserve(static_cast<uint32_t>(snapshot.foregroundColorRuns.size()));
   for(const auto& colorRunSnapshot : snapshot.foregroundColorRuns)
@@ -562,6 +694,15 @@ StyledTextApplyResult StyledTextApplier::BuildTextStyleRunResult(const Dali::Ui:
     result.underlinedCharacterRuns.PushBack(ToUnderlinedCharacterRun(underlineRunSnapshot));
   }
 
+  for(const auto& anchorRunSnapshot : snapshot.anchorRuns)
+  {
+    result.foregroundColorRuns.PushBack(ToColorRun(StyledTextColorRunSnapshot{
+      anchorRunSnapshot.characterIndex,
+      anchorRunSnapshot.numberOfCharacters,
+      anchorRunSnapshot.color}));
+    result.underlinedCharacterRuns.PushBack(ToAnchorUnderlineRun(anchorRunSnapshot));
+  }
+
   result.strikethroughCharacterRuns.Reserve(static_cast<uint32_t>(snapshot.lineThroughRuns.size()));
   for(const auto& lineThroughRunSnapshot : snapshot.lineThroughRuns)
   {
@@ -571,9 +712,14 @@ StyledTextApplyResult StyledTextApplier::BuildTextStyleRunResult(const Dali::Ui:
   return result;
 }
 
-void StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(const Dali::Ui::Text::StyledText& styledText, Dali::Ui::Text::LogicalModel& logicalModel, float dpi)
+void StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(const Dali::Ui::Text::StyledText& styledText,
+                                                            Dali::Ui::Text::LogicalModel&     logicalModel,
+                                                            float                             dpi,
+                                                            const Vector4&                    anchorColor,
+                                                            const Vector4&                    anchorClickedColor,
+                                                            bool                              includeAnchorSpans)
 {
-  const StyledTextStyleRunSnapshot snapshot = BuildTextStyleRunSnapshot(styledText, dpi);
+  const StyledTextStyleRunSnapshot snapshot = BuildTextStyleRunSnapshot(styledText, dpi, anchorColor, anchorClickedColor, includeAnchorSpans);
   const std::string                utf8Text = styledText ? ToStdString(styledText.GetText()) : std::string();
   ApplySnapshotToLogicalModel(snapshot, utf8Text, logicalModel);
 }

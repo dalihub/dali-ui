@@ -236,7 +236,11 @@ void Controller::TextUpdater::SetStyledText(Controller& controller, const Styled
   {
     model->mVisualModel->SetTextColor(impl.mTextColor);
 
-    Dali::Ui::Internal::Text::StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(styledText, *logicalModel, GetDpi());
+    Dali::Ui::Internal::Text::StyledTextApplier::ApplyTextAndStyleRunsToLogicalModel(styledText,
+                                                                                     *logicalModel,
+                                                                                     GetDpi(),
+                                                                                     impl.mAnchorColor,
+                                                                                     impl.mAnchorClickedColor);
 
     const Length characterCount = logicalModel->mText.Count();
 

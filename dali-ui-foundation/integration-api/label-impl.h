@@ -1020,6 +1020,36 @@ private: // Implementation
   void UpdateAnchorTouchInterception();
 
   /**
+   * @brief Gets the text content offset in label coordinates.
+   */
+  Vector2 GetTextContentOffset() const;
+
+  /**
+   * @brief Clears accessibility anchor actors.
+   */
+  void ClearA11yAnchors();
+
+  /**
+   * @brief Updates accessibility anchor actors.
+   */
+  void UpdateA11yAnchors(bool contentDirty);
+
+  /**
+   * @brief Updates sync accessibility anchor actors from the controller.
+   */
+  void UpdateSyncA11yAnchors();
+
+  /**
+   * @brief Updates async accessibility anchor actors from cached hit regions.
+   */
+  void UpdateAsyncA11yAnchors();
+
+  /**
+   * @brief Called when accessibility is enabled or disabled.
+   */
+  void OnAccessibilityStatusChanged();
+
+  /**
    * @brief Initializes marquee based on the current text layout.
    *
    * @param[in] contentSize The size of the text content excluding padding.
@@ -1303,6 +1333,9 @@ private:
   bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
   bool mHasStyledTextSource : 1;      // whether current text source was set by SetStyledText().
   bool mHasAnchors : 1;               // whether the text has anchors.
+  bool mHasAsyncAnchorHitRegions : 1; // whether active async anchor hit regions are cached.
+  bool mAsyncAnchorGeometryDirty : 1; // whether cached async anchor geometry may no longer match the content layout.
+  bool mHasA11yAnchors : 1;           // whether accessibility TextAnchor actors are attached.
   bool mIsVisible : 1;                // cached result of IsEffectivelyVisible().
   bool mIsVisibleInitialized : 1;     // whether mIsVisible has been initialized.
   bool mIsViewBackgroundEnabled : 1;  // whether the view background is enabled.

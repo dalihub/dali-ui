@@ -377,8 +377,7 @@ bool Controller::EventHandler::KeyEvent(Controller& controller, const Dali::KeyE
 
 void Controller::EventHandler::AnchorEvent(Controller& controller, float x, float y)
 {
-  if(!controller.mImpl->mMarkupProcessorEnabled || !controller.mImpl->mModel->mLogicalModel->mAnchors.Count() ||
-     !controller.mImpl->IsShowingRealText())
+  if(!controller.mImpl->mModel->mLogicalModel->mAnchors.Count() || !controller.mImpl->IsShowingRealText())
   {
     return;
   }

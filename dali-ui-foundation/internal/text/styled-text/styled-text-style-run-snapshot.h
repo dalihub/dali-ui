@@ -78,6 +78,17 @@ struct StyledTextLineThroughRunSnapshot
   Dali::Ui::Text::StrikethroughStyleProperties properties{};
 };
 
+struct StyledTextAnchorRunSnapshot
+{
+  Dali::Ui::Text::CharacterIndex characterIndex{0u};
+  Dali::Ui::Text::Length         numberOfCharacters{0u};
+  std::string                    href{};
+  Vector4                        color{Color::MEDIUM_BLUE};
+  Vector4                        clickedColor{Color::DARK_MAGENTA};
+  bool                           hasColor{false};
+  bool                           hasClickedColor{false};
+};
+
 struct StyledTextStyleRunSnapshot
 {
   std::vector<StyledTextColorRunSnapshot>       foregroundColorRuns;
@@ -85,6 +96,7 @@ struct StyledTextStyleRunSnapshot
   std::vector<StyledTextFontRunSnapshot>        fontRuns;
   std::vector<StyledTextUnderlineRunSnapshot>   underlineRuns;
   std::vector<StyledTextLineThroughRunSnapshot> lineThroughRuns;
+  std::vector<StyledTextAnchorRunSnapshot>      anchorRuns;
 };
 
 } // namespace Internal
