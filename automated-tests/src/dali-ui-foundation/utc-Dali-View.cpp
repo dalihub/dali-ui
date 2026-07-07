@@ -20,7 +20,6 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
-#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
@@ -3560,60 +3559,6 @@ int UtcDaliViewAccessibilityRoleConversionP(void)
 
   view.SetProperty(View::Property::ACCESSIBILITY_ROLE, -1);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::UNKNOWN, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliViewAccessibilityReadingInfoP(void)
-{
-  UiTestApplication application;
-
-  View view = View::New();
-  auto accessible = Dali::Accessibility::Accessible::Get(view);
-  DALI_TEST_CHECK(accessible);
-
-  auto& viewData = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view));
-
-  auto defaultTypes = viewData.GetAccessibilityReadingInfoType();
-  DALI_TEST_EQUALS(static_cast<bool>(defaultTypes[Dali::Integration::Accessibility::ReadingInfoType::NAME]), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<bool>(defaultTypes[Dali::Integration::Accessibility::ReadingInfoType::ROLE]), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<bool>(defaultTypes[Dali::Integration::Accessibility::ReadingInfoType::DESCRIPTION]), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<bool>(defaultTypes[Dali::Integration::Accessibility::ReadingInfoType::STATE]), true, TEST_LOCATION);
-
-  Dali::Integration::Accessibility::ReadingInfoTypes internalTypes;
-  internalTypes[Dali::Integration::Accessibility::ReadingInfoType::NAME]        = true;
-  internalTypes[Dali::Integration::Accessibility::ReadingInfoType::ROLE]        = true;
-  internalTypes[Dali::Integration::Accessibility::ReadingInfoType::DESCRIPTION] = true;
-  internalTypes[Dali::Integration::Accessibility::ReadingInfoType::STATE]       = true;
-  viewData.SetAccessibilityReadingInfoType(internalTypes);
-
-  auto storedTypes = viewData.GetAccessibilityReadingInfoType();
-  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::NAME]), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::ROLE]), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::DESCRIPTION]), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::STATE]), true, TEST_LOCATION);
-
-  viewData.SetAccessibilityReadingInfoType({});
-  storedTypes = viewData.GetAccessibilityReadingInfoType();
-  DALI_TEST_EQUALS(static_cast<bool>(storedTypes[Dali::Integration::Accessibility::ReadingInfoType::NAME]), false, TEST_LOCATION);
-
-  Property::Map attributes;
-  attributes.Insert("reading_info_type", "name|description");
-  view.SetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES, attributes);
-
-  auto exportedAttributes = accessible->GetAttributes();
-  DALI_TEST_EQUALS(exportedAttributes["reading_info_type"], "name|description", TEST_LOCATION);
-
-  attributes["reading_info_type"] = "name|role|description|state";
-  view.SetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES, attributes);
-
-  exportedAttributes = accessible->GetAttributes();
-  DALI_TEST_EQUALS(exportedAttributes["reading_info_type"], "name|role|description|state", TEST_LOCATION);
-
-  view.SetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES, Property::Map());
-
-  exportedAttributes = accessible->GetAttributes();
-  DALI_TEST_CHECK(exportedAttributes.find("reading_info_type") == exportedAttributes.end());
 
   END_TEST;
 }

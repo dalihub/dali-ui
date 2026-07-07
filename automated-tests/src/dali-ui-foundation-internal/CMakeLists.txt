@@ -73,6 +73,7 @@ SET(TC_SOURCES
     utc-Dali-TextGradientShaderComposition-internal.cpp
     utc-Dali-TextGradientTypesetterMask-internal.cpp
     utc-Dali-TextGradientVisualMaskPlumbing-internal.cpp
+    utc-Dali-ViewAccessibility-internal.cpp
 )
 
 # ---------------------------------------------------------
