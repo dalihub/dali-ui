@@ -58,6 +58,18 @@ public:
   static StyledText New(const Dali::String& text);
 
   /**
+   * @brief Converts supported DALi markup into a StyledText snapshot.
+   *
+   * Supported markup tags are converted into spans. Unsupported tags are skipped
+   * on a best-effort basis while preserving their text content where possible.
+   * Text content and attribute values are decoded for supported XHTML entities.
+   *
+   * @param[in] markup The markup string to convert
+   * @return A new StyledText snapshot
+   */
+  static StyledText FromMarkup(const Dali::String& markup);
+
+  /**
    * @brief Gets the text payload.
    *
    * @return The text payload

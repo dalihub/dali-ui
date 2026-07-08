@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/styled-text/markup-to-styled-text.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
 
 namespace Dali
@@ -41,6 +42,11 @@ Internal::Text::StyledText* GetImplementation(const StyledText& styledText)
 StyledText StyledText::New(const Dali::String& text)
 {
   return StyledText(new Internal::Text::StyledText(text));
+}
+
+StyledText StyledText::FromMarkup(const Dali::String& markup)
+{
+  return Internal::Text::MarkupToStyledText(markup, nullptr);
 }
 
 Dali::String StyledText::GetText() const

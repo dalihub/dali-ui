@@ -46,7 +46,7 @@ constexpr float HEADER_HEIGHT       = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEA
 constexpr float FOOTER_HEIGHT       = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
 constexpr int   WINDOW_WIDTH        = 920;
 constexpr int   WINDOW_HEIGHT       = 820;
-constexpr std::size_t CASE_COUNT     = 23u;
+constexpr std::size_t CASE_COUNT     = 25u;
 
 constexpr uint32_t BADGE_DISABLED_BACKGROUND = 0x1E293B;
 constexpr uint32_t BADGE_DISABLED_BORDER     = 0x475569;
@@ -85,6 +85,8 @@ enum class StyledTextCase
   FONT_SPAN_FIELD_MERGE,
   FONT_SPAN_LATER_WEIGHT_WINS,
   ANCHOR_SPAN,
+  MARKUP_TO_STYLED_TEXT_BASIC,
+  MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY,
   FUTURE_GRADIENT_SPAN_DISABLED,
 };
 
@@ -143,8 +145,17 @@ constexpr std::array<StyledTextCaseInfo, CASE_COUNT> CASES{{
   {StyledTextCase::FONT_SPAN_FIELD_MERGE, "FontSpan: field merge", "Family-only and weight-only FontSpans overlap; unset fields do not clear each other.", true, StyledTextValueKind::FONT, true, true, false, true},
   {StyledTextCase::FONT_SPAN_LATER_WEIGHT_WINS, "FontSpan: later normal wins", "Earlier bold FontSpan is overridden by a later explicit normal weight on the inner range.", true, StyledTextValueKind::NONE, true, true, false, true},
   {StyledTextCase::ANCHOR_SPAN, "AnchorSpan", "Two StyledText anchors. The first uses Label AnchorColor fallback; the second has explicit color and clicked color.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
+  {StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC, "FromMarkup: basic styles", "Converts DALi markup to StyledText. SetText remains plain text.", true, StyledTextValueKind::NONE, false, false, false, true},
+  {StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY, "FromMarkup: anchor + entities", "Converts anchor markup and entities to AnchorSpan and decoded text.", true, StyledTextValueKind::NONE, false, false, false, true},
   {StyledTextCase::FUTURE_GRADIENT_SPAN_DISABLED, "Future GradientSpan", "Disabled placeholder. GradientSpan is not implemented in this phase.", false, StyledTextValueKind::NONE, false, false, false, false},
 }};
+
+constexpr const char* FROM_MARKUP_BASIC_TEXT =
+  "<color value='red'>Red</color> <font weight='bold' size='34'>Font</font> <b>Bold</b> <i>Italic</i>\n"
+  "<u color='green' height='2' type='dashed' dash-gap='3' dash-width='5'>Under</u> <s color='blue' height='3'>Strike</s> <background color='yellow'>BG</background>";
+
+constexpr const char* FROM_MARKUP_ANCHOR_ENTITY_TEXT =
+  "<a href=https://example.com?a=1&amp;b=2 color=blue clicked-color='red'>entity link</a> | A &lt; B &amp;&amp; C &gt; D | raw 1 < 2 && 3 > 2";
 
 constexpr std::array<uint32_t, 4u> COLOR_VALUES{{
   0xEF4444,
@@ -995,6 +1006,22 @@ private:
         state.valueInfo = "fallback: Label AnchorColor #0EA5E9 | explicit " + CurrentColorValueInfo("color");
         return FinishBuilder(builder, state);
       }
+      case StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC:
+      {
+        state.text      = FROM_MARKUP_BASIC_TEXT;
+        state.spanMode  = "StyledText::FromMarkup";
+        state.rangeInfo = "markup converted to StyledText spans";
+        state.valueInfo = "color/font/b/i/u/s/background";
+        return Text::StyledText::FromMarkup(state.text.c_str());
+      }
+      case StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY:
+      {
+        state.text      = FROM_MARKUP_ANCHOR_ENTITY_TEXT;
+        state.spanMode  = "StyledText::FromMarkup";
+        state.rangeInfo = "anchor markup converted to AnchorSpan";
+        state.valueInfo = "href entity decode + unquoted attrs";
+        return Text::StyledText::FromMarkup(state.text.c_str());
+      }
       default:
       {
         state.text      = CurrentCase().title;
@@ -1070,7 +1097,7 @@ private:
 
     SetActionBadge(mPreviousBadge, "PREV", true, UiColor(0x1E3A8A), UiColor(0x93C5FD));
     SetActionBadge(mNextBadge, "NEXT", true, UiColor(0x1E3A8A), UiColor(0x93C5FD));
-    SetActionBadge(mSourceBadge, mPlainSource ? "SOURCE SetText" : "SOURCE StyledText", CanToggleSource(), UiColor(BADGE_READY_BACKGROUND), UiColor(BADGE_READY_BORDER));
+    SetActionBadge(mSourceBadge, SourceBadgeText(), CanToggleSource(), UiColor(BADGE_READY_BACKGROUND), UiColor(BADGE_READY_BORDER));
     SetActionBadge(mResetBadge, "RESET", true, UiColor(BADGE_WARN_BACKGROUND), UiColor(BADGE_WARN_BORDER));
 
     SetActionBadge(mValueBadge, ValueBadgeText(), CanChangeValue(), UiColor(BADGE_APPLY_BACKGROUND), UiColor(BADGE_APPLY_BORDER));
@@ -1085,10 +1112,10 @@ private:
              << " | " << state.rangeInfo << " | " << state.valueInfo;
     SetHudBadge(mExpectedBadge, expected.str(), UiColor(0x0F172A), UiColor(0x334155), UiColor(BADGE_DISABLED_TEXT));
 
-    const std::string sourceText = mPlainSource ? "SetText plain source" : "SetStyledText source";
+    const std::string sourceText = SourceTitleText();
     SetHudBadge(mSyncTitleBadge, "SYNC LABEL  SetAsyncRendering(false) | " + sourceText, UiColor(0xE2E8F0), UiColor(0xCBD5E1), UiColor(0x0F172A));
     std::string asyncTitle = "ASYNC LABEL  SetAsyncRendering(true) | " + sourceText;
-    if(CurrentCase().type == StyledTextCase::ANCHOR_SPAN && !mPlainSource)
+    if(IsAnchorClickCase() && !mPlainSource)
     {
       asyncTitle += " | async anchor click enabled";
     }
@@ -1147,6 +1174,36 @@ private:
         return "VALUE N/A";
       }
     }
+  }
+
+  bool IsFromMarkupCase() const
+  {
+    return (CurrentCase().type == StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC) ||
+           (CurrentCase().type == StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY);
+  }
+
+  bool IsAnchorClickCase() const
+  {
+    return (CurrentCase().type == StyledTextCase::ANCHOR_SPAN) ||
+           (CurrentCase().type == StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY);
+  }
+
+  std::string SourceBadgeText() const
+  {
+    if(mPlainSource)
+    {
+      return "SOURCE SetText";
+    }
+    return IsFromMarkupCase() ? "SOURCE FromMarkup" : "SOURCE StyledText";
+  }
+
+  std::string SourceTitleText() const
+  {
+    if(mPlainSource)
+    {
+      return "SetText plain source";
+    }
+    return IsFromMarkupCase() ? "SetStyledText(StyledText::FromMarkup)" : "SetStyledText source";
   }
 
   std::string ClearBadgeText() const
@@ -1449,6 +1506,10 @@ private:
         return "Bold normal wins";
       case StyledTextCase::ANCHOR_SPAN:
         return "Fallback explicit links";
+      case StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC:
+        return FROM_MARKUP_BASIC_TEXT;
+      case StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY:
+        return FROM_MARKUP_ANCHOR_ENTITY_TEXT;
       default:
         return CurrentCase().title;
     }

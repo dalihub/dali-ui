@@ -54,6 +54,15 @@ void CheckRange(const StyledText& styledText, uint32_t index, uint32_t startInde
   DALI_TEST_EQUALS(styledText.GetSpanEndIndexAt(index), endIndex, TEST_LOCATION);
 }
 
+void CheckSemiTransparentRedColor(const UiColor& color)
+{
+  const Vector4 rgba = color.GetRgba();
+  DALI_TEST_EQUALS(rgba.a, 128.0f / 255.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(rgba.r, 1.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(rgba.g, 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(rgba.b, 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+}
+
 void CheckCodePointRangeValidation(const Dali::String& text, uint32_t expectedCount, uint32_t additionalInvalidEnd = 0u)
 {
   StyledTextBuilder builder = StyledTextBuilder::New(text);
@@ -721,6 +730,223 @@ int UtcDaliStyledTextBuilderFromStyledTextPreservesAnchorSpanP(void)
   DALI_TEST_CHECK(copiedAttributes.Has(AnchorAttributes::Attribute::COLOR));
   DALI_TEST_EQUALS(copiedAttributes.GetHref(), Dali::String(""), TEST_LOCATION);
   DALI_TEST_EQUALS(copiedAttributes.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupColorP(void)
+{
+  UiTestApplication application;
+
+  StyledText styledText = StyledText::FromMarkup("<color value='red'>Hello</color>");
+
+  DALI_TEST_CHECK(styledText);
+  DALI_TEST_EQUALS(styledText.GetText(), "Hello", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(styledText, 0u, 0u, 5u);
+
+  ForegroundColorSpan span = ForegroundColorSpan::DownCast(styledText.GetSpanAt(0u));
+  DALI_TEST_CHECK(span);
+  DALI_TEST_EQUALS(span.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupAlphaHexColorP(void)
+{
+  UiTestApplication application;
+
+  const char* markups[] =
+  {
+    "<color value='#80FF0000'>A</color>",
+    "<color value='0x80FF0000'>A</color>",
+  };
+
+  for(const char* markup : markups)
+  {
+    StyledText styledText = StyledText::FromMarkup(markup);
+    DALI_TEST_EQUALS(styledText.GetText(), "A", TEST_LOCATION);
+    DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+    CheckRange(styledText, 0u, 0u, 1u);
+    CheckSemiTransparentRedColor(ForegroundColorSpan::DownCast(styledText.GetSpanAt(0u)).GetColor());
+  }
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupAttributeQuotesP(void)
+{
+  UiTestApplication application;
+
+  const char* markups[] =
+  {
+    "<color value='red'>A</color>",
+    "<color value=\"red\">A</color>",
+    "<color value=red>A</color>",
+  };
+
+  for(const char* markup : markups)
+  {
+    StyledText styledText = StyledText::FromMarkup(markup);
+    DALI_TEST_EQUALS(styledText.GetText(), "A", TEST_LOCATION);
+    DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+    CheckRange(styledText, 0u, 0u, 1u);
+    DALI_TEST_EQUALS(ForegroundColorSpan::DownCast(styledText.GetSpanAt(0u)).GetColor().GetRgba(), Color::RED, TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupRawSymbolsAndTextEntitiesP(void)
+{
+  UiTestApplication application;
+
+  StyledText rawText = StyledText::FromMarkup("1 < 2 && 3 > 2");
+  DALI_TEST_EQUALS(rawText.GetText(), "1 < 2 && 3 > 2", TEST_LOCATION);
+  DALI_TEST_EQUALS(rawText.GetSpanCount(), 0u, TEST_LOCATION);
+
+  StyledText entityText = StyledText::FromMarkup("A &lt; B &amp;&amp; C &gt; D &#60; &#x3C;");
+  DALI_TEST_EQUALS(entityText.GetText(), "A < B && C > D < <", TEST_LOCATION);
+  DALI_TEST_EQUALS(entityText.GetSpanCount(), 0u, TEST_LOCATION);
+
+  StyledText unknownEntityText = StyledText::FromMarkup("A &unknown; B & C");
+  DALI_TEST_EQUALS(unknownEntityText.GetText(), "A &unknown; B & C", TEST_LOCATION);
+  DALI_TEST_EQUALS(unknownEntityText.GetSpanCount(), 0u, TEST_LOCATION);
+
+  StyledText entityRecoveryText = StyledText::FromMarkup("A & B &amp; C");
+  DALI_TEST_EQUALS(entityRecoveryText.GetText(), "A & B & C", TEST_LOCATION);
+  DALI_TEST_EQUALS(entityRecoveryText.GetSpanCount(), 0u, TEST_LOCATION);
+
+  StyledText unknownThenEntityText = StyledText::FromMarkup("&unknown;&amp;");
+  DALI_TEST_EQUALS(unknownThenEntityText.GetText(), "&unknown;&", TEST_LOCATION);
+  DALI_TEST_EQUALS(unknownThenEntityText.GetSpanCount(), 0u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupNestedColorP(void)
+{
+  UiTestApplication application;
+
+  StyledText styledText = StyledText::FromMarkup("<color value='red'>a<color value='blue'>b</color>c</color>");
+
+  DALI_TEST_EQUALS(styledText.GetText(), "abc", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 2u, TEST_LOCATION);
+
+  CheckRange(styledText, 0u, 0u, 3u);
+  DALI_TEST_EQUALS(ForegroundColorSpan::DownCast(styledText.GetSpanAt(0u)).GetColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  CheckRange(styledText, 1u, 1u, 2u);
+  DALI_TEST_EQUALS(ForegroundColorSpan::DownCast(styledText.GetSpanAt(1u)).GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupNestedFontOrderP(void)
+{
+  UiTestApplication application;
+
+  StyledText normalWins = StyledText::FromMarkup("<b><font weight='normal'>x</font></b>");
+  DALI_TEST_EQUALS(normalWins.GetText(), "x", TEST_LOCATION);
+  DALI_TEST_EQUALS(normalWins.GetSpanCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(FontSpan::DownCast(normalWins.GetSpanAt(0u)).GetFontAttributes().GetWeight(), FontWeight::BOLD, TEST_LOCATION);
+  DALI_TEST_EQUALS(FontSpan::DownCast(normalWins.GetSpanAt(1u)).GetFontAttributes().GetWeight(), FontWeight::NORMAL, TEST_LOCATION);
+
+  StyledText boldWins = StyledText::FromMarkup("<font weight='normal'><b>x</b></font>");
+  DALI_TEST_EQUALS(boldWins.GetText(), "x", TEST_LOCATION);
+  DALI_TEST_EQUALS(boldWins.GetSpanCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(FontSpan::DownCast(boldWins.GetSpanAt(0u)).GetFontAttributes().GetWeight(), FontWeight::NORMAL, TEST_LOCATION);
+  DALI_TEST_EQUALS(FontSpan::DownCast(boldWins.GetSpanAt(1u)).GetFontAttributes().GetWeight(), FontWeight::BOLD, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupDecorationsAndBackgroundP(void)
+{
+  UiTestApplication application;
+
+  StyledText styledText = StyledText::FromMarkup("<u color='green' height='2.0f' type='dashed' dash-gap='3' dash-width='4'>under</u><s color='blue' height='5'>strike</s><background color='yellow'>bg</background>");
+
+  DALI_TEST_EQUALS(styledText.GetText(), "understrikebg", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 3u, TEST_LOCATION);
+
+  CheckRange(styledText, 0u, 0u, 5u);
+  Underline underline = UnderlineSpan::DownCast(styledText.GetSpanAt(0u)).GetUnderline();
+  DALI_TEST_EQUALS(underline.GetColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(underline.GetThickness(), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(underline.GetType(), Underline::Type::DASHED, TEST_LOCATION);
+  DALI_TEST_EQUALS(underline.GetDashGap(), 3.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(underline.GetDashLength(), 4.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  CheckRange(styledText, 1u, 5u, 11u);
+  LineThrough lineThrough = LineThroughSpan::DownCast(styledText.GetSpanAt(1u)).GetLineThrough();
+  DALI_TEST_EQUALS(lineThrough.GetColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+  DALI_TEST_EQUALS(lineThrough.GetThickness(), 5.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  CheckRange(styledText, 2u, 11u, 13u);
+  DALI_TEST_EQUALS(BackgroundColorSpan::DownCast(styledText.GetSpanAt(2u)).GetColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupAnchorP(void)
+{
+  UiTestApplication application;
+
+  StyledText styledText = StyledText::FromMarkup("<a href='https://example.com?a=1&amp;b=2' color='red' clicked-color='blue'>link</a>");
+
+  DALI_TEST_EQUALS(styledText.GetText(), "link", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(styledText, 0u, 0u, 4u);
+
+  AnchorSpan anchorSpan = AnchorSpan::DownCast(styledText.GetSpanAt(0u));
+  DALI_TEST_CHECK(anchorSpan);
+
+  AnchorAttributes attributes = anchorSpan.GetAnchorAttributes();
+  DALI_TEST_CHECK(attributes.Has(AnchorAttributes::Attribute::HREF));
+  DALI_TEST_CHECK(attributes.Has(AnchorAttributes::Attribute::COLOR));
+  DALI_TEST_CHECK(attributes.Has(AnchorAttributes::Attribute::CLICKED_COLOR));
+  DALI_TEST_EQUALS(attributes.GetHref(), "https://example.com?a=1&b=2", TEST_LOCATION);
+  DALI_TEST_EQUALS(attributes.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
+  DALI_TEST_EQUALS(attributes.GetClickedColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+
+  StyledText quoteEntity = StyledText::FromMarkup("<a href='a&quot;b&apos;c'>x</a>");
+  AnchorAttributes quoteAttributes = AnchorSpan::DownCast(quoteEntity.GetSpanAt(0u)).GetAnchorAttributes();
+  DALI_TEST_EQUALS(quoteAttributes.GetHref(), "a\"b'c", TEST_LOCATION);
+
+  StyledText emptyHref = StyledText::FromMarkup("<a href=''>x</a>");
+  DALI_TEST_EQUALS(emptyHref.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(AnchorSpan::DownCast(emptyHref.GetSpanAt(0u)).GetAnchorAttributes().GetHref(), "", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupUnquotedAnchorHrefP(void)
+{
+  UiTestApplication application;
+
+  StyledText styledText = StyledText::FromMarkup("<a href=https://example.com?a=1&amp;b=2>link</a>");
+
+  DALI_TEST_EQUALS(styledText.GetText(), "link", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(styledText, 0u, 0u, 4u);
+
+  AnchorSpan anchorSpan = AnchorSpan::DownCast(styledText.GetSpanAt(0u));
+  DALI_TEST_CHECK(anchorSpan);
+  DALI_TEST_EQUALS(anchorSpan.GetAnchorAttributes().GetHref(), "https://example.com?a=1&b=2", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupUnicodeRangeP(void)
+{
+  UiTestApplication application;
+
+  StyledText styledText = StyledText::FromMarkup("<color value='red'>가😀B</color>");
+
+  DALI_TEST_EQUALS(styledText.GetText(), "가😀B", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(styledText, 0u, 0u, 3u);
 
   END_TEST;
 }
