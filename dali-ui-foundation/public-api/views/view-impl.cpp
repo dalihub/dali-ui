@@ -63,6 +63,7 @@
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/internal/views/view/view-gradient-color-binding.h>
 #include <dali-ui-foundation/internal/views/view/view-visual-data.h>
 #include <dali-ui-foundation/internal/visuals/color/color-visual.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
@@ -100,6 +101,10 @@ namespace Ui
 
 namespace
 {
+
+constexpr char BACKGROUND_COLOR_BINDING_ID[]    = "BackgroundColor";
+constexpr char BACKGROUND_GRADIENT_BINDING_ID[] = "BackgroundGradient";
+constexpr char COLOR_BINDING_ID[]               = "Color";
 
 /// Scoped guard that lets View::OnChildAdd accept a non-View Actor as a child.
 /// Used by IntegrationView::AddActorChild. Thread-local because Actor::Add invokes
@@ -968,7 +973,7 @@ void ViewImpl::SetPivot(const Vector3& point)
 UiColor ViewImpl::GetBackgroundColor()
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(Self(), "BackgroundColor", outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), BACKGROUND_COLOR_BINDING_ID, outColor))
   {
     return outColor;
   }
@@ -988,7 +993,8 @@ UiColor ViewImpl::GetBackgroundColor()
 
 void ViewImpl::SetBackgroundColor(const UiColor& color)
 {
-  SetColorBinding("BackgroundColor", color, this, &ViewImpl::SetBackgroundColorInternal);
+  ClearGradientColorBinding(BACKGROUND_GRADIENT_BINDING_ID);
+  SetColorBinding(BACKGROUND_COLOR_BINDING_ID, color, this, &ViewImpl::SetBackgroundColorInternal);
 }
 
 void ViewImpl::SetBackgroundImage(const Dali::String& url)
@@ -999,7 +1005,7 @@ void ViewImpl::SetBackgroundImage(const Dali::String& url)
     return;
   }
 
-  UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
+  ClearBackgroundBinding();
 
   mImpl->SetBackground(Internal::CreateImageVisualPropertyMap(url));
 }
@@ -1012,8 +1018,12 @@ void ViewImpl::SetBackgroundGradient(const Gradient::Base& gradient)
     return;
   }
 
-  UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
+  UiColorManager::Get().ClearBinding(Self(), BACKGROUND_COLOR_BINDING_ID);
+  SetColorBinding(BACKGROUND_GRADIENT_BINDING_ID, gradient, this, &ViewImpl::SetBackgroundGradientInternal);
+}
 
+void ViewImpl::SetBackgroundGradientInternal(const Gradient::Base& gradient)
+{
   Property::Map map = Internal::CreateGradientVisualPropertyMap(gradient);
   mImpl->SetBackground(map);
 }
@@ -1021,7 +1031,7 @@ void ViewImpl::SetBackgroundGradient(const Gradient::Base& gradient)
 UiColor ViewImpl::GetColor() const
 {
   UiColor outColor;
-  if(UiColorManager::Get().GetBindingColor(Self(), "Color", outColor))
+  if(UiColorManager::Get().GetBindingColor(Self(), COLOR_BINDING_ID, outColor))
   {
     return outColor;
   }
@@ -1030,7 +1040,7 @@ UiColor ViewImpl::GetColor() const
 
 void ViewImpl::SetColor(const UiColor& color)
 {
-  SetColorBinding("Color", color, this, &ViewImpl::SetColorInternal);
+  SetColorBinding(COLOR_BINDING_ID, color, this, &ViewImpl::SetColorInternal);
 }
 
 UiColor ViewImpl::GetCurrentColor() const
@@ -1622,6 +1632,67 @@ void ViewImpl::ResetEffectiveScaleRecursive()
   {
     GetImpl(childView).ResetEffectiveScaleRecursive();
   }
+}
+
+bool ViewImpl::UpdateColorBindingInternal(StringView bindingId, const UiColor& color)
+{
+  auto manager = UiColorManager::Get();
+  if(!color.HasColorId())
+  {
+    manager.ClearBinding(Self(), bindingId);
+    return true;
+  }
+
+  if(manager.HasBinding(Self(), bindingId))
+  {
+    manager.SetBindingColor(Self(), bindingId, color);
+    return true;
+  }
+  return false;
+}
+
+void ViewImpl::SetColorBindingInternal(StringView bindingId, const UiColor& color, ColorCallback callback)
+{
+  auto manager = UiColorManager::Get();
+  manager.RegisterBinding(Self(), bindingId, std::move(callback));
+  manager.SetBindingColor(Self(), bindingId, color);
+}
+
+bool ViewImpl::UpdateColorBindingInternal(StringView bindingId, const Gradient::Base& gradient)
+{
+  if(!Internal::ViewGradientColorBinding::HasTokenColor(gradient))
+  {
+    ClearGradientColorBinding(bindingId);
+    return true;
+  }
+  return Internal::ViewGradientColorBinding::Update(*this, bindingId, gradient);
+}
+
+void ViewImpl::SetColorBindingInternal(StringView bindingId, const Gradient::Base& gradient, Callback<void(const Gradient::Base&)> callback)
+{
+  if(Internal::ViewGradientColorBinding::Add(*this, bindingId, gradient, std::move(callback)))
+  {
+    UiColorManager::Get().ColorTableChangedSignal().Connect(this, &ViewImpl::OnColorTableChanged);
+  }
+}
+
+void ViewImpl::OnColorTableChanged()
+{
+  Internal::ViewGradientColorBinding::ApplyAll(*this);
+}
+
+void ViewImpl::ClearGradientColorBinding(StringView bindingId)
+{
+  if(Internal::ViewGradientColorBinding::Clear(*this, bindingId))
+  {
+    UiColorManager::Get().ColorTableChangedSignal().Disconnect(this, &ViewImpl::OnColorTableChanged);
+  }
+}
+
+void ViewImpl::ClearBackgroundBinding()
+{
+  UiColorManager::Get().ClearBinding(Self(), BACKGROUND_COLOR_BINDING_ID);
+  ClearGradientColorBinding(BACKGROUND_GRADIENT_BINDING_ID);
 }
 
 void ViewImpl::InvalidateMeasure()
@@ -2532,7 +2603,7 @@ void ViewImpl::ClearBackground()
 {
   mImpl->UnregisterVisual(Ui::View::Property::BACKGROUND);
 
-  UiColorManager::Get().ClearBinding(Self(), "BackgroundColor");
+  ClearBackgroundBinding();
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
   RelayoutRequest();

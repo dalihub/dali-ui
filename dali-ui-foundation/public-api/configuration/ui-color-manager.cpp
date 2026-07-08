@@ -103,5 +103,10 @@ void UiColorManager::InvalidateCache(const UiColor& color)
   GetImpl(*this).InvalidateCache(color);
 }
 
+UiColorManager::ColorTableChangedSignalType& UiColorManager::ColorTableChangedSignal()
+{
+  return GetImpl(*this).ColorTableChangedSignal();
+}
+
 } // namespace Ui
 } // namespace Dali

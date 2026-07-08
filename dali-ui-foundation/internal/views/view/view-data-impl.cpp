@@ -994,7 +994,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         std::string          url;
         Vector4              color;
         const Property::Map* map = value.GetMap();
-        UiColorManager::Get().ClearBinding(viewImpl.Self(), "BackgroundColor");
+        viewImpl.ClearBackgroundBinding();
         if(map && !map->Empty())
         {
           viewImpl.GetViewDataImpl().SetBackground(*map);

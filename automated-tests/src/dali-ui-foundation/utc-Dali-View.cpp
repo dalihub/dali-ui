@@ -254,6 +254,92 @@ uint32_t AccessibilityStateMask(UiAccessibility::State state)
   return 1u << static_cast<uint32_t>(state);
 }
 
+const char* const BACKGROUND_COLOR_TOKEN = "UtcBackgroundColor";
+const char* const BACKGROUND_GRADIENT_START_TOKEN = "UtcBackgroundGradientStart";
+const char* const BACKGROUND_GRADIENT_END_TOKEN = "UtcBackgroundGradientEnd";
+
+const Vector4 BACKGROUND_COLOR_A(0.1f, 0.2f, 0.3f, 1.0f);
+const Vector4 BACKGROUND_COLOR_B(0.7f, 0.6f, 0.5f, 1.0f);
+const Vector4 BACKGROUND_GRADIENT_START_A(0.8f, 0.1f, 0.2f, 1.0f);
+const Vector4 BACKGROUND_GRADIENT_START_B(0.2f, 0.8f, 0.1f, 1.0f);
+const Vector4 BACKGROUND_GRADIENT_END_A(0.1f, 0.2f, 0.8f, 1.0f);
+const Vector4 BACKGROUND_GRADIENT_END_B(0.9f, 0.8f, 0.2f, 1.0f);
+
+bool gUseAlternateBackgroundColors = false;
+
+bool OverrideBackgroundColors(StringView colorId, Vector4& outColor)
+{
+  if(colorId == BACKGROUND_COLOR_TOKEN)
+  {
+    outColor = gUseAlternateBackgroundColors ? BACKGROUND_COLOR_B : BACKGROUND_COLOR_A;
+    return true;
+  }
+
+  if(colorId == BACKGROUND_GRADIENT_START_TOKEN)
+  {
+    outColor = gUseAlternateBackgroundColors ? BACKGROUND_GRADIENT_START_B : BACKGROUND_GRADIENT_START_A;
+    return true;
+  }
+
+  if(colorId == BACKGROUND_GRADIENT_END_TOKEN)
+  {
+    outColor = gUseAlternateBackgroundColors ? BACKGROUND_GRADIENT_END_B : BACKGROUND_GRADIENT_END_A;
+    return true;
+  }
+
+  return false;
+}
+
+Gradient::Linear CreateBackgroundTokenGradient()
+{
+  Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  Dali::Vector<Gradient::StopNode> stopNodes;
+  stopNodes.PushBack(Gradient::StopNode(0.0f, UiColor(BACKGROUND_GRADIENT_START_TOKEN)));
+  stopNodes.PushBack(Gradient::StopNode(1.0f, UiColor(BACKGROUND_GRADIENT_END_TOKEN)));
+  gradient.SetStopNodes(stopNodes);
+  return gradient;
+}
+
+Property::Map GetBackgroundPropertyMap(View view)
+{
+  Property::Value backgroundValue = view.GetProperty(Ui::View::Property::BACKGROUND);
+  const Property::Map* backgroundMap = backgroundValue.GetMap();
+  DALI_TEST_CHECK(backgroundMap);
+  return backgroundMap ? *backgroundMap : Property::Map();
+}
+
+Vector4 GetBackgroundMixColor(View view)
+{
+  Property::Map backgroundMap = GetBackgroundPropertyMap(view);
+  Property::Value* colorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+  DALI_TEST_CHECK(colorValue);
+
+  Vector4 color;
+  DALI_TEST_CHECK(colorValue && colorValue->Get(color));
+  return color;
+}
+
+Vector4 GetBackgroundGradientStopColor(View view, uint32_t index)
+{
+  Property::Map backgroundMap = GetBackgroundPropertyMap(view);
+  Property::Value* stopColorValue = backgroundMap.Find(Ui::GradientVisualPropertyIndex::STOP_COLOR);
+  DALI_TEST_CHECK(stopColorValue);
+
+  const Property::Array* stopColors = stopColorValue ? stopColorValue->GetArray() : nullptr;
+  DALI_TEST_CHECK(stopColors);
+  DALI_TEST_CHECK(stopColors && index < stopColors->Count());
+
+  Vector4 color;
+  DALI_TEST_CHECK(stopColors && stopColors->GetElementAt(index).Get(color));
+  return color;
+}
+
+bool HasBackgroundVisual(View view)
+{
+  Property::Map backgroundMap = GetBackgroundPropertyMap(view);
+  return !backgroundMap.Empty() && backgroundMap.Find(Ui::VisualBasePropertyIndex::TYPE);
+}
+
 } // namespace
 
 void utc_dali_view_startup(void)
@@ -519,6 +605,53 @@ int UtcDaliViewSetBackgroundGradientP(void)
   const Property::Array* stopColors = stopColorValue ? stopColorValue->GetArray() : nullptr;
   DALI_TEST_CHECK(stopColors);
   DALI_TEST_EQUALS(stopColors ? stopColors->Count() : 0u, 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewBackgroundGradientTokenBindingRefreshP(void)
+{
+  UiTestApplication application;
+  UiColorManager manager = UiColorManager::Get();
+  View view = View::New();
+
+  gUseAlternateBackgroundColors = false;
+  manager.SetColorOverride(OverrideBackgroundColors);
+
+  view.SetBackgroundColor(UiColor(BACKGROUND_COLOR_TOKEN));
+  DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), BACKGROUND_COLOR_A, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetBackgroundMixColor(view), BACKGROUND_COLOR_A, TEST_LOCATION);
+
+  view.SetBackgroundGradient(CreateBackgroundTokenGradient());
+  DALI_TEST_EQUALS(GetVisualType(GetBackgroundPropertyMap(view)), static_cast<int>(Ui::Integration::InternalVisualType::GRADIENT), TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetBackgroundColor().IsNone());
+  DALI_TEST_EQUALS(GetBackgroundGradientStopColor(view, 0u), BACKGROUND_GRADIENT_START_A, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetBackgroundGradientStopColor(view, 1u), BACKGROUND_GRADIENT_END_A, TEST_LOCATION);
+
+  gUseAlternateBackgroundColors = true;
+  manager.SetColorOverride(OverrideBackgroundColors);
+  DALI_TEST_EQUALS(GetBackgroundGradientStopColor(view, 0u), BACKGROUND_GRADIENT_START_B, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetBackgroundGradientStopColor(view, 1u), BACKGROUND_GRADIENT_END_B, TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetBackgroundColor().IsNone());
+
+  view.SetBackgroundGradient(Gradient::Base::None());
+  DALI_TEST_CHECK(!HasBackgroundVisual(view));
+
+  gUseAlternateBackgroundColors = false;
+  manager.SetColorOverride(OverrideBackgroundColors);
+  DALI_TEST_CHECK(!HasBackgroundVisual(view));
+
+  view.SetBackgroundColor(UiColor(BACKGROUND_COLOR_TOKEN));
+  DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), BACKGROUND_COLOR_A, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetBackgroundMixColor(view), BACKGROUND_COLOR_A, TEST_LOCATION);
+
+  gUseAlternateBackgroundColors = true;
+  manager.SetColorOverride(OverrideBackgroundColors);
+  DALI_TEST_EQUALS(view.GetBackgroundColor().GetRgba(), BACKGROUND_COLOR_B, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetBackgroundMixColor(view), BACKGROUND_COLOR_B, TEST_LOCATION);
+
+  manager.ClearColorOverride();
+  gUseAlternateBackgroundColors = false;
+
   END_TEST;
 }
 

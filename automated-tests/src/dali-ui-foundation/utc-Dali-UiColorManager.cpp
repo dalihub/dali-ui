@@ -519,6 +519,29 @@ int UtcDaliUiColorManagerSetColorOverrideRefreshP(void)
   END_TEST;
 }
 
+int UtcDaliUiColorManagerColorTableChangedSignalP(void)
+{
+  UiTestApplication application;
+
+  UiColorManager manager = UiColorManager::Get();
+  int callCount = 0;
+  manager.ColorTableChangedSignal().Connect(&application, [&callCount]()
+  {
+    callCount++;
+  });
+
+  manager.SetColorOverride(OverridePrimary);
+  DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
+
+  manager.SetColorOverride(OverrideAll);
+  DALI_TEST_EQUALS(callCount, 2, TEST_LOCATION);
+
+  manager.ClearColorOverride();
+  DALI_TEST_EQUALS(callCount, 3, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliUiColorManagerSetColorOverrideReplaceP(void)
 {
   UiTestApplication application;

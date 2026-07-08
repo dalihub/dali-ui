@@ -21,6 +21,7 @@
 #include <dali/public-api/common/dali-string-view.h>
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/base-handle.h>
+#include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -77,6 +78,8 @@ using ColorCallback = Callback<void(const Vector4&)>;
 class DALI_UI_API UiColorManager : public BaseHandle
 {
 public:
+  using ColorTableChangedSignalType = Signal<void()>;
+
   /**
    * @brief Creates an uninitialized UiColorManager handle.
    */
@@ -279,6 +282,18 @@ public:
    * @param[in] color The UiColor whose cache entry should be invalidated
    */
   void InvalidateCache(const UiColor& color);
+
+  /**
+   * @brief Returns a signal that is emitted when the resolved color table changes.
+   *
+   * This signal is emitted after cached colors are invalidated and existing
+   * color bindings are refreshed. It can be used by objects that store
+   * compound color data, such as gradients, and need to re-resolve their own
+   * UiColor values.
+   *
+   * @return A reference to the color-table-changed signal
+   */
+  ColorTableChangedSignalType& ColorTableChangedSignal();
 
 public: // Not intended for Application developers
   /// @cond internal

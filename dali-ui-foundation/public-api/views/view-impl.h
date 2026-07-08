@@ -1279,6 +1279,11 @@ protected:
   /**
    * @brief Registers a color binding for theme-aware color updates.
    *
+   * A binding ID represents a stable callback slot. If a binding with the same
+   * ID already exists, this method updates only the bound color; it does not
+   * replace the existing callback. Call ClearBinding() before reusing an ID with
+   * a different target object or setter.
+   *
    * @tparam T        Type of the instance (ViewImpl or a derived class)
    * @param[in] bindingId  Caller-defined identifier for this binding
    * @param[in] color      The UiColor to apply
@@ -1288,20 +1293,35 @@ protected:
   template<typename T>
   void SetColorBinding(StringView bindingId, const UiColor& color, T* inst, void (T::*setter)(const Vector4&))
   {
-    auto manager = UiColorManager::Get();
-    if(color.HasColorId())
+    if(!UpdateColorBindingInternal(bindingId, color))
     {
-      if(!manager.HasBinding(Self(), bindingId))
-      {
-        manager.RegisterBinding(Self(), bindingId, ColorCallback::New(inst, setter));
-      }
-      manager.SetBindingColor(Self(), bindingId, color);
-    }
-    else
-    {
-      manager.ClearBinding(Self(), bindingId);
+      SetColorBindingInternal(bindingId, color, ColorCallback::New(inst, setter));
     }
     (inst->*setter)(color.GetRgba());
+  }
+
+  /**
+   * @brief Registers a gradient color binding for theme-aware gradient updates.
+   *
+   * A binding ID represents a stable callback slot. If a binding with the same
+   * ID already exists, this method updates only the stored gradient; it does not
+   * replace the existing callback. Call ClearGradientColorBinding() before
+   * reusing an ID with a different target object or setter.
+   *
+   * @tparam T        Type of the instance (ViewImpl or a derived class)
+   * @param[in] bindingId  Caller-defined identifier for this gradient binding
+   * @param[in] gradient   The gradient to apply
+   * @param[in] inst       The object whose @a setter will be used as the callback
+   * @param[in] setter     Member function called both immediately and on theme change
+   */
+  template<typename T>
+  void SetColorBinding(StringView bindingId, const Gradient::Base& gradient, T* inst, void (T::*setter)(const Gradient::Base&))
+  {
+    if(!UpdateColorBindingInternal(bindingId, gradient))
+    {
+      SetColorBindingInternal(bindingId, gradient, Callback<void(const Gradient::Base&)>::New(inst, setter));
+    }
+    (inst->*setter)(gradient);
   }
 
   /**
@@ -1385,7 +1405,24 @@ private:
   ViewImpl& operator=(const ViewImpl&) = delete;
   ViewImpl& operator=(ViewImpl&&)      = delete;
 
+  /**
+   * @brief Updates or clears an existing color binding.
+   * @return True when no callback registration is needed; false when the caller should register a new callback.
+   */
+  bool UpdateColorBindingInternal(StringView bindingId, const UiColor& color);
+  void SetColorBindingInternal(StringView bindingId, const UiColor& color, ColorCallback callback);
+
+  /**
+   * @brief Updates or clears an existing gradient color binding.
+   * @return True when no callback registration is needed; false when the caller should register a new callback.
+   */
+  bool UpdateColorBindingInternal(StringView bindingId, const Gradient::Base& gradient);
+  void SetColorBindingInternal(StringView bindingId, const Gradient::Base& gradient, Callback<void(const Gradient::Base&)> callback);
+  void OnColorTableChanged();
+  void ClearGradientColorBinding(StringView bindingId);
+  void ClearBackgroundBinding();
   void SetBackgroundColorInternal(const Vector4& color);
+  void SetBackgroundGradientInternal(const Gradient::Base& gradient);
   void SetBorderlineColorInternal(const Vector4& color);
   void SetColorInternal(const Vector4& color);
   void OnChildOrderChanged(Actor parent, Actor orderChangedChild);

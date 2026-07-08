@@ -136,6 +136,11 @@ public:
    */
   void InvalidateCache(const UiColor& color);
 
+  /**
+   * @copydoc Dali::Ui::UiColorManager::ColorTableChangedSignal
+   */
+  UiColorManager::ColorTableChangedSignalType& ColorTableChangedSignal();
+
 protected:
   /**
    * @brief Constructs a new UiColorManagerImpl.
@@ -167,9 +172,11 @@ private:
   };
 
   void OnThemeChanged();
+  void HandleColorTableUpdate();
   void RefreshBindings();
 
   std::unordered_map<RefObject*, ViewBinding> mBindings;
+  UiColorManager::ColorTableChangedSignalType mColorTableChangedSignal;
   ColorOverrideFunc                           mColorOverride{nullptr};
   SlotDelegate<UiColorManagerImpl>            mSlotDelegate{this};
   bool                                        mIsApplying{false};

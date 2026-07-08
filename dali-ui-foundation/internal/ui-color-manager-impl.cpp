@@ -242,15 +242,13 @@ void UiColorManagerImpl::ClearBindings(void* objectPtr)
 void UiColorManagerImpl::SetColorOverride(ColorOverrideFunc func)
 {
   mColorOverride = func;
-  UiColorCache::Get().InvalidateAll();
-  RefreshBindings();
+  HandleColorTableUpdate();
 }
 
 void UiColorManagerImpl::ClearColorOverride()
 {
   mColorOverride = nullptr;
-  UiColorCache::Get().InvalidateAll();
-  RefreshBindings();
+  HandleColorTableUpdate();
 }
 
 void UiColorManagerImpl::InvalidateCache()
@@ -269,10 +267,21 @@ void UiColorManagerImpl::InvalidateCache(const UiColor& color)
   }
 }
 
+UiColorManager::ColorTableChangedSignalType& UiColorManagerImpl::ColorTableChangedSignal()
+{
+  return mColorTableChangedSignal;
+}
+
 void UiColorManagerImpl::OnThemeChanged()
+{
+  HandleColorTableUpdate();
+}
+
+void UiColorManagerImpl::HandleColorTableUpdate()
 {
   UiColorCache::Get().InvalidateAll();
   RefreshBindings();
+  mColorTableChangedSignal.Emit();
 }
 
 void UiColorManagerImpl::RefreshBindings()
