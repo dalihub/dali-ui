@@ -36,6 +36,16 @@ struct LabelImpl::PropertyHandler
   static void SetProperty(Ui::View view, Property::Index index, const Property::Value& value);
 
   /**
+   * Handles property set notifications for label-specific properties.
+   *
+   * @param[in] impl The label implementation.
+   * @param[in] index The property index of the property being set.
+   * @param[in] propertyValue The value being set.
+   * @return true if handled, false otherwise.
+   */
+  static bool OnPropertySet(LabelImpl& impl, Dali::Property::Index index, const Dali::Property::Value& propertyValue);
+
+  /**
    * Get properties from the label
    *
    * @param[in] textField The handle for the text field

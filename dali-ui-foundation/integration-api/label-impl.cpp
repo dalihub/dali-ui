@@ -3837,80 +3837,9 @@ void LabelImpl::SetBevelShadowColorInternal(const Vector4& color)
 // =============================================================================
 void LabelImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue)
 {
-  switch(index)
+  if(!PropertyHandler::OnPropertySet(*this, index, propertyValue))
   {
-    case Dali::Actor::Property::SIZE:
-    {
-      const Vector2& size = propertyValue.Get<Vector2>();
-      if(size != mSize)
-      {
-        mSize                 = size;
-        mIsContentLayoutDirty = true;
-      }
-      break;
-    }
-    case Dali::Actor::Property::SIZE_WIDTH:
-    {
-      const float width = propertyValue.Get<float>();
-      if(width != mSize.width)
-      {
-        mSize.width           = width;
-        mIsContentLayoutDirty = true;
-      }
-      break;
-    }
-    case Dali::Actor::Property::SIZE_HEIGHT:
-    {
-      const float height = propertyValue.Get<float>();
-      if(height != mSize.height)
-      {
-        mSize.height          = height;
-        mIsContentLayoutDirty = true;
-      }
-      break;
-    }
-    case Ui::View::Property::PADDING:
-    {
-      mIsContentLayoutDirty = true;
-      break;
-    }
-    case Ui::View::Property::BACKGROUND:
-    {
-      OnBackgroundPropertyChanged();
-      break;
-    }
-    case Text::LabelPropertyIndex::TEXT_COLOR:
-    {
-      const Vector4& textColor = propertyValue.Get<Vector4>();
-      if(mController->GetDefaultColor() != textColor)
-      {
-        mController->SetDefaultColor(textColor);
-        RequestRendererUpdate();
-
-        // Trigger constraint always.
-        if(DALI_LIKELY(mVisual))
-        {
-          Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount, true);
-        }
-      }
-      break;
-    }
-    case Text::LabelPropertyIndex::CUTOUT_ENABLED:
-    {
-      UpdateCutoutState(propertyValue.Get<bool>());
-      break;
-    }
-    default:
-    {
-      if(HandleVariationPropertySet(index, propertyValue))
-      {
-        // Handled as a font variation property.
-        break;
-      }
-
-      ViewImpl::OnPropertySet(index, propertyValue); // up call to control for non-handled properties
-      break;
-    }
+    ViewImpl::OnPropertySet(index, propertyValue); // up call to control for non-handled properties
   }
 
   if(mIsContentLayoutDirty)

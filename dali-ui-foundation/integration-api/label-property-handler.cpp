@@ -241,6 +241,78 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
   }
 }
 
+bool LabelImpl::PropertyHandler::OnPropertySet(LabelImpl& impl, Dali::Property::Index index, const Dali::Property::Value& propertyValue)
+{
+  switch(index)
+  {
+    case Dali::Actor::Property::SIZE:
+    {
+      const Vector2& size = propertyValue.Get<Vector2>();
+      if(size != impl.mSize)
+      {
+        impl.mSize                 = size;
+        impl.mIsContentLayoutDirty = true;
+      }
+      return true;
+    }
+    case Dali::Actor::Property::SIZE_WIDTH:
+    {
+      const float width = propertyValue.Get<float>();
+      if(width != impl.mSize.width)
+      {
+        impl.mSize.width           = width;
+        impl.mIsContentLayoutDirty = true;
+      }
+      return true;
+    }
+    case Dali::Actor::Property::SIZE_HEIGHT:
+    {
+      const float height = propertyValue.Get<float>();
+      if(height != impl.mSize.height)
+      {
+        impl.mSize.height          = height;
+        impl.mIsContentLayoutDirty = true;
+      }
+      return true;
+    }
+    case Ui::View::Property::PADDING:
+    {
+      impl.mIsContentLayoutDirty = true;
+      return true;
+    }
+    case Ui::View::Property::BACKGROUND:
+    {
+      impl.OnBackgroundPropertyChanged();
+      return true;
+    }
+    case Text::LabelPropertyIndex::TEXT_COLOR:
+    {
+      const Vector4& textColor = propertyValue.Get<Vector4>();
+      if(impl.mController->GetDefaultColor() != textColor)
+      {
+        impl.mController->SetDefaultColor(textColor);
+        impl.RequestRendererUpdate();
+
+        // Trigger constraint always.
+        if(DALI_LIKELY(impl.mVisual))
+        {
+          Internal::TextVisual::SetConstraintApplyAlways(impl.mVisual, impl.mTextColorAnimatedCount, true);
+        }
+      }
+      return true;
+    }
+    case Text::LabelPropertyIndex::CUTOUT_ENABLED:
+    {
+      impl.UpdateCutoutState(propertyValue.Get<bool>());
+      return true;
+    }
+    default:
+    {
+      return impl.HandleVariationPropertySet(index, propertyValue);
+    }
+  }
+}
+
 Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property::Index index)
 {
   Property::Value value;
