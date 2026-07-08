@@ -163,8 +163,10 @@ Notes and limits:
 
 - Applies to **CHANGE**, and to **ENTER / EXIT** when the owner carries the
   corresponding slot effect: a child added under a no-transition descendant
-  fires the owner's ENTER, and a child removed via `View::Remove` /
-  `RemoveAllChildren` fires the owner's EXIT. Raw `Actor::Remove` (bypassing the
+  fires the owner's ENTER, and a child removed via
+  `View::Remove(child, RemovePolicy::ANIMATE_EXIT)` or
+  `RemoveAllChildren(RemovePolicy::ANIMATE_EXIT)` fires the owner's EXIT, while
+  the no-argument `RemoveAllChildren()` is immediate and fires no EXIT. Raw `Actor::Remove` (bypassing the
   View remove API) is **not** deferred. The effect is sourced from the owner
   while geometry and the EXIT ghost use the child's real direct parent. The
   closest transition-bearing ancestor wins, so a descendant with its own
@@ -298,8 +300,10 @@ cancel in-flight transitions — see the caveat below.
   valid.
 
 - **EXIT ghost is non-resurrectable.** While EXIT is in flight the
-  child is logically removed from the parent (`GetChildCount` /
-  `GetChildAt` skip it) but stays in the actor tree. Adding the same
+  child is logically removed from the parent — the logical accessors
+  (`GetChildViewCount` / `GetChildViewAt`) skip it — but it stays in
+  the actor tree, so the inherited `Dali::Actor::GetChildCount` /
+  `Dali::Actor::GetChildAt` still count and return it. Adding the same
   child back to the same parent via `View::Insert` or inherited
   `Actor::Add` is silently ignored — the EXIT continues. To cancel,
   reparent to a different parent: the dispatcher auto-cancels the
