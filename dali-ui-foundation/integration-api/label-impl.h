@@ -1020,6 +1020,16 @@ private: // Implementation
   void UpdateAnchorTouchInterception();
 
   /**
+   * @brief Clears the stored StyledText source state.
+   */
+  void ClearStyledTextSourceState();
+
+  /**
+   * @brief Clears async anchor interaction state.
+   */
+  void ClearAnchorInteractionState();
+
+  /**
    * @brief Gets the text content offset in label coordinates.
    */
   Vector2 GetTextContentOffset() const;
@@ -1296,7 +1306,6 @@ private:
   std::unordered_map<Dali::Property::Index, Dali::String> mVariationIndexMap;
   WeakHandle<Ui::View>                                    mMaskSourceView;
   Dali::String                                            mTranslatableText; ///< Stored resourceId for localization binding
-  Text::StyledText                                        mStyledTextSource; ///< Stored StyledText source snapshot.
 
   Visual::Base          mVisual;
   Text::ControllerPtr   mController;

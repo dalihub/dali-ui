@@ -38,6 +38,7 @@
 #include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-source-data.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-marquee-helper.h>
@@ -288,15 +289,8 @@ LabelImpl::~LabelImpl()
 void LabelImpl::SetText(const Dali::String& text)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
-  mStyledTextSource    = Text::StyledText();
-  mHasStyledTextSource = false;
-  if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
-  {
-    Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
-    mHasAsyncAnchorHitRegions = false;
-    mHasA11yAnchors           = false;
-  }
-  mAsyncAnchorGeometryDirty = false;
+  ClearStyledTextSourceState();
+  ClearAnchorInteractionState();
   mController->SetText(ToStdString(text));
   UpdateAnchorTouchInterception();
   InvalidateTextMeasure();
@@ -315,21 +309,14 @@ void LabelImpl::SetStyledText(const Text::StyledText& styledText)
 
   if(styledText)
   {
-    mStyledTextSource    = styledText;
+    Internal::Text::SetStyledTextSource(Ui::View::DownCast(Self()), styledText);
     mHasStyledTextSource = true;
   }
   else
   {
-    mStyledTextSource    = Text::StyledText();
-    mHasStyledTextSource = false;
+    ClearStyledTextSourceState();
   }
-  if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
-  {
-    Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
-    mHasAsyncAnchorHitRegions = false;
-    mHasA11yAnchors           = false;
-  }
-  mAsyncAnchorGeometryDirty = false;
+  ClearAnchorInteractionState();
 
   mController->SetStyledText(styledText);
   UpdateAnchorTouchInterception();
@@ -338,7 +325,23 @@ void LabelImpl::SetStyledText(const Text::StyledText& styledText)
 
 Text::StyledText LabelImpl::GetStyledText() const
 {
-  return mHasStyledTextSource ? mStyledTextSource : Text::StyledText();
+  if(!mHasStyledTextSource)
+  {
+    return Text::StyledText();
+  }
+
+  return Internal::Text::GetStyledTextSource(Ui::View::DownCast(Self()));
+}
+
+void LabelImpl::ClearStyledTextSourceState()
+{
+  if(!mHasStyledTextSource)
+  {
+    return;
+  }
+
+  Internal::Text::ClearStyledTextSource(Ui::View::DownCast(Self()));
+  mHasStyledTextSource = false;
 }
 
 void LabelImpl::SetFontFamily(const Dali::String& fontFamily)
@@ -1432,13 +1435,7 @@ void LabelImpl::SetAsyncRendering(bool asyncRendering)
   mController->SetAsyncRendering(asyncRendering);
   if(!asyncRendering)
   {
-    if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
-    {
-      Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
-      mHasAsyncAnchorHitRegions = false;
-      mHasA11yAnchors           = false;
-    }
-    mAsyncAnchorGeometryDirty = false;
+    ClearAnchorInteractionState();
     UpdateAnchorTouchInterception();
   }
 }
@@ -2516,13 +2513,7 @@ void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo)
   Ui::View selfView = Ui::View::DownCast(Self());
   if(renderInfo.anchorHitRegions.empty())
   {
-    if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
-    {
-      Internal::Text::ClearAnchorInteractionData(selfView);
-      mHasAsyncAnchorHitRegions = false;
-      mHasA11yAnchors           = false;
-    }
-    mAsyncAnchorGeometryDirty = false;
+    ClearAnchorInteractionState();
   }
   else
   {
@@ -2899,6 +2890,18 @@ Vector2 LabelImpl::GetTextContentOffset() const
   }
 
   return Vector2(static_cast<float>(padding.start), static_cast<float>(padding.top));
+}
+
+void LabelImpl::ClearAnchorInteractionState()
+{
+  if(mHasAsyncAnchorHitRegions || mHasA11yAnchors)
+  {
+    Internal::Text::ClearAnchorInteractionData(Ui::View::DownCast(Self()));
+    mHasAsyncAnchorHitRegions = false;
+    mHasA11yAnchors           = false;
+  }
+
+  mAsyncAnchorGeometryDirty = false;
 }
 
 void LabelImpl::ClearA11yAnchors()
@@ -3647,17 +3650,21 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
     parameters.clickedAnchors = Internal::Text::GetAnchorClickedStates(Ui::View::DownCast(Self()));
   }
 
-  if(mHasStyledTextSource && mStyledTextSource)
+  if(mHasStyledTextSource)
   {
-    const Dali::String styledText         = mStyledTextSource.GetText();
-    parameters.text                       = std::string(styledText.CStr(), styledText.Size());
-    parameters.enableMarkup               = false;
-    parameters.hasStyledTextStyleSnapshot = true;
-    parameters.styledTextStyleSnapshot =
-      Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(mStyledTextSource,
-                                                                             GetDpi(),
-                                                                             mController->GetAnchorColor(),
-                                                                             mController->GetAnchorClickedColor());
+    const Text::StyledText styledTextSource = Internal::Text::GetStyledTextSource(Ui::View::DownCast(Self()));
+    if(styledTextSource)
+    {
+      const Dali::String styledText         = styledTextSource.GetText();
+      parameters.text                       = std::string(styledText.CStr(), styledText.Size());
+      parameters.enableMarkup               = false;
+      parameters.hasStyledTextStyleSnapshot = true;
+      parameters.styledTextStyleSnapshot =
+        Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(styledTextSource,
+                                                                               GetDpi(),
+                                                                               mController->GetAnchorColor(),
+                                                                               mController->GetAnchorClickedColor());
+    }
   }
 
   return parameters;

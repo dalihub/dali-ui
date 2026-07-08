@@ -364,8 +364,13 @@ void AsyncTextLoader::ClearTextModelData()
   mTextModel->mVisualModel->mGlyphsPerCharacter.Clear();
   mTextModel->mVisualModel->mGlyphPositions.Clear();
   mTextModel->mVisualModel->mLines.Clear();
+  mTextModel->mVisualModel->mColors.Clear();
   mTextModel->mVisualModel->mColorIndices.Clear();
+  mTextModel->mVisualModel->mBackgroundColors.Clear();
   mTextModel->mVisualModel->mBackgroundColorIndices.Clear();
+  mTextModel->mVisualModel->mUnderlineRuns.Clear();
+  mTextModel->mVisualModel->mStrikethroughRuns.Clear();
+  mTextModel->mVisualModel->mCharacterSpacingRuns.Clear();
 }
 
 void AsyncTextLoader::Update(AsyncTextParameters& parameters)

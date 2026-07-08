@@ -113,6 +113,21 @@ TextAbstraction::FontDescription DefaultFontDescription()
   return description;
 }
 
+Dali::Ui::Text::AsyncTextParameters CreateAsyncRenderParameters(const std::string& text)
+{
+  Dali::Ui::Text::AsyncTextParameters parameters;
+  parameters.text           = text;
+  parameters.fontSize       = 18.0f;
+  parameters.textColor      = Color::BLACK;
+  parameters.textWidth      = 240.0f;
+  parameters.textHeight     = 80.0f;
+  parameters.originWidth    = parameters.textWidth;
+  parameters.originHeight   = parameters.textHeight;
+  parameters.maxTextureSize = 4096;
+  parameters.requestType    = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
+  return parameters;
+}
+
 } // namespace
 
 void utc_dali_styled_text_applier_internal_startup(void)
@@ -896,6 +911,195 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
   DALI_TEST_EQUALS(clickedMarkupRenderInfo.anchorHitRegions[0u].isClicked, true, TEST_LOCATION);
   DALI_TEST_EQUALS(clickedMarkupRenderInfo.anchorHitRegions[0u].color, Color::YELLOW, TEST_LOCATION);
   DALI_TEST_EQUALS(clickedMarkupRenderInfo.anchorHitRegions[0u].clickedColor, Color::YELLOW, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncAnchorToPlainClearsStyleP(void)
+{
+  UiTestApplication application;
+
+  const std::string styledText = "open docs";
+  const std::string plainText  = "plain text";
+
+  PublicText::AnchorAttributes attributes;
+  attributes.SetHref("docs://open");
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(styledText.c_str());
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::AnchorSpan::New(attributes), 0u, 4u));
+
+  Dali::Ui::Text::AsyncTextParameters styledParameters = CreateAsyncRenderParameters(styledText);
+  styledParameters.anchorColor                         = Color::GREEN;
+  styledParameters.anchorClickedColor                  = Color::MAGENTA;
+  styledParameters.hasStyledTextStyleSnapshot          = true;
+  styledParameters.styledTextStyleSnapshot             = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(),
+                                                                                                                        96.0f,
+                                                                                                                        styledParameters.anchorColor,
+                                                                                                                        styledParameters.anchorClickedColor);
+
+  Dali::Ui::Text::AsyncTextLoader     loader           = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo styledRenderInfo = loader.RenderText(styledParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(styledRenderInfo.anchorHitRegions.size()), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledRenderInfo.isOverlayStyle, true, TEST_LOCATION);
+  DALI_TEST_CHECK(styledRenderInfo.overlayStylePixelData);
+
+  Dali::Ui::Text::AsyncTextParameters plainParameters  = CreateAsyncRenderParameters(plainText);
+  Dali::Ui::Text::AsyncTextRenderInfo plainRenderInfo  = loader.RenderText(plainParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(plainRenderInfo.anchorHitRegions.size()), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.styleEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.isOverlayStyle, false, TEST_LOCATION);
+  DALI_TEST_CHECK(!plainRenderInfo.stylePixelData);
+  DALI_TEST_CHECK(!plainRenderInfo.overlayStylePixelData);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncUnderlineToPlainClearsStyleP(void)
+{
+  UiTestApplication application;
+
+  const std::string styledText = "under text";
+  const std::string plainText  = "plain text";
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(styledText.c_str());
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::UnderlineSpan::New(CreateUnderline(Color::BLUE, 2.0f)), 0u, 5u));
+
+  Dali::Ui::Text::AsyncTextParameters styledParameters = CreateAsyncRenderParameters(styledText);
+  styledParameters.hasStyledTextStyleSnapshot          = true;
+  styledParameters.styledTextStyleSnapshot             = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+
+  Dali::Ui::Text::AsyncTextLoader     loader           = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo styledRenderInfo = loader.RenderText(styledParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(styledRenderInfo.isOverlayStyle, true, TEST_LOCATION);
+  DALI_TEST_CHECK(styledRenderInfo.overlayStylePixelData);
+
+  Dali::Ui::Text::AsyncTextParameters plainParameters = CreateAsyncRenderParameters(plainText);
+  Dali::Ui::Text::AsyncTextRenderInfo plainRenderInfo = loader.RenderText(plainParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(plainRenderInfo.styleEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.isOverlayStyle, false, TEST_LOCATION);
+  DALI_TEST_CHECK(!plainRenderInfo.stylePixelData);
+  DALI_TEST_CHECK(!plainRenderInfo.overlayStylePixelData);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncLineThroughToPlainClearsStyleP(void)
+{
+  UiTestApplication application;
+
+  const std::string styledText = "strike text";
+  const std::string plainText  = "plain text";
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(styledText.c_str());
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::LineThroughSpan::New(CreateLineThrough(Color::RED, 2.0f)), 0u, 6u));
+
+  Dali::Ui::Text::AsyncTextParameters styledParameters = CreateAsyncRenderParameters(styledText);
+  styledParameters.hasStyledTextStyleSnapshot          = true;
+  styledParameters.styledTextStyleSnapshot             = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+
+  Dali::Ui::Text::AsyncTextLoader     loader           = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo styledRenderInfo = loader.RenderText(styledParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(styledRenderInfo.isOverlayStyle, true, TEST_LOCATION);
+  DALI_TEST_CHECK(styledRenderInfo.overlayStylePixelData);
+
+  Dali::Ui::Text::AsyncTextParameters plainParameters = CreateAsyncRenderParameters(plainText);
+  Dali::Ui::Text::AsyncTextRenderInfo plainRenderInfo = loader.RenderText(plainParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(plainRenderInfo.styleEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.isOverlayStyle, false, TEST_LOCATION);
+  DALI_TEST_CHECK(!plainRenderInfo.stylePixelData);
+  DALI_TEST_CHECK(!plainRenderInfo.overlayStylePixelData);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncBackgroundToPlainClearsStyleP(void)
+{
+  UiTestApplication application;
+
+  const std::string styledText = "color text";
+  const std::string plainText  = "plain text";
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(styledText.c_str());
+  DALI_TEST_CHECK(builder.SetSpan(PublicText::BackgroundColorSpan::New(Dali::Ui::UiColor(Color::YELLOW)), 0u, 5u));
+
+  Dali::Ui::Text::AsyncTextParameters styledParameters = CreateAsyncRenderParameters(styledText);
+  styledParameters.hasStyledTextStyleSnapshot          = true;
+  styledParameters.styledTextStyleSnapshot             = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(), 96.0f);
+
+  Dali::Ui::Text::AsyncTextLoader     loader           = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo styledRenderInfo = loader.RenderText(styledParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(styledRenderInfo.styleEnabled, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledRenderInfo.styleTextureEnabled, true, TEST_LOCATION);
+  DALI_TEST_CHECK(styledRenderInfo.stylePixelData);
+
+  Dali::Ui::Text::AsyncTextParameters plainParameters = CreateAsyncRenderParameters(plainText);
+  Dali::Ui::Text::AsyncTextRenderInfo plainRenderInfo = loader.RenderText(plainParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(plainRenderInfo.styleEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.isOverlayStyle, false, TEST_LOCATION);
+  DALI_TEST_CHECK(!plainRenderInfo.stylePixelData);
+  DALI_TEST_CHECK(!plainRenderInfo.overlayStylePixelData);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncMarkupUnderlineToPlainClearsStyleP(void)
+{
+  UiTestApplication application;
+
+  Dali::Ui::Text::AsyncTextParameters markupParameters = CreateAsyncRenderParameters("<u>open</u>");
+  markupParameters.enableMarkup                         = true;
+
+  Dali::Ui::Text::AsyncTextLoader     loader           = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo markupRenderInfo = loader.RenderText(markupParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(markupRenderInfo.isOverlayStyle, true, TEST_LOCATION);
+  DALI_TEST_CHECK(markupRenderInfo.overlayStylePixelData);
+
+  Dali::Ui::Text::AsyncTextParameters plainParameters = CreateAsyncRenderParameters("open");
+  Dali::Ui::Text::AsyncTextRenderInfo plainRenderInfo = loader.RenderText(plainParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(plainRenderInfo.styleEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.isOverlayStyle, false, TEST_LOCATION);
+  DALI_TEST_CHECK(!plainRenderInfo.stylePixelData);
+  DALI_TEST_CHECK(!plainRenderInfo.overlayStylePixelData);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAsyncMarkupLineThroughToPlainClearsStyleP(void)
+{
+  UiTestApplication application;
+
+  Dali::Ui::Text::AsyncTextParameters markupParameters = CreateAsyncRenderParameters("<s>open</s>");
+  markupParameters.enableMarkup                         = true;
+
+  Dali::Ui::Text::AsyncTextLoader     loader           = Dali::Ui::Text::AsyncTextLoader::New();
+  Dali::Ui::Text::AsyncTextRenderInfo markupRenderInfo = loader.RenderText(markupParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(markupRenderInfo.isOverlayStyle, true, TEST_LOCATION);
+  DALI_TEST_CHECK(markupRenderInfo.overlayStylePixelData);
+
+  Dali::Ui::Text::AsyncTextParameters plainParameters = CreateAsyncRenderParameters("open");
+  Dali::Ui::Text::AsyncTextRenderInfo plainRenderInfo = loader.RenderText(plainParameters, false, Size::ZERO);
+
+  DALI_TEST_EQUALS(plainRenderInfo.styleEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.styleTextureEnabled, false, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainRenderInfo.isOverlayStyle, false, TEST_LOCATION);
+  DALI_TEST_CHECK(!plainRenderInfo.stylePixelData);
+  DALI_TEST_CHECK(!plainRenderInfo.overlayStylePixelData);
 
   END_TEST;
 }
