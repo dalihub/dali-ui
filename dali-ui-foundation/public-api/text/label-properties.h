@@ -135,13 +135,6 @@ struct LabelPropertyIndex
     LAYOUT_DIRECTION_MODE,
 
     /**
-     * @brief Whether mark-up processing is enabled for the text.
-     * @details Name "markupEnabled", type Property::BOOLEAN.
-     * @see Label::SetMarkupEnabled(), Label::IsMarkupEnabled().
-     */
-    MARKUP_ENABLED,
-
-    /**
      * @brief The color of the anchor.
      * @details Name "anchorColor", type Property::VECTOR4.
      * @see Label::SetAnchorColor(), Label::GetAnchorColor().

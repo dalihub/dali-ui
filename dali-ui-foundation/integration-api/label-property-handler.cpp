@@ -114,11 +114,6 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
       }
       break;
     }
-    case Text::LabelPropertyIndex::MARKUP_ENABLED:
-    {
-      impl.SetMarkupEnabled(value.Get<bool>());
-      break;
-    }
     case Text::LabelPropertyIndex::ANCHOR_COLOR:
     {
       impl.SetAnchorColor(UiColor(value.Get<Vector4>()));
@@ -375,11 +370,6 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
     case Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
       value = impl.GetLayoutDirectionMode();
-      break;
-    }
-    case Text::LabelPropertyIndex::MARKUP_ENABLED:
-    {
-      value = impl.IsMarkupEnabled();
       break;
     }
     case Text::LabelPropertyIndex::ANCHOR_COLOR:

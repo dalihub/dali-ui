@@ -110,7 +110,6 @@ LABEL_PROPERTY_REGISTRATION("overflowMode",               INTEGER, OVERFLOW_MODE
 LABEL_PROPERTY_REGISTRATION("lineHeight",                 FLOAT,   LINE_HEIGHT                   )
 LABEL_PROPERTY_REGISTRATION("lineHeightMode",             INTEGER, LINE_HEIGHT_MODE              )
 LABEL_PROPERTY_REGISTRATION("layoutDirectionMode",        INTEGER, LAYOUT_DIRECTION_MODE         )
-LABEL_PROPERTY_REGISTRATION("markupEnabled",              BOOLEAN, MARKUP_ENABLED                )
 LABEL_PROPERTY_REGISTRATION("anchorColor",                VECTOR4, ANCHOR_COLOR                  )
 LABEL_PROPERTY_REGISTRATION("anchorClickedColor",         VECTOR4, ANCHOR_CLICKED_COLOR          )
 LABEL_PROPERTY_REGISTRATION("marqueeTriggerPolicy",       INTEGER, MARQUEE_TRIGGER_POLICY        )
@@ -687,18 +686,6 @@ void LabelImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 Text::LayoutDirectionMode LabelImpl::GetLayoutDirectionMode() const
 {
   return mController->GetLayoutDirectionMode();
-}
-
-void LabelImpl::SetMarkupEnabled(bool enabled)
-{
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
-  mController->SetMarkupProcessorEnabled(enabled, !mHasStyledTextSource);
-  UpdateAnchorTouchInterception();
-}
-
-bool LabelImpl::IsMarkupEnabled() const
-{
-  return mController->IsMarkupProcessorEnabled();
 }
 
 void LabelImpl::SetAnchorColor(const UiColor& color)

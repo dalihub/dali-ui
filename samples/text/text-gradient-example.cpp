@@ -1271,7 +1271,6 @@ private:
     label.SetTextGradientOverlay(Gradient::Base::None());
     label.SetTextUnderline(Text::Underline::None());
     label.SetTextShadow(Text::Shadow::None());
-    label.SetMarkupEnabled(false);
     label.SetText("");
     label.SetTextColor(UiColor(0x111827));
     label.SetFontSize(item.fontSize);
@@ -1286,8 +1285,14 @@ private:
     label.SetTextGradientOverlayBoundsMode(CurrentOverlayBoundsMode());
     label.SetTextGradientOverlayMode(CurrentOverlayMode());
     ApplyPreviewOptions(label);
-    label.SetMarkupEnabled(item.markup);
-    label.SetText(item.text);
+    if(item.markup)
+    {
+      label.SetStyledText(Text::StyledText::FromMarkup(item.text));
+    }
+    else
+    {
+      label.SetText(item.text);
+    }
 
     if(item.style)
     {

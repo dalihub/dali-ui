@@ -44,7 +44,6 @@ const char* const PROPERTY_NAME_OVERFLOW_MODE                  = "overflowMode";
 const char* const PROPERTY_NAME_LINE_HEIGHT                    = "lineHeight";
 const char* const PROPERTY_NAME_LINE_HEIGHT_MODE               = "lineHeightMode";
 const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE          = "layoutDirectionMode";
-const char* const PROPERTY_NAME_MARKUP_ENABLED                 = "markupEnabled";
 const char* const PROPERTY_NAME_ANCHOR_COLOR                   = "anchorColor";
 const char* const PROPERTY_NAME_ANCHOR_CLICKED_COLOR           = "anchorClickedColor";
 const char* const PROPERTY_NAME_MARQUEE_TRIGGER_POLICY         = "marqueeTriggerPolicy";
@@ -394,14 +393,13 @@ int UtcDaliLabelSetTextClearsStyledTextSourceP(void)
   END_TEST;
 }
 
-int UtcDaliLabelStyledTextIgnoresMarkupEnabledP(void)
+int UtcDaliLabelStyledTextLiteralMarkupP(void)
 {
   UiTestApplication application;
   Label             label = Label::New();
   DALI_TEST_CHECK(label);
 
   label.SetStyledText(Text::StyledText::New("<color value='red'>ABC</color>"));
-  label.SetMarkupEnabled(true);
 
   DALI_TEST_EQUALS(label.GetText(), "<color value='red'>ABC</color>", TEST_LOCATION);
   DALI_TEST_CHECK(label.GetStyledText());
@@ -410,7 +408,7 @@ int UtcDaliLabelStyledTextIgnoresMarkupEnabledP(void)
   END_TEST;
 }
 
-int UtcDaliLabelAsyncStyledTextLiteralMarkupIgnoresMarkupEnabledP(void)
+int UtcDaliLabelAsyncStyledTextLiteralMarkupP(void)
 {
   UiTestApplication application;
   application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
@@ -427,7 +425,6 @@ int UtcDaliLabelAsyncStyledTextLiteralMarkupIgnoresMarkupEnabledP(void)
   gAsyncNaturalSizeWidth    = 0.0f;
   gAsyncNaturalSizeHeight   = 0.0f;
 
-  label.SetMarkupEnabled(true);
   label.SetFontSize(16.0f);
   label.SetStyledText(Text::StyledText::New("<b>Hi</b>"));
   label.AsyncNaturalSizeComputedSignal().Connect(&OnAsyncNaturalSizeComputed);
@@ -619,21 +616,6 @@ int UtcDaliLabelLayoutDirectionMode(void)
 
   label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
   DALI_TEST_EQUALS(label.GetLayoutDirectionMode(), Text::LayoutDirectionMode::CONTENTS, TEST_LOCATION);
-
-  END_TEST;
-}
-
-int UtcDaliLabelMarkupEnabled(void)
-{
-  UiTestApplication application;
-  Label             label = Label::New();
-  DALI_TEST_CHECK(label);
-
-  label.SetMarkupEnabled(true);
-  DALI_TEST_EQUALS(label.IsMarkupEnabled(), true, TEST_LOCATION);
-
-  label.SetMarkupEnabled(false);
-  DALI_TEST_EQUALS(label.IsMarkupEnabled(), false, TEST_LOCATION);
 
   END_TEST;
 }
@@ -1220,7 +1202,6 @@ int UtcDaliLabelGetProperty(void)
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_LINE_HEIGHT) == Label::Property::LINE_HEIGHT);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_LINE_HEIGHT_MODE) == Label::Property::LINE_HEIGHT_MODE);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_LAYOUT_DIRECTION_MODE) == Label::Property::LAYOUT_DIRECTION_MODE);
-  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARKUP_ENABLED) == Label::Property::MARKUP_ENABLED);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_ANCHOR_COLOR) == Label::Property::ANCHOR_COLOR);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_ANCHOR_CLICKED_COLOR) == Label::Property::ANCHOR_CLICKED_COLOR);
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_MARQUEE_TRIGGER_POLICY) == Label::Property::MARQUEE_TRIGGER_POLICY);
@@ -1319,10 +1300,6 @@ int UtcDaliLabelSetProperty(void)
 
   label.SetProperty(Label::Property::LAYOUT_DIRECTION_MODE, "INHERIT");
   DALI_TEST_EQUALS(label.GetProperty<Text::LayoutDirectionMode>(Label::Property::LAYOUT_DIRECTION_MODE), Text::LayoutDirectionMode::INHERIT, TEST_LOCATION);
-
-  // MARKUP_ENABLED
-  label.SetProperty(Label::Property::MARKUP_ENABLED, true);
-  DALI_TEST_EQUALS(label.GetProperty<bool>(Label::Property::MARKUP_ENABLED), true, TEST_LOCATION);
 
   // ANCHOR_COLOR
   label.SetProperty(Label::Property::ANCHOR_COLOR, Color::BLUE);

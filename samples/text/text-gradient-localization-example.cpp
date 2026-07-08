@@ -100,7 +100,7 @@ public:
   {
     if(Data* data = GetAttachment<Data>(GetDataId()))
     {
-      data->descriptionLabel.SetText(text);
+      data->descriptionLabel.SetStyledText(Text::StyledText::FromMarkup(text));
     }
   }
 
@@ -143,7 +143,6 @@ private:
     descriptionLabel.SetFontSize(DESCRIPTION_FONT_SIZE);
     descriptionLabel.SetTextColor(UiColor(COLOR_MUTED_TEXT));
     descriptionLabel.SetMultiLine(true);
-    descriptionLabel.SetMarkupEnabled(true);
     descriptionLabel.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
     ApplyDescriptionGradient(descriptionLabel);
 

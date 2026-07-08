@@ -76,7 +76,6 @@ public:
       LINE_HEIGHT                    = Text::LabelPropertyIndex::LINE_HEIGHT,
       LINE_HEIGHT_MODE               = Text::LabelPropertyIndex::LINE_HEIGHT_MODE,
       LAYOUT_DIRECTION_MODE          = Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE,
-      MARKUP_ENABLED                 = Text::LabelPropertyIndex::MARKUP_ENABLED,
       ANCHOR_COLOR                   = Text::LabelPropertyIndex::ANCHOR_COLOR,
       ANCHOR_CLICKED_COLOR           = Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR,
       MARQUEE_TRIGGER_POLICY         = Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY,
@@ -341,10 +340,10 @@ public: // Setters for chaining
   /**
    * @brief Sets a gradient overlay applied to the resolved text glyph fill.
    *
-   * The overlay is evaluated after the Label text color, TextGradient, markup
-   * color, or color glyph result has been resolved. It affects visible glyph
-   * fill pixels only and does not affect text decorations such as shadow,
-   * underline, strikethrough, outline, or background.
+   * The overlay is evaluated after the Label text color, TextGradient,
+   * StyledText color spans, or color glyph result has been resolved. It affects
+   * visible glyph fill pixels only and does not affect text decorations such as
+   * shadow, underline, strikethrough, outline, or background.
    *
    * The overlay mode is evaluated inside the text shader and does not change
    * the framebuffer blending state.
@@ -533,20 +532,6 @@ public: // Setters for chaining
    * @return The LayoutDirectionMode used to resolve the text layout direction.
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
-
-  /**
-   * @brief Enables or disables mark-up processing for the text.
-   *
-   * @param[in] enabled True to enable mark-up parsing, false to render text as plain string.
-   */
-  void SetMarkupEnabled(bool enabled);
-
-  /**
-   * @brief Gets whether mark-up processing is enabled.
-   *
-   * @return True if mark-up parsing is enabled, otherwise false.
-   */
-  bool IsMarkupEnabled() const;
 
   /**
    * @brief Sets the color of anchors in the text.

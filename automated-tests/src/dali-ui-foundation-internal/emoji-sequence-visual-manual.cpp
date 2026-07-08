@@ -721,32 +721,19 @@ std::string HtmlEscape(const std::string& text)
   return escaped;
 }
 
-void AppendMarkupEscaped(std::string& output, const std::string& text, size_t begin, size_t length)
+uint32_t Utf32IndexFromUtf8ByteOffset(const std::string& text, size_t byteOffset)
 {
-  for(size_t index = begin; index < begin + length && index < text.size(); ++index)
+  const size_t limit = std::min(byteOffset, text.size());
+  uint32_t     index = 0u;
+  for(size_t byte = 0u; byte < limit; ++byte)
   {
-    switch(text[index])
+    const unsigned char character = static_cast<unsigned char>(text[byte]);
+    if((character & 0xC0u) != 0x80u)
     {
-      case '&':
-        output += "&amp;";
-        break;
-      case '<':
-        output += "&lt;";
-        break;
-      case '>':
-        output += "&gt;";
-        break;
-      case '"':
-        output += "&quot;";
-        break;
-      case '\'':
-        output += "&apos;";
-        break;
-      default:
-        output.push_back(text[index]);
-        break;
+      ++index;
     }
   }
+  return index;
 }
 
 void AppendUtf8(std::string& output, uint32_t codepoint)
@@ -2085,19 +2072,18 @@ private:
     return needles;
   }
 
-  std::string HighlightSearchMatches(const std::string& text) const
+  Text::StyledText BuildHighlightedStyledText(const std::string& text) const
   {
+    Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(text.c_str());
+
     const std::vector<std::string> needles = HighlightNeedlesForCurrentSearch();
     if(needles.empty())
     {
-      return HtmlEscape(text);
+      return builder.Build();
     }
 
     const std::string lowerText = ToLowerAscii(text);
-    std::string       markup;
-    markup.reserve(text.size() + 64u);
-
-    size_t cursor = 0u;
+    size_t            cursor    = 0u;
     while(cursor < text.size())
     {
       size_t matchBegin = std::string::npos;
@@ -2120,35 +2106,38 @@ private:
 
       if(matchBegin == std::string::npos)
       {
-        AppendMarkupEscaped(markup, text, cursor, text.size() - cursor);
         break;
       }
 
-      if(matchBegin > cursor)
+      const uint32_t startIndex = Utf32IndexFromUtf8ByteOffset(text, matchBegin);
+      const uint32_t endIndex   = Utf32IndexFromUtf8ByteOffset(text, matchBegin + matchSize);
+      if(startIndex < endIndex)
       {
-        AppendMarkupEscaped(markup, text, cursor, matchBegin - cursor);
+        builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(0xB42318)), startIndex, endIndex);
       }
 
-      markup += "<color value='#B42318'>";
-      AppendMarkupEscaped(markup, text, matchBegin, matchSize);
-      markup += "</color>";
       cursor = matchBegin + matchSize;
     }
 
-    return markup;
+    return builder.Build();
   }
 
-  std::string VisibleDetailMarkupForIndex(size_t index)
+  Text::StyledText VisibleDetailStyledTextForIndex(size_t index)
   {
-    return HighlightSearchMatches(VisibleDetailTextForIndex(index));
+    return BuildHighlightedStyledText(VisibleDetailTextForIndex(index));
   }
 
   void SetRowDetailText(RowActors& row, size_t index)
   {
     const bool searchActive = IsSearchActive();
-    row.detail.SetMarkupEnabled(searchActive);
-    row.detail.SetText(searchActive ? VisibleDetailMarkupForIndex(index).c_str()
-                                    : VisibleDetailTextForIndex(index).c_str());
+    if(searchActive)
+    {
+      row.detail.SetStyledText(VisibleDetailStyledTextForIndex(index));
+    }
+    else
+    {
+      row.detail.SetText(VisibleDetailTextForIndex(index).c_str());
+    }
   }
 
   void ApplySearchText(const std::string& text)

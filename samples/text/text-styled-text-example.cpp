@@ -77,7 +77,7 @@ enum class StyledTextCase
   UNDERLINE_SPAN_SINGLE,
   LINE_THROUGH_SPAN_SINGLE,
   FOREGROUND_BACKGROUND_DECORATION_SPAN,
-  MARKUP_IGNORED,
+  LITERAL_MARKUP_TEXT,
   FONT_SPAN_WEIGHT,
   FONT_SPAN_SLANT,
   FONT_SPAN_SIZE,
@@ -110,7 +110,6 @@ struct StyledTextCaseInfo
   StyledTextValueKind valueKind;
   bool                rangeChange;
   bool                clearable;
-  bool                markupToggle;
   bool                sourceToggle;
 };
 
@@ -123,31 +122,31 @@ struct PreviewState
 };
 
 constexpr std::array<StyledTextCaseInfo, CASE_COUNT> CASES{{
-  {StyledTextCase::PLAIN_TEXT, "Plain text", "No span. Source toggles SetText and StyledText::New for the same text.", true, StyledTextValueKind::NONE, false, false, false, true},
-  {StyledTextCase::FOREGROUND_COLOR_SPAN_SINGLE, "Single ForegroundColorSpan", "One ForegroundColorSpan over the current range. Value, Range and Clear affect this case.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
-  {StyledTextCase::FOREGROUND_COLOR_SPAN_MULTIPLE, "Multiple ForegroundColorSpan objects", "Two separate ForegroundColorSpan objects. Value updates the pair; Range moves the second span.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
-  {StyledTextCase::FOREGROUND_COLOR_SPAN_SAME_OBJECT_UPDATE, "Same span object update", "One ForegroundColorSpan object is attached twice; final range wins for that object.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
-  {StyledTextCase::FOREGROUND_COLOR_SPAN_OVERLAP, "Overlap order", "Red first, variable later span second. Overlap should follow downstream later-wins segmentation.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
-  {StyledTextCase::FOREGROUND_COLOR_SPAN_CLEAR, "Clear spans", "Starts with a ForegroundColorSpan. Clear removes spans in this case; Reset restores the span.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
-  {StyledTextCase::FOREGROUND_COLOR_SPAN_CHANGE_VALUE, "Change span value", "Value cycles the ForegroundColorSpan payload while staying in this case.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
-  {StyledTextCase::FOREGROUND_COLOR_SPAN_CHANGE_RANGE, "Change span range", "Range moves the ForegroundColorSpan range while staying in this case.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
-  {StyledTextCase::BACKGROUND_COLOR_SPAN_SINGLE, "Single BackgroundColorSpan", "One BackgroundColorSpan over the current range. Value, Range and Clear affect this case.", true, StyledTextValueKind::BACKGROUND, true, true, false, true},
-  {StyledTextCase::BACKGROUND_COLOR_SPAN_OVERLAP, "BackgroundColorSpan overlap", "Yellow first, variable later background second. Overlap should follow later-wins segmentation.", true, StyledTextValueKind::BACKGROUND, true, true, false, true},
-  {StyledTextCase::FOREGROUND_AND_BACKGROUND_COLOR_SPAN, "ForegroundColorSpan + BackgroundColorSpan", "Foreground and background spans share the current range but remain independent categories.", true, StyledTextValueKind::FOREGROUND_AND_BACKGROUND, true, true, false, true},
-  {StyledTextCase::UNDERLINE_SPAN_SINGLE, "Single UnderlineSpan", "One UnderlineSpan over the current range. Value, Range and Clear affect this case.", true, StyledTextValueKind::UNDERLINE, true, true, false, true},
-  {StyledTextCase::LINE_THROUGH_SPAN_SINGLE, "Single LineThroughSpan", "One LineThroughSpan over the current range. Value, Range and Clear affect this case.", true, StyledTextValueKind::LINE_THROUGH, true, true, false, true},
-  {StyledTextCase::FOREGROUND_BACKGROUND_DECORATION_SPAN, "Foreground + Background + Decorations", "ForegroundColorSpan, BackgroundColorSpan, UnderlineSpan and LineThroughSpan share a range as independent categories.", true, StyledTextValueKind::FOREGROUND_AND_BACKGROUND, true, true, false, true},
-  {StyledTextCase::MARKUP_IGNORED, "Markup ignored", "StyledText source keeps markup tags as text even when MARKUP_ENABLED is true.", true, StyledTextValueKind::NONE, false, false, true, true},
-  {StyledTextCase::FONT_SPAN_WEIGHT, "FontSpan: weight bold", "One FontSpan applies WEIGHT over the current range. Value toggles bold and explicit normal.", true, StyledTextValueKind::FONT, true, true, false, true},
-  {StyledTextCase::FONT_SPAN_SLANT, "FontSpan: slant italic", "One FontSpan applies SLANT over the current range. Value toggles italic and normal.", true, StyledTextValueKind::FONT, true, true, false, true},
-  {StyledTextCase::FONT_SPAN_SIZE, "FontSpan: size in pixels", "One FontSpan applies pixel SIZE over the current range. Value cycles larger pixel sizes.", true, StyledTextValueKind::FONT, true, true, false, true},
-  {StyledTextCase::FONT_SPAN_COMBINED, "FontSpan: combined attributes", "One FontSpan applies family, size, weight and slant together. Family may fall back by platform.", true, StyledTextValueKind::FONT, true, true, false, true},
-  {StyledTextCase::FONT_SPAN_FIELD_MERGE, "FontSpan: field merge", "Family-only and weight-only FontSpans overlap; unset fields do not clear each other.", true, StyledTextValueKind::FONT, true, true, false, true},
-  {StyledTextCase::FONT_SPAN_LATER_WEIGHT_WINS, "FontSpan: later normal wins", "Earlier bold FontSpan is overridden by a later explicit normal weight on the inner range.", true, StyledTextValueKind::NONE, true, true, false, true},
-  {StyledTextCase::ANCHOR_SPAN, "AnchorSpan", "Two StyledText anchors. The first uses Label AnchorColor fallback; the second has explicit color and clicked color.", true, StyledTextValueKind::FOREGROUND, true, true, false, true},
-  {StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC, "FromMarkup: basic styles", "Converts DALi markup to StyledText. SetText remains plain text.", true, StyledTextValueKind::NONE, false, false, false, true},
-  {StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY, "FromMarkup: anchor + entities", "Converts anchor markup and entities to AnchorSpan and decoded text.", true, StyledTextValueKind::NONE, false, false, false, true},
-  {StyledTextCase::FUTURE_GRADIENT_SPAN_DISABLED, "Future GradientSpan", "Disabled placeholder. GradientSpan is not implemented in this phase.", false, StyledTextValueKind::NONE, false, false, false, false},
+  {StyledTextCase::PLAIN_TEXT, "Plain text", "No span. Source toggles SetText and StyledText::New for the same text.", true, StyledTextValueKind::NONE, false, false, true},
+  {StyledTextCase::FOREGROUND_COLOR_SPAN_SINGLE, "Single ForegroundColorSpan", "One ForegroundColorSpan over the current range. Value, Range and Clear affect this case.", true, StyledTextValueKind::FOREGROUND, true, true, true},
+  {StyledTextCase::FOREGROUND_COLOR_SPAN_MULTIPLE, "Multiple ForegroundColorSpan objects", "Two separate ForegroundColorSpan objects. Value updates the pair; Range moves the second span.", true, StyledTextValueKind::FOREGROUND, true, true, true},
+  {StyledTextCase::FOREGROUND_COLOR_SPAN_SAME_OBJECT_UPDATE, "Same span object update", "One ForegroundColorSpan object is attached twice; final range wins for that object.", true, StyledTextValueKind::FOREGROUND, true, true, true},
+  {StyledTextCase::FOREGROUND_COLOR_SPAN_OVERLAP, "Overlap order", "Red first, variable later span second. Overlap should follow downstream later-wins segmentation.", true, StyledTextValueKind::FOREGROUND, true, true, true},
+  {StyledTextCase::FOREGROUND_COLOR_SPAN_CLEAR, "Clear spans", "Starts with a ForegroundColorSpan. Clear removes spans in this case; Reset restores the span.", true, StyledTextValueKind::FOREGROUND, true, true, true},
+  {StyledTextCase::FOREGROUND_COLOR_SPAN_CHANGE_VALUE, "Change span value", "Value cycles the ForegroundColorSpan payload while staying in this case.", true, StyledTextValueKind::FOREGROUND, true, true, true},
+  {StyledTextCase::FOREGROUND_COLOR_SPAN_CHANGE_RANGE, "Change span range", "Range moves the ForegroundColorSpan range while staying in this case.", true, StyledTextValueKind::FOREGROUND, true, true, true},
+  {StyledTextCase::BACKGROUND_COLOR_SPAN_SINGLE, "Single BackgroundColorSpan", "One BackgroundColorSpan over the current range. Value, Range and Clear affect this case.", true, StyledTextValueKind::BACKGROUND, true, true, true},
+  {StyledTextCase::BACKGROUND_COLOR_SPAN_OVERLAP, "BackgroundColorSpan overlap", "Yellow first, variable later background second. Overlap should follow later-wins segmentation.", true, StyledTextValueKind::BACKGROUND, true, true, true},
+  {StyledTextCase::FOREGROUND_AND_BACKGROUND_COLOR_SPAN, "ForegroundColorSpan + BackgroundColorSpan", "Foreground and background spans share the current range but remain independent categories.", true, StyledTextValueKind::FOREGROUND_AND_BACKGROUND, true, true, true},
+  {StyledTextCase::UNDERLINE_SPAN_SINGLE, "Single UnderlineSpan", "One UnderlineSpan over the current range. Value, Range and Clear affect this case.", true, StyledTextValueKind::UNDERLINE, true, true, true},
+  {StyledTextCase::LINE_THROUGH_SPAN_SINGLE, "Single LineThroughSpan", "One LineThroughSpan over the current range. Value, Range and Clear affect this case.", true, StyledTextValueKind::LINE_THROUGH, true, true, true},
+  {StyledTextCase::FOREGROUND_BACKGROUND_DECORATION_SPAN, "Foreground + Background + Decorations", "ForegroundColorSpan, BackgroundColorSpan, UnderlineSpan and LineThroughSpan share a range as independent categories.", true, StyledTextValueKind::FOREGROUND_AND_BACKGROUND, true, true, true},
+  {StyledTextCase::LITERAL_MARKUP_TEXT, "Literal markup text", "StyledText source keeps markup tags as plain text.", true, StyledTextValueKind::NONE, false, false, true},
+  {StyledTextCase::FONT_SPAN_WEIGHT, "FontSpan: weight bold", "One FontSpan applies WEIGHT over the current range. Value toggles bold and explicit normal.", true, StyledTextValueKind::FONT, true, true, true},
+  {StyledTextCase::FONT_SPAN_SLANT, "FontSpan: slant italic", "One FontSpan applies SLANT over the current range. Value toggles italic and normal.", true, StyledTextValueKind::FONT, true, true, true},
+  {StyledTextCase::FONT_SPAN_SIZE, "FontSpan: size in pixels", "One FontSpan applies pixel SIZE over the current range. Value cycles larger pixel sizes.", true, StyledTextValueKind::FONT, true, true, true},
+  {StyledTextCase::FONT_SPAN_COMBINED, "FontSpan: combined attributes", "One FontSpan applies family, size, weight and slant together. Family may fall back by platform.", true, StyledTextValueKind::FONT, true, true, true},
+  {StyledTextCase::FONT_SPAN_FIELD_MERGE, "FontSpan: field merge", "Family-only and weight-only FontSpans overlap; unset fields do not clear each other.", true, StyledTextValueKind::FONT, true, true, true},
+  {StyledTextCase::FONT_SPAN_LATER_WEIGHT_WINS, "FontSpan: later normal wins", "Earlier bold FontSpan is overridden by a later explicit normal weight on the inner range.", true, StyledTextValueKind::NONE, true, true, true},
+  {StyledTextCase::ANCHOR_SPAN, "AnchorSpan", "Two StyledText anchors. The first uses Label AnchorColor fallback; the second has explicit color and clicked color.", true, StyledTextValueKind::FOREGROUND, true, true, true},
+  {StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC, "FromMarkup: basic styles", "Converts DALi markup to StyledText. SetText remains plain text.", true, StyledTextValueKind::NONE, false, false, true},
+  {StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY, "FromMarkup: anchor + entities", "Converts anchor markup and entities to AnchorSpan and decoded text.", true, StyledTextValueKind::NONE, false, false, true},
+  {StyledTextCase::FUTURE_GRADIENT_SPAN_DISABLED, "Future GradientSpan", "Disabled placeholder. GradientSpan is not implemented in this phase.", false, StyledTextValueKind::NONE, false, false, false},
 }};
 
 constexpr const char* FROM_MARKUP_BASIC_TEXT =
@@ -309,7 +308,6 @@ private:
       mValueBadge,
       mRangeBadge,
       mClearBadge,
-      mMarkupBadge,
       mExpectedBadge,
     });
 
@@ -370,9 +368,6 @@ private:
     mClearBadge = CreateLabel("", 13.0f, UiColor(BADGE_ON_TEXT));
     ConfigureHudBadge(mClearBadge, HEADER_BADGE_HEIGHT, UiColor(BADGE_CLEAR_BACKGROUND), UiColor(BADGE_CLEAR_BORDER), UiColor(BADGE_ON_TEXT), Text::Alignment::CENTER);
 
-    mMarkupBadge = CreateLabel("", 13.0f, UiColor(BADGE_ON_TEXT));
-    ConfigureHudBadge(mMarkupBadge, HEADER_BADGE_HEIGHT, UiColor(0x9D174D), UiColor(0xF9A8D4), UiColor(BADGE_ON_TEXT), Text::Alignment::CENTER);
-
     mExpectedBadge = CreateLabel("", 12.0f, UiColor(BADGE_DISABLED_TEXT));
     ConfigureHudBadge(mExpectedBadge, HEADER_INFO_HEIGHT, UiColor(0x0F172A), UiColor(0x334155), UiColor(BADGE_DISABLED_TEXT), Text::Alignment::START, true);
   }
@@ -409,7 +404,7 @@ private:
     ConfigureHudBadge(mCaseListLabel, FOOTER_BADGE_HEIGHT, UiColor(BADGE_DISABLED_BACKGROUND), UiColor(BADGE_DISABLED_BORDER), UiColor(BADGE_DISABLED_TEXT), Text::Alignment::START);
 
     mHelpLabel = CreateLabel(
-      "ACTIONS  Click badges | V Value | R Range | C Clear | T Source | M Markup | X Reset | ESC Quit",
+      "ACTIONS  Click badges | V Value | R Range | C Clear | T Source | X Reset | ESC Quit",
       12.0f,
       UiColor(BADGE_DISABLED_TEXT));
     ConfigureHudBadge(mHelpLabel, FOOTER_LINE_HEIGHT, UiColor(0x0F172A), UiColor(0x334155), UiColor(BADGE_DISABLED_TEXT), Text::Alignment::START);
@@ -455,10 +450,6 @@ private:
     mClearBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     {
       ClearCurrentSpans();
-    });
-    mMarkupBadge.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
-    {
-      ToggleMarkup();
     });
   }
 
@@ -512,15 +503,13 @@ private:
     x += sourceWidth + HEADER_ROW_GAP;
     SetBadgeBounds(mResetBadge, x, row1Y, resetWidth, HEADER_BADGE_HEIGHT);
 
-    const float actionWidth = (contentWidth - (HEADER_ROW_GAP * 3.0f)) / 4.0f;
+    const float actionWidth = (contentWidth - (HEADER_ROW_GAP * 2.0f)) / 3.0f;
     x = HEADER_PADDING;
     SetBadgeBounds(mValueBadge, x, row2Y, actionWidth, HEADER_BADGE_HEIGHT);
     x += actionWidth + HEADER_ROW_GAP;
     SetBadgeBounds(mRangeBadge, x, row2Y, actionWidth, HEADER_BADGE_HEIGHT);
     x += actionWidth + HEADER_ROW_GAP;
     SetBadgeBounds(mClearBadge, x, row2Y, actionWidth, HEADER_BADGE_HEIGHT);
-    x += actionWidth + HEADER_ROW_GAP;
-    SetBadgeBounds(mMarkupBadge, x, row2Y, actionWidth, HEADER_BADGE_HEIGHT);
 
     SetBadgeBounds(mExpectedBadge, HEADER_PADDING, infoY, contentWidth, HEADER_INFO_HEIGHT);
   }
@@ -894,10 +883,10 @@ private:
         state.valueInfo = CurrentColorValueInfo("fg") + " | " + CurrentBackgroundValueInfo("bg") + " | fixed decorations";
         return FinishBuilder(builder, state);
       }
-      case StyledTextCase::MARKUP_IGNORED:
+      case StyledTextCase::LITERAL_MARKUP_TEXT:
       {
         state.text      = "<color value='red'>Markup Should Not Parse</color>";
-        state.spanMode  = "none; StyledText source ignores MARKUP_ENABLED";
+        state.spanMode  = "none; StyledText source uses literal text";
         state.rangeInfo = "range: n/a";
         state.valueInfo = "value: literal markup text";
         return Text::StyledText::New(state.text.c_str());
@@ -1067,22 +1056,18 @@ private:
   void ApplyPlainTextToPreviews(const Dali::String& text)
   {
     mPreviewLabel.SetAsyncRendering(false);
-    mPreviewLabel.SetMarkupEnabled(mMarkupEnabled);
     mPreviewLabel.SetText(text);
 
     mAsyncPreviewLabel.SetAsyncRendering(true);
-    mAsyncPreviewLabel.SetMarkupEnabled(mMarkupEnabled);
     mAsyncPreviewLabel.SetText(text);
   }
 
   void ApplyStyledTextToPreviews(const Text::StyledText& styledText)
   {
     mPreviewLabel.SetAsyncRendering(false);
-    mPreviewLabel.SetMarkupEnabled(mMarkupEnabled);
     mPreviewLabel.SetStyledText(styledText);
 
     mAsyncPreviewLabel.SetAsyncRendering(true);
-    mAsyncPreviewLabel.SetMarkupEnabled(mMarkupEnabled);
     mAsyncPreviewLabel.SetStyledText(styledText);
   }
 
@@ -1103,7 +1088,6 @@ private:
     SetActionBadge(mValueBadge, ValueBadgeText(), CanChangeValue(), UiColor(BADGE_APPLY_BACKGROUND), UiColor(BADGE_APPLY_BORDER));
     SetActionBadge(mRangeBadge, mRangeVariant ? "RANGE Alt" : "RANGE Base", CanChangeRange(), UiColor(0x4C1D95), UiColor(0xC4B5FD));
     SetActionBadge(mClearBadge, ClearBadgeText(), CanClear(), UiColor(BADGE_CLEAR_BACKGROUND), UiColor(BADGE_CLEAR_BORDER));
-    SetActionBadge(mMarkupBadge, mMarkupEnabled ? "MARKUP On" : "MARKUP Off", CanToggleMarkup(), UiColor(0x9D174D), UiColor(0xF9A8D4));
 
     std::ostringstream expected;
     expected << info.description << "\n"
@@ -1243,12 +1227,6 @@ private:
     return info.enabled && !mPlainSource && !mCleared && info.clearable;
   }
 
-  bool CanToggleMarkup() const
-  {
-    const StyledTextCaseInfo& info = CurrentCase();
-    return info.enabled && info.markupToggle;
-  }
-
   bool CanToggleSource() const
   {
     const StyledTextCaseInfo& info = CurrentCase();
@@ -1316,16 +1294,6 @@ private:
     ApplyCurrentCase();
   }
 
-  void ToggleMarkup()
-  {
-    if(!CanToggleMarkup())
-    {
-      return;
-    }
-    mMarkupEnabled = !mMarkupEnabled;
-    ApplyCurrentCase();
-  }
-
   void ToggleSource()
   {
     if(!CanToggleSource())
@@ -1350,7 +1318,6 @@ private:
     mRangeVariant    = false;
     mCleared         = false;
     mPlainSource     = false;
-    mMarkupEnabled   = CurrentCase().markupToggle;
     mLastAnchorHref.clear();
   }
 
@@ -1490,7 +1457,7 @@ private:
         return "LineThroughSpan sample";
       case StyledTextCase::FOREGROUND_BACKGROUND_DECORATION_SPAN:
         return "Decorated StyledText";
-      case StyledTextCase::MARKUP_IGNORED:
+      case StyledTextCase::LITERAL_MARKUP_TEXT:
         return "<color value='red'>Markup Should Not Parse</color>";
       case StyledTextCase::FONT_SPAN_WEIGHT:
         return "Weight span sample";
@@ -1588,10 +1555,6 @@ private:
     {
       ChangeCurrentRange();
     }
-    else if(keyName == "m" || keyName == "M")
-    {
-      ToggleMarkup();
-    }
     else if(keyName == "x" || keyName == "X")
     {
       ResetCurrentCase();
@@ -1608,7 +1571,6 @@ private:
     status << "Case " << (mCaseIndex + 1u) << "/" << CASES.size() << ": " << CurrentCase().title << "\n";
     status << CurrentCase().description << "\n";
     status << "Source: " << (mPlainSource ? "SetText" : "StyledText")
-           << " | MARKUP_ENABLED: " << (mMarkupEnabled ? "true" : "false")
            << " | Sync label: async=false | Async label: async=true\n";
     status << "Span mode: " << state.spanMode << "\n";
     status << state.rangeInfo << " | " << state.valueInfo;
@@ -1631,7 +1593,6 @@ private:
   Label mValueBadge;
   Label mRangeBadge;
   Label mClearBadge;
-  Label mMarkupBadge;
   Label mExpectedBadge;
 
   Label mSyncTitleBadge;
@@ -1653,7 +1614,6 @@ private:
   bool        mRangeVariant{false};
   bool        mCleared{false};
   bool        mPlainSource{false};
-  bool        mMarkupEnabled{false};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

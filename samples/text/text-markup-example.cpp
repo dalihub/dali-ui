@@ -44,11 +44,11 @@ private:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
 
-    mAnchorLabel      = CreateMarkupLabel("클릭하면 사이트로 이동 합니다: <a href='https://www.samsung.com'>Samsung Electronics</a>");
-    mAnchorColorLabel = CreateMarkupLabel("색깔이 다른 Anchor: <a href='https://research.samsung.com'>Samsung Research</a>");
+    mAnchorLabel      = CreateStyledTextLabel("클릭하면 사이트로 이동 합니다: <a href='https://www.samsung.com'>Samsung Electronics</a>");
+    mAnchorColorLabel = CreateStyledTextLabel("색깔이 다른 Anchor: <a href='https://research.samsung.com'>Samsung Research</a>");
     root.AddChildren({
       Label::New("Text Markup Example"),
-      CreateMarkupLabel("<font size='24' family='SamsungOneUI_700'>Markup </font><color value='red'>Text</color>"),
+      CreateStyledTextLabel("<font size='24' family='SamsungOneUI_700'>Markup </font><color value='red'>Text</color>"),
       mAnchorLabel,
       mAnchorColorLabel,
     });
@@ -74,10 +74,10 @@ private:
     }
   }
 
-  Label CreateMarkupLabel(Dali::String text)
+  Label CreateStyledTextLabel(Dali::String text)
   {
-    Label label = Label::New(text);
-    label.SetMarkupEnabled(true);
+    Label label = Label::New();
+    label.SetStyledText(Text::StyledText::FromMarkup(text));
     label.SetFontSize(20.0f);
     label.SetFontFamily("SamsungOneUI_400");
     return label;

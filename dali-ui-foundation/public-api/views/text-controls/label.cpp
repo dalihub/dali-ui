@@ -295,16 +295,6 @@ Text::LayoutDirectionMode Label::GetLayoutDirectionMode() const
   return GetImpl(*this).GetLayoutDirectionMode();
 }
 
-void Label::SetMarkupEnabled(bool enabled)
-{
-  GetImpl(*this).SetMarkupEnabled(enabled);
-}
-
-bool Label::IsMarkupEnabled() const
-{
-  return GetImpl(*this).IsMarkupEnabled();
-}
-
 void Label::SetAnchorColor(const UiColor& color)
 {
   GetImpl(*this).SetAnchorColor(color);

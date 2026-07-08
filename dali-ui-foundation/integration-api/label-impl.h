@@ -277,16 +277,6 @@ public:
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
 
   /**
-   * @copydoc Dali::Ui::Label::SetMarkupEnabled
-   */
-  void SetMarkupEnabled(bool enabled);
-
-  /**
-   * @copydoc Dali::Ui::Label::IsMarkupEnabled
-   */
-  bool IsMarkupEnabled() const;
-
-  /**
    * @copydoc Dali::Ui::Label::SetAnchorColor
    */
   void SetAnchorColor(const UiColor& color);
@@ -1004,7 +994,7 @@ private: // Implementation
   void OnLocaleChanged(std::string locale);
 
   /**
-   * @brief Handles touch interactions for text anchors when mark-up is enabled.
+   * @brief Handles touch interactions for text anchors.
    *
    * @param[in] actor The label that received the touch.
    * @param[in] touch The touch event information.
