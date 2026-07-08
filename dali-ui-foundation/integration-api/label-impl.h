@@ -40,8 +40,6 @@
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
-#include <unordered_map>
-
 namespace Dali
 {
 
@@ -1303,9 +1301,8 @@ private:
   Signal<void(View, float, float)>        mAsyncNaturalSizeComputedSignal;
   Signal<void(View, float, float)>        mAsyncHeightForWidthComputedSignal;
 
-  std::unordered_map<Dali::Property::Index, Dali::String> mVariationIndexMap;
-  WeakHandle<Ui::View>                                    mMaskSourceView;
-  Dali::String                                            mTranslatableText; ///< Stored resourceId for localization binding
+  WeakHandle<Ui::View> mMaskSourceView;
+  Dali::String         mTranslatableText; ///< Stored resourceId for localization binding
 
   Visual::Base          mVisual;
   Text::ControllerPtr   mController;
@@ -1341,6 +1338,7 @@ private:
   bool mHasLastMeasureMetrics : 1;    // whether the last OnMeasure inputs have been captured.
   bool mIsTouchDown : 1;              // whether the currently intercepted touch is in the down state.
   bool mHasStyledTextSource : 1;      // whether current text source was set by SetStyledText().
+  bool mHasVariationProperties : 1;   // whether font variation custom properties have been registered.
   bool mHasAnchors : 1;               // whether the text has anchors.
   bool mHasAsyncAnchorHitRegions : 1; // whether active async anchor hit regions are cached.
   bool mAsyncAnchorGeometryDirty : 1; // whether cached async anchor geometry may no longer match the content layout.

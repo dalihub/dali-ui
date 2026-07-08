@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 #include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
+#include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-source-data.h>
@@ -264,6 +265,7 @@ LabelImpl::LabelImpl()
   mHasLastMeasureMetrics(false),
   mIsTouchDown(false),
   mHasStyledTextSource(false),
+  mHasVariationProperties(false),
   mHasAnchors(false),
   mHasAsyncAnchorHitRegions(false),
   mAsyncAnchorGeometryDirty(false),
@@ -1356,14 +1358,17 @@ Dali::Property::Index LabelImpl::RegisterFontVariationProperty(const Dali::Strin
     tagValue->Get(value);
   }
 
-  const Dali::Property::Index index    = self.RegisterProperty(tag.CStr(), value);
-  const bool                  inserted = mVariationIndexMap.emplace(index, tag).second;
+  const Dali::Property::Index                index = self.RegisterProperty(tag.CStr(), value);
+  Internal::Text::FontVariationPropertyData& data =
+    Internal::Text::GetOrCreateFontVariationPropertyData(Ui::View::DownCast(Self()));
+  const bool inserted     = data.Insert(index, tag);
+  mHasVariationProperties = true;
   if(inserted)
   {
     PropertyNotification notification = self.AddPropertyNotification(index, StepCondition(1.0f));
     // TODO: Make step value customizable by user.
     notification.NotifySignal().Connect(this, &LabelImpl::OnVariationPropertyNotify);
-    // TODO: Support UnregisterProperty() and remove the tag from mVariationIndexMap.
+    // TODO: Support UnregisterProperty() and remove the tag from FontVariationPropertyData.
   }
   return index;
 }
@@ -3426,30 +3431,48 @@ void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrien
 
 void LabelImpl::OnVariationPropertyNotify(PropertyNotification source)
 {
+  if(!mHasVariationProperties)
+  {
+    return;
+  }
+
+  const auto* data = Internal::Text::GetFontVariationPropertyData(Ui::View::DownCast(Self()));
+  if(!data)
+  {
+    return;
+  }
+
   Actor self = Self();
 
   Property::Map map;
   mController->GetVariationsMap(map);
 
-  for(const auto& [index, tag] : mVariationIndexMap)
-  {
-    if(self.DoesCustomPropertyExist(index))
-    {
-      float value = 0.f;
-      self.GetCurrentProperty(index).Get(value);
-      map[tag] = value;
-    }
-  }
+  data->ApplyCurrentPropertyValues(self, map);
 
   mController->SetVariationsMap(map);
 }
 
 bool LabelImpl::HandleVariationPropertySet(Property::Index index, const Property::Value& propertyValue)
 {
-  Actor self = Self();
+  if(!mHasVariationProperties)
+  {
+    return false;
+  }
 
-  auto iter = mVariationIndexMap.find(index);
-  if(!self.DoesCustomPropertyExist(index) || iter == mVariationIndexMap.end())
+  const auto* data = Internal::Text::GetFontVariationPropertyData(Ui::View::DownCast(Self()));
+  if(!data)
+  {
+    return false;
+  }
+
+  Dali::String tag;
+  if(!data->Find(index, tag))
+  {
+    return false;
+  }
+
+  Actor self = Self();
+  if(!self.DoesCustomPropertyExist(index))
   {
     return false;
   }
@@ -3459,7 +3482,7 @@ bool LabelImpl::HandleVariationPropertySet(Property::Index index, const Property
 
   Property::Map map;
   mController->GetVariationsMap(map);
-  map[iter->second] = value;
+  map[tag] = value;
 
   mController->SetVariationsMap(map);
 
