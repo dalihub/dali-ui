@@ -52,9 +52,11 @@ public:
   StyledText();
   explicit StyledText(const Dali::String& text);
   StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments);
+  StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments, uint32_t utf32Length);
   ~StyledText() override;
 
   const Dali::String&  GetText() const;
+  uint32_t             GetUtf32Length() const;
   uint32_t             GetSpanCount() const;
   Dali::Ui::Text::Span GetSpanAt(uint32_t index) const;
   uint32_t             GetSpanStartIndexAt(uint32_t index) const;
@@ -72,6 +74,7 @@ private:
 private:
   Dali::String                mText;
   std::vector<SpanAttachment> mAttachments;
+  uint32_t                    mUtf32Length{0u};
 };
 
 } // namespace Text

@@ -545,6 +545,35 @@ int UtcDaliStyledTextApplierComplexUnicodeTextAndColorRangeP(void)
   END_TEST;
 }
 
+int UtcDaliStyledTextApplierMixedUnicodeSingleCharacterRangeP(void)
+{
+  UiTestApplication application;
+
+  const Dali::String texts[] =
+  {
+    "A가B",
+    Dali::String("A"
+                 "\xF0\x9F\x98\x80"
+                 "B"),
+  };
+
+  for(const auto& text : texts)
+  {
+    PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New(text);
+    PublicText::ForegroundColorSpan         span    = PublicText::ForegroundColorSpan::New(Dali::Ui::UiColor(Color::RED));
+
+    DALI_TEST_CHECK(builder.SetSpan(span, 1u, 2u));
+
+    const auto result = StyledTextInternal::StyledTextApplier::BuildTextStyleRunResult(builder.Build(), 96.0f);
+
+    DALI_TEST_EQUALS(result.text.Count(), 3u, TEST_LOCATION);
+    DALI_TEST_EQUALS(result.foregroundColorRuns.Count(), 1u, TEST_LOCATION);
+    CheckColorRun(result.foregroundColorRuns[0u], 1u, 1u, Color::RED);
+  }
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextApplierApplyTextAndStyleRunsToLogicalModelP(void)
 {
   UiTestApplication application;

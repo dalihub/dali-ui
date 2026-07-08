@@ -39,7 +39,12 @@ class StyledTextBuilder;
 /**
  * @brief Immutable styled text snapshot.
  *
- * Span ranges use UTF-32 code point indices in the plain text.
+ * StyledText stores UTF-8 text together with span attachments. Span range
+ * indexes are indexes in the decoded UTF-32 sequence of that UTF-8 text.
+ *
+ * Range indexes are not UTF-8 byte offsets. Use Text::Utf8ToUtf32Range() when
+ * converting byte ranges from UTF-8 string APIs, and use GetUtf32Length() when
+ * a range should cover this whole snapshot.
  */
 class DALI_UI_API StyledText : public BaseHandle
 {
@@ -77,6 +82,16 @@ public:
   Dali::String GetText() const;
 
   /**
+   * @brief Gets the decoded UTF-32 length of the text payload.
+   *
+   * The returned value is the same unit used by span range indexes. It is not
+   * the UTF-8 byte size returned by Dali::String::Size().
+   *
+   * @return The decoded UTF-32 length
+   */
+  uint32_t GetUtf32Length() const;
+
+  /**
    * @brief Gets the number of attached spans.
    *
    * @return The span attachment count
@@ -92,18 +107,22 @@ public:
   Span GetSpanAt(uint32_t index) const;
 
   /**
-   * @brief Gets the inclusive UTF-32 code point start index of the span attachment.
+   * @brief Gets the inclusive UTF-32 start index of the span attachment.
+   *
+   * The attachment index should be less than GetSpanCount().
    *
    * @param[in] index The attachment index
-   * @return The UTF-32 code point start index, or 0 if the index is invalid
+   * @return The UTF-32 start index
    */
   uint32_t GetSpanStartIndexAt(uint32_t index) const;
 
   /**
-   * @brief Gets the exclusive UTF-32 code point end index of the span attachment.
+   * @brief Gets the exclusive UTF-32 end index of the span attachment.
+   *
+   * The attachment index should be less than GetSpanCount().
    *
    * @param[in] index The attachment index
-   * @return The UTF-32 code point end index, or 0 if the index is invalid
+   * @return The exclusive UTF-32 end index
    */
   uint32_t GetSpanEndIndexAt(uint32_t index) const;
 

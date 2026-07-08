@@ -54,6 +54,11 @@ Dali::String StyledText::GetText() const
   return *this ? GetImplementation(*this)->GetText() : Dali::String();
 }
 
+uint32_t StyledText::GetUtf32Length() const
+{
+  return *this ? GetImplementation(*this)->GetUtf32Length() : 0u;
+}
+
 uint32_t StyledText::GetSpanCount() const
 {
   return *this ? GetImplementation(*this)->GetSpanCount() : 0u;

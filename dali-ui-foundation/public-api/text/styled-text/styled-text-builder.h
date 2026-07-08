@@ -38,7 +38,14 @@ namespace Text
 /**
  * @brief Mutable builder for creating immutable StyledText snapshots.
  *
- * Span ranges use UTF-32 code point indices in the plain text.
+ * StyledTextBuilder stores UTF-8 text while building a StyledText snapshot.
+ * Span range indexes are indexes in the decoded UTF-32 sequence of the current
+ * UTF-8 text.
+ *
+ * Range indexes are not UTF-8 byte offsets. Use Text::Utf8ToUtf32Range() when
+ * converting byte ranges from UTF-8 string APIs. When building text
+ * incrementally, use GetUtf32Length() before and after AppendText() to calculate
+ * the range of appended text.
  */
 class DALI_UI_API StyledTextBuilder : public BaseHandle
 {
@@ -49,12 +56,19 @@ public:
   StyledTextBuilder() = default;
 
   /**
-   * @brief Creates a builder with initial text and no spans.
+   * @brief Creates an empty StyledTextBuilder.
    *
-   * @param[in] text The initial text
    * @return A new StyledTextBuilder
    */
-  static StyledTextBuilder New(const Dali::String& text = Dali::String());
+  static StyledTextBuilder New();
+
+  /**
+   * @brief Creates a StyledTextBuilder with initial UTF-8 text.
+   *
+   * @param[in] text The initial UTF-8 text payload
+   * @return A new StyledTextBuilder
+   */
+  static StyledTextBuilder New(const Dali::String& text);
 
   /**
    * @brief Creates a builder initialized from a StyledText snapshot.
@@ -79,21 +93,25 @@ public:
   void AppendText(const Dali::String& text);
 
   /**
-   * @brief Attaches or updates a span over a half-open UTF-32 code point range.
+   * @brief Attaches or updates a span over a half-open UTF-32 range.
    *
-   * The range is [startIndex, endIndex) in the builder's plain text.
+   * The range is [utf32StartIndex, utf32EndIndex) in the decoded UTF-32 sequence
+   * of the builder's current UTF-8 text.
+   *
+   * The range is not a UTF-8 byte range. Use Text::Utf8ToUtf32Range() to convert
+   * UTF-8 byte ranges, for example ranges returned from std::string::find().
    *
    * A builder stores at most one attachment for the same Span handle. Calling
    * SetSpan() again with the same Span handle updates the existing attachment
-   * instead of adding another one. Multiple equal-looking span payloads can be
+   * range without changing its insertion order. The same visual style can be
    * attached to different ranges by creating separate Span handles.
    *
    * @param[in] span The span payload
-   * @param[in] startIndex The inclusive UTF-32 code point start index
-   * @param[in] endIndex The exclusive UTF-32 code point end index
+   * @param[in] utf32StartIndex The inclusive UTF-32 start index
+   * @param[in] utf32EndIndex The exclusive UTF-32 end index
    * @return true if the attachment was stored, false if validation failed
    */
-  bool SetSpan(const Span& span, uint32_t startIndex, uint32_t endIndex);
+  bool SetSpan(const Span& span, uint32_t utf32StartIndex, uint32_t utf32EndIndex);
 
   /**
    * @brief Removes the attachment for the same Span handle.
@@ -126,6 +144,16 @@ public:
   Dali::String GetText() const;
 
   /**
+   * @brief Gets the decoded UTF-32 length of the text payload.
+   *
+   * The returned value is the same unit used by span range indexes. It is not
+   * the UTF-8 byte size returned by Dali::String::Size().
+   *
+   * @return The decoded UTF-32 length
+   */
+  uint32_t GetUtf32Length() const;
+
+  /**
    * @brief Gets the number of attached spans.
    *
    * @return The span attachment count
@@ -141,18 +169,22 @@ public:
   Span GetSpanAt(uint32_t index) const;
 
   /**
-   * @brief Gets the inclusive UTF-32 code point start index of the span attachment.
+   * @brief Gets the inclusive UTF-32 start index of the span attachment.
+   *
+   * The attachment index should be less than GetSpanCount().
    *
    * @param[in] index The attachment index
-   * @return The UTF-32 code point start index, or 0 if the index is invalid
+   * @return The UTF-32 start index
    */
   uint32_t GetSpanStartIndexAt(uint32_t index) const;
 
   /**
-   * @brief Gets the exclusive UTF-32 code point end index of the span attachment.
+   * @brief Gets the exclusive UTF-32 end index of the span attachment.
+   *
+   * The attachment index should be less than GetSpanCount().
    *
    * @param[in] index The attachment index
-   * @return The UTF-32 code point end index, or 0 if the index is invalid
+   * @return The exclusive UTF-32 end index
    */
   uint32_t GetSpanEndIndexAt(uint32_t index) const;
 

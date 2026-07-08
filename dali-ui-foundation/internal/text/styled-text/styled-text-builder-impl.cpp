@@ -23,7 +23,7 @@
 #include <cstdint>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/character-set-conversion.h>
+#include <dali-ui-foundation/public-api/text/text-utils.h>
 
 namespace Dali
 {
@@ -36,16 +36,6 @@ namespace Text
 
 namespace
 {
-
-uint32_t GetCodePointCount(const Dali::String& text)
-{
-  if(text.Empty())
-  {
-    return 0u;
-  }
-
-  return Dali::Ui::Text::GetNumberOfUtf8Characters(reinterpret_cast<const uint8_t*>(text.CStr()), text.Size());
-}
 
 bool SameSpanObject(const Dali::Ui::Text::Span& lhs, const Dali::Ui::Text::Span& rhs)
 {
@@ -65,13 +55,15 @@ uint32_t GetNextInsertionOrder(const std::vector<SpanAttachment>& attachments)
 } // unnamed namespace
 
 StyledTextBuilder::StyledTextBuilder(const Dali::String& text)
-: mText(text)
+: mText(text),
+  mUtf32Length(Dali::Ui::Text::Utf8ToUtf32Length(text))
 {
 }
 
 StyledTextBuilder::StyledTextBuilder(const StyledText& styledText)
 : mText(styledText.GetText()),
   mAttachments(styledText.GetAttachments()),
+  mUtf32Length(styledText.GetUtf32Length()),
   mNextInsertionOrder(GetNextInsertionOrder(mAttachments))
 {
 }
@@ -82,17 +74,19 @@ void StyledTextBuilder::SetText(const Dali::String& text)
 {
   mText = text;
   mAttachments.clear();
+  mUtf32Length        = Dali::Ui::Text::Utf8ToUtf32Length(text);
   mNextInsertionOrder = 0u;
 }
 
 void StyledTextBuilder::AppendText(const Dali::String& text)
 {
   mText += text;
+  mUtf32Length += Dali::Ui::Text::Utf8ToUtf32Length(text);
 }
 
-bool StyledTextBuilder::SetSpan(const Dali::Ui::Text::Span& span, uint32_t startIndex, uint32_t endIndex)
+bool StyledTextBuilder::SetSpan(const Dali::Ui::Text::Span& span, uint32_t utf32StartIndex, uint32_t utf32EndIndex)
 {
-  if(!span || (startIndex >= endIndex) || (endIndex > GetCodePointCount(mText)))
+  if(!span || (utf32StartIndex >= utf32EndIndex) || (utf32EndIndex > mUtf32Length))
   {
     return false;
   }
@@ -104,12 +98,12 @@ bool StyledTextBuilder::SetSpan(const Dali::Ui::Text::Span& span, uint32_t start
 
   if(iter != mAttachments.end())
   {
-    iter->startIndex = startIndex;
-    iter->endIndex   = endIndex;
+    iter->startIndex = utf32StartIndex;
+    iter->endIndex   = utf32EndIndex;
     return true;
   }
 
-  mAttachments.push_back({span, startIndex, endIndex, mNextInsertionOrder++});
+  mAttachments.push_back({span, utf32StartIndex, utf32EndIndex, mNextInsertionOrder++});
   return true;
 }
 
@@ -153,6 +147,11 @@ void StyledTextBuilder::ClearSpans()
 const Dali::String& StyledTextBuilder::GetText() const
 {
   return mText;
+}
+
+uint32_t StyledTextBuilder::GetUtf32Length() const
+{
+  return mUtf32Length;
 }
 
 uint32_t StyledTextBuilder::GetSpanCount() const

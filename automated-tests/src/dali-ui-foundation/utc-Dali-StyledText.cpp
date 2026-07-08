@@ -63,32 +63,52 @@ void CheckSemiTransparentRedColor(const UiColor& color)
   DALI_TEST_EQUALS(rgba.b, 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 }
 
-void CheckCodePointRangeValidation(const Dali::String& text, uint32_t expectedCount, uint32_t additionalInvalidEnd = 0u)
+void CheckUtf32LengthApis(const Dali::String& text, uint32_t expectedUtf32Length, uint32_t expectedByteLength)
+{
+  DALI_TEST_EQUALS(text.Size(), expectedByteLength, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::Text::Utf8ToUtf32Length(text), expectedUtf32Length, TEST_LOCATION);
+
+  StyledText styledText = StyledText::New(text);
+  DALI_TEST_EQUALS(styledText.GetUtf32Length(), expectedUtf32Length, TEST_LOCATION);
+
+  StyledTextBuilder builder = StyledTextBuilder::New(text);
+  DALI_TEST_EQUALS(builder.GetUtf32Length(), expectedUtf32Length, TEST_LOCATION);
+
+  StyledText snapshot = builder.Build();
+  DALI_TEST_EQUALS(snapshot.GetUtf32Length(), expectedUtf32Length, TEST_LOCATION);
+
+  StyledTextBuilder copyBuilder = StyledTextBuilder::FromStyledText(snapshot);
+  DALI_TEST_EQUALS(copyBuilder.GetUtf32Length(), expectedUtf32Length, TEST_LOCATION);
+}
+
+void CheckUtf32RangeValidation(const Dali::String& text, uint32_t expectedUtf32Length, uint32_t expectedByteLength)
 {
   StyledTextBuilder builder = StyledTextBuilder::New(text);
   ForegroundColorSpan         span    = ForegroundColorSpan::New(UiColor(Color::RED));
 
-  DALI_TEST_CHECK(builder.SetSpan(span, 0u, expectedCount));
-  DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
-  CheckRange(builder, 0u, 0u, expectedCount);
+  CheckUtf32LengthApis(text, expectedUtf32Length, expectedByteLength);
 
-  DALI_TEST_CHECK(!builder.SetSpan(span, 0u, expectedCount + 1u));
+  DALI_TEST_CHECK(builder.SetSpan(span, 0u, expectedUtf32Length));
   DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
-  CheckRange(builder, 0u, 0u, expectedCount);
+  CheckRange(builder, 0u, 0u, expectedUtf32Length);
 
-  if(additionalInvalidEnd > expectedCount + 1u)
+  DALI_TEST_CHECK(!builder.SetSpan(span, 0u, expectedUtf32Length + 1u));
+  DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(builder, 0u, 0u, expectedUtf32Length);
+
+  if(expectedByteLength != expectedUtf32Length)
   {
-    DALI_TEST_CHECK(!builder.SetSpan(span, 0u, additionalInvalidEnd));
+    DALI_TEST_CHECK(!builder.SetSpan(span, 0u, expectedByteLength));
     DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
-    CheckRange(builder, 0u, 0u, expectedCount);
+    CheckRange(builder, 0u, 0u, expectedUtf32Length);
   }
 
-  DALI_TEST_CHECK(!builder.SetSpan(span, expectedCount, expectedCount));
+  DALI_TEST_CHECK(!builder.SetSpan(span, expectedUtf32Length, expectedUtf32Length));
   DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
-  CheckRange(builder, 0u, 0u, expectedCount);
+  CheckRange(builder, 0u, 0u, expectedUtf32Length);
 }
 
-void CheckCodePointSubRangeValidation(const Dali::String& text, uint32_t startIndex, uint32_t endIndex)
+void CheckUtf32SubRangeValidation(const Dali::String& text, uint32_t startIndex, uint32_t endIndex)
 {
   StyledTextBuilder builder = StyledTextBuilder::New(text);
   ForegroundColorSpan         span    = ForegroundColorSpan::New(UiColor(Color::BLUE));
@@ -96,6 +116,61 @@ void CheckCodePointSubRangeValidation(const Dali::String& text, uint32_t startIn
   DALI_TEST_CHECK(builder.SetSpan(span, startIndex, endIndex));
   DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
   CheckRange(builder, 0u, startIndex, endIndex);
+}
+
+void CheckUtf32Length(const Dali::String& text, uint32_t expectedUtf32Length, uint32_t expectedByteLength)
+{
+  DALI_TEST_EQUALS(text.Size(), expectedByteLength, TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Ui::Text::Utf8ToUtf32Length(text), expectedUtf32Length, TEST_LOCATION);
+}
+
+void CheckUtf8ToUtf32Index(const Dali::String& text, uint32_t utf8Index, bool expectedResult, uint32_t expectedUtf32Index)
+{
+  uint32_t utf32Index = 999u;
+  DALI_TEST_EQUALS(Dali::Ui::Text::Utf8ToUtf32Index(text, utf8Index, utf32Index), expectedResult, TEST_LOCATION);
+  DALI_TEST_EQUALS(utf32Index, expectedResult ? expectedUtf32Index : 999u, TEST_LOCATION);
+}
+
+void CheckUtf8ToUtf32Range(const Dali::String& text, uint32_t utf8StartIndex, uint32_t utf8EndIndex, bool expectedResult, uint32_t expectedUtf32StartIndex, uint32_t expectedUtf32EndIndex)
+{
+  uint32_t utf32StartIndex = 999u;
+  uint32_t utf32EndIndex   = 777u;
+  DALI_TEST_EQUALS(Dali::Ui::Text::Utf8ToUtf32Range(text, utf8StartIndex, utf8EndIndex, utf32StartIndex, utf32EndIndex), expectedResult, TEST_LOCATION);
+  DALI_TEST_EQUALS(utf32StartIndex, expectedResult ? expectedUtf32StartIndex : 999u, TEST_LOCATION);
+  DALI_TEST_EQUALS(utf32EndIndex, expectedResult ? expectedUtf32EndIndex : 777u, TEST_LOCATION);
+}
+
+void CheckUtf32ToUtf8Index(const Dali::String& text, uint32_t utf32Index, bool expectedResult, uint32_t expectedUtf8Index)
+{
+  uint32_t utf8Index = 999u;
+  DALI_TEST_EQUALS(Dali::Ui::Text::Utf32ToUtf8Index(text, utf32Index, utf8Index), expectedResult, TEST_LOCATION);
+  DALI_TEST_EQUALS(utf8Index, expectedResult ? expectedUtf8Index : 999u, TEST_LOCATION);
+}
+
+void CheckUtf32ToUtf8Range(const Dali::String& text, uint32_t utf32StartIndex, uint32_t utf32EndIndex, bool expectedResult, uint32_t expectedUtf8StartIndex, uint32_t expectedUtf8EndIndex)
+{
+  uint32_t utf8StartIndex = 999u;
+  uint32_t utf8EndIndex   = 777u;
+  DALI_TEST_EQUALS(Dali::Ui::Text::Utf32ToUtf8Range(text, utf32StartIndex, utf32EndIndex, utf8StartIndex, utf8EndIndex), expectedResult, TEST_LOCATION);
+  DALI_TEST_EQUALS(utf8StartIndex, expectedResult ? expectedUtf8StartIndex : 999u, TEST_LOCATION);
+  DALI_TEST_EQUALS(utf8EndIndex, expectedResult ? expectedUtf8EndIndex : 777u, TEST_LOCATION);
+}
+
+void CheckUtf8Utf32FullRangeRoundTrip(const Dali::String& text, uint32_t expectedUtf32Length, uint32_t expectedByteLength)
+{
+  CheckUtf32Length(text, expectedUtf32Length, expectedByteLength);
+
+  uint32_t utf32StartIndex = 999u;
+  uint32_t utf32EndIndex   = 777u;
+  DALI_TEST_CHECK(Dali::Ui::Text::Utf8ToUtf32Range(text, 0u, text.Size(), utf32StartIndex, utf32EndIndex));
+  DALI_TEST_EQUALS(utf32StartIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(utf32EndIndex, expectedUtf32Length, TEST_LOCATION);
+
+  uint32_t utf8StartIndex = 999u;
+  uint32_t utf8EndIndex   = 777u;
+  DALI_TEST_CHECK(Dali::Ui::Text::Utf32ToUtf8Range(text, 0u, expectedUtf32Length, utf8StartIndex, utf8EndIndex));
+  DALI_TEST_EQUALS(utf8StartIndex, 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(utf8EndIndex, expectedByteLength, TEST_LOCATION);
 }
 
 } // unnamed namespace
@@ -108,11 +183,18 @@ int UtcDaliStyledTextDefaultConstructorP(void)
 
   DALI_TEST_CHECK(!styledText);
   DALI_TEST_EQUALS(styledText.GetText(), String(), TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetUtf32Length(), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledText.GetSpanCount(), 0u, TEST_LOCATION);
   DALI_TEST_CHECK(!styledText.GetSpanAt(0u));
   DALI_TEST_EQUALS(styledText.GetSpanStartIndexAt(0u), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledText.GetSpanEndIndexAt(0u), 0u, TEST_LOCATION);
   DALI_TEST_CHECK(styledText.IsEmpty());
+
+  StyledTextBuilder emptyBuilder = StyledTextBuilder::New();
+  DALI_TEST_CHECK(emptyBuilder);
+  DALI_TEST_EQUALS(emptyBuilder.GetText(), Dali::String(), TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyBuilder.GetUtf32Length(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyBuilder.GetSpanCount(), 0u, TEST_LOCATION);
 
   END_TEST;
 }
@@ -125,11 +207,236 @@ int UtcDaliStyledTextNewP(void)
 
   DALI_TEST_CHECK(styledText);
   DALI_TEST_EQUALS(styledText.GetText(), "Hello", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetUtf32Length(), 5u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledText.GetSpanCount(), 0u, TEST_LOCATION);
   DALI_TEST_CHECK(!styledText.GetSpanAt(1u));
   DALI_TEST_EQUALS(styledText.GetSpanStartIndexAt(1u), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledText.GetSpanEndIndexAt(1u), 0u, TEST_LOCATION);
   DALI_TEST_CHECK(!styledText.IsEmpty());
+
+  END_TEST;
+}
+
+int UtcDaliTextUtf8ToUtf32LengthP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_EQUALS(Dali::Ui::Text::Utf8ToUtf32Length(Dali::StringView()), 0u, TEST_LOCATION);
+  CheckUtf32Length("ABC", 3u, 3u);
+  CheckUtf32Length("가나다", 3u, 9u);
+  CheckUtf32Length("A가B", 3u, 5u);
+  CheckUtf32Length(Dali::String("A"
+                                "\xF0\x9F\x98\x80"
+                                "B"),
+                   3u,
+                   6u);
+  CheckUtf32Length(Dali::String("A"
+                                "\xE2\x9D\xA4"
+                                "\xEF\xB8\x8F"
+                                "B"),
+                   4u,
+                   8u);
+  CheckUtf32Length(Dali::String("A"
+                                "\xF0\x9F\x91\xA9"
+                                "\xE2\x80\x8D"
+                                "\xF0\x9F\x92\xBB"
+                                "B"),
+                   5u,
+                   13u);
+  CheckUtf32Length(Dali::String("A"
+                                "\xF0\x9F\x91\x8D"
+                                "\xF0\x9F\x8F\xBD"
+                                "B"),
+                   4u,
+                   10u);
+  CheckUtf32Length(Dali::String("A"
+                                "\xF0\x9F\x87\xB0"
+                                "\xF0\x9F\x87\xB7"
+                                "B"),
+                   4u,
+                   10u);
+  CheckUtf32Length(Dali::String("A"
+                                "e"
+                                "\xCC\x81"
+                                "B"),
+                   4u,
+                   5u);
+
+  const char notNullTerminatedText[] =
+  {
+    'a',
+    'b',
+    'c',
+    'd',
+  };
+  DALI_TEST_EQUALS(Dali::Ui::Text::Utf8ToUtf32Length(Dali::StringView(notNullTerminatedText, 3u)), 3u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUtf8ToUtf32IndexP(void)
+{
+  UiTestApplication application;
+
+  const Dali::String emptyText("");
+  CheckUtf8ToUtf32Index(emptyText, 0u, true, 0u);
+  CheckUtf8ToUtf32Index(emptyText, 1u, false, 0u);
+
+  const Dali::String text("A"
+                          "\xEA\xB0\x80"
+                          "B");
+
+  CheckUtf8ToUtf32Index(text, 0u, true, 0u);
+  CheckUtf8ToUtf32Index(text, 1u, true, 1u);
+  CheckUtf8ToUtf32Index(text, 2u, false, 0u);
+  CheckUtf8ToUtf32Index(text, 3u, false, 0u);
+  CheckUtf8ToUtf32Index(text, 4u, true, 2u);
+  CheckUtf8ToUtf32Index(text, 5u, true, 3u);
+  CheckUtf8ToUtf32Index(text, 6u, false, 0u);
+
+  const char truncatedText[] =
+  {
+    'A',
+    static_cast<char>(0xEA),
+    static_cast<char>(0xB0),
+  };
+  uint32_t output = 123u;
+  DALI_TEST_CHECK(!Dali::Ui::Text::Utf8ToUtf32Index(Dali::StringView(truncatedText, 3u), 3u, output));
+  DALI_TEST_EQUALS(output, 123u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUtf8ToUtf32RangeP(void)
+{
+  UiTestApplication application;
+
+  const Dali::String emptyText("");
+  CheckUtf8ToUtf32Range(emptyText, 0u, 0u, true, 0u, 0u);
+  CheckUtf8ToUtf32Range(emptyText, 0u, 1u, false, 0u, 0u);
+
+  const Dali::String text("A"
+                          "\xEA\xB0\x80"
+                          "B");
+
+  CheckUtf8ToUtf32Range(text, 1u, 4u, true, 1u, 2u);
+  CheckUtf8ToUtf32Range(text, 0u, 5u, true, 0u, 3u);
+  CheckUtf8ToUtf32Range(text, 1u, 1u, true, 1u, 1u);
+  CheckUtf8ToUtf32Range(text, 5u, 5u, true, 3u, 3u);
+  CheckUtf8ToUtf32Range(text, 2u, 4u, false, 0u, 0u);
+  CheckUtf8ToUtf32Range(text, 1u, 3u, false, 0u, 0u);
+  CheckUtf8ToUtf32Range(text, 4u, 1u, false, 0u, 0u);
+  CheckUtf8ToUtf32Range(text, 0u, 6u, false, 0u, 0u);
+
+  const char truncatedText[] =
+  {
+    'A',
+    static_cast<char>(0xEA),
+    static_cast<char>(0xB0),
+  };
+  uint32_t start = 123u;
+  uint32_t end   = 456u;
+  DALI_TEST_CHECK(!Dali::Ui::Text::Utf8ToUtf32Range(Dali::StringView(truncatedText, 3u), 0u, 3u, start, end));
+  DALI_TEST_EQUALS(start, 123u, TEST_LOCATION);
+  DALI_TEST_EQUALS(end, 456u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUtf32ToUtf8IndexP(void)
+{
+  UiTestApplication application;
+
+  const Dali::String emptyText("");
+  CheckUtf32ToUtf8Index(emptyText, 0u, true, 0u);
+  CheckUtf32ToUtf8Index(emptyText, 1u, false, 0u);
+
+  const Dali::String text("A"
+                          "\xEA\xB0\x80"
+                          "B");
+
+  CheckUtf32ToUtf8Index(text, 0u, true, 0u);
+  CheckUtf32ToUtf8Index(text, 1u, true, 1u);
+  CheckUtf32ToUtf8Index(text, 2u, true, 4u);
+  CheckUtf32ToUtf8Index(text, 3u, true, 5u);
+  CheckUtf32ToUtf8Index(text, 4u, false, 0u);
+
+  const char truncatedText[] =
+  {
+    'A',
+    static_cast<char>(0xEA),
+    static_cast<char>(0xB0),
+  };
+  uint32_t output = 123u;
+  DALI_TEST_CHECK(!Dali::Ui::Text::Utf32ToUtf8Index(Dali::StringView(truncatedText, 3u), 2u, output));
+  DALI_TEST_EQUALS(output, 123u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUtf32ToUtf8RangeP(void)
+{
+  UiTestApplication application;
+
+  const Dali::String emptyText("");
+  CheckUtf32ToUtf8Range(emptyText, 0u, 0u, true, 0u, 0u);
+  CheckUtf32ToUtf8Range(emptyText, 0u, 1u, false, 0u, 0u);
+
+  const Dali::String text("A"
+                          "\xEA\xB0\x80"
+                          "B");
+
+  CheckUtf32ToUtf8Range(text, 1u, 2u, true, 1u, 4u);
+  CheckUtf32ToUtf8Range(text, 0u, 3u, true, 0u, 5u);
+  CheckUtf32ToUtf8Range(text, 1u, 1u, true, 1u, 1u);
+  CheckUtf32ToUtf8Range(text, 3u, 3u, true, 5u, 5u);
+  CheckUtf32ToUtf8Range(text, 2u, 1u, false, 0u, 0u);
+  CheckUtf32ToUtf8Range(text, 0u, 4u, false, 0u, 0u);
+
+  const char truncatedText[] =
+  {
+    'A',
+    static_cast<char>(0xEA),
+    static_cast<char>(0xB0),
+  };
+  uint32_t start = 123u;
+  uint32_t end   = 456u;
+  DALI_TEST_CHECK(!Dali::Ui::Text::Utf32ToUtf8Range(Dali::StringView(truncatedText, 3u), 0u, 2u, start, end));
+  DALI_TEST_EQUALS(start, 123u, TEST_LOCATION);
+  DALI_TEST_EQUALS(end, 456u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliTextUtf8Utf32ComplexUnicodeConversionP(void)
+{
+  UiTestApplication application;
+
+  CheckUtf8Utf32FullRangeRoundTrip(Dali::String("A"
+                                                "\xE2\x9D\xA4"
+                                                "\xEF\xB8\x8F"
+                                                "B"),
+                                   4u,
+                                   8u);
+  CheckUtf8Utf32FullRangeRoundTrip(Dali::String("A"
+                                                "\xF0\x9F\x91\xA9"
+                                                "\xE2\x80\x8D"
+                                                "\xF0\x9F\x92\xBB"
+                                                "B"),
+                                   5u,
+                                   13u);
+  CheckUtf8Utf32FullRangeRoundTrip(Dali::String("A"
+                                                "\xF0\x9F\x87\xB0"
+                                                "\xF0\x9F\x87\xB7"
+                                                "B"),
+                                   4u,
+                                   10u);
+  CheckUtf8Utf32FullRangeRoundTrip(Dali::String("A"
+                                                "e"
+                                                "\xCC\x81"
+                                                "B"),
+                                   4u,
+                                   5u);
 
   END_TEST;
 }
@@ -308,6 +615,7 @@ int UtcDaliStyledTextBuilderSetSpanAndBuildP(void)
 
   DALI_TEST_CHECK(builder);
   DALI_TEST_EQUALS(builder.GetText(), "Hello DALi", TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetUtf32Length(), 10u, TEST_LOCATION);
   DALI_TEST_EQUALS(builder.GetSpanCount(), 0u, TEST_LOCATION);
 
   DALI_TEST_CHECK(builder.SetSpan(span, 0u, 5u));
@@ -321,6 +629,7 @@ int UtcDaliStyledTextBuilderSetSpanAndBuildP(void)
   StyledText styledText = builder.Build();
   DALI_TEST_CHECK(styledText);
   DALI_TEST_EQUALS(styledText.GetText(), "Hello DALi", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetUtf32Length(), 10u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
   CheckSpanIdentity(styledText.GetSpanAt(0u), span);
   CheckRange(styledText, 0u, 0u, 5u);
@@ -483,27 +792,18 @@ int UtcDaliStyledTextBuilderRangeValidationP(void)
 
   ForegroundColorSpan span = ForegroundColorSpan::New(UiColor(Color::GREEN));
 
-  CheckCodePointRangeValidation("ABC", 3u);
+  CheckUtf32RangeValidation("ABC", 3u, 3u);
+  CheckUtf32RangeValidation("가나다", 3u, 9u);
+  CheckUtf32RangeValidation("A가B", 3u, 5u);
 
-  StyledTextBuilder koreanBuilder = StyledTextBuilder::New("가나다");
-  DALI_TEST_CHECK(koreanBuilder.SetSpan(span, 0u, 3u));
-  DALI_TEST_CHECK(!koreanBuilder.SetSpan(span, 0u, 4u));
-  DALI_TEST_EQUALS(koreanBuilder.GetSpanCount(), 1u, TEST_LOCATION);
-  CheckRange(koreanBuilder, 0u, 0u, 3u);
-
-  StyledTextBuilder mixedBuilder = StyledTextBuilder::New("Hi가");
-  DALI_TEST_CHECK(mixedBuilder.SetSpan(span, 0u, 3u));
-  DALI_TEST_CHECK(!mixedBuilder.SetSpan(span, 0u, 4u));
-  DALI_TEST_EQUALS(mixedBuilder.GetSpanCount(), 1u, TEST_LOCATION);
-  CheckRange(mixedBuilder, 0u, 0u, 3u);
-
-  StyledTextBuilder emojiBuilder = StyledTextBuilder::New("😀A");
-  DALI_TEST_CHECK(emojiBuilder.SetSpan(span, 0u, 2u));
-  DALI_TEST_CHECK(!emojiBuilder.SetSpan(span, 0u, 3u));
-  DALI_TEST_EQUALS(emojiBuilder.GetSpanCount(), 1u, TEST_LOCATION);
-  CheckRange(emojiBuilder, 0u, 0u, 2u);
+  // "A😀B": U+0041 U+1F600 U+0042
+  const Dali::String emojiText("A"
+                               "\xF0\x9F\x98\x80"
+                               "B");
+  CheckUtf32RangeValidation(emojiText, 3u, 6u);
 
   StyledTextBuilder invalidBuilder = StyledTextBuilder::New("abc");
+  DALI_TEST_EQUALS(invalidBuilder.GetUtf32Length(), 3u, TEST_LOCATION);
   DALI_TEST_CHECK(!invalidBuilder.SetSpan(Span(), 0u, 1u));
   DALI_TEST_CHECK(!invalidBuilder.SetSpan(span, 1u, 1u));
   DALI_TEST_CHECK(!invalidBuilder.SetSpan(span, 2u, 1u));
@@ -519,30 +819,30 @@ int UtcDaliStyledTextBuilderComplexUnicodeRangeValidationP(void)
 
   // "A❤️B"
   // U+0041 U+2764 U+FE0F U+0042
-  // expected code point count: 4
+  // expected UTF-32 character count: 4
   const Dali::String variationSelectorText("A"
                                            "\xE2\x9D\xA4"
                                            "\xEF\xB8\x8F"
                                            "B");
   const uint32_t variationSelectorExpectedCount = 4u;
-  CheckCodePointRangeValidation(variationSelectorText, variationSelectorExpectedCount);
-  CheckCodePointSubRangeValidation(variationSelectorText, 1u, 3u);
+  CheckUtf32RangeValidation(variationSelectorText, variationSelectorExpectedCount, 8u);
+  CheckUtf32SubRangeValidation(variationSelectorText, 1u, 3u);
 
   // "A👩‍💻B"
   // U+0041 U+1F469 U+200D U+1F4BB U+0042
-  // expected code point count: 5, UTF-16 code unit count: 7
+  // expected UTF-32 character count: 5, UTF-16 code unit count: 7
   const Dali::String zwjEmojiText("A"
                                   "\xF0\x9F\x91\xA9"
                                   "\xE2\x80\x8D"
                                   "\xF0\x9F\x92\xBB"
                                   "B");
   const uint32_t zwjEmojiExpectedCount = 5u;
-  CheckCodePointRangeValidation(zwjEmojiText, zwjEmojiExpectedCount, 7u);
-  CheckCodePointSubRangeValidation(zwjEmojiText, 1u, 4u);
+  CheckUtf32RangeValidation(zwjEmojiText, zwjEmojiExpectedCount, 13u);
+  CheckUtf32SubRangeValidation(zwjEmojiText, 1u, 4u);
 
   // "👨‍👩‍👧‍👦"
   // U+1F468 U+200D U+1F469 U+200D U+1F467 U+200D U+1F466
-  // expected code point count: 7
+  // expected UTF-32 character count: 7
   const Dali::String familyZwJText("\xF0\x9F\x91\xA8"
                                    "\xE2\x80\x8D"
                                    "\xF0\x9F\x91\xA9"
@@ -551,53 +851,53 @@ int UtcDaliStyledTextBuilderComplexUnicodeRangeValidationP(void)
                                    "\xE2\x80\x8D"
                                    "\xF0\x9F\x91\xA6");
   const uint32_t familyZwJExpectedCount = 7u;
-  CheckCodePointRangeValidation(familyZwJText, familyZwJExpectedCount);
+  CheckUtf32RangeValidation(familyZwJText, familyZwJExpectedCount, 25u);
 
   // "A👍🏽B"
   // U+0041 U+1F44D U+1F3FD U+0042
-  // expected code point count: 4
+  // expected UTF-32 character count: 4
   const Dali::String skinToneText("A"
                                   "\xF0\x9F\x91\x8D"
                                   "\xF0\x9F\x8F\xBD"
                                   "B");
   const uint32_t skinToneExpectedCount = 4u;
-  CheckCodePointRangeValidation(skinToneText, skinToneExpectedCount);
-  CheckCodePointSubRangeValidation(skinToneText, 1u, 3u);
+  CheckUtf32RangeValidation(skinToneText, skinToneExpectedCount, 10u);
+  CheckUtf32SubRangeValidation(skinToneText, 1u, 3u);
 
   // "A🇰🇷B"
   // U+0041 U+1F1F0 U+1F1F7 U+0042
-  // expected code point count: 4
+  // expected UTF-32 character count: 4
   const Dali::String regionalFlagText("A"
                                       "\xF0\x9F\x87\xB0"
                                       "\xF0\x9F\x87\xB7"
                                       "B");
   const uint32_t regionalFlagExpectedCount = 4u;
-  CheckCodePointRangeValidation(regionalFlagText, regionalFlagExpectedCount);
-  CheckCodePointSubRangeValidation(regionalFlagText, 1u, 3u);
+  CheckUtf32RangeValidation(regionalFlagText, regionalFlagExpectedCount, 10u);
+  CheckUtf32SubRangeValidation(regionalFlagText, 1u, 3u);
 
   // "A1️⃣B"
   // U+0041 U+0031 U+FE0F U+20E3 U+0042
-  // expected code point count: 5
+  // expected UTF-32 character count: 5
   const Dali::String keycapText("A"
                                 "1"
                                 "\xEF\xB8\x8F"
                                 "\xE2\x83\xA3"
                                 "B");
   const uint32_t keycapExpectedCount = 5u;
-  CheckCodePointRangeValidation(keycapText, keycapExpectedCount);
-  CheckCodePointSubRangeValidation(keycapText, 1u, 4u);
+  CheckUtf32RangeValidation(keycapText, keycapExpectedCount, 9u);
+  CheckUtf32SubRangeValidation(keycapText, 1u, 4u);
 
   // "AéB"
   // U+0041 U+0065 U+0301 U+0042
-  // expected code point count: 4
+  // expected UTF-32 character count: 4
   // Keep the middle character in decomposed form, not precomposed U+00E9.
   const Dali::String combiningMarkText("A"
                                        "e"
                                        "\xCC\x81"
                                        "B");
   const uint32_t combiningMarkExpectedCount = 4u;
-  CheckCodePointRangeValidation(combiningMarkText, combiningMarkExpectedCount);
-  CheckCodePointSubRangeValidation(combiningMarkText, 1u, 3u);
+  CheckUtf32RangeValidation(combiningMarkText, combiningMarkExpectedCount, 5u);
+  CheckUtf32SubRangeValidation(combiningMarkText, 1u, 3u);
 
   END_TEST;
 }
@@ -640,27 +940,34 @@ int UtcDaliStyledTextBuilderTextMutationAndSnapshotP(void)
   StyledTextBuilder builder = StyledTextBuilder::New("abc");
   ForegroundColorSpan         span    = ForegroundColorSpan::New(UiColor(Color::YELLOW));
 
+  DALI_TEST_EQUALS(builder.GetUtf32Length(), 3u, TEST_LOCATION);
   DALI_TEST_CHECK(builder.SetSpan(span, 0u, 1u));
-  builder.AppendText("def");
-  DALI_TEST_EQUALS(builder.GetText(), "abcdef", TEST_LOCATION);
+  builder.AppendText("가😀");
+  DALI_TEST_EQUALS(builder.GetText(), "abc가😀", TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetUtf32Length(), 5u, TEST_LOCATION);
   DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
   CheckRange(builder, 0u, 0u, 1u);
 
-  builder.SetText("xyz");
-  DALI_TEST_EQUALS(builder.GetText(), "xyz", TEST_LOCATION);
+  builder.SetText("가나다");
+  DALI_TEST_EQUALS(builder.GetText(), "가나다", TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetUtf32Length(), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(builder.GetSpanCount(), 0u, TEST_LOCATION);
 
   DALI_TEST_CHECK(builder.SetSpan(span, 0u, 3u));
   StyledText snapshot = builder.Build();
+  DALI_TEST_EQUALS(snapshot.GetUtf32Length(), 3u, TEST_LOCATION);
 
   builder.SetText("changed");
-  DALI_TEST_EQUALS(snapshot.GetText(), "xyz", TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetUtf32Length(), 7u, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.GetText(), "가나다", TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.GetUtf32Length(), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(snapshot.GetSpanCount(), 1u, TEST_LOCATION);
   CheckSpanIdentity(snapshot.GetSpanAt(0u), span);
   CheckRange(snapshot, 0u, 0u, 3u);
 
   StyledTextBuilder copyBuilder = StyledTextBuilder::FromStyledText(snapshot);
-  DALI_TEST_EQUALS(copyBuilder.GetText(), "xyz", TEST_LOCATION);
+  DALI_TEST_EQUALS(copyBuilder.GetText(), "가나다", TEST_LOCATION);
+  DALI_TEST_EQUALS(copyBuilder.GetUtf32Length(), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(copyBuilder.GetSpanCount(), 1u, TEST_LOCATION);
   CheckSpanIdentity(copyBuilder.GetSpanAt(0u), span);
   CheckRange(copyBuilder, 0u, 0u, 3u);
@@ -945,8 +1252,17 @@ int UtcDaliStyledTextFromMarkupUnicodeRangeP(void)
   StyledText styledText = StyledText::FromMarkup("<color value='red'>가😀B</color>");
 
   DALI_TEST_EQUALS(styledText.GetText(), "가😀B", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetUtf32Length(), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
   CheckRange(styledText, 0u, 0u, 3u);
+
+  StyledText entityText = StyledText::FromMarkup("<u>&lt;가😀</u>");
+
+  DALI_TEST_EQUALS(entityText.GetText(), "<가😀", TEST_LOCATION);
+  DALI_TEST_EQUALS(entityText.GetUtf32Length(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(entityText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(entityText, 0u, 0u, 3u);
+  DALI_TEST_CHECK(UnderlineSpan::DownCast(entityText.GetSpanAt(0u)));
 
   END_TEST;
 }

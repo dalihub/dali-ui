@@ -32,6 +32,7 @@
 #include <fstream>
 #include <functional>
 #include <iostream>
+#include <limits>
 #include <set>
 #include <sstream>
 #include <stdexcept>
@@ -721,19 +722,24 @@ std::string HtmlEscape(const std::string& text)
   return escaped;
 }
 
-uint32_t Utf32IndexFromUtf8ByteOffset(const std::string& text, size_t byteOffset)
+bool ConvertUtf8ByteRangeToUtf32Range(const std::string& text,
+                                       size_t             utf8StartIndex,
+                                       size_t             utf8EndIndex,
+                                       uint32_t&          utf32StartIndex,
+                                       uint32_t&          utf32EndIndex)
 {
-  const size_t limit = std::min(byteOffset, text.size());
-  uint32_t     index = 0u;
-  for(size_t byte = 0u; byte < limit; ++byte)
+  if(utf8StartIndex > utf8EndIndex ||
+     utf8EndIndex > text.size() ||
+     text.size() > std::numeric_limits<uint32_t>::max())
   {
-    const unsigned char character = static_cast<unsigned char>(text[byte]);
-    if((character & 0xC0u) != 0x80u)
-    {
-      ++index;
-    }
+    return false;
   }
-  return index;
+
+  return Text::Utf8ToUtf32Range(Dali::StringView(text.data(), static_cast<uint32_t>(text.size())),
+                                static_cast<uint32_t>(utf8StartIndex),
+                                static_cast<uint32_t>(utf8EndIndex),
+                                utf32StartIndex,
+                                utf32EndIndex);
 }
 
 void AppendUtf8(std::string& output, uint32_t codepoint)
@@ -2109,9 +2115,10 @@ private:
         break;
       }
 
-      const uint32_t startIndex = Utf32IndexFromUtf8ByteOffset(text, matchBegin);
-      const uint32_t endIndex   = Utf32IndexFromUtf8ByteOffset(text, matchBegin + matchSize);
-      if(startIndex < endIndex)
+      uint32_t startIndex = 0u;
+      uint32_t endIndex   = 0u;
+      if(ConvertUtf8ByteRangeToUtf32Range(text, matchBegin, matchBegin + matchSize, startIndex, endIndex) &&
+         startIndex < endIndex)
       {
         builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(0xB42318)), startIndex, endIndex);
       }

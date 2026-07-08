@@ -105,6 +105,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/text/text-utils.h>
 
 #include <dali-ui-foundation/public-api/visuals/border-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>

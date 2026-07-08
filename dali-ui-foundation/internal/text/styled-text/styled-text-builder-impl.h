@@ -48,12 +48,13 @@ public:
 
   void SetText(const Dali::String& text);
   void AppendText(const Dali::String& text);
-  bool SetSpan(const Dali::Ui::Text::Span& span, uint32_t startIndex, uint32_t endIndex);
+  bool SetSpan(const Dali::Ui::Text::Span& span, uint32_t utf32StartIndex, uint32_t utf32EndIndex);
   bool RemoveSpan(const Dali::Ui::Text::Span& span);
   bool RemoveSpanAt(uint32_t index);
   void ClearSpans();
 
   const Dali::String&  GetText() const;
+  uint32_t             GetUtf32Length() const;
   uint32_t             GetSpanCount() const;
   Dali::Ui::Text::Span GetSpanAt(uint32_t index) const;
   uint32_t             GetSpanStartIndexAt(uint32_t index) const;
@@ -70,6 +71,7 @@ private:
 private:
   Dali::String                mText;
   std::vector<SpanAttachment> mAttachments;
+  uint32_t                    mUtf32Length{0u};
   uint32_t                    mNextInsertionOrder{0u};
 };
 

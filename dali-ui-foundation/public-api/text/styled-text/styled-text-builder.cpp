@@ -43,6 +43,11 @@ Internal::Text::StyledText* GetImplementation(const StyledText& styledText)
 
 } // unnamed namespace
 
+StyledTextBuilder StyledTextBuilder::New()
+{
+  return New(Dali::String());
+}
+
 StyledTextBuilder StyledTextBuilder::New(const Dali::String& text)
 {
   return StyledTextBuilder(new Internal::Text::StyledTextBuilder(text));
@@ -69,9 +74,9 @@ void StyledTextBuilder::AppendText(const Dali::String& text)
   }
 }
 
-bool StyledTextBuilder::SetSpan(const Span& span, uint32_t startIndex, uint32_t endIndex)
+bool StyledTextBuilder::SetSpan(const Span& span, uint32_t utf32StartIndex, uint32_t utf32EndIndex)
 {
-  return *this ? GetImplementation(*this)->SetSpan(span, startIndex, endIndex) : false;
+  return *this ? GetImplementation(*this)->SetSpan(span, utf32StartIndex, utf32EndIndex) : false;
 }
 
 bool StyledTextBuilder::RemoveSpan(const Span& span)
@@ -95,6 +100,11 @@ void StyledTextBuilder::ClearSpans()
 Dali::String StyledTextBuilder::GetText() const
 {
   return *this ? GetImplementation(*this)->GetText() : Dali::String();
+}
+
+uint32_t StyledTextBuilder::GetUtf32Length() const
+{
+  return *this ? GetImplementation(*this)->GetUtf32Length() : 0u;
 }
 
 uint32_t StyledTextBuilder::GetSpanCount() const
@@ -125,7 +135,7 @@ StyledText StyledTextBuilder::Build() const
   }
 
   auto* impl = GetImplementation(*this);
-  return StyledText(new Internal::Text::StyledText(impl->GetText(), impl->GetAttachments()));
+  return StyledText(new Internal::Text::StyledText(impl->GetText(), impl->GetAttachments(), impl->GetUtf32Length()));
 }
 
 StyledTextBuilder::StyledTextBuilder(BaseObject* impl)

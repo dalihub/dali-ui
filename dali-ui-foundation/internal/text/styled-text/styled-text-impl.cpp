@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/text-utils.h>
+
 namespace Dali
 {
 namespace Ui
@@ -30,13 +33,22 @@ namespace Text
 StyledText::StyledText() = default;
 
 StyledText::StyledText(const Dali::String& text)
-: mText(text)
+: mText(text),
+  mUtf32Length(Dali::Ui::Text::Utf8ToUtf32Length(text))
 {
 }
 
 StyledText::StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments)
 : mText(text),
-  mAttachments(attachments)
+  mAttachments(attachments),
+  mUtf32Length(Dali::Ui::Text::Utf8ToUtf32Length(text))
+{
+}
+
+StyledText::StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments, uint32_t utf32Length)
+: mText(text),
+  mAttachments(attachments),
+  mUtf32Length(utf32Length)
 {
 }
 
@@ -45,6 +57,11 @@ StyledText::~StyledText() = default;
 const Dali::String& StyledText::GetText() const
 {
   return mText;
+}
+
+uint32_t StyledText::GetUtf32Length() const
+{
+  return mUtf32Length;
 }
 
 uint32_t StyledText::GetSpanCount() const
