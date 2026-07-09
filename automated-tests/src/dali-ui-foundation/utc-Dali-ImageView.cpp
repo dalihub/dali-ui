@@ -194,6 +194,25 @@ int UtcDaliImageViewSetGetImageColorP(void)
   END_TEST;
 }
 
+int UtcDaliImageViewImageColorTokenBindingP(void)
+{
+  UiTestApplication application;
+  UiColorManager    manager = UiColorManager::Get();
+  ImageView         view    = ImageView::New();
+  UiColor           tokenColor("ImageColorToken");
+  UiColor           bindingColor;
+
+  view.SetImageColor(tokenColor);
+  DALI_TEST_CHECK(manager.GetBindingColor(view, "ImageColor", bindingColor));
+  DALI_TEST_CHECK(bindingColor == tokenColor);
+  DALI_TEST_CHECK(view.GetImageColor() == tokenColor);
+
+  view.SetImageColor(UiColor(1.0f, 0.5f, 0.5f, 1.0f));
+  DALI_TEST_CHECK(!manager.GetBindingColor(view, "ImageColor", bindingColor));
+
+  END_TEST;
+}
+
 // PixelArea
 
 int UtcDaliImageViewSetGetPixelAreaP(void)

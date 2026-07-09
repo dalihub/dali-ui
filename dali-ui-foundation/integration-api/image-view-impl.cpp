@@ -611,22 +611,10 @@ Ui::Image::MaskingType ImageViewImpl::GetMaskingMode() const
 
 void ImageViewImpl::SetImageColor(const UiColor& color)
 {
-  if(mImageColor.GetRgba() != color.GetRgba())
+  if(mImageColor != color)
   {
     mImageColor = color;
-    // Update the mix color directly on the existing visual without a full rebuild.
-    if(mVisual)
-    {
-      Dali::Property::Map map;
-      map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, mImageColor.GetRgba());
-      mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
-    }
-    else
-    {
-      // Visual not yet created: defer to next OnMeasure pass
-      mVisualDirty = true;
-      InvalidateMeasure();
-    }
+    SetColorBinding("ImageColor", color, this, &ImageViewImpl::SetImageColorInternal);
   }
 }
 
@@ -811,6 +799,23 @@ void ImageViewImpl::OnViewResourceReady(Ui::View view)
 
   // Request a re-layout now that the natural size is known, so aspect-ratio adjustment applies.
   InvalidateMeasure();
+}
+
+void ImageViewImpl::SetImageColorInternal(const Vector4& color)
+{
+  // Update the mix color directly on the existing visual without a full rebuild.
+  if(mVisual)
+  {
+    Dali::Property::Map map;
+    map.Insert(Ui::VisualBasePropertyIndex::MIX_COLOR, color);
+    mVisual.DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
+  }
+  else
+  {
+    // Visual not yet created: defer to next OnMeasure pass
+    mVisualDirty = true;
+    InvalidateMeasure();
+  }
 }
 
 MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstraint)

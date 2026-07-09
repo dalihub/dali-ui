@@ -350,6 +350,13 @@ private: // Internal methods
    */
   void OnViewResourceReady(Ui::View view);
 
+  /**
+   * @brief Applies the resolved image color to the image visual.
+   *
+   * @param[in] color The resolved image color
+   */
+  void SetImageColorInternal(const Vector4& color);
+
 private:
   // Not copyable or movable
   ImageViewImpl(const ImageViewImpl&)            = delete;
