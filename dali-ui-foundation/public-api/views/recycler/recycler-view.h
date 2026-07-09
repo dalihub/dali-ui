@@ -19,6 +19,7 @@
 
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
+#include <dali-ui-foundation/public-api/views/recycler/item-decoration.h>
 #include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
 #include <dali-ui-foundation/public-api/views/scroll/edge-effect.h>
 #include <dali-ui-foundation/public-api/views/scroll/scrollable-enum.h>
@@ -57,9 +58,9 @@ public:
 
   static RecyclerView DownCast(BaseHandle handle);
 
-  void         SetAdapter(ItemAdapter& adapter);
-  ItemAdapter* GetAdapter() const;
-  void         ClearAdapter();
+  void        SetAdapter(ItemAdapter adapter);
+  ItemAdapter GetAdapter() const;
+  void        ClearAdapter();
 
   void          SetItemsLayouter(ItemsLayouter layouter);
   ItemsLayouter GetItemsLayouter() const;
@@ -103,6 +104,13 @@ public:
   bool  GetScrollOnFocus() const;
   void  SetFocusScrollPeek(float peek);
   float GetFocusScrollPeek() const;
+
+  // Item decoration — add overlay/background views around items.
+  // RecyclerView auto-removes the decoration when it is destroyed (via DestroyedSignal),
+  // so manual RemoveItemDecoration is optional. Adding the same decoration twice is a no-op
+  // (logged as an error). Do not destroy a decoration from inside its own callbacks.
+  void AddItemDecoration(ItemDecoration& decoration);
+  void RemoveItemDecoration(ItemDecoration& decoration);
 
 public: // Scroll state signals — match ScrollView API
   using ScrollStartedSignalType  = Signal<void(RecyclerView)>;

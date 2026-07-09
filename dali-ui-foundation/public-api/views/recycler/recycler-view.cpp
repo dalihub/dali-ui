@@ -97,12 +97,12 @@ RecyclerView::RecyclerView(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::RecyclerViewImpl>(internal);
 }
 
-void RecyclerView::SetAdapter(ItemAdapter& adapter)
+void RecyclerView::SetAdapter(ItemAdapter adapter)
 {
-  GetImpl(*this).SetAdapter(adapter);
+  GetImpl(*this).SetAdapter(std::move(adapter));
 }
 
-ItemAdapter* RecyclerView::GetAdapter() const
+ItemAdapter RecyclerView::GetAdapter() const
 {
   return GetImpl(*this).GetAdapter();
 }
@@ -255,6 +255,16 @@ void RecyclerView::SetFocusScrollPeek(float peek)
 float RecyclerView::GetFocusScrollPeek() const
 {
   return GetImpl(*this).GetFocusScrollPeek();
+}
+
+void RecyclerView::AddItemDecoration(ItemDecoration& decoration)
+{
+  GetImpl(*this).AddItemDecoration(decoration);
+}
+
+void RecyclerView::RemoveItemDecoration(ItemDecoration& decoration)
+{
+  GetImpl(*this).RemoveItemDecoration(decoration);
 }
 
 RecyclerView::ScrollStartedSignalType& RecyclerView::ScrollStartedSignal()

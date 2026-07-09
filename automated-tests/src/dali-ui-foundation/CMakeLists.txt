@@ -10,6 +10,7 @@ SET(TC_SOURCES
         utc-Dali-UiStyle.cpp
         utc-Dali-ScrollView.cpp
         utc-Dali-ScrollBar.cpp
+        utc-Dali-GroupAdapter.cpp
         utc-Dali-AnimatedImageVisual.cpp
         utc-Dali-BorderVisual.cpp
         utc-Dali-Unit.cpp

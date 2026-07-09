@@ -10,3 +10,4 @@ IF(NOT COMMAND DALI_ADD_SAMPLE)
 ENDIF()
 
 DALI_ADD_SAMPLE(recyclerview.example recyclerview-example.cpp)
+DALI_ADD_SAMPLE(recycler-group.example recycler-group-example.cpp)
