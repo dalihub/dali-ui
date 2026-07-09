@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/multi-language-helper-functions.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
+#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
@@ -151,6 +152,29 @@ int UtcDaliStyledTextApplierNoSpansP(void)
   DALI_TEST_EQUALS(result.text[0u], static_cast<PublicText::Character>('A'), TEST_LOCATION);
   DALI_TEST_EQUALS(result.text[1u], static_cast<PublicText::Character>('B'), TEST_LOCATION);
   DALI_TEST_EQUALS(result.text[2u], static_cast<PublicText::Character>('C'), TEST_LOCATION);
+  DALI_TEST_EQUALS(result.foregroundColorRuns.Count(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.backgroundColorRuns.Count(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.fontDescriptionRuns.Count(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.underlinedCharacterRuns.Count(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.strikethroughCharacterRuns.Count(), 0u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierAnnotationSpanNoOpP(void)
+{
+  UiTestApplication application;
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("Hello TV");
+  PublicText::AnnotationSpan    style   = PublicText::AnnotationSpan::New("style", "gradient");
+  PublicText::AnnotationSpan    role    = PublicText::AnnotationSpan::New("role", "link");
+
+  DALI_TEST_CHECK(builder.SetSpan(style, 6u, 8u));
+  DALI_TEST_CHECK(builder.SetSpan(role, 6u, 8u));
+
+  const auto result = StyledTextInternal::StyledTextApplier::BuildTextStyleRunResult(builder.Build(), 96.0f);
+
+  DALI_TEST_EQUALS(result.text.Count(), 8u, TEST_LOCATION);
   DALI_TEST_EQUALS(result.foregroundColorRuns.Count(), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(result.backgroundColorRuns.Count(), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(result.fontDescriptionRuns.Count(), 0u, TEST_LOCATION);

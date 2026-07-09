@@ -24,6 +24,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/span.h>
 
 namespace Dali
@@ -53,15 +54,20 @@ public:
   explicit StyledText(const Dali::String& text);
   StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments);
   StyledText(const Dali::String& text, const std::vector<SpanAttachment>& attachments, uint32_t utf32Length);
+  StyledText(const Dali::String& text, std::vector<SpanAttachment>&& attachments, uint32_t utf32Length);
   ~StyledText() override;
 
-  const Dali::String&  GetText() const;
-  uint32_t             GetUtf32Length() const;
-  uint32_t             GetSpanCount() const;
-  Dali::Ui::Text::Span GetSpanAt(uint32_t index) const;
-  uint32_t             GetSpanStartIndexAt(uint32_t index) const;
-  uint32_t             GetSpanEndIndexAt(uint32_t index) const;
-  bool                 IsEmpty() const;
+  const Dali::String&            GetText() const;
+  uint32_t                       GetUtf32Length() const;
+  uint32_t                       GetSpanCount() const;
+  Dali::Ui::Text::Span           GetSpanAt(uint32_t index) const;
+  uint32_t                       GetSpanStartIndexAt(uint32_t index) const;
+  uint32_t                       GetSpanEndIndexAt(uint32_t index) const;
+  uint32_t                       GetAnnotationCount() const;
+  Dali::Ui::Text::AnnotationSpan GetAnnotationAt(uint32_t index) const;
+  uint32_t                       GetAnnotationStartIndexAt(uint32_t index) const;
+  uint32_t                       GetAnnotationEndIndexAt(uint32_t index) const;
+  bool                           IsEmpty() const;
 
   const std::vector<SpanAttachment>& GetAttachments() const;
 
@@ -72,8 +78,12 @@ private:
   StyledText& operator=(StyledText&&)      = delete;
 
 private:
+  void BuildAnnotationIndices();
+
+private:
   Dali::String                mText;
   std::vector<SpanAttachment> mAttachments;
+  std::vector<uint32_t>       mAnnotationIndices;
   uint32_t                    mUtf32Length{0u};
 };
 

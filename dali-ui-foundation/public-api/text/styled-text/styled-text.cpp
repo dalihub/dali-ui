@@ -18,6 +18,9 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
+// EXTERNAL INCLUDES
+#include <utility>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/styled-text/markup-to-styled-text.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
@@ -46,7 +49,8 @@ StyledText StyledText::New(const Dali::String& text)
 
 StyledText StyledText::FromMarkup(const Dali::String& markup)
 {
-  return Internal::Text::MarkupToStyledText(markup, nullptr);
+  Internal::Text::StyledTextMarkupResult result = Internal::Text::ParseStyledTextMarkup(markup, nullptr);
+  return StyledText(new Internal::Text::StyledText(result.text, std::move(result.attachments), result.utf32Length));
 }
 
 Dali::String StyledText::GetText() const
@@ -77,6 +81,26 @@ uint32_t StyledText::GetSpanStartIndexAt(uint32_t index) const
 uint32_t StyledText::GetSpanEndIndexAt(uint32_t index) const
 {
   return *this ? GetImplementation(*this)->GetSpanEndIndexAt(index) : 0u;
+}
+
+uint32_t StyledText::GetAnnotationCount() const
+{
+  return *this ? GetImplementation(*this)->GetAnnotationCount() : 0u;
+}
+
+AnnotationSpan StyledText::GetAnnotationAt(uint32_t index) const
+{
+  return *this ? GetImplementation(*this)->GetAnnotationAt(index) : AnnotationSpan();
+}
+
+uint32_t StyledText::GetAnnotationStartIndexAt(uint32_t index) const
+{
+  return *this ? GetImplementation(*this)->GetAnnotationStartIndexAt(index) : 0u;
+}
+
+uint32_t StyledText::GetAnnotationEndIndexAt(uint32_t index) const
+{
+  return *this ? GetImplementation(*this)->GetAnnotationEndIndexAt(index) : 0u;
 }
 
 bool StyledText::IsEmpty() const

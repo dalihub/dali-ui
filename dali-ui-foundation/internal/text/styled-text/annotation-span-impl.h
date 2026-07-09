@@ -19,12 +19,9 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
-#include <cstdint>
-#include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
-#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
+#include <dali-ui-foundation/internal/text/styled-text/span-impl.h>
 
 namespace Dali
 {
@@ -35,22 +32,22 @@ namespace Internal
 namespace Text
 {
 
-struct MarkupParseInfo
+/**
+ * @brief Implementation for annotation span payloads.
+ */
+class AnnotationSpan : public Span
 {
-  uint32_t unsupportedTagCount{0u};
-  uint32_t malformedTagCount{0u};
-  uint32_t invalidAttributeCount{0u};
-};
+public:
+  AnnotationSpan(const Dali::String& key, const Dali::String& value);
+  ~AnnotationSpan() override;
 
-struct StyledTextMarkupResult
-{
-  Dali::String                text;
-  std::vector<SpanAttachment> attachments;
-  uint32_t                    utf32Length{0u};
-};
+  const Dali::String& GetKey() const;
+  const Dali::String& GetValue() const;
 
-StyledTextMarkupResult     ParseStyledTextMarkup(const Dali::String& markup, MarkupParseInfo* info = nullptr);
-Dali::Ui::Text::StyledText MarkupToStyledText(const Dali::String& markup, MarkupParseInfo* info = nullptr);
+private:
+  Dali::String mKey;
+  Dali::String mValue;
+};
 
 } // namespace Text
 } // namespace Internal

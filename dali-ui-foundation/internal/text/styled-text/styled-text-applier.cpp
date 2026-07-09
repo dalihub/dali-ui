@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
@@ -453,6 +454,10 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
 
   for(const auto& attachment : attachments)
   {
+    if(Dali::Ui::Text::AnnotationSpan::DownCast(attachment.span))
+    {
+      continue;
+    }
     if(Dali::Ui::Text::ForegroundColorSpan::DownCast(attachment.span))
     {
       orderedForegroundColorAttachments.push_back(&attachment);

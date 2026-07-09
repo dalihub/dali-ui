@@ -8,4 +8,4 @@ msgid "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_TITLE"
 msgstr "Midday brief"
 
 msgid "IDS_TEXT_GRADIENT_LOCALIZATION_CARD_DESCRIPTION"
-msgstr "<color value='#4B5563'>Today</color> the weather is clear <color value='#4B5563'>and it is a great day for exercise.</color>"
+msgstr "<annotation style='muted'>Today</annotation> the weather is clear <annotation style='muted'>and it is a great day for exercise.</annotation>"

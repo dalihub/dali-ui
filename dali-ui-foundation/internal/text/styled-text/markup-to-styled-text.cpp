@@ -39,6 +39,7 @@
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/xhtml-entities.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
@@ -69,6 +70,7 @@ enum class TagType
   STRIKETHROUGH,
   BACKGROUND,
   ANCHOR,
+  ANNOTATION,
 };
 
 struct Attribute
@@ -96,6 +98,7 @@ struct OpenTag
   Dali::Ui::Text::Underline        underline;
   Dali::Ui::Text::LineThrough      lineThrough;
   Dali::Ui::Text::AnchorAttributes anchorAttributes;
+  std::vector<Attribute>           annotationAttributes;
 };
 
 struct CompletedSpan
@@ -104,6 +107,7 @@ struct CompletedSpan
   uint32_t             startIndex{0u};
   uint32_t             endIndex{0u};
   uint32_t             openOrder{0u};
+  uint32_t             attributeOrder{0u};
 };
 
 bool IsAsciiAlpha(char c)
@@ -463,6 +467,10 @@ TagType GetTagType(const std::string& name)
   if(name == MarkupTag::ANCHOR)
   {
     return TagType::ANCHOR;
+  }
+  if(name == "annotation")
+  {
+    return TagType::ANNOTATION;
   }
   if((name == MarkupTag::PARAGRAPH) || (name == MarkupTag::EMBEDDED_ITEM) ||
      (name == MarkupTag::SPAN) || (name == MarkupTag::CHARACTER_SPACING))
@@ -930,6 +938,12 @@ bool BuildAnchorOpenTag(const ParsedTag& parsedTag, OpenTag& openTag, MarkupPars
   return true;
 }
 
+bool BuildAnnotationOpenTag(const ParsedTag& parsedTag, OpenTag& openTag)
+{
+  openTag.annotationAttributes = parsedTag.attributes;
+  return !openTag.annotationAttributes.empty();
+}
+
 class MarkupParser
 {
 public:
@@ -939,7 +953,7 @@ public:
   {
   }
 
-  Dali::Ui::Text::StyledText Parse()
+  StyledTextMarkupResult Parse()
   {
     for(std::size_t index = 0u; index < mInput.size();)
     {
@@ -959,7 +973,7 @@ public:
     }
 
     CompleteOpenTagsAtEndOfFile();
-    return BuildStyledText();
+    return BuildResult();
   }
 
 private:
@@ -1066,6 +1080,10 @@ private:
       {
         return BuildAnchorOpenTag(parsedTag, openTag, mInfo);
       }
+      case TagType::ANNOTATION:
+      {
+        return BuildAnnotationOpenTag(parsedTag, openTag);
+      }
       case TagType::UNKNOWN:
       case TagType::UNSUPPORTED:
       {
@@ -1153,13 +1171,33 @@ private:
       return;
     }
 
+    if(openTag.type == TagType::ANNOTATION)
+    {
+      CompleteAnnotationOpenTag(openTag, endIndex);
+      return;
+    }
+
     Dali::Ui::Text::Span span = CreateSpan(openTag);
     if(!span)
     {
       return;
     }
 
-    mCompletedSpans.push_back({span, openTag.startIndex, endIndex, openTag.openOrder});
+    mCompletedSpans.push_back({span, openTag.startIndex, endIndex, openTag.openOrder, 0u});
+  }
+
+  void CompleteAnnotationOpenTag(const OpenTag& openTag, uint32_t endIndex)
+  {
+    for(uint32_t attributeIndex = 0u; attributeIndex < openTag.annotationAttributes.size(); ++attributeIndex)
+    {
+      const Attribute& attribute = openTag.annotationAttributes[attributeIndex];
+
+      Dali::Ui::Text::Span span = Dali::Ui::Text::AnnotationSpan::New(Dali::String(attribute.name.c_str()), Dali::String(attribute.value.c_str()));
+      if(span)
+      {
+        mCompletedSpans.push_back({span, openTag.startIndex, endIndex, openTag.openOrder, attributeIndex});
+      }
+    }
   }
 
   Dali::Ui::Text::Span CreateSpan(const OpenTag& openTag) const
@@ -1192,6 +1230,10 @@ private:
       {
         return Dali::Ui::Text::AnchorSpan::New(openTag.anchorAttributes);
       }
+      case TagType::ANNOTATION:
+      {
+        return Dali::Ui::Text::Span();
+      }
       case TagType::UNKNOWN:
       case TagType::UNSUPPORTED:
       {
@@ -1202,21 +1244,34 @@ private:
     return Dali::Ui::Text::Span();
   }
 
-  Dali::Ui::Text::StyledText BuildStyledText()
+  StyledTextMarkupResult BuildResult()
   {
-    Dali::Ui::Text::StyledTextBuilder builder = Dali::Ui::Text::StyledTextBuilder::New(Dali::String(mPlainText.c_str()));
-
     std::sort(mCompletedSpans.begin(), mCompletedSpans.end(), [](const CompletedSpan& lhs, const CompletedSpan& rhs)
     {
-      return lhs.openOrder < rhs.openOrder;
+      if(lhs.openOrder != rhs.openOrder)
+      {
+        return lhs.openOrder < rhs.openOrder;
+      }
+      return lhs.attributeOrder < rhs.attributeOrder;
     });
 
+    StyledTextMarkupResult result;
+    result.text        = Dali::String(mPlainText.c_str());
+    result.utf32Length = mPlainIndex;
+    result.attachments.reserve(mCompletedSpans.size());
+
+    uint32_t insertionOrder = 0u;
     for(const auto& completedSpan : mCompletedSpans)
     {
-      builder.SetSpan(completedSpan.span, completedSpan.startIndex, completedSpan.endIndex);
+      if(!completedSpan.span || completedSpan.startIndex >= completedSpan.endIndex)
+      {
+        continue;
+      }
+
+      result.attachments.push_back({completedSpan.span, completedSpan.startIndex, completedSpan.endIndex, insertionOrder++});
     }
 
-    return builder.Build();
+    return result;
   }
 
 private:
@@ -1231,10 +1286,22 @@ private:
 
 } // unnamed namespace
 
-Dali::Ui::Text::StyledText MarkupToStyledText(const Dali::String& markup, MarkupParseInfo* info)
+StyledTextMarkupResult ParseStyledTextMarkup(const Dali::String& markup, MarkupParseInfo* info)
 {
   MarkupParser parser(markup, info);
   return parser.Parse();
+}
+
+Dali::Ui::Text::StyledText MarkupToStyledText(const Dali::String& markup, MarkupParseInfo* info)
+{
+  StyledTextMarkupResult result = ParseStyledTextMarkup(markup, info);
+
+  Dali::Ui::Text::StyledTextBuilder builder = Dali::Ui::Text::StyledTextBuilder::New(result.text);
+  for(const auto& attachment : result.attachments)
+  {
+    builder.SetSpan(attachment.span, attachment.startIndex, attachment.endIndex);
+  }
+  return builder.Build();
 }
 
 } // namespace Text

@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/internal/text/styled-text/markup-to-styled-text.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
@@ -482,6 +483,49 @@ int UtcDaliMarkupToStyledTextAnchorPolicyP(void)
   DALI_TEST_EQUALS(emptyHrefText.GetSpanCount(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(PublicText::AnchorSpan::DownCast(emptyHrefText.GetSpanAt(0u)).GetAnchorAttributes().GetHref(), "", TEST_LOCATION);
   CheckInfo(emptyHrefInfo, 0u, 0u, 0u);
+
+  END_TEST;
+}
+
+int UtcDaliMarkupToStyledTextAnnotationPolicyP(void)
+{
+  UiTestApplication application;
+
+  StyledTextInternal::MarkupParseInfo info;
+  PublicText::StyledText styledText = Parse("<annotation style='gradient' role='link'>hello world</annotation>", info);
+
+  DALI_TEST_EQUALS(styledText.GetText(), "hello world", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationCount(), 2u, TEST_LOCATION);
+  CheckRange(styledText, 0u, 0u, 11u);
+  CheckRange(styledText, 1u, 0u, 11u);
+
+  PublicText::AnnotationSpan style = PublicText::AnnotationSpan::DownCast(styledText.GetSpanAt(0u));
+  PublicText::AnnotationSpan role  = PublicText::AnnotationSpan::DownCast(styledText.GetSpanAt(1u));
+  DALI_TEST_CHECK(style);
+  DALI_TEST_CHECK(role);
+  DALI_TEST_EQUALS(style.GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetValue(), "gradient", TEST_LOCATION);
+  DALI_TEST_EQUALS(role.GetKey(), "role", TEST_LOCATION);
+  DALI_TEST_EQUALS(role.GetValue(), "link", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationAt(0u).GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationAt(1u).GetKey(), "role", TEST_LOCATION);
+  CheckInfo(info, 0u, 0u, 0u);
+
+  StyledTextInternal::MarkupParseInfo valueInfo;
+  PublicText::StyledText valueText = Parse("<annotation value='semantic'>x</annotation>", valueInfo);
+  DALI_TEST_EQUALS(valueText.GetText(), "x", TEST_LOCATION);
+  DALI_TEST_EQUALS(valueText.GetAnnotationCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(valueText.GetAnnotationAt(0u).GetKey(), "value", TEST_LOCATION);
+  DALI_TEST_EQUALS(valueText.GetAnnotationAt(0u).GetValue(), "semantic", TEST_LOCATION);
+  CheckInfo(valueInfo, 0u, 0u, 0u);
+
+  StyledTextInternal::MarkupParseInfo noAttributeInfo;
+  PublicText::StyledText noAttributeText = Parse("<annotation>plain</annotation>", noAttributeInfo);
+  DALI_TEST_EQUALS(noAttributeText.GetText(), "plain", TEST_LOCATION);
+  DALI_TEST_EQUALS(noAttributeText.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(noAttributeText.GetAnnotationCount(), 0u, TEST_LOCATION);
+  CheckInfo(noAttributeInfo, 0u, 0u, 0u);
 
   END_TEST;
 }

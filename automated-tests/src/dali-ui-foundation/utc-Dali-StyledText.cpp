@@ -1041,6 +1041,349 @@ int UtcDaliStyledTextBuilderFromStyledTextPreservesAnchorSpanP(void)
   END_TEST;
 }
 
+int UtcDaliStyledTextBuilderPushPopSpanP(void)
+{
+  UiTestApplication application;
+
+  StyledTextBuilder builder = StyledTextBuilder::New();
+  DALI_TEST_EQUALS(builder.PushSpan(Span()), StyledTextBuilder::INVALID_SPAN_TOKEN, TEST_LOCATION);
+  DALI_TEST_CHECK(!builder.PopSpan());
+  DALI_TEST_CHECK(!builder.PopSpan(StyledTextBuilder::INVALID_SPAN_TOKEN));
+
+  ForegroundColorSpan redSpan   = ForegroundColorSpan::New(UiColor(Color::RED));
+  ForegroundColorSpan blueSpan  = ForegroundColorSpan::New(UiColor(Color::BLUE));
+  ForegroundColorSpan greenSpan = ForegroundColorSpan::New(UiColor(Color::GREEN));
+
+  StyledTextBuilder otherBuilder = StyledTextBuilder::New();
+  otherBuilder.PushSpan(ForegroundColorSpan::New(UiColor(Color::YELLOW)));
+  const uint32_t otherToken = otherBuilder.PushSpan(ForegroundColorSpan::New(UiColor(Color::MAGENTA)));
+
+  builder.AppendText("A");
+  const uint32_t redToken = builder.PushSpan(redSpan);
+  DALI_TEST_CHECK(redToken != StyledTextBuilder::INVALID_SPAN_TOKEN);
+  builder.AppendText("B");
+  const uint32_t blueToken = builder.PushSpan(blueSpan);
+  DALI_TEST_CHECK(blueToken != StyledTextBuilder::INVALID_SPAN_TOKEN);
+  builder.AppendText("C");
+  const uint32_t greenToken = builder.PushSpan(greenSpan);
+  DALI_TEST_CHECK(greenToken != StyledTextBuilder::INVALID_SPAN_TOKEN);
+  builder.AppendText("D");
+
+  DALI_TEST_CHECK(builder.PopSpan(blueToken));
+  DALI_TEST_CHECK(!builder.PopSpan(blueToken));
+  DALI_TEST_CHECK(!builder.PopSpan(greenToken));
+  DALI_TEST_CHECK(!builder.PopSpan(otherToken));
+  DALI_TEST_EQUALS(builder.GetSpanCount(), 2u, TEST_LOCATION);
+
+  CheckSpanIdentity(builder.GetSpanAt(0u), blueSpan);
+  CheckRange(builder, 0u, 2u, 4u);
+  CheckSpanIdentity(builder.GetSpanAt(1u), greenSpan);
+  CheckRange(builder, 1u, 3u, 4u);
+
+  builder.AppendText("E");
+  DALI_TEST_CHECK(builder.PopSpan(redToken));
+  DALI_TEST_EQUALS(builder.GetSpanCount(), 3u, TEST_LOCATION);
+  CheckSpanIdentity(builder.GetSpanAt(0u), redSpan);
+  CheckRange(builder, 0u, 1u, 5u);
+  CheckSpanIdentity(builder.GetSpanAt(1u), blueSpan);
+  CheckSpanIdentity(builder.GetSpanAt(2u), greenSpan);
+
+  StyledTextBuilder latestBuilder = StyledTextBuilder::New();
+  latestBuilder.AppendText("A");
+  const uint32_t latestRedToken = latestBuilder.PushSpan(redSpan);
+  latestBuilder.AppendText("B");
+  const uint32_t latestBlueToken = latestBuilder.PushSpan(blueSpan);
+  latestBuilder.AppendText("C");
+
+  DALI_TEST_CHECK(latestBuilder.PopSpan());
+  DALI_TEST_CHECK(!latestBuilder.PopSpan(latestBlueToken));
+  DALI_TEST_EQUALS(latestBuilder.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckSpanIdentity(latestBuilder.GetSpanAt(0u), blueSpan);
+  CheckRange(latestBuilder, 0u, 2u, 3u);
+  DALI_TEST_CHECK(latestBuilder.PopSpan(latestRedToken));
+  DALI_TEST_EQUALS(latestBuilder.GetSpanCount(), 2u, TEST_LOCATION);
+  CheckSpanIdentity(latestBuilder.GetSpanAt(0u), redSpan);
+  CheckRange(latestBuilder, 0u, 1u, 3u);
+  CheckSpanIdentity(latestBuilder.GetSpanAt(1u), blueSpan);
+  CheckRange(latestBuilder, 1u, 2u, 3u);
+
+  StyledTextBuilder emptyRangeBuilder = StyledTextBuilder::New("A");
+  const uint32_t     emptyRangeToken  = emptyRangeBuilder.PushSpan(redSpan);
+  DALI_TEST_CHECK(emptyRangeBuilder.PopSpan(emptyRangeToken));
+  DALI_TEST_EQUALS(emptyRangeBuilder.GetSpanCount(), 0u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextBuilderBuildDoesNotCloseOpenSpansP(void)
+{
+  UiTestApplication application;
+
+  AnnotationSpan    annotation = AnnotationSpan::New("style", "gradient");
+  StyledTextBuilder builder    = StyledTextBuilder::New();
+  builder.AppendText("Hello ");
+
+  const uint32_t token = builder.PushSpan(annotation);
+  DALI_TEST_CHECK(token != StyledTextBuilder::INVALID_SPAN_TOKEN);
+  builder.AppendText("TV");
+
+  StyledText styledText = builder.Build();
+  DALI_TEST_EQUALS(styledText.GetText(), "Hello TV", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationCount(), 1u, TEST_LOCATION);
+  CheckSpanIdentity(styledText.GetSpanAt(0u), annotation);
+  CheckRange(styledText, 0u, 6u, 8u);
+  CheckSpanIdentity(styledText.GetAnnotationAt(0u), annotation);
+  DALI_TEST_EQUALS(styledText.GetAnnotationStartIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationEndIndexAt(0u), 8u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationAt(0u).GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationAt(0u).GetValue(), "gradient", TEST_LOCATION);
+
+  DALI_TEST_EQUALS(builder.GetSpanCount(), 0u, TEST_LOCATION);
+  builder.AppendText(" Pro");
+
+  StyledText secondBuild = builder.Build();
+  DALI_TEST_EQUALS(secondBuild.GetText(), "Hello TV Pro", TEST_LOCATION);
+  DALI_TEST_EQUALS(secondBuild.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondBuild.GetAnnotationCount(), 1u, TEST_LOCATION);
+  CheckSpanIdentity(secondBuild.GetAnnotationAt(0u), annotation);
+  DALI_TEST_EQUALS(secondBuild.GetAnnotationStartIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondBuild.GetAnnotationEndIndexAt(0u), 12u, TEST_LOCATION);
+
+  DALI_TEST_CHECK(builder.PopSpan(token));
+  DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckSpanIdentity(builder.GetAnnotationAt(0u), annotation);
+  DALI_TEST_EQUALS(builder.GetAnnotationStartIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetAnnotationEndIndexAt(0u), 12u, TEST_LOCATION);
+  DALI_TEST_CHECK(!builder.PopSpan(token));
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextAnnotationSpanIntegrationP(void)
+{
+  UiTestApplication application;
+
+  StyledTextBuilder builder = StyledTextBuilder::New("Hello TV");
+  ForegroundColorSpan foreground = ForegroundColorSpan::New(UiColor(Color::RED));
+  AnnotationSpan firstAnnotation = AnnotationSpan::New("content-type", "brand");
+  AnnotationSpan secondAnnotation = AnnotationSpan::New("tone", "greeting");
+
+  DALI_TEST_CHECK(builder.SetSpan(foreground, 0u, 5u));
+  DALI_TEST_CHECK(builder.SetSpan(firstAnnotation, 6u, 8u));
+  DALI_TEST_CHECK(builder.SetSpan(secondAnnotation, 0u, 5u));
+  DALI_TEST_EQUALS(firstAnnotation.GetKey(), "content-type", TEST_LOCATION);
+  DALI_TEST_EQUALS(firstAnnotation.GetValue(), "brand", TEST_LOCATION);
+
+  DALI_TEST_EQUALS(builder.GetSpanCount(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetAnnotationCount(), 2u, TEST_LOCATION);
+  CheckSpanIdentity(builder.GetSpanAt(1u), firstAnnotation);
+  CheckSpanIdentity(builder.GetAnnotationAt(0u), firstAnnotation);
+  DALI_TEST_EQUALS(builder.GetAnnotationStartIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetAnnotationEndIndexAt(0u), 8u, TEST_LOCATION);
+  CheckSpanIdentity(builder.GetAnnotationAt(1u), secondAnnotation);
+  DALI_TEST_EQUALS(builder.GetAnnotationStartIndexAt(1u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetAnnotationEndIndexAt(1u), 5u, TEST_LOCATION);
+
+  DALI_TEST_CHECK(!builder.GetAnnotationAt(2u));
+  DALI_TEST_EQUALS(builder.GetAnnotationStartIndexAt(2u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetAnnotationEndIndexAt(2u), 0u, TEST_LOCATION);
+
+  StyledText styledText = builder.Build();
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationCount(), 2u, TEST_LOCATION);
+  CheckSpanIdentity(styledText.GetSpanAt(1u), firstAnnotation);
+  CheckSpanIdentity(styledText.GetAnnotationAt(0u), firstAnnotation);
+  DALI_TEST_EQUALS(styledText.GetAnnotationStartIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationEndIndexAt(0u), 8u, TEST_LOCATION);
+
+  StyledTextBuilder copyBuilder = StyledTextBuilder::FromStyledText(styledText);
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationCount(), 2u, TEST_LOCATION);
+  CheckSpanIdentity(copyBuilder.GetAnnotationAt(0u), firstAnnotation);
+
+  DALI_TEST_CHECK(copyBuilder.RemoveSpan(firstAnnotation));
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationCount(), 1u, TEST_LOCATION);
+  CheckSpanIdentity(copyBuilder.GetAnnotationAt(0u), secondAnnotation);
+
+  DALI_TEST_CHECK(copyBuilder.RemoveSpanAt(1u));
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationCount(), 0u, TEST_LOCATION);
+
+  DALI_TEST_CHECK(copyBuilder.SetSpan(firstAnnotation, 6u, 8u));
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationStartIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationEndIndexAt(0u), 8u, TEST_LOCATION);
+
+  DALI_TEST_CHECK(copyBuilder.SetSpan(firstAnnotation, 0u, 5u));
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationEndIndexAt(0u), 5u, TEST_LOCATION);
+
+  copyBuilder.ClearSpans();
+  DALI_TEST_EQUALS(copyBuilder.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(copyBuilder.GetAnnotationCount(), 0u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextBuilderAnnotationCacheUpdateP(void)
+{
+  UiTestApplication application;
+
+  StyledTextBuilder resolveBuilder = StyledTextBuilder::FromMarkup(
+    "<annotation style='muted'>Muted</annotation> "
+    "<annotation style='accent'>Accent</annotation>");
+
+  const uint32_t annotationCount = resolveBuilder.GetAnnotationCount();
+  DALI_TEST_EQUALS(annotationCount, 2u, TEST_LOCATION);
+
+  for(uint32_t index = 0u; index < annotationCount; ++index)
+  {
+    AnnotationSpan annotation = resolveBuilder.GetAnnotationAt(index);
+    const uint32_t startIndex = resolveBuilder.GetAnnotationStartIndexAt(index);
+    const uint32_t endIndex   = resolveBuilder.GetAnnotationEndIndexAt(index);
+
+    if(annotation.GetKey() == "style")
+    {
+      if(annotation.GetValue() == "muted")
+      {
+        DALI_TEST_CHECK(resolveBuilder.SetSpan(ForegroundColorSpan::New(UiColor(Color::RED)), startIndex, endIndex));
+      }
+      else if(annotation.GetValue() == "accent")
+      {
+        DALI_TEST_CHECK(resolveBuilder.SetSpan(ForegroundColorSpan::New(UiColor(Color::BLUE)), startIndex, endIndex));
+      }
+    }
+  }
+
+  DALI_TEST_EQUALS(resolveBuilder.GetAnnotationCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(resolveBuilder.GetAnnotationAt(0u).GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(resolveBuilder.GetAnnotationAt(0u).GetValue(), "muted", TEST_LOCATION);
+  DALI_TEST_EQUALS(resolveBuilder.GetAnnotationAt(1u).GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(resolveBuilder.GetAnnotationAt(1u).GetValue(), "accent", TEST_LOCATION);
+
+  StyledText resolvedText = resolveBuilder.Build();
+  DALI_TEST_EQUALS(resolvedText.GetAnnotationCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(resolvedText.GetSpanCount() >= 4u);
+
+  StyledTextBuilder rangeBuilder = StyledTextBuilder::New("Hello TV Pro");
+  AnnotationSpan    annotation   = AnnotationSpan::New("style", "muted");
+
+  DALI_TEST_CHECK(rangeBuilder.SetSpan(annotation, 0u, 5u));
+  DALI_TEST_EQUALS(rangeBuilder.GetAnnotationCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeBuilder.GetAnnotationStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeBuilder.GetAnnotationEndIndexAt(0u), 5u, TEST_LOCATION);
+
+  DALI_TEST_CHECK(rangeBuilder.SetSpan(annotation, 6u, 8u));
+  DALI_TEST_EQUALS(rangeBuilder.GetAnnotationCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeBuilder.GetAnnotationStartIndexAt(0u), 6u, TEST_LOCATION);
+  DALI_TEST_EQUALS(rangeBuilder.GetAnnotationEndIndexAt(0u), 8u, TEST_LOCATION);
+
+  StyledTextBuilder removeBuilder = StyledTextBuilder::New("Hello TV");
+  ForegroundColorSpan foreground  = ForegroundColorSpan::New(UiColor(Color::RED));
+  AnnotationSpan      first       = AnnotationSpan::New("style", "first");
+  AnnotationSpan      second      = AnnotationSpan::New("style", "second");
+
+  DALI_TEST_CHECK(removeBuilder.SetSpan(foreground, 0u, 5u));
+  DALI_TEST_CHECK(removeBuilder.SetSpan(first, 0u, 5u));
+  DALI_TEST_CHECK(removeBuilder.SetSpan(second, 6u, 8u));
+  DALI_TEST_EQUALS(removeBuilder.GetAnnotationCount(), 2u, TEST_LOCATION);
+
+  DALI_TEST_CHECK(removeBuilder.RemoveSpan(foreground));
+
+  DALI_TEST_EQUALS(removeBuilder.GetAnnotationCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(removeBuilder.GetAnnotationAt(0u).GetValue(), "first", TEST_LOCATION);
+  DALI_TEST_EQUALS(removeBuilder.GetAnnotationAt(1u).GetValue(), "second", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextBuilderFromMarkupP(void)
+{
+  UiTestApplication application;
+
+  StyledTextBuilder colorBuilder = StyledTextBuilder::FromMarkup("<color value='red'>가😀B</color>");
+
+  DALI_TEST_EQUALS(colorBuilder.GetText(), "가😀B", TEST_LOCATION);
+  DALI_TEST_EQUALS(colorBuilder.GetUtf32Length(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(colorBuilder.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(colorBuilder, 0u, 0u, 3u);
+  DALI_TEST_CHECK(ForegroundColorSpan::DownCast(colorBuilder.GetSpanAt(0u)));
+
+  StyledTextBuilder annotationBuilder = StyledTextBuilder::FromMarkup("<annotation style='gradient' role='link'>hello world</annotation>");
+
+  DALI_TEST_EQUALS(annotationBuilder.GetText(), "hello world", TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetSpanCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationAt(0u).GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationAt(0u).GetValue(), "gradient", TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationAt(1u).GetKey(), "role", TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationAt(1u).GetValue(), "link", TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationEndIndexAt(0u), 11u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationStartIndexAt(1u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationBuilder.GetAnnotationEndIndexAt(1u), 11u, TEST_LOCATION);
+  DALI_TEST_CHECK(AnnotationSpan::DownCast(annotationBuilder.GetSpanAt(0u)));
+  DALI_TEST_CHECK(AnnotationSpan::DownCast(annotationBuilder.GetSpanAt(1u)));
+
+  StyledTextBuilder mutableBuilder = StyledTextBuilder::FromMarkup("<u>Hello</u>");
+  DALI_TEST_CHECK(!mutableBuilder.PopSpan());
+
+  ForegroundColorSpan foreground = ForegroundColorSpan::New(UiColor(Color::RED));
+  DALI_TEST_CHECK(mutableBuilder.SetSpan(foreground, 0u, 5u));
+
+  StyledText mutableText = mutableBuilder.Build();
+  DALI_TEST_EQUALS(mutableText.GetText(), "Hello", TEST_LOCATION);
+  DALI_TEST_EQUALS(mutableText.GetSpanCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(UnderlineSpan::DownCast(mutableText.GetSpanAt(0u)));
+  CheckSpanIdentity(mutableText.GetSpanAt(1u), foreground);
+
+  StyledTextBuilder noAttributeBuilder = StyledTextBuilder::FromMarkup("<annotation>plain</annotation>");
+
+  DALI_TEST_EQUALS(noAttributeBuilder.GetText(), "plain", TEST_LOCATION);
+  DALI_TEST_EQUALS(noAttributeBuilder.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(noAttributeBuilder.GetAnnotationCount(), 0u, TEST_LOCATION);
+
+  StyledText emptyAnnotation = StyledText::FromMarkup("<annotation style='muted'></annotation>");
+  DALI_TEST_EQUALS(emptyAnnotation.GetText(), "", TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyAnnotation.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyAnnotation.GetAnnotationCount(), 0u, TEST_LOCATION);
+
+  StyledText emptyColor = StyledText::FromMarkup("<color value='red'></color>");
+  DALI_TEST_EQUALS(emptyColor.GetText(), "", TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyColor.GetSpanCount(), 0u, TEST_LOCATION);
+
+  StyledText emptyUnderline = StyledText::FromMarkup("<u></u>");
+  DALI_TEST_EQUALS(emptyUnderline.GetText(), "", TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyUnderline.GetSpanCount(), 0u, TEST_LOCATION);
+
+  StyledTextBuilder emptyBuilder = StyledTextBuilder::FromMarkup("<annotation style='muted'></annotation>");
+  DALI_TEST_EQUALS(emptyBuilder.GetText(), "", TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyBuilder.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyBuilder.GetAnnotationCount(), 0u, TEST_LOCATION);
+
+  StyledText emptyAnnotationThenText = StyledText::FromMarkup("<annotation style='muted'></annotation>plain");
+  DALI_TEST_EQUALS(emptyAnnotationThenText.GetText(), "plain", TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyAnnotationThenText.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(emptyAnnotationThenText.GetAnnotationCount(), 0u, TEST_LOCATION);
+
+  const char* equivalenceMarkup = "<annotation style='gradient' role='link'>hello world</annotation>";
+  StyledText styledText = StyledText::FromMarkup(equivalenceMarkup);
+  StyledText builderText = StyledTextBuilder::FromMarkup(equivalenceMarkup).Build();
+
+  DALI_TEST_EQUALS(builderText.GetText(), styledText.GetText(), TEST_LOCATION);
+  DALI_TEST_EQUALS(builderText.GetSpanCount(), styledText.GetSpanCount(), TEST_LOCATION);
+  DALI_TEST_EQUALS(builderText.GetAnnotationCount(), styledText.GetAnnotationCount(), TEST_LOCATION);
+  for(uint32_t index = 0u; index < styledText.GetAnnotationCount(); ++index)
+  {
+    DALI_TEST_EQUALS(builderText.GetAnnotationAt(index).GetKey(), styledText.GetAnnotationAt(index).GetKey(), TEST_LOCATION);
+    DALI_TEST_EQUALS(builderText.GetAnnotationAt(index).GetValue(), styledText.GetAnnotationAt(index).GetValue(), TEST_LOCATION);
+    DALI_TEST_EQUALS(builderText.GetAnnotationStartIndexAt(index), styledText.GetAnnotationStartIndexAt(index), TEST_LOCATION);
+    DALI_TEST_EQUALS(builderText.GetAnnotationEndIndexAt(index), styledText.GetAnnotationEndIndexAt(index), TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
 int UtcDaliStyledTextFromMarkupColorP(void)
 {
   UiTestApplication application;
@@ -1055,6 +1398,84 @@ int UtcDaliStyledTextFromMarkupColorP(void)
   ForegroundColorSpan span = ForegroundColorSpan::DownCast(styledText.GetSpanAt(0u));
   DALI_TEST_CHECK(span);
   DALI_TEST_EQUALS(span.GetColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextFromMarkupAnnotationP(void)
+{
+  UiTestApplication application;
+
+  StyledText styledText = StyledText::FromMarkup("<annotation style='gradient' role='link'>hello world</annotation>");
+
+  DALI_TEST_EQUALS(styledText.GetText(), "hello world", TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationCount(), 2u, TEST_LOCATION);
+  CheckRange(styledText, 0u, 0u, 11u);
+  CheckRange(styledText, 1u, 0u, 11u);
+
+  AnnotationSpan styleAnnotation = AnnotationSpan::DownCast(styledText.GetSpanAt(0u));
+  AnnotationSpan roleAnnotation  = AnnotationSpan::DownCast(styledText.GetSpanAt(1u));
+  DALI_TEST_CHECK(styleAnnotation);
+  DALI_TEST_CHECK(roleAnnotation);
+  DALI_TEST_EQUALS(styleAnnotation.GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(styleAnnotation.GetValue(), "gradient", TEST_LOCATION);
+  DALI_TEST_EQUALS(roleAnnotation.GetKey(), "role", TEST_LOCATION);
+  DALI_TEST_EQUALS(roleAnnotation.GetValue(), "link", TEST_LOCATION);
+  CheckSpanIdentity(styledText.GetAnnotationAt(0u), styleAnnotation);
+  CheckSpanIdentity(styledText.GetAnnotationAt(1u), roleAnnotation);
+  DALI_TEST_EQUALS(styledText.GetAnnotationStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationEndIndexAt(0u), 11u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationStartIndexAt(1u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetAnnotationEndIndexAt(1u), 11u, TEST_LOCATION);
+
+  StyledText unicodeText = StyledText::FromMarkup("<annotation style='gradient' role='emoji'>가😀</annotation>");
+
+  DALI_TEST_EQUALS(unicodeText.GetText(), "가😀", TEST_LOCATION);
+  DALI_TEST_EQUALS(unicodeText.GetUtf32Length(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(unicodeText.GetSpanCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(unicodeText.GetAnnotationCount(), 2u, TEST_LOCATION);
+  CheckRange(unicodeText, 0u, 0u, 2u);
+  CheckRange(unicodeText, 1u, 0u, 2u);
+  DALI_TEST_EQUALS(unicodeText.GetAnnotationAt(0u).GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(unicodeText.GetAnnotationAt(0u).GetValue(), "gradient", TEST_LOCATION);
+  DALI_TEST_EQUALS(unicodeText.GetAnnotationAt(1u).GetKey(), "role", TEST_LOCATION);
+  DALI_TEST_EQUALS(unicodeText.GetAnnotationAt(1u).GetValue(), "emoji", TEST_LOCATION);
+
+  StyledText valueText = StyledText::FromMarkup("<annotation value='semantic'>가😀</annotation>");
+
+  DALI_TEST_EQUALS(valueText.GetText(), "가😀", TEST_LOCATION);
+  DALI_TEST_EQUALS(valueText.GetUtf32Length(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(valueText.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(valueText.GetAnnotationCount(), 1u, TEST_LOCATION);
+  CheckRange(valueText, 0u, 0u, 2u);
+
+  AnnotationSpan valueAnnotation = AnnotationSpan::DownCast(valueText.GetSpanAt(0u));
+  DALI_TEST_CHECK(valueAnnotation);
+  DALI_TEST_EQUALS(valueAnnotation.GetKey(), "value", TEST_LOCATION);
+  DALI_TEST_EQUALS(valueAnnotation.GetValue(), "semantic", TEST_LOCATION);
+  CheckSpanIdentity(valueText.GetAnnotationAt(0u), valueAnnotation);
+  DALI_TEST_EQUALS(valueText.GetAnnotationStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(valueText.GetAnnotationEndIndexAt(0u), 2u, TEST_LOCATION);
+
+  StyledText noAttribute = StyledText::FromMarkup("<annotation>plain</annotation>");
+  DALI_TEST_EQUALS(noAttribute.GetText(), "plain", TEST_LOCATION);
+  DALI_TEST_EQUALS(noAttribute.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(noAttribute.GetAnnotationCount(), 0u, TEST_LOCATION);
+
+  StyledText unclosed = StyledText::FromMarkup("<annotation value='tail'>TV");
+  DALI_TEST_EQUALS(unclosed.GetText(), "TV", TEST_LOCATION);
+  DALI_TEST_EQUALS(unclosed.GetAnnotationCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(unclosed.GetAnnotationAt(0u).GetKey(), "value", TEST_LOCATION);
+  DALI_TEST_EQUALS(unclosed.GetAnnotationAt(0u).GetValue(), "tail", TEST_LOCATION);
+  DALI_TEST_EQUALS(unclosed.GetAnnotationStartIndexAt(0u), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(unclosed.GetAnnotationEndIndexAt(0u), 2u, TEST_LOCATION);
+
+  StyledText malformed = StyledText::FromMarkup("<unknown>plain</unknown><annotation value='x'>ok</annotation>");
+  DALI_TEST_EQUALS(malformed.GetText(), "plainok", TEST_LOCATION);
+  DALI_TEST_EQUALS(malformed.GetAnnotationCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(malformed.GetAnnotationAt(0u).GetKey(), "value", TEST_LOCATION);
+  DALI_TEST_EQUALS(malformed.GetAnnotationAt(0u).GetValue(), "x", TEST_LOCATION);
 
   END_TEST;
 }

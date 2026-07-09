@@ -26,7 +26,7 @@ namespace
 {
 constexpr int   WINDOW_WIDTH       = 980;
 constexpr int   WINDOW_HEIGHT      = 820;
-constexpr std::size_t CASE_COUNT    = 6u;
+constexpr std::size_t CASE_COUNT    = 13u;
 constexpr float PAGE_PADDING       = 28.0f;
 constexpr float PAGE_SPACING       = 12.0f;
 constexpr float TITLE_FONT_SIZE    = 25.0f;
@@ -58,6 +58,11 @@ struct ExampleCase
   std::string      stats;
   Text::StyledText result;
 };
+
+uint32_t Utf32LengthOf(const std::string& text)
+{
+  return Text::Utf8ToUtf32Length(Dali::StringView(text.data(), static_cast<uint32_t>(text.size())));
+}
 
 std::string RangeText(uint32_t startIndex, uint32_t endIndex)
 {
@@ -100,60 +105,294 @@ Label NewTextLabel(float fontSize, uint32_t color, bool multiline = true)
   return label;
 }
 
-ExampleCase BuildIncrementalCase()
+Text::StyledText BuildFromMarkupOneShotStyledText()
 {
-  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
+  return Text::StyledText::FromMarkup("<color value='red'>Hello</color> StyledText");
+}
 
-  builder.AppendText("Today: ");
-
-  const uint32_t koreanStart = builder.GetUtf32Length();
-  builder.AppendText("가나다");
-  const uint32_t koreanEnd = builder.GetUtf32Length();
-
-  builder.AppendText(" ");
-
-  const uint32_t emojiStart = builder.GetUtf32Length();
-  builder.AppendText(Dali::String("\xF0\x9F\x98\x80"));
-  const uint32_t emojiEnd = builder.GetUtf32Length();
-
-  builder.SetSpan(NewForegroundSpan(RED), koreanStart, koreanEnd);
-  builder.SetSpan(NewForegroundSpan(BLUE), emojiStart, emojiEnd);
-
-  const Dali::String text = builder.GetText();
+ExampleCase BuildFromMarkupOneShotCase()
+{
+  const char* markup = "<color value='red'>Hello</color> StyledText";
 
   ExampleCase data;
-  data.title       = "Case 1: Incremental builder range";
-  data.description = "Scenario: Incremental AppendText(). GetUtf32Length() markers are taken before and after each appended segment.";
-  data.sourceText  = text.CStr();
-  data.stats       = "UTF-8 bytes: " + std::to_string(text.Size()) +
-               "\nUTF-32 length: " + std::to_string(builder.GetUtf32Length()) +
-               "\nUTF-32 ranges: 가나다 " + RangeText(koreanStart, koreanEnd) +
-               ", 😀 " + RangeText(emojiStart, emojiEnd) +
-               "\nNote: GetUtf32Length() is cached by the builder.";
-  data.result = builder.Build();
+  data.title       = "Case 1: StyledText::FromMarkup one-shot";
+  data.description = "Start here when a resource or constant string already uses supported DALi markup.";
+  data.sourceText  = markup;
+  data.result      = BuildFromMarkupOneShotStyledText();
+  data.stats       = "API: Text::StyledText::FromMarkup()\nNo builder is needed for one-shot markup conversion."
+               "\nSpan count: " + std::to_string(data.result.GetSpanCount());
   return data;
 }
 
-ExampleCase BuildFullTextSpanCase()
+Text::StyledText BuildFromMarkupThenSetSpanStyledText()
 {
-  const Dali::String text("Full range: A"
-                          "\xE2\x9D\xA4"
-                          "\xEF\xB8\x8F"
-                          "B 가나다");
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::FromMarkup("<u>Hello</u> StyledText");
+  builder.SetSpan(NewForegroundSpan(RED), 0u, 5u);
+  return builder.Build();
+}
 
-  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(text);
-  const uint32_t          length  = builder.GetUtf32Length();
-  builder.SetSpan(NewBackgroundSpan(0xDBEAFE), 0u, length);
-  builder.SetSpan(NewForegroundSpan(PURPLE), 0u, length);
+ExampleCase BuildFromMarkupThenSetSpanCase()
+{
+  const char* markup = "<u>Hello</u> StyledText";
+
+  Text::StyledText result = BuildFromMarkupThenSetSpanStyledText();
 
   ExampleCase data;
-  data.title       = "Case 2: Full text span";
-  data.description = "Builder already owns the text, so the whole range uses builder.GetUtf32Length().";
+  data.title       = "Case 2: StyledTextBuilder::FromMarkup then SetSpan";
+  data.description = "Parse markup into a mutable builder, then add an app-defined span before Build().";
+  data.sourceText  = markup;
+  data.result      = result;
+  data.stats       = "Builder source: StyledTextBuilder::FromMarkup()\nExtra foreground range: " + RangeText(0u, 5u) +
+               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  return data;
+}
+
+Text::StyledText BuildPushPopSimpleStyledText()
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
+
+  builder.AppendText("Normal ");
+  builder.PushSpan(NewForegroundSpan(RED));
+  builder.AppendText("Red");
+  builder.PopSpan();
+  builder.AppendText(" Normal");
+
+  return builder.Build();
+}
+
+ExampleCase BuildPushPopSimpleCase()
+{
+  Text::StyledText result = BuildPushPopSimpleStyledText();
+
+  ExampleCase data;
+  data.title       = "Case 3: PushSpan / PopSpan simple";
+  data.description = "Recommended builder pattern: append text while a span is open, then close the most recent open span.";
+  data.sourceText  = "Normal Red Normal";
+  data.result      = result;
+  data.stats       = "Manual range indexes: none\nPopSpan() closes the most recently pushed span."
+               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  return data;
+}
+
+Text::StyledText BuildNestedPushPopStyledText()
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
+
+  builder.AppendText("Normal ");
+
+  builder.PushSpan(NewForegroundSpan(RED));
+  builder.AppendText("Red ");
+
+  builder.PushSpan(NewUnderlineSpan(AMBER));
+  builder.AppendText("Red Underline");
+  builder.PopSpan();
+
+  builder.AppendText(" Red");
+  builder.PopSpan();
+
+  builder.AppendText(" Normal");
+
+  return builder.Build();
+}
+
+ExampleCase BuildNestedPushPopCase()
+{
+  Text::StyledText result = BuildNestedPushPopStyledText();
+
+  ExampleCase data;
+  data.title       = "Case 4: Nested PushSpan / PopSpan";
+  data.description = "Nested styles can be expressed naturally with the open span stack and no explicit range math.";
+  data.sourceText  = "Normal Red Red Underline Red Normal";
+  data.result      = result;
+  data.stats       = "Manual range indexes: none\nInner underline is popped first; outer foreground stays open."
+               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  return data;
+}
+
+Text::StyledText BuildPushPopTokenStyledText()
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
+
+  builder.AppendText("Normal ");
+
+  const uint32_t highlightToken = builder.PushSpan(NewBackgroundSpan(BG_SOFT_AMBER));
+  builder.AppendText("Highlighted ");
+
+  builder.PushSpan(NewUnderlineSpan(AMBER));
+  builder.AppendText("Highlighted Underline");
+
+  builder.PopSpan(highlightToken);
+  builder.AppendText(" Normal");
+
+  return builder.Build();
+}
+
+ExampleCase BuildPushPopTokenCase()
+{
+  Text::StyledText result = BuildPushPopTokenStyledText();
+
+  ExampleCase data;
+  data.title       = "Case 5: PushSpan token / PopSpan(token)";
+  data.description = "Keep a token for a block span when nested pushes may happen before the block ends.";
+  data.sourceText  = "Normal Highlighted Highlighted Underline Normal";
+  data.result      = result;
+  data.stats       = "PopSpan(token) closes the matching span and any spans above it."
+               "\nThis closes underline and background together at the block boundary."
+               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  return data;
+}
+
+Text::StyledText BuildNonMutatingBuildStyledText()
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
+
+  const uint32_t token = builder.PushSpan(NewForegroundSpan(BLUE));
+
+  builder.AppendText("First snapshot");
+  builder.Build(); // Creates a snapshot without closing the open span in the builder.
+
+  builder.AppendText(" continues");
+  Text::StyledText result = builder.Build();
+
+  builder.PopSpan(token);
+  return result;
+}
+
+ExampleCase BuildNonMutatingBuildCase()
+{
+  Text::StyledText result = BuildNonMutatingBuildStyledText();
+
+  ExampleCase data;
+  data.title       = "Case 6: Build() does not close open spans";
+  data.description = "Build() creates a snapshot. It does not mutate the builder or pop open spans.";
+  data.sourceText  = "First snapshot continues";
+  data.result      = result;
+  data.stats       = "The helper calls Build(), appends more text, then calls Build() again."
+               "\nThe open blue span is still active for the second snapshot."
+               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  return data;
+}
+
+Text::StyledText BuildAnnotationResolveStyledText()
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::FromMarkup(
+    "<annotation style='muted' role='summary'>Muted</annotation> Normal "
+    "<annotation style='accent' role='action' background='soft'>Accent</annotation>");
+
+  const uint32_t annotationCount = builder.GetAnnotationCount();
+  for(uint32_t annotationIndex = 0u; annotationIndex < annotationCount; ++annotationIndex)
+  {
+    const Text::AnnotationSpan annotation = builder.GetAnnotationAt(annotationIndex);
+    const uint32_t             startIndex = builder.GetAnnotationStartIndexAt(annotationIndex);
+    const uint32_t             endIndex   = builder.GetAnnotationEndIndexAt(annotationIndex);
+
+    if(annotation.GetKey() == "style")
+    {
+      if(annotation.GetValue() == "muted")
+      {
+        builder.SetSpan(NewForegroundSpan(TEXT_MUTED), startIndex, endIndex);
+      }
+      else if(annotation.GetValue() == "accent")
+      {
+        builder.SetSpan(NewForegroundSpan(PURPLE), startIndex, endIndex);
+      }
+    }
+    else if(annotation.GetKey() == "background")
+    {
+      if(annotation.GetValue() == "soft")
+      {
+        builder.SetSpan(NewBackgroundSpan(BG_SOFT_PURPLE), startIndex, endIndex);
+      }
+    }
+  }
+
+  return builder.Build();
+}
+
+ExampleCase BuildAnnotationResolveCase()
+{
+  const char* markup =
+    "<annotation style='muted' role='summary'>Muted</annotation> Normal "
+    "<annotation style='accent' role='action' background='soft'>Accent</annotation>";
+
+  Text::StyledText result = BuildAnnotationResolveStyledText();
+
+  ExampleCase data;
+  data.title       = "Case 7: Resolve annotation markup";
+  data.description = "Annotation markup is semantic metadata. App or theme code resolves key/value pairs into concrete visual spans.";
+  data.sourceText  = markup;
+  data.result      = result;
+  data.stats       = "Each attribute in one annotation tag becomes a separate AnnotationSpan."
+               "\nAnnotation loop caches GetAnnotationCount() before the loop."
+               "\nEach matching visual range receives a new span instance."
+               "\nAnnotation count: " + std::to_string(result.GetAnnotationCount()) +
+               "\nSpan count after resolve: " + std::to_string(result.GetSpanCount());
+  return data;
+}
+
+Text::StyledText BuildDirectRangeStyledText()
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("Hello StyledText");
+  builder.SetSpan(NewForegroundSpan(GREEN), 0u, 5u);
+  builder.SetSpan(NewBackgroundSpan(BG_SOFT_BLUE), 6u, builder.GetUtf32Length());
+  return builder.Build();
+}
+
+ExampleCase BuildDirectRangeCase()
+{
+  const Dali::String text("Hello StyledText");
+  Text::StyledText   result = BuildDirectRangeStyledText();
+
+  ExampleCase data;
+  data.title       = "Case 8: Direct SetSpan with known UTF-32 range";
+  data.description = "Use SetSpan() directly when the UTF-32 range is already known.";
   data.sourceText  = text.CStr();
-  data.stats       = "UTF-8 bytes: " + std::to_string(text.Size()) +
-               "\nUTF-32 length: " + std::to_string(length) +
-               "\nFull UTF-32 range: " + RangeText(0u, length);
-  data.result = builder.Build();
+  data.result      = result;
+  data.stats       = "Foreground range for Hello: " + RangeText(0u, 5u) +
+               "\nBackground range for StyledText: " + RangeText(6u, result.GetUtf32Length()) +
+               "\nSpan count: " + std::to_string(result.GetSpanCount());
+  return data;
+}
+
+Text::StyledText BuildUtf8ToUtf32RangeStyledText()
+{
+  const std::string prefix = "Hello ";
+  const std::string target = "가😀";
+  const std::string suffix = " StyledText";
+  const std::string text   = prefix + target + suffix;
+
+  const uint32_t startIndex = Utf32LengthOf(prefix);
+  const uint32_t endIndex   = startIndex + Utf32LengthOf(target);
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(text.c_str());
+  builder.SetSpan(NewForegroundSpan(RED), startIndex, endIndex);
+  builder.SetSpan(NewUnderlineSpan(RED), startIndex, endIndex);
+
+  return builder.Build();
+}
+
+ExampleCase BuildUtf8ToUtf32RangeCase()
+{
+  const std::string prefix = "Hello ";
+  const std::string target = "가😀";
+  const std::string suffix = " StyledText";
+  const std::string text   = prefix + target + suffix;
+
+  const uint32_t startIndex = Utf32LengthOf(prefix);
+  const uint32_t endIndex   = startIndex + Utf32LengthOf(target);
+
+  Text::StyledText result = BuildUtf8ToUtf32RangeStyledText();
+
+  ExampleCase data;
+  data.title       = "Case 9: UTF-8 text with computed UTF-32 range";
+  data.description = "Advanced case: compute UTF-32 range indexes from UTF-8 string parts before calling SetSpan().";
+  data.sourceText  = text;
+  data.result      = result;
+  data.stats       = "Target: " + target +
+               "\nPrefix UTF-8 bytes: " + std::to_string(prefix.size()) +
+               "\nTarget UTF-8 bytes: " + std::to_string(target.size()) +
+               "\nTarget UTF-32 range: " + RangeText(startIndex, endIndex) +
+               "\nSpan count: " + std::to_string(result.GetSpanCount());
   return data;
 }
 
@@ -190,8 +429,8 @@ ExampleCase BuildUtf8FindCase()
   }
 
   ExampleCase data;
-  data.title       = "Case 3: Completed UTF-8 string + std::string::find()";
-  data.description = "std::string::find() returns a UTF-8 byte range. Utf8ToUtf32Range() converts it before SetSpan() receives the UTF-32 range.";
+  data.title       = "Case 10: UTF-8 string find converted to UTF-32 range";
+  data.description = "std::string::find() returns a UTF-8 byte range. Convert it before passing the range to SetSpan().";
   data.sourceText  = text;
   data.stats       = "find target: " + target +
                "\ntarget found: " + BoolText(targetFound) +
@@ -261,8 +500,8 @@ ExampleCase BuildUtf32BackToUtf8Case()
   const std::string extracted = backwardConverted ? text.substr(utf8StartIndex, utf8EndIndex - utf8StartIndex) : "";
 
   ExampleCase data;
-  data.title       = "Case 4: UTF-32 span range back to UTF-8 substring";
-  data.description = "Utf8ToUtf32Range() feeds SetSpan(), then Utf32ToUtf8Range() converts the stored span range back to UTF-8 bytes.";
+  data.title       = "Case 11: Stored UTF-32 range converted back to UTF-8";
+  data.description = "A stored span range is UTF-32. Convert it back when you need a UTF-8 substring range.";
   data.sourceText  = text;
   data.stats       = "target found: " + BoolText(targetFound) +
                "\nfind UTF-8 byte range: " + RangeText(utf8StartFromFind, utf8EndFromFind) +
@@ -313,13 +552,13 @@ ExampleCase BuildComplexUnicodeCase()
     sourceText += rows[rowIndex].text;
     stats += "\n" + rows[rowIndex].text +
              " | " + std::to_string(rows[rowIndex].text.size()) +
-             " | " + std::to_string(Text::Utf8ToUtf32Length(Dali::StringView(rows[rowIndex].text.data(), static_cast<uint32_t>(rows[rowIndex].text.size())))) +
+             " | " + std::to_string(Utf32LengthOf(rows[rowIndex].text)) +
              " | " + RangeText(startIndex, endIndex);
   }
 
   ExampleCase data;
-  data.title       = "Case 5: Complex Unicode table";
-  data.description = "UTF-8 byte size and UTF-32 length can differ, including sequences that look compact on screen.";
+  data.title       = "Case 12: Complex Unicode ranges";
+  data.description = "UTF-8 byte size and UTF-32 length can differ, including emoji sequences that look compact on screen.";
   data.sourceText  = sourceText;
   data.stats       = stats;
   data.result      = builder.Build();
@@ -346,7 +585,7 @@ ExampleCase BuildBoundaryFailureCase()
   builder.SetSpan(NewForegroundSpan(GREEN), 1u, 2u);
 
   ExampleCase data;
-  data.title       = "Case 6: Boundary failure";
+  data.title       = "Case 13: Invalid UTF-8 boundary conversion";
   data.description = "A UTF-8 byte index inside a multi-byte sequence is not a valid conversion boundary.";
   data.sourceText  = text.CStr();
   data.stats       = "Utf8ToUtf32Index(text, 2): " + BoolText(indexConverted) +
@@ -363,14 +602,28 @@ ExampleCase BuildCase(std::size_t index)
   switch(index)
   {
     case 0u:
-      return BuildIncrementalCase();
+      return BuildFromMarkupOneShotCase();
     case 1u:
-      return BuildFullTextSpanCase();
+      return BuildFromMarkupThenSetSpanCase();
     case 2u:
-      return BuildUtf8FindCase();
+      return BuildPushPopSimpleCase();
     case 3u:
-      return BuildUtf32BackToUtf8Case();
+      return BuildNestedPushPopCase();
     case 4u:
+      return BuildPushPopTokenCase();
+    case 5u:
+      return BuildNonMutatingBuildCase();
+    case 6u:
+      return BuildAnnotationResolveCase();
+    case 7u:
+      return BuildDirectRangeCase();
+    case 8u:
+      return BuildUtf8ToUtf32RangeCase();
+    case 9u:
+      return BuildUtf8FindCase();
+    case 10u:
+      return BuildUtf32BackToUtf8Case();
+    case 11u:
       return BuildComplexUnicodeCase();
     default:
       return BuildBoundaryFailureCase();
@@ -403,7 +656,7 @@ private:
     root.SetBackgroundColor(UiColor(PAGE_BACKGROUND));
 
     mTitleLabel = NewTextLabel(TITLE_FONT_SIZE, TEXT_PRIMARY, false);
-    mTitleLabel.SetText("StyledTextBuilder UTF-8 / UTF-32 Range Example");
+    mTitleLabel.SetText("StyledTextBuilder App Usage Guide");
     mTitleLabel.SetFontFamily("SamsungOneUI_700");
 
     mCaseTitleLabel = NewTextLabel(CASE_FONT_SIZE, TEXT_PRIMARY, false);

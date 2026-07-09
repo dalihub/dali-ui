@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
@@ -50,6 +51,11 @@ namespace Text
 class DALI_UI_API StyledTextBuilder : public BaseHandle
 {
 public:
+  /**
+   * @brief Invalid span token returned by PushSpan() on failure.
+   */
+  static constexpr uint32_t INVALID_SPAN_TOKEN = 0u;
+
   /**
    * @brief Creates an uninitialized StyledTextBuilder handle.
    */
@@ -79,6 +85,21 @@ public:
   static StyledTextBuilder FromStyledText(const StyledText& styledText);
 
   /**
+   * @brief Converts supported DALi markup into a StyledTextBuilder.
+   *
+   * Supported DALi markup tags are converted into spans. Each attribute in an
+   * annotation markup tag is converted into a separate AnnotationSpan key/value
+   * pair over the annotated text range. Unsupported tags are skipped on a
+   * best-effort basis while preserving their text content where possible. Entity
+   * references recognized by DALi markup are decoded in text content and
+   * attribute values.
+   *
+   * @param[in] markup The markup string to convert
+   * @return A new StyledTextBuilder
+   */
+  static StyledTextBuilder FromMarkup(const Dali::String& markup);
+
+  /**
    * @brief Replaces the text and clears all span attachments.
    *
    * @param[in] text The new text
@@ -91,6 +112,37 @@ public:
    * @param[in] text The text to append
    */
   void AppendText(const Dali::String& text);
+
+  /**
+   * @brief Opens a span at the current decoded UTF-32 text end.
+   *
+   * The returned token is local to this builder and remains valid only while
+   * the pushed span is still open. 0u is an invalid token.
+   *
+   * @param[in] span The span payload
+   * @return A non-zero token on success, or 0u if validation failed
+   */
+  uint32_t PushSpan(const Span& span);
+
+  /**
+   * @brief Closes the most recently pushed open span.
+   *
+   * Empty ranges are closed without creating a span attachment.
+   *
+   * @return true if an open span was closed
+   */
+  bool PopSpan();
+
+  /**
+   * @brief Closes the open span matching the token and any spans above it.
+   *
+   * The token must have been returned by PushSpan() from this builder and must
+   * still be open. 0u is an invalid token.
+   *
+   * @param[in] token The token returned by PushSpan()
+   * @return true if the token was found and closed
+   */
+  bool PopSpan(uint32_t token);
 
   /**
    * @brief Attaches or updates a span over a half-open UTF-32 range.
@@ -187,6 +239,41 @@ public:
    * @return The exclusive UTF-32 end index
    */
   uint32_t GetSpanEndIndexAt(uint32_t index) const;
+
+  /**
+   * @brief Gets the number of attached annotation spans.
+   *
+   * @return The annotation span attachment count
+   */
+  uint32_t GetAnnotationCount() const;
+
+  /**
+   * @brief Gets the annotation span payload at the given annotation index.
+   *
+   * @param[in] index The annotation index
+   * @return The annotation span payload, or an empty AnnotationSpan if the index is invalid
+   */
+  AnnotationSpan GetAnnotationAt(uint32_t index) const;
+
+  /**
+   * @brief Gets the inclusive UTF-32 start index of the annotation span attachment.
+   *
+   * The annotation index should be less than GetAnnotationCount().
+   *
+   * @param[in] index The annotation index
+   * @return The UTF-32 start index
+   */
+  uint32_t GetAnnotationStartIndexAt(uint32_t index) const;
+
+  /**
+   * @brief Gets the exclusive UTF-32 end index of the annotation span attachment.
+   *
+   * The annotation index should be less than GetAnnotationCount().
+   *
+   * @param[in] index The annotation index
+   * @return The exclusive UTF-32 end index
+   */
+  uint32_t GetAnnotationEndIndexAt(uint32_t index) const;
 
   /**
    * @brief Builds an immutable StyledText snapshot.

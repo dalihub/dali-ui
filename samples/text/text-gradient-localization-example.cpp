@@ -58,6 +58,30 @@ void ApplyDescriptionGradient(Label label)
   label.SetTextGradient(gradient);
 }
 
+Text::StyledText BuildDescriptionStyledText(const Dali::String& markup)
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::FromMarkup(markup);
+
+  // The PO strings mark solid muted ranges as <annotation style='muted'>...</annotation>.
+  const uint32_t annotationCount = builder.GetAnnotationCount();
+  for(uint32_t annotationIndex = 0u; annotationIndex < annotationCount; ++annotationIndex)
+  {
+    const Text::AnnotationSpan annotation = builder.GetAnnotationAt(annotationIndex);
+    const uint32_t             startIndex = builder.GetAnnotationStartIndexAt(annotationIndex);
+    const uint32_t             endIndex   = builder.GetAnnotationEndIndexAt(annotationIndex);
+
+    if(annotation.GetKey() == "style")
+    {
+      if(annotation.GetValue() == "muted")
+      {
+        builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(COLOR_MUTED_TEXT)), startIndex, endIndex);
+      }
+    }
+  }
+
+  return builder.Build();
+}
+
 class LocalizedCard : public StackLayout
 {
 public:
@@ -100,7 +124,7 @@ public:
   {
     if(Data* data = GetAttachment<Data>(GetDataId()))
     {
-      data->descriptionLabel.SetStyledText(Text::StyledText::FromMarkup(text));
+      data->descriptionLabel.SetStyledText(BuildDescriptionStyledText(text));
     }
   }
 

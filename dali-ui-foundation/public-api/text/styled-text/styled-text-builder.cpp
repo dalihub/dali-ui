@@ -18,7 +18,11 @@
 // CLASS HEADER
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 
+// EXTERNAL INCLUDES
+#include <utility>
+
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/styled-text/markup-to-styled-text.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-builder-impl.h>
 
 namespace Dali
@@ -58,6 +62,12 @@ StyledTextBuilder StyledTextBuilder::FromStyledText(const StyledText& styledText
   return styledText ? StyledTextBuilder(new Internal::Text::StyledTextBuilder(*GetImplementation(styledText))) : StyledTextBuilder::New();
 }
 
+StyledTextBuilder StyledTextBuilder::FromMarkup(const Dali::String& markup)
+{
+  Internal::Text::StyledTextMarkupResult result = Internal::Text::ParseStyledTextMarkup(markup, nullptr);
+  return StyledTextBuilder(new Internal::Text::StyledTextBuilder(result.text, std::move(result.attachments), result.utf32Length));
+}
+
 void StyledTextBuilder::SetText(const Dali::String& text)
 {
   if(*this)
@@ -77,6 +87,21 @@ void StyledTextBuilder::AppendText(const Dali::String& text)
 bool StyledTextBuilder::SetSpan(const Span& span, uint32_t utf32StartIndex, uint32_t utf32EndIndex)
 {
   return *this ? GetImplementation(*this)->SetSpan(span, utf32StartIndex, utf32EndIndex) : false;
+}
+
+uint32_t StyledTextBuilder::PushSpan(const Span& span)
+{
+  return *this ? GetImplementation(*this)->PushSpan(span) : INVALID_SPAN_TOKEN;
+}
+
+bool StyledTextBuilder::PopSpan()
+{
+  return *this ? GetImplementation(*this)->PopSpan() : false;
+}
+
+bool StyledTextBuilder::PopSpan(uint32_t token)
+{
+  return *this ? GetImplementation(*this)->PopSpan(token) : false;
 }
 
 bool StyledTextBuilder::RemoveSpan(const Span& span)
@@ -127,6 +152,26 @@ uint32_t StyledTextBuilder::GetSpanEndIndexAt(uint32_t index) const
   return *this ? GetImplementation(*this)->GetSpanEndIndexAt(index) : 0u;
 }
 
+uint32_t StyledTextBuilder::GetAnnotationCount() const
+{
+  return *this ? GetImplementation(*this)->GetAnnotationCount() : 0u;
+}
+
+AnnotationSpan StyledTextBuilder::GetAnnotationAt(uint32_t index) const
+{
+  return *this ? GetImplementation(*this)->GetAnnotationAt(index) : AnnotationSpan();
+}
+
+uint32_t StyledTextBuilder::GetAnnotationStartIndexAt(uint32_t index) const
+{
+  return *this ? GetImplementation(*this)->GetAnnotationStartIndexAt(index) : 0u;
+}
+
+uint32_t StyledTextBuilder::GetAnnotationEndIndexAt(uint32_t index) const
+{
+  return *this ? GetImplementation(*this)->GetAnnotationEndIndexAt(index) : 0u;
+}
+
 StyledText StyledTextBuilder::Build() const
 {
   if(!*this)
@@ -135,6 +180,11 @@ StyledText StyledTextBuilder::Build() const
   }
 
   auto* impl = GetImplementation(*this);
+  if(impl->HasOpenSpans())
+  {
+    return StyledText(new Internal::Text::StyledText(impl->GetText(), impl->CreateFinalizedAttachments(), impl->GetUtf32Length()));
+  }
+
   return StyledText(new Internal::Text::StyledText(impl->GetText(), impl->GetAttachments(), impl->GetUtf32Length()));
 }
 

@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/span.h>
 
 namespace Dali
@@ -65,9 +66,12 @@ public:
   /**
    * @brief Converts supported DALi markup into a StyledText snapshot.
    *
-   * Supported markup tags are converted into spans. Unsupported tags are skipped
-   * on a best-effort basis while preserving their text content where possible.
-   * Text content and attribute values are decoded for supported XHTML entities.
+   * Supported DALi markup tags are converted into spans. Each attribute in an
+   * annotation markup tag is converted into a separate AnnotationSpan key/value
+   * pair over the annotated text range. Unsupported tags are skipped on a
+   * best-effort basis while preserving their text content where possible. Entity
+   * references recognized by DALi markup are decoded in text content and
+   * attribute values.
    *
    * @param[in] markup The markup string to convert
    * @return A new StyledText snapshot
@@ -125,6 +129,41 @@ public:
    * @return The exclusive UTF-32 end index
    */
   uint32_t GetSpanEndIndexAt(uint32_t index) const;
+
+  /**
+   * @brief Gets the number of attached annotation spans.
+   *
+   * @return The annotation span attachment count
+   */
+  uint32_t GetAnnotationCount() const;
+
+  /**
+   * @brief Gets the annotation span payload at the given annotation index.
+   *
+   * @param[in] index The annotation index
+   * @return The annotation span payload, or an empty AnnotationSpan if the index is invalid
+   */
+  AnnotationSpan GetAnnotationAt(uint32_t index) const;
+
+  /**
+   * @brief Gets the inclusive UTF-32 start index of the annotation span attachment.
+   *
+   * The annotation index should be less than GetAnnotationCount().
+   *
+   * @param[in] index The annotation index
+   * @return The UTF-32 start index
+   */
+  uint32_t GetAnnotationStartIndexAt(uint32_t index) const;
+
+  /**
+   * @brief Gets the exclusive UTF-32 end index of the annotation span attachment.
+   *
+   * The annotation index should be less than GetAnnotationCount().
+   *
+   * @param[in] index The annotation index
+   * @return The exclusive UTF-32 end index
+   */
+  uint32_t GetAnnotationEndIndexAt(uint32_t index) const;
 
   /**
    * @brief Returns whether this snapshot has empty text.
