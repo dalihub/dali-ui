@@ -15,9 +15,9 @@
  *
  */
 
+#include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
-#include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -74,7 +74,9 @@ struct RemoveControllerInSlotFunctor
 struct ViewLayoutFinishedSignalData
 {
   ViewLayoutFinishedSignalData()
-  : called(false), count(0), bounds(0.0f, 0.0f, 0.0f, 0.0f)
+  : called(false),
+    count(0),
+    bounds(0.0f, 0.0f, 0.0f, 0.0f)
   {
   }
   bool       called;
@@ -103,7 +105,9 @@ struct ViewLayoutFinishedSignalFunctor
 struct ReinvalidateOnceFunctor
 {
   ReinvalidateOnceFunctor(View target, int& count, bool& done)
-  : target(target), count(count), done(done)
+  : target(target),
+    count(count),
+    done(done)
   {
   }
   void operator()(View, LayoutRect)
@@ -125,7 +129,10 @@ struct ReinvalidateOnceFunctor
 struct ReenterProcessLayoutsFunctor
 {
   ReenterProcessLayoutsFunctor(LayoutController& c, View target, int& count, bool& done)
-  : controller(c), target(target), count(count), done(done)
+  : controller(c),
+    target(target),
+    count(count),
+    done(done)
   {
   }
   void operator()(View, LayoutRect)
@@ -148,7 +155,8 @@ struct ReenterProcessLayoutsFunctor
 struct ViewSlotRemoveControllerFunctor
 {
   ViewSlotRemoveControllerFunctor(Window window, int& count)
-  : window(window), count(count)
+  : window(window),
+    count(count)
   {
   }
   void operator()(View, LayoutRect)
@@ -243,9 +251,9 @@ int UtcDaliLayoutControllerLayoutFinishedSignalP(void)
   root.SetRequestedHeight(100.0f);
   window.Add(root);
 
-  // Drive a layout pass: the pending work drains to nothing, so the signal
-  // fires exactly once with this window.
-  controller.ProcessLayouts();
+  // Drive a full pre+post cycle: the pre phase drains the pending work and the
+  // post phase (after size negotiation) emits the signal exactly once.
+  application.SendNotification();
 
   DALI_TEST_EQUALS(data.called, true, TEST_LOCATION);
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
@@ -269,12 +277,13 @@ int UtcDaliLayoutControllerLayoutFinishedSignalNoSpuriousEmitP(void)
   root.SetRequestedHeight(100.0f);
   window.Add(root);
 
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
 
-  // Subsequent passes with nothing pending must NOT re-fire (latch cleared).
-  controller.ProcessLayouts();
-  controller.ProcessLayouts();
+  // Subsequent cycles with nothing pending must NOT re-fire (latch cleared;
+  // the post phase sees no scheduled emit).
+  application.SendNotification();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
   END_TEST;
 }
@@ -295,12 +304,12 @@ int UtcDaliLayoutControllerLayoutFinishedSignalRefiresP(void)
   root.SetRequestedHeight(100.0f);
   window.Add(root);
 
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
 
   // Invalidate again: a new dirty->quiescent transition fires the signal again.
   root.SetRequestedWidth(200.0f);
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 2, TEST_LOCATION);
   END_TEST;
 }
@@ -321,15 +330,17 @@ int UtcDaliLayoutControllerLayoutFinishedSignalRemoveInSlotP(void)
   root.SetRequestedHeight(100.0f);
   window.Add(root);
 
-  // The slot destroys the controller during the emit; the deferred
-  // self-destruct must not cause a use-after-free.
-  controller.ProcessLayouts();
+  // The slot destroys the controller during the post-phase emit; the deferred
+  // self-destruct (at the outermost Process unwind) must not cause a
+  // use-after-free.
+  application.SendNotification();
   DALI_TEST_EQUALS(removeCount, 1, TEST_LOCATION); // window signal fired exactly once before destroy
   // 'controller' is now dangling and must not be touched again.
 
   // A fresh Get() recreates the controller for the window without crashing.
   LayoutController& fresh = LayoutController::Get(window);
-  fresh.ProcessLayouts();
+  (void)fresh;
+  application.SendNotification();
   DALI_TEST_CHECK(true);
   END_TEST;
 }
@@ -351,8 +362,8 @@ int UtcDaliViewLayoutFinishedSignalP(void)
   ViewLayoutFinishedSignalFunctor functor(data);
   child.LayoutFinishedSignal().Connect(&application, functor);
 
-  LayoutController& controller = LayoutController::Get(window);
-  controller.ProcessLayouts();
+  // Drive a full pre+post cycle; the View signal emits in the post phase.
+  application.SendNotification();
 
   DALI_TEST_EQUALS(data.called, true, TEST_LOCATION);
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
@@ -378,11 +389,10 @@ int UtcDaliViewLayoutFinishedSignalNoSpuriousEmitP(void)
   ViewLayoutFinishedSignalFunctor functor(data);
   root.LayoutFinishedSignal().Connect(&application, functor);
 
-  LayoutController& controller = LayoutController::Get(window);
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
-  controller.ProcessLayouts();
-  controller.ProcessLayouts();
+  application.SendNotification();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
   END_TEST;
 }
@@ -400,11 +410,10 @@ int UtcDaliViewLayoutFinishedSignalRefiresP(void)
   ViewLayoutFinishedSignalFunctor functor(data);
   root.LayoutFinishedSignal().Connect(&application, functor);
 
-  LayoutController& controller = LayoutController::Get(window);
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
   root.SetRequestedWidth(240.0f);
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 2, TEST_LOCATION);
   END_TEST;
 }
@@ -430,8 +439,7 @@ int UtcDaliViewLayoutFinishedSignalSubscribedViewsOnlyP(void)
   ViewLayoutFinishedSignalFunctor functor(data);
   childA.LayoutFinishedSignal().Connect(&application, functor);
 
-  LayoutController& controller = LayoutController::Get(window);
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
   DALI_TEST_CHECK(data.view == childA);
   END_TEST;
@@ -455,8 +463,7 @@ int UtcDaliViewLayoutFinishedSignalRtlTargetBoundsP(void)
   ViewLayoutFinishedSignalFunctor functor(data);
   child.LayoutFinishedSignal().Connect(&application, functor);
 
-  LayoutController& controller = LayoutController::Get(window);
-  controller.ProcessLayouts();
+  application.SendNotification();
 
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
   Actor a = child;
@@ -484,10 +491,12 @@ int UtcDaliViewLayoutFinishedSignalSuppressWindowSignalWhenSlotInvalidatesP(void
   ReinvalidateOnceFunctor viewFunctor(root, viewEmitCount, didInvalidate);
   root.LayoutFinishedSignal().Connect(&application, viewFunctor);
 
-  controller.ProcessLayouts();
+  // Post phase emits the View signal; its slot re-invalidates, so the window
+  // signal is suppressed this episode and deferred to the next cycle.
+  application.SendNotification();
   DALI_TEST_EQUALS(winData.count, 0, TEST_LOCATION);
   DALI_TEST_EQUALS(viewEmitCount, 1, TEST_LOCATION);
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(winData.count, 1, TEST_LOCATION);
   END_TEST;
 }
@@ -520,9 +529,13 @@ int UtcDaliViewLayoutFinishedSignalSlotReentersProcessLayoutsP(void)
   ReenterProcessLayoutsFunctor aFunctor(controller, b, aCount, done);
   a.LayoutFinishedSignal().Connect(&application, aFunctor);
 
-  controller.ProcessLayouts();
-  controller.ProcessLayouts();
-  controller.ProcessLayouts();
+  // The slot re-enters ProcessLayouts() during the post-phase emit; drive
+  // several full cycles so the re-invalidated + re-entered episode settles and
+  // b's final (width 120) bounds are delivered.
+  application.SendNotification();
+  application.SendNotification();
+  application.SendNotification();
+  application.SendNotification();
 
   // A slot that re-invalidates a sibling AND re-enters ProcessLayouts starts a
   // new dirty->settled episode, so exact emit counts are implementation-defined
@@ -552,14 +565,13 @@ int UtcDaliViewLayoutFinishedSignalRemoveViewBeforeEmitP(void)
   ViewLayoutFinishedSignalFunctor functor(data);
   child.LayoutFinishedSignal().Connect(&application, functor);
 
-  LayoutController& controller = LayoutController::Get(window);
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, 1, TEST_LOCATION);
 
   root.Remove(child);
   int before = data.count;
   root.SetRequestedWidth(240.0f);
-  controller.ProcessLayouts();
+  application.SendNotification();
   DALI_TEST_EQUALS(data.count, before, TEST_LOCATION); // no emit for removed child, no UAF
   END_TEST;
 }
@@ -591,17 +603,18 @@ int UtcDaliViewLayoutFinishedSignalRemoveControllerInSlotP(void)
   root.SetRequestedHeight(100.0f);
   window.Add(root);
 
-  LayoutController& controller = LayoutController::Get(window);
-
   int                             slotCount = 0;
   ViewSlotRemoveControllerFunctor functor(window, slotCount);
   root.LayoutFinishedSignal().Connect(&application, functor);
 
-  controller.ProcessLayouts();
+  // The View slot destroys the controller during the post-phase View emit; the
+  // deferred self-destruct at the outermost Process unwind must be UAF-safe.
+  application.SendNotification();
   DALI_TEST_EQUALS(slotCount, 1, TEST_LOCATION);
 
   LayoutController& fresh = LayoutController::Get(window);
-  fresh.ProcessLayouts();
+  (void)fresh;
+  application.SendNotification();
   DALI_TEST_CHECK(true);
   END_TEST;
 }

@@ -59,7 +59,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
 
 - **LayoutController**  
   - Singleton per window via `LayoutController::Get(Window)`.  
-  - When layout is invalidated, layout roots are registered; the Adaptor calls `Process()` once per frame, and the controller runs `ProcessLayouts()` to perform Measure and Arrange.
+  - When layout is invalidated, layout roots are registered; the Adaptor calls `Process()` once per frame. The controller registers for both the pre- and post-process phases: `ProcessLayouts()` runs in the pre-process phase to perform Measure and Arrange (before core size negotiation), and the `LayoutFinished` signals (LayoutController and View) are emitted in the post-process phase (after size negotiation).
 
 ### 2. Integration API (Implementation)
 
@@ -83,7 +83,7 @@ Layout processing is driven by **LayoutController** per window. Each frame, it r
   - Each provides `Get(ViewImpl&)` (returns nullptr if not attached) and `GetOrCreate(ViewImpl&)` (creates if missing).
 
 - **LayoutControllerImpl**  
-  - Keeps layout roots in `mPendingViews`; `ProcessLayouts()` resolves constraints, then runs Measure and Arrange for each root.
+  - Keeps layout roots in `mPendingViews`; `ProcessLayouts()` resolves constraints, then runs Measure and Arrange for each root during the pre-process phase. Once the pending work drains, it schedules the `LayoutFinished` emit for the post-process phase (after core size negotiation) rather than emitting inline.
 
 ### 3. Layout Managers (Algorithms)
 
@@ -310,7 +310,7 @@ A Standalone child:
 ### Invalidation flow
 
 When layout must be recomputed (e.g. size or child change):  
-`ViewImpl::InvalidateMeasure()` or `InvalidateArrange()` → propagate to parent layout → at layout root, `RegisterWithLayoutController()` → `LayoutControllerImpl::RequestLayout(ViewImpl*)` adds the root to `mPendingViews` → next frame the Adaptor calls `Process()` → `ProcessLayouts()` runs Measure then Arrange for those roots.
+`ViewImpl::InvalidateMeasure()` or `InvalidateArrange()` → propagate to parent layout → at layout root, `RegisterWithLayoutController()` → `LayoutControllerImpl::RequestLayout(ViewImpl*)` adds the root to `mPendingViews` → next frame the Adaptor calls `Process()` → in the pre-process phase `ProcessLayouts()` runs Measure then Arrange for those roots → after core size negotiation, the post-process phase emits the `LayoutFinished` signals.
 
 ---
 

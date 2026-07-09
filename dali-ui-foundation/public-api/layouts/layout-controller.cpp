@@ -147,10 +147,13 @@ public:
     mWindowWidth    = static_cast<int32_t>(size.width);
     mWindowHeight   = static_cast<int32_t>(size.height);
 
-    // Register as a processor with the adaptor (postProcess=false: run before dali Relayout)
+    // Register as a processor with the adaptor twice:
+    //  - pre  (postProcess=false): run Measure/Arrange before dali Relayout.
+    //  - post (postProcess=true):  emit LayoutFinished after size negotiation.
     if(DALI_LIKELY(Adaptor::IsAvailable()))
     {
       Adaptor::Get().RegisterProcessor(*this, false);
+      Adaptor::Get().RegisterProcessor(*this, true);
 
       // Connect to window resize signal
       window.ResizedSignal().Connect(this, &LayoutControllerImpl::OnWindowResized);
@@ -162,10 +165,11 @@ public:
    */
   ~LayoutControllerImpl() override
   {
-    // Unregister from adaptor
+    // Unregister from adaptor (both the pre and post registrations)
     if(DALI_LIKELY(Adaptor::IsAvailable()))
     {
-      Adaptor::Get().UnregisterProcessor(*this);
+      Adaptor::Get().UnregisterProcessor(*this, false);
+      Adaptor::Get().UnregisterProcessor(*this, true);
     }
   }
 
@@ -407,47 +411,66 @@ public:
       {
         if(mPendingViews.empty() && mLayoutDirtySinceEmit)
         {
-          // Deliver every subscribed View's layout-finished event FIRST (in
-          // traversal order), then decide the window signal.
-          //
-          // CAVEAT (do not "fix" by adding a cap without agreement): a View
-          // LayoutFinishedSignal slot that unconditionally re-invalidates layout
-          // spins an endless dirty->settled->emit cycle. This is intentionally
-          // NOT capped here (consistent with the window signal and other
-          // toolkits); the contract is documented on View::LayoutFinishedSignal
-          // as "guard re-layout in the slot behind a real condition". A view is
-          // also re-collected/re-emitted whenever it is re-arranged, even with
-          // unchanged bounds, so callers must not treat an emit as "bounds
-          // changed".
-          EmitPendingViewLayoutFinishedSignals();
-
-          if(mDestroyPending)
-          {
-            // A slot called Remove(window) -> deferred destroy at the outermost
-            // Process() unwind. Skip BOTH the window Emit and the idle request.
-          }
-          else if(mPendingViews.empty() && mPendingViewLayoutFinishedEvents.empty())
-          {
-            // Truly settled: no re-queued layout work AND no View events stranded
-            // by a nested depth>=2 ProcessLayouts (its settle gate was skipped).
-            mLayoutDirtySinceEmit = false;
-            mLayoutFinishedSignal.Emit(window);
-          }
-          else
-          {
-            // A slot re-invalidated, or a nested pass repopulated the events map.
-            // Keep the latch armed and schedule a follow-up settled pass to drain.
-            mLayoutDirtySinceEmit = true;
-            if(DALI_LIKELY(Adaptor::IsAvailable()))
-            {
-              Adaptor::Get().RequestProcessEventsOnIdle();
-            }
-          }
+          // Fully settled in the pre phase. Do NOT emit here; the signals must
+          // fire in the post-process phase (after core size negotiation). Just
+          // schedule the emit for this frame's post pass, which runs later in
+          // the same ProcessEvents cycle.
+          mEmitScheduled = true;
         }
         else if(!mPendingViews.empty())
         {
-          // Work was re-scheduled during this pass; not settled yet. Ensure a
-          // follow-up pass runs even if the app would otherwise idle.
+          // Work was re-scheduled during this pass; not settled yet. Cancel any
+          // stale schedule so the post pass does not emit from a previous frame,
+          // and ensure a follow-up pass runs even if the app would otherwise idle.
+          mEmitScheduled        = false;
+          mLayoutDirtySinceEmit = true;
+          if(DALI_LIKELY(Adaptor::IsAvailable()))
+          {
+            Adaptor::Get().RequestProcessEventsOnIdle();
+          }
+        }
+      }
+    }
+    else
+    {
+      // Post-process phase (postProcess == true), window valid. RunProcessors
+      // (pre) always runs before RunPostProcessors (post) in the same
+      // ProcessEvents cycle, so the outermost pre pass has already re-evaluated
+      // mEmitScheduled this frame: it is true only when the layout settled this
+      // frame, and false when pending work remains. Emit exactly once here.
+      if(mProcessDepth == 1 && mEmitScheduled)
+      {
+        mEmitScheduled = false;
+
+        // Deliver every subscribed View's layout-finished event FIRST (in
+        // traversal order), then decide the window signal.
+        //
+        // CAVEAT (do not "fix" by adding a cap without agreement): a View
+        // LayoutFinishedSignal slot that unconditionally re-invalidates layout
+        // spins an endless dirty->settled->emit cycle. This is intentionally
+        // NOT capped here (consistent with the window signal); the contract is
+        // documented on View::LayoutFinishedSignal as "guard re-layout in the
+        // slot behind a real condition". A view is also re-collected/re-emitted
+        // whenever it is re-arranged, even with unchanged bounds, so callers
+        // must not treat an emit as "bounds changed".
+        EmitPendingViewLayoutFinishedSignals();
+
+        if(mDestroyPending)
+        {
+          // A slot called Remove(window) -> deferred destroy at the outermost
+          // Process() unwind. Skip BOTH the window Emit and the idle request.
+        }
+        else if(mPendingViews.empty() && mPendingViewLayoutFinishedEvents.empty())
+        {
+          // Truly settled: no re-queued layout work AND no View events stranded
+          // by a nested depth>=2 ProcessLayouts (its settle gate was skipped).
+          mLayoutDirtySinceEmit = false;
+          mLayoutFinishedSignal.Emit(window);
+        }
+        else
+        {
+          // A slot re-invalidated, or a nested pass repopulated the events map.
+          // Keep the latch armed and schedule a follow-up settled pass to drain.
           mLayoutDirtySinceEmit = true;
           if(DALI_LIKELY(Adaptor::IsAvailable()))
           {
@@ -858,6 +881,7 @@ private:
   bool                                                  mProcessingScheduled;
   LayoutController::LayoutFinishedSignalType            mLayoutFinishedSignal;                ///< Emitted when layout fully settles for this window
   bool                                                  mLayoutDirtySinceEmit{false};         ///< Settled latch: armed by RequestLayout, cleared at emit
+  bool                                                  mEmitScheduled{false};                ///< PRE-phase settle detected; POST phase must emit the layout-finished signals this frame
   int                                                   mProcessDepth{0};                     ///< Process() re-entrancy depth (emit gate + deferred-destroy safe point)
   bool                                                  mDestroyPending{false};               ///< Deferred self-destruct requested during processing
   std::vector<ActiveCollectorFrame>                     mActiveCollectorStack;                ///< Stack of per-root collectors (nested-pass safe)

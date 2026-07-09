@@ -147,6 +147,12 @@ public:
    *   layout work drains to nothing. It recurs whenever layout is invalidated
    *   again and settles again; it is not a one-shot for the application
    *   lifetime.
+   * - Emitted during the post-process phase, i.e. AFTER DALi core size
+   *   negotiation (Relayout) for the frame in which layout settled. Measure and
+   *   Arrange still run in the pre-process phase; only the emit is deferred to
+   *   post-process. A manual ProcessLayouts() therefore performs layout
+   *   synchronously but does NOT emit this signal in the same call; the emit
+   *   fires on the next post-process pass (e.g. after the next ProcessEvents).
    * - Reflects Measure/Arrange completion ONLY. It does NOT wait for layout
    *   transition animations to finish; use a transition-finished callback if
    *   post-animation geometry is required.

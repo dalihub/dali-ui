@@ -1603,10 +1603,13 @@ public: // State API (non-chaining)
    *
    * Fires once per dirty-to-settled layout episode of this View's window, after
    * all Measure/Arrange work for the window has drained (same settle point as
-   * LayoutController::LayoutFinishedSignal). The callback receives this View and
-   * its arranged target as a LayoutRect in PARENT-relative, visual (scale-
-   * applied) units. Under RIGHT_TO_LEFT the x is the mirrored (final) position.
-   * The bounds are the PRE-transition target, not intermediate animated values.
+   * LayoutController::LayoutFinishedSignal). Emitted during the post-process
+   * phase, i.e. AFTER DALi core size negotiation (Relayout); Measure/Arrange
+   * still run in the pre-process phase and only the emit is deferred. The
+   * callback receives this View and its arranged target as a LayoutRect in
+   * PARENT-relative, visual (scale-applied) units. Under RIGHT_TO_LEFT the x is
+   * the mirrored (final) position. The bounds are the PRE-transition target,
+   * snapshotted during arrange, not intermediate animated values.
    *
    * Recurs: if a slot invalidates layout again, the View is re-arranged and the
    * signal fires again on a later settled pass. Connecting after a layout pass
