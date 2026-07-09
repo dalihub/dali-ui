@@ -666,6 +666,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mDispatchKeyEvents(true),
   mAccessibleCreatable(true),
   mProcessorRegistered(false),
+  mFittingModeLayoutFinishedSignalConnected(false),
   mDefaultFocusIndicatorSuppressedByStateEffect(false),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT))
 {
@@ -995,7 +996,7 @@ void ViewDataImpl::RelayoutDefault(const Vector2& size, RelayoutContainer& conta
     }
   }
 
-  ApplyFittingMode(size);
+  ApplyFittingMode(size, false);
 }
 
 const ViewState& ViewDataImpl::GetState() const
@@ -4738,12 +4739,30 @@ void ViewDataImpl::EmitAccessibilityStateChanged(Dali::Integration::Accessibilit
   }
 }
 
-void ViewDataImpl::ApplyFittingMode(const Vector2& size)
+void ViewDataImpl::ApplyFittingMode(const Vector2& size, bool isLayoutFinishedUpdate)
 {
   if(DALI_LIKELY(mVisualData))
   {
-    mVisualData->ApplyFittingMode(size);
+    mVisualData->ApplyFittingMode(size, isLayoutFinishedUpdate);
   }
+}
+
+void ViewDataImpl::EnsureFittingModeLayoutFinishedSignalConnected()
+{
+  if(!mFittingModeLayoutFinishedSignalConnected)
+  {
+    Ui::View handle = Ui::View::DownCast(mViewImpl.Self());
+    if(handle)
+    {
+      handle.LayoutFinishedSignal().Connect(this, &ViewDataImpl::OnLayoutFinished);
+      mFittingModeLayoutFinishedSignalConnected = true;
+    }
+  }
+}
+
+void ViewDataImpl::OnLayoutFinished(Ui::View view, LayoutRect bounds)
+{
+  ApplyFittingMode(Vector2(bounds.width, bounds.height), true);
 }
 
 void ViewDataImpl::SetBackground(const Property::Map& map)
@@ -5248,7 +5267,7 @@ void ViewDataImpl::Process(bool postProcessor)
   if(DALI_LIKELY(mVisualData))
   {
     // Call ApplyFittingMode
-    mVisualData->ApplyFittingMode(mSize);
+    mVisualData->ApplyFittingMode(mSize, false);
   }
   mProcessorRegistered = false;
 }

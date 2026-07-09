@@ -663,8 +663,22 @@ public:
    * @brief Apply fittingMode
    *
    * @param[in] size The size of the view
+   * @param[in] isLayoutFinishedUpdate Whether fitting mode is updated after layout has finished
    */
-  void ApplyFittingMode(const Vector2& size);
+  void ApplyFittingMode(const Vector2& size, bool isLayoutFinishedUpdate = false);
+
+  /**
+   * @brief Ensures this view listens to its layout-finished signal for fitting mode update.
+   */
+  void EnsureFittingModeLayoutFinishedSignalConnected();
+
+  /**
+   * @brief Called when this view's layout is finished.
+   *
+   * @param[in] view The view whose layout is finished
+   * @param[in] bounds The arranged bounds of the view
+   */
+  void OnLayoutFinished(Ui::View view, LayoutRect bounds);
 
   /**
    * @brief Register processor
@@ -895,6 +909,7 @@ private:
   bool mDispatchKeyEvents : 1;                            ///< Whether the actor emits key event signals
   bool mAccessibleCreatable : 1;                          ///< Whether we can create new accessible or not.
   bool mProcessorRegistered : 1;                          ///< Whether the processor is registered.
+  bool mFittingModeLayoutFinishedSignalConnected : 1;     ///< Whether layout-finished signal is connected for fitting mode update.
   bool mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
 
   static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG) - 1>::value + 1;

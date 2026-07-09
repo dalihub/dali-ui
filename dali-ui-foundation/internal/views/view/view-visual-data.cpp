@@ -638,6 +638,11 @@ void ViewDataImpl::VisualData::RegisterVisual(Property::Index index, Ui::Integra
     mVisuals.PushBack(newRegisteredVisual);
 
     Internal::Visual::Base& visualImpl = Ui::GetImplementation(visual);
+    if(visualImpl.IsFittingModeRequired() && visualImpl.GetType() != Ui::Integration::InternalVisualType::TEXT)
+    {
+      mOuter.EnsureFittingModeLayoutFinishedSignalConnected();
+    }
+
     // Put on stage if enabled and the view is already on the stage
     if((enabled == VisualState::ENABLED) && self.GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
     {
@@ -1484,7 +1489,7 @@ Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Integ
   return Dali::Ui::VisualBase();
 }
 
-void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
+void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, bool isLayoutFinishedUpdate)
 {
   Actor  self;
   Insets padding;
@@ -1500,7 +1505,8 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
 
     Internal::Visual::Base& visualImpl = Ui::GetImplementation((*iter)->visual);
 
-    if(!visualImpl.IsFittingModeRequired())
+    if(!visualImpl.IsFittingModeRequired() ||
+       (isLayoutFinishedUpdate && visualImpl.GetType() == Ui::Integration::InternalVisualType::TEXT))
     {
       continue;
     }

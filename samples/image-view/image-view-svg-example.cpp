@@ -33,7 +33,7 @@ using namespace Dali::Ui;
 class ImageViewSvgController : public ConnectionTracker
 {
   static constexpr int SVG_COUNT  = 2;
-  static constexpr int SIZE_COUNT = 3;
+  static constexpr int SIZE_COUNT = 4;
   static constexpr int TINT_COUNT = 4;
 
   struct SvgEntry
@@ -62,7 +62,7 @@ public:
   explicit ImageViewSvgController(Application& application)
   : mApplication(application),
     mSvgIndex(0),
-    mSizeIndex(1),
+    mSizeIndex(0),
     mTintIndex(0),
     mLastLoadingStatus(-1)
   {
@@ -304,6 +304,7 @@ const ImageViewSvgController::SvgEntry ImageViewSvgController::SVGS[ImageViewSvg
 };
 
 const ImageViewSvgController::SizeEntry ImageViewSvgController::SIZES[ImageViewSvgController::SIZE_COUNT] = {
+  {"unset", 0},
   {"128px", 128},
   {"256px", 256},
   {"512px", 512},
