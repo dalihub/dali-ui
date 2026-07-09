@@ -173,7 +173,8 @@ private:
 
   void OnScrollerPositionChanged(PropertyNotification source);
   void OnScrollAnimationFinished(Animation animation);
-  bool OnWheelEvent(Actor actor, WheelEvent event);
+  bool HasIntrinsicWheelHandling() const override;
+  bool OnWheelEvent(const Dali::WheelEvent& event) override;
   void OnPanGesture(Actor actor, PanGesture gesture);
 
   // Scroll state helpers — mirror ScrollView's Send* pattern.

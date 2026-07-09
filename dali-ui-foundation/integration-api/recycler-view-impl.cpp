@@ -41,7 +41,6 @@ namespace Integration
 namespace
 {
 constexpr float    DEFAULT_CACHE_EXTENT = 300.0f;
-constexpr float    KEY_SCROLL_ANIM_SEC  = 0.25f;
 constexpr float    KEY_ABSORB_VEL       = 600.0f;
 constexpr uint32_t KEY_FOCUS_CHECK_MS   = 50u;
 constexpr float    WHEEL_SCROLL_STEP    = 120.0f;
@@ -209,8 +208,6 @@ void RecyclerViewImpl::OnInitialize()
   mPanGestureDetector.AddDirection(PanGestureDetector::DIRECTION_HORIZONTAL);
   mPanGestureDetector.DetectedSignal().Connect(this, &RecyclerViewImpl::OnPanGesture);
   mPanGestureDetector.Attach(Self());
-
-  Self().WheelEventSignal().Connect(this, &RecyclerViewImpl::OnWheelEvent);
 
   FocusManager::Get().FocusChangedSignal().Connect(this, &RecyclerViewImpl::OnFocusManagerChanged);
 }
@@ -1521,7 +1518,12 @@ void RecyclerViewImpl::OnScrollAnimationFinished(Animation /*animation*/)
   SendScrollFinished();
 }
 
-bool RecyclerViewImpl::OnWheelEvent(Actor /*actor*/, WheelEvent event)
+bool RecyclerViewImpl::HasIntrinsicWheelHandling() const
+{
+  return true;
+}
+
+bool RecyclerViewImpl::OnWheelEvent(const Dali::WheelEvent& event)
 {
   if(!mAdapter || !mLayouter)
   {

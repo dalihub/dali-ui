@@ -427,10 +427,6 @@ void WebViewImpl::OnInitialize()
   self.SetProperty(Actor::Property::FOCUSABLE, true);
   self.SetProperty(Actor::Property::FOCUS_ON_TOUCH, true);
 
-  // Key events are now handled via OnKeyEvent() virtual override.
-  // Touch events are handled via signal connection.
-  self.TouchEventSignal().Connect(this, &WebViewImpl::OnTouchEvent);
-
   // --- Property notifications for display-area tracking ---
   // Fire when world position, size, or scale change by at least 1 unit / 0.1 scale step.
   mPositionUpdateNotification = self.AddPropertyNotification(Actor::Property::WORLD_POSITION, StepCondition(1.0f, 1.0f));
@@ -1372,7 +1368,12 @@ bool WebViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   return false;
 }
 
-bool WebViewImpl::OnTouchEvent(Dali::Actor /*actor*/, Dali::TouchEvent touch)
+bool WebViewImpl::HasIntrinsicTouchHandling() const
+{
+  return true;
+}
+
+bool WebViewImpl::OnTouchEvent(const Dali::TouchEvent& touch)
 {
   if(mMouseEventsEnabled && mWebEngine)
   {

@@ -541,12 +541,16 @@ private: // From ViewImpl
    */
   bool OnKeyEvent(const Dali::KeyEvent& event) override;
 
+private: // From CustomActorImpl
   /**
-   * @brief Handles touch events from Actor::TouchedSignal.
-   *
-   * Forwards the touch to the web engine via SendTouchEvent.
+   * @copydoc Dali::CustomActorImpl::HasIntrinsicTouchHandling()
    */
-  bool OnTouchEvent(Dali::Actor actor, Dali::TouchEvent touch);
+  bool HasIntrinsicTouchHandling() const override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnTouchEvent()
+   */
+  bool OnTouchEvent(const Dali::TouchEvent& touch) override;
 
 private: // Internal rendering callbacks
   /**

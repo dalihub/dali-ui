@@ -491,9 +491,14 @@ private:
   bool OnTouch(Actor actor, TouchEvent touch);
 
   /**
+   * @copydoc Dali::CustomActorImpl::HasIntrinsicWheelHandling()
+   */
+  bool HasIntrinsicWheelHandling() const override;
+
+  /**
    * @brief Handles mouse wheel events for scrolling.
    */
-  bool OnWheelEvent(Actor actor, WheelEvent event);
+  bool OnWheelEvent(const Dali::WheelEvent& event) override;
 
   /**
    * @brief Callback for pan gesture detection.

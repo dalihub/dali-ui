@@ -171,9 +171,6 @@ void ScrollViewImpl::OnInitialize()
   // After interception begins, subsequent events arrive here instead of children.
   Self().TouchEventSignal().Connect(this, &ScrollViewImpl::OnTouch);
 
-  // Handle mouse wheel events for desktop / emulator scrolling.
-  Self().WheelEventSignal().Connect(this, &ScrollViewImpl::OnWheelEvent);
-
   // Auto-scroll to focused child: subscribe to global focus changes.
   // Disconnects automatically when this object is destroyed (ConnectionTracker).
   FocusManager::Get().FocusChangedSignal().Connect(this, &ScrollViewImpl::OnFocusManagerChanged);
@@ -1620,7 +1617,12 @@ Vector2 ScrollViewImpl::DeltaFromScrollPosition(const Vector2& scrollPosition) c
   return Vector2(mScrollPosition.x - scrollPosition.x, mScrollPosition.y - scrollPosition.y);
 }
 
-bool ScrollViewImpl::OnWheelEvent(Actor /*actor*/, WheelEvent event)
+bool ScrollViewImpl::HasIntrinsicWheelHandling() const
+{
+  return true;
+}
+
+bool ScrollViewImpl::OnWheelEvent(const Dali::WheelEvent& event)
 {
   if(!mContent || !mHasScrollableArea)
   {
