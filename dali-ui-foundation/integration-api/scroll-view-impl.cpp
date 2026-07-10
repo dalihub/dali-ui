@@ -35,6 +35,7 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
@@ -1927,8 +1928,8 @@ void ScrollViewImpl::OnDragging(const PanGesture& gesture)
     // Scroll offset drives the rendered position directly. Setting the
     // Actor property bypasses layout so this does not feed back into the
     // requested layout position.
-    mContent.SetProperty(Actor::Property::POSITION_X, newX);
-    mContent.SetProperty(Actor::Property::POSITION_Y, newY);
+    Dali::Ui::Extension::SetPositionX(mContent, newX);
+    Dali::Ui::Extension::SetPositionY(mContent, newY);
 
     // Update scroll position from the actual content position
     mCurrentPosition = Vector2(newX, newY);
@@ -2232,8 +2233,8 @@ void ScrollViewImpl::ApplyScrollPosition(const Vector2& position)
     float posX = mMaximumStartX - position.x;
     float posY = mMaximumStartY - position.y;
 
-    mContent.SetProperty(Actor::Property::POSITION_X, posX);
-    mContent.SetProperty(Actor::Property::POSITION_Y, posY);
+    Dali::Ui::Extension::SetPositionX(mContent, posX);
+    Dali::Ui::Extension::SetPositionY(mContent, posY);
 
     // Update scroll bar position
     mScrollBar.UpdateScrollPosition(position);

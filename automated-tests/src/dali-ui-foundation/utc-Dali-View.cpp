@@ -21,6 +21,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
 #include <dali-ui-foundation/extension-api/shadow.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
@@ -3430,6 +3431,28 @@ int UtcDaliViewAccessibilityCallbacksP(void)
 
   parent.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::BUTTON));
   accessible->OnStatePropertySet(AccessibilityStateMask(UiAccessibility::State::SELECTED));
+
+  END_TEST;
+}
+
+int UtcDaliViewExtensionGeometrySettersP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliViewExtensionGeometrySettersP - extension-api free functions drive the Actor render geometry of a View handle");
+
+  View view = View::New();
+
+  // The raw Actor geometry setters are deleted on the public View handle;
+  // custom-view authors use the Dali::Ui::Extension free functions instead.
+  Extension::SetPositionX(view, 12.0f);
+  Extension::SetPositionY(view, 34.0f);
+  Extension::SetSizeWidth(view, 56.0f);
+  Extension::SetSizeHeight(view, 78.0f);
+
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_X), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_Y), 34.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 56.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 78.0f, TEST_LOCATION);
 
   END_TEST;
 }

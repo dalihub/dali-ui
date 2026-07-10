@@ -54,13 +54,15 @@ class ScrollViewImpl;
  * Basic usage:
  * @code
  * // Create a ScrollView
- * ScrollView scrollView = ScrollView::New()
- *     .SetSize(400.0f, 300.0f);
+ * ScrollView scrollView = ScrollView::New();
+ * scrollView.SetRequestedWidth(400.0f);
+ * scrollView.SetRequestedHeight(300.0f);
  *
  * // Create content view larger than the scroll view
- * View content = View::New()
- *     .SetSize(800.0f, 600.0f)
- *     .BackgroundColor(Color::WHITE);
+ * View content = View::New();
+ * content.SetRequestedWidth(800.0f);
+ * content.SetRequestedHeight(600.0f);
+ * content.BackgroundColor(Color::WHITE);
  * scrollView.SetContent(content);
  *
  * // Connect to scroll signals

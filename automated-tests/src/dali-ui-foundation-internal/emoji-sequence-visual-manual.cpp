@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
@@ -2640,10 +2641,10 @@ private:
     view.SetRequestedPositionY(y);
     view.SetRequestedWidth(width);
     view.SetRequestedHeight(height);
-    view.SetProperty(Actor::Property::POSITION_X, x);
-    view.SetProperty(Actor::Property::POSITION_Y, y);
-    view.SetProperty(Actor::Property::SIZE_WIDTH, width);
-    view.SetProperty(Actor::Property::SIZE_HEIGHT, height);
+    Dali::Ui::Extension::SetPositionX(view, x);
+    Dali::Ui::Extension::SetPositionY(view, y);
+    Dali::Ui::Extension::SetSizeWidth(view, width);
+    Dali::Ui::Extension::SetSizeHeight(view, height);
   }
 
   void UpdateFloatingSearchBounds()

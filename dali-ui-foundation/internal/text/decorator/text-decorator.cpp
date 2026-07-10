@@ -1880,8 +1880,7 @@ struct Decorator::Impl : public ConnectionTracker
     const float popupHeight = mCopyPastePopup.actor.GetRelayoutSize(Dimension::HEIGHT);
 
     // Sets the position of the popup below.
-    mCopyPastePopup.actor.SetProperty(Actor::Property::POSITION_Y,
-                                      floorf(CalculateVerticalPopUpPosition(0.5f * popupHeight, true)));
+    mCopyPastePopup.actor.SetPositionY(floorf(CalculateVerticalPopUpPosition(0.5f * popupHeight, true)));
   }
 
   void PopUpLeavesBottomBoundary(PropertyNotification source)
@@ -1889,8 +1888,7 @@ struct Decorator::Impl : public ConnectionTracker
     const float popupHeight = mCopyPastePopup.actor.GetRelayoutSize(Dimension::HEIGHT);
 
     // Sets the position of the popup above.
-    mCopyPastePopup.actor.SetProperty(Actor::Property::POSITION_Y,
-                                      floorf(CalculateVerticalPopUpPosition(0.5f * popupHeight, false)));
+    mCopyPastePopup.actor.SetPositionY(floorf(CalculateVerticalPopUpPosition(0.5f * popupHeight, false)));
   }
 
   void SetUpPopupPositionNotifications(const Vector3& popupHalfSize)

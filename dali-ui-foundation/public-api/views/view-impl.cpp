@@ -1263,10 +1263,10 @@ MeasuredSize ViewImpl::OnArrange(const LayoutRect& bounds)
   float height = bounds.height;
 
   Actor self = Self();
-  self.SetProperty(Actor::Property::POSITION_X, x);
-  self.SetProperty(Actor::Property::POSITION_Y, y);
-  self.SetProperty(Actor::Property::SIZE_WIDTH, width);
-  self.SetProperty(Actor::Property::SIZE_HEIGHT, height);
+  self.SetPositionX(x);
+  self.SetPositionY(y);
+  self.SetWidth(width);
+  self.SetHeight(height);
 
   if(!mImpl->mChildren.Empty())
   {
@@ -1387,7 +1387,7 @@ void ViewImpl::ApplyLayoutDirection(float parentWidth)
     Actor child  = childImpl.Self();
     float oldX   = child.GetProperty<float>(Actor::Property::POSITION_X);
     float childW = child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
-    child.SetProperty(Actor::Property::POSITION_X, parentWidth - oldX - childW);
+    child.SetPositionX(parentWidth - oldX - childW);
   }
 }
 
@@ -2639,10 +2639,10 @@ MeasuredSize ViewImpl::DispatchMeasureWithLayoutManager(LayoutManager* manager, 
 MeasuredSize ViewImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& visualBounds)
 {
   Actor self = Self();
-  self.SetProperty(Actor::Property::POSITION_X, visualBounds.x);
-  self.SetProperty(Actor::Property::POSITION_Y, visualBounds.y);
-  self.SetProperty(Actor::Property::SIZE_WIDTH, visualBounds.width);
-  self.SetProperty(Actor::Property::SIZE_HEIGHT, visualBounds.height);
+  self.SetPositionX(visualBounds.x);
+  self.SetPositionY(visualBounds.y);
+  self.SetWidth(visualBounds.width);
+  self.SetHeight(visualBounds.height);
 
   float   s       = GetEffectiveScale();
   Extents padding = GetPadding();
@@ -2661,10 +2661,10 @@ MeasuredSize ViewImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, 
 MeasuredSize ViewImpl::DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& visualBounds)
 {
   Actor self = Self();
-  self.SetProperty(Actor::Property::POSITION_X, visualBounds.x);
-  self.SetProperty(Actor::Property::POSITION_Y, visualBounds.y);
-  self.SetProperty(Actor::Property::SIZE_WIDTH, visualBounds.width);
-  self.SetProperty(Actor::Property::SIZE_HEIGHT, visualBounds.height);
+  self.SetPositionX(visualBounds.x);
+  self.SetPositionY(visualBounds.y);
+  self.SetWidth(visualBounds.width);
+  self.SetHeight(visualBounds.height);
   Ui::View view = Ui::View::DownCast(self);
   return callback->Invoke(view, visualBounds);
 }

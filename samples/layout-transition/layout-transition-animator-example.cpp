@@ -134,7 +134,7 @@ public:
     }
     const float p = ctx.progress;
     actor.SetProperty(Actor::Property::OPACITY, p);
-    actor.SetProperty(Actor::Property::SIZE_HEIGHT, ctx.toBounds.height * p);
+    actor.SetHeight(ctx.toBounds.height * p);
   }
 
   /// EXIT animator: height fromBounds.height → 0 anchored at the TOP edge,
@@ -148,7 +148,7 @@ public:
     }
     const float p = ctx.progress;
     actor.SetProperty(Actor::Property::OPACITY, 1.0f - p);
-    actor.SetProperty(Actor::Property::SIZE_HEIGHT, ctx.fromBounds.height * (1.0f - p));
+    actor.SetHeight(ctx.fromBounds.height * (1.0f - p));
   }
 
   /// CHANGE animator: linear interpolation of arranged bounds.
@@ -164,10 +164,10 @@ public:
     const float y   = ctx.fromBounds.y      + (ctx.toBounds.y - ctx.fromBounds.y) * p;
     const float w   = ctx.fromBounds.width  + (ctx.toBounds.width  - ctx.fromBounds.width)  * p;
     const float h   = ctx.fromBounds.height + (ctx.toBounds.height - ctx.fromBounds.height) * p;
-    actor.SetProperty(Actor::Property::POSITION_X, x);
-    actor.SetProperty(Actor::Property::POSITION_Y, y);
-    actor.SetProperty(Actor::Property::SIZE_WIDTH, w);
-    actor.SetProperty(Actor::Property::SIZE_HEIGHT, h);
+    actor.SetPositionX(x);
+    actor.SetPositionY(y);
+    actor.SetWidth(w);
+    actor.SetHeight(h);
   }
 
   void AppendChild()

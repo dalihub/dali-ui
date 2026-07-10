@@ -1795,10 +1795,10 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
 MeasuredSize InputFieldImpl::OnArrange(const LayoutRect& bounds)
 {
   Actor self = Self();
-  self.SetProperty(Actor::Property::POSITION_X, bounds.x);
-  self.SetProperty(Actor::Property::POSITION_Y, bounds.y);
-  self.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
-  self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
+  self.SetPositionX(bounds.x);
+  self.SetPositionY(bounds.y);
+  self.SetWidth(bounds.width);
+  self.SetHeight(bounds.height);
 
   DALI_LOG_RELEASE_INFO("[%p] pos:%f,%f, size:%f,%f\n", mController.Get(), bounds.x, bounds.y, bounds.width,
                         bounds.height);

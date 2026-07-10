@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/recycler-view-impl.h>
 #include <dali-ui-foundation/integration-api/recycler.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
@@ -623,10 +624,10 @@ MeasuredSize RecyclerViewImpl::OnMeasure(float widthConstraint, float heightCons
 
 MeasuredSize RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
 {
-  Self().SetProperty(Actor::Property::POSITION_X, bounds.x);
-  Self().SetProperty(Actor::Property::POSITION_Y, bounds.y);
-  Self().SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
-  Self().SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
+  Self().SetPositionX(bounds.x);
+  Self().SetPositionY(bounds.y);
+  Self().SetWidth(bounds.width);
+  Self().SetHeight(bounds.height);
 
   const float newWidth    = std::max(0.0f, bounds.width);
   const float newHeight   = std::max(0.0f, bounds.height);
@@ -677,13 +678,13 @@ void RecyclerViewImpl::UpdateScrollerSize()
   const float contentExtent = mLayouter.ComputeScrollRange();
   if(mLayouter.CanScrollHorizontally() && !mLayouter.CanScrollVertically())
   {
-    mScroller.SetProperty(Actor::Property::SIZE_WIDTH, std::max(mViewportWidth, contentExtent));
-    mScroller.SetProperty(Actor::Property::SIZE_HEIGHT, mViewportHeight);
+    Dali::Ui::Extension::SetSizeWidth(mScroller, std::max(mViewportWidth, contentExtent));
+    Dali::Ui::Extension::SetSizeHeight(mScroller, mViewportHeight);
   }
   else
   {
-    mScroller.SetProperty(Actor::Property::SIZE_WIDTH, mViewportWidth);
-    mScroller.SetProperty(Actor::Property::SIZE_HEIGHT, std::max(mViewportHeight, contentExtent));
+    Dali::Ui::Extension::SetSizeWidth(mScroller, mViewportWidth);
+    Dali::Ui::Extension::SetSizeHeight(mScroller, std::max(mViewportHeight, contentExtent));
   }
 }
 
@@ -1045,13 +1046,13 @@ void RecyclerViewImpl::ApplyScrollerPosition()
   const float offset = mLayouter.ComputeScrollOffset();
   if(mLayouter.CanScrollHorizontally() && !mLayouter.CanScrollVertically())
   {
-    mScroller.SetProperty(Actor::Property::POSITION_X, -offset);
-    mScroller.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+    Dali::Ui::Extension::SetPositionX(mScroller, -offset);
+    Dali::Ui::Extension::SetPositionY(mScroller, 0.0f);
   }
   else
   {
-    mScroller.SetProperty(Actor::Property::POSITION_X, 0.0f);
-    mScroller.SetProperty(Actor::Property::POSITION_Y, -offset);
+    Dali::Ui::Extension::SetPositionX(mScroller, 0.0f);
+    Dali::Ui::Extension::SetPositionY(mScroller, -offset);
   }
 }
 

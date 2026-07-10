@@ -206,10 +206,10 @@ void ApplyBoundsEndpointAtBoundsAnimation(Animation&                animation,
   {
     // Bounds duration 0: settle target immediately. Visual spec's own
     // duration still drives the lifecycle animation.
-    actor.SetProperty(Actor::Property::POSITION_X, target.x);
-    actor.SetProperty(Actor::Property::POSITION_Y, target.y);
-    actor.SetProperty(Actor::Property::SIZE_WIDTH, target.width);
-    actor.SetProperty(Actor::Property::SIZE_HEIGHT, target.height);
+    actor.SetPositionX(target.x);
+    actor.SetPositionY(target.y);
+    actor.SetWidth(target.width);
+    actor.SetHeight(target.height);
     return;
   }
 
@@ -233,10 +233,10 @@ void SetActorBoundsImmediate(Dali::Actor actor, const LayoutRect& bounds)
   {
     return;
   }
-  actor.SetProperty(Actor::Property::POSITION_X, bounds.x);
-  actor.SetProperty(Actor::Property::POSITION_Y, bounds.y);
-  actor.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
-  actor.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
+  actor.SetPositionX(bounds.x);
+  actor.SetPositionY(bounds.y);
+  actor.SetWidth(bounds.width);
+  actor.SetHeight(bounds.height);
 }
 
 LayoutTransitionDispatcher::TransientActorState
@@ -412,10 +412,10 @@ void LayoutTransitionDispatcher::SettleChangeWithoutAnimation(ViewImpl*         
   CancelActiveAnimation(child, SpecCancelPolicy::SETTLE_ENTER_TO_FINAL);
   CancelActiveAnimator(child);
   CancelPendingExit(child);
-  actor.SetProperty(Actor::Property::POSITION_X, to.x);
-  actor.SetProperty(Actor::Property::POSITION_Y, to.y);
-  actor.SetProperty(Actor::Property::SIZE_WIDTH, to.width);
-  actor.SetProperty(Actor::Property::SIZE_HEIGHT, to.height);
+  actor.SetPositionX(to.x);
+  actor.SetPositionY(to.y);
+  actor.SetWidth(to.width);
+  actor.SetHeight(to.height);
 }
 
 void LayoutTransitionDispatcher::CollectTransitionViews(ViewImpl* node, std::vector<ViewImpl*>& out)
@@ -1098,10 +1098,10 @@ void LayoutTransitionDispatcher::StartChangeTransition(ViewImpl*             chi
   // the visually current state. Same-thread message order ensures these
   // SetProperty messages are processed before the AnimateTo target is
   // captured by the update thread.
-  actor.SetProperty(Actor::Property::POSITION_X, effectiveFrom.x);
-  actor.SetProperty(Actor::Property::POSITION_Y, effectiveFrom.y);
-  actor.SetProperty(Actor::Property::SIZE_WIDTH, effectiveFrom.width);
-  actor.SetProperty(Actor::Property::SIZE_HEIGHT, effectiveFrom.height);
+  actor.SetPositionX(effectiveFrom.x);
+  actor.SetPositionY(effectiveFrom.y);
+  actor.SetWidth(effectiveFrom.width);
+  actor.SetHeight(effectiveFrom.height);
 
   Animation  anim = Animation::New(durationSec + delaySec);
   TimePeriod period(delaySec, durationSec);
@@ -1419,10 +1419,10 @@ void LayoutTransitionDispatcher::StartAnimatorChange(ViewImpl* child, const Layo
 
   // Revert actor properties to effectiveFrom; the application callback will
   // overwrite per frame from this point.
-  actor.SetProperty(Actor::Property::POSITION_X, effectiveFrom.x);
-  actor.SetProperty(Actor::Property::POSITION_Y, effectiveFrom.y);
-  actor.SetProperty(Actor::Property::SIZE_WIDTH, effectiveFrom.width);
-  actor.SetProperty(Actor::Property::SIZE_HEIGHT, effectiveFrom.height);
+  actor.SetPositionX(effectiveFrom.x);
+  actor.SetPositionY(effectiveFrom.y);
+  actor.SetWidth(effectiveFrom.width);
+  actor.SetHeight(effectiveFrom.height);
 
   AnimatorState state;
   state.slot              = LayoutTransitionSlot::CHANGE;

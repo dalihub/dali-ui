@@ -344,7 +344,7 @@ public: // Properties
    *
    * To drive the rendered position without affecting the layout request
    * (e.g. for scrolling or animation that should not feed back into
-   * layout), set Actor::Property::POSITION_X via SetProperty directly.
+   * layout), use Dali::Ui::Extension::SetPositionX(view, x).
    *
    * @param[in] x The requested X position
    */
@@ -383,6 +383,13 @@ public: // Properties
    * A positive value sets a fixed width.
    * WRAP_CONTENT (-1): sizes to content (default).
    * MATCH_PARENT (-2): fills the parent container.
+   *
+   * @note The raw Dali::Actor size setters (SetSize/SetWidth/SetHeight) are
+   * unavailable on View: a View's rendered geometry is owned by the layout
+   * system and would be overwritten on the next Arrange. Use this and
+   * SetRequestedHeight() for layout-aware sizing; to drive the rendered size
+   * directly (e.g. for scrolling or animation that must not feed back into
+   * layout), use Dali::Ui::Extension::SetSizeWidth(view, width).
    *
    * @param[in] width The requested width
    */
@@ -503,6 +510,26 @@ public: // Properties
    */
   Extents GetPadding() const;
 
+  // The Dali::Actor geometry setters below are deleted on View because a View's
+  // rendered geometry (size and position) is owned by the layout system: every
+  // Measure/Arrange pass writes the Actor POSITION_* and SIZE_* properties
+  // directly (see OnArrange), so any value set through them would be silently
+  // overwritten on the next layout pass. They are kept private so the
+  // invoke-method generator, which scans only public members, does not emit
+  // wrappers that would call the deleted functions. Public callers use the
+  // layout-aware API (SetRequestedWidth/Height, SetRequestedPositionX/Y) or the
+  // Dali::Ui::Extension geometry setters instead.
+private:
+  void SetSize(const Vector3& size)         = delete;
+  void SetWidth(float width)                = delete;
+  void SetHeight(float height)              = delete;
+  void SetDepth(float depth)                = delete;
+  void SetPosition(const Vector3& position) = delete;
+  void SetPositionX(float x)                = delete;
+  void SetPositionY(float y)                = delete;
+  void SetPositionZ(float z)                = delete;
+
+public:
   /**
    * @brief Sets the layout mode of this View.
    *
@@ -512,13 +539,13 @@ public: // Properties
    * LayoutMode::STANDALONE excludes this View from the parent's accumulation,
    * spacing and index calculations. The View's size is still measured normally
    * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
-   * but its position is taken from SetPositionX/SetPositionY instead of being
+   * but its position is taken from SetRequestedPositionX/SetRequestedPositionY instead of being
    * decided by the parent layout. This is useful for floating overlays, drag
    * previews, tooltips and absolute positioning inside any LayoutManager.
    *
    * Standalone children ignore the parent's padding entirely. Their measured
    * size is the parent's full inner size minus the child's own margin, and
-   * their final position is SetPositionX/SetPositionY plus the child's own
+   * their final position is SetRequestedPositionX/SetRequestedPositionY plus the child's own
    * margin in the parent's coordinate space. This keeps size and position
    * consistent: a Standalone child with MATCH_PARENT fills the parent edge
    * to edge regardless of parent padding, and any margin set on the child

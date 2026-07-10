@@ -14,6 +14,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
 
@@ -360,9 +361,9 @@ private:
     // origin and initial size explicit.
     shimmerBand.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     shimmerBand.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-    shimmerBand.SetProperty(Actor::Property::SIZE_WIDTH, SHIMMER_BAND_WIDTH);
-    shimmerBand.SetProperty(Actor::Property::POSITION_X, GetShimmerStartX());
-    shimmerBand.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+    Dali::Ui::Extension::SetSizeWidth(shimmerBand, SHIMMER_BAND_WIDTH);
+    Dali::Ui::Extension::SetPositionX(shimmerBand, GetShimmerStartX());
+    Dali::Ui::Extension::SetPositionY(shimmerBand, 0.0f);
 
     GradientVisual shimmerGradient = GradientVisual::New();
     shimmerGradient.SetLinearGradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));

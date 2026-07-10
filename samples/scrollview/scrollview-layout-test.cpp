@@ -53,9 +53,10 @@ public:
       .SetScrollDirection(ScrollDirection::Vertical)
       .SetLayoutWidth(400.0f)
       .SetLayoutHeight(600.0f)
-      .SetPosition(100.0f, 100.0f)
       .BackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))
       .SetContent(content);
+    scrollView.SetRequestedPositionX(100.0f);
+    scrollView.SetRequestedPositionY(100.0f);
 
     // Add scroll view to window
     window.Add(scrollView);
@@ -70,9 +71,10 @@ public:
       .SetScrollDirection(ScrollDirection::Vertical)
       .SetLayoutWidth(400.0f)
       .SetLayoutHeight(600.0f)
-      .SetPosition(600.0f, 100.0f)
       .BackgroundColor(Vector4(0.8f, 0.8f, 0.8f, 1.0f))
       .SetContent(matchParentContent);
+    scrollView2.SetRequestedPositionX(600.0f);
+    scrollView2.SetRequestedPositionY(100.0f);
 
     window.Add(scrollView2);
   }

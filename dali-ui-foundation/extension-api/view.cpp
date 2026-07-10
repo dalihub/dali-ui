@@ -1,5 +1,3 @@
-#pragma once
-
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
@@ -17,15 +15,38 @@
  *
  */
 
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
-#include <dali-ui-foundation/extension-api/group-selectable-view-impl.h>
-#include <dali-ui-foundation/extension-api/interactive-view-impl.h>
-#include <dali-ui-foundation/extension-api/property-registration-helper.h>
-#include <dali-ui-foundation/extension-api/selectable-view-impl.h>
-#include <dali-ui-foundation/extension-api/shadow.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
-#include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
-#include <dali-ui-foundation/extension-api/theme-loader-interface.h>
-#include <dali-ui-foundation/extension-api/ui-config-impl.h>
+// CLASS HEADER
 #include <dali-ui-foundation/extension-api/view.h>
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/actors/actor.h>
+
+namespace Dali
+{
+namespace Ui
+{
+namespace Extension
+{
+void SetPositionX(View view, float x)
+{
+  static_cast<Dali::Actor&>(view).SetPositionX(x);
+}
+
+void SetPositionY(View view, float y)
+{
+  static_cast<Dali::Actor&>(view).SetPositionY(y);
+}
+
+void SetSizeWidth(View view, float width)
+{
+  static_cast<Dali::Actor&>(view).SetWidth(width);
+}
+
+void SetSizeHeight(View view, float height)
+{
+  static_cast<Dali::Actor&>(view).SetHeight(height);
+}
+
+} // namespace Extension
+} // namespace Ui
+} // namespace Dali

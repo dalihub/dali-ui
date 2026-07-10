@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
@@ -36,8 +37,8 @@ View CreateView(UiTestApplication& application)
 {
   View view = View::New();
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
-  view.SetProperty(Actor::Property::SIZE_WIDTH, 400.0f);
-  view.SetProperty(Actor::Property::SIZE_HEIGHT, 400.0f);
+  Dali::Ui::Extension::SetSizeWidth(view, 400.0f);
+  Dali::Ui::Extension::SetSizeHeight(view, 400.0f);
   application.GetScene().Add(view);
   view.Arrange(LayoutRect(0.0f, 0.0f, 400.0f, 400.0f));
   application.SendNotification();

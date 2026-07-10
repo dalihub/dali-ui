@@ -41,9 +41,9 @@ config.Apply();
 ## 사용 예시
 
 ```cpp
-view.SetRequestedWidth(200_dp)
-    .SetRequestedHeight(100_spx)
-    .SetPositionX(50_sdp);
+view.SetRequestedWidth(200_dp);
+view.SetRequestedHeight(100_spx);
+view.SetRequestedPositionX(50_sdp);
 ```
 
 <br/>

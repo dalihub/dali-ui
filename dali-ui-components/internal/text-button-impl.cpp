@@ -230,10 +230,10 @@ MeasuredSize TextButtonImpl::OnMeasure(float widthConstraint, float heightConstr
 MeasuredSize TextButtonImpl::OnArrange(const LayoutRect& bounds)
 {
   Actor self = Self();
-  self.SetProperty(Actor::Property::POSITION_X, bounds.x);
-  self.SetProperty(Actor::Property::POSITION_Y, bounds.y);
-  self.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
-  self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
+  self.SetPositionX(bounds.x);
+  self.SetPositionY(bounds.y);
+  self.SetWidth(bounds.width);
+  self.SetHeight(bounds.height);
 
   float   s       = GetEffectiveScale();
   Extents padding = GetPadding();

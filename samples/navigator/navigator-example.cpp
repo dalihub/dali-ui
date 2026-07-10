@@ -31,6 +31,7 @@
 #include <dali-ui-components/public-api/dialog/dialog-container.h>
 #include <dali-ui-components/public-api/navigator/navigator.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
@@ -154,7 +155,7 @@ private:
     // already arranged and stable at 0, so AnimateTo from the current value is correct.
     // Opacity is never touched by layout, so AnimateTo is used for it everywhere.
     spec->enter = [](Animation& anim, View view) {
-      view.SetProperty(Actor::Property::POSITION_X, PAGE_SLIDE_TRAVEL);
+      Dali::Ui::Extension::SetPositionX(view, PAGE_SLIDE_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
       KeyFrames slideX = KeyFrames::New();
       slideX.Add(0.0f, PAGE_SLIDE_TRAVEL);
@@ -167,7 +168,7 @@ private:
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.82f, AlphaFunction::EASE_OUT);
     };
     spec->popEnter = [](Animation& anim, View view) {
-      view.SetProperty(Actor::Property::POSITION_X, -PAGE_SLIDE_TRAVEL);
+      Dali::Ui::Extension::SetPositionX(view, -PAGE_SLIDE_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.82f);
       KeyFrames slideX = KeyFrames::New();
       slideX.Add(0.0f, -PAGE_SLIDE_TRAVEL);
@@ -180,11 +181,11 @@ private:
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
     };
     spec->snapIncoming = [](View view) {
-      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
+      Dali::Ui::Extension::SetPositionX(view, 0.0f);
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     };
     spec->snapOutgoing = [](View view) {
-      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
+      Dali::Ui::Extension::SetPositionX(view, 0.0f);
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     };
 
@@ -210,8 +211,8 @@ private:
       wobbleY.Add(1.0f, 0.0f);
 
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
-      view.SetProperty(Actor::Property::POSITION_X, PAGE_WOBBLE_TRAVEL);
-      view.SetProperty(Actor::Property::POSITION_Y, -PAGE_WOBBLE_VERTICAL_TRAVEL);
+      Dali::Ui::Extension::SetPositionX(view, PAGE_WOBBLE_TRAVEL);
+      Dali::Ui::Extension::SetPositionY(view, -PAGE_WOBBLE_VERTICAL_TRAVEL);
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), wobbleX, AlphaFunction::EASE_OUT);
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_Y), wobbleY, AlphaFunction::EASE_OUT);
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 1.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.34f));
@@ -232,13 +233,13 @@ private:
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT, TimePeriod(0.0f, 0.28f));
     };
     spec->snapIncoming = [](View view) {
-      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
-      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      Dali::Ui::Extension::SetPositionX(view, 0.0f);
+      Dali::Ui::Extension::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     };
     spec->snapOutgoing = [](View view) {
-      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
-      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      Dali::Ui::Extension::SetPositionX(view, 0.0f);
+      Dali::Ui::Extension::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     };
 
@@ -255,7 +256,7 @@ private:
     // to 0 by ViewImpl::OnArrange). popExit animates the already-arranged modal from its
     // current position, so AnimateTo is correct there.
     spec->enter = [](Animation& anim, View view) {
-      view.SetProperty(Actor::Property::POSITION_Y, MODAL_DROP_TRAVEL);
+      Dali::Ui::Extension::SetPositionY(view, MODAL_DROP_TRAVEL);
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
       KeyFrames dropY = KeyFrames::New();
       dropY.Add(0.0f, MODAL_DROP_TRAVEL);
@@ -268,12 +269,12 @@ private:
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT);
     };
     spec->snapIncoming = [](View view) {
-      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      Dali::Ui::Extension::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     };
     spec->snapOutgoing = [](View view) {
-      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      Dali::Ui::Extension::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     };
@@ -313,8 +314,8 @@ private:
       scale.Add(0.70f, Vector3(0.96f, 0.96f, 1.0f));
       scale.Add(1.0f, Vector3(1.0f, 1.0f, 1.0f));
 
-      view.SetProperty(Actor::Property::POSITION_X, -MODAL_SHAKE_X_TRAVEL);
-      view.SetProperty(Actor::Property::POSITION_Y, -MODAL_BOUNCE_TRAVEL);
+      Dali::Ui::Extension::SetPositionX(view, -MODAL_SHAKE_X_TRAVEL);
+      Dali::Ui::Extension::SetPositionY(view, -MODAL_BOUNCE_TRAVEL);
       view.SetProperty(Actor::Property::SCALE, Vector3(0.62f, 0.62f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 0.0f);
       anim.AnimateBetween(Property(view, Actor::Property::POSITION_X), shakeX, AlphaFunction::EASE_OUT);
@@ -343,14 +344,14 @@ private:
       anim.AnimateTo(Property(view, Actor::Property::OPACITY), 0.0f, AlphaFunction::EASE_OUT, TimePeriod(0.08f, 0.30f));
     };
     spec->snapIncoming = [](View view) {
-      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
-      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      Dali::Ui::Extension::SetPositionX(view, 0.0f);
+      Dali::Ui::Extension::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     };
     spec->snapOutgoing = [](View view) {
-      view.SetProperty(Actor::Property::POSITION_X, 0.0f);
-      view.SetProperty(Actor::Property::POSITION_Y, 0.0f);
+      Dali::Ui::Extension::SetPositionX(view, 0.0f);
+      Dali::Ui::Extension::SetPositionY(view, 0.0f);
       view.SetProperty(Actor::Property::SCALE, Vector3(1.0f, 1.0f, 1.0f));
       view.SetProperty(Actor::Property::OPACITY, 1.0f);
     };

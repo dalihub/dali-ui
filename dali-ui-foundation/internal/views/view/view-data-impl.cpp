@@ -1405,7 +1405,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             if(width >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
                !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
             {
-              viewImpl.Self().SetProperty(Actor::Property::SIZE_WIDTH, width);
+              viewImpl.Self().SetWidth(width);
             }
           }
         }
@@ -1435,7 +1435,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             if(height >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
                !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
             {
-              viewImpl.Self().SetProperty(Actor::Property::SIZE_HEIGHT, height);
+              viewImpl.Self().SetHeight(height);
             }
           }
         }

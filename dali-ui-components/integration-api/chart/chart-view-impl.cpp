@@ -249,10 +249,10 @@ MeasuredSize ChartViewImpl::OnArrange(const LayoutRect& bounds)
   // system never resets those positions, so no save/restore is needed.
 
   Actor self = Self();
-  self.SetProperty(Actor::Property::POSITION_X, bounds.x);
-  self.SetProperty(Actor::Property::POSITION_Y, bounds.y);
-  self.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
-  self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
+  self.SetPositionX(bounds.x);
+  self.SetPositionY(bounds.y);
+  self.SetWidth(bounds.width);
+  self.SetHeight(bounds.height);
 
   const Vector2 newSize(bounds.width, bounds.height);
   if(newSize != mSize && newSize.width > 0.0f && newSize.height > 0.0f)
