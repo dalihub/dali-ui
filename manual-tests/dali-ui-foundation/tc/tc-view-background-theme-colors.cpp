@@ -107,9 +107,12 @@ public:
     cardRow.SetRequestedWidth(MATCH_PARENT);
     cardRow.SetRequestedHeight(CARD_HEIGHT);
     cardRow.SetPadding(Extents(0, 0, 0, GAP));
-    cardRow.AddChildren({MakeColorCard(), MakeGradientCard()});
+    cardRow.Add(MakeColorCard());
+    cardRow.Add(MakeGradientCard());
 
-    root.AddChildren({mStatusLabel, cardRow, MakeToggleButton()});
+    root.Add(mStatusLabel);
+    root.Add(cardRow);
+    root.Add(MakeToggleButton());
     contentArea.Add(root);
   }
 
