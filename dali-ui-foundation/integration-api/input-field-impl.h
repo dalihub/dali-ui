@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/public-api/text/style/outline.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
 namespace Dali
 {
@@ -87,6 +88,11 @@ public:
    * @copydoc Dali::Ui::InputField::GetText
    */
   Dali::String GetText() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetStyledText
+   */
+  void SetStyledText(const Text::StyledText& styledText);
 
   /**
    * @copydoc Dali::Ui::InputField::SetFontFamily
@@ -387,16 +393,6 @@ public:
    * @copydoc Dali::Ui::InputField::GetLayoutDirectionMode
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
-
-  /**
-   * @copydoc Dali::Ui::InputField::SetMarkupEnabled
-   */
-  void SetMarkupEnabled(bool enabled);
-
-  /**
-   * @copydoc Dali::Ui::InputField::IsMarkupEnabled
-   */
-  bool IsMarkupEnabled() const;
 
   /**
    * @copydoc Dali::Ui::InputField::SetFontWeight

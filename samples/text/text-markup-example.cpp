@@ -21,6 +21,19 @@ namespace
 {
 constexpr float STACK_SPACING = 10.0f;
 constexpr float STACK_PADDING = 20.0f;
+constexpr float INPUT_FIELD_HEIGHT = 64.0f;
+constexpr float INPUT_EDITOR_HEIGHT = 170.0f;
+
+constexpr const char* INPUT_FIELD_MARKUP =
+  "<color value='red'>Red</color> <font weight='bold' size='22'>Font</font> <i>Italic</i> "
+  "<u color='green' height='2' type='dashed' dash-gap='3' dash-width='5'>Underline</u> "
+  "<s color='blue' height='3'>Strike</s> <background color='yellow'>BG</background>";
+
+constexpr const char* INPUT_EDITOR_MARKUP =
+  "<color value='red'>Red</color> <font family='SamsungOneUI_700' size='24'>Font</font> <b>Bold</b> <i>Italic</i>\n"
+  "<u color='green' height='2' type='dashed' dash-gap='3' dash-width='5'>Underline</u> "
+  "<s color='blue' height='3'>Strike</s> <background color='yellow'>Background</background>\n"
+  "<a href='https://www.samsung.com' color='blue' clicked-color='red'>Anchor color</a> &lt;entity&gt;";
 } // namespace
 
 class TextController : public ConnectionTracker
@@ -51,6 +64,10 @@ private:
       CreateStyledTextLabel("<font size='24' family='SamsungOneUI_700'>Markup </font><color value='red'>Text</color>"),
       mAnchorLabel,
       mAnchorColorLabel,
+      CreatePlainLabel("InputField markup"),
+      CreateMarkupInputField(INPUT_FIELD_MARKUP),
+      CreatePlainLabel("InputEditor markup"),
+      CreateMarkupInputEditor(INPUT_EDITOR_MARKUP),
     });
     window.Add(root);
 
@@ -81,6 +98,54 @@ private:
     label.SetFontSize(20.0f);
     label.SetFontFamily("SamsungOneUI_400");
     return label;
+  }
+
+  Label CreatePlainLabel(const char* text)
+  {
+    Label label = Label::New(text);
+    label.SetFontSize(16.0f);
+    label.SetFontFamily("SamsungOneUI_700");
+    label.SetTextColor(UiColor(0x333333));
+    return label;
+  }
+
+  InputField CreateMarkupInputField(const Dali::String& markup)
+  {
+    InputField inputField = InputField::New();
+    inputField.SetStyledText(Text::StyledText::FromMarkup(markup));
+    inputField.SetFontSize(20.0f);
+    inputField.SetFontFamily("SamsungOneUI_400");
+    inputField.SetTextColor(UiColor(0x202020));
+    inputField.SetCursorWidth(2);
+    inputField.SetCursorColor(UiColor(0x202020));
+    inputField.SetSelectionColor(UiColor(0xA7D8FF));
+    inputField.SetRequestedWidth(MATCH_PARENT);
+    inputField.SetRequestedHeight(INPUT_FIELD_HEIGHT);
+    inputField.SetBackgroundColor(UiColor(0xF3F3F3));
+    inputField.SetPadding(Extents(12, 12, 8, 8));
+    inputField.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    inputField.SetFocusable(true);
+    inputField.SetMaximumLength(500);
+    return inputField;
+  }
+
+  InputEditor CreateMarkupInputEditor(const Dali::String& markup)
+  {
+    InputEditor inputEditor = InputEditor::New();
+    inputEditor.SetStyledText(Text::StyledText::FromMarkup(markup));
+    inputEditor.SetFontSize(20.0f);
+    inputEditor.SetFontFamily("SamsungOneUI_400");
+    inputEditor.SetTextColor(UiColor(0x202020));
+    inputEditor.SetCursorWidth(2);
+    inputEditor.SetCursorColor(UiColor(0x202020));
+    inputEditor.SetSelectionColor(UiColor(0xA7D8FF));
+    inputEditor.SetRequestedWidth(MATCH_PARENT);
+    inputEditor.SetRequestedHeight(INPUT_EDITOR_HEIGHT);
+    inputEditor.SetBackgroundColor(UiColor(0xF3F3F3));
+    inputEditor.SetPadding(Extents(12, 12, 8, 8));
+    inputEditor.SetFocusable(true);
+    inputEditor.SetMaximumLength(500);
+    return inputEditor;
   }
 
   void PrintLabelInfo(Label label, const char* title)

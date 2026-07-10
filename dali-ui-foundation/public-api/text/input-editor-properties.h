@@ -294,13 +294,6 @@ struct InputEditorPropertyIndex
     LAYOUT_DIRECTION_MODE,
 
     /**
-     * @brief Whether mark-up processing is enabled for the text.
-     * @details Name "markupEnabled", type Property::BOOLEAN.
-     * @see InputEditor::SetMarkupEnabled(), InputEditor::IsMarkupEnabled().
-     */
-    MARKUP_ENABLED,
-
-    /**
      * @brief The font weight.
      * @details Name "fontWeight", type Text::FontWeight (Property::INTEGER) or Property::STRING.
      * @note Return type is Text::FontWeight (Property::INTEGER).

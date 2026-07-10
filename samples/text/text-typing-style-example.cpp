@@ -250,10 +250,9 @@ private:
     descLabel.SetRequestedHeight(WRAP_CONTENT);
     mainContainer.Add(descLabel);
 
-    // InputEditor with markup
+    // InputEditor with styled text imported from markup
     mInputEditor = InputEditor::New();
-    mInputEditor.SetMarkupEnabled(true);
-    mInputEditor.SetText("<font family='DejaVu Sans'><color value='#FF00FF'>Magenta</color> <color value='#00AAFF'>Blue</color> <color value='#00CC66'>Green</color> text</font>");
+    mInputEditor.SetStyledText(Text::StyledText::FromMarkup("<font family='DejaVu Sans'><color value='#FF00FF'>Magenta</color> <color value='#00AAFF'>Blue</color> <color value='#00CC66'>Green</color> text</font>"));
     mInputEditor.SetFontSize(20.0f);
     mInputEditor.SetTextColor(UiColor(COLOR_DARK_TEXT));
     mInputEditor.SetCursorWidth(2);

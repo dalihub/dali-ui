@@ -110,6 +110,11 @@ Dali::String InputEditor::GetText() const
   return GetImpl(*this).GetText();
 }
 
+void InputEditor::SetStyledText(const Text::StyledText& styledText)
+{
+  GetImpl(*this).SetStyledText(styledText);
+}
+
 void InputEditor::SetFontFamily(const Dali::String& fontFamily)
 {
   GetImpl(*this).SetFontFamily(fontFamily);
@@ -418,16 +423,6 @@ void InputEditor::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 Text::LayoutDirectionMode InputEditor::GetLayoutDirectionMode() const
 {
   return GetImpl(*this).GetLayoutDirectionMode();
-}
-
-void InputEditor::SetMarkupEnabled(bool enabled)
-{
-  GetImpl(*this).SetMarkupEnabled(enabled);
-}
-
-bool InputEditor::IsMarkupEnabled() const
-{
-  return GetImpl(*this).IsMarkupEnabled();
 }
 
 void InputEditor::SetFontWeight(Text::FontWeight weight)

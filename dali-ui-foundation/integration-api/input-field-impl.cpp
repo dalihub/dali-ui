@@ -157,7 +157,6 @@ INPUT_FIELD_PROPERTY_REGISTRATION("passwordMaskCharacter",            INTEGER, P
 INPUT_FIELD_PROPERTY_REGISTRATION("passwordRevealDuration",           INTEGER, PASSWORD_REVEAL_DURATION            )
 INPUT_FIELD_PROPERTY_REGISTRATION("editable",                         BOOLEAN, EDITABLE                            )
 INPUT_FIELD_PROPERTY_REGISTRATION("layoutDirectionMode",              INTEGER, LAYOUT_DIRECTION_MODE               )
-INPUT_FIELD_PROPERTY_REGISTRATION("markupEnabled",                    BOOLEAN, MARKUP_ENABLED                      )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWeight",                       INTEGER, FONT_WEIGHT                         )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontWidth",                        INTEGER, FONT_WIDTH                          )
 INPUT_FIELD_PROPERTY_REGISTRATION("fontSlant",                        INTEGER, FONT_SLANT                          )
@@ -330,6 +329,13 @@ Dali::String InputFieldImpl::GetText() const
   std::string text;
   mController->GetText(text);
   return ToDaliString(text);
+}
+
+void InputFieldImpl::SetStyledText(const Text::StyledText& styledText)
+{
+  DALI_LOG_RELEASE_INFO("[%p] SetStyledText\n", mController.Get());
+
+  mController->SetStyledText(styledText);
 }
 
 void InputFieldImpl::SetFontFamily(const Dali::String& fontFamily)
@@ -727,17 +733,6 @@ void InputFieldImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 Text::LayoutDirectionMode InputFieldImpl::GetLayoutDirectionMode() const
 {
   return mController->GetLayoutDirectionMode();
-}
-
-void InputFieldImpl::SetMarkupEnabled(bool enabled)
-{
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
-  mController->SetMarkupProcessorEnabled(enabled);
-}
-
-bool InputFieldImpl::IsMarkupEnabled() const
-{
-  return mController->IsMarkupProcessorEnabled();
 }
 
 void InputFieldImpl::SetFontWeight(Text::FontWeight weight)

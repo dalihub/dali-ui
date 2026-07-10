@@ -240,7 +240,9 @@ label.SetMaximumFontSizeScale(2.0f);
 
 ## Markup
 
-Mark-up tag를 사용하면 텍스트 일부의 color, font, underline, anchor 등을 변경할 수 있습니다. 기본적으로 text component는 mark-up string을 처리하지 않습니다. mark-up 처리를 사용하려면 `SetMarkupEnabled(true)`를 설정해야 합니다.
+Mark-up tag를 사용하면 텍스트 일부의 color, font, underline, anchor 등을 변경할 수 있습니다. Mark-up string은 `Text::StyledText::FromMarkup()`으로 `StyledText`로 변환한 뒤 `SetStyledText()`로 적용합니다.
+
+Mark-up string을 `Label::New()`나 `SetText()`에 직접 전달하면 plain text로 처리됩니다.
 
 > [!WARNING]
 > mark-up processor는 mark-up string의 정확성을 검증하지 않습니다. 잘못된 mark-up string은 텍스트가 의도와 다르게 렌더링되는 원인이 될 수 있습니다.
@@ -278,25 +280,25 @@ Hexadecimal 형식:
 color (RGB / ARGB):
 
 ~~~cpp
-Label rgb = Label::New("<color value='0xFF0000'>Red Text</color>");
-rgb.SetMarkupEnabled(true);
+Label rgb = Label::New();
+rgb.SetStyledText(Text::StyledText::FromMarkup("<color value='0xFF0000'>Red Text</color>"));
 
-Label argb = Label::New("<color value='0xFFFF0000'>Red Text</color>");
-argb.SetMarkupEnabled(true);
+Label argb = Label::New();
+argb.SetStyledText(Text::StyledText::FromMarkup("<color value='0xFFFF0000'>Red Text</color>"));
 ~~~
 
 font:
 
 ~~~cpp
-Label label = Label::New("<font family='Sans' size='20'>Hello world</font>");
-label.SetMarkupEnabled(true);
+Label label = Label::New();
+label.SetStyledText(Text::StyledText::FromMarkup("<font family='Sans' size='20'>Hello world</font>"));
 ~~~
 
 bold:
 
 ~~~cpp
-Label label = Label::New("<b>Bold</b>");
-label.SetMarkupEnabled(true);
+Label label = Label::New();
+label.SetStyledText(Text::StyledText::FromMarkup("<b>Bold</b>"));
 ~~~
 
 > [!NOTE]
@@ -305,8 +307,8 @@ label.SetMarkupEnabled(true);
 italic:
 
 ~~~cpp
-Label label = Label::New("<i>Italic</i>");
-label.SetMarkupEnabled(true);
+Label label = Label::New();
+label.SetStyledText(Text::StyledText::FromMarkup("<i>Italic</i>"));
 ~~~
 
 > [!NOTE]
@@ -315,29 +317,29 @@ label.SetMarkupEnabled(true);
 underline:
 
 ~~~cpp
-Label label = Label::New("<u color='0xFF0000' height='2'>Underline</u>");
-label.SetMarkupEnabled(true);
+Label label = Label::New();
+label.SetStyledText(Text::StyledText::FromMarkup("<u color='0xFF0000' height='2'>Underline</u>"));
 ~~~
 
 line-through:
 
 ~~~cpp
-Label label = Label::New("<s color='#9C3A64' height='2'>Strike</s>");
-label.SetMarkupEnabled(true);
+Label label = Label::New();
+label.SetStyledText(Text::StyledText::FromMarkup("<s color='#9C3A64' height='2'>Strike</s>"));
 ~~~
 
 background:
 
 ~~~cpp
-Label label = Label::New("<background color='yellow'>Background</background>");
-label.SetMarkupEnabled(true);
+Label label = Label::New();
+label.SetStyledText(Text::StyledText::FromMarkup("<background color='yellow'>Background</background>"));
 ~~~
 
 anchor:
 
 ~~~cpp
-Label label = Label::New("<a href='https://www.tizen.org'>Tizen</a>");
-label.SetMarkupEnabled(true);
+Label label = Label::New();
+label.SetStyledText(Text::StyledText::FromMarkup("<a href='https://www.tizen.org'>Tizen</a>"));
 ~~~
 
 anchor 클릭 처리:

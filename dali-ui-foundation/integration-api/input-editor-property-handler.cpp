@@ -214,11 +214,6 @@ void InputEditorImpl::PropertyHandler::SetProperty(Ui::View view, Property::Inde
       }
       break;
     }
-    case Text::InputEditorPropertyIndex::MARKUP_ENABLED:
-    {
-      impl.SetMarkupEnabled(value.Get<bool>());
-      break;
-    }
     case Text::InputEditorPropertyIndex::FONT_WEIGHT:
     {
       Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
@@ -493,11 +488,6 @@ Property::Value InputEditorImpl::PropertyHandler::GetProperty(Ui::View view, Pro
     case Text::InputEditorPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
       value = impl.GetLayoutDirectionMode();
-      break;
-    }
-    case Text::InputEditorPropertyIndex::MARKUP_ENABLED:
-    {
-      value = impl.IsMarkupEnabled();
       break;
     }
     case Text::InputEditorPropertyIndex::FONT_WEIGHT:

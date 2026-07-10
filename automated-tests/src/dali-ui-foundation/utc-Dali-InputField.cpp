@@ -64,7 +64,6 @@ const char* const PROPERTY_NAME_PASSWORD_MASK_CHARACTER              = "password
 const char* const PROPERTY_NAME_PASSWORD_REVEAL_DURATION             = "passwordRevealDuration";
 const char* const PROPERTY_NAME_EDITABLE                             = "editable";
 const char* const PROPERTY_NAME_LAYOUT_DIRECTION_MODE                = "layoutDirectionMode";
-const char* const PROPERTY_NAME_MARKUP_ENABLED                       = "markupEnabled";
 const char* const PROPERTY_NAME_FONT_WEIGHT                          = "fontWeight";
 const char* const PROPERTY_NAME_FONT_WIDTH                           = "fontWidth";
 const char* const PROPERTY_NAME_FONT_SLANT                           = "fontSlant";
@@ -740,25 +739,33 @@ int UtcDaliInputFieldLayoutDirectionMode(void)
 }
 
 
-int UtcDaliInputFieldMarkupEnabled(void)
+int UtcDaliInputFieldSetStyledText(void)
 {
   UiTestApplication application;
   InputField inputField = InputField::New();
   DALI_TEST_CHECK(inputField);
 
-  // Default value should be false
-  DALI_TEST_EQUALS(inputField.IsMarkupEnabled(), false, TEST_LOCATION);
+  inputField.SetStyledText(Text::StyledText::FromMarkup("<color value='red'>Hello</color>"));
+  DALI_TEST_EQUALS(inputField.GetText(), "Hello", TEST_LOCATION);
 
-  // Test SetMarkupEnabled with true
-  inputField.SetMarkupEnabled(true);
-  DALI_TEST_EQUALS(inputField.IsMarkupEnabled(), true, TEST_LOCATION);
+  inputField.SetStyledText(Text::StyledText::FromMarkup("<annotation style='muted'>Muted</annotation>"));
+  DALI_TEST_EQUALS(inputField.GetText(), "Muted", TEST_LOCATION);
 
-  // Test SetMarkupEnabled with false
-  inputField.SetMarkupEnabled(false);
-  DALI_TEST_EQUALS(inputField.IsMarkupEnabled(), false, TEST_LOCATION);
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::FromMarkup("<annotation style='muted'>Hello</annotation>");
+  const uint32_t annotationCount = builder.GetAnnotationCount();
+  for(uint32_t annotationIndex = 0u; annotationIndex < annotationCount; ++annotationIndex)
+  {
+    const Text::AnnotationSpan annotation = builder.GetAnnotationAt(annotationIndex);
+    if(annotation.GetKey() == "style" && annotation.GetValue() == "muted")
+    {
+      builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(0x808080)), builder.GetAnnotationStartIndexAt(annotationIndex), builder.GetAnnotationEndIndexAt(annotationIndex));
+    }
+  }
+  inputField.SetStyledText(builder.Build());
+  DALI_TEST_EQUALS(inputField.GetText(), "Hello", TEST_LOCATION);
 
-  // Test setter
-  inputField.SetMarkupEnabled(true);
+  inputField.SetText("<color value='red'>Hello</color>");
+  DALI_TEST_EQUALS(inputField.GetText(), "<color value='red'>Hello</color>", TEST_LOCATION);
 
   END_TEST;
 }
@@ -1113,7 +1120,6 @@ int UtcDaliInputFieldGetProperty(void)
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MAXIMUM_LENGTH) == InputField::Property::MAXIMUM_LENGTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_EDITABLE) == InputField::Property::EDITABLE);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_LAYOUT_DIRECTION_MODE) == InputField::Property::LAYOUT_DIRECTION_MODE);
-  DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_MARKUP_ENABLED) == InputField::Property::MARKUP_ENABLED);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WEIGHT) == InputField::Property::FONT_WEIGHT);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_WIDTH) == InputField::Property::FONT_WIDTH);
   DALI_TEST_CHECK(inputField.GetPropertyIndex(PROPERTY_NAME_FONT_SLANT) == InputField::Property::FONT_SLANT);
@@ -1283,13 +1289,6 @@ int UtcDaliInputFieldSetProperty(void)
 
   inputField.SetProperty(InputField::Property::LAYOUT_DIRECTION_MODE, "INHERIT");
   DALI_TEST_EQUALS(inputField.GetProperty<Text::LayoutDirectionMode>(InputField::Property::LAYOUT_DIRECTION_MODE), Text::LayoutDirectionMode::INHERIT, TEST_LOCATION);
-
-  // MARKUP_ENABLED
-  inputField.SetProperty(InputField::Property::MARKUP_ENABLED, true);
-  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::MARKUP_ENABLED), true, TEST_LOCATION);
-
-  inputField.SetProperty(InputField::Property::MARKUP_ENABLED, false);
-  DALI_TEST_EQUALS(inputField.GetProperty<bool>(InputField::Property::MARKUP_ENABLED), false, TEST_LOCATION);
 
   // FONT_WEIGHT
   inputField.SetProperty(InputField::Property::FONT_WEIGHT, Text::FontWeight::BOLD);

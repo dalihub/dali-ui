@@ -24,6 +24,7 @@
 #include <dali-ui-foundation/public-api/text/style/outline.h>
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -92,7 +93,6 @@ public:
       MAXIMUM_LENGTH                       = Text::InputEditorPropertyIndex::MAXIMUM_LENGTH,
       EDITABLE                             = Text::InputEditorPropertyIndex::EDITABLE,
       LAYOUT_DIRECTION_MODE                = Text::InputEditorPropertyIndex::LAYOUT_DIRECTION_MODE,
-      MARKUP_ENABLED                       = Text::InputEditorPropertyIndex::MARKUP_ENABLED,
       FONT_WEIGHT                          = Text::InputEditorPropertyIndex::FONT_WEIGHT,
       FONT_WIDTH                           = Text::InputEditorPropertyIndex::FONT_WIDTH,
       FONT_SLANT                           = Text::InputEditorPropertyIndex::FONT_SLANT,
@@ -194,6 +194,19 @@ public: // Setters for chaining
    * @return The text currently set on the inputEditor in UTF-8 format.
    */
   Dali::String GetText() const;
+
+  /**
+   * @brief Replaces the current editable text with styled text.
+   *
+   * The plain text is taken from the StyledText snapshot, and supported visual
+   * spans are applied as the initial editable style runs. Subsequent user
+   * editing and typing style changes may update the internal style runs. This
+   * API does not provide StyledText round-tripping; use GetText() to retrieve
+   * plain text.
+   *
+   * @param[in] styledText The styled text snapshot to apply.
+   */
+  void SetStyledText(const Text::StyledText& styledText);
 
   /**
    * @brief Sets the font family of the text.
@@ -721,23 +734,6 @@ public: // Setters for chaining
    * @return The LayoutDirectionMode used to resolve the text layout direction.
    */
   Text::LayoutDirectionMode GetLayoutDirectionMode() const;
-
-  /**
-   * @brief Enables or disables mark-up processing for the input text.
-   *
-   * When enabled, markup tags in the input text are interpreted and rendered
-   * accordingly. When disabled, the input text is treated as plain text.
-   *
-   * @param[in] enabled True to enable mark-up parsing, false to render text as plain string.
-   */
-  void SetMarkupEnabled(bool enabled);
-
-  /**
-   * @brief Gets whether mark-up processing is enabled.
-   *
-   * @return True if mark-up parsing is enabled, otherwise false.
-   */
-  bool IsMarkupEnabled() const;
 
   /**
    * @brief Sets the font weight.

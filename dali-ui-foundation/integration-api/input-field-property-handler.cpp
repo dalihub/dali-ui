@@ -220,11 +220,6 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::MARKUP_ENABLED:
-    {
-      impl.SetMarkupEnabled(value.Get<bool>());
-      break;
-    }
     case Text::InputFieldPropertyIndex::FONT_WEIGHT:
     {
       Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
@@ -494,11 +489,6 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
     case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
       value = impl.GetLayoutDirectionMode();
-      break;
-    }
-    case Text::InputFieldPropertyIndex::MARKUP_ENABLED:
-    {
-      value = impl.IsMarkupEnabled();
       break;
     }
     case Text::InputFieldPropertyIndex::FONT_WEIGHT:

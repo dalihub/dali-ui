@@ -154,7 +154,6 @@ INPUT_EDITOR_PROPERTY_REGISTRATION("selectionHandlePressedImageRight", STRING,  
 INPUT_EDITOR_PROPERTY_REGISTRATION("maximumLength",                    INTEGER, MAXIMUM_LENGTH                      )
 INPUT_EDITOR_PROPERTY_REGISTRATION("editable",                         BOOLEAN, EDITABLE                            )
 INPUT_EDITOR_PROPERTY_REGISTRATION("layoutDirectionMode",              INTEGER, LAYOUT_DIRECTION_MODE               )
-INPUT_EDITOR_PROPERTY_REGISTRATION("markupEnabled",                    BOOLEAN, MARKUP_ENABLED                      )
 INPUT_EDITOR_PROPERTY_REGISTRATION("fontWeight",                       INTEGER, FONT_WEIGHT                         )
 INPUT_EDITOR_PROPERTY_REGISTRATION("fontWidth",                        INTEGER, FONT_WIDTH                          )
 INPUT_EDITOR_PROPERTY_REGISTRATION("fontSlant",                        INTEGER, FONT_SLANT                          )
@@ -331,6 +330,13 @@ Dali::String InputEditorImpl::GetText() const
   std::string text;
   mController->GetText(text);
   return ToDaliString(text);
+}
+
+void InputEditorImpl::SetStyledText(const Text::StyledText& styledText)
+{
+  DALI_LOG_RELEASE_INFO("[%p] SetStyledText\n", mController.Get());
+
+  mController->SetStyledText(styledText);
 }
 
 void InputEditorImpl::SetFontFamily(const Dali::String& fontFamily)
@@ -735,17 +741,6 @@ void InputEditorImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
 Text::LayoutDirectionMode InputEditorImpl::GetLayoutDirectionMode() const
 {
   return mController->GetLayoutDirectionMode();
-}
-
-void InputEditorImpl::SetMarkupEnabled(bool enabled)
-{
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
-  mController->SetMarkupProcessorEnabled(enabled);
-}
-
-bool InputEditorImpl::IsMarkupEnabled() const
-{
-  return mController->IsMarkupProcessorEnabled();
 }
 
 void InputEditorImpl::SetFontWeight(Text::FontWeight weight)
