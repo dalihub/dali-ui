@@ -212,18 +212,10 @@ UI scale은 Label, InputField, InputEditor의 measure/relayout 과정에서 font
 
 ## Font Size Scale
 
-`SetFontSizeScale()`은 `SetFontSize()`로 설정한 font size 값을 변경하지 않고, layout/rendering 시 적용되는 scale을 설정합니다.
-`SetSystemFontSizeScaleEnabled(true)`를 사용하면 시스템 font size 설정을 반영합니다.
+Font size scale은 `SetFontSize()`로 설정한 font size 값을 변경하지 않고 layout/rendering 시 적용됩니다.
+Label은 앱에서 임의의 font size scale을 직접 설정하는 API를 제공하지 않습니다. 시스템 font size scale이 활성화된 경우 이를 scale source로 사용합니다.
+시스템 font size 설정의 영향을 받지 않으려면 `SetSystemFontSizeScaleEnabled(false)`를 사용합니다.
 minimum/maximum font size scale은 최종 scale 범위를 제한하며, minimum 값이 maximum 값보다 큰 경우 minimum 값이 우선됩니다.
-
-사용자 지정 scale:
-
-~~~cpp
-Label label = Label::New("Scaled text");
-label.SetFontSizeScale(1.5f);
-label.SetMinimumFontSizeScale(0.8f);
-label.SetMaximumFontSizeScale(2.0f);
-~~~
 
 시스템 font size scale 반영:
 
@@ -232,6 +224,13 @@ Label label = Label::New("System scaled text");
 label.SetSystemFontSizeScaleEnabled(true);
 label.SetMinimumFontSizeScale(0.8f);
 label.SetMaximumFontSizeScale(2.0f);
+~~~
+
+시스템 font size scale 영향 제외:
+
+~~~cpp
+Label label = Label::New("Fixed size text");
+label.SetSystemFontSizeScaleEnabled(false);
 ~~~
 
 `GetAdjustedFontSizeScale()`로 최종 적용된 font size scale을 조회할 수 있습니다.

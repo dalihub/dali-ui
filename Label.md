@@ -212,18 +212,10 @@ UI scale is reflected in font size and text layout related values during the mea
 
 ## Font Size Scale
 
-`SetFontSizeScale()` does not change the original `SetFontSize()` property value. It sets a scale that is applied during layout/rendering.
-`SetSystemFontSizeScaleEnabled(true)` enables reflecting the system font size setting.
+Font size scale is applied during layout/rendering without changing the font size value set by `SetFontSize()`.
+Label does not provide an app-defined font size scale setter. When enabled, the system font size scale is used as the scale source.
+To ignore system font size changes, disable it with `SetSystemFontSizeScaleEnabled(false)`.
 Minimum/maximum font size scale limits the final scale range. If the minimum value is greater than the maximum, the minimum takes priority.
-
-User-defined scale:
-
-~~~cpp
-Label label = Label::New("Scaled text");
-label.SetFontSizeScale(1.5f);
-label.SetMinimumFontSizeScale(0.8f);
-label.SetMaximumFontSizeScale(2.0f);
-~~~
 
 System font size scale:
 
@@ -232,6 +224,13 @@ Label label = Label::New("System scaled text");
 label.SetSystemFontSizeScaleEnabled(true);
 label.SetMinimumFontSizeScale(0.8f);
 label.SetMaximumFontSizeScale(2.0f);
+~~~
+
+Ignore system font size scale:
+
+~~~cpp
+Label label = Label::New("Fixed size text");
+label.SetSystemFontSizeScaleEnabled(false);
 ~~~
 
 `GetAdjustedFontSizeScale()` returns the final applied font size scale.
