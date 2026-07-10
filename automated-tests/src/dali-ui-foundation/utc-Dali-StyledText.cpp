@@ -1301,6 +1301,21 @@ int UtcDaliStyledTextBuilderFromMarkupP(void)
 {
   UiTestApplication application;
 
+  const char* const plainMarkup = "Hello 가😀";
+  StyledText        plainText   = StyledText::FromMarkup(plainMarkup);
+
+  DALI_TEST_EQUALS(plainText.GetText(), plainMarkup, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainText.GetUtf32Length(), 8u, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainText.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainText.GetAnnotationCount(), 0u, TEST_LOCATION);
+
+  StyledTextBuilder plainBuilder = StyledTextBuilder::FromMarkup(plainMarkup);
+
+  DALI_TEST_EQUALS(plainBuilder.GetText(), plainMarkup, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainBuilder.GetUtf32Length(), 8u, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainBuilder.GetSpanCount(), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(plainBuilder.GetAnnotationCount(), 0u, TEST_LOCATION);
+
   StyledTextBuilder colorBuilder = StyledTextBuilder::FromMarkup("<color value='red'>가😀B</color>");
 
   DALI_TEST_EQUALS(colorBuilder.GetText(), "가😀B", TEST_LOCATION);
@@ -1533,6 +1548,14 @@ int UtcDaliStyledTextFromMarkupRawSymbolsAndTextEntitiesP(void)
   DALI_TEST_EQUALS(rawText.GetText(), "1 < 2 && 3 > 2", TEST_LOCATION);
   DALI_TEST_EQUALS(rawText.GetSpanCount(), 0u, TEST_LOCATION);
 
+  StyledText literalText = StyledText::FromMarkup("1 < 2");
+  DALI_TEST_EQUALS(literalText.GetText(), "1 < 2", TEST_LOCATION);
+  DALI_TEST_EQUALS(literalText.GetSpanCount(), 0u, TEST_LOCATION);
+
+  StyledText simpleEntityText = StyledText::FromMarkup("A &amp; B");
+  DALI_TEST_EQUALS(simpleEntityText.GetText(), "A & B", TEST_LOCATION);
+  DALI_TEST_EQUALS(simpleEntityText.GetSpanCount(), 0u, TEST_LOCATION);
+
   StyledText entityText = StyledText::FromMarkup("A &lt; B &amp;&amp; C &gt; D &#60; &#x3C;");
   DALI_TEST_EQUALS(entityText.GetText(), "A < B && C > D < <", TEST_LOCATION);
   DALI_TEST_EQUALS(entityText.GetSpanCount(), 0u, TEST_LOCATION);
@@ -1555,6 +1578,12 @@ int UtcDaliStyledTextFromMarkupRawSymbolsAndTextEntitiesP(void)
 int UtcDaliStyledTextFromMarkupNestedColorP(void)
 {
   UiTestApplication application;
+
+  StyledText textRunStyledText = StyledText::FromMarkup("abc<color value='red'>def</color>ghi");
+
+  DALI_TEST_EQUALS(textRunStyledText.GetText(), "abcdefghi", TEST_LOCATION);
+  DALI_TEST_EQUALS(textRunStyledText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(textRunStyledText, 0u, 3u, 6u);
 
   StyledText styledText = StyledText::FromMarkup("<color value='red'>a<color value='blue'>b</color>c</color>");
 
@@ -1684,6 +1713,16 @@ int UtcDaliStyledTextFromMarkupUnicodeRangeP(void)
   DALI_TEST_EQUALS(entityText.GetSpanCount(), 1u, TEST_LOCATION);
   CheckRange(entityText, 0u, 0u, 3u);
   DALI_TEST_CHECK(UnderlineSpan::DownCast(entityText.GetSpanAt(0u)));
+
+  StyledText annotationText = StyledText::FromMarkup("가😀<annotation style='x'>나</annotation>다");
+
+  DALI_TEST_EQUALS(annotationText.GetText(), "가😀나다", TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationText.GetUtf32Length(), 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationText.GetAnnotationCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationText.GetAnnotationStartIndexAt(0u), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationText.GetAnnotationEndIndexAt(0u), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationText.GetAnnotationAt(0u).GetKey(), "style", TEST_LOCATION);
+  DALI_TEST_EQUALS(annotationText.GetAnnotationAt(0u).GetValue(), "x", TEST_LOCATION);
 
   END_TEST;
 }

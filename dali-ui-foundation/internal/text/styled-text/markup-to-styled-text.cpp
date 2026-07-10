@@ -207,6 +207,42 @@ uint32_t CountUtf8CodePoints(const std::string& text)
   return count;
 }
 
+bool TryBuildPlainTextMarkupResult(const Dali::String& markup, StyledTextMarkupResult& result)
+{
+  if(markup.Empty())
+  {
+    result.text        = markup;
+    result.utf32Length = 0u;
+    return true;
+  }
+
+  const char* const data = markup.CStr();
+  const std::size_t size = markup.Size();
+
+  uint32_t utf32Length = 0u;
+  for(std::size_t index = 0u; index < size;)
+  {
+    const char c = data[index];
+    if((c == '<') || (c == '&'))
+    {
+      return false;
+    }
+
+    std::size_t length = Utf8CharacterLength(static_cast<unsigned char>(c));
+    if(index + length > size)
+    {
+      length = 1u;
+    }
+
+    index += length;
+    ++utf32Length;
+  }
+
+  result.text        = markup;
+  result.utf32Length = utf32Length;
+  return true;
+}
+
 void AppendUtf8CodePoint(uint32_t codePoint, std::string& output)
 {
   if(codePoint <= 0x7Fu)
@@ -951,6 +987,7 @@ public:
   : mInput(ToStdString(markup)),
     mInfo(info)
   {
+    mPlainText.reserve(mInput.size());
   }
 
   StyledTextMarkupResult Parse()
@@ -967,9 +1004,18 @@ public:
           index = tagEndIndex + 1u;
           continue;
         }
+
+        AppendTextAt(index);
+        continue;
       }
 
-      AppendTextAt(index);
+      if(mInput[index] == '&')
+      {
+        AppendTextAt(index);
+        continue;
+      }
+
+      AppendPlainTextRun(index);
     }
 
     CompleteOpenTagsAtEndOfFile();
@@ -981,6 +1027,25 @@ private:
   {
     mPlainText += text;
     mPlainIndex += CountUtf8CodePoints(text);
+  }
+
+  void AppendPlainTextRun(std::size_t& index)
+  {
+    const std::size_t begin = index;
+
+    while((index < mInput.size()) && (mInput[index] != '<') && (mInput[index] != '&'))
+    {
+      std::size_t length = Utf8CharacterLength(static_cast<unsigned char>(mInput[index]));
+      if(index + length > mInput.size())
+      {
+        length = 1u;
+      }
+
+      index += length;
+      ++mPlainIndex;
+    }
+
+    mPlainText.append(mInput, begin, index - begin);
   }
 
   void AppendTextAt(std::size_t& index)
@@ -1288,6 +1353,12 @@ private:
 
 StyledTextMarkupResult ParseStyledTextMarkup(const Dali::String& markup, MarkupParseInfo* info)
 {
+  StyledTextMarkupResult fastResult;
+  if(TryBuildPlainTextMarkupResult(markup, fastResult))
+  {
+    return fastResult;
+  }
+
   MarkupParser parser(markup, info);
   return parser.Parse();
 }
