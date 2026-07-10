@@ -13,7 +13,7 @@ Pressed 상태에서 Disabled가 되면 Pressed가 해제되는지 확인한다.
 1. 파란색 뷰를 터치한 채로 유지한다
 2. 로그에 `[Normal] -> [Pressed]` 표시 확인
 3. 1.5초간 유지하면 타이머가 Disable 시킨다
-4. **기대 결과**: `[Pressed] -> [Pressed, Disabled]` -> `[Pressed, Disabled] -> [Disabled]` 순서로 로그 표시, "PRESSED cleared by DISABLED!" 메시지 출력
+4. **기대 결과**: `[Pressed] -> [Disabled]` 로그 표시, "PRESSED cleared by DISABLED!" 메시지 출력
 5. 뷰가 빨간색으로 변경됨
 6. "Re-enable" 버튼을 탭하여 초기화
 

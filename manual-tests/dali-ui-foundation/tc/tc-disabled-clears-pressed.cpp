@@ -93,6 +93,7 @@ public:
     mResetButton.Add(resetLabel);
 
     mDisableTimer = Timer::New(DISABLE_DELAY);
+    mDisableTimer.TickSignal().Connect(this, &TcDisabledClearsPressed::OnDisableTimerTick);
 
     StackLayout root = StackLayout::New();
     root.SetSpacing(SPACING);
