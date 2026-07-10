@@ -21,7 +21,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/provider-api/ui-config-impl.h>
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 
 namespace Dali
 {
@@ -38,7 +38,7 @@ using UiConfigImplPtr = IntrusivePtr<UiConfigImpl>;
 /**
  * @brief Components UiConfig implementation.
  */
-class UiConfigImpl : public Dali::Ui::Provider::UiConfigImpl
+class UiConfigImpl : public Dali::Ui::Extension::UiConfigImpl
 {
 public:
   /**

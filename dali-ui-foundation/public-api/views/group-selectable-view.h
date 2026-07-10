@@ -26,7 +26,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Provider
+namespace Extension
 {
 class GroupSelectableViewImpl;
 }
@@ -159,7 +159,7 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The GroupSelectableView implementation
    */
-  explicit DALI_UI_API GroupSelectableView(Provider::GroupSelectableViewImpl& implementation);
+  explicit DALI_UI_API GroupSelectableView(Extension::GroupSelectableViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this GroupSelectableView from an Internal::CustomActor pointer.

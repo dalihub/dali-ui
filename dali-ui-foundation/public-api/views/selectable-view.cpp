@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
+#include <dali-ui-foundation/extension-api/selectable-view-impl.h>
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 
 namespace Dali
@@ -30,7 +30,7 @@ SelectableView::SelectableView()
 
 SelectableView SelectableView::New()
 {
-  Provider::SelectableViewImplPtr impl = Provider::SelectableViewImpl::New();
+  Extension::SelectableViewImplPtr impl = Extension::SelectableViewImpl::New();
 
   SelectableView handle(*impl);
 
@@ -41,7 +41,7 @@ SelectableView SelectableView::New()
 
 SelectableView SelectableView::DownCast(BaseHandle handle)
 {
-  return View::DownCast<SelectableView, Provider::SelectableViewImpl>(handle);
+  return View::DownCast<SelectableView, Extension::SelectableViewImpl>(handle);
 }
 
 SelectableView::SelectableView(const SelectableView& view) = default;
@@ -52,7 +52,7 @@ SelectableView::~SelectableView()
 {
 }
 
-SelectableView::SelectableView(Provider::SelectableViewImpl& implementation)
+SelectableView::SelectableView(Extension::SelectableViewImpl& implementation)
 : InteractiveView(implementation)
 {
 }
@@ -60,32 +60,32 @@ SelectableView::SelectableView(Provider::SelectableViewImpl& implementation)
 SelectableView::SelectableView(Dali::Internal::CustomActor* internal)
 : InteractiveView(internal)
 {
-  VerifyCustomActorPointer<Provider::SelectableViewImpl>(internal);
+  VerifyCustomActorPointer<Extension::SelectableViewImpl>(internal);
 }
 
 Signal<void(View, bool, InputEvent)>& SelectableView::SelectionChangedSignal()
 {
-  return Provider::GetImpl(*this).SelectionChangedSignal();
+  return Extension::GetImpl(*this).SelectionChangedSignal();
 }
 
 bool SelectableView::IsSelected() const
 {
-  return Provider::GetImpl(*this).IsSelected();
+  return Extension::GetImpl(*this).IsSelected();
 }
 
 void SelectableView::SetSelected(bool selected)
 {
-  Provider::GetImpl(*this).SetSelected(selected);
+  Extension::GetImpl(*this).SetSelected(selected);
 }
 
 bool SelectableView::IsToggleByClickEnabled() const
 {
-  return Provider::GetImpl(*this).IsToggleByClickEnabled();
+  return Extension::GetImpl(*this).IsToggleByClickEnabled();
 }
 
 void SelectableView::SetToggleByClickEnabled(bool enabled)
 {
-  Provider::GetImpl(*this).SetToggleByClickEnabled(enabled);
+  Extension::GetImpl(*this).SetToggleByClickEnabled(enabled);
 }
 
 } // namespace Ui

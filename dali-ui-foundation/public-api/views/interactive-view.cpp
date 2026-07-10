@@ -14,7 +14,7 @@
  * limitations under the License.
  *
  */
-#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
+#include <dali-ui-foundation/extension-api/interactive-view-impl.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 
 namespace Dali
@@ -29,7 +29,7 @@ InteractiveView::InteractiveView()
 
 InteractiveView InteractiveView::New()
 {
-  Provider::InteractiveViewImplPtr impl = Provider::InteractiveViewImpl::New();
+  Extension::InteractiveViewImplPtr impl = Extension::InteractiveViewImpl::New();
 
   InteractiveView handle(*impl);
 
@@ -40,7 +40,7 @@ InteractiveView InteractiveView::New()
 
 InteractiveView InteractiveView::DownCast(BaseHandle handle)
 {
-  return View::DownCast<InteractiveView, Provider::InteractiveViewImpl>(handle);
+  return View::DownCast<InteractiveView, Extension::InteractiveViewImpl>(handle);
 }
 
 InteractiveView::InteractiveView(const InteractiveView& view) = default;
@@ -51,7 +51,7 @@ InteractiveView::~InteractiveView()
 {
 }
 
-InteractiveView::InteractiveView(Provider::InteractiveViewImpl& implementation)
+InteractiveView::InteractiveView(Extension::InteractiveViewImpl& implementation)
 : View(implementation)
 {
 }
@@ -59,62 +59,62 @@ InteractiveView::InteractiveView(Provider::InteractiveViewImpl& implementation)
 InteractiveView::InteractiveView(Dali::Internal::CustomActor* internal)
 : View(internal)
 {
-  VerifyCustomActorPointer<Provider::InteractiveViewImpl>(internal);
+  VerifyCustomActorPointer<Extension::InteractiveViewImpl>(internal);
 }
 
 Signal<void(View, bool, InputEvent)>& InteractiveView::PressedChangedSignal()
 {
-  return Provider::GetImpl(*this).PressedChangedSignal();
+  return Extension::GetImpl(*this).PressedChangedSignal();
 }
 
 Signal<void(View, bool)>& InteractiveView::PseudoDisabledChangedSignal()
 {
-  return Provider::GetImpl(*this).PseudoDisabledChangedSignal();
+  return Extension::GetImpl(*this).PseudoDisabledChangedSignal();
 }
 
 Signal<void(View, InputEvent)>& InteractiveView::ClickedSignal()
 {
-  return Provider::GetImpl(*this).ClickedSignal();
+  return Extension::GetImpl(*this).ClickedSignal();
 }
 
 Signal<bool(View, InputEvent)>& InteractiveView::LongPressedSignal()
 {
-  return Provider::GetImpl(*this).LongPressedSignal();
+  return Extension::GetImpl(*this).LongPressedSignal();
 }
 
 bool InteractiveView::IsPressed() const
 {
-  return Provider::GetImpl(*this).IsPressed();
+  return Extension::GetImpl(*this).IsPressed();
 }
 
 bool InteractiveView::IsPseudoDisabled() const
 {
-  return Provider::GetImpl(*this).IsPseudoDisabled();
+  return Extension::GetImpl(*this).IsPseudoDisabled();
 }
 
 void InteractiveView::SetPseudoDisabled(bool pseudoDisabled)
 {
-  Provider::GetImpl(*this).SetPseudoDisabled(pseudoDisabled);
+  Extension::GetImpl(*this).SetPseudoDisabled(pseudoDisabled);
 }
 
 bool InteractiveView::IsClickable() const
 {
-  return Provider::GetImpl(*this).IsClickable();
+  return Extension::GetImpl(*this).IsClickable();
 }
 
 void InteractiveView::SetClickable(bool clickable)
 {
-  Provider::GetImpl(*this).SetClickable(clickable);
+  Extension::GetImpl(*this).SetClickable(clickable);
 }
 
 KeyClickPolicy InteractiveView::GetKeyClickPolicy() const
 {
-  return Provider::GetImpl(*this).GetKeyClickPolicy();
+  return Extension::GetImpl(*this).GetKeyClickPolicy();
 }
 
 void InteractiveView::SetKeyClickPolicy(KeyClickPolicy policy)
 {
-  Provider::GetImpl(*this).SetKeyClickPolicy(policy);
+  Extension::GetImpl(*this).SetKeyClickPolicy(policy);
 }
 
 } // namespace Ui

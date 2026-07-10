@@ -52,7 +52,7 @@ using ExecutionKeyPredicate = bool (*)(const Dali::String& keyName);
  */
 using ViewInitializer = void (*)(View view);
 
-namespace Provider
+namespace Extension
 {
 class UiConfigImpl;
 }
@@ -832,7 +832,7 @@ public: // Properties
    *
    * If no style sheet has been set, a new mutable style sheet is created and
    * stored in this config. This allows applications to inspect or override a
-   * provider preset before Apply().
+   * extension preset before Apply().
    *
    * @return The style sheet stored in this config
    */
@@ -857,11 +857,11 @@ public: // Properties
 
 public: // Not intended for Application developers
   /**
-   * @brief This constructor is used by provider config presets to wrap an implementation object.
+   * @brief This constructor is used by extension config presets to wrap an implementation object.
    *
-   * @param[in] impl A pointer to the provider UiConfig implementation
+   * @param[in] impl A pointer to the extension UiConfig implementation
    */
-  explicit UiConfig(Provider::UiConfigImpl* impl);
+  explicit UiConfig(Extension::UiConfigImpl* impl);
 };
 
 } // namespace Ui

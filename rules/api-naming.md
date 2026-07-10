@@ -3,7 +3,7 @@
 ## Rule: Boolean Enabled API Naming
 
 - Status: required
-- Scope: public-api, provider-api, integration-api
+- Scope: public-api, extension-api, integration-api
 - Applies To: C++ methods that expose boolean option properties
 
 ### Intent
@@ -16,7 +16,7 @@ void SetXxxEnabled(bool enabled);
 bool IsXxxEnabled() const;
 ```
 
-This makes call sites easy to scan and keeps public, provider, and integration
+This makes call sites easy to scan and keeps public, extension, and integration
 API names consistent.
 
 ### Preferred
@@ -116,7 +116,7 @@ must keep the adaptor method name.
 
 When renaming public boolean APIs, update:
 
-- Public, provider, integration, and internal forwarding declarations.
+- Public, extension, integration, and internal forwarding declarations.
 - Tests and samples.
 - Wiki pages and manual-test documents.
 - PR description public API tables.
@@ -126,7 +126,7 @@ Mention whether serialized property keys are intentionally unchanged.
 ## Rule: Natural Boolean Phrase Order
 
 - Status: recommended
-- Scope: public-api, provider-api, integration-api
+- Scope: public-api, extension-api, integration-api
 - Applies To: New or renamed boolean APIs
 
 ### Intent

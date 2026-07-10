@@ -36,11 +36,11 @@ void TVViewInitializer(View view)
 
 } // unnamed namespace
 
-class TVConfigImpl : public Provider::UiConfigImpl
+class TVConfigImpl : public Extension::UiConfigImpl
 {
 };
 
-TVConfig::TVConfig(Provider::UiConfigImpl* impl)
+TVConfig::TVConfig(Extension::UiConfigImpl* impl)
 : UiConfig(impl)
 {
 }

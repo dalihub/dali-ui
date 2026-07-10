@@ -28,7 +28,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Provider
+namespace Extension
 {
 class UiStyleImpl;
 }
@@ -72,7 +72,7 @@ protected:
    *
    * @param[in] impl The implementation object
    */
-  explicit UiStyle(Provider::UiStyleImpl* impl);
+  explicit UiStyle(Extension::UiStyleImpl* impl);
 };
 
 /**

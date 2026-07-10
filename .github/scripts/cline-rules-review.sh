@@ -134,11 +134,11 @@ const lines = [`감지된 이슈 ${issueCount}건`, ''];
 
 for (const [index, issue] of issues.slice(0, 50).entries()) {
   issue.summary = 'components가 foundation internal/integration header를 include함';
-  issue.rule = 'component-boundaries.md / Components Use Foundation Public and Provider APIs';
+  issue.rule = 'component-boundaries.md / Components Use Foundation Public and Extension APIs';
   issue.location = `${issue.file}:${issue.line}`;
   issue.severity = 'required';
-  issue.problem = `dali-ui-components는 foundation public/provider API만 사용해야 하지만 ${issue.include}를 추가했습니다.`;
-  issue.recommendation = 'foundation internal/integration header 의존을 제거하고 public/provider API로 필요한 정보를 전달하세요.';
+  issue.problem = `dali-ui-components는 foundation public/extension API만 사용해야 하지만 ${issue.include}를 추가했습니다.`;
+  issue.recommendation = 'foundation internal/integration header 의존을 제거하고 public/extension API로 필요한 정보를 전달하세요.';
 
   lines.push(`<details>`);
   lines.push(`<summary>(${index + 1}) ${issue.summary}</summary>`);
@@ -150,7 +150,7 @@ for (const [index, issue] of issues.slice(0, 50).entries()) {
   lines.push(`\`${issue.location}\``);
   lines.push('');
   lines.push('#### 문제');
-  lines.push(`\`dali-ui-components\`는 foundation public/provider API만 사용해야 하지만 \`${issue.include}\`를 추가했습니다.`);
+  lines.push(`\`dali-ui-components\`는 foundation public/extension API만 사용해야 하지만 \`${issue.include}\`를 추가했습니다.`);
   lines.push('');
   lines.push('#### 권장 조치');
   lines.push(issue.recommendation);

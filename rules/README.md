@@ -19,7 +19,7 @@ Use this structure when adding or updating a rule:
 ## Rule: Short Rule Name
 
 - Status: required | recommended | contextual
-- Scope: public-api | provider-api | integration-api | internal | docs | tests
+- Scope: public-api | extension-api | integration-api | internal | docs | tests
 - Applies To: Concrete code or document pattern
 
 ### Intent

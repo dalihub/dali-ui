@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/provider-api/shadow.h>
+#include <dali-ui-foundation/extension-api/shadow.h>
 
 // EXTERNAL INCLUDES
 #include <algorithm>
@@ -30,7 +30,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Provider
+namespace Extension
 {
 namespace Shadow
 {
@@ -148,6 +148,6 @@ Property::Map CreatePropertyMap(const Ui::Shadow& shadow)
 }
 
 } // namespace Shadow
-} // namespace Provider
+} // namespace Extension
 } // namespace Ui
 } // namespace Dali

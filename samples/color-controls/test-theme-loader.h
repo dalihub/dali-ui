@@ -15,7 +15,7 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/provider-api/theme-loader-interface.h>
+#include <dali-ui-foundation/extension-api/theme-loader-interface.h>
 
 #include <string>
 

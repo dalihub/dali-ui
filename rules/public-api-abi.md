@@ -3,7 +3,7 @@
 ## Rule: Respect API Level Stability
 
 - Status: required
-- Scope: public-api, provider-api, integration-api, internal
+- Scope: public-api, extension-api, integration-api, internal
 - Applies To: C++ API changes
 
 ### Intent
@@ -11,7 +11,7 @@
 `dali-ui` has several API levels with different stability expectations:
 
 - `public-api`: app developer surface.
-- `provider-api`: provider-facing extension surface.
+- `extension-api`: ABI-stable extension surface.
 - `integration-api`: extension library surface; recompilation is acceptable.
 - `internal`: implementation detail.
 

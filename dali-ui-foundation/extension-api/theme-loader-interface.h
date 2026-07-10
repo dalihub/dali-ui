@@ -34,7 +34,7 @@ namespace Ui
 /**
  * @brief Abstract interface for theme-based color loading.
  *
- * Provider or derived config implementations implement this interface.
+ * Extension or derived config implementations implement this interface.
  * A concrete instance is created via UiConfigImpl::CreateThemeLoader().
  *
  * The virtual method set is fixed for ABI stability. Future extensions

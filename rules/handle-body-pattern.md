@@ -3,7 +3,7 @@
 ## Rule: Public Handles Stay Lightweight
 
 - Status: required
-- Scope: public-api, provider-api, integration-api, internal
+- Scope: public-api, extension-api, integration-api, internal
 - Applies To: Public handle classes and implementation classes
 
 ### Intent
@@ -17,7 +17,7 @@ Typical layout:
 
 ```text
 public-api/foo.h
-provider-api/foo-impl.h
+extension-api/foo-impl.h
 internal/foo-impl.cpp
 ```
 

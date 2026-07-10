@@ -107,7 +107,7 @@ dali-ui-components/
 | Layer | Location | Visibility |
 |-------|----------|------------|
 | Public API | `public-api/chart/` | App developers |
-| Provider API | `provider-api/` | DALi UI module providers |
+| Extension API | `extension-api/` | DALi UI module providers |
 | Integration API | `integration-api/chart/` | Component contributors |
 | Rendering helpers | `integration-api/chart/` | Internal to `ChartViewImpl` |
 | DALi UI Foundation | `dali-ui-foundation/` | Shared infrastructure |

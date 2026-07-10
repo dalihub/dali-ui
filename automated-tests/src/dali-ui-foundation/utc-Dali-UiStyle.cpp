@@ -17,7 +17,7 @@
 
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/dali-ui-foundation-provider.h>
+#include <dali-ui-foundation/dali-ui-foundation-extension.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 
 using namespace Dali;
@@ -26,7 +26,7 @@ using namespace Dali::Ui;
 namespace
 {
 
-class TestStyleImpl : public Provider::UiStyleImpl
+class TestStyleImpl : public Extension::UiStyleImpl
 {
 public:
   explicit TestStyleImpl(int value)
@@ -79,7 +79,7 @@ private:
   }
 };
 
-class OtherStyleImpl : public Provider::UiStyleImpl
+class OtherStyleImpl : public Extension::UiStyleImpl
 {
 protected:
   ~OtherStyleImpl() override = default;

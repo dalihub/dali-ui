@@ -49,6 +49,7 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
@@ -58,7 +59,6 @@
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
-#include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
@@ -2064,11 +2064,11 @@ void ViewDataImpl::AppendShadow(const Dali::Ui::Shadow& shadow)
     // Keep the first shadow as the View::Property::SHADOW visual. That makes
     // property lookup and shadow blur/opacity animations target the primary
     // shadow directly, while later shadows can live in the visual container.
-    SetFirstShadow(Provider::Shadow::CreatePropertyMap(shadow));
+    SetFirstShadow(Extension::Shadow::CreatePropertyMap(shadow));
     return;
   }
 
-  ColorVisual visual = Provider::Shadow::CreateVisual(shadow);
+  ColorVisual visual = Extension::Shadow::CreateVisual(shadow);
   visual.SetName("shadow");
   if(AddShadowVisualObject(visual, Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND))
   {

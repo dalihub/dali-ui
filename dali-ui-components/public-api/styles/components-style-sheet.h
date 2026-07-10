@@ -35,7 +35,7 @@ namespace StyleSheet
  *
  * Components::UiConfig already provides a components style sheet. Applications
  * usually override entries through Components::UiConfig::StyleSheet().
- * Create a separate sheet only when a provider needs to replace the whole
+ * Create a separate sheet only when an extension author needs to replace the whole
  * style sheet through UiConfig::ResetStyleSheet().
  *
  * @return A new components style sheet

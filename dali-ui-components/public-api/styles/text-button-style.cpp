@@ -20,7 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/styles/text-button-style-impl.h>
-#include <dali-ui-foundation/provider-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 
 // EXTERNAL INCLUDES

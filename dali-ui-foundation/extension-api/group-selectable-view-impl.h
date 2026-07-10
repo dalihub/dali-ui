@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
+#include <dali-ui-foundation/extension-api/selectable-view-impl.h>
 #include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
@@ -26,7 +26,7 @@ namespace Dali
 
 namespace Ui
 {
-namespace Provider
+namespace Extension
 {
 
 class GroupSelectableViewImpl;
@@ -115,7 +115,7 @@ inline DALI_UI_API const GroupSelectableViewImpl& GetImpl(const GroupSelectableV
   return static_cast<const GroupSelectableViewImpl&>(handle);
 }
 
-} // namespace Provider
+} // namespace Extension
 } // namespace Ui
 
 } // namespace Dali

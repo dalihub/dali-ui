@@ -22,7 +22,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
-#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
+#include <dali-ui-foundation/extension-api/selectable-view-impl.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <test-gesture-generator.h>
@@ -108,7 +108,7 @@ struct SelectionChangedSignalFunctor
   SelectionChangedSignalData& signalData;
 };
 
-class TestSelectableViewImpl : public Provider::SelectableViewImpl
+class TestSelectableViewImpl : public Extension::SelectableViewImpl
 {
 public:
   static IntrusivePtr<TestSelectableViewImpl> New()
@@ -117,7 +117,7 @@ public:
   }
 };
 
-Dali::TypeRegistration testSelectableViewImplTypeReg(typeid(TestSelectableViewImpl), typeid(Provider::SelectableViewImpl), nullptr);
+Dali::TypeRegistration testSelectableViewImplTypeReg(typeid(TestSelectableViewImpl), typeid(Extension::SelectableViewImpl), nullptr);
 
 /**
  * @brief Helper to create a View, add it to the scene, attach selectable, and render.

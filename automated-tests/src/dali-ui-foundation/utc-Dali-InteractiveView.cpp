@@ -19,7 +19,7 @@
 #include <iostream>
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
+#include <dali-ui-foundation/extension-api/interactive-view-impl.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
@@ -181,7 +181,7 @@ struct LongPressedSignalFunctor
   LongPressedSignalData& signalData;
 };
 
-class TestInteractiveViewImpl : public Provider::InteractiveViewImpl
+class TestInteractiveViewImpl : public Extension::InteractiveViewImpl
 {
 public:
   static IntrusivePtr<TestInteractiveViewImpl> New()
@@ -190,7 +190,7 @@ public:
   }
 };
 
-Dali::TypeRegistration testInteractiveViewImplTypeReg(typeid(TestInteractiveViewImpl), typeid(Provider::InteractiveViewImpl), nullptr);
+Dali::TypeRegistration testInteractiveViewImplTypeReg(typeid(TestInteractiveViewImpl), typeid(Extension::InteractiveViewImpl), nullptr);
 
 InteractiveView CreateTestInteractiveView(TestApplication& application, float width = 100.0f, float height = 100.0f)
 {

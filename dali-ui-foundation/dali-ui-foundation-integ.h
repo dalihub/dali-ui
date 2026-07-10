@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/dali-ui-foundation-provider.h>
+#include <dali-ui-foundation/dali-ui-foundation-extension.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
@@ -61,8 +61,8 @@
 #include <dali-ui-foundation/integration-api/visuals/visuals-container.h>
 
 // Impl
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
-#include <dali-ui-foundation/provider-api/ui-config-impl.h>
 
 // Layouts
 #include <dali-ui-foundation/integration-api/layouts/absolute-layout-impl.h>

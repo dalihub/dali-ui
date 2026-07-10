@@ -16,7 +16,7 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/provider-api/shadow.h>
+#include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 
@@ -161,8 +161,8 @@ int UtcDaliShadowPropertyMapRoundTripP(void)
   UiTestApplication application;
 
   Shadow       shadow(12.0f, Vector2(6.0f, 7.0f), UiColor(0.2f, 0.3f, 0.4f, 0.5f), Vector2(8.0f, 9.0f), CutoutPolicy::CUTOUT_OUTSIDE_WITH_CORNER_RADIUS);
-  Property::Map map = Provider::Shadow::CreatePropertyMap(shadow);
-  Shadow       roundTrip = Provider::Shadow::CreateShadow(map);
+  Property::Map map = Extension::Shadow::CreatePropertyMap(shadow);
+  Shadow       roundTrip = Extension::Shadow::CreateShadow(map);
 
   DALI_TEST_EQUALS(roundTrip.GetColor().GetRgba(), shadow.GetColor().GetRgba(), TEST_LOCATION);
   DALI_TEST_EQUALS(roundTrip.GetBlurRadius(), shadow.GetBlurRadius(), TEST_LOCATION);
@@ -170,9 +170,9 @@ int UtcDaliShadowPropertyMapRoundTripP(void)
   DALI_TEST_EQUALS(roundTrip.GetOffset(), shadow.GetOffset(), TEST_LOCATION);
   DALI_TEST_EQUALS(roundTrip.GetExtents(), shadow.GetExtents(), TEST_LOCATION);
 
-  Shadow none = Provider::Shadow::CreateShadow(Property::Map());
+  Shadow none = Extension::Shadow::CreateShadow(Property::Map());
   DALI_TEST_CHECK(none == Shadow::None());
-  DALI_TEST_CHECK(Provider::Shadow::CreatePropertyMap(Shadow::None()).Empty());
+  DALI_TEST_CHECK(Extension::Shadow::CreatePropertyMap(Shadow::None()).Empty());
 
   END_TEST;
 }
@@ -182,7 +182,7 @@ int UtcDaliShadowVisualHelpersP(void)
   UiTestApplication application;
 
   Shadow      shadow(14.0f, Vector2(1.5f, 2.5f), UiColor(0.3f, 0.4f, 0.5f, 0.6f), Vector2(3.5f, 4.5f), CutoutPolicy::CUTOUT_VIEW);
-  ColorVisual visual = Provider::Shadow::CreateVisual(shadow);
+  ColorVisual visual = Extension::Shadow::CreateVisual(shadow);
 
   DALI_TEST_EQUALS(visual.GetColor().GetRgba(), shadow.GetColor().GetRgba(), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetBlurRadius(), shadow.GetBlurRadius(), TEST_LOCATION);

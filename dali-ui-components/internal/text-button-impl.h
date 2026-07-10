@@ -19,7 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/public-api/text-button.h>
-#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
+#include <dali-ui-foundation/extension-api/interactive-view-impl.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
 namespace Dali
@@ -29,7 +29,7 @@ namespace Ui
 namespace Internal
 {
 
-class TextButtonImpl : public Provider::InteractiveViewImpl
+class TextButtonImpl : public Extension::InteractiveViewImpl
 {
 public:
   static Ui::TextButton New(TextButtonStyle style);

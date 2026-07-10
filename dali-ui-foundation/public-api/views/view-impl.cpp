@@ -48,6 +48,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 
+#include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
@@ -69,7 +70,6 @@
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
-#include <dali-ui-foundation/provider-api/shadow.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
@@ -2617,7 +2617,7 @@ void ViewImpl::SetShadow(const Shadow& shadow)
     return;
   }
 
-  mImpl->SetShadow(Provider::Shadow::CreatePropertyMap(shadow));
+  mImpl->SetShadow(Dali::Ui::Extension::Shadow::CreatePropertyMap(shadow));
 }
 
 void ViewImpl::SetShadow(const ShadowStack& shadowStack)

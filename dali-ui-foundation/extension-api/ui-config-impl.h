@@ -26,7 +26,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/provider-api/theme-loader-interface.h>
+#include <dali-ui-foundation/extension-api/theme-loader-interface.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
@@ -38,16 +38,16 @@ namespace Dali
 namespace Ui
 {
 
-namespace Provider
+namespace Extension
 {
 
 class UiConfigImpl;
 using UiConfigImplPtr = IntrusivePtr<UiConfigImpl>;
 
 /**
- * @brief Provider-facing implementation base for UiConfig presets.
+ * @brief Extension-facing implementation base for UiConfig presets.
  *
- * Module providers can derive from this class to distribute preconfigured
+ * Module extension authors can derive from this class to distribute preconfigured
  * UiConfig handles. It supports a "freeze" mechanism: once Freeze() is called
  * by UiConfig::Apply(), all subsequent setter calls will trigger
  * DALI_ASSERT_ALWAYS.
@@ -586,7 +586,7 @@ private:
   Impl* mImpl;
 };
 
-} // namespace Provider
+} // namespace Extension
 
 /**
  * @brief Retrieves the UiConfigImpl from a UiConfig handle.
@@ -594,10 +594,10 @@ private:
  * @param[in] obj The UiConfig handle
  * @return A reference to the internal implementation
  */
-inline Provider::UiConfigImpl& GetImpl(UiConfig& obj)
+inline Extension::UiConfigImpl& GetImpl(UiConfig& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Provider::UiConfigImpl&>(handle);
+  return static_cast<Extension::UiConfigImpl&>(handle);
 }
 
 /**
@@ -606,10 +606,10 @@ inline Provider::UiConfigImpl& GetImpl(UiConfig& obj)
  * @param[in] obj The UiConfig handle
  * @return A const reference to the internal implementation
  */
-inline const Provider::UiConfigImpl& GetImpl(const UiConfig& obj)
+inline const Extension::UiConfigImpl& GetImpl(const UiConfig& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Provider::UiConfigImpl&>(handle);
+  return static_cast<const Extension::UiConfigImpl&>(handle);
 }
 
 } // namespace Ui

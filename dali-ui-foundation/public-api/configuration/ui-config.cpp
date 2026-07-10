@@ -27,8 +27,8 @@
 #include <utility>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 #include <dali-ui-foundation/integration-api/ui-theme-manager-impl.h>
-#include <dali-ui-foundation/provider-api/ui-config-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -186,14 +186,14 @@ BaseHandle GetRuntime()
 
 } // unnamed namespace
 
-UiConfig::UiConfig(Provider::UiConfigImpl* impl)
+UiConfig::UiConfig(Extension::UiConfigImpl* impl)
 : BaseHandle(impl)
 {
 }
 
 UiConfig UiConfig::New()
 {
-  Provider::UiConfigImplPtr impl = Provider::UiConfigImpl::New();
+  Extension::UiConfigImplPtr impl = Extension::UiConfigImpl::New();
 
   // Pass ownership to handle
   UiConfig handle(impl.Get());
@@ -203,7 +203,7 @@ UiConfig UiConfig::New()
 
 UiConfig UiConfig::DownCast(BaseHandle handle)
 {
-  return UiConfig(dynamic_cast<Provider::UiConfigImpl*>(handle.GetObjectPtr()));
+  return UiConfig(dynamic_cast<Extension::UiConfigImpl*>(handle.GetObjectPtr()));
 }
 
 void UiConfig::Apply()

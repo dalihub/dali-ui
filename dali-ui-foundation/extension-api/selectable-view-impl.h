@@ -17,7 +17,7 @@
  *
  */
 
-#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
+#include <dali-ui-foundation/extension-api/interactive-view-impl.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/selectable-view.h>
 
@@ -26,7 +26,7 @@ namespace Dali
 
 namespace Ui
 {
-namespace Provider
+namespace Extension
 {
 
 class SelectableViewImpl;
@@ -125,7 +125,7 @@ inline DALI_UI_API const SelectableViewImpl& GetImpl(const SelectableView& view)
   return static_cast<const SelectableViewImpl&>(handle);
 }
 
-} // namespace Provider
+} // namespace Extension
 } // namespace Ui
 
 } // namespace Dali

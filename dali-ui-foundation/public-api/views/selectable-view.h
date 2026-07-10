@@ -26,7 +26,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Provider
+namespace Extension
 {
 class SelectableViewImpl;
 }
@@ -159,7 +159,7 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The SelectableView implementation
    */
-  explicit DALI_UI_API SelectableView(Provider::SelectableViewImpl& implementation);
+  explicit DALI_UI_API SelectableView(Extension::SelectableViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this SelectableView from an Internal::CustomActor pointer.

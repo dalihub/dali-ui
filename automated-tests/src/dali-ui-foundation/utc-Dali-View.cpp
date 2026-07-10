@@ -20,7 +20,7 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 
-#include <dali-ui-foundation/provider-api/shadow.h>
+#include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/visuals/gradient-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
@@ -236,7 +236,7 @@ Shadow GetShadowProperty(View view)
   Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
   const Property::Map* shadowMap = shadowValue.GetMap();
   DALI_TEST_CHECK(shadowMap);
-  return shadowMap ? Provider::Shadow::CreateShadow(*shadowMap) : Shadow::None();
+  return shadowMap ? Extension::Shadow::CreateShadow(*shadowMap) : Shadow::None();
 }
 
 int GetVisualType(const Property::Map& map)
@@ -702,7 +702,7 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 2u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow2.GetBlurRadius(), TEST_LOCATION);
 
-  view.SetProperty(View::Property::SHADOW, Provider::Shadow::CreatePropertyMap(shadow1));
+  view.SetProperty(View::Property::SHADOW, Extension::Shadow::CreatePropertyMap(shadow1));
   DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
   DALI_TEST_EQUALS(GetShadowProperty(view).GetBlurRadius(), shadow1.GetBlurRadius(), TEST_LOCATION);
 

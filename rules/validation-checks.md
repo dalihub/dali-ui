@@ -16,14 +16,14 @@ Use this to see how widely the preferred pattern appears:
 rg -o '\bSet[A-Za-z0-9]+Enabled\(bool' \
   dali-ui-foundation/public-api \
   dali-ui-components/public-api \
-  dali-ui-foundation/provider-api \
+  dali-ui-foundation/extension-api \
   dali-ui-foundation/integration-api \
   dali-ui-components/integration-api | wc -l
 
 rg -o '\bIs[A-Za-z0-9]+Enabled\(\) const' \
   dali-ui-foundation/public-api \
   dali-ui-components/public-api \
-  dali-ui-foundation/provider-api \
+  dali-ui-foundation/extension-api \
   dali-ui-foundation/integration-api \
   dali-ui-components/integration-api | wc -l
 ```
@@ -39,28 +39,28 @@ Search for getter/setter forms that should usually be renamed:
 rg -n '\bGet[A-Za-z0-9]+Enabled\(\) const' \
   dali-ui-foundation/public-api \
   dali-ui-components/public-api \
-  dali-ui-foundation/provider-api \
+  dali-ui-foundation/extension-api \
   dali-ui-foundation/integration-api \
   dali-ui-components/integration-api
 
 rg -n '\bSetEnable[A-Za-z0-9]+\(bool' \
   dali-ui-foundation/public-api \
   dali-ui-components/public-api \
-  dali-ui-foundation/provider-api \
+  dali-ui-foundation/extension-api \
   dali-ui-foundation/integration-api \
   dali-ui-components/integration-api
 
 rg -n '\bEnable[A-Za-z0-9]+\(bool' \
   dali-ui-foundation/public-api \
   dali-ui-components/public-api \
-  dali-ui-foundation/provider-api \
+  dali-ui-foundation/extension-api \
   dali-ui-foundation/integration-api \
   dali-ui-components/integration-api
 
 rg -n '\bIsEnable[A-Za-z0-9]+\(\) const' \
   dali-ui-foundation/public-api \
   dali-ui-components/public-api \
-  dali-ui-foundation/provider-api \
+  dali-ui-foundation/extension-api \
   dali-ui-foundation/integration-api \
   dali-ui-components/integration-api
 ```
@@ -95,7 +95,7 @@ git diff --check
 Also inspect:
 
 - Public headers.
-- Provider and integration forwarding APIs.
+- Extension and integration forwarding APIs.
 - Internal implementation method names.
 - Tests, samples, and wiki references.
 - PR description public API change table.

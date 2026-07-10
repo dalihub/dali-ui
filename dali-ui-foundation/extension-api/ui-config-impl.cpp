@@ -16,7 +16,7 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/provider-api/ui-config-impl.h>
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/window-system-devel.h>
@@ -26,7 +26,7 @@
 #include <array>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/provider-api/ui-config-impl.h>
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 
 namespace
@@ -49,7 +49,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Provider
+namespace Extension
 {
 
 class UiConfigImpl::Impl
@@ -598,7 +598,7 @@ ThemeLoaderInterface* UiConfigImpl::CreateThemeLoader()
   return nullptr;
 }
 
-} // namespace Provider
+} // namespace Extension
 
 } // namespace Ui
 

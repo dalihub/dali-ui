@@ -19,12 +19,12 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <dali-ui-foundation/provider-api/group-selectable-view-impl.h>
-#include <dali-ui-foundation/provider-api/interactive-view-impl.h>
-#include <dali-ui-foundation/provider-api/property-registration-helper.h>
-#include <dali-ui-foundation/provider-api/selectable-view-impl.h>
-#include <dali-ui-foundation/provider-api/shadow.h>
-#include <dali-ui-foundation/provider-api/styles/ui-style-debug.h>
-#include <dali-ui-foundation/provider-api/styles/ui-style-impl.h>
-#include <dali-ui-foundation/provider-api/theme-loader-interface.h>
-#include <dali-ui-foundation/provider-api/ui-config-impl.h>
+#include <dali-ui-foundation/extension-api/group-selectable-view-impl.h>
+#include <dali-ui-foundation/extension-api/interactive-view-impl.h>
+#include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/extension-api/selectable-view-impl.h>
+#include <dali-ui-foundation/extension-api/shadow.h>
+#include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
+#include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
+#include <dali-ui-foundation/extension-api/theme-loader-interface.h>
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>

@@ -29,7 +29,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Provider
+namespace Extension
 {
 namespace Shadow
 {
@@ -59,6 +59,6 @@ DALI_UI_API Ui::Shadow CreateShadow(const Property::Map& map);
 DALI_UI_API Property::Map CreatePropertyMap(const Ui::Shadow& shadow);
 
 } // namespace Shadow
-} // namespace Provider
+} // namespace Extension
 } // namespace Ui
 } // namespace Dali

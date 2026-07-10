@@ -28,7 +28,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Provider
+namespace Extension
 {
 
 namespace Internal
@@ -77,6 +77,6 @@ inline DALI_UI_API const UiStyleImpl& GetImpl(const UiStyle& obj)
   return static_cast<const UiStyleImpl&>(handle);
 }
 
-} // namespace Provider
+} // namespace Extension
 } // namespace Ui
 } // namespace Dali

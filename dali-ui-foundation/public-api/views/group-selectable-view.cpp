@@ -15,7 +15,7 @@
  *
  */
 
-#include <dali-ui-foundation/provider-api/group-selectable-view-impl.h>
+#include <dali-ui-foundation/extension-api/group-selectable-view-impl.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
 
 namespace Dali
@@ -30,7 +30,7 @@ GroupSelectableView::GroupSelectableView()
 
 GroupSelectableView GroupSelectableView::New()
 {
-  Provider::GroupSelectableViewImplPtr impl = Provider::GroupSelectableViewImpl::New();
+  Extension::GroupSelectableViewImplPtr impl = Extension::GroupSelectableViewImpl::New();
 
   GroupSelectableView handle(*impl);
 
@@ -41,7 +41,7 @@ GroupSelectableView GroupSelectableView::New()
 
 GroupSelectableView GroupSelectableView::DownCast(BaseHandle handle)
 {
-  return View::DownCast<GroupSelectableView, Provider::GroupSelectableViewImpl>(handle);
+  return View::DownCast<GroupSelectableView, Extension::GroupSelectableViewImpl>(handle);
 }
 
 GroupSelectableView::GroupSelectableView(const GroupSelectableView& view) = default;
@@ -52,7 +52,7 @@ GroupSelectableView::~GroupSelectableView()
 {
 }
 
-GroupSelectableView::GroupSelectableView(Provider::GroupSelectableViewImpl& implementation)
+GroupSelectableView::GroupSelectableView(Extension::GroupSelectableViewImpl& implementation)
 : SelectableView(implementation)
 {
 }
@@ -60,22 +60,22 @@ GroupSelectableView::GroupSelectableView(Provider::GroupSelectableViewImpl& impl
 GroupSelectableView::GroupSelectableView(Dali::Internal::CustomActor* internal)
 : SelectableView(internal)
 {
-  VerifyCustomActorPointer<Provider::GroupSelectableViewImpl>(internal);
+  VerifyCustomActorPointer<Extension::GroupSelectableViewImpl>(internal);
 }
 
 void GroupSelectableView::SetGroupName(const Dali::String& name)
 {
-  Provider::GetImpl(*this).SetGroupName(name);
+  Extension::GetImpl(*this).SetGroupName(name);
 }
 
 Dali::String GroupSelectableView::GetGroupName() const
 {
-  return Provider::GetImpl(*this).GetGroupName();
+  return Extension::GetImpl(*this).GetGroupName();
 }
 
 SelectionGroup GroupSelectableView::GetGroup() const
 {
-  return Provider::GetImpl(*this).GetGroup();
+  return Extension::GetImpl(*this).GetGroup();
 }
 
 } // namespace Ui

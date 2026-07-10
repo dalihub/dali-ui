@@ -16,13 +16,13 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/provider-api/styles/ui-style-impl.h>
+#include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Provider
+namespace Extension
 {
 namespace Internal
 {
@@ -44,6 +44,6 @@ UiStyleImpl::~UiStyleImpl()
   delete mPrivate;
 }
 
-} // namespace Provider
+} // namespace Extension
 } // namespace Ui
 } // namespace Dali

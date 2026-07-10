@@ -27,7 +27,7 @@ namespace Dali
 
 namespace Ui
 {
-namespace Provider
+namespace Extension
 {
 
 class InteractiveViewImpl;
@@ -155,7 +155,7 @@ inline DALI_UI_API const InteractiveViewImpl& GetImpl(const InteractiveView& vie
   return static_cast<const InteractiveViewImpl&>(handle);
 }
 
-} // namespace Provider
+} // namespace Extension
 } // namespace Ui
 
 } // namespace Dali

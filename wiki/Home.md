@@ -34,12 +34,14 @@ DALi exposes three API levels with different stability guarantees and intended a
 | Level | Audience | ABI Stability | Umbrella Header |
 |---|---|---|---|
 | **Public API** | App developers | **Guaranteed** — must not break across releases | `<dali-ui-foundation/dali-ui-foundation.h>` |
-| **Provider API** | DALi UI module providers | **Guaranteed** — must not break across releases | `<dali-ui-foundation/dali-ui-foundation-provider.h>` |
+| **Extension API** | DALi UI module providers | **Guaranteed** — must not break across releases | `<dali-ui-foundation/dali-ui-foundation-extension.h>` |
 | **Integration API** | Framework developers | Not required — consumers rebuild alongside dali-ui | `<dali-ui-foundation/dali-ui-foundation-integ.h>` |
+
+> **Note:** The former `provider-api` level has been renamed to `extension-api`.
 
 **As an app developer**, use the Public API umbrella header or individual `public-api/` headers. This is the layer with guaranteed ABI stability.
 
-**As a DALi UI module provider**, use the Provider API umbrella header when you need ABI-stable implementation-level extension points.
+**As a DALi UI module provider**, use the Extension API umbrella header when you need ABI-stable implementation-level extension points.
 
 **As a framework developer**, you may also depend on the Integration API umbrella header, with the understanding
 that it may change between dali-ui versions and will require a rebuild.

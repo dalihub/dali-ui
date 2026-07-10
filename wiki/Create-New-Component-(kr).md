@@ -11,9 +11,9 @@ Public component handle은 컴포넌트의 동작에 맞는 foundation class를 
 | 사용 목적 | Public base | Internal impl base |
 |---|---|---|
 | 기본 visual/container component | `View` | `ViewImpl` |
-| click/focus 등 interaction이 필요한 component | `InteractiveView` | `Provider::InteractiveViewImpl` |
-| selection 상태가 필요한 component | `SelectableView` | `Provider::SelectableViewImpl` |
-| single-selection(radio) group 멤버 component | `GroupSelectableView` | `Provider::GroupSelectableViewImpl` |
+| click/focus 등 interaction이 필요한 component | `InteractiveView` | `Extension::InteractiveViewImpl` |
+| selection 상태가 필요한 component | `SelectableView` | `Extension::SelectableViewImpl` |
+| single-selection(radio) group 멤버 component | `GroupSelectableView` | `Extension::GroupSelectableViewImpl` |
 
 Public handle과 internal impl의 상속 계층을 맞춥니다.
 
@@ -23,7 +23,7 @@ class TextButton : public InteractiveView
   ...
 };
 
-class TextButtonImpl : public Provider::InteractiveViewImpl
+class TextButtonImpl : public Extension::InteractiveViewImpl
 {
   ...
 };
@@ -44,7 +44,7 @@ class TextButtonImpl : public Provider::InteractiveViewImpl
 
 ### Style Class Pattern
 
-컴포넌트 style class는 immutable `UiStyle` handle로 정의합니다. Style 관련 public/provider/integration/internal 파일은 각 API level의 `styles/` 디렉터리 아래에 둡니다.
+컴포넌트 style class는 immutable `UiStyle` handle로 정의합니다. Style 관련 public/extension/integration/internal 파일은 각 API level의 `styles/` 디렉터리 아래에 둡니다.
 
 `DefaultKey()`와 `Default()`는 뒤에서 설명할 `StyleSheet` override를 지원하기 위한 API입니다. `DefaultPreset()`은 override가 없을 때 사용할 cached built-in 기본 style을 제공합니다.
 

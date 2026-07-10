@@ -26,7 +26,7 @@ namespace Dali
 namespace Ui
 {
 
-namespace Provider
+namespace Extension
 {
 class InteractiveViewImpl;
 }
@@ -265,7 +265,7 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The InteractiveView implementation
    */
-  explicit DALI_UI_API InteractiveView(Provider::InteractiveViewImpl& implementation);
+  explicit DALI_UI_API InteractiveView(Extension::InteractiveViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this InteractiveView from an Internal::CustomActor pointer.

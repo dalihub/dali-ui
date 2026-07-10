@@ -19,7 +19,7 @@
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/provider-api/styles/ui-style-impl.h>
+#include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 
 namespace Dali
 {
@@ -28,10 +28,10 @@ namespace Ui
 
 UiStyle UiStyle::DownCast(BaseHandle handle)
 {
-  return UiStyle(dynamic_cast<Provider::UiStyleImpl*>(handle.GetObjectPtr()));
+  return UiStyle(dynamic_cast<Extension::UiStyleImpl*>(handle.GetObjectPtr()));
 }
 
-UiStyle::UiStyle(Provider::UiStyleImpl* impl)
+UiStyle::UiStyle(Extension::UiStyleImpl* impl)
 : BaseHandle(impl)
 {
 }
