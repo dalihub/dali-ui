@@ -103,7 +103,7 @@ config.Apply(); // config와 config의 style sheet를 모두 freeze합니다.
 ```
 
 `ResetStyleSheet()`는 provider가 style sheet 전체를 교체해야 할 때 사용할 수 있습니다.
-`StyleSheet::New()`도 이 고급 provider 경로를 위해 제공하지만, 일반 앱 코드는
+`StyleSheet::New()`도 이 고급 extension 경로를 위해 제공하지만, 일반 앱 코드는
 보통 config preset이 이미 가진 sheet에서 시작합니다.
 `TextButtonStyle::Default()`나 `TextButtonStyle::DefaultPreset()` 같은
 컴포넌트 style accessor는 `Apply()` 전에 호출하지 않습니다.

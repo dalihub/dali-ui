@@ -33,12 +33,14 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 세 가지 API 레벨
 | 레벨 | 대상 | ABI 안정성 | 우산 헤더 |
 |------|------|------------|-----------|
 | **Public API** | 앱 개발자 | **보장** — 릴리즈 간 ABI가 깨져서는 안 됨 | `<dali-ui-foundation/dali-ui-foundation.h>` |
-| **Provider API** | DALi UI 모듈 제공자 | **보장** — 릴리즈 간 ABI가 깨져서는 안 됨 | `<dali-ui-foundation/dali-ui-foundation-provider.h>` |
+| **Extension API** | DALi UI 모듈 제공자 | **보장** — 릴리즈 간 ABI가 깨져서는 안 됨 | `<dali-ui-foundation/dali-ui-foundation-extension.h>` |
 | **Integration API** | Framework 개발자 | 불필요 — dali-ui와 함께 재빌드 가능 | `<dali-ui-foundation/dali-ui-foundation-integ.h>` |
+
+> **Note:** 기존 `provider-api` 레벨은 `extension-api`로 이름이 변경되었습니다.
 
 **앱 개발자**라면 Public API 우산 헤더 또는 개별 `public-api/` 헤더를 사용하세요. ABI 안정성이 보장되는 레이어입니다.
 
-**DALi UI 모듈 제공자**라면 ABI 안정성이 필요한 구현 레벨 확장 지점에 Provider API 우산 헤더를 사용하세요.
+**DALi UI 모듈 제공자**라면 ABI 안정성이 필요한 구현 레벨 확장 지점에 Extension API 우산 헤더를 사용하세요.
 
 **Framework 개발자**라면 Integration API 우산 헤더도 사용할 수 있습니다. 다만 dali-ui 버전 간에 변경될 수 있으며, 변경 시 재빌드가 필요합니다.
 

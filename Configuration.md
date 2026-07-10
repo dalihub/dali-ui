@@ -106,8 +106,8 @@ config.StyleSheet()
 config.Apply(); // Freezes both config and its style sheet.
 ```
 
-`ResetStyleSheet()` is still available when a provider wants to replace the whole
-sheet. `StyleSheet::New()` is also available for that advanced provider path,
+`ResetStyleSheet()` is still available when a module provider wants to replace the whole
+sheet. `StyleSheet::New()` is also available for that advanced extension path,
 but application code should normally start from the sheet already owned by the
 config preset.
 Do not call component style accessors such as `TextButtonStyle::Default()` or

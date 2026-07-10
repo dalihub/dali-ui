@@ -13,9 +13,9 @@ A public component handle should inherit from the foundation class that matches 
 | Use case | Public base | Internal impl base |
 |---|---|---|
 | Basic visual/container component | `View` | `ViewImpl` |
-| Clickable/focusable interactive component | `InteractiveView` | `Provider::InteractiveViewImpl` |
-| Component with selectable state | `SelectableView` | `Provider::SelectableViewImpl` |
-| Single-selection (radio) group member component | `GroupSelectableView` | `Provider::GroupSelectableViewImpl` |
+| Clickable/focusable interactive component | `InteractiveView` | `Extension::InteractiveViewImpl` |
+| Component with selectable state | `SelectableView` | `Extension::SelectableViewImpl` |
+| Single-selection (radio) group member component | `GroupSelectableView` | `Extension::GroupSelectableViewImpl` |
 
 Keep the public handle and internal impl hierarchy aligned:
 
@@ -25,7 +25,7 @@ class TextButton : public InteractiveView
   ...
 };
 
-class TextButtonImpl : public Provider::InteractiveViewImpl
+class TextButtonImpl : public Extension::InteractiveViewImpl
 {
   ...
 };
@@ -46,7 +46,7 @@ Providers can also set a component's default style through the style sheet in `U
 
 ### Style Class Pattern
 
-A component style class is an immutable `UiStyle` handle. Style-related public, provider, integration, and internal files live under the `styles/` directory of their API level.
+A component style class is an immutable `UiStyle` handle. Style-related public, extension, integration, and internal files live under the `styles/` directory of their API level.
 
 `DefaultKey()` and `Default()` exist to support `StyleSheet` overrides described later. `DefaultPreset()` provides the component's cached built-in default style when no override is registered.
 
