@@ -23,10 +23,10 @@ dali-ui의 text 기능은 모두 `View` 기반 컴포넌트로 제공됩니다. 
 | 범주 | 관련 기능 | 주요 component |
 |---|---|---|
 | Text layout | multi-line, wrap, alignment, overflow, line height | Label, InputEditor |
-| Text style | color, underline, shadow, outline, background | Label, InputField, InputEditor |
+| Text style | color, underline, shadow, outline, background, styled text | Label, InputField, InputEditor |
 | Font | font family, size, weight, width, slant, variation | Label, InputField, InputEditor |
 | Text input | placeholder, cursor, selection, input filter | InputField, InputEditor |
-| Advanced label rendering | text fit, marquee, async rendering, render scale, cutout | Label |
+| Advanced label rendering | text fit, marquee, async rendering, render scale, cutout, text gradient, gradient overlay | Label |
 | Localization | translatable text/placeholder, binding | Label, InputField, InputEditor |
 
 <br/>
@@ -93,6 +93,19 @@ label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
 
 <br/>
 
+## 고급 텍스트 스타일
+
+간단한 부분 스타일링은 DALi markup을 `StyledText`로 변환해서 사용할 수 있습니다. 코드로 텍스트를 구성해야 하는 경우에는 `StyledTextBuilder`로 텍스트를 조립하고, 특정 range에 span을 붙인 뒤 `SetStyledText()`로 적용합니다.
+
+`TextGradient`는 resolve된 glyph fill에 gradient를 적용하는 `Label` rendering 기능입니다. `TextGradientOverlay`를 사용하면 별도의 overlay actor 없이 highlight나 shimmer 효과를 만들 수 있습니다.
+
+| 기능 | 사용 시점 | 자세한 내용 |
+|---|---|---|
+| `StyledText` | 특정 text range를 스타일링하거나 semantic annotation을 해석해야 할 때 | [StyledText](https://github.sec.samsung.net/NUI/dali-ui/wiki/StyledText-(kr)) |
+| `TextGradient` / `TextGradientOverlay` | `Label` text rendering에 gradient, highlight, shimmer 효과를 적용할 때 | [Text Gradient](https://github.sec.samsung.net/NUI/dali-ui/wiki/Text-Gradient-(kr)) |
+
+<br/>
+
 ## Samples
 
 | 기능 | 샘플 |
@@ -100,7 +113,9 @@ label.SetLayoutDirectionMode(Text::LayoutDirectionMode::CONTENTS);
 | 기본 | [text-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-example.cpp) |
 | Layout direction | [text-layout-direction-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-layout-direction-example.cpp) |
 | Markup | [text-markup-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-markup-example.cpp) |
+| StyledText | [text-styled-text-simple-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-styled-text-simple-example.cpp), [text-styled-text-builder-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-styled-text-builder-example.cpp) |
 | Style | [text-style-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-style-example.cpp) |
+| Text Gradient | [text-gradient-simple-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-gradient-simple-example.cpp), [text-gradient-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-gradient-example.cpp) |
 | Bevel | [text-style-bevel-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-style-bevel-example.cpp) |
 | Font variation | [text-font-variation-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-font-variation-example.cpp) |
 | Text fit | [text-fit-example.cpp](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/text/text-fit-example.cpp) |
