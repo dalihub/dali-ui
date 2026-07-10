@@ -168,8 +168,8 @@ private:
 
     // Input filter buttons row
     Label btnSetInputFilter = CreateButton("Set InputFilter", 0x2980B9);
-    Label btnClearInputFilter = CreateButton("Clear InputFilter", 0x7F8C8D);
-    View inputFilterRow = CreateButtonRow({btnSetInputFilter, btnClearInputFilter});
+    Label btnResetInputFilter = CreateButton("Reset InputFilter", 0x7F8C8D);
+    View inputFilterRow = CreateButtonRow({btnSetInputFilter, btnResetInputFilter});
 
     // Other buttons row
     Label btnMaxLen = CreateButton("Max Length", 0xD35400);
@@ -252,7 +252,7 @@ private:
 
     // Connect button touch signals - Input filter
     btnSetInputFilter.TouchEventSignal().Connect(this, &InputFieldController::OnButtonSetInputFilterTouched);
-    btnClearInputFilter.TouchEventSignal().Connect(this, &InputFieldController::OnButtonClearInputFilterTouched);
+    btnResetInputFilter.TouchEventSignal().Connect(this, &InputFieldController::OnButtonResetInputFilterTouched);
 
     // Connect button touch signals - Other
     btnMaxLen.TouchEventSignal().Connect(this, &InputFieldController::OnButtonMaxLenTouched);
@@ -679,11 +679,11 @@ private:
     return true;
   }
 
-  bool OnButtonClearInputFilterTouched(Actor, TouchEvent touch)
+  bool OnButtonResetInputFilterTouched(Actor, TouchEvent touch)
   {
     if(touch.GetState(0) == PointState::UP)
     {
-      mInputField.ClearInputFilter();
+      mInputField.SetInputFilter(Text::InputFilter::None());
       mInputFilterSet = false;
       mInputField.InputRejectedSignal().Disconnect(this, &InputFieldController::OnInputRejected);
       UpdateStatus();

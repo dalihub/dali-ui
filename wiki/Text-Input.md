@@ -254,6 +254,12 @@ field.SetInputFilter(inputFilter);
 
 The example above allows only digits, but rejects 0 to 5, so only 6 to 9 can be entered.
 
+The current filter can be retrieved with `GetInputFilter()`.
+
+~~~cpp
+Text::InputFilter currentFilter = field.GetInputFilter();
+~~~
+
 The rejection reason can be checked from `InputRejectedSignal`:
 
 ~~~cpp
@@ -264,10 +270,10 @@ field.InputRejectedSignal().Connect(
   });
 ~~~
 
-Clear the filter:
+Clear the filter by passing `Text::InputFilter::None()`:
 
 ~~~cpp
-field.ClearInputFilter();
+field.SetInputFilter(Text::InputFilter::None());
 ~~~
 
 <br/>

@@ -100,6 +100,26 @@ InputFilter::~InputFilter()
   delete mImpl;
 }
 
+const InputFilter& InputFilter::None()
+{
+  static const InputFilter none;
+  return none;
+}
+
+bool InputFilter::operator==(const InputFilter& rhs) const
+{
+  DALI_ASSERT_VALID_INPUT_FILTER(mImpl);
+  DALI_ASSERT_VALID_INPUT_FILTER(rhs.mImpl);
+
+  return mImpl->mAllowPattern == rhs.mImpl->mAllowPattern &&
+         mImpl->mDenyPattern == rhs.mImpl->mDenyPattern;
+}
+
+bool InputFilter::operator!=(const InputFilter& rhs) const
+{
+  return !(*this == rhs);
+}
+
 void InputFilter::SetAllowPattern(const Dali::String& pattern)
 {
   DALI_ASSERT_VALID_INPUT_FILTER(mImpl);

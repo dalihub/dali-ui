@@ -2113,9 +2113,11 @@ public: // Queries & retrieves.
   void SetInputFilter(const InputFilter& inputFilter);
 
   /**
-   * @brief Clears the input filter.
+   * @brief Gets the input filter.
+   *
+   * @return The current input filter, or Text::InputFilter::None() if not set.
    */
-  void ClearInputFilter();
+  InputFilter GetInputFilter() const;
 
   /**
    * @brief Sets the Placeholder Properties.

@@ -680,21 +680,18 @@ public: // Setters for chaining
    * @note This filter is applied to inserted input, such as user input, input
    * method commits, and paste operations. It is not applied when text is set
    * directly with SetText().
+   * Pass Text::InputFilter::None() to clear the input filter.
    *
    * @param[in] inputFilter The input filter to apply.
-   * @return This input editor.
    */
   void SetInputFilter(const Text::InputFilter& inputFilter);
 
   /**
-   * @brief Clears the input filter.
+   * @brief Gets the input filter.
    *
-   * After clearing the input filter, all input is allowed unless another input
-   * filter is set.
-   *
-   * @return This input editor.
+   * @return The current input filter, or Text::InputFilter::None() if not set.
    */
-  void ClearInputFilter();
+  Text::InputFilter GetInputFilter() const;
 
   /**
    * @brief Sets whether the InputEditor can be edited by user interaction.

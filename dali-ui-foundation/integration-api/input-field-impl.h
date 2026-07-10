@@ -350,9 +350,9 @@ public:
   void SetInputFilter(const Text::InputFilter& inputFilter);
 
   /**
-   * @copydoc Dali::Ui::InputField::ClearInputFilter
+   * @copydoc Dali::Ui::InputField::GetInputFilter
    */
-  void ClearInputFilter();
+  Text::InputFilter GetInputFilter() const;
 
   /**
    * @copydoc Dali::Ui::InputField::SetPasswordMode

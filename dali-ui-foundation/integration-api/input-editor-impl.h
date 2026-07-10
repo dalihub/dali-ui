@@ -380,9 +380,9 @@ public:
   void SetInputFilter(const Text::InputFilter& inputFilter);
 
   /**
-   * @copydoc Dali::Ui::InputEditor::ClearInputFilter
+   * @copydoc Dali::Ui::InputEditor::GetInputFilter
    */
-  void ClearInputFilter();
+  Text::InputFilter GetInputFilter() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetLayoutDirectionMode

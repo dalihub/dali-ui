@@ -651,6 +651,31 @@ int UtcDaliInputFieldPasswordRevealDuration(void)
   END_TEST;
 }
 
+int UtcDaliInputFieldInputFilter(void)
+{
+  UiTestApplication application;
+  InputField inputField = InputField::New();
+  DALI_TEST_CHECK(inputField);
+
+  DALI_TEST_CHECK(inputField.GetInputFilter() == Text::InputFilter::None());
+
+  Text::InputFilter inputFilter;
+  inputFilter.SetAllowPattern("[\\d]");
+  inputFilter.SetDenyPattern("[0-5]");
+  inputField.SetInputFilter(inputFilter);
+
+  Text::InputFilter currentInputFilter = inputField.GetInputFilter();
+  DALI_TEST_EQUALS(currentInputFilter.GetAllowPattern(), Dali::String("[\\d]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(currentInputFilter.GetDenyPattern(), Dali::String("[0-5]"), TEST_LOCATION);
+  DALI_TEST_CHECK(currentInputFilter == inputFilter);
+  DALI_TEST_CHECK(currentInputFilter != Text::InputFilter::None());
+
+  inputField.SetInputFilter(Text::InputFilter::None());
+  DALI_TEST_CHECK(inputField.GetInputFilter() == Text::InputFilter::None());
+
+  END_TEST;
+}
+
 int UtcDaliInputFieldPasswordProperties(void)
 {
   UiTestApplication application;

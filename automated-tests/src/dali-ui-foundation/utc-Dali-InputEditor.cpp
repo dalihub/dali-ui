@@ -633,6 +633,31 @@ int UtcDaliInputEditorMaximumLength(void)
   END_TEST;
 }
 
+int UtcDaliInputEditorInputFilter(void)
+{
+  UiTestApplication application;
+  InputEditor inputEditor = InputEditor::New();
+  DALI_TEST_CHECK(inputEditor);
+
+  DALI_TEST_CHECK(inputEditor.GetInputFilter() == Text::InputFilter::None());
+
+  Text::InputFilter inputFilter;
+  inputFilter.SetAllowPattern("[\\d]");
+  inputFilter.SetDenyPattern("[0-5]");
+  inputEditor.SetInputFilter(inputFilter);
+
+  Text::InputFilter currentInputFilter = inputEditor.GetInputFilter();
+  DALI_TEST_EQUALS(currentInputFilter.GetAllowPattern(), Dali::String("[\\d]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(currentInputFilter.GetDenyPattern(), Dali::String("[0-5]"), TEST_LOCATION);
+  DALI_TEST_CHECK(currentInputFilter == inputFilter);
+  DALI_TEST_CHECK(currentInputFilter != Text::InputFilter::None());
+
+  inputEditor.SetInputFilter(Text::InputFilter::None());
+  DALI_TEST_CHECK(inputEditor.GetInputFilter() == Text::InputFilter::None());
+
+  END_TEST;
+}
+
 int UtcDaliInputEditorEditable(void)
 {
   UiTestApplication application;

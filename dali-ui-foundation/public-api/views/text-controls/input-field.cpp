@@ -370,9 +370,9 @@ void InputField::SetInputFilter(const Text::InputFilter& inputFilter)
   GetImpl(*this).SetInputFilter(inputFilter);
 }
 
-void InputField::ClearInputFilter()
+Text::InputFilter InputField::GetInputFilter() const
 {
-  GetImpl(*this).ClearInputFilter();
+  return GetImpl(*this).GetInputFilter();
 }
 
 void InputField::SetPasswordMode(Text::PasswordMode mode)

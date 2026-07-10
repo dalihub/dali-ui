@@ -105,6 +105,32 @@ public:
    */
   ~InputFilter();
 
+  /**
+   * @brief Returns a value representing no input filter.
+   *
+   * This value can be passed to SetInputFilter() to clear the input filter.
+   * It is equivalent to an input filter with empty allow and deny patterns.
+   *
+   * @return A shared none value.
+   */
+  static const InputFilter& None();
+
+  /**
+   * @brief Compares this input filter with another input filter.
+   *
+   * @param[in] rhs The input filter to compare with.
+   * @return true if both values are equal.
+   */
+  bool operator==(const InputFilter& rhs) const;
+
+  /**
+   * @brief Compares this input filter with another input filter.
+   *
+   * @param[in] rhs The input filter to compare with.
+   * @return true if both values are not equal.
+   */
+  bool operator!=(const InputFilter& rhs) const;
+
 public:
   /**
    * @brief Sets the allow pattern.

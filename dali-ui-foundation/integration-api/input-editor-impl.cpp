@@ -723,9 +723,9 @@ void InputEditorImpl::SetInputFilter(const Text::InputFilter& inputFilter)
   mController->SetInputFilter(inputFilter);
 }
 
-void InputEditorImpl::ClearInputFilter()
+Text::InputFilter InputEditorImpl::GetInputFilter() const
 {
-  mController->ClearInputFilter();
+  return mController->GetInputFilter();
 }
 
 void InputEditorImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)

@@ -1953,14 +1953,22 @@ int UtcDaliTextInputFilterP(void)
   Text::InputFilter filter;
   DALI_TEST_EQUALS(filter.GetAllowPattern(), Dali::String(""), TEST_LOCATION);
   DALI_TEST_EQUALS(filter.GetDenyPattern(), Dali::String(""), TEST_LOCATION);
+  DALI_TEST_CHECK(filter == Text::InputFilter::None());
+
+  Text::InputFilter none = Text::InputFilter::None();
+  DALI_TEST_EQUALS(none.GetAllowPattern(), Dali::String(""), TEST_LOCATION);
+  DALI_TEST_EQUALS(none.GetDenyPattern(), Dali::String(""), TEST_LOCATION);
+  DALI_TEST_CHECK(none == filter);
 
   // SetAllowPattern
   filter.SetAllowPattern("[\\d]");
   DALI_TEST_EQUALS(filter.GetAllowPattern(), Dali::String("[\\d]"), TEST_LOCATION);
+  DALI_TEST_CHECK(filter != Text::InputFilter::None());
 
   // SetDenyPattern
   filter.SetDenyPattern("[0-5]");
   DALI_TEST_EQUALS(filter.GetDenyPattern(), Dali::String("[0-5]"), TEST_LOCATION);
+  DALI_TEST_CHECK(filter != Text::InputFilter::None());
 
   END_TEST;
 }

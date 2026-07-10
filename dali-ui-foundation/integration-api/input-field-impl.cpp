@@ -681,9 +681,9 @@ void InputFieldImpl::SetInputFilter(const Text::InputFilter& inputFilter)
   mController->SetInputFilter(inputFilter);
 }
 
-void InputFieldImpl::ClearInputFilter()
+Text::InputFilter InputFieldImpl::GetInputFilter() const
 {
-  mController->ClearInputFilter();
+  return mController->GetInputFilter();
 }
 
 void InputFieldImpl::SetPasswordMode(Text::PasswordMode mode)

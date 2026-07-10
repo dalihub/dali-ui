@@ -252,6 +252,12 @@ field.SetInputFilter(inputFilter);
 
 위 예시는 숫자만 허용하되 0-5는 거부하므로, 6-9만 입력 가능합니다.
 
+현재 설정된 필터는 `GetInputFilter()`로 확인할 수 있습니다.
+
+~~~cpp
+Text::InputFilter currentFilter = field.GetInputFilter();
+~~~
+
 거부 사유는 `InputRejectedSignal`에서 확인할 수 있습니다:
 
 ~~~cpp
@@ -262,10 +268,10 @@ field.InputRejectedSignal().Connect(
   });
 ~~~
 
-필터 해제:
+필터 해제는 `Text::InputFilter::None()`을 전달합니다:
 
 ~~~cpp
-field.ClearInputFilter();
+field.SetInputFilter(Text::InputFilter::None());
 ~~~
 
 <br/>

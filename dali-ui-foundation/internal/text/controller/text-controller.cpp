@@ -1856,25 +1856,35 @@ uint32_t Controller::GetHiddenTextSubstituteCount() const
 
 void Controller::SetInputFilter(const InputFilter& inputFilter)
 {
-  EnsureCreated(mImpl->mInputFilterProcessor);
-
   std::string allowPattern;
   std::string denyPattern;
 
   Dali::Integration::GetStdString(inputFilter.GetAllowPattern(), allowPattern);
   Dali::Integration::GetStdString(inputFilter.GetDenyPattern(), denyPattern);
 
+  if(allowPattern.empty() && denyPattern.empty())
+  {
+    mImpl->mInputFilterProcessor.reset();
+    return;
+  }
+
+  EnsureCreated(mImpl->mInputFilterProcessor);
+
   mImpl->mInputFilterProcessor->SetAllowPattern(allowPattern);
   mImpl->mInputFilterProcessor->SetDenyPattern(denyPattern);
 }
 
-void Controller::ClearInputFilter()
+InputFilter Controller::GetInputFilter() const
 {
-  if(mImpl->mInputFilterProcessor)
+  if(!mImpl->mInputFilterProcessor)
   {
-    mImpl->mInputFilterProcessor->SetAllowPattern("");
-    mImpl->mInputFilterProcessor->SetDenyPattern("");
+    return InputFilter::None();
   }
+
+  InputFilter inputFilter;
+  inputFilter.SetAllowPattern(Dali::Integration::ToDaliString(mImpl->mInputFilterProcessor->GetAllowPattern()));
+  inputFilter.SetDenyPattern(Dali::Integration::ToDaliString(mImpl->mInputFilterProcessor->GetDenyPattern()));
+  return inputFilter;
 }
 
 void Controller::SetPlaceholderProperty(const Property::Map& map)

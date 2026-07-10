@@ -400,9 +400,9 @@ void InputEditor::SetInputFilter(const Text::InputFilter& inputFilter)
   GetImpl(*this).SetInputFilter(inputFilter);
 }
 
-void InputEditor::ClearInputFilter()
+Text::InputFilter InputEditor::GetInputFilter() const
 {
-  GetImpl(*this).ClearInputFilter();
+  return GetImpl(*this).GetInputFilter();
 }
 
 void InputEditor::SetEditable(bool editable)
