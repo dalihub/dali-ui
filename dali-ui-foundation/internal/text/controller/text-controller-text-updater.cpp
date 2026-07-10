@@ -96,9 +96,6 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
     }
   }
 
-  // Stores the plain UTF-8 text source.
-  impl.mRawText = text;
-
   if(!text.empty())
   {
     ModelPtr&        model        = impl.mModel;
@@ -193,7 +190,7 @@ void Controller::TextUpdater::SetStyledText(Controller& controller, const Styled
   // Reset keyboard as text changed
   impl.ResetInputMethodContext();
 
-  // StyledText is a new content source, so clear previous raw markup/style state first.
+  // StyledText is a new content source, so clear previous text/style state first.
   ResetText(controller);
   impl.ClearStyleData();
 
@@ -205,7 +202,6 @@ void Controller::TextUpdater::SetStyledText(Controller& controller, const Styled
   LogicalModelPtr& logicalModel = model->mLogicalModel;
 
   const std::string styledPlainText = styledText ? std::string(styledText.GetText().CStr()) : std::string();
-  impl.mRawText                     = styledPlainText;
 
   if(styledText && !styledPlainText.empty())
   {

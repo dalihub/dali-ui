@@ -717,11 +717,6 @@ void Controller::GetText(std::string& text) const
   mImpl->GetText(text);
 }
 
-void Controller::GetRawText(std::string& text) const
-{
-  text = mImpl->mRawText;
-}
-
 Length Controller::GetNumberOfCharacters() const
 {
   return mImpl->GetNumberOfCharacters();

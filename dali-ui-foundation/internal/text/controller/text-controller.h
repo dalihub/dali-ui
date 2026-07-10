@@ -808,14 +808,6 @@ public: // Update.
   void GetText(std::string& text) const;
 
   /**
-   * @brief Retrieve raw text previously set.
-   *
-   * @note Raw text including markup tag.
-   * @param[out] text A string of UTF-8 characters.
-   */
-  void GetRawText(std::string& text) const;
-
-  /**
    * @brief Retrieves number of characters previously set.
    *
    * @return A length of string of UTF-32 characters.

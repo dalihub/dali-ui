@@ -391,7 +391,6 @@ public:
     mView(),
     mModifyEvents(),
     mTextFitCandidates(),
-    mRawText(),
     mTextUpdateInfo(),
     mTextColor(Color::BLACK),
     mAnchorColor(Color::MEDIUM_BLUE),
@@ -1258,7 +1257,6 @@ public:
   // Containers / complex values
   Vector<ModifyEvent>                mModifyEvents;      ///< Temporary stores the text set until the next relayout.
   Dali::Vector<Text::Fit::Candidate> mTextFitCandidates; ///< List of Text::Fit::Candidate for TextFitCandidates operation.
-  std::string                        mRawText;           ///< Raw text including markup tag.
   TextUpdateInfo                     mTextUpdateInfo;    ///< Info of the characters updated.
 
   // Geometry / colors

@@ -3570,7 +3570,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   // Logically, all properties of the label should be passed.
 
   std::string text;
-  mController->GetRawText(text);
+  mController->GetText(text);
 
   Text::AsyncTextParameters parameters;
   parameters.requestType     = requestType;
