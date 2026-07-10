@@ -80,7 +80,8 @@ public:
     mLayout = StackLayout::New(StackOrientation::HORIZONTAL);
     mLayout.SetRequestedWidth(MATCH_PARENT);
     mLayout.SetRequestedHeight(60.0f);
-    mLayout.AddChildren({mNonFocusable, mFocusableChild});
+    mLayout.Add(mNonFocusable);
+    mLayout.Add(mFocusableChild);
 
     auto btnRequestFocus = Label::New();
     btnRequestFocus.SetText("RequestFocus on Layout");
@@ -112,7 +113,10 @@ public:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
     root.SetPadding(Extents(GAP, GAP, GAP, GAP));
-    root.AddChildren({mStatusLabel, btnRequestFocus, layoutLabel, mLayout});
+    root.Add(mStatusLabel);
+    root.Add(btnRequestFocus);
+    root.Add(layoutLabel);
+    root.Add(mLayout);
     contentArea.Add(root);
 
   }

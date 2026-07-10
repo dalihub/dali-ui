@@ -133,7 +133,7 @@ private:
     AbsoluteLayout root = AbsoluteLayout::New();
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.AddChildren({mCanvasView});
+    root.Add(mCanvasView);
     window.Add(root);
   }
 

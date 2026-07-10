@@ -60,11 +60,9 @@ public:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
     root.SetPadding(Extents(CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD, CONTAINER_PAD));
-    root.AddChildren({
-      CreateLabel(0),
-      CreateLabel(1),
-      CreateLabel(2)
-    });
+    root.Add(CreateLabel(0));
+    root.Add(CreateLabel(1));
+    root.Add(CreateLabel(2));
     contentArea.Add(root);
   }
 

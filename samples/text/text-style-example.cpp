@@ -123,27 +123,25 @@ private:
     mInputFieldTextBackgroundColor = CreateBaseInputField("InputField Text Background Color");
     mInputFieldTextBackgroundColor.SetTextBackgroundColor(UiColor(0x00FFFF));
 
-    root.AddChildren({
-      Label::New("Text Style Example"),
-      mSlantLabel,
-      mWeightLabel,
-      mWidthLabel,
-      underlineMinLabel,
-      mUnderlineLabel,
-      shadowMinLabel,
-      mShadowLabel,
-      outlineMinLabel,
-      mOutlineLabel,
-      lineThroughMinLabel,
-      mLineThroughLabel,
-      mTextBackgroundColorLabel,
-      Label::New("InputField with Styles:"),
-      mInputFieldUnderline,
-      mInputFieldShadow,
-      mInputFieldOutline,
-      mInputFieldLineThrough,
-      mInputFieldTextBackgroundColor,
-    });
+    root.Add(Label::New("Text Style Example"));
+    root.Add(mSlantLabel);
+    root.Add(mWeightLabel);
+    root.Add(mWidthLabel);
+    root.Add(underlineMinLabel);
+    root.Add(mUnderlineLabel);
+    root.Add(shadowMinLabel);
+    root.Add(mShadowLabel);
+    root.Add(outlineMinLabel);
+    root.Add(mOutlineLabel);
+    root.Add(lineThroughMinLabel);
+    root.Add(mLineThroughLabel);
+    root.Add(mTextBackgroundColorLabel);
+    root.Add(Label::New("InputField with Styles:"));
+    root.Add(mInputFieldUnderline);
+    root.Add(mInputFieldShadow);
+    root.Add(mInputFieldOutline);
+    root.Add(mInputFieldLineThrough);
+    root.Add(mInputFieldTextBackgroundColor);
     window.Add(root);
 
 

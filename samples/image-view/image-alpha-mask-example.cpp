@@ -79,7 +79,11 @@ private:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.AddChildren({CreateCompareRow(), CreateInfoLabel(), CreateMaskButtonRow(), CreateImageTypeButton(), CreateModeToggle()});
+    root.Add(CreateCompareRow());
+    root.Add(CreateInfoLabel());
+    root.Add(CreateMaskButtonRow());
+    root.Add(CreateImageTypeButton());
+    root.Add(CreateModeToggle());
     window.Add(root);
 
     window.KeyEventSignal().Connect(this, &ImageAlphaMaskController::OnKeyEvent);
@@ -95,7 +99,8 @@ private:
     row.SetSpacing(8.0f);
     row.SetPadding(Extents(8, 8, 8, 8));
     row.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    row.AddChildren({CreatePanel("CROP: OFF", false, PANEL_CROP_OFF), CreatePanel("CROP: ON", true, PANEL_CROP_ON)});
+    row.Add(CreatePanel("CROP: OFF", false, PANEL_CROP_OFF));
+    row.Add(CreatePanel("CROP: ON", true, PANEL_CROP_ON));
     return row;
   }
 
@@ -126,7 +131,7 @@ private:
     mAnimatedImages[panelIdx].SetCropToMask(cropToMask);
     mAnimatedImages[panelIdx].SetMaskingMode(Ui::Image::MaskingType::MASKING_ON_RENDERING);
     mAnimatedImages[panelIdx].SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
-    mAnimatedImages[panelIdx].SetVisibility(false);
+    mAnimatedImages[panelIdx].SetVisible(false);
 
     StackLayout panel = StackLayout::New(StackOrientation::VERTICAL);
     panel.SetRequestedWidth(WRAP_CONTENT);
@@ -142,7 +147,11 @@ private:
     titleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
-    panel.AddChildren({titleLabel, CreateSpacer(), mStaticImages[panelIdx], mAnimatedImages[panelIdx], CreateSpacer()});
+    panel.Add(titleLabel);
+    panel.Add(CreateSpacer());
+    panel.Add(mStaticImages[panelIdx]);
+    panel.Add(mAnimatedImages[panelIdx]);
+    panel.Add(CreateSpacer());
     return panel;
   }
 
@@ -260,8 +269,8 @@ private:
 
     for(int i = 0; i < PANEL_COUNT; ++i)
     {
-      mStaticImages[i].SetVisibility(!showAnimated);
-      mAnimatedImages[i].SetVisibility(showAnimated);
+      mStaticImages[i].SetVisible(!showAnimated);
+      mAnimatedImages[i].SetVisible(showAnimated);
     }
 
     if(showAnimated)

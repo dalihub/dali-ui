@@ -64,7 +64,7 @@ public:
     insideA.SetRequestedWidth(MATCH_PARENT);
     insideA.SetRequestedHeight(60.0f);
     insideA.SetFocusable(true);
-    insideA.SetTouchFocusable(true);
+    insideA.SetFocusOnTouchEnabled(true);
     ConnectFocusColor(insideA, COLOR_GROUP);
     mInsideA = insideA;
 
@@ -75,14 +75,15 @@ public:
     insideB.SetRequestedWidth(MATCH_PARENT);
     insideB.SetRequestedHeight(60.0f);
     insideB.SetFocusable(true);
-    insideB.SetTouchFocusable(true);
+    insideB.SetFocusOnTouchEnabled(true);
     ConnectFocusColor(insideB, COLOR_GROUP);
     mInsideB = insideB;
 
     mGroup = StackLayout::New(StackOrientation::VERTICAL);
     mGroup.SetRequestedWidth(MATCH_PARENT);
     mGroup.SetRequestedHeight(132.0f);
-    mGroup.AddChildren({mInsideA, mInsideB});
+    mGroup.Add(mInsideA);
+    mGroup.Add(mInsideB);
 
     Label outside = Label::New();
     outside.SetText("Outside");
@@ -91,7 +92,7 @@ public:
     outside.SetRequestedWidth(MATCH_PARENT);
     outside.SetRequestedHeight(60.0f);
     outside.SetFocusable(true);
-    outside.SetTouchFocusable(true);
+    outside.SetFocusOnTouchEnabled(true);
     ConnectFocusColor(outside, COLOR_DEFAULT);
     mOutside = outside;
 
@@ -110,19 +111,19 @@ public:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
     root.SetPadding(Extents(GAP, GAP, GAP, GAP));
-    root.AddChildren({mStatusLabel,
-                      CreateButton("Set FocusGroup OFF", [this]() {
+    root.Add(mStatusLabel);
+    root.Add(CreateButton("Set FocusGroup OFF", [this]() {
                         FocusManager::Get().SetAsFocusGroup(mGroup, false);
                         mStatusLabel.SetText("FocusGroup: OFF");
-                      }),
-                      CreateButton("Set FocusGroup ON", [this]() {
+                      }));
+    root.Add(CreateButton("Set FocusGroup ON", [this]() {
                         FocusManager::Get().SetAsFocusGroup(mGroup, true);
                         mStatusLabel.SetText("FocusGroup: ON (default navigation scoped)");
-                      }),
-                      groupLabel,
-                      mGroup,
-                      outsideLabel,
-                      mOutside});
+                      }));
+    root.Add(groupLabel);
+    root.Add(mGroup);
+    root.Add(outsideLabel);
+    root.Add(mOutside);
     contentArea.Add(root);
 
     // Start focus on Inside A

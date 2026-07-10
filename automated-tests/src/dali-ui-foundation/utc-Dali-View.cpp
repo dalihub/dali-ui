@@ -2400,28 +2400,6 @@ int UtcDaliViewFocusChangedSignalNoConnectionN(void)
   END_TEST;
 }
 
-int UtcDaliViewIsOnSceneP(void)
-{
-  UiTestApplication application;
-  View              view = View::New();
-
-  DALI_TEST_CHECK(!view.IsOnScene());
-
-  application.GetScene().Add(view);
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_CHECK(view.IsOnScene());
-
-  application.GetScene().Remove(view);
-  application.SendNotification();
-  application.Render();
-
-  DALI_TEST_CHECK(!view.IsOnScene());
-
-  END_TEST;
-}
-
 // =============================================================================
 // SetLeftFocusableView: MoveFocus(LEFT) moves to the designated view
 // =============================================================================
@@ -2821,45 +2799,6 @@ int UtcDaliViewAttachmentSetNullN(void)
   END_TEST;
 }
 
-int UtcDaliViewSetLayoutDirectionP(void)
-{
-  UiTestApplication application;
-  View              view = View::New();
-  application.GetScene().Add(view);
-
-  view.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-  DALI_TEST_EQUALS(view.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), false, TEST_LOCATION);
-
-  view.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
-  DALI_TEST_EQUALS(view.GetEffectiveLayoutDirection(), LayoutDirection::LEFT_TO_RIGHT, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), false, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliViewClearLayoutDirectionP(void)
-{
-  UiTestApplication application;
-  View              view = View::New();
-  application.GetScene().Add(view);
-
-  view.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), false, TEST_LOCATION);
-
-  view.ClearLayoutDirection();
-  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), true, TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliViewIsLayoutDirectionInheritedDefaultP(void)
-{
-  UiTestApplication application;
-  View              view = View::New();
-
-  DALI_TEST_EQUALS(view.IsLayoutDirectionInherited(), true, TEST_LOCATION);
-  END_TEST;
-}
-
 int UtcDaliViewGetEffectiveLayoutDirectionInheritedP(void)
 {
   UiTestApplication application;
@@ -2869,7 +2808,7 @@ int UtcDaliViewGetEffectiveLayoutDirectionInheritedP(void)
   parent.Add(child);
 
   parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-  DALI_TEST_EQUALS(child.IsLayoutDirectionInherited(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.IsInheritLayoutDirectionEnabled(), true, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
   END_TEST;
 }
@@ -3022,9 +2961,6 @@ int UtcDaliViewLayoutDirectionSetReArrangesP(void)
   parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
   DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
 
-  parent.ClearLayoutDirection();
-  parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
-  DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
   END_TEST;
 }
 

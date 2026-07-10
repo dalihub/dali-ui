@@ -115,7 +115,7 @@ int UtcDaliFocusManagerRequestFocusOnLayoutFallbackToSelfP(void)
   child2.SetEnabled(false); // disabled
   View child3 = View::New();
   child3.SetFocusable(true);
-  child3.SetVisibility(false); // invisible
+  child3.SetVisible(false); // invisible
 
   auto nested = Layout::New();                                        // sub-layout, not focusable
   View grand1 = View::New();
@@ -123,7 +123,7 @@ int UtcDaliFocusManagerRequestFocusOnLayoutFallbackToSelfP(void)
   grand1.SetEnabled(false); // disabled
   View grand2 = View::New();
   grand2.SetFocusable(true);
-  grand2.SetVisibility(false); // invisible
+  grand2.SetVisible(false); // invisible
 
   nested.Add(grand1);
   nested.Add(grand2);
@@ -151,7 +151,7 @@ int UtcDaliFocusManagerDescendantFocusBlockedP(void)
   UiTestApplication application;
 
   auto layout = Layout::New();
-  layout.SetDescendantFocusBlocked(true);
+  layout.SetAllowDescendantFocusEnabled(false);
   View child = View::New();
   child.SetFocusable(true);
   layout.Add(child);
@@ -170,11 +170,11 @@ int UtcDaliFocusManagerDescendantFocusBlockedGetterP(void)
   UiTestApplication application;
 
   View view = View::New();
-  DALI_TEST_CHECK(!view.IsDescendantFocusBlocked());
-  view.SetDescendantFocusBlocked(true);
-  DALI_TEST_CHECK(view.IsDescendantFocusBlocked());
-  view.SetDescendantFocusBlocked(false);
-  DALI_TEST_CHECK(!view.IsDescendantFocusBlocked());
+  DALI_TEST_CHECK(view.IsAllowDescendantFocusEnabled());
+  view.SetAllowDescendantFocusEnabled(false);
+  DALI_TEST_CHECK(!view.IsAllowDescendantFocusEnabled());
+  view.SetAllowDescendantFocusEnabled(true);
+  DALI_TEST_CHECK(view.IsAllowDescendantFocusEnabled());
   END_TEST;
 }
 
@@ -660,7 +660,7 @@ int UtcDaliFocusManagerMoveFocusRejectsBlockedAncestorCandidateN(void)
   fallbackFinder.SetRequestedWidth(50.0f);
   fallbackFinder.SetRequestedHeight(50.0f);
 
-  blockedParent.SetDescendantFocusBlocked(true);
+  blockedParent.SetAllowDescendantFocusEnabled(false);
   blockedParent.Add(blockedChild);
 
   current.SetRightFocusableView(blockedChild);
@@ -1182,7 +1182,7 @@ int UtcDaliFocusManagerForwardSkipsInvisibleAndDisabledP(void)
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
   v2.SetFocusable(true);
-  v2.SetVisibility(false);
+  v2.SetVisible(false);
   v2.SetRequestedPositionX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
@@ -1232,7 +1232,7 @@ int UtcDaliFocusManagerForwardDescendantBlockedSkipsSubtreeP(void)
   blocked.SetRequestedPositionX(60.0f);
   blocked.SetRequestedWidth(50.0f);
   blocked.SetRequestedHeight(50.0f);
-  blocked.SetDescendantFocusBlocked(true);
+  blocked.SetAllowDescendantFocusEnabled(false);
   View v2 = View::New();
   v2.SetFocusable(true);
   v2.SetRequestedWidth(50.0f);

@@ -21,18 +21,13 @@
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/common/unique-ptr.h>
-#include <dali/public-api/events/long-press-gesture.h>
 #include <dali/public-api/events/pan-gesture.h>
-#include <dali/public-api/events/pinch-gesture.h>
-#include <dali/public-api/events/tap-gesture.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/object/property-index-ranges.h>
 #include <dali/public-api/rendering/texture.h>
 #include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
-#include <limits>
-#include <memory>
 #include <unordered_set>
 
 // INTERNAL INCLUDES
@@ -200,16 +195,6 @@ public: // Non-virtual API (safe to reorder / extend)
   const ViewState& GetState() const;
 
   /**
-   * @copydoc Ui::View::IsEnabled()
-   */
-  bool IsEnabled() const;
-
-  /**
-   * @copydoc Ui::View::SetEnabled()
-   */
-  void SetEnabled(bool enabled);
-
-  /**
    * @copydoc Ui::View::IsEffectivelyEnabled()
    */
   bool IsEffectivelyEnabled() const;
@@ -240,104 +225,9 @@ public: // Non-virtual API (safe to reorder / extend)
   DALI_INTERNAL void EmitLayoutFinishedSignal(const LayoutRect& bounds);
 
   /**
-   * @copydoc Ui::View::GetScaleX()
-   */
-  float GetScaleX() const;
-
-  /**
-   * @copydoc Ui::View::GetCurrentScaleX()
-   */
-  float GetCurrentScaleX() const;
-
-  /**
-   * @copydoc Ui::View::SetScaleX()
-   */
-  void SetScaleX(float scaleX);
-
-  /**
-   * @copydoc Ui::View::GetScaleY()
-   */
-  float GetScaleY() const;
-
-  /**
-   * @copydoc Ui::View::GetCurrentScaleY()
-   */
-  float GetCurrentScaleY() const;
-
-  /**
-   * @copydoc Ui::View::SetScaleY()
-   */
-  void SetScaleY(float scaleY);
-
-  /**
-   * @copydoc Ui::View::SetLayoutDirection()
-   */
-  void SetLayoutDirection(Dali::LayoutDirection::Type direction);
-
-  /**
-   * @copydoc Ui::View::ClearLayoutDirection()
-   */
-  void ClearLayoutDirection();
-
-  /**
-   * @copydoc Ui::View::IsLayoutDirectionInherited()
-   */
-  bool IsLayoutDirectionInherited() const;
-
-  /**
    * @copydoc Ui::View::GetEffectiveLayoutDirection()
    */
   Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
-
-  /**
-   * @copydoc Ui::View::IsVisible()
-   */
-  bool IsVisible() const;
-
-  /**
-   * @copydoc Ui::View::SetVisibility()
-   */
-  void SetVisibility(bool visibility);
-
-  /**
-   * @copydoc Ui::View::GetOpacity()
-   */
-  float GetOpacity() const;
-
-  /**
-   * @copydoc Ui::View::SetOpacity()
-   */
-  void SetOpacity(float opacity);
-
-  /**
-   * @copydoc Ui::View::GetSize()
-   */
-  MeasuredSize GetSize() const;
-
-  /**
-   * @copydoc Ui::View::GetCurrentSize()
-   */
-  MeasuredSize GetCurrentSize() const;
-
-  /**
-   * @copydoc Ui::View::GetPositionX()
-   */
-  float GetPositionX() const;
-
-  /**
-   * @copydoc Ui::View::GetCurrentPositionX()
-   */
-  float GetCurrentPositionX() const;
-
-  /**
-   * @copydoc Ui::View::GetPositionY()
-   */
-  float GetPositionY() const;
-
-  /**
-   * @copydoc Ui::View::GetCurrentPositionY()
-   */
-  float GetCurrentPositionY() const;
 
   /**
    * @copydoc Ui::View::SetRequestedPositionX()
@@ -358,46 +248,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::GetRequestedPositionY()
    */
   float GetRequestedPositionY() const;
-
-  /**
-   * @copydoc Ui::View::GetParentOrigin()
-   */
-  Vector3 GetParentOrigin() const;
-
-  /**
-   * @copydoc Ui::View::SetParentOrigin()
-   */
-  void SetParentOrigin(const Vector3& point);
-
-  /**
-   * @copydoc Ui::View::GetPivot()
-   */
-  Vector3 GetPivot() const;
-
-  /**
-   * @copydoc Ui::View::SetPivot()
-   */
-  void SetPivot(const Vector3& point);
-
-  /**
-   * @copydoc Ui::View::IsFocusable()
-   */
-  bool IsFocusable() const;
-
-  /**
-   * @copydoc Ui::View::SetFocusable()
-   */
-  void SetFocusable(bool focusable);
-
-  /**
-   * @copydoc Ui::View::IsTouchFocusable()
-   */
-  bool IsTouchFocusable() const;
-
-  /**
-   * @copydoc Ui::View::SetTouchFocusable()
-   */
-  void SetTouchFocusable(bool touchFocusable);
 
   /**
    * @copydoc Ui::View::SetBackgroundColor()
@@ -493,16 +343,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::SetBorderlineOffset()
    */
   void SetBorderlineOffset(float offset);
-
-  /**
-   * @copydoc Ui::View::GetName()
-   */
-  Dali::String GetName() const;
-
-  /**
-   * @copydoc Ui::View::SetName()
-   */
-  void SetName(const Dali::String& name);
 
   /**
    * @copydoc Ui::View::ClearBackground()
@@ -1004,23 +844,6 @@ public: // Non-virtual API (safe to reorder / extend)
    */
   void LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
 
-  // Focus
-
-  /**
-   * @copydoc Ui::View::SetDescendantFocusBlocked
-   */
-  void SetDescendantFocusBlocked(bool blocked);
-
-  /**
-   * @copydoc Ui::View::IsDescendantFocusBlocked
-   */
-  bool IsDescendantFocusBlocked() const;
-
-  /**
-   * @copydoc Ui::View::HasAncestorBlockingFocus
-   */
-  bool HasAncestorBlockingFocus() const;
-
   // Focus Navigation
 
   /**
@@ -1045,11 +868,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::FocusChangedSignal()
    */
   Ui::View::FocusChangedSignalType& FocusChangedSignal();
-
-  /**
-   * @copydoc Ui::View::IsOnScene()
-   */
-  bool IsOnScene() const;
 
   /// @cond internal
   DALI_INTERNAL void SetAsFocusGroup(bool isFocusGroup);

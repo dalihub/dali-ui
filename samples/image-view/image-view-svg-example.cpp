@@ -86,7 +86,9 @@ private:
     contents.SetRequestedHeight(MATCH_PARENT);
     contents.SetPadding(Extents(12, 12, 12, 12));
     contents.SetSpacing(8.0f);
-    contents.AddChildren({CreateInfoLabel(), CreateImageArea(), CreateButtonRow()});
+    contents.Add(CreateInfoLabel());
+    contents.Add(CreateImageArea());
+    contents.Add(CreateButtonRow());
     return contents;
   }
 

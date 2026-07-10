@@ -983,7 +983,7 @@ int UtcDaliScrollViewDoesNotFocusTouchFocusableChildWhenDraggingP(void)
   child.SetRequestedWidth(100.0f);
   child.SetRequestedHeight(100.0f);
   child.SetFocusable(true);
-  child.SetTouchFocusable(true);
+  child.SetFocusOnTouchEnabled(true);
   child.TouchEventSignal().Connect([](Actor, TouchEvent) { return true; });
 
   content.Add(child);

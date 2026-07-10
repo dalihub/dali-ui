@@ -133,7 +133,7 @@ private:
     prevButton.SetBackgroundColor(UiColor(0x222222, 0.75f));
     prevButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     { OnPrevScene(); });
-    prevButton.AddChildren({prevLabel});
+    prevButton.Add(prevLabel);
 
     Label nextLabel = Label::New("Next >");
     nextLabel.SetLayoutParams(AbsoluteLayoutParams::New().SetX(0.5f).SetY(0.5f).SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
@@ -151,7 +151,7 @@ private:
     nextButton.SetBackgroundColor(UiColor(0x222222, 0.75f));
     nextButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent)
     { OnNextScene(); });
-    nextButton.AddChildren({nextLabel});
+    nextButton.Add(nextLabel);
 
     StackLayout btnBar = StackLayout::New(StackOrientation::HORIZONTAL);
     btnBar.SetSpacing(4.0f);
@@ -160,12 +160,14 @@ private:
                              .SetY(mH - btnH)
                              .SetWidth(mW)
                              .SetHeight(btnH));
-    btnBar.AddChildren({prevButton, nextButton});
+    btnBar.Add(prevButton);
+    btnBar.Add(nextButton);
 
     AbsoluteLayout root = AbsoluteLayout::New();
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.AddChildren({mCanvasView, btnBar});
+    root.Add(mCanvasView);
+    root.Add(btnBar);
     window.Add(root);
 
     mTimer = Timer::New(1000.0f / 30.0f); // 30 fps

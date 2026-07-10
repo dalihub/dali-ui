@@ -82,8 +82,8 @@ void AddScaleAnimation(Animation animation, View view, const Vector2& targetScal
 
 bool ComputeParentCenterPivot(View parent, View child, Vector3& pivot)
 {
-  const MeasuredSize parentSize = parent.GetCurrentSize();
-  const MeasuredSize childSize  = child.GetCurrentSize();
+  const Vector3 parentSize = parent.GetCurrentSize();
+  const Vector3 childSize  = child.GetCurrentSize();
 
   if(childSize.width <= PROPERTY_EPSILON || childSize.height <= PROPERTY_EPSILON)
   {
@@ -720,7 +720,7 @@ void OverlayEffectData::RestoreRecoil(RecoilRestoreMode restoreMode)
 
     if(restoreMode == RecoilRestoreMode::IMMEDIATE)
     {
-      target.SetScale(item.originalScale.x, item.originalScale.y);
+      target.SetScale(Vector3(item.originalScale.x, item.originalScale.y, 1.0f));
     }
     else
     {

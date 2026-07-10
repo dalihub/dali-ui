@@ -734,18 +734,16 @@ private:
     mHelpLabel.SetBorderlineColor(UiColor(0x111827));
     mHelpLabel.SetTextColor(UiColor(0xCBD5E1));
 
-    mHudRoot.AddChildren({
-      mModeBadge,
-      mCountBadge,
-      mAsyncBadge,
-      mOperationBadge,
-      mTimingBadge,
-      mHeartbeatBadge,
-      mHeapBadge,
-      mMemoryBadge,
-      mDetailLabel,
-      mHelpLabel,
-    });
+    mHudRoot.Add(mModeBadge);
+    mHudRoot.Add(mCountBadge);
+    mHudRoot.Add(mAsyncBadge);
+    mHudRoot.Add(mOperationBadge);
+    mHudRoot.Add(mTimingBadge);
+    mHudRoot.Add(mHeartbeatBadge);
+    mHudRoot.Add(mHeapBadge);
+    mHudRoot.Add(mMemoryBadge);
+    mHudRoot.Add(mDetailLabel);
+    mHudRoot.Add(mHelpLabel);
     mRoot.Add(mHudRoot);
   }
 

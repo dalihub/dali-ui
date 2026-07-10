@@ -62,7 +62,8 @@ public:
     mBlueBox = blueBox;
 
     Layout root = Layout::New();
-    root.AddChildren({mRedBox, mBlueBox});
+    root.Add(mRedBox);
+    root.Add(mBlueBox);
     window.Add(root);
   }
 

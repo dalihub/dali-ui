@@ -134,10 +134,8 @@ private:
     mAnimatedLabel = CreateLabel("Animated Gradient", 60.0f);
     ApplyAnimatedGradient(mAnimatedLabel);
 
-    root.AddChildren({
-      mStaticLabel,
-      mAnimatedLabel,
-    });
+    root.Add(mStaticLabel);
+    root.Add(mAnimatedLabel);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &TextGradientSimpleController::OnKeyEvent);

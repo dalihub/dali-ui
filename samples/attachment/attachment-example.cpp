@@ -76,7 +76,7 @@ public:
     counter.SetRequestedPositionX(60.0f);
     counter.SetRequestedPositionY(60.0f);
     counter.SetBackgroundColor(UiColor(0x1565C0));
-    counter.AddChildren({label});
+    counter.Add(label);
     counter.ConnectClickedSignal(this, &AttachmentExampleController::OnCounterClicked);
 
     Label resetLabel = Label::New("Detach and Reset");
@@ -94,7 +94,7 @@ public:
     reset.SetRequestedPositionY(160.0f);
     reset.SetBackgroundColor(UiColor(0x424242));
     reset.ConnectClickedSignal(this, &AttachmentExampleController::OnResetClicked);
-    reset.AddChildren({resetLabel});
+    reset.Add(resetLabel);
 
     mCounter = counter;
     window.Add(counter);

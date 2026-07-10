@@ -24,7 +24,7 @@
  *   - 1500px non-focusable gap
  *   - "Bottom Item 1~5" (focusable)
  *
- * The ScrollView itself is KEYBOARD_FOCUSABLE=true and seeded with focus.
+ * The ScrollView itself is FOCUSABLE=true and seeded with focus.
  * External focusable buttons sit above and below the ScrollView to verify
  * focus can exit in both directions.
  *
@@ -185,7 +185,7 @@ private:
     mExtTopBtn.SetRequestedHeight(EXT_BTN_H);
     mExtTopBtn.SetRequestedPositionX(0.0f);
     mExtTopBtn.SetRequestedPositionY(EXT_TOP_Y);
-    mExtTopBtn.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
+    mExtTopBtn.SetProperty(Actor::Property::FOCUSABLE, true);
 
     Label lbl = Label::New("External Top Button  [focusable — OUTSIDE ScrollView]");
     lbl.SetRequestedWidth(WINDOW_W);
@@ -203,7 +203,7 @@ private:
     mExtBotBtn.SetRequestedHeight(EXT_BTN_H);
     mExtBotBtn.SetRequestedPositionX(0.0f);
     mExtBotBtn.SetRequestedPositionY(EXT_BOT_Y);
-    mExtBotBtn.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
+    mExtBotBtn.SetProperty(Actor::Property::FOCUSABLE, true);
 
     Label lbl = Label::New("External Bottom Button  [focusable — OUTSIDE ScrollView]");
     lbl.SetRequestedWidth(WINDOW_W);
@@ -230,7 +230,7 @@ private:
     topArea.SetRequestedWidth(MATCH_PARENT);
     topArea.SetRequestedHeight(ITEM_H);
     topArea.SetProperty(View::Property::CORNER_RADIUS, Vector4(10, 10, 10, 10));
-    topArea.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, false);
+    topArea.SetProperty(Actor::Property::FOCUSABLE, false);
     Label topLbl = Label::New("Top Area  [NON-focusable]  — ScrollView itself has focus");
     topLbl.SetRequestedWidth(MATCH_PARENT);
     topLbl.SetRequestedHeight(ITEM_H);
@@ -242,7 +242,7 @@ private:
     gap.SetBackgroundColor(COLOR_GAP);
     gap.SetRequestedWidth(MATCH_PARENT);
     gap.SetRequestedHeight(GAP_H);
-    gap.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, false);
+    gap.SetProperty(Actor::Property::FOCUSABLE, false);
     gap.SetProperty(View::Property::CORNER_RADIUS, Vector4(10, 10, 10, 10));
     std::ostringstream gapOss;
     gapOss << "── 1500px non-focusable gap ──\n"
@@ -264,7 +264,7 @@ private:
       item.SetRequestedWidth(MATCH_PARENT);
       item.SetRequestedHeight(ITEM_H);
       item.SetProperty(View::Property::CORNER_RADIUS, Vector4(10, 10, 10, 10));
-      item.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
+      item.SetProperty(Actor::Property::FOCUSABLE, true);
 
       std::ostringstream oss;
       oss << "Bottom Item " << (i + 1) << "  [focusable]";
@@ -290,7 +290,7 @@ private:
     mScrollView.SetRequestedPositionX(0.0f);
     mScrollView.SetRequestedPositionY(SCROLL_Y);
     mScrollView.SetBackgroundColor(COLOR_SCROLL_IDLE);
-    mScrollView.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
+    mScrollView.SetProperty(Actor::Property::FOCUSABLE, true);
     mScrollView.SetContent(content);
 
     window.Add(mScrollView);

@@ -90,7 +90,9 @@ private:
     contents.SetRequestedHeight(MATCH_PARENT);
     contents.SetPadding(Extents(10, 10, 10, 10));
     contents.SetSpacing(8.0f);
-    contents.AddChildren({CreateTypeButton(), CreateImageGrid(), CreateSwapButton()});
+    contents.Add(CreateTypeButton());
+    contents.Add(CreateImageGrid());
+    contents.Add(CreateSwapButton());
     return contents;
   }
 

@@ -382,8 +382,8 @@ void WebViewImpl::OnInitialize()
   Actor self = Self();
 
   // Make the view keyboard-focusable so it can receive key events.
-  self.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
-  self.SetProperty(DevelActor::Property::TOUCH_FOCUSABLE, true);
+  self.SetProperty(Actor::Property::FOCUSABLE, true);
+  self.SetProperty(Actor::Property::FOCUS_ON_TOUCH, true);
 
   // Key events are now handled via OnKeyEvent() virtual override.
   // Touch events are handled via signal connection.

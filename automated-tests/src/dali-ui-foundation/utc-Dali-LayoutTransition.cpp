@@ -534,7 +534,7 @@ int UtcDaliLayoutTransitionInitialMountOptInFiresEnterP(void)
 int UtcDaliLayoutTransitionGhostInteractionDisabledP(void)
 {
   // PR-6 #3: while EXIT is in flight, the ghost child has SENSITIVE
-  // and KEYBOARD_FOCUSABLE forced to false so it cannot be tapped.
+  // and FOCUSABLE forced to false so it cannot be tapped.
   UiTestApplication application;
   ResetCaptures();
 
@@ -561,7 +561,7 @@ int UtcDaliLayoutTransitionGhostInteractionDisabledP(void)
 
   // Ghost is still in the actor tree but interaction is disabled.
   DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::SENSITIVE), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<bool>(Actor::Property::FOCUSABLE), false, TEST_LOCATION);
   END_TEST;
 }
 

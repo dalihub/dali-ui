@@ -949,19 +949,21 @@ int UtcDaliInteractiveViewOverlayEffectRecoilOwnerTargetP(void)
 {
   UiTestApplication application;
   InteractiveView   view = CreateTestInteractiveView(application);
-  view.SetScale(1.2f, 0.8f);
+  view.SetScale(Vector3(1.2f, 0.8f, 1.0f));
 
   ProcessTouch(application, PointState::DOWN);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  Vector3 currentScale = view.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(currentScale.x, 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(currentScale.y, 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
 
   ProcessTouch(application, PointState::FINISHED, 120u);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f, 0.001f, TEST_LOCATION);
+  currentScale = view.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(currentScale.x, 1.2f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(currentScale.y, 0.8f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -969,13 +971,14 @@ int UtcDaliInteractiveViewOverlayEffectRecoilRestoreInterruptedByPressP(void)
 {
   UiTestApplication application;
   InteractiveView   view = CreateTestInteractiveView(application);
-  view.SetScale(1.2f, 0.8f);
+  view.SetScale(Vector3(1.2f, 0.8f, 1.0f));
 
   ProcessTouch(application, PointState::DOWN);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  Vector3 currentScale = view.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(currentScale.x, 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(currentScale.y, 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
 
   FocusManager::Get().ClearFocus();
   ProcessTouch(application, PointState::FINISHED, 120u);
@@ -986,15 +989,17 @@ int UtcDaliInteractiveViewOverlayEffectRecoilRestoreInterruptedByPressP(void)
   ProcessTouch(application, PointState::DOWN, 180u);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  currentScale = view.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(currentScale.x, 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(currentScale.y, 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
 
   FocusManager::Get().ClearFocus();
   ProcessTouch(application, PointState::FINISHED, 240u);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f, 0.001f, TEST_LOCATION);
+  currentScale = view.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(currentScale.x, 1.2f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(currentScale.y, 0.8f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1005,7 +1010,7 @@ int UtcDaliInteractiveViewOverlayEffectRecoilStateEffectTargetP(void)
   View              target = View::New();
   target.SetRequestedWidth(80.0f);
   target.SetRequestedHeight(80.0f);
-  target.SetScale(1.5f, 0.5f);
+  target.SetScale(Vector3(1.5f, 0.5f, 1.0f));
   owner.Add(target);
   owner.SetStateEffectTarget(target);
 
@@ -1015,16 +1020,19 @@ int UtcDaliInteractiveViewOverlayEffectRecoilStateEffectTargetP(void)
   ProcessTouch(application, PointState::DOWN);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(owner.GetCurrentScaleX(), 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(owner.GetCurrentScaleY(), 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(target.GetCurrentScaleX(), 1.5f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(target.GetCurrentScaleY(), 0.5f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  Vector3 ownerScale = owner.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  Vector3 targetScale = target.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(ownerScale.x, 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ownerScale.y, 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(targetScale.x, 1.5f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(targetScale.y, 0.5f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
 
   ProcessTouch(application, PointState::FINISHED, 120u);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(target.GetCurrentScaleX(), 1.5f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(target.GetCurrentScaleY(), 0.5f, 0.001f, TEST_LOCATION);
+  targetScale = target.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(targetScale.x, 1.5f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(targetScale.y, 0.5f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1039,7 +1047,7 @@ int UtcDaliInteractiveViewOverlayEffectRecoilChildrenP(void)
   child1.SetRequestedHeight(20.0f);
   child1.SetRequestedPositionX(10.0f);
   child1.SetRequestedPositionY(20.0f);
-  child1.SetScale(2.0f, 1.0f);
+  child1.SetScale(Vector3(2.0f, 1.0f, 1.0f));
 
   View child2 = View::New();
   child2.SetRequestedWidth(30.0f);
@@ -1059,22 +1067,27 @@ int UtcDaliInteractiveViewOverlayEffectRecoilChildrenP(void)
   ProcessTouch(application, PointState::DOWN);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child1.GetCurrentScaleX(), 2.0f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child1.GetCurrentScaleY(), OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child2.GetCurrentScaleX(), OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child2.GetCurrentScaleY(), OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  Vector3 viewScale = view.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  Vector3 child1Scale = child1.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  Vector3 child2Scale = child2.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(viewScale.x, 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewScale.y, 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child1Scale.x, 2.0f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child1Scale.y, OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child2Scale.x, OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child2Scale.y, OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(child1.GetPivot(), Vector3(2.0f, 1.5f, child1OriginalPivot.z), TEST_LOCATION);
   DALI_TEST_EQUALS(child2.GetPivot(), Vector3(0.0f, 0.333333f, child2OriginalPivot.z), 0.001f, TEST_LOCATION);
 
   ProcessTouch(application, PointState::FINISHED, 120u);
   FinishRecoilAnimation(application);
 
-  DALI_TEST_EQUALS(child1.GetCurrentScaleX(), 2.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child1.GetCurrentScaleY(), 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child2.GetCurrentScaleX(), 1.0f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(child2.GetCurrentScaleY(), 1.0f, 0.001f, TEST_LOCATION);
+  child1Scale = child1.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  child2Scale = child2.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+  DALI_TEST_EQUALS(child1Scale.x, 2.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child1Scale.y, 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child2Scale.x, 1.0f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child2Scale.y, 1.0f, 0.001f, TEST_LOCATION);
   DALI_TEST_EQUALS(child1.GetPivot(), child1OriginalPivot, TEST_LOCATION);
   DALI_TEST_EQUALS(child2.GetPivot(), child2OriginalPivot, TEST_LOCATION);
   END_TEST;
@@ -1092,7 +1105,7 @@ int UtcDaliInteractiveViewOverlayEffectRecoilChildrenSkipsMoreThanThreeP(void)
     children[i] = View::New();
     children[i].SetRequestedWidth(20.0f);
     children[i].SetRequestedHeight(20.0f);
-    children[i].SetScale(1.0f + static_cast<float>(i), 1.0f + static_cast<float>(i));
+    children[i].SetScale(Vector3(1.0f + static_cast<float>(i), 1.0f + static_cast<float>(i), 1.0f));
     view.Add(children[i]);
   }
 
@@ -1105,8 +1118,9 @@ int UtcDaliInteractiveViewOverlayEffectRecoilChildrenSkipsMoreThanThreeP(void)
   for(uint32_t i = 0u; i < 4u; ++i)
   {
     const float originalScale = 1.0f + static_cast<float>(i);
-    DALI_TEST_EQUALS(children[i].GetCurrentScaleX(), originalScale, 0.001f, TEST_LOCATION);
-    DALI_TEST_EQUALS(children[i].GetCurrentScaleY(), originalScale, 0.001f, TEST_LOCATION);
+    Vector3 viewScale = children[i].GetCurrentProperty<Vector3>(Actor::Property::SCALE);
+    DALI_TEST_EQUALS(viewScale.x, originalScale, 0.001f, TEST_LOCATION);
+    DALI_TEST_EQUALS(viewScale.y, originalScale, 0.001f, TEST_LOCATION);
   }
 
   ProcessTouch(application, PointState::FINISHED, 120u);
@@ -1181,24 +1195,26 @@ int UtcDaliInteractiveViewOverlayEffectDisabledClearsPressEffectP(void)
   InteractiveView   view = CreateTestInteractiveView(application);
 
   view.SetStateEffect(OverlayEffect::Plain());
-  view.SetScale(1.2f, 0.8f);
+  view.SetScale(Vector3(1.2f, 0.8f, 1.0f));
 
   ProcessTouch(application, PointState::DOWN);
   FinishRecoilAnimation(application);
 
+  Vector3 viewScale = view.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::PRESSED));
   DALI_TEST_EQUALS(view.GetVisualCount(OVERLAY_VISUAL_RANGE), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewScale.x, 1.2f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewScale.y, 0.8f * OVERLAY_RECOIL_SCALE_FACTOR, 0.001f, TEST_LOCATION);
 
   view.SetEnabled(false);
   FinishRecoilAnimation(application);
 
+  viewScale = view.GetCurrentProperty<Vector3>(Actor::Property::SCALE);
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::DISABLED));
   DALI_TEST_CHECK(!view.GetState().Contains(ViewState::PRESSED));
   DALI_TEST_EQUALS(view.GetVisualCount(OVERLAY_VISUAL_RANGE), 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleX(), 1.2f, 0.001f, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetCurrentScaleY(), 0.8f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewScale.x, 1.2f, 0.001f, TEST_LOCATION);
+  DALI_TEST_EQUALS(viewScale.y, 0.8f, 0.001f, TEST_LOCATION);
   END_TEST;
 }
 

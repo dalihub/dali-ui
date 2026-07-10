@@ -652,14 +652,14 @@ namespace
 // Returns true when a View can receive keyboard focus. Mirrors the conditions
 // DALi's global FocusFinder applies so we never propose a candidate that the
 // FocusManager would then reject.
-// USER_INTERACTION_ENABLED (not SENSITIVE) is the correct "enabled/disabled"
+// ENABLED (not SENSITIVE) is the correct "enabled/disabled"
 // flag for keyboard focus: SENSITIVE controls touch hit-testing only.
 bool IsFocusableCandidate(View view)
 {
   return view &&
-         view.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
+         view.GetProperty<bool>(Actor::Property::FOCUSABLE) &&
          view.GetProperty<bool>(Actor::Property::VISIBLE) &&
-         view.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED);
+         view.GetProperty<bool>(Actor::Property::ENABLED);
 }
 
 } // namespace
@@ -771,7 +771,7 @@ View ScrollViewImpl::OnFocusRequested()
   // Return Self() so OnKeyEvent can step-scroll toward the first/last focusable
   // item.  Only valid if ScrollView is keyboard-focusable; otherwise delegate to
   // the base class so FocusManager can use child delegation instead of failing.
-  if(!selfView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+  if(!selfView.GetProperty<bool>(Actor::Property::FOCUSABLE))
     return LayoutImpl::OnFocusRequested();
   return selfView;
 }
@@ -923,7 +923,7 @@ View ScrollViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDi
     // Transfer focus to Self() so subsequent arrow presses are handled by OnKeyEvent.
     // Scroll one step immediately so this key press is not wasted.
     ScrollByKeyDirection(direction);
-    if(selfView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE))
+    if(selfView.GetProperty<bool>(Actor::Property::FOCUSABLE))
     {
       mKeyScrollLastChild = currentFocusedView;
       mKeyScrollLastDir   = direction;
@@ -1028,7 +1028,7 @@ void ScrollViewImpl::CollectNextFocusCandidate(View container, View excludeView,
     // Only recurse into a container if it permits keyboard focus on its children.
     // This mirrors the FocusManager's own traversal rule, so we never propose a
     // candidate that the FocusManager itself would skip.
-    const bool childrenFocusable = child.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN);
+    const bool childrenFocusable = child.GetProperty<bool>(Actor::Property::ALLOW_DESCENDANT_FOCUS);
     if(childrenFocusable)
     {
       CollectNextFocusCandidate(child, excludeView, currentPos, direction, bestView, bestDist);
@@ -1105,7 +1105,7 @@ View ScrollViewImpl::PageScrollAndFocus(FocusDirection direction)
   if(atBoundary) TriggerKeyEdgeFeedback(direction);
 
   View selfView = View::DownCast(Self());
-  return selfView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ? selfView : View();
+  return selfView.GetProperty<bool>(Actor::Property::FOCUSABLE) ? selfView : View();
 }
 
 View ScrollViewImpl::FullScrollAndFocus(bool toEnd)
@@ -1153,7 +1153,7 @@ View ScrollViewImpl::FullScrollAndFocus(bool toEnd)
   if(bestItem) return bestItem;
 
   View selfView = View::DownCast(Self());
-  return selfView.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) ? selfView : View();
+  return selfView.GetProperty<bool>(Actor::Property::FOCUSABLE) ? selfView : View();
 }
 
 bool ScrollViewImpl::IsAtScrollBoundary(FocusDirection direction) const

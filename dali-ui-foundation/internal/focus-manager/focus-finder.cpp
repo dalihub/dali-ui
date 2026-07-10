@@ -328,8 +328,8 @@ bool IsBetterCandidate(Ui::FocusDirection direction, Bounds& focusedRect, Bounds
 
 bool IsFocusable(Actor& actor)
 {
-  return (actor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE) &&
-          actor.GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED) &&
+  return (actor.GetProperty<bool>(Actor::Property::FOCUSABLE) &&
+          actor.GetProperty<bool>(Actor::Property::ENABLED) &&
           actor.GetProperty<bool>(Actor::Property::VISIBLE) &&
           !actor.GetCurrentProperty<bool>(DevelActor::Property::WORLD_IGNORED) &&
           actor.GetProperty<Vector4>(Actor::Property::WORLD_COLOR).a > FULLY_TRANSPARENT);
@@ -346,7 +346,7 @@ Actor FindNextFocus(Actor& actor, Actor& focusedActor, Bounds& focusedRect, Boun
 {
   Actor nearestActor;
   if(CanTraverseFocus(actor) &&
-     actor.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
+     actor.GetProperty<bool>(Actor::Property::ALLOW_DESCENDANT_FOCUS))
   {
     // Recursively children
     const auto childCount = actor.GetChildCount();
@@ -443,7 +443,7 @@ void AddFocusables(Actor rootActor, Actor& focusedActor, FocusFinderWorkspace& w
       workspace.focusableViews.push_back({actor, node.rect, true});
     }
 
-    if(!actor.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
+    if(!actor.GetProperty<bool>(Actor::Property::ALLOW_DESCENDANT_FOCUS))
     {
       continue;
     }
@@ -464,7 +464,7 @@ void AddFocusables(Actor rootActor, Actor& focusedActor, FocusFinderWorkspace& w
       }
 
       const bool focusable   = IsFocusable(child);
-      const bool hasChildren = child.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN);
+      const bool hasChildren = child.GetProperty<bool>(Actor::Property::ALLOW_DESCENDANT_FOCUS);
       if(!focusable && !hasChildren)
       {
         continue;

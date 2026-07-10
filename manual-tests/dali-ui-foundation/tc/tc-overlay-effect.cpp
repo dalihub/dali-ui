@@ -91,7 +91,10 @@ private:
     row.SetSpacing(GAP);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(WRAP_CONTENT);
-    row.AddChildren(children);
+    for(auto& child : children)
+    {
+      row.Add(child);
+    }
     return row;
   }
 
@@ -120,7 +123,7 @@ private:
     card.SetBackgroundColor(color);
     card.SetRequestedWidth(CARD_W);
     card.SetRequestedHeight(CARD_H);
-    card.SetTouchFocusable(options.touchFocusable);
+    card.SetFocusOnTouchEnabled(options.touchFocusable);
     card.SetStateEffect(effect);
     card.Add(CreateTextContent(text));
     return card;
@@ -132,7 +135,7 @@ private:
     card.SetRequestedWidth(CARD_W);
     card.SetRequestedHeight(CARD_H);
     card.SetBackgroundColor(UiColor(0xAA5568));
-    card.SetTouchFocusable(false);
+    card.SetFocusOnTouchEnabled(false);
     card.SetStateEffect(OverlayEffect::Plain().Configure().SetOverlayColor(UiColor(0x000000, 0.4f)).Build());
     card.SetPadding(Extents(TARGET_INSET, TARGET_INSET, TARGET_INSET, TARGET_INSET));
 
@@ -161,7 +164,7 @@ private:
     toggle.SetBackgroundColor(UiColor(0x1A202C));
     toggle.SetRequestedWidth(CARD_W);
     toggle.SetRequestedHeight(CARD_H);
-    toggle.SetTouchFocusable(false);
+    toggle.SetFocusOnTouchEnabled(false);
     toggle.SetStateEffect(OverlayEffect::Round());
 
     StackLayout content = StackLayout::New(StackOrientation::VERTICAL);
@@ -182,7 +185,9 @@ private:
     mDisabledStatusLabel.SetRequestedWidth(MATCH_PARENT);
     mDisabledStatusLabel.SetRequestedHeight(WRAP_CONTENT);
 
-    content.AddChildren({titleLabel, ManualTest::MakeWeightedSpacer(), mDisabledStatusLabel});
+    content.Add(titleLabel);
+    content.Add(ManualTest::MakeWeightedSpacer());
+    content.Add(mDisabledStatusLabel);
     toggle.Add(content);
 
     toggle.ClickedSignal().Connect(this, [this](View, InputEvent)

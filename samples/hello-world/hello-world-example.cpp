@@ -66,7 +66,8 @@ public:
     redChild.Raise();
     mSecondChild.Raise();
 //    parent.Insert(0, redChild);
-//    parent.AddChildren({redChild, mSecondChild});
+//    parent.Add(redChild);
+    parent.Add(mSecondChild);
     window.Add(parent);
   }
 

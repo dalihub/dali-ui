@@ -135,7 +135,8 @@ private:
     StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.AddChildren({CreateImageRow(), CreateButtonRow()});
+    contents.Add(CreateImageRow());
+    contents.Add(CreateButtonRow());
     return contents;
   }
 
@@ -145,12 +146,10 @@ private:
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(300.0f);
-    row.AddChildren({
-      CreateImageContainer("ImageView\n(JPG)", mImageView),
-      CreateImageContainer("ImageView\n(GIF)", mGifImageView),
-      CreateImageContainer("AnimatedImageView\n(GIF)", mAnimatedImageView),
-      CreateImageContainer("LottieAnimationView\n(always AspectRatio)", mLottieView),
-    });
+    row.Add(CreateImageContainer("ImageView\n(JPG)", mImageView));
+    row.Add(CreateImageContainer("ImageView\n(GIF)", mGifImageView));
+    row.Add(CreateImageContainer("AnimatedImageView\n(GIF)", mAnimatedImageView));
+    row.Add(CreateImageContainer("LottieAnimationView\n(always AspectRatio)", mLottieView));
     return row;
   }
 
@@ -178,7 +177,8 @@ private:
     imageContainer.SetBackgroundColor(UiColor(0x2A2A2A));
     imageContainer.Add(imageView);
 
-    container.AddChildren({title, imageContainer});
+    container.Add(title);
+    container.Add(imageContainer);
     return container;
   }
 

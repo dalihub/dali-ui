@@ -83,30 +83,28 @@ public:
     mContainer.SetRequestedHeight(96.0f);
     mContainer.SetBackgroundColor(UiColor(COLOR_CONTAINER));
     mContainer.SetPadding(Extents(GAP, GAP, GAP, GAP));
-    mContainer.AddChildren({mChild});
+    mContainer.Add(mChild);
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
     root.SetPadding(Extents(GAP, GAP, GAP, GAP));
-    root.AddChildren({
-      mStatusLabel,
-      CreateButton("Set Block OFF", [this]() {
+    root.Add(mStatusLabel);
+    root.Add(CreateButton("Set Block OFF", [this]() {
         SetBlocked(false);
         mStatusLabel.SetText("BLOCKED: OFF");
-      }),
-      CreateButton("Set Block ON", [this]() {
+      }));
+    root.Add(CreateButton("Set Block ON", [this]() {
         SetBlocked(true);
         mStatusLabel.SetText("BLOCKED: ON");
-      }),
-      CreateButton("RequestFocus on Child", [this]() {
+      }));
+    root.Add(CreateButton("RequestFocus on Child", [this]() {
         bool ok = FocusManager::Get().RequestFocus(mChild);
         mStatusLabel.SetText(ok ? "Child focused: SUCCESS" : "Child focus REJECTED");
-      }),
-      containerLabel,
-      mContainer,
-    });
+      }));
+    root.Add(containerLabel);
+    root.Add(mContainer);
     contentArea.Add(root);
   }
 
@@ -134,7 +132,7 @@ private:
   void SetBlocked(bool blocked)
   {
     FocusManager::Get().ClearFocus();
-    mContainer.SetDescendantFocusBlocked(blocked);
+    mContainer.SetAllowDescendantFocusEnabled(!blocked);
     mContainer.SetBackgroundColor(UiColor(blocked ? COLOR_BLOCKED : COLOR_CONTAINER));
     mChild.SetBackgroundColor(UiColor(COLOR_DEFAULT));
   }

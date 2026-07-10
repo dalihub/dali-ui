@@ -186,7 +186,7 @@ private:
     buttonLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     buttonLabel.SetMultiLine(true);
-    layout.AddChildren({buttonLabel});
+    layout.Add(buttonLabel);
     return layout;
   }
 

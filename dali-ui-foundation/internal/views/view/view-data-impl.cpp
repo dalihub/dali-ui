@@ -660,7 +660,7 @@ void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
       mState = mState - ViewState::FOCUS_INDICATED;
     }
 
-    if(state.Contains(ViewState::FOCUSED) && !mViewImpl.IsEnabled())
+    if(state.Contains(ViewState::FOCUSED) && !mViewImpl.Self().IsEnabled())
     {
       mState = mState - ViewState::PRESSED + ViewState::DISABLED;
     }

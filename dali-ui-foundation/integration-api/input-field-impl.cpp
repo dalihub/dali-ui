@@ -226,7 +226,7 @@ Text::TypingStyle::Mask ToTypingStyleMask(Text::InputStyle::Mask inputStyleMask)
 void SetKeyInputFocus(ViewImpl& impl)
 {
   Ui::View view = Ui::View::DownCast(impl.Self());
-  if(view && view.IsOnScene())
+  if(view && view.IsConnectedToScene())
   {
     Internal::KeyInputFocusManager::Get().SetFocus(view);
   }
@@ -243,7 +243,7 @@ void SetKeyInputFocus(ViewImpl& impl)
 void ClearKeyInputFocus(ViewImpl& impl)
 {
   Ui::View view = Ui::View::DownCast(impl.Self());
-  if(view && view.IsOnScene())
+  if(view && view.IsConnectedToScene())
   {
     Internal::KeyInputFocusManager::Get().RemoveFocus(view);
   }
@@ -1386,7 +1386,7 @@ void InputFieldImpl::OnInitialize()
 
   auto viewHandle = Ui::View::DownCast(self);
   viewHandle.SetFocusable(true);
-  viewHandle.SetTouchFocusable(true);
+  viewHandle.SetFocusOnTouchEnabled(true);
 
   if(Dali::Adaptor::IsAvailable())
   {

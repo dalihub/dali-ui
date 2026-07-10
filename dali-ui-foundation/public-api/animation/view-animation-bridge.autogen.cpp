@@ -79,6 +79,20 @@ ViewAnimationBridge& ViewAnimationBridge::ShadowOpacityBy(float relative, Durati
   return *this;
 }
 
+ViewAnimationBridge& ViewAnimationBridge::Size(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplySizeTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::SizeBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplySizeBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
 ViewAnimationBridge& ViewAnimationBridge::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
@@ -104,6 +118,20 @@ ViewAnimationBridge& ViewAnimationBridge::SizeHeightBy(float relative, Duration 
 {
   ExtendIfNeeded(delay, duration);
   Internal::ViewAnimationSpecImpl::ApplySizeHeightBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::Position(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyPositionTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::PositionBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyPositionBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
   return *this;
 }
 
@@ -135,45 +163,73 @@ ViewAnimationBridge& ViewAnimationBridge::PositionYBy(float relative, Duration d
   return *this;
 }
 
+ViewAnimationBridge& ViewAnimationBridge::Scale(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyScaleTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::ScaleBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyScaleBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
 ViewAnimationBridge& ViewAnimationBridge::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, Actor::Property::SCALE_X), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  Internal::ViewAnimationSpecImpl::ApplyScaleXTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
   return *this;
 }
 
 ViewAnimationBridge& ViewAnimationBridge::ScaleXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, Actor::Property::SCALE_X), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  Internal::ViewAnimationSpecImpl::ApplyScaleXBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
   return *this;
 }
 
 ViewAnimationBridge& ViewAnimationBridge::ScaleY(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, Actor::Property::SCALE_Y), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  Internal::ViewAnimationSpecImpl::ApplyScaleYTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
   return *this;
 }
 
 ViewAnimationBridge& ViewAnimationBridge::ScaleYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, Actor::Property::SCALE_Y), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  Internal::ViewAnimationSpecImpl::ApplyScaleYBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyColorTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::ColorBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyColorBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
   return *this;
 }
 
 ViewAnimationBridge& ViewAnimationBridge::Opacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateTo(Property(mView, Actor::Property::OPACITY), target, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  Internal::ViewAnimationSpecImpl::ApplyOpacityTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
   return *this;
 }
 
 ViewAnimationBridge& ViewAnimationBridge::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);
-  mAnimation.AnimateBy(Property(mView, Actor::Property::OPACITY), relative, alpha, TimePeriod(delay.InSeconds(), duration.InSeconds()));
+  Internal::ViewAnimationSpecImpl::ApplyOpacityBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
   return *this;
 }
 

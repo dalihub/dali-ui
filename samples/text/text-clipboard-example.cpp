@@ -205,18 +205,16 @@ private:
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
     content.SetPadding(Extents(0, 0, 0, STACK_PADDING));
-    content.AddChildren({
-      plainTitle,
-      CreateButtonRow({btnCopyPlain, btnPastePlain, btnHasPlain}),
-      htmlTitle,
-      CreateButtonRow({btnCopyHtml, btnPasteHtml, btnHasHtml}),
-      uriTitle,
-      CreateButtonRow({btnCopyUri, btnPasteUri, btnHasUri}),
-      multiTitle,
-      CreateButtonRow({btnMultiCopy, btnMultiPaste}),
-      mMultiResultLabel,
-      CreateButtonRow({btnStressStart, btnStressStop, btnClear}),
-    });
+    content.Add(plainTitle);
+    content.Add(CreateButtonRow({btnCopyPlain, btnPastePlain, btnHasPlain}));
+    content.Add(htmlTitle);
+    content.Add(CreateButtonRow({btnCopyHtml, btnPasteHtml, btnHasHtml}));
+    content.Add(uriTitle);
+    content.Add(CreateButtonRow({btnCopyUri, btnPasteUri, btnHasUri}));
+    content.Add(multiTitle);
+    content.Add(CreateButtonRow({btnMultiCopy, btnMultiPaste}));
+    content.Add(mMultiResultLabel);
+    content.Add(CreateButtonRow({btnStressStart, btnStressStop, btnClear}));
 
     ScrollView scrollView = ScrollView::New();
     scrollView.SetScrollDirection(ScrollDirection::Vertical);
@@ -230,13 +228,11 @@ private:
     rootLayout.SetRequestedWidth(MATCH_PARENT);
     rootLayout.SetRequestedHeight(MATCH_PARENT);
     rootLayout.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
-    rootLayout.AddChildren({
-      titleLabel,
-      description,
-      mInputField,
-      mResultLabel,
-      scrollView,
-    });
+    rootLayout.Add(titleLabel);
+    rootLayout.Add(description);
+    rootLayout.Add(mInputField);
+    rootLayout.Add(mResultLabel);
+    rootLayout.Add(scrollView);
 
     window.Add(rootLayout);
 

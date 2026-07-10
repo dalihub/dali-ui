@@ -103,6 +103,18 @@ ViewAnimationSpec& ViewAnimationSpec::ShadowOpacityBy(float relative, Duration d
   return *this;
 }
 
+ViewAnimationSpec& ViewAnimationSpec::Size(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::SizeBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeBy);
+  return *this;
+}
+
 ViewAnimationSpec& ViewAnimationSpec::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeWidthTo);
@@ -124,6 +136,18 @@ ViewAnimationSpec& ViewAnimationSpec::SizeHeight(float target, Duration duration
 ViewAnimationSpec& ViewAnimationSpec::SizeHeightBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplySizeHeightBy);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::Position(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::PositionBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyPositionBy);
   return *this;
 }
 
@@ -151,39 +175,63 @@ ViewAnimationSpec& ViewAnimationSpec::PositionYBy(float relative, Duration durat
   return *this;
 }
 
+ViewAnimationSpec& ViewAnimationSpec::Scale(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyScaleTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::ScaleBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyScaleBy);
+  return *this;
+}
+
 ViewAnimationSpec& ViewAnimationSpec::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateToEntry(Actor::Property::SCALE_X, target, duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyScaleXTo);
   return *this;
 }
 
 ViewAnimationSpec& ViewAnimationSpec::ScaleXBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateByEntry(Actor::Property::SCALE_X, relative, duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyScaleXBy);
   return *this;
 }
 
 ViewAnimationSpec& ViewAnimationSpec::ScaleY(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateToEntry(Actor::Property::SCALE_Y, target, duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyScaleYTo);
   return *this;
 }
 
 ViewAnimationSpec& ViewAnimationSpec::ScaleYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateByEntry(Actor::Property::SCALE_Y, relative, duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyScaleYBy);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyColorTo);
+  return *this;
+}
+
+ViewAnimationSpec& ViewAnimationSpec::ColorBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyColorBy);
   return *this;
 }
 
 ViewAnimationSpec& ViewAnimationSpec::Opacity(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateToEntry(Actor::Property::OPACITY, target, duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyOpacityTo);
   return *this;
 }
 
 ViewAnimationSpec& ViewAnimationSpec::OpacityBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
-  Internal::GetImpl(*this).AddAnimateByEntry(Actor::Property::OPACITY, relative, duration, alpha, delay);
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &Internal::ViewAnimationSpecImpl::ApplyOpacityBy);
   return *this;
 }
 

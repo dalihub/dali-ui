@@ -156,19 +156,17 @@ private:
     mLineHeightLabel  = CreateLineHeightLabel("LineHeight:2, LineHeightMode:Relative", 2, Text::LineHeightMode::RELATIVE);
     mLineHeightLabel2 = CreateLineHeightLabel("LineHeight:50, LineHeightMode:Absolute", 50, Text::LineHeightMode::ABSOLUTE);
 
-    contents.AddChildren({
-      Label::New("Text Example"),
-      mField,
-      mLabel,
-      mLabel2,
-      mLabel3,
-      mLineHeightLabel,
-      mLineHeightLabel2,
-      CreateSeparator(),
-      CreateAlignmentLabel(Text::Alignment::START),
-      CreateAlignmentLabel(Text::Alignment::CENTER),
-      CreateAlignmentLabel(Text::Alignment::END),
-    });
+    contents.Add(Label::New("Text Example"));
+    contents.Add(mField);
+    contents.Add(mLabel);
+    contents.Add(mLabel2);
+    contents.Add(mLabel3);
+    contents.Add(mLineHeightLabel);
+    contents.Add(mLineHeightLabel2);
+    contents.Add(CreateSeparator());
+    contents.Add(CreateAlignmentLabel(Text::Alignment::START));
+    contents.Add(CreateAlignmentLabel(Text::Alignment::CENTER));
+    contents.Add(CreateAlignmentLabel(Text::Alignment::END));
     return contents;
   }
 

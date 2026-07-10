@@ -121,8 +121,10 @@ bool ViewAnimationSpecImpl::ContainsLayoutBoundsProperty() const
 {
   for(const auto& entry : mEntries)
   {
-    if(entry.apply == &ApplyPositionXTo || entry.apply == &ApplyPositionXBy ||
+    if(entry.apply == &ApplyPositionTo || entry.apply == &ApplyPositionBy ||
+       entry.apply == &ApplyPositionXTo || entry.apply == &ApplyPositionXBy ||
        entry.apply == &ApplyPositionYTo || entry.apply == &ApplyPositionYBy ||
+       entry.apply == &ApplySizeTo || entry.apply == &ApplySizeBy ||
        entry.apply == &ApplySizeWidthTo || entry.apply == &ApplySizeWidthBy ||
        entry.apply == &ApplySizeHeightTo || entry.apply == &ApplySizeHeightBy)
     {
@@ -208,6 +210,18 @@ void ViewAnimationSpecImpl::ApplyShadowOpacityBy(Animation& animation, View view
   }
 }
 
+void ViewAnimationSpecImpl::ApplySizeTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::SIZE), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplySizeBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::SIZE), entry.value, entry.alpha, period);
+}
+
 void ViewAnimationSpecImpl::ApplySizeWidthTo(Animation& animation, View view, const Entry& entry)
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
@@ -232,6 +246,18 @@ void ViewAnimationSpecImpl::ApplySizeHeightBy(Animation& animation, View view, c
   animation.AnimateBy(Property(view, Actor::Property::SIZE_HEIGHT), entry.value, entry.alpha, period);
 }
 
+void ViewAnimationSpecImpl::ApplyPositionTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::POSITION), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyPositionBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::POSITION), entry.value, entry.alpha, period);
+}
+
 void ViewAnimationSpecImpl::ApplyPositionXTo(Animation& animation, View view, const Entry& entry)
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
@@ -254,6 +280,66 @@ void ViewAnimationSpecImpl::ApplyPositionYBy(Animation& animation, View view, co
 {
   TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
   animation.AnimateBy(Property(view, Actor::Property::POSITION_Y), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyScaleTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::SCALE), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyScaleBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::SCALE), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyScaleXTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::SCALE_X), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyScaleXBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::SCALE_X), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyScaleYTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::SCALE_Y), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyScaleYBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::SCALE_Y), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyColorTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::COLOR), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyColorBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::COLOR), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyOpacityTo(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(view, Actor::Property::OPACITY), entry.value, entry.alpha, period);
+}
+
+void ViewAnimationSpecImpl::ApplyOpacityBy(Animation& animation, View view, const Entry& entry)
+{
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(view, Actor::Property::OPACITY), entry.value, entry.alpha, period);
 }
 
 } // namespace Internal

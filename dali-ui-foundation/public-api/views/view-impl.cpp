@@ -21,7 +21,6 @@
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/devel-api/scripting/scripting.h>
@@ -472,16 +471,6 @@ const ViewState& ViewImpl::GetState() const
   return mImpl->mState;
 }
 
-bool ViewImpl::IsEnabled() const
-{
-  return Self().GetProperty<bool>(DevelActor::Property::USER_INTERACTION_ENABLED);
-}
-
-void ViewImpl::SetEnabled(bool enabled)
-{
-  Self().SetProperty(DevelActor::Property::USER_INTERACTION_ENABLED, enabled);
-}
-
 bool ViewImpl::IsEffectivelyEnabled() const
 {
   return Internal::ViewStateManager::Get().IsEffectivelyEnabled(*this);
@@ -809,113 +798,9 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   mImpl->ApplyFittingMode(size);
 }
 
-// =============================================================================
-// API (size, position, parent origin, pivot)
-// =============================================================================
-
-float ViewImpl::GetScaleX() const
-{
-  return Self().GetProperty<float>(Actor::Property::SCALE_X);
-}
-
-float ViewImpl::GetCurrentScaleX() const
-{
-  return Self().GetCurrentProperty<float>(Actor::Property::SCALE_X);
-}
-
-void ViewImpl::SetScaleX(float scaleX)
-{
-  Self().SetProperty(Actor::Property::SCALE_X, scaleX);
-}
-
-float ViewImpl::GetScaleY() const
-{
-  return Self().GetProperty<float>(Actor::Property::SCALE_Y);
-}
-
-float ViewImpl::GetCurrentScaleY() const
-{
-  return Self().GetCurrentProperty<float>(Actor::Property::SCALE_Y);
-}
-
-void ViewImpl::SetScaleY(float scaleY)
-{
-  Self().SetProperty(Actor::Property::SCALE_Y, scaleY);
-}
-
-void ViewImpl::SetLayoutDirection(Dali::LayoutDirection::Type direction)
-{
-  Self().SetProperty(Actor::Property::LAYOUT_DIRECTION, direction);
-  // Direction only affects child placement, not measured sizes.
-  InvalidateArrange();
-}
-
-void ViewImpl::ClearLayoutDirection()
-{
-  Self().SetProperty(Actor::Property::INHERIT_LAYOUT_DIRECTION, true);
-  InvalidateArrange();
-}
-
-bool ViewImpl::IsLayoutDirectionInherited() const
-{
-  return Self().GetProperty<bool>(Actor::Property::INHERIT_LAYOUT_DIRECTION);
-}
-
 Dali::LayoutDirection::Type ViewImpl::GetEffectiveLayoutDirection() const
 {
   return static_cast<Dali::LayoutDirection::Type>(Self().GetProperty<int>(Actor::Property::LAYOUT_DIRECTION));
-}
-
-bool ViewImpl::IsVisible() const
-{
-  return Self().GetProperty<float>(Actor::Property::VISIBLE);
-}
-
-void ViewImpl::SetVisibility(bool visibility)
-{
-  Self().SetProperty(Actor::Property::VISIBLE, visibility);
-}
-
-float ViewImpl::GetOpacity() const
-{
-  return Self().GetProperty<float>(Actor::Property::OPACITY);
-}
-
-void ViewImpl::SetOpacity(float opacity)
-{
-  Self().SetProperty(Actor::Property::OPACITY, opacity);
-}
-
-MeasuredSize ViewImpl::GetSize() const
-{
-  return MeasuredSize(Self().GetProperty<float>(Actor::Property::SIZE_WIDTH),
-                      Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT));
-}
-
-MeasuredSize ViewImpl::GetCurrentSize() const
-{
-  return MeasuredSize(Self().GetCurrentProperty<float>(Actor::Property::SIZE_WIDTH),
-                      Self().GetCurrentProperty<float>(Actor::Property::SIZE_HEIGHT));
-}
-
-float ViewImpl::GetPositionX() const
-{
-  return Self().GetProperty<float>(Actor::Property::POSITION_X);
-}
-
-float ViewImpl::GetCurrentPositionX() const
-{
-  return Self().GetCurrentProperty<float>(Actor::Property::POSITION_X);
-}
-
-float ViewImpl::GetPositionY() const
-{
-  return Self().GetProperty<float>(Actor::Property::POSITION_Y);
-}
-
-float ViewImpl::GetCurrentPositionY() const
-{
-  return Self().GetCurrentProperty<float>(Actor::Property::POSITION_Y);
 }
 
 void ViewImpl::SetRequestedPositionX(float x)
@@ -948,26 +833,6 @@ float ViewImpl::GetRequestedPositionX() const
 float ViewImpl::GetRequestedPositionY() const
 {
   return mImpl->mRequestedPositionY;
-}
-
-Vector3 ViewImpl::GetParentOrigin() const
-{
-  return Self().GetProperty<Vector3>(Actor::Property::PARENT_ORIGIN);
-}
-
-void ViewImpl::SetParentOrigin(const Vector3& point)
-{
-  Self().SetProperty(Actor::Property::PARENT_ORIGIN, point);
-}
-
-Vector3 ViewImpl::GetPivot() const
-{
-  return Self().GetProperty<Vector3>(Actor::Property::PIVOT);
-}
-
-void ViewImpl::SetPivot(const Vector3& point)
-{
-  Self().SetProperty(Actor::Property::PIVOT, point);
 }
 
 UiColor ViewImpl::GetBackgroundColor()
@@ -1121,36 +986,6 @@ float ViewImpl::GetBorderlineOffset() const
 void ViewImpl::SetBorderlineOffset(float offset)
 {
   Self().SetProperty(Ui::View::Property::BORDERLINE_OFFSET, offset);
-}
-
-Dali::String ViewImpl::GetName() const
-{
-  return Self().GetProperty<Dali::String>(Dali::Actor::Property::NAME);
-}
-
-void ViewImpl::SetName(const Dali::String& name)
-{
-  Self().SetProperty(Dali::Actor::Property::NAME, name);
-}
-
-bool ViewImpl::IsFocusable() const
-{
-  return Self().GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE);
-}
-
-void ViewImpl::SetFocusable(bool focusable)
-{
-  Self().SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, focusable);
-}
-
-bool ViewImpl::IsTouchFocusable() const
-{
-  return Self().GetProperty<bool>(DevelActor::Property::TOUCH_FOCUSABLE);
-}
-
-void ViewImpl::SetTouchFocusable(bool touchFocusable)
-{
-  Self().SetProperty(DevelActor::Property::TOUCH_FOCUSABLE, touchFocusable);
 }
 
 // =============================================================================
@@ -2709,33 +2544,9 @@ View ViewImpl::RequestFocusNavigation(View currentFocusedView, FocusDirection di
   return OnFocusNavigationRequested(currentFocusedView, direction);
 }
 
-void ViewImpl::SetDescendantFocusBlocked(bool blocked)
-{
-  Self().SetProperty(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN, !blocked);
-}
-
-bool ViewImpl::IsDescendantFocusBlocked() const
-{
-  return !Self().GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN);
-}
-
-bool ViewImpl::HasAncestorBlockingFocus() const
-{
-  Dali::Actor parent = Self().GetParent();
-  while(parent)
-  {
-    if(!parent.GetProperty<bool>(DevelActor::Property::KEYBOARD_FOCUSABLE_CHILDREN))
-    {
-      return true;
-    }
-    parent = parent.GetParent();
-  }
-  return false;
-}
-
 View ViewImpl::RequestFocus()
 {
-  if(HasAncestorBlockingFocus())
+  if(Self().HasAncestorBlockingFocus())
   {
     return View();
   }
@@ -2756,7 +2567,7 @@ View ViewImpl::RequestChildFirstFocus()
 {
   Ui::View self = Ui::View::DownCast(Self());
 
-  if(self.IsDescendantFocusBlocked())
+  if(!self.IsAllowDescendantFocusEnabled())
   {
     return DefaultOnFocusRequested();
   }
@@ -3257,7 +3068,7 @@ void ViewImpl::OnPropertySet(Property::Index index, const Property::Value& prope
       }
       break;
     }
-    case DevelActor::Property::USER_INTERACTION_ENABLED:
+    case Actor::Property::ENABLED:
     {
       const bool enabled = propertyValue.Get<bool>();
 
@@ -3338,11 +3149,6 @@ bool ViewImpl::IsResourceReady() const
 {
   const Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(*this);
   return viewDataImpl.IsResourceReady();
-}
-
-bool ViewImpl::IsOnScene() const
-{
-  return Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE);
 }
 
 void ViewImpl::OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimension)

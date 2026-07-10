@@ -79,18 +79,16 @@ private:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(4.0f);
     root.SetPadding(Extents(8, 8, 8, 8));
-    root.AddChildren({
-      CreateImageSourceLabel(),
-      CreateAnimationArea(),
-      CreateStatusLabel(),
-      CreateReloadHintLabel(),
-      CreatePlaybackRow(),
-      CreateChangeImageRow(),
-      CreateLoopRow(),
-      CreateSpeedRow(),
-      CreateStopBehaviorRow(),
-      CreateFrameDelayRow(),
-    });
+    root.Add(CreateImageSourceLabel());
+    root.Add(CreateAnimationArea());
+    root.Add(CreateStatusLabel());
+    root.Add(CreateReloadHintLabel());
+    root.Add(CreatePlaybackRow());
+    root.Add(CreateChangeImageRow());
+    root.Add(CreateLoopRow());
+    root.Add(CreateSpeedRow());
+    root.Add(CreateStopBehaviorRow());
+    root.Add(CreateFrameDelayRow());
     window.Add(root);
 
     window.KeyEventSignal().Connect(this, &AnimatedImageViewSampleController::OnKeyEvent);
@@ -190,7 +188,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton));
     return row;
   }
 
@@ -206,7 +205,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton));
     return row;
   }
 
@@ -222,7 +222,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton));
     return row;
   }
 
@@ -238,7 +239,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(FRAME_DELAY_LABELS[mFrameDelayIndex], [this](View, InputEvent) { OnFrameDelayToggle(); }, mFrameDelayButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(FRAME_DELAY_LABELS[mFrameDelayIndex], [this](View, InputEvent) { OnFrameDelayToggle(); }, mFrameDelayButton));
     return row;
   }
 

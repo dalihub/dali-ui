@@ -795,10 +795,8 @@ private:
     mAsyncPreviewLabel.SetAsyncRendering(true);
     mAsyncPreviewLabel.SetBackgroundColor(UiColor(0xF8FAFC));
 
-    mNormalPreviewContainer.AddChildren({
-      mPreviewLabel,
-      mAsyncPreviewLabel,
-    });
+    mNormalPreviewContainer.Add(mPreviewLabel);
+    mNormalPreviewContainer.Add(mAsyncPreviewLabel);
 
     mMarqueeMatrixContainer = StackLayout::New(StackOrientation::VERTICAL);
     mMarqueeMatrixContainer.SetSpacing(4.0f);
@@ -832,47 +830,39 @@ private:
     ApplyPreviewOptions();
     SetMarqueeMatrixVisible(false);
 
-    mHeaderRoot.AddChildren({
-      mCaseBadge,
-      mGradientTypeBadge,
-      mSpreadBadge,
-      mBoundsBadge,
-      mSizeBadge,
-      mHAlignBadge,
-      mVAlignBadge,
-      mMarqueeBadge,
-      mMatrixBadge,
-      mAnimationBadge,
-      mResetBadge,
-      mClearBadge,
-      mOverlayTypeBadge,
-      mOverlaySpreadBadge,
-      mOverlayBoundsBadge,
-      mOverlayAnimationBadge,
-      mOverlayToggleBadge,
-      mOverlayResetBadge,
-      mOverlayModeBadge,
-      mOverlayFillBadge,
-      mExpectedBadge,
-    });
+    mHeaderRoot.Add(mCaseBadge);
+    mHeaderRoot.Add(mGradientTypeBadge);
+    mHeaderRoot.Add(mSpreadBadge);
+    mHeaderRoot.Add(mBoundsBadge);
+    mHeaderRoot.Add(mSizeBadge);
+    mHeaderRoot.Add(mHAlignBadge);
+    mHeaderRoot.Add(mVAlignBadge);
+    mHeaderRoot.Add(mMarqueeBadge);
+    mHeaderRoot.Add(mMatrixBadge);
+    mHeaderRoot.Add(mAnimationBadge);
+    mHeaderRoot.Add(mResetBadge);
+    mHeaderRoot.Add(mClearBadge);
+    mHeaderRoot.Add(mOverlayTypeBadge);
+    mHeaderRoot.Add(mOverlaySpreadBadge);
+    mHeaderRoot.Add(mOverlayBoundsBadge);
+    mHeaderRoot.Add(mOverlayAnimationBadge);
+    mHeaderRoot.Add(mOverlayToggleBadge);
+    mHeaderRoot.Add(mOverlayResetBadge);
+    mHeaderRoot.Add(mOverlayModeBadge);
+    mHeaderRoot.Add(mOverlayFillBadge);
+    mHeaderRoot.Add(mExpectedBadge);
 
-    mContentRoot.AddChildren({
-      mNormalPreviewContainer,
-      mMarqueeMatrixContainer,
-    });
+    mContentRoot.Add(mNormalPreviewContainer);
+    mContentRoot.Add(mMarqueeMatrixContainer);
 
-    mFooterRoot.AddChildren({
-      mMenuTitleLabel,
-      mCaseListLabel,
-      mHelpLabel,
-      mViewHelpLabel,
-    });
+    mFooterRoot.Add(mMenuTitleLabel);
+    mFooterRoot.Add(mCaseListLabel);
+    mFooterRoot.Add(mHelpLabel);
+    mFooterRoot.Add(mViewHelpLabel);
 
-    mRoot.AddChildren({
-      mHeaderRoot,
-      mContentRoot,
-      mFooterRoot,
-    });
+    mRoot.Add(mHeaderRoot);
+    mRoot.Add(mContentRoot);
+    mRoot.Add(mFooterRoot);
     ConnectHeaderActions();
     UpdateHeaderLayout();
     UpdateFooterLayout();
@@ -1197,13 +1187,11 @@ private:
     row.SetSpacing(4.0f);
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(MATRIX_HEADER_HEIGHT);
-    row.AddChildren({
-      CreateMatrixCell("", MATRIX_CAPTION_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f),
-      CreateMatrixCell("Short Sync", MATRIX_CELL_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f),
-      CreateMatrixCell("Short Async", MATRIX_CELL_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f),
-      CreateMatrixCell("Long Sync", MATRIX_CELL_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f),
-      CreateMatrixCell("Long Async", MATRIX_CELL_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f),
-    });
+    row.Add(CreateMatrixCell("", MATRIX_CAPTION_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f));
+    row.Add(CreateMatrixCell("Short Sync", MATRIX_CELL_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f));
+    row.Add(CreateMatrixCell("Short Async", MATRIX_CELL_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f));
+    row.Add(CreateMatrixCell("Long Sync", MATRIX_CELL_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f));
+    row.Add(CreateMatrixCell("Long Async", MATRIX_CELL_WIDTH, MATRIX_HEADER_HEIGHT, UiColor(0xE5E7EB), 12.0f));
     mMarqueeMatrixContainer.Add(row);
   }
 
@@ -1225,13 +1213,11 @@ private:
     const Text::Alignment horizontalAlignment = isHorizontal ? alignment : Text::Alignment::CENTER;
     const Text::Alignment verticalAlignment   = isHorizontal ? Text::Alignment::CENTER : alignment;
 
-    row.AddChildren({
-      CreateMatrixCell(caption, MATRIX_CAPTION_WIDTH, rowHeight, UiColor(0xE5E7EB), 13.0f),
-      CreateMarqueeMatrixLabel(shortText, false, orientation, horizontalAlignment, verticalAlignment, !isHorizontal, rowHeight),
-      CreateMarqueeMatrixLabel(shortText, true, orientation, horizontalAlignment, verticalAlignment, !isHorizontal, rowHeight),
-      CreateMarqueeMatrixLabel(longText, false, orientation, horizontalAlignment, verticalAlignment, !isHorizontal, rowHeight),
-      CreateMarqueeMatrixLabel(longText, true, orientation, horizontalAlignment, verticalAlignment, !isHorizontal, rowHeight),
-    });
+    row.Add(CreateMatrixCell(caption, MATRIX_CAPTION_WIDTH, rowHeight, UiColor(0xE5E7EB), 13.0f));
+    row.Add(CreateMarqueeMatrixLabel(shortText, false, orientation, horizontalAlignment, verticalAlignment, !isHorizontal, rowHeight));
+    row.Add(CreateMarqueeMatrixLabel(shortText, true, orientation, horizontalAlignment, verticalAlignment, !isHorizontal, rowHeight));
+    row.Add(CreateMarqueeMatrixLabel(longText, false, orientation, horizontalAlignment, verticalAlignment, !isHorizontal, rowHeight));
+    row.Add(CreateMarqueeMatrixLabel(longText, true, orientation, horizontalAlignment, verticalAlignment, !isHorizontal, rowHeight));
     mMarqueeMatrixContainer.Add(row);
   }
 

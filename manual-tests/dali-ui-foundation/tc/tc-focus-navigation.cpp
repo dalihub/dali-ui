@@ -86,19 +86,23 @@ public:
     auto row0 = StackLayout::New(StackOrientation::HORIZONTAL);
     row0.SetRequestedWidth(MATCH_PARENT);
     row0.SetRequestedHeight(CELL_SIZE);
-    row0.AddChildren({mViews[0], mViews[1]});
+    row0.Add(mViews[0]);
+    row0.Add(mViews[1]);
 
     auto row1 = StackLayout::New(StackOrientation::HORIZONTAL);
     row1.SetRequestedWidth(MATCH_PARENT);
     row1.SetRequestedHeight(CELL_SIZE);
-    row1.AddChildren({mViews[2], mViews[3]});
+    row1.Add(mViews[2]);
+    row1.Add(mViews[3]);
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
     root.SetPadding(Extents(GAP, GAP, GAP, GAP));
-    root.AddChildren({mStatusLabel, row0, row1});
+    root.Add(mStatusLabel);
+    root.Add(row0);
+    root.Add(row1);
     contentArea.Add(root);
 
     FocusManager::Get().RequestFocus(mViews[0]);

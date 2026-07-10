@@ -408,8 +408,8 @@ private:
     mRecyclerView.SetKeyScrollEnabled(true);
     mRecyclerView.SetKeyScrollStep(ROW_H * 1.5f);
     mRecyclerView.SetFocusScrollPeek(ROW_H * 0.5f);
-    // RecyclerView itself must be KEYBOARD_FOCUSABLE for the "no-item" step-scroll mode.
-    mRecyclerView.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
+    // RecyclerView itself must be FOCUSABLE for the "no-item" step-scroll mode.
+    mRecyclerView.SetProperty(Actor::Property::FOCUSABLE, true);
 
     mRecyclerView.ScrollStartedSignal().Connect(this, &RecyclerViewSampleController::OnScrollStarted);
     mRecyclerView.ScrollFinishedSignal().Connect(this, &RecyclerViewSampleController::OnScrollFinished);

@@ -268,7 +268,7 @@ void InteractiveTraitImpl::OnAttached(View& view)
   view.TouchEventSignal().Connect(this, &InteractiveTraitImpl::OnTouchInternal);
   mTapGestureDetector.Attach(view);
   view.SetFocusable(true);
-  view.SetTouchFocusable(true);
+  view.SetFocusOnTouchEnabled(true);
 
   if(mLongPressGestureDetector)
   {

@@ -64,12 +64,10 @@ private:
     StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.AddChildren({
-      CreateSectionLabel("FitSizeToImage  (ImageLoadWithViewSize is always OFF)"),
-      CreateFitSizeContainer(),
-      CreateFitSizeInfoLabel(),
-      CreateFitSizeToggle(),
-    });
+    contents.Add(CreateSectionLabel("FitSizeToImage  (ImageLoadWithViewSize is always OFF)"));
+    contents.Add(CreateFitSizeContainer());
+    contents.Add(CreateFitSizeInfoLabel());
+    contents.Add(CreateFitSizeToggle());
     return contents;
   }
 
@@ -91,7 +89,7 @@ private:
     container.SetRequestedWidth(MATCH_PARENT);
     container.SetRequestedHeight(WRAP_CONTENT);
     container.SetBackgroundColor(UiColor(0x444444));
-    container.AddChildren({mFitImage});
+    container.Add(mFitImage);
     return container;
   }
 
@@ -122,7 +120,7 @@ private:
     button.SetRequestedHeight(56.0f);
     button.SetPadding(Extents(4, 4, 4, 4));
     button.SetBackgroundColor(UiColor(0x444444));
-    button.AddChildren({mFitSizeLabel});
+    button.Add(mFitSizeLabel);
 
     button.AsInteractive().ClickedSignal().Connect(this, &ImageViewFitSizeController::OnFitSizeToggleClicked);
     return button;

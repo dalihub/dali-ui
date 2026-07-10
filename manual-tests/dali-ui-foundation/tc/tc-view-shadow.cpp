@@ -73,16 +73,16 @@ public:
     row.SetRequestedWidth(MATCH_PARENT);
     row.SetRequestedHeight(WRAP_CONTENT);
     row.SetSpacing(ROW_GAP);
-    row.AddChildren({CreateCard("ANIMATED\nblur + opacity", true),
-                     CreateCard("STATIC\nshadow", false)});
+    row.Add(CreateCard("ANIMATED\nblur + opacity", true));
+    row.Add(CreateCard("STATIC\nshadow", false));
     root.Add(row);
 
     StackLayout cornerRow = StackLayout::New(StackOrientation::HORIZONTAL);
     cornerRow.SetRequestedWidth(MATCH_PARENT);
     cornerRow.SetRequestedHeight(WRAP_CONTENT);
     cornerRow.SetSpacing(ROW_GAP);
-    cornerRow.AddChildren({CreateMultiShadowCard("RADIUS\n0", 0.0f),
-                           CreateMultiShadowCard("RADIUS\n42", 42.0f)});
+    cornerRow.Add(CreateMultiShadowCard("RADIUS\n0", 0.0f));
+    cornerRow.Add(CreateMultiShadowCard("RADIUS\n42", 42.0f));
     root.Add(cornerRow);
 
     StackLayout animatedCornerRow = StackLayout::New(StackOrientation::HORIZONTAL);

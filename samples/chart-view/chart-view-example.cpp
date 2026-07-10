@@ -200,7 +200,10 @@ public:
     mRootLayout = AbsoluteLayout::New();
     mRootLayout.SetRequestedWidth(MATCH_PARENT);
     mRootLayout.SetRequestedHeight(MATCH_PARENT);
-    mRootLayout.AddChildren({mSceneLabel, mDebugLabel, mPrevButton, mNextButton});
+    mRootLayout.Add(mSceneLabel);
+    mRootLayout.Add(mDebugLabel);
+    mRootLayout.Add(mPrevButton);
+    mRootLayout.Add(mNextButton);
     window.Add(mRootLayout);
 
     // Show first scene

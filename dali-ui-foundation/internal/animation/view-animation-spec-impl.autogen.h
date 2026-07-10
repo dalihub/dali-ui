@@ -84,8 +84,8 @@ public:
   bool ContainsReverseAlpha() const;
 
   /// Returns true if any entry targets a layout-owned bounds property
-  /// (POSITION_X, POSITION_Y, SIZE_WIDTH, SIZE_HEIGHT). Used by
-  /// LayoutTransition to reject visual specs that try to drive bounds —
+  /// (POSITION, POSITION_X, POSITION_Y, SIZE, SIZE_WIDTH, SIZE_HEIGHT). Used
+  /// by LayoutTransition to reject visual specs that try to drive bounds —
   /// bounds animation belongs to the bounds-effect channel.
   bool ContainsLayoutBoundsProperty() const;
 
@@ -95,14 +95,28 @@ public:
   static void ApplyShadowBlurRadiusBy(Animation& animation, View view, const Entry& entry);
   static void ApplyShadowOpacityTo(Animation& animation, View view, const Entry& entry);
   static void ApplyShadowOpacityBy(Animation& animation, View view, const Entry& entry);
+  static void ApplySizeTo(Animation& animation, View view, const Entry& entry);
+  static void ApplySizeBy(Animation& animation, View view, const Entry& entry);
   static void ApplySizeWidthTo(Animation& animation, View view, const Entry& entry);
   static void ApplySizeWidthBy(Animation& animation, View view, const Entry& entry);
   static void ApplySizeHeightTo(Animation& animation, View view, const Entry& entry);
   static void ApplySizeHeightBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyPositionTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyPositionBy(Animation& animation, View view, const Entry& entry);
   static void ApplyPositionXTo(Animation& animation, View view, const Entry& entry);
   static void ApplyPositionXBy(Animation& animation, View view, const Entry& entry);
   static void ApplyPositionYTo(Animation& animation, View view, const Entry& entry);
   static void ApplyPositionYBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyScaleTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyScaleBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyScaleXTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyScaleXBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyScaleYTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyScaleYBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyColorTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyColorBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyOpacityTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyOpacityBy(Animation& animation, View view, const Entry& entry);
 
 protected:
   ViewAnimationSpecImpl();

@@ -196,7 +196,7 @@ private:
     mScaleValueLabel.SetText(buffer);
 
     // Update indicator position (scale ranges from 1.0 to 2.5)
-    float indicatorX = ((mCurrentScale - 1.0f) / 1.5f) * mScaleBar.GetSize().GetWidth();
+    float indicatorX = ((mCurrentScale - 1.0f) / 1.5f) * mScaleBar.GetSize().width;
     mScaleIndicator.SetRequestedPositionX(indicatorX);
   }
 
@@ -240,7 +240,7 @@ private:
     card.SetCornerRadius(CARD_CORNER_RADIUS);
     card.SetMargin(Extents(CARD_SPACING / 2, CARD_SPACING / 2, 0, 0));
     card.SetFocusable(true);
-    card.SetTouchFocusable(true);
+    card.SetFocusOnTouchEnabled(true);
 
     Label titleLabel = Label::New(CARD_TEXTS[index]);
     titleLabel.SetFontSize(FONT_SIZE_TITLE);
@@ -390,7 +390,7 @@ private:
       info.currentAnimation = snapAnim;
     }
 
-    if(info.titleLabel.GetHeightForWidth(info.titleLabel.GetSize().GetWidth()) > TITLE_HEIGHT)
+    if(info.titleLabel.GetHeightForWidth(info.titleLabel.GetSize().width) > TITLE_HEIGHT)
     {
       info.titleLabel.StartMarquee();
     }
@@ -467,7 +467,7 @@ private:
     if(touch.GetState(0) == PointState::MOTION)
     {
       Vector2 position = touch.GetLocalPosition(0);
-      mCurrentScale = std::clamp(1.0f + (position.x / mScaleBar.GetSize().GetWidth()) * 1.5f, 1.0f, 2.5f);
+      mCurrentScale = std::clamp(1.0f + (position.x / mScaleBar.GetSize().width) * 1.5f, 1.0f, 2.5f);
       UpdateScaleDisplay();
     }
     return true;

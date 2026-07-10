@@ -909,7 +909,7 @@ int UtcDaliViewStateTouchFocusableDoesNotFocusOnDownP(void)
 
   MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
   view.SetFocusable(true);
-  view.SetTouchFocusable(true);
+  view.SetFocusOnTouchEnabled(true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
 
@@ -926,7 +926,7 @@ int UtcDaliViewStateTouchFocusableFocusesOnReleaseP(void)
 
   MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
   view.SetFocusable(true);
-  view.SetTouchFocusable(true);
+  view.SetFocusOnTouchEnabled(true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
   application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 20.0f), 120u));
@@ -944,7 +944,7 @@ int UtcDaliViewStateTouchFocusableDoesNotFocusWhenInterruptedP(void)
 
   MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
   view.SetFocusable(true);
-  view.SetTouchFocusable(true);
+  view.SetFocusOnTouchEnabled(true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
   application.ProcessEvent(GenerateTouch(PointState::INTERRUPTED, Vector2(20.0f, 20.0f), 120u));
@@ -962,7 +962,7 @@ int UtcDaliViewStateTouchFocusableDoesNotFocusRemovedCandidateOnReleaseP(void)
 
   MakeTopLeftHitTestView(application, view, Vector2(0.0f, 0.0f));
   view.SetFocusable(true);
-  view.SetTouchFocusable(true);
+  view.SetFocusOnTouchEnabled(true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
 
@@ -989,7 +989,7 @@ int UtcDaliViewStateTouchFocusableClearsFocusIndicationOnDownAndFocusesOnRelease
   view2.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view1.SetFocusable(true);
   view2.SetFocusable(true);
-  view2.SetTouchFocusable(true);
+  view2.SetFocusOnTouchEnabled(true);
   FocusManager::Get().SetCurrentFocusView(view1);
   IntegrationView::SetState(GetImpl(view1), ViewState::FOCUS_INDICATED, true);
 
@@ -1022,7 +1022,7 @@ int UtcDaliViewStateTouchFocusableDescendantClearsAncestorFocusIndicationAndFocu
   child.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   parent.SetFocusable(true);
   child.SetFocusable(true);
-  child.SetTouchFocusable(true);
+  child.SetFocusOnTouchEnabled(true);
   FocusManager::Get().SetCurrentFocusView(parent);
   IntegrationView::SetState(GetImpl(parent), ViewState::FOCUS_INDICATED, true);
 

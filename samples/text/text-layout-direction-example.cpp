@@ -51,21 +51,21 @@ private:
     dirLabel.SetRequestedWidth(40.0f);
     Label modeLabel = Label::New("Mode");
     modeLabel.SetRequestedWidth(100.0f);
-    header.AddChildren({dirLabel, modeLabel, Label::New("Result")});
+    header.Add(dirLabel);
+    header.Add(modeLabel);
+    header.Add(Label::New("Result"));
 
-    root.AddChildren({
-      Label::New("Text Layout Direction Mode Example"),
-      header,
-      CreateLayoutDirection("LTR", "CONTENTS", "Hello world", Text::LayoutDirectionMode::CONTENTS),
-      CreateLayoutDirection("LTR", "INHERIT", "Hello world", Text::LayoutDirectionMode::INHERIT),
-      CreateLayoutDirection("LTR", "LOCALE", "Hello world", Text::LayoutDirectionMode::LOCALE),
-      CreateLayoutDirection("RTL", "CONTENTS", "שלום עולם", Text::LayoutDirectionMode::CONTENTS),
-      CreateLayoutDirection("RTL", "INHERIT", "שלום עולם", Text::LayoutDirectionMode::INHERIT),
-      CreateLayoutDirection("RTL", "LOCALE", "שלום עולם", Text::LayoutDirectionMode::LOCALE),
-      CreateLayoutDirection("MIX", "CONTENTS", "שלום עולם, Hello world", Text::LayoutDirectionMode::CONTENTS),
-      CreateLayoutDirection("MIX", "INHERIT", "שלום עולם, Hello world", Text::LayoutDirectionMode::INHERIT),
-      CreateLayoutDirection("MIX", "LOCALE", "שלום עולם, Hello world", Text::LayoutDirectionMode::LOCALE),
-    });
+    root.Add(Label::New("Text Layout Direction Mode Example"));
+    root.Add(header);
+    root.Add(CreateLayoutDirection("LTR", "CONTENTS", "Hello world", Text::LayoutDirectionMode::CONTENTS));
+    root.Add(CreateLayoutDirection("LTR", "INHERIT", "Hello world", Text::LayoutDirectionMode::INHERIT));
+    root.Add(CreateLayoutDirection("LTR", "LOCALE", "Hello world", Text::LayoutDirectionMode::LOCALE));
+    root.Add(CreateLayoutDirection("RTL", "CONTENTS", "שלום עולם", Text::LayoutDirectionMode::CONTENTS));
+    root.Add(CreateLayoutDirection("RTL", "INHERIT", "שלום עולם", Text::LayoutDirectionMode::INHERIT));
+    root.Add(CreateLayoutDirection("RTL", "LOCALE", "שלום עולם", Text::LayoutDirectionMode::LOCALE));
+    root.Add(CreateLayoutDirection("MIX", "CONTENTS", "שלום עולם, Hello world", Text::LayoutDirectionMode::CONTENTS));
+    root.Add(CreateLayoutDirection("MIX", "INHERIT", "שלום עולם, Hello world", Text::LayoutDirectionMode::INHERIT));
+    root.Add(CreateLayoutDirection("MIX", "LOCALE", "שלום עולם, Hello world", Text::LayoutDirectionMode::LOCALE));
     window.Add(root);
 
     window.KeyEventSignal().Connect(this, &TextLayoutController::OnKeyEvent);
@@ -85,7 +85,9 @@ private:
     resultLabel.SetLayoutDirectionMode(mode);
     resultLabel.SetTextColor(UiColor(0xEFEFEF));
     resultLabel.SetBackgroundColor(UiColor(0x020202));
-    row.AddChildren({textTypeLabel, layoutModeLabel, resultLabel});
+    row.Add(textTypeLabel);
+    row.Add(layoutModeLabel);
+    row.Add(resultLabel);
     return row;
   }
 

@@ -27,7 +27,7 @@
  *     TriggerKeyEdgeFeedback(); return View();
  *   }
  *
- * The app opts in by setting KEYBOARD_FOCUSABLE=true on the ScrollView and
+ * The app opts in by setting FOCUSABLE=true on the ScrollView and
  * seeding focus to it.
  *
  * Layout:
@@ -174,11 +174,11 @@ private:
       item.SetBackgroundColor(ITEM_COLORS[i % 2]);
       item.SetRequestedWidth(MATCH_PARENT);
       item.SetRequestedHeight(ITEM_H);
-      item.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, false);
+      item.SetProperty(Actor::Property::FOCUSABLE, false);
       item.SetProperty(View::Property::CORNER_RADIUS, Vector4(8, 8, 8, 8));
 
       std::ostringstream oss;
-      oss << "Item " << (i + 1) << "  [KEYBOARD_FOCUSABLE = false]";
+      oss << "Item " << (i + 1) << "  [FOCUSABLE = false]";
       Label lbl = Label::New(oss.str().c_str());
       lbl.SetRequestedWidth(MATCH_PARENT);
       lbl.SetRequestedHeight(ITEM_H);
@@ -197,7 +197,7 @@ private:
     mScrollView.SetRequestedPositionX(0.0f);
     mScrollView.SetRequestedPositionY(SCROLL_Y);
     mScrollView.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
-    mScrollView.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true); // opt-in for Self() key-scroll
+    mScrollView.SetProperty(Actor::Property::FOCUSABLE, true); // opt-in for Self() key-scroll
     mScrollView.SetContent(content);
 
     window.Add(mScrollView);

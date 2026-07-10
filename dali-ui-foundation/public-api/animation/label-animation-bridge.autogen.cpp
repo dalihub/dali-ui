@@ -72,6 +72,18 @@ LabelAnimationBridge& LabelAnimationBridge::ShadowOpacityBy(float relative, Dura
   return *this;
 }
 
+LabelAnimationBridge& LabelAnimationBridge::Size(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::Size(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::SizeBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::SizeBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationBridge& LabelAnimationBridge::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::SizeWidth(target, duration, alpha, delay);
@@ -93,6 +105,18 @@ LabelAnimationBridge& LabelAnimationBridge::SizeHeight(float target, Duration du
 LabelAnimationBridge& LabelAnimationBridge::SizeHeightBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::SizeHeightBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::Position(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::Position(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::PositionBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::PositionBy(relative, duration, alpha, delay);
   return *this;
 }
 
@@ -120,6 +144,18 @@ LabelAnimationBridge& LabelAnimationBridge::PositionYBy(float relative, Duration
   return *this;
 }
 
+LabelAnimationBridge& LabelAnimationBridge::Scale(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::Scale(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::ScaleBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ScaleBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationBridge& LabelAnimationBridge::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::ScaleX(target, duration, alpha, delay);
@@ -141,6 +177,18 @@ LabelAnimationBridge& LabelAnimationBridge::ScaleY(float target, Duration durati
 LabelAnimationBridge& LabelAnimationBridge::ScaleYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::ScaleYBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::Color(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationBridge& LabelAnimationBridge::ColorBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::ColorBy(relative, duration, alpha, delay);
   return *this;
 }
 

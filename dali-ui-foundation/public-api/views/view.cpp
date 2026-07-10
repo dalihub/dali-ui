@@ -29,9 +29,6 @@
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali/devel-api/object/type-registry.h>
-#include <dali/integration-api/debug.h>
-#include <dali/public-api/actors/actor.h>
 
 namespace Dali
 {
@@ -131,62 +128,6 @@ void View::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 // Properties
 // =============================================================================
 
-float View::GetScaleX() const
-{
-  return GetImpl(*this).GetScaleX();
-}
-
-float View::GetCurrentScaleX() const
-{
-  return GetImpl(*this).GetCurrentScaleX();
-}
-
-void View::SetScaleX(float scaleX)
-{
-  GetImpl(*this).SetScaleX(scaleX);
-}
-
-float View::GetScaleY() const
-{
-  return GetImpl(*this).GetScaleY();
-}
-
-float View::GetCurrentScaleY() const
-{
-  return GetImpl(*this).GetCurrentScaleY();
-}
-
-void View::SetScaleY(float scaleY)
-{
-  GetImpl(*this).SetScaleY(scaleY);
-}
-
-void View::SetScale(float scaleX, float scaleY)
-{
-  SetScaleX(scaleX);
-  SetScaleY(scaleY);
-}
-
-Vector2 View::GetCurrentScale() const
-{
-  return Vector2(GetCurrentScaleX(), GetCurrentScaleY());
-}
-
-void View::SetLayoutDirection(Dali::LayoutDirection::Type direction)
-{
-  GetImpl(*this).SetLayoutDirection(direction);
-}
-
-void View::ClearLayoutDirection()
-{
-  GetImpl(*this).ClearLayoutDirection();
-}
-
-bool View::IsLayoutDirectionInherited() const
-{
-  return GetImpl(*this).IsLayoutDirectionInherited();
-}
-
 Dali::LayoutDirection::Type View::GetEffectiveLayoutDirection() const
 {
   return GetImpl(*this).GetEffectiveLayoutDirection();
@@ -200,36 +141,6 @@ void View::SetUiScalePolicy(UiScalePolicy policy)
 UiScalePolicy View::GetUiScalePolicy() const
 {
   return GetImpl(*this).GetUiScalePolicy();
-}
-
-bool View::IsVisible() const
-{
-  return GetImpl(*this).IsVisible();
-}
-
-void View::SetVisibility(bool visibility)
-{
-  GetImpl(*this).SetVisibility(visibility);
-}
-
-float View::GetOpacity() const
-{
-  return GetImpl(*this).GetOpacity();
-}
-
-void View::SetOpacity(float opacity)
-{
-  GetImpl(*this).SetOpacity(opacity);
-}
-
-MeasuredSize View::GetSize() const
-{
-  return GetImpl(*this).GetSize();
-}
-
-MeasuredSize View::GetCurrentSize() const
-{
-  return GetImpl(*this).GetCurrentSize();
 }
 
 void View::SetRequestedPositionX(float x)
@@ -250,41 +161,6 @@ void View::SetRequestedPositionY(float y)
 float View::GetRequestedPositionY() const
 {
   return GetImpl(*this).GetRequestedPositionY();
-}
-
-float View::GetPositionX() const
-{
-  return GetImpl(*this).GetPositionX();
-}
-
-float View::GetPositionY() const
-{
-  return GetImpl(*this).GetPositionY();
-}
-
-Vector2 View::GetCurrentPosition() const
-{
-  return Vector2(GetImpl(*this).GetCurrentPositionX(), GetImpl(*this).GetCurrentPositionY());
-}
-
-void View::SetParentOrigin(const Vector3& point)
-{
-  GetImpl(*this).SetParentOrigin(point);
-}
-
-Vector3 View::GetParentOrigin() const
-{
-  return GetImpl(*this).GetParentOrigin();
-}
-
-void View::SetPivot(const Vector3& point)
-{
-  GetImpl(*this).SetPivot(point);
-}
-
-Vector3 View::GetPivot() const
-{
-  return GetImpl(*this).GetPivot();
 }
 
 void View::SetRequestedWidth(float width)
@@ -377,41 +253,6 @@ LayoutMode View::GetLayoutMode() const
   return GetImpl(*this).GetLayoutMode();
 }
 
-bool View::IsFocusable() const
-{
-  return GetImpl(*this).IsFocusable();
-}
-
-void View::SetFocusable(bool focusable)
-{
-  GetImpl(*this).SetFocusable(focusable);
-}
-
-bool View::IsTouchFocusable() const
-{
-  return GetImpl(*this).IsTouchFocusable();
-}
-
-void View::SetTouchFocusable(bool touchFocusable)
-{
-  GetImpl(*this).SetTouchFocusable(touchFocusable);
-}
-
-void View::SetDescendantFocusBlocked(bool blocked)
-{
-  GetImpl(*this).SetDescendantFocusBlocked(blocked);
-}
-
-bool View::IsDescendantFocusBlocked() const
-{
-  return GetImpl(*this).IsDescendantFocusBlocked();
-}
-
-bool View::HasAncestorBlockingFocus() const
-{
-  return GetImpl(*this).HasAncestorBlockingFocus();
-}
-
 void View::SetLeftFocusableView(View view)
 {
   SetProperty(Property::LEFT_FOCUSABLE_VIEW_ID, view.GetProperty<int>(Actor::Property::ID));
@@ -500,16 +341,6 @@ void View::SetColor(const UiColor& color)
 UiColor View::GetCurrentColor() const
 {
   return GetImpl(*this).GetCurrentColor();
-}
-
-bool View::IsEnabled() const
-{
-  return GetImpl(*this).IsEnabled();
-}
-
-void View::SetEnabled(bool enabled)
-{
-  GetImpl(*this).SetEnabled(enabled);
 }
 
 bool View::IsEffectivelyEnabled() const
@@ -625,16 +456,6 @@ float View::GetBorderlineOffset() const
 void View::SetBorderlineOffset(float offset)
 {
   GetImpl(*this).SetBorderlineOffset(offset);
-}
-
-Dali::String View::GetName() const
-{
-  return GetImpl(*this).GetName();
-}
-
-void View::SetName(const Dali::String& name)
-{
-  GetImpl(*this).SetName(name);
 }
 
 InteractiveTrait View::AsInteractive()
@@ -828,11 +649,6 @@ bool View::HasAccessibilityState(Accessibility::State state) const
   const ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   const Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
   return viewDataImpl.HasAccessibilityState(state);
-}
-
-bool View::IsOnScene() const
-{
-  return GetImpl(*this).IsOnScene();
 }
 
 View::ResourceReadySignalType& View::ResourceReadySignal()

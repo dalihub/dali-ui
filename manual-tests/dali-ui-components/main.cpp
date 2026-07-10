@@ -116,7 +116,7 @@ private:
     header.SetRequestedHeight(HEADER_HEIGHT);
     header.SetBackgroundColor(UiColor(COLOR_HEADER_BG));
     header.SetPadding(Extents(PADDING_H, PADDING_H, 0, 0));
-    header.AddChildren({titleLabel});
+    header.Add(titleLabel);
     return header;
   }
 
@@ -149,7 +149,8 @@ private:
       EnterTestCase(index);
       return true;
     });
-    item.AddChildren({nameLabel, descriptionLabel});
+    item.Add(nameLabel);
+    item.Add(descriptionLabel);
     return item;
   }
 
@@ -199,7 +200,8 @@ private:
     header.SetRequestedWidth(MATCH_PARENT);
     header.SetRequestedHeight(HEADER_HEIGHT);
     header.SetBackgroundColor(UiColor(COLOR_HEADER_BG));
-    header.AddChildren({backLabel, titleLabel});
+    header.Add(backLabel);
+    header.Add(titleLabel);
     mRootContainer.Add(header);
 
     StackLayout contentArea = StackLayout::New(StackOrientation::VERTICAL);

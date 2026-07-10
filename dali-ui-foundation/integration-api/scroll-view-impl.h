@@ -580,7 +580,7 @@ private:
    *  !next AND at scroll boundary:
    *    Return View() so FocusFinder can exit to a neighboring view (e.g. Ext Bottom).
    *  Case 3 — no next focusable AND not at scroll boundary:
-   *    Transfer focus to Self() (if KEYBOARD_FOCUSABLE) so OnKeyEvent drives
+   *    Transfer focus to Self() (if FOCUSABLE) so OnKeyEvent drives
    *    further step-scrolling. Sets mKeyScrollLastChild/Dir to suppress re-selection
    *    of content items while in this blind-scroll mode.
    *  Case 4 — next focusable beyond mKeyScrollStep:

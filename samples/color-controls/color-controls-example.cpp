@@ -64,7 +64,8 @@ public:
     mSecondChild.SetRequestedPositionX(100_spx);
     mSecondChild.SetRequestedPositionY(100_spx);
 
-    parent.AddChildren({redChild, mSecondChild});
+    parent.Add(redChild);
+    parent.Add(mSecondChild);
     window.Add(parent);
   }
 

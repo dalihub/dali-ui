@@ -23,7 +23,6 @@
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/unique-ptr.h>
 #include <dali/public-api/object/base-handle.h>
-#include <functional>
 #include <initializer_list>
 
 // INTERNAL INCLUDES
@@ -51,12 +50,6 @@
 #include <dali-ui-foundation/public-api/views/view-with.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
-#include <dali/public-api/actors/custom-actor.h>
-#include <dali/public-api/animation/animation.h>
-#include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/object/base-handle.h>
-#include <functional>
-#include <initializer_list>
 
 namespace Dali
 {
@@ -99,7 +92,6 @@ using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
  */
 class DALI_UI_API View : public CustomActor
 {
-public:
 public: // Creation & Destruction
   /**
    * @brief Creates an uninitialized View handle.
@@ -315,46 +307,17 @@ public: // Properties
   // @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
   // @ANIMATABLE_MANUAL(ShadowBlurRadius, float)
   // @ANIMATABLE_MANUAL(ShadowOpacity, float)
+  // @ANIMATABLE_MANUAL(Size, Vector3)
   // @ANIMATABLE_MANUAL(SizeWidth, float)
   // @ANIMATABLE_MANUAL(SizeHeight, float)
+  // @ANIMATABLE_MANUAL(Position, Vector3)
   // @ANIMATABLE_MANUAL(PositionX, float)
   // @ANIMATABLE_MANUAL(PositionY, float)
-
-  /**
-   * @brief Gets the x scale factor applied to the view.
-   *
-   * @return The x scale factor
-   */
-  float GetScaleX() const;
-
-  /**
-   * @brief Gets the current x scale factor applied to the view.
-   *
-   * @return The current x scale factor
-   */
-  float GetCurrentScaleX() const;
-
-  // @ANIMATABLE(Actor::Property::SCALE_X, float)
-  /**
-   * @brief Sets the x scale factor applied to the view.
-   *
-   * @param[in] scaleX The X scale factor to set
-   */
-  void SetScaleX(float scaleX);
-
-  /**
-   * @brief Gets the y scale factor applied to the view.
-   *
-   * @return The y scale factor
-   */
-  float GetScaleY() const;
-
-  /**
-   * @brief Gets the current y scale factor applied to the view.
-   *
-   * @return The current y scale factor
-   */
-  float GetCurrentScaleY() const;
+  // @ANIMATABLE_MANUAL(Scale, Vector3)
+  // @ANIMATABLE_MANUAL(ScaleX, float)
+  // @ANIMATABLE_MANUAL(ScaleY, float)
+  // @ANIMATABLE_MANUAL(Color, Vector4)
+  // @ANIMATABLE_MANUAL(Opacity, float)
 
   /**
    * @brief Sets the UiScale participation policy for this view.
@@ -370,85 +333,6 @@ public: // Properties
    * @return The current UiScalePolicy
    */
   UiScalePolicy GetUiScalePolicy() const;
-
-  // @ANIMATABLE(Actor::Property::SCALE_Y, float)
-  /**
-   * @brief Sets the y scale factor applied to the view.
-   *
-   * @param[in] scaleY The Y scale factor to set
-   */
-  void SetScaleY(float scaleY);
-
-  /**
-   * @brief Sets the y scale factor applied to the view.
-   *
-   * @param[in] scaleX The X scale factor to set
-   * @param[in] scaleY The Y scale factor to set
-   */
-  void SetScale(float scaleX, float scaleY);
-
-  /**
-   * @brief Gets the current scale factor applied to the view.
-   *
-   * @return The current scale factor
-   */
-  Vector2 GetCurrentScale() const;
-
-  /**
-   * @brief Checks if the view is visible.
-   *
-   * @return True if the view is visible, false otherwise
-   */
-  bool IsVisible() const;
-
-  /**
-   * @brief Sets the visibility of the view.
-   *
-   * @note Toggling visibility does NOT fire a parent's
-   * @c LayoutTransition. ENTER / EXIT dispatch only on
-   * @c Actor::Add / @c View::Remove(View, RemovePolicy::ANIMATE_EXIT) —
-   * visibility-driven transitions are not supported. To animate a
-   * hide/show, drive @c Actor::Property::OPACITY or @c SCALE via your own
-   * @c Animation, or call @c Remove(child, RemovePolicy::ANIMATE_EXIT) +
-   * @c Add to participate in the layout transition.
-   *
-   * @param[in] visibility True to make the view visible, false to hide it
-   * @return Reference to this View for fluent chaining
-   */
-  void SetVisibility(bool visibility);
-
-  /**
-   * @brief Gets the opacity of the view.
-   *
-   * @return The opacity value (0.0 to 1.0)
-   */
-  float GetOpacity() const;
-
-  // @ANIMATABLE(Actor::Property::OPACITY, float)
-  /**
-   * @brief Sets the opacity of the view.
-   *
-   * @param[in] opacity The opacity value to set (0.0 to 1.0)
-   * @return Reference to this View for fluent chaining
-   */
-  void SetOpacity(float opacity);
-
-  /**
-   * @brief Gets the actual rendered size of this View after layout.
-   *
-   * This is a read-only result of the layout system's Measure/Arrange passes.
-   * To set the desired size, use SetRequestedWidth() / SetRequestedHeight().
-   *
-   * @return The actual size (width, height) as set by the layout system
-   */
-  MeasuredSize GetSize() const;
-
-  /**
-   * @brief Gets the current rendered size of this View.
-   *
-   * @return The current rendered size (width, height)
-   */
-  MeasuredSize GetCurrentSize() const;
 
   /**
    * @brief Sets the X position requested by the user.
@@ -492,61 +376,6 @@ public: // Properties
    * @see GetRequestedPositionX
    */
   float GetRequestedPositionY() const;
-
-  /**
-   * @brief Returns the current rendered X position (Actor::Property::POSITION_X).
-   *
-   * After a layout pass, this is the requested X plus the parent's left
-   * padding plus this view's left margin. Direct property writes (e.g.
-   * scroll offset animations) may also modify it.
-   *
-   * @return The current rendered X position
-   */
-  float GetPositionX() const;
-
-  /**
-   * @brief Returns the current rendered Y position (Actor::Property::POSITION_Y).
-   *
-   * @return The current rendered Y position
-   * @see GetPositionX
-   */
-  float GetPositionY() const;
-
-  /**
-   * @brief Returns the current rendered position (Actor::Property::POSITION).
-   *
-   * @return The current rendered position
-   * @see GetPositionX, GetPositionY
-   */
-  Vector2 GetCurrentPosition() const;
-
-  /**
-   * @brief Sets the parent origin of the View.
-   *
-   * @param[in] point The parent origin to set
-   */
-  void SetParentOrigin(const Vector3& point);
-
-  /**
-   * @brief Gets the parent origin of the View.
-   *
-   * @return The parent origin of the View
-   */
-  Vector3 GetParentOrigin() const;
-
-  /**
-   * @brief Sets the pivot of the View.
-   *
-   * @param[in] point The pivot to set
-   */
-  void SetPivot(const Vector3& point);
-
-  /**
-   * @brief Gets the pivot of the View.
-   *
-   * @return The pivot of the View
-   */
-  Vector3 GetPivot() const;
 
   /**
    * @brief Sets the requested width.
@@ -707,61 +536,6 @@ public: // Properties
   LayoutMode GetLayoutMode() const;
 
   /**
-   * @brief Gets whether the actor should be focusable by keyboard navigation.
-   *
-   * @return True if it is focusable
-   */
-  bool IsFocusable() const;
-
-  /**
-   * @brief Sets whether the actor should be focusable by keyboard navigation.
-   *
-   * @param[in] focusable True if it is focusable
-   */
-  void SetFocusable(bool focusable);
-
-  /**
-   * @brief Gets whether the actor should be focused when touched.
-   *
-   * @return True if it is focused when touched
-   */
-  bool IsTouchFocusable() const;
-
-  /**
-   * @brief Sets whether the actor should be focused when touched.
-   *
-   * @param[in] touchFocusable True if it gets focused when touched
-   */
-  void SetTouchFocusable(bool touchFocusable);
-
-  /**
-   * @brief Sets whether descendant focus is blocked.
-   *
-   * When blocked, none of this View's descendants can receive keyboard focus.
-   * Focus requests on descendants will be rejected.
-   *
-   * @param[in] blocked True to block descendant focus
-   */
-  void SetDescendantFocusBlocked(bool blocked);
-
-  /**
-   * @brief Gets whether descendant focus is blocked.
-   *
-   * @return True if descendant focus is blocked
-   */
-  bool IsDescendantFocusBlocked() const;
-
-  /**
-   * @brief Checks whether any ancestor has descendant focus blocked.
-   *
-   * Traverses the parent chain on every call to determine if any ancestor
-   * has set SetDescendantFocusBlocked to true.
-   *
-   * @return true if an ancestor blocks descendant focus, false otherwise.
-   */
-  bool HasAncestorBlockingFocus() const;
-
-  /**
    * @brief Sets the left focusable View for keyboard navigation.
    *
    * @param[in] view The View to focus when navigating left
@@ -911,23 +685,6 @@ public: // Properties
   UiColor GetCurrentColor() const;
 
   /**
-   * @brief Checks if the view is enabled.
-   *
-   * @return True if the view is enabled (default), false if disabled
-   */
-  bool IsEnabled() const;
-
-  /**
-   * @brief Sets whether the view is enabled.
-   *
-   * A disabled view does not receive user interaction. Setting this to false
-   * adds the Disabled state and emits StateChangedSignal.
-   *
-   * @param[in] enabled True to enable, false to disable
-   */
-  void SetEnabled(bool enabled);
-
-  /**
    * @brief Gets the corner radius of the view.
    *
    * @return The corner radius as Vector4 (topLeft, topRight, bottomRight, bottomLeft)
@@ -1069,53 +826,6 @@ public: // Properties
   void SetBorderlineOffset(float offset);
 
   /**
-   * @brief Gets the name of the view.
-   *
-   * @return The name
-   */
-  Dali::String GetName() const;
-
-  /**
-   * @brief Sets the name of this view.
-   *
-   * @param[in] name The name to set
-   */
-  void SetName(const Dali::String& name);
-
-  /**
-   * @brief Sets the layout direction of this view explicitly.
-   *
-   * Overrides inherited direction from the parent. To revert to inheritance,
-   * use ClearLayoutDirection().
-   *
-   * @param[in] direction The layout direction to set (LEFT_TO_RIGHT or RIGHT_TO_LEFT)
-   * @return Reference to this View for fluent chaining
-   * @note RTL mirror: when the effective layout direction resolves to
-   * RIGHT_TO_LEFT, every non-standalone child's X position is mirrored about
-   * the parent width after arrange (newX = parentWidth - oldX - childWidth),
-   * regardless of the layout manager. The only opt-out is placing a child in
-   * LayoutMode STANDALONE, which is never mirrored.
-   */
-  void SetLayoutDirection(Dali::LayoutDirection::Type direction);
-
-  /**
-   * @brief Clears the explicitly set layout direction.
-   *
-   * After calling this, the view inherits its layout direction from the parent.
-   */
-  void ClearLayoutDirection();
-
-  /**
-   * @brief Returns true if this view is inheriting layout direction from its parent.
-   *
-   * This is true by default. It becomes false only when SetLayoutDirection() has been
-   * called to set an explicit direction, and is restored to true by ClearLayoutDirection().
-   *
-   * @return True if inheriting, false if an explicit direction has been set
-   */
-  bool IsLayoutDirectionInherited() const;
-
-  /**
    * @brief Returns the effective layout direction applied to this view.
    *
    * Always returns the resolved direction (LEFT_TO_RIGHT or RIGHT_TO_LEFT),
@@ -1156,6 +866,7 @@ public: // Properties
    * @return InteractiveTrait handle
    */
   InteractiveTrait AsInteractive();
+
   /**
    * @brief Attaches the selectable trait to this View.
    *
@@ -1203,19 +914,7 @@ public: // Properties
    * @endcode
    */
   void SetLayoutParams(LayoutParams params);
-  /**
-   * @brief Adds a list of children to this View in a declarative way.
-   * This method allows for a hierarchical UI tree construction by passing
-   * a brace-enclosed initializer list of View objects.
-   * @param[in] children The initializer list containing child View handles to be added.
-   */
-  void AddChildren(std::initializer_list<View> children)
-  {
-    for(const auto& child : children)
-    {
-      Add(child);
-    }
-  }
+
   /**
    * @brief Adds a list of visuals to this View in a declarative way.
    * This method allows for append visuals construction by passing
@@ -1235,6 +934,7 @@ public: // Properties
       DALI_ASSERT_ALWAYS(added && "Too many visuals are added by declarative method, or try to add duplicated VisualBase!");
     }
   }
+
   /**
    * @brief Sets an attachment from uniquely owned data.
    *
@@ -2164,13 +1864,6 @@ public:
    * @see Dali::Ui::Accessibility::State
    */
   bool HasAccessibilityState(Accessibility::State state) const;
-
-  /**
-   * @brief Checks whether the view is connected to the scene.
-   *
-   * @return true if the view is on scene, false otherwise
-   */
-  bool IsOnScene() const;
 
   /**
    * @brief This signal is emitted after all resources required by a View are loaded and ready.

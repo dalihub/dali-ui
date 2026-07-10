@@ -299,37 +299,29 @@ private:
     CreatePreviewLabels();
     CreateFooterBadges();
 
-    mHeaderRoot.AddChildren({
-      mCaseBadge,
-      mPreviousBadge,
-      mNextBadge,
-      mSourceBadge,
-      mResetBadge,
-      mValueBadge,
-      mRangeBadge,
-      mClearBadge,
-      mExpectedBadge,
-    });
+    mHeaderRoot.Add(mCaseBadge);
+    mHeaderRoot.Add(mPreviousBadge);
+    mHeaderRoot.Add(mNextBadge);
+    mHeaderRoot.Add(mSourceBadge);
+    mHeaderRoot.Add(mResetBadge);
+    mHeaderRoot.Add(mValueBadge);
+    mHeaderRoot.Add(mRangeBadge);
+    mHeaderRoot.Add(mClearBadge);
+    mHeaderRoot.Add(mExpectedBadge);
 
-    mContentRoot.AddChildren({
-      mSyncTitleBadge,
-      mPreviewLabel,
-      mAsyncTitleBadge,
-      mAsyncPreviewLabel,
-    });
+    mContentRoot.Add(mSyncTitleBadge);
+    mContentRoot.Add(mPreviewLabel);
+    mContentRoot.Add(mAsyncTitleBadge);
+    mContentRoot.Add(mAsyncPreviewLabel);
 
-    mFooterRoot.AddChildren({
-      mMenuTitleLabel,
-      mCaseListLabel,
-      mHelpLabel,
-      mViewHelpLabel,
-    });
+    mFooterRoot.Add(mMenuTitleLabel);
+    mFooterRoot.Add(mCaseListLabel);
+    mFooterRoot.Add(mHelpLabel);
+    mFooterRoot.Add(mViewHelpLabel);
 
-    mRoot.AddChildren({
-      mHeaderRoot,
-      mContentRoot,
-      mFooterRoot,
-    });
+    mRoot.Add(mHeaderRoot);
+    mRoot.Add(mContentRoot);
+    mRoot.Add(mFooterRoot);
 
     ConnectHeaderActions();
     UpdateHeaderLayout();

@@ -74,18 +74,16 @@ private:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetSpacing(4.0f);
     root.SetPadding(Extents(8, 8, 8, 8));
-    root.AddChildren({
-      CreateAnimationArea(),
-      CreateStatusLabel(),
-      CreatePlaybackRow(),
-      CreateLoopRow(),
-      CreateLoopingModeRow(),
-      CreateSpeedRow(),
-      CreateStopBehaviorRow(),
-      CreateFrameRangeRow(),
-      CreateRenderScaleRow(),
-      CreatePlaceholderRow(),
-    });
+    root.Add(CreateAnimationArea());
+    root.Add(CreateStatusLabel());
+    root.Add(CreatePlaybackRow());
+    root.Add(CreateLoopRow());
+    root.Add(CreateLoopingModeRow());
+    root.Add(CreateSpeedRow());
+    root.Add(CreateStopBehaviorRow());
+    root.Add(CreateFrameRangeRow());
+    root.Add(CreateRenderScaleRow());
+    root.Add(CreatePlaceholderRow());
     window.Add(root);
 
     window.KeyEventSignal().Connect(this, &LottieAnimationViewSampleController::OnKeyEvent);
@@ -148,7 +146,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(LOOP_LABELS[mLoopIndex], [this](View, InputEvent) { OnLoopToggle(); }, mLoopButton));
     return row;
   }
 
@@ -164,7 +163,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(LOOPING_MODE_LABELS[mLoopingModeIndex], [this](View, InputEvent) { OnLoopingModeToggle(); }, mLoopingModeButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(LOOPING_MODE_LABELS[mLoopingModeIndex], [this](View, InputEvent) { OnLoopingModeToggle(); }, mLoopingModeButton));
     return row;
   }
 
@@ -180,7 +180,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(SPEED_LABELS[mSpeedIndex], [this](View, InputEvent) { OnSpeedToggle(); }, mSpeedButton));
     return row;
   }
 
@@ -196,7 +197,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(STOP_BEHAVIOR_LABELS[mStopBehaviorIndex], [this](View, InputEvent) { OnStopBehaviorToggle(); }, mStopBehaviorButton));
     return row;
   }
 
@@ -212,7 +214,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(FRAME_RANGE_LABELS[mFrameRangeIndex], [this](View, InputEvent) { OnFrameRangeToggle(); }, mFrameRangeButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(FRAME_RANGE_LABELS[mFrameRangeIndex], [this](View, InputEvent) { OnFrameRangeToggle(); }, mFrameRangeButton));
     return row;
   }
 
@@ -228,7 +231,8 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({label, CreateToggleButton(RENDER_SCALE_LABELS[mRenderScaleIndex], [this](View, InputEvent) { OnRenderScaleToggle(); }, mRenderScaleButton)});
+    row.Add(label);
+    row.Add(CreateToggleButton(RENDER_SCALE_LABELS[mRenderScaleIndex], [this](View, InputEvent) { OnRenderScaleToggle(); }, mRenderScaleButton));
     return row;
   }
 
@@ -244,11 +248,9 @@ private:
     label.SetFontSize(12.0f);
     label.SetTextColor(UiColor(0xAAAAAA));
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    row.AddChildren({
-      label,
-      CreateButton("Set Placeholder", [this](View, const InputEvent&) { OnSetPlaceholder(); }),
-      CreateButton("Clear URL", [this](View, const InputEvent&) { OnClearUrl(); }),
-    });
+    row.Add(label);
+    row.Add(CreateButton("Set Placeholder", [this](View, const InputEvent&) { OnSetPlaceholder(); }));
+    row.Add(CreateButton("Clear URL", [this](View, const InputEvent&) { OnClearUrl(); }));
     return row;
   }
 

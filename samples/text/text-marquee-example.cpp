@@ -57,7 +57,7 @@ private:
     title.SetMultiLine(true);
     title.SetLineHeight(1.6f);
     title.SetFocusable(true);
-    title.SetTouchFocusable(true);
+    title.SetFocusOnTouchEnabled(true);
 
     StackLayout manualSection = StackLayout::New(StackOrientation::VERTICAL);
     manualSection.SetRequestedWidth(MATCH_PARENT);
@@ -75,8 +75,14 @@ private:
     mLabelMultiline = CreateMarqueeLabel(TEXT_LTR, true, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::VERTICAL);
     mLabelFocus     = CreateMarqueeLabel(TEXT_LTR, false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL);
     mLabelFocus.SetFocusable(true);
-    mLabelFocus.SetTouchFocusable(true);
-    manualSection.AddChildren({manualTitle, mLabelLtr, mLabelRtl, verticalTitle, mLabelMultiline, focusTitle, mLabelFocus});
+    mLabelFocus.SetFocusOnTouchEnabled(true);
+    manualSection.Add(manualTitle);
+    manualSection.Add(mLabelLtr);
+    manualSection.Add(mLabelRtl);
+    manualSection.Add(verticalTitle);
+    manualSection.Add(mLabelMultiline);
+    manualSection.Add(focusTitle);
+    manualSection.Add(mLabelFocus);
 
     StackLayout overflowSection = StackLayout::New(StackOrientation::VERTICAL);
     overflowSection.SetRequestedWidth(MATCH_PARENT);
@@ -94,8 +100,14 @@ private:
     mOverflowLabelMultiline = CreateMarqueeLabel(TEXT_LTR, true, Text::MarqueeTriggerPolicy::ON_OVERFLOW, Text::MarqueeOrientation::VERTICAL);
     mOverflowLabelFocus     = CreateMarqueeLabel(TEXT_LTR, false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL);
     mOverflowLabelFocus.SetFocusable(true);
-    mOverflowLabelFocus.SetTouchFocusable(true);
-    overflowSection.AddChildren({overflowTitle, mOverflowLabel, mOverflowLabelRtl, overflowVerticalTitle, mOverflowLabelMultiline, overflowFocusTitle, mOverflowLabelFocus});
+    mOverflowLabelFocus.SetFocusOnTouchEnabled(true);
+    overflowSection.Add(overflowTitle);
+    overflowSection.Add(mOverflowLabel);
+    overflowSection.Add(mOverflowLabelRtl);
+    overflowSection.Add(overflowVerticalTitle);
+    overflowSection.Add(mOverflowLabelMultiline);
+    overflowSection.Add(overflowFocusTitle);
+    overflowSection.Add(mOverflowLabelFocus);
 
     StackLayout alignmentSection = StackLayout::New(StackOrientation::HORIZONTAL);
     alignmentSection.SetRequestedWidth(MATCH_PARENT);
@@ -114,9 +126,14 @@ private:
     mLabelVerticalEnd.SetRequestedHeight(200);
     mLabelVerticalEnd.SetMaximumHeight(200);
     mLabelVerticalEnd.SetVerticalTextAlignment(Text::Alignment::END);
-    alignmentSection.AddChildren({mLabelVerticalStart, mLabelVerticalCenter, mLabelVerticalEnd});
+    alignmentSection.Add(mLabelVerticalStart);
+    alignmentSection.Add(mLabelVerticalCenter);
+    alignmentSection.Add(mLabelVerticalEnd);
 
-    root.AddChildren({title, manualSection, overflowSection, alignmentSection});
+    root.Add(title);
+    root.Add(manualSection);
+    root.Add(overflowSection);
+    root.Add(alignmentSection);
     window.Add(root);
 
     mLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnFocusChanged);
@@ -155,7 +172,7 @@ private:
     {
       if(focused)
       {
-        if(label.GetNaturalSize().width > label.GetSize().GetWidth())
+        if(label.GetNaturalSize().width > label.GetSize().width)
         {
           label.StartMarquee();
         }
@@ -328,10 +345,10 @@ private:
 
   void SetOverflowVisibility(bool visible)
   {
-    mOverflowLabel.SetVisibility(visible);
-    mOverflowLabelRtl.SetVisibility(visible);
-    mOverflowLabelMultiline.SetVisibility(visible);
-    mOverflowLabelFocus.SetVisibility(visible);
+    mOverflowLabel.SetVisible(visible);
+    mOverflowLabelRtl.SetVisible(visible);
+    mOverflowLabelMultiline.SetVisible(visible);
+    mOverflowLabelFocus.SetVisible(visible);
   }
 
   void PrintAllLabelInfo()

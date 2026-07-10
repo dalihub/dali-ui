@@ -370,7 +370,7 @@ Dali::Integration::Accessibility::States ViewAccessible::CalculateStates()
   Dali::Actor                              self = Self();
   Dali::Integration::Accessibility::States states;
 
-  states[State::FOCUSABLE]   = self.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE);
+  states[State::FOCUSABLE]   = self.GetProperty<bool>(Actor::Property::FOCUSABLE);
   states[State::FOCUSED]     = Ui::FocusManager::Get().GetCurrentFocusView() == self;
   states[State::HIGHLIGHTED] = IsHighlighted();
   states[State::SENSITIVE]   = (Dali::DevelActor::IsHittable(self) && Dali::DevelActor::GetTouchRequired(self));

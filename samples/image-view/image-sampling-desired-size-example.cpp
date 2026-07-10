@@ -93,18 +93,16 @@ private:
     StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.AddChildren({
-      CreateSectionLabel("SamplingMode  —  small image displayed large (ImageView / AnimatedImageView)"),
-      CreateSamplingImageTypeRow(),
-      CreateSamplingImage(),
-      CreateSamplingInfoLabel(),
-      CreateSamplingButtonRow(),
-      CreateSectionLabel("DesiredSize  —  large image loaded at reduced resolution (All types)"),
-      CreateDesiredSizeImageTypeRow(),
-      CreateDesiredSizeImage(),
-      CreateDesiredSizeInfoLabel(),
-      CreateDesiredSizeButtonRow(),
-    });
+    contents.Add(CreateSectionLabel("SamplingMode  —  small image displayed large (ImageView / AnimatedImageView)"));
+    contents.Add(CreateSamplingImageTypeRow());
+    contents.Add(CreateSamplingImage());
+    contents.Add(CreateSamplingInfoLabel());
+    contents.Add(CreateSamplingButtonRow());
+    contents.Add(CreateSectionLabel("DesiredSize  —  large image loaded at reduced resolution (All types)"));
+    contents.Add(CreateDesiredSizeImageTypeRow());
+    contents.Add(CreateDesiredSizeImage());
+    contents.Add(CreateDesiredSizeInfoLabel());
+    contents.Add(CreateDesiredSizeButtonRow());
     return contents;
   }
 

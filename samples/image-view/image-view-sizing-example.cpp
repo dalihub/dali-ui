@@ -75,16 +75,14 @@ private:
     StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.AddChildren({
-      CreateSectionLabel("1. ImageLoadWithViewSize  (view size → image load size)"),
-      CreateSyncSizeContainer(),
-      CreateSyncSizeInfoLabel(),
-      CreateSyncSizeRow(),
-      CreateSectionLabel("2. OrientationCorrection  (exif-rotated.jpg: EXIF orientation=6, Rotate 90 CW)"),
-      CreateOrientationArea(),
-      CreateOrientationInfoLabel(),
-      CreateOrientationToggle(),
-    });
+    contents.Add(CreateSectionLabel("1. ImageLoadWithViewSize  (view size → image load size)"));
+    contents.Add(CreateSyncSizeContainer());
+    contents.Add(CreateSyncSizeInfoLabel());
+    contents.Add(CreateSyncSizeRow());
+    contents.Add(CreateSectionLabel("2. OrientationCorrection  (exif-rotated.jpg: EXIF orientation=6, Rotate 90 CW)"));
+    contents.Add(CreateOrientationArea());
+    contents.Add(CreateOrientationInfoLabel());
+    contents.Add(CreateOrientationToggle());
     return contents;
   }
 
@@ -259,12 +257,12 @@ private:
   void OnSyncImageResourceReady(View /*view*/)
   {
     ++mSyncResourceReadyCount;
-    MeasuredSize size = mSyncImage.GetSize();
+    Vector3 size = mSyncImage.GetSize();
     DALI_LOG_RELEASE_INFO("[SyncSizing] ResourceReady #%d (ImageLoadWithViewSize=%s) — viewSize=(%.0f,%.0f)\n",
                           mSyncResourceReadyCount,
                           mImageLoadWithViewSize ? "ON" : "OFF",
-                          size.GetWidth(),
-                          size.GetHeight());
+                          size.width,
+                          size.height);
 
     if(mSyncSizeInfoLabel)
     {

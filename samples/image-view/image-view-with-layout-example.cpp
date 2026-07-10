@@ -79,7 +79,8 @@ private:
     contents.SetSpacing(8.0f);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.AddChildren({CreateRow(0), CreateRow(2)});
+    contents.Add(CreateRow(0));
+    contents.Add(CreateRow(2));
     return contents;
   }
 
@@ -101,7 +102,8 @@ private:
     mImages[startIndex + 1].SetRequestedHeight(MATCH_PARENT);
     mImages[startIndex + 1].SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
 
-    row.AddChildren({mImages[startIndex], mImages[startIndex + 1]});
+    row.Add(mImages[startIndex]);
+    row.Add(mImages[startIndex + 1]);
     return row;
   }
 

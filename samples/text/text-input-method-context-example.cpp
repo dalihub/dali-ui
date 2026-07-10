@@ -441,29 +441,23 @@ private:
     inputRow.SetRequestedWidth(MATCH_PARENT);
     inputRow.SetRequestedHeight(WRAP_CONTENT);
     inputRow.SetSpacing(STACK_SPACING);
-    inputRow.AddChildren({
-      mInputField,
-      mInputEditor,
-    });
+    inputRow.Add(mInputField);
+    inputRow.Add(mInputEditor);
 
     StackLayout statusRow = StackLayout::New(StackOrientation::HORIZONTAL);
     statusRow.SetRequestedWidth(MATCH_PARENT);
     statusRow.SetRequestedHeight(WRAP_CONTENT);
     statusRow.SetSpacing(STACK_SPACING);
-    statusRow.AddChildren({
-      mStatusLeftLabel,
-      mStatusRightLabel,
-    });
+    statusRow.Add(mStatusLeftLabel);
+    statusRow.Add(mStatusRightLabel);
 
     // Fixed header area
     StackLayout fixedHeader = StackLayout::New(StackOrientation::VERTICAL);
     fixedHeader.SetSpacing(STACK_SPACING);
     fixedHeader.SetRequestedWidth(MATCH_PARENT);
     fixedHeader.SetRequestedHeight(WRAP_CONTENT);
-    fixedHeader.AddChildren({
-      statusRow,
-      inputRow,
-    });
+    fixedHeader.Add(statusRow);
+    fixedHeader.Add(inputRow);
 
     // Scrollable content area
     StackLayout scrollContent = StackLayout::New(StackOrientation::VERTICAL);
@@ -471,44 +465,33 @@ private:
     scrollContent.SetRequestedWidth(MATCH_PARENT);
     scrollContent.SetRequestedHeight(WRAP_CONTENT);
     scrollContent.SetPadding(Extents(0, 0, 0, STACK_PADDING));
-    scrollContent.AddChildren({
-      CreateSectionTitle("Panel Visibility"),
-      panelRow,
-
-      CreateSectionTitle("Auto / Restore / Return"),
-      autoRow,
-
-      CreateSectionTitle("Prediction / Fullscreen / Panel Data"),
-      modeDataRow,
-
-      CreateSectionTitle("Panel Position"),
-      posRow,
-      alignRow,
-
-      CreateSectionTitle("Panel Layout"),
-      layoutRow1,
-      layoutRow2,
-      layoutRow3,
-
-      CreateSectionTitle("Return Key"),
-      returnKeyRow1,
-      returnKeyRow2,
-      returnKeyRow3,
-
-      CreateSectionTitle("Auto Capital"),
-      autoCapitalRow,
-
-      CreateSectionTitle("Layout Variation"),
-      variationRow1,
-      variationRow2,
-      variationRow3,
-
-      CreateSectionTitle("Query"),
-      queryRow,
-
-      CreateSectionTitle("Log"),
-      mLogLabel,
-    });
+    scrollContent.Add(CreateSectionTitle("Panel Visibility"));
+    scrollContent.Add(panelRow);
+    scrollContent.Add(CreateSectionTitle("Auto / Restore / Return"));
+    scrollContent.Add(autoRow);
+    scrollContent.Add(CreateSectionTitle("Prediction / Fullscreen / Panel Data"));
+    scrollContent.Add(modeDataRow);
+    scrollContent.Add(CreateSectionTitle("Panel Position"));
+    scrollContent.Add(posRow);
+    scrollContent.Add(alignRow);
+    scrollContent.Add(CreateSectionTitle("Panel Layout"));
+    scrollContent.Add(layoutRow1);
+    scrollContent.Add(layoutRow2);
+    scrollContent.Add(layoutRow3);
+    scrollContent.Add(CreateSectionTitle("Return Key"));
+    scrollContent.Add(returnKeyRow1);
+    scrollContent.Add(returnKeyRow2);
+    scrollContent.Add(returnKeyRow3);
+    scrollContent.Add(CreateSectionTitle("Auto Capital"));
+    scrollContent.Add(autoCapitalRow);
+    scrollContent.Add(CreateSectionTitle("Layout Variation"));
+    scrollContent.Add(variationRow1);
+    scrollContent.Add(variationRow2);
+    scrollContent.Add(variationRow3);
+    scrollContent.Add(CreateSectionTitle("Query"));
+    scrollContent.Add(queryRow);
+    scrollContent.Add(CreateSectionTitle("Log"));
+    scrollContent.Add(mLogLabel);
 
     // ScrollView for options
     ScrollView scrollView = ScrollView::New();
@@ -524,10 +507,8 @@ private:
     rootLayout.SetRequestedWidth(MATCH_PARENT);
     rootLayout.SetRequestedHeight(MATCH_PARENT);
     rootLayout.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
-    rootLayout.AddChildren({
-      fixedHeader,
-      scrollView,
-    });
+    rootLayout.Add(fixedHeader);
+    rootLayout.Add(scrollView);
 
     window.Add(rootLayout);
 

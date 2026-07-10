@@ -102,7 +102,10 @@ private:
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.AddChildren({CreateTypeRow(), CreateImageArea(), CreateStatusBar(), CreateControls()});
+    root.Add(CreateTypeRow());
+    root.Add(CreateImageArea());
+    root.Add(CreateStatusBar());
+    root.Add(CreateControls());
     return root;
   }
 
@@ -176,7 +179,10 @@ private:
     controls.SetRequestedWidth(MATCH_PARENT);
     controls.SetRequestedHeight(WRAP_CONTENT);
     controls.SetPadding(Extents(2, 2, 2, 2));
-    controls.AddChildren({CreateImageControlRow(), CreateLoadingToggleRow(), CreateReleasePolicyRow(), CreateLoadPolicyRow()});
+    controls.Add(CreateImageControlRow());
+    controls.Add(CreateLoadingToggleRow());
+    controls.Add(CreateReleasePolicyRow());
+    controls.Add(CreateLoadPolicyRow());
     return controls;
   }
 

@@ -130,7 +130,7 @@ private:
     label.SetTextColor(UiColor(0xFFFFFFu));
     label.SetRequestedPositionX(24.0f);
     label.SetRequestedPositionY(24.0f);
-    page.AddChildren({label});
+    page.Add(label);
 
     ++mNextPageNumber;
     if(usePageFade)
@@ -459,7 +459,7 @@ private:
     label.SetTextColor(UiColor(0xFFFFFFu));
     label.SetRequestedPositionX(10.0f);
     label.SetRequestedPositionY(28.0f);
-    button.AddChildren({label});
+    button.Add(label);
 
     button.ConnectClickedSignal(this, [onClicked](View, InputEvent) { onClicked(); });
     return button;

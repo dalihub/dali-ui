@@ -817,8 +817,8 @@ void VisualBaseImpl::Process(bool postProcessor)
     {
       // TODO : Can we believe this values?
       // TODO : Need to consider RTL case.
+      Vector2 viewSize(owner.GetSize());
       auto&   viewImpl       = GetImpl(owner);
-      Vector2 viewSize       = viewImpl.GetSize().ToVector2();
       Extents viewPadding    = viewImpl.GetPadding();
       float   effectiveScale = viewImpl.GetEffectiveScale();
       ApplyFittingModeInternal(viewSize, viewPadding, effectiveScale);

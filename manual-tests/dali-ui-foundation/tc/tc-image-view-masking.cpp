@@ -133,7 +133,9 @@ public:
     StackLayout leftPreview = StackLayout::New(StackOrientation::HORIZONTAL);
     leftPreview.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     leftPreview.SetRequestedHeight(PREVIEW_SIZE);
-    leftPreview.AddChildren({leftLeadingSpacer, mImageLeft, leftTrailingSpacer});
+    leftPreview.Add(leftLeadingSpacer);
+    leftPreview.Add(mImageLeft);
+    leftPreview.Add(leftTrailingSpacer);
     previewRow.Add(leftPreview);
 
     View previewSpacer = View::New();
@@ -149,7 +151,9 @@ public:
     StackLayout rightPreview = StackLayout::New(StackOrientation::HORIZONTAL);
     rightPreview.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
     rightPreview.SetRequestedHeight(PREVIEW_SIZE);
-    rightPreview.AddChildren({rightLeadingSpacer, mImageRight, rightTrailingSpacer});
+    rightPreview.Add(rightLeadingSpacer);
+    rightPreview.Add(mImageRight);
+    rightPreview.Add(rightTrailingSpacer);
     previewRow.Add(rightPreview);
 
     content.Add(previewRow);
@@ -254,7 +258,7 @@ private:
 
     buttonLabel.SetMultiLine(true);
 
-    btn.AddChildren({buttonLabel});
+    btn.Add(buttonLabel);
     btn.SetFocusable(true);
     InteractiveTrait interactive = btn.AsInteractive();
     interactive.ClickedSignal().Connect(this, [onClick = std::move(onClick)](View, InputEvent) -> bool {

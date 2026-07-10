@@ -220,7 +220,7 @@ private:
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     label.SetBackgroundColor(UiColor(COLORS[ci]));
     label.SetFocusable(true);
-    label.SetTouchFocusable(true);
+    label.SetFocusOnTouchEnabled(true);
 
     mAllViews.push_back({label, name, COLORS[ci]});
 

@@ -103,19 +103,17 @@ private:
     mInputFieldOutlineZeroWidth = CreateBaseInputField("");
     ApplyInputFieldOutlineZeroWidth();
 
-    root.AddChildren({
-      guide,
-      mModeLabel,
-      mDefaultLabel,
-      mShadowNonZeroLabel,
-      mShadowZeroLabel,
-      mInputFieldShadowNonZero,
-      mInputFieldShadowZero,
-      mOutlineLabel,
-      mOutlineZeroWidthLabel,
-      mInputFieldOutline,
-      mInputFieldOutlineZeroWidth,
-    });
+    root.Add(guide);
+    root.Add(mModeLabel);
+    root.Add(mDefaultLabel);
+    root.Add(mShadowNonZeroLabel);
+    root.Add(mShadowZeroLabel);
+    root.Add(mInputFieldShadowNonZero);
+    root.Add(mInputFieldShadowZero);
+    root.Add(mOutlineLabel);
+    root.Add(mOutlineZeroWidthLabel);
+    root.Add(mInputFieldOutline);
+    root.Add(mInputFieldOutlineZeroWidth);
     window.Add(root);
 
     ConnectAsyncRenderFinishedSignal(mDefaultLabel);

@@ -181,7 +181,7 @@ private:
 
     buttonLabel.SetMultiLine(true);
 
-    btn.AddChildren({buttonLabel});
+    btn.Add(buttonLabel);
     btn.SetFocusable(true);
 
     InteractiveTrait interactive = btn.AsInteractive();

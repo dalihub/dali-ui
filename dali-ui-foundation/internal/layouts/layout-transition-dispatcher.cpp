@@ -307,11 +307,11 @@ LayoutTransitionDispatcher::SaveAndDisableGhostInteraction(Dali::Actor actor)
     return snap;
   }
   snap.sensitive         = actor.GetProperty<bool>(Actor::Property::SENSITIVE);
-  snap.keyboardFocusable = actor.GetProperty<bool>(Actor::Property::KEYBOARD_FOCUSABLE);
-  snap.touchFocusable    = actor.GetProperty<bool>(DevelActor::Property::TOUCH_FOCUSABLE);
+  snap.keyboardFocusable = actor.GetProperty<bool>(Actor::Property::FOCUSABLE);
+  snap.touchFocusable    = actor.GetProperty<bool>(Actor::Property::FOCUS_ON_TOUCH);
   actor.SetProperty(Actor::Property::SENSITIVE, false);
-  actor.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, false);
-  actor.SetProperty(DevelActor::Property::TOUCH_FOCUSABLE, false);
+  actor.SetProperty(Actor::Property::FOCUSABLE, false);
+  actor.SetProperty(Actor::Property::FOCUS_ON_TOUCH, false);
   return snap;
 }
 
@@ -342,8 +342,8 @@ void LayoutTransitionDispatcher::RestoreGhostInteraction(Dali::Actor actor, cons
     return;
   }
   actor.SetProperty(Actor::Property::SENSITIVE, snap.sensitive);
-  actor.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, snap.keyboardFocusable);
-  actor.SetProperty(DevelActor::Property::TOUCH_FOCUSABLE, snap.touchFocusable);
+  actor.SetProperty(Actor::Property::FOCUSABLE, snap.keyboardFocusable);
+  actor.SetProperty(Actor::Property::FOCUS_ON_TOUCH, snap.touchFocusable);
 }
 
 LayoutRect LayoutTransitionDispatcher::VisualBoundsOf(ViewImpl* parent, ViewImpl* child) const
@@ -1661,7 +1661,7 @@ void LayoutTransitionDispatcher::FinalizeAnimator(ViewImpl* child)
     // Restore the interaction state we disabled at EXIT entry BEFORE
     // unparenting. parentHandle.Remove fires synchronous signals
     // (DevelActor::ChildRemovedSignal) whose handlers may observe or
-    // mutate SENSITIVE / KEYBOARD_FOCUSABLE / TOUCH_FOCUSABLE — those
+    // mutate SENSITIVE / FOCUSABLE / FOCUS_ON_TOUCH — those
     // must reflect the application's original values, not the disabled-
     // during-EXIT values, by the time any handler runs. Doing the
     // restore first also means handlers that explicitly set those
@@ -2049,8 +2049,8 @@ void LayoutTransitionDispatcher::OnViewDestroyed(ViewImpl* view)
   // state restored before the entry is dropped. OnViewDestroyed is also
   // reached from OnSceneDisconnection — at which point the application
   // may still hold the View handle and re-add the child to a different
-  // parent. Skipping the restore would leave SENSITIVE / KEYBOARD_FOCUSABLE
-  // / TOUCH_FOCUSABLE forced to false on the resurrected actor.
+  // parent. Skipping the restore would leave SENSITIVE / FOCUSABLE
+  // / FOCUS_ON_TOUCH forced to false on the resurrected actor.
   CancelActiveAnimation(view);
   CancelPendingExit(view);
   CancelActiveAnimator(view);
@@ -2196,8 +2196,8 @@ void LayoutTransitionDispatcher::OnAnimationFinished(Animation finished)
     // Restore transient state (clipping) and ghost interaction state
     // BEFORE unparenting. parentHandle.Remove fires synchronous signals
     // (DevelActor::ChildRemovedSignal) whose handlers may observe or
-    // mutate the child's SENSITIVE / KEYBOARD_FOCUSABLE /
-    // TOUCH_FOCUSABLE properties — those must reflect the application's
+    // mutate the child's SENSITIVE / FOCUSABLE /
+    // FOCUS_ON_TOUCH properties — those must reflect the application's
     // original values, not the disabled-during-EXIT values, by the time
     // any handler runs. Doing the restores first also means handlers
     // setting those properties on the unparented child are not

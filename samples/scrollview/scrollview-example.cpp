@@ -597,7 +597,7 @@ private:
         gap.SetRequestedWidth(MATCH_PARENT);
         gap.SetRequestedHeight(GAP_H);
         gap.SetProperty(View::Property::CORNER_RADIUS, Vector4(8, 8, 8, 8));
-        gap.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, false);
+        gap.SetProperty(Actor::Property::FOCUSABLE, false);
         gap.Add(gapLabel);
         content.Add(gap);
       }
@@ -607,7 +607,7 @@ private:
       item.SetRequestedWidth(MATCH_PARENT);
       item.SetRequestedHeight(ITEM_H);
       item.SetProperty(View::Property::CORNER_RADIUS, Vector4(10, 10, 10, 10));
-      item.SetProperty(Actor::Property::KEYBOARD_FOCUSABLE, true);
+      item.SetProperty(Actor::Property::FOCUSABLE, true);
 
       // Item number label (large, centered vertically)
       std::ostringstream nameOss;

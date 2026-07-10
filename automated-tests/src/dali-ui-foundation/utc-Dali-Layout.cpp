@@ -184,7 +184,8 @@ int UtcDaliLayoutContentsP(void)
   Layout layout = Layout::New();
   View a = View::New();
   View b = View::New();
-  layout.AddChildren({a, b});
+  layout.Add(a);
+  layout.Add(b);
   DALI_TEST_EQUALS(layout.GetChildCount(), 2u, TEST_LOCATION);
   DALI_TEST_CHECK(layout.GetChildViewAt(0) == a);
   DALI_TEST_CHECK(layout.GetChildViewAt(1) == b);
@@ -195,7 +196,6 @@ int UtcDaliLayoutContentsEmptyP(void)
 {
   UiTestApplication application;
   Layout layout = Layout::New();
-  layout.AddChildren({});
   DALI_TEST_EQUALS(layout.GetChildCount(), 0u, TEST_LOCATION);
   END_TEST;
 }
@@ -258,7 +258,7 @@ int UtcDaliLayoutContentsSetterP(void)
   UiTestApplication application;
   Layout layout = Layout::New();
   View a = View::New();
-  layout.AddChildren({a});
+  layout.Add(a);
   DALI_TEST_EQUALS(layout.GetChildCount(), 1u, TEST_LOCATION);
   END_TEST;
 }

@@ -98,7 +98,9 @@ public:
     root.SetSpacing(SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetPadding(Extents(PAD, PAD, PAD, PAD));
-    root.AddChildren({mTarget, mResetButton, mLog});
+    root.Add(mTarget);
+    root.Add(mResetButton);
+    root.Add(mLog);
     contentArea.Add(root);
   }
 

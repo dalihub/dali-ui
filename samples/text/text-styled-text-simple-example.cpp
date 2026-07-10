@@ -151,10 +151,8 @@ private:
       }
     }
 
-    root.AddChildren({
-      titleLabel,
-      sampleLabel,
-    });
+    root.Add(titleLabel);
+    root.Add(sampleLabel);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &TextStyledTextSimpleController::OnKeyEvent);

@@ -79,7 +79,10 @@ private:
     StackLayout contents = StackLayout::New(StackOrientation::VERTICAL);
     contents.SetRequestedWidth(MATCH_PARENT);
     contents.SetRequestedHeight(MATCH_PARENT);
-    contents.AddChildren({CreateImageArea(), CreateInfoLabel(), CreateAreaButtonRow(), CreateExtraButtonRow()});
+    contents.Add(CreateImageArea());
+    contents.Add(CreateInfoLabel());
+    contents.Add(CreateAreaButtonRow());
+    contents.Add(CreateExtraButtonRow());
     return contents;
   }
 

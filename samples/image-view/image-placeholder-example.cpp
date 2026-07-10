@@ -83,7 +83,10 @@ private:
     mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
-    root.AddChildren({title, mContainer, mStatusLabel, CreateControlRow()});
+    root.Add(title);
+    root.Add(mContainer);
+    root.Add(mStatusLabel);
+    root.Add(CreateControlRow());
     window.Add(root);
 
     window.KeyEventSignal().Connect(this, &ImagePlaceholderController::OnKeyEvent);

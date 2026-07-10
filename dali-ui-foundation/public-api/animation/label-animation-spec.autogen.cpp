@@ -125,6 +125,18 @@ LabelAnimationSpec& LabelAnimationSpec::ShadowOpacityBy(float relative, Duration
   return *this;
 }
 
+LabelAnimationSpec& LabelAnimationSpec::Size(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::Size(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::SizeBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::SizeBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationSpec& LabelAnimationSpec::SizeWidth(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::SizeWidth(target, duration, alpha, delay);
@@ -146,6 +158,18 @@ LabelAnimationSpec& LabelAnimationSpec::SizeHeight(float target, Duration durati
 LabelAnimationSpec& LabelAnimationSpec::SizeHeightBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::SizeHeightBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::Position(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::Position(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::PositionBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::PositionBy(relative, duration, alpha, delay);
   return *this;
 }
 
@@ -173,6 +197,18 @@ LabelAnimationSpec& LabelAnimationSpec::PositionYBy(float relative, Duration dur
   return *this;
 }
 
+LabelAnimationSpec& LabelAnimationSpec::Scale(const Vector3& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::Scale(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::ScaleBy(const Vector3& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ScaleBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 LabelAnimationSpec& LabelAnimationSpec::ScaleX(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::ScaleX(target, duration, alpha, delay);
@@ -194,6 +230,18 @@ LabelAnimationSpec& LabelAnimationSpec::ScaleY(float target, Duration duration, 
 LabelAnimationSpec& LabelAnimationSpec::ScaleYBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationSpec::ScaleYBy(relative, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::Color(const Vector4& target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::Color(target, duration, alpha, delay);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::ColorBy(const Vector4& relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationSpec::ColorBy(relative, duration, alpha, delay);
   return *this;
 }
 

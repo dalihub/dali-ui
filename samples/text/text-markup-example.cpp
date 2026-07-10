@@ -59,16 +59,14 @@ private:
 
     mAnchorLabel      = CreateStyledTextLabel("클릭하면 사이트로 이동 합니다: <a href='https://www.samsung.com'>Samsung Electronics</a>");
     mAnchorColorLabel = CreateStyledTextLabel("색깔이 다른 Anchor: <a href='https://research.samsung.com'>Samsung Research</a>");
-    root.AddChildren({
-      Label::New("Text Markup Example"),
-      CreateStyledTextLabel("<font size='24' family='SamsungOneUI_700'>Markup </font><color value='red'>Text</color>"),
-      mAnchorLabel,
-      mAnchorColorLabel,
-      CreatePlainLabel("InputField markup"),
-      CreateMarkupInputField(INPUT_FIELD_MARKUP),
-      CreatePlainLabel("InputEditor markup"),
-      CreateMarkupInputEditor(INPUT_EDITOR_MARKUP),
-    });
+    root.Add(Label::New("Text Markup Example"));
+    root.Add(CreateStyledTextLabel("<font size='24' family='SamsungOneUI_700'>Markup </font><color value='red'>Text</color>"));
+    root.Add(mAnchorLabel);
+    root.Add(mAnchorColorLabel);
+    root.Add(CreatePlainLabel("InputField markup"));
+    root.Add(CreateMarkupInputField(INPUT_FIELD_MARKUP));
+    root.Add(CreatePlainLabel("InputEditor markup"));
+    root.Add(CreateMarkupInputEditor(INPUT_EDITOR_MARKUP));
     window.Add(root);
 
     mAnchorColorLabel.SetAnchorColor(UiColor(0xFF0000));

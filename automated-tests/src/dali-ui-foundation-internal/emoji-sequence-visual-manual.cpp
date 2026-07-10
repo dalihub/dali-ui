@@ -2566,7 +2566,7 @@ private:
     mSearchInput.SetCornerRadius(0.5f);
     mSearchInput.SetProperty(View::Property::SHADOW, CreateSoftShadowMap(0.14f, 3.0f, 5.0f, Vector2(1.02f, 1.08f)));
     mSearchInput.SetFocusable(true);
-    mSearchInput.SetTouchFocusable(true);
+    mSearchInput.SetFocusOnTouchEnabled(true);
     mSearchInput.SetProperty(Actor::Property::VISIBLE, false);
     mSearchInput.SetProperty(Actor::Property::SENSITIVE, false);
     mSearchInput.SetProperty(Actor::Property::OPACITY, 0.0f);

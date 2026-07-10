@@ -266,7 +266,7 @@ private:
 
     buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
-    btn.AddChildren({buttonLabel});
+    btn.Add(buttonLabel);
     btn.SetFocusable(true);
 
     InteractiveTrait interactive = btn.AsInteractive();
@@ -304,7 +304,7 @@ private:
 
     buttonLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
 
-    btn.AddChildren({buttonLabel});
+    btn.Add(buttonLabel);
     btn.SetFocusable(true);
 
     InteractiveTrait interactive = btn.AsInteractive();

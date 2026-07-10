@@ -268,7 +268,7 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
   }
 
   // Check whether the view is in the stage and is keyboard focusable.
-  if(view && view.IsFocusable() && view.IsEnabled() && view.IsOnScene() &&
+  if(view && view.IsFocusable() && view.IsEnabled() && view.IsConnectedToScene() &&
      (currentWindow = Dali::Integration::SceneHolder::Get(view))) ///< Note : SceneHolder might not be valid even if view is connected to scene.
                                                                   ///         (e.g. Adaptor Stopped, SceneHolder removed but Scene is still alive)
   {
@@ -315,13 +315,13 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
       mCurrentFocusViews.push_back(std::pair<WeakHandle<Layer>, WeakHandle<View>>(mCurrentFocusedWindow, view));
     }
 
-    if(currentFocusedView && currentFocusedView.IsOnScene())
+    if(currentFocusedView && currentFocusedView.IsConnectedToScene())
     {
       DetachFocusIndicator(currentFocusedView);
       Internal::KeyInputFocusManager::Get().RemoveFocus(currentFocusedView);
     }
 
-    if(view && view.IsOnScene())
+    if(view.IsConnectedToScene())
     {
       Internal::KeyInputFocusManager::Get().SetFocus(view);
       RefreshFocusIndicator(view);
@@ -358,7 +358,7 @@ View FocusManager::GetCurrentFocusView()
 {
   View view = mCurrentFocusView.GetHandle();
 
-  if(view && !view.IsOnScene())
+  if(view && !view.IsConnectedToScene())
   {
     // If the view has been removed from the stage, then it should not be focused
     view.Reset();
@@ -380,7 +380,7 @@ View FocusManager::GetFocusViewFromCurrentWindow()
     }
   }
 
-  if(view && !view.IsOnScene())
+  if(view && !view.IsConnectedToScene())
   {
     // If the view has been removed from the window, then the window doesn't have any focused view
     view.Reset();
@@ -404,7 +404,7 @@ void FocusManager::MoveFocusBackward()
       // Get pre focused view
       View target = mFocusHistory[mFocusHistory.size() - 1].GetHandle();
 
-      if(target && target.IsOnScene())
+      if(target && target.IsConnectedToScene())
       {
         // Delete pre focused view in history because it will pushed again by SetCurrentFocusView()
         mFocusHistory.pop_back();
@@ -634,7 +634,7 @@ void FocusManager::ClearFocus(View view)
       }
     }
 
-    if(view.IsOnScene())
+    if(view.IsConnectedToScene())
     {
       Internal::KeyInputFocusManager::Get().RemoveFocus(view);
     }
@@ -932,8 +932,8 @@ void FocusManager::OnTouch(Dali::Integration::SceneHolder sceneHolder, TouchEven
         return;
       }
 
-      // If KEYBOARD_FOCUSABLE and TOUCH_FOCUSABLE is true, set focus view on touch release.
-      if(hitView && hitView.IsFocusable() && hitView.IsTouchFocusable() && !hitView.HasAncestorBlockingFocus())
+      // If FOCUSABLE and FOCUS_ON_TOUCH is true, set focus view on touch release.
+      if(hitView && hitView.IsFocusable() && hitView.IsFocusOnTouchEnabled() && !hitView.HasAncestorBlockingFocus())
       {
         mTouchFocusCandidate = hitView;
         mTouchFocusDeviceId  = touch.GetDeviceId(0);
@@ -946,7 +946,7 @@ void FocusManager::OnTouch(Dali::Integration::SceneHolder sceneHolder, TouchEven
       if(candidate && touch.GetDeviceId(0) == mTouchFocusDeviceId)
       {
         View hitView = View::DownCast(touch.GetHitActor(0));
-        if(hitView == candidate && candidate.IsFocusable() && candidate.IsTouchFocusable() && !candidate.HasAncestorBlockingFocus())
+        if(hitView == candidate && candidate.IsFocusable() && candidate.IsFocusOnTouchEnabled() && !candidate.HasAncestorBlockingFocus())
         {
           Ui::FocusDevice device = ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0));
           DoSetCurrentFocusView(candidate, {device, touch.GetDeviceName(0), Ui::InputEvent::New(touch)});

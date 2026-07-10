@@ -324,11 +324,9 @@ private:
     fixedHeader.SetSpacing(STACK_SPACING);
     fixedHeader.SetRequestedWidth(MATCH_PARENT);
     fixedHeader.SetRequestedHeight(WRAP_CONTENT);
-    fixedHeader.AddChildren({
-      titleLabel,
-      mInputEditor,
-      mStatusLabel,
-    });
+    fixedHeader.Add(titleLabel);
+    fixedHeader.Add(mInputEditor);
+    fixedHeader.Add(mStatusLabel);
 
     // Scrollable content area (all test buttons)
     StackLayout scrollContent = StackLayout::New(StackOrientation::VERTICAL);
@@ -336,21 +334,19 @@ private:
     scrollContent.SetRequestedWidth(MATCH_PARENT);
     scrollContent.SetRequestedHeight(WRAP_CONTENT);
     scrollContent.SetPadding(Extents(0, 0, 0, STACK_PADDING));
-    scrollContent.AddChildren({
-      cursorRow1,
-      cursorRow2,
-      placeholderRow,
-      selectionRow1,
-      selectionRow2,
-      selectionRow3,
-      otherRow,
-      textBgRow,
-      lineWrapRow,
-      lineHeightRow,
-      alignmentRow,
-      autoGrowRow,
-      infoRow,
-    });
+    scrollContent.Add(cursorRow1);
+    scrollContent.Add(cursorRow2);
+    scrollContent.Add(placeholderRow);
+    scrollContent.Add(selectionRow1);
+    scrollContent.Add(selectionRow2);
+    scrollContent.Add(selectionRow3);
+    scrollContent.Add(otherRow);
+    scrollContent.Add(textBgRow);
+    scrollContent.Add(lineWrapRow);
+    scrollContent.Add(lineHeightRow);
+    scrollContent.Add(alignmentRow);
+    scrollContent.Add(autoGrowRow);
+    scrollContent.Add(infoRow);
 
     // ScrollView for test buttons
     ScrollView scrollView = ScrollView::New();
@@ -366,10 +362,8 @@ private:
     rootLayout.SetRequestedWidth(MATCH_PARENT);
     rootLayout.SetRequestedHeight(MATCH_PARENT);
     rootLayout.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
-    rootLayout.AddChildren({
-      fixedHeader,
-      scrollView,
-    });
+    rootLayout.Add(fixedHeader);
+    rootLayout.Add(scrollView);
 
     window.Add(rootLayout);
 

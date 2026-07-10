@@ -87,7 +87,11 @@ public:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(COLOR_BG));
     root.SetPadding(Extents(PAD, PAD, PAD, PAD));
-    root.AddChildren({mStatusLabel, field1Label, mField1, field2Label, mField2});
+    root.Add(mStatusLabel);
+    root.Add(field1Label);
+    root.Add(mField1);
+    root.Add(field2Label);
+    root.Add(mField2);
     contentArea.Add(root);
 
     FocusManager::Get().FocusChangedSignal().Connect(this, &TcInputFieldFocus::OnFocusChanged);
