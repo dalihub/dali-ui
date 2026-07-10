@@ -136,7 +136,6 @@ public:
   const float& GetOutlineBlurRadius() const override { return mZeroFloat; }
   const Vector4& GetBackgroundColor() const override { return mTransparentColor; }
   bool IsBackgroundEnabled() const override { return false; }
-  bool IsMarkupProcessorEnabled() const override { return false; }
   const UiText::GlyphInfo* GetHyphens() const override { return nullptr; }
   const UiText::Length* GetHyphenIndices() const override { return nullptr; }
   UiText::Length GetHyphensCount() const override { return 0u; }

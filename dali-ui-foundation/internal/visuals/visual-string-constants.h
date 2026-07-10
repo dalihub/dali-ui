@@ -141,7 +141,6 @@ extern const char* const OVERFLOW_MODE_PROPERTY;
 extern const char* const LINE_HEIGHT_PROPERTY;
 extern const char* const LINE_HEIGHT_MODE_PROPERTY;
 extern const char* const TEXT_COLOR_PROPERTY;
-extern const char* const MARKUP_ENABLED_PROPERTY;
 
 // NPatch visual
 extern const char* const BORDER_ONLY;

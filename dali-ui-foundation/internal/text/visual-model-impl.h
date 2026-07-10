@@ -497,20 +497,6 @@ public:
   bool IsBackgroundEnabled() const;
 
   /**
-   * @brief Sets whether the text has a markup-processor or not.
-   *
-   * @param[in] enabled true if the text has a markup-processor.
-   */
-  void SetMarkupProcessorEnabled(bool enabled);
-
-  /**
-   * @brief Returns whether the text has a markup-processor or not.
-   *
-   * @return whether the text has a markup-processor or not.
-   */
-  bool IsMarkupProcessorEnabled() const;
-
-  /**
    * @brief Sets ellipsis position
    * @param[in] ellipsisPosition The ellipsis position for the text
    */
@@ -915,7 +901,6 @@ public:
   bool  mOutlineEnabled : 1;              ///< Outline enabled flag.
   bool  mUnderlineColorSet : 1;           ///< Has the underline color been explicitly set?
   bool  mBackgroundEnabled : 1;           ///< Background enabled flag
-  bool  mMarkupProcessorEnabled : 1;      ///< Markup-processor enabled flag
   bool  mStrikethroughEnabled : 1;        ///< Strikethrough enabled flag
   bool  mStrikethroughColorSet : 1;       ///< Has the strikethrough color been explicitly set?
   float mCharacterSpacing;                ///< Contains the value of the character spacing.

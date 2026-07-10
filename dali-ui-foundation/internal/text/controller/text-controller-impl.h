@@ -419,7 +419,6 @@ public:
     mRecalculateLayoutSize(true),
     mRecalculateHeightForWidth(true),
     mIsEmittingTextChangedSignal(false),
-    mMarkupProcessorEnabled(false),
     mClipboardHideEnabled(true),
     mIsMarqueeEnabled(false),
     mIsMarqueeMaxTextureExceeded(false),
@@ -1297,7 +1296,6 @@ public:
   bool               mRecalculateLayoutSize : 1;       ///< Whether the layout size needs to be recalculated.
   bool               mRecalculateHeightForWidth : 1;   ///< Whether the height for width needs to be recalculated.
   bool               mIsEmittingTextChangedSignal : 1; ///< Whether TextChangedSignal is currently being emitted.
-  bool               mMarkupProcessorEnabled : 1;      ///< Whether the mark-up procesor is enabled.
   bool               mClipboardHideEnabled : 1;        ///< Whether the ClipboardHide function work or not
   bool               mIsMarqueeEnabled : 1;            ///< Whether auto text scrolling is enabled.
   bool               mIsMarqueeMaxTextureExceeded : 1; ///< Whether auto text scrolling is exceed max texture size.

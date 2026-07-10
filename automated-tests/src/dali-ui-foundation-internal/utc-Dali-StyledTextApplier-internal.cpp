@@ -26,6 +26,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
@@ -857,10 +858,9 @@ int UtcDaliStyledTextApplierAsyncSnapshotKeepsTextP(void)
   DALI_TEST_CHECK(builder.SetSpan(PublicText::FontSpan::New(attributes), 0u, plainText.size()));
 
   Dali::Ui::Text::AsyncTextParameters baseParameters;
-  baseParameters.text         = plainText;
-  baseParameters.fontSize     = 16.0f;
-  baseParameters.textColor    = Color::BLACK;
-  baseParameters.enableMarkup = false;
+  baseParameters.text      = plainText;
+  baseParameters.fontSize  = 16.0f;
+  baseParameters.textColor = Color::BLACK;
 
   Dali::Ui::Text::AsyncTextParameters styledParameters = baseParameters;
   styledParameters.hasStyledTextStyleSnapshot          = true;
@@ -870,7 +870,6 @@ int UtcDaliStyledTextApplierAsyncSnapshotKeepsTextP(void)
   const Size                       baseSize   = loader.ComputeNaturalSize(baseParameters);
   const Size                       styledSize = loader.ComputeNaturalSize(styledParameters);
 
-  DALI_TEST_CHECK(!styledParameters.enableMarkup);
   DALI_TEST_CHECK(baseSize.height > 0.0f);
   DALI_TEST_CHECK(styledSize.height > baseSize.height);
 
@@ -932,8 +931,10 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
   DALI_TEST_EQUALS(clickedRenderInfo.anchorHitRegions[0u].color, Color::MAGENTA, TEST_LOCATION);
   DALI_TEST_EQUALS(clickedRenderInfo.anchorHitRegions[0u].clickedColor, Color::MAGENTA, TEST_LOCATION);
 
+  PublicText::StyledText fromMarkupStyledText = PublicText::StyledText::FromMarkup("<a href='docs://raw'>open</a> docs");
+
   Dali::Ui::Text::AsyncTextParameters markupParameters;
-  markupParameters.text               = "<a href='docs://raw'>open</a> docs";
+  markupParameters.text               = fromMarkupStyledText.GetText().CStr();
   markupParameters.fontSize           = 18.0f;
   markupParameters.textColor          = Color::BLACK;
   markupParameters.anchorColor        = Color::CYAN;
@@ -944,7 +945,11 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
   markupParameters.originHeight       = markupParameters.textHeight;
   markupParameters.maxTextureSize     = 4096;
   markupParameters.requestType        = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
-  markupParameters.enableMarkup       = true;
+  markupParameters.hasStyledTextStyleSnapshot = true;
+  markupParameters.styledTextStyleSnapshot    = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(fromMarkupStyledText,
+                                                                                                                 96.0f,
+                                                                                                                 markupParameters.anchorColor,
+                                                                                                                 markupParameters.anchorClickedColor);
 
   Dali::Ui::Text::AsyncTextRenderInfo markupRenderInfo = loader.RenderText(markupParameters, false, Size::ZERO);
 
@@ -1107,12 +1112,14 @@ int UtcDaliStyledTextApplierAsyncBackgroundToPlainClearsStyleP(void)
   END_TEST;
 }
 
-int UtcDaliStyledTextApplierAsyncMarkupUnderlineToPlainClearsStyleP(void)
+int UtcDaliStyledTextApplierAsyncFromMarkupUnderlineToPlainClearsStyleP(void)
 {
   UiTestApplication application;
 
-  Dali::Ui::Text::AsyncTextParameters markupParameters = CreateAsyncRenderParameters("<u>open</u>");
-  markupParameters.enableMarkup                         = true;
+  PublicText::StyledText fromMarkupStyledText           = PublicText::StyledText::FromMarkup("<u>open</u>");
+  Dali::Ui::Text::AsyncTextParameters markupParameters = CreateAsyncRenderParameters(fromMarkupStyledText.GetText().CStr());
+  markupParameters.hasStyledTextStyleSnapshot          = true;
+  markupParameters.styledTextStyleSnapshot             = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(fromMarkupStyledText, 96.0f);
 
   Dali::Ui::Text::AsyncTextLoader     loader           = Dali::Ui::Text::AsyncTextLoader::New();
   Dali::Ui::Text::AsyncTextRenderInfo markupRenderInfo = loader.RenderText(markupParameters, false, Size::ZERO);
@@ -1132,12 +1139,14 @@ int UtcDaliStyledTextApplierAsyncMarkupUnderlineToPlainClearsStyleP(void)
   END_TEST;
 }
 
-int UtcDaliStyledTextApplierAsyncMarkupLineThroughToPlainClearsStyleP(void)
+int UtcDaliStyledTextApplierAsyncFromMarkupLineThroughToPlainClearsStyleP(void)
 {
   UiTestApplication application;
 
-  Dali::Ui::Text::AsyncTextParameters markupParameters = CreateAsyncRenderParameters("<s>open</s>");
-  markupParameters.enableMarkup                         = true;
+  PublicText::StyledText fromMarkupStyledText           = PublicText::StyledText::FromMarkup("<s>open</s>");
+  Dali::Ui::Text::AsyncTextParameters markupParameters = CreateAsyncRenderParameters(fromMarkupStyledText.GetText().CStr());
+  markupParameters.hasStyledTextStyleSnapshot          = true;
+  markupParameters.styledTextStyleSnapshot             = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(fromMarkupStyledText, 96.0f);
 
   Dali::Ui::Text::AsyncTextLoader     loader           = Dali::Ui::Text::AsyncTextLoader::New();
   Dali::Ui::Text::AsyncTextRenderInfo markupRenderInfo = loader.RenderText(markupParameters, false, Size::ZERO);

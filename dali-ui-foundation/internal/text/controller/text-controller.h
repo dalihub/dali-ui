@@ -218,32 +218,6 @@ public: // Configure the text controller.
   void SetGlyphType(TextAbstraction::GlyphType glyphType);
 
   /**
-   * @brief Enables/disables the mark-up processor.
-   *
-   * By default is disabled.
-   *
-   * @param[in] enable Whether to enable the mark-up processor.
-   */
-  void SetMarkupProcessorEnabled(bool enable);
-
-  /**
-   * @brief Enables/disables the mark-up processor.
-   *
-   * @param[in] enable Whether to enable the mark-up processor.
-   * @param[in] reprocessText Whether to reprocess the current raw text source immediately.
-   */
-  void SetMarkupProcessorEnabled(bool enable, bool reprocessText);
-
-  /**
-   * @brief Retrieves whether the mark-up processor is enabled.
-   *
-   * By default is disabled.
-   *
-   * @return @e true if the mark-up processor is enabled, otherwise returns @e false.
-   */
-  bool IsMarkupProcessorEnabled() const;
-
-  /**
    * @brief Retrieves whether the current text contains anchors.
    *
    * @return @e true if the current text contains anchors. @e false.

@@ -162,12 +162,6 @@ struct TextVisualPropertyIndex
      */
     TEXT_COLOR,
 
-    /**
-     * @brief Whether mark-up processing is enabled for the text.
-     * @details Name "markupEnabled", type Property::BOOLEAN.
-     * @see TextVisual::SetMarkupEnabled(), TextVisual::IsMarkupEnabled().
-     */
-    MARKUP_ENABLED,
   };
 
 }; // struct TextVisualPropertyIndex

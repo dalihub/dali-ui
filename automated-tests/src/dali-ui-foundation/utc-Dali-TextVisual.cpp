@@ -301,23 +301,6 @@ int UtcDaliTextVisualTextColor(void)
   END_TEST;
 }
 
-int UtcDaliTextVisualMarkupEnabled(void)
-{
-  UiTestApplication application;
-
-  TextVisual visual = TextVisual::New();
-
-  DALI_TEST_EQUALS(visual.IsMarkupEnabled(), false, TEST_LOCATION);
-
-  visual.SetMarkupEnabled(true);
-  DALI_TEST_EQUALS(visual.IsMarkupEnabled(), true, TEST_LOCATION);
-
-  visual.SetMarkupEnabled(false);
-  DALI_TEST_EQUALS(visual.IsMarkupEnabled(), false, TEST_LOCATION);
-
-  END_TEST;
-}
-
 int UtcDaliTextVisualSetGetPropertyValue(void)
 {
   UiTestApplication application;
@@ -442,15 +425,6 @@ int UtcDaliTextVisualSetGetPropertyValue(void)
   DALI_TEST_EQUALS(visual.GetTextColor().GetRgba(), Vector4(0.0f, 1.0f, 0.0f, 1.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetProperty<Vector4>(TextVisual::Property::TEXT_COLOR), Vector4(0.0f, 1.0f, 0.0f, 1.0f), TEST_LOCATION);
 
-  // MARKUP_ENABLED
-  visual.SetMarkupEnabled(true);
-  DALI_TEST_EQUALS(visual.IsMarkupEnabled(), true, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<bool>(TextVisual::Property::MARKUP_ENABLED), true, TEST_LOCATION);
-
-  visual.SetProperty(TextVisual::Property::MARKUP_ENABLED, false);
-  DALI_TEST_EQUALS(visual.IsMarkupEnabled(), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.GetProperty<bool>(TextVisual::Property::MARKUP_ENABLED), false, TEST_LOCATION);
-
   END_TEST;
 }
 
@@ -474,7 +448,6 @@ int UtcDaliTextVisualSetters(void)
   visual.SetLineHeight(1.5f);
   visual.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
   visual.SetTextColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
-  visual.SetMarkupEnabled(true);
 
   DALI_TEST_EQUALS(visual.GetText(), "Hello", TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetFontFamily(), "Arial", TEST_LOCATION);
@@ -490,7 +463,6 @@ int UtcDaliTextVisualSetters(void)
   DALI_TEST_EQUALS(visual.GetLineHeight(), 1.5f, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
   DALI_TEST_EQUALS(visual.GetTextColor().GetRgba(), Vector4(1.0f, 0.0f, 0.0f, 1.0f), TEST_LOCATION);
-  DALI_TEST_EQUALS(visual.IsMarkupEnabled(), true, TEST_LOCATION);
 
   END_TEST;
 }
@@ -580,7 +552,6 @@ int UtcDaliTextVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.SetLineHeight(1.5f);});
   TestAssertFunction([&](){empty.SetLineHeightMode(Text::LineHeightMode::RELATIVE);});
   TestAssertFunction([&](){empty.SetTextColor(UiColor(Vector4::ONE));});
-  TestAssertFunction([&](){empty.SetMarkupEnabled(true);});
 
   TestAssertFunction([&](){empty.GetText();});
   TestAssertFunction([&](){empty.GetFontFamily();});
@@ -596,7 +567,6 @@ int UtcDaliTextVisualInvalidHandle(void)
   TestAssertFunction([&](){empty.GetLineHeight();});
   TestAssertFunction([&](){empty.GetLineHeightMode();});
   TestAssertFunction([&](){empty.GetTextColor();});
-  TestAssertFunction([&](){empty.IsMarkupEnabled();});
 
   END_TEST;
 }

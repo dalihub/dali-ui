@@ -133,7 +133,6 @@ const NameIndexMatch NAME_INDEX_MATCH_TABLE[] = {
   {LINE_HEIGHT_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT},
   {LINE_HEIGHT_MODE_PROPERTY, Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE},
   {TEXT_COLOR_PROPERTY, Ui::TextVisualPropertyIndex::TEXT_COLOR},
-  {MARKUP_ENABLED_PROPERTY, Ui::TextVisualPropertyIndex::MARKUP_ENABLED},
 };
 const int NAME_INDEX_MATCH_TABLE_SIZE = sizeof(NAME_INDEX_MATCH_TABLE) / sizeof(NAME_INDEX_MATCH_TABLE[0]);
 
@@ -213,8 +212,6 @@ void TextVisual::DoCreatePropertyMap(Property::Map& map) const
   map.Insert(Ui::TextVisualPropertyIndex::LINE_HEIGHT_MODE, mLineHeightMode);
 
   map.Insert(Ui::TextVisualPropertyIndex::TEXT_COLOR, mController->GetDefaultColor());
-
-  map.Insert(Ui::TextVisualPropertyIndex::MARKUP_ENABLED, mController->IsMarkupProcessorEnabled());
 }
 
 void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
@@ -700,11 +697,6 @@ void TextVisual::DoSetProperty(Dali::Property::Index index, const Dali::Property
       }
       break;
     }
-    case Ui::TextVisualPropertyIndex::MARKUP_ENABLED:
-    {
-      mController->SetMarkupProcessorEnabled(propertyValue.Get<bool>());
-      break;
-    }
   }
 }
 
@@ -811,7 +803,6 @@ void TextVisual::UpdateRenderer()
 
       const bool outlineEnabled    = mController->GetTextModel()->IsOutlineEnabled();
       const bool backgroundEnabled = mController->GetTextModel()->IsBackgroundEnabled();
-      const bool markupEnabled     = mController->IsMarkupProcessorEnabled();
       // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
       const bool underlineRunEnabled = mController->GetTextModel()->IsMarkupUnderlineSet();
       const bool strikethroughRunEnabled =
@@ -824,7 +815,7 @@ void TextVisual::UpdateRenderer()
       const bool backgroundWithCutoutEnabled = mController->GetTextModel()->IsBackgroundWithCutoutEnabled();
       const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
       const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
-      const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient || markupEnabled;
+      const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
       const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
       const bool embossEnabled               = mController->IsEmbossEnabled();
 

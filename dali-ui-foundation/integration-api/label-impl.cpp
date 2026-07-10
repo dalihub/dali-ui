@@ -3064,7 +3064,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   const bool hasGradientFeature = gradientState.baseRenderable || gradientState.overlayRenderable;
   const bool needsMarqueeComposition =
     hasGradientFeature ||
-    Text::MarqueeBuilder::HasOverlayStyle(*textModel, mController->IsMarkupProcessorEnabled());
+    Text::MarqueeBuilder::HasOverlayStyle(*textModel);
   if(needsMarqueeComposition)
   {
     Text::MarqueeBuilder::FeatureInfo featureInfo;
@@ -3072,7 +3072,6 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     {
       featureInfo =
         Text::MarqueeBuilder::CollectGradientFeatureInfo(*textModel,
-                                                         mController->IsMarkupProcessorEnabled(),
                                                          mController->IsTextCutout());
     }
     else
@@ -3592,7 +3591,6 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.fontSlant                  = mController->GetDefaultFontSlant();
   parameters.isMultiLine                = mController->IsMultiLineEnabled();
   parameters.ellipsis                   = mController->IsTextElideEnabled();
-  parameters.enableMarkup               = mController->IsMarkupProcessorEnabled();
   parameters.minLineSize                = mController->GetDefaultLineSize();
   parameters.relativeLineSize           = mController->GetRelativeLineSize();
   parameters.characterSpacing           = mController->GetCharacterSpacing();
@@ -3667,7 +3665,6 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
     {
       const Dali::String styledText         = styledTextSource.GetText();
       parameters.text                       = std::string(styledText.CStr(), styledText.Size());
-      parameters.enableMarkup               = false;
       parameters.hasStyledTextStyleSnapshot = true;
       parameters.styledTextStyleSnapshot =
         Dali::Ui::Internal::Text::StyledTextApplier::BuildTextStyleRunSnapshot(styledTextSource,

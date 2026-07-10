@@ -348,11 +348,6 @@ bool ViewModel::IsBackgroundEnabled() const
   return mModel->IsBackgroundEnabled();
 }
 
-bool ViewModel::IsMarkupProcessorEnabled() const
-{
-  return mModel->IsMarkupProcessorEnabled();
-}
-
 const GlyphInfo* ViewModel::GetHyphens() const
 {
   return mModel->GetHyphens();

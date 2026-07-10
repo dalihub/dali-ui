@@ -839,7 +839,6 @@ int UtcDaliVisualBaseRecreateTextVisual01(void)
   TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_HEIGHT, 1.5f);}, false);
   TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::LINE_HEIGHT_MODE, Text::LineHeightMode::RELATIVE);}, false);
   TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::TEXT_COLOR, Vector4(1.0f, 0.0f, 0.0f, 1.0f));}, false);
-  TestVisualBaseChanged([](VisualBase visual){visual.SetProperty(TextVisual::Property::MARKUP_ENABLED, true);}, false);
 
   END_TEST;
 }

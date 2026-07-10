@@ -67,7 +67,6 @@ public:
       LINE_HEIGHT          = TextVisualPropertyIndex::LINE_HEIGHT,
       LINE_HEIGHT_MODE     = TextVisualPropertyIndex::LINE_HEIGHT_MODE,
       TEXT_COLOR           = TextVisualPropertyIndex::TEXT_COLOR,
-      MARKUP_ENABLED       = TextVisualPropertyIndex::MARKUP_ENABLED,
     };
   };
 
@@ -286,20 +285,6 @@ public: // Setters
    * @param[in] textColor The color of the text
    */
   void SetTextColor(const UiColor& textColor);
-
-  /**
-   * @brief Gets whether mark-up processing is enabled.
-   *
-   * @return True if mark-up processing is enabled
-   */
-  bool IsMarkupEnabled() const;
-
-  /**
-   * @brief Sets whether the mark-up processing is enabled.
-   *
-   * @param[in] enabled True to enable mark-up processing
-   */
-  void SetMarkupEnabled(bool enabled);
 
 public:
   TextVisual()                                     = default;

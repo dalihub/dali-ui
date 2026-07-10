@@ -304,14 +304,13 @@ int UtcDaliStyledTextControllerLineThroughSpanReachesVisualModelP(void)
   END_TEST;
 }
 
-int UtcDaliStyledTextControllerDecorationMatchesMarkupPathP(void)
+int UtcDaliStyledTextControllerDecorationMatchesFromMarkupP(void)
 {
   UiTestApplication application;
 
-  PublicText::ControllerPtr markupController = PublicText::Controller::New();
-  markupController->SetMarkupProcessorEnabled(true);
-  markupController->SetText("H<u color='green' height='2.0f' type='dashed' dash-width='4.0f' dash-gap='2.0f'>ell</u><s color='red' height='2.5f'>o</s>");
-  RelayoutController(markupController);
+  PublicText::ControllerPtr fromMarkupController = PublicText::Controller::New();
+  fromMarkupController->SetStyledText(PublicText::StyledText::FromMarkup("H<u color='green' height='2.0f' type='dashed' dash-width='4.0f' dash-gap='2.0f'>ell</u><s color='red' height='2.5f'>o</s>"));
+  RelayoutController(fromMarkupController);
 
   const PublicText::Underline   underline   = CreateUnderline(Color::GREEN, 2.0f, PublicText::Underline::Type::DASHED, 4.0f, 2.0f);
   const PublicText::LineThrough lineThrough = CreateLineThrough(Color::RED, 2.5f);
@@ -323,28 +322,28 @@ int UtcDaliStyledTextControllerDecorationMatchesMarkupPathP(void)
   styledController->SetStyledText(builder.Build());
   RelayoutController(styledController);
 
-  PublicText::VisualModel& markupVisualModel = GetVisualModel(markupController);
+  PublicText::VisualModel& fromMarkupVisualModel = GetVisualModel(fromMarkupController);
   PublicText::VisualModel& styledVisualModel = GetVisualModel(styledController);
 
-  DALI_TEST_EQUALS(markupVisualModel.GetNumberOfUnderlineRuns(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fromMarkupVisualModel.GetNumberOfUnderlineRuns(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledVisualModel.GetNumberOfUnderlineRuns(), 1u, TEST_LOCATION);
-  DALI_TEST_EQUALS(markupVisualModel.GetNumberOfStrikethroughRuns(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(fromMarkupVisualModel.GetNumberOfStrikethroughRuns(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledVisualModel.GetNumberOfStrikethroughRuns(), 1u, TEST_LOCATION);
-  CheckTypesetterDecorationInput(GetTextModel(markupController), true, true);
+  CheckTypesetterDecorationInput(GetTextModel(fromMarkupController), true, true);
   CheckTypesetterDecorationInput(GetTextModel(styledController), true, true);
 
-  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].glyphRun.glyphIndex, markupVisualModel.mUnderlineRuns[0u].glyphRun.glyphIndex, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].glyphRun.numberOfGlyphs, markupVisualModel.mUnderlineRuns[0u].glyphRun.numberOfGlyphs, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.color, markupVisualModel.mUnderlineRuns[0u].properties.color, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.height, markupVisualModel.mUnderlineRuns[0u].properties.height, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.type, markupVisualModel.mUnderlineRuns[0u].properties.type, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.dashWidth, markupVisualModel.mUnderlineRuns[0u].properties.dashWidth, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.dashGap, markupVisualModel.mUnderlineRuns[0u].properties.dashGap, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].glyphRun.glyphIndex, fromMarkupVisualModel.mUnderlineRuns[0u].glyphRun.glyphIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].glyphRun.numberOfGlyphs, fromMarkupVisualModel.mUnderlineRuns[0u].glyphRun.numberOfGlyphs, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.color, fromMarkupVisualModel.mUnderlineRuns[0u].properties.color, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.height, fromMarkupVisualModel.mUnderlineRuns[0u].properties.height, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.type, fromMarkupVisualModel.mUnderlineRuns[0u].properties.type, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.dashWidth, fromMarkupVisualModel.mUnderlineRuns[0u].properties.dashWidth, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].properties.dashGap, fromMarkupVisualModel.mUnderlineRuns[0u].properties.dashGap, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
-  DALI_TEST_EQUALS(styledVisualModel.mStrikethroughRuns[0u].glyphRun.glyphIndex, markupVisualModel.mStrikethroughRuns[0u].glyphRun.glyphIndex, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mStrikethroughRuns[0u].glyphRun.numberOfGlyphs, markupVisualModel.mStrikethroughRuns[0u].glyphRun.numberOfGlyphs, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mStrikethroughRuns[0u].properties.color, markupVisualModel.mStrikethroughRuns[0u].properties.color, TEST_LOCATION);
-  DALI_TEST_EQUALS(styledVisualModel.mStrikethroughRuns[0u].properties.height, markupVisualModel.mStrikethroughRuns[0u].properties.height, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mStrikethroughRuns[0u].glyphRun.glyphIndex, fromMarkupVisualModel.mStrikethroughRuns[0u].glyphRun.glyphIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mStrikethroughRuns[0u].glyphRun.numberOfGlyphs, fromMarkupVisualModel.mStrikethroughRuns[0u].glyphRun.numberOfGlyphs, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mStrikethroughRuns[0u].properties.color, fromMarkupVisualModel.mStrikethroughRuns[0u].properties.color, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledVisualModel.mStrikethroughRuns[0u].properties.height, fromMarkupVisualModel.mStrikethroughRuns[0u].properties.height, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
   END_TEST;
 }
@@ -405,21 +404,17 @@ int UtcDaliStyledTextControllerSetStyledTextForegroundBackgroundDecorationIndepe
   END_TEST;
 }
 
-int UtcDaliStyledTextControllerMarkupEnabledIgnoredP(void)
+int UtcDaliStyledTextControllerSetTextTreatsMarkupAsPlainTextP(void)
 {
   UiTestApplication application;
 
   PublicText::ControllerPtr controller = PublicText::Controller::New();
-  controller->SetStyledText(PublicText::StyledText::New("<color value='red'>ABC</color>"));
-  controller->SetMarkupProcessorEnabled(true, false);
+  controller->SetText("Default <color value='red'>Red</color> Default");
 
   std::string text;
   controller->GetText(text);
-  DALI_TEST_EQUALS(text, std::string("<color value='red'>ABC</color>"), TEST_LOCATION);
+  DALI_TEST_EQUALS(text, std::string("Default <color value='red'>Red</color> Default"), TEST_LOCATION);
   DALI_TEST_EQUALS(GetLogicalModel(controller).mColorRuns.Count(), 0u, TEST_LOCATION);
-
-  controller->SetText("Default <color value='red'>Red</color> Default");
-  DALI_TEST_CHECK(GetLogicalModel(controller).mColorRuns.Count() > 0u);
 
   END_TEST;
 }
@@ -491,13 +486,12 @@ int UtcDaliStyledTextControllerSetStyledTextClearsOldBackgroundColorRunsP(void)
   END_TEST;
 }
 
-int UtcDaliStyledTextControllerSetStyledTextClearsOldMarkupColorRunsP(void)
+int UtcDaliStyledTextControllerSetStyledTextClearsOldFromMarkupColorRunsP(void)
 {
   UiTestApplication application;
 
   PublicText::ControllerPtr controller = PublicText::Controller::New();
-  controller->SetMarkupProcessorEnabled(true);
-  controller->SetText("Default <color value='red'>Red</color> Default");
+  controller->SetStyledText(PublicText::StyledText::FromMarkup("Default <color value='red'>Red</color> Default"));
 
   PublicText::LogicalModel& logicalModel = GetLogicalModel(controller);
   DALI_TEST_CHECK(logicalModel.mColorRuns.Count() > 0u);

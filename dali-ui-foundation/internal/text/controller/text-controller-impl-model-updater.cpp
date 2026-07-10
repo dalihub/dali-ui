@@ -449,8 +449,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
           underlineRun.glyphRun.numberOfGlyphs = numberOfIndices;
           impl.mModel->mVisualModel->mUnderlineRuns.PushBack(underlineRun);
 
-          // Mark-up processor case
-          if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled())
+          if(0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count())
           {
             impl.CopyUnderlinedFromLogicalToVisualModels(false);
           }
@@ -490,8 +489,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
           colorRun.characterRun.numberOfCharacters = numberOfIndices;
           impl.mModel->mLogicalModel->mColorRuns.PushBack(colorRun);
 
-          // Mark-up processor case
-          if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled())
+          if(0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count())
           {
             impl.CopyUnderlinedFromLogicalToVisualModels(false);
           }
@@ -505,8 +503,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
           backgroundColorRun.color                           = LIGHT_BLUE;
           impl.mModel->mLogicalModel->mBackgroundColorRuns.PushBack(backgroundColorRun);
 
-          // Mark-up processor case
-          if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled())
+          if(0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count())
           {
             impl.CopyUnderlinedFromLogicalToVisualModels(false);
           }
@@ -526,8 +523,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
           underlineRun.glyphRun.numberOfGlyphs = numberOfIndices;
           impl.mModel->mVisualModel->mUnderlineRuns.PushBack(underlineRun);
 
-          // Mark-up processor case
-          if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled())
+          if(0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count())
           {
             impl.CopyUnderlinedFromLogicalToVisualModels(false);
           }
@@ -547,8 +543,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
           underlineRun.glyphRun.numberOfGlyphs = numberOfIndices;
           impl.mModel->mVisualModel->mUnderlineRuns.PushBack(underlineRun);
 
-          // Mark-up processor case
-          if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled())
+          if(0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count())
           {
             impl.CopyUnderlinedFromLogicalToVisualModels(false);
           }
@@ -568,8 +563,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
           underlineRun.glyphRun.numberOfGlyphs = numberOfIndices;
           impl.mModel->mVisualModel->mUnderlineRuns.PushBack(underlineRun);
 
-          // Mark-up processor case
-          if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled())
+          if(0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count())
           {
             impl.CopyUnderlinedFromLogicalToVisualModels(false);
           }
@@ -589,8 +583,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
           underlineRun.glyphRun.numberOfGlyphs = numberOfIndices;
           impl.mModel->mVisualModel->mUnderlineRuns.PushBack(underlineRun);
 
-          // Mark-up processor case
-          if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled())
+          if(0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count())
           {
             impl.CopyUnderlinedFromLogicalToVisualModels(false);
           }
@@ -653,7 +646,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
       (0u != impl.mModel->mVisualModel->mStrikethroughRuns.Count()) ||
       (0u != impl.mModel->mVisualModel->mCharacterSpacingRuns.Count());
 
-    if(impl.mModel->mVisualModel->IsMarkupProcessorEnabled() || shouldSyncInlineStyleRuns)
+    if(shouldSyncInlineStyleRuns)
     {
       impl.CopyUnderlinedFromLogicalToVisualModels(true);
       impl.CopyStrikethroughFromLogicalToVisualModels();

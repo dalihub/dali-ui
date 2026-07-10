@@ -197,11 +197,9 @@ struct MarqueeBuilder
     }
   };
 
-  static bool HasOverlayStyle(const ModelInterface& textModel,
-                              bool                  markupEnabled);
+  static bool HasOverlayStyle(const ModelInterface& textModel);
 
   static FeatureInfo CollectGradientFeatureInfo(const ModelInterface& textModel,
-                                                bool                  markupEnabled,
                                                 bool                  textCutoutEnabled);
 
   static Sampler CreateTextScrollSampler(bool isHorizontal);

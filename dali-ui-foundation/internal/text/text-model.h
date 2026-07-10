@@ -285,11 +285,6 @@ public:
   bool IsBackgroundEnabled() const override;
 
   /**
-   * @copydoc ModelInterface::IsMarkupProcessorEnabled()
-   */
-  bool IsMarkupProcessorEnabled() const override;
-
-  /**
    * @copydoc ModelInterface::GetHyphens()
    */
   const GlyphInfo* GetHyphens() const override;

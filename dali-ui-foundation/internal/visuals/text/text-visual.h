@@ -58,7 +58,6 @@ typedef IntrusivePtr<TextVisual> TextVisualPtr;
  * | horizontalAlignment | STRING  |
  * | verticalAlignment   | STRING  |
  * | textColor           | VECTOR4 |
- * | enableMarkup        | BOOLEAN |
  * | shadow              | STRING  |
  * | underline           | STRING  |
  * | outline             | STRING  |

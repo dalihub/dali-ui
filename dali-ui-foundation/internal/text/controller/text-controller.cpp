@@ -151,33 +151,6 @@ void Controller::SetGlyphType(TextAbstraction::GlyphType glyphType)
   RequestRelayout();
 }
 
-void Controller::SetMarkupProcessorEnabled(bool enable)
-{
-  SetMarkupProcessorEnabled(enable, true);
-}
-
-void Controller::SetMarkupProcessorEnabled(bool enable, bool reprocessText)
-{
-  if(enable != mImpl->mMarkupProcessorEnabled)
-  {
-    // If Text was already set, call the SetText again for enabling or disabling markup
-    mImpl->mMarkupProcessorEnabled = enable;
-    if(reprocessText)
-    {
-      std::string text;
-      GetText(text);
-      SetText(text);
-    }
-  }
-
-  mImpl->mModel->mVisualModel->SetMarkupProcessorEnabled(enable);
-}
-
-bool Controller::IsMarkupProcessorEnabled() const
-{
-  return mImpl->mMarkupProcessorEnabled;
-}
-
 bool Controller::HasAnchors() const
 {
   return (mImpl->mModel->mLogicalModel->mAnchors.Count() && mImpl->IsShowingRealText());

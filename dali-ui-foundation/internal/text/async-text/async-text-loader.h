@@ -152,7 +152,6 @@ struct AsyncTextParameters
     suppressAutoMarquee{false},
     isMultiLine{false},
     ellipsis{true},
-    enableMarkup{false},
     hasStyledTextStyleSnapshot{false},
     isUnderlineEnabled{false},
     isShadowEnabled{false},
@@ -250,7 +249,6 @@ struct AsyncTextParameters
   bool suppressAutoMarquee : 1;            ///< whether automatic marquee evaluation is suppressed.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
   bool ellipsis : 1;                       ///< Whether the ellipsis layout option is enabled.
-  bool enableMarkup : 1;                   ///< Whether the mark-up processor is enabled.
   bool hasStyledTextStyleSnapshot : 1;     ///< Whether style runs came from a StyledText snapshot.
   bool isUnderlineEnabled : 1;             ///< Underline enabeld flag.
   bool isShadowEnabled : 1;                ///< Shadow enabled flag.

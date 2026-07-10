@@ -425,7 +425,6 @@ const char* const OVERFLOW_MODE_PROPERTY("overflowMode");
 const char* const LINE_HEIGHT_PROPERTY("lineHeight");
 const char* const LINE_HEIGHT_MODE_PROPERTY("lineHeightMode");
 const char* const TEXT_COLOR_PROPERTY("textColor");
-const char* const MARKUP_ENABLED_PROPERTY("markupEnabled");
 
 // NPatch visual
 const char* const BORDER_ONLY("borderOnly");

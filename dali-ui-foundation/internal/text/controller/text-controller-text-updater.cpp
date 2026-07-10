@@ -29,7 +29,6 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.h>
 #include <dali-ui-foundation/internal/text/emoji-helper.h>
-#include <dali-ui-foundation/internal/text/markup-processor/markup-processor.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 
@@ -97,8 +96,7 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
     }
   }
 
-  // Stores raw text including markup tags.
-  // Currently, this raw text cannot be updated when it is editable.
+  // Stores the plain UTF-8 text source.
   impl.mRawText = text;
 
   if(!text.empty())
@@ -107,31 +105,8 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
     LogicalModelPtr& logicalModel = model->mLogicalModel;
     model->mVisualModel->SetTextColor(impl.mTextColor);
 
-    MarkupProcessData markupProcessData(logicalModel->mColorRuns, logicalModel->mFontDescriptionRuns,
-                                        logicalModel->mEmbeddedItems, logicalModel->mAnchors,
-                                        logicalModel->mUnderlinedCharacterRuns, logicalModel->mBackgroundColorRuns,
-                                        logicalModel->mStrikethroughCharacterRuns, logicalModel->mBoundedParagraphRuns,
-                                        logicalModel->mCharacterSpacingCharacterRuns);
-
-    Length         textSize = 0u;
-    const uint8_t* utf8     = NULL;
-    if(impl.mMarkupProcessorEnabled)
-    {
-      MarkupPropertyData markupPropertyData(GetDpi(), impl.mAnchorColor, impl.mAnchorClickedColor);
-
-      ProcessMarkupString(text, markupPropertyData, markupProcessData);
-      textSize = markupProcessData.markupProcessedText.size();
-
-      // This is a bit horrible but std::string returns a (signed) char*
-      utf8 = reinterpret_cast<const uint8_t*>(markupProcessData.markupProcessedText.c_str());
-    }
-    else
-    {
-      textSize = text.size();
-
-      // This is a bit horrible but std::string returns a (signed) char*
-      utf8 = reinterpret_cast<const uint8_t*>(text.c_str());
-    }
+    const Length   textSize = text.size();
+    const uint8_t* utf8     = reinterpret_cast<const uint8_t*>(text.c_str());
 
     //  Convert text into UTF-32
     Vector<Character>& utf32Characters = logicalModel->mText;
@@ -554,11 +529,6 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
       textUpdateInfo.mNumberOfCharactersToAdd += maxSizeOfNewText;
     }
 
-    if(impl.mMarkupProcessorEnabled)
-    {
-      InsertTextAnchor(controller, maxSizeOfNewText, cursorIndex);
-    }
-
     // Update the cursor index.
     cursorIndex += maxSizeOfNewText;
 
@@ -776,11 +746,6 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
       currentText.Erase(first, last);
 
-      if(impl.mMarkupProcessorEnabled)
-      {
-        RemoveTextAnchor(controller, cursorOffset, numberOfCharacters, previousCursorIndex);
-      }
-
       if(nullptr != impl.mEditableControlInterface)
       {
         impl.mEditableControlInterface->CursorPositionChanged(previousCursorIndex, cursorIndex);
@@ -824,16 +789,6 @@ bool Controller::TextUpdater::RemoveSelectedText(Controller& controller)
     {
       textRemoved = true;
       impl.ChangeState(EventData::EDITING);
-
-      if(impl.mMarkupProcessorEnabled)
-      {
-        int             cursorOffset        = -1;
-        int             numberOfCharacters  = removedString.length();
-        CharacterIndex& cursorIndex         = impl.mEventData->mPrimaryCursorPosition;
-        CharacterIndex  previousCursorIndex = cursorIndex + numberOfCharacters;
-
-        RemoveTextAnchor(controller, cursorOffset, numberOfCharacters, previousCursorIndex);
-      }
 
       if(impl.mSelectableControlInterface != nullptr)
       {
@@ -880,132 +835,6 @@ void Controller::TextUpdater::ResetText(Controller& controller)
 
   // Apply modifications to the model
   impl.mOperationsPending = ALL_OPERATIONS;
-}
-
-void Controller::TextUpdater::InsertTextAnchor(Controller& controller, int numberOfCharacters,
-                                               CharacterIndex previousCursorIndex)
-{
-  Controller::Impl& impl         = *controller.mImpl;
-  ModelPtr&         model        = impl.mModel;
-  LogicalModelPtr&  logicalModel = model->mLogicalModel;
-
-  for(auto& anchor : logicalModel->mAnchors)
-  {
-    if(anchor.endIndex < previousCursorIndex) //      [anchor]  CUR
-    {
-      continue;
-    }
-    if(anchor.startIndex < previousCursorIndex) //      [anCURr]
-    {
-      anchor.endIndex += numberOfCharacters;
-    }
-    else // CUR  [anchor]
-    {
-      anchor.startIndex += numberOfCharacters;
-      anchor.endIndex += numberOfCharacters;
-    }
-    DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::InsertTextAnchor[%p] Anchor[%s] start[%d] end[%d]\n",
-                  &controller, anchor.href, anchor.startIndex, anchor.endIndex);
-  }
-}
-
-void Controller::TextUpdater::RemoveTextAnchor(Controller& controller, int cursorOffset, int numberOfCharacters,
-                                               CharacterIndex previousCursorIndex)
-{
-  Controller::Impl&        impl         = *controller.mImpl;
-  ModelPtr&                model        = impl.mModel;
-  LogicalModelPtr&         logicalModel = model->mLogicalModel;
-  Vector<Anchor>::Iterator it           = logicalModel->mAnchors.Begin();
-
-  while(it != logicalModel->mAnchors.End())
-  {
-    Anchor& anchor = *it;
-
-    if(anchor.endIndex <= previousCursorIndex && cursorOffset == 0) // [anchor]    CUR >>
-    {
-      // Nothing happens.
-    }
-    else if(anchor.endIndex <= previousCursorIndex && cursorOffset == -1) // [anchor] << CUR
-    {
-      int endIndex = anchor.endIndex;
-      int offset   = previousCursorIndex - endIndex;
-      int index    = endIndex - (numberOfCharacters - offset);
-
-      if(index < endIndex)
-      {
-        endIndex = index;
-      }
-
-      if((int)anchor.startIndex >= endIndex)
-      {
-        if(anchor.href)
-        {
-          delete[] anchor.href;
-        }
-        it = logicalModel->mAnchors.Erase(it);
-        continue;
-      }
-      else
-      {
-        anchor.endIndex = endIndex;
-      }
-    }
-    else if(anchor.startIndex >= previousCursorIndex && cursorOffset == -1) // << CUR    [anchor]
-    {
-      anchor.startIndex -= numberOfCharacters;
-      anchor.endIndex -= numberOfCharacters;
-    }
-    else if(anchor.startIndex >= previousCursorIndex && cursorOffset == 0) //    CUR >> [anchor]
-    {
-      int startIndex = anchor.startIndex;
-      int endIndex   = anchor.endIndex;
-      int index      = previousCursorIndex + numberOfCharacters - 1;
-
-      if(startIndex > index)
-      {
-        anchor.startIndex -= numberOfCharacters;
-        anchor.endIndex -= numberOfCharacters;
-      }
-      else if(endIndex > index + 1)
-      {
-        anchor.endIndex -= numberOfCharacters;
-      }
-      else
-      {
-        if(anchor.href)
-        {
-          delete[] anchor.href;
-        }
-        it = logicalModel->mAnchors.Erase(it);
-        continue;
-      }
-    }
-    else if(cursorOffset == -1) // [<< CUR]
-    {
-      int startIndex = anchor.startIndex;
-      int index      = previousCursorIndex - numberOfCharacters;
-
-      if(startIndex >= index)
-      {
-        anchor.startIndex = index;
-      }
-      anchor.endIndex -= numberOfCharacters;
-    }
-    else if(cursorOffset == 0) // [CUR >>]
-    {
-      anchor.endIndex -= numberOfCharacters;
-    }
-    else
-    {
-      // When this condition is reached, someting is wrong.
-      DALI_LOG_ERROR("Controller::RemoveTextAnchor[%p] Invaild state cursorOffset[%d]\n", &controller, cursorOffset);
-    }
-
-    DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::RemoveTextAnchor[%p] Anchor[%s] start[%d] end[%d]\n",
-                  &controller, anchor.href, anchor.startIndex, anchor.endIndex);
-
-    it++;
-  }
 }
 
 } // namespace Text

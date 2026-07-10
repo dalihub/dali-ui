@@ -525,18 +525,18 @@ int UtcDaliTextGradientOverlayShaderFeatureWithMixedBaseGradientP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientOverlayShaderFeatureWithMarkupAndEmojiP(void)
+int UtcDaliTextGradientOverlayShaderFeatureWithMultiColorAndEmojiP(void)
 {
-  TextFeature::FeatureBuilder markupBuilder;
-  markupBuilder.EnableMultiColor(true);
-  markupBuilder.EnableTextGradientOverlay(true);
+  TextFeature::FeatureBuilder multiColorBuilder;
+  multiColorBuilder.EnableMultiColor(true);
+  multiColorBuilder.EnableTextGradientOverlay(true);
 
-  std::string markupPrefix = GetFragmentPrefix(markupBuilder);
+  std::string multiColorPrefix = GetFragmentPrefix(multiColorBuilder);
 
-  DALI_TEST_EQUALS(markupBuilder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_MULTI_COLOR_TEXT_WITH_TEXT_GRADIENT_OVERLAY, TEST_LOCATION);
-  ExpectNoTextGradientDefine(markupPrefix);
-  ExpectTextGradientOverlayDefine(markupPrefix);
-  DALI_TEST_EQUALS(markupPrefix.find("#define IS_REQUIRED_MULTI_COLOR\n") != std::string::npos, true, TEST_LOCATION);
+  DALI_TEST_EQUALS(multiColorBuilder.GetShaderType(), UiInternal::VisualFactoryCache::TEXT_SHADER_MULTI_COLOR_TEXT_WITH_TEXT_GRADIENT_OVERLAY, TEST_LOCATION);
+  ExpectNoTextGradientDefine(multiColorPrefix);
+  ExpectTextGradientOverlayDefine(multiColorPrefix);
+  DALI_TEST_EQUALS(multiColorPrefix.find("#define IS_REQUIRED_MULTI_COLOR\n") != std::string::npos, true, TEST_LOCATION);
 
   TextFeature::FeatureBuilder emojiBuilder;
   emojiBuilder.EnableEmoji(true);
@@ -730,7 +730,7 @@ int UtcDaliTextGradientShaderCompositionMixedEmojiFeatureP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientShaderCompositionDisabledColorOnlyMarkupKeepsLegacyStyleFeatureP(void)
+int UtcDaliTextGradientShaderCompositionDisabledColorOnlyStyledTextKeepsStyleFeatureP(void)
 {
   TextFeature::FeatureBuilder builder =
     BuildSeparatedStyleFeature(false, false, true, false, true);
@@ -748,7 +748,7 @@ int UtcDaliTextGradientShaderCompositionDisabledColorOnlyMarkupKeepsLegacyStyleF
   END_TEST;
 }
 
-int UtcDaliTextGradientShaderCompositionColorOnlyMarkupMixedKeepsStyleTextureOffP(void)
+int UtcDaliTextGradientShaderCompositionColorOnlyStyledTextMixedKeepsStyleTextureOffP(void)
 {
   TextFeature::FeatureBuilder builder =
     BuildSeparatedStyleFeature(false, true, true, false, false);

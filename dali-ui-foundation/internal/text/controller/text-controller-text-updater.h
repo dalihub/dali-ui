@@ -85,26 +85,6 @@ struct Controller::TextUpdater
    * @param[in] controller The controller
    */
   static void ResetText(Controller& controller);
-
-  /**
-   * @brief Update anchor position from given number of inserted characters.
-   *
-   * @param[in] controller The controller
-   * @param[in] numberOfCharacters The number of inserted characters.
-   * @param[in] previousCursorIndex A cursor position before event occurs.
-   */
-  static void InsertTextAnchor(Controller& controller, int numberOfCharacters, CharacterIndex previousCursorIndex);
-
-  /**
-   * @brief Update anchor position from given number of removed characters.
-   *
-   * @param[in] controller The controller
-   * @param[in] cursorOffset Start position from the current cursor position to start deleting characters.
-   * @param[in] numberOfCharacters The number of removed characters.
-   * @param[in] previousCursorIndex A cursor position before event occurs.
-   */
-  static void RemoveTextAnchor(Controller& controller, int cursorOffset, int numberOfCharacters,
-                               CharacterIndex previousCursorIndex);
 };
 
 } // namespace Text

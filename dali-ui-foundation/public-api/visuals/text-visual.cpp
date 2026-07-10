@@ -191,16 +191,6 @@ void TextVisual::SetTextColor(const UiColor& textColor)
   VisualBase::SetProperty(TextVisual::Property::TEXT_COLOR, textColor.GetRgba());
 }
 
-bool TextVisual::IsMarkupEnabled() const
-{
-  return VisualBase::GetProperty<bool>(TextVisual::Property::MARKUP_ENABLED);
-}
-
-void TextVisual::SetMarkupEnabled(bool enabled)
-{
-  VisualBase::SetProperty(TextVisual::Property::MARKUP_ENABLED, enabled);
-}
-
 // =============================================================================
 // Internal API
 // =============================================================================

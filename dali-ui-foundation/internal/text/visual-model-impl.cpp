@@ -441,11 +441,6 @@ void VisualModel::SetBackgroundEnabled(bool enabled)
   mBackgroundEnabled = enabled;
 }
 
-void VisualModel::SetMarkupProcessorEnabled(bool enabled)
-{
-  mMarkupProcessorEnabled = enabled;
-}
-
 void VisualModel::SetTextElideEnabled(bool enabled)
 {
   mTextElideEnabled = enabled;
@@ -600,11 +595,6 @@ const float VisualModel::GetCharacterSpacing() const
 bool VisualModel::IsBackgroundEnabled() const
 {
   return mBackgroundEnabled;
-}
-
-bool VisualModel::IsMarkupProcessorEnabled() const
-{
-  return mMarkupProcessorEnabled;
 }
 
 bool VisualModel::IsTextElideEnabled() const
@@ -816,7 +806,6 @@ VisualModel::VisualModel()
   mOutlineEnabled(false),
   mUnderlineColorSet(false),
   mBackgroundEnabled(false),
-  mMarkupProcessorEnabled(false),
   mStrikethroughEnabled(false),
   mStrikethroughColorSet(false),
   mCharacterSpacing(0.0f),

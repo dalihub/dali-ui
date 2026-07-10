@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
 #include <dali-ui-foundation/public-api/text/label-properties.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
@@ -66,7 +67,7 @@ struct RenderedTextVisual
   Dali::Ui::Integration::Visual::Base internalVisual;
 };
 
-RenderedTextVisual CreateRenderedInternalTextVisualWithView(UiTestApplication& application, const char* text = "TextGradient", bool markupEnabled = false)
+RenderedTextVisual CreateRenderedInternalTextVisualWithView(UiTestApplication& application, const char* text = "TextGradient")
 {
   Dali::Ui::View view = Dali::Ui::View::New();
   view.SetProperty(Actor::Property::SIZE, Vector3(VISUAL_WIDTH, VISUAL_HEIGHT, 0.0f));
@@ -75,7 +76,6 @@ RenderedTextVisual CreateRenderedInternalTextVisualWithView(UiTestApplication& a
   propertyMap.Add(Dali::Ui::VisualBasePropertyIndex::TYPE, Dali::Ui::Integration::InternalVisualType::TEXT);
   propertyMap.Add(Dali::Ui::TextVisualPropertyIndex::TEXT, text);
   propertyMap.Add(Dali::Ui::TextVisualPropertyIndex::FONT_SIZE, 12.0f);
-  propertyMap.Add(Dali::Ui::TextVisualPropertyIndex::MARKUP_ENABLED, markupEnabled);
 
   Dali::Ui::Integration::Visual::Base internalVisual = Dali::Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
   DALI_TEST_CHECK(internalVisual);
@@ -88,30 +88,38 @@ RenderedTextVisual CreateRenderedInternalTextVisualWithView(UiTestApplication& a
   return {view, internalVisual};
 }
 
-Dali::Ui::Integration::Visual::Base CreateRenderedInternalTextVisual(UiTestApplication& application, const char* text = "TextGradient", bool markupEnabled = false)
-{
-  return CreateRenderedInternalTextVisualWithView(application, text, markupEnabled).internalVisual;
-}
-
-RenderedTextVisual CreateRenderedMarkupTextVisual(UiTestApplication& application)
-{
-  return CreateRenderedInternalTextVisualWithView(application, "Default <color value='red'>Red</color> Default", true);
-}
-
-RenderedTextVisual CreateRenderedMarkupUnderlineTextVisual(UiTestApplication& application)
-{
-  return CreateRenderedInternalTextVisualWithView(application, "Default <u color='red'>Underlined</u> Default", true);
-}
-
-RenderedTextVisual CreateRenderedMarkupBackgroundTextVisual(UiTestApplication& application)
-{
-  return CreateRenderedInternalTextVisualWithView(application, "Default <background color='yellow'>Background</background> Default", true);
-}
-
 void UpdateTextVisual(Dali::Ui::Integration::Visual::Base internalVisual)
 {
   UiInternal::TextVisual::EnableRendererUpdate(internalVisual);
   UiInternal::TextVisual::UpdateRenderer(internalVisual);
+}
+
+Dali::Ui::Integration::Visual::Base CreateRenderedInternalTextVisual(UiTestApplication& application, const char* text = "TextGradient")
+{
+  return CreateRenderedInternalTextVisualWithView(application, text).internalVisual;
+}
+
+RenderedTextVisual CreateRenderedStyledTextVisual(UiTestApplication& application, const UiText::StyledText& styledText)
+{
+  RenderedTextVisual rendered = CreateRenderedInternalTextVisualWithView(application, styledText.GetText().CStr());
+  UiInternal::TextVisual::GetController(rendered.internalVisual)->SetStyledText(styledText);
+  UpdateTextVisual(rendered.internalVisual);
+  return rendered;
+}
+
+RenderedTextVisual CreateRenderedFromMarkupTextVisual(UiTestApplication& application)
+{
+  return CreateRenderedStyledTextVisual(application, UiText::StyledText::FromMarkup("Default <color value='red'>Red</color> Default"));
+}
+
+RenderedTextVisual CreateRenderedFromMarkupUnderlineTextVisual(UiTestApplication& application)
+{
+  return CreateRenderedStyledTextVisual(application, UiText::StyledText::FromMarkup("Default <u color='red'>Underlined</u> Default"));
+}
+
+RenderedTextVisual CreateRenderedFromMarkupBackgroundTextVisual(UiTestApplication& application)
+{
+  return CreateRenderedStyledTextVisual(application, UiText::StyledText::FromMarkup("Default <background color='yellow'>Background</background> Default"));
 }
 
 void ExpectNoTextGradientOverlayRendererProperties(Renderer renderer)
@@ -308,7 +316,7 @@ int UtcDaliTextGradientVisualMaskDisabledClearsStoredMaskP(void)
 {
   UiTestApplication application;
 
-  RenderedTextVisual rendered = CreateRenderedMarkupTextVisual(application);
+  RenderedTextVisual rendered = CreateRenderedFromMarkupTextVisual(application);
   Dali::Ui::Integration::Visual::Base internalVisual = rendered.internalVisual;
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
@@ -325,7 +333,7 @@ int UtcDaliTextGradientVisualMaskStyleSetterReappliesAfterDisabledP(void)
 {
   UiTestApplication application;
 
-  RenderedTextVisual rendered = CreateRenderedMarkupTextVisual(application);
+  RenderedTextVisual rendered = CreateRenderedFromMarkupTextVisual(application);
   Dali::Ui::Integration::Visual::Base internalVisual = rendered.internalVisual;
   UiInternal::TextVisual::SetTextGradientStyle(internalVisual, MakeEnabledGradientStyle());
 
@@ -344,15 +352,14 @@ int UtcDaliTextGradientVisualMaskStyleSetterReappliesAfterDisabledP(void)
   END_TEST;
 }
 
-int UtcDaliTextGradientVisualMaskColorOnlyMarkupCreatesMaskP(void)
+int UtcDaliTextGradientVisualMaskColorOnlyFromMarkupCreatesMaskP(void)
 {
   UiTestApplication application;
 
-  RenderedTextVisual rendered = CreateRenderedMarkupTextVisual(application);
+  RenderedTextVisual rendered = CreateRenderedFromMarkupTextVisual(application);
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
-  DALI_TEST_CHECK(controller->IsMarkupProcessorEnabled());
   DALI_TEST_CHECK(!controller->GetTextModel()->IsMarkupUnderlineSet());
   DALI_TEST_CHECK(!controller->GetTextModel()->IsMarkupStrikethroughSet());
   DALI_TEST_CHECK(!controller->GetTextModel()->IsMarkupBackgroundColorSet());
@@ -369,18 +376,16 @@ int UtcDaliTextGradientVisualMaskStyledSimpleThenPlainDoesNotCreateStoredMaskP(v
 {
   UiTestApplication application;
 
-  RenderedTextVisual rendered = CreateRenderedMarkupUnderlineTextVisual(application);
+  RenderedTextVisual rendered = CreateRenderedFromMarkupUnderlineTextVisual(application);
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   DALI_TEST_CHECK(!UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual));
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
-  controller->SetMarkupProcessorEnabled(false);
   controller->SetText("");
   controller->SetText("TextGradient");
   UpdateTextVisual(rendered.internalVisual);
 
-  DALI_TEST_CHECK(!controller->IsMarkupProcessorEnabled());
   DALI_TEST_CHECK(controller->GetTextModel()->GetNumberOfGlyphs() > 0u);
 
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
@@ -394,11 +399,10 @@ int UtcDaliTextGradientVisualMaskStyledSimpleDoesNotCreateStoredMaskP(void)
 {
   UiTestApplication application;
 
-  RenderedTextVisual rendered = CreateRenderedMarkupUnderlineTextVisual(application);
+  RenderedTextVisual rendered = CreateRenderedFromMarkupUnderlineTextVisual(application);
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
-  DALI_TEST_CHECK(controller->IsMarkupProcessorEnabled());
   DALI_TEST_CHECK(controller->GetTextModel()->IsMarkupUnderlineSet());
   DALI_TEST_CHECK(!UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual));
   END_TEST;
@@ -408,11 +412,10 @@ int UtcDaliTextGradientVisualMaskBackgroundStyleDoesNotCreateStoredMaskP(void)
 {
   UiTestApplication application;
 
-  RenderedTextVisual rendered = CreateRenderedMarkupBackgroundTextVisual(application);
+  RenderedTextVisual rendered = CreateRenderedFromMarkupBackgroundTextVisual(application);
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
-  DALI_TEST_CHECK(controller->IsMarkupProcessorEnabled());
   DALI_TEST_CHECK(controller->GetTextModel()->IsMarkupBackgroundColorSet());
   DALI_TEST_CHECK(!UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual));
   END_TEST;

@@ -32,7 +32,6 @@
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
-#include <dali-ui-foundation/internal/text/markup-processor/markup-processor.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
@@ -396,9 +395,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     mTextModel->mLogicalModel->mFontDescriptionRuns;                                        // Desired font descriptions.
   Vector<FontRun>&                       validFonts = mTextModel->mLogicalModel->mFontRuns; // Validated fonts.
   Vector<BidirectionalParagraphInfoRun>& bidirectionalInfo =
-    mTextModel->mLogicalModel->mBidirectionalParagraphInfo;            // The bidirectional info per paragraph.
-  Vector<ColorRun>& colorRuns = mTextModel->mLogicalModel->mColorRuns; // colors of the text.
-
+    mTextModel->mLogicalModel->mBidirectionalParagraphInfo; // The bidirectional info per paragraph.
   // Set the default font's description with the given text parameters.
   TextAbstraction::FontDescription defaultFontDescription;
   defaultFontDescription.family = parameters.fontFamily;
@@ -478,15 +475,8 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mRemoveFrontInset = false;
   mTextModel->mRemoveBackInset  = false;
 
-  ////////////////////////////////////////////////////////////////////////////////
-  // Process the markup string if the mark-up processor is enabled.
-  ////////////////////////////////////////////////////////////////////////////////
-
-  mTextModel->mVisualModel->SetMarkupProcessorEnabled(parameters.enableMarkup);
-
   if(parameters.hasStyledTextStyleSnapshot)
   {
-    DALI_ASSERT_DEBUG(!parameters.enableMarkup && "StyledText snapshot must not use markup processing");
     Dali::Ui::Internal::Text::StyledTextApplier::ApplySnapshotToLogicalModel(parameters.styledTextStyleSnapshot,
                                                                              parameters.text,
                                                                              *mTextModel->mLogicalModel);
@@ -495,29 +485,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   }
   else
   {
-    MarkupProcessData markupProcessData(
-      colorRuns, fontDescriptionRuns, mTextModel->mLogicalModel->mEmbeddedItems, mTextModel->mLogicalModel->mAnchors,
-      mTextModel->mLogicalModel->mUnderlinedCharacterRuns, mTextModel->mLogicalModel->mBackgroundColorRuns,
-      mTextModel->mLogicalModel->mStrikethroughCharacterRuns, mTextModel->mLogicalModel->mBoundedParagraphRuns,
-      mTextModel->mLogicalModel->mCharacterSpacingCharacterRuns);
+    textSize = parameters.text.size();
 
-    if(parameters.enableMarkup)
-    {
-      MarkupPropertyData markupPropertyData(GetDpi(mModule.GetFontClient()), parameters.anchorColor, parameters.anchorClickedColor);
-
-      ProcessMarkupString(parameters.text, markupPropertyData, markupProcessData);
-      textSize = markupProcessData.markupProcessedText.size();
-
-      // This is a bit horrible but std::string returns a (signed) char*
-      utf8 = reinterpret_cast<const uint8_t*>(markupProcessData.markupProcessedText.c_str());
-    }
-    else
-    {
-      textSize = parameters.text.size();
-
-      // This is a bit horrible but std::string returns a (signed) char*
-      utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
-    }
+    // This is a bit horrible but std::string returns a (signed) char*
+    utf8 = reinterpret_cast<const uint8_t*>(parameters.text.c_str());
 
     ////////////////////////////////////////////////////////////////////////////////
     // Convert from utf8 to utf32
@@ -719,11 +690,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
                            mTextModel->mVisualModel->mBackgroundColorIndices);
 
   ////////////////////////////////////////////////////////////////////////////////
-  // Update visual model for markup style.
+  // Update visual model for StyledText range style.
   ////////////////////////////////////////////////////////////////////////////////
 
-  // StyledText snapshots keep markup disabled, but their inline style runs still need visual materialization.
-  if(mTextModel->mVisualModel->IsMarkupProcessorEnabled() || parameters.hasStyledTextStyleSnapshot)
+  if(parameters.hasStyledTextStyleSnapshot)
   {
     const Vector<UnderlinedCharacterRun>&    underlinedCharacterRuns = mTextModel->mLogicalModel->mUnderlinedCharacterRuns;
     const Vector<StrikethroughCharacterRun>& strikethroughCharacterRuns =
@@ -1052,7 +1022,6 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   const bool outlineEnabled    = mTextModel->IsOutlineEnabled();
   const bool backgroundEnabled = mTextModel->IsBackgroundEnabled();
-  const bool markupEnabled     = parameters.enableMarkup;
   // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
   const bool underlineRunEnabled         = mTextModel->IsMarkupUnderlineSet();
   const bool strikethroughRunEnabled     = mTextModel->IsMarkupStrikethroughSet();
@@ -1063,7 +1032,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   const bool backgroundWithCutoutEnabled = mTextModel->IsBackgroundWithCutoutEnabled();
   const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
   const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
-  const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient || markupEnabled;
+  const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
   const bool isOverlayStyle              = underlineEnabled || strikethroughEnabled;
   const bool embossEnabled               = parameters.isEmbossEnabled;
 

@@ -157,19 +157,17 @@ void UploadTextScrollTexture(Texture texture, PixelData data)
 
 } // namespace
 
-bool MarqueeBuilder::HasOverlayStyle(const ModelInterface& textModel,
-                                     bool                  markupEnabled)
+bool MarqueeBuilder::HasOverlayStyle(const ModelInterface& textModel)
 {
-  const bool markupUnderlineEnabled     = markupEnabled && textModel.IsMarkupUnderlineSet();
-  const bool markupStrikethroughEnabled = markupEnabled && textModel.IsMarkupStrikethroughSet();
+  const bool rangeUnderlineEnabled     = textModel.IsMarkupUnderlineSet();
+  const bool rangeStrikethroughEnabled = textModel.IsMarkupStrikethroughSet();
   return textModel.IsUnderlineEnabled() ||
          textModel.IsStrikethroughEnabled() ||
-         markupUnderlineEnabled ||
-         markupStrikethroughEnabled;
+         rangeUnderlineEnabled ||
+         rangeStrikethroughEnabled;
 }
 
 MarqueeBuilder::FeatureInfo MarqueeBuilder::CollectGradientFeatureInfo(const ModelInterface& textModel,
-                                                                       bool                  markupEnabled,
                                                                        bool                  textCutoutEnabled)
 {
   FeatureInfo info;
@@ -211,7 +209,7 @@ MarqueeBuilder::FeatureInfo MarqueeBuilder::CollectGradientFeatureInfo(const Mod
   const bool backgroundMarkupSet = textModel.IsMarkupBackgroundColorSet();
 
   info.styleTextureEnabled = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
-  info.isOverlayStyle      = HasOverlayStyle(textModel, markupEnabled);
+  info.isOverlayStyle      = HasOverlayStyle(textModel);
   info.cutoutEnabled       = textCutoutEnabled || textModel.IsBackgroundWithCutoutEnabled();
   return info;
 }
