@@ -668,15 +668,13 @@ private:
     mResultLabel      = NewTextLabel(RESULT_FONT_SIZE, TEXT_PRIMARY);
     mFooterLabel      = NewTextLabel(FOOTER_FONT_SIZE, TEXT_MUTED, false);
 
-    root.AddChildren({
-      mTitleLabel,
-      mCaseTitleLabel,
-      mDescriptionLabel,
-      mSourceLabel,
-      mStatsLabel,
-      mResultLabel,
-      mFooterLabel,
-    });
+    root.Add(mTitleLabel);
+    root.Add(mCaseTitleLabel);
+    root.Add(mDescriptionLabel);
+    root.Add(mSourceLabel);
+    root.Add(mStatsLabel);
+    root.Add(mResultLabel);
+    root.Add(mFooterLabel);
 
     window.Add(root);
     window.KeyEventSignal().Connect(this, &TextStyledTextBuilderController::OnKeyEvent);
