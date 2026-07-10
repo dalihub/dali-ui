@@ -99,8 +99,7 @@ public:
       TEXT_COLOR_RED                 = Text::LabelPropertyIndex::TEXT_COLOR_RED,
       TEXT_COLOR_GREEN               = Text::LabelPropertyIndex::TEXT_COLOR_GREEN,
       TEXT_COLOR_BLUE                = Text::LabelPropertyIndex::TEXT_COLOR_BLUE,
-      TEXT_COLOR_ALPHA               = Text::LabelPropertyIndex::TEXT_COLOR_ALPHA,
-      PIXEL_SNAP_FACTOR              = Text::LabelPropertyIndex::PIXEL_SNAP_FACTOR
+      TEXT_COLOR_ALPHA               = Text::LabelPropertyIndex::TEXT_COLOR_ALPHA
     };
   };
 
@@ -286,8 +285,6 @@ public: // Setters for chaining
    */
   UiColor GetTextColor();
 
-  // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)
-  // @ANIMATABLE_MANUAL(TextGradientOverlayStartOffset, float)
   /**
    * @brief Sets the text gradient.
    *
@@ -1188,6 +1185,27 @@ public: // Setters for chaining
   void StopMarquee();
 
   /**
+   * @brief Sets the pixel snap factor used by text rendering.
+   *
+   * This value controls the degree of pixel snapping applied to the visual
+   * position. 0.0f disables snapping and preserves the original position,
+   * while 1.0f applies full pixel alignment.
+   *
+   * The backing animatable property is registered on demand when this method
+   * is first called or when PixelSnapFactor animation is first used.
+   *
+   * @param[in] factor The pixel snap factor.
+   */
+  void SetPixelSnapFactor(float factor);
+
+  /**
+   * @brief Gets the pixel snap factor value set on this Label.
+   *
+   * @return The pixel snap factor, or 0.0f if it has not been set.
+   */
+  float GetPixelSnapFactor() const;
+
+  /**
    * @brief Requests asynchronous natural size computation.
    *
    * This method can be used regardless of whether asynchronous rendering is enabled.
@@ -1288,6 +1306,9 @@ public: // Not intended for application developers
   explicit DALI_UI_API Label(Dali::Internal::CustomActor* internal);
   /// @endcond
 
+  // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)
+  // @ANIMATABLE_MANUAL(TextGradientOverlayStartOffset, float)
+  // @ANIMATABLE_MANUAL(PixelSnapFactor, float)
 public: // Animation
   /**
    * @brief Creates a LabelAnimationBridge for this Label.

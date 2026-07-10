@@ -662,6 +662,16 @@ public:
   void StopMarquee();
 
   /**
+   * @copydoc Dali::Ui::Label::SetPixelSnapFactor
+   */
+  void SetPixelSnapFactor(float factor);
+
+  /**
+   * @copydoc Dali::Ui::Label::GetPixelSnapFactor
+   */
+  float GetPixelSnapFactor() const;
+
+  /**
    * @copydoc Dali::Ui::Label::RequestAsyncNaturalSize
    */
   void RequestAsyncNaturalSize();

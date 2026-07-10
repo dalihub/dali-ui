@@ -25,6 +25,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
+#include <dali-ui-foundation/internal/text/text-pixel-snap-data.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 
 namespace Dali
@@ -57,6 +58,30 @@ LabelAnimationSpecImpl::~LabelAnimationSpecImpl() = default;
 LabelAnimationSpecImplPtr LabelAnimationSpecImpl::New()
 {
   return LabelAnimationSpecImplPtr(new LabelAnimationSpecImpl());
+}
+
+void LabelAnimationSpecImpl::ApplyPixelSnapFactorTo(Animation& animation, Label label, const Entry& entry)
+{
+  const Property::Index index = EnsureTextPixelSnapFactorProperty(label);
+  if(index == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateTo(Property(label, index), entry.value, entry.alpha, period);
+}
+
+void LabelAnimationSpecImpl::ApplyPixelSnapFactorBy(Animation& animation, Label label, const Entry& entry)
+{
+  const Property::Index index = EnsureTextPixelSnapFactorProperty(label);
+  if(index == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  TimePeriod period(entry.delay.InSeconds(), entry.duration.InSeconds());
+  animation.AnimateBy(Property(label, index), entry.value, entry.alpha, period);
 }
 
 void LabelAnimationSpecImpl::ApplyTextGradientStartOffsetTo(Animation& animation, Label label, const Entry& entry)

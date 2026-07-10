@@ -638,6 +638,16 @@ void Label::StopMarquee()
   GetImpl(*this).StopMarquee();
 }
 
+void Label::SetPixelSnapFactor(float factor)
+{
+  GetImpl(*this).SetPixelSnapFactor(factor);
+}
+
+float Label::GetPixelSnapFactor() const
+{
+  return GetImpl(*this).GetPixelSnapFactor();
+}
+
 void Label::RequestAsyncNaturalSize()
 {
   GetImpl(*this).RequestAsyncNaturalSize();

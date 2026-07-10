@@ -308,23 +308,7 @@ struct LabelPropertyIndex
      * @brief The alpha component of the text color.
      * @details Name "textColorAlpha", type Property::FLOAT.
      */
-    TEXT_COLOR_ALPHA,
-
-    /**
-     * @brief The pixel snap factor.
-     * @details Name "pixelSnapFactor", type Property::FLOAT.
-     * Controls the degree of pixel snapping applied to the visual position.
-     * A value of 0.0f disables snapping (original position is preserved),
-     * while 1.0f applies full pixel alignment. Intermediate values blend
-     * smoothly between the original and snapped positions.
-     *
-     * This property is typically animated to balance smooth motion and
-     * crisp alignment. Use 0.0f during animations to avoid snapping artifacts,
-     * and gradually increase to 1.0f as the animation settles for sharp rendering.
-     *
-     * The value must be in the range [0.0f, 1.0f].
-     */
-    PIXEL_SNAP_FACTOR
+    TEXT_COLOR_ALPHA
   };
 };
 } // namespace Text

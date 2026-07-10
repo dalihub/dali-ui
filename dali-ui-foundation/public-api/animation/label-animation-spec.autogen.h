@@ -478,6 +478,25 @@ public:
    */
   LabelAnimationSpec& TextGradientOverlayStartOffsetBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
 
+  /**
+   * @brief Animates the pixel snap factor.
+   *
+   * @param[in] target The target value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  LabelAnimationSpec& PixelSnapFactor(float target, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+  /**
+   * @brief Animates the pixel snap factor by a relative amount.
+   *
+   * @param[in] relative The relative value
+   * @param[in] duration The animation duration
+   * @param[in] alpha The alpha function (default: linear)
+   * @param[in] delay The delay before starting (default: 0)
+   */
+  LabelAnimationSpec& PixelSnapFactorBy(float relative, Duration duration, AlphaFunction alpha = AlphaFunction(), Duration delay = Duration());
+
 
 public: // Not intended for application developers
   /// @cond internal

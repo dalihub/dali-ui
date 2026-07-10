@@ -226,6 +226,75 @@ int UtcDaliAnimationSpecDownCastP(void)
   END_TEST;
 }
 
+int UtcDaliLabelPixelSnapFactorAnimationOnDemandP(void)
+{
+  UiTestApplication application;
+
+  Label setterLabel = Label::New();
+  application.GetScene().Add(setterLabel);
+
+  // PixelSnapFactor is registered on demand, not as a default Label property.
+  DALI_TEST_EQUALS(setterLabel.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(setterLabel.GetPixelSnapFactor(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  setterLabel.SetPixelSnapFactor(0.75f);
+  const Property::Index setterPixelSnapFactorIndex = setterLabel.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR);
+  DALI_TEST_CHECK(setterPixelSnapFactorIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(setterLabel.GetPixelSnapFactor(), 0.75f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  setterLabel.SetPixelSnapFactor(0.0f);
+  DALI_TEST_EQUALS(setterLabel.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR), setterPixelSnapFactorIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(setterLabel.GetPixelSnapFactor(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  Label label = Label::New();
+  application.GetScene().Add(label);
+
+  // Animation also registers the backing property on demand.
+  DALI_TEST_EQUALS(label.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetPixelSnapFactor(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  Animation bridgeAnimation = Animation::New(0.0f);
+  label.Animate(bridgeAnimation)
+    .PixelSnapFactor(1.0f, Duration(0.1f));
+
+  const Property::Index pixelSnapFactorIndex = label.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR);
+  DALI_TEST_CHECK(pixelSnapFactorIndex != Property::INVALID_INDEX);
+  DALI_TEST_EQUALS(label.GetProperty<float>(pixelSnapFactorIndex), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(bridgeAnimation.GetDuration(), 0.1f, TEST_LOCATION);
+
+  bridgeAnimation.Play();
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+  DALI_TEST_EQUALS(label.GetCurrentProperty<float>(pixelSnapFactorIndex), 1.0f, 0.01f, TEST_LOCATION);
+
+  Animation byAnimation = Animation::New(0.0f);
+  label.Animate(byAnimation)
+    .PixelSnapFactorBy(-0.5f, Duration(0.1f));
+  DALI_TEST_EQUALS(label.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR), pixelSnapFactorIndex, TEST_LOCATION);
+
+  byAnimation.Play();
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+  DALI_TEST_EQUALS(label.GetCurrentProperty<float>(pixelSnapFactorIndex), 0.5f, 0.01f, TEST_LOCATION);
+
+  LabelAnimationSpec spec = Label::NewAnimationSpec();
+  spec.PixelSnapFactor(0.25f, Duration(0.1f));
+
+  Animation specAnimation = Animation::New(0.0f);
+  spec.ApplyTo(specAnimation, label);
+  DALI_TEST_EQUALS(label.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR), pixelSnapFactorIndex, TEST_LOCATION);
+
+  specAnimation.Play();
+  application.SendNotification();
+  application.Render(0);
+  application.Render(100);
+  DALI_TEST_EQUALS(label.GetCurrentProperty<float>(pixelSnapFactorIndex), 0.25f, 0.01f, TEST_LOCATION);
+
+  END_TEST;
+}
+
 // Setter, Getter
 
 int UtcDaliLabelText(void)
@@ -1224,7 +1293,6 @@ int UtcDaliLabelGetProperty(void)
 
   // Animatable
   DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_TEXT_COLOR) == Label::Property::TEXT_COLOR);
-  DALI_TEST_CHECK(label.GetPropertyIndex(PROPERTY_NAME_PIXEL_SNAP_FACTOR) == Label::Property::PIXEL_SNAP_FACTOR);
 
   END_TEST;
 }
@@ -1400,10 +1468,6 @@ int UtcDaliLabelSetProperty(void)
   // RENDER_SCALE
   label.SetProperty(Label::Property::RENDER_SCALE, 2.0f);
   DALI_TEST_EQUALS(label.GetProperty<float>(Label::Property::RENDER_SCALE), 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
-
-  // PIXEL_SNAP_FACTOR
-  label.SetProperty(Label::Property::PIXEL_SNAP_FACTOR, 0.5f);
-  DALI_TEST_EQUALS(label.GetProperty<float>(Label::Property::PIXEL_SNAP_FACTOR), 0.5f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
 
   // Animatable
   // TEXT_COLOR

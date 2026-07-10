@@ -373,13 +373,13 @@ private:
       info.descLabel.SetRenderScale(scale);
 
       // Set initial PixelSnapFactor to 0
-      info.titleLabel.SetProperty(Label::Property::PIXEL_SNAP_FACTOR, 0.0f);
-      info.descLabel.SetProperty(Label::Property::PIXEL_SNAP_FACTOR, 0.0f);
+      info.titleLabel.SetPixelSnapFactor(0.0f);
+      info.descLabel.SetPixelSnapFactor(0.0f);
 
       // Animate PixelSnapFactor to 1.0
       Animation snapAnim = Animation::New(SNAP_ANIM_DURATION);
-      snapAnim.AnimateTo(Property(info.titleLabel, Label::Property::PIXEL_SNAP_FACTOR), 1.0f);
-      snapAnim.AnimateTo(Property(info.descLabel, Label::Property::PIXEL_SNAP_FACTOR), 1.0f);
+      info.titleLabel.Animate(snapAnim).PixelSnapFactor(1.0f, Duration(SNAP_ANIM_DURATION));
+      info.descLabel.Animate(snapAnim).PixelSnapFactor(1.0f, Duration(SNAP_ANIM_DURATION));
       snapAnim.Play();
 
       // Store animation
@@ -415,8 +415,8 @@ private:
 
       // Animate PixelSnapFactor back to 0
       Animation snapAnim = Animation::New(SNAP_ANIM_DURATION);
-      snapAnim.AnimateTo(Property(info.titleLabel, Label::Property::PIXEL_SNAP_FACTOR), 0.0f);
-      snapAnim.AnimateTo(Property(info.descLabel, Label::Property::PIXEL_SNAP_FACTOR), 0.0f);
+      info.titleLabel.Animate(snapAnim).PixelSnapFactor(0.0f, Duration(SNAP_ANIM_DURATION));
+      info.descLabel.Animate(snapAnim).PixelSnapFactor(0.0f, Duration(SNAP_ANIM_DURATION));
       snapAnim.Play();
 
       if(info.currentAnimation)

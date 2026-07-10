@@ -44,6 +44,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-marquee-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
+#include <dali-ui-foundation/internal/text/text-pixel-snap-data.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
@@ -134,7 +135,6 @@ LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorRed",    TEXT_COLO
 LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorGreen",  TEXT_COLOR_GREEN, TEXT_COLOR,     1)
 LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorBlue",   TEXT_COLOR_BLUE,  TEXT_COLOR,     2)
 LABEL_ANIMATABLE_PROPERTY_COMPONENT_REGISTRATION(   "textColorAlpha",  TEXT_COLOR_ALPHA, TEXT_COLOR,     3)
-LABEL_ANIMATABLE_PROPERTY_REGISTRATION          (   "pixelSnapFactor", FLOAT,            PIXEL_SNAP_FACTOR)
 
 DALI_TYPE_REGISTRATION_END()
 // clang-format on
@@ -1536,6 +1536,23 @@ void LabelImpl::StopMarquee()
   SetMarqueeEnabled(false);
 }
 
+void LabelImpl::SetPixelSnapFactor(float factor)
+{
+  View                  owner = View::DownCast(Self());
+  const Property::Index index = Internal::EnsureTextPixelSnapFactorProperty(owner);
+  if(index != Property::INVALID_INDEX)
+  {
+    owner.SetProperty(index, factor);
+  }
+}
+
+float LabelImpl::GetPixelSnapFactor() const
+{
+  View                  owner = View::DownCast(Self());
+  const Property::Index index = Internal::GetTextPixelSnapFactorPropertyIndex(owner);
+  return index != Property::INVALID_INDEX ? owner.GetProperty<float>(index) : 0.0f;
+}
+
 void LabelImpl::RequestAsyncNaturalSize()
 {
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
@@ -1774,8 +1791,6 @@ void LabelImpl::OnInitialize()
   DALI_ASSERT_DEBUG(mController && "Invalid Text Controller")
   mController->SetControlInterface(this);
   mController->SetAnchorControlInterface(this);
-
-  self.SetProperty(Text::LabelPropertyIndex::PIXEL_SNAP_FACTOR, 0.0f);
 
   // Use height-for-width negotiation by default
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH);

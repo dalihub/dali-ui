@@ -65,6 +65,24 @@ void ApplyLabelTextGradientOverlayStartOffsetBy(Animation& animation, View view,
   }
 }
 
+void ApplyLabelPixelSnapFactorTo(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+{
+  Label child = Label::DownCast(view);
+  if(child)
+  {
+    Internal::LabelAnimationSpecImpl::ApplyPixelSnapFactorTo(animation, child, entry);
+  }
+}
+
+void ApplyLabelPixelSnapFactorBy(Animation& animation, View view, const Internal::ViewAnimationSpecImpl::Entry& entry)
+{
+  Label child = Label::DownCast(view);
+  if(child)
+  {
+    Internal::LabelAnimationSpecImpl::ApplyPixelSnapFactorBy(animation, child, entry);
+  }
+}
+
 } // namespace
 
 LabelAnimationSpec::LabelAnimationSpec() = default;
@@ -350,6 +368,18 @@ LabelAnimationSpec& LabelAnimationSpec::TextGradientOverlayStartOffset(float tar
 LabelAnimationSpec& LabelAnimationSpec::TextGradientOverlayStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
 {
   Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyLabelTextGradientOverlayStartOffsetBy);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::PixelSnapFactor(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateToEntry(Dali::Property::INVALID_INDEX, target, duration, alpha, delay, &ApplyLabelPixelSnapFactorTo);
+  return *this;
+}
+
+LabelAnimationSpec& LabelAnimationSpec::PixelSnapFactorBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  Internal::GetImpl(*this).AddAnimateByEntry(Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, &ApplyLabelPixelSnapFactorBy);
   return *this;
 }
 
