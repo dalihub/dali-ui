@@ -32,6 +32,23 @@ Renderer::~Renderer()
 {
 }
 
+bool Renderer::SetAtlasGradientState(const Internal::Gradient::AtlasRendererState&)
+{
+  return false;
+}
+
+void Renderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds)
+{
+}
+
+void Renderer::SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex)
+{
+}
+
+void Renderer::SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint)
+{
+}
+
 } // namespace Text
 
 } // namespace Ui

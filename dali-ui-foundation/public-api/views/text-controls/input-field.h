@@ -17,6 +17,7 @@
  *
  */
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
 #include <dali-ui-foundation/public-api/text/input-field-properties.h>
 #include <dali-ui-foundation/public-api/text/input-filter.h>
@@ -36,11 +37,15 @@ namespace Dali
 
 namespace Ui
 {
+class InputFieldAnimationBridge;
+class InputFieldAnimationSpec;
+
 namespace Integration
 {
 class InputFieldImpl;
 }
 
+// @ANIMATION_CONFIG(InputField, View)
 /**
  * @brief InputField is a single-line editable text view.
  *
@@ -250,6 +255,61 @@ public: // Setters for chaining
   UiColor GetTextColor();
 
   /**
+   * @brief Sets the gradient used to fill the default monochrome text glyphs.
+   *
+   * A renderable gradient replaces TextColor RGB for monochrome glyphs that
+   * otherwise use the default text color. TextColor alpha remains an opacity
+   * multiplier. Explicit foreground colors, color glyphs, embedded items, and
+   * text decorations are not replaced. Password masking glyphs are treated as
+   * default monochrome glyphs and receive the gradient.
+   *
+   * Changing TextColor while a gradient is active does not clear the gradient.
+   * Setting Gradient::Base::None(), or a gradient with fewer than two stops,
+   * clears the gradient and restores the latest TextColor.
+   *
+   * Linear, Radial, and Conic gradients are supported, including their units,
+   * spread method, start offset, and stop alpha values.
+   * Gradient::Units::OBJECT_BOUNDING_BOX uses normalized coordinates in the
+   * selected bounds, from (-0.5, -0.5) to (0.5, 0.5), while
+   * Gradient::Units::USER_SPACE uses pixel coordinates in the same bounds.
+   *
+   * @param[in] gradient The authored gradient value.
+   */
+  void SetTextGradient(const Gradient::Base& gradient);
+
+  /**
+   * @brief Gets the text gradient.
+   *
+   * @return The authored text gradient, or Type::NONE if no gradient is set.
+   */
+  Gradient::Base GetTextGradient() const;
+
+  /**
+   * @brief Sets the bounds used to evaluate text and placeholder gradients.
+   *
+   * The default is Text::GradientBoundsMode::CONTENT_BOUND. It uses the actual
+   * laid-out extents of the currently displayed text or placeholder. During
+   * horizontal scrolling, the gradient moves with the text content so a glyph
+   * keeps the same gradient color.
+   *
+   * Text::GradientBoundsMode::VIEW_BOUND uses the full InputField view bounds,
+   * including padding. Scrolling glyphs then move below a gradient fixed to the
+   * control view; the clipping or stencil rectangle does not reduce the bounds.
+   *
+   * The selected mode is shared by the normal and placeholder gradients.
+   *
+   * @param[in] mode The text gradient bounds mode.
+   */
+  void SetTextGradientBoundsMode(Text::GradientBoundsMode mode);
+
+  /**
+   * @brief Gets the shared bounds mode used for text and placeholder gradients.
+   *
+   * @return The current text gradient bounds mode.
+   */
+  Text::GradientBoundsMode GetTextGradientBoundsMode() const;
+
+  /**
    * @brief Sets the horizontal alignment of the text within the inputField.
    *
    * @param[in] alignment The horizontal text alignment.
@@ -318,6 +378,29 @@ public: // Setters for chaining
    * @return The placeholder text color as a UiColor.
    */
   UiColor GetPlaceholderColor();
+
+  /**
+   * @brief Sets the gradient used to fill the default monochrome placeholder glyphs.
+   *
+   * While the placeholder is displayed, a renderable gradient replaces
+   * PlaceholderColor RGB and preserves PlaceholderColor alpha as an opacity
+   * multiplier. Changing PlaceholderColor does not clear the gradient.
+   * Setting Gradient::Base::None(), or a gradient with fewer than two stops,
+   * restores the latest PlaceholderColor.
+   *
+   * This authored value is independent of the normal text gradient.
+   * Linear, Radial, and Conic gradients have the same support as TextGradient.
+   *
+   * @param[in] gradient The authored placeholder gradient value.
+   */
+  void SetPlaceholderTextGradient(const Gradient::Base& gradient);
+
+  /**
+   * @brief Gets the placeholder text gradient.
+   *
+   * @return The authored placeholder gradient, or Type::NONE if none is set.
+   */
+  Gradient::Base GetPlaceholderTextGradient() const;
 
   /**
    * @brief Sets whether the placeholder text is shown when the input field has focus.
@@ -1302,6 +1385,24 @@ public: // Not intended for application developers
    */
   explicit DALI_UI_API InputField(Dali::Internal::CustomActor* internal);
   /// @endcond
+
+  // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)
+  // @ANIMATABLE_MANUAL(PlaceholderTextGradientStartOffset, float)
+public: // Animation
+  /**
+   * @brief Creates an InputFieldAnimationBridge for this InputField.
+   *
+   * @param[in] animation The Animation to apply to
+   * @return An InputFieldAnimationBridge
+   */
+  InputFieldAnimationBridge Animate(Animation animation);
+
+  /**
+   * @brief Creates a new InputFieldAnimationSpec.
+   *
+   * @return A new InputFieldAnimationSpec
+   */
+  static InputFieldAnimationSpec NewAnimationSpec();
 
 public:
 };

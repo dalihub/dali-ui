@@ -22,6 +22,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/animation/duration.h>
+#include <dali-ui-foundation/public-api/animation/input-editor-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/input-editor-animation-spec.autogen.h>
+#include <dali-ui-foundation/public-api/animation/input-field-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/input-field-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/animation/label-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/label-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>

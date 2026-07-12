@@ -220,7 +220,7 @@ enum class PasswordMode : uint8_t
 /**
  * @brief Enumeration for selecting the bounds used to evaluate text gradient coordinates.
  *
- * The selected bounds define the target rectangle for Label TextGradient rendering.
+ * The selected bounds define the target rectangle for text view TextGradient rendering.
  * Gradient::Units then defines whether coordinates inside that rectangle are
  * normalized or pixel-based.
  */
@@ -229,15 +229,18 @@ enum class GradientBoundsMode : uint8_t
   /**
    * @brief Use laid-out text content bounds.
    *
-   * This is the default mode. For marquee text, the visible marquee content
-   * viewport is used to keep the gradient stable while scrolling.
+   * This is the default mode. The exact scrolling behavior depends on the text
+   * view. Label marquee uses the visible marquee content viewport so the
+   * gradient remains stable while marquee scrolling. InputField and InputEditor
+   * use content-relative bounds, so a scrolling glyph keeps the same position
+   * inside the gradient.
    */
   CONTENT_BOUND = 0,
 
   /**
-   * @brief Use the Label view bounds.
+   * @brief Use the text view bounds.
    *
-   * The full Label size is used, including padding.
+   * The full text view size is used, including padding.
    */
   VIEW_BOUND = 1
 };

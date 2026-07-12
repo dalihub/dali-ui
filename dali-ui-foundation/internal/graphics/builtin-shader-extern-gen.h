@@ -61,6 +61,8 @@ extern const std::string_view SHADER_PRIMITIVE_VISUAL_SHADER_VERT;
 extern const std::string_view SHADER_RENDER_EFFECT_FRAG;
 extern const std::string_view SHADER_RENDER_EFFECT_VERT;
 extern const std::string_view SHADER_SPREAD_FILTER_SHADER_FRAG;
+extern const std::string_view SHADER_TEXT_ATLAS_GRADIENT_SHADER_VERT;
+extern const std::string_view SHADER_TEXT_ATLAS_L8_GRADIENT_SHADER_FRAG;
 extern const std::string_view SHADER_TEXT_ATLAS_L8_SHADER_FRAG;
 extern const std::string_view SHADER_TEXT_ATLAS_RGBA_SHADER_FRAG;
 extern const std::string_view SHADER_TEXT_ATLAS_SHADER_VERT;

@@ -16,6 +16,7 @@
 #include "manual-test-case.h"
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <string>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -30,17 +31,103 @@ constexpr uint32_t COLOR_ITEM_NAME   = 0x212121; // Near-black
 constexpr uint32_t COLOR_ITEM_DESC   = 0x757575; // Gray
 constexpr uint32_t COLOR_SEPARATOR   = 0xE0E0E0; // Light gray
 constexpr uint32_t COLOR_APP_BG      = 0xF5F5F5; // Light gray
+constexpr uint32_t COLOR_SEARCH_TEXT = 0x374151; // Soft black
+constexpr uint32_t COLOR_MATCH_TEXT  = 0x2563EB; // Blue
 
 // Sizes (pixels)
-constexpr float HEADER_HEIGHT = 60.0f;
-constexpr float SEPARATOR_H   = 1.0f;
-constexpr float PADDING_H     = 20.0f;
-constexpr float PADDING_V     = 14.0f;
+constexpr float HEADER_HEIGHT       = 60.0f;
+constexpr float SEARCH_HEIGHT = 48.0f;
+constexpr float SEPARATOR_H         = 1.0f;
+constexpr float PADDING_H           = 20.0f;
+constexpr float PADDING_V           = 14.0f;
 
 // Font sizes (pixels)
 constexpr float FONT_HEADER  = 22.0f;
+constexpr float FONT_SEARCH  = 16.0f;
 constexpr float FONT_TC_NAME = 17.0f;
 constexpr float FONT_TC_DESC = 13.0f;
+
+struct SearchCache
+{
+  std::string nameKey;
+  std::string descriptionKey;
+};
+
+std::string ToStdString(const Dali::String& text)
+{
+  return text.CStr();
+}
+
+std::string MakeSearchKey(const Dali::String& text)
+{
+  std::string key = ToStdString(text);
+  for(char& ch : key)
+  {
+    if(ch >= 'A' && ch <= 'Z')
+    {
+      ch = static_cast<char>(ch - 'A' + 'a');
+    }
+  }
+  return key;
+}
+
+bool ContainsSearchKey(const std::string& textKey, const std::string& searchKey)
+{
+  return searchKey.empty() || textKey.find(searchKey) != std::string::npos;
+}
+
+Gradient::Linear CreateSearchBackgroundGradient()
+{
+  Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetStopNodes({
+    Gradient::StopNode(0.0f, UiColor(0xFFFFFF)),
+    Gradient::StopNode(0.52f, UiColor(0xF8FBFF)),
+    Gradient::StopNode(1.0f, UiColor(0xF6F1FF)),
+  });
+  return gradient;
+}
+
+Gradient::Linear CreateSearchPlaceholderGradient()
+{
+  Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetStopNodes({
+    Gradient::StopNode(0.00f, UiColor(0x4F7DF3)),
+    Gradient::StopNode(0.45f, UiColor(0x8B5CF6)),
+    Gradient::StopNode(1.00f, UiColor(0xEC4899)),
+  });
+  return gradient;
+}
+
+Text::StyledText BuildHighlightedText(const Dali::String& text, const std::string& textKey, const std::string& searchKey)
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New(text);
+  if(searchKey.empty())
+  {
+    return builder.Build();
+  }
+
+  const Dali::StringView sourceView(text);
+
+  std::size_t position = textKey.find(searchKey);
+  while(position != std::string::npos)
+  {
+    uint32_t utf32Start = 0u;
+    uint32_t utf32End   = 0u;
+    if(Text::Utf8ToUtf32Range(
+         sourceView,
+         static_cast<uint32_t>(position),
+         static_cast<uint32_t>(position + searchKey.size()),
+         utf32Start,
+         utf32End))
+    {
+      builder.SetSpan(Text::ForegroundColorSpan::New(UiColor(COLOR_MATCH_TEXT)), utf32Start, utf32End);
+    }
+    position = textKey.find(searchKey, position + searchKey.size());
+  }
+  return builder.Build();
+}
 } // namespace
 
 /**
@@ -71,6 +158,11 @@ private:
     window.KeyEventSignal().Connect(this, &ManualTestLauncher::OnKeyEvent);
 
     mTestCases = ManualTest::Registry::Get().CreateAll();
+    mSearchCache.reserve(mTestCases.size());
+    for(const auto& tc : mTestCases)
+    {
+      mSearchCache.push_back({MakeSearchKey(tc->GetName()), MakeSearchKey(tc->GetDescription())});
+    }
 
     mRootContainer = StackLayout::New(StackOrientation::VERTICAL);
     mRootContainer.SetRequestedWidth(MATCH_PARENT);
@@ -91,34 +183,19 @@ private:
 
     // ── Header ──────────────────────────────────────────────────────────────
     mRootContainer.Add(MakeHeader("Manual Tests"));
+    mRootContainer.Add(MakeSearchField());
 
     // ── TC list ─────────────────────────────────────────────────────────────
-    StackLayout listContent = StackLayout::New(StackOrientation::VERTICAL);
-    listContent.SetRequestedWidth(MATCH_PARENT);
-    listContent.SetRequestedHeight(WRAP_CONTENT);
-
-    if(mTestCases.empty())
-    {
-      Label emptyLabel = Label::New("No test cases registered.");
-      emptyLabel.SetTextColor(UiColor(COLOR_ITEM_DESC));
-      emptyLabel.SetFontSize(FONT_TC_NAME);
-      emptyLabel.SetRequestedWidth(MATCH_PARENT);
-      emptyLabel.SetRequestedHeight(WRAP_CONTENT);
-      emptyLabel.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
-      listContent.Add(emptyLabel);
-    }
-
-    for(std::size_t i = 0; i < mTestCases.size(); ++i)
-    {
-      listContent.Add(MakeListItem(i));
-      listContent.Add(MakeSeparator());
-    }
+    mListContent = StackLayout::New(StackOrientation::VERTICAL);
+    mListContent.SetRequestedWidth(MATCH_PARENT);
+    mListContent.SetRequestedHeight(WRAP_CONTENT);
+    RefreshListContent();
 
     ScrollView scrollView = ScrollView::New();
     scrollView.SetScrollDirection(ScrollDirection::Vertical);
     scrollView.SetRequestedWidth(MATCH_PARENT);
     scrollView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-    scrollView.SetContent(listContent);
+    scrollView.SetContent(mListContent);
     mRootContainer.Add(scrollView);
   }
 
@@ -140,7 +217,74 @@ private:
     return header;
   }
 
-  View MakeListItem(std::size_t index)
+  View MakeSearchField()
+  {
+    mSearchField = InputField::New();
+    mSearchField.SetRequestedWidth(MATCH_PARENT);
+    mSearchField.SetRequestedHeight(SEARCH_HEIGHT);
+    mSearchField.SetBackgroundColor(UiColor(0xFFFFFF, 0.72f));
+    mSearchField.SetBorderlineWidth(1.0f);
+    mSearchField.SetBorderlineColor(UiColor(0xD9E5FF));
+    mSearchField.SetMargin(Extents(8.0f, 8.0f, 8.0f, 8.0f));
+    mSearchField.SetPadding(Extents(16.0f, 16.0f, 0.0f, 0.0f));
+    mSearchField.SetFontSize(FONT_SEARCH);
+    mSearchField.SetTextColor(UiColor(COLOR_SEARCH_TEXT));
+    mSearchField.SetPlaceholder("What are you looking for?");
+    mSearchField.SetPlaceholderTextGradient(CreateSearchPlaceholderGradient());
+    mSearchField.SetBackgroundGradient(CreateSearchBackgroundGradient());
+    mSearchField.SetVerticalTextAlignment(Text::Alignment::CENTER);
+    mSearchField.SetText(mSearchText);
+    mSearchField.TextChangedSignal().Connect(this, &ManualTestLauncher::OnSearchTextChanged);
+    return mSearchField;
+  }
+
+  void RefreshListContent()
+  {
+    if(!mListContent)
+    {
+      return;
+    }
+
+    mListContent.RemoveAllChildren();
+    const std::string searchKey = MakeSearchKey(mSearchText);
+
+    if(mTestCases.empty())
+    {
+      Label emptyLabel = Label::New("No test cases registered.");
+      emptyLabel.SetTextColor(UiColor(COLOR_ITEM_DESC));
+      emptyLabel.SetFontSize(FONT_TC_NAME);
+      emptyLabel.SetRequestedWidth(MATCH_PARENT);
+      emptyLabel.SetRequestedHeight(WRAP_CONTENT);
+      emptyLabel.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
+      mListContent.Add(emptyLabel);
+      return;
+    }
+
+    std::size_t visibleCount = 0u;
+    for(std::size_t i = 0; i < mTestCases.size(); ++i)
+    {
+      const auto& cache = mSearchCache[i];
+      if(ContainsSearchKey(cache.nameKey, searchKey) || ContainsSearchKey(cache.descriptionKey, searchKey))
+      {
+        mListContent.Add(MakeListItem(i, searchKey));
+        mListContent.Add(MakeSeparator());
+        ++visibleCount;
+      }
+    }
+
+    if(visibleCount == 0u)
+    {
+      Label emptyLabel = Label::New("No matching test cases.");
+      emptyLabel.SetTextColor(UiColor(COLOR_ITEM_DESC));
+      emptyLabel.SetFontSize(FONT_TC_NAME);
+      emptyLabel.SetRequestedWidth(MATCH_PARENT);
+      emptyLabel.SetRequestedHeight(WRAP_CONTENT);
+      emptyLabel.SetPadding(Extents(PADDING_H, PADDING_H, PADDING_V * 2, PADDING_V * 2));
+      mListContent.Add(emptyLabel);
+    }
+  }
+
+  View MakeListItem(std::size_t index, const std::string& searchKey)
   {
     const auto& tc = mTestCases[index];
 
@@ -155,6 +299,13 @@ private:
     descriptionLabel.SetFontSize(FONT_TC_DESC);
     descriptionLabel.SetRequestedWidth(MATCH_PARENT);
     descriptionLabel.SetRequestedHeight(WRAP_CONTENT);
+
+    if(!searchKey.empty())
+    {
+      const auto& cache = mSearchCache[index];
+      nameLabel.SetStyledText(BuildHighlightedText(tc->GetName(), cache.nameKey, searchKey));
+      descriptionLabel.SetStyledText(BuildHighlightedText(tc->GetDescription(), cache.descriptionKey, searchKey));
+    }
 
     StackLayout item = StackLayout::New(StackOrientation::VERTICAL);
     item.SetRequestedWidth(MATCH_PARENT);
@@ -181,6 +332,12 @@ private:
     separator.SetRequestedHeight(SEPARATOR_H);
     separator.SetBackgroundColor(UiColor(COLOR_SEPARATOR));
     return separator;
+  }
+
+  void OnSearchTextChanged(View)
+  {
+    mSearchText = mSearchField.GetText();
+    RefreshListContent();
   }
 
   // -------------------------------------------------------------------------
@@ -280,6 +437,10 @@ private:
 
   Application&                                       mApplication;
   StackLayout                                        mRootContainer;
+  StackLayout                                        mListContent;
+  InputField                                         mSearchField;
+  Dali::String                                       mSearchText;
+  std::vector<SearchCache>                           mSearchCache;
   std::vector<std::unique_ptr<ManualTest::TestCase>> mTestCases;
   ManualTest::TestCase*                              mActiveCase{nullptr};
 };

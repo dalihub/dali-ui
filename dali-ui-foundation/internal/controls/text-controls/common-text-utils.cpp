@@ -28,7 +28,9 @@
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/hidden-text.h>
+#include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
+#include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -60,6 +62,59 @@ bool ValidateRange(const std::string& string, std::size_t begin, std::size_t end
   // 2. It does not break graphemes (compound emojis, glyphs with combining characters etc.).
 
   return true;
+}
+
+Vector2 CalculateRenderablePosition(Actor textActor, Text::ControllerPtr controller, float alignmentOffset, Actor stencil)
+{
+  const Vector2& scrollOffset = controller->GetTextModel()->GetScrollPosition();
+  if(stencil)
+  {
+    return Vector2(scrollOffset.x + alignmentOffset, scrollOffset.y);
+  }
+
+  Extents    padding         = textActor.GetProperty<Extents>(Ui::View::Property::PADDING);
+  const auto layoutDirection = static_cast<Dali::LayoutDirection::Type>(
+    textActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+  if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+  {
+    std::swap(padding.start, padding.end);
+  }
+  return Vector2(scrollOffset.x + alignmentOffset + padding.start, scrollOffset.y + padding.top);
+}
+
+void UpdateAtlasGradient(Text::RendererPtr                                        renderer,
+                         Text::ControllerPtr                                      controller,
+                         Actor                                                    stencil,
+                         const Vector2&                                           renderablePosition,
+                         float                                                    minLineOffset,
+                         const Text::Internal::Gradient::AtlasGradientFrameState& state,
+                         const Vector2&                                           viewSize)
+{
+  if(!renderer || !state.enabled)
+  {
+    return;
+  }
+
+  const Vector2 layoutSize = controller->GetView().GetLayoutSize();
+  Vector4       bounds;
+  if(state.boundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+  {
+    Vector2 contentOffset = renderablePosition;
+    if(stencil)
+    {
+      const Vector3 stencilPosition = stencil.GetProperty<Vector3>(Actor::Property::POSITION);
+      contentOffset += Vector2(stencilPosition.x, stencilPosition.y);
+    }
+    bounds = Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
+  }
+  else
+  {
+    const auto model = controller->GetTextModel();
+    bounds           = Text::Internal::CalculateAtlasGradientContentBounds(
+      layoutSize, model->GetLines(), model->GetNumberOfLines(), minLineOffset);
+  }
+
+  renderer->UpdateAtlasGradient(layoutSize, bounds);
 }
 } // namespace
 Bounds CommonTextUtils::GetTextBoundingRectangle(Text::ModelPtr model, TextAbstraction::CharacterIndex startIndex,
@@ -122,9 +177,11 @@ void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::Control
 void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
                                  Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
                                  Actor& backgroundActor, Actor& cursorLayerActor, Actor& stencil,
-                                 std::vector<Actor>&              clippingDecorationActors,
-                                 std::vector<Ui::TextAnchor>&     anchorActors,
-                                 Text::Controller::UpdateTextType updateTextType)
+                                 std::vector<Actor>&                                      clippingDecorationActors,
+                                 std::vector<Ui::TextAnchor>&                             anchorActors,
+                                 Text::Controller::UpdateTextType                         updateTextType,
+                                 const Text::Internal::Gradient::AtlasGradientFrameState& gradientState,
+                                 const Vector2&                                           viewSize)
 {
   Actor newRenderableActor;
 
@@ -152,33 +209,9 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
   if(renderableActor)
   {
-    const Vector2& scrollOffset = controller->GetTextModel()->GetScrollPosition();
-
-    float renderableActorPositionX, renderableActorPositionY;
-
-    if(stencil)
-    {
-      renderableActorPositionX = scrollOffset.x + alignmentOffset;
-      renderableActorPositionY = scrollOffset.y;
-    }
-    else
-    {
-      Extents padding;
-      padding = textActor.GetProperty<Extents>(Ui::View::Property::PADDING);
-
-      // Support Right-To-Left of padding
-      Dali::LayoutDirection::Type layoutDirection = static_cast<Dali::LayoutDirection::Type>(
-        textActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
-      if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
-      {
-        std::swap(padding.start, padding.end);
-      }
-
-      renderableActorPositionX = scrollOffset.x + alignmentOffset + padding.start;
-      renderableActorPositionY = scrollOffset.y + padding.top;
-    }
-
-    renderableActor.SetProperty(Actor::Property::POSITION, Vector2(renderableActorPositionX, renderableActorPositionY));
+    const Vector2 renderableActorPosition = CalculateRenderablePosition(textActor, controller, alignmentOffset, stencil);
+    renderableActor.SetProperty(Actor::Property::POSITION, renderableActorPosition);
+    UpdateAtlasGradient(renderer, controller, stencil, renderableActorPosition, alignmentOffset, gradientState, viewSize);
 
     // Make sure the actors are parented correctly with/without clipping.
     // When stencil is null, `self` is the text View itself; use the Integration
@@ -222,7 +255,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
         addChild(backgroundActor);
         backgroundActor.SetProperty(
           Actor::Property::POSITION,
-          Vector2(renderableActorPositionX, renderableActorPositionY)); // In text field's coords.
+          renderableActorPosition); // In text field's coords.
         backgroundActor.LowerBelow(highlightActor);
       }
       else
@@ -240,6 +273,21 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
     SynchronizeTextAnchorsInParent(textActor, controller, anchorActors);
   }
+}
+
+void CommonTextUtils::UpdateTextRenderPosition(
+  Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller, float alignmentOffset,
+  Actor renderableActor, Actor stencil, const Text::Internal::Gradient::AtlasGradientFrameState& gradientState,
+  const Vector2& viewSize)
+{
+  if(!renderableActor || !renderer)
+  {
+    return;
+  }
+
+  const Vector2 position = CalculateRenderablePosition(textActor, controller, alignmentOffset, stencil);
+  renderableActor.SetProperty(Actor::Property::POSITION, position);
+  UpdateAtlasGradient(renderer, controller, stencil, position, alignmentOffset, gradientState, viewSize);
 }
 
 void TextControlAccessible::InitDefaultFeatures()

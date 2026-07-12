@@ -15,6 +15,8 @@
  *
  */
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
+#include <dali-ui-foundation/public-api/animation/input-editor-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/input-editor-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
 #include <dali/devel-api/object/type-registry.h>
 
@@ -100,6 +102,16 @@ InputEditor::InputEditor(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::InputEditorImpl>(internal);
 }
 
+InputEditorAnimationBridge InputEditor::Animate(Animation animation)
+{
+  return InputEditorAnimationBridge(animation, *this);
+}
+
+InputEditorAnimationSpec InputEditor::NewAnimationSpec()
+{
+  return InputEditorAnimationSpec::New();
+}
+
 void InputEditor::SetText(const Dali::String& text)
 {
   GetImpl(*this).SetText(text);
@@ -143,6 +155,26 @@ void InputEditor::SetTextColor(const UiColor& color)
 UiColor InputEditor::GetTextColor()
 {
   return GetImpl(*this).GetTextColor();
+}
+
+void InputEditor::SetTextGradient(const Gradient::Base& gradient)
+{
+  GetImpl(*this).SetTextGradient(gradient);
+}
+
+Gradient::Base InputEditor::GetTextGradient() const
+{
+  return GetImpl(*this).GetTextGradient();
+}
+
+void InputEditor::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
+{
+  GetImpl(*this).SetTextGradientBoundsMode(mode);
+}
+
+Text::GradientBoundsMode InputEditor::GetTextGradientBoundsMode() const
+{
+  return GetImpl(*this).GetTextGradientBoundsMode();
 }
 
 void InputEditor::SetLineWrapMode(Text::LineWrapMode mode)
@@ -223,6 +255,16 @@ void InputEditor::SetPlaceholderColor(const UiColor& color)
 UiColor InputEditor::GetPlaceholderColor()
 {
   return GetImpl(*this).GetPlaceholderColor();
+}
+
+void InputEditor::SetPlaceholderTextGradient(const Gradient::Base& gradient)
+{
+  GetImpl(*this).SetPlaceholderTextGradient(gradient);
+}
+
+Gradient::Base InputEditor::GetPlaceholderTextGradient() const
+{
+  return GetImpl(*this).GetPlaceholderTextGradient();
 }
 
 void InputEditor::SetShowPlaceholderOnFocus(bool enabled)

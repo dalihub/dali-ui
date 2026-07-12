@@ -79,6 +79,81 @@ const char* const PROPERTY_NAME_TYPING_FONT_WEIGHT                   = "typingFo
 const char* const PROPERTY_NAME_TYPING_FONT_WIDTH                    = "typingFontWidth";
 const char* const PROPERTY_NAME_TYPING_FONT_SLANT                    = "typingFontSlant";
 
+constexpr const char* TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME             = "uTextGradientStartOffset";
+constexpr const char* PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME = "uPlaceholderTextGradientStartOffset";
+constexpr float       EPSILON                                              = Math::MACHINE_EPSILON_1000;
+
+Gradient::Linear MakeInputEditorGradient(const Vector4& first, const Vector4& second)
+{
+  Gradient::Linear gradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
+  gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(first)), Gradient::StopNode(1.0f, UiColor(second))});
+  return gradient;
+}
+
+Gradient::Radial MakeInputEditorRadialGradient()
+{
+  Gradient::Radial gradient(Vector2(16.0f, 20.0f), 28.0f);
+  gradient.SetUnits(Gradient::Units::USER_SPACE);
+  gradient.SetSpreadMethod(Gradient::SpreadMethod::REPEAT);
+  gradient.SetStartOffset(0.125f);
+  gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Vector4(1.0f, 0.0f, 0.0f, 0.0f))),
+                         Gradient::StopNode(0.5f, UiColor(Color::GREEN)),
+                         Gradient::StopNode(1.0f, UiColor(Color::BLUE))});
+  return gradient;
+}
+
+Gradient::Conic MakeInputEditorConicGradient()
+{
+  Gradient::Conic gradient(Vector2(0.25f, 0.75f), Radian(0.75f));
+  gradient.SetUnits(Gradient::Units::OBJECT_BOUNDING_BOX);
+  gradient.SetSpreadMethod(Gradient::SpreadMethod::REFLECT);
+  gradient.SetStartOffset(-0.25f);
+  gradient.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::CYAN)),
+                         Gradient::StopNode(1.0f, UiColor(Vector4(1.0f, 1.0f, 0.0f, 0.35f)))});
+  return gradient;
+}
+
+void ExpectInputEditorGradient(const Gradient::Base& gradient, const Vector4& first, const Vector4& second)
+{
+  DALI_TEST_EQUALS(gradient.GetType(), Gradient::Type::LINEAR, TEST_LOCATION);
+  const auto linear = Gradient::Linear::DownCast(gradient);
+  DALI_TEST_CHECK(linear.GetType() == Gradient::Type::LINEAR);
+  DALI_TEST_EQUALS(linear.GetStartPosition(), Vector2(-0.5f, 0.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(linear.GetEndPosition(), Vector2(0.5f, 0.0f), TEST_LOCATION);
+  const auto stops = linear.GetStopNodes();
+  DALI_TEST_EQUALS(stops.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(stops[0u].GetColor().GetRgba(), first, TEST_LOCATION);
+  DALI_TEST_EQUALS(stops[1u].GetColor().GetRgba(), second, TEST_LOCATION);
+}
+
+void ExpectInputEditorRadialGradient(const Gradient::Base& gradient)
+{
+  DALI_TEST_EQUALS(gradient.GetType(), Gradient::Type::RADIAL, TEST_LOCATION);
+  const auto radial = Gradient::Radial::DownCast(gradient);
+  DALI_TEST_EQUALS(radial.GetUnits(), Gradient::Units::USER_SPACE, TEST_LOCATION);
+  DALI_TEST_EQUALS(radial.GetSpreadMethod(), Gradient::SpreadMethod::REPEAT, TEST_LOCATION);
+  DALI_TEST_EQUALS(radial.GetStartOffset(), 0.125f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(radial.GetCenter(), Vector2(16.0f, 20.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(radial.GetRadius(), 28.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  const auto stops = radial.GetStopNodes();
+  DALI_TEST_EQUALS(stops.Count(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(stops[0u].GetColor().GetRgba(), Vector4(1.0f, 0.0f, 0.0f, 0.0f), TEST_LOCATION);
+}
+
+void ExpectInputEditorConicGradient(const Gradient::Base& gradient)
+{
+  DALI_TEST_EQUALS(gradient.GetType(), Gradient::Type::CONIC, TEST_LOCATION);
+  const auto conic = Gradient::Conic::DownCast(gradient);
+  DALI_TEST_EQUALS(conic.GetUnits(), Gradient::Units::OBJECT_BOUNDING_BOX, TEST_LOCATION);
+  DALI_TEST_EQUALS(conic.GetSpreadMethod(), Gradient::SpreadMethod::REFLECT, TEST_LOCATION);
+  DALI_TEST_EQUALS(conic.GetStartOffset(), -0.25f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(conic.GetCenter(), Vector2(0.25f, 0.75f), TEST_LOCATION);
+  DALI_TEST_EQUALS(conic.GetStartAngle(), Radian(0.75f), TEST_LOCATION);
+  const auto stops = conic.GetStopNodes();
+  DALI_TEST_EQUALS(stops.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(stops[1u].GetColor().GetRgba(), Vector4(1.0f, 1.0f, 0.0f, 0.35f), TEST_LOCATION);
+}
+
 } // namespace
 
 void utc_dali_input_editor_startup(void)
@@ -1561,5 +1636,192 @@ int UtcDaliInputEditorSetPlaceholderDoesNotClearTranslatablePlaceholderP(void)
   DALI_TEST_EQUALS(inputEditor.GetPlaceholder(), "Placeholder Default", TEST_LOCATION);
 
   CleanupInputEditorLocalization(inputEditor);
+  END_TEST;
+}
+
+int UtcDaliInputEditorTextGradientDefaultsP(void)
+{
+  UiTestApplication application;
+  InputEditor      editor = InputEditor::New();
+
+  DALI_TEST_EQUALS(editor.GetTextGradient().GetType(), Gradient::Type::NONE, TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetPlaceholderTextGradient().GetType(), Gradient::Type::NONE, TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetTextGradientBoundsMode(), Text::GradientBoundsMode::CONTENT_BOUND, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorTextGradientSetGetCopyAndBoundsP(void)
+{
+  UiTestApplication application;
+  InputEditor      editor = InputEditor::New();
+
+  Gradient::Linear source = MakeInputEditorGradient(Color::RED, Color::BLUE);
+  editor.SetTextGradient(source);
+  editor.SetTextGradient(source); // Identical authored value is a public no-op.
+  ExpectInputEditorGradient(editor.GetTextGradient(), Color::RED, Color::BLUE);
+
+  source.SetStartAndEndPosition(Vector2(10.0f, 20.0f), Vector2(30.0f, 40.0f));
+  source.SetStopNodes({Gradient::StopNode(0.0f, UiColor(Color::GREEN)),
+                       Gradient::StopNode(1.0f, UiColor(Color::YELLOW))});
+  ExpectInputEditorGradient(editor.GetTextGradient(), Color::RED, Color::BLUE);
+
+  editor.SetTextGradientBoundsMode(Text::GradientBoundsMode::VIEW_BOUND);
+  DALI_TEST_EQUALS(editor.GetTextGradientBoundsMode(), Text::GradientBoundsMode::VIEW_BOUND, TEST_LOCATION);
+  editor.SetTextGradientBoundsMode(Text::GradientBoundsMode::CONTENT_BOUND);
+  DALI_TEST_EQUALS(editor.GetTextGradientBoundsMode(), Text::GradientBoundsMode::CONTENT_BOUND, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorTextGradientRadialConicAuthoredP(void)
+{
+  UiTestApplication application;
+  InputEditor      editor = InputEditor::New();
+
+  editor.SetTextGradient(MakeInputEditorRadialGradient());
+  ExpectInputEditorRadialGradient(editor.GetTextGradient());
+
+  editor.SetPlaceholderTextGradient(MakeInputEditorConicGradient());
+  ExpectInputEditorConicGradient(editor.GetPlaceholderTextGradient());
+  END_TEST;
+}
+
+int UtcDaliInputEditorTextGradientNormalPlaceholderIndependentP(void)
+{
+  UiTestApplication application;
+  InputEditor      editor = InputEditor::New();
+
+  editor.SetTextGradient(MakeInputEditorGradient(Color::RED, Color::BLUE));
+  editor.SetPlaceholderTextGradient(MakeInputEditorGradient(Color::GREEN, Color::YELLOW));
+  ExpectInputEditorGradient(editor.GetTextGradient(), Color::RED, Color::BLUE);
+  ExpectInputEditorGradient(editor.GetPlaceholderTextGradient(), Color::GREEN, Color::YELLOW);
+
+  editor.SetTextGradient(Gradient::Base::None());
+  DALI_TEST_EQUALS(editor.GetTextGradient().GetType(), Gradient::Type::NONE, TEST_LOCATION);
+  ExpectInputEditorGradient(editor.GetPlaceholderTextGradient(), Color::GREEN, Color::YELLOW);
+
+  editor.SetPlaceholderTextGradient(Gradient::Base::None());
+  DALI_TEST_EQUALS(editor.GetPlaceholderTextGradient().GetType(), Gradient::Type::NONE, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorTextGradientColorFallbackP(void)
+{
+  UiTestApplication application;
+  InputEditor      editor = InputEditor::New();
+
+  editor.SetTextColor(UiColor(Color::RED));
+  editor.SetTextGradient(MakeInputEditorGradient(Color::GREEN, Color::YELLOW));
+  editor.SetTextColor(UiColor(Color::BLUE));
+  DALI_TEST_EQUALS(editor.GetTextGradient().GetType(), Gradient::Type::LINEAR, TEST_LOCATION);
+  editor.SetTextGradient(Gradient::Base::None());
+  DALI_TEST_EQUALS(editor.GetTextColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+
+  editor.SetPlaceholderColor(UiColor(Color::CYAN));
+  editor.SetPlaceholderTextGradient(MakeInputEditorGradient(Color::RED, Color::BLUE));
+  editor.SetPlaceholderColor(UiColor(Color::MAGENTA));
+  DALI_TEST_EQUALS(editor.GetPlaceholderTextGradient().GetType(), Gradient::Type::LINEAR, TEST_LOCATION);
+  editor.SetPlaceholderTextGradient(Gradient::Base::None());
+  DALI_TEST_EQUALS(editor.GetPlaceholderColor().GetRgba(), Color::MAGENTA, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorTextGradientRejectInvalidP(void)
+{
+  UiTestApplication application;
+  InputEditor      editor = InputEditor::New();
+
+  Gradient::Linear oneStop(Vector2::ZERO, Vector2::ONE);
+  oneStop.SetStopNodes({Gradient::StopNode(0.5f, UiColor(Color::RED))});
+
+  editor.SetTextGradient(MakeInputEditorGradient(Color::RED, Color::BLUE));
+  editor.SetTextGradient(oneStop);
+  DALI_TEST_EQUALS(editor.GetTextGradient().GetType(), Gradient::Type::NONE, TEST_LOCATION);
+
+  editor.SetPlaceholderTextGradient(MakeInputEditorGradient(Color::GREEN, Color::YELLOW));
+  editor.SetPlaceholderTextGradient(oneStop);
+  DALI_TEST_EQUALS(editor.GetPlaceholderTextGradient().GetType(), Gradient::Type::NONE, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliInputEditorTextGradientControlLifecycleP(void)
+{
+  TestApplication application;
+
+  for(uint32_t iteration = 0u; iteration < 6u; ++iteration)
+  {
+    InputEditor editor = InputEditor::New();
+    DALI_TEST_CHECK(editor);
+    editor.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 100.0f));
+    editor.SetPlaceholder("multiline\nplaceholder");
+    editor.SetTextGradient(MakeInputEditorGradient(Color::CYAN, Color::MAGENTA));
+    editor.SetPlaceholderTextGradient(MakeInputEditorGradient(Color::GREEN, Color::YELLOW));
+    editor.SetTextGradientBoundsMode(Text::GradientBoundsMode::VIEW_BOUND);
+
+    application.GetScene().Add(editor);
+    editor.SetText("line one\nline two\nline three\nline four");
+    editor.SetText("");
+    editor.SetPlaceholderTextGradient(Gradient::Base::None());
+    editor.SetTextGradientBoundsMode(Text::GradientBoundsMode::CONTENT_BOUND);
+    application.GetScene().Remove(editor);
+    editor.Reset();
+  }
+  END_TEST;
+}
+
+int UtcDaliInputEditorTextGradientStartOffsetAnimationP(void)
+{
+  TestApplication application;
+  InputEditor     editor = InputEditor::New();
+
+  Animation noGradientAnimation = Animation::New(0.1f);
+  editor.Animate(noGradientAnimation)
+    .TextGradientStartOffset(0.75f, Duration(0.1f))
+    .TextGradientStartOffsetBy(0.1f, Duration(0.1f))
+    .PlaceholderTextGradientStartOffset(0.5f, Duration(0.1f))
+    .PlaceholderTextGradientStartOffsetBy(0.1f, Duration(0.1f));
+  DALI_TEST_EQUALS(editor.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetPropertyIndex(PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  InputEditorAnimationSpec noGradientSpec = InputEditor::NewAnimationSpec();
+  noGradientSpec.TextGradientStartOffset(0.25f, Duration(0.1f))
+    .PlaceholderTextGradientStartOffset(0.35f, Duration(0.1f));
+  noGradientSpec.ApplyTo(noGradientAnimation, editor);
+  DALI_TEST_EQUALS(editor.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetPropertyIndex(PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), Property::INVALID_INDEX, TEST_LOCATION);
+
+  editor.SetTextGradient(MakeInputEditorRadialGradient());
+  editor.SetPlaceholderTextGradient(MakeInputEditorConicGradient());
+
+  Animation animation = Animation::New(0.1f);
+  editor.Animate(animation)
+    .TextGradientStartOffset(0.75f, Duration(0.1f))
+    .PlaceholderTextGradientStartOffset(0.5f, Duration(0.1f));
+
+  const Property::Index normalIndex = editor.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  const Property::Index placeholderIndex = editor.GetPropertyIndex(PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME);
+  DALI_TEST_CHECK(normalIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(placeholderIndex != Property::INVALID_INDEX);
+  DALI_TEST_CHECK(normalIndex != placeholderIndex);
+  DALI_TEST_EQUALS(editor.GetProperty<float>(normalIndex), 0.125f, EPSILON, TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetProperty<float>(placeholderIndex), -0.25f, EPSILON, TEST_LOCATION);
+
+  InputEditorAnimationSpec spec = InputEditor::NewAnimationSpec();
+  spec.TextGradientStartOffsetBy(0.05f, Duration(0.1f))
+    .PlaceholderTextGradientStartOffsetBy(0.05f, Duration(0.1f));
+  Animation specAnimation = Animation::New(0.1f);
+  spec.ApplyTo(specAnimation, editor);
+  DALI_TEST_EQUALS(editor.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), normalIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetPropertyIndex(PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), placeholderIndex, TEST_LOCATION);
+
+  editor.SetTextGradient(Gradient::Base::None());
+  editor.SetPlaceholderTextGradient(Gradient::Base::None());
+
+  Animation afterClearAnimation = Animation::New(0.1f);
+  editor.Animate(afterClearAnimation)
+    .TextGradientStartOffset(0.2f, Duration(0.1f))
+    .PlaceholderTextGradientStartOffset(0.3f, Duration(0.1f));
+  DALI_TEST_EQUALS(editor.GetPropertyIndex(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), normalIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetPropertyIndex(PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME), placeholderIndex, TEST_LOCATION);
+
   END_TEST;
 }

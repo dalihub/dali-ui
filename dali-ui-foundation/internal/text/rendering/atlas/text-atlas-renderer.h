@@ -45,6 +45,11 @@ public:
   virtual Actor Render(ViewInterface& view, Actor textControl, Property::Index animatablePropertyIndex,
                        float& alignmentOffset, int depth);
 
+  bool SetAtlasGradientState(const Internal::Gradient::AtlasRendererState& state) override;
+  void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds) override;
+  void SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex) override;
+  void SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint = false) override;
+
 protected:
   /**
    * @brief Constructor.

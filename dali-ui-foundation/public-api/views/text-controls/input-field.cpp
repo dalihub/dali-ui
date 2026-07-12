@@ -15,6 +15,8 @@
  *
  */
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
+#include <dali-ui-foundation/public-api/animation/input-field-animation-bridge.autogen.h>
+#include <dali-ui-foundation/public-api/animation/input-field-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
 #include <dali/devel-api/object/type-registry.h>
 
@@ -100,6 +102,16 @@ InputField::InputField(Dali::Internal::CustomActor* internal)
   VerifyCustomActorPointer<Integration::InputFieldImpl>(internal);
 }
 
+InputFieldAnimationBridge InputField::Animate(Animation animation)
+{
+  return InputFieldAnimationBridge(animation, *this);
+}
+
+InputFieldAnimationSpec InputField::NewAnimationSpec()
+{
+  return InputFieldAnimationSpec::New();
+}
+
 void InputField::SetText(const Dali::String& text)
 {
   GetImpl(*this).SetText(text);
@@ -143,6 +155,26 @@ void InputField::SetTextColor(const UiColor& color)
 UiColor InputField::GetTextColor()
 {
   return GetImpl(*this).GetTextColor();
+}
+
+void InputField::SetTextGradient(const Gradient::Base& gradient)
+{
+  GetImpl(*this).SetTextGradient(gradient);
+}
+
+Gradient::Base InputField::GetTextGradient() const
+{
+  return GetImpl(*this).GetTextGradient();
+}
+
+void InputField::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
+{
+  GetImpl(*this).SetTextGradientBoundsMode(mode);
+}
+
+Text::GradientBoundsMode InputField::GetTextGradientBoundsMode() const
+{
+  return GetImpl(*this).GetTextGradientBoundsMode();
 }
 
 void InputField::SetHorizontalTextAlignment(Text::Alignment alignment)
@@ -193,6 +225,16 @@ void InputField::SetPlaceholderColor(const UiColor& color)
 UiColor InputField::GetPlaceholderColor()
 {
   return GetImpl(*this).GetPlaceholderColor();
+}
+
+void InputField::SetPlaceholderTextGradient(const Gradient::Base& gradient)
+{
+  GetImpl(*this).SetPlaceholderTextGradient(gradient);
+}
+
+Gradient::Base InputField::GetPlaceholderTextGradient() const
+{
+  return GetImpl(*this).GetPlaceholderTextGradient();
 }
 
 void InputField::SetShowPlaceholderOnFocus(bool enabled)

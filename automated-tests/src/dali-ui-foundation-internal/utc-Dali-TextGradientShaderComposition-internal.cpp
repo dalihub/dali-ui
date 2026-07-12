@@ -119,6 +119,21 @@ void ExpectPosition(const Vector2& position, const Vector2& expected)
   DALI_TEST_EQUALS(position.y, expected.y, EPSILON, TEST_LOCATION);
 }
 
+UiText::LineRun MakeLine(float width,
+                         float alignmentOffset,
+                         float ascender = 8.0f,
+                         float descender = -2.0f,
+                         float lineSpacing = 0.0f)
+{
+  UiText::LineRun line;
+  line.width           = width;
+  line.alignmentOffset = alignmentOffset;
+  line.ascender        = ascender;
+  line.descender       = descender;
+  line.lineSpacing     = lineSpacing;
+  return line;
+}
+
 void ExpectNoTextGradientRendererProperties(Renderer renderer)
 {
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientStartPosition"), Property::INVALID_INDEX, TEST_LOCATION);
@@ -1300,6 +1315,59 @@ int UtcDaliRenderDataUnsupportedP(void)
   END_TEST;
 }
 
+int UtcDaliRenderDataBoundsOriginIndependenceP(void)
+{
+  const Vector2 coordinateSize(300.0f, 120.0f);
+  const Vector4 firstBounds(0.0f, 0.0f, 0.5f, 0.75f);
+  const Vector4 scrolledBounds(0.2f, -0.15f, 0.5f, 0.75f);
+
+  TextInternal::Gradient::Style linear;
+  linear.enabled     = true;
+  linear.type        = Dali::Ui::Gradient::Type::LINEAR;
+  linear.units       = Dali::Ui::Gradient::Units::USER_SPACE;
+  linear.linearStart = Vector2(20.0f, 10.0f);
+  linear.linearEnd   = Vector2(140.0f, 70.0f);
+  linear.stops.PushBack({0.0f, Color::RED});
+  linear.stops.PushBack({1.0f, Color::BLUE});
+
+  const auto linearFirst = TextInternal::Gradient::ResolveRenderData(linear, firstBounds, coordinateSize);
+  const auto linearScrolled = TextInternal::Gradient::ResolveRenderData(linear, scrolledBounds, coordinateSize);
+  ExpectPosition(linearScrolled.startPosition, linearFirst.startPosition);
+  ExpectPosition(linearScrolled.endPosition, linearFirst.endPosition);
+  ExpectBounds(linearScrolled.bounds, scrolledBounds);
+
+  TextInternal::Gradient::Style radial = linear;
+  radial.type         = Dali::Ui::Gradient::Type::RADIAL;
+  radial.radialCenter = Vector2(75.0f, 45.0f);
+  radial.radialRadius = 30.0f;
+  const auto radialFirst = TextInternal::Gradient::ResolveRenderData(radial, firstBounds, coordinateSize);
+  const auto radialScrolled = TextInternal::Gradient::ResolveRenderData(radial, scrolledBounds, coordinateSize);
+  ExpectPosition(radialScrolled.radialCenter, radialFirst.radialCenter);
+  ExpectPosition(radialScrolled.radialScale, radialFirst.radialScale);
+  ExpectBounds(radialScrolled.bounds, scrolledBounds);
+
+  TextInternal::Gradient::Style conic = linear;
+  conic.type            = Dali::Ui::Gradient::Type::CONIC;
+  conic.conicCenter     = Vector2(60.0f, 35.0f);
+  conic.conicStartAngle = Radian(0.6f);
+  const auto conicFirst = TextInternal::Gradient::ResolveRenderData(conic, firstBounds, coordinateSize);
+  const auto conicScrolled = TextInternal::Gradient::ResolveRenderData(conic, scrolledBounds, coordinateSize);
+  ExpectPosition(conicScrolled.conicCenter, conicFirst.conicCenter);
+  ExpectPosition(conicScrolled.conicScale, conicFirst.conicScale);
+  DALI_TEST_EQUALS(conicScrolled.conicStartAngle, conicFirst.conicStartAngle, EPSILON, TEST_LOCATION);
+  ExpectBounds(conicScrolled.bounds, scrolledBounds);
+
+  linear.units = Dali::Ui::Gradient::Units::OBJECT_BOUNDING_BOX;
+  linear.linearStart = Vector2(-0.5f, 0.0f);
+  linear.linearEnd   = Vector2(0.5f, 0.0f);
+  const auto objectFirst = TextInternal::Gradient::ResolveRenderData(linear, firstBounds, coordinateSize);
+  const auto objectScrolled = TextInternal::Gradient::ResolveRenderData(linear, scrolledBounds, coordinateSize);
+  ExpectPosition(objectScrolled.startPosition, objectFirst.startPosition);
+  ExpectPosition(objectScrolled.endPosition, objectFirst.endPosition);
+  ExpectBounds(objectScrolled.bounds, scrolledBounds);
+  END_TEST;
+}
+
 int UtcDaliTextGradientShaderCompositionMarqueeHorizontalFeatureP(void)
 {
   std::string vertexShader   = std::string(TEXT_GRADIENT_DEFINE) + std::string(SHADER_TEXT_SCROLLER_SHADER_VERT);
@@ -1590,6 +1658,186 @@ int UtcDaliTextGradientShaderCompositionCalculateContentBoundsEndP(void)
                                                                       UiText::Alignment::END);
 
   ExpectBounds(bounds, Vector4(0.6f, 0.6f, 0.4f, 0.4f));
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasVariantP(void)
+{
+  const std::string vertexShader(SHADER_TEXT_ATLAS_GRADIENT_SHADER_VERT);
+  const std::string fragmentShader(SHADER_TEXT_ATLAS_L8_GRADIENT_SHADER_FRAG);
+
+  DALI_TEST_CHECK(vertexShader.find("INPUT highp float aGradientFill;") != std::string::npos);
+  DALI_TEST_CHECK(vertexShader.find("aPosition + 0.5 * uTextGradientLayoutSize") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("UNIFORM sampler2D sGradientLookup;") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("if(vGradientFill > 0.5)") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("gradient.rgb / gradient.a") != std::string::npos);
+  DALI_TEST_CHECK(fragmentShader.find("vColor.a * textColorAnimatable.a * gradient.a * coverage") != std::string::npos);
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasContentBoundsUnionP(void)
+{
+  UiText::LineRun lines[2];
+  lines[0].alignmentOffset = 20.0f;
+  lines[0].width           = 80.0f;
+  lines[0].ascender        = 15.0f;
+  lines[0].descender       = -5.0f;
+  lines[1].alignmentOffset = 50.0f;
+  lines[1].width           = 40.0f;
+  lines[1].ascender        = 12.0f;
+  lines[1].descender       = -4.0f;
+
+  const Vector4 bounds = TextInternal::CalculateAtlasGradientContentBounds(
+    Vector2(200.0f, 100.0f), lines, 2u, 10.0f);
+
+  ExpectBounds(bounds, Vector4(0.05f, 0.0f, 0.4f, 0.36f));
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasContentBoundsEmptyLinePolicyP(void)
+{
+  UiText::LineRun firstEmpty[2] = {MakeLine(0.0f, 150.0f, 9.0f, -3.0f),
+                                   MakeLine(40.0f, 20.0f, 9.0f, -3.0f)};
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(200.0f, 60.0f), firstEmpty, 2u, 0.0f),
+               Vector4(0.1f, 0.0f, 0.2f, 0.4f));
+
+  UiText::LineRun trailingEmpty[2] = {MakeLine(40.0f, 20.0f, 9.0f, -3.0f),
+                                      MakeLine(0.0f, -70.0f, 9.0f, -3.0f)};
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(200.0f, 60.0f), trailingEmpty, 2u, 0.0f),
+               Vector4(0.1f, 0.0f, 0.2f, 0.4f));
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasContentBoundsAllEmptyP(void)
+{
+  UiText::LineRun newlineOnly[2] = {MakeLine(0.0f, 100.0f, 8.0f, -2.0f),
+                                    MakeLine(0.0f, -50.0f, 9.0f, -3.0f)};
+  const float safeWidth = Math::MACHINE_EPSILON_1000 / 200.0f;
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(200.0f, 50.0f), newlineOnly, 2u, 0.0f),
+               Vector4(0.0f, 0.0f, safeWidth, 22.0f / 50.0f));
+
+  UiText::LineRun zeroMetric = MakeLine(0.0f, 90.0f, 0.0f, 0.0f);
+  const float safeHeight = Math::MACHINE_EPSILON_1000 / 50.0f;
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(200.0f, 50.0f), &zeroMetric, 1u, 0.0f),
+               Vector4(0.0f, 0.0f, safeWidth, safeHeight));
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasContentBoundsWhitespaceAndAlignmentP(void)
+{
+  UiText::LineRun whitespace = MakeLine(30.0f, 85.0f);
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(200.0f, 40.0f), &whitespace, 1u, 5.0f),
+               Vector4(0.4f, 0.0f, 0.15f, 0.25f));
+
+  UiText::LineRun centered = MakeLine(60.0f, 70.0f);
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(200.0f, 40.0f), &centered, 1u, 10.0f),
+               Vector4(0.3f, 0.0f, 0.3f, 0.25f));
+
+  UiText::LineRun rightAligned = MakeLine(40.0f, 160.0f);
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(200.0f, 40.0f), &rightAligned, 1u, 0.0f),
+               Vector4(0.8f, 0.0f, 0.2f, 0.25f));
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasContentBoundsNegativeAndDifferentWidthsP(void)
+{
+  UiText::LineRun lines[3] = {MakeLine(20.0f, 15.0f),
+                              MakeLine(60.0f, -10.0f),
+                              MakeLine(30.0f, 90.0f)};
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(200.0f, 60.0f), lines, 3u, 10.0f),
+               Vector4(-0.1f, 0.0f, 0.65f, 0.5f));
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasContentBoundsHeightRangeAndInvalidLayoutP(void)
+{
+  UiText::LineRun tall[2] = {MakeLine(40.0f, 0.0f, 15.0f, -5.0f),
+                             MakeLine(40.0f, 0.0f, 15.0f, -5.0f)};
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(100.0f, 20.0f), tall, 2u, 0.0f),
+               Vector4(0.0f, 0.0f, 0.4f, 2.0f));
+
+  UiText::LineRun shortLine = MakeLine(40.0f, 0.0f, 4.0f, -1.0f);
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2(100.0f, 20.0f), &shortLine, 1u, 0.0f),
+               Vector4(0.0f, 0.0f, 0.4f, 0.25f));
+
+  ExpectBounds(TextInternal::CalculateAtlasGradientContentBounds(
+                 Vector2::ZERO, &shortLine, 1u, 0.0f),
+               Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasAndLabelContentBoundsParityP(void)
+{
+  UiText::LineRun lines[2] = {MakeLine(60.0f, 70.0f, 15.0f, -5.0f),
+                              MakeLine(30.0f, 85.0f, 15.0f, -5.0f)};
+  const Vector2 size(200.0f, 40.0f);
+  const Vector4 labelBounds = TextInternal::CalculateGradientContentBounds(
+    size, size, lines, 2u, UiText::Alignment::START);
+  const Vector4 atlasBounds = TextInternal::CalculateAtlasGradientContentBounds(
+    size, lines, 2u, 0.0f);
+  ExpectBounds(atlasBounds, labelBounds);
+
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionLabelEmptyFallbackP(void)
+{
+  const Vector2 textureSize(100.0f, 50.0f);
+  const Vector2 layoutSize(40.0f, 20.0f);
+  const Vector4 fullLayoutFallback(0.0f, 0.0f, 0.4f, 0.4f);
+
+  ExpectBounds(TextInternal::CalculateGradientContentBounds(
+                 textureSize, layoutSize, nullptr, 0u, UiText::Alignment::START),
+               fullLayoutFallback);
+
+  UiText::LineRun ignored = MakeLine(30.0f, 5.0f);
+  ExpectBounds(TextInternal::CalculateGradientContentBounds(
+                 textureSize, layoutSize, &ignored, 0u, UiText::Alignment::START),
+               fullLayoutFallback);
+
+  UiText::LineRun empty[2] = {MakeLine(0.0f, 100.0f, 15.0f, -5.0f),
+                              MakeLine(0.0f, -80.0f, 15.0f, -5.0f)};
+  ExpectBounds(TextInternal::CalculateGradientContentBounds(
+                 textureSize, layoutSize, empty, 2u, UiText::Alignment::START),
+               fullLayoutFallback);
+
+  UiText::LineRun trailingNewline[2] = {MakeLine(30.0f, 5.0f), MakeLine(0.0f, 80.0f)};
+  ExpectBounds(TextInternal::CalculateGradientContentBounds(
+                 textureSize, layoutSize, trailingNewline, 2u, UiText::Alignment::START),
+               Vector4(0.05f, 0.0f, 0.3f, 0.4f));
+
+  const float safeWidth  = Math::MACHINE_EPSILON_1000 / textureSize.width;
+  const float safeHeight = Math::MACHINE_EPSILON_1000 / textureSize.height;
+  ExpectBounds(TextInternal::CalculateGradientContentBounds(
+                 textureSize, Vector2::ZERO, nullptr, 0u, UiText::Alignment::START),
+               Vector4(0.0f, 0.0f, safeWidth, safeHeight));
+  ExpectBounds(TextInternal::CalculateGradientContentBounds(
+                 Vector2::ZERO, layoutSize, nullptr, 0u, UiText::Alignment::START),
+               Vector4(0.0f, 0.0f, 1.0f, 1.0f));
+
+  const Vector4 atlasEmpty = TextInternal::CalculateAtlasGradientContentBounds(
+    layoutSize, empty, 2u, 0.0f);
+  DALI_TEST_EQUALS(atlasEmpty.z, Math::MACHINE_EPSILON_1000 / layoutSize.width, EPSILON, TEST_LOCATION);
+  DALI_TEST_CHECK(atlasEmpty.z < fullLayoutFallback.z);
+  END_TEST;
+}
+
+int UtcDaliTextGradientShaderCompositionAtlasViewBoundsScrollP(void)
+{
+  const Vector4 bounds = TextInternal::CalculateGradientViewBounds(
+    Vector2(300.0f, 100.0f), Vector2(200.0f, 80.0f), Vector2(12.0f, -10.0f));
+
+  ExpectBounds(bounds, Vector4(-0.04f, 0.1f, 2.0f / 3.0f, 0.8f));
   END_TEST;
 }
 

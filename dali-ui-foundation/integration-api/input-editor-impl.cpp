@@ -77,7 +77,9 @@ BaseHandle Create()
   return BaseHandle();
 }
 
-constexpr const char* LOCALIZATION_PLACEHOLDER_BINDING_ID = "Ui.InputEditor.Placeholder";
+constexpr const char* LOCALIZATION_PLACEHOLDER_BINDING_ID                  = "Ui.InputEditor.Placeholder";
+constexpr const char* TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME             = "uTextGradientStartOffset";
+constexpr const char* PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME = "uPlaceholderTextGradientStartOffset";
 
 UiConfig::SystemFontSize ToUiConfigSystemFontSize(Dali::Integration::SystemSettings::FontSize fontSize)
 {
@@ -486,6 +488,109 @@ Dali::String InputEditorImpl::GetPlaceholder() const
   std::string text;
   mController->GetPlaceholderText(Text::Controller::PLACEHOLDER_TYPE_INACTIVE, text);
   return ToDaliString(text);
+}
+
+void InputEditorImpl::SetTextGradient(const Dali::Ui::Gradient::Base& gradient)
+{
+  if(!mAtlasGradientState.SetTextGradient(gradient))
+  {
+    SyncGradientAnimProperties();
+    return;
+  }
+
+  SyncGradientAnimProperties();
+
+  if(!mController->IsShowingPlaceholderText() && !SyncAtlasGradientState())
+  {
+    RequestTextRelayout();
+  }
+}
+
+Gradient::Base InputEditorImpl::GetTextGradient() const
+{
+  return mAtlasGradientState.GetTextGradient();
+}
+
+void InputEditorImpl::SetPlaceholderTextGradient(const Dali::Ui::Gradient::Base& gradient)
+{
+  if(!mAtlasGradientState.SetPlaceholderGradient(gradient))
+  {
+    SyncPlaceholderGradientAnimProperties();
+    return;
+  }
+
+  SyncPlaceholderGradientAnimProperties();
+
+  if(mController->IsShowingPlaceholderText() && !SyncAtlasGradientState())
+  {
+    RequestTextRelayout();
+  }
+}
+
+Gradient::Base InputEditorImpl::GetPlaceholderTextGradient() const
+{
+  return mAtlasGradientState.GetPlaceholderGradient();
+}
+
+void InputEditorImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
+{
+  if(mAtlasGradientState.SetBoundsMode(mode))
+  {
+    RequestTextRelayout();
+  }
+}
+
+Text::GradientBoundsMode InputEditorImpl::GetTextGradientBoundsMode() const
+{
+  return mAtlasGradientState.GetBoundsMode();
+}
+
+Dali::Property::Index InputEditorImpl::EnsureGradientAnimOffset()
+{
+  const auto& state = mAtlasGradientState.GetRendererState(false);
+  if(!state.IsEnabled())
+  {
+    return Property::INVALID_INDEX;
+  }
+
+  Actor self = Self();
+  if(!self)
+  {
+    return Property::INVALID_INDEX;
+  }
+
+  if(mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    mGradientAnimOffsetIndex =
+      self.RegisterProperty(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME, state.style.startOffset);
+    BindGradientAnimProperties();
+  }
+
+  return mGradientAnimOffsetIndex;
+}
+
+Dali::Property::Index InputEditorImpl::EnsurePlaceholderGradientAnimOffset()
+{
+  const auto& state = mAtlasGradientState.GetRendererState(true);
+  if(!state.IsEnabled())
+  {
+    return Property::INVALID_INDEX;
+  }
+
+  Actor self = Self();
+  if(!self)
+  {
+    return Property::INVALID_INDEX;
+  }
+
+  if(mPlaceholderGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    mPlaceholderGradientAnimOffsetIndex =
+      self.RegisterProperty(PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME, state.style.startOffset);
+    BindGradientAnimProperties();
+  }
+
+  return mPlaceholderGradientAnimOffsetIndex;
 }
 
 void InputEditorImpl::SetPlaceholderColor(const UiColor& color)
@@ -1525,6 +1630,7 @@ void InputEditorImpl::OnRelayout(const Vector2& size, RelayoutContainer& contain
   }
 
   Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
+  SyncAtlasGradientState();
 
   if((Text::Controller::NONE_UPDATED != updateTextType) || !mRenderer)
   {
@@ -1538,11 +1644,18 @@ void InputEditorImpl::OnRelayout(const Vector2& size, RelayoutContainer& contain
 
     if(!mRenderer)
     {
-      mRenderer      = Text::Backend::Get().NewRenderer();
+      mRenderer = Text::Backend::Get().NewRenderer();
+      ApplyAtlasGradientState();
       updateTextType = static_cast<Text::Controller::UpdateTextType>(updateTextType | Text::Controller::MODEL_UPDATED);
     }
 
     RenderText(updateTextType);
+  }
+  else
+  {
+    const auto gradientState = mAtlasGradientState.GetFrameState(mController->IsShowingPlaceholderText(), mAppliedAtlasGradientState);
+    Ui::Internal::CommonTextUtils::UpdateTextRenderPosition(Self(), mRenderer, mController, mAlignmentOffset,
+                                                            mRenderableActor, mStencil, gradientState, size);
   }
 
   if(mCursorPositionChanged)
@@ -1573,6 +1686,82 @@ void InputEditorImpl::OnRelayout(const Vector2& size, RelayoutContainer& contain
   {
     mController->RequestProcessInputStyleChangedSignals();
   }
+}
+
+void InputEditorImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
+{
+  if(IsGradientAnimProperty(index))
+  {
+    if(state == Animation::State::PLAYING)
+    {
+      ++mGradientAnimCount;
+    }
+    else if(state == Animation::State::STOPPED)
+    {
+      if(mGradientAnimCount)
+      {
+        --mGradientAnimCount;
+      }
+    }
+
+    SetGradientAnimApplyRate();
+  }
+  else if(IsPlaceholderGradientAnimProperty(index))
+  {
+    if(state == Animation::State::PLAYING)
+    {
+      ++mPlaceholderGradientAnimCount;
+    }
+    else if(state == Animation::State::STOPPED)
+    {
+      if(mPlaceholderGradientAnimCount)
+      {
+        --mPlaceholderGradientAnimCount;
+      }
+    }
+
+    SetGradientAnimApplyRate();
+  }
+
+  ViewImpl::OnAnimateAnimatableProperty(animation, index, state);
+}
+
+void InputEditorImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
+{
+  if(IsGradientAnimProperty(index))
+  {
+    if(applied)
+    {
+      ++mGradientAnimCount;
+    }
+    else
+    {
+      if(mGradientAnimCount)
+      {
+        --mGradientAnimCount;
+      }
+    }
+
+    SetGradientAnimApplyRate();
+  }
+  else if(IsPlaceholderGradientAnimProperty(index))
+  {
+    if(applied)
+    {
+      ++mPlaceholderGradientAnimCount;
+    }
+    else
+    {
+      if(mPlaceholderGradientAnimCount)
+      {
+        --mPlaceholderGradientAnimCount;
+      }
+    }
+
+    SetGradientAnimApplyRate();
+  }
+
+  ViewImpl::OnConstraintAnimatableProperty(constraint, index, applied);
 }
 
 Vector3 InputEditorImpl::GetNaturalSize()
@@ -2246,7 +2435,184 @@ void InputEditorImpl::AddLayer(Actor& layer, Actor& actor)
 
 void InputEditorImpl::RenderText(Text::Controller::UpdateTextType updateTextType)
 {
-  Ui::Internal::CommonTextUtils::RenderText(Self(), mRenderer, mController, mDecorator, mAlignmentOffset, mRenderableActor, mBackgroundActor, mCursorLayer, mStencil, mClippingDecorationActors, mAnchorActors, updateTextType);
+  const Vector2 size          = Self().GetProperty<Vector3>(Actor::Property::SIZE).GetVectorXY();
+  const auto    gradientState = mAtlasGradientState.GetFrameState(mController->IsShowingPlaceholderText(), mAppliedAtlasGradientState);
+  Ui::Internal::CommonTextUtils::RenderText(Self(), mRenderer, mController, mDecorator, mAlignmentOffset,
+                                            mRenderableActor, mBackgroundActor, mCursorLayer, mStencil,
+                                            mClippingDecorationActors, mAnchorActors, updateTextType,
+                                            gradientState, size);
+  BindGradientAnimProperties();
+}
+
+bool InputEditorImpl::SyncAtlasGradientState()
+{
+  const auto& state = mAtlasGradientState.GetRendererState(mController->IsShowingPlaceholderText());
+  if(mAppliedAtlasGradientState.Matches(state))
+  {
+    BindGradientAnimProperties();
+    return true;
+  }
+
+  const bool enabled = state.IsEnabled();
+  if(!enabled)
+  {
+    if(mAppliedAtlasGradientState.IsGradientApplied())
+    {
+      if(mRenderer)
+      {
+        mRenderer.Reset();
+      }
+      mAppliedAtlasGradientState.Reset();
+      return false;
+    }
+
+    // Switching between two disabled normal/placeholder resources, or clearing
+    // an unsupported fallback, requires no renderer work.
+    mAppliedAtlasGradientState.Set(state);
+    BindGradientAnimProperties();
+    return true;
+  }
+
+  if(mAppliedAtlasGradientState.initialized && !mAppliedAtlasGradientState.enabled && !mAppliedAtlasGradientState.IsSolidFallback())
+  {
+    if(mRenderer)
+    {
+      mRenderer.Reset();
+    }
+    mAppliedAtlasGradientState.Reset();
+    return false;
+  }
+
+  if(mRenderer && mRenderer->SetAtlasGradientState(state))
+  {
+    mAppliedAtlasGradientState.Set(state);
+    BindGradientAnimProperties();
+    return true;
+  }
+
+  if(mRenderer)
+  {
+    mAppliedAtlasGradientState.SetSolidFallback(state);
+    BindGradientAnimProperties();
+    return true;
+  }
+
+  return false;
+}
+
+void InputEditorImpl::ApplyAtlasGradientState()
+{
+  if(mRenderer)
+  {
+    const auto& state = mAtlasGradientState.GetRendererState(mController->IsShowingPlaceholderText());
+    if(!state.IsEnabled())
+    {
+      mAppliedAtlasGradientState.Set(state);
+    }
+    else if(mRenderer->SetAtlasGradientState(state))
+    {
+      mAppliedAtlasGradientState.Set(state);
+    }
+    else
+    {
+      mAppliedAtlasGradientState.SetSolidFallback(state);
+    }
+    BindGradientAnimProperties();
+  }
+}
+
+void InputEditorImpl::SyncGradientAnimProperties()
+{
+  if(mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  const auto& state = mAtlasGradientState.GetRendererState(false);
+  if(!state.IsEnabled())
+  {
+    return;
+  }
+
+  Actor self = Self();
+  if(self)
+  {
+    self.SetProperty(mGradientAnimOffsetIndex, state.style.startOffset);
+  }
+}
+
+void InputEditorImpl::SyncPlaceholderGradientAnimProperties()
+{
+  if(mPlaceholderGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  const auto& state = mAtlasGradientState.GetRendererState(true);
+  if(!state.IsEnabled())
+  {
+    return;
+  }
+
+  Actor self = Self();
+  if(self)
+  {
+    self.SetProperty(mPlaceholderGradientAnimOffsetIndex, state.style.startOffset);
+  }
+}
+
+void InputEditorImpl::BindGradientAnimProperties()
+{
+  if(!mRenderer)
+  {
+    return;
+  }
+
+  Property::Index sourceIndex = Property::INVALID_INDEX;
+  if(IsActiveGradientAnimSupported())
+  {
+    sourceIndex = mController->IsShowingPlaceholderText() ? mPlaceholderGradientAnimOffsetIndex : mGradientAnimOffsetIndex;
+  }
+
+  Actor sourceActor;
+  if(sourceIndex != Property::INVALID_INDEX)
+  {
+    sourceActor = Self();
+  }
+
+  mRenderer->SetAtlasGradientAnimProperties(sourceActor, sourceIndex);
+  SetGradientAnimApplyRate(true);
+}
+
+bool InputEditorImpl::IsActiveGradientAnimSupported() const
+{
+  return mAppliedAtlasGradientState.IsGradientApplied() &&
+         mAtlasGradientState.GetRendererState(mController->IsShowingPlaceholderText()).IsEnabled();
+}
+
+bool InputEditorImpl::IsGradientAnimProperty(Dali::Property::Index index) const
+{
+  return index != Property::INVALID_INDEX &&
+         index == mGradientAnimOffsetIndex;
+}
+
+bool InputEditorImpl::IsPlaceholderGradientAnimProperty(Dali::Property::Index index) const
+{
+  return index != Property::INVALID_INDEX &&
+         index == mPlaceholderGradientAnimOffsetIndex;
+}
+
+void InputEditorImpl::SetGradientAnimApplyRate(bool notifyToConstraint)
+{
+  if(!mRenderer)
+  {
+    return;
+  }
+
+  const bool            showingPlaceholder = mController->IsShowingPlaceholderText();
+  const Property::Index sourceIndex        = showingPlaceholder ? mPlaceholderGradientAnimOffsetIndex : mGradientAnimOffsetIndex;
+  const bool            applyAlways        = IsActiveGradientAnimSupported() && sourceIndex != Property::INVALID_INDEX;
+  mRenderer->SetAtlasGradientAnimApplyAlways(applyAlways, notifyToConstraint);
 }
 
 void InputEditorImpl::EmitTextChanged()

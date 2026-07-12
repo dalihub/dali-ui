@@ -37,6 +37,7 @@ struct GradientGlyphInfo
   bool usesGradientFill{false};
   bool isColorGlyph{false};
   bool hasExplicitColor{false};
+  bool isEmbeddedItem{false};
 };
 
 /**

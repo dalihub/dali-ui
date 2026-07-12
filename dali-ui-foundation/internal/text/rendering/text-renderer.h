@@ -21,6 +21,8 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/common/intrusive-ptr.h>
+#include <dali/public-api/math/vector2.h>
+#include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/ref-object.h>
 
 namespace Dali
@@ -29,6 +31,12 @@ namespace Ui
 {
 namespace Text
 {
+namespace Internal::Gradient
+{
+struct AtlasGradientFrameState;
+struct AtlasRendererState;
+} //namespace Internal::Gradient
+
 class Renderer;
 typedef IntrusivePtr<Renderer> RendererPtr;
 
@@ -55,6 +63,41 @@ public:
    */
   virtual Actor Render(ViewInterface& view, Actor textContol, Property::Index animatablePropertyIndex,
                        float& alignmentOffset, int depth) = 0;
+
+  /**
+   * @brief Supplies the active normal/placeholder atlas gradient snapshot.
+   *
+   * @return True if this renderer accepted and owns the supplied snapshot. False
+   * if this renderer does not support atlas gradients; callers must keep the
+   * authored value and render the text with the existing solid color fallback.
+   *
+   * Other renderer backends intentionally keep the default unsupported behavior.
+   */
+  virtual bool SetAtlasGradientState(const Internal::Gradient::AtlasRendererState& state);
+
+  /**
+   * @brief Updates bounds-dependent uniforms without rebuilding text geometry.
+   */
+  virtual void UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds);
+
+  /**
+   * @brief Binds a control-owned source property to the atlas text gradient start offset uniform.
+   *
+   * Unsupported renderer backends intentionally keep the default no-op behavior.
+   * Passing an empty actor or invalid property index clears the current binding.
+   *
+   * @param[in] sourceActor The actor owning the source property.
+   * @param[in] startOffsetPropertyIndex Source property index for uTextGradientStartOffset.
+   */
+  virtual void SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex);
+
+  /**
+   * @brief Updates atlas text gradient start offset constraint apply rate.
+   *
+   * @param[in] applyAlways True while an animation or constraint is actively driving the source property.
+   * @param[in] notifyToConstraint True to reapply the current rate to existing constraints.
+   */
+  virtual void SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint = false);
 
 protected:
   /**

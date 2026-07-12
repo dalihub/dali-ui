@@ -160,6 +160,46 @@ inline Vector4 CalculateGradientViewBounds(const Vector2& coordinateSize,
                  viewSize.height / coordinateSize.height);
 }
 
+struct GradientLineExtents
+{
+  bool  hasHorizontalContent{false};
+  float minX{0.0f};
+  float maxX{0.0f};
+  float height{0.0f};
+};
+
+/**
+ * @brief Calculates shared horizontal line extents and vertical line-height sum.
+ *
+ * Zero-width lines do not affect the horizontal union, but every line still
+ * contributes its layout height (including empty lines created by newlines).
+ */
+inline GradientLineExtents CalculateGradientLineExtents(const LineRun* lines,
+                                                        Length         numberOfLines,
+                                                        float          horizontalOffset = 0.0f)
+{
+  GradientLineExtents extents;
+  if(lines == nullptr)
+  {
+    return extents;
+  }
+
+  for(Length index = 0u; index < numberOfLines; ++index)
+  {
+    const float lineWidth = std::max(lines[index].width, 0.0f);
+    if(lineWidth > Math::MACHINE_EPSILON_1000)
+    {
+      const float lineStart        = lines[index].alignmentOffset - horizontalOffset;
+      const float lineEnd          = lineStart + lineWidth;
+      extents.minX                 = extents.hasHorizontalContent ? std::min(extents.minX, lineStart) : lineStart;
+      extents.maxX                 = extents.hasHorizontalContent ? std::max(extents.maxX, lineEnd) : lineEnd;
+      extents.hasHorizontalContent = true;
+    }
+    extents.height += std::max(GetLineHeight(lines[index], index + 1u == numberOfLines), 0.0f);
+  }
+  return extents;
+}
+
 /**
  * @brief Calculates CONTENT_BOUND gradient bounds inside a rendered text texture.
  *
@@ -185,36 +225,21 @@ inline Vector4 CalculateGradientContentBounds(const Vector2& textureSize,
     return Vector4(0.0f, 0.0f, 1.0f, 1.0f);
   }
 
-  float boundsX     = 0.0f;
+  float boundsX = 0.0f;
+  // Preserve the texture-based Label adapter's historical fallback. Atlas has
+  // its own epsilon-safe fallback below because it has no gradient texture.
   float boundsWidth = std::min(std::max(layoutSize.width, 0.0f), textureSize.width);
 
   if(lines != nullptr && numberOfLines > 0u)
   {
-    bool  hasLineBounds = false;
-    float minX          = textureSize.width;
-    float maxX          = 0.0f;
-
-    for(Length index = 0u; index < numberOfLines; ++index)
-    {
-      const LineRun& line      = lines[index];
-      const float    lineWidth = std::max(line.width, 0.0f);
-      if(lineWidth <= Math::MACHINE_EPSILON_1000)
-      {
-        continue;
-      }
-
-      const float lineStart = line.alignmentOffset;
-      const float lineEnd   = lineStart + lineWidth;
-
-      hasLineBounds = true;
-      minX          = std::min(minX, lineStart);
-      maxX          = std::max(maxX, lineEnd);
-    }
+    const GradientLineExtents extents = CalculateGradientLineExtents(lines, numberOfLines);
+    float                     minX    = extents.minX;
+    float                     maxX    = extents.maxX;
 
     minX = std::min(std::max(minX, 0.0f), textureSize.width);
     maxX = std::min(std::max(maxX, minX), textureSize.width);
 
-    if(hasLineBounds && (maxX - minX) > Math::MACHINE_EPSILON_1000)
+    if(extents.hasHorizontalContent && (maxX - minX) > Math::MACHINE_EPSILON_1000)
     {
       boundsX     = minX;
       boundsWidth = maxX - minX;
@@ -251,6 +276,45 @@ inline Vector4 CalculateGradientContentBounds(const Vector2& textureSize,
                  boundsY / textureSize.height,
                  boundsWidth / textureSize.width,
                  boundsHeight / textureSize.height);
+}
+
+/**
+ * @brief Adapts the shared laid-out content-extents policy to atlas local coordinates.
+ *
+ * Atlas vertices remove @p minLineOffset and use layoutSize as their coordinate
+ * size. Unlike the texture adapter above, line bounds are not clipped: RTL/bidi
+ * fragments are allowed to extend outside the nominal layout.
+ */
+inline Vector4 CalculateAtlasGradientContentBounds(const Vector2& layoutSize,
+                                                   const LineRun* lines,
+                                                   Length         numberOfLines,
+                                                   float          minLineOffset)
+{
+  if(layoutSize.width < Math::MACHINE_EPSILON_1000 ||
+     layoutSize.height < Math::MACHINE_EPSILON_1000)
+  {
+    return Vector4(0.0f, 0.0f, 1.0f, 1.0f);
+  }
+
+  float minX          = 0.0f;
+  float maxX          = Math::MACHINE_EPSILON_1000;
+  float contentHeight = std::max(layoutSize.height, Math::MACHINE_EPSILON_1000);
+
+  if(lines != nullptr && numberOfLines > 0u)
+  {
+    const GradientLineExtents extents = CalculateGradientLineExtents(lines, numberOfLines, minLineOffset);
+    if(extents.hasHorizontalContent)
+    {
+      minX = extents.minX;
+      maxX = std::max(extents.maxX, extents.minX + Math::MACHINE_EPSILON_1000);
+    }
+    contentHeight = std::max(extents.height, Math::MACHINE_EPSILON_1000);
+  }
+
+  return Vector4(minX / layoutSize.width,
+                 0.0f,
+                 (maxX - minX) / layoutSize.width,
+                 contentHeight / layoutSize.height);
 }
 
 /**

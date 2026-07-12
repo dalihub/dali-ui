@@ -56,7 +56,17 @@ public:
                          Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
                          Actor& backgroundActor, Actor& cursorLayerActor, Actor& stencil,
                          std::vector<Actor>& clippingDecorationActors, std::vector<Ui::TextAnchor>& anchorActors,
-                         Text::Controller::UpdateTextType updateTextType);
+                         Text::Controller::UpdateTextType                         updateTextType,
+                         const Text::Internal::Gradient::AtlasGradientFrameState& gradientState,
+                         const Vector2&                                           viewSize);
+
+  /**
+   * @brief Synchronizes actor scrolling and atlas gradient bounds without rebuilding glyph geometry.
+   */
+  static void UpdateTextRenderPosition(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
+                                       float alignmentOffset, Actor renderableActor, Actor stencil,
+                                       const Text::Internal::Gradient::AtlasGradientFrameState& gradientState,
+                                       const Vector2&                                           viewSize);
 
   /**
    * Common method to synchronize TextAnchor actors with Anchor objects in text's logical model.

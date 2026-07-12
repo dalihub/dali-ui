@@ -47,7 +47,11 @@ GradientGlyphInfo ClassifyGradientGlyph(TextAbstraction::FontClient& fontClient,
   GradientGlyphInfo classification;
   classification.isColorGlyph     = IsRenderableColorGlyph(fontClient, glyph.fontId, glyph.index);
   classification.hasExplicitColor = HasExplicitColor(colorIndices, glyphIndex);
-  classification.usesGradientFill = !classification.isColorGlyph && !classification.hasExplicitColor;
+  // FontClient reserves fontId 0 plus a non-zero cache index for embedded
+  // items. A zero font id alone is also used as a generic "not found" value.
+  classification.isEmbeddedItem   = (0u == glyph.fontId) && (0u != glyph.index);
+  classification.usesGradientFill = !classification.isColorGlyph && !classification.hasExplicitColor &&
+                                    !classification.isEmbeddedItem;
 
   return classification;
 }

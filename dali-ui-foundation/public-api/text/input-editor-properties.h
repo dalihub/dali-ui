@@ -20,6 +20,9 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/object/property-index-ranges.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
+
 namespace Dali
 {
 namespace Ui

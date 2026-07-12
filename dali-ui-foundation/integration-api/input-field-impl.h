@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
+#include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/text/text-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
@@ -173,6 +174,50 @@ public:
    * @copydoc Dali::Ui::InputField::GetPlaceholderColor
    */
   UiColor GetPlaceholderColor();
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetTextGradient
+   */
+  void SetTextGradient(const Dali::Ui::Gradient::Base& gradient);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTextGradient
+   */
+  Dali::Ui::Gradient::Base GetTextGradient() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetPlaceholderTextGradient
+   */
+  void SetPlaceholderTextGradient(const Dali::Ui::Gradient::Base& gradient);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetPlaceholderTextGradient
+   */
+  Dali::Ui::Gradient::Base GetPlaceholderTextGradient() const;
+
+  /**
+   * @copydoc Dali::Ui::InputField::SetTextGradientBoundsMode
+   */
+  void SetTextGradientBoundsMode(Text::GradientBoundsMode mode);
+
+  /**
+   * @copydoc Dali::Ui::InputField::GetTextGradientBoundsMode
+   */
+  Text::GradientBoundsMode GetTextGradientBoundsMode() const;
+
+  /**
+   * @brief Ensures the hidden source property used by TextGradientStartOffset animation.
+   *
+   * @return The hidden property index, or Property::INVALID_INDEX if no renderable text gradient is authored.
+   */
+  Dali::Property::Index EnsureGradientAnimOffset();
+
+  /**
+   * @brief Ensures the hidden source property used by PlaceholderTextGradientStartOffset animation.
+   *
+   * @return The hidden property index, or Property::INVALID_INDEX if no renderable placeholder text gradient is authored.
+   */
+  Dali::Property::Index EnsurePlaceholderGradientAnimOffset();
 
   /**
    * @copydoc Dali::Ui::InputField::SetShowPlaceholderOnFocus
@@ -762,6 +807,17 @@ public: // From ViewImpl
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
 
   /**
+   * @copydoc CustomActorImpl::OnAnimateAnimatableProperty()
+   */
+  void OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index,
+                                   Dali::Animation::State state) override;
+
+  /**
+   * @copydoc CustomActorImpl::OnConstraintAnimatableProperty()
+   */
+  void OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied) override;
+
+  /**
    * @copydoc ViewImpl::GetNaturalSize()
    */
   Vector3 GetNaturalSize() override;
@@ -1024,6 +1080,63 @@ private: // Implementation
   void RenderText(Text::Controller::UpdateTextType updateTextType);
 
   /**
+   * @brief Synchronizes the active normal/placeholder atlas gradient resource with the current renderer.
+   *
+   * @return True if the current renderer remains usable after synchronization.
+   */
+  bool SyncAtlasGradientState();
+
+  /**
+   * @brief Applies the active normal/placeholder atlas gradient resource to a newly-created renderer.
+   */
+  void ApplyAtlasGradientState();
+
+  /**
+   * @brief Updates the normal hidden TextGradient start offset source property from the authored gradient.
+   */
+  void SyncGradientAnimProperties();
+
+  /**
+   * @brief Updates the placeholder hidden TextGradient start offset source property from the authored gradient.
+   */
+  void SyncPlaceholderGradientAnimProperties();
+
+  /**
+   * @brief Binds the active normal/placeholder hidden start offset source property to the atlas renderer.
+   */
+  void BindGradientAnimProperties();
+
+  /**
+   * @brief Returns true when the active normal/placeholder channel has a renderer-supported gradient.
+   *
+   * @return True if the active channel supports TextGradient animation.
+   */
+  bool IsActiveGradientAnimSupported() const;
+
+  /**
+   * @brief Returns true when index is the normal hidden TextGradient animation source property.
+   *
+   * @param[in] index The property index to check.
+   * @return True if the index is the normal TextGradient animation property.
+   */
+  bool IsGradientAnimProperty(Dali::Property::Index index) const;
+
+  /**
+   * @brief Returns true when index is the placeholder hidden TextGradient animation source property.
+   *
+   * @param[in] index The property index to check.
+   * @return True if the index is the placeholder TextGradient animation property.
+   */
+  bool IsPlaceholderGradientAnimProperty(Dali::Property::Index index) const;
+
+  /**
+   * @brief Updates TextGradient animation constraint apply rate on the atlas renderer.
+   *
+   * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
+   */
+  void SetGradientAnimApplyRate(bool notifyToConstraint = false);
+
+  /**
    * @brief Emits TextChanged signal.
    */
   void EmitTextChanged();
@@ -1127,20 +1240,26 @@ private:
   Signal<void(View)>                                  mSelectionClearedSignal;
   Signal<void(View, Text::TypingStyle::Mask)>         mTypingStyleChangedSignal;
 
-  InputMethodContext          mInputMethodContext;
-  TapGestureDetector          mTapGestureDetector;
-  PanGestureDetector          mPanGestureDetector;
-  LongPressGestureDetector    mLongPressGestureDetector;
-  Text::ControllerPtr         mController;
-  Text::RendererPtr           mRenderer;
-  Text::DecoratorPtr          mDecorator;
-  Actor                       mStencil;
-  std::vector<Actor>          mClippingDecorationActors; ///< Decoration actors which need clipping.
-  std::vector<Ui::TextAnchor> mAnchorActors;
-  Actor                       mRenderableActor;
-  Actor                       mActiveLayer;
-  Actor                       mCursorLayer;
-  Actor                       mBackgroundActor;
+  InputMethodContext                                  mInputMethodContext;
+  TapGestureDetector                                  mTapGestureDetector;
+  PanGestureDetector                                  mPanGestureDetector;
+  LongPressGestureDetector                            mLongPressGestureDetector;
+  Text::ControllerPtr                                 mController;
+  Text::RendererPtr                                   mRenderer;
+  Text::Internal::Gradient::EditableAtlasState        mAtlasGradientState;
+  Text::Internal::Gradient::AppliedAtlasGradientState mAppliedAtlasGradientState;
+  Property::Index                                     mGradientAnimOffsetIndex{Property::INVALID_INDEX};
+  Property::Index                                     mPlaceholderGradientAnimOffsetIndex{Property::INVALID_INDEX};
+  int                                                 mGradientAnimCount{0};
+  int                                                 mPlaceholderGradientAnimCount{0};
+  Text::DecoratorPtr                                  mDecorator;
+  Actor                                               mStencil;
+  std::vector<Actor>                                  mClippingDecorationActors; ///< Decoration actors which need clipping.
+  std::vector<Ui::TextAnchor>                         mAnchorActors;
+  Actor                                               mRenderableActor;
+  Actor                                               mActiveLayer;
+  Actor                                               mCursorLayer;
+  Actor                                               mBackgroundActor;
 
   Text::OverflowMode mOverflowMode;
   float              mAlignmentOffset;

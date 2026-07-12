@@ -20,10 +20,12 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
+#include <dali/integration-api/constraint-integ.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
+#include <dali/public-api/object/weak-handle.h>
 #include <dali/public-api/rendering/geometry.h>
 #include <dali/public-api/rendering/renderer.h>
 #include <map>
@@ -34,11 +36,15 @@
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/glyph-run.h>
+#include <dali-ui-foundation/internal/text/gradient-glyph-classification.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-mesh-factory.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
+#include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
+#include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -57,6 +63,17 @@ const float    HALF(0.5f);
 const float    ONE_AND_A_HALF(1.5f);
 const uint32_t DOUBLE_PIXEL_PADDING = 4u; // Padding will be added twice to Atlas
 const uint16_t NO_OUTLINE           = 0u;
+
+constexpr const char*     UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME("uTextGradientStartOffset");
+static constexpr uint32_t TEXT_ATLAS_GRADIENT_START_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 28u);
+
+void GradientOffsetConstraint(float& current, const PropertyInputContainer& inputs)
+{
+  if(inputs.Count() > 0u)
+  {
+    current = inputs[0]->GetFloat();
+  }
+}
 } // namespace
 
 struct AtlasRenderer::Impl
@@ -67,6 +84,11 @@ struct AtlasRenderer::Impl
     STYLE_DROP_SHADOW
   };
 
+  ~Impl()
+  {
+    ClearGradientAnimBinding();
+  }
+
   struct MeshRecord
   {
     MeshRecord()
@@ -76,6 +98,8 @@ struct AtlasRenderer::Impl
 
     uint32_t             mAtlasId;
     AtlasManager::Mesh2D mMesh;
+    Vector<float>        mGradientFlags;
+    bool                 mHasGradientFill{false};
   };
 
   /**
@@ -156,9 +180,10 @@ struct AtlasRenderer::Impl
     mGlyphManager = AtlasGlyphManager::Get();
     mFontClient   = TextAbstraction::FontClient::Get();
 
-    mQuadVertexFormat["aPosition"] = Property::VECTOR2;
-    mQuadVertexFormat["aTexCoord"] = Property::VECTOR2;
-    mQuadVertexFormat["aColor"]    = Property::VECTOR4;
+    mQuadVertexFormat["aPosition"]         = Property::VECTOR2;
+    mQuadVertexFormat["aTexCoord"]         = Property::VECTOR2;
+    mQuadVertexFormat["aColor"]            = Property::VECTOR4;
+    mGradientVertexFormat["aGradientFill"] = Property::FLOAT;
   }
 
   void CacheGlyph(const GlyphInfo& glyph, FontId lastFontId, const AtlasGlyphManager::GlyphStyle& style,
@@ -292,7 +317,8 @@ struct AtlasRenderer::Impl
                     Vector<TextCacheEntry>& newTextCache, bool isGlyphCached, float fontMetricsAscender,
                     bool underlineEnabled, uint32_t underlineChunkId, float underlinePosition, float underlineThickness,
                     Vector<Extent>& underlineExtents, bool strikethroughEnabled, uint32_t strikethroughChunkId,
-                    float strikethroughThickness, Vector<Extent>& strikethroughExtents)
+                    float strikethroughThickness, Vector<Extent>& strikethroughExtents,
+                    bool usesGradientFill)
   {
     // Generate mesh data for this quad, plugging in our supplied position
     AtlasManager::Mesh2D newMesh;
@@ -329,12 +355,12 @@ struct AtlasRenderer::Impl
 
     StitchTextMesh(slot, meshContainer, newMesh, baseLine, underlineEnabled, underlineChunkId, underlinePosition,
                    underlineThickness, underlineExtents, strikethroughEnabled, strikethroughChunkId,
-                   strikethroughPosition, strikethroughThickness, strikethroughExtents);
+                   strikethroughPosition, strikethroughThickness, strikethroughExtents, usesGradientFill);
   }
 
   void CreateActors(const std::vector<MeshRecord>& meshContainer, const Size& textSize, const Vector4& color,
                     const Vector4& shadowColor, const Vector2& shadowOffset, Actor textControl,
-                    Property::Index animatablePropertyIndex, bool drawShadow)
+                    Property::Index animatablePropertyIndex, bool drawShadow, bool allowGradient)
   {
     if(!mActor)
     {
@@ -351,7 +377,8 @@ struct AtlasRenderer::Impl
     {
       const MeshRecord& meshRecord = *it;
 
-      Actor actor = CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_NORMAL);
+      Actor actor = CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_NORMAL,
+                                    allowGradient);
 
       // Whether the actor has renderers.
       const bool hasRenderer = actor.GetRendererCount() > 0u;
@@ -370,7 +397,7 @@ struct AtlasRenderer::Impl
         }
 
         Actor shadowActor =
-          CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_DROP_SHADOW);
+          CreateMeshActor(textControl, animatablePropertyIndex, color, meshRecord, textSize, STYLE_DROP_SHADOW, false);
 #if defined(DEBUG_ENABLED)
         shadowActor.SetProperty(Dali::Actor::Property::NAME, "Text Shadow renderable actor");
 #endif
@@ -648,6 +675,9 @@ struct AtlasRenderer::Impl
           const ColorIndex colorIndex = useDefaultColor ? 0u : *(colorIndicesBuffer + i);
           const Vector4&   color =
             (useDefaultColor || (0u == colorIndex)) ? defaultColor : *(colorsBuffer + colorIndex - 1u);
+          const bool usesGradientFill = mGradientState.IsEnabled() &&
+                                        Internal::ClassifyGradientGlyph(mFontClient, glyph, colorIndicesBuffer, i)
+                                          .usesGradientFill;
 
           // The new underlined chunk. Add new id if they are not consecutive indices (this is for Markup case)
           //  Examples: "Hello <u>World</u> Hello <u>World</u>", "<u>World</u> Hello <u>World</u>", "<u>   World</u>
@@ -690,7 +720,7 @@ struct AtlasRenderer::Impl
           GenerateMesh(glyph, positionPlusOutlineOffset, color, NO_OUTLINE, slot, meshContainer, newTextCache, false,
                        currentFontMetricsAscender, isGlyphUnderlined, underlineChunkId, currentUnderlinePosition,
                        maxUnderlineHeight, underlineExtents, isGlyphStrikethrough, strikethroughChunkId,
-                       maxStrikethroughHeight, strikethroughExtents);
+                       maxStrikethroughHeight, strikethroughExtents, usesGradientFill);
 
           lastFontId = glyph.fontId; // Prevents searching for existing blocksizes when string of the same fontId.
         }
@@ -699,7 +729,7 @@ struct AtlasRenderer::Impl
         {
           GenerateMesh(glyph, position, outlineColor, outlineWidth, slotOutline, meshContainerOutline, newTextCache,
                        false, currentFontMetricsAscender, false, 0u, currentUnderlinePosition, maxUnderlineHeight,
-                       underlineExtents, false, 0u, maxStrikethroughHeight, strikethroughExtents);
+                       underlineExtents, false, 0u, maxStrikethroughHeight, strikethroughExtents, false);
         }
       }
 
@@ -732,7 +762,7 @@ struct AtlasRenderer::Impl
     {
       const bool drawShadow = STYLE_DROP_SHADOW == style;
       CreateActors(meshContainerOutline, textSize, outlineColor, shadowColor, shadowOffset, textControl,
-                   animatablePropertyIndex, drawShadow);
+                   animatablePropertyIndex, drawShadow, false);
 
       isShadowDrawn = drawShadow;
     }
@@ -742,7 +772,7 @@ struct AtlasRenderer::Impl
     {
       const bool drawShadow = !isShadowDrawn && (STYLE_DROP_SHADOW == style);
       CreateActors(meshContainer, textSize, defaultColor, shadowColor, shadowOffset, textControl,
-                   animatablePropertyIndex, drawShadow);
+                   animatablePropertyIndex, drawShadow, true);
     }
 
 #if defined(DEBUG_ENABLED)
@@ -784,8 +814,219 @@ struct AtlasRenderer::Impl
     mTextCache.Resize(0);
   }
 
+  void SetGradientState(const Internal::Gradient::AtlasRendererState& state)
+  {
+    const bool identityChange = mGradientState.resourceId != state.resourceId;
+    const bool styleChange    = identityChange ||
+                             mGradientState.styleRevision != state.styleRevision;
+    const bool lookupChange = identityChange ||
+                              mGradientState.lookupRevision != state.lookupRevision ||
+                              mGradientState.lookupTexture != state.lookupTexture ||
+                              mGradientState.lookupSampler != state.lookupSampler;
+
+    mGradientState = state;
+    if(!styleChange && !lookupChange)
+    {
+      return;
+    }
+
+    for(auto& renderer : mGradientRenderers)
+    {
+      if(lookupChange)
+      {
+        TextureSet textureSet = renderer.GetTextures();
+        textureSet.SetTexture(1u, mGradientState.lookupTexture);
+        textureSet.SetSampler(1u, mGradientState.lookupSampler);
+      }
+      if(styleChange)
+      {
+        ApplyGradientStyleProperties(renderer);
+      }
+    }
+  }
+
+  void UpdateGradient(const Vector2& coordinateSize, const Vector4& bounds)
+  {
+    const bool coordinateChange = mGradientCoordinateSize != coordinateSize;
+    const bool boundsChange     = mGradientBounds != bounds;
+    if(!coordinateChange && !boundsChange)
+    {
+      return;
+    }
+
+    // ResolveRenderData normalizes USER_SPACE geometry by bounds pixel size,
+    // not bounds origin. Origin is consumed directly by the fragment shader.
+    const bool boundsSizeChange = mGradientBounds.z != bounds.z || mGradientBounds.w != bounds.w;
+    mGradientCoordinateSize     = coordinateSize;
+    mGradientBounds             = bounds;
+    for(auto& renderer : mGradientRenderers)
+    {
+      ApplyGradientFrameProperties(renderer, coordinateChange, boundsChange, boundsSizeChange);
+    }
+  }
+
+  void RemoveGradientAnimConstraints()
+  {
+    for(auto& constraint : mGradientAnimConstraints)
+    {
+      if(constraint)
+      {
+        constraint.Remove();
+      }
+    }
+    mGradientAnimConstraints.clear();
+  }
+
+  void ClearGradientAnimBinding()
+  {
+    RemoveGradientAnimConstraints();
+    mGradientAnimSourceActor.Reset();
+    mGradientAnimOffsetIndex = Property::INVALID_INDEX;
+    mGradientAnimApplyAlways = false;
+  }
+
+  void BindGradientAnimConstraint(Dali::Renderer renderer)
+  {
+    Actor sourceActor = mGradientAnimSourceActor.GetHandle();
+    if(!renderer ||
+       !sourceActor ||
+       mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+    {
+      return;
+    }
+
+    const Property::Index rendererStartOffsetIndex = renderer.GetPropertyIndex(UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME);
+    if(rendererStartOffsetIndex == Property::INVALID_INDEX)
+    {
+      return;
+    }
+
+    Constraint constraint = Constraint::New<float>(renderer, rendererStartOffsetIndex, GradientOffsetConstraint);
+    constraint.AddSource(Source(sourceActor, mGradientAnimOffsetIndex));
+    constraint.SetApplyRate(mGradientAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                     : Dali::Constraint::APPLY_ONCE);
+    Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_ATLAS_GRADIENT_START_OFFSET_CONSTRAINT_TAG);
+    constraint.Apply();
+    mGradientAnimConstraints.push_back(constraint);
+  }
+
+  void RebindGradientAnimConstraints()
+  {
+    RemoveGradientAnimConstraints();
+    for(auto& renderer : mGradientRenderers)
+    {
+      BindGradientAnimConstraint(renderer);
+    }
+  }
+
+  void SetGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex)
+  {
+    if(!sourceActor || startOffsetPropertyIndex == Property::INVALID_INDEX)
+    {
+      ClearGradientAnimBinding();
+      return;
+    }
+
+    Actor      currentSourceActor = mGradientAnimSourceActor.GetHandle();
+    const bool changed            = currentSourceActor != sourceActor || mGradientAnimOffsetIndex != startOffsetPropertyIndex;
+
+    // The renderer is owned by the control, so keep the animation source weak
+    // and take a temporary Actor handle only while binding constraints.
+    mGradientAnimSourceActor = WeakHandle<Actor>(sourceActor);
+    mGradientAnimOffsetIndex = startOffsetPropertyIndex;
+
+    if(changed)
+    {
+      RebindGradientAnimConstraints();
+    }
+  }
+
+  void SetGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint)
+  {
+    if(mGradientAnimApplyAlways != applyAlways || notifyToConstraint)
+    {
+      mGradientAnimApplyAlways = applyAlways;
+      for(auto& constraint : mGradientAnimConstraints)
+      {
+        if(constraint)
+        {
+          constraint.SetApplyRate(mGradientAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                           : Dali::Constraint::APPLY_ONCE);
+        }
+      }
+    }
+  }
+
+  void ApplyGradientGeometryProperties(Dali::Renderer renderer)
+  {
+    if(!renderer || !mGradientState.IsEnabled())
+    {
+      return;
+    }
+
+    const auto data = Internal::Gradient::ResolveRenderData(
+      mGradientState.style, mGradientBounds, mGradientCoordinateSize);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientStartPosition", data.startPosition);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientEndPosition", data.endPosition);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialCenter", data.radialCenter);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientRadialScale", data.radialScale);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicCenter", data.conicCenter);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicScale", data.conicScale);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientConicStartAngle", data.conicStartAngle);
+  }
+
+  void ApplyGradientStyleProperties(Dali::Renderer renderer)
+  {
+    if(!renderer || !mGradientState.IsEnabled())
+    {
+      return;
+    }
+
+    const auto data = Internal::Gradient::ResolveRenderData(
+      mGradientState.style, mGradientBounds, mGradientCoordinateSize);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientType", static_cast<float>(data.type));
+    Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, data.startOffset);
+    ApplyGradientGeometryProperties(renderer);
+  }
+
+  void ApplyGradientFrameProperties(Dali::Renderer renderer,
+                                    bool           coordinateChange,
+                                    bool           boundsChange,
+                                    bool           boundsSizeChange)
+  {
+    if(!renderer || !mGradientState.IsEnabled())
+    {
+      return;
+    }
+
+    if(coordinateChange)
+    {
+      Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", mGradientCoordinateSize);
+    }
+    if(boundsChange)
+    {
+      Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", mGradientBounds);
+    }
+    if(coordinateChange || boundsSizeChange)
+    {
+      ApplyGradientGeometryProperties(renderer);
+    }
+  }
+
+  void ApplyAllGradientProperties(Dali::Renderer renderer)
+  {
+    if(!renderer || !mGradientState.IsEnabled())
+    {
+      return;
+    }
+
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientLayoutSize", mGradientCoordinateSize);
+    Internal::Gradient::SetRendererProperty(renderer, "uTextGradientBounds", mGradientBounds);
+    ApplyGradientStyleProperties(renderer);
+  }
+
   Actor CreateMeshActor(Actor textControl, Property::Index animatablePropertyIndex, const Vector4& defaultColor,
-                        const MeshRecord& meshRecord, const Vector2& actorSize, Style style)
+                        const MeshRecord& meshRecord, const Vector2& actorSize, Style style, bool allowGradient)
   {
     VertexBuffer quadVertices = VertexBuffer::New(mQuadVertexFormat);
     quadVertices.SetData(const_cast<AtlasManager::Vertex2D*>(&meshRecord.mMesh.mVertices[0]),
@@ -793,15 +1034,55 @@ struct AtlasRenderer::Impl
 
     Geometry quadGeometry = Geometry::New();
     quadGeometry.AddVertexBuffer(quadVertices);
-    quadGeometry.SetIndexBuffer(&meshRecord.mMesh.mIndices[0], meshRecord.mMesh.mIndices.Size());
 
-    TextureSet textureSet(mGlyphManager.GetTextures(meshRecord.mAtlasId));
-
-    // Choose the shader to use.
     const bool isColorShader =
       (STYLE_DROP_SHADOW != style) && (Pixel::BGRA8888 == mGlyphManager.GetPixelFormat(meshRecord.mAtlasId));
+    const bool hasCompleteGradientFlags = meshRecord.mGradientFlags.Count() == meshRecord.mMesh.mVertices.Count();
+    const bool useGradientShader        = allowGradient && (STYLE_NORMAL == style) && !isColorShader &&
+                                   mGradientState.IsEnabled() && meshRecord.mHasGradientFill &&
+                                   hasCompleteGradientFlags;
+    if(useGradientShader)
+    {
+      VertexBuffer gradientVertices = VertexBuffer::New(mGradientVertexFormat);
+      gradientVertices.SetData(const_cast<float*>(meshRecord.mGradientFlags.Begin()), meshRecord.mGradientFlags.Count());
+      quadGeometry.AddVertexBuffer(gradientVertices);
+    }
+    quadGeometry.SetIndexBuffer(&meshRecord.mMesh.mIndices[0], meshRecord.mMesh.mIndices.Size());
+
+    TextureSet textureSet;
+    if(useGradientShader)
+    {
+      const TextureSet atlasTextureSet = mGlyphManager.GetTextures(meshRecord.mAtlasId);
+      textureSet                       = TextureSet::New();
+      textureSet.SetTexture(0u, atlasTextureSet.GetTexture(0u));
+      const Sampler atlasSampler = atlasTextureSet.GetSampler(0u);
+      if(atlasSampler)
+      {
+        textureSet.SetSampler(0u, atlasSampler);
+      }
+      textureSet.SetTexture(1u, mGradientState.lookupTexture);
+      textureSet.SetSampler(1u, mGradientState.lookupSampler);
+    }
+    else
+    {
+      textureSet = mGlyphManager.GetTextures(meshRecord.mAtlasId);
+    }
+
+    // Choose the shader to use.
     Shader shader;
-    if(isColorShader)
+    if(useGradientShader)
+    {
+      if(!mShaderL8Gradient)
+      {
+        mShaderL8Gradient = Shader::New(
+          ToDaliStringView(SHADER_TEXT_ATLAS_GRADIENT_SHADER_VERT),
+          ToDaliStringView(SHADER_TEXT_ATLAS_L8_GRADIENT_SHADER_FRAG),
+          static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL),
+          "TEXT_ATLAS_L8_GRADIENT");
+      }
+      shader = mShaderL8Gradient;
+    }
+    else if(isColorShader)
     {
       // The glyph is an emoji and is not a shadow.
       if(!mShaderRgba)
@@ -851,6 +1132,11 @@ struct AtlasRenderer::Impl
     renderer.SetTextures(textureSet);
     renderer.SetProperty(Dali::Renderer::Property::BLEND_MODE, BlendMode::ON);
     renderer.SetProperty(Dali::Renderer::Property::DEPTH_INDEX, Dali::Ui::Integration::DepthIndex::CONTENT + mDepth);
+    if(useGradientShader)
+    {
+      mGradientRenderers.push_back(renderer);
+      ApplyAllGradientProperties(renderer);
+    }
 
     Actor actor = Actor::New();
 #if defined(DEBUG_ENABLED)
@@ -871,7 +1157,7 @@ struct AtlasRenderer::Impl
                       AtlasManager::Mesh2D& newMesh, float baseLine, bool underlineEnabled, uint32_t underlineChunkId,
                       float underlinePosition, float underlineThickness, Vector<Extent>& underlineExtents,
                       bool strikethroughEnabled, uint32_t strikethroughChunkId, float strikethroughPosition,
-                      float strikethroughThickness, Vector<Extent>& strikethroughExtents)
+                      float strikethroughThickness, Vector<Extent>& strikethroughExtents, bool usesGradientFill)
   {
     if(slot.mImageId)
     {
@@ -885,6 +1171,14 @@ struct AtlasRenderer::Impl
       {
         if(slot.mAtlasId == mIt->mAtlasId)
         {
+          if(mGradientState.IsEnabled())
+          {
+            for(uint32_t vertex = 0u; vertex < newMesh.mVertices.Count(); ++vertex)
+            {
+              mIt->mGradientFlags.PushBack(usesGradientFill ? 1.0f : 0.0f);
+            }
+            mIt->mHasGradientFill = mIt->mHasGradientFill || usesGradientFill;
+          }
           // Append the mesh to the existing mesh and adjust any extents
           Ui::Internal::AtlasMeshFactory::AppendMesh(mIt->mMesh, newMesh);
 
@@ -907,6 +1201,14 @@ struct AtlasRenderer::Impl
       MeshRecord meshRecord;
       meshRecord.mAtlasId = slot.mAtlasId;
       meshRecord.mMesh    = newMesh;
+      if(mGradientState.IsEnabled())
+      {
+        for(uint32_t vertex = 0u; vertex < newMesh.mVertices.Count(); ++vertex)
+        {
+          meshRecord.mGradientFlags.PushBack(usesGradientFill ? 1.0f : 0.0f);
+        }
+        meshRecord.mHasGradientFill = usesGradientFill;
+      }
       meshContainer.push_back(meshRecord);
 
       if(underlineEnabled)
@@ -1180,6 +1482,13 @@ struct AtlasRenderer::Impl
           faceIndex += 4;
         }
       }
+      if(!meshRecords[index].mGradientFlags.Empty())
+      {
+        for(uint32_t vertex = 0u; vertex < newMesh.mVertices.Count(); ++vertex)
+        {
+          meshRecords[index].mGradientFlags.PushBack(0.0f);
+        }
+      }
       Ui::Internal::AtlasMeshFactory::AppendMesh(meshRecords[index].mMesh, newMesh);
     }
   }
@@ -1251,19 +1560,36 @@ struct AtlasRenderer::Impl
       newMesh.mIndices.PushBack(faceIndex + 1u);
       faceIndex += 4;
 
+      if(!meshRecords[index].mGradientFlags.Empty())
+      {
+        for(uint32_t vertex = 0u; vertex < newMesh.mVertices.Count(); ++vertex)
+        {
+          meshRecords[index].mGradientFlags.PushBack(0.0f);
+        }
+      }
       Ui::Internal::AtlasMeshFactory::AppendMesh(meshRecords[index].mMesh, newMesh);
     }
   }
 
-  Actor                       mActor;            ///< The actor parent which renders the text
-  AtlasGlyphManager           mGlyphManager;     ///< Glyph Manager to handle upload and caching
-  TextAbstraction::FontClient mFontClient;       ///< The font client used to supply glyph information
-  Shader                      mShaderL8;         ///< The shader for glyphs and emoji's shadows.
-  Shader                      mShaderRgba;       ///< The shader for emojis.
-  std::vector<MaxBlockSize>   mBlockSizes;       ///< Maximum size needed to contain a glyph in a block within a new atlas
-  Vector<TextCacheEntry>      mTextCache;        ///< Caches data from previous render
-  Property::Map               mQuadVertexFormat; ///< Describes the vertex format for text
-  int                         mDepth;            ///< DepthIndex passed by control when connect to stage
+  Actor                                  mActor;            ///< The actor parent which renders the text
+  AtlasGlyphManager                      mGlyphManager;     ///< Glyph Manager to handle upload and caching
+  TextAbstraction::FontClient            mFontClient;       ///< The font client used to supply glyph information
+  Shader                                 mShaderL8;         ///< The shader for glyphs and emoji's shadows.
+  Shader                                 mShaderL8Gradient; ///< Gradient-enabled L8 shader variant.
+  Shader                                 mShaderRgba;       ///< The shader for emojis.
+  std::vector<MaxBlockSize>              mBlockSizes;       ///< Maximum size needed to contain a glyph in a block within a new atlas
+  Vector<TextCacheEntry>                 mTextCache;        ///< Caches data from previous render
+  Property::Map                          mQuadVertexFormat; ///< Describes the vertex format for text
+  Property::Map                          mGradientVertexFormat;
+  Internal::Gradient::AtlasRendererState mGradientState;
+  std::vector<Dali::Renderer>            mGradientRenderers;
+  std::vector<Dali::Constraint>          mGradientAnimConstraints;
+  WeakHandle<Actor>                      mGradientAnimSourceActor;
+  Property::Index                        mGradientAnimOffsetIndex{Property::INVALID_INDEX};
+  Vector2                                mGradientCoordinateSize{Vector2::ONE};
+  Vector4                                mGradientBounds{0.0f, 0.0f, 1.0f, 1.0f};
+  int                                    mDepth; ///< DepthIndex passed by control when connect to stage
+  bool                                   mGradientAnimApplyAlways{false};
 };
 
 Text::RendererPtr AtlasRenderer::New()
@@ -1279,6 +1605,9 @@ Actor AtlasRenderer::Render(Text::ViewInterface& view, Actor textControl, Proper
   DALI_LOG_INFO(gLogFilter, Debug::General, "Text::AtlasRenderer::Render()\n");
 
   UnparentAndReset(mImpl->mActor);
+  mImpl->RemoveGradientAnimConstraints();
+  mImpl->mGradientRenderers.clear();
+  mImpl->mGradientCoordinateSize = view.GetLayoutSize();
 
   Length numberOfGlyphs = view.GetNumberOfGlyphs();
 
@@ -1312,7 +1641,30 @@ Actor AtlasRenderer::Render(Text::ViewInterface& view, Actor textControl, Proper
     }
   }
 
+  mImpl->RebindGradientAnimConstraints();
+
   return mImpl->mActor;
+}
+
+bool AtlasRenderer::SetAtlasGradientState(const Internal::Gradient::AtlasRendererState& state)
+{
+  mImpl->SetGradientState(state);
+  return true;
+}
+
+void AtlasRenderer::UpdateAtlasGradient(const Vector2& coordinateSize, const Vector4& bounds)
+{
+  mImpl->UpdateGradient(coordinateSize, bounds);
+}
+
+void AtlasRenderer::SetAtlasGradientAnimProperties(Actor sourceActor, Property::Index startOffsetPropertyIndex)
+{
+  mImpl->SetGradientAnimProperties(sourceActor, startOffsetPropertyIndex);
+}
+
+void AtlasRenderer::SetAtlasGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint)
+{
+  mImpl->SetGradientAnimApplyAlways(applyAlways, notifyToConstraint);
 }
 
 AtlasRenderer::AtlasRenderer()
