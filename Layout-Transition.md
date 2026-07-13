@@ -110,8 +110,8 @@ auto onChange = [](const LayoutAnimatorContext& ctx)
     const float p = ctx.progress;
     const float x = ctx.fromBounds.x + (ctx.toBounds.x - ctx.fromBounds.x) * p;
     const float y = ctx.fromBounds.y + (ctx.toBounds.y - ctx.fromBounds.y) * p;
-    actor.SetProperty(Actor::Property::POSITION_X, x);
-    actor.SetProperty(Actor::Property::POSITION_Y, y);
+    actor.SetPositionX(x);
+    actor.SetPositionY(y);
 };
 
 LayoutAnimatorTiming timing;
