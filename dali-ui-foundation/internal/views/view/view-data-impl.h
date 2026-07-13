@@ -761,54 +761,6 @@ private:
   void UpdateBorderline();
 
 private:
-  ViewImpl& mViewImpl;
-
-  // State
-  Ui::ViewState                    mState;
-  ViewImpl::StateChangedSignalType mStateChangedSignal;
-
-  // UiScale
-  UiScalePolicy mScalePolicy{UiScalePolicy::INHERIT};
-  mutable float mEffectiveScale{-1.0f};
-
-  // Requested position (used when parent is not a layout)
-  float mRequestedPositionX;
-  float mRequestedPositionY;
-
-  // Measure/Arrange State (cache-based)
-  // mLastMeasuredConstraint.width < 0 means no valid measure cache
-  MeasuredSize mMeasuredSize;
-  MeasuredSize mLastMeasuredConstraint;
-  LayoutRect   mArrangedBounds;
-  // true = invalidated since the last arrange, false = NeverArranged or Valid.
-  // Used by InvalidateArrange's early-exit guard so repeated invalidations
-  // within a frame collapse to one parent-chain walk. Set by InvalidateMeasure
-  // too (measure invalidation implies arrange invalidation).
-  bool mArrangeDirty;
-
-  // Children (synchronized with Actor hierarchy via OnChildAdd/OnChildRemove)
-  Dali::Vector<Ui::View> mChildren;
-  bool                   mSkipChildrenUpdate;
-
-  // Layout transition
-  Ui::LayoutTransition          mLayoutTransition;
-  std::unordered_set<ViewImpl*> mPendingEnterChildren;                          ///< Children added since last layout pass; consumed by transition dispatcher
-  std::unordered_set<ViewImpl*> mPendingReorderedChildren;                      ///< Children whose sibling order changed since the last layout pass
-  bool                          mPendingChildRemovalForLayoutTransition{false}; ///< True if at least one child was removed via View::Remove / RemoveAllChildren since the last layout pass; consumed by dispatcher to tag remaining children's CHANGE cause as SIBLING_REMOVED
-  bool                          mInitialLayoutDone{false};                      ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
-
-  // Trait storage
-  std::vector<std::pair<TraitId, IntrusivePtr<TraitObject>>> mTraits;
-
-  // Owned by mTraits through ReservedTraitId::CORE_INTERACTION_TRAITS so the trait object lifecycle
-  // continues to use the trait attachment hooks; cached here for fast framework
-  // access on input, focus, and state hot paths.
-  Internal::CoreInteractionObject* mCoreInteractionObject;
-
-  std::unique_ptr<AccessibilityData>   mAccessibilityData;
-  std::unique_ptr<VisualData>          mVisualData;
-  std::unique_ptr<AttachmentContainer> mAttachments;
-
   struct SizeConstraints
   {
     float minWidth  = 0.0f;
@@ -816,7 +768,19 @@ private:
     float maxWidth  = std::numeric_limits<float>::max();
     float maxHeight = std::numeric_limits<float>::max();
   };
-  std::unique_ptr<SizeConstraints> mSizeConstraints; ///< Lazy-allocated measurement min/max bounds (natural units).
+
+  struct FocusNavigationData
+  {
+    int                     leftId             = -1;
+    int                     rightId            = -1;
+    int                     upId               = -1;
+    int                     downId             = -1;
+    int                     clockwiseId        = -1;
+    int                     counterClockwiseId = -1;
+    int                     forwardId          = -1;
+    int                     backwardId         = -1;
+    FocusNavigationCallback callback;
+  };
 
   SizeConstraints& EnsureSizeConstraints()
   {
@@ -826,20 +790,6 @@ private:
     }
     return *mSizeConstraints;
   }
-
-  struct FocusNavigationData
-  {
-    int leftId             = -1;
-    int rightId            = -1;
-    int upId               = -1;
-    int downId             = -1;
-    int clockwiseId        = -1;
-    int counterClockwiseId = -1;
-    int forwardId          = -1;
-    int backwardId         = -1;
-  };
-  std::unique_ptr<FocusNavigationData> mFocusNavigationData;     ///< Lazy-allocated directional focus IDs.
-  FocusNavigationCallback              mFocusNavigationCallback; ///< Callback for focus navigation.
 
   FocusNavigationData& EnsureFocusNavigationData()
   {
@@ -855,37 +805,54 @@ private:
     return mFocusNavigationData ? mFocusNavigationData.get()->*field : -1;
   }
 
-  Extents                            mMargin;          ///< Layout margin
-  Extents                            mPadding;         ///< Layout padding
-  float                              mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float                              mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  Ui::LayoutMode                     mLayoutMode;      ///< Layout mode of the view
-  RenderEffectImplPtr                mRenderEffect;    ///< The render effect on this view
-  Vector2                            mSize;            ///< The size of the view
-  Ui::View::KeyEventSignalType       mKeyEventSignal;
-  Ui::View::FocusChangedSignalType   mFocusChangedSignal;
-  Ui::View::ResourceReadySignalType  mResourceReadySignal;
-  ViewImpl::LayoutFinishedSignalType mLayoutFinishedSignal;
+  ViewImpl&                                                  mViewImpl;
+  Ui::ViewState                                              mState;
+  UiScalePolicy                                              mScalePolicy{UiScalePolicy::INHERIT};
+  mutable float                                              mEffectiveScale{-1.0f};
+  std::vector<std::pair<TraitId, IntrusivePtr<TraitObject>>> mTraits;
+  Internal::CoreInteractionObject*                           mCoreInteractionObject;
+  std::unique_ptr<VisualData>                                mVisualData;
+  std::unique_ptr<AttachmentContainer>                       mAttachments;
+  std::unique_ptr<FocusNavigationData>                       mFocusNavigationData;
+  InputMethodContext                                         mInputMethodContext;
+  RenderEffectImplPtr                                        mRenderEffect;        ///< The render effect on this view
+  std::vector<Dali::Ui::VisualBase>                          mShadowVisualObjects; ///< Additional shadow visuals after the primary shadow.
+  ViewImpl::StateChangedSignalType                           mStateChangedSignal;
+  Ui::View::KeyEventSignalType                               mKeyEventSignal;
+  Ui::View::FocusChangedSignalType                           mFocusChangedSignal;
+  Ui::View::ResourceReadySignalType                          mResourceReadySignal;
+  ViewImpl::LayoutFinishedSignalType                         mLayoutFinishedSignal;
+  Ui::View::OffScreenRenderingFinishedSignalType             mOffScreenRenderingFinishedSignal; ///< Emits only when type is REFRESH_ONCE
+  std::unique_ptr<OffScreenRenderingImpl>                    mOffScreenRenderingImpl;
+  Ui::View::OffScreenRenderingType                           mOffScreenRenderingType;
+  CallbackBase*                                              mIdleCallback; ///< The idle callback to emit the resource ready signal.
 
-  // Off screen rendering context
-  std::unique_ptr<OffScreenRenderingImpl> mOffScreenRenderingImpl;
-  Ui::View::OffScreenRenderingType        mOffScreenRenderingType;
-  Ui::View::OffScreenRenderingFinishedSignalType
-    mOffScreenRenderingFinishedSignal; ///< Emits only when type is REFRESH_ONCE
+  // Used when the parent is not a layout.
+  float mRequestedPositionX;
+  float mRequestedPositionY;
+  // mLastMeasuredConstraint.width < 0 means no valid measure cache
+  MeasuredSize                     mMeasuredSize;
+  MeasuredSize                     mLastMeasuredConstraint;
+  LayoutRect                       mArrangedBounds;
+  Extents                          mMargin;          ///< Layout margin
+  Extents                          mPadding;         ///< Layout padding
+  float                            mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  float                            mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  Ui::LayoutMode                   mLayoutMode;      ///< Layout mode of the view
+  Vector2                          mSize;            ///< The size of the view
+  std::unique_ptr<SizeConstraints> mSizeConstraints; ///< Lazy-allocated measurement min/max bounds (natural units).
+  Dali::Vector<Ui::View>           mChildren;        ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
+  Ui::LayoutTransition             mLayoutTransition;
+  std::unordered_set<ViewImpl*>    mPendingEnterChildren;     ///< Children added since last layout pass; consumed by transition dispatcher
+  std::unordered_set<ViewImpl*>    mPendingReorderedChildren; ///< Children whose sibling order changed since the last layout pass
 
-  std::vector<Dali::Ui::VisualBase> mShadowVisualObjects; ///< Additional shadow visuals after the primary shadow.
+  std::unique_ptr<AccessibilityData> mAccessibilityData;
+  int32_t                            mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2; ///< Frequently touched accessibility-related value kept here to avoid AccessibilityData creation.
 
-  InputMethodContext mInputMethodContext;
-  CallbackBase*      mIdleCallback; ///< The idle callback to emit the resource ready signal.
-
-  static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG) - 1>::value + 1;
-
-  ViewImpl::ViewBehaviour mFlags : VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
-
-  // Frequencly touched accessibility relative values.
-  // Keep it on ViewDataImpl to avoid AccessibilityData creation.
-  int32_t mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2;
-
+  bool mSkipChildrenUpdate;                               ///< Plain bool because ScopedSkipChildrenUpdate stores a bool reference.
+  bool mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
+  bool mPendingChildRemovalForLayoutTransition : 1;       ///< True if at least one child was removed via View::Remove / RemoveAllChildren since the last layout pass; consumed by dispatcher to tag remaining children's CHANGE cause as SIBLING_REMOVED
+  bool mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
   bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
   bool mIsEmittingResourceReadySignal : 1;                ///< True during ResourceReady().
   bool mIdleCallbackRegistered : 1;                       ///< True if need to emit the resource ready signal again.
@@ -894,50 +861,50 @@ private:
   bool mProcessorRegistered : 1;                          ///< Whether the processor is registered.
   bool mDefaultFocusIndicatorSuppressedByStateEffect : 1; ///< Whether the current StateEffect suppresses the default focus indicator.
 
-  // Properties - these need to be members of Internal::ViewDataImpl as they access private methods/data of
-  // ViewImpl and Internal::ViewDataImpl.
-  static const PropertyRegistration PROPERTY_1;
-  static const PropertyRegistration PROPERTY_2;
-  static const PropertyRegistration PROPERTY_3;
-  static const PropertyRegistration PROPERTY_5;
-  static const PropertyRegistration PROPERTY_6;
-  static const PropertyRegistration PROPERTY_7;
-  static const PropertyRegistration PROPERTY_8;
-  static const PropertyRegistration PROPERTY_9;
-  static const PropertyRegistration PROPERTY_10;
-  static const PropertyRegistration PROPERTY_11;
-  static const PropertyRegistration PROPERTY_12;
-  static const PropertyRegistration PROPERTY_13;
-  static const PropertyRegistration PROPERTY_14;
-  static const PropertyRegistration PROPERTY_15;
-  static const PropertyRegistration PROPERTY_16;
-  static const PropertyRegistration PROPERTY_17;
-  static const PropertyRegistration PROPERTY_18;
-  static const PropertyRegistration PROPERTY_19;
-  static const PropertyRegistration PROPERTY_20;
-  static const PropertyRegistration PROPERTY_21;
-  static const PropertyRegistration PROPERTY_22;
-  static const PropertyRegistration PROPERTY_23;
-  static const PropertyRegistration PROPERTY_24;
-  static const PropertyRegistration PROPERTY_25;
-  static const PropertyRegistration PROPERTY_26;
-  static const PropertyRegistration PROPERTY_27;
-  static const PropertyRegistration PROPERTY_28;
-  static const PropertyRegistration PROPERTY_30;
-  static const PropertyRegistration PROPERTY_31;
-  static const PropertyRegistration PROPERTY_32;
-  static const PropertyRegistration PROPERTY_33;
-  static const PropertyRegistration PROPERTY_34;
-  static const PropertyRegistration PROPERTY_35;
-  static const PropertyRegistration PROPERTY_36;
-  static const PropertyRegistration PROPERTY_37;
-  static const PropertyRegistration PROPERTY_38;
-  static const PropertyRegistration PROPERTY_39;
-  static const PropertyRegistration PROPERTY_40;
-  static const PropertyRegistration PROPERTY_42;
-  static const PropertyRegistration PROPERTY_43;
-  static const PropertyRegistration PROPERTY_44;
-
+  static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG) - 1>::value + 1;
+  ViewImpl::ViewBehaviour   mFlags : VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
+  // Property registrations access private methods and data of ViewImpl and ViewDataImpl.
+  static const PropertyRegistration           PROPERTY_1;
+  static const PropertyRegistration           PROPERTY_2;
+  static const PropertyRegistration           PROPERTY_3;
+  static const PropertyRegistration           PROPERTY_5;
+  static const PropertyRegistration           PROPERTY_6;
+  static const PropertyRegistration           PROPERTY_7;
+  static const PropertyRegistration           PROPERTY_8;
+  static const PropertyRegistration           PROPERTY_9;
+  static const PropertyRegistration           PROPERTY_10;
+  static const PropertyRegistration           PROPERTY_11;
+  static const PropertyRegistration           PROPERTY_12;
+  static const PropertyRegistration           PROPERTY_13;
+  static const PropertyRegistration           PROPERTY_14;
+  static const PropertyRegistration           PROPERTY_15;
+  static const PropertyRegistration           PROPERTY_16;
+  static const PropertyRegistration           PROPERTY_17;
+  static const PropertyRegistration           PROPERTY_18;
+  static const PropertyRegistration           PROPERTY_19;
+  static const PropertyRegistration           PROPERTY_20;
+  static const PropertyRegistration           PROPERTY_21;
+  static const PropertyRegistration           PROPERTY_22;
+  static const PropertyRegistration           PROPERTY_23;
+  static const PropertyRegistration           PROPERTY_24;
+  static const PropertyRegistration           PROPERTY_25;
+  static const PropertyRegistration           PROPERTY_26;
+  static const PropertyRegistration           PROPERTY_27;
+  static const PropertyRegistration           PROPERTY_28;
+  static const PropertyRegistration           PROPERTY_30;
+  static const PropertyRegistration           PROPERTY_31;
+  static const PropertyRegistration           PROPERTY_32;
+  static const PropertyRegistration           PROPERTY_33;
+  static const PropertyRegistration           PROPERTY_34;
+  static const PropertyRegistration           PROPERTY_35;
+  static const PropertyRegistration           PROPERTY_36;
+  static const PropertyRegistration           PROPERTY_37;
+  static const PropertyRegistration           PROPERTY_38;
+  static const PropertyRegistration           PROPERTY_39;
+  static const PropertyRegistration           PROPERTY_40;
+  static const PropertyRegistration           PROPERTY_42;
+  static const PropertyRegistration           PROPERTY_43;
+  static const PropertyRegistration           PROPERTY_44;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_1;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_2;
   static const AnimatablePropertyRegistration ANIMATABLE_PROPERTY_3;

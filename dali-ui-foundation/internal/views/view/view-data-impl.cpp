@@ -614,6 +614,15 @@ const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_7(typeReg
 
 ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
 : mViewImpl(viewImpl),
+  mCoreInteractionObject(nullptr),
+  mVisualData(nullptr),
+  mAttachments(nullptr),
+  mFocusNavigationData(nullptr),
+  mInputMethodContext(),
+  mRenderEffect(nullptr),
+  mOffScreenRenderingImpl(nullptr),
+  mOffScreenRenderingType(Ui::View::OffScreenRenderingType::NONE),
+  mIdleCallback(nullptr),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
   mMeasuredSize{0.0f, 0.0f},
@@ -621,36 +630,26 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   // InvalidateMeasure still propagates. See view-impl.cpp for details.
   mLastMeasuredConstraint{std::numeric_limits<float>::quiet_NaN(), std::numeric_limits<float>::quiet_NaN()},
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
-  mArrangeDirty(false),
-  mSkipChildrenUpdate(false),
-  mCoreInteractionObject(nullptr),
-  mAccessibilityData(nullptr),
-  mVisualData(nullptr),
-  mAttachments(nullptr),
-  mFocusNavigationData(nullptr),
   mMargin(),
   mPadding(),
   mRequestedWidth(WRAP_CONTENT),
   mRequestedHeight(WRAP_CONTENT),
   mLayoutMode(Ui::LayoutMode::DEFAULT),
-  mRenderEffect(nullptr),
   mSize(0, 0),
-  mKeyEventSignal(),
-  mFocusChangedSignal(),
-  mResourceReadySignal(),
-  mOffScreenRenderingImpl(nullptr),
-  mOffScreenRenderingType(Ui::View::OffScreenRenderingType::NONE),
-  mInputMethodContext(),
-  mIdleCallback(nullptr),
-  mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT)),
+  mAccessibilityData(nullptr),
   mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
+  mSkipChildrenUpdate(false),
+  mArrangeDirty(false),
+  mPendingChildRemovalForLayoutTransition(false),
+  mInitialLayoutDone(false),
   mIsFocusGroup(false),
   mIsEmittingResourceReadySignal(false),
   mIdleCallbackRegistered(false),
   mDispatchKeyEvents(true),
   mAccessibleCreatable(true),
   mProcessorRegistered(false),
-  mDefaultFocusIndicatorSuppressedByStateEffect(false)
+  mDefaultFocusIndicatorSuppressedByStateEffect(false),
+  mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT))
 {
 }
 
@@ -1209,14 +1208,17 @@ bool ViewDataImpl::IsGroupSelectable() const
 
 void ViewDataImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback)
 {
-  mFocusNavigationCallback = std::move(callback);
+  if(callback || mFocusNavigationData)
+  {
+    EnsureFocusNavigationData().callback = std::move(callback);
+  }
 }
 
 View ViewDataImpl::RequestFocusNavigation(View currentFocusedView, FocusDirection direction)
 {
-  if(mFocusNavigationCallback)
+  if(mFocusNavigationData && mFocusNavigationData->callback)
   {
-    return mFocusNavigationCallback.Invoke(currentFocusedView, direction);
+    return mFocusNavigationData->callback.Invoke(currentFocusedView, direction);
   }
   return mViewImpl.OnFocusNavigationRequested(currentFocusedView, direction);
 }
