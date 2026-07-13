@@ -1,7 +1,7 @@
 # Auto-generated from dali-ui.spec.in by makespec.sh
 Name:       dali2-ui-foundation
 Summary:    DALi UI Library
-Version:    2.5.29.10863
+Version:    2.5.30.10887
 Release:    1
 Group:      System/Libraries
 License:    Apache-2.0 and BSD-3-Clause and MIT
@@ -93,6 +93,8 @@ Development components for dali-ui-components.
 # Build
 ##############################
 %build
+# TODO: temporary fix => will remove after included in gcc_warning_sr_pkgs list in build.conf
+%gcc_unforce_options
 PREFIX="/usr"
 CXXFLAGS+=" -Wall -g -Os -DNDEBUG -fPIC -fvisibility-inlines-hidden -fdata-sections -ffunction-sections "
 LDFLAGS+=" -Wl,--rpath=$PREFIX/lib -Wl,--as-needed -Wl,--gc-sections -lgcc_s -lgcc -Wl,-Bsymbolic-functions "
