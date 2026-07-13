@@ -803,6 +803,14 @@ private:
     bool                          idleCallbackRegistered{false};
   };
 
+  struct LayoutTransitionData
+  {
+    LayoutTransition              transition;
+    std::unordered_set<ViewImpl*> pendingEnterChildren;
+    std::unordered_set<ViewImpl*> pendingReorderedChildren;
+    bool                          hasPendingChildRemoval{false};
+  };
+
   SizeConstraints& EnsureSizeConstraints()
   {
     if(!mSizeConstraints)
@@ -839,6 +847,20 @@ private:
     return *mResourceReadyData;
   }
 
+  LayoutTransitionData& EnsureLayoutTransitionData()
+  {
+    if(!mLayoutTransitionData)
+    {
+      mLayoutTransitionData = std::make_unique<LayoutTransitionData>();
+    }
+    return *mLayoutTransitionData;
+  }
+
+  bool HasLayoutTransition() const
+  {
+    return mLayoutTransitionData && mLayoutTransitionData->transition;
+  }
+
   int GetFocusNavigationId(int FocusNavigationData::* field) const
   {
     return mFocusNavigationData ? mFocusNavigationData.get()->*field : -1;
@@ -861,29 +883,26 @@ private:
   View::FocusChangedSignalType         mFocusChangedSignal;
   View::LayoutFinishedSignalType       mLayoutFinishedSignal;
 
-  float                            mRequestedPositionX;
-  float                            mRequestedPositionY;
-  MeasuredSize                     mMeasuredSize; ///< mLastMeasuredConstraint.width < 0 means no valid measure cache
-  MeasuredSize                     mLastMeasuredConstraint;
-  LayoutRect                       mArrangedBounds;
-  Extents                          mMargin;          ///< Layout margin
-  Extents                          mPadding;         ///< Layout padding
-  float                            mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float                            mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  LayoutMode                       mLayoutMode;      ///< Layout mode of the view
-  Vector2                          mSize;            ///< The size of the view
-  std::unique_ptr<SizeConstraints> mSizeConstraints; ///< Lazy-allocated measurement min/max bounds (natural units).
-  Dali::Vector<View>               mChildren;        ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
-  LayoutTransition                 mLayoutTransition;
-  std::unordered_set<ViewImpl*>    mPendingEnterChildren;     ///< Children added since last layout pass; consumed by transition dispatcher
-  std::unordered_set<ViewImpl*>    mPendingReorderedChildren; ///< Children whose sibling order changed since the last layout pass
+  float                                 mRequestedPositionX;
+  float                                 mRequestedPositionY;
+  MeasuredSize                          mMeasuredSize; ///< mLastMeasuredConstraint.width < 0 means no valid measure cache
+  MeasuredSize                          mLastMeasuredConstraint;
+  LayoutRect                            mArrangedBounds;
+  Extents                               mMargin;          ///< Layout margin
+  Extents                               mPadding;         ///< Layout padding
+  float                                 mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  float                                 mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  LayoutMode                            mLayoutMode;      ///< Layout mode of the view
+  Vector2                               mSize;            ///< The size of the view
+  std::unique_ptr<SizeConstraints>      mSizeConstraints; ///< Lazy-allocated measurement min/max bounds (natural units).
+  Dali::Vector<View>                    mChildren;        ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
+  std::unique_ptr<LayoutTransitionData> mLayoutTransitionData;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;
   int32_t                            mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2; ///< Frequently touched accessibility-related value kept here to avoid AccessibilityData creation.
 
   bool mSkipChildrenUpdate;                               ///< Plain bool because ScopedSkipChildrenUpdate stores a bool reference.
   bool mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
-  bool mPendingChildRemovalForLayoutTransition : 1;       ///< True if at least one child was removed via View::Remove / RemoveAllChildren since the last layout pass; consumed by dispatcher to tag remaining children's CHANGE cause as SIBLING_REMOVED
   bool mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
   bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
   bool mDispatchKeyEvents : 1;                            ///< Whether the actor emits key event signals
