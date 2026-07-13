@@ -782,6 +782,17 @@ private:
     FocusNavigationCallback callback;
   };
 
+  struct RenderEffectData
+  {
+    // Public effect set through View::SetRenderEffect().
+    RenderEffectImplPtr renderEffect;
+
+    // Unlike renderEffect, this handleless effect is created only by the OFFSCREEN_RENDERING property.
+    std::unique_ptr<OffScreenRenderingImpl>        offScreenRendering;
+    Ui::View::OffScreenRenderingType               offScreenRenderingType{Ui::View::OffScreenRenderingType::NONE};
+    Ui::View::OffScreenRenderingFinishedSignalType offScreenRenderingFinishedSignal;
+  };
+
   SizeConstraints& EnsureSizeConstraints()
   {
     if(!mSizeConstraints)
@@ -800,6 +811,15 @@ private:
     return *mFocusNavigationData;
   }
 
+  RenderEffectData& EnsureRenderEffectData()
+  {
+    if(!mRenderEffectData)
+    {
+      mRenderEffectData = std::make_unique<RenderEffectData>();
+    }
+    return *mRenderEffectData;
+  }
+
   int GetFocusNavigationId(int FocusNavigationData::* field) const
   {
     return mFocusNavigationData ? mFocusNavigationData.get()->*field : -1;
@@ -814,16 +834,13 @@ private:
   std::unique_ptr<VisualData>                                mVisualData;
   std::unique_ptr<AttachmentContainer>                       mAttachments;
   std::unique_ptr<FocusNavigationData>                       mFocusNavigationData;
+  std::unique_ptr<RenderEffectData>                          mRenderEffectData;
   InputMethodContext                                         mInputMethodContext;
-  RenderEffectImplPtr                                        mRenderEffect; ///< The render effect on this view
   ViewImpl::StateChangedSignalType                           mStateChangedSignal;
   Ui::View::KeyEventSignalType                               mKeyEventSignal;
   Ui::View::FocusChangedSignalType                           mFocusChangedSignal;
   Ui::View::ResourceReadySignalType                          mResourceReadySignal;
   ViewImpl::LayoutFinishedSignalType                         mLayoutFinishedSignal;
-  Ui::View::OffScreenRenderingFinishedSignalType             mOffScreenRenderingFinishedSignal; ///< Emits only when type is REFRESH_ONCE
-  std::unique_ptr<OffScreenRenderingImpl>                    mOffScreenRenderingImpl;
-  Ui::View::OffScreenRenderingType                           mOffScreenRenderingType;
   CallbackBase*                                              mIdleCallback; ///< The idle callback to emit the resource ready signal.
 
   float                            mRequestedPositionX;

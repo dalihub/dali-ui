@@ -112,6 +112,33 @@ int UtcDaliRenderEffectBlurDownscaleFactorP(void)
   END_TEST;
 }
 
+int UtcDaliRenderEffectOffScreenRenderingPropertyP(void)
+{
+  UiTestApplication application;
+  tet_infoline("UtcDaliRenderEffectOffScreenRenderingPropertyP");
+
+  View view = CreateView(application);
+
+  DALI_TEST_CHECK(view.OffScreenRenderingFinishedSignal().Empty());
+
+  view.SetProperty(View::Property::OFFSCREEN_RENDERING, View::REFRESH_ALWAYS);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING), static_cast<int32_t>(View::REFRESH_ALWAYS), TEST_LOCATION);
+
+  view.SetProperty(View::Property::OFFSCREEN_RENDERING, View::REFRESH_ONCE);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING), static_cast<int32_t>(View::REFRESH_ONCE), TEST_LOCATION);
+
+  view.SetProperty(View::Property::OFFSCREEN_RENDERING, View::NONE);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(view.GetProperty<int32_t>(View::Property::OFFSCREEN_RENDERING), static_cast<int32_t>(View::NONE), TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliRenderEffectBackgroundBlurIntermediateDownsampleP(void)
 {
   UiTestApplication application;
