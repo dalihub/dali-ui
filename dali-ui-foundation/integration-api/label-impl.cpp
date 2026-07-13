@@ -43,6 +43,7 @@
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-gradient-marquee-helper.h>
+#include <dali-ui-foundation/internal/text/text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/internal/text/text-pixel-snap-data.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
@@ -245,15 +246,8 @@ LabelImpl::LabelImpl()
   mLineHeightMode(Text::LineHeightMode::RELATIVE),
   mOverflowMode(Text::OverflowMode::ELLIPSIS),
   mMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL),
-  mTextGradientBoundsMode(Text::GradientBoundsMode::CONTENT_BOUND),
-  mTextGradientOverlayBoundsMode(Text::GradientBoundsMode::CONTENT_BOUND),
-  mTextGradientOverlayMode(Text::GradientOverlayMode::SRC_OVER),
-  mGradientAnimOffsetIndex(Property::INVALID_INDEX),
-  mGradientOverlayAnimOffsetIndex(Property::INVALID_INDEX),
   mAsyncLineCount(0),
   mTextColorAnimatedCount(0),
-  mGradientAnimCount(0),
-  mGradientOverlayAnimCount(0),
   mRendererUpdateNeeded(false),
   mMeasureInvalidated(false),
   mIsAsyncRenderRequested(false),
@@ -310,7 +304,7 @@ void LabelImpl::SetStyledText(const Text::StyledText& styledText)
 
   if(styledText)
   {
-    Internal::Text::SetStyledTextSource(Ui::View::DownCast(Self()), styledText);
+    Internal::Text::SetStyledTextSource(mStyledTextSourceData, styledText);
     mHasStyledTextSource = true;
   }
   else
@@ -331,7 +325,7 @@ Text::StyledText LabelImpl::GetStyledText() const
     return Text::StyledText();
   }
 
-  return Internal::Text::GetStyledTextSource(Ui::View::DownCast(Self()));
+  return Internal::Text::GetStyledTextSource(mStyledTextSourceData);
 }
 
 void LabelImpl::ClearStyledTextSourceState()
@@ -341,7 +335,7 @@ void LabelImpl::ClearStyledTextSourceState()
     return;
   }
 
-  Internal::Text::ClearStyledTextSource(Ui::View::DownCast(Self()));
+  Internal::Text::ClearStyledTextSource(mStyledTextSourceData);
   mHasStyledTextSource = false;
 }
 
@@ -414,7 +408,8 @@ void LabelImpl::SetTextGradient(const Gradient::Base& gradient)
 {
   if(Text::Internal::Gradient::IsRenderable(gradient))
   {
-    mTextGradient = gradient;
+    auto& data        = Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData);
+    data.textGradient = gradient;
     SyncGradientAnimProperties();
     UpdateTextGradientStyle();
     RequestTextRelayout();
@@ -423,8 +418,12 @@ void LabelImpl::SetTextGradient(const Gradient::Base& gradient)
   }
   else
   {
-    const bool hadTextGradient = Text::Internal::Gradient::IsRenderable(mTextGradient);
-    mTextGradient              = Gradient::Base::None();
+    auto*      data            = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+    const bool hadTextGradient = data && Text::Internal::Gradient::IsRenderable(data->textGradient);
+    if(data)
+    {
+      data->textGradient = Gradient::Base::None();
+    }
 
     if(hadTextGradient)
     {
@@ -439,17 +438,20 @@ void LabelImpl::SetTextGradient(const Gradient::Base& gradient)
 
 Gradient::Base LabelImpl::GetTextGradient() const
 {
-  return mTextGradient;
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  return data ? data->textGradient : Gradient::Base::None();
 }
 
 void LabelImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
 {
-  if(mTextGradientBoundsMode == mode)
+  const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const auto  currentMode = data ? data->textGradientBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  if(currentMode == mode)
   {
     return;
   }
 
-  mTextGradientBoundsMode = mode;
+  Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData).textGradientBoundsMode = mode;
   if(DALI_LIKELY(mVisual))
   {
     Internal::TextVisual::SetTextGradientBoundsMode(mVisual, mode);
@@ -462,14 +464,16 @@ void LabelImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
 
 Text::GradientBoundsMode LabelImpl::GetTextGradientBoundsMode() const
 {
-  return mTextGradientBoundsMode;
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  return data ? data->textGradientBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
 }
 
 void LabelImpl::SetTextGradientOverlay(const Gradient::Base& gradient)
 {
   if(Text::Internal::Gradient::IsRenderable(gradient))
   {
-    mTextGradientOverlay = gradient;
+    auto& data               = Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData);
+    data.textGradientOverlay = gradient;
     SyncGradientOverlayAnimProperties();
     UpdateTextGradientOverlayStyle();
     RequestTextRelayout();
@@ -478,8 +482,12 @@ void LabelImpl::SetTextGradientOverlay(const Gradient::Base& gradient)
   }
   else
   {
-    const bool hadTextGradientOverlay = Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
-    mTextGradientOverlay              = Gradient::Base::None();
+    auto*      data                   = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+    const bool hadTextGradientOverlay = data && Text::Internal::Gradient::IsRenderable(data->textGradientOverlay);
+    if(data)
+    {
+      data->textGradientOverlay = Gradient::Base::None();
+    }
 
     if(hadTextGradientOverlay)
     {
@@ -494,17 +502,20 @@ void LabelImpl::SetTextGradientOverlay(const Gradient::Base& gradient)
 
 Gradient::Base LabelImpl::GetTextGradientOverlay() const
 {
-  return mTextGradientOverlay;
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  return data ? data->textGradientOverlay : Gradient::Base::None();
 }
 
 void LabelImpl::SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode)
 {
-  if(mTextGradientOverlayBoundsMode == mode)
+  const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const auto  currentMode = data ? data->textGradientOverlayBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  if(currentMode == mode)
   {
     return;
   }
 
-  mTextGradientOverlayBoundsMode = mode;
+  Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData).textGradientOverlayBoundsMode = mode;
   if(DALI_LIKELY(mVisual))
   {
     Internal::TextVisual::SetTextGradientOverlayBoundsMode(mVisual, mode);
@@ -517,17 +528,20 @@ void LabelImpl::SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode)
 
 Text::GradientBoundsMode LabelImpl::GetTextGradientOverlayBoundsMode() const
 {
-  return mTextGradientOverlayBoundsMode;
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  return data ? data->textGradientOverlayBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
 }
 
 void LabelImpl::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
 {
-  if(mTextGradientOverlayMode == mode)
+  const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const auto  currentMode = data ? data->textGradientOverlayMode : Text::GradientOverlayMode::SRC_OVER;
+  if(currentMode == mode)
   {
     return;
   }
 
-  mTextGradientOverlayMode = mode;
+  Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData).textGradientOverlayMode = mode;
   if(DALI_LIKELY(mVisual))
   {
     Internal::TextVisual::SetTextGradientOverlayMode(mVisual, mode);
@@ -540,7 +554,8 @@ void LabelImpl::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
 
 Text::GradientOverlayMode LabelImpl::GetTextGradientOverlayMode() const
 {
-  return mTextGradientOverlayMode;
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  return data ? data->textGradientOverlayMode : Text::GradientOverlayMode::SRC_OVER;
 }
 
 Dali::Property::Index LabelImpl::EnsureGradientAnimOffset()
@@ -556,15 +571,16 @@ Dali::Property::Index LabelImpl::EnsureGradientAnimOffset()
     return Property::INVALID_INDEX;
   }
 
-  if(mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  auto& data = Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData);
+  if(data.gradientAnimOffsetIndex == Property::INVALID_INDEX)
   {
-    const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(mTextGradient);
-    mGradientAnimOffsetIndex =
+    const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(data.textGradient);
+    data.gradientAnimOffsetIndex =
       self.RegisterProperty(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME, style.startOffset);
     BindGradientAnimProperties();
   }
 
-  return mGradientAnimOffsetIndex;
+  return data.gradientAnimOffsetIndex;
 }
 
 Dali::Property::Index LabelImpl::EnsureGradientOverlayAnimOffset()
@@ -580,15 +596,16 @@ Dali::Property::Index LabelImpl::EnsureGradientOverlayAnimOffset()
     return Property::INVALID_INDEX;
   }
 
-  if(mGradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
+  auto& data = Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData);
+  if(data.gradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
   {
-    const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(mTextGradientOverlay);
-    mGradientOverlayAnimOffsetIndex =
+    const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(data.textGradientOverlay);
+    data.gradientOverlayAnimOffsetIndex =
       self.RegisterProperty(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME, style.startOffset);
     BindGradientOverlayAnimProperties();
   }
 
-  return mGradientOverlayAnimOffsetIndex;
+  return data.gradientOverlayAnimOffsetIndex;
 }
 
 void LabelImpl::SetHorizontalTextAlignment(Text::Alignment alignment)
@@ -1779,13 +1796,6 @@ void LabelImpl::OnInitialize()
   Internal::TextVisual::SetAsyncTextInterface(mVisual, this);
   Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, Text::LabelPropertyIndex::TEXT_COLOR);
   Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
-  Internal::TextVisual::SetTextGradientBoundsMode(mVisual, mTextGradientBoundsMode);
-  Internal::TextVisual::SetTextGradientOverlayBoundsMode(mVisual, mTextGradientOverlayBoundsMode);
-  Internal::TextVisual::SetTextGradientOverlayMode(mVisual, mTextGradientOverlayMode);
-  BindGradientAnimProperties();
-  BindGradientOverlayAnimProperties();
-  UpdateTextGradientStyle();
-  UpdateTextGradientOverlayStyle();
 
   mController = Internal::TextVisual::GetController(mVisual);
   DALI_ASSERT_DEBUG(mController && "Invalid Text Controller")
@@ -2170,6 +2180,7 @@ MeasuredSize LabelImpl::OnArrange(const LayoutRect& bounds)
 
 void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
 {
+  auto* gradientData = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
   if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
   {
     if(state == Animation::State::PLAYING)
@@ -2186,33 +2197,33 @@ void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property
 
     Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
   }
-  else if(IsGradientAnimProperty(index))
+  else if(gradientData && index != Property::INVALID_INDEX && index == gradientData->gradientAnimOffsetIndex)
   {
     if(state == Animation::State::PLAYING)
     {
-      ++mGradientAnimCount;
+      ++gradientData->gradientAnimCount;
     }
     else if(state == Animation::State::STOPPED)
     {
-      if(mGradientAnimCount)
+      if(gradientData->gradientAnimCount)
       {
-        --mGradientAnimCount;
+        --gradientData->gradientAnimCount;
       }
     }
 
     SetGradientAnimApplyRate();
   }
-  else if(IsGradientOverlayAnimProperty(index))
+  else if(gradientData && index != Property::INVALID_INDEX && index == gradientData->gradientOverlayAnimOffsetIndex)
   {
     if(state == Animation::State::PLAYING)
     {
-      ++mGradientOverlayAnimCount;
+      ++gradientData->gradientOverlayAnimCount;
     }
     else if(state == Animation::State::STOPPED)
     {
-      if(mGradientOverlayAnimCount)
+      if(gradientData->gradientOverlayAnimCount)
       {
-        --mGradientOverlayAnimCount;
+        --gradientData->gradientOverlayAnimCount;
       }
     }
 
@@ -2223,6 +2234,7 @@ void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property
 
 void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
 {
+  auto* gradientData = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
   if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
   {
     if(applied)
@@ -2239,33 +2251,33 @@ void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Pro
 
     Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
   }
-  else if(IsGradientAnimProperty(index))
+  else if(gradientData && index != Property::INVALID_INDEX && index == gradientData->gradientAnimOffsetIndex)
   {
     if(applied)
     {
-      ++mGradientAnimCount;
+      ++gradientData->gradientAnimCount;
     }
     else
     {
-      if(mGradientAnimCount)
+      if(gradientData->gradientAnimCount)
       {
-        --mGradientAnimCount;
+        --gradientData->gradientAnimCount;
       }
     }
 
     SetGradientAnimApplyRate();
   }
-  else if(IsGradientOverlayAnimProperty(index))
+  else if(gradientData && index != Property::INVALID_INDEX && index == gradientData->gradientOverlayAnimOffsetIndex)
   {
     if(applied)
     {
-      ++mGradientOverlayAnimCount;
+      ++gradientData->gradientOverlayAnimCount;
     }
     else
     {
-      if(mGradientOverlayAnimCount)
+      if(gradientData->gradientOverlayAnimCount)
       {
-        --mGradientOverlayAnimCount;
+        --gradientData->gradientOverlayAnimCount;
       }
     }
 
@@ -2374,9 +2386,20 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
   Text::MarqueeBuilder::PreparedContent preparedContent =
     Text::MarqueeBuilder::CreateTextContent(data, sampler);
 
+  const auto*           gradientData                   = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const Gradient::Base& textGradient                   = gradientData ? gradientData->textGradient : Gradient::Base::None();
+  const Gradient::Base& textGradientOverlay            = gradientData ? gradientData->textGradientOverlay : Gradient::Base::None();
+  const auto            textGradientBoundsMode         = gradientData ? gradientData->textGradientBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto            textGradientOverlayBoundsMode  = gradientData ? gradientData->textGradientOverlayBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto            textGradientOverlayMode        = gradientData ? gradientData->textGradientOverlayMode : Text::GradientOverlayMode::SRC_OVER;
+  const Property::Index gradientAnimOffsetIndex        = gradientData ? gradientData->gradientAnimOffsetIndex : Property::INVALID_INDEX;
+  const Property::Index gradientOverlayAnimOffsetIndex = gradientData ? gradientData->gradientOverlayAnimOffsetIndex : Property::INVALID_INDEX;
+  const bool            gradientAnimApplyAlways        = gradientData && gradientData->gradientAnimCount > 0;
+  const bool            gradientOverlayApplyAlways     = gradientData && gradientData->gradientOverlayAnimCount > 0;
+
   const Text::MarqueeBuilder::GradientState gradientState =
-    Text::MarqueeBuilder::ResolveGradientState(mTextGradient,
-                                               mTextGradientOverlay,
+    Text::MarqueeBuilder::ResolveGradientState(textGradient,
+                                               textGradientOverlay,
                                                verifiedSize);
   const bool hasGradientFeature      = gradientState.baseRenderable || gradientState.overlayRenderable;
   const bool needsMarqueeComposition = hasGradientFeature || renderInfo.isOverlayStyle;
@@ -2396,10 +2419,10 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
     featureInfo.cutoutEnabled  = cutoutEnabled;
 
     Text::MarqueeBuilder::AnimationState animationState;
-    animationState.baseStartOffsetIndex    = mGradientAnimOffsetIndex;
-    animationState.baseApplyAlways         = mGradientAnimCount > 0;
-    animationState.overlayStartOffsetIndex = mGradientOverlayAnimOffsetIndex;
-    animationState.overlayApplyAlways      = mGradientOverlayAnimCount > 0;
+    animationState.baseStartOffsetIndex    = gradientAnimOffsetIndex;
+    animationState.baseApplyAlways         = gradientAnimApplyAlways;
+    animationState.overlayStartOffsetIndex = gradientOverlayAnimOffsetIndex;
+    animationState.overlayApplyAlways      = gradientOverlayApplyAlways;
 
     Text::MarqueeBuilder::CompositionRequest compositionRequest;
     compositionRequest.sampler        = sampler;
@@ -2408,7 +2431,7 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
     compositionRequest.embossEnabled  = renderInfo.isEmbossEnabled;
     compositionRequest.gradientState  = gradientState;
     compositionRequest.animationState = animationState;
-    compositionRequest.overlayMode    = mTextGradientOverlayMode;
+    compositionRequest.overlayMode    = textGradientOverlayMode;
 
     const Text::MarqueeBuilder::CompositionPlan compositionPlan =
       Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
@@ -2452,7 +2475,7 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
       if(compositionPlan.needsBaseBounds)
       {
         Vector2       textGradientCoordinateSize;
-        const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(mTextGradientBoundsMode,
+        const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(textGradientBoundsMode,
                                                                                     textGradientCoordinateSize);
         compositionRequest.baseBoundsResolved        = true;
         compositionRequest.baseBounds.bounds         = textGradientBounds;
@@ -2462,7 +2485,7 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
       if(compositionPlan.needsOverlayBounds)
       {
         Vector2       textGradientOverlayCoordinateSize;
-        const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(mTextGradientOverlayBoundsMode,
+        const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
                                                                                        textGradientOverlayCoordinateSize);
         compositionRequest.overlayBoundsResolved        = true;
         compositionRequest.overlayBounds.bounds         = textGradientOverlayBounds;
@@ -2613,10 +2636,11 @@ void LabelImpl::UpdateTextGradientStyle()
 {
   if(DALI_LIKELY(mVisual))
   {
+    const auto*                     data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
     Text::Internal::Gradient::Style style;
-    if(Text::Internal::Gradient::IsRenderable(mTextGradient))
+    if(data && Text::Internal::Gradient::IsRenderable(data->textGradient))
     {
-      style = Text::Internal::Gradient::CreateStyle(mTextGradient);
+      style = Text::Internal::Gradient::CreateStyle(data->textGradient);
     }
 
     Internal::TextVisual::SetTextGradientStyle(mVisual, style);
@@ -2627,10 +2651,11 @@ void LabelImpl::UpdateTextGradientOverlayStyle()
 {
   if(DALI_LIKELY(mVisual))
   {
+    const auto*                     data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
     Text::Internal::Gradient::Style style;
-    if(Text::Internal::Gradient::IsRenderable(mTextGradientOverlay))
+    if(data && Text::Internal::Gradient::IsRenderable(data->textGradientOverlay))
     {
-      style = Text::Internal::Gradient::CreateStyle(mTextGradientOverlay);
+      style = Text::Internal::Gradient::CreateStyle(data->textGradientOverlay);
     }
 
     Internal::TextVisual::SetTextGradientOverlayStyle(mVisual, style);
@@ -2639,7 +2664,8 @@ void LabelImpl::UpdateTextGradientOverlayStyle()
 
 void LabelImpl::SyncGradientAnimProperties()
 {
-  if(mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data || data->gradientAnimOffsetIndex == Property::INVALID_INDEX)
   {
     return;
   }
@@ -2655,16 +2681,14 @@ void LabelImpl::SyncGradientAnimProperties()
     return;
   }
 
-  const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(mTextGradient);
-  if(mGradientAnimOffsetIndex != Property::INVALID_INDEX)
-  {
-    self.SetProperty(mGradientAnimOffsetIndex, style.startOffset);
-  }
+  const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(data->textGradient);
+  self.SetProperty(data->gradientAnimOffsetIndex, style.startOffset);
 }
 
 void LabelImpl::SyncGradientOverlayAnimProperties()
 {
-  if(mGradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data || data->gradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
   {
     return;
   }
@@ -2680,16 +2704,14 @@ void LabelImpl::SyncGradientOverlayAnimProperties()
     return;
   }
 
-  const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(mTextGradientOverlay);
-  if(mGradientOverlayAnimOffsetIndex != Property::INVALID_INDEX)
-  {
-    self.SetProperty(mGradientOverlayAnimOffsetIndex, style.startOffset);
-  }
+  const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(data->textGradientOverlay);
+  self.SetProperty(data->gradientOverlayAnimOffsetIndex, style.startOffset);
 }
 
 bool LabelImpl::IsGradientAnimSupported() const
 {
-  return Text::Internal::Gradient::IsRenderable(mTextGradient);
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  return data && Text::Internal::Gradient::IsRenderable(data->textGradient);
 }
 
 bool LabelImpl::IsGradientOverlayAnimSupported() const
@@ -2697,14 +2719,17 @@ bool LabelImpl::IsGradientOverlayAnimSupported() const
   // The hidden animation source property belongs to Label, not to the current
   // renderer/scroller. Marquee renderers bind it later when overlay composition
   // is available.
-  return Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
+  const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  return data && Text::Internal::Gradient::IsRenderable(data->textGradientOverlay);
 }
 
 void LabelImpl::BindGradientAnimProperties()
 {
+  const auto*           data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const Property::Index sourceIndex = data ? data->gradientAnimOffsetIndex : Property::INVALID_INDEX;
   if(DALI_LIKELY(mVisual))
   {
-    Internal::TextVisual::SetGradientAnimProperties(mVisual, mGradientAnimOffsetIndex);
+    Internal::TextVisual::SetGradientAnimProperties(mVisual, sourceIndex);
     SetGradientAnimApplyRate(true);
   }
 
@@ -2712,15 +2737,17 @@ void LabelImpl::BindGradientAnimProperties()
   {
     // Full marquee setup binds the initial source index.
     // This updates an active scroller when the source is created later.
-    mTextScroller->SetGradientAnimProperties(mGradientAnimOffsetIndex);
+    mTextScroller->SetGradientAnimProperties(sourceIndex);
   }
 }
 
 void LabelImpl::BindGradientOverlayAnimProperties()
 {
+  const auto*           data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const Property::Index sourceIndex = data ? data->gradientOverlayAnimOffsetIndex : Property::INVALID_INDEX;
   if(DALI_LIKELY(mVisual))
   {
-    Internal::TextVisual::SetGradientOverlayAnimProperties(mVisual, mGradientOverlayAnimOffsetIndex);
+    Internal::TextVisual::SetGradientOverlayAnimProperties(mVisual, sourceIndex);
     SetGradientOverlayAnimApplyRate(true);
   }
 
@@ -2728,25 +2755,14 @@ void LabelImpl::BindGradientOverlayAnimProperties()
   {
     // Full marquee setup binds the initial overlay source index.
     // This updates an active scroller when the source is created later.
-    mTextScroller->SetGradientOverlayAnimProperties(mGradientOverlayAnimOffsetIndex);
+    mTextScroller->SetGradientOverlayAnimProperties(sourceIndex);
   }
-}
-
-bool LabelImpl::IsGradientAnimProperty(Dali::Property::Index index) const
-{
-  return index != Property::INVALID_INDEX &&
-         index == mGradientAnimOffsetIndex;
-}
-
-bool LabelImpl::IsGradientOverlayAnimProperty(Dali::Property::Index index) const
-{
-  return index != Property::INVALID_INDEX &&
-         index == mGradientOverlayAnimOffsetIndex;
 }
 
 void LabelImpl::SetGradientAnimApplyRate(bool notifyToConstraint)
 {
-  const bool applyAlways = mGradientAnimCount > 0;
+  const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const bool  applyAlways = data && data->gradientAnimCount > 0;
   if(DALI_LIKELY(mVisual))
   {
     Internal::TextVisual::SetGradientAnimApplyAlways(mVisual, applyAlways, notifyToConstraint);
@@ -2760,7 +2776,8 @@ void LabelImpl::SetGradientAnimApplyRate(bool notifyToConstraint)
 
 void LabelImpl::SetGradientOverlayAnimApplyRate(bool notifyToConstraint)
 {
-  const bool applyAlways = mGradientOverlayAnimCount > 0;
+  const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const bool  applyAlways = data && data->gradientOverlayAnimCount > 0;
   if(DALI_LIKELY(mVisual))
   {
     Internal::TextVisual::SetGradientOverlayAnimApplyAlways(mVisual, applyAlways, notifyToConstraint);
@@ -3071,10 +3088,21 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   Text::MarqueeBuilder::PreparedContent preparedContent =
     Text::MarqueeBuilder::CreateTextContent(data, sampler);
 
+  const auto*           gradientData                   = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  const Gradient::Base& textGradient                   = gradientData ? gradientData->textGradient : Gradient::Base::None();
+  const Gradient::Base& textGradientOverlay            = gradientData ? gradientData->textGradientOverlay : Gradient::Base::None();
+  const auto            textGradientBoundsMode         = gradientData ? gradientData->textGradientBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto            textGradientOverlayBoundsMode  = gradientData ? gradientData->textGradientOverlayBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto            textGradientOverlayMode        = gradientData ? gradientData->textGradientOverlayMode : Text::GradientOverlayMode::SRC_OVER;
+  const Property::Index gradientAnimOffsetIndex        = gradientData ? gradientData->gradientAnimOffsetIndex : Property::INVALID_INDEX;
+  const Property::Index gradientOverlayAnimOffsetIndex = gradientData ? gradientData->gradientOverlayAnimOffsetIndex : Property::INVALID_INDEX;
+  const bool            gradientAnimApplyAlways        = gradientData && gradientData->gradientAnimCount > 0;
+  const bool            gradientOverlayApplyAlways     = gradientData && gradientData->gradientOverlayAnimCount > 0;
+
   const Text::ModelInterface* const         textModel = mController->GetTextModel();
   const Text::MarqueeBuilder::GradientState gradientState =
-    Text::MarqueeBuilder::ResolveGradientState(mTextGradient,
-                                               mTextGradientOverlay,
+    Text::MarqueeBuilder::ResolveGradientState(textGradient,
+                                               textGradientOverlay,
                                                verifiedSize);
   const bool hasGradientFeature = gradientState.baseRenderable || gradientState.overlayRenderable;
   const bool needsMarqueeComposition =
@@ -3095,10 +3123,10 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     }
 
     Text::MarqueeBuilder::AnimationState animationState;
-    animationState.baseStartOffsetIndex    = mGradientAnimOffsetIndex;
-    animationState.baseApplyAlways         = mGradientAnimCount > 0;
-    animationState.overlayStartOffsetIndex = mGradientOverlayAnimOffsetIndex;
-    animationState.overlayApplyAlways      = mGradientOverlayAnimCount > 0;
+    animationState.baseStartOffsetIndex    = gradientAnimOffsetIndex;
+    animationState.baseApplyAlways         = gradientAnimApplyAlways;
+    animationState.overlayStartOffsetIndex = gradientOverlayAnimOffsetIndex;
+    animationState.overlayApplyAlways      = gradientOverlayApplyAlways;
 
     Text::MarqueeBuilder::CompositionRequest compositionRequest;
     compositionRequest.sampler        = sampler;
@@ -3107,7 +3135,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     compositionRequest.embossEnabled  = mController->IsEmbossEnabled();
     compositionRequest.gradientState  = gradientState;
     compositionRequest.animationState = animationState;
-    compositionRequest.overlayMode    = mTextGradientOverlayMode;
+    compositionRequest.overlayMode    = textGradientOverlayMode;
 
     const Text::MarqueeBuilder::CompositionPlan compositionPlan =
       Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
@@ -3136,7 +3164,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
         if(compositionPlan.needsBaseBounds)
         {
           Vector2       textGradientCoordinateSize;
-          const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(mTextGradientBoundsMode,
+          const Vector4 textGradientBounds             = resolveMarqueeGradientBounds(textGradientBoundsMode,
                                                                                       textGradientCoordinateSize);
           compositionRequest.baseBoundsResolved        = true;
           compositionRequest.baseBounds.bounds         = textGradientBounds;
@@ -3146,7 +3174,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
         if(compositionPlan.needsOverlayBounds)
         {
           Vector2       textGradientOverlayCoordinateSize;
-          const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(mTextGradientOverlayBoundsMode,
+          const Vector4 textGradientOverlayBounds         = resolveMarqueeGradientBounds(textGradientOverlayBoundsMode,
                                                                                          textGradientOverlayCoordinateSize);
           compositionRequest.overlayBoundsResolved        = true;
           compositionRequest.overlayBounds.bounds         = textGradientOverlayBounds;
@@ -3666,8 +3694,9 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.embossStrength                 = mController->GetEmbossStrength();
   parameters.embossLightColor               = mController->GetEmbossLightColor();
   parameters.embossShadowColor              = mController->GetEmbossShadowColor();
-  parameters.isTextGradientRequested        = Text::Internal::Gradient::IsRenderable(mTextGradient);
-  parameters.isTextGradientOverlayRequested = Text::Internal::Gradient::IsRenderable(mTextGradientOverlay);
+  const auto* gradientData                  = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+  parameters.isTextGradientRequested        = gradientData && Text::Internal::Gradient::IsRenderable(gradientData->textGradient);
+  parameters.isTextGradientOverlayRequested = gradientData && Text::Internal::Gradient::IsRenderable(gradientData->textGradientOverlay);
   if(mHasAsyncAnchorHitRegions)
   {
     parameters.clickedAnchors = Internal::Text::GetAnchorClickedStates(Ui::View::DownCast(Self()));
@@ -3675,7 +3704,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
 
   if(mHasStyledTextSource)
   {
-    const Text::StyledText styledTextSource = Internal::Text::GetStyledTextSource(Ui::View::DownCast(Self()));
+    const Text::StyledText styledTextSource = Internal::Text::GetStyledTextSource(mStyledTextSourceData);
     if(styledTextSource)
     {
       const Dali::String styledText         = styledTextSource.GetText();

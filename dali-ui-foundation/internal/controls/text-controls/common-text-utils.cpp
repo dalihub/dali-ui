@@ -82,13 +82,13 @@ Vector2 CalculateRenderablePosition(Actor textActor, Text::ControllerPtr control
   return Vector2(scrollOffset.x + alignmentOffset + padding.start, scrollOffset.y + padding.top);
 }
 
-void UpdateAtlasGradient(Text::RendererPtr                                        renderer,
-                         Text::ControllerPtr                                      controller,
-                         Actor                                                    stencil,
-                         const Vector2&                                           renderablePosition,
-                         float                                                    minLineOffset,
-                         const Text::Internal::Gradient::AtlasGradientFrameState& state,
-                         const Vector2&                                           viewSize)
+void UpdateAtlasGradient(Text::RendererPtr                                renderer,
+                         Text::ControllerPtr                              controller,
+                         Actor                                            stencil,
+                         const Vector2&                                   renderablePosition,
+                         float                                            minLineOffset,
+                         const Text::Internal::Gradient::AtlasFrameState& state,
+                         const Vector2&                                   viewSize)
 {
   if(!renderer || !state.enabled)
   {
@@ -177,11 +177,11 @@ void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::Control
 void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
                                  Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
                                  Actor& backgroundActor, Actor& cursorLayerActor, Actor& stencil,
-                                 std::vector<Actor>&                                      clippingDecorationActors,
-                                 std::vector<Ui::TextAnchor>&                             anchorActors,
-                                 Text::Controller::UpdateTextType                         updateTextType,
-                                 const Text::Internal::Gradient::AtlasGradientFrameState& gradientState,
-                                 const Vector2&                                           viewSize)
+                                 std::vector<Actor>&                              clippingDecorationActors,
+                                 std::vector<Ui::TextAnchor>&                     anchorActors,
+                                 Text::Controller::UpdateTextType                 updateTextType,
+                                 const Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
+                                 const Vector2&                                   viewSize)
 {
   Actor newRenderableActor;
 
@@ -211,7 +211,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
   {
     const Vector2 renderableActorPosition = CalculateRenderablePosition(textActor, controller, alignmentOffset, stencil);
     renderableActor.SetProperty(Actor::Property::POSITION, renderableActorPosition);
-    UpdateAtlasGradient(renderer, controller, stencil, renderableActorPosition, alignmentOffset, gradientState, viewSize);
+    UpdateAtlasGradient(renderer, controller, stencil, renderableActorPosition, alignmentOffset, atlasFrameState, viewSize);
 
     // Make sure the actors are parented correctly with/without clipping.
     // When stencil is null, `self` is the text View itself; use the Integration
@@ -277,7 +277,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 
 void CommonTextUtils::UpdateTextRenderPosition(
   Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller, float alignmentOffset,
-  Actor renderableActor, Actor stencil, const Text::Internal::Gradient::AtlasGradientFrameState& gradientState,
+  Actor renderableActor, Actor stencil, const Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
   const Vector2& viewSize)
 {
   if(!renderableActor || !renderer)
@@ -287,7 +287,7 @@ void CommonTextUtils::UpdateTextRenderPosition(
 
   const Vector2 position = CalculateRenderablePosition(textActor, controller, alignmentOffset, stencil);
   renderableActor.SetProperty(Actor::Property::POSITION, position);
-  UpdateAtlasGradient(renderer, controller, stencil, position, alignmentOffset, gradientState, viewSize);
+  UpdateAtlasGradient(renderer, controller, stencil, position, alignmentOffset, atlasFrameState, viewSize);
 }
 
 void TextControlAccessible::InitDefaultFeatures()

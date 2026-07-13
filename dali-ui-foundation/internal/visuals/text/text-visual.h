@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
+#include <dali-ui-foundation/internal/visuals/text/text-visual-gradient-data.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual-shader-factory.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
@@ -84,7 +85,7 @@ public:
    * @param[in] visual The text visual.
    * @return The text controller
    */
-  static Text::ControllerPtr GetController(Ui::Integration::Visual::Base visual)
+  static Ui::Text::ControllerPtr GetController(Ui::Integration::Visual::Base visual)
   {
     return GetVisualObject(visual).mController;
   };
@@ -157,7 +158,7 @@ public:
    * @param[in] parameters The async text parameters.
    * @return true if the async text render request was successful, false otherwise.
    */
-  static bool UpdateAsyncRenderer(Ui::Integration::Visual::Base visual, Text::AsyncTextParameters& parameters)
+  static bool UpdateAsyncRenderer(Ui::Integration::Visual::Base visual, Ui::Text::AsyncTextParameters& parameters)
   {
     return GetVisualObject(visual).UpdateAsyncRenderer(parameters);
   };
@@ -167,7 +168,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] parameters The async text parameters.
    */
-  static void RequestAsyncSizeComputation(Ui::Integration::Visual::Base visual, Text::AsyncTextParameters& parameters)
+  static void RequestAsyncSizeComputation(Ui::Integration::Visual::Base visual, Ui::Text::AsyncTextParameters& parameters)
   {
     GetVisualObject(visual).RequestAsyncSizeComputation(parameters);
   };
@@ -177,7 +178,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] asyncTextInterface The async text interface.
    */
-  static void SetAsyncTextInterface(Ui::Integration::Visual::Base visual, Text::AsyncTextInterface* asyncTextInterface)
+  static void SetAsyncTextInterface(Ui::Integration::Visual::Base visual, Ui::Text::AsyncTextInterface* asyncTextInterface)
   {
     GetVisualObject(visual).SetAsyncTextInterface(asyncTextInterface);
   };
@@ -222,19 +223,9 @@ public:
    * @param[in] visual The text visual.
    * @param[in] style The TextGradient style snapshot.
    */
-  static void SetTextGradientStyle(Ui::Integration::Visual::Base visual, const Text::Internal::Gradient::Style& style)
+  static void SetTextGradientStyle(Ui::Integration::Visual::Base visual, const Ui::Text::Internal::Gradient::Style& style)
   {
-    TextVisual& visualObject                = GetVisualObject(visual);
-    visualObject.mTextGradientStyle         = style;
-    visualObject.mTextGradientMaskPixelData = PixelData();
-    visualObject.mGradientRenderer          = VisualRenderer();
-    visualObject.mHasGradientContext        = false;
-    visualObject.mRendererUpdateNeeded      = true;
-
-    if(visualObject.IsOnScene())
-    {
-      visualObject.UpdateRenderer();
-    }
+    GetVisualObject(visual).SetTextGradientStyle(style);
   };
 
   /**
@@ -242,18 +233,9 @@ public:
    * @param[in] visual The text visual.
    * @param[in] mode The TextGradient bounds mode.
    */
-  static void SetTextGradientBoundsMode(Ui::Integration::Visual::Base visual, Text::GradientBoundsMode mode)
+  static void SetTextGradientBoundsMode(Ui::Integration::Visual::Base visual, Ui::Text::GradientBoundsMode mode)
   {
-    TextVisual& visualObject             = GetVisualObject(visual);
-    visualObject.mTextGradientBoundsMode = mode;
-    visualObject.mGradientRenderer       = VisualRenderer();
-    visualObject.mHasGradientContext     = false;
-    visualObject.mRendererUpdateNeeded   = true;
-
-    if(visualObject.IsOnScene())
-    {
-      visualObject.UpdateRenderer();
-    }
+    GetVisualObject(visual).SetTextGradientBoundsMode(mode);
   };
 
   /**
@@ -261,19 +243,9 @@ public:
    * @param[in] visual The text visual.
    * @param[in] style The TextGradientOverlay style snapshot.
    */
-  static void SetTextGradientOverlayStyle(Ui::Integration::Visual::Base visual, const Text::Internal::Gradient::Style& style)
+  static void SetTextGradientOverlayStyle(Ui::Integration::Visual::Base visual, const Ui::Text::Internal::Gradient::Style& style)
   {
-    TextVisual& visualObject = GetVisualObject(visual);
-    visualObject.RemoveGradientOverlayAnimConstraints();
-    visualObject.mTextGradientOverlayStyle  = style;
-    visualObject.mGradientOverlayRenderer   = VisualRenderer();
-    visualObject.mHasGradientOverlayContext = false;
-    visualObject.mRendererUpdateNeeded      = true;
-
-    if(visualObject.IsOnScene())
-    {
-      visualObject.UpdateRenderer();
-    }
+    GetVisualObject(visual).SetTextGradientOverlayStyle(style);
   };
 
   /**
@@ -281,18 +253,9 @@ public:
    * @param[in] visual The text visual.
    * @param[in] mode The TextGradientOverlay bounds mode.
    */
-  static void SetTextGradientOverlayBoundsMode(Ui::Integration::Visual::Base visual, Text::GradientBoundsMode mode)
+  static void SetTextGradientOverlayBoundsMode(Ui::Integration::Visual::Base visual, Ui::Text::GradientBoundsMode mode)
   {
-    TextVisual& visualObject                    = GetVisualObject(visual);
-    visualObject.mTextGradientOverlayBoundsMode = mode;
-    visualObject.mGradientOverlayRenderer       = VisualRenderer();
-    visualObject.mHasGradientOverlayContext     = false;
-    visualObject.mRendererUpdateNeeded          = true;
-
-    if(visualObject.IsOnScene())
-    {
-      visualObject.UpdateRenderer();
-    }
+    GetVisualObject(visual).SetTextGradientOverlayBoundsMode(mode);
   };
 
   /**
@@ -300,16 +263,9 @@ public:
    * @param[in] visual The text visual.
    * @param[in] mode The TextGradientOverlay mode.
    */
-  static void SetTextGradientOverlayMode(Ui::Integration::Visual::Base visual, Text::GradientOverlayMode mode)
+  static void SetTextGradientOverlayMode(Ui::Integration::Visual::Base visual, Ui::Text::GradientOverlayMode mode)
   {
-    TextVisual& visualObject              = GetVisualObject(visual);
-    visualObject.mTextGradientOverlayMode = mode;
-    visualObject.mRendererUpdateNeeded    = true;
-
-    if(visualObject.IsOnScene())
-    {
-      visualObject.UpdateRenderer();
-    }
+    GetVisualObject(visual).SetTextGradientOverlayMode(mode);
   };
 
   /**
@@ -344,20 +300,20 @@ public:
    * @param[in] originSize The origin size for calculating vertical alignment.
    * @return A pixel data with the requested marquee text content rendered.
    */
-  static PixelData RenderMarqueeText(Ui::Integration::Visual::Base     visual,
-                                     const Vector2&                    size,
-                                     Text::Direction                   textDirection,
-                                     Text::Typesetter::RenderBehaviour behaviour,
-                                     bool                              ignoreHorizontalAlignment,
-                                     Pixel::Format                     pixelFormat,
-                                     const Vector2&                    originSize);
+  static PixelData RenderMarqueeText(Ui::Integration::Visual::Base         visual,
+                                     const Vector2&                        size,
+                                     Ui::Text::Direction                   textDirection,
+                                     Ui::Text::Typesetter::RenderBehaviour behaviour,
+                                     bool                                  ignoreHorizontalAlignment,
+                                     Pixel::Format                         pixelFormat,
+                                     const Vector2&                        originSize);
 
   /**
    * @brief Render preserved-color marquee PixelData with the TextVisual-owned Typesetter.
    */
   static PixelData RenderMarqueeTextGradientPreserved(Ui::Integration::Visual::Base visual,
                                                       const Vector2&                size,
-                                                      Text::Direction               textDirection,
+                                                      Ui::Text::Direction           textDirection,
                                                       bool                          ignoreHorizontalAlignment,
                                                       Pixel::Format                 pixelFormat,
                                                       const Vector2&                originSize);
@@ -367,7 +323,7 @@ public:
    */
   static PixelData RenderMarqueeTextGradientMask(Ui::Integration::Visual::Base visual,
                                                  const Vector2&                size,
-                                                 Text::Direction               textDirection,
+                                                 Ui::Text::Direction           textDirection,
                                                  bool                          ignoreHorizontalAlignment,
                                                  Pixel::Format                 pixelFormat,
                                                  const Vector2&                originSize);
@@ -379,7 +335,7 @@ public:
    */
   static PixelData GetTextGradientMaskPixelData(Ui::Integration::Visual::Base visual)
   {
-    return GetVisualObject(visual).mTextGradientMaskPixelData;
+    return GetVisualObject(visual).GetTextGradientMaskPixelData();
   };
 
 public: // from Visual::Base
@@ -507,19 +463,31 @@ private:
    * @param[in] parameters The async text parameters.
    * @return true if the async text render request was successful, false otherwise.
    */
-  bool UpdateAsyncRenderer(Text::AsyncTextParameters& parameters);
+  bool UpdateAsyncRenderer(Ui::Text::AsyncTextParameters& parameters);
 
   /**
    * @brief Requests the async size computation.
    * @param[in] parameters The async text parameters.
    */
-  void RequestAsyncSizeComputation(Text::AsyncTextParameters& parameters);
+  void RequestAsyncSizeComputation(Ui::Text::AsyncTextParameters& parameters);
 
   /**
    * @brief Set the control's async text interface.
    * @param[in] asyncTextInterface The async text interface.
    */
-  void SetAsyncTextInterface(Text::AsyncTextInterface* asyncTextInterface);
+  void SetAsyncTextInterface(Ui::Text::AsyncTextInterface* asyncTextInterface);
+
+  void SetTextGradientStyle(const Ui::Text::Internal::Gradient::Style& style);
+
+  void SetTextGradientBoundsMode(Ui::Text::GradientBoundsMode mode);
+
+  void SetTextGradientOverlayStyle(const Ui::Text::Internal::Gradient::Style& style);
+
+  void SetTextGradientOverlayBoundsMode(Ui::Text::GradientBoundsMode mode);
+
+  void SetTextGradientOverlayMode(Ui::Text::GradientOverlayMode mode);
+
+  PixelData GetTextGradientMaskPixelData() const;
 
   /**
    * @brief Sets the TextGradient start-offset source property index registered by the control.
@@ -725,22 +693,10 @@ private:
   typedef std::vector<Constraint>     ConstraintContainer;
 
 private:
-  Text::ControllerPtr       mController;         ///< The text's controller.
-  Text::TypesetterPtr       mTypesetter;         ///< The text's typesetter.
-  Text::AsyncTextInterface* mAsyncTextInterface; ///< The text's async interface.
-
-  Text::Internal::Gradient::Style mTextGradientStyle; ///< Stored TextGradient snapshot.
-  Text::GradientBoundsMode        mTextGradientBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
-  Text::Internal::Gradient::Style mTextGradientOverlayStyle; ///< Stored TextGradientOverlay snapshot.
-  Text::GradientBoundsMode        mTextGradientOverlayBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
-  Text::GradientOverlayMode       mTextGradientOverlayMode{Text::GradientOverlayMode::SRC_OVER};
-  PixelData                       mTextGradientMaskPixelData;    ///< Stored TextGradient mask for future shader composition.
-  VisualRenderer                  mGradientRenderer;             ///< Last renderer where TextGradient uniforms were registered.
-  Vector2                         mLastGradientCoordSize;        ///< Last coordinate size used for TextGradient uniforms.
-  Vector4                         mLastGradientBounds;           ///< Last bounds used for TextGradient uniforms.
-  VisualRenderer                  mGradientOverlayRenderer;      ///< Last renderer where TextGradientOverlay uniforms were registered.
-  Vector2                         mLastGradientOverlayCoordSize; ///< Last coordinate size used for TextGradientOverlay uniforms.
-  Vector4                         mLastGradientOverlayBounds;    ///< Last bounds used for TextGradientOverlay uniforms.
+  Ui::Text::ControllerPtr       mController;         ///< The text's controller.
+  Ui::Text::TypesetterPtr       mTypesetter;         ///< The text's typesetter.
+  Ui::Text::AsyncTextInterface* mAsyncTextInterface; ///< The text's async interface.
+  TextVisualGradientDataPtr     mGradientData;       ///< Lazily allocated TextGradient rendering state.
 
   TextVisualShaderFactory&                mTextVisualShaderFactory; ///< The shader factory for text visual.
   TextVisualShaderFeature::FeatureBuilder mTextShaderFeatureCache;  ///< The cached shader feature for text visual.
@@ -751,32 +707,24 @@ private:
   Property::Index   mHasMultipleTextColorsIndex; ///< The index of uHasMultipleTextColors proeprty.
   Property::Index
                       mAnimatableTextColorPropertyIndex; ///< The index of animatable text color property registered by the control.
-  Property::Index     mGradientAnimOffsetIndex;          ///< Animatable TextGradient start offset source property.
-  Property::Index     mGradientOverlayAnimOffsetIndex;   ///< Animatable TextGradientOverlay start offset source property.
   Property::Index     mTextColorAnimatableIndex;         ///< The index of uTextColorAnimatable property.
   Property::Index     mTextRequireRenderPropertyIndex;   ///< The index of requireRender property.
   RendererContainer   mRendererList;
   ConstraintContainer mColorConstraintList;
   ConstraintContainer mOpacityConstraintList;
-  ConstraintContainer mGradientAnimConstraints;
-  ConstraintContainer mGradientOverlayAnimConstraints;
 
-  float                mLineHeight;
-  Text::LineHeightMode mLineHeightMode;
-  Text::OverflowMode   mOverflowMode;
-  uint32_t             mTextLoadingTaskId;                  ///< The currently requested text loading(render) task Id.
-  uint32_t             mNaturalSizeTaskId;                  ///< The currently requested natural size task Id.
-  uint32_t             mHeightForWidthTaskId;               ///< The currently requested height for width task Id.
-  bool                 mRendererUpdateNeeded : 1;           ///< The flag to indicate whether the renderer needs to be updated.
-  bool                 mTextRequireRender : 1;              ///< The flag to indicate whether the text needs to be rendered.
-  bool                 mIsConstraintAppliedAlways : 1;      ///< Whether the constraint need to be applied always.
-  bool                 mGradientAnimApplyAlways : 1;        ///< Whether TextGradient constraints need to be applied always.
-  bool                 mGradientOverlayAnimApplyAlways : 1; ///< Whether TextGradientOverlay constraints need to be applied always.
-  bool                 mHasGradientContext : 1;             ///< Whether cached TextGradient uniform bounds are valid.
-  bool                 mHasGradientOverlayContext : 1;      ///< Whether cached TextGradientOverlay uniform bounds are valid.
-  bool                 mIsTextLoadingTaskRunning : 1;       ///< Whether the requested text loading task is running or not.
-  bool                 mIsNaturalSizeTaskRunning : 1;       ///< Whether the requested natural size task is running or not.
-  bool                 mIsHeightForWidthTaskRunning : 1;    ///< Whether the requested height for width task is running or not.
+  float                    mLineHeight;
+  Ui::Text::LineHeightMode mLineHeightMode;
+  Ui::Text::OverflowMode   mOverflowMode;
+  uint32_t                 mTextLoadingTaskId;               ///< The currently requested text loading(render) task Id.
+  uint32_t                 mNaturalSizeTaskId;               ///< The currently requested natural size task Id.
+  uint32_t                 mHeightForWidthTaskId;            ///< The currently requested height for width task Id.
+  bool                     mRendererUpdateNeeded : 1;        ///< The flag to indicate whether the renderer needs to be updated.
+  bool                     mTextRequireRender : 1;           ///< The flag to indicate whether the text needs to be rendered.
+  bool                     mIsConstraintAppliedAlways : 1;   ///< Whether the constraint need to be applied always.
+  bool                     mIsTextLoadingTaskRunning : 1;    ///< Whether the requested text loading task is running or not.
+  bool                     mIsNaturalSizeTaskRunning : 1;    ///< Whether the requested natural size task is running or not.
+  bool                     mIsHeightForWidthTaskRunning : 1; ///< Whether the requested height for width task is running or not.
 };
 
 } // namespace Internal

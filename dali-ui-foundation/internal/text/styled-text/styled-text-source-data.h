@@ -18,9 +18,11 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <memory>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
-#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {
@@ -44,11 +46,13 @@ private:
   Dali::Ui::Text::StyledText mStyledText;
 };
 
-void SetStyledTextSource(Dali::Ui::View owner, const Dali::Ui::Text::StyledText& styledText);
+using StyledTextSourceDataPtr = std::unique_ptr<StyledTextSourceData>;
 
-void ClearStyledTextSource(Dali::Ui::View owner);
+void SetStyledTextSource(StyledTextSourceDataPtr& data, const Dali::Ui::Text::StyledText& styledText);
 
-Dali::Ui::Text::StyledText GetStyledTextSource(Dali::Ui::View owner);
+void ClearStyledTextSource(StyledTextSourceDataPtr& data);
+
+Dali::Ui::Text::StyledText GetStyledTextSource(const StyledTextSourceDataPtr& data);
 
 } // namespace Text
 } // namespace Internal

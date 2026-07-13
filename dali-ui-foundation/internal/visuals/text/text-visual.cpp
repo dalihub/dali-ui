@@ -228,18 +228,11 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mController(Text::Controller::New()),
   mTypesetter(Text::Typesetter::New(mController->GetTextModel())),
   mAsyncTextInterface(nullptr),
-  mGradientRenderer(),
-  mLastGradientCoordSize(Vector2::ZERO),
-  mLastGradientBounds(Vector4::ZERO),
-  mGradientOverlayRenderer(),
-  mLastGradientOverlayCoordSize(Vector2::ZERO),
-  mLastGradientOverlayBounds(Vector4::ZERO),
+  mGradientData(),
   mTextVisualShaderFactory(shaderFactory),
   mTextShaderFeatureCache(),
   mHasMultipleTextColorsIndex(Property::INVALID_INDEX),
   mAnimatableTextColorPropertyIndex(Property::INVALID_INDEX),
-  mGradientAnimOffsetIndex(Property::INVALID_INDEX),
-  mGradientOverlayAnimOffsetIndex(Property::INVALID_INDEX),
   mTextColorAnimatableIndex(Property::INVALID_INDEX),
   mTextRequireRenderPropertyIndex(Property::INVALID_INDEX),
   mLineHeight(Text::LINE_HEIGHT_AUTO),
@@ -251,10 +244,6 @@ TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory
   mRendererUpdateNeeded(false),
   mTextRequireRender(false),
   mIsConstraintAppliedAlways(false),
-  mGradientAnimApplyAlways(false),
-  mGradientOverlayAnimApplyAlways(false),
-  mHasGradientContext(false),
-  mHasGradientOverlayContext(false),
   mIsTextLoadingTaskRunning(false),
   mIsNaturalSizeTaskRunning(false),
   mIsHeightForWidthTaskRunning(false)
@@ -411,11 +400,14 @@ void TextVisual::RemoveRenderer(Actor& actor, bool removeDefaultRenderer)
   }
   // Clear the renderer list
   mRendererList.clear();
-  mTextGradientMaskPixelData = PixelData();
-  mGradientRenderer          = VisualRenderer();
-  mHasGradientContext        = false;
-  mGradientOverlayRenderer   = VisualRenderer();
-  mHasGradientOverlayContext = false;
+  if(auto* gradientData = GetTextVisualGradientData(mGradientData))
+  {
+    gradientData->mTextGradientMaskPixelData = PixelData();
+    gradientData->mGradientRenderer          = VisualRenderer();
+    gradientData->mHasGradientContext        = false;
+    gradientData->mGradientOverlayRenderer   = VisualRenderer();
+    gradientData->mHasGradientOverlayContext = false;
+  }
   RemoveGradientAnimConstraints();
   RemoveGradientOverlayAnimConstraints();
 
@@ -1149,15 +1141,16 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       uint32_t textureSetIndex = 0u;
       if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
       {
+        auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
         AddTexture(textureSet, renderInfo.textGradientPreservedPixelData, sampler, textureSetIndex);
         ++textureSetIndex;
-        mTextGradientMaskPixelData = renderInfo.textGradientMaskPixelData;
+        gradientData.mTextGradientMaskPixelData = renderInfo.textGradientMaskPixelData;
         AddTexture(textureSet, renderInfo.textGradientMaskPixelData, sampler, textureSetIndex);
         ++textureSetIndex;
-        Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
+        Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
         if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
         {
-          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientOverlayStyle);
+          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle);
         }
       }
       else
@@ -1167,11 +1160,13 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
         if(mTextShaderFeatureCache.IsEnabledTextGradient())
         {
-          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
+          auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
+          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
         }
         if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
         {
-          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientOverlayStyle);
+          auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
+          Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle);
         }
       }
 
@@ -1378,8 +1373,11 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
     {
       // Apply constraint once after async text completed.
       SetConstraintApplyAlways(mIsConstraintAppliedAlways, true);
-      SetGradientAnimApplyAlways(mGradientAnimApplyAlways, true);
-      SetGradientOverlayAnimApplyAlways(mGradientOverlayAnimApplyAlways, true);
+      if(const auto* gradientData = GetTextVisualGradientData(mGradientData))
+      {
+        SetGradientAnimApplyAlways(gradientData->mGradientAnimApplyAlways, true);
+        SetGradientOverlayAnimApplyAlways(gradientData->mGradientOverlayAnimApplyAlways, true);
+      }
     }
   }
   else
@@ -1396,11 +1394,124 @@ void TextVisual::SetAsyncTextInterface(Text::AsyncTextInterface* asyncTextInterf
   mAsyncTextInterface = asyncTextInterface;
 }
 
+void TextVisual::SetTextGradientStyle(const Text::Internal::Gradient::Style& style)
+{
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && !Text::Internal::Gradient::IsRenderable(style))
+  {
+    return;
+  }
+
+  gradientData                             = &GetOrCreateTextVisualGradientData(mGradientData);
+  gradientData->mTextGradientStyle         = style;
+  gradientData->mTextGradientMaskPixelData = PixelData();
+  gradientData->mGradientRenderer          = VisualRenderer();
+  gradientData->mHasGradientContext        = false;
+  mRendererUpdateNeeded                    = true;
+
+  if(IsOnScene())
+  {
+    UpdateRenderer();
+  }
+}
+
+void TextVisual::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
+{
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && mode == Text::GradientBoundsMode::CONTENT_BOUND)
+  {
+    return;
+  }
+
+  gradientData                          = &GetOrCreateTextVisualGradientData(mGradientData);
+  gradientData->mTextGradientBoundsMode = mode;
+  gradientData->mGradientRenderer       = VisualRenderer();
+  gradientData->mHasGradientContext     = false;
+  mRendererUpdateNeeded                 = true;
+
+  if(IsOnScene())
+  {
+    UpdateRenderer();
+  }
+}
+
+void TextVisual::SetTextGradientOverlayStyle(const Text::Internal::Gradient::Style& style)
+{
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && !Text::Internal::Gradient::IsRenderable(style))
+  {
+    return;
+  }
+
+  gradientData = &GetOrCreateTextVisualGradientData(mGradientData);
+  RemoveGradientOverlayAnimConstraints();
+  gradientData->mTextGradientOverlayStyle  = style;
+  gradientData->mGradientOverlayRenderer   = VisualRenderer();
+  gradientData->mHasGradientOverlayContext = false;
+  mRendererUpdateNeeded                    = true;
+
+  if(IsOnScene())
+  {
+    UpdateRenderer();
+  }
+}
+
+void TextVisual::SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode)
+{
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && mode == Text::GradientBoundsMode::CONTENT_BOUND)
+  {
+    return;
+  }
+
+  gradientData                                 = &GetOrCreateTextVisualGradientData(mGradientData);
+  gradientData->mTextGradientOverlayBoundsMode = mode;
+  gradientData->mGradientOverlayRenderer       = VisualRenderer();
+  gradientData->mHasGradientOverlayContext     = false;
+  mRendererUpdateNeeded                        = true;
+
+  if(IsOnScene())
+  {
+    UpdateRenderer();
+  }
+}
+
+void TextVisual::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
+{
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && mode == Text::GradientOverlayMode::SRC_OVER)
+  {
+    return;
+  }
+
+  gradientData                           = &GetOrCreateTextVisualGradientData(mGradientData);
+  gradientData->mTextGradientOverlayMode = mode;
+  mRendererUpdateNeeded                  = true;
+
+  if(IsOnScene())
+  {
+    UpdateRenderer();
+  }
+}
+
+PixelData TextVisual::GetTextGradientMaskPixelData() const
+{
+  const auto* gradientData = GetTextVisualGradientData(mGradientData);
+  return gradientData ? gradientData->mTextGradientMaskPixelData : PixelData();
+}
+
 void TextVisual::SetGradientAnimProperties(Property::Index startOffsetPropertyIndex)
 {
-  const bool changed = mGradientAnimOffsetIndex != startOffsetPropertyIndex;
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && startOffsetPropertyIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
 
-  mGradientAnimOffsetIndex = startOffsetPropertyIndex;
+  gradientData       = &GetOrCreateTextVisualGradientData(mGradientData);
+  const bool changed = gradientData->mGradientAnimOffsetIndex != startOffsetPropertyIndex;
+
+  gradientData->mGradientAnimOffsetIndex = startOffsetPropertyIndex;
 
   if(changed)
   {
@@ -1410,9 +1521,16 @@ void TextVisual::SetGradientAnimProperties(Property::Index startOffsetPropertyIn
 
 void TextVisual::SetGradientOverlayAnimProperties(Property::Index startOffsetPropertyIndex)
 {
-  const bool changed = mGradientOverlayAnimOffsetIndex != startOffsetPropertyIndex;
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && startOffsetPropertyIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
 
-  mGradientOverlayAnimOffsetIndex = startOffsetPropertyIndex;
+  gradientData       = &GetOrCreateTextVisualGradientData(mGradientData);
+  const bool changed = gradientData->mGradientOverlayAnimOffsetIndex != startOffsetPropertyIndex;
+
+  gradientData->mGradientOverlayAnimOffsetIndex = startOffsetPropertyIndex;
 
   if(changed)
   {
@@ -1451,18 +1569,25 @@ void TextVisual::SetConstraintApplyAlways(bool applyAlways, bool notifyToConstra
 
 void TextVisual::SetGradientAnimApplyAlways(bool applyAlways, bool notifyToConstraint)
 {
-  if(mGradientAnimApplyAlways != applyAlways || notifyToConstraint)
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && !applyAlways)
   {
-    mGradientAnimApplyAlways = applyAlways;
+    return;
+  }
+
+  gradientData = &GetOrCreateTextVisualGradientData(mGradientData);
+  if(gradientData->mGradientAnimApplyAlways != applyAlways || notifyToConstraint)
+  {
+    gradientData->mGradientAnimApplyAlways = applyAlways;
 
     if(mControl.GetHandle())
     {
-      for(auto& constraint : mGradientAnimConstraints)
+      for(auto& constraint : gradientData->mGradientAnimConstraints)
       {
         if(constraint)
         {
-          constraint.SetApplyRate(mGradientAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
-                                                           : Dali::Constraint::APPLY_ONCE);
+          constraint.SetApplyRate(gradientData->mGradientAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                                         : Dali::Constraint::APPLY_ONCE);
         }
       }
     }
@@ -1471,18 +1596,25 @@ void TextVisual::SetGradientAnimApplyAlways(bool applyAlways, bool notifyToConst
 
 void TextVisual::SetGradientOverlayAnimApplyAlways(bool applyAlways, bool notifyToConstraint)
 {
-  if(mGradientOverlayAnimApplyAlways != applyAlways || notifyToConstraint)
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData && !applyAlways)
   {
-    mGradientOverlayAnimApplyAlways = applyAlways;
+    return;
+  }
+
+  gradientData = &GetOrCreateTextVisualGradientData(mGradientData);
+  if(gradientData->mGradientOverlayAnimApplyAlways != applyAlways || notifyToConstraint)
+  {
+    gradientData->mGradientOverlayAnimApplyAlways = applyAlways;
 
     if(mControl.GetHandle())
     {
-      for(auto& constraint : mGradientOverlayAnimConstraints)
+      for(auto& constraint : gradientData->mGradientOverlayAnimConstraints)
       {
         if(constraint)
         {
-          constraint.SetApplyRate(mGradientOverlayAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
-                                                                  : Dali::Constraint::APPLY_ONCE);
+          constraint.SetApplyRate(gradientData->mGradientOverlayAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                                                : Dali::Constraint::APPLY_ONCE);
         }
       }
     }
@@ -1491,140 +1623,162 @@ void TextVisual::SetGradientOverlayAnimApplyAlways(bool applyAlways, bool notify
 
 void TextVisual::RemoveGradientAnimConstraints()
 {
-  for(auto& constraint : mGradientAnimConstraints)
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData)
+  {
+    return;
+  }
+
+  for(auto& constraint : gradientData->mGradientAnimConstraints)
   {
     if(constraint)
     {
       constraint.Remove();
     }
   }
-  mGradientAnimConstraints.clear();
+  gradientData->mGradientAnimConstraints.clear();
 }
 
 void TextVisual::RemoveGradientOverlayAnimConstraints()
 {
-  for(auto& constraint : mGradientOverlayAnimConstraints)
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData)
+  {
+    return;
+  }
+
+  for(auto& constraint : gradientData->mGradientOverlayAnimConstraints)
   {
     if(constraint)
     {
       constraint.Remove();
     }
   }
-  mGradientOverlayAnimConstraints.clear();
+  gradientData->mGradientOverlayAnimConstraints.clear();
 }
 
 void TextVisual::RebindGradientAnimConstraints()
 {
   RemoveGradientAnimConstraints();
 
-  if(!mHasGradientContext ||
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData ||
+     !gradientData->mHasGradientContext ||
      !mTextShaderFeatureCache.IsEnabledAnyTextGradient() ||
-     !mGradientRenderer ||
-     mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+     !gradientData->mGradientRenderer ||
+     gradientData->mGradientAnimOffsetIndex == Property::INVALID_INDEX)
   {
     return;
   }
 
   const Text::Internal::Gradient::RenderData renderData =
-    Text::Internal::Gradient::ResolveRenderData(mTextGradientStyle, mLastGradientBounds, mLastGradientCoordSize);
+    Text::Internal::Gradient::ResolveRenderData(gradientData->mTextGradientStyle,
+                                                gradientData->mLastGradientBounds,
+                                                gradientData->mLastGradientCoordSize);
   if(!renderData.enabled)
   {
     return;
   }
 
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, renderData.startPosition);
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, renderData.endPosition);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_POSITION_NAME, renderData.startPosition);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_END_POSITION_NAME, renderData.endPosition);
   const Property::Index startOffsetIndex =
-    Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, renderData.startOffset);
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, renderData.bounds);
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(renderData.type));
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, renderData.radialCenter);
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, renderData.radialScale);
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME, renderData.conicCenter);
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME, renderData.conicScale);
-  Text::Internal::Gradient::SetRendererProperty(mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
+    Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_START_OFFSET_NAME, renderData.startOffset);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_BOUNDS_NAME, renderData.bounds);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_TYPE_NAME, static_cast<float>(renderData.type));
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_CENTER_NAME, renderData.radialCenter);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_RADIAL_SCALE_NAME, renderData.radialScale);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_CENTER_NAME, renderData.conicCenter);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME, renderData.conicScale);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientRenderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
 
-  BindGradientAnimConstraints(mGradientRenderer, startOffsetIndex);
+  BindGradientAnimConstraints(gradientData->mGradientRenderer, startOffsetIndex);
 }
 
 void TextVisual::RebindGradientOverlayAnimConstraints()
 {
   RemoveGradientOverlayAnimConstraints();
 
-  if(!mHasGradientOverlayContext ||
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData ||
+     !gradientData->mHasGradientOverlayContext ||
      !mTextShaderFeatureCache.IsEnabledTextGradientOverlay() ||
-     !mGradientOverlayRenderer ||
-     mGradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
+     !gradientData->mGradientOverlayRenderer ||
+     gradientData->mGradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
   {
     return;
   }
 
   const Text::Internal::Gradient::RenderData renderData =
-    Text::Internal::Gradient::ResolveRenderData(mTextGradientOverlayStyle, mLastGradientOverlayBounds, mLastGradientOverlayCoordSize);
+    Text::Internal::Gradient::ResolveRenderData(gradientData->mTextGradientOverlayStyle,
+                                                gradientData->mLastGradientOverlayBounds,
+                                                gradientData->mLastGradientOverlayCoordSize);
   if(!renderData.enabled)
   {
     return;
   }
 
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_POSITION_NAME, renderData.startPosition);
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_END_POSITION_NAME, renderData.endPosition);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_POSITION_NAME, renderData.startPosition);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_END_POSITION_NAME, renderData.endPosition);
   const Property::Index startOffsetIndex =
-    Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME, renderData.startOffset);
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME, renderData.bounds);
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME, static_cast<float>(renderData.type));
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME, renderData.radialCenter);
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME, renderData.radialScale);
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME, renderData.conicCenter);
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME, renderData.conicScale);
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
-  Text::Internal::Gradient::SetRendererProperty(mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME, static_cast<float>(mTextGradientOverlayMode));
+    Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_START_OFFSET_NAME, renderData.startOffset);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_BOUNDS_NAME, renderData.bounds);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_TYPE_NAME, static_cast<float>(renderData.type));
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_CENTER_NAME, renderData.radialCenter);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_RADIAL_SCALE_NAME, renderData.radialScale);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME, renderData.conicCenter);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME, renderData.conicScale);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
+  Text::Internal::Gradient::SetRendererProperty(gradientData->mGradientOverlayRenderer, UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME, static_cast<float>(gradientData->mTextGradientOverlayMode));
 
-  BindGradientOverlayAnimConstraints(mGradientOverlayRenderer, startOffsetIndex);
+  BindGradientOverlayAnimConstraints(gradientData->mGradientOverlayRenderer, startOffsetIndex);
 }
 
 void TextVisual::BindGradientAnimConstraints(VisualRenderer& renderer,
                                              Property::Index startOffsetIndex)
 {
-  Actor control = mControl.GetHandle();
-  if(!control || mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  Actor control      = mControl.GetHandle();
+  if(!gradientData || !control || gradientData->mGradientAnimOffsetIndex == Property::INVALID_INDEX)
   {
     return;
   }
 
-  const auto applyRate = mGradientAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
-                                                  : Dali::Constraint::APPLY_ONCE;
+  const auto applyRate = gradientData->mGradientAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                                : Dali::Constraint::APPLY_ONCE;
 
-  if(mGradientAnimOffsetIndex != Property::INVALID_INDEX)
+  if(gradientData->mGradientAnimOffsetIndex != Property::INVALID_INDEX)
   {
     Constraint constraint = Constraint::New<float>(renderer, startOffsetIndex, GradientOffsetConstraint);
-    constraint.AddSource(Source(control, mGradientAnimOffsetIndex));
+    constraint.AddSource(Source(control, gradientData->mGradientAnimOffsetIndex));
     constraint.SetApplyRate(applyRate);
     Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_VISUAL_GRADIENT_START_OFFSET_CONSTRAINT_TAG);
     constraint.Apply();
-    mGradientAnimConstraints.push_back(constraint);
+    gradientData->mGradientAnimConstraints.push_back(constraint);
   }
 }
 
 void TextVisual::BindGradientOverlayAnimConstraints(VisualRenderer& renderer,
                                                     Property::Index startOffsetIndex)
 {
-  Actor control = mControl.GetHandle();
-  if(!control || mGradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  Actor control      = mControl.GetHandle();
+  if(!gradientData || !control || gradientData->mGradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
   {
     return;
   }
 
-  const auto applyRate = mGradientOverlayAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
-                                                         : Dali::Constraint::APPLY_ONCE;
+  const auto applyRate = gradientData->mGradientOverlayAnimApplyAlways ? Dali::Constraint::APPLY_ALWAYS
+                                                                       : Dali::Constraint::APPLY_ONCE;
 
-  if(mGradientOverlayAnimOffsetIndex != Property::INVALID_INDEX)
+  if(gradientData->mGradientOverlayAnimOffsetIndex != Property::INVALID_INDEX)
   {
     Constraint constraint = Constraint::New<float>(renderer, startOffsetIndex, GradientOffsetConstraint);
-    constraint.AddSource(Source(control, mGradientOverlayAnimOffsetIndex));
+    constraint.AddSource(Source(control, gradientData->mGradientOverlayAnimOffsetIndex));
     constraint.SetApplyRate(applyRate);
     Dali::Integration::ConstraintSetInternalTag(constraint, TEXT_VISUAL_GRADIENT_OVERLAY_START_OFFSET_CONSTRAINT_TAG);
     constraint.Apply();
-    mGradientOverlayAnimConstraints.push_back(constraint);
+    gradientData->mGradientOverlayAnimConstraints.push_back(constraint);
   }
 }
 
@@ -1763,7 +1917,8 @@ bool TextVisual::IsTextGradientCompositionSupported(const Vector2& size, bool ha
   (void)isOverlayStyle;
   (void)isMarqueeEnabled;
 
-  if(!Text::Internal::Gradient::IsRenderable(mTextGradientStyle))
+  const auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData || !Text::Internal::Gradient::IsRenderable(gradientData->mTextGradientStyle))
   {
     return false;
   }
@@ -1795,7 +1950,8 @@ bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bo
   (void)styleTextureEnabled;
   (void)isOverlayStyle;
 
-  if(!Text::Internal::Gradient::IsRenderable(mTextGradientStyle))
+  const auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData || !Text::Internal::Gradient::IsRenderable(gradientData->mTextGradientStyle))
   {
     return false;
   }
@@ -1823,7 +1979,8 @@ bool TextVisual::IsTextGradientMixedCompositionSupported(const Vector2& size, bo
 bool TextVisual::IsTextGradientOverlayCompositionSupported(const Vector2& size, bool isHeightTiling,
                                                            bool isMarqueeEnabled, bool isCutoutEnabled) const
 {
-  if(!Text::Internal::Gradient::IsRenderable(mTextGradientOverlayStyle))
+  const auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData || !Text::Internal::Gradient::IsRenderable(gradientData->mTextGradientOverlayStyle))
   {
     return false;
   }
@@ -1853,7 +2010,8 @@ Vector4 TextVisual::CalculateGradientContentBounds(const Vector2& textureSize) c
 
 Vector4 TextVisual::ResolveTextGradientBounds(const Vector2& textureSize, const Vector4& contentBounds) const
 {
-  if(mTextGradientBoundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+  const auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(gradientData && gradientData->mTextGradientBoundsMode == Text::GradientBoundsMode::VIEW_BOUND)
   {
     Vector2 visualOffset = Vector2::ZERO;
     if(mImpl->mTransform)
@@ -1869,7 +2027,8 @@ Vector4 TextVisual::ResolveTextGradientBounds(const Vector2& textureSize, const 
 
 Vector4 TextVisual::ResolveTextGradientOverlayBounds(const Vector2& textureSize, const Vector4& contentBounds) const
 {
-  if(mTextGradientOverlayBoundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+  const auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(gradientData && gradientData->mTextGradientOverlayBoundsMode == Text::GradientBoundsMode::VIEW_BOUND)
   {
     Vector2 visualOffset = Vector2::ZERO;
     if(mImpl->mTransform)
@@ -1885,8 +2044,14 @@ Vector4 TextVisual::ResolveTextGradientOverlayBounds(const Vector2& textureSize,
 
 void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds)
 {
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData)
+  {
+    return;
+  }
+
   const Text::Internal::Gradient::RenderData renderData =
-    Text::Internal::Gradient::ResolveRenderData(mTextGradientStyle, textBounds, textureSize);
+    Text::Internal::Gradient::ResolveRenderData(gradientData->mTextGradientStyle, textBounds, textureSize);
   if(!renderData.enabled)
   {
     return;
@@ -1904,10 +2069,10 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_SCALE_NAME, renderData.conicScale);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
 
-  mGradientRenderer      = renderer;
-  mLastGradientCoordSize = textureSize;
-  mLastGradientBounds    = renderData.bounds;
-  mHasGradientContext    = true;
+  gradientData->mGradientRenderer      = renderer;
+  gradientData->mLastGradientCoordSize = textureSize;
+  gradientData->mLastGradientBounds    = renderData.bounds;
+  gradientData->mHasGradientContext    = true;
 
   RemoveGradientAnimConstraints();
   BindGradientAnimConstraints(renderer, startOffsetIndex);
@@ -1915,8 +2080,14 @@ void TextVisual::ApplyTextGradientUniforms(VisualRenderer& renderer, const Vecto
 
 void TextVisual::ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, const Vector2& textureSize, const Vector4& textBounds)
 {
+  auto* gradientData = GetTextVisualGradientData(mGradientData);
+  if(!gradientData)
+  {
+    return;
+  }
+
   const Text::Internal::Gradient::RenderData renderData =
-    Text::Internal::Gradient::ResolveRenderData(mTextGradientOverlayStyle, textBounds, textureSize);
+    Text::Internal::Gradient::ResolveRenderData(gradientData->mTextGradientOverlayStyle, textBounds, textureSize);
   if(!renderData.enabled)
   {
     return;
@@ -1933,12 +2104,12 @@ void TextVisual::ApplyTextGradientOverlayUniforms(VisualRenderer& renderer, cons
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_CENTER_NAME, renderData.conicCenter);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_SCALE_NAME, renderData.conicScale);
   Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME, renderData.conicStartAngle);
-  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME, static_cast<float>(mTextGradientOverlayMode));
+  Text::Internal::Gradient::SetRendererProperty(renderer, UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME, static_cast<float>(gradientData->mTextGradientOverlayMode));
 
-  mGradientOverlayRenderer      = renderer;
-  mLastGradientOverlayCoordSize = textureSize;
-  mLastGradientOverlayBounds    = renderData.bounds;
-  mHasGradientOverlayContext    = true;
+  gradientData->mGradientOverlayRenderer      = renderer;
+  gradientData->mLastGradientOverlayCoordSize = textureSize;
+  gradientData->mLastGradientOverlayBounds    = renderData.bounds;
+  gradientData->mHasGradientOverlayContext    = true;
 
   RemoveGradientOverlayAnimConstraints();
   BindGradientOverlayAnimConstraints(renderer, startOffsetIndex);
@@ -1984,7 +2155,10 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
 
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_VISUAL_UPDATE_RENDERER");
 
-  mTextGradientMaskPixelData = PixelData();
+  if(auto* gradientData = GetTextVisualGradientData(mGradientData))
+  {
+    gradientData->mTextGradientMaskPixelData = PixelData();
+  }
 
   // No tiling required. Use the default renderer.
   if(size.height < maxTextureSize)
@@ -2188,19 +2362,21 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
 
   if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
   {
+    auto&     gradientData = GetOrCreateTextVisualGradientData(mGradientData);
     PixelData preservedData =
       mTypesetter->RenderTextGradientPreserved(size, textDirection, false, Pixel::RGBA8888);
     AddTexture(textureSet, preservedData, sampler, textureSetIndex);
     ++textureSetIndex;
 
-    mTextGradientMaskPixelData = mTypesetter->RenderTextGradientMask(size, textDirection, false, Pixel::L8);
-    AddTexture(textureSet, mTextGradientMaskPixelData, sampler, textureSetIndex);
+    gradientData.mTextGradientMaskPixelData =
+      mTypesetter->RenderTextGradientMask(size, textDirection, false, Pixel::L8);
+    AddTexture(textureSet, gradientData.mTextGradientMaskPixelData, sampler, textureSetIndex);
     ++textureSetIndex;
 
-    Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
+    Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
     if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
     {
-      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientOverlayStyle);
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle);
     }
   }
   else
@@ -2228,11 +2404,13 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
 
     if(mTextShaderFeatureCache.IsEnabledTextGradient())
     {
-      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientStyle);
+      auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientStyle);
     }
     if(mTextShaderFeatureCache.IsEnabledTextGradientOverlay())
     {
-      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, mTextGradientOverlayStyle);
+      auto& gradientData = GetOrCreateTextVisualGradientData(mGradientData);
+      Text::Internal::Gradient::AddLookupTexture(textureSet, textureSetIndex, gradientData.mTextGradientOverlayStyle);
     }
   }
 

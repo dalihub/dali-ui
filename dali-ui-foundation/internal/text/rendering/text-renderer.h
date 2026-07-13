@@ -33,7 +33,7 @@ namespace Text
 {
 namespace Internal::Gradient
 {
-struct AtlasGradientFrameState;
+struct AtlasFrameState;
 struct AtlasRendererState;
 } //namespace Internal::Gradient
 

@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
+#include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
@@ -1114,22 +1115,6 @@ private: // Implementation
   bool IsActiveGradientAnimSupported() const;
 
   /**
-   * @brief Returns true when index is the normal hidden TextGradient animation source property.
-   *
-   * @param[in] index The property index to check.
-   * @return True if the index is the normal TextGradient animation property.
-   */
-  bool IsGradientAnimProperty(Dali::Property::Index index) const;
-
-  /**
-   * @brief Returns true when index is the placeholder hidden TextGradient animation source property.
-   *
-   * @param[in] index The property index to check.
-   * @return True if the index is the placeholder TextGradient animation property.
-   */
-  bool IsPlaceholderGradientAnimProperty(Dali::Property::Index index) const;
-
-  /**
    * @brief Updates TextGradient animation constraint apply rate on the atlas renderer.
    *
    * @param[in] notifyToConstraint True to update existing constraints even if the state did not change.
@@ -1240,37 +1225,35 @@ private:
   Signal<void(View)>                                  mSelectionClearedSignal;
   Signal<void(View, Text::TypingStyle::Mask)>         mTypingStyleChangedSignal;
 
-  InputMethodContext                                  mInputMethodContext;
-  TapGestureDetector                                  mTapGestureDetector;
-  PanGestureDetector                                  mPanGestureDetector;
-  LongPressGestureDetector                            mLongPressGestureDetector;
-  Text::ControllerPtr                                 mController;
-  Text::RendererPtr                                   mRenderer;
-  Text::Internal::Gradient::EditableAtlasState        mAtlasGradientState;
-  Text::Internal::Gradient::AppliedAtlasGradientState mAppliedAtlasGradientState;
-  Property::Index                                     mGradientAnimOffsetIndex{Property::INVALID_INDEX};
-  Property::Index                                     mPlaceholderGradientAnimOffsetIndex{Property::INVALID_INDEX};
-  int                                                 mGradientAnimCount{0};
-  int                                                 mPlaceholderGradientAnimCount{0};
-  Text::DecoratorPtr                                  mDecorator;
-  Actor                                               mStencil;
-  std::vector<Actor>                                  mClippingDecorationActors; ///< Decoration actors which need clipping.
-  std::vector<Ui::TextAnchor>                         mAnchorActors;
-  Actor                                               mRenderableActor;
-  Actor                                               mActiveLayer;
-  Actor                                               mCursorLayer;
-  Actor                                               mBackgroundActor;
+  Internal::Text::EditableTextGradientPropertyDataPtr mTextGradientPropertyData;
+
+  InputMethodContext                        mInputMethodContext;
+  TapGestureDetector                        mTapGestureDetector;
+  PanGestureDetector                        mPanGestureDetector;
+  LongPressGestureDetector                  mLongPressGestureDetector;
+  Text::ControllerPtr                       mController;
+  Text::RendererPtr                         mRenderer;
+  Text::Internal::Gradient::AtlasApplyState mAtlasApplyState;
+  Text::DecoratorPtr                        mDecorator;
+  Actor                                     mStencil;
+  std::vector<Actor>                        mClippingDecorationActors; ///< Decoration actors which need clipping.
+  std::vector<Ui::TextAnchor>               mAnchorActors;
+  Actor                                     mRenderableActor;
+  Actor                                     mActiveLayer;
+  Actor                                     mCursorLayer;
+  Actor                                     mBackgroundActor;
 
   Text::OverflowMode mOverflowMode;
   float              mAlignmentOffset;
   bool               mMeasureInvalidated : 1;
   bool               mHasBeenStaged : 1;
-  bool               mTextChanged : 1;           ///< If true, emits TextChangedSignal in next OnRelayout().
-  bool               mCursorPositionChanged : 1; ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
-  bool               mSelectionStarted : 1;      ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
-  bool               mSelectionChanged : 1;      ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
-  bool               mSelectionCleared : 1;      ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
-  bool               mFocusGainedByTouch : 1;    ///< If true, focus was gained by touch, skip scroll in focus gained.
+  bool               mHasTextGradientPropertyData : 1; ///< Whether editable TextGradient property data has been created.
+  bool               mTextChanged : 1;                 ///< If true, emits TextChangedSignal in next OnRelayout().
+  bool               mCursorPositionChanged : 1;       ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
+  bool               mSelectionStarted : 1;            ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
+  bool               mSelectionChanged : 1;            ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
+  bool               mSelectionCleared : 1;            ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
+  bool               mFocusGainedByTouch : 1;          ///< If true, focus was gained by touch, skip scroll in focus gained.
 
   Dali::String mTranslatablePlaceholder; ///< Resource ID for translatable placeholder binding.
 

@@ -153,7 +153,7 @@ bool AtlasRendererState::IsEnabled() const
   return IsRenderable(style) && lookupTexture && lookupSampler;
 }
 
-bool AppliedAtlasGradientState::Matches(const AtlasRendererState& state) const
+bool AtlasApplyState::Matches(const AtlasRendererState& state) const
 {
   return initialized &&
          resourceId == state.resourceId &&
@@ -161,9 +161,9 @@ bool AppliedAtlasGradientState::Matches(const AtlasRendererState& state) const
          lookupRevision == state.lookupRevision;
 }
 
-void AppliedAtlasGradientState::Set(const AtlasRendererState& state)
+void AtlasApplyState::Set(const AtlasRendererState& state)
 {
-  status         = AtlasGradientApplicationStatus::APPLIED;
+  status         = AtlasApplyStatus::APPLIED;
   initialized    = true;
   enabled        = state.IsEnabled();
   resourceId     = state.resourceId;
@@ -171,9 +171,9 @@ void AppliedAtlasGradientState::Set(const AtlasRendererState& state)
   lookupRevision = state.lookupRevision;
 }
 
-void AppliedAtlasGradientState::SetSolidFallback(const AtlasRendererState& state)
+void AtlasApplyState::SetSolidFallback(const AtlasRendererState& state)
 {
-  status         = AtlasGradientApplicationStatus::SOLID_FALLBACK;
+  status         = AtlasApplyStatus::SOLID_FALLBACK;
   initialized    = true;
   enabled        = state.IsEnabled();
   resourceId     = state.resourceId;
@@ -181,27 +181,27 @@ void AppliedAtlasGradientState::SetSolidFallback(const AtlasRendererState& state
   lookupRevision = state.lookupRevision;
 }
 
-bool AppliedAtlasGradientState::IsGradientApplied() const
+bool AtlasApplyState::IsGradientApplied() const
 {
-  return initialized && enabled && status == AtlasGradientApplicationStatus::APPLIED;
+  return initialized && enabled && status == AtlasApplyStatus::APPLIED;
 }
 
-bool AppliedAtlasGradientState::IsSolidFallback() const
+bool AtlasApplyState::IsSolidFallback() const
 {
-  return initialized && status == AtlasGradientApplicationStatus::SOLID_FALLBACK;
+  return initialized && status == AtlasApplyStatus::SOLID_FALLBACK;
 }
 
-void AppliedAtlasGradientState::Reset()
+void AtlasApplyState::Reset()
 {
-  *this = AppliedAtlasGradientState{};
+  *this = AtlasApplyState{};
 }
 
-PreparedAtlasState::PreparedAtlasState()
+AtlasResource::AtlasResource()
 {
   mRendererState.resourceId = AllocateResourceId();
 }
 
-bool PreparedAtlasState::Set(const Dali::Ui::Gradient::Base& gradient)
+bool AtlasResource::Set(const Dali::Ui::Gradient::Base& gradient)
 {
   const Style                    newStyle       = CreateStyle(gradient);
   const Dali::Ui::Gradient::Base newAuthored    = IsRenderable(gradient) ? gradient : Dali::Ui::Gradient::Base::None();
@@ -259,47 +259,47 @@ bool PreparedAtlasState::Set(const Dali::Ui::Gradient::Base& gradient)
   return true;
 }
 
-const Dali::Ui::Gradient::Base& PreparedAtlasState::Get() const
+const Dali::Ui::Gradient::Base& AtlasResource::Get() const
 {
   return mAuthored;
 }
 
-bool PreparedAtlasState::IsEnabled() const
+bool AtlasResource::IsEnabled() const
 {
   return mRendererState.IsEnabled();
 }
 
-uint64_t PreparedAtlasState::GetStyleRevision() const
+uint64_t AtlasResource::GetStyleRevision() const
 {
   return mRendererState.styleRevision;
 }
 
-uint64_t PreparedAtlasState::GetLookupRevision() const
+uint64_t AtlasResource::GetLookupRevision() const
 {
   return mRendererState.lookupRevision;
 }
 
-uint64_t PreparedAtlasState::GetLookupGenerationCount() const
+uint64_t AtlasResource::GetLookupGenerationCount() const
 {
   return mLookupGenerationCount;
 }
 
-const AtlasRendererState& PreparedAtlasState::GetRendererState() const
+const AtlasRendererState& AtlasResource::GetRendererState() const
 {
   return mRendererState;
 }
 
-bool EditableAtlasState::SetTextGradient(const Dali::Ui::Gradient::Base& gradient)
+bool EditableAtlasResources::SetTextGradient(const Dali::Ui::Gradient::Base& gradient)
 {
   return mText.Set(gradient);
 }
 
-bool EditableAtlasState::SetPlaceholderGradient(const Dali::Ui::Gradient::Base& gradient)
+bool EditableAtlasResources::SetPlaceholderGradient(const Dali::Ui::Gradient::Base& gradient)
 {
   return mPlaceholder.Set(gradient);
 }
 
-bool EditableAtlasState::SetBoundsMode(Text::GradientBoundsMode mode)
+bool EditableAtlasResources::SetBoundsMode(Text::GradientBoundsMode mode)
 {
   if(mBoundsMode == mode)
   {
@@ -309,35 +309,35 @@ bool EditableAtlasState::SetBoundsMode(Text::GradientBoundsMode mode)
   return true;
 }
 
-const Dali::Ui::Gradient::Base& EditableAtlasState::GetTextGradient() const
+const Dali::Ui::Gradient::Base& EditableAtlasResources::GetTextGradient() const
 {
   return mText.Get();
 }
 
-const Dali::Ui::Gradient::Base& EditableAtlasState::GetPlaceholderGradient() const
+const Dali::Ui::Gradient::Base& EditableAtlasResources::GetPlaceholderGradient() const
 {
   return mPlaceholder.Get();
 }
 
-Text::GradientBoundsMode EditableAtlasState::GetBoundsMode() const
+Text::GradientBoundsMode EditableAtlasResources::GetBoundsMode() const
 {
   return mBoundsMode;
 }
 
-const AtlasRendererState& EditableAtlasState::GetRendererState(bool placeholder) const
+const AtlasRendererState& EditableAtlasResources::GetRendererState(bool placeholder) const
 {
   return (placeholder ? mPlaceholder : mText).GetRendererState();
 }
 
-AtlasGradientFrameState EditableAtlasState::GetFrameState(bool placeholder) const
+AtlasFrameState EditableAtlasResources::GetFrameState(bool placeholder) const
 {
-  return AtlasGradientFrameState{GetRendererState(placeholder).IsEnabled(), mBoundsMode};
+  return AtlasFrameState{GetRendererState(placeholder).IsEnabled(), mBoundsMode};
 }
 
-AtlasGradientFrameState EditableAtlasState::GetFrameState(bool placeholder, const AppliedAtlasGradientState& applied) const
+AtlasFrameState EditableAtlasResources::GetFrameState(bool placeholder, const AtlasApplyState& applied) const
 {
-  AtlasGradientFrameState frameState = GetFrameState(placeholder);
-  frameState.enabled                 = frameState.enabled &&
+  AtlasFrameState frameState = GetFrameState(placeholder);
+  frameState.enabled         = frameState.enabled &&
                        applied.Matches(GetRendererState(placeholder)) &&
                        applied.IsGradientApplied();
   return frameState;

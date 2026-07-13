@@ -25,7 +25,9 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-source-data.h>
 #include <dali-ui-foundation/internal/text/text-control-interface.h>
+#include <dali-ui-foundation/internal/text/text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/text-scroller.h>
 #include <dali-ui-foundation/internal/visuals/text/text-visual.h>
@@ -916,12 +918,12 @@ private: // Implementation
   void UpdateTextGradientOverlayStyle();
 
   /**
-   * @brief Updates hidden TextGradient animation source properties from mTextGradient.
+   * @brief Updates hidden TextGradient animation source properties from the authored TextGradient.
    */
   void SyncGradientAnimProperties();
 
   /**
-   * @brief Updates hidden TextGradientOverlay animation source properties from mTextGradientOverlay.
+   * @brief Updates hidden TextGradientOverlay animation source properties from the authored TextGradientOverlay.
    */
   void SyncGradientOverlayAnimProperties();
 
@@ -949,22 +951,6 @@ private: // Implementation
    * created after full marquee setup.
    */
   void BindGradientOverlayAnimProperties();
-
-  /**
-   * @brief Returns true when index is one of the hidden TextGradient animation source properties.
-   *
-   * @param[in] index The property index to check.
-   * @return True if the index is a TextGradient animation property.
-   */
-  bool IsGradientAnimProperty(Dali::Property::Index index) const;
-
-  /**
-   * @brief Returns true when index is one of the hidden TextGradientOverlay animation source properties.
-   *
-   * @param[in] index The property index to check.
-   * @return True if the index is a TextGradientOverlay animation property.
-   */
-  bool IsGradientOverlayAnimProperty(Dali::Property::Index index) const;
 
   /**
    * @brief Updates TextGradient animation constraint apply rate on the visual and active scroller.
@@ -1304,6 +1290,9 @@ private:
   WeakHandle<Ui::View> mMaskSourceView;
   Dali::String         mTranslatableText; ///< Stored resourceId for localization binding
 
+  Internal::Text::TextGradientPropertyDataPtr mTextGradientPropertyData;
+  Internal::Text::StyledTextSourceDataPtr     mStyledTextSourceData;
+
   Visual::Base          mVisual;
   Text::ControllerPtr   mController;
   Text::TextScrollerPtr mTextScroller;
@@ -1316,18 +1305,9 @@ private:
   Text::LineHeightMode       mLineHeightMode;
   Text::OverflowMode         mOverflowMode;
   Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
-  Gradient::Base             mTextGradient;
-  Text::GradientBoundsMode   mTextGradientBoundsMode;
-  Gradient::Base             mTextGradientOverlay;
-  Text::GradientBoundsMode   mTextGradientOverlayBoundsMode;
-  Text::GradientOverlayMode  mTextGradientOverlayMode;
-  Dali::Property::Index      mGradientAnimOffsetIndex;
-  Dali::Property::Index      mGradientOverlayAnimOffsetIndex;
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;
-  int  mGradientAnimCount;
-  int  mGradientOverlayAnimCount;
   bool mRendererUpdateNeeded : 1;     // Whether the text renderer needs to be updated.
   bool mMeasureInvalidated : 1;       // whether measurement has been invalidated.
   bool mIsAsyncRenderRequested : 1;   // whether an async render has been requested.

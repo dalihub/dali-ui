@@ -38,9 +38,11 @@
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
+#include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
+#include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
@@ -302,6 +304,7 @@ InputFieldImpl::InputFieldImpl()
   mAlignmentOffset(0.f),
   mMeasureInvalidated(false),
   mHasBeenStaged(false),
+  mHasTextGradientPropertyData(false),
   mTextChanged(false),
   mCursorPositionChanged(false),
   mSelectionStarted(false),
@@ -465,7 +468,15 @@ UiColor InputFieldImpl::GetPlaceholderColor()
 
 void InputFieldImpl::SetTextGradient(const Dali::Ui::Gradient::Base& gradient)
 {
-  if(!mAtlasGradientState.SetTextGradient(gradient))
+  auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data && !Text::Internal::Gradient::IsRenderable(gradient))
+  {
+    return;
+  }
+
+  data                         = &Internal::Text::GetOrCreateEditableTextGradientPropertyData(mTextGradientPropertyData);
+  mHasTextGradientPropertyData = true;
+  if(!data->atlasResources.SetTextGradient(gradient))
   {
     SyncGradientAnimProperties();
     return;
@@ -481,12 +492,21 @@ void InputFieldImpl::SetTextGradient(const Dali::Ui::Gradient::Base& gradient)
 
 Gradient::Base InputFieldImpl::GetTextGradient() const
 {
-  return mAtlasGradientState.GetTextGradient();
+  const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  return data ? data->atlasResources.GetTextGradient() : Gradient::Base::None();
 }
 
 void InputFieldImpl::SetPlaceholderTextGradient(const Dali::Ui::Gradient::Base& gradient)
 {
-  if(!mAtlasGradientState.SetPlaceholderGradient(gradient))
+  auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data && !Text::Internal::Gradient::IsRenderable(gradient))
+  {
+    return;
+  }
+
+  data                         = &Internal::Text::GetOrCreateEditableTextGradientPropertyData(mTextGradientPropertyData);
+  mHasTextGradientPropertyData = true;
+  if(!data->atlasResources.SetPlaceholderGradient(gradient))
   {
     SyncPlaceholderGradientAnimProperties();
     return;
@@ -502,12 +522,22 @@ void InputFieldImpl::SetPlaceholderTextGradient(const Dali::Ui::Gradient::Base& 
 
 Gradient::Base InputFieldImpl::GetPlaceholderTextGradient() const
 {
-  return mAtlasGradientState.GetPlaceholderGradient();
+  const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  return data ? data->atlasResources.GetPlaceholderGradient() : Gradient::Base::None();
 }
 
 void InputFieldImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
 {
-  if(mAtlasGradientState.SetBoundsMode(mode))
+  const auto* data        = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  const auto  currentMode = data ? data->atlasResources.GetBoundsMode() : Text::GradientBoundsMode::CONTENT_BOUND;
+  if(currentMode == mode)
+  {
+    return;
+  }
+
+  auto& gradientData           = Internal::Text::GetOrCreateEditableTextGradientPropertyData(mTextGradientPropertyData);
+  mHasTextGradientPropertyData = true;
+  if(gradientData.atlasResources.SetBoundsMode(mode))
   {
     RequestTextRelayout();
   }
@@ -515,12 +545,24 @@ void InputFieldImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
 
 Text::GradientBoundsMode InputFieldImpl::GetTextGradientBoundsMode() const
 {
-  return mAtlasGradientState.GetBoundsMode();
+  const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  return data ? data->atlasResources.GetBoundsMode() : Text::GradientBoundsMode::CONTENT_BOUND;
 }
 
 Dali::Property::Index InputFieldImpl::EnsureGradientAnimOffset()
 {
-  const auto& state = mAtlasGradientState.GetRendererState(false);
+  if(!mHasTextGradientPropertyData)
+  {
+    return Property::INVALID_INDEX;
+  }
+
+  auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data)
+  {
+    return Property::INVALID_INDEX;
+  }
+
+  const auto& state = data->atlasResources.GetRendererState(false);
   if(!state.IsEnabled())
   {
     return Property::INVALID_INDEX;
@@ -532,19 +574,30 @@ Dali::Property::Index InputFieldImpl::EnsureGradientAnimOffset()
     return Property::INVALID_INDEX;
   }
 
-  if(mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  if(data->gradientAnimOffsetIndex == Property::INVALID_INDEX)
   {
-    mGradientAnimOffsetIndex =
+    data->gradientAnimOffsetIndex =
       self.RegisterProperty(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME, state.style.startOffset);
     BindGradientAnimProperties();
   }
 
-  return mGradientAnimOffsetIndex;
+  return data->gradientAnimOffsetIndex;
 }
 
 Dali::Property::Index InputFieldImpl::EnsurePlaceholderGradientAnimOffset()
 {
-  const auto& state = mAtlasGradientState.GetRendererState(true);
+  if(!mHasTextGradientPropertyData)
+  {
+    return Property::INVALID_INDEX;
+  }
+
+  auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data)
+  {
+    return Property::INVALID_INDEX;
+  }
+
+  const auto& state = data->atlasResources.GetRendererState(true);
   if(!state.IsEnabled())
   {
     return Property::INVALID_INDEX;
@@ -556,14 +609,14 @@ Dali::Property::Index InputFieldImpl::EnsurePlaceholderGradientAnimOffset()
     return Property::INVALID_INDEX;
   }
 
-  if(mPlaceholderGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  if(data->placeholderGradientAnimOffsetIndex == Property::INVALID_INDEX)
   {
-    mPlaceholderGradientAnimOffsetIndex =
+    data->placeholderGradientAnimOffsetIndex =
       self.RegisterProperty(PLACEHOLDER_TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME, state.style.startOffset);
     BindGradientAnimProperties();
   }
 
-  return mPlaceholderGradientAnimOffsetIndex;
+  return data->placeholderGradientAnimOffsetIndex;
 }
 
 void InputFieldImpl::SetShowPlaceholderOnFocus(bool enabled)
@@ -1613,9 +1666,19 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
   }
   else
   {
-    const auto gradientState = mAtlasGradientState.GetFrameState(mController->IsShowingPlaceholderText(), mAppliedAtlasGradientState);
+    auto atlasFrameState = Text::Internal::Gradient::AtlasFrameState{};
+    if(mHasTextGradientPropertyData)
+    {
+      const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+      DALI_ASSERT_DEBUG(data && "Editable TextGradient property data should exist after creation");
+      if(data)
+      {
+        atlasFrameState = data->atlasResources.GetFrameState(mController->IsShowingPlaceholderText(), mAtlasApplyState);
+      }
+    }
+
     Ui::Internal::CommonTextUtils::UpdateTextRenderPosition(Self(), mRenderer, mController, mAlignmentOffset,
-                                                            mRenderableActor, mStencil, gradientState, size);
+                                                            mRenderableActor, mStencil, atlasFrameState, size);
   }
 
   if(mCursorPositionChanged)
@@ -1650,33 +1713,36 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
 
 void InputFieldImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
 {
-  if(IsGradientAnimProperty(index))
+  auto* data = mHasTextGradientPropertyData
+                 ? Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData)
+                 : nullptr;
+  if(data && index != Property::INVALID_INDEX && index == data->gradientAnimOffsetIndex)
   {
     if(state == Animation::State::PLAYING)
     {
-      ++mGradientAnimCount;
+      ++data->gradientAnimCount;
     }
     else if(state == Animation::State::STOPPED)
     {
-      if(mGradientAnimCount)
+      if(data->gradientAnimCount)
       {
-        --mGradientAnimCount;
+        --data->gradientAnimCount;
       }
     }
 
     SetGradientAnimApplyRate();
   }
-  else if(IsPlaceholderGradientAnimProperty(index))
+  else if(data && index != Property::INVALID_INDEX && index == data->placeholderGradientAnimOffsetIndex)
   {
     if(state == Animation::State::PLAYING)
     {
-      ++mPlaceholderGradientAnimCount;
+      ++data->placeholderGradientAnimCount;
     }
     else if(state == Animation::State::STOPPED)
     {
-      if(mPlaceholderGradientAnimCount)
+      if(data->placeholderGradientAnimCount)
       {
-        --mPlaceholderGradientAnimCount;
+        --data->placeholderGradientAnimCount;
       }
     }
 
@@ -1688,33 +1754,36 @@ void InputFieldImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Pro
 
 void InputFieldImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
 {
-  if(IsGradientAnimProperty(index))
+  auto* data = mHasTextGradientPropertyData
+                 ? Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData)
+                 : nullptr;
+  if(data && index != Property::INVALID_INDEX && index == data->gradientAnimOffsetIndex)
   {
     if(applied)
     {
-      ++mGradientAnimCount;
+      ++data->gradientAnimCount;
     }
     else
     {
-      if(mGradientAnimCount)
+      if(data->gradientAnimCount)
       {
-        --mGradientAnimCount;
+        --data->gradientAnimCount;
       }
     }
 
     SetGradientAnimApplyRate();
   }
-  else if(IsPlaceholderGradientAnimProperty(index))
+  else if(data && index != Property::INVALID_INDEX && index == data->placeholderGradientAnimOffsetIndex)
   {
     if(applied)
     {
-      ++mPlaceholderGradientAnimCount;
+      ++data->placeholderGradientAnimCount;
     }
     else
     {
-      if(mPlaceholderGradientAnimCount)
+      if(data->placeholderGradientAnimCount)
       {
-        --mPlaceholderGradientAnimCount;
+        --data->placeholderGradientAnimCount;
       }
     }
 
@@ -2366,19 +2435,43 @@ void InputFieldImpl::AddLayer(Actor& layer, Actor& actor)
 
 void InputFieldImpl::RenderText(Text::Controller::UpdateTextType updateTextType)
 {
-  const Vector2 size          = Self().GetProperty<Vector3>(Actor::Property::SIZE).GetVectorXY();
-  const auto    gradientState = mAtlasGradientState.GetFrameState(mController->IsShowingPlaceholderText(), mAppliedAtlasGradientState);
+  const Vector2 size            = Self().GetProperty<Vector3>(Actor::Property::SIZE).GetVectorXY();
+  auto          atlasFrameState = Text::Internal::Gradient::AtlasFrameState{};
+  if(mHasTextGradientPropertyData)
+  {
+    const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+    DALI_ASSERT_DEBUG(data && "Editable TextGradient property data should exist after creation");
+    if(data)
+    {
+      atlasFrameState = data->atlasResources.GetFrameState(mController->IsShowingPlaceholderText(), mAtlasApplyState);
+    }
+  }
+
   Ui::Internal::CommonTextUtils::RenderText(Self(), mRenderer, mController, mDecorator, mAlignmentOffset,
                                             mRenderableActor, mBackgroundActor, mCursorLayer, mStencil,
                                             mClippingDecorationActors, mAnchorActors, updateTextType,
-                                            gradientState, size);
+                                            atlasFrameState, size);
   BindGradientAnimProperties();
 }
 
 bool InputFieldImpl::SyncAtlasGradientState()
 {
-  const auto& state = mAtlasGradientState.GetRendererState(mController->IsShowingPlaceholderText());
-  if(mAppliedAtlasGradientState.Matches(state))
+  if(!mHasTextGradientPropertyData)
+  {
+    BindGradientAnimProperties();
+    return true;
+  }
+
+  const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data)
+  {
+    DALI_ASSERT_DEBUG(data && "Editable TextGradient property data should exist after creation");
+    BindGradientAnimProperties();
+    return true;
+  }
+
+  const auto& state = data->atlasResources.GetRendererState(mController->IsShowingPlaceholderText());
+  if(mAtlasApplyState.Matches(state))
   {
     BindGradientAnimProperties();
     return true;
@@ -2387,43 +2480,43 @@ bool InputFieldImpl::SyncAtlasGradientState()
   const bool enabled = state.IsEnabled();
   if(!enabled)
   {
-    if(mAppliedAtlasGradientState.IsGradientApplied())
+    if(mAtlasApplyState.IsGradientApplied())
     {
       if(mRenderer)
       {
         mRenderer.Reset();
       }
-      mAppliedAtlasGradientState.Reset();
+      mAtlasApplyState.Reset();
       return false;
     }
 
     // Switching between two disabled normal/placeholder resources, or clearing
     // an unsupported fallback, requires no renderer work.
-    mAppliedAtlasGradientState.Set(state);
+    mAtlasApplyState.Set(state);
     BindGradientAnimProperties();
     return true;
   }
 
-  if(mAppliedAtlasGradientState.initialized && !mAppliedAtlasGradientState.enabled && !mAppliedAtlasGradientState.IsSolidFallback())
+  if(mAtlasApplyState.initialized && !mAtlasApplyState.enabled && !mAtlasApplyState.IsSolidFallback())
   {
     if(mRenderer)
     {
       mRenderer.Reset();
     }
-    mAppliedAtlasGradientState.Reset();
+    mAtlasApplyState.Reset();
     return false;
   }
 
   if(mRenderer && mRenderer->SetAtlasGradientState(state))
   {
-    mAppliedAtlasGradientState.Set(state);
+    mAtlasApplyState.Set(state);
     BindGradientAnimProperties();
     return true;
   }
 
   if(mRenderer)
   {
-    mAppliedAtlasGradientState.SetSolidFallback(state);
+    mAtlasApplyState.SetSolidFallback(state);
     BindGradientAnimProperties();
     return true;
   }
@@ -2435,18 +2528,32 @@ void InputFieldImpl::ApplyAtlasGradientState()
 {
   if(mRenderer)
   {
-    const auto& state = mAtlasGradientState.GetRendererState(mController->IsShowingPlaceholderText());
+    if(!mHasTextGradientPropertyData)
+    {
+      BindGradientAnimProperties();
+      return;
+    }
+
+    const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+    if(!data)
+    {
+      DALI_ASSERT_DEBUG(data && "Editable TextGradient property data should exist after creation");
+      BindGradientAnimProperties();
+      return;
+    }
+
+    const auto& state = data->atlasResources.GetRendererState(mController->IsShowingPlaceholderText());
     if(!state.IsEnabled())
     {
-      mAppliedAtlasGradientState.Set(state);
+      mAtlasApplyState.Set(state);
     }
     else if(mRenderer->SetAtlasGradientState(state))
     {
-      mAppliedAtlasGradientState.Set(state);
+      mAtlasApplyState.Set(state);
     }
     else
     {
-      mAppliedAtlasGradientState.SetSolidFallback(state);
+      mAtlasApplyState.SetSolidFallback(state);
     }
     BindGradientAnimProperties();
   }
@@ -2454,12 +2561,18 @@ void InputFieldImpl::ApplyAtlasGradientState()
 
 void InputFieldImpl::SyncGradientAnimProperties()
 {
-  if(mGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  if(!mHasTextGradientPropertyData)
   {
     return;
   }
 
-  const auto& state = mAtlasGradientState.GetRendererState(false);
+  auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data || data->gradientAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  const auto& state = data->atlasResources.GetRendererState(false);
   if(!state.IsEnabled())
   {
     return;
@@ -2468,18 +2581,24 @@ void InputFieldImpl::SyncGradientAnimProperties()
   Actor self = Self();
   if(self)
   {
-    self.SetProperty(mGradientAnimOffsetIndex, state.style.startOffset);
+    self.SetProperty(data->gradientAnimOffsetIndex, state.style.startOffset);
   }
 }
 
 void InputFieldImpl::SyncPlaceholderGradientAnimProperties()
 {
-  if(mPlaceholderGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  if(!mHasTextGradientPropertyData)
   {
     return;
   }
 
-  const auto& state = mAtlasGradientState.GetRendererState(true);
+  auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  if(!data || data->placeholderGradientAnimOffsetIndex == Property::INVALID_INDEX)
+  {
+    return;
+  }
+
+  const auto& state = data->atlasResources.GetRendererState(true);
   if(!state.IsEnabled())
   {
     return;
@@ -2488,7 +2607,7 @@ void InputFieldImpl::SyncPlaceholderGradientAnimProperties()
   Actor self = Self();
   if(self)
   {
-    self.SetProperty(mPlaceholderGradientAnimOffsetIndex, state.style.startOffset);
+    self.SetProperty(data->placeholderGradientAnimOffsetIndex, state.style.startOffset);
   }
 }
 
@@ -2499,10 +2618,18 @@ void InputFieldImpl::BindGradientAnimProperties()
     return;
   }
 
+  if(!mHasTextGradientPropertyData)
+  {
+    return;
+  }
+
   Property::Index sourceIndex = Property::INVALID_INDEX;
   if(IsActiveGradientAnimSupported())
   {
-    sourceIndex = mController->IsShowingPlaceholderText() ? mPlaceholderGradientAnimOffsetIndex : mGradientAnimOffsetIndex;
+    if(const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData))
+    {
+      sourceIndex = mController->IsShowingPlaceholderText() ? data->placeholderGradientAnimOffsetIndex : data->gradientAnimOffsetIndex;
+    }
   }
 
   Actor sourceActor;
@@ -2517,32 +2644,31 @@ void InputFieldImpl::BindGradientAnimProperties()
 
 bool InputFieldImpl::IsActiveGradientAnimSupported() const
 {
-  return mAppliedAtlasGradientState.IsGradientApplied() &&
-         mAtlasGradientState.GetRendererState(mController->IsShowingPlaceholderText()).IsEnabled();
-}
+  if(!mHasTextGradientPropertyData || !mAtlasApplyState.IsGradientApplied())
+  {
+    return false;
+  }
 
-bool InputFieldImpl::IsGradientAnimProperty(Dali::Property::Index index) const
-{
-  return index != Property::INVALID_INDEX &&
-         index == mGradientAnimOffsetIndex;
-}
-
-bool InputFieldImpl::IsPlaceholderGradientAnimProperty(Dali::Property::Index index) const
-{
-  return index != Property::INVALID_INDEX &&
-         index == mPlaceholderGradientAnimOffsetIndex;
+  const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
+  DALI_ASSERT_DEBUG(data && "Editable TextGradient property data should exist after creation");
+  return data &&
+         data->atlasResources.GetRendererState(mController->IsShowingPlaceholderText()).IsEnabled();
 }
 
 void InputFieldImpl::SetGradientAnimApplyRate(bool notifyToConstraint)
 {
-  if(!mRenderer)
+  if(!mRenderer || !mHasTextGradientPropertyData)
   {
     return;
   }
 
-  const bool            showingPlaceholder = mController->IsShowingPlaceholderText();
-  const Property::Index sourceIndex        = showingPlaceholder ? mPlaceholderGradientAnimOffsetIndex : mGradientAnimOffsetIndex;
-  const bool            applyAlways        = IsActiveGradientAnimSupported() && sourceIndex != Property::INVALID_INDEX;
+  const bool  showingPlaceholder = mController->IsShowingPlaceholderText();
+  const auto* data               = mHasTextGradientPropertyData
+                                     ? Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData)
+                                     : nullptr;
+  DALI_ASSERT_DEBUG(!mHasTextGradientPropertyData || data);
+  const Property::Index sourceIndex = data ? (showingPlaceholder ? data->placeholderGradientAnimOffsetIndex : data->gradientAnimOffsetIndex) : Property::INVALID_INDEX;
+  const bool            applyAlways = IsActiveGradientAnimSupported() && sourceIndex != Property::INVALID_INDEX;
   mRenderer->SetAtlasGradientAnimApplyAlways(applyAlways, notifyToConstraint);
 }
 

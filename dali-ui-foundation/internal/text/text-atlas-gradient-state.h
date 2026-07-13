@@ -20,7 +20,10 @@
 
 namespace Dali::Ui::Text::Internal::Gradient
 {
-enum class AtlasGradientApplicationStatus : uint8_t
+/**
+ * @brief Enumerates the result of applying an atlas resource to a renderer.
+ */
+enum class AtlasApplyStatus : uint8_t
 {
   UNINITIALIZED,
   APPLIED,
@@ -28,9 +31,11 @@ enum class AtlasGradientApplicationStatus : uint8_t
 };
 
 /**
- * Renderer-owned value snapshot for one prepared gradient resource. Style is
- * copied only when this resource version changes; Texture and Sampler handles
- * retain their underlying resources independently of the control lifetime.
+ * @brief Stores the renderer-facing values for one prepared atlas resource.
+ *
+ * The style is copied only when the resource version changes. Texture and
+ * Sampler handles retain their underlying resources independently of the
+ * control lifetime.
  */
 struct AtlasRendererState
 {
@@ -41,25 +46,34 @@ struct AtlasRendererState
   uint64_t styleRevision{0u};
   uint64_t lookupRevision{0u};
 
+  /**
+   * @brief Returns whether this state contains a renderable resource.
+   *
+   * @return True if the style and lookup resources are valid.
+   */
   bool IsEnabled() const;
 };
 
-/** Small frame-only state used while scrolling or resizing. */
-struct AtlasGradientFrameState
+/**
+ * @brief Stores per-frame atlas data used while scrolling or resizing.
+ */
+struct AtlasFrameState
 {
   bool                     enabled{false};
   Text::GradientBoundsMode boundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
 };
 
-/** Tracks which resource version has been applied to one renderer instance. */
-struct AppliedAtlasGradientState
+/**
+ * @brief Tracks which atlas resource version is applied to one renderer instance.
+ */
+struct AtlasApplyState
 {
-  AtlasGradientApplicationStatus status{AtlasGradientApplicationStatus::UNINITIALIZED};
-  bool                           initialized{false};
-  bool                           enabled{false};
-  uint64_t                       resourceId{0u};
-  uint64_t                       styleRevision{0u};
-  uint64_t                       lookupRevision{0u};
+  AtlasApplyStatus status{AtlasApplyStatus::UNINITIALIZED};
+  bool             initialized{false};
+  bool             enabled{false};
+  uint64_t         resourceId{0u};
+  uint64_t         styleRevision{0u};
+  uint64_t         lookupRevision{0u};
 
   bool Matches(const AtlasRendererState& state) const;
   void Set(const AtlasRendererState& state);
@@ -70,19 +84,20 @@ struct AppliedAtlasGradientState
 };
 
 /**
- * Control-owned prepared state for one authored gradient. The LUT cache key is
- * intentionally the stop list only; geometry, units, spread, bounds and scroll
- * never recreate it.
+ * @brief Stores the prepared atlas resource for one authored gradient.
+ *
+ * The LUT cache key is intentionally the stop list only. Geometry, units,
+ * spread, bounds, and scrolling do not recreate the lookup texture.
  */
-class PreparedAtlasState
+class AtlasResource
 {
 public:
-  PreparedAtlasState();
+  AtlasResource();
 
-  PreparedAtlasState(const PreparedAtlasState&)            = delete;
-  PreparedAtlasState(PreparedAtlasState&&)                 = delete;
-  PreparedAtlasState& operator=(const PreparedAtlasState&) = delete;
-  PreparedAtlasState& operator=(PreparedAtlasState&&)      = delete;
+  AtlasResource(const AtlasResource&)            = delete;
+  AtlasResource(AtlasResource&&)                 = delete;
+  AtlasResource& operator=(const AtlasResource&) = delete;
+  AtlasResource& operator=(AtlasResource&&)      = delete;
 
   bool Set(const Dali::Ui::Gradient::Base& gradient);
 
@@ -99,8 +114,11 @@ private:
   uint64_t                 mLookupGenerationCount{0u};
 };
 
-/** Control-owned normal/placeholder pair with one shared bounds policy. */
-class EditableAtlasState
+/**
+ * @brief Stores prepared normal and placeholder atlas resources with one shared
+ * bounds policy.
+ */
+class EditableAtlasResources
 {
 public:
   bool SetTextGradient(const Dali::Ui::Gradient::Base& gradient);
@@ -111,12 +129,12 @@ public:
   const Dali::Ui::Gradient::Base& GetPlaceholderGradient() const;
   Text::GradientBoundsMode        GetBoundsMode() const;
   const AtlasRendererState&       GetRendererState(bool placeholder) const;
-  AtlasGradientFrameState         GetFrameState(bool placeholder) const;
-  AtlasGradientFrameState         GetFrameState(bool placeholder, const AppliedAtlasGradientState& applied) const;
+  AtlasFrameState                 GetFrameState(bool placeholder) const;
+  AtlasFrameState                 GetFrameState(bool placeholder, const AtlasApplyState& applied) const;
 
 private:
-  PreparedAtlasState       mText;
-  PreparedAtlasState       mPlaceholder;
+  AtlasResource            mText;
+  AtlasResource            mPlaceholder;
   Text::GradientBoundsMode mBoundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
 };
 
