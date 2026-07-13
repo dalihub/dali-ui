@@ -692,7 +692,11 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
 
   ShadowStack stack{shadow2, shadow3};
   ShadowStack copiedStack(stack);
+  DALI_TEST_EQUALS(stack.GetShadowCount(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(stack.GetShadowAt(0u).GetBlurRadius(), shadow2.GetBlurRadius(), TEST_LOCATION);
+  DALI_TEST_EQUALS(stack.GetShadowAt(1u).GetBlurRadius(), shadow3.GetBlurRadius(), TEST_LOCATION);
   stack.Clear();
+  DALI_TEST_EQUALS(stack.GetShadowCount(), 0u, TEST_LOCATION);
 
   view.SetShadow(copiedStack);
   DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 1u, TEST_LOCATION);

@@ -32,6 +32,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/layout-transition-dispatcher.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <algorithm>
@@ -590,7 +591,7 @@ public:
         continue;
       }
       ViewImpl& arrangedImpl = GetImpl(viewHandle);
-      if(!arrangedImpl.HasLayoutFinishedSignalConnections())
+      if(!Internal::ViewDataImpl::Get(arrangedImpl).HasLayoutFinishedSignalConnections())
       {
         continue;
       }
@@ -649,11 +650,12 @@ public:
       {
         continue;
       }
-      if(!viewImpl.HasLayoutFinishedSignalConnections())
+      Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
+      if(!viewDataImpl.HasLayoutFinishedSignalConnections())
       {
         continue; // unsubscribed since snapshot
       }
-      viewImpl.EmitLayoutFinishedSignal(event.bounds);
+      viewDataImpl.EmitLayoutFinishedSignal(event.bounds);
     }
   }
 

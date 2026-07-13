@@ -30,8 +30,6 @@ namespace Dali
 namespace Ui
 {
 
-class ViewImpl;
-
 /**
  * @brief Describes an ordered stack of View shadows.
  */
@@ -77,12 +75,24 @@ public:
    */
   void Clear();
 
+  /**
+   * @brief Gets the number of shadows in the stack.
+   *
+   * @return The number of shadows
+   */
+  uint32_t GetShadowCount() const;
+
+  /**
+   * @brief Gets a shadow from the stack.
+   *
+   * The returned reference remains valid until the ShadowStack is modified or destroyed.
+   *
+   * @param[in] index The shadow index
+   * @return The shadow at @a index
+   */
+  const Shadow& GetShadowAt(uint32_t index) const;
+
 private:
-  friend class ViewImpl;
-
-  uint32_t      GetInternalShadowCount() const;
-  const Shadow& GetInternalShadow(uint32_t index) const;
-
   class Impl;
   Impl* mImpl{nullptr};
 };

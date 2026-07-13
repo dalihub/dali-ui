@@ -41,34 +41,58 @@
 #include <dali/integration-api/rendering/decorated-visual-renderer.h>
 #include <dali/integration-api/rendering/visual-renderer.h>
 #include <dali/integration-api/string-utils.h>
+#include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/animation/constraints.h>
 #include <dali/public-api/math/math-utils.h>
 #include <dali/public-api/object/object-registry.h>
+#include <dali/public-api/size-negotiation/relayout-container.h>
 #include <cmath>
 #include <cstring>
 #include <limits>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/shadow.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
+#include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
+#include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
+#include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
+#include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
+#include <dali-ui-foundation/internal/ui-color-manager-impl.h>
+#include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
+#include <dali-ui-foundation/internal/views/state-effect-target-trait.h>
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
+#include <dali-ui-foundation/internal/views/view/view-gradient-color-binding.h>
 #include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
+#include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
+#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/layouts/layout-controller.h>
+#include <dali-ui-foundation/public-api/layouts/layout-manager.h>
+#include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include <algorithm>
 
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdString;
+
+namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali
 {
@@ -83,7 +107,165 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VIEW_DATA");
 #endif
 
-constexpr unsigned int OFF_SCREEN_RENDERING_TYPE_COUNT = 3u;
+constexpr unsigned int OFF_SCREEN_RENDERING_TYPE_COUNT  = 3u;
+constexpr char         BACKGROUND_COLOR_BINDING_ID[]    = "BackgroundColor";
+constexpr char         BACKGROUND_GRADIENT_BINDING_ID[] = "BackgroundGradient";
+constexpr char         COLOR_BINDING_ID[]               = "Color";
+constexpr float        MEASURE_CACHE_DIRTY              = -1.0f;
+
+class ScopedSkipChildrenUpdate
+{
+public:
+  explicit ScopedSkipChildrenUpdate(bool& flag)
+  : mFlag(flag),
+    mPrevious(flag)
+  {
+    mFlag = true;
+  }
+
+  ~ScopedSkipChildrenUpdate()
+  {
+    mFlag = mPrevious;
+  }
+
+  ScopedSkipChildrenUpdate(const ScopedSkipChildrenUpdate&)            = delete;
+  ScopedSkipChildrenUpdate& operator=(const ScopedSkipChildrenUpdate&) = delete;
+
+private:
+  bool& mFlag;
+  bool  mPrevious;
+};
+
+LayoutCallbacksObject* GetLayoutCallbacksObject(ViewDataImpl& viewDataImpl)
+{
+  IntrusivePtr<TraitObject> object = viewDataImpl.GetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS);
+  return dynamic_cast<LayoutCallbacksObject*>(object.Get());
+}
+
+LayoutCallbacksObject* EnsureLayoutCallbacksObject(ViewDataImpl& viewDataImpl)
+{
+  auto* object = GetLayoutCallbacksObject(viewDataImpl);
+  if(!object)
+  {
+    IntrusivePtr<TraitObject> newObject(new LayoutCallbacksObject());
+    object = static_cast<LayoutCallbacksObject*>(newObject.Get());
+    viewDataImpl.SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, newObject);
+  }
+  return object;
+}
+
+TraitId ToTraitId(LayoutParamsType type)
+{
+  switch(type)
+  {
+    case LayoutParamsType::ABSOLUTE:
+      return Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS;
+    case LayoutParamsType::STACK:
+      return Integration::ReservedTraitId::STACK_LAYOUT_PARAMS;
+    case LayoutParamsType::GRID:
+      return Integration::ReservedTraitId::GRID_LAYOUT_PARAMS;
+    case LayoutParamsType::FLEX:
+      return Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS;
+  }
+  DALI_ASSERT_ALWAYS(false && "Unknown LayoutParamsType");
+  return Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS;
+}
+
+IntrusivePtr<TraitObject> AsTraitObject(BaseHandle traitHandle)
+{
+  if(!traitHandle)
+  {
+    return nullptr;
+  }
+
+  return IntrusivePtr<TraitObject>(static_cast<TraitObject*>(traitHandle.GetObjectPtr()));
+}
+
+template<typename HandleType>
+HandleType GetKnownTraitHandle(const ViewDataImpl& viewDataImpl, TraitId id)
+{
+  IntrusivePtr<TraitObject> object = viewDataImpl.GetTrait(id);
+  return object ? HandleType::DownCast(BaseHandle(static_cast<BaseObject*>(object.Get()))) : HandleType();
+}
+
+bool IsSelfOrDescendant(View owner, View target)
+{
+  if(!owner || !target)
+  {
+    return false;
+  }
+
+  const int32_t ownerId  = owner.GetProperty<int32_t>(Actor::Property::ID);
+  const int32_t targetId = target.GetProperty<int32_t>(Actor::Property::ID);
+  return ownerId == targetId || owner.FindChildById(targetId);
+}
+
+StateEffectTargetTrait GetOrCreateStateEffectTargetTrait(ViewDataImpl& viewDataImpl)
+{
+  StateEffectTargetTrait trait = GetKnownTraitHandle<StateEffectTargetTrait>(viewDataImpl, Integration::ReservedTraitId::STATE_EFFECT_TARGET);
+  if(!trait)
+  {
+    trait = StateEffectTargetTrait::New();
+    viewDataImpl.SetTrait(Integration::ReservedTraitId::STATE_EFFECT_TARGET, AsTraitObject(trait));
+  }
+  return trait;
+}
+
+void ResetStateEffect(ViewDataImpl& viewDataImpl, StateEffect effect)
+{
+  viewDataImpl.RemoveTrait(Integration::ReservedTraitId::STATE_EFFECT);
+
+  if(effect)
+  {
+    viewDataImpl.SetTrait(Integration::ReservedTraitId::STATE_EFFECT, AsTraitObject(effect));
+  }
+
+  viewDataImpl.RefreshDefaultFocusIndicatorSuppression();
+}
+
+View FindStateEffectTarget(View owner, int32_t targetId)
+{
+  if(!owner || targetId == StateEffectTargetTraitImpl::INVALID_TARGET_ID)
+  {
+    return View();
+  }
+
+  if(owner.GetProperty<int32_t>(Actor::Property::ID) == targetId)
+  {
+    return owner;
+  }
+
+  return View::DownCast(owner.FindChildById(targetId));
+}
+
+void ArrangeStandaloneChild(ViewImpl& childImpl, float parentFullWidth, float parentFullHeight)
+{
+  float        childScale = childImpl.GetEffectiveScale();
+  Extents      margin     = childImpl.GetMargin();
+  float        marginW    = static_cast<float>(margin.start + margin.end) * childScale;
+  float        marginH    = static_cast<float>(margin.top + margin.bottom) * childScale;
+  MeasuredSize measured   = childImpl.GetMeasuredSize();
+  float        childW     = measured.width;
+  float        childH     = measured.height;
+
+  if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+  {
+    childW = std::max(0.0f, parentFullWidth - marginW);
+  }
+  if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+  {
+    childH = std::max(0.0f, parentFullHeight - marginH);
+  }
+  if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+  {
+    childImpl.Measure(childW, childH);
+  }
+
+  LayoutRect bounds(childImpl.GetRequestedPositionX() * childScale + static_cast<float>(margin.start) * childScale,
+                    childImpl.GetRequestedPositionY() * childScale + static_cast<float>(margin.top) * childScale,
+                    childW, childH);
+  childImpl.Arrange(bounds);
+}
 
 /**
  * Performs actions as requested using the action name.
@@ -492,9 +674,2540 @@ ViewDataImpl::~ViewDataImpl()
   }
 }
 
+void ViewDataImpl::SetBehaviourFlags(ViewImpl::ViewBehaviour behaviourFlags)
+{
+  mFlags = behaviourFlags;
+}
+
+bool ViewDataImpl::AreVisualsEnabled() const
+{
+  return !(mFlags & Ui::ViewImpl::ViewBehaviour::DISABLE_VISUALS);
+}
+
+void ViewDataImpl::Destroy()
+{
+  auto colorManager = UiColorManager::Get();
+  if(colorManager)
+  {
+    GetImpl(colorManager).ClearBindings(mViewImpl.GetOwner());
+  }
+
+  auto localizationManager = UiLocalizationManager::Get();
+  if(localizationManager)
+  {
+    GetImpl(localizationManager).ClearBindings(mViewImpl.GetOwner());
+  }
+
+  NotifyTraitsViewDestroying();
+  LayoutController::UnregisterFromAll(&mViewImpl);
+  ClearRenderEffect();
+}
+
 void ViewDataImpl::InitializeVisualData()
 {
   mVisualData = std::make_unique<ViewDataImpl::VisualData>(*this);
+}
+
+MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightConstraint)
+{
+  float s    = mViewImpl.GetEffectiveScale();
+  float natW = (widthConstraint >= 0.f && s > 0.f) ? widthConstraint / s : widthConstraint;
+  float natH = (heightConstraint >= 0.f && s > 0.f) ? heightConstraint / s : heightConstraint;
+
+  float pw = static_cast<float>(mPadding.start + mPadding.end);
+  float ph = static_cast<float>(mPadding.top + mPadding.bottom);
+
+  float effectiveWidth  = (mRequestedWidth >= 0) ? mRequestedWidth : natW;
+  float effectiveHeight = (mRequestedHeight >= 0) ? mRequestedHeight : natH;
+
+  float contentWidth  = std::max(0.0f, effectiveWidth - pw);
+  float contentHeight = std::max(0.0f, effectiveHeight - ph);
+
+  if(!mChildren.Empty())
+  {
+    float                 maxRight  = 0.0f;
+    float                 maxBottom = 0.0f;
+    std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+    for(auto& childView : childSnapshot)
+    {
+      ViewImpl& childImpl = GetImpl(childView);
+      if(IntegrationView::IsLayoutModeStandalone(childImpl))
+      {
+        continue;
+      }
+
+      float        childScale            = childImpl.GetEffectiveScale();
+      Extents      margin                = childImpl.GetMargin();
+      float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
+      float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
+      float        childWidthConstraint  = std::max(0.0f, contentWidth * s - marginW);
+      float        childHeightConstraint = std::max(0.0f, contentHeight * s - marginH);
+      MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
+
+      float childNatW  = (s > 0.0f) ? childSize.width / s : childSize.width;
+      float childNatH  = (s > 0.0f) ? childSize.height / s : childSize.height;
+      float childX     = childImpl.GetRequestedPositionX();
+      float childY     = childImpl.GetRequestedPositionY();
+      float natMarginW = (s > 0.0f) ? marginW / s : marginW;
+      float natMarginH = (s > 0.0f) ? marginH / s : marginH;
+      maxRight         = std::max(maxRight, childX + natMarginW + childNatW);
+      maxBottom        = std::max(maxBottom, childY + natMarginH + childNatH);
+    }
+
+    MeasuredSize size;
+    if(mRequestedWidth >= 0)
+    {
+      size.width = mRequestedWidth;
+    }
+    else if(mRequestedWidth == MATCH_PARENT)
+    {
+      size.width = GetMinimumWidth();
+    }
+    else
+    {
+      size.width = maxRight + pw;
+      if(natW >= 0.0f)
+      {
+        size.width = std::min(size.width, natW);
+      }
+    }
+    if(mRequestedHeight >= 0)
+    {
+      size.height = mRequestedHeight;
+    }
+    else if(mRequestedHeight == MATCH_PARENT)
+    {
+      size.height = GetMinimumHeight();
+    }
+    else
+    {
+      size.height = maxBottom + ph;
+      if(natH >= 0.0f)
+      {
+        size.height = std::min(size.height, natH);
+      }
+    }
+    return {size.width * s, size.height * s};
+  }
+
+  MeasuredSize size;
+  if(mRequestedWidth >= 0)
+  {
+    size.width = mRequestedWidth;
+  }
+  else if(mRequestedWidth == MATCH_PARENT)
+  {
+    size.width = GetMinimumWidth();
+  }
+  else
+  {
+    Vector3 naturalSize     = mViewImpl.Self().GetNaturalSize();
+    float   contentNaturalW = std::max(0.0f, naturalSize.width - pw);
+    size.width              = contentNaturalW + pw;
+    if(natW >= 0.0f)
+    {
+      size.width = std::min(size.width, natW);
+    }
+  }
+  if(mRequestedHeight >= 0)
+  {
+    size.height = mRequestedHeight;
+  }
+  else if(mRequestedHeight == MATCH_PARENT)
+  {
+    size.height = GetMinimumHeight();
+  }
+  else
+  {
+    Vector3 naturalSize     = mViewImpl.Self().GetNaturalSize();
+    float   contentNaturalH = std::max(0.0f, naturalSize.height - ph);
+    size.height             = contentNaturalH + ph;
+    if(natH >= 0.0f)
+    {
+      size.height = std::min(size.height, natH);
+    }
+  }
+  return {size.width * s, size.height * s};
+}
+
+MeasuredSize ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
+{
+  Actor self = mViewImpl.Self();
+  self.SetPositionX(bounds.x);
+  self.SetPositionY(bounds.y);
+  self.SetWidth(bounds.width);
+  self.SetHeight(bounds.height);
+
+  if(!mChildren.Empty())
+  {
+    float s            = mViewImpl.GetEffectiveScale();
+    float visPadLeft   = static_cast<float>(mPadding.start) * s;
+    float visPadRight  = static_cast<float>(mPadding.end) * s;
+    float visPadTop    = static_cast<float>(mPadding.top) * s;
+    float visPadBottom = static_cast<float>(mPadding.bottom) * s;
+
+    std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+    for(auto& childView : childSnapshot)
+    {
+      ViewImpl& childImpl = GetImpl(childView);
+      if(IntegrationView::IsLayoutModeStandalone(childImpl))
+      {
+        continue;
+      }
+
+      float        childScale      = childImpl.GetEffectiveScale();
+      Extents      margin          = childImpl.GetMargin();
+      float        visMarginStart  = static_cast<float>(margin.start) * childScale;
+      float        visMarginEnd    = static_cast<float>(margin.end) * childScale;
+      float        visMarginTop    = static_cast<float>(margin.top) * childScale;
+      float        visMarginBottom = static_cast<float>(margin.bottom) * childScale;
+      float        visMarginW      = visMarginStart + visMarginEnd;
+      float        visMarginH      = visMarginTop + visMarginBottom;
+      MeasuredSize childMeasured   = childImpl.GetMeasuredSize();
+      float        childW          = childMeasured.width;
+      float        childH          = childMeasured.height;
+
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT)
+      {
+        childW = std::max(0.0f, bounds.width - visPadLeft - visPadRight - visMarginW);
+      }
+      if(childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childH = std::max(0.0f, bounds.height - visPadTop - visPadBottom - visMarginH);
+      }
+      float childX = visPadLeft + visMarginStart + childImpl.GetRequestedPositionX() * s;
+      float childY = visPadTop + visMarginTop + childImpl.GetRequestedPositionY() * s;
+
+      if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
+      {
+        childImpl.Measure(childW, childH);
+      }
+
+      childImpl.Arrange(LayoutRect(childX, childY, childW, childH));
+    }
+  }
+
+  return {bounds.width, bounds.height};
+}
+
+bool ViewDataImpl::HandleKeyEventDefault(const Dali::KeyEvent& event)
+{
+  if(auto* traitObject = GetCoreInteractionObject())
+  {
+    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+    {
+      return interactiveTraitImpl->OnKeyEvent(View::DownCast(mViewImpl.Self()), event);
+    }
+  }
+  return false;
+}
+
+void ViewDataImpl::HandleFocusChangedDefault(bool focused)
+{
+  InputEvent cause;
+  auto       focusManager = Ui::FocusManager::Get();
+  if(focusManager)
+  {
+    cause = GetImpl(focusManager).FocusChangedContext().inputEvent;
+  }
+
+  const bool focusIndicated = focusManager && GetImpl(focusManager).FocusChangedContext().focusIndicated;
+  SetState(ViewState::FOCUSED + (focusIndicated ? ViewState::FOCUS_INDICATED : ViewState::NORMAL), focused, cause);
+
+  if(auto* traitObject = GetCoreInteractionObject())
+  {
+    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+    {
+      interactiveTraitImpl->OnFocusedChanged(View::DownCast(mViewImpl.Self()), focused);
+    }
+  }
+
+  EmitFocusChangedSignal(focused);
+}
+
+void ViewDataImpl::RelayoutDefault(const Vector2& size, RelayoutContainer& container)
+{
+  if(IntegrationView::HasLayoutCapability(mViewImpl) || GetParentLayout() || GetParentView())
+  {
+    return;
+  }
+
+  if((mPadding.start != 0) || (mPadding.end != 0) || (mPadding.top != 0) ||
+     (mPadding.bottom != 0) || (mMargin.start != 0) || (mMargin.end != 0) ||
+     (mMargin.top != 0) || (mMargin.bottom != 0))
+  {
+    for(unsigned int i = 0, numChildren = mViewImpl.Self().GetChildCount(); i < numChildren; ++i)
+    {
+      Actor   child = mViewImpl.Self().GetChildAt(i);
+      Vector2 newChildSize(size);
+
+      Extents padding = mPadding;
+
+      Dali::LayoutDirection::Type layoutDirection = GetEffectiveLayoutDirection();
+
+      if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
+      {
+        std::swap(padding.start, padding.end);
+      }
+
+      newChildSize.width  = size.width - (padding.start + padding.end);
+      newChildSize.height = size.height - (padding.top + padding.bottom);
+
+      Vector2 childOffset(0.f, 0.f);
+      childOffset.x += (mMargin.start + padding.start);
+      childOffset.y += (mMargin.top + padding.top);
+
+      child.SetProperty(Actor::Property::POSITION, Vector2(childOffset.x, childOffset.y));
+
+      container.Add(child, newChildSize);
+    }
+  }
+
+  if(Dali::Integration::Accessibility::IsUp()) // LCOV_EXCL_LINE
+  {
+    auto accessible = GetAccessibleObject();
+    if(DALI_LIKELY(accessible))
+    {
+      auto highlightFrame = accessible->GetHighlightActor();
+      if(accessible->GetCurrentlyHighlightedActor() == mViewImpl.Self() &&
+         highlightFrame.GetProperty<Vector3>(Dali::Actor::Property::SIZE).GetVectorXY() != size)
+      {
+        highlightFrame.SetProperty(Actor::Property::SIZE, size);
+        container.Add(highlightFrame, size);
+      }
+    }
+  }
+
+  ApplyFittingMode(size);
+}
+
+const ViewState& ViewDataImpl::GetState() const
+{
+  return mState;
+}
+
+bool ViewDataImpl::IsEffectivelyEnabled() const
+{
+  return ViewStateManager::Get().IsEffectivelyEnabled(mViewImpl);
+}
+
+bool ViewDataImpl::IsEffectivelyFocused() const
+{
+  return ViewStateManager::Get().IsEffectivelyFocused(mViewImpl);
+}
+
+ViewImpl::LayoutFinishedSignalType& ViewDataImpl::LayoutFinishedSignal()
+{
+  return mLayoutFinishedSignal;
+}
+
+ViewImpl::StateChangedSignalType& ViewDataImpl::StateChangedSignal()
+{
+  return mStateChangedSignal;
+}
+
+Ui::View::ResourceReadySignalType& ViewDataImpl::ResourceReadySignal()
+{
+  return mResourceReadySignal;
+}
+
+Ui::View::OffScreenRenderingFinishedSignalType& ViewDataImpl::OffScreenRenderingFinishedSignal()
+{
+  return mOffScreenRenderingFinishedSignal;
+}
+
+bool ViewDataImpl::HasLayoutFinishedSignalConnections() const
+{
+  return !mLayoutFinishedSignal.Empty();
+}
+
+void ViewDataImpl::EmitLayoutFinishedSignal(const LayoutRect& bounds)
+{
+  Dali::Ui::View handle(mViewImpl.GetOwner());
+  if(handle && !mLayoutFinishedSignal.Empty())
+  {
+    mLayoutFinishedSignal.Emit(handle, bounds);
+  }
+}
+
+PendingLayoutTransitionChanges ViewDataImpl::TakePendingLayoutTransitionChanges()
+{
+  PendingLayoutTransitionChanges changes;
+  std::swap(changes.enterChildren, mPendingEnterChildren);
+  std::swap(changes.reorderedChildren, mPendingReorderedChildren);
+  changes.hadChildRemoval                 = mPendingChildRemovalForLayoutTransition;
+  mPendingChildRemovalForLayoutTransition = false;
+  return changes;
+}
+
+Ui::InteractiveTrait ViewDataImpl::EnsureInteractiveTrait()
+{
+  auto* traitObject = GetCoreInteractionObject();
+
+  if(!traitObject)
+  {
+    IntrusivePtr<CoreInteractionObject> newTraitObject = new CoreInteractionObject();
+    traitObject                                        = newTraitObject.Get();
+    SetTrait(Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
+    AttachInteractiveStateEffect();
+  }
+
+  return Ui::InteractiveTrait::New(traitObject);
+}
+
+void ViewDataImpl::SetStateEffect(StateEffect effect)
+{
+  if(!effect)
+  {
+    effect = StateEffect::None();
+  }
+  ResetStateEffect(*this, effect);
+
+  if(effect && !effect.IsNone() && IsInteractive())
+  {
+    GetImpl(effect).OnInteractiveAttached(View::DownCast(mViewImpl.Self()));
+  }
+  RefreshDefaultFocusIndicatorSuppression();
+}
+
+void ViewDataImpl::AttachInteractiveStateEffect()
+{
+  StateEffect existingEffect = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+  if(existingEffect)
+  {
+    GetImpl(existingEffect).OnInteractiveAttached(View::DownCast(mViewImpl.Self()));
+    RefreshDefaultFocusIndicatorSuppression();
+    return;
+  }
+
+  StateEffect defaultEffect = UiConfig::GetCurrent().GetDefaultStateEffectForInteractive();
+  if(defaultEffect && !defaultEffect.IsNone())
+  {
+    ResetStateEffect(*this, defaultEffect);
+    GetImpl(defaultEffect).OnInteractiveAttached(View::DownCast(mViewImpl.Self()));
+    RefreshDefaultFocusIndicatorSuppression();
+  }
+}
+
+bool ViewDataImpl::IsDefaultFocusIndicatorSuppressedByStateEffect() const
+{
+  return mDefaultFocusIndicatorSuppressedByStateEffect;
+}
+
+void ViewDataImpl::RefreshDefaultFocusIndicatorSuppression()
+{
+  bool        suppress = false;
+  StateEffect effect   = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+  if(effect && !effect.IsNone())
+  {
+    suppress = GetImpl(effect).ShouldSuppressDefaultFocusIndicator(View::DownCast(mViewImpl.Self()));
+  }
+
+  if(mDefaultFocusIndicatorSuppressedByStateEffect == suppress)
+  {
+    return;
+  }
+
+  mDefaultFocusIndicatorSuppressedByStateEffect = suppress;
+
+  Ui::FocusManager focusManager = Ui::FocusManager::Get();
+  if(focusManager)
+  {
+    Dali::Ui::GetImpl(focusManager).RefreshFocusIndicator(Ui::View::DownCast(mViewImpl.Self()));
+  }
+}
+
+void ViewDataImpl::InvalidateDefaultFocusIndicatorSuppression(const Integration::StateEffectImpl& effect)
+{
+  StateEffect current = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+  if(!current || current.IsNone() || (&GetImpl(current) != &effect))
+  {
+    return;
+  }
+
+  RefreshDefaultFocusIndicatorSuppression();
+}
+
+void ViewDataImpl::SetStateEffectTarget(View target)
+{
+  View owner = View::DownCast(mViewImpl.Self());
+  if(target)
+  {
+    DALI_ASSERT_ALWAYS(IsSelfOrDescendant(owner, target) && "State effect target must be this View or a descendant");
+  }
+
+  StateEffectTargetTrait trait = GetOrCreateStateEffectTargetTrait(*this);
+  trait.GetImpl().SetTargetId(target ? target.GetProperty<int32_t>(Actor::Property::ID) : StateEffectTargetTraitImpl::INVALID_TARGET_ID);
+
+  StateEffect effect = GetKnownTraitHandle<StateEffect>(*this, Integration::ReservedTraitId::STATE_EFFECT);
+  if(effect && !effect.IsNone())
+  {
+    GetImpl(effect).OnStateEffectTargetsChanged(owner);
+  }
+}
+
+View ViewDataImpl::GetStateEffectTarget() const
+{
+  View                   owner = View::DownCast(mViewImpl.Self());
+  StateEffectTargetTrait trait = GetKnownTraitHandle<StateEffectTargetTrait>(*this, Integration::ReservedTraitId::STATE_EFFECT_TARGET);
+  if(!trait)
+  {
+    return owner;
+  }
+
+  View target = FindStateEffectTarget(owner, trait.GetImpl().GetTargetId());
+  return target ? target : owner;
+}
+
+bool ViewDataImpl::IsInteractive() const
+{
+  auto* traitObject = GetCoreInteractionObject();
+  return traitObject && traitObject->GetInteractiveTraitImpl();
+}
+
+Ui::SelectableTrait ViewDataImpl::EnsureSelectableTrait()
+{
+  auto* traitObject = GetCoreInteractionObject();
+
+  if(!traitObject)
+  {
+    IntrusivePtr<CoreInteractionObject> newTraitObject = new CoreInteractionObject();
+    traitObject                                        = newTraitObject.Get();
+    SetTrait(Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
+    AttachInteractiveStateEffect();
+  }
+
+  return Ui::SelectableTrait::New(traitObject);
+}
+
+bool ViewDataImpl::IsSelectable() const
+{
+  auto* traitObject = GetCoreInteractionObject();
+  return traitObject && traitObject->GetSelectableTraitImpl();
+}
+
+Ui::GroupSelectableTrait ViewDataImpl::EnsureGroupSelectableTrait()
+{
+  auto* traitObject = GetCoreInteractionObject();
+
+  if(!traitObject)
+  {
+    IntrusivePtr<CoreInteractionObject> newTraitObject = new CoreInteractionObject();
+    traitObject                                        = newTraitObject.Get();
+    SetTrait(Integration::ReservedTraitId::CORE_INTERACTION_TRAITS, newTraitObject);
+    AttachInteractiveStateEffect();
+  }
+
+  return Ui::GroupSelectableTrait::New(traitObject);
+}
+
+bool ViewDataImpl::IsGroupSelectable() const
+{
+  auto* traitObject = GetCoreInteractionObject();
+  return traitObject && traitObject->GetGroupSelectableTraitImpl();
+}
+
+void ViewDataImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback)
+{
+  mFocusNavigationCallback = std::move(callback);
+}
+
+View ViewDataImpl::RequestFocusNavigation(View currentFocusedView, FocusDirection direction)
+{
+  if(mFocusNavigationCallback)
+  {
+    return mFocusNavigationCallback.Invoke(currentFocusedView, direction);
+  }
+  return mViewImpl.OnFocusNavigationRequested(currentFocusedView, direction);
+}
+
+View ViewDataImpl::RequestFocus()
+{
+  if(mViewImpl.Self().HasAncestorBlockingFocus())
+  {
+    return View();
+  }
+  return mViewImpl.OnFocusRequested();
+}
+
+View ViewDataImpl::ResolveDefaultFocusRequest()
+{
+  Ui::View self = Ui::View::DownCast(mViewImpl.Self());
+  if(IntegrationView::HasLayoutCapability(mViewImpl))
+  {
+    if(!self.IsAllowDescendantFocusEnabled())
+    {
+      return self.IsFocusable() && self.IsEnabled() && self.IsVisible() ? self : View();
+    }
+
+    for(auto& child : mChildren)
+    {
+      if(child && child.IsVisible())
+      {
+        View resolved = ViewDataImpl::Get(GetImpl(child)).RequestFocus();
+        if(resolved)
+        {
+          return resolved;
+        }
+      }
+    }
+  }
+
+  return self.IsFocusable() && self.IsEnabled() && self.IsVisible() ? self : View();
+}
+
+bool ViewDataImpl::IsFocusGroup() const
+{
+  return mIsFocusGroup;
+}
+
+void ViewDataImpl::SetAsFocusGroup(bool isFocusGroup)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::FOCUS_GROUP, isFocusGroup);
+}
+
+Ui::View::KeyEventSignalType& ViewDataImpl::KeyEventSignal()
+{
+  return mKeyEventSignal;
+}
+
+Ui::View::FocusChangedSignalType& ViewDataImpl::FocusChangedSignal()
+{
+  return mFocusChangedSignal;
+}
+
+bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
+{
+  Dali::Ui::View handle(mViewImpl.GetOwner());
+  bool           consumed = FilterKeyEvent(event);
+
+  if(!consumed && !mKeyEventSignal.Empty())
+  {
+    consumed = mKeyEventSignal.Emit(handle, event);
+  }
+
+  if(!consumed)
+  {
+    consumed = mViewImpl.OnKeyEvent(event);
+  }
+
+  return consumed;
+}
+
+bool ViewDataImpl::ActivateAccessibilityDefault()
+{
+  return Ui::FocusManager::Get().SetCurrentFocusView(Ui::View::DownCast(mViewImpl.Self()));
+}
+
+ViewAccessible* ViewDataImpl::CreateDefaultAccessibleObject()
+{
+  return new ViewAccessible(mViewImpl.Self());
+}
+
+Dali::LayoutDirection::Type ViewDataImpl::GetEffectiveLayoutDirection() const
+{
+  return static_cast<Dali::LayoutDirection::Type>(mViewImpl.Self().GetProperty<int>(Actor::Property::LAYOUT_DIRECTION));
+}
+
+void ViewDataImpl::SetRequestedPositionX(float x)
+{
+  if(!Dali::Equals(mRequestedPositionX, x))
+  {
+    mRequestedPositionX = x;
+    // InvalidateMeasure (not InvalidateArrange): a WRAP_CONTENT parent's
+    // OnMeasure reads the child's RequestedPosition into maxRight/maxBottom,
+    // so a position change can affect the parent's measured size. Measure
+    // invalidation also marks the chain dirty for Arrange.
+    InvalidateMeasure();
+  }
+}
+
+void ViewDataImpl::SetRequestedPositionY(float y)
+{
+  if(!Dali::Equals(mRequestedPositionY, y))
+  {
+    mRequestedPositionY = y;
+    InvalidateMeasure();
+  }
+}
+
+float ViewDataImpl::GetRequestedPositionX() const
+{
+  return mRequestedPositionX;
+}
+
+float ViewDataImpl::GetRequestedPositionY() const
+{
+  return mRequestedPositionY;
+}
+
+void ViewDataImpl::SetUiScalePolicy(UiScalePolicy policy)
+{
+  if(mScalePolicy != policy)
+  {
+    mScalePolicy = policy;
+    ResetEffectiveScaleRecursive();
+    InvalidateMeasure();
+  }
+}
+
+UiScalePolicy ViewDataImpl::GetUiScalePolicy() const
+{
+  return mScalePolicy;
+}
+
+float ViewDataImpl::GetEffectiveScale() const
+{
+  if(mEffectiveScale < 0.0f)
+  {
+    mEffectiveScale = ComputeEffectiveScale();
+  }
+  return mEffectiveScale;
+}
+
+void ViewDataImpl::InvalidateMeasure()
+{
+  // Early-exit guard: if already dirty, the ancestor chain has already been
+  // invalidated and the layout root has been registered, so re-propagation is
+  // redundant. "Never measured" state (NaN) still requires propagation because
+  // the chain has never been walked from this view.
+  //
+  // NOTE: Callers that change the view's ancestor-chain structure
+  // (e.g. reparenting) must not rely on this view's InvalidateMeasure to reach
+  // the new parent chain — the guard may skip propagation. Instead, the
+  // reparenting site should invalidate the new parent directly. See
+  // OnChildAdd / OnChildRemove where this is done.
+  if(Dali::Equals(mLastMeasuredConstraint.width, MEASURE_CACHE_DIRTY))
+  {
+    return;
+  }
+
+  mEffectiveScale                = -1.0f;
+  mLastMeasuredConstraint.width  = MEASURE_CACHE_DIRTY;
+  mLastMeasuredConstraint.height = MEASURE_CACHE_DIRTY;
+  mArrangeDirty                  = true;
+
+  // Layout boundary: a standalone view is excluded from its parent's
+  // OnMeasure/OnArrange accumulation, so its measure result cannot change
+  // the parent's measured size. Stop propagation here and register this view
+  // as its own layout root.
+  //
+  // When the parent has a LayoutTransition attached, also invalidate the
+  // parent so its CaptureBeforeLayout / StartTransitionsAfterLayout pass
+  // runs in the same layout batch. Combined with the controller's
+  // depth-sorted iteration, this lets the parent capture pre-change
+  // bounds before the standalone child's own arrange updates them, so
+  // a standalone child's RequestedWidth / RequestedHeight change
+  // surfaces as the parent's CHANGE slot. Mirrors the existing
+  // OnChildAdd guard for the standalone+transition combination.
+  if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    Ui::View parentView = GetParentView();
+    if(parentView && GetImpl(parentView).GetLayoutTransition())
+    {
+      GetImpl(parentView).InvalidateMeasure();
+    }
+    RegisterWithLayoutController();
+    return;
+  }
+
+  Ui::Layout parentLayout = GetParentLayout();
+  if(parentLayout)
+  {
+    GetImpl(parentLayout).InvalidateMeasure();
+    return;
+  }
+
+  Ui::View parentView = GetParentView();
+  if(parentView)
+  {
+    GetImpl(parentView).InvalidateMeasure();
+    return;
+  }
+
+  RegisterWithLayoutController();
+}
+
+void ViewDataImpl::InvalidateArrange()
+{
+  // Early-exit guard mirrors InvalidateMeasure: if already dirty, the
+  // ancestor chain has already been invalidated. Only the Dirty state
+  // short-circuits; NeverArranged (mArrangeDirty=false, but never arranged)
+  // still propagates on its first invalidation.
+  if(mArrangeDirty)
+  {
+    return;
+  }
+
+  mArrangeDirty = true;
+
+  // Layout boundary: standalone child's arrange result does not feed back
+  // into the parent's arrangement — stop here and self-register.
+  if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    RegisterWithLayoutController();
+    return;
+  }
+
+  Ui::Layout parentLayout = GetParentLayout();
+  if(parentLayout)
+  {
+    GetImpl(parentLayout).InvalidateArrange();
+    return;
+  }
+
+  // Propagate to parent View (no LayoutManager)
+  Ui::View parentView = GetParentView();
+  if(parentView)
+  {
+    GetImpl(parentView).InvalidateArrange();
+    return;
+  }
+
+  // Reached top of View tree → register with LayoutController
+  RegisterWithLayoutController();
+}
+
+MeasuredSize ViewDataImpl::GetMeasuredSize() const
+{
+  return mMeasuredSize;
+}
+
+UiColor ViewDataImpl::GetBackgroundColor() const
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(mViewImpl.Self(), BACKGROUND_COLOR_BINDING_ID, outColor))
+  {
+    return outColor;
+  }
+
+  Property::Map    backgroundMap = mViewImpl.Self().GetProperty<Property::Map>(Ui::View::Property::BACKGROUND);
+  Property::Value* typeValue     = backgroundMap.Find(Ui::VisualBasePropertyIndex::TYPE);
+  int              type          = static_cast<int>(Ui::Integration::InternalVisualType::COLOR);
+  if(typeValue && typeValue->Get(type) && type != static_cast<int>(Ui::Integration::InternalVisualType::COLOR))
+  {
+    return UiColor();
+  }
+
+  Property::Value* colorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+  Vector4          color;
+  return colorValue && colorValue->Get(color) ? UiColor(color) : UiColor();
+}
+
+void ViewDataImpl::SetBackgroundColor(const UiColor& color)
+{
+  ClearGradientColorBinding(BACKGROUND_GRADIENT_BINDING_ID);
+  if(!UpdateColorBindingInternal(BACKGROUND_COLOR_BINDING_ID, color))
+  {
+    SetColorBindingInternal(BACKGROUND_COLOR_BINDING_ID, color, ColorCallback::New(this, &ViewDataImpl::SetBackgroundColorInternal));
+  }
+  SetBackgroundColorInternal(color.GetRgba());
+}
+
+void ViewDataImpl::SetBackgroundImage(const Dali::String& url)
+{
+  if(url.Empty())
+  {
+    ClearBackground();
+    return;
+  }
+
+  ClearBackgroundBinding();
+  SetBackground(Internal::CreateImageVisualPropertyMap(url));
+}
+
+void ViewDataImpl::SetBackgroundGradient(const Gradient::Base& gradient)
+{
+  if(gradient.GetType() == Gradient::Type::NONE || gradient.GetStopNodes().Count() < 2u)
+  {
+    ClearBackground();
+    return;
+  }
+
+  UiColorManager::Get().ClearBinding(mViewImpl.Self(), BACKGROUND_COLOR_BINDING_ID);
+  if(!UpdateColorBindingInternal(BACKGROUND_GRADIENT_BINDING_ID, gradient))
+  {
+    SetColorBindingInternal(BACKGROUND_GRADIENT_BINDING_ID, gradient,
+                            Callback<void(const Gradient::Base&)>::New(this, &ViewDataImpl::SetBackgroundGradientInternal));
+  }
+  SetBackgroundGradientInternal(gradient);
+}
+
+UiColor ViewDataImpl::GetColor() const
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(mViewImpl.Self(), COLOR_BINDING_ID, outColor))
+  {
+    return outColor;
+  }
+  return UiColor(mViewImpl.Self().GetProperty<Vector4>(Actor::Property::COLOR));
+}
+
+void ViewDataImpl::SetColor(const UiColor& color)
+{
+  if(!UpdateColorBindingInternal(COLOR_BINDING_ID, color))
+  {
+    SetColorBindingInternal(COLOR_BINDING_ID, color, ColorCallback::New(this, &ViewDataImpl::SetColorInternal));
+  }
+  SetColorInternal(color.GetRgba());
+}
+
+UiColor ViewDataImpl::GetCurrentColor() const
+{
+  return UiColor(mViewImpl.Self().GetCurrentProperty<Vector4>(Actor::Property::COLOR));
+}
+
+Vector4 ViewDataImpl::GetCornerRadius() const
+{
+  return mViewImpl.Self().GetProperty<Vector4>(Ui::View::Property::CORNER_RADIUS);
+}
+
+void ViewDataImpl::SetCornerRadius(const Vector4& radius)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::CORNER_RADIUS, radius);
+}
+
+CornerRadiusPolicy ViewDataImpl::GetCornerRadiusPolicy() const
+{
+  return static_cast<CornerRadiusPolicy>(mViewImpl.Self().GetProperty<int>(Ui::View::Property::CORNER_RADIUS_POLICY));
+}
+
+void ViewDataImpl::SetCornerRadiusPolicy(CornerRadiusPolicy policy)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::CORNER_RADIUS_POLICY, static_cast<int>(policy));
+}
+
+Vector4 ViewDataImpl::GetCornerSquareness() const
+{
+  return mViewImpl.Self().GetProperty<Vector4>(Ui::View::Property::CORNER_SQUARENESS);
+}
+
+void ViewDataImpl::SetCornerSquareness(const Vector4& squareness)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::CORNER_SQUARENESS, squareness);
+}
+
+float ViewDataImpl::GetBorderlineWidth() const
+{
+  return mViewImpl.Self().GetProperty<float>(Ui::View::Property::BORDERLINE_WIDTH);
+}
+
+void ViewDataImpl::SetBorderlineWidth(float width)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::BORDERLINE_WIDTH, width);
+}
+
+UiColor ViewDataImpl::GetBorderlineColor() const
+{
+  UiColor outColor;
+  if(UiColorManager::Get().GetBindingColor(mViewImpl.Self(), "BorderlineColor", outColor))
+  {
+    return outColor;
+  }
+  return mViewImpl.Self().GetProperty<Vector4>(Ui::View::Property::BORDERLINE_COLOR);
+}
+
+void ViewDataImpl::SetBorderlineColor(const UiColor& color)
+{
+  if(!UpdateColorBindingInternal("BorderlineColor", color))
+  {
+    SetColorBindingInternal("BorderlineColor", color, ColorCallback::New(this, &ViewDataImpl::SetBorderlineColorInternal));
+  }
+  SetBorderlineColorInternal(color.GetRgba());
+}
+
+float ViewDataImpl::GetBorderlineOffset() const
+{
+  return mViewImpl.Self().GetProperty<float>(Ui::View::Property::BORDERLINE_OFFSET);
+}
+
+void ViewDataImpl::SetBorderlineOffset(float offset)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::BORDERLINE_OFFSET, offset);
+}
+
+void ViewDataImpl::ClearBackground()
+{
+  UnregisterVisual(Ui::View::Property::BACKGROUND);
+  ClearBackgroundBinding();
+
+  // Trigger a size negotiation request that may be needed when unregistering a visual.
+  mViewImpl.RelayoutRequest();
+}
+
+void ViewDataImpl::SetShadow(const Shadow& shadow)
+{
+  if(shadow == Shadow::None())
+  {
+    ClearShadow();
+    return;
+  }
+
+  SetShadow(Dali::Ui::Extension::Shadow::CreatePropertyMap(shadow));
+}
+
+void ViewDataImpl::SetShadow(const ShadowStack& shadowStack)
+{
+  ClearShadow();
+  const uint32_t shadowCount = shadowStack.GetShadowCount();
+  for(uint32_t index = 0u; index < shadowCount; ++index)
+  {
+    AppendShadow(shadowStack.GetShadowAt(index));
+  }
+}
+
+void ViewDataImpl::SetRequestedWidth(float width)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::REQUESTED_WIDTH, width);
+}
+
+float ViewDataImpl::GetRequestedWidth() const
+{
+  return mRequestedWidth;
+}
+
+void ViewDataImpl::SetRequestedHeight(float height)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::REQUESTED_HEIGHT, height);
+}
+
+float ViewDataImpl::GetRequestedHeight() const
+{
+  return mRequestedHeight;
+}
+
+void ViewDataImpl::SetMinimumWidth(float width)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::MINIMUM_WIDTH, width);
+}
+
+float ViewDataImpl::GetMinimumWidth() const
+{
+  return mSizeConstraints ? mSizeConstraints->minWidth : 0.0f;
+}
+
+void ViewDataImpl::SetMinimumHeight(float height)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::MINIMUM_HEIGHT, height);
+}
+
+float ViewDataImpl::GetMinimumHeight() const
+{
+  return mSizeConstraints ? mSizeConstraints->minHeight : 0.0f;
+}
+
+void ViewDataImpl::SetMaximumWidth(float width)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::MAXIMUM_WIDTH, width);
+}
+
+float ViewDataImpl::GetMaximumWidth() const
+{
+  return mSizeConstraints ? mSizeConstraints->maxWidth : std::numeric_limits<float>::max();
+}
+
+void ViewDataImpl::SetMaximumHeight(float height)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::MAXIMUM_HEIGHT, height);
+}
+
+float ViewDataImpl::GetMaximumHeight() const
+{
+  return mSizeConstraints ? mSizeConstraints->maxHeight : std::numeric_limits<float>::max();
+}
+
+void ViewDataImpl::SetMargin(const Extents& margin)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::MARGIN, margin);
+}
+
+Extents ViewDataImpl::GetMargin() const
+{
+  return mMargin;
+}
+
+void ViewDataImpl::SetPadding(const Extents& padding)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::PADDING, padding);
+}
+
+Extents ViewDataImpl::GetPadding() const
+{
+  return mPadding;
+}
+
+void ViewDataImpl::SetLayoutMode(Ui::LayoutMode mode)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::LAYOUT_MODE, static_cast<int>(mode));
+}
+
+Ui::LayoutMode ViewDataImpl::GetLayoutMode() const
+{
+  return mLayoutMode;
+}
+
+void ViewDataImpl::SetLayoutTransition(LayoutTransition transition)
+{
+  mLayoutTransition = transition;
+  // Detach: drop any pending ENTER / REORDER / REMOVE markers. Records
+  // are only produced while a transition is attached (see OnChildAdd /
+  // Insert / OnChildOrderChanged / Remove); a previously attached
+  // transition could have left entries that we want to discard now so
+  // a later re-attach does not surface them as a stale cause on the
+  // next pass. In particular mPendingChildRemovalForLayoutTransition is
+  // consumed only when StartTransitionsForView runs (which requires an
+  // attached transition), so without this clear the marker would
+  // survive a detach -> layout pass -> reattach cycle and tag the next
+  // unrelated CHANGE as SIBLING_REMOVED.
+  if(!transition)
+  {
+    mPendingEnterChildren.clear();
+    mPendingReorderedChildren.clear();
+    mPendingChildRemovalForLayoutTransition = false;
+    // Symmetric with the direct markers above: drop any inherited-ENTER
+    // candidates this view owns in the dispatcher, so a detach -> reattach
+    // cycle does not surface a stale ENTER for a grand-child added under the
+    // old transition. The records live in the per-window dispatcher; an
+    // off-window view's records were already dropped by its scene-disconnect
+    // cleanup (OnViewDestroyed).
+    Window window = Window::Get(mViewImpl.Self());
+    if(window)
+    {
+      LayoutController::Get(window).ClearPendingInheritedEnters(&mViewImpl);
+    }
+    return;
+  }
+
+  // Attach: seed any pre-existing children as pending ENTER candidates,
+  // but only when this view has not yet completed its initial layout
+  // pass. OnChildAdd only inserts into mPendingEnterChildren when a
+  // transition is already attached, so the order
+  //   parent.Add(child); parent.SetLayoutTransition(transition);
+  // would otherwise leave the child out of the pending set entirely.
+  // Without this seed, the dispatcher's first pass would neither
+  // dispatch ENTER nor settle a declarative ENTER spec onto the child,
+  // leaving e.g. a child pre-set to opacity = 0 permanently invisible.
+  //
+  // Restricted to !mInitialLayoutDone so re-attaching a transition on a
+  // view that has already been on screen does not retroactively classify
+  // its already-visible children as initial-mount candidates.
+  if(!mInitialLayoutDone)
+  {
+    for(auto& childView : mChildren)
+    {
+      mPendingEnterChildren.insert(&GetImpl(childView));
+    }
+  }
+}
+
+LayoutTransition ViewDataImpl::GetLayoutTransition() const
+{
+  return mLayoutTransition;
+}
+
+LayoutRect ViewDataImpl::GetArrangedBounds() const
+{
+  return mArrangedBounds;
+}
+
+bool ViewDataImpl::IsInitialLayoutDone() const
+{
+  return mInitialLayoutDone;
+}
+
+uint32_t ViewDataImpl::GetChildViewCount() const
+{
+  return static_cast<uint32_t>(mChildren.Count());
+}
+
+Ui::View ViewDataImpl::GetChildViewAt(uint32_t index) const
+{
+  if(index < mChildren.Count())
+  {
+    return mChildren[index];
+  }
+  return Ui::View();
+}
+
+Dali::Vector<Ui::View>& ViewDataImpl::GetChildren()
+{
+  return mChildren;
+}
+
+const Dali::Vector<Ui::View>& ViewDataImpl::GetChildren() const
+{
+  return mChildren;
+}
+
+int32_t ViewDataImpl::IndexOfChildView(Ui::View view) const
+{
+  if(!view)
+  {
+    return -1;
+  }
+  for(size_t i = 0; i < mChildren.Count(); ++i)
+  {
+    if(mChildren[i] == view)
+    {
+      return static_cast<int32_t>(i);
+    }
+  }
+  return -1;
+}
+
+void ViewDataImpl::Insert(uint32_t index, Ui::View child)
+{
+  if(!child)
+  {
+    return;
+  }
+
+  // Adding to the Actor tree triggers OnChildAdd on this ViewImpl, which is
+  // the single source of truth for registering the child in mChildren and
+  // for invalidating the new parent chain. Insert only takes additional
+  // responsibility for positioning the child at the requested index.
+  mViewImpl.Self().Add(child);
+
+  if(index >= mChildren.Count())
+  {
+    // OnChildAdd push_back'd the child at the end; target index is end.
+    return;
+  }
+
+  // Fast path: when this was a fresh add, OnChildAdd push_back'd the child,
+  // so it is at the tail of mChildren. Avoid an O(N) scan in that case.
+  IntegrationView::ChildContainer::Iterator it;
+  if(mChildren.Count() > 0 && *(mChildren.End() - 1) == child)
+  {
+    it = mChildren.End() - 1;
+  }
+  else
+  {
+    it = std::find(mChildren.Begin(), mChildren.End(), child);
+    if(it == mChildren.End())
+    {
+      // OnChildAdd did not register this child (e.g. non-View actor). Nothing
+      // to reorder.
+      return;
+    }
+  }
+
+  const size_t currentIdx = static_cast<size_t>(std::distance(mChildren.Begin(), it));
+  if(currentIdx == index)
+  {
+    return;
+  }
+
+  Ui::View moved = std::move(*it);
+  mChildren.Erase(it);
+  mChildren.Insert(mChildren.Begin() + index, std::move(moved));
+
+  // Tag every logical child so the layout transition dispatcher reports
+  // CHANGE cause as LayoutChangeCause::REORDERED for both the moved child and the
+  // siblings whose indices shifted as a result. dali-core's
+  // OnChildOrderChanged fires only on actor-tree sibling order changes;
+  // Insert() touches the logical (mChildren) order alone, so this is the
+  // only place that records the reorder for the CHANGE classifier.
+  // Matches OnChildOrderChanged's full-list tagging so a logical reorder
+  // and an actor-tree reorder produce the same cause classification.
+  // Skip the record when no transition is attached — the dispatcher
+  // would never consume it, and stale raw pointers could outlive the
+  // child without any global cleanup.
+  if(mLayoutTransition)
+  {
+    for(auto& childView : mChildren)
+    {
+      mPendingReorderedChildren.insert(&GetImpl(childView));
+    }
+  }
+
+  // mChildren order affects layout output (e.g. LinearLayout visual order,
+  // GridLayout cell assignment). When the child was already under this view
+  // (Self().Add is a no-op in that case), OnChildAdd does not fire, so this
+  // is the only invalidation point for the reorder. When the child was a
+  // fresh add, self is already dirty from OnChildAdd and the guard makes
+  // this a no-op.
+  InvalidateMeasure();
+}
+
+void ViewDataImpl::RemoveAllChildren(Ui::RemovePolicy policy)
+{
+  // Operate on the actor children (consistent with the inherited
+  // GetChildCount / GetChildAt). Snapshot up front: with ANIMATE_EXIT the
+  // EXIT-ing View children stay attached as ghosts, so iterating the live
+  // actor list would revisit them and never terminate. Each removal is routed
+  // through the per-child Remove, which already handles this view's own EXIT
+  // slot, an inherited SUBTREE-scope EXIT owner, and the in-flight-ghost
+  // guard; OnChildRemove keeps mChildren in sync for the immediate paths.
+  Actor              self = mViewImpl.Self();
+  std::vector<Actor> snapshot;
+  const uint32_t     count = self.GetChildCount();
+  snapshot.reserve(count);
+  for(uint32_t i = 0u; i < count; ++i)
+  {
+    snapshot.push_back(self.GetChildAt(i));
+  }
+
+  for(auto& childActor : snapshot)
+  {
+    Ui::View childView = Ui::View::DownCast(childActor);
+    if(childView)
+    {
+      // View child: EXIT-aware removal honouring @p policy.
+      Remove(childView, policy);
+    }
+    else
+    {
+      // Non-View actor child: no EXIT transition applies, unparent now.
+      self.Remove(childActor);
+    }
+  }
+}
+
+void ViewDataImpl::Remove(Ui::View child, Ui::RemovePolicy policy)
+{
+  if(!child)
+  {
+    return;
+  }
+
+  const bool animateExit = (policy == Ui::RemovePolicy::ANIMATE_EXIT);
+
+  // ANIMATE_EXIT only: if a LayoutTransition with an EXIT slot (spec OR
+  // animator) is attached, hand the child off to the layout transition
+  // dispatcher so the EXIT animation can play. IMMEDIATE (and the
+  // no-EXIT-slot case) falls through to the immediate unparent below.
+  Ui::LayoutTransition transition = mLayoutTransition;
+  bool                 deferred   = false;
+  if(animateExit && transition)
+  {
+    auto&      impl      = Internal::GetImpl(transition);
+    const bool hasExitFx = static_cast<bool>(impl.GetExitVisualSpec()) || impl.HasExitAnimator() || impl.HasActiveExitBoundsEffect();
+    if(hasExitFx)
+    {
+      Actor  self   = mViewImpl.Self();
+      Window window = Window::Get(self);
+      if(window)
+      {
+        // Remove the child from this view's layout-tracking list and
+        // invalidate so siblings flow into the freed slot during the next
+        // layout pass. The child's Actor stays under this Actor so the
+        // dispatcher can animate it before unparenting.
+        ViewImpl& childImpl = GetImpl(child);
+        auto      it        = std::find(mChildren.begin(), mChildren.end(), child);
+        if(it != mChildren.end())
+        {
+          mChildren.Erase(it);
+          mPendingEnterChildren.erase(&childImpl);
+          // Same rationale as the immediate-remove path's OnChildRemove:
+          // a stale raw ViewImpl* in the reorder set could outlive its
+          // child after deferred-remove EXIT and cause a future heap-
+          // reused address to be misclassified as REORDERED. Erase
+          // per-child here (not full clear) so the cause of any
+          // siblings still pending reorder is preserved.
+          mPendingReorderedChildren.erase(&childImpl);
+          // Mark sibling removal so the dispatcher tags this pass's CHANGE
+          // dispatches on the remaining siblings as SIBLING_REMOVED. Set
+          // only when a transition is attached to avoid leaving stale
+          // marker state on views without transitions.
+          mPendingChildRemovalForLayoutTransition = true;
+          InvalidateMeasure();
+
+          // Only schedule the EXIT transition when @p child was actually a
+          // tracked child. Calling Remove on a non-child must not fire
+          // any DALi layout-transition lifecycle / animation; without this
+          // guard a misuse would leave a ghost animation that fires
+          // OnStart / OnFinished and races with
+          // the actor's real parent.
+          LayoutController::Get(window).ScheduleLayoutExit(&mViewImpl, child);
+          deferred = true;
+        }
+      }
+    }
+  }
+
+  if(!deferred)
+  {
+    // Guard against re-removing a child that is currently an EXIT ghost
+    // under this view. Ghost detection: actor parent is still Self() (the
+    // deferred-remove keeps the actor attached) AND the child has already
+    // been removed from the logical children list (mChildren). Without
+    // this guard, the second Remove bypasses the dispatcher
+    // duplicate-EXIT guard and synchronously unparents the ghost, which
+    // triggers OnSceneDisconnection -> CancelPendingExit/CancelActiveAnimator
+    // and silently cancels the in-flight EXIT (no OnFinished, no fade).
+    // The same applies when the parent's LayoutTransition has been replaced
+    // or cleared between the first and second Remove -- the second
+    // call cannot enter the deferred branch but the ghost is still in
+    // flight under its original transition.
+    if(child.GetParent() == mViewImpl.Self() &&
+       std::find(mChildren.begin(), mChildren.end(), child) == mChildren.end())
+    {
+      return;
+    }
+
+    Actor      selfActor      = mViewImpl.Self();
+    Window     window         = Window::Get(selfActor);
+    auto       it             = std::find(mChildren.begin(), mChildren.end(), child);
+    const bool isCurrentChild = (it != mChildren.end());
+
+    // Inherited (SUBTREE-scope) EXIT: this view does not handle EXIT through
+    // its own transition (otherwise the deferred branch above would have run).
+    // Walk up to the closest ancestor SUBTREE owner that carries an EXIT
+    // effect; if found, defer the child to that owner. The actor stays under
+    // this view -- the ghost's direct/visual parent -- while the owner's
+    // transition drives the EXIT effect (INV-GHOST-UNDER-DIRECT-PARENT). The
+    // closest-owner / standalone-boundary rules are enforced inside the
+    // resolver, so a child claimed by a closer (non-SUBTREE or non-EXIT)
+    // transition is not stolen by an ancestor.
+    // ANIMATE_EXIT only: inherited (SUBTREE-scope) EXIT defer. IMMEDIATE skips
+    // this and unparents synchronously below.
+    if(animateExit && window && isCurrentChild)
+    {
+      ViewImpl* owner = Internal::FindGoverningSubtreeOwner(&mViewImpl, Internal::ReflowSlot::EXIT);
+      if(owner)
+      {
+        ViewImpl& childImpl = GetImpl(child);
+        mChildren.Erase(it);
+        mPendingEnterChildren.erase(&childImpl);
+        mPendingReorderedChildren.erase(&childImpl);
+        // Remaining siblings under THIS direct parent reflow into the freed
+        // slot; tag their CHANGE as SIBLING_REMOVED on the next pass -- but only
+        // when THIS view owns a transition to consume the marker. For an
+        // inherited EXIT this view may have no transition, and the marker --
+        // consumed only by a transition-bearing view's layout pass -- would
+        // never be cleared and would mis-tag a future CHANGE if it later gains
+        // one.
+        if(transition)
+        {
+          mPendingChildRemovalForLayoutTransition = true;
+        }
+        InvalidateMeasure();
+        LayoutController::Get(window).ScheduleLayoutExit(&mViewImpl, child, owner);
+        return;
+      }
+    }
+
+    // Mark sibling removal for the next CHANGE pass when a transition is
+    // attached (without an EXIT slot) AND we have a window. The
+    // remaining children may reflow and should be tagged with
+    // SIBLING_REMOVED. Skip the marker when no transition is attached,
+    // or when no window is available -- without a window the marker
+    // cannot be consumed by the dispatcher in this pass (no layout
+    // pass runs), so it would leak across a later add-to-window event
+    // and mis-tag the first layout pass's CHANGE as SIBLING_REMOVED.
+    if(transition && window && isCurrentChild)
+    {
+      mPendingChildRemovalForLayoutTransition = true;
+    }
+    selfActor.Remove(child);
+  }
+}
+
+void ViewDataImpl::Raise(Ui::LayoutOrderPolicy policy)
+{
+  Actor self = mViewImpl.Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      self.Raise();
+      return;
+    }
+  }
+  self.Raise();
+}
+
+void ViewDataImpl::Lower(Ui::LayoutOrderPolicy policy)
+{
+  Actor self = mViewImpl.Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      self.Lower();
+      return;
+    }
+  }
+  self.Lower();
+}
+
+void ViewDataImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
+{
+  Actor self = mViewImpl.Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      self.RaiseToTop();
+      return;
+    }
+  }
+  self.RaiseToTop();
+}
+
+void ViewDataImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
+{
+  Actor self = mViewImpl.Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      self.LowerToBottom();
+      return;
+    }
+  }
+  self.LowerToBottom();
+}
+
+void ViewDataImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
+{
+  if(!target)
+  {
+    return;
+  }
+  Actor self = mViewImpl.Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      self.RaiseAbove(target);
+      return;
+    }
+  }
+  self.RaiseAbove(target);
+}
+
+void ViewDataImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
+{
+  if(!target)
+  {
+    return;
+  }
+  Actor self = mViewImpl.Self();
+  if(policy == Ui::LayoutOrderPolicy::PRESERVE)
+  {
+    Ui::View parent = Ui::View::DownCast(self.GetParent());
+    if(parent)
+    {
+      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      self.LowerBelow(target);
+      return;
+    }
+  }
+  self.LowerBelow(target);
+}
+
+void ViewDataImpl::OnChildAdded(Actor& child, bool allowNonViewChild)
+{
+  if(mSkipChildrenUpdate)
+  {
+    return;
+  }
+
+  Ui::View view = Ui::View::DownCast(child);
+  if(view)
+  {
+    mChildren.PushBack(view);
+
+    ViewImpl& childImpl = GetImpl(view);
+
+    // If this child still has an in-flight transition under an old parent
+    // (reparent during EXIT), cancel it before we mark the child for
+    // ENTER under this view. Otherwise the orphan callback / animation
+    // would keep driving the actor against the old parent's coord system.
+    {
+      Actor  self   = mViewImpl.Self();
+      Window window = Window::Get(self);
+      if(window)
+      {
+        auto& controller = LayoutController::Get(window);
+        controller.NotifyChildReparented(&childImpl);
+
+        // Inherited (SUBTREE-scope) ENTER: when THIS view has no transition of
+        // its own, a child added here is not recorded for direct ENTER (the
+        // gate below requires this view's transition). Notify the dispatcher so
+        // it can walk up to the closest ancestor SUBTREE owner with an ENTER
+        // effect and register an inherited-ENTER candidate. When this view HAS
+        // a transition it is the closest owner and the direct path below claims
+        // the child, so the inherited walk is skipped here.
+        if(!mLayoutTransition)
+        {
+          controller.NotifyChildAdded(&mViewImpl, view);
+        }
+      }
+    }
+
+    // Mark this child for ENTER-slot dispatch only when this view has a
+    // LayoutTransition attached at the time of the add. Recording
+    // unconditionally would (a) accumulate stale entries while no
+    // transition is attached, ready to mis-fire as ENTER once a future
+    // SetLayoutTransition + unrelated layout pass runs, and (b) keep
+    // raw ViewImpl* pointers alive in the set after the child is
+    // destroyed (no global cleanup hook today). Recording at the event
+    // time matches the semantic that ENTER is for "child added under a
+    // transition-bearing parent".
+    if(mLayoutTransition)
+    {
+      mPendingEnterChildren.insert(&childImpl);
+    }
+
+    // Standalone children do not contribute to this view's OnMeasure/OnArrange
+    // accumulation, so adding one does not invalidate this view's cached
+    // measured size or arranged bounds. Skip self-invalidation in that case.
+    const bool childAffectsSelf = !IntegrationView::IsLayoutModeStandalone(childImpl);
+
+    // Reset the effective scale cache for the entire subtree being added.
+    // The child may be arriving from a parent with a different UiScalePolicy
+    // context (e.g. reparented from DISABLED to INHERIT), so every descendant's
+    // cached mEffectiveScale is potentially stale and must be recomputed.
+    //
+    // InvalidateMeasure() alone is not sufficient: it only resets
+    // mEffectiveScale on the direct child and propagates *upward*. Descendants
+    // retain their old cached values and use them in the next Measure() call,
+    // producing incorrect font sizes, paddings, and decorations even though
+    // the layout container size updates correctly.
+    //
+    // ResetEffectiveScaleRecursive() sets mEffectiveScale = -1.0f and
+    // mLastMeasuredConstraint = NaN for every node in the subtree, guaranteeing:
+    //   (a) scale is recomputed from the new parent chain on next GetEffectiveScale(), and
+    //   (b) the NaN constraint forces a cache miss in Measure() so all nodes
+    //       fully re-measure with the new scale.
+    //
+    // After this, InvalidateMeasure() transitions the direct child from NaN to
+    // DIRTY (the guard passes because NaN != DIRTY per IEEE 754) and propagates
+    // up to the new layout root.
+    ViewDataImpl::Get(childImpl).ResetEffectiveScaleRecursive();
+
+    // Invalidate the child's measure cache -- its previous cache was computed
+    // under a different parent's constraints and is no longer reliable.
+    childImpl.InvalidateMeasure();
+
+    if(childAffectsSelf)
+    {
+      // Also invalidate this view's chain directly. The child's
+      // InvalidateMeasure may early-exit via the dirty guard if the child was
+      // already invalidated under its previous parent (reparenting of a dirty
+      // child), in which case the new parent chain would not be reached.
+      // Calling InvalidateMeasure on self guarantees the new ancestor chain
+      // is marked and the new layout root is registered. If self is already
+      // dirty, the guard makes this a no-op.
+      //
+      // For standalone (boundary) children, this fallback is unnecessary: the
+      // child's own InvalidateMeasure registers it as a layout root (Phase 2
+      // boundary rule), and OnSceneConnection re-registers dirty boundaries
+      // that were already dirty when reparented.
+      InvalidateMeasure();
+    }
+    else if(mLayoutTransition)
+    {
+      // Standalone child + transition-attached parent: the standalone
+      // path above does not dirty self, so this view would not be
+      // reached by ProcessLayouts and the dispatcher would never run
+      // its CaptureBeforeLayout / StartTransitionsAfterLayout pass for
+      // this parent -- meaning the ENTER (and any subsequent CHANGE)
+      // would never be dispatched, while the pending-enter set
+      // accumulates entries that fire late on the next unrelated
+      // dirty event. Force the parent dirty so its dispatcher pass
+      // runs in the same layout batch as the standalone child's.
+      InvalidateMeasure();
+    }
+  }
+  else
+  {
+    if(allowNonViewChild)
+    {
+      // Permitted via IntegrationView::AddActorChild: skip the View-only check
+      // and do not record this child in mChildren (it is excluded from layout).
+      return;
+    }
+    DALI_ASSERT_ALWAYS(false && "View could only have child as View class!");
+  }
+}
+
+void ViewDataImpl::OnChildRemoved(Actor& child)
+{
+  if(mSkipChildrenUpdate)
+  {
+    return;
+  }
+
+  Ui::View view = Ui::View::DownCast(child);
+  if(view)
+  {
+    auto it = std::find(mChildren.begin(), mChildren.end(), view);
+    if(it != mChildren.end())
+    {
+      ViewImpl& childImpl = GetImpl(view);
+
+      // Standalone children are excluded from this view's OnMeasure/OnArrange
+      // accumulation, so removing one does not change this view's measured
+      // size or arranged bounds. Skip self-invalidation in that case to avoid
+      // an unnecessary parent chain walk.
+      const bool childWasAffectingSelf = !IntegrationView::IsLayoutModeStandalone(childImpl);
+
+      // If the child was added and removed within the same frame (before
+      // any layout pass consumed the pending-enter set), drop the ENTER
+      // marker so the dispatcher does not fire on a no-longer-present view.
+      // Same for the reorder marker: Insert() / OnChildOrderChanged keep
+      // raw ViewImpl* pointers in mPendingReorderedChildren which must
+      // not survive the child's removal -- otherwise a heap-reused address
+      // could mis-classify a future child as REORDERED.
+      mPendingEnterChildren.erase(&childImpl);
+      mPendingReorderedChildren.erase(&childImpl);
+
+      // Record sibling removal so the next CHANGE pass tags remaining
+      // siblings as SIBLING_REMOVED. This covers paths that reach
+      // OnChildRemove without going through View::Remove's marker-
+      // setting branch (e.g. inherited Actor::Remove called directly on
+      // the view actor). Same window guard as View::Remove -- without
+      // a window the marker cannot be consumed in this pass and would
+      // leak across a later add-to-window event. Setting the marker
+      // here is idempotent with View::Remove's own setter.
+      if(mLayoutTransition && Window::Get(mViewImpl.Self()))
+      {
+        mPendingChildRemovalForLayoutTransition = true;
+      }
+
+      // Invalidate the removed child's measure cache so that it gets
+      // re-measured when re-parented to a different container.
+      // Note: Actor parent-child relationship is already severed at this
+      // point, so child's InvalidateMeasure cannot propagate to us.
+      childImpl.InvalidateMeasure();
+      mChildren.Erase(it);
+
+      if(childWasAffectingSelf)
+      {
+        InvalidateMeasure();
+      }
+    }
+  }
+}
+
+void ViewDataImpl::OnViewSceneConnection()
+{
+  OnSceneConnection();
+
+  if(auto* traitObject = GetCoreInteractionObject())
+  {
+    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+    {
+      interactiveTraitImpl->OnSceneConnection(View::DownCast(mViewImpl.Self()));
+    }
+  }
+
+  Actor self(mViewImpl.Self());
+  int   clippingMode = ClippingMode::DISABLED;
+  if(self.GetProperty(Actor::Property::CLIPPING_MODE).Get(clippingMode) &&
+     clippingMode == ClippingMode::CLIP_CHILDREN &&
+     (DALI_UNLIKELY(!mVisualData) || mVisualData->mVisuals.Empty()) &&
+     self.GetRendererCount() == 0u)
+  {
+    mViewImpl.SetBackgroundColor(Color::TRANSPARENT);
+  }
+
+  // Register as a layout root if this view is:
+  //   (a) the top of the view tree (no parent view), OR
+  //   (b) a standalone (boundary) view whose invalidation does not propagate
+  //       to its parent. Such a view must self-register so its pending layout
+  //       work is processed by the LayoutController on the current window.
+  //
+  // The boundary case matters when a view becomes dirty while off-scene
+  // (RegisterWithLayoutController silently no-ops without a window). Once
+  // connected to a scene here, it must register so the pending state is
+  // picked up in the new window's controller.
+  const bool isDirty = Dali::Equals(mLastMeasuredConstraint.width, MEASURE_CACHE_DIRTY) ||
+                       mArrangeDirty;
+  if(!GetParentView() || (IntegrationView::IsLayoutModeStandalone(mViewImpl) && isDirty))
+  {
+    RegisterWithLayoutController();
+  }
+  else if(IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    // Standalone but clean: no layout pass needed, but must be tracked by
+    // UiScaleManager so future scale changes reach this view. This covers the
+    // case where a standalone view was unregistered on scene-disconnection and
+    // reconnects without any pending dirty work.
+    Window window = Window::Get(mViewImpl.Self());
+    if(window)
+    {
+      UiScaleManager::Get().RegisterLayoutRoot(View::DownCast(mViewImpl.Self()));
+    }
+  }
+}
+
+void ViewDataImpl::OnViewSceneDisconnection()
+{
+  // When a view leaves the scene (including being removed from a parent or
+  // when its window is destroyed), remove any pending LayoutController
+  // registration. Otherwise the controller would carry a stale entry whose
+  // parent-chain is no longer in this window, and the next layout pass
+  // would process a view that is effectively orphaned. The view's destructor
+  // already calls UnregisterFromAll as a last resort, but doing it here
+  // avoids stale pending work between disconnect and destruction.
+  LayoutController::UnregisterFromAll(&mViewImpl);
+
+  if(auto* traitObject = GetCoreInteractionObject())
+  {
+    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+    {
+      interactiveTraitImpl->OnSceneDisconnection(View::DownCast(mViewImpl.Self()));
+    }
+  }
+
+  OnSceneDisconnection();
+
+  // Remove from UiScaleManager if this view was registered as a layout root.
+  // Two cases match the registration paths in RegisterWithLayoutController:
+  //   (a) tree root: no parent view and no parent layout
+  //   (b) standalone: boundary views self-register regardless of their parent
+  if((!GetParentView() && !GetParentLayout()) || IntegrationView::IsLayoutModeStandalone(mViewImpl))
+  {
+    UiScaleManager::Get().UnregisterLayoutRoot(View::DownCast(mViewImpl.Self()));
+  }
+}
+
+void ViewDataImpl::OnPropertySet(Property::Index index, const Property::Value& propertyValue)
+{
+  // If the clipping mode has been set, we may need to create a renderer.
+  // Only do this if we are already on-stage as the OnSceneConnection will handle the off-stage clipping controls.
+  switch(index)
+  {
+    case Actor::Property::CLIPPING_MODE:
+    {
+      if(mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
+      {
+        Actor self(mViewImpl.Self());
+        int   clippingMode = ClippingMode::DISABLED;
+        if(self.GetProperty(Actor::Property::CLIPPING_MODE).Get(clippingMode) &&
+           clippingMode == ClippingMode::CLIP_CHILDREN &&
+           (DALI_UNLIKELY(!mVisualData) || mVisualData->mVisuals.Empty()) &&
+           self.GetRendererCount() == 0u)
+        {
+          mViewImpl.SetBackgroundColor(Color::TRANSPARENT);
+        }
+      }
+      break;
+    }
+    case Actor::Property::ENABLED:
+    {
+      const bool enabled = propertyValue.Get<bool>();
+
+      if(!enabled && mViewImpl.Self() == Dali::Ui::FocusManager::Get().GetCurrentFocusView())
+      {
+        Dali::Ui::FocusManager::Get().ClearFocus();
+      }
+
+      IntegrationView::SetState(mViewImpl, ViewState::DISABLED, !enabled);
+
+      if(auto* traitObject = GetCoreInteractionObject())
+      {
+        if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
+        {
+          interactiveTraitImpl->OnEnabledChanged(View::DownCast(mViewImpl.Self()), enabled);
+        }
+      }
+      break;
+    }
+  }
+}
+
+void ViewDataImpl::OnSizeSet(const Vector3& targetSize)
+{
+  mSize = Vector2(targetSize);
+
+  // Notify that size or UiScale changed
+  SizeOrUiScaleChanged();
+}
+
+void ViewDataImpl::OnSizeAnimation(Animation& animation)
+{
+  // @todo size negotiate background to new size, animate as well?
+
+  // TODO : Could we clear animation constraint when size animation stopped?
+  CreateAnimationConstraints(animation.GetBaseObject(), Dali::Actor::Property::SIZE);
+}
+
+void ViewDataImpl::OnAnimateAnimatableProperty(Animation& animation, Property::Index index, Animation::State state)
+{
+  if(state == Animation::State::PLAYING)
+  {
+    CreateAnimationConstraints(animation.GetBaseObject(), index);
+  }
+  else if(state == Animation::State::STOPPED)
+  {
+    ClearAnimationConstraints(animation.GetBaseObject(), index);
+  }
+}
+
+void ViewDataImpl::OnConstraintAnimatableProperty(Constraint& constraint, Property::Index index, bool applied)
+{
+  if(applied)
+  {
+    CreateAnimationConstraints(constraint.GetBaseObject(), index);
+  }
+  else
+  {
+    ClearAnimationConstraints(constraint.GetBaseObject(), index);
+  }
+}
+
+void ViewDataImpl::GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward)
+{
+  if(mRenderEffect)
+  {
+    mRenderEffect->GetOffScreenRenderTasks(tasks, isForward);
+  }
+  if(mOffScreenRenderingImpl)
+  {
+    mOffScreenRenderingImpl->GetOffScreenRenderTasks(tasks, isForward);
+  }
+}
+
+Dali::Texture ViewDataImpl::GetOffScreenRenderingOutput() const
+{
+  if(mOffScreenRenderingType != Ui::View::OffScreenRenderingType::REFRESH_ONCE)
+  {
+    DALI_LOG_ERROR(
+      "Precondition unsatisfied: Set property OFFSCREEN_RENDERING to OffScreenRenderingType::REFRESH_ONCE\n");
+    return Dali::Texture();
+  }
+  return mOffScreenRenderingImpl->GetTexture();
+}
+
+Vector3 ViewDataImpl::GetNaturalSize()
+{
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "ViewImpl::GetNaturalSize for %s\n",
+                mViewImpl.Self().GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
+  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::View::Property::BACKGROUND);
+  if(visualImplPtr)
+  {
+    Vector2 naturalSize;
+    visualImplPtr->GetNaturalSize(naturalSize);
+    naturalSize.width += (mPadding.start + mPadding.end);
+    naturalSize.height += (mPadding.top + mPadding.bottom);
+    return Vector3(naturalSize);
+  }
+  return Vector3::ZERO;
+}
+
+void ViewDataImpl::SetMeasureCallback(MeasureCallback callback)
+{
+  EnsureLayoutCallbacksObject(*this)->SetMeasureCallback(std::move(callback));
+  InvalidateMeasure();
+}
+
+void ViewDataImpl::SetArrangeCallback(ArrangeCallback callback)
+{
+  EnsureLayoutCallbacksObject(*this)->SetArrangeCallback(std::move(callback));
+  InvalidateArrange();
+}
+
+MeasureCallback* ViewDataImpl::GetMeasureCallback()
+{
+  auto* object = GetLayoutCallbacksObject(*this);
+  return object ? object->GetMeasureCallback() : nullptr;
+}
+
+ArrangeCallback* ViewDataImpl::GetArrangeCallback()
+{
+  auto* object = GetLayoutCallbacksObject(*this);
+  return object ? object->GetArrangeCallback() : nullptr;
+}
+
+void ViewDataImpl::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
+{
+  DALI_ASSERT_ALWAYS(manager && "AttachLayoutManager requires a non-null LayoutManager.");
+  DALI_ASSERT_ALWAYS(!HasLayoutManager() && "LayoutManager already set. Cannot replace an existing LayoutManager.");
+
+  IntrusivePtr<TraitObject> object(new LayoutManagerObject(std::move(manager)));
+  IntegrationView::SetTrait(mViewImpl, Integration::ReservedTraitId::LAYOUT_MANAGER, object);
+  InvalidateMeasure();
+}
+
+LayoutManager* ViewDataImpl::GetLayoutManager() const
+{
+  IntrusivePtr<TraitObject> object        = IntegrationView::GetTrait(mViewImpl, Integration::ReservedTraitId::LAYOUT_MANAGER);
+  auto*                     managerObject = object ? static_cast<LayoutManagerObject*>(object.Get()) : nullptr;
+  return managerObject ? managerObject->GetLayoutManager() : nullptr;
+}
+
+bool ViewDataImpl::HasLayoutManager() const
+{
+  return GetLayoutManager() != nullptr;
+}
+
+bool ViewDataImpl::HasLayoutCallback() const
+{
+  auto* object = GetLayoutCallbacksObject(const_cast<ViewDataImpl&>(*this));
+  return object && (object->GetMeasureCallback() || object->GetArrangeCallback());
+}
+
+BaseHandle ViewDataImpl::GetLayoutParams(LayoutParamsType type) const
+{
+  IntrusivePtr<TraitObject> object     = GetTrait(ToTraitId(type));
+  auto*                     baseObject = dynamic_cast<BaseObject*>(object.Get());
+  return baseObject ? BaseHandle(baseObject) : BaseHandle();
+}
+
+void ViewDataImpl::SetLayoutParams(Ui::LayoutParams params)
+{
+  auto& paramsImpl = static_cast<LayoutParamsImpl&>(params.GetBaseObject());
+  SetTrait(paramsImpl.GetTraitId(), AsTraitObject(params));
+  InvalidateMeasure();
+}
+
+void ViewDataImpl::SetRenderEffect(Ui::RenderEffect effect)
+{
+  ClearRenderEffect();
+
+  if(effect)
+  {
+    RenderEffectImpl* object = dynamic_cast<RenderEffectImpl*>(effect.GetObjectPtr());
+    DALI_ASSERT_ALWAYS(object && "Given render effect is not valid.");
+
+    Dali::Ui::View ownerView(mViewImpl.GetOwner());
+    object->SetOwnerView(ownerView);
+
+    mRenderEffect = object;
+  }
+  else
+  {
+    mRenderEffect.Reset();
+  }
+}
+
+RenderEffect ViewDataImpl::GetRenderEffect() const
+{
+  return RenderEffect(mRenderEffect.Get());
+}
+
+void ViewDataImpl::ClearRenderEffect()
+{
+  if(mRenderEffect)
+  {
+    RenderEffectImplPtr effectImpl = std::move(mRenderEffect);
+
+    // Reset handle first to avoid circular reference
+    mRenderEffect.Reset();
+
+    effectImpl->ClearOwnerView();
+  }
+}
+
+MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
+{
+  float s = mViewImpl.GetEffectiveScale();
+
+  // Push effective scale to the actor animatable property so that decoration
+  // constraints (corner radius, borderline width) can read it as a scale input.
+  // Read back the current actor property value to skip redundant scene-graph writes.
+  // This also naturally corrects any value set externally on EFFECTIVE_SCALE.
+  if(!Dali::Equals(s, mViewImpl.Self().GetProperty<float>(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX)))
+  {
+    // SetProperty triggers ViewDataImpl::SetProperty(VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), which:
+    //   - updates the actor animatable so decoration constraints re-evaluate, and
+    //   - calls UpdateCornerRadius() for active RenderEffect / OffScreenRendering.
+    mViewImpl.Self().SetProperty(Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, s);
+  }
+
+  float natW = (visualW > 0.f) ? visualW / s : visualW;
+  float natH = (visualH > 0.f) ? visualH / s : visualH;
+
+  // Ensure constraints respect this view's min/max bounds so that
+  // OnMeasure (and therefore child measurements) see the effective
+  // available space. Without this, children would be measured against
+  // the original (smaller) constraint, then ApplyConstraints would
+  // enlarge the result — leaving children incorrectly sized.
+  float effNatW = std::min(std::max(natW, GetMinimumWidth()), GetMaximumWidth());
+  float effNatH = std::min(std::max(natH, GetMinimumHeight()), GetMaximumHeight());
+
+  if(mLastMeasuredConstraint.width >= 0.0f && FloatEqual(mLastMeasuredConstraint.width, effNatW) &&
+     FloatEqual(mLastMeasuredConstraint.height, effNatH))
+  {
+    return mMeasuredSize;
+  }
+
+  // OnMeasure receives and returns visual (scale-applied) sizes, consistent with OnArrange.
+  float        effVisW = (effNatW >= 0.f) ? effNatW * s : effNatW;
+  float        effVisH = (effNatH >= 0.f) ? effNatH * s : effNatH;
+  MeasuredSize visual;
+  if(auto* callback = GetMeasureCallback())
+  {
+    Ui::View view = Ui::View::DownCast(mViewImpl.Self());
+    visual        = callback->Invoke(view, effVisW, effVisH);
+  }
+  else if(auto* manager = mViewImpl.GetLayoutManager())
+  {
+    visual = DispatchMeasureWithLayoutManager(manager, effVisW, effVisH);
+  }
+  else
+  {
+    visual = mViewImpl.OnMeasure(effVisW, effVisH);
+  }
+  visual                         = ApplyConstraints(visual);
+  mMeasuredSize.width            = visual.width;
+  mMeasuredSize.height           = visual.height;
+  mLastMeasuredConstraint.width  = effNatW;
+  mLastMeasuredConstraint.height = effNatH;
+
+  // Ensure standalone children are measured even when OnMeasure (e.g. in
+  // leaf views like Label) does not iterate children. The measure cache
+  // prevents redundant work when OnMeasure already measured them.
+  MeasureStandaloneChildren(effVisW, effVisH);
+
+  return mMeasuredSize;
+}
+
+MeasuredSize ViewDataImpl::Arrange(const LayoutRect& bounds)
+{
+  MeasuredSize arrangedSize;
+  if(auto* callback = GetArrangeCallback())
+  {
+    arrangedSize = DispatchArrangeWithCallback(callback, bounds);
+  }
+  else if(auto* manager = mViewImpl.GetLayoutManager())
+  {
+    arrangedSize = DispatchArrangeWithLayoutManager(manager, bounds);
+  }
+  else
+  {
+    arrangedSize = mViewImpl.OnArrange(bounds);
+  }
+  mArrangedBounds = bounds;
+  mArrangeDirty   = false;
+
+  // Ensure standalone children are arranged even when OnArrange (e.g. in
+  // leaf views like Label) does not iterate children.
+  ArrangeStandaloneChildren(bounds);
+
+  // Mirror direct children when the effective layout direction resolves to
+  // RIGHT_TO_LEFT. Runs once per Arrange after every OnArrange variant
+  // (LayoutManager / ArrangeCallback / default), keeping layout managers
+  // direction-agnostic.
+  ApplyLayoutDirection(bounds.width);
+
+  // Mark this view as having completed an arrange pass. Read by the layout
+  // transition dispatcher to suppress ENTER on initial mount: the dispatcher
+  // records views that were captured before this flag became true and
+  // settles their declarative ENTER specs to final values without firing
+  // OnStart / OnFinished.
+  mInitialLayoutDone = true;
+
+  // Register as a layout-finished candidate with the controller currently
+  // running this pass (file-static resolved), only when subscribed. Snapshot
+  // and emission happen later on the controller side (RTL correctness + before
+  // StartTransitionsAfterLayout overwrites actor props).
+  if(HasLayoutFinishedSignalConnections())
+  {
+    LayoutController::NotifyViewArranged(&mViewImpl);
+  }
+
+  return arrangedSize;
+}
+
+void ViewDataImpl::MeasureStandaloneChildren(float visEffW, float visEffH)
+{
+  // Snapshot: a child's Measure() may mutate mImpl->mChildren.
+  std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+  for(auto& childView : childSnapshot)
+  {
+    ViewImpl& childImpl = GetImpl(childView);
+    if(!IntegrationView::IsLayoutModeStandalone(childImpl))
+    {
+      continue;
+    }
+    float   childScale = childImpl.GetEffectiveScale();
+    Extents margin     = childImpl.GetMargin();
+    float   visMarginW = static_cast<float>(margin.start + margin.end) * childScale;
+    float   visMarginH = static_cast<float>(margin.top + margin.bottom) * childScale;
+    float   childVisW  = std::max(0.0f, visEffW - visMarginW);
+    float   childVisH  = std::max(0.0f, visEffH - visMarginH);
+    childImpl.Measure(childVisW, childVisH);
+  }
+}
+
+void ViewDataImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
+{
+  // Snapshot: a child's Arrange() may mutate mImpl->mChildren.
+  std::vector<Ui::View> childSnapshot(mChildren.Begin(), mChildren.End());
+  for(auto& childView : childSnapshot)
+  {
+    ViewImpl& childImpl = GetImpl(childView);
+    if(!IntegrationView::IsLayoutModeStandalone(childImpl))
+    {
+      continue;
+    }
+    ArrangeStandaloneChild(childImpl, bounds.width, bounds.height);
+  }
+}
+
+void ViewDataImpl::ApplyLayoutDirection(float parentWidth)
+{
+  if(mViewImpl.GetEffectiveLayoutDirection() != Dali::LayoutDirection::RIGHT_TO_LEFT)
+  {
+    return;
+  }
+
+  for(auto& childView : mChildren)
+  {
+    ViewImpl& childImpl = GetImpl(childView);
+    if(IntegrationView::IsLayoutModeStandalone(childImpl))
+    {
+      continue;
+    }
+
+    Actor child  = childImpl.Self();
+    float oldX   = child.GetProperty<float>(Actor::Property::POSITION_X);
+    float childW = child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+    child.SetPositionX(parentWidth - oldX - childW);
+  }
+}
+
+float ViewDataImpl::ComputeEffectiveScale() const
+{
+  if(mScalePolicy == UiScalePolicy::DISABLED)
+  {
+    return 1.0f;
+  }
+  if(mScalePolicy == UiScalePolicy::ENABLED)
+  {
+    return UiScaleManager::Get().GetScale();
+  }
+
+  // INHERIT: walk up the parent chain (Layout first, consistent with InvalidateMeasure)
+  Ui::Layout parentLayout = GetParentLayout();
+  if(parentLayout)
+  {
+    return GetImpl(parentLayout).GetEffectiveScale();
+  }
+
+  Ui::View parentView = GetParentView();
+  if(parentView)
+  {
+    return GetImpl(parentView).GetEffectiveScale();
+  }
+
+  // Root: inherit from UiScaleManager
+  return UiScaleManager::Get().GetScale();
+}
+
+void ViewDataImpl::ResetEffectiveScaleRecursive()
+{
+  mEffectiveScale = -1.0f;
+
+  // Reset measure cache to the NaN "never measured" initial state (not to
+  // MEASURE_CACHE_DIRTY = -1.0f). This forces a cache miss in Measure() so
+  // every node re-measures with the new scale.
+  //
+  // NaN is required here (not DIRTY) because the caller follows this with
+  // InvalidateMeasure() on the root. DIRTY would trigger InvalidateMeasure's
+  // early-exit guard on the root and skip RegisterWithLayoutController().
+  // NaN != DIRTY, so the guard does not fire; Dali::Equals(NaN, DIRTY) is
+  // false per IEEE 754.
+  mLastMeasuredConstraint.width  = std::numeric_limits<float>::quiet_NaN();
+  mLastMeasuredConstraint.height = std::numeric_limits<float>::quiet_NaN();
+
+  for(auto& childView : mChildren)
+  {
+    ViewDataImpl::Get(GetImpl(childView)).ResetEffectiveScaleRecursive();
+  }
+}
+
+bool ViewDataImpl::UpdateColorBindingInternal(StringView bindingId, const UiColor& color)
+{
+  auto manager = UiColorManager::Get();
+  if(!color.HasColorId())
+  {
+    manager.ClearBinding(mViewImpl.Self(), bindingId);
+    return true;
+  }
+
+  if(manager.HasBinding(mViewImpl.Self(), bindingId))
+  {
+    manager.SetBindingColor(mViewImpl.Self(), bindingId, color);
+    return true;
+  }
+  return false;
+}
+
+void ViewDataImpl::SetColorBindingInternal(StringView bindingId, const UiColor& color, ColorCallback callback)
+{
+  auto manager = UiColorManager::Get();
+  manager.RegisterBinding(mViewImpl.Self(), bindingId, std::move(callback));
+  manager.SetBindingColor(mViewImpl.Self(), bindingId, color);
+}
+
+bool ViewDataImpl::UpdateColorBindingInternal(StringView bindingId, const Gradient::Base& gradient)
+{
+  if(!Internal::ViewGradientColorBinding::HasTokenColor(gradient))
+  {
+    ClearGradientColorBinding(bindingId);
+    return true;
+  }
+  return Internal::ViewGradientColorBinding::Update(mViewImpl, bindingId, gradient);
+}
+
+void ViewDataImpl::SetColorBindingInternal(StringView bindingId, const Gradient::Base& gradient, Callback<void(const Gradient::Base&)> callback)
+{
+  if(Internal::ViewGradientColorBinding::Add(mViewImpl, bindingId, gradient, std::move(callback)))
+  {
+    UiColorManager::Get().ColorTableChangedSignal().Connect(this, &ViewDataImpl::OnColorTableChanged);
+  }
+}
+
+void ViewDataImpl::OnColorTableChanged()
+{
+  Internal::ViewGradientColorBinding::ApplyAll(mViewImpl);
+}
+
+void ViewDataImpl::ClearGradientColorBinding(StringView bindingId)
+{
+  if(Internal::ViewGradientColorBinding::Clear(mViewImpl, bindingId))
+  {
+    UiColorManager::Get().ColorTableChangedSignal().Disconnect(this, &ViewDataImpl::OnColorTableChanged);
+  }
+}
+
+void ViewDataImpl::ClearBackgroundBinding()
+{
+  UiColorManager::Get().ClearBinding(mViewImpl.Self(), BACKGROUND_COLOR_BINDING_ID);
+  ClearGradientColorBinding(BACKGROUND_GRADIENT_BINDING_ID);
+}
+
+void ViewDataImpl::RegisterWithLayoutController()
+{
+  Actor  self   = mViewImpl.Self();
+  Window window = Window::Get(self);
+
+  DALI_LOG_DEBUG_INFO("[ViewImpl] RegisterWithLayoutController: hasWindow=%d\n", window ? 1 : 0);
+
+  if(window)
+  {
+    LayoutController& controller = LayoutController::Get(window);
+    controller.RequestLayout(&mViewImpl);
+
+    // Register as a layout root in UiScaleManager so it gets invalidated when
+    // the system scale changes. Duplicate registration is silently ignored.
+    UiScaleManager::Get().RegisterLayoutRoot(Ui::View::DownCast(self));
+  }
+}
+
+MeasuredSize ViewDataImpl::ApplyConstraints(const MeasuredSize& size) const
+{
+  // size is in visual (scale-applied) units; scale min/max (natural) accordingly.
+  float        s           = mViewImpl.GetEffectiveScale();
+  MeasuredSize constrained = size;
+  constrained.width        = std::max(constrained.width, GetMinimumWidth() * s);
+  constrained.height       = std::max(constrained.height, GetMinimumHeight() * s);
+  constrained.width        = std::min(constrained.width, GetMaximumWidth() * s);
+  constrained.height       = std::min(constrained.height, GetMaximumHeight() * s);
+  return constrained;
+}
+
+Ui::Layout ViewDataImpl::GetParentLayout() const
+{
+  Actor parent = mViewImpl.Self().GetParent();
+  if(parent)
+  {
+    return Ui::Layout::DownCast(parent);
+  }
+  return Ui::Layout();
+}
+
+Ui::View ViewDataImpl::GetParentView() const
+{
+  Actor parent = mViewImpl.Self().GetParent();
+  if(parent)
+  {
+    return Ui::View::DownCast(parent);
+  }
+  return Ui::View();
+}
+
+void ViewDataImpl::SetBackgroundGradientInternal(const Gradient::Base& gradient)
+{
+  SetBackground(Internal::CreateGradientVisualPropertyMap(gradient));
+}
+
+void ViewDataImpl::SetColorInternal(const Vector4& color)
+{
+  mViewImpl.Self().SetProperty(Actor::Property::COLOR, color);
+}
+
+void ViewDataImpl::SetBorderlineColorInternal(const Vector4& color)
+{
+  mViewImpl.Self().SetProperty(Ui::View::Property::BORDERLINE_COLOR, color);
+}
+
+void ViewDataImpl::SetBackgroundColorInternal(const Vector4& color)
+{
+  Property::Map map = Internal::CreateColorVisualPropertyMap(color);
+
+  Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::View::Property::BACKGROUND);
+  if(visualImplPtr && visualImplPtr->GetType() == Ui::Integration::InternalVisualType::COLOR)
+  {
+    // Update background color only
+    visualImplPtr->DoAction(Dali::Ui::Integration::Visual::Action::UPDATE_PROPERTY, map);
+    return;
+  }
+
+  SetBackground(map);
+}
+
+MeasuredSize ViewDataImpl::DispatchMeasureWithLayoutManager(LayoutManager* manager, float widthConstraint, float heightConstraint)
+{
+  float s = mViewImpl.GetEffectiveScale();
+
+  Extents padding = mViewImpl.GetPadding();
+  float   visPadW = static_cast<float>(padding.start + padding.end) * s;
+  float   visPadH = static_cast<float>(padding.top + padding.bottom) * s;
+
+  float requestedWidth  = mViewImpl.GetRequestedWidth();
+  float requestedHeight = mViewImpl.GetRequestedHeight();
+
+  float requestedVisW = (requestedWidth >= 0.f) ? requestedWidth * s : requestedWidth;
+  float requestedVisH = (requestedHeight >= 0.f) ? requestedHeight * s : requestedHeight;
+  float effectiveVisW = (requestedVisW >= 0.f) ? requestedVisW : widthConstraint;
+  float effectiveVisH = (requestedVisH >= 0.f) ? requestedVisH : heightConstraint;
+  float contentVisW   = std::max(0.0f, effectiveVisW - visPadW);
+  float contentVisH   = std::max(0.0f, effectiveVisH - visPadH);
+
+  MeasuredSize visContent = manager->Measure(&mViewImpl, contentVisW, contentVisH);
+
+  float resultVisW;
+  if(requestedVisW >= 0.f)
+    resultVisW = requestedVisW;
+  else if(requestedWidth == MATCH_PARENT)
+    resultVisW = mViewImpl.GetMinimumWidth() * s;
+  else
+    resultVisW = visContent.width + visPadW;
+
+  float resultVisH;
+  if(requestedVisH >= 0.f)
+    resultVisH = requestedVisH;
+  else if(requestedHeight == MATCH_PARENT)
+    resultVisH = mViewImpl.GetMinimumHeight() * s;
+  else
+    resultVisH = visContent.height + visPadH;
+
+  return MeasuredSize(resultVisW, resultVisH);
+}
+
+MeasuredSize ViewDataImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& visualBounds)
+{
+  Actor self = mViewImpl.Self();
+  self.SetPositionX(visualBounds.x);
+  self.SetPositionY(visualBounds.y);
+  self.SetWidth(visualBounds.width);
+  self.SetHeight(visualBounds.height);
+
+  float   s       = mViewImpl.GetEffectiveScale();
+  Extents padding = mViewImpl.GetPadding();
+
+  LayoutRect visContentBounds;
+  visContentBounds.x      = static_cast<float>(padding.start) * s;
+  visContentBounds.y      = static_cast<float>(padding.top) * s;
+  visContentBounds.width  = std::max(0.0f, visualBounds.width - static_cast<float>(padding.start + padding.end) * s);
+  visContentBounds.height = std::max(0.0f, visualBounds.height - static_cast<float>(padding.top + padding.bottom) * s);
+
+  manager->Arrange(&mViewImpl, visContentBounds);
+
+  return {visualBounds.width, visualBounds.height};
+}
+
+MeasuredSize ViewDataImpl::DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& visualBounds)
+{
+  Actor self = mViewImpl.Self();
+  self.SetPositionX(visualBounds.x);
+  self.SetPositionY(visualBounds.y);
+  self.SetWidth(visualBounds.width);
+  self.SetHeight(visualBounds.height);
+  Ui::View view = Ui::View::DownCast(self);
+  return callback->Invoke(view, visualBounds);
+}
+
+void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)
+{
+  Dali::Ui::View handle = Ui::View::DownCast(mViewImpl.Self());
+
+  if(Dali::Integration::Accessibility::IsUp())
+  {
+    auto accessible = GetAccessibleObject();
+    if(DALI_LIKELY(accessible))
+    {
+      accessible->EmitFocused(focusGained);
+      auto parent = dynamic_cast<Dali::Accessibility::ActorAccessible*>(accessible->GetParent());
+      if(parent && !accessible->GetStates()[Dali::Integration::Accessibility::State::MANAGES_DESCENDANTS]) // LCOV_EXCL_LINE
+      {
+        parent->EmitActiveDescendantChanged(accessible.Get());
+      }
+    }
+  }
+
+  // signals are allocated dynamically when someone connects
+  if(!mFocusChangedSignal.Empty())
+  {
+    mFocusChangedSignal.Emit(handle, focusGained);
+  }
+}
+
+void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
+{
+  if(mSkipChildrenUpdate)
+  {
+    return;
+  }
+
+  Actor                           self            = mViewImpl.Self();
+  uint32_t                        actorChildCount = self.GetChildCount();
+  IntegrationView::ChildContainer newChildren;
+  newChildren.Reserve(actorChildCount);
+
+  for(uint32_t i = 0; i < actorChildCount; ++i)
+  {
+    Ui::View view = Ui::View::DownCast(self.GetChildAt(i));
+    if(view)
+    {
+      auto it = std::find(mChildren.begin(), mChildren.end(), view);
+      if(it != mChildren.end())
+      {
+        newChildren.PushBack(std::move(*it));
+      }
+    }
+  }
+
+  mChildren = std::move(newChildren);
+
+  // Tag every child as reordered so the layout transition dispatcher can
+  // tag CHANGE-slot dispatches with @c LayoutChangeCause::REORDERED. The
+  // dispatcher consumes this set once per layout pass. Skip when no
+  // transition is attached so stale records cannot leak across an
+  // unrelated SetLayoutTransition + layout pass later, and so raw
+  // ViewImpl* pointers do not outlive their owning views without a
+  // central cleanup hook.
+  if(mLayoutTransition)
+  {
+    for(auto& childView : mChildren)
+    {
+      mPendingReorderedChildren.insert(&GetImpl(childView));
+    }
+  }
+
+  // A logical child-order change can alter the measured size (e.g. a wrap
+  // layout where line-breaking depends on child order), so invalidate measure
+  // — not just arrange — mirroring the Insert/MoveChild reorder path.
+  mViewImpl.InvalidateMeasure();
 }
 
 // =============================================================================
@@ -994,7 +3707,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         std::string          url;
         Vector4              color;
         const Property::Map* map = value.GetMap();
-        viewImpl.ClearBackgroundBinding();
+        ViewDataImpl::Get(viewImpl).ClearBackgroundBinding();
         if(map && !map->Empty())
         {
           viewImpl.GetViewDataImpl().SetBackground(*map);
@@ -1402,7 +4115,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           {
             dataImpl.mRequestedWidth = width;
             viewImpl.InvalidateMeasure();
-            if(width >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
+            if(width >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
                !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
             {
               viewImpl.Self().SetWidth(width);
@@ -1432,7 +4145,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
           {
             dataImpl.mRequestedHeight = height;
             viewImpl.InvalidateMeasure();
-            if(height >= 0 && !viewImpl.GetParentLayout() && !viewImpl.GetParentView() &&
+            if(height >= 0 && !dataImpl.GetParentLayout() && !dataImpl.GetParentView() &&
                !Integration::View::HasLayoutCapability(viewImpl) && viewImpl.GetChildViewCount() == 0)
             {
               viewImpl.Self().SetHeight(height);
@@ -1521,7 +4234,7 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
             // the self.InvalidateMeasure() above may no longer propagate
             // (e.g. after transitioning to STANDALONE this view becomes a
             // layout boundary and stops propagation).
-            Ui::View parentView = viewImpl.GetParentView();
+            Ui::View parentView = dataImpl.GetParentView();
             if(parentView)
             {
               GetImpl(parentView).InvalidateMeasure();

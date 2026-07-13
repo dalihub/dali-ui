@@ -28,6 +28,7 @@
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 namespace Dali
 {
 namespace Ui
@@ -176,7 +177,7 @@ bool KeyInputFocusManagerImpl::NotifyKeyEvent(Ui::View view, const KeyEvent& eve
 
   if(view)
   {
-    consumed = GetImpl(view).NotifyKeyEvent(event);
+    consumed = ViewDataImpl::Get(GetImpl(view)).NotifyKeyEvent(event);
 
     // if view doesn't consume KeyEvent, give KeyEvent to its parent.
     if(!consumed)

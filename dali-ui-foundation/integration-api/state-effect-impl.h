@@ -31,7 +31,8 @@ namespace Ui
 namespace Internal
 {
 class ViewStateManager;
-}
+class ViewDataImpl;
+} //namespace Internal
 
 namespace Integration
 {
@@ -112,7 +113,7 @@ protected:
 
 private:
   friend class Internal::ViewStateManager;
-  friend class Dali::Ui::ViewImpl;
+  friend class Internal::ViewDataImpl;
 };
 
 } // namespace Integration

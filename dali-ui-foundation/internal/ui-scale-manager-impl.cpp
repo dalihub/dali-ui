@@ -24,6 +24,7 @@
 #include <cmath>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -87,7 +88,7 @@ void UiScaleManagerImpl::SetScale(float scale)
       ViewImpl& viewImpl = GetImpl(rootView);
       // Reset scale cache for the entire subtree first, so every view
       // re-evaluates its effective scale on the next Measure pass.
-      viewImpl.ResetEffectiveScaleRecursive();
+      ViewDataImpl::Get(viewImpl).ResetEffectiveScaleRecursive();
       // Then invalidate measure at the root to schedule a re-layout pass.
       viewImpl.InvalidateMeasure();
     }

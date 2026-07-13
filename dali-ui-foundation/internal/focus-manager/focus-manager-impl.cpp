@@ -43,6 +43,7 @@
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -64,7 +65,7 @@ Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_KEY
 
 bool IsDefaultFocusIndicatorSuppressedByStateEffect(View view)
 {
-  return view && GetImpl(view).IsDefaultFocusIndicatorSuppressedByStateEffect();
+  return view && ViewDataImpl::Get(GetImpl(view)).IsDefaultFocusIndicatorSuppressedByStateEffect();
 }
 
 bool IsScreenPointInsideView(View view, const Vector2& screenPosition)
@@ -249,7 +250,7 @@ bool FocusManager::RequestFocus(View view)
     return false;
   }
 
-  View resolved = GetImpl(view).RequestFocus();
+  View resolved = ViewDataImpl::Get(GetImpl(view)).RequestFocus();
   if(resolved)
   {
     return DoSetCurrentFocusView(resolved, {Ui::FocusDevice::PROGRAMMATIC, ""});
@@ -477,7 +478,7 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction, const FocusChangeCont
   // Apply: resolve through RequestFocus (child delegation) then commit
   if(candidate)
   {
-    View resolved = GetImpl(candidate).RequestFocus();
+    View resolved = ViewDataImpl::Get(GetImpl(candidate)).RequestFocus();
     if(resolved && !resolved.HasAncestorBlockingFocus())
     {
       return DoSetCurrentFocusView(resolved, context);
@@ -570,7 +571,7 @@ FocusManager::ParentNavigationResult FocusManager::FindNextFocusByParentNavigati
 
     if(parentView)
     {
-      result.candidate = GetImpl(parentView).RequestFocusNavigation(currentFocusView, direction);
+      result.candidate = ViewDataImpl::Get(GetImpl(parentView)).RequestFocusNavigation(currentFocusView, direction);
       if(result.candidate)
       {
         return result;
@@ -707,7 +708,7 @@ void FocusManager::SetAsFocusGroup(View view, bool isFocusGroup)
 {
   if(view)
   {
-    GetImpl(view).SetAsFocusGroup(isFocusGroup);
+    ViewDataImpl::Get(GetImpl(view)).SetAsFocusGroup(isFocusGroup);
   }
 }
 
@@ -715,7 +716,7 @@ bool FocusManager::IsFocusGroup(View view) const
 {
   if(view)
   {
-    return GetImpl(view).IsFocusGroup();
+    return ViewDataImpl::Get(GetImpl(view)).IsFocusGroup();
   }
   return false;
 }

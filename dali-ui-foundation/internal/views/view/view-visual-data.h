@@ -74,6 +74,8 @@ typedef Dali::OwnerContainer<RegisteredVisual*> RegisteredVisualContainer;
 // private inner class
 class ViewDataImpl::VisualData : public Visual::EventObserver, public Visual::ConstraintObserver
 {
+  friend std::string DumpView(const ::Dali::Ui::ViewImpl& view);
+
 public:
   // Constructor
   VisualData(ViewDataImpl& outer);
@@ -111,22 +113,22 @@ public: // Visual::ConstraintObserver
 
 public:
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::IsResourceReady()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::IsResourceReady()
    */
   bool IsResourceReady() const;
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::EnableReadyTransitionOverridden()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::EnableReadyTransitionOverridden()
    */
   void EnableReadyTransitionOverridden(Ui::Integration::Visual::Base& visual, bool enable);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::EnableCornerPropertiesOverridden()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::EnableCornerPropertiesOverridden()
    */
   void EnableCornerPropertiesOverridden(Ui::Integration::Visual::Base& visual, bool enable, Dali::Constraint cornerRadiusConstraint);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::GetVisualResourceStatus()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::GetVisualResourceStatus()
    */
   Ui::Visual::ResourceStatus GetVisualResourceStatus(Property::Index index) const;
 
@@ -139,37 +141,37 @@ public:
   void CopyInstancedProperties(RegisteredVisualContainer& visuals, Dictionary<Property::Map>& instancedProperties);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, int depthIndex);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::RegisterVisual()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::RegisterVisual()
    */
   void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled, int depthIndex);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::UnregisterVisual()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::UnregisterVisual()
    */
   void UnregisterVisual(Property::Index index);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::GetVisual()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::GetVisual()
    */
   Ui::Integration::Visual::Base GetVisual(Property::Index index) const;
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::GetVisualImplPtr()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::GetVisualImplPtr()
    */
   Ui::Internal::Visual::Base* GetVisualImplPtr(Property::Index index) const;
 
@@ -180,17 +182,17 @@ public:
   Ui::Integration::Visual::Base GetVisual(const std::string& name) const;
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::GetVisualProperty()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::GetVisualProperty()
    */
   Dali::Property GetVisualProperty(Dali::Property::Index index, Dali::Property::Key visualPropertyKey);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::EnableVisual()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::EnableVisual()
    */
   void EnableVisual(Property::Index index, bool enable);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::IsVisualEnabled()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::IsVisualEnabled()
    */
   bool IsVisualEnabled(Property::Index index) const;
 
@@ -230,19 +232,19 @@ public:
   void ReplaceStateVisualsAndProperties(const StylePtr oldState, const StylePtr newState, const std::string& subState);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::DoAction()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::DoAction()
    */
   void DoAction(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                 const Dali::Property::Value& attributes);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::DoActionExtension()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::DoActionExtension()
    */
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::VisualEventSignal()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::VisualEventSignal()
    */
   Ui::View::VisualEventSignalType& VisualEventSignal();
 
@@ -272,7 +274,7 @@ public:
   void ClearVisuals();
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::ApplyFittingMode()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::ApplyFittingMode()
    */
   void ApplyFittingMode(const Vector2& size);
 
@@ -289,12 +291,12 @@ public:
   void StartObservingVisual(Ui::Integration::Visual::Base& visual);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::CreateAnimationConstraints()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::CreateAnimationConstraints()
    */
   void CreateAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::ClearAnimationConstraints()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::ClearAnimationConstraints()
    */
   void ClearAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 

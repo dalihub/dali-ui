@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
@@ -53,7 +54,7 @@ void StateEffectImpl::InvalidateDefaultFocusIndicatorSuppression(Ui::View view)
 {
   if(view)
   {
-    GetImpl(view).InvalidateDefaultFocusIndicatorSuppression(*this);
+    Internal::ViewDataImpl::Get(GetImpl(view)).InvalidateDefaultFocusIndicatorSuppression(*this);
   }
 }
 

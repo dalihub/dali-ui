@@ -28,17 +28,13 @@
 #include <dali/public-api/signals/callback.h>
 #include <dali/public-api/signals/dali-signal.h>
 #include <cstdint>
-#include <unordered_set>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
-#include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
-#include <dali-ui-foundation/public-api/traits/trait-id.h>
-#include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/types/unique-any.h>
@@ -64,11 +60,6 @@ namespace Internal
 {
 class ViewDataImpl;
 } //namespace Internal
-
-namespace Integration
-{
-class StateEffectImpl;
-}
 
 class ViewImpl;
 using ViewImplPtr = IntrusivePtr<ViewImpl>;
@@ -109,8 +100,6 @@ public:
 
     LAST_VIEW_BEHAVIOUR_FLAG
   };
-
-  static const int VIEW_BEHAVIOUR_FLAG_COUNT = Log<LAST_VIEW_BEHAVIOUR_FLAG - 1>::value + 1; ///< Total count of flags
 
 public: // ABI-frozen virtual API
   // ============================================================
@@ -213,16 +202,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::LayoutFinishedSignal()
    */
   LayoutFinishedSignalType& LayoutFinishedSignal();
-
-  /**
-   * @brief Whether LayoutFinishedSignal has at least one connected slot.
-   */
-  DALI_INTERNAL bool HasLayoutFinishedSignalConnections() const;
-
-  /**
-   * @brief Emits LayoutFinishedSignal with @p bounds if still connected.
-   */
-  DALI_INTERNAL void EmitLayoutFinishedSignal(const LayoutRect& bounds);
 
   /**
    * @copydoc Ui::View::GetEffectiveLayoutDirection()
@@ -393,33 +372,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @copydoc Ui::View::SetStateEffect()
    */
   void SetStateEffect(StateEffect effect);
-
-  /**
-   * @brief Gets whether the current StateEffect suppresses FocusManager's default focus indicator.
-   *
-   * This is a cached value updated when the StateEffect changes or when the
-   * StateEffect implementation invalidates it.
-   *
-   * @return True if the current StateEffect suppresses the default focus indicator
-   */
-  bool IsDefaultFocusIndicatorSuppressedByStateEffect() const;
-
-  /**
-   * @brief Recomputes the cached default focus indicator suppression state.
-   */
-  void RefreshDefaultFocusIndicatorSuppression();
-
-  /**
-   * @brief Applies the current or default StateEffect after this View becomes interactive.
-   */
-  void AttachInteractiveStateEffect();
-
-  /**
-   * @brief Recomputes default focus indicator suppression if the given effect is currently attached.
-   *
-   * @param[in] effect The StateEffect implementation requesting invalidation
-   */
-  void InvalidateDefaultFocusIndicatorSuppression(const Integration::StateEffectImpl& effect);
 
   /**
    * @copydoc Ui::View::SetStateEffectTarget()
@@ -683,25 +635,6 @@ public: // Non-virtual API (safe to reorder / extend)
   void AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager);
 
   /**
-   * @brief Returns whether this view has a LayoutManager attached.
-   *
-   * @return True if a LayoutManager is attached
-   */
-  bool HasLayoutManager() const;
-
-  /**
-   * @brief Returns whether this view has a MeasureCallback or
-   *        ArrangeCallback set.
-   *
-   * Used by HasLayoutCapability to recognize callback-driven custom
-   * layout views so that legacy relayout and child-first focus behave
-   * consistently with Layout subclasses and LayoutManager attachments.
-   *
-   * @return True if either callback is set
-   */
-  bool HasLayoutCallback() const;
-
-  /**
    * @copydoc Ui::View::SetLayoutTransition()
    */
   void SetLayoutTransition(LayoutTransition transition);
@@ -721,56 +654,6 @@ public: // Non-virtual API (safe to reorder / extend)
    * @return The most recent arranged bounds
    */
   LayoutRect GetArrangedBounds() const;
-
-  /**
-   * @brief Atomically retrieves and clears the set of children that were
-   * added since the previous layout pass.
-   *
-   * Internal helper used by the layout transition dispatcher to fire
-   * ENTER-slot animations. Must be called once per layout pass; subsequent
-   * calls before a new OnChildAdd return an empty set.
-   *
-   * @return Set of child ViewImpl pointers
-   */
-  std::unordered_set<ViewImpl*> TakePendingEnterChildren();
-
-  /**
-   * @brief Atomically retrieves and clears the set of children whose
-   * sibling order changed since the previous layout pass.
-   *
-   * Internal helper used by the layout transition dispatcher to tag
-   * CHANGE-slot dispatches with @c LayoutChangeCause::REORDERED.
-   *
-   * @return Set of child ViewImpl pointers
-   */
-  std::unordered_set<ViewImpl*> TakePendingReorderedChildren();
-
-  /**
-   * @brief Atomically retrieves and clears the marker that records whether
-   * any child was removed via @c View::Remove(child, RemovePolicy::ANIMATE_EXIT)
-   * or the internal @c ViewImpl::RemoveAllChildren since the last layout pass.
-   *
-   * Internal helper used by the layout transition dispatcher to tag
-   * CHANGE-slot dispatches on the remaining children with
-   * @c LayoutChangeCause::SIBLING_REMOVED.
-   *
-   * @return @c true if a removal occurred and the marker was cleared
-   */
-  bool TakePendingChildRemovalForLayoutTransition();
-
-  /**
-   * @brief Returns @c true if this view has completed at least one
-   * @c Arrange pass.
-   *
-   * Used by the layout transition dispatcher to distinguish initial-mount
-   * children from children added at runtime after the parent has already
-   * been arranged. Children present at the parent's first arrange pass are
-   * treated as the view's "always there" state and ENTER is suppressed for
-   * them by default (the surface has typically not been displayed yet, so
-   * the fade-in would be invisible). Apps can opt into firing ENTER for
-   * initial-mount children via @c LayoutTransition::SetEnterOnInitialMount.
-   */
-  bool IsInitialLayoutDone() const;
 
   // Child Management
 
@@ -870,13 +753,7 @@ public: // Non-virtual API (safe to reorder / extend)
   Ui::View::FocusChangedSignalType& FocusChangedSignal();
 
   /// @cond internal
-  DALI_INTERNAL void SetAsFocusGroup(bool isFocusGroup);
-  DALI_INTERNAL bool IsFocusGroup() const;
-  DALI_INTERNAL bool NotifyKeyEvent(const KeyEvent& event);
   DALI_INTERNAL void NotifyFocusChanged(bool focused);
-  DALI_INTERNAL void NotifyFocusChangeCommitted(Ui::View committedFocusableView);
-  DALI_INTERNAL View RequestFocusNavigation(View currentFocusedView, FocusDirection direction);
-  DALI_INTERNAL View RequestFocus();
   /// @endcond
 
 protected:
@@ -924,12 +801,6 @@ protected:
   virtual void OnFocusChanged(bool focused);
 
   /**
-   * @brief Called when this view's chosen focusable view will be focused.
-   * @param[in] committedFocusableView The committed focusable view
-   */
-  virtual void OnFocusChangeCommitted(Ui::View committedFocusableView);
-
-  /**
    * @brief Called when the focus manager requests the next focusable view within this container.
    *
    * Override to provide custom focus navigation logic. If a callback is set via
@@ -952,6 +823,18 @@ protected:
    * @return The view that should receive focus, or an empty handle if focus cannot be accepted
    */
   virtual View OnFocusRequested();
+
+  /**
+   * @brief Called when the effective scale changes.
+   *
+   * Subclasses (Label, InputField) override this to update scale-dependent
+   * content such as font sizes.
+   *
+   * @param[in] newScale The new effective scale factor
+   */
+  virtual void OnEffectiveScaleChanged(float newScale)
+  {
+  }
 
   // ============================================================
   // protected: Framework overrides (CustomActorImpl)
@@ -1085,14 +968,9 @@ protected:
   /**
    * @brief Gets texture output of offscreen rendering.
    * @return The offscreen rendering output texture
-   * @note Valid only inside OffScreenRenderingFinishedSignal() with RENDER_ONCE type.
+   * @note Valid only inside OffScreenRenderingFinishedSignal() with REFRESH_ONCE type.
    */
   Dali::Texture GetOffScreenRenderingOutput() const;
-
-  /**
-   * @brief Marks this view's resources as ready (does not request relayout).
-   */
-  void SetResourceReady();
 
   /**
    * @brief Registers a color binding for theme-aware color updates.
@@ -1143,18 +1021,6 @@ protected:
   }
 
   /**
-   * @brief Gets the measure callback, if set.
-   * @return Pointer to the MeasureCallback, or nullptr if not set
-   */
-  MeasureCallback* GetMeasureCallback();
-
-  /**
-   * @brief Gets the arrange callback, if set.
-   * @return Pointer to the ArrangeCallback, or nullptr if not set
-   */
-  ArrangeCallback* GetArrangeCallback();
-
-  /**
    * @brief Gets the LayoutManager, if attached.
    *
    * Returned pointer is non-owning. Ownership remains with the View's trait.
@@ -1162,19 +1028,6 @@ protected:
    * @return Pointer to the LayoutManager, or nullptr if not attached
    */
   LayoutManager* GetLayoutManager() const;
-
-  /**
-   * @brief Resolves focus by iterating visible children, with self fallback.
-   *
-   * Used by OnFocusRequested for views that have layout capability (Layout
-   * subclasses or any View with a LayoutManager attached).
-   */
-  View RequestChildFirstFocus();
-
-  /**
-   * @brief Returns self if focusable, enabled and visible; otherwise empty.
-   */
-  View DefaultOnFocusRequested();
 
   // ============================================================
   // private
@@ -1184,38 +1037,6 @@ private:
   friend class Internal::ViewDataImpl; ///< Pimpl body
 
   Internal::ViewDataImpl& GetViewDataImpl() const;
-  Ui::Layout              GetParentLayout() const;
-  Ui::View                GetParentView() const;
-  void                    EmitFocusChangedSignal(bool focusGained);
-  MeasuredSize            ApplyConstraints(const MeasuredSize& size) const;
-  void                    RegisterWithLayoutController();
-  void                    MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
-  void                    ArrangeStandaloneChildren(const LayoutRect& bounds);
-  void                    ApplyLayoutDirection(float parentWidth);
-  float                   ComputeEffectiveScale() const;
-  MeasuredSize            DispatchMeasureWithLayoutManager(LayoutManager* manager,
-                                                           float          widthConstraint,
-                                                           float          heightConstraint);
-  MeasuredSize            DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& bounds);
-  MeasuredSize            DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& bounds);
-
-public:
-  /**
-   * @brief Recursively resets the effective-scale cache and measure cache for
-   *        this view and all its descendants.
-   * Called by UiScaleManagerImpl::SetScale() so that the entire subtree
-   * re-evaluates its effective scale on the next Measure pass.
-   */
-  void ResetEffectiveScaleRecursive();
-
-  /**
-   * @brief Called when the effective scale changes.
-   * Subclasses (Label, InputField) override this to update font size scale.
-   * @param[in] newScale The new effective scale factor
-   */
-  virtual void OnEffectiveScaleChanged(float newScale)
-  {
-  }
 
 private:
   ViewImpl(const ViewImpl&)            = delete;
@@ -1236,18 +1057,7 @@ private:
    */
   bool UpdateColorBindingInternal(StringView bindingId, const Gradient::Base& gradient);
   void SetColorBindingInternal(StringView bindingId, const Gradient::Base& gradient, Callback<void(const Gradient::Base&)> callback);
-  void OnColorTableChanged();
   void ClearGradientColorBinding(StringView bindingId);
-  void ClearBackgroundBinding();
-  void SetBackgroundColorInternal(const Vector4& color);
-  void SetBackgroundGradientInternal(const Gradient::Base& gradient);
-  void SetBorderlineColorInternal(const Vector4& color);
-  void SetColorInternal(const Vector4& color);
-  void OnChildOrderChanged(Actor parent, Actor orderChangedChild);
-
-  // UiScale
-  UiScalePolicy mScalePolicy{UiScalePolicy::INHERIT}; // 1 byte
-  mutable float mEffectiveScale{-1.0f};               // -1 = uncomputed sentinel
 
   Internal::ViewDataImpl* mImpl;
 };

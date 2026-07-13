@@ -73,27 +73,27 @@ public:
   AccessibilityData(ViewImpl& viewImpl);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::AppendAccessibilityAttribute()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::AppendAccessibilityAttribute()
    */
   void AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::RemoveAccessibilityAttribute()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::RemoveAccessibilityAttribute()
    */
   void RemoveAccessibilityAttribute(const Dali::String& key);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::ClearAccessibilityAttributes()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::ClearAccessibilityAttributes()
    */
   void ClearAccessibilityAttributes();
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::SetAccessibilityReadingInfoType()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::SetAccessibilityReadingInfoType()
    */
   void SetAccessibilityReadingInfoType(const Dali::Integration::Accessibility::ReadingInfoTypes types); // LCOV_EXCL_LINE
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::GetAccessibilityReadingInfoType()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::GetAccessibilityReadingInfoType()
    */
   Dali::Integration::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const; // LCOV_EXCL_LINE
 
@@ -134,7 +134,7 @@ public:
                                   const Dali::Property::Value& value);
 
   /**
-   * @copydoc Dali::Ui::ViewImpl::Impl::GetAccessibleObject()
+   * @copydoc Dali::Ui::Internal::ViewDataImpl::GetAccessibleObject()
    */
   SharedPtr<Ui::ViewAccessible> GetAccessibleObject();
 

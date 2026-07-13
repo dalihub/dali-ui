@@ -656,7 +656,7 @@ View::ResourceReadySignalType& View::ResourceReadySignal()
   ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
 
-  return viewDataImpl.mResourceReadySignal;
+  return viewDataImpl.ResourceReadySignal();
 }
 
 View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSignal()
@@ -664,7 +664,7 @@ View::OffScreenRenderingFinishedSignalType& View::OffScreenRenderingFinishedSign
   ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
 
-  return viewDataImpl.mOffScreenRenderingFinishedSignal;
+  return viewDataImpl.OffScreenRenderingFinishedSignal();
 }
 
 View::KeyEventSignalType& View::KeyEventSignal()

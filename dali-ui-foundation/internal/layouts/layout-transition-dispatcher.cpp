@@ -34,6 +34,7 @@
 #include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-validation.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
@@ -351,7 +352,7 @@ LayoutRect LayoutTransitionDispatcher::VisualBoundsOf(ViewImpl* parent, ViewImpl
   LayoutRect bounds = child->GetArrangedBounds();
   // Mirror only when the child participates in the parent's
   // ApplyLayoutDirection pass. Standalone children are explicitly skipped
-  // there (see ViewImpl::ApplyLayoutDirection), so mirroring them here
+  // there (see ViewDataImpl::ApplyLayoutDirection), so mirroring them here
   // would diverge from the actor's actual on-screen position and cause a
   // visible jump on the first transition under an RTL parent.
   if(parent &&
@@ -458,7 +459,7 @@ void LayoutTransitionDispatcher::CaptureGovernedChildren(ViewImpl*              
   for(auto& childView : children)
   {
     ViewImpl& childImpl = GetImpl(childView);
-    out.push_back({&childImpl, parent, VisualBoundsOf(parent, &childImpl), !childImpl.IsInitialLayoutDone()});
+    out.push_back({&childImpl, parent, VisualBoundsOf(parent, &childImpl), !ViewDataImpl::Get(childImpl).IsInitialLayoutDone()});
 
     // Under SUBTREE scope, descend into descendants the owner governs: those
     // with no transition of their own (a child with its own transition
@@ -488,7 +489,7 @@ void LayoutTransitionDispatcher::CaptureSingleView(ViewImpl* view)
   // completed any layout pass. The flag is set inside ViewImpl::Arrange
   // (called below by ProcessLayoutRoot), so checking before that runs
   // gives us a stable signal for StartTransitionsForView to consume.
-  if(!view->IsInitialLayoutDone())
+  if(!ViewDataImpl::Get(*view).IsInitialLayoutDone())
   {
     mInitialMountViews.insert(view);
   }
@@ -547,9 +548,7 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
   {
     // No snapshot — nothing to compare against, but still consume any
     // pending sets so they do not leak into later passes.
-    root->TakePendingEnterChildren();
-    root->TakePendingReorderedChildren();
-    root->TakePendingChildRemovalForLayoutTransition();
+    ViewDataImpl::Get(*root).TakePendingLayoutTransitionChanges();
     mInitialMountViews.erase(root);
     return;
   }
@@ -558,9 +557,7 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
   if(!transition)
   {
     mCaptured.erase(capIt);
-    root->TakePendingEnterChildren();
-    root->TakePendingReorderedChildren();
-    root->TakePendingChildRemovalForLayoutTransition();
+    ViewDataImpl::Get(*root).TakePendingLayoutTransitionChanges();
     mInitialMountViews.erase(root);
     return;
   }
@@ -603,15 +600,16 @@ void LayoutTransitionDispatcher::StartTransitionsForView(ViewImpl* root)
     }
   }
 
-  std::unordered_set<ViewImpl*> enterChildren     = root->TakePendingEnterChildren();
-  std::unordered_set<ViewImpl*> reorderedChildren = root->TakePendingReorderedChildren();
+  PendingLayoutTransitionChanges pendingChanges    = ViewDataImpl::Get(*root).TakePendingLayoutTransitionChanges();
+  auto&                          enterChildren     = pendingChanges.enterChildren;
+  auto&                          reorderedChildren = pendingChanges.reorderedChildren;
   // Capture sibling add/remove markers for CHANGE cause refinement. A
   // sibling add is detected as "this pass introduced at least one ENTER
   // child", a sibling remove via the dispatcher-facing marker set in
   // ViewImpl::Remove / RemoveAllChildren. Per-cause precedence is:
   // REORDERED > SIBLING_ADDED > SIBLING_REMOVED > WINDOW_RESIZED > OTHER.
   const bool hadSiblingAdd    = !enterChildren.empty();
-  const bool hadSiblingRemove = root->TakePendingChildRemovalForLayoutTransition();
+  const bool hadSiblingRemove = pendingChanges.hadChildRemoval;
 
   // Per-pass window-resize flag (reset by StartTransitionsAfterLayout).
   // CHANGE causes are tagged WINDOW_RESIZED; the per-transition opt-out

@@ -1935,7 +1935,7 @@ public:
    * @return The signal to connect to
    * @pre The View has been initialized.
    * @note This signal is emitted when the offscreen rendering task is completed.
-   * @note This signal is only emitted when OffScreenRenderingType is set to RENDER_ONCE.
+   * @note This signal is only emitted when OffScreenRenderingType is set to REFRESH_ONCE.
    */
   OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
 

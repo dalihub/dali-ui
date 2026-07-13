@@ -123,12 +123,12 @@ bool IsLayoutModeStandalone(const ViewImpl& viewImpl)
 
 ChildContainer& GetChildren(ViewImpl& viewImpl)
 {
-  return GetViewImplData(viewImpl).mChildren;
+  return GetViewImplData(viewImpl).GetChildren();
 }
 
 const ChildContainer& GetChildren(const ViewImpl& viewImpl)
 {
-  return GetViewImplData(viewImpl).mChildren;
+  return GetViewImplData(viewImpl).GetChildren();
 }
 
 bool IsLayout(ViewImpl& viewImpl)
@@ -138,7 +138,8 @@ bool IsLayout(ViewImpl& viewImpl)
 
 bool HasLayoutCapability(ViewImpl& viewImpl)
 {
-  return IsLayout(viewImpl) || viewImpl.HasLayoutManager() || viewImpl.HasLayoutCallback();
+  const auto& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
+  return IsLayout(viewImpl) || viewDataImpl.HasLayoutManager() || viewDataImpl.HasLayoutCallback();
 }
 
 } // namespace View

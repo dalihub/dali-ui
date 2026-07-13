@@ -183,13 +183,13 @@ void ShadowStack::Clear()
   mImpl->Clear();
 }
 
-uint32_t ShadowStack::GetInternalShadowCount() const
+uint32_t ShadowStack::GetShadowCount() const
 {
   DALI_ASSERT_VALID_SHADOW_STACK(mImpl);
   return mImpl->GetShadowCount();
 }
 
-const Shadow& ShadowStack::GetInternalShadow(uint32_t index) const
+const Shadow& ShadowStack::GetShadowAt(uint32_t index) const
 {
   DALI_ASSERT_VALID_SHADOW_STACK(mImpl);
   return mImpl->GetShadow(index);

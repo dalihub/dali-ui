@@ -295,8 +295,8 @@ DALI_UI_API bool IsLayout(ViewImpl& viewImpl);
  *        LayoutManager attached, or any View with a MeasureCallback /
  *        ArrangeCallback set).
  * @param[in] viewImpl The view implementation to query
- * @return True if IsLayout(viewImpl) || viewImpl.HasLayoutManager() ||
- *         viewImpl.HasLayoutCallback()
+ * @return True if the View is a Layout or its ViewDataImpl has a LayoutManager
+ *         or a measure / arrange callback
  */
 DALI_UI_API bool HasLayoutCapability(ViewImpl& viewImpl);
 
