@@ -22,6 +22,7 @@
 #include <dali-ui-components/internal/styles/text-button-style-impl.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
+#include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 
 // EXTERNAL INCLUDES
 #include <utility>
@@ -35,7 +36,12 @@ namespace
 
 StateEffect CreateDefaultTextButtonStateEffect()
 {
-  return StateEffect::DefaultForInteractive();
+  StateEffect effect = StateEffect::DefaultForInteractive();
+  if(effect.IsNone())
+  {
+    return OverlayEffect::Plain();
+  }
+  return effect;
 }
 
 } // namespace

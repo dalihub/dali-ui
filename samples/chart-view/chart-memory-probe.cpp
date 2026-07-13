@@ -1143,7 +1143,9 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application         app = Application::New(&argc, &argv);
-  Components::UiConfig::New().Apply();
+  Components::UiConfig config = Components::UiConfig::New();
+  config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
+  config.Apply();
   MemProbeApp         probe(app);
   app.MainLoop();
   return 0;

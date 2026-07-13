@@ -532,7 +532,9 @@ const Ui::AnimatedImage::StopBehavior LottieAnimationViewSampleController::STOP_
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  UiConfig::New().Apply();
+  UiConfig config = UiConfig::New();
+  config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
+  config.Apply();
   LottieAnimationViewSampleController controller(application);
   application.MainLoop();
   return 0;

@@ -84,13 +84,13 @@ view.SetStateEffect(brandOverlay);
 
 ## Interactive Defaults Via UiConfig
 
-`InteractiveView`, or a View made interactive through `AsInteractive()`, receives the default state effect configured in `UiConfig`. The current default is `OverlayEffect::Plain()`.
+`InteractiveView`, or a View made interactive through `AsInteractive()` or selectable traits, receives the default state effect configured in `UiConfig`. The current default is `StateEffect::None()`.
 
-To prevent Interactive Views from receiving a default effect, configure `UiConfig` before the application starts.
+This means Interactive Views do not receive an automatic visual effect unless the application configures one before startup.
 
 ```cpp
 UiConfig config = UiConfig::New();
-config.SetDefaultStateEffectForInteractive(StateEffect::None());
+config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
 config.Apply();
 ```
 

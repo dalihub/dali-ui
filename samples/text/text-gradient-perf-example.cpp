@@ -1081,6 +1081,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
 
   UiConfig config = UiConfig::New();
   config.SetLabelAsyncRendering(true);
+  config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
 
   TextGradientPerfExample controller(application);

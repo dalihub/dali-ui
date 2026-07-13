@@ -192,6 +192,13 @@ public:
 
 Dali::TypeRegistration testInteractiveViewImplTypeReg(typeid(TestInteractiveViewImpl), typeid(Extension::InteractiveViewImpl), nullptr);
 
+UiConfig CreateDefaultOverlayConfig()
+{
+  UiConfig config = UiConfig::New();
+  config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
+  return config;
+}
+
 InteractiveView CreateTestInteractiveView(TestApplication& application, float width = 100.0f, float height = 100.0f)
 {
   InteractiveView view = InteractiveView::New();
@@ -718,7 +725,7 @@ int UtcDaliInteractiveViewImplSubclassSmokeP(void)
 
 int UtcDaliInteractiveViewDefaultOverlayEffectP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   view = CreateTestInteractiveView(application);
 
   uint32_t initialChildCount = view.GetChildCount();
@@ -740,7 +747,7 @@ int UtcDaliInteractiveViewDefaultOverlayEffectP(void)
 
 int UtcDaliInteractiveViewOverlayEffectTargetP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   owner  = CreateTestInteractiveView(application);
   View              target = View::New();
   target.SetRequestedWidth(80.0f);
@@ -761,7 +768,7 @@ int UtcDaliInteractiveViewOverlayEffectTargetP(void)
 
 int UtcDaliInteractiveViewOverlayEffectCleansTargetOnOwnerDestroyP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   View              target;
 
   {
@@ -794,7 +801,7 @@ int UtcDaliInteractiveViewOverlayEffectCleansTargetOnOwnerDestroyP(void)
 
 int UtcDaliInteractiveViewOverlayEffectRetargetsTargetP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   owner   = CreateTestInteractiveView(application);
   View              target1 = View::New();
   View              target2 = View::New();
@@ -825,7 +832,7 @@ int UtcDaliInteractiveViewOverlayEffectRetargetsTargetP(void)
 
 int UtcDaliInteractiveViewOverlayEffectFollowsTargetCornerRadiusP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   view = CreateTestInteractiveView(application);
   view.SetCornerRadius(Vector4(4.0f, 5.0f, 6.0f, 7.0f));
   view.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
@@ -843,7 +850,7 @@ int UtcDaliInteractiveViewOverlayEffectFollowsTargetCornerRadiusP(void)
 
 int UtcDaliInteractiveViewOverlayEffectRefreshesActiveCornerRadiusP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   view = CreateTestInteractiveView(application);
   view.SetCornerRadius(Vector4(4.0f, 5.0f, 6.0f, 7.0f));
   view.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
@@ -947,7 +954,7 @@ int UtcDaliInteractiveViewOverlayEffectConfigureP(void)
 
 int UtcDaliInteractiveViewOverlayEffectRecoilOwnerTargetP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   view = CreateTestInteractiveView(application);
   view.SetScale(Vector3(1.2f, 0.8f, 1.0f));
 
@@ -969,7 +976,7 @@ int UtcDaliInteractiveViewOverlayEffectRecoilOwnerTargetP(void)
 
 int UtcDaliInteractiveViewOverlayEffectRecoilRestoreInterruptedByPressP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   view = CreateTestInteractiveView(application);
   view.SetScale(Vector3(1.2f, 0.8f, 1.0f));
 
@@ -1005,7 +1012,7 @@ int UtcDaliInteractiveViewOverlayEffectRecoilRestoreInterruptedByPressP(void)
 
 int UtcDaliInteractiveViewOverlayEffectRecoilStateEffectTargetP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   owner  = CreateTestInteractiveView(application);
   View              target = View::New();
   target.SetRequestedWidth(80.0f);
@@ -1400,7 +1407,7 @@ int UtcDaliInteractiveViewStateEffectEmptyHandleAsNoneP(void)
 
 int UtcDaliInteractiveViewStateEffectReplaceAndNoneP(void)
 {
-  UiTestApplication application;
+  UiTestApplication application(CreateDefaultOverlayConfig());
   InteractiveView   view = CreateTestInteractiveView(application);
 
   ProcessTouch(application, PointState::DOWN);

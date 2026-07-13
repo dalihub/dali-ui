@@ -273,5 +273,6 @@ int UtcDaliTextButtonStyleDefaultKeyP(void)
   DALI_TEST_EQUALS(style.GetTextColor().GetColorId(), UiColor::ON_PRIMARY.GetColorId(), TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetFontSize(), 16.0f, TEST_LOCATION);
   DALI_TEST_CHECK(style.GetStateEffect());
+  DALI_TEST_CHECK(!style.GetStateEffect().IsNone());
   END_TEST;
 }

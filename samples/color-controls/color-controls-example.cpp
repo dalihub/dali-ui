@@ -97,7 +97,9 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   Application application = Application::New(&argc, &argv);
-  TestConfig::New().Apply();
+  TestConfig config = TestConfig::New();
+  config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
+  config.Apply();
   ColorControlsExample test(application);
   application.MainLoop();
   return 0;

@@ -231,6 +231,7 @@ int DALI_EXPORT_API main(int argc, char** argv)
   // (AsGroupSelectable) creates an InteractiveTrait, which reads UiConfig (e.g. the
   // key-click policy) on construction.
   UiConfig config = UiConfig::New();
+  config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
   config.Apply();
 
   GroupSelectableTraitGroupNameController controller(application);

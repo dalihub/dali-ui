@@ -27,8 +27,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/ui-config-impl.h>
-#include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
-
 namespace
 {
 
@@ -56,7 +54,7 @@ class UiConfigImpl::Impl
 {
 public:
   Impl()
-  : mDefaultStateEffectForInteractive(OverlayEffect::Plain()),
+  : mDefaultStateEffectForInteractive(StateEffect::None()),
     mExecutionKeyPredicate(DefaultExecutionKeyPredicate),
     mViewInitializer(UiConfig::DefaultViewInitializer),
     mDefaultTextColor(Vector4(0.0f, 0.0f, 0.0f, 1.0f)),

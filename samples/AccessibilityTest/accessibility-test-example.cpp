@@ -346,7 +346,9 @@ private:
 int main(int argc, char** argv)
 {
   auto app = Dali::Application::New(&argc, &argv);
-  Dali::Ui::UiConfig::New().Apply();
+  Dali::Ui::UiConfig config = Dali::Ui::UiConfig::New();
+  config.SetDefaultStateEffectForInteractive(Dali::Ui::OverlayEffect::Plain());
+  config.Apply();
   AccessibilityTest test(app);
   app.MainLoop();
   return 0;

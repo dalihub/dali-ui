@@ -164,7 +164,7 @@ int UtcDaliStateEffectUiConfigDefaultForInteractiveP(void)
 {
   UiConfig config = UiConfig::New();
 
-  DALI_TEST_CHECK(config.GetDefaultStateEffectForInteractive());
+  DALI_TEST_CHECK(config.GetDefaultStateEffectForInteractive().IsNone());
 
   TestStateEffectImpl* impl   = nullptr;
   StateEffect          effect = TestStateEffect::New(impl);

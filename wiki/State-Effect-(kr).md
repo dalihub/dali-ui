@@ -83,13 +83,13 @@ view.SetStateEffect(brandOverlay);
 
 ## UiConfig를 통한 Interactive 기본값
 
-`InteractiveView` (또는 `AsInteractive()` 를 통해 interactive가 된 view)는 config에 지정된 기본 state effect를 적용받습니다. 현재 기본값은 `OverlayEffect::Plain()`입니다.
+`InteractiveView` (또는 `AsInteractive()` 나 selectable trait을 통해 interactive가 된 view)는 config에 지정된 기본 state effect를 적용받습니다. 현재 기본값은 `StateEffect::None()`입니다.
 
-Interactive View에 기본 effect를 적용하지 않으려면 application 시작전에 다음처럼 config를 설정합니다.
+따라서 application이 시작 전에 기본 effect를 설정하지 않으면 Interactive View에 자동 시각 효과가 적용되지 않습니다.
 
 ```cpp
 UiConfig config = UiConfig::New();
-config.SetDefaultStateEffectForInteractive(StateEffect::None());
+config.SetDefaultStateEffectForInteractive(OverlayEffect::Plain());
 config.Apply();
 ```
 
