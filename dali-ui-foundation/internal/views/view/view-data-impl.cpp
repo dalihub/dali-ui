@@ -991,12 +991,12 @@ bool ViewDataImpl::IsEffectivelyFocused() const
   return ViewStateManager::Get().IsEffectivelyFocused(mViewImpl);
 }
 
-ViewImpl::LayoutFinishedSignalType& ViewDataImpl::LayoutFinishedSignal()
+View::LayoutFinishedSignalType& ViewDataImpl::LayoutFinishedSignal()
 {
   return mLayoutFinishedSignal;
 }
 
-ViewImpl::StateChangedSignalType& ViewDataImpl::StateChangedSignal()
+View::StateChangedSignalType& ViewDataImpl::StateChangedSignal()
 {
   return mStateChangedSignal;
 }

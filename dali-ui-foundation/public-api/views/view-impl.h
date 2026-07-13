@@ -86,9 +86,6 @@ public:
 
   class Extension; ///< Forward declare future extension interface
 
-  using StateChangedSignalType   = Signal<void(Ui::View, StateEvent)>;
-  using LayoutFinishedSignalType = Signal<void(Ui::View, LayoutRect)>;
-
   /**
    * @brief Flags for the constructor.
    */
@@ -196,12 +193,12 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @copydoc Ui::View::StateChangedSignal()
    */
-  StateChangedSignalType& StateChangedSignal();
+  View::StateChangedSignalType& StateChangedSignal();
 
   /**
    * @copydoc Ui::View::LayoutFinishedSignal()
    */
-  LayoutFinishedSignalType& LayoutFinishedSignal();
+  View::LayoutFinishedSignalType& LayoutFinishedSignal();
 
   /**
    * @copydoc Ui::View::GetEffectiveLayoutDirection()

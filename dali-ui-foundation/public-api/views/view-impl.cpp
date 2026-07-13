@@ -185,12 +185,12 @@ bool ViewImpl::IsEffectivelyFocused() const
   return mImpl->IsEffectivelyFocused();
 }
 
-ViewImpl::LayoutFinishedSignalType& ViewImpl::LayoutFinishedSignal()
+View::LayoutFinishedSignalType& ViewImpl::LayoutFinishedSignal()
 {
   return mImpl->LayoutFinishedSignal();
 }
 
-ViewImpl::StateChangedSignalType& ViewImpl::StateChangedSignal()
+View::StateChangedSignalType& ViewImpl::StateChangedSignal()
 {
   return mImpl->StateChangedSignal();
 }

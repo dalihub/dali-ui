@@ -66,7 +66,7 @@ class CoreInteractionObject;
 /// Defined here (not in the public View::Property enum) to keep it internal.
 /// Value matches Dali::Ui::View::ANIMATABLE_PROPERTY_START_INDEX + 500,
 /// @warning Please change this value if view.h add new enum as Dali::Ui::View::ANIMATABLE_PROPERTY_START_INDEX + 500
-inline constexpr Property::Index VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX = Ui::View::ANIMATABLE_PROPERTY_START_INDEX + 500;
+inline constexpr Property::Index VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX = View::ANIMATABLE_PROPERTY_START_INDEX + 500;
 
 class AttachmentContainer;
 
@@ -133,30 +133,30 @@ public:
   MeasuredSize Measure(float visualWidth, float visualHeight);
   MeasuredSize Arrange(const LayoutRect& bounds);
 
-  const ViewState&                                GetState() const;
-  bool                                            IsEffectivelyEnabled() const;
-  bool                                            IsEffectivelyFocused() const;
-  ViewImpl::LayoutFinishedSignalType&             LayoutFinishedSignal();
-  ViewImpl::StateChangedSignalType&               StateChangedSignal();
-  Ui::View::ResourceReadySignalType&              ResourceReadySignal();
-  Ui::View::OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
-  bool                                            HasLayoutFinishedSignalConnections() const;
-  void                                            EmitLayoutFinishedSignal(const LayoutRect& bounds);
-  PendingLayoutTransitionChanges                  TakePendingLayoutTransitionChanges();
+  const ViewState&                            GetState() const;
+  bool                                        IsEffectivelyEnabled() const;
+  bool                                        IsEffectivelyFocused() const;
+  View::LayoutFinishedSignalType&             LayoutFinishedSignal();
+  View::StateChangedSignalType&               StateChangedSignal();
+  View::ResourceReadySignalType&              ResourceReadySignal();
+  View::OffScreenRenderingFinishedSignalType& OffScreenRenderingFinishedSignal();
+  bool                                        HasLayoutFinishedSignalConnections() const;
+  void                                        EmitLayoutFinishedSignal(const LayoutRect& bounds);
+  PendingLayoutTransitionChanges              TakePendingLayoutTransitionChanges();
 
-  Ui::InteractiveTrait     EnsureInteractiveTrait();
-  void                     SetStateEffect(StateEffect effect);
-  void                     AttachInteractiveStateEffect();
-  bool                     IsDefaultFocusIndicatorSuppressedByStateEffect() const;
-  void                     RefreshDefaultFocusIndicatorSuppression();
-  void                     InvalidateDefaultFocusIndicatorSuppression(const Integration::StateEffectImpl& effect);
-  void                     SetStateEffectTarget(View target);
-  View                     GetStateEffectTarget() const;
-  bool                     IsInteractive() const;
-  Ui::SelectableTrait      EnsureSelectableTrait();
-  bool                     IsSelectable() const;
-  Ui::GroupSelectableTrait EnsureGroupSelectableTrait();
-  bool                     IsGroupSelectable() const;
+  InteractiveTrait     EnsureInteractiveTrait();
+  void                 SetStateEffect(StateEffect effect);
+  void                 AttachInteractiveStateEffect();
+  bool                 IsDefaultFocusIndicatorSuppressedByStateEffect() const;
+  void                 RefreshDefaultFocusIndicatorSuppression();
+  void                 InvalidateDefaultFocusIndicatorSuppression(const Integration::StateEffectImpl& effect);
+  void                 SetStateEffectTarget(View target);
+  View                 GetStateEffectTarget() const;
+  bool                 IsInteractive() const;
+  SelectableTrait      EnsureSelectableTrait();
+  bool                 IsSelectable() const;
+  GroupSelectableTrait EnsureGroupSelectableTrait();
+  bool                 IsGroupSelectable() const;
 
   UiColor            GetBackgroundColor() const;
   void               SetBackgroundColor(const UiColor& color);
@@ -181,62 +181,62 @@ public:
   void               SetShadow(const Shadow& shadow);
   void               SetShadow(const ShadowStack& shadowStack);
 
-  void                              SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback);
-  View                              RequestFocusNavigation(View currentFocusedView, FocusDirection direction);
-  View                              RequestFocus();
-  bool                              IsFocusGroup() const;
-  void                              SetAsFocusGroup(bool isFocusGroup);
-  Ui::View::KeyEventSignalType&     KeyEventSignal();
-  Ui::View::FocusChangedSignalType& FocusChangedSignal();
-  bool                              NotifyKeyEvent(const KeyEvent& event);
+  void                          SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback);
+  View                          RequestFocusNavigation(View currentFocusedView, FocusDirection direction);
+  View                          RequestFocus();
+  bool                          IsFocusGroup() const;
+  void                          SetAsFocusGroup(bool isFocusGroup);
+  View::KeyEventSignalType&     KeyEventSignal();
+  View::FocusChangedSignalType& FocusChangedSignal();
+  bool                          NotifyKeyEvent(const KeyEvent& event);
 
-  Dali::LayoutDirection::Type   GetEffectiveLayoutDirection() const;
-  void                          SetRequestedPositionX(float x);
-  void                          SetRequestedPositionY(float y);
-  float                         GetRequestedPositionX() const;
-  float                         GetRequestedPositionY() const;
-  void                          SetUiScalePolicy(UiScalePolicy policy);
-  UiScalePolicy                 GetUiScalePolicy() const;
-  float                         GetEffectiveScale() const;
-  void                          InvalidateMeasure();
-  void                          InvalidateArrange();
-  MeasuredSize                  GetMeasuredSize() const;
-  void                          SetRequestedWidth(float width);
-  float                         GetRequestedWidth() const;
-  void                          SetRequestedHeight(float height);
-  float                         GetRequestedHeight() const;
-  void                          SetMinimumWidth(float width);
-  float                         GetMinimumWidth() const;
-  void                          SetMinimumHeight(float height);
-  float                         GetMinimumHeight() const;
-  void                          SetMaximumWidth(float width);
-  float                         GetMaximumWidth() const;
-  void                          SetMaximumHeight(float height);
-  float                         GetMaximumHeight() const;
-  void                          SetMargin(const Extents& margin);
-  Extents                       GetMargin() const;
-  void                          SetPadding(const Extents& padding);
-  Extents                       GetPadding() const;
-  void                          SetLayoutMode(Ui::LayoutMode mode);
-  Ui::LayoutMode                GetLayoutMode() const;
-  void                          SetLayoutTransition(LayoutTransition transition);
-  LayoutTransition              GetLayoutTransition() const;
-  LayoutRect                    GetArrangedBounds() const;
-  bool                          IsInitialLayoutDone() const;
-  uint32_t                      GetChildViewCount() const;
-  Ui::View                      GetChildViewAt(uint32_t index) const;
-  Dali::Vector<Ui::View>&       GetChildren();
-  const Dali::Vector<Ui::View>& GetChildren() const;
-  int32_t                       IndexOfChildView(Ui::View view) const;
-  void                          Insert(uint32_t index, Ui::View child);
-  void                          RemoveAllChildren(Ui::RemovePolicy policy);
-  void                          Remove(Ui::View child, Ui::RemovePolicy policy);
-  void                          Raise(Ui::LayoutOrderPolicy policy);
-  void                          Lower(Ui::LayoutOrderPolicy policy);
-  void                          RaiseToTop(Ui::LayoutOrderPolicy policy);
-  void                          LowerToBottom(Ui::LayoutOrderPolicy policy);
-  void                          RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy);
-  void                          LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy);
+  Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
+  void                        SetRequestedPositionX(float x);
+  void                        SetRequestedPositionY(float y);
+  float                       GetRequestedPositionX() const;
+  float                       GetRequestedPositionY() const;
+  void                        SetUiScalePolicy(UiScalePolicy policy);
+  UiScalePolicy               GetUiScalePolicy() const;
+  float                       GetEffectiveScale() const;
+  void                        InvalidateMeasure();
+  void                        InvalidateArrange();
+  MeasuredSize                GetMeasuredSize() const;
+  void                        SetRequestedWidth(float width);
+  float                       GetRequestedWidth() const;
+  void                        SetRequestedHeight(float height);
+  float                       GetRequestedHeight() const;
+  void                        SetMinimumWidth(float width);
+  float                       GetMinimumWidth() const;
+  void                        SetMinimumHeight(float height);
+  float                       GetMinimumHeight() const;
+  void                        SetMaximumWidth(float width);
+  float                       GetMaximumWidth() const;
+  void                        SetMaximumHeight(float height);
+  float                       GetMaximumHeight() const;
+  void                        SetMargin(const Extents& margin);
+  Extents                     GetMargin() const;
+  void                        SetPadding(const Extents& padding);
+  Extents                     GetPadding() const;
+  void                        SetLayoutMode(LayoutMode mode);
+  LayoutMode                  GetLayoutMode() const;
+  void                        SetLayoutTransition(LayoutTransition transition);
+  LayoutTransition            GetLayoutTransition() const;
+  LayoutRect                  GetArrangedBounds() const;
+  bool                        IsInitialLayoutDone() const;
+  uint32_t                    GetChildViewCount() const;
+  View                        GetChildViewAt(uint32_t index) const;
+  Dali::Vector<View>&         GetChildren();
+  const Dali::Vector<View>&   GetChildren() const;
+  int32_t                     IndexOfChildView(View view) const;
+  void                        Insert(uint32_t index, View child);
+  void                        RemoveAllChildren(RemovePolicy policy);
+  void                        Remove(View child, RemovePolicy policy);
+  void                        Raise(LayoutOrderPolicy policy);
+  void                        Lower(LayoutOrderPolicy policy);
+  void                        RaiseToTop(LayoutOrderPolicy policy);
+  void                        LowerToBottom(LayoutOrderPolicy policy);
+  void                        RaiseAbove(View target, LayoutOrderPolicy policy);
+  void                        LowerBelow(View target, LayoutOrderPolicy policy);
 
   void             SetMeasureCallback(MeasureCallback callback);
   void             SetArrangeCallback(ArrangeCallback callback);
@@ -248,11 +248,11 @@ public:
   bool             HasLayoutCallback() const;
 
   BaseHandle    GetLayoutParams(LayoutParamsType type) const;
-  void          SetLayoutParams(Ui::LayoutParams params);
+  void          SetLayoutParams(LayoutParams params);
   void          GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward);
   Dali::Texture GetOffScreenRenderingOutput() const;
   Vector3       GetNaturalSize();
-  void          SetRenderEffect(Ui::RenderEffect effect);
+  void          SetRenderEffect(RenderEffect effect);
   RenderEffect  GetRenderEffect() const;
   void          ClearRenderEffect();
 
@@ -260,7 +260,7 @@ public:
   float ComputeEffectiveScale() const;
 
   Ui::Layout GetParentLayout() const;
-  Ui::View   GetParentView() const;
+  View       GetParentView() const;
   void       EmitFocusChangedSignal(bool focusGained);
   void       RegisterWithLayoutController();
 
@@ -395,17 +395,17 @@ public:
    */
   void ResourceReady();
 
-  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual);
+  void RegisterVisual(Property::Index index, Integration::Visual::Base& visual);
 
-  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, int depthIndex);
+  void RegisterVisual(Property::Index index, Integration::Visual::Base& visual, int depthIndex);
 
-  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled);
+  void RegisterVisual(Property::Index index, Integration::Visual::Base& visual, bool enabled);
 
-  void RegisterVisual(Property::Index index, Ui::Integration::Visual::Base& visual, bool enabled, int depthIndex);
+  void RegisterVisual(Property::Index index, Integration::Visual::Base& visual, bool enabled, int depthIndex);
 
   void UnregisterVisual(Property::Index index);
 
-  Ui::Integration::Visual::Base GetVisual(Property::Index index) const;
+  Integration::Visual::Base GetVisual(Property::Index index) const;
 
   /**
    * @brief Get the raw pointer of visual impl.
@@ -415,7 +415,7 @@ public:
    * @param[in] index Index of parameter
    * @return Raw pointer of visual base implements. nullptr if not exist.
    */
-  Ui::Internal::Visual::Base* GetVisualImplPtr(Property::Index index) const;
+  Visual::Base* GetVisualImplPtr(Property::Index index) const;
 
   /**
    * @brief Sets the background visual from a property map.
@@ -429,7 +429,7 @@ public:
    * @param[in] enable flat to set enabled or disabled.
    * @param[in] cornerRadiusConstraint Optional constraint to link the view's corner properties to the visual's.
    */
-  void EnableCornerPropertiesOverridden(Ui::Integration::Visual::Base& visual, bool enable,
+  void EnableCornerPropertiesOverridden(Integration::Visual::Base& visual, bool enable,
                                         Dali::Constraint cornerRadiusConstraint = Dali::Constraint());
 
   void EnableVisual(Property::Index index, bool enable);
@@ -444,7 +444,7 @@ public:
   void DoActionExtension(Dali::Property::Index visualIndex, Dali::Property::Index actionId,
                          const Dali::Any& attributes);
 
-  bool AddVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
+  bool AddVisualObject(VisualBase visualBase, Integration::Visual::InternalContainerRangeType internalContainerRangeType);
 
   /**
    * @brief Adds a shadow visual object.
@@ -452,13 +452,13 @@ public:
    * @param[in] internalContainerRangeType The range of visuals to be added
    * @return True if the visual was added successfully, false otherwise
    */
-  bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
+  bool AddShadowVisualObject(VisualBase visualBase, Integration::Visual::InternalContainerRangeType internalContainerRangeType);
 
-  void RemoveVisualObject(Dali::Ui::VisualBase visualBase);
+  void RemoveVisualObject(VisualBase visualBase);
 
-  uint32_t GetVisualObjectCount(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType) const;
+  uint32_t GetVisualObjectCount(Integration::Visual::InternalContainerRangeType internalContainerRangeType) const;
 
-  Dali::Ui::VisualBase GetVisualObjectAt(Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const;
+  VisualBase GetVisualObjectAt(Integration::Visual::InternalContainerRangeType internalContainerRangeType, uint32_t siblingOrder) const;
 
   /**
    * @brief Function used to set view properties.
@@ -548,7 +548,7 @@ public:
    */
   Dali::Integration::Accessibility::ReadingInfoTypes GetAccessibilityReadingInfoType() const; // LCOV_EXCL_LINE
 
-  Ui::View::VisualEventSignalType& VisualEventSignal();
+  View::VisualEventSignalType& VisualEventSignal();
 
   /**
    * @brief Replaces all shadows with a single shadow described by a property map.
@@ -579,7 +579,7 @@ public:
    *
    * @param[in] shadow The shadow value to append
    */
-  void AppendShadow(const Dali::Ui::Shadow& shadow);
+  void AppendShadow(const Shadow& shadow);
 
   /**
    * @brief Clears the first shadow and all additional shadow visuals.
@@ -625,7 +625,7 @@ public:
    */
   void ClearAnimationConstraints(const Dali::BaseObject& animationObject, Property::Index index);
 
-  SharedPtr<Ui::ViewAccessible> GetAccessibleObject();
+  SharedPtr<ViewAccessible> GetAccessibleObject();
 
   Dali::Vector<Dali::Devel::Accessibility::Relation> GetAccessibilityRelations(); // LCOV_EXCL_LINE
 
@@ -761,6 +761,8 @@ private:
   void UpdateBorderline();
 
 private:
+  using TraitEntries = std::vector<std::pair<TraitId, IntrusivePtr<TraitObject>>>;
+
   struct SizeConstraints
   {
     float minWidth  = 0.0f;
@@ -788,17 +790,17 @@ private:
     RenderEffectImplPtr renderEffect;
 
     // Unlike renderEffect, this handleless effect is created only by the OFFSCREEN_RENDERING property.
-    std::unique_ptr<OffScreenRenderingImpl>        offScreenRendering;
-    Ui::View::OffScreenRenderingType               offScreenRenderingType{Ui::View::OffScreenRenderingType::NONE};
-    Ui::View::OffScreenRenderingFinishedSignalType offScreenRenderingFinishedSignal;
+    std::unique_ptr<OffScreenRenderingImpl>    offScreenRendering;
+    View::OffScreenRenderingType               offScreenRenderingType{View::OffScreenRenderingType::NONE};
+    View::OffScreenRenderingFinishedSignalType offScreenRenderingFinishedSignal;
   };
 
   struct ResourceReadyData
   {
-    Ui::View::ResourceReadySignalType resourceReadySignal;
-    CallbackBase*                     idleCallback{nullptr};
-    bool                              isEmittingResourceReadySignal{false};
-    bool                              idleCallbackRegistered{false};
+    View::ResourceReadySignalType resourceReadySignal;
+    CallbackBase*                 idleCallback{nullptr};
+    bool                          isEmittingResourceReadySignal{false};
+    bool                          idleCallbackRegistered{false};
   };
 
   SizeConstraints& EnsureSizeConstraints()
@@ -842,22 +844,22 @@ private:
     return mFocusNavigationData ? mFocusNavigationData.get()->*field : -1;
   }
 
-  ViewImpl&                                                  mViewImpl;
-  Ui::ViewState                                              mState;
-  UiScalePolicy                                              mScalePolicy{UiScalePolicy::INHERIT};
-  mutable float                                              mEffectiveScale{-1.0f};
-  std::vector<std::pair<TraitId, IntrusivePtr<TraitObject>>> mTraits;
-  Internal::CoreInteractionObject*                           mCoreInteractionObject;
-  std::unique_ptr<VisualData>                                mVisualData;
-  std::unique_ptr<AttachmentContainer>                       mAttachments;
-  std::unique_ptr<FocusNavigationData>                       mFocusNavigationData;
-  std::unique_ptr<RenderEffectData>                          mRenderEffectData;
-  std::unique_ptr<ResourceReadyData>                         mResourceReadyData;
-  InputMethodContext                                         mInputMethodContext;
-  ViewImpl::StateChangedSignalType                           mStateChangedSignal;
-  Ui::View::KeyEventSignalType                               mKeyEventSignal;
-  Ui::View::FocusChangedSignalType                           mFocusChangedSignal;
-  ViewImpl::LayoutFinishedSignalType                         mLayoutFinishedSignal;
+  ViewImpl&                            mViewImpl;
+  ViewState                            mState;
+  UiScalePolicy                        mScalePolicy{UiScalePolicy::INHERIT};
+  mutable float                        mEffectiveScale{-1.0f};
+  TraitEntries                         mTraits;
+  Internal::CoreInteractionObject*     mCoreInteractionObject;
+  std::unique_ptr<VisualData>          mVisualData;
+  std::unique_ptr<AttachmentContainer> mAttachments;
+  std::unique_ptr<FocusNavigationData> mFocusNavigationData;
+  std::unique_ptr<RenderEffectData>    mRenderEffectData;
+  std::unique_ptr<ResourceReadyData>   mResourceReadyData;
+  InputMethodContext                   mInputMethodContext;
+  View::StateChangedSignalType         mStateChangedSignal;
+  View::KeyEventSignalType             mKeyEventSignal;
+  View::FocusChangedSignalType         mFocusChangedSignal;
+  View::LayoutFinishedSignalType       mLayoutFinishedSignal;
 
   float                            mRequestedPositionX;
   float                            mRequestedPositionY;
@@ -868,11 +870,11 @@ private:
   Extents                          mPadding;         ///< Layout padding
   float                            mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
   float                            mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  Ui::LayoutMode                   mLayoutMode;      ///< Layout mode of the view
+  LayoutMode                       mLayoutMode;      ///< Layout mode of the view
   Vector2                          mSize;            ///< The size of the view
   std::unique_ptr<SizeConstraints> mSizeConstraints; ///< Lazy-allocated measurement min/max bounds (natural units).
-  Dali::Vector<Ui::View>           mChildren;        ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
-  Ui::LayoutTransition             mLayoutTransition;
+  Dali::Vector<View>               mChildren;        ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
+  LayoutTransition                 mLayoutTransition;
   std::unordered_set<ViewImpl*>    mPendingEnterChildren;     ///< Children added since last layout pass; consumed by transition dispatcher
   std::unordered_set<ViewImpl*>    mPendingReorderedChildren; ///< Children whose sibling order changed since the last layout pass
 
