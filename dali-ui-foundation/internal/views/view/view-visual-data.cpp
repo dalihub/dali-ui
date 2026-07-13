@@ -1422,6 +1422,22 @@ bool ViewDataImpl::VisualData::AddShadowVisualObject(Dali::Ui::VisualBase visual
   return mVisualObjectsContainer[containerIndex].AddShadowVisualBase(visualBase, Dali::Ui::Integration::VisualsContainer::ShadowType::BOX_SHADOW);
 }
 
+void ViewDataImpl::VisualData::RemoveBoxShadowVisualObjects()
+{
+  constexpr auto rangeType      = Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND;
+  const int      containerIndex = static_cast<int>(rangeType);
+  auto&          container      = mVisualObjectsContainer[containerIndex];
+
+  for(uint32_t index = container ? container.GetVisualBasesCount() : 0u; index > 0u;)
+  {
+    Dali::Ui::VisualBase visualBase = container.GetVisualBaseAt(--index);
+    if(GetImplementation(visualBase).GetShadowType() == Dali::Ui::Integration::VisualsContainer::ShadowType::BOX_SHADOW)
+    {
+      container.RemoveVisualBase(visualBase);
+    }
+  }
+}
+
 void ViewDataImpl::VisualData::RemoveVisualObject(Dali::Ui::VisualBase visualBase)
 {
   if(DALI_UNLIKELY(!visualBase))

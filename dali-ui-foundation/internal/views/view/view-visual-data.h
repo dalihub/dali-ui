@@ -329,6 +329,11 @@ public:
   bool AddShadowVisualObject(Dali::Ui::VisualBase visualBase, Dali::Ui::Integration::Visual::InternalContainerRangeType internalContainerRangeType);
 
   /**
+   * @brief Removes all box shadow visuals from the background effect container.
+   */
+  void RemoveBoxShadowVisualObjects();
+
+  /**
    * @copydoc Ui::View::RemoveVisual()
    */
   void RemoveVisualObject(Dali::Ui::VisualBase visualBase);

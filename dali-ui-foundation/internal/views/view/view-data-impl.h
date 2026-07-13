@@ -815,8 +815,7 @@ private:
   std::unique_ptr<AttachmentContainer>                       mAttachments;
   std::unique_ptr<FocusNavigationData>                       mFocusNavigationData;
   InputMethodContext                                         mInputMethodContext;
-  RenderEffectImplPtr                                        mRenderEffect;        ///< The render effect on this view
-  std::vector<Dali::Ui::VisualBase>                          mShadowVisualObjects; ///< Additional shadow visuals after the primary shadow.
+  RenderEffectImplPtr                                        mRenderEffect; ///< The render effect on this view
   ViewImpl::StateChangedSignalType                           mStateChangedSignal;
   Ui::View::KeyEventSignalType                               mKeyEventSignal;
   Ui::View::FocusChangedSignalType                           mFocusChangedSignal;
@@ -827,11 +826,9 @@ private:
   Ui::View::OffScreenRenderingType                           mOffScreenRenderingType;
   CallbackBase*                                              mIdleCallback; ///< The idle callback to emit the resource ready signal.
 
-  // Used when the parent is not a layout.
-  float mRequestedPositionX;
-  float mRequestedPositionY;
-  // mLastMeasuredConstraint.width < 0 means no valid measure cache
-  MeasuredSize                     mMeasuredSize;
+  float                            mRequestedPositionX;
+  float                            mRequestedPositionY;
+  MeasuredSize                     mMeasuredSize; ///< mLastMeasuredConstraint.width < 0 means no valid measure cache
   MeasuredSize                     mLastMeasuredConstraint;
   LayoutRect                       mArrangedBounds;
   Extents                          mMargin;          ///< Layout margin

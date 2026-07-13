@@ -744,6 +744,16 @@ int UtcDaliViewShadowStackReplaceAndClearP(void)
   DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 0u, TEST_LOCATION);
   Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
   DALI_TEST_CHECK(shadowValue.GetMap() && shadowValue.GetMap()->Empty());
+
+  ColorVisual visual = ColorVisual::New();
+  DALI_TEST_EQUALS(view.AddVisual(visual, Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), true, TEST_LOCATION);
+
+  view.SetShadow(copiedStack);
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 3u, TEST_LOCATION);
+
+  view.SetShadow(Shadow::None());
+  DALI_TEST_EQUALS(view.GetVisualCount(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetVisualAt(Visual::ContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND, 0u), visual, TEST_LOCATION);
   END_TEST;
 }
 

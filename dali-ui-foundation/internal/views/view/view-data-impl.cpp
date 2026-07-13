@@ -4787,7 +4787,6 @@ void ViewDataImpl::AppendShadow(const Dali::Ui::Shadow& shadow)
   visual.SetName("shadow");
   if(AddShadowVisualObject(visual, Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND))
   {
-    mShadowVisualObjects.push_back(visual);
     mViewImpl.RelayoutRequest();
   }
 }
@@ -4797,13 +4796,8 @@ void ViewDataImpl::ClearShadow()
   if(DALI_LIKELY(mVisualData))
   {
     mVisualData->UnregisterVisual(Ui::View::Property::SHADOW);
+    mVisualData->RemoveBoxShadowVisualObjects();
   }
-
-  for(auto& visualObject : mShadowVisualObjects)
-  {
-    RemoveVisualObject(visualObject);
-  }
-  mShadowVisualObjects.clear();
 
   mViewImpl.RelayoutRequest();
 }
