@@ -19,6 +19,7 @@
 
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
 #include <dali-ui-foundation/public-api/types/unique-any.h>
+#include <iterator>
 #include <utility>
 #include <vector>
 
@@ -60,11 +61,16 @@ public:
    */
   bool RemoveAttachment(AttachmentId id)
   {
-    for(auto iter = mAttachments.begin(); iter != mAttachments.end(); ++iter)
+    for(auto iter = mAttachments.rbegin(); iter != mAttachments.rend(); ++iter)
     {
       if(iter->first == id)
       {
-        mAttachments.erase(iter);
+        auto forwardIter = std::next(iter).base();
+        if(forwardIter != std::prev(mAttachments.end()))
+        {
+          *forwardIter = Dali::Move(mAttachments.back());
+        }
+        mAttachments.pop_back();
         return true;
       }
     }
@@ -108,12 +114,17 @@ public:
    */
   UniqueAny DetachAttachment(AttachmentId id)
   {
-    for(auto iter = mAttachments.begin(); iter != mAttachments.end(); ++iter)
+    for(auto iter = mAttachments.rbegin(); iter != mAttachments.rend(); ++iter)
     {
       if(iter->first == id)
       {
-        UniqueAny attachment = Dali::Move(iter->second);
-        mAttachments.erase(iter);
+        auto      forwardIter = std::next(iter).base();
+        UniqueAny attachment  = Dali::Move(forwardIter->second);
+        if(forwardIter != std::prev(mAttachments.end()))
+        {
+          *forwardIter = Dali::Move(mAttachments.back());
+        }
+        mAttachments.pop_back();
         return attachment;
       }
     }
@@ -121,6 +132,8 @@ public:
   }
 
 private:
+  // This is expected to outperform a hash map for the common case of small
+  // attachment counts, roughly up to a few dozen entries.
   std::vector<std::pair<AttachmentId, UniqueAny>> mAttachments;
 };
 
