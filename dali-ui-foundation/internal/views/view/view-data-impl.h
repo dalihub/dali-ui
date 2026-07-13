@@ -699,6 +699,8 @@ protected: // From processor-interface
   }
 
 private:
+  class ScopedSkipChildrenUpdate;
+
   void SetBehaviourFlags(ViewImpl::ViewBehaviour behaviourFlags);
   void Destroy();
 
@@ -901,7 +903,7 @@ private:
   std::unique_ptr<AccessibilityData> mAccessibilityData;
   int32_t                            mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2; ///< Frequently touched accessibility-related value kept here to avoid AccessibilityData creation.
 
-  bool mSkipChildrenUpdate;                               ///< Plain bool because ScopedSkipChildrenUpdate stores a bool reference.
+  bool mSkipChildrenUpdate : 1;
   bool mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
   bool mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
   bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.

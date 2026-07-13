@@ -101,6 +101,29 @@ namespace Ui
 namespace Internal
 {
 
+class ViewDataImpl::ScopedSkipChildrenUpdate
+{
+public:
+  explicit ScopedSkipChildrenUpdate(ViewDataImpl& viewDataImpl)
+  : mViewDataImpl(viewDataImpl),
+    mPrevious(viewDataImpl.mSkipChildrenUpdate)
+  {
+    mViewDataImpl.mSkipChildrenUpdate = true;
+  }
+
+  ~ScopedSkipChildrenUpdate()
+  {
+    mViewDataImpl.mSkipChildrenUpdate = mPrevious;
+  }
+
+  ScopedSkipChildrenUpdate(const ScopedSkipChildrenUpdate&)            = delete;
+  ScopedSkipChildrenUpdate& operator=(const ScopedSkipChildrenUpdate&) = delete;
+
+private:
+  ViewDataImpl& mViewDataImpl;
+  bool          mPrevious;
+};
+
 namespace
 {
 #if defined(DEBUG_ENABLED)
@@ -112,29 +135,6 @@ constexpr char         BACKGROUND_COLOR_BINDING_ID[]    = "BackgroundColor";
 constexpr char         BACKGROUND_GRADIENT_BINDING_ID[] = "BackgroundGradient";
 constexpr char         COLOR_BINDING_ID[]               = "Color";
 constexpr float        MEASURE_CACHE_DIRTY              = -1.0f;
-
-class ScopedSkipChildrenUpdate
-{
-public:
-  explicit ScopedSkipChildrenUpdate(bool& flag)
-  : mFlag(flag),
-    mPrevious(flag)
-  {
-    mFlag = true;
-  }
-
-  ~ScopedSkipChildrenUpdate()
-  {
-    mFlag = mPrevious;
-  }
-
-  ScopedSkipChildrenUpdate(const ScopedSkipChildrenUpdate&)            = delete;
-  ScopedSkipChildrenUpdate& operator=(const ScopedSkipChildrenUpdate&) = delete;
-
-private:
-  bool& mFlag;
-  bool  mPrevious;
-};
 
 LayoutCallbacksObject* GetLayoutCallbacksObject(ViewDataImpl& viewDataImpl)
 {
@@ -2117,7 +2117,7 @@ void ViewDataImpl::Raise(Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
       self.Raise();
       return;
     }
@@ -2133,7 +2133,7 @@ void ViewDataImpl::Lower(Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
       self.Lower();
       return;
     }
@@ -2149,7 +2149,7 @@ void ViewDataImpl::RaiseToTop(Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
       self.RaiseToTop();
       return;
     }
@@ -2165,7 +2165,7 @@ void ViewDataImpl::LowerToBottom(Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
       self.LowerToBottom();
       return;
     }
@@ -2185,7 +2185,7 @@ void ViewDataImpl::RaiseAbove(Ui::View target, Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
       self.RaiseAbove(target);
       return;
     }
@@ -2205,7 +2205,7 @@ void ViewDataImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
     Ui::View parent = Ui::View::DownCast(self.GetParent());
     if(parent)
     {
-      ScopedSkipChildrenUpdate guard(GetImpl(parent).mImpl->mSkipChildrenUpdate);
+      ScopedSkipChildrenUpdate guard(ViewDataImpl::Get(GetImpl(parent)));
       self.LowerBelow(target);
       return;
     }
