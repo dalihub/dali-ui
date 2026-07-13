@@ -793,6 +793,14 @@ private:
     Ui::View::OffScreenRenderingFinishedSignalType offScreenRenderingFinishedSignal;
   };
 
+  struct ResourceReadyData
+  {
+    Ui::View::ResourceReadySignalType resourceReadySignal;
+    CallbackBase*                     idleCallback{nullptr};
+    bool                              isEmittingResourceReadySignal{false};
+    bool                              idleCallbackRegistered{false};
+  };
+
   SizeConstraints& EnsureSizeConstraints()
   {
     if(!mSizeConstraints)
@@ -820,6 +828,15 @@ private:
     return *mRenderEffectData;
   }
 
+  ResourceReadyData& EnsureResourceReadyData()
+  {
+    if(!mResourceReadyData)
+    {
+      mResourceReadyData = std::make_unique<ResourceReadyData>();
+    }
+    return *mResourceReadyData;
+  }
+
   int GetFocusNavigationId(int FocusNavigationData::* field) const
   {
     return mFocusNavigationData ? mFocusNavigationData.get()->*field : -1;
@@ -835,13 +852,12 @@ private:
   std::unique_ptr<AttachmentContainer>                       mAttachments;
   std::unique_ptr<FocusNavigationData>                       mFocusNavigationData;
   std::unique_ptr<RenderEffectData>                          mRenderEffectData;
+  std::unique_ptr<ResourceReadyData>                         mResourceReadyData;
   InputMethodContext                                         mInputMethodContext;
   ViewImpl::StateChangedSignalType                           mStateChangedSignal;
   Ui::View::KeyEventSignalType                               mKeyEventSignal;
   Ui::View::FocusChangedSignalType                           mFocusChangedSignal;
-  Ui::View::ResourceReadySignalType                          mResourceReadySignal;
   ViewImpl::LayoutFinishedSignalType                         mLayoutFinishedSignal;
-  CallbackBase*                                              mIdleCallback; ///< The idle callback to emit the resource ready signal.
 
   float                            mRequestedPositionX;
   float                            mRequestedPositionY;
@@ -868,8 +884,6 @@ private:
   bool mPendingChildRemovalForLayoutTransition : 1;       ///< True if at least one child was removed via View::Remove / RemoveAllChildren since the last layout pass; consumed by dispatcher to tag remaining children's CHANGE cause as SIBLING_REMOVED
   bool mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
   bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
-  bool mIsEmittingResourceReadySignal : 1;                ///< True during ResourceReady().
-  bool mIdleCallbackRegistered : 1;                       ///< True if need to emit the resource ready signal again.
   bool mDispatchKeyEvents : 1;                            ///< Whether the actor emits key event signals
   bool mAccessibleCreatable : 1;                          ///< Whether we can create new accessible or not.
   bool mProcessorRegistered : 1;                          ///< Whether the processor is registered.
@@ -877,6 +891,7 @@ private:
 
   static constexpr uint32_t VIEW_BEHAVIOUR_FLAG_COUNT = Dali::Log<static_cast<uint32_t>(ViewImpl::LAST_VIEW_BEHAVIOUR_FLAG) - 1>::value + 1;
   ViewImpl::ViewBehaviour   mFlags : VIEW_BEHAVIOUR_FLAG_COUNT; ///< Flags passed in from constructor.
+
   // Property registrations access private methods and data of ViewImpl and ViewDataImpl.
   static const PropertyRegistration           PROPERTY_1;
   static const PropertyRegistration           PROPERTY_2;

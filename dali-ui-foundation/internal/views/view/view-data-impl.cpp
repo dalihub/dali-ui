@@ -619,8 +619,8 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mAttachments(nullptr),
   mFocusNavigationData(nullptr),
   mRenderEffectData(nullptr),
+  mResourceReadyData(nullptr),
   mInputMethodContext(),
-  mIdleCallback(nullptr),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
   mMeasuredSize{0.0f, 0.0f},
@@ -641,8 +641,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mPendingChildRemovalForLayoutTransition(false),
   mInitialLayoutDone(false),
   mIsFocusGroup(false),
-  mIsEmittingResourceReadySignal(false),
-  mIdleCallbackRegistered(false),
   mDispatchKeyEvents(true),
   mAccessibleCreatable(true),
   mProcessorRegistered(false),
@@ -664,10 +662,10 @@ ViewDataImpl::~ViewDataImpl()
     Adaptor::Get().UnregisterProcessorOnce(*this, true);
   }
 
-  if(mIdleCallback && Adaptor::IsAvailable())
+  if(mResourceReadyData && mResourceReadyData->idleCallback && Adaptor::IsAvailable())
   {
     // Removes the callback from the callback manager in case the view is destroyed before the callback is executed.
-    Adaptor::Get().RemoveIdle(mIdleCallback);
+    Adaptor::Get().RemoveIdle(mResourceReadyData->idleCallback);
   }
 }
 
@@ -1005,7 +1003,7 @@ ViewImpl::StateChangedSignalType& ViewDataImpl::StateChangedSignal()
 
 Ui::View::ResourceReadySignalType& ViewDataImpl::ResourceReadySignal()
 {
-  return mResourceReadySignal;
+  return EnsureResourceReadyData().resourceReadySignal;
 }
 
 Ui::View::OffScreenRenderingFinishedSignalType& ViewDataImpl::OffScreenRenderingFinishedSignal()
@@ -4976,39 +4974,39 @@ Dali::Property ViewDataImpl::GetVisualProperty(Dali::Property::Index index, Dali
 
 void ViewDataImpl::EmitResourceReadySignal()
 {
-  if(DALI_LIKELY(Dali::Adaptor::IsAvailable())) ///< Avoid resource ready callback during shutting down
+  if(!mResourceReadyData || !Dali::Adaptor::IsAvailable()) ///< Avoid resource ready callback during shutting down
   {
-    if(!mIsEmittingResourceReadySignal)
-    {
-      // Guard against calls to emit the signal during the callback
-      mIsEmittingResourceReadySignal = true;
+    return;
+  }
 
-      // If the signal handler changes visual, it may become ready during this call & therefore this method will
-      // get called again recursively. If so, mIdleCallbackRegistered is set below, and we act on it after that
-      // secondary invocation has completed by notifying in an Idle callback to prevent further recursion.
-      Dali::Ui::View handle(mViewImpl.GetOwner());
-      mResourceReadySignal.Emit(handle);
+  ResourceReadyData& resourceReadyData = *mResourceReadyData;
+  if(!resourceReadyData.isEmittingResourceReadySignal)
+  {
+    // Guard against calls to emit the signal during the callback
+    resourceReadyData.isEmittingResourceReadySignal = true;
 
-      mIsEmittingResourceReadySignal = false;
-    }
-    else
+    // If the signal handler changes visual, it may become ready during this call & therefore this method will
+    // get called again recursively. If so, idleCallbackRegistered is set below, and we act on it after that
+    // secondary invocation has completed by notifying in an Idle callback to prevent further recursion.
+    Dali::Ui::View handle(mViewImpl.GetOwner());
+    resourceReadyData.resourceReadySignal.Emit(handle);
+
+    resourceReadyData.isEmittingResourceReadySignal = false;
+  }
+  else if(!resourceReadyData.idleCallbackRegistered)
+  {
+    resourceReadyData.idleCallbackRegistered = true;
+
+    // Add idler to emit the signal again
+    if(!resourceReadyData.idleCallback)
     {
-      if(!mIdleCallbackRegistered)
+      // The callback manager takes the ownership of the callback object.
+      resourceReadyData.idleCallback = MakeCallback(this, &ViewDataImpl::OnIdleCallback);
+      if(DALI_UNLIKELY(!Adaptor::Get().AddIdle(resourceReadyData.idleCallback, true)))
       {
-        mIdleCallbackRegistered = true;
-
-        // Add idler to emit the signal again
-        if(!mIdleCallback)
-        {
-          // The callback manager takes the ownership of the callback object.
-          mIdleCallback = MakeCallback(this, &ViewDataImpl::OnIdleCallback);
-          if(DALI_UNLIKELY(!Adaptor::Get().AddIdle(mIdleCallback, true)))
-          {
-            DALI_LOG_ERROR("Fail to add idle callback for view resource ready. Skip this callback.\n");
-            mIdleCallback           = nullptr;
-            mIdleCallbackRegistered = false;
-          }
-        }
+        DALI_LOG_ERROR("Fail to add idle callback for view resource ready. Skip this callback.\n");
+        resourceReadyData.idleCallback           = nullptr;
+        resourceReadyData.idleCallbackRegistered = false;
       }
     }
   }
@@ -5016,8 +5014,15 @@ void ViewDataImpl::EmitResourceReadySignal()
 
 bool ViewDataImpl::OnIdleCallback()
 {
+  if(!mResourceReadyData)
+  {
+    return false;
+  }
+
+  ResourceReadyData& resourceReadyData = *mResourceReadyData;
+
   // Reset the flag
-  mIdleCallbackRegistered = false;
+  resourceReadyData.idleCallbackRegistered = false;
 
   // A visual is ready so view may need relayouting if staged
   if(mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
@@ -5027,14 +5032,14 @@ bool ViewDataImpl::OnIdleCallback()
 
   EmitResourceReadySignal();
 
-  if(!mIdleCallbackRegistered)
+  if(!resourceReadyData.idleCallbackRegistered)
   {
     // Set the pointer to null as the callback manager deletes the callback after execute it.
-    mIdleCallback = nullptr;
+    resourceReadyData.idleCallback = nullptr;
   }
 
-  // Repeat idle if mIdleCallbackRegistered become true one more time.
-  return mIdleCallbackRegistered;
+  // Repeat idle if idleCallbackRegistered becomes true one more time.
+  return resourceReadyData.idleCallbackRegistered;
 }
 
 SharedPtr<Ui::ViewAccessible> ViewDataImpl::GetAccessibleObject()
