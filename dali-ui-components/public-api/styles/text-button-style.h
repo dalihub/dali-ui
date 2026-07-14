@@ -159,6 +159,12 @@ public:
   Builder&  SetPadding(const Extents& padding) &;
   Builder&& SetPadding(const Extents& padding) &&;
 
+  Builder&  SetPadding(int16_t horizontal, int16_t vertical) &;
+  Builder&& SetPadding(int16_t horizontal, int16_t vertical) &&;
+
+  Builder&  SetPadding(int16_t padding) &;
+  Builder&& SetPadding(int16_t padding) &&;
+
   Builder&  SetBackgroundColor(const UiColor& color) &;
   Builder&& SetBackgroundColor(const UiColor& color) &&;
 

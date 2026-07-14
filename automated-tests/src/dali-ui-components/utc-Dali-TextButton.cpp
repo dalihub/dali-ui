@@ -209,6 +209,32 @@ int UtcDaliTextButtonStyleP(void)
   END_TEST;
 }
 
+int UtcDaliTextButtonStylePaddingHelpersP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  TextButtonStyle::Builder horizontalVerticalBuilder;
+  horizontalVerticalBuilder.SetPadding(4, 6);
+  TextButtonStyle horizontalVertical = std::move(horizontalVerticalBuilder).Build();
+  DALI_TEST_EQUALS(horizontalVertical.GetPadding(), Extents(4, 4, 6, 6), TEST_LOCATION);
+
+  TextButtonStyle horizontalVerticalRvalue = TextButtonStyle::Builder()
+                                              .SetPadding(5, 7)
+                                              .Build();
+  DALI_TEST_EQUALS(horizontalVerticalRvalue.GetPadding(), Extents(5, 5, 7, 7), TEST_LOCATION);
+
+  TextButtonStyle::Builder builder;
+  builder.SetPadding(8);
+  TextButtonStyle all = std::move(builder).Build();
+  DALI_TEST_EQUALS(all.GetPadding(), Extents(8, 8, 8, 8), TEST_LOCATION);
+
+  TextButtonStyle allRvalue = TextButtonStyle::Builder()
+                                .SetPadding(9)
+                                .Build();
+  DALI_TEST_EQUALS(allRvalue.GetPadding(), Extents(9, 9, 9, 9), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliTextButtonStyleConfigureP(void)
 {
   UiTestApplication application(Components::UiConfig::New());

@@ -298,6 +298,28 @@ TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(const Extents& p
   return std::move(*this);
 }
 
+TextButtonStyle::Builder& TextButtonStyle::Builder::SetPadding(int16_t horizontal, int16_t vertical) &
+{
+  return SetPadding(Extents(horizontal, horizontal, vertical, vertical));
+}
+
+TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(int16_t horizontal, int16_t vertical) &&
+{
+  SetPadding(horizontal, vertical);
+  return std::move(*this);
+}
+
+TextButtonStyle::Builder& TextButtonStyle::Builder::SetPadding(int16_t padding) &
+{
+  return SetPadding(Extents(padding, padding, padding, padding));
+}
+
+TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(int16_t padding) &&
+{
+  SetPadding(padding);
+  return std::move(*this);
+}
+
 TextButtonStyle::Builder& TextButtonStyle::Builder::SetBackgroundColor(const UiColor& color) &
 {
   mImpl->SetBackgroundColor(color);

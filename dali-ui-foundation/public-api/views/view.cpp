@@ -228,6 +228,49 @@ void View::SetMargin(const Extents& margin)
   GetImpl(*this).SetMargin(margin);
 }
 
+void View::SetMargin(int16_t start, int16_t end, int16_t top, int16_t bottom)
+{
+  SetMargin(Extents(start, end, top, bottom));
+}
+
+void View::SetMargin(int16_t horizontal, int16_t vertical)
+{
+  SetMargin(Extents(horizontal, horizontal, vertical, vertical));
+}
+
+void View::SetMargin(int16_t uniform)
+{
+  SetMargin(Extents(uniform, uniform, uniform, uniform));
+}
+
+void View::SetStartMargin(int16_t margin)
+{
+  Extents extents = GetMargin();
+  extents.start   = margin;
+  SetMargin(extents);
+}
+
+void View::SetEndMargin(int16_t margin)
+{
+  Extents extents = GetMargin();
+  extents.end     = margin;
+  SetMargin(extents);
+}
+
+void View::SetTopMargin(int16_t margin)
+{
+  Extents extents = GetMargin();
+  extents.top     = margin;
+  SetMargin(extents);
+}
+
+void View::SetBottomMargin(int16_t margin)
+{
+  Extents extents = GetMargin();
+  extents.bottom  = margin;
+  SetMargin(extents);
+}
+
 Extents View::GetMargin() const
 {
   return GetImpl(*this).GetMargin();
@@ -236,6 +279,49 @@ Extents View::GetMargin() const
 void View::SetPadding(const Extents& padding)
 {
   GetImpl(*this).SetPadding(padding);
+}
+
+void View::SetPadding(int16_t start, int16_t end, int16_t top, int16_t bottom)
+{
+  SetPadding(Extents(start, end, top, bottom));
+}
+
+void View::SetPadding(int16_t horizontal, int16_t vertical)
+{
+  SetPadding(Extents(horizontal, horizontal, vertical, vertical));
+}
+
+void View::SetPadding(int16_t uniform)
+{
+  SetPadding(Extents(uniform, uniform, uniform, uniform));
+}
+
+void View::SetStartPadding(int16_t padding)
+{
+  Extents extents = GetPadding();
+  extents.start   = padding;
+  SetPadding(extents);
+}
+
+void View::SetEndPadding(int16_t padding)
+{
+  Extents extents = GetPadding();
+  extents.end     = padding;
+  SetPadding(extents);
+}
+
+void View::SetTopPadding(int16_t padding)
+{
+  Extents extents = GetPadding();
+  extents.top     = padding;
+  SetPadding(extents);
+}
+
+void View::SetBottomPadding(int16_t padding)
+{
+  Extents extents = GetPadding();
+  extents.bottom  = padding;
+  SetPadding(extents);
 }
 
 Extents View::GetPadding() const

@@ -1118,6 +1118,50 @@ int UtcDaliViewGetPaddingP(void)
   END_TEST;
 }
 
+int UtcDaliViewMarginHelpersP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  view.SetMargin(1, 2, 3, 4);
+  DALI_TEST_EQUALS(view.GetMargin(), Extents(1, 2, 3, 4), TEST_LOCATION);
+
+  view.SetMargin(5, 6);
+  DALI_TEST_EQUALS(view.GetMargin(), Extents(5, 5, 6, 6), TEST_LOCATION);
+
+  view.SetMargin(7);
+  DALI_TEST_EQUALS(view.GetMargin(), Extents(7, 7, 7, 7), TEST_LOCATION);
+
+  view.SetStartMargin(8);
+  view.SetEndMargin(9);
+  view.SetTopMargin(10);
+  view.SetBottomMargin(11);
+  DALI_TEST_EQUALS(view.GetMargin(), Extents(8, 9, 10, 11), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewPaddingHelpersP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  view.SetPadding(1, 2, 3, 4);
+  DALI_TEST_EQUALS(view.GetPadding(), Extents(1, 2, 3, 4), TEST_LOCATION);
+
+  view.SetPadding(5, 6);
+  DALI_TEST_EQUALS(view.GetPadding(), Extents(5, 5, 6, 6), TEST_LOCATION);
+
+  view.SetPadding(7);
+  DALI_TEST_EQUALS(view.GetPadding(), Extents(7, 7, 7, 7), TEST_LOCATION);
+
+  view.SetStartPadding(8);
+  view.SetEndPadding(9);
+  view.SetTopPadding(10);
+  view.SetBottomPadding(11);
+  DALI_TEST_EQUALS(view.GetPadding(), Extents(8, 9, 10, 11), TEST_LOCATION);
+  END_TEST;
+}
+
 int UtcDaliViewLayoutWidthChainingP(void)
 {
   UiTestApplication application;
