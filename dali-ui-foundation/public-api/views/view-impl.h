@@ -783,6 +783,17 @@ protected:
   virtual MeasuredSize OnArrange(const LayoutRect& bounds);
 
   /**
+   * @brief Filters a key event before it is emitted through KeyEventSignal().
+   *
+   * Override this to consume key events that must be handled before
+   * application key-event listeners and the default key-event handler.
+   *
+   * @param[in] event The key event.
+   * @return True if the event is consumed.
+   */
+  virtual bool FilterKeyEvent(const Dali::KeyEvent& event);
+
+  /**
    * @brief Called when a key event is received.
    * @param[in] event The key event
    * @return True if the event is consumed

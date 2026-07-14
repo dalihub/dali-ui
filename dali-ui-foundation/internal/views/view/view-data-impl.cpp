@@ -620,7 +620,6 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mFocusNavigationData(nullptr),
   mRenderEffectData(nullptr),
   mResourceReadyData(nullptr),
-  mInputMethodContext(),
   mRequestedPositionX(0.0f),
   mRequestedPositionY(0.0f),
   mMeasuredSize{0.0f, 0.0f},
@@ -1280,7 +1279,7 @@ Ui::View::FocusChangedSignalType& ViewDataImpl::FocusChangedSignal()
 bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
 {
   Dali::Ui::View handle(mViewImpl.GetOwner());
-  bool           consumed = FilterKeyEvent(event);
+  bool           consumed = mViewImpl.FilterKeyEvent(event);
 
   if(!consumed && !mKeyEventSignal.Empty())
   {
@@ -4565,22 +4564,6 @@ Ui::View::VisualEventSignalType& ViewDataImpl::VisualEventSignal()
 {
   DALI_ASSERT_ALWAYS(mVisualData && "Visual Disabled view cannot use VisualEventSignal!!");
   return mVisualData->VisualEventSignal();
-}
-
-void ViewDataImpl::SetInputMethodContext(InputMethodContext& inputMethodContext)
-{
-  mInputMethodContext = inputMethodContext;
-}
-
-bool ViewDataImpl::FilterKeyEvent(const KeyEvent& event)
-{
-  bool consumed(false);
-
-  if(mInputMethodContext)
-  {
-    consumed = Dali::Integration::InputMethodContext::FilterEventKey(mInputMethodContext, event);
-  }
-  return consumed;
 }
 
 ViewDataImpl::AccessibilityData& ViewDataImpl::GetOrCreateAccessibilityData()

@@ -840,6 +840,11 @@ private: // From ViewImpl
   void OnSceneConnection(int depth) override;
 
   /**
+   * @copydoc ViewImpl::FilterKeyEvent()
+   */
+  bool FilterKeyEvent(const KeyEvent& event) override;
+
+  /**
    * @copydoc ViewImpl::OnKeyEvent()
    */
   bool OnKeyEvent(const KeyEvent& event) override;

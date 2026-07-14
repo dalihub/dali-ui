@@ -1577,10 +1577,6 @@ void InputFieldImpl::OnInitialize()
   self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::HEIGHT);
   self.SceneConnectedSignal().Connect(this, &InputFieldImpl::OnSceneConnect);
 
-  Ui::View  view         = Ui::View::DownCast(self);
-  ViewImpl& viewInternal = Ui::GetImpl(view);
-  Internal::ViewDataImpl::Get(viewInternal).SetInputMethodContext(mInputMethodContext);
-
   EnableClipping();
 
   // TODO: Re-enable when grab handle and popup support are fully implemented.
@@ -1893,6 +1889,11 @@ void InputFieldImpl::OnSceneConnection(int depth)
       mDecorator->SetBoundingBox(BoundsInteger(0, 0, static_cast<int32_t>(posSize.width), static_cast<int32_t>(posSize.height)));
     }
   }
+}
+
+bool InputFieldImpl::FilterKeyEvent(const KeyEvent& event)
+{
+  return mInputMethodContext && Dali::Integration::InputMethodContext::FilterEventKey(mInputMethodContext, event);
 }
 
 bool InputFieldImpl::OnKeyEvent(const KeyEvent& event)

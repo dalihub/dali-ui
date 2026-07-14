@@ -23,7 +23,6 @@
 #include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h> // LCOV_EXCL_LINE
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>  // LCOV_EXCL_LINE
-#include <dali/integration-api/adaptor-framework/input-method-context-integ.h>
 #include <dali/integration-api/processor-interface.h>
 #include <dali/public-api/animation/constraint.h>
 #include <dali/public-api/math/compile-time-math.h>
@@ -487,19 +486,6 @@ public:
   void OnSceneDisconnection();
 
   /**
-   * @brief Set the input method context.
-   * @param[in] inputMethodContext The input method context.
-   */
-  void SetInputMethodContext(InputMethodContext& inputMethodContext);
-
-  /**
-   * @brief Filter an key event.
-   * @param[in] event The key to be filtered.
-   * @return True if the key handled, otherwise false.
-   */
-  bool FilterKeyEvent(const KeyEvent& event);
-
-  /**
    * @brief Get private AccessibilityData context for this impl. If not created yet, it will create new data.
    * @return The l-value of AccessibilityData context.
    */
@@ -879,7 +865,6 @@ private:
   std::unique_ptr<FocusNavigationData> mFocusNavigationData;
   std::unique_ptr<RenderEffectData>    mRenderEffectData;
   std::unique_ptr<ResourceReadyData>   mResourceReadyData;
-  InputMethodContext                   mInputMethodContext;
   View::StateChangedSignalType         mStateChangedSignal;
   View::KeyEventSignalType             mKeyEventSignal;
   View::FocusChangedSignalType         mFocusChangedSignal;

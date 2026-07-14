@@ -161,6 +161,11 @@ void ViewImpl::OnSceneConnection(int depth)
   mImpl->OnViewSceneConnection();
 }
 
+bool ViewImpl::FilterKeyEvent(const Dali::KeyEvent&)
+{
+  return false;
+}
+
 bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
 {
   return mImpl->HandleKeyEventDefault(event);
