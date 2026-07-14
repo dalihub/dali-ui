@@ -9,7 +9,6 @@ SET(TC_SOURCES
     utc-Dali-Components.cpp
     utc-Dali-DummyComponent.cpp
     utc-Dali-TextButton.cpp
-    utc-Dali-CheckBox.cpp
     utc-Dali-ChartView.cpp
     utc-Dali-ChartSeries.cpp
     utc-Dali-PieSeries.cpp

@@ -41,7 +41,6 @@
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
-#include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/types/unique-any.h>
@@ -50,9 +49,7 @@
 #include <dali-ui-foundation/public-api/views/effects/shadow-stack.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
-#include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>
 #include <dali-ui-foundation/public-api/views/recycler/items-layouter.h>
