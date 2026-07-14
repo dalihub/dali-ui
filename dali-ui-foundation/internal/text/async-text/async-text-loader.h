@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/rendering/visual-renderer.h>
@@ -101,7 +102,7 @@ struct AsyncTextParameters
     shadowOffset{},
     outlineOffset{},
     embossDirection{},
-    padding{0u, 0u, 0u, 0u},
+    padding{},
     variationsMap{},
     textFitCandidates{},
     styledTextStyleSnapshot{},
@@ -191,7 +192,7 @@ struct AsyncTextParameters
   Vector2 outlineOffset;
   Vector2 embossDirection;
 
-  Extents padding; ///< The padding of the boundaries where the text is going to be laid-out.
+  Insets padding; ///< The padding of the boundaries where the text is going to be laid-out.
 
   Property::Map                      variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
   Dali::Vector<Text::Fit::Candidate> textFitCandidates;

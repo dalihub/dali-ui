@@ -2180,7 +2180,7 @@ void ScrollViewImpl::UpdateScrollingProperties()
     return;
   }
 
-  Extents padding = GetPadding();
+  Insets padding = GetPadding();
 
   mMaximumStartX = padding.start;
   mMaximumStartY = padding.top;

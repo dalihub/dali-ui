@@ -556,22 +556,22 @@ float ViewImpl::GetMaximumHeight() const
 // Layout Properties API
 // =============================================================================
 
-void ViewImpl::SetMargin(const Extents& margin)
+void ViewImpl::SetMargin(const Insets& margin)
 {
   mImpl->SetMargin(margin);
 }
 
-Extents ViewImpl::GetMargin() const
+Insets ViewImpl::GetMargin() const
 {
   return mImpl->GetMargin();
 }
 
-void ViewImpl::SetPadding(const Extents& padding)
+void ViewImpl::SetPadding(const Insets& padding)
 {
   mImpl->SetPadding(padding);
 }
 
-Extents ViewImpl::GetPadding() const
+Insets ViewImpl::GetPadding() const
 {
   return mImpl->GetPadding();
 }

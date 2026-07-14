@@ -118,7 +118,7 @@ CornerRadiusPolicy TextButtonStyle::GetCornerRadiusPolicy() const
   return GetImpl(*this).GetCornerRadiusPolicy();
 }
 
-Extents TextButtonStyle::GetPadding() const
+Insets TextButtonStyle::GetPadding() const
 {
   return GetImpl(*this).GetPadding();
 }
@@ -286,35 +286,35 @@ TextButtonStyle::Builder&& TextButtonStyle::Builder::SetCornerRadiusPolicy(Corne
   return std::move(*this);
 }
 
-TextButtonStyle::Builder& TextButtonStyle::Builder::SetPadding(const Extents& padding) &
+TextButtonStyle::Builder& TextButtonStyle::Builder::SetPadding(const Insets& padding) &
 {
   mImpl->SetPadding(padding);
   return *this;
 }
 
-TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(const Extents& padding) &&
+TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(const Insets& padding) &&
 {
   SetPadding(padding);
   return std::move(*this);
 }
 
-TextButtonStyle::Builder& TextButtonStyle::Builder::SetPadding(int16_t horizontal, int16_t vertical) &
+TextButtonStyle::Builder& TextButtonStyle::Builder::SetPadding(float horizontal, float vertical) &
 {
-  return SetPadding(Extents(horizontal, horizontal, vertical, vertical));
+  return SetPadding(Insets(horizontal, horizontal, vertical, vertical));
 }
 
-TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(int16_t horizontal, int16_t vertical) &&
+TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(float horizontal, float vertical) &&
 {
   SetPadding(horizontal, vertical);
   return std::move(*this);
 }
 
-TextButtonStyle::Builder& TextButtonStyle::Builder::SetPadding(int16_t padding) &
+TextButtonStyle::Builder& TextButtonStyle::Builder::SetPadding(float padding) &
 {
-  return SetPadding(Extents(padding, padding, padding, padding));
+  return SetPadding(Insets(padding, padding, padding, padding));
 }
 
-TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(int16_t padding) &&
+TextButtonStyle::Builder&& TextButtonStyle::Builder::SetPadding(float padding) &&
 {
   SetPadding(padding);
   return std::move(*this);
@@ -504,12 +504,12 @@ CornerRadiusPolicy TextButtonStyleImpl::GetCornerRadiusPolicy() const
   return mCornerRadiusPolicy;
 }
 
-void TextButtonStyleImpl::SetPadding(const Extents& padding)
+void TextButtonStyleImpl::SetPadding(const Insets& padding)
 {
   mPadding = padding;
 }
 
-Extents TextButtonStyleImpl::GetPadding() const
+Insets TextButtonStyleImpl::GetPadding() const
 {
   return mPadding;
 }
@@ -601,7 +601,7 @@ TextButtonStyleImpl::TextButtonStyleImpl()
   mMaximumHeight(UNCONSTRAINED_MAX_SIZE),
   mCornerRadius(0.5f, 0.5f, 0.5f, 0.5f),
   mCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE),
-  mPadding(16u, 16u, 12u, 12u),
+  mPadding(16.0f, 16.0f, 12.0f, 12.0f),
   mBackgroundColor(UiColor::PRIMARY),
   mHorizontalAlignment(LayoutAlignment::CENTER),
   mVerticalAlignment(LayoutAlignment::CENTER),

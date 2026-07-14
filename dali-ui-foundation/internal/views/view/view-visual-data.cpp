@@ -1486,10 +1486,10 @@ Dali::Ui::VisualBase ViewDataImpl::VisualData::GetVisualObjectAt(Dali::Ui::Integ
 
 void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
 {
-  Actor   self;
-  Extents padding;
-  float   effectiveScale;
-  bool    paddingFetched = false;
+  Actor  self;
+  Insets padding;
+  float  effectiveScale;
+  bool   paddingFetched = false;
 
   for(RegisteredVisualContainer::Iterator iter = mVisuals.Begin(); iter != mVisuals.End(); iter++)
   {
@@ -1507,8 +1507,9 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size)
 
     if(!paddingFetched)
     {
-      self    = mOuter.mViewImpl.Self();
-      padding = self.GetProperty<Extents>(Ui::View::Property::PADDING);
+      self                    = mOuter.mViewImpl.Self();
+      Vector4 propertyPadding = self.GetProperty<Vector4>(Ui::View::Property::PADDING);
+      padding                 = Insets(propertyPadding.x, propertyPadding.y, propertyPadding.z, propertyPadding.w);
       if(Dali::LayoutDirection::RIGHT_TO_LEFT == mOuter.mViewImpl.GetEffectiveLayoutDirection())
       {
         std::swap(padding.start, padding.end);

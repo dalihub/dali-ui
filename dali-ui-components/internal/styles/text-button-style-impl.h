@@ -56,8 +56,8 @@ public:
   void               SetCornerRadiusPolicy(CornerRadiusPolicy policy);
   CornerRadiusPolicy GetCornerRadiusPolicy() const;
 
-  void    SetPadding(const Extents& padding);
-  Extents GetPadding() const;
+  void   SetPadding(const Insets& padding);
+  Insets GetPadding() const;
 
   void    SetBackgroundColor(const UiColor& color);
   UiColor GetBackgroundColor() const;
@@ -93,7 +93,7 @@ private:
   float              mMaximumHeight{0.0f};
   Vector4            mCornerRadius;
   CornerRadiusPolicy mCornerRadiusPolicy{CornerRadiusPolicy::ABSOLUTE};
-  Extents            mPadding;
+  Insets             mPadding;
   UiColor            mBackgroundColor;
   LayoutAlignment    mHorizontalAlignment{LayoutAlignment::CENTER};
   LayoutAlignment    mVerticalAlignment{LayoutAlignment::CENTER};

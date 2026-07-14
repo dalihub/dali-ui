@@ -22,11 +22,11 @@
 #include <dali-ui-foundation/public-api/styles/ui-style-key.h>
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/common/extents.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
@@ -90,7 +90,7 @@ public:
 
   CornerRadiusPolicy GetCornerRadiusPolicy() const;
 
-  Extents GetPadding() const;
+  Insets GetPadding() const;
 
   UiColor GetBackgroundColor() const;
 
@@ -156,14 +156,14 @@ public:
   Builder&  SetCornerRadiusPolicy(CornerRadiusPolicy policy) &;
   Builder&& SetCornerRadiusPolicy(CornerRadiusPolicy policy) &&;
 
-  Builder&  SetPadding(const Extents& padding) &;
-  Builder&& SetPadding(const Extents& padding) &&;
+  Builder&  SetPadding(const Insets& padding) &;
+  Builder&& SetPadding(const Insets& padding) &&;
 
-  Builder&  SetPadding(int16_t horizontal, int16_t vertical) &;
-  Builder&& SetPadding(int16_t horizontal, int16_t vertical) &&;
+  Builder&  SetPadding(float horizontal, float vertical) &;
+  Builder&& SetPadding(float horizontal, float vertical) &&;
 
-  Builder&  SetPadding(int16_t padding) &;
-  Builder&& SetPadding(int16_t padding) &&;
+  Builder&  SetPadding(float padding) &;
+  Builder&& SetPadding(float padding) &&;
 
   Builder&  SetBackgroundColor(const UiColor& color) &;
   Builder&& SetBackgroundColor(const UiColor& color) &&;

@@ -35,6 +35,7 @@
 #include <dali-ui-foundation/internal/visuals/visual-constraint-observer.h>
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 namespace Dali
@@ -270,7 +271,7 @@ public:
    *                        For RTL layouts, start/end should already be swapped by the caller.
    * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
    */
-  void ApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale);
+  void ApplyFittingMode(const Vector2& controlSize, const Insets& viewPadding, float effectiveScale);
 
   /**
    * @brief Applies the fitting mode transform to this visual.
@@ -286,7 +287,7 @@ public:
    *                        For RTL layouts, start/end should already be swapped by the caller.
    * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
    */
-  virtual void OnApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale);
+  virtual void OnApplyFittingMode(const Vector2& controlSize, const Insets& viewPadding, float effectiveScale);
 
   /**
    * @brief Query whether the fittingMode is required.
@@ -538,7 +539,7 @@ protected:
    * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
    * @param[in] fittingMode The fitting mode to apply.
    */
-  void DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale, Ui::Image::FittingMode fittingMode);
+  void DoApplyFittingMode(const Vector2& controlSize, const Insets& viewPadding, float effectiveScale, Ui::Image::FittingMode fittingMode);
 
   /**
    * @brief Query whether the corners of the visual requires to be rounded.

@@ -470,7 +470,7 @@ void TextVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
   // Do nothing
 }
 
-void TextVisual::OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
+void TextVisual::OnApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale)
 {
   // Apply UiScale to controller
   if(mController->SetUiScale(effectiveScale))

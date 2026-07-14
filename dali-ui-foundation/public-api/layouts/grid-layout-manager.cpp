@@ -117,9 +117,9 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
     colSpan          = std::min(colSpan, colCount - col);
 
     float        childScale            = childImpl.GetEffectiveScale();
-    Extents      margin                = childImpl.GetMargin();
-    float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
-    float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
+    Insets       margin                = childImpl.GetMargin();
+    float        marginW               = (margin.start + margin.end) * childScale;
+    float        marginH               = (margin.top + margin.bottom) * childScale;
     float        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
     float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
@@ -190,9 +190,9 @@ void MeasureGridChildrenAndFillAuto(std::vector<View>& children, float available
     }
 
     float        childScale            = childImpl.GetEffectiveScale();
-    Extents      margin                = childImpl.GetMargin();
-    float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
-    float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
+    Insets       margin                = childImpl.GetMargin();
+    float        marginW               = (margin.start + margin.end) * childScale;
+    float        marginH               = (margin.top + margin.bottom) * childScale;
     float        childWidthConstraint  = std::max(0.0f, availableWidth - marginW);
     float        childHeightConstraint = std::max(0.0f, availableHeight - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);
@@ -415,12 +415,12 @@ void ArrangeGridChildrenToCells(std::vector<View>& children, const std::vector<f
       childBounds.height -= rowSpacing;
     }
 
-    float   childScale = childImpl.GetEffectiveScale();
-    Extents margin     = childImpl.GetMargin();
-    childBounds.x += static_cast<float>(margin.start) * childScale;
-    childBounds.y += static_cast<float>(margin.top) * childScale;
-    childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end) * childScale);
-    childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom) * childScale);
+    float  childScale = childImpl.GetEffectiveScale();
+    Insets margin     = childImpl.GetMargin();
+    childBounds.x += margin.start * childScale;
+    childBounds.y += margin.top * childScale;
+    childBounds.width  = std::max(0.0f, childBounds.width - (margin.start + margin.end) * childScale);
+    childBounds.height = std::max(0.0f, childBounds.height - (margin.top + margin.bottom) * childScale);
 
     float        cellWidth     = childBounds.width;
     float        cellHeight    = childBounds.height;
@@ -583,9 +583,9 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
                                  colCount, impl->mRowDefinitions, impl->mColumnDefinitions, rowHeights, colWidths,
                                  visRowSpacing, visColSpacing, s);
 
-  Extents parentPadding   = view->GetPadding();
-  float   requestedWidth  = view->GetRequestedWidth();
-  float   requestedHeight = view->GetRequestedHeight();
+  Insets parentPadding   = view->GetPadding();
+  float  requestedWidth  = view->GetRequestedWidth();
+  float  requestedHeight = view->GetRequestedHeight();
 
   float starAvailableWidth  = availableWidth;
   float starAvailableHeight = availableHeight;
@@ -601,7 +601,7 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
       }
     }
     nonStarWidth += visColSpacing * (colCount > 0 ? colCount - 1 : 0);
-    float pw              = static_cast<float>(parentPadding.start + parentPadding.end) * s;
+    float pw              = (parentPadding.start + parentPadding.end) * s;
     float minWidthContent = std::max(0.0f, view->GetMinimumWidth() * s - pw);
     starAvailableWidth    = std::max(nonStarWidth, minWidthContent);
   }
@@ -617,7 +617,7 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
       }
     }
     nonStarHeight += visRowSpacing * (rowCount > 0 ? rowCount - 1 : 0);
-    float ph               = static_cast<float>(parentPadding.top + parentPadding.bottom) * s;
+    float ph               = (parentPadding.top + parentPadding.bottom) * s;
     float minHeightContent = std::max(0.0f, view->GetMinimumHeight() * s - ph);
     starAvailableHeight    = std::max(nonStarHeight, minHeightContent);
   }

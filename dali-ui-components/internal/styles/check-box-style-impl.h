@@ -39,12 +39,12 @@ public:
   CheckBoxStyleImpl();
   CheckBoxStyleImpl(const CheckBoxStyleImpl& rhs);
 
-  void    SetMinimumWidth(float width);
-  float   GetMinimumWidth() const;
-  void    SetMinimumHeight(float height);
-  float   GetMinimumHeight() const;
-  void    SetPadding(const Extents& padding);
-  Extents GetPadding() const;
+  void   SetMinimumWidth(float width);
+  float  GetMinimumWidth() const;
+  void   SetMinimumHeight(float height);
+  float  GetMinimumHeight() const;
+  void   SetPadding(const Insets& padding);
+  Insets GetPadding() const;
 
   void  SetIconWidth(float width);
   float GetIconWidth() const;
@@ -85,7 +85,7 @@ protected:
 private:
   float                                         mMinimumWidth{0.0f};
   float                                         mMinimumHeight{0.0f};
-  Extents                                       mPadding;
+  Insets                                        mPadding;
   float                                         mIconWidth{0.0f};
   float                                         mIconHeight{0.0f};
   float                                         mLabelGap{0.0f};

@@ -72,7 +72,8 @@ Vector2 CalculateRenderablePosition(Actor textActor, Text::ControllerPtr control
     return Vector2(scrollOffset.x + alignmentOffset, scrollOffset.y);
   }
 
-  Extents    padding         = textActor.GetProperty<Extents>(Ui::View::Property::PADDING);
+  Vector4    propertyPadding = textActor.GetProperty<Vector4>(Ui::View::Property::PADDING);
+  Insets     padding(propertyPadding.x, propertyPadding.y, propertyPadding.z, propertyPadding.w);
   const auto layoutDirection = static_cast<Dali::LayoutDirection::Type>(
     textActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
   if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)

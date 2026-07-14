@@ -300,7 +300,7 @@ void NPatchVisual::SetFittingMode(Ui::Image::FittingMode fittingMode)
   mFittingMode = fittingMode;
 }
 
-void NPatchVisual::OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
+void NPatchVisual::OnApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale)
 {
   DoApplyFittingMode(controlSize, padding, effectiveScale, mFittingMode);
 }

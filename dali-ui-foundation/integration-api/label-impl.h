@@ -41,6 +41,7 @@
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 
 namespace Dali
 {
@@ -776,7 +777,7 @@ private: // UiScale
    *
    * @return The effective text padding.
    */
-  Extents GetEffectiveTextPadding() const;
+  Insets GetEffectiveTextPadding() const;
 
 private: // System FontSize
   /**
@@ -1214,7 +1215,7 @@ private: // Implementation
    * @param[in] layoutDirection The layout direction.
    * @return The parameters for asynchronous text processing.
    */
-  Text::AsyncTextParameters GetAsyncTextParameters(Text::Async::RequestType requestType, const Vector2& contentSize, const Extents& padding, Dali::LayoutDirection::Type layoutDirection);
+  Text::AsyncTextParameters GetAsyncTextParameters(Text::Async::RequestType requestType, const Vector2& contentSize, const Insets& padding, Dali::LayoutDirection::Type layoutDirection);
 
   /**
    * @brief Emits TextFitChanged signal.

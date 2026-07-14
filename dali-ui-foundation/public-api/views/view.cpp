@@ -223,108 +223,108 @@ float View::GetMaximumHeight() const
   return GetImpl(*this).GetMaximumHeight();
 }
 
-void View::SetMargin(const Extents& margin)
+void View::SetMargin(const Insets& margin)
 {
   GetImpl(*this).SetMargin(margin);
 }
 
-void View::SetMargin(int16_t start, int16_t end, int16_t top, int16_t bottom)
+void View::SetMargin(float start, float end, float top, float bottom)
 {
-  SetMargin(Extents(start, end, top, bottom));
+  SetMargin(Insets(start, end, top, bottom));
 }
 
-void View::SetMargin(int16_t horizontal, int16_t vertical)
+void View::SetMargin(float horizontal, float vertical)
 {
-  SetMargin(Extents(horizontal, horizontal, vertical, vertical));
+  SetMargin(Insets(horizontal, horizontal, vertical, vertical));
 }
 
-void View::SetMargin(int16_t uniform)
+void View::SetMargin(float uniform)
 {
-  SetMargin(Extents(uniform, uniform, uniform, uniform));
+  SetMargin(Insets(uniform, uniform, uniform, uniform));
 }
 
-void View::SetStartMargin(int16_t margin)
+void View::SetStartMargin(float margin)
 {
-  Extents extents = GetMargin();
-  extents.start   = margin;
-  SetMargin(extents);
+  Insets insets = GetMargin();
+  insets.start  = margin;
+  SetMargin(insets);
 }
 
-void View::SetEndMargin(int16_t margin)
+void View::SetEndMargin(float margin)
 {
-  Extents extents = GetMargin();
-  extents.end     = margin;
-  SetMargin(extents);
+  Insets insets = GetMargin();
+  insets.end    = margin;
+  SetMargin(insets);
 }
 
-void View::SetTopMargin(int16_t margin)
+void View::SetTopMargin(float margin)
 {
-  Extents extents = GetMargin();
-  extents.top     = margin;
-  SetMargin(extents);
+  Insets insets = GetMargin();
+  insets.top    = margin;
+  SetMargin(insets);
 }
 
-void View::SetBottomMargin(int16_t margin)
+void View::SetBottomMargin(float margin)
 {
-  Extents extents = GetMargin();
-  extents.bottom  = margin;
-  SetMargin(extents);
+  Insets insets = GetMargin();
+  insets.bottom = margin;
+  SetMargin(insets);
 }
 
-Extents View::GetMargin() const
+Insets View::GetMargin() const
 {
   return GetImpl(*this).GetMargin();
 }
 
-void View::SetPadding(const Extents& padding)
+void View::SetPadding(const Insets& padding)
 {
   GetImpl(*this).SetPadding(padding);
 }
 
-void View::SetPadding(int16_t start, int16_t end, int16_t top, int16_t bottom)
+void View::SetPadding(float start, float end, float top, float bottom)
 {
-  SetPadding(Extents(start, end, top, bottom));
+  SetPadding(Insets(start, end, top, bottom));
 }
 
-void View::SetPadding(int16_t horizontal, int16_t vertical)
+void View::SetPadding(float horizontal, float vertical)
 {
-  SetPadding(Extents(horizontal, horizontal, vertical, vertical));
+  SetPadding(Insets(horizontal, horizontal, vertical, vertical));
 }
 
-void View::SetPadding(int16_t uniform)
+void View::SetPadding(float uniform)
 {
-  SetPadding(Extents(uniform, uniform, uniform, uniform));
+  SetPadding(Insets(uniform, uniform, uniform, uniform));
 }
 
-void View::SetStartPadding(int16_t padding)
+void View::SetStartPadding(float padding)
 {
-  Extents extents = GetPadding();
-  extents.start   = padding;
-  SetPadding(extents);
+  Insets insets = GetPadding();
+  insets.start  = padding;
+  SetPadding(insets);
 }
 
-void View::SetEndPadding(int16_t padding)
+void View::SetEndPadding(float padding)
 {
-  Extents extents = GetPadding();
-  extents.end     = padding;
-  SetPadding(extents);
+  Insets insets = GetPadding();
+  insets.end    = padding;
+  SetPadding(insets);
 }
 
-void View::SetTopPadding(int16_t padding)
+void View::SetTopPadding(float padding)
 {
-  Extents extents = GetPadding();
-  extents.top     = padding;
-  SetPadding(extents);
+  Insets insets = GetPadding();
+  insets.top    = padding;
+  SetPadding(insets);
 }
 
-void View::SetBottomPadding(int16_t padding)
+void View::SetBottomPadding(float padding)
 {
-  Extents extents = GetPadding();
-  extents.bottom  = padding;
-  SetPadding(extents);
+  Insets insets = GetPadding();
+  insets.bottom = padding;
+  SetPadding(insets);
 }
 
-Extents View::GetPadding() const
+Insets View::GetPadding() const
 {
   return GetImpl(*this).GetPadding();
 }

@@ -1038,7 +1038,7 @@ void Visual::Base::SetTransformMapUsageForFittingMode(bool used)
   mImpl->mRenderer.RegisterProperty("visualTransformUseEffectiveScale", mImpl->mTransformMapSetForFittingMode ? 0.0f : 1.0f);
 }
 
-void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
+void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale)
 {
   // Notify to visual's constraint that view's size is changed.
   UpdateApplyRate(Actor::Property::SIZE);
@@ -1046,24 +1046,24 @@ void Visual::Base::ApplyFittingMode(const Vector2& controlSize, const Extents& p
   OnApplyFittingMode(controlSize, padding, effectiveScale);
 }
 
-void Visual::Base::OnApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale)
+void Visual::Base::OnApplyFittingMode(const Vector2& controlSize, const Insets& viewPadding, float effectiveScale)
 {
   const static Property::Map emptyMap;
   SetTransformAndSize(emptyMap, controlSize, effectiveScale);
 }
 
-void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale, Ui::Image::FittingMode fittingMode)
+void Visual::Base::DoApplyFittingMode(const Vector2& controlSize, const Insets& viewPadding, float effectiveScale, Ui::Image::FittingMode fittingMode)
 {
   if(IsPixelAreaSetForFittingMode())
   {
     SetPixelAreaForFittingMode(FULL_TEXTURE_RECT);
   }
 
-  Extents padding = (mImpl->mFlags & Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING) ? Extents() : viewPadding;
+  Insets padding = (mImpl->mFlags & Impl::IS_FITTING_MODE_IGNORE_VIEW_PADDING) ? Insets() : viewPadding;
 
   Vector2 finalSize   = controlSize - Vector2(padding.start + padding.end, padding.top + padding.bottom) * effectiveScale;
   Vector2 finalOffset = Vector2(padding.start, padding.top) * effectiveScale;
-  bool    zeroPadding = (padding == Extents());
+  bool    zeroPadding = (padding == Insets());
 
   Property::Map transformMap;
 

@@ -212,10 +212,10 @@ public:
   float                       GetMaximumWidth() const;
   void                        SetMaximumHeight(float height);
   float                       GetMaximumHeight() const;
-  void                        SetMargin(const Extents& margin);
-  Extents                     GetMargin() const;
-  void                        SetPadding(const Extents& padding);
-  Extents                     GetPadding() const;
+  void                        SetMargin(const Insets& margin);
+  Insets                      GetMargin() const;
+  void                        SetPadding(const Insets& padding);
+  Insets                      GetPadding() const;
   void                        SetLayoutMode(LayoutMode mode);
   LayoutMode                  GetLayoutMode() const;
   void                        SetLayoutTransition(LayoutTransition transition);
@@ -875,8 +875,8 @@ private:
   MeasuredSize                          mMeasuredSize; ///< mLastMeasuredConstraint.width < 0 means no valid measure cache
   MeasuredSize                          mLastMeasuredConstraint;
   LayoutRect                            mArrangedBounds;
-  Extents                               mMargin;          ///< Layout margin
-  Extents                               mPadding;         ///< Layout padding
+  Insets                                mMargin;          ///< Layout margin
+  Insets                                mPadding;         ///< Layout padding
   float                                 mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
   float                                 mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
   LayoutMode                            mLayoutMode;      ///< Layout mode of the view

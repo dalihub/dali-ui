@@ -434,7 +434,7 @@ void ScrollBarImpl::PlayFadeOut()
 void ScrollBarImpl::UpdatePosition(const Vector2& position)
 {
   // Get padding from View (inherited)
-  Extents padding = GetPadding();
+  Insets padding = GetPadding();
 
   // mViewPortWidth/Height are VISUAL units (set from the ScrollView's actor size).
   // AbsoluteLayoutParams expects NATURAL units, so convert by dividing by the
@@ -555,11 +555,11 @@ void ScrollBarImpl::CreateVBar()
   mVerticalBar.SetCornerRadius(mBarCornerRadius.x, mBarCornerRadius.y, mBarCornerRadius.w, mBarCornerRadius.z);
 
   // Place at right edge with offset using AbsoluteLayoutParams (natural units).
-  Extents padding          = GetPadding();
-  float   scale            = GetEffectiveScale();
-  float   naturalSelfWidth = ((mViewPortWidth > 0.0f) ? mViewPortWidth : Self().GetProperty<float>(Actor::Property::SIZE_WIDTH)) / scale;
-  float   contentWidth     = naturalSelfWidth - padding.start - padding.end;
-  float   xPos             = contentWidth - mBarThickness - mBarOffset;
+  Insets padding          = GetPadding();
+  float  scale            = GetEffectiveScale();
+  float  naturalSelfWidth = ((mViewPortWidth > 0.0f) ? mViewPortWidth : Self().GetProperty<float>(Actor::Property::SIZE_WIDTH)) / scale;
+  float  contentWidth     = naturalSelfWidth - padding.start - padding.end;
+  float  xPos             = contentWidth - mBarThickness - mBarOffset;
   mVerticalBar.SetLayoutParams(AbsoluteLayoutParams::New()
                                  .SetBounds(LayoutRect(xPos, 0.0f, mBarThickness, 0.0f)));
   mLastVBarBounds = LayoutRect(xPos, 0.0f, mBarThickness, 0.0f);
@@ -572,11 +572,11 @@ void ScrollBarImpl::UpdateVBarSize(float ratio)
   if(!mVerticalBar)
     return;
 
-  Extents padding           = GetPadding();
-  float   scale             = GetEffectiveScale();
-  float   naturalSelfHeight = ((mViewPortHeight > 0.0f) ? mViewPortHeight : Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT)) / scale;
-  float   contentHeight     = naturalSelfHeight - padding.top - padding.bottom;
-  float   sizeHeight        = std::max(GetBarMinSize(), std::round(contentHeight * ratio));
+  Insets padding           = GetPadding();
+  float  scale             = GetEffectiveScale();
+  float  naturalSelfHeight = ((mViewPortHeight > 0.0f) ? mViewPortHeight : Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT)) / scale;
+  float  contentHeight     = naturalSelfHeight - padding.top - padding.bottom;
+  float  sizeHeight        = std::max(GetBarMinSize(), std::round(contentHeight * ratio));
 
   float naturalSelfWidth = ((mViewPortWidth > 0.0f) ? mViewPortWidth : Self().GetProperty<float>(Actor::Property::SIZE_WIDTH)) / scale;
   float contentWidth     = naturalSelfWidth - padding.start - padding.end;
@@ -614,11 +614,11 @@ void ScrollBarImpl::CreateHBar()
   mHorizontalBar.SetCornerRadius(mBarCornerRadius.x, mBarCornerRadius.y, mBarCornerRadius.w, mBarCornerRadius.z);
 
   // Place at bottom edge with offset using AbsoluteLayoutParams (natural units).
-  Extents padding           = GetPadding();
-  float   scale             = GetEffectiveScale();
-  float   naturalSelfHeight = ((mViewPortHeight > 0.0f) ? mViewPortHeight : Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT)) / scale;
-  float   contentHeight     = naturalSelfHeight - padding.top - padding.bottom;
-  float   yPos              = contentHeight - mBarThickness - mBarOffset;
+  Insets padding           = GetPadding();
+  float  scale             = GetEffectiveScale();
+  float  naturalSelfHeight = ((mViewPortHeight > 0.0f) ? mViewPortHeight : Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT)) / scale;
+  float  contentHeight     = naturalSelfHeight - padding.top - padding.bottom;
+  float  yPos              = contentHeight - mBarThickness - mBarOffset;
   mHorizontalBar.SetLayoutParams(AbsoluteLayoutParams::New()
                                    .SetBounds(LayoutRect(0.0f, yPos, 0.0f, mBarThickness)));
   mLastHBarBounds = LayoutRect(0.0f, yPos, 0.0f, mBarThickness);
@@ -631,11 +631,11 @@ void ScrollBarImpl::UpdateHBarSize(float ratio)
   if(!mHorizontalBar)
     return;
 
-  Extents padding          = GetPadding();
-  float   scale            = GetEffectiveScale();
-  float   naturalSelfWidth = ((mViewPortWidth > 0.0f) ? mViewPortWidth : Self().GetProperty<float>(Actor::Property::SIZE_WIDTH)) / scale;
-  float   contentWidth     = naturalSelfWidth - padding.start - padding.end;
-  float   sizeWidth        = std::max(GetBarMinSize(), std::round(contentWidth * ratio));
+  Insets padding          = GetPadding();
+  float  scale            = GetEffectiveScale();
+  float  naturalSelfWidth = ((mViewPortWidth > 0.0f) ? mViewPortWidth : Self().GetProperty<float>(Actor::Property::SIZE_WIDTH)) / scale;
+  float  contentWidth     = naturalSelfWidth - padding.start - padding.end;
+  float  sizeWidth        = std::max(GetBarMinSize(), std::round(contentWidth * ratio));
 
   float naturalSelfHeight = ((mViewPortHeight > 0.0f) ? mViewPortHeight : Self().GetProperty<float>(Actor::Property::SIZE_HEIGHT)) / scale;
   float contentHeight     = naturalSelfHeight - padding.top - padding.bottom;

@@ -44,6 +44,11 @@ namespace
 {
 constexpr uint32_t MAXIMUM_VISUAL_OBJECTS_COUNT = (Dali::Ui::Integration::DepthIndex::Ranges::CONTENT - Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND) / 2;
 
+Vector4 ToVector4(const Insets& insets)
+{
+  return Vector4(insets.start, insets.end, insets.top, insets.bottom);
+}
+
 #if defined(DEBUG_ENABLED)
 Debug::Filter* gVisualBaseLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VISUAL_BASE");
 #endif
@@ -819,7 +824,7 @@ void VisualBaseImpl::Process(bool postProcessor)
       // TODO : Need to consider RTL case.
       Vector2 viewSize(owner.GetSize());
       auto&   viewImpl       = GetImpl(owner);
-      Extents viewPadding    = viewImpl.GetPadding();
+      Insets  viewPadding    = viewImpl.GetPadding();
       float   effectiveScale = viewImpl.GetEffectiveScale();
       ApplyFittingModeInternal(viewSize, viewPadding, effectiveScale);
     }
@@ -897,13 +902,13 @@ void VisualBaseImpl::UpdatePropertyInternal()
   DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) UpdatePropertyInternal() Status(%d) done (Visual::Base[%p])\n", this, GetName().CStr(), static_cast<int>(previousUpdatedStatus), mVisual.GetObjectPtr());
 }
 
-void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale)
+void VisualBaseImpl::ApplyFittingModeInternal(const Vector2& controlSize, const Insets& viewPadding, float effectiveScale)
 {
 #if defined(DEBUG_ENABLED)
   {
     std::ostringstream oss;
     oss.imbue(std::locale::classic());
-    oss << controlSize << ", " << viewPadding << ", " << effectiveScale;
+    oss << controlSize << ", " << ToVector4(viewPadding) << ", " << effectiveScale;
     DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General, "VisualBaseImpl[%p](%s) ApplyFittingModeInternal(%s) Status(%d) (Visual::Base[%p])\n", this, GetName().CStr(), oss.str().c_str(), static_cast<int>(mPropertyUpdatedStatus), mVisual.GetObjectPtr());
   }
 #endif

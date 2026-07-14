@@ -146,9 +146,9 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
       h *= childScale;
     }
 
-    Extents margin  = childImpl.GetMargin();
-    float   marginW = static_cast<float>(margin.start + margin.end) * childScale;
-    float   marginH = static_cast<float>(margin.top + margin.bottom) * childScale;
+    Insets margin  = childImpl.GetMargin();
+    float  marginW = (margin.start + margin.end) * childScale;
+    float  marginH = (margin.top + margin.bottom) * childScale;
 
     // Always measure children. When the child has no explicit positive extent
     // on an axis (WRAP_CONTENT / MATCH_PARENT), the constraint is the available
@@ -304,8 +304,8 @@ MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bo
       {
         if(childImpl.GetRequestedWidth() == MATCH_PARENT)
         {
-          Extents margin = childImpl.GetMargin();
-          w              = std::max(0.0f, availableWidth - static_cast<float>(margin.start + margin.end) * childScale);
+          Insets margin = childImpl.GetMargin();
+          w             = std::max(0.0f, availableWidth - (margin.start + margin.end) * childScale);
         }
         else
         {
@@ -316,8 +316,8 @@ MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bo
       {
         if(childImpl.GetRequestedHeight() == MATCH_PARENT)
         {
-          Extents margin = childImpl.GetMargin();
-          h              = std::max(0.0f, availableHeight - static_cast<float>(margin.top + margin.bottom) * childScale);
+          Insets margin = childImpl.GetMargin();
+          h             = std::max(0.0f, availableHeight - (margin.top + margin.bottom) * childScale);
         }
         else
         {
@@ -344,11 +344,11 @@ MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bo
       y *= childScale;
     }
 
-    Extents margin = childImpl.GetMargin();
+    Insets margin = childImpl.GetMargin();
 
     LayoutRect childBounds;
-    childBounds.x      = bounds.x + x + static_cast<float>(margin.start) * childScale;
-    childBounds.y      = bounds.y + y + static_cast<float>(margin.top) * childScale;
+    childBounds.x      = bounds.x + x + margin.start * childScale;
+    childBounds.y      = bounds.y + y + margin.top * childScale;
     childBounds.width  = w;
     childBounds.height = h;
 

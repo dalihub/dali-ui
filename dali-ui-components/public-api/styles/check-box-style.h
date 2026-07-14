@@ -21,11 +21,11 @@
 #include <dali-ui-foundation/public-api/styles/ui-style.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
 #include <dali/public-api/common/dali-string.h>
-#include <dali/public-api/common/extents.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 
 namespace Dali
@@ -63,9 +63,9 @@ public:
 
   Builder Configure() const;
 
-  float   GetMinimumWidth() const;
-  float   GetMinimumHeight() const;
-  Extents GetPadding() const;
+  float  GetMinimumWidth() const;
+  float  GetMinimumHeight() const;
+  Insets GetPadding() const;
 
   float GetIconWidth() const;
   float GetIconHeight() const;
@@ -106,8 +106,8 @@ public:
   Builder&& SetMinimumWidth(float width) &&;
   Builder&  SetMinimumHeight(float height) &;
   Builder&& SetMinimumHeight(float height) &&;
-  Builder&  SetPadding(const Extents& padding) &;
-  Builder&& SetPadding(const Extents& padding) &&;
+  Builder&  SetPadding(const Insets& padding) &;
+  Builder&& SetPadding(const Insets& padding) &&;
 
   Builder&  SetIconWidth(float width) &;
   Builder&& SetIconWidth(float width) &&;

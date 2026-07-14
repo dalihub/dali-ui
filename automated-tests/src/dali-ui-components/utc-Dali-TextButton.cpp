@@ -177,7 +177,7 @@ int UtcDaliTextButtonStyleP(void)
                             .SetMaximumHeight(100.0f)
                             .SetCornerRadius(6.0f)
                             .SetCornerRadiusPolicy(CornerRadiusPolicy::RELATIVE)
-                            .SetPadding(Extents(4u, 5u, 6u, 7u))
+                            .SetPadding(Insets(4.0f, 5.0f, 6.0f, 7.0f))
                             .SetBackgroundColor(UiColor(Color::BLUE))
                             .SetHorizontalAlignment(LayoutAlignment::END)
                             .SetVerticalAlignment(LayoutAlignment::START)
@@ -196,7 +196,7 @@ int UtcDaliTextButtonStyleP(void)
   DALI_TEST_EQUALS(button.GetMaximumHeight(), 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(button.GetCornerRadius(), Vector4(6.0f, 6.0f, 6.0f, 6.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(button.GetCornerRadiusPolicy(), CornerRadiusPolicy::RELATIVE, TEST_LOCATION);
-  DALI_TEST_EQUALS(button.GetPadding(), Extents(4u, 5u, 6u, 7u), TEST_LOCATION);
+  DALI_TEST_EQUALS(button.GetPadding(), Insets(4.0f, 5.0f, 6.0f, 7.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(button.GetBackgroundColor().GetRgba(), Color::BLUE, TEST_LOCATION);
   DALI_TEST_EQUALS(button.GetHorizontalAlignment(), LayoutAlignment::END, TEST_LOCATION);
   DALI_TEST_EQUALS(button.GetVerticalAlignment(), LayoutAlignment::START, TEST_LOCATION);
@@ -216,22 +216,32 @@ int UtcDaliTextButtonStylePaddingHelpersP(void)
   TextButtonStyle::Builder horizontalVerticalBuilder;
   horizontalVerticalBuilder.SetPadding(4, 6);
   TextButtonStyle horizontalVertical = std::move(horizontalVerticalBuilder).Build();
-  DALI_TEST_EQUALS(horizontalVertical.GetPadding(), Extents(4, 4, 6, 6), TEST_LOCATION);
+  DALI_TEST_EQUALS(horizontalVertical.GetPadding(), Insets(4.0f, 4.0f, 6.0f, 6.0f), TEST_LOCATION);
 
   TextButtonStyle horizontalVerticalRvalue = TextButtonStyle::Builder()
                                               .SetPadding(5, 7)
                                               .Build();
-  DALI_TEST_EQUALS(horizontalVerticalRvalue.GetPadding(), Extents(5, 5, 7, 7), TEST_LOCATION);
+  DALI_TEST_EQUALS(horizontalVerticalRvalue.GetPadding(), Insets(5.0f, 5.0f, 7.0f, 7.0f), TEST_LOCATION);
 
   TextButtonStyle::Builder builder;
   builder.SetPadding(8);
   TextButtonStyle all = std::move(builder).Build();
-  DALI_TEST_EQUALS(all.GetPadding(), Extents(8, 8, 8, 8), TEST_LOCATION);
+  DALI_TEST_EQUALS(all.GetPadding(), Insets(8.0f, 8.0f, 8.0f, 8.0f), TEST_LOCATION);
 
   TextButtonStyle allRvalue = TextButtonStyle::Builder()
                                 .SetPadding(9)
                                 .Build();
-  DALI_TEST_EQUALS(allRvalue.GetPadding(), Extents(9, 9, 9, 9), TEST_LOCATION);
+  DALI_TEST_EQUALS(allRvalue.GetPadding(), Insets(9.0f, 9.0f, 9.0f, 9.0f), TEST_LOCATION);
+
+  TextButtonStyle fractional = TextButtonStyle::Builder()
+                                 .SetPadding(0.5f, 1.5f)
+                                 .Build();
+  DALI_TEST_EQUALS(fractional.GetPadding(), Insets(0.5f, 0.5f, 1.5f, 1.5f), TEST_LOCATION);
+
+  TextButtonStyle fractionalAll = TextButtonStyle::Builder()
+                                    .SetPadding(2.5f)
+                                    .Build();
+  DALI_TEST_EQUALS(fractionalAll.GetPadding(), Insets(2.5f, 2.5f, 2.5f, 2.5f), TEST_LOCATION);
   END_TEST;
 }
 
@@ -248,7 +258,7 @@ int UtcDaliTextButtonStyleConfigureP(void)
 
   DALI_TEST_EQUALS(style.GetMinimumWidth(), 10.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetMinimumHeight(), 10.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(style.GetPadding(), Extents(16u, 16u, 12u, 12u), TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetPadding(), Insets(16.0f, 16.0f, 12.0f, 12.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetFontSize(), 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetTextColor().GetRgba(), Color::WHITE, TEST_LOCATION);
   DALI_TEST_CHECK(style.GetStateEffect().IsNone());
@@ -292,7 +302,7 @@ int UtcDaliTextButtonStyleDefaultKeyP(void)
   DALI_TEST_EQUALS(style.GetMinimumHeight(), 10.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetCornerRadius(), Vector4(0.5f, 0.5f, 0.5f, 0.5f), TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetCornerRadiusPolicy(), CornerRadiusPolicy::RELATIVE, TEST_LOCATION);
-  DALI_TEST_EQUALS(style.GetPadding(), Extents(16u, 16u, 12u, 12u), TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetPadding(), Insets(16.0f, 16.0f, 12.0f, 12.0f), TEST_LOCATION);
   DALI_TEST_CHECK(style.GetBackgroundColor().HasColorId());
   DALI_TEST_EQUALS(style.GetBackgroundColor().GetColorId(), UiColor::PRIMARY.GetColorId(), TEST_LOCATION);
   DALI_TEST_CHECK(style.GetTextColor().HasColorId());

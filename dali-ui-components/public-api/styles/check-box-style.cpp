@@ -111,7 +111,7 @@ float CheckBoxStyle::GetMinimumHeight() const
 {
   return GetImpl(*this).GetMinimumHeight();
 }
-Extents CheckBoxStyle::GetPadding() const
+Insets CheckBoxStyle::GetPadding() const
 {
   return GetImpl(*this).GetPadding();
 }
@@ -188,7 +188,7 @@ CheckBoxStyle::Builder::~Builder()                                              
 
 CBS_SETTER(SetMinimumWidth, float)
 CBS_SETTER(SetMinimumHeight, float)
-CBS_SETTER(SetPadding, const Extents&)
+CBS_SETTER(SetPadding, const Insets&)
 CBS_SETTER(SetIconWidth, float)
 CBS_SETTER(SetIconHeight, float)
 CBS_SETTER(SetLabelGap, float)
@@ -246,11 +246,11 @@ float CheckBoxStyleImpl::GetMinimumHeight() const
 {
   return mMinimumHeight;
 }
-void CheckBoxStyleImpl::SetPadding(const Extents& v)
+void CheckBoxStyleImpl::SetPadding(const Insets& v)
 {
   mPadding = v;
 }
-Extents CheckBoxStyleImpl::GetPadding() const
+Insets CheckBoxStyleImpl::GetPadding() const
 {
   return mPadding;
 }

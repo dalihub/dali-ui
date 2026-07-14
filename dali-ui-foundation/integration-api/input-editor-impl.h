@@ -44,6 +44,7 @@
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 
 namespace Dali
 {
@@ -799,7 +800,7 @@ private: // UiScale
    *
    * @return The effective text padding.
    */
-  Extents GetEffectiveTextPadding() const;
+  Insets GetEffectiveTextPadding() const;
 
 private: // System FontSize
   /**

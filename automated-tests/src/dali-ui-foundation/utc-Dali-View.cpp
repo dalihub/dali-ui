@@ -1077,11 +1077,11 @@ int UtcDaliViewSetMarginP(void)
   View              view = View::New();
   Extents           margin(10, 20, 30, 40);
   view.SetMargin(margin);
-  Extents got = view.GetMargin();
-  DALI_TEST_EQUALS(got.start, 10u, TEST_LOCATION);
-  DALI_TEST_EQUALS(got.end, 20u, TEST_LOCATION);
-  DALI_TEST_EQUALS(got.top, 30u, TEST_LOCATION);
-  DALI_TEST_EQUALS(got.bottom, 40u, TEST_LOCATION);
+  Insets got = view.GetMargin();
+  DALI_TEST_EQUALS(got.start, 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.end, 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.top, 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.bottom, 40.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1089,9 +1089,9 @@ int UtcDaliViewGetMarginP(void)
 {
   UiTestApplication application;
   View              view = View::New();
-  Extents           got  = view.GetMargin();
-  DALI_TEST_EQUALS(got.start, 0u, TEST_LOCATION);
-  DALI_TEST_EQUALS(got.end, 0u, TEST_LOCATION);
+  Insets            got  = view.GetMargin();
+  DALI_TEST_EQUALS(got.start, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.end, 0.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1101,11 +1101,11 @@ int UtcDaliViewSetPaddingP(void)
   View              view = View::New();
   Extents           padding(5, 15, 25, 35);
   view.SetPadding(padding);
-  Extents got = view.GetPadding();
-  DALI_TEST_EQUALS(got.start, 5u, TEST_LOCATION);
-  DALI_TEST_EQUALS(got.end, 15u, TEST_LOCATION);
-  DALI_TEST_EQUALS(got.top, 25u, TEST_LOCATION);
-  DALI_TEST_EQUALS(got.bottom, 35u, TEST_LOCATION);
+  Insets got = view.GetPadding();
+  DALI_TEST_EQUALS(got.start, 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.end, 15.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.top, 25.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(got.bottom, 35.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1113,8 +1113,8 @@ int UtcDaliViewGetPaddingP(void)
 {
   UiTestApplication application;
   View              view = View::New();
-  Extents           got  = view.GetPadding();
-  DALI_TEST_EQUALS(got.start, 0u, TEST_LOCATION);
+  Insets            got  = view.GetPadding();
+  DALI_TEST_EQUALS(got.start, 0.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -1124,19 +1124,22 @@ int UtcDaliViewMarginHelpersP(void)
   View              view = View::New();
 
   view.SetMargin(1, 2, 3, 4);
-  DALI_TEST_EQUALS(view.GetMargin(), Extents(1, 2, 3, 4), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMargin(), Insets(1.0f, 2.0f, 3.0f, 4.0f), TEST_LOCATION);
 
   view.SetMargin(5, 6);
-  DALI_TEST_EQUALS(view.GetMargin(), Extents(5, 5, 6, 6), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMargin(), Insets(5.0f, 5.0f, 6.0f, 6.0f), TEST_LOCATION);
 
   view.SetMargin(7);
-  DALI_TEST_EQUALS(view.GetMargin(), Extents(7, 7, 7, 7), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMargin(), Insets(7.0f, 7.0f, 7.0f, 7.0f), TEST_LOCATION);
 
   view.SetStartMargin(8);
   view.SetEndMargin(9);
   view.SetTopMargin(10);
   view.SetBottomMargin(11);
-  DALI_TEST_EQUALS(view.GetMargin(), Extents(8, 9, 10, 11), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetMargin(), Insets(8.0f, 9.0f, 10.0f, 11.0f), TEST_LOCATION);
+
+  view.SetMargin(0.5f, 1.5f, 2.5f, 3.5f);
+  DALI_TEST_EQUALS(view.GetMargin(), Insets(0.5f, 1.5f, 2.5f, 3.5f), TEST_LOCATION);
   END_TEST;
 }
 
@@ -1146,19 +1149,27 @@ int UtcDaliViewPaddingHelpersP(void)
   View              view = View::New();
 
   view.SetPadding(1, 2, 3, 4);
-  DALI_TEST_EQUALS(view.GetPadding(), Extents(1, 2, 3, 4), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPadding(), Insets(1.0f, 2.0f, 3.0f, 4.0f), TEST_LOCATION);
 
   view.SetPadding(5, 6);
-  DALI_TEST_EQUALS(view.GetPadding(), Extents(5, 5, 6, 6), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPadding(), Insets(5.0f, 5.0f, 6.0f, 6.0f), TEST_LOCATION);
 
   view.SetPadding(7);
-  DALI_TEST_EQUALS(view.GetPadding(), Extents(7, 7, 7, 7), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPadding(), Insets(7.0f, 7.0f, 7.0f, 7.0f), TEST_LOCATION);
 
   view.SetStartPadding(8);
   view.SetEndPadding(9);
   view.SetTopPadding(10);
   view.SetBottomPadding(11);
-  DALI_TEST_EQUALS(view.GetPadding(), Extents(8, 9, 10, 11), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPadding(), Insets(8.0f, 9.0f, 10.0f, 11.0f), TEST_LOCATION);
+
+  view.SetPadding(0.5f, 1.5f, 2.5f, 3.5f);
+  DALI_TEST_EQUALS(view.GetPadding(), Insets(0.5f, 1.5f, 2.5f, 3.5f), TEST_LOCATION);
+
+  float  assignedValues[] = {12.5f, 13.5f, 14.5f, 15.5f};
+  Insets assignedInsets;
+  assignedInsets = assignedValues;
+  DALI_TEST_EQUALS(assignedInsets, Insets(12.5f, 13.5f, 14.5f, 15.5f), TEST_LOCATION);
   END_TEST;
 }
 
@@ -2756,11 +2767,30 @@ int UtcDaliViewTypedSetterAndSetPropertyConvergeP(void)
   viewA.SetMargin(Extents(7, 8, 9, 10));
 
   Ui::View viewB = Ui::View::New();
-  Dali::Handle(viewB).SetProperty(Ui::View::Property::MARGIN, Extents(7, 8, 9, 10));
+  Dali::Handle(viewB).SetProperty(Ui::View::Property::MARGIN, Vector4(7.0f, 8.0f, 9.0f, 10.0f));
 
   DALI_TEST_EQUALS(viewA.GetMargin(), viewB.GetMargin(), TEST_LOCATION);
-  DALI_TEST_EQUALS(Dali::Handle(viewA).GetProperty<Extents>(Ui::View::Property::MARGIN),
-                   Dali::Handle(viewB).GetProperty<Extents>(Ui::View::Property::MARGIN),
+  DALI_TEST_EQUALS(Dali::Handle(viewA).GetProperty<Vector4>(Ui::View::Property::MARGIN),
+                   Dali::Handle(viewB).GetProperty<Vector4>(Ui::View::Property::MARGIN),
+                   TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewSetPropertyAcceptsExtentsForSpacingP(void)
+{
+  UiTestApplication application;
+
+  Ui::View view = Ui::View::New();
+  Dali::Handle(view).SetProperty(Ui::View::Property::MARGIN, Extents(1, 2, 3, 4));
+  Dali::Handle(view).SetProperty(Ui::View::Property::PADDING, Extents(5, 6, 7, 8));
+
+  DALI_TEST_EQUALS(view.GetMargin(), Insets(1.0f, 2.0f, 3.0f, 4.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetPadding(), Insets(5.0f, 6.0f, 7.0f, 8.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Handle(view).GetProperty<Vector4>(Ui::View::Property::MARGIN),
+                   Vector4(1.0f, 2.0f, 3.0f, 4.0f),
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(Dali::Handle(view).GetProperty<Vector4>(Ui::View::Property::PADDING),
+                   Vector4(5.0f, 6.0f, 7.0f, 8.0f),
                    TEST_LOCATION);
   END_TEST;
 }

@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-types.h>
 #include <dali-ui-foundation/public-api/visuals/visual-base.h>
@@ -484,7 +485,7 @@ private:
    *                        For RTL layouts, start/end should already be swapped by the caller.
    * @param[in] effectiveScale The effective scale for the owner. It should be multiplied at viewPadding.
    */
-  void ApplyFittingModeInternal(const Vector2& controlSize, const Extents& viewPadding, float effectiveScale);
+  void ApplyFittingModeInternal(const Vector2& controlSize, const Insets& viewPadding, float effectiveScale);
 
 protected:
   /**

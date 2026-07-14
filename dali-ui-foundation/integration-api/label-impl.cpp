@@ -1513,9 +1513,9 @@ int LabelImpl::GetLineCount()
 
 int LabelImpl::GetLineCount(float width)
 {
-  Extents padding      = GetEffectiveTextPadding();
-  float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
-  DALI_LOG_RELEASE_INFO("[%p] contentWidth:%f, padding start:%d, end:%d\n", mController.Get(), contentWidth, padding.start, padding.end);
+  Insets padding      = GetEffectiveTextPadding();
+  float  contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  DALI_LOG_RELEASE_INFO("[%p] contentWidth:%f, padding start:%f, end:%f\n", mController.Get(), contentWidth, padding.start, padding.end);
   return mController->GetLineCount(contentWidth);
 }
 
@@ -1583,7 +1583,7 @@ void LabelImpl::RequestAsyncHeightForWidth(float width)
 {
   DALI_LOG_RELEASE_INFO("[%p] width:%f\n", mController.Get(), width);
   Actor                             self            = Self();
-  Extents                           padding         = GetEffectiveTextPadding();
+  Insets                            padding         = GetEffectiveTextPadding();
   float                             contentWidth    = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
   Text::AsyncTextParameters         parameters      = GetAsyncTextParameters(Text::Async::COMPUTE_HEIGHT_FOR_WIDTH, Size(contentWidth, 0.0f), padding, layoutDirection);
@@ -1603,7 +1603,7 @@ void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
   }
 
   Actor                             self            = Self();
-  Extents                           padding         = GetEffectiveTextPadding();
+  Insets                            padding         = GetEffectiveTextPadding();
   float                             contentWidth    = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   float                             contentHeight   = std::max(height - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
@@ -1625,7 +1625,7 @@ void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstr
   }
 
   Actor                             self                    = Self();
-  Extents                           padding                 = GetEffectiveTextPadding();
+  Insets                            padding                 = GetEffectiveTextPadding();
   float                             contentWidth            = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   float                             contentHeightConstraint = std::max(heightConstraint - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection         = mController->GetLayoutDirection(self);
@@ -1647,7 +1647,7 @@ void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float h
   }
 
   Actor                             self                   = Self();
-  Extents                           padding                = GetEffectiveTextPadding();
+  Insets                            padding                = GetEffectiveTextPadding();
   float                             contentWidthConstraint = std::max(widthConstraint - static_cast<float>(padding.start + padding.end), 0.0f);
   float                             contentHeight          = std::max(height - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection        = mController->GetLayoutDirection(self);
@@ -1669,7 +1669,7 @@ void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float h
   }
 
   Actor                             self                    = Self();
-  Extents                           padding                 = GetEffectiveTextPadding();
+  Insets                            padding                 = GetEffectiveTextPadding();
   float                             contentWidthConstraint  = std::max(widthConstraint - static_cast<float>(padding.start + padding.end), 0.0f);
   float                             contentHeightConstraint = std::max(heightConstraint - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection         = mController->GetLayoutDirection(self);
@@ -1744,14 +1744,14 @@ float LabelImpl::GetTextUiScale() const
   return mController->GetUiScale();
 }
 
-Extents LabelImpl::GetEffectiveTextPadding() const
+Insets LabelImpl::GetEffectiveTextPadding() const
 {
-  Extents     padding     = GetPadding();
+  Insets      padding     = GetPadding();
   const float textUiScale = GetTextUiScale();
-  padding.start           = static_cast<int16_t>(static_cast<float>(padding.start) * textUiScale);
-  padding.end             = static_cast<int16_t>(static_cast<float>(padding.end) * textUiScale);
-  padding.top             = static_cast<int16_t>(static_cast<float>(padding.top) * textUiScale);
-  padding.bottom          = static_cast<int16_t>(static_cast<float>(padding.bottom) * textUiScale);
+  padding.start *= textUiScale;
+  padding.end *= textUiScale;
+  padding.top *= textUiScale;
+  padding.bottom *= textUiScale;
   return padding;
 }
 
@@ -1850,7 +1850,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
   Actor self = Self();
 
-  Extents padding = GetEffectiveTextPadding();
+  Insets  padding = GetEffectiveTextPadding();
   float   width   = std::max(size.x - static_cast<float>(padding.start + padding.end), 0.0f);
   float   height  = std::max(size.y - static_cast<float>(padding.top + padding.bottom), 0.0f);
   Vector2 contentSize(width, height);
@@ -2027,7 +2027,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
 Vector3 LabelImpl::GetNaturalSize()
 {
-  Extents padding     = GetEffectiveTextPadding();
+  Insets  padding     = GetEffectiveTextPadding();
   Vector3 naturalSize = mController->GetNaturalSize();
   naturalSize.width += static_cast<float>(padding.start + padding.end);
   naturalSize.height += static_cast<float>(padding.top + padding.bottom);
@@ -2037,8 +2037,8 @@ Vector3 LabelImpl::GetNaturalSize()
 
 float LabelImpl::GetHeightForWidth(float width)
 {
-  Extents padding      = GetEffectiveTextPadding();
-  float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  Insets padding      = GetEffectiveTextPadding();
+  float  contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   return mController->GetHeightForWidth(contentWidth) + static_cast<float>(padding.top + padding.bottom);
 }
 
@@ -2564,7 +2564,7 @@ void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo)
   // Padding is already included in renderedSize when cutout is enabled.
   if(!renderInfo.isCutoutEnabled)
   {
-    Extents padding = GetEffectiveTextPadding();
+    Insets padding = GetEffectiveTextPadding();
     width += static_cast<float>(padding.start + padding.end);
     height += static_cast<float>(padding.top + padding.bottom);
   }
@@ -2586,7 +2586,7 @@ void LabelImpl::AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo)
     {
       DALI_LOG_RELEASE_INFO("[%p] natural size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
       mAsyncLineCount     = renderInfo.lineCount;
-      Extents     padding = GetEffectiveTextPadding();
+      Insets      padding = GetEffectiveTextPadding();
       const float width   = renderInfo.renderedSize.width + static_cast<float>(padding.start + padding.end);
       const float height  = renderInfo.renderedSize.height + static_cast<float>(padding.top + padding.bottom);
       EmitAsyncNaturalSizeComputed(width, height);
@@ -2596,7 +2596,7 @@ void LabelImpl::AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo)
     {
       DALI_LOG_RELEASE_INFO("[%p] height for width:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
       mAsyncLineCount     = renderInfo.lineCount;
-      Extents     padding = GetEffectiveTextPadding();
+      Insets      padding = GetEffectiveTextPadding();
       const float width   = renderInfo.renderedSize.width + static_cast<float>(padding.start + padding.end);
       const float height  = renderInfo.renderedSize.height + static_cast<float>(padding.top + padding.bottom);
       EmitAsyncHeightForWidthComputed(width, height);
@@ -2905,8 +2905,8 @@ void LabelImpl::UpdateAnchorTouchInterception()
 
 Vector2 LabelImpl::GetTextContentOffset() const
 {
-  Extents padding = GetEffectiveTextPadding();
-  Actor   self    = Self();
+  Insets padding = GetEffectiveTextPadding();
+  Actor  self    = Self();
 
   if(Dali::LayoutDirection::RIGHT_TO_LEFT == mController->GetLayoutDirection(self))
   {
@@ -3608,7 +3608,7 @@ void LabelImpl::ApplyLocalizedText(BaseHandle target, const Dali::String& text)
   SetText(text);
 }
 
-Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::RequestType requestType, const Vector2& contentSize, const Extents& padding, const Dali::LayoutDirection::Type layoutDirection)
+Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::RequestType requestType, const Vector2& contentSize, const Insets& padding, const Dali::LayoutDirection::Type layoutDirection)
 {
   // Logically, all properties of the label should be passed.
 

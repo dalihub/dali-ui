@@ -585,22 +585,22 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @copydoc Ui::View::SetMargin()
    */
-  void SetMargin(const Extents& margin);
+  void SetMargin(const Insets& margin);
 
   /**
    * @copydoc Ui::View::GetMargin()
    */
-  Extents GetMargin() const;
+  Insets GetMargin() const;
 
   /**
    * @copydoc Ui::View::SetPadding()
    */
-  void SetPadding(const Extents& padding);
+  void SetPadding(const Insets& padding);
 
   /**
    * @copydoc Ui::View::GetPadding()
    */
-  Extents GetPadding() const;
+  Insets GetPadding() const;
 
   /**
    * @copydoc Ui::View::SetLayoutMode()

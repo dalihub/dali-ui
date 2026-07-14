@@ -92,7 +92,7 @@ public: // from Visual
   /**
    * @copydoc Visual::Base::OnApplyFittingMode
    */
-  void OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale) override;
+  void OnApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale) override;
 
   /**
    * @copydoc Visual::Base::CreatePropertyMap

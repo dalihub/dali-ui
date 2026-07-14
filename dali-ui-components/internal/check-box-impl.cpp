@@ -333,9 +333,9 @@ MeasuredSize CheckBoxImpl::OnMeasure(float widthConstraint, float heightConstrai
 {
   float s = GetEffectiveScale();
 
-  Extents padding = GetPadding();
-  float   visPadW = static_cast<float>(padding.start + padding.end) * s;
-  float   visPadH = static_cast<float>(padding.top + padding.bottom) * s;
+  Insets padding = GetPadding();
+  float  visPadW = static_cast<float>(padding.start + padding.end) * s;
+  float  visPadH = static_cast<float>(padding.top + padding.bottom) * s;
 
   float gapVis   = mGap * s;
   bool  hasLabel = !mText.Empty();
@@ -422,8 +422,8 @@ MeasuredSize CheckBoxImpl::OnArrange(const LayoutRect& bounds)
   self.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
   self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
 
-  float   s       = GetEffectiveScale();
-  Extents padding = GetPadding();
+  float  s       = GetEffectiveScale();
+  Insets padding = GetPadding();
 
   // Under RTL we mirror the layout ourselves: swap start/end padding, and flip each child's
   // x within the content band (mapX below). The Lottie artwork is direction-independent and is

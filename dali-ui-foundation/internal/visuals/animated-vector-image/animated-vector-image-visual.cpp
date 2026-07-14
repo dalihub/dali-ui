@@ -700,7 +700,7 @@ void AnimatedVectorImageVisual::DoSetOffScene(Actor& actor)
   DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose, "AnimatedVectorImageVisual::DoSetOffScene [%p]\n", this);
 }
 
-void AnimatedVectorImageVisual::OnApplyFittingMode(const Vector2& controlSize, const Extents& padding, float effectiveScale)
+void AnimatedVectorImageVisual::OnApplyFittingMode(const Vector2& controlSize, const Insets& padding, float effectiveScale)
 {
   DoApplyFittingMode(controlSize, padding, effectiveScale, Ui::Image::FittingMode::FIT_KEEP_ASPECT_RATIO);
 }

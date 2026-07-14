@@ -270,7 +270,7 @@ int UtcDaliCheckBoxNewWithStyleP(void)
   CheckBoxStyle style = CheckBoxStyle::Builder()
                           .SetMinimumWidth(60.0f)
                           .SetMinimumHeight(40.0f)
-                          .SetPadding(Extents(2u, 3u, 4u, 5u))
+                          .SetPadding(Insets(2.0f, 3.0f, 4.0f, 5.0f))
                           .Build();
 
   CheckBox cb = CheckBox::New(style);
@@ -278,7 +278,13 @@ int UtcDaliCheckBoxNewWithStyleP(void)
   // View-inherited fields are pushed onto the widget by ApplyInitialStyle().
   DALI_TEST_EQUALS(cb.GetMinimumWidth(), 60.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(cb.GetMinimumHeight(), 40.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(cb.GetPadding(), Extents(2u, 3u, 4u, 5u), TEST_LOCATION);
+  DALI_TEST_EQUALS(cb.GetPadding(), Insets(2.0f, 3.0f, 4.0f, 5.0f), TEST_LOCATION);
+
+  CheckBoxStyle fractionalStyle = CheckBoxStyle::Builder()
+                                    .SetPadding(Insets(0.5f, 1.5f, 2.5f, 3.5f))
+                                    .Build();
+  CheckBox fractional = CheckBox::New(fractionalStyle);
+  DALI_TEST_EQUALS(fractional.GetPadding(), Insets(0.5f, 1.5f, 2.5f, 3.5f), TEST_LOCATION);
   END_TEST;
 }
 
@@ -308,7 +314,7 @@ int UtcDaliCheckBoxStyleP(void)
   CheckBoxStyle style = CheckBoxStyle::Builder()
                           .SetMinimumWidth(50.0f)
                           .SetMinimumHeight(44.0f)
-                          .SetPadding(Extents(4u, 5u, 6u, 7u))
+                          .SetPadding(Insets(4.0f, 5.0f, 6.0f, 7.0f))
                           .SetIconWidth(40.0f)
                           .SetIconHeight(28.0f)
                           .SetLabelGap(10.0f)
@@ -345,7 +351,7 @@ int UtcDaliCheckBoxStyleP(void)
   CheckBox cb = CheckBox::New(style);
   DALI_TEST_EQUALS(cb.GetMinimumWidth(), 50.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(cb.GetMinimumHeight(), 44.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(cb.GetPadding(), Extents(4u, 5u, 6u, 7u), TEST_LOCATION);
+  DALI_TEST_EQUALS(cb.GetPadding(), Insets(4.0f, 5.0f, 6.0f, 7.0f), TEST_LOCATION);
   END_TEST;
 }
 
@@ -367,7 +373,7 @@ int UtcDaliCheckBoxStyleConfigureP(void)
 
   // Unset fields preserve the DefaultPreset defaults (labelGap 8.0f, padding 8, zero min-size).
   DALI_TEST_EQUALS(style.GetLabelGap(), 8.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(style.GetPadding(), Extents(8u, 8u, 8u, 8u), TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetPadding(), Insets(8.0f, 8.0f, 8.0f, 8.0f), TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetMinimumWidth(), 0.0f, TEST_LOCATION);
   END_TEST;
 }
@@ -389,7 +395,7 @@ int UtcDaliCheckBoxStyleDefaultKeyP(void)
   DALI_TEST_EQUALS(style.GetIconHeight(), 36.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetFontSize(), 16.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetFontFamily(), std::string("SamsungOneUI600"), TEST_LOCATION);
-  DALI_TEST_EQUALS(style.GetPadding(), Extents(8u, 8u, 8u, 8u), TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetPadding(), Insets(8.0f, 8.0f, 8.0f, 8.0f), TEST_LOCATION);
   DALI_TEST_CHECK(style.GetIconColor().HasColorId());
   DALI_TEST_EQUALS(style.GetIconColor().GetColorId(), UiColor::OUTLINE.GetColorId(), TEST_LOCATION);
   DALI_TEST_CHECK(style.GetSelectedIconColor().HasColorId());

@@ -37,6 +37,7 @@
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
 #include <dali-ui-foundation/public-api/types/unique-any.h>
@@ -487,7 +488,7 @@ public: // Properties
    *
    * @param[in] margin The margin to set
    */
-  void SetMargin(const Extents& margin);
+  void SetMargin(const Insets& margin);
 
   /**
    * @brief Sets the view margin for each edge.
@@ -497,7 +498,7 @@ public: // Properties
    * @param[in] top The top margin
    * @param[in] bottom The bottom margin
    */
-  void SetMargin(int16_t start, int16_t end, int16_t top, int16_t bottom);
+  void SetMargin(float start, float end, float top, float bottom);
 
   /**
    * @brief Sets the horizontal and vertical view margin.
@@ -505,40 +506,40 @@ public: // Properties
    * @param[in] horizontal The start and end margin
    * @param[in] vertical The top and bottom margin
    */
-  void SetMargin(int16_t horizontal, int16_t vertical);
+  void SetMargin(float horizontal, float vertical);
 
   /**
    * @brief Sets the same view margin for all edges.
    *
    * @param[in] uniform The margin for all edges
    */
-  void SetMargin(int16_t uniform);
+  void SetMargin(float uniform);
 
   /** @brief Sets the start view margin. */
-  void SetStartMargin(int16_t margin);
+  void SetStartMargin(float margin);
 
   /** @brief Sets the end view margin. */
-  void SetEndMargin(int16_t margin);
+  void SetEndMargin(float margin);
 
   /** @brief Sets the top view margin. */
-  void SetTopMargin(int16_t margin);
+  void SetTopMargin(float margin);
 
   /** @brief Sets the bottom view margin. */
-  void SetBottomMargin(int16_t margin);
+  void SetBottomMargin(float margin);
 
   /**
    * @brief Gets the view margin.
    *
    * @return The view margin
    */
-  Extents GetMargin() const;
+  Insets GetMargin() const;
 
   /**
    * @brief Sets the view padding.
    *
    * @param[in] padding The padding to set
    */
-  void SetPadding(const Extents& padding);
+  void SetPadding(const Insets& padding);
 
   /**
    * @brief Sets the view padding for each edge.
@@ -548,7 +549,7 @@ public: // Properties
    * @param[in] top The top padding
    * @param[in] bottom The bottom padding
    */
-  void SetPadding(int16_t start, int16_t end, int16_t top, int16_t bottom);
+  void SetPadding(float start, float end, float top, float bottom);
 
   /**
    * @brief Sets the horizontal and vertical view padding.
@@ -556,33 +557,33 @@ public: // Properties
    * @param[in] horizontal The start and end padding
    * @param[in] vertical The top and bottom padding
    */
-  void SetPadding(int16_t horizontal, int16_t vertical);
+  void SetPadding(float horizontal, float vertical);
 
   /**
    * @brief Sets the same view padding for all edges.
    *
    * @param[in] uniform The padding for all edges
    */
-  void SetPadding(int16_t uniform);
+  void SetPadding(float uniform);
 
   /** @brief Sets the start view padding. */
-  void SetStartPadding(int16_t padding);
+  void SetStartPadding(float padding);
 
   /** @brief Sets the end view padding. */
-  void SetEndPadding(int16_t padding);
+  void SetEndPadding(float padding);
 
   /** @brief Sets the top view padding. */
-  void SetTopPadding(int16_t padding);
+  void SetTopPadding(float padding);
 
   /** @brief Sets the bottom view padding. */
-  void SetBottomPadding(int16_t padding);
+  void SetBottomPadding(float padding);
 
   /**
    * @brief Gets the view padding.
    *
    * @return The view padding
    */
-  Extents GetPadding() const;
+  Insets GetPadding() const;
 
   // The Dali::Actor geometry setters below are deleted on View because a View's
   // rendered geometry (size and position) is owned by the layout system: every
@@ -1579,14 +1580,14 @@ public:
 
       /**
        * @brief The outer space around the View.
-       * @details Name "margin", type Property::EXTENTS.
+       * @details Name "margin", type Property::VECTOR4, ordered as start, end, top, bottom.
        * @note Margin property is to be supported by Layout algorithms and containers in future.
        */
       MARGIN,
 
       /**
        * @brief The inner space of the View.
-       * @details Name "padding", type Property::EXTENTS.
+       * @details Name "padding", type Property::VECTOR4, ordered as start, end, top, bottom.
        */
       PADDING,
 

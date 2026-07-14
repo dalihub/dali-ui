@@ -88,8 +88,8 @@ std::vector<FlexLine> BuildFlexLinesForArrange(std::vector<View>&         childr
     {
       continue;
     }
-    float   childScale = childImpl.GetEffectiveScale();
-    Extents margin     = childImpl.GetMargin();
+    float  childScale = childImpl.GetEffectiveScale();
+    Insets margin     = childImpl.GetMargin();
 
     float basis = GetFlexBasis(childImpl);
     if(basis >= 0.0f)
@@ -104,8 +104,8 @@ std::vector<FlexLine> BuildFlexLinesForArrange(std::vector<View>&         childr
       }
     }
 
-    float visMarginMainH = static_cast<float>(margin.top + margin.bottom) * childScale;
-    float visMarginMainW = static_cast<float>(margin.start + margin.end) * childScale;
+    float visMarginMainH = (margin.top + margin.bottom) * childScale;
+    float visMarginMainW = (margin.start + margin.end) * childScale;
     float childMainSize  = isMainAxisHorizontal ? workingSizes[i].width + visMarginMainW
                                                 : workingSizes[i].height + visMarginMainH;
     bool  shouldWrap     = (wrap != FlexWrap::NO_WRAP) && !currentLine.childIndices.empty() &&
@@ -253,14 +253,14 @@ void ArrangeOneFlexLine(FlexLine& line, std::vector<View>& children,
   {
     ViewImpl& childImpl  = GetImpl(children[idx]);
     float     childScale = childImpl.GetEffectiveScale();
-    Extents   margin     = childImpl.GetMargin();
+    Insets    margin     = childImpl.GetMargin();
 
     float childMainSize  = isMainAxisHorizontal ? workingSizes[idx].width : workingSizes[idx].height;
     float childCrossSize = isMainAxisHorizontal ? workingSizes[idx].height : workingSizes[idx].width;
-    float marginMain     = isMainAxisHorizontal ? static_cast<float>(margin.start + margin.end) * childScale
-                                                : static_cast<float>(margin.top + margin.bottom) * childScale;
-    float marginCross    = isMainAxisHorizontal ? static_cast<float>(margin.top + margin.bottom) * childScale
-                                                : static_cast<float>(margin.start + margin.end) * childScale;
+    float marginMain     = isMainAxisHorizontal ? (margin.start + margin.end) * childScale
+                                                : (margin.top + margin.bottom) * childScale;
+    float marginCross    = isMainAxisHorizontal ? (margin.top + margin.bottom) * childScale
+                                                : (margin.start + margin.end) * childScale;
 
     bool crossIsMatchParent = isMainAxisHorizontal ? (childImpl.GetRequestedHeight() == MATCH_PARENT)
                                                    : (childImpl.GetRequestedWidth() == MATCH_PARENT);
@@ -344,10 +344,10 @@ void ArrangeOneFlexLine(FlexLine& line, std::vector<View>& children,
       childBounds.width  = allocCross;
       childBounds.height = allocMain;
     }
-    childBounds.x += static_cast<float>(margin.start) * childScale;
-    childBounds.y += static_cast<float>(margin.top) * childScale;
-    childBounds.width  = std::max(0.0f, childBounds.width - static_cast<float>(margin.start + margin.end) * childScale);
-    childBounds.height = std::max(0.0f, childBounds.height - static_cast<float>(margin.top + margin.bottom) * childScale);
+    childBounds.x += margin.start * childScale;
+    childBounds.y += margin.top * childScale;
+    childBounds.width  = std::max(0.0f, childBounds.width - (margin.start + margin.end) * childScale);
+    childBounds.height = std::max(0.0f, childBounds.height - (margin.top + margin.bottom) * childScale);
 
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
@@ -483,9 +483,9 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
     }
 
     float        childScale            = childImpl.GetEffectiveScale();
-    Extents      margin                = childImpl.GetMargin();
-    float        marginW               = static_cast<float>(margin.start + margin.end) * childScale;
-    float        marginH               = static_cast<float>(margin.top + margin.bottom) * childScale;
+    Insets       margin                = childImpl.GetMargin();
+    float        marginW               = (margin.start + margin.end) * childScale;
+    float        marginH               = (margin.top + margin.bottom) * childScale;
     float        childWidthConstraint  = std::max(0.0f, widthConstraint - marginW);
     float        childHeightConstraint = std::max(0.0f, heightConstraint - marginH);
     MeasuredSize childSize             = childImpl.Measure(childWidthConstraint, childHeightConstraint);

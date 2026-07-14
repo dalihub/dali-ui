@@ -180,9 +180,9 @@ MeasuredSize TextButtonImpl::OnMeasure(float widthConstraint, float heightConstr
 {
   float s = GetEffectiveScale();
 
-  Extents padding = GetPadding();
-  float   visPadW = static_cast<float>(padding.start + padding.end) * s;
-  float   visPadH = static_cast<float>(padding.top + padding.bottom) * s;
+  Insets padding = GetPadding();
+  float  visPadW = static_cast<float>(padding.start + padding.end) * s;
+  float  visPadH = static_cast<float>(padding.top + padding.bottom) * s;
 
   float requestedWidth  = GetRequestedWidth();
   float requestedHeight = GetRequestedHeight();
@@ -235,8 +235,8 @@ MeasuredSize TextButtonImpl::OnArrange(const LayoutRect& bounds)
   self.SetWidth(bounds.width);
   self.SetHeight(bounds.height);
 
-  float   s       = GetEffectiveScale();
-  Extents padding = GetPadding();
+  float  s       = GetEffectiveScale();
+  Insets padding = GetPadding();
 
   LayoutRect contentBounds;
   contentBounds.x      = static_cast<float>(padding.start) * s;

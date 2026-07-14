@@ -1472,14 +1472,14 @@ float InputFieldImpl::GetTextUiScale() const
   return mController->GetUiScale();
 }
 
-Extents InputFieldImpl::GetEffectiveTextPadding() const
+Insets InputFieldImpl::GetEffectiveTextPadding() const
 {
-  Extents     padding     = GetPadding();
+  Insets      padding     = GetPadding();
   const float textUiScale = GetTextUiScale();
-  padding.start           = static_cast<uint16_t>(static_cast<float>(padding.start) * textUiScale);
-  padding.end             = static_cast<uint16_t>(static_cast<float>(padding.end) * textUiScale);
-  padding.top             = static_cast<uint16_t>(static_cast<float>(padding.top) * textUiScale);
-  padding.bottom          = static_cast<uint16_t>(static_cast<float>(padding.bottom) * textUiScale);
+  padding.start *= textUiScale;
+  padding.end *= textUiScale;
+  padding.top *= textUiScale;
+  padding.bottom *= textUiScale;
   return padding;
 }
 
@@ -1596,7 +1596,7 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
 {
   Actor self = Self();
 
-  Extents padding = GetEffectiveTextPadding();
+  Insets  padding = GetEffectiveTextPadding();
   float   width   = std::max(size.x - static_cast<float>(padding.start + padding.end), 0.0f);
   float   height  = std::max(size.y - static_cast<float>(padding.top + padding.bottom), 0.0f);
   Vector2 contentSize(width, height);
@@ -1791,7 +1791,7 @@ void InputFieldImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali
 
 Vector3 InputFieldImpl::GetNaturalSize()
 {
-  Extents padding     = GetEffectiveTextPadding();
+  Insets  padding     = GetEffectiveTextPadding();
   Vector3 naturalSize = mController->GetNaturalSize();
   naturalSize.width += static_cast<float>(padding.start + padding.end);
   naturalSize.height += static_cast<float>(padding.top + padding.bottom);
@@ -1800,8 +1800,8 @@ Vector3 InputFieldImpl::GetNaturalSize()
 
 float InputFieldImpl::GetHeightForWidth(float width)
 {
-  Extents padding      = GetEffectiveTextPadding();
-  float   contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
+  Insets padding      = GetEffectiveTextPadding();
+  float  contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   return mController->GetHeightForWidth(contentWidth) + static_cast<float>(padding.top + padding.bottom);
 }
 
@@ -1930,7 +1930,7 @@ void InputFieldImpl::OnTapDetected(Actor actor, TapGesture gesture)
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
 
   // Deliver the tap before the focus event to controller; this allows us to detect when focus is gained due to tap-gestures
-  Extents        padding    = GetEffectiveTextPadding();
+  Insets         padding    = GetEffectiveTextPadding();
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->TapEvent(gesture.GetNumberOfTaps(), localPoint.x - static_cast<float>(padding.start), localPoint.y - static_cast<float>(padding.top));
   mController->AnchorEvent(localPoint.x - static_cast<float>(padding.start), localPoint.y - static_cast<float>(padding.top));
@@ -1962,7 +1962,7 @@ void InputFieldImpl::OnLongPressDetected(Actor actor, LongPressGesture gesture)
   {
     Dali::Integration::InputMethodContext::Activate(mInputMethodContext);
   }
-  Extents        padding    = GetEffectiveTextPadding();
+  Insets         padding    = GetEffectiveTextPadding();
   const Vector2& localPoint = gesture.GetLocalPoint();
   mController->LongPressEvent(gesture.GetState(), localPoint.x - static_cast<float>(padding.start), localPoint.y - static_cast<float>(padding.top));
   SetKeyInputFocus(*this);
@@ -2007,8 +2007,8 @@ MeasuredSize InputFieldImpl::OnMeasure(float widthConstraint, float heightConstr
       // GetNaturalSize() includes view padding, but GetDefaultFontLineHeight() does not.
       // Therefore, when text is empty, padding must be added explicitly to keep
       // measurement consistent with the normal natural size path.
-      const Extents padding = GetEffectiveTextPadding();
-      naturalHeight         = mController->GetDefaultFontLineHeight() + padding.top + padding.bottom;
+      const Insets padding = GetEffectiveTextPadding();
+      naturalHeight        = mController->GetDefaultFontLineHeight() + padding.top + padding.bottom;
     }
   }
 

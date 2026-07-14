@@ -42,6 +42,7 @@
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
+#include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/types/unique-any.h>

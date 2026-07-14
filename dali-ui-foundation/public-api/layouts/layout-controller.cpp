@@ -836,10 +836,10 @@ private:
     // layout pass works in visual (scale-applied) units. Convert with the
     // root's effective scale so the root matches the non-root path, which
     // already scales these properties.
-    float   s        = view->GetEffectiveScale();
-    Extents margin   = view->GetMargin();
-    float   marginW  = static_cast<float>(margin.start + margin.end) * s;
-    float   marginH  = static_cast<float>(margin.top + margin.bottom) * s;
+    float  s         = view->GetEffectiveScale();
+    Insets margin    = view->GetMargin();
+    float  marginW   = (margin.start + margin.end) * s;
+    float  marginH   = (margin.top + margin.bottom) * s;
     widthConstraint  = std::max(0.0f, widthConstraint - marginW);
     heightConstraint = std::max(0.0f, heightConstraint - marginH);
 
@@ -850,8 +850,8 @@ private:
     // MATCH_PARENT roots fill the available constraint rather than using
     // their measured (minimum) size.
     LayoutRect bounds;
-    bounds.x      = (view->GetRequestedPositionX() + static_cast<float>(margin.start)) * s;
-    bounds.y      = (view->GetRequestedPositionY() + static_cast<float>(margin.top)) * s;
+    bounds.x      = (view->GetRequestedPositionX() + margin.start) * s;
+    bounds.y      = (view->GetRequestedPositionY() + margin.top) * s;
     bounds.width  = (layoutWidth == MATCH_PARENT) ? widthConstraint : measuredSize.width;
     bounds.height = (layoutHeight == MATCH_PARENT) ? heightConstraint : measuredSize.height;
 
