@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali/devel-api/actors/actor-devel.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -72,10 +71,6 @@ private:
     PrintLabelInfo(mLineHeightLabel2, "Label Absolute Line Height");
     PrintInputFieldInfo(mField, "InputField");
 
-
-    DevelActor::OnRelayoutSignal(mLabel2).Connect(this, &TextController::OnRelayout);
-    DevelActor::OnRelayoutSignal(mLabel3).Connect(this, &TextController::OnRelayout);
-
     mField.TextChangedSignal().Connect(this, &TextController::OnTextChanged);
     mField.SetMaximumLength(20);
     mField.MaximumLengthReachedSignal().Connect(this, &TextController::OnMaximumLengthReached);
@@ -112,14 +107,6 @@ private:
   void OnAsyncHeightForWidth(View view, float width, float height)
   {
     Label label = Label::DownCast(view);
-    if(label)
-    {
-    }
-  }
-
-  void OnRelayout(Actor actor)
-  {
-    Label label = Label::DownCast(actor);
     if(label)
     {
     }

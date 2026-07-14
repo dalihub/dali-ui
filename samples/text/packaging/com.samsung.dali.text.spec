@@ -105,6 +105,7 @@ exit 0
 %{app_exe_dir}/text-markup.example
 %{app_exe_dir}/text-marquee.example
 %{app_exe_dir}/text-style.example
+%{app_exe_dir}/text-style-clear.example
 %{app_exe_dir}/text-style-bevel.example
 %{app_exe_dir}/text-effect.example
 %{app_exe_dir}/text-fit.example
@@ -113,7 +114,12 @@ exit 0
 %{app_exe_dir}/text-font-variation.example
 %{app_exe_dir}/text-cutout-mask.example
 %{app_exe_dir}/text-gradient.example
+%{app_exe_dir}/text-input-gradient.example
+%{app_exe_dir}/text-styled-text.example
+%{app_exe_dir}/text-styled-text-builder.example
+%{app_exe_dir}/text-styled-text-simple.example
 %{app_exe_dir}/text-gradient-simple.example
+%{app_exe_dir}/text-gradient-perf.example
 %{app_exe_dir}/text-colrv1.example
 %{app_exe_dir}/text-emoji.example
 %{app_exe_dir}/text-render-scale.example
