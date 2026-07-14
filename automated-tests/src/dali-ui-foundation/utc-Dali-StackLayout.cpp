@@ -238,7 +238,7 @@ int UtcDaliStackLayoutMeasureArrangeP(void)
   layout.SetRequestedWidth(150.0f);
   layout.SetRequestedHeight(200.0f);
   MeasuredSize m = layout.Measure(150.0f, 200.0f);
-  MeasuredSize a = layout.Arrange(LayoutRect(0, 0, 150, 200));
+  LayoutRect a = layout.Arrange(LayoutRect(0, 0, 150, 200));
   DALI_TEST_EQUALS(m.GetWidth(), 150.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(m.GetHeight(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(a.GetWidth(), 150.0f, TEST_LOCATION);
@@ -314,7 +314,7 @@ int UtcDaliStackLayoutArrangeHorizontalP(void)
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(100.0f);
   MeasuredSize m = layout.Measure(200.0f, 100.0f);
-  MeasuredSize a = layout.Arrange(LayoutRect(0, 0, 200, 100));
+  LayoutRect a = layout.Arrange(LayoutRect(0, 0, 200, 100));
   DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(m.GetHeight(), 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(a.GetWidth(), 200.0f, TEST_LOCATION);

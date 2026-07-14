@@ -538,10 +538,10 @@ MeasuredSize MyMeasure(View view, float widthConstraint, float heightConstraint)
     return MeasuredSize(200.0f, 100.0f);
 }
 
-// Arrange 콜백 시그니처: MeasuredSize(View, const LayoutRect& bounds)
-MeasuredSize MyArrange(View view, const LayoutRect& bounds)
+// Arrange 콜백 시그니처: LayoutRect(View, const LayoutRect& bounds)
+LayoutRect MyArrange(View view, const LayoutRect& bounds)
 {
-    return MeasuredSize(bounds.GetWidth(), bounds.GetHeight());
+    return bounds; // 프레임워크가 x/y/width/height를 적용하는 최종 self bounds
 }
 
 Layout layout = Layout::New();

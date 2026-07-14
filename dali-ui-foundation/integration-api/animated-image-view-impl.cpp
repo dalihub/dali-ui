@@ -540,7 +540,7 @@ MeasuredSize AnimatedImageViewImpl::OnMeasure(float widthConstraint, float heigh
   return MeasuredSize(w * s, h * s);
 }
 
-MeasuredSize AnimatedImageViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect AnimatedImageViewImpl::OnArrange(const LayoutRect& bounds)
 {
   return ViewImpl::OnArrange(bounds);
 }

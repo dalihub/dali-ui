@@ -240,8 +240,8 @@ protected:
 
 private:
   // ViewImpl overrides
-  void         OnInitialize() override;
-  MeasuredSize OnArrange(const LayoutRect& bounds) override;
+  void       OnInitialize() override;
+  LayoutRect OnArrange(const LayoutRect& bounds) override;
 
   // Helpers
   void SyncLayerSizes();

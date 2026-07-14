@@ -438,9 +438,9 @@ MeasuredSize LottieAnimationViewImpl::OnMeasure(float widthConstraint, float hei
   return MeasuredSize(w * s, h * s);
 }
 
-MeasuredSize LottieAnimationViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect LottieAnimationViewImpl::OnArrange(const LayoutRect& bounds)
 {
-  MeasuredSize result = ViewImpl::OnArrange(bounds);
+  LayoutRect result = ViewImpl::OnArrange(bounds);
   ApplyLayout(Vector2(bounds.width, bounds.height));
   return result;
 }

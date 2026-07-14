@@ -92,11 +92,11 @@ MeasuredSize ScrollViewLayoutManager::Measure(ViewImpl* view, float widthConstra
   return MeasuredSize(maxWidth, maxHeight);
 }
 
-MeasuredSize ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
+void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
-    return MeasuredSize(0.0f, 0.0f);
+    return;
   }
 
   Integration::ScrollViewImpl* scrollImpl = dynamic_cast<Integration::ScrollViewImpl*>(view);
@@ -146,8 +146,6 @@ MeasuredSize ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& 
       scrollImpl->SetScrollableHeight(childBounds.height);
     }
   }
-
-  return MeasuredSize(bounds.width, bounds.height);
 }
 
 } // namespace Ui

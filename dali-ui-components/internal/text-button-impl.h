@@ -58,7 +58,7 @@ public:
 protected:
   void         OnInitialize() override;
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
-  MeasuredSize OnArrange(const LayoutRect& bounds) override;
+  LayoutRect   OnArrange(const LayoutRect& bounds) override;
 
   TextButtonImpl();
   ~TextButtonImpl() override;

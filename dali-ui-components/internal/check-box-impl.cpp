@@ -414,14 +414,10 @@ MeasuredSize CheckBoxImpl::OnMeasure(float widthConstraint, float heightConstrai
   return MeasuredSize(resultVisW, resultVisH);
 }
 
-MeasuredSize CheckBoxImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
 {
-  Actor self = Self();
-  self.SetProperty(Actor::Property::POSITION_X, bounds.x);
-  self.SetProperty(Actor::Property::POSITION_Y, bounds.y);
-  self.SetProperty(Actor::Property::SIZE_WIDTH, bounds.width);
-  self.SetProperty(Actor::Property::SIZE_HEIGHT, bounds.height);
-
+  // Self geometry (x/y/width/height) is applied centrally in ViewImpl::Arrange
+  // from this method's returned LayoutRect; no actor-level setters needed here.
   float  s       = GetEffectiveScale();
   Insets padding = GetPadding();
 
@@ -471,7 +467,7 @@ MeasuredSize CheckBoxImpl::OnArrange(const LayoutRect& bounds)
   GetImpl(mLabel).Measure(labelRect.width, labelRect.height);
   GetImpl(mLabel).Arrange(labelRect);
 
-  return MeasuredSize(bounds.width, bounds.height);
+  return bounds;
 }
 
 CheckBoxImpl::CheckBoxImpl() = default;

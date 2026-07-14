@@ -2085,17 +2085,11 @@ MeasuredSize InputEditorImpl::OnMeasure(float widthConstraint, float heightConst
   return MeasuredSize(measuredWidth, measuredHeight);
 }
 
-MeasuredSize InputEditorImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect InputEditorImpl::OnArrange(const LayoutRect& bounds)
 {
-  Actor self = Self();
-  self.SetPositionX(bounds.x);
-  self.SetPositionY(bounds.y);
-  self.SetWidth(bounds.width);
-  self.SetHeight(bounds.height);
-
   DALI_LOG_RELEASE_INFO("[%p] pos:%f,%f, size:%f,%f\n", mController.Get(), bounds.x, bounds.y, bounds.width,
                         bounds.height);
-  return {bounds.width, bounds.height};
+  return bounds;
 }
 
 // =============================================================================

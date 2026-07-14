@@ -130,7 +130,7 @@ public:
   bool AreVisualsEnabled() const;
 
   MeasuredSize Measure(float visualWidth, float visualHeight);
-  MeasuredSize Arrange(const LayoutRect& bounds);
+  LayoutRect   Arrange(const LayoutRect& bounds);
 
   const ViewState&                            GetState() const;
   bool                                        IsEffectivelyEnabled() const;
@@ -705,7 +705,7 @@ private:
   void Destroy();
 
   MeasuredSize    MeasureDefault(float widthConstraint, float heightConstraint);
-  MeasuredSize    ArrangeDefault(const LayoutRect& bounds);
+  LayoutRect      ArrangeDefault(const LayoutRect& bounds);
   bool            HandleKeyEventDefault(const Dali::KeyEvent& event);
   void            HandleFocusChangedDefault(bool focused);
   void            RelayoutDefault(const Vector2& size, RelayoutContainer& container);
@@ -729,8 +729,9 @@ private:
   void         ArrangeStandaloneChildren(const LayoutRect& bounds);
   void         ApplyLayoutDirection(float parentWidth);
   MeasuredSize DispatchMeasureWithLayoutManager(LayoutManager* manager, float widthConstraint, float heightConstraint);
-  MeasuredSize DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& bounds);
-  MeasuredSize DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& bounds);
+  void         DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& bounds);
+  LayoutRect   DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& bounds);
+  void         ApplySelfBoundsIfChanged(const LayoutRect& bounds);
   void         OnColorTableChanged();
 
   /**
@@ -904,6 +905,7 @@ private:
 
   bool mSkipChildrenUpdate : 1;
   bool mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
+  bool mArrangeInProgress;                                ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy (plain bool so the scope guard can bind a bool&).
   bool mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
   bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
   bool mDispatchKeyEvents : 1;                            ///< Whether the actor emits key event signals

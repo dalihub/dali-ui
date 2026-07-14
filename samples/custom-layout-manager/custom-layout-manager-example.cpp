@@ -68,7 +68,7 @@ public:
     return {totalWidth, totalHeight};
   }
 
-  MeasuredSize Arrange(ViewImpl* view, const LayoutRect& bounds) override
+  void Arrange(ViewImpl* view, const LayoutRect& bounds) override
   {
     float          x     = bounds.x;
     float          y     = bounds.y;
@@ -90,7 +90,6 @@ public:
       y += sz.height;
     }
 
-    return {bounds.width, bounds.height};
   }
 };
 

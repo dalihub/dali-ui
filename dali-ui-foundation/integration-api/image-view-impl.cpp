@@ -883,7 +883,7 @@ MeasuredSize ImageViewImpl::OnMeasure(float widthConstraint, float heightConstra
   return MeasuredSize(w * s, h * s);
 }
 
-MeasuredSize ImageViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect ImageViewImpl::OnArrange(const LayoutRect& bounds)
 {
   DALI_LOG_DEBUG_INFO("[ImageViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f) hasVisual=%d\n",
                       bounds.x, bounds.y, bounds.width, bounds.height, mVisual ? 1 : 0);

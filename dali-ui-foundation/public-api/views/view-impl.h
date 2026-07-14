@@ -466,7 +466,7 @@ public: // Non-virtual API (safe to reorder / extend)
   /**
    * @copydoc Ui::View::Arrange()
    */
-  MeasuredSize Arrange(const LayoutRect& bounds);
+  LayoutRect Arrange(const LayoutRect& bounds);
 
   /**
    * @copydoc Ui::View::InvalidateMeasure()
@@ -779,8 +779,12 @@ protected:
 
   /**
    * @brief Called during arrange pass. Override to implement custom arrangement.
+   *
+   * Return the view's final self bounds (parent-local, pre-RTL logical). The
+   * framework validates the returned rect and applies its x/y/width/height to
+   * the self actor; do NOT call self geometry setters. Default echoes @p bounds.
    */
-  virtual MeasuredSize OnArrange(const LayoutRect& bounds);
+  virtual LayoutRect OnArrange(const LayoutRect& bounds);
 
   /**
    * @brief Filters a key event before it is emitted through KeyEventSignal().

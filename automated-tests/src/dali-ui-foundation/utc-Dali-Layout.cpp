@@ -277,7 +277,7 @@ MeasuredSize HorizontalLineMeasure(View self, float widthConstraint, float heigh
   return {widthConstraint, maxHeight};
 }
 
-MeasuredSize HorizontalLineArrange(View self, const LayoutRect& bounds)
+LayoutRect HorizontalLineArrange(View self, const LayoutRect& bounds)
 {
   float x = bounds.x;
   for(uint32_t i = 0; i < self.GetChildViewCount(); ++i)
@@ -287,7 +287,7 @@ MeasuredSize HorizontalLineArrange(View self, const LayoutRect& bounds)
     child.Arrange({x, bounds.y, sz.width, sz.height});
     x += sz.width;
   }
-  return {bounds.width, bounds.height};
+  return bounds;
 }
 } // namespace
 

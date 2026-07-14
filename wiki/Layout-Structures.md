@@ -542,10 +542,10 @@ MeasuredSize MyMeasure(View view, float widthConstraint, float heightConstraint)
     return MeasuredSize(200.0f, 100.0f);
 }
 
-// Arrange callback signature: MeasuredSize(View, const LayoutRect& bounds)
-MeasuredSize MyArrange(View view, const LayoutRect& bounds)
+// Arrange callback signature: LayoutRect(View, const LayoutRect& bounds)
+LayoutRect MyArrange(View view, const LayoutRect& bounds)
 {
-    return MeasuredSize(bounds.GetWidth(), bounds.GetHeight());
+    return bounds; // final self bounds (x/y/width/height) applied by the framework
 }
 
 Layout layout = Layout::New();

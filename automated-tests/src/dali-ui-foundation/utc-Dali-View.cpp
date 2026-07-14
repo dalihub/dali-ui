@@ -193,9 +193,16 @@ MeasuredSize PlainMeasure(View, float, float)
   return MeasuredSize(40.0f, 30.0f);
 }
 
-MeasuredSize PlainArrange(View, const LayoutRect&)
+LayoutRect PlainArrange(View, const LayoutRect& bounds)
 {
-  return MeasuredSize(40.0f, 30.0f);
+  return bounds;
+}
+
+// Returns a self rect differing from the input slot on all four axes, used to
+// verify the framework adopts the returned x/y/width/height as final geometry.
+LayoutRect CustomBoundsArrange(View, const LayoutRect&)
+{
+  return LayoutRect(15.0f, 25.0f, 60.0f, 40.0f);
 }
 
 // During the child's own Measure, add a new sibling to the parent. This
@@ -223,13 +230,13 @@ MeasuredSize ReentrantRemoveMeasure(View, float, float)
 
 // During the child's own Arrange, remove a sibling from the parent. This
 // reaches ViewImpl::OnChildRemove -> mChildren.Erase mid-iteration.
-MeasuredSize ReentrantRemoveArrange(View, const LayoutRect&)
+LayoutRect ReentrantRemoveArrange(View, const LayoutRect& bounds)
 {
   if(gSiblingToRemove && gSiblingToRemove.GetParent() == static_cast<Actor>(gReentrantParent))
   {
     gReentrantParent.Remove(gSiblingToRemove, RemovePolicy::IMMEDIATE);
   }
-  return MeasuredSize(40.0f, 30.0f);
+  return bounds;
 }
 
 Shadow GetShadowProperty(View view)
@@ -1208,9 +1215,35 @@ int UtcDaliViewArrangeP(void)
   UiTestApplication application;
   View              view = View::New();
   LayoutRect        bounds(10.0f, 20.0f, 100.0f, 80.0f);
-  MeasuredSize      size = view.Arrange(bounds);
+  LayoutRect        size = view.Arrange(bounds);
   DALI_TEST_EQUALS(size.GetWidth(), 100.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(size.GetHeight(), 80.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliViewArrangeAdoptsReturnedBoundsP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  // A callback returning a self rect different from the input slot on all four
+  // axes; the framework must adopt x/y/width/height as the final self geometry.
+  view.SetArrangeCallback(ArrangeCallback::New(&CustomBoundsArrange));
+
+  LayoutRect result = view.Arrange(LayoutRect(5.0f, 5.0f, 200.0f, 100.0f));
+
+  // Arrange() returns the adopted final bounds (all four axes).
+  DALI_TEST_EQUALS(result.x, 15.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.y, 25.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.width, 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(result.height, 40.0f, TEST_LOCATION);
+
+  // The self actor geometry reflects the returned rect on all four axes.
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_X), 15.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_Y), 25.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 60.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 40.0f, TEST_LOCATION);
+
   END_TEST;
 }
 
@@ -1448,7 +1481,7 @@ int UtcDaliViewArrangeWithLayoutP(void)
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(200.0f);
   MeasuredSize measured = layout.Measure(200.0f, 200.0f);
-  MeasuredSize arranged = layout.Arrange(LayoutRect(0, 0, 200, 200));
+  LayoutRect arranged = layout.Arrange(LayoutRect(0, 0, 200, 200));
   DALI_TEST_EQUALS(measured.GetWidth(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.GetHeight(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(arranged.GetWidth(), 200.0f, TEST_LOCATION);

@@ -222,7 +222,7 @@ struct DiagonalLayout
     return {totalW, totalH};
   }
 
-  static MeasuredSize OnArrange(View self, const LayoutRect& bounds)
+  static LayoutRect OnArrange(View self, const LayoutRect& bounds)
   {
     float x = bounds.x, y = bounds.y;
     for(uint32_t i = 0; i < self.GetChildViewCount(); ++i)
@@ -232,7 +232,7 @@ struct DiagonalLayout
       x += sz.width;
       y += sz.height;
     }
-    return {bounds.width, bounds.height};
+    return bounds; // 프레임워크가 x/y/width/height를 적용하는 최종 self bounds
   }
 };
 

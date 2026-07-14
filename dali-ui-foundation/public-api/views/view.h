@@ -180,9 +180,9 @@ public: // Measure / Arrange API
    * This method calls OnArrange internally (Template Method pattern).
    *
    * @param[in] bounds The bounds to arrange the view in
-   * @return The final arranged size
+   * @return The final arranged bounds (parent-local, pre-RTL logical)
    */
-  MeasuredSize Arrange(const LayoutRect& bounds);
+  LayoutRect Arrange(const LayoutRect& bounds);
 
   /**
    * @brief Invalidates the measure of this view.

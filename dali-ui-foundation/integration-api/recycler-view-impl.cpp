@@ -622,13 +622,8 @@ MeasuredSize RecyclerViewImpl::OnMeasure(float widthConstraint, float heightCons
   return MeasuredSize(width, height);
 }
 
-MeasuredSize RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
 {
-  Self().SetPositionX(bounds.x);
-  Self().SetPositionY(bounds.y);
-  Self().SetWidth(bounds.width);
-  Self().SetHeight(bounds.height);
-
   const float newWidth    = std::max(0.0f, bounds.width);
   const float newHeight   = std::max(0.0f, bounds.height);
   const bool  sizeChanged = (newWidth != mViewportWidth || newHeight != mViewportHeight);
@@ -650,7 +645,7 @@ MeasuredSize RecyclerViewImpl::OnArrange(const LayoutRect& bounds)
   mScrollBar.RaiseToTop();
   UpdateScrollBar();
 
-  return MeasuredSize(bounds.width, bounds.height);
+  return bounds;
 }
 
 void RecyclerViewImpl::EnsureScroller()

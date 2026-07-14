@@ -188,9 +188,9 @@ MeasuredSize CanvasViewImpl::OnMeasure(float widthConstraint, float heightConstr
   return ViewImpl::OnMeasure(widthConstraint, heightConstraint);
 }
 
-MeasuredSize CanvasViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect CanvasViewImpl::OnArrange(const LayoutRect& bounds)
 {
-  MeasuredSize result = ViewImpl::OnArrange(bounds);
+  LayoutRect result = ViewImpl::OnArrange(bounds);
 
   const Vector2 newSize(bounds.width, bounds.height);
   if(DALI_LIKELY(mCanvasRenderer) && newSize != mSize && newSize.width > 0.f && newSize.height > 0.f)

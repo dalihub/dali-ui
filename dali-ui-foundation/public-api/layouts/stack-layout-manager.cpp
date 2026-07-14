@@ -326,11 +326,11 @@ MeasuredSize StackLayoutManager::Measure(ViewImpl* view, float widthConstraint, 
   return totalSize;
 }
 
-MeasuredSize StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
+void StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
-    return MeasuredSize(0.0f, 0.0f);
+    return;
   }
 
   auto* impl = GetImplAs<Impl>();
@@ -558,8 +558,6 @@ MeasuredSize StackLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bound
       currentX += slotWidth + visSpacing;
     }
   }
-
-  return MeasuredSize(bounds.width, bounds.height);
 }
 
 } // namespace Ui

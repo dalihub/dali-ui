@@ -79,7 +79,7 @@ MeasuredSize View::Measure(float widthConstraint, float heightConstraint)
   return GetImpl(*this).Measure(widthConstraint, heightConstraint);
 }
 
-MeasuredSize View::Arrange(const LayoutRect& bounds)
+LayoutRect View::Arrange(const LayoutRect& bounds)
 {
   return GetImpl(*this).Arrange(bounds);
 }

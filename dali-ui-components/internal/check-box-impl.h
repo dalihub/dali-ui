@@ -68,7 +68,7 @@ protected:
   void         OnInitialize() override;
   void         OnSceneConnection(int depth) override;
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
-  MeasuredSize OnArrange(const LayoutRect& bounds) override;
+  LayoutRect   OnArrange(const LayoutRect& bounds) override;
 
   /**
    * @copydoc Ui::Internal::ViewImpl::CreateAccessibleObject()

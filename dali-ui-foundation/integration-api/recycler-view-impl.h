@@ -108,7 +108,7 @@ public:
 
 protected:
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
-  MeasuredSize OnArrange(const LayoutRect& bounds) override;
+  LayoutRect   OnArrange(const LayoutRect& bounds) override;
 
   View OnFocusRequested() override;
   View OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction) override;

@@ -552,11 +552,11 @@ MeasuredSize FlexLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   return result;
 }
 
-MeasuredSize FlexLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
+void FlexLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
-    return MeasuredSize(0.0f, 0.0f);
+    return;
   }
 
   auto* impl = GetImplAs<Impl>();
@@ -649,8 +649,6 @@ MeasuredSize FlexLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds
     ArrangeOneFlexLine(line, children, workingSizes, bounds, contentWidth, contentHeight, crossOffset, mainOffset,
                        justify.spacing, impl->mAlignItems, IsMainAxisHorizontal(), IsMainAxisReversed());
   }
-
-  return MeasuredSize(bounds.width, bounds.height);
 }
 
 } // namespace Ui

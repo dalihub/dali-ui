@@ -332,6 +332,45 @@ inline bool IsValidSizeBound(float v)
   return std::isfinite(v) && v >= 0.0f;
 }
 
+// A valid arrange input/return LayoutRect: finite x/y (negative allowed),
+// finite non-negative width/height.
+inline bool IsValidLayoutRect(const LayoutRect& b)
+{
+  return std::isfinite(b.x) && std::isfinite(b.y) && IsValidSizeBound(b.width) && IsValidSizeBound(b.height);
+}
+
+// The returned rect is a new trust boundary: a customization hook may return an
+// invalid rect. Valid returns are adopted whole; invalid returns fall back to
+// the full input rect (no per-field clamp, no min/max reapply).
+inline LayoutRect ResolveReturnedBounds(const LayoutRect& inputBounds, const LayoutRect& returnedBounds)
+{
+  if(IsValidLayoutRect(returnedBounds))
+  {
+    return returnedBounds;
+  }
+  DALI_LOG_ERROR("Invalid LayoutRect returned from arrange customization; falling back to input bounds\n");
+  DALI_ASSERT_DEBUG(IsValidLayoutRect(returnedBounds));
+  return inputBounds;
+}
+
+// RAII: sets a flag true for the enclosing scope, restoring on exit (including
+// exception/assertion unwind). Used to guard against same-view re-entrant Arrange.
+struct ScopedTrueFlag
+{
+  bool& mFlag;
+  explicit ScopedTrueFlag(bool& flag)
+  : mFlag(flag)
+  {
+    mFlag = true;
+  }
+  ~ScopedTrueFlag()
+  {
+    mFlag = false;
+  }
+  ScopedTrueFlag(const ScopedTrueFlag&)            = delete;
+  ScopedTrueFlag& operator=(const ScopedTrueFlag&) = delete;
+};
+
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(
   Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
 static constexpr uint32_t BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG(
@@ -661,6 +700,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
   mSkipChildrenUpdate(false),
   mArrangeDirty(false),
+  mArrangeInProgress(false),
   mInitialLayoutDone(false),
   mIsFocusGroup(false),
   mDispatchKeyEvents(true),
@@ -848,14 +888,10 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
   return {size.width * s, size.height * s};
 }
 
-MeasuredSize ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
+LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
 {
-  Actor self = mViewImpl.Self();
-  self.SetPositionX(bounds.x);
-  self.SetPositionY(bounds.y);
-  self.SetWidth(bounds.width);
-  self.SetHeight(bounds.height);
-
+  // Self geometry is applied centrally in Arrange() via ApplySelfBoundsIfChanged;
+  // the default arrange only places regular children and echoes the input bounds.
   if(!mChildren.Empty())
   {
     float s            = mViewImpl.GetEffectiveScale();
@@ -905,7 +941,7 @@ MeasuredSize ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
     }
   }
 
-  return {bounds.width, bounds.height};
+  return bounds;
 }
 
 bool ViewDataImpl::HandleKeyEventDefault(const Dali::KeyEvent& event)
@@ -2803,33 +2839,54 @@ MeasuredSize ViewDataImpl::Measure(float visualW, float visualH)
   return mMeasuredSize;
 }
 
-MeasuredSize ViewDataImpl::Arrange(const LayoutRect& bounds)
+LayoutRect ViewDataImpl::Arrange(const LayoutRect& bounds)
 {
-  MeasuredSize arrangedSize;
+  // Validate first-party layout invariants in DEBUG only: this runs on the
+  // per-frame, per-view layout hot path (including deep child recursion), so a
+  // release-active assert/throw here would turn a manager/measure glitch into an
+  // app-terminating exception. The untrusted customization RETURN is still
+  // guarded in release by ResolveReturnedBounds (log + fall back to input).
+  DALI_ASSERT_DEBUG(IsValidLayoutRect(bounds));
+  DALI_ASSERT_DEBUG(!mArrangeInProgress); // same-view re-entrant Arrange is unsupported
+  ScopedTrueFlag arrangeGuard(mArrangeInProgress);
+
+  // Phase 1: apply the input bounds as provisional self geometry, so a
+  // customization hook that reads back self event-side geometry observes the
+  // input (as before this refactor), not stale prior-pass geometry.
+  ApplySelfBoundsIfChanged(bounds);
+
+  LayoutRect returnedBounds = bounds;
   if(auto* callback = GetArrangeCallback())
   {
-    arrangedSize = DispatchArrangeWithCallback(callback, bounds);
+    returnedBounds = DispatchArrangeWithCallback(callback, bounds);
   }
   else if(auto* manager = mViewImpl.GetLayoutManager())
   {
-    arrangedSize = DispatchArrangeWithLayoutManager(manager, bounds);
+    DispatchArrangeWithLayoutManager(manager, bounds);
+    returnedBounds = bounds; // Managers arrange children only; owner final == input.
   }
   else
   {
-    arrangedSize = mViewImpl.OnArrange(bounds);
+    returnedBounds = mViewImpl.OnArrange(bounds);
   }
-  mArrangedBounds = bounds;
+
+  // Phase 2: adopt the validated returned rect (all four axes) as the
+  // authoritative final self geometry. Invalid returns fall back to input.
+  const LayoutRect finalBounds = ResolveReturnedBounds(bounds, returnedBounds);
+  ApplySelfBoundsIfChanged(finalBounds);
+
+  mArrangedBounds = finalBounds;
   mArrangeDirty   = false;
 
   // Ensure standalone children are arranged even when OnArrange (e.g. in
   // leaf views like Label) does not iterate children.
-  ArrangeStandaloneChildren(bounds);
+  ArrangeStandaloneChildren(finalBounds);
 
   // Mirror direct children when the effective layout direction resolves to
   // RIGHT_TO_LEFT. Runs once per Arrange after every OnArrange variant
   // (LayoutManager / ArrangeCallback / default), keeping layout managers
   // direction-agnostic.
-  ApplyLayoutDirection(bounds.width);
+  ApplyLayoutDirection(finalBounds.width);
 
   // Mark this view as having completed an arrange pass. Read by the layout
   // transition dispatcher to suppress ENTER on initial mount: the dispatcher
@@ -2847,7 +2904,7 @@ MeasuredSize ViewDataImpl::Arrange(const LayoutRect& bounds)
     LayoutController::NotifyViewArranged(&mViewImpl);
   }
 
-  return arrangedSize;
+  return finalBounds;
 }
 
 void ViewDataImpl::MeasureStandaloneChildren(float visEffW, float visEffH)
@@ -3138,15 +3195,11 @@ MeasuredSize ViewDataImpl::DispatchMeasureWithLayoutManager(LayoutManager* manag
   return MeasuredSize(resultVisW, resultVisH);
 }
 
-MeasuredSize ViewDataImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& visualBounds)
+void ViewDataImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, const LayoutRect& visualBounds)
 {
-  Actor self = mViewImpl.Self();
-  self.SetPositionX(visualBounds.x);
-  self.SetPositionY(visualBounds.y);
-  self.SetWidth(visualBounds.width);
-  self.SetHeight(visualBounds.height);
-
-  float  s       = mViewImpl.GetEffectiveScale();
+  // Self geometry is applied centrally in Arrange(); the manager arranges
+  // children only within the padding-adjusted content bounds. Owner final == input.
+  float   s       = mViewImpl.GetEffectiveScale();
   Insets padding = mViewImpl.GetPadding();
 
   LayoutRect visContentBounds;
@@ -3156,19 +3209,39 @@ MeasuredSize ViewDataImpl::DispatchArrangeWithLayoutManager(LayoutManager* manag
   visContentBounds.height = std::max(0.0f, visualBounds.height - static_cast<float>(padding.top + padding.bottom) * s);
 
   manager->Arrange(&mViewImpl, visContentBounds);
-
-  return {visualBounds.width, visualBounds.height};
 }
 
-MeasuredSize ViewDataImpl::DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& visualBounds)
+LayoutRect ViewDataImpl::DispatchArrangeWithCallback(ArrangeCallback* callback, const LayoutRect& visualBounds)
+{
+  // Self geometry is applied centrally in Arrange(); the callback returns the
+  // view's final self bounds.
+  Ui::View view = Ui::View::DownCast(mViewImpl.Self());
+  return callback->Invoke(view, visualBounds);
+}
+
+void ViewDataImpl::ApplySelfBoundsIfChanged(const LayoutRect& bounds)
 {
   Actor self = mViewImpl.Self();
-  self.SetPositionX(visualBounds.x);
-  self.SetPositionY(visualBounds.y);
-  self.SetWidth(visualBounds.width);
-  self.SetHeight(visualBounds.height);
-  Ui::View view = Ui::View::DownCast(self);
-  return callback->Invoke(view, visualBounds);
+
+  // Read the event-side target property and write only axes that actually
+  // differ. Exact comparison (not epsilon): the returned rect is authoritative
+  // geometry and must equal mArrangedBounds / the actor target exactly.
+  if(self.GetProperty<float>(Actor::Property::POSITION_X) != bounds.x)
+  {
+    self.SetPositionX(bounds.x);
+  }
+  if(self.GetProperty<float>(Actor::Property::POSITION_Y) != bounds.y)
+  {
+    self.SetPositionY(bounds.y);
+  }
+  if(self.GetProperty<float>(Actor::Property::SIZE_WIDTH) != bounds.width)
+  {
+    self.SetWidth(bounds.width);
+  }
+  if(self.GetProperty<float>(Actor::Property::SIZE_HEIGHT) != bounds.height)
+  {
+    self.SetHeight(bounds.height);
+  }
 }
 
 void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)

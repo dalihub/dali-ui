@@ -237,7 +237,7 @@ void ChartViewImpl::OnInitialize()
                       this, static_cast<int>(mType), mSize.width, mSize.height);
 }
 
-MeasuredSize ChartViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect ChartViewImpl::OnArrange(const LayoutRect& bounds)
 {
   // ViewImpl::OnArrange is intentionally not called.  It would iterate child
   // Views and call Arrange(0,0,w,h) on those without AbsoluteLayoutParams,
@@ -248,12 +248,7 @@ MeasuredSize ChartViewImpl::OnArrange(const LayoutRect& bounds)
   // PlaceTextLabels.  Because ViewImpl::OnArrange is skipped, the layout
   // system never resets those positions, so no save/restore is needed.
 
-  Actor self = Self();
-  self.SetPositionX(bounds.x);
-  self.SetPositionY(bounds.y);
-  self.SetWidth(bounds.width);
-  self.SetHeight(bounds.height);
-
+  // Self geometry is applied centrally by ViewImpl::Arrange (ApplySelfBoundsIfChanged).
   const Vector2 newSize(bounds.width, bounds.height);
   if(newSize != mSize && newSize.width > 0.0f && newSize.height > 0.0f)
   {
@@ -277,8 +272,8 @@ MeasuredSize ChartViewImpl::OnArrange(const LayoutRect& bounds)
     mNeedsDataUpdate = false;
   }
 
-  // Return measured size matching the layout-assigned bounds.
-  return MeasuredSize(bounds.width, bounds.height);
+  // Echo the layout-assigned bounds as this view's final self bounds.
+  return bounds;
 }
 
 // =============================================================================

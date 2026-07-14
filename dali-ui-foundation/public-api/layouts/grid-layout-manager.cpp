@@ -630,11 +630,11 @@ MeasuredSize GridLayoutManager::Measure(ViewImpl* view, float widthConstraint, f
   return MeasuredSize(totalWidth, totalHeight);
 }
 
-MeasuredSize GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
+void GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
-    return MeasuredSize(0.0f, 0.0f);
+    return;
   }
 
   auto* impl = GetImplAs<Impl>();
@@ -674,8 +674,6 @@ MeasuredSize GridLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds
                        colPositions);
 
   ArrangeGridChildrenToCells(children, rowPositions, colPositions, rowCount, colCount, visRowSpacing, visColSpacing);
-
-  return MeasuredSize(bounds.width, bounds.height);
 }
 
 } // namespace Ui

@@ -191,9 +191,9 @@ void VideoViewImpl::OnInitialize()
   ViewImpl::OnInitialize();
 }
 
-MeasuredSize VideoViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect VideoViewImpl::OnArrange(const LayoutRect& bounds)
 {
-  MeasuredSize result = ViewImpl::OnArrange(bounds);
+  LayoutRect result = ViewImpl::OnArrange(bounds);
   UpdateDisplayArea();
   return result;
 }

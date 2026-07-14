@@ -58,7 +58,7 @@ public:
     return {widthConstraint, totalHeight};
   }
 
-  static MeasuredSize OnArrange(View self, const LayoutRect& bounds)
+  static LayoutRect OnArrange(View self, const LayoutRect& bounds)
   {
     float x = bounds.x;
     float y = bounds.y;
@@ -76,7 +76,7 @@ public:
       y += sz.height;
     }
 
-    return {bounds.width, bounds.height};
+    return bounds;
   }
 };
 

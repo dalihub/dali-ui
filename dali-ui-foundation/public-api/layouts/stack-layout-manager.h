@@ -55,7 +55,7 @@ public:
   float            GetSpacing() const;
 
   MeasuredSize Measure(ViewImpl* view, float widthConstraint, float heightConstraint) override;
-  MeasuredSize Arrange(ViewImpl* view, const LayoutRect& bounds) override;
+  void         Arrange(ViewImpl* view, const LayoutRect& bounds) override;
 
 private:
   class Impl;

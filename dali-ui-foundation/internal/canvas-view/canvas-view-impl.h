@@ -216,7 +216,7 @@ private: // From ViewImpl
   /**
    * @copydoc ViewImpl::OnArrange
    */
-  MeasuredSize OnArrange(const LayoutRect& bounds) override;
+  LayoutRect OnArrange(const LayoutRect& bounds) override;
 
   /**
    * @copydoc CustomActorImpl::OnSceneConnection

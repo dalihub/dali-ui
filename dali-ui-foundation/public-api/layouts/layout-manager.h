@@ -78,10 +78,9 @@ public:
    * according to the layout algorithm.
    *
    * @param[in] view The view whose children to arrange
-   * @param[in] bounds The available bounds for arranging children
-   * @return The final arranged size
+   * @param[in] bounds The available bounds for arranging children (owner-local content area)
    */
-  virtual MeasuredSize Arrange(ViewImpl* view, const LayoutRect& bounds) = 0;
+  virtual void Arrange(ViewImpl* view, const LayoutRect& bounds) = 0;
 
 protected:
   class Impl;

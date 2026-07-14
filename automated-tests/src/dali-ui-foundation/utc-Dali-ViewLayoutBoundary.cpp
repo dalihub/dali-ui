@@ -50,7 +50,7 @@ protected:
     return ViewImpl::OnMeasure(widthConstraint, heightConstraint);
   }
 
-  MeasuredSize OnArrange(const LayoutRect& bounds) override
+  LayoutRect OnArrange(const LayoutRect& bounds) override
   {
     mArrangeCount++;
     return ViewImpl::OnArrange(bounds);

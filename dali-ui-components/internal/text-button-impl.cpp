@@ -227,15 +227,9 @@ MeasuredSize TextButtonImpl::OnMeasure(float widthConstraint, float heightConstr
   return MeasuredSize(resultVisW, resultVisH);
 }
 
-MeasuredSize TextButtonImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect TextButtonImpl::OnArrange(const LayoutRect& bounds)
 {
-  Actor self = Self();
-  self.SetPositionX(bounds.x);
-  self.SetPositionY(bounds.y);
-  self.SetWidth(bounds.width);
-  self.SetHeight(bounds.height);
-
-  float  s       = GetEffectiveScale();
+  float   s       = GetEffectiveScale();
   Insets padding = GetPadding();
 
   LayoutRect contentBounds;
@@ -247,7 +241,7 @@ MeasuredSize TextButtonImpl::OnArrange(const LayoutRect& bounds)
   GetImpl(mLabel).Measure(contentBounds.width, contentBounds.height);
   GetImpl(mLabel).Arrange(contentBounds);
 
-  return MeasuredSize(bounds.width, bounds.height);
+  return bounds;
 }
 
 TextButtonImpl::TextButtonImpl() = default;

@@ -65,10 +65,10 @@ public:
   Ui::VideoSyncMode GetSyncMode() const;
 
 private:
-  void         OnInitialize() override;
-  MeasuredSize OnArrange(const LayoutRect& bounds) override;
-  void         OnSceneConnection(int depth) override;
-  void         OnSceneDisconnection() override;
+  void       OnInitialize() override;
+  LayoutRect OnArrange(const LayoutRect& bounds) override;
+  void       OnSceneConnection(int depth) override;
+  void       OnSceneDisconnection() override;
 
 private:
   void CreateVideoPlayer();

@@ -829,7 +829,7 @@ protected: // From ViewImpl
   /**
    * @copydoc ViewImpl::OnArrange
    */
-  MeasuredSize OnArrange(const LayoutRect& bounds) override;
+  LayoutRect OnArrange(const LayoutRect& bounds) override;
 
 public: // From CustomActorImpl
   /**

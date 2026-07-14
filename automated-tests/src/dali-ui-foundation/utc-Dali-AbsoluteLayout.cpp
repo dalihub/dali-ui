@@ -37,9 +37,9 @@ MeasuredSize PlainMeasure(View, float, float)
   return MeasuredSize(40.0f, 30.0f);
 }
 
-MeasuredSize PlainArrange(View, const LayoutRect&)
+LayoutRect PlainArrange(View, const LayoutRect& bounds)
 {
-  return MeasuredSize(40.0f, 30.0f);
+  return bounds;
 }
 
 // During the child's own Measure, remove a sibling from the parent. This
@@ -54,13 +54,13 @@ MeasuredSize ReentrantRemoveMeasure(View, float, float)
 }
 
 // During the child's own Arrange, remove a sibling from the parent.
-MeasuredSize ReentrantRemoveArrange(View, const LayoutRect&)
+LayoutRect ReentrantRemoveArrange(View, const LayoutRect& bounds)
 {
   if(gSiblingToRemove && gSiblingToRemove.GetParent() == static_cast<Actor>(gReentrantParent))
   {
     gReentrantParent.Remove(gSiblingToRemove, RemovePolicy::IMMEDIATE);
   }
-  return MeasuredSize(40.0f, 30.0f);
+  return bounds;
 }
 
 } // namespace
@@ -236,7 +236,7 @@ int UtcDaliAbsoluteLayoutMeasureArrangeP(void)
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(150.0f);
   MeasuredSize m = layout.Measure(200.0f, 150.0f);
-  MeasuredSize a = layout.Arrange(LayoutRect(0, 0, 200, 150));
+  LayoutRect a = layout.Arrange(LayoutRect(0, 0, 200, 150));
   DALI_TEST_EQUALS(m.GetWidth(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(m.GetHeight(), 150.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(a.GetWidth(), 200.0f, TEST_LOCATION);

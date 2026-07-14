@@ -470,12 +470,12 @@ MeasuredSize WebViewImpl::OnMeasure(float widthConstraint, float heightConstrain
   return MeasuredSize(w, h);
 }
 
-MeasuredSize WebViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect WebViewImpl::OnArrange(const LayoutRect& bounds)
 {
   DALI_LOG_DEBUG_INFO("[WebViewImpl] OnArrange: bounds=(x=%.0f,y=%.0f,w=%.0f,h=%.0f)\n",
                       bounds.x, bounds.y, bounds.width, bounds.height);
 
-  MeasuredSize result = ViewImpl::OnArrange(bounds);
+  LayoutRect result = ViewImpl::OnArrange(bounds);
 
   // Recalculate and apply the new display area.
   auto displayArea = CalculateDisplayArea(Self());

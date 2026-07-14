@@ -228,11 +228,11 @@ MeasuredSize AbsoluteLayoutManager::Measure(ViewImpl* view, float widthConstrain
   return MeasuredSize(maxRight, maxBottom);
 }
 
-MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
+void AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 {
   if(!view)
   {
-    return MeasuredSize(0.0f, 0.0f);
+    return;
   }
 
   const uint32_t count           = GetChildViewCount(view);
@@ -359,8 +359,6 @@ MeasuredSize AbsoluteLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bo
     }
     childImpl.Arrange(childBounds);
   }
-
-  return MeasuredSize(bounds.width, bounds.height);
 }
 
 } // namespace Ui

@@ -330,7 +330,7 @@ using MeasureCallback = Callback<MeasuredSize(View, float, float)>;
  *
  * @note Signature: MeasuredSize(View view, const LayoutRect& bounds)
  */
-using ArrangeCallback = Callback<MeasuredSize(View, const LayoutRect&)>;
+using ArrangeCallback = Callback<LayoutRect(View, const LayoutRect&)>;
 
 /**
  * @brief Enumeration for stack layout orientation.
