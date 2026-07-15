@@ -244,6 +244,7 @@ exit 0
 %defattr(-,root,root,-)
 %{_libdir}/lib%{dali_ui_components}.so*
 %license LICENSE
+%license third-party/md4c/LICENSE.md
 %{dali_ui_image_files}/components/*
 
 %files -n %{dali_ui_components}-devel
