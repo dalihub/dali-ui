@@ -30,7 +30,7 @@ name | desc. | sample
 WidgetView | (~10.2026) | -
 [WebView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1WebView.html) | A `View` for displaying web content (HTML, web pages). Supports navigation, JavaScript integration, and various web engine features. | [samples/web-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/web-view)
 [CanvasView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1CanvasView.html) | A `View` for displaying ThorVG-backed vector drawables. | [samples/canvas-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/canvas-view)
-VideoView | (~10.2026) | -
+[VideoView](https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1VideoView.html) | A `View` for displaying video from an externally created Tizen MMPlayer/ESPlayer session. | [samples/video-view](https://github.sec.samsung.net/NUI/dali-ui/tree/devel/samples/video-view)
 RecyclerView | (~10.2026) | -
 
 <br/>
