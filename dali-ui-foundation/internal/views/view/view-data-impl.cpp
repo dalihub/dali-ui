@@ -2534,8 +2534,9 @@ void ViewDataImpl::OnPropertySet(Property::Index index, const Property::Value& p
     case Actor::Property::ENABLED:
     {
       const bool enabled = propertyValue.Get<bool>();
+      View       self    = View::DownCast(mViewImpl.Self());
 
-      if(!enabled && mViewImpl.Self() == Dali::Ui::FocusManager::Get().GetCurrentFocusView())
+      if(!enabled && self == Dali::Ui::FocusManager::Get().GetCurrentFocusView())
       {
         Dali::Ui::FocusManager::Get().ClearFocus();
       }
@@ -2546,7 +2547,7 @@ void ViewDataImpl::OnPropertySet(Property::Index index, const Property::Value& p
       {
         if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
         {
-          interactiveTraitImpl->OnEnabledChanged(View::DownCast(mViewImpl.Self()), enabled);
+          interactiveTraitImpl->OnEnabledChanged(self, enabled);
         }
       }
       break;
@@ -3518,12 +3519,23 @@ void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
 
   if(mState != prev)
   {
-    if(prev.Contains(ViewState::PRESSED) && !mState.Contains(ViewState::PRESSED) && mState.IsAnyDisabled())
+    const bool pressedClearedByDisabled = prev.Contains(ViewState::PRESSED) && !mState.Contains(ViewState::PRESSED) && mState.IsAnyDisabled();
+
+    if(pressedClearedByDisabled)
     {
       cause = cause ? cause.WithCancellation() : InputEvent::Programmatic().WithCancellation();
     }
 
-    ViewStateManager::Get().NotifyStateChanged(View::DownCast(mViewImpl.Self()), prev, mState, cause);
+    View self = View::DownCast(mViewImpl.Self());
+    ViewStateManager::Get().NotifyStateChanged(self, prev, mState, cause);
+
+    if(pressedClearedByDisabled)
+    {
+      if(auto* traitObject = GetCoreInteractionObject())
+      {
+        traitObject->OnPressedClearedByViewState(self, cause);
+      }
+    }
   }
 }
 

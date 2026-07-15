@@ -45,7 +45,6 @@ InteractiveTraitImpl::InteractiveTraitImpl()
   mPressedExecutionKey(),
   mPressedExecutionKeyCount(0),
   mPseudoDisabled(false),
-  mPressed(false),
   mClickable(true),
   mClickBlockedByTouch(false),
   mClickBlockedByKey(false)
@@ -97,7 +96,8 @@ Signal<bool(View, InputEvent)>& InteractiveTraitImpl::LongPressedSignal()
 
 bool InteractiveTraitImpl::IsPressed() const
 {
-  return mPressed;
+  View owner = mOwner.GetHandle();
+  return owner && owner.GetState().Contains(ViewState::PRESSED);
 }
 
 bool InteractiveTraitImpl::IsPseudoDisabled() const
@@ -117,11 +117,6 @@ void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
   if(owner)
   {
     ExtensionView::SetState(GetImpl(owner), ViewState::PSEUDO_DISABLED, pseudoDisabled);
-  }
-
-  if(mPseudoDisabled && mPressed)
-  {
-    SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
   }
 
   mPseudoDisabledChangedSignal.Emit(owner, mPseudoDisabled);
@@ -159,10 +154,7 @@ void InteractiveTraitImpl::OnFocusedChanged(View view, bool focused)
     // NOTE This is for the case that,
     // when holding key pressed and the focus moved to the other object before release,
     // the key release event never come to this view.
-    if(mPressed)
-    {
-      SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
-    }
+    SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
   }
 }
 
@@ -173,10 +165,11 @@ void InteractiveTraitImpl::OnEnabledChanged(View view, bool enabled)
     Internal::PendingPressManager::Get().Cancel(*this);
   }
 
-  if(!enabled && mPressed)
-  {
-    SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
-  }
+}
+
+void InteractiveTraitImpl::OnPressedClearedByViewState(View view, InputEvent event)
+{
+  OnPressedChanged(view, event);
 }
 
 void InteractiveTraitImpl::OnSceneConnection(View)
@@ -189,11 +182,6 @@ void InteractiveTraitImpl::OnSceneDisconnection(View)
   ClearKeyPressedHistory();
   mClickBlockedByTouch = false;
   mClickBlockedByKey   = false;
-
-  if(mPressed)
-  {
-    SetPressedInternal(false, InputEvent::Programmatic().WithCancellation());
-  }
 }
 
 bool InteractiveTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
@@ -365,7 +353,7 @@ void InteractiveTraitImpl::OnTap(View view, TapGesture tap)
 
 void InteractiveTraitImpl::OnPressedChanged(View view, InputEvent inputEvent)
 {
-  mPressedChangedSignal.Emit(view, mPressed, inputEvent);
+  mPressedChangedSignal.Emit(view, IsPressed(), inputEvent);
 }
 
 void InteractiveTraitImpl::OnClicked(View view, InputEvent inputEvent)
@@ -430,19 +418,24 @@ void InteractiveTraitImpl::ClearKeyPressedHistory()
 
 void InteractiveTraitImpl::SetPressedInternal(bool value, InputEvent event)
 {
-  if(value == mPressed)
+  View owner = mOwner.GetHandle();
+  if(!owner)
   {
     return;
   }
 
-  mPressed = value;
-
-  View owner = mOwner.GetHandle();
-  if(owner)
+  const bool pressed = IsPressed();
+  if(value == pressed)
   {
-    ExtensionView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
+    return;
   }
 
+  if(value && owner.GetState().IsAnyDisabled())
+  {
+    return;
+  }
+
+  ExtensionView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
   OnPressedChanged(owner, event);
 }
 

@@ -143,6 +143,11 @@ public: // InteractiveTrait
   virtual void OnEnabledChanged(View view, bool enabled);
 
   /**
+   * @brief Called when ViewState clears the pressed state as part of another state transition.
+   */
+  void OnPressedClearedByViewState(View view, InputEvent event);
+
+  /**
    * @brief Called when the view is connected to a scene.
    */
   virtual void OnSceneConnection(View view);
@@ -223,7 +228,6 @@ private:
   UniquePtr<Dali::String>              mPressedExecutionKey;
   uint32_t                             mPressedExecutionKeyCount;
   bool                                 mPseudoDisabled : 1;
-  bool                                 mPressed : 1;
   bool                                 mClickable : 1;
   bool                                 mClickBlockedByTouch : 1;
   bool                                 mClickBlockedByKey : 1;

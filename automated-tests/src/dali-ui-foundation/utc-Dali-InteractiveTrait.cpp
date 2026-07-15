@@ -172,6 +172,20 @@ View CreateInteractiveView(TestApplication& application, float width = 100.0f, f
   return view;
 }
 
+void ProcessTouch(TestApplication& application, PointState::Type state, const Vector2& position, uint32_t time = 100u, int deviceId = 1)
+{
+  Dali::Integration::TouchEvent touchEvent;
+  Dali::Integration::Point      point;
+  point.SetState(state);
+  point.SetScreenPosition(position);
+  point.SetDeviceId(deviceId);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchEvent.points.push_back(point);
+  touchEvent.time = time;
+  application.ProcessEvent(touchEvent);
+}
+
 } // namespace
 
 void utc_dali_interactivetrait_startup(void)
@@ -411,6 +425,136 @@ int UtcDaliInteractiveTraitSceneDisconnectionClearsPressedP(void)
   DALI_TEST_CHECK(!data.pressed);
   DALI_TEST_CHECK(data.event.IsCancellation());
   DALI_TEST_CHECK(!view.AsInteractive().IsPressed());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitPseudoDisabledBlocksPressedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  InteractiveTrait            interactive = view.AsInteractive();
+  interactive.PressedChangedSignal().Connect(&application, functor);
+  interactive.SetPseudoDisabled(true);
+
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 100u);
+
+  DALI_TEST_CHECK(!data.called);
+  DALI_TEST_CHECK(!interactive.IsPressed());
+  DALI_TEST_CHECK(!view.GetState().Contains(ViewState::PRESSED));
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitDisabledBlocksPressedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  InteractiveTrait            interactive = view.AsInteractive();
+  interactive.PressedChangedSignal().Connect(&application, functor);
+  view.SetEnabled(false);
+
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 100u);
+
+  DALI_TEST_CHECK(!data.called);
+  DALI_TEST_CHECK(!interactive.IsPressed());
+  DALI_TEST_CHECK(!view.GetState().Contains(ViewState::PRESSED));
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitVisibilityFalseClearsPressedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  InteractiveTrait            interactive = view.AsInteractive();
+  interactive.PressedChangedSignal().Connect(&application, functor);
+
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(interactive.IsPressed());
+
+  data.Reset();
+  view.SetVisible(false);
+  application.SendNotification();
+  application.Render();
+  ProcessTouch(application, PointState::FINISHED, Vector2(50.0f, 50.0f), 120u);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.pressed);
+  DALI_TEST_CHECK(data.event.IsCancellation());
+  DALI_TEST_CHECK(!interactive.IsPressed());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitSensitiveFalseClearsPressedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  InteractiveTrait            interactive = view.AsInteractive();
+  interactive.PressedChangedSignal().Connect(&application, functor);
+
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(interactive.IsPressed());
+
+  data.Reset();
+  view.SetSensitive(false);
+  ProcessTouch(application, PointState::MOTION, Vector2(50.0f, 50.0f), 120u);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.pressed);
+  DALI_TEST_CHECK(data.event.IsCancellation());
+  DALI_TEST_CHECK(!interactive.IsPressed());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitParentSensitiveFalseClearsPressedP(void)
+{
+  UiTestApplication application;
+  View              parent = View::New();
+  View              view   = View::New();
+
+  parent.SetRequestedWidth(100.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetPivot(Pivot::TOP_LEFT);
+  parent.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+
+  application.GetScene().Add(parent);
+  parent.Add(view);
+  InteractiveTrait interactive = view.AsInteractive();
+  application.SendNotification();
+  application.Render();
+
+  PressedChangedSignalData    data;
+  PressedChangedSignalFunctor functor(data);
+  interactive.PressedChangedSignal().Connect(&application, functor);
+
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(interactive.IsPressed());
+
+  data.Reset();
+  parent.SetSensitive(false);
+  ProcessTouch(application, PointState::MOTION, Vector2(50.0f, 50.0f), 120u);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.pressed);
+  DALI_TEST_CHECK(data.event.IsCancellation());
+  DALI_TEST_CHECK(!interactive.IsPressed());
   END_TEST;
 }
 

@@ -25,6 +25,7 @@
 #include <dali-ui-foundation/internal/views/view/group-selectable-trait-impl.h>
 #include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
+#include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 
 namespace Dali
@@ -53,6 +54,8 @@ public:
   InteractiveTraitImpl*     GetInteractiveTraitImpl() const;
   SelectableTraitImpl*      GetSelectableTraitImpl() const;
   GroupSelectableTraitImpl* GetGroupSelectableTraitImpl() const;
+
+  void OnPressedClearedByViewState(View view, InputEvent event);
 
 protected:
   ~CoreInteractionObject() override;

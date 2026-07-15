@@ -95,6 +95,14 @@ GroupSelectableTraitImpl* CoreInteractionObject::GetGroupSelectableTraitImpl() c
   return mGroupSelectableTraitImpl.get();
 }
 
+void CoreInteractionObject::OnPressedClearedByViewState(View view, InputEvent event)
+{
+  if(mInteractiveTraitImpl)
+  {
+    mInteractiveTraitImpl->OnPressedClearedByViewState(view, event);
+  }
+}
+
 void CoreInteractionObject::OnAttached(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "CoreInteractionObject can not be attached to multiple target views");
