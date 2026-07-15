@@ -76,6 +76,8 @@ public:
 
   InputEventImpl(const WheelEvent& originEvent);
 
+  InputEventImpl(const HoverEvent& originEvent);
+
   /**
    * @brief Create a new InputEvent with NONE type.
    */
@@ -108,6 +110,8 @@ public:
   static InputEventImplPtr New(const LongPressGesture& originEvent);
 
   static InputEventImplPtr New(const WheelEvent& originEvent);
+
+  static InputEventImplPtr New(const HoverEvent& originEvent);
 
   InputEventImplPtr WithCancellation() const;
 
@@ -148,6 +152,8 @@ public:
 
   const WheelEvent& GetWheelEvent() const;
 
+  const HoverEvent& GetHoverEvent() const;
+
 private:
   /**
    * @brief Destructor.
@@ -160,10 +166,10 @@ private:
   InputEventImpl& operator=(InputEventImpl&& rhs)      = delete; ///< Deleted move assignment operator
 
 private:
-  InputEventType                                                                               mEventType;
-  bool                                                                                         mProgrammatic : 1;
-  bool                                                                                         mCancellation : 1;
-  std::variant<std::monostate, TouchEvent, KeyEvent, TapGesture, LongPressGesture, WheelEvent> mEvent;
+  InputEventType                                                                                           mEventType;
+  bool                                                                                                     mProgrammatic : 1;
+  bool                                                                                                     mCancellation : 1;
+  std::variant<std::monostate, TouchEvent, KeyEvent, TapGesture, LongPressGesture, WheelEvent, HoverEvent> mEvent;
 };
 
 } // namespace Internal

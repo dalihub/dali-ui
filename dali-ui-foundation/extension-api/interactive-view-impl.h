@@ -82,6 +82,11 @@ public:
   Signal<bool(Ui::View, InputEvent)>& LongPressedSignal();
 
   /**
+   * @copydoc InteractiveView::HoveredChangedSignal()
+   */
+  Signal<void(Ui::View, bool, InputEvent)>& HoveredChangedSignal();
+
+  /**
    * @copydoc InteractiveView::IsPressed()
    */
   bool IsPressed() const;
@@ -90,6 +95,11 @@ public:
    * @copydoc InteractiveView::IsPseudoDisabled()
    */
   bool IsPseudoDisabled() const;
+
+  /**
+   * @copydoc InteractiveView::IsHovered()
+   */
+  bool IsHovered() const;
 
   /**
    * @copydoc InteractiveView::SetPseudoDisabled()

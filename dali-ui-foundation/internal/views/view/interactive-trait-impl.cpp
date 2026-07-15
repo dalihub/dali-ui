@@ -23,7 +23,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/view.h>
-#include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/interactive-trait/pending-press-manager.h>
 #include <dali-ui-foundation/internal/scroll-state-observer.h>
@@ -31,8 +30,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace ExtensionView   = Dali::Ui::Extension::View;
-namespace IntegrationView = Dali::Ui::Integration::View;
+namespace ExtensionView = Dali::Ui::Extension::View;
 
 namespace Dali::Ui::Internal
 {
@@ -94,6 +92,11 @@ Signal<bool(View, InputEvent)>& InteractiveTraitImpl::LongPressedSignal()
   return mLongPressedSignal;
 }
 
+Signal<void(View, bool, InputEvent)>& InteractiveTraitImpl::HoveredChangedSignal()
+{
+  return mHoveredChangedSignal;
+}
+
 bool InteractiveTraitImpl::IsPressed() const
 {
   View owner = mOwner.GetHandle();
@@ -103,6 +106,12 @@ bool InteractiveTraitImpl::IsPressed() const
 bool InteractiveTraitImpl::IsPseudoDisabled() const
 {
   return mPseudoDisabled;
+}
+
+bool InteractiveTraitImpl::IsHovered() const
+{
+  View owner = mOwner.GetHandle();
+  return owner && owner.GetState().Contains(ViewState::HOVERED);
 }
 
 void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
@@ -164,12 +173,16 @@ void InteractiveTraitImpl::OnEnabledChanged(View view, bool enabled)
   {
     Internal::PendingPressManager::Get().Cancel(*this);
   }
-
 }
 
 void InteractiveTraitImpl::OnPressedClearedByViewState(View view, InputEvent event)
 {
   OnPressedChanged(view, event);
+}
+
+void InteractiveTraitImpl::OnHoveredClearedByViewState(View view, InputEvent event)
+{
+  mHoveredChangedSignal.Emit(view, IsHovered(), event);
 }
 
 void InteractiveTraitImpl::OnSceneConnection(View)
@@ -201,6 +214,34 @@ bool InteractiveTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
     default:
       break;
   }
+  return false;
+}
+
+bool InteractiveTraitImpl::OnHoverEvent(View view, const HoverEvent& event)
+{
+  InputEvent inputEvent = InputEvent::New(event);
+
+  switch(event.GetState(0u))
+  {
+    case PointState::STARTED:
+    case PointState::MOTION:
+    {
+      SetHoveredInternal(true, inputEvent);
+      return true;
+    }
+    case PointState::FINISHED:
+    case PointState::LEAVE:
+    case PointState::INTERRUPTED:
+    {
+      SetHoveredInternal(false, inputEvent);
+      return true;
+    }
+    default:
+    {
+      break;
+    }
+  }
+
   return false;
 }
 
@@ -437,6 +478,29 @@ void InteractiveTraitImpl::SetPressedInternal(bool value, InputEvent event)
 
   ExtensionView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
   OnPressedChanged(owner, event);
+}
+
+void InteractiveTraitImpl::SetHoveredInternal(bool value, InputEvent event)
+{
+  View owner = mOwner.GetHandle();
+  if(!owner)
+  {
+    return;
+  }
+
+  const bool hovered = IsHovered();
+  if(value == hovered)
+  {
+    return;
+  }
+
+  if(value && owner.GetState().IsAnyDisabled())
+  {
+    return;
+  }
+
+  ExtensionView::SetState(GetImpl(owner), ViewState::HOVERED, value, event);
+  mHoveredChangedSignal.Emit(owner, IsHovered(), event);
 }
 
 bool InteractiveTraitImpl::ShouldTapTriggerClicked() const

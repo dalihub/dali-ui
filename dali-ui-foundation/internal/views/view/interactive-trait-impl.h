@@ -20,6 +20,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/events/long-press-gesture-detector.h>
 #include <dali/public-api/events/tap-gesture-detector.h>
 #include <dali/public-api/object/weak-handle.h>
@@ -83,6 +84,11 @@ public: // Signals
    */
   Signal<bool(View, InputEvent)>& LongPressedSignal();
 
+  /**
+   * @copydoc Dali::Ui::InteractiveTrait::HoveredChangedSignal
+   */
+  Signal<void(View, bool, InputEvent)>& HoveredChangedSignal();
+
 public: // API
   /**
    * @copydoc Dali::Ui::InteractiveTrait::IsPressed
@@ -93,6 +99,11 @@ public: // API
    * @copydoc Dali::Ui::InteractiveTrait::IsPseudoDisabled
    */
   bool IsPseudoDisabled() const;
+
+  /**
+   * @copydoc Dali::Ui::InteractiveTrait::IsHovered
+   */
+  bool IsHovered() const;
 
   /**
    * @copydoc Dali::Ui::InteractiveTrait::SetPseudoDisabled
@@ -138,6 +149,11 @@ public: // InteractiveTrait
   virtual bool OnKeyEvent(View view, const KeyEvent& event);
 
   /**
+   * @brief Called when the view receives hover input.
+   */
+  virtual bool OnHoverEvent(View view, const HoverEvent& event);
+
+  /**
    * @brief Called when the view becomes enabled or disabled.
    */
   virtual void OnEnabledChanged(View view, bool enabled);
@@ -146,6 +162,11 @@ public: // InteractiveTrait
    * @brief Called when ViewState clears the pressed state as part of another state transition.
    */
   void OnPressedClearedByViewState(View view, InputEvent event);
+
+  /**
+   * @brief Called when ViewState clears the hovered state as part of another state transition.
+   */
+  void OnHoveredClearedByViewState(View view, InputEvent event);
 
   /**
    * @brief Called when the view is connected to a scene.
@@ -209,6 +230,7 @@ private:
   void RecordPressedExecutionKey(const Dali::String& keyName);
   void ClearKeyPressedHistory();
   void SetPressedInternal(bool value, InputEvent event);
+  void SetHoveredInternal(bool value, InputEvent event);
   bool ShouldTapTriggerClicked() const;
   bool ShouldKeyReleaseTriggerClicked() const;
   bool ShouldKeyPressTriggerClicked() const;
@@ -224,6 +246,7 @@ private:
   Signal<void(View, bool)>             mPseudoDisabledChangedSignal;
   Signal<void(View, InputEvent)>       mClickedSignal;
   Signal<bool(View, InputEvent)>       mLongPressedSignal;
+  Signal<void(View, bool, InputEvent)> mHoveredChangedSignal;
   KeyClickPolicy                       mKeyClickPolicy;
   UniquePtr<Dali::String>              mPressedExecutionKey;
   uint32_t                             mPressedExecutionKeyCount;

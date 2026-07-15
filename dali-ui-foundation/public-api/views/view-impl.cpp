@@ -151,6 +151,16 @@ bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   return mImpl->HandleKeyEventDefault(event);
 }
 
+bool ViewImpl::HasIntrinsicHoverHandling() const
+{
+  return mImpl->HasIntrinsicHoverHandlingDefault();
+}
+
+bool ViewImpl::OnHoverEvent(const Dali::HoverEvent& event)
+{
+  return mImpl->HandleHoverEventDefault(event);
+}
+
 // =============================================================================
 // State API
 // =============================================================================

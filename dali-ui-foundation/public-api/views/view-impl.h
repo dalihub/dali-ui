@@ -21,6 +21,7 @@
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/common/extents.h>
 #include <dali/public-api/common/unique-ptr.h>
+#include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/events/pan-gesture.h>
 #include <dali/public-api/object/base-handle.h>
 #include <dali/public-api/object/property-index-ranges.h>
@@ -197,6 +198,16 @@ public: // Virtual API
   {
     return NULL;
   }
+
+  /**
+   * @copydoc CustomActorImpl::HasIntrinsicHoverHandling
+   */
+  bool HasIntrinsicHoverHandling() const override;
+
+  /**
+   * @copydoc CustomActorImpl::OnHoverEvent
+   */
+  bool OnHoverEvent(const Dali::HoverEvent& event) override;
 
 public: // Non-virtual API (safe to reorder / extend)
   /**

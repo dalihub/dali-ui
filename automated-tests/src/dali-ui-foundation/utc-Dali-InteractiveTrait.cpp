@@ -22,6 +22,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
 #include <test-gesture-generator.h>
+#include <dali/integration-api/events/hover-event-integ.h>
 #include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/events/touch-event-integ.h>
 
@@ -114,6 +115,46 @@ struct PressedChangedSignalFunctor
   PressedChangedSignalData& signalData;
 };
 
+struct HoveredChangedSignalData
+{
+  HoveredChangedSignalData()
+  : called(false),
+    hovered(false)
+  {
+  }
+
+  void Reset()
+  {
+    called  = false;
+    hovered = false;
+    view    = View();
+    event   = InputEvent();
+  }
+
+  bool called;
+  bool hovered;
+  View view;
+  InputEvent event;
+};
+
+struct HoveredChangedSignalFunctor
+{
+  HoveredChangedSignalFunctor(HoveredChangedSignalData& data)
+  : signalData(data)
+  {
+  }
+
+  void operator()(View view, bool hovered, InputEvent event)
+  {
+    signalData.called = true;
+    signalData.hovered = hovered;
+    signalData.view = view;
+    signalData.event = event;
+  }
+
+  HoveredChangedSignalData& signalData;
+};
+
 struct LongPressedSignalData
 {
   LongPressedSignalData()
@@ -184,6 +225,19 @@ void ProcessTouch(TestApplication& application, PointState::Type state, const Ve
   touchEvent.points.push_back(point);
   touchEvent.time = time;
   application.ProcessEvent(touchEvent);
+}
+
+void ProcessHover(TestApplication& application, PointState::Type state, const Vector2& position, uint32_t time = 100u, int deviceId = 5)
+{
+  Dali::Integration::HoverEvent hoverEvent(time);
+  Dali::Integration::Point      point;
+  point.SetState(state);
+  point.SetScreenPosition(position);
+  point.SetDeviceId(deviceId);
+  point.SetDeviceClass(Device::Class::MOUSE);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  hoverEvent.points.push_back(point);
+  application.ProcessEvent(hoverEvent);
 }
 
 } // namespace
@@ -356,16 +410,7 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
   view.AsInteractive().PressedChangedSignal().Connect(&application, functor);
 
   // Touch down
-  Dali::Integration::TouchEvent touchDown;
-  Dali::Integration::Point      point;
-  point.SetState(PointState::DOWN);
-  point.SetScreenPosition(Vector2(50.0f, 50.0f));
-  point.SetDeviceId(1);
-  point.SetDeviceClass(Device::Class::TOUCH);
-  point.SetDeviceSubclass(Device::Subclass::NONE);
-  touchDown.points.push_back(point);
-  touchDown.time = 100;
-  application.ProcessEvent(touchDown);
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 100u);
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(!data.event.IsCancellation());
@@ -374,16 +419,7 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
   data.Reset();
 
   // Touch up
-  Dali::Integration::TouchEvent touchUp;
-  Dali::Integration::Point      pointUp;
-  pointUp.SetState(PointState::FINISHED);
-  pointUp.SetScreenPosition(Vector2(50.0f, 50.0f));
-  pointUp.SetDeviceId(1);
-  pointUp.SetDeviceClass(Device::Class::TOUCH);
-  pointUp.SetDeviceSubclass(Device::Subclass::NONE);
-  touchUp.points.push_back(pointUp);
-  touchUp.time = 120;
-  application.ProcessEvent(touchUp);
+  ProcessTouch(application, PointState::FINISHED, Vector2(50.0f, 50.0f), 120u);
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(!data.event.IsCancellation());
@@ -400,16 +436,7 @@ int UtcDaliInteractiveTraitSceneDisconnectionClearsPressedP(void)
   PressedChangedSignalFunctor functor(data);
   view.AsInteractive().PressedChangedSignal().Connect(&application, functor);
 
-  Dali::Integration::TouchEvent touchDown;
-  Dali::Integration::Point      point;
-  point.SetState(PointState::DOWN);
-  point.SetScreenPosition(Vector2(50.0f, 50.0f));
-  point.SetDeviceId(1);
-  point.SetDeviceClass(Device::Class::TOUCH);
-  point.SetDeviceSubclass(Device::Subclass::NONE);
-  touchDown.points.push_back(point);
-  touchDown.time = 100;
-  application.ProcessEvent(touchDown);
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 100u);
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(data.pressed);
@@ -555,6 +582,253 @@ int UtcDaliInteractiveTraitParentSensitiveFalseClearsPressedP(void)
   DALI_TEST_CHECK(!data.pressed);
   DALI_TEST_CHECK(data.event.IsCancellation());
   DALI_TEST_CHECK(!interactive.IsPressed());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitHoveredChangedSignalP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  HoveredChangedSignalData    data;
+  HoveredChangedSignalFunctor functor(data);
+  InteractiveTrait            interactive = view.AsInteractive();
+  interactive.HoveredChangedSignal().Connect(&application, functor);
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.hovered);
+  DALI_TEST_CHECK(data.view == view);
+  DALI_TEST_CHECK(data.event.GetInputEventType() == InputEventType::HOVER_EVENT);
+  DALI_TEST_CHECK(interactive.IsHovered());
+  DALI_TEST_CHECK(view.GetState().Contains(ViewState::HOVERED));
+
+  data.Reset();
+  ProcessHover(application, PointState::MOTION, Vector2(150.0f, 150.0f), 120u);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.hovered);
+  DALI_TEST_CHECK(!interactive.IsHovered());
+  DALI_TEST_CHECK(!view.GetState().Contains(ViewState::HOVERED));
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitHoverMovesBetweenViewsP(void)
+{
+  UiTestApplication application;
+  View              firstView = View::New();
+  View              secondView = View::New();
+
+  firstView.SetRequestedWidth(100.0f);
+  firstView.SetRequestedHeight(100.0f);
+  firstView.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
+  firstView.SetPivot(Pivot::TOP_LEFT);
+  firstView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  firstView.SetLayoutMode(LayoutMode::STANDALONE);
+  firstView.SetRequestedX(0.0f);
+  firstView.SetRequestedY(0.0f);
+
+  secondView.SetRequestedWidth(100.0f);
+  secondView.SetRequestedHeight(100.0f);
+  secondView.SetProperty(Actor::Property::SIZE, Vector2(100.0f, 100.0f));
+  secondView.SetPivot(Pivot::TOP_LEFT);
+  secondView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  secondView.SetLayoutMode(LayoutMode::STANDALONE);
+  secondView.SetRequestedX(120.0f);
+  secondView.SetRequestedY(0.0f);
+
+  application.GetScene().Add(firstView);
+  application.GetScene().Add(secondView);
+  InteractiveTrait firstInteractive  = firstView.AsInteractive();
+  InteractiveTrait secondInteractive = secondView.AsInteractive();
+
+  application.SendNotification();
+  application.Render();
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+
+  DALI_TEST_CHECK(firstInteractive.IsHovered());
+  DALI_TEST_CHECK(!secondInteractive.IsHovered());
+  DALI_TEST_CHECK(firstView.GetState().Contains(ViewState::HOVERED));
+  DALI_TEST_CHECK(!secondView.GetState().Contains(ViewState::HOVERED));
+
+  ProcessHover(application, PointState::MOTION, Vector2(150.0f, 50.0f), 120u);
+
+  DALI_TEST_CHECK(!firstInteractive.IsHovered());
+  DALI_TEST_CHECK(secondInteractive.IsHovered());
+  DALI_TEST_CHECK(!firstView.GetState().Contains(ViewState::HOVERED));
+  DALI_TEST_CHECK(secondView.GetState().Contains(ViewState::HOVERED));
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitHoveredCombinesWithPressedP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+  InteractiveTrait  interactive = view.AsInteractive();
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 110u);
+
+  DALI_TEST_CHECK(interactive.IsHovered());
+  DALI_TEST_CHECK(interactive.IsPressed());
+  DALI_TEST_CHECK(view.GetState().Contains(ViewState::HOVERED));
+  DALI_TEST_CHECK(view.GetState().Contains(ViewState::PRESSED));
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitClickableFalseAllowsHoveredP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+  InteractiveTrait  interactive = view.AsInteractive();
+  interactive.SetClickable(false);
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+
+  DALI_TEST_CHECK(interactive.IsHovered());
+  DALI_TEST_CHECK(view.GetState().Contains(ViewState::HOVERED));
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitPseudoDisabledBlocksHoveredP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+  InteractiveTrait  interactive = view.AsInteractive();
+  interactive.SetPseudoDisabled(true);
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+
+  DALI_TEST_CHECK(!interactive.IsHovered());
+  DALI_TEST_CHECK(!view.GetState().Contains(ViewState::HOVERED));
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitDisabledBlocksHoveredP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+  InteractiveTrait  interactive = view.AsInteractive();
+  view.SetEnabled(false);
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+
+  DALI_TEST_CHECK(!interactive.IsHovered());
+  DALI_TEST_CHECK(!view.GetState().Contains(ViewState::HOVERED));
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitSceneDisconnectionClearsHoveredP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  HoveredChangedSignalData    data;
+  HoveredChangedSignalFunctor functor(data);
+  InteractiveTrait            interactive = view.AsInteractive();
+  interactive.HoveredChangedSignal().Connect(&application, functor);
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(interactive.IsHovered());
+
+  data.Reset();
+  application.GetScene().Remove(view);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.hovered);
+  DALI_TEST_CHECK(data.event.IsCancellation());
+  DALI_TEST_CHECK(!interactive.IsHovered());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitSensitiveFalseClearsHoveredP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  HoveredChangedSignalData    data;
+  HoveredChangedSignalFunctor functor(data);
+  InteractiveTrait            interactive = view.AsInteractive();
+  interactive.HoveredChangedSignal().Connect(&application, functor);
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(interactive.IsHovered());
+
+  data.Reset();
+  view.SetSensitive(false);
+  ProcessHover(application, PointState::MOTION, Vector2(50.0f, 50.0f), 120u);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.hovered);
+  DALI_TEST_CHECK(data.event.IsCancellation());
+  DALI_TEST_CHECK(!interactive.IsHovered());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitVisibilityFalseClearsHoveredP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  HoveredChangedSignalData    data;
+  HoveredChangedSignalFunctor functor(data);
+  InteractiveTrait            interactive = view.AsInteractive();
+  interactive.HoveredChangedSignal().Connect(&application, functor);
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(interactive.IsHovered());
+
+  data.Reset();
+  view.SetVisible(false);
+  ProcessHover(application, PointState::MOTION, Vector2(50.0f, 50.0f), 120u);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.hovered);
+  DALI_TEST_CHECK(data.event.IsCancellation());
+  DALI_TEST_CHECK(!interactive.IsHovered());
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitParentSensitiveFalseClearsHoveredP(void)
+{
+  UiTestApplication application;
+  View              parent = View::New();
+  View              view = View::New();
+
+  parent.SetRequestedWidth(100.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetPivot(Pivot::TOP_LEFT);
+  parent.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+
+  application.GetScene().Add(parent);
+  parent.Add(view);
+  InteractiveTrait interactive = view.AsInteractive();
+  application.SendNotification();
+  application.Render();
+
+  HoveredChangedSignalData    data;
+  HoveredChangedSignalFunctor functor(data);
+  interactive.HoveredChangedSignal().Connect(&application, functor);
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u);
+  DALI_TEST_CHECK(interactive.IsHovered());
+
+  data.Reset();
+  parent.SetSensitive(false);
+  ProcessHover(application, PointState::MOTION, Vector2(50.0f, 50.0f), 120u);
+
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(!data.hovered);
+  DALI_TEST_CHECK(data.event.IsCancellation());
+  DALI_TEST_CHECK(!interactive.IsHovered());
   END_TEST;
 }
 

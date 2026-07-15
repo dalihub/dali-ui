@@ -143,6 +143,14 @@ public: // Signals
    */
   Signal<bool(View, InputEvent)>& LongPressedSignal();
 
+  /**
+   * @brief Emitted when the hovered state changes.
+   *
+   * @return The hovered changed signal
+   * @see InteractiveTrait::HoveredChangedSignal
+   */
+  Signal<void(View, bool, InputEvent)>& HoveredChangedSignal();
+
 public: // API
   /**
    * @brief Returns whether the view is currently in the pressed state.
@@ -159,6 +167,14 @@ public: // API
    * @see InteractiveTrait::IsPseudoDisabled
    */
   bool IsPseudoDisabled() const;
+
+  /**
+   * @brief Returns whether the view is currently in the hovered state.
+   *
+   * @return True if hovered
+   * @see InteractiveTrait::IsHovered
+   */
+  bool IsHovered() const;
 
   /**
    * @brief Sets the pseudo disabled state.

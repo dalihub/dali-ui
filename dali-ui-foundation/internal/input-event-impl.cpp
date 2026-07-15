@@ -85,6 +85,15 @@ InputEventImpl::InputEventImpl(const WheelEvent& originEvent)
 {
 }
 
+InputEventImpl::InputEventImpl(const HoverEvent& originEvent)
+: BaseObject(),
+  mEventType(InputEventType::HOVER_EVENT),
+  mProgrammatic(false),
+  mCancellation(originEvent.GetState(0u) == PointState::INTERRUPTED),
+  mEvent(originEvent)
+{
+}
+
 InputEventImpl::~InputEventImpl()
 {
 }
@@ -115,6 +124,11 @@ InputEventImplPtr InputEventImpl::New(const LongPressGesture& originEvent)
 }
 
 InputEventImplPtr InputEventImpl::New(const WheelEvent& originEvent)
+{
+  return InputEventImplPtr(new InputEventImpl(originEvent));
+}
+
+InputEventImplPtr InputEventImpl::New(const HoverEvent& originEvent)
 {
   return InputEventImplPtr(new InputEventImpl(originEvent));
 }
@@ -170,6 +184,12 @@ const WheelEvent& InputEventImpl::GetWheelEvent() const
 {
   DALI_ASSERT_ALWAYS(mEventType == InputEventType::WHEEL_EVENT);
   return std::get<WheelEvent>(mEvent);
+}
+
+const HoverEvent& InputEventImpl::GetHoverEvent() const
+{
+  DALI_ASSERT_ALWAYS(mEventType == InputEventType::HOVER_EVENT);
+  return std::get<HoverEvent>(mEvent);
 }
 
 } // namespace Internal

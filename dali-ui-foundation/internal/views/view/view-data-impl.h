@@ -770,6 +770,8 @@ private:
   MeasuredSize    MeasureDefault(float widthConstraint, float heightConstraint);
   LayoutRect      ArrangeDefault(const LayoutRect& bounds);
   bool            HandleKeyEventDefault(const Dali::KeyEvent& event);
+  bool            HasIntrinsicHoverHandlingDefault() const;
+  bool            HandleHoverEventDefault(const Dali::HoverEvent& event);
   void            HandleFocusChangedDefault(bool focused);
   void            RelayoutDefault(const Vector2& size, RelayoutContainer& container);
   View            ResolveDefaultFocusRequest();

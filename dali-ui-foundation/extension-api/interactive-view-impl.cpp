@@ -77,6 +77,11 @@ Signal<bool(Ui::View, InputEvent)>& InteractiveViewImpl::LongPressedSignal()
   return GetInteractiveTrait().LongPressedSignal();
 }
 
+Signal<void(View, bool, InputEvent)>& InteractiveViewImpl::HoveredChangedSignal()
+{
+  return GetInteractiveTrait().HoveredChangedSignal();
+}
+
 bool InteractiveViewImpl::IsPressed() const
 {
   return GetInteractiveTrait().IsPressed();
@@ -85,6 +90,11 @@ bool InteractiveViewImpl::IsPressed() const
 bool InteractiveViewImpl::IsPseudoDisabled() const
 {
   return GetInteractiveTrait().IsPseudoDisabled();
+}
+
+bool InteractiveViewImpl::IsHovered() const
+{
+  return GetInteractiveTrait().IsHovered();
 }
 
 void InteractiveViewImpl::SetPseudoDisabled(bool pseudoDisabled)

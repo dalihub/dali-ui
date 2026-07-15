@@ -71,6 +71,14 @@ InputEvent InputEvent::New(const WheelEvent& originEvent)
   return InputEvent(impl.Get());
 }
 
+InputEvent InputEvent::New(const HoverEvent& originEvent)
+{
+  Internal::InputEventImplPtr impl = Internal::InputEventImpl::New(originEvent);
+
+  // Pass ownership to handle
+  return InputEvent(impl.Get());
+}
+
 InputEvent::InputEvent(Internal::InputEventImpl* impl)
 : BaseHandle(impl)
 {
@@ -120,6 +128,11 @@ const LongPressGesture& InputEvent::GetLongPressGesture() const
 const WheelEvent& InputEvent::GetWheelEvent() const
 {
   return GetImpl(*this).GetWheelEvent();
+}
+
+const HoverEvent& InputEvent::GetHoverEvent() const
+{
+  return GetImpl(*this).GetHoverEvent();
 }
 
 } // namespace Ui

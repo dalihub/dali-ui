@@ -61,6 +61,11 @@ enum class InputEventType : uint32_t
   WHEEL_EVENT = 5,
 
   /**
+   * @brief The input event is from hover event.
+   */
+  HOVER_EVENT = 6,
+
+  /**
    * @brief Reserved for future expansion.
    */
   RESERVED = 99

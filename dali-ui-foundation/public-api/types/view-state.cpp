@@ -122,6 +122,7 @@ const ViewState ViewState::FOCUS_INDICATED = ViewState::Create("FocusIndicated")
 const ViewState ViewState::PRESSED         = ViewState::Create("Pressed");
 const ViewState ViewState::DISABLED        = ViewState::Create("Disabled");
 const ViewState ViewState::PSEUDO_DISABLED = ViewState::Create("PseudoDisabled");
+const ViewState ViewState::HOVERED         = ViewState::Create("Hovered");
 const ViewState ViewState::SELECTED        = ViewState::Create("Selected");
 
 // --- Predefined Composite States ---

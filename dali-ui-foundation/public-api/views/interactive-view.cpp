@@ -82,6 +82,11 @@ Signal<bool(View, InputEvent)>& InteractiveView::LongPressedSignal()
   return Extension::GetImpl(*this).LongPressedSignal();
 }
 
+Signal<void(View, bool, InputEvent)>& InteractiveView::HoveredChangedSignal()
+{
+  return Extension::GetImpl(*this).HoveredChangedSignal();
+}
+
 bool InteractiveView::IsPressed() const
 {
   return Extension::GetImpl(*this).IsPressed();
@@ -90,6 +95,11 @@ bool InteractiveView::IsPressed() const
 bool InteractiveView::IsPseudoDisabled() const
 {
   return Extension::GetImpl(*this).IsPseudoDisabled();
+}
+
+bool InteractiveView::IsHovered() const
+{
+  return Extension::GetImpl(*this).IsHovered();
 }
 
 void InteractiveView::SetPseudoDisabled(bool pseudoDisabled)

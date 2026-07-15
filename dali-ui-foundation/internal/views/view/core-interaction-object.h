@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <memory>
 
@@ -56,6 +57,10 @@ public:
   GroupSelectableTraitImpl* GetGroupSelectableTraitImpl() const;
 
   void OnPressedClearedByViewState(View view, InputEvent event);
+  void OnHoveredClearedByViewState(View view, InputEvent event);
+
+  bool HasIntrinsicHoverHandling() const;
+  bool OnHoverEvent(const HoverEvent& event);
 
 protected:
   ~CoreInteractionObject() override;

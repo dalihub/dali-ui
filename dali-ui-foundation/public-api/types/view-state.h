@@ -71,6 +71,7 @@ public:
   static const ViewState PRESSED;         ///< View is being pressed (touch or key)
   static const ViewState DISABLED;        ///< View is disabled
   static const ViewState PSEUDO_DISABLED; ///< View appears disabled but still interactive
+  static const ViewState HOVERED;         ///< View is being hovered
   static const ViewState SELECTED;        ///< View is selected
 
   // --- Predefined Composite States ---

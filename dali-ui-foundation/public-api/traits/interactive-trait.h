@@ -139,6 +139,13 @@ public: // Signals
    */
   Signal<bool(View, InputEvent)>& LongPressedSignal();
 
+  /**
+   * @brief Emitted when the hovered state changes.
+   *
+   * @return The hovered changed signal
+   */
+  Signal<void(View, bool, InputEvent)>& HoveredChangedSignal();
+
 public: // API
   /**
    * @brief The boolean flag for pressed state.
@@ -155,6 +162,13 @@ public: // API
    * @return True if the object is pseudo disabled
    */
   bool IsPseudoDisabled() const;
+
+  /**
+   * @brief The boolean flag for hovered state.
+   *
+   * @return True if the object is hovered
+   */
+  bool IsHovered() const;
 
   /**
    * @brief Sets the pseudo disabled state to the view.

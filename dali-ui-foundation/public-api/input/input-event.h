@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/events/hover-event.h>
 #include <dali/public-api/events/key-event.h>
 #include <dali/public-api/events/long-press-gesture.h>
 #include <dali/public-api/events/tap-gesture.h>
@@ -138,6 +139,14 @@ public:
   static InputEvent New(const WheelEvent& originEvent);
 
   /**
+   * @brief Creates a new InputEvent from a hover event.
+   *
+   * @param[in] originEvent The originating hover event
+   * @return A handle to the new InputEvent
+   */
+  static InputEvent New(const HoverEvent& originEvent);
+
+  /**
    * @brief Get the type of this event.
    *
    * @return The type of the input event
@@ -198,6 +207,11 @@ public:
    * @brief
    */
   const WheelEvent& GetWheelEvent() const;
+
+  /**
+   * @brief
+   */
+  const HoverEvent& GetHoverEvent() const;
 
 public: // Not intended for Application developers
   /**

@@ -103,6 +103,29 @@ void CoreInteractionObject::OnPressedClearedByViewState(View view, InputEvent ev
   }
 }
 
+void CoreInteractionObject::OnHoveredClearedByViewState(View view, InputEvent event)
+{
+  if(mInteractiveTraitImpl)
+  {
+    mInteractiveTraitImpl->OnHoveredClearedByViewState(view, event);
+  }
+}
+
+bool CoreInteractionObject::HasIntrinsicHoverHandling() const
+{
+  return mInteractiveTraitImpl != nullptr;
+}
+
+bool CoreInteractionObject::OnHoverEvent(const HoverEvent& event)
+{
+  View owner = mOwner.GetHandle();
+  if(owner && mInteractiveTraitImpl)
+  {
+    return mInteractiveTraitImpl->OnHoverEvent(owner, event);
+  }
+  return false;
+}
+
 void CoreInteractionObject::OnAttached(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "CoreInteractionObject can not be attached to multiple target views");
