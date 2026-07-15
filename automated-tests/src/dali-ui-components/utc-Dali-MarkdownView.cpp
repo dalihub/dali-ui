@@ -1,0 +1,1401 @@
+/*
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ *
+ */
+
+#include <dali-ui-components/dali-ui-components.h>
+#include <dali-ui-components/internal/markdown/markdown-parser.h>
+#include <dali-ui-components/internal/markdown/markdown-view-impl.h>
+#include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
+#include <dali-ui-foundation/public-api/views/text-controls/label.h>
+#include <dali-ui-test-suite-utils.h>
+#include <utility>
+#include <vector>
+
+using namespace Dali;
+using namespace Dali::Ui;
+using namespace Dali::Ui::Internal;
+
+void utc_dali_markdown_view_startup(void)
+{
+  test_return_value = TET_UNDEF;
+}
+
+void utc_dali_markdown_view_cleanup(void)
+{
+  test_return_value = TET_PASS;
+}
+
+namespace
+{
+
+const MarkdownRenderNode* FindFirstRole(const MarkdownRenderSnapshot& snapshot, MarkdownRenderRole role)
+{
+  for(const auto& node : snapshot.nodes)
+  {
+    if(node.role == role)
+    {
+      return &node;
+    }
+  }
+  return nullptr;
+}
+
+const MarkdownRenderNode* FindText(const MarkdownRenderSnapshot& snapshot, const std::string& text)
+{
+  for(const auto& node : snapshot.nodes)
+  {
+    if(node.text == text)
+    {
+      return &node;
+    }
+  }
+  return nullptr;
+}
+
+uint32_t CountRole(const MarkdownRenderSnapshot& snapshot, MarkdownRenderRole role)
+{
+  uint32_t count = 0u;
+  for(const auto& node : snapshot.nodes)
+  {
+    if(node.role == role)
+    {
+      ++count;
+    }
+  }
+  return count;
+}
+
+uint32_t CountTaskListItems(const MarkdownRenderSnapshot& snapshot)
+{
+  uint32_t count = 0u;
+  for(const auto& node : snapshot.nodes)
+  {
+    if(node.taskListItem)
+    {
+      ++count;
+    }
+  }
+  return count;
+}
+
+uint32_t CountAutolinks(const MarkdownRenderSnapshot& snapshot)
+{
+  uint32_t count = 0u;
+  for(const auto& node : snapshot.nodes)
+  {
+    for(const auto& link : node.linkRanges)
+    {
+      if(link.isAutolink)
+      {
+        ++count;
+      }
+    }
+  }
+  return count;
+}
+
+uint32_t CountStyleFlag(const MarkdownRenderSnapshot& snapshot, uint32_t flag)
+{
+  uint32_t count = 0u;
+  for(const auto& node : snapshot.nodes)
+  {
+    for(const auto& styleRun : node.styleRuns)
+    {
+      if((styleRun.flags & flag) != 0u)
+      {
+        ++count;
+      }
+    }
+  }
+  return count;
+}
+
+uint32_t CountZeroLengthLinks(const MarkdownRenderSnapshot& snapshot)
+{
+  uint32_t count = 0u;
+  for(const auto& node : snapshot.nodes)
+  {
+    for(const auto& link : node.linkRanges)
+    {
+      if(link.start == link.end)
+      {
+        ++count;
+      }
+    }
+  }
+  return count;
+}
+
+uint32_t CountZeroLengthInlineObjects(const MarkdownRenderSnapshot& snapshot)
+{
+  uint32_t count = 0u;
+  for(const auto& node : snapshot.nodes)
+  {
+    for(const auto& object : node.inlineObjects)
+    {
+      if(object.length == 0u)
+      {
+        ++count;
+      }
+    }
+  }
+  return count;
+}
+
+bool HasPlainTextLineBreakMetadata(const MarkdownRenderSnapshot& snapshot)
+{
+  return !snapshot.plainTextLineBreaks.empty();
+}
+
+void CheckPlainTextLineBreakEvents(const MarkdownRenderSnapshot& snapshot)
+{
+  for(const auto& event : snapshot.plainTextLineBreaks)
+  {
+    DALI_TEST_CHECK(event.nodeIndex < snapshot.nodes.size());
+    if(event.nodeIndex < snapshot.nodes.size())
+    {
+      DALI_TEST_CHECK(event.position <= snapshot.nodes[event.nodeIndex].utf32Length);
+    }
+  }
+}
+
+void CheckPlainText(const char* markdown, const char* expected)
+{
+  DALI_TEST_EQUALS(MarkdownView::ToPlainText(Dali::String(markdown)), expected, TEST_LOCATION);
+}
+
+void CollectLabels(Ui::View view, std::vector<Label>& labels)
+{
+  Label label = Label::DownCast(view);
+  if(label)
+  {
+    labels.push_back(label);
+  }
+
+  for(uint32_t index = 0u; index < view.GetChildViewCount(); ++index)
+  {
+    CollectLabels(view.GetChildViewAt(index), labels);
+  }
+}
+
+View GetListItemAtDepth(MarkdownView view, uint32_t depth)
+{
+  if(depth == 0u || view.GetChildViewCount() == 0u)
+  {
+    return View();
+  }
+
+  View list = view.GetChildViewAt(0u);
+  for(uint32_t currentDepth = 1u; currentDepth <= depth; ++currentDepth)
+  {
+    if(!list || list.GetChildViewCount() == 0u)
+    {
+      return View();
+    }
+
+    View listItem = list.GetChildViewAt(0u);
+    if(currentDepth == depth)
+    {
+      return listItem;
+    }
+    if(!listItem || listItem.GetChildViewCount() < 2u)
+    {
+      return View();
+    }
+
+    View contentHost = listItem.GetChildViewAt(1u);
+    if(!contentHost || contentHost.GetChildViewCount() == 0u)
+    {
+      return View();
+    }
+    list = contentHost.GetChildViewAt(contentHost.GetChildViewCount() - 1u);
+  }
+  return View();
+}
+
+View GetListItemMarkerHost(View listItem)
+{
+  return listItem && listItem.GetChildViewCount() > 0u ? listItem.GetChildViewAt(0u) : View();
+}
+
+View GetShapeMarker(View listItem)
+{
+  View markerHost = GetListItemMarkerHost(listItem);
+  return markerHost && markerHost.GetChildViewCount() > 0u ? markerHost.GetChildViewAt(0u) : View();
+}
+
+View GetListItemTaskRow(View listItem)
+{
+  if(!listItem || listItem.GetChildViewCount() < 2u)
+  {
+    return View();
+  }
+
+  View contentHost = listItem.GetChildViewAt(1u);
+  if(!contentHost || contentHost.GetChildViewCount() == 0u)
+  {
+    return View();
+  }
+
+  View firstChild = contentHost.GetChildViewAt(0u);
+  return firstChild && !Label::DownCast(firstChild) ? firstChild : View();
+}
+
+Label GetListItemTaskMarker(View listItem)
+{
+  View taskRow = GetListItemTaskRow(listItem);
+  return taskRow && taskRow.GetChildViewCount() > 0u
+           ? Label::DownCast(taskRow.GetChildViewAt(0u))
+           : Label();
+}
+
+Label GetListItemTextLabel(View listItem)
+{
+  if(!listItem || listItem.GetChildViewCount() < 2u)
+  {
+    return Label();
+  }
+
+  View contentHost = listItem.GetChildViewAt(1u);
+  if(!contentHost || contentHost.GetChildViewCount() == 0u)
+  {
+    return Label();
+  }
+
+  View  firstChild = contentHost.GetChildViewAt(0u);
+  Label textLabel  = Label::DownCast(firstChild);
+  if(textLabel)
+  {
+    return textLabel;
+  }
+  return firstChild && firstChild.GetChildViewCount() > 1u
+           ? Label::DownCast(firstChild.GetChildViewAt(1u))
+           : Label();
+}
+
+void CheckDefaultUnorderedMarkerGeometry(View listItem)
+{
+  View markerHost = GetListItemMarkerHost(listItem);
+  View marker     = GetShapeMarker(listItem);
+  DALI_TEST_CHECK(markerHost);
+  DALI_TEST_CHECK(marker);
+  if(!markerHost || !marker)
+  {
+    return;
+  }
+
+  DALI_TEST_EQUALS(markerHost.GetRequestedWidth(), 32.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(markerHost.GetMargin().end, 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(marker.GetRequestedWidth(), 6.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(marker.GetRequestedHeight(), 6.0f, TEST_LOCATION);
+
+  const Insets margin = marker.GetMargin();
+  DALI_TEST_EQUALS(margin.start, 26.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(margin.end, 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(margin.top, 13.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(margin.bottom, 13.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(margin.top + marker.GetRequestedHeight() + margin.bottom, 32.0f, TEST_LOCATION);
+}
+
+Label GetOnlyRenderedLabel(MarkdownView view)
+{
+  std::vector<Label> labels;
+  CollectLabels(view, labels);
+  DALI_TEST_EQUALS(labels.size(), 1u, TEST_LOCATION);
+  return labels.size() == 1u ? labels[0u] : Label();
+}
+
+void CheckNoAnchorSpans(const Text::StyledText& styledText)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    DALI_TEST_CHECK(!Text::AnchorSpan::DownCast(styledText.GetSpanAt(index)));
+  }
+}
+
+void CheckNoUnderlineSpans(const Text::StyledText& styledText)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    DALI_TEST_CHECK(!Text::UnderlineSpan::DownCast(styledText.GetSpanAt(index)));
+  }
+}
+
+Text::StyledText CheckStyledLinkPresentation(Label label)
+{
+  const Text::StyledText styledText = label.GetStyledText();
+  DALI_TEST_CHECK(styledText);
+  if(styledText)
+  {
+    CheckNoAnchorSpans(styledText);
+    CheckNoUnderlineSpans(styledText);
+  }
+  return styledText;
+}
+
+void CheckRenderedLinkText(MarkdownView view, const char* markdown, const char* expected)
+{
+  view.SetMarkdown(markdown);
+  Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_CHECK(label);
+  if(label)
+  {
+    DALI_TEST_EQUALS(label.GetText(), expected, TEST_LOCATION);
+    const Text::StyledText styledText = label.GetStyledText();
+    if(styledText)
+    {
+      CheckNoAnchorSpans(styledText);
+      CheckNoUnderlineSpans(styledText);
+    }
+  }
+  CheckPlainText(markdown, expected);
+}
+
+bool HasLabelText(const std::vector<Label>& labels, const char* expected)
+{
+  for(const auto& label : labels)
+  {
+    if(label.GetText() == expected)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool HasFontSpanRange(const Text::StyledText& styledText, uint32_t start, uint32_t end)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    if(Text::FontSpan::DownCast(styledText.GetSpanAt(index)) &&
+       styledText.GetSpanStartIndexAt(index) == start &&
+       styledText.GetSpanEndIndexAt(index) == end)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool HasBackgroundSpanRange(const Text::StyledText& styledText, uint32_t start, uint32_t end)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    if(Text::BackgroundColorSpan::DownCast(styledText.GetSpanAt(index)) &&
+       styledText.GetSpanStartIndexAt(index) == start &&
+       styledText.GetSpanEndIndexAt(index) == end)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool HasFontStyleAt(const Text::StyledText& styledText, uint32_t position)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    if(Text::FontSpan::DownCast(styledText.GetSpanAt(index)) &&
+       styledText.GetSpanStartIndexAt(index) <= position &&
+       position < styledText.GetSpanEndIndexAt(index))
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+void CheckFontStyleCoverage(const Text::StyledText& styledText, uint32_t start, uint32_t end, bool expected)
+{
+  for(uint32_t position = start; position < end; ++position)
+  {
+    DALI_TEST_EQUALS(HasFontStyleAt(styledText, position), expected, TEST_LOCATION);
+  }
+}
+
+} // namespace
+
+int UtcDaliMarkdownParserSnapshotP(void)
+{
+  MarkdownParser parser;
+  auto           snapshot = parser.Parse("# Title\n\nHello **world** and *DALi*\n\n- [x] task\n\n[link](https://example.com \"title\")\n\n![alt](image.png \"caption\")\n\n| A | B |\n|---|:--:|\n| 1 | 2 |\n\n~~gone~~\n\n```cpp\nint x;\n```\n",
+                                         1u);
+
+  DALI_TEST_CHECK(snapshot.parseSucceeded);
+  DALI_TEST_CHECK(snapshot.nodes.size() > 10u);
+
+  auto heading = FindFirstRole(snapshot, MarkdownRenderRole::HEADING);
+  DALI_TEST_CHECK(heading);
+  DALI_TEST_EQUALS(heading->headingLevel, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(heading->text, std::string("Title"), TEST_LOCATION);
+
+  auto paragraph = FindText(snapshot, "Hello world and DALi");
+  DALI_TEST_CHECK(paragraph);
+  DALI_TEST_EQUALS(paragraph->styleRuns.size(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK((paragraph->styleRuns[0].flags & MARKDOWN_TEXT_STYLE_STRONG) != 0u);
+  DALI_TEST_CHECK((paragraph->styleRuns[1].flags & MARKDOWN_TEXT_STYLE_EMPHASIS) != 0u);
+
+  auto listItem = FindFirstRole(snapshot, MarkdownRenderRole::LIST_ITEM);
+  DALI_TEST_CHECK(listItem);
+  DALI_TEST_CHECK(listItem->taskListItem);
+  DALI_TEST_CHECK(listItem->taskChecked);
+  DALI_TEST_CHECK(FindText(snapshot, "task"));
+
+  auto link = FindText(snapshot, "link");
+  DALI_TEST_CHECK(link);
+  DALI_TEST_EQUALS(link->linkRanges.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(link->linkRanges[0].href, std::string("https://example.com"), TEST_LOCATION);
+  DALI_TEST_EQUALS(link->linkRanges[0].title, std::string("title"), TEST_LOCATION);
+
+  auto image = FindFirstRole(snapshot, MarkdownRenderRole::BLOCK_IMAGE);
+  DALI_TEST_CHECK(image);
+  DALI_TEST_EQUALS(image->sourceUrl, std::string("image.png"), TEST_LOCATION);
+  DALI_TEST_EQUALS(image->altText, std::string("alt"), TEST_LOCATION);
+
+  auto code = FindFirstRole(snapshot, MarkdownRenderRole::CODE_BLOCK);
+  DALI_TEST_CHECK(code);
+  DALI_TEST_EQUALS(code->language, std::string("cpp"), TEST_LOCATION);
+  DALI_TEST_CHECK(code->text.find("int x;") != std::string::npos);
+
+  auto strike = FindText(snapshot, "gone");
+  DALI_TEST_CHECK(strike);
+  DALI_TEST_EQUALS(strike->styleRuns.size(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK((strike->styleRuns[0].flags & MARKDOWN_TEXT_STYLE_STRIKETHROUGH) != 0u);
+
+  auto table = FindFirstRole(snapshot, MarkdownRenderRole::TABLE);
+  DALI_TEST_CHECK(table);
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserEntitiesAndUnicodeP(void)
+{
+  MarkdownParser parser;
+  auto           snapshot = parser.Parse("Tom &amp; Jerry &copy; &ndash; &hellip; &rarr;\n\n안녕하세요 **DALi**", 2u);
+
+  DALI_TEST_CHECK(snapshot.parseSucceeded);
+  DALI_TEST_CHECK(FindText(snapshot, "Tom & Jerry © – … →"));
+  auto korean = FindText(snapshot, "안녕하세요 DALi");
+  DALI_TEST_CHECK(korean);
+  DALI_TEST_EQUALS(korean->utf32Length, 10u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserSoftAndHardBreakP(void)
+{
+  MarkdownParser parser;
+  auto           soft = parser.Parse("soft\nbreak", 3u);
+  DALI_TEST_CHECK(FindText(soft, "soft break"));
+
+  auto hard = parser.Parse("hard  \nbreak", 4u);
+  DALI_TEST_CHECK(FindText(hard, "hard\nbreak"));
+
+  auto code  = parser.Parse("```text\na\nb\n```", 5u);
+  auto block = FindFirstRole(code, MarkdownRenderRole::CODE_BLOCK);
+  DALI_TEST_CHECK(block);
+  DALI_TEST_CHECK(block->text.find("a\nb") != std::string::npos);
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserNumericEntitiesP(void)
+{
+  MarkdownParser parser;
+  auto           snapshot = parser.Parse("&#169; &#x2192; &#0; &#xD800; &#x110000;", 6u);
+  DALI_TEST_CHECK(snapshot.parseSucceeded);
+  DALI_TEST_CHECK(FindText(snapshot, "© → � � �"));
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserNestedSpansAndImagesP(void)
+{
+  MarkdownParser parser;
+  auto           snapshot = parser.Parse("***bold italic***\n\n**outer *inner* outer**\n\n[**bold link**](https://example.com)\n\n![*styled alt*](image.png)\n\nText ![alt](icon.png) continues\n\n~~**nested**~~", 7u);
+
+  DALI_TEST_CHECK(snapshot.parseSucceeded);
+  auto first = FindText(snapshot, "bold italic");
+  DALI_TEST_CHECK(first);
+  DALI_TEST_EQUALS(first->styleRuns.size(), 2u, TEST_LOCATION);
+
+  auto link = FindText(snapshot, "bold link");
+  DALI_TEST_CHECK(link);
+  DALI_TEST_EQUALS(link->linkRanges.size(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!link->styleRuns.empty());
+
+  auto blockImage = FindFirstRole(snapshot, MarkdownRenderRole::BLOCK_IMAGE);
+  DALI_TEST_CHECK(blockImage);
+  DALI_TEST_EQUALS(blockImage->sourceUrl, std::string("image.png"), TEST_LOCATION);
+  DALI_TEST_EQUALS(blockImage->altText, std::string("styled alt"), TEST_LOCATION);
+
+  auto inlineImage = FindText(snapshot, "Text alt continues");
+  DALI_TEST_CHECK(inlineImage);
+  DALI_TEST_EQUALS(inlineImage->inlineObjects.size(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(inlineImage->inlineObjects[0].position, 5u, TEST_LOCATION);
+
+  auto nested = FindText(snapshot, "nested");
+  DALI_TEST_CHECK(nested);
+  DALI_TEST_EQUALS(nested->styleRuns.size(), 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserBlockImageWhitespaceP(void)
+{
+  MarkdownParser parser;
+  auto           snapshot = parser.Parse("  ![alt](image.png \"caption\")  \n\nText ![inline](icon.png) continues\n\n![one](one.png) ![two](two.png)\n", 9u);
+
+  DALI_TEST_CHECK(snapshot.parseSucceeded);
+  DALI_TEST_EQUALS(CountRole(snapshot, MarkdownRenderRole::BLOCK_IMAGE), 1u, TEST_LOCATION);
+
+  auto blockImage = FindFirstRole(snapshot, MarkdownRenderRole::BLOCK_IMAGE);
+  DALI_TEST_CHECK(blockImage);
+  DALI_TEST_EQUALS(blockImage->sourceUrl, std::string("image.png"), TEST_LOCATION);
+  DALI_TEST_EQUALS(blockImage->altText, std::string("alt"), TEST_LOCATION);
+
+  auto inlineImage = FindText(snapshot, "Text inline continues");
+  DALI_TEST_CHECK(inlineImage);
+  DALI_TEST_EQUALS(inlineImage->inlineObjects.size(), 1u, TEST_LOCATION);
+
+  auto twoImages = FindText(snapshot, "one two");
+  DALI_TEST_CHECK(twoImages);
+  DALI_TEST_EQUALS(twoImages->inlineObjects.size(), 2u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserTableTaskSetextRawHtmlP(void)
+{
+  MarkdownParser parser;
+  auto           snapshot = parser.Parse("Title\n-----\n\n- [ ] todo\n- [x] done\n\n| A | B | C |\n|:--|:-:|--:|\n| 1 | 2 | 3 |\n\n<div>raw</div>", 8u);
+
+  auto heading = FindFirstRole(snapshot, MarkdownRenderRole::HEADING);
+  DALI_TEST_CHECK(heading);
+  DALI_TEST_EQUALS(heading->headingLevel, 2u, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(CountRole(snapshot, MarkdownRenderRole::LIST_ITEM), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountRole(snapshot, MarkdownRenderRole::TABLE_CELL), 6u, TEST_LOCATION);
+
+  bool sawLeft   = false;
+  bool sawCenter = false;
+  bool sawRight  = false;
+  for(const auto& node : snapshot.nodes)
+  {
+    if(node.role == MarkdownRenderRole::TABLE_CELL)
+    {
+      sawLeft   = sawLeft || node.tableAlignment == MarkdownTableAlignment::LEFT;
+      sawCenter = sawCenter || node.tableAlignment == MarkdownTableAlignment::CENTER;
+      sawRight  = sawRight || node.tableAlignment == MarkdownTableAlignment::RIGHT;
+    }
+  }
+  DALI_TEST_CHECK(sawLeft);
+  DALI_TEST_CHECK(sawCenter);
+  DALI_TEST_CHECK(sawRight);
+  DALI_TEST_CHECK(FindText(snapshot, "<div>raw</div>") || FindText(snapshot, "raw"));
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserOrderedListMarkerColumnP(void)
+{
+  MarkdownParser parser;
+  auto           snapshot = parser.Parse("8. eight\n9. nine\n10. ten\n", 10u);
+
+  uint32_t orderedItemCount = 0u;
+  for(const auto& node : snapshot.nodes)
+  {
+    if(node.role == MarkdownRenderRole::LIST_ITEM)
+    {
+      ++orderedItemCount;
+      DALI_TEST_CHECK(node.listKind == MarkdownListKind::ORDERED);
+      DALI_TEST_EQUALS(node.listMarkerColumnLength, 3u, TEST_LOCATION);
+    }
+  }
+  DALI_TEST_EQUALS(orderedItemCount, 3u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserPlainTextModeIsolationP(void)
+{
+  MarkdownParser parser;
+  const char*    markdown = "Line one\nLine two\n\n[]()\n\n![](empty.png)\n\nBefore <span>HTML</span> after\n\n<div>\nHTML block\n</div>\n\nAfter";
+
+  const auto defaultSnapshot   = parser.Parse(markdown, 11u);
+  const auto plainTextSnapshot = parser.Parse(markdown, 12u, MarkdownParser::Options::PlainText());
+
+  DALI_TEST_CHECK(defaultSnapshot.parseSucceeded);
+  DALI_TEST_CHECK(plainTextSnapshot.parseSucceeded);
+  DALI_TEST_CHECK(defaultSnapshot.plainTextLineBreaks.empty());
+  DALI_TEST_CHECK(!plainTextSnapshot.plainTextLineBreaks.empty());
+  DALI_TEST_CHECK(!HasPlainTextLineBreakMetadata(defaultSnapshot));
+  DALI_TEST_CHECK(HasPlainTextLineBreakMetadata(plainTextSnapshot));
+  CheckPlainTextLineBreakEvents(plainTextSnapshot);
+
+  // Link metadata is also retained for rendering so an empty label can still
+  // project its URL. Plain-text-only line-break and image metadata stay isolated.
+  DALI_TEST_EQUALS(CountZeroLengthLinks(defaultSnapshot), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountZeroLengthInlineObjects(defaultSnapshot), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(CountZeroLengthLinks(plainTextSnapshot) > 0u);
+  DALI_TEST_CHECK(CountZeroLengthInlineObjects(plainTextSnapshot) > 0u);
+
+  DALI_TEST_CHECK(FindText(defaultSnapshot, "Before <span>HTML</span> after"));
+  DALI_TEST_CHECK(FindText(plainTextSnapshot, "Before HTML after"));
+  DALI_TEST_EQUALS(CountRole(defaultSnapshot, MarkdownRenderRole::RAW_HTML), 0u, TEST_LOCATION);
+  DALI_TEST_CHECK(CountRole(plainTextSnapshot, MarkdownRenderRole::RAW_HTML) > 0u);
+
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserPlainTextDialectParityP(void)
+{
+  MarkdownParser parser;
+  const char*    markdown = "Title\n-----\n\n- [ ] todo\n- [x] done\n\n~~gone~~\n\n<https://example.com>\n\n| A | B |\n|---|---|\n| 1 | 2 |\n";
+
+  const auto defaultSnapshot   = parser.Parse(markdown, 13u);
+  const auto plainTextSnapshot = parser.Parse(markdown, 14u, MarkdownParser::Options::PlainText());
+
+  DALI_TEST_CHECK(defaultSnapshot.parseSucceeded);
+  DALI_TEST_CHECK(plainTextSnapshot.parseSucceeded);
+  DALI_TEST_EQUALS(CountRole(defaultSnapshot, MarkdownRenderRole::HEADING), CountRole(plainTextSnapshot, MarkdownRenderRole::HEADING), TEST_LOCATION);
+  DALI_TEST_EQUALS(CountRole(defaultSnapshot, MarkdownRenderRole::TABLE), CountRole(plainTextSnapshot, MarkdownRenderRole::TABLE), TEST_LOCATION);
+  DALI_TEST_EQUALS(CountRole(defaultSnapshot, MarkdownRenderRole::TABLE_CELL), CountRole(plainTextSnapshot, MarkdownRenderRole::TABLE_CELL), TEST_LOCATION);
+  DALI_TEST_EQUALS(CountTaskListItems(defaultSnapshot), CountTaskListItems(plainTextSnapshot), TEST_LOCATION);
+  DALI_TEST_EQUALS(CountStyleFlag(defaultSnapshot, MARKDOWN_TEXT_STYLE_STRIKETHROUGH), CountStyleFlag(plainTextSnapshot, MARKDOWN_TEXT_STYLE_STRIKETHROUGH), TEST_LOCATION);
+  DALI_TEST_EQUALS(CountAutolinks(defaultSnapshot), CountAutolinks(plainTextSnapshot), TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliMarkdownParserPlainTextSparseLineBreakLookupP(void)
+{
+  MarkdownParser parser;
+  auto           snapshot = parser.Parse("A\nB  \nC\n\nD\nE", 15u, MarkdownParser::Options::PlainText());
+
+  DALI_TEST_CHECK(snapshot.parseSucceeded);
+  DALI_TEST_CHECK(snapshot.plainTextLineBreaks.size() >= 3u);
+
+  MarkdownPlainTextLineBreak firstNodeFirst;
+  MarkdownPlainTextLineBreak firstNodeSecond;
+  MarkdownPlainTextLineBreak otherNode;
+  bool                       foundFirstNodeFirst  = false;
+  bool                       foundFirstNodeSecond = false;
+  bool                       foundOtherNode       = false;
+
+  for(const auto& event : snapshot.plainTextLineBreaks)
+  {
+    if(!foundFirstNodeFirst)
+    {
+      firstNodeFirst     = event;
+      foundFirstNodeFirst = true;
+      continue;
+    }
+
+    if(event.nodeIndex == firstNodeFirst.nodeIndex && !foundFirstNodeSecond)
+    {
+      firstNodeSecond     = event;
+      foundFirstNodeSecond = true;
+    }
+    else if(event.nodeIndex != firstNodeFirst.nodeIndex && !foundOtherNode)
+    {
+      otherNode     = event;
+      foundOtherNode = true;
+    }
+  }
+
+  DALI_TEST_CHECK(foundFirstNodeFirst);
+  DALI_TEST_CHECK(foundFirstNodeSecond);
+  DALI_TEST_CHECK(foundOtherNode);
+
+  if(foundFirstNodeFirst && foundFirstNodeSecond && foundOtherNode)
+  {
+    snapshot.plainTextLineBreaks.clear();
+    snapshot.plainTextLineBreaks.push_back(firstNodeSecond);
+    snapshot.plainTextLineBreaks.push_back(otherNode);
+    snapshot.plainTextLineBreaks.push_back(firstNodeFirst);
+
+    DALI_TEST_EQUALS(MarkdownSnapshotToPlainText(snapshot), Dali::String("A\nB\nC\nD\nE"), TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewConstructorP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view;
+  DALI_TEST_CHECK(!view);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewNewAndDownCastP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+  DALI_TEST_CHECK(view);
+  DALI_TEST_CHECK(MarkdownView::DownCast(BaseHandle(view)));
+  DALI_TEST_CHECK(DownCast<MarkdownView>(BaseHandle(view)));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewSetGetClearP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("Hello **world**");
+  DALI_TEST_EQUALS(view.GetMarkdown(), Dali::String("Hello **world**"), TEST_LOCATION);
+  DALI_TEST_CHECK(view.GetChildCount() > 0u);
+
+  view.Clear();
+  DALI_TEST_CHECK(view.GetMarkdown().Empty());
+  DALI_TEST_EQUALS(view.GetChildCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewStreamingSetReuseP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("안녕");
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 1u, TEST_LOCATION);
+  View firstChild = view.GetChildViewAt(0u);
+
+  view.SetMarkdown("안녕하세요");
+  DALI_TEST_EQUALS(view.GetMarkdown(), Dali::String("안녕하세요"), TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(firstChild == view.GetChildViewAt(0u));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewRepeatedSetDoesNotChurnTreeP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view     = MarkdownView::New();
+  const char*       markdown = "- item\n\n> quote\n\n| A | B |\n|---|---|\n| 1 | 2 |\n";
+
+  view.SetMarkdown(markdown);
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 3u, TEST_LOCATION);
+  View firstChild  = view.GetChildViewAt(0u);
+  View secondChild = view.GetChildViewAt(1u);
+  View thirdChild  = view.GetChildViewAt(2u);
+
+  view.SetMarkdown(markdown);
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(firstChild == view.GetChildViewAt(0u));
+  DALI_TEST_CHECK(secondChild == view.GetChildViewAt(1u));
+  DALI_TEST_CHECK(thirdChild == view.GetChildViewAt(2u));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewMiddleInsertionKeepsExistingLayoutOrderP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("A\n\nC");
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 2u, TEST_LOCATION);
+  View firstChild  = view.GetChildViewAt(0u);
+  View secondChild = view.GetChildViewAt(1u);
+
+  view.SetMarkdown("A\n\nB\n\nC");
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(firstChild == view.GetChildViewAt(0u));
+  DALI_TEST_CHECK(secondChild != view.GetChildViewAt(1u));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewSamePathStyleChangeReusesLeafP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("This is **impor");
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 1u, TEST_LOCATION);
+  View firstChild = view.GetChildViewAt(0u);
+
+  view.SetMarkdown("This is **important**");
+
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(firstChild == view.GetChildViewAt(0u));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewContainerHierarchyP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("- item\n  - nested\n\n> quote\n\n| A | B |\n|---|---|\n| 1 | 2 |\n");
+
+  const auto& snapshot = Dali::Ui::Internal::GetImpl(view).GetSnapshot();
+  DALI_TEST_CHECK(FindFirstRole(snapshot, MarkdownRenderRole::LIST));
+  DALI_TEST_CHECK(FindFirstRole(snapshot, MarkdownRenderRole::QUOTE));
+  DALI_TEST_CHECK(FindFirstRole(snapshot, MarkdownRenderRole::TABLE));
+  DALI_TEST_CHECK(FindText(snapshot, "item"));
+  DALI_TEST_CHECK(FindText(snapshot, "nested"));
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 3u, TEST_LOCATION);
+
+  View list = view.GetChildViewAt(0u);
+  DALI_TEST_CHECK(list);
+  DALI_TEST_EQUALS(list.GetChildViewCount(), 1u, TEST_LOCATION);
+  View listItem = list.GetChildViewAt(0u);
+  DALI_TEST_CHECK(listItem);
+  DALI_TEST_EQUALS(listItem.GetChildViewCount(), 2u, TEST_LOCATION);
+  View listContent = listItem.GetChildViewAt(1u);
+  DALI_TEST_CHECK(listContent);
+  DALI_TEST_CHECK(listContent.GetChildViewCount() >= 2u);
+  DALI_TEST_CHECK(Label::DownCast(listContent.GetChildViewAt(0u)));
+
+  View quote = view.GetChildViewAt(1u);
+  DALI_TEST_CHECK(quote);
+  DALI_TEST_EQUALS(quote.GetChildViewCount(), 2u, TEST_LOCATION);
+  View quoteContent = quote.GetChildViewAt(1u);
+  DALI_TEST_CHECK(quoteContent);
+  DALI_TEST_CHECK(quoteContent.GetChildViewCount() > 0u);
+
+  View table = view.GetChildViewAt(2u);
+  DALI_TEST_CHECK(table);
+  DALI_TEST_EQUALS(table.GetChildViewCount(), 2u, TEST_LOCATION);
+  View tableHead = table.GetChildViewAt(0u);
+  DALI_TEST_CHECK(tableHead);
+  DALI_TEST_EQUALS(tableHead.GetChildViewCount(), 2u, TEST_LOCATION);
+  View tableHeadContent = tableHead.GetChildViewAt(0u);
+  DALI_TEST_CHECK(tableHeadContent);
+  DALI_TEST_EQUALS(tableHeadContent.GetChildViewCount(), 1u, TEST_LOCATION);
+  View tableHeaderRow = tableHeadContent.GetChildViewAt(0u);
+  DALI_TEST_CHECK(tableHeaderRow);
+  DALI_TEST_EQUALS(tableHeaderRow.GetChildViewCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(tableHead.GetChildViewAt(1u));
+  View tableCell = tableHeaderRow.GetChildViewAt(0u);
+  DALI_TEST_CHECK(tableCell);
+  DALI_TEST_CHECK(tableCell.GetChildViewCount() > 0u);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewUnorderedListMarkerGeometryP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+  view.SetMarkdown("- level 1\n  - level 2\n    - level 3\n      - level 4");
+
+  View depth1 = GetShapeMarker(GetListItemAtDepth(view, 1u));
+  View depth2 = GetShapeMarker(GetListItemAtDepth(view, 2u));
+  View depth3 = GetShapeMarker(GetListItemAtDepth(view, 3u));
+  View depth4 = GetShapeMarker(GetListItemAtDepth(view, 4u));
+  DALI_TEST_CHECK(depth1);
+  DALI_TEST_CHECK(depth2);
+  DALI_TEST_CHECK(depth3);
+  DALI_TEST_CHECK(depth4);
+
+  for(uint32_t depth = 1u; depth <= 4u; ++depth)
+  {
+    CheckDefaultUnorderedMarkerGeometry(GetListItemAtDepth(view, depth));
+  }
+
+  DALI_TEST_EQUALS(depth1.GetBackgroundColor().GetRgba(), Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(depth1.GetCornerRadiusPolicy(), CornerRadiusPolicy::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(depth1.GetCornerRadius(), Vector4(0.5f, 0.5f, 0.5f, 0.5f), TEST_LOCATION);
+
+  DALI_TEST_CHECK(depth2.GetBackgroundColor().IsNone());
+  DALI_TEST_EQUALS(depth2.GetCornerRadiusPolicy(), CornerRadiusPolicy::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(depth2.GetCornerRadius(), Vector4(0.5f, 0.5f, 0.5f, 0.5f), TEST_LOCATION);
+  DALI_TEST_EQUALS(depth2.GetBorderlineWidth(), 1.25f, TEST_LOCATION);
+  DALI_TEST_EQUALS(depth2.GetBorderlineColor().GetRgba(), Color::BLACK, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(depth3.GetBackgroundColor().GetRgba(), Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(depth3.GetCornerRadius(), Vector4::ZERO, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(depth4.GetBackgroundColor().GetRgba(), Color::BLACK, TEST_LOCATION);
+  DALI_TEST_EQUALS(depth4.GetCornerRadiusPolicy(), CornerRadiusPolicy::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(depth4.GetCornerRadius(), Vector4(0.5f, 0.5f, 0.5f, 0.5f), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("- first line  \n  second line");
+  View listItem   = GetListItemAtDepth(view, 1u);
+  View marker     = GetShapeMarker(listItem);
+  View markerHost = GetListItemMarkerHost(listItem);
+  DALI_TEST_CHECK(marker);
+  DALI_TEST_CHECK(markerHost);
+  CheckDefaultUnorderedMarkerGeometry(listItem);
+
+  View contentHost = listItem.GetChildViewAt(1u);
+  DALI_TEST_CHECK(contentHost);
+  Label textLabel = Label::DownCast(contentHost.GetChildViewAt(0u));
+  DALI_TEST_CHECK(textLabel);
+  DALI_TEST_EQUALS(textLabel.GetFontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(textLabel.GetLineHeight(), 32.0f, TEST_LOCATION);
+
+  view.SetMarkdown("- first line  \n  second line");
+  DALI_TEST_CHECK(marker == GetShapeMarker(GetListItemAtDepth(view, 1u)));
+
+  view.SetMarkdown("- first line extended  \n  second line");
+  listItem = GetListItemAtDepth(view, 1u);
+  DALI_TEST_CHECK(marker == GetShapeMarker(listItem));
+  DALI_TEST_CHECK(markerHost == GetListItemMarkerHost(listItem));
+
+  view.SetMarkdown("1. ordered");
+  listItem   = GetListItemAtDepth(view, 1u);
+  markerHost = GetListItemMarkerHost(listItem);
+  DALI_TEST_CHECK(Label::DownCast(markerHost.GetChildViewAt(0u)));
+
+  view.SetMarkdown("1. [ ] todo\n2. [x] done");
+  View taskList = view.GetChildViewAt(0u);
+  DALI_TEST_CHECK(taskList);
+  DALI_TEST_EQUALS(taskList.GetChildViewCount(), 2u, TEST_LOCATION);
+  View  firstTaskItem    = taskList.GetChildViewAt(0u);
+  View  secondTaskItem   = taskList.GetChildViewAt(1u);
+  Label firstTaskMarker  = Label::DownCast(GetShapeMarker(firstTaskItem));
+  Label secondTaskMarker = Label::DownCast(GetShapeMarker(secondTaskItem));
+  DALI_TEST_CHECK(firstTaskMarker);
+  DALI_TEST_CHECK(secondTaskMarker);
+  DALI_TEST_EQUALS(firstTaskMarker.GetText(), Dali::String("1."), TEST_LOCATION);
+  DALI_TEST_EQUALS(secondTaskMarker.GetText(), Dali::String("2."), TEST_LOCATION);
+  Label firstTaskCheckbox  = GetListItemTaskMarker(firstTaskItem);
+  Label secondTaskCheckbox = GetListItemTaskMarker(secondTaskItem);
+  DALI_TEST_CHECK(firstTaskCheckbox);
+  DALI_TEST_CHECK(secondTaskCheckbox);
+  DALI_TEST_EQUALS(firstTaskCheckbox.GetText(), Dali::String("[ ]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(secondTaskCheckbox.GetText(), Dali::String("[x]"), TEST_LOCATION);
+  Label firstTaskText  = GetListItemTextLabel(firstTaskItem);
+  Label secondTaskText = GetListItemTextLabel(secondTaskItem);
+  DALI_TEST_CHECK(firstTaskText);
+  DALI_TEST_CHECK(secondTaskText);
+  DALI_TEST_EQUALS(firstTaskText.GetText(), Dali::String("todo"), TEST_LOCATION);
+  DALI_TEST_EQUALS(secondTaskText.GetText(), Dali::String("done"), TEST_LOCATION);
+  DALI_TEST_EQUALS(firstTaskItem.GetMargin().start, 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(secondTaskItem.GetMargin().start, 12.0f, TEST_LOCATION);
+
+  view.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  DALI_TEST_EQUALS(firstTaskMarker.GetText(), Dali::String(".1"), TEST_LOCATION);
+  DALI_TEST_EQUALS(secondTaskMarker.GetText(), Dali::String(".2"), TEST_LOCATION);
+  DALI_TEST_EQUALS(firstTaskCheckbox.GetText(), Dali::String("[ ]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(secondTaskCheckbox.GetText(), Dali::String("[x]"), TEST_LOCATION);
+  view.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
+  DALI_TEST_EQUALS(firstTaskMarker.GetText(), Dali::String("1."), TEST_LOCATION);
+  DALI_TEST_EQUALS(secondTaskMarker.GetText(), Dali::String("2."), TEST_LOCATION);
+
+  view.SetMarkdown("- [ ] task");
+  listItem        = GetListItemAtDepth(view, 1u);
+  markerHost      = GetListItemMarkerHost(listItem);
+  View taskBullet = GetShapeMarker(listItem);
+  DALI_TEST_CHECK(taskBullet);
+  DALI_TEST_CHECK(!Label::DownCast(taskBullet));
+  Label taskMarker = GetListItemTaskMarker(listItem);
+  DALI_TEST_CHECK(taskMarker);
+  DALI_TEST_EQUALS(taskMarker.GetText(), Dali::String("[ ]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(taskMarker.GetRequestedWidth(), taskMarker.GetNaturalSize().width, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(markerHost.GetRequestedWidth(), 32.0f, TEST_LOCATION);
+
+  View  taskRow  = GetListItemTaskRow(listItem);
+  Label taskText = GetListItemTextLabel(listItem);
+  view.SetMarkdown("- [x] task");
+  listItem = GetListItemAtDepth(view, 1u);
+  DALI_TEST_CHECK(GetListItemMarkerHost(listItem) == markerHost);
+  DALI_TEST_CHECK(GetShapeMarker(listItem) == taskBullet);
+  DALI_TEST_CHECK(GetListItemTaskRow(listItem) == taskRow);
+  DALI_TEST_CHECK(GetListItemTaskMarker(listItem) == taskMarker);
+  DALI_TEST_CHECK(GetListItemTextLabel(listItem) == taskText);
+  DALI_TEST_EQUALS(taskMarker.GetText(), Dali::String("[x]"), TEST_LOCATION);
+
+  view.SetMarkdown("- [ ]\n  - nested");
+  listItem = GetListItemAtDepth(view, 1u);
+  taskRow  = GetListItemTaskRow(listItem);
+  DALI_TEST_CHECK(taskRow);
+  DALI_TEST_EQUALS(taskRow.GetChildViewCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(GetListItemTaskMarker(listItem));
+  DALI_TEST_CHECK(!GetListItemTextLabel(listItem));
+  View taskContentHost = listItem.GetChildViewAt(1u);
+  DALI_TEST_EQUALS(taskContentHost.GetChildViewCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(taskContentHost.GetChildViewAt(0u) == taskRow);
+  DALI_TEST_CHECK(taskContentHost.GetChildViewAt(1u));
+
+  view.SetMarkdown("- unordered again");
+  listItem = GetListItemAtDepth(view, 1u);
+  DALI_TEST_CHECK(GetShapeMarker(listItem));
+  DALI_TEST_CHECK(!Label::DownCast(GetShapeMarker(listItem)));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewLinkTextProjectionP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  const std::vector<std::pair<const char*, const char*>> cases = {
+    {"[DALi](https://example.com)", "DALi [https://example.com]"},
+    {"See [DALi](https://example.com) for details.", "See DALi [https://example.com] for details."},
+    {"[empty]()", "empty []"},
+    {"[](https://example.com)", " [https://example.com]"},
+    {"[DALi](https://example.com \"title\")", "DALi [https://example.com]"},
+    {"<https://example.com>", "https://example.com [https://example.com]"},
+    {"[A](a) and [B](b)", "A [a] and B [b]"},
+    {"[A](a)[B](b)", "A [a]B [b]"},
+    {"[링크](url)", "링크 [url]"},
+    {"[DALi](https://예시.테스트/문서)", "DALi [https://예시.테스트/문서]"},
+  };
+
+  for(const auto& testCase : cases)
+  {
+    CheckRenderedLinkText(view, testCase.first, testCase.second);
+  }
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewLinkStyleProjectionP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("[**bold link**](url)");
+  Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "bold link [url]", TEST_LOCATION);
+  Text::StyledText styledText = CheckStyledLinkPresentation(label);
+  DALI_TEST_CHECK(HasFontSpanRange(styledText, 0u, 9u));
+
+  view.SetMarkdown("[*italic*](url)");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "italic [url]", TEST_LOCATION);
+  styledText = CheckStyledLinkPresentation(label);
+  DALI_TEST_CHECK(HasFontSpanRange(styledText, 0u, 6u));
+
+  view.SetMarkdown("[***styled***](url)");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "styled [url]", TEST_LOCATION);
+  styledText = CheckStyledLinkPresentation(label);
+  DALI_TEST_CHECK(HasFontSpanRange(styledText, 0u, 6u));
+
+  view.SetMarkdown("[`code`](url)");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "code [url]", TEST_LOCATION);
+  styledText = CheckStyledLinkPresentation(label);
+  DALI_TEST_CHECK(HasFontSpanRange(styledText, 0u, 4u));
+  DALI_TEST_CHECK(HasBackgroundSpanRange(styledText, 0u, 4u));
+
+  view.SetMarkdown("[link](url) **after**");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "link [url] after", TEST_LOCATION);
+  styledText = CheckStyledLinkPresentation(label);
+  DALI_TEST_CHECK(HasFontSpanRange(styledText, 11u, 16u));
+
+  view.SetMarkdown("**before** [link](url)");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "before link [url]", TEST_LOCATION);
+  styledText = CheckStyledLinkPresentation(label);
+  DALI_TEST_CHECK(HasFontSpanRange(styledText, 0u, 6u));
+
+  view.SetMarkdown("[A](a) **middle** [B](b)");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "A [a] middle B [b]", TEST_LOCATION);
+  styledText = CheckStyledLinkPresentation(label);
+  DALI_TEST_CHECK(HasFontSpanRange(styledText, 6u, 12u));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewLinkOuterStyleBoundaryP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("**before [link](url) after**");
+  Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "before link [url] after", TEST_LOCATION);
+
+  const Text::StyledText styledText = CheckStyledLinkPresentation(label);
+  CheckFontStyleCoverage(styledText, 0u, 11u, true);
+  CheckFontStyleCoverage(styledText, 11u, 17u, false);
+  CheckFontStyleCoverage(styledText, 17u, 23u, true);
+
+  view.SetMarkdown("**x[](url)y**");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "x [url]y", TEST_LOCATION);
+
+  const Text::StyledText zeroLengthStyledText = CheckStyledLinkPresentation(label);
+  CheckFontStyleCoverage(zeroLengthStyledText, 0u, 1u, true);
+  CheckFontStyleCoverage(zeroLengthStyledText, 1u, 7u, false);
+  CheckFontStyleCoverage(zeroLengthStyledText, 7u, 8u, true);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewLinkMultipleZeroLengthBoundariesP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("**a[](u)b[](v)c**");
+  const Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "a [u]b [v]c", TEST_LOCATION);
+
+  const Text::StyledText styledText = CheckStyledLinkPresentation(label);
+  CheckFontStyleCoverage(styledText, 0u, 1u, true);
+  CheckFontStyleCoverage(styledText, 1u, 5u, false);
+  CheckFontStyleCoverage(styledText, 5u, 6u, true);
+  CheckFontStyleCoverage(styledText, 6u, 10u, false);
+  CheckFontStyleCoverage(styledText, 10u, 11u, true);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewLinkComponentContextsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+  view.SetMarkdown("# [Heading](heading-url)\n\n- [Item](item-url)\n\n> [Quote](quote-url)\n\n| Link |\n|---|\n| [Cell](cell-url) |");
+
+  std::vector<Label> labels;
+  CollectLabels(view, labels);
+  DALI_TEST_CHECK(HasLabelText(labels, "Heading [heading-url]"));
+  DALI_TEST_CHECK(HasLabelText(labels, "Item [item-url]"));
+  DALI_TEST_CHECK(HasLabelText(labels, "Quote [quote-url]"));
+  DALI_TEST_CHECK(HasLabelText(labels, "Cell [cell-url]"));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewLinkReconciliationP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("[DALi](url-a)");
+  View  firstChild = view.GetChildViewAt(0u);
+  Label label      = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "DALi [url-a]", TEST_LOCATION);
+
+  view.SetMarkdown("[DALi](url-a)");
+  DALI_TEST_CHECK(firstChild == view.GetChildViewAt(0u));
+  DALI_TEST_EQUALS(GetOnlyRenderedLabel(view).GetText(), "DALi [url-a]", TEST_LOCATION);
+
+  view.SetMarkdown("[DALi](url-b)");
+  DALI_TEST_CHECK(firstChild == view.GetChildViewAt(0u));
+  DALI_TEST_EQUALS(GetOnlyRenderedLabel(view).GetText(), "DALi [url-b]", TEST_LOCATION);
+
+  view.SetMarkdown("[Docs](url-b)");
+  DALI_TEST_CHECK(firstChild == view.GetChildViewAt(0u));
+  DALI_TEST_EQUALS(GetOnlyRenderedLabel(view).GetText(), "Docs [url-b]", TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewLinkNonLinkRegressionP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  view.SetMarkdown("plain text");
+  Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "plain text", TEST_LOCATION);
+  DALI_TEST_CHECK(!label.GetStyledText());
+
+  view.SetMarkdown("`[not a link](url)`");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(label.GetText(), "[not a link](url)", TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetStyledText());
+  CheckNoAnchorSpans(label.GetStyledText());
+  CheckNoUnderlineSpans(label.GetStyledText());
+
+  view.SetMarkdown("Before <a href=\"url\">HTML</a> after");
+  label = GetOnlyRenderedLabel(view);
+  DALI_TEST_CHECK(std::string(label.GetText().CStr()).find(" [url]") == std::string::npos);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewToPlainTextGoldenP(void)
+{
+  const char* markdown = R"MARKDOWN(# What is Self-Supervised Learning?
+
+Self-supervised learning is a branch of machine learning where a model learns to predict part of its input from other parts of the input, **without requiring explicit labels**. This is in contrast to traditional supervised learning, which depends on labeled datasets.
+
+---
+
+## 🔍 Key Characteristics
+
+- **No Manual Labels:** The model generates its own "labels" from the data.
+- **Pretext Tasks:** Typical pretext tasks include:
+  - *Predicting missing words* in a sentence
+  - *Colorizing grayscale images*
+  - *Predicting the next frame* in a video
+
+---
+
+> "Self-supervised learning unlocks the ability to learn from vast amounts of unlabeled data.")MARKDOWN"
+"  \n"
+R"MARKDOWN(> — Yann LeCun
+
+---
+
+## 🚀 Popular Approaches
+
+| Approach   | Domain        | Example           |
+|------------|---------------|------------------|
+| Masked LM  | NLP           | BERT             |
+| Contrastive| Vision        | SimCLR, MoCo     |
+| Autoencoders | General     | Variational AE   |
+
+### Sample Code (PyTorch)
+
+```python
+import torch.nn as nn
+
+class AutoEncoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.enc = nn.Linear(784, 64)
+        self.dec = nn.Linear(64, 784)
+    def forward(self, x):
+        z = self.enc(x)
+        return self.dec(z)
+```
+
+### 📝 Summary
+
+- Self-supervised learning = **labels from data itself**
+- Core to large language models (LLMs) and modern AI
+
+For more info, see [LeCun's talk](https://youtu.be/MkN6a6C1b_w).
+)MARKDOWN";
+
+  const char* expected = R"PLAIN(What is Self-Supervised Learning?
+Self-supervised learning is a branch of machine learning where a model learns to predict part of its input from other parts of the input, without requiring explicit labels. This is in contrast to traditional supervised learning, which depends on labeled datasets.
+
+🔍 Key Characteristics
+No Manual Labels: The model generates its own "labels" from the data.
+Pretext Tasks: Typical pretext tasks include:
+Predicting missing words in a sentence
+Colorizing grayscale images
+Predicting the next frame in a video
+
+"Self-supervised learning unlocks the ability to learn from vast amounts of unlabeled data."
+— Yann LeCun
+
+🚀 Popular Approaches
+Approach
+Domain
+Example
+Masked LM
+NLP
+BERT
+Contrastive
+Vision
+SimCLR, MoCo
+Autoencoders
+General
+Variational AE
+Sample Code (PyTorch)
+python
+import torch.nn as nn
+
+class AutoEncoder(nn.Module):
+    def __init__(self):
+        super().__init__()
+        self.enc = nn.Linear(784, 64)
+        self.dec = nn.Linear(64, 784)
+    def forward(self, x):
+        z = self.enc(x)
+        return self.dec(z)
+📝 Summary
+Self-supervised learning = labels from data itself
+Core to large language models (LLMs) and modern AI
+For more info, see LeCun's talk [https://youtu.be/MkN6a6C1b_w].)PLAIN";
+
+  CheckPlainText(markdown, expected);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewToPlainTextBasicsP(void)
+{
+  CheckPlainText("", "");
+  CheckPlainText(" \t\r\n", "");
+  CheckPlainText("plain paragraph", "plain paragraph");
+  CheckPlainText("First paragraph.\n\nSecond paragraph.", "First paragraph.\nSecond paragraph.");
+  CheckPlainText("# Heading 1\n\n## Heading 2", "Heading 1\nHeading 2");
+  CheckPlainText("This is **bold**, *italic*, ~~strike~~ and `code`.", "This is bold, italic, strike and code.");
+  CheckPlainText("First line\nSecond line", "First line\nSecond line");
+  CheckPlainText("A &amp; B &#169; &#x2192;", "A & B © →");
+  CheckPlainText("\\*literal\\* 한글 😀", "*literal* 한글 😀");
+  CheckPlainText("First\n\n---\n\nSecond", "First\n\nSecond");
+  CheckPlainText("---\n\nOnly text\n\n---\n\n", "\nOnly text");
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewToPlainTextListsAndQuotesP(void)
+{
+  CheckPlainText("- Alpha\n- Beta", "Alpha\nBeta");
+  CheckPlainText("- Parent\n  - Child\n    - Grandchild", "Parent\nChild\nGrandchild");
+  CheckPlainText("3. Alpha\n4. Beta", "3. Alpha\n4. Beta");
+  CheckPlainText("1. Parent\n   1. Child\n   2. Next", "1. Parent\n1. Child\n2. Next");
+  CheckPlainText("1. Ordered\n   - Unordered\n\n1. Reset", "1. Ordered\nUnordered\n2. Reset");
+  CheckPlainText("1. First paragraph\n\n   Second paragraph", "1. First paragraph\n1. Second paragraph");
+  CheckPlainText("- [x] done\n- [ ] todo", "[x] done\n[ ] todo");
+  CheckPlainText("> First line\n> Second line", "First line\nSecond line");
+  CheckPlainText("> - item\n>   1. ordered", "item\n1. ordered");
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewToPlainTextLinksImagesCodeAndTablesP(void)
+{
+  CheckPlainText("See [DALi](https://example.com \"title\").", "See DALi [https://example.com].");
+  CheckPlainText("[empty]()", "empty []");
+  CheckPlainText("<https://example.com>", "https://example.com [https://example.com]");
+  CheckPlainText("![diagram](diagram.png \"title\")", "diagram [diagram.png]");
+  CheckPlainText("![](empty.png)", " [empty.png]");
+  CheckPlainText("A ![icon](icon.png) B", "A icon [icon.png] B");
+  CheckPlainText("[![diagram](diagram.png)](page.html)", "diagram [diagram.png] [page.html]");
+  CheckPlainText("```python\nprint(\"Hello\")\n```", "python\nprint(\"Hello\")");
+  CheckPlainText("```\nplain code\n```", "\nplain code");
+  CheckPlainText("```text\n  indented\n\n  next\n```\n\n# After", "text\n  indented\n\n  next\nAfter");
+  CheckPlainText("```text\nalpha\r\nbeta\r\n```", "text\nalpha\nbeta");
+  CheckPlainText("```\n```", "");
+  CheckPlainText("| A | B |\n|---|---|\n| 1 | 2 |", "A\nB\n1\n2");
+  CheckPlainText("| A |  | **B** |\n|---|---|---|\n| [C](url) | D | E |", "A\n\nB\nC [url]\nD\nE");
+  CheckPlainText("Before <span>HTML</span> after", "Before HTML after");
+  CheckPlainText("<div>\nHTML block\n</div>\n\nAfter", "\nAfter");
+  CheckPlainText("Open **strong", "Open **strong");
+  CheckPlainText("`unterminated", "`unterminated");
+
+  const Dali::String first  = MarkdownView::ToPlainText("Repeated [call](url)");
+  const Dali::String second = MarkdownView::ToPlainText("Repeated [call](url)");
+  DALI_TEST_EQUALS(first, "Repeated call [url]", TEST_LOCATION);
+  DALI_TEST_EQUALS(second, "Repeated call [url]", TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewToPlainTextLargeSparseEventsP(void)
+{
+  const std::string filler(12000u, 'a');
+  const std::string markdown = filler + " [![diagram](diagram.png)](page.html) tail";
+  const std::string expected = filler + " diagram [diagram.png] [page.html] tail";
+
+  const Dali::String plainText = MarkdownView::ToPlainText(Dali::String(markdown.c_str()));
+  DALI_TEST_EQUALS(plainText, Dali::String(expected.c_str()), TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewToPlainTextCrlfP(void)
+{
+  CheckPlainText("First\r\nSecond\r\n\r\nThird", "First\nSecond\nThird");
+  CheckPlainText("- Alpha\r\n- Beta\r\n\r\n| A | B |\r\n|---|---|\r\n| 1 | 2 |\r\n", "Alpha\nBeta\nA\nB\n1\n2");
+  CheckPlainText("```text\r\nalpha\r\nbeta\r\n```\r\n\r\nAfter", "text\nalpha\nbeta\nAfter");
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewToPlainTextUtf8BoundariesP(void)
+{
+  CheckPlainText("한글 😀 [링크](url) ![그림](img.png)", "한글 😀 링크 [url] 그림 [img.png]");
+  CheckPlainText("😀  \n다음", "😀\n다음");
+  CheckPlainText("한글\n😀", "한글\n😀");
+  END_TEST;
+}

@@ -787,6 +787,11 @@ public:
   void InvalidateFontData();
 
   /**
+   * @brief Invalidates layout-direction dependent text data and requests relayout.
+   */
+  void InvalidateLayoutDirectionData();
+
+  /**
    * @brief Helper to move the cursor, grab handle etc.
    */
   bool ProcessInputEvents();
