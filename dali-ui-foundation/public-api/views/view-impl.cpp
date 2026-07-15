@@ -290,24 +290,24 @@ Dali::LayoutDirection::Type ViewImpl::GetEffectiveLayoutDirection() const
   return mImpl->GetEffectiveLayoutDirection();
 }
 
-void ViewImpl::SetRequestedPositionX(float x)
+void ViewImpl::SetRequestedX(float x)
 {
-  mImpl->SetRequestedPositionX(x);
+  mImpl->SetRequestedX(x);
 }
 
-void ViewImpl::SetRequestedPositionY(float y)
+void ViewImpl::SetRequestedY(float y)
 {
-  mImpl->SetRequestedPositionY(y);
+  mImpl->SetRequestedY(y);
 }
 
-float ViewImpl::GetRequestedPositionX() const
+float ViewImpl::GetRequestedX() const
 {
-  return mImpl->GetRequestedPositionX();
+  return mImpl->GetRequestedX();
 }
 
-float ViewImpl::GetRequestedPositionY() const
+float ViewImpl::GetRequestedY() const
 {
-  return mImpl->GetRequestedPositionY();
+  return mImpl->GetRequestedY();
 }
 
 UiColor ViewImpl::GetBackgroundColor()

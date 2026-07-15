@@ -57,7 +57,7 @@ public:
     blueBox.SetOpacity(0.3f);
     blueBox.SetRequestedWidth(200_spx);
     blueBox.SetRequestedHeight(200_spx);
-    blueBox.SetRequestedPositionX(220_spx);
+    blueBox.SetRequestedX(220_spx);
     blueBox.ConnectClickedSignal(this, &AnimationExample::OnBlueClicked);
     mBlueBox = blueBox;
 

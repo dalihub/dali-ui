@@ -44,8 +44,8 @@ page.SetBackgroundColor(UiColor(0x1565C0u));
 Label title = Label::New("Page 1");
 title.SetFontSize(28.0f);
 title.SetTextColor(UiColor(0xFFFFFFu));
-title.SetRequestedPositionX(24.0f);
-title.SetRequestedPositionY(24.0f);
+title.SetRequestedX(24.0f);
+title.SetRequestedY(24.0f);
 page.Add(title);
 
 navigator.Push(page);

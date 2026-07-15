@@ -47,14 +47,14 @@ public:
     View panel = View::New();
     panel.SetRequestedWidth(420.0f);
     panel.SetRequestedHeight(180.0f);
-    panel.SetRequestedPositionY(100.0f);
+    panel.SetRequestedY(100.0f);
     root.Add(panel);
 
     Label label = Label::New("Hello World!");
     label.SetRequestedWidth(380.0f);
     label.SetRequestedHeight(100.0f);
-    label.SetRequestedPositionX(20.0f);
-    label.SetRequestedPositionY(40.0f);
+    label.SetRequestedX(20.0f);
+    label.SetRequestedY(40.0f);
     label.SetFontSize(20.0f);
     label.SetMultiLine(true);
     panel.Add(label);

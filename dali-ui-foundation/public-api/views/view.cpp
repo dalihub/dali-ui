@@ -143,24 +143,24 @@ UiScalePolicy View::GetUiScalePolicy() const
   return GetImpl(*this).GetUiScalePolicy();
 }
 
-void View::SetRequestedPositionX(float x)
+void View::SetRequestedX(float x)
 {
-  GetImpl(*this).SetRequestedPositionX(x);
+  GetImpl(*this).SetRequestedX(x);
 }
 
-float View::GetRequestedPositionX() const
+float View::GetRequestedX() const
 {
-  return GetImpl(*this).GetRequestedPositionX();
+  return GetImpl(*this).GetRequestedX();
 }
 
-void View::SetRequestedPositionY(float y)
+void View::SetRequestedY(float y)
 {
-  GetImpl(*this).SetRequestedPositionY(y);
+  GetImpl(*this).SetRequestedY(y);
 }
 
-float View::GetRequestedPositionY() const
+float View::GetRequestedY() const
 {
-  return GetImpl(*this).GetRequestedPositionY();
+  return GetImpl(*this).GetRequestedY();
 }
 
 void View::SetRequestedWidth(float width)

@@ -61,8 +61,8 @@ public:
     mSecondChild.SetBackgroundColor(UiColor("ThemeColor2"));
     mSecondChild.SetRequestedWidth(100_spx);
     mSecondChild.SetRequestedHeight(100_spx);
-    mSecondChild.SetRequestedPositionX(100_spx);
-    mSecondChild.SetRequestedPositionY(100_spx);
+    mSecondChild.SetRequestedX(100_spx);
+    mSecondChild.SetRequestedY(100_spx);
 
     parent.Add(redChild);
     parent.Add(mSecondChild);

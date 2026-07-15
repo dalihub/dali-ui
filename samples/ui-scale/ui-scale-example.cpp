@@ -997,8 +997,8 @@ private:
     View child = View::New();
     child.SetRequestedWidth(size);
     child.SetRequestedHeight(size);
-    child.SetRequestedPositionX(x);
-    child.SetRequestedPositionY(y);
+    child.SetRequestedX(x);
+    child.SetRequestedY(y);
     child.SetBackgroundColor(color);
     return child;
   }
@@ -1070,8 +1070,8 @@ private:
       View maskSource = View::New();
       maskSource.SetRequestedWidth(EFFECT_BOX_SIZE);
       maskSource.SetRequestedHeight(EFFECT_BOX_SIZE);
-      maskSource.SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f);
-      maskSource.SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f);
+      maskSource.SetRequestedX(EFFECT_BOX_SIZE * 0.5f);
+      maskSource.SetRequestedY(EFFECT_BOX_SIZE * 0.5f);
       maskSource.SetBackgroundColor(UiColor(C_WHITE));
       maskSource.SetCornerRadius(ABS_CORNER_RADIUS);
       maskSource.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);
@@ -1160,8 +1160,8 @@ private:
       View maskSource = View::New();
       maskSource.SetRequestedWidth(EFFECT_BOX_SIZE);
       maskSource.SetRequestedHeight(EFFECT_BOX_SIZE);
-      maskSource.SetRequestedPositionX(EFFECT_BOX_SIZE * 0.5f);
-      maskSource.SetRequestedPositionY(EFFECT_BOX_SIZE * 0.5f);
+      maskSource.SetRequestedX(EFFECT_BOX_SIZE * 0.5f);
+      maskSource.SetRequestedY(EFFECT_BOX_SIZE * 0.5f);
       maskSource.SetBackgroundColor(UiColor(C_WHITE));
       maskSource.SetCornerRadius(ABS_CORNER_RADIUS);
       maskSource.SetCornerRadiusPolicy(CornerRadiusPolicy::ABSOLUTE);

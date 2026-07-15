@@ -39,7 +39,7 @@ namespace Extension
  * @param[in] x The rendered X position
  * @warning Writes the Actor render property POSITION_X directly and bypasses the
  * layout request; for a layout-managed child the next Arrange pass overwrites it.
- * Use View::SetRequestedPositionX/Y and View::SetRequestedWidth/Height for
+ * Use View::SetRequestedX/Y and View::SetRequestedWidth/Height for
  * layout-aware placement and sizing.
  */
 DALI_UI_API void SetPositionX(View view, float x);

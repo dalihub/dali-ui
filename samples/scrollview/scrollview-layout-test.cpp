@@ -55,8 +55,8 @@ public:
       .SetLayoutHeight(600.0f)
       .BackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f))
       .SetContent(content);
-    scrollView.SetRequestedPositionX(100.0f);
-    scrollView.SetRequestedPositionY(100.0f);
+    scrollView.SetRequestedX(100.0f);
+    scrollView.SetRequestedY(100.0f);
 
     // Add scroll view to window
     window.Add(scrollView);
@@ -73,8 +73,8 @@ public:
       .SetLayoutHeight(600.0f)
       .BackgroundColor(Vector4(0.8f, 0.8f, 0.8f, 1.0f))
       .SetContent(matchParentContent);
-    scrollView2.SetRequestedPositionX(600.0f);
-    scrollView2.SetRequestedPositionY(100.0f);
+    scrollView2.SetRequestedX(600.0f);
+    scrollView2.SetRequestedY(100.0f);
 
     window.Add(scrollView2);
   }

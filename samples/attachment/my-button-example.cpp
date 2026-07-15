@@ -122,8 +122,8 @@ public:
     MyButton button = MyButton::New("MyButton: 0");
     button.SetRequestedWidth(220.0f);
     button.SetRequestedHeight(80.0f);
-    button.SetRequestedPositionX(60.0f);
-    button.SetRequestedPositionY(60.0f);
+    button.SetRequestedX(60.0f);
+    button.SetRequestedY(60.0f);
     button.ConnectClickedSignal(this, &MyButtonExampleController::OnClicked);
     window.Add(button);
   }

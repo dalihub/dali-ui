@@ -1052,15 +1052,15 @@ int UtcDaliInteractiveViewOverlayEffectRecoilChildrenP(void)
   View child1 = View::New();
   child1.SetRequestedWidth(20.0f);
   child1.SetRequestedHeight(20.0f);
-  child1.SetRequestedPositionX(10.0f);
-  child1.SetRequestedPositionY(20.0f);
+  child1.SetRequestedX(10.0f);
+  child1.SetRequestedY(20.0f);
   child1.SetScale(Vector3(2.0f, 1.0f, 1.0f));
 
   View child2 = View::New();
   child2.SetRequestedWidth(30.0f);
   child2.SetRequestedHeight(30.0f);
-  child2.SetRequestedPositionX(50.0f);
-  child2.SetRequestedPositionY(40.0f);
+  child2.SetRequestedX(50.0f);
+  child2.SetRequestedY(40.0f);
 
   view.Add(child1);
   view.Add(child2);

@@ -47,8 +47,8 @@ private:
     mImage = ImageView::New(RESOURCES_DIR "gallery-large-3.jpg");
     mImage.SetRequestedWidth(halfW - 4.0f);
     mImage.SetRequestedHeight(halfH - 4.0f);
-    mImage.SetRequestedPositionX(0.0f);
-    mImage.SetRequestedPositionY(0.0f);
+    mImage.SetRequestedX(0.0f);
+    mImage.SetRequestedY(0.0f);
     window.Add(mImage);
 
     mImage.ResourceReadySignal().Connect(this, &ImageViewSampleController::OnResourceReady);

@@ -98,8 +98,8 @@ void MakeTopLeftHitTestView(UiTestApplication& application, View view, const Vec
 {
   view.SetPivot(Pivot::TOP_LEFT);
   view.SetParentOrigin(ParentOrigin::TOP_LEFT);
-  view.SetRequestedPositionX(position.x);
-  view.SetRequestedPositionY(position.y);
+  view.SetRequestedX(position.x);
+  view.SetRequestedY(position.y);
   application.SendNotification();
   application.Render();
 }

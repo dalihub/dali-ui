@@ -40,8 +40,8 @@ namespace ExportAccessibility = Dali::Integration::Accessibility;
 
 void SetGeometry(View view, float x, float y, float width, float height)
 {
-  view.SetRequestedPositionX(x);
-  view.SetRequestedPositionY(y);
+  view.SetRequestedX(x);
+  view.SetRequestedY(y);
   view.SetRequestedWidth(width);
   view.SetRequestedHeight(height);
 }

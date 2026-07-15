@@ -48,8 +48,8 @@ Label MakeStatusLabel(const char* text, float y)
   Label label = Label::New(text);
   label.SetRequestedWidth(620.0f);
   label.SetRequestedHeight(48.0f);
-  label.SetRequestedPositionX(40.0f);
-  label.SetRequestedPositionY(y);
+  label.SetRequestedX(40.0f);
+  label.SetRequestedY(y);
   label.SetFontSize(18.0f);
   label.SetTextColor(UiColor(0x202124));
   label.SetBackgroundColor(UiColor(0xF1F3F4));
@@ -77,15 +77,15 @@ public:
     View view = View::New();
     view.SetRequestedWidth(180.0f);
     view.SetRequestedHeight(120.0f);
-    view.SetRequestedPositionX(40.0f);
-    view.SetRequestedPositionY(40.0f);
+    view.SetRequestedX(40.0f);
+    view.SetRequestedY(40.0f);
     view.SetBackgroundColor(UiColor(0xDDE7F6));
 
     Label label = Label::New("Label + FluxLabelData");
     label.SetRequestedWidth(260.0f);
     label.SetRequestedHeight(120.0f);
-    label.SetRequestedPositionX(250.0f);
-    label.SetRequestedPositionY(40.0f);
+    label.SetRequestedX(250.0f);
+    label.SetRequestedY(40.0f);
     label.SetFontSize(20.0f);
     label.SetTextColor(UiColor(0xFFFFFF));
     label.SetBackgroundColor(UiColor(0x1565C0));
@@ -95,8 +95,8 @@ public:
     ImageView imageView = ImageView::New();
     imageView.SetRequestedWidth(120.0f);
     imageView.SetRequestedHeight(120.0f);
-    imageView.SetRequestedPositionX(540.0f);
-    imageView.SetRequestedPositionY(40.0f);
+    imageView.SetRequestedX(540.0f);
+    imageView.SetRequestedY(40.0f);
     imageView.SetBackgroundColor(UiColor(0x2E7D32));
 
     mViewStatus  = MakeStatusLabel("View policy: pending", 200.0f);

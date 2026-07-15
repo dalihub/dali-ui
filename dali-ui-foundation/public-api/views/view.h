@@ -349,34 +349,34 @@ public: // Properties
    *
    * @param[in] x The requested X position
    */
-  void SetRequestedPositionX(float x);
+  void SetRequestedX(float x);
 
   /**
    * @brief Returns the user-requested X position.
    *
    * Independent of layout passes; returns the last value set via
-   * SetRequestedPositionX. To read the current rendered X position
+   * SetRequestedX. To read the current rendered X position
    * (Actor::Property::POSITION_X) instead, use GetPositionX().
    *
    * @return The requested X position
    */
-  float GetRequestedPositionX() const;
+  float GetRequestedX() const;
 
   /**
    * @brief Sets the Y position requested by the user.
    *
    * @param[in] y The requested Y position
-   * @see SetRequestedPositionX
+   * @see SetRequestedX
    */
-  void SetRequestedPositionY(float y);
+  void SetRequestedY(float y);
 
   /**
    * @brief Returns the user-requested Y position.
    *
    * @return The requested Y position
-   * @see GetRequestedPositionX
+   * @see GetRequestedX
    */
-  float GetRequestedPositionY() const;
+  float GetRequestedY() const;
 
   /**
    * @brief Sets the requested width.
@@ -592,7 +592,7 @@ public: // Properties
   // overwritten on the next layout pass. They are kept private so the
   // invoke-method generator, which scans only public members, does not emit
   // wrappers that would call the deleted functions. Public callers use the
-  // layout-aware API (SetRequestedWidth/Height, SetRequestedPositionX/Y) or the
+  // layout-aware API (SetRequestedWidth/Height, SetRequestedX/Y) or the
   // Dali::Ui::Extension geometry setters instead.
 private:
   void SetSize(const Vector3& size)         = delete;
@@ -614,13 +614,13 @@ public:
    * LayoutMode::STANDALONE excludes this View from the parent's accumulation,
    * spacing and index calculations. The View's size is still measured normally
    * (so MATCH_PARENT, WRAP_CONTENT and explicit RequestedWidth/Height all work),
-   * but its position is taken from SetRequestedPositionX/SetRequestedPositionY instead of being
+   * but its position is taken from SetRequestedX/SetRequestedY instead of being
    * decided by the parent layout. This is useful for floating overlays, drag
    * previews, tooltips and absolute positioning inside any LayoutManager.
    *
    * Standalone children ignore the parent's padding entirely. Their measured
    * size is the parent's full inner size minus the child's own margin, and
-   * their final position is SetRequestedPositionX/SetRequestedPositionY plus the child's own
+   * their final position is SetRequestedX/SetRequestedY plus the child's own
    * margin in the parent's coordinate space. This keeps size and position
    * consistent: a Standalone child with MATCH_PARENT fills the parent edge
    * to edge regardless of parent padding, and any margin set on the child

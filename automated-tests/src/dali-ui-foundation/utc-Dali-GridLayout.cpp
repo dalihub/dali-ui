@@ -642,8 +642,8 @@ int UtcDaliGridLayoutStandaloneExcludedFromCellsP(void)
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(20.0f);
   standalone.SetRequestedHeight(20.0f);
-  standalone.SetRequestedPositionX(70.0f);
-  standalone.SetRequestedPositionY(80.0f);
+  standalone.SetRequestedX(70.0f);
+  standalone.SetRequestedY(80.0f);
   // Even with grid params set, Standalone takes precedence and bypasses cell placement.
   standalone.SetLayoutParams(GridLayoutParams::New().SetRow(1).SetColumn(0));
   layout.Add(standalone);

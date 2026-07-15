@@ -975,7 +975,7 @@ int UtcDaliViewLayoutBoundary_FixJUsesParentActorSize_P(void)
 // Before fix: OnMeasure read childImpl.GetPositionX() which had been
 // overwritten by the previous Arrange to padLeft + margin + requested,
 // so the next WRAP_CONTENT computation added padLeft a second time.
-// After fix: OnMeasure reads GetRequestedPositionX (raw user intent),
+// After fix: OnMeasure reads GetRequestedX (raw user intent),
 // so size stays stable across resizes.
 int UtcDaliViewLayoutBoundary_WrapContentPaddingNoAccumulation_P(void)
 {
@@ -1022,9 +1022,9 @@ int UtcDaliViewLayoutBoundary_WrapContentPaddingNoAccumulation_P(void)
   END_TEST;
 }
 
-// T4.5: SetRequestedPositionX on a default-mode child must invalidate the
+// T4.5: SetRequestedX on a default-mode child must invalidate the
 // parent's measure cache. A WRAP_CONTENT parent without a LayoutManager
-// computes its size from each child's RequestedPosition + measured width
+// computes its size from each child's RequestedX/Y + measured width
 // (maxRight). Without invalidation, repeated Measure calls would return
 // the stale cached size.
 int UtcDaliViewLayoutBoundary_SetRequestedPositionInvalidatesParentMeasure_P(void)
@@ -1038,8 +1038,8 @@ int UtcDaliViewLayoutBoundary_SetRequestedPositionInvalidatesParentMeasure_P(voi
   View child = View::New();
   child.SetRequestedWidth(50.0f);
   child.SetRequestedHeight(50.0f);
-  child.SetRequestedPositionX(0.0f);
-  child.SetRequestedPositionY(0.0f);
+  child.SetRequestedX(0.0f);
+  child.SetRequestedY(0.0f);
   parent.Add(child);
 
   parent.Measure(1000.0f, 1000.0f);
@@ -1051,8 +1051,8 @@ int UtcDaliViewLayoutBoundary_SetRequestedPositionInvalidatesParentMeasure_P(voi
   // Move child further to the right/bottom; parent's WRAP_CONTENT size must
   // grow to include the new extent (250, 250) without an explicit
   // InvalidateMeasure on the parent.
-  child.SetRequestedPositionX(200.0f);
-  child.SetRequestedPositionY(200.0f);
+  child.SetRequestedX(200.0f);
+  child.SetRequestedY(200.0f);
 
   parent.Measure(1000.0f, 1000.0f);
   MeasuredSize secondSize = parent.GetMeasuredSize();

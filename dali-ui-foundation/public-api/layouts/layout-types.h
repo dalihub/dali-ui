@@ -97,14 +97,14 @@ constexpr float UNCONSTRAINED_MAX_SIZE = FLT_MAX;
  * Standalone: the parent container excludes this View from its accumulation/spacing/
  * index calculations. The View's size is still measured normally (so MATCH_PARENT,
  * WRAP_CONTENT and explicit RequestedWidth/Height work as usual), but its position is
- * taken from the View's own SetRequestedPositionX/SetRequestedPositionY instead of
+ * taken from the View's own SetRequestedX/SetRequestedY instead of
  * being decided by the parent's layout. Useful for floating overlays, drag previews,
  * tooltips and absolute positioning within an arbitrary LayoutManager.
  */
 enum class LayoutMode : uint8_t
 {
   DEFAULT    = 0, ///< Managed by the parent container's layout (default).
-  STANDALONE = 1, ///< Excluded from parent's layout accumulation; uses SetRequestedPositionX/SetRequestedPositionY.
+  STANDALONE = 1, ///< Excluded from parent's layout accumulation; uses SetRequestedX/SetRequestedY.
 };
 
 /**

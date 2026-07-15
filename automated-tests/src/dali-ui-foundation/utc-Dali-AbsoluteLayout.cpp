@@ -471,8 +471,8 @@ int UtcDaliAbsoluteLayoutStandaloneBypassesBoundsP(void)
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(30.0f);
   standalone.SetRequestedHeight(20.0f);
-  standalone.SetRequestedPositionX(60.0f);
-  standalone.SetRequestedPositionY(70.0f);
+  standalone.SetRequestedX(60.0f);
+  standalone.SetRequestedY(70.0f);
   // AbsoluteLayoutParams bounds should be ignored for Standalone children.
   standalone.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, 999, 999)));
   layout.Add(standalone);

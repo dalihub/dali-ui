@@ -1134,7 +1134,7 @@ int UtcDaliScrollViewMultiTouchFlushesPendingPressAndPressesNewTouchP(void)
   View childB = View::New();
   childB.SetPivot(Pivot::TOP_LEFT);
   childB.SetParentOrigin(ParentOrigin::TOP_LEFT);
-  childB.SetRequestedPositionX(100.0f);
+  childB.SetRequestedX(100.0f);
   childB.SetRequestedWidth(80.0f);
   childB.SetRequestedHeight(80.0f);
 

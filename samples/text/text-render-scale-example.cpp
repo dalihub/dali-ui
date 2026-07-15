@@ -197,7 +197,7 @@ private:
 
     // Update indicator position (scale ranges from 1.0 to 2.5)
     float indicatorX = ((mCurrentScale - 1.0f) / 1.5f) * mScaleBar.GetSize().width;
-    mScaleIndicator.SetRequestedPositionX(indicatorX);
+    mScaleIndicator.SetRequestedX(indicatorX);
   }
 
   // -------------------------------------------------------------------------

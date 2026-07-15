@@ -67,7 +67,7 @@ public:
     child2.SetBackgroundColor(Color::GREEN);
     child2.SetRequestedWidth(WRAP_CONTENT);
     child2.SetRequestedHeight(200.0f);
-    child2.SetRequestedPositionY(300.0f);
+    child2.SetRequestedY(300.0f);
     child2.SetMargin(Extents(50, 50, 50, 50));
 
     // Child 2's child: Yellow, 100x100
@@ -84,7 +84,7 @@ public:
     child3.SetBackgroundColor(Color::BLUE);
     child3.SetRequestedWidth(200.0f);
     child3.SetRequestedHeight(MATCH_PARENT);
-    child3.SetRequestedPositionY(600.0f);
+    child3.SetRequestedY(600.0f);
     child3.SetMargin(Extents(50, 50, 50, 50));
     mRoot.Add(child3);
 
@@ -94,8 +94,8 @@ public:
     toggleBtn.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.5f));
     toggleBtn.SetRequestedWidth(200.0f);
     toggleBtn.SetRequestedHeight(50.0f);
-    toggleBtn.SetRequestedPositionX(0.0f);
-    toggleBtn.SetRequestedPositionY(0.0f);
+    toggleBtn.SetRequestedX(0.0f);
+    toggleBtn.SetRequestedY(0.0f);
     toggleBtn.SetLayoutMode(LayoutMode::STANDALONE);
     toggleBtn.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
     Label toggleLabel = Label::New("Change LayoutDirection");

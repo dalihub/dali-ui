@@ -73,8 +73,8 @@ public:
     counter.SetAttachment(COUNTER_DATA_ID, Dali::MakeUnique<CounterData>(label));
     counter.SetRequestedWidth(220.0f);
     counter.SetRequestedHeight(80.0f);
-    counter.SetRequestedPositionX(60.0f);
-    counter.SetRequestedPositionY(60.0f);
+    counter.SetRequestedX(60.0f);
+    counter.SetRequestedY(60.0f);
     counter.SetBackgroundColor(UiColor(0x1565C0));
     counter.Add(label);
     counter.ConnectClickedSignal(this, &AttachmentExampleController::OnCounterClicked);
@@ -90,8 +90,8 @@ public:
     InteractiveView reset = InteractiveView::New();
     reset.SetRequestedWidth(220.0f);
     reset.SetRequestedHeight(64.0f);
-    reset.SetRequestedPositionX(60.0f);
-    reset.SetRequestedPositionY(160.0f);
+    reset.SetRequestedX(60.0f);
+    reset.SetRequestedY(160.0f);
     reset.SetBackgroundColor(UiColor(0x424242));
     reset.ConnectClickedSignal(this, &AttachmentExampleController::OnResetClicked);
     reset.Add(resetLabel);

@@ -117,22 +117,22 @@ private:
     panel.SetBackgroundColor(COLOR_INFO_BG);
     panel.SetRequestedWidth(WINDOW_W);
     panel.SetRequestedHeight(INFO_H);
-    panel.SetRequestedPositionX(0.0f);
-    panel.SetRequestedPositionY(0.0f);
+    panel.SetRequestedX(0.0f);
+    panel.SetRequestedY(0.0f);
 
     mPageLabel = Label::New("Page 0/0");
     mPageLabel.SetRequestedWidth(300.0f);
     mPageLabel.SetRequestedHeight(40.0f);
-    mPageLabel.SetRequestedPositionX(12.0f);
-    mPageLabel.SetRequestedPositionY(4.0f);
+    mPageLabel.SetRequestedX(12.0f);
+    mPageLabel.SetRequestedY(4.0f);
     mPageLabel.SetTextColor(Color::WHITE);
     panel.Add(mPageLabel);
 
     mEventLabel = Label::New("—");
     mEventLabel.SetRequestedWidth(WINDOW_W - 16.0f);
     mEventLabel.SetRequestedHeight(34.0f);
-    mEventLabel.SetRequestedPositionX(12.0f);
-    mEventLabel.SetRequestedPositionY(42.0f);
+    mEventLabel.SetRequestedX(12.0f);
+    mEventLabel.SetRequestedY(42.0f);
     mEventLabel.SetTextColor(Color::WHITE);
     panel.Add(mEventLabel);
 
@@ -177,8 +177,8 @@ private:
     mPageScrollView.SetMaxFlingDistance(PAGE_W * 20);
     mPageScrollView.SetRequestedWidth(WINDOW_W);
     mPageScrollView.SetRequestedHeight(SCROLL_H);
-    mPageScrollView.SetRequestedPositionX(0.0f);
-    mPageScrollView.SetRequestedPositionY(SCROLL_Y);
+    mPageScrollView.SetRequestedX(0.0f);
+    mPageScrollView.SetRequestedY(SCROLL_Y);
     mPageScrollView.SetBackgroundColor(Vector4(0.08f, 0.08f, 0.08f, 1.0f));
     mPageScrollView.SetContent(mContent);
 
@@ -211,8 +211,8 @@ private:
     panel.SetBackgroundColor(COLOR_CTRL_BG);
     panel.SetRequestedWidth(WINDOW_W);
     panel.SetRequestedHeight(CTRL_H);
-    panel.SetRequestedPositionX(0.0f);
-    panel.SetRequestedPositionY(ctrlY);
+    panel.SetRequestedX(0.0f);
+    panel.SetRequestedY(ctrlY);
 
     auto addRow = [&](float y, std::vector<std::pair<const char*, Vector4>> items) {
       int   n       = static_cast<int>(items.size());
@@ -222,8 +222,8 @@ private:
         View btn = MakeButton(items[i].first, items[i].second);
         btn.SetRequestedWidth(btnW);
         btn.SetRequestedHeight(BTN_H);
-        btn.SetRequestedPositionX(CTRL_PAD + i * (btnW + BTN_GAP));
-        btn.SetRequestedPositionY(y);
+        btn.SetRequestedX(CTRL_PAD + i * (btnW + BTN_GAP));
+        btn.SetRequestedY(y);
         btn.TouchEventSignal().Connect(this, &PageScrollDynamicController::OnButtonTouched);
         mButtons.push_back({btn, std::string(items[i].first)});
         panel.Add(btn);
@@ -267,8 +267,8 @@ private:
     Label nameLabel = Label::New(name.str().c_str());
     nameLabel.SetRequestedWidth(PAGE_W - 40.0f);
     nameLabel.SetRequestedHeight(80.0f);
-    nameLabel.SetRequestedPositionX(20.0f);
-    nameLabel.SetRequestedPositionY(PAGE_H * 0.4f);
+    nameLabel.SetRequestedX(20.0f);
+    nameLabel.SetRequestedY(PAGE_H * 0.4f);
     nameLabel.SetTextColor(Color::WHITE);
     nameLabel.SetProperty(Label::Property::FONT_SIZE, 28.0f);
     page.Add(nameLabel);

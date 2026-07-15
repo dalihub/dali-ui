@@ -123,8 +123,8 @@ public:
     toggleBtn.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.5f));
     toggleBtn.SetRequestedWidth(200.0f);
     toggleBtn.SetRequestedHeight(50.0f);
-    toggleBtn.SetRequestedPositionX(0.0f);
-    toggleBtn.SetRequestedPositionY(0.0f);
+    toggleBtn.SetRequestedX(0.0f);
+    toggleBtn.SetRequestedY(0.0f);
     toggleBtn.SetLayoutMode(LayoutMode::STANDALONE);
     toggleBtn.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
     Label toggleLabel = Label::New("Change LayoutDirection");

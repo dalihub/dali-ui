@@ -101,14 +101,14 @@ private:
     panel.SetBackgroundColor(COLOR_BG);
     panel.SetRequestedWidth(WINDOW_W);
     panel.SetRequestedHeight(INFO_H);
-    panel.SetRequestedPositionX(0.0f);
-    panel.SetRequestedPositionY(0.0f);
+    panel.SetRequestedX(0.0f);
+    panel.SetRequestedY(0.0f);
 
     Label title = Label::New("Test: Key-scroll with no focusable items in content");
     title.SetRequestedWidth(WINDOW_W - 8.0f);
     title.SetRequestedHeight(28.0f);
-    title.SetRequestedPositionX(8.0f);
-    title.SetRequestedPositionY(4.0f);
+    title.SetRequestedX(8.0f);
+    title.SetRequestedY(4.0f);
     title.SetTextColor(Color::WHITE);
     panel.Add(title);
 
@@ -116,8 +116,8 @@ private:
     mKeyScrollChip.SetBackgroundColor(COLOR_ACTIVE);
     mKeyScrollChip.SetRequestedWidth(180.0f);
     mKeyScrollChip.SetRequestedHeight(32.0f);
-    mKeyScrollChip.SetRequestedPositionX(8.0f);
-    mKeyScrollChip.SetRequestedPositionY(36.0f);
+    mKeyScrollChip.SetRequestedX(8.0f);
+    mKeyScrollChip.SetRequestedY(36.0f);
     mKeyScrollChip.SetProperty(View::Property::CORNER_RADIUS, Vector4(6, 6, 6, 6));
     mKeyScrollChip.TouchEventSignal().Connect(this, &NoFocusKeyScrollTest::OnKeyScrollChipTouched);
     Label ksLabel = Label::New("KeyScroll: ON");
@@ -130,32 +130,32 @@ private:
     mScrollPosLabel = Label::New("ScrollPos: 0");
     mScrollPosLabel.SetRequestedWidth(WINDOW_W - 196.0f);
     mScrollPosLabel.SetRequestedHeight(32.0f);
-    mScrollPosLabel.SetRequestedPositionX(196.0f);
-    mScrollPosLabel.SetRequestedPositionY(36.0f);
+    mScrollPosLabel.SetRequestedX(196.0f);
+    mScrollPosLabel.SetRequestedY(36.0f);
     mScrollPosLabel.SetTextColor(Color::WHITE);
     panel.Add(mScrollPosLabel);
 
     mArrowCountLabel = Label::New("↑↓ key presses: 0   (scroll pos unchanged = key-scroll not firing)");
     mArrowCountLabel.SetRequestedWidth(WINDOW_W - 8.0f);
     mArrowCountLabel.SetRequestedHeight(32.0f);
-    mArrowCountLabel.SetRequestedPositionX(8.0f);
-    mArrowCountLabel.SetRequestedPositionY(72.0f);
+    mArrowCountLabel.SetRequestedX(8.0f);
+    mArrowCountLabel.SetRequestedY(72.0f);
     mArrowCountLabel.SetTextColor(Color::WHITE);
     panel.Add(mArrowCountLabel);
 
     mFocusLabel = Label::New("Focused: —  (no focusable items in content)");
     mFocusLabel.SetRequestedWidth(WINDOW_W - 8.0f);
     mFocusLabel.SetRequestedHeight(32.0f);
-    mFocusLabel.SetRequestedPositionX(8.0f);
-    mFocusLabel.SetRequestedPositionY(108.0f);
+    mFocusLabel.SetRequestedX(8.0f);
+    mFocusLabel.SetRequestedY(108.0f);
     mFocusLabel.SetTextColor(Color::WHITE);
     panel.Add(mFocusLabel);
 
     Label hint = Label::New("ScrollView is focusable + focused. Press ↑↓ — scroll pos should change. K toggles KeyScroll.");
     hint.SetRequestedWidth(WINDOW_W - 8.0f);
     hint.SetRequestedHeight(30.0f);
-    hint.SetRequestedPositionX(8.0f);
-    hint.SetRequestedPositionY(144.0f);
+    hint.SetRequestedX(8.0f);
+    hint.SetRequestedY(144.0f);
     hint.SetTextColor(Vector4(1.0f, 0.9f, 0.2f, 1.0f));
     panel.Add(hint);
 
@@ -194,8 +194,8 @@ private:
     mScrollView.SetKeyScrollStep(150.0f);
     mScrollView.SetRequestedWidth(WINDOW_W);
     mScrollView.SetRequestedHeight(SCROLL_H);
-    mScrollView.SetRequestedPositionX(0.0f);
-    mScrollView.SetRequestedPositionY(SCROLL_Y);
+    mScrollView.SetRequestedX(0.0f);
+    mScrollView.SetRequestedY(SCROLL_Y);
     mScrollView.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
     mScrollView.SetProperty(Actor::Property::FOCUSABLE, true); // opt-in for Self() key-scroll
     mScrollView.SetContent(content);

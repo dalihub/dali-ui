@@ -206,24 +206,24 @@ public: // Non-virtual API (safe to reorder / extend)
   Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
 
   /**
-   * @copydoc Ui::View::SetRequestedPositionX()
+   * @copydoc Ui::View::SetRequestedX()
    */
-  void SetRequestedPositionX(float x);
+  void SetRequestedX(float x);
 
   /**
-   * @copydoc Ui::View::SetRequestedPositionY()
+   * @copydoc Ui::View::SetRequestedY()
    */
-  void SetRequestedPositionY(float y);
+  void SetRequestedY(float y);
 
   /**
-   * @copydoc Ui::View::GetRequestedPositionX()
+   * @copydoc Ui::View::GetRequestedX()
    */
-  float GetRequestedPositionX() const;
+  float GetRequestedX() const;
 
   /**
-   * @copydoc Ui::View::GetRequestedPositionY()
+   * @copydoc Ui::View::GetRequestedY()
    */
-  float GetRequestedPositionY() const;
+  float GetRequestedY() const;
 
   /**
    * @copydoc Ui::View::SetBackgroundColor()

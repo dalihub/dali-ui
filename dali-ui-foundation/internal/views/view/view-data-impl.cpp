@@ -285,8 +285,8 @@ void ArrangeStandaloneChild(ViewImpl& childImpl, float parentFullWidth, float pa
     childImpl.Measure(childW, childH);
   }
 
-  LayoutRect bounds(childImpl.GetRequestedPositionX() * childScale + static_cast<float>(margin.start) * childScale,
-                    childImpl.GetRequestedPositionY() * childScale + static_cast<float>(margin.top) * childScale,
+  LayoutRect bounds(childImpl.GetRequestedX() * childScale + static_cast<float>(margin.start) * childScale,
+                    childImpl.GetRequestedY() * childScale + static_cast<float>(margin.top) * childScale,
                     childW, childH);
   childImpl.Arrange(bounds);
 }
@@ -683,8 +683,8 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mFocusNavigationData(nullptr),
   mRenderEffectData(nullptr),
   mResourceReadyData(nullptr),
-  mRequestedPositionX(0.0f),
-  mRequestedPositionY(0.0f),
+  mRequestedX(0.0f),
+  mRequestedY(0.0f),
   mMeasuredSize{0.0f, 0.0f},
   // NaN is distinct from MEASURE_CACHE_DIRTY (-1.0f), so the first
   // InvalidateMeasure still propagates. See view-impl.cpp for details.
@@ -804,8 +804,8 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
 
       float childNatW  = (s > 0.0f) ? childSize.width / s : childSize.width;
       float childNatH  = (s > 0.0f) ? childSize.height / s : childSize.height;
-      float childX     = childImpl.GetRequestedPositionX();
-      float childY     = childImpl.GetRequestedPositionY();
+      float childX     = childImpl.GetRequestedX();
+      float childY     = childImpl.GetRequestedY();
       float natMarginW = (s > 0.0f) ? marginW / s : marginW;
       float natMarginH = (s > 0.0f) ? marginH / s : marginH;
       maxRight         = std::max(maxRight, childX + natMarginW + childNatW);
@@ -929,8 +929,8 @@ LayoutRect ViewDataImpl::ArrangeDefault(const LayoutRect& bounds)
       {
         childH = std::max(0.0f, bounds.height - visPadTop - visPadBottom - visMarginH);
       }
-      float childX = visPadLeft + visMarginStart + childImpl.GetRequestedPositionX() * s;
-      float childY = visPadTop + visMarginTop + childImpl.GetRequestedPositionY() * s;
+      float childX = visPadLeft + visMarginStart + childImpl.GetRequestedX() * s;
+      float childY = visPadTop + visMarginTop + childImpl.GetRequestedY() * s;
 
       if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
       {
@@ -1370,36 +1370,36 @@ Dali::LayoutDirection::Type ViewDataImpl::GetEffectiveLayoutDirection() const
   return static_cast<Dali::LayoutDirection::Type>(mViewImpl.Self().GetProperty<int>(Actor::Property::LAYOUT_DIRECTION));
 }
 
-void ViewDataImpl::SetRequestedPositionX(float x)
+void ViewDataImpl::SetRequestedX(float x)
 {
-  if(!Dali::Equals(mRequestedPositionX, x))
+  if(!Dali::Equals(mRequestedX, x))
   {
-    mRequestedPositionX = x;
+    mRequestedX = x;
     // InvalidateMeasure (not InvalidateArrange): a WRAP_CONTENT parent's
-    // OnMeasure reads the child's RequestedPosition into maxRight/maxBottom,
+    // OnMeasure reads the child's RequestedX/Y into maxRight/maxBottom,
     // so a position change can affect the parent's measured size. Measure
     // invalidation also marks the chain dirty for Arrange.
     InvalidateMeasure();
   }
 }
 
-void ViewDataImpl::SetRequestedPositionY(float y)
+void ViewDataImpl::SetRequestedY(float y)
 {
-  if(!Dali::Equals(mRequestedPositionY, y))
+  if(!Dali::Equals(mRequestedY, y))
   {
-    mRequestedPositionY = y;
+    mRequestedY = y;
     InvalidateMeasure();
   }
 }
 
-float ViewDataImpl::GetRequestedPositionX() const
+float ViewDataImpl::GetRequestedX() const
 {
-  return mRequestedPositionX;
+  return mRequestedX;
 }
 
-float ViewDataImpl::GetRequestedPositionY() const
+float ViewDataImpl::GetRequestedY() const
 {
-  return mRequestedPositionY;
+  return mRequestedY;
 }
 
 void ViewDataImpl::SetUiScalePolicy(UiScalePolicy policy)

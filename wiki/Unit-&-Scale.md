@@ -47,7 +47,7 @@ With the above configuration, each unit converts as follows:
 ```cpp
 view.SetRequestedWidth(200_dp);
 view.SetRequestedHeight(100_spx);
-view.SetRequestedPositionX(50_sdp);
+view.SetRequestedX(50_sdp);
 ```
 
 <br/>

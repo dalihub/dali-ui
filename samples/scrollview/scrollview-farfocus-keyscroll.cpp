@@ -130,46 +130,46 @@ private:
     panel.SetBackgroundColor(COLOR_BG);
     panel.SetRequestedWidth(WINDOW_W);
     panel.SetRequestedHeight(INFO_H);
-    panel.SetRequestedPositionX(0.0f);
-    panel.SetRequestedPositionY(0.0f);
+    panel.SetRequestedX(0.0f);
+    panel.SetRequestedY(0.0f);
 
     Label title = Label::New("Test: Key-scroll from non-focusable first page + focus exit");
     title.SetRequestedWidth(WINDOW_W - 8.0f);
     title.SetRequestedHeight(28.0f);
-    title.SetRequestedPositionX(8.0f);
-    title.SetRequestedPositionY(4.0f);
+    title.SetRequestedX(8.0f);
+    title.SetRequestedY(4.0f);
     title.SetTextColor(Color::WHITE);
     panel.Add(title);
 
     mFocusLabel = Label::New("Focused: ScrollView  (OnKeyEvent path)");
     mFocusLabel.SetRequestedWidth(WINDOW_W - 8.0f);
     mFocusLabel.SetRequestedHeight(28.0f);
-    mFocusLabel.SetRequestedPositionX(8.0f);
-    mFocusLabel.SetRequestedPositionY(36.0f);
+    mFocusLabel.SetRequestedX(8.0f);
+    mFocusLabel.SetRequestedY(36.0f);
     mFocusLabel.SetTextColor(Color::WHITE);
     panel.Add(mFocusLabel);
 
     mScrollPosLabel = Label::New("ScrollPos: 0");
     mScrollPosLabel.SetRequestedWidth(WINDOW_W - 8.0f);
     mScrollPosLabel.SetRequestedHeight(28.0f);
-    mScrollPosLabel.SetRequestedPositionX(8.0f);
-    mScrollPosLabel.SetRequestedPositionY(68.0f);
+    mScrollPosLabel.SetRequestedX(8.0f);
+    mScrollPosLabel.SetRequestedY(68.0f);
     mScrollPosLabel.SetTextColor(Color::WHITE);
     panel.Add(mScrollPosLabel);
 
     mStepLabel = Label::New("Key-scroll steps: 0  |  Focus changes: 0");
     mStepLabel.SetRequestedWidth(WINDOW_W - 8.0f);
     mStepLabel.SetRequestedHeight(28.0f);
-    mStepLabel.SetRequestedPositionX(8.0f);
-    mStepLabel.SetRequestedPositionY(100.0f);
+    mStepLabel.SetRequestedX(8.0f);
+    mStepLabel.SetRequestedY(100.0f);
     mStepLabel.SetTextColor(Color::WHITE);
     panel.Add(mStepLabel);
 
     Label hint = Label::New("↓ step-scrolls then jumps to Bottom Item 1. At boundary: focus exits to External Button.  R=reset");
     hint.SetRequestedWidth(WINDOW_W - 8.0f);
     hint.SetRequestedHeight(28.0f);
-    hint.SetRequestedPositionX(8.0f);
-    hint.SetRequestedPositionY(130.0f);
+    hint.SetRequestedX(8.0f);
+    hint.SetRequestedY(130.0f);
     hint.SetTextColor(Vector4(1.0f, 0.9f, 0.2f, 1.0f));
     panel.Add(hint);
 
@@ -183,8 +183,8 @@ private:
     mExtTopBtn.SetBackgroundColor(COLOR_EXT_TOP);
     mExtTopBtn.SetRequestedWidth(WINDOW_W);
     mExtTopBtn.SetRequestedHeight(EXT_BTN_H);
-    mExtTopBtn.SetRequestedPositionX(0.0f);
-    mExtTopBtn.SetRequestedPositionY(EXT_TOP_Y);
+    mExtTopBtn.SetRequestedX(0.0f);
+    mExtTopBtn.SetRequestedY(EXT_TOP_Y);
     mExtTopBtn.SetProperty(Actor::Property::FOCUSABLE, true);
 
     Label lbl = Label::New("External Top Button  [focusable — OUTSIDE ScrollView]");
@@ -201,8 +201,8 @@ private:
     mExtBotBtn.SetBackgroundColor(COLOR_EXT_BOT);
     mExtBotBtn.SetRequestedWidth(WINDOW_W);
     mExtBotBtn.SetRequestedHeight(EXT_BTN_H);
-    mExtBotBtn.SetRequestedPositionX(0.0f);
-    mExtBotBtn.SetRequestedPositionY(EXT_BOT_Y);
+    mExtBotBtn.SetRequestedX(0.0f);
+    mExtBotBtn.SetRequestedY(EXT_BOT_Y);
     mExtBotBtn.SetProperty(Actor::Property::FOCUSABLE, true);
 
     Label lbl = Label::New("External Bottom Button  [focusable — OUTSIDE ScrollView]");
@@ -252,7 +252,7 @@ private:
     Label gapLbl = Label::New(gapOss.str().c_str());
     gapLbl.SetRequestedWidth(MATCH_PARENT);
     gapLbl.SetRequestedHeight(GAP_H * 0.15f);
-    gapLbl.SetRequestedPositionY(GAP_H * 0.42f);
+    gapLbl.SetRequestedY(GAP_H * 0.42f);
     gap.Add(gapLbl);
     content.Add(gap);
 
@@ -287,8 +287,8 @@ private:
     mScrollView.SetKeyScrollStep(KEY_SCROLL_STEP);
     mScrollView.SetRequestedWidth(WINDOW_W);
     mScrollView.SetRequestedHeight(SCROLL_H);
-    mScrollView.SetRequestedPositionX(0.0f);
-    mScrollView.SetRequestedPositionY(SCROLL_Y);
+    mScrollView.SetRequestedX(0.0f);
+    mScrollView.SetRequestedY(SCROLL_Y);
     mScrollView.SetBackgroundColor(COLOR_SCROLL_IDLE);
     mScrollView.SetProperty(Actor::Property::FOCUSABLE, true);
     mScrollView.SetContent(content);

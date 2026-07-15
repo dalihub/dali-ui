@@ -191,12 +191,12 @@ int UtcDaliFocusManagerFocusGroupContainmentP(void)
   FocusManager::Get().SetAsFocusGroup(group, true);
   View insideA = View::New();
   insideA.SetFocusable(true);
-  insideA.SetRequestedPositionY(0.0f);
+  insideA.SetRequestedY(0.0f);
   insideA.SetRequestedWidth(50.0f);
   insideA.SetRequestedHeight(50.0f);
   View insideB = View::New();
   insideB.SetFocusable(true);
-  insideB.SetRequestedPositionY(60.0f);
+  insideB.SetRequestedY(60.0f);
   insideB.SetRequestedWidth(50.0f);
   insideB.SetRequestedHeight(50.0f);
   group.Add(insideA);
@@ -204,7 +204,7 @@ int UtcDaliFocusManagerFocusGroupContainmentP(void)
 
   View outside = View::New();
   outside.SetFocusable(true);
-  outside.SetRequestedPositionY(120.0f);
+  outside.SetRequestedY(120.0f);
   outside.SetRequestedWidth(50.0f);
   outside.SetRequestedHeight(50.0f);
 
@@ -238,17 +238,17 @@ int UtcDaliFocusManagerFocusGroupForwardBackwardContainmentP(void)
 
   View insideA = View::New();
   insideA.SetFocusable(true);
-  insideA.SetRequestedPositionX(0.0f);
+  insideA.SetRequestedX(0.0f);
   insideA.SetRequestedWidth(50.0f);
   insideA.SetRequestedHeight(50.0f);
   View insideB = View::New();
   insideB.SetFocusable(true);
-  insideB.SetRequestedPositionX(60.0f);
+  insideB.SetRequestedX(60.0f);
   insideB.SetRequestedWidth(50.0f);
   insideB.SetRequestedHeight(50.0f);
   View outside = View::New();
   outside.SetFocusable(true);
-  outside.SetRequestedPositionX(120.0f);
+  outside.SetRequestedX(120.0f);
   outside.SetRequestedWidth(50.0f);
   outside.SetRequestedHeight(50.0f);
 
@@ -294,17 +294,17 @@ int UtcDaliFocusManagerFocusGroupStopsParentNavigationP(void)
   View group   = View::New();
   View current = View::New();
   current.SetFocusable(true);
-  current.SetRequestedPositionX(0.0f);
+  current.SetRequestedX(0.0f);
   current.SetRequestedWidth(50.0f);
   current.SetRequestedHeight(50.0f);
   View inside = View::New();
   inside.SetFocusable(true);
-  inside.SetRequestedPositionX(60.0f);
+  inside.SetRequestedX(60.0f);
   inside.SetRequestedWidth(50.0f);
   inside.SetRequestedHeight(50.0f);
   View outside = View::New();
   outside.SetFocusable(true);
-  outside.SetRequestedPositionX(120.0f);
+  outside.SetRequestedX(120.0f);
   outside.SetRequestedWidth(50.0f);
   outside.SetRequestedHeight(50.0f);
 
@@ -450,26 +450,26 @@ int UtcDaliFocusManagerMoveFocusPriorityStep1WinsOverStep2And3P(void)
   //
   View current = View::New();
   current.SetFocusable(true);
-  current.SetRequestedPositionX(0.0f);
-  current.SetRequestedPositionY(0.0f);
+  current.SetRequestedX(0.0f);
+  current.SetRequestedY(0.0f);
   current.SetRequestedWidth(50.0f);
   current.SetRequestedHeight(50.0f);
   View viewProp = View::New();
   viewProp.SetFocusable(true);
-  viewProp.SetRequestedPositionX(200.0f);
-  viewProp.SetRequestedPositionY(0.0f);
+  viewProp.SetRequestedX(200.0f);
+  viewProp.SetRequestedY(0.0f);
   viewProp.SetRequestedWidth(50.0f);
   viewProp.SetRequestedHeight(50.0f);
   View viewCallback = View::New();
   viewCallback.SetFocusable(true);
-  viewCallback.SetRequestedPositionX(200.0f);
-  viewCallback.SetRequestedPositionY(60.0f);
+  viewCallback.SetRequestedX(200.0f);
+  viewCallback.SetRequestedY(60.0f);
   viewCallback.SetRequestedWidth(50.0f);
   viewCallback.SetRequestedHeight(50.0f);
   View viewFinder = View::New();
   viewFinder.SetFocusable(true);
-  viewFinder.SetRequestedPositionX(60.0f);
-  viewFinder.SetRequestedPositionY(0.0f);
+  viewFinder.SetRequestedX(60.0f);
+  viewFinder.SetRequestedY(0.0f);
   viewFinder.SetRequestedWidth(50.0f);
   viewFinder.SetRequestedHeight(50.0f);
 
@@ -511,20 +511,20 @@ int UtcDaliFocusManagerMoveFocusPriorityStep2WinsOverStep3P(void)
   // Same layout but NO parent callback set.
   View current = View::New();
   current.SetFocusable(true);
-  current.SetRequestedPositionX(0.0f);
-  current.SetRequestedPositionY(0.0f);
+  current.SetRequestedX(0.0f);
+  current.SetRequestedY(0.0f);
   current.SetRequestedWidth(50.0f);
   current.SetRequestedHeight(50.0f);
   View viewProp = View::New();
   viewProp.SetFocusable(true);
-  viewProp.SetRequestedPositionX(200.0f);
-  viewProp.SetRequestedPositionY(0.0f);
+  viewProp.SetRequestedX(200.0f);
+  viewProp.SetRequestedY(0.0f);
   viewProp.SetRequestedWidth(50.0f);
   viewProp.SetRequestedHeight(50.0f);
   View viewFinder = View::New();
   viewFinder.SetFocusable(true);
-  viewFinder.SetRequestedPositionX(60.0f);
-  viewFinder.SetRequestedPositionY(0.0f);
+  viewFinder.SetRequestedX(60.0f);
+  viewFinder.SetRequestedY(0.0f);
   viewFinder.SetRequestedWidth(50.0f);
   viewFinder.SetRequestedHeight(50.0f);
 
@@ -561,14 +561,14 @@ int UtcDaliFocusManagerMoveFocusPriorityStep3FallbackP(void)
   // No directional property, no callback — only FocusFinder.
   View current = View::New();
   current.SetFocusable(true);
-  current.SetRequestedPositionX(0.0f);
-  current.SetRequestedPositionY(0.0f);
+  current.SetRequestedX(0.0f);
+  current.SetRequestedY(0.0f);
   current.SetRequestedWidth(50.0f);
   current.SetRequestedHeight(50.0f);
   View viewFinder = View::New();
   viewFinder.SetFocusable(true);
-  viewFinder.SetRequestedPositionX(60.0f);
-  viewFinder.SetRequestedPositionY(0.0f);
+  viewFinder.SetRequestedX(60.0f);
+  viewFinder.SetRequestedY(0.0f);
   viewFinder.SetRequestedWidth(50.0f);
   viewFinder.SetRequestedHeight(50.0f);
 
@@ -599,8 +599,8 @@ int UtcDaliFocusManagerMoveFocusPriorityAllStepsFailN(void)
   // current is the only focusable view — no candidate in any step.
   View current = View::New();
   current.SetFocusable(true);
-  current.SetRequestedPositionX(0.0f);
-  current.SetRequestedPositionY(0.0f);
+  current.SetRequestedX(0.0f);
+  current.SetRequestedY(0.0f);
   current.SetRequestedWidth(50.0f);
   current.SetRequestedHeight(50.0f);
 
@@ -656,7 +656,7 @@ int UtcDaliFocusManagerMoveFocusRejectsBlockedAncestorCandidateN(void)
   blockedChild.SetFocusable(true);
   View fallbackFinder = View::New();
   fallbackFinder.SetFocusable(true);
-  fallbackFinder.SetRequestedPositionX(60.0f);
+  fallbackFinder.SetRequestedX(60.0f);
   fallbackFinder.SetRequestedWidth(50.0f);
   fallbackFinder.SetRequestedHeight(50.0f);
 
@@ -734,26 +734,26 @@ int UtcDaliFocusManagerForwardRootLayerOrderingP(void)
   UiTestApplication application;
 
   View parentA = View::New();
-  parentA.SetRequestedPositionX(0.0f);
+  parentA.SetRequestedX(0.0f);
   parentA.SetRequestedWidth(120.0f);
   parentA.SetRequestedHeight(50.0f);
   View parentB = View::New();
-  parentB.SetRequestedPositionX(140.0f);
+  parentB.SetRequestedX(140.0f);
   parentB.SetRequestedWidth(120.0f);
   parentB.SetRequestedHeight(50.0f);
   View a1 = View::New();
   a1.SetFocusable(true);
-  a1.SetRequestedPositionX(0.0f);
+  a1.SetRequestedX(0.0f);
   a1.SetRequestedWidth(50.0f);
   a1.SetRequestedHeight(50.0f);
   View a2 = View::New();
   a2.SetFocusable(true);
-  a2.SetRequestedPositionX(60.0f);
+  a2.SetRequestedX(60.0f);
   a2.SetRequestedWidth(50.0f);
   a2.SetRequestedHeight(50.0f);
   View b1 = View::New();
   b1.SetFocusable(true);
-  b1.SetRequestedPositionX(0.0f);
+  b1.SetRequestedX(0.0f);
   b1.SetRequestedWidth(50.0f);
   b1.SetRequestedHeight(50.0f);
 
@@ -787,17 +787,17 @@ int UtcDaliFocusManagerForwardSiblingsP(void)
   View parent = View::New();
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
+  v1.SetRequestedX(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
   v2.SetFocusable(true);
-  v2.SetRequestedPositionX(60.0f);
+  v2.SetRequestedX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
   View v3 = View::New();
   v3.SetFocusable(true);
-  v3.SetRequestedPositionX(120.0f);
+  v3.SetRequestedX(120.0f);
   v3.SetRequestedWidth(50.0f);
   v3.SetRequestedHeight(50.0f);
   parent.Add(v1);
@@ -825,17 +825,17 @@ int UtcDaliFocusManagerBackwardSiblingsP(void)
   View parent = View::New();
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
+  v1.SetRequestedX(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
   v2.SetFocusable(true);
-  v2.SetRequestedPositionX(60.0f);
+  v2.SetRequestedX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
   View v3 = View::New();
   v3.SetFocusable(true);
-  v3.SetRequestedPositionX(120.0f);
+  v3.SetRequestedX(120.0f);
   v3.SetRequestedWidth(50.0f);
   v3.SetRequestedHeight(50.0f);
   parent.Add(v1);
@@ -867,17 +867,17 @@ int UtcDaliFocusManagerForwardBackwardRtlSiblingsP(void)
 
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
+  v1.SetRequestedX(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
   v2.SetFocusable(true);
-  v2.SetRequestedPositionX(60.0f);
+  v2.SetRequestedX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
   View v3 = View::New();
   v3.SetFocusable(true);
-  v3.SetRequestedPositionX(120.0f);
+  v3.SetRequestedX(120.0f);
   v3.SetRequestedWidth(50.0f);
   v3.SetRequestedHeight(50.0f);
 
@@ -922,19 +922,19 @@ int UtcDaliFocusManagerForwardBackwardRtlStandaloneSiblingsP(void)
   View v1 = View::New();
   v1.SetLayoutMode(LayoutMode::STANDALONE);
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(120.0f);
+  v1.SetRequestedX(120.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
   v2.SetLayoutMode(LayoutMode::STANDALONE);
   v2.SetFocusable(true);
-  v2.SetRequestedPositionX(60.0f);
+  v2.SetRequestedX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
   View v3 = View::New();
   v3.SetLayoutMode(LayoutMode::STANDALONE);
   v3.SetFocusable(true);
-  v3.SetRequestedPositionX(0.0f);
+  v3.SetRequestedX(0.0f);
   v3.SetRequestedWidth(50.0f);
   v3.SetRequestedHeight(50.0f);
 
@@ -1031,16 +1031,16 @@ int UtcDaliFocusManagerForwardSkipsNonFocusableP(void)
   View parent = View::New();
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
+  v1.SetRequestedX(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
-  v2.SetRequestedPositionX(60.0f);
+  v2.SetRequestedX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f); // not focusable
   View v3 = View::New();
   v3.SetFocusable(true);
-  v3.SetRequestedPositionX(120.0f);
+  v3.SetRequestedX(120.0f);
   v3.SetRequestedWidth(50.0f);
   v3.SetRequestedHeight(50.0f);
   parent.Add(v1);
@@ -1070,23 +1070,23 @@ int UtcDaliFocusManagerForwardNestedLayoutP(void)
   View parent = View::New();
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
-  v1.SetRequestedPositionY(0.0f);
+  v1.SetRequestedX(0.0f);
+  v1.SetRequestedY(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View nested = View::New();
-  nested.SetRequestedPositionX(60.0f);
-  nested.SetRequestedPositionY(0.0f);
+  nested.SetRequestedX(60.0f);
+  nested.SetRequestedY(0.0f);
   nested.SetRequestedWidth(50.0f);
   nested.SetRequestedHeight(120.0f);
   View v2 = View::New();
   v2.SetFocusable(true);
-  v2.SetRequestedPositionY(0.0f);
+  v2.SetRequestedY(0.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
   View v3 = View::New();
   v3.SetFocusable(true);
-  v3.SetRequestedPositionY(60.0f);
+  v3.SetRequestedY(60.0f);
   v3.SetRequestedWidth(50.0f);
   v3.SetRequestedHeight(50.0f);
   nested.Add(v2);
@@ -1116,12 +1116,12 @@ int UtcDaliFocusManagerForwardAtEndFailsN(void)
   View parent = View::New();
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
+  v1.SetRequestedX(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
   v2.SetFocusable(true);
-  v2.SetRequestedPositionX(60.0f);
+  v2.SetRequestedX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
   parent.Add(v1);
@@ -1146,12 +1146,12 @@ int UtcDaliFocusManagerBackwardAtBeginFailsN(void)
   View parent = View::New();
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
+  v1.SetRequestedX(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
   v2.SetFocusable(true);
-  v2.SetRequestedPositionX(60.0f);
+  v2.SetRequestedX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
   parent.Add(v1);
@@ -1177,24 +1177,24 @@ int UtcDaliFocusManagerForwardSkipsInvisibleAndDisabledP(void)
   View parent = View::New();
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
+  v1.SetRequestedX(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View v2 = View::New();
   v2.SetFocusable(true);
   v2.SetVisible(false);
-  v2.SetRequestedPositionX(60.0f);
+  v2.SetRequestedX(60.0f);
   v2.SetRequestedWidth(50.0f);
   v2.SetRequestedHeight(50.0f);
   View v3 = View::New();
   v3.SetFocusable(true);
   v3.SetEnabled(false);
-  v3.SetRequestedPositionX(120.0f);
+  v3.SetRequestedX(120.0f);
   v3.SetRequestedWidth(50.0f);
   v3.SetRequestedHeight(50.0f);
   View v4 = View::New();
   v4.SetFocusable(true);
-  v4.SetRequestedPositionX(180.0f);
+  v4.SetRequestedX(180.0f);
   v4.SetRequestedWidth(50.0f);
   v4.SetRequestedHeight(50.0f);
   parent.Add(v1);
@@ -1225,11 +1225,11 @@ int UtcDaliFocusManagerForwardDescendantBlockedSkipsSubtreeP(void)
   View parent  = View::New();
   View v1 = View::New();
   v1.SetFocusable(true);
-  v1.SetRequestedPositionX(0.0f);
+  v1.SetRequestedX(0.0f);
   v1.SetRequestedWidth(50.0f);
   v1.SetRequestedHeight(50.0f);
   View blocked = View::New();
-  blocked.SetRequestedPositionX(60.0f);
+  blocked.SetRequestedX(60.0f);
   blocked.SetRequestedWidth(50.0f);
   blocked.SetRequestedHeight(50.0f);
   blocked.SetAllowDescendantFocusEnabled(false);
@@ -1240,7 +1240,7 @@ int UtcDaliFocusManagerForwardDescendantBlockedSkipsSubtreeP(void)
   blocked.Add(v2);
   View v3 = View::New();
   v3.SetFocusable(true);
-  v3.SetRequestedPositionX(120.0f);
+  v3.SetRequestedX(120.0f);
   v3.SetRequestedWidth(50.0f);
   v3.SetRequestedHeight(50.0f);
   parent.Add(v1);

@@ -129,8 +129,8 @@ private:
     Label label = Label::New(("Page " + std::to_string(mNextPageNumber)).c_str());
     label.SetFontSize(28.0f);
     label.SetTextColor(UiColor(0xFFFFFFu));
-    label.SetRequestedPositionX(24.0f);
-    label.SetRequestedPositionY(24.0f);
+    label.SetRequestedX(24.0f);
+    label.SetRequestedY(24.0f);
     page.Add(label);
 
     ++mNextPageNumber;
@@ -458,8 +458,8 @@ private:
     Label label = Label::New(text);
     label.SetFontSize(13.0f);
     label.SetTextColor(UiColor(0xFFFFFFu));
-    label.SetRequestedPositionX(10.0f);
-    label.SetRequestedPositionY(28.0f);
+    label.SetRequestedX(10.0f);
+    label.SetRequestedY(28.0f);
     button.Add(label);
 
     button.ConnectClickedSignal(this, [onClicked](View, InputEvent) { onClicked(); });

@@ -494,8 +494,8 @@ int UtcDaliViewGetPositionXP(void)
   View              view  = View::New();
   const float       testX = 50.0f;
 
-  view.SetRequestedPositionX(testX);
-  DALI_TEST_EQUALS(view.GetRequestedPositionX(), testX, TEST_LOCATION);
+  view.SetRequestedX(testX);
+  DALI_TEST_EQUALS(view.GetRequestedX(), testX, TEST_LOCATION);
   END_TEST;
 }
 
@@ -505,8 +505,8 @@ int UtcDaliViewGetPositionYP(void)
   View              view  = View::New();
   const float       testY = 75.0f;
 
-  view.SetRequestedPositionY(testY);
-  DALI_TEST_EQUALS(view.GetRequestedPositionY(), testY, TEST_LOCATION);
+  view.SetRequestedY(testY);
+  DALI_TEST_EQUALS(view.GetRequestedY(), testY, TEST_LOCATION);
   END_TEST;
 }
 
@@ -535,8 +535,8 @@ int UtcDaliViewPositionXChainingP(void)
   UiTestApplication application;
   View              view  = View::New();
   const float       testX = 125.0f;
-  view.SetRequestedPositionX(testX);
-  DALI_TEST_EQUALS(view.GetRequestedPositionX(), testX, TEST_LOCATION);
+  view.SetRequestedX(testX);
+  DALI_TEST_EQUALS(view.GetRequestedX(), testX, TEST_LOCATION);
   END_TEST;
 }
 
@@ -545,8 +545,8 @@ int UtcDaliViewPositionYChainingP(void)
   UiTestApplication application;
   View              view  = View::New();
   const float       testY = 175.0f;
-  view.SetRequestedPositionY(testY);
-  DALI_TEST_EQUALS(view.GetRequestedPositionY(), testY, TEST_LOCATION);
+  view.SetRequestedY(testY);
+  DALI_TEST_EQUALS(view.GetRequestedY(), testY, TEST_LOCATION);
   END_TEST;
 }
 
@@ -841,13 +841,13 @@ int UtcDaliViewMultipleChainingP(void)
   const UiColor     testColor(0.0f, 1.0f, 0.0f, 0.8f);
   view.SetRequestedWidth(testWidth);
   view.SetRequestedHeight(testHeight);
-  view.SetRequestedPositionX(testX);
-  view.SetRequestedPositionY(testY);
+  view.SetRequestedX(testX);
+  view.SetRequestedY(testY);
   view.SetBackgroundColor(testColor);
   DALI_TEST_EQUALS(view.GetRequestedWidth(), testWidth, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetRequestedHeight(), testHeight, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetRequestedPositionX(), testX, TEST_LOCATION);
-  DALI_TEST_EQUALS(view.GetRequestedPositionY(), testY, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetRequestedX(), testX, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetRequestedY(), testY, TEST_LOCATION);
   END_TEST;
 }
 
@@ -2079,8 +2079,8 @@ int UtcDaliViewStandaloneUsesPositionP(void)
   child.SetLayoutMode(LayoutMode::STANDALONE);
   child.SetRequestedWidth(40.0f);
   child.SetRequestedHeight(30.0f);
-  child.SetRequestedPositionX(50.0f);
-  child.SetRequestedPositionY(60.0f);
+  child.SetRequestedX(50.0f);
+  child.SetRequestedY(60.0f);
   parent.Add(child);
 
   parent.Measure(200.0f, 150.0f);
@@ -2107,8 +2107,8 @@ int UtcDaliViewStandaloneExcludedFromWrapContentP(void)
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(500.0f);
   standalone.SetRequestedHeight(500.0f);
-  standalone.SetRequestedPositionX(1000.0f);
-  standalone.SetRequestedPositionY(1000.0f);
+  standalone.SetRequestedX(1000.0f);
+  standalone.SetRequestedY(1000.0f);
   parent.Add(standalone);
 
   MeasuredSize size = parent.Measure(800.0f, 800.0f);
@@ -2957,7 +2957,7 @@ int UtcDaliViewLayoutDirectionRtlMirrorsChildP(void)
   View child = View::New();
   child.SetRequestedWidth(50.0f);
   child.SetRequestedHeight(50.0f);
-  child.SetRequestedPositionX(20.0f);
+  child.SetRequestedX(20.0f);
   parent.Add(child);
 
   parent.Measure(200.0f, 100.0f);
@@ -2984,7 +2984,7 @@ int UtcDaliViewLayoutDirectionLtrLeavesChildP(void)
   View child = View::New();
   child.SetRequestedWidth(50.0f);
   child.SetRequestedHeight(50.0f);
-  child.SetRequestedPositionX(20.0f);
+  child.SetRequestedX(20.0f);
   parent.Add(child);
 
   parent.Measure(200.0f, 100.0f);
@@ -3010,8 +3010,8 @@ int UtcDaliViewLayoutDirectionRtlSkipsStandaloneChildP(void)
   standalone.SetLayoutMode(LayoutMode::STANDALONE);
   standalone.SetRequestedWidth(50.0f);
   standalone.SetRequestedHeight(30.0f);
-  standalone.SetRequestedPositionX(10.0f);
-  standalone.SetRequestedPositionY(15.0f);
+  standalone.SetRequestedX(10.0f);
+  standalone.SetRequestedY(15.0f);
   parent.Add(standalone);
 
   parent.Measure(200.0f, 100.0f);
@@ -3037,13 +3037,13 @@ int UtcDaliViewLayoutDirectionRtlMirrorsRecursivelyP(void)
   View parent = View::New();
   parent.SetRequestedWidth(150.0f);
   parent.SetRequestedHeight(100.0f);
-  parent.SetRequestedPositionX(0.0f);
+  parent.SetRequestedX(0.0f);
   grandParent.Add(parent);
 
   View child = View::New();
   child.SetRequestedWidth(50.0f);
   child.SetRequestedHeight(40.0f);
-  child.SetRequestedPositionX(10.0f);
+  child.SetRequestedX(10.0f);
   parent.Add(child);
 
   grandParent.Measure(300.0f, 200.0f);
@@ -3071,7 +3071,7 @@ int UtcDaliViewLayoutDirectionSetReArrangesP(void)
   View child = View::New();
   child.SetRequestedWidth(50.0f);
   child.SetRequestedHeight(50.0f);
-  child.SetRequestedPositionX(20.0f);
+  child.SetRequestedX(20.0f);
   parent.Add(child);
 
   parent.Measure(200.0f, 100.0f);

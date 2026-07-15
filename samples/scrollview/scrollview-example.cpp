@@ -135,14 +135,14 @@ private:
     panel.SetBackgroundColor(COLOR_PANEL_BG);
     panel.SetRequestedWidth(WINDOW_W);
     panel.SetRequestedHeight(OBSERVER_H);
-    panel.SetRequestedPositionX(0.0f);
-    panel.SetRequestedPositionY(0.0f);
+    panel.SetRequestedX(0.0f);
+    panel.SetRequestedY(0.0f);
 
     Label title = Label::New("ScrollStateObserver");
     title.SetRequestedWidth(WINDOW_W);
     title.SetRequestedHeight(34.0f);
-    title.SetRequestedPositionX(0.0f);
-    title.SetRequestedPositionY(4.0f);
+    title.SetRequestedX(0.0f);
+    title.SetRequestedY(4.0f);
     title.SetTextColor(Color::WHITE);
     panel.Add(title);
 
@@ -161,24 +161,24 @@ private:
       mObserverChips[i].SetBackgroundColor(COLOR_INACTIVE);
       mObserverChips[i].SetRequestedWidth(CHIP_W);
       mObserverChips[i].SetRequestedHeight(CHIP_H);
-      mObserverChips[i].SetRequestedPositionX(x);
-      mObserverChips[i].SetRequestedPositionY(ROW_Y);
+      mObserverChips[i].SetRequestedX(x);
+      mObserverChips[i].SetRequestedY(ROW_Y);
       mObserverChips[i].SetProperty(View::Property::CORNER_RADIUS, Vector4(8.0f, 8.0f, 8.0f, 8.0f));
       panel.Add(mObserverChips[i]);
 
       Label nameLabel = Label::New(names[i]);
       nameLabel.SetRequestedWidth(CHIP_W);
       nameLabel.SetRequestedHeight(CHIP_H / 2.0f);
-      nameLabel.SetRequestedPositionX(0.0f);
-      nameLabel.SetRequestedPositionY(4.0f);
+      nameLabel.SetRequestedX(0.0f);
+      nameLabel.SetRequestedY(4.0f);
       nameLabel.SetTextColor(Color::WHITE);
       mObserverChips[i].Add(nameLabel);
 
       mObserverValues[i] = Label::New("OFF");
       mObserverValues[i].SetRequestedWidth(CHIP_W);
       mObserverValues[i].SetRequestedHeight(CHIP_H / 2.0f);
-      mObserverValues[i].SetRequestedPositionX(0.0f);
-      mObserverValues[i].SetRequestedPositionY(CHIP_H / 2.0f);
+      mObserverValues[i].SetRequestedX(0.0f);
+      mObserverValues[i].SetRequestedY(CHIP_H / 2.0f);
       mObserverValues[i].SetTextColor(Color::WHITE);
       mObserverChips[i].Add(mObserverValues[i]);
     }
@@ -228,54 +228,54 @@ private:
     panel.SetBackgroundColor(COLOR_LOG_BG);
     panel.SetRequestedWidth(WINDOW_W);
     panel.SetRequestedHeight(SIGNAL_LOG_H);
-    panel.SetRequestedPositionX(0.0f);
-    panel.SetRequestedPositionY(OBSERVER_H);
+    panel.SetRequestedX(0.0f);
+    panel.SetRequestedY(OBSERVER_H);
 
     Label title = Label::New("ScrollView Signals");
     title.SetRequestedWidth(WINDOW_W);
     title.SetRequestedHeight(26.0f);
-    title.SetRequestedPositionX(0.0f);
-    title.SetRequestedPositionY(2.0f);
+    title.SetRequestedX(0.0f);
+    title.SetRequestedY(2.0f);
     title.SetTextColor(Color::WHITE);
     panel.Add(title);
 
     mLastSignalLabel = Label::New("Last:  —");
     mLastSignalLabel.SetRequestedWidth(WINDOW_W * 0.5f);
     mLastSignalLabel.SetRequestedHeight(26.0f);
-    mLastSignalLabel.SetRequestedPositionX(8.0f);
-    mLastSignalLabel.SetRequestedPositionY(28.0f);
+    mLastSignalLabel.SetRequestedX(8.0f);
+    mLastSignalLabel.SetRequestedY(28.0f);
     mLastSignalLabel.SetTextColor(Color::WHITE);
     panel.Add(mLastSignalLabel);
 
     mScrollPosLabel = Label::New("ScrollPos: (0, 0)");
     mScrollPosLabel.SetRequestedWidth(WINDOW_W * 0.5f);
     mScrollPosLabel.SetRequestedHeight(26.0f);
-    mScrollPosLabel.SetRequestedPositionX(WINDOW_W * 0.5f);
-    mScrollPosLabel.SetRequestedPositionY(28.0f);
+    mScrollPosLabel.SetRequestedX(WINDOW_W * 0.5f);
+    mScrollPosLabel.SetRequestedY(28.0f);
     mScrollPosLabel.SetTextColor(Color::WHITE);
     panel.Add(mScrollPosLabel);
 
     mDragDeltaLabel = Label::New("Delta: (0.0, 0.0)");
     mDragDeltaLabel.SetRequestedWidth(WINDOW_W * 0.5f);
     mDragDeltaLabel.SetRequestedHeight(26.0f);
-    mDragDeltaLabel.SetRequestedPositionX(8.0f);
-    mDragDeltaLabel.SetRequestedPositionY(56.0f);
+    mDragDeltaLabel.SetRequestedX(8.0f);
+    mDragDeltaLabel.SetRequestedY(56.0f);
     mDragDeltaLabel.SetTextColor(Color::WHITE);
     panel.Add(mDragDeltaLabel);
 
     mFlingVelocityLabel = Label::New("FlingStart: (0, 0)");
     mFlingVelocityLabel.SetRequestedWidth(WINDOW_W * 0.5f);
     mFlingVelocityLabel.SetRequestedHeight(26.0f);
-    mFlingVelocityLabel.SetRequestedPositionX(WINDOW_W * 0.5f);
-    mFlingVelocityLabel.SetRequestedPositionY(56.0f);
+    mFlingVelocityLabel.SetRequestedX(WINDOW_W * 0.5f);
+    mFlingVelocityLabel.SetRequestedY(56.0f);
     mFlingVelocityLabel.SetTextColor(Color::WHITE);
     panel.Add(mFlingVelocityLabel);
 
     mEdgeEffectLabel = Label::New("EdgeEffect: OFF  ( E to toggle )");
     mEdgeEffectLabel.SetRequestedWidth(WINDOW_W - 8.0f);
     mEdgeEffectLabel.SetRequestedHeight(26.0f);
-    mEdgeEffectLabel.SetRequestedPositionX(8.0f);
-    mEdgeEffectLabel.SetRequestedPositionY(84.0f);
+    mEdgeEffectLabel.SetRequestedX(8.0f);
+    mEdgeEffectLabel.SetRequestedY(84.0f);
     mEdgeEffectLabel.SetTextColor(Color::WHITE);
     panel.Add(mEdgeEffectLabel);
 
@@ -292,14 +292,14 @@ private:
     panel.SetBackgroundColor(COLOR_FOCUS_BG);
     panel.SetRequestedWidth(WINDOW_W);
     panel.SetRequestedHeight(FOCUS_PANEL_H);
-    panel.SetRequestedPositionX(0.0f);
-    panel.SetRequestedPositionY(PANEL_Y);
+    panel.SetRequestedX(0.0f);
+    panel.SetRequestedY(PANEL_Y);
 
     Label title = Label::New("Focus Scroll");
     title.SetRequestedWidth(WINDOW_W);
     title.SetRequestedHeight(26.0f);
-    title.SetRequestedPositionX(0.0f);
-    title.SetRequestedPositionY(4.0f);
+    title.SetRequestedX(0.0f);
+    title.SetRequestedY(4.0f);
     title.SetTextColor(Color::WHITE);
     panel.Add(title);
 
@@ -313,8 +313,8 @@ private:
     mScrollOnFocusChip.SetBackgroundColor(COLOR_ACTIVE);
     mScrollOnFocusChip.SetRequestedWidth(CHIP_W);
     mScrollOnFocusChip.SetRequestedHeight(CHIP_H);
-    mScrollOnFocusChip.SetRequestedPositionX(8.0f);
-    mScrollOnFocusChip.SetRequestedPositionY(ROW1_Y);
+    mScrollOnFocusChip.SetRequestedX(8.0f);
+    mScrollOnFocusChip.SetRequestedY(ROW1_Y);
     mScrollOnFocusChip.SetProperty(View::Property::CORNER_RADIUS, Vector4(6, 6, 6, 6));
     Label scrollOnFocusLabel = Label::New("ScrollOnFocus: ON");
     scrollOnFocusLabel.SetRequestedWidth(CHIP_W);
@@ -328,8 +328,8 @@ private:
     mFocusLastChip.SetBackgroundColor(Vector4(0.55f, 0.25f, 0.75f, 1.0f));
     mFocusLastChip.SetRequestedWidth(FOCUS_LAST_W);
     mFocusLastChip.SetRequestedHeight(CHIP_H);
-    mFocusLastChip.SetRequestedPositionX(CHIP_W + 16.0f);
-    mFocusLastChip.SetRequestedPositionY(ROW1_Y);
+    mFocusLastChip.SetRequestedX(CHIP_W + 16.0f);
+    mFocusLastChip.SetRequestedY(ROW1_Y);
     mFocusLastChip.SetProperty(View::Property::CORNER_RADIUS, Vector4(6, 6, 6, 6));
     Label focusLastLabel = Label::New("Focus Last (F)");
     focusLastLabel.SetRequestedWidth(FOCUS_LAST_W);
@@ -342,8 +342,8 @@ private:
     mFocusedLabel = Label::New("Focused: —");
     mFocusedLabel.SetRequestedWidth(WINDOW_W - CHIP_W - FOCUS_LAST_W - 32.0f);
     mFocusedLabel.SetRequestedHeight(CHIP_H);
-    mFocusedLabel.SetRequestedPositionX(CHIP_W + FOCUS_LAST_W + 24.0f);
-    mFocusedLabel.SetRequestedPositionY(ROW1_Y);
+    mFocusedLabel.SetRequestedX(CHIP_W + FOCUS_LAST_W + 24.0f);
+    mFocusedLabel.SetRequestedY(ROW1_Y);
     mFocusedLabel.SetTextColor(Color::WHITE);
     panel.Add(mFocusedLabel);
 
@@ -361,8 +361,8 @@ private:
       mModeChips[i].SetBackgroundColor(i == 0 ? COLOR_MODE_ON : COLOR_INACTIVE);
       mModeChips[i].SetRequestedWidth(MODE_CHIP_W);
       mModeChips[i].SetRequestedHeight(CHIP_H);
-      mModeChips[i].SetRequestedPositionX(x);
-      mModeChips[i].SetRequestedPositionY(ROW2_Y);
+      mModeChips[i].SetRequestedX(x);
+      mModeChips[i].SetRequestedY(ROW2_Y);
       mModeChips[i].SetProperty(View::Property::CORNER_RADIUS, Vector4(6, 6, 6, 6));
       Label modeLabel = Label::New(MODE_NAMES[i]);
       modeLabel.SetRequestedWidth(MODE_CHIP_W);
@@ -379,24 +379,24 @@ private:
     Label peekTitle = Label::New("Peek:");
     peekTitle.SetRequestedWidth(52.0f);
     peekTitle.SetRequestedHeight(CHIP_H);
-    peekTitle.SetRequestedPositionX(8.0f);
-    peekTitle.SetRequestedPositionY(ROW3_Y);
+    peekTitle.SetRequestedX(8.0f);
+    peekTitle.SetRequestedY(ROW3_Y);
     peekTitle.SetTextColor(Color::WHITE);
     panel.Add(peekTitle);
 
     mPeekLabel = Label::New("0 px");
     mPeekLabel.SetRequestedWidth(80.0f);
     mPeekLabel.SetRequestedHeight(CHIP_H);
-    mPeekLabel.SetRequestedPositionX(64.0f);
-    mPeekLabel.SetRequestedPositionY(ROW3_Y);
+    mPeekLabel.SetRequestedX(64.0f);
+    mPeekLabel.SetRequestedY(ROW3_Y);
     mPeekLabel.SetTextColor(Color::WHITE);
     panel.Add(mPeekLabel);
 
     Label peekHint = Label::New("( +/- keys to adjust )");
     peekHint.SetRequestedWidth(WINDOW_W - 64.0f - 80.0f - 8.0f);
     peekHint.SetRequestedHeight(CHIP_H);
-    peekHint.SetRequestedPositionX(64.0f + 80.0f + 8.0f);
-    peekHint.SetRequestedPositionY(ROW3_Y);
+    peekHint.SetRequestedX(64.0f + 80.0f + 8.0f);
+    peekHint.SetRequestedY(ROW3_Y);
     peekHint.SetTextColor(Color::WHITE);
     panel.Add(peekHint);
 
@@ -407,8 +407,8 @@ private:
     mKeyScrollChip.SetBackgroundColor(COLOR_INACTIVE);
     mKeyScrollChip.SetRequestedWidth(CHIP_W);
     mKeyScrollChip.SetRequestedHeight(CHIP_H);
-    mKeyScrollChip.SetRequestedPositionX(8.0f);
-    mKeyScrollChip.SetRequestedPositionY(ROW4_Y);
+    mKeyScrollChip.SetRequestedX(8.0f);
+    mKeyScrollChip.SetRequestedY(ROW4_Y);
     mKeyScrollChip.SetProperty(View::Property::CORNER_RADIUS, Vector4(6, 6, 6, 6));
     Label keyScrollLabel = Label::New("KeyScroll: OFF");
     keyScrollLabel.SetRequestedWidth(CHIP_W);
@@ -421,8 +421,8 @@ private:
     mKeyScrollStepLabel = Label::New("Step: 150 px");
     mKeyScrollStepLabel.SetRequestedWidth(WINDOW_W - CHIP_W - 24.0f);
     mKeyScrollStepLabel.SetRequestedHeight(CHIP_H);
-    mKeyScrollStepLabel.SetRequestedPositionX(CHIP_W + 16.0f);
-    mKeyScrollStepLabel.SetRequestedPositionY(ROW4_Y);
+    mKeyScrollStepLabel.SetRequestedX(CHIP_W + 16.0f);
+    mKeyScrollStepLabel.SetRequestedY(ROW4_Y);
     mKeyScrollStepLabel.SetTextColor(Color::WHITE);
     panel.Add(mKeyScrollStepLabel);
 
@@ -430,8 +430,8 @@ private:
     Label keyHint = Label::New("Keys: ↑↓ focus  F focus-last  S scroll-on-focus  1~4 mode  +/- peek  K key-scroll  [/] step  E edge-effect");
     keyHint.SetRequestedWidth(WINDOW_W - 8.0f);
     keyHint.SetRequestedHeight(22.0f);
-    keyHint.SetRequestedPositionX(8.0f);
-    keyHint.SetRequestedPositionY(ROW4_Y + CHIP_H + 2.0f);
+    keyHint.SetRequestedX(8.0f);
+    keyHint.SetRequestedY(ROW4_Y + CHIP_H + 2.0f);
     keyHint.SetTextColor(Color::WHITE);
     panel.Add(keyHint);
 
@@ -591,7 +591,7 @@ private:
         Label gapLabel = Label::New(gapOss.str().c_str());
         gapLabel.SetRequestedWidth(MATCH_PARENT);
         gapLabel.SetRequestedHeight(GAP_H * 0.3f);
-        gapLabel.SetRequestedPositionY(GAP_H * 0.35f);
+        gapLabel.SetRequestedY(GAP_H * 0.35f);
         View gap = View::New();
         gap.SetBackgroundColor(Vector4(0.75f, 0.78f, 0.82f, 1.0f));
         gap.SetRequestedWidth(MATCH_PARENT);
@@ -619,8 +619,8 @@ private:
       Label nameLabel = Label::New(nameOss.str().c_str());
       nameLabel.SetRequestedWidth(WINDOW_W - 2 * CONTENT_PAD);
       nameLabel.SetRequestedHeight(ITEM_H * 0.6f);
-      nameLabel.SetRequestedPositionX(0.0f);
-      nameLabel.SetRequestedPositionY(ITEM_H * 0.1f);
+      nameLabel.SetRequestedX(0.0f);
+      nameLabel.SetRequestedY(ITEM_H * 0.1f);
       item.Add(nameLabel);
 
       // Hint label (small, bottom)
@@ -633,8 +633,8 @@ private:
       Label hintLabel = Label::New(hintOss.str().c_str());
       hintLabel.SetRequestedWidth(WINDOW_W - 2 * CONTENT_PAD);
       hintLabel.SetRequestedHeight(ITEM_H * 0.3f);
-      hintLabel.SetRequestedPositionX(0.0f);
-      hintLabel.SetRequestedPositionY(ITEM_H * 0.65f);
+      hintLabel.SetRequestedX(0.0f);
+      hintLabel.SetRequestedY(ITEM_H * 0.65f);
       item.Add(hintLabel);
 
       mFocusItems[i]      = item;
@@ -657,8 +657,8 @@ private:
     mScrollView.SetKeyScrollStep(KEY_SCROLL_STEP);
     mScrollView.SetRequestedWidth(WINDOW_W);
     mScrollView.SetRequestedHeight(SCROLL_VIEW_H);
-    mScrollView.SetRequestedPositionX(0.0f);
-    mScrollView.SetRequestedPositionY(SCROLL_Y);
+    mScrollView.SetRequestedX(0.0f);
+    mScrollView.SetRequestedY(SCROLL_Y);
     mScrollView.SetBackgroundColor(Vector4(0.9f, 0.9f, 0.9f, 1.0f));
     mScrollView.SetContent(content);
 

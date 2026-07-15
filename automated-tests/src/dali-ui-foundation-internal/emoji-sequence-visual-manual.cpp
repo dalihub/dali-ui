@@ -2538,8 +2538,8 @@ private:
   {
     mSearchOverlay = AbsoluteLayout::New();
     mSearchOverlay.SetLayoutMode(LayoutMode::STANDALONE);
-    mSearchOverlay.SetRequestedPositionX(0.0f);
-    mSearchOverlay.SetRequestedPositionY(0.0f);
+    mSearchOverlay.SetRequestedX(0.0f);
+    mSearchOverlay.SetRequestedY(0.0f);
     mSearchOverlay.SetBackgroundColor(Color::TRANSPARENT);
 
     mSearchDismissLayer = View::New();
@@ -2591,8 +2591,8 @@ private:
     mSearchIcon.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     mSearchIcon.SetVerticalTextAlignment(Text::Alignment::CENTER);
     mSearchIcon.SetTextOverflowMode(Text::OverflowMode::CLIP);
-    mSearchIcon.SetRequestedPositionX(0.0f);
-    mSearchIcon.SetRequestedPositionY(-1.0f);
+    mSearchIcon.SetRequestedX(0.0f);
+    mSearchIcon.SetRequestedY(-1.0f);
     mSearchIcon.SetRequestedWidth(FLOATING_SEARCH_BUTTON_SIZE);
     mSearchIcon.SetRequestedHeight(FLOATING_SEARCH_BUTTON_SIZE);
     mSearchIcon.TouchEventSignal().Connect(this, &EmojiVisualController::OnSearchButtonTouched);
@@ -2637,8 +2637,8 @@ private:
       return;
     }
 
-    view.SetRequestedPositionX(x);
-    view.SetRequestedPositionY(y);
+    view.SetRequestedX(x);
+    view.SetRequestedY(y);
     view.SetRequestedWidth(width);
     view.SetRequestedHeight(height);
     Dali::Ui::Extension::SetPositionX(view, x);
@@ -2820,8 +2820,8 @@ private:
   {
     mPreviewOverlay = AbsoluteLayout::New();
     mPreviewOverlay.SetLayoutMode(LayoutMode::STANDALONE);
-    mPreviewOverlay.SetRequestedPositionX(0.0f);
-    mPreviewOverlay.SetRequestedPositionY(0.0f);
+    mPreviewOverlay.SetRequestedX(0.0f);
+    mPreviewOverlay.SetRequestedY(0.0f);
     mPreviewOverlay.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.70f));
     mPreviewOverlay.SetProperty(Actor::Property::VISIBLE, false);
     mPreviewOverlay.SetProperty(Actor::Property::DRAW_MODE, DrawMode::OVERLAY_2D);

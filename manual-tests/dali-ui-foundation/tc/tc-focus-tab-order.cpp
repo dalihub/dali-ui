@@ -124,14 +124,14 @@ private:
 
     // Index 0 at x=200, index 1 at x=100, index 2 at x=0
     mS1[0] = CreateView("v0(idx0)", 0);
-    mS1[0].SetRequestedPositionX(200.0f);
-    mS1[0].SetRequestedPositionY(0.0f);
+    mS1[0].SetRequestedX(200.0f);
+    mS1[0].SetRequestedY(0.0f);
     mS1[1] = CreateView("v1(idx1)", 1);
-    mS1[1].SetRequestedPositionX(100.0f);
-    mS1[1].SetRequestedPositionY(0.0f);
+    mS1[1].SetRequestedX(100.0f);
+    mS1[1].SetRequestedY(0.0f);
     mS1[2] = CreateView("v2(idx2)", 2);
-    mS1[2].SetRequestedPositionX(0.0f);
-    mS1[2].SetRequestedPositionY(0.0f);
+    mS1[2].SetRequestedX(0.0f);
+    mS1[2].SetRequestedY(0.0f);
     container.Add(mS1[0]);
     container.Add(mS1[1]);
     container.Add(mS1[2]);
@@ -147,26 +147,26 @@ private:
     FocusManager::Get().SetAsFocusGroup(container, true);
 
     auto groupA = View::New();
-    groupA.SetRequestedPositionX(0.0f);
-    groupA.SetRequestedPositionY(0.0f);
+    groupA.SetRequestedX(0.0f);
+    groupA.SetRequestedY(0.0f);
     groupA.SetRequestedWidth(100.0f);
     groupA.SetRequestedHeight(MATCH_PARENT);
     mS2[0] = CreateView("a1", 0);
-    mS2[0].SetRequestedPositionY(0.0f);
+    mS2[0].SetRequestedY(0.0f);
     mS2[1] = CreateView("a2", 1);
-    mS2[1].SetRequestedPositionY(30.0f);
+    mS2[1].SetRequestedY(30.0f);
     groupA.Add(mS2[0]);
     groupA.Add(mS2[1]);
 
     auto groupB = View::New();
-    groupB.SetRequestedPositionX(120.0f);
-    groupB.SetRequestedPositionY(0.0f);
+    groupB.SetRequestedX(120.0f);
+    groupB.SetRequestedY(0.0f);
     groupB.SetRequestedWidth(100.0f);
     groupB.SetRequestedHeight(MATCH_PARENT);
     mS2[2] = CreateView("b1", 2);
-    mS2[2].SetRequestedPositionY(0.0f);
+    mS2[2].SetRequestedY(0.0f);
     mS2[3] = CreateView("b2", 3);
-    mS2[3].SetRequestedPositionY(30.0f);
+    mS2[3].SetRequestedY(30.0f);
     groupB.Add(mS2[2]);
     groupB.Add(mS2[3]);
 
@@ -186,18 +186,18 @@ private:
     float cx = 150.0f, cy = 80.0f;
 
     mS3[0] = CreateView("large", 0);
-    mS3[0].SetRequestedPositionX(cx - 70.0f);
-    mS3[0].SetRequestedPositionY(cy - 70.0f);
+    mS3[0].SetRequestedX(cx - 70.0f);
+    mS3[0].SetRequestedY(cy - 70.0f);
     mS3[0].SetRequestedWidth(140.0f);
     mS3[0].SetRequestedHeight(140.0f);
     mS3[1] = CreateView("medium", 1);
-    mS3[1].SetRequestedPositionX(cx - 45.0f);
-    mS3[1].SetRequestedPositionY(cy - 45.0f);
+    mS3[1].SetRequestedX(cx - 45.0f);
+    mS3[1].SetRequestedY(cy - 45.0f);
     mS3[1].SetRequestedWidth(90.0f);
     mS3[1].SetRequestedHeight(90.0f);
     mS3[2] = CreateView("small", 2);
-    mS3[2].SetRequestedPositionX(cx - 20.0f);
-    mS3[2].SetRequestedPositionY(cy - 20.0f);
+    mS3[2].SetRequestedX(cx - 20.0f);
+    mS3[2].SetRequestedY(cy - 20.0f);
     mS3[2].SetRequestedWidth(40.0f);
     mS3[2].SetRequestedHeight(40.0f);
 

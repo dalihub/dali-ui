@@ -156,8 +156,8 @@ private:
     Label label = Label::New(text);
     label.SetFontSize(15.0f);
     label.SetTextColor(UiColor(0xFFFFFFu));
-    label.SetRequestedPositionX(12.0f);
-    label.SetRequestedPositionY(28.0f);
+    label.SetRequestedX(12.0f);
+    label.SetRequestedY(28.0f);
     button.Add(label);
 
     button.ConnectClickedSignal(this, [onClicked](View, InputEvent) { onClicked(); });

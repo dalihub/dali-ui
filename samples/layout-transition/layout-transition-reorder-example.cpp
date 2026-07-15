@@ -32,7 +32,7 @@ using namespace Dali::Ui;
  * edit mode, pressing a child removes it from the StackLayout, floats
  * it under the window at its press-time world bounds, and inserts a
  * same-sized invisible (OPACITY 0) proxy into its slot to reserve the
- * layout space. Drag moves the floating child by RequestedPosition;
+ * layout space. Drag moves the floating child by RequestedX/Y;
  * each time the child's world Y crosses a sibling's Y the proxy is
  * Inserted at the new index and the CHANGE slot animates the sibling
  * reflow. When the finger approaches the top / bottom edge of the
@@ -470,12 +470,12 @@ private:
     // window level does not resize it to fill the window. The original
     // request values were saved above and are restored on FinishDrag.
     // (View defaults to TOP_LEFT origin/pivot with POSITION_USES_PIVOT
-    // false, so RequestedPosition X/Y already places the child's
+    // false, so RequestedX/Y already places the child's
     // top-left at the requested coordinates in window space.)
     mDraggedChild.SetRequestedWidth(bounds.width);
     mDraggedChild.SetRequestedHeight(bounds.height);
-    mDraggedChild.SetRequestedPositionX(bounds.x);
-    mDraggedChild.SetRequestedPositionY(bounds.y);
+    mDraggedChild.SetRequestedX(bounds.x);
+    mDraggedChild.SetRequestedY(bounds.y);
     mWindow.Add(mDraggedChild);
     mDraggedChild.RaiseToTop(LayoutOrderPolicy::PRESERVE);
 
@@ -504,11 +504,11 @@ private:
     const float draggedY    = std::clamp(rootPosition.y - mDragGrabOffsetY, minY, maxY);
     mDragBounds.y           = draggedY;
 
-    // Drive position through RequestedPosition: the dragged child is a
+    // Drive position through RequestedX/Y: the dragged child is a
     // layout root under the window, and its OnArrange writes POSITION_X/Y
-    // from GetRequestedPositionX/Y.
-    mDraggedChild.SetRequestedPositionX(mDragBounds.x);
-    mDraggedChild.SetRequestedPositionY(mDragBounds.y);
+    // from GetRequestedX/Y.
+    mDraggedChild.SetRequestedX(mDragBounds.x);
+    mDraggedChild.SetRequestedY(mDragBounds.y);
 
     const uint32_t targetIndex = ComputeTargetIndexFromDraggedY(mDragBounds.y);
     if(targetIndex != mDraggedIndex)
@@ -576,8 +576,8 @@ private:
     const float stackWorldY = GetStackWorldY();
     const float dropStackX  = dragBounds.x - stackWorldX;
     const float dropStackY  = dragBounds.y - stackWorldY;
-    droppedChild.SetRequestedPositionX(dropStackX);
-    droppedChild.SetRequestedPositionY(dropStackY);
+    droppedChild.SetRequestedX(dropStackX);
+    droppedChild.SetRequestedY(dropStackY);
     // Drive the layout pass synchronously so the Arrange that writes
     // mArrangedBounds happens BEFORE the swap below — between the swap
     // and the next mStack layout pass nothing else calls Arrange on the
@@ -602,13 +602,13 @@ private:
     // into a normal slot (e.g. MATCH_PARENT width). Clear the explicit
     // position so the parent arrange — not the floating layout-root path
     // — owns the final placement. These setters only flip RequestedW/H
-    // and RequestedPosition; they do NOT call Arrange, so the
+    // and RequestedX/Y; they do NOT call Arrange, so the
     // mArrangedBounds value baked above is preserved until the next
     // mStack layout pass takes its snapshot.
     droppedChild.SetRequestedWidth(originalReqW);
     droppedChild.SetRequestedHeight(originalReqH);
-    droppedChild.SetRequestedPositionX(0.0f);
-    droppedChild.SetRequestedPositionY(0.0f);
+    droppedChild.SetRequestedX(0.0f);
+    droppedChild.SetRequestedY(0.0f);
     mStack.Insert(targetIndex, droppedChild);
 
     mStack.SetLayoutTransition(savedTransition);

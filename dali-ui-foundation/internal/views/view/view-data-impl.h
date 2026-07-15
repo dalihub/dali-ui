@@ -190,10 +190,10 @@ public:
   bool                          NotifyKeyEvent(const KeyEvent& event);
 
   Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
-  void                        SetRequestedPositionX(float x);
-  void                        SetRequestedPositionY(float y);
-  float                       GetRequestedPositionX() const;
-  float                       GetRequestedPositionY() const;
+  void                        SetRequestedX(float x);
+  void                        SetRequestedY(float y);
+  float                       GetRequestedX() const;
+  float                       GetRequestedY() const;
   void                        SetUiScalePolicy(UiScalePolicy policy);
   UiScalePolicy               GetUiScalePolicy() const;
   float                       GetEffectiveScale() const;
@@ -885,8 +885,8 @@ private:
   View::FocusChangedSignalType         mFocusChangedSignal;
   View::LayoutFinishedSignalType       mLayoutFinishedSignal;
 
-  float                                 mRequestedPositionX;
-  float                                 mRequestedPositionY;
+  float                                 mRequestedX;
+  float                                 mRequestedY;
   MeasuredSize                          mMeasuredSize; ///< mLastMeasuredConstraint.width < 0 means no valid measure cache
   MeasuredSize                          mLastMeasuredConstraint;
   LayoutRect                            mArrangedBounds;

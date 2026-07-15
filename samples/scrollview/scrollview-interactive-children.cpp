@@ -90,14 +90,14 @@ public:
     mStatusBar.SetBackgroundColor(COLOR_STATUS_BG);
     mStatusBar.SetRequestedWidth(WINDOW_WIDTH);
     mStatusBar.SetRequestedHeight(STATUS_BAR_HEIGHT);
-    mStatusBar.SetRequestedPositionX(0.0f);
-    mStatusBar.SetRequestedPositionY(0.0f);
+    mStatusBar.SetRequestedX(0.0f);
+    mStatusBar.SetRequestedY(0.0f);
 
     mStatusLabel = Label::New("Tap an item or scroll the list");
     mStatusLabel.SetRequestedWidth(WINDOW_WIDTH - 20.0f);
     mStatusLabel.SetRequestedHeight(STATUS_BAR_HEIGHT);
-    mStatusLabel.SetRequestedPositionX(10.0f);
-    mStatusLabel.SetRequestedPositionY(0.0f);
+    mStatusLabel.SetRequestedX(10.0f);
+    mStatusLabel.SetRequestedY(0.0f);
     mStatusBar.Add(mStatusLabel);
     window.Add(mStatusBar);
 
@@ -131,8 +131,8 @@ public:
     mScrollView.SetOverScrollMode(OverScrollMode::ContentScrolls);
     mScrollView.SetRequestedWidth(WINDOW_WIDTH);
     mScrollView.SetRequestedHeight(scrollViewHeight);
-    mScrollView.SetRequestedPositionX(0.0f);
-    mScrollView.SetRequestedPositionY(STATUS_BAR_HEIGHT);
+    mScrollView.SetRequestedX(0.0f);
+    mScrollView.SetRequestedY(STATUS_BAR_HEIGHT);
     mScrollView.SetContent(content);
 
     mScrollView.ScrollStartedSignal().Connect(this, &ScrollInteractiveChildrenController::OnScrollStarted);
@@ -165,7 +165,7 @@ private:
     Label text = Label::New(oss.str().c_str());
     text.SetRequestedWidth(WINDOW_WIDTH - 32.0f);
     text.SetRequestedHeight(ITEM_HEIGHT);
-    text.SetRequestedPositionX(16.0f);
+    text.SetRequestedX(16.0f);
     text.SetFocusable(true);
     item.Add(text);
 

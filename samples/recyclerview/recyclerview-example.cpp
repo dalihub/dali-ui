@@ -340,8 +340,8 @@ private:
     Label title = Label::New("RecyclerView  |  Key scroll + focusability mix sample");
     title.SetRequestedWidth(WINDOW_W - 32.0f);
     title.SetRequestedHeight(30.0f);
-    title.SetRequestedPositionX(16.0f);
-    title.SetRequestedPositionY(8.0f);
+    title.SetRequestedX(16.0f);
+    title.SetRequestedY(8.0f);
     title.SetTextColor(COLOR_WHITE);
     header.Add(title);
 
@@ -349,8 +349,8 @@ private:
     mStatsLabel = Label::New("--");
     mStatsLabel.SetRequestedWidth(WINDOW_W - 32.0f);
     mStatsLabel.SetRequestedHeight(22.0f);
-    mStatsLabel.SetRequestedPositionX(16.0f);
-    mStatsLabel.SetRequestedPositionY(42.0f);
+    mStatsLabel.SetRequestedX(16.0f);
+    mStatsLabel.SetRequestedY(42.0f);
     mStatsLabel.SetTextColor(COLOR_SLATE);
     header.Add(mStatsLabel);
 
@@ -358,8 +358,8 @@ private:
     mFocusInfoLabel = Label::New("Focus: none");
     mFocusInfoLabel.SetRequestedWidth(WINDOW_W - 32.0f);
     mFocusInfoLabel.SetRequestedHeight(22.0f);
-    mFocusInfoLabel.SetRequestedPositionX(16.0f);
-    mFocusInfoLabel.SetRequestedPositionY(68.0f);
+    mFocusInfoLabel.SetRequestedX(16.0f);
+    mFocusInfoLabel.SetRequestedY(68.0f);
     mFocusInfoLabel.SetTextColor(UiColor(0xFDE047));
     header.Add(mFocusInfoLabel);
 
@@ -367,8 +367,8 @@ private:
     mScrollStateLabel = Label::New("Scroll: IDLE");
     mScrollStateLabel.SetRequestedWidth(WINDOW_W - 32.0f);
     mScrollStateLabel.SetRequestedHeight(22.0f);
-    mScrollStateLabel.SetRequestedPositionX(16.0f);
-    mScrollStateLabel.SetRequestedPositionY(94.0f);
+    mScrollStateLabel.SetRequestedX(16.0f);
+    mScrollStateLabel.SetRequestedY(94.0f);
     mScrollStateLabel.SetTextColor(COLOR_GREEN_BRIGHT);
     header.Add(mScrollStateLabel);
 
@@ -379,8 +379,8 @@ private:
       "   Keys: Up/Down/PgUp/PgDn/Home/End");
     hint.SetRequestedWidth(WINDOW_W - 32.0f);
     hint.SetRequestedHeight(28.0f);
-    hint.SetRequestedPositionX(16.0f);
-    hint.SetRequestedPositionY(118.0f);
+    hint.SetRequestedX(16.0f);
+    hint.SetRequestedY(118.0f);
     hint.SetTextColor(COLOR_SLATE);
     header.Add(hint);
 
@@ -398,7 +398,7 @@ private:
     mRecyclerView = RecyclerView::New();
     mRecyclerView.SetRequestedWidth(WINDOW_W);
     mRecyclerView.SetRequestedHeight(WINDOW_H - HEADER_H);
-    mRecyclerView.SetRequestedPositionY(HEADER_H);
+    mRecyclerView.SetRequestedY(HEADER_H);
     mRecyclerView.SetCacheExtent(ROW_H * 2.0f, ROW_H * 2.0f);
     mRecyclerView.SetItemsLayouter(mLayouter);
     mRecyclerView.SetAdapter(mAdapter);

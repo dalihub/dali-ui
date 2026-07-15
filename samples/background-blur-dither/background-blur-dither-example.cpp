@@ -127,8 +127,8 @@ private:
     mImageBoard.SetLayoutMode(LayoutMode::STANDALONE);
     mImageBoard.SetRequestedWidth(MATCH_PARENT);
     mImageBoard.SetRequestedHeight(MATCH_PARENT);
-    mImageBoard.SetRequestedPositionX(0.0f);
-    mImageBoard.SetRequestedPositionY(0.0f);
+    mImageBoard.SetRequestedX(0.0f);
+    mImageBoard.SetRequestedY(0.0f);
     mImageBoard.SetBackgroundColor(Color::TRANSPARENT);
     mImageBoard.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     mImageBoard.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -151,8 +151,8 @@ private:
         image.SetLayoutMode(LayoutMode::STANDALONE);
         image.SetRequestedWidth(IMAGE_SIZE);
         image.SetRequestedHeight(IMAGE_SIZE);
-        image.SetRequestedPositionX(startX + strideX * column);
-        image.SetRequestedPositionY(startY + strideY * row);
+        image.SetRequestedX(startX + strideX * column);
+        image.SetRequestedY(startY + strideY * row);
         image.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
         image.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
         mImageBoard.Add(image);
@@ -170,8 +170,8 @@ private:
     mBlurPane.SetLayoutMode(LayoutMode::STANDALONE);
     mBlurPane.SetRequestedWidth(MATCH_PARENT);
     mBlurPane.SetRequestedHeight(MATCH_PARENT);
-    mBlurPane.SetRequestedPositionX(0.0f);
-    mBlurPane.SetRequestedPositionY(0.0f);
+    mBlurPane.SetRequestedX(0.0f);
+    mBlurPane.SetRequestedY(0.0f);
     mBlurPane.SetBackgroundColor(Color::TRANSPARENT);
     mBlurPane.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     mBlurPane.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
@@ -195,8 +195,8 @@ private:
     mStatusLabel.SetLayoutMode(LayoutMode::STANDALONE);
     mStatusLabel.SetRequestedWidth(260.0f);
     mStatusLabel.SetRequestedHeight(40.0f);
-    mStatusLabel.SetRequestedPositionX(static_cast<float>(windowSize.width) - 284.0f);
-    mStatusLabel.SetRequestedPositionY(24.0f);
+    mStatusLabel.SetRequestedX(static_cast<float>(windowSize.width) - 284.0f);
+    mStatusLabel.SetRequestedY(24.0f);
     mStatusLabel.SetFontSize(14.0f);
     mStatusLabel.SetTextColor(UiColor(0xFFFFFF));
     mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::END);
@@ -216,8 +216,8 @@ private:
     mHelpLabel.SetLayoutMode(LayoutMode::STANDALONE);
     mHelpLabel.SetRequestedWidth(static_cast<float>(windowSize.width) - HELP_MARGIN * 2.0f);
     mHelpLabel.SetRequestedHeight(HELP_HEIGHT);
-    mHelpLabel.SetRequestedPositionX(HELP_MARGIN);
-    mHelpLabel.SetRequestedPositionY(static_cast<float>(windowSize.height) - HELP_HEIGHT - HELP_MARGIN);
+    mHelpLabel.SetRequestedX(HELP_MARGIN);
+    mHelpLabel.SetRequestedY(static_cast<float>(windowSize.height) - HELP_HEIGHT - HELP_MARGIN);
     mHelpLabel.SetFontSize(15.0f);
     mHelpLabel.SetTextColor(UiColor(0xFFE66D));
     mHelpLabel.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.68f));
@@ -263,9 +263,9 @@ private:
     mRoot.SetProperty(Actor::Property::SIZE, Vector2(windowSize.GetWidth(), windowSize.GetHeight()));
     mImageBoard.SetProperty(Actor::Property::SIZE, Vector2(windowSize.GetWidth(), windowSize.GetHeight()));
     mBlurPane.SetProperty(Actor::Property::SIZE, Vector2(windowSize.GetWidth(), windowSize.GetHeight()));
-    mStatusLabel.SetRequestedPositionX(static_cast<float>(windowSize.GetWidth()) - 284.0f);
+    mStatusLabel.SetRequestedX(static_cast<float>(windowSize.GetWidth()) - 284.0f);
     mHelpLabel.SetRequestedWidth(static_cast<float>(windowSize.GetWidth()) - HELP_MARGIN * 2.0f);
-    mHelpLabel.SetRequestedPositionY(static_cast<float>(windowSize.GetHeight()) - HELP_HEIGHT - HELP_MARGIN);
+    mHelpLabel.SetRequestedY(static_cast<float>(windowSize.GetHeight()) - HELP_HEIGHT - HELP_MARGIN);
   }
 
   void OnKeyEvent(Window window, KeyEvent event)

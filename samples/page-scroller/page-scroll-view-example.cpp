@@ -103,15 +103,15 @@ private:
     panel.SetBackgroundColor(COLOR_INFO_BG);
     panel.SetRequestedWidth(WINDOW_W);
     panel.SetRequestedHeight(INFO_H);
-    panel.SetRequestedPositionX(0.0f);
-    panel.SetRequestedPositionY(0.0f);
+    panel.SetRequestedX(0.0f);
+    panel.SetRequestedY(0.0f);
 
     // Page counter label (top-left)
     mPageLabel = Label::New("Page 1 / 5");
     mPageLabel.SetRequestedWidth(220.0f);
     mPageLabel.SetRequestedHeight(40.0f);
-    mPageLabel.SetRequestedPositionX(12.0f);
-    mPageLabel.SetRequestedPositionY(4.0f);
+    mPageLabel.SetRequestedX(12.0f);
+    mPageLabel.SetRequestedY(4.0f);
     mPageLabel.SetTextColor(Color::WHITE);
     panel.Add(mPageLabel);
 
@@ -119,8 +119,8 @@ private:
     mScrollPosLabel = Label::New("ScrollPos: 0");
     mScrollPosLabel.SetRequestedWidth(250.0f);
     mScrollPosLabel.SetRequestedHeight(40.0f);
-    mScrollPosLabel.SetRequestedPositionX(240.0f);
-    mScrollPosLabel.SetRequestedPositionY(4.0f);
+    mScrollPosLabel.SetRequestedX(240.0f);
+    mScrollPosLabel.SetRequestedY(4.0f);
     mScrollPosLabel.SetTextColor(Color::WHITE);
     panel.Add(mScrollPosLabel);
 
@@ -128,8 +128,8 @@ private:
     Label hint = Label::New("← → nav   1-5 jump   ESC");
     hint.SetRequestedWidth(WINDOW_W - 24.0f);
     hint.SetRequestedHeight(34.0f);
-    hint.SetRequestedPositionX(12.0f);
-    hint.SetRequestedPositionY(50.0f);
+    hint.SetRequestedX(12.0f);
+    hint.SetRequestedY(50.0f);
     hint.SetTextColor(Color::WHITE);
     panel.Add(hint);
 
@@ -171,8 +171,8 @@ private:
       Label nameLabel = Label::New(PAGE_NAMES[i]);
       nameLabel.SetRequestedWidth(PAGE_W - 40.0f);
       nameLabel.SetRequestedHeight(80.0f);
-      nameLabel.SetRequestedPositionX(20.0f);
-      nameLabel.SetRequestedPositionY(PAGE_H * 0.4f);
+      nameLabel.SetRequestedX(20.0f);
+      nameLabel.SetRequestedY(PAGE_H * 0.4f);
       nameLabel.SetTextColor(Color::WHITE);
       nameLabel.SetProperty(Label::Property::FONT_SIZE, 32.0f);
       page.Add(nameLabel);
@@ -183,8 +183,8 @@ private:
       Label hintLabel = Label::New(hint.str().c_str());
       hintLabel.SetRequestedWidth(PAGE_W - 40.0f);
       hintLabel.SetRequestedHeight(40.0f);
-      hintLabel.SetRequestedPositionX(20.0f);
-      hintLabel.SetRequestedPositionY(PAGE_H * 0.5f + 50.0f);
+      hintLabel.SetRequestedX(20.0f);
+      hintLabel.SetRequestedY(PAGE_H * 0.5f + 50.0f);
       hintLabel.SetTextColor(Color::WHITE);
       page.Add(hintLabel);
 
@@ -199,8 +199,8 @@ private:
     mPageScrollView.SetMaxFlingDistance(PAGE_W * PAGE_COUNT);
     mPageScrollView.SetRequestedWidth(WINDOW_W);
     mPageScrollView.SetRequestedHeight(SCROLL_H);
-    mPageScrollView.SetRequestedPositionX(0.0f);
-    mPageScrollView.SetRequestedPositionY(SCROLL_Y);
+    mPageScrollView.SetRequestedX(0.0f);
+    mPageScrollView.SetRequestedY(SCROLL_Y);
     mPageScrollView.SetContent(content);
 
     window.Add(mPageScrollView);

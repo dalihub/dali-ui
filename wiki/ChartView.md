@@ -102,9 +102,9 @@ window.Add(root);
 ```
 
 ```cpp
-// Method 2: SetRequestedPositionX/Y without a separate layout params object
-chart.SetRequestedPositionX(20.0f);
-chart.SetRequestedPositionY(60.0f);
+// Method 2: SetRequestedX/Y without a separate layout params object
+chart.SetRequestedX(20.0f);
+chart.SetRequestedY(60.0f);
 window.Add(chart);
 ```
 
@@ -1043,8 +1043,8 @@ window.Add(root);
 
 ```cpp
 // Size is fixed by ChartView::New(); only position needs setting
-chart.SetRequestedPositionX(50.0f);
-chart.SetRequestedPositionY(100.0f);
+chart.SetRequestedX(50.0f);
+chart.SetRequestedY(100.0f);
 window.Add(chart);
 ```
 

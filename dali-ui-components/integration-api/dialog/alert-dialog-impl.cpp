@@ -132,8 +132,8 @@ void AlertDialogImpl::SetActionButtons(const std::vector<std::pair<Dali::String,
     Ui::Label label = Ui::Label::New(entry.first);
     label.SetFontSize(16.0f);
     label.SetTextColor(UiColor(0xFFFFFFu));
-    label.SetRequestedPositionX(16.0f);
-    label.SetRequestedPositionY(18.0f);
+    label.SetRequestedX(16.0f);
+    label.SetRequestedY(18.0f);
     button.Add(label);
 
     button.ConnectClickedSignal(this, &AlertDialogImpl::OnActionClicked);

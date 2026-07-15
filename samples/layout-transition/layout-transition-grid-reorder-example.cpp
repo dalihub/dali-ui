@@ -46,7 +46,7 @@ using namespace Dali::Ui;
  * long-pressing a cell floats it under the window at its press-time world
  * bounds and inserts a same-sized invisible (OPACITY 0) proxy into its
  * logical slot to reserve the grid space. Dragging moves the floating
- * cell by RequestedPosition; once the floating cell's world position moves
+ * cell by RequestedX/Y; once the floating cell's world position moves
  * past another cell's position by more than half a cell, the proxy is
  * moved to that cell's linear index and every cell's GridLayoutParams
  * Row/Column is reassigned, so the CHANGE slot animates the reflow.
@@ -485,8 +485,8 @@ private:
     // Float the cell under the window at its press-time position.
     cell.SetRequestedWidth(mDragBounds.width);
     cell.SetRequestedHeight(mDragBounds.height);
-    cell.SetRequestedPositionX(mDragBounds.x);
-    cell.SetRequestedPositionY(mDragBounds.y);
+    cell.SetRequestedX(mDragBounds.x);
+    cell.SetRequestedY(mDragBounds.y);
     mWindow.Add(cell);
     cell.RaiseToTop(LayoutOrderPolicy::PRESERVE);
     // Force the floating cell's layout pass so it lands at its requested world
@@ -521,8 +521,8 @@ private:
     mDragBounds.x = std::clamp(rootPosition.x - mDragGrabOffset.x, minX, maxX);
     mDragBounds.y = std::clamp(rootPosition.y - mDragGrabOffset.y, minY, maxY);
 
-    mDraggedChild.SetRequestedPositionX(mDragBounds.x);
-    mDraggedChild.SetRequestedPositionY(mDragBounds.y);
+    mDraggedChild.SetRequestedX(mDragBounds.x);
+    mDraggedChild.SetRequestedY(mDragBounds.y);
 
     const uint32_t targetIndex = ComputeTargetIndex(mDragBounds);
     if(targetIndex != mDraggedIndex)
@@ -575,8 +575,8 @@ private:
     // position rather than teleporting before sliding into the slot.
     const float dropGridX = dragBounds.x - GetGridWorldX();
     const float dropGridY = dragBounds.y - GetGridWorldY();
-    droppedChild.SetRequestedPositionX(dropGridX);
-    droppedChild.SetRequestedPositionY(dropGridY);
+    droppedChild.SetRequestedX(dropGridX);
+    droppedChild.SetRequestedY(dropGridY);
     LayoutController::Get(mWindow).ProcessLayouts();
 
     // Mirror BeginDrag's swap: detach the transition so removing the proxy and
@@ -592,8 +592,8 @@ private:
     }
     droppedChild.SetRequestedWidth(originalReqW);
     droppedChild.SetRequestedHeight(originalReqH);
-    droppedChild.SetRequestedPositionX(0.0f);
-    droppedChild.SetRequestedPositionY(0.0f);
+    droppedChild.SetRequestedX(0.0f);
+    droppedChild.SetRequestedY(0.0f);
     mGridItems[targetIndex] = droppedChild;
     mGrid.Add(droppedChild);
     ApplyGridOrder();

@@ -147,8 +147,8 @@ private:
     DALI_LOG_RELEASE_INFO("[WVLOG][init] WebView::New() -> handle=%s\n", mWebView ? "valid" : "EMPTY");
     mWebView.SetRequestedWidth(static_cast<float>(mWindowSize.width));
     mWebView.SetRequestedHeight(webViewHeight);
-    mWebView.SetRequestedPositionX(0.0f);
-    mWebView.SetRequestedPositionY(TOOLBAR_HEIGHT + STATUS_HEIGHT);
+    mWebView.SetRequestedX(0.0f);
+    mWebView.SetRequestedY(TOOLBAR_HEIGHT + STATUS_HEIGHT);
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetRequestedWidth(MATCH_PARENT);

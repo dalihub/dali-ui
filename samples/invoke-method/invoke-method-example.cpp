@@ -93,8 +93,8 @@ void Place(View view, const Vector3& position, const Vector3& size)
 {
   Invoke(view, "SetParentOrigin", ParentOrigin::TOP_LEFT);
   Invoke(view, "SetPivot", Pivot::TOP_LEFT);
-  Invoke(view, "SetRequestedPositionX", position.x);
-  Invoke(view, "SetRequestedPositionY", position.y);
+  Invoke(view, "SetRequestedX", position.x);
+  Invoke(view, "SetRequestedY", position.y);
   Invoke(view, "SetRequestedWidth", size.width);
   Invoke(view, "SetRequestedHeight", size.height);
 }

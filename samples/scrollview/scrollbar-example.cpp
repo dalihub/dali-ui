@@ -86,8 +86,8 @@ public:
     // scrollBar.SetHorizontalScrollBarVisibility(ScrollBarVisibility::Never);
     // scrollBar.SetRequestedWidth(600.0f);
     // scrollBar.SetRequestedHeight(50.0f);
-    // scrollBar.SetRequestedPositionX(0.0f);
-    // scrollBar.SetRequestedPositionY(1250.0f);
+    // scrollBar.SetRequestedX(0.0f);
+    // scrollBar.SetRequestedY(1250.0f);
     // window.Add(scrollBar);
   }
 

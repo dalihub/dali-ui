@@ -108,7 +108,7 @@ private:
     mToggleButton.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.65f));
     mToggleButton.SetRequestedWidth(TOGGLE_BUTTON_WIDTH);
     mToggleButton.SetRequestedHeight(TOGGLE_BUTTON_HEIGHT);
-    mToggleButton.SetRequestedPositionY(0.0f);
+    mToggleButton.SetRequestedY(0.0f);
     mToggleButton.SetLayoutMode(LayoutMode::STANDALONE);
     mToggleButton.SetLayoutDirection(Dali::LayoutDirection::LEFT_TO_RIGHT);
 
@@ -145,7 +145,7 @@ private:
 
   void PositionToggleButton(Window::WindowSize windowSize)
   {
-    mToggleButton.SetRequestedPositionX((static_cast<float>(windowSize.GetWidth()) - TOGGLE_BUTTON_WIDTH) * 0.5f);
+    mToggleButton.SetRequestedX((static_cast<float>(windowSize.GetWidth()) - TOGGLE_BUTTON_WIDTH) * 0.5f);
   }
 
   Application& mApplication;

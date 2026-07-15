@@ -850,8 +850,8 @@ private:
     // MATCH_PARENT roots fill the available constraint rather than using
     // their measured (minimum) size.
     LayoutRect bounds;
-    bounds.x      = (view->GetRequestedPositionX() + margin.start) * s;
-    bounds.y      = (view->GetRequestedPositionY() + margin.top) * s;
+    bounds.x      = (view->GetRequestedX() + margin.start) * s;
+    bounds.y      = (view->GetRequestedY() + margin.top) * s;
     bounds.width  = (layoutWidth == MATCH_PARENT) ? widthConstraint : measuredSize.width;
     bounds.height = (layoutHeight == MATCH_PARENT) ? heightConstraint : measuredSize.height;
 
