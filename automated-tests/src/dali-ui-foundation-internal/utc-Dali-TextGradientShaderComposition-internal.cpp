@@ -1675,18 +1675,10 @@ int UtcDaliTextGradientShaderCompositionAtlasVariantP(void)
   END_TEST;
 }
 
-#if 0 // FIXME
 int UtcDaliTextGradientShaderCompositionAtlasContentBoundsUnionP(void)
 {
-  UiText::LineRun lines[2];
-  lines[0].alignmentOffset = 20.0f;
-  lines[0].width           = 80.0f;
-  lines[0].ascender        = 15.0f;
-  lines[0].descender       = -5.0f;
-  lines[1].alignmentOffset = 50.0f;
-  lines[1].width           = 40.0f;
-  lines[1].ascender        = 12.0f;
-  lines[1].descender       = -4.0f;
+  UiText::LineRun lines[2] = {MakeLine(80.0f, 20.0f, 15.0f, -5.0f),
+                              MakeLine(40.0f, 50.0f, 12.0f, -4.0f)};
 
   const Vector4 bounds = TextInternal::CalculateAtlasGradientContentBounds(
     Vector2(200.0f, 100.0f), lines, 2u, 10.0f);
@@ -1694,7 +1686,6 @@ int UtcDaliTextGradientShaderCompositionAtlasContentBoundsUnionP(void)
   ExpectBounds(bounds, Vector4(0.05f, 0.0f, 0.4f, 0.36f));
   END_TEST;
 }
-#endif
 
 int UtcDaliTextGradientShaderCompositionAtlasContentBoundsEmptyLinePolicyP(void)
 {
