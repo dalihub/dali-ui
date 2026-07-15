@@ -29,7 +29,6 @@
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
-#include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
 #include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
@@ -58,6 +57,10 @@ namespace Ui
 {
 
 // Forward declarations
+class AbsoluteLayoutParams;
+class FlexLayoutParams;
+class GridLayoutParams;
+class StackLayoutParams;
 class LayoutManager;
 class LayoutTransition;
 class RenderEffect;
@@ -1020,10 +1023,12 @@ public:
   /**
    * @brief Sets layout parameters on this View.
    *
-   * The params handle is stored on the View as-is, and the View's
-   * measure cache is invalidated.
+   * The View stores an independent copy of the parameters and invalidates its
+   * measure cache. Changes made to @p params after this call do not affect the
+   * View.
    *
    * @param[in] params The layout parameters to attach to this View
+   *
    * @code
    * auto params = AbsoluteLayoutParams::New();
    * params.SetBounds(LayoutRect(10, 20, 100, 200));
@@ -1031,7 +1036,10 @@ public:
    * child.SetLayoutParams(params);
    * @endcode
    */
-  void SetLayoutParams(LayoutParams params);
+  void SetLayoutParams(const AbsoluteLayoutParams& params);
+  void SetLayoutParams(const FlexLayoutParams& params);
+  void SetLayoutParams(const GridLayoutParams& params);
+  void SetLayoutParams(const StackLayoutParams& params);
 
   /**
    * @brief Adds a list of visuals to this View in a declarative way.
@@ -1365,30 +1373,17 @@ public:
   void LowerBelow(View target, LayoutOrderPolicy policy);
 
   /**
-   * @brief Retrieves the layout parameters of a specific type attached to this View.
+   * @brief Copies the attached layout parameters into @p params.
    *
-   * Returns the stored handle. Modifying the returned handle directly
-   * changes the internal data. Call InvalidateMeasure() afterwards if
-   * the layout needs to be recalculated.
-   *
-   * @tparam T The concrete LayoutParams type (e.g. AbsoluteLayoutParams, FlexLayoutParams).
-   *           T must provide static GetLayoutParamsType() and static DownCast(BaseHandle).
-   * @return A valid handle if the params are attached, or an uninitialized handle
-   *
-   * @code
-   * auto params = view.GetLayoutParams<AbsoluteLayoutParams>();
-   * if (params)
-   * {
-   *   params.SetWidth(200.0f);
-   *   view.InvalidateMeasure();
-   * }
-   * @endcode
+   * @param[out] params Receives an independent copy of the attached parameters;
+   *                    left unchanged if none of the requested type are attached
+   * @return true if parameters of the requested type are attached; otherwise
+   *         false, leaving @p params unchanged
    */
-  template<typename T>
-  T GetLayoutParams() const
-  {
-    return T::DownCast(GetLayoutParamsInternal(T::GetLayoutParamsType()));
-  }
+  bool TryGetLayoutParams(AbsoluteLayoutParams& params) const;
+  bool TryGetLayoutParams(FlexLayoutParams& params) const;
+  bool TryGetLayoutParams(GridLayoutParams& params) const;
+  bool TryGetLayoutParams(StackLayoutParams& params) const;
 
 public: // State API (non-chaining)
   using StateChangedSignalType   = Signal<void(View, StateEvent)>;
@@ -1541,15 +1536,6 @@ public: // Not intended for application developers
    */
   explicit DALI_UI_API View(Dali::Internal::CustomActor* internal);
   /// @endcond
-
-private:
-  /**
-   * @brief Retrieves a layout params trait by LayoutParamsType.
-   *
-   * @param[in] type The layout params type identifier
-   * @return The trait as a BaseHandle, or an empty handle if not found
-   */
-  BaseHandle GetLayoutParamsInternal(LayoutParamsType type) const;
 
 public:
   /**

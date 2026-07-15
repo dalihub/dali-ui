@@ -612,19 +612,5 @@ inline AbsoluteLayoutFlags operator&(AbsoluteLayoutFlags lhs, AbsoluteLayoutFlag
   return static_cast<AbsoluteLayoutFlags>(static_cast<uint8_t>(lhs) & static_cast<uint8_t>(rhs));
 }
 
-/**
- * @brief Enumeration for identifying layout parameter types.
- *
- * Used by View::GetLayoutParams<T>() and View::SetLayoutParams()
- * to look up the correct layout parameters attached to a View.
- */
-enum class LayoutParamsType : uint8_t
-{
-  ABSOLUTE = 0,
-  STACK    = 1,
-  GRID     = 2,
-  FLEX     = 3
-};
-
 } // namespace Ui
 } // namespace Dali

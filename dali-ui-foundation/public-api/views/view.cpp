@@ -20,9 +20,13 @@
 #include <dali-ui-foundation/internal/views/view/view-renderers.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-bridge.autogen.h>
 #include <dali-ui-foundation/public-api/animation/view-animation-spec.autogen.h>
+#include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
@@ -589,14 +593,44 @@ View View::GetStateEffectTarget() const
   return GetImpl(*this).GetStateEffectTarget();
 }
 
-BaseHandle View::GetLayoutParamsInternal(LayoutParamsType type) const
-{
-  return GetImpl(*this).GetLayoutParams(type);
-}
-
-void View::SetLayoutParams(LayoutParams params)
+void View::SetLayoutParams(const AbsoluteLayoutParams& params)
 {
   GetImpl(*this).SetLayoutParams(params);
+}
+
+void View::SetLayoutParams(const FlexLayoutParams& params)
+{
+  GetImpl(*this).SetLayoutParams(params);
+}
+
+void View::SetLayoutParams(const GridLayoutParams& params)
+{
+  GetImpl(*this).SetLayoutParams(params);
+}
+
+void View::SetLayoutParams(const StackLayoutParams& params)
+{
+  GetImpl(*this).SetLayoutParams(params);
+}
+
+bool View::TryGetLayoutParams(AbsoluteLayoutParams& params) const
+{
+  return GetImpl(*this).TryGetLayoutParams(params);
+}
+
+bool View::TryGetLayoutParams(FlexLayoutParams& params) const
+{
+  return GetImpl(*this).TryGetLayoutParams(params);
+}
+
+bool View::TryGetLayoutParams(GridLayoutParams& params) const
+{
+  return GetImpl(*this).TryGetLayoutParams(params);
+}
+
+bool View::TryGetLayoutParams(StackLayoutParams& params) const
+{
+  return GetImpl(*this).TryGetLayoutParams(params);
 }
 
 void View::Insert(uint32_t index, View child)

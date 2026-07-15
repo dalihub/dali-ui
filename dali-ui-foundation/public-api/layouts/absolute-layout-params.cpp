@@ -19,121 +19,159 @@
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/ref-object.h>
+#include <dali/public-api/common/dali-common.h>
 
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
+#define DALI_ASSERT_VALID_LAYOUT_PARAMS(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use moved-from AbsoluteLayoutParams")
 
 namespace Dali
 {
 namespace Ui
 {
 
+class AbsoluteLayoutParams::Impl
+{
+public:
+  Impl()
+  : mBounds(0.0f, 0.0f, -1.0f, -1.0f),
+    mFlags(AbsoluteLayoutFlags::NONE)
+  {
+  }
+
+  LayoutRect          mBounds;
+  AbsoluteLayoutFlags mFlags;
+};
+
 AbsoluteLayoutParams::AbsoluteLayoutParams()
+: mImpl(new Impl())
 {
 }
 
-AbsoluteLayoutParams::AbsoluteLayoutParams(const AbsoluteLayoutParams& handle)
-: LayoutParams(handle)
+AbsoluteLayoutParams::AbsoluteLayoutParams(const AbsoluteLayoutParams& other)
+: mImpl(nullptr)
 {
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(other.mImpl);
+  mImpl = new Impl(*other.mImpl);
+}
+
+AbsoluteLayoutParams::AbsoluteLayoutParams(AbsoluteLayoutParams&& other) noexcept
+: mImpl(other.mImpl)
+{
+  other.mImpl = nullptr;
+}
+
+AbsoluteLayoutParams& AbsoluteLayoutParams::operator=(const AbsoluteLayoutParams& other)
+{
+  if(this != &other)
+  {
+    DALI_ASSERT_VALID_LAYOUT_PARAMS(other.mImpl);
+    Impl* newImpl = new Impl(*other.mImpl);
+    delete mImpl;
+    mImpl = newImpl;
+  }
+  return *this;
+}
+
+AbsoluteLayoutParams& AbsoluteLayoutParams::operator=(AbsoluteLayoutParams&& other) noexcept
+{
+  if(this != &other)
+  {
+    delete mImpl;
+    mImpl       = other.mImpl;
+    other.mImpl = nullptr;
+  }
+  return *this;
 }
 
 AbsoluteLayoutParams::~AbsoluteLayoutParams()
 {
-}
-
-AbsoluteLayoutParams::AbsoluteLayoutParams(Internal::AbsoluteLayoutParamsImpl* implementation)
-: LayoutParams(implementation)
-{
+  delete mImpl;
 }
 
 AbsoluteLayoutParams AbsoluteLayoutParams::New()
 {
-  IntrusivePtr<Internal::AbsoluteLayoutParamsImpl> impl(new Internal::AbsoluteLayoutParamsImpl());
-  return AbsoluteLayoutParams(impl.Get());
-}
-
-AbsoluteLayoutParams AbsoluteLayoutParams::New(const AbsoluteLayoutParams& other)
-{
-  IntrusivePtr<Internal::AbsoluteLayoutParamsImpl> impl(new Internal::AbsoluteLayoutParamsImpl(GetImpl(other)));
-  return AbsoluteLayoutParams(impl.Get());
-}
-
-AbsoluteLayoutParams AbsoluteLayoutParams::DownCast(BaseHandle handle)
-{
-  return AbsoluteLayoutParams(dynamic_cast<Internal::AbsoluteLayoutParamsImpl*>(handle.GetObjectPtr()));
-}
-
-LayoutParamsType AbsoluteLayoutParams::GetLayoutParamsType()
-{
-  return LayoutParamsType::ABSOLUTE;
+  return AbsoluteLayoutParams();
 }
 
 AbsoluteLayoutParams& AbsoluteLayoutParams::SetBounds(const LayoutRect& bounds)
 {
-  GetImpl(*this).SetBounds(bounds);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mBounds = bounds;
   return *this;
 }
 
 LayoutRect AbsoluteLayoutParams::GetBounds() const
 {
-  return GetImpl(*this).GetBounds();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mBounds;
 }
 
 AbsoluteLayoutParams& AbsoluteLayoutParams::SetX(float x)
 {
-  GetImpl(*this).SetX(x);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mBounds.SetX(x);
   return *this;
 }
 
 float AbsoluteLayoutParams::GetX() const
 {
-  return GetImpl(*this).GetBounds().GetX();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mBounds.GetX();
 }
 
 AbsoluteLayoutParams& AbsoluteLayoutParams::SetY(float y)
 {
-  GetImpl(*this).SetY(y);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mBounds.SetY(y);
   return *this;
 }
 
 float AbsoluteLayoutParams::GetY() const
 {
-  return GetImpl(*this).GetBounds().GetY();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mBounds.GetY();
 }
 
 AbsoluteLayoutParams& AbsoluteLayoutParams::SetWidth(float width)
 {
-  GetImpl(*this).SetWidth(width);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mBounds.SetWidth(width);
   return *this;
 }
 
 float AbsoluteLayoutParams::GetWidth() const
 {
-  return GetImpl(*this).GetBounds().GetWidth();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mBounds.GetWidth();
 }
 
 AbsoluteLayoutParams& AbsoluteLayoutParams::SetHeight(float height)
 {
-  GetImpl(*this).SetHeight(height);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mBounds.SetHeight(height);
   return *this;
 }
 
 float AbsoluteLayoutParams::GetHeight() const
 {
-  return GetImpl(*this).GetBounds().GetHeight();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mBounds.GetHeight();
 }
 
 AbsoluteLayoutParams& AbsoluteLayoutParams::SetFlags(AbsoluteLayoutFlags flags)
 {
-  GetImpl(*this).SetFlags(flags);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mFlags = flags;
   return *this;
 }
 
 AbsoluteLayoutFlags AbsoluteLayoutParams::GetFlags() const
 {
-  return GetImpl(*this).GetFlags();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mFlags;
 }
 
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_LAYOUT_PARAMS

@@ -62,11 +62,14 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
+#include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
+#include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
-#include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
+#include <dali-ui-foundation/internal/layouts/stack-layout-params-impl.h>
 #include <dali-ui-foundation/internal/ui-color-manager-impl.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 #include <dali-ui-foundation/internal/views/state-effect-target-trait.h>
@@ -80,10 +83,13 @@
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-scale-manager.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/layouts/layout-manager.h>
-#include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/text/text-utils.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
@@ -214,23 +220,6 @@ LayoutCallbacksObject* EnsureLayoutCallbacksObject(ViewDataImpl& viewDataImpl)
     viewDataImpl.SetTrait(Integration::ReservedTraitId::LAYOUT_SIGNALS, newObject);
   }
   return object;
-}
-
-TraitId ToTraitId(LayoutParamsType type)
-{
-  switch(type)
-  {
-    case LayoutParamsType::ABSOLUTE:
-      return Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS;
-    case LayoutParamsType::STACK:
-      return Integration::ReservedTraitId::STACK_LAYOUT_PARAMS;
-    case LayoutParamsType::GRID:
-      return Integration::ReservedTraitId::GRID_LAYOUT_PARAMS;
-    case LayoutParamsType::FLEX:
-      return Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS;
-  }
-  DALI_ASSERT_ALWAYS(false && "Unknown LayoutParamsType");
-  return Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS;
 }
 
 IntrusivePtr<TraitObject> AsTraitObject(BaseHandle traitHandle)
@@ -2707,18 +2696,84 @@ bool ViewDataImpl::HasLayoutCallback() const
   return object && (object->GetMeasureCallback() || object->GetArrangeCallback());
 }
 
-BaseHandle ViewDataImpl::GetLayoutParams(LayoutParamsType type) const
+void ViewDataImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
 {
-  IntrusivePtr<TraitObject> object     = GetTrait(ToTraitId(type));
-  auto*                     baseObject = dynamic_cast<BaseObject*>(object.Get());
-  return baseObject ? BaseHandle(baseObject) : BaseHandle();
+  IntrusivePtr<TraitObject> object(new AbsoluteLayoutParamsImpl(params));
+  SetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS, object);
+  InvalidateMeasure();
 }
 
-void ViewDataImpl::SetLayoutParams(Ui::LayoutParams params)
+void ViewDataImpl::SetLayoutParams(const FlexLayoutParams& params)
 {
-  auto& paramsImpl = static_cast<LayoutParamsImpl&>(params.GetBaseObject());
-  SetTrait(paramsImpl.GetTraitId(), AsTraitObject(params));
+  IntrusivePtr<TraitObject> object(new FlexLayoutParamsImpl(params));
+  SetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, object);
   InvalidateMeasure();
+}
+
+void ViewDataImpl::SetLayoutParams(const GridLayoutParams& params)
+{
+  IntrusivePtr<TraitObject> object(new GridLayoutParamsImpl(params));
+  SetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS, object);
+  InvalidateMeasure();
+}
+
+void ViewDataImpl::SetLayoutParams(const StackLayoutParams& params)
+{
+  IntrusivePtr<TraitObject> object(new StackLayoutParamsImpl(params));
+  SetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, object);
+  InvalidateMeasure();
+}
+
+bool ViewDataImpl::TryGetLayoutParams(AbsoluteLayoutParams& params) const
+{
+  IntrusivePtr<TraitObject> object = GetTrait(Integration::ReservedTraitId::ABSOLUTE_LAYOUT_PARAMS);
+  if(!object)
+  {
+    return false;
+  }
+  auto* impl = dynamic_cast<AbsoluteLayoutParamsImpl*>(object.Get());
+  DALI_ASSERT_ALWAYS(impl && "ABSOLUTE_LAYOUT_PARAMS trait must be an AbsoluteLayoutParamsImpl");
+  params.SetBounds(impl->GetBounds()).SetFlags(impl->GetFlags());
+  return true;
+}
+
+bool ViewDataImpl::TryGetLayoutParams(FlexLayoutParams& params) const
+{
+  IntrusivePtr<TraitObject> object = GetTrait(Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS);
+  if(!object)
+  {
+    return false;
+  }
+  auto* impl = dynamic_cast<FlexLayoutParamsImpl*>(object.Get());
+  DALI_ASSERT_ALWAYS(impl && "FLEX_LAYOUT_PARAMS trait must be a FlexLayoutParamsImpl");
+  params.SetFlexGrow(impl->GetFlexGrow()).SetFlexShrink(impl->GetFlexShrink()).SetFlexBasis(impl->GetFlexBasis()).SetAlignSelf(impl->GetAlignSelf());
+  return true;
+}
+
+bool ViewDataImpl::TryGetLayoutParams(GridLayoutParams& params) const
+{
+  IntrusivePtr<TraitObject> object = GetTrait(Integration::ReservedTraitId::GRID_LAYOUT_PARAMS);
+  if(!object)
+  {
+    return false;
+  }
+  auto* impl = dynamic_cast<GridLayoutParamsImpl*>(object.Get());
+  DALI_ASSERT_ALWAYS(impl && "GRID_LAYOUT_PARAMS trait must be a GridLayoutParamsImpl");
+  params.SetRow(impl->GetRow()).SetColumn(impl->GetColumn()).SetRowSpan(impl->GetRowSpan()).SetColumnSpan(impl->GetColumnSpan()).SetHorizontalAlignment(impl->GetHorizontalAlignment()).SetVerticalAlignment(impl->GetVerticalAlignment());
+  return true;
+}
+
+bool ViewDataImpl::TryGetLayoutParams(StackLayoutParams& params) const
+{
+  IntrusivePtr<TraitObject> object = GetTrait(Integration::ReservedTraitId::STACK_LAYOUT_PARAMS);
+  if(!object)
+  {
+    return false;
+  }
+  auto* impl = dynamic_cast<StackLayoutParamsImpl*>(object.Get());
+  DALI_ASSERT_ALWAYS(impl && "STACK_LAYOUT_PARAMS trait must be a StackLayoutParamsImpl");
+  params.SetWeight(impl->GetWeight()).SetAlignment(impl->GetAlignment());
+  return true;
 }
 
 void ViewDataImpl::SetRenderEffect(Ui::RenderEffect effect)

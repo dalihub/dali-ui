@@ -196,12 +196,12 @@ grid.AddChildren({header, sideBar, main, footer});
 ```cpp
 // Copy base params to reuse across multiple children
 auto base = GridLayoutParams::New().SetRowSpan(2).SetColumnSpan(2);
-viewA.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(0));
-viewB.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(2));
+viewA.SetLayoutParams(GridLayoutParams(base).SetRow(0).SetColumn(0));
+viewB.SetLayoutParams(GridLayoutParams(base).SetRow(0).SetColumn(2));
 ```
 
-> **Caution**: `SetLayoutParams()` stores the handle as-is. Passing the same params handle to
-> multiple Views causes them to share state. Always use `New(other)` to create an independent copy.
+> **Note**: `SetLayoutParams()` stores an independent copy. Reusing the same params handle for
+> multiple Views is safe, and later changes to the input handle do not affect previously configured Views.
 
 Sample: [gridlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/gridlayout)
 

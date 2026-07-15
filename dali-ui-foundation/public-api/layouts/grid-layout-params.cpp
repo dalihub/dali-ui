@@ -19,121 +19,168 @@
 #include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/ref-object.h>
+#include <dali/public-api/common/dali-common.h>
+#include <algorithm>
 
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
+#define DALI_ASSERT_VALID_LAYOUT_PARAMS(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use moved-from GridLayoutParams")
 
 namespace Dali
 {
 namespace Ui
 {
 
+class GridLayoutParams::Impl
+{
+public:
+  Impl()
+  : mRow(0u),
+    mColumn(0u),
+    mRowSpan(1u),
+    mColumnSpan(1u),
+    mHorizontalAlignment(LayoutAlignment::FILL),
+    mVerticalAlignment(LayoutAlignment::FILL)
+  {
+  }
+
+  uint32_t        mRow;
+  uint32_t        mColumn;
+  uint32_t        mRowSpan;
+  uint32_t        mColumnSpan;
+  LayoutAlignment mHorizontalAlignment;
+  LayoutAlignment mVerticalAlignment;
+};
+
 GridLayoutParams::GridLayoutParams()
+: mImpl(new Impl())
 {
 }
 
-GridLayoutParams GridLayoutParams::New()
+GridLayoutParams::GridLayoutParams(const GridLayoutParams& other)
+: mImpl(nullptr)
 {
-  IntrusivePtr<Internal::GridLayoutParamsImpl> impl(new Internal::GridLayoutParamsImpl());
-  return GridLayoutParams(impl.Get());
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(other.mImpl);
+  mImpl = new Impl(*other.mImpl);
 }
 
-GridLayoutParams GridLayoutParams::New(const GridLayoutParams& other)
+GridLayoutParams::GridLayoutParams(GridLayoutParams&& other) noexcept
+: mImpl(other.mImpl)
 {
-  IntrusivePtr<Internal::GridLayoutParamsImpl> impl(new Internal::GridLayoutParamsImpl(GetImpl(other)));
-  return GridLayoutParams(impl.Get());
+  other.mImpl = nullptr;
 }
 
-GridLayoutParams::GridLayoutParams(const GridLayoutParams& handle)
-: LayoutParams(handle)
+GridLayoutParams& GridLayoutParams::operator=(const GridLayoutParams& other)
 {
+  if(this != &other)
+  {
+    DALI_ASSERT_VALID_LAYOUT_PARAMS(other.mImpl);
+    Impl* newImpl = new Impl(*other.mImpl);
+    delete mImpl;
+    mImpl = newImpl;
+  }
+  return *this;
+}
+
+GridLayoutParams& GridLayoutParams::operator=(GridLayoutParams&& other) noexcept
+{
+  if(this != &other)
+  {
+    delete mImpl;
+    mImpl       = other.mImpl;
+    other.mImpl = nullptr;
+  }
+  return *this;
 }
 
 GridLayoutParams::~GridLayoutParams()
 {
+  delete mImpl;
 }
 
-GridLayoutParams::GridLayoutParams(Internal::GridLayoutParamsImpl* implementation)
-: LayoutParams(implementation)
+GridLayoutParams GridLayoutParams::New()
 {
-}
-
-GridLayoutParams GridLayoutParams::DownCast(BaseHandle handle)
-{
-  return GridLayoutParams(dynamic_cast<Internal::GridLayoutParamsImpl*>(handle.GetObjectPtr()));
-}
-
-LayoutParamsType GridLayoutParams::GetLayoutParamsType()
-{
-  return LayoutParamsType::GRID;
+  return GridLayoutParams();
 }
 
 GridLayoutParams& GridLayoutParams::SetRow(uint32_t row)
 {
-  GetImpl(*this).SetRow(row);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mRow = row;
   return *this;
 }
 
 uint32_t GridLayoutParams::GetRow() const
 {
-  return GetImpl(*this).GetRow();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mRow;
 }
 
 GridLayoutParams& GridLayoutParams::SetColumn(uint32_t column)
 {
-  GetImpl(*this).SetColumn(column);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mColumn = column;
   return *this;
 }
 
 uint32_t GridLayoutParams::GetColumn() const
 {
-  return GetImpl(*this).GetColumn();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mColumn;
 }
 
 GridLayoutParams& GridLayoutParams::SetRowSpan(uint32_t span)
 {
-  GetImpl(*this).SetRowSpan(span);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mRowSpan = std::max(1u, span);
   return *this;
 }
 
 uint32_t GridLayoutParams::GetRowSpan() const
 {
-  return GetImpl(*this).GetRowSpan();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mRowSpan;
 }
 
 GridLayoutParams& GridLayoutParams::SetColumnSpan(uint32_t span)
 {
-  GetImpl(*this).SetColumnSpan(span);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mColumnSpan = std::max(1u, span);
   return *this;
 }
 
 uint32_t GridLayoutParams::GetColumnSpan() const
 {
-  return GetImpl(*this).GetColumnSpan();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mColumnSpan;
 }
 
 GridLayoutParams& GridLayoutParams::SetHorizontalAlignment(LayoutAlignment alignment)
 {
-  GetImpl(*this).SetHorizontalAlignment(alignment);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mHorizontalAlignment = alignment;
   return *this;
 }
 
 LayoutAlignment GridLayoutParams::GetHorizontalAlignment() const
 {
-  return GetImpl(*this).GetHorizontalAlignment();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mHorizontalAlignment;
 }
 
 GridLayoutParams& GridLayoutParams::SetVerticalAlignment(LayoutAlignment alignment)
 {
-  GetImpl(*this).SetVerticalAlignment(alignment);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mVerticalAlignment = alignment;
   return *this;
 }
 
 LayoutAlignment GridLayoutParams::GetVerticalAlignment() const
 {
-  return GetImpl(*this).GetVerticalAlignment();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mVerticalAlignment;
 }
 
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_LAYOUT_PARAMS

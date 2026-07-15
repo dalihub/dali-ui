@@ -18,14 +18,13 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/base-handle.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
-#include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
 
 namespace Dali
 {
@@ -37,38 +36,13 @@ namespace Internal
 /**
  * @brief Trait implementation that stores StackLayout child parameters.
  */
-class StackLayoutParamsImpl : public LayoutParamsImpl
+class StackLayoutParamsImpl : public TraitObject
 {
 public:
-  /**
-   * @brief Constructs with default weight (0, meaning no extra space allocation).
-   */
-  StackLayoutParamsImpl()
-  : LayoutParamsImpl(),
-    mWeight(0.0f),
-    mAlignment(LayoutAlignment::START)
+  explicit StackLayoutParamsImpl(const StackLayoutParams& params)
+  : mWeight(params.GetWeight()),
+    mAlignment(params.GetAlignment())
   {
-  }
-
-  StackLayoutParamsImpl(const StackLayoutParamsImpl& other)
-  : LayoutParamsImpl(),
-    mWeight(other.mWeight),
-    mAlignment(other.mAlignment)
-  {
-  }
-
-  TraitId GetTraitId() const override
-  {
-    return Integration::ReservedTraitId::STACK_LAYOUT_PARAMS;
-  }
-
-  /**
-   * @brief Sets the weight for proportional space distribution along the stack axis.
-   * @param[in] weight The layout weight (0 means no extra space).
-   */
-  void SetWeight(float weight)
-  {
-    mWeight = weight;
   }
 
   /**
@@ -78,11 +52,6 @@ public:
   float GetWeight() const
   {
     return mWeight;
-  }
-
-  void SetAlignment(LayoutAlignment alignment)
-  {
-    mAlignment = alignment;
   }
 
   LayoutAlignment GetAlignment() const
@@ -102,23 +71,6 @@ public:
     return object ? static_cast<StackLayoutParamsImpl*>(object.Get()) : nullptr;
   }
 
-  /**
-   * @brief Retrieves or creates the StackLayoutParams trait on a view.
-   * @param[in] viewImpl The view implementation.
-   * @return Reference to the params (newly created if not already attached).
-   */
-  static StackLayoutParamsImpl& GetOrCreate(ViewImpl& viewImpl)
-  {
-    StackLayoutParamsImpl* existing = Get(viewImpl);
-    if(existing)
-    {
-      return *existing;
-    }
-    StackLayoutParams params = StackLayoutParams::New();
-    Integration::View::SetTrait(viewImpl, Integration::ReservedTraitId::STACK_LAYOUT_PARAMS, IntrusivePtr<TraitObject>(&static_cast<TraitObject&>(params.GetBaseObject())));
-    return static_cast<StackLayoutParamsImpl&>(params.GetBaseObject());
-  }
-
 protected:
   ~StackLayoutParamsImpl() override = default;
 
@@ -128,18 +80,6 @@ private:
 };
 
 } // namespace Internal
-
-inline Internal::StackLayoutParamsImpl& GetImpl(StackLayoutParams& obj)
-{
-  BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Internal::StackLayoutParamsImpl&>(handle);
-}
-
-inline const Internal::StackLayoutParamsImpl& GetImpl(const StackLayoutParams& obj)
-{
-  const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Internal::StackLayoutParamsImpl&>(handle);
-}
 
 } // namespace Ui
 } // namespace Dali

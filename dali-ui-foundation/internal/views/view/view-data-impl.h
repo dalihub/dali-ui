@@ -246,8 +246,14 @@ public:
   bool             HasLayoutManager() const;
   bool             HasLayoutCallback() const;
 
-  BaseHandle    GetLayoutParams(LayoutParamsType type) const;
-  void          SetLayoutParams(LayoutParams params);
+  void          SetLayoutParams(const AbsoluteLayoutParams& params);
+  void          SetLayoutParams(const FlexLayoutParams& params);
+  void          SetLayoutParams(const GridLayoutParams& params);
+  void          SetLayoutParams(const StackLayoutParams& params);
+  bool          TryGetLayoutParams(AbsoluteLayoutParams& params) const;
+  bool          TryGetLayoutParams(FlexLayoutParams& params) const;
+  bool          TryGetLayoutParams(GridLayoutParams& params) const;
+  bool          TryGetLayoutParams(StackLayoutParams& params) const;
   void          GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward);
   Dali::Texture GetOffScreenRenderingOutput() const;
   Vector3       GetNaturalSize();

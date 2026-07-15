@@ -18,15 +18,13 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/base-handle.h>
-#include <algorithm>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
-#include <dali-ui-foundation/internal/layouts/layout-params-impl.h>
 #include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
 #include <dali-ui-foundation/public-api/traits/trait-id.h>
+#include <dali-ui-foundation/public-api/traits/trait-object.h>
 
 namespace Dali
 {
@@ -38,42 +36,15 @@ namespace Internal
 /**
  * @brief Trait implementation that stores FlexLayout child parameters.
  */
-class FlexLayoutParamsImpl : public LayoutParamsImpl
+class FlexLayoutParamsImpl : public TraitObject
 {
 public:
-  /**
-   * @brief Constructs with default flex properties (grow=0, shrink=1, basis=WRAP_CONTENT, alignSelf=AUTO).
-   */
-  FlexLayoutParamsImpl()
-  : LayoutParamsImpl(),
-    mFlexGrow(0.0f),
-    mFlexShrink(1.0f),
-    mFlexBasis(WRAP_CONTENT),
-    mAlignSelf(FlexAlign::AUTO)
+  explicit FlexLayoutParamsImpl(const FlexLayoutParams& params)
+  : mFlexGrow(params.GetFlexGrow()),
+    mFlexShrink(params.GetFlexShrink()),
+    mFlexBasis(params.GetFlexBasis()),
+    mAlignSelf(params.GetAlignSelf())
   {
-  }
-
-  FlexLayoutParamsImpl(const FlexLayoutParamsImpl& other)
-  : LayoutParamsImpl(),
-    mFlexGrow(other.mFlexGrow),
-    mFlexShrink(other.mFlexShrink),
-    mFlexBasis(other.mFlexBasis),
-    mAlignSelf(other.mAlignSelf)
-  {
-  }
-
-  TraitId GetTraitId() const override
-  {
-    return Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS;
-  }
-
-  /**
-   * @brief Sets the flex grow factor for distributing remaining space.
-   * @param[in] grow The grow factor (0 means no growing).
-   */
-  void SetFlexGrow(float grow)
-  {
-    mFlexGrow = std::max(0.0f, grow);
   }
 
   /**
@@ -86,15 +57,6 @@ public:
   }
 
   /**
-   * @brief Sets the flex shrink factor for distributing negative space.
-   * @param[in] shrink The shrink factor (1 means proportional shrinking).
-   */
-  void SetFlexShrink(float shrink)
-  {
-    mFlexShrink = std::max(0.0f, shrink);
-  }
-
-  /**
    * @brief Gets the flex shrink factor.
    * @return The shrink factor.
    */
@@ -104,30 +66,12 @@ public:
   }
 
   /**
-   * @brief Sets the initial main size of the flex item before grow/shrink.
-   * @param[in] basis The flex basis value.
-   */
-  void SetFlexBasis(float basis)
-  {
-    mFlexBasis = basis;
-  }
-
-  /**
    * @brief Gets the flex basis value.
    * @return The flex basis.
    */
   float GetFlexBasis() const
   {
     return mFlexBasis;
-  }
-
-  /**
-   * @brief Sets the cross-axis alignment override for this child.
-   * @param[in] align The alignment (AUTO defers to parent's alignItems).
-   */
-  void SetAlignSelf(FlexAlign align)
-  {
-    mAlignSelf = align;
   }
 
   /**
@@ -151,23 +95,6 @@ public:
     return object ? static_cast<FlexLayoutParamsImpl*>(object.Get()) : nullptr;
   }
 
-  /**
-   * @brief Retrieves or creates the FlexLayoutParams trait on a view.
-   * @param[in] viewImpl The view implementation.
-   * @return Reference to the params (newly created if not already attached).
-   */
-  static FlexLayoutParamsImpl& GetOrCreate(ViewImpl& viewImpl)
-  {
-    FlexLayoutParamsImpl* existing = Get(viewImpl);
-    if(existing)
-    {
-      return *existing;
-    }
-    FlexLayoutParams params = FlexLayoutParams::New();
-    Integration::View::SetTrait(viewImpl, Integration::ReservedTraitId::FLEX_LAYOUT_PARAMS, IntrusivePtr<TraitObject>(&static_cast<TraitObject&>(params.GetBaseObject())));
-    return static_cast<FlexLayoutParamsImpl&>(params.GetBaseObject());
-  }
-
 protected:
   ~FlexLayoutParamsImpl() override = default;
 
@@ -179,18 +106,6 @@ private:
 };
 
 } // namespace Internal
-
-inline Internal::FlexLayoutParamsImpl& GetImpl(FlexLayoutParams& obj)
-{
-  BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Internal::FlexLayoutParamsImpl&>(handle);
-}
-
-inline const Internal::FlexLayoutParamsImpl& GetImpl(const FlexLayoutParams& obj)
-{
-  const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Internal::FlexLayoutParamsImpl&>(handle);
-}
 
 } // namespace Ui
 } // namespace Dali

@@ -51,6 +51,10 @@ namespace Ui
 {
 
 // Forward declarations
+class AbsoluteLayoutParams;
+class FlexLayoutParams;
+class GridLayoutParams;
+class StackLayoutParams;
 class Layout;
 class LayoutManager;
 class LayoutTransition;
@@ -598,17 +602,15 @@ public: // Non-virtual API (safe to reorder / extend)
 
   // Layout Params
 
-  /**
-   * @copydoc Ui::View::SetLayoutParams()
-   */
-  void SetLayoutParams(Ui::LayoutParams params);
+  void SetLayoutParams(const AbsoluteLayoutParams& params);
+  void SetLayoutParams(const FlexLayoutParams& params);
+  void SetLayoutParams(const GridLayoutParams& params);
+  void SetLayoutParams(const StackLayoutParams& params);
 
-  /**
-   * @brief Retrieves a layout params trait by LayoutParamsType.
-   * @param[in] type The layout params type
-   * @return The layout params handle
-   */
-  BaseHandle GetLayoutParams(LayoutParamsType type) const;
+  bool TryGetLayoutParams(AbsoluteLayoutParams& params) const;
+  bool TryGetLayoutParams(FlexLayoutParams& params) const;
+  bool TryGetLayoutParams(GridLayoutParams& params) const;
+  bool TryGetLayoutParams(StackLayoutParams& params) const;
 
   // Layout Properties
 

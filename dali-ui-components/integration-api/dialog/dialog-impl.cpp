@@ -192,11 +192,8 @@ void DialogImpl::ApplyAlignment(Ui::View view)
   {
     return;
   }
-  StackLayoutParams params = view.GetLayoutParams<StackLayoutParams>();
-  if(!params)
-  {
-    params = StackLayoutParams::New();
-  }
+  StackLayoutParams params;
+  view.TryGetLayoutParams(params);
   params.SetAlignment(mAlignment);
   view.SetLayoutParams(params);
 }

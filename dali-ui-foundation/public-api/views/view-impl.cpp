@@ -33,7 +33,10 @@
 
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
-#include <dali-ui-foundation/public-api/layouts/layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/flex-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/grid-layout-params.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/render-effects/render-effect.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -673,14 +676,44 @@ void ViewImpl::LowerBelow(Ui::View target, Ui::LayoutOrderPolicy policy)
   mImpl->LowerBelow(target, policy);
 }
 
-BaseHandle ViewImpl::GetLayoutParams(LayoutParamsType type) const
-{
-  return mImpl->GetLayoutParams(type);
-}
-
-void ViewImpl::SetLayoutParams(Ui::LayoutParams params)
+void ViewImpl::SetLayoutParams(const AbsoluteLayoutParams& params)
 {
   mImpl->SetLayoutParams(params);
+}
+
+void ViewImpl::SetLayoutParams(const FlexLayoutParams& params)
+{
+  mImpl->SetLayoutParams(params);
+}
+
+void ViewImpl::SetLayoutParams(const GridLayoutParams& params)
+{
+  mImpl->SetLayoutParams(params);
+}
+
+void ViewImpl::SetLayoutParams(const StackLayoutParams& params)
+{
+  mImpl->SetLayoutParams(params);
+}
+
+bool ViewImpl::TryGetLayoutParams(AbsoluteLayoutParams& params) const
+{
+  return mImpl->TryGetLayoutParams(params);
+}
+
+bool ViewImpl::TryGetLayoutParams(FlexLayoutParams& params) const
+{
+  return mImpl->TryGetLayoutParams(params);
+}
+
+bool ViewImpl::TryGetLayoutParams(GridLayoutParams& params) const
+{
+  return mImpl->TryGetLayoutParams(params);
+}
+
+bool ViewImpl::TryGetLayoutParams(StackLayoutParams& params) const
+{
+  return mImpl->TryGetLayoutParams(params);
 }
 
 // =============================================================================

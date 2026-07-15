@@ -22,7 +22,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 
 namespace Dali
@@ -30,17 +29,10 @@ namespace Dali
 namespace Ui
 {
 
-// Forward declarations
-namespace Internal
-{
-class GridLayoutParamsImpl;
-}
-
 /**
  * @brief GridLayoutParams stores per-child layout parameters for GridLayout.
  *
- * This handle provides direct access to row, column, rowSpan, and columnSpan
- * attached to a child view.
+ * This value type provides row, column, spans, and alignment for a child view.
  * Use View::SetLayoutParams() to attach parameters to a child view.
  *
  * @code
@@ -50,55 +42,55 @@ class GridLayoutParamsImpl;
  *   .SetColumnSpan(3));
  * @endcode
  */
-class DALI_UI_API GridLayoutParams : public LayoutParams
+class DALI_UI_API GridLayoutParams
 {
 public:
   /**
-   * @brief Creates an uninitialized handle.
+   * @brief Creates parameters with default values.
    */
   GridLayoutParams();
 
   /**
    * @brief Creates a new GridLayoutParams with default values.
    *
-   * @return A handle to a newly allocated GridLayoutParams
+   * @return A value initialized with default parameters
    */
   static GridLayoutParams New();
 
   /**
-   * @brief Creates a new GridLayoutParams by copying values from an existing one.
-   *
-   * @param[in] other The params to copy from
-   * @return A handle to a newly allocated GridLayoutParams with copied values
-   */
-  static GridLayoutParams New(const GridLayoutParams& other);
-
-  /**
    * @brief Copy constructor.
    *
-   * @param[in] handle Handle to copy
+   * @param[in] other Value to copy
    */
-  GridLayoutParams(const GridLayoutParams& handle);
+  GridLayoutParams(const GridLayoutParams& other);
+
+  /**
+   * @brief Creates a value by moving another value.
+   *
+   * @note After the move the source is in a moved-from state; assign it a valid
+   * value before use. Calling a getter or setter on, or copying from, a
+   * moved-from value throws.
+   */
+  GridLayoutParams(GridLayoutParams&& other) noexcept;
+
+  /**
+   * @brief Copies another value.
+   */
+  GridLayoutParams& operator=(const GridLayoutParams& other);
+
+  /**
+   * @brief Moves another value.
+   *
+   * @note After the move the source is in a moved-from state; assign it a valid
+   * value before use. Calling a getter or setter on, or copying from, a
+   * moved-from value throws.
+   */
+  GridLayoutParams& operator=(GridLayoutParams&& other) noexcept;
 
   /**
    * @brief Destructor.
    */
   ~GridLayoutParams();
-
-  /**
-   * @brief Downcasts a handle to GridLayoutParams.
-   *
-   * @param[in] handle Handle to an object
-   * @return A valid handle or an uninitialized handle
-   */
-  static GridLayoutParams DownCast(BaseHandle handle);
-
-  /**
-   * @brief Returns the layout params type identifier.
-   *
-   * @return LayoutParamsType::GRID
-   */
-  static LayoutParamsType GetLayoutParamsType();
 
   /**
    * @brief Sets the row index for this child in the grid.
@@ -190,10 +182,9 @@ public:
    */
   LayoutAlignment GetVerticalAlignment() const;
 
-public: // Not intended for application developers
-  /// @cond internal
-  explicit GridLayoutParams(Internal::GridLayoutParamsImpl* implementation);
-  /// @endcond
+private:
+  class Impl;
+  Impl* mImpl{nullptr};
 };
 
 } // namespace Ui

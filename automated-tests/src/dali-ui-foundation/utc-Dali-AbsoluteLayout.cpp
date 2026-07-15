@@ -23,6 +23,14 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+template<typename T>
+T GetRequiredLayoutParams(View view)
+{
+  T params;
+  DALI_TEST_CHECK(view.TryGetLayoutParams(params));
+  return params;
+}
+
 namespace
 {
 // --- Reentrant layout mutation helpers. A child removes a sibling from the
@@ -149,7 +157,7 @@ int UtcDaliAbsoluteLayoutSetLayoutBoundsP(void)
   layout.Add(child);
   LayoutRect bounds(10.0f, 20.0f, 100.0f, 50.0f);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(bounds));
-  LayoutRect got = child.GetLayoutParams<AbsoluteLayoutParams>().GetBounds();
+  LayoutRect got = GetRequiredLayoutParams<AbsoluteLayoutParams>(child).GetBounds();
   DALI_TEST_EQUALS(got.GetX(), 10.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(got.GetY(), 20.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(got.GetWidth(), 100.0f, TEST_LOCATION);
@@ -164,11 +172,64 @@ int UtcDaliAbsoluteLayoutGetLayoutBoundsP(void)
   View child = View::New();
   layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New());
-  LayoutRect got = child.GetLayoutParams<AbsoluteLayoutParams>().GetBounds();
+  LayoutRect got = GetRequiredLayoutParams<AbsoluteLayoutParams>(child).GetBounds();
   DALI_TEST_EQUALS(got.GetX(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(got.GetY(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(got.GetWidth(), -1.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(got.GetHeight(), -1.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliAbsoluteLayoutParamsValueSemanticsP(void)
+{
+  UiTestApplication    application;
+  View                 a     = View::New();
+  View                 b     = View::New();
+  View                 empty = View::New();
+  LayoutRect           boundsA(1.0f, 2.0f, 30.0f, 40.0f);
+  LayoutRect           boundsB(5.0f, 6.0f, 70.0f, 80.0f);
+  AbsoluteLayoutParams source = AbsoluteLayoutParams::New()
+                                  .SetBounds(boundsA)
+                                  .SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL);
+
+  AbsoluteLayoutParams copied(source);
+  AbsoluteLayoutParams assigned;
+  assigned = source;
+
+  a.SetLayoutParams(source);
+  b.SetLayoutParams(source);
+  source.SetBounds(boundsB).SetFlags(AbsoluteLayoutFlags::ALL);
+  DALI_TEST_EQUALS(copied.GetBounds().GetX(), boundsA.GetX(), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(assigned.GetFlags()), static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), TEST_LOCATION);
+
+  auto storedA = GetRequiredLayoutParams<AbsoluteLayoutParams>(a);
+  auto storedB = GetRequiredLayoutParams<AbsoluteLayoutParams>(b);
+  DALI_TEST_EQUALS(storedA.GetBounds().GetX(), boundsA.GetX(), TEST_LOCATION);
+  DALI_TEST_EQUALS(storedA.GetBounds().GetY(), boundsA.GetY(), TEST_LOCATION);
+  DALI_TEST_EQUALS(storedA.GetBounds().GetWidth(), boundsA.GetWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(storedA.GetBounds().GetHeight(), boundsA.GetHeight(), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(storedA.GetFlags()), static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), TEST_LOCATION);
+  DALI_TEST_EQUALS(storedB.GetBounds().GetX(), boundsA.GetX(), TEST_LOCATION);
+
+  storedA.SetBounds(boundsB).SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL);
+  auto unchangedA = GetRequiredLayoutParams<AbsoluteLayoutParams>(a);
+  DALI_TEST_EQUALS(unchangedA.GetBounds().GetX(), boundsA.GetX(), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(unchangedA.GetFlags()), static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), TEST_LOCATION);
+
+  a.SetLayoutParams(storedA);
+  auto committedA = GetRequiredLayoutParams<AbsoluteLayoutParams>(a);
+  auto unchangedB = GetRequiredLayoutParams<AbsoluteLayoutParams>(b);
+  DALI_TEST_EQUALS(committedA.GetBounds().GetX(), boundsB.GetX(), TEST_LOCATION);
+  DALI_TEST_EQUALS(committedA.GetBounds().GetY(), boundsB.GetY(), TEST_LOCATION);
+  DALI_TEST_EQUALS(committedA.GetBounds().GetWidth(), boundsB.GetWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(committedA.GetBounds().GetHeight(), boundsB.GetHeight(), TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint8_t>(committedA.GetFlags()), static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL), TEST_LOCATION);
+  DALI_TEST_EQUALS(unchangedB.GetBounds().GetX(), boundsA.GetX(), TEST_LOCATION);
+  AbsoluteLayoutParams missingParams = AbsoluteLayoutParams::New().SetX(7.0f);
+  DALI_TEST_CHECK(!empty.TryGetLayoutParams(missingParams));
+  DALI_TEST_EQUALS(missingParams.GetX(), 7.0f, TEST_LOCATION);
+  StackLayoutParams wrongTypeParams;
+  DALI_TEST_CHECK(!a.TryGetLayoutParams(wrongTypeParams));
   END_TEST;
 }
 
@@ -179,10 +240,10 @@ int UtcDaliAbsoluteLayoutSetLayoutFlagsP(void)
   View child = View::New();
   layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetFlags(AbsoluteLayoutFlags::POSITION_PROPORTIONAL));
-  DALI_TEST_EQUALS(static_cast<uint8_t>(child.GetLayoutParams<AbsoluteLayoutParams>().GetFlags()),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(GetRequiredLayoutParams<AbsoluteLayoutParams>(child).GetFlags()),
                    static_cast<uint8_t>(AbsoluteLayoutFlags::POSITION_PROPORTIONAL), TEST_LOCATION);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetFlags(AbsoluteLayoutFlags::ALL));
-  DALI_TEST_EQUALS(static_cast<uint8_t>(child.GetLayoutParams<AbsoluteLayoutParams>().GetFlags()),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(GetRequiredLayoutParams<AbsoluteLayoutParams>(child).GetFlags()),
                    static_cast<uint8_t>(AbsoluteLayoutFlags::ALL), TEST_LOCATION);
   END_TEST;
 }
@@ -194,7 +255,7 @@ int UtcDaliAbsoluteLayoutGetLayoutFlagsP(void)
   View child = View::New();
   layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New());
-  DALI_TEST_EQUALS(static_cast<uint8_t>(child.GetLayoutParams<AbsoluteLayoutParams>().GetFlags()),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(GetRequiredLayoutParams<AbsoluteLayoutParams>(child).GetFlags()),
                    static_cast<uint8_t>(AbsoluteLayoutFlags::NONE), TEST_LOCATION);
   END_TEST;
 }
@@ -206,7 +267,7 @@ int UtcDaliAbsoluteLayoutLayoutBoundsZeroP(void)
   View child = View::New();
   layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(LayoutRect(0, 0, 0, 0)));
-  LayoutRect got = child.GetLayoutParams<AbsoluteLayoutParams>().GetBounds();
+  LayoutRect got = GetRequiredLayoutParams<AbsoluteLayoutParams>(child).GetBounds();
   DALI_TEST_EQUALS(got.GetX(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(got.GetY(), 0.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(got.GetWidth(), 0.0f, TEST_LOCATION);
@@ -221,7 +282,7 @@ int UtcDaliAbsoluteLayoutSizeProportionalFlagP(void)
   View child = View::New();
   layout.Add(child);
   child.SetLayoutParams(AbsoluteLayoutParams::New().SetFlags(AbsoluteLayoutFlags::SIZE_PROPORTIONAL));
-  DALI_TEST_EQUALS(static_cast<uint8_t>(child.GetLayoutParams<AbsoluteLayoutParams>().GetFlags()),
+  DALI_TEST_EQUALS(static_cast<uint8_t>(GetRequiredLayoutParams<AbsoluteLayoutParams>(child).GetFlags()),
                    static_cast<uint8_t>(AbsoluteLayoutFlags::SIZE_PROPORTIONAL), TEST_LOCATION);
   END_TEST;
 }
@@ -579,9 +640,10 @@ int UtcDaliAbsoluteLayoutBoundsUpdateAfterArrangeP(void)
   DALI_TEST_EQUALS(child.GetSize().width, 50.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetSize().height, 40.0f, TEST_LOCATION);
 
-  // Mutate the existing params and request a remeasure.
-  child.GetLayoutParams<AbsoluteLayoutParams>().SetBounds(LayoutRect(70.0f, 80.0f, 90.0f, 30.0f));
-  child.InvalidateMeasure();
+  // Modify a snapshot and commit it to request a remeasure.
+  auto params = GetRequiredLayoutParams<AbsoluteLayoutParams>(child);
+  params.SetBounds(LayoutRect(70.0f, 80.0f, 90.0f, 30.0f));
+  child.SetLayoutParams(params);
 
   layout.Measure(200.0f, 150.0f);
   layout.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 150.0f));
@@ -615,8 +677,9 @@ int UtcDaliAbsoluteLayoutBoundsRepeatedUpdateP(void)
 
   for(const auto& rect : updates)
   {
-    child.GetLayoutParams<AbsoluteLayoutParams>().SetBounds(rect);
-    child.InvalidateMeasure();
+    auto params = GetRequiredLayoutParams<AbsoluteLayoutParams>(child);
+    params.SetBounds(rect);
+    child.SetLayoutParams(params);
 
     layout.Measure(300.0f, 200.0f);
     layout.Arrange(LayoutRect(0.0f, 0.0f, 300.0f, 200.0f));

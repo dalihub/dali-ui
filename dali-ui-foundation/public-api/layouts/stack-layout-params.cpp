@@ -19,77 +19,107 @@
 #include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 
 // EXTERNAL INCLUDES
-#include <dali/public-api/object/ref-object.h>
+#include <dali/public-api/common/dali-common.h>
 
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/layouts/stack-layout-params-impl.h>
+#define DALI_ASSERT_VALID_LAYOUT_PARAMS(impl) \
+  DALI_ASSERT_ALWAYS((impl) && "Cannot use moved-from StackLayoutParams")
 
 namespace Dali
 {
 namespace Ui
 {
 
+class StackLayoutParams::Impl
+{
+public:
+  Impl()
+  : mWeight(0.0f),
+    mAlignment(LayoutAlignment::START)
+  {
+  }
+
+  float           mWeight;
+  LayoutAlignment mAlignment;
+};
+
 StackLayoutParams::StackLayoutParams()
+: mImpl(new Impl())
 {
 }
 
-StackLayoutParams StackLayoutParams::New()
+StackLayoutParams::StackLayoutParams(const StackLayoutParams& other)
+: mImpl(nullptr)
 {
-  IntrusivePtr<Internal::StackLayoutParamsImpl> impl(new Internal::StackLayoutParamsImpl());
-  return StackLayoutParams(impl.Get());
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(other.mImpl);
+  mImpl = new Impl(*other.mImpl);
 }
 
-StackLayoutParams StackLayoutParams::New(const StackLayoutParams& other)
+StackLayoutParams::StackLayoutParams(StackLayoutParams&& other) noexcept
+: mImpl(other.mImpl)
 {
-  IntrusivePtr<Internal::StackLayoutParamsImpl> impl(new Internal::StackLayoutParamsImpl(GetImpl(other)));
-  return StackLayoutParams(impl.Get());
+  other.mImpl = nullptr;
 }
 
-StackLayoutParams::StackLayoutParams(const StackLayoutParams& handle)
-: LayoutParams(handle)
+StackLayoutParams& StackLayoutParams::operator=(const StackLayoutParams& other)
 {
+  if(this != &other)
+  {
+    DALI_ASSERT_VALID_LAYOUT_PARAMS(other.mImpl);
+    Impl* newImpl = new Impl(*other.mImpl);
+    delete mImpl;
+    mImpl = newImpl;
+  }
+  return *this;
+}
+
+StackLayoutParams& StackLayoutParams::operator=(StackLayoutParams&& other) noexcept
+{
+  if(this != &other)
+  {
+    delete mImpl;
+    mImpl       = other.mImpl;
+    other.mImpl = nullptr;
+  }
+  return *this;
 }
 
 StackLayoutParams::~StackLayoutParams()
 {
+  delete mImpl;
 }
 
-StackLayoutParams::StackLayoutParams(Internal::StackLayoutParamsImpl* implementation)
-: LayoutParams(implementation)
+StackLayoutParams StackLayoutParams::New()
 {
-}
-
-StackLayoutParams StackLayoutParams::DownCast(BaseHandle handle)
-{
-  return StackLayoutParams(dynamic_cast<Internal::StackLayoutParamsImpl*>(handle.GetObjectPtr()));
-}
-
-LayoutParamsType StackLayoutParams::GetLayoutParamsType()
-{
-  return LayoutParamsType::STACK;
+  return StackLayoutParams();
 }
 
 StackLayoutParams& StackLayoutParams::SetWeight(float weight)
 {
-  GetImpl(*this).SetWeight(weight);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mWeight = weight;
   return *this;
 }
 
 float StackLayoutParams::GetWeight() const
 {
-  return GetImpl(*this).GetWeight();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mWeight;
 }
 
 StackLayoutParams& StackLayoutParams::SetAlignment(LayoutAlignment alignment)
 {
-  GetImpl(*this).SetAlignment(alignment);
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  mImpl->mAlignment = alignment;
   return *this;
 }
 
 LayoutAlignment StackLayoutParams::GetAlignment() const
 {
-  return GetImpl(*this).GetAlignment();
+  DALI_ASSERT_VALID_LAYOUT_PARAMS(mImpl);
+  return mImpl->mAlignment;
 }
 
 } // namespace Ui
 } // namespace Dali
+
+#undef DALI_ASSERT_VALID_LAYOUT_PARAMS

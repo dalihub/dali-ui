@@ -150,7 +150,6 @@
 #include <dali-ui-foundation/public-api/layouts/layout-bounds-effects.h>
 #include <dali-ui-foundation/public-api/layouts/layout-controller.h>
 #include <dali-ui-foundation/public-api/layouts/layout-manager.h>
-#include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition-types.h>
 #include <dali-ui-foundation/public-api/layouts/layout-transition.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>

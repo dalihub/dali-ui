@@ -23,6 +23,14 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+template<typename T>
+T GetRequiredLayoutParams(View view)
+{
+  T params;
+  DALI_TEST_CHECK(view.TryGetLayoutParams(params));
+  return params;
+}
+
 void utc_dali_stacklayout_startup(void)
 {
   test_return_value = TET_UNDEF;
@@ -160,7 +168,7 @@ int UtcDaliStackLayoutSetLayoutWeightP(void)
   View child = View::New();
   layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
-  DALI_TEST_EQUALS(child.GetLayoutParams<StackLayoutParams>().GetWeight(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetRequiredLayoutParams<StackLayoutParams>(child).GetWeight(), 1.0f, TEST_LOCATION);
   END_TEST;
 }
 
@@ -171,9 +179,54 @@ int UtcDaliStackLayoutGetLayoutWeightP(void)
   View child = View::New();
   layout.Add(child);
   child.SetLayoutParams(StackLayoutParams::New().SetWeight(0.0f));
-  DALI_TEST_EQUALS(child.GetLayoutParams<StackLayoutParams>().GetWeight(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetRequiredLayoutParams<StackLayoutParams>(child).GetWeight(), 0.0f, TEST_LOCATION);
   child.SetLayoutParams(StackLayoutParams::New().SetWeight(0.5f));
-  DALI_TEST_EQUALS(child.GetLayoutParams<StackLayoutParams>().GetWeight(), 0.5f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetRequiredLayoutParams<StackLayoutParams>(child).GetWeight(), 0.5f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStackLayoutParamsValueSemanticsP(void)
+{
+  UiTestApplication application;
+  View              a      = View::New();
+  View              b      = View::New();
+  View              empty  = View::New();
+  StackLayoutParams source = StackLayoutParams::New()
+                               .SetWeight(1.0f)
+                               .SetAlignment(LayoutAlignment::CENTER);
+
+  StackLayoutParams copied(source);
+  StackLayoutParams assigned;
+  assigned = source;
+
+  a.SetLayoutParams(source);
+  b.SetLayoutParams(source);
+  source.SetWeight(2.0f).SetAlignment(LayoutAlignment::END);
+  DALI_TEST_EQUALS(copied.GetWeight(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(assigned.GetAlignment(), LayoutAlignment::CENTER, TEST_LOCATION);
+
+  auto storedA = GetRequiredLayoutParams<StackLayoutParams>(a);
+  auto storedB = GetRequiredLayoutParams<StackLayoutParams>(b);
+  DALI_TEST_EQUALS(storedA.GetWeight(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(storedA.GetAlignment(), LayoutAlignment::CENTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(storedB.GetWeight(), 1.0f, TEST_LOCATION);
+
+  storedA.SetWeight(3.0f).SetAlignment(LayoutAlignment::FILL);
+  auto unchangedA = GetRequiredLayoutParams<StackLayoutParams>(a);
+  DALI_TEST_EQUALS(unchangedA.GetWeight(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(unchangedA.GetAlignment(), LayoutAlignment::CENTER, TEST_LOCATION);
+
+  a.SetLayoutParams(storedA);
+  auto committedA = GetRequiredLayoutParams<StackLayoutParams>(a);
+  auto unchangedB = GetRequiredLayoutParams<StackLayoutParams>(b);
+  DALI_TEST_EQUALS(committedA.GetWeight(), 3.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(committedA.GetAlignment(), LayoutAlignment::FILL, TEST_LOCATION);
+  DALI_TEST_EQUALS(unchangedB.GetWeight(), 1.0f, TEST_LOCATION);
+  StackLayoutParams missingParams = StackLayoutParams::New().SetWeight(7.0f);
+  DALI_TEST_CHECK(!empty.TryGetLayoutParams(missingParams));
+  DALI_TEST_EQUALS(missingParams.GetWeight(), 7.0f, TEST_LOCATION);
+  AbsoluteLayoutParams wrongTypeParams;
+  DALI_TEST_CHECK(!a.TryGetLayoutParams(wrongTypeParams));
   END_TEST;
 }
 
@@ -217,8 +270,8 @@ int UtcDaliStackLayoutWeightMultipleP(void)
   layout.Add(c2);
   c1.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f));
   c2.SetLayoutParams(StackLayoutParams::New().SetWeight(2.0f));
-  DALI_TEST_EQUALS(c1.GetLayoutParams<StackLayoutParams>().GetWeight(), 1.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(c2.GetLayoutParams<StackLayoutParams>().GetWeight(), 2.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetRequiredLayoutParams<StackLayoutParams>(c1).GetWeight(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(GetRequiredLayoutParams<StackLayoutParams>(c2).GetWeight(), 2.0f, TEST_LOCATION);
   END_TEST;
 }
 

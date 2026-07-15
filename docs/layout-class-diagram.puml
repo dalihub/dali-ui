@@ -55,9 +55,6 @@ package "Dali::Ui (Public API)" as public_api {
     + New(StackOrientation) : StackLayout
     + SetOrientation(StackOrientation) : StackLayout&
     + SetSpacing(float) : StackLayout&
-    + {static} GetParams(View) : StackLayoutParams
-    + {static} GetOrCreateParams(View) : StackLayoutParams
-    + {static} SetLayoutWeight(View, float)
   }
 
   class "FlexLayout" as FlexLayout <<handle>> {
@@ -67,12 +64,6 @@ package "Dali::Ui (Public API)" as public_api {
     + SetJustifyContent(FlexJustify) : FlexLayout&
     + SetAlignItems(FlexAlign) : FlexLayout&
     + SetAlignContent(FlexAlign) : FlexLayout&
-    + {static} GetParams(View) : FlexLayoutParams
-    + {static} GetOrCreateParams(View) : FlexLayoutParams
-    + {static} SetFlexGrow(View, float)
-    + {static} SetFlexShrink(View, float)
-    + {static} SetFlexBasis(View, float)
-    + {static} SetAlignSelf(View, FlexAlign)
   }
 
   class "GridLayout" as GridLayout <<handle>> {
@@ -81,48 +72,58 @@ package "Dali::Ui (Public API)" as public_api {
     + AddColumnDefinition(GridLength)
     + SetRowSpacing(float) : GridLayout&
     + SetColumnSpacing(float) : GridLayout&
-    + {static} GetParams(View) : GridLayoutParams
-    + {static} GetOrCreateParams(View) : GridLayoutParams
-    + {static} SetRow(View, uint32_t)
-    + {static} SetColumn(View, uint32_t)
-    + {static} SetRowSpan(View, uint32_t)
-    + {static} SetColumnSpan(View, uint32_t)
   }
 
   class "AbsoluteLayout" as AbsoluteLayout <<handle>> {
     + New() : AbsoluteLayout
-    + {static} GetParams(View) : AbsoluteLayoutParams
-    + {static} GetOrCreateParams(View) : AbsoluteLayoutParams
-    + {static} SetLayoutBounds(View, LayoutRect)
-    + {static} GetLayoutBounds(View) : LayoutRect
-    + {static} SetLayoutFlags(View, AbsoluteLayoutFlags)
-    + {static} GetLayoutFlags(View) : AbsoluteLayoutFlags
   }
 
-  class "AbsoluteLayoutParams" as AbsoluteLayoutParams <<handle>> {
+  class "AbsoluteLayoutParams" as AbsoluteLayoutParams <<value>> {
     + SetBounds(LayoutRect) : AbsoluteLayoutParams&
     + GetBounds() : LayoutRect
+    + SetX(float) : AbsoluteLayoutParams&
+    + GetX() : float
+    + SetY(float) : AbsoluteLayoutParams&
+    + GetY() : float
+    + SetWidth(float) : AbsoluteLayoutParams&
+    + GetWidth() : float
+    + SetHeight(float) : AbsoluteLayoutParams&
+    + GetHeight() : float
     + SetFlags(AbsoluteLayoutFlags) : AbsoluteLayoutParams&
     + GetFlags() : AbsoluteLayoutFlags
   }
 
-  class "FlexLayoutParams" as FlexLayoutParams <<handle>> {
+  class "FlexLayoutParams" as FlexLayoutParams <<value>> {
     + SetFlexGrow(float) : FlexLayoutParams&
+    + GetFlexGrow() : float
     + SetFlexShrink(float) : FlexLayoutParams&
+    + GetFlexShrink() : float
     + SetFlexBasis(float) : FlexLayoutParams&
+    + GetFlexBasis() : float
     + SetAlignSelf(FlexAlign) : FlexLayoutParams&
+    + GetAlignSelf() : FlexAlign
   }
 
-  class "GridLayoutParams" as GridLayoutParams <<handle>> {
+  class "GridLayoutParams" as GridLayoutParams <<value>> {
     + SetRow(uint32_t) : GridLayoutParams&
+    + GetRow() : uint32_t
     + SetColumn(uint32_t) : GridLayoutParams&
+    + GetColumn() : uint32_t
     + SetRowSpan(uint32_t) : GridLayoutParams&
+    + GetRowSpan() : uint32_t
     + SetColumnSpan(uint32_t) : GridLayoutParams&
+    + GetColumnSpan() : uint32_t
+    + SetHorizontalAlignment(LayoutAlignment) : GridLayoutParams&
+    + GetHorizontalAlignment() : LayoutAlignment
+    + SetVerticalAlignment(LayoutAlignment) : GridLayoutParams&
+    + GetVerticalAlignment() : LayoutAlignment
   }
 
-  class "StackLayoutParams" as StackLayoutParams <<handle>> {
+  class "StackLayoutParams" as StackLayoutParams <<value>> {
     + SetWeight(float) : StackLayoutParams&
     + GetWeight() : float
+    + SetAlignment(LayoutAlignment) : StackLayoutParams&
+    + GetAlignment() : LayoutAlignment
   }
 
   class "LayoutController" as LayoutController <<singleton>> {
@@ -205,37 +206,37 @@ package "Dali::Ui::Integration (Implementation)" as integration {
   }
 
   class "AbsoluteLayoutParamsImpl" as AbsoluteLayoutParamsImpl <<trait>> {
-    + SetBounds(LayoutRect)
+    + explicit AbsoluteLayoutParamsImpl(const AbsoluteLayoutParams&)
     + GetBounds() : LayoutRect
-    + SetFlags(AbsoluteLayoutFlags)
     + GetFlags() : AbsoluteLayoutFlags
     + {static} Get(ViewImpl&) : AbsoluteLayoutParamsImpl*
-    + {static} GetOrCreate(ViewImpl&) : AbsoluteLayoutParamsImpl&
   }
 
   class "FlexLayoutParamsImpl" as FlexLayoutParamsImpl <<trait>> {
-    + SetFlexGrow(float)
-    + SetFlexShrink(float)
-    + SetFlexBasis(float)
-    + SetAlignSelf(FlexAlign)
+    + explicit FlexLayoutParamsImpl(const FlexLayoutParams&)
+    + GetFlexGrow() : float
+    + GetFlexShrink() : float
+    + GetFlexBasis() : float
+    + GetAlignSelf() : FlexAlign
     + {static} Get(ViewImpl&) : FlexLayoutParamsImpl*
-    + {static} GetOrCreate(ViewImpl&) : FlexLayoutParamsImpl&
   }
 
   class "GridLayoutParamsImpl" as GridLayoutParamsImpl <<trait>> {
-    + SetRow(uint32_t)
-    + SetColumn(uint32_t)
-    + SetRowSpan(uint32_t)
-    + SetColumnSpan(uint32_t)
+    + explicit GridLayoutParamsImpl(const GridLayoutParams&)
+    + GetRow() : uint32_t
+    + GetColumn() : uint32_t
+    + GetRowSpan() : uint32_t
+    + GetColumnSpan() : uint32_t
+    + GetHorizontalAlignment() : LayoutAlignment
+    + GetVerticalAlignment() : LayoutAlignment
     + {static} Get(ViewImpl&) : GridLayoutParamsImpl*
-    + {static} GetOrCreate(ViewImpl&) : GridLayoutParamsImpl&
   }
 
   class "StackLayoutParamsImpl" as StackLayoutParamsImpl <<trait>> {
-    + SetWeight(float)
+    + explicit StackLayoutParamsImpl(const StackLayoutParams&)
     + GetWeight() : float
+    + GetAlignment() : LayoutAlignment
     + {static} Get(ViewImpl&) : StackLayoutParamsImpl*
-    + {static} GetOrCreate(ViewImpl&) : StackLayoutParamsImpl&
   }
 }
 
@@ -328,16 +329,11 @@ LayoutManager <|-- AbsoluteLayoutManager
 
 ViewImpl ..> LayoutManager : owns via Trait (AttachLayoutManager)
 
-' ========== Layout Params (Handle -> Impl) ==========
-AbsoluteLayoutParams ..> AbsoluteLayoutParamsImpl : uses
-FlexLayoutParams ..> FlexLayoutParamsImpl : uses
-GridLayoutParams ..> GridLayoutParamsImpl : uses
-StackLayoutParams ..> StackLayoutParamsImpl : uses
-
-AbsoluteLayout ..> AbsoluteLayoutParams : creates
-FlexLayout ..> FlexLayoutParams : creates
-GridLayout ..> GridLayoutParams : creates
-StackLayout ..> StackLayoutParams : creates
+' ========== Layout Params (value + private PIMPL; View-owned trait snapshot) ==========
+ViewImpl ..> AbsoluteLayoutParamsImpl : creates snapshot
+ViewImpl ..> FlexLayoutParamsImpl : creates snapshot
+ViewImpl ..> GridLayoutParamsImpl : creates snapshot
+ViewImpl ..> StackLayoutParamsImpl : creates snapshot
 
 ' ========== Layout Params Traits ==========
 AbsoluteLayoutManager ..> AbsoluteLayoutParamsImpl : reads
