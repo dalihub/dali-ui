@@ -19,6 +19,7 @@ CONTEXT_FILE="$REVIEW_DIR/context.md"
 REVIEW_INPUT_DIR="$PR_WORKSPACE/.rules-review-input"
 INPUT_DIFF_FILE="$REVIEW_INPUT_DIR/pr.diff"
 INPUT_JSON_FILE="$REVIEW_INPUT_DIR/input.json"
+RESULT_JSON_FILE="$REVIEW_INPUT_DIR/result.json"
 RAW_OUTPUT_FILE="$REVIEW_DIR/cline-output.jsonl"
 REVIEW_TEXT_FILE="$REVIEW_DIR/review.md"
 DETERMINISTIC_REVIEW_FILE="$REVIEW_DIR/deterministic-review.md"
@@ -190,7 +191,8 @@ const [knownIssuesPath, outPath] = process.argv.slice(2);
 const input = {
   alreadyReportedIssues: JSON.parse(fs.readFileSync(knownIssuesPath, 'utf8')),
   rulesDirectory: 'rules',
-  diffFile: '.rules-review-input/pr.diff'
+  diffFile: '.rules-review-input/pr.diff',
+  resultFile: '.rules-review-input/result.json'
 };
 
 fs.writeFileSync(outPath, JSON.stringify(input, null, 2) + '\n');
@@ -206,10 +208,11 @@ input.alreadyReportedIssues contains findings that are already reported by anoth
 Find code or documentation changes in input.diffFile that violate, or may violate, the rules in input.rulesDirectory.
 Return only findings that are not already covered by input.alreadyReportedIssues.
 
-Your entire response is a JSON array.
-Your final submit summary is the response.
-When calling submit_and_exit, put exactly the JSON array in the summary field.
-The summary field must start with [ and end with ].
+Before calling submit_and_exit, use run_commands to write the JSON array to input.resultFile.
+Write exactly the JSON array to input.resultFile.
+Do not write Markdown, prose, or a code fence to input.resultFile.
+Do not finish until input.resultFile exists and contains valid JSON.
+Your final submit summary is ignored.
 
 Each issue item has this schema:
 {
@@ -230,6 +233,7 @@ Input is a JSON object with these fields:
 - alreadyReportedIssues: issue items that are already reported
 - rulesDirectory: path to the rule documents directory
 - diffFile: path to the unified git diff file
+- resultFile: path where the final JSON array must be written
 
 Input file:
 .rules-review-input/input.json
@@ -242,15 +246,15 @@ cline -y --act --json --timeout 900 "$TASK_PROMPT" > "$RAW_OUTPUT_FILE"
 CLINE_STATUS=$?
 set -e
 
-node - "$RAW_OUTPUT_FILE" "$REVIEW_TEXT_FILE" <<'NODE'
+node - "$RESULT_JSON_FILE" "$RAW_OUTPUT_FILE" "$REVIEW_TEXT_FILE" <<'NODE'
 const fs = require('fs');
 
-const [rawPath, outPath] = process.argv.slice(2);
+const [resultPath, rawPath, outPath] = process.argv.slice(2);
 const raw = fs.readFileSync(rawPath, 'utf8');
 let result = '';
 
 function normalizeText(text) {
-  return text.replace(/\\n/g, '\n').trim();
+  return text.trim();
 }
 
 function escapeHtml(text) {
@@ -276,31 +280,6 @@ function normalizeSeverity(value) {
   return ['required', 'recommended', 'contextual', 'needs_confirmation'].includes(severity)
     ? severity
     : 'needs_confirmation';
-}
-
-function extractJsonArray(text) {
-  const normalized = normalizeText(text);
-  if (!normalized) return [];
-
-  try {
-    const parsed = JSON.parse(normalized);
-    return Array.isArray(parsed) ? parsed : null;
-  } catch {
-    // Some providers can add transport text around the model output.
-  }
-
-  const start = normalized.indexOf('[');
-  const end = normalized.lastIndexOf(']');
-  if (start !== -1 && end > start) {
-    try {
-      const parsed = JSON.parse(normalized.slice(start, end + 1));
-      return Array.isArray(parsed) ? parsed : null;
-    } catch {
-      return null;
-    }
-  }
-
-  return null;
 }
 
 function sanitizeIssue(issue) {
@@ -339,32 +318,23 @@ function fallbackIssueDetails(text) {
 
   const escaped = escapeHtml(truncateText(normalized, 3000));
   return `<details>
-<summary>Cline JSON 결과 파싱 실패</summary>
+<summary>Cline 결과 파일 검증 실패</summary>
 
 #### 규칙
-Cline CLI output format / JSON issue array
+Cline result file / JSON issue array
 
 #### 위치
 확인 필요
 
 #### 문제
-Cline이 JSON issue array를 반환하지 않았습니다. 출력 일부:
+Cline이 유효한 JSON issue array 파일을 생성하지 않았습니다. 상세 내용:
 
 ${escaped}
 
 #### 권장 조치
-rules-review-debug artifact의 \`cline-output.jsonl\`를 확인하세요.
+rules-review-debug artifact의 \`result.json\`과 \`cline-output.jsonl\`을 확인하세요.
 
 </details>`;
-}
-
-function extractIssueDetails(text) {
-  const parsed = extractJsonArray(text);
-  if (Array.isArray(parsed)) {
-    return renderIssueDetails(parsed.slice(0, 50).map(sanitizeIssue));
-  }
-
-  return fallbackIssueDetails(text);
 }
 
 function acceptMessage(message) {
@@ -396,11 +366,28 @@ for (const line of raw.split(/\r?\n/)) {
   }
 }
 
-if (!result.trim()) {
-  result = '';
+let review = '';
+try {
+  if (!fs.existsSync(resultPath)) throw new Error('Cline이 result.json을 생성하지 않았습니다.');
+  const parsed = JSON.parse(fs.readFileSync(resultPath, 'utf8'));
+  if (!Array.isArray(parsed)) throw new Error('result.json의 최상위 값이 JSON array가 아닙니다.');
+
+  const requiredFields = ['summary', 'rule', 'location', 'severity', 'problem', 'recommendation'];
+  const allowedSeverities = new Set(['required', 'recommended', 'contextual', 'needs_confirmation']);
+  for (const [index, issue] of parsed.entries()) {
+    if (!issue || typeof issue !== 'object' || Array.isArray(issue)) throw new Error(`result.json item ${index + 1}이 object가 아닙니다.`);
+    for (const field of requiredFields) {
+      if (typeof issue[field] !== 'string' || !issue[field].trim()) throw new Error(`result.json item ${index + 1}의 ${field}가 비어 있습니다.`);
+    }
+    if (!allowedSeverities.has(issue.severity)) throw new Error(`result.json item ${index + 1}의 severity가 올바르지 않습니다.`);
+  }
+
+  review = renderIssueDetails(parsed.slice(0, 50).map(sanitizeIssue));
+} catch (error) {
+  review = fallbackIssueDetails(`${error.message}\n\nCline 출력 일부:\n${result}`);
 }
 
-fs.writeFileSync(outPath, extractIssueDetails(result) + '\n');
+fs.writeFileSync(outPath, review + '\n');
 NODE
 
 {
@@ -525,6 +512,9 @@ cp "$INPUT_JSON_FILE" "$DEBUG_DIR/input.json"
 cp "$RULES_FILE" "$DEBUG_DIR/rules.md"
 cp "$DIFF_FILE" "$DEBUG_DIR/pr.diff"
 cp "$RAW_OUTPUT_FILE" "$DEBUG_DIR/cline-output.jsonl"
+if [ -f "$RESULT_JSON_FILE" ]; then
+  cp "$RESULT_JSON_FILE" "$DEBUG_DIR/result.json"
+fi
 cp "$DETERMINISTIC_ISSUES_FILE" "$DEBUG_DIR/deterministic-issues.json"
 cp "$REVIEW_TEXT_FILE" "$DEBUG_DIR/cline-review.md"
 cp "$DETERMINISTIC_REVIEW_FILE" "$DEBUG_DIR/deterministic-review.md"
