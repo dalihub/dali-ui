@@ -28,8 +28,6 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-theme-manager.h>
-#include <dali-ui-foundation/public-api/views/selectable-view.h> // Ui::SelectableView::DownCast/IsSelected
-#include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h> // public GetImpl(Ui::View&)
 
 namespace Dali
@@ -70,10 +68,6 @@ void CheckBoxImpl::SetText(const Dali::String& text)
 {
   mText = text;
   mLabel.SetText(text);
-
-  // Mirror the label onto the single accessible node's name.
-  Ui::View self = Ui::View::DownCast(Self());
-  self.SetProperty(Ui::View::Property::ACCESSIBILITY_NAME, text);
 
   InvalidateMeasure(); // label presence changes the measured size
 }
@@ -160,11 +154,7 @@ void CheckBoxImpl::OnInitialize()
 {
   Ui::Extension::SelectableViewImpl::OnInitialize(); // base first (attaches the SelectableTrait)
 
-  Ui::View self = Ui::View::DownCast(Self());
-
-  // Accessibility role; clip children to the control box.
-  self.SetProperty(Ui::View::Property::ACCESSIBILITY_ROLE,
-                   static_cast<int32_t>(Accessibility::Role::CHECK_BOX));
+  // Clip children to the control box.
   Self().SetProperty(Actor::Property::CLIPPING_MODE, ClippingMode::CLIP_TO_BOUNDING_BOX);
 
   // The Lottie glyph (mIcon) needs the url + frame ranges from the style, so it is created
@@ -174,7 +164,6 @@ void CheckBoxImpl::OnInitialize()
   // Optional trailing label (empty until SetText()), vertically centered against the icon.
   mLabel = Ui::Label::New();
   mLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
-  mLabel.SetProperty(Ui::View::Property::ACCESSIBILITY_HIDDEN, true);
   Self().Add(mLabel);
 
   // React to selection changes (no virtual OnSelectedChanged hook exists on the base).
@@ -203,7 +192,6 @@ void CheckBoxImpl::ApplyInitialStyle(CheckBoxStyle style)
   mIcon = style.CreateIcon();
   DALI_ASSERT_ALWAYS(mIcon && "CheckBox icon generator returned an empty ISelectableImage");
   Ui::View iconView = mIcon.GetView();
-  iconView.SetProperty(Ui::View::Property::ACCESSIBILITY_HIDDEN, true);
   Self().Add(iconView);
   mIcon.TransitionFinishedSignal().Connect(this, &CheckBoxImpl::OnAnimationFinished);
 
@@ -222,14 +210,12 @@ void CheckBoxImpl::ApplyInitialStyle(CheckBoxStyle style)
   SetTextUnderline(style.GetTextUnderline());
 
   RefreshRestingFrame();
-  UpdateAccessibility(IsSelected());
 }
 
 void CheckBoxImpl::OnSelectionChanged(View /*view*/, bool selected, InputEvent event)
 {
   // Selection authority stays here; the glyph view only renders the requested state.
   mIcon.SetSelected(selected, IsSelectionAnimationRequired(event));
-  UpdateAccessibility(selected);
 }
 
 bool CheckBoxImpl::IsSelectionAnimationRequired(const InputEvent& event) const
@@ -264,35 +250,6 @@ void CheckBoxImpl::PushStateColors()
   // Resolve the deselected/selected tokens against the current theme and push the RGBA into
   // the glyph view, which seats them on its inner-fill recolour callback.
   mIcon.SetStateColors(mIconColor.GetRgba(), mSelectedIconColor.GetRgba());
-}
-
-void CheckBoxImpl::UpdateAccessibility(bool selected)
-{
-  Ui::View self = Ui::View::DownCast(Self());
-  if(selected)
-  {
-    self.AddAccessibilityState(Accessibility::State::CHECKED);
-  }
-  else
-  {
-    self.RemoveAccessibilityState(Accessibility::State::CHECKED);
-  }
-  // The usage-hint description is supplied on demand by CheckBoxAccessible::GetDescriptionRaw()
-  // (localized by the framework via dgettext); we do NOT write ACCESSIBILITY_DESCRIPTION here so
-  // an app-set description keeps priority and the default stays localizable per current state.
-}
-
-ViewAccessible* CheckBoxImpl::CreateAccessibleObject()
-{
-  return new CheckBoxAccessible(Self());
-}
-
-std::string CheckBoxImpl::CheckBoxAccessible::GetDescriptionRaw() const
-{
-  // Read the live selection state through the public handle; the framework localizes the
-  // returned raw string (dgettext domain "dali-ui") in ViewAccessible::GetDescription().
-  const bool selected = Ui::SelectableView::DownCast(Self()).IsSelected();
-  return selected ? std::string("Double tap to deselect") : std::string("Double tap to select");
 }
 
 void CheckBoxImpl::OnThemeChanged()

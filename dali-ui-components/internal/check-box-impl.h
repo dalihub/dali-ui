@@ -20,7 +20,6 @@
 #include <dali-ui-components/public-api/check-box.h>
 #include <dali-ui-components/public-api/styles/check-box-style.h>
 #include <dali-ui-foundation/extension-api/selectable-view-impl.h>
-#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
@@ -70,28 +69,8 @@ protected:
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
   LayoutRect   OnArrange(const LayoutRect& bounds) override;
 
-  /**
-   * @copydoc Ui::Internal::ViewImpl::CreateAccessibleObject()
-   */
-  ViewAccessible* CreateAccessibleObject() override;
-
   CheckBoxImpl();
   ~CheckBoxImpl() override;
-
-  /**
-   * @brief Accessible node for CheckBox: supplies the localizable default usage-hint
-   * description derived from the current selection state.
-   */
-  class CheckBoxAccessible : public ViewAccessible
-  {
-  public:
-    using ViewAccessible::ViewAccessible;
-
-    /**
-     * @copydoc Dali::Ui::ViewAccessible::GetDescriptionRaw()
-     */
-    std::string GetDescriptionRaw() const override;
-  };
 
 private:
   void ApplyInitialStyle(CheckBoxStyle style);
@@ -105,8 +84,6 @@ private:
   void RefreshRestingFrame();
   // Resolve the icon tokens against the current theme and push them into the glyph view.
   void PushStateColors();
-  // Mirror selected -> a11y CHECKED bit + usage-hint description.
-  void UpdateAccessibility(bool selected);
 
 private:
   Ui::ISelectableImage mIcon;  ///< selectable image (drives its own frame-range + recolour)

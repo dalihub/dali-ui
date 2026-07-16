@@ -21,13 +21,13 @@
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/styles/check-box-style-impl.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-debug.h>
-#include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/effects/overlay-effect.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/adaptor-framework/environment-variable.h>
 #include <string>
 #include <utility>
 
@@ -42,12 +42,25 @@ StateEffect CreateDefaultCheckBoxStateEffect()
 {
   return OverlayEffect::Round();
 }
-// The Lottie asset ships in dali-ui-components/images/ and installs to
-// <dali image dir>/components/checkbox.json; resolve that path at runtime.
+// The Lottie asset ships in dali-ui-components/images/ and installs to the components-owned
+// image dir (checkbox.json). The dir is baked in via the DALI_UI_COMPONENTS_IMAGE_DIR compile
+// definition; when that is 0 (no default resource dir) we fall back to the DALI_IMAGE_DIR
+// environment variable plus the "components/" subdir, mirroring the default-resource layout.
 Dali::String DefaultIconUrl()
 {
-  const std::string path = Dali::Ui::Integration::AssetManager::GetDaliImagePath() + "components/checkbox.json";
-  return Dali::String(path.c_str());
+  const char* const dir = DALI_UI_COMPONENTS_IMAGE_DIR;
+  std::string       base;
+  if(nullptr == dir)
+  {
+    const char* const env = Dali::EnvironmentVariable::GetEnvironmentVariable("DALI_IMAGE_DIR");
+    base                  = (nullptr != env) ? std::string(env) : std::string();
+    base += "components/";
+  }
+  else
+  {
+    base = dir;
+  }
+  return Dali::String((base + "checkbox.json").c_str());
 }
 // The default icon generator: builds a selectable Lottie image from the shipped checkbox.json
 // with the segment layout from its markers — select plays [0,19] (the "on" marker), deselect

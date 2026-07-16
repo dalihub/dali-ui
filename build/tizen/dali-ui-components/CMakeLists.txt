@@ -8,6 +8,15 @@ FILE(GLOB_RECURSE SOURCES "${COMPONENTS_ROOT_SRC_DIR}/*.cpp")
 # 공유 라이브러리 생성
 ADD_LIBRARY(${PROJECT_LIB_NAME} SHARED ${SOURCES})
 
+# Components-owned image dir for the default icon assets (installed under
+# <dataReadOnlyInstallDir>/ui/images/components). Mirrors DALI_IMAGE_DIR's =0 env fallback so
+# non-default-resource builds keep resolving via the DALI_IMAGE_DIR environment variable.
+IF( USE_DEFAULT_RESOURCE_DIR )
+  TARGET_COMPILE_DEFINITIONS(${PROJECT_LIB_NAME} PRIVATE DALI_UI_COMPONENTS_IMAGE_DIR="${dataReadOnlyDir}/ui/images/components/")
+ELSE()
+  TARGET_COMPILE_DEFINITIONS(${PROJECT_LIB_NAME} PRIVATE DALI_UI_COMPONENTS_IMAGE_DIR=0)
+ENDIF()
+
 INCLUDE_DIRECTORIES(
   ${ROOT_SRC_DIR}
   ${DALICORE_INCLUDE_DIRS}

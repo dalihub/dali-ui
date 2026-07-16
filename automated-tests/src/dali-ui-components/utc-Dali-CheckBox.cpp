@@ -21,8 +21,6 @@
 #include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
-#include <dali/devel-api/atspi-interfaces/accessible.h>
 
 #include <string>
 
@@ -97,36 +95,6 @@ int UtcDaliCheckBoxCopyMoveDownCast(void)
   BaseHandle handle(cb);
   DALI_TEST_CHECK(CheckBox::DownCast(handle));
   DALI_TEST_CHECK(!CheckBox::DownCast(BaseHandle())); // empty for unrelated
-  END_TEST;
-}
-
-int UtcDaliCheckBoxRoleIsCheckBox(void)
-{
-  UiTestApplication application(Components::UiConfig::New());
-  CheckBox          cb    = CheckBox::New();
-  Actor             actor = cb;
-  int32_t           role  = actor.GetProperty<int32_t>(Ui::View::Property::ACCESSIBILITY_ROLE);
-  DALI_TEST_EQUALS(role, static_cast<int32_t>(Ui::Accessibility::Role::CHECK_BOX), TEST_LOCATION);
-  END_TEST;
-}
-
-int UtcDaliCheckBoxSelectTogglesCheckedBitPreservesEnabled(void)
-{
-  UiTestApplication application(Components::UiConfig::New());
-  CheckBox          cb = CheckBox::New();
-
-  // Capture the ENABLED bit up front, then assert the CHECKED toggle preserves it
-  // (AddAccessibilityState/RemoveAccessibilityState are additive/subtractive, not a
-  // whole-bitset replacement).
-  const bool enabledBefore = cb.HasAccessibilityState(Ui::Accessibility::State::ENABLED);
-
-  cb.SetSelected(true);
-  DALI_TEST_CHECK(cb.HasAccessibilityState(Ui::Accessibility::State::CHECKED));
-  DALI_TEST_EQUALS(cb.HasAccessibilityState(Ui::Accessibility::State::ENABLED), enabledBefore, TEST_LOCATION);
-
-  cb.SetSelected(false);
-  DALI_TEST_CHECK(!cb.HasAccessibilityState(Ui::Accessibility::State::CHECKED));
-  DALI_TEST_EQUALS(cb.HasAccessibilityState(Ui::Accessibility::State::ENABLED), enabledBefore, TEST_LOCATION);
   END_TEST;
 }
 
@@ -401,36 +369,6 @@ int UtcDaliCheckBoxStyleDefaultKeyP(void)
   DALI_TEST_CHECK(style.GetSelectedIconColor().HasColorId());
   DALI_TEST_EQUALS(style.GetSelectedIconColor().GetColorId(), UiColor::PRIMARY.GetColorId(), TEST_LOCATION);
   DALI_TEST_CHECK(style.GetStateEffect());
-  END_TEST;
-}
-
-int UtcDaliCheckBoxAccessibilityDescriptionDefaultAndOverride(void)
-{
-  UiTestApplication application(Components::UiConfig::New());
-
-  // Default (no app-set description): the accessible resolves a non-empty, state-derived usage
-  // hint from CheckBoxAccessible::GetDescriptionRaw() (localized by the framework via dgettext;
-  // untranslated in the test environment, so it returns the raw string unchanged).
-  CheckBox cb         = CheckBox::New();
-  auto*    accessible = Dali::Accessibility::Accessible::Get(cb);
-  DALI_TEST_CHECK(accessible);
-
-  const std::string uncheckedHint = accessible->GetDescription();
-  DALI_TEST_CHECK(!uncheckedHint.empty());
-
-  // The default hint tracks the current selection state (checked vs unchecked differ).
-  cb.SetSelected(true);
-  const std::string checkedHint = accessible->GetDescription();
-  DALI_TEST_CHECK(!checkedHint.empty());
-  DALI_TEST_CHECK(checkedHint != uncheckedHint);
-
-  // An app-set ACCESSIBILITY_DESCRIPTION wins over the default (deterministic).
-  CheckBox custom = CheckBox::New();
-  custom.SetProperty(Ui::View::Property::ACCESSIBILITY_DESCRIPTION, "APP HINT");
-  auto* customAccessible = Dali::Accessibility::Accessible::Get(custom);
-  DALI_TEST_CHECK(customAccessible);
-  DALI_TEST_EQUALS(customAccessible->GetDescription(), std::string("APP HINT"), TEST_LOCATION);
-
   END_TEST;
 }
 
