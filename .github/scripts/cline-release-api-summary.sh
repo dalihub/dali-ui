@@ -40,24 +40,22 @@ Produce a declaration-level API change summary between the two releases. Analyze
 
 Ignore implementation-only changes, comments, whitespace, includes, forward declarations, and changes that do not change an exposed declaration. Group changes by their owning class. A class must use its complete C++ namespace, for example "Dali::Ui::View".
 
-Return only a JSON array. Each item must have this schema:
+Return only a JSON array. Each array item represents exactly one API change and must have this schema:
 {
   "section": "Public API | Extension API | Integration API",
   "className": "Dali::Ui::ClassName",
-  "changes": [
-    {
-      "type": "Add | Change | Remove",
-      "before": "previous declaration; required only for Change and Remove",
-      "after": "current declaration; required only for Add and Change",
-      "link": "API description URL; required only for Add and Change"
-    }
-  ]
+  "kind": "class | api",
+  "type": "Add | Change | Remove",
+  "before": "previous declaration; required only for Change and Remove",
+  "after": "current declaration; required only for Add and Change",
+  "memberName": "after API method name; required only when kind is api and type is Add or Change"
 }
 
-For Add and Change, generate the link for the *after* API using this exact pattern:
-https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/classDali_1_1Ui_1_1View.html?h=setpadding#function-setpadding
+For kind "api", each item must describe one declaration only: one method, constructor, destructor, operator, enum value, property, or type alias. Never combine multiple declarations in one before or after string.
 
-Replace the class portion with the fully-qualified class using "_1_1" between namespace/class segments. Replace setpadding with the lower-case API method name. The link must point only to the after API. For Remove, set link to an empty string. Keep declarations concise but unambiguous, including argument types and relevant qualifiers. Return [] when there are no declaration-level changes.
+When an entire class is newly added, return exactly one item with kind "class" and type "Add". Do not return the new class's member declarations separately. For this item, use the complete class namespace in className and set after to the class name only. Do not report an unchanged class as a class-level change.
+
+Do not generate URLs. Keep declarations concise but unambiguous, including argument types and relevant qualifiers. Return [] when there are no declaration-level changes.
 
 Your final submit summary must be exactly the JSON array.
 EOF
@@ -117,7 +115,16 @@ function tableText(value) {
 const validSections = ['Public API', 'Extension API', 'Integration API'];
 const baseUrl = 'https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/';
 const parsed = parseArray(completion);
-let output = '<!-- dali-ui-release-api-summary -->\n## AI API Summary\n';
+let output = '<!-- dali-ui-release-api-summary -->\n## API Changes (AI-Generated)\n';
+
+function classUrl(className) {
+  return `${baseUrl}class${className.replace(/::/g, '_1_1')}.html`;
+}
+
+function apiUrl(className, memberName) {
+  const anchor = text(memberName).toLowerCase();
+  return anchor ? `${classUrl(className)}?h=${anchor}#function-${anchor}` : '';
+}
 
 if (!parsed) {
   output += '\n> Cline 결과를 API 변경 목록으로 해석하지 못했습니다. workflow artifact의 `cline-output.jsonl`을 확인하세요.\n';
@@ -126,13 +133,19 @@ if (!parsed) {
   for (const item of parsed) {
     const section = text(item?.section);
     const className = text(item?.className);
-    if (!validSections.includes(section) || !/^Dali(?:::[A-Za-z_][A-Za-z0-9_]*)+$/.test(className) || !Array.isArray(item?.changes)) continue;
-    const changes = item.changes.filter(change => ['Add', 'Change', 'Remove'].includes(text(change?.type)));
-    if (changes.length === 0) continue;
+    const kind = text(item?.kind);
+    const type = text(item?.type);
+    if (!validSections.includes(section) || !/^Dali(?:::[A-Za-z_][A-Za-z0-9_]*)+$/.test(className) || !['class', 'api'].includes(kind) || !['Add', 'Change', 'Remove'].includes(type)) continue;
     if (!sections.has(section)) sections.set(section, new Map());
     const classes = sections.get(section);
     if (!classes.has(className)) classes.set(className, []);
-    classes.get(className).push(...changes);
+    classes.get(className).push({
+      kind,
+      type,
+      before: text(item?.before),
+      after: text(item?.after),
+      memberName: text(item?.memberName)
+    });
   }
 
   if (sections.size === 0) {
@@ -145,11 +158,13 @@ if (!parsed) {
       for (const [className, changes] of [...classes.entries()].sort(([a], [b]) => a.localeCompare(b))) {
         output += `\n**${className}**\n\n| Type | API |\n| --- | --- |\n`;
         for (const change of changes) {
-          const type = text(change.type);
+          const type = change.type;
           const before = tableText(change.before);
           const after = tableText(change.after);
-          const link = text(change.link);
-          const linkedAfter = link.startsWith(baseUrl) ? `[${after}](${link})` : after;
+          const classAddition = change.kind === 'class' && type === 'Add';
+          const afterText = classAddition ? `class ${className}` : after;
+          const link = change.kind === 'class' ? classUrl(className) : apiUrl(className, change.memberName);
+          const linkedAfter = link ? `[${afterText}](${link})` : afterText;
           const api = type === 'Remove' ? before : type === 'Change' ? `${before} → ${linkedAfter}` : linkedAfter;
           output += `| ${type} | ${api} |\n`;
         }
