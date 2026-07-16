@@ -36,6 +36,7 @@ plugins:
         daliUi:
           src-dirs: >-
             dali-ui-foundation/public-api
+            dali-ui-foundation/extension-api
             dali-ui-foundation/integration-api
             dali-ui-components/public-api
             dali-ui-components/integration-api
