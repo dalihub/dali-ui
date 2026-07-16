@@ -13,40 +13,79 @@ DEBUG_DIR="${GITHUB_WORKSPACE:-$PWD}/release-api-summary-debug"
 rm -rf "$WORK_DIR" "$INPUT_DIR" "$DEBUG_DIR"
 mkdir -p "$WORK_DIR" "$INPUT_DIR" "$DEBUG_DIR"
 
-create_api_diff() {
+UNIT_LIST="$INPUT_DIR/units.list"
+: > "$UNIT_LIST"
+
+create_change_units() {
   local section=$1
-  local diff_file="$INPUT_DIR/${section}.diff"
+  local status old_header new_header path unit_id diff_file input_file index=0
+  local -a pathspecs
 
   case "$section" in
     public-api)
-      git diff --find-renames --unified=20 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- \
-        ':(glob)dali-ui-foundation/public-api/**/*.h' \
-        ':(glob)dali-ui-components/public-api/**/*.h' > "$diff_file"
+      pathspecs=(
+        ':(glob)dali-ui-foundation/public-api/**/*.h'
+        ':(glob)dali-ui-components/public-api/**/*.h'
+      )
       ;;
     extension-api)
-      git diff --find-renames --unified=20 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- \
-        ':(glob)dali-ui-foundation/extension-api/**/*.h' > "$diff_file"
+      pathspecs=(':(glob)dali-ui-foundation/extension-api/**/*.h')
       ;;
     integration-api)
-      git diff --find-renames --unified=20 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- \
-        ':(glob)dali-ui-foundation/integration-api/**/*.h' \
-        ':(glob)dali-ui-components/integration-api/**/*.h' > "$diff_file"
+      pathspecs=(
+        ':(glob)dali-ui-foundation/integration-api/**/*.h'
+        ':(glob)dali-ui-components/integration-api/**/*.h'
+      )
       ;;
   esac
 
-  cat > "$INPUT_DIR/${section}.json" <<EOF
+  while IFS=$'\t' read -r status old_header new_header
+  do
+    [ -n "$status" ] || continue
+    case "$status" in
+      A|M)
+        new_header=$old_header
+        old_header=$old_header
+        ;;
+      D)
+        new_header=''
+        ;;
+      R*|C*)
+        ;;
+      *)
+        continue
+        ;;
+    esac
+
+    index=$((index + 1))
+    unit_id="${section}-${index}"
+    diff_file="$INPUT_DIR/${unit_id}.diff"
+    input_file="$INPUT_DIR/${unit_id}.json"
+    path=${new_header:-$old_header}
+
+    if [ -n "$new_header" ] && [ "$old_header" != "$new_header" ]; then
+      git diff --find-renames --unified=20 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- "$old_header" "$new_header" > "$diff_file"
+    else
+      git diff --find-renames --unified=20 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- "$path" > "$diff_file"
+    fi
+
+    cat > "$input_file" <<EOF
 {
   "previousReleaseTag": "${PREVIOUS_RELEASE_TAG}",
   "releaseTag": "${RELEASE_TAG}",
   "apiLevel": "${section}",
-  "apiDiffFile": ".release-api-summary-input/${section}.diff"
+  "apiDiffFile": ".release-api-summary-input/${unit_id}.diff",
+  "oldHeader": "${old_header}",
+  "newHeader": "${new_header}"
 }
 EOF
+    printf '%s\n' "$unit_id" >> "$UNIT_LIST"
+  done < <(git diff --name-status --find-renames "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- "${pathspecs[@]}")
 }
 
 for section in public-api extension-api integration-api
 do
-  create_api_diff "$section"
+  create_change_units "$section"
 done
 
 cat > "$WORK_DIR/prompt.md" <<'EOF'
@@ -60,15 +99,16 @@ Return a machine-readable list of Add, Remove, and Change records for the releas
 ## 2. Input and analysis scope
 
 Read INPUT_FILE.
-INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiLevel`, and `apiDiffFile` fields.
+INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiLevel`, `apiDiffFile`, `oldHeader`, and `newHeader` fields.
 `previousReleaseTag` is the old Git release tag and `releaseTag` is the new Git release tag.
 `apiLevel` is exactly one of `public-api`, `extension-api`, or `integration-api`.
 `apiDiffFile` is the unified Git diff to analyze for this execution.
+`oldHeader` is the repository-relative old header path, or an empty string for a newly added header.
+`newHeader` is the repository-relative new header path, or an empty string for a removed header.
 
-This execution receives one diff file for one API category.
-The diff can contain headers from multiple source directories.
-For example, the `public-api` diff can contain both `dali-ui-foundation/public-api/` and `dali-ui-components/public-api/` headers.
-The workflow runs separate executions for `public-api`, `extension-api`, and `integration-api`.
+This execution analyzes exactly one change unit.
+A change unit is one modified, added, or removed header, or one Git-detected old/new header rename pair.
+When `oldHeader` and `newHeader` differ, analyze them together as one declaration change unit.
 
 Read the unified diff at `apiDiffFile`.
 Analyze only declarations in headers included by that diff.
@@ -79,6 +119,8 @@ When the diff lacks enough context, inspect both complete header revisions with 
 
 Return exactly one JSON array and nothing else.
 Do not return Markdown, a code fence, an explanation, or conversational text.
+Do not replace the JSON array with a summary, even when the change set is large.
+Do not omit records because the output is long.
 Each array item represents exactly one declaration.
 Do not combine overloads or multiple declarations into one item.
 Do not put multiple declarations in `before` or `after`.
@@ -129,9 +171,21 @@ For example, use `Dali::Ui::InputField`, not `InputField`.
 Set `ownerKind` to `class` for declarations owned by a class or struct.
 Report a namespace-level enum, using its complete namespace as `className` and `ownerKind: "namespace"`.
 
-For a class or struct addition, create exactly one Add record with `kind: "class"`.
-For a class or struct removal, create exactly one Remove record with `kind: "class"`.
-Do not create separate member records when the containing class or struct itself was added or removed.
+Apply the class and struct lifecycle rule before applying any other reporting rule.
+
+If a class or struct declaration is added, create exactly one Add record with `kind: "class"`.
+Do not create records for constructors, destructors, methods, operators, enums, type aliases, or data members contained by that added class or struct.
+This rule applies even when the class or struct is declared in a newly added header.
+This rule applies even when the class or struct has public or protected members.
+This rule overrides the general requirement to report individual declarations.
+
+If a class or struct declaration is removed, create exactly one Remove record with `kind: "class"`.
+Do not create records for constructors, destructors, methods, operators, enums, type aliases, or data members contained by that removed class or struct.
+This rule overrides the general requirement to report individual declarations.
+
+For example, a new `Dali::Ui::CheckBox` class with `New()` and `SetText(...)` requires one Add record for `Dali::Ui::CheckBox` only.
+Do not output Add records for `New()` or `SetText(...)` in that case.
+
 For all other declarations, create one record for each added, removed, or changed declaration.
 
 Use Add only when the declaration exists only at `releaseTag`.
@@ -139,7 +193,7 @@ Use Remove only when the declaration exists only at `previousReleaseTag`.
 Use Change only when the same declaration exists in both releases but its declaration-level API signature changed.
 An API signature includes fully-qualified namespace, owning class or struct, declaration name, parameter types, parameter order, parameter count, return type, `const`, ref qualifiers, `static`, `virtual`, `override`, `noexcept`, and template parameters.
 Treat a namespace change as Change when the declarations otherwise represent the same API.
-For example, moving `Dali::Ui::Provider::Foo::Bar()` to `Dali::Ui::Extension::Foo::Bar()` is one Change record.
+For example, moving `Dali::Ui::OldNamespace::Foo::Bar()` to `Dali::Ui::NewNamespace::Foo::Bar()` is one Change record.
 Do not represent that namespace change as unrelated Remove and Add records.
 Treat a class or struct rename as Change when the old and new declarations otherwise represent the same API.
 
@@ -148,22 +202,96 @@ Treat a class or struct rename as Change when the old and new declarations other
 Do not report namespace-level free functions or namespace-level type aliases.
 Do not report comments, whitespace-only changes, include directives, forward declarations, friend declarations, private implementation helpers, function-body-only changes, or unchanged declarations moved only by a file rename.
 
+Before returning the JSON array, verify that every diff hunk in `apiDiffFile` was examined.
 Before returning the JSON array, verify that each item represents exactly one declaration.
 Verify that each added or removed class or struct has exactly one class record.
+Verify that no member of an added or removed class or struct is included.
 Verify that no private member, friend declaration, comment-only change, or whitespace-only change is included.
+Return `[]` only after every diff hunk was examined and none contains a reportable declaration change.
 EOF
 
 CLINE_STATUS=0
-for section in public-api extension-api integration-api
+while IFS= read -r unit_id
 do
   set +e
-  cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${section}.json|" "$WORK_DIR/prompt.md")" > "$WORK_DIR/cline-output-${section}.jsonl"
+  cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${unit_id}.json|" "$WORK_DIR/prompt.md")" > "$WORK_DIR/cline-output-${unit_id}.jsonl"
   status=$?
   set -e
   if [ "$status" -ne 0 ]; then
     CLINE_STATUS=$status
   fi
-done
+done < "$UNIT_LIST"
+
+RECONCILIATION_INPUT="$INPUT_DIR/reconciliation.json"
+RECONCILIATION_PROMPT="$WORK_DIR/reconciliation-prompt.md"
+
+node - "$WORK_DIR" "$RECONCILIATION_INPUT" <<'NODE'
+const fs = require('fs');
+
+const [workDir, inputPath] = process.argv.slice(2);
+
+function completionFromRaw(raw) {
+  let completion = '';
+  for (const line of raw.split(/\r?\n/)) {
+    try {
+      const event = JSON.parse(line);
+      if ((event.say === 'completion_result' || event.type === 'run_result') && typeof event.text === 'string') completion = event.text;
+      if (event.type === 'agent_event' && event.event?.type === 'done' && typeof event.event.text === 'string') completion = event.event.text;
+    } catch {}
+  }
+  return completion;
+}
+
+function parseArray(value) {
+  try {
+    const parsed = JSON.parse(value.trim());
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
+}
+
+const candidates = fs.readdirSync(workDir)
+  .filter(name => name.startsWith('cline-output-') && name.endsWith('.jsonl'))
+  .flatMap(name => parseArray(completionFromRaw(fs.readFileSync(`${workDir}/${name}`, 'utf8'))))
+  .filter(item => item && (String(item.type).toLowerCase() === 'add' || String(item.type).toLowerCase() === 'remove'));
+
+fs.writeFileSync(inputPath, JSON.stringify({candidates}, null, 2));
+process.stdout.write(String(candidates.length));
+NODE
+
+cat > "$RECONCILIATION_PROMPT" <<'EOF'
+You are a C++ API relocation reconciler.
+
+Read RECONCILIATION_INPUT.
+RECONCILIATION_INPUT contains a `candidates` array of Add and Remove API declaration records produced from separate header change units.
+
+Find only Add and Remove pairs that represent the same API declaration moved or renamed across different headers, classes, or namespaces.
+Treat a namespace change as one Change only when the old and new declarations otherwise represent the same API.
+Do not match declarations merely because they have similar names.
+Do not invent declarations that are not present in `candidates`.
+
+Return exactly one JSON array and nothing else.
+Return no Markdown, explanation, or conversational text.
+Return one Change object for each confirmed pair.
+Use the same object schema as the candidate records.
+Set `before` from the Remove record.
+Set `after` from the Add record.
+Set `className`, `ownerKind`, `kind`, `memberName`, and `file` from the Add record.
+Set `beforeMemberName` from the Remove record.
+Set `type` to `Change`.
+Return `[]` when no pair is confirmed.
+EOF
+
+if [ "$(node -e 'const value = require(process.argv[1]); process.stdout.write(String(value.candidates.length))' "$RECONCILIATION_INPUT")" -gt 0 ]; then
+  set +e
+  cline -y --act --json --timeout 900 "$(sed "s|RECONCILIATION_INPUT|.release-api-summary-input/reconciliation.json|" "$RECONCILIATION_PROMPT")" > "$WORK_DIR/cline-output-reconciliation.jsonl"
+  status=$?
+  set -e
+  if [ "$status" -ne 0 ]; then
+    CLINE_STATUS=$status
+  fi
+fi
 
 node - "$WORK_DIR" "$RESULT_FILE" "$CLINE_STATUS" <<'NODE'
 const fs = require('fs');
@@ -284,10 +412,28 @@ const baseUrl = 'https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/';
 const rawFiles = fs.readdirSync(workDir)
   .filter(name => name.startsWith('cline-output-') && name.endsWith('.jsonl'))
   .sort();
-const parsedArrays = rawFiles
-  .map(name => parseArray(completionFromRaw(fs.readFileSync(`${workDir}/${name}`, 'utf8'))))
-  .filter(Array.isArray);
-const parsed = parsedArrays.flat();
+const parsedResults = rawFiles.map(name => ({
+  name,
+  array: parseArray(completionFromRaw(fs.readFileSync(`${workDir}/${name}`, 'utf8')))
+}));
+const reconciliationResults = parsedResults.filter(result => result.name === 'cline-output-reconciliation.jsonl');
+const unitResults = parsedResults.filter(result => result.name !== 'cline-output-reconciliation.jsonl');
+const parsedArrays = unitResults.map(result => result.array).filter(Array.isArray);
+const parseFailures = parsedResults.filter(result => !Array.isArray(result.array));
+const reconciledChanges = reconciliationResults.flatMap(result => result.array || []);
+
+function matchesReconciledChange(candidate, change) {
+  if (normalizedSection(candidate?.section) !== normalizedSection(change?.section)) return false;
+  const candidateType = normalizedType(candidate?.type);
+  if (candidateType === 'Add') return text(candidate?.after) === text(change?.after) && text(candidate?.className) === text(change?.className);
+  if (candidateType === 'Remove') return text(candidate?.before) === text(change?.before);
+  return false;
+}
+
+const parsed = parsedArrays
+  .flat()
+  .filter(candidate => !reconciledChanges.some(change => matchesReconciledChange(candidate, change)))
+  .concat(reconciledChanges);
 let output = '<!-- dali-ui-release-api-summary -->\n## API Changes (AI-Generated)\n';
 
 function ownerUrl(className, ownerKind) {
@@ -334,7 +480,9 @@ function shortClassName(className) {
   return className.slice(className.lastIndexOf('::') + 2);
 }
 
-if (parsedArrays.length === 0) {
+if (rawFiles.length === 0) {
+  output += '\n선언 수준의 Public API, Extension API, Integration API 변경이 없습니다.\n';
+} else if (parsedArrays.length === 0) {
   output += '\n> Cline 결과를 API 변경 목록으로 해석하지 못했습니다. workflow artifact의 `cline-output.jsonl`을 확인하세요.\n';
 } else {
   const sections = new Map();
@@ -350,7 +498,7 @@ if (parsedArrays.length === 0) {
       skippedItems += 1;
       continue;
     }
-    if ((ownerKind === 'namespace' && declarationKind !== 'enum') || (ownerKind === 'class' && declarationKind === 'api')) {
+    if (ownerKind === 'namespace' && declarationKind !== 'enum') {
       skippedItems += 1;
       continue;
     }
@@ -376,7 +524,7 @@ if (parsedArrays.length === 0) {
   }
 
   if (sections.size === 0) {
-    output += '\n선언 수준의 Public API, Extension API, Integration API 변경이 없습니다.\n';
+    output += '\n> Cline이 reportable API 변경을 반환하지 않았습니다. debug artifact를 확인하세요.\n';
   } else {
     for (const section of validSections) {
       const classes = sections.get(section);
@@ -422,11 +570,17 @@ if (parsedArrays.length === 0) {
   if (skippedItems > 0) output += `\n> Cline 결과 ${skippedItems}건은 schema가 맞지 않아 제외되었습니다. debug artifact의 \`cline-output.jsonl\`을 확인하세요.\n`;
 }
 
+if (parseFailures.length > 0) output += `\n> Cline 결과 ${parseFailures.length}개 unit은 JSON array가 아니어서 제외되었습니다: ${parseFailures.map(result => `\`${result.name}\``).join(', ')}\n`;
+
 if (Number(statusText) !== 0) output += `\n> Cline CLI가 status ${statusText}로 종료되었습니다. 결과가 불완전할 수 있습니다.\n`;
 fs.writeFileSync(resultPath, output);
 NODE
 
 cp "$WORK_DIR/prompt.md" "$DEBUG_DIR/prompt.md"
 cp "$INPUT_DIR"/* "$DEBUG_DIR/"
-cp "$WORK_DIR"/cline-output-*.jsonl "$DEBUG_DIR/"
+for output_file in "$WORK_DIR"/cline-output-*.jsonl
+do
+  [ -e "$output_file" ] || continue
+  cp "$output_file" "$DEBUG_DIR/"
+done
 cp "$RESULT_FILE" "$DEBUG_DIR/summary.md"
