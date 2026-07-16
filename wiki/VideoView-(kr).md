@@ -38,7 +38,7 @@
 
 ```
 App:  player_create() → player_set_uri()  (네이티브 핸들은 아직 IDLE 상태)
-App:  source = CreateVideoSourceFromMMPlayer(player)
+App:  source = CreateVideoSourceFromMMPlayerUnderlay(player)
 App:  videoView = VideoView::New(source);  window.Add(videoView)
                         ↓ 동기적으로 실행됨 — 플레이어가 IDLE 상태일 때 display가 연결됨
 App:  player_prepare()  →  videoView.Play()
@@ -67,7 +67,7 @@ player_create(&player);
 player_set_uri(player, "video.mp4");
 
 // 2. 핸들을 VideoSource로 감싸기
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayer(player);
+VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(player);
 
 // 3. VideoView를 생성하고 window에 추가
 VideoView videoView = VideoView::New(source);
@@ -116,7 +116,7 @@ esplusplayer_set_ready_to_prepare_cb(player, OnReadyToPrepare, userData);
 esplusplayer_set_prepare_async_done_cb(player, OnPrepareAsyncDone, userData);
 
 // NativeImage (GPU 텍스처):
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayer(player);
+VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerNativeImage(player);
 // 대신 Underlay (hole-punch)를 쓰려면:
 // VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerUnderlay(player);
 
@@ -141,16 +141,16 @@ esplusplayer_prepare_async(player);
 
 | 모드 | 헬퍼 | 장점 | 단점 |
 |---|---|---|---|
-| **Underlay** | `CreateVideoSourceFromMMPlayer()`, `CreateVideoSourceFromESPlayerUnderlay()` | 플랫폼이 직접 합성(hole-punch)해서 오버헤드가 낮음; geometry/ROI가 view와 자동으로 동기화됨 | 영상이 항상 UI 레이어보다 아래에 그려짐; DALi 렌더 이펙트/블렌딩을 프레임 자체에 직접 적용할 수 없음 |
-| **NativeImage** | `CreateVideoSourceFromMMPlayerNativeImage()`, `CreateVideoSourceFromESPlayer()` | 디코딩된 프레임이 일반 GPU 텍스처가 되어 다른 View 콘텐츠처럼 corner radius, 블렌딩, 렌더 이펙트 적용 가능 | 디코드 결과를 텍스처로 복사하는 추가 오버헤드 |
+| **Underlay** | `CreateVideoSourceFromMMPlayerUnderlay()`, `CreateVideoSourceFromESPlayerUnderlay()` | 플랫폼이 직접 합성(hole-punch)해서 오버헤드가 낮음; geometry/ROI가 view와 자동으로 동기화됨 | 영상이 항상 UI 레이어보다 아래에 그려짐; DALi 렌더 이펙트/블렌딩을 프레임 자체에 직접 적용할 수 없음 |
+| **NativeImage** | `CreateVideoSourceFromMMPlayerNativeImage()`, `CreateVideoSourceFromESPlayerNativeImage()` | 디코딩된 프레임이 일반 GPU 텍스처가 되어 다른 View 콘텐츠처럼 corner radius, 블렌딩, 렌더 이펙트 적용 가능 | 디코드 결과를 텍스처로 복사하는 추가 오버헤드 |
 
 ### 헬퍼 → 플레이어 → Capability 매핑
 
 | 헬퍼 | 플레이어 | Capability | Provider ID |
 |---|---|---|---|
-| `CreateVideoSourceFromMMPlayer()` | MMPlayer | `SupportsUnderlay`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
+| `CreateVideoSourceFromMMPlayerUnderlay()` | MMPlayer | `SupportsUnderlay`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
 | `CreateVideoSourceFromMMPlayerNativeImage()` | MMPlayer | `SupportsNativeImage`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
-| `CreateVideoSourceFromESPlayer()` | ESPlayer | `SupportsNativeImage` | `"tizen.esplayer"` |
+| `CreateVideoSourceFromESPlayerNativeImage()` | ESPlayer | `SupportsNativeImage` | `"tizen.esplayer"` |
 | `CreateVideoSourceFromESPlayerUnderlay()` | ESPlayer | `SupportsUnderlay` | `"tizen.esplayer"` |
 
 ---
@@ -164,9 +164,9 @@ esplusplayer_prepare_async(player);
 `<dali-ui-foundation/public-api/video/tizen-video-source.h>`에 선언되어 있습니다:
 
 ```cpp
-VideoSource CreateVideoSourceFromMMPlayer(player_h player, const VideoSourceOptions& options = {});
+VideoSource CreateVideoSourceFromMMPlayerUnderlay(player_h player, const VideoSourceOptions& options = {});
 VideoSource CreateVideoSourceFromMMPlayerNativeImage(player_h player, const VideoSourceOptions& options = {});
-VideoSource CreateVideoSourceFromESPlayer(esplusplayer_handle player, const VideoSourceOptions& options = {});
+VideoSource CreateVideoSourceFromESPlayerNativeImage(esplusplayer_handle player, const VideoSourceOptions& options = {});
 VideoSource CreateVideoSourceFromESPlayerUnderlay(esplusplayer_handle player, const VideoSourceOptions& options = {});
 ```
 
@@ -198,7 +198,7 @@ struct VideoSourceOptions
 ```cpp
 VideoSourceOptions options;
 options.controlPolicy = VideoControlPolicy::DisplayOnly;
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayer(player, options);
+VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(player, options);
 ```
 
 ---

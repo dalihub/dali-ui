@@ -219,7 +219,7 @@ void PrintPlayerError(const char* operation, int error)
  *
  * ESPlayer NativeImage flow:
  *   1. esplusplayer_create / open / set stream info (IDLE state)
- *   2. CreateVideoSourceFromESPlayer() wraps the handle (SupportsNativeImage capability)
+ *   2. CreateVideoSourceFromESPlayerNativeImage() wraps the handle (SupportsNativeImage capability)
  *   3. VideoView::New(source) creates EsVideoPlayer internally
  *   4. window.Add() → AttachToScene: NativeImage created, IMAGE visual registered,
  *      SetRenderingTarget(NativeImagePtr) → DoInitializeTextureStreamMode: registers
@@ -349,7 +349,7 @@ private:
       }
       else
       {
-        source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayer(mEsPlayer);
+        source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerNativeImage(mEsPlayer);
       }
     }
     else
@@ -365,7 +365,7 @@ private:
       }
       else
       {
-        source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayer(mPlayer);
+        source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(mPlayer);
       }
     }
 

@@ -29,7 +29,7 @@ video-view.example es-underlay    # ESPlayer underlay, 하드코딩된 H.264 테
 ### MMPlayer underlay / MMPlayer NativeImage
 
 - 앱이 CAPI player를 생성하고 URI만 설정한다: `player_create` → `player_set_uri` (아직 IDLE).
-- native handle을 `Dali::Ui::Tizen::CreateVideoSourceFromMMPlayer()`(underlay) 또는
+- native handle을 `Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay()`(underlay) 또는
   `CreateVideoSourceFromMMPlayerNativeImage()`(NativeImage)로 감싸 `VideoSource`로 만든다.
   - 이 지점 외에는 `VideoView`가 MMPlayer/ESPlayer 여부를 알지 못한다.
 - `VideoView::New(source)` → `window.Add(view)`로 scene에 붙인다. underlay 모드는 이때
@@ -51,7 +51,7 @@ display attach 호출뿐).
 ### ESPlayer NativeImage / ESPlayer underlay
 
 - `esplusplayer_create` / `open` / stream info 설정 (IDLE 상태).
-- `CreateVideoSourceFromESPlayer()`(NativeImage) 또는 `CreateVideoSourceFromESPlayerUnderlay()`
+- `CreateVideoSourceFromESPlayerNativeImage()`(NativeImage) 또는 `CreateVideoSourceFromESPlayerUnderlay()`
   (underlay, providerId `"tizen.esplayer"` — NativeImage와 같은 id다. 팩토리가 capability와
   무관하게 이 providerId를 항상 `EsVideoPlayer`로 라우팅하므로 tcore/ecore용 provider를 따로 둘
   필요가 없다)로 핸들을 감싼다. `VideoView::New(source)`는 provider factory를 거쳐 항상

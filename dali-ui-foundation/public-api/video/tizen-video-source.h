@@ -34,7 +34,8 @@ static constexpr const char* MMPLAYER_PROVIDER_ID = "tizen.mmplayer";
 static constexpr const char* ESPLAYER_PROVIDER_ID = "tizen.esplayer";
 
 /**
- * @brief Wraps an externally created Tizen MMPlayer handle as a VideoSource.
+ * @brief Wraps an externally created Tizen MMPlayer handle as a VideoSource for underlay (hole-punch)
+ * rendering.
  *
  * The caller owns the native player lifecycle (create / prepare / destroy). The
  * returned VideoSource only describes the session; VideoView attaches it for display.
@@ -44,7 +45,7 @@ static constexpr const char* ESPLAYER_PROVIDER_ID = "tizen.esplayer";
  *       VideoSource::New entry point it calls is exported (DALI_UI_API), so this links
  *       from an external app regardless of the library's symbol-visibility build.
  */
-inline VideoSource CreateVideoSourceFromMMPlayer(player_h player, const VideoSourceOptions& options = {})
+inline VideoSource CreateVideoSourceFromMMPlayerUnderlay(player_h player, const VideoSourceOptions& options = {})
 {
   VideoSourceCapabilities capabilities;
   capabilities.flags = VideoSourceCapabilities::SupportsUnderlay |
@@ -56,8 +57,7 @@ inline VideoSource CreateVideoSourceFromMMPlayer(player_h player, const VideoSou
 /**
  * @brief Wraps an externally created Tizen MMPlayer handle as a VideoSource for NativeImage rendering.
  *
- * Unlike CreateVideoSourceFromMMPlayer (which uses platform underlay/VideoShell), this variant
- * uses GPU texture rendering: decoded frames are pushed into a NativeImageSourceQueue and
+ * Uses GPU texture rendering: decoded frames are pushed into a NativeImageSourceQueue and
  * rendered as a regular textured quad. Use this when underlay compositing is not available or
  * when a textured rendering pipeline is preferred.
  */
@@ -71,10 +71,12 @@ inline VideoSource CreateVideoSourceFromMMPlayerNativeImage(player_h player, con
 }
 
 /**
- * @brief Wraps an externally created Tizen ESPlayer handle as a VideoSource.
- * Uses NativeImage texture rendering (GPU-based).
+ * @brief Wraps an externally created Tizen ESPlayer handle as a VideoSource for NativeImage rendering.
+ *
+ * Uses GPU texture rendering: decoded frames are pushed into a NativeImageSourceQueue and
+ * rendered as a regular textured quad.
  */
-inline VideoSource CreateVideoSourceFromESPlayer(esplusplayer_handle player, const VideoSourceOptions& options = {})
+inline VideoSource CreateVideoSourceFromESPlayerNativeImage(esplusplayer_handle player, const VideoSourceOptions& options = {})
 {
   VideoSourceCapabilities capabilities;
   capabilities.flags = VideoSourceCapabilities::SupportsNativeImage;
