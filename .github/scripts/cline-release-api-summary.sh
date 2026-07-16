@@ -76,7 +76,8 @@ create_change_units() {
   "apiLevel": "${section}",
   "apiDiffFile": ".release-api-summary-input/${unit_id}.diff",
   "oldHeader": "${old_header}",
-  "newHeader": "${new_header}"
+  "newHeader": "${new_header}",
+  "resultFile": ".release-api-summary-input/${unit_id}.result.json"
 }
 EOF
     printf '%s\n' "$unit_id" >> "$UNIT_LIST"
@@ -99,12 +100,13 @@ Return a machine-readable list of Add, Remove, and Change records for the releas
 ## 2. Input and analysis scope
 
 Read INPUT_FILE.
-INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiLevel`, `apiDiffFile`, `oldHeader`, and `newHeader` fields.
+INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiLevel`, `apiDiffFile`, `oldHeader`, `newHeader`, and `resultFile` fields.
 `previousReleaseTag` is the old Git release tag and `releaseTag` is the new Git release tag.
 `apiLevel` is exactly one of `public-api`, `extension-api`, or `integration-api`.
 `apiDiffFile` is the unified Git diff to analyze for this execution.
 `oldHeader` is the repository-relative old header path, or an empty string for a newly added header.
 `newHeader` is the repository-relative new header path, or an empty string for a removed header.
+`resultFile` is the path where you must write the final JSON array.
 
 This execution analyzes exactly one change unit.
 A change unit is one modified, added, or removed header, or one Git-detected old/new header rename pair.
@@ -121,6 +123,11 @@ Return exactly one JSON array and nothing else.
 Do not return Markdown, a code fence, an explanation, or conversational text.
 Do not replace the JSON array with a summary, even when the change set is large.
 Do not omit records because the output is long.
+Your final submit summary is ignored.
+Before submitting, use `run_commands` to write the JSON array to `resultFile`.
+Write exactly the JSON array to `resultFile`.
+Do not write Markdown, prose, or a code fence to `resultFile`.
+Do not finish the task until `resultFile` exists and contains valid JSON.
 Each array item represents exactly one declaration.
 Do not combine overloads or multiple declarations into one item.
 Do not put multiple declarations in `before` or `after`.
@@ -213,10 +220,22 @@ EOF
 CLINE_STATUS=0
 while IFS= read -r unit_id
 do
+  log_file="$WORK_DIR/cline-log-${unit_id}.jsonl"
+  result_file="$INPUT_DIR/${unit_id}.result.json"
   set +e
-  cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${unit_id}.json|" "$WORK_DIR/prompt.md")" > "$WORK_DIR/cline-output-${unit_id}.jsonl"
+  cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${unit_id}.json|" "$WORK_DIR/prompt.md")" > "$log_file"
   status=$?
+  if grep -q 'Rate limit exceeded' "$log_file"; then
+    sleep 60
+    cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${unit_id}.json|" "$WORK_DIR/prompt.md")" > "$log_file"
+    status=$?
+  fi
   set -e
+  if [ -f "$result_file" ]; then
+    cp "$result_file" "$WORK_DIR/cline-output-${unit_id}.jsonl"
+  else
+    cp "$log_file" "$WORK_DIR/cline-output-${unit_id}.jsonl"
+  fi
   if [ "$status" -ne 0 ]; then
     CLINE_STATUS=$status
   fi
@@ -231,6 +250,7 @@ const fs = require('fs');
 const [workDir, inputPath] = process.argv.slice(2);
 
 function completionFromRaw(raw) {
+  if (raw.trim().startsWith('[')) return raw;
   let completion = '';
   for (const line of raw.split(/\r?\n/)) {
     try {
@@ -256,7 +276,10 @@ const candidates = fs.readdirSync(workDir)
   .flatMap(name => parseArray(completionFromRaw(fs.readFileSync(`${workDir}/${name}`, 'utf8'))))
   .filter(item => item && (String(item.type).toLowerCase() === 'add' || String(item.type).toLowerCase() === 'remove'));
 
-fs.writeFileSync(inputPath, JSON.stringify({candidates}, null, 2));
+fs.writeFileSync(inputPath, JSON.stringify({
+  candidates,
+  resultFile: '.release-api-summary-input/reconciliation.result.json'
+}, null, 2));
 process.stdout.write(String(candidates.length));
 NODE
 
@@ -265,6 +288,7 @@ You are a C++ API relocation reconciler.
 
 Read RECONCILIATION_INPUT.
 RECONCILIATION_INPUT contains a `candidates` array of Add and Remove API declaration records produced from separate header change units.
+RECONCILIATION_INPUT contains `resultFile`, the path where you must write the final JSON array.
 
 Find only Add and Remove pairs that represent the same API declaration moved or renamed across different headers, classes, or namespaces.
 Treat a namespace change as one Change only when the old and new declarations otherwise represent the same API.
@@ -273,6 +297,8 @@ Do not invent declarations that are not present in `candidates`.
 
 Return exactly one JSON array and nothing else.
 Return no Markdown, explanation, or conversational text.
+Before submitting, use `run_commands` to write exactly the JSON array to `resultFile`.
+Do not finish until `resultFile` exists and contains valid JSON.
 Return one Change object for each confirmed pair.
 Use the same object schema as the candidate records.
 Set `before` from the Remove record.
@@ -284,10 +310,17 @@ Return `[]` when no pair is confirmed.
 EOF
 
 if [ "$(node -e 'const value = require(process.argv[1]); process.stdout.write(String(value.candidates.length))' "$RECONCILIATION_INPUT")" -gt 0 ]; then
+  reconciliation_log="$WORK_DIR/cline-log-reconciliation.jsonl"
+  reconciliation_result="$INPUT_DIR/reconciliation.result.json"
   set +e
-  cline -y --act --json --timeout 900 "$(sed "s|RECONCILIATION_INPUT|.release-api-summary-input/reconciliation.json|" "$RECONCILIATION_PROMPT")" > "$WORK_DIR/cline-output-reconciliation.jsonl"
+  cline -y --act --json --timeout 900 "$(sed "s|RECONCILIATION_INPUT|.release-api-summary-input/reconciliation.json|" "$RECONCILIATION_PROMPT")" > "$reconciliation_log"
   status=$?
   set -e
+  if [ -f "$reconciliation_result" ]; then
+    cp "$reconciliation_result" "$WORK_DIR/cline-output-reconciliation.jsonl"
+  else
+    cp "$reconciliation_log" "$WORK_DIR/cline-output-reconciliation.jsonl"
+  fi
   if [ "$status" -ne 0 ]; then
     CLINE_STATUS=$status
   fi
@@ -299,6 +332,7 @@ const fs = require('fs');
 const [workDir, resultPath, statusText] = process.argv.slice(2);
 
 function completionFromRaw(raw) {
+  if (raw.trim().startsWith('[')) return raw;
   let completion = '';
   let buffer = '';
 
@@ -582,5 +616,10 @@ for output_file in "$WORK_DIR"/cline-output-*.jsonl
 do
   [ -e "$output_file" ] || continue
   cp "$output_file" "$DEBUG_DIR/"
+done
+for log_file in "$WORK_DIR"/cline-log-*.jsonl
+do
+  [ -e "$log_file" ] || continue
+  cp "$log_file" "$DEBUG_DIR/"
 done
 cp "$RESULT_FILE" "$DEBUG_DIR/summary.md"
