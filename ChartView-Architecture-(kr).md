@@ -210,9 +210,10 @@ MATCH_PARENT 요청 크기로 선언되어 있지만, 상속된 ViewImpl 레이�
 Layout 부모가 아닌 경우 이를 올바르게 전파하지 못하므로 SIZE가
 0×0(WRAP_CONTENT 자연 크기 = 0)으로 초기화됩니다.
 
-대신, OnArrange는 bounds를 직접 Self()에 적용하고 Rebuild*() 함수를
-직접 호출합니다. ViewImpl::OnInitialize에서 설정된 PIVOT=TOP_LEFT
-덕분에 POSITION은 피벗 연산 없이 왼쪽 상단 모서리로 매핑됩니다.
+대신, OnArrange는 최종 self bounds를 반환하고(프레임워크가 반환된
+LayoutRect를 Self()에 적용) Rebuild*() 함수를 직접 호출합니다.
+ViewImpl::OnInitialize에서 설정된 PIVOT=TOP_LEFT 덕분에 POSITION은
+피벗 연산 없이 왼쪽 상단 모서리로 매핑됩니다.
 
 텍스트 레이블 위치(축 눈금, 범례, 제목)는 PlaceTextLabels()에서
 Actor::Property::POSITION을 통해 설정됩니다. ViewImpl::OnArrange를
@@ -223,16 +224,12 @@ TOP_CENTER)이 최종 화면 위치 계산 시 올바르게 적용됩니다.
 ```
 
 ```cpp
-MeasuredSize ChartViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect ChartViewImpl::OnArrange(const LayoutRect& bounds)
 {
   // Intentionally skip ViewImpl::OnArrange — see comment above.
-  Actor             self    = Self();
-  const Vector2     newSize(bounds.width, bounds.height);
-
-  self.SetPositionX(bounds.x);
-  self.SetPositionY(bounds.y);
-  self.SetWidth(bounds.width);
-  self.SetHeight(bounds.height);
+  // Self geometry is applied centrally by the framework (ViewImpl::Arrange)
+  // from the returned bounds; this override does not set Self() directly.
+  const Vector2 newSize(bounds.width, bounds.height);
 
   if(newSize != mSize && newSize.width > 0.0f && newSize.height > 0.0f)
   {
@@ -242,7 +239,7 @@ MeasuredSize ChartViewImpl::OnArrange(const LayoutRect& bounds)
   if(mNeedsBackgroundUpdate) { RebuildBackground(); mNeedsBackgroundUpdate = false; }
   if(mNeedsDataUpdate)       { RebuildData();       mNeedsDataUpdate       = false; }
 
-  return MeasuredSize(bounds.width, bounds.height);
+  return bounds;
 }
 ```
 

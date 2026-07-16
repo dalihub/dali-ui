@@ -210,8 +210,9 @@ MATCH_PARENT requested size, but the inherited ViewImpl layout does
 not propagate that correctly for non-Layout parents, so their SIZE
 is reset to 0×0 (WRAP_CONTENT natural size = 0).
 
-Instead, OnArrange applies bounds directly to Self() and calls
-Rebuild*() functions directly.  With PIVOT=TOP_LEFT (set by
+Instead, OnArrange returns its final self bounds (which the framework
+applies to Self() from the returned LayoutRect) and calls Rebuild*()
+functions directly.  With PIVOT=TOP_LEFT (set by
 ViewImpl::OnInitialize), POSITION maps to the top-left corner
 without any pivot math.
 
@@ -225,16 +226,12 @@ screen position.
 ```
 
 ```cpp
-MeasuredSize ChartViewImpl::OnArrange(const LayoutRect& bounds)
+LayoutRect ChartViewImpl::OnArrange(const LayoutRect& bounds)
 {
   // Intentionally skip ViewImpl::OnArrange — see comment above.
-  Actor             self    = Self();
-  const Vector2     newSize(bounds.width, bounds.height);
-
-  self.SetPositionX(bounds.x);
-  self.SetPositionY(bounds.y);
-  self.SetWidth(bounds.width);
-  self.SetHeight(bounds.height);
+  // Self geometry is applied centrally by the framework (ViewImpl::Arrange)
+  // from the returned bounds; this override does not set Self() directly.
+  const Vector2 newSize(bounds.width, bounds.height);
 
   if(newSize != mSize && newSize.width > 0.0f && newSize.height > 0.0f)
   {
@@ -244,7 +241,7 @@ MeasuredSize ChartViewImpl::OnArrange(const LayoutRect& bounds)
   if(mNeedsBackgroundUpdate) { RebuildBackground(); mNeedsBackgroundUpdate = false; }
   if(mNeedsDataUpdate)       { RebuildData();       mNeedsDataUpdate       = false; }
 
-  return MeasuredSize(bounds.width, bounds.height);
+  return bounds;
 }
 ```
 
