@@ -25,7 +25,6 @@ create_api_diff() {
       ;;
     extension-api)
       git diff --find-renames --unified=20 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- \
-        ':(glob)dali-ui-foundation/provider-api/**/*.h' \
         ':(glob)dali-ui-foundation/extension-api/**/*.h' > "$diff_file"
       ;;
     integration-api)
@@ -51,44 +50,107 @@ do
 done
 
 cat > "$WORK_DIR/prompt.md" <<'EOF'
-Read INPUT_FILE and the unified diff in apiDiffFile.
+## 1. Role and objective
 
-Produce an exhaustive declaration-level API change summary between the two releases. Analyze only C++ declarations in these directories:
-- public-api -> section "Public API"
-- extension-api -> section "Extension API"
-- integration-api -> section "Integration API"
+You are a C++ API declaration-diff analyzer.
+Analyze every reportable C++ API declaration change between the supplied old and new release revisions.
+Limit the analysis to the supplied API diff.
+Return a machine-readable list of Add, Remove, and Change records for the release API summary.
 
-In older releases, extension-api was named provider-api. Treat provider-api and extension-api as the same Extension API surface. A path-only rename is not an API change. However, a public declaration renamed from Dali::Ui::Provider to Dali::Ui::Extension is a Change: report its before and after fully-qualified declarations.
+## 2. Input and analysis scope
 
-Ignore implementation-only changes, comments, whitespace, includes, forward declarations, and changes that do not change an exposed declaration. Group changes by their owning class. A class must use its complete C++ namespace, for example "Dali::Ui::View".
+Read INPUT_FILE.
+INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiLevel`, and `apiDiffFile` fields.
+`previousReleaseTag` is the old Git release tag and `releaseTag` is the new Git release tag.
+`apiLevel` is exactly one of `public-api`, `extension-api`, or `integration-api`.
+`apiDiffFile` is the unified Git diff to analyze for this execution.
 
-Report only declarations in a class's public section, or protected declarations that are part of the extension contract. Never report private declarations, friend declarations, data members, implementation helpers, or comment-only changes. The diff may not include the relevant access specifier, so for every candidate use `git show <previousReleaseTag>:<header>` and `git show <releaseTag>:<header>` to inspect the complete before and after header before deciding whether it is exposed.
+This execution receives one diff file for one API category.
+The diff can contain headers from multiple source directories.
+For example, the `public-api` diff can contain both `dali-ui-foundation/public-api/` and `dali-ui-components/public-api/` headers.
+The workflow runs separate executions for `public-api`, `extension-api`, and `integration-api`.
 
-Return only a JSON array. Each array item represents exactly one API change and must have this schema:
-{
-  "section": "Public API | Extension API | Integration API",
-  "className": "Dali::Ui::ClassName",
-  "ownerKind": "class | namespace",
-  "kind": "class | api",
-  "type": "Add | Change | Remove",
-  "before": "previous declaration; required only for Change and Remove",
-  "after": "current declaration; required only for Add and Change",
-  "beforeMemberName": "previous API method name; required for api Change",
-  "memberName": "after API method name; required only when kind is api and type is Add or Change",
-  "file": "current or previous API header path"
-}
+Read the unified diff at `apiDiffFile`.
+Analyze only declarations in headers included by that diff.
+Do not report declarations from headers outside that diff.
+When the diff lacks enough context, inspect both complete header revisions with `git show <previousReleaseTag>:<header-path>` and `git show <releaseTag>:<header-path>`.
 
-For kind "api", each item must describe one declaration only: one method, constructor, destructor, operator, enum value, property, or type alias. Never combine multiple declarations in one before or after string.
+## 3. Required output format
 
-When an entire class is newly added, return exactly one item with kind "class" and type "Add". Do not return the new class's member declarations separately. For this item, use the complete class namespace in className and set after to the class name only. Do not report an unchanged class as a class-level change. For free functions, use ownerKind "namespace" and the complete owning namespace in className.
+Return exactly one JSON array and nothing else.
+Do not return Markdown, a code fence, an explanation, or conversational text.
+Each array item represents exactly one declaration.
+Do not combine overloads or multiple declarations into one item.
+Do not put multiple declarations in `before` or `after`.
+Do not separate declarations with semicolons, commas, newlines, bullet points, or explanatory text.
 
-Do not generate URLs. Keep declarations concise but unambiguous, including argument types and relevant qualifiers. Return [] when there are no declaration-level changes.
+Each item must use exactly this schema:
+[
+  {
+    "section": "public-api | extension-api | integration-api",
+    "className": "fully-qualified class, struct, or enum namespace name",
+    "ownerKind": "class | namespace",
+    "kind": "class | struct | enum | type-alias | data-member | constructor | destructor | method | operator | function",
+    "type": "Add | Remove | Change",
+    "before": "old declaration, or empty string",
+    "after": "new declaration, or empty string",
+    "beforeMemberName": "old member name, or empty string",
+    "memberName": "new member name, or empty string",
+    "file": "repository-relative header path"
+  }
+]
 
-The Class column is rendered separately. Do not prefix an API declaration with its owning class name (for example, write "SetPadding(...)" rather than "Dali::Ui::View::SetPadding(...)"). Preserve namespaces that are part of return types and parameter types.
+Set `section` to the exact `apiLevel` value from INPUT_FILE.
+Set `file` to the repository-relative header path containing the changed declaration.
+Set `type` to exactly one of `Add`, `Remove`, or `Change`.
+Set `kind` to exactly one value permitted by the schema.
 
-Examine every API-header diff hunk before responding. Do not stop after reporting newly added classes: also report every changed, added, and removed declaration in existing classes. Return all findings even when the array is long.
+For Add, set `before` and `beforeMemberName` to empty strings.
+For Remove, set `after` and `memberName` to empty strings.
+For Change, set `before` to the complete old declaration and `after` to the complete new declaration.
+For a class or struct record, set `memberName` and `beforeMemberName` to empty strings.
+For a member function, set `memberName` to its declaration name without the owning class or struct name.
+For example, use `SetPadding` for `Dali::Ui::View::SetPadding(...)`.
+For a changed member function, set `beforeMemberName` to the old declaration name without its owner name.
+For a constructor, use the class or struct name as `memberName`.
+For a destructor, use the destructor name as `memberName`.
+For an operator, use the complete operator name as `memberName`.
 
-Your final submit summary must be exactly the JSON array.
+## 4. Analysis and classification rules
+
+Report these declaration types: class, struct, enum, type alias, data member, constructor, destructor, operator function, and member function.
+For class or struct members, determine access from the complete header.
+Report public and protected members.
+Do not report private members.
+Remember that a `class` defaults to private member access and a `struct` defaults to public member access.
+
+Use the complete namespace-qualified class or struct name in `className`.
+For example, use `Dali::Ui::InputField`, not `InputField`.
+Set `ownerKind` to `class` for declarations owned by a class or struct.
+Report a namespace-level enum, using its complete namespace as `className` and `ownerKind: "namespace"`.
+
+For a class or struct addition, create exactly one Add record with `kind: "class"`.
+For a class or struct removal, create exactly one Remove record with `kind: "class"`.
+Do not create separate member records when the containing class or struct itself was added or removed.
+For all other declarations, create one record for each added, removed, or changed declaration.
+
+Use Add only when the declaration exists only at `releaseTag`.
+Use Remove only when the declaration exists only at `previousReleaseTag`.
+Use Change only when the same declaration exists in both releases but its declaration-level API signature changed.
+An API signature includes fully-qualified namespace, owning class or struct, declaration name, parameter types, parameter order, parameter count, return type, `const`, ref qualifiers, `static`, `virtual`, `override`, `noexcept`, and template parameters.
+Treat a namespace change as Change when the declarations otherwise represent the same API.
+For example, moving `Dali::Ui::Provider::Foo::Bar()` to `Dali::Ui::Extension::Foo::Bar()` is one Change record.
+Do not represent that namespace change as unrelated Remove and Add records.
+Treat a class or struct rename as Change when the old and new declarations otherwise represent the same API.
+
+## 5. Exclusions and final verification
+
+Do not report namespace-level free functions or namespace-level type aliases.
+Do not report comments, whitespace-only changes, include directives, forward declarations, friend declarations, private implementation helpers, function-body-only changes, or unchanged declarations moved only by a file rename.
+
+Before returning the JSON array, verify that each item represents exactly one declaration.
+Verify that each added or removed class or struct has exactly one class record.
+Verify that no private member, friend declaration, comment-only change, or whitespace-only change is included.
 EOF
 
 CLINE_STATUS=0
@@ -132,16 +194,21 @@ function completionFromRaw(raw) {
 function normalizedSection(value) {
   const section = text(value).toLowerCase().replace(/[ _-]/g, '');
   if (section === 'publicapi') return 'Public API';
-  if (section === 'extensionapi' || section === 'providerapi') return 'Extension API';
+  if (section === 'extensionapi') return 'Extension API';
   if (section === 'integrationapi') return 'Integration API';
   return '';
 }
 
 function normalizedKind(value) {
   const kind = text(value).toLowerCase().replace(/[ _-]/g, '');
-  if (kind === 'class') return 'class';
-  if (['api', 'method', 'function', 'member', 'constructor', 'destructor', 'operator', 'property', 'enum', 'typealias'].includes(kind)) return 'api';
+  if (kind === 'class' || kind === 'struct') return 'class';
+  if (['api', 'method', 'function', 'member', 'constructor', 'destructor', 'operator', 'property', 'enum', 'typealias', 'datamember'].includes(kind)) return 'api';
   return '';
+}
+
+function normalizedDeclarationKind(value) {
+  const kind = text(value).toLowerCase().replace(/[ _-]/g, '');
+  return ['class', 'struct', 'enum', 'typealias', 'datamember', 'constructor', 'destructor', 'method', 'operator', 'function', 'api'].includes(kind) ? kind : '';
 }
 
 function normalizedOwnerKind(value) {
@@ -213,12 +280,6 @@ function tableText(value) {
 }
 
 const validSections = ['Public API', 'Extension API', 'Integration API'];
-const sectionInputs = new Map([
-  ['Public API', 'public-api'],
-  ['Extension API', 'extension-api'],
-  ['Integration API', 'integration-api']
-]);
-const inputDir = '.release-api-summary-input';
 const baseUrl = 'https://pages.github.sec.samsung.net/NUI/dali-ui/daliUi/';
 const rawFiles = fs.readdirSync(workDir)
   .filter(name => name.startsWith('cline-output-') && name.endsWith('.jsonl'))
@@ -253,7 +314,19 @@ function isReportableChange(change) {
   return !/\bfriend\s+(?:class|struct)\b/.test(`${change.before}\n${change.after}`);
 }
 
+function containsMultipleDeclarations(declaration) {
+  return /;\s*(?:class|struct|enum|using|typedef|(?:virtual\s+)?[A-Za-z_~])/.test(tableText(declaration));
+}
+
+function hasRequiredFields(change) {
+  if (containsMultipleDeclarations(change.before) || containsMultipleDeclarations(change.after)) return false;
+  if (change.type === 'Add') return Boolean(change.after) && !change.before;
+  if (change.type === 'Remove') return Boolean(change.before) && !change.after;
+  return Boolean(change.before) && Boolean(change.after);
+}
+
 function changeKey(change) {
+  if (change.kind === 'class') return [change.kind, change.ownerKind, change.type].join('\u0000');
   return [change.kind, change.ownerKind, change.type, change.before, change.after, change.memberName].join('\u0000');
 }
 
@@ -270,14 +343,20 @@ if (parsedArrays.length === 0) {
     const section = normalizedSection(item?.section);
     const className = text(item?.className);
     const kind = normalizedKind(item?.kind);
+    const declarationKind = normalizedDeclarationKind(item?.kind);
     const ownerKind = normalizedOwnerKind(item?.ownerKind);
     const type = normalizedType(item?.type);
-    if (!validSections.includes(section) || !/^Dali(?:::[A-Za-z_][A-Za-z0-9_]*)+$/.test(className) || !['class', 'api'].includes(kind) || !['Add', 'Change', 'Remove'].includes(type)) continue;
-    if (!sections.has(section)) sections.set(section, new Map());
-    const classes = sections.get(section);
-    if (!classes.has(className)) classes.set(className, []);
-    classes.get(className).push({
+    if (!validSections.includes(section) || !/^Dali(?:::[A-Za-z_][A-Za-z0-9_]*)+$/.test(className) || !['class', 'api'].includes(kind) || !declarationKind || !['Add', 'Change', 'Remove'].includes(type)) {
+      skippedItems += 1;
+      continue;
+    }
+    if ((ownerKind === 'namespace' && declarationKind !== 'enum') || (ownerKind === 'class' && declarationKind === 'api')) {
+      skippedItems += 1;
+      continue;
+    }
+    const change = {
       kind,
+      declarationKind,
       ownerKind,
       type,
       before: text(item?.before),
@@ -285,7 +364,15 @@ if (parsedArrays.length === 0) {
       beforeMemberName: text(item?.beforeMemberName) || memberNameFromDeclaration(item?.before),
       memberName: text(item?.memberName) || memberNameFromDeclaration(item?.after),
       file: text(item?.file)
-    });
+    };
+    if (!hasRequiredFields(change) || !isReportableChange(change)) {
+      skippedItems += 1;
+      continue;
+    }
+    if (!sections.has(section)) sections.set(section, new Map());
+    const classes = sections.get(section);
+    if (!classes.has(className)) classes.set(className, []);
+    classes.get(className).push(change);
   }
 
   if (sections.size === 0) {
@@ -294,8 +381,7 @@ if (parsedArrays.length === 0) {
     for (const section of validSections) {
       const classes = sections.get(section);
       if (!classes) continue;
-      if (output.includes('\n### ')) output += '\n<br/>\n';
-      output += `\n### ${section.toLowerCase().replace(' ', '-')}\n\n| Type | Class | API |\n| --- | --- | --- |\n`;
+      let rows = '';
       for (const [className, changes] of [...classes.entries()].sort(([a], [b]) => a.localeCompare(b))) {
         const outputChanges = changes.flatMap(change => {
           const splitChange = change.kind === 'api' && change.type === 'Change' && change.beforeMemberName && change.memberName && change.beforeMemberName !== change.memberName;
@@ -305,7 +391,7 @@ if (parsedArrays.length === 0) {
                 {...change, type: 'Add', before: '', beforeMemberName: ''}
               ]
             : [change];
-        }).filter(isReportableChange);
+        });
         const uniqueChanges = [...new Map(outputChanges.map(change => [changeKey(change), change])).values()].sort((a, b) => {
           const typeOrder = {Add: 0, Remove: 1, Change: 2};
           const typeDifference = typeOrder[a.type] - typeOrder[b.type];
@@ -318,47 +404,22 @@ if (parsedArrays.length === 0) {
           const after = apiText(outputChange.after, className);
           const classAddition = outputChange.kind === 'class' && type === 'Add';
           const afterText = classAddition ? `class ${shortClassName(className)}` : after;
-          const link = outputChange.kind === 'class' ? ownerUrl(className, outputChange.ownerKind) : apiUrl(className, outputChange.ownerKind, outputChange.memberName);
+          const link = outputChange.kind === 'class' || ['enum', 'datamember'].includes(outputChange.declarationKind)
+            ? ownerUrl(className, outputChange.ownerKind)
+            : apiUrl(className, outputChange.ownerKind, outputChange.memberName);
           const linkedAfter = link ? `[${afterText}](${link})` : afterText;
           const api = type === 'Remove' ? before : type === 'Change' ? `${before} → ${linkedAfter}` : linkedAfter;
           const owner = outputChange.ownerKind === 'namespace' ? `${className} (namespace)` : className;
-          output += `| ${type} | \`${owner}\` | ${api} |\n`;
+          rows += `| ${type} | \`${owner}\` | ${api} |\n`;
         }
       }
+      if (!rows) continue;
+      if (output.includes('\n### ')) output += '\n<br/>\n';
+      output += `\n### ${section.toLowerCase().replace(' ', '-')}\n\n| Type | Class | API |\n| --- | --- | --- |\n${rows}`;
     }
   }
 
-  skippedItems = parsed.length - [...sections.values()].reduce((count, classes) => count + [...classes.values()].reduce((sum, changes) => sum + changes.length, 0), 0);
   if (skippedItems > 0) output += `\n> Cline 결과 ${skippedItems}건은 schema가 맞지 않아 제외되었습니다. debug artifact의 \`cline-output.jsonl\`을 확인하세요.\n`;
-
-  for (const [section, inputName] of sectionInputs) {
-    const diffPath = `${inputDir}/${inputName}.diff`;
-    const changedFiles = new Set();
-    let currentFile = '';
-    let hasDeclarationChange = false;
-    for (const line of fs.readFileSync(diffPath, 'utf8').split(/\r?\n/)) {
-      const fileMatch = line.match(/^\+\+\+ b\/(.+\.h)$/);
-      if (fileMatch) {
-        if (currentFile && hasDeclarationChange) changedFiles.add(currentFile);
-        currentFile = fileMatch[1];
-        hasDeclarationChange = false;
-        continue;
-      }
-      if (!currentFile || !/^[+-](?![+-])/.test(line) || /^[+-]\s*(?:\/\/|\/\*|\*)/.test(line)) continue;
-      if (/\b(class|struct|enum|using|typedef)\b|;\s*$/.test(line)) hasDeclarationChange = true;
-    }
-    if (currentFile && hasDeclarationChange) changedFiles.add(currentFile);
-    const reportedFiles = new Set(
-      [...(sections.get(section)?.values() || [])]
-        .flat()
-        .map(change => change.file.replace('dali-ui-foundation/provider-api/', 'dali-ui-foundation/extension-api/'))
-        .filter(Boolean)
-    );
-    const missingFiles = [...changedFiles].filter(file => !reportedFiles.has(file));
-    if (missingFiles.length > 0) {
-      output += `\n> ${section.toLowerCase().replace(' ', '-')} header ${missingFiles.length}개에 대한 Cline 결과가 없습니다: ${missingFiles.map(file => `\`${file}\``).join(', ')}\n`;
-    }
-  }
 }
 
 if (Number(statusText) !== 0) output += `\n> Cline CLI가 status ${statusText}로 종료되었습니다. 결과가 불완전할 수 있습니다.\n`;
