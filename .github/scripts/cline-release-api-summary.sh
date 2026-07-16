@@ -42,7 +42,7 @@ create_api_diff() {
 {
   "previousReleaseTag": "${PREVIOUS_RELEASE_TAG}",
   "releaseTag": "${RELEASE_TAG}",
-  "apiLevel": "${section}",
+  "apiCategory": "${section}",
   "apiDiffFile": ".release-api-summary-input/${section}.diff",
   "resultFile": ".release-api-summary-input/${section}.result.json"
 }
@@ -65,11 +65,17 @@ Return a machine-readable list of Add, Remove, and Change records for the releas
 ## 2. Input and analysis scope
 
 Read INPUT_FILE.
-INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiLevel`, `apiDiffFile`, and `resultFile` fields.
+INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiCategory`, `apiDiffFile`, and `resultFile` fields.
 `previousReleaseTag` is the old Git release tag and `releaseTag` is the new Git release tag.
-`apiLevel` is exactly one of `public-api`, `extension-api`, or `integration-api`.
+`apiCategory` is exactly one of `public-api`, `extension-api`, or `integration-api`.
 `apiDiffFile` is the unified Git diff to analyze for this execution.
 `resultFile` is the path where you must write the final JSON array.
+
+The term API category means only the repository directory category identified by `apiCategory`.
+The terms C++ access and access level mean only the effective `public`, `protected`, or `private` member access inside a class or struct.
+API category and C++ access are independent concepts.
+A declaration in a `public-api` header is not necessarily a public C++ member.
+A public or protected C++ member in an `extension-api` or `integration-api` header is still reportable.
 
 This execution analyzes one API category.
 The diff can contain headers from multiple source directories and renamed headers.
@@ -78,6 +84,9 @@ Read the unified diff at `apiDiffFile`.
 Analyze only declarations in headers included by that diff.
 Do not report declarations from headers outside that diff.
 When the diff lacks enough context, inspect both complete header revisions with `git show <previousReleaseTag>:<header-path>` and `git show <releaseTag>:<header-path>`.
+Minimize model iterations.
+Batch all required file inspections into as few tool calls as possible.
+Do not inspect declarations one by one with separate `git show` commands.
 
 ## 3. Required output format
 
@@ -99,7 +108,7 @@ Each item must use exactly this schema:
 [
   {
     "section": "public-api | extension-api | integration-api",
-    "className": "fully-qualified class, struct, or enum namespace name",
+    "className": "fully-qualified declared class or struct name, or complete owning namespace for a namespace-level enum",
     "ownerKind": "class | namespace",
     "kind": "class | struct | enum | type-alias | data-member | constructor | destructor | method | operator | function",
     "type": "Add | Remove | Change",
@@ -107,11 +116,13 @@ Each item must use exactly this schema:
     "after": "new declaration, or empty string",
     "beforeMemberName": "old member name, or empty string",
     "memberName": "new member name, or empty string",
+    "oldAccess": "namespace | public | protected | private | absent",
+    "newAccess": "namespace | public | protected | private | absent",
     "file": "repository-relative header path"
   }
 ]
 
-Set `section` to the exact `apiLevel` value from INPUT_FILE.
+Set `section` to the exact `apiCategory` value from INPUT_FILE.
 Set `file` to the repository-relative header path containing the changed declaration.
 Set `type` to exactly one of `Add`, `Remove`, or `Change`.
 Set `kind` to exactly one value permitted by the schema.
@@ -119,6 +130,10 @@ Set `kind` to exactly one value permitted by the schema.
 For Add, set `before` and `beforeMemberName` to empty strings.
 For Remove, set `after` and `memberName` to empty strings.
 For Change, set `before` to the complete old declaration and `after` to the complete new declaration.
+For Add, set `oldAccess` to `absent` and set `newAccess` to the effective access at `releaseTag`.
+For Remove, set `newAccess` to `absent` and set `oldAccess` to the effective access at `previousReleaseTag`.
+For Change, set both `oldAccess` and `newAccess` to the effective access in the corresponding complete header revision.
+Use `namespace` access only for a declaration directly owned by a namespace.
 For a class or struct record, set `memberName` and `beforeMemberName` to empty strings.
 For a member function, set `memberName` to its declaration name without the owning class or struct name.
 For example, use `SetPadding` for `Dali::Ui::View::SetPadding(...)`.
@@ -130,25 +145,37 @@ For an operator, use the complete operator name as `memberName`.
 ## 4. Analysis and classification rules
 
 Report these declaration types: class, struct, enum, type alias, data member, constructor, destructor, operator function, and member function.
-For class or struct members, determine access from the complete header.
-Report public and protected members.
-Do not report private members.
-Remember that a `class` defaults to private member access and a `struct` defaults to public member access.
+
+For every candidate declaration, identify whether its direct owner is a namespace, class, or struct before classifying the change.
+For every declaration owned by a class or struct, determine its effective C++ access from the complete old and new owning class or struct definitions before creating a result item.
+Use the nearest preceding explicit `public:`, `protected:`, or `private:` label in the same class or struct definition.
+If no explicit access label precedes the declaration, use `private` for a `class` and `public` for a `struct`.
+Do not infer C++ access from the API category, header path, class name, comments, documentation, export macros, or whether a declaration appears to be an implementation helper.
+
+Report members whose applicable effective C++ access is `public` or `protected`.
+Never report a member whose applicable effective C++ access is `private`.
+For Add, the applicable access is `newAccess`.
+For Remove, the applicable access is `oldAccess`.
+For Change, both `oldAccess` and `newAccess` must be determined; never report the item if either applicable declaration is private.
+Do not create a result item until the required access values have been determined from the complete owning definition.
 
 Use the complete namespace-qualified class or struct name in `className`.
 For example, use `Dali::Ui::InputField`, not `InputField`.
-Set `ownerKind` to `class` for declarations owned by a class or struct.
+For a class or struct record, set `ownerKind` to `class` and use the complete declared class or struct name in `className`.
+For a member owned by a class or struct, set `ownerKind` to `class` and use the complete owning class or struct name in `className`.
 Report a namespace-level enum, using its complete namespace as `className` and `ownerKind: "namespace"`.
+Namespace-level enums are required reportable declarations.
+Do not exclude a namespace-level enum under the rule that excludes namespace-level free functions and type aliases.
 
 Apply the class and struct lifecycle rule before applying any other reporting rule.
 
-If a class or struct declaration is added, create exactly one Add record with `kind: "class"`.
+If a class or struct declaration is added, create exactly one Add record using its exact declaration kind: `kind: "class"` for a class or `kind: "struct"` for a struct.
 Do not create records for constructors, destructors, methods, operators, enums, type aliases, or data members contained by that added class or struct.
 This rule applies even when the class or struct is declared in a newly added header.
 This rule applies even when the class or struct has public or protected members.
 This rule overrides the general requirement to report individual declarations.
 
-If a class or struct declaration is removed, create exactly one Remove record with `kind: "class"`.
+If a class or struct declaration is removed, create exactly one Remove record using its exact declaration kind: `kind: "class"` for a class or `kind: "struct"` for a struct.
 Do not create records for constructors, destructors, methods, operators, enums, type aliases, or data members contained by that removed class or struct.
 This rule overrides the general requirement to report individual declarations.
 
@@ -169,25 +196,45 @@ Treat a class or struct rename as Change when the old and new declarations other
 ## 5. Exclusions and final verification
 
 Do not report namespace-level free functions or namespace-level type aliases.
-Do not report comments, whitespace-only changes, include directives, forward declarations, friend declarations, private implementation helpers, function-body-only changes, or unchanged declarations moved only by a file rename.
+Do report namespace-level enums.
+Do not report comments, whitespace-only changes, include directives, forward declarations, friend declarations, members whose effective C++ access is private, function-body-only changes, or unchanged declarations moved only by a file rename.
 
 Before returning the JSON array, verify that every diff hunk in `apiDiffFile` was examined.
 Before returning the JSON array, verify that each item represents exactly one declaration.
-Verify that each added or removed class or struct has exactly one class record.
+Verify that each added or removed class or struct has exactly one class or struct record with the matching `kind`.
 Verify that no member of an added or removed class or struct is included.
-Verify that no private member, friend declaration, comment-only change, or whitespace-only change is included.
+Verify that every result item has the required `oldAccess` and `newAccess` values.
+Verify again that API category was not used to determine C++ access.
+Verify that no item has applicable effective C++ access `private`.
+Verify that every namespace-level enum change is included.
+Verify that no friend declaration, comment-only change, or whitespace-only change is included.
 Return `[]` only after every diff hunk was examined and none contains a reportable declaration change.
 EOF
 
 CLINE_STATUS=0
+CLINE_HAS_RUN=false
 for section in public-api extension-api integration-api
 do
   log_file="$WORK_DIR/cline-log-${section}.jsonl"
   result_file="$INPUT_DIR/${section}.result.json"
+
+  if [ ! -s "$INPUT_DIR/${section}.diff" ]; then
+    echo "Skipping Cline for ${section}: diff is empty."
+    printf '[]\n' > "$result_file"
+    cp "$result_file" "$WORK_DIR/cline-output-${section}.jsonl"
+    continue
+  fi
+
+  if [ "$CLINE_HAS_RUN" = true ]; then
+    echo "Waiting 20 seconds before running Cline for ${section}."
+    sleep 20
+  fi
+
   set +e
   cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${section}.json|" "$WORK_DIR/prompt.md")" > "$log_file"
   status=$?
   set -e
+  CLINE_HAS_RUN=true
   if [ -f "$result_file" ]; then
     cp "$result_file" "$WORK_DIR/cline-output-${section}.jsonl"
   else
@@ -258,12 +305,19 @@ function normalizedType(value) {
   return '';
 }
 
+function normalizedAccess(value) {
+  const access = text(value).toLowerCase();
+  return ['namespace', 'public', 'protected', 'private', 'absent'].includes(access) ? access : '';
+}
+
 function isCandidateItem(item) {
   return Boolean(
     normalizedSection(item?.section) &&
     /^Dali(?:::[A-Za-z_][A-Za-z0-9_]*)+$/.test(text(item?.className)) &&
     normalizedKind(item?.kind) &&
-    normalizedType(item?.type)
+    normalizedType(item?.type) &&
+    normalizedAccess(item?.oldAccess) &&
+    normalizedAccess(item?.newAccess)
   );
 }
 
@@ -357,9 +411,19 @@ function containsMultipleDeclarations(declaration) {
 
 function hasRequiredFields(change) {
   if (containsMultipleDeclarations(change.before) || containsMultipleDeclarations(change.after)) return false;
-  if (change.type === 'Add') return Boolean(change.after) && !change.before;
-  if (change.type === 'Remove') return Boolean(change.before) && !change.after;
-  return Boolean(change.before) && Boolean(change.after);
+  const reportableAccess = new Set(['namespace', 'public', 'protected']);
+  const accessMatchesOwner = access => {
+    if (change.kind === 'class') return reportableAccess.has(access);
+    if (change.ownerKind === 'namespace') return access === 'namespace';
+    return access === 'public' || access === 'protected';
+  };
+  if (change.type === 'Add') {
+    return Boolean(change.after) && !change.before && change.oldAccess === 'absent' && accessMatchesOwner(change.newAccess);
+  }
+  if (change.type === 'Remove') {
+    return Boolean(change.before) && !change.after && accessMatchesOwner(change.oldAccess) && change.newAccess === 'absent';
+  }
+  return Boolean(change.before) && Boolean(change.after) && accessMatchesOwner(change.oldAccess) && accessMatchesOwner(change.newAccess);
 }
 
 function changeKey(change) {
@@ -390,12 +454,14 @@ if (rawFiles.length === 0) {
     const declarationKind = normalizedDeclarationKind(item?.kind);
     let ownerKind = normalizedOwnerKind(item?.ownerKind);
     const type = normalizedType(item?.type);
+    const oldAccess = normalizedAccess(item?.oldAccess);
+    const newAccess = normalizedAccess(item?.newAccess);
     if (kind === 'class' && ownerKind === 'namespace') {
       const declarationName = classNameFromDeclaration(type === 'Remove' ? item?.before : item?.after);
       if (declarationName && !className.endsWith(`::${declarationName}`)) className = `${className}::${declarationName}`;
       ownerKind = 'class';
     }
-    if (!validSections.includes(section) || !/^Dali(?:::[A-Za-z_][A-Za-z0-9_]*)+$/.test(className) || !['class', 'api'].includes(kind) || !declarationKind || !['Add', 'Change', 'Remove'].includes(type)) {
+    if (!validSections.includes(section) || !/^Dali(?:::[A-Za-z_][A-Za-z0-9_]*)+$/.test(className) || !['class', 'api'].includes(kind) || !declarationKind || !['Add', 'Change', 'Remove'].includes(type) || !oldAccess || !newAccess) {
       skippedItems += 1;
       continue;
     }
@@ -412,6 +478,8 @@ if (rawFiles.length === 0) {
       after: text(item?.after),
       beforeMemberName: text(item?.beforeMemberName) || memberNameFromDeclaration(item?.before),
       memberName: text(item?.memberName) || memberNameFromDeclaration(item?.after),
+      oldAccess,
+      newAccess,
       file: text(item?.file)
     };
     if (!hasRequiredFields(change) || !isReportableChange(change)) {
@@ -452,7 +520,8 @@ if (rawFiles.length === 0) {
           const before = apiText(outputChange.before, className);
           const after = apiText(outputChange.after, className);
           const classAddition = outputChange.kind === 'class' && type === 'Add';
-          const afterText = classAddition ? `class ${shortClassName(className)}` : after;
+          const declarationLabel = outputChange.declarationKind === 'struct' ? 'struct' : 'class';
+          const afterText = classAddition ? `${declarationLabel} ${shortClassName(className)}` : after;
           const link = outputChange.kind === 'class' || ['enum', 'datamember'].includes(outputChange.declarationKind)
             ? ownerUrl(className, outputChange.ownerKind)
             : apiUrl(className, outputChange.ownerKind, outputChange.memberName);
@@ -468,7 +537,7 @@ if (rawFiles.length === 0) {
     }
   }
 
-  if (skippedItems > 0) output += `\n> Cline 결과 ${skippedItems}건은 schema가 맞지 않아 제외되었습니다. debug artifact의 \`cline-output.jsonl\`을 확인하세요.\n`;
+  if (skippedItems > 0) output += `\n> Cline 결과 ${skippedItems}건은 schema 또는 C++ access 조건이 맞지 않아 제외되었습니다. debug artifact의 \`cline-output.jsonl\`을 확인하세요.\n`;
 }
 
 if (parseFailures.length > 0) output += `\n> Cline이 JSON array를 쓰지 않은 API category가 있습니다: ${parseFailures.map(result => `\`${result.name}\``).join(', ')}. debug artifact의 \`cline-log-*.jsonl\`을 확인하세요.\n`;
