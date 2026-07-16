@@ -1,0 +1,100 @@
+name: Release API Summary
+
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: write
+
+jobs:
+  summarize-api-changes:
+    runs-on: [ code-linux, code-large ]
+    env:
+      CLINE_MODEL: ${{ vars.CLINE_MODEL || 'GaussO4.1' }}
+      CLINE_VERSION: 0.6.0
+      CLINE_REGISTRY: https://bart.sec.samsung.net/artifactory/api/npm/coding-assistant-npm-remote/
+      CLINE_NO_PROXY: aicoding.sec.samsung.net,bart.sec.samsung.net,codei.sec.samsung.net,ocean.sec.samsung.net,github.sec.samsung.net,ipaas-mcp.sec.samsung.net
+      PROXY_URL: http://10.112.1.184:8080/
+
+    steps:
+      - name: Resolve previous published release
+        id: releases
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const releases = await github.paginate(github.rest.repos.listReleases, {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              per_page: 100
+            });
+            const current = context.payload.release;
+            const previous = releases
+              .filter(release => !release.draft && release.id !== current.id && release.published_at && release.published_at < current.published_at)
+              .sort((a, b) => b.published_at.localeCompare(a.published_at))[0];
+            if (!previous) core.setFailed('A previous published release is required to create an API summary.');
+            core.setOutput('previous_tag', previous?.tag_name || '');
+            core.setOutput('release_tag', current.tag_name);
+
+      - name: Checkout release
+        uses: code-actions/checkout@v4
+        with:
+          ref: ${{ steps.releases.outputs.release_tag }}
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: code-actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Configure proxy
+        run: |
+          echo "http_proxy=$PROXY_URL" >> "$GITHUB_ENV"
+          echo "https_proxy=$PROXY_URL" >> "$GITHUB_ENV"
+          echo "HTTP_PROXY=$PROXY_URL" >> "$GITHUB_ENV"
+          echo "HTTPS_PROXY=$PROXY_URL" >> "$GITHUB_ENV"
+          echo "no_proxy=$CLINE_NO_PROXY" >> "$GITHUB_ENV"
+          echo "NO_PROXY=$CLINE_NO_PROXY" >> "$GITHUB_ENV"
+          npm config set proxy "$PROXY_URL"
+          npm config set https-proxy "$PROXY_URL"
+          npm config set registry "$CLINE_REGISTRY"
+          npm config set strict-ssl false
+
+      - name: Install and authenticate Cline CLI
+        env:
+          CLINE_UMS_TOKEN: ${{ secrets.CLINE_UMS_TOKEN }}
+        run: |
+          test -n "$CLINE_UMS_TOKEN"
+          npm install -g "cline@$CLINE_VERSION" --registry "$CLINE_REGISTRY"
+          cline auth -k "$CLINE_UMS_TOKEN" -m "$CLINE_MODEL"
+
+      - name: Generate API summary
+        env:
+          RELEASE_TAG: ${{ steps.releases.outputs.release_tag }}
+          PREVIOUS_RELEASE_TAG: ${{ steps.releases.outputs.previous_tag }}
+        run: bash .github/scripts/cline-release-api-summary.sh
+
+      - name: Update release description
+        uses: actions/github-script@v7
+        env:
+          SUMMARY_FILE: ${{ github.workspace }}/release-api-summary.md
+        with:
+          script: |
+            const fs = require('fs');
+            const marker = '<!-- dali-ui-release-api-summary -->';
+            const summary = fs.readFileSync(process.env.SUMMARY_FILE, 'utf8').trim();
+            const release = context.payload.release;
+            const previous = (release.body || '').replace(new RegExp(`\\n?${marker}[\\s\\S]*$`), '').trimEnd();
+            await github.rest.repos.updateRelease({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              release_id: release.id,
+              body: `${previous}\n\n${summary}`
+            });
+
+      - name: Upload API summary debug artifact
+        if: always()
+        uses: CODE-Actions/upload-artifact@v2
+        with:
+          name: release-api-summary-${{ github.event.release.tag_name }}
+          path: ${{ github.workspace }}/release-api-summary-debug
