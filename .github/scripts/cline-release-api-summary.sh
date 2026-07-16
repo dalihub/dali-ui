@@ -13,12 +13,9 @@ DEBUG_DIR="${GITHUB_WORKSPACE:-$PWD}/release-api-summary-debug"
 rm -rf "$WORK_DIR" "$INPUT_DIR" "$DEBUG_DIR"
 mkdir -p "$WORK_DIR" "$INPUT_DIR" "$DEBUG_DIR"
 
-UNIT_LIST="$INPUT_DIR/units.list"
-: > "$UNIT_LIST"
-
-create_change_units() {
+create_api_diff() {
   local section=$1
-  local status old_header new_header path unit_id diff_file input_file index=0
+  local diff_file="$INPUT_DIR/${section}.diff"
   local -a pathspecs
 
   case "$section" in
@@ -39,54 +36,22 @@ create_change_units() {
       ;;
   esac
 
-  while IFS=$'\t' read -r status old_header new_header
-  do
-    [ -n "$status" ] || continue
-    case "$status" in
-      A|M)
-        new_header=$old_header
-        old_header=$old_header
-        ;;
-      D)
-        new_header=''
-        ;;
-      R*|C*)
-        ;;
-      *)
-        continue
-        ;;
-    esac
+  git diff --find-renames --unified=5 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- "${pathspecs[@]}" > "$diff_file"
 
-    index=$((index + 1))
-    unit_id="${section}-${index}"
-    diff_file="$INPUT_DIR/${unit_id}.diff"
-    input_file="$INPUT_DIR/${unit_id}.json"
-    path=${new_header:-$old_header}
-
-    if [ -n "$new_header" ] && [ "$old_header" != "$new_header" ]; then
-      git diff --find-renames --unified=20 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- "$old_header" "$new_header" > "$diff_file"
-    else
-      git diff --find-renames --unified=20 "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- "$path" > "$diff_file"
-    fi
-
-    cat > "$input_file" <<EOF
+  cat > "$INPUT_DIR/${section}.json" <<EOF
 {
   "previousReleaseTag": "${PREVIOUS_RELEASE_TAG}",
   "releaseTag": "${RELEASE_TAG}",
   "apiLevel": "${section}",
-  "apiDiffFile": ".release-api-summary-input/${unit_id}.diff",
-  "oldHeader": "${old_header}",
-  "newHeader": "${new_header}",
-  "resultFile": ".release-api-summary-input/${unit_id}.result.json"
+  "apiDiffFile": ".release-api-summary-input/${section}.diff",
+  "resultFile": ".release-api-summary-input/${section}.result.json"
 }
 EOF
-    printf '%s\n' "$unit_id" >> "$UNIT_LIST"
-  done < <(git diff --name-status --find-renames "$PREVIOUS_RELEASE_TAG" "$RELEASE_TAG" -- "${pathspecs[@]}")
 }
 
 for section in public-api extension-api integration-api
 do
-  create_change_units "$section"
+  create_api_diff "$section"
 done
 
 cat > "$WORK_DIR/prompt.md" <<'EOF'
@@ -100,17 +65,14 @@ Return a machine-readable list of Add, Remove, and Change records for the releas
 ## 2. Input and analysis scope
 
 Read INPUT_FILE.
-INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiLevel`, `apiDiffFile`, `oldHeader`, `newHeader`, and `resultFile` fields.
+INPUT_FILE is JSON with `previousReleaseTag`, `releaseTag`, `apiLevel`, `apiDiffFile`, and `resultFile` fields.
 `previousReleaseTag` is the old Git release tag and `releaseTag` is the new Git release tag.
 `apiLevel` is exactly one of `public-api`, `extension-api`, or `integration-api`.
 `apiDiffFile` is the unified Git diff to analyze for this execution.
-`oldHeader` is the repository-relative old header path, or an empty string for a newly added header.
-`newHeader` is the repository-relative new header path, or an empty string for a removed header.
 `resultFile` is the path where you must write the final JSON array.
 
-This execution analyzes exactly one change unit.
-A change unit is one modified, added, or removed header, or one Git-detected old/new header rename pair.
-When `oldHeader` and `newHeader` differ, analyze them together as one declaration change unit.
+This execution analyzes one API category.
+The diff can contain headers from multiple source directories and renamed headers.
 
 Read the unified diff at `apiDiffFile`.
 Analyze only declarations in headers included by that diff.
@@ -218,113 +180,23 @@ Return `[]` only after every diff hunk was examined and none contains a reportab
 EOF
 
 CLINE_STATUS=0
-while IFS= read -r unit_id
+for section in public-api extension-api integration-api
 do
-  log_file="$WORK_DIR/cline-log-${unit_id}.jsonl"
-  result_file="$INPUT_DIR/${unit_id}.result.json"
+  log_file="$WORK_DIR/cline-log-${section}.jsonl"
+  result_file="$INPUT_DIR/${section}.result.json"
   set +e
-  cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${unit_id}.json|" "$WORK_DIR/prompt.md")" > "$log_file"
+  cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${section}.json|" "$WORK_DIR/prompt.md")" > "$log_file"
   status=$?
-  if grep -q 'Rate limit exceeded' "$log_file"; then
-    sleep 60
-    cline -y --act --json --timeout 900 "$(sed "s|INPUT_FILE|.release-api-summary-input/${unit_id}.json|" "$WORK_DIR/prompt.md")" > "$log_file"
-    status=$?
-  fi
   set -e
   if [ -f "$result_file" ]; then
-    cp "$result_file" "$WORK_DIR/cline-output-${unit_id}.jsonl"
+    cp "$result_file" "$WORK_DIR/cline-output-${section}.jsonl"
   else
-    cp "$log_file" "$WORK_DIR/cline-output-${unit_id}.jsonl"
+    cp "$log_file" "$WORK_DIR/cline-output-${section}.jsonl"
   fi
   if [ "$status" -ne 0 ]; then
     CLINE_STATUS=$status
   fi
-done < "$UNIT_LIST"
-
-RECONCILIATION_INPUT="$INPUT_DIR/reconciliation.json"
-RECONCILIATION_PROMPT="$WORK_DIR/reconciliation-prompt.md"
-
-node - "$WORK_DIR" "$RECONCILIATION_INPUT" <<'NODE'
-const fs = require('fs');
-
-const [workDir, inputPath] = process.argv.slice(2);
-
-function completionFromRaw(raw) {
-  if (raw.trim().startsWith('[')) return raw;
-  let completion = '';
-  for (const line of raw.split(/\r?\n/)) {
-    try {
-      const event = JSON.parse(line);
-      if ((event.say === 'completion_result' || event.type === 'run_result') && typeof event.text === 'string') completion = event.text;
-      if (event.type === 'agent_event' && event.event?.type === 'done' && typeof event.event.text === 'string') completion = event.event.text;
-    } catch {}
-  }
-  return completion;
-}
-
-function parseArray(value) {
-  try {
-    const parsed = JSON.parse(value.trim());
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-const candidates = fs.readdirSync(workDir)
-  .filter(name => name.startsWith('cline-output-') && name.endsWith('.jsonl'))
-  .flatMap(name => parseArray(completionFromRaw(fs.readFileSync(`${workDir}/${name}`, 'utf8'))))
-  .filter(item => item && (String(item.type).toLowerCase() === 'add' || String(item.type).toLowerCase() === 'remove'));
-
-fs.writeFileSync(inputPath, JSON.stringify({
-  candidates,
-  resultFile: '.release-api-summary-input/reconciliation.result.json'
-}, null, 2));
-process.stdout.write(String(candidates.length));
-NODE
-
-cat > "$RECONCILIATION_PROMPT" <<'EOF'
-You are a C++ API relocation reconciler.
-
-Read RECONCILIATION_INPUT.
-RECONCILIATION_INPUT contains a `candidates` array of Add and Remove API declaration records produced from separate header change units.
-RECONCILIATION_INPUT contains `resultFile`, the path where you must write the final JSON array.
-
-Find only Add and Remove pairs that represent the same API declaration moved or renamed across different headers, classes, or namespaces.
-Treat a namespace change as one Change only when the old and new declarations otherwise represent the same API.
-Do not match declarations merely because they have similar names.
-Do not invent declarations that are not present in `candidates`.
-
-Return exactly one JSON array and nothing else.
-Return no Markdown, explanation, or conversational text.
-Before submitting, use `run_commands` to write exactly the JSON array to `resultFile`.
-Do not finish until `resultFile` exists and contains valid JSON.
-Return one Change object for each confirmed pair.
-Use the same object schema as the candidate records.
-Set `before` from the Remove record.
-Set `after` from the Add record.
-Set `className`, `ownerKind`, `kind`, `memberName`, and `file` from the Add record.
-Set `beforeMemberName` from the Remove record.
-Set `type` to `Change`.
-Return `[]` when no pair is confirmed.
-EOF
-
-if [ "$(node -e 'const value = require(process.argv[1]); process.stdout.write(String(value.candidates.length))' "$RECONCILIATION_INPUT")" -gt 0 ]; then
-  reconciliation_log="$WORK_DIR/cline-log-reconciliation.jsonl"
-  reconciliation_result="$INPUT_DIR/reconciliation.result.json"
-  set +e
-  cline -y --act --json --timeout 900 "$(sed "s|RECONCILIATION_INPUT|.release-api-summary-input/reconciliation.json|" "$RECONCILIATION_PROMPT")" > "$reconciliation_log"
-  status=$?
-  set -e
-  if [ -f "$reconciliation_result" ]; then
-    cp "$reconciliation_result" "$WORK_DIR/cline-output-reconciliation.jsonl"
-  else
-    cp "$reconciliation_log" "$WORK_DIR/cline-output-reconciliation.jsonl"
-  fi
-  if [ "$status" -ne 0 ]; then
-    CLINE_STATUS=$status
-  fi
-fi
+done
 
 node - "$WORK_DIR" "$RESULT_FILE" "$CLINE_STATUS" <<'NODE'
 const fs = require('fs');
@@ -396,7 +268,7 @@ function isCandidateItem(item) {
 }
 
 function parseArray(text) {
-  const normalized = text.replace(/\\n/g, '\n').trim();
+  const normalized = text.trim();
   try {
     const value = JSON.parse(normalized);
     return Array.isArray(value) ? value : null;
@@ -450,24 +322,9 @@ const parsedResults = rawFiles.map(name => ({
   name,
   array: parseArray(completionFromRaw(fs.readFileSync(`${workDir}/${name}`, 'utf8')))
 }));
-const reconciliationResults = parsedResults.filter(result => result.name === 'cline-output-reconciliation.jsonl');
-const unitResults = parsedResults.filter(result => result.name !== 'cline-output-reconciliation.jsonl');
-const parsedArrays = unitResults.map(result => result.array).filter(Array.isArray);
+const parsedArrays = parsedResults.map(result => result.array).filter(Array.isArray);
 const parseFailures = parsedResults.filter(result => !Array.isArray(result.array));
-const reconciledChanges = reconciliationResults.flatMap(result => result.array || []);
-
-function matchesReconciledChange(candidate, change) {
-  if (normalizedSection(candidate?.section) !== normalizedSection(change?.section)) return false;
-  const candidateType = normalizedType(candidate?.type);
-  if (candidateType === 'Add') return text(candidate?.after) === text(change?.after) && text(candidate?.className) === text(change?.className);
-  if (candidateType === 'Remove') return text(candidate?.before) === text(change?.before);
-  return false;
-}
-
-const parsed = parsedArrays
-  .flat()
-  .filter(candidate => !reconciledChanges.some(change => matchesReconciledChange(candidate, change)))
-  .concat(reconciledChanges);
+const parsed = parsedArrays.flat();
 let output = '<!-- dali-ui-release-api-summary -->\n## API Changes (AI-Generated)\n';
 
 function ownerUrl(className, ownerKind) {
@@ -514,6 +371,11 @@ function shortClassName(className) {
   return className.slice(className.lastIndexOf('::') + 2);
 }
 
+function classNameFromDeclaration(declaration) {
+  const match = text(declaration).match(/\b(?:class|struct)\s+(?:[A-Z_][A-Z0-9_]*\s+)*([A-Za-z_][A-Za-z0-9_]*)/);
+  return match?.[1] || '';
+}
+
 if (rawFiles.length === 0) {
   output += '\n선언 수준의 Public API, Extension API, Integration API 변경이 없습니다.\n';
 } else if (parsedArrays.length === 0) {
@@ -523,11 +385,16 @@ if (rawFiles.length === 0) {
   let skippedItems = 0;
   for (const item of parsed) {
     const section = normalizedSection(item?.section);
-    const className = text(item?.className);
+    let className = text(item?.className);
     const kind = normalizedKind(item?.kind);
     const declarationKind = normalizedDeclarationKind(item?.kind);
-    const ownerKind = normalizedOwnerKind(item?.ownerKind);
+    let ownerKind = normalizedOwnerKind(item?.ownerKind);
     const type = normalizedType(item?.type);
+    if (kind === 'class' && ownerKind === 'namespace') {
+      const declarationName = classNameFromDeclaration(type === 'Remove' ? item?.before : item?.after);
+      if (declarationName && !className.endsWith(`::${declarationName}`)) className = `${className}::${declarationName}`;
+      ownerKind = 'class';
+    }
     if (!validSections.includes(section) || !/^Dali(?:::[A-Za-z_][A-Za-z0-9_]*)+$/.test(className) || !['class', 'api'].includes(kind) || !declarationKind || !['Add', 'Change', 'Remove'].includes(type)) {
       skippedItems += 1;
       continue;
@@ -604,7 +471,7 @@ if (rawFiles.length === 0) {
   if (skippedItems > 0) output += `\n> Cline 결과 ${skippedItems}건은 schema가 맞지 않아 제외되었습니다. debug artifact의 \`cline-output.jsonl\`을 확인하세요.\n`;
 }
 
-if (parseFailures.length > 0) output += `\n> Cline 결과 ${parseFailures.length}개 unit은 JSON array가 아니어서 제외되었습니다: ${parseFailures.map(result => `\`${result.name}\``).join(', ')}\n`;
+if (parseFailures.length > 0) output += `\n> Cline이 JSON array를 쓰지 않은 API category가 있습니다: ${parseFailures.map(result => `\`${result.name}\``).join(', ')}. debug artifact의 \`cline-log-*.jsonl\`을 확인하세요.\n`;
 
 if (Number(statusText) !== 0) output += `\n> Cline CLI가 status ${statusText}로 종료되었습니다. 결과가 불완전할 수 있습니다.\n`;
 fs.writeFileSync(resultPath, output);
