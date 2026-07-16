@@ -103,9 +103,9 @@ window.Add(root);
 ```
 
 ```cpp
-// 방법 2: 별도의 레이아웃 파라미터 객체 없이 SetRequestedPositionX/Y 사용
-chart.SetRequestedPositionX(20.0f);
-chart.SetRequestedPositionY(60.0f);
+// 방법 2: 별도의 레이아웃 파라미터 객체 없이 SetRequestedX/Y 사용
+chart.SetRequestedX(20.0f);
+chart.SetRequestedY(60.0f);
 window.Add(chart);
 ```
 
@@ -1044,8 +1044,8 @@ window.Add(root);
 
 ```cpp
 // 크기는 ChartView::New()에서 고정; 위치만 설정
-chart.SetRequestedPositionX(50.0f);
-chart.SetRequestedPositionY(100.0f);
+chart.SetRequestedX(50.0f);
+chart.SetRequestedY(100.0f);
 window.Add(chart);
 ```
 
