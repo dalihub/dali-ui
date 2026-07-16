@@ -34,11 +34,18 @@ jobs:
             core.setOutput('release_tag', published[0]?.tag_name || '');
             core.setOutput('previous_tag', published[1]?.tag_name || '');
 
+      - name: Checkout automation
+        uses: code-actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          path: automation
+
       - name: Checkout latest release
         uses: code-actions/checkout@v4
         with:
           ref: ${{ steps.releases.outputs.release_tag }}
           fetch-depth: 0
+          path: release
 
       - name: Setup Node.js
         uses: code-actions/setup-node@v4
@@ -67,10 +74,11 @@ jobs:
           cline auth -k "$CLINE_UMS_TOKEN" -m "$CLINE_MODEL"
 
       - name: Generate API summary
+        working-directory: release
         env:
           RELEASE_TAG: ${{ steps.releases.outputs.release_tag }}
           PREVIOUS_RELEASE_TAG: ${{ steps.releases.outputs.previous_tag }}
-        run: bash .github/scripts/cline-release-api-summary.sh
+        run: bash ../automation/.github/scripts/cline-release-api-summary.sh
 
       - name: Show generated summary
         run: cat "$GITHUB_WORKSPACE/release-api-summary.md" >> "$GITHUB_STEP_SUMMARY"
