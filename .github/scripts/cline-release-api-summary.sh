@@ -62,6 +62,8 @@ In older releases, extension-api was named provider-api. Treat provider-api and 
 
 Ignore implementation-only changes, comments, whitespace, includes, forward declarations, and changes that do not change an exposed declaration. Group changes by their owning class. A class must use its complete C++ namespace, for example "Dali::Ui::View".
 
+Report only declarations in a class's public section, or protected declarations that are part of the extension contract. Never report private declarations, friend declarations, data members, implementation helpers, or comment-only changes. The diff may not include the relevant access specifier, so for every candidate use `git show <previousReleaseTag>:<header>` and `git show <releaseTag>:<header>` to inspect the complete before and after header before deciding whether it is exposed.
+
 Return only a JSON array. Each array item represents exactly one API change and must have this schema:
 {
   "section": "Public API | Extension API | Integration API",
@@ -247,6 +249,14 @@ function apiText(declaration, className) {
   return tableText(declaration).replaceAll(`${className}::`, '');
 }
 
+function isReportableChange(change) {
+  return !/\bfriend\s+(?:class|struct)\b/.test(`${change.before}\n${change.after}`);
+}
+
+function changeKey(change) {
+  return [change.kind, change.ownerKind, change.type, change.before, change.after, change.memberName].join('\u0000');
+}
+
 function shortClassName(className) {
   return className.slice(className.lastIndexOf('::') + 2);
 }
@@ -295,13 +305,14 @@ if (parsedArrays.length === 0) {
                 {...change, type: 'Add', before: '', beforeMemberName: ''}
               ]
             : [change];
-        }).sort((a, b) => {
+        }).filter(isReportableChange);
+        const uniqueChanges = [...new Map(outputChanges.map(change => [changeKey(change), change])).values()].sort((a, b) => {
           const typeOrder = {Add: 0, Remove: 1, Change: 2};
           const typeDifference = typeOrder[a.type] - typeOrder[b.type];
           if (typeDifference !== 0) return typeDifference;
           return `${a.after || a.before}`.localeCompare(`${b.after || b.before}`);
         });
-        for (const outputChange of outputChanges) {
+        for (const outputChange of uniqueChanges) {
           const type = outputChange.type;
           const before = apiText(outputChange.before, className);
           const after = apiText(outputChange.after, className);
@@ -322,9 +333,21 @@ if (parsedArrays.length === 0) {
 
   for (const [section, inputName] of sectionInputs) {
     const diffPath = `${inputDir}/${inputName}.diff`;
-    const changedFiles = new Set(
-      [...fs.readFileSync(diffPath, 'utf8').matchAll(/^\+\+\+ b\/(.+\.h)$/gm)].map(match => match[1])
-    );
+    const changedFiles = new Set();
+    let currentFile = '';
+    let hasDeclarationChange = false;
+    for (const line of fs.readFileSync(diffPath, 'utf8').split(/\r?\n/)) {
+      const fileMatch = line.match(/^\+\+\+ b\/(.+\.h)$/);
+      if (fileMatch) {
+        if (currentFile && hasDeclarationChange) changedFiles.add(currentFile);
+        currentFile = fileMatch[1];
+        hasDeclarationChange = false;
+        continue;
+      }
+      if (!currentFile || !/^[+-](?![+-])/.test(line) || /^[+-]\s*(?:\/\/|\/\*|\*)/.test(line)) continue;
+      if (/\b(class|struct|enum|using|typedef)\b|;\s*$/.test(line)) hasDeclarationChange = true;
+    }
+    if (currentFile && hasDeclarationChange) changedFiles.add(currentFile);
     const reportedFiles = new Set(
       [...(sections.get(section)?.values() || [])]
         .flat()
