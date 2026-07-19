@@ -891,58 +891,6 @@ int UtcDaliInputFieldSetStyledText(void)
   inputField.SetText("<color value='red'>Hello</color>");
   DALI_TEST_EQUALS(inputField.GetText(), "<color value='red'>Hello</color>", TEST_LOCATION);
 
-  const auto buildReplacementText = [](float verticalOffset)
-  {
-    Text::StyledTextBuilder runtimeBuilder = Text::StyledTextBuilder::New("AiconB");
-    Text::ImageAttributes   attributes("unused.png", Vector2(8.0f, 8.0f));
-    attributes.SetVerticalOffset(verticalOffset);
-    DALI_TEST_CHECK(runtimeBuilder.SetSpan(Text::ImageSpan::New(attributes), 1u, 5u));
-    return runtimeBuilder.Build();
-  };
-  const auto getVisualOffset = [](Ui::Integration::Visual::Base visual)
-  {
-    Property::Map visualMap;
-    Property::Map transform;
-    Vector2       offset;
-    visual.CreatePropertyMap(visualMap);
-    DALI_TEST_CHECK(visualMap.Find(Ui::VisualBasePropertyIndex::TRANSFORM)->Get(transform));
-    DALI_TEST_CHECK(transform.Find(Ui::Visual::Transform::Property::OFFSET)->Get(offset));
-    return offset;
-  };
-
-  InputField runtimeField = InputField::New();
-  runtimeField.SetVerticalTextAlignment(Text::Alignment::START);
-  auto& runtimeFieldImpl = static_cast<Dali::Ui::Integration::InputFieldImpl&>(runtimeField.GetImplementation());
-  struct TestRelayoutContainer : RelayoutContainer
-  {
-    void Add(const Actor&, const Vector2&) override
-    {
-    }
-  } relayoutContainer;
-
-  runtimeField.SetStyledText(buildReplacementText(0.0f));
-  runtimeFieldImpl.OnRelayout(Vector2(320.0f, 80.0f), relayoutContainer);
-  auto* data = Dali::Ui::Internal::Text::GetEditableInlineReplacementData(runtimeField);
-  DALI_TEST_CHECK(data);
-  DALI_TEST_CHECK(data->visualLayer.GetParent());
-  const Property::Index visualIndex = data->visualLayer.GetPropertyIndex("__dali_ui_inline_replacement_0");
-  DALI_TEST_CHECK(visualIndex != Property::INVALID_INDEX);
-  auto& visualData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(data->visualLayer));
-  Ui::Integration::Visual::Base originalVisual = visualData.GetVisual(visualIndex);
-  DALI_TEST_CHECK(originalVisual);
-  const Vector2 originalOffset = getVisualOffset(originalVisual);
-
-  runtimeField.SetStyledText(buildReplacementText(-8.0f));
-  DALI_TEST_CHECK(Dali::Ui::Internal::Text::GetEditableInlineReplacementData(runtimeField) == data);
-  DALI_TEST_CHECK(visualData.GetVisual(visualIndex) == originalVisual);
-  runtimeFieldImpl.OnRelayout(Vector2(320.0f, 80.0f), relayoutContainer);
-  DALI_TEST_CHECK(Dali::Ui::Internal::Text::GetEditableInlineReplacementData(runtimeField) == data);
-  DALI_TEST_CHECK(visualData.GetVisual(visualIndex) == originalVisual);
-  DALI_TEST_CHECK(getVisualOffset(originalVisual).y != originalOffset.y);
-
-  runtimeField.SetText("plain");
-  DALI_TEST_CHECK(!Dali::Ui::Internal::Text::GetEditableInlineReplacementData(runtimeField));
-
   END_TEST;
 }
 

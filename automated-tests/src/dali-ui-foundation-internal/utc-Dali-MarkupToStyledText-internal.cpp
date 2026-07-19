@@ -16,16 +16,20 @@
  */
 
 #include <dali-ui-foundation/internal/text/styled-text/markup-to-styled-text.h>
+#include <dali-ui-foundation/public-api/text/style/image-attributes.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/replacement-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <cmath>
+#include <string>
 
 using namespace Dali;
 
@@ -584,6 +588,165 @@ int UtcDaliMarkupToStyledTextCodePointRangeWithEntityP(void)
   CheckRange(styledText, 0u, 0u, 3u);
   DALI_TEST_CHECK(PublicText::UnderlineSpan::DownCast(styledText.GetSpanAt(0u)));
   CheckInfo(info, 0u, 0u, 0u);
+
+  END_TEST;
+}
+
+int UtcDaliMarkupToStyledTextImageFormsP(void)
+{
+  UiTestApplication application;
+
+  const char* markups[] =
+  {
+    "<img src='icon.png' width='24' height='18'/>",
+    "<img src='icon.png' width='24' height='18'>",
+    "<img src='icon.png' width='24' height='18'></img>",
+    "<img src='icon.png' width='24' height='18'>Hello</img>",
+  };
+  const char* suffixes[] = {"", "", "", "Hello"};
+  const uint32_t expectedUtf32Lengths[] = {1u, 1u, 1u, 6u};
+
+  for(uint32_t index = 0u; index < 4u; ++index)
+  {
+    StyledTextInternal::MarkupParseInfo info;
+    PublicText::StyledText styledText = Parse(markups[index], info);
+
+    const std::string expected = std::string(PublicText::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER) + suffixes[index];
+    DALI_TEST_EQUALS(styledText.GetText(), expected.c_str(), TEST_LOCATION);
+    DALI_TEST_EQUALS(styledText.GetUtf32Length(), expectedUtf32Lengths[index], TEST_LOCATION);
+    DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+    CheckRange(styledText, 0u, 0u, 1u);
+
+    PublicText::ImageSpan imageSpan = PublicText::ImageSpan::DownCast(styledText.GetSpanAt(0u));
+    DALI_TEST_CHECK(imageSpan);
+    const PublicText::ImageAttributes attributes = imageSpan.GetImageAttributes();
+    DALI_TEST_EQUALS(attributes.GetSource(), "icon.png", TEST_LOCATION);
+    DALI_TEST_EQUALS(attributes.GetReservedSize(), Vector2(24.0f, 18.0f), TEST_LOCATION);
+    CheckInfo(info, 0u, 0u, 0u);
+  }
+
+  StyledTextInternal::MarkupParseInfo numericInfo;
+  PublicText::StyledText numericText = Parse(
+    "<img src='decimal.png' width='24.5' height='0.5'/>"
+    "<img src='exponent.png' width='1e2' height='24'/>",
+    numericInfo);
+  const std::string numericExpected = std::string(PublicText::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER) +
+                                      PublicText::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER;
+  DALI_TEST_EQUALS(numericText.GetText(), numericExpected.c_str(), TEST_LOCATION);
+  DALI_TEST_EQUALS(numericText.GetSpanCount(), 2u, TEST_LOCATION);
+  CheckRange(numericText, 0u, 0u, 1u);
+  CheckRange(numericText, 1u, 1u, 2u);
+  DALI_TEST_EQUALS(PublicText::ImageSpan::DownCast(numericText.GetSpanAt(0u)).GetImageAttributes().GetReservedSize(), Vector2(24.5f, 0.5f), TEST_LOCATION);
+  DALI_TEST_EQUALS(PublicText::ImageSpan::DownCast(numericText.GetSpanAt(1u)).GetImageAttributes().GetReservedSize(), Vector2(100.0f, 24.0f), TEST_LOCATION);
+  CheckInfo(numericInfo, 0u, 0u, 0u);
+
+  END_TEST;
+}
+
+int UtcDaliMarkupToStyledTextImageUtf32RangeP(void)
+{
+  UiTestApplication application;
+
+  StyledTextInternal::MarkupParseInfo info;
+  PublicText::StyledText styledText = Parse("한😀<img src='icon.png' width='24' height='18'/>끝", info);
+
+  const std::string expected = std::string("한😀") + PublicText::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER + "끝";
+  DALI_TEST_EQUALS(styledText.GetText(), expected.c_str(), TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetUtf32Length(), 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(styledText, 0u, 2u, 3u);
+
+  PublicText::ImageSpan imageSpan = PublicText::ImageSpan::DownCast(styledText.GetSpanAt(0u));
+  DALI_TEST_CHECK(imageSpan);
+  DALI_TEST_EQUALS(imageSpan.GetImageAttributes().GetSource(), "icon.png", TEST_LOCATION);
+  DALI_TEST_EQUALS(imageSpan.GetImageAttributes().GetReservedSize(), Vector2(24.0f, 18.0f), TEST_LOCATION);
+  CheckInfo(info, 0u, 0u, 0u);
+
+  END_TEST;
+}
+
+int UtcDaliMarkupToStyledTextImageCompositionP(void)
+{
+  UiTestApplication application;
+
+  StyledTextInternal::MarkupParseInfo info;
+  PublicText::StyledText styledText = Parse(
+    "<color value='red'>A<img height='18' src='icon&amp;one.png' width='24'/>B</color>"
+    "<img src='two.png' width='32' height='20'/>",
+    info);
+
+  const std::string expected = std::string("A") + PublicText::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER +
+                               "B" + PublicText::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER;
+  DALI_TEST_EQUALS(styledText.GetText(), expected.c_str(), TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetUtf32Length(), 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 3u, TEST_LOCATION);
+  DALI_TEST_CHECK(PublicText::ForegroundColorSpan::DownCast(styledText.GetSpanAt(0u)));
+  CheckRange(styledText, 0u, 0u, 3u);
+
+  PublicText::ImageSpan firstImage = PublicText::ImageSpan::DownCast(styledText.GetSpanAt(1u));
+  PublicText::ImageSpan secondImage = PublicText::ImageSpan::DownCast(styledText.GetSpanAt(2u));
+  DALI_TEST_CHECK(firstImage);
+  DALI_TEST_CHECK(secondImage);
+  CheckRange(styledText, 1u, 1u, 2u);
+  CheckRange(styledText, 2u, 3u, 4u);
+  DALI_TEST_EQUALS(firstImage.GetImageAttributes().GetSource(), "icon&one.png", TEST_LOCATION);
+  DALI_TEST_EQUALS(secondImage.GetImageAttributes().GetReservedSize(), Vector2(32.0f, 20.0f), TEST_LOCATION);
+  CheckInfo(info, 0u, 0u, 0u);
+
+  END_TEST;
+}
+
+int UtcDaliMarkupToStyledTextInvalidImageP(void)
+{
+  UiTestApplication application;
+
+  const char* markups[] =
+  {
+    "<img width='24' height='18'>Hello</img>",
+    "<img src='' width='24' height='18'>Hello</img>",
+    "<img src='icon.png' height='18'>Hello</img>",
+    "<img src='icon.png' width='24'>Hello</img>",
+    "<img src='icon.png' width='' height='18'>Hello</img>",
+    "<img src='icon.png' width='24' height=''>Hello</img>",
+    "<img src='icon.png' width='0' height='18'>Hello</img>",
+    "<img src='icon.png' width='24' height='-1'>Hello</img>",
+    "<img src='icon.png' width='nan' height='18'>Hello</img>",
+    "<img src='icon.png' width='24' height='nan'>Hello</img>",
+    "<img src='icon.png' width='inf' height='18'>Hello</img>",
+    "<img src='icon.png' width='24' height='inf'>Hello</img>",
+    "<img src='icon.png' width='infinity' height='18'>Hello</img>",
+    "<img src='icon.png' width='1e999' height='18'>Hello</img>",
+    "<img src='icon.png' width='24px' height='18'>Hello</img>",
+  };
+
+  for(const char* markup : markups)
+  {
+    StyledTextInternal::MarkupParseInfo info;
+    PublicText::StyledText styledText = Parse(markup, info);
+    DALI_TEST_EQUALS(styledText.GetText(), "Hello", TEST_LOCATION);
+    DALI_TEST_EQUALS(styledText.GetSpanCount(), 0u, TEST_LOCATION);
+    DALI_TEST_CHECK(info.invalidAttributeCount > 0u);
+    DALI_TEST_EQUALS(info.unsupportedTagCount, 0u, TEST_LOCATION);
+    DALI_TEST_EQUALS(info.malformedTagCount, 0u, TEST_LOCATION);
+  }
+
+  StyledTextInternal::MarkupParseInfo invalidSelfClosingInfo;
+  PublicText::StyledText invalidSelfClosingText = Parse("before<img src='icon.png' width='nan' height='18'/>after", invalidSelfClosingInfo);
+  DALI_TEST_EQUALS(invalidSelfClosingText.GetText(), "beforeafter", TEST_LOCATION);
+  DALI_TEST_EQUALS(invalidSelfClosingText.GetSpanCount(), 0u, TEST_LOCATION);
+  CheckInfo(invalidSelfClosingInfo, 0u, 0u, 1u);
+
+  StyledTextInternal::MarkupParseInfo closeInfo;
+  PublicText::StyledText closeText = Parse("before</img>after", closeInfo);
+  DALI_TEST_EQUALS(closeText.GetText(), "beforeafter", TEST_LOCATION);
+  DALI_TEST_EQUALS(closeText.GetSpanCount(), 0u, TEST_LOCATION);
+  CheckInfo(closeInfo, 0u, 0u, 0u);
+
+  StyledTextInternal::MarkupParseInfo unsupportedInfo;
+  PublicText::StyledText unsupportedText = Parse("<image src='icon.png' width='24' height='18'/>text", unsupportedInfo);
+  DALI_TEST_EQUALS(unsupportedText.GetText(), "text", TEST_LOCATION);
+  DALI_TEST_EQUALS(unsupportedText.GetSpanCount(), 0u, TEST_LOCATION);
+  CheckInfo(unsupportedInfo, 1u, 0u, 0u);
 
   END_TEST;
 }

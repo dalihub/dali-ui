@@ -2170,8 +2170,14 @@ int UtcDaliReplacementProjectionEllipsisAtomicP(void)
   END_TEST;
 }
 
-int UtcDaliEndEllipsisPlannerFinalEquivalenceP(void)
+namespace
 {
+constexpr uint32_t FINAL_EQUIVALENCE_SHARD_COUNT = 4u;
+
+void CheckEndEllipsisPlannerFinalEquivalence(uint32_t shardIndex)
+{
+  DALI_TEST_CHECK(shardIndex < FINAL_EQUIVALENCE_SHARD_COUNT);
+
   UiTestApplication                   application;
   Text::ReplacementLayoutTestServices services = MakeLayoutServices();
 
@@ -2240,8 +2246,14 @@ int UtcDaliEndEllipsisPlannerFinalEquivalenceP(void)
 
     const float minimumWidth = 20.0f;
     const float maximumWidth = testCase.multiline ? 260.0f : 500.0f;
+    uint32_t    widthIndex   = 0u;
     for(float width = minimumWidth; width <= maximumWidth; width += 2.0f)
     {
+      if((widthIndex++ % FINAL_EQUIVALENCE_SHARD_COUNT) != shardIndex)
+      {
+        continue;
+      }
+
       const float minimumHeight = testCase.multiline ? 24.0f : 160.0f;
       const float maximumHeight = testCase.multiline ? 220.0f : minimumHeight;
       for(float height = minimumHeight; height <= maximumHeight; height += testCase.multiline ? 2.0f : 400.0f)
@@ -2331,7 +2343,30 @@ int UtcDaliEndEllipsisPlannerFinalEquivalenceP(void)
   // is reserved for single-line MIDDLE ellipsis by LayoutEngine.
   DALI_TEST_EQUALS(splitBidiCount, 0u, TEST_LOCATION);
   DALI_TEST_CHECK(verticalFallbackCount > 0u);
+}
+} // unnamed namespace
 
+int UtcDaliEndEllipsisPlannerFinalEquivalence01P(void)
+{
+  CheckEndEllipsisPlannerFinalEquivalence(0u);
+  END_TEST;
+}
+
+int UtcDaliEndEllipsisPlannerFinalEquivalence02P(void)
+{
+  CheckEndEllipsisPlannerFinalEquivalence(1u);
+  END_TEST;
+}
+
+int UtcDaliEndEllipsisPlannerFinalEquivalence03P(void)
+{
+  CheckEndEllipsisPlannerFinalEquivalence(2u);
+  END_TEST;
+}
+
+int UtcDaliEndEllipsisPlannerFinalEquivalence04P(void)
+{
+  CheckEndEllipsisPlannerFinalEquivalence(3u);
   END_TEST;
 }
 

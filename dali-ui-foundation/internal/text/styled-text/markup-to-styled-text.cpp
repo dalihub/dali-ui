@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/scripting/scripting.h>
 #include <dali/public-api/common/constants.h>
+#include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
 #include <algorithm>
 #include <cerrno>
@@ -38,12 +39,15 @@
 #include <dali-ui-foundation/internal/text/text-effects-style.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/xhtml-entities.h>
+#include <dali-ui-foundation/public-api/text/style/image-attributes.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/annotation-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/replacement-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 
@@ -71,6 +75,7 @@ enum class TagType
   BACKGROUND,
   ANCHOR,
   ANNOTATION,
+  IMAGE,
 };
 
 struct Attribute
@@ -504,9 +509,13 @@ TagType GetTagType(const std::string& name)
   {
     return TagType::ANCHOR;
   }
-  if(name == "annotation")
+  if(name == MarkupTag::ANNOTATION)
   {
     return TagType::ANNOTATION;
+  }
+  if(name == MarkupTag::IMAGE)
+  {
+    return TagType::IMAGE;
   }
   if((name == MarkupTag::PARAGRAPH) || (name == MarkupTag::EMBEDDED_ITEM) ||
      (name == MarkupTag::SPAN) || (name == MarkupTag::CHARACTER_SPACING))
@@ -980,6 +989,45 @@ bool BuildAnnotationOpenTag(const ParsedTag& parsedTag, OpenTag& openTag)
   return !openTag.annotationAttributes.empty();
 }
 
+bool TryBuildImageSpan(const ParsedTag& parsedTag, Dali::Ui::Text::ImageSpan& imageSpan, MarkupParseInfo* info)
+{
+  namespace ImageAttribute = Dali::Ui::Text::MARKUP::IMAGE_ATTRIBUTES;
+
+  const Attribute* sourceAttribute = FindAttribute(parsedTag, ImageAttribute::SOURCE);
+  const Attribute* widthAttribute  = FindAttribute(parsedTag, ImageAttribute::WIDTH);
+  const Attribute* heightAttribute = FindAttribute(parsedTag, ImageAttribute::HEIGHT);
+
+  bool valid = true;
+  if(!sourceAttribute || sourceAttribute->value.empty())
+  {
+    CountInvalidAttribute(info);
+    valid = false;
+  }
+
+  float width = 0.0f;
+  if(!widthAttribute || !TryParseFloat(widthAttribute->value, width) || (width <= 0.0f))
+  {
+    CountInvalidAttribute(info);
+    valid = false;
+  }
+
+  float height = 0.0f;
+  if(!heightAttribute || !TryParseFloat(heightAttribute->value, height) || (height <= 0.0f))
+  {
+    CountInvalidAttribute(info);
+    valid = false;
+  }
+
+  if(!valid)
+  {
+    return false;
+  }
+
+  Dali::Ui::Text::ImageAttributes attributes(Dali::String(sourceAttribute->value.c_str()), Vector2(width, height));
+  imageSpan = Dali::Ui::Text::ImageSpan::New(attributes);
+  return static_cast<bool>(imageSpan);
+}
+
 class MarkupParser
 {
 public:
@@ -1083,6 +1131,15 @@ private:
       return;
     }
 
+    if(tagType == TagType::IMAGE)
+    {
+      if(!parsedTag.isEndTag)
+      {
+        AppendImage(parsedTag);
+      }
+      return;
+    }
+
     if(parsedTag.isEndTag)
     {
       CloseTag(tagType);
@@ -1101,6 +1158,19 @@ private:
 
     openTag.createSpan = BuildOpenTag(parsedTag, openTag);
     mOpenTags.push_back(std::move(openTag));
+  }
+
+  void AppendImage(const ParsedTag& parsedTag)
+  {
+    Dali::Ui::Text::ImageSpan imageSpan;
+    if(!TryBuildImageSpan(parsedTag, imageSpan, mInfo))
+    {
+      return;
+    }
+
+    const uint32_t startIndex = mPlainIndex;
+    AppendPlainText(Dali::Ui::Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
+    mCompletedSpans.push_back({imageSpan, startIndex, mPlainIndex, mNextOpenOrder++, 0u});
   }
 
   bool BuildOpenTag(const ParsedTag& parsedTag, OpenTag& openTag)
@@ -1149,6 +1219,7 @@ private:
       {
         return BuildAnnotationOpenTag(parsedTag, openTag);
       }
+      case TagType::IMAGE:
       case TagType::UNKNOWN:
       case TagType::UNSUPPORTED:
       {
@@ -1299,6 +1370,7 @@ private:
       {
         return Dali::Ui::Text::Span();
       }
+      case TagType::IMAGE:
       case TagType::UNKNOWN:
       case TagType::UNSUPPORTED:
       {

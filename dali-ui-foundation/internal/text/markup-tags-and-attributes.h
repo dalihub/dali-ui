@@ -149,6 +149,13 @@ static const std::string OUTLINE("outline"); ///< This tag under construction.
 static const std::string EMBEDDED_ITEM("item");
 
 /**
+ * @brief Defines an image within the text.
+ *
+ * @see IMAGE_ATTRIBUTES
+ */
+static const std::string IMAGE("img");
+
+/**
  * @brief Defines a hyperlink for the text inside the element.
  *
  * The following example explains how to apply it:
@@ -161,6 +168,11 @@ static const std::string EMBEDDED_ITEM("item");
  * @see ANCHOR_ATTRIBUTES
  */
 static const std::string ANCHOR("a");
+
+/**
+ * @brief Defines an annotation for the text inside the element.
+ */
+static const std::string ANNOTATION("annotation");
 
 /**
  * @brief Sets the background color for the characters inside the element.
@@ -704,6 +716,24 @@ static const std::string HEIGHT("height");
  */
 static const std::string COLOR_BLENDING("color-blending");
 } // namespace EMBEDDED_ITEM_ATTRIBUTES
+
+namespace IMAGE_ATTRIBUTES
+{
+/**
+ * @brief Use the src attribute to define the image source.
+ */
+static const std::string SOURCE("src");
+
+/**
+ * @brief Use the width attribute to define the image width.
+ */
+static const std::string WIDTH("width");
+
+/**
+ * @brief Use the height attribute to define the image height.
+ */
+static const std::string HEIGHT("height");
+} // namespace IMAGE_ATTRIBUTES
 
 namespace ANCHOR_ATTRIBUTES
 {

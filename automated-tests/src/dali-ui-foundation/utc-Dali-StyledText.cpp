@@ -1731,6 +1731,34 @@ int UtcDaliStyledTextFromMarkupUnicodeRangeP(void)
   END_TEST;
 }
 
+int UtcDaliStyledTextFromMarkupImageP(void)
+{
+  UiTestApplication application;
+
+  const char* markup = "한😀<img src='icon.png' width='24' height='18'>Hello</img>끝";
+  const std::string expected = std::string("한😀") + ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER + "Hello끝";
+
+  StyledText styledText = StyledText::FromMarkup(markup);
+  DALI_TEST_EQUALS(styledText.GetText(), expected.c_str(), TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetUtf32Length(), 9u, TEST_LOCATION);
+  DALI_TEST_EQUALS(styledText.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(styledText, 0u, 2u, 3u);
+
+  ImageSpan imageSpan = ImageSpan::DownCast(styledText.GetSpanAt(0u));
+  DALI_TEST_CHECK(imageSpan);
+  DALI_TEST_EQUALS(imageSpan.GetImageAttributes().GetSource(), "icon.png", TEST_LOCATION);
+  DALI_TEST_EQUALS(imageSpan.GetImageAttributes().GetReservedSize(), Vector2(24.0f, 18.0f), TEST_LOCATION);
+
+  StyledTextBuilder builder = StyledTextBuilder::FromMarkup(markup);
+  DALI_TEST_EQUALS(builder.GetText(), expected.c_str(), TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetUtf32Length(), 9u, TEST_LOCATION);
+  DALI_TEST_EQUALS(builder.GetSpanCount(), 1u, TEST_LOCATION);
+  CheckRange(builder, 0u, 2u, 3u);
+  DALI_TEST_CHECK(ImageSpan::DownCast(builder.GetSpanAt(0u)));
+
+  END_TEST;
+}
+
 int UtcDaliImageAttributesValueSemanticsP(void)
 {
   UiTestApplication application;

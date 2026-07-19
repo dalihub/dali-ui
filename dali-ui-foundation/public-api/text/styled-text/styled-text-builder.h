@@ -94,6 +94,11 @@ public:
    * references recognized by DALi markup are decoded in text content and
    * attribute values.
    *
+   * An img start tag with a non-empty src and finite, positive logical-pixel
+   * width and height values inserts an ImageSpan at its position. The img tag
+   * is treated as a void element. A matching end tag is ignored, and text after
+   * the start tag remains ordinary following text.
+   *
    * @param[in] markup The markup string to convert
    * @return A new StyledTextBuilder
    */

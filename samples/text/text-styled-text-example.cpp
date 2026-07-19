@@ -48,7 +48,7 @@ constexpr float HEADER_HEIGHT       = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEA
 constexpr float FOOTER_HEIGHT       = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
 constexpr int   WINDOW_WIDTH        = 920;
 constexpr int   WINDOW_HEIGHT       = 820;
-constexpr std::size_t CASE_COUNT     = 26u;
+constexpr std::size_t CASE_COUNT     = 27u;
 
 constexpr uint32_t BADGE_DISABLED_BACKGROUND = 0x1E293B;
 constexpr uint32_t BADGE_DISABLED_BORDER     = 0x475569;
@@ -89,6 +89,7 @@ enum class StyledTextCase
   ANCHOR_SPAN,
   MARKUP_TO_STYLED_TEXT_BASIC,
   MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY,
+  MARKUP_TO_STYLED_TEXT_IMAGE,
   IMAGE_SPAN,
   FUTURE_GRADIENT_SPAN_DISABLED,
 };
@@ -149,6 +150,7 @@ constexpr std::array<StyledTextCaseInfo, CASE_COUNT> CASES{{
   {StyledTextCase::ANCHOR_SPAN, "AnchorSpan", "Two StyledText anchors. The first uses Label AnchorColor fallback; the second has explicit color and clicked color.", true, StyledTextValueKind::FOREGROUND, true, true, true},
   {StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC, "FromMarkup: basic styles", "Converts DALi markup to StyledText. SetText remains plain text.", true, StyledTextValueKind::NONE, false, false, true},
   {StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY, "FromMarkup: anchor + entities", "Converts anchor markup and entities to AnchorSpan and decoded text.", true, StyledTextValueKind::NONE, false, false, true},
+  {StyledTextCase::MARKUP_TO_STYLED_TEXT_IMAGE, "FromMarkup: ImageSpan", "All supported img forms insert one atomic ImageSpan while preserving following text.", true, StyledTextValueKind::NONE, false, false, true},
   {StyledTextCase::IMAGE_SPAN, "ImageSpan", "Recommended form: append one U+FFFC and attach one ImageSpan to its exact UTF-32 range.", true, StyledTextValueKind::NONE, false, false, false},
   {StyledTextCase::FUTURE_GRADIENT_SPAN_DISABLED, "Future GradientSpan", "Disabled placeholder. GradientSpan is not implemented in this phase.", false, StyledTextValueKind::NONE, false, false, false},
 }};
@@ -159,6 +161,12 @@ constexpr const char* FROM_MARKUP_BASIC_TEXT =
 
 constexpr const char* FROM_MARKUP_ANCHOR_ENTITY_TEXT =
   "<a href=https://example.com?a=1&amp;b=2 color=blue clicked-color='red'>entity link</a> | A &lt; B &amp;&amp; C &gt; D | raw 1 < 2 && 3 > 2";
+
+constexpr const char* FROM_MARKUP_IMAGE_TEXT =
+  "Self-closing <img src='" RESOURCES_DIR "flag_kr.png' width='64' height='40'/> | "
+  "open-only <img src='" RESOURCES_DIR "flag_us.png' width='72' height='40'> text |\n"
+  "empty pair <img src='" RESOURCES_DIR "flag_ae.png' width='58' height='40'></img> | "
+  "content pair <img src='" RESOURCES_DIR "flag&#95;kr.png' width='64' height='40'>Hello</img> preserved";
 
 constexpr std::array<uint32_t, 4u> COLOR_VALUES{{
   0xEF4444,
@@ -1007,6 +1015,14 @@ private:
         state.valueInfo = "href entity decode + unquoted attrs";
         return Text::StyledText::FromMarkup(state.text.c_str());
       }
+      case StyledTextCase::MARKUP_TO_STYLED_TEXT_IMAGE:
+      {
+        state.text      = FROM_MARKUP_IMAGE_TEXT;
+        state.spanMode  = "StyledText::FromMarkup img";
+        state.rangeInfo = "four img tags, each over one generated U+FFFC";
+        state.valueInfo = "src + logical width/height | child text preserved";
+        return Text::StyledText::FromMarkup(state.text.c_str());
+      }
       case StyledTextCase::IMAGE_SPAN:
       {
         Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
@@ -1179,7 +1195,8 @@ private:
   bool IsFromMarkupCase() const
   {
     return (CurrentCase().type == StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC) ||
-           (CurrentCase().type == StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY);
+           (CurrentCase().type == StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY) ||
+           (CurrentCase().type == StyledTextCase::MARKUP_TO_STYLED_TEXT_IMAGE);
   }
 
   bool IsAnchorClickCase() const
@@ -1493,6 +1510,8 @@ private:
         return FROM_MARKUP_BASIC_TEXT;
       case StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY:
         return FROM_MARKUP_ANCHOR_ENTITY_TEXT;
+      case StyledTextCase::MARKUP_TO_STYLED_TEXT_IMAGE:
+        return FROM_MARKUP_IMAGE_TEXT;
       case StyledTextCase::IMAGE_SPAN:
         return std::string("Before ") + Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER + " after";
       default:
