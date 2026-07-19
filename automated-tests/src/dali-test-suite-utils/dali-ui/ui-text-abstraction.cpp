@@ -133,10 +133,7 @@ public:
 class FontClient : public BaseObject
 {
 public:
-  FontClient()
-  : mGlyphInfo()
-  {
-  }
+  FontClient() = default;
 
   ~FontClient()
   {
@@ -332,9 +329,33 @@ public:
   {
     blobLength = 0;
   }
+  GlyphIndex CreateEmbeddedItem(const Dali::TextAbstraction::FontClient::EmbeddedItemDescription&,
+                                Pixel::Format& pixelFormat)
+  {
+    static thread_local GlyphIndex nextEmbeddedItemIndex = 1u;
+    pixelFormat = Pixel::RGBA8888;
+    return nextEmbeddedItemIndex++;
+  }
   const GlyphInfo& GetEllipsisGlyph(PointSize26Dot6 pointSize)
   {
-    return mGlyphInfo;
+    // Some internal UTCs register the production FontClient object while the
+    // test API symbols are interposed. Do not write through this test class's
+    // instance layout in that case; return independent deterministic storage.
+    static thread_local GlyphInfo ellipsisGlyph;
+    const FontId fontId    = GetMockFontId(pointSize);
+    const float  pixelSize = GetMockFontPixelSize(fontId);
+    ellipsisGlyph.fontId           = fontId;
+    ellipsisGlyph.index            = 0x2026u;
+    ellipsisGlyph.width            = std::max(1.0f, pixelSize * 0.5f);
+    ellipsisGlyph.height           = pixelSize;
+    ellipsisGlyph.xBearing         = 0.0f;
+    ellipsisGlyph.yBearing         = pixelSize * 0.8f;
+    ellipsisGlyph.advance          = ellipsisGlyph.width;
+    ellipsisGlyph.scaleFactor      = 1.0f;
+    ellipsisGlyph.isItalicRequired = false;
+    ellipsisGlyph.isBoldRequired   = false;
+    ellipsisGlyph.isShaped         = false;
+    return ellipsisGlyph;
   }
   bool IsColorGlyph(FontId fontId, GlyphIndex glyphIndex)
   {
@@ -352,9 +373,6 @@ public:
   {
     return false;
   }
-
-private:
-  GlyphInfo mGlyphInfo;
 }; // class FontClient
 
 class Shaping : public BaseObject
@@ -743,9 +761,26 @@ void FontClient::CreateVectorBlob(FontId        fontId,
   GetImplementation(*this).CreateVectorBlob(fontId, glyphIndex, blob, blobLength, nominalWidth, nominalHeight);
 }
 
+GlyphIndex FontClient::CreateEmbeddedItem(const EmbeddedItemDescription& description, Pixel::Format& pixelFormat)
+{
+  return GetImplementation(*this).CreateEmbeddedItem(description, pixelFormat);
+}
+
 const GlyphInfo& FontClient::GetEllipsisGlyph(PointSize26Dot6 pointSize)
 {
   return GetImplementation(*this).GetEllipsisGlyph(pointSize);
+}
+
+const FontPathList& FontClient::GetCustomFontDirectories()
+{
+  static const FontPathList customFontDirectories;
+  return customFontDirectories;
+}
+
+CustomFontAddedSignalType& FontClient::CustomFontAddedSignal()
+{
+  static CustomFontAddedSignalType customFontAddedSignal;
+  return customFontAddedSignal;
 }
 
 bool FontClient::IsColorGlyph(FontId fontId, GlyphIndex glyphIndex)
