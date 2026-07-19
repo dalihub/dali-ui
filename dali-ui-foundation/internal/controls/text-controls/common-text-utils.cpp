@@ -66,7 +66,7 @@ bool ValidateRange(const std::string& string, std::size_t begin, std::size_t end
 
 Vector2 CalculateRenderablePosition(Actor textActor, Text::ControllerPtr controller, float alignmentOffset, Actor stencil)
 {
-  const Vector2& scrollOffset = controller->GetTextModel()->GetScrollPosition();
+  const Vector2& scrollOffset = controller->GetRenderTextModel()->GetScrollPosition();
   if(stencil)
   {
     return Vector2(scrollOffset.x + alignmentOffset, scrollOffset.y);
@@ -110,7 +110,7 @@ void UpdateAtlasGradient(Text::RendererPtr                                render
   }
   else
   {
-    const auto model = controller->GetTextModel();
+    const auto model = controller->GetRenderTextModel();
     bounds           = Text::Internal::CalculateAtlasGradientContentBounds(
       layoutSize, model->GetLines(), model->GetNumberOfLines(), minLineOffset);
   }

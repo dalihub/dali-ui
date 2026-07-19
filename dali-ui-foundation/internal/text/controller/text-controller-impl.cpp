@@ -1889,7 +1889,26 @@ Ui::TextAnchor Controller::Impl::CreateAnchorActor(Anchor anchor)
   actor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   actor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
 
-  auto    rect   = Ui::Internal::CommonTextUtils::GetTextBoundingRectangle(mModel, anchor.startIndex, anchor.endIndex - 1);
+  ModelPtr                      geometryModel = mModel;
+  CharacterIndex                geometryStart = anchor.startIndex;
+  CharacterIndex                geometryEnd   = anchor.endIndex;
+  const ReplacementRenderState& replacement   = GetReplacementRenderState();
+  if(replacement.processingModel && replacement.projection.HasReplacements())
+  {
+    geometryModel = replacement.processingModel;
+    geometryStart = replacement.projection.LogicalBoundaryToProjected(
+      anchor.startIndex,
+      ReplacementProjection::BoundaryAffinity::LEADING);
+    geometryEnd = replacement.projection.LogicalBoundaryToProjected(
+      anchor.endIndex,
+      ReplacementProjection::BoundaryAffinity::TRAILING);
+  }
+
+  Bounds rect;
+  if(geometryEnd > geometryStart)
+  {
+    rect = Ui::Internal::CommonTextUtils::GetTextBoundingRectangle(geometryModel, geometryStart, geometryEnd - 1u);
+  }
   Vector2 offset = mModel->mLayoutOffsetWithPadding;
   actor.SetProperty(Actor::Property::POSITION, Vector2(rect.x + offset.x, rect.y + offset.y));
   actor.SetProperty(Actor::Property::SIZE, Vector2(rect.width, rect.height));

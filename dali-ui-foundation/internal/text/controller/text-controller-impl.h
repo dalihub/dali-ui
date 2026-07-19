@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/internal/text/input-filter-processor.h>
 #include <dali-ui-foundation/internal/text/input-style.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
@@ -361,6 +362,16 @@ struct OutlineDefaults
 struct Controller::Impl
 {
 public:
+  /**
+   * @brief Stores replacement data allocated for controllers that use replacements.
+   */
+  struct ReplacementData
+  {
+    ReplacementSourceSnapshot sourceSnapshot;
+    ReplacementRenderState    renderState;
+    uint64_t                  layoutGeneration{0u};
+  };
+
   enum class ClearFocusOnEscapeState
   {
     ENABLE  = 0,
@@ -392,6 +403,7 @@ public:
     mModifyEvents(),
     mTextFitCandidates(),
     mTextUpdateInfo(),
+    mReplacementData(),
     mTextColor(Color::BLACK),
     mAnchorColor(Color::MEDIUM_BLUE),
     mAnchorClickedColor(Color::DARK_MAGENTA),
@@ -458,6 +470,14 @@ public:
 
   ~Impl()
   {
+    if(mReplacementData && mReplacementData->renderState.attempted)
+    {
+      mView.SetVisualModel(mModel->mVisualModel);
+      mView.SetLogicalModel(mModel->mLogicalModel);
+      mView.SetFinalElisionResult(nullptr);
+      TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
+      mReplacementData->renderState.Clear(bidirectionalSupport);
+    }
     delete mHiddenInput;
     delete mFontDefaults;
     delete mUnderlineDefaults;
@@ -479,6 +499,113 @@ public:
       mFontClient = TextAbstraction::FontClient::Get();
     }
     return mFontClient;
+  }
+
+  /**
+   * @brief Invalidates all replacement render state.
+   *
+   * The active view is detached before the projected model is released.
+   */
+  void InvalidateReplacementRenderState()
+  {
+    // Detach first: ReplacementRenderState::Clear() may release the model
+    // currently referenced by mView.
+    mView.SetVisualModel(mModel->mVisualModel);
+    mView.SetLogicalModel(mModel->mLogicalModel);
+    mView.SetFinalElisionResult(nullptr);
+    if(mReplacementData && mReplacementData->renderState.attempted)
+    {
+      TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
+      mReplacementData->renderState.Clear(bidirectionalSupport);
+    }
+    if(mReplacementData)
+    {
+      ++mReplacementData->layoutGeneration;
+    }
+  }
+
+  bool HasReplacementData() const
+  {
+    return static_cast<bool>(mReplacementData);
+  }
+
+  bool HasValidReplacementSource() const
+  {
+    return mReplacementData && mReplacementData->sourceSnapshot.hasValidReplacementSource &&
+           !mReplacementData->sourceSnapshot.runs.Empty();
+  }
+
+  uint64_t NextReplacementLayoutGeneration()
+  {
+    return ++mReplacementData->layoutGeneration;
+  }
+
+  /**
+   * @brief Gets the authored replacement snapshot.
+   *
+   * @return The authored snapshot, or an empty snapshot if none was allocated.
+   */
+  const ReplacementSourceSnapshot& GetReplacementSourceSnapshot() const
+  {
+    static const ReplacementSourceSnapshot EMPTY_SNAPSHOT;
+    return mReplacementData ? mReplacementData->sourceSnapshot : EMPTY_SNAPSHOT;
+  }
+
+  /**
+   * @brief Gets or creates the authored replacement snapshot.
+   *
+   * @return The authored snapshot.
+   */
+  ReplacementSourceSnapshot& GetOrCreateReplacementSourceSnapshot()
+  {
+    if(!mReplacementData)
+    {
+      mReplacementData = std::make_unique<ReplacementData>();
+    }
+    return mReplacementData->sourceSnapshot;
+  }
+
+  /**
+   * @brief Gets the replacement render state.
+   *
+   * @return The render state, or an empty state if none was allocated.
+   */
+  const ReplacementRenderState& GetReplacementRenderState() const
+  {
+    static const ReplacementRenderState EMPTY_STATE;
+    return mReplacementData ? mReplacementData->renderState : EMPTY_STATE;
+  }
+
+  /**
+   * @brief Gets the allocated replacement render state.
+   *
+   * @return The render state, or nullptr if none was allocated.
+   */
+  const ReplacementRenderState* GetReplacementRenderStatePtr() const
+  {
+    return mReplacementData ? &mReplacementData->renderState : nullptr;
+  }
+
+  /**
+   * @brief Gets or creates the replacement render state.
+   *
+   * @return The replacement render state.
+   */
+  ReplacementRenderState& GetOrCreateReplacementRenderState()
+  {
+    if(!mReplacementData)
+    {
+      mReplacementData = std::make_unique<ReplacementData>();
+    }
+    return mReplacementData->renderState;
+  }
+
+  /**
+   * @brief Releases the authored and rendered replacement data.
+   */
+  void ClearReplacementData()
+  {
+    mReplacementData.reset();
   }
 
   // Text Controller Implementation.
@@ -1258,6 +1385,7 @@ public:
   Vector<ModifyEvent>                mModifyEvents;      ///< Temporary stores the text set until the next relayout.
   Dali::Vector<Text::Fit::Candidate> mTextFitCandidates; ///< List of Text::Fit::Candidate for TextFitCandidates operation.
   TextUpdateInfo                     mTextUpdateInfo;    ///< Info of the characters updated.
+  std::unique_ptr<ReplacementData>   mReplacementData;   ///< Replacement data allocated on demand.
 
   // Geometry / colors
   Vector4 mTextColor;          ///< The regular text color

@@ -29,8 +29,12 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller-event-handler.h>
+#include <dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-parameters.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 
 namespace
 {
@@ -143,6 +147,165 @@ float GetEffectiveEditableLayoutHeight(Controller::Impl& impl, float layoutHeigh
   // Return the smaller value to prevent incorrect scrollable detection.
   return (lineHeightSum < layoutHeight) ? lineHeightSum : layoutHeight;
 }
+
+bool IsReplacementElideEnabled(const Controller::Impl& impl)
+{
+  bool enabled = impl.mModel->mElideEnabled;
+  if(impl.mEventData != nullptr)
+  {
+    if(impl.mEventData->mPlaceholderEllipsisFlag && impl.IsShowingPlaceholderText())
+    {
+      enabled = impl.mEventData->mIsPlaceholderElideEnabled;
+    }
+    else if(EventData::INACTIVE != impl.mEventData->mState)
+    {
+      enabled = false;
+    }
+  }
+  return enabled;
+}
+
+void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSize)
+{
+  if(!impl.HasValidReplacementSource())
+  {
+    return;
+  }
+
+  const ReplacementSourceSnapshot& source = impl.GetReplacementSourceSnapshot();
+
+  // START/MIDDLE are not released for replacement content. Preserve the
+  // projected atomic boxes and use CLIP instead of exposing their underlying
+  // source text through an ordinary ellipsis pass.
+  const bool useReplacementClipFallback =
+    IsReplacementElideEnabled(impl) && impl.mModel->mEllipsisPosition != EllipsisPosition::END;
+
+  ReplacementRenderState&               result               = impl.GetOrCreateReplacementRenderState();
+  TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
+  // Detach the View before releasing a previous projected model. Any rejected
+  // or failed projection below therefore leaves the controller on its immutable
+  // original model instead of retaining a stale pointer until the next relayout.
+  impl.mView.SetVisualModel(impl.mModel->mVisualModel);
+  impl.mView.SetLogicalModel(impl.mModel->mLogicalModel);
+  impl.mView.SetFinalElisionResult(nullptr);
+  result.Clear(bidirectionalSupport);
+  result.attempted        = true;
+  result.sourceRevision   = source.sourceRevision;
+  result.layoutGeneration = impl.NextReplacementLayoutGeneration();
+  result.projection       = ReplacementProjection::Build(impl.mModel->mLogicalModel->mText,
+                                                         source.runs,
+                                                         impl.GetEffectiveTextScale());
+  if(!result.projection.HasReplacements())
+  {
+    return;
+  }
+
+  ProjectedTextProcessingSource projectedSource;
+  if(!PrepareProjectedTextProcessingSource(*impl.mModel, result.projection, projectedSource))
+  {
+    return;
+  }
+
+  result.processingModel = Model::New();
+  CopyTextProcessingProperties(*impl.mModel, *result.processingModel);
+  result.processingModel->mVisualModel->mControlSize = contentSize;
+
+  const uint32_t pointsPerUnit = impl.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
+  float          pointSize     = static_cast<float>(TextAbstraction::FontClient::DEFAULT_POINT_SIZE) /
+                    static_cast<float>(pointsPerUnit);
+  if(impl.mFontDefaults != nullptr)
+  {
+    pointSize = (impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
+                  ? impl.mFontDefaults->mFitPointSize
+                  : impl.mFontDefaults->mDefaultPointSize * impl.GetEffectiveTextScale();
+  }
+
+  const TextAbstraction::PointSize26Dot6 fontPointSize =
+    static_cast<TextAbstraction::PointSize26Dot6>(pointSize * pointsPerUnit);
+  FontId defaultFontId = 0u;
+  if(impl.mFontDefaults != nullptr)
+  {
+    defaultFontId = impl.mFontDefaults->GetFontId(impl.GetFontClient(), pointSize);
+  }
+  else
+  {
+    TextAbstraction::FontDescription defaultFontDescription;
+    defaultFontId = impl.GetFontClient().GetFontId(defaultFontDescription, fontPointSize);
+  }
+
+  const Controller::OperationsMask updateOperations = static_cast<Controller::OperationsMask>(
+    Controller::GET_LINE_BREAKS | Controller::GET_SCRIPTS | Controller::VALIDATE_FONTS |
+    Controller::BIDI_INFO | Controller::SHAPE_TEXT | Controller::GET_GLYPH_METRICS | Controller::COLOR);
+  ControllerImplModelUpdater::Update(impl,
+                                     projectedSource.source,
+                                     *result.processingModel,
+                                     updateOperations);
+
+  VisualModel& projectedVisual = *result.processingModel->mVisualModel;
+  const Length glyphCount      = projectedVisual.mGlyphs.Count();
+  projectedVisual.mGlyphPositions.Resize(glyphCount);
+  result.processingModel->mElideEnabled = IsReplacementElideEnabled(impl) && !useReplacementClipFallback;
+  projectedVisual.SetTextElideEnabled(result.processingModel->mElideEnabled);
+  projectedVisual.SetEllipsisPosition(result.processingModel->mEllipsisPosition);
+
+  ReplacementLayoutData replacementLayoutData;
+  replacementLayoutData.runs                = &result.projection.GetReplacementRuns();
+  replacementLayoutData.defaultFontId       = defaultFontId;
+  replacementLayoutData.horizontalAlignment = result.processingModel->mHorizontalAlignment;
+  replacementLayoutData.layoutDirection     = impl.mLayoutDirection;
+  replacementLayoutData.matchLayoutDirection =
+    result.processingModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS;
+  Layout::Parameters layoutParameters(contentSize,
+                                      result.processingModel,
+                                      impl.GetFontClient(),
+                                      bidirectionalSupport);
+  layoutParameters.numberOfGlyphs         = glyphCount;
+  layoutParameters.estimatedNumberOfLines = 1u;
+  layoutParameters.replacementLayoutData  = &replacementLayoutData;
+  const Vector<Character>& processingText = result.processingModel->mLogicalModel->mText;
+  layoutParameters.isLastNewParagraph     = !processingText.Empty() &&
+                                        TextAbstraction::IsNewParagraph(processingText[processingText.Count() - 1u]);
+
+  const float fontPixelSize = ConvertPointToPixel(pointSize);
+  impl.mLayoutEngine.SetFontPixelSize(fontPixelSize);
+  bool marqueeEnabled = impl.mIsMarqueeEnabled;
+  impl.mLayoutEngine.LayoutText(layoutParameters,
+                                result.layoutSize,
+                                result.processingModel->mElideEnabled,
+                                marqueeEnabled,
+                                impl.mIsMarqueeMaxTextureExceeded,
+                                false,
+                                result.processingModel->mEllipsisPosition);
+  impl.mIsMarqueeEnabled = marqueeEnabled;
+  projectedVisual.SetLayoutSize(result.layoutSize);
+
+  float alignmentOffset = 0.0f;
+  impl.mLayoutEngine.Align(contentSize,
+                           0u,
+                           processingText.Count(),
+                           result.processingModel->mHorizontalAlignment,
+                           projectedVisual.mLines,
+                           alignmentOffset,
+                           impl.mLayoutDirection,
+                           result.processingModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS);
+
+  // Synchronous Label alignment is applied by the TextVisual transform. Keep
+  // the active model's scroll in the same coordinate space as the original
+  // model; ReplacementPlacement already carries its independent vertical
+  // offset for the registered inline visual. Async layout applies alignment
+  // inside its worker-local model instead.
+  result.processingModel->mScrollPosition = impl.mModel->mScrollPosition;
+  impl.mView.SetVisualModel(result.processingModel->mVisualModel);
+  impl.mView.SetLogicalModel(result.processingModel->mLogicalModel);
+  impl.mView.ResolveFinalElision(impl.GetFontClient(), result.finalElision, result.layoutGeneration);
+  impl.mView.SetFinalElisionResult(&result.finalElision);
+  ExtractReplacementPlacements(*result.processingModel,
+                               result.projection,
+                               result.finalElision,
+                               impl.GetFontClient(),
+                               defaultFontId,
+                               result.placements);
+}
 } // anonymous namespace
 
 Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Controller&           controller,
@@ -247,6 +410,14 @@ Size Controller::Relayouter::CalculateLayoutSizeOnRequiredControllerSize(Control
 
   // Restore the actual control's size.
   visualModel->mControlSize = actualControlSize;
+
+  // A valid projected model is the authoritative measurement result. The
+  // immutable original model remains available for logical/semantic queries.
+  const ReplacementRenderState& replacement = impl.GetReplacementRenderState();
+  if(replacement.processingModel && replacement.projection.HasReplacements())
+  {
+    calculatedLayoutSize = replacement.layoutSize;
+  }
 
   return calculatedLayoutSize;
 }
@@ -817,6 +988,12 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
   Size layoutSize;
   updated = DoRelayout(impl, size, operationsPending, layoutSize) || updated;
 
+  const ReplacementRenderState& replacement = impl.GetReplacementRenderState();
+  if(replacement.processingModel && replacement.projection.HasReplacements())
+  {
+    layoutSize = replacement.layoutSize;
+  }
+
   if(updated)
   {
     updateTextType = MODEL_UPDATED;
@@ -919,6 +1096,33 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
   VisualModelPtr& visualModel = impl.mModel->mVisualModel;
   layoutSize                  = visualModel->GetLayoutSize();
 
+  // A valid replacement projection owns the complete layout/alignment pass.
+  // Do not first lay out the underlying glyph stream and then mix its result
+  // with replacement placements: natural size, wrapping and ellipsis must all
+  // come from the same projected model.
+  if(impl.HasValidReplacementSource() &&
+     NO_OPERATION != ((LAYOUT | ALIGN) & operations))
+  {
+    UpdateReplacementRenderState(impl, size);
+    const ReplacementRenderState& replacement = impl.GetReplacementRenderState();
+    if(replacement.processingModel && replacement.projection.HasReplacements())
+    {
+      layoutSize = replacement.layoutSize;
+      if(NO_OPERATION != (UPDATE_LAYOUT_SIZE & operations))
+      {
+        visualModel->SetLayoutSize(layoutSize);
+      }
+      impl.mIsTextDirectionRTL = false;
+      const Vector<LineRun>& projectedLines =
+        replacement.processingModel->mVisualModel->mLines;
+      if(!projectedLines.Empty())
+      {
+        impl.mIsTextDirectionRTL = projectedLines[0u].direction;
+      }
+      return true;
+    }
+  }
+
   if(NO_OPERATION != (LAYOUT & operations))
   {
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "-->Controller::DoRelayout LAYOUT & operations\n");
@@ -969,6 +1173,10 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
       }
 
       // Nothing else to do if there is no glyphs.
+      if(impl.HasValidReplacementSource())
+      {
+        UpdateReplacementRenderState(impl, size);
+      }
       DALI_LOG_INFO(gLogFilter, Debug::Verbose, "<--Controller::DoRelayout no glyphs, view updated true\n");
       return true;
     }
@@ -1068,6 +1276,12 @@ bool Controller::Relayouter::DoRelayout(Controller::Impl& impl, const Size& size
   {
     DoRelayoutHorizontalAlignment(impl, size, startIndex, requestedNumberOfCharacters);
     viewUpdated = true;
+  }
+
+  if(impl.HasValidReplacementSource() && NO_OPERATION != ((LAYOUT | ALIGN) & operations))
+  {
+    // Replacement placements are produced after the final layout/alignment used by this relayout request.
+    UpdateReplacementRenderState(impl, size);
   }
 #if defined(DEBUG_ENABLED)
   std::string currentText;

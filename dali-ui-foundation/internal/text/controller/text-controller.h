@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
@@ -1996,11 +1997,54 @@ public: // Queries & retrieves.
   bool IsTextChangedSignalEmission() const;
 
   /**
-   * @brief Retrieves the text's model.
+   * @brief Retrieves the immutable logical/source-domain model.
    *
-   * @return A pointer to the text's model.
+   * This model always retains the original UTF-32 text and authored semantic
+   * ranges. Editing, accessibility and public source queries use this model.
    */
-  const ModelInterface* GetTextModel() const;
+  const ModelInterface* GetLogicalTextModel() const;
+
+  /**
+   * @brief Retrieves the authoritative layout/render-domain model.
+   *
+   * This is the logical model on the ordinary fast path and the projected
+   * processing model while valid replacements are active.
+   */
+  const ModelInterface* GetRenderTextModel() const;
+
+  // Kept until all render consumers switch to GetRenderTextModel().
+  const ModelInterface* GetTextModel() const
+  {
+    return GetRenderTextModel();
+  }
+
+  /**
+   * @brief Checks whether valid replacement source data is present.
+   *
+   * @return true if replacement processing is required.
+   */
+  bool HasValidReplacementSource() const;
+
+  /**
+   * @brief Retrieves the final replacement glyph sequence.
+   *
+   * @return The resolved result, or nullptr when replacements are inactive.
+   */
+  const FinalElisionResult* GetFinalElisionResult() const;
+
+  /**
+   * @brief Gets the authored replacement snapshot.
+   *
+   * @return The copy-safe replacement source for the current text.
+   */
+  const ReplacementSourceSnapshot& GetReplacementSourceSnapshot() const;
+
+  /**
+   * @brief Gets the latest replacement render state.
+   *
+   * @return The projected layout and final replacement placements.
+   */
+  const ReplacementRenderState& GetReplacementRenderState() const;
 
   /**
    * @brief Used to get scrolled distance by user input

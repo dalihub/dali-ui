@@ -22,6 +22,7 @@
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/math/math-utils.h>
 #include <memory.h>
+#include <atomic>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
@@ -49,6 +50,12 @@ float GetDpi()
     fontClient.GetDpi(horizontalDpi, verticalDpi);
   }
   return static_cast<float>(horizontalDpi);
+}
+
+uint64_t NextReplacementSourceRevision()
+{
+  static std::atomic<uint64_t> revision{0u};
+  return revision.fetch_add(1u, std::memory_order_relaxed) + 1u;
 }
 
 } // namespace
@@ -202,6 +209,15 @@ void Controller::TextUpdater::SetStyledText(Controller& controller, const Styled
   LogicalModelPtr& logicalModel = model->mLogicalModel;
 
   const std::string styledPlainText = styledText ? std::string(styledText.GetText().CStr()) : std::string();
+
+  ReplacementSourceSnapshot replacementSource =
+    Dali::Ui::Internal::Text::StyledTextApplier::BuildReplacementSourceSnapshot(styledText,
+                                                                                0u);
+  if(replacementSource.hasValidReplacementSource)
+  {
+    replacementSource.sourceRevision            = NextReplacementSourceRevision();
+    impl.GetOrCreateReplacementSourceSnapshot() = std::move(replacementSource);
+  }
 
   if(styledText && !styledPlainText.empty())
   {
@@ -802,9 +818,20 @@ void Controller::TextUpdater::ResetText(Controller& controller)
   Controller::Impl& impl         = *controller.mImpl;
   LogicalModelPtr&  logicalModel = impl.mModel->mLogicalModel;
 
+  const bool hadReplacementData = impl.HasReplacementData();
+  if(hadReplacementData)
+  {
+    impl.InvalidateReplacementRenderState();
+  }
+
   // Reset buffers.
   logicalModel->mText.Clear();
 
+  // A source mutation invalidates every sync/async placement and image visual.
+  if(hadReplacementData)
+  {
+    impl.ClearReplacementData();
+  }
   // Reset the embedded images buffer.
   logicalModel->ClearEmbeddedImages();
 

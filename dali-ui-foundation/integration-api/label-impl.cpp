@@ -1945,17 +1945,17 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     Internal::TextVisual::EnableRendererUpdate(mVisual);
 
     // Calculate the size of the visual that can fit the text
-    Size layoutSize = mController->GetTextModel()->GetLayoutSize();
-    layoutSize.x    = contentSize.x;
+    const Text::ModelInterface* const renderModel = mController->GetRenderTextModel();
+    Size                              layoutSize  = renderModel->GetLayoutSize();
+    layoutSize.x                                  = contentSize.x;
 
-    const Vector2& shadowOffset = mController->GetTextModel()->GetShadowOffset();
-    if(mController->GetTextModel()->IsShadowEnabled() && shadowOffset.y > Math::MACHINE_EPSILON_1)
+    const Vector2& shadowOffset = renderModel->GetShadowOffset();
+    if(renderModel->IsShadowEnabled() && shadowOffset.y > Math::MACHINE_EPSILON_1)
     {
       layoutSize.y += shadowOffset.y;
     }
 
-    float outlineWidth =
-      mController->GetTextModel()->IsOutlineEnabled() ? mController->GetTextModel()->GetOutlineWidth() : 0.0f;
+    float outlineWidth = renderModel->IsOutlineEnabled() ? renderModel->GetOutlineWidth() : 0.0f;
     layoutSize.y += outlineWidth * 2.0f;
     layoutSize.y = std::min(layoutSize.y, contentSize.y);
 
@@ -2401,7 +2401,7 @@ void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
   {
     const bool cutoutEnabled = renderInfo.isCutoutEnabled ||
                                mController->IsTextCutout() ||
-                               mController->GetTextModel()->IsBackgroundWithCutoutEnabled();
+                               mController->GetRenderTextModel()->IsBackgroundWithCutoutEnabled();
     Text::MarqueeBuilder::FeatureInfo featureInfo;
     if(hasGradientFeature)
     {
@@ -3093,7 +3093,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   const bool            gradientAnimApplyAlways        = gradientData && gradientData->gradientAnimCount > 0;
   const bool            gradientOverlayApplyAlways     = gradientData && gradientData->gradientOverlayAnimCount > 0;
 
-  const Text::ModelInterface* const         textModel = mController->GetTextModel();
+  const Text::ModelInterface* const         textModel = mController->GetRenderTextModel();
   const Text::MarqueeBuilder::GradientState gradientState =
     Text::MarqueeBuilder::ResolveGradientState(textGradient,
                                                textGradientOverlay,

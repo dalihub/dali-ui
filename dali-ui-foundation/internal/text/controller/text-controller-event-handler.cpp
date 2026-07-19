@@ -384,18 +384,29 @@ void Controller::EventHandler::AnchorEvent(Controller& controller, float x, floa
 
   CharacterIndex cursorPosition = 0u;
 
+  const ReplacementRenderState& replacement = controller.mImpl->GetReplacementRenderState();
+  const bool                    hasReplacementProjection =
+    replacement.processingModel && replacement.projection.HasReplacements();
+  ModelPtr hitModel = hasReplacementProjection
+                        ? replacement.processingModel
+                        : controller.mImpl->mModel;
+
   // Convert from control's coords to text's coords.
 
-  const float xPosition = x - controller.mImpl->mModel->mScrollPosition.x;
-  const float yPosition = y - controller.mImpl->mModel->mScrollPosition.y;
+  const float xPosition = x - hitModel->mScrollPosition.x;
+  const float yPosition = y - hitModel->mScrollPosition.y;
 
   Vector2 alignmentOffset = controller.mImpl->mModel->mLayoutAlignmentOffset;
 
   // Whether to touch point hits on a glyph.
   bool matchedCharacter = false;
   cursorPosition        = Text::GetClosestCursorIndex(
-    controller.mImpl->mModel->mVisualModel, controller.mImpl->mModel->mLogicalModel, controller.mImpl->mMetrics,
+    hitModel->mVisualModel, hitModel->mLogicalModel, controller.mImpl->mMetrics,
     xPosition, yPosition - alignmentOffset.y, CharacterHitTest::TAP, matchedCharacter);
+  if(hasReplacementProjection)
+  {
+    cursorPosition = replacement.projection.ProjectedBoundaryToLogical(cursorPosition);
+  }
 
   std::string href;
   if(AnchorClickEvent(controller, cursorPosition, href))

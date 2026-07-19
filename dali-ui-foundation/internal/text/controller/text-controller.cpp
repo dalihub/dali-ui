@@ -1718,7 +1718,7 @@ Vector2 Controller::CalculateLayoutSize(float width, float height, bool forceUpd
 int Controller::GetLineCount(float width)
 {
   GetHeightForWidth(width);
-  return mImpl->mModel->GetNumberOfLines();
+  return GetRenderTextModel()->GetNumberOfLines();
 }
 
 void Controller::SetTextChangedSignalEmission(bool emitting)
@@ -1731,9 +1731,45 @@ bool Controller::IsTextChangedSignalEmission() const
   return mImpl->mIsEmittingTextChangedSignal;
 }
 
-const ModelInterface* Controller::GetTextModel() const
+const ModelInterface* Controller::GetLogicalTextModel() const
 {
   return mImpl->mModel.Get();
+}
+
+const ModelInterface* Controller::GetRenderTextModel() const
+{
+  const ReplacementRenderState* replacement = mImpl->GetReplacementRenderStatePtr();
+  if(replacement && replacement->processingModel && replacement->projection.HasReplacements())
+  {
+    return replacement->processingModel.Get();
+  }
+  return mImpl->mModel.Get();
+}
+
+bool Controller::HasValidReplacementSource() const
+{
+  return mImpl->HasValidReplacementSource();
+}
+
+const FinalElisionResult* Controller::GetFinalElisionResult() const
+{
+  const ReplacementRenderState* replacement = mImpl->GetReplacementRenderStatePtr();
+  if(replacement && replacement->processingModel && replacement->projection.HasReplacements() &&
+     replacement->finalElision.resolved)
+  {
+    return &replacement->finalElision;
+  }
+  return nullptr;
+}
+
+const ReplacementSourceSnapshot& Controller::GetReplacementSourceSnapshot() const
+{
+  return mImpl->GetReplacementSourceSnapshot();
+}
+
+const ReplacementRenderState& Controller::GetReplacementRenderState() const
+{
+  return mImpl->GetReplacementRenderState();
 }
 
 float Controller::GetScrollAmountByUserInput()
@@ -2023,12 +2059,111 @@ void Controller::RequestAsyncRender()
   mImpl->RequestAsyncRender();
 }
 
+namespace
+{
+struct InclusiveCharacterRange
+{
+  CharacterIndex start{0u};
+  CharacterIndex end{0u};
+  CharacterIndex endExclusive{0u};
+};
+
+bool NormalizeInclusiveCharacterRange(CharacterIndex           start,
+                                      CharacterIndex           end,
+                                      Length                   logicalCount,
+                                      InclusiveCharacterRange& normalized)
+{
+  if(logicalCount == 0u || (start >= logicalCount && end >= logicalCount))
+  {
+    return false;
+  }
+
+  start = std::min(start, static_cast<CharacterIndex>(logicalCount - 1u));
+  end   = std::min(end, static_cast<CharacterIndex>(logicalCount - 1u));
+  if(start > end)
+  {
+    std::swap(start, end);
+  }
+
+  normalized.start        = start;
+  normalized.end          = end;
+  normalized.endExclusive = end + 1u; // Safe after clamping to a valid character index.
+  return true;
+}
+
+bool LogicalRangeIsWithinReplacement(const ProjectedReplacementRun& replacement,
+                                     CharacterIndex                 start,
+                                     CharacterIndex                 end)
+{
+  const CharacterIndex replacementStart = replacement.logicalCharacterRange.characterIndex;
+  const Length         replacementCount = replacement.logicalCharacterRange.numberOfCharacters;
+  return replacementCount > 0u && start >= replacementStart &&
+         start - replacementStart < replacementCount && end >= replacementStart &&
+         end - replacementStart < replacementCount;
+}
+
+bool PlacementMatchesReplacement(const ReplacementPlacement&    placement,
+                                 const ProjectedReplacementRun& replacement)
+{
+  return placement.logicalCharacterRange.characterIndex == replacement.logicalCharacterRange.characterIndex &&
+         placement.logicalCharacterRange.numberOfCharacters == replacement.logicalCharacterRange.numberOfCharacters;
+}
+
+bool PlacementIntersectsRange(const ReplacementPlacement& placement, CharacterIndex start, CharacterIndex endExclusive)
+{
+  const CharacterIndex placementStart = placement.logicalCharacterRange.characterIndex;
+  const Length         placementCount = placement.logicalCharacterRange.numberOfCharacters;
+  const uint64_t       placementEnd   = static_cast<uint64_t>(placementStart) + placementCount;
+  return placement.visible && !placement.elided && placementCount > 0u &&
+         placementStart < endExclusive && static_cast<uint64_t>(start) < placementEnd;
+}
+} // unnamed namespace
+
 Vector<Vector2> Controller::GetTextSize(CharacterIndex startIndex, CharacterIndex endIndex)
 {
   Vector<Vector2> sizesList;
   Vector<Vector2> positionsList;
 
-  GetTextGeometry(mImpl->mModel, startIndex, endIndex, sizesList, positionsList);
+  InclusiveCharacterRange logicalRange;
+  if(!NormalizeInclusiveCharacterRange(startIndex, endIndex, mImpl->mModel->GetNumberOfCharacters(), logicalRange))
+  {
+    return sizesList;
+  }
+  startIndex = logicalRange.start;
+  endIndex   = logicalRange.end;
+
+  const ReplacementRenderState& replacementState = mImpl->GetReplacementRenderState();
+  ModelPtr                      geometryModel    = mImpl->mModel;
+  if(replacementState.processingModel && replacementState.projection.HasReplacements())
+  {
+    const ProjectedReplacementRun* replacement =
+      replacementState.projection.FindByLogicalCharacter(logicalRange.start);
+    if(replacement && LogicalRangeIsWithinReplacement(*replacement, logicalRange.start, logicalRange.end))
+    {
+      for(const ReplacementPlacement& placement : replacementState.placements)
+      {
+        if(PlacementMatchesReplacement(placement, *replacement) && placement.visible && !placement.elided)
+        {
+          sizesList.PushBack(placement.size);
+          return sizesList;
+        }
+      }
+      return sizesList;
+    }
+
+    geometryModel                       = replacementState.processingModel;
+    const CharacterIndex projectedStart = replacementState.projection.LogicalBoundaryToProjected(
+      logicalRange.start,
+      ReplacementProjection::BoundaryAffinity::LEADING);
+    const CharacterIndex projectedEnd = replacementState.projection.LogicalBoundaryToProjected(
+      logicalRange.endExclusive,
+      ReplacementProjection::BoundaryAffinity::TRAILING);
+    startIndex = projectedStart;
+    endIndex   = projectedEnd > projectedStart ? projectedEnd - 1u : projectedStart;
+  }
+
+  GetTextGeometry(geometryModel, startIndex, endIndex, sizesList, positionsList,
+                  replacementState.processingModel ? &replacementState.finalElision : nullptr);
   return sizesList;
 }
 
@@ -2037,28 +2172,249 @@ Vector<Vector2> Controller::GetTextPosition(CharacterIndex startIndex, Character
   Vector<Vector2> sizesList;
   Vector<Vector2> positionsList;
 
-  GetTextGeometry(mImpl->mModel, startIndex, endIndex, sizesList, positionsList);
+  InclusiveCharacterRange logicalRange;
+  if(!NormalizeInclusiveCharacterRange(startIndex, endIndex, mImpl->mModel->GetNumberOfCharacters(), logicalRange))
+  {
+    return positionsList;
+  }
+  startIndex = logicalRange.start;
+  endIndex   = logicalRange.end;
+
+  const ReplacementRenderState& replacementState = mImpl->GetReplacementRenderState();
+  ModelPtr                      geometryModel    = mImpl->mModel;
+  if(replacementState.processingModel && replacementState.projection.HasReplacements())
+  {
+    const ProjectedReplacementRun* replacement =
+      replacementState.projection.FindByLogicalCharacter(logicalRange.start);
+    if(replacement && LogicalRangeIsWithinReplacement(*replacement, logicalRange.start, logicalRange.end))
+    {
+      for(const ReplacementPlacement& placement : replacementState.placements)
+      {
+        if(PlacementMatchesReplacement(placement, *replacement) && placement.visible && !placement.elided)
+        {
+          positionsList.PushBack(placement.position);
+          return positionsList;
+        }
+      }
+      return positionsList;
+    }
+
+    geometryModel                       = replacementState.processingModel;
+    const CharacterIndex projectedStart = replacementState.projection.LogicalBoundaryToProjected(
+      logicalRange.start,
+      ReplacementProjection::BoundaryAffinity::LEADING);
+    const CharacterIndex projectedEnd = replacementState.projection.LogicalBoundaryToProjected(
+      logicalRange.endExclusive,
+      ReplacementProjection::BoundaryAffinity::TRAILING);
+    startIndex = projectedStart;
+    endIndex   = projectedEnd > projectedStart ? projectedEnd - 1u : projectedStart;
+  }
+
+  GetTextGeometry(geometryModel, startIndex, endIndex, sizesList, positionsList,
+                  replacementState.processingModel ? &replacementState.finalElision : nullptr);
   return positionsList;
 }
 
 Bounds Controller::GetLineBoundingRectangle(const uint32_t lineIndex)
 {
-  return GetLineBoundingRect(mImpl->mModel, lineIndex);
+  const ReplacementRenderState& replacement   = mImpl->GetReplacementRenderState();
+  ModelPtr                      geometryModel = (replacement.processingModel && replacement.projection.HasReplacements())
+                                                  ? replacement.processingModel
+                                                  : mImpl->mModel;
+  return GetLineBoundingRect(geometryModel, lineIndex);
 }
 
 Bounds Controller::GetCharacterBoundingRectangle(const uint32_t charIndex)
 {
-  return GetCharacterBoundingRect(mImpl->mModel, charIndex);
+  if(charIndex >= mImpl->mModel->GetNumberOfCharacters())
+  {
+    return {};
+  }
+
+  const ReplacementRenderState& replacementState = mImpl->GetReplacementRenderState();
+  ModelPtr                      geometryModel    = mImpl->mModel;
+  CharacterIndex                geometryIndex    = charIndex;
+  if(replacementState.processingModel && replacementState.projection.HasReplacements())
+  {
+    const ProjectedReplacementRun* replacement =
+      replacementState.projection.FindByLogicalCharacter(charIndex);
+    if(replacement)
+    {
+      for(const ReplacementPlacement& placement : replacementState.placements)
+      {
+        if(PlacementMatchesReplacement(placement, *replacement) && placement.visible && !placement.elided)
+        {
+          return {placement.position.x, placement.position.y, placement.size.x, placement.size.y};
+        }
+      }
+      return {};
+    }
+
+    geometryModel = replacementState.processingModel;
+    geometryIndex = replacementState.projection.LogicalCharacterToProjected(charIndex);
+  }
+  return GetCharacterBoundingRect(geometryModel, geometryIndex,
+                                  replacementState.processingModel ? &replacementState.finalElision : nullptr);
 }
 
 int Controller::GetCharacterIndexAtPosition(float visualX, float visualY)
 {
-  return GetCharIndexAtPosition(mImpl->mModel, visualX, visualY);
+  const ReplacementRenderState& replacementState = mImpl->GetReplacementRenderState();
+  ModelPtr                      geometryModel    = mImpl->mModel;
+  const bool                    hasReplacementProjection =
+    replacementState.processingModel && replacementState.projection.HasReplacements();
+  if(hasReplacementProjection)
+  {
+    geometryModel                           = replacementState.processingModel;
+    const ReplacementProjection& projection = replacementState.projection;
+    for(const ReplacementPlacement& placement : replacementState.placements)
+    {
+      if(!placement.visible || placement.elided)
+      {
+        continue;
+      }
+      const float placementX = placement.position.x + geometryModel->mScrollPosition.x;
+      const float placementY = placement.position.y + geometryModel->mScrollPosition.y;
+      if(visualX >= placementX && visualX < placementX + placement.size.x &&
+         visualY >= placementY && visualY < placementY + placement.size.y)
+      {
+        const ProjectedReplacementRun* run = projection.FindByLogicalCharacter(
+          placement.logicalCharacterRange.characterIndex);
+        if(run)
+        {
+          const CharacterIndex logicalBoundary = projection.HitTestLogicalBoundary(
+            run->projectedCharacterIndex,
+            visualX - placementX,
+            placement.size.x,
+            placement.lineDirection);
+          return logicalBoundary <= static_cast<CharacterIndex>(std::numeric_limits<int>::max())
+                   ? static_cast<int>(logicalBoundary)
+                   : -1;
+        }
+      }
+    }
+  }
+
+  const int projectedIndex = GetCharIndexAtPosition(geometryModel,
+                                                    visualX - geometryModel->mScrollPosition.x,
+                                                    visualY - geometryModel->mScrollPosition.y);
+  if(!hasReplacementProjection || projectedIndex < 0)
+  {
+    return projectedIndex;
+  }
+
+  const ReplacementProjection& projection = replacementState.projection;
+  if(const ProjectedReplacementRun* run = projection.FindByProjectedCharacter(projectedIndex))
+  {
+    for(const ReplacementPlacement& placement : replacementState.placements)
+    {
+      if(placement.visible && !placement.elided &&
+         placement.logicalCharacterRange.characterIndex == run->logicalCharacterRange.characterIndex &&
+         placement.logicalCharacterRange.numberOfCharacters == run->logicalCharacterRange.numberOfCharacters)
+      {
+        const float          placementX      = placement.position.x + geometryModel->mScrollPosition.x;
+        const CharacterIndex logicalBoundary = projection.HitTestLogicalBoundary(
+          projectedIndex,
+          visualX - placementX,
+          placement.size.x,
+          placement.lineDirection);
+        return logicalBoundary <= static_cast<CharacterIndex>(std::numeric_limits<int>::max())
+                 ? static_cast<int>(logicalBoundary)
+                 : -1;
+      }
+    }
+  }
+
+  const CharacterIndex logicalIndex = projection.ProjectedCharacterToLogical(projectedIndex);
+  return logicalIndex <= static_cast<CharacterIndex>(std::numeric_limits<int>::max())
+           ? static_cast<int>(logicalIndex)
+           : -1;
 }
 
 Bounds Controller::GetTextBoundingRectangle(CharacterIndex startIndex, CharacterIndex endIndex)
 {
-  return Ui::Internal::CommonTextUtils::GetTextBoundingRectangle(mImpl->mModel, startIndex, endIndex);
+  InclusiveCharacterRange logicalRange;
+  if(!NormalizeInclusiveCharacterRange(startIndex, endIndex, mImpl->mModel->GetNumberOfCharacters(), logicalRange))
+  {
+    return {};
+  }
+  startIndex = logicalRange.start;
+  endIndex   = logicalRange.end;
+
+  const ReplacementRenderState& replacementState         = mImpl->GetReplacementRenderState();
+  ModelPtr                      geometryModel            = mImpl->mModel;
+  const bool                    hasReplacementProjection = replacementState.processingModel &&
+                                        replacementState.projection.HasReplacements();
+  if(hasReplacementProjection)
+  {
+    const ProjectedReplacementRun* replacement =
+      replacementState.projection.FindByLogicalCharacter(logicalRange.start);
+    if(replacement && LogicalRangeIsWithinReplacement(*replacement, logicalRange.start, logicalRange.end))
+    {
+      const auto placement = std::find_if(replacementState.placements.Begin(),
+                                          replacementState.placements.End(),
+                                          [replacement](const ReplacementPlacement& candidate)
+      {
+        return PlacementMatchesReplacement(candidate, *replacement) && candidate.visible && !candidate.elided;
+      });
+      if(placement == replacementState.placements.End())
+      {
+        return {};
+      }
+    }
+
+    geometryModel                       = replacementState.processingModel;
+    const CharacterIndex projectedStart = replacementState.projection.LogicalBoundaryToProjected(
+      logicalRange.start,
+      ReplacementProjection::BoundaryAffinity::LEADING);
+    const CharacterIndex projectedEnd = replacementState.projection.LogicalBoundaryToProjected(
+      logicalRange.endExclusive,
+      ReplacementProjection::BoundaryAffinity::TRAILING);
+    if(projectedEnd <= projectedStart)
+    {
+      return {};
+    }
+    startIndex = projectedStart;
+    endIndex   = projectedEnd - 1u;
+  }
+
+  Bounds bounds = Ui::Internal::CommonTextUtils::GetTextBoundingRectangle(geometryModel, startIndex, endIndex);
+  if(!hasReplacementProjection)
+  {
+    return bounds;
+  }
+
+  bool hasBounds = bounds.width > 0.0f || bounds.height > 0.0f;
+  for(const ReplacementPlacement& placement : replacementState.placements)
+  {
+    if(!PlacementIntersectsRange(placement, logicalRange.start, logicalRange.endExclusive))
+    {
+      continue;
+    }
+
+    if(!hasBounds)
+    {
+      bounds    = Bounds(placement.position.x, placement.position.y, placement.size.x, placement.size.y);
+      hasBounds = true;
+      continue;
+    }
+
+    const float left   = std::min(bounds.x, placement.position.x);
+    const float top    = std::min(bounds.y, placement.position.y);
+    const float right  = std::max(bounds.x + bounds.width, placement.position.x + placement.size.x);
+    const float bottom = std::max(bounds.y + bounds.height, placement.position.y + placement.size.y);
+    bounds             = Bounds(left, top, right - left, bottom - top);
+  }
+
+  if(hasBounds)
+  {
+    const float controlWidth = geometryModel->mVisualModel->mControlSize.width;
+    const float left         = std::max(0.0f, bounds.x);
+    const float right        = std::min(controlWidth, bounds.x + bounds.width);
+    bounds.x                 = left;
+    bounds.width             = std::max(0.0f, right - left);
+  }
+  return bounds;
 }
 
 bool Controller::IsInputStyleChangedSignalsQueueEmpty()
