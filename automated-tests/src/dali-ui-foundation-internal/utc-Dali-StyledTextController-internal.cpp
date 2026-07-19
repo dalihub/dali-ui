@@ -50,7 +50,7 @@ PublicText::VisualModel& GetVisualModel(const PublicText::ControllerPtr& control
   return *impl.mModel->mVisualModel;
 }
 
-PublicText::Model& GetTextModel(const PublicText::ControllerPtr& controller)
+PublicText::Model& GetLogicalModelObject(const PublicText::ControllerPtr& controller)
 {
   PublicText::Controller::Impl& impl = PublicText::Controller::Impl::GetImplementation(*controller.Get());
   return *impl.mModel;
@@ -277,7 +277,7 @@ int UtcDaliStyledTextControllerUnderlineSpanReachesVisualModelP(void)
   PublicText::VisualModel& visualModel = GetVisualModel(controller);
   DALI_TEST_EQUALS(visualModel.GetNumberOfUnderlineRuns(), 1u, TEST_LOCATION);
   CheckUnderlineGlyphRun(visualModel, visualModel.mUnderlineRuns[0u], 1u, 3u, underline);
-  CheckTypesetterDecorationInput(GetTextModel(controller), true, false);
+  CheckTypesetterDecorationInput(GetLogicalModelObject(controller), true, false);
 
   END_TEST;
 }
@@ -299,7 +299,7 @@ int UtcDaliStyledTextControllerLineThroughSpanReachesVisualModelP(void)
   PublicText::VisualModel& visualModel = GetVisualModel(controller);
   DALI_TEST_EQUALS(visualModel.GetNumberOfStrikethroughRuns(), 1u, TEST_LOCATION);
   CheckLineThroughGlyphRun(visualModel, visualModel.mStrikethroughRuns[0u], 0u, 5u, lineThrough);
-  CheckTypesetterDecorationInput(GetTextModel(controller), false, true);
+  CheckTypesetterDecorationInput(GetLogicalModelObject(controller), false, true);
 
   END_TEST;
 }
@@ -329,8 +329,8 @@ int UtcDaliStyledTextControllerDecorationMatchesFromMarkupP(void)
   DALI_TEST_EQUALS(styledVisualModel.GetNumberOfUnderlineRuns(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(fromMarkupVisualModel.GetNumberOfStrikethroughRuns(), 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(styledVisualModel.GetNumberOfStrikethroughRuns(), 1u, TEST_LOCATION);
-  CheckTypesetterDecorationInput(GetTextModel(fromMarkupController), true, true);
-  CheckTypesetterDecorationInput(GetTextModel(styledController), true, true);
+  CheckTypesetterDecorationInput(GetLogicalModelObject(fromMarkupController), true, true);
+  CheckTypesetterDecorationInput(GetLogicalModelObject(styledController), true, true);
 
   DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].glyphRun.glyphIndex, fromMarkupVisualModel.mUnderlineRuns[0u].glyphRun.glyphIndex, TEST_LOCATION);
   DALI_TEST_EQUALS(styledVisualModel.mUnderlineRuns[0u].glyphRun.numberOfGlyphs, fromMarkupVisualModel.mUnderlineRuns[0u].glyphRun.numberOfGlyphs, TEST_LOCATION);

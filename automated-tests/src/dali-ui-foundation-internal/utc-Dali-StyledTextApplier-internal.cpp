@@ -15,6 +15,7 @@
  *
  */
 
+#include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/multi-language-helper-functions.h>
@@ -24,6 +25,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
@@ -931,6 +933,93 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
   DALI_TEST_EQUALS(clickedRenderInfo.anchorHitRegions[0u].color, Color::MAGENTA, TEST_LOCATION);
   DALI_TEST_EQUALS(clickedRenderInfo.anchorHitRegions[0u].clickedColor, Color::MAGENTA, TEST_LOCATION);
 
+  // An anchor whose semantic range is replaced by an ImageSpan must use the
+  // same compacted CENTER + END ellipsis x coordinate as the renderer and
+  // replacement placement. It must not retain the pre-elision line offset.
+  const std::string imageAnchorText = "Long prefix words [image] trailing text";
+  PublicText::StyledTextBuilder imageAnchorBuilder = PublicText::StyledTextBuilder::New(imageAnchorText.c_str());
+  PublicText::ImageAttributes imageAttributes("icon.png", Vector2(70.0f, 28.0f));
+  PublicText::ImageSpan imageSpan = PublicText::ImageSpan::New(imageAttributes);
+  PublicText::AnchorAttributes imageAnchorAttributes;
+  imageAnchorAttributes.SetHref("docs://image");
+  PublicText::AnchorSpan imageAnchorSpan = PublicText::AnchorSpan::New(imageAnchorAttributes);
+  DALI_TEST_CHECK(imageAnchorBuilder.SetSpan(imageSpan, 18u, 25u));
+  DALI_TEST_CHECK(imageAnchorBuilder.SetSpan(imageAnchorSpan, 18u, 25u));
+  const PublicText::StyledText imageAnchorStyledText = imageAnchorBuilder.Build();
+
+  Dali::Ui::Text::AsyncTextParameters imageAnchorParameters;
+  imageAnchorParameters.text                        = imageAnchorText;
+  imageAnchorParameters.fontSize                    = 18.0f;
+  imageAnchorParameters.textColor                   = Color::BLACK;
+  imageAnchorParameters.anchorColor                 = Color::GREEN;
+  imageAnchorParameters.anchorClickedColor          = Color::MAGENTA;
+  imageAnchorParameters.textHeight                  = 80.0f;
+  imageAnchorParameters.originHeight                = imageAnchorParameters.textHeight;
+  imageAnchorParameters.maxTextureSize              = 4096;
+  imageAnchorParameters.requestType                 = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
+  imageAnchorParameters.horizontalAlignment         = Dali::Ui::Text::Alignment::CENTER;
+  imageAnchorParameters.lineWrapMode                = Dali::Ui::Text::LineWrapMode::CHARACTER;
+  imageAnchorParameters.ellipsisPosition             = Dali::Ui::Text::EllipsisPosition::END;
+  imageAnchorParameters.hasStyledTextStyleSnapshot   = true;
+  imageAnchorParameters.styledTextStyleSnapshot      =
+    StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(imageAnchorStyledText,
+                                                                     96.0f,
+                                                                     imageAnchorParameters.anchorColor,
+                                                                     imageAnchorParameters.anchorClickedColor);
+  imageAnchorParameters.replacementSourceSnapshot =
+    StyledTextInternal::StyledTextApplier::BuildReplacementSourceSnapshot(imageAnchorStyledText, 73u);
+
+  Dali::Ui::Text::AsyncTextLoader imageAnchorLoader = Dali::Ui::Text::AsyncTextLoader::New();
+  bool foundVisibleElidedImageAnchor = false;
+  for(float width = 80.0f; width <= 480.0f && !foundVisibleElidedImageAnchor; width += 2.0f)
+  {
+    imageAnchorParameters.textWidth                   = width;
+    imageAnchorParameters.originWidth                 = width;
+    imageAnchorParameters.replacementLayoutGeneration = static_cast<uint64_t>(width);
+    const Dali::Ui::Text::AsyncTextRenderInfo imageAnchorRenderInfo =
+      imageAnchorLoader.RenderText(imageAnchorParameters, false, Size::ZERO);
+    const Dali::Ui::Text::ReplacementRenderState* imageAnchorState =
+      Dali::Ui::Text::GetImplementation(imageAnchorLoader).GetReplacementRenderState();
+    if(!imageAnchorState)
+    {
+      continue;
+    }
+    if(!imageAnchorState->finalElision.textElided || imageAnchorState->placements.Count() != 1u ||
+       !imageAnchorState->placements[0u].visible)
+    {
+      continue;
+    }
+
+    const Dali::Ui::Text::ReplacementPlacement& imagePlacement = imageAnchorState->placements[0u];
+    Vector2 finalGlyphPosition;
+    DALI_TEST_CHECK(imageAnchorState->finalElision.GetFinalGlyphPosition(
+      imagePlacement.syntheticGlyphIndex,
+      finalGlyphPosition));
+    DALI_TEST_EQUALS(imagePlacement.position.x,
+                     finalGlyphPosition.x,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(imageAnchorRenderInfo.replacementPlacements.Count(), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(imageAnchorRenderInfo.replacementPlacements[0u].position.x,
+                     finalGlyphPosition.x,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(static_cast<uint32_t>(imageAnchorRenderInfo.anchorHitRegions.size()), 1u, TEST_LOCATION);
+    DALI_TEST_EQUALS(static_cast<uint32_t>(imageAnchorRenderInfo.anchorHitRegions[0u].rectangles.size()),
+                     1u,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(imageAnchorRenderInfo.anchorHitRegions[0u].rectangles[0u].x,
+                     finalGlyphPosition.x,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(imageAnchorRenderInfo.anchorHitRegions[0u].rectangles[0u].width,
+                     imagePlacement.size.x,
+                     Math::MACHINE_EPSILON_1000,
+                     TEST_LOCATION);
+    foundVisibleElidedImageAnchor = true;
+  }
+  DALI_TEST_CHECK(foundVisibleElidedImageAnchor);
+
   PublicText::StyledText fromMarkupStyledText = PublicText::StyledText::FromMarkup("<a href='docs://raw'>open</a> docs");
 
   Dali::Ui::Text::AsyncTextParameters markupParameters;
@@ -1382,6 +1471,65 @@ int UtcDaliStyledTextApplierSameBackgroundObjectUpdatedRangeP(void)
 
   DALI_TEST_EQUALS(result.backgroundColorRuns.Count(), 1u, TEST_LOCATION);
   CheckColorRun(result.backgroundColorRuns[0u], 2u, 3u, Color::MAGENTA);
+
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierImageReplacementSnapshotP(void)
+{
+  UiTestApplication application;
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("A[one]B[two]C");
+
+  PublicText::ImageAttributes firstAttributes("icon.png", Vector2(24.0f, 18.0f));
+  firstAttributes.SetAlignment(PublicText::ImageAttributes::InlineAlignment::TEXT_CENTER);
+  firstAttributes.SetVerticalOffset(2.0f);
+  firstAttributes.SetAlternativeText("");
+  PublicText::ImageSpan first = PublicText::ImageSpan::New(firstAttributes);
+
+  PublicText::ImageAttributes secondAttributes("icon.png", Vector2(20.0f, 20.0f));
+  secondAttributes.SetAlternativeText("second icon");
+  PublicText::ImageSpan second = PublicText::ImageSpan::New(secondAttributes);
+
+  DALI_TEST_CHECK(builder.SetSpan(first, 1u, 6u));
+  DALI_TEST_CHECK(builder.SetSpan(second, 7u, 12u));
+
+  const PublicText::ReplacementSourceSnapshot snapshot =
+    StyledTextInternal::StyledTextApplier::BuildReplacementSourceSnapshot(builder.Build(), 42u);
+  DALI_TEST_EQUALS(snapshot.sourceRevision, 42u, TEST_LOCATION);
+  DALI_TEST_EQUALS(snapshot.runs.Count(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(snapshot.hasValidReplacementSource);
+
+  const PublicText::ReplacementRunSnapshot& firstRun = snapshot.runs[0u];
+  DALI_TEST_EQUALS(firstRun.type, PublicText::ReplacementType::IMAGE, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstRun.logicalCharacterRange.characterIndex, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstRun.logicalCharacterRange.numberOfCharacters, 5u, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstRun.metrics.width, 24.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstRun.metrics.height, 18.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstRun.metrics.verticalOffset, 2.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+  DALI_TEST_EQUALS(firstRun.metrics.verticalAlignment, PublicText::ReplacementVerticalAlignment::TEXT_CENTER, TEST_LOCATION);
+  const PublicText::ReplacementRunSnapshot& secondRun = snapshot.runs[1u];
+  DALI_TEST_CHECK(secondRun.occurrenceIdentity != firstRun.occurrenceIdentity);
+  DALI_TEST_EQUALS(secondRun.image.source, firstRun.image.source, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliStyledTextApplierInvalidImagePayloadFallbackP(void)
+{
+  UiTestApplication application;
+
+  PublicText::StyledTextBuilder builder = PublicText::StyledTextBuilder::New("bad");
+  PublicText::ImageAttributes  attributes("", Vector2(-1.0f, 20.0f));
+  PublicText::ImageSpan        span = PublicText::ImageSpan::New(attributes);
+  DALI_TEST_CHECK(builder.SetSpan(span, 0u, 3u));
+
+  const PublicText::ReplacementSourceSnapshot snapshot =
+    StyledTextInternal::StyledTextApplier::BuildReplacementSourceSnapshot(builder.Build(), 9u);
+  DALI_TEST_EQUALS(snapshot.runs.Count(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!snapshot.hasValidReplacementSource);
+  attributes.SetSource("icon.png");
+  attributes.SetReservedSize(Vector2(12.0f, 12.0f));
+  DALI_TEST_EQUALS(snapshot.runs[0u].image.source, "", TEST_LOCATION);
 
   END_TEST;
 }

@@ -72,12 +72,14 @@ SET(TC_SOURCES
     utc-Dali-MarkupToStyledText-internal.cpp
     utc-Dali-StyledTextApplier-internal.cpp
     utc-Dali-StyledTextController-internal.cpp
+    utc-Dali-ReplacementProjection-internal.cpp
     utc-Dali-TextGradientStyle-internal.cpp
     utc-Dali-TextAtlasGradientState-internal.cpp
     utc-Dali-TextGradientShaderComposition-internal.cpp
     utc-Dali-TextGradientTypesetterMask-internal.cpp
     utc-Dali-TextGradientPropertyData-internal.cpp
     utc-Dali-TextGradientVisualMaskPlumbing-internal.cpp
+    utc-Dali-TextVisualAsyncPublication-internal.cpp
     utc-Dali-ViewAccessibility-internal.cpp
     utc-Dali-ViewFittingMode-internal.cpp
     utc-Dali-View-order-internal.cpp
@@ -89,6 +91,7 @@ SET(TC_SOURCES
 #    as test case files.
 # ---------------------------------------------------------
 SET(TEST_HARNESS_SOURCES
+    replacement-layout-test-adapter.cpp
     ../dali-test-suite-utils/mesh-builder.cpp
     ../dali-test-suite-utils/dali-test-suite-utils.cpp
     ../dali-test-suite-utils/test-actor-utils.cpp
@@ -313,4 +316,51 @@ TARGET_LINK_LIBRARIES(${EMOJI_LABEL_PERF_NAME}
     -ldl
     --coverage
     -rdynamic
+)
+
+# ---------------------------------------------------------
+# 14. Replacement real text-abstraction diagnostic
+#     The normal UTC executable intentionally interposes lightweight text
+#     abstraction fakes. This separate target omits that harness so Hebrew,
+#     bidi reorder and END ellipsis exercise the production Adaptor services.
+#     Build explicitly with:
+#       cmake --build <build-dir> --target dali-replacement-real-layout-diagnostic
+# ---------------------------------------------------------
+SET(REPLACEMENT_REAL_LAYOUT_NAME dali-replacement-real-layout-diagnostic)
+
+ADD_EXECUTABLE(${REPLACEMENT_REAL_LAYOUT_NAME} EXCLUDE_FROM_ALL
+    ${LIBRARY_SOURCES}
+    replacement-layout-test-adapter.cpp
+    replacement-real-layout-diagnostic.cpp
+)
+
+ADD_DEPENDENCIES(${REPLACEMENT_REAL_LAYOUT_NAME} generate_builtin_shaders_internal)
+
+TARGET_LINK_LIBRARIES(${REPLACEMENT_REAL_LAYOUT_NAME}
+    ${DALICORE_LIBRARIES}
+    ${DALIADAPTOR_LIBRARIES}
+    -lpthread
+    -ldl
+    --coverage
+    -rdynamic
+)
+
+# ---------------------------------------------------------
+# 15. Ordinary ellipsis performance tool
+#     This target links the installed production library and is intentionally
+#     excluded from the normal UTC build.
+# ---------------------------------------------------------
+SET(ORDINARY_ELLIPSIS_PERF_NAME dali-ordinary-ellipsis-perf)
+
+ADD_EXECUTABLE(${ORDINARY_ELLIPSIS_PERF_NAME} EXCLUDE_FROM_ALL
+    ordinary-ellipsis-perf-manual.cpp
+)
+
+TARGET_LINK_LIBRARIES(${ORDINARY_ELLIPSIS_PERF_NAME}
+    dali2-ui-foundation
+    ${DALICORE_LIBRARIES}
+    ${DALIADAPTOR_LIBRARIES}
+    -lpthread
+    -ldl
+    --coverage
 )

@@ -19,6 +19,7 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
+#include <utility>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -1723,6 +1724,98 @@ int UtcDaliStyledTextFromMarkupUnicodeRangeP(void)
   DALI_TEST_EQUALS(annotationText.GetAnnotationEndIndexAt(0u), 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(annotationText.GetAnnotationAt(0u).GetKey(), "style", TEST_LOCATION);
   DALI_TEST_EQUALS(annotationText.GetAnnotationAt(0u).GetValue(), "x", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliImageAttributesValueSemanticsP(void)
+{
+  UiTestApplication application;
+
+  DALI_TEST_EQUALS(static_cast<uint32_t>(ImageAttributes::InlineAlignment::TEXT_BOTTOM), 0u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(ImageAttributes::InlineAlignment::TEXT_BASELINE), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<uint32_t>(ImageAttributes::InlineAlignment::TEXT_CENTER), 2u, TEST_LOCATION);
+
+  ImageAttributes defaults;
+  DALI_TEST_CHECK(!defaults.HasAttributes());
+  DALI_TEST_EQUALS(defaults.GetAlignment(), ImageAttributes::InlineAlignment::TEXT_BOTTOM, TEST_LOCATION);
+  DALI_TEST_EQUALS(defaults.GetVerticalOffset(), 0.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  ImageAttributes explicitDefault;
+  explicitDefault.SetAlignment(ImageAttributes::InlineAlignment::TEXT_BOTTOM);
+  DALI_TEST_CHECK(explicitDefault != defaults);
+  explicitDefault.Unset(ImageAttributes::Attribute::ALIGNMENT);
+  DALI_TEST_CHECK(explicitDefault == defaults);
+
+  ImageAttributes attributes("icon.png", Vector2(24.0f, 18.0f));
+  DALI_TEST_CHECK(attributes.Has(ImageAttributes::Attribute::SOURCE));
+  DALI_TEST_CHECK(attributes.Has(ImageAttributes::Attribute::RESERVED_SIZE));
+  DALI_TEST_CHECK(!attributes.Has(ImageAttributes::Attribute::ALIGNMENT));
+  DALI_TEST_EQUALS(attributes.GetAlignment(), ImageAttributes::InlineAlignment::TEXT_BOTTOM, TEST_LOCATION);
+  DALI_TEST_EQUALS(attributes.GetSource(), "icon.png", TEST_LOCATION);
+  DALI_TEST_EQUALS(attributes.GetReservedSize(), Vector2(24.0f, 18.0f), TEST_LOCATION);
+
+  DALI_TEST_CHECK(!attributes.Has(ImageAttributes::Attribute::ALTERNATIVE_TEXT));
+  attributes.SetAlternativeText("");
+  DALI_TEST_CHECK(attributes.Has(ImageAttributes::Attribute::ALTERNATIVE_TEXT));
+  DALI_TEST_EQUALS(attributes.GetAlternativeText(), "", TEST_LOCATION);
+
+  attributes.SetAlignment(ImageAttributes::InlineAlignment::TEXT_CENTER);
+  attributes.SetVerticalOffset(3.0f);
+  DALI_TEST_CHECK(attributes.Has(ImageAttributes::Attribute::VERTICAL_OFFSET));
+  ImageAttributes copy(attributes);
+  DALI_TEST_CHECK(copy == attributes);
+  copy.Unset(ImageAttributes::Attribute::ALTERNATIVE_TEXT);
+  DALI_TEST_CHECK(copy != attributes);
+  DALI_TEST_CHECK(!copy.Has(ImageAttributes::Attribute::ALTERNATIVE_TEXT));
+
+  ImageAttributes moved(std::move(copy));
+  DALI_TEST_EQUALS(moved.GetSource(), "icon.png", TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetAlignment(), ImageAttributes::InlineAlignment::TEXT_CENTER, TEST_LOCATION);
+  DALI_TEST_EQUALS(moved.GetVerticalOffset(), 3.0f, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliImageSpanHandleAndSnapshotSemanticsP(void)
+{
+  UiTestApplication application;
+
+  ReplacementSpan emptyReplacement;
+  ImageSpan       emptyImage;
+  DALI_TEST_CHECK(!emptyReplacement);
+  DALI_TEST_CHECK(!emptyImage);
+  DALI_TEST_CHECK(!ReplacementSpan::DownCast(BaseHandle()));
+  DALI_TEST_CHECK(!ImageSpan::DownCast(BaseHandle()));
+  DALI_TEST_EQUALS(sizeof(ReplacementSpan), sizeof(Span), TEST_LOCATION);
+
+  ImageAttributes attributes("icon.png", Vector2(24.0f, 24.0f));
+  attributes.SetAlternativeText("confirm");
+  ImageSpan image = ImageSpan::New(attributes);
+  DALI_TEST_CHECK(image);
+  DALI_TEST_CHECK(ImageSpan::DownCast(image));
+  DALI_TEST_CHECK(ReplacementSpan::DownCast(image));
+  DALI_TEST_CHECK(Span::DownCast(image));
+
+  ForegroundColorSpan ordinary = ForegroundColorSpan::New(UiColor(Color::RED));
+  DALI_TEST_CHECK(!ReplacementSpan::DownCast(ordinary));
+  DALI_TEST_CHECK(!ImageSpan::DownCast(ordinary));
+
+  attributes.SetSource("other.png");
+  DALI_TEST_EQUALS(image.GetImageAttributes().GetSource(), "icon.png", TEST_LOCATION);
+  ImageAttributes getterCopy = image.GetImageAttributes();
+  getterCopy.SetSource("getter-copy.png");
+  DALI_TEST_EQUALS(image.GetImageAttributes().GetSource(), "icon.png", TEST_LOCATION);
+
+  ReplacementSpan replacementCopy = ReplacementSpan::DownCast(image);
+  ReplacementSpan replacementMove = std::move(replacementCopy);
+  DALI_TEST_CHECK(replacementMove);
+  DALI_TEST_CHECK(ImageSpan::DownCast(replacementMove));
+
+  ImageAttributes invalid;
+  ImageSpan invalidSpan = ImageSpan::New(invalid);
+  DALI_TEST_CHECK(invalidSpan);
+  DALI_TEST_CHECK(!invalidSpan.GetImageAttributes().HasAttributes());
 
   END_TEST;
 }

@@ -360,11 +360,11 @@ int UtcDaliTextGradientVisualMaskColorOnlyFromMarkupCreatesMaskP(void)
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
-  DALI_TEST_CHECK(!controller->GetTextModel()->IsMarkupUnderlineSet());
-  DALI_TEST_CHECK(!controller->GetTextModel()->IsMarkupStrikethroughSet());
-  DALI_TEST_CHECK(!controller->GetTextModel()->IsMarkupBackgroundColorSet());
-  DALI_TEST_CHECK(controller->GetTextModel()->GetColors() != nullptr);
-  DALI_TEST_CHECK(controller->GetTextModel()->GetColorIndices() != nullptr);
+  DALI_TEST_CHECK(!controller->GetRenderTextModel()->IsMarkupUnderlineSet());
+  DALI_TEST_CHECK(!controller->GetRenderTextModel()->IsMarkupStrikethroughSet());
+  DALI_TEST_CHECK(!controller->GetRenderTextModel()->IsMarkupBackgroundColorSet());
+  DALI_TEST_CHECK(controller->GetRenderTextModel()->GetColors() != nullptr);
+  DALI_TEST_CHECK(controller->GetRenderTextModel()->GetColorIndices() != nullptr);
 
   PixelData mask = UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual);
   DALI_TEST_CHECK(mask);
@@ -386,7 +386,7 @@ int UtcDaliTextGradientVisualMaskStyledSimpleThenPlainDoesNotCreateStoredMaskP(v
   controller->SetText("TextGradient");
   UpdateTextVisual(rendered.internalVisual);
 
-  DALI_TEST_CHECK(controller->GetTextModel()->GetNumberOfGlyphs() > 0u);
+  DALI_TEST_CHECK(controller->GetRenderTextModel()->GetNumberOfGlyphs() > 0u);
 
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
@@ -403,7 +403,7 @@ int UtcDaliTextGradientVisualMaskStyledSimpleDoesNotCreateStoredMaskP(void)
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
-  DALI_TEST_CHECK(controller->GetTextModel()->IsMarkupUnderlineSet());
+  DALI_TEST_CHECK(controller->GetRenderTextModel()->IsMarkupUnderlineSet());
   DALI_TEST_CHECK(!UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual));
   END_TEST;
 }
@@ -416,7 +416,7 @@ int UtcDaliTextGradientVisualMaskBackgroundStyleDoesNotCreateStoredMaskP(void)
   UiInternal::TextVisual::SetTextGradientStyle(rendered.internalVisual, MakeEnabledGradientStyle());
 
   auto controller = UiInternal::TextVisual::GetController(rendered.internalVisual);
-  DALI_TEST_CHECK(controller->GetTextModel()->IsMarkupBackgroundColorSet());
+  DALI_TEST_CHECK(controller->GetRenderTextModel()->IsMarkupBackgroundColorSet());
   DALI_TEST_CHECK(!UiInternal::TextVisual::GetTextGradientMaskPixelData(rendered.internalVisual));
   END_TEST;
 }

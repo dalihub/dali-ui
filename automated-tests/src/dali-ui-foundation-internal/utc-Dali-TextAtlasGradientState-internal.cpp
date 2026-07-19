@@ -472,7 +472,7 @@ int UtcDaliTextAtlasGradientCommonTextUtilsBackgroundScrollP(void)
   DALI_TEST_CHECK(recordingRenderer->lastCoordinateSize.x > 120.0f);
 
   auto* model = const_cast<Dali::Ui::Text::Model*>(
-    dynamic_cast<const Dali::Ui::Text::Model*>(controller->GetTextModel()));
+    dynamic_cast<const Dali::Ui::Text::Model*>(controller->GetRenderTextModel()));
   DALI_TEST_CHECK(model);
   model->mScrollPosition = Vector2(-24.0f, -6.0f);
 

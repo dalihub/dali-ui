@@ -80,6 +80,55 @@ void OnAsyncNaturalSizeComputed(View, float width, float height)
   gAsyncNaturalSizeWidth    = width;
   gAsyncNaturalSizeHeight   = height;
 }
+
+bool HasValidTextTexture(Actor actor)
+{
+  for(uint32_t rendererIndex = 0u; rendererIndex < actor.GetRendererCount(); ++rendererIndex)
+  {
+    TextureSet textures = actor.GetRendererAt(rendererIndex).GetTextures();
+    if(!textures || textures.GetTextureCount() == 0u)
+    {
+      continue;
+    }
+
+    Texture texture = textures.GetTexture(0u);
+    if(texture && texture.GetWidth() > 0u && texture.GetHeight() > 0u)
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
+bool WaitForValidTextTexture(UiTestApplication& application, Label label)
+{
+  constexpr uint32_t MAX_TRIGGER_COUNT = 4u;
+  for(uint32_t trigger = 0u; trigger < MAX_TRIGGER_COUNT && !HasValidTextTexture(label); ++trigger)
+  {
+    if(!Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT))
+    {
+      return false;
+    }
+    application.SendNotification();
+    application.Render();
+  }
+  return HasValidTextTexture(label);
+}
+
+bool WaitForAsyncNaturalSize(UiTestApplication& application)
+{
+  constexpr uint32_t MAX_TRIGGER_COUNT = 4u;
+  for(uint32_t trigger = 0u; trigger < MAX_TRIGGER_COUNT && !gAsyncNaturalSizeComputed; ++trigger)
+  {
+    if(!Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT))
+    {
+      return false;
+    }
+    application.SendNotification();
+    application.Render();
+  }
+  return gAsyncNaturalSizeComputed;
+}
 } // namespace
 
 void utc_dali_label_startup(void)
@@ -1719,5 +1768,231 @@ int UtcDaliLabelExplicitDomainUnaffectedByDefaultDomainP(void)
   DALI_TEST_EQUALS(label.GetText(), "Title A", TEST_LOCATION);
 
   CleanupLocalization(label);
+  END_TEST;
+}
+
+int UtcDaliLabelImageSpanAuthoritativeNaturalSizeAndFallbackP(void)
+{
+  UiTestApplication application;
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("A[icon]B");
+  Text::ImageSpan image = Text::ImageSpan::New(
+    Text::ImageAttributes("/path/that/does/not/exist.png", Vector2(180.0f, 32.0f)));
+  DALI_TEST_CHECK(builder.SetSpan(image, 1u, 7u));
+
+  Label label = Label::New();
+  DALI_TEST_EQUALS(label.ResourceReadySignal().GetConnectionCount(), 0u, TEST_LOCATION);
+  label.SetFontSize(16.0f);
+  label.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 80.0f));
+  application.GetScene().Add(label);
+  label.SetStyledText(builder.Build());
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(label.ResourceReadySignal().GetConnectionCount() > 0u);
+  DALI_TEST_EQUALS(label.GetText(), "A[icon]B", TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetStyledText());
+
+  const Vector3 replacementNaturalSize = label.GetNaturalSize();
+  DALI_TEST_CHECK(replacementNaturalSize.width >= 180.0f);
+  DALI_TEST_CHECK(replacementNaturalSize.height >= 32.0f);
+
+  Text::StyledTextBuilder invalidBuilder = Text::StyledTextBuilder::New("A[icon]B");
+  Text::ImageAttributes invalidAttributes("", Vector2(180.0f, 32.0f));
+  DALI_TEST_CHECK(invalidBuilder.SetSpan(Text::ImageSpan::New(invalidAttributes), 1u, 7u));
+  label.SetStyledText(invalidBuilder.Build());
+  const Vector3 fallbackNaturalSize = label.GetNaturalSize();
+  DALI_TEST_CHECK(fallbackNaturalSize.width < replacementNaturalSize.width);
+  DALI_TEST_EQUALS(label.GetText(), "A[icon]B", TEST_LOCATION);
+  DALI_TEST_EQUALS(label.ResourceReadySignal().GetConnectionCount(), 0u, TEST_LOCATION);
+
+  const Text::StyledText replacementText = builder.Build();
+  for(uint32_t iteration = 0u; iteration < 8u; ++iteration)
+  {
+    label.SetStyledText(replacementText);
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_CHECK(label.ResourceReadySignal().GetConnectionCount() > 0u);
+
+    label.SetText("plain");
+    DALI_TEST_EQUALS(label.ResourceReadySignal().GetConnectionCount(), 0u, TEST_LOCATION);
+  }
+
+  Label transient = Label::New();
+  transient.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 80.0f));
+  application.GetScene().Add(transient);
+  transient.SetStyledText(replacementText);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(transient.ResourceReadySignal().GetConnectionCount() > 0u);
+  application.GetScene().Remove(transient);
+  transient.Reset();
+  application.SendNotification();
+  application.Render();
+
+  Label cleared = Label::New();
+  cleared.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 80.0f));
+  application.GetScene().Add(cleared);
+  cleared.SetStyledText(replacementText);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(cleared.ResourceReadySignal().GetConnectionCount() > 0u);
+  cleared.SetText("");
+  DALI_TEST_EQUALS(cleared.ResourceReadySignal().GetConnectionCount(), 0u, TEST_LOCATION);
+  application.GetScene().Remove(cleared);
+  cleared.Reset();
+
+  Label firstShared  = Label::New();
+  Label secondShared = Label::New();
+  firstShared.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 80.0f));
+  secondShared.SetProperty(Actor::Property::SIZE, Vector2(240.0f, 80.0f));
+  application.GetScene().Add(firstShared);
+  application.GetScene().Add(secondShared);
+  firstShared.SetStyledText(replacementText);
+  secondShared.SetStyledText(replacementText);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(firstShared.ResourceReadySignal().GetConnectionCount() > 0u);
+  DALI_TEST_CHECK(secondShared.ResourceReadySignal().GetConnectionCount() > 0u);
+  application.GetScene().Remove(firstShared);
+  firstShared.Reset();
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_CHECK(secondShared.ResourceReadySignal().GetConnectionCount() > 0u);
+  application.GetScene().Remove(secondShared);
+  secondShared.Reset();
+
+  Label ordinary = Label::New("ordinary");
+  application.GetScene().Add(ordinary);
+  application.SendNotification();
+  application.Render();
+  DALI_TEST_EQUALS(ordinary.ResourceReadySignal().GetConnectionCount(), 0u, TEST_LOCATION);
+  application.GetScene().Remove(ordinary);
+  ordinary.Reset();
+
+  END_TEST;
+}
+
+int UtcDaliLabelImageSpanAsyncNaturalSizeParityP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("before [icon] after");
+  DALI_TEST_CHECK(builder.SetSpan(Text::ImageSpan::New(
+                                   Text::ImageAttributes("missing-image.png", Vector2(160.0f, 30.0f))),
+                                 7u,
+                                 13u));
+
+  Label label = Label::New();
+  label.SetFontSize(16.0f);
+  label.SetStyledText(builder.Build());
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  const Vector3 syncSize = label.GetNaturalSize();
+  gAsyncNaturalSizeComputed = false;
+  gAsyncNaturalSizeWidth    = 0.0f;
+  gAsyncNaturalSizeHeight   = 0.0f;
+  label.AsyncNaturalSizeComputedSignal().Connect(&OnAsyncNaturalSizeComputed);
+  label.SetAsyncRendering(true);
+  label.RequestAsyncNaturalSize();
+  DALI_TEST_CHECK(WaitForAsyncNaturalSize(application));
+  DALI_TEST_EQUALS(gAsyncNaturalSizeWidth, syncSize.width, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gAsyncNaturalSizeHeight, syncSize.height, 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(label.GetText(), "before [icon] after", TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliLabelImageSpanBlocksMarqueeAndDoesNotAutoRestartP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New("A long plain text that can marquee before an inline replacement is applied.");
+  label.SetRequestedWidth(80.0f);
+  label.SetRequestedHeight(40.0f);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(0);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(label.IsMarqueeRunning());
+
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("A [icon] replacement");
+  DALI_TEST_CHECK(builder.SetSpan(Text::ImageSpan::New(
+                                   Text::ImageAttributes("missing-image.png", Vector2(24.0f, 24.0f))),
+                                 2u,
+                                 8u));
+  label.SetStyledText(builder.Build());
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(!label.IsMarqueeRunning());
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(!label.IsMarqueeRunning());
+
+  label.SetText("Plain text again; removal alone must not restart marquee.");
+  application.SendNotification();
+  application.Render(16);
+  DALI_TEST_CHECK(!label.IsMarqueeRunning());
+
+  END_TEST;
+}
+
+int UtcDaliLabelOrdinaryAsyncMarqueeKeepsPublishedTextureP(void)
+{
+  UiTestApplication application;
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+
+  Dali::TextAbstraction::FontClient fontClient = Dali::TextAbstraction::FontClient::Get();
+  (void)fontClient;
+
+  Label label = Label::New(
+    "Ordinary asynchronous marquee text must keep its published renderer and texture for every animation frame.");
+  label.SetRequestedWidth(160.0f);
+  label.SetRequestedHeight(48.0f);
+  label.SetAsyncRendering(true);
+  label.SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL);
+  label.SetMarqueeLoopCount(0);
+  application.GetScene().Add(label);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(WaitForValidTextTexture(application, label));
+
+  label.StartMarquee();
+  application.SendNotification();
+  application.Render(16);
+  constexpr uint32_t MAX_TRIGGER_COUNT = 4u;
+  for(uint32_t trigger = 0u; trigger < MAX_TRIGGER_COUNT && !label.IsMarqueeRunning(); ++trigger)
+  {
+    DALI_TEST_CHECK(Test::WaitForEventThreadTrigger(1, ASYNC_TEXT_THREAD_TIMEOUT));
+    application.SendNotification();
+    application.Render(16);
+  }
+  DALI_TEST_CHECK(label.IsMarqueeRunning());
+
+  for(uint32_t frame = 0u; frame < 32u; ++frame)
+  {
+    application.Render(16);
+    DALI_TEST_CHECK(label.GetRendererCount() > 0u);
+    DALI_TEST_CHECK(HasValidTextTexture(label));
+    DALI_TEST_CHECK(label.IsMarqueeRunning());
+  }
+
+  label.StopMarquee();
+  DALI_TEST_CHECK(!label.IsMarqueeRunning());
+  DALI_TEST_CHECK(HasValidTextTexture(label));
+
   END_TEST;
 }
