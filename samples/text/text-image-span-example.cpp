@@ -93,7 +93,6 @@ struct ImageSpec
   Vector2                               size{24.0f, 24.0f};
   Text::ImageAttributes::InlineAlignment alignment{Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM};
   float                                 verticalOffset{0.0f};
-  const char*                           alternativeText{nullptr};
 };
 
 struct CaseData
@@ -596,14 +595,6 @@ private:
         Text::ImageAttributes attributes(source.c_str(), image.size);
         attributes.SetAlignment(image.alignment);
         attributes.SetVerticalOffset(image.verticalOffset);
-        if(image.alternativeText)
-        {
-          attributes.SetAlternativeText(image.alternativeText);
-        }
-        else
-        {
-          attributes.SetAlternativeText(""); // Explicit decorative image.
-        }
         // A new handle per occurrence is intentional, including same-source cases.
         DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), image.start, image.end) &&
                            "ImageSpan sample range must be valid");
@@ -625,7 +616,6 @@ private:
     Text::ImageAttributes attributes(sourceUrl.c_str(), size);
     attributes.SetAlignment(alignment);
     attributes.SetVerticalOffset(verticalOffset);
-    attributes.SetAlternativeText("");
     DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), begin, begin + 1u) &&
                        "Lifecycle ImageSpan range must be valid");
   }
@@ -638,7 +628,6 @@ private:
     const std::string sourceUrl = ResolveImageSource(source);
     Text::ImageAttributes attributes(sourceUrl.c_str(), size);
     attributes.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
-    attributes.SetAlternativeText("");
     DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), begin, builder.GetUtf32Length()) &&
                        "Lifecycle multi-character ImageSpan range must be valid");
   }

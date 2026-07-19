@@ -1755,19 +1755,11 @@ int UtcDaliImageAttributesValueSemanticsP(void)
   DALI_TEST_EQUALS(attributes.GetSource(), "icon.png", TEST_LOCATION);
   DALI_TEST_EQUALS(attributes.GetReservedSize(), Vector2(24.0f, 18.0f), TEST_LOCATION);
 
-  DALI_TEST_CHECK(!attributes.Has(ImageAttributes::Attribute::ALTERNATIVE_TEXT));
-  attributes.SetAlternativeText("");
-  DALI_TEST_CHECK(attributes.Has(ImageAttributes::Attribute::ALTERNATIVE_TEXT));
-  DALI_TEST_EQUALS(attributes.GetAlternativeText(), "", TEST_LOCATION);
-
   attributes.SetAlignment(ImageAttributes::InlineAlignment::TEXT_CENTER);
   attributes.SetVerticalOffset(3.0f);
   DALI_TEST_CHECK(attributes.Has(ImageAttributes::Attribute::VERTICAL_OFFSET));
   ImageAttributes copy(attributes);
   DALI_TEST_CHECK(copy == attributes);
-  copy.Unset(ImageAttributes::Attribute::ALTERNATIVE_TEXT);
-  DALI_TEST_CHECK(copy != attributes);
-  DALI_TEST_CHECK(!copy.Has(ImageAttributes::Attribute::ALTERNATIVE_TEXT));
 
   ImageAttributes moved(std::move(copy));
   DALI_TEST_EQUALS(moved.GetSource(), "icon.png", TEST_LOCATION);
@@ -1790,7 +1782,6 @@ int UtcDaliImageSpanHandleAndSnapshotSemanticsP(void)
   DALI_TEST_EQUALS(sizeof(ReplacementSpan), sizeof(Span), TEST_LOCATION);
 
   ImageAttributes attributes("icon.png", Vector2(24.0f, 24.0f));
-  attributes.SetAlternativeText("confirm");
   ImageSpan image = ImageSpan::New(attributes);
   DALI_TEST_CHECK(image);
   DALI_TEST_CHECK(ImageSpan::DownCast(image));

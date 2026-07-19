@@ -207,7 +207,6 @@ private:
                              : Vector2(mImagesPerLabel == 1u ? 18.0f : 8.0f,
                                        mImagesPerLabel == 1u ? 18.0f : 8.0f);
       Text::ImageAttributes attributes(SourceFor(labelIndex, imageIndex).c_str(), size);
-      attributes.SetAlternativeText("");
       DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), begin, begin + 1u) &&
                          "Performance ImageSpan range must be valid");
       builder.AppendText("x");

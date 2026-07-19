@@ -26,7 +26,7 @@ namespace
 {
 constexpr int   WINDOW_WIDTH       = 980;
 constexpr int   WINDOW_HEIGHT      = 820;
-constexpr std::size_t CASE_COUNT    = 13u;
+constexpr std::size_t CASE_COUNT    = 14u;
 constexpr float PAGE_PADDING       = 28.0f;
 constexpr float PAGE_SPACING       = 12.0f;
 constexpr float TITLE_FONT_SIZE    = 25.0f;
@@ -597,6 +597,34 @@ ExampleCase BuildBoundaryFailureCase()
   return data;
 }
 
+ExampleCase BuildImageSpanCase()
+{
+  Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
+  builder.AppendText("Before ");
+
+  const uint32_t imageIndex = builder.GetUtf32Length();
+  builder.AppendText("\uFFFC");
+
+  builder.AppendText(" after");
+
+  Text::ImageAttributes imageAttributes(RESOURCES_DIR "flag_kr.png", Vector2(64.0f, 40.0f));
+  imageAttributes.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
+
+  Text::ImageSpan imageSpan = Text::ImageSpan::New(imageAttributes);
+  builder.SetSpan(imageSpan, imageIndex, imageIndex + 1u);
+
+  ExampleCase data;
+  data.title       = "Case 14: Recommended ImageSpan authoring";
+  data.description = "Append one U+FFFC, remember its UTF-32 index, then attach one ImageSpan to [index,index+1).";
+  data.sourceText  = "Before [U+FFFC] after";
+  data.stats       = "Canonical source unit: U+FFFC OBJECT REPLACEMENT CHARACTER"
+               "\nImageSpan UTF-32 range: " + RangeText(imageIndex, imageIndex + 1u) +
+               "\nReserved size: 64x40 logical pixels"
+               "\nSpan count: 1";
+  data.result = builder.Build();
+  return data;
+}
+
 ExampleCase BuildCase(std::size_t index)
 {
   switch(index)
@@ -625,8 +653,10 @@ ExampleCase BuildCase(std::size_t index)
       return BuildUtf32BackToUtf8Case();
     case 11u:
       return BuildComplexUnicodeCase();
-    default:
+    case 12u:
       return BuildBoundaryFailureCase();
+    default:
+      return BuildImageSpanCase();
   }
 }
 

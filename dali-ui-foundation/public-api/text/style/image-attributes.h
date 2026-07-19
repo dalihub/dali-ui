@@ -71,11 +71,10 @@ public:
    */
   enum class Attribute : uint32_t
   {
-    SOURCE,          ///< The image resource identifier.
-    RESERVED_SIZE,   ///< The reserved image box size in logical pixels.
-    ALIGNMENT,       ///< The vertical alignment relative to the surrounding text metrics.
-    VERTICAL_OFFSET, ///< The vertical offset applied after alignment, in logical pixels.
-    ALTERNATIVE_TEXT ///< The alternative text, including an explicitly set empty string.
+    SOURCE,         ///< The image resource identifier.
+    RESERVED_SIZE,  ///< The reserved image box size in logical pixels.
+    ALIGNMENT,      ///< The vertical alignment relative to the surrounding text metrics.
+    VERTICAL_OFFSET ///< The vertical offset applied after alignment, in logical pixels.
   };
 
   /**
@@ -230,30 +229,6 @@ public:
    * @return The vertical offset in logical pixels
    */
   float GetVerticalOffset() const;
-
-  /**
-   * @brief Sets the alternative text for the image.
-   *
-   * An unset value means that no alternative text was authored. An explicitly
-   * set empty string expresses decorative intent, and a non-empty string is the
-   * authored textual alternative. The consuming text control determines how
-   * this value is exposed through accessibility and plain-text operations.
-   * Setting this attribute does not affect visual layout, and the source is
-   * never substituted for it.
-   *
-   * @param[in] text The alternative text, including an explicitly empty string
-   */
-  void SetAlternativeText(const Dali::String& text);
-
-  /**
-   * @brief Retrieves the alternative text for the image.
-   *
-   * Use Has(ALTERNATIVE_TEXT) to distinguish an unset value from an explicitly
-   * set empty string.
-   *
-   * @return The alternative text, or an empty string for a default-constructed object
-   */
-  Dali::String GetAlternativeText() const;
 
   /**
    * @brief Checks whether an attribute is explicitly set.

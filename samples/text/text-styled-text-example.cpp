@@ -46,7 +46,7 @@ constexpr float HEADER_HEIGHT       = HEADER_PADDING + HEADER_BADGE_HEIGHT + HEA
 constexpr float FOOTER_HEIGHT       = FOOTER_PADDING + FOOTER_BADGE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_ROW_GAP + FOOTER_LINE_HEIGHT + FOOTER_PADDING;
 constexpr int   WINDOW_WIDTH        = 920;
 constexpr int   WINDOW_HEIGHT       = 820;
-constexpr std::size_t CASE_COUNT     = 25u;
+constexpr std::size_t CASE_COUNT     = 26u;
 
 constexpr uint32_t BADGE_DISABLED_BACKGROUND = 0x1E293B;
 constexpr uint32_t BADGE_DISABLED_BORDER     = 0x475569;
@@ -87,6 +87,7 @@ enum class StyledTextCase
   ANCHOR_SPAN,
   MARKUP_TO_STYLED_TEXT_BASIC,
   MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY,
+  IMAGE_SPAN,
   FUTURE_GRADIENT_SPAN_DISABLED,
 };
 
@@ -146,6 +147,7 @@ constexpr std::array<StyledTextCaseInfo, CASE_COUNT> CASES{{
   {StyledTextCase::ANCHOR_SPAN, "AnchorSpan", "Two StyledText anchors. The first uses Label AnchorColor fallback; the second has explicit color and clicked color.", true, StyledTextValueKind::FOREGROUND, true, true, true},
   {StyledTextCase::MARKUP_TO_STYLED_TEXT_BASIC, "FromMarkup: basic styles", "Converts DALi markup to StyledText. SetText remains plain text.", true, StyledTextValueKind::NONE, false, false, true},
   {StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY, "FromMarkup: anchor + entities", "Converts anchor markup and entities to AnchorSpan and decoded text.", true, StyledTextValueKind::NONE, false, false, true},
+  {StyledTextCase::IMAGE_SPAN, "ImageSpan", "Recommended form: append one U+FFFC and attach one ImageSpan to its exact UTF-32 range.", true, StyledTextValueKind::NONE, false, false, false},
   {StyledTextCase::FUTURE_GRADIENT_SPAN_DISABLED, "Future GradientSpan", "Disabled placeholder. GradientSpan is not implemented in this phase.", false, StyledTextValueKind::NONE, false, false, false},
 }};
 
@@ -1003,6 +1005,26 @@ private:
         state.valueInfo = "href entity decode + unquoted attrs";
         return Text::StyledText::FromMarkup(state.text.c_str());
       }
+      case StyledTextCase::IMAGE_SPAN:
+      {
+        Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
+        builder.AppendText("Before ");
+
+        const uint32_t imageIndex = builder.GetUtf32Length();
+        builder.AppendText("\uFFFC");
+
+        builder.AppendText(" after");
+
+        Text::ImageAttributes imageAttributes(RESOURCES_DIR "flag_kr.png", Vector2(64.0f, 40.0f));
+        imageAttributes.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
+        builder.SetSpan(Text::ImageSpan::New(imageAttributes), imageIndex, imageIndex + 1u);
+
+        state.text      = "Before \uFFFC after";
+        state.spanMode  = "ImageSpan over one U+FFFC";
+        state.rangeInfo = "range: " + RangeText(imageIndex, imageIndex + 1u);
+        state.valueInfo = "reserved size: 64x40 | alignment: TEXT_CENTER";
+        return builder.Build();
+      }
       default:
       {
         state.text      = CurrentCase().title;
@@ -1469,6 +1491,8 @@ private:
         return FROM_MARKUP_BASIC_TEXT;
       case StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY:
         return FROM_MARKUP_ANCHOR_ENTITY_TEXT;
+      case StyledTextCase::IMAGE_SPAN:
+        return "Before \uFFFC after";
       default:
         return CurrentCase().title;
     }

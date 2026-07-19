@@ -31,11 +31,10 @@ namespace Text
 {
 namespace
 {
-constexpr uint32_t SOURCE_MASK           = 1u << 0u;
-constexpr uint32_t RESERVED_SIZE_MASK    = 1u << 1u;
-constexpr uint32_t ALIGNMENT_MASK        = 1u << 2u;
-constexpr uint32_t VERTICAL_OFFSET_MASK  = 1u << 3u;
-constexpr uint32_t ALTERNATIVE_TEXT_MASK = 1u << 4u;
+constexpr uint32_t SOURCE_MASK          = 1u << 0u;
+constexpr uint32_t RESERVED_SIZE_MASK   = 1u << 1u;
+constexpr uint32_t ALIGNMENT_MASK       = 1u << 2u;
+constexpr uint32_t VERTICAL_OFFSET_MASK = 1u << 3u;
 
 uint32_t ToMask(ImageAttributes::Attribute attribute)
 {
@@ -49,8 +48,6 @@ uint32_t ToMask(ImageAttributes::Attribute attribute)
       return ALIGNMENT_MASK;
     case ImageAttributes::Attribute::VERTICAL_OFFSET:
       return VERTICAL_OFFSET_MASK;
-    case ImageAttributes::Attribute::ALTERNATIVE_TEXT:
-      return ALTERNATIVE_TEXT_MASK;
   }
   return 0u;
 }
@@ -63,7 +60,7 @@ public:
   Vector2         reservedSize{};
   InlineAlignment alignment{InlineAlignment::TEXT_BOTTOM};
   float           verticalOffset{0.0f};
-  Dali::String    alternativeText;
+  Dali::String    alternativeText; ///< Reserved for future internal accessibility support.
   uint32_t        definedMask{0u};
 };
 
@@ -173,19 +170,6 @@ float ImageAttributes::GetVerticalOffset() const
   return mImpl->verticalOffset;
 }
 
-void ImageAttributes::SetAlternativeText(const Dali::String& text)
-{
-  DALI_ASSERT_VALID_IMAGE_ATTRIBUTES(mImpl);
-  mImpl->alternativeText = text;
-  mImpl->definedMask |= ALTERNATIVE_TEXT_MASK;
-}
-
-Dali::String ImageAttributes::GetAlternativeText() const
-{
-  DALI_ASSERT_VALID_IMAGE_ATTRIBUTES(mImpl);
-  return mImpl->alternativeText;
-}
-
 bool ImageAttributes::Has(Attribute attribute) const
 {
   DALI_ASSERT_VALID_IMAGE_ATTRIBUTES(mImpl);
@@ -216,8 +200,7 @@ bool ImageAttributes::operator==(const ImageAttributes& rhs) const
   return (!Has(Attribute::SOURCE) || mImpl->source == rhs.mImpl->source) &&
          (!Has(Attribute::RESERVED_SIZE) || mImpl->reservedSize == rhs.mImpl->reservedSize) &&
          (!Has(Attribute::ALIGNMENT) || mImpl->alignment == rhs.mImpl->alignment) &&
-         (!Has(Attribute::VERTICAL_OFFSET) || mImpl->verticalOffset == rhs.mImpl->verticalOffset) &&
-         (!Has(Attribute::ALTERNATIVE_TEXT) || mImpl->alternativeText == rhs.mImpl->alternativeText);
+         (!Has(Attribute::VERTICAL_OFFSET) || mImpl->verticalOffset == rhs.mImpl->verticalOffset);
 }
 
 bool ImageAttributes::operator!=(const ImageAttributes& rhs) const

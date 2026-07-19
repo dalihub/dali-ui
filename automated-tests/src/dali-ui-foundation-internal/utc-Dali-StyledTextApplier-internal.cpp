@@ -1484,11 +1484,9 @@ int UtcDaliStyledTextApplierImageReplacementSnapshotP(void)
   PublicText::ImageAttributes firstAttributes("icon.png", Vector2(24.0f, 18.0f));
   firstAttributes.SetAlignment(PublicText::ImageAttributes::InlineAlignment::TEXT_CENTER);
   firstAttributes.SetVerticalOffset(2.0f);
-  firstAttributes.SetAlternativeText("");
   PublicText::ImageSpan first = PublicText::ImageSpan::New(firstAttributes);
 
   PublicText::ImageAttributes secondAttributes("icon.png", Vector2(20.0f, 20.0f));
-  secondAttributes.SetAlternativeText("second icon");
   PublicText::ImageSpan second = PublicText::ImageSpan::New(secondAttributes);
 
   DALI_TEST_CHECK(builder.SetSpan(first, 1u, 6u));
