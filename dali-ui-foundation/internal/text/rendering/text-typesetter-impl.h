@@ -39,6 +39,7 @@ namespace Text
 {
 class ModelInterface;
 class ViewModel;
+struct FinalElisionResult;
 
 /**
  * @brief This class is seperated logics for TypeSetter.
@@ -77,6 +78,20 @@ public:
    * @return A pointer to the view model.
    */
   ViewModel* GetViewModel();
+
+  /**
+   * @brief Sets the model used by subsequent render calls.
+   *
+   * @param[in] model Pointer to the text's data model.
+   */
+  void SetModel(const ModelInterface* model);
+
+  /**
+   * @brief Sets the resolved replacement glyph sequence.
+   *
+   * @param[in] result The replacement result.
+   */
+  void SetFinalElisionResult(const FinalElisionResult* result);
 
   /**
    * @brief Set the font client.

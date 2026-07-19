@@ -29,6 +29,7 @@ namespace Ui
 {
 namespace Text
 {
+struct FinalElisionResult;
 /**
  * @brief Get the rendered size & position of a specific text range.
  * if the requested text is at multilines, multiple sizes/positions will be returned for each text located in a separate
@@ -42,7 +43,7 @@ namespace Text
  * @param[in] positionsList list of positions for the requested text
  */
 void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterIndex endIndex, Vector<Vector2>& sizesList,
-                     Vector<Vector2>& positionsList);
+                     Vector<Vector2>& positionsList, const FinalElisionResult* finalElision = nullptr);
 
 /**
  * @brief Get the line bounding rectangle.
@@ -83,7 +84,8 @@ float GetLineTop(const Vector<LineRun>& lines, const LineRun& lineRun);
  * @param[in] charIndex character index to which we want to calculate the geometry for.
  * @return Rect {x, y, width, height}.
  */
-Bounds GetCharacterBoundingRect(ModelPtr textModel, const uint32_t charIndex);
+Bounds GetCharacterBoundingRect(ModelPtr textModel, const uint32_t charIndex,
+                                const FinalElisionResult* finalElision = nullptr);
 
 /**
  * @brief Get the character index.

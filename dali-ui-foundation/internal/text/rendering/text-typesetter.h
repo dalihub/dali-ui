@@ -38,6 +38,7 @@ namespace Text
 class ModelInterface;
 class ViewModel;
 class Typesetter;
+struct FinalElisionResult;
 
 typedef IntrusivePtr<Typesetter> TypesetterPtr;
 
@@ -93,6 +94,20 @@ public:
    * @return A pointer to the view model.
    */
   ViewModel* GetViewModel();
+
+  /**
+   * @brief Sets the model used by subsequent render calls.
+   *
+   * @param[in] model Pointer to the text's data model.
+   */
+  void SetModel(const ModelInterface* model);
+
+  /**
+   * @brief Selects the resolved replacement glyph sequence used by subsequent render calls.
+   *
+   * @param[in] result The replacement result, or nullptr for the ordinary path.
+   */
+  void SetFinalElisionResult(const FinalElisionResult* result);
 
   /**
    * @brief Set the font client.

@@ -34,6 +34,8 @@ namespace Ui
 {
 namespace Text
 {
+struct FinalElisionResult;
+
 /**
  * @brief Responsible of creating and store temporary modifications of the text model.
  * i.e. The elide of text.
@@ -49,6 +51,22 @@ public:
    * @param[in] model Pointer to the text's model interface.
    */
   ViewModel(const ModelInterface* const model);
+
+  /**
+   * @brief Sets the model used to retrieve render data.
+   *
+   * Transient elision state associated with the previous model is cleared.
+   *
+   * @param[in] model Pointer to the text's data model.
+   */
+  void SetModel(const ModelInterface* model);
+
+  /**
+   * @brief Sets the resolved replacement glyph sequence.
+   *
+   * @param[in] result The replacement result.
+   */
+  void SetFinalElisionResult(const FinalElisionResult* result);
 
   /**
    * @brief Virtual destructor.
@@ -442,11 +460,12 @@ public:
   const Vector<CharacterDirection>& GetCharacterDirections() const override;
 
 private:
-  const ModelInterface* const mModel;            ///< Pointer to the text's model.
-  Vector<GlyphInfo>           mElidedGlyphs;     ///< Stores the glyphs of the elided text.
-  Vector<Vector2>             mElidedLayout;     ///< Stores the positions of each glyph of the elided text.
-  bool                        mIsTextElided : 1; ///< Whether the text has been elided.
-  float                       mElidedOffset;     ///< The width of the (control - elided line). This is required for calculating the correct
+  const ModelInterface*     mModel;              ///< Pointer to the current authoritative render model.
+  const FinalElisionResult* mFinalElisionResult; ///< Non-owning resolved replacement sequence.
+  Vector<GlyphInfo>         mElidedGlyphs;       ///< Fallback storage for unresolved ModelInterface implementations.
+  Vector<Vector2>           mElidedLayout;       ///< Fallback positions for unresolved ModelInterface implementations.
+  bool                      mIsTextElided : 1;   ///< Whether the text has been elided.
+  float                     mElidedOffset;       ///< The width of the (control - elided line). This is required for calculating the correct
                                                  ///< horizontal align offset.
   GlyphIndex mStartIndexOfElidedGlyphs;          ///< The start index of elided glyphs.
   GlyphIndex mEndIndexOfElidedGlyphs;            ///< The end index of elided glyphs.

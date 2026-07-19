@@ -23,6 +23,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/bounded-paragraph-run.h>
+#include <dali-ui-foundation/internal/text/final-elision-result.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/text-view-interface.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
@@ -62,6 +63,28 @@ public:
    * @param[in] logicalModel The logical model used by the View.
    */
   void SetLogicalModel(LogicalModelPtr logicalModel);
+
+  /**
+   * @brief Binds the final result owned by the active render model.
+   *
+   * A null pointer disables the cache and preserves the ordinary legacy path.
+   *
+   * @param[in] result The resolved final sequence, or nullptr to disable it.
+   */
+  void SetFinalElisionResult(const FinalElisionResult* result);
+
+  /**
+   * @brief Resolves the final glyph sequence for a completed layout generation.
+   *
+   * Repeated calls for the same generation reuse the resolved result.
+   *
+   * @param[in] fontClient The FontClient owned by the current text pipeline.
+   * @param[in,out] result The final glyph and source-mapping result.
+   * @param[in] layoutGeneration The generation of the completed layout pass.
+   */
+  void ResolveFinalElision(TextAbstraction::FontClient& fontClient,
+                           FinalElisionResult&          result,
+                           uint64_t                     layoutGeneration) const;
 
   /**
    * @copydoc Dali::Ui::Text::ViewInterface::GetControlSize()
@@ -306,6 +329,16 @@ public:
   Alignment GetVerticalLineAlignment() const override;
 
 private:
+  Length GetGlyphsUncached(GlyphInfo*                   glyphs,
+                           Vector2*                     glyphPositions,
+                           TextAbstraction::FontClient* fontClient,
+                           float&                       minLineOffset,
+                           GlyphIndex                   glyphIndex,
+                           Length                       numberOfGlyphs,
+                           GlyphIndex*                  sourceGlyphIndices      = nullptr,
+                           GlyphIndex*                  ellipsisFinalGlyphIndex = nullptr,
+                           bool                         hasActiveReplacement    = false) const;
+
   // Undefined
   View(const View& handle);
 
@@ -316,6 +349,7 @@ private:
   struct Impl;
   Impl* mImpl;
 };
+
 } // namespace Text
 
 } // namespace Ui

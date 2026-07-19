@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
+#include <dali-ui-foundation/internal/text/final-glyph-geometry.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
 #include <algorithm>
@@ -62,7 +63,7 @@ void UpdateLineInfo(const LineRun* lineRun, float& currentLineOffset, float& cur
 }
 
 void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterIndex endIndex, Vector<Vector2>& sizesList,
-                     Vector<Vector2>& positionsList)
+                     Vector<Vector2>& positionsList, const FinalElisionResult* finalElision)
 {
   VisualModelPtr&  visualModel  = textModel->mVisualModel;
   LogicalModelPtr& logicalModel = textModel->mLogicalModel;
@@ -160,15 +161,29 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
   CharacterDirection isPrevoiusRightToLeft =
     (nullptr != modelCharacterDirectionsBuffer ? *(modelCharacterDirectionsBuffer + startIndex) : false);
   const bool                   isEllipsisEnabled               = textModel->mElideEnabled;
+  const bool                   useFinalElision                 = finalElision && finalElision->resolved && finalElision->textElided;
   const GlyphIndex             startIndexOfGlyphs              = textModel->GetStartIndexOfElidedGlyphs();
   const GlyphIndex             endIndexOfGlyphs                = textModel->GetEndIndexOfElidedGlyphs();
   const GlyphIndex             firstMiddleIndexOfElidedGlyphs  = textModel->GetFirstMiddleIndexOfElidedGlyphs();
   const GlyphIndex             secondMiddleIndexOfElidedGlyphs = textModel->GetSecondMiddleIndexOfElidedGlyphs();
   const EllipsisPosition::Type ellipsisPosition                = textModel->GetEllipsisPosition();
+  bool                         hasBlock                        = false;
 
   for(GlyphIndex index = glyphStart; index <= glyphEnd; ++index)
   {
-    if(isEllipsisEnabled)
+    FinalGlyphGeometry finalGlyphGeometry;
+    if(useFinalElision)
+    {
+      if(!GetFinalSourceGlyphGeometry(*textModel, *finalElision, index, finalGlyphGeometry))
+      {
+        if(GetNextLine(index, lineIndex, lineRun, lastGlyphOfLine, numberOfLines, isLastLine))
+        {
+          UpdateLineInfo(lineRun, currentLineOffset, currentLineHeight, lastGlyphOfLine, isLastLine);
+        }
+        continue;
+      }
+    }
+    else if(isEllipsisEnabled)
     {
       if(ellipsisPosition == EllipsisPosition::MIDDLE)
       {
@@ -209,6 +224,8 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
 
     const GlyphInfo& glyph    = *(glyphsBuffer + index);
     const Vector2&   position = *(positionsBuffer + index);
+    const float      glyphX   = useFinalElision ? finalGlyphGeometry.contentLocalPenPosition.x
+                                                : lineRun->alignmentOffset + position.x;
 
     // If NULL, means all of the characters is left to right.
     isCurrentRightToLeft = (nullptr != modelCharacterDirectionsBuffer
@@ -224,7 +241,7 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
         (glyphStart == glyphEnd) ? (endIndex - startIndex) + 1 : (numberOfCharactersStart - interGlyphIndex);
 
       currentPosition.x =
-        lineRun->alignmentOffset + position.x - glyph.xBearing + textModel->mScrollPosition.x +
+        glyphX - glyph.xBearing + textModel->mScrollPosition.x +
         glyphAdvance * static_cast<float>(isCurrentRightToLeft
                                             ? (numberOfCharactersStart - interGlyphIndex - numberOfCharacters)
                                             : interGlyphIndex);
@@ -239,7 +256,7 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
       const CharacterIndex interGlyphIndex    = endIndex - *(glyphToCharacterBuffer + glyphEnd);
       const Length         numberOfCharacters = numberOfCharactersEnd - interGlyphIndex - 1;
 
-      currentPosition.x = lineRun->alignmentOffset + position.x - glyph.xBearing + textModel->mScrollPosition.x +
+      currentPosition.x = glyphX - glyph.xBearing + textModel->mScrollPosition.x +
                           (isCurrentRightToLeft ? (glyphAdvance * static_cast<float>(numberOfCharacters)) : 0.f);
       currentPosition.y = currentLineOffset + textModel->mScrollPosition.y;
       currentSize.x     = static_cast<float>(interGlyphIndex + 1) * glyphAdvance;
@@ -248,7 +265,7 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
     }
     else
     {
-      currentPosition.x = lineRun->alignmentOffset + position.x - glyph.xBearing + textModel->mScrollPosition.x;
+      currentPosition.x = glyphX - glyph.xBearing + textModel->mScrollPosition.x;
       currentPosition.y = currentLineOffset + textModel->mScrollPosition.y;
       currentSize.x     = glyph.advance;
       currentSize.y     = currentLineHeight;
@@ -260,13 +277,14 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
       }
     }
 
-    if((index == glyphStart) ||
+    if(!hasBlock || (index == glyphStart) ||
        (isEllipsisEnabled &&
         (((ellipsisPosition == EllipsisPosition::MIDDLE) && (index == secondMiddleIndexOfElidedGlyphs)) ||
          ((ellipsisPosition == EllipsisPosition::START) && (index - 1 == startIndexOfGlyphs)))))
     {
       blockPos  = currentPosition;
       blockSize = currentSize;
+      hasBlock  = true;
     }
     else if((isPrevoiusRightToLeft != isCurrentRightToLeft) ||
             (!Dali::Equals(blockPos.y, currentPosition.y))) // new direction or new line
@@ -290,9 +308,11 @@ void GetTextGeometry(ModelPtr textModel, CharacterIndex startIndex, CharacterInd
     isPrevoiusRightToLeft = isCurrentRightToLeft;
   }
 
-  // add last block
-  sizesList.PushBack(blockSize);
-  positionsList.PushBack(blockPos);
+  if(hasBlock)
+  {
+    sizesList.PushBack(blockSize);
+    positionsList.PushBack(blockPos);
+  }
 }
 
 float GetLineLeft(const LineRun& lineRun)
@@ -375,7 +395,8 @@ float GetCharacterWidth(const GlyphInfo& glyph)
   return glyph.advance;
 }
 
-Bounds GetCharacterBoundingRect(ModelPtr textModel, const uint32_t charIndex)
+Bounds GetCharacterBoundingRect(ModelPtr textModel, const uint32_t charIndex,
+                                const FinalElisionResult* finalElision)
 {
   if(textModel->mVisualModel == nullptr)
   {
@@ -404,9 +425,21 @@ Bounds GetCharacterBoundingRect(ModelPtr textModel, const uint32_t charIndex)
   const int      lineIndex = visualModel->GetLineOfCharacter(charIndex);
   const LineRun& lineRun   = lines[lineIndex];
 
-  // Calculate the left: x position of the glyph + alignmentOffset of the line +  mScrollPosition.x.
-  float characterX =
-    lineRun.alignmentOffset + GetCharacterLeft(glyphInfo, characterPosition) + textModel->mScrollPosition.x;
+  float characterX = 0.0f;
+  if(finalElision && finalElision->resolved && finalElision->textElided)
+  {
+    FinalGlyphGeometry finalGlyphGeometry;
+    if(!GetFinalSourceGlyphGeometry(*textModel, *finalElision, glyphIndex, finalGlyphGeometry))
+    {
+      return {0, 0, 0, 0};
+    }
+    characterX = finalGlyphGeometry.contentLocalPenPosition.x - glyphInfo.xBearing + textModel->mScrollPosition.x;
+  }
+  else
+  {
+    characterX = lineRun.alignmentOffset + GetCharacterLeft(glyphInfo, characterPosition) +
+                 textModel->mScrollPosition.x;
+  }
 
   // Calculate the Top(characterY): position.Y + previouse lines height + mScrollPosition.y.
   bool isFirstLine = lineIndex == 0;

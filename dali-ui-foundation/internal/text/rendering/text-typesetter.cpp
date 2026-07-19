@@ -198,6 +198,16 @@ ViewModel* Typesetter::GetViewModel()
   return mImpl->GetViewModel();
 }
 
+void Typesetter::SetModel(const ModelInterface* model)
+{
+  mImpl->SetModel(model);
+}
+
+void Typesetter::SetFinalElisionResult(const FinalElisionResult* result)
+{
+  mImpl->SetFinalElisionResult(result);
+}
+
 void Typesetter::SetFontClient(TextAbstraction::FontClient& fontClient)
 {
   mImpl->SetFontClient(fontClient);

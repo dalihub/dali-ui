@@ -22,8 +22,10 @@
 #include <memory.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/final-elision-result.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
 namespace Dali
 {
@@ -52,10 +54,57 @@ void GlyphMemmove(T* buffer, Length bufferSize, Length dstIndex, Length srcIndex
     memmove(buffer + dstIndex, buffer + srcIndex, safeCount * sizeof(T));
   }
 }
+
+FontId FindEllipsisFontId(const GlyphInfo* glyphs, Length numberOfGlyphs, GlyphIndex glyphIndex)
+{
+  if(!glyphs || glyphIndex >= numberOfGlyphs)
+  {
+    return 0u;
+  }
+
+  if(glyphs[glyphIndex].fontId != 0u)
+  {
+    return glyphs[glyphIndex].fontId;
+  }
+
+  if(!IsSyntheticReplacementGlyph(glyphs[glyphIndex]))
+  {
+    return 0u;
+  }
+
+  // A replacement is deliberately not backed by a font glyph. If END
+  // ellipsis lands on it, use the closest surrounding text font so the
+  // replacement box itself can be exchanged for the ellipsis glyph. Looking
+  // backward first follows the existing tail-elision typography.
+  for(Length distance = 1u; distance < numberOfGlyphs; ++distance)
+  {
+    if(distance <= glyphIndex)
+    {
+      const FontId precedingFontId = glyphs[glyphIndex - distance].fontId;
+      if(precedingFontId != 0u)
+      {
+        return precedingFontId;
+      }
+    }
+
+    const GlyphIndex followingIndex = glyphIndex + distance;
+    if(followingIndex < numberOfGlyphs)
+    {
+      const FontId followingFontId = glyphs[followingIndex].fontId;
+      if(followingFontId != 0u)
+      {
+        return followingFontId;
+      }
+    }
+  }
+
+  return 0u;
+}
 } // unnamed namespace
 
 ViewModel::ViewModel(const ModelInterface* const model)
 : mModel(model),
+  mFinalElisionResult(nullptr),
   mElidedGlyphs(),
   mElidedLayout(),
   mIsTextElided(false),
@@ -69,6 +118,28 @@ ViewModel::ViewModel(const ModelInterface* const model)
 
 ViewModel::~ViewModel()
 {
+}
+
+void ViewModel::SetModel(const ModelInterface* model)
+{
+  mFinalElisionResult = nullptr;
+  if(mModel != model)
+  {
+    mModel = model;
+    mElidedGlyphs.Clear();
+    mElidedLayout.Clear();
+    mIsTextElided                    = false;
+    mElidedOffset                    = 0.0f;
+    mStartIndexOfElidedGlyphs        = 0u;
+    mEndIndexOfElidedGlyphs          = 0u;
+    mFirstMiddleIndexOfElidedGlyphs  = 0u;
+    mSecondMiddleIndexOfElidedGlyphs = 0u;
+  }
+}
+
+void ViewModel::SetFinalElisionResult(const FinalElisionResult* result)
+{
+  mFinalElisionResult = result;
 }
 
 const Size& ViewModel::GetControlSize() const
@@ -140,7 +211,7 @@ Length ViewModel::GetNumberOfGlyphs() const
 {
   if(mIsTextElided && mModel->IsTextElideEnabled())
   {
-    return mElidedGlyphs.Count();
+    return mFinalElisionResult ? mFinalElisionResult->glyphs.Count() : mElidedGlyphs.Count();
   }
   else
   {
@@ -194,7 +265,7 @@ const GlyphInfo* ViewModel::GetGlyphs() const
 {
   if(mIsTextElided && mModel->IsTextElideEnabled())
   {
-    return mElidedGlyphs.Begin();
+    return mFinalElisionResult ? mFinalElisionResult->glyphs.Begin() : mElidedGlyphs.Begin();
   }
   else
   {
@@ -208,7 +279,7 @@ const Vector2* ViewModel::GetLayout() const
 {
   if(mIsTextElided && mModel->IsTextElideEnabled())
   {
-    return mElidedLayout.Begin();
+    return mFinalElisionResult ? mFinalElisionResult->lineLocalGlyphPositions.Begin() : mElidedLayout.Begin();
   }
   else
   {
@@ -398,8 +469,20 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
 {
   mIsTextElided             = false;
   mStartIndexOfElidedGlyphs = mFirstMiddleIndexOfElidedGlyphs = mSecondMiddleIndexOfElidedGlyphs = 0;
-  mEndIndexOfElidedGlyphs                                                                        = mModel->GetNumberOfGlyphs() - 1u;
+  mEndIndexOfElidedGlyphs                                                                        = mModel->GetNumberOfGlyphs() == 0u ? 0u : mModel->GetNumberOfGlyphs() - 1u;
 
+  if(mFinalElisionResult && mFinalElisionResult->resolved)
+  {
+    mIsTextElided                    = mFinalElisionResult->textElided;
+    mElidedOffset                    = mFinalElisionResult->elidedOffset;
+    mStartIndexOfElidedGlyphs        = mFinalElisionResult->startIndex;
+    mEndIndexOfElidedGlyphs          = mFinalElisionResult->endIndex;
+    mFirstMiddleIndexOfElidedGlyphs  = mFinalElisionResult->firstMiddleIndex;
+    mSecondMiddleIndexOfElidedGlyphs = mFinalElisionResult->secondMiddleIndex;
+    return;
+  }
+
+  // Ordinary models retain the existing renderer-owned ellipsis path.
   auto                          ellipsisPosition          = GetEllipsisPosition();
   auto                          characterSpacing          = GetCharacterSpacing();
   const Character*              textBuffer                = GetTextBuffer();
@@ -535,13 +618,22 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
           {
             const GlyphInfo& glyphToRemove = *(elidedGlyphsBuffer + indexOfEllipsis);
 
-            if(0u != glyphToRemove.fontId)
-            {
-              // i.e. The font id of the glyph shaped from the '\n' character is zero.
+            // Every removed glyph contributes to the fit calculation, even
+            // if it has no FontClient glyph. Synthetic replacements use
+            // fontId 0 but can have a large non-zero advance. Keeping that
+            // advance here leaves a replacement-sized hole before ellipsis.
+            calculatedAdvance = GetCalculatedAdvance(*(textBuffer + (*(glyphToCharacterMapBuffer + indexOfEllipsis))),
+                                                     characterSpacing, glyphToRemove.advance);
+            removedGlypsWidth += calculatedAdvance;
+            actualAdvance -= glyphToRemove.advance;
 
+            const FontId ellipsisFontId = FindEllipsisFontId(elidedGlyphsBuffer, numberOfGlyphs, indexOfEllipsis);
+
+            if(0u != ellipsisFontId)
+            {
               // Need to reshape the glyph as the font may be different in size.
               const GlyphInfo& ellipsisGlyph =
-                fontClient.GetEllipsisGlyph(fontClient.GetPointSize(glyphToRemove.fontId));
+                fontClient.GetEllipsisGlyph(fontClient.GetPointSize(ellipsisFontId));
 
               if(!firstPenSet || EqualsZero(glyphToRemove.advance))
               {
@@ -560,14 +652,9 @@ void ViewModel::ElideGlyphs(TextAbstraction::FontClient& fontClient)
                 firstPenSet = true;
               }
 
-              calculatedAdvance = GetCalculatedAdvance(*(textBuffer + (*(glyphToCharacterMapBuffer + indexOfEllipsis))),
-                                                       characterSpacing, glyphToRemove.advance);
-              removedGlypsWidth += calculatedAdvance;
-
               // Calculate the width of the ellipsis glyph and check if it fits.
               const float ellipsisGlyphWidth = ellipsisGlyph.advance;
 
-              actualAdvance -= glyphToRemove.advance;
               float calculatedWidth = actualAdvance + ellipsisGlyphWidth;
 
               // For Marquee, there are cases where the layout is larger than the control.

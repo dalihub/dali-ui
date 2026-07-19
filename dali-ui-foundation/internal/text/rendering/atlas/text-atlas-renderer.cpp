@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
@@ -566,6 +567,17 @@ struct AtlasRenderer::Impl
       else
       {
         glyph = *(glyphsBuffer + i);
+      }
+
+      // Synthetic replacement glyphs are layout-only. ImageVisual renders the
+      // reserved box, so atlas/font/style work must be skipped completely.
+      if(Text::IsSyntheticReplacementGlyph(glyph))
+      {
+        if(addHyphen)
+        {
+          hyphenIndex++;
+        }
+        continue;
       }
 
       Vector<UnderlinedGlyphRun>::ConstIterator currentUnderlinedGlyphRunIt = underlineRuns.End();

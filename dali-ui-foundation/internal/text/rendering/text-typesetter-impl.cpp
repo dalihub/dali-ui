@@ -17,6 +17,7 @@
 
 // CLASS HEADER
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter-impl.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
@@ -747,6 +748,13 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
                                    const InputParameterForEachGlyph& inputParamsForGlyph,
                                    OutputParameterForEachGlyph&      outputParamsForGlyph)
 {
+  // Replacement glyphs reserve layout space only. They never participate in
+  // font bitmap lookup, text effects, underline or strikethrough rasterization.
+  if(IsSyntheticReplacementGlyph(*glyphInfo))
+  {
+    return;
+  }
+
   Vector<UnderlinedGlyphRun>::ConstIterator currentUnderlinedGlyphRunIt = inputParamsForGlyph.underlineRuns.End();
   const bool                                underlineGlyph =
     inputParamsForGlyph.underlineEnabled ||
@@ -1038,7 +1046,8 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
       glyphInfo = inputParamsForGlyph.glyphsBuffer + elidedGlyphIndex;
     }
 
-    if((glyphInfo->width < Math::MACHINE_EPSILON_1000) || (glyphInfo->height < Math::MACHINE_EPSILON_1000))
+    if(IsSyntheticReplacementGlyph(*glyphInfo) ||
+       (glyphInfo->width < Math::MACHINE_EPSILON_1000) || (glyphInfo->height < Math::MACHINE_EPSILON_1000))
     {
       // Nothing to do if the glyph's width or height is zero.
       continue;
@@ -1196,7 +1205,8 @@ void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient   
       glyphInfo = inputParamsForGlyph.glyphsBuffer + elidedGlyphIndex;
     }
 
-    if((glyphInfo->width < Math::MACHINE_EPSILON_1000) || (glyphInfo->height < Math::MACHINE_EPSILON_1000))
+    if(IsSyntheticReplacementGlyph(*glyphInfo) ||
+       (glyphInfo->width < Math::MACHINE_EPSILON_1000) || (glyphInfo->height < Math::MACHINE_EPSILON_1000))
     {
       continue;
     }
@@ -1864,6 +1874,16 @@ Typesetter::Impl::Impl(const ModelInterface* const model)
 }
 
 Typesetter::Impl::~Impl() = default;
+
+void Typesetter::Impl::SetModel(const ModelInterface* model)
+{
+  mModel->SetModel(model);
+}
+
+void Typesetter::Impl::SetFinalElisionResult(const FinalElisionResult* result)
+{
+  mModel->SetFinalElisionResult(result);
+}
 
 } // namespace Text
 
