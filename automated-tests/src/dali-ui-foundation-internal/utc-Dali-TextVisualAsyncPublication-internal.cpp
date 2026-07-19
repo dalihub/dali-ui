@@ -15,6 +15,10 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <dali.h>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
@@ -27,7 +31,6 @@
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui/ui-event-thread-callback.h>
-#include <dali.h>
 
 using namespace Dali;
 

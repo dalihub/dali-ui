@@ -15,16 +15,15 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/rendering/view-model.h>
-
 // EXTERNAL INCLUDES
 #include <memory.h>
+#include <algorithm>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/final-elision-result.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
+#include <dali-ui-foundation/internal/text/rendering/view-model.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
 namespace Dali

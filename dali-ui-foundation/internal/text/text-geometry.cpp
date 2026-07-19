@@ -15,19 +15,17 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/text-geometry.h>
-
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/math/math-utils.h>
+#include <algorithm>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/final-glyph-geometry.h>
 #include <dali-ui-foundation/internal/text/line-run.h>
+#include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/visual-model-impl.h>
-#include <algorithm>
 
 using namespace Dali;
 

@@ -15,9 +15,6 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.h>
-
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/trace.h>
@@ -28,6 +25,7 @@
 #include <dali-ui-foundation/internal/text/bidirectional-support.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
+#include <dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>

@@ -1,5 +1,5 @@
-#ifndef DALI_UI_EDITABLE_INLINE_REPLACEMENT_RUNTIME_H
-#define DALI_UI_EDITABLE_INLINE_REPLACEMENT_RUNTIME_H
+#ifndef DALI_UI_EDITABLE_INLINE_REPLACEMENT_DATA_H
+#define DALI_UI_EDITABLE_INLINE_REPLACEMENT_DATA_H
 
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -33,7 +34,7 @@ struct ReplacementRenderState;
 namespace Dali::Ui::Internal::Text
 {
 /**
- * @brief Enumerates the actions for an editable replacement runtime update.
+ * @brief Enumerates actions for updating editable inline replacement data.
  */
 enum class EditableInlineReplacementUpdate
 {
@@ -43,12 +44,12 @@ enum class EditableInlineReplacementUpdate
 };
 
 /**
- * @brief Resolves the runtime action for authored and rendered replacement state.
+ * @brief Resolves the update action for authored and rendered replacement state.
  *
  * @param[in] source The current authored replacement source.
  * @param[in] state The current replacement render state.
  * @param[in] suppressed Whether replacement rendering is explicitly suppressed.
- * @return The action for the editable replacement runtime.
+ * @return The editable inline replacement update action.
  */
 EditableInlineReplacementUpdate ResolveEditableInlineReplacementUpdate(
   const Ui::Text::ReplacementSourceSnapshot& source,
@@ -56,12 +57,21 @@ EditableInlineReplacementUpdate ResolveEditableInlineReplacementUpdate(
   bool                                       suppressed);
 
 /**
- * @brief Stores the on-demand ImageVisual runtime of an editable text control.
+ * @brief Stores on-demand inline replacement data for an editable text control.
  */
-struct EditableInlineReplacementRuntime
+struct EditableInlineReplacementData
 {
-  explicit EditableInlineReplacementRuntime(Ui::View owner);
-  ~EditableInlineReplacementRuntime();
+  /**
+   * @brief Creates inline replacement data for an editable visual owner.
+   *
+   * @param[in] owner The visual owner.
+   */
+  explicit EditableInlineReplacementData(Ui::View owner);
+
+  /**
+   * @brief Destroys the inline replacement data and its visual layer.
+   */
+  ~EditableInlineReplacementData();
 
   /**
    * @brief Places the visual layer in the editable content hierarchy.
@@ -81,43 +91,43 @@ struct EditableInlineReplacementRuntime
 };
 
 /**
- * @brief Gets an editable inline replacement runtime.
+ * @brief Gets editable inline replacement data.
  *
  * @param[in] owner The visual owner.
- * @return The runtime, or nullptr.
+ * @return The data, or nullptr.
  */
-EditableInlineReplacementRuntime* GetEditableInlineReplacementRuntime(Ui::View owner);
+EditableInlineReplacementData* GetEditableInlineReplacementData(Ui::View owner);
 
 /**
- * @brief Gets an editable inline replacement runtime during owner destruction.
+ * @brief Gets editable inline replacement data from a visual owner implementation.
  *
  * @param[in] owner The visual owner implementation.
- * @return The runtime, or nullptr.
+ * @return The data, or nullptr.
  */
-EditableInlineReplacementRuntime* GetEditableInlineReplacementRuntime(Ui::ViewImpl& owner);
+EditableInlineReplacementData* GetEditableInlineReplacementData(Ui::ViewImpl& owner);
 
 /**
- * @brief Gets or creates an editable inline replacement runtime.
+ * @brief Gets or creates editable inline replacement data.
  *
  * @param[in] owner The visual owner.
- * @return The runtime.
+ * @return The data.
  */
-EditableInlineReplacementRuntime& GetOrCreateEditableInlineReplacementRuntime(Ui::View owner);
+EditableInlineReplacementData& GetOrCreateEditableInlineReplacementData(Ui::View owner);
 
 /**
- * @brief Removes an editable inline replacement runtime.
+ * @brief Removes editable inline replacement data.
  *
  * @param[in] owner The visual owner.
  */
-void RemoveEditableInlineReplacementRuntime(Ui::View owner);
+void RemoveEditableInlineReplacementData(Ui::View owner);
 
 /**
- * @brief Removes an editable inline replacement runtime during owner destruction.
+ * @brief Removes editable inline replacement data from a visual owner implementation.
  *
  * @param[in] owner The visual owner implementation.
  */
-void RemoveEditableInlineReplacementRuntime(Ui::ViewImpl& owner);
+void RemoveEditableInlineReplacementData(Ui::ViewImpl& owner);
 
 } // namespace Dali::Ui::Internal::Text
 
-#endif // DALI_UI_EDITABLE_INLINE_REPLACEMENT_RUNTIME_H
+#endif // DALI_UI_EDITABLE_INLINE_REPLACEMENT_DATA_H

@@ -14,12 +14,14 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
+// EXTERNAL INCLUDES
 #include <cstdint>
 #include <sstream>
 #include <string>
 #include <vector>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -632,9 +634,9 @@ private:
 
   void ResetLayoutOverrides()
   {
-    mHorizontalAlignmentOverride = AlignmentOverride::CASE_DEFAULT;
-    mVerticalAlignmentOverride   = AlignmentOverride::CASE_DEFAULT;
-    mOverflowOverride            = ToggleOverride::CASE_DEFAULT;
+    mHorizontalAlignmentOverride = AlignmentOverride::START;
+    mVerticalAlignmentOverride   = AlignmentOverride::START;
+    mOverflowOverride            = ToggleOverride::ON;
     mMultilineOverride           = ToggleOverride::CASE_DEFAULT;
     mRelativeLineHeightEnabled   = false;
     mWrapContentHeightEnabled    = false;
@@ -988,9 +990,9 @@ private:
   bool              mLifecycleAlternate{false};
   bool              mRelativeLineHeightEnabled{false};
   bool              mWrapContentHeightEnabled{false};
-  AlignmentOverride mHorizontalAlignmentOverride{AlignmentOverride::CASE_DEFAULT};
-  AlignmentOverride mVerticalAlignmentOverride{AlignmentOverride::CASE_DEFAULT};
-  ToggleOverride    mOverflowOverride{ToggleOverride::CASE_DEFAULT};
+  AlignmentOverride mHorizontalAlignmentOverride{AlignmentOverride::START};
+  AlignmentOverride mVerticalAlignmentOverride{AlignmentOverride::START};
+  ToggleOverride    mOverflowOverride{ToggleOverride::ON};
   ToggleOverride    mMultilineOverride{ToggleOverride::CASE_DEFAULT};
   std::string       mActionStatus;
 };

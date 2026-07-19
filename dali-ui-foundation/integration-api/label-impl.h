@@ -18,7 +18,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/integration-api/system/system-settings.h>
 #include <string>
 
@@ -42,6 +41,7 @@
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
 {
@@ -903,13 +903,38 @@ private: // Implementation
    */
   void RequestRendererUpdate();
 
+  /**
+   * @brief Checks whether valid inline replacement source data is available.
+   *
+   * @return true if the current text contains an applicable replacement source.
+   */
   bool HasInlineReplacementSource() const;
-  void ClearInlineReplacementRuntime();
-  void UpdateInlineReplacementRuntime(const Text::ReplacementSourceSnapshot&    source,
-                                      const Vector<Text::ReplacementPlacement>& placements,
-                                      uint64_t                                  sourceRevision,
-                                      const Vector2&                            ownerSize,
-                                      const Insets&                             padding);
+
+  /**
+   * @brief Removes on-demand inline replacement data and disconnects resource notifications.
+   */
+  void ClearInlineReplacementData();
+
+  /**
+   * @brief Updates on-demand inline replacement data from the final text layout.
+   *
+   * @param[in] source The authored replacement source.
+   * @param[in] placements The final replacement placements.
+   * @param[in] sourceRevision The revision of @p source.
+   * @param[in] ownerSize The control size.
+   * @param[in] padding The effective text padding.
+   */
+  void UpdateInlineReplacementData(const Text::ReplacementSourceSnapshot&    source,
+                                   const Vector<Text::ReplacementPlacement>& placements,
+                                   uint64_t                                  sourceRevision,
+                                   const Vector2&                            ownerSize,
+                                   const Insets&                             padding);
+
+  /**
+   * @brief Refreshes inline replacement visuals after resource loading.
+   *
+   * @param[in] view The visual owner.
+   */
   void OnInlineReplacementResourcesReady(Ui::View view);
 
   /**

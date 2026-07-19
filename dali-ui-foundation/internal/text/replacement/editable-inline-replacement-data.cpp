@@ -14,20 +14,21 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-runtime.h>
+// EXTERNAL INCLUDES
+#include <dali/public-api/common/unique-ptr.h>
 
-#include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
-
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
+#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-data.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
-#include <dali/public-api/common/unique-ptr.h>
 
 namespace Dali::Ui::Internal::Text
 {
 namespace
 {
-const AttachmentId EDITABLE_INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID = AttachmentId::Alloc();
+const AttachmentId EDITABLE_INLINE_REPLACEMENT_DATA_ATTACHMENT_ID = AttachmentId::Alloc();
 }
 
 EditableInlineReplacementUpdate ResolveEditableInlineReplacementUpdate(
@@ -50,7 +51,7 @@ EditableInlineReplacementUpdate ResolveEditableInlineReplacementUpdate(
            : EditableInlineReplacementUpdate::CLEAR;
 }
 
-EditableInlineReplacementRuntime::EditableInlineReplacementRuntime(Ui::View owner)
+EditableInlineReplacementData::EditableInlineReplacementData(Ui::View owner)
 : visualLayer(Ui::View::New()),
   host(visualLayer, Dali::Ui::Integration::DepthIndex::CONTENT)
 {
@@ -61,16 +62,16 @@ EditableInlineReplacementRuntime::EditableInlineReplacementRuntime(Ui::View owne
   visualLayer.SetUiScalePolicy(UiScalePolicy::DISABLED);
 }
 
-EditableInlineReplacementRuntime::~EditableInlineReplacementRuntime()
+EditableInlineReplacementData::~EditableInlineReplacementData()
 {
   manager.Clear();
   visualLayer.Unparent();
 }
 
-void EditableInlineReplacementRuntime::PlaceVisualLayer(Actor          contentParent,
-                                                        Actor          textActor,
-                                                        Actor          cursorLayer,
-                                                        const Vector2& contentSize)
+void EditableInlineReplacementData::PlaceVisualLayer(Actor          contentParent,
+                                                     Actor          textActor,
+                                                     Actor          cursorLayer,
+                                                     const Vector2& contentSize)
 {
   if(!contentParent || !visualLayer)
   {
@@ -95,46 +96,46 @@ void EditableInlineReplacementRuntime::PlaceVisualLayer(Actor          contentPa
   }
 }
 
-EditableInlineReplacementRuntime* GetEditableInlineReplacementRuntime(Ui::View owner)
+EditableInlineReplacementData* GetEditableInlineReplacementData(Ui::View owner)
 {
-  return owner ? owner.GetAttachment<EditableInlineReplacementRuntime>(EDITABLE_INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID)
+  return owner ? owner.GetAttachment<EditableInlineReplacementData>(EDITABLE_INLINE_REPLACEMENT_DATA_ATTACHMENT_ID)
                : nullptr;
 }
 
-EditableInlineReplacementRuntime* GetEditableInlineReplacementRuntime(Ui::ViewImpl& owner)
+EditableInlineReplacementData* GetEditableInlineReplacementData(Ui::ViewImpl& owner)
 {
-  using StoredType      = Dali::UniquePtr<EditableInlineReplacementRuntime>;
+  using StoredType      = Dali::UniquePtr<EditableInlineReplacementData>;
   UniqueAny* attachment = Internal::ViewDataImpl::Get(owner).GetAttachment(
-    EDITABLE_INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID);
+    EDITABLE_INLINE_REPLACEMENT_DATA_ATTACHMENT_ID);
   StoredType* data = attachment ? attachment->Get<StoredType>() : nullptr;
   return data ? data->Get() : nullptr;
 }
 
-EditableInlineReplacementRuntime& GetOrCreateEditableInlineReplacementRuntime(Ui::View owner)
+EditableInlineReplacementData& GetOrCreateEditableInlineReplacementData(Ui::View owner)
 {
-  DALI_ASSERT_ALWAYS(owner && "Inline replacement runtime requires a valid owner");
-  EditableInlineReplacementRuntime* data = GetEditableInlineReplacementRuntime(owner);
+  DALI_ASSERT_ALWAYS(owner && "Inline replacement data requires a valid owner");
+  EditableInlineReplacementData* data = GetEditableInlineReplacementData(owner);
   if(!data)
   {
-    owner.SetAttachment(EDITABLE_INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID,
-                        Dali::MakeUnique<EditableInlineReplacementRuntime>(owner));
-    data = GetEditableInlineReplacementRuntime(owner);
+    owner.SetAttachment(EDITABLE_INLINE_REPLACEMENT_DATA_ATTACHMENT_ID,
+                        Dali::MakeUnique<EditableInlineReplacementData>(owner));
+    data = GetEditableInlineReplacementData(owner);
   }
-  DALI_ASSERT_ALWAYS(data && "Inline replacement runtime creation failed");
+  DALI_ASSERT_ALWAYS(data && "Inline replacement data creation failed");
   return *data;
 }
 
-void RemoveEditableInlineReplacementRuntime(Ui::View owner)
+void RemoveEditableInlineReplacementData(Ui::View owner)
 {
   if(owner)
   {
-    owner.RemoveAttachment(EDITABLE_INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID);
+    owner.RemoveAttachment(EDITABLE_INLINE_REPLACEMENT_DATA_ATTACHMENT_ID);
   }
 }
 
-void RemoveEditableInlineReplacementRuntime(Ui::ViewImpl& owner)
+void RemoveEditableInlineReplacementData(Ui::ViewImpl& owner)
 {
-  Internal::ViewDataImpl::Get(owner).RemoveAttachment(EDITABLE_INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID);
+  Internal::ViewDataImpl::Get(owner).RemoveAttachment(EDITABLE_INLINE_REPLACEMENT_DATA_ATTACHMENT_ID);
 }
 
 } // namespace Dali::Ui::Internal::Text

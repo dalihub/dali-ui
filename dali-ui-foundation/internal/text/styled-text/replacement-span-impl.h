@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/styled-text/span-impl.h>
 
 namespace Dali

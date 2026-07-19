@@ -16,15 +16,18 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
-#include <dali-ui-foundation/public-api/views/view.h>
+// EXTERNAL INCLUDES
 #include <dali/public-api/math/vector4.h>
 #include <dali/public-api/object/weak-handle.h>
 #include <cstdint>
 #include <string>
 #include <unordered_map>
 #include <vector>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali
 {
@@ -36,11 +39,7 @@ namespace Text
 {
 
 /**
- * @brief Control-independent registered-visual host for inline replacements.
- *
- * Each host allocates owner-local dynamic property indices, so it never
- * depends on a Label/InputField/InputEditor property namespace. The owning
- * control chooses the content depth when constructing the host.
+ * @brief Registers inline replacement visuals for an owning view.
  */
 class InlineReplacementViewHost
 {
@@ -105,11 +104,7 @@ private:
 };
 
 /**
- * @brief Control-owned runtime for laid-out inline replacements.
- *
- * The manager owns ImageVisual handles, not child Actors. Authored source data
- * and final placements are diffed by occurrence identity. The runtime is
- * control-independent; its owner supplies the final placements.
+ * @brief Manages inline replacement visuals for final text placements.
  */
 class InlineReplacementManager
 {

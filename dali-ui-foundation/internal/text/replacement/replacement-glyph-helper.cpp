@@ -14,13 +14,12 @@
  * limitations under the License.
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
-
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/replacement/replacement-segment-iterator.h>
+// EXTERNAL INCLUDES
 #include <algorithm>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-segment-iterator.h>
 namespace Dali::Ui::Text
 {
 namespace

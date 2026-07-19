@@ -15,9 +15,6 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/async-text/async-text-manager-impl.h>
-
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/environment-variable.h>
 #include <dali/devel-api/common/singleton-service.h>
@@ -29,6 +26,7 @@
 #include <mutex>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/async-text/async-text-manager-impl.h>
 
 namespace Dali
 {

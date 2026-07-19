@@ -15,9 +15,6 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
-
 // EXTERNAL INCLUDES
 #include <dali/integration-api/adaptor-framework/clipboard-integ.h>
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
@@ -35,6 +32,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-data-clearer.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-event-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.h>
+#include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>

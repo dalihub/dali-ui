@@ -14,13 +14,13 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
-
 // EXTERNAL INCLUDES
 #include <algorithm>
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/final-glyph-geometry.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
 
 namespace Dali::Ui::Text
 {

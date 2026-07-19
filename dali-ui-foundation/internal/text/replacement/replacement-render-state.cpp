@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-// CLASS HEADER
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 
 namespace Dali::Ui::Text

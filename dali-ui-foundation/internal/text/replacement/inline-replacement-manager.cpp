@@ -14,15 +14,16 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
-
+// EXTERNAL INCLUDES
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <algorithm>
 #include <cmath>
 #include <limits>
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
+#include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-url.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>

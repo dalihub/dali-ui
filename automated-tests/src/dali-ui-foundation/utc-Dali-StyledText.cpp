@@ -15,11 +15,14 @@
  *
  */
 
+// EXTERNAL INCLUDES
 #include <stdlib.h>
 #include <dali.h>
+#include <utility>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
-#include <utility>
 
 using namespace Dali;
 using namespace Dali::Ui;

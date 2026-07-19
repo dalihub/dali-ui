@@ -14,12 +14,11 @@
  * limitations under the License.
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
-
 // EXTERNAL INCLUDES
 #include <algorithm>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 namespace Dali::Ui::Text
 {
 namespace

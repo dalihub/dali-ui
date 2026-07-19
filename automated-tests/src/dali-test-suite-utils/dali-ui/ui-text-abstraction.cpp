@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// EXTERNAL INCLUDES
 #include <dali/devel-api/common/singleton-service.h>
 #include <dali/devel-api/text-abstraction/bidirectional-support.h>
 #include <dali/devel-api/text-abstraction/font-client.h>

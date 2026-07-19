@@ -15,9 +15,7 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/text-selection-handle-controller.h>
-
+// EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <limits>
 
@@ -27,6 +25,7 @@
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
+#include <dali-ui-foundation/internal/text/text-selection-handle-controller.h>
 
 using namespace Dali;
 

@@ -17,9 +17,12 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/text-definitions.h>
+// EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/glyph-info.h>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/text-definitions.h>
 
 namespace Dali::Ui::Text
 {

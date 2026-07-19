@@ -14,10 +14,12 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/replacement/replacement-edit-normalizer.h>
-
+// EXTERNAL INCLUDES
 #include <algorithm>
 #include <cstdint>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/replacement/replacement-edit-normalizer.h>
 
 namespace Dali::Ui::Text
 {

@@ -18,7 +18,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/integration-api/adaptor-framework/input-method-context-integ.h>
 #include <dali/integration-api/system/system-settings.h>
 #include <dali/public-api/events/long-press-gesture-detector.h>
@@ -45,6 +44,7 @@
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
 
 namespace Dali
 {
@@ -1044,17 +1044,17 @@ private: // Implementation
   void OnSceneConnect(Dali::Actor actor);
 
   /**
-   * @brief Updates inline replacement visuals from the final text layout.
+   * @brief Updates on-demand inline replacement data from the final text layout.
    *
    * @param[in] ownerSize The control size.
    * @param[in] padding The effective text padding.
    */
-  void UpdateInlineReplacementRuntime(const Vector2& ownerSize, const Insets& padding);
+  void UpdateInlineReplacementData(const Vector2& ownerSize, const Insets& padding);
 
   /**
-   * @brief Removes inline replacement visuals.
+   * @brief Removes on-demand inline replacement data and disconnects resource notifications.
    */
-  void ClearInlineReplacementRuntime();
+  void ClearInlineReplacementData();
 
   /**
    * @brief Refreshes inline replacement visuals after resource loading.

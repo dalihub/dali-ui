@@ -14,14 +14,13 @@
  * limitations under the License.
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
-
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/script.h>
 #include <algorithm>
 #include <cmath>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 namespace Dali::Ui::Text
 {
 namespace

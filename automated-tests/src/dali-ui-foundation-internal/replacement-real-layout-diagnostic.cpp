@@ -14,19 +14,19 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/character-set-conversion.h>
-#include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
-
-#include "replacement-layout-test-adapter.h"
-
+// EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
-
 #include <cmath>
 #include <initializer_list>
 #include <iostream>
 #include <stdexcept>
 #include <string>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/character-set-conversion.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
+#include "replacement-layout-test-adapter.h"
 
 using namespace Dali;
 using namespace Dali::Ui;

@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
+// EXTERNAL INCLUDES
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -23,6 +22,9 @@
 #include <sstream>
 #include <string>
 #include <utility>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

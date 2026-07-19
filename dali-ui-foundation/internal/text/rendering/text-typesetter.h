@@ -19,7 +19,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali/devel-api/adaptor-framework/pixel-buffer.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/devel-api/text-abstraction/text-abstraction-definitions.h>
@@ -28,6 +27,9 @@
 #include <dali/public-api/images/pixel.h>
 #include <dali/public-api/object/ref-object.h>
 #include <memory> ///< for std::unique_ptr
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/text-enumerations.h>
 
 namespace Dali
 {

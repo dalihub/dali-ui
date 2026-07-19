@@ -15,15 +15,18 @@
  *
  */
 
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/integration-api/input-field-impl.h>
-#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-runtime.h>
-#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
-#include <dali-ui-test-suite-utils.h>
+// EXTERNAL INCLUDES
 #include <dali.h>
 #include <stdlib.h>
 #include <iostream>
 #include <limits>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/integration-api/input-field-impl.h>
+#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-data.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -919,26 +922,26 @@ int UtcDaliInputFieldSetStyledText(void)
 
   runtimeField.SetStyledText(buildReplacementText(0.0f));
   runtimeFieldImpl.OnRelayout(Vector2(320.0f, 80.0f), relayoutContainer);
-  auto* runtime = Dali::Ui::Internal::Text::GetEditableInlineReplacementRuntime(runtimeField);
-  DALI_TEST_CHECK(runtime);
-  DALI_TEST_CHECK(runtime->visualLayer.GetParent());
-  const Property::Index visualIndex = runtime->visualLayer.GetPropertyIndex("__dali_ui_inline_replacement_0");
+  auto* data = Dali::Ui::Internal::Text::GetEditableInlineReplacementData(runtimeField);
+  DALI_TEST_CHECK(data);
+  DALI_TEST_CHECK(data->visualLayer.GetParent());
+  const Property::Index visualIndex = data->visualLayer.GetPropertyIndex("__dali_ui_inline_replacement_0");
   DALI_TEST_CHECK(visualIndex != Property::INVALID_INDEX);
-  auto& visualData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(runtime->visualLayer));
+  auto& visualData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(data->visualLayer));
   Ui::Integration::Visual::Base originalVisual = visualData.GetVisual(visualIndex);
   DALI_TEST_CHECK(originalVisual);
   const Vector2 originalOffset = getVisualOffset(originalVisual);
 
   runtimeField.SetStyledText(buildReplacementText(-8.0f));
-  DALI_TEST_CHECK(Dali::Ui::Internal::Text::GetEditableInlineReplacementRuntime(runtimeField) == runtime);
+  DALI_TEST_CHECK(Dali::Ui::Internal::Text::GetEditableInlineReplacementData(runtimeField) == data);
   DALI_TEST_CHECK(visualData.GetVisual(visualIndex) == originalVisual);
   runtimeFieldImpl.OnRelayout(Vector2(320.0f, 80.0f), relayoutContainer);
-  DALI_TEST_CHECK(Dali::Ui::Internal::Text::GetEditableInlineReplacementRuntime(runtimeField) == runtime);
+  DALI_TEST_CHECK(Dali::Ui::Internal::Text::GetEditableInlineReplacementData(runtimeField) == data);
   DALI_TEST_CHECK(visualData.GetVisual(visualIndex) == originalVisual);
   DALI_TEST_CHECK(getVisualOffset(originalVisual).y != originalOffset.y);
 
   runtimeField.SetText("plain");
-  DALI_TEST_CHECK(!Dali::Ui::Internal::Text::GetEditableInlineReplacementRuntime(runtimeField));
+  DALI_TEST_CHECK(!Dali::Ui::Internal::Text::GetEditableInlineReplacementData(runtimeField));
 
   END_TEST;
 }

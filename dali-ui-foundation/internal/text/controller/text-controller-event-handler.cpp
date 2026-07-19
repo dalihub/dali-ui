@@ -15,9 +15,6 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/controller/text-controller-event-handler.h>
-
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/key-devel.h>
 #include <dali/integration-api/debug.h>
@@ -25,6 +22,7 @@
 #include <dali/integration-api/trace.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/controller/text-controller-event-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-text-updater.h>

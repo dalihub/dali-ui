@@ -15,9 +15,6 @@
  *
  */
 
-// CLASS  HEADER
-#include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
-
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/pixel-data-integ.h>
@@ -27,6 +24,7 @@
 #include <utility>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
 #include <dali-ui-foundation/internal/text/bidirectional-support.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>

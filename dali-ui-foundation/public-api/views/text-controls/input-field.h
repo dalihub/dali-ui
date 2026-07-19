@@ -16,6 +16,11 @@
  * limitations under the License.
  *
  */
+// EXTERNAL INCLUDES
+#include <dali/public-api/adaptor-framework/input-method-context.h>
+#include <functional>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
@@ -29,8 +34,6 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali/public-api/adaptor-framework/input-method-context.h>
-#include <functional>
 
 namespace Dali
 {

@@ -17,11 +17,14 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/public-api/text/styled-text/span.h>
-#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
+// EXTERNAL INCLUDES
 #include <cstdint>
 #include <string>
 #include <vector>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/text/styled-text/span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 
 namespace Dali::Ui::Text
 {

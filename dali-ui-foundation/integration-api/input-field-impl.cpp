@@ -26,6 +26,8 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/system/system-settings.h>
 #include <dali/public-api/actors/actor.h>
+#include <algorithm>
+#include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
@@ -40,7 +42,7 @@
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
-#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-runtime.h>
+#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
@@ -55,9 +57,6 @@
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
-
-#include <algorithm>
-#include <limits>
 
 namespace IntegrationView = Dali::Ui::Integration::View;
 
@@ -317,15 +316,15 @@ InputFieldImpl::InputFieldImpl()
 
 InputFieldImpl::~InputFieldImpl()
 {
-  if(Internal::Text::EditableInlineReplacementRuntime* data =
-       Internal::Text::GetEditableInlineReplacementRuntime(*this))
+  if(Internal::Text::EditableInlineReplacementData* data =
+       Internal::Text::GetEditableInlineReplacementData(*this))
   {
     if(data->resourceReadyConnected)
     {
       data->visualLayer.ResourceReadySignal().Disconnect(this, &InputFieldImpl::OnInlineReplacementResourcesReady);
     }
     data->manager.PrepareOwnerDestruction();
-    Internal::Text::RemoveEditableInlineReplacementRuntime(*this);
+    Internal::Text::RemoveEditableInlineReplacementData(*this);
   }
   UnparentAndReset(mStencil);
 }
@@ -337,7 +336,7 @@ void InputFieldImpl::SetText(const Dali::String& text)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
 
-  ClearInlineReplacementRuntime();
+  ClearInlineReplacementData();
   mController->SetText(ToStdString(text));
 }
 
@@ -356,7 +355,7 @@ void InputFieldImpl::SetStyledText(const Text::StyledText& styledText)
   if(!mController->HasValidReplacementSource() ||
      mController->GetHiddenTextMode() != Text::HiddenText::Mode::NONE)
   {
-    ClearInlineReplacementRuntime();
+    ClearInlineReplacementData();
   }
 }
 
@@ -1027,9 +1026,8 @@ Text::Underline InputFieldImpl::GetTextUnderline() const
   return underline;
 }
 
-void InputFieldImpl::UpdateInlineReplacementRuntime(const Vector2& ownerSize, const Insets& padding)
+void InputFieldImpl::UpdateInlineReplacementData(const Vector2& ownerSize, const Insets& padding)
 {
-  Ui::View                                              owner  = Ui::View::DownCast(Self());
   const Text::ReplacementSourceSnapshot&                source = mController->GetReplacementSourceSnapshot();
   const Text::ReplacementRenderState&                   state  = mController->GetReplacementRenderState();
   const Internal::Text::EditableInlineReplacementUpdate update =
@@ -1039,7 +1037,7 @@ void InputFieldImpl::UpdateInlineReplacementRuntime(const Vector2& ownerSize, co
       mController->GetHiddenTextMode() != Text::HiddenText::Mode::NONE);
   if(update == Internal::Text::EditableInlineReplacementUpdate::CLEAR)
   {
-    ClearInlineReplacementRuntime();
+    ClearInlineReplacementData();
     return;
   }
   if(update == Internal::Text::EditableInlineReplacementUpdate::WAIT_FOR_LAYOUT)
@@ -1047,8 +1045,8 @@ void InputFieldImpl::UpdateInlineReplacementRuntime(const Vector2& ownerSize, co
     return;
   }
 
-  Internal::Text::EditableInlineReplacementRuntime* data =
-    Internal::Text::GetEditableInlineReplacementRuntime(owner);
+  Internal::Text::EditableInlineReplacementData* data =
+    Internal::Text::GetEditableInlineReplacementData(*this);
   if(!data)
   {
     bool hasVisibleImage = false;
@@ -1065,7 +1063,7 @@ void InputFieldImpl::UpdateInlineReplacementRuntime(const Vector2& ownerSize, co
     {
       return;
     }
-    data = &Internal::Text::GetOrCreateEditableInlineReplacementRuntime(owner);
+    data = &Internal::Text::GetOrCreateEditableInlineReplacementData(Ui::View::DownCast(Self()));
   }
 
   if(!data->resourceReadyConnected)
@@ -1089,30 +1087,36 @@ void InputFieldImpl::UpdateInlineReplacementRuntime(const Vector2& ownerSize, co
                        source.sourceRevision);
 }
 
-void InputFieldImpl::ClearInlineReplacementRuntime()
+void InputFieldImpl::ClearInlineReplacementData()
 {
-  Ui::View owner = Ui::View::DownCast(Self());
-  if(Internal::Text::EditableInlineReplacementRuntime* data =
-       Internal::Text::GetEditableInlineReplacementRuntime(owner))
+  if(Internal::Text::EditableInlineReplacementData* data =
+       Internal::Text::GetEditableInlineReplacementData(*this))
   {
     if(data->resourceReadyConnected)
     {
       data->visualLayer.ResourceReadySignal().Disconnect(this, &InputFieldImpl::OnInlineReplacementResourcesReady);
     }
-    Internal::Text::RemoveEditableInlineReplacementRuntime(owner);
+    Internal::Text::RemoveEditableInlineReplacementData(*this);
   }
 }
 
 void InputFieldImpl::OnInlineReplacementResourcesReady(Ui::View)
 {
-  const Text::ReplacementRenderState& state = mController->GetReplacementRenderState();
-  if(mController->HasValidReplacementSource() && state.processingModel && state.projection.HasReplacements())
+  if(!mController->HasValidReplacementSource())
   {
-    if(Internal::Text::EditableInlineReplacementRuntime* data =
-         Internal::Text::GetEditableInlineReplacementRuntime(Ui::View::DownCast(Self())))
-    {
-      data->manager.Refresh();
-    }
+    return;
+  }
+
+  const Text::ReplacementRenderState& state = mController->GetReplacementRenderState();
+  if(!state.processingModel || !state.projection.HasReplacements())
+  {
+    return;
+  }
+
+  if(Internal::Text::EditableInlineReplacementData* data =
+       Internal::Text::GetEditableInlineReplacementData(*this))
+  {
+    data->manager.Refresh();
   }
 }
 
@@ -1783,7 +1787,14 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
                                                             mRenderableActor, mStencil, atlasFrameState, size);
   }
 
-  UpdateInlineReplacementRuntime(size, padding);
+  if(mController->HasValidReplacementSource())
+  {
+    UpdateInlineReplacementData(size, padding);
+  }
+  else
+  {
+    ClearInlineReplacementData();
+  }
 
   if(mCursorPositionChanged)
   {

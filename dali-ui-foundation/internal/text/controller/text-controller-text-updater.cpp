@@ -15,9 +15,6 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/controller/text-controller-text-updater.h>
-
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/math/math-utils.h>
@@ -29,6 +26,7 @@
 #include <dali-ui-foundation/internal/text/characters-helper-functions.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.h>
+#include <dali-ui-foundation/internal/text/controller/text-controller-text-updater.h>
 #include <dali-ui-foundation/internal/text/emoji-helper.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>

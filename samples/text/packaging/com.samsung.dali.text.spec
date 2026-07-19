@@ -118,6 +118,10 @@ exit 0
 %{app_exe_dir}/text-styled-text.example
 %{app_exe_dir}/text-styled-text-builder.example
 %{app_exe_dir}/text-styled-text-simple.example
+%{app_exe_dir}/text-image-span.example
+%{app_exe_dir}/text-image-span-simple.example
+%{app_exe_dir}/text-image-span-perf.example
+%{app_exe_dir}/text-input-image-span.example
 %{app_exe_dir}/text-gradient-simple.example
 %{app_exe_dir}/text-gradient-perf.example
 %{app_exe_dir}/text-colrv1.example

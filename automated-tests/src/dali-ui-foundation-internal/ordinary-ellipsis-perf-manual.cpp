@@ -14,19 +14,21 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
-#include <dali-ui-foundation/internal/text/controller/text-controller.h>
-#include <dali-ui-foundation/internal/text/text-view.h>
+// EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/public-api/adaptor-framework/application.h>
 #include <dali/public-api/adaptor-framework/timer.h>
-
 #include <algorithm>
 #include <array>
 #include <chrono>
 #include <iostream>
 #include <string>
 #include <vector>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
+#include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/text-view.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

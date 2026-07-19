@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include "replacement-layout-test-adapter.h"
-
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>

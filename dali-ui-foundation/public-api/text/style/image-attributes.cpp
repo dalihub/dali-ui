@@ -17,7 +17,7 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
 
-// CLASS HEADER
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/image-attributes.h>
 
 #define DALI_ASSERT_VALID_IMAGE_ATTRIBUTES(impl) \

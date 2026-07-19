@@ -15,15 +15,18 @@
  *
  */
 
-#include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-test-suite-utils.h>
-#include <dali-ui/ui-event-thread-callback.h>
+// EXTERNAL INCLUDES
 #include <dali.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/string-utils.h>
 #include <stdlib.h>
 #include <iostream>
 #include <limits>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-test-suite-utils.h>
+#include <dali-ui/ui-event-thread-callback.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

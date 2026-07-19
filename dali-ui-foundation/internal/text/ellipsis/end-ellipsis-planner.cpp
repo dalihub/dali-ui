@@ -14,14 +14,15 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-planner.h>
+// EXTERNAL INCLUDES
+#include <algorithm>
+#include <limits>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-planner.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
-
-#include <algorithm>
-#include <limits>
 
 namespace Dali::Ui::Text
 {

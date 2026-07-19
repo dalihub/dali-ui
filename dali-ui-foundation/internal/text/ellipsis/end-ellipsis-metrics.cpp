@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-metrics.h>
 
 namespace Dali::Ui::Text

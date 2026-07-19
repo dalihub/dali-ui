@@ -15,9 +15,6 @@
  *
  */
 
-// CLASS HEADER
-#include "view-visual-data.h"
-
 // EXTERNAL INCLUDES
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/constraint-integ.h>
@@ -39,6 +36,7 @@
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 #include "view-data-impl.h"
+#include "view-visual-data.h"
 #include "visual-constraint-functions.h"
 
 using Dali::Integration::ToStdString;

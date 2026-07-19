@@ -23,6 +23,7 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/clipboard-integ.h>
 #include <dali/public-api/rendering/shader.h>
+#include <utility>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
@@ -35,8 +36,6 @@
 #include <dali-ui-foundation/internal/text/styled-text/editable-styled-text-data.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
-
-#include <utility>
 
 namespace Dali
 {

@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 

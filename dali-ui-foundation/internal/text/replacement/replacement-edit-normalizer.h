@@ -17,6 +17,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 
 namespace Dali::Ui::Text

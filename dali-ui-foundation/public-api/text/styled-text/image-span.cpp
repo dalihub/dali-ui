@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/styled-text/image-span-impl.h>
 #include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 

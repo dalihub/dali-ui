@@ -15,9 +15,6 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
-
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/trace.h>
@@ -31,6 +28,7 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-event-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-model-updater.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
+#include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-parameters.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>

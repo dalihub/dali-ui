@@ -17,10 +17,13 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/text-definitions.h>
+// EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/math/vector2.h>
 #include <limits>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/text-definitions.h>
 
 namespace Dali::Ui::Text
 {

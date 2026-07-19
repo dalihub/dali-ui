@@ -15,10 +15,6 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
-#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
-
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/constraint-integ.h>
@@ -40,8 +36,10 @@
 #include <dali-ui-foundation/internal/text/gradient-glyph-classification.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-mesh-factory.h>
+#include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/strikethrough-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/underline-helper-functions.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>

@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/internal/text/styled-text/editable-styled-text-data.h>
+// EXTERNAL INCLUDES
+#include <algorithm>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/styled-text/editable-styled-text-data.h>
 #include <dali-ui-foundation/public-api/text/styled-text/replacement-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
-
-#include <algorithm>
 
 namespace Dali::Ui::Text
 {

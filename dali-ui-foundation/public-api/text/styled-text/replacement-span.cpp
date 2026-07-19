@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/styled-text/replacement-span-impl.h>
 #include <dali-ui-foundation/public-api/text/styled-text/replacement-span.h>
 

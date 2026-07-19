@@ -15,11 +15,7 @@
  *
  */
 
-// CLASS HEADER
-#include "visual-base-impl.h"
-
-// EXTERNAL HEADER
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
+// EXTERNAL INCLUDES
 #include <dali/devel-api/rendering/renderer-devel.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
@@ -30,7 +26,7 @@
 #include <algorithm>
 #include <locale>
 
-// INTERNAL HEARDER
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/primitive-visual-properties-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
@@ -38,9 +34,11 @@
 #include <dali-ui-foundation/internal/helpers/property-helper.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
+#include "visual-base-impl.h"
 
 namespace
 {

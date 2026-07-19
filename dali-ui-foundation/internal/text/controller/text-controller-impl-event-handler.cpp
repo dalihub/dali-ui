@@ -15,14 +15,12 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/controller/text-controller-impl-event-handler.h>
-
 // EXTERNAL INCLUDES
 #include <dali/integration-api/debug.h>
 #include <dali/public-api/adaptor-framework/key.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/controller/text-controller-impl-event-handler.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>

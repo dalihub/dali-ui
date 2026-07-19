@@ -15,11 +15,7 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
-
 // EXTERNAL INCLUDES
-#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali/devel-api/object/property-map-devel.h>
 #include <dali/devel-api/scripting/enum-helper.h>
 #include <dali/devel-api/scripting/scripting.h>
@@ -30,7 +26,9 @@
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/helpers/property-helper.h>
+#include <dali-ui-foundation/internal/visuals/visual-base-data-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-string-constants.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
 using Dali::Integration::ToPropertyValue;

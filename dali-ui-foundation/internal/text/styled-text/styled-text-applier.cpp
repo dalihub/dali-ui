@@ -15,11 +15,9 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
-
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-common.h>
+#include <dali/public-api/math/vector4.h>
 #include <algorithm>
 #include <cstdint>
 #include <cstring>
@@ -32,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/font-description-run.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
+#include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>

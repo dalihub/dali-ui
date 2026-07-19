@@ -15,12 +15,10 @@
  *
  */
 
-// CLASS HEADER
-#include <dali-ui-foundation/internal/text/text-view.h>
-
 // EXTERNAL INCLUDES
 #include <dali/public-api/math/vector2.h>
 #include <memory.h>
+#include <algorithm>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/ellipsis/end-ellipsis-metrics.h>
@@ -29,6 +27,7 @@
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
+#include <dali-ui-foundation/internal/text/text-view.h>
 
 namespace Dali::Ui::Text
 {

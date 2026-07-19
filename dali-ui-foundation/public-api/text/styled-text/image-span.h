@@ -16,6 +16,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/text/style/image-attributes.h>
 #include <dali-ui-foundation/public-api/text/styled-text/replacement-span.h>
 

@@ -15,6 +15,10 @@
  *
  */
 
+// EXTERNAL INCLUDES
+#include <dali.h>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
@@ -29,7 +33,6 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 #include <dali-ui-test-suite-utils.h>
-#include <dali.h>
 
 using namespace Dali;
 

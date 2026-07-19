@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#include <dali-ui-foundation/dali-ui-foundation.h>
-
+// EXTERNAL INCLUDES
 #include <array>
 #include <chrono>
 #include <cstdint>
@@ -23,6 +22,9 @@
 #include <sstream>
 #include <string>
 #include <vector>
+
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/dali-ui-foundation.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

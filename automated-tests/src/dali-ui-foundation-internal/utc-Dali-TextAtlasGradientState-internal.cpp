@@ -8,6 +8,10 @@
  * http://www.apache.org/licenses/LICENSE-2.0
  */
 
+// EXTERNAL INCLUDES
+#include <dali.h>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
@@ -18,7 +22,6 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-test-suite-utils.h>
-#include <dali.h>
 
 using namespace Dali;
 

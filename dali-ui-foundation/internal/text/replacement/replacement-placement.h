@@ -17,10 +17,13 @@
  * limitations under the License.
  */
 
+// EXTERNAL INCLUDES
+#include <dali/devel-api/text-abstraction/font-client.h>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/final-elision-result.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
-#include <dali/devel-api/text-abstraction/font-client.h>
 
 namespace Dali::Ui::Text
 {

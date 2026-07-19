@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/replacement/replacement-edit-normalizer.h>
 #include <dali-ui-foundation/internal/text/styled-text/editable-styled-text-data.h>
 #include <dali-ui-foundation/public-api/text/style/image-attributes.h>

@@ -14,6 +14,13 @@
  * limitations under the License.
  */
 
+// EXTERNAL INCLUDES
+#include <algorithm>
+#include <cmath>
+#include <limits>
+#include <vector>
+
+// INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
@@ -27,7 +34,7 @@
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
-#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-runtime.h>
+#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -35,10 +42,6 @@
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
-#include <algorithm>
-#include <cmath>
-#include <limits>
-#include <vector>
 #include "replacement-layout-test-adapter.h"
 
 using namespace Dali;
@@ -1598,12 +1601,12 @@ int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
   };
 
   {
-    Dali::Ui::Internal::Text::EditableInlineReplacementRuntime runtime(owner);
-    runtime.PlaceVisualLayer(contentParent, textActor, cursorLayer, Vector2(200.0f, 160.0f));
-    DALI_TEST_CHECK(runtime.visualLayer.GetParent() == contentParent);
-    DALI_TEST_CHECK(getChildOrder(highlight) < getChildOrder(runtime.visualLayer));
-    DALI_TEST_CHECK(getChildOrder(runtime.visualLayer) < getChildOrder(textActor));
-    DALI_TEST_CHECK(getChildOrder(runtime.visualLayer) < getChildOrder(cursorLayer));
+    Dali::Ui::Internal::Text::EditableInlineReplacementData data(owner);
+    data.PlaceVisualLayer(contentParent, textActor, cursorLayer, Vector2(200.0f, 160.0f));
+    DALI_TEST_CHECK(data.visualLayer.GetParent() == contentParent);
+    DALI_TEST_CHECK(getChildOrder(highlight) < getChildOrder(data.visualLayer));
+    DALI_TEST_CHECK(getChildOrder(data.visualLayer) < getChildOrder(textActor));
+    DALI_TEST_CHECK(getChildOrder(data.visualLayer) < getChildOrder(cursorLayer));
   }
   DALI_TEST_EQUALS(contentParent.GetChildCount(), 3u, TEST_LOCATION);
 
