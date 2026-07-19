@@ -24,6 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/color-run.h>
 #include <dali-ui-foundation/internal/text/font-description-run.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/strikethrough-character-run.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-style-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
@@ -133,6 +134,16 @@ public:
                                                               const Vector4&                    anchorColor        = Color::MEDIUM_BLUE,
                                                               const Vector4&                    anchorClickedColor = Color::DARK_MAGENTA,
                                                               bool                              includeAnchorSpans = true);
+
+  /**
+   * @brief Extracts copy-safe ReplacementSpan values without retaining public handles.
+   *
+   * Invalid ImageSpan payloads are retained so the common projection validator
+   * safely preserves their underlying text.
+   */
+  static Dali::Ui::Text::ReplacementSourceSnapshot BuildReplacementSourceSnapshot(
+    const Dali::Ui::Text::StyledText& styledText,
+    uint64_t                          sourceRevision);
 
   /**
    * @brief Applies plain UTF-8 text and supported style run snapshot data.

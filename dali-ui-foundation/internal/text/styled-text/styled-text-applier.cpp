@@ -31,6 +31,7 @@
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/font-description-run.h>
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
@@ -38,6 +39,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
 
@@ -145,6 +147,20 @@ void CopyFontFamily(const std::string& family, Dali::Ui::Text::FontDescriptionRu
 std::string ToStdString(const Dali::String& string)
 {
   return std::string(string.CStr(), string.Size());
+}
+
+Dali::Ui::Text::ReplacementVerticalAlignment ToReplacementAlignment(Dali::Ui::Text::ImageAttributes::InlineAlignment alignment)
+{
+  switch(alignment)
+  {
+    case Dali::Ui::Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM:
+      return Dali::Ui::Text::ReplacementVerticalAlignment::TEXT_BOTTOM;
+    case Dali::Ui::Text::ImageAttributes::InlineAlignment::TEXT_CENTER:
+      return Dali::Ui::Text::ReplacementVerticalAlignment::TEXT_CENTER;
+    case Dali::Ui::Text::ImageAttributes::InlineAlignment::TEXT_BASELINE:
+    default:
+      return Dali::Ui::Text::ReplacementVerticalAlignment::TEXT_BASELINE;
+  }
 }
 
 char* CopyToCString(const std::string& string)
@@ -601,6 +617,73 @@ StyledTextStyleRunSnapshot StyledTextApplier::BuildTextStyleRunSnapshot(const Da
                                                       anchorClickedColor));
   }
 
+  return snapshot;
+}
+
+Dali::Ui::Text::ReplacementSourceSnapshot StyledTextApplier::BuildReplacementSourceSnapshot(
+  const Dali::Ui::Text::StyledText& styledText,
+  uint64_t                          sourceRevision)
+{
+  Dali::Ui::Text::ReplacementSourceSnapshot snapshot;
+  snapshot.sourceRevision = sourceRevision;
+  if(!styledText)
+  {
+    return snapshot;
+  }
+
+  const StyledText* const impl = GetImplementation(styledText);
+  if(nullptr == impl)
+  {
+    return snapshot;
+  }
+
+  // StyledTextBuilder stores attachments in insertion order. Extract each
+  // ImageSpan in one pass so the ordinary no-image path does not allocate a
+  // temporary pointer vector and an image is downcast only once.
+  for(const SpanAttachment& attachment : impl->GetAttachments())
+  {
+    const Dali::Ui::Text::ImageSpan imageSpan = Dali::Ui::Text::ImageSpan::DownCast(attachment.span);
+    if(!imageSpan)
+    {
+      continue;
+    }
+
+    const Dali::Ui::Text::ImageAttributes  attributes = imageSpan.GetImageAttributes();
+    Dali::Ui::Text::ReplacementRunSnapshot run;
+    run.logicalCharacterRange.characterIndex     = attachment.startIndex;
+    run.logicalCharacterRange.numberOfCharacters = attachment.endIndex - attachment.startIndex;
+    run.type                                     = Dali::Ui::Text::ReplacementType::IMAGE;
+    run.occurrenceIdentity                       = static_cast<uint64_t>(attachment.insertionOrder) + 1u;
+
+    if(attributes.Has(Dali::Ui::Text::ImageAttributes::Attribute::SOURCE))
+    {
+      run.image.source = ToStdString(attributes.GetSource());
+    }
+    if(attributes.Has(Dali::Ui::Text::ImageAttributes::Attribute::RESERVED_SIZE))
+    {
+      const Vector2 size = attributes.GetReservedSize();
+      run.metrics.width  = size.width;
+      run.metrics.height = size.height;
+    }
+    if(attributes.Has(Dali::Ui::Text::ImageAttributes::Attribute::ALIGNMENT))
+    {
+      run.metrics.verticalAlignment = ToReplacementAlignment(attributes.GetAlignment());
+    }
+    if(attributes.Has(Dali::Ui::Text::ImageAttributes::Attribute::VERTICAL_OFFSET))
+    {
+      run.metrics.verticalOffset = attributes.GetVerticalOffset();
+    }
+
+    snapshot.runs.PushBack(std::move(run));
+  }
+
+  if(!snapshot.runs.Empty())
+  {
+    Dali::Vector<Dali::Ui::Text::Character> logicalText;
+    ConvertTextToUtf32(styledText.GetText(), logicalText);
+    snapshot.hasValidReplacementSource =
+      Dali::Ui::Text::ReplacementProjection::HasValidSource(logicalText, snapshot.runs);
+  }
   return snapshot;
 }
 
