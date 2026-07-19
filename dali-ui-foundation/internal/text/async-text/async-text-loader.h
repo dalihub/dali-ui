@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-style-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/internal/text/text-model-interface.h>
@@ -106,6 +107,7 @@ struct AsyncTextParameters
     variationsMap{},
     textFitCandidates{},
     styledTextStyleSnapshot{},
+    replacementSourceSnapshot{},
     clickedAnchors{},
     fontSize{0.f},
     minLineSize{0.f},
@@ -131,6 +133,7 @@ struct AsyncTextParameters
     renderScaleWidth{0.f},
     renderScaleHeight{0.f},
     maxTextureSize{0},
+    replacementLayoutGeneration{0u},
     marqueeSpeed{1},
     marqueeLoopCount{1},
     marqueeGap{0},
@@ -197,7 +200,8 @@ struct AsyncTextParameters
   Property::Map                      variationsMap; ///< The map for variable fonts. it might be replaced by variable map run.
   Dali::Vector<Text::Fit::Candidate> textFitCandidates;
   Dali::Ui::Text::Internal::StyledTextStyleRunSnapshot
-                                       styledTextStyleSnapshot; ///< Copy-safe StyledText style run snapshot for async rendering.
+                                       styledTextStyleSnapshot;   ///< Copy-safe StyledText style run snapshot for async rendering.
+  ReplacementSourceSnapshot            replacementSourceSnapshot; ///< Copy-safe authored replacement values.
   std::vector<AsyncAnchorClickedState> clickedAnchors;
 
   float fontSize;           ///< The font's size (in pixels).
@@ -224,10 +228,11 @@ struct AsyncTextParameters
   float renderScaleWidth;  ///< The requested original textWidth when using render scale.
   float renderScaleHeight; ///< The requested original textHeight when using render scale.
 
-  int maxTextureSize; ///< The maximum size of texture.
-  int marqueeSpeed;   ///< marquee properties.
-  int marqueeLoopCount;
-  int marqueeGap;
+  int      maxTextureSize;              ///< The maximum size of texture.
+  uint64_t replacementLayoutGeneration; ///< UI request generation copied to final replacement placements.
+  int      marqueeSpeed;                ///< marquee properties.
+  int      marqueeLoopCount;
+  int      marqueeGap;
 
   uint16_t outlineWidth; ///< The width of the outline.
 
@@ -287,6 +292,9 @@ struct AsyncTextRenderInfo
     controlSize(),
     renderedSize(),
     anchorHitRegions(),
+    replacementPlacements(),
+    replacementSourceRevision(0u),
+    replacementLayoutGeneration(0u),
     lineCount(0),
     marqueeWrapGap(0.f),
     hasMultipleTextColors(false),
@@ -321,6 +329,9 @@ struct AsyncTextRenderInfo
   Size                              controlSize;                       ///< View size used to display the rendered text.
   Size                              renderedSize;                      ///< Final displayed size reported back to the caller.
   std::vector<AsyncAnchorHitRegion> anchorHitRegions;                  ///< Anchor hit regions in text content local coordinates.
+  Vector<ReplacementPlacement>      replacementPlacements;             ///< Final-layout values; no image runtime objects.
+  uint64_t                          replacementSourceRevision;
+  uint64_t                          replacementLayoutGeneration;
   int                               lineCount;
   float                             marqueeWrapGap;
   bool                              hasMultipleTextColors : 1;

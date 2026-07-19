@@ -351,7 +351,6 @@ void AsyncTextManager::RequestCancel(uint32_t taskId)
         }
       }
 #endif
-      return;
     }
   }
 

@@ -32,11 +32,16 @@
 #include <dali-ui-foundation/internal/text/color-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-placement.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
+#include <dali-ui-foundation/internal/text/text-view.h>
 
 namespace Dali
 {
@@ -130,28 +135,47 @@ void ApplyAsyncAnchorClickedStates(const Text::AsyncTextParameters& parameters, 
   }
 }
 
-std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(Text::ModelPtr                   textModel,
-                                                                   const Text::AsyncTextParameters& parameters)
+std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(
+  Text::ModelPtr                     semanticModel,
+  Text::ModelPtr                     geometryModel,
+  const Text::ReplacementProjection* projection,
+  const Text::AsyncTextParameters&   parameters)
 {
   std::vector<Text::AsyncAnchorHitRegion> regions;
-  if(!textModel || textModel->mLogicalModel->mAnchors.Empty())
+  if(!semanticModel || !geometryModel || semanticModel->mLogicalModel->mAnchors.Empty())
   {
     return regions;
   }
 
   const float coordinateScale = parameters.renderScale > 1.0f ? 1.0f / parameters.renderScale : 1.0f;
-  regions.reserve(textModel->mLogicalModel->mAnchors.Count());
+  regions.reserve(semanticModel->mLogicalModel->mAnchors.Count());
 
-  for(const auto& anchor : textModel->mLogicalModel->mAnchors)
+  for(const auto& anchor : semanticModel->mLogicalModel->mAnchors)
   {
     if(anchor.endIndex <= anchor.startIndex)
     {
       continue;
     }
 
+    Text::CharacterIndex geometryStart = anchor.startIndex;
+    Text::CharacterIndex geometryEnd   = anchor.endIndex;
+    if(projection)
+    {
+      geometryStart = projection->LogicalBoundaryToProjected(
+        anchor.startIndex,
+        Text::ReplacementProjection::BoundaryAffinity::LEADING);
+      geometryEnd = projection->LogicalBoundaryToProjected(
+        anchor.endIndex,
+        Text::ReplacementProjection::BoundaryAffinity::TRAILING);
+    }
+    if(geometryEnd <= geometryStart)
+    {
+      continue;
+    }
+
     Vector<Vector2> sizes;
     Vector<Vector2> positions;
-    Text::GetTextGeometry(textModel, anchor.startIndex, anchor.endIndex - 1u, sizes, positions);
+    Text::GetTextGeometry(geometryModel, geometryStart, geometryEnd - 1u, sizes, positions);
     if(sizes.Empty() || sizes.Count() != positions.Count())
     {
       continue;
@@ -166,9 +190,9 @@ std::vector<Text::AsyncAnchorHitRegion> BuildAsyncAnchorHitRegions(Text::ModelPt
     region.isClicked          = anchor.isClicked;
     region.clickedColor       = anchor.isMarkupClickedColorSet ? anchor.markupClickedColor : parameters.anchorClickedColor;
 
-    if(textModel->mLogicalModel->mColorRuns.Count() > anchor.colorRunIndex)
+    if(semanticModel->mLogicalModel->mColorRuns.Count() > anchor.colorRunIndex)
     {
-      region.color = textModel->mLogicalModel->mColorRuns[anchor.colorRunIndex].color;
+      region.color = semanticModel->mLogicalModel->mColorRuns[anchor.colorRunIndex].color;
     }
     else
     {
@@ -211,6 +235,7 @@ AsyncTextLoader::AsyncTextLoader()
 : mModule(),
   mTextModel(),
   mMetrics(),
+  mReplacementData(),
   mLocale(),
   mCustomFonts(),
   mNumberOfCharacters(0u),
@@ -236,6 +261,10 @@ AsyncTextLoader::AsyncTextLoader()
 
 AsyncTextLoader::~AsyncTextLoader()
 {
+  if(mReplacementData && mReplacementData->renderState.attempted)
+  {
+    mReplacementData->renderState.Clear(mModule.GetBidirectionalSupport());
+  }
 }
 
 void AsyncTextLoader::SetLocale(const std::string& locale)
@@ -301,6 +330,14 @@ void AsyncTextLoader::Initialize()
     }
   }
 
+  if(mReplacementData)
+  {
+    if(mReplacementData->renderState.attempted)
+    {
+      mReplacementData->renderState.Clear(mModule.GetBidirectionalSupport());
+    }
+    mReplacementData.reset();
+  }
   ClearTextModelData();
 
   mNumberOfCharacters = 0u;
@@ -385,8 +422,10 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   const uint8_t* utf8     = nullptr; // pointer to the first character of the text (encoded in utf8)
   Length         textSize = 0u;      // The length of the utf8 string.
 
-  Length&           numberOfCharacters = mNumberOfCharacters;
-  Vector<Character> mirroredUtf32Characters;
+  Length&                       numberOfCharacters = mNumberOfCharacters;
+  Vector<Character>             mirroredUtf32Characters;
+  ProjectedTextProcessingSource projectedSourceStorage;
+  TextProcessingSource          processingSource;
 
   Vector<Character>&          utf32Characters = mTextModel->mLogicalModel->mText;          // Characters encoded in utf32.
   Vector<LineBreakInfo>&      lineBreakInfo   = mTextModel->mLogicalModel->mLineBreakInfo; // The line break info.
@@ -406,6 +445,7 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   mTextModel->mHorizontalAlignment   = parameters.horizontalAlignment;
   mTextModel->mVerticalAlignment     = parameters.verticalAlignment;
   mTextModel->mVerticalLineAlignment = parameters.verticalLineAlignment;
+  mTextModel->mVisualModel->SetVerticalLineAlignment(parameters.verticalLineAlignment);
 
   mTextModel->mLogicalModel->mVariationsMap = parameters.variationsMap;
 
@@ -502,6 +542,31 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
     utf32Characters.Resize(numberOfCharacters);
   }
 
+  processingSource = MakeTextProcessingSource(*mTextModel);
+  if(!parameters.replacementSourceSnapshot.runs.Empty())
+  {
+    mReplacementData                         = std::make_unique<ReplacementData>();
+    ReplacementRenderState& replacementState = mReplacementData->renderState;
+    mReplacementData->originalLogicalText    = utf32Characters;
+    replacementState.attempted               = true;
+    replacementState.sourceRevision          = parameters.replacementSourceSnapshot.sourceRevision;
+    replacementState.layoutGeneration        = parameters.replacementLayoutGeneration;
+    replacementState.projection              = ReplacementProjection::Build(
+      mReplacementData->originalLogicalText,
+      parameters.replacementSourceSnapshot.runs,
+      parameters.effectiveTextScale * parameters.renderScale);
+    if(replacementState.projection.HasReplacements() &&
+       PrepareProjectedTextProcessingSource(*mTextModel,
+                                            replacementState.projection,
+                                            projectedSourceStorage))
+    {
+      processingSource = projectedSourceStorage.source;
+      ApplyTextProcessingSource(processingSource, *mTextModel->mLogicalModel);
+      numberOfCharacters               = utf32Characters.Count();
+      replacementState.processingModel = mTextModel;
+    }
+  }
+
   ApplyAsyncAnchorClickedStates(parameters, *mTextModel->mLogicalModel);
 
   ////////////////////////////////////////////////////////////////////////////////
@@ -589,9 +654,26 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 
   // Validates the fonts. If there is a character with no assigned font it sets a default one.
   // After this call, fonts are validated.
-  mModule.GetMultilanguageSupport().ValidateFonts(mModule.GetFontClient(), utf32Characters, scripts,
-                                                  fontDescriptionRuns, defaultFontDescription, defaultPointSize, scale,
-                                                  0u, numberOfCharacters, validFonts, variationsMapPtr);
+  if(processingSource.HasReplacements())
+  {
+    ValidateFontsForProcessingSource(mModule.GetMultilanguageSupport(),
+                                     mModule.GetFontClient(),
+                                     processingSource,
+                                     scripts,
+                                     defaultFontDescription,
+                                     defaultPointSize,
+                                     scale,
+                                     0u,
+                                     numberOfCharacters,
+                                     validFonts,
+                                     variationsMapPtr);
+  }
+  else
+  {
+    mModule.GetMultilanguageSupport().ValidateFonts(mModule.GetFontClient(), utf32Characters, scripts,
+                                                    fontDescriptionRuns, defaultFontDescription, defaultPointSize,
+                                                    scale, 0u, numberOfCharacters, validFonts, variationsMapPtr);
+  }
 
   ////////////////////////////////////////////////////////////////////////////////
   // Retrieve the Bidirectional info.
@@ -634,10 +716,8 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   // Retrieve the glyphs. Text shaping
   ////////////////////////////////////////////////////////////////////////////////
 
-  Vector<GlyphInfo>&      glyphs                = mTextModel->mVisualModel->mGlyphs;
-  Vector<CharacterIndex>& glyphsToCharactersMap = mTextModel->mVisualModel->mGlyphsToCharacters;
-  Vector<Length>&         charactersPerGlyph    = mTextModel->mVisualModel->mCharactersPerGlyph;
-  Vector<GlyphIndex>      newParagraphGlyphs;
+  Vector<GlyphInfo>& glyphs = mTextModel->mVisualModel->mGlyphs;
+  Vector<GlyphIndex> newParagraphGlyphs;
   newParagraphGlyphs.Reserve(numberOfParagraphs);
 
   const Length currentNumberOfGlyphs = glyphs.Count();
@@ -645,8 +725,18 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   const Vector<Character>& textToShape = mIsTextMirrored ? mirroredUtf32Characters : utf32Characters;
 
   // Shapes the text.
-  ShapeText(mModule.GetShaping(), mModule.GetFontClient(), textToShape, lineBreakInfo, scripts, validFonts, 0u, 0u,
-            numberOfCharacters, glyphs, glyphsToCharactersMap, charactersPerGlyph, newParagraphGlyphs);
+  ShapeTextForProcessingSource(mModule.GetShaping(),
+                               mModule.GetFontClient(),
+                               processingSource,
+                               textToShape,
+                               lineBreakInfo,
+                               scripts,
+                               validFonts,
+                               0u,
+                               0u,
+                               numberOfCharacters,
+                               *mTextModel->mVisualModel,
+                               newParagraphGlyphs);
 
   // Create the 'number of glyphs' per character and the glyph to character conversion tables.
   mTextModel->mVisualModel->CreateGlyphsPerCharacterTable(0u, 0u, numberOfCharacters);
@@ -658,21 +748,12 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
 
   const Length numberOfGlyphs = static_cast<Length>(glyphs.Count()) - currentNumberOfGlyphs;
 
-  mMetrics->GetGlyphMetrics(glyphs.Begin(), numberOfGlyphs);
-
-  GlyphInfo* glyphsBuffer = glyphs.Begin();
-
-  // Update the width and advance of all new paragraph characters.
-  for(Vector<GlyphIndex>::ConstIterator it = newParagraphGlyphs.Begin(), endIt = newParagraphGlyphs.End(); it != endIt;
-      ++it)
-  {
-    const GlyphIndex index = *it;
-    GlyphInfo&       glyph = *(glyphsBuffer + index);
-
-    glyph.xBearing = 0.f;
-    glyph.width    = 0.f;
-    glyph.advance  = 0.f;
-  }
+  GetGlyphMetricsForProcessingSource(*mMetrics,
+                                     processingSource,
+                                     glyphs,
+                                     0u,
+                                     numberOfGlyphs,
+                                     newParagraphGlyphs);
 
   ////////////////////////////////////////////////////////////////////////////////
   // Set the color runs in glyphs.
@@ -803,6 +884,85 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   }
 }
 
+void AsyncTextLoader::UpdateReplacementProcessing(AsyncTextParameters& parameters, FontId defaultFontId)
+{
+  if(!mReplacementData || !mReplacementData->renderState.projection.HasReplacements())
+  {
+    return;
+  }
+
+  ReplacementRenderState& replacementState = mReplacementData->renderState;
+
+  View finalView;
+  finalView.SetVisualModel(mTextModel->mVisualModel);
+  finalView.SetLogicalModel(mTextModel->mLogicalModel);
+  // One async request may perform natural-size, height-for-width, text-fit and
+  // final fixed-size layouts. Each pass mutates the worker model and therefore
+  // receives its own final-elision generation; the request generation remains
+  // separately available for UI-thread stale-result rejection.
+  const uint64_t finalGeneration = ++mReplacementData->finalElisionGeneration;
+  finalView.ResolveFinalElision(mModule.GetFontClient(),
+                                replacementState.finalElision,
+                                finalGeneration);
+
+  ReplacementRenderState& result = replacementState;
+  result.processingModel         = mTextModel;
+  result.layoutSize              = mTextModel->mVisualModel->GetLayoutSize();
+  result.sourceRevision          = parameters.replacementSourceSnapshot.sourceRevision;
+  result.layoutGeneration        = parameters.replacementLayoutGeneration;
+
+  ExtractReplacementPlacements(*mTextModel,
+                               result.projection,
+                               result.finalElision,
+                               mModule.GetFontClient(),
+                               defaultFontId,
+                               result.placements);
+}
+
+void AsyncTextLoader::CopyReplacementResult(AsyncTextRenderInfo& renderInfo, float renderScale) const
+{
+  if(!mReplacementData || !mReplacementData->renderState.projection.HasReplacements())
+  {
+    return;
+  }
+
+  const ReplacementRenderState& replacementState = mReplacementData->renderState;
+  renderInfo.replacementPlacements               = replacementState.placements;
+  renderInfo.replacementSourceRevision           = replacementState.sourceRevision;
+  renderInfo.replacementLayoutGeneration         = replacementState.layoutGeneration;
+  if(renderScale > 1.0f)
+  {
+    const float logicalScale = 1.0f / renderScale;
+    for(ReplacementPlacement& placement : renderInfo.replacementPlacements)
+    {
+      placement.position *= logicalScale;
+      placement.size *= logicalScale;
+    }
+  }
+}
+
+const Model* AsyncTextLoader::GetRenderTextModel() const
+{
+  if(mReplacementData &&
+     mReplacementData->renderState.processingModel &&
+     mReplacementData->renderState.projection.HasReplacements())
+  {
+    return mReplacementData->renderState.processingModel.Get();
+  }
+  return mTextModel.Get();
+}
+
+void AsyncTextLoader::CopyRenderModelSummary(AsyncTextRenderInfo& renderInfo) const
+{
+  const Model* const renderModel = GetRenderTextModel();
+  renderInfo.lineCount           = renderModel ? renderModel->GetNumberOfLines() : 0u;
+  renderInfo.isTextDirectionRTL  = false;
+  if(renderModel && !renderModel->mVisualModel->mLines.Empty())
+  {
+    renderInfo.isTextDirectionRTL = renderModel->mVisualModel->mLines[0u].direction;
+  }
+}
+
 Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
 {
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_LAYOUT");
@@ -812,6 +972,8 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   ////////////////////////////////////////////////////////////////////////////////
 
   Length& numberOfCharacters = mNumberOfCharacters;
+
+  const Size textLayoutArea(parameters.textWidth, parameters.textHeight);
 
   // Calculate the number of glyphs to layout.
   const Vector<GlyphIndex>& charactersToGlyph        = mTextModel->mVisualModel->mCharactersToGlyph;
@@ -847,6 +1009,7 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
     mTextModel->mVisualModel->SetLayoutSize(Size::ZERO);
 
     // Nothing else to do if there is no glyphs.
+    UpdateReplacementProcessing(parameters, 0u);
     DALI_LOG_RELEASE_INFO("no glyphs\n");
     return Size::ZERO;
   }
@@ -870,18 +1033,19 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
 
   // Set vertical line alignment.
   mTextModel->mVerticalLineAlignment = parameters.verticalLineAlignment;
+  mTextModel->mVisualModel->SetVerticalLineAlignment(parameters.verticalLineAlignment);
 
   // Set character spacing.
   mTextModel->mVisualModel->SetCharacterSpacing(parameters.characterSpacing);
 
   // Set the layout parameters.
-  Size textLayoutArea(parameters.textWidth, parameters.textHeight);
-
   mTextModel->mLineWrapMode = parameters.lineWrapMode;
 
   // Set the layout parameters.
-  Layout::Parameters layoutParameters(textLayoutArea, mTextModel, mModule.GetFontClient(),
-                                      mModule.GetBidirectionalSupport());
+  Layout::Parameters            layoutParameters(textLayoutArea, mTextModel, mModule.GetFontClient(),
+                                                 mModule.GetBidirectionalSupport());
+  const ReplacementRenderState* replacementState     = mReplacementData ? &mReplacementData->renderState : nullptr;
+  const bool                    hasActiveReplacement = replacementState && replacementState->projection.HasReplacements();
 
   // Resize the vector of positions to have the same size than the vector of glyphs.
   Vector<Vector2>& glyphPositions = mTextModel->mVisualModel->mGlyphPositions;
@@ -900,7 +1064,13 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
     TextAbstraction::IsNewParagraph(*(textBuffer + (mTextModel->mLogicalModel->mText.Count() - 1u)));
 
   // Update the ellipsis
-  bool ellipsisEnabled      = parameters.ellipsis;
+  // START/MIDDLE are not released for replacement content. Keep the
+  // replacement projection active and fall back to CLIP so the underlying
+  // authored range is never exposed as ordinary text.
+  const bool useReplacementClipFallback =
+    hasActiveReplacement &&
+    parameters.ellipsis && parameters.ellipsisPosition != EllipsisPosition::END;
+  bool ellipsisEnabled      = parameters.ellipsis && !useReplacementClipFallback;
   mTextModel->mElideEnabled = ellipsisEnabled;
   mTextModel->mVisualModel->SetTextElideEnabled(ellipsisEnabled);
 
@@ -909,14 +1079,46 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   mTextModel->mVisualModel->SetEllipsisPosition(ellipsisPosition);
 
   // Update the visual model.
-  Size newLayoutSize; // The size of the text after it has been laid-out.
-  bool isMarqueeEnabled            = parameters.isMarqueeEnabled;
-  bool isMarqueeMaxTextureExceeded = parameters.isMarqueeMaxTextureExceeded;
-  bool isHiddenInputEnabled        = false;
+  Size       newLayoutSize; // The size of the text after it has been laid-out.
+  bool       isMarqueeEnabled            = parameters.isMarqueeEnabled;
+  bool       isMarqueeMaxTextureExceeded = parameters.isMarqueeMaxTextureExceeded;
+  bool       isHiddenInputEnabled        = false;
+  const auto layoutText                  = [&](ReplacementLayoutData* replacementLayoutData)
+  {
+    layoutParameters.replacementLayoutData = replacementLayoutData;
+    updated                                = mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, ellipsisEnabled, isMarqueeEnabled,
+                                                                      isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+  };
 
-  updated = mLayoutEngine.LayoutText(layoutParameters, newLayoutSize, ellipsisEnabled, isMarqueeEnabled,
-                                     isMarqueeMaxTextureExceeded, isHiddenInputEnabled, ellipsisPosition);
+  FontId replacementDefaultFontId = 0u;
+  if(hasActiveReplacement)
+  {
+    const bool                             textFit            = parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled;
+    const float                            effectiveTextScale = textFit ? 1.0f : parameters.effectiveTextScale;
+    const float                            fontScale          = effectiveTextScale * parameters.renderScale;
+    const uint32_t                         pointsPerUnit      = mModule.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
+    const TextAbstraction::PointSize26Dot6 pointSize =
+      static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * fontScale * pointsPerUnit);
+    TextAbstraction::FontDescription defaultFontDescription;
+    defaultFontDescription.family = parameters.fontFamily;
+    defaultFontDescription.weight = parameters.fontWeight;
+    defaultFontDescription.width  = parameters.fontWidth;
+    defaultFontDescription.slant  = parameters.fontSlant;
 
+    ReplacementLayoutData replacementLayoutData;
+    replacementLayoutData.runs                = &replacementState->projection.GetReplacementRuns();
+    replacementDefaultFontId                  = mModule.GetFontClient().GetFontId(defaultFontDescription, pointSize);
+    replacementLayoutData.defaultFontId       = replacementDefaultFontId;
+    replacementLayoutData.horizontalAlignment = parameters.horizontalAlignment;
+    replacementLayoutData.layoutDirection     = parameters.layoutDirection;
+    replacementLayoutData.matchLayoutDirection =
+      mTextModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS;
+    layoutText(&replacementLayoutData);
+  }
+  else
+  {
+    layoutText(nullptr);
+  }
   mIsTextDirectionRTL = false;
 
   if(!mTextModel->mVisualModel->mLines.Empty())
@@ -974,6 +1176,19 @@ Size AsyncTextLoader::Layout(AsyncTextParameters& parameters, bool& updated)
   }
 #endif
 
+  // Every secondary layout/text-fit/max-size path calls Layout(), so this is the final aligned placement source.
+  UpdateReplacementProcessing(parameters, replacementDefaultFontId);
+
+  if(replacementState && replacementState->processingModel &&
+     replacementState->projection.HasReplacements())
+  {
+    if(!replacementState->processingModel->mVisualModel->mLines.Empty())
+    {
+      mIsTextDirectionRTL = replacementState->processingModel->mVisualModel->mLines[0u].direction;
+    }
+    return replacementState->layoutSize;
+  }
+
   return newLayoutSize;
 }
 
@@ -981,15 +1196,26 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 {
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_ASYNC_RENDER");
 
+  ReplacementRenderState* replacementState = mReplacementData ? &mReplacementData->renderState : nullptr;
+  ModelPtr                renderModel      = (replacementState && replacementState->processingModel &&
+                          replacementState->projection.HasReplacements())
+                                               ? replacementState->processingModel
+                                               : mTextModel;
+
   // render test
   mTypesetter->SetFontClient(mModule.GetFontClient());
+  mTypesetter->SetModel(renderModel.Get());
+  if(replacementState && replacementState->projection.HasReplacements())
+  {
+    mTypesetter->SetFinalElisionResult(&replacementState->finalElision);
+  }
 
   // Check whether it is a markup text with multiple text colors
-  const Vector4* const    colorsBuffer       = mTextModel->GetColors();
-  const ColorIndex* const colorIndicesBuffer = mTextModel->GetColorIndices();
+  const Vector4* const    colorsBuffer       = renderModel->GetColors();
+  const ColorIndex* const colorIndicesBuffer = renderModel->GetColorIndices();
 
-  const Text::GlyphInfo* const glyphsBuffer          = mTextModel->GetGlyphs();
-  const Text::Length           numberOfGlyphs        = mTextModel->GetNumberOfGlyphs();
+  const Text::GlyphInfo* const glyphsBuffer          = renderModel->GetGlyphs();
+  const Text::Length           numberOfGlyphs        = renderModel->GetNumberOfGlyphs();
   const bool                   hasColorIndexBuffer   = nullptr != colorsBuffer && nullptr != colorIndicesBuffer;
   TextAbstraction::FontClient& fontClient            = mModule.GetFontClient();
   bool                         hasMultipleTextColors = false;
@@ -1017,19 +1243,19 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   }
 
   // Check whether the text contains any style colors (e.g. underline color, shadow color, etc.)
-  const bool     shadowEnabled = mTextModel->IsShadowEnabled();
-  const Vector2& shadowOffset  = mTextModel->GetShadowOffset();
+  const bool     shadowEnabled = renderModel->IsShadowEnabled();
+  const Vector2& shadowOffset  = renderModel->GetShadowOffset();
 
-  const bool outlineEnabled    = mTextModel->IsOutlineEnabled();
-  const bool backgroundEnabled = mTextModel->IsBackgroundEnabled();
+  const bool outlineEnabled    = renderModel->IsOutlineEnabled();
+  const bool backgroundEnabled = renderModel->IsBackgroundEnabled();
   // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
-  const bool underlineRunEnabled         = mTextModel->IsMarkupUnderlineSet();
-  const bool strikethroughRunEnabled     = mTextModel->IsMarkupStrikethroughSet();
-  const bool underlineEnabled            = mTextModel->IsUnderlineEnabled() || underlineRunEnabled;
-  const bool strikethroughEnabled        = mTextModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
-  const bool backgroundMarkupSet         = mTextModel->IsMarkupBackgroundColorSet();
-  const bool cutoutEnabled               = mTextModel->IsCutoutEnabled();
-  const bool backgroundWithCutoutEnabled = mTextModel->IsBackgroundWithCutoutEnabled();
+  const bool underlineRunEnabled         = renderModel->IsMarkupUnderlineSet();
+  const bool strikethroughRunEnabled     = renderModel->IsMarkupStrikethroughSet();
+  const bool underlineEnabled            = renderModel->IsUnderlineEnabled() || underlineRunEnabled;
+  const bool strikethroughEnabled        = renderModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
+  const bool backgroundMarkupSet         = renderModel->IsMarkupBackgroundColorSet();
+  const bool cutoutEnabled               = renderModel->IsCutoutEnabled();
+  const bool backgroundWithCutoutEnabled = renderModel->IsBackgroundWithCutoutEnabled();
   const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
   const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
   const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
@@ -1042,7 +1268,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
 
   // The width is the control's width, height is the minimum height of the text.
   // This calculated layout size determines the size of the pixel data buffer.
-  Size layoutSize = mTextModel->mVisualModel->GetLayoutSize();
+  Size layoutSize = renderModel->mVisualModel->GetLayoutSize();
   layoutSize.x    = parameters.textWidth;
 
   if(parameters.isMarqueeEnabled && parameters.marqueeOrientation == Text::MarqueeOrientation::VERTICAL)
@@ -1055,7 +1281,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     layoutSize.y += shadowOffset.y;
   }
 
-  float outlineWidth = outlineEnabled ? mTextModel->GetOutlineWidth() : 0.0f;
+  float outlineWidth = outlineEnabled ? renderModel->GetOutlineWidth() : 0.0f;
   layoutSize.y += outlineWidth * 2.0f;
   layoutSize.y = std::min(layoutSize.y, parameters.textHeight);
 
@@ -1065,7 +1291,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     float xOffset = parameters.padding.start;
     float yOffset = parameters.padding.top + std::round((parameters.textHeight - layoutSize.y) *
                                                         VERTICAL_ALIGNMENT_TABLE[static_cast<int>(parameters.verticalAlignment)]);
-    mTextModel->mVisualModel->SetOffsetWithCutout(Vector2(xOffset, yOffset));
+    renderModel->mVisualModel->SetOffsetWithCutout(Vector2(xOffset, yOffset));
 
     // The layout size is set to the text control size including padding.
     layoutSize.x = parameters.textWidth + (parameters.padding.start + parameters.padding.end);
@@ -1098,11 +1324,15 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     renderInfo.size = layoutSize;
   }
   renderInfo.textLogicalBounds = CalculateGradientContentBounds(layoutSize,
-                                                                mTextModel->mVisualModel->GetLayoutSize(),
-                                                                mTextModel->mVisualModel->mLines.Begin(),
-                                                                mTextModel->mVisualModel->mLines.Count(),
+                                                                renderModel->mVisualModel->GetLayoutSize(),
+                                                                renderModel->mVisualModel->mLines.Begin(),
+                                                                renderModel->mVisualModel->mLines.Count(),
                                                                 parameters.verticalAlignment);
-  renderInfo.anchorHitRegions  = BuildAsyncAnchorHitRegions(mTextModel, parameters);
+  const Text::ReplacementProjection* activeProjection =
+    (replacementState && replacementState->processingModel && replacementState->projection.HasReplacements())
+      ? &replacementState->projection
+      : nullptr;
+  renderInfo.anchorHitRegions = BuildAsyncAnchorHitRegions(mTextModel, renderModel, activeProjection, parameters);
 
   // Set the direction of text.
   renderInfo.isTextDirectionRTL = mIsTextDirectionRTL;
@@ -1132,7 +1362,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   {
     if(renderInfo.isCutoutEnabled)
     {
-      float cutoutAlpha         = mTextModel->GetDefaultColor().a;
+      float cutoutAlpha         = renderModel->GetDefaultColor().a;
       renderInfo.stylePixelData = mTypesetter->RenderWithCutout(
         layoutSize, textDirection, cutoutData, Text::Typesetter::RENDER_NO_TEXT, false, Pixel::RGBA8888, cutoutAlpha);
     }
@@ -1231,7 +1461,7 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
   renderInfo.styleTextureEnabled     = styleTextureEnabled;
   renderInfo.styleBlocksTextGradient = styleBlocksTextGradient;
   renderInfo.isOverlayStyle          = isOverlayStyle;
-  renderInfo.lineCount               = mTextModel->GetNumberOfLines();
+  renderInfo.lineCount               = renderModel->GetNumberOfLines();
   renderInfo.isEmbossEnabled         = embossEnabled;
 
   if(cutoutEnabled)
@@ -1244,6 +1474,8 @@ AsyncTextRenderInfo AsyncTextLoader::Render(AsyncTextParameters& parameters)
     float renderedHeight    = isRenderScale ? parameters.renderScaleHeight : parameters.textHeight;
     renderInfo.renderedSize = Size(renderedWidth, renderedHeight);
   }
+
+  CopyReplacementResult(renderInfo, parameters.renderScale);
 
   return renderInfo;
 }
@@ -1506,7 +1738,8 @@ AsyncTextRenderInfo AsyncTextLoader::GetHeightForWidth(AsyncTextParameters& para
   renderInfo.renderedSize.width  = parameters.textWidth;
   renderInfo.renderedSize.height = height;
   renderInfo.requestType         = Async::COMPUTE_HEIGHT_FOR_WIDTH;
-  renderInfo.lineCount           = mTextModel->GetNumberOfLines();
+  CopyRenderModelSummary(renderInfo);
+  CopyReplacementResult(renderInfo, parameters.renderScale);
 
   return renderInfo;
 }
@@ -1520,7 +1753,8 @@ AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& paramet
   AsyncTextRenderInfo renderInfo;
   renderInfo.renderedSize = textNaturalSize;
   renderInfo.requestType  = Async::COMPUTE_NATURAL_SIZE;
-  renderInfo.lineCount    = mTextModel->GetNumberOfLines();
+  CopyRenderModelSummary(renderInfo);
+  CopyReplacementResult(renderInfo, parameters.renderScale);
 
   return renderInfo;
 }

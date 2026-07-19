@@ -22,6 +22,7 @@
 #include <dali/devel-api/threading/mutex.h>
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/object/base-object.h>
+#include <memory>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
@@ -30,6 +31,8 @@
 #include <dali-ui-foundation/internal/text/layouts/layout-engine.h>
 #include <dali-ui-foundation/internal/text/layouts/layout-parameters.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 
 namespace Dali
@@ -140,7 +143,24 @@ public:
    */
   AsyncTextRenderInfo GetHeightForWidth(AsyncTextParameters& parameters);
 
+  /**
+   * @brief Gets the request-local replacement layout state.
+   *
+   * @return The replacement layout state, or nullptr if no replacement is active.
+   */
+  const ReplacementRenderState* GetReplacementRenderState() const
+  {
+    return mReplacementData ? &mReplacementData->renderState : nullptr;
+  }
+
 private:
+  struct ReplacementData
+  {
+    ReplacementRenderState renderState;
+    Vector<Character>      originalLogicalText;
+    uint64_t               finalElisionGeneration{0u};
+  };
+
   // Worker thread
   /**
    * @brief Initializes internal fields.
@@ -171,6 +191,41 @@ private:
    * @return The size of the text after it has been laid-out.
    */
   Size Layout(AsyncTextParameters& parameters, bool& updated);
+
+  /**
+   * @brief Updates replacement state after layout and alignment.
+   *
+   * @param[in] parameters All options required to render text.
+   * @param[in] defaultFontId The font used when a replacement line has no visible text glyph.
+   */
+  void UpdateReplacementProcessing(AsyncTextParameters& parameters, FontId defaultFontId);
+
+  /**
+   * @brief Copies replacement placements to the render result.
+   *
+   * The worker coordinates are converted to logical coordinates using the
+   * render scale.
+   *
+   * @param[in,out] renderInfo The render result to update.
+   * @param[in] renderScale The scale used by the worker layout.
+   */
+  void CopyReplacementResult(AsyncTextRenderInfo& renderInfo, float renderScale) const;
+
+  /**
+   * @brief Gets the worker-local model used for rendering.
+   *
+   * @return The projected model when replacements are active, or the ordinary
+   * model otherwise.
+   */
+  const Model* GetRenderTextModel() const;
+
+  /**
+   * @brief Copies summary information from the render model.
+   *
+   * @param[in,out] renderInfo The render result to update with the line count
+   * and first-line direction.
+   */
+  void CopyRenderModelSummary(AsyncTextRenderInfo& renderInfo) const;
 
   /**
    * @brief Off screend render the updated text model to render.
@@ -220,11 +275,12 @@ private:
    */
   Text::AsyncTextModule mModule;
 
-  Text::ModelPtr       mTextModel;
-  MetricsPtr           mMetrics;
-  Text::Layout::Engine mLayoutEngine;
-  Text::TypesetterPtr  mTypesetter;
-  std::string          mLocale;
+  Text::ModelPtr                   mTextModel;
+  MetricsPtr                       mMetrics;
+  Text::Layout::Engine             mLayoutEngine;
+  Text::TypesetterPtr              mTypesetter;
+  std::unique_ptr<ReplacementData> mReplacementData;
+  std::string                      mLocale;
 
   TextAbstraction::FontPathList mCustomFonts;
 

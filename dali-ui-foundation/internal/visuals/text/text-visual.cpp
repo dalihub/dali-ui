@@ -226,7 +226,7 @@ void TextVisual::DoCreateInstancePropertyMap(Property::Map& map) const
 TextVisual::TextVisual(VisualFactoryCache& factoryCache, TextVisualShaderFactory& shaderFactory)
 : Visual::Base(factoryCache, Ui::Integration::InternalVisualType::TEXT),
   mController(Text::Controller::New()),
-  mTypesetter(Text::Typesetter::New(mController->GetTextModel())),
+  mTypesetter(Text::Typesetter::New(mController->GetRenderTextModel())),
   mAsyncTextInterface(nullptr),
   mGradientData(),
   mTextVisualShaderFactory(shaderFactory),
@@ -336,7 +336,7 @@ void TextVisual::DoSetOnScene(Actor& actor)
 {
   mControl = actor;
 
-  const Vector4& defaultColor = mController->GetTextModel()->GetDefaultColor();
+  const Vector4& defaultColor = mController->GetRenderTextModel()->GetDefaultColor();
   if(mTextColorAnimatableIndex == Property::INVALID_INDEX)
   {
     mTextColorAnimatableIndex = mImpl->mRenderer.RegisterUniqueProperty("uTextColorAnimatable", defaultColor);
@@ -511,6 +511,11 @@ PixelData TextVisual::RenderMarqueeText(Ui::Integration::Visual::Base     visual
                                         const Vector2&                    originSize)
 {
   TextVisual& visualObject = GetVisualObject(visual);
+  visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
+  if(visualObject.mController->HasValidReplacementSource())
+  {
+    visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
+  }
   return visualObject.mTypesetter->Render(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
 }
 
@@ -522,6 +527,11 @@ PixelData TextVisual::RenderMarqueeTextGradientPreserved(Ui::Integration::Visual
                                                          const Vector2&                originSize)
 {
   TextVisual& visualObject = GetVisualObject(visual);
+  visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
+  if(visualObject.mController->HasValidReplacementSource())
+  {
+    visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
+  }
   return visualObject.mTypesetter->RenderTextGradientPreserved(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize);
 }
 
@@ -533,6 +543,11 @@ PixelData TextVisual::RenderMarqueeTextGradientMask(Ui::Integration::Visual::Bas
                                                     const Vector2&                originSize)
 {
   TextVisual& visualObject = GetVisualObject(visual);
+  visualObject.mTypesetter->SetModel(visualObject.mController->GetRenderTextModel());
+  if(visualObject.mController->HasValidReplacementSource())
+  {
+    visualObject.mTypesetter->SetFinalElisionResult(visualObject.mController->GetFinalElisionResult());
+  }
   return visualObject.mTypesetter->RenderTextGradientMask(size, textDirection, ignoreHorizontalAlignment, pixelFormat, originSize);
 }
 
@@ -746,6 +761,11 @@ void TextVisual::UpdateRenderer()
   Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(control);
 
   const Text::Controller::UpdateTextType updateTextType = mController->Relayout(relayoutSize, layoutDirection);
+  mTypesetter->SetModel(mController->GetRenderTextModel());
+  if(mController->HasValidReplacementSource())
+  {
+    mTypesetter->SetFinalElisionResult(mController->GetFinalElisionResult());
+  }
 
   if(Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType) || mRendererUpdateNeeded)
   {
@@ -757,13 +777,15 @@ void TextVisual::UpdateRenderer()
 
     if((relayoutSize.width > Math::MACHINE_EPSILON_1000) && (relayoutSize.height > Math::MACHINE_EPSILON_1000))
     {
+      const Text::ModelInterface* const renderModel = mController->GetRenderTextModel();
+
       // Check whether it is a markup text with multiple text colors
-      const Vector4* const          colorsBuffer = mController->GetTextModel()->GetColors();
-      const Text::ColorIndex* const colorIndices = mController->GetTextModel()->GetColorIndices();
+      const Vector4* const          colorsBuffer = renderModel->GetColors();
+      const Text::ColorIndex* const colorIndices = renderModel->GetColorIndices();
 
       TextAbstraction::FontClient  fontClient            = TextAbstraction::FontClient::Get();
-      const Text::GlyphInfo* const glyphsBuffer          = mController->GetTextModel()->GetGlyphs();
-      const Text::Length           numberOfGlyphs        = mController->GetTextModel()->GetNumberOfGlyphs();
+      const Text::GlyphInfo* const glyphsBuffer          = renderModel->GetGlyphs();
+      const Text::Length           numberOfGlyphs        = renderModel->GetNumberOfGlyphs();
       const bool                   hasColorIndexBuffer   = nullptr != colorsBuffer && nullptr != colorIndices;
       bool                         hasMultipleTextColors = false;
       bool                         containsColorGlyph    = false;
@@ -791,20 +813,18 @@ void TextVisual::UpdateRenderer()
 
       // Check whether the text contains any style colors (e.g. underline color, shadow color, etc.)
 
-      const bool shadowEnabled = mController->GetTextModel()->IsShadowEnabled();
+      const bool shadowEnabled = renderModel->IsShadowEnabled();
 
-      const bool outlineEnabled    = mController->GetTextModel()->IsOutlineEnabled();
-      const bool backgroundEnabled = mController->GetTextModel()->IsBackgroundEnabled();
+      const bool outlineEnabled    = renderModel->IsOutlineEnabled();
+      const bool backgroundEnabled = renderModel->IsBackgroundEnabled();
       // Legacy "Markup" accessors also report range decoration runs produced by StyledText spans.
-      const bool underlineRunEnabled = mController->GetTextModel()->IsMarkupUnderlineSet();
-      const bool strikethroughRunEnabled =
-        mController->GetTextModel()->IsMarkupStrikethroughSet();
-      const bool underlineEnabled = mController->GetTextModel()->IsUnderlineEnabled() || underlineRunEnabled;
-      const bool strikethroughEnabled =
-        mController->GetTextModel()->IsStrikethroughEnabled() || strikethroughRunEnabled;
-      const bool backgroundMarkupSet         = mController->GetTextModel()->IsMarkupBackgroundColorSet();
+      const bool underlineRunEnabled         = renderModel->IsMarkupUnderlineSet();
+      const bool strikethroughRunEnabled     = renderModel->IsMarkupStrikethroughSet();
+      const bool underlineEnabled            = renderModel->IsUnderlineEnabled() || underlineRunEnabled;
+      const bool strikethroughEnabled        = renderModel->IsStrikethroughEnabled() || strikethroughRunEnabled;
+      const bool backgroundMarkupSet         = renderModel->IsMarkupBackgroundColorSet();
       const bool cutoutEnabled               = mController->IsTextCutout();
-      const bool backgroundWithCutoutEnabled = mController->GetTextModel()->IsBackgroundWithCutoutEnabled();
+      const bool backgroundWithCutoutEnabled = renderModel->IsBackgroundWithCutoutEnabled();
       const bool styleTextureEnabled         = shadowEnabled || outlineEnabled || backgroundEnabled || backgroundMarkupSet;
       const bool styleBlocksTextGradient     = cutoutEnabled || backgroundWithCutoutEnabled;
       const bool styleEnabled                = styleTextureEnabled || styleBlocksTextGradient;
@@ -839,7 +859,7 @@ void TextVisual::UpdateRenderer()
           // typesetter.
           // Note : We reset OffsetWithCutout whenever visual trasnform updated. So we need to "append" the offset
           // if UpdateRenderer() called without visual transform changed.
-          const Vector2& previousCutoutOffset = mController->GetTextModel()->GetOffsetWithCutout();
+          const Vector2& previousCutoutOffset = renderModel->GetOffsetWithCutout();
           mController->SetOffsetWithCutout(visualTransform.mOffset + previousCutoutOffset);
 
           visualTransform.SetPropertyMap(Property::Map());
@@ -1362,22 +1382,13 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
       mAsyncTextInterface->AsyncRenderFinished(renderInfo);
     }
 
-    // Ignore current result when user re-request async load during load complete callback.
-    if(mIsTextLoadingTaskRunning)
+    // A completion callback may request the next render. The result committed
+    // above remains visible until that request publishes its own valid result.
+    SetConstraintApplyAlways(mIsConstraintAppliedAlways, true);
+    if(const auto* gradientData = GetTextVisualGradientData(mGradientData))
     {
-      // Remove the texture set and any renderer previously set.
-      RemoveRenderer(control, true);
-      return;
-    }
-    else
-    {
-      // Apply constraint once after async text completed.
-      SetConstraintApplyAlways(mIsConstraintAppliedAlways, true);
-      if(const auto* gradientData = GetTextVisualGradientData(mGradientData))
-      {
-        SetGradientAnimApplyAlways(gradientData->mGradientAnimApplyAlways, true);
-        SetGradientOverlayAnimApplyAlways(gradientData->mGradientOverlayAnimApplyAlways, true);
-      }
+      SetGradientAnimApplyAlways(gradientData->mGradientAnimApplyAlways, true);
+      SetGradientOverlayAnimApplyAlways(gradientData->mGradientOverlayAnimApplyAlways, true);
     }
   }
   else
@@ -2000,7 +2011,7 @@ bool TextVisual::IsTextGradientOverlayCompositionSupported(const Vector2& size, 
 
 Vector4 TextVisual::CalculateGradientContentBounds(const Vector2& textureSize) const
 {
-  const Text::ModelInterface* const textModel = mController->GetTextModel();
+  const Text::ModelInterface* const textModel = mController->GetRenderTextModel();
   return Text::Internal::CalculateGradientContentBounds(textureSize,
                                                         textModel->GetLayoutSize(),
                                                         textModel->GetLines(),
@@ -2269,7 +2280,7 @@ void TextVisual::AddRenderer(Actor& actor, const Vector2& size, bool hasMultiple
     }
   }
 
-  const Vector4& defaultColor = mController->GetTextModel()->GetDefaultColor();
+  const Vector4& defaultColor = mController->GetRenderTextModel()->GetDefaultColor();
 
   for(RendererContainer::iterator iter = mRendererList.begin(); iter != mRendererList.end(); ++iter)
   {
@@ -2358,7 +2369,7 @@ TextureSet TextVisual::GetTextTexture(const Vector2& size)
   Text::Direction    textDirection   = mController->GetTextDirection();
   uint32_t           textureSetIndex = 0u;
   Devel::PixelBuffer cutoutData;
-  float              cutoutAlpha = mController->GetTextModel()->GetDefaultColor().a;
+  float              cutoutAlpha = mController->GetRenderTextModel()->GetDefaultColor().a;
 
   if(mTextShaderFeatureCache.IsEnabledTextGradientMixed())
   {

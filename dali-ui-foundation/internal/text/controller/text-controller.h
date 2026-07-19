@@ -2012,12 +2012,6 @@ public: // Queries & retrieves.
    */
   const ModelInterface* GetRenderTextModel() const;
 
-  // Kept until all render consumers switch to GetRenderTextModel().
-  const ModelInterface* GetTextModel() const
-  {
-    return GetRenderTextModel();
-  }
-
   /**
    * @brief Checks whether valid replacement source data is present.
    *
