@@ -208,6 +208,9 @@ public: // Setters for chaining
    * API does not provide StyledText round-tripping; use GetText() to retrieve
    * plain text.
    *
+   * Text edits update the ranges of surviving span attachments. SetText()
+   * clears the styled text state.
+   *
    * @param[in] styledText The styled text snapshot to apply.
    */
   void SetStyledText(const Text::StyledText& styledText);

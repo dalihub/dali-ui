@@ -122,9 +122,10 @@ float CalculateLineHeightSum(const Vector<LineRun>& lines)
  */
 float GetEffectiveEditableLayoutHeight(Controller::Impl& impl, float layoutHeight)
 {
-  const bool      isEditable  = NULL != impl.mEventData;
-  const bool      isMultiline = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
-  VisualModelPtr& visualModel = impl.mModel->mVisualModel;
+  const bool      isEditable    = NULL != impl.mEventData;
+  const bool      isMultiline   = impl.mLayoutEngine.GetLayout() == Layout::Engine::MULTI_LINE_BOX;
+  ModelPtr        geometryModel = impl.GetEditableGeometryModel();
+  VisualModelPtr& visualModel   = geometryModel->mVisualModel;
 
   if(!isEditable || !isMultiline || visualModel->mLines.Empty())
   {
@@ -169,6 +170,16 @@ void UpdateReplacementRenderState(Controller::Impl& impl, const Size& contentSiz
 {
   if(!impl.HasValidReplacementSource())
   {
+    return;
+  }
+
+  if(impl.mHiddenInput && impl.mEventData && impl.mHiddenInput->GetMode() != HiddenText::Mode::NONE)
+  {
+    const ReplacementRenderState* state = impl.GetReplacementRenderStatePtr();
+    if(state && state->attempted)
+    {
+      impl.InvalidateReplacementRenderState();
+    }
     return;
   }
 
@@ -1032,6 +1043,7 @@ Controller::UpdateTextType Controller::Relayouter::Relayout(Controller& controll
       }
     }
   }
+  impl.SyncReplacementScrollPosition();
 
   if(isEditable)
   {

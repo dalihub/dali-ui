@@ -66,6 +66,10 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   CharacterIndex selectionStart = eventData->mLeftSelectionPosition;
   CharacterIndex selectionEnd   = eventData->mRightSelectionPosition;
 
+  impl.NormalizeReplacementSelection(selectionStart, selectionEnd);
+  eventData->mLeftSelectionPosition  = selectionStart;
+  eventData->mRightSelectionPosition = selectionEnd;
+
   DecoratorPtr& decorator = eventData->mDecorator;
 
   if(selectionStart == selectionEnd)
@@ -80,7 +84,23 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   decorator->SetHighlightActive(true);
   decorator->ClearHighlights();
 
-  ModelPtr&        model        = impl.mModel;
+  const bool indicesSwapped = selectionStart > selectionEnd;
+  if(indicesSwapped)
+  {
+    selectionStart = impl.LogicalBoundaryToEditable(selectionStart,
+                                                    ReplacementProjection::BoundaryAffinity::TRAILING);
+    selectionEnd   = impl.LogicalBoundaryToEditable(selectionEnd,
+                                                    ReplacementProjection::BoundaryAffinity::LEADING);
+  }
+  else
+  {
+    selectionStart = impl.LogicalBoundaryToEditable(selectionStart,
+                                                    ReplacementProjection::BoundaryAffinity::LEADING);
+    selectionEnd   = impl.LogicalBoundaryToEditable(selectionEnd,
+                                                    ReplacementProjection::BoundaryAffinity::TRAILING);
+  }
+
+  ModelPtr         model        = impl.GetEditableGeometryModel();
   VisualModelPtr&  visualModel  = model->mVisualModel;
   LogicalModelPtr& logicalModel = model->mLogicalModel;
 
@@ -93,17 +113,20 @@ void SelectionHandleController::Reposition(Controller::Impl& impl)
   const CharacterDirection* const modelCharacterDirectionsBuffer =
     (0u != logicalModel->mCharacterDirections.Count()) ? logicalModel->mCharacterDirections.Begin() : NULL;
 
-  const bool               isLastCharacter = selectionEnd >= logicalModel->mText.Count();
-  const CharacterDirection startDirection =
-    ((NULL == modelCharacterDirectionsBuffer) ? false : *(modelCharacterDirectionsBuffer + selectionStart));
-  const CharacterDirection endDirection =
-    ((NULL == modelCharacterDirectionsBuffer)
-       ? false
-       : *(modelCharacterDirectionsBuffer + (selectionEnd - (isLastCharacter ? 1u : 0u))));
+  auto directionAtBoundary = [&](CharacterIndex boundary, bool trailing)
+  {
+    if(NULL == modelCharacterDirectionsBuffer || logicalModel->mText.Empty())
+    {
+      return CharacterDirection(false);
+    }
+    CharacterIndex character = trailing && boundary > 0u ? boundary - 1u : boundary;
+    character                = std::min(character, static_cast<CharacterIndex>(logicalModel->mText.Count() - 1u));
+    return *(modelCharacterDirectionsBuffer + character);
+  };
+  const CharacterDirection startDirection = directionAtBoundary(selectionStart, indicesSwapped);
+  const CharacterDirection endDirection   = directionAtBoundary(selectionEnd, !indicesSwapped);
 
   // Swap the indices if the start is greater than the end.
-  const bool indicesSwapped = selectionStart > selectionEnd;
-
   // Tell the decorator to flip the selection handles if needed.
   decorator->SetSelectionHandleFlipState(indicesSwapped, startDirection, endDirection);
 
@@ -511,7 +534,7 @@ void SelectionHandleController::Reposition(Controller::Impl& impl, float visualX
     return;
   }
 
-  ModelPtr&       model          = impl.mModel;
+  ModelPtr        model          = impl.GetEditableGeometryModel();
   VisualModelPtr& visualModel    = model->mVisualModel;
   const Length    numberOfGlyphs = visualModel->mGlyphs.Count();
   const Length    numberOfLines  = visualModel->mLines.Count();
@@ -527,6 +550,10 @@ void SelectionHandleController::Reposition(Controller::Impl& impl, float visualX
   CharacterIndex noTextHitIndex(0);
   const bool     characterHit = FindSelectionIndices(visualModel, model->mLogicalModel, impl.mMetrics, visualX, visualY,
                                                      selectionStart, selectionEnd, noTextHitIndex);
+  selectionStart              = impl.EditableBoundaryToLogical(selectionStart);
+  selectionEnd                = impl.EditableBoundaryToLogical(selectionEnd);
+  noTextHitIndex              = impl.EditableBoundaryToLogical(noTextHitIndex);
+  impl.NormalizeReplacementSelection(selectionStart, selectionEnd);
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "%p selectionStart %d selectionEnd %d\n", &impl, selectionStart,
                 selectionEnd);
 

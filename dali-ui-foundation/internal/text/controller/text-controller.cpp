@@ -712,6 +712,18 @@ void Controller::SetStyledText(const StyledText& styledText)
   TextUpdater::SetStyledText(*this, styledText);
 }
 
+StyledText Controller::GetStyledText() const
+{
+  if(!mImpl->mEventData || !mImpl->mEventData->mEditableStyledText)
+  {
+    return {};
+  }
+
+  std::string text;
+  mImpl->GetText(text);
+  return mImpl->mEventData->mEditableStyledText->Build(text);
+}
+
 void Controller::GetText(std::string& text) const
 {
   mImpl->GetText(text);
@@ -2681,7 +2693,9 @@ void Controller::ResetCursorPosition(CharacterIndex cursorIndex)
   // Reset the cursor position
   if(NULL != mImpl->mEventData)
   {
-    mImpl->mEventData->mPrimaryCursorPosition = cursorIndex;
+    mImpl->mEventData->mPrimaryCursorPosition = mImpl->NormalizeReplacementBoundary(
+      cursorIndex,
+      ReplacementEditNormalizer::BoundaryAffinity::TRAILING);
 
     // Update the cursor if it's in editing mode.
     if(EventData::IsEditingState(mImpl->mEventData->mState))
@@ -2713,7 +2727,10 @@ bool Controller::ShouldClearFocusOnEscape() const
 
 Actor Controller::CreateBackgroundActor()
 {
-  return CreateControllerBackgroundActor(mImpl->mView, mImpl->mModel->mVisualModel, mImpl->mModel->mLogicalModel,
+  ModelPtr geometryModel = mImpl->GetEditableGeometryModel();
+  return CreateControllerBackgroundActor(mImpl->mView,
+                                         geometryModel->mVisualModel,
+                                         geometryModel->mLogicalModel,
                                          mImpl->mShaderBackground);
 }
 

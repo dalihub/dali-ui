@@ -26,10 +26,13 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/input-filter-processor.h>
 #include <dali-ui-foundation/internal/text/input-style.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-edit-normalizer.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
+#include <dali-ui-foundation/internal/text/styled-text/editable-styled-text-data.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 
@@ -126,12 +129,13 @@ struct EventData
             stateToCheck == EDITING_WITH_PASTE_POPUP);
   }
 
-  DecoratorPtr                  mDecorator;               ///< Pointer to the decorator.
-  InputMethodContext            mInputMethodContext;      ///< The Input Method Framework Manager.
-  std::unique_ptr<FontDefaults> mPlaceholderFont;         ///< The placeholder default font.
-  std::string                   mPlaceholderTextActive;   ///< The text to display when the TextField is empty with key-input focus.
-  std::string                   mPlaceholderTextInactive; ///< The text to display when the TextField is empty and inactive.
-  Vector4                       mPlaceholderTextColor;    ///< The in/active placeholder text color.
+  DecoratorPtr                            mDecorator;               ///< Pointer to the decorator.
+  InputMethodContext                      mInputMethodContext;      ///< The Input Method Framework Manager.
+  std::unique_ptr<FontDefaults>           mPlaceholderFont;         ///< The placeholder default font.
+  std::unique_ptr<EditableStyledTextData> mEditableStyledText;      ///< Authored editable StyledText data, allocated on demand.
+  std::string                             mPlaceholderTextActive;   ///< The text to display when the TextField is empty with key-input focus.
+  std::string                             mPlaceholderTextInactive; ///< The text to display when the TextField is empty and inactive.
+  Vector4                                 mPlaceholderTextColor;    ///< The in/active placeholder text color.
 
   /**
    * This is used to delay handling events until after the model has been updated.
@@ -608,6 +612,140 @@ public:
     mReplacementData.reset();
   }
 
+  /**
+   * @brief Gets the model used for editable geometry.
+   *
+   * @return The current editable geometry model.
+   */
+  ModelPtr GetEditableGeometryModel() const
+  {
+    const ReplacementRenderState* state = GetReplacementRenderStatePtr();
+    return state && state->processingModel && state->projection.HasReplacements() ? state->processingModel : mModel;
+  }
+
+  /**
+   * @brief Maps a logical boundary to the editable geometry model.
+   *
+   * @param[in] boundary The logical boundary.
+   * @param[in] affinity The boundary affinity.
+   * @return The geometry-model boundary.
+   */
+  CharacterIndex LogicalBoundaryToEditable(CharacterIndex                          boundary,
+                                           ReplacementProjection::BoundaryAffinity affinity) const
+  {
+    const ReplacementRenderState* state = GetReplacementRenderStatePtr();
+    return state && state->processingModel && state->projection.HasReplacements()
+             ? state->projection.LogicalBoundaryToProjected(boundary, affinity)
+             : std::min(boundary, static_cast<CharacterIndex>(mModel->mLogicalModel->mText.Count()));
+  }
+
+  /**
+   * @brief Maps an editable geometry boundary to the logical model.
+   *
+   * @param[in] boundary The geometry-model boundary.
+   * @return The logical boundary.
+   */
+  CharacterIndex EditableBoundaryToLogical(CharacterIndex boundary) const
+  {
+    const ReplacementRenderState* state = GetReplacementRenderStatePtr();
+    return state && state->processingModel && state->projection.HasReplacements()
+             ? state->projection.ProjectedBoundaryToLogical(boundary)
+             : std::min(boundary, static_cast<CharacterIndex>(mModel->mLogicalModel->mText.Count()));
+  }
+
+  /**
+   * @brief Copies the authoritative editable scroll position to the processing model.
+   */
+  void SyncReplacementScrollPosition()
+  {
+    ReplacementRenderState* state = mReplacementData ? &mReplacementData->renderState : nullptr;
+    if(state && state->processingModel && state->projection.HasReplacements())
+    {
+      state->processingModel->mScrollPosition     = mModel->mScrollPosition;
+      state->processingModel->mScrollPositionLast = mModel->mScrollPositionLast;
+    }
+  }
+
+  /**
+   * @brief Normalizes a logical cursor boundary around replacements.
+   *
+   * @param[in] boundary The logical boundary.
+   * @param[in] affinity The requested affinity.
+   * @return The normalized logical boundary.
+   */
+  CharacterIndex NormalizeReplacementBoundary(CharacterIndex                              boundary,
+                                              ReplacementEditNormalizer::BoundaryAffinity affinity) const
+  {
+    return HasValidReplacementSource()
+             ? ReplacementEditNormalizer::NormalizeBoundary(GetReplacementSourceSnapshot().runs,
+                                                            boundary,
+                                                            affinity,
+                                                            mModel->mLogicalModel->mText.Count())
+             : std::min(boundary, static_cast<CharacterIndex>(mModel->mLogicalModel->mText.Count()));
+  }
+
+  /**
+   * @brief Expands a logical selection around replacements.
+   *
+   * @param[in,out] first The first boundary.
+   * @param[in,out] second The second boundary.
+   */
+  void NormalizeReplacementSelection(CharacterIndex& first, CharacterIndex& second) const
+  {
+    if(HasValidReplacementSource())
+    {
+      ReplacementEditNormalizer::NormalizeSelection(GetReplacementSourceSnapshot().runs,
+                                                    first,
+                                                    second,
+                                                    mModel->mLogicalModel->mText.Count());
+    }
+    else
+    {
+      const CharacterIndex textLength = mModel->mLogicalModel->mText.Count();
+      first                           = std::min(first, textLength);
+      second                          = std::min(second, textLength);
+    }
+  }
+
+  /**
+   * @brief Invalidates derived state and updates authored ranges for an edit.
+   *
+   * @param[in] start The normalized edit start.
+   * @param[in] removedLength The normalized removed length.
+   * @param[in] insertedLength The inserted length.
+   */
+  void PrepareEditableTextEdit(CharacterIndex start, Length removedLength, Length insertedLength)
+  {
+    if(removedLength == 0u && insertedLength == 0u)
+    {
+      return;
+    }
+
+    if(mEventData && mEventData->mEditableStyledText)
+    {
+      mEventData->mEditableStyledText->ApplyEdit(start, removedLength, insertedLength);
+    }
+
+    if(!HasReplacementData())
+    {
+      return;
+    }
+
+    InvalidateReplacementRenderState();
+    ReplacementSourceSnapshot& source = mReplacementData->sourceSnapshot;
+    ReplacementEditNormalizer::ApplyEdit(source.runs, start, removedLength, insertedLength);
+    source.hasValidReplacementSource = !source.runs.Empty();
+    ++source.sourceRevision;
+    if(source.sourceRevision == 0u)
+    {
+      source.sourceRevision = 1u;
+    }
+    if(!source.hasValidReplacementSource)
+    {
+      ClearReplacementData();
+    }
+  }
+
   // Text Controller Implementation.
 
   /**
@@ -1024,6 +1162,20 @@ public:
    * @return The new cursor index.
    */
   CharacterIndex CalculateNewCursorIndex(CharacterIndex index) const;
+
+  /**
+   * @brief Hit-tests a cursor boundary in the current editable geometry.
+   *
+   * @param[in] visualX The x position in text coordinates.
+   * @param[in] visualY The y position in text coordinates.
+   * @param[in] hitTest The hit-test mode.
+   * @param[out] matchedCharacter Whether a character was hit.
+   * @return The logical cursor boundary.
+   */
+  CharacterIndex GetClosestLogicalCursorIndex(float                  visualX,
+                                              float                  visualY,
+                                              CharacterHitTest::Mode hitTest,
+                                              bool&                  matchedCharacter) const;
 
   /**
    * @brief Updates the cursor position.

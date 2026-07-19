@@ -802,6 +802,13 @@ public: // Update.
   void SetStyledText(const StyledText& styledText);
 
   /**
+   * @brief Gets the current editable StyledText snapshot.
+   *
+   * @return The current snapshot, or an empty handle for plain text content.
+   */
+  StyledText GetStyledText() const;
+
+  /**
    * @brief Retrieve any text previously set.
    *
    * @param[out] text A string of UTF-8 characters.

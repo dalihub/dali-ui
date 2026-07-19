@@ -234,6 +234,16 @@ public:
   void SetPosition(Cursor cursor, float x, float y, float cursorHeight, float lineHeight);
 
   /**
+   * @brief Sets the visual geometry of a cursor.
+   *
+   * @param[in] cursor The cursor to set.
+   * @param[in] x The x position relative to the top-left of the parent control.
+   * @param[in] y The y position relative to the top-left of the parent control.
+   * @param[in] cursorHeight The visual height of the cursor.
+   */
+  void SetVisualCursorGeometry(Cursor cursor, float x, float y, float cursorHeight);
+
+  /**
    * @brief Retrieves the position, height and lineHeight of a cursor.
    *
    * @param[in] cursor The cursor to get.

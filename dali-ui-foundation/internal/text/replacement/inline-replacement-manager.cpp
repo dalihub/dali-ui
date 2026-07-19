@@ -350,6 +350,27 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
                                       float                                         effectiveScale,
                                       uint64_t                                      expectedSourceRevision)
 {
+  return Update(host,
+                source,
+                placements,
+                contentOffset,
+                contentOffset,
+                contentSize,
+                ownerSize,
+                effectiveScale,
+                expectedSourceRevision);
+}
+
+bool InlineReplacementManager::Update(InlineReplacementViewHost&                    host,
+                                      const Ui::Text::ReplacementSourceSnapshot&    source,
+                                      const Vector<Ui::Text::ReplacementPlacement>& placements,
+                                      const Vector2&                                placementOffset,
+                                      const Vector2&                                clipOffset,
+                                      const Vector2&                                contentSize,
+                                      const Vector2&                                ownerSize,
+                                      float                                         effectiveScale,
+                                      uint64_t                                      expectedSourceRevision)
+{
   Ui::View owner = host.GetOwner();
   if(!owner || source.sourceRevision != expectedSourceRevision)
   {
@@ -420,8 +441,8 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
       continue;
     }
 
-    const Vector2 reservedOffset = contentOffset + placement.position;
-    if(!RectanglesIntersect(reservedOffset, placement.size, contentOffset, contentSize))
+    const Vector2 reservedOffset = placementOffset + placement.position;
+    if(!RectanglesIntersect(reservedOffset, placement.size, clipOffset, contentSize))
     {
       continue;
     }
@@ -458,7 +479,7 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
     entry->lastSeenGeneration = updateGeneration;
     entry->reservedOffset     = reservedOffset;
     entry->reservedSize       = placement.size;
-    entry->clipOffset         = contentOffset;
+    entry->clipOffset         = clipOffset;
     entry->clipSize           = contentSize;
     entry->ownerSize          = ownerSize;
     entry->effectiveScale     = effectiveScale;

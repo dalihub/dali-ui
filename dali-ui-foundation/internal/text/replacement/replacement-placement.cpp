@@ -33,6 +33,102 @@ struct SurroundingMetrics
   bool  hasVisibleText{false};
 };
 
+bool ContainsGlyph(const LineRun& line, GlyphIndex glyphIndex)
+{
+  const auto contains = [glyphIndex](const GlyphRun& run)
+  {
+    return glyphIndex >= run.glyphIndex && glyphIndex < run.glyphIndex + run.numberOfGlyphs;
+  };
+  return contains(line.glyphRun) || (line.isSplitToTwoHalves && contains(line.glyphRunSecondHalf));
+}
+
+ReplacementCaretMetric ToCaretMetric(const TextAbstraction::FontMetrics& fontMetrics)
+{
+  ReplacementCaretMetric metric;
+  metric.ascender = fontMetrics.ascender;
+  metric.height   = fontMetrics.height > 0.0f
+                      ? fontMetrics.height
+                      : fontMetrics.ascender - fontMetrics.descender;
+  return metric;
+}
+
+bool ResolveGlyphCaretMetric(const VisualModel&           visual,
+                             const FinalElisionResult&    finalElision,
+                             TextAbstraction::FontClient& fontClient,
+                             const LineRun&               line,
+                             GlyphIndex                   glyphIndex,
+                             ReplacementCaretMetric&      metric)
+{
+  if(glyphIndex >= visual.mGlyphs.Count() || !ContainsGlyph(line, glyphIndex) ||
+     !finalElision.IsOriginalGlyphVisible(glyphIndex))
+  {
+    return false;
+  }
+
+  const GlyphInfo& glyph = visual.mGlyphs[glyphIndex];
+  if(glyph.fontId == 0u || IsSyntheticReplacementGlyph(glyph))
+  {
+    return false;
+  }
+
+  TextAbstraction::FontMetrics fontMetrics;
+  fontClient.GetFontMetrics(glyph.fontId, fontMetrics);
+  metric = ToCaretMetric(fontMetrics);
+  return metric.height > 0.0f;
+}
+
+ReplacementCaretMetric ResolveBoundaryCaretMetric(const VisualModel&            visual,
+                                                  const FinalElisionResult&     finalElision,
+                                                  TextAbstraction::FontClient&  fontClient,
+                                                  const LineRun&                line,
+                                                  GlyphIndex                    replacementGlyphIndex,
+                                                  bool                          preferPrevious,
+                                                  const ReplacementCaretMetric& fallback)
+{
+  GlyphIndex lineStart = line.glyphRun.glyphIndex;
+  GlyphIndex lineEnd   = line.glyphRun.glyphIndex + line.glyphRun.numberOfGlyphs;
+  if(line.isSplitToTwoHalves)
+  {
+    lineStart = std::min(lineStart, line.glyphRunSecondHalf.glyphIndex);
+    lineEnd   = std::max(lineEnd,
+                         line.glyphRunSecondHalf.glyphIndex + line.glyphRunSecondHalf.numberOfGlyphs);
+  }
+  lineEnd = std::min<GlyphIndex>(lineEnd, visual.mGlyphs.Count());
+
+  const auto findPrevious = [&]()
+  {
+    ReplacementCaretMetric metric;
+    for(GlyphIndex index = replacementGlyphIndex; index > lineStart;)
+    {
+      --index;
+      if(ResolveGlyphCaretMetric(visual, finalElision, fontClient, line, index, metric))
+      {
+        return metric;
+      }
+    }
+    return ReplacementCaretMetric{};
+  };
+  const auto findNext = [&]()
+  {
+    ReplacementCaretMetric metric;
+    for(GlyphIndex index = replacementGlyphIndex + 1u; index < lineEnd; ++index)
+    {
+      if(ResolveGlyphCaretMetric(visual, finalElision, fontClient, line, index, metric))
+      {
+        return metric;
+      }
+    }
+    return ReplacementCaretMetric{};
+  };
+
+  ReplacementCaretMetric metric = preferPrevious ? findPrevious() : findNext();
+  if(metric.height <= 0.0f)
+  {
+    metric = preferPrevious ? findNext() : findPrevious();
+  }
+  return metric.height > 0.0f ? metric : fallback;
+}
+
 void IncludeGlyphMetrics(const VisualModel&           visual,
                          const FinalElisionResult&    finalElision,
                          TextAbstraction::FontClient& fontClient,
@@ -134,6 +230,13 @@ void ExtractReplacementPlacements(const Model&                  model,
   const VisualModel&               visual = *model.mVisualModel;
   const Vector<SurroundingMetrics> lineMetrics =
     ResolveSurroundingMetrics(visual, finalElision, fontClient, defaultFontId);
+  ReplacementCaretMetric defaultCaretMetric;
+  if(defaultFontId != 0u)
+  {
+    TextAbstraction::FontMetrics defaultFontMetrics;
+    fontClient.GetFontMetrics(defaultFontId, defaultFontMetrics);
+    defaultCaretMetric = ToCaretMetric(defaultFontMetrics);
+  }
   for(const ProjectedReplacementRun& replacement : projection.GetReplacementRuns())
   {
     ReplacementPlacement placement;
@@ -159,9 +262,24 @@ void ExtractReplacementPlacements(const Model&                  model,
       const LineRun& line                   = visual.mLines[geometry.lineIndex];
       placement.lineIndex                   = geometry.lineIndex;
       placement.lineDirection               = line.direction;
+      placement.baseline                    = geometry.baseline;
       placement.position.x                  = geometry.contentLocalPenPosition.x;
       const SurroundingMetrics& surrounding = lineMetrics[geometry.lineIndex];
       placement.position.y                  = geometry.baseline + GetReplacementTop(replacement.metrics, surrounding);
+      placement.leadingCaretMetric          = ResolveBoundaryCaretMetric(visual,
+                                                                         finalElision,
+                                                                         fontClient,
+                                                                         line,
+                                                                         placement.syntheticGlyphIndex,
+                                                                         true,
+                                                                         defaultCaretMetric);
+      placement.trailingCaretMetric         = ResolveBoundaryCaretMetric(visual,
+                                                                         finalElision,
+                                                                         fontClient,
+                                                                         line,
+                                                                         placement.syntheticGlyphIndex,
+                                                                         false,
+                                                                         defaultCaretMetric);
     }
     placement.elided = finalElision.textElided && !placement.visible;
     placements.PushBack(placement);

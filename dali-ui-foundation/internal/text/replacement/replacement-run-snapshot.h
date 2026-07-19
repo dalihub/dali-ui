@@ -116,6 +116,15 @@ struct ReplacementSourceSnapshot
 };
 
 /**
+ * @brief Stores the font metric used to draw a caret at a replacement boundary.
+ */
+struct ReplacementCaretMetric
+{
+  float ascender{0.0f};
+  float height{0.0f};
+};
+
+/**
  * @brief Stores the final placement of a replacement.
  *
  * The position is content-local after text alignment and before control padding.
@@ -123,16 +132,19 @@ struct ReplacementSourceSnapshot
  */
 struct ReplacementPlacement
 {
-  CharacterRun       logicalCharacterRange{}; ///< Original logical UTF-32 domain.
-  uint32_t           sourceRunIndex{0u};      ///< Index in the request-local authored snapshot.
-  uint64_t           occurrenceIdentity{0u};
-  GlyphIndex         syntheticGlyphIndex{0u}; ///< Glyph domain; never inferred from charactersPerGlyph.
-  LineIndex          lineIndex{0u};
-  Vector2            position{};
-  Vector2            size{};
-  CharacterDirection lineDirection{false};
-  bool               visible{false};
-  bool               elided{false};
+  CharacterRun           logicalCharacterRange{}; ///< Original logical UTF-32 domain.
+  uint32_t               sourceRunIndex{0u};      ///< Index in the request-local authored snapshot.
+  uint64_t               occurrenceIdentity{0u};
+  GlyphIndex             syntheticGlyphIndex{0u}; ///< Glyph domain; never inferred from charactersPerGlyph.
+  LineIndex              lineIndex{0u};
+  Vector2                position{};
+  Vector2                size{};
+  ReplacementCaretMetric leadingCaretMetric{};
+  ReplacementCaretMetric trailingCaretMetric{};
+  float                  baseline{0.0f};
+  CharacterDirection     lineDirection{false};
+  bool                   visible{false};
+  bool                   elided{false};
 };
 
 } // namespace Dali::Ui::Text

@@ -48,12 +48,18 @@ struct CursorInfo
   CursorInfo()
   : primaryPosition(),
     secondaryPosition(),
+    primaryCaretPosition(),
+    secondaryCaretPosition(),
     lineOffset(0.f),
     glyphOffset(0.f),
     lineHeight(0.f),
     primaryCursorHeight(0.f),
     secondaryCursorHeight(0.f),
-    isSecondaryCursor(false)
+    primaryCaretHeight(0.f),
+    secondaryCaretHeight(0.f),
+    isSecondaryCursor(false),
+    hasPrimaryCaretGeometry(false),
+    hasSecondaryCaretGeometry(false)
   {
   }
 
@@ -61,14 +67,20 @@ struct CursorInfo
   {
   }
 
-  Vector2 primaryPosition;       ///< The primary cursor's position (in text's coords).
-  Vector2 secondaryPosition;     ///< The secondary cursor's position (in text's coords).
-  float   lineOffset;            ///< The vertical offset where the line containing the cursor starts.
-  float   glyphOffset;           ///< The difference of line ascender and glyph ascender.
-  float   lineHeight;            ///< The height of the line where the cursor is placed.
-  float   primaryCursorHeight;   ///< The primary cursor's height.
-  float   secondaryCursorHeight; ///< The secondary cursor's height.
-  bool    isSecondaryCursor;     ///< Whether the secondary cursor is valid.
+  Vector2 primaryPosition;           ///< The primary cursor's position (in text's coords).
+  Vector2 secondaryPosition;         ///< The secondary cursor's position (in text's coords).
+  Vector2 primaryCaretPosition;      ///< The primary caret's visual position when it differs from line geometry.
+  Vector2 secondaryCaretPosition;    ///< The secondary caret's visual position when it differs from line geometry.
+  float   lineOffset;                ///< The vertical offset where the line containing the cursor starts.
+  float   glyphOffset;               ///< The difference of line ascender and glyph ascender.
+  float   lineHeight;                ///< The height of the line where the cursor is placed.
+  float   primaryCursorHeight;       ///< The primary cursor's height.
+  float   secondaryCursorHeight;     ///< The secondary cursor's height.
+  float   primaryCaretHeight;        ///< The primary caret's visual height.
+  float   secondaryCaretHeight;      ///< The secondary caret's visual height.
+  bool    isSecondaryCursor;         ///< Whether the secondary cursor is valid.
+  bool    hasPrimaryCaretGeometry;   ///< Whether primary visual geometry is available.
+  bool    hasSecondaryCaretGeometry; ///< Whether secondary visual geometry is available.
 };
 
 /**

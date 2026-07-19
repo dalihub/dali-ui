@@ -40,6 +40,7 @@
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
+#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-runtime.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
@@ -316,6 +317,16 @@ InputFieldImpl::InputFieldImpl()
 
 InputFieldImpl::~InputFieldImpl()
 {
+  if(Internal::Text::EditableInlineReplacementRuntime* data =
+       Internal::Text::GetEditableInlineReplacementRuntime(*this))
+  {
+    if(data->resourceReadyConnected)
+    {
+      data->visualLayer.ResourceReadySignal().Disconnect(this, &InputFieldImpl::OnInlineReplacementResourcesReady);
+    }
+    data->manager.PrepareOwnerDestruction();
+    Internal::Text::RemoveEditableInlineReplacementRuntime(*this);
+  }
   UnparentAndReset(mStencil);
 }
 
@@ -326,6 +337,7 @@ void InputFieldImpl::SetText(const Dali::String& text)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
 
+  ClearInlineReplacementRuntime();
   mController->SetText(ToStdString(text));
 }
 
@@ -341,6 +353,11 @@ void InputFieldImpl::SetStyledText(const Text::StyledText& styledText)
   DALI_LOG_RELEASE_INFO("[%p] SetStyledText\n", mController.Get());
 
   mController->SetStyledText(styledText);
+  if(!mController->HasValidReplacementSource() ||
+     mController->GetHiddenTextMode() != Text::HiddenText::Mode::NONE)
+  {
+    ClearInlineReplacementRuntime();
+  }
 }
 
 void InputFieldImpl::SetFontFamily(const Dali::String& fontFamily)
@@ -1010,6 +1027,95 @@ Text::Underline InputFieldImpl::GetTextUnderline() const
   return underline;
 }
 
+void InputFieldImpl::UpdateInlineReplacementRuntime(const Vector2& ownerSize, const Insets& padding)
+{
+  Ui::View                                              owner  = Ui::View::DownCast(Self());
+  const Text::ReplacementSourceSnapshot&                source = mController->GetReplacementSourceSnapshot();
+  const Text::ReplacementRenderState&                   state  = mController->GetReplacementRenderState();
+  const Internal::Text::EditableInlineReplacementUpdate update =
+    Internal::Text::ResolveEditableInlineReplacementUpdate(
+      source,
+      state,
+      mController->GetHiddenTextMode() != Text::HiddenText::Mode::NONE);
+  if(update == Internal::Text::EditableInlineReplacementUpdate::CLEAR)
+  {
+    ClearInlineReplacementRuntime();
+    return;
+  }
+  if(update == Internal::Text::EditableInlineReplacementUpdate::WAIT_FOR_LAYOUT)
+  {
+    return;
+  }
+
+  Internal::Text::EditableInlineReplacementRuntime* data =
+    Internal::Text::GetEditableInlineReplacementRuntime(owner);
+  if(!data)
+  {
+    bool hasVisibleImage = false;
+    for(const Text::ReplacementPlacement& placement : state.placements)
+    {
+      if(placement.visible && !placement.elided && placement.sourceRunIndex < source.runs.Count() &&
+         source.runs[placement.sourceRunIndex].type == Text::ReplacementType::IMAGE)
+      {
+        hasVisibleImage = true;
+        break;
+      }
+    }
+    if(!hasVisibleImage)
+    {
+      return;
+    }
+    data = &Internal::Text::GetOrCreateEditableInlineReplacementRuntime(owner);
+  }
+
+  if(!data->resourceReadyConnected)
+  {
+    data->visualLayer.ResourceReadySignal().Connect(this, &InputFieldImpl::OnInlineReplacementResourcesReady);
+    data->resourceReadyConnected = true;
+  }
+
+  const Vector2 scrollOffset(-mController->GetHorizontalScrollPosition(), -mController->GetVerticalScrollPosition());
+  const Vector2 contentSize(std::max(0.0f, ownerSize.x - static_cast<float>(padding.start + padding.end)),
+                            std::max(0.0f, ownerSize.y - static_cast<float>(padding.top + padding.bottom)));
+  data->PlaceVisualLayer(mStencil, mRenderableActor, mCursorLayer, contentSize);
+  data->manager.Update(data->host,
+                       source,
+                       state.placements,
+                       scrollOffset,
+                       Vector2::ZERO,
+                       contentSize,
+                       contentSize,
+                       GetEffectiveScale(),
+                       source.sourceRevision);
+}
+
+void InputFieldImpl::ClearInlineReplacementRuntime()
+{
+  Ui::View owner = Ui::View::DownCast(Self());
+  if(Internal::Text::EditableInlineReplacementRuntime* data =
+       Internal::Text::GetEditableInlineReplacementRuntime(owner))
+  {
+    if(data->resourceReadyConnected)
+    {
+      data->visualLayer.ResourceReadySignal().Disconnect(this, &InputFieldImpl::OnInlineReplacementResourcesReady);
+    }
+    Internal::Text::RemoveEditableInlineReplacementRuntime(owner);
+  }
+}
+
+void InputFieldImpl::OnInlineReplacementResourcesReady(Ui::View)
+{
+  const Text::ReplacementRenderState& state = mController->GetReplacementRenderState();
+  if(mController->HasValidReplacementSource() && state.processingModel && state.projection.HasReplacements())
+  {
+    if(Internal::Text::EditableInlineReplacementRuntime* data =
+         Internal::Text::GetEditableInlineReplacementRuntime(Ui::View::DownCast(Self())))
+    {
+      data->manager.Refresh();
+    }
+  }
+}
+
 void InputFieldImpl::SetTextShadow(const Text::Shadow& shadow)
 {
   if(shadow == Text::Shadow::None())
@@ -1676,6 +1782,8 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
     Ui::Internal::CommonTextUtils::UpdateTextRenderPosition(Self(), mRenderer, mController, mAlignmentOffset,
                                                             mRenderableActor, mStencil, atlasFrameState, size);
   }
+
+  UpdateInlineReplacementRuntime(size, padding);
 
   if(mCursorPositionChanged)
   {

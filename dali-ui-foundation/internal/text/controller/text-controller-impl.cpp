@@ -395,12 +395,81 @@ void UpdateCursorPositionForAlignment(Controller::Impl& impl, bool needFullAlign
   }
 }
 
+struct ReplacementCursorBoundary
+{
+  const ReplacementPlacement* placement{nullptr};
+  bool                        leading{false};
+};
+
+ReplacementCursorBoundary ResolveReplacementCursorBoundary(const ReplacementRenderState& state,
+                                                           CharacterIndex                logicalBoundary)
+{
+  const ReplacementPlacement* trailingPlacement = nullptr;
+  for(const ReplacementPlacement& placement : state.placements)
+  {
+    if(!placement.visible || placement.elided)
+    {
+      continue;
+    }
+
+    const CharacterIndex start = placement.logicalCharacterRange.characterIndex;
+    const CharacterIndex end   = start + placement.logicalCharacterRange.numberOfCharacters;
+    if(logicalBoundary == start)
+    {
+      return ReplacementCursorBoundary{&placement, true};
+    }
+    if(logicalBoundary == end)
+    {
+      trailingPlacement = &placement;
+    }
+  }
+
+  return ReplacementCursorBoundary{trailingPlacement, false};
+}
+
+void ApplyReplacementCaretGeometry(const ReplacementCursorBoundary& boundary, CursorInfo& cursorInfo)
+{
+  const ReplacementPlacement* placement = boundary.placement;
+  if(placement == nullptr)
+  {
+    return;
+  }
+
+  const ReplacementCaretMetric& metric = boundary.leading ? placement->leadingCaretMetric
+                                                          : placement->trailingCaretMetric;
+  if(metric.height <= 0.0f)
+  {
+    return;
+  }
+
+  const float leadingEdge  = placement->lineDirection ? placement->position.x + placement->size.x
+                                                      : placement->position.x;
+  const float trailingEdge = placement->lineDirection ? placement->position.x
+                                                      : placement->position.x + placement->size.x;
+  const float caretX       = boundary.leading ? leadingEdge : trailingEdge;
+  const float caretTop     = placement->baseline - metric.ascender;
+
+  cursorInfo.primaryPosition.x       = caretX;
+  cursorInfo.primaryCaretPosition    = Vector2(caretX, caretTop);
+  cursorInfo.primaryCaretHeight      = cursorInfo.isSecondaryCursor ? 0.5f * metric.height : metric.height;
+  cursorInfo.hasPrimaryCaretGeometry = true;
+
+  if(cursorInfo.isSecondaryCursor)
+  {
+    cursorInfo.secondaryCaretPosition    = Vector2(cursorInfo.secondaryPosition.x,
+                                                   caretTop + 0.5f * metric.height);
+    cursorInfo.secondaryCaretHeight      = 0.5f * metric.height;
+    cursorInfo.hasSecondaryCaretGeometry = true;
+  }
+}
+
 } // unnamed Namespace
 
 EventData::EventData(DecoratorPtr decorator, InputMethodContext& inputMethodContext)
 : mDecorator(decorator),
   mInputMethodContext(inputMethodContext),
   mPlaceholderFont(nullptr),
+  mEditableStyledText(),
   mPlaceholderTextActive(),
   mPlaceholderTextInactive(),
   mPlaceholderTextColor(0.8f, 0.8f, 0.8f, 0.8f),
@@ -1018,6 +1087,8 @@ void Controller::Impl::SetTextSelectionRange(const uint32_t* pStart, const uint3
       mEventData->mRightSelectionPosition = std::min(*pEnd, length);
     }
 
+    NormalizeReplacementSelection(mEventData->mLeftSelectionPosition, mEventData->mRightSelectionPosition);
+
     if(mEventData->mLeftSelectionPosition == mEventData->mRightSelectionPosition)
     {
       ChangeState(EventData::EDITING);
@@ -1056,6 +1127,8 @@ bool Controller::Impl::SetPrimaryCursorPosition(CharacterIndex index, bool focus
     // Nothing to do if there is no text.
     return false;
   }
+
+  index = NormalizeReplacementBoundary(index, ReplacementEditNormalizer::BoundaryAffinity::LEADING);
 
   if(mEventData->mPrimaryCursorPosition == index && mEventData->mState != EventData::SELECTING)
   {
@@ -1152,6 +1225,8 @@ void Controller::Impl::RetrieveSelection(std::string& selectedText, bool deleteA
     return;
   }
 
+  NormalizeReplacementSelection(mEventData->mLeftSelectionPosition, mEventData->mRightSelectionPosition);
+
   const bool handlesCrossed = mEventData->mLeftSelectionPosition > mEventData->mRightSelectionPosition;
 
   // Get start and end position of selection
@@ -1188,6 +1263,7 @@ void Controller::Impl::RetrieveSelection(std::string& selectedText, bool deleteA
         mEventData->mInputStyleChangedQueue.PushBack(styleChangedMask);
       }
 
+      PrepareEditableTextEdit(startOfSelectedText, lengthOfSelectedText, 0u);
       mModel->mLogicalModel->UpdateTextStyleRuns(startOfSelectedText, -static_cast<int>(lengthOfSelectedText));
 
       // Mark the paragraphs to be updated.
@@ -1229,13 +1305,16 @@ void Controller::Impl::SetSelection(int start, int end)
   uint32_t oldStart = mEventData->mLeftSelectionPosition;
   uint32_t oldEnd   = mEventData->mRightSelectionPosition;
 
-  mEventData->mLeftSelectionPosition  = start;
-  mEventData->mRightSelectionPosition = end;
+  CharacterIndex normalizedStart = static_cast<CharacterIndex>(std::max(start, 0));
+  CharacterIndex normalizedEnd   = static_cast<CharacterIndex>(std::max(end, 0));
+  NormalizeReplacementSelection(normalizedStart, normalizedEnd);
+  mEventData->mLeftSelectionPosition  = normalizedStart;
+  mEventData->mRightSelectionPosition = normalizedEnd;
   mEventData->mUpdateCursorPosition   = true;
 
   if(mSelectableControlInterface != nullptr)
   {
-    mSelectableControlInterface->SelectionChanged(oldStart, oldEnd, start, end);
+    mSelectableControlInterface->SelectionChanged(oldStart, oldEnd, normalizedStart, normalizedEnd);
   }
 }
 
@@ -1384,18 +1463,34 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
     return;
   }
 
-  const bool                  isMultiLine = (Layout::Engine::MULTI_LINE_BOX == mLayoutEngine.GetLayout());
+  const bool                      isMultiLine   = (Layout::Engine::MULTI_LINE_BOX == mLayoutEngine.GetLayout());
+  ModelPtr                        geometryModel = GetEditableGeometryModel();
+  const ReplacementRenderState*   replacement   = GetReplacementRenderStatePtr();
+  const ReplacementCursorBoundary replacementBoundary =
+    replacement && replacement->processingModel && replacement->projection.HasReplacements()
+      ? ResolveReplacementCursorBoundary(*replacement, logical)
+      : ReplacementCursorBoundary{};
+  const ReplacementProjection::BoundaryAffinity projectionAffinity =
+    replacementBoundary.placement && !replacementBoundary.leading
+      ? ReplacementProjection::BoundaryAffinity::TRAILING
+      : ReplacementProjection::BoundaryAffinity::LEADING;
+  const CharacterIndex        geometryLogical = LogicalBoundaryToEditable(logical, projectionAffinity);
   GetCursorPositionParameters parameters;
-  parameters.visualModel           = mModel->mVisualModel;
-  parameters.logicalModel          = mModel->mLogicalModel;
+  parameters.visualModel           = geometryModel->mVisualModel;
+  parameters.logicalModel          = geometryModel->mLogicalModel;
   parameters.metrics               = mMetrics;
-  parameters.logical               = logical;
-  parameters.verticalLineAlignment = mModel->GetVerticalLineAlignment();
+  parameters.logical               = geometryLogical;
+  parameters.verticalLineAlignment = geometryModel->GetVerticalLineAlignment();
   parameters.isMultiline           = isMultiLine;
 
   float defaultFontLineHeight = GetDefaultFontLineHeight();
 
   Text::GetCursorPosition(parameters, defaultFontLineHeight, cursorInfo);
+
+  if(replacementBoundary.placement)
+  {
+    ApplyReplacementCaretGeometry(replacementBoundary, cursorInfo);
+  }
 
   // Adds Outline offset.
   const float outlineWidth = mModel->IsOutlineEnabled() ? static_cast<float>(mModel->GetOutlineWidth()) : 0.0f;
@@ -1403,8 +1498,16 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
   cursorInfo.primaryPosition.y += outlineWidth;
   cursorInfo.secondaryPosition.x += outlineWidth;
   cursorInfo.secondaryPosition.y += outlineWidth;
+  if(cursorInfo.hasPrimaryCaretGeometry)
+  {
+    cursorInfo.primaryCaretPosition += Vector2(outlineWidth, outlineWidth);
+  }
+  if(cursorInfo.hasSecondaryCaretGeometry)
+  {
+    cursorInfo.secondaryCaretPosition += Vector2(outlineWidth, outlineWidth);
+  }
 
-  if(isMultiLine)
+  if(isMultiLine && !cursorInfo.hasPrimaryCaretGeometry)
   {
     // If the text is editable and multi-line, the cursor position after a white space shouldn't exceed the boundaries
     // of the text control.
@@ -1417,7 +1520,7 @@ void Controller::Impl::GetCursorPosition(CharacterIndex logical, CursorInfo& cur
       cursorInfo.primaryPosition.x = 0.f;
     }
 
-    const float edgeWidth = mModel->mVisualModel->mControlSize.width - mEventData->mDecorator->GetEffectiveCursorWidth();
+    const float edgeWidth = geometryModel->mVisualModel->mControlSize.width - mEventData->mDecorator->GetEffectiveCursorWidth();
     if(cursorInfo.primaryPosition.x > edgeWidth)
     {
       cursorInfo.primaryPosition.x = edgeWidth;
@@ -1433,27 +1536,52 @@ CharacterIndex Controller::Impl::CalculateNewCursorIndex(CharacterIndex index) c
     return 0u;
   }
 
-  CharacterIndex cursorIndex = mEventData->mPrimaryCursorPosition;
+  CharacterIndex cursorIndex  = mEventData->mPrimaryCursorPosition;
+  const bool     moveBackward = index < cursorIndex;
 
-  const GlyphIndex* const charactersToGlyphBuffer  = mModel->mVisualModel->mCharactersToGlyph.Begin();
-  const Length* const     charactersPerGlyphBuffer = mModel->mVisualModel->mCharactersPerGlyph.Begin();
+  ModelPtr                      geometryModel       = GetEditableGeometryModel();
+  CharacterIndex                geometryCursorIndex = cursorIndex;
+  CharacterIndex                geometryIndex       = index;
+  const ReplacementRenderState* replacement         = GetReplacementRenderStatePtr();
+  if(replacement && replacement->processingModel && replacement->projection.HasReplacements())
+  {
+    geometryCursorIndex = replacement->projection.LogicalBoundaryToProjected(
+      cursorIndex,
+      moveBackward ? ReplacementProjection::BoundaryAffinity::LEADING
+                   : ReplacementProjection::BoundaryAffinity::TRAILING);
+    if(moveBackward)
+    {
+      if(geometryCursorIndex == 0u)
+      {
+        return 0u;
+      }
+      geometryIndex = geometryCursorIndex - 1u;
+    }
+    else
+    {
+      geometryIndex = geometryCursorIndex;
+    }
+  }
 
-  GlyphIndex glyphIndex         = *(charactersToGlyphBuffer + index);
+  const GlyphIndex* const charactersToGlyphBuffer  = geometryModel->mVisualModel->mCharactersToGlyph.Begin();
+  const Length* const     charactersPerGlyphBuffer = geometryModel->mVisualModel->mCharactersPerGlyph.Begin();
+
+  GlyphIndex glyphIndex         = *(charactersToGlyphBuffer + geometryIndex);
   Length     numberOfCharacters = *(charactersPerGlyphBuffer + glyphIndex);
 
   if(numberOfCharacters > 1u)
   {
-    const Script script = mModel->mLogicalModel->GetScript(index);
+    const Script script = geometryModel->mLogicalModel->GetScript(geometryIndex);
     if(HasLigatureMustBreak(script))
     {
       if(numberOfCharacters == 2u)
       {
-        const Character* const textBuffer = mModel->mLogicalModel->mText.Begin();
-        Character              character  = *(textBuffer + index);
+        const Character* const textBuffer = geometryModel->mLogicalModel->mText.Begin();
+        Character              character  = *(textBuffer + geometryIndex);
 
-        CharacterIndex nextIndex          = index + 1u;
+        CharacterIndex nextIndex          = geometryIndex + 1u;
         bool           isCurrentCombining = TextAbstraction::IsCombiningDiacriticalMarks(character);
-        bool           isNextValid        = nextIndex < mModel->mLogicalModel->mText.Count();
+        bool           isNextValid        = nextIndex < geometryModel->mLogicalModel->mText.Count();
         bool           isNextCombining    = isNextValid && TextAbstraction::IsCombiningDiacriticalMarks(*(textBuffer + nextIndex));
 
         if(!isCurrentCombining && !isNextCombining)
@@ -1477,20 +1605,65 @@ CharacterIndex Controller::Impl::CalculateNewCursorIndex(CharacterIndex index) c
     }
   }
 
-  if(index < mEventData->mPrimaryCursorPosition)
+  if(moveBackward)
   {
-    cursorIndex = cursorIndex < numberOfCharacters ? 0u : cursorIndex - numberOfCharacters;
+    geometryCursorIndex = geometryCursorIndex < numberOfCharacters ? 0u : geometryCursorIndex - numberOfCharacters;
   }
   else
   {
-    Length textLength = mModel->mVisualModel->mCharactersToGlyph.Count();
-    cursorIndex       = cursorIndex + numberOfCharacters > textLength ? textLength : cursorIndex + numberOfCharacters;
+    Length textLength   = geometryModel->mVisualModel->mCharactersToGlyph.Count();
+    geometryCursorIndex = geometryCursorIndex + numberOfCharacters > textLength
+                            ? textLength
+                            : geometryCursorIndex + numberOfCharacters;
   }
+
+  cursorIndex = replacement && replacement->processingModel && replacement->projection.HasReplacements()
+                  ? replacement->projection.ProjectedBoundaryToLogical(geometryCursorIndex)
+                  : geometryCursorIndex;
 
   // Will update the cursor hook position.
   mEventData->mUpdateCursorHookPosition = true;
 
   return cursorIndex;
+}
+
+CharacterIndex Controller::Impl::GetClosestLogicalCursorIndex(float                  visualX,
+                                                              float                  visualY,
+                                                              CharacterHitTest::Mode hitTest,
+                                                              bool&                  matchedCharacter) const
+{
+  const ReplacementRenderState* replacement = GetReplacementRenderStatePtr();
+  if(replacement && replacement->processingModel && replacement->projection.HasReplacements())
+  {
+    for(const ReplacementPlacement& placement : replacement->placements)
+    {
+      if(placement.visible && !placement.elided &&
+         visualX >= placement.position.x && visualX < placement.position.x + placement.size.x &&
+         visualY >= placement.position.y && visualY < placement.position.y + placement.size.y)
+      {
+        const ProjectedReplacementRun* run = replacement->projection.FindByLogicalCharacter(
+          placement.logicalCharacterRange.characterIndex);
+        if(run)
+        {
+          matchedCharacter = true;
+          return replacement->projection.HitTestLogicalBoundary(run->projectedCharacterIndex,
+                                                                visualX - placement.position.x,
+                                                                placement.size.x,
+                                                                placement.lineDirection);
+        }
+      }
+    }
+  }
+
+  ModelPtr             geometryModel    = GetEditableGeometryModel();
+  const CharacterIndex geometryBoundary = Text::GetClosestCursorIndex(geometryModel->mVisualModel,
+                                                                      geometryModel->mLogicalModel,
+                                                                      mMetrics,
+                                                                      visualX,
+                                                                      visualY,
+                                                                      hitTest,
+                                                                      matchedCharacter);
+  return EditableBoundaryToLogical(geometryBoundary);
 }
 
 void Controller::Impl::UpdateCursorPosition(const CursorInfo& cursorInfo)
@@ -1510,6 +1683,14 @@ void Controller::Impl::UpdateCursorPosition(const CursorInfo& cursorInfo)
   // Sets the cursor position.
   mEventData->mDecorator->SetPosition(PRIMARY_CURSOR, cursorPosition.x, cursorPosition.y,
                                       cursorInfo.primaryCursorHeight, cursorInfo.lineHeight);
+  if(cursorInfo.hasPrimaryCaretGeometry)
+  {
+    const Vector2 visualPosition = cursorInfo.primaryCaretPosition + mModel->mScrollPosition;
+    mEventData->mDecorator->SetVisualCursorGeometry(PRIMARY_CURSOR,
+                                                    visualPosition.x,
+                                                    visualPosition.y,
+                                                    cursorInfo.primaryCaretHeight);
+  }
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Primary cursor position: %f,%f\n", cursorPosition.x, cursorPosition.y);
 
   if(mEventData->mUpdateGrabHandlePosition)
@@ -1523,12 +1704,23 @@ void Controller::Impl::UpdateCursorPosition(const CursorInfo& cursorInfo)
 
   if(cursorInfo.isSecondaryCursor)
   {
-    mEventData->mDecorator->SetPosition(SECONDARY_CURSOR, cursorInfo.secondaryPosition.x + mModel->mScrollPosition.x,
-                                        cursorInfo.secondaryPosition.y + mModel->mScrollPosition.y,
-                                        cursorInfo.secondaryCursorHeight, cursorInfo.lineHeight);
+    const Vector2 secondaryPosition = cursorInfo.secondaryPosition + mModel->mScrollPosition;
+    mEventData->mDecorator->SetPosition(SECONDARY_CURSOR,
+                                        secondaryPosition.x,
+                                        secondaryPosition.y,
+                                        cursorInfo.secondaryCursorHeight,
+                                        cursorInfo.lineHeight);
+    if(cursorInfo.hasSecondaryCaretGeometry)
+    {
+      const Vector2 visualPosition = cursorInfo.secondaryCaretPosition + mModel->mScrollPosition;
+      mEventData->mDecorator->SetVisualCursorGeometry(SECONDARY_CURSOR,
+                                                      visualPosition.x,
+                                                      visualPosition.y,
+                                                      cursorInfo.secondaryCaretHeight);
+    }
     DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Secondary cursor position: %f,%f\n",
-                  cursorInfo.secondaryPosition.x + mModel->mScrollPosition.x,
-                  cursorInfo.secondaryPosition.y + mModel->mScrollPosition.y);
+                  secondaryPosition.x,
+                  secondaryPosition.y);
   }
 
   // Set which cursors are active according the state.
@@ -1573,6 +1765,7 @@ void Controller::Impl::ClampHorizontalScroll(const Vector2& layoutSize)
   {
     mModel->mScrollPosition.x = 0.f;
   }
+  SyncReplacementScrollPosition();
 }
 
 void Controller::Impl::ClampVerticalScroll(const Vector2& layoutSize)
@@ -1580,6 +1773,7 @@ void Controller::Impl::ClampVerticalScroll(const Vector2& layoutSize)
   if(Layout::Engine::SINGLE_LINE_BOX == mLayoutEngine.GetLayout())
   {
     // Nothing to do if the text is single line.
+    SyncReplacementScrollPosition();
     return;
   }
 
@@ -1598,6 +1792,7 @@ void Controller::Impl::ClampVerticalScroll(const Vector2& layoutSize)
     // Recalculate vertical offset to preserve VerticalAlignment (CENTER/END).
     Relayouter::CalculateVerticalOffset(*this, mModel->mVisualModel->mControlSize);
   }
+  SyncReplacementScrollPosition();
 }
 
 void Controller::Impl::ScrollToMakePositionVisible(const Vector2& position, float lineHeight)
@@ -1640,8 +1835,9 @@ void Controller::Impl::ScrollToMakePositionVisible(const Vector2& position, floa
     }
 
     // Clamp the scroll position to valid bounds after adjustment.
-    ClampVerticalScroll(mModel->mVisualModel->GetLayoutSize());
+    ClampVerticalScroll(GetEditableGeometryModel()->mVisualModel->GetLayoutSize());
   }
+  SyncReplacementScrollPosition();
 }
 
 std::pair<float, float> Controller::Impl::CalculateScrollTarget(const CursorInfo& info) const
@@ -1649,7 +1845,8 @@ std::pair<float, float> Controller::Impl::CalculateScrollTarget(const CursorInfo
   float visibleTop    = info.primaryPosition.y - info.glyphOffset;
   float visibleBottom = visibleTop + info.lineHeight;
 
-  const Length lineCount = mModel->mVisualModel->mLines.Count();
+  ModelPtr     geometryModel = GetEditableGeometryModel();
+  const Length lineCount     = geometryModel->mVisualModel->mLines.Count();
   if(lineCount > 0u)
   {
     // Find the line index by comparing line offsets with cursor's lineOffset.
@@ -1660,7 +1857,7 @@ std::pair<float, float> Controller::Impl::CalculateScrollTarget(const CursorInfo
 
     for(LineIndex index = 0u; index < lineCount; ++index)
     {
-      const float lineOffset = CalculateLineOffset(mModel->mVisualModel->mLines, index);
+      const float lineOffset = CalculateLineOffset(geometryModel->mVisualModel->mLines, index);
       const float distance   = std::fabs(lineOffset - info.lineOffset);
 
       if(distance < minDistance)
@@ -1675,9 +1872,9 @@ std::pair<float, float> Controller::Impl::CalculateScrollTarget(const CursorInfo
 
     if(isFirstLine || isLastLine)
     {
-      const LineRun&  line              = *(mModel->mVisualModel->mLines.Begin() + lineIndex);
+      const LineRun&  line              = *(geometryModel->mVisualModel->mLines.Begin() + lineIndex);
       const float     naturalLineHeight = line.ascender - line.descender;
-      const Alignment verticalLineAlign = mModel->GetVerticalLineAlignment();
+      const Alignment verticalLineAlign = geometryModel->GetVerticalLineAlignment();
       const float     lineBoxHeight =
         GetPreOffsetVerticalLineAlignment(line, verticalLineAlign) +
         naturalLineHeight +
@@ -1705,22 +1902,25 @@ void Controller::Impl::ScrollTextToMatchCursor(const CursorInfo& cursorInfo)
   // Get the current cursor position in decorator coords.
   const Vector2& currentCursorPosition = mEventData->mDecorator->GetPosition(PRIMARY_CURSOR);
 
-  const CharacterIndex characterIndex =
-    (mEventData->mPrimaryCursorPosition > 0u) ? mEventData->mPrimaryCursorPosition - 1u : 0u;
-  const LineIndex lineIndex = mModel->mVisualModel->GetLineOfCharacter(characterIndex);
+  ModelPtr       geometryModel  = GetEditableGeometryModel();
+  CharacterIndex geometryCursor = LogicalBoundaryToEditable(
+    mEventData->mPrimaryCursorPosition,
+    ReplacementProjection::BoundaryAffinity::LEADING);
+  const CharacterIndex characterIndex = geometryCursor > 0u ? geometryCursor - 1u : 0u;
+  const LineIndex      lineIndex      = geometryModel->mVisualModel->GetLineOfCharacter(characterIndex);
 
   // Calculate the offset to match the cursor position before the character was deleted.
   mModel->mScrollPosition.x = currentCursorPosition.x - cursorInfo.primaryPosition.x;
 
   // If text control has more than two lines and current line index is not last, calculate scrollpositionY
-  if(mModel->mVisualModel->mLines.Count() > 1u && lineIndex != mModel->mVisualModel->mLines.Count() - 1u)
+  if(geometryModel->mVisualModel->mLines.Count() > 1u && lineIndex != geometryModel->mVisualModel->mLines.Count() - 1u)
   {
     const float currentCursorGlyphOffset = mEventData->mDecorator->GetGlyphOffset(PRIMARY_CURSOR);
     mModel->mScrollPosition.y            = currentCursorPosition.y - cursorInfo.lineOffset - currentCursorGlyphOffset;
   }
 
-  ClampHorizontalScroll(mModel->mVisualModel->GetLayoutSize());
-  ClampVerticalScroll(mModel->mVisualModel->GetLayoutSize());
+  ClampHorizontalScroll(geometryModel->mVisualModel->GetLayoutSize());
+  ClampVerticalScroll(geometryModel->mVisualModel->GetLayoutSize());
 
   // Makes the new cursor position visible if needed, using LineHeight-aware scroll target.
   auto [visibleTop, visibleBottom] = CalculateScrollTarget(cursorInfo);
@@ -1808,7 +2008,7 @@ void Controller::Impl::ScrollBy(Vector2 scroll)
 {
   if(mEventData && (fabs(scroll.x) > Math::MACHINE_EPSILON_0 || fabs(scroll.y) > Math::MACHINE_EPSILON_0))
   {
-    const Vector2& layoutSize    = mModel->mVisualModel->GetLayoutSize();
+    const Vector2& layoutSize    = GetEditableGeometryModel()->mVisualModel->GetLayoutSize();
     const Vector2  currentScroll = mModel->mScrollPosition;
 
     scroll.x = -scroll.x;
@@ -1843,8 +2043,9 @@ bool Controller::Impl::IsScrollable(const Vector2& displacement)
     const bool isVerticalScrollEnabled   = mEventData->mDecorator->IsVerticalScrollEnabled();
     if(isHorizontalScrollEnabled || isVerticalScrollEnabled)
     {
-      const Vector2& targetSize = mModel->mVisualModel->mControlSize;
-      const Vector2& layoutSize = mModel->mVisualModel->GetLayoutSize();
+      ModelPtr       geometryModel = GetEditableGeometryModel();
+      const Vector2& targetSize    = geometryModel->mVisualModel->mControlSize;
+      const Vector2& layoutSize    = geometryModel->mVisualModel->GetLayoutSize();
 
       if(isHorizontalScrollEnabled)
       {
@@ -2456,6 +2657,7 @@ void Controller::Impl::ResetScrollPosition()
     // Reset the scroll position.
     mModel->mScrollPosition                = Vector2::ZERO;
     mEventData->mScrollAfterUpdatePosition = true;
+    SyncReplacementScrollPosition();
   }
 }
 

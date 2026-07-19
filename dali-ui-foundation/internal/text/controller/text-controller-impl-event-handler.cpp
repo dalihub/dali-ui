@@ -295,7 +295,8 @@ void ControllerImplEventHandler::OnCursorKeyEvent(Controller::Impl& impl, const 
   EventData&       eventData       = *impl.mEventData;
   ModelPtr&        model           = impl.mModel;
   LogicalModelPtr& logicalModel    = model->mLogicalModel;
-  VisualModelPtr&  visualModel     = model->mVisualModel;
+  ModelPtr         geometryModel   = impl.GetEditableGeometryModel();
+  VisualModelPtr&  visualModel     = geometryModel->mVisualModel;
   uint32_t         oldSelStart     = eventData.mLeftSelectionPosition;
   uint32_t         oldSelEnd       = eventData.mRightSelectionPosition;
 
@@ -352,11 +353,14 @@ void ControllerImplEventHandler::OnCursorKeyEvent(Controller::Impl& impl, const 
     // Ignore Shift-Up for text selection for now.
 
     // Get first the line index of the current cursor position index.
+    CharacterIndex geometryCursorPosition = impl.LogicalBoundaryToEditable(
+      primaryCursorPosition,
+      ReplacementProjection::BoundaryAffinity::LEADING);
     CharacterIndex characterIndex = 0u;
 
-    if(primaryCursorPosition > 0u)
+    if(geometryCursorPosition > 0u)
     {
-      characterIndex = primaryCursorPosition - 1u;
+      characterIndex = geometryCursorPosition - 1u;
     }
 
     const LineIndex lineIndex         = visualModel->GetLineOfCharacter(characterIndex);
@@ -376,20 +380,24 @@ void ControllerImplEventHandler::OnCursorKeyEvent(Controller::Impl& impl, const 
 
     // Use the cursor hook position 'x' and the next hit 'y' position to calculate the new cursor index.
     bool matchedCharacter = false;
-    primaryCursorPosition =
-      Text::GetClosestCursorIndex(visualModel, logicalModel, impl.mMetrics, eventData.mCursorHookPositionX, hitPointY,
-                                  CharacterHitTest::TAP, matchedCharacter);
+    primaryCursorPosition = impl.GetClosestLogicalCursorIndex(eventData.mCursorHookPositionX,
+                                                              hitPointY,
+                                                              CharacterHitTest::TAP,
+                                                              matchedCharacter);
   }
   else if(Dali::DALI_KEY_CURSOR_DOWN == keyCode && !isShiftModifier)
   {
     // Ignore Shift-Down for text selection for now.
 
     // Get first the line index of the current cursor position index.
+    CharacterIndex geometryCursorPosition = impl.LogicalBoundaryToEditable(
+      primaryCursorPosition,
+      ReplacementProjection::BoundaryAffinity::LEADING);
     CharacterIndex characterIndex = 0u;
 
-    if(primaryCursorPosition > 0u)
+    if(geometryCursorPosition > 0u)
     {
-      characterIndex = primaryCursorPosition - 1u;
+      characterIndex = geometryCursorPosition - 1u;
     }
 
     const LineIndex lineIndex = visualModel->GetLineOfCharacter(characterIndex);
@@ -414,9 +422,10 @@ void ControllerImplEventHandler::OnCursorKeyEvent(Controller::Impl& impl, const 
 
       // Use the cursor hook position 'x' and the next hit 'y' position to calculate the new cursor index.
       bool matchedCharacter = false;
-      primaryCursorPosition =
-        Text::GetClosestCursorIndex(visualModel, logicalModel, impl.mMetrics, eventData.mCursorHookPositionX,
-                                    hitPointY, CharacterHitTest::TAP, matchedCharacter);
+      primaryCursorPosition = impl.GetClosestLogicalCursorIndex(eventData.mCursorHookPositionX,
+                                                                hitPointY,
+                                                                CharacterHitTest::TAP,
+                                                                matchedCharacter);
     }
   }
 
@@ -517,11 +526,9 @@ void ControllerImplEventHandler::OnTapEvent(Controller::Impl& impl, const Event&
 {
   if(impl.mEventData)
   {
-    const unsigned int tapCount     = event.p1.mUint;
-    EventData&         eventData    = *impl.mEventData;
-    ModelPtr&          model        = impl.mModel;
-    LogicalModelPtr&   logicalModel = model->mLogicalModel;
-    VisualModelPtr&    visualModel  = model->mVisualModel;
+    const unsigned int tapCount  = event.p1.mUint;
+    EventData&         eventData = *impl.mEventData;
+    ModelPtr&          model     = impl.mModel;
 
     if(1u == tapCount)
     {
@@ -538,8 +545,10 @@ void ControllerImplEventHandler::OnTapEvent(Controller::Impl& impl, const Event&
 
         // Whether to touch point hits on a glyph.
         bool matchedCharacter            = false;
-        eventData.mPrimaryCursorPosition = Text::GetClosestCursorIndex(
-          visualModel, logicalModel, impl.mMetrics, xPosition, yPosition, CharacterHitTest::TAP, matchedCharacter);
+        eventData.mPrimaryCursorPosition = impl.GetClosestLogicalCursorIndex(xPosition,
+                                                                             yPosition,
+                                                                             CharacterHitTest::TAP,
+                                                                             matchedCharacter);
 
         if(impl.mSelectableControlInterface != nullptr && eventData.mDecorator->IsHighlightVisible())
         {
@@ -615,7 +624,7 @@ void ControllerImplEventHandler::OnPanEvent(Controller::Impl& impl, const Event&
       {
         ModelPtr& model = impl.mModel;
 
-        const Vector2& layoutSize     = model->mVisualModel->GetLayoutSize();
+        const Vector2& layoutSize     = impl.GetEditableGeometryModel()->mVisualModel->GetLayoutSize();
         Vector2&       scrollPosition = model->mScrollPosition;
         const Vector2  currentScroll  = scrollPosition;
 
@@ -791,8 +800,9 @@ void ControllerImplEventHandler::OnSelectRangeEvent(Controller::Impl& impl, cons
 
     // Calculate the selection index.
     const uint32_t length = static_cast<uint32_t>(model->mLogicalModel->mText.Count());
-    const uint32_t start  = std::min(event.p2.mUint, length);
-    const uint32_t end    = std::min(event.p3.mUint, length);
+    CharacterIndex start  = std::min(event.p2.mUint, length);
+    CharacterIndex end    = std::min(event.p3.mUint, length);
+    impl.NormalizeReplacementSelection(start, end);
 
     if(start != end)
     {
@@ -825,10 +835,11 @@ void ControllerImplEventHandler::OnHandlePressed(Controller::Impl& impl, const E
   const float yPosition = event.p3.mFloat - scrollPosition.y;
 
   // Need to calculate the handle's new position.
-  bool                 matchedCharacter = false;
-  const CharacterIndex handleNewPosition =
-    Text::GetClosestCursorIndex(model->mVisualModel, model->mLogicalModel, impl.mMetrics, xPosition, yPosition,
-                                CharacterHitTest::SCROLL, matchedCharacter);
+  bool                 matchedCharacter  = false;
+  const CharacterIndex handleNewPosition = impl.GetClosestLogicalCursorIndex(xPosition,
+                                                                             yPosition,
+                                                                             CharacterHitTest::SCROLL,
+                                                                             matchedCharacter);
 
   EventData& eventData = *impl.mEventData;
   uint32_t   oldStart  = eventData.mLeftSelectionPosition;
@@ -918,8 +929,10 @@ void ControllerImplEventHandler::OnHandleReleased(Controller::Impl& impl, const 
     const float yPosition = event.p3.mFloat - scrollPosition.y;
 
     bool matchedCharacter = false;
-    handlePosition        = Text::GetClosestCursorIndex(model->mVisualModel, model->mLogicalModel, impl.mMetrics, xPosition,
-                                                        yPosition, CharacterHitTest::SCROLL, matchedCharacter);
+    handlePosition        = impl.GetClosestLogicalCursorIndex(xPosition,
+                                                              yPosition,
+                                                              CharacterHitTest::SCROLL,
+                                                              matchedCharacter);
   }
 
   EventData& eventData = *impl.mEventData;
@@ -1021,7 +1034,8 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
 {
   ModelPtr&       model          = impl.mModel;
   Vector2&        scrollPosition = model->mScrollPosition;
-  VisualModelPtr& visualModel    = model->mVisualModel;
+  ModelPtr        geometryModel  = impl.GetEditableGeometryModel();
+  VisualModelPtr& visualModel    = geometryModel->mVisualModel;
 
   const float    xSpeed                = event.p2.mFloat;
   const float    ySpeed                = event.p3.mFloat;
@@ -1076,9 +1090,10 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
     // Get the new handle position.
     // The hit-test position is in text's coords.
     bool                 matchedCharacter = false;
-    const CharacterIndex handlePosition   = Text::GetClosestCursorIndex(
-      visualModel, impl.mModel->mLogicalModel, impl.mMetrics, hitTestX, hitTestY,
-      CharacterHitTest::SCROLL, matchedCharacter);
+    const CharacterIndex handlePosition   = impl.GetClosestLogicalCursorIndex(hitTestX,
+                                                                              hitTestY,
+                                                                              CharacterHitTest::SCROLL,
+                                                                              matchedCharacter);
 
     if(eventData.mPrimaryCursorPosition != handlePosition)
     {
@@ -1109,11 +1124,12 @@ void ControllerImplEventHandler::OnHandleScrolling(Controller::Impl& impl, const
     // Get the new handle position.
     // The hit-test position is in text's coords.
     bool                 matchedCharacter = false;
-    const CharacterIndex handlePosition   = Text::GetClosestCursorIndex(
-      visualModel, impl.mModel->mLogicalModel, impl.mMetrics, hitTestX, hitTestY,
-      CharacterHitTest::SCROLL, matchedCharacter);
-    uint32_t oldStart = eventData.mLeftSelectionPosition;
-    uint32_t oldEnd   = eventData.mRightSelectionPosition;
+    const CharacterIndex handlePosition   = impl.GetClosestLogicalCursorIndex(hitTestX,
+                                                                              hitTestY,
+                                                                              CharacterHitTest::SCROLL,
+                                                                              matchedCharacter);
+    uint32_t             oldStart         = eventData.mLeftSelectionPosition;
+    uint32_t             oldEnd           = eventData.mRightSelectionPosition;
 
     if(leftSelectionHandleEvent)
     {

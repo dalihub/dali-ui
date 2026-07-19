@@ -1044,6 +1044,26 @@ private: // Implementation
   void OnSceneConnect(Dali::Actor actor);
 
   /**
+   * @brief Updates inline replacement visuals from the final text layout.
+   *
+   * @param[in] ownerSize The control size.
+   * @param[in] padding The effective text padding.
+   */
+  void UpdateInlineReplacementRuntime(const Vector2& ownerSize, const Insets& padding);
+
+  /**
+   * @brief Removes inline replacement visuals.
+   */
+  void ClearInlineReplacementRuntime();
+
+  /**
+   * @brief Refreshes inline replacement visuals after resource loading.
+   *
+   * @param[in] view The visual owner.
+   */
+  void OnInlineReplacementResourcesReady(Ui::View view);
+
+  /**
    * @brief Callback when a tap gesture is detected.
    */
   void OnTapDetected(Actor actor, TapGesture tap);

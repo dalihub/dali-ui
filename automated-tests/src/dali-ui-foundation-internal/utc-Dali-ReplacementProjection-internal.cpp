@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/styles/character-spacing-helper-functions.h>
 #include <dali-ui-foundation/internal/text/rendering/view-model.h>
+#include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-runtime.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -1337,6 +1338,278 @@ int UtcDaliReplacementControllerModelGeometryAndAffinityContractP(void)
   END_TEST;
 }
 
+int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
+{
+  UiTestApplication application;
+
+  const auto createEditableController = [](bool multiline = true)
+  {
+    Text::ControllerPtr controller = Text::Controller::New();
+    Text::DecoratorPtr  decorator  = Text::Decorator::New(*controller, *controller);
+    Dali::InputMethodContext inputMethodContext;
+    controller->EnableTextInput(decorator, inputMethodContext);
+    controller->SetDefaultFontSize(18.0f, Text::Controller::PIXEL_SIZE);
+    controller->SetMultiLineEnabled(multiline);
+    controller->SetTextElideEnabled(false);
+    return controller;
+  };
+
+  Text::ControllerPtr     controller = createEditableController();
+  Text::Controller::Impl& impl       = Text::Controller::Impl::GetImplementation(*controller.Get());
+  controller->SetText("AiconB");
+
+  Text::ReplacementSourceSnapshot source;
+  source.runs.PushBack(Candidate(1u, 4u, 84.0f, 112.0f, 531u));
+  source.sourceRevision                       = 31u;
+  source.hasValidReplacementSource            = true;
+  impl.GetOrCreateReplacementSourceSnapshot() = source;
+  controller->Relayout(Size(220.0f, 180.0f));
+
+  const Text::ReplacementPlacement& placement = impl.GetReplacementRenderState().placements[0u];
+  DALI_TEST_CHECK(placement.visible);
+  DALI_TEST_CHECK(placement.leadingCaretMetric.height > 0.0f);
+  DALI_TEST_CHECK(placement.trailingCaretMetric.height > 0.0f);
+
+  Text::CursorInfo before;
+  Text::CursorInfo after;
+  impl.GetCursorPosition(1u, before);
+  impl.GetCursorPosition(5u, after);
+
+  DALI_TEST_CHECK(before.hasPrimaryCaretGeometry);
+  DALI_TEST_CHECK(after.hasPrimaryCaretGeometry);
+  DALI_TEST_EQUALS(before.primaryPosition.x,
+                   placement.position.x,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(after.primaryPosition.x,
+                   placement.position.x + placement.size.x,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(before.primaryCaretPosition.y,
+                   placement.baseline - placement.leadingCaretMetric.ascender,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(after.primaryCaretPosition.y,
+                   placement.baseline - placement.trailingCaretMetric.ascender,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(after.primaryCaretHeight < placement.size.y);
+  DALI_TEST_CHECK(after.lineHeight > after.primaryCaretHeight);
+
+  impl.UpdateCursorPosition(after);
+  const Vector2& storedCursorPosition = impl.mEventData->mDecorator->GetPosition(Text::PRIMARY_CURSOR);
+  DALI_TEST_EQUALS(storedCursorPosition,
+                   after.primaryPosition + impl.mModel->mScrollPosition,
+                   TEST_LOCATION);
+  float storedX;
+  float storedY;
+  float storedCursorHeight;
+  float storedLineHeight;
+  impl.mEventData->mDecorator->GetPosition(Text::PRIMARY_CURSOR,
+                                           storedX,
+                                           storedY,
+                                           storedCursorHeight,
+                                           storedLineHeight);
+  DALI_TEST_EQUALS(storedCursorHeight,
+                   after.primaryCursorHeight,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(storedLineHeight, after.lineHeight, Math::MACHINE_EPSILON_1000, TEST_LOCATION);
+
+  const auto [visibleTop, visibleBottom] = impl.CalculateScrollTarget(after);
+  DALI_TEST_CHECK(visibleBottom - visibleTop >= after.lineHeight - Math::MACHINE_EPSILON_1000);
+
+  struct CaretCase
+  {
+    Text::ReplacementPlacement placement;
+    Text::CursorInfo            before;
+    Text::CursorInfo            after;
+  };
+  const auto layoutCaretCase = [&createEditableController](const char*                         text,
+                                                           Text::CharacterIndex                start,
+                                                           Text::Length                        length,
+                                                           Text::ReplacementRunSnapshot        run,
+                                                           const Size&                         controlSize,
+                                                           bool                                multiline)
+  {
+    Text::ControllerPtr     caseController = createEditableController(multiline);
+    Text::Controller::Impl& caseImpl = Text::Controller::Impl::GetImplementation(*caseController.Get());
+    caseController->SetText(text);
+    run.logicalCharacterRange = Text::CharacterRun{start, length};
+    Text::ReplacementSourceSnapshot caseSource;
+    caseSource.runs.PushBack(run);
+    caseSource.sourceRevision                       = run.occurrenceIdentity;
+    caseSource.hasValidReplacementSource            = true;
+    caseImpl.GetOrCreateReplacementSourceSnapshot() = caseSource;
+    caseController->Relayout(controlSize);
+
+    CaretCase result;
+    result.placement = caseImpl.GetReplacementRenderState().placements[0u];
+    caseImpl.GetCursorPosition(start, result.before);
+    caseImpl.GetCursorPosition(start + length, result.after);
+    return result;
+  };
+
+  Text::ReplacementRunSnapshot smallRun = Candidate(1u, 4u, 18.0f, 14.0f, 533u);
+  const CaretCase small = layoutCaretCase("AiconB", 1u, 4u, smallRun, Size(220.0f, 80.0f), false);
+  DALI_TEST_EQUALS(small.before.primaryCaretHeight,
+                   before.primaryCaretHeight,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(small.after.primaryCaretHeight,
+                   placement.trailingCaretMetric.height,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_CHECK(small.placement.size.y < placement.size.y);
+
+  const Text::ReplacementVerticalAlignment alignments[] = {
+    Text::ReplacementVerticalAlignment::TEXT_BASELINE,
+    Text::ReplacementVerticalAlignment::TEXT_BOTTOM,
+    Text::ReplacementVerticalAlignment::TEXT_CENTER};
+  const float offsets[] = {-9.0f, 7.0f};
+  uint64_t    occurrence = 534u;
+  for(const Text::ReplacementVerticalAlignment alignment : alignments)
+  {
+    for(const float offset : offsets)
+    {
+      Text::ReplacementRunSnapshot alignedRun = Candidate(1u, 4u, 88.0f, 74.0f, occurrence++);
+      alignedRun.metrics.verticalAlignment     = alignment;
+      alignedRun.metrics.verticalOffset        = offset;
+      const CaretCase aligned = layoutCaretCase("AiconB",
+                                                1u,
+                                                4u,
+                                                alignedRun,
+                                                Size(220.0f, 160.0f),
+                                                true);
+      DALI_TEST_EQUALS(aligned.before.primaryCaretHeight,
+                       small.before.primaryCaretHeight,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(aligned.after.primaryCaretHeight,
+                       small.after.primaryCaretHeight,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_EQUALS(aligned.before.primaryCaretPosition.y,
+                       aligned.placement.baseline - aligned.placement.leadingCaretMetric.ascender,
+                       Math::MACHINE_EPSILON_1000,
+                       TEST_LOCATION);
+      DALI_TEST_CHECK(std::isfinite(aligned.before.primaryCaretPosition.x));
+      DALI_TEST_CHECK(std::isfinite(aligned.before.primaryCaretPosition.y));
+      DALI_TEST_CHECK(std::isfinite(aligned.before.primaryCaretHeight));
+    }
+  }
+
+  Text::ReplacementRunSnapshot tallerThanControlRun = Candidate(1u, 4u, 92.0f, 260.0f, occurrence++);
+  const CaretCase tallerThanControl = layoutCaretCase("AiconB",
+                                                      1u,
+                                                      4u,
+                                                      tallerThanControlRun,
+                                                      Size(220.0f, 160.0f),
+                                                      true);
+  DALI_TEST_CHECK(tallerThanControl.after.primaryCaretHeight < tallerThanControl.placement.size.y);
+  DALI_TEST_CHECK(tallerThanControl.after.lineHeight > tallerThanControl.after.primaryCaretHeight);
+
+  // The internal harness interposes a no-op bidi reorder. Exercise the
+  // production RTL boundary branch with the final placement direction that
+  // the real-layout diagnostic obtains from the bidi service.
+  Text::ReplacementPlacement& rtlPlacement = impl.GetOrCreateReplacementRenderState().placements[0u];
+  rtlPlacement.lineDirection               = true;
+  impl.GetCursorPosition(1u, before);
+  impl.GetCursorPosition(5u, after);
+  DALI_TEST_EQUALS(before.primaryPosition.x,
+                   rtlPlacement.position.x + rtlPlacement.size.x,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(after.primaryPosition.x,
+                   rtlPlacement.position.x,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  Text::ControllerPtr     adjacentController = createEditableController(false);
+  Text::Controller::Impl& adjacentImpl =
+    Text::Controller::Impl::GetImplementation(*adjacentController.Get());
+  adjacentController->SetText("AabcdwxyzB");
+  Text::ReplacementSourceSnapshot adjacentSource;
+  adjacentSource.runs.PushBack(Candidate(1u, 4u, 38.0f, 28.0f, occurrence++));
+  adjacentSource.runs.PushBack(Candidate(5u, 4u, 64.0f, 44.0f, occurrence++));
+  adjacentSource.sourceRevision                       = occurrence;
+  adjacentSource.hasValidReplacementSource            = true;
+  adjacentImpl.GetOrCreateReplacementSourceSnapshot() = adjacentSource;
+  adjacentController->Relayout(Size(260.0f, 100.0f));
+  const Text::ReplacementPlacement& secondAdjacent =
+    adjacentImpl.GetReplacementRenderState().placements[1u];
+  Text::CursorInfo sharedBoundary;
+  adjacentImpl.GetCursorPosition(5u, sharedBoundary);
+  DALI_TEST_CHECK(sharedBoundary.hasPrimaryCaretGeometry);
+  DALI_TEST_EQUALS(sharedBoundary.primaryPosition.x,
+                   secondAdjacent.position.x,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  Text::ControllerPtr     replacementOnlyController = createEditableController();
+  Text::Controller::Impl& replacementOnlyImpl =
+    Text::Controller::Impl::GetImplementation(*replacementOnlyController.Get());
+  replacementOnlyController->SetText("icon");
+  Text::ReplacementSourceSnapshot replacementOnlySource;
+  replacementOnlySource.runs.PushBack(Candidate(0u, 4u, 96.0f, 128.0f, 532u));
+  replacementOnlySource.sourceRevision                       = 32u;
+  replacementOnlySource.hasValidReplacementSource            = true;
+  replacementOnlyImpl.GetOrCreateReplacementSourceSnapshot() = replacementOnlySource;
+  replacementOnlyController->Relayout(Size(220.0f, 180.0f));
+
+  Text::CursorInfo replacementOnlyBefore;
+  Text::CursorInfo replacementOnlyAfter;
+  replacementOnlyImpl.GetCursorPosition(0u, replacementOnlyBefore);
+  replacementOnlyImpl.GetCursorPosition(4u, replacementOnlyAfter);
+  DALI_TEST_CHECK(replacementOnlyBefore.hasPrimaryCaretGeometry);
+  DALI_TEST_CHECK(replacementOnlyAfter.hasPrimaryCaretGeometry);
+  DALI_TEST_CHECK(replacementOnlyAfter.primaryCaretHeight > 0.0f);
+  DALI_TEST_CHECK(replacementOnlyAfter.primaryCaretHeight < replacementOnlyAfter.lineHeight);
+
+  Text::ControllerPtr     ordinaryController = createEditableController();
+  Text::Controller::Impl& ordinaryImpl =
+    Text::Controller::Impl::GetImplementation(*ordinaryController.Get());
+  ordinaryController->SetText("ordinary editable text");
+  ordinaryController->Relayout(Size(220.0f, 80.0f));
+  Text::CursorInfo ordinaryCursor;
+  ordinaryImpl.GetCursorPosition(8u, ordinaryCursor);
+  DALI_TEST_CHECK(!ordinaryCursor.hasPrimaryCaretGeometry);
+  DALI_TEST_CHECK(!ordinaryCursor.hasSecondaryCaretGeometry);
+  DALI_TEST_CHECK(ordinaryCursor.primaryCursorHeight > 0.0f);
+
+  View  owner         = View::New();
+  Actor contentParent = Actor::New();
+  Actor highlight     = Actor::New();
+  Actor textActor     = Actor::New();
+  Actor cursorLayer   = Actor::New();
+  contentParent.Add(highlight);
+  contentParent.Add(textActor);
+  contentParent.Add(cursorLayer);
+  const auto getChildOrder = [&contentParent](Actor child)
+  {
+    for(uint32_t index = 0u; index < contentParent.GetChildCount(); ++index)
+    {
+      if(contentParent.GetChildAt(index) == child)
+      {
+        return index;
+      }
+    }
+    return std::numeric_limits<uint32_t>::max();
+  };
+
+  {
+    Dali::Ui::Internal::Text::EditableInlineReplacementRuntime runtime(owner);
+    runtime.PlaceVisualLayer(contentParent, textActor, cursorLayer, Vector2(200.0f, 160.0f));
+    DALI_TEST_CHECK(runtime.visualLayer.GetParent() == contentParent);
+    DALI_TEST_CHECK(getChildOrder(highlight) < getChildOrder(runtime.visualLayer));
+    DALI_TEST_CHECK(getChildOrder(runtime.visualLayer) < getChildOrder(textActor));
+    DALI_TEST_CHECK(getChildOrder(runtime.visualLayer) < getChildOrder(cursorLayer));
+  }
+  DALI_TEST_EQUALS(contentParent.GetChildCount(), 3u, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
 {
   UiTestApplication application;
@@ -1525,6 +1798,23 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineOffset, Vector2(13.0f, 9.0f), TEST_LOCATION);
 
+  // A new authored snapshot with the same occurrence and descriptor reuses
+  // the existing visual while committing its new placement.
+  source.sourceRevision      = 6u;
+  placements[0u].position.x = 17.0f;
+  DALI_TEST_CHECK(firstManager.Update(firstHost,
+                                      source,
+                                      placements,
+                                      Vector2::ZERO,
+                                      Vector2(100.0f, 40.0f),
+                                      Vector2(100.0f, 40.0f),
+                                      1.0f,
+                                      6u));
+  inlineVisual = firstViewData.GetVisual(firstVisualIndex);
+  DALI_TEST_CHECK(inlineVisual == sourceChangedVisual);
+  getTransform(inlineSize, inlineOffset);
+  DALI_TEST_EQUALS(inlineOffset, Vector2(17.0f, 9.0f), TEST_LOCATION);
+
   // The registered visual has no child-actor clip. Its quad and sampled pixel
   // area must be cropped explicitly to the content box.
   placements[0u].position = Vector2(-8.0f, 9.0f);
@@ -1535,7 +1825,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      5u));
+                                      6u));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineOffset, Vector2(0.0f, 9.0f), TEST_LOCATION);
@@ -1560,7 +1850,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      5u));
+                                      6u));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   DALI_TEST_CHECK(inlineVisual != sourceChangedVisual);
   getTransform(inlineSize, inlineOffset);
@@ -1578,7 +1868,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(140.0f, 80.0f),
                                       Vector2(140.0f, 80.0f),
                                       2.0f,
-                                      5u));
+                                      6u));
   inlineVisual = firstViewData.GetVisual(firstVisualIndex);
   getTransform(inlineSize, inlineOffset);
   DALI_TEST_EQUALS(inlineSize, Vector2(60.0f, 40.0f), TEST_LOCATION);
@@ -1594,7 +1884,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      5u));
+                                      6u));
   DALI_TEST_CHECK(!firstViewData.GetVisual(firstVisualIndex));
   DALI_TEST_CHECK(secondViewData.GetVisual(secondVisualIndex));
 
@@ -1607,7 +1897,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      5u));
+                                      6u));
   DALI_TEST_CHECK(firstViewData.GetVisual(firstVisualIndex));
 
   // JSON would otherwise bypass the factory's static-only option and create
@@ -1620,7 +1910,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                       Vector2(100.0f, 40.0f),
                                       Vector2(100.0f, 40.0f),
                                       1.0f,
-                                      5u));
+                                      6u));
   DALI_TEST_CHECK(!firstViewData.GetVisual(firstVisualIndex));
   firstManager.Clear();
   DALI_TEST_CHECK(!firstViewData.GetVisual(firstVisualIndex));
@@ -1638,7 +1928,7 @@ int UtcDaliInlineReplacementManagerDescriptorAndOwnershipP(void)
                                        Vector2(100.0f, 40.0f),
                                        Vector2(100.0f, 40.0f),
                                        1.0f,
-                                       5u));
+                                       6u));
     Ui::Integration::Visual::Base discardedVisual = firstViewData.GetVisual(firstVisualIndex);
     DALI_TEST_CHECK(discardedVisual);
     firstManager.Clear();

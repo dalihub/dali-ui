@@ -72,6 +72,11 @@ void Controller::TextUpdater::SetText(Controller& controller, const std::string&
 
   Controller::Impl& impl = *controller.mImpl;
 
+  if(impl.mEventData)
+  {
+    impl.mEventData->mEditableStyledText.reset();
+  }
+
   // Reset keyboard as text changed
   impl.ResetInputMethodContext();
 
@@ -200,6 +205,19 @@ void Controller::TextUpdater::SetStyledText(Controller& controller, const Styled
   // StyledText is a new content source, so clear previous text/style state first.
   ResetText(controller);
   impl.ClearStyleData();
+
+  if(impl.mEventData)
+  {
+    if(styledText)
+    {
+      impl.mEventData->mEditableStyledText = std::make_unique<EditableStyledTextData>();
+      impl.mEventData->mEditableStyledText->Set(styledText);
+    }
+    else
+    {
+      impl.mEventData->mEditableStyledText.reset();
+    }
+  }
 
   CharacterIndex lastCursorIndex = 0u;
 
@@ -423,6 +441,10 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
 
     // The cursor position.
     CharacterIndex& cursorIndex = eventData->mPrimaryCursorPosition;
+    cursorIndex                 = impl.NormalizeReplacementBoundary(cursorIndex,
+                                                                    ReplacementEditNormalizer::BoundaryAffinity::TRAILING);
+
+    impl.PrepareEditableTextEdit(cursorIndex, 0u, maxSizeOfNewText);
 
     // Update the text's style.
 
@@ -641,13 +663,26 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
       cursorIndex = eventData->mPrimaryCursorPosition + cursorOffset;
     }
 
+    const CharacterIndex requestedCursorIndex = cursorIndex;
+    const int            requestedCount       = numberOfCharacters;
+    if(impl.HasValidReplacementSource())
+    {
+      CharacterRun normalized = ReplacementEditNormalizer::NormalizeDeletion(
+        impl.GetReplacementSourceSnapshot().runs,
+        CharacterRun{cursorIndex, static_cast<Length>(std::max(numberOfCharacters, 0))},
+        currentText.Count());
+      cursorIndex        = normalized.characterIndex;
+      numberOfCharacters = static_cast<int>(normalized.numberOfCharacters);
+    }
+    const bool replacementNormalized = cursorIndex != requestedCursorIndex || numberOfCharacters != requestedCount;
+
     // Handle Emoji clustering for cursor handling
     //  Deletion case: this is handling the deletion cases when the cursor is before or after Emoji
     //   - Before: when use delete key and cursor is before Emoji (cursorOffset = -1)
     //   - After: when use backspace key and cursor is after Emoji (cursorOffset = 0)
 
     const Script script = logicalModel->GetScript(cursorIndex);
-    if((numberOfCharacters == 1u) && (IsOneOfEmojiScripts(script)))
+    if(!replacementNormalized && (numberOfCharacters == 1u) && (IsOneOfEmojiScripts(script)))
     {
       // TODO: Use this clustering for Emoji cases only. This needs more testing to generalize to all scripts.
       CharacterRun emojiClusteredCharacters =
@@ -660,7 +695,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
       numberOfCharacters = actualNumberOfCharacters;
     }
 
-    if(HasLigatureMustBreak(script) && cursorOffset == 0) // delete key.
+    if(!replacementNormalized && HasLigatureMustBreak(script) && cursorOffset == 0) // delete key.
     {
       GlyphIndex glyphIndex               = *(visualModel->mCharactersToGlyph.Begin() + cursorIndex);
       Length     actualNumberOfCharacters = *(visualModel->mCharactersPerGlyph.Begin() + glyphIndex);
@@ -740,6 +775,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
       }
 
       // Updates the text style runs by removing characters. Runs with no characters are removed.
+      impl.PrepareEditableTextEdit(cursorIndex, numberOfCharacters, 0u);
       logicalModel->UpdateTextStyleRuns(cursorIndex, -numberOfCharacters);
 
       // Remove the characters.

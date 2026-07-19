@@ -153,6 +153,30 @@ public:
               uint64_t                                      expectedSourceRevision);
 
   /**
+   * @brief Applies a current final-layout snapshot with independent placement and clip offsets.
+   *
+   * @param[in] host The owner used to register replacement visuals.
+   * @param[in] source The authored replacement source.
+   * @param[in] placements The placements produced by the final layout.
+   * @param[in] placementOffset The placement offset in owner coordinates.
+   * @param[in] clipOffset The visible content offset in owner coordinates.
+   * @param[in] contentSize The visible text content size.
+   * @param[in] ownerSize The size of the visual owner.
+   * @param[in] effectiveScale The effective visual scale.
+   * @param[in] expectedSourceRevision The source revision accepted by the owner.
+   * @return true if the source revision is valid.
+   */
+  bool Update(InlineReplacementViewHost&                    host,
+              const Ui::Text::ReplacementSourceSnapshot&    source,
+              const Vector<Ui::Text::ReplacementPlacement>& placements,
+              const Vector2&                                placementOffset,
+              const Vector2&                                clipOffset,
+              const Vector2&                                contentSize,
+              const Vector2&                                ownerSize,
+              float                                         effectiveScale,
+              uint64_t                                      expectedSourceRevision);
+
+  /**
    * @brief Removes and discards all registered visuals.
    */
   void Clear();
