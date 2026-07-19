@@ -1011,7 +1011,7 @@ private:
         builder.AppendText("Before ");
 
         const uint32_t imageIndex = builder.GetUtf32Length();
-        builder.AppendText("\uFFFC");
+        builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
 
         builder.AppendText(" after");
 
@@ -1019,7 +1019,7 @@ private:
         imageAttributes.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
         builder.SetSpan(Text::ImageSpan::New(imageAttributes), imageIndex, imageIndex + 1u);
 
-        state.text      = "Before \uFFFC after";
+        state.text      = std::string("Before ") + Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER + " after";
         state.spanMode  = "ImageSpan over one U+FFFC";
         state.rangeInfo = "range: " + RangeText(imageIndex, imageIndex + 1u);
         state.valueInfo = "reserved size: 64x40 | alignment: TEXT_CENTER";
@@ -1492,7 +1492,7 @@ private:
       case StyledTextCase::MARKUP_TO_STYLED_TEXT_ANCHOR_ENTITY:
         return FROM_MARKUP_ANCHOR_ENTITY_TEXT;
       case StyledTextCase::IMAGE_SPAN:
-        return "Before \uFFFC after";
+        return std::string("Before ") + Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER + " after";
       default:
         return CurrentCase().title;
     }

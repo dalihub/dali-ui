@@ -26,22 +26,28 @@ namespace Text
 {
 
 /**
- * @brief Marker base handle for built-in replacement spans.
+ * @brief Base handle for built-in spans that replace a text range with an
+ *        atomic inline object.
  *
- * Attach a concrete subtype with StyledTextBuilder::SetSpan(), using an exact
- * half-open range [start, end) measured in UTF-32 code-point indices. An
- * accepted replacement is represented by one atomic layout unit. The covered
- * code points remain part of the StyledText logical text but are not rendered
- * while the replacement is applied.
+ * Attach a concrete subtype with StyledTextBuilder::SetSpan(). The half-open
+ * range [start, end) uses UTF-32 code-point indices. When the replacement is
+ * applied, the covered logical text remains in StyledText but is represented
+ * by one atomic layout unit.
  *
- * This class does not expose public construction, measurement, drawing or
- * custom replacement hooks for application-defined subclasses. Applications
- * create a concrete built-in replacement, such as ImageSpan, through that
- * type's factory.
+ * Applications create a supported concrete subtype, such as ImageSpan. Custom
+ * measurement and drawing hooks are not provided.
  */
 class DALI_UI_API ReplacementSpan : public Span
 {
 public:
+  /**
+   * @brief The UTF-8 encoded U+FFFC OBJECT REPLACEMENT CHARACTER used for
+   *        canonical one-character replacement authoring.
+   *
+   * Pass this value to StyledTextBuilder::AppendText().
+   */
+  inline static constexpr char OBJECT_REPLACEMENT_CHARACTER[] = "\xEF\xBF\xBC";
+
   /**
    * @brief Creates an uninitialized ReplacementSpan handle.
    */

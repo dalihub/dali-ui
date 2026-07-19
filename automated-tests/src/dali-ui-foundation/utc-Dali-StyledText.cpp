@@ -1769,9 +1769,40 @@ int UtcDaliImageAttributesValueSemanticsP(void)
   END_TEST;
 }
 
+int UtcDaliReplacementSpanObjectReplacementCharacterP(void)
+{
+  UiTestApplication application;
+
+  static_assert(sizeof(ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER) == 4u);
+
+  const char* replacementCharacter = ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER;
+  DALI_TEST_EQUALS(static_cast<unsigned char>(replacementCharacter[0]), 0xEFu, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<unsigned char>(replacementCharacter[1]), 0xBFu, TEST_LOCATION);
+  DALI_TEST_EQUALS(static_cast<unsigned char>(replacementCharacter[2]), 0xBCu, TEST_LOCATION);
+  DALI_TEST_EQUALS(replacementCharacter[3], '\0', TEST_LOCATION);
+
+  StyledTextBuilder objectBuilder = StyledTextBuilder::New();
+  const uint32_t    objectIndex   = objectBuilder.GetUtf32Length();
+  objectBuilder.AppendText(ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
+  DALI_TEST_EQUALS(objectBuilder.GetUtf32Length(), objectIndex + 1u, TEST_LOCATION);
+
+  ImageAttributes objectAttributes("icon.png", Vector2(24.0f, 24.0f));
+  DALI_TEST_CHECK(objectBuilder.SetSpan(ImageSpan::New(objectAttributes), objectIndex, objectIndex + 1u));
+  StyledText objectText = objectBuilder.Build();
+  DALI_TEST_EQUALS(objectText.GetUtf32Length(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(objectText.GetSpanCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(objectText.GetSpanStartIndexAt(0u), objectIndex, TEST_LOCATION);
+  DALI_TEST_EQUALS(objectText.GetSpanEndIndexAt(0u), objectIndex + 1u, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliImageSpanHandleAndSnapshotSemanticsP(void)
 {
   UiTestApplication application;
+
+  static_assert(sizeof(ReplacementSpan) == sizeof(Span));
+  static_assert(sizeof(ImageSpan) == sizeof(ReplacementSpan));
 
   ReplacementSpan emptyReplacement;
   ImageSpan       emptyImage;

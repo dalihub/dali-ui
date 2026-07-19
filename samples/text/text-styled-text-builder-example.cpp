@@ -443,14 +443,8 @@ ExampleCase BuildUtf8FindCase()
 
 ExampleCase BuildUtf32BackToUtf8Case()
 {
-  const std::string text   = "Back to UTF-8: A"
-                           "\xF0\x9F\x91\xA9"
-                           "\xE2\x80\x8D"
-                           "\xF0\x9F\x92\xBB"
-                           "B";
-  const std::string target = "\xF0\x9F\x91\xA9"
-                             "\xE2\x80\x8D"
-                             "\xF0\x9F\x92\xBB";
+  const std::string text   = "Back to UTF-8: A👩‍💻B";
+  const std::string target = "👩‍💻";
 
   const std::size_t found       = text.find(target);
   const bool        targetFound = (found != std::string::npos);
@@ -525,11 +519,11 @@ ExampleCase BuildComplexUnicodeCase()
 
   const std::array<Row, 6u> rows{{
     {"가나다", BG_SOFT_RED},
-    {"\xF0\x9F\x98\x80", BG_SOFT_BLUE},
-    {"\xE2\x9D\xA4\xEF\xB8\x8F", BG_SOFT_PURPLE},
-    {"\xF0\x9F\x91\xA9\xE2\x80\x8D\xF0\x9F\x92\xBB", BG_SOFT_GREEN},
-    {"\xF0\x9F\x87\xB0\xF0\x9F\x87\xB7", BG_SOFT_AMBER},
-    {"Ae\xCC\x81""B", BG_SOFT_CYAN},
+    {"😀", BG_SOFT_BLUE},
+    {"❤️", BG_SOFT_PURPLE},
+    {"👩‍💻", BG_SOFT_GREEN},
+    {"🇰🇷", BG_SOFT_AMBER},
+    {"AéB", BG_SOFT_CYAN},
   }};
 
   Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
@@ -567,9 +561,7 @@ ExampleCase BuildComplexUnicodeCase()
 
 ExampleCase BuildBoundaryFailureCase()
 {
-  const Dali::String text("A"
-                          "\xEA\xB0\x80"
-                          "B");
+  const Dali::String text("A가B");
 
   uint32_t indexOutputBefore = 123u;
   uint32_t indexOutput       = indexOutputBefore;
@@ -603,7 +595,7 @@ ExampleCase BuildImageSpanCase()
   builder.AppendText("Before ");
 
   const uint32_t imageIndex = builder.GetUtf32Length();
-  builder.AppendText("\uFFFC");
+  builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
 
   builder.AppendText(" after");
 

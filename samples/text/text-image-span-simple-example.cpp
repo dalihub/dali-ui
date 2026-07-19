@@ -63,7 +63,7 @@ private:
     builder.AppendText("Before ");
 
     const uint32_t imageIndex = builder.GetUtf32Length();
-    builder.AppendText("\uFFFC");
+    builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
 
     builder.AppendText(" after");
 
@@ -85,11 +85,11 @@ private:
     Text::StyledTextBuilder pushPopBuilder = Text::StyledTextBuilder::New();
     pushPopBuilder.AppendText("Push/Pop before ");
 
-    Text::ImageAttributes pushPopImageAttributes(RESOURCES_DIR "flag_us.png", Vector2(64.0f, 40.0f));
+    Text::ImageAttributes pushPopImageAttributes(RESOURCES_DIR "flag_kr.png", Vector2(64.0f, 40.0f));
     pushPopImageAttributes.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
 
     pushPopBuilder.PushSpan(Text::ImageSpan::New(pushPopImageAttributes));
-    pushPopBuilder.AppendText("\uFFFC");
+    pushPopBuilder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
     pushPopBuilder.PopSpan();
 
     pushPopBuilder.AppendText(" after");

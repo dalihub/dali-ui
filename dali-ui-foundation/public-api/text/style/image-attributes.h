@@ -52,18 +52,18 @@ class DALI_UI_API ImageAttributes
 {
 public:
   /**
-   * @brief Specifies the vertical alignment of the reserved image box.
+   * @brief Specifies the vertical alignment of the reserved image box relative
+   *        to surrounding text metrics.
    *
-   * Alignment is calculated from the surrounding text metrics. It is not
-   * recalculated from a line expanded by the reserved image box. A line that
-   * contains only a replacement uses the consuming control's default font
-   * metrics. The vertical offset is applied after alignment.
+   * Alignment is not recalculated from the final line box expanded by the
+   * reserved image box. A replacement-only line uses the consuming control's
+   * default font metrics. The vertical offset is applied after alignment.
    */
   enum class InlineAlignment : uint8_t
   {
-    TEXT_BOTTOM = 0, ///< Aligns the box bottom with the bottom of surrounding text metrics.
+    TEXT_BOTTOM = 0, ///< Aligns the box bottom with the bottom of the surrounding text.
     TEXT_BASELINE,   ///< Aligns the box bottom with the surrounding text baseline.
-    TEXT_CENTER      ///< Aligns the box center with the center of surrounding text metrics.
+    TEXT_CENTER      ///< Aligns the box center with the center of the surrounding text.
   };
 
   /**
@@ -106,8 +106,6 @@ public:
   /**
    * @brief Creates image attributes by moving another ImageAttributes object.
    *
-   * After the operation, @p rhs may only be destroyed or assigned a new value.
-   *
    * @param[in] rhs The image attributes to move from
    */
   ImageAttributes(ImageAttributes&& rhs) noexcept;
@@ -125,15 +123,13 @@ public:
   /**
    * @brief Moves another ImageAttributes object to this object.
    *
-   * After the operation, @p rhs may only be destroyed or assigned a new value.
-   *
    * @param[in] rhs The image attributes to move from
    * @return A reference to this object
    */
   ImageAttributes& operator=(ImageAttributes&& rhs) noexcept;
 
   /**
-   * @brief Destroys the image attributes.
+   * @brief Destructor.
    */
   ~ImageAttributes();
 
@@ -143,7 +139,7 @@ public:
    * The identifier is stored without loading or validating the resource. An
    * empty identifier makes an ImageSpan replacement invalid. Failure to load a
    * non-empty identifier does not change the reserved image box or text
-   * layout. The identifier is not used automatically as alternative text.
+   * layout.
    *
    * @param[in] source The image resource identifier
    */
@@ -199,8 +195,7 @@ public:
    * @brief Retrieves the vertical alignment of the reserved image box.
    *
    * A default-constructed object returns TEXT_BOTTOM. Use Has(ALIGNMENT) to
-   * distinguish that default from an explicitly set TEXT_BOTTOM value. After
-   * Unset(ALIGNMENT), the previously assigned value may still be returned.
+   * distinguish that default from an explicitly set TEXT_BOTTOM value.
    *
    * @return The vertical alignment
    */
@@ -222,9 +217,7 @@ public:
    * @brief Retrieves the vertical offset of the reserved image box.
    *
    * A default-constructed object returns 0.0f. Use Has(VERTICAL_OFFSET) to
-   * distinguish that default from an explicitly set zero value. After
-   * Unset(VERTICAL_OFFSET), the previously assigned value may still be
-   * returned.
+   * distinguish that default from an explicitly set zero value.
    *
    * @return The vertical offset in logical pixels
    */

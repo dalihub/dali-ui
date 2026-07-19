@@ -16,11 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <array>
-#include <chrono>
 #include <cstdint>
-#include <cstdio>
-#include <cstring>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -31,59 +27,9 @@ using namespace Dali::Ui;
 namespace
 {
 constexpr std::size_t CASE_COUNT = 31u;
-constexpr std::array<float, 5u> WIDTH_SWEEP = {180.0f, 220.0f, 260.0f, 340.0f, 0.0f};
-constexpr uint32_t LIFECYCLE_INTERVAL_MS = 250u;
-constexpr uint32_t LIFECYCLE_PHASE_COUNT = 12u;
+constexpr float       RELATIVE_LINE_HEIGHT = 1.6f;
 constexpr const char* REMOTE_IMAGE_URL =
   "https://www.w3.org/assets/logos/w3c-2025-transitional/w3c-72x48.png";
-
-struct MemorySnapshot
-{
-  long rssKb{0};
-  long hwmKb{0};
-};
-
-MemorySnapshot ReadMemory()
-{
-  MemorySnapshot snapshot;
-  if(FILE* file = std::fopen("/proc/self/status", "r"))
-  {
-    char line[128];
-    while(std::fgets(line, sizeof(line), file))
-    {
-      if(std::strncmp(line, "VmRSS:", 6u) == 0)
-      {
-        std::sscanf(line + 6u, "%ld", &snapshot.rssKb);
-      }
-      else if(std::strncmp(line, "VmHWM:", 6u) == 0)
-      {
-        std::sscanf(line + 6u, "%ld", &snapshot.hwmKb);
-      }
-    }
-    std::fclose(file);
-  }
-  return snapshot;
-}
-
-const char* LifecyclePhaseName(uint32_t phase)
-{
-  switch(phase)
-  {
-    case 0u: return "persistent set (local+web)";
-    case 1u: return "next sample-case update";
-    case 2u: return "builder ClearSpans";
-    case 3u: return "plain/empty source clear";
-    case 4u: return "transient Label add";
-    case 5u: return "shared StyledText update";
-    case 6u: return "transient Label detach";
-    case 7u: return "active transient destroy";
-    case 8u: return "markup-composed set";
-    case 9u: return "markup-composed update";
-    case 10u: return "markup clear/active branch";
-    case 11u:
-    default: return "markup Label detach/destroy";
-  }
-}
 
 struct ImageSpec
 {
@@ -152,6 +98,20 @@ ToggleOverride NextToggleOverride(ToggleOverride value)
   }
 }
 
+std::string ReplacementText(std::string text)
+{
+  constexpr char MARKER[] = "[image]";
+  std::size_t    position = 0u;
+  while((position = text.find(MARKER, position)) != std::string::npos)
+  {
+    text.replace(position,
+                 sizeof(MARKER) - 1u,
+                 Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
+    position += sizeof(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER) - 1u;
+  }
+  return text;
+}
+
 ImageSpec ImageAt(const std::string&                       text,
                   const char*                              marker,
                   const char*                              source,
@@ -198,7 +158,13 @@ ImageSpec ObjectAt(const std::string&                       text,
                    Text::ImageAttributes::InlineAlignment alignment = Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM,
                    float                                    verticalOffset = 0.0f)
 {
-  return ImageAt(text, "\uFFFC", source, size, alignment, verticalOffset, occurrence);
+  return ImageAt(text,
+                 Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER,
+                 source,
+                 size,
+                 alignment,
+                 verticalOffset,
+                 occurrence);
 }
 
 const char* AlignmentName(Text::ImageAttributes::InlineAlignment alignment)
@@ -221,11 +187,6 @@ const char* TextAlignmentName(Text::Alignment alignment)
     case Text::Alignment::CENTER:
     default: return "CENTER";
   }
-}
-
-const char* OverrideName(bool caseDefault)
-{
-  return caseDefault ? "case" : "override";
 }
 
 Label NewHudLabel(const char* text, float height, uint32_t background, bool interactive = false)
@@ -280,7 +241,7 @@ private:
     {
       case 0u:
       {
-        const std::string text = "A\uFFFCB";
+        const std::string text = ReplacementText("A[image]B");
         return {"1. One U+FFFC", "The object replacement character is replaced by one TEXT_BOTTOM image.",
                 text, {ObjectAt(text, 0u, "flag_kr.png", Vector2(24.0f, 24.0f))}, false};
       }
@@ -289,7 +250,7 @@ private:
                 "Press [icon] to continue", {{6u, 12u, "flag_kr.png", Vector2(32.0f, 24.0f)}}};
       case 2u:
       {
-        const std::string text = "X\uFFFC\uFFFC\uFFFCY";
+        const std::string text = ReplacementText("X[image][image][image]Y");
         return {"3. Multiple and adjacent", "Three U+FFFC occurrences use three ImageSpan handles; adjacent boxes remain distinct.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(24.0f, 24.0f)),
@@ -298,7 +259,7 @@ private:
       }
       case 3u:
       {
-        const std::string text = "baseline \uFFFC bottom \uFFFC center \uFFFC up \uFFFC down \uFFFC";
+        const std::string text = ReplacementText("baseline [image] bottom [image] center [image] up [image] down [image]");
         return {"4. Alignment and vertical offset", "All alignments are visible; positive offset moves down and negative offset moves up.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(30.0f, 38.0f), Text::ImageAttributes::InlineAlignment::TEXT_BASELINE),
@@ -309,16 +270,18 @@ private:
       }
       case 4u:
       {
-        const std::string text = "before \uFFFC after\n\uFFFC\nend";
-        return {"5. Multiline and replacement-only line", "Width sweep wraps around a wide box and retains the image-only line.",
+        const std::string text = ReplacementText("before [image] after\n[image]\nend");
+        return {"5. Multiline and replacement-only line", "Window resizing wraps around a wide box and retains the image-only line.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(120.0f, 60.0f)),
                  ObjectAt(text, 1u, "flag_us.png", Vector2(40.0f, 40.0f))}};
       }
       case 5u:
       {
-        const std::string text =
-          "This is a long paragraph with an inline \uFFFC image placed between ordinary words. Resize the preview to observe how the sentence wraps before and after the image. A second \uFFFC marker appears later while several more words continue across multiple lines.";
+        const std::string text = ReplacementText(
+          "This is a long paragraph with an inline [image] image placed between ordinary words. "
+          "Resize the preview to observe how the sentence wraps before and after the image. "
+          "A second [image] marker appears later while several more words continue across multiple lines.");
         return {"6. Long multiline prose", "Two U+FFFC images remain in flow while the paragraph wraps across many lines.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(36.0f, 26.0f)),
@@ -326,16 +289,20 @@ private:
       }
       case 6u:
       {
-        const std::string text =
-          "Text before the oversized inline image explains the first line. The next phrase contains \uFFFC in continuous prose, followed by enough text to wrap onto several more lines and show the expanded line box clearly.";
+        const std::string text = ReplacementText(
+          "Text before the oversized inline image explains the first line. "
+          "The next phrase contains [image] in continuous prose, followed by enough text to wrap onto several more lines "
+          "and show the expanded line box clearly.");
         return {"7. Large image inside multiline text", "The 180x130 box expands its line while surrounding prose continues above and below it.",
                 text,
                 {ObjectAt(text, 0u, "flag_us.png", Vector2(180.0f, 130.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}};
       }
       case 7u:
       {
-        const std::string text =
-          "Sizes \uFFFC 8x8, \uFFFC 12x12, \uFFFC 16x16, \uFFFC 24x24, \uFFFC 32x20, \uFFFC 40x40, \uFFFC 64x32, \uFFFC 80x48, and \uFFFC 120x60 are distributed through multiline prose so every box participates in wrapping.";
+        const std::string text = ReplacementText(
+          "Sizes [image] 8x8, [image] 12x12, [image] 16x16, [image] 24x24, [image] 32x20, "
+          "[image] 40x40, [image] 64x32, [image] 80x48, and [image] 120x60 are distributed through multiline prose "
+          "so every box participates in wrapping.");
         return {"8. Nine image sizes", "Required tiny, rectangular, square and large boxes exercise same-line and multiline layout.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(8.0f, 8.0f)),
@@ -350,40 +317,40 @@ private:
       }
       case 8u:
       {
-        const std::string text = "LTR אבג \uFFFC العربية end";
+        const std::string text = ReplacementText("LTR אבג [image] العربية end");
         return {"9. RTL and mixed bidi", "The U+FFFC image remains one visual unit between Hebrew and Arabic text.",
                 text, {ObjectAt(text, 0u, "flag_ae.png", Vector2(34.0f, 24.0f))}, true, false, true};
       }
       case 9u:
       {
-        const std::string text = "Long prefix words \uFFFC trailing text";
-        return {"10. END ellipsis atomicity", "Width sweep places END ellipsis before or after the whole image, never through it.",
+        const std::string text = ReplacementText("Long prefix words [image] trailing text");
+        return {"10. END ellipsis atomicity", "Window resizing places END ellipsis before or after the whole image, never through it.",
                 text, {ObjectAt(text, 0u, "flag_kr.png", Vector2(70.0f, 28.0f))}, false, true};
       }
       case 10u:
       {
-        const std::string text = "Atomic\uFFFCsuffix without spaces still has a stable END ellipsis boundary";
+        const std::string text = ReplacementText("Atomic[image]suffix without spaces still has a stable END ellipsis boundary");
         return {"11. END ellipsis without spaces", "An adjacent image remains atomic without whitespace on either side.",
                 text, {ObjectAt(text, 0u, "flag_us.png", Vector2(64.0f, 32.0f))}, false, true, false,
                 Text::Alignment::START, Text::Alignment::CENTER, Text::LineWrapMode::CHARACTER};
       }
       case 11u:
       {
-        const std::string text = "\uFFFC image starts a long single line whose remaining words overflow the preview";
+        const std::string text = ReplacementText("[image] image starts a long single line whose remaining words overflow the preview");
         return {"12. END ellipsis with leading image", "The leading image is retained or removed as one complete unit.",
                 text, {ObjectAt(text, 0u, "flag_ae.png", Vector2(92.0f, 38.0f))}, false, true, false,
                 Text::Alignment::START};
       }
       case 12u:
       {
-        const std::string text = "A long single line ends with one final replacement \uFFFC";
+        const std::string text = ReplacementText("A long single line ends with one final replacement [image]");
         return {"13. END ellipsis with trailing image", "The final image cannot remain after ellipsis or become partially clipped.",
                 text, {ObjectAt(text, 0u, "flag_kr.png", Vector2(72.0f, 30.0f))}, false, true, false,
                 Text::Alignment::END};
       }
       case 13u:
       {
-        const std::string text = "Marquee \uFFFC must remain static even when the surrounding line is deliberately long";
+        const std::string text = ReplacementText("Marquee [image] must remain static even when the surrounding line is deliberately long");
         CaseData data{"14. Marquee blocked", "Starting marquee must leave replacement content in its static layout.",
                       text, {ObjectAt(text, 0u, "flag_us.png", Vector2(58.0f, 28.0f))}, false};
         data.marqueeCase = true;
@@ -391,8 +358,8 @@ private:
       }
       case 14u:
       {
-        const std::string text = "Sizes \uFFFC then \uFFFC then \uFFFC and ordinary trailing words";
-        return {"15. END ellipsis with mixed sizes", "Widths exercise ellipsis before, on and after differently sized boxes.",
+        const std::string text = ReplacementText("Sizes [image] then [image] then [image] and ordinary trailing words");
+        return {"15. END ellipsis with mixed sizes", "Window widths exercise ellipsis before, on and after differently sized boxes.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(8.0f, 8.0f)),
                  ObjectAt(text, 1u, "flag_us.png", Vector2(120.0f, 60.0f)),
@@ -401,7 +368,7 @@ private:
       }
       case 15u:
       {
-        const std::string text = "One \uFFFC two \uFFFC three \uFFFC followed by ordinary text before the end";
+        const std::string text = ReplacementText("One [image] two [image] three [image] followed by ordinary text before the end");
         return {"16. END ellipsis between images", "Every threshold exposes a monotonic prefix with no stale visual after ellipsis.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(48.0f, 28.0f)),
@@ -411,33 +378,33 @@ private:
       }
       case 16u:
       {
-        const std::string text = "Readable prefix \uFFFC followed by a sentence that will be elided cleanly";
+        const std::string text = ReplacementText("Readable prefix [image] followed by a sentence that will be elided cleanly");
         return {"17. END ellipsis on image boundary", "At the threshold, U+FFFC changes directly into ellipsis without an image-sized blank gap.",
                 text, {ObjectAt(text, 0u, "flag_kr.png", Vector2(82.0f, 30.0f))}, false, true};
       }
       case 17u:
       {
-        const std::string text = "\uFFFC";
+        const std::string text = ReplacementText("[image]");
         return {"18. Image-only END ellipsis", "The only image is either fully visible or replaced by ellipsis without a residual box.",
                 text, {ObjectAt(text, 0u, "flag_us.png", Vector2(120.0f, 60.0f))}, false, true};
       }
       case 18u:
       {
-        const std::string text = "ordinary text before the final \uFFFC";
+        const std::string text = ReplacementText("ordinary text before the final [image]");
         return {"19. Text plus image END ellipsis", "The trailing image is never retained to the right of the ellipsis.",
                 text, {ObjectAt(text, 0u, "flag_ae.png", Vector2(80.0f, 48.0f))}, false, true, false,
                 Text::Alignment::START};
       }
       case 19u:
       {
-        const std::string text = "\uFFFC ordinary text after the leading replacement keeps extending";
+        const std::string text = ReplacementText("[image] ordinary text after the leading replacement keeps extending");
         return {"20. Image plus text END ellipsis", "A visible leading image remains before ellipsis while only its following text is removed.",
                 text, {ObjectAt(text, 0u, "flag_kr.png", Vector2(64.0f, 32.0f))}, false, true, false,
                 Text::Alignment::START};
       }
       case 20u:
       {
-        const std::string text = "sizes \uFFFC text \uFFFC\uFFFC text \uFFFC end";
+        const std::string text = ReplacementText("sizes [image] text [image][image] text [image] end");
         return {"21. Mixed-size END ellipsis sweep", "The 8x8, 24x24, 48x32 and 80x48 boxes cross the boundary independently and atomically.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(8.0f, 8.0f)),
@@ -448,15 +415,15 @@ private:
       }
       case 21u:
       {
-        const std::string text = "אבג LTR words \uFFFC continue inside an RTL paragraph until the END boundary";
+        const std::string text = ReplacementText("אבג LTR words [image] continue inside an RTL paragraph until the END boundary");
         return {"22. RTL paragraph plus LTR END ellipsis", "Paragraph direction changes the physical END edge without changing replacement visibility.",
                 text, {ObjectAt(text, 0u, "flag_ae.png", Vector2(56.0f, 30.0f))}, false, true, true,
                 Text::Alignment::START};
       }
       case 22u:
       {
-        const std::string text = "resource lifecycle \uFFFC keeps the same 64x32 reservation after success or failure";
-        CaseData data{"23. Load failure and lifecycle", "Press L to alternate a valid and missing source; layout must not move.",
+        const std::string text = ReplacementText("resource lifecycle [image] keeps the same 64x32 reservation after success or failure");
+        CaseData data{"23. Load failure and lifecycle", "Switch Source to alternate a valid and missing source; layout must not move.",
                       text,
                       {ObjectAt(text, 0u, mLifecycleAlternate ? "flag_kr.png" : "missing-image.png", Vector2(64.0f, 32.0f))},
                       false};
@@ -465,20 +432,19 @@ private:
       }
       case 23u:
       {
-        const std::string text = "LTR prefix \uFFFC אבג العربية mixed direction trailing words for ellipsis";
+        const std::string text = ReplacementText("LTR prefix [image] אבג العربية mixed direction trailing words for ellipsis");
         return {"24. END ellipsis in mixed bidi text", "RTL layout and mixed-direction text keep the replacement on the correct side of END ellipsis.",
                 text, {ObjectAt(text, 0u, "flag_ae.png", Vector2(56.0f, 30.0f))}, false, true, true,
                 Text::Alignment::START};
       }
       case 24u:
       {
-        const std::string text =
-          "A multiline paragraph begins with enough ordinary prose to create several wrapped lines. "
-          "The first inline \uFFFC image should remain visible while more sentences continue through the preview. "
+        const std::string text = ReplacementText("A multiline paragraph begins with enough ordinary prose to create several wrapped lines. "
+          "The first inline [image] image should remain visible while more sentences continue through the preview. "
           "Additional words deliberately repeat the wrapping pressure so that vertical overflow selects a final visible line. "
-          "Near that boundary a second \uFFFC image may either fit completely before the ellipsis or disappear completely. "
-          "Everything after the boundary, including this third \uFFFC image and the remaining paragraph, must stay hidden. "
-          "The final sentences provide enough length for both wide and narrow window sizes to exercise multiline END ellipsis.";
+          "Near that boundary a second [image] image may either fit completely before the ellipsis or disappear completely. "
+          "Everything after the boundary, including this third [image] image and the remaining paragraph, must stay hidden. "
+          "The final sentences provide enough length for both wide and narrow window sizes to exercise multiline END ellipsis.");
         return {"25. Multiline END ellipsis line boundary", "Only replacements before the final visible ellipsis boundary remain; later-line images are hidden.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(42.0f, 28.0f)),
@@ -488,12 +454,11 @@ private:
       }
       case 25u:
       {
-        const std::string text =
-          "Centered multiline ellipsis begins with ordinary words and a small \uFFFC image. "
-          "Several phrases follow to build multiple lines before a very wide \uFFFC replacement approaches the last visible line. "
-          "More text and a tall \uFFFC replacement continue beyond it so resize can move the final boundary across different box sizes. "
+        const std::string text = ReplacementText("Centered multiline ellipsis begins with ordinary words and a small [image] image. "
+          "Several phrases follow to build multiple lines before a very wide [image] replacement approaches the last visible line. "
+          "More text and a tall [image] replacement continue beyond it so resize can move the final boundary across different box sizes. "
           "This deliberately long tail keeps wrapping through additional sentences and verifies that no image can appear below or after ellipsis. "
-          "One more sequence of ordinary words makes the vertical overflow deterministic at the wider preview size as well.";
+          "One more sequence of ordinary words makes the vertical overflow deterministic at the wider preview size as well.");
         CaseData data{"26. Text-fit multiline END ellipsis", "Text-fit must preserve atomic mixed-size images at the final ellipsis boundary.",
                       text,
                       {ObjectAt(text, 0u, "flag_kr.png", Vector2(26.0f, 20.0f)),
@@ -505,13 +470,13 @@ private:
       }
       case 26u:
       {
-        const std::string text =
-          "An oversized replacement follows wrapped introductory prose and tests vertical END ellipsis. "
-          "More words place \uFFFC near a constrained line before many trailing sentences continue. "
+        const std::string text = ReplacementText("An oversized replacement follows wrapped introductory prose and tests vertical END ellipsis. "
+          "More words place [image] near a constrained line before many trailing sentences continue. "
           "The large reserved box must be fully visible only when its whole line participates in the visible layout. "
           "Otherwise the renderer must choose a text ellipsis boundary without flashing, cropping or retaining the large image. "
-          "Repeated trailing words add stable overflow for wide and narrow resize verification.";
-        CaseData data{"27. RenderScale 2x oversized END ellipsis", "While text is truncated, exactly one END ellipsis remains visible; the 210x120 image is wholly visible or wholly elided.",
+          "Repeated trailing words add stable overflow for wide and narrow resize verification.");
+        CaseData data{"27. RenderScale 2x oversized END ellipsis",
+                      "While text is truncated, exactly one END ellipsis remains visible; the 210x120 image is wholly visible or wholly elided.",
                       text,
                       {ObjectAt(text, 0u, "flag_us.png", Vector2(210.0f, 120.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)},
                       true, true, false, Text::Alignment::END, Text::Alignment::START};
@@ -520,13 +485,12 @@ private:
       }
       case 27u:
       {
-        const std::string text =
-          "line one before \uFFFC\n"
-          "\uFFFC\n"
-          "line three contains \uFFFC and more words that wrap\n"
+        const std::string text = ReplacementText("line one before [image]\n"
+          "[image]\n"
+          "line three contains [image] and more words that wrap\n"
           "line four is intentionally verbose and continues beyond the available height\n"
-          "line five has \uFFFC and must be completely elided\n"
-          "line six ends the explicit-newline scenario";
+          "line five has [image] and must be completely elided\n"
+          "line six ends the explicit-newline scenario");
         return {"28. Multiline ellipsis with image-only lines", "Explicit newlines, an image-only line and later replacements remain atomic at the vertical cutoff.",
                 text,
                 {ObjectAt(text, 0u, "flag_kr.png", Vector2(44.0f, 28.0f)),
@@ -537,7 +501,7 @@ private:
       }
       case 28u:
       {
-        const std::string text = "Remote HTTPS image \uFFFC downloaded between ordinary text";
+        const std::string text = ReplacementText("Remote HTTPS image [image] downloaded between ordinary text");
         return {"29. Remote HTTPS image download",
                 "Network required: both previews keep a stable 144x96 box while downloading, then display the W3C PNG.",
                 text,
@@ -548,9 +512,8 @@ private:
       }
       case 29u:
       {
-        const std::string text =
-          "Portrait source in a square reservation \uFFFC followed by a landscape source in a tall reservation \uFFFC. "
-          "Both images must keep their natural ratio while ordinary multiline text wraps around the fixed boxes.";
+        const std::string text = ReplacementText("Portrait source in a square reservation [image] followed by a landscape source in a tall reservation [image]. "
+          "Both images must keep their natural ratio while ordinary multiline text wraps around the fixed boxes.");
         return {"30. Opposite aspect ratios and boxes",
                 "The portrait photo stays narrow inside 96x96; the landscape flag stays letterboxed inside 64x120 without a stretched frame.",
                 text,
@@ -569,11 +532,10 @@ private:
       case 30u:
       default:
       {
-        const std::string text =
-          "Cold source \uFFFC and same-source cache reuse \uFFFC remain in fixed boxes while the source switches repeatedly.";
+        const std::string text = ReplacementText("Cold source [image] and same-source cache reuse [image] remain in fixed boxes while the source switches repeatedly.");
         const char* source = mLifecycleAlternate ? "../../image-view/res/sample.jpg" : "flag_us.png";
         CaseData data{"31. Cold, warm-cache and source switching",
-                      "Press L repeatedly: both Labels and both occurrences must reveal only aspect-fitted pixels, with no full-box flash or stale source.",
+                      "Switch Source repeatedly: both Labels and both occurrences must reveal only aspect-fitted pixels, with no full-box flash or stale source.",
                       text,
                       {ObjectAt(text, 0u, source, Vector2(110.0f, 90.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER),
                        ObjectAt(text, 1u, source, Vector2(70.0f, 120.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)},
@@ -603,125 +565,6 @@ private:
     return builder.Build();
   }
 
-  void AppendLifecycleImage(Text::StyledTextBuilder&                 builder,
-                            const char*                              source,
-                            Vector2                                  size,
-                            Text::ImageAttributes::InlineAlignment alignment = Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM,
-                            float                                    verticalOffset = 0.0f) const
-  {
-    const uint32_t begin = builder.GetUtf32Length();
-    builder.AppendText("\uFFFC");
-
-    const std::string sourceUrl = ResolveImageSource(source);
-    Text::ImageAttributes attributes(sourceUrl.c_str(), size);
-    attributes.SetAlignment(alignment);
-    attributes.SetVerticalOffset(verticalOffset);
-    DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), begin, begin + 1u) &&
-                       "Lifecycle ImageSpan range must be valid");
-  }
-
-  void AppendLifecycleRange(Text::StyledTextBuilder& builder, const char* source, Vector2 size) const
-  {
-    const uint32_t begin = builder.GetUtf32Length();
-    builder.AppendText("[range]");
-
-    const std::string sourceUrl = ResolveImageSource(source);
-    Text::ImageAttributes attributes(sourceUrl.c_str(), size);
-    attributes.SetAlignment(Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
-    DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), begin, builder.GetUtf32Length()) &&
-                       "Lifecycle multi-character ImageSpan range must be valid");
-  }
-
-  Text::StyledText BuildLifecycleStyledText(bool alternate) const
-  {
-    Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
-    builder.AppendText(alternate ? "Updated local " : "Persistent local ");
-    AppendLifecycleImage(builder,
-                         alternate ? "flag_us.png" : "flag_kr.png",
-                         alternate ? Vector2(54.0f, 30.0f) : Vector2(32.0f, 24.0f));
-    builder.AppendText(" web ");
-    AppendLifecycleImage(builder,
-                         REMOTE_IMAGE_URL,
-                         alternate ? Vector2(96.0f, 58.0f) : Vector2(72.0f, 48.0f),
-                         Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
-    builder.AppendText(" adjacent ");
-    AppendLifecycleImage(builder, "flag_ae.png", Vector2(18.0f, 18.0f));
-    AppendLifecycleImage(builder, "flag_ae.png", Vector2(30.0f, 20.0f));
-    builder.AppendText(" exact-range ");
-    AppendLifecycleRange(builder, alternate ? "missing-image-lifecycle.png" : "flag_kr.png", Vector2(64.0f, 34.0f));
-    builder.AppendText(" followed by enough ordinary words to exercise END ellipsis and multiline overflow while resources change.");
-    return builder.Build();
-  }
-
-  Text::StyledText BuildLifecycleMarkupStyledText(bool alternate) const
-  {
-    Text::StyledTextBuilder builder = Text::StyledTextBuilder::FromMarkup(
-      alternate ? "<color value='#FCA5A5'>Updated markup</color> <u>local</u> "
-                : "<color value='#93C5FD'>Markup source</color> <u>local</u> ");
-    AppendLifecycleImage(builder,
-                         alternate ? "flag_ae.png" : "flag_us.png",
-                         alternate ? Vector2(48.0f, 34.0f) : Vector2(30.0f, 22.0f));
-    builder.AppendText(" <s>web</s> ");
-    AppendLifecycleImage(builder,
-                         REMOTE_IMAGE_URL,
-                         alternate ? Vector2(110.0f, 64.0f) : Vector2(76.0f, 48.0f),
-                         Text::ImageAttributes::InlineAlignment::TEXT_CENTER);
-    builder.AppendText(" with styled trailing words that remain long enough for ellipsis.");
-    return builder.Build();
-  }
-
-  Text::StyledText BuildLifecycleMarkupWithoutImages() const
-  {
-    return Text::StyledText::FromMarkup(
-      "<color value='#86EFAC'>Markup remains, ImageSpan attachments are cleared.</color> "
-      "The next cycle recreates local and web resources.");
-  }
-
-  void ConfigureLifecycleLabel(Label label, bool multiline, bool async) const
-  {
-    label.SetAsyncRendering(async);
-    label.SetMultiLine(multiline);
-    label.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
-    label.SetLineWrapMode(Text::LineWrapMode::WORD);
-    label.SetFontSize(15.0f);
-    label.SetRenderScale(1.0f);
-    label.SetTextFit(Text::Fit::None());
-    label.SetTextColor(UiColor(0x111827));
-    label.SetBackgroundColor(UiColor(0xE2E8F0));
-    label.SetPadding(Extents(4, 4, 2, 2));
-    label.SetHorizontalTextAlignment(Text::Alignment::START);
-    label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    label.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
-    label.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-  }
-
-  void ConfigureLifecycleCaseLabel(Label label, const CaseData& data, bool async) const
-  {
-    ConfigureLifecycleLabel(label, data.multiline, async);
-    label.SetTextOverflowMode(data.ellipsis ? Text::OverflowMode::ELLIPSIS : Text::OverflowMode::CLIP);
-    label.SetLineWrapMode(data.lineWrapMode);
-    label.SetFontSize(data.fontSize);
-    label.SetRenderScale(data.renderScale);
-    if(data.textFit)
-    {
-      label.SetTextFit(Text::Fit::Range(14.0f, 28.0f, 2.0f));
-    }
-    else
-    {
-      label.SetTextFit(Text::Fit::None());
-    }
-    label.SetHorizontalTextAlignment(data.horizontalAlignment);
-    label.SetVerticalTextAlignment(data.verticalAlignment);
-    label.SetLayoutDirection(data.rtl ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT);
-  }
-
-  Label NewLifecycleLabel(bool multiline, bool async) const
-  {
-    Label label = Label::New();
-    ConfigureLifecycleLabel(label, multiline, async);
-    return label;
-  }
-
   Text::Alignment ResolveAlignment(AlignmentOverride value, Text::Alignment caseDefault) const
   {
     switch(value)
@@ -747,25 +590,43 @@ private:
 
   void CycleHorizontalAlignment()
   {
+    mActionStatus.clear();
     mHorizontalAlignmentOverride = NextAlignmentOverride(mHorizontalAlignmentOverride);
     ApplyCase();
   }
 
   void CycleVerticalAlignment()
   {
+    mActionStatus.clear();
     mVerticalAlignmentOverride = NextAlignmentOverride(mVerticalAlignmentOverride);
     ApplyCase();
   }
 
   void CycleOverflowMode()
   {
+    mActionStatus.clear();
     mOverflowOverride = NextToggleOverride(mOverflowOverride);
     ApplyCase();
   }
 
   void CycleMultiline()
   {
+    mActionStatus.clear();
     mMultilineOverride = NextToggleOverride(mMultilineOverride);
+    ApplyCase();
+  }
+
+  void ToggleLineHeight()
+  {
+    mRelativeLineHeightEnabled = !mRelativeLineHeightEnabled;
+    mActionStatus              = "Line height changed";
+    ApplyCase();
+  }
+
+  void TogglePreviewHeight()
+  {
+    mWrapContentHeightEnabled = !mWrapContentHeightEnabled;
+    mActionStatus             = "Preview height changed";
     ApplyCase();
   }
 
@@ -775,6 +636,11 @@ private:
     mVerticalAlignmentOverride   = AlignmentOverride::CASE_DEFAULT;
     mOverflowOverride            = ToggleOverride::CASE_DEFAULT;
     mMultilineOverride           = ToggleOverride::CASE_DEFAULT;
+    mRelativeLineHeightEnabled   = false;
+    mWrapContentHeightEnabled    = false;
+    mReplacementEnabled          = true;
+    mLifecycleAlternate          = false;
+    mActionStatus                = "Case settings restored";
     ApplyCase();
   }
 
@@ -785,14 +651,14 @@ private:
     const bool            ellipsis   = ResolveToggle(mOverflowOverride, data.ellipsis);
     const bool            multiline  = ResolveToggle(mMultilineOverride, data.multiline);
 
-    mHorizontalAlignmentControl.SetText((std::string("H: ") + TextAlignmentName(horizontal) + " [" +
-                                         OverrideName(mHorizontalAlignmentOverride == AlignmentOverride::CASE_DEFAULT) + "]").c_str());
-    mVerticalAlignmentControl.SetText((std::string("V: ") + TextAlignmentName(vertical) + " [" +
-                                       OverrideName(mVerticalAlignmentOverride == AlignmentOverride::CASE_DEFAULT) + "]").c_str());
-    mOverflowControl.SetText((std::string("O: ") + (ellipsis ? "ELLIPSIS" : "CLIP") + " [" +
-                              OverrideName(mOverflowOverride == ToggleOverride::CASE_DEFAULT) + "]").c_str());
-    mMultilineControl.SetText((std::string("M: ") + (multiline ? "ON" : "OFF") + " [" +
-                               OverrideName(mMultilineOverride == ToggleOverride::CASE_DEFAULT) + "]").c_str());
+    mHorizontalAlignmentControl.SetText((std::string("Horizontal: ") + TextAlignmentName(horizontal)).c_str());
+    mVerticalAlignmentControl.SetText((std::string("Vertical: ") + TextAlignmentName(vertical)).c_str());
+    mOverflowControl.SetText((std::string("Overflow: ") + (ellipsis ? "ELLIPSIS" : "CLIP")).c_str());
+    mMultilineControl.SetText((std::string("Multiline: ") + (multiline ? "ON" : "OFF")).c_str());
+    mLineHeightControl.SetText((std::string("Line Height: ") + (mRelativeLineHeightEnabled ? "RELATIVE 1.6" : "AUTO")).c_str());
+    mPreviewHeightControl.SetText((std::string("Height: ") + (mWrapContentHeightEnabled ? "WRAP_CONTENT" : "FILL")).c_str());
+    mReplacementControl.SetText((std::string("Replacement: ") + (mReplacementEnabled ? "ON" : "OFF")).c_str());
+    mSourceControl.SetText((std::string("Source: ") + (mLifecycleAlternate ? "B" : "A")).c_str());
   }
 
   void ConfigurePreview(Label label, bool async) const
@@ -803,6 +669,8 @@ private:
     label.SetTextOverflowMode(ResolveToggle(mOverflowOverride, data.ellipsis) ? Text::OverflowMode::ELLIPSIS : Text::OverflowMode::CLIP);
     label.SetLineWrapMode(data.lineWrapMode);
     label.SetFontSize(data.fontSize);
+    label.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+    label.SetLineHeight(mRelativeLineHeightEnabled ? RELATIVE_LINE_HEIGHT : Text::LINE_HEIGHT_AUTO);
     label.SetRenderScale(data.renderScale);
     if(data.textFit)
     {
@@ -815,9 +683,12 @@ private:
     label.SetHorizontalTextAlignment(ResolveAlignment(mHorizontalAlignmentOverride, data.horizontalAlignment));
     label.SetVerticalTextAlignment(ResolveAlignment(mVerticalAlignmentOverride, data.verticalAlignment));
     label.SetLayoutDirection(data.rtl ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT);
-    const float previewWidth = WIDTH_SWEEP[mWidthIndex];
-    label.SetRequestedWidth(previewWidth > 0.0f ? previewWidth : MATCH_PARENT);
-    label.SetMaximumWidth(previewWidth > 0.0f ? previewWidth : 10000.0f);
+    label.SetRequestedWidth(MATCH_PARENT);
+    label.SetRequestedHeight(mWrapContentHeightEnabled ? WRAP_CONTENT : MATCH_PARENT);
+    label.SetLayoutParams(StackLayoutParams::New()
+                            .SetWeight(mWrapContentHeightEnabled ? 0.0f : 1.0f)
+                            .SetAlignment(LayoutAlignment::FILL));
+    label.SetMaximumWidth(10000.0f);
   }
 
   std::string StatusText(const CaseData& data, const Text::StyledText& styledText) const
@@ -828,55 +699,45 @@ private:
     {
       advancedRange |= image.end - image.start != 1u;
     }
-    const float previewWidth = WIDTH_SWEEP[mWidthIndex];
     const Text::Alignment horizontal = ResolveAlignment(mHorizontalAlignmentOverride, data.horizontalAlignment);
     const Text::Alignment vertical   = ResolveAlignment(mVerticalAlignmentOverride, data.verticalAlignment);
     const bool            ellipsis   = ResolveToggle(mOverflowOverride, data.ellipsis);
     const bool            multiline  = ResolveToggle(mMultilineOverride, data.multiline);
-    status << "logical: " << data.logicalText << "\nreplacement: " << (mReplacementEnabled ? "ON" : "OFF")
-           << " | primary: " << (mUseAsync ? "async" : "sync")
-           << " | width: " << (previewWidth > 0.0f ? std::to_string(static_cast<int>(previewWidth)) : "wide")
-           << " | authoring: " << (advancedRange ? "multi-character compact" : "U+FFFC identity")
-           << " | renderScale: " << data.renderScale << " | textFit: " << (data.textFit ? "ON" : "OFF")
-           << " | span count: " << styledText.GetSpanCount() << "\n";
-    status << "layout: H=" << TextAlignmentName(horizontal) << " ("
-           << OverrideName(mHorizontalAlignmentOverride == AlignmentOverride::CASE_DEFAULT) << ") | V="
-           << TextAlignmentName(vertical) << " ("
-           << OverrideName(mVerticalAlignmentOverride == AlignmentOverride::CASE_DEFAULT) << ") | overflow="
-           << (ellipsis ? "ELLIPSIS" : "CLIP") << " ("
-           << OverrideName(mOverflowOverride == ToggleOverride::CASE_DEFAULT) << ") | multiline="
-           << (multiline ? "ON" : "OFF") << " ("
-           << OverrideName(mMultilineOverride == ToggleOverride::CASE_DEFAULT) << ")\n";
+    status << "Layout: " << (multiline ? "multiline" : "single line") << ", "
+           << (ellipsis ? "END ellipsis" : "clip") << ", horizontal=" << TextAlignmentName(horizontal)
+           << ", vertical=" << TextAlignmentName(vertical) << "\n";
+    status << "Text: " << (data.rtl ? "RTL" : "LTR") << ", font=" << data.fontSize
+           << ", line height=" << (mRelativeLineHeightEnabled ? "RELATIVE 1.6" : "AUTO")
+           << ", height=" << (mWrapContentHeightEnabled ? "WRAP_CONTENT" : "FILL")
+           << ", render scale=" << data.renderScale << ", text fit=" << (data.textFit ? "ON" : "OFF")
+           << ", authoring=" << (advancedRange ? "multi-character range" : "U+FFFC")
+           << ", replacement=" << (mReplacementEnabled ? "ON" : "OFF") << "\n";
+    status << "Images (" << styledText.GetSpanCount() << "): ";
     for(std::size_t i = 0u; i < data.images.size(); ++i)
     {
       const ImageSpec& image = data.images[i];
-      status << "#" << i + 1u << " [" << image.start << "," << image.end << ") " << image.source
-             << " " << image.size.width << "x" << image.size.height << " " << AlignmentName(image.alignment);
+      if(i > 0u)
+      {
+        status << ", ";
+      }
+      status << image.size.width << "x" << image.size.height << " " << AlignmentName(image.alignment);
       if(image.verticalOffset != 0.0f)
       {
         status << " offset=" << image.verticalOffset;
       }
-      status << "\n";
     }
-    const Vector3 natural = mPrimary.GetNaturalSize();
-    status << "primary natural size: " << natural.width << " x " << natural.height;
+    status << "\n";
     if(data.marqueeCase)
     {
-      const bool marqueeRunning = mPrimary.IsMarqueeRunning();
-      status << " | marquee running: " << (marqueeRunning ? "YES" : "NO");
-      if(mReplacementEnabled && marqueeRunning)
-      {
-        status << " (BUG)";
-      }
+      status << "Marquee: " << (mPrimary.IsMarqueeRunning() ? "RUNNING" : "STOPPED") << "\n";
     }
     if(data.lifecycleCase)
     {
-      status << " | lifecycle variant: " << (mLifecycleAlternate ? "B" : "A") << " (press L)";
+      status << "Resource source variant: " << (mLifecycleAlternate ? "B" : "A") << "\n";
     }
-    status << "\nellipsis policy: END supported | START/MIDDLE unsupported (replacement-preserving CLIP fallback)";
-    if(!mStressStatus.empty())
+    if(!mActionStatus.empty())
     {
-      status << "\n" << mStressStatus;
+      status << mActionStatus;
     }
     return status.str();
   }
@@ -885,12 +746,21 @@ private:
   {
     const CaseData        data       = GetCase(mCaseIndex);
     const Text::StyledText styledText = BuildStyledText(data, mReplacementEnabled);
-    ConfigurePreview(mPrimary, mUseAsync);
+    mPrimary.StopMarquee();
+    mParity.StopMarquee();
+    ConfigurePreview(mPrimary, false);
     ConfigurePreview(mParity, true);
     mPrimary.SetStyledText(styledText);
     mParity.SetStyledText(styledText); // Same immutable source; runtime remains control-owned.
-    mTitle.SetText((std::to_string(mCaseIndex + 1u) + "/" + std::to_string(CASE_COUNT) + "  " + data.title).c_str());
-    mExpected.SetText(data.expected);
+    std::string displayTitle(data.title);
+    const std::size_t numberSeparator = displayTitle.find(". ");
+    if(numberSeparator != std::string::npos)
+    {
+      displayTitle.erase(0u, numberSeparator + 2u);
+    }
+    mTitle.SetText(("Case " + std::to_string(mCaseIndex + 1u) + " / " + std::to_string(CASE_COUNT) + " — " + displayTitle).c_str());
+    mDescription.SetText(data.expected);
+    mExpected.SetText("Expected: sync and async output match; every replacement remains one complete layout unit.");
     mStatus.SetText(StatusText(data, styledText).c_str());
     UpdateLayoutControls(data);
   }
@@ -899,273 +769,6 @@ private:
   {
     const CaseData data = GetCase(mCaseIndex);
     mStatus.SetText(StatusText(data, mPrimary.GetStyledText()).c_str());
-  }
-
-  void RemoveLifecycleLabel(Label& label)
-  {
-    if(label && label.GetParent())
-    {
-      mStressRoot.Remove(label, RemovePolicy::IMMEDIATE);
-    }
-  }
-
-  void EnsureLifecycleSetClearLabel()
-  {
-    if(!mLifecycleSetClearLabel)
-    {
-      mLifecycleSetClearLabel = NewLifecycleLabel(false, false);
-      mStressRoot.Add(mLifecycleSetClearLabel);
-    }
-  }
-
-  void EnsureLifecycleMarkupLabel()
-  {
-    if(!mLifecycleMarkupLabel)
-    {
-      mLifecycleMarkupLabel = NewLifecycleLabel(false, true);
-      mStressRoot.Add(mLifecycleMarkupLabel);
-    }
-  }
-
-  void UpdateLifecycleStatus(uint32_t phase)
-  {
-    const MemorySnapshot memory = ReadMemory();
-    if(memory.rssKb > mLifecyclePeakRssKb)
-    {
-      mLifecyclePeakRssKb = memory.rssKb;
-    }
-
-    std::ostringstream status;
-    status << "lifecycle loop: " << (mLifecycleRunning ? "RUNNING" : "STOPPED")
-           << " (F/button) | interval: " << LIFECYCLE_INTERVAL_MS << " ms"
-           << " | step: " << mLifecycleStep
-           << " | cycles: " << (mLifecycleStep / LIFECYCLE_PHASE_COUNT)
-           << " | phase: " << LifecyclePhaseName(phase)
-           << " | sample case: " << (mLifecycleCaseIndex + 1u) << "/" << CASE_COUNT;
-    if(memory.rssKb > 0 && mLifecycleBaselineMemory.rssKb > 0)
-    {
-      status << " | RSS: " << memory.rssKb << " KiB (delta "
-             << memory.rssKb - mLifecycleBaselineMemory.rssKb << ", peak "
-             << mLifecyclePeakRssKb - mLifecycleBaselineMemory.rssKb << ")"
-             << " | HWM: " << memory.hwmKb << " KiB";
-    }
-    mStressStatus = status.str();
-    RefreshStatus();
-  }
-
-  bool OnLifecycleTimerTick()
-  {
-    if(!mLifecycleRunning)
-    {
-      return false;
-    }
-
-    const uint32_t phase = static_cast<uint32_t>(mLifecycleStep % LIFECYCLE_PHASE_COUNT);
-    const uint64_t cycle = mLifecycleStep / LIFECYCLE_PHASE_COUNT;
-    switch(phase)
-    {
-      case 0u:
-      {
-        EnsureLifecycleSetClearLabel();
-        ConfigureLifecycleLabel(mLifecycleSetClearLabel, false, (cycle & 1u) != 0u);
-        mLifecycleSetClearLabel.SetStyledText(BuildLifecycleStyledText(false));
-        break;
-      }
-      case 1u:
-      {
-        EnsureLifecycleSetClearLabel();
-        mLifecycleCaseIndex      = static_cast<std::size_t>(cycle % CASE_COUNT);
-        const CaseData caseData = GetCase(mLifecycleCaseIndex);
-        ConfigureLifecycleCaseLabel(mLifecycleSetClearLabel, caseData, (cycle & 1u) == 0u);
-        mLifecycleSetClearLabel.SetStyledText(BuildStyledText(caseData, true));
-        break;
-      }
-      case 2u:
-      {
-        if(mLifecycleSetClearLabel)
-        {
-          Text::StyledText current = mLifecycleSetClearLabel.GetStyledText();
-          if(current)
-          {
-            Text::StyledTextBuilder builder = Text::StyledTextBuilder::FromStyledText(current);
-            builder.ClearSpans();
-            mLifecycleSetClearLabel.SetStyledText(builder.Build());
-          }
-        }
-        break;
-      }
-      case 3u:
-      {
-        if(mLifecycleSetClearLabel)
-        {
-          if((cycle & 1u) == 0u)
-          {
-            mLifecycleSetClearLabel.SetText("Plain text clears all replacement runtime and pending image loads.");
-          }
-          else
-          {
-            mLifecycleSetClearLabel.SetStyledText(Text::StyledText());
-          }
-        }
-        break;
-      }
-      case 4u:
-      {
-        RemoveLifecycleLabel(mLifecycleTransientLabel);
-        mLifecycleTransientLabel.Reset();
-        mLifecycleTransientLabel = NewLifecycleLabel(true, (cycle & 1u) == 0u);
-        mStressRoot.Add(mLifecycleTransientLabel);
-        mLifecycleTransientLabel.SetStyledText(BuildLifecycleStyledText((cycle & 1u) != 0u));
-        break;
-      }
-      case 5u:
-      {
-        const Text::StyledText shared = BuildLifecycleStyledText((cycle & 1u) == 0u);
-        if(mLifecycleTransientLabel)
-        {
-          mLifecycleTransientLabel.SetStyledText(shared);
-        }
-        EnsureLifecycleSetClearLabel();
-        mLifecycleSetClearLabel.SetStyledText(shared);
-        break;
-      }
-      case 6u:
-      {
-        RemoveLifecycleLabel(mLifecycleTransientLabel);
-        if(mLifecycleSetClearLabel)
-        {
-          mLifecycleSetClearLabel.SetText("Shared StyledText removed from the surviving Label.");
-        }
-        break;
-      }
-      case 7u:
-      {
-        mLifecycleTransientLabel.Reset();
-        break;
-      }
-      case 8u:
-      {
-        EnsureLifecycleMarkupLabel();
-        ConfigureLifecycleLabel(mLifecycleMarkupLabel, false, (cycle & 1u) != 0u);
-        mLifecycleMarkupLabel.SetStyledText(BuildLifecycleMarkupStyledText(false));
-        break;
-      }
-      case 9u:
-      {
-        EnsureLifecycleMarkupLabel();
-        ConfigureLifecycleLabel(mLifecycleMarkupLabel, (cycle & 1u) != 0u, (cycle & 1u) == 0u);
-        mLifecycleMarkupLabel.SetStyledText(BuildLifecycleMarkupStyledText(true));
-        break;
-      }
-      case 10u:
-      {
-        if(mLifecycleMarkupLabel)
-        {
-          if((cycle & 1u) == 0u)
-          {
-            mLifecycleMarkupLabel.SetStyledText(BuildLifecycleMarkupWithoutImages());
-          }
-          else
-          {
-            // Keep active remote ImageVisuals on odd cycles so the next phase destroys the owner mid-load.
-            mLifecycleMarkupLabel.SetStyledText(BuildLifecycleMarkupStyledText(false));
-          }
-        }
-        break;
-      }
-      case 11u:
-      default:
-      {
-        RemoveLifecycleLabel(mLifecycleMarkupLabel);
-        mLifecycleMarkupLabel.Reset();
-        break;
-      }
-    }
-
-    ++mLifecycleStep;
-    UpdateLifecycleStatus(phase);
-    return true;
-  }
-
-  void StopLifecycleLoop()
-  {
-    if(mLifecycleTimer)
-    {
-      mLifecycleTimer.Stop();
-      mLifecycleTimer.Reset();
-    }
-    mLifecycleRunning = false;
-
-    RemoveLifecycleLabel(mLifecycleTransientLabel);
-    RemoveLifecycleLabel(mLifecycleMarkupLabel);
-    RemoveLifecycleLabel(mLifecycleSetClearLabel);
-    mLifecycleTransientLabel.Reset();
-    mLifecycleMarkupLabel.Reset();
-    mLifecycleSetClearLabel.Reset();
-    mStressRoot.RemoveAllChildren();
-    mStressRoot.SetRequestedHeight(1.0f);
-    UpdateLifecycleStatus(static_cast<uint32_t>(mLifecycleStep % LIFECYCLE_PHASE_COUNT));
-  }
-
-  void ToggleLifecycleLoop()
-  {
-    if(mLifecycleRunning)
-    {
-      StopLifecycleLoop();
-      return;
-    }
-
-    mStressRoot.RemoveAllChildren();
-    mStressLabels.clear();
-    mStressRoot.SetRequestedHeight(96.0f);
-    mLifecycleStep           = 0u;
-    mLifecycleCaseIndex      = 0u;
-    mLifecycleBaselineMemory = ReadMemory();
-    mLifecyclePeakRssKb      = mLifecycleBaselineMemory.rssKb;
-    mLifecycleRunning        = true;
-    mLifecycleTimer          = Timer::New(LIFECYCLE_INTERVAL_MS);
-    mLifecycleTimer.TickSignal().Connect(this, &TextImageSpanController::OnLifecycleTimerTick);
-    OnLifecycleTimerTick();
-    mLifecycleTimer.Start();
-  }
-
-  void RunStress()
-  {
-    if(mLifecycleRunning)
-    {
-      StopLifecycleLoop();
-    }
-    mStressRoot.RemoveAllChildren();
-    mStressLabels.clear();
-    const uint32_t imagesPerLabel = mStressTenImages ? 10u : 1u;
-    const auto start = std::chrono::steady_clock::now();
-    for(uint32_t labelIndex = 0u; labelIndex < 100u; ++labelIndex)
-    {
-      Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
-      for(uint32_t imageIndex = 0u; imageIndex < imagesPerLabel; ++imageIndex)
-      {
-        const uint32_t begin = builder.GetUtf32Length();
-        builder.AppendText("\uFFFC");
-        const char* file = (imageIndex % 2u == 0u) ? "flag_kr.png" : "flag_us.png";
-        Text::ImageAttributes attributes(Resource(file).c_str(), Vector2(10.0f, 10.0f));
-        DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), begin, begin + 1u) &&
-                           "Stress ImageSpan range must be valid");
-      }
-      Label label = Label::New();
-      label.SetFontSize(8.0f);
-      label.SetStyledText(builder.Build());
-      label.SetRequestedWidth(120.0f);
-      label.SetRequestedHeight(12.0f);
-      mStressRoot.Add(label);
-      mStressLabels.push_back(label);
-    }
-    const double milliseconds = std::chrono::duration<double, std::milli>(
-      std::chrono::steady_clock::now() - start).count();
-    std::ostringstream status;
-    status << "stress: 100 Labels x " << imagesPerLabel << " image(s), build/add " << milliseconds << " ms";
-    mStressStatus = status.str();
-    mStressTenImages = !mStressTenImages;
-    ApplyCase();
   }
 
   void OnInit(Application application)
@@ -1180,16 +783,108 @@ private:
     root.SetSpacing(8.0f);
     root.SetPadding(Extents(16, 16, 16, 16));
 
-    mTitle    = NewHudLabel("", 48.0f, 0x1D4ED8);
-    mExpected = NewHudLabel("", 58.0f, 0x334155);
-    mStatus   = NewHudLabel("", 150.0f, 0x1E293B);
+    mTitle       = NewHudLabel("", 48.0f, 0x1D4ED8);
+    mDescription = NewHudLabel("", 64.0f, 0x334155);
+    mStatus      = NewHudLabel("", 142.0f, 0x1E293B);
+    mExpected    = NewHudLabel("", 50.0f, 0x334155);
     mStatus.SetHorizontalTextAlignment(Text::Alignment::START);
+    mStatus.SetFontSize(14.0f);
+    mDescription.SetFontSize(15.0f);
+
+    StackLayout actions = StackLayout::New(StackOrientation::HORIZONTAL);
+    actions.SetSpacing(6.0f);
+    actions.SetRequestedWidth(MATCH_PARENT);
+    actions.SetRequestedHeight(44.0f);
+    Label previous = NewHudLabel("Previous Case", 44.0f, 0x1D4ED8, true);
+    Label next     = NewHudLabel("Next Case", 44.0f, 0x1D4ED8, true);
+    Label reset    = NewHudLabel("Reset Case", 44.0f, 0x334155, true);
+    Label marquee  = NewHudLabel("Start Marquee", 44.0f, 0x475569, true);
+    for(Label button : {previous, next, reset, marquee})
+    {
+      actions.Add(button);
+    }
+    previous.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) {
+      mActionStatus.clear();
+      mCaseIndex = (mCaseIndex + CASE_COUNT - 1u) % CASE_COUNT;
+      ApplyCase();
+    });
+    next.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) {
+      mActionStatus.clear();
+      mCaseIndex = (mCaseIndex + 1u) % CASE_COUNT;
+      ApplyCase();
+    });
+    reset.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ResetLayoutOverrides(); });
+    marquee.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) {
+      mPrimary.StartMarquee();
+      mParity.StartMarquee();
+      mActionStatus = "Marquee requested for both columns";
+      RefreshStatus();
+    });
+
+    StackLayout layoutActions = StackLayout::New(StackOrientation::HORIZONTAL);
+    layoutActions.SetSpacing(6.0f);
+    layoutActions.SetRequestedWidth(MATCH_PARENT);
+    layoutActions.SetRequestedHeight(44.0f);
+    StackLayout contentActions = StackLayout::New(StackOrientation::HORIZONTAL);
+    contentActions.SetSpacing(6.0f);
+    contentActions.SetRequestedWidth(MATCH_PARENT);
+    contentActions.SetRequestedHeight(44.0f);
+    mHorizontalAlignmentControl = NewHudLabel("", 44.0f, 0x475569, true);
+    mVerticalAlignmentControl   = NewHudLabel("", 44.0f, 0x475569, true);
+    mOverflowControl            = NewHudLabel("", 44.0f, 0x475569, true);
+    mMultilineControl           = NewHudLabel("", 44.0f, 0x475569, true);
+    mLineHeightControl          = NewHudLabel("", 44.0f, 0x475569, true);
+    mPreviewHeightControl       = NewHudLabel("", 44.0f, 0x475569, true);
+    mReplacementControl         = NewHudLabel("", 44.0f, 0x475569, true);
+    mSourceControl              = NewHudLabel("", 44.0f, 0x475569, true);
+    for(Label control : {mHorizontalAlignmentControl, mVerticalAlignmentControl, mOverflowControl})
+    {
+      layoutActions.Add(control);
+    }
+    for(Label control : {mMultilineControl, mLineHeightControl, mPreviewHeightControl, mReplacementControl, mSourceControl})
+    {
+      contentActions.Add(control);
+    }
+    mHorizontalAlignmentControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleHorizontalAlignment(); });
+    mVerticalAlignmentControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleVerticalAlignment(); });
+    mOverflowControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleOverflowMode(); });
+    mMultilineControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleMultiline(); });
+    mLineHeightControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleLineHeight(); });
+    mPreviewHeightControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { TogglePreviewHeight(); });
+    mReplacementControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) {
+      mActionStatus.clear();
+      mReplacementEnabled = !mReplacementEnabled;
+      ApplyCase();
+    });
+    mSourceControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) {
+      mActionStatus.clear();
+      mLifecycleAlternate = !mLifecycleAlternate;
+      ApplyCase();
+    });
 
     StackLayout previews = StackLayout::New(StackOrientation::HORIZONTAL);
     previews.SetSpacing(8.0f);
     previews.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     mPrimary = Label::New();
     mParity  = Label::New();
+    StackLayout syncColumn       = StackLayout::New(StackOrientation::VERTICAL);
+    StackLayout asyncColumn      = StackLayout::New(StackOrientation::VERTICAL);
+    StackLayout syncPreviewSlot  = StackLayout::New(StackOrientation::VERTICAL);
+    StackLayout asyncPreviewSlot = StackLayout::New(StackOrientation::VERTICAL);
+    for(StackLayout column : {syncColumn, asyncColumn})
+    {
+      column.SetSpacing(6.0f);
+      column.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+      previews.Add(column);
+    }
+    for(StackLayout slot : {syncPreviewSlot, asyncPreviewSlot})
+    {
+      slot.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    }
+    syncColumn.Add(NewHudLabel("SYNC", 34.0f, 0x0F766E));
+    asyncColumn.Add(NewHudLabel("ASYNC", 34.0f, 0x7C3AED));
+    syncColumn.Add(syncPreviewSlot);
+    asyncColumn.Add(asyncPreviewSlot);
     for(Label label : {mPrimary, mParity})
     {
       label.SetFontSize(28.0f);
@@ -1197,64 +892,18 @@ private:
       label.SetBackgroundColor(UiColor(0xF8FAFC));
       label.SetPadding(Extents(14, 14, 14, 14));
       label.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-      previews.Add(label);
     }
-
-    StackLayout actions = StackLayout::New(StackOrientation::HORIZONTAL);
-    actions.SetSpacing(6.0f);
-    actions.SetRequestedWidth(MATCH_PARENT);
-    actions.SetRequestedHeight(44.0f);
-    const std::array<const char*, 8u> names = {"Previous", "Next", "Sync/Async", "Width", "Replacement", "Marquee", "Stress", "Loop (F)"};
-    std::array<Label, 8u> buttons;
-    for(std::size_t i = 0u; i < names.size(); ++i)
-    {
-      buttons[i] = NewHudLabel(names[i], 44.0f, i < 2u ? 0x1D4ED8 : 0x475569, true);
-      actions.Add(buttons[i]);
-    }
-    buttons[0].AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { mCaseIndex = (mCaseIndex + CASE_COUNT - 1u) % CASE_COUNT; ApplyCase(); });
-    buttons[1].AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { mCaseIndex = (mCaseIndex + 1u) % CASE_COUNT; ApplyCase(); });
-    buttons[2].AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { mUseAsync = !mUseAsync; ApplyCase(); });
-    buttons[3].AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { mWidthIndex = (mWidthIndex + 1u) % WIDTH_SWEEP.size(); ApplyCase(); });
-    buttons[4].AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { mReplacementEnabled = !mReplacementEnabled; ApplyCase(); });
-    buttons[5].AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) {
-      mPrimary.StartMarquee();
-      mParity.StartMarquee();
-      mStatus.SetText(StatusText(GetCase(mCaseIndex), mPrimary.GetStyledText()).c_str());
-    });
-    buttons[6].AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { RunStress(); });
-    buttons[7].AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleLifecycleLoop(); });
-
-    StackLayout layoutActions = StackLayout::New(StackOrientation::HORIZONTAL);
-    layoutActions.SetSpacing(6.0f);
-    layoutActions.SetRequestedWidth(MATCH_PARENT);
-    layoutActions.SetRequestedHeight(44.0f);
-    mHorizontalAlignmentControl = NewHudLabel("", 44.0f, 0x475569, true);
-    mVerticalAlignmentControl   = NewHudLabel("", 44.0f, 0x475569, true);
-    mOverflowControl            = NewHudLabel("", 44.0f, 0x475569, true);
-    mMultilineControl           = NewHudLabel("", 44.0f, 0x475569, true);
-    Label resetLayout           = NewHudLabel("Defaults (D)", 44.0f, 0x334155, true);
-    layoutActions.Add(mHorizontalAlignmentControl);
-    layoutActions.Add(mVerticalAlignmentControl);
-    layoutActions.Add(mOverflowControl);
-    layoutActions.Add(mMultilineControl);
-    layoutActions.Add(resetLayout);
-    mHorizontalAlignmentControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleHorizontalAlignment(); });
-    mVerticalAlignmentControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleVerticalAlignment(); });
-    mOverflowControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleOverflowMode(); });
-    mMultilineControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleMultiline(); });
-    resetLayout.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ResetLayoutOverrides(); });
-
-    mStressRoot = StackLayout::New(StackOrientation::VERTICAL);
-    mStressRoot.SetRequestedWidth(1.0f);
-    mStressRoot.SetRequestedHeight(1.0f);
+    syncPreviewSlot.Add(mPrimary);
+    asyncPreviewSlot.Add(mParity);
 
     root.Add(mTitle);
-    root.Add(mExpected);
-    root.Add(previews);
-    root.Add(mStatus);
+    root.Add(mDescription);
     root.Add(actions);
     root.Add(layoutActions);
-    root.Add(mStressRoot);
+    root.Add(contentActions);
+    root.Add(previews);
+    root.Add(mStatus);
+    root.Add(mExpected);
     window.Add(root);
     window.KeyEventSignal().Connect(this, &TextImageSpanController::OnKey);
     ApplyCase();
@@ -1272,11 +921,13 @@ private:
     }
     else if(event.GetKeyName() == "Left")
     {
+      mActionStatus.clear();
       mCaseIndex = (mCaseIndex + CASE_COUNT - 1u) % CASE_COUNT;
       ApplyCase();
     }
     else if(event.GetKeyName() == "Right")
     {
+      mActionStatus.clear();
       mCaseIndex = (mCaseIndex + 1u) % CASE_COUNT;
       ApplyCase();
     }
@@ -1296,74 +947,52 @@ private:
     {
       CycleMultiline();
     }
+    else if(event.GetKeyName() == "g" || event.GetKeyName() == "G")
+    {
+      ToggleLineHeight();
+    }
+    else if(event.GetKeyName() == "w" || event.GetKeyName() == "W")
+    {
+      TogglePreviewHeight();
+    }
     else if(event.GetKeyName() == "d" || event.GetKeyName() == "D")
     {
       ResetLayoutOverrides();
     }
     else if(event.GetKeyName() == "l" || event.GetKeyName() == "L")
     {
+      mActionStatus.clear();
       mLifecycleAlternate = !mLifecycleAlternate;
       ApplyCase();
-    }
-    else if(event.GetKeyName() == "f" || event.GetKeyName() == "F")
-    {
-      ToggleLifecycleLoop();
-    }
-    else if(event.GetKeyName() == "q")
-    {
-      UiScaleManager::Get().SetScale(0.8f);
-    }
-    else if(event.GetKeyName() == "w")
-    {
-      UiScaleManager::Get().SetScale(1.0f);
-    }
-    else if(event.GetKeyName() == "e")
-    {
-      UiScaleManager::Get().SetScale(1.2f);
-    }
-    else if(event.GetKeyName() == "r")
-    {
-      UiScaleManager::Get().SetScale(1.5f);
-    }
-    else if(event.GetKeyName() == "t")
-    {
-      UiScaleManager::Get().SetScale(2.0f);
     }
   }
 
 private:
-  Application&       mApplication;
-  Label              mTitle;
-  Label              mExpected;
-  Label              mPrimary;
-  Label              mParity;
-  Label              mStatus;
-  Label              mHorizontalAlignmentControl;
-  Label              mVerticalAlignmentControl;
-  Label              mOverflowControl;
-  Label              mMultilineControl;
-  Label              mLifecycleSetClearLabel;
-  Label              mLifecycleTransientLabel;
-  Label              mLifecycleMarkupLabel;
-  StackLayout        mStressRoot;
-  std::vector<Label> mStressLabels;
-  Timer              mLifecycleTimer;
-  MemorySnapshot     mLifecycleBaselineMemory;
-  std::size_t        mCaseIndex{0u};
-  std::size_t        mLifecycleCaseIndex{0u};
-  uint64_t           mLifecycleStep{0u};
-  long               mLifecyclePeakRssKb{0};
-  bool               mUseAsync{false};
-  std::size_t        mWidthIndex{2u};
-  bool               mReplacementEnabled{true};
-  bool               mLifecycleAlternate{false};
-  bool               mStressTenImages{false};
-  bool               mLifecycleRunning{false};
-  AlignmentOverride  mHorizontalAlignmentOverride{AlignmentOverride::CASE_DEFAULT};
-  AlignmentOverride  mVerticalAlignmentOverride{AlignmentOverride::CASE_DEFAULT};
-  ToggleOverride     mOverflowOverride{ToggleOverride::CASE_DEFAULT};
-  ToggleOverride     mMultilineOverride{ToggleOverride::CASE_DEFAULT};
-  std::string        mStressStatus;
+  Application&      mApplication;
+  Label             mTitle;
+  Label             mDescription;
+  Label             mExpected;
+  Label             mPrimary;
+  Label             mParity;
+  Label             mStatus;
+  Label             mHorizontalAlignmentControl;
+  Label             mVerticalAlignmentControl;
+  Label             mOverflowControl;
+  Label             mMultilineControl;
+  Label             mLineHeightControl;
+  Label             mPreviewHeightControl;
+  Label             mReplacementControl;
+  Label             mSourceControl;
+  std::size_t       mCaseIndex{0u};
+  bool              mReplacementEnabled{true};
+  bool              mLifecycleAlternate{false};
+  bool              mRelativeLineHeightEnabled{false};
+  bool              mWrapContentHeightEnabled{false};
+  AlignmentOverride mHorizontalAlignmentOverride{AlignmentOverride::CASE_DEFAULT};
+  AlignmentOverride mVerticalAlignmentOverride{AlignmentOverride::CASE_DEFAULT};
+  ToggleOverride    mOverflowOverride{ToggleOverride::CASE_DEFAULT};
+  ToggleOverride    mMultilineOverride{ToggleOverride::CASE_DEFAULT};
+  std::string       mActionStatus;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

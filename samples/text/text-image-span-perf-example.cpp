@@ -16,11 +16,9 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <algorithm>
 #include <array>
 #include <chrono>
-#include <cstdio>
-#include <cstring>
+#include <cstdint>
 #include <iomanip>
 #include <sstream>
 #include <string>
@@ -33,109 +31,182 @@ namespace
 {
 using Clock = std::chrono::steady_clock;
 
-constexpr int      WINDOW_WIDTH          = 1920;
-constexpr int      WINDOW_HEIGHT         = 1080;
-constexpr float    HUD_HEIGHT            = 104.0f;
-constexpr uint32_t GRID_COLUMNS          = 20u;
-constexpr uint32_t HEARTBEAT_INTERVAL_MS = 100u;
-constexpr uint32_t STAT_REFRESH_MS       = 750u;
+constexpr int                      WINDOW_WIDTH   = 1080;
+constexpr int                      WINDOW_HEIGHT  = 820;
+constexpr char                     IMAGE_MARKER[] = "[image]";
+constexpr std::array<uint32_t, 4u> INTERVALS_MS{{500u, 1000u, 2000u, 3000u}};
 
-enum class SourceMode
+struct ImageSpec
 {
-  SAME,
-  TEN_REPEAT,
-  ALL_DIFFERENT_FAILURE,
+  const char*                            source{nullptr};
+  Vector2                                size{24.0f, 24.0f};
+  Text::ImageAttributes::InlineAlignment alignment{Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM};
+  float                                  verticalOffset{0.0f};
 };
 
-enum class SizeMode
+struct StyledTextCase
 {
-  SMALL,
-  MIXED,
+  const char*            name{nullptr};
+  const char*            description{nullptr};
+  const char*            pattern{nullptr};
+  std::vector<ImageSpec> images;
+  bool                   multiline{true};
+  bool                   expectedEllipsis{false};
+  bool                   rtl{false};
+  Text::Alignment        horizontalAlignment{Text::Alignment::START};
+  Text::Alignment        verticalAlignment{Text::Alignment::CENTER};
+  Text::LineWrapMode     lineWrapMode{Text::LineWrapMode::WORD};
+  float                  fontSize{28.0f};
 };
 
-struct MemorySnapshot
+ImageSpec Image(const char* source,
+                Vector2     size,
+                Text::ImageAttributes::InlineAlignment alignment = Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM,
+                float verticalOffset = 0.0f)
 {
-  long rssKb{0};
-  long hwmKb{0};
-};
-
-bool ParseProcMetric(const char* line, const char* key, long& value)
-{
-  const std::size_t length = std::strlen(key);
-  return std::strncmp(line, key, length) == 0 && std::sscanf(line + length, "%ld", &value) == 1;
+  return {source, size, alignment, verticalOffset};
 }
 
-MemorySnapshot ReadMemory()
+std::vector<ImageSpec> RepeatedImages(uint32_t count, const char* source, Vector2 size)
 {
-  MemorySnapshot snapshot;
-  if(FILE* file = std::fopen("/proc/self/status", "r"))
+  std::vector<ImageSpec> images;
+  images.reserve(count);
+  for(uint32_t index = 0u; index < count; ++index)
   {
-    char line[128];
-    while(std::fgets(line, sizeof(line), file))
-    {
-      ParseProcMetric(line, "VmRSS:", snapshot.rssKb);
-      ParseProcMetric(line, "VmHWM:", snapshot.hwmKb);
-    }
-    std::fclose(file);
+    images.push_back(Image(source, size));
   }
-  return snapshot;
+  return images;
 }
 
-double ElapsedMilliseconds(const Clock::time_point& start)
+std::vector<StyledTextCase> CreateCases()
 {
-  return std::chrono::duration<double, std::milli>(Clock::now() - start).count();
+  std::vector<StyledTextCase> cases;
+  cases.reserve(32u);
+
+  cases.push_back({"Short text", "A short StyledText snapshot without replacements.", "Short text", {}, false});
+  cases.push_back({"Medium text", "Ordinary medium-length text exercises the no-ImageSpan path.",
+                   "A medium-length sentence changes repeatedly without any replacement span.", {}, false});
+  cases.push_back({"Long wrapped text", "Long multiline content without ellipsis.",
+                   "This long paragraph wraps over several lines while the same Label is repeatedly updated. "
+                   "It keeps ordinary shaping and layout active without creating any image visual. "
+                   "Additional words make the workload distinct from the short and medium cases."});
+  cases.push_back({"Very long END ellipsis", "Single-line ordinary text requires END ellipsis.",
+                   "A very long single line of ordinary text deliberately exceeds the preview width and must end with one stable ellipsis.",
+                   {}, false, true});
+  cases.push_back({"Explicit newlines", "Multiple explicit lines without replacements.",
+                   "First explicit line\nSecond explicit line\nThird explicit line"});
+  cases.push_back({"Image only", "One replacement is the complete logical text.", "[image]",
+                   {Image("flag_kr.png", Vector2(72.0f, 44.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
+  cases.push_back({"Text then image", "A trailing replacement follows ordinary text.", "Text before [image]",
+                   {Image("flag_us.png", Vector2(58.0f, 34.0f))}, false});
+  cases.push_back({"Image then text", "A leading replacement precedes ordinary text.", "[image] text after",
+                   {Image("flag_ae.png", Vector2(58.0f, 34.0f))}, false});
+  cases.push_back({"Text image text", "One replacement participates inside a sentence.", "Text before [image] text after",
+                   {Image("flag_kr.png", Vector2(64.0f, 38.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
+  cases.push_back({"Adjacent images", "Two consecutive replacements have different reserved sizes.", "Before [image][image] after",
+                   {Image("flag_kr.png", Vector2(32.0f, 24.0f)), Image("flag_us.png", Vector2(68.0f, 38.0f))}, false});
+  cases.push_back({"One baseline image", "A single baseline-aligned image exercises one-visual publication.", "Baseline [image] image",
+                   {Image("flag_ae.png", Vector2(48.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BASELINE)}, false});
+  cases.push_back({"Two local sources", "Two images use different bundled resources.", "Korea [image] and USA [image]",
+                   {Image("flag_kr.png", Vector2(52.0f, 32.0f)), Image("flag_us.png", Vector2(52.0f, 32.0f))}, false});
+  cases.push_back({"Five images", "Five replacements alternate bundled local resources.",
+                   "One [image] two [image] three [image] four [image] five [image]",
+                   {Image("flag_kr.png", Vector2(30.0f, 20.0f)), Image("flag_us.png", Vector2(30.0f, 20.0f)),
+                    Image("flag_ae.png", Vector2(30.0f, 20.0f)), Image("flag_kr_alt.png", Vector2(30.0f, 20.0f)),
+                    Image("flag_us_alt.png", Vector2(30.0f, 20.0f))}});
+  cases.push_back({"Ten images", "Ten small replacements exercise a denser runtime sidecar.",
+                   "[image] [image] [image] [image] [image] [image] [image] [image] [image] [image]",
+                   RepeatedImages(10u, "flag_kr.png", Vector2(24.0f, 16.0f))});
+  cases.push_back({"Same source repeated", "Three occurrences reuse one decoded local source.",
+                   "Repeated [image] source [image] reuse [image]",
+                   RepeatedImages(3u, "flag_us.png", Vector2(56.0f, 32.0f))});
+  cases.push_back({"Different local sources", "Six bundled sources alternate in one paragraph.",
+                   "[image] [image] [image] [image] [image] [image]",
+                   {Image("flag_kr.png", Vector2(42.0f, 26.0f)), Image("flag_us.png", Vector2(42.0f, 26.0f)),
+                    Image("flag_ae.png", Vector2(42.0f, 26.0f)), Image("flag_kr_alt.png", Vector2(42.0f, 26.0f)),
+                    Image("flag_us_alt.png", Vector2(42.0f, 26.0f)), Image("flag_ae_alt.png", Vector2(42.0f, 26.0f))}});
+  cases.push_back({"Tiny image", "An 8x8 replacement stays visible in ordinary text.", "Tiny [image] image",
+                   {Image("flag_kr.png", Vector2(8.0f, 8.0f))}, false});
+  cases.push_back({"Large image", "A large replacement expands its surrounding line.",
+                   "Text before the large [image] replacement and enough trailing text to wrap below it.",
+                   {Image("flag_us.png", Vector2(180.0f, 100.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
+  cases.push_back({"Mixed image sizes", "Tiny, medium, wide, and tall boxes share one paragraph.",
+                   "Tiny [image], medium [image], wide [image], and tall [image] replacements.",
+                   {Image("flag_kr.png", Vector2(10.0f, 10.0f)), Image("flag_us.png", Vector2(40.0f, 28.0f)),
+                    Image("flag_ae.png", Vector2(100.0f, 34.0f)),
+                    Image("flag_kr_alt.png", Vector2(42.0f, 86.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
+  cases.push_back({"TEXT_BOTTOM", "The image bottom aligns with the surrounding text bottom.", "Bottom [image] alignment",
+                   {Image("flag_us.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM)}, false});
+  cases.push_back({"TEXT_BASELINE", "The image bottom aligns with the text baseline.", "Baseline [image] alignment",
+                   {Image("flag_kr.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_BASELINE)}, false});
+  cases.push_back({"TEXT_CENTER", "The image is vertically centered in the text line.", "Center [image] alignment",
+                   {Image("flag_ae.png", Vector2(54.0f, 42.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
+  cases.push_back({"Positive vertical offset", "A positive offset moves the image down.", "Positive [image] offset",
+                   {Image("flag_kr.png", Vector2(48.0f, 32.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER, 8.0f)}, false});
+  cases.push_back({"Negative vertical offset", "A negative offset moves the image up.", "Negative [image] offset",
+                   {Image("flag_us.png", Vector2(48.0f, 32.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER, -8.0f)}, false});
+  cases.push_back({"LTR paragraph", "A replacement participates in left-to-right layout.",
+                   "English before [image] and ordinary text after the image.",
+                   {Image("flag_kr.png", Vector2(52.0f, 30.0f))}});
+  cases.push_back({"RTL paragraph", "A replacement participates in right-to-left layout.",
+                   "עברית לפני [image] العربية بعد الصورة",
+                   {Image("flag_ae.png", Vector2(52.0f, 30.0f))}, true, false, true});
+  cases.push_back({"Mixed bidi", "LTR, Hebrew, and Arabic runs surround one replacement.",
+                   "LTR עברית [image] العربية trailing text",
+                   {Image("flag_us.png", Vector2(52.0f, 30.0f))}, true, false, true});
+  cases.push_back({"Replacement-only line", "An explicit line contains only one large replacement.",
+                   "Line before\n[image]\nLine after",
+                   {Image("flag_kr.png", Vector2(140.0f, 76.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
+  cases.push_back({"Multiline wrapping", "Three replacements participate in word wrapping.",
+                   "A long multiline paragraph places [image] between ordinary words, continues with enough text to wrap, "
+                   "then adds [image] and a final [image] before the remaining tail.",
+                   {Image("flag_kr.png", Vector2(44.0f, 28.0f)), Image("flag_us.png", Vector2(72.0f, 36.0f)),
+                    Image("flag_ae.png", Vector2(36.0f, 44.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}});
+  cases.push_back({"END ellipsis image boundary", "A replacement is fully visible or fully elided at END.",
+                   "A readable prefix approaches [image] and a deliberately long trailing sentence exceeds the preview width.",
+                   {Image("flag_us.png", Vector2(100.0f, 48.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false, true});
+  cases.push_back({"Missing local resource", "A missing local source retains the authored reservation.",
+                   "Missing image [image] keeps layout stable while loading fails.",
+                   {Image("missing-image-span-perf.png", Vector2(80.0f, 48.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)}, false});
+  cases.push_back({"Multiline END ellipsis", "Explicit lines and later images cross the vertical ellipsis boundary.",
+                   "First line [image]\nSecond line contains enough words to wrap around [image]\n"
+                   "Third line [image] continues with a long tail that must be elided before the final [image].",
+                   {Image("flag_kr.png", Vector2(44.0f, 28.0f)), Image("flag_us.png", Vector2(90.0f, 48.0f)),
+                    Image("flag_ae.png", Vector2(48.0f, 36.0f)), Image("flag_kr_alt.png", Vector2(72.0f, 40.0f))},
+                   true, true});
+
+  return cases;
 }
 
-const char* SourceModeName(SourceMode mode)
+const char* AlignmentName(Text::Alignment alignment)
 {
-  switch(mode)
+  switch(alignment)
   {
-    case SourceMode::TEN_REPEAT: return "10-source repeat";
-    case SourceMode::ALL_DIFFERENT_FAILURE: return "all-different (failure-path)";
-    case SourceMode::SAME:
-    default: return "same source";
+    case Text::Alignment::CENTER: return "CENTER";
+    case Text::Alignment::END: return "END";
+    case Text::Alignment::START:
+    default: return "START";
   }
 }
 
-const char* SizeModeName(SizeMode mode)
+Label NewPanelLabel(const char* text, float height, uint32_t background, bool interactive = false)
 {
-  return mode == SizeMode::MIXED ? "mixed size" : "small image";
-}
-
-uint32_t CountActors(Actor actor)
-{
-  if(!actor)
+  Label label = Label::New(text);
+  label.SetFontSize(interactive ? 14.0f : 16.0f);
+  label.SetTextColor(UiColor(0xF8FAFC));
+  label.SetBackgroundColor(UiColor(background));
+  label.SetPadding(Extents(10u, 10u, 6u, 6u));
+  label.SetMultiLine(true);
+  label.SetHorizontalTextAlignment(interactive ? Text::Alignment::CENTER : Text::Alignment::START);
+  label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  label.SetRequestedWidth(MATCH_PARENT);
+  label.SetRequestedHeight(height);
+  label.SetCornerRadius(6.0f);
+  if(interactive)
   {
-    return 0u;
+    label.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
   }
-  uint32_t count = 1u;
-  for(uint32_t index = 0u; index < actor.GetChildCount(); ++index)
-  {
-    count += CountActors(actor.GetChildAt(index));
-  }
-  return count;
-}
-
-void CollectRenderStats(Actor actor, uint32_t& rendererCount, std::vector<TextureSet>& textureSets)
-{
-  if(!actor)
-  {
-    return;
-  }
-
-  rendererCount += actor.GetRendererCount();
-  for(uint32_t index = 0u; index < actor.GetRendererCount(); ++index)
-  {
-    TextureSet textures = actor.GetRendererAt(index).GetTextures();
-    if(textures && std::find(textureSets.begin(), textureSets.end(), textures) == textureSets.end())
-    {
-      textureSets.push_back(textures);
-    }
-  }
-  for(uint32_t index = 0u; index < actor.GetChildCount(); ++index)
-  {
-    CollectRenderStats(actor.GetChildAt(index), rendererCount, textureSets);
-  }
+  return label;
 }
 } // unnamed namespace
 
@@ -154,236 +225,260 @@ private:
     return std::string(RESOURCES_DIR) + file;
   }
 
-  std::string SourceFor(uint32_t labelIndex, uint32_t imageIndex) const
-  {
-    static constexpr std::array<const char*, 10u> SOURCES{{
-      "flag_kr.png",
-      "flag_us.png",
-      "flag_ae.png",
-      "flag_kr_alt.png",
-      "flag_us_alt.png",
-      "flag_ae_alt.png",
-      "cursor_handle.png",
-      "cursor_handle_pressed.png",
-      "selection_handle_left.png",
-      "selection_handle_right.png",
-    }};
-
-    const uint32_t occurrence = labelIndex * mImagesPerLabel + imageIndex;
-    switch(mSourceMode)
-    {
-      case SourceMode::TEN_REPEAT:
-        return Resource(SOURCES[occurrence % SOURCES.size()]);
-      case SourceMode::ALL_DIFFERENT_FAILURE:
-        // The repository does not ship thousands of distinct decoded assets. This mode intentionally uses unique
-        // missing descriptors to measure descriptor/Visual/failure callback cost, not decoded texture memory.
-        return std::string(RESOURCES_DIR) + "missing-image-span-perf-" + std::to_string(occurrence) + ".png";
-      case SourceMode::SAME:
-      default:
-        return Resource(SOURCES[0u]);
-    }
-  }
-
-  Text::StyledText BuildText(uint32_t labelIndex) const
+  Text::StyledText BuildCase(const StyledTextCase& data) const
   {
     Text::StyledTextBuilder builder = Text::StyledTextBuilder::New();
-    static constexpr std::array<Vector2, 9u> MIXED_SIZES{{
-      Vector2(8.0f, 8.0f),
-      Vector2(12.0f, 12.0f),
-      Vector2(16.0f, 16.0f),
-      Vector2(24.0f, 24.0f),
-      Vector2(32.0f, 20.0f),
-      Vector2(40.0f, 40.0f),
-      Vector2(64.0f, 32.0f),
-      Vector2(80.0f, 48.0f),
-      Vector2(120.0f, 60.0f),
-    }};
-    for(uint32_t imageIndex = 0u; imageIndex < mImagesPerLabel; ++imageIndex)
+    const std::string       pattern(data.pattern ? data.pattern : "");
+    std::size_t             cursor = 0u;
+
+    for(const ImageSpec& image : data.images)
     {
-      const uint32_t begin = builder.GetUtf32Length();
-      builder.AppendText("\uFFFC");
-      const Vector2 size = mSizeMode == SizeMode::MIXED
-                             ? MIXED_SIZES[(labelIndex + imageIndex) % MIXED_SIZES.size()]
-                             : Vector2(mImagesPerLabel == 1u ? 18.0f : 8.0f,
-                                       mImagesPerLabel == 1u ? 18.0f : 8.0f);
-      Text::ImageAttributes attributes(SourceFor(labelIndex, imageIndex).c_str(), size);
-      DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), begin, begin + 1u) &&
-                         "Performance ImageSpan range must be valid");
-      builder.AppendText("x");
+      const std::size_t marker = pattern.find(IMAGE_MARKER, cursor);
+      DALI_ASSERT_ALWAYS(marker != std::string::npos && "ImageSpan perf case has too few image markers");
+      builder.AppendText(pattern.substr(cursor, marker - cursor).c_str());
+
+      const uint32_t imageIndex = builder.GetUtf32Length();
+      builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
+
+      Text::ImageAttributes attributes(Resource(image.source).c_str(), image.size);
+      attributes.SetAlignment(image.alignment);
+      attributes.SetVerticalOffset(image.verticalOffset);
+      DALI_ASSERT_ALWAYS(builder.SetSpan(Text::ImageSpan::New(attributes), imageIndex, imageIndex + 1u) &&
+                         "ImageSpan perf range must be valid");
+      cursor = marker + sizeof(IMAGE_MARKER) - 1u;
     }
+
+    DALI_ASSERT_ALWAYS(pattern.find(IMAGE_MARKER, cursor) == std::string::npos &&
+                       "ImageSpan perf case has too many image markers");
+    builder.AppendText(pattern.substr(cursor).c_str());
     return builder.Build();
   }
 
-  LayoutRect LabelBounds(uint32_t index) const
+  void ConfigureLabel(const StyledTextCase& data)
   {
-    const uint32_t rows = (mLabelCount + GRID_COLUMNS - 1u) / GRID_COLUMNS;
-    const float cellWidth = static_cast<float>(WINDOW_WIDTH) / static_cast<float>(GRID_COLUMNS);
-    const float cellHeight = (static_cast<float>(WINDOW_HEIGHT) - HUD_HEIGHT) / static_cast<float>(rows);
-    const uint32_t column = index % GRID_COLUMNS;
-    const uint32_t row    = index / GRID_COLUMNS;
-    return LayoutRect(column * cellWidth + 1.0f,
-                      row * cellHeight + 1.0f,
-                      std::max(1.0f, cellWidth - 2.0f),
-                      std::max(1.0f, cellHeight - 2.0f));
+    mPreview.SetAsyncRendering(mAsyncRendering);
+    mPreview.SetMultiLine(data.multiline);
+    mPreview.SetTextOverflowMode(data.expectedEllipsis ? Text::OverflowMode::ELLIPSIS : Text::OverflowMode::CLIP);
+    mPreview.SetLineWrapMode(data.lineWrapMode);
+    mPreview.SetFontSize(data.fontSize);
+    mPreview.SetTextColor(UiColor(0x111827));
+    mPreview.SetBackgroundColor(UiColor(0xF8FAFC));
+    mPreview.SetPadding(Extents(20u, 20u, 18u, 18u));
+    mPreview.SetHorizontalTextAlignment(data.horizontalAlignment);
+    mPreview.SetVerticalTextAlignment(data.verticalAlignment);
+    mPreview.SetLayoutDirection(data.rtl ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT);
+    mPreview.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
   }
 
-  void ClearGrid()
+  void CreatePreview(const StyledTextCase& data)
   {
-    if(mGrid && mGridAttached)
-    {
-      mRoot.Remove(mGrid);
-    }
-    mLabels.clear();
-    mGrid.Reset();
-    mGridAttached = false;
+    mPreview = Label::New();
+    ConfigureLabel(data);
+    mPreviewContainer.Add(mPreview);
   }
 
-  void CreateGrid(const char* operation)
+  void RecreatePreview(const StyledTextCase& data)
   {
-    ClearGrid();
-    mReadyCallbacks = 0u;
-    mMaxHeartbeatStallMs = 0.0;
-
-    const auto creationStart = Clock::now();
-    mGrid = AbsoluteLayout::New();
-    mGrid.SetRequestedWidth(static_cast<float>(WINDOW_WIDTH));
-    mGrid.SetRequestedHeight(static_cast<float>(WINDOW_HEIGHT) - HUD_HEIGHT);
-    mGrid.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(
-      LayoutRect(0.0f, HUD_HEIGHT, static_cast<float>(WINDOW_WIDTH), static_cast<float>(WINDOW_HEIGHT) - HUD_HEIGHT)));
-    mLabels.reserve(mLabelCount);
-
-    for(uint32_t index = 0u; index < mLabelCount; ++index)
+    if(mPreview)
     {
-      Label label = Label::New();
-      label.SetAsyncRendering(mAsyncRendering);
-      label.SetFontSize(mImagesPerLabel == 1u ? 13.0f : 8.0f);
-      label.SetMultiLine(false);
-      label.SetTextOverflowMode(mEllipsis ? Text::OverflowMode::ELLIPSIS : Text::OverflowMode::CLIP);
-      label.SetTextColor(UiColor(0xE5E7EB));
-      label.SetBackgroundColor(index % 2u ? UiColor(0x1F2937) : UiColor(0x111827));
-      label.SetPadding(Extents(0, 0, 0, 0));
-      label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
-      label.SetVerticalTextAlignment(Text::Alignment::CENTER);
-      const LayoutRect bounds = LabelBounds(index);
-      label.SetRequestedWidth(bounds.width);
-      label.SetRequestedHeight(bounds.height);
-      label.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(bounds));
-      label.SetStyledText(BuildText(index));
-      label.ResourceReadySignal().Connect(this, [this](View)
-      {
-        ++mReadyCallbacks;
-      });
-      mGrid.Add(label);
-      mLabels.push_back(label);
+      mPreviewContainer.Remove(mPreview, RemovePolicy::IMMEDIATE);
+      mPreview.Reset();
     }
-
-    mRoot.Add(mGrid);
-    mGridAttached = true;
-    mCreationMs   = ElapsedMilliseconds(creationStart);
-
-    const auto measureStart = Clock::now();
-    for(Label label : mLabels)
-    {
-      label.GetNaturalSize();
-    }
-    mMeasureMs     = ElapsedMilliseconds(measureStart);
-    mLastOperation = operation;
-    RefreshStats();
+    CreatePreview(data);
   }
 
-  void ResizeLabels()
+  void ApplyCurrentCase()
   {
-    const auto start = Clock::now();
-    mWide = !mWide;
-    for(uint32_t index = 0u; index < mLabels.size(); ++index)
-    {
-      const LayoutRect base = LabelBounds(index);
-      const float width = mWide ? base.width : std::max(1.0f, base.width * 0.72f);
-      mLabels[index].SetRequestedWidth(width);
-      mLabels[index].SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(
-        LayoutRect(base.x, base.y, width, base.height)));
-    }
-    mRelayoutMutationMs = ElapsedMilliseconds(start);
-    mLastOperation      = mWide ? "live resize wide" : "live resize narrow";
-    RefreshStats();
-  }
+    const Clock::time_point start = Clock::now();
+    const StyledTextCase&   data  = mCases[mCaseIndex];
+    Text::StyledText        text  = mFreshBuild ? BuildCase(data) : mPrebuilt[mCaseIndex];
 
-  void ToggleAttached()
-  {
-    if(mGridAttached)
+    if(mRecreateLabel)
     {
-      mRoot.Remove(mGrid);
-      mGridAttached = false;
-      mLastOperation = "detached (entries off-scene)";
+      RecreatePreview(data);
     }
     else
     {
-      mRoot.Add(mGrid);
-      mGridAttached = true;
-      mLastOperation = "reattached";
+      ConfigureLabel(data);
     }
-    RefreshStats();
+    mPreview.SetStyledText(text);
+
+    mLastUpdateMilliseconds = std::chrono::duration<double, std::milli>(Clock::now() - start).count();
+    ++mTickCount;
+    UpdateHud(text);
   }
 
-  void CycleSourceMode()
+  void UpdateControls()
   {
-    mSourceMode = static_cast<SourceMode>((static_cast<uint32_t>(mSourceMode) + 1u) % 3u);
-    CreateGrid("source mode recreate");
+    std::ostringstream interval;
+    interval << "Interval: " << std::fixed << std::setprecision(1)
+             << static_cast<double>(INTERVALS_MS[mIntervalIndex]) / 1000.0 << "s";
+    mPlaybackControl.SetText(mRunning ? "Playback: RUNNING" : "Playback: PAUSED");
+    mIntervalControl.SetText(interval.str().c_str());
+    mRenderingControl.SetText(mAsyncRendering ? "Rendering: ASYNC" : "Rendering: SYNC");
+    mLabelControl.SetText(mRecreateLabel ? "Label: RECREATE" : "Label: REUSE");
+    mStyledTextControl.SetText(mFreshBuild ? "StyledText: FRESH BUILD" : "StyledText: PREBUILT REUSE");
   }
 
-  void RefreshStats()
+  void UpdateHud(const Text::StyledText& text)
   {
-    mMemory = ReadMemory();
-    mActorCount = CountActors(mRoot);
-    mRendererCount = 0u;
-    std::vector<TextureSet> textureSets;
-    CollectRenderStats(mRoot, mRendererCount, textureSets);
-    mTextureSetCount = static_cast<uint32_t>(textureSets.size());
-    UpdateHud();
+    const StyledTextCase& data = mCases[mCaseIndex];
+    std::ostringstream status;
+    status << "Case " << mCaseIndex + 1u << " / " << mCases.size() << " — " << data.name << "\n"
+           << data.description << "\n"
+           << "UTF-32 length: " << text.GetUtf32Length() << " | ImageSpan count: " << data.images.size()
+           << " | Expected ellipsis: " << (data.expectedEllipsis ? "YES" : "NO") << "\n"
+           << "Interval: " << (static_cast<double>(INTERVALS_MS[mIntervalIndex]) / 1000.0) << "s"
+           << " | Rendering: " << (mAsyncRendering ? "ASYNC" : "SYNC")
+           << " | Label: " << (mRecreateLabel ? "RECREATE" : "REUSE")
+           << " | StyledText: " << (mFreshBuild ? "FRESH BUILD" : "PREBUILT REUSE") << "\n"
+           << "Tick count: " << mTickCount << " | Last update: " << std::fixed << std::setprecision(3)
+           << mLastUpdateMilliseconds << " ms"
+           << " | Layout: " << (data.multiline ? "multiline" : "single line")
+           << ", " << AlignmentName(data.horizontalAlignment) << "\n"
+           << "Last update time is sample telemetry, not a product performance pass criterion.";
+    mStatus.SetText(status.str().c_str());
+    UpdateControls();
   }
 
-  void UpdateHud()
+  void RestartTimer()
   {
-    if(!mHud)
+    if(mTimer)
     {
-      return;
+      mTimer.Stop();
+      mTimer.Reset();
     }
-
-    std::ostringstream text;
-    text << "ImageSpan PERF (public API, real visible grid) | " << mLabelCount << " Label x "
-         << mImagesPerLabel << " image | " << SourceModeName(mSourceMode)
-         << " | " << SizeModeName(mSizeMode) << " | END ellipsis " << (mEllipsis ? "on" : "off")
-         << " | " << (mAsyncRendering ? "async" : "sync")
-         << " | " << (mGridAttached ? "visible/attached" : "detached") << "\n"
-         << std::fixed << std::setprecision(2)
-         << "op=" << mLastOperation << " create=" << mCreationMs << "ms natural-query=" << mMeasureMs
-         << "ms resize-mutation=" << mRelayoutMutationMs << "ms heartbeat-max-stall=" << mMaxHeartbeatStallMs
-         << "ms | actors=" << mActorCount << " renderers/draw-upper-bound=" << mRendererCount
-         << " unique-TextureSet=" << mTextureSetCount << " authored-ImageVisual="
-         << mLabelCount * mImagesPerLabel << " ready-label-callback=" << mReadyCallbacks
-         << " | VmRSS=" << (mMemory.rssKb / 1024.0) << "MB VmHWM=" << (mMemory.hwmKb / 1024.0) << "MB\n"
-         << "Keys: N=100/300  I=1/10 images  S=source  M=size  E=ellipsis  W=warm recreate  D=detach  R=resize  A=sync/async  Esc=quit. "
-            "Cold-cache numbers require a fresh process; all-different mode measures unique failure descriptors, not decoded texture memory.";
-    mHud.SetText(text.str().c_str());
+    mTimer = Timer::New(INTERVALS_MS[mIntervalIndex]);
+    mTimer.TickSignal().Connect(this, &TextImageSpanPerfController::OnTick);
+    if(mRunning)
+    {
+      mTimer.Start();
+    }
   }
 
-  bool OnHeartbeat()
+  bool OnTick()
   {
-    const auto now = Clock::now();
-    if(mLastHeartbeat.time_since_epoch().count() != 0)
+    if(!mRunning)
     {
-      const double interval = std::chrono::duration<double, std::milli>(now - mLastHeartbeat).count();
-      mMaxHeartbeatStallMs  = std::max(mMaxHeartbeatStallMs,
-                                     std::max(0.0, interval - static_cast<double>(HEARTBEAT_INTERVAL_MS)));
+      return false;
     }
-    mLastHeartbeat = now;
+    mCaseIndex = (mCaseIndex + 1u) % mCases.size();
+    ApplyCurrentCase();
     return true;
   }
 
-  bool OnStatRefresh()
+  void TogglePlayback()
   {
-    RefreshStats();
-    return true;
+    mRunning = !mRunning;
+    if(mRunning)
+    {
+      if(!mTimer)
+      {
+        RestartTimer();
+      }
+      else
+      {
+        mTimer.Start();
+      }
+    }
+    else if(mTimer)
+    {
+      mTimer.Stop();
+    }
+    UpdateControls();
+  }
+
+  void CycleInterval()
+  {
+    mIntervalIndex = (mIntervalIndex + 1u) % INTERVALS_MS.size();
+    RestartTimer();
+    UpdateHud(mPreview.GetStyledText());
+  }
+
+  void ToggleRendering()
+  {
+    mAsyncRendering = !mAsyncRendering;
+    UpdateControls();
+  }
+
+  void ToggleLabelMode()
+  {
+    mRecreateLabel = !mRecreateLabel;
+    UpdateControls();
+  }
+
+  void ToggleStyledTextMode()
+  {
+    mFreshBuild = !mFreshBuild;
+    UpdateControls();
+  }
+
+  void OnInit(Application application)
+  {
+    Window window = application.GetWindow();
+    window.SetPositionSize(PositionSize(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
+    window.SetBackgroundColor(UiColor(0x0F172A));
+
+    mCases = CreateCases();
+    mPrebuilt.reserve(mCases.size());
+    for(const StyledTextCase& data : mCases)
+    {
+      mPrebuilt.push_back(BuildCase(data));
+    }
+
+    StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
+    root.SetSpacing(8.0f);
+    root.SetPadding(Extents(16u, 16u, 16u, 16u));
+    root.SetRequestedWidth(MATCH_PARENT);
+    root.SetRequestedHeight(MATCH_PARENT);
+
+    Label title = NewPanelLabel("ImageSpan repeated StyledText lifecycle and performance validation", 48.0f, 0x1D4ED8);
+    title.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+
+    StackLayout primaryControls = StackLayout::New(StackOrientation::HORIZONTAL);
+    primaryControls.SetSpacing(6.0f);
+    primaryControls.SetRequestedWidth(MATCH_PARENT);
+    primaryControls.SetRequestedHeight(46.0f);
+    mPlaybackControl  = NewPanelLabel("", 46.0f, 0x0F766E, true);
+    mIntervalControl  = NewPanelLabel("", 46.0f, 0x475569, true);
+    mRenderingControl = NewPanelLabel("", 46.0f, 0x475569, true);
+    for(Label control : {mPlaybackControl, mIntervalControl, mRenderingControl})
+    {
+      primaryControls.Add(control);
+    }
+
+    StackLayout lifecycleControls = StackLayout::New(StackOrientation::HORIZONTAL);
+    lifecycleControls.SetSpacing(6.0f);
+    lifecycleControls.SetRequestedWidth(MATCH_PARENT);
+    lifecycleControls.SetRequestedHeight(46.0f);
+    mLabelControl      = NewPanelLabel("", 46.0f, 0x475569, true);
+    mStyledTextControl = NewPanelLabel("", 46.0f, 0x475569, true);
+    lifecycleControls.Add(mLabelControl);
+    lifecycleControls.Add(mStyledTextControl);
+
+    mPlaybackControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { TogglePlayback(); });
+    mIntervalControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleInterval(); });
+    mRenderingControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleRendering(); });
+    mLabelControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleLabelMode(); });
+    mStyledTextControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleStyledTextMode(); });
+
+    mPreviewContainer = StackLayout::New(StackOrientation::VERTICAL);
+    mPreviewContainer.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    CreatePreview(mCases[mCaseIndex]);
+
+    mStatus = NewPanelLabel("", 158.0f, 0x1E293B);
+    mStatus.SetFontSize(15.0f);
+
+    root.Add(title);
+    root.Add(primaryControls);
+    root.Add(lifecycleControls);
+    root.Add(mPreviewContainer);
+    root.Add(mStatus);
+    window.Add(root);
+    window.KeyEventSignal().Connect(this, &TextImageSpanPerfController::OnKey);
+
+    ApplyCurrentCase();
+    RestartTimer();
   }
 
   void OnKey(Window, KeyEvent event)
@@ -392,119 +487,53 @@ private:
     {
       return;
     }
-
-    const auto key = event.GetKeyName();
     if(IsKey(event, Dali::DALI_KEY_ESCAPE) || IsKey(event, Dali::DALI_KEY_BACK))
     {
       mApplication.Quit();
     }
-    else if(key == "n" || key == "N")
+    else if(event.GetKeyString() == "p" || event.GetKeyString() == "P")
     {
-      mLabelCount = mLabelCount == 100u ? 300u : 100u;
-      CreateGrid("label-count recreate");
+      TogglePlayback();
     }
-    else if(key == "i" || key == "I")
+    else if(event.GetKeyString() == "i" || event.GetKeyString() == "I")
     {
-      mImagesPerLabel = mImagesPerLabel == 1u ? 10u : 1u;
-      CreateGrid("image-count recreate");
+      CycleInterval();
     }
-    else if(key == "s" || key == "S")
+    else if(event.GetKeyString() == "r" || event.GetKeyString() == "R")
     {
-      CycleSourceMode();
+      ToggleRendering();
     }
-    else if(key == "m" || key == "M")
+    else if(event.GetKeyString() == "l" || event.GetKeyString() == "L")
     {
-      mSizeMode = mSizeMode == SizeMode::SMALL ? SizeMode::MIXED : SizeMode::SMALL;
-      CreateGrid("size-mode recreate");
+      ToggleLabelMode();
     }
-    else if(key == "e" || key == "E")
+    else if(event.GetKeyString() == "s" || event.GetKeyString() == "S")
     {
-      mEllipsis = !mEllipsis;
-      CreateGrid("ellipsis-mode recreate");
+      ToggleStyledTextMode();
     }
-    else if(key == "w" || key == "W")
-    {
-      CreateGrid("warm-cache recreate");
-    }
-    else if(key == "d" || key == "D")
-    {
-      ToggleAttached();
-    }
-    else if(key == "r" || key == "R")
-    {
-      ResizeLabels();
-    }
-    else if(key == "a" || key == "A")
-    {
-      mAsyncRendering = !mAsyncRendering;
-      CreateGrid("render-mode recreate");
-    }
-  }
-
-  void OnInit(Application application)
-  {
-    Window window = application.GetWindow();
-    window.SetPositionSize(PositionSize(0, 0, WINDOW_WIDTH, WINDOW_HEIGHT));
-    window.SetBackgroundColor(UiColor(0x030712));
-
-    mRoot = AbsoluteLayout::New();
-    mRoot.SetRequestedWidth(MATCH_PARENT);
-    mRoot.SetRequestedHeight(MATCH_PARENT);
-
-    mHud = Label::New();
-    mHud.SetFontSize(14.0f);
-    mHud.SetMultiLine(true);
-    mHud.SetTextColor(UiColor(0xF8FAFC));
-    mHud.SetBackgroundColor(UiColor(0x0F3D5E));
-    mHud.SetPadding(Extents(10, 10, 4, 4));
-    mHud.SetHorizontalTextAlignment(Text::Alignment::START);
-    mHud.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mHud.SetRequestedWidth(static_cast<float>(WINDOW_WIDTH));
-    mHud.SetRequestedHeight(HUD_HEIGHT);
-    mHud.SetLayoutParams(AbsoluteLayoutParams::New().SetBounds(
-      LayoutRect(0.0f, 0.0f, static_cast<float>(WINDOW_WIDTH), HUD_HEIGHT)));
-    mRoot.Add(mHud);
-
-    window.Add(mRoot);
-    window.KeyEventSignal().Connect(this, &TextImageSpanPerfController::OnKey);
-
-    mHeartbeat = Timer::New(HEARTBEAT_INTERVAL_MS);
-    mHeartbeat.TickSignal().Connect(this, &TextImageSpanPerfController::OnHeartbeat);
-    mHeartbeat.Start();
-    mStatRefresh = Timer::New(STAT_REFRESH_MS);
-    mStatRefresh.TickSignal().Connect(this, &TextImageSpanPerfController::OnStatRefresh);
-    mStatRefresh.Start();
-
-    CreateGrid("fresh-process create");
   }
 
 private:
-  Application&       mApplication;
-  AbsoluteLayout     mRoot;
-  AbsoluteLayout     mGrid;
-  Label              mHud;
-  std::vector<Label> mLabels;
-  Timer              mHeartbeat;
-  Timer              mStatRefresh;
-  Clock::time_point  mLastHeartbeat;
-  MemorySnapshot     mMemory;
-  std::string        mLastOperation{"startup"};
-  SourceMode         mSourceMode{SourceMode::SAME};
-  SizeMode           mSizeMode{SizeMode::SMALL};
-  uint32_t           mLabelCount{100u};
-  uint32_t           mImagesPerLabel{1u};
-  uint32_t           mReadyCallbacks{0u};
-  uint32_t           mActorCount{0u};
-  uint32_t           mRendererCount{0u};
-  uint32_t           mTextureSetCount{0u};
-  double             mCreationMs{0.0};
-  double             mMeasureMs{0.0};
-  double             mRelayoutMutationMs{0.0};
-  double             mMaxHeartbeatStallMs{0.0};
-  bool               mAsyncRendering{false};
-  bool               mGridAttached{false};
-  bool               mWide{true};
-  bool               mEllipsis{false};
+  Application&                  mApplication;
+  StackLayout                   mPreviewContainer;
+  Label                         mPreview;
+  Label                         mStatus;
+  Label                         mPlaybackControl;
+  Label                         mIntervalControl;
+  Label                         mRenderingControl;
+  Label                         mLabelControl;
+  Label                         mStyledTextControl;
+  Timer                         mTimer;
+  std::vector<StyledTextCase>   mCases;
+  std::vector<Text::StyledText> mPrebuilt;
+  std::size_t                   mCaseIndex{0u};
+  std::size_t                   mIntervalIndex{1u};
+  uint64_t                      mTickCount{0u};
+  double                        mLastUpdateMilliseconds{0.0};
+  bool                          mRunning{true};
+  bool                          mAsyncRendering{false};
+  bool                          mRecreateLabel{false};
+  bool                          mFreshBuild{true};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

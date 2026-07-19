@@ -24,9 +24,34 @@ namespace
 {
 constexpr int         WINDOW_WIDTH  = 900;
 constexpr int         WINDOW_HEIGHT = 720;
+constexpr float       RELATIVE_LINE_HEIGHT = 1.6f;
 constexpr const char* REMOTE_IMAGE =
   "https://www.w3.org/assets/logos/w3c-2025-transitional/w3c-72x48.png";
 constexpr const char* FAILED_IMAGE = "https://127.0.0.1:1/image-span-failure.png";
+
+Label NewTextLabel(const char* text, float fontSize, uint32_t color)
+{
+  Label label = Label::New(text);
+  label.SetFontSize(fontSize);
+  label.SetTextColor(UiColor(color));
+  label.SetMultiLine(true);
+  label.SetRequestedWidth(MATCH_PARENT);
+  label.SetRequestedHeight(WRAP_CONTENT);
+  return label;
+}
+
+Label NewButton(const char* text)
+{
+  Label button = NewTextLabel(text, 14.0f, 0xF8FAFC);
+  button.SetBackgroundColor(UiColor(0x475569));
+  button.SetPadding(Extents(8u, 8u, 5u, 5u));
+  button.SetHorizontalTextAlignment(Text::Alignment::CENTER);
+  button.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  button.SetRequestedHeight(46.0f);
+  button.SetCornerRadius(6.0f);
+  button.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+  return button;
+}
 
 void AppendImage(Text::StyledTextBuilder& builder,
                  const char*              source,
@@ -39,7 +64,7 @@ void AppendImage(Text::StyledTextBuilder& builder,
   attributes.SetAlignment(alignment);
   attributes.SetVerticalOffset(verticalOffset);
   builder.PushSpan(Text::ImageSpan::New(attributes));
-  builder.AppendText("\uFFFC");
+  builder.AppendText(Text::ReplacementSpan::OBJECT_REPLACEMENT_CHARACTER);
   builder.PopSpan();
 }
 
@@ -75,9 +100,9 @@ Text::StyledText BuildEditorText(float verticalOffset)
               Text::ImageAttributes::InlineAlignment::TEXT_BOTTOM);
   builder.AppendText(" C ");
   AppendImage(builder, RESOURCES_DIR "flag_ae.png", Vector2(52.0f, 36.0f), verticalOffset);
-  builder.AppendText(" D.\nRTL boundaries: \xD7\xA2\xD7\x91\xD7\xA8\xD7\x99\xD7\xAA ");
+  builder.AppendText(" D.\nRTL boundaries: עברית ");
   AppendImage(builder, RESOURCES_DIR "flag_kr.png", Vector2(80.0f, 48.0f), verticalOffset);
-  builder.AppendText(" \xD8\xA7\xD9\x84\xD8\xB9\xD8\xB1\xD8\xA8\xD9\x8A\xD8\xA9.\n");
+  builder.AppendText(" العربية.\n");
   builder.AppendText("\nRemote image ");
   AppendImage(builder, REMOTE_IMAGE, Vector2(72.0f, 48.0f), verticalOffset);
   builder.AppendText(" followed by mixed direction: English العربية עברית.\nFailed resource keeps its reserved box: ");
@@ -109,30 +134,79 @@ private:
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
 
-    Label title = Label::New("Editable ImageSpan: click a control and use normal cursor/edit/selection keys");
-    title.SetFontSize(20.0f);
-    title.SetTextColor(UiColor(0x0F172A));
+    Label title = NewTextLabel("Editable ImageSpan", 24.0f, 0x0F172A);
     title.SetHorizontalTextAlignment(Text::Alignment::CENTER);
-    title.SetRequestedWidth(MATCH_PARENT);
-    title.SetRequestedHeight(WRAP_CONTENT);
+
+    Label guide = NewTextLabel("Click a control, then move the cursor, edit, and select across each image.", 16.0f, 0x475569);
+    guide.SetHorizontalTextAlignment(Text::Alignment::CENTER);
 
     CreateEditableControls();
 
-    mStatus = Label::New();
-    mStatus.SetFontSize(16.0f);
-    mStatus.SetTextColor(UiColor(0x334155));
-    mStatus.SetMultiLine(true);
-    mStatus.SetRequestedWidth(MATCH_PARENT);
-    mStatus.SetRequestedHeight(WRAP_CONTENT);
+    Label fieldTitle  = NewTextLabel("InputField — single line", 17.0f, 0x1E293B);
+    Label editorTitle = NewTextLabel("InputEditor — multiline", 17.0f, 0x1E293B);
+
+    mFieldCard = StackLayout::New(StackOrientation::VERTICAL);
+    mFieldCard.SetPadding(Extents(2u, 2u, 2u, 2u));
+    mFieldCard.SetRequestedWidth(MATCH_PARENT);
+    mFieldCard.SetRequestedHeight(94.0f);
+    mFieldCard.SetBackgroundColor(UiColor(0xCBD5E1));
+    mFieldCard.Add(mField);
+
+    mEditorCard = StackLayout::New(StackOrientation::VERTICAL);
+    mEditorCard.SetPadding(Extents(2u, 2u, 2u, 2u));
+    mEditorCard.SetRequestedWidth(MATCH_PARENT);
+    mEditorCard.SetBackgroundColor(UiColor(0xCBD5E1));
+    mEditorCard.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    mEditorCard.Add(mEditor);
+
+    StackLayout contentToolbar = StackLayout::New(StackOrientation::HORIZONTAL);
+    contentToolbar.SetSpacing(6.0f);
+    contentToolbar.SetRequestedWidth(MATCH_PARENT);
+    contentToolbar.SetRequestedHeight(46.0f);
+    StackLayout settingToolbar = StackLayout::New(StackOrientation::HORIZONTAL);
+    settingToolbar.SetSpacing(6.0f);
+    settingToolbar.SetRequestedWidth(MATCH_PARENT);
+    settingToolbar.SetRequestedHeight(46.0f);
+    Label resetButton = NewButton("Reset StyledText");
+    Label plainButton = NewButton("Set Plain Text");
+    mAlignmentButton  = NewButton("");
+    mOffsetButton     = NewButton("");
+    mLineHeightButton = NewButton("");
+    mLifecycleButton  = NewButton("");
+    for(Label button : {resetButton, plainButton, mLifecycleButton})
+    {
+      contentToolbar.Add(button);
+    }
+    for(Label button : {mAlignmentButton, mOffsetButton, mLineHeightButton})
+    {
+      settingToolbar.Add(button);
+    }
+    resetButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { SetStyledContent("StyledText restored"); });
+    plainButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { SetPlainContent("Plain text set"); });
+    mAlignmentButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { CycleAlignment(); });
+    mOffsetButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleVerticalOffset(); });
+    mLineHeightButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleLineHeight(); });
+    mLifecycleButton.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ToggleLifecycle(); });
+
+    mStatus = NewTextLabel("", 13.0f, 0xE2E8F0);
+    mStatus.SetBackgroundColor(UiColor(0x1E293B));
+    mStatus.SetPadding(Extents(12u, 12u, 8u, 8u));
+    mStatus.SetRequestedHeight(172.0f);
+    mStatus.SetCornerRadius(7.0f);
 
     mRoot.Add(title);
-    mRoot.Add(mField);
-    mRoot.Add(mEditor);
+    mRoot.Add(guide);
+    mRoot.Add(fieldTitle);
+    mRoot.Add(mFieldCard);
+    mRoot.Add(editorTitle);
+    mRoot.Add(mEditorCard);
+    mRoot.Add(contentToolbar);
+    mRoot.Add(settingToolbar);
     mRoot.Add(mStatus);
     window.Add(mRoot);
     window.KeyEventSignal().Connect(this, &TextInputImageSpanController::OnKeyEvent);
 
-    SetStyledContent();
+    SetStyledContent("StyledText active");
   }
 
   void CreateEditableControls()
@@ -144,8 +218,9 @@ private:
     mField.SetPadding(Extents(14u, 14u, 10u, 10u));
     mField.SetTextOverflowMode(Text::OverflowMode::CLIP);
     mField.SetRequestedWidth(MATCH_PARENT);
-    mField.SetRequestedHeight(92.0f);
+    mField.SetRequestedHeight(MATCH_PARENT);
     mField.SetMaximumLength(5000);
+    mField.SetCornerRadius(6.0f);
 
     mEditor = InputEditor::New();
     mEditor.SetFontSize(25.0f);
@@ -154,37 +229,39 @@ private:
     mEditor.SetPadding(Extents(14u, 14u, 12u, 12u));
     mEditor.SetLineWrapMode(Text::LineWrapMode::WORD);
     mEditor.SetTextOverflowMode(Text::OverflowMode::CLIP);
+    ApplyLineHeight();
     mEditor.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     mEditor.SetMaximumLength(5000);
+    mEditor.SetCornerRadius(6.0f);
   }
 
   void RecreateEditableControls()
   {
-    mRoot.Remove(mField);
-    mRoot.Remove(mEditor);
-    mRoot.Remove(mStatus);
+    mFieldCard.Remove(mField, RemovePolicy::IMMEDIATE);
+    mEditorCard.Remove(mEditor, RemovePolicy::IMMEDIATE);
     mField.Reset();
     mEditor.Reset();
 
     CreateEditableControls();
-    mRoot.Add(mField);
-    mRoot.Add(mEditor);
-    mRoot.Add(mStatus);
-    SetStyledContent();
+    mFieldCard.Add(mField);
+    mEditorCard.Add(mEditor);
+    SetStyledContent("Editable controls recreated");
   }
 
-  void SetStyledContent()
+  void SetStyledContent(const char* action)
   {
     mField.SetStyledText(BuildFieldText(mVerticalOffset));
     mEditor.SetStyledText(BuildEditorText(mVerticalOffset));
-    UpdateStatus("StyledText active");
+    mStyledContent = true;
+    UpdateStatus(action);
   }
 
-  void SetPlainContent()
+  void SetPlainContent(const char* action)
   {
     mField.SetText("Plain InputField: StyledText and ImageSpan state cleared.");
     mEditor.SetText("Plain InputEditor\nSetText() clears every authored span and runtime image resource.");
-    UpdateStatus("Plain text active");
+    mStyledContent = false;
+    UpdateStatus(action);
   }
 
   void UpdateStatus(const char* state)
@@ -192,12 +269,19 @@ private:
     const char* alignment = mAlignment == Text::Alignment::START
                               ? "START"
                               : (mAlignment == Text::Alignment::CENTER ? "CENTER" : "END");
-    std::string text      = std::string(state) +
-                       " | R: reset StyledText | C: SetText clear | A: alignment | O: vertical offset | "
-                       "T: 300ms set/clear/destroy stress | Esc: quit\n" +
-                       "alignment=" + alignment + " offset=" + std::to_string(mVerticalOffset) +
-                       " stress=" + (mStressEnabled ? "ON" : "OFF") +
-                       " | Select across the 180x96 replacement to verify highlight < image < cursor.";
+    mAlignmentButton.SetText((std::string("Alignment: ") + alignment).c_str());
+    mOffsetButton.SetText((std::string("Vertical Offset: ") + (mVerticalOffset == 0.0f ? "0" : "-8")).c_str());
+    mLineHeightButton.SetText((std::string("Line Height: ") + (mRelativeLineHeightEnabled ? "RELATIVE 1.6" : "AUTO")).c_str());
+    mLifecycleButton.SetText((std::string("Lifecycle: ") + (mLifecycleEnabled ? "RUNNING" : "STOPPED")).c_str());
+
+    std::string text = std::string("Content: ") + (mStyledContent ? "StyledText" : "Plain") +
+                       "\nHorizontal alignment: " + alignment +
+                       "\nVertical offset: " + std::to_string(static_cast<int>(mVerticalOffset)) +
+                       "\nLine height: " + (mRelativeLineHeightEnabled ? "RELATIVE 1.6" : "AUTO") +
+                       "\nLifecycle: " + (mLifecycleEnabled ? "RUNNING (300 ms set / clear / recreate)" : "STOPPED") +
+                       "\nLast action: " + state +
+                       "\nTry: move the cursor, select through an image, then use Backspace/Delete at its boundary."
+                       "\nShortcuts: R, C, A, O, H, T.";
     mStatus.SetText(text.c_str());
   }
 
@@ -211,41 +295,60 @@ private:
     UpdateStatus("Alignment changed");
   }
 
-  void ToggleStress()
+  void ToggleVerticalOffset()
   {
-    mStressEnabled = !mStressEnabled;
-    if(mStressEnabled)
-    {
-      if(!mStressTimer)
-      {
-        mStressTimer = Timer::New(300u);
-        mStressTimer.TickSignal().Connect(this, &TextInputImageSpanController::OnStressTick);
-      }
-      mStressTimer.Start();
-    }
-    else if(mStressTimer)
-    {
-      mStressTimer.Stop();
-    }
-    UpdateStatus("Lifecycle stress toggled");
+    mVerticalOffset = mVerticalOffset == 0.0f ? -8.0f : 0.0f;
+    SetStyledContent("StyledText rebuilt with a new vertical offset");
   }
 
-  bool OnStressTick()
+  void ApplyLineHeight()
   {
-    mStressPhase = (mStressPhase + 1u) % 3u;
-    if(mStressPhase == 0u)
+    mEditor.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+    mEditor.SetLineHeight(mRelativeLineHeightEnabled ? RELATIVE_LINE_HEIGHT : Text::LINE_HEIGHT_AUTO);
+  }
+
+  void ToggleLineHeight()
+  {
+    mRelativeLineHeightEnabled = !mRelativeLineHeightEnabled;
+    ApplyLineHeight();
+    UpdateStatus("Line height changed");
+  }
+
+  void ToggleLifecycle()
+  {
+    mLifecycleEnabled = !mLifecycleEnabled;
+    if(mLifecycleEnabled)
     {
-      SetStyledContent();
+      if(!mLifecycleTimer)
+      {
+        mLifecycleTimer = Timer::New(300u);
+        mLifecycleTimer.TickSignal().Connect(this, &TextInputImageSpanController::OnLifecycleTick);
+      }
+      mLifecycleTimer.Start();
     }
-    else if(mStressPhase == 1u)
+    else if(mLifecycleTimer)
     {
-      SetPlainContent();
+      mLifecycleTimer.Stop();
+    }
+    UpdateStatus("Lifecycle playback toggled");
+  }
+
+  bool OnLifecycleTick()
+  {
+    mLifecyclePhase = (mLifecyclePhase + 1u) % 3u;
+    if(mLifecyclePhase == 0u)
+    {
+      SetStyledContent("Lifecycle set StyledText");
+    }
+    else if(mLifecyclePhase == 1u)
+    {
+      SetPlainContent("Lifecycle set plain text");
     }
     else
     {
       RecreateEditableControls();
     }
-    return mStressEnabled;
+    return mLifecycleEnabled;
   }
 
   void OnKeyEvent(Window, KeyEvent event)
@@ -260,11 +363,11 @@ private:
     }
     else if(event.GetKeyString() == "r" || event.GetKeyString() == "R")
     {
-      SetStyledContent();
+      SetStyledContent("StyledText restored");
     }
     else if(event.GetKeyString() == "c" || event.GetKeyString() == "C")
     {
-      SetPlainContent();
+      SetPlainContent("Plain text set");
     }
     else if(event.GetKeyString() == "a" || event.GetKeyString() == "A")
     {
@@ -272,26 +375,37 @@ private:
     }
     else if(event.GetKeyString() == "o" || event.GetKeyString() == "O")
     {
-      mVerticalOffset = mVerticalOffset == 0.0f ? -8.0f : 0.0f;
-      SetStyledContent();
+      ToggleVerticalOffset();
+    }
+    else if(event.GetKeyString() == "h" || event.GetKeyString() == "H")
+    {
+      ToggleLineHeight();
     }
     else if(event.GetKeyString() == "t" || event.GetKeyString() == "T")
     {
-      ToggleStress();
+      ToggleLifecycle();
     }
   }
 
 private:
   Application&    mApplication;
   StackLayout     mRoot;
+  StackLayout     mFieldCard;
+  StackLayout     mEditorCard;
   InputField      mField;
   InputEditor     mEditor;
   Label           mStatus;
-  Timer           mStressTimer;
+  Label           mAlignmentButton;
+  Label           mOffsetButton;
+  Label           mLineHeightButton;
+  Label           mLifecycleButton;
+  Timer           mLifecycleTimer;
   Text::Alignment mAlignment{Text::Alignment::START};
   float           mVerticalOffset{0.0f};
-  bool            mStressEnabled{false};
-  uint32_t        mStressPhase{0u};
+  bool            mRelativeLineHeightEnabled{false};
+  bool            mStyledContent{true};
+  bool            mLifecycleEnabled{false};
+  uint32_t        mLifecyclePhase{0u};
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

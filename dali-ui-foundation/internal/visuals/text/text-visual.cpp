@@ -758,9 +758,17 @@ void TextVisual::UpdateRenderer()
     return;
   }
 
+  Vector2 layoutConstraintSize = relayoutSize;
+  if(mController->GetFinalElisionResult())
+  {
+    // Keep replacement relayout constrained by the control area that produced
+    // the final result, not by the reduced render-texture height.
+    layoutConstraintSize = mController->GetRenderTextModel()->GetControlSize();
+  }
+
   Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(control);
 
-  const Text::Controller::UpdateTextType updateTextType = mController->Relayout(relayoutSize, layoutDirection);
+  const Text::Controller::UpdateTextType updateTextType = mController->Relayout(layoutConstraintSize, layoutDirection);
   mTypesetter->SetModel(mController->GetRenderTextModel());
   if(mController->HasValidReplacementSource())
   {
