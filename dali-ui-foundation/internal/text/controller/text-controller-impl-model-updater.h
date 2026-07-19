@@ -20,10 +20,10 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-processing-source.h>
 
 namespace Dali::Ui::Text
 {
-
 /**
  * Contains methods for updating the models in the TextController
  */
@@ -40,6 +40,23 @@ struct ControllerImplModelUpdater
    * @return true if mode has been modified.
    */
   static bool Update(Controller::Impl& impl, OperationsMask operationsRequired);
+
+  /**
+   * @brief Updates a caller-selected model from an immutable processing source.
+   *
+   * This overload is used after an accepted replacement projection has been
+   * prepared. Ordinary controls use Update() above.
+   *
+   * @param[in] impl A reference to the Controller::Impl class.
+   * @param[in] source The source buffers used by the canonical updater.
+   * @param[in,out] targetModel The logical and visual model to update.
+   * @param[in] operationsRequired The operations required.
+   * @return true if the model has been modified.
+   */
+  static bool Update(Controller::Impl&           impl,
+                     const TextProcessingSource& source,
+                     Model&                      targetModel,
+                     OperationsMask              operationsRequired);
 };
 
 } // namespace Dali::Ui::Text

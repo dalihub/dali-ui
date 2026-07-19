@@ -24,6 +24,7 @@
 #include <dali/public-api/math/vector2.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/text/replacement/replacement-layout-data.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
@@ -64,6 +65,7 @@ struct Parameters
     startLineIndex{0u},
     estimatedNumberOfLines{0u},
     interGlyphExtraAdvance{0.f},
+    replacementLayoutData{nullptr},
     isLastNewParagraph{false}
   {
   }
@@ -79,6 +81,7 @@ struct Parameters
   LineIndex                             startLineIndex;                  ///< The line index where to insert the new lines.
   Length                                estimatedNumberOfLines;          ///< The estimated number of lines.
   float                                 interGlyphExtraAdvance;          ///< Extra advance added to each glyph.
+  const ReplacementLayoutData*          replacementLayoutData;           ///< Optional synthetic replacement metrics.
   bool                                  isLastNewParagraph : 1;          ///< Whether the last character is a new paragraph character.
 };
 

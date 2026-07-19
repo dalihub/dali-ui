@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
 #include <dali-ui-foundation/internal/text/hyphenator.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
+#include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
@@ -73,10 +74,23 @@ constexpr Dali::Vector4 BACKGROUND_SUB7(1.f, 0.8f, 0.8f, 1.f);
 
 bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask operationsRequired)
 {
+  const TextProcessingSource source = MakeTextProcessingSource(*impl.mModel);
+  return Update(impl, source, *impl.mModel, operationsRequired);
+}
+
+bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
+                                        const TextProcessingSource& source,
+                                        Model&                      targetModel,
+                                        OperationsMask              operationsRequired)
+{
   DALI_LOG_INFO(gLogFilter, Debug::General, "Controller::UpdateModel\n");
 
+  const bool isProjectedTarget = source.HasReplacements();
+
   // Calculate the operations to be done.
-  const OperationsMask operations = static_cast<OperationsMask>(impl.mOperationsPending & operationsRequired);
+  const OperationsMask operations = isProjectedTarget
+                                      ? operationsRequired
+                                      : static_cast<OperationsMask>(impl.mOperationsPending & operationsRequired);
 
   if(Controller::NO_OPERATION == operations)
   {
@@ -85,11 +99,33 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
   }
   DALI_TRACE_SCOPE(gTraceFilter, "DALI_TEXT_MODEL_UPDATE");
 
-  Vector<Character>& srcCharacters = impl.mModel->mLogicalModel->mText;
+  if(isProjectedTarget)
+  {
+    ApplyTextProcessingSource(source, *targetModel.mLogicalModel);
+  }
+
+  TextUpdateInfo projectedUpdateInfo;
+  if(isProjectedTarget)
+  {
+    projectedUpdateInfo.Clear();
+    projectedUpdateInfo.mCharacterIndex              = 0u;
+    projectedUpdateInfo.mParagraphCharacterIndex     = 0u;
+    projectedUpdateInfo.mRequestedNumberOfCharacters = targetModel.mLogicalModel->mText.Count();
+    projectedUpdateInfo.mNumberOfCharactersToAdd     = targetModel.mLogicalModel->mText.Count();
+    projectedUpdateInfo.mPreviousNumberOfCharacters  = 0u;
+    projectedUpdateInfo.mStartGlyphIndex             = 0u;
+    projectedUpdateInfo.mStartLineIndex              = 0u;
+    projectedUpdateInfo.mEstimatedNumberOfLines      = 1u;
+    projectedUpdateInfo.mClearAll                    = false;
+    projectedUpdateInfo.mFullRelayoutNeeded          = true;
+  }
+  TextUpdateInfo& updateInfo = isProjectedTarget ? projectedUpdateInfo : impl.mTextUpdateInfo;
+
+  Vector<Character>& srcCharacters = targetModel.mLogicalModel->mText;
   Vector<Character>  displayCharacters;
   bool               useHiddenText = false;
 
-  if(impl.mHiddenInput && impl.mEventData != nullptr)
+  if(!isProjectedTarget && impl.mHiddenInput && impl.mEventData != nullptr)
   {
     if(impl.mEventData->mIsShowingPlaceholderText)
     {
@@ -110,21 +146,24 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
   // Number of characters of the paragraphs to be removed.
   Length paragraphCharacters = 0u;
 
-  impl.CalculateTextUpdateIndices(paragraphCharacters);
+  if(!isProjectedTarget)
+  {
+    impl.CalculateTextUpdateIndices(paragraphCharacters);
+  }
 
   // Check whether the indices for updating the text is valid
-  if(impl.mTextUpdateInfo.mParagraphCharacterIndex > numberOfCharacters ||
-     impl.mTextUpdateInfo.mRequestedNumberOfCharacters > numberOfCharacters)
+  if(updateInfo.mParagraphCharacterIndex > numberOfCharacters ||
+     updateInfo.mRequestedNumberOfCharacters > numberOfCharacters)
   {
     if(numberOfCharacters == 0u)
     {
-      impl.mTextUpdateInfo.Clear();
-      impl.mTextUpdateInfo.mClearAll = true;
+      updateInfo.Clear();
+      updateInfo.mClearAll = true;
     }
     else // numberOfCharacters > 0u
     {
       std::string currentText;
-      Utf32ToUtf8(impl.mModel->mLogicalModel->mText.Begin(), numberOfCharacters, currentText);
+      Utf32ToUtf8(targetModel.mLogicalModel->mText.Begin(), numberOfCharacters, currentText);
 
       DALI_LOG_ERROR("Controller::Impl::UpdateModel: mTextUpdateInfo has invalid indices\n");
       DALI_LOG_ERROR("Number of characters: %d, current text is: %s paragraphCharacters: %d\n", numberOfCharacters,
@@ -132,45 +171,45 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
 
       // Dump mTextUpdateInfo
       DALI_LOG_ERROR("Dump mTextUpdateInfo:\n");
-      DALI_LOG_ERROR("     mTextUpdateInfo.mCharacterIndex = %u\n", impl.mTextUpdateInfo.mCharacterIndex);
+      DALI_LOG_ERROR("     mTextUpdateInfo.mCharacterIndex = %u\n", updateInfo.mCharacterIndex);
       DALI_LOG_ERROR("     mTextUpdateInfo.mNumberOfCharactersToRemove = %u\n",
-                     impl.mTextUpdateInfo.mNumberOfCharactersToRemove);
+                     updateInfo.mNumberOfCharactersToRemove);
       DALI_LOG_ERROR("     mTextUpdateInfo.mNumberOfCharactersToAdd = %u\n",
-                     impl.mTextUpdateInfo.mNumberOfCharactersToAdd);
+                     updateInfo.mNumberOfCharactersToAdd);
       DALI_LOG_ERROR("     mTextUpdateInfo.mPreviousNumberOfCharacters = %u\n",
-                     impl.mTextUpdateInfo.mPreviousNumberOfCharacters);
+                     updateInfo.mPreviousNumberOfCharacters);
       DALI_LOG_ERROR("     mTextUpdateInfo.mParagraphCharacterIndex = %u\n",
-                     impl.mTextUpdateInfo.mParagraphCharacterIndex);
+                     updateInfo.mParagraphCharacterIndex);
       DALI_LOG_ERROR("     mTextUpdateInfo.mRequestedNumberOfCharacters = %u\n",
-                     impl.mTextUpdateInfo.mRequestedNumberOfCharacters);
-      DALI_LOG_ERROR("     mTextUpdateInfo.mStartGlyphIndex = %u\n", impl.mTextUpdateInfo.mStartGlyphIndex);
-      DALI_LOG_ERROR("     mTextUpdateInfo.mStartLineIndex = %u\n", impl.mTextUpdateInfo.mStartLineIndex);
+                     updateInfo.mRequestedNumberOfCharacters);
+      DALI_LOG_ERROR("     mTextUpdateInfo.mStartGlyphIndex = %u\n", updateInfo.mStartGlyphIndex);
+      DALI_LOG_ERROR("     mTextUpdateInfo.mStartLineIndex = %u\n", updateInfo.mStartLineIndex);
       DALI_LOG_ERROR("     mTextUpdateInfo.mEstimatedNumberOfLines = %u\n",
-                     impl.mTextUpdateInfo.mEstimatedNumberOfLines);
-      DALI_LOG_ERROR("     mTextUpdateInfo.mClearAll = %d\n", impl.mTextUpdateInfo.mClearAll);
-      DALI_LOG_ERROR("     mTextUpdateInfo.mFullRelayoutNeeded = %d\n", impl.mTextUpdateInfo.mFullRelayoutNeeded);
+                     updateInfo.mEstimatedNumberOfLines);
+      DALI_LOG_ERROR("     mTextUpdateInfo.mClearAll = %d\n", updateInfo.mClearAll);
+      DALI_LOG_ERROR("     mTextUpdateInfo.mFullRelayoutNeeded = %d\n", updateInfo.mFullRelayoutNeeded);
       DALI_LOG_ERROR("     mTextUpdateInfo.mIsLastCharacterNewParagraph = %d\n",
-                     impl.mTextUpdateInfo.mIsLastCharacterNewParagraph);
+                     updateInfo.mIsLastCharacterNewParagraph);
 
       return false;
     }
   }
 
-  startIndex = impl.mTextUpdateInfo.mParagraphCharacterIndex;
+  startIndex = updateInfo.mParagraphCharacterIndex;
 
-  if(impl.mTextUpdateInfo.mClearAll || (0u != paragraphCharacters))
+  if(!isProjectedTarget && (updateInfo.mClearAll || (0u != paragraphCharacters)))
   {
     impl.ClearModelData(startIndex, startIndex + ((paragraphCharacters > 0u) ? paragraphCharacters - 1u : 0u),
                         operations);
   }
 
-  impl.mTextUpdateInfo.mClearAll = false;
+  updateInfo.mClearAll = false;
 
   // Whether the model is updated.
   bool updated = false;
 
-  Vector<LineBreakInfo>& lineBreakInfo               = impl.mModel->mLogicalModel->mLineBreakInfo;
-  const Length           requestedNumberOfCharacters = impl.mTextUpdateInfo.mRequestedNumberOfCharacters;
+  Vector<LineBreakInfo>& lineBreakInfo               = targetModel.mLogicalModel->mLineBreakInfo;
+  const Length           requestedNumberOfCharacters = updateInfo.mRequestedNumberOfCharacters;
 
   if(Controller::NO_OPERATION != (Controller::GET_LINE_BREAKS & operations))
   {
@@ -189,12 +228,12 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
     if(multilanguageSupport.IsICULineBreakNeeded())
     {
       std::string currentText;
-      Utf32ToUtf8(impl.mModel->mLogicalModel->mText.Begin(), numberOfCharacters, currentText);
+      Utf32ToUtf8(targetModel.mLogicalModel->mText.Begin(), numberOfCharacters, currentText);
       multilanguageSupport.UpdateICULineBreak(currentText, numberOfCharacters, lineBreakInfo.Begin());
     }
 
-    if(impl.mModel->mLineWrapMode == LineWrapMode::HYPHENATION ||
-       impl.mModel->mLineWrapMode == LineWrapMode::MIXED)
+    if(targetModel.mLineWrapMode == LineWrapMode::HYPHENATION ||
+       targetModel.mLineWrapMode == LineWrapMode::MIXED)
     {
       CharacterIndex end                 = startIndex + requestedNumberOfCharacters;
       LineBreakInfo* lineBreakInfoBuffer = lineBreakInfo.Begin();
@@ -230,15 +269,15 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
     }
 
     // Create the paragraph info.
-    impl.mModel->mLogicalModel->CreateParagraphInfo(startIndex, requestedNumberOfCharacters);
+    targetModel.mLogicalModel->CreateParagraphInfo(startIndex, requestedNumberOfCharacters);
     updated = true;
   }
 
   const bool getScripts    = Controller::NO_OPERATION != (Controller::GET_SCRIPTS & operations);
   const bool validateFonts = Controller::NO_OPERATION != (Controller::VALIDATE_FONTS & operations);
 
-  Vector<ScriptRun>& scripts    = impl.mModel->mLogicalModel->mScriptRuns;
-  Vector<FontRun>&   validFonts = impl.mModel->mLogicalModel->mFontRuns;
+  Vector<ScriptRun>& scripts    = targetModel.mLogicalModel->mScriptRuns;
+  Vector<FontRun>&   validFonts = targetModel.mLogicalModel->mFontRuns;
 
   if(getScripts || validateFonts)
   {
@@ -255,8 +294,6 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
     if(validateFonts)
     {
       // Validate the fonts set through the mark-up string.
-      Vector<FontDescriptionRun>& fontDescriptionRuns = impl.mModel->mLogicalModel->mFontDescriptionRuns;
-
       float effectiveTextScale = impl.GetEffectiveTextScale();
       // Get the default font's description.
       TextAbstraction::FontDescription defaultFontDescription;
@@ -292,26 +329,52 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
       }
 
       Property::Map* variationsMapPtr = nullptr;
-      if(!impl.mModel->mLogicalModel->mVariationsMap.Empty())
+      if(!targetModel.mLogicalModel->mVariationsMap.Empty())
       {
-        variationsMapPtr = &impl.mModel->mLogicalModel->mVariationsMap;
+        variationsMapPtr = &targetModel.mLogicalModel->mVariationsMap;
       }
 
       // Validates the fonts. If there is a character with no assigned font it sets a default one.
       // After this call, fonts are validated.
-      multilanguageSupport.ValidateFonts(impl.GetFontClient(), utf32Characters, scripts, fontDescriptionRuns,
-                                         defaultFontDescription, defaultPointSize, effectiveTextScale, startIndex,
-                                         requestedNumberOfCharacters, validFonts, variationsMapPtr);
+      if(source.HasReplacements())
+      {
+        ValidateFontsForProcessingSource(multilanguageSupport,
+                                         impl.GetFontClient(),
+                                         source,
+                                         scripts,
+                                         defaultFontDescription,
+                                         defaultPointSize,
+                                         effectiveTextScale,
+                                         startIndex,
+                                         requestedNumberOfCharacters,
+                                         validFonts,
+                                         variationsMapPtr);
+      }
+      else
+      {
+        // Preserve the original hidden-input source and call shape exactly on the ordinary fast path.
+        multilanguageSupport.ValidateFonts(impl.GetFontClient(),
+                                           utf32Characters,
+                                           scripts,
+                                           targetModel.mLogicalModel->mFontDescriptionRuns,
+                                           defaultFontDescription,
+                                           defaultPointSize,
+                                           effectiveTextScale,
+                                           startIndex,
+                                           requestedNumberOfCharacters,
+                                           validFonts,
+                                           variationsMapPtr);
+      }
     }
     updated = true;
   }
 
   Vector<Character> mirroredUtf32Characters;
   bool              textMirrored       = false;
-  const Length      numberOfParagraphs = impl.mModel->mLogicalModel->mParagraphInfo.Count();
+  const Length      numberOfParagraphs = targetModel.mLogicalModel->mParagraphInfo.Count();
   if(Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
   {
-    Vector<BidirectionalParagraphInfoRun>& bidirectionalInfo = impl.mModel->mLogicalModel->mBidirectionalParagraphInfo;
+    Vector<BidirectionalParagraphInfoRun>& bidirectionalInfo = targetModel.mLogicalModel->mBidirectionalParagraphInfo;
     bidirectionalInfo.Reserve(numberOfParagraphs);
 
     TextAbstraction::BidirectionalSupport bidirectionalSupport = TextAbstraction::BidirectionalSupport::Get();
@@ -319,13 +382,13 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
     // Calculates the bidirectional info for the whole paragraph if it contains right to left scripts.
     SetBidirectionalInfo(
       bidirectionalSupport, utf32Characters, scripts, lineBreakInfo, startIndex, requestedNumberOfCharacters,
-      bidirectionalInfo, impl.mModel->mLogicalModel->mBidirectionalLineInfo,
-      (impl.mModel->mLayoutDirectionMode != LayoutDirectionMode::CONTENTS), impl.mLayoutDirection);
+      bidirectionalInfo, targetModel.mLogicalModel->mBidirectionalLineInfo,
+      (targetModel.mLayoutDirectionMode != LayoutDirectionMode::CONTENTS), impl.mLayoutDirection);
 
     if(0u != bidirectionalInfo.Count())
     {
       // Only set the character directions if there is right to left characters.
-      Vector<CharacterDirection>& directions = impl.mModel->mLogicalModel->mCharacterDirections;
+      Vector<CharacterDirection>& directions = targetModel.mLogicalModel->mCharacterDirections;
       GetCharactersDirection(bidirectionalSupport, bidirectionalInfo, numberOfCharacters, startIndex,
                              requestedNumberOfCharacters, directions);
 
@@ -338,15 +401,13 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
     else
     {
       // There is no right to left characters. Clear the directions vector.
-      impl.mModel->mLogicalModel->mCharacterDirections.Clear();
+      targetModel.mLogicalModel->mCharacterDirections.Clear();
     }
     updated = true;
   }
 
-  Vector<GlyphInfo>&      glyphs                = impl.mModel->mVisualModel->mGlyphs;
-  Vector<CharacterIndex>& glyphsToCharactersMap = impl.mModel->mVisualModel->mGlyphsToCharacters;
-  Vector<Length>&         charactersPerGlyph    = impl.mModel->mVisualModel->mCharactersPerGlyph;
-  Vector<GlyphIndex>      newParagraphGlyphs;
+  Vector<GlyphInfo>& glyphs = targetModel.mVisualModel->mGlyphs;
+  Vector<GlyphIndex> newParagraphGlyphs;
   newParagraphGlyphs.Reserve(numberOfParagraphs);
 
   const Length currentNumberOfGlyphs = glyphs.Count();
@@ -371,15 +432,24 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
     TextAbstraction::Shaping shaping = TextAbstraction::Shaping::Get();
 
     // Shapes the text.
-    ShapeText(shaping, impl.GetFontClient(), textToShape, lineBreakInfo, scripts, validFonts, startIndex,
-              impl.mTextUpdateInfo.mStartGlyphIndex, requestedNumberOfCharacters, glyphs, glyphsToCharactersMap,
-              charactersPerGlyph, newParagraphGlyphs);
+    ShapeTextForProcessingSource(shaping,
+                                 impl.GetFontClient(),
+                                 source,
+                                 textToShape,
+                                 lineBreakInfo,
+                                 scripts,
+                                 validFonts,
+                                 startIndex,
+                                 updateInfo.mStartGlyphIndex,
+                                 requestedNumberOfCharacters,
+                                 *targetModel.mVisualModel,
+                                 newParagraphGlyphs);
 
     // Create the 'number of glyphs' per character and the glyph to character conversion tables.
-    impl.mModel->mVisualModel->CreateGlyphsPerCharacterTable(startIndex, impl.mTextUpdateInfo.mStartGlyphIndex,
-                                                             requestedNumberOfCharacters);
-    impl.mModel->mVisualModel->CreateCharacterToGlyphTable(startIndex, impl.mTextUpdateInfo.mStartGlyphIndex,
-                                                           requestedNumberOfCharacters);
+    targetModel.mVisualModel->CreateGlyphsPerCharacterTable(startIndex, updateInfo.mStartGlyphIndex,
+                                                            requestedNumberOfCharacters);
+    targetModel.mVisualModel->CreateCharacterToGlyphTable(startIndex, updateInfo.mStartGlyphIndex,
+                                                          requestedNumberOfCharacters);
 
     updated = true;
   }
@@ -395,20 +465,12 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
 
   if(Controller::NO_OPERATION != (Controller::GET_GLYPH_METRICS & operations))
   {
-    GlyphInfo* glyphsBuffer = glyphs.Begin();
-    impl.mMetrics->GetGlyphMetrics(glyphsBuffer + impl.mTextUpdateInfo.mStartGlyphIndex, numberOfGlyphs);
-
-    // Update the width and advance of all new paragraph characters.
-    for(Vector<GlyphIndex>::ConstIterator it = newParagraphGlyphs.Begin(), endIt = newParagraphGlyphs.End();
-        it != endIt; ++it)
-    {
-      const GlyphIndex index = *it;
-      GlyphInfo&       glyph = *(glyphsBuffer + index);
-
-      glyph.xBearing = 0.f;
-      glyph.width    = 0.f;
-      glyph.advance  = 0.f;
-    }
+    GetGlyphMetricsForProcessingSource(*impl.mMetrics,
+                                       source,
+                                       glyphs,
+                                       updateInfo.mStartGlyphIndex,
+                                       numberOfGlyphs,
+                                       newParagraphGlyphs);
     updated = true;
   }
 
@@ -419,7 +481,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
   }
 #endif
 
-  if((nullptr != impl.mEventData) && impl.mEventData->mPreEditFlag &&
+  if(!isProjectedTarget && (nullptr != impl.mEventData) && impl.mEventData->mPreEditFlag &&
      (0u != impl.mModel->mVisualModel->mCharactersToGlyph.Count()))
   {
     Dali::Integration::InputMethodContext::PreEditAttributeDataContainer attrs;
@@ -610,17 +672,17 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
   if(Controller::NO_OPERATION != (Controller::COLOR & operations))
   {
     // Set the color runs in glyphs.
-    SetColorSegmentationInfo(impl.mModel->mLogicalModel->mColorRuns, impl.mModel->mVisualModel->mCharactersToGlyph,
-                             impl.mModel->mVisualModel->mGlyphsPerCharacter, startIndex,
-                             impl.mTextUpdateInfo.mStartGlyphIndex, requestedNumberOfCharacters,
-                             impl.mModel->mVisualModel->mColors, impl.mModel->mVisualModel->mColorIndices);
+    SetColorSegmentationInfo(targetModel.mLogicalModel->mColorRuns, targetModel.mVisualModel->mCharactersToGlyph,
+                             targetModel.mVisualModel->mGlyphsPerCharacter, startIndex,
+                             updateInfo.mStartGlyphIndex, requestedNumberOfCharacters,
+                             targetModel.mVisualModel->mColors, targetModel.mVisualModel->mColorIndices);
 
     // Set the background color runs in glyphs.
     SetColorSegmentationInfo(
-      impl.mModel->mLogicalModel->mBackgroundColorRuns, impl.mModel->mVisualModel->mCharactersToGlyph,
-      impl.mModel->mVisualModel->mGlyphsPerCharacter, startIndex, impl.mTextUpdateInfo.mStartGlyphIndex,
-      requestedNumberOfCharacters, impl.mModel->mVisualModel->mBackgroundColors,
-      impl.mModel->mVisualModel->mBackgroundColorIndices);
+      targetModel.mLogicalModel->mBackgroundColorRuns, targetModel.mVisualModel->mCharactersToGlyph,
+      targetModel.mVisualModel->mGlyphsPerCharacter, startIndex, updateInfo.mStartGlyphIndex,
+      requestedNumberOfCharacters, targetModel.mVisualModel->mBackgroundColors,
+      targetModel.mVisualModel->mBackgroundColorIndices);
 
     updated = true;
   }
@@ -633,24 +695,31 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
 #endif
 
   if((Controller::NO_OPERATION != (Controller::SHAPE_TEXT & operations)) &&
-     !((nullptr != impl.mEventData) && impl.mEventData->mPreEditFlag &&
+     !((!isProjectedTarget && nullptr != impl.mEventData) && impl.mEventData->mPreEditFlag &&
        (0u != impl.mModel->mVisualModel->mCharactersToGlyph.Count())))
   {
     // Markup-era inline run containers are also used by StyledText range spans.
     // Existing visual runs are included so a later plain text/style update clears stale glyph runs.
     const bool shouldSyncInlineStyleRuns =
-      (0u != impl.mModel->mLogicalModel->mUnderlinedCharacterRuns.Count()) ||
-      (0u != impl.mModel->mLogicalModel->mStrikethroughCharacterRuns.Count()) ||
-      (0u != impl.mModel->mLogicalModel->mCharacterSpacingCharacterRuns.Count()) ||
-      (0u != impl.mModel->mVisualModel->mUnderlineRuns.Count()) ||
-      (0u != impl.mModel->mVisualModel->mStrikethroughRuns.Count()) ||
-      (0u != impl.mModel->mVisualModel->mCharacterSpacingRuns.Count());
+      (0u != targetModel.mLogicalModel->mUnderlinedCharacterRuns.Count()) ||
+      (0u != targetModel.mLogicalModel->mStrikethroughCharacterRuns.Count()) ||
+      (0u != targetModel.mLogicalModel->mCharacterSpacingCharacterRuns.Count()) ||
+      (0u != targetModel.mVisualModel->mUnderlineRuns.Count()) ||
+      (0u != targetModel.mVisualModel->mStrikethroughRuns.Count()) ||
+      (0u != targetModel.mVisualModel->mCharacterSpacingRuns.Count());
 
     if(shouldSyncInlineStyleRuns)
     {
-      impl.CopyUnderlinedFromLogicalToVisualModels(true);
-      impl.CopyStrikethroughFromLogicalToVisualModels();
-      impl.CopyCharacterSpacingFromLogicalToVisualModels();
+      if(isProjectedTarget)
+      {
+        CopyProcessingCharacterStylesToVisual(*targetModel.mLogicalModel, *targetModel.mVisualModel);
+      }
+      else
+      {
+        impl.CopyUnderlinedFromLogicalToVisualModels(true);
+        impl.CopyStrikethroughFromLogicalToVisualModels();
+        impl.CopyCharacterSpacingFromLogicalToVisualModels();
+      }
     }
 
     updated = true;
@@ -669,7 +738,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
     if(timeStamps[5] - timeStamps[0] > logThreshold)
     {
       std::string currentText;
-      Utf32ToUtf8(impl.mModel->mLogicalModel->mText.Begin(), numberOfCharacters, currentText);
+      Utf32ToUtf8(targetModel.mLogicalModel->mText.Begin(), numberOfCharacters, currentText);
       DALI_LOG_DEBUG_INFO("DALI_TEXT_MODEL_UPDATE shape:%u ms, glyph:%u ms, preedit:%u ms, color:%u ms, copy:%u ms\n",
                           timeShape, timeGlyph, timePreedit, timeColor, timeCopy);
       DALI_LOG_DEBUG_INFO("DALI_TEXT_MODEL_UPDATE chars:%d, text:%s\n", numberOfCharacters, currentText.c_str());
@@ -678,11 +747,11 @@ bool ControllerImplModelUpdater::Update(Controller::Impl& impl, OperationsMask o
 #endif
 
   // The estimated number of lines. Used to avoid reallocations when layouting.
-  impl.mTextUpdateInfo.mEstimatedNumberOfLines =
-    std::max(impl.mModel->mVisualModel->mLines.Count(), impl.mModel->mLogicalModel->mParagraphInfo.Count());
+  updateInfo.mEstimatedNumberOfLines =
+    std::max(targetModel.mVisualModel->mLines.Count(), targetModel.mLogicalModel->mParagraphInfo.Count());
 
   // Set the previous number of characters for the next time the text is updated.
-  impl.mTextUpdateInfo.mPreviousNumberOfCharacters = numberOfCharacters;
+  updateInfo.mPreviousNumberOfCharacters = numberOfCharacters;
 
   return updated;
 }
