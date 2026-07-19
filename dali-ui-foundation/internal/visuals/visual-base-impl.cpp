@@ -1006,9 +1006,24 @@ Ui::Visual::ResourceStatus Visual::Base::GetResourceStatus() const
   return mImpl->mResourceStatus;
 }
 
+void Visual::Base::SetResourceReadyRelayoutRequired(bool required)
+{
+  mImpl->mResourceReadyRelayoutRequired = required;
+}
+
+bool Visual::Base::IsResourceReadyRelayoutRequired() const
+{
+  return mImpl->mResourceReadyRelayoutRequired;
+}
+
 bool Visual::Base::IsFittingModeRequired() const
 {
   return mImpl->mFittingModeRequired;
+}
+
+void Visual::Base::SetFittingModeRequired(bool required)
+{
+  mImpl->mFittingModeRequired = required;
 }
 
 bool Visual::Base::IsPixelAreaSetForFittingMode() const

@@ -91,6 +91,7 @@ Internal::Visual::Base::Impl::Impl(Ui::Integration::InternalVisualType type)
   mAlwaysUsingCornerRadius(false),
   mAlwaysUsingCornerSquareness(false),
   mFittingModeRequired(false),
+  mResourceReadyRelayoutRequired(true),
   mPixelAreaSetByFittingMode(false),
   mTransformMapSetForFittingMode(false),
   mTransformMapUsingDefault(true),

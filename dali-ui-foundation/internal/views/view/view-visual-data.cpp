@@ -405,6 +405,11 @@ void ViewDataImpl::VisualData::NotifyVisualEvent(Visual::Base& object, Property:
 
 void ViewDataImpl::VisualData::RelayoutRequest(Visual::Base& object)
 {
+  if(!object.IsResourceReadyRelayoutRequired())
+  {
+    return;
+  }
+
   if(mOuter.mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
     mOuter.mViewImpl.RelayoutRequest();

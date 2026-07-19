@@ -249,6 +249,23 @@ public:
   Ui::Visual::ResourceStatus GetResourceStatus() const;
 
   /**
+   * @brief Sets whether resource completion should request owner relayout.
+   *
+   * Visuals with externally reserved geometry can disable this and update only
+   * their renderer transform when the resource becomes ready.
+   *
+   * @param[in] required Whether resource completion requires owner relayout.
+   */
+  void SetResourceReadyRelayoutRequired(bool required);
+
+  /**
+   * @brief Queries whether resource completion should request owner relayout.
+   *
+   * @return true if resource completion requires owner relayout.
+   */
+  bool IsResourceReadyRelayoutRequired() const;
+
+  /**
    * @brief Change the fitting mode to this visual.
    *
    * Default visuals do nothing for this API.
@@ -295,6 +312,14 @@ public:
    * @return Returns true if the fittingMode is required, false otherwise.
    */
   bool IsFittingModeRequired() const;
+
+  /**
+   * @brief Sets whether the owner View should apply its fitting bounds.
+   *
+   * This is an internal placement seam for visuals whose transform is managed
+   * by an external layout model rather than by the owner View bounds.
+   */
+  void SetFittingModeRequired(bool required);
 
   /**
    * @brief Query whether the pixel area is set by fitting mode.

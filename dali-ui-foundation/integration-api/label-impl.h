@@ -903,6 +903,15 @@ private: // Implementation
    */
   void RequestRendererUpdate();
 
+  bool HasInlineReplacementSource() const;
+  void ClearInlineReplacementRuntime();
+  void UpdateInlineReplacementRuntime(const Text::ReplacementSourceSnapshot&    source,
+                                      const Vector<Text::ReplacementPlacement>& placements,
+                                      uint64_t                                  sourceRevision,
+                                      const Vector2&                            ownerSize,
+                                      const Insets&                             padding);
+  void OnInlineReplacementResourcesReady(Ui::View view);
+
   /**
    * @brief Stops the current sync marquee so it can be rebuilt on the next relayout.
    */

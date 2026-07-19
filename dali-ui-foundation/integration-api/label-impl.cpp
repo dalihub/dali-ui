@@ -28,6 +28,7 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/system/system-settings.h>
 #include <dali/public-api/actors/actor.h>
+#include <dali/public-api/common/unique-ptr.h>
 #include <algorithm>
 #include <cmath>
 
@@ -38,6 +39,7 @@
 #include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
 #include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
+#include <dali-ui-foundation/internal/text/replacement/inline-replacement-manager.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-source-data.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
@@ -59,6 +61,7 @@
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/render-effects/mask-effect.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation.h>
+#include <dali-ui-foundation/public-api/traits/attachment-id.h>
 #include <dali-ui-foundation/public-api/types/align-enumerations.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -143,6 +146,54 @@ DALI_TYPE_REGISTRATION_END()
 constexpr const char* LOCALIZATION_TEXT_BINDING_ID                     = "Ui.Label.Text";
 constexpr const char* TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME         = "uTextGradientStartOffset";
 constexpr const char* TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME = "uTextGradientOverlayStartOffset";
+
+struct InlineReplacementRuntimeData
+{
+  explicit InlineReplacementRuntimeData(Ui::View owner)
+  : host(owner, Dali::Ui::Integration::DepthIndex::CONTENT + 1)
+  {
+  }
+
+  Internal::Text::InlineReplacementViewHost host;
+  Internal::Text::InlineReplacementManager  manager;
+  uint64_t                                  requestGeneration{0u};
+  uint64_t                                  lastRenderGeneration{0u};
+  bool                                      resourceReadyConnected{false};
+};
+
+const AttachmentId INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID = AttachmentId::Alloc();
+
+InlineReplacementRuntimeData* GetInlineReplacementRuntimeData(Ui::View owner)
+{
+  return owner ? owner.GetAttachment<InlineReplacementRuntimeData>(INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID)
+               : nullptr;
+}
+
+InlineReplacementRuntimeData* GetInlineReplacementRuntimeData(ViewImpl& owner)
+{
+  using StoredType = Dali::UniquePtr<InlineReplacementRuntimeData>;
+
+  UniqueAny* attachment = Internal::ViewDataImpl::Get(owner).GetAttachment(
+    INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID);
+  StoredType* data = attachment ? attachment->Get<StoredType>() : nullptr;
+  return data ? data->Get() : nullptr;
+}
+
+InlineReplacementRuntimeData& GetOrCreateInlineReplacementRuntimeData(Ui::View owner)
+{
+  DALI_ASSERT_ALWAYS(owner && "Inline replacement runtime requires a valid owner");
+
+  InlineReplacementRuntimeData* data = GetInlineReplacementRuntimeData(owner);
+  if(!data)
+  {
+    owner.SetAttachment(INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID,
+                        Dali::MakeUnique<InlineReplacementRuntimeData>(owner));
+    data = GetInlineReplacementRuntimeData(owner);
+  }
+
+  DALI_ASSERT_ALWAYS(data && "Inline replacement runtime creation failed");
+  return *data;
+}
 
 float GetDpi()
 {
@@ -273,6 +324,17 @@ LabelImpl::LabelImpl()
 
 LabelImpl::~LabelImpl()
 {
+  auto& viewData = Internal::ViewDataImpl::Get(*this);
+  if(InlineReplacementRuntimeData* data = GetInlineReplacementRuntimeData(*this))
+  {
+    if(data->resourceReadyConnected)
+    {
+      viewData.ResourceReadySignal().Disconnect(this, &LabelImpl::OnInlineReplacementResourcesReady);
+      data->resourceReadyConnected = false;
+    }
+    data->manager.PrepareOwnerDestruction();
+    viewData.RemoveAttachment(INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID);
+  }
   // This prevents access to the async text interface until the visual is actually destroyed.
   Internal::TextVisual::SetAsyncTextInterface(mVisual, nullptr);
   DiscardLabelVisual(mVisual);
@@ -283,12 +345,20 @@ LabelImpl::~LabelImpl()
 // =============================================================================
 void LabelImpl::SetText(const Dali::String& text)
 {
+  const bool hadInlineReplacements = HasInlineReplacementSource();
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
   ClearStyledTextSourceState();
   ClearAnchorInteractionState();
   mController->SetText(ToStdString(text));
   UpdateAnchorTouchInterception();
   InvalidateTextMeasure();
+  if(hadInlineReplacements)
+  {
+    ClearInlineReplacementRuntime();
+    // Removing replacements does not implicitly restart a previous marquee.
+    SuppressAutoMarqueeEvaluation();
+    mLastMarqueeEnabled = false;
+  }
 }
 
 Dali::String LabelImpl::GetText() const
@@ -300,6 +370,7 @@ Dali::String LabelImpl::GetText() const
 
 void LabelImpl::SetStyledText(const Text::StyledText& styledText)
 {
+  const bool hadInlineReplacements = HasInlineReplacementSource();
   DALI_LOG_RELEASE_INFO("[%p] SetStyledText\n", mController.Get());
 
   if(styledText)
@@ -316,6 +387,23 @@ void LabelImpl::SetStyledText(const Text::StyledText& styledText)
   mController->SetStyledText(styledText);
   UpdateAnchorTouchInterception();
   InvalidateTextMeasure();
+  if(hadInlineReplacements)
+  {
+    ClearInlineReplacementRuntime();
+  }
+  if(HasInlineReplacementSource())
+  {
+    StopMarqueeImmediately();
+    mController->SetMarqueeEnabled(false);
+    mLastMarqueeEnabled = false;
+    SuppressAutoMarqueeEvaluation();
+  }
+  else if(hadInlineReplacements)
+  {
+    // A source edit may remove the blocker, but it never restarts scrolling.
+    SuppressAutoMarqueeEvaluation();
+    mLastMarqueeEnabled = false;
+  }
 }
 
 Text::StyledText LabelImpl::GetStyledText() const
@@ -337,6 +425,81 @@ void LabelImpl::ClearStyledTextSourceState()
 
   Internal::Text::ClearStyledTextSource(mStyledTextSourceData);
   mHasStyledTextSource = false;
+}
+
+bool LabelImpl::HasInlineReplacementSource() const
+{
+  return mController && mController->HasValidReplacementSource();
+}
+
+void LabelImpl::ClearInlineReplacementRuntime()
+{
+  Ui::View owner = Ui::View::DownCast(Self());
+  if(InlineReplacementRuntimeData* data = GetInlineReplacementRuntimeData(owner))
+  {
+    if(data->resourceReadyConnected)
+    {
+      owner.ResourceReadySignal().Disconnect(this, &LabelImpl::OnInlineReplacementResourcesReady);
+      data->resourceReadyConnected = false;
+    }
+    owner.RemoveAttachment(INLINE_REPLACEMENT_RUNTIME_ATTACHMENT_ID);
+  }
+}
+
+void LabelImpl::UpdateInlineReplacementRuntime(const Text::ReplacementSourceSnapshot&    source,
+                                               const Vector<Text::ReplacementPlacement>& placements,
+                                               uint64_t                                  sourceRevision,
+                                               const Vector2&                            ownerSize,
+                                               const Insets&                             padding)
+{
+  Ui::View                      owner = Ui::View::DownCast(Self());
+  InlineReplacementRuntimeData* data  = GetInlineReplacementRuntimeData(owner);
+  if(!data)
+  {
+    bool hasVisibleImage = false;
+    for(const Text::ReplacementPlacement& placement : placements)
+    {
+      if(placement.visible && !placement.elided && placement.sourceRunIndex < source.runs.Count())
+      {
+        const Text::ReplacementRunSnapshot& run = source.runs[placement.sourceRunIndex];
+        hasVisibleImage                         = run.type == Text::ReplacementType::IMAGE && !run.image.source.empty();
+        if(hasVisibleImage)
+        {
+          break;
+        }
+      }
+    }
+
+    if(!hasVisibleImage)
+    {
+      return;
+    }
+    data = &GetOrCreateInlineReplacementRuntimeData(owner);
+  }
+  if(!data->resourceReadyConnected)
+  {
+    owner.ResourceReadySignal().Connect(this, &LabelImpl::OnInlineReplacementResourcesReady);
+    data->resourceReadyConnected = true;
+  }
+  data->manager.Update(data->host,
+                       source,
+                       placements,
+                       Vector2(static_cast<float>(padding.start), static_cast<float>(padding.top)),
+                       Vector2(std::max(0.0f,
+                                        ownerSize.x - static_cast<float>(padding.start + padding.end)),
+                               std::max(0.0f,
+                                        ownerSize.y - static_cast<float>(padding.top + padding.bottom))),
+                       ownerSize,
+                       GetEffectiveScale(),
+                       sourceRevision);
+}
+
+void LabelImpl::OnInlineReplacementResourcesReady(Ui::View)
+{
+  if(InlineReplacementRuntimeData* data = GetInlineReplacementRuntimeData(Ui::View::DownCast(Self())))
+  {
+    data->manager.Refresh();
+  }
 }
 
 void LabelImpl::SetFontFamily(const Dali::String& fontFamily)
@@ -1837,6 +2000,7 @@ void LabelImpl::OnInitialize()
 
 void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 {
+  mSize                           = size;
   const bool contentLayoutDirty   = mIsContentLayoutDirty;
   const bool manualRenderFinished = mIsManualRenderFinished;
   mIsContentLayoutDirty           = false;
@@ -1935,7 +2099,23 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   PrepareMarqueeLayout(contentSize, marqueeOrientation, originSize);
 
   const Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
-  const bool                             textModelUpdated =
+  if(mController->HasValidReplacementSource())
+  {
+    const Text::ReplacementRenderState& replacementResult = mController->GetReplacementRenderState();
+    if(replacementResult.processingModel && replacementResult.projection.HasReplacements())
+    {
+      UpdateInlineReplacementRuntime(mController->GetReplacementSourceSnapshot(),
+                                     replacementResult.placements,
+                                     replacementResult.sourceRevision,
+                                     size,
+                                     padding);
+    }
+    else
+    {
+      ClearInlineReplacementRuntime();
+    }
+  }
+  const bool textModelUpdated =
     Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType);
   const bool syncAnchorUpdateNeeded = !mHasA11yAnchors || contentLayoutDirty || textModelUpdated || mRendererUpdateNeeded;
 
@@ -1955,7 +2135,8 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       layoutSize.y += shadowOffset.y;
     }
 
-    float outlineWidth = renderModel->IsOutlineEnabled() ? renderModel->GetOutlineWidth() : 0.0f;
+    float outlineWidth =
+      renderModel->IsOutlineEnabled() ? renderModel->GetOutlineWidth() : 0.0f;
     layoutSize.y += outlineWidth * 2.0f;
     layoutSize.y = std::min(layoutSize.y, contentSize.y);
 
@@ -2354,6 +2535,12 @@ void LabelImpl::EmitAnchorClicked(const std::string& href)
 // =============================================================================
 void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
 {
+  if(HasInlineReplacementSource())
+  {
+    StopMarqueeImmediately();
+    mController->SetMarqueeEnabled(false);
+    return;
+  }
   // Prevent restarting marquee after StopMarquee().
   if(!mController->IsMarqueeEnabled() && mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::MANUAL)
   {
@@ -2551,6 +2738,29 @@ void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo)
     }
   }
   UpdateAnchorTouchInterception();
+
+  // Image visuals are event-thread objects. Worker output is applied only when
+  // both immutable source and render request generations are still current.
+  if(mController->HasValidReplacementSource())
+  {
+    const Text::ReplacementSourceSnapshot& replacementSource = mController->GetReplacementSourceSnapshot();
+    InlineReplacementRuntimeData*          runtime           = GetInlineReplacementRuntimeData(selfView);
+    if(runtime && renderInfo.replacementSourceRevision == replacementSource.sourceRevision &&
+       renderInfo.replacementLayoutGeneration == runtime->lastRenderGeneration)
+    {
+      Insets replacementPadding = GetEffectiveTextPadding();
+      Actor  self               = Self();
+      if(Dali::LayoutDirection::RIGHT_TO_LEFT == mController->GetLayoutDirection(self))
+      {
+        std::swap(replacementPadding.start, replacementPadding.end);
+      }
+      UpdateInlineReplacementRuntime(replacementSource,
+                                     renderInfo.replacementPlacements,
+                                     renderInfo.replacementSourceRevision,
+                                     mSize,
+                                     replacementPadding);
+    }
+  }
 
   float width  = renderInfo.renderedSize.width;
   float height = renderInfo.renderedSize.height;
@@ -3222,6 +3432,14 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
 void LabelImpl::UpdateMarqueeState()
 {
+  if(HasInlineReplacementSource())
+  {
+    StopMarqueeImmediately();
+    mController->SetMarqueeEnabled(false);
+    mLastMarqueeEnabled = false;
+    SuppressAutoMarqueeEvaluation();
+    return;
+  }
   EnableAutoMarqueeEvaluation();
   if(mController->IsMarqueeEnabled())
   {
@@ -3304,6 +3522,15 @@ Text::TextScrollerPtr LabelImpl::GetTextScroller()
 
 void LabelImpl::SetMarqueeEnabled(bool enabled)
 {
+  if(enabled && HasInlineReplacementSource())
+  {
+    StopMarqueeImmediately();
+    mController->SetMarqueeEnabled(false);
+    mLastMarqueeEnabled = false;
+    SuppressAutoMarqueeEvaluation();
+    RequestAsyncRender();
+    return;
+  }
   if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
   {
     if(enabled)
@@ -3391,6 +3618,15 @@ void LabelImpl::OnSceneConnection(int depth)
 
 void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOrientation orientation)
 {
+  if(HasInlineReplacementSource())
+  {
+    if(mController->IsMarqueeEnabled())
+    {
+      StopMarqueeImmediately();
+      mController->SetMarqueeEnabled(false);
+    }
+    return;
+  }
   if(mMarqueeTriggerPolicy != Text::MarqueeTriggerPolicy::ON_OVERFLOW || mSuppressAutoMarquee || !IsVisible())
   {
     return;
@@ -3616,6 +3852,17 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.padding         = padding;
   parameters.layoutDirection = layoutDirection;
   parameters.text            = text;
+  if(HasInlineReplacementSource())
+  {
+    parameters.replacementSourceSnapshot   = mController->GetReplacementSourceSnapshot();
+    Ui::View                      owner    = Ui::View::DownCast(Self());
+    InlineReplacementRuntimeData& runtime  = GetOrCreateInlineReplacementRuntimeData(owner);
+    parameters.replacementLayoutGeneration = ++runtime.requestGeneration;
+    if(requestType <= Text::Async::RENDER_CONSTRAINT)
+    {
+      runtime.lastRenderGeneration = parameters.replacementLayoutGeneration;
+    }
+  }
 
   parameters.maxTextureSize             = Dali::GetMaxTextureSize();
   parameters.fontSize                   = mController->GetDefaultFontSize(Text::Controller::POINT_SIZE);
@@ -3665,8 +3912,12 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.isTextFitCandidatesEnabled = mController->IsTextFitCandidatesEnabled();
   parameters.textFitCandidates          = mController->GetTextFitCandidates();
   parameters.isMarqueeEnabled           = mController->IsMarqueeEnabled();
-  parameters.marqueeTriggerPolicy       = mMarqueeTriggerPolicy;
-  parameters.suppressAutoMarquee        = mSuppressAutoMarquee;
+  if(HasInlineReplacementSource())
+  {
+    parameters.isMarqueeEnabled = false;
+  }
+  parameters.marqueeTriggerPolicy = mMarqueeTriggerPolicy;
+  parameters.suppressAutoMarquee  = mSuppressAutoMarquee;
   if(parameters.isMarqueeEnabled || parameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
   {
     parameters.marqueeStopMode    = GetTextScroller()->GetStopMode();
