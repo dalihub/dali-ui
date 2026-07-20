@@ -1917,8 +1917,8 @@ void LabelImpl::OnInitialize()
   mController->SetAnchorControlInterface(this);
 
   // Use height-for-width negotiation by default
-  self.SetResizePolicy(ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH);
-  self.SetResizePolicy(ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT);
+  DevelActor::SetResizePolicy(self, ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH);
+  DevelActor::SetResizePolicy(self, ResizePolicy::DIMENSION_DEPENDENCY, Dimension::HEIGHT);
 
   // Enable the text ellipsis.
   mController->SetTextElideEnabled(true);
