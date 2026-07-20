@@ -38,7 +38,7 @@
 
 ```
 App:  player_create() → player_set_uri()  (native handle stays IDLE)
-App:  source = CreateVideoSourceFromMMPlayer(player)
+App:  source = CreateVideoSourceFromMMPlayerUnderlay(player)
 App:  videoView = VideoView::New(source);  window.Add(videoView)
                         ↓ synchronous — display is attached here, while the player is IDLE
 App:  player_prepare()  →  videoView.Play()
@@ -67,7 +67,7 @@ player_create(&player);
 player_set_uri(player, "video.mp4");
 
 // 2. Wrap the handle as a VideoSource
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayer(player);
+VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(player);
 
 // 3. Create the VideoView and add it to the window
 VideoView videoView = VideoView::New(source);
@@ -116,7 +116,7 @@ esplusplayer_set_ready_to_prepare_cb(player, OnReadyToPrepare, userData);
 esplusplayer_set_prepare_async_done_cb(player, OnPrepareAsyncDone, userData);
 
 // NativeImage (GPU texture):
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayer(player);
+VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerNativeImage(player);
 // Underlay (hole-punch), instead:
 // VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerUnderlay(player);
 
@@ -141,16 +141,16 @@ There is no separate mode-selection API — the rendering mode is determined ent
 
 | Mode | Helpers | Pros | Cons |
 |---|---|---|---|
-| **Underlay** | `CreateVideoSourceFromMMPlayer()`, `CreateVideoSourceFromESPlayerUnderlay()` | Platform-composited (hole-punch), lower overhead; geometry/ROI kept in sync with the view automatically | Video always renders beneath the UI layer; DALi render effects/blending cannot be applied directly to the frame |
-| **NativeImage** | `CreateVideoSourceFromMMPlayerNativeImage()`, `CreateVideoSourceFromESPlayer()` | Decoded frames become a regular GPU texture — supports corner radius, blending, and other View render effects like any other content | Extra decode-to-texture copy overhead |
+| **Underlay** | `CreateVideoSourceFromMMPlayerUnderlay()`, `CreateVideoSourceFromESPlayerUnderlay()` | Platform-composited (hole-punch), lower overhead; geometry/ROI kept in sync with the view automatically | Video always renders beneath the UI layer; DALi render effects/blending cannot be applied directly to the frame |
+| **NativeImage** | `CreateVideoSourceFromMMPlayerNativeImage()`, `CreateVideoSourceFromESPlayerNativeImage()` | Decoded frames become a regular GPU texture — supports corner radius, blending, and other View render effects like any other content | Extra decode-to-texture copy overhead |
 
 ### Helper → Player → Capability Mapping
 
 | Helper | Player | Capability | Provider ID |
 |---|---|---|---|
-| `CreateVideoSourceFromMMPlayer()` | MMPlayer | `SupportsUnderlay`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
+| `CreateVideoSourceFromMMPlayerUnderlay()` | MMPlayer | `SupportsUnderlay`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
 | `CreateVideoSourceFromMMPlayerNativeImage()` | MMPlayer | `SupportsNativeImage`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
-| `CreateVideoSourceFromESPlayer()` | ESPlayer | `SupportsNativeImage` | `"tizen.esplayer"` |
+| `CreateVideoSourceFromESPlayerNativeImage()` | ESPlayer | `SupportsNativeImage` | `"tizen.esplayer"` |
 | `CreateVideoSourceFromESPlayerUnderlay()` | ESPlayer | `SupportsUnderlay` | `"tizen.esplayer"` |
 
 ---
@@ -164,9 +164,9 @@ There is no separate mode-selection API — the rendering mode is determined ent
 Declared in `<dali-ui-foundation/public-api/video/tizen-video-source.h>`:
 
 ```cpp
-VideoSource CreateVideoSourceFromMMPlayer(player_h player, const VideoSourceOptions& options = {});
+VideoSource CreateVideoSourceFromMMPlayerUnderlay(player_h player, const VideoSourceOptions& options = {});
 VideoSource CreateVideoSourceFromMMPlayerNativeImage(player_h player, const VideoSourceOptions& options = {});
-VideoSource CreateVideoSourceFromESPlayer(esplusplayer_handle player, const VideoSourceOptions& options = {});
+VideoSource CreateVideoSourceFromESPlayerNativeImage(esplusplayer_handle player, const VideoSourceOptions& options = {});
 VideoSource CreateVideoSourceFromESPlayerUnderlay(esplusplayer_handle player, const VideoSourceOptions& options = {});
 ```
 
@@ -198,7 +198,7 @@ struct VideoSourceOptions
 ```cpp
 VideoSourceOptions options;
 options.controlPolicy = VideoControlPolicy::DisplayOnly;
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayer(player, options);
+VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(player, options);
 ```
 
 ---
