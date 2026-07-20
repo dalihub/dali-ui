@@ -1,0 +1,32 @@
+virtual activate
+virtual escape
+virtual value change: increment
+virtual value change: decrement
+virtual scroll to child
+reading status: 0
+reading status: 1
+reading status: 2
+reading status: 3
+reading status: 4
+highlight changed: true
+highlight changed: false
+
+PASS basic strings and role
+PASS flags and automation id
+PASS state Add/Remove/Has
+PASS reading info Add/Remove/Has
+PASS View relation
+PASS scalar language spans
+PASS typed and raw attributes
+PASS per-View translation binding
+PASS requested text virtuals
+PASS handled empty requested values
+PASS requested virtual fallback
+PASS action virtual dispatch
+PASS scroll-to-child virtual dispatch
+PASS pan and zoom virtuals
+PASS unified reading status signal
+PASS highlight signal
+
+Overall: PASS
+focus-triggered accessibility highlight: accessibility bridge inactive

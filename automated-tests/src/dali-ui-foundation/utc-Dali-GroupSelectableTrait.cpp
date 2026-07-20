@@ -18,12 +18,12 @@
 #include <stdlib.h>
 #include <iostream>
 
-#include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/traits/group-selectable-trait.h>
 #include <dali-ui-foundation/public-api/views/selection-group.h>
 #include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali.h>
 #include <test-gesture-generator.h>
 
 using namespace Dali;
@@ -35,8 +35,7 @@ namespace UiAccessibility = Dali::Ui::Accessibility;
 
 bool IsRadioButton(View view)
 {
-  return view.GetProperty<int>(View::Property::ACCESSIBILITY_ROLE) ==
-         static_cast<int>(UiAccessibility::Role::RADIO_BUTTON);
+  return view.GetAccessibilityRole() == UiAccessibility::Role::RADIO_BUTTON;
 }
 
 bool IsChecked(View view)
@@ -576,12 +575,14 @@ int UtcDaliGroupSelectableTraitUserSignalsSurviveGroupingP(void)
   bool selectionCalled = false;
 
   InteractiveTrait interactive = view.AsInteractive();
-  interactive.ClickedSignal().Connect(&application, [&clickedCalled](View, InputEvent) {
+  interactive.ClickedSignal().Connect(&application, [&clickedCalled](View, InputEvent)
+  {
     clickedCalled = true;
   });
 
   SelectableTrait selectable = view.AsSelectable();
-  selectable.SelectionChangedSignal().Connect(&application, [&selectionCalled](View, bool, InputEvent) {
+  selectable.SelectionChangedSignal().Connect(&application, [&selectionCalled](View, bool, InputEvent)
+  {
     selectionCalled = true;
   });
 
@@ -611,7 +612,8 @@ int UtcDaliGroupSelectableTraitGroupArbitratesBeforeUserCallbackP(void)
   bool userCallbackRan          = false;
   bool winnerWasBInCallback     = false;
   bool aStillSelectedInCallback = true;
-  b.AsSelectable().SelectionChangedSignal().Connect(&application, [&](View, bool selected, InputEvent) {
+  b.AsSelectable().SelectionChangedSignal().Connect(&application, [&](View, bool selected, InputEvent)
+  {
     if(selected)
     {
       SelectionGroup g         = SelectionGroup::Find("UtcArbOrder");
@@ -667,8 +669,7 @@ int UtcDaliGroupSelectableTraitRemoveWinnerPreservesSelectedClearsCheckedP(void)
   // Logical SELECTED state is preserved.
   DALI_TEST_CHECK(selectable.IsSelected());
   // Role restored to pre-join NONE (default).
-  DALI_TEST_CHECK(view.GetProperty<int>(View::Property::ACCESSIBILITY_ROLE) ==
-                  static_cast<int>(UiAccessibility::Role::NONE));
+  DALI_TEST_CHECK(view.GetAccessibilityRole() == UiAccessibility::Role::NONE);
   // CHECKED follows the restored non-checkable role -> cleared, even though selected.
   DALI_TEST_CHECK(!IsChecked(view));
   // ENABLED preserved by the RMW.

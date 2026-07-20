@@ -509,11 +509,11 @@ void GroupSelectableTraitImpl::ApplyRadioAccessibility()
 
   if(!mRoleCached)
   {
-    mPreviousRole = owner.GetProperty<int32_t>(View::Property::ACCESSIBILITY_ROLE);
+    mPreviousRole = static_cast<int32_t>(owner.GetAccessibilityRole());
     mRoleCached   = true;
   }
 
-  owner.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(Accessibility::Role::RADIO_BUTTON));
+  owner.SetAccessibilityRole(Accessibility::Role::RADIO_BUTTON);
 
   // Seed CHECKED from the member's current selected state, reusing the sibling-handle
   // helper (mirrors selectable-trait-impl.cpp:34-38) rather than an inline re-DownCast.
@@ -532,11 +532,11 @@ void GroupSelectableTraitImpl::RestoreAccessibility()
   // Capture the role being restored BEFORE mRoleCached/mPreviousRole are reset below.
   // If the role was never cached (ApplyRadioAccessibility never ran), the member never
   // became RADIO_BUTTON, so fall back to the View's current role.
-  const int32_t restoredRole = mRoleCached ? mPreviousRole : owner.GetProperty<int32_t>(View::Property::ACCESSIBILITY_ROLE);
+  const int32_t restoredRole = mRoleCached ? mPreviousRole : static_cast<int32_t>(owner.GetAccessibilityRole());
 
   if(mRoleCached)
   {
-    owner.SetProperty(View::Property::ACCESSIBILITY_ROLE, mPreviousRole);
+    owner.SetAccessibilityRole(static_cast<Accessibility::Role>(mPreviousRole));
     mRoleCached = false;
   }
 

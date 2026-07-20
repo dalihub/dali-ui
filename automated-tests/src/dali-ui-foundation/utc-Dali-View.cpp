@@ -28,8 +28,8 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
-#include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>
+#include <dali/integration-api/events/key-event-integ.h>
 #include <stdlib.h>
 #include <algorithm>
 #include <iostream>
@@ -159,8 +159,8 @@ IntrusivePtr<TraitObject> ToTraitObject(BaseHandle handle)
 
 DummyTrait GetDummyTrait(ViewImpl& viewImpl, TraitId id)
 {
-  IntrusivePtr<TraitObject> object   = IntegrationView::GetTrait(viewImpl, id);
-  auto*                   baseObject = dynamic_cast<BaseObject*>(object.Get());
+  IntrusivePtr<TraitObject> object     = IntegrationView::GetTrait(viewImpl, id);
+  auto*                     baseObject = dynamic_cast<BaseObject*>(object.Get());
   return baseObject ? DummyTrait::DownCast(BaseHandle(baseObject)) : DummyTrait();
 }
 
@@ -241,8 +241,8 @@ LayoutRect ReentrantRemoveArrange(View, const LayoutRect& bounds)
 
 Shadow GetShadowProperty(View view)
 {
-  Property::Value shadowValue = view.GetProperty(View::Property::SHADOW);
-  const Property::Map* shadowMap = shadowValue.GetMap();
+  Property::Value      shadowValue = view.GetProperty(View::Property::SHADOW);
+  const Property::Map* shadowMap   = shadowValue.GetMap();
   DALI_TEST_CHECK(shadowMap);
   return shadowMap ? Extension::Shadow::CreateShadow(*shadowMap) : Shadow::None();
 }
@@ -262,9 +262,9 @@ uint32_t AccessibilityStateMask(UiAccessibility::State state)
   return 1u << static_cast<uint32_t>(state);
 }
 
-const char* const BACKGROUND_COLOR_TOKEN = "UtcBackgroundColor";
+const char* const BACKGROUND_COLOR_TOKEN          = "UtcBackgroundColor";
 const char* const BACKGROUND_GRADIENT_START_TOKEN = "UtcBackgroundGradientStart";
-const char* const BACKGROUND_GRADIENT_END_TOKEN = "UtcBackgroundGradientEnd";
+const char* const BACKGROUND_GRADIENT_END_TOKEN   = "UtcBackgroundGradientEnd";
 
 const Vector4 BACKGROUND_COLOR_A(0.1f, 0.2f, 0.3f, 1.0f);
 const Vector4 BACKGROUND_COLOR_B(0.7f, 0.6f, 0.5f, 1.0f);
@@ -300,7 +300,7 @@ bool OverrideBackgroundColors(StringView colorId, Vector4& outColor)
 
 Gradient::Linear CreateBackgroundTokenGradient()
 {
-  Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  Gradient::Linear                 gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
   Dali::Vector<Gradient::StopNode> stopNodes;
   stopNodes.PushBack(Gradient::StopNode(0.0f, UiColor(BACKGROUND_GRADIENT_START_TOKEN)));
   stopNodes.PushBack(Gradient::StopNode(1.0f, UiColor(BACKGROUND_GRADIENT_END_TOKEN)));
@@ -310,16 +310,16 @@ Gradient::Linear CreateBackgroundTokenGradient()
 
 Property::Map GetBackgroundPropertyMap(View view)
 {
-  Property::Value backgroundValue = view.GetProperty(Ui::View::Property::BACKGROUND);
-  const Property::Map* backgroundMap = backgroundValue.GetMap();
+  Property::Value      backgroundValue = view.GetProperty(Ui::View::Property::BACKGROUND);
+  const Property::Map* backgroundMap   = backgroundValue.GetMap();
   DALI_TEST_CHECK(backgroundMap);
   return backgroundMap ? *backgroundMap : Property::Map();
 }
 
 Vector4 GetBackgroundMixColor(View view)
 {
-  Property::Map backgroundMap = GetBackgroundPropertyMap(view);
-  Property::Value* colorValue = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
+  Property::Map    backgroundMap = GetBackgroundPropertyMap(view);
+  Property::Value* colorValue    = backgroundMap.Find(Ui::VisualBasePropertyIndex::MIX_COLOR);
   DALI_TEST_CHECK(colorValue);
 
   Vector4 color;
@@ -329,7 +329,7 @@ Vector4 GetBackgroundMixColor(View view)
 
 Vector4 GetBackgroundGradientStopColor(View view, uint32_t index)
 {
-  Property::Map backgroundMap = GetBackgroundPropertyMap(view);
+  Property::Map    backgroundMap  = GetBackgroundPropertyMap(view);
   Property::Value* stopColorValue = backgroundMap.Find(Ui::GradientVisualPropertyIndex::STOP_COLOR);
   DALI_TEST_CHECK(stopColorValue);
 
@@ -563,7 +563,7 @@ int UtcDaliViewBackgroundColorSetterP(void)
 int UtcDaliViewSetBackgroundImageP(void)
 {
   UiTestApplication application;
-  View              view = View::New();
+  View              view     = View::New();
   const char*       imageUrl = "background-image.png";
 
   view.SetBackgroundColor(UiColor(1.0f, 0.0f, 0.0f, 1.0f));
@@ -587,7 +587,7 @@ int UtcDaliViewSetBackgroundGradientP(void)
   UiTestApplication application;
   View              view = View::New();
 
-  Gradient::Linear gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
+  Gradient::Linear                 gradient(Vector2(-0.5f, -0.5f), Vector2(0.5f, 0.5f));
   Dali::Vector<Gradient::StopNode> stopNodes;
   stopNodes.PushBack(Gradient::StopNode(0.0f, UiColor(Color::RED)));
   stopNodes.PushBack(Gradient::StopNode(1.0f, UiColor(Color::BLUE)));
@@ -619,8 +619,8 @@ int UtcDaliViewSetBackgroundGradientP(void)
 int UtcDaliViewBackgroundGradientTokenBindingRefreshP(void)
 {
   UiTestApplication application;
-  UiColorManager manager = UiColorManager::Get();
-  View view = View::New();
+  UiColorManager    manager = UiColorManager::Get();
+  View              view    = View::New();
 
   gUseAlternateBackgroundColors = false;
   manager.SetColorOverride(OverrideBackgroundColors);
@@ -796,7 +796,7 @@ int UtcDaliViewShadowAnimationPrimaryShadowP(void)
   application.SendNotification();
   application.Render();
 
-  Dali::Property blurProperty = IntegrationView::GetVisualProperty(view, View::Property::SHADOW, ColorVisualPropertyIndex::BLUR_RADIUS);
+  Dali::Property blurProperty    = IntegrationView::GetVisualProperty(view, View::Property::SHADOW, ColorVisualPropertyIndex::BLUR_RADIUS);
   Dali::Property opacityProperty = IntegrationView::GetVisualProperty(view, View::Property::SHADOW, VisualBasePropertyIndex::OPACITY);
   DALI_TEST_CHECK(blurProperty.propertyIndex != Property::INVALID_INDEX);
   DALI_TEST_CHECK(opacityProperty.propertyIndex != Property::INVALID_INDEX);
@@ -1183,7 +1183,7 @@ int UtcDaliViewPaddingHelpersP(void)
 int UtcDaliViewLayoutWidthChainingP(void)
 {
   UiTestApplication application;
-  View              view   = View::New();
+  View              view = View::New();
   view.SetRequestedWidth(150.0f);
   DALI_TEST_EQUALS(view.GetRequestedWidth(), 150.0f, TEST_LOCATION);
   END_TEST;
@@ -1192,7 +1192,7 @@ int UtcDaliViewLayoutWidthChainingP(void)
 int UtcDaliViewLayoutHeightChainingP(void)
 {
   UiTestApplication application;
-  View              view   = View::New();
+  View              view = View::New();
   view.SetRequestedHeight(80.0f);
   DALI_TEST_EQUALS(view.GetRequestedHeight(), 80.0f, TEST_LOCATION);
   END_TEST;
@@ -1359,7 +1359,7 @@ int UtcDaliViewPaddingChainingP(void)
 int UtcDaliViewMinimumWidthChainingP(void)
 {
   UiTestApplication application;
-  View              view   = View::New();
+  View              view = View::New();
   view.SetMinimumWidth(25.0f);
   DALI_TEST_EQUALS(view.GetMinimumWidth(), 25.0f, TEST_LOCATION);
   END_TEST;
@@ -1368,7 +1368,7 @@ int UtcDaliViewMinimumWidthChainingP(void)
 int UtcDaliViewMinimumHeightChainingP(void)
 {
   UiTestApplication application;
-  View              view   = View::New();
+  View              view = View::New();
   view.SetMinimumHeight(35.0f);
   DALI_TEST_EQUALS(view.GetMinimumHeight(), 35.0f, TEST_LOCATION);
   END_TEST;
@@ -1377,7 +1377,7 @@ int UtcDaliViewMinimumHeightChainingP(void)
 int UtcDaliViewMaximumWidthChainingP(void)
 {
   UiTestApplication application;
-  View              view   = View::New();
+  View              view = View::New();
   view.SetMaximumWidth(300.0f);
   DALI_TEST_EQUALS(view.GetMaximumWidth(), 300.0f, TEST_LOCATION);
   END_TEST;
@@ -1386,7 +1386,7 @@ int UtcDaliViewMaximumWidthChainingP(void)
 int UtcDaliViewMaximumHeightChainingP(void)
 {
   UiTestApplication application;
-  View              view   = View::New();
+  View              view = View::New();
   view.SetMaximumHeight(400.0f);
   DALI_TEST_EQUALS(view.GetMaximumHeight(), 400.0f, TEST_LOCATION);
   END_TEST;
@@ -1481,7 +1481,7 @@ int UtcDaliViewArrangeWithLayoutP(void)
   layout.SetRequestedWidth(200.0f);
   layout.SetRequestedHeight(200.0f);
   MeasuredSize measured = layout.Measure(200.0f, 200.0f);
-  LayoutRect arranged = layout.Arrange(LayoutRect(0, 0, 200, 200));
+  LayoutRect   arranged = layout.Arrange(LayoutRect(0, 0, 200, 200));
   DALI_TEST_EQUALS(measured.GetWidth(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(measured.GetHeight(), 200.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(arranged.GetWidth(), 200.0f, TEST_LOCATION);
@@ -2777,7 +2777,7 @@ int UtcDaliViewBackgroundTypedSettersDoNotFirePropertySetSignalP(void)
   PropertySetRecorder recorder;
   recorder.Connect(view);
 
-  Gradient::Linear gradient(Vector2::ZERO, Vector2::ONE);
+  Gradient::Linear                 gradient(Vector2::ZERO, Vector2::ONE);
   Dali::Vector<Gradient::StopNode> stopNodes;
   stopNodes.PushBack(Gradient::StopNode(0.0f, UiColor(Color::RED)));
   stopNodes.PushBack(Gradient::StopNode(1.0f, UiColor(Color::BLUE)));
@@ -3409,15 +3409,15 @@ int UtcDaliViewAccessibilityExportedPropertiesP(void)
   UiTestApplication application;
 
   View view = View::New();
-  view.SetProperty(View::Property::ACCESSIBILITY_NAME, "Accessible view");
-  view.SetProperty(View::Property::ACCESSIBILITY_DESCRIPTION, "Accessible description");
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::CHECK_BOX));
-  view.SetProperty(View::Property::ACCESSIBILITY_HIGHLIGHTABLE, true);
-  view.SetProperty(View::Property::ACCESSIBILITY_HIDDEN, true);
-  view.SetProperty(View::Property::AUTOMATION_ID, "view-automation-id");
-  view.SetProperty(View::Property::ACCESSIBILITY_VALUE, "60%");
-  view.SetProperty(View::Property::ACCESSIBILITY_SCROLLABLE, true);
-  view.SetProperty(View::Property::ACCESSIBILITY_IS_MODAL, true);
+  view.SetAccessibilityName("Accessible view");
+  view.SetAccessibilityDescription("Accessible description");
+  view.SetAccessibilityRole(UiAccessibility::Role::CHECK_BOX);
+  view.SetAccessibilityHighlightable(true);
+  view.SetAccessibilityHidden(true);
+  view.SetAutomationId("view-automation-id");
+  view.SetAccessibilityValue("60%");
+  view.SetAccessibilityScrollable(true);
+  view.SetAccessibilityModal(true);
   DALI_TEST_CHECK(view.HasAccessibilityState(UiAccessibility::State::ENABLED));
   DALI_TEST_CHECK(!view.HasAccessibilityState(UiAccessibility::State::SELECTED));
   DALI_TEST_CHECK(!view.HasAccessibilityState(UiAccessibility::State::CHECKED));
@@ -3439,9 +3439,7 @@ int UtcDaliViewAccessibilityExportedPropertiesP(void)
   DALI_TEST_CHECK(!view.HasAccessibilityState(UiAccessibility::State::BUSY));
   view.AddAccessibilityState(UiAccessibility::State::BUSY);
 
-  Property::Map attributes;
-  attributes.Insert("resID", "test-resource");
-  view.SetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES, attributes);
+  view.AppendAccessibilityAttribute("resID", "test-resource");
 
   auto accessible = Dali::Accessibility::Accessible::Get(view);
   DALI_TEST_CHECK(accessible);
@@ -3494,28 +3492,28 @@ int UtcDaliViewAccessibilityRoleConversionP(void)
   auto accessible = Dali::Accessibility::Accessible::Get(view);
   DALI_TEST_CHECK(accessible);
 
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::BUTTON));
+  view.SetAccessibilityRole(UiAccessibility::Role::BUTTON);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::PUSH_BUTTON, TEST_LOCATION);
 
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::TEXT));
+  view.SetAccessibilityRole(UiAccessibility::Role::TEXT);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::LABEL, TEST_LOCATION);
 
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::TAB));
+  view.SetAccessibilityRole(UiAccessibility::Role::TAB);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::PAGE_TAB, TEST_LOCATION);
 
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::SCENE_3D));
+  view.SetAccessibilityRole(UiAccessibility::Role::SCENE_3D);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::FILLER, TEST_LOCATION);
   DALI_TEST_EQUALS(ViewAccessible::IsScene3D(view), true, TEST_LOCATION);
 
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::DIALOG));
+  view.SetAccessibilityRole(UiAccessibility::Role::DIALOG);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::DIALOG, TEST_LOCATION);
   DALI_TEST_EQUALS(ViewAccessible::IsModal(view), true, TEST_LOCATION);
 
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::NONE));
+  view.SetAccessibilityRole(UiAccessibility::Role::NONE);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::UNKNOWN, TEST_LOCATION);
   DALI_TEST_EQUALS(static_cast<bool>(accessible->GetStates()[Dali::Integration::Accessibility::State::HIGHLIGHTABLE]), false, TEST_LOCATION);
 
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, -1);
+  view.SetAccessibilityRole(static_cast<UiAccessibility::Role>(-1));
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::UNKNOWN, TEST_LOCATION);
 
   END_TEST;
@@ -3527,7 +3525,7 @@ int UtcDaliViewAccessibilityCallbacksP(void)
 
   View parent = View::New();
   View child  = View::New();
-  parent.SetProperty(View::Property::ACCESSIBILITY_SCROLLABLE, true);
+  parent.SetAccessibilityScrollable(true);
   parent.Add(child);
 
   auto accessible = dynamic_cast<ViewAccessible*>(Dali::Accessibility::Accessible::Get(parent));
@@ -3546,11 +3544,13 @@ int UtcDaliViewAccessibilityCallbacksP(void)
   DALI_TEST_EQUALS(accessible->ScrollToChild(child), false, TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->GrabHighlight(), false, TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->ClearHighlight(), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(Extension::GrabAccessibilityHighlight(parent), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(Extension::ClearAccessibilityHighlight(parent), false, TEST_LOCATION);
 
-  parent.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::CHECK_BOX));
+  parent.SetAccessibilityRole(UiAccessibility::Role::CHECK_BOX);
   accessible->OnStatePropertySet(AccessibilityStateMask(UiAccessibility::State::CHECKED));
 
-  parent.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(UiAccessibility::Role::BUTTON));
+  parent.SetAccessibilityRole(UiAccessibility::Role::BUTTON);
   accessible->OnStatePropertySet(AccessibilityStateMask(UiAccessibility::State::SELECTED));
 
   END_TEST;

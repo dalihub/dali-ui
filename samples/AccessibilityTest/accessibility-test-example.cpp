@@ -16,9 +16,9 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/public-api/views/view-accessibility-types.h>
+#include <dali/dali.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali/devel-api/atspi-interfaces/action.h>
-#include <dali/dali.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>
 
 #include <cstdint>
@@ -48,9 +48,9 @@ void SetGeometry(View view, float x, float y, float width, float height)
 
 void SetAccessibility(View view, Accessibility::Role role, const char* name, const char* description, std::initializer_list<Accessibility::State> states)
 {
-  view.SetProperty(View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(role));
-  view.SetProperty(View::Property::ACCESSIBILITY_NAME, name);
-  view.SetProperty(View::Property::ACCESSIBILITY_DESCRIPTION, description);
+  view.SetAccessibilityRole(role);
+  view.SetAccessibilityName(name);
+  view.SetAccessibilityDescription(description);
   for(auto state : states)
   {
     view.AddAccessibilityState(state);
@@ -77,7 +77,7 @@ public:
   Snapshot Dump(const std::string& label, View view)
   {
     Snapshot snapshot;
-    auto* accessible = Dali::Accessibility::Accessible::Get(view);
+    auto*    accessible = Dali::Accessibility::Accessible::Get(view);
     if(!accessible)
     {
       std::cout << label << ": no accessible object\n";
@@ -92,7 +92,7 @@ public:
     snapshot.states        = accessible->GetStates().GetRawData64();
     snapshot.hidden        = accessible->IsHidden();
     snapshot.relationCount = accessible->GetRelationSet().size();
-    const auto attributes = accessible->GetAttributes();
+    const auto attributes  = accessible->GetAttributes();
     snapshot.attributes.reserve(attributes.size());
     for(const auto& attribute : attributes)
     {
@@ -204,7 +204,7 @@ private:
     mAction = InteractiveView::New();
     SetGeometry(mAction, 32.0f, 112.0f, 300.0f, 72.0f);
     mAction.SetBackgroundColor(Dali::Ui::UiColor(0xD6EAF8));
-    mAction.SetProperty(View::Property::AUTOMATION_ID, "primary-action");
+    mAction.SetAutomationId("primary-action");
     SetAccessibility(mAction,
                      Accessibility::Role::BUTTON,
                      "Primary action",
@@ -234,7 +234,7 @@ private:
     mProgress = View::New();
     SetGeometry(mProgress, 32.0f, 304.0f, 300.0f, 54.0f);
     mProgress.SetBackgroundColor(Dali::Ui::UiColor(0xFADBD8));
-    mProgress.SetProperty(View::Property::ACCESSIBILITY_VALUE, "60%");
+    mProgress.SetAccessibilityValue("60%");
     SetAccessibility(mProgress,
                      Accessibility::Role::PROGRESS_BAR,
                      "Loading progress",
@@ -245,7 +245,7 @@ private:
     mDialog = View::New();
     SetGeometry(mDialog, 372.0f, 112.0f, 300.0f, 168.0f);
     mDialog.SetBackgroundColor(Dali::Ui::UiColor(0xFCF3CF));
-    mDialog.SetProperty(View::Property::ACCESSIBILITY_IS_MODAL, true);
+    mDialog.SetAccessibilityModal(true);
     SetAccessibility(mDialog,
                      Accessibility::Role::DIALOG,
                      "Modal dialog",
@@ -260,7 +260,7 @@ private:
     mHidden = View::New();
     SetGeometry(mHidden, 372.0f, 304.0f, 300.0f, 54.0f);
     mHidden.SetBackgroundColor(Dali::Ui::UiColor(0xEBEDEF));
-    mHidden.SetProperty(View::Property::ACCESSIBILITY_HIDDEN, true);
+    mHidden.SetAccessibilityHidden(true);
     SetAccessibility(mHidden,
                      Accessibility::Role::NOTIFICATION,
                      "Hidden notification",
@@ -281,13 +281,13 @@ private:
 
   void RunAccessibilityCheck()
   {
-    auto title    = mClient.Dump("title", mTitle);
-    auto button   = mClient.Dump("button", mAction);
+    auto title     = mClient.Dump("title", mTitle);
+    auto button    = mClient.Dump("button", mAction);
     bool activated = mClient.Activate("button", mAction);
-    auto selected = mClient.Dump("selected", mSelected);
-    auto progress = mClient.Dump("progress", mProgress);
-    auto dialog   = mClient.Dump("dialog", mDialog);
-    auto hidden   = mClient.Dump("hidden", mHidden);
+    auto selected  = mClient.Dump("selected", mSelected);
+    auto progress  = mClient.Dump("progress", mProgress);
+    auto dialog    = mClient.Dump("dialog", mDialog);
+    auto hidden    = mClient.Dump("hidden", mHidden);
 
     auto focused = Dali::Ui::FocusManager::Get().GetCurrentFocusView();
     std::cout << "focused after activate: " << (focused == mAction ? "primary-action" : "none/other") << '\n';
@@ -326,26 +326,27 @@ private:
                HasState(dialog.states, ExportAccessibility::State::MODAL));
     AddCheck(report, allPassed, "hidden object stays hidden", hidden.exists && hidden.hidden);
 
-    report << '\n' << (allPassed ? "Overall: PASS" : "Overall: FAIL") << '\n';
+    report << '\n'
+           << (allPassed ? "Overall: PASS" : "Overall: FAIL") << '\n';
     report << "Close the app when done.";
     mResult.SetText(report.str().c_str());
   }
 
-  Dali::Application&    mApplication;
+  Dali::Application&      mApplication;
   MockAccessibilityClient mClient;
-  Label                mTitle;
-  InteractiveView      mAction;
-  SelectableView       mSelected;
-  View                 mProgress;
-  View                 mDialog;
-  View                 mHidden;
-  Label                mResult;
+  Label                   mTitle;
+  InteractiveView         mAction;
+  SelectableView          mSelected;
+  View                    mProgress;
+  View                    mDialog;
+  View                    mHidden;
+  Label                   mResult;
 };
 } // namespace
 
 int main(int argc, char** argv)
 {
-  auto app = Dali::Application::New(&argc, &argv);
+  auto               app    = Dali::Application::New(&argc, &argv);
   Dali::Ui::UiConfig config = Dali::Ui::UiConfig::New();
   config.SetDefaultStateEffectForInteractive(Dali::Ui::OverlayEffect::Plain());
   config.Apply();

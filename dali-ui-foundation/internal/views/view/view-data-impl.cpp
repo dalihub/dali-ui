@@ -47,6 +47,7 @@
 #include <dali/public-api/object/object-registry.h>
 #include <dali/public-api/size-negotiation/relayout-container.h>
 #include <cmath>
+#include <cstdlib>
 #include <cstring>
 #include <limits>
 #include <vector>
@@ -82,6 +83,7 @@
 #include <dali-ui-foundation/public-api/layouts/layout-manager.h>
 #include <dali-ui-foundation/public-api/layouts/layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
+#include <dali-ui-foundation/public-api/text/text-utils.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/types/ui-constraint-tag-ranges.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -89,6 +91,7 @@
 #include <algorithm>
 
 using Dali::Integration::GetStdString;
+using Dali::Integration::ToDaliString;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdString;
 
@@ -130,11 +133,63 @@ namespace
 Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, false, "LOG_VIEW_DATA");
 #endif
 
-constexpr unsigned int OFF_SCREEN_RENDERING_TYPE_COUNT  = 3u;
-constexpr char         BACKGROUND_COLOR_BINDING_ID[]    = "BackgroundColor";
-constexpr char         BACKGROUND_GRADIENT_BINDING_ID[] = "BackgroundGradient";
-constexpr char         COLOR_BINDING_ID[]               = "Color";
-constexpr float        MEASURE_CACHE_DIRTY              = -1.0f;
+constexpr unsigned int OFF_SCREEN_RENDERING_TYPE_COUNT        = 3u;
+constexpr char         BACKGROUND_COLOR_BINDING_ID[]          = "BackgroundColor";
+constexpr char         BACKGROUND_GRADIENT_BINDING_ID[]       = "BackgroundGradient";
+constexpr char         COLOR_BINDING_ID[]                     = "Color";
+constexpr float        MEASURE_CACHE_DIRTY                    = -1.0f;
+constexpr char         ACCESSIBILITY_NAME_BINDING_ID[]        = "Ui.View.AccessibilityName";
+constexpr char         ACCESSIBILITY_DESCRIPTION_BINDING_ID[] = "Ui.View.AccessibilityDescription";
+constexpr char         INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-highlight";
+constexpr char         COLLECTION_CONTAINER_ATTRIBUTE[]       = "collection_container";
+constexpr char         COLLECTION_INDEX_ATTRIBUTE[]           = "collection_index";
+
+bool IsValidAccessibilityRole(Accessibility::Role role)
+{
+  const uint32_t value = static_cast<uint32_t>(role);
+  return value >= Accessibility::ROLE_START_INDEX && value < static_cast<uint32_t>(Accessibility::Role::MAX_COUNT);
+}
+
+bool IsValidAccessibilityRelation(Accessibility::RelationType type)
+{
+  return static_cast<uint32_t>(type) < static_cast<uint32_t>(Accessibility::RelationType::MAX_COUNT);
+}
+
+bool IsValidAccessibilityReadingInfo(Accessibility::ReadingInfo info)
+{
+  return static_cast<uint32_t>(info) < static_cast<uint32_t>(Accessibility::ReadingInfo::MAX_COUNT);
+}
+
+Dali::Integration::Accessibility::ReadingInfoType ToIntegrationReadingInfoType(Accessibility::ReadingInfo info)
+{
+  using IntegrationReadingInfo = Dali::Integration::Accessibility::ReadingInfoType;
+  switch(info)
+  {
+    case Accessibility::ReadingInfo::NAME:
+      return IntegrationReadingInfo::NAME;
+    case Accessibility::ReadingInfo::ROLE:
+      return IntegrationReadingInfo::ROLE;
+    case Accessibility::ReadingInfo::DESCRIPTION:
+      return IntegrationReadingInfo::DESCRIPTION;
+    case Accessibility::ReadingInfo::STATE:
+      return IntegrationReadingInfo::STATE;
+    case Accessibility::ReadingInfo::MAX_COUNT:
+      break;
+  }
+  return IntegrationReadingInfo::NAME;
+}
+
+bool GetStringAttribute(const Property::Map& attributes, StringView key, std::string& value)
+{
+  const Property::Value* property = attributes.Find(key);
+  return property && GetStdString(*property, value);
+}
+
+bool GetBooleanAttribute(const Property::Map& attributes, StringView key)
+{
+  std::string value;
+  return GetStringAttribute(attributes, key, value) && value == "true";
+}
 
 Vector4 ToVector4(const Insets& insets)
 {
@@ -380,148 +435,92 @@ static constexpr uint32_t BORDERLINE_WIDTH_CONSTRAINT_TAG(Dali::Ui::ConstraintTa
 static constexpr uint32_t BORDERLINE_COLOR_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 13);
 static constexpr uint32_t BORDERLINE_OFFSET_CONSTRAINT_TAG(Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 14);
 
-bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName, const Property::Map& attributes)
+bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName)
 {
-  using Dali::Devel::Accessibility::ActionType; // LCOV_EXCL_LINE
   DALI_ASSERT_DEBUG(view);
 
-  auto& viewImpl     = GetImpl(view);
-  auto& viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
-  DALI_ASSERT_DEBUG(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActionSignal.Empty());
-
-  ActionType action = ActionType::MAX_COUNT;
+  auto& viewImpl = GetImpl(view);
+  bool  success  = false;
   if(actionName == ACTION_ACCESSIBILITY_ACTIVATE)
   {
-    action = ActionType::ACTIVATE;
+    success = viewImpl.OnAccessibilityActivate();
   }
   else if(actionName == ACTION_ACCESSIBILITY_ESCAPE)
   {
-    action = ActionType::ESCAPE;
+    success = viewImpl.OnAccessibilityEscape();
   }
   else if(actionName == ACTION_ACCESSIBILITY_INCREMENT)
   {
-    action = ActionType::INCREMENT;
+    success = viewImpl.OnAccessibilityValueChange(true);
   }
   else if(actionName == ACTION_ACCESSIBILITY_DECREMENT)
   {
-    action = ActionType::DECREMENT;
-  }
-
-  if(action != ActionType::MAX_COUNT)
-  {
-    bool success = viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActionSignal.Emit({action, Dali::Actor{}});
-    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: %s, success : %d\n", actionName.CStr(),
-                  success);
-    return success;
-  }
-
-  return false;
-}
-
-bool PerformLegacyAccessibilityAction(Ui::View view, const Dali::String& actionName)
-{
-  auto& viewImpl     = GetImpl(view);
-  auto& viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
-  bool  ret          = true;
-  if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_ACTIVATE))
-  {
-    // if cast succeeds there is an implementation so no need to check
-    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActivateSignal.Empty())
-    {
-      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActivateSignal.Emit();
-    }
-    else
-    {
-      ret = GetImpl(view).OnAccessibilityActivated();
-    }
-  }
-  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_SKIPPED))
-  {
-    // if cast succeeds there is an implementation so no need to check
-    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingSkippedSignal.Empty())
-    {
-      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingSkippedSignal.Emit();
-    }
-  }
-  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_PAUSED))
-  {
-    // if cast succeeds there is an implementation so no need to check
-    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingPausedSignal.Empty())
-    {
-      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingPausedSignal.Emit();
-    }
-  }
-  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_RESUMED))
-  {
-    // if cast succeeds there is an implementation so no need to check
-    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingResumedSignal.Empty())
-    {
-      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingResumedSignal.Emit();
-    }
-  }
-  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_CANCELLED))
-  {
-    // if cast succeeds there is an implementation so no need to check
-    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingCancelledSignal.Empty())
-    {
-      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingCancelledSignal.Emit();
-    }
-  }
-  else if(0 == strcmp(actionName.CStr(), ACTION_ACCESSIBILITY_READING_STOPPED))
-  {
-    // if cast succeeds there is an implementation so no need to check
-    if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingStoppedSignal.Empty())
-    {
-      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingStoppedSignal.Emit();
-    }
+    success = viewImpl.OnAccessibilityValueChange(false);
   }
   else
   {
-    ret = false;
+    return false;
   }
 
-  if(ret)
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: %s, success : %d\n", actionName.CStr(), success);
+  return success;
+}
+
+bool PerformAccessibilityReadingStatus(Ui::View view, const Dali::String& actionName)
+{
+  auto&                        viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(GetImpl(view));
+  Accessibility::ReadingStatus status;
+  if(actionName == ACTION_ACCESSIBILITY_READING_SKIPPED)
   {
-    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed Legacy AccessibilityAction: %s\n", actionName.CStr());
+    status = Accessibility::ReadingStatus::SKIPPED;
   }
-  return ret;
+  else if(actionName == ACTION_ACCESSIBILITY_READING_PAUSED)
+  {
+    status = Accessibility::ReadingStatus::PAUSED;
+  }
+  else if(actionName == ACTION_ACCESSIBILITY_READING_RESUMED)
+  {
+    status = Accessibility::ReadingStatus::RESUMED;
+  }
+  else if(actionName == ACTION_ACCESSIBILITY_READING_CANCELLED)
+  {
+    status = Accessibility::ReadingStatus::CANCELLED;
+  }
+  else if(actionName == ACTION_ACCESSIBILITY_READING_STOPPED)
+  {
+    status = Accessibility::ReadingStatus::STOPPED;
+  }
+  else
+  {
+    return false;
+  }
+
+  viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityReadingStatusChangedSignal.Emit(view, status);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Changed accessibility reading status: %s\n", actionName.CStr());
+  return true;
 }
 
 bool DoAccessibilityAction(BaseObject* object, const Dali::String& actionName, const Property::Map& attributes)
 {
   Dali::BaseHandle handle(object);
-
-  Ui::View view         = Ui::View::DownCast(handle);
-  auto&    viewImpl     = GetImpl(view);
-  auto&    viewDataImpl = Dali::Ui::Internal::ViewDataImpl::Get(viewImpl);
+  Ui::View         view = Ui::View::DownCast(handle);
 
   DALI_ASSERT_ALWAYS(view);
-
-  if(!viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityActionSignal.Empty())
-  {
-    return PerformAccessibilityAction(view, actionName, attributes);
-  }
-
-  // Fall back to legacy action is no ActionSignal is connected
-  return PerformLegacyAccessibilityAction(view, actionName);
+  return PerformAccessibilityAction(view, actionName);
 }
 
-bool DoLegacyAccessibilityAction(BaseObject* object, const Dali::String& actionName, const Property::Map& attributes)
+bool DoAccessibilityReadingStatusAction(BaseObject* object, const Dali::String& actionName, const Property::Map& attributes)
 {
   Dali::BaseHandle handle(object);
-
-  Ui::View view = Ui::View::DownCast(handle);
+  Ui::View         view = Ui::View::DownCast(handle);
 
   DALI_ASSERT_ALWAYS(view);
-
-  return PerformLegacyAccessibilityAction(view, actionName);
+  return PerformAccessibilityReadingStatus(view, actionName);
 }
 
-const char* SIGNAL_KEY_EVENT       = "keyEvent";
-const char* SIGNAL_FOCUS_CHANGED   = "focusChanged";
-const char* SIGNAL_GET_NAME        = "getName";
-const char* SIGNAL_GET_DESCRIPTION = "getDescription";
-const char* SIGNAL_DO_GESTURE      = "doGesture";
+const char* SIGNAL_KEY_EVENT     = "keyEvent";
+const char* SIGNAL_FOCUS_CHANGED = "focusChanged";
+const char* SIGNAL_DO_GESTURE    = "doGesture";
 
 /**
  * Connects a callback function with the object's signals.
@@ -554,14 +553,6 @@ static bool DoConnectSignal(BaseObject* object, ConnectionTrackerInterface* trac
     {
       viewImpl.FocusChangedSignal().Connect(tracker, functor);
     }
-    else if(0 == strcmp(signalName.CStr(), SIGNAL_GET_NAME))
-    {
-      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityGetNameSignal.Connect(tracker, functor);
-    }
-    else if(0 == strcmp(signalName.CStr(), SIGNAL_GET_DESCRIPTION))
-    {
-      viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityGetDescriptionSignal.Connect(tracker, functor);
-    }
     else if(0 == strcmp(signalName.CStr(), SIGNAL_DO_GESTURE))
     {
       viewDataImpl.GetOrCreateAccessibilityData().mAccessibilityDoGestureSignal.Connect(tracker, functor);
@@ -586,8 +577,6 @@ DALI_TYPE_REGISTRATION_BEGIN(View, CustomActor, Create);
 
 SignalConnectorType registerSignal1(typeRegistration, SIGNAL_KEY_EVENT, &DoConnectSignal);
 SignalConnectorType registerSignal2(typeRegistration, SIGNAL_FOCUS_CHANGED, &DoConnectSignal);
-SignalConnectorType registerSignal7(typeRegistration, SIGNAL_GET_NAME, &DoConnectSignal);
-SignalConnectorType registerSignal8(typeRegistration, SIGNAL_GET_DESCRIPTION, &DoConnectSignal);
 SignalConnectorType registerSignal9(typeRegistration, SIGNAL_DO_GESTURE, &DoConnectSignal);
 
 // === Accessibility Actions === START
@@ -598,11 +587,11 @@ TypeAction registerAction4(typeRegistration, ACTION_ACCESSIBILITY_DECREMENT, &Do
 // === Accessibility Actions === END
 
 // === Legacy Accessibility Actions === START
-TypeAction registerAction5(typeRegistration, ACTION_ACCESSIBILITY_READING_SKIPPED, &DoLegacyAccessibilityAction);
-TypeAction registerAction6(typeRegistration, ACTION_ACCESSIBILITY_READING_CANCELLED, &DoLegacyAccessibilityAction);
-TypeAction registerAction7(typeRegistration, ACTION_ACCESSIBILITY_READING_STOPPED, &DoLegacyAccessibilityAction);
-TypeAction registerAction8(typeRegistration, ACTION_ACCESSIBILITY_READING_PAUSED, &DoLegacyAccessibilityAction);
-TypeAction registerAction9(typeRegistration, ACTION_ACCESSIBILITY_READING_RESUMED, &DoLegacyAccessibilityAction);
+TypeAction registerAction5(typeRegistration, ACTION_ACCESSIBILITY_READING_SKIPPED, &DoAccessibilityReadingStatusAction);
+TypeAction registerAction6(typeRegistration, ACTION_ACCESSIBILITY_READING_CANCELLED, &DoAccessibilityReadingStatusAction);
+TypeAction registerAction7(typeRegistration, ACTION_ACCESSIBILITY_READING_STOPPED, &DoAccessibilityReadingStatusAction);
+TypeAction registerAction8(typeRegistration, ACTION_ACCESSIBILITY_READING_PAUSED, &DoAccessibilityReadingStatusAction);
+TypeAction registerAction9(typeRegistration, ACTION_ACCESSIBILITY_READING_RESUMED, &DoAccessibilityReadingStatusAction);
 // === Legacy Accessibility Actions === END
 
 DALI_TYPE_REGISTRATION_END()
@@ -634,20 +623,9 @@ const PropertyRegistration ViewDataImpl::PROPERTY_12(typeRegistration, "rightFoc
 const PropertyRegistration ViewDataImpl::PROPERTY_13(typeRegistration, "upFocusableViewId",             Ui::View::Property::UP_FOCUSABLE_VIEW_ID,            Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_14(typeRegistration, "downFocusableViewId",           Ui::View::Property::DOWN_FOCUSABLE_VIEW_ID,          Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_15(typeRegistration, "shadow",                         Ui::View::Property::SHADOW,                           Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_16(typeRegistration, "accessibilityName",              Ui::View::Property::ACCESSIBILITY_NAME,               Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_17(typeRegistration, "accessibilityDescription",       Ui::View::Property::ACCESSIBILITY_DESCRIPTION,        Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_18(typeRegistration, "accessibilityTranslationDomain", Ui::View::Property::ACCESSIBILITY_TRANSLATION_DOMAIN, Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_19(typeRegistration, "accessibilityRole",              Ui::View::Property::ACCESSIBILITY_ROLE,               Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_20(typeRegistration, "accessibilityHighlightable",     Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE,      Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_21(typeRegistration, "accessibilityAttributes",        Ui::View::Property::ACCESSIBILITY_ATTRIBUTES,         Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_22(typeRegistration, "dispatchKeyEvents",              Ui::View::Property::DISPATCH_KEY_EVENTS,              Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_23(typeRegistration, "accessibilityHidden",            Ui::View::Property::ACCESSIBILITY_HIDDEN,             Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_24(typeRegistration, "clockwiseFocusableViewId",      Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID,     Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_25(typeRegistration, "counterClockwiseFocusableViewId", Ui::View::Property::COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID, Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_26(typeRegistration, "automationId",                   Ui::View::Property::AUTOMATION_ID,                    Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_27(typeRegistration, "accessibilityValue",             Ui::View::Property::ACCESSIBILITY_VALUE,              Property::STRING,  &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_28(typeRegistration, "accessibilityScrollable",        Ui::View::Property::ACCESSIBILITY_SCROLLABLE,         Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
-const PropertyRegistration ViewDataImpl::PROPERTY_30(typeRegistration, "accessibilityIsModal",           Ui::View::Property::ACCESSIBILITY_IS_MODAL,           Property::BOOLEAN, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_31(typeRegistration, "offScreenRendering",             Ui::View::Property::OFFSCREEN_RENDERING,              Property::INTEGER, &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_32(typeRegistration, "innerShadow",                    Ui::View::Property::INNER_SHADOW,                     Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
 const PropertyRegistration ViewDataImpl::PROPERTY_33(typeRegistration, "borderline",                     Ui::View::Property::BORDERLINE,                       Property::MAP,     &ViewDataImpl::SetProperty, &ViewDataImpl::GetProperty);
@@ -3199,7 +3177,7 @@ void ViewDataImpl::DispatchArrangeWithLayoutManager(LayoutManager* manager, cons
 {
   // Self geometry is applied centrally in Arrange(); the manager arranges
   // children only within the padding-adjusted content bounds. Owner final == input.
-  float   s       = mViewImpl.GetEffectiveScale();
+  float  s       = mViewImpl.GetEffectiveScale();
   Insets padding = mViewImpl.GetPadding();
 
   LayoutRect visContentBounds;
@@ -3880,66 +3858,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::ACCESSIBILITY_NAME:
-      {
-        std::string name;
-        if(GetStdString(value, name))
-        {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().GetAccessibilityData()) || !name.empty())
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.name = std::move(name);
-          }
-        }
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_DESCRIPTION:
-      {
-        std::string text;
-        if(GetStdString(value, text))
-        {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().GetAccessibilityData()) || !text.empty())
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.description = std::move(text);
-          }
-        }
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_ROLE:
-      {
-        int32_t role;
-        if(value.Get(role))
-        {
-          viewImpl.GetViewDataImpl().mAccessibilityRole = role;
-        }
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE:
-      {
-        bool highlightable;
-        if(value.Get(highlightable))
-        {
-          viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.isHighlightable =
-            highlightable ? TriStateProperty::TRUE : TriStateProperty::FALSE;
-        }
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_ATTRIBUTES:
-      {
-        const Property::Map* map = value.GetMap();
-        if(map)
-        {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().GetAccessibilityData()) || !map->Empty())
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.extraAttributes = *map;
-          }
-        }
-        break;
-      }
-
       case Ui::View::Property::DISPATCH_KEY_EVENTS:
       {
         bool dispatch;
@@ -3950,31 +3868,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         break;
       }
 
-      case Ui::View::Property::ACCESSIBILITY_HIDDEN:
-      {
-        bool hidden;
-        if(value.Get(hidden))
-        {
-          const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-          const bool  originalHidden =
-            DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.isHidden : false;
-          if(originalHidden != hidden)
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.isHidden = hidden;
-
-            auto accessible = viewImpl.GetViewDataImpl().GetAccessibleObject();
-            if(DALI_LIKELY(accessible))
-            {
-              auto* parent = dynamic_cast<Dali::Accessibility::ActorAccessible*>(accessible->GetParent());
-              if(parent)
-              {
-                parent->OnChildrenChanged();
-              }
-            }
-          }
-        }
-        break;
-      }
       case Ui::View::Property::CLOCKWISE_FOCUSABLE_VIEW_ID:
       {
         int focusId;
@@ -4008,59 +3901,6 @@ void ViewDataImpl::SetProperty(BaseObject* object, Property::Index index, const 
         if(value.Get(focusId))
         {
           viewImpl.GetViewDataImpl().EnsureFocusNavigationData().backwardId = focusId;
-        }
-        break;
-      }
-
-      case Ui::View::Property::AUTOMATION_ID:
-      {
-        std::string automationId;
-        if(GetStdString(value, automationId))
-        {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().GetAccessibilityData()) || !automationId.empty())
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.automationId =
-              std::move(automationId);
-          }
-        }
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_VALUE:
-      {
-        std::string accessibilityValue;
-        if(GetStdString(value, accessibilityValue))
-        {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().GetAccessibilityData()) || !accessibilityValue.empty())
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.value = std::move(accessibilityValue);
-          }
-        }
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_SCROLLABLE:
-      {
-        bool isScrollable;
-        if(value.Get(isScrollable))
-        {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().GetAccessibilityData()) || isScrollable)
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.isScrollable = isScrollable;
-          }
-        }
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_IS_MODAL:
-      {
-        bool isModal;
-        if(value.Get(isModal))
-        {
-          if(DALI_LIKELY(viewImpl.GetViewDataImpl().GetAccessibilityData()) || isModal)
-          {
-            viewImpl.GetViewDataImpl().GetOrCreateAccessibilityData().mAccessibilityProps.isModal = isModal;
-          }
         }
         break;
       }
@@ -4449,54 +4289,9 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
         break;
       }
 
-      case Ui::View::Property::ACCESSIBILITY_NAME:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = ToPropertyValue(DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.name : "");
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_DESCRIPTION:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = ToPropertyValue(DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.description : "");
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_ROLE:
-      {
-        value = viewImpl.GetViewDataImpl().mAccessibilityRole;
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = (DALI_LIKELY(accessibilityData) &&
-                 accessibilityData->mAccessibilityProps.isHighlightable == TriStateProperty::TRUE)
-                                          ? true
-                                          : false;
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_ATTRIBUTES:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value =
-          DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.extraAttributes : Property::Map();
-        break;
-      }
-
       case Ui::View::Property::DISPATCH_KEY_EVENTS:
       {
         value = viewImpl.GetViewDataImpl().mDispatchKeyEvents;
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_HIDDEN:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.isHidden : false;
         break;
       }
 
@@ -4521,34 +4316,6 @@ Property::Value ViewDataImpl::GetProperty(BaseObject* object, Property::Index in
       case Ui::View::Property::BACKWARD_FOCUSABLE_VIEW_ID:
       {
         value = viewImpl.GetViewDataImpl().GetFocusNavigationId(&FocusNavigationData::backwardId);
-        break;
-      }
-
-      case Ui::View::Property::AUTOMATION_ID:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = ToPropertyValue(DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.automationId : "");
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_VALUE:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = ToPropertyValue(DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.value : "");
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_SCROLLABLE:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.isScrollable : false;
-        break;
-      }
-
-      case Ui::View::Property::ACCESSIBILITY_IS_MODAL:
-      {
-        const auto* accessibilityData = viewImpl.GetViewDataImpl().GetAccessibilityData();
-        value                         = DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.isModal : false;
         break;
       }
 
@@ -4680,6 +4447,589 @@ ViewDataImpl::AccessibilityData* ViewDataImpl::GetAccessibilityData() const
   return mAccessibilityData.get();
 }
 
+void ViewDataImpl::SetResolvedAccessibilityName(const Dali::String& name)
+{
+  const std::string value = ToStdString(name);
+  if(DALI_UNLIKELY(!GetAccessibilityData()) && value.empty())
+  {
+    return;
+  }
+
+  auto& data = GetOrCreateAccessibilityData();
+  if(data.mAccessibilityProps.name != value)
+  {
+    data.mAccessibilityProps.name = value;
+    data.EmitPropertyChanged(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::NAME);
+  }
+}
+
+void ViewDataImpl::SetAccessibilityName(StringView name)
+{
+  auto manager = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.ClearBinding(mViewImpl.Self(), ACCESSIBILITY_NAME_BINDING_ID);
+  }
+
+  if(auto* data = GetAccessibilityData())
+  {
+    data->mAccessibilityProps.translatableName.clear();
+    data->mAccessibilityProps.nameLanguageSpans.clear();
+    data->UpdateLanguageSpanAttribute(true);
+  }
+  SetResolvedAccessibilityName(ToDaliString(ToStdString(name)));
+}
+
+Dali::String ViewDataImpl::GetAccessibilityName() const
+{
+  const auto* data = GetAccessibilityData();
+  return ToDaliString(DALI_LIKELY(data) ? data->mAccessibilityProps.name : std::string{});
+}
+
+void ViewDataImpl::SetResolvedAccessibilityDescription(const Dali::String& description)
+{
+  const std::string value = ToStdString(description);
+  if(DALI_UNLIKELY(!GetAccessibilityData()) && value.empty())
+  {
+    return;
+  }
+
+  auto& data = GetOrCreateAccessibilityData();
+  if(data.mAccessibilityProps.description != value)
+  {
+    data.mAccessibilityProps.description = value;
+    data.EmitPropertyChanged(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::DESCRIPTION);
+  }
+}
+
+void ViewDataImpl::SetAccessibilityDescription(StringView description)
+{
+  auto manager = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.ClearBinding(mViewImpl.Self(), ACCESSIBILITY_DESCRIPTION_BINDING_ID);
+  }
+
+  if(auto* data = GetAccessibilityData())
+  {
+    data->mAccessibilityProps.translatableDescription.clear();
+    data->mAccessibilityProps.descriptionLanguageSpans.clear();
+    data->UpdateLanguageSpanAttribute(false);
+  }
+  SetResolvedAccessibilityDescription(ToDaliString(ToStdString(description)));
+}
+
+Dali::String ViewDataImpl::GetAccessibilityDescription() const
+{
+  const auto* data = GetAccessibilityData();
+  return ToDaliString(DALI_LIKELY(data) ? data->mAccessibilityProps.description : std::string{});
+}
+
+void ViewDataImpl::SetAccessibilityValue(StringView value)
+{
+  const std::string stringValue = ToStdString(value);
+  if(DALI_UNLIKELY(!GetAccessibilityData()) && stringValue.empty())
+  {
+    return;
+  }
+
+  auto& data = GetOrCreateAccessibilityData();
+  if(data.mAccessibilityProps.value != stringValue)
+  {
+    data.mAccessibilityProps.value = stringValue;
+    data.EmitPropertyChanged(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::VALUE);
+  }
+}
+
+Dali::String ViewDataImpl::GetAccessibilityValue() const
+{
+  const auto* data = GetAccessibilityData();
+  return ToDaliString(DALI_LIKELY(data) ? data->mAccessibilityProps.value : std::string{});
+}
+
+void ViewDataImpl::SetAccessibilityRole(Accessibility::Role role)
+{
+  if(IsValidAccessibilityRole(role))
+  {
+    mAccessibilityRole = static_cast<int32_t>(role);
+  }
+}
+
+Accessibility::Role ViewDataImpl::GetAccessibilityRole() const
+{
+  return static_cast<Accessibility::Role>(mAccessibilityRole);
+}
+
+void ViewDataImpl::SetAccessibilityHidden(bool hidden)
+{
+  const auto* data           = GetAccessibilityData();
+  const bool  originalHidden = DALI_LIKELY(data) ? data->mAccessibilityProps.isHidden : false;
+  if(originalHidden == hidden)
+  {
+    return;
+  }
+
+  GetOrCreateAccessibilityData().mAccessibilityProps.isHidden = hidden;
+  auto accessible                                             = GetOrCreateAccessibilityData().GetAccessibleObject();
+  if(DALI_LIKELY(accessible))
+  {
+    auto* parent = dynamic_cast<Dali::Accessibility::ActorAccessible*>(accessible->GetParent());
+    if(parent)
+    {
+      parent->OnChildrenChanged();
+    }
+  }
+}
+
+bool ViewDataImpl::IsAccessibilityHidden() const
+{
+  const auto* data = GetAccessibilityData();
+  return DALI_LIKELY(data) && data->mAccessibilityProps.isHidden;
+}
+
+void ViewDataImpl::SetAccessibilityHighlightable(bool highlightable)
+{
+  GetOrCreateAccessibilityData().mAccessibilityProps.isHighlightable =
+    highlightable ? TriStateProperty::TRUE : TriStateProperty::FALSE;
+}
+
+void ViewDataImpl::ResetAccessibilityHighlightable()
+{
+  if(auto* data = GetAccessibilityData())
+  {
+    data->mAccessibilityProps.isHighlightable = TriStateProperty::AUTO;
+  }
+}
+
+bool ViewDataImpl::IsAccessibilityHighlightable() const
+{
+  const auto* data  = GetAccessibilityData();
+  const auto  value = DALI_LIKELY(data) ? data->mAccessibilityProps.isHighlightable : TriStateProperty::AUTO;
+  if(value == TriStateProperty::TRUE)
+  {
+    return true;
+  }
+  if(value == TriStateProperty::FALSE)
+  {
+    return false;
+  }
+  return GetAccessibilityRole() != Accessibility::Role::NONE;
+}
+
+void ViewDataImpl::SetAccessibilityScrollable(bool scrollable)
+{
+  if(DALI_LIKELY(GetAccessibilityData()) || scrollable)
+  {
+    GetOrCreateAccessibilityData().mAccessibilityProps.isScrollable = scrollable;
+  }
+}
+
+bool ViewDataImpl::IsAccessibilityScrollable() const
+{
+  const auto* data = GetAccessibilityData();
+  return DALI_LIKELY(data) && data->mAccessibilityProps.isScrollable;
+}
+
+void ViewDataImpl::SetAccessibilityModal(bool modal)
+{
+  if(DALI_LIKELY(GetAccessibilityData()) || modal)
+  {
+    GetOrCreateAccessibilityData().mAccessibilityProps.isModal = modal;
+  }
+}
+
+bool ViewDataImpl::IsAccessibilityModal() const
+{
+  const auto* data = GetAccessibilityData();
+  return DALI_LIKELY(data) && data->mAccessibilityProps.isModal;
+}
+
+void ViewDataImpl::SetAutomationId(StringView automationId)
+{
+  const std::string value = ToStdString(automationId);
+  if(DALI_LIKELY(GetAccessibilityData()) || !value.empty())
+  {
+    GetOrCreateAccessibilityData().mAccessibilityProps.automationId = value;
+  }
+}
+
+Dali::String ViewDataImpl::GetAutomationId() const
+{
+  const auto* data = GetAccessibilityData();
+  return ToDaliString(DALI_LIKELY(data) ? data->mAccessibilityProps.automationId : std::string{});
+}
+
+void ViewDataImpl::ApplyLocalizedAccessibilityName(BaseHandle, const Dali::String& name)
+{
+  SetResolvedAccessibilityName(name);
+}
+
+void ViewDataImpl::SetTranslatableAccessibilityName(StringView resourceId, StringView domain)
+{
+  if(resourceId.Empty())
+  {
+    ClearTranslatableAccessibilityName();
+    return;
+  }
+
+  auto& data                                = GetOrCreateAccessibilityData();
+  data.mAccessibilityProps.translatableName = ToStdString(resourceId);
+  data.mAccessibilityProps.nameLanguageSpans.clear();
+  data.UpdateLanguageSpanAttribute(true);
+
+  auto manager = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.SetBindingResource(mViewImpl.Self(),
+                               ACCESSIBILITY_NAME_BINDING_ID,
+                               resourceId,
+                               domain,
+                               LocalizedStringCallback::New(this, &ViewDataImpl::ApplyLocalizedAccessibilityName));
+  }
+  else
+  {
+    SetResolvedAccessibilityName(ToDaliString(ToStdString(resourceId)));
+  }
+}
+
+Dali::String ViewDataImpl::GetTranslatableAccessibilityName() const
+{
+  const auto* data = GetAccessibilityData();
+  return ToDaliString(DALI_LIKELY(data) ? data->mAccessibilityProps.translatableName : std::string{});
+}
+
+void ViewDataImpl::ClearTranslatableAccessibilityName()
+{
+  if(auto* data = GetAccessibilityData())
+  {
+    data->mAccessibilityProps.translatableName.clear();
+  }
+  auto manager = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.ClearBinding(mViewImpl.Self(), ACCESSIBILITY_NAME_BINDING_ID);
+  }
+}
+
+void ViewDataImpl::ApplyLocalizedAccessibilityDescription(BaseHandle, const Dali::String& description)
+{
+  SetResolvedAccessibilityDescription(description);
+}
+
+void ViewDataImpl::SetTranslatableAccessibilityDescription(StringView resourceId, StringView domain)
+{
+  if(resourceId.Empty())
+  {
+    ClearTranslatableAccessibilityDescription();
+    return;
+  }
+
+  auto& data                                       = GetOrCreateAccessibilityData();
+  data.mAccessibilityProps.translatableDescription = ToStdString(resourceId);
+  data.mAccessibilityProps.descriptionLanguageSpans.clear();
+  data.UpdateLanguageSpanAttribute(false);
+
+  auto manager = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.SetBindingResource(mViewImpl.Self(),
+                               ACCESSIBILITY_DESCRIPTION_BINDING_ID,
+                               resourceId,
+                               domain,
+                               LocalizedStringCallback::New(this, &ViewDataImpl::ApplyLocalizedAccessibilityDescription));
+  }
+  else
+  {
+    SetResolvedAccessibilityDescription(ToDaliString(ToStdString(resourceId)));
+  }
+}
+
+Dali::String ViewDataImpl::GetTranslatableAccessibilityDescription() const
+{
+  const auto* data = GetAccessibilityData();
+  return ToDaliString(DALI_LIKELY(data) ? data->mAccessibilityProps.translatableDescription : std::string{});
+}
+
+void ViewDataImpl::ClearTranslatableAccessibilityDescription()
+{
+  if(auto* data = GetAccessibilityData())
+  {
+    data->mAccessibilityProps.translatableDescription.clear();
+  }
+  auto manager = UiLocalizationManager::Get();
+  if(manager)
+  {
+    manager.ClearBinding(mViewImpl.Self(), ACCESSIBILITY_DESCRIPTION_BINDING_ID);
+  }
+}
+
+void ViewDataImpl::AddAccessibilityRelation(Accessibility::RelationType type, View target)
+{
+  if(!IsValidAccessibilityRelation(type) || !target)
+  {
+    return;
+  }
+
+  auto& targets = GetOrCreateAccessibilityData().mAccessibilityProps.relations[type];
+  for(auto iterator = targets.begin(); iterator != targets.end();)
+  {
+    View current = iterator->GetHandle();
+    if(!current)
+    {
+      iterator = targets.erase(iterator);
+    }
+    else
+    {
+      if(current == target)
+      {
+        return;
+      }
+      ++iterator;
+    }
+  }
+  targets.emplace_back(target);
+}
+
+void ViewDataImpl::RemoveAccessibilityRelation(Accessibility::RelationType type, View target)
+{
+  auto* data = GetAccessibilityData();
+  if(DALI_UNLIKELY(!data) || !IsValidAccessibilityRelation(type) || !target)
+  {
+    return;
+  }
+
+  auto relation = data->mAccessibilityProps.relations.find(type);
+  if(relation == data->mAccessibilityProps.relations.end())
+  {
+    return;
+  }
+  auto& targets = relation->second;
+  targets.erase(std::remove_if(targets.begin(), targets.end(), [&target](const WeakHandle<View>& weakTarget)
+  {
+    const View current = weakTarget.GetHandle();
+    return !current || current == target;
+  }),
+                targets.end());
+  if(targets.empty())
+  {
+    data->mAccessibilityProps.relations.erase(relation);
+  }
+}
+
+void ViewDataImpl::ClearAccessibilityRelations()
+{
+  if(auto* data = GetAccessibilityData())
+  {
+    data->mAccessibilityProps.relations.clear();
+  }
+}
+
+bool ViewDataImpl::HasAccessibilityRelation(Accessibility::RelationType type, View target) const
+{
+  const auto* data = GetAccessibilityData();
+  if(DALI_UNLIKELY(!data) || !IsValidAccessibilityRelation(type) || !target)
+  {
+    return false;
+  }
+  auto relation = data->mAccessibilityProps.relations.find(type);
+  if(relation == data->mAccessibilityProps.relations.end())
+  {
+    return false;
+  }
+  return std::any_of(relation->second.begin(), relation->second.end(), [&target](const WeakHandle<View>& weakTarget)
+  {
+    return weakTarget.GetHandle() == target;
+  });
+}
+
+void ViewDataImpl::AddAccessibilityReadingInfo(Accessibility::ReadingInfo info)
+{
+  if(!IsValidAccessibilityReadingInfo(info))
+  {
+    return;
+  }
+  auto types                                = GetAccessibilityReadingInfoType();
+  types[ToIntegrationReadingInfoType(info)] = true;
+  SetAccessibilityReadingInfoType(types);
+}
+
+void ViewDataImpl::RemoveAccessibilityReadingInfo(Accessibility::ReadingInfo info)
+{
+  if(!IsValidAccessibilityReadingInfo(info))
+  {
+    return;
+  }
+  auto types                                = GetAccessibilityReadingInfoType();
+  types[ToIntegrationReadingInfoType(info)] = false;
+  SetAccessibilityReadingInfoType(types);
+}
+
+void ViewDataImpl::ClearAccessibilityReadingInfo()
+{
+  SetAccessibilityReadingInfoType({});
+}
+
+bool ViewDataImpl::HasAccessibilityReadingInfo(Accessibility::ReadingInfo info) const
+{
+  return IsValidAccessibilityReadingInfo(info) && GetAccessibilityReadingInfoType()[ToIntegrationReadingInfoType(info)];
+}
+
+bool ViewDataImpl::AddAccessibilityNameLanguageSpan(uint32_t start, uint32_t length, StringView locale)
+{
+  const std::string localeValue = ToStdString(locale);
+  auto*             data        = GetAccessibilityData();
+  if(DALI_UNLIKELY(!data) || length == 0u || localeValue.empty() || start > std::numeric_limits<uint32_t>::max() - length)
+  {
+    return false;
+  }
+
+  const uint32_t end = start + length;
+  if(end > Text::Utf8ToUtf32Length(ToDaliString(data->mAccessibilityProps.name)))
+  {
+    return false;
+  }
+  auto& spans = data->mAccessibilityProps.nameLanguageSpans;
+  if(std::any_of(spans.begin(), spans.end(), [start, end](const auto& span)
+  {
+    return start < span.start + span.length && span.start < end;
+  }))
+  {
+    return false;
+  }
+  spans.push_back({start, length, localeValue});
+  std::sort(spans.begin(), spans.end(), [](const auto& lhs, const auto& rhs)
+  { return lhs.start < rhs.start; });
+  data->UpdateLanguageSpanAttribute(true);
+  return true;
+}
+
+void ViewDataImpl::ClearAccessibilityNameLanguageSpans()
+{
+  if(auto* data = GetAccessibilityData())
+  {
+    data->mAccessibilityProps.nameLanguageSpans.clear();
+    data->UpdateLanguageSpanAttribute(true);
+  }
+}
+
+bool ViewDataImpl::AddAccessibilityDescriptionLanguageSpan(uint32_t start, uint32_t length, StringView locale)
+{
+  const std::string localeValue = ToStdString(locale);
+  auto*             data        = GetAccessibilityData();
+  if(DALI_UNLIKELY(!data) || length == 0u || localeValue.empty() || start > std::numeric_limits<uint32_t>::max() - length)
+  {
+    return false;
+  }
+
+  const uint32_t end = start + length;
+  if(end > Text::Utf8ToUtf32Length(ToDaliString(data->mAccessibilityProps.description)))
+  {
+    return false;
+  }
+  auto& spans = data->mAccessibilityProps.descriptionLanguageSpans;
+  if(std::any_of(spans.begin(), spans.end(), [start, end](const auto& span)
+  {
+    return start < span.start + span.length && span.start < end;
+  }))
+  {
+    return false;
+  }
+  spans.push_back({start, length, localeValue});
+  std::sort(spans.begin(), spans.end(), [](const auto& lhs, const auto& rhs)
+  { return lhs.start < rhs.start; });
+  data->UpdateLanguageSpanAttribute(false);
+  return true;
+}
+
+void ViewDataImpl::ClearAccessibilityDescriptionLanguageSpans()
+{
+  if(auto* data = GetAccessibilityData())
+  {
+    data->mAccessibilityProps.descriptionLanguageSpans.clear();
+    data->UpdateLanguageSpanAttribute(false);
+  }
+}
+
+void ViewDataImpl::SetRequestInitialAccessibilityHighlight(bool request)
+{
+  if(request)
+  {
+    AppendAccessibilityAttribute(INITIAL_HIGHLIGHT_ATTRIBUTE, "true");
+  }
+  else
+  {
+    RemoveAccessibilityAttribute(INITIAL_HIGHLIGHT_ATTRIBUTE);
+  }
+}
+
+bool ViewDataImpl::IsInitialAccessibilityHighlightRequested() const
+{
+  const auto* data = GetAccessibilityData();
+  return DALI_LIKELY(data) && GetBooleanAttribute(data->mAccessibilityProps.extraAttributes, INITIAL_HIGHLIGHT_ATTRIBUTE);
+}
+
+void ViewDataImpl::SetAccessibilityCollectionContainer(bool container)
+{
+  if(container)
+  {
+    AppendAccessibilityAttribute(COLLECTION_CONTAINER_ATTRIBUTE, "true");
+  }
+  else
+  {
+    RemoveAccessibilityAttribute(COLLECTION_CONTAINER_ATTRIBUTE);
+  }
+}
+
+bool ViewDataImpl::IsAccessibilityCollectionContainer() const
+{
+  const auto* data = GetAccessibilityData();
+  return DALI_LIKELY(data) && GetBooleanAttribute(data->mAccessibilityProps.extraAttributes, COLLECTION_CONTAINER_ATTRIBUTE);
+}
+
+void ViewDataImpl::SetAccessibilityCollectionIndex(int32_t index)
+{
+  if(index < 0)
+  {
+    ClearAccessibilityCollectionIndex();
+  }
+  else
+  {
+    AppendAccessibilityAttribute(COLLECTION_INDEX_ATTRIBUTE, ToDaliString(std::to_string(index)));
+  }
+}
+
+int32_t ViewDataImpl::GetAccessibilityCollectionIndex() const
+{
+  const auto* data = GetAccessibilityData();
+  std::string value;
+  if(DALI_UNLIKELY(!data) || !GetStringAttribute(data->mAccessibilityProps.extraAttributes, COLLECTION_INDEX_ATTRIBUTE, value))
+  {
+    return -1;
+  }
+  char* parsedEnd = nullptr;
+  long  parsed    = std::strtol(value.c_str(), &parsedEnd, 10);
+  if(parsedEnd != value.c_str() + value.size() || parsed < 0 || parsed > std::numeric_limits<int32_t>::max())
+  {
+    return -1;
+  }
+  return static_cast<int32_t>(parsed);
+}
+
+void ViewDataImpl::ClearAccessibilityCollectionIndex()
+{
+  RemoveAccessibilityAttribute(COLLECTION_INDEX_ATTRIBUTE);
+}
+
+View::AccessibilityReadingStatusChangedSignalType& ViewDataImpl::AccessibilityReadingStatusChangedSignal()
+{
+  return GetOrCreateAccessibilityData().mAccessibilityReadingStatusChangedSignal;
+}
+
+View::AccessibilityHighlightedSignalType& ViewDataImpl::AccessibilityHighlightedSignal()
+{
+  return GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal;
+}
+
 void ViewDataImpl::AppendAccessibilityAttribute(const Dali::String& key, const Dali::String& value)
 {
   GetOrCreateAccessibilityData().AppendAccessibilityAttribute(key, value);
@@ -4751,12 +5101,18 @@ uint32_t ViewDataImpl::GetAccessibilityStates() const
 
 void ViewDataImpl::AddAccessibilityState(Accessibility::State state)
 {
-  SetAccessibilityStates(GetAccessibilityStates() | ViewAccessibilityStateToMask(state));
+  if(static_cast<uint32_t>(state) < static_cast<uint32_t>(Accessibility::State::MAX_COUNT))
+  {
+    SetAccessibilityStates(GetAccessibilityStates() | ViewAccessibilityStateToMask(state));
+  }
 }
 
 void ViewDataImpl::RemoveAccessibilityState(Accessibility::State state)
 {
-  SetAccessibilityStates(GetAccessibilityStates() & ~ViewAccessibilityStateToMask(state));
+  if(static_cast<uint32_t>(state) < static_cast<uint32_t>(Accessibility::State::MAX_COUNT))
+  {
+    SetAccessibilityStates(GetAccessibilityStates() & ~ViewAccessibilityStateToMask(state));
+  }
 }
 
 void ViewDataImpl::ClearAccessibilityStates()
@@ -4766,7 +5122,8 @@ void ViewDataImpl::ClearAccessibilityStates()
 
 bool ViewDataImpl::HasAccessibilityState(Accessibility::State state) const
 {
-  return (GetAccessibilityStates() & ViewAccessibilityStateToMask(state)) != 0u;
+  return static_cast<uint32_t>(state) < static_cast<uint32_t>(Accessibility::State::MAX_COUNT) &&
+         (GetAccessibilityStates() & ViewAccessibilityStateToMask(state)) != 0u;
 }
 
 void ViewDataImpl::EnableCreateAccessible(bool enable)
@@ -5166,11 +5523,22 @@ Dali::Vector<Dali::Devel::Accessibility::Relation> ViewDataImpl::GetAccessibilit
     const auto& relations = accessibilityData->mAccessibilityProps.relations;
     for(const auto& relation : relations)
     {
-      const auto& targets = relation.second;
-
       Dali::Devel::Accessibility::Relation rel{ToIntegrationRelationType(relation.first), {}}; // LCOV_EXCL_LINE
-      std::copy(targets.begin(), targets.end(), std::back_inserter(rel.mTargets));
-      result.PushBack(std::move(rel));
+      for(const auto& weakTarget : relation.second)
+      {
+        View target = weakTarget.GetHandle();
+        if(target)
+        {
+          if(auto* targetAccessible = Dali::Accessibility::Accessible::Get(target))
+          {
+            rel.mTargets.push_back(targetAccessible);
+          }
+        }
+      }
+      if(!rel.mTargets.empty())
+      {
+        result.PushBack(std::move(rel));
+      }
     }
   }
 

@@ -515,16 +515,24 @@ public: // Properties
    */
   void SetMargin(float uniform);
 
-  /** @brief Sets the start view margin. */
+  /**
+   * @brief Sets the start view margin.
+   */
   void SetStartMargin(float margin);
 
-  /** @brief Sets the end view margin. */
+  /**
+   * @brief Sets the end view margin.
+   */
   void SetEndMargin(float margin);
 
-  /** @brief Sets the top view margin. */
+  /**
+   * @brief Sets the top view margin.
+   */
   void SetTopMargin(float margin);
 
-  /** @brief Sets the bottom view margin. */
+  /**
+   * @brief Sets the bottom view margin.
+   */
   void SetBottomMargin(float margin);
 
   /**
@@ -566,16 +574,24 @@ public: // Properties
    */
   void SetPadding(float uniform);
 
-  /** @brief Sets the start view padding. */
+  /**
+   * @brief Sets the start view padding.
+   */
   void SetStartPadding(float padding);
 
-  /** @brief Sets the end view padding. */
+  /**
+   * @brief Sets the end view padding.
+   */
   void SetEndPadding(float padding);
 
-  /** @brief Sets the top view padding. */
+  /**
+   * @brief Sets the top view padding.
+   */
   void SetTopPadding(float padding);
 
-  /** @brief Sets the bottom view padding. */
+  /**
+   * @brief Sets the bottom view padding.
+   */
   void SetBottomPadding(float padding);
 
   /**
@@ -1622,58 +1638,12 @@ public:
       SHADOW,
 
       /**
-       * @brief The name of object visible in accessibility tree.
-       * @details Name "accessibilityName", type Property::STRING.
-       */
-      ACCESSIBILITY_NAME,
-
-      /**
-       * @brief The description of object visible in accessibility tree.
-       * @details Name "accessibilityDescription", type Property::STRING.
-       */
-      ACCESSIBILITY_DESCRIPTION,
-
-      /**
-       * @brief Deprecated. Current translation domain for accessibility clients.
-       * @details Name "accessibilityTranslationDomain", type Property::STRING.
-       */
-      ACCESSIBILITY_TRANSLATION_DOMAIN,
-
-      /**
-       * @brief Role being performed in accessibility hierarchy.
-       * @details Name "accessibilityRole", type Property::INTEGER.
-       * @note Set this property with the integer value of Dali::Ui::Accessibility::Role.
-       * Dali UI converts this semantic role to the adaptor accessibility role when requested by accessibility services.
-       * @see Dali::Ui::Accessibility::Role
-       */
-      ACCESSIBILITY_ROLE,
-
-      /**
-       * @brief Indicates whether accessibility services may highlight this View.
-       * @details Name "accessibilityHighlightable", type Property::BOOLEAN.
-       */
-      ACCESSIBILITY_HIGHLIGHTABLE,
-
-      /**
-       * @brief Set of accessibility attributes describing object in accessibility hierarchy.
-       * @details Name "accessibilityAttributes", type Property::MAP
-       */
-      ACCESSIBILITY_ATTRIBUTES,
-
-      /**
        * @brief Whether a View and its descendants can emit key signals.
        * @details Name "dispatchKeyEvents", type Property::BOOLEAN
        * @note If a View's dispatchKeyEvents is set to false, then it's children will not emit a key event signal
        * either.
        */
       DISPATCH_KEY_EVENTS,
-
-      /**
-       * @brief Marks this View as hidden from accessibility clients.
-       * @details Name "accessibilityHidden", type Property::BOOLEAN.
-       * @note The representative Accessible object will not appear in the exported accessibility tree.
-       */
-      ACCESSIBILITY_HIDDEN,
 
       /**
        * @brief The ID of the clockwise focusable View.
@@ -1686,32 +1656,6 @@ public:
        * @details Name "counterClockwiseFocusableViewId", type Property::INTEGER.
        */
       COUNTER_CLOCKWISE_FOCUSABLE_VIEW_ID,
-
-      /**
-       * @brief Identifier that allows the automation framework to find and interact with this element.
-       * @details Name "automationId", type Property::STRING.
-       * @note This is a string identifier (compared to @c Actor::Property::ID which is an integer).
-       * It will also appear in the AT-SPI tree under the key "automationId".
-       */
-      AUTOMATION_ID,
-
-      /**
-       * @brief The accessibility value represented by the View. For example, "60%" for a slider object.
-       * @details Name "accessibilityValue", type Property::STRING.
-       */
-      ACCESSIBILITY_VALUE,
-
-      /**
-       * @brief Indicates whether accessibility services should treat the View as scrollable.
-       * @details Name "accessibilityScrollable", type Property::BOOLEAN.
-       */
-      ACCESSIBILITY_SCROLLABLE,
-
-      /**
-       * @brief Indicates whether accessibility services should treat the View as modal.
-       * @details Name "accessibilityIsModal", type Property::BOOLEAN.
-       */
-      ACCESSIBILITY_IS_MODAL,
 
       /**
        * @brief Whether to draw on offscreen of not.
@@ -1868,33 +1812,11 @@ public:
   /// @brief Offscreen rendering finished signal type.
   typedef Signal<void(View)> OffScreenRenderingFinishedSignalType;
 
-  /// @brief AccessibilityActivate signal type.
-  typedef Signal<void()> AccessibilityActivateSignalType;
+  /// @brief Accessibility reading lifecycle signal type.
+  using AccessibilityReadingStatusChangedSignalType = Signal<void(View, Accessibility::ReadingStatus)>;
 
-  /// @brief AccessibilityReadingSkipped signal type.
-  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
-
-  /// @brief AccessibilityReadingPaused signal type.
-  typedef Signal<void()> AccessibilityReadingPausedSignalType;
-
-  /// @brief AccessibilityReadingResumed signal type.
-  typedef Signal<void()> AccessibilityReadingResumedSignalType;
-
-  /// @brief AccessibilityReadingCancelled signal type.
-  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
-
-  /// @brief AccessibilityReadingStopped signal type.
-  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
-
-  /// @brief AccessibilityGetName signal type.
-  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
-
-  /// @brief AccessibilityGetDescription signal type.
-  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
-
-  /// @brief AccessibilityHighlighted signal type.
-  /// @param bool highlighted true if View is highlighted, false if highlight is removed.
-  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+  /// @brief Accessibility highlight state signal type.
+  using AccessibilityHighlightedSignalType = Signal<void(View, bool)>;
 
   /// @brief Visual Event signal type.
   typedef Signal<void(View, Dali::Property::Index, Dali::Property::Index)> VisualEventSignalType;
@@ -1933,6 +1855,345 @@ public:
   bool IsResourceReady() const;
 
   /**
+   * @brief Sets the explicit accessibility name.
+   *
+   * @param[in] name The accessibility name
+   */
+  void SetAccessibilityName(StringView name);
+
+  /**
+   * @brief Returns the explicit or resolved accessibility name.
+   *
+   * @return The accessibility name
+   */
+  Dali::String GetAccessibilityName() const;
+
+  /**
+   * @brief Sets the explicit accessibility description.
+   *
+   * @param[in] description The accessibility description
+   */
+  void SetAccessibilityDescription(StringView description);
+
+  /**
+   * @brief Returns the explicit or resolved accessibility description.
+   *
+   * @return The accessibility description
+   */
+  Dali::String GetAccessibilityDescription() const;
+
+  /**
+   * @brief Sets the accessibility value.
+   *
+   * @param[in] value The accessibility value
+   */
+  void SetAccessibilityValue(StringView value);
+
+  /**
+   * @brief Returns the accessibility value.
+   *
+   * @return The accessibility value
+   */
+  Dali::String GetAccessibilityValue() const;
+
+  /**
+   * @brief Sets the accessibility role.
+   *
+   * @param[in] role The accessibility role
+   */
+  void SetAccessibilityRole(Accessibility::Role role);
+
+  /**
+   * @brief Returns the accessibility role.
+   *
+   * @return The accessibility role
+   */
+  Accessibility::Role GetAccessibilityRole() const;
+
+  /**
+   * @brief Sets whether this View is hidden from accessibility clients.
+   *
+   * @param[in] hidden Whether this View is hidden from accessibility clients
+   */
+  void SetAccessibilityHidden(bool hidden);
+
+  /**
+   * @brief Returns whether this View is hidden from accessibility clients.
+   *
+   * @return True if this View is hidden from accessibility clients, false otherwise
+   */
+  bool IsAccessibilityHidden() const;
+
+  /**
+   * @brief Overrides whether this View can receive accessibility highlight.
+   *
+   * @param[in] highlightable Whether this View can receive accessibility highlight
+   */
+  void SetAccessibilityHighlightable(bool highlightable);
+
+  /**
+   * @brief Restores role-based accessibility highlight behavior.
+   */
+  void ResetAccessibilityHighlightable();
+
+  /**
+   * @brief Returns the effective accessibility highlightable state.
+   *
+   * @return True if this View can receive accessibility highlight, false otherwise
+   */
+  bool IsAccessibilityHighlightable() const;
+
+  /**
+   * @brief Sets whether this View exposes accessibility scrolling behavior.
+   *
+   * @param[in] scrollable Whether this View exposes accessibility scrolling behavior
+   */
+  void SetAccessibilityScrollable(bool scrollable);
+
+  /**
+   * @brief Returns whether accessibility scrolling behavior is enabled.
+   *
+   * @return True if accessibility scrolling behavior is enabled, false otherwise
+   */
+  bool IsAccessibilityScrollable() const;
+
+  /**
+   * @brief Sets whether this View is accessibility-modal.
+   *
+   * @param[in] modal Whether this View is accessibility-modal
+   */
+  void SetAccessibilityModal(bool modal);
+
+  /**
+   * @brief Returns whether this View is accessibility-modal.
+   *
+   * @return True if this View is accessibility-modal, false otherwise
+   */
+  bool IsAccessibilityModal() const;
+
+  /**
+   * @brief Sets application automation metadata for this View.
+   *
+   * @param[in] automationId The application automation identifier
+   */
+  void SetAutomationId(StringView automationId);
+
+  /**
+   * @brief Returns application automation metadata for this View.
+   *
+   * @return The application automation identifier
+   */
+  Dali::String GetAutomationId() const;
+
+  /**
+   * @brief Binds the accessibility name to a resource in the default domain.
+   *
+   * @param[in] resourceId The localization resource identifier
+   */
+  void SetTranslatableAccessibilityName(StringView resourceId);
+
+  /**
+   * @brief Binds the accessibility name to a resource and domain.
+   *
+   * @param[in] resourceId The localization resource identifier
+   * @param[in] domain The localization domain
+   */
+  void SetTranslatableAccessibilityName(StringView resourceId, StringView domain);
+
+  /**
+   * @brief Returns the resource id bound to the accessibility name.
+   *
+   * @return The localization resource identifier, or an empty string if no binding exists
+   */
+  Dali::String GetTranslatableAccessibilityName() const;
+
+  /**
+   * @brief Removes the accessibility name localization binding.
+   */
+  void ClearTranslatableAccessibilityName();
+
+  /**
+   * @brief Binds the accessibility description to a resource in the default domain.
+   *
+   * @param[in] resourceId The localization resource identifier
+   */
+  void SetTranslatableAccessibilityDescription(StringView resourceId);
+
+  /**
+   * @brief Binds the accessibility description to a resource and domain.
+   *
+   * @param[in] resourceId The localization resource identifier
+   * @param[in] domain The localization domain
+   */
+  void SetTranslatableAccessibilityDescription(StringView resourceId, StringView domain);
+
+  /**
+   * @brief Returns the resource id bound to the accessibility description.
+   *
+   * @return The localization resource identifier, or an empty string if no binding exists
+   */
+  Dali::String GetTranslatableAccessibilityDescription() const;
+
+  /**
+   * @brief Removes the accessibility description localization binding.
+   */
+  void ClearTranslatableAccessibilityDescription();
+
+  /**
+   * @brief Adds an accessibility relation to another View.
+   *
+   * @param[in] type The accessibility relation type
+   * @param[in] target The target View
+   */
+  void AddAccessibilityRelation(Accessibility::RelationType type, View target);
+
+  /**
+   * @brief Removes an accessibility relation to another View.
+   *
+   * @param[in] type The accessibility relation type
+   * @param[in] target The target View
+   */
+  void RemoveAccessibilityRelation(Accessibility::RelationType type, View target);
+
+  /**
+   * @brief Removes all accessibility relations.
+   */
+  void ClearAccessibilityRelations();
+
+  /**
+   * @brief Returns whether the specified accessibility relation exists.
+   *
+   * @param[in] type The accessibility relation type
+   * @param[in] target The target View
+   * @return True if the relation exists, false otherwise
+   */
+  bool HasAccessibilityRelation(Accessibility::RelationType type, View target) const;
+
+  /**
+   * @brief Adds information to be announced when this View is read.
+   *
+   * @param[in] info The accessibility reading information to add
+   */
+  void AddAccessibilityReadingInfo(Accessibility::ReadingInfo info);
+
+  /**
+   * @brief Removes information from the set announced for this View.
+   *
+   * @param[in] info The accessibility reading information to remove
+   */
+  void RemoveAccessibilityReadingInfo(Accessibility::ReadingInfo info);
+
+  /**
+   * @brief Clears all information announced for this View.
+   */
+  void ClearAccessibilityReadingInfo();
+
+  /**
+   * @brief Returns whether the specified information is announced.
+   *
+   * @param[in] info The accessibility reading information to query
+   * @return True if the information is announced, false otherwise
+   */
+  bool HasAccessibilityReadingInfo(Accessibility::ReadingInfo info) const;
+
+  /**
+   * @brief Adds a code-point-based language span to the accessibility name.
+   *
+   * @param[in] start The zero-based code-point start index
+   * @param[in] length The number of code points in the span
+   * @param[in] locale The locale associated with the span
+   * @return True if the language span was added, false otherwise
+   */
+  bool AddAccessibilityNameLanguageSpan(uint32_t start, uint32_t length, StringView locale);
+
+  /**
+   * @brief Clears all language spans from the accessibility name.
+   */
+  void ClearAccessibilityNameLanguageSpans();
+
+  /**
+   * @brief Adds a code-point-based language span to the accessibility description.
+   *
+   * @param[in] start The zero-based code-point start index
+   * @param[in] length The number of code points in the span
+   * @param[in] locale The locale associated with the span
+   * @return True if the language span was added, false otherwise
+   */
+  bool AddAccessibilityDescriptionLanguageSpan(uint32_t start, uint32_t length, StringView locale);
+
+  /**
+   * @brief Clears all language spans from the accessibility description.
+   */
+  void ClearAccessibilityDescriptionLanguageSpans();
+
+  /**
+   * @brief Sets whether initial accessibility highlight is requested.
+   *
+   * @param[in] request Whether initial accessibility highlight is requested
+   */
+  void SetRequestInitialAccessibilityHighlight(bool request);
+
+  /**
+   * @brief Returns whether initial accessibility highlight is requested.
+   *
+   * @return True if initial accessibility highlight is requested, false otherwise
+   */
+  bool IsInitialAccessibilityHighlightRequested() const;
+
+  /**
+   * @brief Sets whether this View is an accessibility collection container.
+   *
+   * @param[in] container Whether this View is an accessibility collection container
+   */
+  void SetAccessibilityCollectionContainer(bool container);
+
+  /**
+   * @brief Returns whether this View is an accessibility collection container.
+   *
+   * @return True if this View is an accessibility collection container, false otherwise
+   */
+  bool IsAccessibilityCollectionContainer() const;
+
+  /**
+   * @brief Sets this View's zero-based index in an accessibility collection.
+   *
+   * @param[in] index The zero-based collection index, or -1 to clear it
+   */
+  void SetAccessibilityCollectionIndex(int32_t index);
+
+  /**
+   * @brief Returns the collection index, or -1 when it is not set.
+   *
+   * @return The zero-based collection index, or -1 when it is not set
+   */
+  int32_t GetAccessibilityCollectionIndex() const;
+
+  /**
+   * @brief Clears this View's accessibility collection index.
+   */
+  void ClearAccessibilityCollectionIndex();
+
+  /**
+   * @brief Adds or replaces a raw accessibility attribute.
+   *
+   * @param[in] key The accessibility attribute key
+   * @param[in] value The accessibility attribute value
+   */
+  void AppendAccessibilityAttribute(StringView key, StringView value);
+
+  /**
+   * @brief Removes a raw accessibility attribute.
+   *
+   * @param[in] key The accessibility attribute key
+   */
+  void RemoveAccessibilityAttribute(StringView key);
+
+  /**
+   * @brief Removes all raw and typed accessibility attributes.
+   */
+  void ClearAccessibilityAttributes();
+
+  /**
    * @brief Adds the given accessibility state to this View.
    *
    * @SINCE_2_5.30
@@ -1966,6 +2227,20 @@ public:
    * @see Dali::Ui::Accessibility::State
    */
   bool HasAccessibilityState(Accessibility::State state) const;
+
+  /**
+   * @brief Returns the signal emitted when this View's reading lifecycle changes.
+   *
+   * @return The accessibility reading status changed signal
+   */
+  AccessibilityReadingStatusChangedSignalType& AccessibilityReadingStatusChangedSignal();
+
+  /**
+   * @brief Returns the signal emitted when accessibility highlight changes.
+   *
+   * @return The accessibility highlighted signal
+   */
+  AccessibilityHighlightedSignalType& AccessibilityHighlightedSignal();
 
   /**
    * @brief This signal is emitted after all resources required by a View are loaded and ready.

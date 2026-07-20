@@ -497,6 +497,59 @@ public:
    */
   [[nodiscard]] AccessibilityData* GetAccessibilityData() const;
 
+  void                SetAccessibilityName(StringView name);
+  Dali::String        GetAccessibilityName() const;
+  void                SetAccessibilityDescription(StringView description);
+  Dali::String        GetAccessibilityDescription() const;
+  void                SetAccessibilityValue(StringView value);
+  Dali::String        GetAccessibilityValue() const;
+  void                SetAccessibilityRole(Accessibility::Role role);
+  Accessibility::Role GetAccessibilityRole() const;
+  void                SetAccessibilityHidden(bool hidden);
+  bool                IsAccessibilityHidden() const;
+  void                SetAccessibilityHighlightable(bool highlightable);
+  void                ResetAccessibilityHighlightable();
+  bool                IsAccessibilityHighlightable() const;
+  void                SetAccessibilityScrollable(bool scrollable);
+  bool                IsAccessibilityScrollable() const;
+  void                SetAccessibilityModal(bool modal);
+  bool                IsAccessibilityModal() const;
+  void                SetAutomationId(StringView automationId);
+  Dali::String        GetAutomationId() const;
+
+  void         SetTranslatableAccessibilityName(StringView resourceId, StringView domain);
+  Dali::String GetTranslatableAccessibilityName() const;
+  void         ClearTranslatableAccessibilityName();
+  void         SetTranslatableAccessibilityDescription(StringView resourceId, StringView domain);
+  Dali::String GetTranslatableAccessibilityDescription() const;
+  void         ClearTranslatableAccessibilityDescription();
+
+  void AddAccessibilityRelation(Accessibility::RelationType type, View target);
+  void RemoveAccessibilityRelation(Accessibility::RelationType type, View target);
+  void ClearAccessibilityRelations();
+  bool HasAccessibilityRelation(Accessibility::RelationType type, View target) const;
+
+  void AddAccessibilityReadingInfo(Accessibility::ReadingInfo info);
+  void RemoveAccessibilityReadingInfo(Accessibility::ReadingInfo info);
+  void ClearAccessibilityReadingInfo();
+  bool HasAccessibilityReadingInfo(Accessibility::ReadingInfo info) const;
+
+  bool AddAccessibilityNameLanguageSpan(uint32_t start, uint32_t length, StringView locale);
+  void ClearAccessibilityNameLanguageSpans();
+  bool AddAccessibilityDescriptionLanguageSpan(uint32_t start, uint32_t length, StringView locale);
+  void ClearAccessibilityDescriptionLanguageSpans();
+
+  void    SetRequestInitialAccessibilityHighlight(bool request);
+  bool    IsInitialAccessibilityHighlightRequested() const;
+  void    SetAccessibilityCollectionContainer(bool container);
+  bool    IsAccessibilityCollectionContainer() const;
+  void    SetAccessibilityCollectionIndex(int32_t index);
+  int32_t GetAccessibilityCollectionIndex() const;
+  void    ClearAccessibilityCollectionIndex();
+
+  View::AccessibilityReadingStatusChangedSignalType& AccessibilityReadingStatusChangedSignal();
+  View::AccessibilityHighlightedSignalType&          AccessibilityHighlightedSignal();
+
   /**
    * @brief Adds accessibility attribute
    * @param[in] key Attribute name to set
@@ -699,6 +752,11 @@ protected: // From processor-interface
   }
 
 private:
+  void SetResolvedAccessibilityName(const Dali::String& name);
+  void SetResolvedAccessibilityDescription(const Dali::String& description);
+  void ApplyLocalizedAccessibilityName(BaseHandle target, const Dali::String& name);
+  void ApplyLocalizedAccessibilityDescription(BaseHandle target, const Dali::String& description);
+
   class ScopedSkipChildrenUpdate;
 
   void SetBehaviourFlags(ViewImpl::ViewBehaviour behaviourFlags);
@@ -932,20 +990,9 @@ private:
   static const PropertyRegistration           PROPERTY_13;
   static const PropertyRegistration           PROPERTY_14;
   static const PropertyRegistration           PROPERTY_15;
-  static const PropertyRegistration           PROPERTY_16;
-  static const PropertyRegistration           PROPERTY_17;
-  static const PropertyRegistration           PROPERTY_18;
-  static const PropertyRegistration           PROPERTY_19;
-  static const PropertyRegistration           PROPERTY_20;
-  static const PropertyRegistration           PROPERTY_21;
   static const PropertyRegistration           PROPERTY_22;
-  static const PropertyRegistration           PROPERTY_23;
   static const PropertyRegistration           PROPERTY_24;
   static const PropertyRegistration           PROPERTY_25;
-  static const PropertyRegistration           PROPERTY_26;
-  static const PropertyRegistration           PROPERTY_27;
-  static const PropertyRegistration           PROPERTY_28;
-  static const PropertyRegistration           PROPERTY_30;
   static const PropertyRegistration           PROPERTY_31;
   static const PropertyRegistration           PROPERTY_32;
   static const PropertyRegistration           PROPERTY_33;

@@ -58,7 +58,7 @@ Dali::Actor CreateOverlayActor()
   actor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
   actor.SetProperty(Actor::Property::POSITION, Vector3(0.0f, 0.0f, 0.0f));
 
-  actor.SetProperty(Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  actor.SetAccessibilityHighlightable(false);
   return actor;
 }
 
@@ -70,7 +70,7 @@ Dali::Actor CreateOverlayHighlightActor()
   auto actor = Ui::ImageView::New(ToDaliString(focusBorderImagePath));
   actor.SetProperty(Actor::Property::NAME, HIGHLIGHT_NAME);
   DevelActor::SetResizePolicy(actor, ResizePolicy::FIXED, Dimension::ALL_DIMENSIONS);
-  actor.SetProperty(Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  actor.SetAccessibilityHighlightable(false);
   return actor;
 }
 } // unnamed namespace

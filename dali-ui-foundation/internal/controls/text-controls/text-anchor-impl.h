@@ -86,9 +86,9 @@ private: // From ViewImpl
   ViewAccessible* CreateAccessibleObject() override;
 
   /**
-   * @copydoc View::OnAccessibilityActivated()
+   * @copydoc View::OnAccessibilityActivate()
    */
-  bool OnAccessibilityActivated() override;
+  bool OnAccessibilityActivate() override;
 
 private: // Implementation
   /**

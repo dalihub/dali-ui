@@ -18,6 +18,10 @@
 // CLASS HEADER
 #include <dali-ui-foundation/extension-api/view.h>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/views/view-impl.h>
+
 // EXTERNAL INCLUDES
 #include <dali/public-api/actors/actor.h>
 
@@ -27,6 +31,18 @@ namespace Ui
 {
 namespace Extension
 {
+bool GrabAccessibilityHighlight(View view)
+{
+  auto accessible = Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
+  return DALI_LIKELY(accessible) && accessible->GrabHighlight();
+}
+
+bool ClearAccessibilityHighlight(View view)
+{
+  auto accessible = Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
+  return DALI_LIKELY(accessible) && accessible->ClearHighlight();
+}
+
 void SetPositionX(View view, float x)
 {
   static_cast<Dali::Actor&>(view).SetPositionX(x);

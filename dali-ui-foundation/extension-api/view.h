@@ -27,6 +27,30 @@ namespace Ui
 namespace Extension
 {
 /**
+ * @brief Requests accessibility highlight for the given View.
+ *
+ * If another object is highlighted, the accessibility highlight moves to the
+ * given View. When the highlight changes, accessibility clients are notified
+ * of the highlighted state change.
+ *
+ * This request is intended for a View in a stable accessibility tree. A
+ * concurrent accessibility context change, such as a newly showing page or
+ * modal, may cause an accessibility client to choose a different highlight.
+ *
+ * @param[in] view The View to request accessibility highlight for
+ * @return true if the View has the accessibility highlight, false otherwise
+ */
+DALI_UI_API bool GrabAccessibilityHighlight(View view);
+
+/**
+ * @brief Clears accessibility highlight from the given View.
+ *
+ * @param[in] view The View to clear accessibility highlight from
+ * @return true if the accessibility highlight was cleared, false otherwise
+ */
+DALI_UI_API bool ClearAccessibilityHighlight(View view);
+
+/**
  * @brief Sets the rendered X position of the view.
  *
  * The raw Dali::Actor geometry setters (SetPosition, SetSize, SetPositionX/Y/Z,

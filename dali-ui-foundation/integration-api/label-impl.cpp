@@ -1942,7 +1942,7 @@ void LabelImpl::OnInitialize()
 
   mController->SetVerticalLineAlignment(Text::Alignment::CENTER);
 
-  self.SetProperty(Ui::View::Property::ACCESSIBILITY_ROLE, static_cast<int32_t>(Accessibility::Role::TEXT));
+  Ui::View::DownCast(self).SetAccessibilityRole(Accessibility::Role::TEXT);
   Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
   Dali::Integration::Accessibility::Bridge::DisabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
 

@@ -709,6 +709,251 @@ bool View::IsResourceReady() const
   return GetImpl(*this).IsResourceReady();
 }
 
+void View::SetAccessibilityName(StringView name)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityName(name);
+}
+
+Dali::String View::GetAccessibilityName() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetAccessibilityName();
+}
+
+void View::SetAccessibilityDescription(StringView description)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityDescription(description);
+}
+
+Dali::String View::GetAccessibilityDescription() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetAccessibilityDescription();
+}
+
+void View::SetAccessibilityValue(StringView value)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityValue(value);
+}
+
+Dali::String View::GetAccessibilityValue() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetAccessibilityValue();
+}
+
+void View::SetAccessibilityRole(Accessibility::Role role)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityRole(role);
+}
+
+Accessibility::Role View::GetAccessibilityRole() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetAccessibilityRole();
+}
+
+void View::SetAccessibilityHidden(bool hidden)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityHidden(hidden);
+}
+
+bool View::IsAccessibilityHidden() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).IsAccessibilityHidden();
+}
+
+void View::SetAccessibilityHighlightable(bool highlightable)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityHighlightable(highlightable);
+}
+
+void View::ResetAccessibilityHighlightable()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ResetAccessibilityHighlightable();
+}
+
+bool View::IsAccessibilityHighlightable() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).IsAccessibilityHighlightable();
+}
+
+void View::SetAccessibilityScrollable(bool scrollable)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityScrollable(scrollable);
+}
+
+bool View::IsAccessibilityScrollable() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).IsAccessibilityScrollable();
+}
+
+void View::SetAccessibilityModal(bool modal)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityModal(modal);
+}
+
+bool View::IsAccessibilityModal() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).IsAccessibilityModal();
+}
+
+void View::SetAutomationId(StringView automationId)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAutomationId(automationId);
+}
+
+Dali::String View::GetAutomationId() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetAutomationId();
+}
+
+void View::SetTranslatableAccessibilityName(StringView resourceId)
+{
+  SetTranslatableAccessibilityName(resourceId, StringView());
+}
+
+void View::SetTranslatableAccessibilityName(StringView resourceId, StringView domain)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetTranslatableAccessibilityName(resourceId, domain);
+}
+
+Dali::String View::GetTranslatableAccessibilityName() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetTranslatableAccessibilityName();
+}
+
+void View::ClearTranslatableAccessibilityName()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ClearTranslatableAccessibilityName();
+}
+
+void View::SetTranslatableAccessibilityDescription(StringView resourceId)
+{
+  SetTranslatableAccessibilityDescription(resourceId, StringView());
+}
+
+void View::SetTranslatableAccessibilityDescription(StringView resourceId, StringView domain)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetTranslatableAccessibilityDescription(resourceId, domain);
+}
+
+Dali::String View::GetTranslatableAccessibilityDescription() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetTranslatableAccessibilityDescription();
+}
+
+void View::ClearTranslatableAccessibilityDescription()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ClearTranslatableAccessibilityDescription();
+}
+
+void View::AddAccessibilityRelation(Accessibility::RelationType type, View target)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).AddAccessibilityRelation(type, target);
+}
+
+void View::RemoveAccessibilityRelation(Accessibility::RelationType type, View target)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).RemoveAccessibilityRelation(type, target);
+}
+
+void View::ClearAccessibilityRelations()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ClearAccessibilityRelations();
+}
+
+bool View::HasAccessibilityRelation(Accessibility::RelationType type, View target) const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).HasAccessibilityRelation(type, target);
+}
+
+void View::AddAccessibilityReadingInfo(Accessibility::ReadingInfo info)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).AddAccessibilityReadingInfo(info);
+}
+
+void View::RemoveAccessibilityReadingInfo(Accessibility::ReadingInfo info)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).RemoveAccessibilityReadingInfo(info);
+}
+
+void View::ClearAccessibilityReadingInfo()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ClearAccessibilityReadingInfo();
+}
+
+bool View::HasAccessibilityReadingInfo(Accessibility::ReadingInfo info) const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).HasAccessibilityReadingInfo(info);
+}
+
+bool View::AddAccessibilityNameLanguageSpan(uint32_t start, uint32_t length, StringView locale)
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).AddAccessibilityNameLanguageSpan(start, length, locale);
+}
+
+void View::ClearAccessibilityNameLanguageSpans()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ClearAccessibilityNameLanguageSpans();
+}
+
+bool View::AddAccessibilityDescriptionLanguageSpan(uint32_t start, uint32_t length, StringView locale)
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).AddAccessibilityDescriptionLanguageSpan(start, length, locale);
+}
+
+void View::ClearAccessibilityDescriptionLanguageSpans()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ClearAccessibilityDescriptionLanguageSpans();
+}
+
+void View::SetRequestInitialAccessibilityHighlight(bool request)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetRequestInitialAccessibilityHighlight(request);
+}
+
+bool View::IsInitialAccessibilityHighlightRequested() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).IsInitialAccessibilityHighlightRequested();
+}
+
+void View::SetAccessibilityCollectionContainer(bool container)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityCollectionContainer(container);
+}
+
+bool View::IsAccessibilityCollectionContainer() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).IsAccessibilityCollectionContainer();
+}
+
+void View::SetAccessibilityCollectionIndex(int32_t index)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).SetAccessibilityCollectionIndex(index);
+}
+
+int32_t View::GetAccessibilityCollectionIndex() const
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).GetAccessibilityCollectionIndex();
+}
+
+void View::ClearAccessibilityCollectionIndex()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ClearAccessibilityCollectionIndex();
+}
+
+void View::AppendAccessibilityAttribute(StringView key, StringView value)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).AppendAccessibilityAttribute(Dali::String(key), Dali::String(value));
+}
+
+void View::RemoveAccessibilityAttribute(StringView key)
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).RemoveAccessibilityAttribute(Dali::String(key));
+}
+
+void View::ClearAccessibilityAttributes()
+{
+  Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).ClearAccessibilityAttributes();
+}
+
 void View::AddAccessibilityState(Accessibility::State state)
 {
   ViewImpl&               viewImpl     = Ui::GetImpl(*this);
@@ -735,6 +980,16 @@ bool View::HasAccessibilityState(Accessibility::State state) const
   const ViewImpl&               viewImpl     = Ui::GetImpl(*this);
   const Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(viewImpl);
   return viewDataImpl.HasAccessibilityState(state);
+}
+
+View::AccessibilityReadingStatusChangedSignalType& View::AccessibilityReadingStatusChangedSignal()
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).AccessibilityReadingStatusChangedSignal();
+}
+
+View::AccessibilityHighlightedSignalType& View::AccessibilityHighlightedSignal()
+{
+  return Internal::ViewDataImpl::Get(Ui::GetImpl(*this)).AccessibilityHighlightedSignal();
 }
 
 View::ResourceReadySignalType& View::ResourceReadySignal()

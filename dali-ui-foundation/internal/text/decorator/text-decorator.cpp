@@ -712,7 +712,7 @@ struct Decorator::Impl : public ConnectionTracker
     cursor.SetBackgroundColor(color);
     cursor.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     cursor.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-    cursor.SetProperty(Ui::View::Property::ACCESSIBILITY_HIDDEN, true);
+    cursor.SetAccessibilityHidden(true);
   }
 
   // Add or Remove cursor(s) from parent

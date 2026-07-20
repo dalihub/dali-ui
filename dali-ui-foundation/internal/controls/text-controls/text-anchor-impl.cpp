@@ -164,7 +164,7 @@ void TextAnchorImpl::OnInitialize()
   Actor self = Self();
 
   // Accessibility
-  self.SetProperty(Ui::View::Property::ACCESSIBILITY_ROLE, Accessibility::Role::LINK);
+  Ui::View::DownCast(self).SetAccessibilityRole(Accessibility::Role::LINK);
 }
 
 ViewAccessible* TextAnchorImpl::CreateAccessibleObject()
@@ -211,7 +211,7 @@ bool TextAnchorImpl::TextAnchorAccessible::IsValid() const
   return !GetAnchorUri(0).empty();
 }
 
-bool TextAnchorImpl::OnAccessibilityActivated()
+bool TextAnchorImpl::OnAccessibilityActivate()
 {
   Dali::Actor                             current                             = Self();
   Dali::Ui::Text::AnchorControlInterface* parentImplementationAnchorInterface = nullptr;

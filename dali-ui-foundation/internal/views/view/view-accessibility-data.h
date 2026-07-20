@@ -35,39 +35,12 @@ class ViewDataImpl::AccessibilityData : public ConnectionTracker
   friend class Ui::ViewAccessible;
 
 public:
-  /// @brief AccessibilityActivate signal type.
-  typedef Signal<void()> AccessibilityActivateSignalType;
-
-  /// @brief AccessibilityReadingSkipped signal type.
-  typedef Signal<void()> AccessibilityReadingSkippedSignalType;
-
-  /// @brief AccessibilityReadingPaused signal type.
-  typedef Signal<void()> AccessibilityReadingPausedSignalType;
-
-  /// @brief AccessibilityReadingResumed signal type.
-  typedef Signal<void()> AccessibilityReadingResumedSignalType;
-
-  /// @brief AccessibilityReadingCancelled signal type.
-  typedef Signal<void()> AccessibilityReadingCancelledSignalType;
-
-  /// @brief AccessibilityReadingStopped signal type.
-  typedef Signal<void()> AccessibilityReadingStoppedSignalType;
-
-  /// @brief AccessibilityGetName signal type.
-  typedef Signal<void(Dali::String&)> AccessibilityGetNameSignalType;
-
-  /// @brief AccessibilityGetDescription signal type.
-  typedef Signal<void(Dali::String&)> AccessibilityGetDescriptionSignalType;
+  using AccessibilityReadingStatusChangedSignalType = View::AccessibilityReadingStatusChangedSignalType;
 
   /// @brief AccessibilityDoGesture signal type.
   typedef Signal<void(std::pair<Dali::Devel::Accessibility::GestureInfo, bool>&)> AccessibilityDoGestureSignalType; // LCOV_EXCL_LINE
 
-  /// @brief AccessibilityAction signal type.
-  typedef Signal<bool(const Dali::Devel::Accessibility::ActionInfo&)> AccessibilityActionSignalType; // LCOV_EXCL_LINE
-
-  /// @brief AccessibilityHighlighted signal type.
-  /// @param bool highlighted true if View is highlighted, false if highlight is removed.
-  typedef Signal<void(bool)> AccessibilityHighlightedSignalType;
+  using AccessibilityHighlightedSignalType = View::AccessibilityHighlightedSignalType;
 
   // Constructor
   AccessibilityData(ViewImpl& viewImpl);
@@ -86,6 +59,16 @@ public:
    * @copydoc Dali::Ui::Internal::ViewDataImpl::ClearAccessibilityAttributes()
    */
   void ClearAccessibilityAttributes();
+
+  /**
+   * @brief Emits an accessibility property change if an Accessible exists.
+   */
+  void EmitPropertyChanged(Dali::Devel::Accessibility::ObjectPropertyChangeEvent event);
+
+  /**
+   * @brief Updates the exported language span attribute from internal spans.
+   */
+  void UpdateLanguageSpanAttribute(bool nameSpans);
 
   /**
    * @copydoc Dali::Ui::Internal::ViewDataImpl::SetAccessibilityReadingInfoType()
@@ -150,19 +133,9 @@ public:
   static AccessibilityStates GetDefaultViewAccessibilityStates();
 
 public:
-  AccessibilityActivateSignalType         mAccessibilityActivateSignal;
-  AccessibilityReadingSkippedSignalType   mAccessibilityReadingSkippedSignal;
-  AccessibilityReadingPausedSignalType    mAccessibilityReadingPausedSignal;
-  AccessibilityReadingResumedSignalType   mAccessibilityReadingResumedSignal;
-  AccessibilityReadingCancelledSignalType mAccessibilityReadingCancelledSignal;
-  AccessibilityReadingStoppedSignalType   mAccessibilityReadingStoppedSignal;
-
-  AccessibilityGetNameSignalType        mAccessibilityGetNameSignal;
-  AccessibilityGetDescriptionSignalType mAccessibilityGetDescriptionSignal;
-  AccessibilityDoGestureSignalType      mAccessibilityDoGestureSignal;
-
-  AccessibilityActionSignalType      mAccessibilityActionSignal;
-  AccessibilityHighlightedSignalType mAccessibilityHighlightedSignal;
+  AccessibilityReadingStatusChangedSignalType mAccessibilityReadingStatusChangedSignal;
+  AccessibilityDoGestureSignalType            mAccessibilityDoGestureSignal;
+  AccessibilityHighlightedSignalType          mAccessibilityHighlightedSignal;
 
   struct AccessibilityProps
   {
@@ -181,10 +154,21 @@ public:
     std::string description{};
     std::string value{};
     std::string automationId{};
+    std::string translatableName{};
+    std::string translatableDescription{};
 
-    AccessibilityStates                                                                         states{};
-    std::map<Dali::Ui::Accessibility::RelationType, std::set<Dali::Accessibility::Accessible*>> relations{}; // LCOV_EXCL_LINE
-    Property::Map                                                                               extraAttributes{};
+    struct LanguageSpan
+    {
+      uint32_t    start{0u};
+      uint32_t    length{0u};
+      std::string locale{};
+    };
+
+    AccessibilityStates                                                            states{};
+    std::map<Dali::Ui::Accessibility::RelationType, std::vector<WeakHandle<View>>> relations{}; // LCOV_EXCL_LINE
+    Property::Map                                                                  extraAttributes{};
+    std::vector<LanguageSpan>                                                      nameLanguageSpans{};
+    std::vector<LanguageSpan>                                                      descriptionLanguageSpans{};
 
     TriStateProperty isHighlightable : 3;
     bool             isHidden : 1;

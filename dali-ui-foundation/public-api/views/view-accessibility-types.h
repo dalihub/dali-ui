@@ -53,6 +53,37 @@ enum class State : uint32_t
 };
 
 /**
+ * @brief Identifies a part of a View that a screen reader should announce.
+ *
+ * Values are managed through View's Add, Remove, Clear, and Has methods. This
+ * enum is not a bit mask and does not provide bitwise operators.
+ *
+ * @SINCE_2_5.30
+ */
+enum class ReadingInfo : uint32_t
+{
+  NAME = 0,    ///< Announce the accessibility name. @SINCE_2_5.30
+  ROLE,        ///< Announce the accessibility role. @SINCE_2_5.30
+  DESCRIPTION, ///< Announce the accessibility description. @SINCE_2_5.30
+  STATE,       ///< Announce the accessibility state. @SINCE_2_5.30
+  MAX_COUNT    ///< Sentinel value used to validate reading information values. @SINCE_2_5.30
+};
+
+/**
+ * @brief Describes a change in the reading lifecycle of a View.
+ *
+ * @SINCE_2_5.30
+ */
+enum class ReadingStatus : uint32_t
+{
+  SKIPPED = 0, ///< Reading was skipped before it could be completed. @SINCE_2_5.30
+  PAUSED,      ///< Reading was paused. @SINCE_2_5.30
+  RESUMED,     ///< Reading resumed after being paused. @SINCE_2_5.30
+  CANCELLED,   ///< Pending or active reading was cancelled. @SINCE_2_5.30
+  STOPPED      ///< Reading stopped or completed. @SINCE_2_5.30
+};
+
+/**
  * @brief First numeric value reserved for public Dali UI accessibility roles.
  *
  * @SINCE_2_5.30

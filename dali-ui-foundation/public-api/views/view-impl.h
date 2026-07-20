@@ -98,21 +98,23 @@ public:
     LAST_VIEW_BEHAVIOUR_FLAG
   };
 
-public: // ABI-frozen virtual API
-  // ============================================================
-  // WARNING: Do NOT add, reorder, remove, or change signatures.
-  // ============================================================
-
+public: // Virtual API
   /**
    * @copydoc Dali::Ui::View::IsResourceReady
    */
   virtual bool IsResourceReady() const;
 
   /**
-   * @brief This method is called when the view is accessibility activated.
+   * @brief Called when accessibility activation is requested for this View.
    * @return true if this view can perform accessibility activation
    */
-  virtual bool OnAccessibilityActivated();
+  virtual bool OnAccessibilityActivate();
+
+  /**
+   * @brief Called when accessibility requests that the current context be dismissed.
+   * @return true if the escape action has been consumed by this view
+   */
+  virtual bool OnAccessibilityEscape();
 
   /**
    * @brief Called when accessibility pan gesture is received.
@@ -123,16 +125,44 @@ public: // ABI-frozen virtual API
 
   /**
    * @brief Called for accessibility value change (e.g. slider up/down).
-   * @param[in] isIncrease Whether the value should be increased or decreased
+   * @param[in] isIncreased Whether the value should be increased or decreased
    * @return true if the value changed action has been consumed by this view
    */
-  virtual bool OnAccessibilityValueChange(bool isIncrease);
+  virtual bool OnAccessibilityValueChange(bool isIncreased);
+
+  /**
+   * @brief Called when a scrollable view should reveal one of its children.
+   * @param[in] child The child View that should be brought into view
+   * @return true if this view scrolled to the child
+   */
+  virtual bool OnAccessibilityScrollToChild(View child);
 
   /**
    * @brief Called for accessibility zoom action.
    * @return true if the zoom action has been consumed by this view
    */
   virtual bool OnAccessibilityZoom();
+
+  /**
+   * @brief Called when the accessibility client requests a dynamic name.
+   * @param[out] value The requested name, including an intentionally empty value
+   * @return true if this view supplied the value
+   */
+  virtual bool OnAccessibilityRequestName(Dali::String& value);
+
+  /**
+   * @brief Called when the accessibility client requests a dynamic description.
+   * @param[out] value The requested description, including an intentionally empty value
+   * @return true if this view supplied the value
+   */
+  virtual bool OnAccessibilityRequestDescription(Dali::String& value);
+
+  /**
+   * @brief Called when the accessibility client requests a dynamic value.
+   * @param[out] value The requested value, including an intentionally empty value
+   * @return true if this view supplied the value
+   */
+  virtual bool OnAccessibilityRequestValue(Dali::String& value);
 
   /**
    * @brief Creates a custom Accessible object for this view.

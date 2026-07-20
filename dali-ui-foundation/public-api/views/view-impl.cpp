@@ -801,9 +801,14 @@ View ViewImpl::OnFocusRequested()
   return mImpl->ResolveDefaultFocusRequest();
 }
 
-bool ViewImpl::OnAccessibilityActivated()
+bool ViewImpl::OnAccessibilityActivate()
 {
   return mImpl->ActivateAccessibilityDefault();
+}
+
+bool ViewImpl::OnAccessibilityEscape()
+{
+  return false;
 }
 
 bool ViewImpl::OnAccessibilityPan(PanGesture gesture)
@@ -811,14 +816,34 @@ bool ViewImpl::OnAccessibilityPan(PanGesture gesture)
   return false; // Accessibility pan gesture is not handled by default
 }
 
-bool ViewImpl::OnAccessibilityValueChange(bool isIncrease)
+bool ViewImpl::OnAccessibilityValueChange(bool isIncreased)
 {
   return false; // Accessibility value change action is not handled by default
+}
+
+bool ViewImpl::OnAccessibilityScrollToChild(View child)
+{
+  return false;
 }
 
 bool ViewImpl::OnAccessibilityZoom()
 {
   return false; // Accessibility zoom action is not handled by default
+}
+
+bool ViewImpl::OnAccessibilityRequestName(Dali::String& value)
+{
+  return false;
+}
+
+bool ViewImpl::OnAccessibilityRequestDescription(Dali::String& value)
+{
+  return false;
+}
+
+bool ViewImpl::OnAccessibilityRequestValue(Dali::String& value)
+{
+  return false;
 }
 
 ViewAccessible* ViewImpl::CreateAccessibleObject()

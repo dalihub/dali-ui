@@ -2496,7 +2496,7 @@ public: // Text-input Event Queuing.
   bool KeyEvent(const Dali::KeyEvent& event);
 
   /**
-   * @brief Called from AnchorEvent or TextAnchor's OnAccessibilityActivated.
+   * @brief Called from AnchorEvent or TextAnchor's OnAccessibilityActivate.
    * @param[in] cursorPosition Checks if an anchor exists at the given cursor position.
    * @param[out] href If an anchor exists at the given cursor position, the href is written.
    * @return True if an anchor exists at the given cursor position, false otherwise.

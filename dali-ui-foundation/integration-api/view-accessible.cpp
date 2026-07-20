@@ -100,10 +100,7 @@ Dali::Actor CreateHighlightIndicatorActor()
   auto imageView = Ui::ImageView::New(ToDaliString(focusBorderImagePath));
   DevelActor::SetResizePolicy(imageView, ResizePolicy::FILL_TO_PARENT, Dimension::ALL_DIMENSIONS);
 
-  // TODO: AppendAccessibilityAttribute is not yet exposed on View public API.
-  // Revisit when accessibility direction for View-based components is decided.
-  // imageView.AppendAccessibilityAttribute("highlight", Dali::String());
-  imageView.SetProperty(Ui::View::Property::ACCESSIBILITY_HIGHLIGHTABLE, false);
+  imageView.SetAccessibilityHighlightable(false);
 
   return imageView;
 }
@@ -236,21 +233,24 @@ std::string ViewAccessible::GetName() const
   Dali::String            name;
 
   auto* accessibilityData = viewImpl.GetAccessibilityData();
-  if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityGetNameSignal.Empty())
+  if(!internalView.OnAccessibilityRequestName(name))
   {
-    accessibilityData->mAccessibilityGetNameSignal.Emit(name);
-  }
-  else if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.name.empty())
-  {
-    name = ToDaliString(accessibilityData->mAccessibilityProps.name);
-  }
-  else if(auto raw = GetNameRaw(); !raw.first.empty() || raw.second)
-  {
-    name = ToDaliString(raw.first);
-  }
-  else
-  {
-    name = Self().GetProperty<Dali::String>(Actor::Property::NAME);
+    name.Clear();
+    if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.name.empty())
+    {
+      name = ToDaliString(accessibilityData->mAccessibilityProps.name);
+    }
+    if(name.Empty())
+    {
+      if(auto raw = GetNameRaw(); !raw.first.empty() || raw.second)
+      {
+        name = ToDaliString(raw.first);
+      }
+      else
+      {
+        name = Self().GetProperty<Dali::String>(Actor::Property::NAME);
+      }
+    }
   }
 
   return GetLocaleText(ToStdString(name));
@@ -270,17 +270,17 @@ std::string ViewAccessible::GetDescription() const
   Dali::String            description;
 
   auto* accessibilityData = viewImpl.GetAccessibilityData();
-  if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityGetDescriptionSignal.Empty())
+  if(!internalView.OnAccessibilityRequestDescription(description))
   {
-    accessibilityData->mAccessibilityGetDescriptionSignal.Emit(description);
-  }
-  else if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.description.empty())
-  {
-    description = ToDaliString(accessibilityData->mAccessibilityProps.description);
-  }
-  else
-  {
-    description = ToDaliString(GetDescriptionRaw());
+    description.Clear();
+    if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.description.empty())
+    {
+      description = ToDaliString(accessibilityData->mAccessibilityProps.description);
+    }
+    if(description.Empty())
+    {
+      description = ToDaliString(GetDescriptionRaw());
+    }
   }
 
   return GetLocaleText(ToStdString(description));
@@ -293,12 +293,20 @@ std::string ViewAccessible::GetDescriptionRaw() const
 
 std::string ViewAccessible::GetValue() const
 {
-  return ToStdString(Self().GetProperty(Ui::View::Property::ACCESSIBILITY_VALUE));
+  auto         view = Dali::Ui::View::DownCast(Self());
+  Dali::String value;
+  if(!Ui::GetImpl(view).OnAccessibilityRequestValue(value))
+  {
+    value.Clear();
+    value = view.GetAccessibilityValue();
+  }
+  return ToStdString(value);
 }
 
 Dali::Integration::Accessibility::Role ViewAccessible::GetRole() const
 {
-  int32_t rawRole = Self().GetProperty<int32_t>(Ui::View::Property::ACCESSIBILITY_ROLE);
+  const auto view    = Dali::Ui::View::DownCast(Self());
+  int32_t    rawRole = static_cast<int32_t>(view.GetAccessibilityRole());
   return ConvertRawRoleToAccessibilityRole(rawRole);
 }
 
@@ -329,7 +337,7 @@ void ViewAccessible::ApplyAccessibilityProps(Dali::Integration::Accessibility::S
 
   AccessibilityStates viewStates = 0u;
 
-  int32_t rawRole = view.GetProperty<int32_t>(Ui::View::Property::ACCESSIBILITY_ROLE);
+  int32_t rawRole = static_cast<int32_t>(view.GetAccessibilityRole());
 
   bool             isModal       = false;
   TriStateProperty highlightable = TriStateProperty::AUTO;
@@ -395,8 +403,8 @@ Dali::Devel::Accessibility::Attributes ViewAccessible::GetAttributes() const
 
   Dali::Devel::Accessibility::Attributes result;
   Ui::View                               view           = Ui::View::DownCast(Self());
-  Dali::Property::Value                  property       = view.GetProperty(View::Property::ACCESSIBILITY_ATTRIBUTES);
-  Dali::Property::Map*                   attributeMap   = property.GetMap();
+  const auto*                            data           = GetViewImplementation(view).GetAccessibilityData();
+  const Dali::Property::Map*             attributeMap   = DALI_LIKELY(data) ? &data->mAccessibilityProps.extraAttributes : nullptr;
   std::size_t                            attributeCount = attributeMap ? attributeMap->Count() : 0U;
 
   for(std::size_t i = 0; i < attributeCount; i++)
@@ -410,7 +418,7 @@ Dali::Devel::Accessibility::Attributes ViewAccessible::GetAttributes() const
     }
   }
 
-  auto automationId = ToStdString(view.GetProperty(View::Property::AUTOMATION_ID));
+  auto automationId = ToStdString(view.GetAutomationId());
   if(!automationId.empty())
   {
     result.emplace(automationIdKey, std::move(automationId));
@@ -452,13 +460,7 @@ void ViewAccessible::InitDefaultFeatures()
 
 bool ViewAccessible::IsHidden() const
 {
-  auto view = Dali::Ui::View::DownCast(Self());
-
-  ViewImpl&               internalView = Ui::GetImpl(view);
-  Internal::ViewDataImpl& viewImpl     = Internal::ViewDataImpl::Get(internalView);
-
-  const auto* accessibilityData = viewImpl.GetAccessibilityData();
-  return DALI_LIKELY(accessibilityData) ? accessibilityData->mAccessibilityProps.isHidden : false;
+  return Dali::Ui::View::DownCast(Self()).IsAccessibilityHidden();
 }
 
 bool ViewAccessible::GrabFocus()
@@ -577,7 +579,7 @@ bool ViewAccessible::GrabHighlight()
   auto view = Dali::Ui::View::DownCast(self);
   if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Empty())
   {
-    GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(true);
+    GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(view, true);
   }
 
   mHighlightOverlay.UpdateOverlay(highlight);
@@ -604,7 +606,7 @@ bool ViewAccessible::ClearHighlight()
     auto view = Dali::Ui::View::DownCast(self);
     if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Empty())
     {
-      GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(false);
+      GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityHighlightedSignal.Emit(view, false);
     }
     mHighlightOverlay.HideOverlay();
     return true;
@@ -700,20 +702,15 @@ std::string ViewAccessible::GetStringProperty(std::string propertyName) const
 
 bool ViewAccessible::IsScrollable() const
 {
-  return Self().GetProperty<bool>(Ui::View::Property::ACCESSIBILITY_SCROLLABLE);
+  return Dali::Ui::View::DownCast(Self()).IsAccessibilityScrollable();
 }
 
 bool ViewAccessible::ScrollToChild(Actor child)
 {
-  auto view    = Dali::Ui::View::DownCast(Self());
-  bool success = false;
-
-  if(!GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityActionSignal.Empty())
-  {
-    success = GetViewImplementation(view).GetOrCreateAccessibilityData().mAccessibilityActionSignal.Emit({Dali::Devel::Accessibility::ActionType::SCROLL_TO_CHILD, child}); // LCOV_EXCL_LINE
-    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: scrollToChild, success : %d\n", success);
-  }
-
+  auto view      = Dali::Ui::View::DownCast(Self());
+  auto childView = Dali::Ui::View::DownCast(child);
+  bool success   = childView && Ui::GetImpl(view).OnAccessibilityScrollToChild(childView);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: scrollToChild, success : %d\n", success);
   return success;
 }
 
@@ -739,7 +736,7 @@ Vector2 ViewAccessible::GetLastPosition() const
 
 void ViewAccessible::OnStatePropertySet(AccessibilityStates newStates)
 {
-  int32_t rawRole = Self().GetProperty<int32_t>(Ui::View::Property::ACCESSIBILITY_ROLE);
+  int32_t rawRole = static_cast<int32_t>(Dali::Ui::View::DownCast(Self()).GetAccessibilityRole());
   if(IsRoleV2(rawRole))
   {
     Accessibility::Role role = static_cast<Accessibility::Role>(rawRole);
@@ -772,24 +769,24 @@ void ViewAccessible::OnStatePropertySet(AccessibilityStates newStates)
 
 bool ViewAccessible::IsModal(Actor actor)
 {
-  bool isModalPropertySet = actor.GetProperty<bool>(Ui::View::Property::ACCESSIBILITY_IS_MODAL);
-  if(isModalPropertySet)
+  auto view = Dali::Ui::View::DownCast(actor);
+  if(!view)
+  {
+    return false;
+  }
+  if(view.IsAccessibilityModal())
   {
     return true;
   }
 
-  int32_t rawRole = actor.GetProperty<int32_t>(Ui::View::Property::ACCESSIBILITY_ROLE);
+  int32_t rawRole = static_cast<int32_t>(view.GetAccessibilityRole());
   return IsModalRole(rawRole);
 }
 
 bool ViewAccessible::IsScene3D(Actor actor)
 {
-  int32_t rawRole = static_cast<uint32_t>(Accessibility::Role::MAX_COUNT);
-  if(actor.GetProperty(Ui::View::Property::ACCESSIBILITY_ROLE).Get(rawRole))
-  {
-    return IsScene3DRole(rawRole);
-  }
-  return false;
+  auto view = Dali::Ui::View::DownCast(actor);
+  return view && IsScene3DRole(static_cast<int32_t>(view.GetAccessibilityRole()));
 }
 
 void ViewAccessible::SetCustomHighlightOverlay(Vector2 position, Vector2 size)

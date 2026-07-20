@@ -21,6 +21,8 @@
 // EXTERNAL INCLUDES
 #include <dali/integration-api/string-utils.h>
 
+#include <sstream>
+
 // INTERNAL INCLUDES
 #include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/integration-api/debug.h>
@@ -38,12 +40,71 @@ namespace Internal
 {
 namespace
 {
-static constexpr const char* READING_INFO_TYPE_NAME           = "name";
-static constexpr const char* READING_INFO_TYPE_ATTRIBUTE_NAME = "reading_info_type";
-static constexpr const char* READING_INFO_TYPE_ROLE           = "role";
-static constexpr const char* READING_INFO_TYPE_DESCRIPTION    = "description";
-static constexpr const char* READING_INFO_TYPE_STATE          = "state";
-static constexpr const char* READING_INFO_TYPE_SEPARATOR      = "|";
+static constexpr const char* READING_INFO_TYPE_NAME               = "name";
+static constexpr const char* READING_INFO_TYPE_ATTRIBUTE_NAME     = "reading_info_type";
+static constexpr const char* READING_INFO_TYPE_ROLE               = "role";
+static constexpr const char* READING_INFO_TYPE_DESCRIPTION        = "description";
+static constexpr const char* READING_INFO_TYPE_STATE              = "state";
+static constexpr const char* READING_INFO_TYPE_SEPARATOR          = "|";
+static constexpr const char* NAME_LANGUAGE_SPANS_ATTRIBUTE        = "a11y.name.spans";
+static constexpr const char* DESCRIPTION_LANGUAGE_SPANS_ATTRIBUTE = "a11y.description.spans";
+
+std::string EscapeJsonString(const std::string& value)
+{
+  std::string escaped;
+  escaped.reserve(value.size());
+  for(char character : value)
+  {
+    switch(character)
+    {
+      case '\\':
+        escaped += "\\\\";
+        break;
+      case '"':
+        escaped += "\\\"";
+        break;
+      case '\b':
+        escaped += "\\b";
+        break;
+      case '\f':
+        escaped += "\\f";
+        break;
+      case '\n':
+        escaped += "\\n";
+        break;
+      case '\r':
+        escaped += "\\r";
+        break;
+      case '\t':
+        escaped += "\\t";
+        break;
+      default:
+        escaped += character;
+        break;
+    }
+  }
+  return escaped;
+}
+
+template<typename Container>
+std::string SerializeLanguageSpans(const Container& spans)
+{
+  std::ostringstream stream;
+  stream << '[';
+  for(std::size_t index = 0u; index < spans.size(); ++index)
+  {
+    if(index != 0u)
+    {
+      stream << ',';
+    }
+    const auto& span = spans[index];
+    stream << "{\"start\":" << span.start
+           << ",\"length\":" << span.length
+           << ",\"locale\":\"" << EscapeJsonString(span.locale) << "\"}";
+  }
+  stream << ']';
+  return stream.str();
+}
 
 Dali::Bounds GetShowingGeometry(Dali::Bounds rect, Dali::Ui::ViewAccessible* accessible)
 {
@@ -98,9 +159,7 @@ static constexpr uint32_t DEFAULT_DEVEL_VIEW_ACCESSIBILITY_STATES_RAW_DATA =
 } // unnamed namespace
 
 ViewDataImpl::AccessibilityData::AccessibilityData(ViewImpl& viewImpl)
-: mAccessibilityGetNameSignal(),
-  mAccessibilityGetDescriptionSignal(),
-  mAccessibilityDoGestureSignal(),
+: mAccessibilityDoGestureSignal(),
   mViewImpl(viewImpl),
   mIsAccessibilityPositionPropertyNotificationSet(false),
   mIsAccessibilityPropertySetSignalRegistered(false)
@@ -236,29 +295,15 @@ void ViewDataImpl::AccessibilityData::OnAccessibilityPropertySet(Dali::Handle ha
   auto accessible = GetAccessibleObject();
   if(DALI_LIKELY(accessible))
   {
-    if(mAccessibilityGetNameSignal.Empty())
+    if(mAccessibilityProps.name.empty() && index == accessible->GetNamePropertyIndex())
     {
-      if(index == Ui::View::Property::ACCESSIBILITY_NAME ||
-         (mAccessibilityProps.name.empty() && index == accessible->GetNamePropertyIndex()))
-      {
-        accessible->Emit(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::NAME); // LCOV_EXCL_LINE
-        return;
-      }
+      accessible->Emit(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::NAME); // LCOV_EXCL_LINE
+      return;
     }
 
-    if(mAccessibilityGetDescriptionSignal.Empty())
+    if(mAccessibilityProps.description.empty() && index == accessible->GetDescriptionPropertyIndex())
     {
-      if(index == Ui::View::Property::ACCESSIBILITY_DESCRIPTION ||
-         (mAccessibilityProps.description.empty() && index == accessible->GetDescriptionPropertyIndex()))
-      {
-        accessible->Emit(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::DESCRIPTION); // LCOV_EXCL_LINE
-        return;
-      }
-    }
-
-    if(index == Ui::View::Property::ACCESSIBILITY_VALUE)
-    {
-      accessible->Emit(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::VALUE); // LCOV_EXCL_LINE
+      accessible->Emit(Dali::Devel::Accessibility::ObjectPropertyChangeEvent::DESCRIPTION); // LCOV_EXCL_LINE
       return;
     }
   }
@@ -306,16 +351,37 @@ Dali::Integration::Accessibility::ReadingInfoTypes ViewDataImpl::AccessibilityDa
 
 void ViewDataImpl::AccessibilityData::RemoveAccessibilityAttribute(const Dali::String& key)
 {
-  Property::Value* value = mAccessibilityProps.extraAttributes.Find(key);
-  if(value)
-  {
-    mAccessibilityProps.extraAttributes[key] = Property::Value();
-  }
+  mAccessibilityProps.extraAttributes.Remove(key);
 }
 
 void ViewDataImpl::AccessibilityData::ClearAccessibilityAttributes()
 {
   mAccessibilityProps.extraAttributes.Clear();
+  mAccessibilityProps.nameLanguageSpans.clear();
+  mAccessibilityProps.descriptionLanguageSpans.clear();
+}
+
+void ViewDataImpl::AccessibilityData::EmitPropertyChanged(Dali::Devel::Accessibility::ObjectPropertyChangeEvent event)
+{
+  auto accessible = GetAccessibleObject();
+  if(DALI_LIKELY(accessible))
+  {
+    accessible->Emit(event); // LCOV_EXCL_LINE
+  }
+}
+
+void ViewDataImpl::AccessibilityData::UpdateLanguageSpanAttribute(bool nameSpans)
+{
+  const char* key   = nameSpans ? NAME_LANGUAGE_SPANS_ATTRIBUTE : DESCRIPTION_LANGUAGE_SPANS_ATTRIBUTE;
+  const auto& spans = nameSpans ? mAccessibilityProps.nameLanguageSpans : mAccessibilityProps.descriptionLanguageSpans;
+  if(spans.empty())
+  {
+    RemoveAccessibilityAttribute(key);
+  }
+  else
+  {
+    AppendAccessibilityAttribute(key, ToDaliString(SerializeLanguageSpans(spans)));
+  }
 }
 
 void ViewDataImpl::AccessibilityData::SetAccessibilityReadingInfoType(
