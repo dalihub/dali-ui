@@ -1898,6 +1898,13 @@ public: // Default style & Input style
   void SetLayoutOffsetWithPadding(Vector2 offset);
 
   /**
+   * @brief Retrieves the layout alignment offset with padding.
+   *
+   * @return The offset from the text content coordinates to the control coordinates.
+   */
+  Vector2 GetLayoutOffsetWithPadding() const;
+
+  /**
    * @brief Sets whether background color with cutout is enabled.
    *
    * @param[in] enable True if enabled.

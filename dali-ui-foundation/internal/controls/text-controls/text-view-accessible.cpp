@@ -99,11 +99,13 @@ Bounds TextViewAccessible::GetRangeExtents(std::size_t startOffset, std::size_t 
     return {0, 0, 0, 0};
   }
 
-  auto rect    = GetTextController()->GetTextBoundingRectangle(startOffset, endOffset - 1);
-  auto extents = GetExtents(type);
+  auto controller   = GetTextController();
+  auto rect         = controller->GetTextBoundingRectangle(startOffset, endOffset - 1);
+  auto layoutOffset = controller->GetLayoutOffsetWithPadding();
+  auto extents      = GetExtents(type);
 
-  rect.x += extents.x;
-  rect.y += extents.y;
+  rect.x += extents.x + layoutOffset.x;
+  rect.y += extents.y + layoutOffset.y;
   return rect;
 }
 

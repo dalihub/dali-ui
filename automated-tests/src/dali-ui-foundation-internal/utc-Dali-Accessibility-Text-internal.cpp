@@ -159,6 +159,63 @@ int UtcDaliAccessibilityTextUnicodeRangeGeometryInternalP(void)
   END_TEST;
 }
 
+int UtcDaliAccessibilityTextRangeGeometryLayoutOffsetInternalP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+  label.SetFontSize(20.0f);
+  label.SetHorizontalTextAlignment(Text::Alignment::START);
+  label.SetVerticalTextAlignment(Text::Alignment::CENTER);
+  label.SetText("geometry");
+  label.SetRequestedWidth(240.0f);
+  label.SetRequestedHeight(160.0f);
+  label.SetProperty(View::Property::PADDING, Vector4(24.0f, 8.0f, 12.0f, 4.0f));
+  label.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  label.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  application.GetScene().Add(label);
+
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  application.SendNotification();
+  application.Render();
+
+  auto* accessible = Dali::Accessibility::Accessible::Get(label);
+  auto* text       = dynamic_cast<Dali::Accessibility::Text*>(accessible);
+  DALI_TEST_CHECK(text);
+
+  auto actorExtents = accessible->GetExtents(Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  auto textExtents  = text->GetRangeExtents(0u, text->GetCharacterCount(),
+                                            Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  DALI_TEST_CHECK(textExtents.x >= actorExtents.x + 24.0f);
+  DALI_TEST_CHECK(textExtents.y > actorExtents.y + 12.0f);
+  DALI_TEST_CHECK(textExtents.x + textExtents.width <= actorExtents.x + actorExtents.width - 8.0f);
+  DALI_TEST_CHECK(textExtents.y + textExtents.height <= actorExtents.y + actorExtents.height - 4.0f);
+
+  auto actorScreenExtents = accessible->GetExtents(Dali::Devel::Accessibility::CoordinateType::SCREEN);
+  auto textScreenExtents  = text->GetRangeExtents(0u, text->GetCharacterCount(),
+                                                  Dali::Devel::Accessibility::CoordinateType::SCREEN);
+  DALI_TEST_EQUALS(textScreenExtents.x - actorScreenExtents.x,
+                   textExtents.x - actorExtents.x,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(textScreenExtents.y - actorScreenExtents.y,
+                   textExtents.y - actorExtents.y,
+                   Math::MACHINE_EPSILON_1000,
+                   TEST_LOCATION);
+
+  label.SetProperty(Actor::Property::LAYOUT_DIRECTION, LayoutDirection::RIGHT_TO_LEFT);
+  application.SendNotification();
+  application.Render();
+
+  actorExtents = accessible->GetExtents(Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  textExtents  = text->GetRangeExtents(0u, text->GetCharacterCount(),
+                                       Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  DALI_TEST_CHECK(textExtents.x >= actorExtents.x + 8.0f);
+  DALI_TEST_CHECK(textExtents.x + textExtents.width <= actorExtents.x + actorExtents.width - 24.0f);
+
+  END_TEST;
+}
+
 int UtcDaliAccessibilityEditableTextToolkitCompatibilityInternalP(void)
 {
   UiTestApplication application;

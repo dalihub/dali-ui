@@ -2021,6 +2021,11 @@ void Controller::SetLayoutOffsetWithPadding(Vector2 offset)
   mImpl->mModel->mLayoutOffsetWithPadding = offset;
 }
 
+Vector2 Controller::GetLayoutOffsetWithPadding() const
+{
+  return mImpl->mModel->mLayoutOffsetWithPadding;
+}
+
 void Controller::SetBackgroundWithCutoutEnabled(bool cutout)
 {
   mImpl->mModel->mVisualModel->SetBackgroundWithCutoutEnabled(cutout);
