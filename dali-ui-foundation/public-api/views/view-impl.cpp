@@ -26,7 +26,6 @@
 #include <dali/public-api/actors/custom-actor-impl.h>
 #include <dali/public-api/animation/constraint.h>
 #include <utility>
-#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-accessible.h>
@@ -54,33 +53,11 @@ namespace Ui
 namespace
 {
 
-/// Scoped guard that lets View::OnChildAdd accept a non-View Actor as a child.
-/// Used by Integration::View::AddActorChild. Thread-local because Actor::Add invokes
-/// OnChildAdd synchronously on the same (event) thread.
-thread_local bool gAllowNonViewChild = false;
-
-// RAII guard: restores the previous flag value on any exit path (including
-// exceptions from view.Add()), and stays correct under nesting.
-struct AllowNonViewChildScope
-{
-  const bool previous;
-  AllowNonViewChildScope()
-  : previous(gAllowNonViewChild)
-  {
-    gAllowNonViewChild = true;
-  }
-  ~AllowNonViewChildScope()
-  {
-    gAllowNonViewChild = previous;
-  }
-
-  AllowNonViewChildScope(const AllowNonViewChildScope&)                = delete;
-  AllowNonViewChildScope& operator=(const AllowNonViewChildScope&)     = delete;
-  AllowNonViewChildScope(AllowNonViewChildScope&&) noexcept            = default;
-  AllowNonViewChildScope& operator=(AllowNonViewChildScope&&) noexcept = delete;
-};
-
-thread_local std::vector<AllowNonViewChildScope> gAllowScopeList;
+/// Nesting depth of active "allow non-View child" scopes. When > 0, View::OnChildAdd
+/// accepts a non-View Actor as a child. Used by Integration::View::AddActorChild.
+/// Thread-local because Actor::Add invokes OnChildAdd synchronously on the same
+/// (event) thread. POD with a constant initializer: no dynamic init, no heap allocation.
+thread_local unsigned int gAllowNonViewChildDepth = 0u;
 
 } // namespace
 
@@ -876,7 +853,7 @@ void ViewImpl::OnSceneDisconnection()
 
 void ViewImpl::OnChildAdd(Actor& child)
 {
-  mImpl->OnChildAdded(child, gAllowNonViewChild);
+  mImpl->OnChildAdded(child, gAllowNonViewChildDepth > 0u);
 }
 
 void ViewImpl::OnChildRemove(Actor& child)
@@ -986,12 +963,15 @@ void AddActorChild(Ui::View view, Dali::Actor actor)
 
 void AllowToAddActorToChildBegin(Ui::View view)
 {
-  gAllowScopeList.emplace_back();
+  ++gAllowNonViewChildDepth;
 }
 
 void AllowToAddActorToChildEnd(Ui::View view)
 {
-  gAllowScopeList.pop_back();
+  if(gAllowNonViewChildDepth > 0u)
+  {
+    --gAllowNonViewChildDepth;
+  }
 }
 
 } // namespace View
