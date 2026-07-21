@@ -2929,8 +2929,17 @@ void InputEditorImpl::EmitInputRejected(Text::InputFilter::RejectReason reason)
 
 void InputEditorImpl::EmitCursorPositionChanged()
 {
-  Ui::View handle(GetOwner());
-  mCursorPositionChangedSignal.Emit(handle, mController->GetPrimaryCursorPosition());
+  Ui::View   handle(GetOwner());
+  const auto cursorPosition = mController->GetPrimaryCursorPosition();
+  mCursorPositionChangedSignal.Emit(handle, cursorPosition);
+  if(Dali::Integration::Accessibility::IsUp())
+  {
+    auto accessible = Internal::ViewDataImpl::Get(*this).GetAccessibleObject();
+    if(DALI_LIKELY(accessible))
+    {
+      accessible->EmitTextCursorMoved(cursorPosition);
+    }
+  }
   mCursorPositionChanged = false;
 }
 

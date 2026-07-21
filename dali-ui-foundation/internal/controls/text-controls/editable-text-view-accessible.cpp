@@ -53,8 +53,15 @@ bool EditableTextViewAccessible::SetCursorOffset(std::size_t offset)
     return false;
   }
 
-  GetTextController()->ResetCursorPosition(offset);
+  auto controller        = GetTextController();
+  auto oldCursorPosition = controller->GetCursorPosition();
+  controller->ResetCursorPosition(offset);
+  auto newCursorPosition = controller->GetCursorPosition();
   RequestTextRelayout();
+  if(oldCursorPosition != newCursorPosition)
+  {
+    EmitTextCursorMoved(newCursorPosition);
+  }
   return true;
 }
 
