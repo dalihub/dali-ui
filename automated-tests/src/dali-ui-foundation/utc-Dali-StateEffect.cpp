@@ -150,13 +150,23 @@ void utc_dali_state_effect_cleanup(void)
 
 int UtcDaliStateEffectNoneP(void)
 {
-  StateEffect none     = StateEffect::None();
-  StateEffect sameNone = StateEffect::None();
+  WeakHandle<StateEffect> weakNone;
 
-  DALI_TEST_CHECK(none);
-  DALI_TEST_CHECK(none.IsNone());
-  DALI_TEST_EQUALS(none, sameNone, TEST_LOCATION);
+  {
+    StateEffect none     = StateEffect::None();
+    StateEffect sameNone = StateEffect::None();
+
+    DALI_TEST_CHECK(none);
+    DALI_TEST_CHECK(none.IsNone());
+    DALI_TEST_EQUALS(none, sameNone, TEST_LOCATION);
+    weakNone = WeakHandle<StateEffect>(none);
+  }
+
+  DALI_TEST_CHECK(!weakNone.GetHandle());
   DALI_TEST_CHECK(!StateEffect().IsNone());
+
+  StateEffect recreatedNone = StateEffect::None();
+  DALI_TEST_CHECK(recreatedNone.IsNone());
   END_TEST;
 }
 

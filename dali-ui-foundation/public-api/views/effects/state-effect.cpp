@@ -29,20 +29,20 @@ namespace Ui
 namespace
 {
 
+class NoneStateEffectImpl;
+
+// Non-owning cache. NoneStateEffectImpl clears this from OnDestroy().
+NoneStateEffectImpl* gNoneStateEffectImpl = nullptr;
+
 class NoneStateEffectImpl : public Integration::StateEffectImpl
 {
-};
-
-Integration::StateEffectImpl* GetNoneStateEffectImpl()
-{
-  static NoneStateEffectImpl* impl = []()
+protected:
+  void OnDestroy() override
   {
-    auto* none = new NoneStateEffectImpl();
-    none->Reference(); // Keep the sentinel alive until process termination.
-    return none;
-  }();
-  return impl;
-}
+    gNoneStateEffectImpl = nullptr;
+    BaseObject::OnDestroy();
+  }
+};
 
 } // namespace
 
@@ -53,7 +53,11 @@ StateEffect StateEffect::DownCast(BaseHandle handle)
 
 StateEffect StateEffect::None()
 {
-  return StateEffect(GetNoneStateEffectImpl());
+  if(!gNoneStateEffectImpl)
+  {
+    gNoneStateEffectImpl = new NoneStateEffectImpl();
+  }
+  return StateEffect(gNoneStateEffectImpl);
 }
 
 StateEffect StateEffect::DefaultForInteractive()
@@ -63,7 +67,7 @@ StateEffect StateEffect::DefaultForInteractive()
 
 bool StateEffect::IsNone() const
 {
-  return GetObjectPtr() == GetNoneStateEffectImpl();
+  return dynamic_cast<NoneStateEffectImpl*>(GetObjectPtr()) != nullptr;
 }
 
 StateEffect::StateEffect(Integration::StateEffectImpl* impl)
