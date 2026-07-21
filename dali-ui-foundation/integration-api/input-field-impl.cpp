@@ -2364,10 +2364,11 @@ void InputFieldImpl::TextInserted(unsigned int position, unsigned int length, co
     return;
   }
 
-  auto accessible = Internal::ViewDataImpl::Get(*this).GetAccessibleObject();
-  if(DALI_LIKELY(accessible))
+  auto accessible      = Internal::ViewDataImpl::Get(*this).GetAccessibleObject();
+  auto fieldAccessible = dynamic_cast<InputFieldAccessible*>(accessible.Get());
+  if(DALI_LIKELY(fieldAccessible))
   {
-    accessible->EmitTextInserted(position, length, content);
+    fieldAccessible->EmitTextInserted(position, length, content);
   }
 }
 
@@ -2378,10 +2379,11 @@ void InputFieldImpl::TextDeleted(unsigned int position, unsigned int length, con
     return;
   }
 
-  auto accessible = Internal::ViewDataImpl::Get(*this).GetAccessibleObject();
-  if(DALI_LIKELY(accessible))
+  auto accessible      = Internal::ViewDataImpl::Get(*this).GetAccessibleObject();
+  auto fieldAccessible = dynamic_cast<InputFieldAccessible*>(accessible.Get());
+  if(DALI_LIKELY(fieldAccessible))
   {
-    accessible->EmitTextDeleted(position, length, content);
+    fieldAccessible->EmitTextDeleted(position, length, content);
   }
 }
 

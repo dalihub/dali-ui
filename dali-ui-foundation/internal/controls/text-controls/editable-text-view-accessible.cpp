@@ -58,6 +58,11 @@ bool EditableTextViewAccessible::SetCursorOffset(std::size_t offset)
 
 bool EditableTextViewAccessible::CopyText(std::size_t startPosition, std::size_t endPosition)
 {
+  if(IsHiddenInput())
+  {
+    return false;
+  }
+
   auto        text      = GetWholeText();
   std::size_t utf8Start = 0u;
   std::size_t utf8End   = 0u;

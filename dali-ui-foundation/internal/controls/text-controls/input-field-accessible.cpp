@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/input-field-accessible.h>
+#include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali::Ui::Integration
@@ -33,6 +34,16 @@ std::pair<std::string, bool> InputFieldAccessible::GetNameRaw() const
   }
 
   return {GetWholeText(), true};
+}
+
+void InputFieldAccessible::EmitTextInserted(unsigned int position, unsigned int length, const std::string& content)
+{
+  ViewAccessible::EmitTextInserted(position, length, GetTextEventContent(length, content));
+}
+
+void InputFieldAccessible::EmitTextDeleted(unsigned int position, unsigned int length, const std::string& content)
+{
+  ViewAccessible::EmitTextDeleted(position, length, GetTextEventContent(length, content));
 }
 
 const std::vector<Ui::TextAnchor>& InputFieldAccessible::GetTextAnchors() const
@@ -68,6 +79,26 @@ void InputFieldAccessible::RequestTextRelayout()
   auto  self = Ui::View::DownCast(Self());
   auto& impl = static_cast<InputFieldImpl&>(Ui::GetImpl(self));
   impl.RequestTextRelayout();
+}
+
+std::string InputFieldAccessible::GetTextEventContent(unsigned int length, const std::string& content) const
+{
+  if(!IsHiddenInput())
+  {
+    return content;
+  }
+
+  std::string substituteCharacter;
+  auto        substituteCharacterUtf32 = GetSubstituteCharacter();
+  Ui::Text::Utf32ToUtf8(&substituteCharacterUtf32, 1u, substituteCharacter);
+
+  std::string substituteText;
+  substituteText.reserve(substituteCharacter.size() * length);
+  for(unsigned int index = 0u; index < length; ++index)
+  {
+    substituteText.append(substituteCharacter);
+  }
+  return substituteText;
 }
 
 } // namespace Dali::Ui::Integration

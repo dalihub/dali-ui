@@ -308,3 +308,24 @@ int UtcDaliAccessibilityInputFieldPasswordRoleInternalP(void)
 
   END_TEST;
 }
+
+int UtcDaliAccessibilityInputFieldPasswordClipboardProtectionInternalP(void)
+{
+  UiTestApplication application;
+
+  InputField field = InputField::New();
+  field.SetText("secret");
+  field.SetPasswordMode(Text::PasswordMode::HIDE_ALL);
+
+  auto* accessible   = Dali::Accessibility::Accessible::Get(field);
+  auto* editableText = dynamic_cast<Dali::Accessibility::EditableText*>(accessible);
+  DALI_TEST_CHECK(editableText);
+
+  DALI_TEST_EQUALS(editableText->CopyText(0u, 6u), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(editableText->CutText(0u, 6u), false, TEST_LOCATION);
+
+  field.SetPasswordMode(Text::PasswordMode::NONE);
+  DALI_TEST_EQUALS(field.GetText(), "secret", TEST_LOCATION);
+
+  END_TEST;
+}

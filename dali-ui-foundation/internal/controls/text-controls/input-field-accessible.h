@@ -34,6 +34,24 @@ public:
    */
   std::pair<std::string, bool> GetNameRaw() const override;
 
+  /**
+   * @brief Emits a text-inserted event without exposing hidden input.
+   *
+   * @param[in] position The insertion position in Unicode code points
+   * @param[in] length The number of inserted Unicode code points
+   * @param[in] content The inserted UTF-8 text
+   */
+  void EmitTextInserted(unsigned int position, unsigned int length, const std::string& content);
+
+  /**
+   * @brief Emits a text-deleted event without exposing hidden input.
+   *
+   * @param[in] position The deletion position in Unicode code points
+   * @param[in] length The number of deleted Unicode code points
+   * @param[in] content The deleted UTF-8 text
+   */
+  void EmitTextDeleted(unsigned int position, unsigned int length, const std::string& content);
+
 protected:
   /**
    * @copydoc Dali::Ui::Internal::TextViewAccessible::GetTextAnchors()
@@ -59,6 +77,16 @@ protected:
    * @copydoc Dali::Ui::Internal::EditableTextViewAccessible::RequestTextRelayout()
    */
   void RequestTextRelayout() override;
+
+private:
+  /**
+   * @brief Replaces hidden event content with the configured substitute character.
+   *
+   * @param[in] length The number of affected Unicode code points
+   * @param[in] content The original UTF-8 event content
+   * @return The content safe to expose through accessibility
+   */
+  std::string GetTextEventContent(unsigned int length, const std::string& content) const;
 };
 
 } // namespace Dali::Ui::Integration
