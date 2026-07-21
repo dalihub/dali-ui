@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali/devel-api/actors/actor-devel.h>
 
 #include <algorithm>
 #include <cstdio>
@@ -390,7 +391,7 @@ private:
       info.currentAnimation = snapAnim;
     }
 
-    if(info.titleLabel.GetHeightForWidth(info.titleLabel.GetSize().width) > TITLE_HEIGHT)
+    if(DevelActor::GetHeightForWidth(info.titleLabel, info.titleLabel.GetSize().width) > TITLE_HEIGHT)
     {
       info.titleLabel.StartMarquee();
     }

@@ -18,6 +18,7 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/dali.h>
 #include <dali/public-api/events/key-event.h>
+#include <dali/devel-api/actors/actor-devel.h>
 
 #include <algorithm>
 #include <array>
@@ -105,8 +106,8 @@ public:
     mRoot.SetRequestedHeight(MATCH_PARENT);
     PositionSize windowSize = mWindow.GetPositionSize();
     mRoot.SetProperty(Actor::Property::SIZE, Vector2(windowSize.width, windowSize.height));
-    mRoot.SetProperty(Actor::Property::WIDTH_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
-    mRoot.SetProperty(Actor::Property::HEIGHT_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
+    mRoot.SetProperty(DevelActor::Property::WIDTH_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
+    mRoot.SetProperty(DevelActor::Property::HEIGHT_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
     mWindow.Add(mRoot);
 
     CreateMovingImageBoard();
@@ -176,8 +177,8 @@ private:
     mBlurPane.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     mBlurPane.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
     mBlurPane.SetProperty(Actor::Property::SIZE, Vector2(windowSize.width, windowSize.height));
-    mBlurPane.SetProperty(Actor::Property::WIDTH_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
-    mBlurPane.SetProperty(Actor::Property::HEIGHT_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
+    mBlurPane.SetProperty(DevelActor::Property::WIDTH_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
+    mBlurPane.SetProperty(DevelActor::Property::HEIGHT_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
     mRoot.Add(mBlurPane);
 
     mBackgroundBlur = BackgroundBlurEffect::New(BLUR_RADIUS);
