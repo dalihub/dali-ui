@@ -18,8 +18,10 @@
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager-impl.h>
 
 // EXTERNAL INCLUDES
-#include <dali/integration-api/debug.h>
 #include <locale>
+
+#include <dali/integration-api/adaptor-framework/adaptor.h>
+#include <dali/integration-api/debug.h>
 
 namespace
 {
@@ -36,6 +38,7 @@ namespace Ui
 namespace Internal
 {
 AtlasGlyphManager::AtlasGlyphManager()
+: mSlotDelegate(this)
 {
   mAtlasManager = Dali::Ui::AtlasManager::New();
   mSampler      = Sampler::New();
@@ -67,12 +70,13 @@ void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const Ui::AtlasGlyphMa
   record.isItalic      = style.isItalic;
   record.isBold        = style.isBold;
 
-  // Have glyph records been created for this fontId ?
+  // Have glyph records been created for this fontId in the current generation?
   bool foundGlyph = false;
   for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
       fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
   {
-    if(fontGlyphRecordIt->mFontId == glyph.fontId)
+    if(fontGlyphRecordIt->mFontId == glyph.fontId &&
+       fontGlyphRecordIt->mGeneration == mCacheGeneration)
     {
       fontGlyphRecordIt->mGlyphRecords.PushBack(record);
       foundGlyph = true;
@@ -84,7 +88,8 @@ void AtlasGlyphManager::Add(const Text::GlyphInfo& glyph, const Ui::AtlasGlyphMa
   {
     // We need to add a new font entry
     FontGlyphRecord fontGlyphRecord;
-    fontGlyphRecord.mFontId = glyph.fontId;
+    fontGlyphRecord.mFontId     = glyph.fontId;
+    fontGlyphRecord.mGeneration = mCacheGeneration;
     fontGlyphRecord.mGlyphRecords.PushBack(record);
     mFontGlyphRecords.push_back(fontGlyphRecord);
   }
@@ -103,7 +108,8 @@ bool AtlasGlyphManager::IsCached(Text::FontId fontId, Text::GlyphIndex index,
   for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
       fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
   {
-    if(fontGlyphRecordIt->mFontId == fontId)
+    if(fontGlyphRecordIt->mFontId == fontId &&
+       fontGlyphRecordIt->mGeneration == mCacheGeneration)
     {
       for(Vector<GlyphRecordEntry>::Iterator glyphRecordIt = fontGlyphRecordIt->mGlyphRecords.Begin();
           glyphRecordIt != fontGlyphRecordIt->mGlyphRecords.End(); ++glyphRecordIt)
@@ -169,46 +175,87 @@ const Ui::AtlasGlyphManager::Metrics& AtlasGlyphManager::GetMetrics()
   return mMetrics;
 }
 
-void AtlasGlyphManager::AdjustReferenceCount(Text::FontId fontId, Text::GlyphIndex index,
-                                             const Ui::AtlasGlyphManager::GlyphStyle& style, int32_t delta)
+void AtlasGlyphManager::AdjustReferenceCount(Text::FontId fontId, uint32_t imageId, int32_t delta)
 {
-  if(0 != delta)
+  if(0 == delta)
   {
-    DALI_LOG_INFO(gLogFilter, Debug::General, "AdjustReferenceCount %d, font: %d index: %d\n", delta, fontId, index);
+    return;
+  }
 
-    for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
-        fontGlyphRecordIt != mFontGlyphRecords.end(); ++fontGlyphRecordIt)
+  DALI_LOG_INFO(gLogFilter,
+                Debug::General,
+                "AdjustReferenceCount fontId: %u, imageId: %u, delta: %d\n",
+                fontId,
+                imageId,
+                delta);
+
+  for(std::vector<FontGlyphRecord>::iterator fontGlyphRecordIt = mFontGlyphRecords.begin();
+      fontGlyphRecordIt != mFontGlyphRecords.end();
+      ++fontGlyphRecordIt)
+  {
+    // Do not filter by generation.
+    // Renderers using a previous generation must still be able to release
+    // the exact atlas image they reference.
+    if(fontGlyphRecordIt->mFontId != fontId)
     {
-      if(fontGlyphRecordIt->mFontId == fontId)
-      {
-        for(Vector<GlyphRecordEntry>::Iterator glyphRecordIt = fontGlyphRecordIt->mGlyphRecords.Begin();
-            glyphRecordIt != fontGlyphRecordIt->mGlyphRecords.End(); ++glyphRecordIt)
-        {
-          if((glyphRecordIt->mIndex == index) && (glyphRecordIt->mOutlineWidth == style.outline) &&
-             (glyphRecordIt->isItalic == style.isItalic) && (glyphRecordIt->isBold == style.isBold))
-          {
-            glyphRecordIt->mCount += delta;
-            DALI_ASSERT_DEBUG(glyphRecordIt->mCount >= 0 && "Glyph ref-count should not be negative");
-
-            if(!glyphRecordIt->mCount)
-            {
-              mAtlasManager.Remove(glyphRecordIt->mImageId);
-              fontGlyphRecordIt->mGlyphRecords.Remove(glyphRecordIt);
-            }
-            return;
-          }
-        }
-      }
+      continue;
     }
 
-    // Should not arrive here
-    DALI_ASSERT_DEBUG(false && "Failed to adjust ref-count");
+    for(Vector<GlyphRecordEntry>::Iterator glyphRecordIt = fontGlyphRecordIt->mGlyphRecords.Begin();
+        glyphRecordIt != fontGlyphRecordIt->mGlyphRecords.End();
+        ++glyphRecordIt)
+    {
+      if(glyphRecordIt->mImageId == imageId)
+      {
+        glyphRecordIt->mCount += delta;
+
+        DALI_ASSERT_DEBUG(glyphRecordIt->mCount >= 0 &&
+                          "Glyph ref-count should not be negative");
+
+        if(0 == glyphRecordIt->mCount)
+        {
+          mAtlasManager.Remove(glyphRecordIt->mImageId);
+          fontGlyphRecordIt->mGlyphRecords.Remove(glyphRecordIt);
+
+          // If this FontGlyphRecord has no more glyphs, remove the record
+          if(fontGlyphRecordIt->mGlyphRecords.Empty())
+          {
+            mFontGlyphRecords.erase(fontGlyphRecordIt);
+          }
+        }
+        return;
+      }
+    }
   }
+
+  DALI_ASSERT_DEBUG(false && "Failed to adjust glyph ref-count");
 }
 
 TextureSet AtlasGlyphManager::GetTextures(uint32_t atlasId) const
 {
   return mAtlasManager.GetTextures(atlasId);
+}
+
+void AtlasGlyphManager::InvalidateGlyphCache()
+{
+  DALI_LOG_INFO(gLogFilter, Debug::General, "Invalidating atlas glyph cache generation\n");
+  ++mCacheGeneration;
+}
+
+void AtlasGlyphManager::EnsureLocaleChangedConnection()
+{
+  if(mLocaleChangedConnected || !Dali::Adaptor::IsAvailable())
+  {
+    return;
+  }
+
+  Dali::Adaptor::Get().LocaleChangedSignal().Connect(mSlotDelegate, &AtlasGlyphManager::OnLocaleChanged);
+  mLocaleChangedConnected = true;
+}
+
+void AtlasGlyphManager::OnLocaleChanged(std::string /* locale */)
+{
+  InvalidateGlyphCache();
 }
 
 AtlasGlyphManager::~AtlasGlyphManager()

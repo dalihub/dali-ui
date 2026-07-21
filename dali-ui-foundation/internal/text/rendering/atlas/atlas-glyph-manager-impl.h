@@ -20,6 +20,9 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/common/vector-wrapper.h>
 #include <dali/public-api/object/base-object.h>
+#include <dali/public-api/signals/slot-delegate.h>
+#include <cstdint>
+#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/text/rendering/atlas/atlas-glyph-manager.h>
@@ -54,7 +57,8 @@ public:
 
   struct FontGlyphRecord
   {
-    Text::FontId             mFontId;
+    Text::FontId             mFontId{0u};
+    uint64_t                 mGeneration{0u};
     Vector<GlyphRecordEntry> mGlyphRecords;
   };
 
@@ -96,10 +100,17 @@ public:
   Pixel::Format GetPixelFormat(uint32_t atlasId);
 
   /**
-   * @copydoc Ui::AtlasGlyphManager::AdjustReferenceCount
+   * @brief Adjusts the reference count of an atlas glyph image.
+   *
+   * The font ID limits the lookup to matching font records, while the image ID
+   * identifies the exact atlas image across cache generations. When the
+   * reference count reaches zero, the image and glyph record are removed.
+   *
+   * @param[in] fontId The font identifier used to narrow the lookup.
+   * @param[in] imageId The exact atlas image identifier.
+   * @param[in] delta The value added to the current reference count.
    */
-  void AdjustReferenceCount(Text::FontId fontId, Text::GlyphIndex index, const Ui::AtlasGlyphManager::GlyphStyle& style,
-                            int32_t delta);
+  void AdjustReferenceCount(Text::FontId fontId, uint32_t imageId, int32_t delta);
 
   /**
    * @copydoc Ui::AtlasGlyphManager::GetTextures
@@ -111,17 +122,46 @@ public:
    */
   const Ui::AtlasGlyphManager::Metrics& GetMetrics();
 
+  /**
+   * @brief Invalidates cached glyph lookup identities.
+   *
+   * Existing atlas images remain alive while referenced by active renderers.
+   * Subsequent glyph lookups use a new cache generation and therefore do not
+   * reuse records created before this call.
+   */
+  void InvalidateGlyphCache();
+
 protected:
   /**
    * A reference counted object may only be deleted by calling Unreference()
    */
   virtual ~AtlasGlyphManager();
 
+public:
+  /**
+   * @brief Ensures locale changed signal is connected.
+   *
+   * Attempts to connect to Adaptor's LocaleChangedSignal if not already connected
+   * and if Adaptor is available.
+   */
+  void EnsureLocaleChangedConnection();
+
 private:
-  Dali::Ui::AtlasManager         mAtlasManager; ///> Atlas Manager created by GlyphManager
-  std::vector<FontGlyphRecord>   mFontGlyphRecords;
-  Ui::AtlasGlyphManager::Metrics mMetrics; ///> Metrics to pass back on GlyphManager status
-  Sampler                        mSampler;
+  /**
+   * @brief Callback for locale change event.
+   *
+   * @param[in] locale The new locale string (unused, only generation is invalidated).
+   */
+  void OnLocaleChanged(std::string locale);
+
+private:
+  Dali::Ui::AtlasManager          mAtlasManager;
+  std::vector<FontGlyphRecord>    mFontGlyphRecords;
+  Ui::AtlasGlyphManager::Metrics  mMetrics;
+  Sampler                         mSampler;
+  uint64_t                        mCacheGeneration{1u};
+  SlotDelegate<AtlasGlyphManager> mSlotDelegate;
+  bool                            mLocaleChangedConnected{false};
 };
 
 } // namespace Internal
