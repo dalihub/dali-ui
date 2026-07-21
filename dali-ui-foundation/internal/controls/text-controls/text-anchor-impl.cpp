@@ -26,9 +26,6 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/common/dali-common.h>
 
-// INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
-
 // DEVEL INCLUDES
 
 using namespace Dali::Ui::Text;

@@ -64,6 +64,13 @@ public:
 
   void ClearA11yAnchors();
 
+  /**
+   * @brief Gets the TextAnchor actors currently exposed through accessibility.
+   *
+   * @return The accessibility text anchors
+   */
+  const std::vector<Dali::Ui::TextAnchor>& GetA11yAnchors() const;
+
   bool SetA11yAnchors(Dali::Ui::View owner, std::vector<Dali::Ui::TextAnchor>&& anchorActors);
 
   bool UpdateA11yAnchorsFromHitRegions(Dali::Ui::View owner, const Vector2& contentOffset);
@@ -91,6 +98,14 @@ AnchorInteractionData& GetOrCreateAnchorInteractionData(Dali::Ui::View owner);
 void ClearAnchorInteractionData(Dali::Ui::View owner);
 
 void ClearA11yAnchors(Dali::Ui::View owner);
+
+/**
+ * @brief Gets the TextAnchor actors currently exposed by a View.
+ *
+ * @param[in] owner The View that owns the anchors
+ * @return The accessibility text anchors, or an empty collection if none exist
+ */
+const std::vector<Dali::Ui::TextAnchor>& GetA11yAnchors(Dali::Ui::View owner);
 
 bool SetAnchorHitRegions(Dali::Ui::View                                      owner,
                          std::vector<Dali::Ui::Text::AsyncAnchorHitRegion>&& hitRegions);

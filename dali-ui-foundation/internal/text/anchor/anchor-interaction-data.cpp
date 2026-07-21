@@ -185,6 +185,11 @@ void AnchorInteractionData::ClearA11yAnchors()
   mTextAnchorActors.clear();
 }
 
+const std::vector<Dali::Ui::TextAnchor>& AnchorInteractionData::GetA11yAnchors() const
+{
+  return mTextAnchorActors;
+}
+
 bool AnchorInteractionData::SetA11yAnchors(Dali::Ui::View owner, std::vector<Dali::Ui::TextAnchor>&& anchorActors)
 {
   ClearA11yAnchors();
@@ -347,6 +352,14 @@ void ClearA11yAnchors(Dali::Ui::View owner)
   {
     data->ClearA11yAnchors();
   }
+}
+
+const std::vector<Dali::Ui::TextAnchor>& GetA11yAnchors(Dali::Ui::View owner)
+{
+  static const std::vector<Dali::Ui::TextAnchor> EMPTY_ANCHORS;
+
+  auto* data = GetAnchorInteractionData(owner);
+  return data ? data->GetA11yAnchors() : EMPTY_ANCHORS;
 }
 
 bool SetAnchorHitRegions(Dali::Ui::View                                      owner,

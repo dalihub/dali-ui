@@ -15,7 +15,6 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/text-abstraction/segmentation.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h> // LCOV_EXCL_LINE
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/common/dali-string.h>
@@ -25,9 +24,6 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
-#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
-#include <dali-ui-foundation/internal/text/character-set-conversion.h>
-#include <dali-ui-foundation/internal/text/hidden-text.h>
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/text/text-geometry.h>
 #include <dali-ui-foundation/internal/text/text-gradient-bounds.h>
@@ -40,31 +36,7 @@ namespace Dali::Ui::Internal
 {
 namespace
 {
-/**
- * @brief Checks whether [startPosition, endPosition) is a valid, non-empty range within a given string.
- *
- * @param string Source string
- * @param begin Start index (inclusive)
- * @param end End index (exclusive)
- * @return true if the range is valid, false otherwise
- */
-bool ValidateRange(const std::string& string, std::size_t begin, std::size_t end)
-{
-  auto size = string.size();
-
-  if(end <= begin || begin >= size || end > size)
-  {
-    return false;
-  }
-
-  // TODO: Check whether the range [begin, end) describes a valid substring:
-  // 1. It does not break multi-byte UTF-8 sequences.
-  // 2. It does not break graphemes (compound emojis, glyphs with combining characters etc.).
-
-  return true;
-}
-
-Vector2 CalculateRenderablePosition(Actor textActor, Text::ControllerPtr controller, float alignmentOffset, Actor stencil)
+Vector2 CalculateRenderablePosition(Actor textActor, Ui::Text::ControllerPtr controller, float alignmentOffset, Actor stencil)
 {
   const Vector2& scrollOffset = controller->GetRenderTextModel()->GetScrollPosition();
   if(stencil)
@@ -83,13 +55,13 @@ Vector2 CalculateRenderablePosition(Actor textActor, Text::ControllerPtr control
   return Vector2(scrollOffset.x + alignmentOffset + padding.start, scrollOffset.y + padding.top);
 }
 
-void UpdateAtlasGradient(Text::RendererPtr                                renderer,
-                         Text::ControllerPtr                              controller,
-                         Actor                                            stencil,
-                         const Vector2&                                   renderablePosition,
-                         float                                            minLineOffset,
-                         const Text::Internal::Gradient::AtlasFrameState& state,
-                         const Vector2&                                   viewSize)
+void UpdateAtlasGradient(Ui::Text::RendererPtr                                renderer,
+                         Ui::Text::ControllerPtr                              controller,
+                         Actor                                                stencil,
+                         const Vector2&                                       renderablePosition,
+                         float                                                minLineOffset,
+                         const Ui::Text::Internal::Gradient::AtlasFrameState& state,
+                         const Vector2&                                       viewSize)
 {
   if(!renderer || !state.enabled)
   {
@@ -98,7 +70,7 @@ void UpdateAtlasGradient(Text::RendererPtr                                render
 
   const Vector2 layoutSize = controller->GetView().GetLayoutSize();
   Vector4       bounds;
-  if(state.boundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+  if(state.boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
   {
     Vector2 contentOffset = renderablePosition;
     if(stencil)
@@ -106,19 +78,20 @@ void UpdateAtlasGradient(Text::RendererPtr                                render
       const Vector3 stencilPosition = stencil.GetProperty<Vector3>(Actor::Property::POSITION);
       contentOffset += Vector2(stencilPosition.x, stencilPosition.y);
     }
-    bounds = Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
+    bounds = Ui::Text::Internal::CalculateGradientViewBounds(layoutSize, viewSize, contentOffset);
   }
   else
   {
     const auto model = controller->GetRenderTextModel();
-    bounds           = Text::Internal::CalculateAtlasGradientContentBounds(
+    bounds           = Ui::Text::Internal::CalculateAtlasGradientContentBounds(
       layoutSize, model->GetLines(), model->GetNumberOfLines(), minLineOffset);
   }
 
   renderer->UpdateAtlasGradient(layoutSize, bounds);
 }
 } // namespace
-Bounds CommonTextUtils::GetTextBoundingRectangle(Text::ModelPtr model, TextAbstraction::CharacterIndex startIndex,
+
+Bounds CommonTextUtils::GetTextBoundingRectangle(Ui::Text::ModelPtr model, TextAbstraction::CharacterIndex startIndex,
                                                  TextAbstraction::CharacterIndex endIndex)
 {
   Vector<Vector2> sizeList;
@@ -158,13 +131,15 @@ Bounds CommonTextUtils::GetTextBoundingRectangle(Text::ModelPtr model, TextAbstr
   return {minX, minY, maxRight - minX, maxBottom - minY};
 }
 
-void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::ControllerPtr controller,
+void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Ui::Text::ControllerPtr controller,
                                                      std::vector<Ui::TextAnchor>& anchorActors)
 {
   for(auto& anchorActor : anchorActors)
   {
     parent.Remove(anchorActor);
   }
+  anchorActors.clear();
+
   if(Dali::Integration::Accessibility::IsUp()) // LCOV_EXCL_LINE
   {
     controller->GetAnchorActors(anchorActors);
@@ -175,18 +150,18 @@ void CommonTextUtils::SynchronizeTextAnchorsInParent(Actor parent, Text::Control
   }
 }
 
-void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
-                                 Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
+void CommonTextUtils::RenderText(Actor textActor, Ui::Text::RendererPtr renderer, Ui::Text::ControllerPtr controller,
+                                 Ui::Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
                                  Actor& backgroundActor, Actor& cursorLayerActor, Actor& stencil,
-                                 std::vector<Actor>&                              clippingDecorationActors,
-                                 std::vector<Ui::TextAnchor>&                     anchorActors,
-                                 Text::Controller::UpdateTextType                 updateTextType,
-                                 const Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
-                                 const Vector2&                                   viewSize)
+                                 std::vector<Actor>&                                  clippingDecorationActors,
+                                 std::vector<Ui::TextAnchor>&                         anchorActors,
+                                 Ui::Text::Controller::UpdateTextType                 updateTextType,
+                                 const Ui::Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
+                                 const Vector2&                                       viewSize)
 {
   Actor newRenderableActor;
 
-  if(Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType))
+  if(Ui::Text::Controller::NONE_UPDATED != (Ui::Text::Controller::MODEL_UPDATED & updateTextType))
   {
     if(renderer)
     {
@@ -256,7 +231,7 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
         addChild(backgroundActor);
         backgroundActor.SetProperty(
           Actor::Property::POSITION,
-          renderableActorPosition); // In text field's coords.
+          renderableActorPosition); // In input field's coords.
         backgroundActor.LowerBelow(highlightActor);
       }
       else
@@ -277,8 +252,8 @@ void CommonTextUtils::RenderText(Actor textActor, Text::RendererPtr renderer, Te
 }
 
 void CommonTextUtils::UpdateTextRenderPosition(
-  Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller, float alignmentOffset,
-  Actor renderableActor, Actor stencil, const Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
+  Actor textActor, Ui::Text::RendererPtr renderer, Ui::Text::ControllerPtr controller, float alignmentOffset,
+  Actor renderableActor, Actor stencil, const Ui::Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
   const Vector2& viewSize)
 {
   if(!renderableActor || !renderer)
@@ -289,362 +264,6 @@ void CommonTextUtils::UpdateTextRenderPosition(
   const Vector2 position = CalculateRenderablePosition(textActor, controller, alignmentOffset, stencil);
   renderableActor.SetProperty(Actor::Property::POSITION, position);
   UpdateAtlasGradient(renderer, controller, stencil, position, alignmentOffset, atlasFrameState, viewSize);
-}
-
-void TextControlAccessible::InitDefaultFeatures()
-{
-  ViewAccessible::InitDefaultFeatures();
-  AddFeature<Dali::Accessibility::Text>(SharedFromThis());
-  AddFeature<Dali::Accessibility::Hypertext>(SharedFromThis());
-}
-
-std::size_t TextControlAccessible::GetCharacterCount() const
-{
-  return GetWholeText().size();
-}
-
-std::size_t TextControlAccessible::GetCursorOffset() const
-{
-  return 0u;
-}
-
-Bounds TextControlAccessible::GetRangeExtents(std::size_t startOffset, std::size_t endOffset,  // LCOV_EXCL_LINE
-                                              Dali::Devel::Accessibility::CoordinateType type) // LCOV_EXCL_LINE
-{
-  if(!ValidateRange(GetWholeText(), startOffset, endOffset))
-  {
-    return {0, 0, 0, 0};
-  }
-
-  auto rect    = GetTextController()->GetTextBoundingRectangle(startOffset, endOffset - 1);
-  auto extents = GetExtents(type);
-
-  rect.x += extents.x;
-  rect.y += extents.y;
-
-  return rect;
-}
-
-Dali::Devel::Accessibility::Range TextControlAccessible::GetRangeOfSelection(std::size_t selectionIndex) const // LCOV_EXCL_LINE
-{
-  // Since DALi supports only one selection, indices other than 0 are ignored
-  if(selectionIndex > 0)
-  {
-    return {};
-  }
-
-  auto indices     = GetTextController()->GetSelectionIndexes();
-  auto startOffset = static_cast<std::size_t>(indices.first);
-  auto endOffset   = static_cast<std::size_t>(indices.second);
-  auto text        = GetText(startOffset, endOffset);
-
-  return {startOffset, endOffset, std::move(text)};
-}
-
-std::string TextControlAccessible::GetText(std::size_t startOffset, std::size_t endOffset) const
-{
-  auto text = GetWholeText();
-
-  if(!ValidateRange(text, startOffset, endOffset))
-  {
-    return {};
-  }
-
-  if(IsHiddenInput())
-  {
-    std::uint32_t substituteCharacterUtf32 = GetSubstituteCharacter();
-    std::string   substituteCharacterUtf8;
-    std::string   substituteText;
-
-    Ui::Text::Utf32ToUtf8(&substituteCharacterUtf32, 1, substituteCharacterUtf8);
-
-    while(substituteText.length() < endOffset - startOffset)
-    {
-      substituteText.append(substituteCharacterUtf8);
-    }
-
-    return substituteText;
-  }
-
-  return text.substr(startOffset, endOffset - startOffset);
-}
-
-Dali::Devel::Accessibility::Range TextControlAccessible::GetTextAtOffset(std::size_t offset, Dali::Devel::Accessibility::TextBoundary boundary) const // LCOV_EXCL_LINE
-{
-  Dali::Devel::Accessibility::Range range{}; // LCOV_EXCL_LINE
-
-  if(IsHiddenInput())
-  {
-    // Returning empty object, as there is no possibility to parse the textfield
-    // when its content is hidden.
-    return range;
-  }
-
-  auto text     = GetWholeText();
-  auto textSize = text.size();
-
-  switch(boundary)
-  {
-    case Dali::Devel::Accessibility::TextBoundary::CHARACTER: // LCOV_EXCL_LINE
-    {
-      if(offset < textSize)
-      {
-        range.content     = text[offset];
-        range.startOffset = offset;
-        range.endOffset   = offset + 1;
-      }
-      break;
-    }
-
-    case Dali::Devel::Accessibility::TextBoundary::WORD: // LCOV_EXCL_LINE
-    case Dali::Devel::Accessibility::TextBoundary::LINE: // LCOV_EXCL_LINE
-    {
-      std::vector<char> breaks(textSize, '\0');
-
-      if(boundary == Dali::Devel::Accessibility::TextBoundary::WORD) // LCOV_EXCL_LINE
-      {
-        TextAbstraction::Segmentation::Get().GetWordBreakPositionsUtf8(reinterpret_cast<const uint8_t*>(text.c_str()),
-                                                                       textSize, breaks.data());
-      }
-      else
-      {
-        TextAbstraction::Segmentation::Get().GetLineBreakPositionsUtf8(reinterpret_cast<const uint8_t*>(text.c_str()),
-                                                                       textSize, breaks.data());
-      }
-
-      std::size_t index   = 0u;
-      std::size_t counter = 0u;
-
-      while(index < textSize && counter <= offset)
-      {
-        auto start = index;
-        if(breaks[index])
-        {
-          while(breaks[index])
-          {
-            index++;
-          }
-          counter++;
-        }
-        else
-        {
-          if(boundary == Dali::Devel::Accessibility::TextBoundary::WORD) // LCOV_EXCL_LINE
-          {
-            index++;
-          }
-          if(boundary == Dali::Devel::Accessibility::TextBoundary::LINE) // LCOV_EXCL_LINE
-          {
-            counter++;
-          }
-        }
-
-        if((counter > 0) && ((counter - 1) == offset))
-        {
-          range.content     = text.substr(start, index - start + 1);
-          range.startOffset = start;
-          range.endOffset   = index + 1;
-        }
-
-        if(boundary == Dali::Devel::Accessibility::TextBoundary::LINE) // LCOV_EXCL_LINE
-        {
-          index++;
-        }
-      }
-      break;
-    }
-
-    case Dali::Devel::Accessibility::TextBoundary::SENTENCE:  // Not supported by default // LCOV_EXCL_LINE
-    case Dali::Devel::Accessibility::TextBoundary::PARAGRAPH: // Not supported by libunibreak library // LCOV_EXCL_LINE
-    default:
-    {
-      break;
-    }
-  }
-
-  return range;
-}
-
-bool TextControlAccessible::RemoveSelection(std::size_t selectionIndex)
-{
-  // Since DALi supports only one selection, indices other than 0 are ignored
-  if(selectionIndex > 0)
-  {
-    return false;
-  }
-
-  GetTextController()->SetSelection(0, 0);
-
-  return true;
-}
-
-bool TextControlAccessible::SetCursorOffset(std::size_t offset)
-{
-  return false;
-}
-
-bool TextControlAccessible::SetRangeOfSelection(std::size_t selectionIndex, std::size_t startOffset,
-                                                std::size_t endOffset)
-{
-  // Since DALi supports only one selection, indices other than 0 are ignored
-  if(selectionIndex > 0)
-  {
-    return false;
-  }
-
-  // Lack of ValidateRange() is intentional
-
-  GetTextController()->SetSelection(startOffset, endOffset);
-
-  return true;
-}
-
-Dali::Accessibility::Accessible* TextControlAccessible::GetLink(std::int32_t linkIndex) const
-{
-  if(linkIndex < 0 || linkIndex >= GetLinkCount())
-  {
-    return nullptr;
-  }
-
-  auto anchor = GetTextAnchors()[linkIndex];
-
-  return Dali::Accessibility::Accessible::Get(anchor);
-}
-
-std::int32_t TextControlAccessible::GetLinkCount() const
-{
-  return static_cast<std::int32_t>(GetTextAnchors().size());
-}
-
-std::int32_t TextControlAccessible::GetLinkIndex(std::int32_t characterOffset) const
-{
-  return GetTextController()->GetAnchorIndex(static_cast<std::size_t>(characterOffset));
-}
-
-std::string TextControlAccessible::GetWholeText() const
-{
-  std::string text;
-
-  GetTextController()->GetText(text);
-
-  return text;
-}
-
-std::string TextControlAccessible::GetCurrentPlaceholderText() const
-{
-  auto focusView = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
-  bool hasFocus  = Self() == focusView;
-
-  Ui::Text::Controller::PlaceholderType placeholderType =
-    hasFocus ? Ui::Text::Controller::PLACEHOLDER_TYPE_ACTIVE : Ui::Text::Controller::PLACEHOLDER_TYPE_INACTIVE;
-
-  std::string placeholderText;
-
-  GetTextController()->GetPlaceholderText(placeholderType, placeholderText);
-
-  return placeholderText;
-}
-
-std::uint32_t TextControlAccessible::GetSubstituteCharacter() const
-{
-  return Ui::Text::DEFAULT_PASSWORD_MASK_CHARACTER;
-}
-
-bool TextControlAccessible::IsHiddenInput() const
-{
-  return false;
-}
-
-void EditableTextControlAccessible::InitDefaultFeatures()
-{
-  TextControlAccessible::InitDefaultFeatures();
-  AddFeature<Dali::Accessibility::EditableText>(SharedFromThis());
-}
-
-Dali::Integration::Accessibility::States EditableTextControlAccessible::CalculateStates() // LCOV_EXCL_LINE
-{
-  using Dali::Integration::Accessibility::State; // LCOV_EXCL_LINE
-
-  auto states    = ViewAccessible::CalculateStates();
-  auto focusView = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
-
-  states[State::EDITABLE]  = true;
-  states[State::FOCUSABLE] = true;
-  states[State::FOCUSED]   = (Self() == focusView);
-
-  return states;
-}
-
-std::size_t EditableTextControlAccessible::GetCursorOffset() const
-{
-  return GetTextController()->GetCursorPosition();
-}
-
-bool EditableTextControlAccessible::SetCursorOffset(std::size_t offset)
-{
-  if(offset > GetCharacterCount())
-  {
-    return false;
-  }
-
-  GetTextController()->ResetCursorPosition(offset);
-  RequestTextRelayout();
-
-  return true;
-}
-
-bool EditableTextControlAccessible::CopyText(std::size_t startPosition, std::size_t endPosition)
-{
-  auto text = GetWholeText();
-
-  if(!ValidateRange(text, startPosition, endPosition))
-  {
-    return false;
-  }
-
-  GetTextController()->CopyStringToClipboard(text.substr(startPosition, endPosition - startPosition));
-
-  return true;
-}
-
-bool EditableTextControlAccessible::CutText(std::size_t startPosition, std::size_t endPosition)
-{
-  if(!CopyText(startPosition, endPosition))
-  {
-    return false;
-  }
-
-  return DeleteText(startPosition, endPosition);
-}
-
-bool EditableTextControlAccessible::DeleteText(std::size_t startPosition, std::size_t endPosition)
-{
-  auto text = GetWholeText();
-
-  if(!ValidateRange(text, startPosition, endPosition))
-  {
-    return false;
-  }
-
-  return SetTextContents(std::move(text.erase(startPosition, endPosition - startPosition)));
-}
-
-bool EditableTextControlAccessible::InsertText(std::size_t startPosition, std::string newText)
-{
-  auto text = GetWholeText();
-
-  if(!ValidateRange(text, startPosition, startPosition + 1) && !(startPosition == text.size()))
-  {
-    return false;
-  }
-
-  return SetTextContents(std::move(text.insert(startPosition, newText)));
-}
-
-bool EditableTextControlAccessible::SetTextContents(std::string newContents)
-{
-  GetTextController()->SetText(std::move(newContents));
-
-  return true;
 }
 
 } // namespace Dali::Ui::Internal

@@ -21,6 +21,7 @@
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
+#include <dali/integration-api/adaptor-framework/accessibility/accessibility-bridge.h>
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
@@ -31,12 +32,14 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/input-editor-impl.h>
 #include <dali-ui-foundation/integration-api/input-editor-property-handler.h>
+#include <dali-ui-foundation/internal/controls/text-controls/input-editor-accessible.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
+#include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
@@ -1739,7 +1742,29 @@ void InputEditorImpl::OnInitialize()
     systemSettings.FontSizeChangedSignal().Connect(this, &InputEditorImpl::OnSystemFontSizeChanged);
   }
 
+  Ui::View::DownCast(self).SetAccessibilityRole(Ui::Accessibility::Role::ENTRY);
+  Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(
+    this, &InputEditorImpl::OnAccessibilityStatusChanged);
+  Dali::Integration::Accessibility::Bridge::DisabledSignal().Connect(
+    this, &InputEditorImpl::OnAccessibilityStatusChanged);
+
   ApplyInitialConfig();
+}
+
+ViewAccessible* InputEditorImpl::CreateAccessibleObject()
+{
+  return new InputEditorAccessible(Self());
+}
+
+bool InputEditorImpl::OnAccessibilityActivate()
+{
+  SetKeyInputFocus(*this);
+  return true;
+}
+
+void InputEditorImpl::OnAccessibilityStatusChanged()
+{
+  Internal::CommonTextUtils::SynchronizeTextAnchorsInParent(Self(), mController, mAnchorActors);
 }
 
 void InputEditorImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
@@ -2363,12 +2388,30 @@ void InputEditorImpl::InputRejected(Text::InputFilter::RejectReason reason)
 
 void InputEditorImpl::TextInserted(unsigned int position, unsigned int length, const std::string& content)
 {
-  // TODO: Accessible
+  if(!Dali::Integration::Accessibility::IsUp())
+  {
+    return;
+  }
+
+  auto accessible = Internal::ViewDataImpl::Get(*this).GetAccessibleObject();
+  if(DALI_LIKELY(accessible))
+  {
+    accessible->EmitTextInserted(position, length, content);
+  }
 }
 
 void InputEditorImpl::TextDeleted(unsigned int position, unsigned int length, const std::string& content)
 {
-  // TODO: Accessible
+  if(!Dali::Integration::Accessibility::IsUp())
+  {
+    return;
+  }
+
+  auto accessible = Internal::ViewDataImpl::Get(*this).GetAccessibleObject();
+  if(DALI_LIKELY(accessible))
+  {
+    accessible->EmitTextDeleted(position, length, content);
+  }
 }
 
 // =============================================================================

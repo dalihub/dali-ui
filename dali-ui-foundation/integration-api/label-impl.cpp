@@ -36,6 +36,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/label-impl.h>
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
+#include <dali-ui-foundation/internal/controls/text-controls/label-accessible.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 #include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
 #include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
@@ -1947,6 +1948,11 @@ void LabelImpl::OnInitialize()
   Dali::Integration::Accessibility::Bridge::DisabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
 
   ApplyInitialConfig();
+}
+
+ViewAccessible* LabelImpl::CreateAccessibleObject()
+{
+  return new LabelAccessible(Self());
 }
 
 void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)

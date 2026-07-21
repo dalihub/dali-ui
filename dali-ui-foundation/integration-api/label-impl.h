@@ -52,6 +52,7 @@ namespace Ui
 namespace Integration
 {
 
+class LabelAccessible;
 class LabelImpl;
 using LabelImplPtr = IntrusivePtr<LabelImpl>;
 
@@ -62,6 +63,8 @@ using LabelImplPtr = IntrusivePtr<LabelImpl>;
  */
 class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface, public Text::ScrollerInterface, public Text::AnchorControlInterface, public Text::AsyncTextInterface
 {
+  friend class LabelAccessible;
+
 public:
   // Creation & Destruction
 
@@ -800,6 +803,13 @@ public: // From ViewImpl
    */
   void OnInitialize() override;
 
+private: // From ViewImpl
+  /**
+   * @copydoc ViewImpl::CreateAccessibleObject()
+   */
+  ViewAccessible* CreateAccessibleObject() override;
+
+public: // From ViewImpl
   /**
    * @copydoc ViewImpl::OnSceneConnection()
    */

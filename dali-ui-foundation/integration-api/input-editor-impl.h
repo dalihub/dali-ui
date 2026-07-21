@@ -25,7 +25,7 @@
 #include <dali/public-api/events/tap-gesture-detector.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
+#include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
@@ -55,6 +55,7 @@ namespace Ui
 namespace Integration
 {
 
+class InputEditorAccessible;
 class InputEditorImpl;
 using InputEditorImplPtr = IntrusivePtr<InputEditorImpl>;
 
@@ -65,6 +66,8 @@ using InputEditorImplPtr = IntrusivePtr<InputEditorImpl>;
  */
 class DALI_UI_API InputEditorImpl : public ViewImpl, public Text::ControlInterface, public Text::EditableControlInterface, public Text::SelectableControlInterface, public Text::AnchorControlInterface
 {
+  friend class InputEditorAccessible;
+
 public:
   // Creation & Destruction
 
@@ -851,6 +854,16 @@ public: // From ViewImpl
 
 private: // From ViewImpl
   /**
+   * @copydoc ViewImpl::CreateAccessibleObject()
+   */
+  ViewAccessible* CreateAccessibleObject() override;
+
+  /**
+   * @copydoc ViewImpl::OnAccessibilityActivate()
+   */
+  bool OnAccessibilityActivate() override;
+
+  /**
    * @copydoc ViewImpl::OnFocusChanged()
    */
   void OnFocusChanged(bool focused) override;
@@ -869,6 +882,11 @@ private: // From ViewImpl
    * @copydoc ViewImpl::OnKeyEvent()
    */
   bool OnKeyEvent(const KeyEvent& event) override;
+
+  /**
+   * @brief Synchronizes accessibility anchor actors when the bridge status changes.
+   */
+  void OnAccessibilityStatusChanged();
 
 protected: // From ViewImpl
   /**

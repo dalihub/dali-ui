@@ -18,14 +18,10 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/atspi-interfaces/editable-text.h>
-#include <dali/devel-api/atspi-interfaces/hypertext.h>
-#include <dali/devel-api/atspi-interfaces/text.h>
 #include <dali/devel-api/common/vector-wrapper.h>
 #include <dali/public-api/actors/actor.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
@@ -40,33 +36,36 @@ class CommonTextUtils
 public:
   /**
    * Common method to render text, setting up background, foreground actors with decorators/stencil.
-   * @param[in] textActor The TextEditor or TextField
+   * @param[in] textActor The InputEditor or InputField
    * @param[in] renderer pointer to the text renderer
    * @param[in] controller pointer to the text controller
    * @param[in] decorator pointer to the text decorator
    * @param[in,out] alignmentOffset Alignment offset
    * @param[in,out] renderableActor Actor for rendering text
    * @param[in,out] backgroundActor Actor for rendering background
+   * @param[in,out] cursorLayerActor Actor for rendering the cursor
    * @param[in,out] stencil Clipping actor
    * @param[in,out] clippingDecorationActors Clipping decoration actors
    * @param[in,out] anchorActors Anchor actors
    * @param[in] updateTextType How the text has been updated
+   * @param[in] atlasFrameState Atlas gradient state for the current frame
+   * @param[in] viewSize Current view size
    */
-  static void RenderText(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
-                         Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
+  static void RenderText(Actor textActor, Ui::Text::RendererPtr renderer, Ui::Text::ControllerPtr controller,
+                         Ui::Text::DecoratorPtr decorator, float& alignmentOffset, Actor& renderableActor,
                          Actor& backgroundActor, Actor& cursorLayerActor, Actor& stencil,
                          std::vector<Actor>& clippingDecorationActors, std::vector<Ui::TextAnchor>& anchorActors,
-                         Text::Controller::UpdateTextType                 updateTextType,
-                         const Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
-                         const Vector2&                                   viewSize);
+                         Ui::Text::Controller::UpdateTextType                 updateTextType,
+                         const Ui::Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
+                         const Vector2&                                       viewSize);
 
   /**
    * @brief Synchronizes actor scrolling and atlas gradient bounds without rebuilding glyph geometry.
    */
-  static void UpdateTextRenderPosition(Actor textActor, Text::RendererPtr renderer, Text::ControllerPtr controller,
+  static void UpdateTextRenderPosition(Actor textActor, Ui::Text::RendererPtr renderer, Ui::Text::ControllerPtr controller,
                                        float alignmentOffset, Actor renderableActor, Actor stencil,
-                                       const Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
-                                       const Vector2&                                   viewSize);
+                                       const Ui::Text::Internal::Gradient::AtlasFrameState& atlasFrameState,
+                                       const Vector2&                                       viewSize);
 
   /**
    * Common method to synchronize TextAnchor actors with Anchor objects in text's logical model.
@@ -74,7 +73,7 @@ public:
    * @param[in] controller pointer to the text controller
    * @param[in,out] anchorActors Anchor actors
    */
-  static void SynchronizeTextAnchorsInParent(Actor parent, Text::ControllerPtr controller,
+  static void SynchronizeTextAnchorsInParent(Actor parent, Ui::Text::ControllerPtr controller,
                                              std::vector<Ui::TextAnchor>& anchorActors);
 
   /**
@@ -85,192 +84,8 @@ public:
    * @param[in] endIndex end index(included) of the text requested to get bounding box to.
    * @return bounding box of the requested text.
    */
-  static Bounds GetTextBoundingRectangle(Text::ModelPtr model, TextAbstraction::CharacterIndex startIndex,
+  static Bounds GetTextBoundingRectangle(Ui::Text::ModelPtr model, TextAbstraction::CharacterIndex startIndex,
                                          TextAbstraction::CharacterIndex endIndex);
-};
-
-class TextControlAccessible : public ViewAccessible,
-                              public Dali::Accessibility::Text,
-                              public Dali::Accessibility::Hypertext
-{
-public:
-  using ViewAccessible::ViewAccessible;
-
-  // Text
-
-  /**
-   * @copydoc Dali::Accessibility::Text::GetCharacterCount()
-   */
-  std::size_t GetCharacterCount() const override;
-
-  /**
-   * @copydoc Dali::Accessibility::Text::GetCursorOffset()
-   */
-  std::size_t GetCursorOffset() const override;
-
-  /**
-   * @copydoc Dali::Accessibility::Text::GetRangeExtents()
-   */
-  Bounds GetRangeExtents(std::size_t startOffset, std::size_t endOffset,
-                         Dali::Devel::Accessibility::CoordinateType type) override; // LCOV_EXCL_LINE
-
-  /**
-   * @copydoc Dali::Accessibility::Text::GetRangeOfSelection()
-   */
-  Dali::Devel::Accessibility::Range GetRangeOfSelection(std::size_t selectionIndex) const override; // LCOV_EXCL_LINE
-
-  /**
-   * @copydoc Dali::Accessibility::Text::GetText()
-   */
-  std::string GetText(std::size_t startOffset, std::size_t endOffset) const override;
-
-  /**
-   * @copydoc Dali::Accessibility::Text::GetTextAtOffset()
-   */
-  Dali::Devel::Accessibility::Range GetTextAtOffset(std::size_t offset, Dali::Devel::Accessibility::TextBoundary boundary) const override; // LCOV_EXCL_LINE
-
-  /**
-   * @copydoc Dali::Accessibility::Text::RemoveSelection()
-   */
-  bool RemoveSelection(std::size_t selectionIndex) override;
-
-  /**
-   * @copydoc Dali::Accessibility::Text::SetCursorOffset()
-   */
-  bool SetCursorOffset(std::size_t offset) override;
-
-  /**
-   * @copydoc Dali::Accessibility::Text::SetRangeOfSelection()
-   */
-  bool SetRangeOfSelection(std::size_t selectionIndex, std::size_t startOffset, std::size_t endOffset) override;
-
-  // Hypertext
-
-  /**
-   * @copydoc Dali::Accessibility::Hypertext::GetLink()
-   */
-  Dali::Accessibility::Accessible* GetLink(std::int32_t linkIndex) const override;
-
-  /**
-   * @copydoc Dali::Accessibility::Hypertext::GetLinkCount()
-   */
-  std::int32_t GetLinkCount() const override;
-
-  /**
-   * @copydoc Dali::Accessibility::Hypertext::GetLinkIndex()
-   */
-  std::int32_t GetLinkIndex(std::int32_t characterOffset) const override;
-
-protected:
-  /**
-   * @copydoc Dali::Accessibility::Accessible::InitDefaultFeatures()
-   */
-  void InitDefaultFeatures() override;
-
-protected:
-  /**
-   * @brief Gets whole text.
-   *
-   * @return The text
-   */
-  std::string GetWholeText() const;
-
-  /**
-   * @brief Gets current placeholder text.
-   *
-   * @return The placeholder text
-   */
-  std::string GetCurrentPlaceholderText() const;
-
-  /**
-   * @brief Gets text anchors.
-   *
-   * @return Text anchors
-   */
-  virtual const std::vector<Ui::TextAnchor>& GetTextAnchors() const = 0;
-
-  /**
-   * @brief Gets text controller.
-   *
-   * @return The text controller
-   */
-  virtual Ui::Text::ControllerPtr GetTextController() const = 0;
-
-  /**
-   * @brief Get substitute character for hidden text.
-   *
-   * @return The substitute character (Unicode codepoint)
-   */
-  virtual std::uint32_t GetSubstituteCharacter() const;
-
-  /**
-   * @brief Checks whether text should be hidden (replaced with substitute characters).
-   *
-   * @return True if text should be hidden, false otherwise
-   */
-  virtual bool IsHiddenInput() const;
-};
-
-class EditableTextControlAccessible : public TextControlAccessible, public Dali::Accessibility::EditableText
-{
-public:
-  using TextControlAccessible::TextControlAccessible;
-
-  /**
-   * @copydoc Dali::Ui::ControlAccessible::CalculateStates()
-   */
-  Dali::Integration::Accessibility::States CalculateStates() override; // LCOV_EXCL_LINE
-
-  // Text
-
-  /**
-   * @copydoc Dali::Accessibility::Text::GetCursorOffset()
-   */
-  std::size_t GetCursorOffset() const override;
-
-  /**
-   * @copydoc Dali::Accessibility::Text::SetCursorOffset()
-   */
-  bool SetCursorOffset(std::size_t offset) override;
-
-  // EditableText
-
-  /**
-   * @copydoc Dali::Accessibility::EditableText::CopyText()
-   */
-  bool CopyText(size_t startPosition, size_t endPosition) override;
-
-  /**
-   * @copydoc Dali::Accessibility::EditableText::CutText()
-   */
-  bool CutText(size_t startPosition, size_t endPosition) override;
-
-  /**
-   * @copydoc Dali::Accessibility::EditableText::DeleteText()
-   */
-  bool DeleteText(size_t startPosition, size_t endPosition) override;
-
-  /**
-   * @copydoc Dali::Accessibility::EditableText::InsertText()
-   */
-  bool InsertText(size_t startPosition, std::string text) override;
-
-  /**
-   * @copydoc Dali::Accessibility::EditableText::SetTextContents()
-   */
-  bool SetTextContents(std::string newContents) override;
-
-protected:
-  /**
-   * @copydoc Dali::Accessibility::Accessible::InitDefaultFeatures()
-   */
-  void InitDefaultFeatures() override;
-
-protected:
-  /**
-   * @brief Requests text relayout.
-   */
-  virtual void RequestTextRelayout() = 0;
 };
 
 } // namespace Dali::Ui::Internal
