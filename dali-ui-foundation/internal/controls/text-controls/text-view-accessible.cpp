@@ -282,8 +282,15 @@ bool TextViewAccessible::SetRangeOfSelection(std::size_t selectionIndex, std::si
     return false;
   }
 
-  // Lack of ValidateRange() is intentional for dali-toolkit compatibility.
-  GetTextController()->SetSelection(startOffset, endOffset);
+  const auto characterCount = GetCharacterCount();
+  if(startOffset > endOffset || endOffset > characterCount ||
+     startOffset > static_cast<std::size_t>(std::numeric_limits<int>::max()) ||
+     endOffset > static_cast<std::size_t>(std::numeric_limits<int>::max()))
+  {
+    return false;
+  }
+
+  GetTextController()->SetSelection(static_cast<int>(startOffset), static_cast<int>(endOffset));
   return true;
 }
 

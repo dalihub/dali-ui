@@ -20,6 +20,7 @@
 #include <dali/devel-api/atspi-interfaces/editable-text.h>
 #include <dali/devel-api/atspi-interfaces/hypertext.h>
 #include <dali/devel-api/atspi-interfaces/text.h>
+#include <limits>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -261,6 +262,19 @@ int UtcDaliAccessibilityEditableTextUnicodeCharacterOffsetsInternalP(void)
 
   DALI_TEST_EQUALS(text->SetRangeOfSelection(0u, 1u, 3u), true, TEST_LOCATION);
   auto selection = text->GetRangeOfSelection(0u);
+  DALI_TEST_EQUALS(selection.startOffset, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(selection.endOffset, 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(selection.content, u8"a😀", TEST_LOCATION);
+
+  DALI_TEST_EQUALS(text->SetRangeOfSelection(1u, 1u, 3u), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->SetRangeOfSelection(0u, 3u, 1u), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->SetRangeOfSelection(0u, 0u, 5u), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->SetRangeOfSelection(0u, std::numeric_limits<std::size_t>::max(),
+                                             std::numeric_limits<std::size_t>::max()),
+                   false,
+                   TEST_LOCATION);
+
+  selection = text->GetRangeOfSelection(0u);
   DALI_TEST_EQUALS(selection.startOffset, 1u, TEST_LOCATION);
   DALI_TEST_EQUALS(selection.endOffset, 3u, TEST_LOCATION);
   DALI_TEST_EQUALS(selection.content, u8"a😀", TEST_LOCATION);

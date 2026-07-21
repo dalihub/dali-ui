@@ -144,9 +144,7 @@ protected:
   /**
    * @brief Gets the complete text exposed by the View.
    *
-   * Hidden input is replaced with the configured substitute character.
-   *
-   * @return The exposed text
+   * @return The underlying text without accessibility masking
    */
   std::string GetWholeText() const;
 
