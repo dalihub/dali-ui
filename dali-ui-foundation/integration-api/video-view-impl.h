@@ -92,7 +92,7 @@ private:
 
   /**
    * @brief Creates a NativeImage and an IMAGE visual that displays decoded video frames,
-   * used when the video source has SupportsNativeImage capability (e.g. ESPlayer).
+   * used when the video source's rendering mode is NativeImage (e.g. ESPlayer).
    */
   void EnsureNativeImageVisual();
 

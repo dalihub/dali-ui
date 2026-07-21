@@ -51,19 +51,14 @@ bool VideoSource::IsValid() const
   return *this && GetImpl(*this).IsValid();
 }
 
-VideoSourceCapabilities VideoSource::GetCapabilities() const
+VideoRenderingMode VideoSource::GetRenderingMode() const
 {
-  return GetImpl(*this).GetCapabilities();
+  return GetImpl(*this).GetRenderingMode();
 }
 
 VideoSourceOwnership VideoSource::GetOwnership() const
 {
   return GetImpl(*this).GetOwnership();
-}
-
-VideoControlPolicy VideoSource::GetControlPolicy() const
-{
-  return GetImpl(*this).GetControlPolicy();
 }
 
 VideoSource::VideoSource(Internal::VideoSource* internal)
@@ -74,14 +69,14 @@ VideoSource::VideoSource(Internal::VideoSource* internal)
 VideoSource VideoSource::New(const char*               providerId,
                              void*                     nativeSession,
                              const VideoSourceOptions& options,
-                             VideoSourceCapabilities   capabilities)
+                             VideoRenderingMode        renderingMode)
 {
   if(providerId == nullptr || nativeSession == nullptr)
   {
     return VideoSource();
   }
 
-  Ui::Internal::VideoSourcePtr internal = Ui::Internal::VideoSource::New(providerId, nativeSession, options, capabilities);
+  Ui::Internal::VideoSourcePtr internal = Ui::Internal::VideoSource::New(providerId, nativeSession, options, renderingMode);
   return VideoSource(internal.Get());
 }
 

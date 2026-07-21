@@ -17,7 +17,7 @@
 4. [VideoSource](#4-videosource)
    - [Creation Helpers](#41-creation-helpers)
    - [VideoSourceOptions](#42-videosourceoptions)
-   - [VideoSourceCapabilities](#43-videosourcecapabilities)
+   - [VideoRenderingMode](#43-videorenderingmode)
 5. [Playback Control](#5-playback-control)
 6. [Lifecycle & Ordering](#6-lifecycle--ordering)
 7. [Platform Backend Notes](#7-platform-backend-notes)
@@ -31,14 +31,14 @@
 `VideoView` is not a self-contained resource loader like `ImageView`. There is no `SetResourceUrl()` that fetches and prepares a video by itself. Instead, the application:
 
 1. Creates and configures the native player (Tizen CAPI `player_h` for MMPlayer, or `esplusplayer_handle` for ESPlayer) itself — but does **not** prepare or play it yet.
-2. Wraps the native handle as a `VideoSource` using a `Dali::Ui::Tizen::CreateVideoSourceFromXxx()` helper.
+2. Wraps the native handle as a `VideoSource`: the app fills a `Dali::VideoSourceDescriptor` (provider id + native handle + rendering mode) and passes it to `Dali::Ui::CreateVideoSource()`.
 3. Creates a `VideoView` from that source and adds it to the window.
 4. **Only then** prepares the native player and starts playback.
 5. When done, clears the source and destroys the native handle itself.
 
 ```
 App:  player_create() → player_set_uri()  (native handle stays IDLE)
-App:  source = CreateVideoSourceFromMMPlayerUnderlay(player)
+App:  descriptor{providerId, nativeSession, flags};  source = Ui::CreateVideoSource(descriptor)
 App:  videoView = VideoView::New(source);  window.Add(videoView)
                         ↓ synchronous — display is attached here, while the player is IDLE
 App:  player_prepare()  →  videoView.Play()
@@ -56,7 +56,7 @@ App:  videoView.ClearSource();  player_unprepare(player);  player_destroy(player
 
 ```cpp
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/video/tizen-video-source.h>
+#include <dali/public-api/adaptor-framework/video-source-descriptor.h>
 #include <player.h>
 
 using namespace Dali::Ui;
@@ -66,8 +66,12 @@ player_h player;
 player_create(&player);
 player_set_uri(player, "video.mp4");
 
-// 2. Wrap the handle as a VideoSource
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(player);
+// 2. Fill a descriptor and wrap it as a VideoSource
+Dali::VideoSourceDescriptor descriptor;
+descriptor.SetProviderId("tizen.mmplayer");
+descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
+descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor);
 
 // 3. Create the VideoView and add it to the window
 VideoView videoView = VideoView::New(source);
@@ -89,11 +93,12 @@ player_destroy(player);
 
 ### 2.2 MMPlayer NativeImage
 
-Only the creation helper changes; the rest of the flow is identical to underlay.
+Only the rendering mode changes (`NATIVE_IMAGE` instead of `UNDERLAY`); the rest of the flow is identical to underlay.
 
 ```cpp
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerNativeImage(player);
-VideoView   videoView = VideoView::New(source);
+descriptor.SetRenderingMode(Dali::VideoRenderingMode::NATIVE_IMAGE);
+VideoSource source     = Dali::Ui::CreateVideoSource(descriptor);
+VideoView   videoView  = VideoView::New(source);
 window.Add(videoView);
 
 player_prepare(player);
@@ -115,10 +120,14 @@ esplusplayer_set_video_stream_info(player, &videoInfo);
 esplusplayer_set_ready_to_prepare_cb(player, OnReadyToPrepare, userData);
 esplusplayer_set_prepare_async_done_cb(player, OnPrepareAsyncDone, userData);
 
+Dali::VideoSourceDescriptor descriptor;
+descriptor.SetProviderId("tizen.esplayer");
+descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
 // NativeImage (GPU texture):
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerNativeImage(player);
+descriptor.SetRenderingMode(Dali::VideoRenderingMode::NATIVE_IMAGE);
 // Underlay (hole-punch), instead:
-// VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerUnderlay(player);
+// descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor);
 
 VideoView videoView = VideoView::New(source);
 window.Add(videoView);
@@ -137,21 +146,21 @@ esplusplayer_prepare_async(player);
 
 ## 3. Choosing a Rendering Mode
 
-There is no separate mode-selection API — the rendering mode is determined entirely by **which creation helper you call**.
+There is no separate mode-selection API — the rendering mode is determined entirely by the rendering mode you set (`SetRenderingMode()`).
 
-| Mode | Helpers | Pros | Cons |
+| Mode | `VideoRenderingMode` | Pros | Cons |
 |---|---|---|---|
-| **Underlay** | `CreateVideoSourceFromMMPlayerUnderlay()`, `CreateVideoSourceFromESPlayerUnderlay()` | Platform-composited (hole-punch), lower overhead; geometry/ROI kept in sync with the view automatically | Video always renders beneath the UI layer; DALi render effects/blending cannot be applied directly to the frame |
-| **NativeImage** | `CreateVideoSourceFromMMPlayerNativeImage()`, `CreateVideoSourceFromESPlayerNativeImage()` | Decoded frames become a regular GPU texture — supports corner radius, blending, and other View render effects like any other content | Extra decode-to-texture copy overhead |
+| **Underlay** | `UNDERLAY` | Platform-composited (hole-punch), lower overhead; geometry/ROI kept in sync with the view automatically | Video always renders beneath the UI layer; DALi render effects/blending cannot be applied directly to the frame |
+| **NativeImage** | `NATIVE_IMAGE` | Decoded frames become a regular GPU texture — supports corner radius, blending, and other View render effects like any other content | Extra decode-to-texture copy overhead |
 
-### Helper → Player → Capability Mapping
+### Player → Provider ID → Rendering mode
 
-| Helper | Player | Capability | Provider ID |
-|---|---|---|---|
-| `CreateVideoSourceFromMMPlayerUnderlay()` | MMPlayer | `SupportsUnderlay`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
-| `CreateVideoSourceFromMMPlayerNativeImage()` | MMPlayer | `SupportsNativeImage`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
-| `CreateVideoSourceFromESPlayerNativeImage()` | ESPlayer | `SupportsNativeImage` | `"tizen.esplayer"` |
-| `CreateVideoSourceFromESPlayerUnderlay()` | ESPlayer | `SupportsUnderlay` | `"tizen.esplayer"` |
+Set `providerId` and `renderingMode` on the `Dali::VideoSourceDescriptor` yourself; the mode values are `Dali::VideoRenderingMode::` enumerators.
+
+| Player | Provider ID | Rendering mode |
+|---|---|---|
+| MMPlayer | `"tizen.mmplayer"` | `UNDERLAY` or `NATIVE_IMAGE` |
+| ESPlayer | `"tizen.esplayer"` | `UNDERLAY` or `NATIVE_IMAGE` |
 
 ---
 
@@ -159,18 +168,30 @@ There is no separate mode-selection API — the rendering mode is determined ent
 
 `VideoSource` is a lightweight, immutable description of a native player session. It does not own the native handle.
 
-### 4.1 Creation Helpers
+### 4.1 Building a VideoSource
 
-Declared in `<dali-ui-foundation/public-api/video/tizen-video-source.h>`:
+Creation is a two-step composition, so dali-ui itself carries no dependency on the Tizen player headers:
+
+1. The app fills a `Dali::VideoSourceDescriptor` (declared in `<dali/public-api/adaptor-framework/video-source-descriptor.h>`) — provider id, native session handle, and rendering mode. There is no per-provider helper; the app sets the fields itself using the [mapping table above](#player--provider-id--rendering-mode):
 
 ```cpp
-VideoSource CreateVideoSourceFromMMPlayerUnderlay(player_h player, const VideoSourceOptions& options = {});
-VideoSource CreateVideoSourceFromMMPlayerNativeImage(player_h player, const VideoSourceOptions& options = {});
-VideoSource CreateVideoSourceFromESPlayerNativeImage(esplusplayer_handle player, const VideoSourceOptions& options = {});
-VideoSource CreateVideoSourceFromESPlayerUnderlay(esplusplayer_handle player, const VideoSourceOptions& options = {});
+Dali::VideoSourceDescriptor descriptor;
+descriptor.SetProviderId("tizen.mmplayer");
+descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
+descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
 ```
 
-Each helper stamps the correct provider ID and capability flags, then calls `VideoSource::New()` internally. Applications should always go through these helpers, not `VideoSource::New()` directly.
+2. The **bridge** `Dali::Ui::CreateVideoSource()`, declared in `<dali-ui-foundation/public-api/video/video-source.h>`, turns that descriptor into a `VideoSource`:
+
+```cpp
+VideoSource CreateVideoSource(const SourceDescriptor& descriptor, const VideoSourceOptions& options = {});
+```
+
+```cpp
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor);
+```
+
+Applications should always go through `CreateVideoSource()`, not `VideoSource::New()` directly.
 
 ---
 
@@ -180,7 +201,6 @@ Each helper stamps the correct provider ID and capability flags, then calls `Vid
 struct VideoSourceOptions
 {
   VideoSourceOwnership ownership{VideoSourceOwnership::External};
-  VideoControlPolicy   controlPolicy{VideoControlPolicy::ViewControlsPlayback};
 };
 ```
 
@@ -190,39 +210,28 @@ struct VideoSourceOptions
 | `Shared` | The native session is shared or reference-counted. |
 | `Transfer` | Ownership is transferred, if the underlying provider supports it. |
 
-| `VideoControlPolicy` | Meaning |
-|---|---|
-| `ViewControlsPlayback` (default) | `VideoView::Play()/Pause()/Stop()` forward to the native player. |
-| `DisplayOnly` | `VideoView` only attaches display and keeps geometry in sync; the app must control playback directly on the native handle. |
-
 ```cpp
 VideoSourceOptions options;
-options.controlPolicy = VideoControlPolicy::DisplayOnly;
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(player, options);
+options.ownership = VideoSourceOwnership::Shared;
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor, options);
 ```
 
 ---
 
-### 4.3 VideoSourceCapabilities
+### 4.3 VideoRenderingMode
 
 ```cpp
-struct VideoSourceCapabilities
+enum class VideoRenderingMode : uint32_t
 {
-  enum Flag : uint32_t
-  {
-    SupportsUnderlay    = 1u << 0,
-    SupportsNativeImage = 1u << 1,
-    SupportsSeek        = 1u << 2,
-    SupportsVolume      = 1u << 3,
-  };
-  uint32_t flags{0u};
+  Underlay    = 0, // Platform-composited hole-punch; renders beneath the UI.
+  NativeImage = 1, // Decoded frames become a GPU texture; supports UI render effects.
 };
 ```
 
-Capabilities are set automatically by the creation helper you call — you do not set them yourself. Query them back with `VideoSource::GetCapabilities()`, e.g. to check whether a source uses NativeImage rendering:
+You set the mode when building the descriptor (`SetRenderingMode()`). Query it back with `VideoSource::GetRenderingMode()`:
 
 ```cpp
-bool isNativeImage = source.GetCapabilities().flags & VideoSourceCapabilities::SupportsNativeImage;
+bool isNativeImage = source.GetRenderingMode() == VideoRenderingMode::NativeImage;
 ```
 
 ---
@@ -239,7 +248,7 @@ videoView.Pause();
 videoView.Stop();
 ```
 
-`Play()`/`Pause()`/`Stop()` only take effect when `VideoControlPolicy::ViewControlsPlayback` is used (the default). With `DisplayOnly`, these calls are no-ops — call the native player's own start/pause/stop functions directly (e.g. `player_start()`, `esplusplayer_start()`).
+`Play()`/`Pause()`/`Stop()` forward to the native player. An application that prefers to drive playback itself can simply not call them and instead use the native player's own start/pause/stop functions directly (e.g. `player_start()`, `esplusplayer_start()`).
 
 ---
 
@@ -253,7 +262,7 @@ videoView.Stop();
 
 ## 7. Platform Backend Notes
 
-- **tcore vs. ecore is transparent to applications.** Whether the underlying `dali-extension` was built for the tcore or ecore Wayland backend is a build-time choice; the same `CreateVideoSourceFromESPlayerUnderlay()` (or MMPlayer underlay) call works either way.
+- **tcore vs. ecore is transparent to applications.** Whether the underlying `dali-extension` was built for the tcore or ecore Wayland backend is a build-time choice; the same ESPlayer underlay descriptor (`"tizen.esplayer"` + `VideoRenderingMode::UNDERLAY`) works either way.
 - **ESPlayer sessions are always externally owned.** The application must call `esplusplayer_open()`/`esplusplayer_close()`/`esplusplayer_destroy()` itself; `VideoView` never does.
 
 ---
@@ -263,16 +272,14 @@ videoView.Stop();
 | Property | Default |
 |---|---|
 | `VideoSourceOptions::ownership` | `VideoSourceOwnership::External` |
-| `VideoSourceOptions::controlPolicy` | `VideoControlPolicy::ViewControlsPlayback` |
-| `VideoSourceCapabilities::flags` | `0` (set by the creation helper used) |
+| `VideoSourceDescriptor::renderingMode` | `VideoRenderingMode::UNDERLAY` |
 
 ---
 
 ## 9. Important Notes
 
 - **Order matters.** Add the `VideoView` to the window (or otherwise trigger scene connection) **before** calling `player_prepare()`/`esplusplayer_prepare_async()`. Preparing first is a common mistake that results in audio-only playback with no video.
-- **The application owns the native player's entire lifecycle** — creation, prepare, play/pause/stop (unless `DisplayOnly`), and final destruction. `VideoView` only attaches/detaches display and forwards commands.
-- **`DisplayOnly` control policy** disables command forwarding entirely; the app is fully responsible for driving playback on the native handle.
+- **The application owns the native player's entire lifecycle** — creation, prepare, play/pause/stop, and final destruction. `VideoView` only attaches/detaches display and forwards the Play/Pause/Stop commands it is given.
 - **ESPlayer preparation is asynchronous** and requires submitting elementary stream data (and EOS) from a `ready_to_prepare` callback before the player can reach `READY`.
 
 <br/>

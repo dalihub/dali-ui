@@ -21,8 +21,8 @@ IF(NOT CAPI_MEDIA_PLAYER_FOUND)
   RETURN()
 ENDIF()
 
-# tizen-video-source.h also includes the ESPlayer CAPI header, so its include
-# path is required even though this sample only exercises the MMPlayer path.
+# The sample drives an ESPlayer session directly in its ESPlayer modes, so it
+# needs the ESPlayer CAPI headers regardless of which mode is run.
 PKG_CHECK_MODULES(ESPLUSPLAYER REQUIRED esplusplayer)
 
 # Add executable

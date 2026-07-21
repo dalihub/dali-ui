@@ -39,12 +39,11 @@ public:
   static VideoSourcePtr New(const char*               providerId,
                             void*                     nativeSession,
                             const VideoSourceOptions& options,
-                            VideoSourceCapabilities   capabilities);
+                            VideoRenderingMode        renderingMode);
 
-  bool                    IsValid() const;
-  VideoSourceCapabilities GetCapabilities() const;
-  VideoSourceOwnership    GetOwnership() const;
-  VideoControlPolicy      GetControlPolicy() const;
+  bool                 IsValid() const;
+  VideoRenderingMode   GetRenderingMode() const;
+  VideoSourceOwnership GetOwnership() const;
 
   Dali::VideoPlayerPlugin::VideoSourceDescriptor ToAdaptorDescriptor() const;
 
@@ -55,17 +54,16 @@ private:
   VideoSource(const char*               providerId,
               void*                     nativeSession,
               const VideoSourceOptions& options,
-              VideoSourceCapabilities   capabilities);
+              VideoRenderingMode        renderingMode);
 
   VideoSource(const VideoSource&)            = delete;
   VideoSource& operator=(const VideoSource&) = delete;
 
 private:
-  const char*             mProviderId;
-  Any                     mNativeSession;
-  VideoSourceOwnership    mOwnership;
-  VideoControlPolicy      mControlPolicy;
-  VideoSourceCapabilities mCapabilities;
+  const char*          mProviderId;
+  Any                  mNativeSession;
+  VideoSourceOwnership mOwnership;
+  VideoRenderingMode   mRenderingMode;
 };
 
 } // namespace Internal

@@ -18,6 +18,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/public-api/object/any.h>
 #include <dali/public-api/object/base-handle.h>
 #include <cstdint>
 
@@ -40,29 +41,15 @@ enum class VideoSourceOwnership : uint32_t
   Transfer = 2,
 };
 
-enum class VideoControlPolicy : uint32_t
+enum class VideoRenderingMode : uint32_t
 {
-  ViewControlsPlayback = 0,
-  DisplayOnly          = 1,
-};
-
-struct VideoSourceCapabilities
-{
-  enum Flag : uint32_t
-  {
-    SupportsUnderlay    = 1u << 0,
-    SupportsNativeImage = 1u << 1,
-    SupportsSeek        = 1u << 2,
-    SupportsVolume      = 1u << 3,
-  };
-
-  uint32_t flags{0u};
+  Underlay    = 0, ///< Platform-composited hole-punch; renders beneath the UI.
+  NativeImage = 1, ///< Decoded frames become a GPU texture; supports UI render effects.
 };
 
 struct VideoSourceOptions
 {
   VideoSourceOwnership ownership{VideoSourceOwnership::External};
-  VideoControlPolicy   controlPolicy{VideoControlPolicy::ViewControlsPlayback};
 };
 
 class DALI_UI_API VideoSource : public BaseHandle
@@ -79,29 +66,63 @@ public:
 
   static VideoSource DownCast(BaseHandle handle);
 
-  bool                    IsValid() const;
-  VideoSourceCapabilities GetCapabilities() const;
-  VideoSourceOwnership    GetOwnership() const;
-  VideoControlPolicy      GetControlPolicy() const;
+  bool                 IsValid() const;
+  VideoRenderingMode   GetRenderingMode() const;
+  VideoSourceOwnership GetOwnership() const;
 
 public: // Not intended for application developers
   /// @cond internal
   explicit DALI_INTERNAL VideoSource(Internal::VideoSource* internal);
 
   /**
-   * @brief Creation entry point used by the platform VideoSource helpers.
+   * @brief Creation entry point used by CreateVideoSource().
    *
-   * Exported (DALI_UI_API, not DALI_INTERNAL) so the header-only Tizen helpers in
-   * devel-api can link against it even on symbol-visibility (release / GBS) builds.
-   * Applications should use the platform helpers (e.g. Dali::Ui::Tizen::
-   * CreateVideoSourceFromMMPlayer), not this directly.
+   * Exported (DALI_UI_API, not DALI_INTERNAL) so the header-only CreateVideoSource()
+   * bridge can link against it even on symbol-visibility (release / GBS) builds.
+   * Applications should use CreateVideoSource() with a descriptor built by a
+   * dali-adaptor platform helper, not this directly.
    */
   static DALI_UI_API VideoSource New(const char*               providerId,
                                      void*                     nativeSession,
                                      const VideoSourceOptions& options,
-                                     VideoSourceCapabilities   capabilities);
+                                     VideoRenderingMode        renderingMode);
   /// @endcond
 };
+
+/**
+ * @brief Creates a VideoSource from a platform video source descriptor.
+ *
+ * The application fills a Dali::VideoSourceDescriptor (declared in
+ * <dali/public-api/adaptor-framework/video-source-descriptor.h>) with the provider
+ * id, native session handle and capability flags, then passes it here:
+ *
+ * @code
+ * Dali::VideoSourceDescriptor descriptor;
+ * descriptor.SetProviderId("tizen.mmplayer");
+ * descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
+ * descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
+ * VideoSource source = Dali::Ui::CreateVideoSource(descriptor);
+ * @endcode
+ *
+ * The provider id, native session, and rendering mode are taken from the
+ * descriptor as-is; ownership and control policy come from the caller-supplied
+ * options (the descriptor's own ownership/control-policy fields are not read here).
+ *
+ * This is a template so that this header depends on neither the descriptor type
+ * (Dali::VideoSourceDescriptor) nor any platform CAPI header; only the consuming
+ * application pulls those in. The descriptor's rendering mode enum shares the
+ * same underlying values as VideoRenderingMode, so it is mapped by value.
+ *
+ * @param[in] descriptor A platform video source descriptor
+ * @param[in] options Ownership and control-policy options for the source
+ * @return A VideoSource describing the platform player session
+ */
+template<typename SourceDescriptor>
+inline VideoSource CreateVideoSource(const SourceDescriptor& descriptor, const VideoSourceOptions& options = {})
+{
+  const auto renderingMode = static_cast<VideoRenderingMode>(static_cast<uint32_t>(descriptor.GetRenderingMode()));
+  return VideoSource::New(descriptor.GetProviderId().CStr(), AnyCast<void*>(descriptor.GetNativeSession()), options, renderingMode);
+}
 
 } // namespace Ui
 } // namespace Dali

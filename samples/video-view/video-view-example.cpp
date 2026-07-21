@@ -15,8 +15,8 @@
 
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/video/tizen-video-source.h>
 #include <dali/dali.h>
+#include <dali/public-api/adaptor-framework/video-source-descriptor.h>
 #include <dali/public-api/events/key-event.h>
 #include <player.h>
 #include <cstdio>
@@ -28,6 +28,23 @@ using namespace Dali::Ui;
 namespace
 {
 const char* const DEFAULT_VIDEO_URI = "/usr/apps/com.samsung.dali.video-view/res/video-02.mp4";
+
+// Provider ids interpreted by the platform video plugin (dali-extension). The app
+// stamps these into the VideoSourceDescriptor directly - there is no dali-adaptor
+// helper - so this is the sole place the contract strings live in this sample.
+constexpr const char* MMPLAYER_PROVIDER_ID = "tizen.mmplayer";
+constexpr const char* ESPLAYER_PROVIDER_ID = "tizen.esplayer";
+
+// Builds a VideoSourceDescriptor from a native session handle, then converts it to a
+// Ui::VideoSource. The rendering mode (underlay vs NativeImage) is chosen by the caller.
+Dali::Ui::VideoSource MakeVideoSource(const char* providerId, void* nativeSession, Dali::VideoRenderingMode renderingMode)
+{
+  Dali::VideoSourceDescriptor descriptor;
+  descriptor.SetProviderId(providerId);
+  descriptor.SetNativeSession(Dali::Any(nativeSession));
+  descriptor.SetRenderingMode(renderingMode);
+  return Dali::Ui::CreateVideoSource(descriptor);
+}
 
 constexpr float VIDEO_WIDTH         = 640.0f;
 constexpr float VIDEO_HEIGHT        = 360.0f;
@@ -211,7 +228,7 @@ void PrintPlayerError(const char* operation, int error)
  *
  * MMPlayer NativeImage flow:
  *   1. player_create / player_set_uri (IDLE state)
- *   2. CreateVideoSourceFromMMPlayerNativeImage() wraps the handle (SupportsNativeImage)
+ *   2. MakeVideoSource("tizen.mmplayer", handle, VideoRenderingMode::NATIVE_IMAGE)
  *   3. VideoView::New(source) → TizenVideoPlayer, NativeImage path via InitializeTextureStreamMode
  *   4. window.Add() → AttachToScene: NativeImage created, IMAGE visual registered,
  *      SetRenderingTarget(NativeImagePtr) → player_set_media_packet_video_frame_decoded_cb
@@ -219,7 +236,7 @@ void PrintPlayerError(const char* operation, int error)
  *
  * ESPlayer NativeImage flow:
  *   1. esplusplayer_create / open / set stream info (IDLE state)
- *   2. CreateVideoSourceFromESPlayerNativeImage() wraps the handle (SupportsNativeImage capability)
+ *   2. MakeVideoSource("tizen.esplayer", handle, VideoRenderingMode::NATIVE_IMAGE)
  *   3. VideoView::New(source) creates EsVideoPlayer internally
  *   4. window.Add() → AttachToScene: NativeImage created, IMAGE visual registered,
  *      SetRenderingTarget(NativeImagePtr) → DoInitializeTextureStreamMode: registers
@@ -231,9 +248,9 @@ void PrintPlayerError(const char* operation, int error)
  *
  * ESPlayer underlay flow:
  *   1. esplusplayer_create / open / set stream info (IDLE state)
- *   2. CreateVideoSourceFromESPlayerUnderlay() wraps handle (SupportsUnderlay capability,
- *      providerId "tizen.esplayer" — same id as the NativeImage variant; the factory routes
- *      it to EsVideoPlayer regardless of capability)
+ *   2. MakeVideoSource("tizen.esplayer", handle, VideoRenderingMode::UNDERLAY)
+ *      (providerId "tizen.esplayer" — same id as the NativeImage variant; the factory routes
+ *      it to EsVideoPlayer regardless of rendering mode)
  *   3. VideoView::New(source) → EsVideoPlayer (not TizenVideoPlayer, which is MMPlayer-only)
  *   4. window.Add() → AttachToScene: underlay visual created,
  *      SetRenderingTarget(window handle) → EsVideoPlayer::InitializeUnderlayMode binds the
@@ -345,11 +362,11 @@ private:
       }
       if(mMode == Mode::EsPlayerUnderlay)
       {
-        source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerUnderlay(mEsPlayer);
+        source = MakeVideoSource(ESPLAYER_PROVIDER_ID, static_cast<void*>(mEsPlayer), Dali::VideoRenderingMode::UNDERLAY);
       }
       else
       {
-        source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerNativeImage(mEsPlayer);
+        source = MakeVideoSource(ESPLAYER_PROVIDER_ID, static_cast<void*>(mEsPlayer), Dali::VideoRenderingMode::NATIVE_IMAGE);
       }
     }
     else
@@ -361,11 +378,11 @@ private:
       }
       if(mMode == Mode::MmPlayerNativeImage)
       {
-        source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerNativeImage(mPlayer);
+        source = MakeVideoSource(MMPLAYER_PROVIDER_ID, static_cast<void*>(mPlayer), Dali::VideoRenderingMode::NATIVE_IMAGE);
       }
       else
       {
-        source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(mPlayer);
+        source = MakeVideoSource(MMPLAYER_PROVIDER_ID, static_cast<void*>(mPlayer), Dali::VideoRenderingMode::UNDERLAY);
       }
     }
 

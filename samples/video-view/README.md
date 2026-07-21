@@ -29,8 +29,9 @@ video-view.example es-underlay    # ESPlayer underlay, 하드코딩된 H.264 테
 ### MMPlayer underlay / MMPlayer NativeImage
 
 - 앱이 CAPI player를 생성하고 URI만 설정한다: `player_create` → `player_set_uri` (아직 IDLE).
-- native handle을 `Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay()`(underlay) 또는
-  `CreateVideoSourceFromMMPlayerNativeImage()`(NativeImage)로 감싸 `VideoSource`로 만든다.
+- `Dali::VideoSourceDescriptor`를 직접 채운 뒤(providerId `"tizen.mmplayer"`, nativeSession,
+  renderingMode — underlay면 `VideoRenderingMode::UNDERLAY`, NativeImage면 `NATIVE_IMAGE`),
+  `Dali::Ui::CreateVideoSource()`로 `VideoSource`로 만든다. (별도 provider별 헬퍼는 없다.)
   - 이 지점 외에는 `VideoView`가 MMPlayer/ESPlayer 여부를 알지 못한다.
 - `VideoView::New(source)` → `window.Add(view)`로 scene에 붙인다. underlay 모드는 이때
   동기적으로 display target이 **IDLE 상태의 player에** 연결된다 + transparent underlay hole
@@ -51,11 +52,11 @@ display attach 호출뿐).
 ### ESPlayer NativeImage / ESPlayer underlay
 
 - `esplusplayer_create` / `open` / stream info 설정 (IDLE 상태).
-- `CreateVideoSourceFromESPlayerNativeImage()`(NativeImage) 또는 `CreateVideoSourceFromESPlayerUnderlay()`
-  (underlay, providerId `"tizen.esplayer"` — NativeImage와 같은 id다. 팩토리가 capability와
-  무관하게 이 providerId를 항상 `EsVideoPlayer`로 라우팅하므로 tcore/ecore용 provider를 따로 둘
-  필요가 없다)로 핸들을 감싼다. `VideoView::New(source)`는 provider factory를 거쳐 항상
-  **`EsVideoPlayer`** 를 생성한다 (`TizenVideoPlayer`는 MMPlayer 전용이라 사용되지 않음).
+- descriptor의 providerId를 `"tizen.esplayer"`로 두고 renderingMode로 모드를 고른다
+  (NativeImage면 `NATIVE_IMAGE`, underlay면 `UNDERLAY`). 두 모드가 같은
+  providerId다 — 팩토리가 렌더링 모드와 무관하게 이 providerId를 항상 `EsVideoPlayer`로 라우팅하므로
+  tcore/ecore용 provider를 따로 둘 필요가 없다. `VideoView::New(source)`는 provider factory를 거쳐
+  항상 **`EsVideoPlayer`** 를 생성한다 (`TizenVideoPlayer`는 MMPlayer 전용이라 사용되지 않음).
 - 앱이 `ReadyToPrepareCallback`을 등록하고 `prepare_async`를 호출한다. 콜백에서 하드코딩된
   H.264 데이터 + EOS를 제출한다. 100ms 타이머로 READY 상태를 폴링한 뒤 `VideoView::Play()`.
 - NativeImage 모드: decoded-packet 콜백 → `NativeImage::SetSource(tbmSurface)` → GPU 텍스처.
@@ -109,12 +110,12 @@ hello-world와 동일하게 독립 GBS 패키지로 구성돼 있다.
 - `com.samsung.dali.video-view.xml` (tizen package manifest)
 - `packaging/com.samsung.dali.video-view.spec`
   - `capi-media-player`, `esplusplayer` BuildRequires (CAPI `player_h`, ESPlayer 헤더)
-  - `tizen-video-source.h`는 `dali-ui-foundation` public-api에 있어 base
-    `pkgconfig(dali2-ui-foundation)`만으로 찾아진다(별도 integration 패키지 불필요).
+  - `VideoSourceDescriptor`(`video-source-descriptor.h`)는 dali-adaptor public-api에 있어
+    `pkgconfig(dali2-adaptor)`만으로 찾아진다(별도 integration 패키지 불필요).
 - `res/` (아이콘)
 
-> GBS에서 위 헤더를 여전히 못 찾으면, rootstrap의 dali-ui 패키지가 video 헤더 추가 이전 버전일
-> 수 있다. dali-ui를 먼저 GBS로 다시 빌드/설치한 뒤 이 샘플을 빌드한다.
+> GBS에서 위 헤더를 여전히 못 찾으면, rootstrap의 dali-adaptor 패키지가 VideoSourceDescriptor 추가
+> 이전 버전일 수 있다. dali-adaptor를 먼저 GBS로 다시 빌드/설치한 뒤 이 샘플을 빌드한다.
 
 spec이 `samples/video-view/`로 들어가 in-source cmake로 빌드한다. `appid`는
 `com.samsung.dali.video-view`, exec는 `.../bin/video-view.example`이다.

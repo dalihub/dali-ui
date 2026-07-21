@@ -46,18 +46,18 @@ Dali::VideoPlayerPlugin::VideoSourceOwnership ToAdaptorOwnership(VideoSourceOwne
   }
 }
 
-Dali::VideoPlayerPlugin::VideoControlPolicy ToAdaptorControlPolicy(VideoControlPolicy policy)
+Dali::VideoPlayerPlugin::VideoRenderingMode ToAdaptorRenderingMode(VideoRenderingMode mode)
 {
-  switch(policy)
+  switch(mode)
   {
-    case VideoControlPolicy::DisplayOnly:
+    case VideoRenderingMode::NativeImage:
     {
-      return Dali::VideoPlayerPlugin::VideoControlPolicy::DISPLAY_ONLY;
+      return Dali::VideoPlayerPlugin::VideoRenderingMode::NATIVE_IMAGE;
     }
-    case VideoControlPolicy::ViewControlsPlayback:
+    case VideoRenderingMode::Underlay:
     default:
     {
-      return Dali::VideoPlayerPlugin::VideoControlPolicy::VIEW_CONTROLS_PLAYBACK;
+      return Dali::VideoPlayerPlugin::VideoRenderingMode::UNDERLAY;
     }
   }
 }
@@ -66,20 +66,19 @@ Dali::VideoPlayerPlugin::VideoControlPolicy ToAdaptorControlPolicy(VideoControlP
 VideoSourcePtr VideoSource::New(const char*               providerId,
                                 void*                     nativeSession,
                                 const VideoSourceOptions& options,
-                                VideoSourceCapabilities   capabilities)
+                                VideoRenderingMode        renderingMode)
 {
-  return new VideoSource(providerId, nativeSession, options, capabilities);
+  return new VideoSource(providerId, nativeSession, options, renderingMode);
 }
 
 VideoSource::VideoSource(const char*               providerId,
                          void*                     nativeSession,
                          const VideoSourceOptions& options,
-                         VideoSourceCapabilities   capabilities)
+                         VideoRenderingMode        renderingMode)
 : mProviderId(providerId),
   mNativeSession(nativeSession),
   mOwnership(options.ownership),
-  mControlPolicy(options.controlPolicy),
-  mCapabilities(capabilities)
+  mRenderingMode(renderingMode)
 {
 }
 
@@ -92,9 +91,9 @@ bool VideoSource::IsValid() const
   return mProviderId != nullptr && !mNativeSession.Empty();
 }
 
-VideoSourceCapabilities VideoSource::GetCapabilities() const
+VideoRenderingMode VideoSource::GetRenderingMode() const
 {
-  return mCapabilities;
+  return mRenderingMode;
 }
 
 VideoSourceOwnership VideoSource::GetOwnership() const
@@ -102,19 +101,13 @@ VideoSourceOwnership VideoSource::GetOwnership() const
   return mOwnership;
 }
 
-VideoControlPolicy VideoSource::GetControlPolicy() const
-{
-  return mControlPolicy;
-}
-
 Dali::VideoPlayerPlugin::VideoSourceDescriptor VideoSource::ToAdaptorDescriptor() const
 {
   Dali::VideoPlayerPlugin::VideoSourceDescriptor descriptor;
-  descriptor.providerId         = mProviderId;
-  descriptor.nativeSession      = mNativeSession;
-  descriptor.ownership          = ToAdaptorOwnership(mOwnership);
-  descriptor.controlPolicy      = ToAdaptorControlPolicy(mControlPolicy);
-  descriptor.capabilities.flags = mCapabilities.flags;
+  descriptor.SetProviderId(mProviderId);
+  descriptor.SetNativeSession(mNativeSession);
+  descriptor.SetOwnership(ToAdaptorOwnership(mOwnership));
+  descriptor.SetRenderingMode(ToAdaptorRenderingMode(mRenderingMode));
   return descriptor;
 }
 
