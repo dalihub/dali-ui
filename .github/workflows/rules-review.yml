@@ -36,6 +36,7 @@ jobs:
           ref: ${{ github.event.pull_request.head.sha }}
           fetch-depth: 0
           path: pr
+          allow-unsafe-pr-checkout: true
 
       - name: Fetch base commit
         working-directory: pr
