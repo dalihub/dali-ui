@@ -58,13 +58,15 @@ bool EditableTextViewAccessible::SetCursorOffset(std::size_t offset)
 
 bool EditableTextViewAccessible::CopyText(std::size_t startPosition, std::size_t endPosition)
 {
-  auto text = GetWholeText();
-  if(!ValidateRange(text, startPosition, endPosition))
+  auto        text      = GetWholeText();
+  std::size_t utf8Start = 0u;
+  std::size_t utf8End   = 0u;
+  if(!ConvertToUtf8Range(text, startPosition, endPosition, utf8Start, utf8End))
   {
     return false;
   }
 
-  GetTextController()->CopyStringToClipboard(text.substr(startPosition, endPosition - startPosition));
+  GetTextController()->CopyStringToClipboard(text.substr(utf8Start, utf8End - utf8Start));
   return true;
 }
 
@@ -79,22 +81,25 @@ bool EditableTextViewAccessible::CutText(std::size_t startPosition, std::size_t 
 
 bool EditableTextViewAccessible::DeleteText(std::size_t startPosition, std::size_t endPosition)
 {
-  auto text = GetWholeText();
-  if(!ValidateRange(text, startPosition, endPosition))
+  auto        text      = GetWholeText();
+  std::size_t utf8Start = 0u;
+  std::size_t utf8End   = 0u;
+  if(!ConvertToUtf8Range(text, startPosition, endPosition, utf8Start, utf8End))
   {
     return false;
   }
-  return SetTextContents(std::move(text.erase(startPosition, endPosition - startPosition)));
+  return SetTextContents(std::move(text.erase(utf8Start, utf8End - utf8Start)));
 }
 
 bool EditableTextViewAccessible::InsertText(std::size_t startPosition, std::string newText)
 {
-  auto text = GetWholeText();
-  if(!ValidateRange(text, startPosition, startPosition + 1) && !(startPosition == text.size()))
+  auto        text       = GetWholeText();
+  std::size_t utf8Offset = 0u;
+  if(!ConvertToUtf8Offset(text, startPosition, utf8Offset))
   {
     return false;
   }
-  return SetTextContents(std::move(text.insert(startPosition, newText)));
+  return SetTextContents(std::move(text.insert(utf8Offset, newText)));
 }
 
 bool EditableTextViewAccessible::SetTextContents(std::string newContents)

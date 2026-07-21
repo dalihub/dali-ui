@@ -16,24 +16,61 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/text-abstraction/segmentation.h>
+#include <algorithm>
+#include <limits>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/text-view-accessible.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/hidden-text.h>
+#include <dali-ui-foundation/public-api/text/text-utils.h>
 
 namespace Dali::Ui::Internal
 {
-bool TextViewAccessible::ValidateRange(const std::string& string, std::size_t begin, std::size_t end)
+bool TextViewAccessible::ConvertToUtf8Range(const std::string& string, std::size_t begin, std::size_t end,
+                                            std::size_t& utf8Begin, std::size_t& utf8End)
 {
-  const auto size = string.size();
-  if(end <= begin || begin >= size || end > size)
+  if(end <= begin || string.size() > std::numeric_limits<std::uint32_t>::max() ||
+     begin > std::numeric_limits<std::uint32_t>::max() || end > std::numeric_limits<std::uint32_t>::max())
   {
     return false;
   }
 
-  // Kept compatible with dali-toolkit: offsets address the UTF-8 string.
+  std::uint32_t utf8Begin32 = 0u;
+  std::uint32_t utf8End32   = 0u;
+  if(!Ui::Text::Utf32ToUtf8Range(Dali::StringView(string.data(), static_cast<std::uint32_t>(string.size())),
+                                 static_cast<std::uint32_t>(begin),
+                                 static_cast<std::uint32_t>(end),
+                                 utf8Begin32,
+                                 utf8End32))
+  {
+    return false;
+  }
+
+  utf8Begin = utf8Begin32;
+  utf8End   = utf8End32;
+  return true;
+}
+
+bool TextViewAccessible::ConvertToUtf8Offset(const std::string& string, std::size_t offset,
+                                             std::size_t& utf8Offset)
+{
+  if(string.size() > std::numeric_limits<std::uint32_t>::max() ||
+     offset > std::numeric_limits<std::uint32_t>::max())
+  {
+    return false;
+  }
+
+  std::uint32_t utf8Offset32 = 0u;
+  if(!Ui::Text::Utf32ToUtf8Index(Dali::StringView(string.data(), static_cast<std::uint32_t>(string.size())),
+                                 static_cast<std::uint32_t>(offset),
+                                 utf8Offset32))
+  {
+    return false;
+  }
+
+  utf8Offset = utf8Offset32;
   return true;
 }
 
@@ -46,7 +83,7 @@ void TextViewAccessible::InitDefaultFeatures()
 
 std::size_t TextViewAccessible::GetCharacterCount() const
 {
-  return GetWholeText().size();
+  return GetTextController()->GetNumberOfCharacters();
 }
 
 std::size_t TextViewAccessible::GetCursorOffset() const
@@ -57,7 +94,7 @@ std::size_t TextViewAccessible::GetCursorOffset() const
 Bounds TextViewAccessible::GetRangeExtents(std::size_t startOffset, std::size_t endOffset,
                                            Dali::Devel::Accessibility::CoordinateType type) // LCOV_EXCL_LINE
 {
-  if(!ValidateRange(GetWholeText(), startOffset, endOffset))
+  if(endOffset <= startOffset || endOffset > GetCharacterCount())
   {
     return {0, 0, 0, 0};
   }
@@ -87,8 +124,10 @@ Dali::Devel::Accessibility::Range TextViewAccessible::GetRangeOfSelection(std::s
 
 std::string TextViewAccessible::GetText(std::size_t startOffset, std::size_t endOffset) const
 {
-  auto text = GetWholeText();
-  if(!ValidateRange(text, startOffset, endOffset))
+  auto        text            = GetWholeText();
+  std::size_t utf8StartOffset = 0u;
+  std::size_t utf8EndOffset   = 0u;
+  if(!ConvertToUtf8Range(text, startOffset, endOffset, utf8StartOffset, utf8EndOffset))
   {
     return {};
   }
@@ -100,14 +139,15 @@ std::string TextViewAccessible::GetText(std::size_t startOffset, std::size_t end
     std::string   substituteText;
 
     Ui::Text::Utf32ToUtf8(&substituteCharacterUtf32, 1, substituteCharacterUtf8);
-    while(substituteText.length() < endOffset - startOffset)
+    substituteText.reserve(substituteCharacterUtf8.size() * (endOffset - startOffset));
+    for(std::size_t index = startOffset; index < endOffset; ++index)
     {
       substituteText.append(substituteCharacterUtf8);
     }
     return substituteText;
   }
 
-  return text.substr(startOffset, endOffset - startOffset);
+  return text.substr(utf8StartOffset, utf8EndOffset - utf8StartOffset);
 }
 
 Dali::Devel::Accessibility::Range TextViewAccessible::GetTextAtOffset(
@@ -120,7 +160,7 @@ Dali::Devel::Accessibility::Range TextViewAccessible::GetTextAtOffset(
   }
 
   auto text     = GetWholeText();
-  auto textSize = text.size();
+  auto textSize = GetCharacterCount();
 
   switch(boundary)
   {
@@ -128,7 +168,7 @@ Dali::Devel::Accessibility::Range TextViewAccessible::GetTextAtOffset(
     {
       if(offset < textSize)
       {
-        range.content     = text[offset];
+        range.content     = GetText(offset, offset + 1u);
         range.startOffset = offset;
         range.endOffset   = offset + 1;
       }
@@ -137,16 +177,32 @@ Dali::Devel::Accessibility::Range TextViewAccessible::GetTextAtOffset(
     case Dali::Devel::Accessibility::TextBoundary::WORD: // LCOV_EXCL_LINE
     case Dali::Devel::Accessibility::TextBoundary::LINE: // LCOV_EXCL_LINE
     {
-      std::vector<char> breaks(textSize, '\0');
+      if(text.empty() || text.size() > std::numeric_limits<std::uint32_t>::max())
+      {
+        break;
+      }
+
+      std::vector<std::uint32_t> characters(text.size());
+      auto                       characterCount = Ui::Text::Utf8ToUtf32(
+        reinterpret_cast<const std::uint8_t*>(text.data()),
+        static_cast<std::uint32_t>(text.size()),
+        characters.data());
+      if(characterCount != textSize)
+      {
+        break;
+      }
+      characters.resize(characterCount);
+
+      std::vector<char> breaks(characterCount, '\0');
       if(boundary == Dali::Devel::Accessibility::TextBoundary::WORD) // LCOV_EXCL_LINE
       {
-        TextAbstraction::Segmentation::Get().GetWordBreakPositionsUtf8(
-          reinterpret_cast<const uint8_t*>(text.c_str()), textSize, breaks.data());
+        TextAbstraction::Segmentation::Get().GetWordBreakPositions(
+          characters.data(), characterCount, breaks.data());
       }
       else
       {
-        TextAbstraction::Segmentation::Get().GetLineBreakPositionsUtf8(
-          reinterpret_cast<const uint8_t*>(text.c_str()), textSize, breaks.data());
+        TextAbstraction::Segmentation::Get().GetLineBreakPositions(
+          characters.data(), characterCount, breaks.data());
       }
 
       std::size_t index   = 0u;
@@ -156,7 +212,7 @@ Dali::Devel::Accessibility::Range TextViewAccessible::GetTextAtOffset(
         auto start = index;
         if(breaks[index])
         {
-          while(breaks[index])
+          while(index < textSize && breaks[index])
           {
             index++;
           }
@@ -176,9 +232,10 @@ Dali::Devel::Accessibility::Range TextViewAccessible::GetTextAtOffset(
 
         if((counter > 0) && ((counter - 1) == offset))
         {
-          range.content     = text.substr(start, index - start + 1);
+          auto endOffset    = std::min(index + 1u, textSize);
+          range.content     = GetText(start, endOffset);
           range.startOffset = start;
-          range.endOffset   = index + 1;
+          range.endOffset   = endOffset;
         }
 
         if(boundary == Dali::Devel::Accessibility::TextBoundary::LINE) // LCOV_EXCL_LINE

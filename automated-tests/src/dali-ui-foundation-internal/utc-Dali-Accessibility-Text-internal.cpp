@@ -87,7 +87,7 @@ int UtcDaliAccessibilityTextControlsInterfacesInternalP(void)
   END_TEST;
 }
 
-int UtcDaliAccessibilityTextToolkitOffsetCompatibilityInternalP(void)
+int UtcDaliAccessibilityTextUnicodeCharacterOffsetsInternalP(void)
 {
   UiTestApplication application;
 
@@ -96,16 +96,65 @@ int UtcDaliAccessibilityTextToolkitOffsetCompatibilityInternalP(void)
   auto*       text       = dynamic_cast<Dali::Accessibility::Text*>(accessible);
   DALI_TEST_CHECK(text);
 
-  const std::string utf8Text = u8"가a";
+  const std::string utf8Text = u8"가a😀";
   editor.SetText(Dali::String(utf8Text.c_str()));
 
-  // Preserve dali-toolkit compatibility: Text offsets and character count use UTF-8 bytes.
-  DALI_TEST_EQUALS(text->GetCharacterCount(), utf8Text.size(), TEST_LOCATION);
-  DALI_TEST_EQUALS(text->GetText(0u, 3u), u8"가", TEST_LOCATION);
-  auto range = text->GetTextAtOffset(3u, Dali::Devel::Accessibility::TextBoundary::CHARACTER);
-  DALI_TEST_EQUALS(range.content, "a", TEST_LOCATION);
-  DALI_TEST_EQUALS(range.startOffset, 3u, TEST_LOCATION);
-  DALI_TEST_EQUALS(range.endOffset, 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetCharacterCount(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetText(0u, 1u), u8"가", TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetText(1u, 3u), u8"a😀", TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetText(0u, 4u), "", TEST_LOCATION);
+
+  auto range = text->GetTextAtOffset(2u, Dali::Devel::Accessibility::TextBoundary::CHARACTER);
+  DALI_TEST_EQUALS(range.content, u8"😀", TEST_LOCATION);
+  DALI_TEST_EQUALS(range.startOffset, 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(range.endOffset, 3u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliAccessibilityTextUnicodeRangeGeometryInternalP(void)
+{
+  UiTestApplication application;
+
+  Label label = Label::New();
+  label.SetMultiLine(true);
+  label.SetFontSize(20.0f);
+  label.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+  label.SetLineHeight(1.0f);
+  label.SetText(u8"가a😀\n나b");
+  label.SetRequestedWidth(240.0f);
+  label.SetRequestedHeight(240.0f);
+  label.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
+  label.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+  application.GetScene().Add(label);
+
+  application.GetGlAbstraction().SetCheckFramebufferStatusResult(GL_FRAMEBUFFER_COMPLETE);
+  application.SendNotification();
+  application.Render();
+
+  auto* accessible = Dali::Accessibility::Accessible::Get(label);
+  auto* text       = dynamic_cast<Dali::Accessibility::Text*>(accessible);
+  DALI_TEST_CHECK(text);
+
+  auto empty = text->GetRangeExtents(0u, 0u, Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  DALI_TEST_EQUALS(empty, Bounds(0.0f, 0.0f, 0.0f, 0.0f), TEST_LOCATION);
+
+  auto emoji = text->GetRangeExtents(2u, 3u, Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  DALI_TEST_CHECK(emoji.width > 0.0f);
+  DALI_TEST_CHECK(emoji.height > 0.0f);
+
+  auto whole = text->GetRangeExtents(0u, text->GetCharacterCount(),
+                                     Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  DALI_TEST_CHECK(whole.width > 0.0f && whole.width <= 240.0f);
+  DALI_TEST_CHECK(whole.height > 0.0f && whole.height <= 240.0f);
+
+  label.SetLineHeight(2.0f);
+  application.SendNotification();
+  application.Render();
+
+  auto wholeAfter = text->GetRangeExtents(0u, text->GetCharacterCount(),
+                                          Dali::Devel::Accessibility::CoordinateType::WINDOW);
+  DALI_TEST_CHECK(wholeAfter.height > whole.height);
 
   END_TEST;
 }
@@ -136,6 +185,37 @@ int UtcDaliAccessibilityEditableTextToolkitCompatibilityInternalP(void)
   END_TEST;
 }
 
+int UtcDaliAccessibilityEditableTextUnicodeCharacterOffsetsInternalP(void)
+{
+  UiTestApplication application;
+
+  InputField field = InputField::New();
+  field.SetText(u8"가a😀나");
+
+  auto* accessible   = Dali::Accessibility::Accessible::Get(field);
+  auto* text         = dynamic_cast<Dali::Accessibility::Text*>(accessible);
+  auto* editableText = dynamic_cast<Dali::Accessibility::EditableText*>(accessible);
+  DALI_TEST_CHECK(text);
+  DALI_TEST_CHECK(editableText);
+
+  DALI_TEST_EQUALS(text->GetCharacterCount(), 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->SetCursorOffset(4u), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetCursorOffset(), 4u, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(text->SetRangeOfSelection(0u, 1u, 3u), true, TEST_LOCATION);
+  auto selection = text->GetRangeOfSelection(0u);
+  DALI_TEST_EQUALS(selection.startOffset, 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(selection.endOffset, 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(selection.content, u8"a😀", TEST_LOCATION);
+
+  DALI_TEST_EQUALS(editableText->DeleteText(1u, 3u), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetText(0u, 2u), u8"가나", TEST_LOCATION);
+  DALI_TEST_EQUALS(editableText->InsertText(1u, u8"a😀"), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetText(0u, 4u), u8"가a😀나", TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliAccessibilityInputFieldPasswordRoleInternalP(void)
 {
   UiTestApplication application;
@@ -156,9 +236,14 @@ int UtcDaliAccessibilityInputFieldPasswordRoleInternalP(void)
                    "",
                    TEST_LOCATION);
 
+  field.SetText(u8"가😀");
+  DALI_TEST_EQUALS(text->GetCharacterCount(), 2u, TEST_LOCATION);
+  auto maskedText = text->GetText(0u, 2u);
+  DALI_TEST_EQUALS(Text::Utf8ToUtf32Length(Dali::StringView(maskedText.c_str())), 2u, TEST_LOCATION);
+
   field.SetPasswordMode(Text::PasswordMode::NONE);
   DALI_TEST_EQUALS(accessible->GetRole(), Dali::Integration::Accessibility::Role::ENTRY, TEST_LOCATION);
-  DALI_TEST_EQUALS(text->GetText(0u, 6u), "secret", TEST_LOCATION);
+  DALI_TEST_EQUALS(text->GetText(0u, 2u), u8"가😀", TEST_LOCATION);
 
   field.SetAccessibilityRole(Ui::Accessibility::Role::CHECK_BOX);
   field.SetPasswordMode(Text::PasswordMode::HIDE_ALL);

@@ -31,8 +31,9 @@ namespace Dali::Ui::Internal
 /**
  * @brief Common accessibility implementation for Views that expose text.
  *
- * Offset and boundary behavior intentionally follows dali-toolkit's
- * TextControlAccessible implementation for compatibility.
+ * Text range offsets are Unicode code point indices, matching the text
+ * controller and the Dali::Accessibility::Text interface. WORD and LINE
+ * boundary lookup retains dali-toolkit's ordinal offset behavior.
  */
 class TextViewAccessible : public ViewAccessible,
                            public Dali::Accessibility::Text,
@@ -71,6 +72,10 @@ public:
 
   /**
    * @copydoc Dali::Accessibility::Text::GetTextAtOffset()
+   *
+   * @note WORD and LINE boundaries retain dali-toolkit compatibility and treat
+   *       @p offset as a boundary ordinal. Returned range offsets are Unicode
+   *       code point indices.
    */
   Dali::Devel::Accessibility::Range GetTextAtOffset(std::size_t                              offset,
                                                     Dali::Devel::Accessibility::TextBoundary boundary) const override; // LCOV_EXCL_LINE
@@ -114,16 +119,27 @@ protected:
   void InitDefaultFeatures() override;
 
   /**
-   * @brief Checks whether a non-empty byte range is valid for the supplied UTF-8 string.
+   * @brief Converts a non-empty Unicode code point range to a UTF-8 byte range.
    *
-   * The byte-offset semantics intentionally match dali-toolkit.
-   *
-   * @param[in] string The UTF-8 string
-   * @param[in] begin The first byte offset in the range
-   * @param[in] end The byte offset immediately after the range
-   * @return True if the range is valid, false otherwise
+   * @param[in] string The UTF-8 string to index
+   * @param[in] begin The first Unicode code point index in the range
+   * @param[in] end The Unicode code point index immediately after the range
+   * @param[out] utf8Begin The first UTF-8 byte offset in the range
+   * @param[out] utf8End The UTF-8 byte offset immediately after the range
+   * @return True if the code point range is valid, false otherwise
    */
-  static bool ValidateRange(const std::string& string, std::size_t begin, std::size_t end);
+  static bool ConvertToUtf8Range(const std::string& string, std::size_t begin, std::size_t end,
+                                 std::size_t& utf8Begin, std::size_t& utf8End);
+
+  /**
+   * @brief Converts a Unicode code point index to a UTF-8 byte offset.
+   *
+   * @param[in] string The UTF-8 string to index
+   * @param[in] offset The Unicode code point index
+   * @param[out] utf8Offset The corresponding UTF-8 byte offset
+   * @return True if the code point index is valid, false otherwise
+   */
+  static bool ConvertToUtf8Offset(const std::string& string, std::size_t offset, std::size_t& utf8Offset);
 
   /**
    * @brief Gets the complete text exposed by the View.
