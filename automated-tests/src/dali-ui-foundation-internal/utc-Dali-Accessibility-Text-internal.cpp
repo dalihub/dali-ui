@@ -329,3 +329,50 @@ int UtcDaliAccessibilityInputFieldPasswordClipboardProtectionInternalP(void)
 
   END_TEST;
 }
+
+int UtcDaliAccessibilityEditableTextReadOnlyInternalP(void)
+{
+  UiTestApplication application;
+
+  InputField field = InputField::New();
+  field.SetText("field");
+  field.SetEditable(false);
+
+  auto* fieldAccessible = Dali::Accessibility::Accessible::Get(field);
+  auto* fieldText       = dynamic_cast<Dali::Accessibility::Text*>(fieldAccessible);
+  auto* fieldEditable   = dynamic_cast<Dali::Accessibility::EditableText*>(fieldAccessible);
+  DALI_TEST_CHECK(fieldText);
+  DALI_TEST_CHECK(fieldEditable);
+
+  auto states = fieldAccessible->GetStates();
+  DALI_TEST_CHECK(!states[Dali::Integration::Accessibility::State::EDITABLE]);
+  DALI_TEST_CHECK(states[Dali::Integration::Accessibility::State::READ_ONLY]);
+  DALI_TEST_EQUALS(fieldText->SetCursorOffset(2u), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(fieldEditable->CutText(0u, 1u), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(fieldEditable->DeleteText(0u, 1u), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(fieldEditable->InsertText(0u, "x"), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(fieldEditable->SetTextContents("changed"), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(field.GetText(), "field", TEST_LOCATION);
+
+  field.SetEditable(true);
+  states = fieldAccessible->GetStates();
+  DALI_TEST_CHECK(states[Dali::Integration::Accessibility::State::EDITABLE]);
+  DALI_TEST_CHECK(!states[Dali::Integration::Accessibility::State::READ_ONLY]);
+  DALI_TEST_EQUALS(fieldEditable->InsertText(0u, "x"), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(field.GetText(), "xfield", TEST_LOCATION);
+
+  InputEditor editor = InputEditor::New();
+  editor.SetText("editor");
+  editor.SetEditable(false);
+
+  auto* editorAccessible = Dali::Accessibility::Accessible::Get(editor);
+  auto* editorEditable   = dynamic_cast<Dali::Accessibility::EditableText*>(editorAccessible);
+  DALI_TEST_CHECK(editorEditable);
+  states = editorAccessible->GetStates();
+  DALI_TEST_CHECK(!states[Dali::Integration::Accessibility::State::EDITABLE]);
+  DALI_TEST_CHECK(states[Dali::Integration::Accessibility::State::READ_ONLY]);
+  DALI_TEST_EQUALS(editorEditable->SetTextContents("changed"), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(editor.GetText(), "editor", TEST_LOCATION);
+
+  END_TEST;
+}

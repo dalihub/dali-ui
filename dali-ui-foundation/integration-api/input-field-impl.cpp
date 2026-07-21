@@ -2282,7 +2282,15 @@ bool InputFieldImpl::IsEditable() const
 void InputFieldImpl::SetEditable(bool editable)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), editable);
+  const bool wasEditable = mController->IsEditable();
   mController->SetEditable(editable);
+  const bool isEditable = mController->IsEditable();
+  if(wasEditable != isEditable && Dali::Integration::Accessibility::IsUp())
+  {
+    auto& viewData = Internal::ViewDataImpl::Get(*this);
+    viewData.EmitAccessibilityStateChanged(Dali::Integration::Accessibility::State::EDITABLE, isEditable);
+    viewData.EmitAccessibilityStateChanged(Dali::Integration::Accessibility::State::READ_ONLY, !isEditable);
+  }
   if(mInputMethodContext && !editable)
   {
     Dali::Integration::InputMethodContext::Deactivate(mInputMethodContext);

@@ -32,8 +32,10 @@ Dali::Integration::Accessibility::States EditableTextViewAccessible::CalculateSt
 
   auto states    = ViewAccessible::CalculateStates();
   auto focusView = Internal::KeyInputFocusManager::Get().GetCurrentFocusView();
+  bool editable  = GetTextController()->IsEditable();
 
-  states[State::EDITABLE]  = true;
+  states[State::EDITABLE]  = editable;
+  states[State::READ_ONLY] = !editable;
   states[State::FOCUSABLE] = true;
   states[State::FOCUSED]   = (Self() == focusView);
   return states;
@@ -77,6 +79,11 @@ bool EditableTextViewAccessible::CopyText(std::size_t startPosition, std::size_t
 
 bool EditableTextViewAccessible::CutText(std::size_t startPosition, std::size_t endPosition)
 {
+  if(!GetTextController()->IsEditable())
+  {
+    return false;
+  }
+
   if(!CopyText(startPosition, endPosition))
   {
     return false;
@@ -86,6 +93,11 @@ bool EditableTextViewAccessible::CutText(std::size_t startPosition, std::size_t 
 
 bool EditableTextViewAccessible::DeleteText(std::size_t startPosition, std::size_t endPosition)
 {
+  if(!GetTextController()->IsEditable())
+  {
+    return false;
+  }
+
   auto        text      = GetWholeText();
   std::size_t utf8Start = 0u;
   std::size_t utf8End   = 0u;
@@ -98,6 +110,11 @@ bool EditableTextViewAccessible::DeleteText(std::size_t startPosition, std::size
 
 bool EditableTextViewAccessible::InsertText(std::size_t startPosition, std::string newText)
 {
+  if(!GetTextController()->IsEditable())
+  {
+    return false;
+  }
+
   auto        text       = GetWholeText();
   std::size_t utf8Offset = 0u;
   if(!ConvertToUtf8Offset(text, startPosition, utf8Offset))
@@ -109,6 +126,11 @@ bool EditableTextViewAccessible::InsertText(std::size_t startPosition, std::stri
 
 bool EditableTextViewAccessible::SetTextContents(std::string newContents)
 {
+  if(!GetTextController()->IsEditable())
+  {
+    return false;
+  }
+
   GetTextController()->SetText(std::move(newContents));
   return true;
 }
