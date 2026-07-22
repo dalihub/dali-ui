@@ -300,7 +300,7 @@ InputEditorImplPtr InputEditorImpl::New()
 }
 
 InputEditorImpl::InputEditorImpl()
-: ViewImpl(),
+: SizeNegotiatedViewImpl(),
   mLineHeight(Text::LINE_HEIGHT_AUTO),
   mLineHeightMode(Text::LineHeightMode::RELATIVE),
   mOverflowMode(Text::OverflowMode::CLIP),

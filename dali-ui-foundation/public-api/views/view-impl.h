@@ -922,11 +922,6 @@ protected:
   void OnFinalizeTouchEventDispatch(const Dali::TouchEvent& event) override;
 
   /**
-   * @copydoc Dali::CustomActorImpl::OnRelayout()
-   */
-  void OnRelayout(const Vector2& size, RelayoutContainer& container) override;
-
-  /**
    * @copydoc Dali::CustomActorImpl::OnChildAdd()
    */
   void OnChildAdd(Actor& child) override;
@@ -965,46 +960,6 @@ protected:
    * @copydoc Dali::CustomActorImpl::GetOffScreenRenderTasks()
    */
   void GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward) override;
-
-  /**
-   * @copydoc Dali::CustomActorImpl::OnSetResizePolicy()
-   */
-  void OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimension) override;
-
-  /**
-   * @copydoc Dali::CustomActorImpl::GetNaturalSize()
-   */
-  Vector3 GetNaturalSize() override;
-
-  /**
-   * @copydoc Dali::CustomActorImpl::CalculateChildSize()
-   */
-  float CalculateChildSize(const Dali::Actor& child, Dimension::Type dimension) override;
-
-  /**
-   * @copydoc Dali::CustomActorImpl::GetHeightForWidth()
-   */
-  float GetHeightForWidth(float width) override;
-
-  /**
-   * @copydoc Dali::CustomActorImpl::GetWidthForHeight()
-   */
-  float GetWidthForHeight(float height) override;
-
-  /**
-   * @copydoc Dali::CustomActorImpl::RelayoutDependentOnChildren()
-   */
-  bool RelayoutDependentOnChildren(Dimension::Type dimension = Dimension::ALL_DIMENSIONS) override;
-
-  /**
-   * @copydoc Dali::CustomActorImpl::OnCalculateRelayoutSize()
-   */
-  void OnCalculateRelayoutSize(Dimension::Type dimension) override;
-
-  /**
-   * @copydoc Dali::CustomActorImpl::OnLayoutNegotiated()
-   */
-  void OnLayoutNegotiated(float size, Dimension::Type dimension) override;
 
   /**
    * @copydoc Dali::ConnectionTrackerInterface::SignalConnected()

@@ -239,7 +239,7 @@ LabelImplPtr LabelImpl::New()
 }
 
 LabelImpl::LabelImpl()
-: ViewImpl(),
+: SizeNegotiatedViewImpl(),
   mSize(),
   mLastMeasureConstraints(-1.0f, -1.0f),
   mLastMeasureRequestedSize(-1.0f, -1.0f),

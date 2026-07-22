@@ -302,7 +302,7 @@ InputFieldImplPtr InputFieldImpl::New()
 }
 
 InputFieldImpl::InputFieldImpl()
-: ViewImpl(),
+: SizeNegotiatedViewImpl(),
   mOverflowMode(Text::OverflowMode::CLIP),
   mAlignmentOffset(0.f),
   mMeasureInvalidated(false),

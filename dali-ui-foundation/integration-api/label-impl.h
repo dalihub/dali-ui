@@ -22,6 +22,7 @@
 #include <string>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-source-data.h>
@@ -61,7 +62,7 @@ using LabelImplPtr = IntrusivePtr<LabelImpl>;
  *
  * @see Dali::Ui::LabelImpl
  */
-class DALI_UI_API LabelImpl : public ViewImpl, public Text::ControlInterface, public Text::ScrollerInterface, public Text::AnchorControlInterface, public Text::AsyncTextInterface
+class DALI_UI_API LabelImpl : public SizeNegotiatedViewImpl, public Text::ControlInterface, public Text::ScrollerInterface, public Text::AnchorControlInterface, public Text::AsyncTextInterface
 {
   friend class LabelAccessible;
 

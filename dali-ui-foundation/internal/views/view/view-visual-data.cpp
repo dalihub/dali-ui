@@ -27,6 +27,7 @@
 #include <unordered_set>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/visuals/visual-base-impl.h>
@@ -410,7 +411,10 @@ void ViewDataImpl::VisualData::RelayoutRequest(Visual::Base& object)
 
   if(mOuter.mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    mOuter.mViewImpl.RelayoutRequest();
+    if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mOuter.mViewImpl))
+    {
+      sizeNegotiatedViewImpl->RelayoutRequest();
+    }
   }
 }
 

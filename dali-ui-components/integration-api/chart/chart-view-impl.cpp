@@ -92,7 +92,7 @@ DALI_TYPE_REGISTRATION_END()
 // =============================================================================
 
 ChartViewImpl::ChartViewImpl(Ui::ChartView::Type type, const Vector2& size)
-: ViewImpl(),
+: SizeNegotiatedViewImpl(),
   mType(type),
   mSize(size)
 {

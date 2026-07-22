@@ -26,6 +26,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
+#include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
@@ -64,7 +65,7 @@ using InputEditorImplPtr = IntrusivePtr<InputEditorImpl>;
  *
  * @see Dali::Ui::InputEditorImpl
  */
-class DALI_UI_API InputEditorImpl : public ViewImpl, public Text::ControlInterface, public Text::EditableControlInterface, public Text::SelectableControlInterface, public Text::AnchorControlInterface
+class DALI_UI_API InputEditorImpl : public SizeNegotiatedViewImpl, public Text::ControlInterface, public Text::EditableControlInterface, public Text::SelectableControlInterface, public Text::AnchorControlInterface
 {
   friend class InputEditorAccessible;
 

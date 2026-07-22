@@ -36,6 +36,7 @@
 #include <dali-ui-components/integration-api/chart/chart-renderer.h>
 #include <dali-ui-components/integration-api/chart/chart-scale-engine.h>
 #include <dali-ui-components/public-api/chart/chart-view.h>
+#include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -53,7 +54,7 @@ using ChartViewImplPtr = IntrusivePtr<ChartViewImpl>;
 /**
  * @brief Implementation class for Ui::ChartView.
  */
-class DALI_UI_COMPONENTS_API ChartViewImpl : public ViewImpl
+class DALI_UI_COMPONENTS_API ChartViewImpl : public SizeNegotiatedViewImpl
 {
 public:
   static Ui::ChartView New(Ui::ChartView::Type type, const Vector2& size);

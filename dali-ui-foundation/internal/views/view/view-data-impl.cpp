@@ -57,6 +57,7 @@
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
@@ -1732,7 +1733,10 @@ void ViewDataImpl::ClearBackground()
   ClearBackgroundBinding();
 
   // Trigger a size negotiation request that may be needed when unregistering a visual.
-  mViewImpl.RelayoutRequest();
+  if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+  {
+    sizeNegotiatedViewImpl->RelayoutRequest();
+  }
 }
 
 void ViewDataImpl::SetShadow(const Shadow& shadow)
@@ -5357,7 +5361,10 @@ void ViewDataImpl::SetBackground(const Property::Map& map)
       mVisualData->RegisterVisual(Ui::View::Property::BACKGROUND, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND);
       EnableCornerPropertiesOverridden(visual, true);
 
-      mViewImpl.RelayoutRequest();
+      if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+      {
+        sizeNegotiatedViewImpl->RelayoutRequest();
+      }
     }
   }
 }
@@ -5380,7 +5387,10 @@ void ViewDataImpl::SetFirstShadow(const Property::Map& map)
       mVisualData->RegisterVisual(Ui::View::Property::SHADOW, visual, Dali::Ui::Integration::DepthIndex::BACKGROUND_EFFECT);
       EnableCornerPropertiesOverridden(visual, true);
 
-      mViewImpl.RelayoutRequest();
+      if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+      {
+        sizeNegotiatedViewImpl->RelayoutRequest();
+      }
     }
   }
 }
@@ -5400,7 +5410,10 @@ void ViewDataImpl::AppendShadow(const Dali::Ui::Shadow& shadow)
   visual.SetName("shadow");
   if(AddShadowVisualObject(visual, Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND))
   {
-    mViewImpl.RelayoutRequest();
+    if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+    {
+      sizeNegotiatedViewImpl->RelayoutRequest();
+    }
   }
 }
 
@@ -5412,7 +5425,10 @@ void ViewDataImpl::ClearShadow()
     mVisualData->RemoveBoxShadowVisualObjects();
   }
 
-  mViewImpl.RelayoutRequest();
+  if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+  {
+    sizeNegotiatedViewImpl->RelayoutRequest();
+  }
 }
 
 void ViewDataImpl::SetInnerShadow(const Property::Map& map)
@@ -5454,7 +5470,10 @@ void ViewDataImpl::SetInnerShadow(const Property::Map& map)
         EnableCornerPropertiesOverridden(visual, true, innerShadowCornerRadiusConstraint);
       }
 
-      mViewImpl.RelayoutRequest();
+      if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+      {
+        sizeNegotiatedViewImpl->RelayoutRequest();
+      }
     }
   }
 }
@@ -5466,7 +5485,10 @@ void ViewDataImpl::ClearInnerShadow()
     mVisualData->UnregisterVisual(Ui::View::Property::INNER_SHADOW);
 
     // Trigger a size negotiation request that may be needed when unregistering a visual.
-    mViewImpl.RelayoutRequest();
+    if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+    {
+      sizeNegotiatedViewImpl->RelayoutRequest();
+    }
   }
 }
 
@@ -5560,7 +5582,10 @@ void ViewDataImpl::SetBorderline(const Property::Map& map, bool forciblyCreate)
         }
       }
 
-      mViewImpl.RelayoutRequest();
+      if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+      {
+        sizeNegotiatedViewImpl->RelayoutRequest();
+      }
     }
   }
 }
@@ -5572,7 +5597,10 @@ void ViewDataImpl::ClearBorderline()
     mVisualData->UnregisterVisual(Ui::View::Property::BORDERLINE);
 
     // Trigger a size negotiation request that may be needed when unregistering a visual.
-    mViewImpl.RelayoutRequest();
+    if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+    {
+      sizeNegotiatedViewImpl->RelayoutRequest();
+    }
   }
 }
 
@@ -5641,7 +5669,10 @@ bool ViewDataImpl::OnIdleCallback()
   // A visual is ready so view may need relayouting if staged
   if(mViewImpl.Self().GetProperty<bool>(Actor::Property::CONNECTED_TO_SCENE))
   {
-    mViewImpl.RelayoutRequest();
+    if(Integration::SizeNegotiatedViewImpl* sizeNegotiatedViewImpl = dynamic_cast<Integration::SizeNegotiatedViewImpl*>(&mViewImpl))
+    {
+      sizeNegotiatedViewImpl->RelayoutRequest();
+    }
   }
 
   EmitResourceReadySignal();

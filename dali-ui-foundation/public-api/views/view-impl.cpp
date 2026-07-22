@@ -285,11 +285,6 @@ void ViewImpl::OnFocusChanged(bool focused)
   mImpl->HandleFocusChangedDefault(focused);
 }
 
-void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
-{
-  mImpl->RelayoutDefault(size, container);
-}
-
 void ViewImpl::SetRequestedX(float x)
 {
   mImpl->SetRequestedX(x);
@@ -982,43 +977,6 @@ bool ViewImpl::IsResourceReady() const
 {
   const Internal::ViewDataImpl& viewDataImpl = Internal::ViewDataImpl::Get(*this);
   return viewDataImpl.IsResourceReady();
-}
-
-void ViewImpl::OnSetResizePolicy(ResizePolicy::Type policy, Dimension::Type dimension)
-{
-}
-
-Vector3 ViewImpl::GetNaturalSize()
-{
-  return mImpl->GetNaturalSize();
-}
-
-float ViewImpl::CalculateChildSize(const Dali::Actor& child, Dimension::Type dimension)
-{
-  return CalculateChildSizeBase(child, dimension);
-}
-
-float ViewImpl::GetHeightForWidth(float width)
-{
-  return GetHeightForWidthBase(width);
-}
-
-float ViewImpl::GetWidthForHeight(float height)
-{
-  return GetWidthForHeightBase(height);
-}
-
-bool ViewImpl::RelayoutDependentOnChildren(Dimension::Type dimension)
-{
-  return RelayoutDependentOnChildrenBase(dimension);
-}
-
-void ViewImpl::OnCalculateRelayoutSize(Dimension::Type dimension)
-{
-}
-
-void ViewImpl::OnLayoutNegotiated(float size, Dimension::Type dimension)
-{
 }
 
 void ViewImpl::SignalConnected(SlotObserver* slotObserver, CallbackBase* callback)

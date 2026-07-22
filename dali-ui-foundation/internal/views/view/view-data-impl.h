@@ -56,6 +56,12 @@ namespace Dali
 {
 namespace Ui
 {
+
+namespace Integration
+{
+class SizeNegotiatedViewImpl;
+} // namespace Integration
+
 namespace Internal
 {
 class InteractiveTraitImpl;
@@ -101,6 +107,7 @@ class ViewDataImpl : public ConnectionTracker, public Dali::Integration::Process
 {
 private:
   friend class ::Dali::Ui::ViewImpl;
+  friend class ::Dali::Ui::Integration::SizeNegotiatedViewImpl;
   friend std::string DumpView(const ::Dali::Ui::ViewImpl& view);
 
   class AccessibilityData;
