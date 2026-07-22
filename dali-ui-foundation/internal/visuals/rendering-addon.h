@@ -20,6 +20,7 @@
 
 #include <dali-ui-foundation/internal/visuals/npatch/npatch-visual.h>
 #include <dali/devel-api/common/addon-binder.h>
+#include <memory>
 
 namespace Dali
 {
@@ -62,15 +63,15 @@ public:
    */
   static RenderingAddOn& Get()
   {
-    static RenderingAddOn* addon = nullptr;
-    if(!addon)
+    static std::unique_ptr<RenderingAddOn> addon = []
     {
-      addon = new RenderingAddOn();
-      if(addon->IsValid())
+      auto instance = std::make_unique<RenderingAddOn>();
+      if(instance->IsValid())
       {
-        addon->Initialize();
+        instance->Initialize();
       }
-    }
+      return instance;
+    }();
     return *addon;
   }
 };
