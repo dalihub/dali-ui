@@ -73,7 +73,7 @@ struct ChartViewportArgs
  *   parent.Add(chart);
  * @endcode
  */
-class DALI_UI_API ChartView : public View
+class DALI_UI_COMPONENTS_API ChartView : public View
 {
 public:
   enum class Type
@@ -256,8 +256,8 @@ public:
 
 public:
   /// @cond internal
-  explicit DALI_UI_API ChartView(Integration::ChartViewImpl& implementation);
-  explicit DALI_UI_API ChartView(Dali::Internal::CustomActor* internal);
+  explicit ChartView(Integration::ChartViewImpl& implementation);
+  explicit ChartView(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

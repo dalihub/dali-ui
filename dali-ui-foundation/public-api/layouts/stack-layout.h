@@ -150,14 +150,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The Layout implementation
    */
-  explicit DALI_UI_API StackLayout(Integration::StackLayoutImpl& implementation);
+  explicit StackLayout(Integration::StackLayoutImpl& implementation);
 
   /**
    * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API StackLayout(Dali::Internal::CustomActor* internal);
+  explicit StackLayout(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

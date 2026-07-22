@@ -44,7 +44,7 @@ class TextButtonStyleImpl;
 /**
  * @brief Style values used to initialize TextButton appearance and layout.
  */
-class DALI_UI_API TextButtonStyle : public UiStyle
+class DALI_UI_COMPONENTS_API TextButtonStyle : public UiStyle
 {
 public:
   class Builder;
@@ -117,7 +117,7 @@ public: // Not intended for application developers
 /**
  * @brief Mutable builder used to create TextButtonStyle handles.
  */
-class DALI_UI_API TextButtonStyle::Builder
+class DALI_UI_COMPONENTS_API TextButtonStyle::Builder
 {
 public:
   Builder();

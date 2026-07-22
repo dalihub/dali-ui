@@ -39,7 +39,7 @@ class DialogImpl;
  * stack layout) and is typically presented modally inside a DialogContainer.
  * This is the base class for AlertDialog.
  */
-class DALI_UI_API Dialog : public View
+class DALI_UI_COMPONENTS_API Dialog : public View
 {
 public:
   /**

@@ -50,7 +50,7 @@ class NavigatorImpl;
  * shown above the navigation stack and dismissed via NavigateBack or by tapping
  * a DialogContainer's scrim.
  */
-class DALI_UI_API Navigator : public View
+class DALI_UI_COMPONENTS_API Navigator : public View
 {
 public:
   Navigator();

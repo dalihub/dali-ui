@@ -71,7 +71,7 @@ def parse_animatable_tags(header_path):
       name, prop_index (or None), type, type_info, is_manual
     """
     entries = []
-    with open(header_path, 'r') as f:
+    with open(header_path, 'r', encoding='utf-8') as f:
         lines = f.readlines()
 
     for i, line in enumerate(lines):
@@ -122,7 +122,7 @@ def parse_animatable_tags(header_path):
 
 def parse_animation_config(header_path):
     """Parse @ANIMATION_CONFIG tag. Returns dict or None."""
-    with open(header_path, 'r') as f:
+    with open(header_path, 'r', encoding='utf-8') as f:
         for line in f:
             m = CONFIG_TAG_RE.search(line)
             if m:
@@ -329,7 +329,7 @@ def _indent(spaces, text):
 
 def load_template(name):
     path = os.path.join(TEMPLATE_DIR, name)
-    with open(path, 'r') as f:
+    with open(path, 'r', encoding='utf-8') as f:
         return f.read()
 
 
@@ -347,10 +347,10 @@ def render(template_str, substitutions):
 def write_file(path, content):
     os.makedirs(os.path.dirname(path) or '.', exist_ok=True)
     if os.path.exists(path):
-        with open(path, 'r') as f:
+        with open(path, 'r', encoding='utf-8') as f:
             if f.read() == content:
                 return False
-    with open(path, 'w') as f:
+    with open(path, 'w', encoding='utf-8') as f:
         f.write(content)
     return True
 

@@ -118,13 +118,13 @@ private:
 
 } // namespace Integration
 
-inline DALI_UI_API Integration::StateEffectImpl& GetImpl(StateEffect& obj)
+inline Integration::StateEffectImpl& GetImpl(StateEffect& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
   return static_cast<Integration::StateEffectImpl&>(handle);
 }
 
-inline DALI_UI_API const Integration::StateEffectImpl& GetImpl(const StateEffect& obj)
+inline const Integration::StateEffectImpl& GetImpl(const StateEffect& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
   return static_cast<const Integration::StateEffectImpl&>(handle);

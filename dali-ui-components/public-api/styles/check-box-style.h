@@ -40,7 +40,7 @@ class CheckBoxStyleImpl;
 /**
  * @brief Style values used to initialize CheckBox appearance and layout.
  */
-class DALI_UI_API CheckBoxStyle : public UiStyle
+class DALI_UI_COMPONENTS_API CheckBoxStyle : public UiStyle
 {
 public:
   class Builder;
@@ -92,7 +92,7 @@ public: // Not intended for application developers
 /**
  * @brief Mutable builder used to create CheckBoxStyle handles.
  */
-class DALI_UI_API CheckBoxStyle::Builder
+class DALI_UI_COMPONENTS_API CheckBoxStyle::Builder
 {
 public:
   Builder();

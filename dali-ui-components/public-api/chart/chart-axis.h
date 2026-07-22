@@ -39,7 +39,7 @@ class ChartAxis;
 /**
  * @brief Represents the X or Y axis of a ChartView.
  */
-class DALI_UI_API ChartAxis : public Dali::BaseHandle
+class DALI_UI_COMPONENTS_API ChartAxis : public Dali::BaseHandle
 {
 public:
   ChartAxis();
@@ -95,7 +95,7 @@ public:
   float GetLabelsRotation() const;
 
 public:
-  explicit DALI_UI_API ChartAxis(Integration::ChartAxis* impl);
+  explicit ChartAxis(Integration::ChartAxis* impl);
 };
 
 } // namespace Ui

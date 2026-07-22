@@ -40,7 +40,7 @@ namespace StyleSheet
  *
  * @return A new components style sheet
  */
-DALI_UI_API UiStyleSheet New();
+DALI_UI_COMPONENTS_API UiStyleSheet New();
 
 } // namespace StyleSheet
 } // namespace Components

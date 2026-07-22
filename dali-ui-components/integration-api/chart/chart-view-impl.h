@@ -53,7 +53,7 @@ using ChartViewImplPtr = IntrusivePtr<ChartViewImpl>;
 /**
  * @brief Implementation class for Ui::ChartView.
  */
-class DALI_UI_API ChartViewImpl : public ViewImpl
+class DALI_UI_COMPONENTS_API ChartViewImpl : public ViewImpl
 {
 public:
   static Ui::ChartView New(Ui::ChartView::Type type, const Vector2& size);

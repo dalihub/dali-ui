@@ -41,7 +41,7 @@ class UiConfigImpl;
  * and should not apply a separate Dali::Ui::UiConfig as well. Applications may
  * call StyleSheet() before Apply() to override individual style entries.
  */
-class DALI_UI_API UiConfig : public Dali::Ui::UiConfig
+class DALI_UI_COMPONENTS_API UiConfig : public Dali::Ui::UiConfig
 {
 public:
   /**

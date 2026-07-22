@@ -18,7 +18,8 @@
  *
  * Three diagnostic panels + ScrollView:
  *
- *   [0,   0] 600x130  ScrollStateObserver — live gesture/scroll/drag/fling states
+ *   [0,   0] 600x130  Scroll State         — live scroll/drag/fling states, derived
+ *                                            from ScrollView's public signals
  *   [0, 130] 600x90   ScrollView Signals  — last fired signal + scroll position + delta
  *   [0, 220] 600x214  Focus Scroll        — ScrollOnFocus, mode, peek, key-scroll controls
  *   [0, 434] 600x646  ScrollView          — 15 focusable items in 3 groups of 5,
@@ -44,14 +45,12 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/internal/scroll-state-observer.h>
 #include <dali-ui-foundation/public-api/views/scroll/bounce-edge-effect.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <sstream>
 
 using namespace Dali;
 using namespace Dali::Ui;
-using ScrollStateObserver = Dali::Ui::Internal::ScrollStateObserver;
 
 // ─── layout ──────────────────────────────────────────────────────────────────
 static constexpr float WINDOW_W      = 600.0f;
@@ -116,7 +115,6 @@ public:
     BuildFocusPanel(window);
     BuildScrollView(window);
 
-    ConnectObserverSignals();
     ConnectScrollViewSignals();
 
     // Highlight focus changes: update item visuals and the focus panel
@@ -127,7 +125,7 @@ public:
   }
 
 private:
-  // ── Section 1: ScrollStateObserver ─────────────────────────────────────────
+  // ── Section 1: Scroll State (derived from ScrollView's public signals) ────
 
   void BuildObserverPanel(Window& window)
   {
@@ -138,7 +136,7 @@ private:
     panel.SetRequestedX(0.0f);
     panel.SetRequestedY(0.0f);
 
-    Label title = Label::New("ScrollStateObserver");
+    Label title = Label::New("Scroll State");
     title.SetRequestedWidth(WINDOW_W);
     title.SetRequestedHeight(34.0f);
     title.SetRequestedX(0.0f);
@@ -150,10 +148,10 @@ private:
     static constexpr float CHIP_H     = 48.0f;
     static constexpr float CHIP_GAP   = 8.0f;
     static constexpr float ROW_Y      = 44.0f;
-    static constexpr float ROW_X0     = (WINDOW_W - (CHIP_W * 4 + CHIP_GAP * 3)) * 0.5f;
+    static constexpr float ROW_X0     = (WINDOW_W - (CHIP_W * 3 + CHIP_GAP * 2)) * 0.5f;
 
-    const char* names[4] = {"Disambiguating", "Dragging", "Scrolling", "Flinging"};
-    for(int i = 0; i < 4; ++i)
+    const char* names[3] = {"Dragging", "Scrolling", "Flinging"};
+    for(int i = 0; i < 3; ++i)
     {
       float x = ROW_X0 + i * (CHIP_W + CHIP_GAP);
 
@@ -188,37 +186,17 @@ private:
 
   void RefreshObserverPanel()
   {
-    auto& obs = ScrollStateObserver::Get();
-    const bool states[4] = {
-      obs.IsGestureDisambiguating(),
-      obs.IsDragging(),
-      obs.IsScrolling(),
-      obs.IsFlinging(),
+    const bool states[3] = {
+      mIsDragging,
+      mIsScrolling,
+      mIsScrolling && !mIsDragging, // flinging: scrolling without an active drag
     };
-    for(int i = 0; i < 4; ++i)
+    for(int i = 0; i < 3; ++i)
     {
       mObserverChips[i].SetBackgroundColor(states[i] ? COLOR_ACTIVE : COLOR_INACTIVE);
       mObserverValues[i].SetText(states[i] ? "ON" : "OFF");
     }
   }
-
-  void ConnectObserverSignals()
-  {
-    auto& obs = ScrollStateObserver::Get();
-    obs.DisambiguationBeganSignal().Connect(this, &ScrollViewController::OnObserverDisambiguationBegan);
-    obs.DisambiguationEndedSignal().Connect(this, &ScrollViewController::OnObserverDisambiguationEnded);
-    obs.DragStartedSignal().Connect(this,  &ScrollViewController::OnObserverDragStarted);
-    obs.DragFinishedSignal().Connect(this, &ScrollViewController::OnObserverDragFinished);
-    obs.ScrollStartedSignal().Connect(this,  &ScrollViewController::OnObserverScrollStarted);
-    obs.ScrollFinishedSignal().Connect(this, &ScrollViewController::OnObserverScrollFinished);
-  }
-
-  void OnObserverDisambiguationBegan()  { RefreshObserverPanel(); }
-  void OnObserverDisambiguationEnded()  { RefreshObserverPanel(); }
-  void OnObserverDragStarted()          { RefreshObserverPanel(); }
-  void OnObserverDragFinished()         { RefreshObserverPanel(); }
-  void OnObserverScrollStarted()        { RefreshObserverPanel(); }
-  void OnObserverScrollFinished()       { RefreshObserverPanel(); }
 
   // ── Section 2: ScrollView Signals ──────────────────────────────────────────
 
@@ -522,6 +500,8 @@ private:
   {
     SetLastSignal("ScrollStarted");
     UpdateScrollPos(sv);
+    mIsScrolling = true;
+    RefreshObserverPanel();
   }
 
   void OnSVScrolling(ScrollView sv)
@@ -534,6 +514,8 @@ private:
   {
     SetLastSignal("ScrollFinished");
     UpdateScrollPos(sv);
+    mIsScrolling = false;
+    RefreshObserverPanel();
   }
 
   void OnSVDragStarted(ScrollView sv)
@@ -541,6 +523,8 @@ private:
     SetLastSignal("DragStarted");
     UpdateScrollPos(sv);
     mDragDeltaLabel.SetText("Delta: (0.0, 0.0)");
+    mIsDragging = true;
+    RefreshObserverPanel();
   }
 
   void OnSVDragging(ScrollView sv, float deltaX, float deltaY)
@@ -563,6 +547,9 @@ private:
     std::ostringstream oss;
     oss << "FlingStart: (" << static_cast<int>(pos.x) << ", " << static_cast<int>(pos.y) << ")";
     mFlingVelocityLabel.SetText(oss.str().c_str());
+
+    mIsDragging = false;
+    RefreshObserverPanel();
   }
 
   // ── Section 4: ScrollView ──────────────────────────────────────────────────
@@ -920,8 +907,10 @@ private:
   ScrollView   mScrollView;
 
   // Observer panel
-  View  mObserverChips[4];
-  Label mObserverValues[4];
+  View  mObserverChips[3];
+  Label mObserverValues[3];
+  bool  mIsDragging{false};
+  bool  mIsScrolling{false};
 
   // Signal log panel
   Label mLastSignalLabel;

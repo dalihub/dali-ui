@@ -1296,14 +1296,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The Label implementation
    */
-  explicit DALI_UI_API Label(Integration::LabelImpl& implementation);
+  explicit Label(Integration::LabelImpl& implementation);
 
   /**
    * @brief Allows the creation of this Label from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API Label(Dali::Internal::CustomActor* internal);
+  explicit Label(Dali::Internal::CustomActor* internal);
   /// @endcond
 
   // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)

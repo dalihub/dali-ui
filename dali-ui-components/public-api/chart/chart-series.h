@@ -39,7 +39,7 @@ class ChartSeries;
 /**
  * @brief Base class for all chart series (Line, Bar, Pie, Scatter).
  */
-class DALI_UI_API ChartSeries : public Dali::BaseHandle
+class DALI_UI_COMPONENTS_API ChartSeries : public Dali::BaseHandle
 {
 public:
   ChartSeries();
@@ -76,7 +76,7 @@ public:
   int  GetZIndex() const;
 
 public:
-  explicit DALI_UI_API ChartSeries(Integration::ChartSeries* impl);
+  explicit ChartSeries(Integration::ChartSeries* impl);
 };
 
 } // namespace Ui

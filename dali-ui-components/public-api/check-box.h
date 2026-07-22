@@ -59,7 +59,7 @@ enum class SelectionAnimationMode : uint8_t
  * (IsSelected/SetSelected/SelectionChangedSignal/IsToggleByClickEnabled/
  * SetToggleByClickEnabled) and is intentionally NOT redeclared here.
  */
-class DALI_UI_API CheckBox : public SelectableView
+class DALI_UI_COMPONENTS_API CheckBox : public SelectableView
 {
 public:
   CheckBox();

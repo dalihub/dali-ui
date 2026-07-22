@@ -114,13 +114,13 @@ protected:
 
 } // namespace Integration
 
-inline DALI_UI_API Integration::SelectableImageInterfaceImpl& GetImpl(SelectableImageInterface& obj)
+inline Integration::SelectableImageInterfaceImpl& GetImpl(SelectableImageInterface& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
   return static_cast<Integration::SelectableImageInterfaceImpl&>(handle);
 }
 
-inline DALI_UI_API const Integration::SelectableImageInterfaceImpl& GetImpl(const SelectableImageInterface& obj)
+inline const Integration::SelectableImageInterfaceImpl& GetImpl(const SelectableImageInterface& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
   return static_cast<const Integration::SelectableImageInterfaceImpl&>(handle);

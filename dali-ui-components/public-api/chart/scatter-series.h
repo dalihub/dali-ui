@@ -36,7 +36,7 @@ class ScatterSeries;
 /**
  * @brief Scatter plot data series.
  */
-class DALI_UI_API ScatterSeries : public ChartSeries
+class DALI_UI_COMPONENTS_API ScatterSeries : public ChartSeries
 {
 public:
   enum class MarkerShape
@@ -65,7 +65,7 @@ public:
   MarkerShape GetMarkerShape() const;
 
 public:
-  explicit DALI_UI_API ScatterSeries(Integration::ScatterSeries* impl);
+  explicit ScatterSeries(Integration::ScatterSeries* impl);
 };
 
 } // namespace Ui

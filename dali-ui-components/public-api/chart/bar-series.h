@@ -37,7 +37,7 @@ class BarSeries;
 /**
  * @brief Vertical bar chart data series.
  */
-class DALI_UI_API BarSeries : public ChartSeries
+class DALI_UI_COMPONENTS_API BarSeries : public ChartSeries
 {
 public:
   static BarSeries New();
@@ -70,7 +70,7 @@ public:
   float GetDataLabelSize() const;
 
 public:
-  explicit DALI_UI_API BarSeries(Integration::BarSeries* impl);
+  explicit BarSeries(Integration::BarSeries* impl);
 };
 
 } // namespace Ui

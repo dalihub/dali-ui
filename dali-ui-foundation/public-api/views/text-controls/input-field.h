@@ -1382,14 +1382,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The InputField implementation
    */
-  explicit DALI_UI_API InputField(Integration::InputFieldImpl& implementation);
+  explicit InputField(Integration::InputFieldImpl& implementation);
 
   /**
    * @brief Allows the creation of this InputField from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API InputField(Dali::Internal::CustomActor* internal);
+  explicit InputField(Dali::Internal::CustomActor* internal);
   /// @endcond
 
   // @ANIMATABLE_MANUAL(TextGradientStartOffset, float)

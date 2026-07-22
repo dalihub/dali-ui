@@ -147,9 +147,11 @@ void GenerateHeaderFile(ifstream& shaderFile, const string& shaderVariableName, 
     // Using Raw String Literal to generate shader files as this will simplify the file layout.
     // And it will fix some compilation warnings about missing terminating strings.
     // Note : we should skip empty headline to guarantee that "#version ~~~" as top of shader code.
+    constexpr std::size_t MAX_RAW_STRING_LITERAL_SIZE = 8000u;
     outFile << "R\"(";
-    string line;
-    bool   firstLinePrinted = false;
+    string      line;
+    bool        firstLinePrinted   = false;
+    std::size_t currentLiteralSize = 0u;
     while(getline(shaderFile, line))
     {
       if(!firstLinePrinted && line.find_first_not_of(" \t\r\n") == std::string::npos)
@@ -158,7 +160,14 @@ void GenerateHeaderFile(ifstream& shaderFile, const string& shaderVariableName, 
         continue;
       }
       firstLinePrinted = true;
+      if(currentLiteralSize > 0u && currentLiteralSize + line.size() + 1u > MAX_RAW_STRING_LITERAL_SIZE)
+      {
+        outFile << ")\"" << endl
+                << "R\"(";
+        currentLiteralSize = 0u;
+      }
       outFile << line << endl;
+      currentLiteralSize += line.size() + 1u;
     }
     outFile << ")\"" << endl;
     outFile << "};" << endl;
@@ -294,12 +303,8 @@ int GenerateShaderSources(fs::path inDir, fs::path outDir, const bool generateBu
           if(shaderFile.is_open())
           {
             fs::path outFilePath(GetShaderOutputFilePath(outDir, filename));
-            // If output file already exists, then only overwrite if input file is newer than output file
-            if(!fs::exists(outFilePath) || (fs::last_write_time(path) > fs::last_write_time(outFilePath)))
-            {
-              GenerateHeaderFile(shaderFile, shaderVariableName, outFilePath);
-              shaderGenerated = true;
-            }
+            GenerateHeaderFile(shaderFile, shaderVariableName, outFilePath);
+            shaderGenerated = true;
             generator.Add(std::move(shaderVariableName), outFilePath.filename().string());
           }
           break;

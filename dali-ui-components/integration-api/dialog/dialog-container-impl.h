@@ -34,7 +34,7 @@ namespace Integration
 /**
  * @brief Implementation class for Ui::DialogContainer.
  */
-class DALI_UI_API DialogContainerImpl : public ViewImpl
+class DALI_UI_COMPONENTS_API DialogContainerImpl : public ViewImpl
 {
 public:
   static Ui::DialogContainer New();

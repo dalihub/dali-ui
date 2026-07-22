@@ -159,14 +159,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The SelectableView implementation
    */
-  explicit DALI_UI_API SelectableView(Extension::SelectableViewImpl& implementation);
+  explicit SelectableView(Extension::SelectableViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this SelectableView from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API SelectableView(Dali::Internal::CustomActor* internal);
+  explicit SelectableView(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

@@ -50,6 +50,7 @@ LIST(APPEND SOURCES ${BUILT_IN_SHADER_GEN_CPP})
 OPTION(ENABLE_INVOKE_METHOD_WRAPPERS "Generate InvokeMethod wrappers for exported public API handle methods" ON)
 
 IF(ENABLE_INVOKE_METHOD_WRAPPERS)
+  FIND_PACKAGE(Python3 COMPONENTS Interpreter REQUIRED)
   FIND_PROGRAM(INVOKE_METHOD_GENERATOR
                NAMES dali-invoke-method-generator dali-invoke-method-generator.py
                PATHS ${BIN_DIR} $ENV{DESKTOP_PREFIX}/bin ${ROOT_SRC_DIR}/../dali-core/scripts)
@@ -86,7 +87,7 @@ IF(ENABLE_INVOKE_METHOD_WRAPPERS)
        ${FOUNDATION_ROOT_SRC_DIR}/*.hpp)
 
   ADD_CUSTOM_COMMAND(OUTPUT ${INVOKE_METHOD_PUBLIC_API_CPP}
-                     COMMAND ${INVOKE_METHOD_GENERATOR}
+                     COMMAND ${Python3_EXECUTABLE} ${INVOKE_METHOD_GENERATOR}
                              --scan-root ${FOUNDATION_ROOT_SRC_DIR}/public-api
                              --include-prefix dali-ui-foundation/public-api
                              --dependency-scan-root ${INVOKE_METHOD_CORE_PUBLIC_API_DIR}
@@ -119,6 +120,10 @@ ENDIF()
 # ---------------------------------------------------------
 ADD_LIBRARY(${PROJECT_LIB_NAME} SHARED ${SOURCES})
 
+IF(WIN32)
+  TARGET_COMPILE_DEFINITIONS(${PROJECT_LIB_NAME} PRIVATE BUILDING_DALI_UI_FOUNDATION)
+ENDIF()
+
 # Ensure shaders are generated before the library starts compiling its sources
 ADD_DEPENDENCIES(${PROJECT_LIB_NAME} generate_builtin_shaders)
 
@@ -131,15 +136,19 @@ ENDIF()
 # ---------------------------------------------------------
 # 4. Include directory configuration (add third-party and internal APIs, remove toolkit)
 # ---------------------------------------------------------
-INCLUDE_DIRECTORIES(
-  ${ROOT_SRC_DIR}
-  ${FOUNDATION_ROOT_SRC_DIR}/third-party
-  ${FOUNDATION_ROOT_SRC_DIR}/internal
-  ${FOUNDATION_ROOT_SRC_DIR}/integration-api
-  ${DALICORE_INCLUDE_DIRS}
-  ${DALIADAPTOR_INCLUDE_DIRS}
-  ${VCPKG_INCLUDE_DIR}
-  ${INCLUDE_DIR}
+TARGET_INCLUDE_DIRECTORIES(${PROJECT_LIB_NAME}
+  PUBLIC
+    $<BUILD_INTERFACE:${ROOT_SRC_DIR}>
+    $<INSTALL_INTERFACE:include>
+  PRIVATE
+    ${FOUNDATION_ROOT_SRC_DIR}/third-party
+    ${FOUNDATION_ROOT_SRC_DIR}/internal
+    ${FOUNDATION_ROOT_SRC_DIR}/integration-api
+    ${DALICORE_INCLUDE_DIRS}
+    ${DALIADAPTOR_INCLUDE_DIRS}
+    ${DALI_UI_GETTEXT_INCLUDE_DIRS}
+    ${VCPKG_INCLUDE_DIR}
+    ${INCLUDE_DIR}
 )
 
 
@@ -148,10 +157,8 @@ INCLUDE_DIRECTORIES(
 # ---------------------------------------------------------
 # Note: PKG_CHECK_MODULES(OPENGLES glesv2 egl) must be declared in the top-level CMakeLists.txt
 TARGET_LINK_LIBRARIES(${PROJECT_LIB_NAME}
-  ${DALICORE_LDFLAGS}
-  ${DALIADAPTOR_LDFLAGS}
-  ${OPENGLES_LDFLAGS}
-  ${COVERAGE}
+  PUBLIC ${DALI_UI_PLATFORM_LIBRARIES}
+  PRIVATE ${DALI_UI_GETTEXT_LIBRARIES} ${COVERAGE}
 )
 
 SET_TARGET_PROPERTIES(${PROJECT_LIB_NAME}
@@ -165,8 +172,40 @@ SET_TARGET_PROPERTIES(${PROJECT_LIB_NAME}
 # ---------------------------------------------------------
 # 6. Install configuration (add integration-api and shader generator)
 # ---------------------------------------------------------
-# Install so
-INSTALL(TARGETS ${PROJECT_LIB_NAME} DESTINATION ${LIB_DIR})
+# Install library and CMake package metadata.
+IF(INSTALL_CMAKE_MODULES)
+  INSTALL(TARGETS ${PROJECT_LIB_NAME}
+    EXPORT ${PROJECT_LIB_NAME}-targets
+    LIBRARY DESTINATION ${DALI_UI_INSTALL_LIB_DIR}
+    ARCHIVE DESTINATION ${DALI_UI_INSTALL_LIB_DIR}
+    RUNTIME DESTINATION ${DALI_UI_INSTALL_BIN_DIR}
+  )
+
+  INSTALL(EXPORT ${PROJECT_LIB_NAME}-targets
+    NAMESPACE ${PROJECT_LIB_NAME}::
+    FILE ${PROJECT_LIB_NAME}-targets.cmake
+    DESTINATION share/${PROJECT_LIB_NAME}
+  )
+
+  IF(WIN32)
+    SET(PACKAGE_DEPENDENCIES
+"    find_dependency(dali2-core CONFIG REQUIRED)\n    find_dependency(dali2-adaptor CONFIG REQUIRED)\n    find_dependency(unofficial-angle CONFIG REQUIRED)\n")
+  ELSE()
+    SET(PACKAGE_DEPENDENCIES
+"    find_dependency(dali2-core CONFIG REQUIRED)\n    find_dependency(dali2-adaptor CONFIG REQUIRED)\n")
+  ENDIF()
+
+  FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LIB_NAME}-config.cmake
+"include(CMakeFindDependencyMacro)\n${PACKAGE_DEPENDENCIES}include(\${CMAKE_CURRENT_LIST_DIR}/${PROJECT_LIB_NAME}-targets.cmake)\n")
+  INSTALL(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_LIB_NAME}-config.cmake
+          DESTINATION share/${PROJECT_LIB_NAME})
+ELSE()
+  INSTALL(TARGETS ${PROJECT_LIB_NAME}
+    LIBRARY DESTINATION ${DALI_UI_INSTALL_LIB_DIR}
+    ARCHIVE DESTINATION ${DALI_UI_INSTALL_LIB_DIR}
+    RUNTIME DESTINATION ${DALI_UI_INSTALL_BIN_DIR}
+  )
+ENDIF()
 
 # Install headers
 SET(PROJECT_INCLUDE_DIR ${INCLUDE_DIR}/${PROJECT_NAME})
@@ -186,7 +225,7 @@ INSTALL( FILES ${FOUNDATION_ROOT_SRC_DIR}/dali-ui-foundation-extension.h DESTINA
 INSTALL( FILES ${FOUNDATION_ROOT_SRC_DIR}/dali-ui-foundation-integ.h DESTINATION ${PROJECT_INCLUDE_DIR} )
 
 # Install shader generator executable (for development)
-INSTALL(TARGETS ${SHADER_GENERATOR_NAME} RUNTIME DESTINATION ${BIN_DIR})
+INSTALL(TARGETS ${SHADER_GENERATOR_NAME} RUNTIME DESTINATION ${DALI_UI_INSTALL_BIN_DIR})
 
 # Install pkg config
 IF( ENABLE_PKG_CONFIGURE )

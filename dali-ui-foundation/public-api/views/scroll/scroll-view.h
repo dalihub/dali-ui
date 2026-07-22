@@ -518,12 +518,12 @@ public: // Not intended for application developers
   /**
    * @brief Creates a handle from the Integration implementation.
    */
-  explicit DALI_UI_API ScrollView(Integration::ScrollViewImpl& implementation);
+  explicit ScrollView(Integration::ScrollViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this Control from an Internal::CustomActor pointer.
    */
-  explicit DALI_UI_API ScrollView(Dali::Internal::CustomActor* internal);
+  explicit ScrollView(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

@@ -110,14 +110,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The Layout implementation
    */
-  explicit DALI_UI_API Layout(Integration::LayoutImpl& implementation);
+  explicit Layout(Integration::LayoutImpl& implementation);
 
   /**
    * @brief Allows the creation of this Layout from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API Layout(Dali::Internal::CustomActor* internal);
+  explicit Layout(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

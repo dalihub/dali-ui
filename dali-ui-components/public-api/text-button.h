@@ -38,7 +38,7 @@ class TextButtonImpl;
 /**
  * @brief TextButton is a label-only interactive button.
  */
-class DALI_UI_API TextButton : public InteractiveView
+class DALI_UI_COMPONENTS_API TextButton : public InteractiveView
 {
 public:
   TextButton();

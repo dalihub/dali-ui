@@ -41,7 +41,7 @@ class AlertDialogImpl;
  * It derives from Dialog and auto-builds the header (title), body (message) and
  * footer (action buttons) sections from SetTitle / SetMessage / SetActionButtons.
  */
-class DALI_UI_API AlertDialog : public Dialog
+class DALI_UI_COMPONENTS_API AlertDialog : public Dialog
 {
 public:
   /**

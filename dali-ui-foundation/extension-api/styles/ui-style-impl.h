@@ -65,13 +65,13 @@ private:
   Internal::UiStylePrivate* mPrivate;
 };
 
-inline DALI_UI_API UiStyleImpl& GetImpl(UiStyle& obj)
+inline UiStyleImpl& GetImpl(UiStyle& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
   return static_cast<UiStyleImpl&>(handle);
 }
 
-inline DALI_UI_API const UiStyleImpl& GetImpl(const UiStyle& obj)
+inline const UiStyleImpl& GetImpl(const UiStyle& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
   return static_cast<const UiStyleImpl&>(handle);

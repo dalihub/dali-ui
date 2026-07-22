@@ -1614,7 +1614,7 @@ int ChartViewImpl::HitTestPie(const Vector2& local, int& outSeriesIdx) const
   if(dist > outerR) return -1;
   if(pieImpl->GetInnerRadiusRatio() > 0.0f && dist < innerR) return -1;
 
-  float angle = std::atan2(dy, dx) * 180.0f / static_cast<float>(M_PI);
+  float angle = std::atan2(dy, dx) * 180.0f / Math::PI;
   if(angle < 0.0f) angle += 360.0f;
   angle = std::fmod(angle - 270.0f + 360.0f, 360.0f);
 

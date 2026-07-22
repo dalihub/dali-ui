@@ -293,8 +293,8 @@ public: // Rasterization control
 
 public: // Not intended for application developers
   /// @cond internal
-  explicit DALI_UI_API CanvasView(Internal::CanvasViewImpl& implementation);
-  explicit DALI_UI_API CanvasView(Dali::Internal::CustomActor* internal);
+  explicit CanvasView(Internal::CanvasViewImpl& implementation);
+  explicit CanvasView(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

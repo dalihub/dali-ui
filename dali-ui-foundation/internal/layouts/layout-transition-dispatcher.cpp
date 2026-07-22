@@ -125,11 +125,11 @@ float ApplyAlpha(const AlphaFunction& alpha, float t)
       return 1.0f - 4.0f * u * u * u;
     }
     case AlphaFunction::EASE_IN_SINE:
-      return 1.0f - std::cos(t * 0.5f * static_cast<float>(M_PI));
+      return 1.0f - std::cos(t * 0.5f * Math::PI);
     case AlphaFunction::EASE_OUT_SINE:
-      return std::sin(t * 0.5f * static_cast<float>(M_PI));
+      return std::sin(t * 0.5f * Math::PI);
     case AlphaFunction::EASE_IN_OUT_SINE:
-      return 0.5f * (1.0f - std::cos(static_cast<float>(M_PI) * t));
+      return 0.5f * (1.0f - std::cos(Math::PI * t));
     default:
       // BOUNCE / SIN / EASE_OUT_BACK are not yet mapped — linear fallback.
       return t;

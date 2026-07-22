@@ -23,7 +23,7 @@ namespace Dali
 namespace Ui
 {
 
-SelectableLottieImage::FrameRange::FrameRange(int32_t start, int32_t end)
+DALI_UI_API SelectableLottieImage::FrameRange::FrameRange(int32_t start, int32_t end)
 : startFrame(start),
   endFrame(end)
 {

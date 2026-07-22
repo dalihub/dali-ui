@@ -5,92 +5,12 @@ PROJECT(scrollview.example)
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 
-# Find required packages
-FIND_PACKAGE(PkgConfig REQUIRED)
-PKG_CHECK_MODULES(DALICORE REQUIRED dali2-core)
-PKG_CHECK_MODULES(DALIADAPTOR REQUIRED dali2-adaptor)
-PKG_CHECK_MODULES(DALI_UI_FOUNDATION REQUIRED dali2-ui-foundation)
-PKG_CHECK_MODULES(DALI_UI_COMPONENTS REQUIRED dali2-ui-components)
-
-# Add executable
-SET(EXE_NAME scrollview.example)
-ADD_EXECUTABLE(${EXE_NAME} scrollview-example.cpp)
-
-SET(EXE_INTERACTIVE scrollview-interactive-children)
-ADD_EXECUTABLE(${EXE_INTERACTIVE} scrollview-interactive-children.cpp)
-
-SET(EXE_SCROLLBAR scrollview-scrollbar-example)
-ADD_EXECUTABLE(${EXE_SCROLLBAR} scrollbar-example.cpp)
-
-SET(EXE_NOFOCUS scrollview-nofocus-keyscroll)
-ADD_EXECUTABLE(${EXE_NOFOCUS} scrollview-nofocus-keyscroll.cpp)
-
-SET(EXE_FARFOCUS scrollview-farfocus-keyscroll)
-ADD_EXECUTABLE(${EXE_FARFOCUS} scrollview-farfocus-keyscroll.cpp)
-
-# Build Options
-SET(DALI_UI_TEST_APP_CFLAGS -fvisibility=hidden -DHIDE_DALI_INTERNALS)
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  MESSAGE(STATUS "CMAKE_BUILD_TYPE: " Debug)
-  SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -g -O0 -DDEBUG_ENABLED)
-ELSE()
-  MESSAGE(STATUS "CMAKE_BUILD_TYPE: " Release)
-  SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Os)
+IF(NOT COMMAND DALI_ADD_SAMPLE)
+  INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../common.cmake")
 ENDIF()
 
-# Add -rdynamic to export main symbol, so dali-loader could run the main.
-SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Werror -Wall -fPIE -rdynamic)
-
-# Remove some warnings that are not useful for our test apps.
-IF( WIN32 )
-  # TODO: Add Windows-specific compiler flags if needed.
-ELSE()
-  INCLUDE(CheckCXXCompilerFlag)
-
-  CHECK_CXX_COMPILER_FLAG( -Wno-unused-const-variable HAVE_NO_UNUSED_CONST_VARIABLE )
-  IF( HAVE_NO_UNUSED_CONST_VARIABLE )
-    SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-const-variable)
-  ENDIF()
-
-  CHECK_CXX_COMPILER_FLAG( -Wno-unused-command-line-argument HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT )
-  IF( HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT )
-    SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-command-line-argument)
-  ENDIF()
-ENDIF()
-
-# Set output directory
-FOREACH(TARGET_EXE ${EXE_NAME} ${EXE_INTERACTIVE} ${EXE_SCROLLBAR} ${EXE_NOFOCUS} ${EXE_FARFOCUS})
-  SET_TARGET_PROPERTIES(${TARGET_EXE} PROPERTIES
-    RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-
-  INSTALL(TARGETS ${TARGET_EXE} RUNTIME DESTINATION)
-
-  TARGET_LINK_LIBRARIES(${TARGET_EXE}
-    ${DALICORE_LIBRARIES}
-    ${DALIADAPTOR_LIBRARIES}
-    ${DALI_UI_FOUNDATION_LIBRARIES}
-    ${DALI_UI_COMPONENTS_LIBRARIES}
-  )
-
-  TARGET_LINK_DIRECTORIES(${TARGET_EXE} PRIVATE
-    $ENV{DESKTOP_PREFIX}/lib
-  )
-
-  TARGET_INCLUDE_DIRECTORIES(${TARGET_EXE} PRIVATE
-    ${DALICORE_INCLUDE_DIRS}
-    ${DALIADAPTOR_INCLUDE_DIRS}
-    ${DALI_UI_FOUNDATION_INCLUDE_DIRS}
-    ${DALI_UI_COMPONENTS_INCLUDE_DIRS}
-    # Allow access to internal headers (e.g. scroll-state-observer.h) from source tree
-    ${CMAKE_CURRENT_SOURCE_DIR}/../../
-  )
-
-  TARGET_COMPILE_OPTIONS(${TARGET_EXE} PRIVATE
-    ${DALICORE_CFLAGS_OTHER}
-    ${DALIADAPTOR_CFLAGS_OTHER}
-    ${DALI_UI_FOUNDATION_CFLAGS_OTHER}
-    ${DALI_UI_COMPONENTS_CFLAGS_OTHER}
-    ${DALI_UI_TEST_APP_CFLAGS}
-  )
-ENDFOREACH()
+DALI_ADD_SAMPLE(scrollview.example scrollview-example.cpp)
+DALI_ADD_SAMPLE(scrollview-interactive-children scrollview-interactive-children.cpp)
+DALI_ADD_SAMPLE(scrollview-scrollbar-example scrollbar-example.cpp)
+DALI_ADD_SAMPLE(scrollview-nofocus-keyscroll scrollview-nofocus-keyscroll.cpp)
+DALI_ADD_SAMPLE(scrollview-farfocus-keyscroll scrollview-farfocus-keyscroll.cpp)

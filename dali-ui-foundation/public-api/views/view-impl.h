@@ -1109,7 +1109,7 @@ private:
 
 // Helpers for public-api forwarding methods
 
-inline DALI_UI_API ViewImpl& GetImpl(Ui::View& view)
+inline ViewImpl& GetImpl(Ui::View& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
@@ -1118,7 +1118,7 @@ inline DALI_UI_API ViewImpl& GetImpl(Ui::View& view)
   return static_cast<ViewImpl&>(handle);
 }
 
-inline DALI_UI_API const ViewImpl& GetImpl(const Ui::View& view)
+inline const ViewImpl& GetImpl(const Ui::View& view)
 {
   DALI_ASSERT_ALWAYS(view);
 

@@ -75,14 +75,14 @@ private:
 } // namespace Integration
 
 // Helpers for public-api forwarding methods
-inline DALI_UI_API Integration::LayoutImpl& GetImpl(Layout& layout)
+inline Integration::LayoutImpl& GetImpl(Layout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::LayoutImpl&>(handle);
 }
 
-inline DALI_UI_API const Integration::LayoutImpl& GetImpl(const Layout& layout)
+inline const Integration::LayoutImpl& GetImpl(const Layout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();

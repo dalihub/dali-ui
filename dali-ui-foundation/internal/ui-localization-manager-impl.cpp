@@ -19,7 +19,6 @@
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 
 // EXTERNAL INCLUDES
-#include <libintl.h>
 #include <algorithm>
 
 // INTERNAL INCLUDES
@@ -27,6 +26,8 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/string-utils.h>
+
+#include <dali-ui-foundation/internal/localization/gettext-wrapper.h>
 
 namespace Dali
 {
@@ -101,13 +102,13 @@ bool UiLocalizationManagerImpl::RegisterDomain(StringView domainView, StringView
 
   // Do not pass StringView::Data() directly to gettext.
   // StringView may not be null-terminated. Use std::string::c_str().
-  const char* result = bindtextdomain(domain.c_str(), localePath.c_str());
+  const char* result = Localization::BindTextDomain(domain.c_str(), localePath.c_str());
   if(result == nullptr)
   {
     return false;
   }
 
-  bind_textdomain_codeset(domain.c_str(), "UTF-8");
+  Localization::BindTextDomainCodeset(domain.c_str(), "UTF-8");
 
   mRegisteredDomains[domain] = localePath;
 
@@ -201,7 +202,7 @@ Dali::String UiLocalizationManagerImpl::GetLocalizedStringInternal(StringView re
   // Do not pass StringView::Data() directly to dgettext.
   // Always use null-terminated std::string::c_str().
   // If no translation is found, dgettext returns resourceId.
-  const char* translated = dgettext(effectiveDomain.c_str(), resourceId.c_str());
+  const char* translated = Localization::GetText(effectiveDomain.c_str(), resourceId.c_str());
 
   if(translated == nullptr)
   {

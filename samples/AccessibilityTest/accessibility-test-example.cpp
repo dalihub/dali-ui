@@ -40,10 +40,15 @@ namespace ExportAccessibility = Dali::Integration::Accessibility;
 
 void SetGeometry(View view, float x, float y, float width, float height)
 {
+  view.SetLayoutMode(Dali::Ui::LayoutMode::STANDALONE);
   view.SetRequestedX(x);
   view.SetRequestedY(y);
   view.SetRequestedWidth(width);
   view.SetRequestedHeight(height);
+  view.SetProperty(Dali::Actor::Property::PARENT_ORIGIN, Dali::ParentOrigin::TOP_LEFT);
+  view.SetProperty(Dali::Actor::Property::PIVOT, Dali::Pivot::TOP_LEFT);
+  view.SetProperty(Dali::Actor::Property::POSITION, Dali::Vector3(x, y, 0.0f));
+  view.SetProperty(Dali::Actor::Property::SIZE, Dali::Vector2(width, height));
 }
 
 void SetAccessibility(View view, Accessibility::Role role, const char* name, const char* description, std::initializer_list<Accessibility::State> states)

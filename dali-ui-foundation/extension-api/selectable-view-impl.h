@@ -107,7 +107,7 @@ protected:
 
 // Helpers for forwarding methods
 
-inline DALI_UI_API SelectableViewImpl& GetImpl(SelectableView& view)
+inline SelectableViewImpl& GetImpl(SelectableView& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
@@ -116,7 +116,7 @@ inline DALI_UI_API SelectableViewImpl& GetImpl(SelectableView& view)
   return static_cast<SelectableViewImpl&>(handle);
 }
 
-inline DALI_UI_API const SelectableViewImpl& GetImpl(const SelectableView& view)
+inline const SelectableViewImpl& GetImpl(const SelectableView& view)
 {
   DALI_ASSERT_ALWAYS(view);
 

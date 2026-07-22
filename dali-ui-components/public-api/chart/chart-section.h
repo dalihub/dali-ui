@@ -40,7 +40,7 @@ class ChartSection;
  * NaN boundary values extend the section to the corresponding plot area edge.
  * xMin == xMax draws a vertical threshold line; yMin == yMax draws a horizontal one.
  */
-class DALI_UI_API ChartSection : public BaseHandle
+class DALI_UI_COMPONENTS_API ChartSection : public BaseHandle
 {
 public:
   static ChartSection New();
@@ -72,7 +72,7 @@ public:
   float GetStrokeWidth() const;
 
 public:
-  explicit DALI_UI_API ChartSection(Integration::ChartSection* impl);
+  explicit ChartSection(Integration::ChartSection* impl);
 };
 
 } // namespace Ui

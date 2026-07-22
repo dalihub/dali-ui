@@ -161,13 +161,13 @@ private:
 
 } // namespace Internal
 
-inline DALI_UI_API Internal::OverlayEffectImpl& GetImpl(OverlayEffect& obj)
+inline Internal::OverlayEffectImpl& GetImpl(OverlayEffect& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
   return static_cast<Internal::OverlayEffectImpl&>(handle);
 }
 
-inline DALI_UI_API const Internal::OverlayEffectImpl& GetImpl(const OverlayEffect& obj)
+inline const Internal::OverlayEffectImpl& GetImpl(const OverlayEffect& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
   return static_cast<const Internal::OverlayEffectImpl&>(handle);

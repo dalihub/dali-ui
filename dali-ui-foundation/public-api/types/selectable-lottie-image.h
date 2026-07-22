@@ -77,7 +77,7 @@ public:
      * @param[in] start The first frame of the segment
      * @param[in] end   The last frame of the segment
      */
-    FrameRange(int32_t start, int32_t end);
+    DALI_UI_API FrameRange(int32_t start, int32_t end);
 
     int32_t startFrame{0}; ///< The first frame of the segment
     int32_t endFrame{0};   ///< The last frame of the segment

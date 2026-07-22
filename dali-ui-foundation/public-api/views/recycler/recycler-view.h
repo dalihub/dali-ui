@@ -117,8 +117,8 @@ public: // Scroll state signals — match ScrollView API
 
 public: // Not intended for application developers
   /// @cond internal
-  explicit DALI_UI_API RecyclerView(Integration::RecyclerViewImpl& implementation);
-  explicit DALI_UI_API RecyclerView(Dali::Internal::CustomActor* internal);
+  explicit RecyclerView(Integration::RecyclerViewImpl& implementation);
+  explicit RecyclerView(Dali::Internal::CustomActor* internal);
   /// @endcond
 };
 

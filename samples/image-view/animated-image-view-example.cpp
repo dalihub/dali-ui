@@ -30,9 +30,9 @@ using namespace Dali::Ui;
  *
  * Demonstrates:
  *   - Play / Pause / Stop / JumpToFrame
- *   - Change Image  (cycles through WebP, GIF×2, URL array)
+ *   - Change Image  (cycles through WebP, GIFx2, URL array)
  *   - LoopCount  (infinite / 3 / 1)
- *   - FrameSpeedFactor  (0.5× / 1.0× / 2.0×)
+ *   - FrameSpeedFactor  (0.5x / 1.0x / 2.0x)
  *   - StopBehavior  (CURRENT / FIRST / LAST)
  *   - SetFrameDelay  (200ms / 500ms / 1000ms / 2000ms)
  *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)
@@ -99,7 +99,7 @@ private:
     mMonitorTimer.Start();
   }
 
-  // ── Widgets ─────────────────────────────────────────────────────────────
+  // -- Widgets -------------------------------------------------------------
 
   View CreateImageSourceLabel()
   {
@@ -244,7 +244,7 @@ private:
     return row;
   }
 
-  // ── Button helpers ───────────────────────────────────────────────────────
+  // -- Button helpers -------------------------------------------------------
 
   using ClickCallback = std::function<void(View, InputEvent)>;
 
@@ -300,7 +300,7 @@ private:
     return button;
   }
 
-  // ── Image switching ──────────────────────────────────────────────────────
+  // -- Image switching ------------------------------------------------------
 
   void ApplyCurrentImage()
   {
@@ -357,7 +357,7 @@ private:
     ApplyCurrentImage();
   }
 
-  // ── Callbacks ────────────────────────────────────────────────────────────
+  // -- Callbacks ------------------------------------------------------------
 
   void OnPlay()
   {
@@ -590,8 +590,8 @@ const char* AnimatedImageViewSampleController::WEBP_RELOAD_SOURCE_URL  = RESOURC
 const char* AnimatedImageViewSampleController::WEBP_RELOAD_ROTATED_URL = RESOURCES_DIR "webp-reload-rotated.webp";
 const char* AnimatedImageViewSampleController::WEBP_RELOAD_TEMP_URL    = "/tmp/dali-ui-animated-image-reload.webp";
 
-const char* AnimatedImageViewSampleController::LOOP_LABELS[]          = {"Loop: ∞", "Loop: 3", "Loop: 1"};
-const char* AnimatedImageViewSampleController::SPEED_LABELS[]         = {"Speed: 0.5×", "Speed: 1.0×", "Speed: 2.0×"};
+const char* AnimatedImageViewSampleController::LOOP_LABELS[]          = {"Loop: Infinite", "Loop: 3", "Loop: 1"};
+const char* AnimatedImageViewSampleController::SPEED_LABELS[]         = {"Speed: 0.5x", "Speed: 1.0x", "Speed: 2.0x"};
 const char* AnimatedImageViewSampleController::STOP_BEHAVIOR_LABELS[] = {"StopAt: CURRENT", "StopAt: FIRST", "StopAt: LAST"};
 const char* AnimatedImageViewSampleController::FRAME_DELAY_LABELS[]   = {"Delay: 200ms", "Delay: 500ms", "Delay: 1000ms", "Delay: 2000ms"};
 

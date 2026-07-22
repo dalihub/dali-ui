@@ -68,7 +68,7 @@ samples/text/res/locale/alternate/*/LC_MESSAGES/*.mo
 samples/text/res/locale/gradient/*/LC_MESSAGES/*.mo
 
 /dali-ui-foundation/internal/graphics/generated
-/build/tizen/dali-ui-foundation/dali-shader-generator
+/build/tizen/dali-ui-foundation/dali-ui-shader-generator
 
 # Documentation build artifacts (Ignore contents, not the directory itself to allow exceptions)
 /build/doc/*

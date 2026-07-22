@@ -159,14 +159,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The GroupSelectableView implementation
    */
-  explicit DALI_UI_API GroupSelectableView(Extension::GroupSelectableViewImpl& implementation);
+  explicit GroupSelectableView(Extension::GroupSelectableViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this GroupSelectableView from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API GroupSelectableView(Dali::Internal::CustomActor* internal);
+  explicit GroupSelectableView(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

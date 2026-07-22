@@ -1506,14 +1506,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The View implementation
    */
-  explicit DALI_UI_API View(ViewImpl& implementation);
+  explicit View(ViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this View from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API View(Dali::Internal::CustomActor* internal);
+  explicit View(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

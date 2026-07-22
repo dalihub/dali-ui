@@ -41,7 +41,7 @@ namespace Integration
  * Derives from DialogImpl and auto-builds the header (title), body (message) and
  * footer (action buttons) sections.
  */
-class DALI_UI_API AlertDialogImpl : public DialogImpl
+class DALI_UI_COMPONENTS_API AlertDialogImpl : public DialogImpl
 {
 public:
   static Ui::AlertDialog New();

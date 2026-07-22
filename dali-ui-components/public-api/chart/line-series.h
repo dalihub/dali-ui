@@ -38,7 +38,7 @@ class LineSeries;
 /**
  * @brief Line chart data series.
  */
-class DALI_UI_API LineSeries : public ChartSeries
+class DALI_UI_COMPONENTS_API LineSeries : public ChartSeries
 {
 public:
   enum class MarkerShape
@@ -109,7 +109,7 @@ public:
   const DataLabelFormatterType& GetDataLabelFormatter() const;
 
 public:
-  explicit DALI_UI_API LineSeries(Integration::LineSeries* impl);
+  explicit LineSeries(Integration::LineSeries* impl);
 };
 
 } // namespace Ui

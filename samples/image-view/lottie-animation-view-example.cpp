@@ -29,10 +29,10 @@ using namespace Dali::Ui;
  *   - Play / Pause / Stop / JumpToFrame
  *   - LoopCount  (infinite / 3 / 1)
  *   - LoopingMode  (RESTART / AUTO_REVERSE)
- *   - FrameSpeedFactor  (0.5× / 1.0× / 2.0×)
+ *   - FrameSpeedFactor  (0.5x / 1.0x / 2.0x)
  *   - StopBehavior  (CURRENT / FIRST / LAST)
  *   - SetMinMaxFrame  (full / first-half / second-half)
- *   - RenderScale  (0.5× / 1.0× / 2.0×)
+ *   - RenderScale  (0.5x / 1.0x / 2.0x)
  *   - PlaceholderUrl  (show placeholder while new URL loads)
  *   - GetPlayState / GetCurrentFrame / GetTotalFrame  (logged on each button press)
  *   - AnimationFinishedSignal
@@ -91,7 +91,7 @@ private:
     mMonitorTimer.Start();
   }
 
-  // ── Widgets ─────────────────────────────────────────────────────────────
+  // -- Widgets -------------------------------------------------------------
 
   View CreateAnimationArea()
   {
@@ -130,7 +130,7 @@ private:
       CreateButton("PLAY",    [this](View, InputEvent) { OnPlay(); }),
       CreateButton("PAUSE",   [this](View, InputEvent) { OnPause(); }),
       CreateButton("STOP",    [this](View, InputEvent) { OnStop(); }),
-      CreateButton("JUMP→10", [this](View, InputEvent) { OnJumpTo(); }),
+      CreateButton("JUMP > 10", [this](View, InputEvent) { OnJumpTo(); }),
     });
   }
 
@@ -254,7 +254,7 @@ private:
     return row;
   }
 
-  // ── Button helpers ───────────────────────────────────────────────────────
+  // -- Button helpers -------------------------------------------------------
 
   using ClickCallback = std::function<void(View, InputEvent)>;
 
@@ -310,13 +310,13 @@ private:
     return button;
   }
 
-  // ── Callbacks ────────────────────────────────────────────────────────────
+  // -- Callbacks ------------------------------------------------------------
 
   void OnPlay()
   {
     mLottieView.Play();
     UpdateStatus("Playing");
-    DALI_LOG_RELEASE_INFO("[LottieAnimationView] Play() — state=%d frame=%d/%d\n",
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] Play() - state=%d frame=%d/%d\n",
                           static_cast<int>(mLottieView.GetPlayState()),
                           mLottieView.GetCurrentFrame(),
                           mLottieView.GetTotalFrame());
@@ -326,7 +326,7 @@ private:
   {
     mLottieView.Pause();
     UpdateStatus("Paused");
-    DALI_LOG_RELEASE_INFO("[LottieAnimationView] Pause() — state=%d frame=%d/%d\n",
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] Pause() - state=%d frame=%d/%d\n",
                           static_cast<int>(mLottieView.GetPlayState()),
                           mLottieView.GetCurrentFrame(),
                           mLottieView.GetTotalFrame());
@@ -336,7 +336,7 @@ private:
   {
     mLottieView.Stop();
     UpdateStatus("Stopped");
-    DALI_LOG_RELEASE_INFO("[LottieAnimationView] Stop() — state=%d frame=%d/%d\n",
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] Stop() - state=%d frame=%d/%d\n",
                           static_cast<int>(mLottieView.GetPlayState()),
                           mLottieView.GetCurrentFrame(),
                           mLottieView.GetTotalFrame());
@@ -346,7 +346,7 @@ private:
   {
     mLottieView.JumpToFrame(JUMP_FRAME);
     UpdateStatus("Jumped to frame " + std::to_string(JUMP_FRAME));
-    DALI_LOG_RELEASE_INFO("[LottieAnimationView] JumpToFrame(%d) — currentFrame=%d\n",
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] JumpToFrame(%d) - currentFrame=%d\n",
                           JUMP_FRAME,
                           mLottieView.GetCurrentFrame());
   }
@@ -400,7 +400,7 @@ private:
         break;
     }
     Label::DownCast(mFrameRangeButton).SetText(FRAME_RANGE_LABELS[mFrameRangeIndex]);
-    DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetMinMaxFrame — range=%s total=%d\n",
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetMinMaxFrame - range=%s total=%d\n",
                           FRAME_RANGE_LABELS[mFrameRangeIndex], total);
   }
 
@@ -416,7 +416,7 @@ private:
   {
     mLottieView.SetPlaceholderUrl(RESOURCES_DIR "placeholder_image.png");
     mLottieView.SetResourceUrl(RESOURCES_DIR "jolly_walker.json");
-    UpdateStatus("Placeholder set — reloading");
+    UpdateStatus("Placeholder set - reloading");
     DALI_LOG_RELEASE_INFO("[LottieAnimationView] SetPlaceholderUrl + reload\n");
   }
 
@@ -430,8 +430,8 @@ private:
   void OnResourceReady(View view)
   {
     int total = mLottieView.GetTotalFrame();
-    UpdateStatus("Ready — total frames: " + std::to_string(total));
-    DALI_LOG_RELEASE_INFO("[LottieAnimationView] ResourceReady — totalFrame=%d\n", total);
+    UpdateStatus("Ready - total frames: " + std::to_string(total));
+    DALI_LOG_RELEASE_INFO("[LottieAnimationView] ResourceReady - totalFrame=%d\n", total);
 
     // Log content info (layer info)
     Dali::Property::Map contentInfo = mLottieView.GetContentInfo();
@@ -456,7 +456,7 @@ private:
   {
     if(mLottieView && mLottieView.GetPlayState() == Ui::AnimatedImage::PlayState::PLAYING)
     {
-      DALI_LOG_RELEASE_INFO("[LottieAnimationView] Monitor — frame=%d/%d state=%d\n",
+      DALI_LOG_RELEASE_INFO("[LottieAnimationView] Monitor - frame=%d/%d state=%d\n",
                             mLottieView.GetCurrentFrame(),
                             mLottieView.GetTotalFrame(),
                             static_cast<int>(mLottieView.GetPlayState()));
@@ -511,12 +511,12 @@ constexpr int   LottieAnimationViewSampleController::LOOP_COUNTS[];
 constexpr float LottieAnimationViewSampleController::SPEED_FACTORS[];
 constexpr float LottieAnimationViewSampleController::RENDER_SCALES[];
 
-const char* LottieAnimationViewSampleController::LOOP_LABELS[]         = {"Loop: ∞", "Loop: 3", "Loop: 1"};
+const char* LottieAnimationViewSampleController::LOOP_LABELS[]         = {"Loop: Infinite", "Loop: 3", "Loop: 1"};
 const char* LottieAnimationViewSampleController::LOOPING_MODE_LABELS[] = {"Mode: RESTART", "Mode: REVERSE"};
-const char* LottieAnimationViewSampleController::SPEED_LABELS[]        = {"Speed: 0.5×", "Speed: 1.0×", "Speed: 2.0×"};
+const char* LottieAnimationViewSampleController::SPEED_LABELS[]        = {"Speed: 0.5x", "Speed: 1.0x", "Speed: 2.0x"};
 const char* LottieAnimationViewSampleController::STOP_BEHAVIOR_LABELS[] = {"StopAt: CURRENT", "StopAt: FIRST", "StopAt: LAST"};
 const char* LottieAnimationViewSampleController::FRAME_RANGE_LABELS[]   = {"Range: FULL", "Range: 1st HALF", "Range: 2nd HALF"};
-const char* LottieAnimationViewSampleController::RENDER_SCALE_LABELS[]  = {"Scale: 0.5×", "Scale: 1.0×", "Scale: 2.0×"};
+const char* LottieAnimationViewSampleController::RENDER_SCALE_LABELS[]  = {"Scale: 0.5x", "Scale: 1.0x", "Scale: 2.0x"};
 
 const Ui::LottieAnimation::LoopingMode LottieAnimationViewSampleController::LOOPING_MODES[] = {
   Ui::LottieAnimation::LoopingMode::RESTART,

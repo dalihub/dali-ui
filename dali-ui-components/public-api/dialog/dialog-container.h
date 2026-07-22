@@ -46,7 +46,7 @@ class DialogContainerImpl;
  * Navigator connects this to PopModal so the dialog is dismissed when the
  * background is tapped.
  */
-class DALI_UI_API DialogContainer : public View
+class DALI_UI_COMPONENTS_API DialogContainer : public View
 {
 public:
   DialogContainer();

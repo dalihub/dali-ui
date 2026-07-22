@@ -40,7 +40,7 @@ namespace Integration
 /**
  * @brief Implementation class for Ui::Navigator.
  */
-class DALI_UI_API NavigatorImpl : public ViewImpl
+class DALI_UI_COMPONENTS_API NavigatorImpl : public ViewImpl
 {
 public:
   static Ui::Navigator New();

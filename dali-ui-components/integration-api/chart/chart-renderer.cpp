@@ -1261,7 +1261,7 @@ void DataRenderer::RenderPie(Dali::CanvasRenderer::DrawableGroup&    group,
 
     if(pieImpl->IsDataLabelsVisible() && renderSweep >= pieImpl->GetDataLabelMinAngle())
     {
-      const float midRad = (renderStart + renderSweep * 0.5f) * static_cast<float>(M_PI) / 180.0f;
+      const float midRad = (renderStart + renderSweep * 0.5f) * Math::PI / 180.0f;
       const float labelR = isDonut ? (outerR + innerR) * 0.5f : outerR * 0.65f;
       const float pct    = (sl.value / total) * 100.0f;
       char        buf[64];

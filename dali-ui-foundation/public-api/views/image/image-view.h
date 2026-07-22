@@ -530,14 +530,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The ImageView implementation
    */
-  explicit DALI_UI_API ImageView(Integration::ImageViewImpl& implementation);
+  explicit ImageView(Integration::ImageViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this ImageView from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API ImageView(Dali::Internal::CustomActor* internal);
+  explicit ImageView(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

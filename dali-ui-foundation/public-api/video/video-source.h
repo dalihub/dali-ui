@@ -77,15 +77,16 @@ public: // Not intended for application developers
   /**
    * @brief Creation entry point used by CreateVideoSource().
    *
-   * Exported (DALI_UI_API, not DALI_INTERNAL) so the header-only CreateVideoSource()
-   * bridge can link against it even on symbol-visibility (release / GBS) builds.
+   * Exported through the VideoSource DLL interface so the header-only
+   * CreateVideoSource() bridge can link against it even on symbol-visibility
+   * (release / GBS) builds.
    * Applications should use CreateVideoSource() with a descriptor built by a
    * dali-adaptor platform helper, not this directly.
    */
-  static DALI_UI_API VideoSource New(const char*               providerId,
-                                     void*                     nativeSession,
-                                     const VideoSourceOptions& options,
-                                     VideoRenderingMode        renderingMode);
+  static VideoSource New(const char*               providerId,
+                         void*                     nativeSession,
+                         const VideoSourceOptions& options,
+                         VideoRenderingMode        renderingMode);
   /// @endcond
 };
 

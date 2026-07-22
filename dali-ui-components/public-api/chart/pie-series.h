@@ -37,7 +37,7 @@ class PieSeries;
 /**
  * @brief Pie/Donut chart data series.
  */
-class DALI_UI_API PieSeries : public ChartSeries
+class DALI_UI_COMPONENTS_API PieSeries : public ChartSeries
 {
 public:
   PieSeries();
@@ -70,7 +70,7 @@ public:
   float GetDataLabelMinAngle() const;
 
 public:
-  explicit DALI_UI_API PieSeries(Integration::PieSeries* impl);
+  explicit PieSeries(Integration::PieSeries* impl);
 };
 
 } // namespace Ui

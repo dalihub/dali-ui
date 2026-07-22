@@ -280,8 +280,15 @@ void CanvasViewImpl::AddRasterizationTask(bool forceProcess)
     return;
   }
 
-  if(!mCanvasRenderer.Commit() && !forceProcess)
+  if(!mCanvasRenderer.Commit())
   {
+    // A forced synchronous request with no canvas changes is already satisfied
+    // by the current rasterized texture. Treat it as complete so manual mode
+    // does not retry an unchanged ThorVG canvas indefinitely.
+    if(forceProcess)
+    {
+      mLastCommitRasterized = true;
+    }
     return;
   }
 

@@ -23,30 +23,33 @@
 /*
  * Definitions for shared library support.
  *
- * If a library is configured with --enable-exportall or --enable-debug
- * then HIDE_DALI_INTERNALS is not defined, and nothing is hidden.
- * If it is configured without these options (the default), then HIDE_INTERNALS
- * is defined when building the library, visibility is automatically hidden, and the explicit
- * defines below come into use.
- * When building a library that uses DALI, HIDE_DALI_INTERNALS.
+ * DALI UI is split into foundation and components shared libraries. On
+ * Windows each library must export only the declarations that it owns. On
+ * platforms with ELF visibility, HIDE_DALI_INTERNALS selects the explicit
+ * public symbols while export-all and debug builds leave visibility unchanged.
  */
-#if __GNUC__ >= 4
-#ifndef HIDE_DALI_INTERNALS
-#define DALI_UI_API
-#else
-#define DALI_UI_API __attribute__((visibility("default")))
-#endif
-#else
-#ifdef WIN32
-#ifdef BUILDING_DALI_UI
-/** Visibility attribute to hide declarations */
+#if defined(_WIN32)
+#if defined(BUILDING_DALI_UI_FOUNDATION)
 #define DALI_UI_API __declspec(dllexport)
 #else
-/** Visibility attribute to hide declarations */
 #define DALI_UI_API __declspec(dllimport)
+#endif
+
+#if defined(BUILDING_DALI_UI_COMPONENTS)
+#define DALI_UI_COMPONENTS_API __declspec(dllexport)
+#else
+#define DALI_UI_COMPONENTS_API __declspec(dllimport)
+#endif
+#elif defined(__GNUC__) && __GNUC__ >= 4
+#ifndef HIDE_DALI_INTERNALS
+#define DALI_UI_API
+#define DALI_UI_COMPONENTS_API
+#else
+#define DALI_UI_API __attribute__((visibility("default")))
+#define DALI_UI_COMPONENTS_API __attribute__((visibility("default")))
 #endif
 #else
 /** Visibility attribute to show declarations */
 #define DALI_UI_API
-#endif
+#define DALI_UI_COMPONENTS_API
 #endif

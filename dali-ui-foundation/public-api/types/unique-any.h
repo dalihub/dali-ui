@@ -188,7 +188,7 @@ private:
     return typeId;
   }
 
-  static DALI_UI_API Dali::String DemangleTypeName(const char* mangledName);
+  static Dali::String DemangleTypeName(const char* mangledName);
 
   UniqueAny(const UniqueAny&)            = delete;
   UniqueAny& operator=(const UniqueAny&) = delete;

@@ -5,96 +5,12 @@ PROJECT(layoutmodestandalone.example)
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
 
-# Find required packages
-FIND_PACKAGE(PkgConfig REQUIRED)
-PKG_CHECK_MODULES(DALICORE REQUIRED dali2-core)
-PKG_CHECK_MODULES(DALIADAPTOR REQUIRED dali2-adaptor)
-PKG_CHECK_MODULES(DALI_UI_FOUNDATION REQUIRED dali2-ui-foundation)
-PKG_CHECK_MODULES(DALI_UI_COMPONENTS REQUIRED dali2-ui-components)
-
-# Add executables
-SET(EXE_VIEW_NAME view-standalone.example)
-ADD_EXECUTABLE(${EXE_VIEW_NAME} view-standalone-example.cpp)
-
-SET(EXE_ABSOLUTE_NAME absolutelayout-standalone.example)
-ADD_EXECUTABLE(${EXE_ABSOLUTE_NAME} absolutelayout-standalone-example.cpp)
-
-SET(EXE_FLEX_NAME flexlayout-standalone.example)
-ADD_EXECUTABLE(${EXE_FLEX_NAME} flexlayout-standalone-example.cpp)
-
-SET(EXE_GRID_NAME gridlayout-standalone.example)
-ADD_EXECUTABLE(${EXE_GRID_NAME} gridlayout-standalone-example.cpp)
-
-SET(EXE_STACK_NAME stacklayout-standalone.example)
-ADD_EXECUTABLE(${EXE_STACK_NAME} stacklayout-standalone-example.cpp)
-
-SET(ALL_TARGETS
-  ${EXE_VIEW_NAME}
-  ${EXE_ABSOLUTE_NAME}
-  ${EXE_FLEX_NAME}
-  ${EXE_GRID_NAME}
-  ${EXE_STACK_NAME}
-)
-
-# Set output directory
-SET_TARGET_PROPERTIES(${ALL_TARGETS} PROPERTIES
-  RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/bin")
-
-INSTALL(TARGETS ${ALL_TARGETS} RUNTIME DESTINATION)
-
-# Build Options
-SET(DALI_UI_TEST_APP_CFLAGS -fvisibility=hidden -DHIDE_DALI_INTERNALS)
-
-if(CMAKE_BUILD_TYPE MATCHES Debug)
-  MESSAGE(STATUS "CMAKE_BUILD_TYPE: " Debug)
-  SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -g -O0 -DDEBUG_ENABLED)
-ELSE()
-  MESSAGE(STATUS "CMAKE_BUILD_TYPE: " Release)
-  SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Os)
+IF(NOT COMMAND DALI_ADD_SAMPLE)
+  INCLUDE("${CMAKE_CURRENT_LIST_DIR}/../common.cmake")
 ENDIF()
 
-# Add -rdynamic to export main symbol, so dali-loader could run the main.
-SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Werror -Wall -fPIE -rdynamic)
-
-# Remove some warnings that are not useful for our test apps.
-IF( WIN32 )
-  # TODO: Add Windows-specific compiler flags if needed.
-ELSE()
-  INCLUDE(CheckCXXCompilerFlag)
-
-  CHECK_CXX_COMPILER_FLAG( -Wno-unused-const-variable HAVE_NO_UNUSED_CONST_VARIABLE )
-  IF( HAVE_NO_UNUSED_CONST_VARIABLE )
-    SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-const-variable)
-  ENDIF()
-
-  CHECK_CXX_COMPILER_FLAG( -Wno-unused-command-line-argument HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT )
-  IF( HAVE_NO_UNUSED_COMMAND_LINE_ARGUMENT )
-    SET(DALI_UI_TEST_APP_CFLAGS ${DALI_UI_TEST_APP_CFLAGS} -Wno-unused-command-line-argument)
-  ENDIF()
-ENDIF()
-
-# Link libraries, directories, includes, and compiler flags for all targets
-FOREACH(TARGET_NAME ${ALL_TARGETS})
-  TARGET_LINK_LIBRARIES(${TARGET_NAME}
-    ${DALICORE_LIBRARIES}
-    ${DALIADAPTOR_LIBRARIES}
-    ${DALI_UI_FOUNDATION_LIBRARIES}
-    ${DALI_UI_COMPONENTS_LIBRARIES}
-  )
-  TARGET_LINK_DIRECTORIES(${TARGET_NAME} PRIVATE
-    $ENV{DESKTOP_PREFIX}/lib
-  )
-  TARGET_INCLUDE_DIRECTORIES(${TARGET_NAME} PRIVATE
-    ${DALICORE_INCLUDE_DIRS}
-    ${DALIADAPTOR_INCLUDE_DIRS}
-    ${DALI_UI_FOUNDATION_INCLUDE_DIRS}
-    ${DALI_UI_COMPONENTS_INCLUDE_DIRS}
-  )
-  TARGET_COMPILE_OPTIONS(${TARGET_NAME} PRIVATE
-    ${DALICORE_CFLAGS_OTHER}
-    ${DALIADAPTOR_CFLAGS_OTHER}
-    ${DALI_UI_FOUNDATION_CFLAGS_OTHER}
-    ${DALI_UI_COMPONENTS_CFLAGS_OTHER}
-    ${DALI_UI_TEST_APP_CFLAGS}
-  )
-ENDFOREACH()
+DALI_ADD_SAMPLE(view-standalone.example view-standalone-example.cpp)
+DALI_ADD_SAMPLE(absolutelayout-standalone.example absolutelayout-standalone-example.cpp)
+DALI_ADD_SAMPLE(flexlayout-standalone.example flexlayout-standalone-example.cpp)
+DALI_ADD_SAMPLE(gridlayout-standalone.example gridlayout-standalone-example.cpp)
+DALI_ADD_SAMPLE(stacklayout-standalone.example stacklayout-standalone-example.cpp)

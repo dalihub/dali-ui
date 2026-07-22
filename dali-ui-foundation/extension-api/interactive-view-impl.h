@@ -147,7 +147,7 @@ protected:
 
 // Helpers for forwarding methods
 
-inline DALI_UI_API InteractiveViewImpl& GetImpl(InteractiveView& view)
+inline InteractiveViewImpl& GetImpl(InteractiveView& view)
 {
   DALI_ASSERT_ALWAYS(view);
 
@@ -156,7 +156,7 @@ inline DALI_UI_API InteractiveViewImpl& GetImpl(InteractiveView& view)
   return static_cast<InteractiveViewImpl&>(handle);
 }
 
-inline DALI_UI_API const InteractiveViewImpl& GetImpl(const InteractiveView& view)
+inline const InteractiveViewImpl& GetImpl(const InteractiveView& view)
 {
   DALI_ASSERT_ALWAYS(view);
 

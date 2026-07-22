@@ -581,14 +581,14 @@ public: // Not intended for application developers
    *
    * @param[in] implementation The LottieAnimationView implementation
    */
-  explicit DALI_UI_API LottieAnimationView(Integration::LottieAnimationViewImpl& implementation);
+  explicit LottieAnimationView(Integration::LottieAnimationViewImpl& implementation);
 
   /**
    * @brief Allows the creation of this LottieAnimationView from an Internal::CustomActor pointer.
    *
    * @param[in] internal A pointer to the internal CustomActor
    */
-  explicit DALI_UI_API LottieAnimationView(Dali::Internal::CustomActor* internal);
+  explicit LottieAnimationView(Dali::Internal::CustomActor* internal);
   /// @endcond
 
 public:

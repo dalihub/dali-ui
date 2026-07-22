@@ -33,7 +33,7 @@ class DummyComponentImpl;
 /**
  * @brief Dummy
  */
-class DALI_UI_API DummyComponent : public View
+class DALI_UI_COMPONENTS_API DummyComponent : public View
 {
 public:
 public: // Creation & Destruction

@@ -63,14 +63,14 @@ private:
 
 } // namespace Integration
 
-inline DALI_UI_API Integration::AbsoluteLayoutImpl& GetImpl(AbsoluteLayout& layout)
+inline Integration::AbsoluteLayoutImpl& GetImpl(AbsoluteLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   Dali::RefObject& handle = layout.GetImplementation();
   return static_cast<Integration::AbsoluteLayoutImpl&>(handle);
 }
 
-inline const DALI_UI_API Integration::AbsoluteLayoutImpl& GetImpl(const AbsoluteLayout& layout)
+inline const Integration::AbsoluteLayoutImpl& GetImpl(const AbsoluteLayout& layout)
 {
   DALI_ASSERT_ALWAYS(layout);
   const Dali::RefObject& handle = layout.GetImplementation();

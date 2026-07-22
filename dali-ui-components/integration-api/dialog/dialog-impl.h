@@ -38,7 +38,7 @@ namespace Integration
  * StackLayoutManager. Base class for AlertDialogImpl, therefore the constructor
  * is protected and the class is non-final.
  */
-class DALI_UI_API DialogImpl : public ViewImpl
+class DALI_UI_COMPONENTS_API DialogImpl : public ViewImpl
 {
 public:
   /**
