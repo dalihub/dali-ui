@@ -17,6 +17,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/state-effect-impl.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
@@ -25,6 +26,7 @@
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <test-gesture-generator.h>
 
+namespace ExtensionView = Dali::Ui::Extension;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;
@@ -132,7 +134,7 @@ void ProcessTouch(UiTestApplication& application, PointState::Type state, uint32
 
 void SetFocusIndicatedAndRefreshDefaultIndicator(View view)
 {
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
   FocusManager::Get().SetDefaultFocusIndicatorEnabled(true);
 }
 

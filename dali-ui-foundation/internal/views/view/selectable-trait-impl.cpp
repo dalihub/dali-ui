@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/views/view/selectable-trait-impl.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -95,7 +96,7 @@ void SelectableTraitImpl::SetSelectedInternal(bool selected, InputEvent event)
   }
 
   mSelected = selected;
-  Integration::View::SetState(GetImpl(owner), ViewState::SELECTED, selected, event);
+  Extension::SetState(GetImpl(owner), ViewState::SELECTED, selected, event);
 
   // Post-commit, pre-public notification. The internal commit observer lets an internal
   // collaborator (GroupSelectableTraitImpl) observe the already-committed state and fully

@@ -20,6 +20,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/interactive-view-impl.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/reserved-trait-id.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
@@ -30,6 +31,7 @@
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <test-gesture-generator.h>
 
+namespace ExtensionView = Dali::Ui::Extension;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;
@@ -263,7 +265,7 @@ void ProcessTouch(UiTestApplication& application, PointState::Type state, uint32
 void SetFocusIndicated(View view)
 {
   FocusManager::Get().SetCurrentFocusView(view);
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 }
 
 constexpr auto OVERLAY_VISUAL_RANGE = Visual::ContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT;
@@ -1148,7 +1150,7 @@ int UtcDaliInteractiveViewOverlayEffectFocusIndicatedAndPressedP(void)
   DALI_TEST_CHECK(!view.GetState().Contains(ViewState::FOCUS_INDICATED));
   DALI_TEST_EQUALS(view.GetVisualCount(OVERLAY_VISUAL_RANGE), 0u, TEST_LOCATION);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 
   DALI_TEST_EQUALS(view.GetVisualCount(OVERLAY_VISUAL_RANGE), 1u, TEST_LOCATION);
   ColorVisual overlay = GetOverlayVisual(view);
@@ -1181,7 +1183,7 @@ int UtcDaliInteractiveViewOverlayEffectDisabledClearsFocusIndicatedEffectP(void)
   DALI_TEST_CHECK(!view.GetState().Contains(ViewState::FOCUS_INDICATED));
   DALI_TEST_EQUALS(view.GetVisualCount(OVERLAY_VISUAL_RANGE), 0u, TEST_LOCATION);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::FOCUS_INDICATED));
   DALI_TEST_EQUALS(view.GetVisualCount(OVERLAY_VISUAL_RANGE), 1u, TEST_LOCATION);
@@ -1263,12 +1265,12 @@ int UtcDaliInteractiveViewOverlayEffectPseudoDisabledOpacityP(void)
   view.SetStateEffect(OverlayEffect::Plain());
   view.SetOpacity(0.6f);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, true);
 
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::PSEUDO_DISABLED));
   DALI_TEST_EQUALS(view.GetOpacity(), 0.6f * OVERLAY_DISABLED_OPACITY_FACTOR, 0.001f, TEST_LOCATION);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, false);
+  ExtensionView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, false);
 
   DALI_TEST_CHECK(!view.GetState().Contains(ViewState::PSEUDO_DISABLED));
   DALI_TEST_EQUALS(view.GetOpacity(), 0.6f, 0.001f, TEST_LOCATION);
@@ -1283,14 +1285,14 @@ int UtcDaliInteractiveViewOverlayEffectAnyDisabledOpacityRestoresWhenAllDisabled
   view.SetStateEffect(OverlayEffect::Plain());
   view.SetOpacity(0.5f);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, true);
   view.SetEnabled(false);
 
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::PSEUDO_DISABLED));
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::DISABLED));
   DALI_TEST_EQUALS(view.GetOpacity(), 0.5f * OVERLAY_DISABLED_OPACITY_FACTOR, 0.001f, TEST_LOCATION);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, false);
+  ExtensionView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, false);
 
   DALI_TEST_CHECK(!view.GetState().Contains(ViewState::PSEUDO_DISABLED));
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::DISABLED));
@@ -1317,7 +1319,7 @@ int UtcDaliInteractiveViewStateEffectNoneDoesNotApplyDisabledOpacityP(void)
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::DISABLED));
   DALI_TEST_EQUALS(view.GetOpacity(), 0.75f, 0.001f, TEST_LOCATION);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PSEUDO_DISABLED, true);
 
   DALI_TEST_CHECK(view.GetState().Contains(ViewState::PSEUDO_DISABLED));
   DALI_TEST_EQUALS(view.GetOpacity(), 0.75f, 0.001f, TEST_LOCATION);

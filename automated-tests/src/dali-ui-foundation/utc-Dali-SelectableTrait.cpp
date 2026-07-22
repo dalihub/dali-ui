@@ -20,6 +20,7 @@
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/extension-api/selectable-view-impl.h>
@@ -29,6 +30,7 @@
 #include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/events/touch-event-integ.h>
 
+namespace ExtensionView = Dali::Ui::Extension;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;
@@ -406,7 +408,7 @@ int UtcDaliSelectableTraitToggleByClickP(void)
   InputEvent stateCause;
   int        stateChangedCount = 0;
   ConnectionTracker tracker;
-  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
     if(e.Changed(ViewState::SELECTED))
     {
       ++stateChangedCount;

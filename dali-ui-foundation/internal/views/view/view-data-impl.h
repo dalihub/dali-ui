@@ -363,26 +363,26 @@ public:
   void SetState(ViewState state, bool on, InputEvent cause);
 
   /**
-   * @brief Registers a named state-change handler.
-   * @param[in] id       Unique identifier for this handler
+   * @brief Registers a named state observer.
+   * @param[in] id       Unique identifier for this observer
    * @param[in] tracker  ConnectionTrackerInterface for lifetime management
    * @param[in] callback Callback with signature void(View, const StateEvent&)
    */
-  void SetNamedStateHandler(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+  void SetNamedStateObserver(const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
 
   /**
-   * @brief Removes a named state-change handler.
-   * @param[in] id The handler identifier to remove
-   * @return True if a handler was found and removed
+   * @brief Removes a named state observer.
+   * @param[in] id The observer identifier to remove
+   * @return True if an observer was found and removed
    */
-  bool UnsetStateHandler(const Dali::String& id);
+  bool UnsetNamedStateObserver(const Dali::String& id);
 
   /**
-   * @brief Removes a named state-change handler only if it is not currently being processed.
-   * @param[in] id The handler identifier to remove
-   * @return True if removed, false if currently processing or not found
+   * @brief Removes a named state observer unless its callback is currently executing.
+   * @param[in] id The observer identifier to remove
+   * @return True if removed; false if currently executing or not found
    */
-  bool UnsetStateHandlerWhenNotProcessing(const Dali::String& id);
+  bool UnsetNamedStateObserverIfNotExecuting(const Dali::String& id);
 
   /**
    * @brief Returns the core interaction trait object pointer (may be null).

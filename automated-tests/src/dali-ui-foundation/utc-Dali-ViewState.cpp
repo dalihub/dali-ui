@@ -26,8 +26,10 @@
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
+namespace ExtensionView = Dali::Ui::Extension;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;
@@ -36,7 +38,7 @@ using namespace Dali::Ui;
 namespace
 {
 
-// A record of one StateChangedSignal (or WhenStateChanged) callback invocation.
+// A record of one StateChangedSignal (or SetNamedStateObserver) callback invocation.
 struct CallRecord
 {
   std::string tag;    ///< Which handler was called (for ordering verification)
@@ -130,14 +132,14 @@ int UtcDaliViewStateBasicDispatchP(void)
   InputEvent receivedCause;
   int        callCount = 0;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
     ++callCount;
     receivedPrev = e.GetPrev();
     receivedCur  = e.GetCurrent();
     receivedCause = e.GetCause();
   });
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
@@ -159,15 +161,15 @@ int UtcDaliViewStateNoDispatchUnchangedN(void)
   ConnectionTracker tracker;
   int               callCount = 0;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent&) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "observer", &tracker, [&](View, const StateEvent&) {
     ++callCount;
   });
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
 
   // Setting the same state again must not dispatch
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
   DALI_TEST_EQUALS(callCount, 1, TEST_LOCATION);
 
   END_TEST;
@@ -199,20 +201,20 @@ int UtcDaliViewStateDeferredNotificationOrderP(void)
 
   std::vector<CallRecord> log;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "h1", &tracker, [&](View, const StateEvent& e) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "h1", &tracker, [&](View, const StateEvent& e) {
     log.push_back({"h1", e.GetPrev(), e.GetCurrent()});
   });
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "h2", &tracker, [&](View v, const StateEvent& e) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "h2", &tracker, [&](View v, const StateEvent& e) {
     log.push_back({"h2", e.GetPrev(), e.GetCurrent()});
     // Trigger a second state change from inside the handler
     if(e.Added(ViewState::FOCUSED))
     {
-      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
+      ExtensionView::SetState(GetImpl(v), ViewState::PRESSED, true);
     }
   });
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "h3", &tracker, [&](View, const StateEvent& e) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "h3", &tracker, [&](View, const StateEvent& e) {
     log.push_back({"h3", e.GetPrev(), e.GetCurrent()});
   });
 
@@ -220,7 +222,7 @@ int UtcDaliViewStateDeferredNotificationOrderP(void)
   const ViewState stateB = ViewState::FOCUSED;
   const ViewState stateC = ViewState::FOCUSED + ViewState::PRESSED;
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   // Expect 6 records: 3 for A→B, then 3 for B→C (in registration order)
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 6, TEST_LOCATION);
@@ -272,7 +274,7 @@ int UtcDaliViewStateDeferredSignalOrderP(void)
     log.push_back({"signal-1", e.GetPrev(), e.GetCurrent()});
     if(e.Added(ViewState::FOCUSED))
     {
-      IntegrationView::SetState(GetImpl(v), ViewState::PRESSED, true);
+      ExtensionView::SetState(GetImpl(v), ViewState::PRESSED, true);
     }
   });
 
@@ -280,7 +282,7 @@ int UtcDaliViewStateDeferredSignalOrderP(void)
     log.push_back({"signal-2", e.GetPrev(), e.GetCurrent()});
   });
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   // signal-1(A→B) → signal-2(A→B) → signal-1(B→C) → signal-2(B→C)
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 4, TEST_LOCATION);
@@ -365,10 +367,10 @@ int UtcDaliViewStateDisabledClearsPressedP(void)
   UiTestApplication application;
   View            view = CreateView(application);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PRESSED, true);
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PRESSED));
 
-  IntegrationView::SetState(GetImpl(view), ViewState::DISABLED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::DISABLED, true);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::DISABLED));
   DALI_TEST_CHECK(!GetImpl(view).GetState().Contains(ViewState::PRESSED));
@@ -411,14 +413,14 @@ int UtcDaliViewStateDisabledClearsPressedSingleEventP(void)
   View              view = CreateView(application);
   ConnectionTracker tracker;
 
-  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
-  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
     log.push_back({"observer", e.GetPrev(), e.GetCurrent(), e.GetCause()});
   });
 
-  IntegrationView::SetState(GetImpl(view), ViewState::DISABLED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::DISABLED, true);
 
   // Exactly one notification: [Pressed] -> [Disabled]
   DALI_TEST_EQUALS(static_cast<int>(log.size()), 1, TEST_LOCATION);
@@ -445,7 +447,7 @@ int UtcDaliViewStateDisabledClearsFocusedAndPressedP(void)
   view.AsInteractive();
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
-  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::PRESSED));
@@ -471,7 +473,7 @@ int UtcDaliViewStateDisabledClearsInteractiveTraitPressedP(void)
   ConnectionTracker tracker;
 
   InteractiveTrait trait = view.AsInteractive();
-  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
   view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
@@ -502,8 +504,8 @@ int UtcDaliViewStatePseudoDisabledClearsPressedKeepsFocusedP(void)
   ConnectionTracker tracker;
 
   InteractiveTrait trait = view.AsInteractive();
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
-  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PRESSED, true);
 
   std::vector<CallRecord> log;
   view.StateChangedSignal().Connect(&tracker, [&](View, const StateEvent& e) {
@@ -537,7 +539,7 @@ int UtcDaliViewStatePseudoDisabledKeepsFocusedN(void)
   View            view = CreateView(application);
 
   view.AsInteractive();
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   InteractiveTrait trait = view.AsInteractive();
   trait.SetPseudoDisabled(true);
@@ -632,7 +634,7 @@ int UtcDaliViewIsEffectivelyFocusedSelfP(void)
 
   DALI_TEST_CHECK(!view.IsEffectivelyFocused());
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_CHECK(view.IsEffectivelyFocused());
 
@@ -651,7 +653,7 @@ int UtcDaliViewIsEffectivelyFocusedAncestorP(void)
 
   DALI_TEST_CHECK(!child.IsEffectivelyFocused());
 
-  IntegrationView::SetState(GetImpl(parent), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(parent), ViewState::FOCUSED, true);
 
   DALI_TEST_CHECK(child.IsEffectivelyFocused());
   DALI_TEST_CHECK(!GetImpl(child).GetState().Contains(ViewState::FOCUSED)); // own state unchanged
@@ -687,7 +689,7 @@ int UtcDaliViewStateFocusedViaFocusManagerP(void)
 
   ViewState receivedCur;
   int     callCount = 0;
-  IntegrationView::WhenStateChanged(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "observer", &tracker, [&](View, const StateEvent& e) {
     ++callCount;
     receivedCur = e.GetCurrent();
   });
@@ -717,7 +719,7 @@ int UtcDaliViewStateFocusIndicatedProgrammaticCarryP(void)
   view1.SetFocusable(true);
   view2.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view1);
-  IntegrationView::SetState(GetImpl(view1), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view1), ViewState::FOCUS_INDICATED, true);
 
   DALI_TEST_CHECK(GetImpl(view1).GetState().Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(GetImpl(view1).GetState().Contains(ViewState::FOCUS_INDICATED));
@@ -747,7 +749,7 @@ int UtcDaliViewStateFocusIndicatedClearedByTouchOutsideP(void)
   touchReceiver.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(220.0f, 220.0f), 100u));
 
@@ -767,7 +769,7 @@ int UtcDaliViewStateFocusIndicatedClearedByTouchOnFocusedViewP(void)
   view.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
 
@@ -789,7 +791,7 @@ int UtcDaliViewStateFocusIndicatedClearedByTouchOnFocusedDescendantP(void)
   child.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   parent.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(parent);
-  IntegrationView::SetState(GetImpl(parent), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(parent), ViewState::FOCUS_INDICATED, true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
 
@@ -813,7 +815,7 @@ int UtcDaliViewStateFocusIndicatedPreservedByTouchOutsideWhenDisabledP(void)
   view.SetFocusable(true);
   focusManager.SetClearFocusIndicationOnTouch(false);
   focusManager.SetCurrentFocusView(view);
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(220.0f, 220.0f), 100u));
 
@@ -835,7 +837,7 @@ int UtcDaliViewStateFocusIndicatedPreservedByHoverOutsideByDefaultP(void)
 
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 
   application.ProcessEvent(GenerateHover(PointState::STARTED, Vector2(300.0f, 300.0f), 100u));
 
@@ -855,7 +857,7 @@ int UtcDaliViewStateFocusIndicatedClearedByHoverOutsideWhenEnabledP(void)
   view.SetFocusable(true);
   focusManager.SetClearFocusIndicationOnHover(true);
   focusManager.SetCurrentFocusView(view);
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
 
   application.ProcessEvent(GenerateHover(PointState::STARTED, Vector2(300.0f, 300.0f), 100u));
 
@@ -881,7 +883,7 @@ int UtcDaliViewStateFocusIndicatedRestoredByKeyP(void)
   touchReceiver.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
   view.SetFocusable(true);
   FocusManager::Get().SetCurrentFocusView(view);
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, true);
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(220.0f, 220.0f), 100u));
 
   DALI_TEST_CHECK(GetImpl(view).GetState().Contains(ViewState::FOCUSED));
@@ -991,7 +993,7 @@ int UtcDaliViewStateTouchFocusableClearsFocusIndicationOnDownAndFocusesOnRelease
   view2.SetFocusable(true);
   view2.SetFocusOnTouchEnabled(true);
   FocusManager::Get().SetCurrentFocusView(view1);
-  IntegrationView::SetState(GetImpl(view1), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(view1), ViewState::FOCUS_INDICATED, true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(220.0f, 220.0f), 100u));
 
@@ -1024,7 +1026,7 @@ int UtcDaliViewStateTouchFocusableDescendantClearsAncestorFocusIndicationAndFocu
   child.SetFocusable(true);
   child.SetFocusOnTouchEnabled(true);
   FocusManager::Get().SetCurrentFocusView(parent);
-  IntegrationView::SetState(GetImpl(parent), ViewState::FOCUS_INDICATED, true);
+  ExtensionView::SetState(GetImpl(parent), ViewState::FOCUS_INDICATED, true);
 
   application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 20.0f), 100u));
 

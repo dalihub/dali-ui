@@ -68,7 +68,7 @@ bool StateHandlerTrait::Unset(const std::string& id)
   return true;
 }
 
-bool StateHandlerTrait::UnsetWhenNotProcessing(const std::string& id)
+bool StateHandlerTrait::UnsetIfNotExecuting(const std::string& id)
 {
   if(mProcessingId == id)
   {

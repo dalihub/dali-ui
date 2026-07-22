@@ -22,6 +22,7 @@
 #include <dali/integration-api/input-options.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/interactive-trait/pending-press-manager.h>
@@ -30,6 +31,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
+namespace ExtensionView   = Dali::Ui::Extension;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali::Ui::Internal
@@ -114,7 +116,7 @@ void InteractiveTraitImpl::SetPseudoDisabled(bool pseudoDisabled)
   View owner = mOwner.GetHandle();
   if(owner)
   {
-    IntegrationView::SetState(GetImpl(owner), ViewState::PSEUDO_DISABLED, pseudoDisabled);
+    ExtensionView::SetState(GetImpl(owner), ViewState::PSEUDO_DISABLED, pseudoDisabled);
   }
 
   if(mPseudoDisabled && mPressed)
@@ -438,7 +440,7 @@ void InteractiveTraitImpl::SetPressedInternal(bool value, InputEvent event)
   View owner = mOwner.GetHandle();
   if(owner)
   {
-    IntegrationView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
+    ExtensionView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
   }
 
   OnPressedChanged(owner, event);

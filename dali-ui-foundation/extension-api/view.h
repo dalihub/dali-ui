@@ -18,14 +18,120 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/views/view.h>
+
+// EXTERNAL INCLUDES
+#include <dali/public-api/signals/callback.h>
+
+#include <type_traits>
+#include <utility>
 
 namespace Dali
 {
 namespace Ui
 {
+class ViewImpl;
+
 namespace Extension
 {
+namespace Internal
+{
+/**
+ * @cond INTERNAL
+ */
+/**
+ * @brief Registers or replaces a named observer using an owned callback.
+ *
+ * This function is an ABI bridge for the public SetNamedStateObserver()
+ * templates and is not intended to be called directly.
+ *
+ * @param[in] viewImpl The view implementation
+ * @param[in] id Unique identifier for this observer
+ * @param[in] tracker Connection tracker for automatic lifetime management
+ * @param[in] callback Callback to invoke with void(View, const StateEvent&)
+ */
+DALI_UI_API void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback);
+/**
+ * @endcond
+ */
+} // namespace Internal
+
+/**
+ * @brief Updates a state bit in the view's ViewState and emits StateChangedSignal.
+ *
+ * @param[in] viewImpl The view implementation
+ * @param[in] state The state to set or clear
+ * @param[in] on True to add the state, false to remove it
+ * @param[in] cause Input event that triggered the change; leave default if programmatic
+ */
+DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause = InputEvent::Programmatic());
+
+/**
+ * @brief Registers or replaces a named state observer using a member function.
+ *
+ * @param[in] viewImpl The view implementation
+ * @param[in] id Unique identifier for this observer
+ * @param[in] object Object whose member function will be called
+ * @param[in] function Member function with signature void(View, const StateEvent&)
+ * @warning Do not replace an observer from inside the callback registered with
+ * the same @a id.
+ */
+template<class X>
+void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, X* object, void (X::*function)(Ui::View, const StateEvent&))
+{
+  if(object && function)
+  {
+    Internal::SetNamedStateObserver(viewImpl, id, object, MakeCallback(object, function));
+  }
+}
+
+/**
+ * @brief Registers or replaces a named state observer using a callable.
+ *
+ * @param[in] viewImpl The view implementation
+ * @param[in] id Unique identifier for this observer
+ * @param[in] tracker Connection tracker for automatic lifetime management
+ * @param[in] function Callable with signature void(View, const StateEvent&)
+ * @warning Do not replace an observer from inside the callback registered with
+ * the same @a id.
+ */
+template<typename F>
+void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, F&& function)
+{
+  if(tracker)
+  {
+    Internal::SetNamedStateObserver(viewImpl, id, tracker, new CallbackFunctor2<std::decay_t<F>, Ui::View, const StateEvent&>(std::forward<F>(function)));
+  }
+}
+
+/**
+ * @brief Removes a named state observer.
+ *
+ * @param[in] viewImpl The view implementation
+ * @param[in] id The observer identifier to remove
+ * @return True if the observer was found and removed
+ * @warning Do not call this function from the callback registered with the
+ * same @a id. Use UnsetNamedStateObserverIfNotExecuting() in code that may run
+ * from that callback.
+ */
+DALI_UI_API bool UnsetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id);
+
+/**
+ * @brief Removes a named state observer unless that same observer's callback
+ * is currently executing.
+ *
+ * This function may remove a different observer while state observers are
+ * being dispatched. Only execution of the callback registered with the same
+ * @a id prevents removal.
+ *
+ * @param[in] viewImpl The view implementation
+ * @param[in] id The observer identifier to remove
+ * @return True if the observer was removed; false if it was not found or its
+ * callback is currently executing
+ */
+DALI_UI_API bool UnsetNamedStateObserverIfNotExecuting(ViewImpl& viewImpl, const Dali::String& id);
+
 /**
  * @brief Requests accessibility highlight for the given View.
  *

@@ -21,8 +21,10 @@
 #include <dali.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
+namespace ExtensionView = Dali::Ui::Extension;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;
@@ -120,20 +122,20 @@ void utc_dali_viewstatehandler_cleanup(void)
 }
 
 // ============================================================================
-// WhenStateChanged — basic registration and dispatch (member function, #2)
+// SetNamedStateObserver — basic registration and dispatch (member function, #2)
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedMemberFunctionP(void)
+int UtcDaliViewSetNamedStateObserverMemberFunctionP(void)
 {
   UiTestApplication    application;
   View               view = CreateView(application);
   StateChangedData   data;
   StateHandlerTracker tracker(data);
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "TestHandler", &tracker, &StateHandlerTracker::HandleStateChanged);
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "TestHandler", &tracker, &StateHandlerTracker::HandleStateChanged);
 
   // Trigger a state change
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(data.view == view);
@@ -143,19 +145,19 @@ int UtcDaliViewWhenStateChangedMemberFunctionP(void)
 }
 
 // ============================================================================
-// WhenStateChanged — lambda form (#4)
+// SetNamedStateObserver — lambda form (#4)
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedLambdaP(void)
+int UtcDaliViewSetNamedStateObserverLambdaP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   StateChangedData data;
   ConnectionTracker tracker;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "TestHandler", &tracker, StateChangedFunctor(data));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "TestHandler", &tracker, StateChangedFunctor(data));
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
   DALI_TEST_CHECK(ViewState::FOCUSED.WasAdded(data.prev, data.cur));
@@ -164,19 +166,19 @@ int UtcDaliViewWhenStateChangedLambdaP(void)
 }
 
 // ============================================================================
-// WhenStateChanged — method chaining returns *this
+// SetNamedStateObserver — method chaining returns *this
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedChainingP(void)
+int UtcDaliViewSetNamedStateObserverChainingP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   ConnectionTracker tracker;
   StateChangedData data;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "Handler1", &tracker, StateChangedFunctor(data));
-  IntegrationView::WhenStateChanged(GetImpl(view), "Handler2", &tracker, StateChangedFunctor(data));
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "Handler1", &tracker, StateChangedFunctor(data));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "Handler2", &tracker, StateChangedFunctor(data));
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   // Both handlers should fire
   DALI_TEST_EQUALS(data.callCount, 2, TEST_LOCATION);
@@ -185,21 +187,21 @@ int UtcDaliViewWhenStateChangedChainingP(void)
 }
 
 // ============================================================================
-// WhenStateChanged — same ID replaces previous handler
+// SetNamedStateObserver — same ID replaces previous handler
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedReplaceP(void)
+int UtcDaliViewSetNamedStateObserverReplaceP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   ConnectionTracker tracker;
   StateChangedData data1, data2;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data1));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data1));
   // Register with the same ID — should replace the first
-  IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data2));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data2));
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data1.callCount, 0, TEST_LOCATION); // old handler NOT called
   DALI_TEST_EQUALS(data2.callCount, 1, TEST_LOCATION); // new handler called
@@ -208,21 +210,21 @@ int UtcDaliViewWhenStateChangedReplaceP(void)
 }
 
 // ============================================================================
-// WhenStateChanged — no dispatch when state does not change
+// SetNamedStateObserver — no dispatch when state does not change
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedNoChangeN(void)
+int UtcDaliViewSetNamedStateObserverNoChangeN(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   ConnectionTracker tracker;
   StateChangedData data;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
 
   // Set same state twice — second call should not dispatch
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
 
@@ -230,57 +232,57 @@ int UtcDaliViewWhenStateChangedNoChangeN(void)
 }
 
 // ============================================================================
-// UnsetStateHandler — removes a handler by ID
+// UnsetNamedStateObserver — removes a handler by ID
 // ============================================================================
 
-int UtcDaliViewUnsetStateHandlerP(void)
+int UtcDaliViewUnsetNamedStateObserverP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   ConnectionTracker tracker;
   StateChangedData data;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
 
-  bool removed = IntegrationView::UnsetStateHandler(GetImpl(view), "MyHandler");
+  bool removed = ExtensionView::UnsetNamedStateObserver(GetImpl(view), "MyHandler");
   DALI_TEST_CHECK(removed);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION); // not called after removal
 
   END_TEST;
 }
 
-int UtcDaliViewUnsetStateHandlerNotFoundN(void)
+int UtcDaliViewUnsetNamedStateObserverNotFoundN(void)
 {
   UiTestApplication application;
   View            view = CreateView(application);
 
   // No handlers registered — should return false
-  bool removed = IntegrationView::UnsetStateHandler(GetImpl(view), "NonExistent");
+  bool removed = ExtensionView::UnsetNamedStateObserver(GetImpl(view), "NonExistent");
   DALI_TEST_CHECK(!removed);
 
   END_TEST;
 }
 
 // ============================================================================
-// UnsetStateHandler — only removes the specified ID, others intact
+// UnsetNamedStateObserver — only removes the specified ID, others intact
 // ============================================================================
 
-int UtcDaliViewUnsetStateHandlerSeleciveP(void)
+int UtcDaliViewUnsetNamedStateObserverSeleciveP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   ConnectionTracker tracker;
   StateChangedData dataA, dataB;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "HandlerA", &tracker, StateChangedFunctor(dataA));
-  IntegrationView::WhenStateChanged(GetImpl(view), "HandlerB", &tracker, StateChangedFunctor(dataB));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "HandlerA", &tracker, StateChangedFunctor(dataA));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "HandlerB", &tracker, StateChangedFunctor(dataB));
 
-  IntegrationView::UnsetStateHandler(GetImpl(view), "HandlerA");
+  ExtensionView::UnsetNamedStateObserver(GetImpl(view), "HandlerA");
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(dataA.callCount, 0, TEST_LOCATION); // removed
   DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION); // still active
@@ -289,10 +291,10 @@ int UtcDaliViewUnsetStateHandlerSeleciveP(void)
 }
 
 // ============================================================================
-// UnsetStateHandlerWhenNotProcessing — skip removal during own handler
+// UnsetNamedStateObserverIfNotExecuting — skip removal during own handler
 // ============================================================================
 
-int UtcDaliViewUnsetStateHandlerWhenNotProcessingSkipsP(void)
+int UtcDaliViewUnsetNamedStateObserverIfNotExecutingSkipsP(void)
 {
   UiTestApplication  application;
   View             view    = CreateView(application);
@@ -300,39 +302,39 @@ int UtcDaliViewUnsetStateHandlerWhenNotProcessingSkipsP(void)
   bool             handlerCalled = false;
   bool             unsetResult   = true; // intentionally set to true to verify it becomes false
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "BackgroundColor", &tracker, [&](View v, const StateEvent&) {
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "BackgroundColor", &tracker, [&](View v, const StateEvent&) {
     handlerCalled = true;
     // Try to unset self during processing — should be skipped
-    unsetResult = IntegrationView::UnsetStateHandlerWhenNotProcessing(GetImpl(v), "BackgroundColor");
+    unsetResult = ExtensionView::UnsetNamedStateObserverIfNotExecuting(GetImpl(v), "BackgroundColor");
   });
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_CHECK(handlerCalled);
   DALI_TEST_CHECK(!unsetResult); // returns false because it is processing
 
   // Handler should still be active after skipped removal
   handlerCalled = false;
-  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PRESSED, true);
   DALI_TEST_CHECK(handlerCalled);
 
   END_TEST;
 }
 
-int UtcDaliViewUnsetStateHandlerWhenNotProcessingSucceedsP(void)
+int UtcDaliViewUnsetNamedStateObserverIfNotExecutingSucceedsP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   ConnectionTracker tracker;
   StateChangedData data;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "BackgroundColor", &tracker, StateChangedFunctor(data));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "BackgroundColor", &tracker, StateChangedFunctor(data));
 
   // Called from outside a handler — should succeed
-  bool removed = IntegrationView::UnsetStateHandlerWhenNotProcessing(GetImpl(view), "BackgroundColor");
+  bool removed = ExtensionView::UnsetNamedStateObserverIfNotExecuting(GetImpl(view), "BackgroundColor");
   DALI_TEST_CHECK(removed);
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
 
   END_TEST;
@@ -342,7 +344,7 @@ int UtcDaliViewUnsetStateHandlerWhenNotProcessingSucceedsP(void)
 // Auto-disconnect when tracker is destroyed
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
+int UtcDaliViewSetNamedStateObserverAutoDisconnectP(void)
 {
   UiTestApplication application;
   View            view = CreateView(application);
@@ -350,9 +352,9 @@ int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
 
   {
     ConnectionTracker tracker;
-    IntegrationView::WhenStateChanged(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
+    ExtensionView::SetNamedStateObserver(GetImpl(view), "MyHandler", &tracker, StateChangedFunctor(data));
 
-    IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+    ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
     DALI_TEST_EQUALS(data.callCount, 1, TEST_LOCATION);
     data.Reset();
 
@@ -360,7 +362,7 @@ int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
   }
 
   // After tracker destroyed, handler should no longer fire
-  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PRESSED, true);
   DALI_TEST_EQUALS(data.callCount, 0, TEST_LOCATION);
 
   END_TEST;
@@ -370,21 +372,21 @@ int UtcDaliViewWhenStateChangedAutoDisconnectP(void)
 // Multiple state changes — prev/cur correctness
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedPrevCurP(void)
+int UtcDaliViewSetNamedStateObserverPrevCurP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   ConnectionTracker tracker;
   StateChangedData data;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "Observer", &tracker, StateChangedFunctor(data));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "Observer", &tracker, StateChangedFunctor(data));
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
   DALI_TEST_CHECK(!data.prev.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(data.cur.Contains(ViewState::FOCUSED));
   data.Reset();
 
-  IntegrationView::SetState(GetImpl(view), ViewState::PRESSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::PRESSED, true);
   DALI_TEST_CHECK(data.prev.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(data.cur.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(data.cur.Contains(ViewState::PRESSED));
@@ -396,18 +398,18 @@ int UtcDaliViewWhenStateChangedPrevCurP(void)
 // Multiple handlers with different IDs all called on state change
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedMultipleHandlersP(void)
+int UtcDaliViewSetNamedStateObserverMultipleHandlersP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
   ConnectionTracker tracker;
   StateChangedData dataA, dataB, dataC;
 
-  IntegrationView::WhenStateChanged(GetImpl(view), "A", &tracker, StateChangedFunctor(dataA));
-  IntegrationView::WhenStateChanged(GetImpl(view), "B", &tracker, StateChangedFunctor(dataB));
-  IntegrationView::WhenStateChanged(GetImpl(view), "C", &tracker, StateChangedFunctor(dataC));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "A", &tracker, StateChangedFunctor(dataA));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "B", &tracker, StateChangedFunctor(dataB));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "C", &tracker, StateChangedFunctor(dataC));
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(dataA.callCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(dataB.callCount, 1, TEST_LOCATION);
@@ -420,7 +422,7 @@ int UtcDaliViewWhenStateChangedMultipleHandlersP(void)
 // Named handlers and StateChangedSignal both fire
 // ============================================================================
 
-int UtcDaliViewWhenStateChangedAndSignalBothFireP(void)
+int UtcDaliViewSetNamedStateObserverAndSignalBothFireP(void)
 {
   UiTestApplication  application;
   View             view = CreateView(application);
@@ -428,11 +430,11 @@ int UtcDaliViewWhenStateChangedAndSignalBothFireP(void)
   StateChangedData namedData, signalData;
 
   // Named handler
-  IntegrationView::WhenStateChanged(GetImpl(view), "Observer", &tracker, StateChangedFunctor(namedData));
+  ExtensionView::SetNamedStateObserver(GetImpl(view), "Observer", &tracker, StateChangedFunctor(namedData));
   // Anonymous signal
   view.StateChangedSignal().Connect(&tracker, StateChangedFunctor(signalData));
 
-  IntegrationView::SetState(GetImpl(view), ViewState::FOCUSED, true);
+  ExtensionView::SetState(GetImpl(view), ViewState::FOCUSED, true);
 
   DALI_TEST_EQUALS(namedData.callCount, 1, TEST_LOCATION);
   DALI_TEST_EQUALS(signalData.callCount, 1, TEST_LOCATION);

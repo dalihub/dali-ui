@@ -64,7 +64,7 @@ public:
    * @param[in] id       Unique string identifier for this handler
    * @param[in] tracker  ConnectionTrackerInterface for automatic lifetime management
    * @param[in] callback Callback to invoke. Ownership is taken.
-   *                     Signature: void(View, ViewState, ViewState)
+   *                     Signature: void(View, const StateEvent&)
    */
   void Set(const std::string& id, ConnectionTrackerInterface* tracker, CallbackBase* callback);
 
@@ -77,20 +77,20 @@ public:
   bool Unset(const std::string& id);
 
   /**
-   * @brief Removes a named handler only if it is not currently being processed.
+   * @brief Removes a named handler unless that same handler's callback is executing.
    *
    * Prevents re-entrant removal when a handler's own callback triggers
    * code that would unset the same handler.
    *
    * @param[in] id The handler identifier
-   * @return True if removed, false if currently processing or not found
+   * @return True if removed; false if its callback is executing or it was not found
    */
-  bool UnsetWhenNotProcessing(const std::string& id);
+  bool UnsetIfNotExecuting(const std::string& id);
 
   /**
    * @brief Invokes all registered handlers.
    *
-   * Called by Integration::View::SetState when the view's ViewState changes.
+   * Called by Extension::SetState when the view's ViewState changes.
    *
    * @param[in] view The owner view
    * @param[in] prev The previous ViewState

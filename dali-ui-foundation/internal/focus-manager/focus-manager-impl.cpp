@@ -37,6 +37,7 @@
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
@@ -49,6 +50,7 @@
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
+namespace ExtensionView   = Dali::Ui::Extension;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali
@@ -662,7 +664,7 @@ void FocusManager::SetFocusIndicated(View view, bool indicated, InputEvent cause
   if(view)
   {
     const bool focused = GetImpl(view).GetState().Contains(ViewState::FOCUSED);
-    IntegrationView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, indicated && focused, cause);
+    ExtensionView::SetState(GetImpl(view), ViewState::FOCUS_INDICATED, indicated && focused, cause);
     RefreshFocusIndicator(view);
   }
 }

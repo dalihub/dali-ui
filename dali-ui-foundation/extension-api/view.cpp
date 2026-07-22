@@ -18,12 +18,12 @@
 // CLASS HEADER
 #include <dali-ui-foundation/extension-api/view.h>
 
+// EXTERNAL INCLUDES
+#include <dali/public-api/actors/actor.h>
+
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
-
-// EXTERNAL INCLUDES
-#include <dali/public-api/actors/actor.h>
 
 namespace Dali
 {
@@ -31,16 +31,39 @@ namespace Ui
 {
 namespace Extension
 {
+namespace Internal
+{
+void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
+{
+  Ui::Internal::ViewDataImpl::Get(viewImpl).SetNamedStateObserver(id, tracker, callback);
+}
+} // namespace Internal
+
 bool GrabAccessibilityHighlight(View view)
 {
-  auto accessible = Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
+  auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
   return DALI_LIKELY(accessible) && accessible->GrabHighlight();
 }
 
 bool ClearAccessibilityHighlight(View view)
 {
-  auto accessible = Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
+  auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
   return DALI_LIKELY(accessible) && accessible->ClearHighlight();
+}
+
+void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause)
+{
+  Ui::Internal::ViewDataImpl::Get(viewImpl).SetState(state, on, cause);
+}
+
+bool UnsetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id)
+{
+  return Ui::Internal::ViewDataImpl::Get(viewImpl).UnsetNamedStateObserver(id);
+}
+
+bool UnsetNamedStateObserverIfNotExecuting(ViewImpl& viewImpl, const Dali::String& id)
+{
+  return Ui::Internal::ViewDataImpl::Get(viewImpl).UnsetNamedStateObserverIfNotExecuting(id);
 }
 
 void SetPositionX(View view, float x)
