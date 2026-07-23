@@ -57,22 +57,22 @@ void InteractiveViewImpl::OnInitialize()
   EnsureInteractiveTrait();
 }
 
-Signal<void(View, bool, InputEvent)>& InteractiveViewImpl::PressedChangedSignal()
+Signal<void(Ui::View, bool, InputEvent)>& InteractiveViewImpl::PressedChangedSignal()
 {
   return GetInteractiveTrait().PressedChangedSignal();
 }
 
-Signal<void(View, bool)>& InteractiveViewImpl::PseudoDisabledChangedSignal()
+Signal<void(Ui::View, bool)>& InteractiveViewImpl::PseudoDisabledChangedSignal()
 {
   return GetInteractiveTrait().PseudoDisabledChangedSignal();
 }
 
-Signal<void(View, InputEvent)>& InteractiveViewImpl::ClickedSignal()
+Signal<void(Ui::View, InputEvent)>& InteractiveViewImpl::ClickedSignal()
 {
   return GetInteractiveTrait().ClickedSignal();
 }
 
-Signal<bool(View, InputEvent)>& InteractiveViewImpl::LongPressedSignal()
+Signal<bool(Ui::View, InputEvent)>& InteractiveViewImpl::LongPressedSignal()
 {
   return GetInteractiveTrait().LongPressedSignal();
 }

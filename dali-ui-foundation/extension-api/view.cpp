@@ -31,6 +31,8 @@ namespace Ui
 {
 namespace Extension
 {
+namespace View
+{
 namespace Internal
 {
 void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, Dali::ConnectionTrackerInterface* tracker, CallbackBase* callback)
@@ -39,13 +41,13 @@ void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, Dali::Con
 }
 } // namespace Internal
 
-bool GrabAccessibilityHighlight(View view)
+bool GrabAccessibilityHighlight(Ui::View view)
 {
   auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
   return DALI_LIKELY(accessible) && accessible->GrabHighlight();
 }
 
-bool ClearAccessibilityHighlight(View view)
+bool ClearAccessibilityHighlight(Ui::View view)
 {
   auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();
   return DALI_LIKELY(accessible) && accessible->ClearHighlight();
@@ -66,26 +68,27 @@ bool UnsetNamedStateObserverIfNotExecuting(ViewImpl& viewImpl, const Dali::Strin
   return Ui::Internal::ViewDataImpl::Get(viewImpl).UnsetNamedStateObserverIfNotExecuting(id);
 }
 
-void SetPositionX(View view, float x)
+void SetPositionX(Ui::View view, float x)
 {
   static_cast<Dali::Actor&>(view).SetPositionX(x);
 }
 
-void SetPositionY(View view, float y)
+void SetPositionY(Ui::View view, float y)
 {
   static_cast<Dali::Actor&>(view).SetPositionY(y);
 }
 
-void SetSizeWidth(View view, float width)
+void SetSizeWidth(Ui::View view, float width)
 {
   static_cast<Dali::Actor&>(view).SetWidth(width);
 }
 
-void SetSizeHeight(View view, float height)
+void SetSizeHeight(Ui::View view, float height)
 {
   static_cast<Dali::Actor&>(view).SetHeight(height);
 }
 
+} // namespace View
 } // namespace Extension
 } // namespace Ui
 } // namespace Dali

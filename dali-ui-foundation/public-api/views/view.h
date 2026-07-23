@@ -348,7 +348,7 @@ public: // Properties
    *
    * To drive the rendered position without affecting the layout request
    * (e.g. for scrolling or animation that should not feed back into
-   * layout), use Dali::Ui::Extension::SetPositionX(view, x).
+   * layout), use Dali::Ui::Extension::View::SetPositionX(view, x).
    *
    * @param[in] x The requested X position
    */
@@ -393,7 +393,7 @@ public: // Properties
    * system and would be overwritten on the next Arrange. Use this and
    * SetRequestedHeight() for layout-aware sizing; to drive the rendered size
    * directly (e.g. for scrolling or animation that must not feed back into
-   * layout), use Dali::Ui::Extension::SetSizeWidth(view, width).
+   * layout), use Dali::Ui::Extension::View::SetSizeWidth(view, width).
    *
    * @param[in] width The requested width
    */

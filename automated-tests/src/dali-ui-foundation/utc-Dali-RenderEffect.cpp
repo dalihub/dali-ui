@@ -37,8 +37,8 @@ View CreateView(UiTestApplication& application)
 {
   View view = View::New();
   view.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::CENTER);
-  Dali::Ui::Extension::SetSizeWidth(view, 400.0f);
-  Dali::Ui::Extension::SetSizeHeight(view, 400.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(view, 400.0f);
+  Dali::Ui::Extension::View::SetSizeHeight(view, 400.0f);
   application.GetScene().Add(view);
   view.Arrange(LayoutRect(0.0f, 0.0f, 400.0f, 400.0f));
   application.SendNotification();

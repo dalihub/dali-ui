@@ -26,7 +26,7 @@
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <test-gesture-generator.h>
 
-namespace ExtensionView = Dali::Ui::Extension;
+namespace ExtensionView = Dali::Ui::Extension::View;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;

@@ -49,7 +49,7 @@ namespace FocusManager
  * @param[in] view The View to receive key input
  * @return true if @p view became the key-input target; false otherwise
  */
-DALI_UI_API bool SetKeyInputTarget(View view);
+DALI_UI_API bool SetKeyInputTarget(Ui::View view);
 
 /**
  * @brief Clears the key-input target if @p view is still the current target.
@@ -65,7 +65,7 @@ DALI_UI_API bool SetKeyInputTarget(View view);
  * @param[in] view The expected current key-input target
  * @return true if @p view was the current target and was cleared; false otherwise
  */
-DALI_UI_API bool ClearKeyInputTarget(View view);
+DALI_UI_API bool ClearKeyInputTarget(Ui::View view);
 
 /**
  * @brief Checks whether @p view is the current key-input target.
@@ -78,7 +78,7 @@ DALI_UI_API bool ClearKeyInputTarget(View view);
  * @param[in] view The View to check
  * @return true if @p view is the current key-input target; false otherwise
  */
-DALI_UI_API bool IsKeyInputTarget(View view);
+DALI_UI_API bool IsKeyInputTarget(Ui::View view);
 
 } // namespace FocusManager
 } // namespace Extension

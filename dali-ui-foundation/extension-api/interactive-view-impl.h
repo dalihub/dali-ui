@@ -64,22 +64,22 @@ public:
   /**
    * @copydoc InteractiveView::PressedChangedSignal()
    */
-  Signal<void(View, bool, InputEvent)>& PressedChangedSignal();
+  Signal<void(Ui::View, bool, InputEvent)>& PressedChangedSignal();
 
   /**
    * @copydoc InteractiveView::PseudoDisabledChangedSignal()
    */
-  Signal<void(View, bool)>& PseudoDisabledChangedSignal();
+  Signal<void(Ui::View, bool)>& PseudoDisabledChangedSignal();
 
   /**
    * @copydoc InteractiveView::ClickedSignal()
    */
-  Signal<void(View, InputEvent)>& ClickedSignal();
+  Signal<void(Ui::View, InputEvent)>& ClickedSignal();
 
   /**
    * @copydoc InteractiveView::LongPressedSignal()
    */
-  Signal<bool(View, InputEvent)>& LongPressedSignal();
+  Signal<bool(Ui::View, InputEvent)>& LongPressedSignal();
 
   /**
    * @copydoc InteractiveView::IsPressed()

@@ -58,7 +58,7 @@ void SelectableViewImpl::OnInitialize()
   EnsureSelectableTrait();
 }
 
-Signal<void(View, bool, InputEvent)>& SelectableViewImpl::SelectionChangedSignal()
+Signal<void(Ui::View, bool, InputEvent)>& SelectableViewImpl::SelectionChangedSignal()
 {
   return GetSelectableTrait().SelectionChangedSignal();
 }

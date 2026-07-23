@@ -31,7 +31,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
-namespace ExtensionView   = Dali::Ui::Extension;
+namespace ExtensionView   = Dali::Ui::Extension::View;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 namespace Dali::Ui::Internal

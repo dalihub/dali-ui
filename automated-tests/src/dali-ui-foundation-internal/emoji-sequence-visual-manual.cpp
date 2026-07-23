@@ -2641,10 +2641,10 @@ private:
     view.SetRequestedY(y);
     view.SetRequestedWidth(width);
     view.SetRequestedHeight(height);
-    Dali::Ui::Extension::SetPositionX(view, x);
-    Dali::Ui::Extension::SetPositionY(view, y);
-    Dali::Ui::Extension::SetSizeWidth(view, width);
-    Dali::Ui::Extension::SetSizeHeight(view, height);
+    Dali::Ui::Extension::View::SetPositionX(view, x);
+    Dali::Ui::Extension::View::SetPositionY(view, y);
+    Dali::Ui::Extension::View::SetSizeWidth(view, width);
+    Dali::Ui::Extension::View::SetSizeHeight(view, height);
   }
 
   void UpdateFloatingSearchBounds()

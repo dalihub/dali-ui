@@ -673,13 +673,13 @@ void RecyclerViewImpl::UpdateScrollerSize()
   const float contentExtent = mLayouter.ComputeScrollRange();
   if(mLayouter.CanScrollHorizontally() && !mLayouter.CanScrollVertically())
   {
-    Dali::Ui::Extension::SetSizeWidth(mScroller, std::max(mViewportWidth, contentExtent));
-    Dali::Ui::Extension::SetSizeHeight(mScroller, mViewportHeight);
+    Dali::Ui::Extension::View::SetSizeWidth(mScroller, std::max(mViewportWidth, contentExtent));
+    Dali::Ui::Extension::View::SetSizeHeight(mScroller, mViewportHeight);
   }
   else
   {
-    Dali::Ui::Extension::SetSizeWidth(mScroller, mViewportWidth);
-    Dali::Ui::Extension::SetSizeHeight(mScroller, std::max(mViewportHeight, contentExtent));
+    Dali::Ui::Extension::View::SetSizeWidth(mScroller, mViewportWidth);
+    Dali::Ui::Extension::View::SetSizeHeight(mScroller, std::max(mViewportHeight, contentExtent));
   }
 }
 
@@ -1041,13 +1041,13 @@ void RecyclerViewImpl::ApplyScrollerPosition()
   const float offset = mLayouter.ComputeScrollOffset();
   if(mLayouter.CanScrollHorizontally() && !mLayouter.CanScrollVertically())
   {
-    Dali::Ui::Extension::SetPositionX(mScroller, -offset);
-    Dali::Ui::Extension::SetPositionY(mScroller, 0.0f);
+    Dali::Ui::Extension::View::SetPositionX(mScroller, -offset);
+    Dali::Ui::Extension::View::SetPositionY(mScroller, 0.0f);
   }
   else
   {
-    Dali::Ui::Extension::SetPositionX(mScroller, 0.0f);
-    Dali::Ui::Extension::SetPositionY(mScroller, -offset);
+    Dali::Ui::Extension::View::SetPositionX(mScroller, 0.0f);
+    Dali::Ui::Extension::View::SetPositionY(mScroller, -offset);
   }
 }
 

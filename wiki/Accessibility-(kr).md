@@ -247,7 +247,7 @@ highlight 요청 시점에 따라 사용하는 API가 다릅니다.
 상황 | API | 특징
 --|--|--
 페이지, window, modal이 처음 표시됨 | `View::SetRequestInitialAccessibilityHighlight(true)` | accessibility context를 구성할 때 Screen Reader가 초기 대상을 선택하도록 metadata를 제공합니다.
-이미 표시된 안정적인 화면에서 대상을 즉시 이동 | `Extension::GrabAccessibilityHighlight(view)` | 현재 DALi accessibility highlight를 대상 View로 옮기고 `HIGHLIGHTED` 변경을 client에 알립니다.
+이미 표시된 안정적인 화면에서 대상을 즉시 이동 | `Extension::View::GrabAccessibilityHighlight(view)` | 현재 DALi accessibility highlight를 대상 View로 옮기고 `HIGHLIGHTED` 변경을 client에 알립니다.
 
 ### 페이지의 초기 highlight
 
@@ -274,7 +274,7 @@ window.Add(page);
 ```cpp
 #include <dali-ui-foundation/extension-api/view.h>
 
-bool moved = Dali::Ui::Extension::GrabAccessibilityHighlight(targetView);
+bool moved = Dali::Ui::Extension::View::GrabAccessibilityHighlight(targetView);
 if(!moved)
 {
   // Screen Reader bridge가 비활성 상태이거나 highlight를 적용하지 못함
@@ -294,7 +294,7 @@ if(!moved)
 `true`는 Screen Reader가 발화를 시작하거나 완료했다는 acknowledgement가 아닙니다. 이미 같은 View가 highlighted 상태이면 `true`를 반환하지만 새로운 `HIGHLIGHTED` 이벤트를 보내지 않으므로 재발화 API로 사용할 수 없습니다.
 
 ```cpp
-bool cleared = Dali::Ui::Extension::ClearAccessibilityHighlight(targetView);
+bool cleared = Dali::Ui::Extension::View::ClearAccessibilityHighlight(targetView);
 ```
 
 `ClearAccessibilityHighlight()`는 해당 View가 현재 highlighted인 경우에만 `true`를 반환합니다.

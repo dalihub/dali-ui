@@ -32,7 +32,7 @@ namespace Extension
 {
 namespace FocusManager
 {
-bool SetKeyInputTarget(View view)
+bool SetKeyInputTarget(Ui::View view)
 {
   if(!view || !view.IsConnectedToScene() || !Dali::Integration::SceneHolder::Get(view))
   {
@@ -49,7 +49,7 @@ bool SetKeyInputTarget(View view)
   return manager.GetCurrentFocusView() == view;
 }
 
-bool ClearKeyInputTarget(View view)
+bool ClearKeyInputTarget(Ui::View view)
 {
   if(!view)
   {
@@ -66,7 +66,7 @@ bool ClearKeyInputTarget(View view)
   return true;
 }
 
-bool IsKeyInputTarget(View view)
+bool IsKeyInputTarget(Ui::View view)
 {
   if(!view)
   {

@@ -289,7 +289,7 @@ private:
     {
       if(focused)
       {
-        const bool grabbed = Dali::Ui::Extension::GrabAccessibilityHighlight(mSubject);
+        const bool grabbed = Dali::Ui::Extension::View::GrabAccessibilityHighlight(mSubject);
         std::cout << "focus-triggered accessibility highlight: "
                   << (grabbed ? "grabbed" : "accessibility bridge inactive") << '\n';
       }

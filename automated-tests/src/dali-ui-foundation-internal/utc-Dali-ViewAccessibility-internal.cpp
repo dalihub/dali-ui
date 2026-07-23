@@ -657,18 +657,18 @@ int UtcDaliViewAccessibilityHighlightCommandsP(void)
   auto*                      accessible     = dynamic_cast<TestAccessibilityViewAccessible*>(Dali::Accessibility::Accessible::Get(view));
   DALI_TEST_CHECK(accessible);
 
-  DALI_TEST_CHECK(Extension::GrabAccessibilityHighlight(view));
+  DALI_TEST_CHECK(Extension::View::GrabAccessibilityHighlight(view));
   DALI_TEST_EQUALS(accessible->grabHighlightCount, 1, TEST_LOCATION);
 
   accessible->grabHighlightResult = false;
-  DALI_TEST_CHECK(!Extension::GrabAccessibilityHighlight(view));
+  DALI_TEST_CHECK(!Extension::View::GrabAccessibilityHighlight(view));
   DALI_TEST_EQUALS(accessible->grabHighlightCount, 2, TEST_LOCATION);
 
-  DALI_TEST_CHECK(Extension::ClearAccessibilityHighlight(view));
+  DALI_TEST_CHECK(Extension::View::ClearAccessibilityHighlight(view));
   DALI_TEST_EQUALS(accessible->clearHighlightCount, 1, TEST_LOCATION);
 
   accessible->clearHighlightResult = false;
-  DALI_TEST_CHECK(!Extension::ClearAccessibilityHighlight(view));
+  DALI_TEST_CHECK(!Extension::View::ClearAccessibilityHighlight(view));
   DALI_TEST_EQUALS(accessible->clearHighlightCount, 2, TEST_LOCATION);
 
   END_TEST;

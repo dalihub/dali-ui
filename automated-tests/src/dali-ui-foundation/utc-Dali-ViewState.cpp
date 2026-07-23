@@ -29,7 +29,7 @@
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
-namespace ExtensionView = Dali::Ui::Extension;
+namespace ExtensionView = Dali::Ui::Extension::View;
 namespace IntegrationView = Dali::Ui::Integration::View;
 
 using namespace Dali;

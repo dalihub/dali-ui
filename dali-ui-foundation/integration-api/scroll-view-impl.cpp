@@ -1928,8 +1928,8 @@ void ScrollViewImpl::OnDragging(const PanGesture& gesture)
     // Scroll offset drives the rendered position directly. Setting the
     // Actor property bypasses layout so this does not feed back into the
     // requested layout position.
-    Dali::Ui::Extension::SetPositionX(mContent, newX);
-    Dali::Ui::Extension::SetPositionY(mContent, newY);
+    Dali::Ui::Extension::View::SetPositionX(mContent, newX);
+    Dali::Ui::Extension::View::SetPositionY(mContent, newY);
 
     // Update scroll position from the actual content position
     mCurrentPosition = Vector2(newX, newY);
@@ -2233,8 +2233,8 @@ void ScrollViewImpl::ApplyScrollPosition(const Vector2& position)
     float posX = mMaximumStartX - position.x;
     float posY = mMaximumStartY - position.y;
 
-    Dali::Ui::Extension::SetPositionX(mContent, posX);
-    Dali::Ui::Extension::SetPositionY(mContent, posY);
+    Dali::Ui::Extension::View::SetPositionX(mContent, posX);
+    Dali::Ui::Extension::View::SetPositionY(mContent, posY);
 
     // Update scroll bar position
     mScrollBar.UpdateScrollPosition(position);

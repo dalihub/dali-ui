@@ -35,6 +35,8 @@ class ViewImpl;
 
 namespace Extension
 {
+namespace View
+{
 namespace Internal
 {
 /**
@@ -146,7 +148,7 @@ DALI_UI_API bool UnsetNamedStateObserverIfNotExecuting(ViewImpl& viewImpl, const
  * @param[in] view The View to request accessibility highlight for
  * @return true if the View has the accessibility highlight, false otherwise
  */
-DALI_UI_API bool GrabAccessibilityHighlight(View view);
+DALI_UI_API bool GrabAccessibilityHighlight(Ui::View view);
 
 /**
  * @brief Clears accessibility highlight from the given View.
@@ -154,7 +156,7 @@ DALI_UI_API bool GrabAccessibilityHighlight(View view);
  * @param[in] view The View to clear accessibility highlight from
  * @return true if the accessibility highlight was cleared, false otherwise
  */
-DALI_UI_API bool ClearAccessibilityHighlight(View view);
+DALI_UI_API bool ClearAccessibilityHighlight(Ui::View view);
 
 /**
  * @brief Sets the rendered X position of the view.
@@ -172,7 +174,7 @@ DALI_UI_API bool ClearAccessibilityHighlight(View view);
  * Use View::SetRequestedX/Y and View::SetRequestedWidth/Height for
  * layout-aware placement and sizing.
  */
-DALI_UI_API void SetPositionX(View view, float x);
+DALI_UI_API void SetPositionX(Ui::View view, float x);
 
 /**
  * @brief Sets the rendered Y position of the view.
@@ -183,7 +185,7 @@ DALI_UI_API void SetPositionX(View view, float x);
  * layout.
  * @see SetPositionX
  */
-DALI_UI_API void SetPositionY(View view, float y);
+DALI_UI_API void SetPositionY(Ui::View view, float y);
 
 /**
  * @brief Sets the rendered width of the view.
@@ -194,7 +196,7 @@ DALI_UI_API void SetPositionY(View view, float y);
  * layout.
  * @see SetPositionX
  */
-DALI_UI_API void SetSizeWidth(View view, float width);
+DALI_UI_API void SetSizeWidth(Ui::View view, float width);
 
 /**
  * @brief Sets the rendered height of the view.
@@ -205,8 +207,9 @@ DALI_UI_API void SetSizeWidth(View view, float width);
  * layout.
  * @see SetPositionX
  */
-DALI_UI_API void SetSizeHeight(View view, float height);
+DALI_UI_API void SetSizeHeight(Ui::View view, float height);
 
+} // namespace View
 } // namespace Extension
 } // namespace Ui
 } // namespace Dali

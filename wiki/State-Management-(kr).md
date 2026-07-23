@@ -152,7 +152,7 @@ static const ViewState Error   = ViewState::Create("Error");
 auto loadingOrError = Loading + Error;
 ```
 
-> 커스텀 상태의 설정은 `Extension::SetState()`를 통해 이루어지며, extension 개발자 대상입니다.
+> 커스텀 상태의 설정은 `Extension::View::SetState()`를 통해 이루어지며, extension 개발자 대상입니다.
 
 > `ViewState`는 전체 32개의 bit slot을 가집니다. predefined 상태들이 그중 일부를 사용하고, 남은 slot을 커스텀 상태에 사용할 수 있습니다. 사용 가능한 bit 공간을 초과해 등록하면 `DaliException`이 발생합니다.
 
@@ -166,11 +166,11 @@ auto loadingOrError = Loading + Error;
 
 ## Extension Developer Notes
 
-커스텀 상태를 만든 경우, `Extension::SetState()`로 해당 상태의 on/off를 제어합니다. `StateChangedSignal`은 자동으로 발생합니다.
+커스텀 상태를 만든 경우, `Extension::View::SetState()`로 해당 상태의 on/off를 제어합니다. `StateChangedSignal`은 자동으로 발생합니다.
 
 ```cpp
-Extension::SetState(viewImpl, Loading, true);   // Loading 상태 활성화
-Extension::SetState(viewImpl, Loading, false);  // Loading 상태 해제
+Extension::View::SetState(viewImpl, Loading, true);   // Loading 상태 활성화
+Extension::View::SetState(viewImpl, Loading, false);  // Loading 상태 해제
 ```
 
 extension에서 ID로 식별할 수 있는 observer가 필요하면
@@ -179,12 +179,12 @@ extension에서 ID로 식별할 수 있는 observer가 필요하면
 자동으로 제거됩니다.
 
 ```cpp
-Extension::SetNamedStateObserver(viewImpl, "LoadingStyle", tracker,
+Extension::View::SetNamedStateObserver(viewImpl, "LoadingStyle", tracker,
   [](View view, const StateEvent& event) {
     // 상태 변경에 반응합니다.
   });
 
-Extension::UnsetNamedStateObserver(viewImpl, "LoadingStyle");
+Extension::View::UnsetNamedStateObserver(viewImpl, "LoadingStyle");
 ```
 
 동일 ID로 등록된 callback 안에서 그 observer를 교체하거나 직접 해제하면

@@ -361,9 +361,9 @@ private:
     // origin and initial size explicit.
     shimmerBand.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
     shimmerBand.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-    Dali::Ui::Extension::SetSizeWidth(shimmerBand, SHIMMER_BAND_WIDTH);
-    Dali::Ui::Extension::SetPositionX(shimmerBand, GetShimmerStartX());
-    Dali::Ui::Extension::SetPositionY(shimmerBand, 0.0f);
+    Dali::Ui::Extension::View::SetSizeWidth(shimmerBand, SHIMMER_BAND_WIDTH);
+    Dali::Ui::Extension::View::SetPositionX(shimmerBand, GetShimmerStartX());
+    Dali::Ui::Extension::View::SetPositionY(shimmerBand, 0.0f);
 
     GradientVisual shimmerGradient = GradientVisual::New();
     shimmerGradient.SetLinearGradient(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));

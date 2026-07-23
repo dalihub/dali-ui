@@ -3544,8 +3544,8 @@ int UtcDaliViewAccessibilityCallbacksP(void)
   DALI_TEST_EQUALS(accessible->ScrollToChild(child), false, TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->GrabHighlight(), false, TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->ClearHighlight(), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(Extension::GrabAccessibilityHighlight(parent), false, TEST_LOCATION);
-  DALI_TEST_EQUALS(Extension::ClearAccessibilityHighlight(parent), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(Extension::View::GrabAccessibilityHighlight(parent), false, TEST_LOCATION);
+  DALI_TEST_EQUALS(Extension::View::ClearAccessibilityHighlight(parent), false, TEST_LOCATION);
 
   parent.SetAccessibilityRole(UiAccessibility::Role::CHECK_BOX);
   accessible->OnStatePropertySet(AccessibilityStateMask(UiAccessibility::State::CHECKED));
@@ -3565,10 +3565,10 @@ int UtcDaliViewExtensionGeometrySettersP(void)
 
   // The raw Actor geometry setters are deleted on the public View handle;
   // custom-view authors use the Dali::Ui::Extension free functions instead.
-  Extension::SetPositionX(view, 12.0f);
-  Extension::SetPositionY(view, 34.0f);
-  Extension::SetSizeWidth(view, 56.0f);
-  Extension::SetSizeHeight(view, 78.0f);
+  Extension::View::SetPositionX(view, 12.0f);
+  Extension::View::SetPositionY(view, 34.0f);
+  Extension::View::SetSizeWidth(view, 56.0f);
+  Extension::View::SetSizeHeight(view, 78.0f);
 
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_X), 12.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_Y), 34.0f, TEST_LOCATION);

@@ -31,7 +31,7 @@ The sample checks:
 - All five reading lifecycle events through one
   `AccessibilityReadingStatusChangedSignal()` and their exact enum order.
 - The existing bool-based accessibility highlight Signal.
-- `Dali::Ui::Extension::GrabAccessibilityHighlight()` when the sample subject
+- `Dali::Ui::Extension::View::GrabAccessibilityHighlight()` when the sample subject
   receives keyboard focus. With a Screen Reader active, this emits the
   highlighted state change used to announce the subject; otherwise it reports
   an inactive bridge.

@@ -96,7 +96,7 @@ void SelectableTraitImpl::SetSelectedInternal(bool selected, InputEvent event)
   }
 
   mSelected = selected;
-  Extension::SetState(GetImpl(owner), ViewState::SELECTED, selected, event);
+  Extension::View::SetState(GetImpl(owner), ViewState::SELECTED, selected, event);
 
   // Post-commit, pre-public notification. The internal commit observer lets an internal
   // collaborator (GroupSelectableTraitImpl) observe the already-committed state and fully

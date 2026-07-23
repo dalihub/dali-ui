@@ -147,7 +147,7 @@ static const ViewState Error   = ViewState::Create("Error");
 auto loadingOrError = Loading + Error;
 ```
 
-> Activating and deactivating custom states is done via `Extension::SetState()`, which targets extension developers.
+> Activating and deactivating custom states is done via `Extension::View::SetState()`, which targets extension developers.
 
 > `ViewState` has 32 total bit slots. Predefined states use some of those slots, and the remaining slots can be used for custom states. Registering beyond the available bit space throws a `DaliException`.
 
@@ -161,11 +161,11 @@ auto loadingOrError = Loading + Error;
 
 ## Extension Developer Notes
 
-Use `Extension::SetState()` to turn a custom state on or off. `StateChangedSignal` is emitted automatically.
+Use `Extension::View::SetState()` to turn a custom state on or off. `StateChangedSignal` is emitted automatically.
 
 ```cpp
-Extension::SetState(viewImpl, Loading, true);   // activate Loading state
-Extension::SetState(viewImpl, Loading, false);  // deactivate Loading state
+Extension::View::SetState(viewImpl, Loading, true);   // activate Loading state
+Extension::View::SetState(viewImpl, Loading, false);  // deactivate Loading state
 ```
 
 Extensions that need an ID-addressable observer can use `SetNamedStateObserver()`.
@@ -173,12 +173,12 @@ Registering the same ID again replaces the previous observer, and destroying
 the connection tracker removes its observers automatically.
 
 ```cpp
-Extension::SetNamedStateObserver(viewImpl, "LoadingStyle", tracker,
+Extension::View::SetNamedStateObserver(viewImpl, "LoadingStyle", tracker,
   [](View view, const StateEvent& event) {
     // React to the state transition.
   });
 
-Extension::UnsetNamedStateObserver(viewImpl, "LoadingStyle");
+Extension::View::UnsetNamedStateObserver(viewImpl, "LoadingStyle");
 ```
 
 Do not replace or directly unset an observer from inside the callback registered

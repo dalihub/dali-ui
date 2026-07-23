@@ -64,7 +64,7 @@ public:
   /**
    * @copydoc SelectableView::SelectionChangedSignal()
    */
-  Signal<void(View, bool, InputEvent)>& SelectionChangedSignal();
+  Signal<void(Ui::View, bool, InputEvent)>& SelectionChangedSignal();
 
   /**
    * @copydoc SelectableView::IsSelected()
