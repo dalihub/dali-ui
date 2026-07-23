@@ -17,7 +17,7 @@
 4. [VideoSource](#4-videosource)
    - [생성 헬퍼 함수](#41-생성-헬퍼-함수)
    - [VideoSourceOptions](#42-videosourceoptions)
-   - [VideoSourceCapabilities](#43-videosourcecapabilities)
+   - [VideoRenderingMode](#43-videorenderingmode)
 5. [재생 제어](#5-재생-제어)
 6. [생명주기와 순서](#6-생명주기와-순서)
 7. [플랫폼 백엔드 관련 참고사항](#7-플랫폼-백엔드-관련-참고사항)
@@ -31,14 +31,14 @@
 `VideoView`는 `ImageView`처럼 리소스를 알아서 불러오는 자기완결형 View가 아닙니다. `SetResourceUrl()`처럼 URL 하나 던지면 알아서 준비까지 해주는 API가 없습니다. 대신 앱이 다음 순서로 진행해야 합니다:
 
 1. 네이티브 플레이어(MMPlayer용 Tizen CAPI `player_h`, 또는 ESPlayer용 `esplusplayer_handle`)를 직접 생성하고 설정합니다 — 단, 아직 prepare나 play는 하지 않습니다.
-2. `Dali::Ui::Tizen::CreateVideoSourceFromXxx()` 헬퍼로 네이티브 핸들을 감싸 `VideoSource`를 만듭니다.
+2. 네이티브 핸들을 `VideoSource`로 감쌉니다: 앱이 `Dali::VideoSourceDescriptor`(provider id + 네이티브 핸들 + 렌더링 모드)를 채워 `Dali::Ui::CreateVideoSource()`에 넘깁니다.
 3. 그 source로 `VideoView`를 생성하고 window에 추가합니다.
 4. **그 다음에야** 네이티브 플레이어를 prepare하고 재생을 시작합니다.
 5. 종료 시 source를 해제하고, 네이티브 핸들도 앱이 직접 destroy합니다.
 
 ```
 App:  player_create() → player_set_uri()  (네이티브 핸들은 아직 IDLE 상태)
-App:  source = CreateVideoSourceFromMMPlayerUnderlay(player)
+App:  descriptor{providerId, nativeSession, flags};  source = Ui::CreateVideoSource(descriptor)
 App:  videoView = VideoView::New(source);  window.Add(videoView)
                         ↓ 동기적으로 실행됨 — 플레이어가 IDLE 상태일 때 display가 연결됨
 App:  player_prepare()  →  videoView.Play()
@@ -56,7 +56,7 @@ App:  videoView.ClearSource();  player_unprepare(player);  player_destroy(player
 
 ```cpp
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/video/tizen-video-source.h>
+#include <dali/public-api/adaptor-framework/video-source-descriptor.h>
 #include <player.h>
 
 using namespace Dali::Ui;
@@ -66,8 +66,12 @@ player_h player;
 player_create(&player);
 player_set_uri(player, "video.mp4");
 
-// 2. 핸들을 VideoSource로 감싸기
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(player);
+// 2. descriptor를 채워 VideoSource로 감싸기
+Dali::VideoSourceDescriptor descriptor;
+descriptor.SetProviderId("tizen.mmplayer");
+descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
+descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor);
 
 // 3. VideoView를 생성하고 window에 추가
 VideoView videoView = VideoView::New(source);
@@ -89,11 +93,12 @@ player_destroy(player);
 
 ### 2.2 MMPlayer NativeImage
 
-생성 헬퍼 함수만 바뀌고 나머지 흐름은 underlay와 동일합니다.
+렌더링 모드만 바뀌고(`UNDERLAY` → `NATIVE_IMAGE`) 나머지 흐름은 underlay와 동일합니다.
 
 ```cpp
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerNativeImage(player);
-VideoView   videoView = VideoView::New(source);
+descriptor.SetRenderingMode(Dali::VideoRenderingMode::NATIVE_IMAGE);
+VideoSource source     = Dali::Ui::CreateVideoSource(descriptor);
+VideoView   videoView  = VideoView::New(source);
 window.Add(videoView);
 
 player_prepare(player);
@@ -115,10 +120,14 @@ esplusplayer_set_video_stream_info(player, &videoInfo);
 esplusplayer_set_ready_to_prepare_cb(player, OnReadyToPrepare, userData);
 esplusplayer_set_prepare_async_done_cb(player, OnPrepareAsyncDone, userData);
 
+Dali::VideoSourceDescriptor descriptor;
+descriptor.SetProviderId("tizen.esplayer");
+descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
 // NativeImage (GPU 텍스처):
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerNativeImage(player);
+descriptor.SetRenderingMode(Dali::VideoRenderingMode::NATIVE_IMAGE);
 // 대신 Underlay (hole-punch)를 쓰려면:
-// VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromESPlayerUnderlay(player);
+// descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor);
 
 VideoView videoView = VideoView::New(source);
 window.Add(videoView);
@@ -137,21 +146,21 @@ esplusplayer_prepare_async(player);
 
 ## 3. 렌더링 모드 선택
 
-별도의 모드 선택 API는 없습니다 — 렌더링 모드는 **어떤 생성 헬퍼를 호출하느냐**로 전적으로 결정됩니다.
+별도의 모드 선택 API는 없습니다 — 렌더링 모드는 `SetRenderingMode()`로 설정한 값으로 전적으로 결정됩니다.
 
-| 모드 | 헬퍼 | 장점 | 단점 |
+| 모드 | `VideoRenderingMode` | 장점 | 단점 |
 |---|---|---|---|
-| **Underlay** | `CreateVideoSourceFromMMPlayerUnderlay()`, `CreateVideoSourceFromESPlayerUnderlay()` | 플랫폼이 직접 합성(hole-punch)해서 오버헤드가 낮음; geometry/ROI가 view와 자동으로 동기화됨 | 영상이 항상 UI 레이어보다 아래에 그려짐; DALi 렌더 이펙트/블렌딩을 프레임 자체에 직접 적용할 수 없음 |
-| **NativeImage** | `CreateVideoSourceFromMMPlayerNativeImage()`, `CreateVideoSourceFromESPlayerNativeImage()` | 디코딩된 프레임이 일반 GPU 텍스처가 되어 다른 View 콘텐츠처럼 corner radius, 블렌딩, 렌더 이펙트 적용 가능 | 디코드 결과를 텍스처로 복사하는 추가 오버헤드 |
+| **Underlay** | `UNDERLAY` | 플랫폼이 직접 합성(hole-punch)해서 오버헤드가 낮음; geometry/ROI가 view와 자동으로 동기화됨 | 영상이 항상 UI 레이어보다 아래에 그려짐; DALi 렌더 이펙트/블렌딩을 프레임 자체에 직접 적용할 수 없음 |
+| **NativeImage** | `NATIVE_IMAGE` | 디코딩된 프레임이 일반 GPU 텍스처가 되어 다른 View 콘텐츠처럼 corner radius, 블렌딩, 렌더 이펙트 적용 가능 | 디코드 결과를 텍스처로 복사하는 추가 오버헤드 |
 
-### 헬퍼 → 플레이어 → Capability 매핑
+### 플레이어 → Provider ID → 렌더링 모드
 
-| 헬퍼 | 플레이어 | Capability | Provider ID |
-|---|---|---|---|
-| `CreateVideoSourceFromMMPlayerUnderlay()` | MMPlayer | `SupportsUnderlay`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
-| `CreateVideoSourceFromMMPlayerNativeImage()` | MMPlayer | `SupportsNativeImage`, `SupportsSeek`, `SupportsVolume` | `"tizen.mmplayer"` |
-| `CreateVideoSourceFromESPlayerNativeImage()` | ESPlayer | `SupportsNativeImage` | `"tizen.esplayer"` |
-| `CreateVideoSourceFromESPlayerUnderlay()` | ESPlayer | `SupportsUnderlay` | `"tizen.esplayer"` |
+`Dali::VideoSourceDescriptor`에 `providerId`와 `renderingMode`를 직접 설정합니다. 모드 값은 `Dali::VideoRenderingMode::` 열거자입니다.
+
+| 플레이어 | Provider ID | 렌더링 모드 |
+|---|---|---|
+| MMPlayer | `"tizen.mmplayer"` | `UNDERLAY` 또는 `NATIVE_IMAGE` |
+| ESPlayer | `"tizen.esplayer"` | `UNDERLAY` 또는 `NATIVE_IMAGE` |
 
 ---
 
@@ -159,18 +168,30 @@ esplusplayer_prepare_async(player);
 
 `VideoSource`는 네이티브 플레이어 세션을 설명하는 가벼운 불변(immutable) 객체입니다. 네이티브 핸들을 소유하지 않습니다.
 
-### 4.1 생성 헬퍼 함수
+### 4.1 VideoSource 만들기
 
-`<dali-ui-foundation/public-api/video/tizen-video-source.h>`에 선언되어 있습니다:
+생성은 두 단계 조합으로 이루어지며, 덕분에 dali-ui 자체는 Tizen 플레이어 헤더에 대한 의존성이 전혀 없습니다:
+
+1. 앱이 `Dali::VideoSourceDescriptor`(`<dali/public-api/adaptor-framework/video-source-descriptor.h>`에 선언)를 채웁니다 — provider id, 네이티브 세션 핸들, 렌더링 모드. 별도의 provider별 헬퍼는 없으며, [위 매핑 표](#플레이어--provider-id--렌더링-모드)를 참고해 앱이 필드를 직접 설정합니다:
 
 ```cpp
-VideoSource CreateVideoSourceFromMMPlayerUnderlay(player_h player, const VideoSourceOptions& options = {});
-VideoSource CreateVideoSourceFromMMPlayerNativeImage(player_h player, const VideoSourceOptions& options = {});
-VideoSource CreateVideoSourceFromESPlayerNativeImage(esplusplayer_handle player, const VideoSourceOptions& options = {});
-VideoSource CreateVideoSourceFromESPlayerUnderlay(esplusplayer_handle player, const VideoSourceOptions& options = {});
+Dali::VideoSourceDescriptor descriptor;
+descriptor.SetProviderId("tizen.mmplayer");
+descriptor.SetNativeSession(Dali::Any(static_cast<void*>(player)));
+descriptor.SetRenderingMode(Dali::VideoRenderingMode::UNDERLAY);
 ```
 
-각 헬퍼는 알맞은 provider ID와 capability 플래그를 설정한 뒤 내부적으로 `VideoSource::New()`를 호출합니다. 앱은 항상 이 헬퍼들을 거쳐야 하며, `VideoSource::New()`를 직접 호출해서는 안 됩니다.
+2. **브리지** `Dali::Ui::CreateVideoSource()` — `<dali-ui-foundation/public-api/video/video-source.h>`에 선언되어 있으며, descriptor를 `VideoSource`로 변환합니다:
+
+```cpp
+VideoSource CreateVideoSource(const SourceDescriptor& descriptor, const VideoSourceOptions& options = {});
+```
+
+```cpp
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor);
+```
+
+앱은 항상 `CreateVideoSource()`를 거쳐야 하며, `VideoSource::New()`를 직접 호출해서는 안 됩니다.
 
 ---
 
@@ -180,7 +201,6 @@ VideoSource CreateVideoSourceFromESPlayerUnderlay(esplusplayer_handle player, co
 struct VideoSourceOptions
 {
   VideoSourceOwnership ownership{VideoSourceOwnership::External};
-  VideoControlPolicy   controlPolicy{VideoControlPolicy::ViewControlsPlayback};
 };
 ```
 
@@ -190,39 +210,28 @@ struct VideoSourceOptions
 | `Shared` | 네이티브 세션이 공유되거나 참조 카운트됨. |
 | `Transfer` | 하위 provider가 지원하는 경우 소유권이 이전됨. |
 
-| `VideoControlPolicy` | 의미 |
-|---|---|
-| `ViewControlsPlayback` (기본값) | `VideoView::Play()/Pause()/Stop()`이 네이티브 플레이어로 전달됨. |
-| `DisplayOnly` | `VideoView`는 display 연결과 geometry 동기화만 담당함; 재생 제어는 앱이 네이티브 핸들에 직접 해야 함. |
-
 ```cpp
 VideoSourceOptions options;
-options.controlPolicy = VideoControlPolicy::DisplayOnly;
-VideoSource source = Dali::Ui::Tizen::CreateVideoSourceFromMMPlayerUnderlay(player, options);
+options.ownership = VideoSourceOwnership::Shared;
+VideoSource source = Dali::Ui::CreateVideoSource(descriptor, options);
 ```
 
 ---
 
-### 4.3 VideoSourceCapabilities
+### 4.3 VideoRenderingMode
 
 ```cpp
-struct VideoSourceCapabilities
+enum class VideoRenderingMode : uint32_t
 {
-  enum Flag : uint32_t
-  {
-    SupportsUnderlay    = 1u << 0,
-    SupportsNativeImage = 1u << 1,
-    SupportsSeek        = 1u << 2,
-    SupportsVolume      = 1u << 3,
-  };
-  uint32_t flags{0u};
+  Underlay    = 0, // 플랫폼 합성 hole-punch; UI 아래에 렌더링됨.
+  NativeImage = 1, // 디코딩 프레임이 GPU 텍스처가 됨; UI 렌더 이펙트 적용 가능.
 };
 ```
 
-Capability는 호출한 생성 헬퍼가 자동으로 설정하며, 앱이 직접 설정하지 않습니다. `VideoSource::GetCapabilities()`로 조회할 수 있습니다. 예를 들어 source가 NativeImage 렌더링을 쓰는지 확인하려면:
+모드는 descriptor를 만들 때 `SetRenderingMode()`로 설정합니다. `VideoSource::GetRenderingMode()`로 조회할 수 있습니다:
 
 ```cpp
-bool isNativeImage = source.GetCapabilities().flags & VideoSourceCapabilities::SupportsNativeImage;
+bool isNativeImage = source.GetRenderingMode() == VideoRenderingMode::NativeImage;
 ```
 
 ---
@@ -239,7 +248,7 @@ videoView.Pause();
 videoView.Stop();
 ```
 
-`Play()`/`Pause()`/`Stop()`은 `VideoControlPolicy::ViewControlsPlayback`(기본값)일 때만 동작합니다. `DisplayOnly`일 경우 이 호출들은 아무 동작도 하지 않습니다 — 네이티브 플레이어의 재생/일시정지/정지 함수(`player_start()`, `esplusplayer_start()` 등)를 직접 호출해야 합니다.
+`Play()`/`Pause()`/`Stop()`은 네이티브 플레이어로 전달됩니다. 앱이 재생을 직접 제어하고 싶으면 이 호출들을 쓰지 않고 네이티브 플레이어의 재생/일시정지/정지 함수(`player_start()`, `esplusplayer_start()` 등)를 직접 호출하면 됩니다.
 
 ---
 
@@ -253,7 +262,7 @@ videoView.Stop();
 
 ## 7. 플랫폼 백엔드 관련 참고사항
 
-- **tcore/ecore 구분은 앱에게 투명합니다.** 하위 `dali-extension`이 tcore용으로 빌드됐는지 ecore용으로 빌드됐는지는 빌드 타임에 결정되는 사항이며, 동일한 `CreateVideoSourceFromESPlayerUnderlay()`(또는 MMPlayer underlay) 호출이 어느 쪽에서든 동작합니다.
+- **tcore/ecore 구분은 앱에게 투명합니다.** 하위 `dali-extension`이 tcore용으로 빌드됐는지 ecore용으로 빌드됐는지는 빌드 타임에 결정되는 사항이며, 동일한 ESPlayer underlay descriptor(`"tizen.esplayer"` + `VideoRenderingMode::UNDERLAY`)가 어느 쪽에서든 동작합니다.
 - **ESPlayer 세션은 항상 외부 소유입니다.** 앱이 직접 `esplusplayer_open()`/`esplusplayer_close()`/`esplusplayer_destroy()`를 호출해야 하며, `VideoView`는 절대 이 함수들을 호출하지 않습니다.
 
 ---
@@ -263,16 +272,14 @@ videoView.Stop();
 | 프로퍼티 | 기본값 |
 |---|---|
 | `VideoSourceOptions::ownership` | `VideoSourceOwnership::External` |
-| `VideoSourceOptions::controlPolicy` | `VideoControlPolicy::ViewControlsPlayback` |
-| `VideoSourceCapabilities::flags` | `0` (사용한 생성 헬퍼가 설정함) |
+| `VideoSourceDescriptor::renderingMode` | `VideoRenderingMode::UNDERLAY` |
 
 ---
 
 ## 9. 주의사항
 
 - **순서가 중요합니다.** `player_prepare()`/`esplusplayer_prepare_async()`를 호출하기 **전에** `VideoView`를 window에 추가하세요(또는 scene에 연결되도록 하세요). prepare를 먼저 하는 것은 흔한 실수이며, 소리는 나지만 영상이 안 보이는 결과로 이어집니다.
-- **네이티브 플레이어의 전체 생명주기는 앱이 소유합니다** — 생성, prepare, play/pause/stop(`DisplayOnly`가 아닌 경우), 최종 destroy까지 전부. `VideoView`는 display 연결/해제와 명령 전달만 담당합니다.
-- **`DisplayOnly` control policy**는 명령 전달을 완전히 비활성화합니다 — 앱이 네이티브 핸들의 재생을 전적으로 직접 제어해야 합니다.
+- **네이티브 플레이어의 전체 생명주기는 앱이 소유합니다** — 생성, prepare, play/pause/stop, 최종 destroy까지 전부. `VideoView`는 display 연결/해제와 전달받은 Play/Pause/Stop 명령 전달만 담당합니다.
 - **ESPlayer prepare는 비동기입니다** — 플레이어가 `READY`에 도달하려면 `ready_to_prepare` 콜백에서 엘리멘터리 스트림 데이터(및 EOS)를 제출해야 합니다.
 
 <br/>
