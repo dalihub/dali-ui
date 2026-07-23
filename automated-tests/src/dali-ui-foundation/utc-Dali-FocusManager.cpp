@@ -17,11 +17,62 @@
 #include <stdlib.h>
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/extension-api/focus-manager.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+// ============================================================
+// Extension key-input target
+// ============================================================
+
+int UtcDaliFocusManagerExtensionSetAndClearKeyInputTargetP(void)
+{
+  UiTestApplication application;
+
+  View navigationFocus = View::New();
+  navigationFocus.SetFocusable(true);
+  View firstTarget = View::New();
+  View secondTarget = View::New();
+  application.GetScene().Add(navigationFocus);
+  application.GetScene().Add(firstTarget);
+  application.GetScene().Add(secondTarget);
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(Ui::FocusManager::Get().SetCurrentFocusView(navigationFocus));
+  DALI_TEST_CHECK(Ui::Extension::FocusManager::SetKeyInputTarget(firstTarget));
+  DALI_TEST_CHECK(Ui::Extension::FocusManager::IsKeyInputTarget(firstTarget));
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::IsKeyInputTarget(secondTarget));
+  DALI_TEST_CHECK(Ui::FocusManager::Get().GetCurrentFocusView() == navigationFocus);
+
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::ClearKeyInputTarget(secondTarget));
+  DALI_TEST_CHECK(Ui::Extension::FocusManager::SetKeyInputTarget(secondTarget));
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::IsKeyInputTarget(firstTarget));
+  DALI_TEST_CHECK(Ui::Extension::FocusManager::IsKeyInputTarget(secondTarget));
+  DALI_TEST_CHECK(Ui::FocusManager::Get().GetCurrentFocusView() == navigationFocus);
+
+  DALI_TEST_CHECK(Ui::Extension::FocusManager::ClearKeyInputTarget(secondTarget));
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::IsKeyInputTarget(secondTarget));
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::ClearKeyInputTarget(secondTarget));
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::ClearKeyInputTarget(firstTarget));
+  END_TEST;
+}
+
+int UtcDaliFocusManagerExtensionSetKeyInputTargetDisconnectedN(void)
+{
+  UiTestApplication application;
+
+  View disconnectedView = View::New();
+
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::SetKeyInputTarget(disconnectedView));
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::SetKeyInputTarget(View()));
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::ClearKeyInputTarget(View()));
+  DALI_TEST_CHECK(!Ui::Extension::FocusManager::IsKeyInputTarget(View()));
+  END_TEST;
+}
 
 // ============================================================
 // RequestFocus — basic
