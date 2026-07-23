@@ -120,8 +120,7 @@ void RenderEffectImpl::SetOwnerView(Dali::Ui::View view)
         }
       }
 
-      ownerView.EffectiveVisibilityChangedSignal().Connect(this,
-                                                           &RenderEffectImpl::OnViewEffectiveVisibilityChanged);
+      Dali::DevelActor::OnSceneVisibilityChangedSignal(ownerView).Connect(this, &RenderEffectImpl::OnViewEffectiveVisibilityChanged);
 
       Activate(); // Dev note : Activate after set the owner view.
     }
@@ -143,8 +142,7 @@ void RenderEffectImpl::ClearOwnerView()
                 ownerView ? ownerView.GetProperty<int>(Actor::Property::ID) : -1);
   if(ownerView)
   {
-    ownerView.EffectiveVisibilityChangedSignal().Disconnect(this,
-                                                            &RenderEffectImpl::OnViewEffectiveVisibilityChanged);
+    Dali::DevelActor::OnSceneVisibilityChangedSignal(ownerView).Disconnect(this, &RenderEffectImpl::OnViewEffectiveVisibilityChanged);
 
     auto previousOwnerView = ownerView;
     mOwnerView.Reset();
@@ -310,7 +308,7 @@ bool RenderEffectImpl::IsActivateValid() const
   if(size.x > Math::MACHINE_EPSILON_1000 && size.y > Math::MACHINE_EPSILON_1000)
   {
     Dali::Ui::View ownerView = mOwnerView.GetHandle();
-    if(ownerView && DevelActor::IsEffectivelyVisible(ownerView))
+    if(ownerView && Dali::DevelActor::IsOnSceneVisible(ownerView))
     {
       ret = true;
     }

@@ -1358,7 +1358,7 @@ private:
   bool mHasAsyncAnchorHitRegions : 1; // whether active async anchor hit regions are cached.
   bool mAsyncAnchorGeometryDirty : 1; // whether cached async anchor geometry may no longer match the content layout.
   bool mHasA11yAnchors : 1;           // whether accessibility TextAnchor actors are attached.
-  bool mIsVisible : 1;                // cached result of IsEffectivelyVisible().
+  bool mIsVisible : 1;                // cached result of IsOnSceneVisible().
   bool mIsVisibleInitialized : 1;     // whether mIsVisible has been initialized.
   bool mIsViewBackgroundEnabled : 1;  // whether the view background is enabled.
   bool mIsManualRenderInProgress : 1; // True while an async manual render request is in progress. Reset to false when completed.

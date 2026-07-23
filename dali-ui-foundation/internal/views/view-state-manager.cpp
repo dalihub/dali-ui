@@ -112,30 +112,6 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, ViewState prev, ViewSta
   }
 }
 
-bool ViewStateManager::IsEffectivelyEnabled(const ViewImpl& viewImpl) const
-{
-  if(viewImpl.GetState().Contains(ViewState::DISABLED))
-  {
-    return false;
-  }
-
-  Actor parent = viewImpl.Self().GetParent();
-  while(parent)
-  {
-    View parentView = View::DownCast(parent);
-    if(parentView)
-    {
-      if(GetImpl(parentView).GetState().Contains(ViewState::DISABLED))
-      {
-        return false;
-      }
-    }
-    parent = parent.GetParent();
-  }
-
-  return true;
-}
-
 bool ViewStateManager::IsEffectivelyFocused(const ViewImpl& viewImpl) const
 {
   if(viewImpl.GetState().Contains(ViewState::FOCUSED))

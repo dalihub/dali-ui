@@ -215,11 +215,6 @@ public: // Non-virtual API (safe to reorder / extend)
   const ViewState& GetState() const;
 
   /**
-   * @copydoc Ui::View::IsEffectivelyEnabled()
-   */
-  bool IsEffectivelyEnabled() const;
-
-  /**
    * @copydoc Ui::View::IsEffectivelyFocused()
    */
   bool IsEffectivelyFocused() const;

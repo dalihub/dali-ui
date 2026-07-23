@@ -957,17 +957,6 @@ public:
   Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
 
   /**
-   * @brief Returns true if this view and all its View ancestors are enabled.
-   *
-   * Unlike IsEnabled(), which only reflects the view's own state, this method
-   * walks up the scene hierarchy and returns false if any ancestor View carries
-   * ViewState::DISABLED.
-   *
-   * @return True if neither the view nor any ancestor is disabled
-   */
-  bool IsEffectivelyEnabled() const;
-
-  /**
    * @brief Returns true if this view or any of its View ancestors is focused.
    *
    * Unlike the Focused bit in GetState(), this method walks up the scene

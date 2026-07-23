@@ -71,14 +71,6 @@ public:
   void NotifyStateChanged(Ui::View view, ViewState prev, ViewState next, InputEvent cause = InputEvent::Programmatic());
 
   /**
-   * @brief Returns true if the view and all its View ancestors are enabled.
-   *
-   * @param[in] viewImpl  The ViewImpl to test
-   * @return True if neither the view itself nor any ancestor carries ViewState::DISABLED
-   */
-  bool IsEffectivelyEnabled(const ViewImpl& viewImpl) const;
-
-  /**
    * @brief Returns true if the view or any of its View ancestors is focused.
    *
    * @param[in] viewImpl  The ViewImpl to test

@@ -433,11 +433,6 @@ UiColor View::GetCurrentColor() const
   return GetImpl(*this).GetCurrentColor();
 }
 
-bool View::IsEffectivelyEnabled() const
-{
-  return GetImpl(*this).IsEffectivelyEnabled();
-}
-
 bool View::IsEffectivelyFocused() const
 {
   return GetImpl(*this).IsEffectivelyFocused();

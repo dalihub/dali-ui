@@ -1009,11 +1009,6 @@ const ViewState& ViewDataImpl::GetState() const
   return mState;
 }
 
-bool ViewDataImpl::IsEffectivelyEnabled() const
-{
-  return ViewStateManager::Get().IsEffectivelyEnabled(mViewImpl);
-}
-
 bool ViewDataImpl::IsEffectivelyFocused() const
 {
   return ViewStateManager::Get().IsEffectivelyFocused(mViewImpl);

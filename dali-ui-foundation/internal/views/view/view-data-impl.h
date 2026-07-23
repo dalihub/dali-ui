@@ -133,7 +133,6 @@ public:
   LayoutRect   Arrange(const LayoutRect& bounds);
 
   const ViewState&                            GetState() const;
-  bool                                        IsEffectivelyEnabled() const;
   bool                                        IsEffectivelyFocused() const;
   View::LayoutFinishedSignalType&             LayoutFinishedSignal();
   View::StateChangedSignalType&               StateChangedSignal();

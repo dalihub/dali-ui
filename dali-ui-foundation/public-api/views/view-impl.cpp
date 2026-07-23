@@ -160,11 +160,6 @@ const ViewState& ViewImpl::GetState() const
   return mImpl->GetState();
 }
 
-bool ViewImpl::IsEffectivelyEnabled() const
-{
-  return mImpl->IsEffectivelyEnabled();
-}
-
 bool ViewImpl::IsEffectivelyFocused() const
 {
   return mImpl->IsEffectivelyFocused();
