@@ -18,6 +18,7 @@ Whenever the state changes, `StateChangedSignal` fires and delivers a `StateEven
 | `ViewState::FOCUSED` | View has keyboard focus |
 | `ViewState::FOCUS_INDICATED` | View has focus and its focus should be visibly indicated |
 | `ViewState::PRESSED` | View is pressed via touch or key |
+| `ViewState::HOVERED` | View is under hover input |
 | `ViewState::DISABLED` | View is disabled |
 | `ViewState::PSEUDO_DISABLED` | Appears disabled visually but remains interactive |
 | `ViewState::SELECTED` | View is selected |
@@ -40,7 +41,7 @@ Commonly used composite states are also predefined:
 | View type | States it can have |
 |-----------|-------------------|
 | View | `FOCUSED`, `FOCUS_INDICATED`, `DISABLED` |
-| View (Interactive) | + `PRESSED`, `PSEUDO_DISABLED` |
+| View (Interactive) | + `PRESSED`, `HOVERED`, `PSEUDO_DISABLED` |
 | View (Selectable) | + `SELECTED` |
 
 > [!NOTE]
@@ -116,6 +117,7 @@ Predefined states are managed automatically by the system:
 | `FOCUSED` | Focus system | Automatic |
 | `FOCUS_INDICATED` | Focus system | Automatic, based on how focus was reached and whether visible focus feedback should be shown |
 | `PRESSED` | `InteractiveTrait` | Automatic on touch/key input |
+| `HOVERED` | `InteractiveTrait` | Automatic on hover input |
 | `DISABLED` | `View` | `view.SetEnabled(false / true)` |
 | `PSEUDO_DISABLED` | `InteractiveTrait` | `interactiveTrait.SetPseudoDisabled(true / false)` |
 | `SELECTED` | `SelectableTrait` | `selectableTrait.SetSelected(true / false)` |
@@ -128,11 +130,20 @@ view.SetEnabled(false);
 InteractiveTrait interactive = view.AsInteractive();
 interactive.SetPseudoDisabled(true);
 
+// HOVERED
+interactive.HoveredChangedSignal().Connect(tracker, [](View view, bool hovered, InputEvent event) {
+  // hover enter/leave changed the state
+});
+bool hovered = interactive.IsHovered();
+
 // SELECTED (toggle on click)
 SelectableTrait selectable = view.AsSelectable();
 selectable.SetSelected(true);
 selectable.SetToggleByClickEnabled(true);
 ```
+
+> [!NOTE]
+> `HOVERED` is independent from `PRESSED`, so both states can be active at the same time. `SetClickable(false)` does not disable hover state management. `DISABLED` and `PSEUDO_DISABLED` clear `HOVERED` and prevent it from being set.
 
 <br/>
 

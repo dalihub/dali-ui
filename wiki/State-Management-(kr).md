@@ -16,6 +16,7 @@ dali-ui의 View는 현재 상태를 **`ViewState`** 라는 bitmask 값으로 관
 | `ViewState::FOCUSED` | 키보드 포커스를 가진 상태 |
 | `ViewState::FOCUS_INDICATED` | 포커스를 가지고 있고, 그 포커스를 시각적으로 표시해야 하는 상태 |
 | `ViewState::PRESSED` | 터치 또는 키 입력으로 눌린 상태 |
+| `ViewState::HOVERED` | hover 입력이 View 위에 있는 상태 |
 | `ViewState::DISABLED` | 비활성화된 상태 |
 | `ViewState::PSEUDO_DISABLED` | 시각적으로는 비활성화처럼 보이지만 실제로는 상호작용 가능한 상태 |
 | `ViewState::SELECTED` | 선택된 상태 |
@@ -38,7 +39,7 @@ dali-ui의 View는 현재 상태를 **`ViewState`** 라는 bitmask 값으로 관
 | View 종류 | 가질 수 있는 상태 |
 |-----------|-----------------|
 | View | `FOCUSED`, `FOCUS_INDICATED`, `DISABLED` |
-| View (Interactive) | + `PRESSED`, `PSEUDO_DISABLED` |
+| View (Interactive) | + `PRESSED`, `HOVERED`, `PSEUDO_DISABLED` |
 | View (Selectable) | + `SELECTED` |
 
 > [!NOTE]
@@ -120,6 +121,7 @@ predefined 상태들은 시스템이 자동으로 관리합니다.
 | `FOCUSED` | 포커스 시스템 | 자동 |
 | `FOCUS_INDICATED` | 포커스 시스템 | 포커스가 도달한 방식과 시각적 focus 피드백 표시 필요 여부에 따라 자동 |
 | `PRESSED` | `InteractiveTrait` | 터치/키 입력 시 자동 |
+| `HOVERED` | `InteractiveTrait` | hover 입력 시 자동 |
 | `DISABLED` | `View` | `view.SetEnabled(false / true)` |
 | `PSEUDO_DISABLED` | `InteractiveTrait` | `interactiveTrait.SetPseudoDisabled(true / false)` |
 | `SELECTED` | `SelectableTrait` | `selectableTrait.SetSelected(true / false)` |
@@ -132,11 +134,20 @@ view.SetEnabled(false);
 InteractiveTrait interactive = view.AsInteractive();
 interactive.SetPseudoDisabled(true);
 
+// HOVERED
+interactive.HoveredChangedSignal().Connect(tracker, [](View view, bool hovered, InputEvent event) {
+  // hover 진입/해제로 상태가 변경됨
+});
+bool hovered = interactive.IsHovered();
+
 // SELECTED (클릭 시 토글)
 SelectableTrait selectable = view.AsSelectable();
 selectable.SetSelected(true);
 selectable.SetToggleByClickEnabled(true);
 ```
+
+> [!NOTE]
+> `HOVERED`는 `PRESSED`와 독립적이므로 두 상태가 동시에 활성화될 수 있습니다. `SetClickable(false)`는 hover 상태 관리를 비활성화하지 않습니다. `DISABLED`와 `PSEUDO_DISABLED`는 `HOVERED`를 해제하고, 새로 설정되지 않도록 막습니다.
 
 <br/>
 
