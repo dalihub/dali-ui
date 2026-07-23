@@ -376,6 +376,18 @@ int UtcDaliViewNewP(void)
   END_TEST;
 }
 
+int UtcDaliViewLeaveRequiredDefaultP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+
+  DALI_TEST_CHECK(view.GetLeaveRequired());
+
+  view.SetLeaveRequired(false);
+  DALI_TEST_CHECK(!view.GetLeaveRequired());
+  END_TEST;
+}
+
 int UtcDaliViewWithExtensionHookP(void)
 {
   UiTestApplication application;

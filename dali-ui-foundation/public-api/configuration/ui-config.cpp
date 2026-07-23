@@ -568,12 +568,6 @@ UiStyleSheet UiConfig::StyleSheet() const
 
 void UiConfig::DefaultViewInitializer(View view)
 {
-  // NOTE: UI layout coordinates are normally based on the parent's top-left,
-  // while scale/rotation transform origins are normally centered. Keep
-  // ParentOrigin as TOP_LEFT for placement and leave PIVOT unset here so the
-  // DALi default CENTER pivot remains the View transform origin.
-  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
-  view.SetProperty(Actor::Property::POSITION_USES_PIVOT, false);
 }
 
 } // namespace Ui

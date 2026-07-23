@@ -768,13 +768,22 @@ void ViewImpl::Initialize()
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
 
+  View view = View::DownCast(Self());
+  view.SetLeaveRequired(true);
+  // NOTE: UI layout coordinates are normally based on the parent's top-left,
+  // while scale/rotation transform origins are normally centered. Keep
+  // ParentOrigin as TOP_LEFT for placement and leave PIVOT unset here so the
+  // DALi default CENTER pivot remains the View transform origin.
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  view.SetProperty(Actor::Property::POSITION_USES_PIVOT, false);
+
   if(UiConfig::HasCurrent())
   {
-    UiConfig::GetCurrent().GetViewInitializer()(View::DownCast(Self()));
+    UiConfig::GetCurrent().GetViewInitializer()(view);
   }
   else
   {
-    UiConfig::DefaultViewInitializer(View::DownCast(Self()));
+    UiConfig::DefaultViewInitializer(view);
   }
 }
 
