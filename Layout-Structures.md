@@ -29,7 +29,7 @@
 6. [Sizing Constants and Common Properties](#6-sizing-constants-and-common-properties)
    - [WRAP_CONTENT and MATCH_PARENT](#61-wrap_content-and-match_parent)
    - [Margin and Padding](#62-margin-and-padding)
-   - [LayoutParams Sharing](#63-layoutparams-sharing)
+   - [LayoutParams Value Semantics](#63-layoutparams-value-semantics)
 7. [Custom Layout Callbacks](#7-custom-layout-callbacks)
 8. [Layout Processing](#8-layout-processing)
    - [Two-Phase Layout](#81-two-phase-layout)
@@ -138,7 +138,8 @@ root.Add(bottomBar);
 ```cpp
 view.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
 
-StackLayoutParams params = view.GetLayoutParams<StackLayoutParams>();
+StackLayoutParams params;
+view.TryGetLayoutParams(params);
 LayoutAlignment align = params.GetAlignment();
 ```
 
@@ -240,7 +241,8 @@ view.SetLayoutParams(FlexLayoutParams::New()
     .SetFlexBasis(100.0f)
     .SetAlignSelf(FlexAlign::CENTER));
 
-FlexLayoutParams params = view.GetLayoutParams<FlexLayoutParams>();
+FlexLayoutParams params;
+view.TryGetLayoutParams(params);
 ```
 
 | Method | Description | Default |
@@ -366,7 +368,8 @@ view.SetLayoutParams(GridLayoutParams::New()
     .SetHorizontalAlignment(LayoutAlignment::CENTER)
     .SetVerticalAlignment(LayoutAlignment::FILL));
 
-GridLayoutParams params = view.GetLayoutParams<GridLayoutParams>();
+GridLayoutParams params;
+view.TryGetLayoutParams(params);
 ```
 
 | Method | Description | Default |
@@ -447,9 +450,9 @@ absolute.Add(blueBox);
 
 | Method | Description | Default |
 |---|---|---|
-| `SetBounds(LayoutRect)` | Set position and size (x, y, width, height) | `(0, 0, 0, 0)` |
+| `SetBounds(LayoutRect)` | Set position and size (x, y, width, height) | `(0, 0, -1, -1)` |
 | `SetX(float)` / `SetY(float)` | Set position individually | `0` |
-| `SetWidth(float)` / `SetHeight(float)` | Set size individually (`-1` uses View's own size) | `0` |
+| `SetWidth(float)` / `SetHeight(float)` | Set size individually (`-1` uses View's own size) | `-1` |
 | `SetFlags(AbsoluteLayoutFlags)` | Proportional positioning/sizing flags | `NONE` |
 
 ---
@@ -515,19 +518,24 @@ Extents padding = view.GetViewPadding();
 
 ---
 
-### 6.3 LayoutParams Sharing
+### 6.3 LayoutParams Value Semantics
 
-`SetLayoutParams()` stores the handle **as-is** without deep copy. Passing the same handle to multiple Views causes them to share state. Use `New(other)` to create independent copies.
+`SetLayoutParams()` stores an independent copy. `TryGetLayoutParams(out)` copies out an independent snapshot; modify the snapshot and pass it back to `SetLayoutParams()` to commit the change and invalidate layout.
 
 ```cpp
-auto base = GridLayoutParams::New().SetRowSpan(2).SetColumnSpan(2);
+auto params = GridLayoutParams::New().SetRowSpan(2).SetColumnSpan(2);
 
-// Independent copies — changing one does not affect the other
-viewA.SetLayoutParams(GridLayoutParams::New(base).SetColumn(0));
-viewB.SetLayoutParams(GridLayoutParams::New(base).SetColumn(1));
+params.SetColumn(0);
+viewA.SetLayoutParams(params);
+
+params.SetColumn(1);
+viewB.SetLayoutParams(params); // viewA keeps column 0
+
+GridLayoutParams snapshot;
+viewA.TryGetLayoutParams(snapshot);
+snapshot.SetRow(1);              // viewA is unchanged
+viewA.SetLayoutParams(snapshot); // commit and invalidate layout
 ```
-
-> **Important:** Without `New(other)`, two views sharing the same params handle will reflect each other's changes.
 
 ---
 
@@ -657,7 +665,7 @@ LayoutController controller = LayoutController::Get(window);
 
 | Property | Default |
 |---|---|
-| `Bounds` | `(0, 0, 0, 0)` |
+| `Bounds` | `(0, 0, -1, -1)` |
 | `Flags` | `NONE` |
 
 ---
@@ -668,7 +676,7 @@ LayoutController controller = LayoutController::Get(window);
 
 - **One LayoutManager per View.** Each layout subclass (StackLayout, FlexLayout, etc.) attaches its LayoutManager during initialization. Custom layouts can subclass `LayoutManager` and attach it to any View via `View::AttachLayoutManager()`.
 
-- **LayoutParams are stored as-is.** `SetLayoutParams()` does not deep-copy the handle. Use `New(other)` (e.g., `GridLayoutParams::New(base)`) to create independent copies when reusing params across multiple Views.
+- **LayoutParams use value semantics.** `SetLayoutParams()` stores an independent copy, and `TryGetLayoutParams(out)` copies out a snapshot that must be passed back to `SetLayoutParams()` to commit changes.
 
 - **Callbacks override the LayoutManager.** When `SetMeasureCallback()` or `SetArrangeCallback()` is set on a View, the callbacks take priority over the default LayoutManager for that View.
 

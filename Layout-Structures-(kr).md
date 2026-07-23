@@ -27,7 +27,7 @@
 6. [크기 상수와 공통 속성](#6-크기-상수와-공통-속성)
    - [WRAP_CONTENT와 MATCH_PARENT](#61-wrap_content와-match_parent)
    - [마진과 패딩](#62-마진과-패딩)
-   - [LayoutParams 공유](#63-layoutparams-공유)
+   - [LayoutParams 값 의미론](#63-layoutparams-값-의미론)
 7. [커스텀 레이아웃 콜백](#7-커스텀-레이아웃-콜백)
 8. [레이아웃 처리](#8-레이아웃-처리)
    - [2단계 레이아웃](#81-2단계-레이아웃)
@@ -137,7 +137,8 @@ root.Add(bottomBar);
 ```cpp
 view.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::CENTER));
 
-StackLayoutParams params = view.GetLayoutParams<StackLayoutParams>();
+StackLayoutParams params;
+view.TryGetLayoutParams(params);
 LayoutAlignment align = params.GetAlignment();
 ```
 
@@ -239,7 +240,8 @@ view.SetLayoutParams(FlexLayoutParams::New()
     .SetFlexBasis(100.0f)
     .SetAlignSelf(FlexAlign::CENTER));
 
-FlexLayoutParams params = view.GetLayoutParams<FlexLayoutParams>();
+FlexLayoutParams params;
+view.TryGetLayoutParams(params);
 ```
 
 | 메서드 | 설명 | 기본값 |
@@ -364,7 +366,8 @@ view.SetLayoutParams(GridLayoutParams::New()
     .SetHorizontalAlignment(LayoutAlignment::CENTER)
     .SetVerticalAlignment(LayoutAlignment::FILL));
 
-GridLayoutParams params = view.GetLayoutParams<GridLayoutParams>();
+GridLayoutParams params;
+view.TryGetLayoutParams(params);
 ```
 
 | 메서드 | 설명 | 기본값 |
@@ -445,9 +448,9 @@ absolute.Add(blueBox);
 
 | 메서드 | 설명 | 기본값 |
 |---|---|---|
-| `SetBounds(LayoutRect)` | 위치와 크기 설정 (x, y, width, height) | `(0, 0, 0, 0)` |
+| `SetBounds(LayoutRect)` | 위치와 크기 설정 (x, y, width, height) | `(0, 0, -1, -1)` |
 | `SetX(float)` / `SetY(float)` | 위치를 개별 설정 | `0` |
-| `SetWidth(float)` / `SetHeight(float)` | 크기를 개별 설정 (`-1`이면 View 자체 크기 사용) | `0` |
+| `SetWidth(float)` / `SetHeight(float)` | 크기를 개별 설정 (`-1`이면 View 자체 크기 사용) | `-1` |
 | `SetFlags(AbsoluteLayoutFlags)` | 비례 위치/크기 플래그 | `NONE` |
 
 ---
@@ -511,19 +514,24 @@ Extents padding = view.GetViewPadding();
 
 ---
 
-### 6.3 LayoutParams 공유
+### 6.3 LayoutParams 값 의미론
 
-`SetLayoutParams()`는 핸들을 깊은 복사 없이 **그대로** 저장합니다. 같은 핸들을 여러 View에 전달하면 상태를 공유하게 됩니다. 독립적인 복사본을 만들려면 `New(other)`를 사용하세요.
+`SetLayoutParams()`는 독립적인 복사본을 저장합니다. `TryGetLayoutParams(out)`은 독립적인 스냅샷을 복사해 내보내며, 변경 사항을 반영하고 레이아웃을 무효화하려면 수정한 스냅샷을 `SetLayoutParams()`에 다시 전달해야 합니다.
 
 ```cpp
-auto base = GridLayoutParams::New().SetRowSpan(2).SetColumnSpan(2);
+auto params = GridLayoutParams::New().SetRowSpan(2).SetColumnSpan(2);
 
-// 독립적인 복사본 — 하나를 변경해도 다른 것에 영향 없음
-viewA.SetLayoutParams(GridLayoutParams::New(base).SetColumn(0));
-viewB.SetLayoutParams(GridLayoutParams::New(base).SetColumn(1));
+params.SetColumn(0);
+viewA.SetLayoutParams(params);
+
+params.SetColumn(1);
+viewB.SetLayoutParams(params); // viewA는 column 0을 유지
+
+GridLayoutParams snapshot;
+viewA.TryGetLayoutParams(snapshot);
+snapshot.SetRow(1);              // viewA는 아직 변경되지 않음
+viewA.SetLayoutParams(snapshot); // 변경 반영 및 레이아웃 무효화
 ```
-
-> **중요:** `New(other)` 없이 같은 params 핸들을 공유하면 두 뷰가 서로의 변경 사항을 반영하게 됩니다.
 
 ---
 
@@ -688,7 +696,7 @@ view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0
 
 | 속성 | 기본값 |
 |---|---|
-| `Bounds` | `(0, 0, 0, 0)` |
+| `Bounds` | `(0, 0, -1, -1)` |
 | `Flags` | `NONE` |
 
 ---
@@ -699,7 +707,7 @@ view.SetLayoutParams(FlexLayoutParams::New().SetFlexGrow(1.0f).SetFlexShrink(0.0
 
 - **View당 하나의 LayoutManager.** 각 레이아웃 서브클래스(StackLayout, FlexLayout 등)는 초기화 시 자체 LayoutManager를 연결합니다. 커스텀 레이아웃은 `LayoutManager`를 서브클래싱하고 `View::AttachLayoutManager()`로 임의의 View에 연결할 수 있습니다.
 
-- **LayoutParams는 그대로 저장됩니다.** `SetLayoutParams()`는 핸들을 깊은 복사하지 않습니다. 여러 View에 params를 재사용할 때는 `New(other)` (예: `GridLayoutParams::New(base)`)를 사용하여 독립적인 복사본을 만드세요.
+- **LayoutParams는 값 의미론을 사용합니다.** `SetLayoutParams()`는 독립적인 복사본을 저장하며, `TryGetLayoutParams(out)`으로 얻은 스냅샷의 변경은 `SetLayoutParams()`로 다시 전달해야 반영됩니다.
 
 - **콜백은 LayoutManager를 재정의합니다.** View에 `SetMeasureCallback()` 또는 `SetArrangeCallback()`이 설정되면, 해당 View에서 콜백이 기본 LayoutManager보다 우선합니다.
 

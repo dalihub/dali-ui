@@ -191,12 +191,12 @@ grid.AddChildren({header, sideBar, main, footer});
 ```cpp
 // 동일한 base params를 복사해서 여러 자식에 사용
 auto base = GridLayoutParams::New().SetRowSpan(2).SetColumnSpan(2);
-viewA.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(0));
-viewB.SetLayoutParams(GridLayoutParams::New(base).SetRow(0).SetColumn(2));
+viewA.SetLayoutParams(GridLayoutParams(base).SetRow(0).SetColumn(0));
+viewB.SetLayoutParams(GridLayoutParams(base).SetRow(0).SetColumn(2));
 ```
 
-> **주의**: `SetLayoutParams()`는 핸들을 그대로 저장합니다. 동일한 params 핸들을 여러 View에 전달하면
-> 상태를 공유하게 됩니다. 여러 View에 재사용할 때는 반드시 `New(other)`로 복사하세요.
+> **참고**: `SetLayoutParams()`는 독립적인 복사본을 저장합니다. 같은 params 핸들을 여러 View에
+> 재사용해도 안전하며, 이후 입력 핸들을 변경해도 이미 설정된 View에는 영향을 주지 않습니다.
 
 샘플: [gridlayout](https://github.com/dalihub/dali-ui/tree/devel/samples/gridlayout)
 
