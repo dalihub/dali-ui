@@ -147,7 +147,7 @@ static const ViewState Error   = ViewState::Create("Error");
 auto loadingOrError = Loading + Error;
 ```
 
-> Activating and deactivating custom states is done via `Integration::SetState()`, which targets Framework developers.
+> Activating and deactivating custom states is done via `Extension::SetState()`, which targets extension developers.
 
 > `ViewState` has 32 total bit slots. Predefined states use some of those slots, and the remaining slots can be used for custom states. Registering beyond the available bit space throws a `DaliException`.
 
@@ -159,14 +159,33 @@ auto loadingOrError = Loading + Error;
 
 <br/>
 
-## Framework Developer Notes
+## Extension Developer Notes
 
-Use `Integration::SetState()` to turn a custom state on or off. `StateChangedSignal` is emitted automatically.
+Use `Extension::SetState()` to turn a custom state on or off. `StateChangedSignal` is emitted automatically.
 
 ```cpp
-Integration::SetState(viewImpl, Loading, true);   // activate Loading state
-Integration::SetState(viewImpl, Loading, false);  // deactivate Loading state
+Extension::SetState(viewImpl, Loading, true);   // activate Loading state
+Extension::SetState(viewImpl, Loading, false);  // deactivate Loading state
 ```
+
+Extensions that need an ID-addressable observer can use `SetNamedStateObserver()`.
+Registering the same ID again replaces the previous observer, and destroying
+the connection tracker removes its observers automatically.
+
+```cpp
+Extension::SetNamedStateObserver(viewImpl, "LoadingStyle", tracker,
+  [](View view, const StateEvent& event) {
+    // React to the state transition.
+  });
+
+Extension::UnsetNamedStateObserver(viewImpl, "LoadingStyle");
+```
+
+Do not replace or directly unset an observer from inside the callback registered
+with the same ID. Code that may run from that callback can use
+`UnsetNamedStateObserverIfNotExecuting()`; it returns `false` when that observer
+is currently executing or does not exist. An observer with a different ID may
+still be removed while observers are being dispatched.
 
 For theme/color integration based on state, refer to the Framework Developer Notes in the Color & Theme document.
 
