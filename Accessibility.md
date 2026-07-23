@@ -249,7 +249,7 @@ Use a different API depending on when the highlight is requested.
 Situation | API | Behavior
 --|--|--
 A page, window, or modal is first shown | `View::SetRequestInitialAccessibilityHighlight(true)` | Provides metadata for the Screen Reader to select the initial target while building its accessibility context.
-Move immediately within an already visible, stable screen | `Extension::GrabAccessibilityHighlight(view)` | Moves the current DALi accessibility highlight to the target and reports the `HIGHLIGHTED` change to clients.
+Move immediately within an already visible, stable screen | `Extension::View::GrabAccessibilityHighlight(view)` | Moves the current DALi accessibility highlight to the target and reports the `HIGHLIGHTED` change to clients.
 
 ### Initial Highlight for a Page
 
@@ -276,7 +276,7 @@ This function is an extension API, so include its extension header.
 ```cpp
 #include <dali-ui-foundation/extension-api/view.h>
 
-bool moved = Dali::Ui::Extension::GrabAccessibilityHighlight(targetView);
+bool moved = Dali::Ui::Extension::View::GrabAccessibilityHighlight(targetView);
 if(!moved)
 {
   // The Screen Reader bridge is inactive, or highlight could not be applied.
@@ -296,7 +296,7 @@ The return value means:
 `true` is not an acknowledgement that the Screen Reader started or completed speech. If the same View is already highlighted, the function returns `true` without sending another `HIGHLIGHTED` event, so it is not a re-announcement API.
 
 ```cpp
-bool cleared = Dali::Ui::Extension::ClearAccessibilityHighlight(targetView);
+bool cleared = Dali::Ui::Extension::View::ClearAccessibilityHighlight(targetView);
 ```
 
 `ClearAccessibilityHighlight()` returns `true` only when the target View was currently highlighted and the highlight was cleared.
