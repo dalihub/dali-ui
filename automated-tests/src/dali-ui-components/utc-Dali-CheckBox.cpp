@@ -18,7 +18,7 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
@@ -62,8 +62,8 @@ UiStyle CreateCheckBoxOverride()
 }
 
 // Capture-less icon generator for CheckBoxStyle::SetIconGenerator(). Must be a free function
-// (IconGenerator = Ui::Callback<ISelectableImage()>); a capturing lambda would not convert.
-ISelectableImage MakeTestIcon()
+// (IconGenerator = Ui::Callback<SelectableImageInterface()>); a capturing lambda would not convert.
+SelectableImageInterface MakeTestIcon()
 {
   return SelectableLottieAnimationView::New(
     SelectableLottieImage("i_check_box.json",
@@ -170,7 +170,7 @@ int UtcDaliCheckBoxStyleBuilderRoundTrip(void)
   DALI_TEST_EQUALS(style.GetIconHeight(), 28.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetLabelGap(), 8.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetMinimumWidth(), 48.0f, TEST_LOCATION);
-  ISelectableImage icon = style.CreateIcon();
+  SelectableImageInterface icon = style.CreateIcon();
   DALI_TEST_CHECK(icon);
   DALI_TEST_CHECK(icon.GetView());
 
@@ -303,7 +303,7 @@ int UtcDaliCheckBoxStyleP(void)
   DALI_TEST_EQUALS(style.GetIconWidth(), 40.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetIconHeight(), 28.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(style.GetLabelGap(), 10.0f, TEST_LOCATION);
-  ISelectableImage icon = style.CreateIcon();
+  SelectableImageInterface icon = style.CreateIcon();
   DALI_TEST_CHECK(icon);
   DALI_TEST_CHECK(icon.GetView());
   DALI_TEST_EQUALS(style.GetIconColor().GetRgba(), Color::RED, TEST_LOCATION);

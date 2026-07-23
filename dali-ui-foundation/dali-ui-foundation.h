@@ -51,8 +51,8 @@
 #include <dali-ui-foundation/public-api/views/effects/shadow-stack.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
 #include <dali-ui-foundation/public-api/views/group-selectable-view.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-foundation/public-api/views/interactive-view.h>
 #include <dali-ui-foundation/public-api/views/recycler/item-adapter.h>

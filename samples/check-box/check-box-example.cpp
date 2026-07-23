@@ -49,12 +49,12 @@ constexpr float CHECKBOX_HEIGHT = 56.0f;
 // inner-fill recolour key path. Here we reuse the shipped asset (via the default style's icon)
 // and pass the same [0,19] / [20,38] segments and key path ("check_box " has a trailing space,
 // matching the asset layer); a real app can swap in its own asset. Must be a free function
-// (IconGenerator = Ui::Callback<ISelectableImage()>).
-ISelectableImage MakeSampleIcon()
+// (IconGenerator = Ui::Callback<SelectableImageInterface()>).
+SelectableImageInterface MakeSampleIcon()
 {
   // Recover the shipped checkbox.json url from the default icon's drawing view.
-  ISelectableImage defaultIcon = CheckBoxStyle::Default().CreateIcon();
-  Dali::String     url         = LottieAnimationView::DownCast(defaultIcon.GetView()).GetResourceUrl();
+  SelectableImageInterface defaultIcon = CheckBoxStyle::Default().CreateIcon();
+  Dali::String             url         = LottieAnimationView::DownCast(defaultIcon.GetView()).GetResourceUrl();
   return SelectableLottieAnimationView::New(
     SelectableLottieImage(url,
                           SelectableLottieImage::FrameRange(0, 19),

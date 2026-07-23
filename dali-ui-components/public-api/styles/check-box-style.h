@@ -24,7 +24,7 @@
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 
@@ -51,7 +51,7 @@ public:
    * A stateless free function is the expected implementation, so the same generator can be
    * shared across style copies. Move-only (Ui::Callback is move-only).
    */
-  using IconGenerator = Ui::Callback<ISelectableImage()>;
+  using IconGenerator = Ui::Callback<SelectableImageInterface()>;
 
   CheckBoxStyle() = default;
 
@@ -71,7 +71,7 @@ public:
   float GetIconHeight() const;
   float GetLabelGap() const;
 
-  ISelectableImage CreateIcon() const;
+  SelectableImageInterface CreateIcon() const;
 
   UiColor GetIconColor() const;
   UiColor GetSelectedIconColor() const;

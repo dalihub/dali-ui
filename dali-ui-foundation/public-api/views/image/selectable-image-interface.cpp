@@ -16,52 +16,52 @@
  */
 
 // CLASS HEADER
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/i-selectable-image-impl.h>
+#include <dali-ui-foundation/integration-api/selectable-image-interface-impl.h>
 
 namespace Dali
 {
 namespace Ui
 {
 
-ISelectableImage ISelectableImage::DownCast(BaseHandle handle)
+SelectableImageInterface SelectableImageInterface::DownCast(BaseHandle handle)
 {
-  return ISelectableImage(dynamic_cast<Integration::ISelectableImageImpl*>(handle.GetObjectPtr()));
+  return SelectableImageInterface(dynamic_cast<Integration::SelectableImageInterfaceImpl*>(handle.GetObjectPtr()));
 }
 
-Ui::View ISelectableImage::GetView() const
+Ui::View SelectableImageInterface::GetView() const
 {
   return GetImpl(*this).GetView();
 }
 
-void ISelectableImage::SetSelected(bool selected)
+void SelectableImageInterface::SetSelected(bool selected)
 {
   GetImpl(*this).SetSelected(selected);
 }
 
-void ISelectableImage::SetSelected(bool selected, bool animated)
+void SelectableImageInterface::SetSelected(bool selected, bool animated)
 {
   GetImpl(*this).SetSelected(selected, animated);
 }
 
-void ISelectableImage::SetStateColors(const Vector4& deselected, const Vector4& selected)
+void SelectableImageInterface::SetStateColors(const Vector4& deselected, const Vector4& selected)
 {
   GetImpl(*this).SetStateColors(deselected, selected);
 }
 
-bool ISelectableImage::IsTransitioning() const
+bool SelectableImageInterface::IsTransitioning() const
 {
   return GetImpl(*this).IsTransitioning();
 }
 
-ISelectableImage::TransitionFinishedSignalType& ISelectableImage::TransitionFinishedSignal()
+SelectableImageInterface::TransitionFinishedSignalType& SelectableImageInterface::TransitionFinishedSignal()
 {
   return GetImpl(*this).TransitionFinishedSignal();
 }
 
-ISelectableImage::ISelectableImage(Integration::ISelectableImageImpl* impl)
+SelectableImageInterface::SelectableImageInterface(Integration::SelectableImageInterfaceImpl* impl)
 : BaseHandle(impl)
 {
 }

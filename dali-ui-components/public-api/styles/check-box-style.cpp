@@ -53,8 +53,8 @@ Dali::String DefaultIconUrl()
 // with the segment layout from its markers — select plays [0,19] (the "on" marker), deselect
 // plays [20,38] (the "off" marker). The inner-fill key path targets the recoloured fill layer
 // ("check_box " has a trailing space, matching the asset layer name). Must be a free function
-// (IconGenerator = Ui::Callback<ISelectableImage()>).
-ISelectableImage MakeDefaultCheckBoxIcon()
+// (IconGenerator = Ui::Callback<SelectableImageInterface()>).
+SelectableImageInterface MakeDefaultCheckBoxIcon()
 {
   return SelectableLottieAnimationView::New(SelectableLottieImage(DefaultIconUrl(),
                                                                   SelectableLottieImage::FrameRange(0, 19),
@@ -127,7 +127,7 @@ float CheckBoxStyle::GetLabelGap() const
 {
   return GetImpl(*this).GetLabelGap();
 }
-ISelectableImage CheckBoxStyle::CreateIcon() const
+SelectableImageInterface CheckBoxStyle::CreateIcon() const
 {
   return GetImpl(*this).CreateIcon();
 }

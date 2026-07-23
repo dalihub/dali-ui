@@ -18,7 +18,7 @@
  */
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/i-selectable-image-impl.h>
+#include <dali-ui-foundation/integration-api/selectable-image-interface-impl.h>
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
 
@@ -37,16 +37,16 @@ namespace Integration
 /**
  * @brief Internal implementation for SelectableLottieAnimationView.
  *
- * A plain BaseObject that implements Integration::ISelectableImageImpl by COMPOSING a single
+ * A plain BaseObject that implements Integration::SelectableImageInterfaceImpl by COMPOSING a single
  * Ui::LottieAnimationView: it drives that glyph between a "selected" and a "deselected" state
  * by playing (or snapping to) the configured frame segments, and recolours the checked inner
  * fill per-frame with the pre-resolved state colours pushed by the owning component. It
- * inherits the SetSelected() template from ISelectableImageImpl and reimplements only
+ * inherits the SetSelected() template from SelectableImageInterfaceImpl and reimplements only
  * OnSelectedChanged() plus the drawing/state accessors.
  *
  * @see Dali::Ui::SelectableLottieAnimationView
  */
-class SelectableLottieAnimationViewImpl : public ISelectableImageImpl
+class SelectableLottieAnimationViewImpl : public SelectableImageInterfaceImpl
 {
 public:
   using FrameRange = Ui::SelectableLottieImage::FrameRange;
@@ -65,30 +65,30 @@ public:
                                                 const FrameRange&   deselectRange,
                                                 const Dali::String& keyPath = Dali::String());
 
-public: // From Integration::ISelectableImageImpl
+public: // From Integration::SelectableImageInterfaceImpl
   /**
-   * @copydoc Dali::Ui::Integration::ISelectableImageImpl::GetView
+   * @copydoc Dali::Ui::Integration::SelectableImageInterfaceImpl::GetView
    */
   Ui::View GetView() const override;
 
   /**
-   * @copydoc Dali::Ui::Integration::ISelectableImageImpl::SetStateColors
+   * @copydoc Dali::Ui::Integration::SelectableImageInterfaceImpl::SetStateColors
    */
   void SetStateColors(const Vector4& deselected, const Vector4& selected) override;
 
   /**
-   * @copydoc Dali::Ui::Integration::ISelectableImageImpl::IsTransitioning
+   * @copydoc Dali::Ui::Integration::SelectableImageInterfaceImpl::IsTransitioning
    */
   bool IsTransitioning() const override;
 
   /**
-   * @copydoc Dali::Ui::Integration::ISelectableImageImpl::TransitionFinishedSignal
+   * @copydoc Dali::Ui::Integration::SelectableImageInterfaceImpl::TransitionFinishedSignal
    */
-  ISelectableImage::TransitionFinishedSignalType& TransitionFinishedSignal() override;
+  SelectableImageInterface::TransitionFinishedSignalType& TransitionFinishedSignal() override;
 
-protected: // From Integration::ISelectableImageImpl
+protected: // From Integration::SelectableImageInterfaceImpl
   /**
-   * @copydoc Dali::Ui::Integration::ISelectableImageImpl::OnSelectedChanged
+   * @copydoc Dali::Ui::Integration::SelectableImageInterfaceImpl::OnSelectedChanged
    *
    * Plays (or snaps to) the select/deselect segment and re-seats the inner-fill recolour.
    */

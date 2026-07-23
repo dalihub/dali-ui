@@ -19,7 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 // EXTERNAL INCLUDES
@@ -36,7 +36,7 @@ namespace Integration
 /**
  * @brief Implementation-side base for a selectable image's behaviour.
  *
- * This is the implementation counterpart of the public Ui::ISelectableImage handle. It is a
+ * This is the implementation counterpart of the public Ui::SelectableImageInterface handle. It is a
  * plain Dali::BaseObject (NOT a scene actor), so a concrete image implementation composes the
  * actual drawing view (e.g. a Ui::LottieAnimationView member) rather than inheriting one.
  *
@@ -44,9 +44,9 @@ namespace Integration
  * contract and delegates the format-specific work to the protected virtual OnSelectedChanged()
  * hook, so a new image kind only reimplements OnSelectedChanged() plus the pure virtuals below.
  *
- * @see Dali::Ui::ISelectableImage
+ * @see Dali::Ui::SelectableImageInterface
  */
-class DALI_UI_API ISelectableImageImpl : public Dali::BaseObject
+class DALI_UI_API SelectableImageInterfaceImpl : public Dali::BaseObject
 {
 public:
   /**
@@ -71,35 +71,35 @@ public:
   }
 
   /**
-   * @copydoc Dali::Ui::ISelectableImage::GetView
+   * @copydoc Dali::Ui::SelectableImageInterface::GetView
    */
   virtual Ui::View GetView() const = 0;
 
   /**
-   * @copydoc Dali::Ui::ISelectableImage::SetStateColors
+   * @copydoc Dali::Ui::SelectableImageInterface::SetStateColors
    */
   virtual void SetStateColors(const Vector4& deselected, const Vector4& selected) = 0;
 
   /**
-   * @copydoc Dali::Ui::ISelectableImage::IsTransitioning
+   * @copydoc Dali::Ui::SelectableImageInterface::IsTransitioning
    */
   virtual bool IsTransitioning() const = 0;
 
   /**
-   * @copydoc Dali::Ui::ISelectableImage::TransitionFinishedSignal
+   * @copydoc Dali::Ui::SelectableImageInterface::TransitionFinishedSignal
    */
-  virtual ISelectableImage::TransitionFinishedSignalType& TransitionFinishedSignal() = 0;
+  virtual SelectableImageInterface::TransitionFinishedSignalType& TransitionFinishedSignal() = 0;
 
 protected:
   /**
    * @brief Constructor.
    */
-  ISelectableImageImpl() = default;
+  SelectableImageInterfaceImpl() = default;
 
   /**
    * @brief A reference counted object may only be deleted by calling Unreference().
    */
-  ~ISelectableImageImpl() override = default;
+  ~SelectableImageInterfaceImpl() override = default;
 
   /**
    * @brief Format-specific hook that renders the requested state.
@@ -114,16 +114,16 @@ protected:
 
 } // namespace Integration
 
-inline DALI_UI_API Integration::ISelectableImageImpl& GetImpl(ISelectableImage& obj)
+inline DALI_UI_API Integration::SelectableImageInterfaceImpl& GetImpl(SelectableImageInterface& obj)
 {
   BaseObject& handle = obj.GetBaseObject();
-  return static_cast<Integration::ISelectableImageImpl&>(handle);
+  return static_cast<Integration::SelectableImageInterfaceImpl&>(handle);
 }
 
-inline DALI_UI_API const Integration::ISelectableImageImpl& GetImpl(const ISelectableImage& obj)
+inline DALI_UI_API const Integration::SelectableImageInterfaceImpl& GetImpl(const SelectableImageInterface& obj)
 {
   const BaseObject& handle = obj.GetBaseObject();
-  return static_cast<const Integration::ISelectableImageImpl&>(handle);
+  return static_cast<const Integration::SelectableImageInterfaceImpl&>(handle);
 }
 
 } // namespace Ui

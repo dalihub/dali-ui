@@ -41,7 +41,7 @@ SelectableLottieAnimationView SelectableLottieAnimationView::DownCast(BaseHandle
 }
 
 SelectableLottieAnimationView::SelectableLottieAnimationView(Integration::SelectableLottieAnimationViewImpl* impl)
-: ISelectableImage(impl)
+: SelectableImageInterface(impl)
 {
 }
 

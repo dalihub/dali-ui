@@ -19,7 +19,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/types/selectable-lottie-image.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 
 namespace Dali
 {
@@ -38,7 +38,7 @@ class SelectableLottieAnimationViewImpl;
  * "deselect" segment for the deselected state, and recolours the checked inner fill with the
  * pre-resolved state colours pushed by the owning component.
  *
- * It is an ISelectableImage (a behaviour handle), NOT a View: it COMPOSES a LottieAnimationView
+ * It is a SelectableImageInterface (a behaviour handle), NOT a View: it COMPOSES a LottieAnimationView
  * internally and exposes it via GetView() so the owning control can place it into its tree.
  * The selection state itself is owned by the component; this image only renders the state it is
  * told to via SetSelected().
@@ -54,7 +54,7 @@ class SelectableLottieAnimationViewImpl;
  * image.SetSelected(true, true); // animate to selected
  * @endcode
  */
-class DALI_UI_API SelectableLottieAnimationView : public ISelectableImage
+class DALI_UI_API SelectableLottieAnimationView : public SelectableImageInterface
 {
 public: // Creation & Destruction
   /**

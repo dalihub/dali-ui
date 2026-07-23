@@ -15,8 +15,8 @@
  *
  */
 
-#ifndef DALI_UI_FOUNDATION_I_SELECTABLE_IMAGE_H
-#define DALI_UI_FOUNDATION_I_SELECTABLE_IMAGE_H
+#ifndef DALI_UI_FOUNDATION_SELECTABLE_IMAGE_INTERFACE_H
+#define DALI_UI_FOUNDATION_SELECTABLE_IMAGE_INTERFACE_H
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
@@ -33,7 +33,7 @@ namespace Ui
 {
 namespace Integration
 {
-class ISelectableImageImpl;
+class SelectableImageInterfaceImpl;
 }
 
 /**
@@ -44,38 +44,38 @@ class ISelectableImageImpl;
  * itself; it only tells the image which state to render via SetSelected(). The concrete
  * image kind (Lottie today; possibly png/svg/gif later) decides how to render that state
  * and, crucially, which scene view actually draws it: the drawing view is obtained with
- * GetView() and composed into the control's tree, so an ISelectableImage is NOT itself a
+ * GetView() and composed into the control's tree, so a SelectableImageInterface is NOT itself a
  * View.
  *
- * This is a BaseHandle whose implementation (Integration::ISelectableImageImpl) carries the
+ * This is a BaseHandle whose implementation (Integration::SelectableImageInterfaceImpl) carries the
  * behaviour. A concrete image handle (e.g. SelectableLottieAnimationView) derives from this
  * interface and creates the matching implementation.
  *
  * @code
- * ISelectableImage image = SelectableLottieAnimationView::New(...);
+ * SelectableImageInterface image = SelectableLottieAnimationView::New(...);
  * Ui::View view = image.GetView(); // the actual scene view to place
  * image.SetStateColors(deselectedRgba, selectedRgba);
  * image.SetSelected(true, true);   // animate to selected
  * @endcode
  */
-class DALI_UI_API ISelectableImage : public BaseHandle
+class DALI_UI_API SelectableImageInterface : public BaseHandle
 {
 public:
   /// @brief Transition-finished signal type. Emitted when the state transition completes.
   using TransitionFinishedSignalType = Signal<void(View)>;
 
   /**
-   * @brief Creates an uninitialized ISelectableImage handle.
+   * @brief Creates an uninitialized SelectableImageInterface handle.
    */
-  ISelectableImage() = default;
+  SelectableImageInterface() = default;
 
   /**
-   * @brief Downcasts a handle to ISelectableImage.
+   * @brief Downcasts a handle to SelectableImageInterface.
    *
    * @param[in] handle The handle to downcast
-   * @return An initialized ISelectableImage on success, otherwise empty
+   * @return An initialized SelectableImageInterface on success, otherwise empty
    */
-  static ISelectableImage DownCast(BaseHandle handle);
+  static SelectableImageInterface DownCast(BaseHandle handle);
 
   /**
    * @brief Returns the scene view that draws this image.
@@ -126,14 +126,14 @@ public:
 
 protected:
   /**
-   * @brief Creates an ISelectableImage handle from its implementation.
+   * @brief Creates a SelectableImageInterface handle from its implementation.
    *
    * @param[in] impl The implementation object
    */
-  explicit ISelectableImage(Integration::ISelectableImageImpl* impl);
+  explicit SelectableImageInterface(Integration::SelectableImageInterfaceImpl* impl);
 };
 
 } // namespace Ui
 } // namespace Dali
 
-#endif // DALI_UI_FOUNDATION_I_SELECTABLE_IMAGE_H
+#endif // DALI_UI_FOUNDATION_SELECTABLE_IMAGE_INTERFACE_H

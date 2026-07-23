@@ -16,8 +16,8 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
 #include <dali-ui-foundation/public-api/views/image/lottie-animation-view.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/image/selectable-lottie-animation-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/public-api/actors/actor.h>
@@ -81,7 +81,7 @@ int UtcDaliSelectableLottieAnimationViewGetViewP(void)
   END_TEST;
 }
 
-// DownCasts from a base handle through the ISelectableImage handle chain.
+// DownCasts from a base handle through the SelectableImageInterface handle chain.
 int UtcDaliSelectableLottieAnimationViewDownCastP(void)
 {
   UiTestApplication             application;
@@ -91,7 +91,7 @@ int UtcDaliSelectableLottieAnimationViewDownCastP(void)
   SelectableLottieAnimationView roundTrip = SelectableLottieAnimationView::DownCast(base);
   DALI_TEST_CHECK(roundTrip);
 
-  ISelectableImage asInterface = ISelectableImage::DownCast(base);
+  SelectableImageInterface asInterface = SelectableImageInterface::DownCast(base);
   DALI_TEST_CHECK(asInterface);
 
   END_TEST;

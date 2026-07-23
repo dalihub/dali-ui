@@ -20,7 +20,7 @@
 #include <dali-ui-components/public-api/styles/check-box-style.h>
 #include <dali-ui-foundation/extension-api/styles/ui-style-impl.h>
 #include <dali-ui-foundation/public-api/types/callback.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 
 // EXTERNAL INCLUDES
 #include <memory>
@@ -57,9 +57,9 @@ public:
   {
     mIconGenerator = std::make_shared<CheckBoxStyle::IconGenerator>(std::move(generator));
   }
-  ISelectableImage CreateIcon() const
+  SelectableImageInterface CreateIcon() const
   {
-    return mIconGenerator ? mIconGenerator->Invoke() : ISelectableImage();
+    return mIconGenerator ? mIconGenerator->Invoke() : SelectableImageInterface();
   }
 
   void    SetIconColor(const UiColor& color);

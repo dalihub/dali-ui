@@ -49,7 +49,7 @@ DALI_TYPE_REGISTRATION_END()
 // The DEFAULT asset (checkbox.json) exposes two markers: "on" (frames 0..18) and "off"
 // (frames 20..38). The default select plays [0,19] (the +1 lands on the settled checked frame)
 // and deselect plays [20,38]. The style's icon generator
-// builds the selectable image (an ISelectableImage that composes the Lottie glyph); the image
+// builds the selectable image (a SelectableImageInterface that composes the Lottie glyph); the image
 // owns the frame-range playback and the state-driven inner-fill recolour internally.
 
 } // namespace
@@ -190,7 +190,7 @@ void CheckBoxImpl::ApplyInitialStyle(CheckBoxStyle style)
   // ranges are baked into it); the image owns the frame-range playback and the per-frame
   // inner-fill recolour. GetView() is the scene view the image draws into.
   mIcon = style.CreateIcon();
-  DALI_ASSERT_ALWAYS(mIcon && "CheckBox icon generator returned an empty ISelectableImage");
+  DALI_ASSERT_ALWAYS(mIcon && "CheckBox icon generator returned an empty SelectableImageInterface");
   Ui::View iconView = mIcon.GetView();
   Self().Add(iconView);
   mIcon.TransitionFinishedSignal().Connect(this, &CheckBoxImpl::OnAnimationFinished);

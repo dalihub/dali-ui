@@ -142,7 +142,7 @@ bool SelectableLottieAnimationViewImpl::IsTransitioning() const
   return mLottie.GetPlayState() == AnimatedImage::PlayState::PLAYING;
 }
 
-ISelectableImage::TransitionFinishedSignalType& SelectableLottieAnimationViewImpl::TransitionFinishedSignal()
+SelectableImageInterface::TransitionFinishedSignalType& SelectableLottieAnimationViewImpl::TransitionFinishedSignal()
 {
   return mLottie.AnimationFinishedSignal();
 }

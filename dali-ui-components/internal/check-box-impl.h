@@ -23,7 +23,7 @@
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
-#include <dali-ui-foundation/public-api/views/image/i-selectable-image.h>
+#include <dali-ui-foundation/public-api/views/image/selectable-image-interface.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <dali/public-api/common/dali-string.h>
@@ -86,8 +86,8 @@ private:
   void PushStateColors();
 
 private:
-  Ui::ISelectableImage mIcon;  ///< selectable image (drives its own frame-range + recolour)
-  Ui::Label            mLabel; ///< optional trailing label
+  Ui::SelectableImageInterface mIcon;  ///< selectable image (drives its own frame-range + recolour)
+  Ui::Label                    mLabel; ///< optional trailing label
 
   Dali::String mText;
 
