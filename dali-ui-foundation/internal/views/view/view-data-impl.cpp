@@ -3552,7 +3552,14 @@ const UniqueAny* ViewDataImpl::GetAttachment(AttachmentId id) const
   return mAttachments ? mAttachments->GetAttachment(id) : nullptr;
 }
 
-void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
+void ViewDataImpl::SetState(ViewState stateToChange, bool on, InputEvent cause)
+{
+  SetState(on ? ViewState::NORMAL : stateToChange,
+           on ? stateToChange : ViewState::NORMAL,
+           cause);
+}
+
+void ViewDataImpl::SetState(ViewState statesToClear, ViewState statesToSet, InputEvent cause)
 {
   // NOTE Orthogonal state constraint: Disabled is mutually exclusive with Focused and Pressed.
   // Clear them immediately rather than waiting for potentially late system events.
@@ -3561,36 +3568,30 @@ void ViewDataImpl::SetState(ViewState state, bool on, InputEvent cause)
   // the event squence will be: "Focused out" -> "Enabled changed".
 
   ViewState prev = mState;
-  if(on)
-  {
-    mState = mState + state;
 
-    // NOTE Handle orthogonal state constraint
-    // When DISABLED added,
-    // - PRESSED needs to be cleaned immediately
-    // - FOCUSED should have gone already (ASSERT(!mState.Contains(FOCUSED)))
-    // When PSEUDO_DISABLED added,
-    // - PRESSED needs to be cleaned immediately
-    // - FOCUSED can exist
-    if(state.IsAnyDisabled())
-    {
-      mState = mState - ViewState::PRESSED - ViewState::HOVERED;
-    }
+  mState = mState - statesToClear + statesToSet;
+
+  // NOTE Handle orthogonal state constraint
+  // When DISABLED added,
+  // - PRESSED needs to be cleaned immediately
+  // - FOCUSED should have gone already (ASSERT(!mState.Contains(FOCUSED)))
+  // When PSEUDO_DISABLED added,
+  // - PRESSED needs to be cleaned immediately
+  // - FOCUSED can exist
+  if(statesToSet.IsAnyDisabled())
+  {
+    mState = mState - ViewState::PRESSED - ViewState::HOVERED;
   }
-  else
+
+  // NOTE Handle orthogonal state constraint
+  // This is the case that the focus has gone because it turned disabled.
+  // (but disabled state hasn't dispatched yet)
+  // -> Immediately update states at once.
+  if(statesToClear.Contains(ViewState::FOCUSED))
   {
-    // NOTE Handle orthogonal state constraint
-    // This is the case that the focus has gone because it turned disabled.
-    // (but disabled state hasn't dispatched yet)
-    // -> Immediately update states at once.
-    mState = mState - state;
+    mState = mState - ViewState::FOCUS_INDICATED;
 
-    if(state.Contains(ViewState::FOCUSED))
-    {
-      mState = mState - ViewState::FOCUS_INDICATED;
-    }
-
-    if(state.Contains(ViewState::FOCUSED) && !mViewImpl.Self().IsEnabled())
+    if(!mViewImpl.Self().IsEnabled())
     {
       mState = mState - ViewState::PRESSED + ViewState::DISABLED;
     }

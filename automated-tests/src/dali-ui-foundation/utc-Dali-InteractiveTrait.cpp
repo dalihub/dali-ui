@@ -739,6 +739,95 @@ int UtcDaliInteractiveTraitHoveredCombinesWithPressedP(void)
   END_TEST;
 }
 
+int UtcDaliInteractiveTraitHoveredTransitionsToPressedForSameDeviceP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+  InteractiveTrait  interactive = view.AsInteractive();
+
+  ProcessHover(application, PointState::STARTED, Vector2(50.0f, 50.0f), 100u, 5);
+
+  uint32_t stateChangedCount = 0u;
+  ViewState previousState;
+  ViewState currentState;
+  InputEvent stateCause;
+  bool sawPressedRelease = false;
+  std::vector<std::string> signalOrder;
+
+  HoveredChangedSignalData hoveredData;
+  PressedChangedSignalData pressedData;
+
+  view.StateChangedSignal().Connect(&application, [&](View, const StateEvent& event) {
+    ++stateChangedCount;
+    previousState = event.GetPrev();
+    currentState = event.GetCurrent();
+    stateCause = event.GetCause();
+    sawPressedRelease = sawPressedRelease ||
+                        (event.GetPrev().Contains(ViewState::PRESSED) &&
+                         !event.GetCurrent().Contains(ViewState::PRESSED));
+    signalOrder.push_back("state");
+  });
+  interactive.HoveredChangedSignal().Connect(&application, [&](View, bool hovered, InputEvent event) {
+    hoveredData.called = true;
+    hoveredData.hovered = hovered;
+    hoveredData.event = event;
+    signalOrder.push_back("hovered");
+  });
+  interactive.PressedChangedSignal().Connect(&application, [&](View, bool pressed, InputEvent event) {
+    pressedData.called = true;
+    pressedData.pressed = pressed;
+    pressedData.event = event;
+    signalOrder.push_back("pressed");
+  });
+  view.TouchEventSignal().Connect(&application, [&](Actor, TouchEvent) {
+    signalOrder.push_back("touch");
+    return false;
+  });
+
+  ProcessTouch(application, PointState::DOWN, Vector2(50.0f, 50.0f), 110u, 5);
+
+  DALI_TEST_EQUALS(stateChangedCount, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(previousState.Contains(ViewState::HOVERED));
+  DALI_TEST_CHECK(!previousState.Contains(ViewState::PRESSED));
+  DALI_TEST_CHECK(!currentState.Contains(ViewState::HOVERED));
+  DALI_TEST_CHECK(currentState.Contains(ViewState::PRESSED));
+  DALI_TEST_CHECK(stateCause.GetInputEventType() == InputEventType::TOUCH_EVENT);
+  DALI_TEST_CHECK(hoveredData.called);
+  DALI_TEST_CHECK(!hoveredData.hovered);
+  DALI_TEST_CHECK(hoveredData.event.GetInputEventType() == InputEventType::TOUCH_EVENT);
+  DALI_TEST_CHECK(pressedData.called);
+  DALI_TEST_CHECK(pressedData.pressed);
+  DALI_TEST_CHECK(pressedData.event.GetInputEventType() == InputEventType::TOUCH_EVENT);
+  DALI_TEST_EQUALS(signalOrder.size(), 4u, TEST_LOCATION);
+  DALI_TEST_EQUALS(signalOrder[0], std::string("state"), TEST_LOCATION);
+  DALI_TEST_EQUALS(signalOrder[1], std::string("hovered"), TEST_LOCATION);
+  DALI_TEST_EQUALS(signalOrder[2], std::string("pressed"), TEST_LOCATION);
+  DALI_TEST_EQUALS(signalOrder[3], std::string("touch"), TEST_LOCATION);
+
+  hoveredData.Reset();
+  pressedData.Reset();
+  signalOrder.clear();
+
+  ProcessHover(application, PointState::FINISHED, Vector2(50.0f, 50.0f), 110u, 5);
+
+  DALI_TEST_EQUALS(stateChangedCount, 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(!hoveredData.called);
+  DALI_TEST_CHECK(!pressedData.called);
+  DALI_TEST_CHECK(signalOrder.empty());
+  DALI_TEST_CHECK(!interactive.IsHovered());
+  DALI_TEST_CHECK(interactive.IsPressed());
+
+  ProcessTouch(application, PointState::UP, Vector2(50.0f, 50.0f), 120u, 5);
+
+  DALI_TEST_CHECK(stateChangedCount >= 2u);
+  DALI_TEST_CHECK(sawPressedRelease);
+  DALI_TEST_CHECK(!currentState.Contains(ViewState::HOVERED));
+  DALI_TEST_CHECK(!currentState.Contains(ViewState::PRESSED));
+  DALI_TEST_CHECK(!interactive.IsHovered());
+  DALI_TEST_CHECK(!interactive.IsPressed());
+  END_TEST;
+}
+
 int UtcDaliInteractiveTraitClickableFalseAllowsHoveredP(void)
 {
   UiTestApplication application;

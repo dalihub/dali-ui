@@ -44,6 +44,7 @@ InteractiveTraitImpl::InteractiveTraitImpl()
   mPendingTouchEvent(),
   mPressedExecutionKey(),
   mPressedExecutionKeyCount(0),
+  mHoveringDeviceId(-1),
   mPendingKeyAction(PendingKeyAction::NONE),
   mPseudoDisabled(false),
   mClickable(true),
@@ -180,6 +181,7 @@ void InteractiveTraitImpl::OnPressedClearedByViewState(View view, InputEvent eve
 
 void InteractiveTraitImpl::OnHoveredClearedByViewState(View view, InputEvent event)
 {
+  mHoveringDeviceId = -1;
   mHoveredChangedSignal.Emit(view, IsHovered(), event);
 }
 
@@ -192,6 +194,7 @@ void InteractiveTraitImpl::OnSceneDisconnection(View)
   Internal::PendingPressManager::Get().Cancel(*this);
   ClearKeyPressedHistory();
   mPendingTouchEvent.Reset();
+  mHoveringDeviceId    = -1;
   mClickBlockedByTouch = false;
   mClickBlockedByKey   = false;
 }
@@ -227,6 +230,7 @@ bool InteractiveTraitImpl::OnHoverEvent(View view, const HoverEvent& event)
     case PointState::STARTED:
     case PointState::MOTION:
     {
+      mHoveringDeviceId = event.GetDeviceId(0u);
       SetHoveredInternal(true, inputEvent);
       return true;
     }
@@ -234,6 +238,7 @@ bool InteractiveTraitImpl::OnHoverEvent(View view, const HoverEvent& event)
     case PointState::LEAVE:
     case PointState::INTERRUPTED:
     {
+      mHoveringDeviceId = -1;
       SetHoveredInternal(false, inputEvent);
       return true;
     }
@@ -514,8 +519,29 @@ void InteractiveTraitImpl::SetPressedInternal(bool value, InputEvent event)
     return;
   }
 
-  ExtensionView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
+  if(value && IsPressedByHoveringDevice(event))
+  {
+    ExtensionView::SetState(GetImpl(owner), ViewState::HOVERED, ViewState::PRESSED, event);
+    mHoveredChangedSignal.Emit(owner, false, event);
+  }
+  else
+  {
+    ExtensionView::SetState(GetImpl(owner), ViewState::PRESSED, value, event);
+  }
   OnPressedChanged(owner, event);
+}
+
+bool InteractiveTraitImpl::IsPressedByHoveringDevice(const InputEvent& event) const
+{
+  if(!IsHovered() || mHoveringDeviceId < 0 || event.GetInputEventType() != InputEventType::TOUCH_EVENT)
+  {
+    return false;
+  }
+
+  const TouchEvent& touchEvent = event.GetTouchEvent();
+  return touchEvent.GetPointCount() > 0u &&
+         touchEvent.GetState(0u) == PointState::STARTED &&
+         touchEvent.GetDeviceId(0u) == mHoveringDeviceId;
 }
 
 void InteractiveTraitImpl::SetHoveredInternal(bool value, InputEvent event)

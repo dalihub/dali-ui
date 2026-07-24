@@ -53,9 +53,14 @@ bool ClearAccessibilityHighlight(Ui::View view)
   return DALI_LIKELY(accessible) && accessible->ClearHighlight();
 }
 
-void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause)
+void SetState(ViewImpl& viewImpl, ViewState stateToChange, bool on, InputEvent cause)
 {
-  Ui::Internal::ViewDataImpl::Get(viewImpl).SetState(state, on, cause);
+  Ui::Internal::ViewDataImpl::Get(viewImpl).SetState(stateToChange, on, cause);
+}
+
+void SetState(ViewImpl& viewImpl, ViewState statesToClear, ViewState statesToSet, InputEvent cause)
+{
+  Ui::Internal::ViewDataImpl::Get(viewImpl).SetState(statesToClear, statesToSet, cause);
 }
 
 bool UnsetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id)

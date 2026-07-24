@@ -367,11 +367,19 @@ public:
 
   /**
    * @brief Updates a state bit and notifies ViewStateManager if the state changed.
-   * @param[in] state The state to set or clear
-   * @param[in] on    True to add the state, false to remove it
-   * @param[in] cause Input event that triggered the change
+   * @param[in] stateToChange The state to set or clear
+   * @param[in] on            True to add the state, false to remove it
+   * @param[in] cause         Input event that triggered the change
    */
-  void SetState(ViewState state, bool on, InputEvent cause);
+  void SetState(ViewState stateToChange, bool on, InputEvent cause);
+
+  /**
+   * @brief Clears and sets states as a single state change notification.
+   * @param[in] statesToClear The states to clear
+   * @param[in] statesToSet   The states to set
+   * @param[in] cause         Input event that triggered the change
+   */
+  void SetState(ViewState statesToClear, ViewState statesToSet, InputEvent cause);
 
   /**
    * @brief Registers a named state observer.

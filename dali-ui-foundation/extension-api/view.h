@@ -63,11 +63,21 @@ DALI_UI_API void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& i
  * @brief Updates a state bit in the view's ViewState and emits StateChangedSignal.
  *
  * @param[in] viewImpl The view implementation
- * @param[in] state The state to set or clear
+ * @param[in] stateToChange The state to set or clear
  * @param[in] on True to add the state, false to remove it
  * @param[in] cause Input event that triggered the change; leave default if programmatic
  */
-DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState state, bool on, InputEvent cause = InputEvent::Programmatic());
+DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState stateToChange, bool on, InputEvent cause = InputEvent::Programmatic());
+
+/**
+ * @brief Clears and sets states as a single state change notification.
+ *
+ * @param[in] viewImpl The view implementation
+ * @param[in] statesToClear The states to clear
+ * @param[in] statesToSet The states to set
+ * @param[in] cause Input event that triggered the change; leave default if programmatic
+ */
+DALI_UI_API void SetState(ViewImpl& viewImpl, ViewState statesToClear, ViewState statesToSet, InputEvent cause = InputEvent::Programmatic());
 
 /**
  * @brief Registers or replaces a named state observer using a member function.

@@ -234,6 +234,7 @@ private:
   void ClearKeyPressedHistory();
   void SetPressedInternal(bool value, InputEvent event);
   void SetHoveredInternal(bool value, InputEvent event);
+  bool IsPressedByHoveringDevice(const InputEvent& event) const;
   bool ShouldTapTriggerClicked() const;
   bool ShouldKeyReleaseTriggerClicked() const;
   bool ShouldKeyPressTriggerClicked() const;
@@ -263,6 +264,7 @@ private:
   TouchEvent                           mPendingTouchEvent;
   UniquePtr<Dali::String>              mPressedExecutionKey;
   uint32_t                             mPressedExecutionKeyCount;
+  int32_t                              mHoveringDeviceId;
   PendingKeyAction                     mPendingKeyAction;
   bool                                 mPseudoDisabled : 1;
   bool                                 mClickable : 1;
