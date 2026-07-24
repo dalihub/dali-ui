@@ -23,6 +23,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/visual-factory-cache.h>
 #include <dali-ui-foundation/internal/visuals/visual-shader-factory-interface.h>
+#include <cstdint>
 #include <string_view>
 
 namespace Dali
@@ -101,7 +102,7 @@ namespace TextGradient
 /**
  * @brief Whether text uses TextGradient fill or not.
  */
-enum Type
+enum Type : uint8_t
 {
   NO_TEXT_GRADIENT = 0,   ///< The text uses the existing text color fill.
   HAS_TEXT_GRADIENT,      ///< The single-color text uses TextGradient fill.

@@ -122,8 +122,6 @@ void UniqueAny::Reset()
   mHolder = nullptr;
 }
 
-UniqueAny::HolderBase::~HolderBase() = default;
-
 Dali::String UniqueAny::DemangleTypeName(const char* mangledName)
 {
   if(!mangledName || mangledName[0] == '\0')

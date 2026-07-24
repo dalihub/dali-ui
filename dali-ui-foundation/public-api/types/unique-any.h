@@ -153,7 +153,7 @@ public:
 private:
   struct DALI_UI_API HolderBase
   {
-    virtual ~HolderBase();
+    virtual ~HolderBase() = default;
     virtual const TypeInfoId& GetType() const = 0;
   };
 

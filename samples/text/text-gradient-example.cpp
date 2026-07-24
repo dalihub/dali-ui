@@ -269,6 +269,7 @@ Label CreateLabel(const char* text, float fontSize, const UiColor& color)
 {
   Label label = Label::New(text);
   label.SetFontSize(fontSize);
+  label.SetFontFamily("SamsungOneUI_500");
   label.SetTextColor(color);
   label.SetMultiLine(true);
   label.SetRequestedWidth(MATCH_PARENT);

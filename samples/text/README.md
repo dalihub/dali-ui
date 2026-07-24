@@ -115,6 +115,32 @@ Run localization samples:
 ./bin/text-gradient-localization.example
 ~~~
 
+### Windows / MSVC
+
+Use an x64 Visual Studio Developer PowerShell after installing the DALi
+dependencies. The separate tools vcpkg supplies `msgfmt.exe`; the DALi vcpkg
+supplies the runtime `libintl.dll`.
+
+~~~powershell
+$Msgfmt = "C:\Tools\DALI_VCPKG_TOOLS\vcpkg\installed\x64-windows\tools\gettext\bin\msgfmt.exe"
+
+cmake -S .\samples -B C:\work\DALi\out\dali-ui-samples `
+  -DDALI_UI_SAMPLE_LIST=text `
+  "-DMSGFMT_EXECUTABLE=$Msgfmt"
+
+cmake --build C:\work\DALi\out\dali-ui-samples --target `
+  text-localization-po.example `
+  text-localization-custom-component.example `
+  text-gradient-localization.example
+
+$env:PATH = "C:\work\DALi\dali-env\bin;C:\Tools\DALI_VCPKG\vcpkg\installed\x64-windows\bin;$env:PATH"
+.\samples\text\bin\text-localization-po.example.exe
+~~~
+
+The Windows samples update gettext's `LANGUAGE` environment variable and call
+`RefreshBindings()`. Press `1`, `2`, or `3` to select `en_US`, `ko_KR`, or
+`ar_AE`.
+
 ### GBS build (Tizen)
 
 ~~~bash

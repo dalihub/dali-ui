@@ -42,21 +42,50 @@ DALI_ADD_SAMPLE(text-localization.example text-localization-example.cpp)
 DALI_ADD_SAMPLE(text-localization-po.example text-localization-po-example.cpp)
 DALI_ADD_SAMPLE(text-localization-custom-component.example text-localization-custom-component-example.cpp)
 DALI_ADD_SAMPLE(text-gradient-localization.example text-gradient-localization-example.cpp)
+DALI_ADD_SAMPLE(text-windows.example text-windows-example.cpp)
 DALI_ADD_SAMPLE(text-image-span.example text-image-span-example.cpp)
 DALI_ADD_SAMPLE(text-input-image-span.example text-input-image-span-example.cpp)
 DALI_ADD_SAMPLE(text-image-span-perf.example text-image-span-perf-example.cpp)
 
 # Generate runtime message catalogs when gettext is available.
-FIND_PROGRAM(MSGFMT_EXECUTABLE msgfmt)
+IF(DEFINED ENV{DALI_MSGFMT_EXECUTABLE}
+   AND EXISTS "$ENV{DALI_MSGFMT_EXECUTABLE}")
+  SET(MSGFMT_EXECUTABLE "$ENV{DALI_MSGFMT_EXECUTABLE}" CACHE FILEPATH
+      "Path to the gettext msgfmt executable" FORCE)
+ELSE()
+  SET(MSGFMT_HINTS)
+  IF(DEFINED ENV{DALI_GETTEXT_TOOLS_BIN})
+    LIST(APPEND MSGFMT_HINTS "$ENV{DALI_GETTEXT_TOOLS_BIN}")
+  ENDIF()
+  IF(DEFINED _VCPKG_INSTALLED_DIR AND DEFINED VCPKG_TARGET_TRIPLET)
+    LIST(APPEND MSGFMT_HINTS
+      "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/gettext"
+      "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/tools/gettext/bin"
+    )
+  ENDIF()
+  IF(DEFINED ENV{VCPKG_ROOT} AND DEFINED VCPKG_TARGET_TRIPLET)
+    LIST(APPEND MSGFMT_HINTS
+      "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/tools/gettext"
+      "$ENV{VCPKG_ROOT}/installed/${VCPKG_TARGET_TRIPLET}/tools/gettext/bin"
+    )
+  ENDIF()
+  IF(WIN32)
+    LIST(APPEND MSGFMT_HINTS
+      "C:/Tools/DALI_VCPKG_TOOLS/vcpkg/installed/x64-windows/tools/gettext"
+      "C:/Tools/DALI_VCPKG_TOOLS/vcpkg/installed/x64-windows/tools/gettext/bin")
+  ENDIF()
+  FIND_PROGRAM(MSGFMT_EXECUTABLE NAMES msgfmt msgfmt.exe HINTS ${MSGFMT_HINTS})
+ENDIF()
+
 IF(MSGFMT_EXECUTABLE)
   # MSYS2-based msgfmt can fail when multiple instances start simultaneously.
-  # Create a job pool to serialize msgfmt execution while allowing other builds to parallelize.
+  # Serialize msgfmt while allowing the rest of the Ninja build to parallelize.
   SET(MSGFMT_JOB_POOL_ARGUMENT)
   IF(CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.15")
     SET_PROPERTY(GLOBAL APPEND PROPERTY JOB_POOLS dali_msgfmt_pool=1)
     SET(MSGFMT_JOB_POOL_ARGUMENT JOB_POOL dali_msgfmt_pool)
   ENDIF()
-
+  MESSAGE(STATUS "Using gettext msgfmt: ${MSGFMT_EXECUTABLE}")
   SET(PO_MO_FILES)
   SET(TEXT_LOCALIZATION_LOCALES en_US ko_KR ar_AE)
 
@@ -74,6 +103,7 @@ IF(MSGFMT_EXECUTABLE)
       DEPENDS ${PO_FILE}
       ${MSGFMT_JOB_POOL_ARGUMENT}
       COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
+      VERBATIM
     )
     LIST(APPEND PO_MO_FILES ${MO_FILE})
   ENDFOREACH()
@@ -92,6 +122,7 @@ IF(MSGFMT_EXECUTABLE)
       DEPENDS ${PO_FILE}
       ${MSGFMT_JOB_POOL_ARGUMENT}
       COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
+      VERBATIM
     )
     LIST(APPEND PO_MO_FILES ${MO_FILE})
   ENDFOREACH()
@@ -110,6 +141,26 @@ IF(MSGFMT_EXECUTABLE)
       DEPENDS ${PO_FILE}
       ${MSGFMT_JOB_POOL_ARGUMENT}
       COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
+      VERBATIM
+    )
+    LIST(APPEND PO_MO_FILES ${MO_FILE})
+  ENDFOREACH()
+
+  SET(TEXT_WINDOWS_LOCALIZATION_DOMAIN text-windows-example)
+  SET(TEXT_WINDOWS_LOCALIZATION_PO_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/po/windows")
+  SET(TEXT_WINDOWS_LOCALIZATION_LOCALE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/res/locale/windows")
+  FOREACH(LOCALE ${TEXT_LOCALIZATION_LOCALES})
+    SET(PO_FILE "${TEXT_WINDOWS_LOCALIZATION_PO_DIR}/${LOCALE}.po")
+    SET(MO_DIR "${TEXT_WINDOWS_LOCALIZATION_LOCALE_DIR}/${LOCALE}/LC_MESSAGES")
+    SET(MO_FILE "${MO_DIR}/${TEXT_WINDOWS_LOCALIZATION_DOMAIN}.mo")
+    ADD_CUSTOM_COMMAND(
+      OUTPUT ${MO_FILE}
+      COMMAND ${CMAKE_COMMAND} -E make_directory ${MO_DIR}
+      COMMAND ${MSGFMT_EXECUTABLE} -o ${MO_FILE} ${PO_FILE}
+      DEPENDS ${PO_FILE}
+      ${MSGFMT_JOB_POOL_ARGUMENT}
+      COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
+      VERBATIM
     )
     LIST(APPEND PO_MO_FILES ${MO_FILE})
   ENDFOREACH()
@@ -118,6 +169,12 @@ IF(MSGFMT_EXECUTABLE)
   ADD_DEPENDENCIES(text-localization-po.example text-localization-po-resources)
   ADD_DEPENDENCIES(text-localization-custom-component.example text-localization-po-resources)
   ADD_DEPENDENCIES(text-gradient-localization.example text-localization-po-resources)
+  ADD_DEPENDENCIES(text-windows.example text-localization-po-resources)
+ELSEIF(WIN32)
+  MESSAGE(FATAL_ERROR
+    "msgfmt is required to build the Windows localization samples. "
+    "Run the windows-dependencies tools setup or set DALI_MSGFMT_EXECUTABLE."
+  )
 ELSE()
   MESSAGE(WARNING "msgfmt not found; localization .mo files will not be generated")
 ENDIF()

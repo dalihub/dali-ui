@@ -1,0 +1,8 @@
+msgid ""
+msgstr ""
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# text-windows-example: localized styled sentence
+msgid "IDS_TEXT_WINDOWS_LOCALIZED_SENTENCE"
+msgstr "<annotation style='muted'>اليوم</annotation> الطقس صافٍ <annotation style='muted'>ومناسب جدًا لممارسة الرياضة.</annotation>"

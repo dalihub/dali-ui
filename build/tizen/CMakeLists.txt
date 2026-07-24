@@ -100,15 +100,20 @@ ELSE()
   )
 ENDIF()
 
-# gettext is optional on desktop Windows. Existing backends retain their
-# platform-provided gettext implementation.
+# The Windows backend uses the native libintl supplied by
+# windows-dependencies. Keep it mandatory so configuration fails clearly
+# instead of silently disabling localization at runtime.
 IF(WIN32)
-  FIND_PACKAGE(Intl QUIET)
-  IF(Intl_FOUND)
-    ADD_COMPILE_DEFINITIONS(DALI_UI_HAS_GETTEXT)
-    SET(DALI_UI_GETTEXT_INCLUDE_DIRS ${Intl_INCLUDE_DIRS})
-    SET(DALI_UI_GETTEXT_LIBRARIES ${Intl_LIBRARIES})
+  FIND_PACKAGE(Intl REQUIRED)
+  IF(NOT Intl_LIBRARY)
+    MESSAGE(FATAL_ERROR
+      "Windows localization requires the libintl import library. "
+      "Run the windows-dependencies vcpkg setup before building dali-ui."
+    )
   ENDIF()
+  ADD_COMPILE_DEFINITIONS(DALI_UI_HAS_GETTEXT)
+  SET(DALI_UI_GETTEXT_INCLUDE_DIRS ${Intl_INCLUDE_DIRS})
+  SET(DALI_UI_GETTEXT_LIBRARIES ${Intl_LIBRARIES})
 ENDIF()
 
 SET( VCPKG_INCLUDE_DIR "${_VCPKG_INSTALLED_DIR}/${VCPKG_TARGET_TRIPLET}/include")
