@@ -284,7 +284,6 @@ bool InteractiveTraitImpl::HandleKeyPressed(View view, InputEvent event)
 
     if(ShouldKeyPressTriggerClicked())
     {
-      ClearKeyPressedHistory();
       SetPendingKeyAction(event, false);
     }
     else if(ShouldKeyPressTriggerLongPressed())

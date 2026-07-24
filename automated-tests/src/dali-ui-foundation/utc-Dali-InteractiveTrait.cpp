@@ -949,6 +949,44 @@ int UtcDaliInteractiveTraitKeyEventClickedOnPressP(void)
   END_TEST;
 }
 
+int UtcDaliInteractiveTraitKeyEventOnPressPolicyReleasesPressedStateP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+  view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_PRESS);
+
+  ClickedSignalData        clickedData;
+  ClickedSignalFunctor     clickedFunctor(clickedData);
+  PressedChangedSignalData pressedData;
+  PressedChangedSignalFunctor pressedFunctor(pressedData);
+  view.AsInteractive().ClickedSignal().Connect(&application, clickedFunctor);
+  view.AsInteractive().PressedChangedSignal().Connect(&application, pressedFunctor);
+
+  FocusManager::Get().SetCurrentFocusView(view);
+  application.SendNotification();
+  application.Render();
+
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(clickedData.called);
+  DALI_TEST_CHECK(pressedData.called);
+  DALI_TEST_CHECK(pressedData.pressed);
+  DALI_TEST_CHECK(view.AsInteractive().IsPressed());
+
+  pressedData.Reset();
+
+  Dali::Integration::KeyEvent keyUp(
+    "Return", "", "", 0, 0, 120, Dali::Integration::KeyEvent::UP, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyUp);
+
+  DALI_TEST_CHECK(pressedData.called);
+  DALI_TEST_CHECK(!pressedData.pressed);
+  DALI_TEST_CHECK(!view.AsInteractive().IsPressed());
+  END_TEST;
+}
+
 int UtcDaliInteractiveTraitKeyEventDisabledPolicyP(void)
 {
   UiTestApplication application;
