@@ -16,6 +16,8 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/public-api/adaptor-framework/drag-and-drop.h>
+#include <dali/public-api/adaptor-framework/drag-data.h>
+#include <dali/public-api/adaptor-framework/drag-event.h>
 #include <dali/public-api/events/long-press-gesture-detector.h>
 #include <dali/public-api/events/long-press-gesture.h>
 #include <dali/public-api/events/touch-event.h>
@@ -29,9 +31,8 @@ using namespace Dali::Ui;
 
 namespace
 {
-const char  MIME_TYPE[]  = "text/plain";
-const char* MIME_TYPES[] = {MIME_TYPE};
-const char* DATA_SET[]   = {"BLUE CARD"};
+const char MIME_TYPE[] = "text/plain";
+const char DRAG_DATA[] = "BLUE CARD";
 
 const UiColor SOURCE_COLOR(0x1E88E5u);
 const UiColor LEFT_TARGET_COLOR(0x388E3Cu);
@@ -83,6 +84,12 @@ Label NewLabel(const char* text, float fontSize, const UiColor& color)
   label.SetMultiLine(true);
   return label;
 }
+
+void SetRequestedPosition(View view, float x, float y)
+{
+  view.SetRequestedX(x);
+  view.SetRequestedY(y);
+}
 } // unnamed namespace
 
 class DragAndDropController : public ConnectionTracker
@@ -105,25 +112,21 @@ public:
     root.SetRequestedHeight(MATCH_PARENT);
 
     Label title = NewLabel("DALi UI public Drag & Drop", 24.0f, UiColor(0xFFFFFFu));
-    title.SetRequestedPositionX(32_spx);
-    title.SetRequestedPositionY(24_spx);
+    SetRequestedPosition(title, 32.0f, 24.0f);
     root.Add(title);
 
     Label guide = NewLabel("Long press BLUE CARD and move the shadow onto a target, including the separate target window. A target turns blue when the drop succeeds.", 14.0f, UiColor(0xD5DEE8u));
-    guide.SetRequestedPositionX(32_spx);
-    guide.SetRequestedPositionY(66_spx);
+    SetRequestedPosition(guide, 32.0f, 66.0f);
     guide.SetRequestedWidth(900_spx);
     root.Add(guide);
 
     mSource = View::New();
     mSource.SetBackgroundColor(SOURCE_COLOR);
-    mSource.SetRequestedPositionX(SOURCE_X);
-    mSource.SetRequestedPositionY(126_spx);
+    SetRequestedPosition(mSource, SOURCE_X, 126.0f);
     mSource.SetRequestedWidth(260_spx);
     mSource.SetRequestedHeight(150_spx);
     mSourceLabel = NewLabel("SOURCE\nBLUE CARD\nLong press to drag", 18.0f, UiColor(0xFFFFFFu));
-    mSourceLabel.SetRequestedPositionX(24_spx);
-    mSourceLabel.SetRequestedPositionY(28_spx);
+    SetRequestedPosition(mSourceLabel, 24.0f, 28.0f);
     mSource.Add(mSourceLabel);
     root.Add(mSource);
 
@@ -134,8 +137,7 @@ public:
 
     mLog = NewLabel("Waiting for drag events...", 14.0f, UiColor(0xEBF3F7u));
     mLog.SetBackgroundColor(UiColor(0x30363Du));
-    mLog.SetRequestedPositionX(32_spx);
-    mLog.SetRequestedPositionY(320_spx);
+    SetRequestedPosition(mLog, 32.0f, 320.0f);
     mLog.SetRequestedWidth(900_spx);
     mLog.SetRequestedHeight(260_spx);
     root.Add(mLog);
@@ -152,13 +154,11 @@ private:
   {
     View target = View::New();
     target.SetBackgroundColor(color);
-    target.SetRequestedPositionX(x);
-    target.SetRequestedPositionY(126_spx);
+    SetRequestedPosition(target, x, 126.0f);
     target.SetRequestedWidth(260_spx);
     target.SetRequestedHeight(150_spx);
     label = NewLabel(std::string(name).append("\nDrop BLUE CARD here").c_str(), 18.0f, UiColor(0xFFFFFFu));
-    label.SetRequestedPositionX(24_spx);
-    label.SetRequestedPositionY(54_spx);
+    SetRequestedPosition(label, 24.0f, 54.0f);
     target.Add(label);
     return target;
   }
@@ -171,8 +171,7 @@ private:
     mShadowCard.SetRequestedWidth(MATCH_PARENT);
     mShadowCard.SetRequestedHeight(MATCH_PARENT);
     mShadowLabel = NewLabel("DRAGGING\nBLUE CARD", 18.0f, UiColor(0xFFFFFFu));
-    mShadowLabel.SetRequestedPositionX(12_spx);
-    mShadowLabel.SetRequestedPositionY(20_spx);
+    SetRequestedPosition(mShadowLabel, 12.0f, 20.0f);
     mShadowCard.Add(mShadowLabel);
     mShadowWindow.Add(mShadowCard);
   }
@@ -188,19 +187,16 @@ private:
     root.SetRequestedHeight(MATCH_PARENT);
 
     Label title = NewLabel("Separate target window", 18.0f, UiColor(0xFFFFFFu));
-    title.SetRequestedPositionX(24_spx);
-    title.SetRequestedPositionY(22_spx);
+    SetRequestedPosition(title, 24.0f, 22.0f);
     root.Add(title);
 
     mWindowTargetCard = View::New();
     mWindowTargetCard.SetBackgroundColor(WINDOW_TARGET_COLOR);
-    mWindowTargetCard.SetRequestedPositionX(24_spx);
-    mWindowTargetCard.SetRequestedPositionY(68_spx);
+    SetRequestedPosition(mWindowTargetCard, 24.0f, 68.0f);
     mWindowTargetCard.SetRequestedWidth(312_spx);
     mWindowTargetCard.SetRequestedHeight(170_spx);
     mWindowTargetLabel = NewLabel("TARGET WINDOW\nDrop BLUE CARD here", 18.0f, UiColor(0xFFFFFFu));
-    mWindowTargetLabel.SetRequestedPositionX(24_spx);
-    mWindowTargetLabel.SetRequestedPositionY(58_spx);
+    SetRequestedPosition(mWindowTargetLabel, 24.0f, 58.0f);
     mWindowTargetCard.Add(mWindowTargetLabel);
     root.Add(mWindowTargetCard);
 
@@ -219,9 +215,13 @@ private:
   void RegisterTargets()
   {
     mDnd = DragAndDrop::Get();
-    const bool leftRegistered = mDnd.AddListener(mLeftTarget, MIME_TYPE, [this](const DragAndDrop::DragEvent& event) { OnTargetEvent("TARGET A", mLeftTarget, mLeftTargetLabel, mLeftTargetColor, event); });
-    const bool rightRegistered = mDnd.AddListener(mRightTarget, MIME_TYPE, [this](const DragAndDrop::DragEvent& event) { OnTargetEvent("TARGET B", mRightTarget, mRightTargetLabel, mRightTargetColor, event); });
-    const bool windowRegistered = mDnd.AddListener(mTargetWindow, MIME_TYPE, [this](const DragAndDrop::DragEvent& event) { OnWindowTargetEvent(event); });
+    mDnd.SourceEventSignal().Connect(this, &DragAndDropController::OnSourceEvent);
+    mDnd.ActorDragEventSignal().Connect(this, &DragAndDropController::OnActorTargetEvent);
+    mDnd.WindowDragEventSignal().Connect(this, &DragAndDropController::OnWindowTargetEvent);
+
+    const bool leftRegistered   = mDnd.AddListener(mLeftTarget, MIME_TYPE);
+    const bool rightRegistered  = mDnd.AddListener(mRightTarget, MIME_TYPE);
+    const bool windowRegistered = mDnd.AddListener(mTargetWindow, MIME_TYPE);
     AddLog(std::string("target registration: A=") + (leftRegistered ? "ok" : "failed") + ", B=" + (rightRegistered ? "ok" : "failed") + ", window=" + (windowRegistered ? "ok" : "failed"));
   }
 
@@ -247,10 +247,9 @@ private:
     CreateShadowWindow();
 
     DragAndDrop::DragData dragData;
-    dragData.SetMimeTypes(MIME_TYPES, 1);
-    dragData.SetDataSet(DATA_SET, 1);
+    dragData.AddData(MIME_TYPE, DRAG_DATA);
 
-    const bool started = mDnd.StartDragAndDrop(actor, mShadowWindow, dragData, [this](DragAndDrop::SourceEventType type) { OnSourceEvent(type); });
+    const bool started = mDnd.StartDragAndDrop(actor, mShadowWindow, dragData);
     if(!started)
     {
       DestroyShadowWindow();
@@ -268,7 +267,7 @@ private:
     mShadowLabel.Reset();
   }
 
-  void OnSourceEvent(DragAndDrop::SourceEventType type)
+  void OnSourceEvent(DragAndDrop /*dragAndDrop*/, Actor /*source*/, DragAndDrop::SourceEventType type)
   {
     if(type == DragAndDrop::SourceEventType::START)
     {
@@ -284,54 +283,73 @@ private:
     AddLog(std::string("source: ") + ToString(type));
   }
 
+  void OnActorTargetEvent(DragAndDrop /*dragAndDrop*/, Actor target, const DragAndDrop::DragEvent& event)
+  {
+    if(target == mLeftTarget)
+    {
+      OnTargetEvent("TARGET A", mLeftTarget, mLeftTargetLabel, mLeftTargetColor, event);
+    }
+    else if(target == mRightTarget)
+    {
+      OnTargetEvent("TARGET B", mRightTarget, mRightTargetLabel, mRightTargetColor, event);
+    }
+  }
+
   void OnTargetEvent(const char* targetName, View target, Label label, UiColor& targetColor, const DragAndDrop::DragEvent& event)
   {
     std::ostringstream stream;
-    stream << targetName << ": " << ToString(event.GetAction())
+    stream << targetName << ": " << ToString(event.GetDragType())
            << " position=(" << event.GetPosition().x << ", " << event.GetPosition().y << ")";
 
-    if(event.GetAction() == DragAndDrop::DragType::ENTER)
+    if(event.GetDragType() == DragAndDrop::DragType::ENTER)
     {
       target.SetBackgroundColor(DROP_HIGHLIGHT_COLOR);
       label.SetText(std::string(targetName).append("\nRelease to drop").c_str());
     }
-    else if(event.GetAction() == DragAndDrop::DragType::LEAVE)
+    else if(event.GetDragType() == DragAndDrop::DragType::LEAVE)
     {
       target.SetBackgroundColor(targetColor);
       label.SetText(std::string(targetName).append("\nDrop BLUE CARD here").c_str());
     }
-    else if(event.GetAction() == DragAndDrop::DragType::DROP && event.GetData())
+    else if(event.GetDragType() == DragAndDrop::DragType::DROP && !event.GetData().Empty())
     {
+      const Dali::String data = event.GetData();
       targetColor = SOURCE_COLOR;
       target.SetBackgroundColor(targetColor);
-      label.SetText(std::string(targetName).append("\nDROPPED\n").append(event.GetData()).c_str());
-      stream << " data=" << event.GetData();
+      label.SetText(std::string(targetName).append("\nDROPPED\n").append(data.CStr()).c_str());
+      stream << " data=" << data.CStr();
     }
     AddLog(stream.str());
   }
 
-  void OnWindowTargetEvent(const DragAndDrop::DragEvent& event)
+  void OnWindowTargetEvent(DragAndDrop /*dragAndDrop*/, Window target, const DragAndDrop::DragEvent& event)
   {
+    if(target != mTargetWindow)
+    {
+      return;
+    }
+
     std::ostringstream stream;
-    stream << "TARGET WINDOW: " << ToString(event.GetAction())
+    stream << "TARGET WINDOW: " << ToString(event.GetDragType())
            << " position=(" << event.GetPosition().x << ", " << event.GetPosition().y << ")";
 
-    if(event.GetAction() == DragAndDrop::DragType::ENTER)
+    if(event.GetDragType() == DragAndDrop::DragType::ENTER)
     {
       mWindowTargetCard.SetBackgroundColor(DROP_HIGHLIGHT_COLOR);
       mWindowTargetLabel.SetText("TARGET WINDOW\nRelease to drop");
     }
-    else if(event.GetAction() == DragAndDrop::DragType::LEAVE)
+    else if(event.GetDragType() == DragAndDrop::DragType::LEAVE)
     {
       mWindowTargetCard.SetBackgroundColor(mWindowTargetColor);
       mWindowTargetLabel.SetText("TARGET WINDOW\nDrop BLUE CARD here");
     }
-    else if(event.GetAction() == DragAndDrop::DragType::DROP && event.GetData())
+    else if(event.GetDragType() == DragAndDrop::DragType::DROP && !event.GetData().Empty())
     {
+      const Dali::String data = event.GetData();
       mWindowTargetColor = SOURCE_COLOR;
       mWindowTargetCard.SetBackgroundColor(mWindowTargetColor);
-      mWindowTargetLabel.SetText(std::string("TARGET WINDOW\nDROPPED\n").append(event.GetData()).c_str());
-      stream << " data=" << event.GetData();
+      mWindowTargetLabel.SetText(std::string("TARGET WINDOW\nDROPPED\n").append(data.CStr()).c_str());
+      stream << " data=" << data.CStr();
     }
     AddLog(stream.str());
   }
