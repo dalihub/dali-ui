@@ -67,9 +67,18 @@ Label CreateHeaderLabel(const char* text)
   return label;
 }
 
+void SetEnvironmentVariable(const char* name, const char* value)
+{
+#if defined(_WIN32)
+  _putenv_s(name, value);
+#else
+  setenv(name, value, 1);
+#endif
+}
+
 void SetSystemFontSizeEnv(const char* fontSize)
 {
-  setenv(FONT_SIZE_ENV, fontSize, 1);
+  SetEnvironmentVariable(FONT_SIZE_ENV, fontSize);
 }
 } // namespace
 
@@ -433,8 +442,8 @@ private:
 int DALI_EXPORT_API main(int argc, char** argv)
 {
   // Ubuntu/X backend-only test hook for runtime system font size changes.
-  setenv(FONT_SIZE_WATCH_ENV, "1", 1);
-  setenv(FONT_SIZE_ENV, "NORMAL", 1);
+  SetEnvironmentVariable(FONT_SIZE_WATCH_ENV, "1");
+  SetEnvironmentVariable(FONT_SIZE_ENV, "NORMAL");
 
   Application application = Application::New(&argc, &argv);
   auto config = UiConfig::New();

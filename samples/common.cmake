@@ -22,7 +22,7 @@ IF(WIN32)
   # The top-level sample build applies these directory-wide. Keep standalone
   # sample configuration ABI-compatible as well.
   IF(MSVC AND NOT DALI_UI_SAMPLE_MSVC_OPTIONS_INHERITED)
-    SET(DALI_UI_SAMPLE_COMPILE_OPTIONS /vmg)
+    SET(DALI_UI_SAMPLE_COMPILE_OPTIONS /vmg /utf-8)
     SET(DALI_UI_SAMPLE_COMPILE_DEFINITIONS __restrict__=__restrict)
   ENDIF()
 ELSE()

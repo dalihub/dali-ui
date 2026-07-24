@@ -11,4 +11,9 @@ ENDIF()
 
 DALI_ADD_SAMPLE(chart-view.example chart-view-example.cpp)
 DALI_ADD_SAMPLE(chart-gallery.example chart-gallery.cpp)
-DALI_ADD_SAMPLE(chart-memory-probe chart-memory-probe.cpp)
+
+# This diagnostic uses Linux-only interfaces such as <features.h> and
+# /proc/self/statm.
+IF(NOT WIN32)
+  DALI_ADD_SAMPLE(chart-memory-probe chart-memory-probe.cpp)
+ENDIF()

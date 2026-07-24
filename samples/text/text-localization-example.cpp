@@ -44,6 +44,11 @@ using namespace Dali::Ui;
 
 namespace
 {
+#if defined(_WIN32)
+constexpr int MESSAGE_LOCALE_CATEGORY = LC_ALL;
+#else
+constexpr int MESSAGE_LOCALE_CATEGORY = LC_MESSAGES;
+#endif
 constexpr float STACK_SPACING = 10.0f;
 constexpr float STACK_PADDING = 20.0f;
 
@@ -452,7 +457,7 @@ private:
   void SetLocale(Dali::String locale)
   {
     // for test.
-    setlocale(LC_MESSAGES, locale.CStr());
+    setlocale(MESSAGE_LOCALE_CATEGORY, locale.CStr());
     // Apps can only use public headers in platform builds.
     // Dali::DevelApplication::SetApplicationLocale(mApplication, locale.CStr());
   }

@@ -49,6 +49,11 @@ using namespace Dali::Ui;
 
 namespace
 {
+#if defined(_WIN32)
+constexpr int MESSAGE_LOCALE_CATEGORY = LC_ALL;
+#else
+constexpr int MESSAGE_LOCALE_CATEGORY = LC_MESSAGES;
+#endif
 
 constexpr float STACK_SPACING    = 10.0f;
 constexpr float STACK_PADDING    = 20.0f;
@@ -424,7 +429,7 @@ private:
 
   void UpdateStatusLabel()
   {
-    const char* lcMsg = setlocale(LC_MESSAGES, nullptr);
+    const char* lcMsg = setlocale(MESSAGE_LOCALE_CATEGORY, nullptr);
     if(!lcMsg)
     {
       lcMsg = "(null)";
@@ -455,7 +460,7 @@ private:
   {
     mCurrentLocale = locale;
 
-    const char* result = setlocale(LC_MESSAGES, locale.c_str());
+    const char* result = setlocale(MESSAGE_LOCALE_CATEGORY, locale.c_str());
     if(!result)
     {
       std::printf("setlocale(LC_MESSAGES, \"%s\") failed\n", locale.c_str());
@@ -468,7 +473,7 @@ private:
 
     UpdateStatusLabel();
 
-    std::printf("LC_MESSAGES=%s\n", setlocale(LC_MESSAGES, nullptr));
+    std::printf("LC_MESSAGES=%s\n", setlocale(MESSAGE_LOCALE_CATEGORY, nullptr));
   }
 
   void ToggleBypass()

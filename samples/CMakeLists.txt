@@ -8,7 +8,7 @@ SET(CMAKE_C_STANDARD 99)
 # DALi callbacks store member-function pointers in a fixed general form.
 # Keep sample consumers ABI-compatible with the Windows DALi libraries.
 IF(MSVC)
-  ADD_COMPILE_OPTIONS(/vmg)
+  ADD_COMPILE_OPTIONS(/vmg /utf-8)
   ADD_COMPILE_DEFINITIONS(__restrict__=__restrict)
   SET(DALI_UI_SAMPLE_MSVC_OPTIONS_INHERITED TRUE)
 ENDIF()
