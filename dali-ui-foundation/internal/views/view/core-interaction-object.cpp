@@ -147,6 +147,24 @@ void CoreInteractionObject::CancelKeyEventDispatch()
   }
 }
 
+bool CoreInteractionObject::HasIntrinsicTouchHandling() const
+{
+  return mInteractiveTraitImpl != nullptr;
+}
+
+bool CoreInteractionObject::OnTouchEvent(View view, const TouchEvent& event)
+{
+  return mInteractiveTraitImpl ? mInteractiveTraitImpl->OnTouch(view, event) : false;
+}
+
+void CoreInteractionObject::FinalizeTouchEventDispatch(View view, const TouchEvent& event)
+{
+  if(mInteractiveTraitImpl)
+  {
+    mInteractiveTraitImpl->FinalizeTouchEventDispatch(view, event);
+  }
+}
+
 void CoreInteractionObject::OnAttached(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "CoreInteractionObject can not be attached to multiple target views");

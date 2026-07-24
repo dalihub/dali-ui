@@ -227,7 +227,7 @@ private:
 
   void FinalizeKeyEventDispatch();
   void CancelKeyEventDispatch();
-  bool OnTouchInternal(Actor actor, TouchEvent touchEvent);
+  void FinalizeTouchEventDispatch(View view, const TouchEvent& event);
   void OnTapInternal(Actor actor, TapGesture event);
   void OnLongPressedInternal(Actor actor, LongPressGesture event);
   void RecordPressedExecutionKey(const Dali::String& keyName);
@@ -260,6 +260,7 @@ private:
   Signal<void(View, bool, InputEvent)> mHoveredChangedSignal;
   KeyClickPolicy                       mKeyClickPolicy;
   InputEvent                           mPendingKeyInputEvent;
+  TouchEvent                           mPendingTouchEvent;
   UniquePtr<Dali::String>              mPressedExecutionKey;
   uint32_t                             mPressedExecutionKeyCount;
   PendingKeyAction                     mPendingKeyAction;

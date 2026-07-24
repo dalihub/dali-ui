@@ -166,6 +166,21 @@ bool ViewImpl::OnHoverEvent(const Dali::HoverEvent& event)
   return mImpl->HandleHoverEventDefault(event);
 }
 
+bool ViewImpl::HasIntrinsicTouchHandling() const
+{
+  return mImpl->HasIntrinsicTouchHandlingDefault();
+}
+
+bool ViewImpl::OnTouchEvent(const Dali::TouchEvent& event)
+{
+  return mImpl->HandleTouchEventDefault(event);
+}
+
+void ViewImpl::OnFinalizeTouchEventDispatch(const Dali::TouchEvent& event)
+{
+  mImpl->FinalizeTouchEventDispatchDefault(event);
+}
+
 // =============================================================================
 // State API
 // =============================================================================

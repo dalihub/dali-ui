@@ -428,6 +428,66 @@ int UtcDaliInteractiveTraitPressedChangedSignalP(void)
   END_TEST;
 }
 
+int UtcDaliInteractiveTraitTouchHookRunsBeforeTouchSignalP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+
+  std::vector<Dali::String> dispatchOrder;
+  view.AsInteractive().PressedChangedSignal().Connect(
+    &application,
+    [&dispatchOrder](View, bool pressed, InputEvent) {
+      dispatchOrder.push_back(pressed ? "pressed" : "released");
+    });
+  view.TouchEventSignal().Connect(
+    &application,
+    [&dispatchOrder, view](Actor, const TouchEvent& event) mutable {
+      DALI_TEST_EQUALS(view.AsInteractive().IsPressed(), event.GetState(0) == PointState::STARTED, TEST_LOCATION);
+      dispatchOrder.push_back("touch");
+      return true;
+    });
+  view.AsInteractive().ClickedSignal().Connect(
+    &application,
+    [&dispatchOrder](View, InputEvent) {
+      dispatchOrder.push_back("clicked");
+    });
+
+  Dali::Integration::TouchEvent touchDown;
+  Dali::Integration::Point      point;
+  point.SetState(PointState::DOWN);
+  point.SetScreenPosition(Vector2(50.0f, 50.0f));
+  point.SetDeviceId(1);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchDown.points.push_back(point);
+  touchDown.time = 100;
+  application.ProcessEvent(touchDown);
+
+  DALI_TEST_EQUALS(dispatchOrder.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[0], Dali::String("pressed"), TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[1], Dali::String("touch"), TEST_LOCATION);
+
+  dispatchOrder.clear();
+
+  Dali::Integration::TouchEvent touchUp;
+  Dali::Integration::Point      pointUp;
+  pointUp.SetState(PointState::FINISHED);
+  pointUp.SetScreenPosition(Vector2(50.0f, 50.0f));
+  pointUp.SetDeviceId(1);
+  pointUp.SetDeviceClass(Device::Class::TOUCH);
+  pointUp.SetDeviceSubclass(Device::Subclass::NONE);
+  touchUp.points.push_back(pointUp);
+  touchUp.time = 120;
+  application.ProcessEvent(touchUp);
+
+  DALI_TEST_EQUALS(dispatchOrder.size(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[0], Dali::String("released"), TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[1], Dali::String("touch"), TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[2], Dali::String("clicked"), TEST_LOCATION);
+  DALI_TEST_CHECK(!view.AsInteractive().IsPressed());
+  END_TEST;
+}
+
 int UtcDaliInteractiveTraitSceneDisconnectionClearsPressedP(void)
 {
   UiTestApplication application;

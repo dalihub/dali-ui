@@ -907,6 +907,21 @@ protected:
   void OnSceneDisconnection() override;
 
   /**
+   * @copydoc Dali::CustomActorImpl::HasIntrinsicTouchHandling()
+   */
+  bool HasIntrinsicTouchHandling() const override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnTouchEvent()
+   */
+  bool OnTouchEvent(const Dali::TouchEvent& event) override;
+
+  /**
+   * @copydoc Dali::CustomActorImpl::OnFinalizeTouchEventDispatch()
+   */
+  void OnFinalizeTouchEventDispatch(const Dali::TouchEvent& event) override;
+
+  /**
    * @copydoc Dali::CustomActorImpl::OnRelayout()
    */
   void OnRelayout(const Vector2& size, RelayoutContainer& container) override;

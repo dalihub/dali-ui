@@ -41,6 +41,7 @@ InteractiveTraitImpl::InteractiveTraitImpl()
   mPseudoDisabledChangedSignal(),
   mKeyClickPolicy(UiConfig::GetCurrent().GetKeyClickPolicy()),
   mPendingKeyInputEvent(),
+  mPendingTouchEvent(),
   mPressedExecutionKey(),
   mPressedExecutionKeyCount(0),
   mPendingKeyAction(PendingKeyAction::NONE),
@@ -65,11 +66,6 @@ void InteractiveTraitImpl::EnableLongPressDetection()
   {
     mLongPressGestureDetector = LongPressGestureDetector::New();
     mLongPressGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnLongPressedInternal);
-    View owner = mOwner.GetHandle();
-    if(owner)
-    {
-      mLongPressGestureDetector.Attach(owner);
-    }
   }
 }
 
@@ -195,6 +191,7 @@ void InteractiveTraitImpl::OnSceneDisconnection(View)
 {
   Internal::PendingPressManager::Get().Cancel(*this);
   ClearKeyPressedHistory();
+  mPendingTouchEvent.Reset();
   mClickBlockedByTouch = false;
   mClickBlockedByKey   = false;
 }
@@ -331,15 +328,8 @@ void InteractiveTraitImpl::OnAttached(View& view)
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "The trait can not be attached multiple target views");
   mOwner = view;
 
-  view.TouchEventSignal().Connect(this, &InteractiveTraitImpl::OnTouchInternal);
-  mTapGestureDetector.Attach(view);
   view.SetFocusable(true);
   view.SetFocusOnTouchEnabled(true);
-
-  if(mLongPressGestureDetector)
-  {
-    mLongPressGestureDetector.Attach(view);
-  }
 }
 
 void InteractiveTraitImpl::OnDetaching(View& view)
@@ -355,10 +345,14 @@ void InteractiveTraitImpl::OnViewDestroying(ViewImpl* viewImpl)
 
 bool InteractiveTraitImpl::OnTouch(View view, TouchEvent touchEvent)
 {
+  mPendingTouchEvent.Reset();
+
   if(!view.IsEnabled())
   {
     return false;
   }
+
+  mPendingTouchEvent = touchEvent;
 
   switch(touchEvent.GetState(0))
   {
@@ -414,11 +408,25 @@ bool InteractiveTraitImpl::OnTouch(View view, TouchEvent touchEvent)
   return false;
 }
 
+void InteractiveTraitImpl::FinalizeTouchEventDispatch(View view, const TouchEvent& event)
+{
+  TouchEvent pendingEvent = mPendingTouchEvent;
+  mPendingTouchEvent.Reset();
+
+  if(!pendingEvent || pendingEvent != event)
+  {
+    return;
+  }
+
+  mTapGestureDetector.HandleEvent(view, event);
+  if(mLongPressGestureDetector)
+  {
+    mLongPressGestureDetector.HandleEvent(view, event);
+  }
+}
+
 void InteractiveTraitImpl::OnTap(View view, TapGesture tap)
 {
-  // NOTE Using TapGestureDetector.HandleEvent() in OnTouch handler can detect tap gesture,
-  // but Clicked event should be triggered after the all registered touch event handlers are called.
-  // So, we need to detect tap gesture without using OnTouch + HandleEvent.
   if(ShouldTapTriggerClicked())
   {
     InputEvent inputEvent = InputEvent::New(tap);
@@ -445,11 +453,6 @@ bool InteractiveTraitImpl::OnLongPressed(View view, InputEvent inputEvent)
 bool InteractiveTraitImpl::IsExecutionKey(const Dali::String& keyName) const
 {
   return UiConfig::GetCurrent().GetExecutionKeyPredicate()(keyName);
-}
-
-bool InteractiveTraitImpl::OnTouchInternal(Actor actor, TouchEvent touchEvent)
-{
-  return OnTouch(View::DownCast(actor), touchEvent);
 }
 
 void InteractiveTraitImpl::OnTapInternal(Actor actor, TapGesture event)

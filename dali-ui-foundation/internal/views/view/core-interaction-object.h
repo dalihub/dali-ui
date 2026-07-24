@@ -65,6 +65,9 @@ public:
   bool OnKeyEvent(View view, const KeyEvent& event);
   void FinalizeKeyEventDispatch();
   void CancelKeyEventDispatch();
+  bool HasIntrinsicTouchHandling() const;
+  bool OnTouchEvent(View view, const TouchEvent& event);
+  void FinalizeTouchEventDispatch(View view, const TouchEvent& event);
 
 protected:
   ~CoreInteractionObject() override;

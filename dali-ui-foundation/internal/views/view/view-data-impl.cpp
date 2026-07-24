@@ -963,6 +963,15 @@ bool ViewDataImpl::HasIntrinsicHoverHandlingDefault() const
   return false;
 }
 
+bool ViewDataImpl::HasIntrinsicTouchHandlingDefault() const
+{
+  if(auto* traitObject = GetCoreInteractionObject())
+  {
+    return traitObject->HasIntrinsicTouchHandling();
+  }
+  return false;
+}
+
 bool ViewDataImpl::HandleHoverEventDefault(const Dali::HoverEvent& event)
 {
   if(auto* traitObject = GetCoreInteractionObject())
@@ -970,6 +979,23 @@ bool ViewDataImpl::HandleHoverEventDefault(const Dali::HoverEvent& event)
     return traitObject->OnHoverEvent(event);
   }
   return false;
+}
+
+bool ViewDataImpl::HandleTouchEventDefault(const Dali::TouchEvent& event)
+{
+  if(auto* traitObject = GetCoreInteractionObject())
+  {
+    return traitObject->OnTouchEvent(View::DownCast(mViewImpl.Self()), event);
+  }
+  return false;
+}
+
+void ViewDataImpl::FinalizeTouchEventDispatchDefault(const Dali::TouchEvent& event)
+{
+  if(auto* traitObject = GetCoreInteractionObject())
+  {
+    traitObject->FinalizeTouchEventDispatch(View::DownCast(mViewImpl.Self()), event);
+  }
 }
 
 void ViewDataImpl::HandleFocusChangedDefault(bool focused)

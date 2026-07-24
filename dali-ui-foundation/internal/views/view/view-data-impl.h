@@ -772,6 +772,9 @@ private:
   void            FinalizeKeyEventDispatchDefault();
   bool            HasIntrinsicHoverHandlingDefault() const;
   bool            HandleHoverEventDefault(const Dali::HoverEvent& event);
+  bool            HasIntrinsicTouchHandlingDefault() const;
+  bool            HandleTouchEventDefault(const Dali::TouchEvent& event);
+  void            FinalizeTouchEventDispatchDefault(const Dali::TouchEvent& event);
   void            HandleFocusChangedDefault(bool focused);
   void            RelayoutDefault(const Vector2& size, RelayoutContainer& container);
   View            ResolveDefaultFocusRequest();
