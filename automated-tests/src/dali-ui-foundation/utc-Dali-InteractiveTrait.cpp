@@ -17,6 +17,7 @@
 
 #include <stdlib.h>
 #include <iostream>
+#include <vector>
 
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
@@ -865,6 +866,63 @@ int UtcDaliInteractiveTraitKeyEventClickedOnReleaseP(void)
 
   DALI_TEST_CHECK(data.called);
   DALI_TEST_CHECK(data.view == view);
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitKeyDispatchOrderAndConsumptionP(void)
+{
+  UiTestApplication application;
+  View              view = CreateInteractiveView(application);
+  view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+
+  std::vector<Dali::String> dispatchOrder;
+  bool                      clicked = false;
+
+  view.AsInteractive().PressedChangedSignal().Connect(
+    &application,
+    [&dispatchOrder](View, bool pressed, InputEvent) {
+      dispatchOrder.push_back(pressed ? "pressed" : "released");
+    });
+  view.KeyEventSignal().Connect(
+    &application,
+    [&dispatchOrder, &clicked, view](View, const KeyEvent& event) mutable {
+      DALI_TEST_EQUALS(view.AsInteractive().IsPressed(), event.GetState() == KeyEvent::State::DOWN, TEST_LOCATION);
+      DALI_TEST_CHECK(!clicked);
+      dispatchOrder.push_back("key");
+      return true;
+    });
+  view.AsInteractive().ClickedSignal().Connect(
+    &application,
+    [&dispatchOrder, &clicked](View, InputEvent) {
+      clicked = true;
+      dispatchOrder.push_back("clicked");
+    });
+
+  FocusManager::Get().SetCurrentFocusView(view);
+  application.SendNotification();
+  application.Render();
+
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, 100, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_EQUALS(dispatchOrder.size(), 2u, TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[0], Dali::String("pressed"), TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[1], Dali::String("key"), TEST_LOCATION);
+  DALI_TEST_CHECK(!clicked);
+
+  dispatchOrder.clear();
+
+  Dali::Integration::KeyEvent keyUp(
+    "Return", "", "", 0, 0, 120, Dali::Integration::KeyEvent::UP, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyUp);
+
+  DALI_TEST_EQUALS(dispatchOrder.size(), 3u, TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[0], Dali::String("released"), TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[1], Dali::String("key"), TEST_LOCATION);
+  DALI_TEST_EQUALS(dispatchOrder[2], Dali::String("clicked"), TEST_LOCATION);
+  DALI_TEST_CHECK(clicked);
+  DALI_TEST_CHECK(!view.AsInteractive().IsPressed());
   END_TEST;
 }
 

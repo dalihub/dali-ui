@@ -417,6 +417,29 @@ struct ScopedTrueFlag
   ScopedTrueFlag& operator=(const ScopedTrueFlag&) = delete;
 };
 
+class ScopedKeyEventDispatch
+{
+public:
+  explicit ScopedKeyEventDispatch(CoreInteractionObject* coreInteractionObject)
+  : mCoreInteractionObject(coreInteractionObject)
+  {
+  }
+
+  ~ScopedKeyEventDispatch()
+  {
+    if(mCoreInteractionObject)
+    {
+      mCoreInteractionObject->CancelKeyEventDispatch();
+    }
+  }
+
+  ScopedKeyEventDispatch(const ScopedKeyEventDispatch&)            = delete;
+  ScopedKeyEventDispatch& operator=(const ScopedKeyEventDispatch&) = delete;
+
+private:
+  CoreInteractionObject* mCoreInteractionObject{nullptr};
+};
+
 static constexpr uint32_t INNER_SHADOW_CORNER_RADIUS_CONSTRAINT_TAG(
   Dali::Ui::ConstraintTagRanges::UI_CONSTRAINT_TAG_START + 10);
 static constexpr uint32_t BORDERLINE_CORNER_RADIUS_CONSTRAINT_TAG(
@@ -670,6 +693,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mSkipChildrenUpdate(false),
   mArrangeDirty(false),
   mArrangeInProgress(false),
+  mKeyEventDispatchInProgress(false),
   mInitialLayoutDone(false),
   mIsFocusGroup(false),
   mDispatchKeyEvents(true),
@@ -917,12 +941,17 @@ bool ViewDataImpl::HandleKeyEventDefault(const Dali::KeyEvent& event)
 {
   if(auto* traitObject = GetCoreInteractionObject())
   {
-    if(auto* interactiveTraitImpl = traitObject->GetInteractiveTraitImpl())
-    {
-      return interactiveTraitImpl->OnKeyEvent(View::DownCast(mViewImpl.Self()), event);
-    }
+    return traitObject->OnKeyEvent(View::DownCast(mViewImpl.Self()), event);
   }
   return false;
+}
+
+void ViewDataImpl::FinalizeKeyEventDispatchDefault()
+{
+  if(auto* traitObject = GetCoreInteractionObject())
+  {
+    traitObject->FinalizeKeyEventDispatch();
+  }
 }
 
 bool ViewDataImpl::HasIntrinsicHoverHandlingDefault() const
@@ -1322,17 +1351,24 @@ Ui::View::FocusChangedSignalType& ViewDataImpl::FocusChangedSignal()
 bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
 {
   Dali::Ui::View handle(mViewImpl.GetOwner());
-  bool           consumed = mViewImpl.FilterKeyEvent(event);
-
-  if(!consumed && !mKeyEventSignal.Empty())
+  if(mViewImpl.FilterKeyEvent(event))
   {
-    consumed = mKeyEventSignal.Emit(handle, event);
+    return true;
   }
 
-  if(!consumed)
+  DALI_ASSERT_DEBUG(!mKeyEventDispatchInProgress && "Nested key dispatch to the same view is unsupported");
+  ScopedTrueFlag         dispatchFlagGuard(mKeyEventDispatchInProgress);
+  ScopedKeyEventDispatch dispatchGuard(GetCoreInteractionObject());
+
+  bool consumed = mViewImpl.OnKeyEvent(event);
+
+  if(!mKeyEventSignal.Empty())
   {
-    consumed = mViewImpl.OnKeyEvent(event);
+    const bool signalConsumed = mKeyEventSignal.Emit(handle, event);
+    consumed                  = consumed || signalConsumed;
   }
+
+  mViewImpl.OnFinalizeKeyEventDispatch(event);
 
   return consumed;
 }

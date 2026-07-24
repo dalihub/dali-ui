@@ -62,6 +62,10 @@ public:
   bool HasIntrinsicHoverHandling() const;
   bool OnHoverEvent(const HoverEvent& event);
 
+  bool OnKeyEvent(View view, const KeyEvent& event);
+  void FinalizeKeyEventDispatch();
+  void CancelKeyEventDispatch();
+
 protected:
   ~CoreInteractionObject() override;
 

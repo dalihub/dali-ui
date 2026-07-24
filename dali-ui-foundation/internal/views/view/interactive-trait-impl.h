@@ -28,6 +28,7 @@
 #include <dali/public-api/signals/dali-signal.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 
 namespace Dali
@@ -224,6 +225,8 @@ private:
   friend class CoreInteractionObject;
   friend class Dali::Ui::Internal::PendingPressManager;
 
+  void FinalizeKeyEventDispatch();
+  void CancelKeyEventDispatch();
   bool OnTouchInternal(Actor actor, TouchEvent touchEvent);
   void OnTapInternal(Actor actor, TapGesture event);
   void OnLongPressedInternal(Actor actor, LongPressGesture event);
@@ -237,8 +240,16 @@ private:
   bool ShouldKeyPressTriggerLongPressed() const;
   bool HandleKeyPressed(View view, InputEvent event);
   bool HandleKeyReleased(View view, InputEvent event);
+  void SetPendingKeyAction(InputEvent event, bool longPressed);
 
 private:
+  enum class PendingKeyAction
+  {
+    NONE,
+    CLICKED,
+    LONG_PRESSED
+  };
+
   WeakHandle<View>                     mOwner;
   TapGestureDetector                   mTapGestureDetector;
   LongPressGestureDetector             mLongPressGestureDetector;
@@ -248,8 +259,10 @@ private:
   Signal<bool(View, InputEvent)>       mLongPressedSignal;
   Signal<void(View, bool, InputEvent)> mHoveredChangedSignal;
   KeyClickPolicy                       mKeyClickPolicy;
+  InputEvent                           mPendingKeyInputEvent;
   UniquePtr<Dali::String>              mPressedExecutionKey;
   uint32_t                             mPressedExecutionKeyCount;
+  PendingKeyAction                     mPendingKeyAction;
   bool                                 mPseudoDisabled : 1;
   bool                                 mClickable : 1;
   bool                                 mClickBlockedByTouch : 1;

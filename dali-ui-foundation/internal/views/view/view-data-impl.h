@@ -769,6 +769,7 @@ private:
   MeasuredSize    MeasureDefault(float widthConstraint, float heightConstraint);
   LayoutRect      ArrangeDefault(const LayoutRect& bounds);
   bool            HandleKeyEventDefault(const Dali::KeyEvent& event);
+  void            FinalizeKeyEventDispatchDefault();
   bool            HasIntrinsicHoverHandlingDefault() const;
   bool            HandleHoverEventDefault(const Dali::HoverEvent& event);
   void            HandleFocusChangedDefault(bool focused);
@@ -970,6 +971,7 @@ private:
   bool mSkipChildrenUpdate : 1;
   bool mArrangeDirty : 1;                                 ///< True when invalidated since the last arrange.
   bool mArrangeInProgress;                                ///< True while this view's own Arrange() is on the stack; guards same-view re-entrancy (plain bool so the scope guard can bind a bool&).
+  bool mKeyEventDispatchInProgress;                       ///< True while this view's key event dispatch is on the stack; guards unsupported same-view re-entrancy.
   bool mInitialLayoutDone : 1;                            ///< True after this view has completed at least one arrange pass; used by the dispatcher to suppress ENTER on initial mount
   bool mIsFocusGroup : 1;                                 ///< Stores whether the view is a focus group.
   bool mDispatchKeyEvents : 1;                            ///< Whether the actor emits key event signals

@@ -40,8 +40,10 @@ InteractiveTraitImpl::InteractiveTraitImpl()
   mPressedChangedSignal(),
   mPseudoDisabledChangedSignal(),
   mKeyClickPolicy(UiConfig::GetCurrent().GetKeyClickPolicy()),
+  mPendingKeyInputEvent(),
   mPressedExecutionKey(),
   mPressedExecutionKeyCount(0),
+  mPendingKeyAction(PendingKeyAction::NONE),
   mPseudoDisabled(false),
   mClickable(true),
   mClickBlockedByTouch(false),
@@ -199,6 +201,8 @@ void InteractiveTraitImpl::OnSceneDisconnection(View)
 
 bool InteractiveTraitImpl::OnKeyEvent(View view, const KeyEvent& event)
 {
+  DALI_ASSERT_DEBUG(mPendingKeyAction == PendingKeyAction::NONE && "Nested key dispatch is unsupported");
+
   InputEvent inputEvent = InputEvent::New(event);
 
   switch(event.GetState())
@@ -245,6 +249,31 @@ bool InteractiveTraitImpl::OnHoverEvent(View view, const HoverEvent& event)
   return false;
 }
 
+void InteractiveTraitImpl::FinalizeKeyEventDispatch()
+{
+  const PendingKeyAction pendingAction = mPendingKeyAction;
+  InputEvent             pendingEvent  = mPendingKeyInputEvent;
+
+  mPendingKeyAction     = PendingKeyAction::NONE;
+  mPendingKeyInputEvent = InputEvent();
+
+  View view = mOwner.GetHandle();
+  if(pendingAction == PendingKeyAction::CLICKED)
+  {
+    OnClicked(view, pendingEvent);
+  }
+  else if(pendingAction == PendingKeyAction::LONG_PRESSED)
+  {
+    mClickBlockedByKey = OnLongPressed(view, pendingEvent);
+  }
+}
+
+void InteractiveTraitImpl::CancelKeyEventDispatch()
+{
+  mPendingKeyAction     = PendingKeyAction::NONE;
+  mPendingKeyInputEvent = InputEvent();
+}
+
 bool InteractiveTraitImpl::HandleKeyPressed(View view, InputEvent event)
 {
   const Dali::String& keyName = event.GetKeyEvent().GetKeyName();
@@ -256,11 +285,11 @@ bool InteractiveTraitImpl::HandleKeyPressed(View view, InputEvent event)
     if(ShouldKeyPressTriggerClicked())
     {
       ClearKeyPressedHistory();
-      OnClicked(view, event);
+      SetPendingKeyAction(event, false);
     }
     else if(ShouldKeyPressTriggerLongPressed())
     {
-      mClickBlockedByKey = OnLongPressed(view, event);
+      SetPendingKeyAction(event, true);
     }
     return true;
   }
@@ -277,13 +306,20 @@ bool InteractiveTraitImpl::HandleKeyReleased(View view, InputEvent event)
 
     if(ShouldKeyReleaseTriggerClicked())
     {
-      OnClicked(view, event);
+      SetPendingKeyAction(event, false);
     }
 
     mClickBlockedByKey = false;
     return true;
   }
   return false;
+}
+
+void InteractiveTraitImpl::SetPendingKeyAction(InputEvent event, bool longPressed)
+{
+  DALI_ASSERT_DEBUG(mPendingKeyAction == PendingKeyAction::NONE && "Multiple semantic key actions in one dispatch are unsupported");
+  mPendingKeyAction     = longPressed ? PendingKeyAction::LONG_PRESSED : PendingKeyAction::CLICKED;
+  mPendingKeyInputEvent = event;
 }
 
 View InteractiveTraitImpl::GetOwner() const

@@ -151,6 +151,11 @@ bool ViewImpl::OnKeyEvent(const Dali::KeyEvent& event)
   return mImpl->HandleKeyEventDefault(event);
 }
 
+void ViewImpl::OnFinalizeKeyEventDispatch(const Dali::KeyEvent&)
+{
+  mImpl->FinalizeKeyEventDispatchDefault();
+}
+
 bool ViewImpl::HasIntrinsicHoverHandling() const
 {
   return mImpl->HasIntrinsicHoverHandlingDefault();

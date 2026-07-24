@@ -838,6 +838,12 @@ protected:
   virtual bool OnKeyEvent(const Dali::KeyEvent& event);
 
   /**
+   * @brief Called after KeyEventSignal() has been emitted for a key event.
+   * @param[in] event The key event
+   */
+  virtual void OnFinalizeKeyEventDispatch(const Dali::KeyEvent& event);
+
+  /**
    * @brief Called when the view's focus state changes. Override to add
    *        custom focus handling. Call the base class at the end of the
    *        override to preserve default state management.

@@ -126,6 +126,27 @@ bool CoreInteractionObject::OnHoverEvent(const HoverEvent& event)
   return false;
 }
 
+bool CoreInteractionObject::OnKeyEvent(View view, const KeyEvent& event)
+{
+  return mInteractiveTraitImpl ? mInteractiveTraitImpl->OnKeyEvent(view, event) : false;
+}
+
+void CoreInteractionObject::FinalizeKeyEventDispatch()
+{
+  if(mInteractiveTraitImpl)
+  {
+    mInteractiveTraitImpl->FinalizeKeyEventDispatch();
+  }
+}
+
+void CoreInteractionObject::CancelKeyEventDispatch()
+{
+  if(mInteractiveTraitImpl)
+  {
+    mInteractiveTraitImpl->CancelKeyEventDispatch();
+  }
+}
+
 void CoreInteractionObject::OnAttached(TraitId id, View& view)
 {
   DALI_ASSERT_ALWAYS(!(mOwner.GetHandle()) && "CoreInteractionObject can not be attached to multiple target views");
