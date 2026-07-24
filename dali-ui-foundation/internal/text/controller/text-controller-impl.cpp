@@ -23,6 +23,7 @@
 #include <dali/public-api/actors/layer.h>
 #include <dali/public-api/adaptor-framework/clipboard-data.h>
 #include <dali/public-api/rendering/renderer.h>
+#include <algorithm>
 #include <cmath>
 #include <limits>
 
@@ -706,14 +707,12 @@ Dali::LayoutDirection::Type Controller::Impl::GetLayoutDirection(Dali::Actor& ac
      (mModel->mLayoutDirectionMode == LayoutDirectionMode::INHERIT && !mIsLayoutDirectionChanged))
   {
     Dali::Integration::SceneHolder sceneHolder = Dali::Integration::SceneHolder::Get(actor);
-    return static_cast<Dali::LayoutDirection::Type>(
-      sceneHolder ? sceneHolder.GetRootLayer().GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>()
-                  : LayoutDirection::LEFT_TO_RIGHT);
+    return sceneHolder ? sceneHolder.GetRootLayer().GetEffectiveLayoutDirection()
+                       : LayoutDirection::LEFT_TO_RIGHT;
   }
   else
   {
-    return static_cast<Dali::LayoutDirection::Type>(
-      actor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+    return actor.GetEffectiveLayoutDirection();
   }
 }
 

@@ -1519,7 +1519,7 @@ void ViewDataImpl::VisualData::ApplyFittingMode(const Vector2& size, bool isLayo
       self                    = mOuter.mViewImpl.Self();
       Vector4 propertyPadding = self.GetProperty<Vector4>(Ui::View::Property::PADDING);
       padding                 = Insets(propertyPadding.x, propertyPadding.y, propertyPadding.z, propertyPadding.w);
-      if(Dali::LayoutDirection::RIGHT_TO_LEFT == mOuter.mViewImpl.GetEffectiveLayoutDirection())
+      if(Dali::LayoutDirection::RIGHT_TO_LEFT == self.GetEffectiveLayoutDirection())
       {
         std::swap(padding.start, padding.end);
       }

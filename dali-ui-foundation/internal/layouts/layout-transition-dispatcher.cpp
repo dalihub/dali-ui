@@ -357,7 +357,7 @@ LayoutRect LayoutTransitionDispatcher::VisualBoundsOf(ViewImpl* parent, ViewImpl
   // visible jump on the first transition under an RTL parent.
   if(parent &&
      !IntegrationView::IsLayoutModeStandalone(*child) &&
-     parent->GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT)
+     parent->Self().GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT)
   {
     const LayoutRect parentBounds = parent->GetArrangedBounds();
     bounds.x                      = parentBounds.width - bounds.x - bounds.width;

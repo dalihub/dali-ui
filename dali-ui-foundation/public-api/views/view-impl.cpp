@@ -270,11 +270,6 @@ void ViewImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   mImpl->RelayoutDefault(size, container);
 }
 
-Dali::LayoutDirection::Type ViewImpl::GetEffectiveLayoutDirection() const
-{
-  return mImpl->GetEffectiveLayoutDirection();
-}
-
 void ViewImpl::SetRequestedX(float x)
 {
   mImpl->SetRequestedX(x);

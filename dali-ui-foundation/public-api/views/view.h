@@ -947,16 +947,6 @@ public:
   void SetBorderlineOffset(float offset);
 
   /**
-   * @brief Returns the effective layout direction applied to this view.
-   *
-   * Always returns the resolved direction (LEFT_TO_RIGHT or RIGHT_TO_LEFT),
-   * taking inheritance into account.
-   *
-   * @return The effective layout direction
-   */
-  Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
-
-  /**
    * @brief Returns true if this view or any of its View ancestors is focused.
    *
    * Unlike the Focused bit in GetState(), this method walks up the scene

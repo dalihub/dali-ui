@@ -381,7 +381,7 @@ LayoutRect CheckBoxImpl::OnArrange(const LayoutRect& bounds)
   // Under RTL we mirror the layout ourselves: swap start/end padding, and flip each child's
   // x within the content band (mapX below). The Lottie artwork is direction-independent and is
   // NOT mirrored; only the icon/label placement flips (icon leading, label trailing in both).
-  const bool rtl = (GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT);
+  const bool rtl = (Self().GetEffectiveLayoutDirection() == Dali::LayoutDirection::RIGHT_TO_LEFT);
   if(rtl)
   {
     std::swap(padding.start, padding.end);

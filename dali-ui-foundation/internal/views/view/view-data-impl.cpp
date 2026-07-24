@@ -984,7 +984,7 @@ void ViewDataImpl::RelayoutDefault(const Vector2& size, RelayoutContainer& conta
 
       Insets padding = mPadding;
 
-      Dali::LayoutDirection::Type layoutDirection = GetEffectiveLayoutDirection();
+      Dali::LayoutDirection::Type layoutDirection = mViewImpl.Self().GetEffectiveLayoutDirection();
 
       if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
       {
@@ -1345,11 +1345,6 @@ bool ViewDataImpl::ActivateAccessibilityDefault()
 ViewAccessible* ViewDataImpl::CreateDefaultAccessibleObject()
 {
   return new ViewAccessible(mViewImpl.Self());
-}
-
-Dali::LayoutDirection::Type ViewDataImpl::GetEffectiveLayoutDirection() const
-{
-  return static_cast<Dali::LayoutDirection::Type>(mViewImpl.Self().GetProperty<int>(Actor::Property::LAYOUT_DIRECTION));
 }
 
 void ViewDataImpl::SetRequestedX(float x)
@@ -2994,7 +2989,7 @@ void ViewDataImpl::ArrangeStandaloneChildren(const LayoutRect& bounds)
 
 void ViewDataImpl::ApplyLayoutDirection(float parentWidth)
 {
-  if(mViewImpl.GetEffectiveLayoutDirection() != Dali::LayoutDirection::RIGHT_TO_LEFT)
+  if(mViewImpl.Self().GetEffectiveLayoutDirection() != Dali::LayoutDirection::RIGHT_TO_LEFT)
   {
     return;
   }

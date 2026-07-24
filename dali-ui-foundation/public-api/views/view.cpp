@@ -132,11 +132,6 @@ void View::AttachLayoutManager(Dali::UniquePtr<LayoutManager> manager)
 // Properties
 // =============================================================================
 
-Dali::LayoutDirection::Type View::GetEffectiveLayoutDirection() const
-{
-  return GetImpl(*this).GetEffectiveLayoutDirection();
-}
-
 void View::SetUiScalePolicy(UiScalePolicy policy)
 {
   GetImpl(*this).SetUiScalePolicy(policy);

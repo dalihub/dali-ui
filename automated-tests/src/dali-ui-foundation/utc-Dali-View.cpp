@@ -2942,7 +2942,7 @@ int UtcDaliViewGetEffectiveLayoutDirectionInheritedP(void)
   parent.Add(child);
 
   parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
-  DALI_TEST_EQUALS(child.IsInheritLayoutDirectionEnabled(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetLayoutDirection(), LayoutDirection::INHERIT, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
   END_TEST;
 }

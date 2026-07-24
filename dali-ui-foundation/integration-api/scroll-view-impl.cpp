@@ -152,8 +152,7 @@ void ScrollViewImpl::OnInitialize()
   // STANDALONE children are excluded from the automatic ApplyLayoutDirection
   // traversal, so propagate the current direction immediately and then track
   // future changes via signal.
-  mScrollBar.SetLayoutDirection(
-    static_cast<LayoutDirection::Type>(Self().GetProperty<int>(Actor::Property::LAYOUT_DIRECTION)));
+  mScrollBar.SetLayoutDirection(Self().GetEffectiveLayoutDirection());
   Self().LayoutDirectionChangedSignal().Connect(this, &ScrollViewImpl::OnLayoutDirectionChanged);
 
   // Connect to relayout signal to update scroll bar when sizes change

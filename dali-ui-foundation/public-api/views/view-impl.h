@@ -241,11 +241,6 @@ public: // Non-virtual API (safe to reorder / extend)
   View::LayoutFinishedSignalType& LayoutFinishedSignal();
 
   /**
-   * @copydoc Ui::View::GetEffectiveLayoutDirection()
-   */
-  Dali::LayoutDirection::Type GetEffectiveLayoutDirection() const;
-
-  /**
    * @copydoc Ui::View::SetRequestedX()
    */
   void SetRequestedX(float x);

@@ -46,8 +46,7 @@ Vector2 CalculateRenderablePosition(Actor textActor, Ui::Text::ControllerPtr con
 
   Vector4    propertyPadding = textActor.GetProperty<Vector4>(Ui::View::Property::PADDING);
   Insets     padding(propertyPadding.x, propertyPadding.y, propertyPadding.z, propertyPadding.w);
-  const auto layoutDirection = static_cast<Dali::LayoutDirection::Type>(
-    textActor.GetProperty(Dali::Actor::Property::LAYOUT_DIRECTION).Get<int>());
+  const auto layoutDirection = textActor.GetEffectiveLayoutDirection();
   if(Dali::LayoutDirection::RIGHT_TO_LEFT == layoutDirection)
   {
     std::swap(padding.start, padding.end);
