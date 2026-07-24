@@ -5,7 +5,7 @@ SET(FOUNDATION_ROOT_SRC_DIR ${ROOT_SRC_DIR}/dali-ui-foundation)
 # ---------------------------------------------------------
 # 1. Shader Generator Configuration
 # ---------------------------------------------------------
-SET(SHADER_GENERATOR_NAME dali-shader-generator)
+SET(SHADER_GENERATOR_NAME dali-ui-shader-generator)
 SET(SHADER_GENERATOR_SOURCES ${FOUNDATION_ROOT_SRC_DIR}/shader-generator/shader-generator.cpp)
 
 # Build shader generator executable for host

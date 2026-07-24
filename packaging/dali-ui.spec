@@ -227,7 +227,7 @@ exit 0
 %{dev_include_path}/dali-ui-foundation/dali-ui-foundation-extension.h
 %{dev_include_path}/dali-ui-foundation/extension-api/*
 %{dev_include_path}/dali-ui-foundation/public-api/*
-%{_bindir}/dali-shader-generator
+%{_bindir}/dali-ui-shader-generator
 
 %files integration-devel
 %defattr(-,root,root,-)
