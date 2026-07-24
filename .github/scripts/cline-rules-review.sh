@@ -40,7 +40,13 @@ if [ ! -d rules ]; then
   exit 1
 fi
 
-git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- rules > "$CHANGED_RULES_FILE" || true
+if ! MERGE_BASE_SHA=$(git merge-base "$BASE_SHA" "$HEAD_SHA"); then
+  echo "Failed to find the merge base between $BASE_SHA and $HEAD_SHA." >&2
+  echo "Ensure that the base branch history is available in the PR workspace." >&2
+  exit 1
+fi
+
+git diff --name-only "$MERGE_BASE_SHA" "$HEAD_SHA" -- rules > "$CHANGED_RULES_FILE"
 
 {
   echo "# dali-ui/rules"
@@ -55,9 +61,9 @@ git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- rules > "$CHANGED_RULES_FILE" ||
 } > "$RULES_FILE"
 
 DIFF_TRUNCATED=false
-git diff --find-renames --unified=80 "$BASE_SHA" "$HEAD_SHA" -- . \
+git diff --find-renames --unified=80 "$MERGE_BASE_SHA" "$HEAD_SHA" -- . \
   ':(exclude).github/workflows/rules-review.yml' \
-  > "$DIFF_FILE.full" || true
+  > "$DIFF_FILE.full"
 
 if [ "$(wc -c < "$DIFF_FILE.full")" -gt "$MAX_DIFF_BYTES" ]; then
   head -c "$MAX_DIFF_BYTES" "$DIFF_FILE.full" > "$DIFF_FILE"

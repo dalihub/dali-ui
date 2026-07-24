@@ -45,9 +45,9 @@ jobs:
           BASE_REPO: ${{ github.event.pull_request.base.repo.full_name }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git fetch origin "$BASE_SHA" --depth=1 || {
+          git fetch origin "$BASE_SHA" || {
             git remote add base "https://x-access-token:${GITHUB_TOKEN}@github.sec.samsung.net/${BASE_REPO}.git"
-            git fetch base "$BASE_SHA" --depth=1
+            git fetch base "$BASE_SHA"
           }
 
       - name: Setup Node.js
