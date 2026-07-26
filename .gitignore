@@ -75,5 +75,7 @@ samples/text/res/locale/gradient/*/LC_MESSAGES/*.mo
 !/build/doc/source/
 
 libdali2-ui*.so*
+/_build/
+/samples/_build/
 *-example
 dali.info
