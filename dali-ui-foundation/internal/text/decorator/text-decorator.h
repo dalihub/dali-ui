@@ -19,12 +19,12 @@
  */
 
 // EXTERNAL INCLUDES
+#include <dali/devel-api/size-negotiation/relayout-container.h>
 #include <dali/public-api/actors/actor.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/math/rect.h>
 #include <dali/public-api/object/property-map.h>
 #include <dali/public-api/object/ref-object.h>
-#include <dali/public-api/size-negotiation/relayout-container.h>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
