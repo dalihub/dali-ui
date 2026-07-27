@@ -538,6 +538,16 @@ public:
   uint32_t GetAmbiguousPressDuration() const;
 
   /**
+   * @copydoc UiConfig::SetWebEngineType()
+   */
+  void SetWebEngineType(WebEngineType type);
+
+  /**
+   * @copydoc UiConfig::GetWebEngineType()
+   */
+  WebEngineType GetWebEngineType() const;
+
+  /**
    * @brief Called after this config is applied via UiConfig::Apply().
    *
    * Derived config implementations override this to register themselves

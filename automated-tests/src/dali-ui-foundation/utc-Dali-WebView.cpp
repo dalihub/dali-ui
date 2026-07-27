@@ -49,6 +49,29 @@ void OnPlainTextCallback(const Dali::String& text) {}
 // Construction & Destruction
 // ===========================================================================
 
+int UtcDaliWebViewUiConfigWebEngineTypeP(void)
+{
+  UiConfig config = UiConfig::New();
+
+  DALI_TEST_EQUALS(config.GetWebEngineType(), WebEngineType::CHROMIUM, TEST_LOCATION);
+
+  config.SetWebEngineType(WebEngineType::LWE);
+  DALI_TEST_EQUALS(config.GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
+
+  config.Apply();
+
+  DALI_TEST_EQUALS(UiConfig::GetCurrent().GetWebEngineType(), WebEngineType::LWE, TEST_LOCATION);
+  DALI_TEST_ASSERTION(config.SetWebEngineType(WebEngineType::CHROMIUM), "UiConfig is frozen after UiConfig::Apply()");
+
+  END_TEST;
+}
+
+int UtcDaliWebViewNewWithoutAppliedUiConfigN(void)
+{
+  DALI_TEST_ASSERTION(WebView::New(), "UiConfig::Apply() must be called before WebView::New()");
+  END_TEST;
+}
+
 int UtcDaliWebViewConstructorP(void)
 {
   UiTestApplication application;
@@ -920,4 +943,3 @@ int UtcDaliWebViewPageLoadErrorTypeEnumP(void)
   DALI_TEST_EQUALS(static_cast<int>(WebViewPageLoadErrorType::PRINT), 6, TEST_LOCATION);
   END_TEST;
 }
-

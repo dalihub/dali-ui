@@ -556,6 +556,16 @@ uint32_t UiConfig::GetAmbiguousPressDuration() const
   return GetImpl(*this).GetAmbiguousPressDuration();
 }
 
+void UiConfig::SetWebEngineType(WebEngineType type)
+{
+  GetImpl(*this).SetWebEngineType(type);
+}
+
+WebEngineType UiConfig::GetWebEngineType() const
+{
+  return GetImpl(*this).GetWebEngineType();
+}
+
 void UiConfig::ResetStyleSheet(UiStyleSheet styleSheet)
 {
   GetImpl(*this).ResetStyleSheet(styleSheet);

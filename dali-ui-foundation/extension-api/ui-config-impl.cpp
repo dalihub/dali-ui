@@ -79,6 +79,7 @@ public:
     mTapRecognizerTime(UINT32_MAX),
     mAmbiguousPressDelay(100u),
     mAmbiguousPressDuration(64u),
+    mWebEngineType(WebEngineType::CHROMIUM),
     mClearFocusOnEscapeEnabled(true),
     mClearFocusIndicationOnTouch(true),
     mClearFocusIndicationOnHover(false),
@@ -118,6 +119,7 @@ public:
   uint32_t                  mTapRecognizerTime;
   uint32_t                  mAmbiguousPressDelay;
   uint32_t                  mAmbiguousPressDuration;
+  WebEngineType             mWebEngineType;
   float                     mCachedDpiFactor{1.0f};
   float                     mCachedScaledDpiFactor{1.0f};
   bool                      mClearFocusOnEscapeEnabled;
@@ -270,6 +272,17 @@ void UiConfigImpl::SetAmbiguousPressDuration(uint32_t timeMs)
 uint32_t UiConfigImpl::GetAmbiguousPressDuration() const
 {
   return mImpl->mAmbiguousPressDuration;
+}
+
+void UiConfigImpl::SetWebEngineType(WebEngineType type)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  mImpl->mWebEngineType = type;
+}
+
+WebEngineType UiConfigImpl::GetWebEngineType() const
+{
+  return mImpl->mWebEngineType;
 }
 
 void UiConfigImpl::SetBrokenImageUrl(UiConfig::BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)

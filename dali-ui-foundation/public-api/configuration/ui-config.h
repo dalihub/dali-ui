@@ -30,6 +30,7 @@
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
 #include <dali-ui-foundation/public-api/views/effects/state-effect.h>
+#include <dali-ui-foundation/public-api/views/web/web-engine-type.h>
 
 namespace Dali
 {
@@ -157,7 +158,8 @@ public:
   /**
    * @brief Creates a new UiConfig with default values.
    *
-   * Default: scalingFactor=1.0f, dpi=160, baselineDpi=160.
+   * Default: scalingFactor=1.0f, dpi=160, baselineDpi=160,
+   * webEngineType=WebEngineType::CHROMIUM.
    *
    * @return An initialized UiConfig handle
    */
@@ -854,6 +856,24 @@ public: // Properties
   {
     return StyleSheet().GetStyle(key);
   }
+
+  /**
+   * @brief Sets the web engine used by WebView instances.
+   *
+   * The engine is selected when the first WebView is created and is shared by
+   * all WebView instances in the process.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] type The web engine type
+   */
+  void SetWebEngineType(WebEngineType type);
+
+  /**
+   * @brief Gets the web engine used by WebView instances.
+   *
+   * @return The configured web engine type
+   */
+  WebEngineType GetWebEngineType() const;
 
 public: // Not intended for Application developers
   /**

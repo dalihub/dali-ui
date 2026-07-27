@@ -1,6 +1,6 @@
-# WebView
+# DALi UI Foundation - WebView
 
-# **[→ Another Guide](https://github.sec.samsung.net/NUI/dali-guide_auto/blob/main/guide/web-view.md)**
+[→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/WebView-(kr))
 
 `WebView` is a View for displaying web content. It enables embedding web pages and HTML content directly in your application, with support for navigation, JavaScript interaction, and various web engine features.
 
@@ -34,8 +34,8 @@ using namespace Dali::Ui;
 // Create an empty WebView
 WebView webView = WebView::New();
 
-// Create a WebView and load a URL immediately
-WebView webView = WebView::New("https://www.example.com");
+// Load a URL
+webView.LoadUrl("https://www.example.com");
 
 // Set size
 webView.SetRequestedWidth(800.0f);
@@ -43,6 +43,16 @@ webView.SetRequestedHeight(600.0f);
 
 // Add to the scene
 window.Add(webView);
+```
+
+### Selecting a Web Engine
+
+WebView uses Chromium by default. To use another web engine, configure it in `UiConfig` at application startup.
+
+```cpp
+UiConfig config = UiConfig::New();
+config.SetWebEngineType(WebEngineType::LWE);
+config.Apply();
 ```
 
 ---
@@ -495,6 +505,14 @@ Add or remove custom HTTP headers for requests:
 webView.AddCustomHeader("X-Custom-Header", "CustomValue");
 webView.RemoveCustomHeader("X-Custom-Header");
 ```
+
+---
+
+## 11. Important Notes
+
+- Apply `UiConfig` before creating the first `WebView`.
+- Select the web engine before calling `UiConfig::Apply()`. Chromium is used by default.
+- Web engine capabilities may differ by platform and engine implementation.
 
 ---
 

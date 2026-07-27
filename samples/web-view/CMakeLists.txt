@@ -10,4 +10,5 @@ IF(NOT COMMAND DALI_ADD_SAMPLE)
 ENDIF()
 
 DALI_ADD_SAMPLE(web-view.example web-view-example.cpp)
+DALI_ADD_SAMPLE(web-view-lwe.example web-view-lwe-example.cpp)
 DALI_ADD_SAMPLE(web-browser.example web-browser-example.cpp)

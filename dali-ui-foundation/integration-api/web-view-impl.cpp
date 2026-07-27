@@ -32,6 +32,7 @@
 #include <algorithm>
 #include <functional>
 #include <memory>
+#include <mutex>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
@@ -39,6 +40,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
@@ -171,8 +173,19 @@ WebViewImpl::~WebViewImpl()
 
 WebViewImplPtr WebViewImpl::New()
 {
+  DALI_ASSERT_ALWAYS(UiConfig::HasCurrent() && "UiConfig::Apply() must be called before WebView::New()");
+
+  const WebEngineType webEngineType = UiConfig::GetCurrent().GetWebEngineType();
+  const char* const   webEngineName = webEngineType == WebEngineType::LWE ? "LWE" : "Chromium";
+
+  static std::once_flag webEngineLogFlag;
+  std::call_once(webEngineLogFlag, [webEngineName]()
+  {
+    DALI_LOG_RELEASE_INFO("[WebView] Using %s web engine as configured in the applied UiConfig.\n", webEngineName);
+  });
+
   auto* impl       = new WebViewImpl();
-  impl->mWebEngine = Dali::WebEngine::New();
+  impl->mWebEngine = Dali::WebEngine::New(static_cast<int32_t>(webEngineType));
   if(impl->mWebEngine)
   {
     impl->mWebEngine.Create(
