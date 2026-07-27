@@ -25,6 +25,7 @@
 #endif
 
 #include <dali/devel-api/actors/actor-devel.h>
+#include <dali/devel-api/actors/actor-enumerations-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/type-info.h>
 #include <dali/integration-api/string-utils.h>
