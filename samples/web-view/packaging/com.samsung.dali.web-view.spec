@@ -75,9 +75,6 @@ cd %{app_root_dir}
 mkdir -p %{buildroot}%{xml_file_dir}
 cp -f %{_builddir}/%{name}-%{version}/%{app_root_dir}/%{name}.xml %{buildroot}%{xml_file_dir}
 
-mkdir -p %{buildroot}%{app_res_dir}
-cp -fr  res/* %{buildroot}%{app_res_dir}
-
 #mkdir -p %{buildroot}%{icon_dir}
 #cp -rf %{buildroot}/res %{buildroot}%{app_res_dir}
 #mv %{buildroot}/res/images/%{name}.png %{buildroot}%{icon_dir}
@@ -107,6 +104,6 @@ exit 0
 %{app_exe_dir}/web-view.example
 %{app_exe_dir}/web-view-lwe.example
 %{app_exe_dir}/web-browser.example
-%{app_res_dir}/*
+%{app_ro_dir}share/dali/samples/web-view/res/*
 %{xml_file_dir}/%{name}.xml
 #%license LICENSE
