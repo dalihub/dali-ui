@@ -18,6 +18,7 @@
  *
  */
 
+#include <dali/devel-api/actors/size-negotiated-actor.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/integration-api/scene.h>
 #include <dali/public-api/dali-core.h>
@@ -117,7 +118,7 @@ enum Type
 // TypeRegistry needs custom actor Implementations to have the same name (namespaces are ignored so we use one here)
 namespace Impl
 {
-struct TestCustomActor : public Dali::CustomActorImpl
+struct TestCustomActor : public Dali::CustomActorImpl, public Dali::SizeNegotiatedActor
 {
 public:
   /**
@@ -329,7 +330,7 @@ struct TestCustomActorVariant5 : public TestCustomActor
     // Chain up first
     TestCustomActor::OnSceneConnection(depth);
 
-    // Take parent off-stage
+    // Take parent off-scene
     Dali::Actor parent = Self().GetParent();
     if(parent)
     {
@@ -360,7 +361,7 @@ struct TestCustomActorVariant6 : public TestCustomActor
     // Chain up first
     TestCustomActor::OnSceneDisconnection();
 
-    // Put parent on-stage
+    // Put parent on-scene
     Dali::Actor parent = Self().GetParent();
     if(parent)
     {
@@ -436,7 +437,7 @@ struct TestCustomActorVariant8 : public TestCustomActor
 };
 
 // Need a class that doesn't override virtual methods
-class SimpleTestCustomActor : public Dali::CustomActorImpl
+class SimpleTestCustomActor : public Dali::CustomActorImpl, public Dali::SizeNegotiatedActor
 {
 public:
   /**
