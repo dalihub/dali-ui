@@ -762,6 +762,16 @@ public:
    */
   void SizeOrUiScaleChanged();
 
+  /**
+   * @brief Refreshes render effects (e.g. blur) that depend on the current self size.
+   *
+   * Unlike SizeOrUiScaleChanged(), this does not re-register the fitting-mode
+   * processor: fitting mode for layout-arranged views is already driven by the
+   * layout-finished signal (see EnsureFittingModeLayoutFinishedSignalConnected()),
+   * so triggering it again here would apply it twice per layout pass.
+   */
+  void RefreshRenderEffects();
+
 protected: // From processor-interface
   void Process(bool postProcessor) override;
 
@@ -973,14 +983,15 @@ private:
   MeasuredSize                          mMeasuredSize; ///< mLastMeasuredConstraint.width < 0 means no valid measure cache
   MeasuredSize                          mLastMeasuredConstraint;
   LayoutRect                            mArrangedBounds;
-  Insets                                mMargin;          ///< Layout margin
-  Insets                                mPadding;         ///< Layout padding
-  float                                 mRequestedWidth;  ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  float                                 mRequestedHeight; ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
-  LayoutMode                            mLayoutMode;      ///< Layout mode of the view
-  Vector2                               mSize;            ///< The size of the view
-  std::unique_ptr<SizeConstraints>      mSizeConstraints; ///< Lazy-allocated measurement min/max bounds (natural units).
-  Dali::Vector<View>                    mChildren;        ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
+  Insets                                mMargin;                       ///< Layout margin
+  Insets                                mPadding;                      ///< Layout padding
+  float                                 mRequestedWidth;               ///< Requested width (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  float                                 mRequestedHeight;              ///< Requested height (WRAP_CONTENT = -1.0f, MATCH_PARENT = -2.0f)
+  LayoutMode                            mLayoutMode;                   ///< Layout mode of the view
+  Vector2                               mSize;                         ///< The size of the view
+  Vector2                               mLastArrangedRenderEffectSize; ///< Self size last seen by ApplySelfBoundsIfChanged, used only to dedupe render-effect refresh (kept separate from mSize, which Process()/ApplyFittingMode rely on)
+  std::unique_ptr<SizeConstraints>      mSizeConstraints;              ///< Lazy-allocated measurement min/max bounds (natural units).
+  Dali::Vector<View>                    mChildren;                     ///< Synchronized with Actor hierarchy via OnChildAdd/OnChildRemove.
   std::unique_ptr<LayoutTransitionData> mLayoutTransitionData;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;

@@ -17,3 +17,6 @@ CXXFLAGS='-g -O0 --coverage' LDFLAGS='--coverage' \
 
 echo "############# Building all samples ##############"
 cmake --build "$BUILD_DIR" -- -j$(nproc)
+
+echo "############# Installing all samples ##############"
+cmake --install "$BUILD_DIR"

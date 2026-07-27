@@ -689,6 +689,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mRequestedHeight(WRAP_CONTENT),
   mLayoutMode(Ui::LayoutMode::DEFAULT),
   mSize(0, 0),
+  mLastArrangedRenderEffectSize(0, 0),
   mAccessibilityData(nullptr),
   mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
   mSkipChildrenUpdate(false),
@@ -3352,6 +3353,25 @@ void ViewDataImpl::ApplySelfBoundsIfChanged(const LayoutRect& bounds)
   {
     self.SetHeight(bounds.height);
   }
+
+  // The layout engine applies self size via SetWidth/SetHeight, which does not
+  // route through Actor::OnSizeSet (only Actor::SetSize does). Drive the same
+  // render-effect refresh OnSizeSet would, so render effects (e.g. blur) that
+  // read the final layout size refresh for layout-sized views that never
+  // receive an explicit SetSize. Fitting mode is intentionally not re-applied
+  // here: it is already driven for layout-arranged views by the
+  // layout-finished signal, and re-registering it here would apply it twice.
+  // Track against a dedicated field rather than mSize: Arrange() can run with
+  // provisional/degenerate bounds for views outside real layout measurement
+  // (e.g. a plain View given an explicit Actor size but never measured by a
+  // layout container), and mSize is load-bearing for Process()/ApplyFittingMode
+  // via the OnSizeSet path - clobbering it here desyncs fitting mode sizing.
+  const Vector2 newSize(bounds.width, bounds.height);
+  if(mLastArrangedRenderEffectSize != newSize)
+  {
+    mLastArrangedRenderEffectSize = newSize;
+    RefreshRenderEffects();
+  }
 }
 
 void ViewDataImpl::EmitFocusChangedSignal(bool focusGained)
@@ -5742,7 +5762,11 @@ void ViewDataImpl::SizeOrUiScaleChanged()
   // Apply fitting mode at post process.r
   RegisterProcessorOnce();
 
-  // Refresh render effects
+  RefreshRenderEffects();
+}
+
+void ViewDataImpl::RefreshRenderEffects()
+{
   if(mRenderEffectData && mRenderEffectData->renderEffect)
   {
     mRenderEffectData->renderEffect->Refresh();

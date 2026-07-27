@@ -18,7 +18,6 @@
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali/dali.h>
 #include <dali/public-api/events/key-event.h>
-#include <dali/devel-api/actors/actor-devel.h>
 
 #include <algorithm>
 #include <array>
@@ -104,10 +103,6 @@ public:
     mRoot.SetBackgroundColor(Color::TRANSPARENT);
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
-    PositionSize windowSize = mWindow.GetPositionSize();
-    mRoot.SetProperty(Actor::Property::SIZE, Vector2(windowSize.width, windowSize.height));
-    mRoot.SetProperty(DevelActor::Property::WIDTH_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
-    mRoot.SetProperty(DevelActor::Property::HEIGHT_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
     mWindow.Add(mRoot);
 
     CreateMovingImageBoard();
@@ -131,9 +126,8 @@ private:
     mImageBoard.SetRequestedX(0.0f);
     mImageBoard.SetRequestedY(0.0f);
     mImageBoard.SetBackgroundColor(Color::TRANSPARENT);
-    mImageBoard.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-    mImageBoard.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-    mImageBoard.SetProperty(Actor::Property::SIZE, Vector2(windowSize.width, windowSize.height));
+    mImageBoard.SetParentOrigin(ParentOrigin::TOP_LEFT);
+    mImageBoard.SetPivot(Pivot::TOP_LEFT);
     mRoot.Add(mImageBoard);
 
     const float strideX     = IMAGE_SIZE + IMAGE_GAP_X;
@@ -154,8 +148,8 @@ private:
         image.SetRequestedHeight(IMAGE_SIZE);
         image.SetRequestedX(startX + strideX * column);
         image.SetRequestedY(startY + strideY * row);
-        image.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-        image.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+        image.SetParentOrigin(ParentOrigin::TOP_LEFT);
+        image.SetPivot(Pivot::TOP_LEFT);
         mImageBoard.Add(image);
 
         imageIndex = (imageIndex + 1u) % NUMBER_OF_IMAGES;
@@ -165,8 +159,6 @@ private:
 
   void CreateFullscreenBlurPane()
   {
-    PositionSize windowSize = mWindow.GetPositionSize();
-
     mBlurPane = View::New();
     mBlurPane.SetLayoutMode(LayoutMode::STANDALONE);
     mBlurPane.SetRequestedWidth(MATCH_PARENT);
@@ -174,11 +166,8 @@ private:
     mBlurPane.SetRequestedX(0.0f);
     mBlurPane.SetRequestedY(0.0f);
     mBlurPane.SetBackgroundColor(Color::TRANSPARENT);
-    mBlurPane.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-    mBlurPane.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
-    mBlurPane.SetProperty(Actor::Property::SIZE, Vector2(windowSize.width, windowSize.height));
-    mBlurPane.SetProperty(DevelActor::Property::WIDTH_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
-    mBlurPane.SetProperty(DevelActor::Property::HEIGHT_RESIZE_POLICY, ResizePolicy::FILL_TO_PARENT);
+    mBlurPane.SetParentOrigin(ParentOrigin::TOP_LEFT);
+    mBlurPane.SetPivot(Pivot::TOP_LEFT);
     mRoot.Add(mBlurPane);
 
     mBackgroundBlur = BackgroundBlurEffect::New(BLUR_RADIUS);
@@ -202,8 +191,8 @@ private:
     mStatusLabel.SetTextColor(UiColor(0xFFFFFF));
     mStatusLabel.SetHorizontalTextAlignment(Text::Alignment::END);
     mStatusLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mStatusLabel.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-    mStatusLabel.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+    mStatusLabel.SetParentOrigin(ParentOrigin::TOP_LEFT);
+    mStatusLabel.SetPivot(Pivot::TOP_LEFT);
     mRoot.Add(mStatusLabel);
 
     UpdateStatusLabel();
@@ -224,8 +213,8 @@ private:
     mHelpLabel.SetBackgroundColor(Vector4(0.0f, 0.0f, 0.0f, 0.68f));
     mHelpLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     mHelpLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mHelpLabel.SetProperty(Actor::Property::PARENT_ORIGIN, ParentOrigin::TOP_LEFT);
-    mHelpLabel.SetProperty(Actor::Property::PIVOT, Pivot::TOP_LEFT);
+    mHelpLabel.SetParentOrigin(ParentOrigin::TOP_LEFT);
+    mHelpLabel.SetPivot(Pivot::TOP_LEFT);
     mRoot.Add(mHelpLabel);
   }
 
@@ -261,9 +250,6 @@ private:
 
   void OnWindowResized(Window windowHandle, Window::WindowSize windowSize)
   {
-    mRoot.SetProperty(Actor::Property::SIZE, Vector2(windowSize.GetWidth(), windowSize.GetHeight()));
-    mImageBoard.SetProperty(Actor::Property::SIZE, Vector2(windowSize.GetWidth(), windowSize.GetHeight()));
-    mBlurPane.SetProperty(Actor::Property::SIZE, Vector2(windowSize.GetWidth(), windowSize.GetHeight()));
     mStatusLabel.SetRequestedX(static_cast<float>(windowSize.GetWidth()) - 284.0f);
     mHelpLabel.SetRequestedWidth(static_cast<float>(windowSize.GetWidth()) - HELP_MARGIN * 2.0f);
     mHelpLabel.SetRequestedY(static_cast<float>(windowSize.GetHeight()) - HELP_HEIGHT - HELP_MARGIN);
@@ -283,7 +269,7 @@ private:
     else if(event.GetKeyName() == "1")
     {
       mBlurVisible = !mBlurVisible;
-      mBlurPane.SetProperty(Actor::Property::VISIBLE, mBlurVisible);
+      mBlurPane.SetVisible(mBlurVisible);
     }
     else if(event.GetKeyName() == "2")
     {
