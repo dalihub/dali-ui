@@ -330,16 +330,7 @@ private:
     {
       // Single animated file
       mAnimatedImageView.SetResourceUrls(Dali::Vector<Dali::String>{});
-      if(mImageIndex == 0)
-      {
-        mReloadRotated = false;
-        WriteReloadWebpSource(mReloadRotated);
-        mAnimatedImageView.SetResourceUrl(WEBP_RELOAD_TEMP_URL);
-      }
-      else
-      {
-        mAnimatedImageView.SetResourceUrl(IMAGE_URLS[mImageIndex]);
-      }
+      mAnimatedImageView.SetResourceUrl(IMAGE_URLS[mImageIndex]);
     }
 
     DALI_LOG_RELEASE_INFO("[AnimatedImageView] Image changed to: %s\n", IMAGE_NAMES[mImageIndex]);
