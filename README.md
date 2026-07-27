@@ -49,6 +49,27 @@ git checkout v2.5.14.10210
 
 ## How to build
 
+### Windows build
+
+For complete Windows SDK workflow and setup instructions, see the
+[windows-dependencies README](https://github.com/dalihub/windows-dependencies/blob/master/README.md).
+
+After installing Windows dependencies and building dali-core and dali-adaptor,
+build dali-ui with:
+
+```powershell
+cd <workspace>\dali-ui
+.\build\windows\build.ps1
+```
+
+To run samples, first apply the runtime environment to your PowerShell session:
+
+```powershell
+cd <workspace>
+. .\dali-env\setenv.ps1
+& "$env:DALI_PREFIX\bin\hello-world.example.exe"
+```
+
 ### Ubuntu build
 
 :warning: DALi env set up required. ([→Link](https://github.com/dalihub/dali-core/blob/master/README.md#1-building-for-ubuntu-desktop))

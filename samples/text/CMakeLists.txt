@@ -49,6 +49,14 @@ DALI_ADD_SAMPLE(text-image-span-perf.example text-image-span-perf-example.cpp)
 # Generate runtime message catalogs when gettext is available.
 FIND_PROGRAM(MSGFMT_EXECUTABLE msgfmt)
 IF(MSGFMT_EXECUTABLE)
+  # MSYS2-based msgfmt can fail when multiple instances start simultaneously.
+  # Create a job pool to serialize msgfmt execution while allowing other builds to parallelize.
+  SET(MSGFMT_JOB_POOL_ARGUMENT)
+  IF(CMAKE_GENERATOR MATCHES "Ninja" AND CMAKE_VERSION VERSION_GREATER_EQUAL "3.15")
+    SET_PROPERTY(GLOBAL APPEND PROPERTY JOB_POOLS dali_msgfmt_pool=1)
+    SET(MSGFMT_JOB_POOL_ARGUMENT JOB_POOL dali_msgfmt_pool)
+  ENDIF()
+
   SET(PO_MO_FILES)
   SET(TEXT_LOCALIZATION_LOCALES en_US ko_KR ar_AE)
 
@@ -64,6 +72,7 @@ IF(MSGFMT_EXECUTABLE)
       COMMAND ${CMAKE_COMMAND} -E make_directory ${MO_DIR}
       COMMAND ${MSGFMT_EXECUTABLE} -o ${MO_FILE} ${PO_FILE}
       DEPENDS ${PO_FILE}
+      ${MSGFMT_JOB_POOL_ARGUMENT}
       COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
     )
     LIST(APPEND PO_MO_FILES ${MO_FILE})
@@ -81,6 +90,7 @@ IF(MSGFMT_EXECUTABLE)
       COMMAND ${CMAKE_COMMAND} -E make_directory ${MO_DIR}
       COMMAND ${MSGFMT_EXECUTABLE} -o ${MO_FILE} ${PO_FILE}
       DEPENDS ${PO_FILE}
+      ${MSGFMT_JOB_POOL_ARGUMENT}
       COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
     )
     LIST(APPEND PO_MO_FILES ${MO_FILE})
@@ -98,6 +108,7 @@ IF(MSGFMT_EXECUTABLE)
       COMMAND ${CMAKE_COMMAND} -E make_directory ${MO_DIR}
       COMMAND ${MSGFMT_EXECUTABLE} -o ${MO_FILE} ${PO_FILE}
       DEPENDS ${PO_FILE}
+      ${MSGFMT_JOB_POOL_ARGUMENT}
       COMMENT "Generating ${MO_FILE} from ${PO_FILE}"
     )
     LIST(APPEND PO_MO_FILES ${MO_FILE})
