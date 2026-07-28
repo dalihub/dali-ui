@@ -38,7 +38,7 @@
 
 - **3-캔버스 분리** — 정적 배경, 동적 데이터, 인터랙티브 오버레이를 독립적인 래스터화 대상으로 분리하여, 터치 이벤트 발생 시 얇은 오버레이 레이어만 재래스터화합니다.
 - **스로틀 타이머** — 레이아웃/렌더 사이클을 시작하기 전에 빠르게 연속 호출되는 `series.SetValues()`를 합산 처리합니다.
-- **`Rebuild*()` 직접 호출 우회** — 초기 레이아웃 이후 데이터 업데이트 시, `RelayoutRequest()`를 거치지 않고 `RebuildData()`를 직접 호출한 뒤 `RequestRasterization()`을 실행합니다. `RelayoutRequest()`는 Adaptor를 깨우지 않기 때문입니다.
+- **`Rebuild*()` 직접 호출 우회** — 초기 레이아웃 이후 데이터 업데이트 시, 레이아웃 패스를 예약하지 않고 `RebuildData()`를 직접 호출한 뒤 `RequestRasterization()`을 실행합니다. 뷰 bounds가 변하지 않았으므로 즉시 래스터화하는 편이 더 가볍고 빠르기 때문입니다.
 - **명시적 제스처 디텍터** — `ViewImpl`이 `EnableGestureDetection`을 노출하지 않으므로, `ChartViewImpl`이 `PanGestureDetector`와 `PinchGestureDetector` 멤버를 직접 관리합니다.
 
 ---
@@ -268,12 +268,12 @@ ChartViewImpl::OnUpdateThrottleTimer()
        │                                   각 캔버스에 RequestRasterization() 호출
        │                                   (즉시 Adaptor 깨움)
        └─ mLastLayout 유효하지 않음 ──────► mNeedsBackgroundUpdate = mNeedsDataUpdate = true
-                                            RelayoutRequest()
+                                            InvalidateArrange()
                                             (다음 OnArrange 프레임으로 지연)
 ```
 
-> **왜 데이터 업데이트 시 RelayoutRequest()를 우회하는가?**
-> `RelayoutRequest()`는 뷰를 `LayoutController`에 등록할 뿐입니다. Adaptor에 새 렌더 패스를 예약하도록 신호를 보내지 않습니다. 타이머 구동 애니메이션이 다른 이벤트 없이 `RelayoutRequest()`를 호출하면 Adaptor는 유휴 상태를 유지하고 차트가 멈춥니다. `RebuildData()` + `RequestRasterization()`을 직접 호출하면 매 타이머 틱마다 Adaptor를 깨울 수 있습니다.
+> **왜 데이터 업데이트 시 레이아웃 패스를 우회하는가?**
+> 뷰 bounds가 변하지 않았으므로 전체 measure/arrange 패스는 불필요합니다. `InvalidateArrange()`는 뷰를 `LayoutController`에 등록할 뿐이며 실제 패스는 다음 idle에 실행됩니다. `RebuildData()` + `RequestRasterization()`을 직접 호출하면 그 자리에서 즉시 래스터화되므로 더 가볍고 빠르며, 타이머 구동 애니메이션이 부드럽게 유지됩니다.
 
 ---
 

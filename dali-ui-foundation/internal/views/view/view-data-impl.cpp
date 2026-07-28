@@ -854,7 +854,7 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
   }
   else
   {
-    Vector3 naturalSize     = mViewImpl.Self().GetNaturalSize();
+    Vector3 naturalSize     = GetNaturalSize();
     float   contentNaturalW = std::max(0.0f, naturalSize.width - pw);
     size.width              = contentNaturalW + pw;
     if(natW >= 0.0f)
@@ -872,7 +872,7 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
   }
   else
   {
-    Vector3 naturalSize     = mViewImpl.Self().GetNaturalSize();
+    Vector3 naturalSize     = GetNaturalSize();
     float   contentNaturalH = std::max(0.0f, naturalSize.height - ph);
     size.height             = contentNaturalH + ph;
     if(natH >= 0.0f)

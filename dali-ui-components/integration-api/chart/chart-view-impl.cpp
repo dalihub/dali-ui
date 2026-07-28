@@ -289,7 +289,7 @@ void ChartViewImpl::AddSeries(Ui::ChartSeries series)
   UpdateScale();
   mNeedsBackgroundUpdate = true;
   mNeedsDataUpdate       = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 void ChartViewImpl::SetXAxis(Ui::ChartAxis axis)
@@ -301,7 +301,7 @@ void ChartViewImpl::SetXAxis(Ui::ChartAxis axis)
   UpdateScale();
   mNeedsBackgroundUpdate = true;
   mNeedsDataUpdate       = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 void ChartViewImpl::SetYAxis(Ui::ChartAxis axis)
@@ -313,7 +313,7 @@ void ChartViewImpl::SetYAxis(Ui::ChartAxis axis)
   UpdateScale();
   mNeedsBackgroundUpdate = true;
   mNeedsDataUpdate       = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 void ChartViewImpl::OnSeriesDataChanged()
@@ -373,14 +373,11 @@ bool ChartViewImpl::OnUpdateThrottleTimer()
     {
       // Bypass the layout system for data-only updates.
       //
-      // RelayoutRequest() only registers with the dali-ui LayoutController;
-      // it does NOT signal the Adaptor to run another render cycle.  The
-      // layout (and therefore RequestRasterization) would only execute when
-      // the Adaptor wakes up for another reason (e.g. a hover event), causing
-      // animated charts to freeze until mouse movement.
-      //
-      // Calling Rebuild*() directly triggers RequestRasterization() which
-      // signals the Adaptor immediately, keeping timer-driven animations smooth.
+      // The view bounds are unchanged, so a full measure/arrange pass is
+      // unnecessary; RebuildBackground() recomputes the internal plot layout
+      // itself.  Calling Rebuild*() directly issues RequestRasterization()
+      // right away, keeping timer-driven animations smooth instead of waiting
+      // for the next layout pass.
       RebuildBackground();
       RebuildData();
     }
@@ -389,7 +386,7 @@ bool ChartViewImpl::OnUpdateThrottleTimer()
       // Not yet laid out — defer until OnArrange provides valid bounds.
       mNeedsBackgroundUpdate = true;
       mNeedsDataUpdate       = true;
-      RelayoutRequest();
+      InvalidateArrange();
     }
   }
   return false;
@@ -443,7 +440,7 @@ bool ChartViewImpl::OnAnimTimer()
     else
     {
       mNeedsDataUpdate = true;
-      RelayoutRequest();
+      InvalidateArrange();
     }
     return false;
   }
@@ -502,7 +499,7 @@ void ChartViewImpl::OnAxisConfigChanged()
   UpdateScale();
   mNeedsBackgroundUpdate = true;
   mNeedsDataUpdate       = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 // =============================================================================
@@ -566,7 +563,7 @@ void ChartViewImpl::ResetZoom()
   mViewportYMax          = GetImplementation(mModel.mYAxis).GetMaxLimit();
   mNeedsBackgroundUpdate = true;
   mNeedsDataUpdate       = true;
-  RelayoutRequest();
+  InvalidateArrange();
   EmitZoomedSignal();
 }
 
@@ -912,7 +909,7 @@ bool ChartViewImpl::RemoveSeries(const Dali::String& name)
     UpdateScale();
     mNeedsDataUpdate       = true;
     mNeedsBackgroundUpdate = true;
-    RelayoutRequest();
+    InvalidateArrange();
     return true;
   }
   return false;
@@ -929,7 +926,7 @@ void ChartViewImpl::RemoveAllSeries()
   UpdateScale();
   mNeedsDataUpdate       = true;
   mNeedsBackgroundUpdate = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 // =============================================================================
@@ -940,7 +937,7 @@ void ChartViewImpl::AddSection(Ui::ChartSection section)
 {
   mModel.mSections.push_back(section);
   mNeedsBackgroundUpdate = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 void ChartViewImpl::RemoveSection(Ui::ChartSection section)
@@ -948,21 +945,21 @@ void ChartViewImpl::RemoveSection(Ui::ChartSection section)
   auto& v = mModel.mSections;
   v.erase(std::remove(v.begin(), v.end(), section), v.end());
   mNeedsBackgroundUpdate = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 void ChartViewImpl::ClearSections()
 {
   mModel.mSections.clear();
   mNeedsBackgroundUpdate = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 void ChartViewImpl::SetTitle(const Dali::String& title)
 {
   mModel.mTitle          = title;
   mNeedsBackgroundUpdate = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 Dali::String ChartViewImpl::GetTitle() const
@@ -974,7 +971,7 @@ void ChartViewImpl::SetTitlePosition(Ui::ChartView::TitlePosition position)
 {
   mModel.mStyle.layout.titlePosition = static_cast<int>(position);
   mNeedsBackgroundUpdate             = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 Ui::ChartView::TitlePosition ChartViewImpl::GetTitlePosition() const
@@ -986,7 +983,7 @@ void ChartViewImpl::SetTitleColor(const Vector4& color)
 {
   mModel.mStyle.render.titleColor = color;
   mNeedsBackgroundUpdate          = true;
-  RelayoutRequest();
+  InvalidateArrange();
 }
 
 Vector4 ChartViewImpl::GetTitleColor() const
@@ -1158,7 +1155,7 @@ void ChartViewImpl::SetProperty(BaseObject* object, Property::Index propertyInde
         }
         break;
     }
-    impl.RelayoutRequest();
+    impl.InvalidateArrange();
   }
 }
 

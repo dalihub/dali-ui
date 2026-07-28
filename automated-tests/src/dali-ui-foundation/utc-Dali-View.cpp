@@ -3158,6 +3158,34 @@ int UtcDaliViewWrapBackgroundPaddingNoDoubleCountP(void)
   END_TEST;
 }
 
+// A leaf WRAP view whose background visual reports a non-zero natural size must
+// measure to that natural size plus padding. The measure path must resolve the
+// natural size from this view's own visual data; resolving it through the actor
+// handle instead yields ZERO and collapses the result to the padding alone.
+int UtcDaliViewWrapBackgroundNaturalSizePlusPaddingP(void)
+{
+  UiTestApplication application;
+  View              view = View::New();
+  view.SetRequestedWidth(WRAP_CONTENT);
+  view.SetRequestedHeight(WRAP_CONTENT);
+  view.SetPadding(Extents(5, 15, 25, 35)); // pw = 20, ph = 60
+
+  // An image visual with an explicit desired size reports that size as its
+  // natural size, so the expected measure result is deterministic without
+  // needing the image itself to be decodable.
+  Property::Map backgroundMap;
+  backgroundMap.Insert(Ui::VisualBasePropertyIndex::TYPE, Ui::Integration::InternalVisualType::IMAGE);
+  backgroundMap.Insert(Ui::ImageVisualPropertyIndex::URL, Dali::String("background-image.png"));
+  backgroundMap.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, 120);
+  backgroundMap.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, 90);
+  view.SetProperty(Ui::View::Property::BACKGROUND, backgroundMap);
+
+  MeasuredSize size = view.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(size.GetWidth(), 140.0f, TEST_LOCATION);  // 120 + pw, buggy: 20
+  DALI_TEST_EQUALS(size.GetHeight(), 150.0f, TEST_LOCATION); // 90 + ph, buggy: 60
+  END_TEST;
+}
+
 // F2-docs anchor: min/max conflict resolution is "max wins" (floor to min, then
 // ceil to max). Min 100 > Max 30 with a requested 50 yields 30.
 int UtcDaliViewMinMaxConflictMaxWinsP(void)
