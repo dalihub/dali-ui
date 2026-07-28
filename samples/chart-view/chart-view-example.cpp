@@ -20,7 +20,7 @@
  *
  * Scene 1 — "Basic Chart Frame"       : empty chart frame (axes, grid, tick labels)
  * Scene 2 — "Multi-Series + Labels"   : Y auto-range, UpdateSeries, Label pool
- * Scene 3 — "Size Change Test"        : OnRelayout / RebuildBackground on resize
+ * Scene 3 — "Size Change Test"        : OnArrange / RebuildBackground on resize
  * Scene 4 — "Marker Shapes & Labels"  : MarkerShape, DataLabel formatting
  * Scene 5 — "Area Chart"              : FillEnabled
  * Scene 6 — "Custom Styling"          : axis colors, grid dash, title position
@@ -440,7 +440,7 @@ public:
 
   // -------------------------------------------------------------------------
   // Scene 3: Size Change Test
-  // — Timer alternates chart size every 2s to verify OnRelayout / RebuildBackground
+  // — Timer alternates chart size every 2s to verify OnArrange / RebuildBackground
   // -------------------------------------------------------------------------
   void CreateSizeChangeScene(Window window)
   {
