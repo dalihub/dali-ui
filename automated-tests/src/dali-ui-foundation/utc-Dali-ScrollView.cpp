@@ -15,12 +15,12 @@
  *
  */
 
-#include <stdlib.h>
-#include <iostream>
-#include <dali.h>
-#include <dali/integration-api/events/touch-event-integ.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali.h>
+#include <dali/integration-api/events/touch-event-integ.h>
+#include <stdlib.h>
+#include <iostream>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -128,13 +128,13 @@ class ScrollStartedCallback : public ConnectionTracker
 {
 public:
   ScrollStartedCallback()
-    : called(false)
+  : called(false)
   {
   }
 
   void OnScrollStarted(ScrollView scrollView)
   {
-    called          = true;
+    called       = true;
     receivedView = scrollView;
   }
 
@@ -151,7 +151,7 @@ class ScrollFinishedCallback : public ConnectionTracker
 {
 public:
   ScrollFinishedCallback()
-    : called(false)
+  : called(false)
   {
   }
 
@@ -174,7 +174,7 @@ class ScrollingCallback : public ConnectionTracker
 {
 public:
   ScrollingCallback()
-    : called(false)
+  : called(false)
   {
   }
 
@@ -192,7 +192,7 @@ class DragStartedCallback : public ConnectionTracker
 {
 public:
   DragStartedCallback()
-    : called(false)
+  : called(false)
   {
   }
 
@@ -210,7 +210,7 @@ class DragFinishedCallback : public ConnectionTracker
 {
 public:
   DragFinishedCallback()
-    : called(false)
+  : called(false)
   {
   }
 
@@ -228,9 +228,9 @@ class DraggingCallback : public ConnectionTracker
 {
 public:
   DraggingCallback()
-    : called(false),
-      deltaX(0.0f),
-      deltaY(0.0f)
+  : called(false),
+    deltaX(0.0f),
+    deltaY(0.0f)
   {
   }
 
@@ -415,7 +415,7 @@ int UtcDaliScrollViewDownCastFromViewN(void)
   UiTestApplication application;
 
   // A plain View should not downcast to ScrollView
-  View view = View::New();
+  View       view = View::New();
   BaseHandle object(view);
 
   ScrollView scrollView = ScrollView::DownCast(object);
@@ -488,7 +488,7 @@ int UtcDaliScrollViewSetScrollPositionSetterP(void)
   content.SetRequestedHeight(1000.0f);
   scrollView.SetContent(content);
 
-  const Vector2  position(50.0f, 75.0f);
+  const Vector2 position(50.0f, 75.0f);
   scrollView.SetScrollPosition(position);
   DALI_TEST_EQUALS(scrollView.GetScrollPosition(), position, TEST_LOCATION);
 
@@ -545,13 +545,75 @@ int UtcDaliScrollViewSetScrollDirectionSetterP(void)
   END_TEST;
 }
 
+int UtcDaliScrollViewPanScrollEnabledP(void)
+{
+  UiTestApplication application;
+
+  ScrollView scrollView = ScrollView::New();
+  scrollView.SetPivot(Pivot::TOP_LEFT);
+  scrollView.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  scrollView.SetRequestedWidth(200.0f);
+  scrollView.SetRequestedHeight(200.0f);
+  scrollView.SetScrollDirection(ScrollDirection::Vertical);
+
+  View content = View::New();
+  content.SetPivot(Pivot::TOP_LEFT);
+  content.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  content.SetRequestedWidth(200.0f);
+  content.SetRequestedHeight(600.0f);
+  scrollView.SetContent(content);
+  application.GetScene().Add(scrollView);
+
+  DragStartedCallback dragStarted;
+  scrollView.DragStartedSignal().Connect(
+    &dragStarted,
+    &DragStartedCallback::OnDragStarted);
+
+  application.SendNotification();
+  application.Render();
+
+  DALI_TEST_CHECK(scrollView.IsPanScrollEnabled());
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 160.0f), 100u));
+
+  // Match a child long-press drag: the ScrollView has already observed DOWN
+  // when the child drag starts and suspends pan scrolling.
+  scrollView.SetPanScrollEnabled(false);
+  DALI_TEST_CHECK(!scrollView.IsPanScrollEnabled());
+
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 120.0f), 116u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 80.0f), 132u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 40.0f), 148u));
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 40.0f), 164u));
+
+  DALI_TEST_CHECK(!dragStarted.called);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition(), Vector2::ZERO, TEST_LOCATION);
+
+  // Programmatic scrolling remains available for edge auto-scroll.
+  scrollView.ScrollToY(120.0f, false);
+  DALI_TEST_EQUALS(scrollView.GetScrollPosition().y, 120.0f, TEST_LOCATION);
+
+  scrollView.SetPanScrollEnabled(true);
+  DALI_TEST_CHECK(scrollView.IsPanScrollEnabled());
+
+  application.ProcessEvent(GenerateTouch(PointState::DOWN, Vector2(20.0f, 160.0f), 200u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 120.0f), 216u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 80.0f), 232u));
+  application.ProcessEvent(GenerateTouch(PointState::MOTION, Vector2(20.0f, 40.0f), 248u));
+  application.ProcessEvent(GenerateTouch(PointState::UP, Vector2(20.0f, 40.0f), 264u));
+
+  DALI_TEST_CHECK(dragStarted.called);
+  DALI_TEST_CHECK(scrollView.GetScrollPosition().y > 120.0f);
+
+  END_TEST;
+}
+
 // MaxFlingDistance Tests
 
 int UtcDaliScrollViewSetGetMaxFlingDistanceP(void)
 {
   UiTestApplication application;
 
-  ScrollView  scrollView  = ScrollView::New();
+  ScrollView  scrollView   = ScrollView::New();
   const float testDistance = 3000.0f;
 
   scrollView.SetMaxFlingDistance(testDistance);
@@ -984,7 +1046,8 @@ int UtcDaliScrollViewDoesNotFocusTouchFocusableChildWhenDraggingP(void)
   child.SetRequestedHeight(100.0f);
   child.SetFocusable(true);
   child.SetFocusOnTouchEnabled(true);
-  child.TouchEventSignal().Connect([](Actor, TouchEvent) { return true; });
+  child.TouchEventSignal().Connect([](Actor, TouchEvent)
+  { return true; });
 
   content.Add(child);
   scrollView.SetContent(content);
@@ -1032,7 +1095,7 @@ int UtcDaliScrollViewDefersInteractiveChildPressedWhileDisambiguatingP(void)
   child.SetRequestedWidth(100.0f);
   child.SetRequestedHeight(100.0f);
 
-  InteractiveTrait interactive = child.AsInteractive();
+  InteractiveTrait            interactive = child.AsInteractive();
   PressedChangedSignalData    data;
   PressedChangedSignalFunctor functor(data);
   interactive.PressedChangedSignal().Connect(&application, functor);
@@ -1076,7 +1139,7 @@ int UtcDaliScrollViewAmbiguousPressDelayExpiresP(void)
   child.SetRequestedWidth(100.0f);
   child.SetRequestedHeight(100.0f);
 
-  InteractiveTrait interactive = child.AsInteractive();
+  InteractiveTrait            interactive = child.AsInteractive();
   PressedChangedSignalData    data;
   PressedChangedSignalFunctor functor(data);
   interactive.PressedChangedSignal().Connect(&application, functor);
@@ -1208,7 +1271,7 @@ int UtcDaliScrollViewDoesNotPressInteractiveChildWhenDraggingP(void)
   child.SetRequestedWidth(100.0f);
   child.SetRequestedHeight(100.0f);
 
-  InteractiveTrait interactive = child.AsInteractive();
+  InteractiveTrait            interactive = child.AsInteractive();
   PressedChangedSignalData    data;
   PressedChangedSignalFunctor functor(data);
   interactive.PressedChangedSignal().Connect(&application, functor);
@@ -1260,7 +1323,7 @@ int UtcDaliScrollViewPressesInteractiveChildOnTapReleaseP(void)
   child.SetRequestedWidth(100.0f);
   child.SetRequestedHeight(100.0f);
 
-  InteractiveTrait interactive = child.AsInteractive();
+  InteractiveTrait            interactive = child.AsInteractive();
   PressedChangedSignalData    data;
   PressedChangedSignalFunctor functor(data);
   interactive.PressedChangedSignal().Connect(&application, functor);

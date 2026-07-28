@@ -495,6 +495,39 @@ private:
 | 상위 View에서 제스처 인식 | 하위 View로 터치 전파 불가 |
 | InterceptTouchEvent 사용 | 상위 View에서 터치 인터셉트 후 제스처 전환 가능 |
 
+### Child Drag와 ScrollView 조정
+
+`ScrollView`는 내부적으로 `InterceptTouchEvent`와
+`PanGestureDetector::HandleEvent()`를 사용합니다. pan threshold에 도달하면 touch
+sequence를 consume하는 것은 일반 scroll에는 올바르지만, child가 소유한
+drag-and-drop gesture와 충돌할 수 있습니다.
+
+active child drag 동안 pan scroll만 중지합니다.
+
+```cpp
+void OnDragStarted(View, DragAndDropDetector)
+{
+  scrollView.SetPanScrollEnabled(false);
+}
+
+void OnDragEnded(View, DragAndDropDetector)
+{
+  scrollView.SetPanScrollEnabled(true);
+}
+```
+
+비활성화된 동안 `ScrollView`는 child touch sequence를 intercept하지 않고 pan
+displacement로 content를 움직이지 않습니다. `ScrollTo()` 같은 programmatic API는
+계속 사용할 수 있으므로 drag-and-drop edge auto-scroll은 구현할 수 있습니다.
+
+child touch callback이 `true`를 반환하는 것만으로는 parent `ScrollView`가 이후
+motion을 intercept하는 것을 막을 수 없습니다. active child drag 동안 parent의
+intercept 정책 자체를 중지해야 합니다.
+
+source/target 등록, custom preview, target acceptance, edge auto-scroll 전체 예제는
+[In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop-(kr))
+문서를 참고하세요.
+
 ---
 
 ## 참고 사항

@@ -134,6 +134,16 @@ void ScrollView::SetScrollDirection(ScrollDirection direction)
   GetImpl(*this).SetScrollDirection(direction);
 }
 
+void ScrollView::SetPanScrollEnabled(bool enabled)
+{
+  GetImpl(*this).SetPanScrollEnabled(enabled);
+}
+
+bool ScrollView::IsPanScrollEnabled() const
+{
+  return GetImpl(*this).IsPanScrollEnabled();
+}
+
 float ScrollView::GetMaxFlingDistance() const
 {
   return GetImpl(*this).GetMaxFlingDistance();

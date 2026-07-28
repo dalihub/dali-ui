@@ -244,3 +244,74 @@ Dali::Ui::Integration::Visual::Base visual;
 ## Validation note
 
 이 변경 이후 `dali-ui/build/tizen`에서 `dali2-ui-foundation`과 `dali2-ui-components` 빌드를 확인했다.
+
+## DragAndDropDetector 후속 public API 이동
+
+`DragAndDropDetector`는 framework 확장용 API가 아니라 애플리케이션이 직접 source,
+target, drag preview를 구성하는 기능이다. 따라서 in-scene drag-and-drop 기능을 정리하면서
+아래와 같이 public API로 후속 이동했다. 위 표는 최초 devel-to-integration migration
+이력으로 유지한다.
+
+| 항목 | Integration 단계 | 현재 |
+|---|---|---|
+| Detector header | `integration-api/drag-drop-detector/drag-and-drop-detector.h` | `public-api/drag-and-drop/drag-and-drop-detector.h` |
+| Types header | detector header에 포함 | `public-api/drag-and-drop/drag-and-drop-types.h` |
+| Source | `integration-api/drag-drop-detector/drag-and-drop-detector.cpp` | `public-api/drag-and-drop/drag-and-drop-detector.cpp` |
+| Namespace | `Dali::Ui::Integration::DragAndDropDetector` | `Dali::Ui::DragAndDropDetector` |
+| Umbrella header | `dali-ui-foundation-integ.h` | `dali-ui-foundation.h` |
+
+## DragAndDropDetector 명시적 제어 세션
+
+키보드, 접근성 action, gamepad처럼 포인터 좌표를 직접 제공하지 않는 입력도 동일한
+drag lifecycle과 application-provided preview를 재사용할 수 있도록 다음 public API를
+추가했다.
+
+| API | 역할 |
+|---|---|
+| `StartDrag(source, deviceClass)` | 등록된 source의 screen bounds 중앙에서 명시적 세션 시작 |
+| `MoveDragTo(target)` | 애플리케이션이 선택한 등록 target으로 이동하고 proposal/feedback 평가 |
+| `Drop()` | 승인된 현재 target에 drop하거나 `NO_TARGET`으로 종료 |
+| `GetDragSessionOrigin()` | 세션이 `GESTURE` 또는 `EXPLICIT`에서 시작됐는지 조회 |
+
+`DragAndDropEvent::sessionOrigin`은 preview, proposal, feedback, cancel/finalize
+callback에서도 같은 세션 출처를 전달한다. Detector는 focus 이동이나 접근성 탐색
+순서를 소유하지 않으며, 애플리케이션이 해당 정책을 결정한 뒤 `MoveDragTo()`를
+호출한다.
+
+## DragAndDropDetector pre-release API 정리
+
+첫 사용처가 생기기 전에 다른 platform의 drag-and-drop API와 용어 및 event 구조를
+맞추기 위해 다음 breaking redesign을 적용했다.
+
+| 항목 | 현재 계약 |
+|---|---|
+| Payload | `DragPayload`가 우선순위가 있는 복수 representation과 allowed/preferred operation 제공 |
+| Dynamic data | `SourcePayloadProvider`가 gesture pickup 시점에 session payload를 한 번 생성 |
+| Lifecycle | 모든 signal이 immutable `DragAndDropEvent` snapshot을 전달 |
+| Coordinates | screen/source-grab/source-parent/target-local/preview-local 좌표를 명시적으로 구분 |
+| Preview | DALi `Visual`과 혼동하지 않도록 `DragPreview` 용어 사용 |
+| Target proposal | `DropProposalCallback`이 selected representation과 COPY/MOVE/LINK operation 반환 |
+| Explicit control | explicit payload를 받는 `StartDrag()` overload 제공 |
+
+Drop handler는 `DragAndDropEvent::GetSelectedRepresentationData()`를 사용해
+proposal의 type을 다시 조회하지 않고 선택된 `Property::Value`를 받을 수 있다.
+
+`EndedSignal`의 event에는 detector query state가 정리된 뒤에도 source, target,
+payload, terminal result가 유지된다. 공통 cleanup은 Ended callback에서 수행할 수
+있지만, 바깥 detach operation과의 재진입 충돌을 막기 위해 새 session은 callback
+반환 뒤 시작해야 한다.
+
+## ScrollView child drag 조정 API
+
+`ScrollView` 안의 child가 drag gesture를 소유하는 동안 일반 pan scrolling을
+중지하고 callback-driven edge auto-scroll만 유지할 수 있도록 public API를
+추가했다.
+
+| API | 역할 |
+|---|---|
+| `SetPanScrollEnabled(bool)` | touch/mouse pan의 content 이동과 intercept를 활성화 또는 비활성화 |
+| `IsPanScrollEnabled()` | 현재 pan scrolling 활성화 상태 조회 |
+
+pan scrolling을 비활성화해도 `ScrollTo()`를 포함한 programmatic scrolling은
+동작한다. 진행 중인 pan을 비활성화하면 fling 없이 interaction을 종료하며 child
+touch sequence를 더 이상 intercept하지 않는다.

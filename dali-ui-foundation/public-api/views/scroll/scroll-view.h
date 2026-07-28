@@ -166,6 +166,28 @@ public: // Setters for chaining
   ScrollDirection GetScrollDirection() const;
 
   /**
+   * @brief Sets whether touch and mouse pan gestures can scroll the content.
+   *
+   * Disabling pan scrolling leaves programmatic scrolling APIs such as
+   * ScrollTo() available. This is useful while a child view owns an in-scene
+   * drag gesture and the ScrollView should move only through application
+   * controlled edge auto-scroll.
+   *
+   * If a pan scroll is active when this is disabled, the interaction is
+   * stopped without starting a fling.
+   *
+   * @param[in] enabled True to enable pan scrolling (default: true)
+   */
+  void SetPanScrollEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether touch and mouse pan gestures can scroll the content.
+   *
+   * @return True if pan scrolling is enabled
+   */
+  bool IsPanScrollEnabled() const;
+
+  /**
    * @brief Sets the maximum distance by fling action.
    *
    * @param[in] distance The maximum fling distance

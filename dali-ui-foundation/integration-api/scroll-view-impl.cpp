@@ -109,6 +109,7 @@ ScrollViewImpl::ScrollViewImpl()
   mVerticalScrollBarVisibility(ScrollBarVisibility::Auto),
   mHorizontalScrollBarVisibility(ScrollBarVisibility::Auto),
   mPanGestureDetector(PanGestureDetector::New()),
+  mPanScrollEnabled(true),
   mPanThreshold(5.0f),
   mLastPanPosition(0.0f, 0.0f),
   mIntercepting(false),
@@ -315,6 +316,60 @@ void ScrollViewImpl::SetScrollDirection(ScrollDirection direction)
         break;
     }
   }
+}
+
+void ScrollViewImpl::SetPanScrollEnabled(bool enabled)
+{
+  if(mPanScrollEnabled == enabled)
+  {
+    return;
+  }
+
+  mPanScrollEnabled = enabled;
+  if(enabled)
+  {
+    return;
+  }
+
+  if(mStartEdgeActive)
+  {
+    if(mStartEdgeEffect)
+    {
+      mStartEdgeEffect.Finish();
+    }
+    mStartEdgeActive  = false;
+    mEdgeDisplacement = 0.0f;
+  }
+  if(mEndEdgeActive)
+  {
+    if(mEndEdgeEffect)
+    {
+      mEndEdgeEffect.Finish();
+    }
+    mEndEdgeActive    = false;
+    mEdgeDisplacement = 0.0f;
+  }
+
+  CancelScrollAnimation();
+  if(mIsDragging)
+  {
+    SendDragFinished();
+  }
+  if(mDisambiguating)
+  {
+    mDisambiguating = false;
+    Ui::Internal::ScrollStateObserver::Get().NotifyGestureDisambiguationEnded();
+  }
+
+  mIntercepting    = false;
+  mJustIntercepted = false;
+  mPanRecognized   = false;
+  mVelocityTracker.Clear();
+}
+
+bool ScrollViewImpl::IsPanScrollEnabled() const
+{
+  return mPanScrollEnabled;
 }
 
 float ScrollViewImpl::GetMaxFlingDistance() const
@@ -1636,6 +1691,16 @@ bool ScrollViewImpl::OnInterceptTouch(Actor actor, TouchEvent touch)
 {
   PointState::Type state = touch.GetState(0);
 
+  if(!mPanScrollEnabled)
+  {
+    // Keep the recognizer's touch sequence balanced, but never allow it to
+    // intercept a child-owned drag or move the content while pan scrolling is
+    // disabled.
+    TouchEvent& nonConstTouch = touch;
+    mPanGestureDetector.HandleEvent(actor, nonConstTouch);
+    return false;
+  }
+
   if(state == PointState::DOWN)
   {
     // mIntercepting stays true only when the previous touch sequence was abandoned
@@ -1772,6 +1837,16 @@ bool ScrollViewImpl::OnTouch(Actor actor, TouchEvent touch)
 
 void ScrollViewImpl::OnPanGesture(Actor actor, PanGesture gesture)
 {
+  if(!mPanScrollEnabled)
+  {
+    if(gesture.GetState() == GestureState::FINISHED ||
+       gesture.GetState() == GestureState::CANCELLED)
+    {
+      mPanRecognized = false;
+    }
+    return;
+  }
+
   switch(gesture.GetState())
   {
     case GestureState::STARTED:

@@ -136,6 +136,18 @@ public: // API
   void SetScrollDirection(ScrollDirection direction);
 
   /**
+   * @brief Sets whether touch and mouse pan gestures can scroll the content.
+   *
+   * Programmatic scrolling remains available while disabled.
+   */
+  void SetPanScrollEnabled(bool enabled);
+
+  /**
+   * @brief Gets whether touch and mouse pan gestures can scroll the content.
+   */
+  bool IsPanScrollEnabled() const;
+
+  /**
    * @brief Gets the maximum fling distance.
    */
   float GetMaxFlingDistance() const;
@@ -781,6 +793,7 @@ private:
 
   // Pan gesture
   PanGestureDetector mPanGestureDetector; ///< Pan gesture detector
+  bool               mPanScrollEnabled;   ///< Whether direct pan input can scroll content
   float              mPanThreshold;       ///< Additional displacement threshold (px) after Pan is recognized
   Vector2            mLastPanPosition;    ///< Last pan position
   VelocityTracker    mVelocityTracker;    ///< Touch-history velocity tracker for fling

@@ -81,6 +81,7 @@ DALi는 안정성 보장 수준과 대상 독자에 따라 세 가지 API 레벨
 * [Focus & Key](https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-&-Key-(kr))
 * [Accessibility](https://github.sec.samsung.net/NUI/dali-ui/wiki/Accessibility-(kr))
 * [Touch & Gesture](https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-&-Gesture-(kr))
+* [In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop-(kr))
 * [State Management](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management-(kr))
 * [State Effect](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Effect-(kr))
 * [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI-(kr))

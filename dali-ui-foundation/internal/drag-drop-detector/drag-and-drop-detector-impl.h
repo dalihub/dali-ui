@@ -20,14 +20,18 @@
 
 // EXTERNAL INCLUDES
 #include <algorithm>
-#include <string>
+#include <utility>
 #include <vector>
 
+#include <dali/public-api/adaptor-framework/timer.h>
+#include <dali/public-api/adaptor-framework/window.h>
+#include <dali/public-api/events/long-press-gesture-detector.h>
+#include <dali/public-api/events/long-press-gesture.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/object/base-object.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/drag-drop-detector/drag-and-drop-detector.h>
+#include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture.h>
 
@@ -45,64 +49,94 @@ using DragAndDropDetectorPtr = IntrusivePtr<DragAndDropDetector>;
 class DragAndDropDetector : public Dali::BaseObject, public ConnectionTracker
 {
 public:
-  using DragAndDropSignal = Dali::Ui::Integration::DragAndDropDetector::DragAndDropSignal;
+  using DragEventSignalType             = Dali::Ui::DragAndDropDetector::DragEventSignalType;
+  using TargetFeedbackChangedSignalType = Dali::Ui::DragAndDropDetector::TargetFeedbackChangedSignalType;
+  using DragPreviewPositionSignalType   = Dali::Ui::DragAndDropDetector::DragPreviewPositionSignalType;
+  using DragPreviewFactory              = Dali::Ui::DragAndDropDetector::DragPreviewFactory;
+  using DragPreviewUpdater              = Dali::Ui::DragAndDropDetector::DragPreviewUpdater;
+  using DragPreviewFinalizer            = Dali::Ui::DragAndDropDetector::DragPreviewFinalizer;
+  using DropProposalCallback            = Dali::Ui::DragAndDropDetector::DropProposalCallback;
+  using AutoScrollCallback              = Dali::Ui::DragAndDropDetector::AutoScrollCallback;
+  using CanStartDragCallback            = Dali::Ui::DragAndDropDetector::CanStartDragCallback;
+  using SourcePayloadProvider           = Dali::Ui::DragAndDropDetector::SourcePayloadProvider;
 
   // Creation
 
   /**
-   * @copydoc Ui::Integration::DragAndDropDetector::New()
+   * @copydoc Dali::Ui::DragAndDropDetector::New()
    */
-  static Dali::Ui::Integration::DragAndDropDetector New();
+  static Dali::Ui::DragAndDropDetector New();
 
   // Public API
 
   /**
-   * @copydoc Dali::DragAndDropDetector::GetContent() const
-   */
-  const std::string& GetContent() const;
-
-  /**
-   * @copydoc Dali::DragAndDropDetector::GetCurrentScreenPosition() const
+   * @copydoc Dali::Ui::DragAndDropDetector::GetCurrentScreenPosition() const
    */
   const Vector2& GetCurrentScreenPosition() const;
 
-  /**
-   * Attaches view to DragAndDropDetector.
-   * @param[in] view  view that will be attached to DragAndDropDetector.
-   */
-  void Attach(Dali::Ui::View& view);
+  void                         AttachSource(Dali::Ui::View& view);
+  void                         SetSourcePayload(Dali::Ui::View& source, Dali::Ui::DragPayload payload);
+  void                         ClearSourcePayload(Dali::Ui::View& source);
+  void                         SetSourcePayloadProvider(Dali::Ui::View& source, SourcePayloadProvider provider);
+  void                         ClearSourcePayloadProvider(Dali::Ui::View& source);
+  void                         AttachTarget(Dali::Ui::View& view);
+  void                         SetDropProposalCallback(Dali::Ui::View& target, DropProposalCallback callback);
+  void                         ClearDropProposalCallback(Dali::Ui::View& target);
+  void                         SetAutoScrollCallback(Dali::Ui::DragAutoScrollConfiguration configuration,
+                                                     AutoScrollCallback                    callback);
+  void                         ClearAutoScrollCallback();
+  void                         SetDragActivationMode(Dali::Ui::DragActivationMode mode);
+  Dali::Ui::DragActivationMode GetDragActivationMode() const;
+  void                         SetDragActivationConfiguration(
+                            Device::Class::Type                   deviceClass,
+                            Dali::Ui::DragActivationConfiguration configuration);
+  void                                  ClearDragActivationConfiguration(Device::Class::Type deviceClass);
+  bool                                  HasDragActivationConfiguration(Device::Class::Type deviceClass) const;
+  Dali::Ui::DragActivationConfiguration GetDragActivationConfiguration(
+    Device::Class::Type deviceClass) const;
+  void  SetCanStartDragCallback(CanStartDragCallback callback);
+  void  ClearCanStartDragCallback();
+  void  SetDragStartThreshold(float threshold);
+  float GetDragStartThreshold() const;
+  bool  IsDragActivationPending() const;
 
-  /**
-   * Detaches view to DragAndDropDetector.
-   * @param[in] view  view that will be Detached from DragAndDropDetector.
-   */
-  void Detach(Dali::Ui::View& view);
+  void DetachSource(Dali::Ui::View& view);
+  void DetachTarget(Dali::Ui::View& view);
 
   /**
    * Detaches all views attached to DragAndDropDetector.
    */
-  void DetachAll();
+  void                        DetachAll();
+  bool                        StartDrag(Dali::Ui::View& source, Device::Class::Type deviceClass);
+  bool                        StartDrag(Dali::Ui::View&       source,
+                                        Dali::Ui::DragPayload payload,
+                                        Device::Class::Type   deviceClass);
+  bool                        MoveDragTo(Dali::Ui::View& target);
+  bool                        Drop();
+  void                        CancelDrag();
+  bool                        IsDragging() const;
+  Dali::Ui::DragSessionOrigin GetDragSessionOrigin() const;
+  Dali::Ui::View              GetDragSource() const;
+  Dali::Ui::View              GetDragTarget() const;
 
-  /**
-   * Returns the number of views attached to the DragAndDropDetector.
-   */
-  uint32_t GetAttachedViewCount() const;
+  uint32_t GetAttachedSourceCount() const;
+  uint32_t GetAttachedTargetCount() const;
 
-  /**
-   * Returns a view by index. An empty handle if the index is not valid.
-   */
-  Dali::Ui::View GetAttachedView(uint32_t index) const;
+  Dali::Ui::View GetAttachedSource(uint32_t index) const;
+  Dali::Ui::View GetAttachedTarget(uint32_t index) const;
 
-  /**
-   * Sets the dragged content.
-   * @param[in] content  A string that represents the content that has been dropped.
-   */
-  void SetContent(const std::string& content);
+  void                         SetDragPreview(Dali::Ui::View preview);
+  void                         SetDragPreviewContainer(Dali::Ui::View container);
+  void                         SetDragPreviewCallbacks(DragPreviewFactory   factory,
+                                                       DragPreviewUpdater   updater,
+                                                       DragPreviewFinalizer finalizer);
+  void                         ClearDragPreviewCallbacks();
+  const Dali::Ui::DragPayload& GetDragPayload() const;
 
-  /**
-   * Clears the stored content.
-   */
-  void ClearContent();
+  DragPreviewPositionSignalType& DragPreviewPositionSignal()
+  {
+    return mDragPreviewPositionSignal;
+  }
 
   /**
    * Sets the position the drop occurred.
@@ -112,87 +146,114 @@ public:
   /**
    * Called when a draggable object start drag.
    */
-  void EmitStartedSignal(Dali::Ui::View& view);
+  void EmitStartedSignal();
 
   /**
    * Called when a draggable object enters other object.
    */
-  void EmitEnteredSignal(Dali::Ui::View& view);
+  void EmitEnteredSignal(Dali::Ui::View target);
 
   /**
    * Called when a draggable object leaves other object.
    */
-  void EmitExitedSignal(Dali::Ui::View& view);
+  void EmitExitedSignal(Dali::Ui::View              target,
+                        Dali::Ui::DragAndDropResult result = Dali::Ui::DragAndDropResult::NONE,
+                        Dali::Ui::DragCancelReason  cancelReason =
+                          Dali::Ui::DragCancelReason::NONE);
 
   /**
    * Called when a draggable object leaves other object.
    */
-  void EmitMovedSignal(Dali::Ui::View& view);
+  void EmitMovedSignal(Dali::Ui::View target);
 
   /**
    * Is called when a drop actually occurs.
    */
-  void EmitDroppedSignal(Dali::Ui::View& view);
+  void EmitDroppedSignal(const Dali::Ui::DragAndDropEvent& event);
 
   /**
    * Called when a draggable object drag ended.
    */
-  void EmitEndedSignal(Dali::Ui::View& view);
+  void EmitEndedSignal(const Dali::Ui::DragAndDropEvent& event);
 
 public: // Signals
   /**
-   * @copydoc Dali::Ui::Integration::DragAndDropDetector::StartedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::StartedSignal
    */
-  DragAndDropSignal& StartedSignal()
+  DragEventSignalType& StartedSignal()
   {
     return mStartedSignal;
   }
 
   /**
-   * @copydoc Dali::Ui::Integration::DragAndDropDetector::EnteredSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::EnteredSignal
    */
-  DragAndDropSignal& EnteredSignal()
+  DragEventSignalType& EnteredSignal()
   {
     return mEnteredSignal;
   }
 
   /**
-   * @copydoc Dali::Ui::Integration::DragAndDropDetector::ExitedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::ExitedSignal
    */
-  DragAndDropSignal& ExitedSignal()
+  DragEventSignalType& ExitedSignal()
   {
     return mExitedSignal;
   }
 
   /**
-   * @copydoc Dali::Ui::Integration::DragAndDropDetector::MovedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::MovedSignal
    */
-  DragAndDropSignal& MovedSignal()
+  DragEventSignalType& MovedSignal()
   {
     return mMovedSignal;
   }
 
   /**
-   * @copydoc Dali::Ui::Integration::DragAndDropDetector::DroppedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::DroppedSignal
    */
-  DragAndDropSignal& DroppedSignal()
+  DragEventSignalType& DroppedSignal()
   {
     return mDroppedSignal;
   }
 
+  DragEventSignalType& CancelledSignal()
+  {
+    return mCancelledSignal;
+  }
+
+  TargetFeedbackChangedSignalType& TargetFeedbackChangedSignal()
+  {
+    return mTargetFeedbackChangedSignal;
+  }
+
   /**
-   * @copydoc Dali::Ui::Integration::DragAndDropDetector::DroppedSignal
+   * @copydoc Dali::Ui::DragAndDropDetector::EndedSignal
    */
-  DragAndDropSignal& EndedSignal()
+  DragEventSignalType& EndedSignal()
   {
     return mEndedSignal;
   }
 
 public:
-  bool OnDrag(Dali::Actor actor, Dali::TouchEvent data);
   void OnPan(Dali::Actor actor, PanGesture gesture);
+  void OnLongPress(Dali::Actor actor, LongPressGesture gesture);
+  bool OnSourceTouch(Dali::Actor actor, Dali::TouchEvent touch);
+  void OnSourceSceneDisconnected(Dali::Actor actor);
+  void OnPreviewContainerSceneDisconnected(Dali::Actor actor);
+  void OnTargetSceneDisconnected(Dali::Actor actor);
+  void OnAutoScrollViewportSceneDisconnected(Dali::Actor actor);
+  void OnWindowFocusChanged(Dali::Window window, bool focusIn);
 
 private:
+  struct TargetResolution
+  {
+    Dali::Ui::View                    acceptedTarget;
+    Dali::Ui::View                    feedbackTarget;
+    Dali::Ui::DropProposal            proposal;
+    Dali::Ui::DragAndDropTargetStatus status{Dali::Ui::DragAndDropTargetStatus::NONE};
+  };
+
   // Construction & Destruction
 
   /**
@@ -209,34 +270,150 @@ private:
   DragAndDropDetector(const DragAndDropDetector&) = delete;
   DragAndDropDetector& operator=(DragAndDropDetector&);
 
+  void AssertRegistrationChangeAllowed() const;
+  void AssertActivationConfigurationChangeAllowed() const;
+  void AssertDragConfigurationChangeAllowed() const;
+  void AssertSourceAttached(const Dali::Ui::View& source) const;
+  void AssertTargetAttached(const Dali::Ui::View& target) const;
+
+  TargetResolution           FindTarget(const Vector2& screenPosition);
+  Dali::Ui::View             HitTestTarget(const Vector2&                     screenPosition,
+                                           const std::vector<Dali::Ui::View>& excludedTargets) const;
+  Dali::Ui::DropProposal     ResolveDropProposal(uint32_t targetIndex);
+  Dali::Ui::DropProposal     NormalizeDropProposal(Dali::Ui::DropProposal proposal) const;
+  bool                       IsTargetEligible(const Dali::Ui::View& target) const;
+  Vector2                    GetViewScreenCenter(const Dali::Ui::View& view) const;
+  Dali::Ui::DragPayload      FindSourcePayload(Dali::Ui::View source) const;
+  SourcePayloadProvider*     FindSourcePayloadProvider(Dali::Ui::View source);
+  Dali::Ui::DragAndDropEvent CreateEvent(Dali::Ui::DragAndDropResult result,
+                                         Dali::Ui::View              target = {},
+                                         Dali::Ui::DragCancelReason  cancelReason =
+                                           Dali::Ui::DragCancelReason::NONE) const;
+  Dali::Ui::DragAndDropEvent CreateEvent(Dali::Ui::DragAndDropResult       result,
+                                         Dali::Ui::View                    target,
+                                         Dali::Ui::DragCancelReason        cancelReason,
+                                         Dali::Ui::View                    candidateTarget,
+                                         Dali::Ui::DragAndDropTargetStatus targetStatus,
+                                         Dali::Ui::DropProposal            proposal) const;
+  void                       CreateDragPreview();
+  void                       UpdateDragPreview();
+  void                       UpdateCoordinateSnapshots(const Vector2& screenPosition);
+  void                       ApplyDefaultDragPreviewPosition();
+  void                       RestoreDragPreviewPositioningProperties(Dali::Ui::View visual);
+  void                       FinalizeDragPreview(Dali::Ui::View visual, const Dali::Ui::DragAndDropEvent& event);
+  void                       ResolveTarget(const Vector2& screenPosition, bool emitMoved);
+  bool                       UpdateExplicitDrag(Dali::Ui::View target);
+  void                       ClearExplicitTarget(Dali::Ui::View target);
+  void                       UpdateTargetFeedback(Dali::Ui::View                    target,
+                                                  Dali::Ui::DragAndDropTargetStatus status);
+  void                       ClearTargetFeedback(Dali::Ui::DragAndDropResult result,
+                                                 Dali::Ui::View              finishingTarget,
+                                                 Dali::Ui::DragCancelReason  cancelReason);
+  void                       UpdateDrag(const Vector2& screenPosition);
+  void                       FinishDrag(bool dropped, Dali::Ui::DragCancelReason cancelReason);
+  void                       StartInterruptionMonitoring();
+  void                       StopInterruptionMonitoring();
+  void                       RemoveDragPreview(Dali::Ui::View visual);
+  Vector2                    CalculateAutoScrollEdgeIntensity() const;
+  void                       UpdateAutoScrollState();
+  void                       StartAutoScrollTimer();
+  void                       StopAutoScrollTimer();
+  bool                       OnAutoScrollTick();
+  void                       BeginActivation(Dali::Ui::View                        view,
+                                             const Vector2&                        localPosition,
+                                             const Vector2&                        screenPosition,
+                                             const Vector2&                        originScreenPosition,
+                                             Device::Class::Type                   deviceClass,
+                                             Dali::Ui::DragActivationConfiguration configuration,
+                                             bool                                  panTracking);
+  bool                       RequiresLongPressDetector() const;
+  void                       UpdateLongPressDetectorAttachments(bool wasRequired);
+  bool                       HasReachedDragStartThreshold(const Vector2& screenPosition) const;
+  void                       TryActivateDrag(Dali::Ui::View view,
+                                             const Vector2& localPosition,
+                                             const Vector2& screenPosition);
+  void                       ActivateDrag(Dali::Ui::View        view,
+                                          const Vector2&        localPosition,
+                                          const Vector2&        screenPosition,
+                                          Dali::Ui::DragPayload payload);
+  void                       ResetPendingActivation();
+
 private:
-  std::string mContent; ///< The current Drag & drop content.
+  DragEventSignalType                   mStartedSignal;
+  DragEventSignalType                   mEnteredSignal;
+  DragEventSignalType                   mExitedSignal;
+  DragEventSignalType                   mMovedSignal;
+  DragEventSignalType                   mDroppedSignal;
+  DragEventSignalType                   mCancelledSignal;
+  DragEventSignalType                   mEndedSignal;
+  TargetFeedbackChangedSignalType       mTargetFeedbackChangedSignal;
+  DragPreviewPositionSignalType         mDragPreviewPositionSignal;
+  DragPreviewFactory                    mDragPreviewFactory;
+  DragPreviewUpdater                    mDragPreviewUpdater;
+  DragPreviewFinalizer                  mDragPreviewFinalizer;
+  AutoScrollCallback                    mAutoScrollCallback;
+  CanStartDragCallback                  mCanStartDragCallback;
+  Dali::Ui::DragAutoScrollConfiguration mAutoScrollConfiguration;
 
-  DragAndDropSignal mStartedSignal;
-  DragAndDropSignal mEnteredSignal;
-  DragAndDropSignal mExitedSignal;
-  DragAndDropSignal mMovedSignal;
-  DragAndDropSignal mDroppedSignal;
-  DragAndDropSignal mEndedSignal;
+  std::vector<Dali::Ui::View>                                   mSources;
+  std::vector<Dali::Ui::View>                                   mTargets;
+  std::vector<std::pair<Dali::Ui::View, Dali::Ui::DragPayload>> mSourcePayloads;
+  std::vector<std::pair<Dali::Ui::View, SourcePayloadProvider>> mSourcePayloadProviders;
+  std::vector<std::pair<Device::Class::Type, Dali::Ui::DragActivationConfiguration>>
+                                    mDragActivationConfigurations;
+  std::vector<DropProposalCallback> mDropProposalCallbacks;
+  Dali::Ui::View                    mDragView; // the current drag view
+  Dali::Ui::View                    mCurrentTarget;
+  Dali::Ui::View                    mFeedbackTarget;
+  Dali::Ui::View                    mConfiguredDragPreview; // reusable application-provided preview
+  Dali::Ui::View                    mDragPreviewContainer;  // optional application-owned preview layer
+  Dali::Ui::View                    mSessionDragPreview;    // preview displayed during the active drag
+  Dali::PanGestureDetector          mPanGestureDetector;    // pan gesture for drag tracking
+  Dali::LongPressGestureDetector    mLongPressGestureDetector;
+  Dali::Window                      mSessionWindow; // source window monitored during a drag
 
-  std::vector<Dali::Ui::View> mViews;              // views attached by Attach interface for drag&drop
-  Dali::Ui::View              mDragView;           // the current drag view
-  Dali::Ui::View              mShadowView;         // a shadow view for indicating where the view is, same size as the dragged view
-  std::vector<uint32_t>       mFirstEnter;         // view id indicating if the cursor is enter
-  Dali::PanGestureDetector    mPanGestureDetector; // pangesture for calculating the shadow actor position
+  Vector2                      mSourceParentPosition;
+  Vector2                      mPreviewLocalPosition;
+  Vector2                      mSourceGrabPosition;
+  Vector2                      mSourceAnchor;
+  Vector2                      mScreenPosition; ///< The screen position of the drop location.
+  Vector2                      mActivationOriginScreenPosition;
+  Vector3                      mOriginalDragPreviewPivot;
+  Vector3                      mOriginalDragPreviewParentOrigin;
+  LayoutMode                   mOriginalDragPreviewLayoutMode;
+  UiScalePolicy                mOriginalDragPreviewUiScalePolicy;
+  float                        mOriginalDragPreviewRequestedX;
+  float                        mOriginalDragPreviewRequestedY;
+  bool                         mOriginalDragPreviewPositionUsesPivot;
+  Dali::Ui::DragPayload        mPendingPayload;
+  Dali::Ui::DragPayload        mSessionPayload;
+  Dali::Ui::DropProposal       mDropProposal;
+  Dali::Timer                  mAutoScrollTimer;
+  Vector2                      mAutoScrollEdgeIntensity;
+  float                        mDragStartThreshold;
+  float                        mPendingDragStartThreshold;
+  Dali::Ui::DragActivationMode mDragActivationMode;
+  Dali::Ui::DragActivationMode mPendingActivationMode;
+  Device::Class::Type          mDragDeviceClass;
+  Dali::Ui::DragSessionOrigin  mDragSessionOrigin;
 
-  Vector2 mLocalPosition;
-  Vector2 mDragLocalPosition;
-  Vector2 mScreenPosition; ///< The screen position of the drop location.
-
-  bool mPointDown; // bool flag to indicate if PointState::DOWN have been processed
+  bool                              mPointDown; // bool flag to indicate if PointState::DOWN have been processed
+  bool                              mActivationPending;
+  bool                              mPendingPayloadResolved;
+  bool                              mPanTracking;
+  bool                              mFinishing;
+  bool                              mEmittingEnded;
+  bool                              mEvaluatingDropProposal;
+  bool                              mAutoScrollTicking;
+  bool                              mDragPreviewPositioningPropertiesOverridden;
+  Dali::Ui::DragAndDropTargetStatus mTargetStatus;
 };
 
 } // namespace Internal
 
 // Helpers for public-api forwarding methods
 
-inline Internal::DragAndDropDetector& GetImplementation(Dali::Ui::Integration::DragAndDropDetector& detector)
+inline Internal::DragAndDropDetector& GetImplementation(Dali::Ui::DragAndDropDetector& detector)
 {
   DALI_ASSERT_ALWAYS(detector && "DragAndDropDetector handle is empty");
 
@@ -245,7 +422,7 @@ inline Internal::DragAndDropDetector& GetImplementation(Dali::Ui::Integration::D
   return static_cast<Internal::DragAndDropDetector&>(handle);
 }
 
-inline const Internal::DragAndDropDetector& GetImplementation(const Dali::Ui::Integration::DragAndDropDetector& detector)
+inline const Internal::DragAndDropDetector& GetImplementation(const Dali::Ui::DragAndDropDetector& detector)
 {
   DALI_ASSERT_ALWAYS(detector && "DragAndDropDetector handle is empty");
 
