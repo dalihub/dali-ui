@@ -37,7 +37,7 @@ void SizeNegotiatedViewImpl::OnSetResizePolicy(ResizePolicy::Type policy, Dimens
 
 Vector3 SizeNegotiatedViewImpl::GetNaturalSize()
 {
-  return Internal::ViewDataImpl::Get(*this).GetNaturalSize();
+  return Internal::ViewDataImpl::Get(*this).GetBackgroundVisualNaturalSize();
 }
 
 float SizeNegotiatedViewImpl::CalculateChildSize(const Dali::Actor& child, Dimension::Type dimension)

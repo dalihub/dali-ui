@@ -854,7 +854,7 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
   }
   else
   {
-    Vector3 naturalSize     = GetNaturalSize();
+    Vector3 naturalSize     = GetBackgroundVisualNaturalSize();
     float   contentNaturalW = std::max(0.0f, naturalSize.width - pw);
     size.width              = contentNaturalW + pw;
     if(natW >= 0.0f)
@@ -872,7 +872,7 @@ MeasuredSize ViewDataImpl::MeasureDefault(float widthConstraint, float heightCon
   }
   else
   {
-    Vector3 naturalSize     = GetNaturalSize();
+    Vector3 naturalSize     = GetBackgroundVisualNaturalSize();
     float   contentNaturalH = std::max(0.0f, naturalSize.height - ph);
     size.height             = contentNaturalH + ph;
     if(natH >= 0.0f)
@@ -2704,9 +2704,9 @@ Dali::Texture ViewDataImpl::GetOffScreenRenderingOutput() const
   return mRenderEffectData->offScreenRendering->GetTexture();
 }
 
-Vector3 ViewDataImpl::GetNaturalSize()
+Vector3 ViewDataImpl::GetBackgroundVisualNaturalSize()
 {
-  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "ViewImpl::GetNaturalSize for %s\n",
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "ViewDataImpl::GetBackgroundVisualNaturalSize for %s\n",
                 mViewImpl.Self().GetProperty<Dali::String>(Dali::Actor::Property::NAME).CStr());
   Ui::Internal::Visual::Base* visualImplPtr = GetVisualImplPtr(Ui::View::Property::BACKGROUND);
   if(visualImplPtr)

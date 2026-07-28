@@ -3124,8 +3124,8 @@ int UtcDaliViewDefaultModeMatchParentChildFillsParentP(void)
 }
 
 // A leaf WRAP view with padding and no visual must measure to its
-// padding (pw, ph), not collapse to 0. GetNaturalSize returns ZERO with no
-// visual, so the result must re-add padding.
+// padding (pw, ph), not collapse to 0. GetBackgroundVisualNaturalSize returns
+// ZERO with no visual, so the result must re-add padding.
 int UtcDaliViewWrapNoVisualPaddingMeasuresPaddingP(void)
 {
   UiTestApplication application;

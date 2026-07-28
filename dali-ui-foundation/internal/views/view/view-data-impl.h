@@ -261,10 +261,13 @@ public:
   bool          TryGetLayoutParams(StackLayoutParams& params) const;
   void          GetOffScreenRenderTasks(Dali::Vector<Dali::RenderTask>& tasks, bool isForward);
   Dali::Texture GetOffScreenRenderingOutput() const;
-  Vector3       GetNaturalSize();
-  void          SetRenderEffect(RenderEffect effect);
-  RenderEffect  GetRenderEffect() const;
-  void          ClearRenderEffect();
+  /// Natural size of the background visual plus padding, or ZERO when the view has
+  /// no background visual. Not an override and never virtually dispatched;
+  /// Actor::GetNaturalSize() reaches it only through SizeNegotiatedViewImpl.
+  Vector3      GetBackgroundVisualNaturalSize();
+  void         SetRenderEffect(RenderEffect effect);
+  RenderEffect GetRenderEffect() const;
+  void         ClearRenderEffect();
 
   void  ResetEffectiveScaleRecursive();
   float ComputeEffectiveScale() const;
