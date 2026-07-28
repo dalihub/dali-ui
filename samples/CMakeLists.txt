@@ -16,7 +16,7 @@ ENDIF()
 INCLUDE(${CMAKE_CURRENT_SOURCE_DIR}/common.cmake)
 
 IF(WIN32)
-  SET(DALI_UI_SAMPLE_LIST "hello-world" CACHE STRING
+  SET(DALI_UI_SAMPLE_LIST "hello-world;key-input" CACHE STRING
       "Semicolon-separated sample directories to build on Windows")
 ELSE()
   SET(DALI_UI_SAMPLE_LIST "" CACHE STRING

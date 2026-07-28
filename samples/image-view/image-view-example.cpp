@@ -21,9 +21,14 @@
 using namespace Dali;
 using namespace Dali::Ui;
 
+namespace
+{
+const char* const REMOTE_IMAGE_URL = "https://raw.githubusercontent.com/dalihub/dali-test/refs/heads/master/visual-tests/remote-download/images/rockstar.jpg";
+}
+
 /**
  * ImageView basic sample:
- * - Loads an image and connects ResourceReadySignal
+ * - Loads local and remote images and connects ResourceReadySignal
  * - Press Escape or Back to quit
  */
 class ImageViewSampleController : public ConnectionTracker
@@ -44,14 +49,22 @@ private:
     float  halfH      = posSize.height * 0.5f;
     window.SetBackgroundColor(Color::DARK_GRAY);
 
-    mImage = ImageView::New(RESOURCES_DIR "gallery-large-3.jpg");
-    mImage.SetRequestedWidth(halfW - 4.0f);
-    mImage.SetRequestedHeight(halfH - 4.0f);
-    mImage.SetRequestedX(0.0f);
-    mImage.SetRequestedY(0.0f);
-    window.Add(mImage);
+    mLocalImage = ImageView::New(RESOURCES_DIR "gallery-large-3.jpg");
+    mLocalImage.SetRequestedWidth(halfW - 4.0f);
+    mLocalImage.SetRequestedHeight(halfH - 4.0f);
+    mLocalImage.SetRequestedX(0.0f);
+    mLocalImage.SetRequestedY(0.0f);
+    window.Add(mLocalImage);
 
-    mImage.ResourceReadySignal().Connect(this, &ImageViewSampleController::OnResourceReady);
+    mRemoteImage = ImageView::New(REMOTE_IMAGE_URL);
+    mRemoteImage.SetRequestedWidth(halfW - 4.0f);
+    mRemoteImage.SetRequestedHeight(halfH - 4.0f);
+    mRemoteImage.SetRequestedX(halfW);
+    mRemoteImage.SetRequestedY(0.0f);
+    window.Add(mRemoteImage);
+
+    mLocalImage.ResourceReadySignal().Connect(this, &ImageViewSampleController::OnResourceReady);
+    mRemoteImage.ResourceReadySignal().Connect(this, &ImageViewSampleController::OnResourceReady);
 
     window.KeyEventSignal().Connect(this, &ImageViewSampleController::OnKeyEvent);
   }
@@ -59,7 +72,8 @@ private:
   void OnResourceReady(View view)
   {
     ImageView imageView = ImageView::DownCast(view);
-    DALI_LOG_RELEASE_INFO("[ImageView] ResourceReadySignal fired. status=%d\n",
+    DALI_LOG_RELEASE_INFO("[ImageView] ResourceReadySignal fired. url=%s status=%d\n",
+                          imageView.GetResourceUrl().CStr(),
                           static_cast<int>(imageView.GetLoadingStatus()));
   }
 
@@ -76,7 +90,8 @@ private:
 
 private:
   Application&  mApplication;
-  Ui::ImageView mImage;
+  Ui::ImageView mLocalImage;
+  Ui::ImageView mRemoteImage;
 };
 
 int DALI_EXPORT_API main(int argc, char** argv)

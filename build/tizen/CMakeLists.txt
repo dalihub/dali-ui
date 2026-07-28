@@ -136,6 +136,11 @@ ELSE()
 ENDIF()
 
 IF( USE_DEFAULT_RESOURCE_DIR )
+  # On Windows the resource dir (e.g. from DALI_DATA_RO_DIR) may contain backslashes.
+  # Baked into the string literals below, the compiler would interpret them as escape
+  # sequences (e.g. "\d", "\s") and strip them, corrupting the path. Normalize to '/'.
+  # No-op on Linux/Tizen paths, which contain no backslashes.
+  STRING( REPLACE "\\" "/" dataReadOnlyDir "${dataReadOnlyDir}" )
   ADD_COMPILE_DEFINITIONS( DALI_IMAGE_DIR="${dataReadOnlyDir}/ui/images/" )
   ADD_COMPILE_DEFINITIONS( DALI_DATA_READ_ONLY_DIR="${dataReadOnlyDir}" )
   # Share resources with toolkit
