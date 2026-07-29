@@ -229,7 +229,7 @@ INCLUDE(CheckCXXCompilerFlag)
 
 # Set up compiler flags and warnings
 IF(MSVC)
-  ADD_COMPILE_OPTIONS(/W3 /vmg /wd4251 /wd4275)
+  ADD_COMPILE_OPTIONS(/W3 /vmg /wd4251 /wd4275 /utf-8)
   ADD_COMPILE_DEFINITIONS(__restrict__=__restrict)
 ELSE()
   ADD_COMPILE_OPTIONS(-Wno-ignored-qualifiers)
