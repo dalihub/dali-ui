@@ -42,7 +42,7 @@ Invoke-DaliCMakeProject `
   -Clean:$Clean `
   -Jobs $Jobs
 
-Install-DaliRuntimeScripts -Context $Context
+Install-DaliRuntimeScripts -Context $Context -Configuration $Configuration
 Assert-DaliPaths -Paths @(
   (Join-Path $Context.InstallPrefix "bin\dali2-ui-foundation.dll"),
   (Join-Path $Context.InstallPrefix "bin\dali2-ui-components.dll"),

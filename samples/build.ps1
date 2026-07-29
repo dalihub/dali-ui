@@ -65,5 +65,5 @@ Invoke-DaliCMakeProject `
   -Clean:$Clean `
   -Jobs $Jobs
 
-Install-DaliRuntimeScripts -Context $Context
+Install-DaliRuntimeScripts -Context $Context -Configuration $Configuration
 Write-Host "`nSamples installed in $($Context.InstallPrefix)\bin." -ForegroundColor Green
