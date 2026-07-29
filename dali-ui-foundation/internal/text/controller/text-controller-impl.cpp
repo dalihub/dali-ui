@@ -877,7 +877,7 @@ float Controller::Impl::GetDefaultFontLineHeight()
   {
     TextAbstraction::FontDescription fontDescription;
     defaultFontId = GetFontClient().GetFontId(fontDescription,
-                                              TextAbstraction::FontClient::DEFAULT_POINT_SIZE * GetEffectiveTextScale());
+                                              static_cast<TextAbstraction::PointSize26Dot6>(TextAbstraction::FontClient::DEFAULT_POINT_SIZE * GetEffectiveTextScale()));
   }
   else
   {

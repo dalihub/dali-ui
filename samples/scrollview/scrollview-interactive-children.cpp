@@ -110,7 +110,7 @@ public:
     content.SetRequestedWidth(WINDOW_WIDTH);
     content.SetRequestedHeight(contentHeight);
     content.SetSpacing(ITEM_SPACING);
-    content.SetPadding(Extents(0, 0, ITEM_SPACING, ITEM_SPACING));
+    content.SetPadding(Extents(0, 0, static_cast<int16_t>(ITEM_SPACING), static_cast<int16_t>(ITEM_SPACING)));
     mContent = content;
 
     for(int i = 0; i < ITEM_COUNT; ++i)

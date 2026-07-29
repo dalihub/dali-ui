@@ -280,8 +280,8 @@ PixelData Typesetter::RenderTextGradientMask(const Vector2& size, Direction text
   if(viewModel.IsCutoutEnabled())
   {
     Vector2 offset = viewModel.GetOffsetWithCutout();
-    penX           = offset.x;
-    penY           = offset.y;
+    penX           = static_cast<int32_t>(offset.x);
+    penY           = static_cast<int32_t>(offset.y);
   }
 
   const uint32_t bufferWidth  = static_cast<uint32_t>(size.width);
@@ -355,8 +355,8 @@ PixelData Typesetter::RenderTextGradientPreserved(const Vector2& size, Direction
   if(viewModel.IsCutoutEnabled())
   {
     Vector2 offset = viewModel.GetOffsetWithCutout();
-    penX           = offset.x;
-    penY           = offset.y;
+    penX           = static_cast<int32_t>(offset.x);
+    penY           = static_cast<int32_t>(offset.y);
   }
 
   const uint32_t bufferWidth  = static_cast<uint32_t>(size.width);
@@ -379,7 +379,7 @@ PixelData Typesetter::RenderWithCutout(const Vector2& size, Direction textDirect
 {
   Devel::PixelBuffer result =
     RenderWithPixelBuffer(size, textDirection, behaviour, ignoreHorizontalAlignment, pixelFormat, originSize);
-  SetMaskForImageBuffer(mask, result, size.width, size.height, originAlpha);
+  SetMaskForImageBuffer(mask, result, static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), originAlpha);
 
   PixelData pixelData = Devel::PixelBuffer::Convert(result);
 
@@ -455,8 +455,8 @@ Devel::PixelBuffer Typesetter::RenderWithPixelBuffer(const Vector2&  size,
   if(isCutoutEnabled)
   {
     Vector2 offset = viewModel.GetOffsetWithCutout();
-    penX           = offset.x;
-    penY           = offset.y;
+    penX           = static_cast<int32_t>(offset.x);
+    penY           = static_cast<int32_t>(offset.y);
   }
 
   // Generate the image buffers of the text for each different style first,
@@ -756,7 +756,7 @@ void Typesetter::SetMaskForImageBuffer(Devel::PixelBuffer& __restrict__ topPixel
     uint8_t* __restrict__ bottomBufferColorBuffer = reinterpret_cast<uint8_t*>(&bottomBufferColor);
 
     // Return the transparency of the text to original.
-    uint8_t originAlphaInt = originAlpha * 255;
+    uint8_t originAlphaInt = static_cast<uint8_t>(originAlpha * 255);
 
     uint8_t topAlpha    = topBufferColorBuffer[3];
     uint8_t bottomAlpha = 255 - topAlpha;

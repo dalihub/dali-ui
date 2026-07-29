@@ -232,7 +232,7 @@ Dali::Texture Gradient::GenerateLookupTexture()
   {
     const float offsetEnd = std::min(1.0f, std::max(0.0f, offsets[i + 1]));
 
-    segmentEnd = floorf(offsetEnd * length + 0.5f);
+    segmentEnd = static_cast<int>(floorf(offsetEnd * length + 0.5f));
     if(segmentEnd == segmentStart)
     {
       continue;

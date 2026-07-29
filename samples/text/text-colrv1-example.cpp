@@ -120,7 +120,7 @@ private:
     auto layout = StackLayout::New(StackOrientation::VERTICAL);
     layout.SetSpacing(STACK_SPACING);
     layout.SetRequestedWidth(MATCH_PARENT);
-    layout.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    layout.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
     Label emojiLabel = Label::New("🥰💀✌️🌴🐢🐐🍄⚽🍻👑📸😬👀🚨🏡🕊️🏆😻🌟🧿🍀🎨🍜🔮");
     emojiLabel.SetFontFamily("Noto Color Emoji");

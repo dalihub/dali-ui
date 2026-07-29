@@ -296,7 +296,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
       // Get the default font's description.
       TextAbstraction::FontDescription defaultFontDescription;
       TextAbstraction::PointSize26Dot6 defaultPointSize =
-        TextAbstraction::FontClient::DEFAULT_POINT_SIZE * effectiveTextScale;
+        static_cast<TextAbstraction::PointSize26Dot6>(TextAbstraction::FontClient::DEFAULT_POINT_SIZE * effectiveTextScale);
 
       // Get the number of points per one unit of point-size
       uint32_t numberOfPointsPerOneUnitOfPointSize = impl.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
@@ -307,7 +307,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
         defaultFontDescription = impl.mEventData->mPlaceholderFont->GetFontDescription();
         if(impl.mEventData->mPlaceholderFont->sizeDefined)
         {
-          defaultPointSize = impl.mEventData->mPlaceholderFont->mDefaultPointSize * effectiveTextScale * numberOfPointsPerOneUnitOfPointSize;
+          defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(impl.mEventData->mPlaceholderFont->mDefaultPointSize * effectiveTextScale * numberOfPointsPerOneUnitOfPointSize);
         }
       }
       else if(nullptr != impl.mFontDefaults)
@@ -317,12 +317,12 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
 
         if(impl.mTextFitEnabled || impl.mTextFitCandidatesEnabled)
         {
-          defaultPointSize = impl.mFontDefaults->mFitPointSize * numberOfPointsPerOneUnitOfPointSize;
+          defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(impl.mFontDefaults->mFitPointSize * numberOfPointsPerOneUnitOfPointSize);
         }
         else
         {
           defaultPointSize =
-            impl.mFontDefaults->mDefaultPointSize * effectiveTextScale * numberOfPointsPerOneUnitOfPointSize;
+            static_cast<TextAbstraction::PointSize26Dot6>(impl.mFontDefaults->mDefaultPointSize * effectiveTextScale * numberOfPointsPerOneUnitOfPointSize);
         }
       }
 

@@ -674,7 +674,7 @@ private:
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetSpacing(PAGE_SPACING);
-    root.SetPadding(Extents(PAGE_PADDING, PAGE_PADDING, PAGE_PADDING, PAGE_PADDING));
+    root.SetPadding(Extents(static_cast<int16_t>(PAGE_PADDING), static_cast<int16_t>(PAGE_PADDING), static_cast<int16_t>(PAGE_PADDING), static_cast<int16_t>(PAGE_PADDING)));
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(PAGE_BACKGROUND));

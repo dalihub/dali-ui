@@ -880,9 +880,9 @@ void PrimitiveVisual::ComputeCubeVertices(Vector<Vertex>& vertices, Vector3 dime
 {
   int   numVertices = 4 * 6; // Four per face.
   int   vertexIndex = 0;     // Tracks progress through vertices.
-  float scaledX     = 0.5 * dimensions.x;
-  float scaledY     = 0.5 * dimensions.y;
-  float scaledZ     = 0.5 * dimensions.z;
+  float scaledX     = static_cast<float>(0.5 * dimensions.x);
+  float scaledY     = static_cast<float>(0.5 * dimensions.y);
+  float scaledZ     = static_cast<float>(0.5 * dimensions.z);
 
   vertices.Resize(numVertices);
 
@@ -1002,9 +1002,9 @@ void PrimitiveVisual::ComputeOctahedronVertices(Vector<Vertex>& vertices, Vector
 {
   int   numVertices = 3 * 8; // Three per face
   int   vertexIndex = 0;     // Tracks progress through vertices.
-  float scaledX     = 0.5 * dimensions.x;
-  float scaledY     = 0.5 * dimensions.y;
-  float scaledZ     = 0.5 * dimensions.z;
+  float scaledX     = static_cast<float>(0.5 * dimensions.x);
+  float scaledY     = static_cast<float>(0.5 * dimensions.y);
+  float scaledZ     = static_cast<float>(0.5 * dimensions.z);
 
   vertices.Resize(numVertices);
 
@@ -1112,12 +1112,12 @@ void PrimitiveVisual::ComputeBevelledCubeVertices(Vector<Vertex>& vertices, Vect
   int normalIndex   = 0;                      // Track progress through normals, as vertices are calculated per face.
 
   float minDimension = std::min(std::min(dimensions.x, dimensions.y), dimensions.z);
-  float bevelAmount  = 0.5 * std::min(bevelPercentage, minDimension); // Cap bevel amount if necessary.
+  float bevelAmount  = static_cast<float>(0.5 * std::min(bevelPercentage, minDimension)); // Cap bevel amount if necessary.
 
   // Distances from centre to outer edge points.
-  float outerX = 0.5 * dimensions.x;
-  float outerY = 0.5 * dimensions.y;
-  float outerZ = 0.5 * dimensions.z;
+  float outerX = static_cast<float>(0.5 * dimensions.x);
+  float outerY = static_cast<float>(0.5 * dimensions.y);
+  float outerZ = static_cast<float>(0.5 * dimensions.z);
 
   // Distances from centre to bevelled points.
   float bevelX = outerX - bevelAmount;

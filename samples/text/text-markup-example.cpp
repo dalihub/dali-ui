@@ -55,7 +55,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
     mAnchorLabel      = CreateStyledTextLabel("클릭하면 사이트로 이동 합니다: <a href='https://www.samsung.com'>Samsung Electronics</a>");
     mAnchorColorLabel = CreateStyledTextLabel("색깔이 다른 Anchor: <a href='https://research.samsung.com'>Samsung Research</a>");

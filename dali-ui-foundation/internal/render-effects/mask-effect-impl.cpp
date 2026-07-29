@@ -277,7 +277,7 @@ void MaskEffectImpl::CreateMaskData()
 
     Vector2 size = GetTargetSize();
 
-    CreateFrameBuffers(ImageDimensions(size.x, size.y));
+    CreateFrameBuffers(ImageDimensions(static_cast<uint32_t>(size.x), static_cast<uint32_t>(size.y)));
     CreateRenderTasks(ownerView);
     SetShaderConstants(ownerView);
 

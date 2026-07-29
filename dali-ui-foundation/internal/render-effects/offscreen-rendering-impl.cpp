@@ -154,8 +154,8 @@ void OffScreenRenderingImpl::CreateFrameBuffer()
 {
   const Size size = GetTargetSize();
 
-  mFrameBuffer    = FrameBuffer::New(size.width, size.height, FrameBuffer::Attachment::AUTO);
-  Texture texture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, size.width, size.height);
+  mFrameBuffer    = FrameBuffer::New(static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height), FrameBuffer::Attachment::AUTO);
+  Texture texture = Texture::New(TextureType::TEXTURE_2D, Pixel::RGBA8888, static_cast<uint32_t>(size.width), static_cast<uint32_t>(size.height));
 
 #if defined(GPU_MEMORY_PROFILE_ENABLED)
   {

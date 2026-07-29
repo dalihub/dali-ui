@@ -346,7 +346,7 @@ void AsyncTextLoader::Initialize()
   mTextModel->mVisualModel->SetUnderlineEnabled(false);
   mTextModel->mVisualModel->SetUnderlineHeight(0.0f);
   mTextModel->mVisualModel->SetOutlineEnabled(false);
-  mTextModel->mVisualModel->SetOutlineWidth(0.0f);
+  mTextModel->mVisualModel->SetOutlineWidth(static_cast<uint16_t>(0.0f));
   mTextModel->mVisualModel->SetShadowEnabled(false);
   mTextModel->mVisualModel->SetShadowOffset(Vector2(0.0f, 0.0f));
   mTextModel->mVisualModel->SetStrikethroughEnabled(false);
@@ -637,12 +637,12 @@ void AsyncTextLoader::Update(AsyncTextParameters& parameters)
   float effectiveTextScale = (parameters.isTextFitEnabled || parameters.isTextFitCandidatesEnabled) ? 1.0f : parameters.effectiveTextScale;
   float scale              = effectiveTextScale * parameters.renderScale;
 
-  TextAbstraction::PointSize26Dot6 defaultPointSize = TextAbstraction::FontClient::DEFAULT_POINT_SIZE * scale;
+  TextAbstraction::PointSize26Dot6 defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(TextAbstraction::FontClient::DEFAULT_POINT_SIZE * scale);
 
   // Get the number of points per one unit of point-size
   uint32_t numberOfPointsPerOneUnitOfPointSize = mModule.GetFontClient().GetNumberOfPointsPerOneUnitOfPointSize();
 
-  defaultPointSize = parameters.fontSize * scale * numberOfPointsPerOneUnitOfPointSize;
+  defaultPointSize = static_cast<TextAbstraction::PointSize26Dot6>(parameters.fontSize * scale * numberOfPointsPerOneUnitOfPointSize);
 
   Property::Map* variationsMapPtr = nullptr;
   if(!mTextModel->mLogicalModel->mVariationsMap.Empty())
@@ -1589,7 +1589,7 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
     parameters.textWidth         = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
     parameters.textHeight        = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
     parameters.minLineSize       = parameters.minLineSize * parameters.renderScale;
-    parameters.marqueeGap        = parameters.marqueeGap * parameters.renderScale;
+    parameters.marqueeGap        = static_cast<int>(parameters.marqueeGap * parameters.renderScale);
     cachedNaturalSize            = false;
     return Size::ZERO;
   }
@@ -1639,7 +1639,7 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
   parameters.textWidth         = ConvertToEven(ceil(parameters.textWidth * parameters.renderScale));
   parameters.textHeight        = ConvertToEven(ceil(parameters.textHeight * parameters.renderScale));
   parameters.minLineSize       = parameters.minLineSize * parameters.renderScale;
-  parameters.marqueeGap        = parameters.marqueeGap * parameters.renderScale;
+  parameters.marqueeGap        = static_cast<int>(parameters.marqueeGap * parameters.renderScale);
 
   // The texture in RenderScale needs to be resized because it exceeds the control size.
   if(!widthEllipsized && naturalSize.width > parameters.textWidth)
@@ -1889,8 +1889,8 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     }
   }
 
-  uint32_t actualWidth  = parameters.textWidth;
-  uint32_t actualHeight = parameters.textHeight;
+  uint32_t actualWidth  = static_cast<uint32_t>(parameters.textWidth);
+  uint32_t actualHeight = static_cast<uint32_t>(parameters.textHeight);
   parameters.textWidth  = verifiedSize.width;
   parameters.textHeight = verifiedSize.height;
 

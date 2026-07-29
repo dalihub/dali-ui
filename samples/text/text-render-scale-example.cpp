@@ -239,7 +239,7 @@ private:
     card.SetRequestedHeight(CARD_HEIGHT);
     card.SetBackgroundColor(CARD_BG_COLOR);
     card.SetCornerRadius(CARD_CORNER_RADIUS);
-    card.SetMargin(Extents(CARD_SPACING / 2, CARD_SPACING / 2, 0, 0));
+    card.SetMargin(Extents(static_cast<int16_t>(CARD_SPACING / 2), static_cast<int16_t>(CARD_SPACING / 2), 0, 0));
     card.SetFocusable(true);
     card.SetFocusOnTouchEnabled(true);
 
@@ -250,7 +250,7 @@ private:
     titleLabel.SetMultiLine(true);
     titleLabel.SetRequestedWidth(MATCH_PARENT);
     titleLabel.SetRequestedHeight(TITLE_HEIGHT);
-    titleLabel.SetPadding(Extents(PADDING, PADDING, PADDING, PADDING));
+    titleLabel.SetPadding(Extents(static_cast<int16_t>(PADDING), static_cast<int16_t>(PADDING), static_cast<int16_t>(PADDING), static_cast<int16_t>(PADDING)));
     titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     titleLabel.SetAsyncRendering(true);
     titleLabel.SetMarqueeSpeed(100);
@@ -267,7 +267,7 @@ private:
     descLabel.SetTextColor(DESC_TEXT_COLOR);
     descLabel.SetRequestedWidth(MATCH_PARENT);
     descLabel.SetRequestedHeight(DESC_HEIGHT);
-    descLabel.SetPadding(Extents(PADDING, PADDING, 0, 0));
+    descLabel.SetPadding(Extents(static_cast<int16_t>(PADDING), static_cast<int16_t>(PADDING), 0, 0));
     descLabel.SetHorizontalTextAlignment(Text::Alignment::START);
     descLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
     descLabel.SetAsyncRendering(true);

@@ -234,8 +234,8 @@ struct AtlasRenderer::Impl
       {
         // Retrieve the emoji's bitmap.
         TextAbstraction::GlyphBufferData glyphBufferData;
-        glyphBufferData.width  = isColorGlyph ? glyph.width : 0; // Desired width and height.
-        glyphBufferData.height = isColorGlyph ? glyph.height : 0;
+        glyphBufferData.width  = isColorGlyph ? static_cast<uint32_t>(glyph.width) : 0; // Desired width and height.
+        glyphBufferData.height = isColorGlyph ? static_cast<uint32_t>(glyph.height) : 0;
 
         mFontClient.CreateBitmap(glyph.fontId, glyph.index, glyph.isItalicRequired, glyph.isBoldRequired,
                                  glyphBufferData, style.outline);
@@ -286,8 +286,8 @@ struct AtlasRenderer::Impl
 
           // Setting the block size and size of new atlas does not mean a new one will be created. An existing atlas may
           // still surffice.
-          uint32_t default_width  = defaultTextAtlasSize.width;
-          uint32_t default_height = defaultTextAtlasSize.height;
+          uint32_t default_width  = static_cast<uint32_t>(defaultTextAtlasSize.width);
+          uint32_t default_height = static_cast<uint32_t>(defaultTextAtlasSize.height);
 
           while((blockSize.mNeededBlockWidth >= (default_width - (DOUBLE_PIXEL_PADDING + 1u)) ||
                  blockSize.mNeededBlockHeight >= (default_height - (DOUBLE_PIXEL_PADDING + 1u))) &&

@@ -123,7 +123,7 @@ private:
 
     StackLayout root = StackLayout::New(StackOrientation::VERTICAL);
     root.SetSpacing(STACK_SPACING);
-    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetBackgroundColor(UiColor(0xF8FAFC));

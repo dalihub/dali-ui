@@ -46,7 +46,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
     mSlantLabel = CreateBaseLabel("Italic Lorem ipsum dolor sit amet.");
     mSlantLabel.SetFontSlant(Text::FontSlant::ITALIC);
@@ -161,7 +161,7 @@ private:
   {
     Label label = Label::New(text);
     label.SetBackgroundColor(BACKGROUND_COLOR);
-    label.SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING));
+    label.SetPadding(Extents(static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING)));
     label.SetFontSize(FONT_SIZE);
     label.SetRequestedWidth(MATCH_PARENT);
     return label;
@@ -172,7 +172,7 @@ private:
     InputField field = InputField::New();
     field.SetText(text);
     field.SetBackgroundColor(BACKGROUND_COLOR);
-    field.SetPadding(Extents(ITEM_PADDING, ITEM_PADDING, ITEM_PADDING, ITEM_PADDING));
+    field.SetPadding(Extents(static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING), static_cast<int16_t>(ITEM_PADDING)));
     field.SetFontSize(FONT_SIZE);
     field.SetRequestedWidth(MATCH_PARENT);
     return field;

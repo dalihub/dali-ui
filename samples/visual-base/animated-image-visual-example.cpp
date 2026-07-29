@@ -180,7 +180,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
     Label titleLabel = Label::New("AnimatedImageVisual Example");
     titleLabel.SetRequestedWidth(WRAP_CONTENT);
@@ -236,7 +236,7 @@ private:
     mRightVisual.SetCornerRadius(0.0f, 0.25f, 0.25f, 0.0f);
     mRightVisual.SetCornerRadiusPolicyRelative();
     mRightVisual.SetCornerSquareness(0.6f);
-    mRightVisual.SetFrameDelay(1000.0f);
+    mRightVisual.SetFrameDelay(static_cast<int>(1000.0f));
     mRightVisual.Play();
 
     mRightBorder = BorderVisual::New();
@@ -254,7 +254,7 @@ private:
     buttonRow.SetSpacing(STACK_SPACING);
     buttonRow.SetRequestedWidth(MATCH_PARENT);
     buttonRow.SetRequestedHeight(WRAP_CONTENT);
-    buttonRow.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    buttonRow.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
     AbsoluteLayout addButton = AbsoluteLayout::New();
     addButton.SetBackgroundColor(UiColor(0xFF0000));

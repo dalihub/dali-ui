@@ -232,7 +232,7 @@ private:
     mainContainer.SetRequestedWidth(MATCH_PARENT);
     mainContainer.SetRequestedHeight(MATCH_PARENT);
     mainContainer.SetSpacing(STACK_SPACING);
-    mainContainer.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    mainContainer.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
     // Title
     Label titleLabel = Label::New("InputEditor Typing Style Example");

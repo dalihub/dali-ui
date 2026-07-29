@@ -92,7 +92,7 @@ VectorAnimationTask::VectorAnimationTask(VisualFactoryCache& factoryCache)
   mStopBehavior(Ui::AnimatedImage::StopBehavior::CURRENT_FRAME),
   mLoopingMode(Ui::LottieAnimation::LoopingMode::RESTART),
   mNextFrameStartTime(),
-  mFrameDurationMicroSeconds(MICROSECONDS_PER_SECOND / 60.0f),
+  mFrameDurationMicroSeconds(static_cast<int64_t>(MICROSECONDS_PER_SECOND / 60.0f)),
   mFrameRate(60.0f),
   mFrameSpeedFactor(1.0f),
   mCurrentFrame(0),

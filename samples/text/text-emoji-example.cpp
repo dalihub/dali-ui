@@ -475,7 +475,7 @@ private:
 
   View AddRow(View parent)
   {
-    View row = CreateContainerView(MATCH_PARENT, WRAP_CONTENT, true);
+    View row = CreateContainerView(static_cast<int>(MATCH_PARENT), static_cast<int>(WRAP_CONTENT), true);
     parent.Add(row);
     return row;
   }
@@ -539,7 +539,7 @@ private:
     //     - LOG_TOP_VIEW (horizontal) - title + buttons
     //     - LOG_VIEW (vertical) - history
 
-    mView = CreateContainerView(MATCH_PARENT, MATCH_PARENT, true);
+    mView = CreateContainerView(static_cast<int>(MATCH_PARENT), static_cast<int>(MATCH_PARENT), true);
     window.Add(mView);
 
     // Main view (left side - emoji area)
@@ -548,13 +548,13 @@ private:
     TrackMainContainer(mMainView);
 
     // Log main view (right side)
-    View logMainView = CreateContainerView(WRAP_CONTENT, (mHeight + mCell) * DEFAULT_COL, false);
+    View logMainView = CreateContainerView(static_cast<int>(WRAP_CONTENT), (mHeight + mCell) * DEFAULT_COL, false);
     logMainView.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     mView.Add(logMainView);
     TrackLogMainContainer(logMainView);
 
     // Log top view with title and buttons
-    View logTopView = CreateContainerView(MATCH_PARENT, WRAP_CONTENT, true);
+    View logTopView = CreateContainerView(static_cast<int>(MATCH_PARENT), static_cast<int>(WRAP_CONTENT), true);
     logMainView.Add(logTopView);
 
     Label titleLabel = CreateEmojiLabel("History", mPixelSize / 3, false);
@@ -579,7 +579,7 @@ private:
     helpBtn.TouchEventSignal().Connect(this, &EmojiController::OnHelpTouched);
 
     // Log view
-    mLogView = CreateContainerView(MATCH_PARENT, WRAP_CONTENT, false);
+    mLogView = CreateContainerView(static_cast<int>(MATCH_PARENT), static_cast<int>(WRAP_CONTENT), false);
     mLogView.SetRequestedHeight(mLogHeight);
     mLogView.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
     logMainView.Add(mLogView);
@@ -1348,7 +1348,7 @@ private:
     const std::array<const char*, 3> childDesc{{"BOY", "GIRL", "EMPTY"}};
 
     int  wrapCount = 0;
-    View emojiView = CreateContainerView(MATCH_PARENT, WRAP_CONTENT, true);
+    View emojiView = CreateContainerView(static_cast<int>(MATCH_PARENT), static_cast<int>(WRAP_CONTENT), true);
 
     for(int p1 = 0; p1 < 3; ++p1)
     {
@@ -1617,7 +1617,7 @@ private:
       ClearLog(mLogView.GetChildViewCount() / 2);
     }
 
-    View row = CreateContainerView(MATCH_PARENT, WRAP_CONTENT, true);
+    View row = CreateContainerView(static_cast<int>(MATCH_PARENT), static_cast<int>(WRAP_CONTENT), true);
     mLogView.Add(row);
 
     Label emoji = Label::New();

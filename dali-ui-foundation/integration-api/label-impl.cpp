@@ -923,7 +923,7 @@ int LabelImpl::GetMarqueeGap() const
   {
     return mTextScroller->GetGap();
   }
-  return UiConfig::GetCurrent().GetMarqueeGap();
+  return static_cast<int>(UiConfig::GetCurrent().GetMarqueeGap());
 }
 
 void LabelImpl::SetMarqueeOrientation(Text::MarqueeOrientation orientation)

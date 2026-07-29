@@ -200,7 +200,7 @@ private:
     root.SetSpacing(STACK_SPACING);
     root.SetRequestedWidth(MATCH_PARENT);
     root.SetRequestedHeight(MATCH_PARENT);
-    root.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
     Label titleLabel = Label::New("ImageVisual Example");
     titleLabel.SetRequestedWidth(WRAP_CONTENT);
@@ -237,7 +237,7 @@ private:
     buttonRow.SetSpacing(STACK_SPACING);
     buttonRow.SetRequestedWidth(MATCH_PARENT);
     buttonRow.SetRequestedHeight(WRAP_CONTENT);
-    buttonRow.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    buttonRow.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
     AbsoluteLayout addButton = AbsoluteLayout::New();
     addButton.SetBackgroundColor(UiColor(0xFF0000));

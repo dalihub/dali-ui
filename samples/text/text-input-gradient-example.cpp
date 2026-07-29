@@ -145,14 +145,14 @@ void ConfigureBand(Label label, float height, const UiColor& background, const U
   label.SetBorderlineColor(border);
   label.SetCornerRadius(6.0f);
   label.SetTextColor(color);
-  label.SetPadding(Extents(10.0f, 10.0f, 0.0f, 0.0f));
+  label.SetPadding(Extents(static_cast<int16_t>(10.0f), static_cast<int16_t>(10.0f), static_cast<int16_t>(0.0f), static_cast<int16_t>(0.0f)));
 }
 
 void StyleInputControl(View control, float height)
 {
   control.SetRequestedWidth(MATCH_PARENT);
   control.SetRequestedHeight(height);
-  control.SetPadding(Extents(22.0f, 22.0f, 14.0f, 14.0f));
+  control.SetPadding(Extents(static_cast<int16_t>(22.0f), static_cast<int16_t>(22.0f), static_cast<int16_t>(14.0f), static_cast<int16_t>(14.0f)));
   control.SetBackgroundColor(UiColor(0xF8FAFC));
   control.SetBorderlineWidth(1.0f);
   control.SetBorderlineOffset(-1.0f);
@@ -162,14 +162,14 @@ void StyleInputControl(View control, float height)
   if(auto field = InputField::DownCast(control))
   {
     field.SetCursorColor(UiColor(0x111827));
-    field.SetCursorWidth(2.0f);
+    field.SetCursorWidth(static_cast<int>(2.0f));
     field.SetMaximumLength(2000);
     field.SetPlaceholderColor(UiColor(0x64748B));
   }
   else if(auto editor = InputEditor::DownCast(control))
   {
     editor.SetCursorColor(UiColor(0x111827));
-    editor.SetCursorWidth(2.0f);
+    editor.SetCursorWidth(static_cast<int>(2.0f));
     editor.SetMaximumLength(4000);
     editor.SetPlaceholderColor(UiColor(0x64748B));
   }
@@ -323,7 +323,7 @@ private:
     mRoot = StackLayout::New(StackOrientation::VERTICAL);
     mRoot.SetRequestedWidth(MATCH_PARENT);
     mRoot.SetRequestedHeight(MATCH_PARENT);
-    mRoot.SetPadding(Extents(ROOT_PADDING, ROOT_PADDING, ROOT_PADDING, ROOT_PADDING));
+    mRoot.SetPadding(Extents(static_cast<int16_t>(ROOT_PADDING), static_cast<int16_t>(ROOT_PADDING), static_cast<int16_t>(ROOT_PADDING), static_cast<int16_t>(ROOT_PADDING)));
     mRoot.SetSpacing(STACK_SPACING);
     mRoot.SetBackgroundColor(UiColor(0x0B1120));
 
@@ -347,7 +347,7 @@ private:
     mContent.SetRequestedWidth(MATCH_PARENT);
     mContent.SetRequestedHeight(MATCH_PARENT);
     mContent.SetSpacing(STACK_SPACING);
-    mContent.SetPadding(Extents(16.0f, 16.0f, 16.0f, 16.0f));
+    mContent.SetPadding(Extents(static_cast<int16_t>(16.0f), static_cast<int16_t>(16.0f), static_cast<int16_t>(16.0f), static_cast<int16_t>(16.0f)));
     mContent.SetBackgroundColor(UiColor(0xFFFFFF));
     mContent.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
 

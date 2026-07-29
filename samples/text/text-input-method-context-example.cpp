@@ -464,7 +464,7 @@ private:
     scrollContent.SetSpacing(STACK_SPACING);
     scrollContent.SetRequestedWidth(MATCH_PARENT);
     scrollContent.SetRequestedHeight(WRAP_CONTENT);
-    scrollContent.SetPadding(Extents(0, 0, 0, STACK_PADDING));
+    scrollContent.SetPadding(Extents(0, 0, 0, static_cast<int16_t>(STACK_PADDING)));
     scrollContent.Add(CreateSectionTitle("Panel Visibility"));
     scrollContent.Add(panelRow);
     scrollContent.Add(CreateSectionTitle("Auto / Restore / Return"));
@@ -506,7 +506,7 @@ private:
     rootLayout.SetSpacing(STACK_SPACING);
     rootLayout.SetRequestedWidth(MATCH_PARENT);
     rootLayout.SetRequestedHeight(MATCH_PARENT);
-    rootLayout.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    rootLayout.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
     rootLayout.Add(fixedHeader);
     rootLayout.Add(scrollView);
 

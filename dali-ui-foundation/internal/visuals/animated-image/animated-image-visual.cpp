@@ -1079,7 +1079,7 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       float desiredWidth = 0.0f;
       if(value.Get(desiredWidth))
       {
-        mDesiredSize.SetWidth(desiredWidth);
+        mDesiredSize.SetWidth(static_cast<Dali::ImageDimensions::IntType>(desiredWidth));
       }
       else
       {
@@ -1093,7 +1093,7 @@ void AnimatedImageVisual::DoSetProperty(Property::Index index, const Property::V
       float desiredHeight = 0.0f;
       if(value.Get(desiredHeight))
       {
-        mDesiredSize.SetHeight(desiredHeight);
+        mDesiredSize.SetHeight(static_cast<Dali::ImageDimensions::IntType>(desiredHeight));
       }
       else
       {

@@ -282,10 +282,10 @@ void VideoViewImpl::UpdateDisplayArea()
   const Vector2 screenPosition    = self.GetProperty(Actor::Property::SCREEN_POSITION).Get<Vector2>();
 
   DisplayArea displayArea;
-  displayArea.x      = screenPosition.x - pivotOffset.x;
-  displayArea.y      = screenPosition.y - pivotOffset.y;
-  displayArea.width  = actorSize.x;
-  displayArea.height = actorSize.y;
+  displayArea.x      = static_cast<int32_t>(screenPosition.x - pivotOffset.x);
+  displayArea.y      = static_cast<int32_t>(screenPosition.y - pivotOffset.y);
+  displayArea.width  = static_cast<int32_t>(actorSize.x);
+  displayArea.height = static_cast<int32_t>(actorSize.y);
 
   mVideoPlayer.SetDisplayArea(displayArea);
 }

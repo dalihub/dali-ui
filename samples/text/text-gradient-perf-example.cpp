@@ -611,7 +611,7 @@ private:
     label.SetMultiLine(false);
     label.SetRequestedWidth(width);
     label.SetRequestedHeight(height);
-    label.SetPadding(Extents(0.0f, 0.0f, 0.0f, 0.0f));
+    label.SetPadding(Extents(static_cast<int16_t>(0.0f), static_cast<int16_t>(0.0f), static_cast<int16_t>(0.0f), static_cast<int16_t>(0.0f)));
     label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     return label;
@@ -682,7 +682,7 @@ private:
     label.SetTextColor(UiColor(0xF8FAFC));
     label.SetFontSize(fontSize);
     label.SetMultiLine(false);
-    label.SetPadding(Extents(10.0f, 10.0f, 0.0f, 0.0f));
+    label.SetPadding(Extents(static_cast<int16_t>(10.0f), static_cast<int16_t>(10.0f), static_cast<int16_t>(0.0f), static_cast<int16_t>(0.0f)));
     label.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     label.SetVerticalTextAlignment(Text::Alignment::CENTER);
     label.SetBackgroundColor(UiColor(0x1F2937));

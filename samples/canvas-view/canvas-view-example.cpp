@@ -170,7 +170,7 @@ private:
     root.Add(btnBar);
     window.Add(root);
 
-    mTimer = Timer::New(1000.0f / 30.0f); // 30 fps
+    mTimer = Timer::New(static_cast<uint32_t>(1000.0f / 30.0f)); // 30 fps
     mTimer.TickSignal().Connect(this, &CanvasViewSample::OnTick);
 
     LoadScene(mCurrentScene);

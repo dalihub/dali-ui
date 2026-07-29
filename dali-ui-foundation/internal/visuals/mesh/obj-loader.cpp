@@ -416,7 +416,7 @@ bool ObjLoader::LoadObject(char* objBuffer, std::streampos fileSize)
       isline >> texture.x;
       isline >> texture.y;
 
-      texture.y = 1.0 - texture.y;
+      texture.y = static_cast<float>(1.0 - texture.y);
       mTextures.PushBack(texture);
     }
     else if(tag == "#_#vt1")
@@ -424,7 +424,7 @@ bool ObjLoader::LoadObject(char* objBuffer, std::streampos fileSize)
       isline >> texture.x;
       isline >> texture.y;
 
-      texture.y = 1.0 - texture.y;
+      texture.y = static_cast<float>(1.0 - texture.y);
       mTextures2.PushBack(texture);
     }
     else if(tag == "s")

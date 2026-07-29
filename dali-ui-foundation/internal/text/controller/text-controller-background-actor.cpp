@@ -50,11 +50,11 @@ struct BackgroundMesh
 
 Length CalculateBackgroundLineHeight(LineRun lineRun)
 {
-  Length height = lineRun.ascender + -(lineRun.descender);
+  Length height = static_cast<Length>(lineRun.ascender + -(lineRun.descender));
 
   if(lineRun.lineSpacing > 0)
   {
-    height += lineRun.lineSpacing;
+    height += static_cast<Length>(lineRun.lineSpacing);
   }
 
   return height;
@@ -135,7 +135,7 @@ Actor CreateControllerBackgroundActor(const View& textView, const VisualModelPtr
 
         if(lineRun[prevLineIndex].lineSpacing < 0)
         {
-          yLineOffset += lineRun[prevLineIndex].lineSpacing;
+          yLineOffset += static_cast<Length>(lineRun[prevLineIndex].lineSpacing);
         }
       }
 

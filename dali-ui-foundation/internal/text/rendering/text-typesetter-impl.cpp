@@ -163,8 +163,8 @@ void TypesetGlyph(GlyphData& __restrict__ data, const Vector2* const __restrict_
   }
 
   // Initial vertical / horizontal offset.
-  const int32_t yOffset = data.verticalOffset + position->y;
-  const int32_t xOffset = data.horizontalOffset + position->x;
+  const int32_t yOffset = data.verticalOffset + static_cast<int32_t>(position->y);
+  const int32_t xOffset = data.horizontalOffset + static_cast<int32_t>(position->x);
 
   // Whether the given glyph is a color one.
   const bool     isColorGlyph    = Internal::IsColorGlyphBuffer(data.glyphBitmap);
@@ -461,7 +461,7 @@ void DrawUnderline(const uint32_t bufferWidth, const uint32_t bufferHeight, Glyp
   const float dashedUnderlineGap   = currentUnderlineProperties.dashGapDefined ? currentUnderlineProperties.dashGap
                                                                                : commonUnderlineProperties.dashGap;
 
-  int32_t underlineYOffset = glyphData.verticalOffset + baseline + currentUnderlinePosition;
+  int32_t underlineYOffset = glyphData.verticalOffset + static_cast<int32_t>(baseline + currentUnderlinePosition);
 
   const uint32_t yRangeMin = underlineYOffset;
   const uint32_t yRangeMax = std::min(bufferHeight, underlineYOffset + static_cast<uint32_t>(maxUnderlineHeight));
@@ -495,7 +495,7 @@ void DrawUnderline(const uint32_t bufferWidth, const uint32_t bufferHeight, Glyp
     }
     if(underlineType == Text::Underline::Type::DOUBLE)
     {
-      int32_t        secondUnderlineYOffset = underlineYOffset - ONE_AND_A_HALF * maxUnderlineHeight;
+      int32_t        secondUnderlineYOffset = underlineYOffset - static_cast<int32_t>(ONE_AND_A_HALF * maxUnderlineHeight);
       const uint32_t secondYRangeMin        = static_cast<uint32_t>(std::max(0, secondUnderlineYOffset));
       const uint32_t secondYRangeMax        = static_cast<uint32_t>(
         std::max(0, std::min(static_cast<int32_t>(bufferHeight),
@@ -563,7 +563,7 @@ void DrawUnderline(const uint32_t bufferWidth, const uint32_t bufferHeight, Glyp
     }
     if(underlineType == Text::Underline::Type::DOUBLE)
     {
-      int32_t        secondUnderlineYOffset = underlineYOffset - ONE_AND_A_HALF * maxUnderlineHeight;
+      int32_t        secondUnderlineYOffset = underlineYOffset - static_cast<int32_t>(ONE_AND_A_HALF * maxUnderlineHeight);
       const uint32_t secondYRangeMin        = static_cast<uint32_t>(std::max(0, secondUnderlineYOffset));
       const uint32_t secondYRangeMax        = static_cast<uint32_t>(
         std::max(0, std::min(static_cast<int32_t>(bufferHeight),
@@ -888,8 +888,8 @@ void CreateImageBufferForEachGlyph(TextAbstraction::FontClient fontClient, Glyph
 
   // Retrieves the glyph's bitmap.
   glyphData.glyphBitmap.buffer = nullptr;
-  glyphData.glyphBitmap.width  = glyphInfo->width; // Desired width and height.
-  glyphData.glyphBitmap.height = glyphInfo->height;
+  glyphData.glyphBitmap.width  = static_cast<uint32_t>(glyphInfo->width); // Desired width and height.
+  glyphData.glyphBitmap.height = static_cast<uint32_t>(glyphInfo->height);
 
   float outlineWidth = inputParamsForGlyph.outlineWidth;
 
@@ -959,25 +959,25 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
 
   if(inputParamsForGlyph.style == Typesetter::STYLE_OUTLINE)
   {
-    glyphData.horizontalOffset -= inputParamsForGlyph.outlineWidth;
-    glyphData.horizontalOffset += inputParamsForLine.styleOffset.x;
+    glyphData.horizontalOffset -= static_cast<int32_t>(inputParamsForGlyph.outlineWidth);
+    glyphData.horizontalOffset += static_cast<int32_t>(inputParamsForLine.styleOffset.x);
     if(isFirstLine)
     {
       // Only need to add the vertical outline offset for the first line
-      glyphData.verticalOffset -= inputParamsForGlyph.outlineWidth;
-      glyphData.verticalOffset += inputParamsForLine.styleOffset.y;
+      glyphData.verticalOffset -= static_cast<int32_t>(inputParamsForGlyph.outlineWidth);
+      glyphData.verticalOffset += static_cast<int32_t>(inputParamsForLine.styleOffset.y);
     }
   }
   else if(inputParamsForGlyph.style == Typesetter::STYLE_SHADOW)
   {
     glyphData.horizontalOffset +=
-      inputParamsForLine.styleOffset.x -
-      inputParamsForGlyph.outlineWidth; // if outline enabled then shadow should offset from outline
+      static_cast<int32_t>(inputParamsForLine.styleOffset.x -
+      inputParamsForGlyph.outlineWidth); // if outline enabled then shadow should offset from outline
 
     if(isFirstLine)
     {
       // Only need to add the vertical shadow offset for first line
-      glyphData.verticalOffset += inputParamsForLine.styleOffset.y - inputParamsForGlyph.outlineWidth;
+      glyphData.verticalOffset += static_cast<int32_t>(inputParamsForLine.styleOffset.y - inputParamsForGlyph.outlineWidth);
     }
   }
 

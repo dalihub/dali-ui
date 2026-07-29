@@ -428,7 +428,7 @@ TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
     SetSpeed(config.GetMarqueeSpeed());
     SetLoopCount(config.GetMarqueeLoopCount());
     SetLoopDelay(config.GetMarqueeLoopDelay());
-    SetGap(config.GetMarqueeGap());
+    SetGap(static_cast<int>(config.GetMarqueeGap()));
     SetStopMode(config.GetMarqueeStopMode());
     SetOrientation(config.GetMarqueeOrientation());
   }

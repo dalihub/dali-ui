@@ -133,15 +133,15 @@ static int MinorAxisDistance(Dali::Ui::FocusDirection direction, Dali::Bounds so
     case Dali::Ui::FocusDirection::RIGHT:
     {
       // the distance between the center verticals
-      return std::abs((source.Top() + (source.Bottom() - source.Top()) * 0.5f) -
-                      (dest.Top() + (dest.Bottom() - dest.Top()) * 0.5f));
+      return std::abs(static_cast<int>((source.Top() + (source.Bottom() - source.Top()) * 0.5f) -
+                      (dest.Top() + (dest.Bottom() - dest.Top()) * 0.5f)));
     }
     case Dali::Ui::FocusDirection::UP:
     case Dali::Ui::FocusDirection::DOWN:
     {
       // the distance between the center horizontals
-      return std::abs((source.Left() + (source.Right() - source.Left()) * 0.5f) -
-                      (dest.Left() + (dest.Right() - dest.Left()) * 0.5f));
+      return std::abs(static_cast<int>((source.Left() + (source.Right() - source.Left()) * 0.5f) -
+                      (dest.Left() + (dest.Right() - dest.Left()) * 0.5f)));
     }
     default:
     {

@@ -204,7 +204,7 @@ private:
     content.SetSpacing(STACK_SPACING);
     content.SetRequestedWidth(MATCH_PARENT);
     content.SetRequestedHeight(WRAP_CONTENT);
-    content.SetPadding(Extents(0, 0, 0, STACK_PADDING));
+    content.SetPadding(Extents(0, 0, 0, static_cast<int16_t>(STACK_PADDING)));
     content.Add(plainTitle);
     content.Add(CreateButtonRow({btnCopyPlain, btnPastePlain, btnHasPlain}));
     content.Add(htmlTitle);
@@ -227,7 +227,7 @@ private:
     rootLayout.SetSpacing(STACK_SPACING);
     rootLayout.SetRequestedWidth(MATCH_PARENT);
     rootLayout.SetRequestedHeight(MATCH_PARENT);
-    rootLayout.SetPadding(Extents(STACK_PADDING, STACK_PADDING, STACK_PADDING, STACK_PADDING));
+    rootLayout.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
     rootLayout.Add(titleLabel);
     rootLayout.Add(description);
     rootLayout.Add(mInputField);
