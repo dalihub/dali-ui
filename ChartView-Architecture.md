@@ -38,7 +38,7 @@ Key design decisions:
 
 - **3-canvas split** — separates static background, dynamic data, and interactive overlay into independent rasterization targets, so touch events only re-rasterize the thin overlay layer.
 - **Throttle timer** — coalesces rapid `series.SetValues()` calls before triggering a layout/render cycle.
-- **Direct `Rebuild*()` bypass** — after the initial layout, data updates call `RebuildData()` directly and invoke `RequestRasterization()` rather than going through `RelayoutRequest()`, because `RelayoutRequest()` does not wake the Adaptor.
+- **Direct `Rebuild*()` bypass** — after the initial layout, data updates call `RebuildData()` directly and invoke `RequestRasterization()` rather than scheduling a layout pass, because the view bounds are unchanged and rasterizing on the spot is cheaper and immediate.
 - **Explicit gesture detectors** — `ViewImpl` does not expose `EnableGestureDetection`, so `ChartViewImpl` manages `PanGestureDetector` and `PinchGestureDetector` members directly.
 
 ---
@@ -270,12 +270,12 @@ ChartViewImpl::OnUpdateThrottleTimer()
        │                                  RequestRasterization() on each canvas
        │                                  (wakes Adaptor immediately)
        └─ mLastLayout not valid ──────► mNeedsBackgroundUpdate = mNeedsDataUpdate = true
-                                         RelayoutRequest()
+                                         InvalidateArrange()
                                          (deferred to next OnArrange frame)
 ```
 
-> **Why bypass RelayoutRequest() for data updates?**
-> `RelayoutRequest()` only registers the view with the `LayoutController`. It does not signal the Adaptor to schedule a new render pass. If a timer-driven animation calls `RelayoutRequest()` with no other events pending, the Adaptor stays idle and the chart freezes. Calling `RebuildData()` + `RequestRasterization()` directly wakes the Adaptor on every timer tick.
+> **Why bypass the layout pass for data updates?**
+> The view bounds are unchanged, so a full measure/arrange pass is unnecessary. `InvalidateArrange()` merely registers the view with the `LayoutController`, which runs the pass on the next idle. Calling `RebuildData()` + `RequestRasterization()` directly rasterizes on the spot, which is cheaper and immediate — keeping timer-driven animations smooth.
 
 ---
 
