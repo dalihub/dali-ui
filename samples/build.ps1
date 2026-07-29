@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
   [ValidateSet("Debug", "Release")]
-  [string]$Configuration = "Debug",
+  [string]$Configuration = "Release",
   [string[]]$Samples = @(),
   [string[]]$ImageViewTargets = @(),
   [string]$VcpkgRoot = "",
