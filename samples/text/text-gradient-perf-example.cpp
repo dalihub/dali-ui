@@ -199,10 +199,16 @@ MemorySnapshot ReadProcessMemorySnapshot()
     snapshot.pssKb = snapshot.rssKb;
   }
 
-#if defined(__GLIBC__) && defined(__GLIBC_PREREQ) && __GLIBC_PREREQ(2, 33)
+#if defined(__GLIBC__) && defined(__GLIBC_PREREQ)
+#if __GLIBC_PREREQ(2, 33)
   const struct mallinfo2 mallocInfo = mallinfo2();
   snapshot.allocatorAvailable       = true;
   snapshot.mallocUsedKb             = static_cast<long>(mallocInfo.uordblks / 1024u);
+#else
+  const struct mallinfo mallocInfo = mallinfo();
+  snapshot.allocatorAvailable      = true;
+  snapshot.mallocUsedKb            = mallocInfo.uordblks / 1024;
+#endif
 #elif defined(__GLIBC__)
   const struct mallinfo mallocInfo = mallinfo();
   snapshot.allocatorAvailable      = true;
