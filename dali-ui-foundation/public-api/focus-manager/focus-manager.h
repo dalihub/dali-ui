@@ -240,30 +240,36 @@ public:
   bool GetClearFocusOnWindowFocusLost() const;
 
   /**
-   * @brief Sets whether touch interaction clears focus indication.
+   * @brief Sets whether touch interaction proposes clearing focus indication.
    *
-   * @param clear Whether touch interaction clears focus indication from the focused view
+   * The final focus indication state may be overridden by a configured
+   * integration focus indication policy.
+   *
+   * @param clear Whether touch interaction proposes clearing focus indication from the focused view
    */
   void SetClearFocusIndicationOnTouch(bool clear);
 
   /**
-   * @brief Gets whether touch interaction clears focus indication.
+   * @brief Gets whether touch interaction proposes clearing focus indication.
    *
-   * @return True if touch interaction clears focus indication from the focused view
+   * @return True if touch interaction proposes clearing focus indication from the focused view
    */
   bool IsClearFocusIndicationOnTouchEnabled() const;
 
   /**
-   * @brief Sets whether hover outside the focused view clears focus indication.
+   * @brief Sets whether hover outside the focused view proposes clearing focus indication.
    *
-   * @param clear Whether hover outside the focused view clears focus indication
+   * The final focus indication state may be overridden by a configured
+   * integration focus indication policy.
+   *
+   * @param clear Whether hover outside the focused view proposes clearing focus indication
    */
   void SetClearFocusIndicationOnHover(bool clear);
 
   /**
-   * @brief Gets whether hover outside the focused view clears focus indication.
+   * @brief Gets whether hover outside the focused view proposes clearing focus indication.
    *
-   * @return True if hover outside the focused view clears focus indication
+   * @return True if hover outside the focused view proposes clearing focus indication
    */
   bool IsClearFocusIndicationOnHoverEnabled() const;
 

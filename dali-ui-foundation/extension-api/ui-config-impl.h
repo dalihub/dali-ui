@@ -27,6 +27,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/theme-loader-interface.h>
+#include <dali-ui-foundation/integration-api/focus-indication-policy.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
@@ -546,6 +547,16 @@ public:
    * @copydoc UiConfig::GetWebEngineType()
    */
   WebEngineType GetWebEngineType() const;
+
+  /**
+   * @copydoc Integration::UiConfig::SetFocusIndicationPolicy()
+   */
+  void SetFocusIndicationPolicy(Integration::FocusIndicationPolicy::Function policy);
+
+  /**
+   * @copydoc Integration::UiConfig::GetFocusIndicationPolicy()
+   */
+  Integration::FocusIndicationPolicy::Function GetFocusIndicationPolicy() const;
 
   /**
    * @brief Called after this config is applied via UiConfig::Apply().

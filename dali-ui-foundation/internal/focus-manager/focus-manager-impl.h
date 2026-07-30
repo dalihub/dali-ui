@@ -25,6 +25,8 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/focus-indication-policy.h>
+#include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/input/input-event.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -51,7 +53,7 @@ public:
   {
     Ui::FocusDevice device = Ui::FocusDevice::UNKNOWN;
     Dali::String    deviceName;
-    Ui::InputEvent  inputEvent;
+    Ui::InputEvent  inputEvent     = Ui::InputEvent::Programmatic();
     bool            focusIndicated = false;
   };
 
@@ -344,6 +346,10 @@ private:
 
   bool ShouldIndicateFocus(const FocusChangeContext& context, bool previousFocusIndicated) const;
 
+  bool ResolveFocusIndication(View previousFocusView, View focusedView, FocusDevice device, InputEvent inputEvent, bool previousFocusIndicated, bool proposedIndicated) const;
+
+  void ApplyAutomaticFocusIndication(View focusedView, bool proposedIndicated, FocusDevice device, InputEvent inputEvent);
+
   /**
    * Clears the pending touch focus candidate.
    */
@@ -376,20 +382,22 @@ private:
   FocusStack                                                          mFocusHistory; ///< Stack to contain pre-focused view history
   SlotDelegate<FocusManager>                                          mSlotDelegate;
   typedef std::vector<std::pair<WeakHandle<Layer>, WeakHandle<View>>> FocusViewContainer;
-  FocusViewContainer                                                  mCurrentFocusViews;                ///< A container of focused views per window
-  WeakHandle<Layer>                                                   mCurrentFocusedWindow;             ///< A weak handle to the current focused window's root layer
-  bool                                                                mDefaultFocusIndicatorEnabled : 1; ///< Whether FocusManager's default focus indicator is enabled.
+  FocusViewContainer                                                  mCurrentFocusViews;    ///< A container of focused views per window
+  WeakHandle<Layer>                                                   mCurrentFocusedWindow; ///< A weak handle to the current focused window's root layer
 
   FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
+
+  Integration::FocusIndicationPolicy::Function mFocusIndicationPolicy; ///< Integration policy for automatic focus indication changes.
 
   uint32_t mCurrentWindowId;    ///< The current native window id
   int32_t  mTouchFocusDeviceId; ///< The device id for the pending touch focus candidate
 
-  bool mClearFocusIndicationOnTouch : 1; ///< Whether touch outside the focused view clears focus indication.
-  bool mClearFocusIndicationOnHover : 1; ///< Whether hover outside the focused view clears focus indication.
-  bool mConfigurationLoaded : 1;         ///< Whether default configuration has been loaded from UiConfig.
-  bool mEnableDefaultAlgorithm : 1;      ///< Whether use default algorithm focus.
-  bool mClearFocusOnWindowFocusLost : 1; ///< Whether clear focus when window loses focus.
+  bool mDefaultFocusIndicatorEnabled : 1; ///< Whether FocusManager's default focus indicator is enabled.
+  bool mClearFocusIndicationOnTouch : 1;  ///< Whether touch outside the focused view clears focus indication.
+  bool mClearFocusIndicationOnHover : 1;  ///< Whether hover outside the focused view clears focus indication.
+  bool mConfigurationLoaded : 1;          ///< Whether default configuration has been loaded from UiConfig.
+  bool mEnableDefaultAlgorithm : 1;       ///< Whether use default algorithm focus.
+  bool mClearFocusOnWindowFocusLost : 1;  ///< Whether clear focus when window loses focus.
 };
 
 } // namespace Internal

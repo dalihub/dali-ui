@@ -16,13 +16,301 @@
 
 #include <stdlib.h>
 #include <dali.h>
+#include <dali/integration-api/events/hover-event-integ.h>
+#include <dali/integration-api/events/key-event-integ.h>
+#include <dali/integration-api/events/touch-event-integ.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/focus-manager.h>
+#include <dali-ui-foundation/integration-api/focus-indication-policy.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
+#include <dali-ui-foundation/integration-api/ui-config-integ.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+namespace UiIntegration = Dali::Ui::Integration;
+
+namespace
+{
+struct FocusIndicationPolicyCall
+{
+  View previousFocusView;
+  View focusedView;
+  FocusDevice device{FocusDevice::UNKNOWN};
+  InputEventType inputEventType{InputEventType::NONE};
+  bool previousFocusIndicated{false};
+  bool proposedIndicated{false};
+};
+
+FocusIndicationPolicyCall gFocusIndicationPolicyCall;
+int gFocusIndicationPolicyCallCount = 0;
+
+bool RecordFocusIndicationPolicy(const UiIntegration::FocusIndicationContext& context)
+{
+  ++gFocusIndicationPolicyCallCount;
+  gFocusIndicationPolicyCall.previousFocusView = context.previousFocusView;
+  gFocusIndicationPolicyCall.focusedView = context.focusedView;
+  gFocusIndicationPolicyCall.device = context.device;
+  gFocusIndicationPolicyCall.inputEventType = context.inputEvent.GetInputEventType();
+  gFocusIndicationPolicyCall.previousFocusIndicated = context.previousFocusIndicated;
+  gFocusIndicationPolicyCall.proposedIndicated = context.proposedIndicated;
+  return context.proposedIndicated;
+}
+
+bool NeverIndicateFocus(const UiIntegration::FocusIndicationContext& context)
+{
+  RecordFocusIndicationPolicy(context);
+  return false;
+}
+
+Dali::Integration::TouchEvent GenerateFocusManagerTouch(PointState::Type state, const Vector2& screenPosition)
+{
+  Dali::Integration::TouchEvent touchEvent;
+  Dali::Integration::Point point;
+  point.SetState(state);
+  point.SetDeviceId(1);
+  point.SetScreenPosition(screenPosition);
+  point.SetDeviceClass(Device::Class::TOUCH);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  touchEvent.points.push_back(point);
+  touchEvent.time = 100u;
+  return touchEvent;
+}
+
+Dali::Integration::HoverEvent GenerateFocusManagerHover(PointState::Type state, const Vector2& screenPosition)
+{
+  Dali::Integration::HoverEvent hoverEvent(100u);
+  Dali::Integration::Point point;
+  point.SetState(state);
+  point.SetDeviceId(2);
+  point.SetScreenPosition(screenPosition);
+  point.SetDeviceClass(Device::Class::MOUSE);
+  point.SetDeviceSubclass(Device::Subclass::NONE);
+  hoverEvent.points.push_back(point);
+  return hoverEvent;
+}
+} // namespace
+
+int UtcDaliFocusManagerFocusIndicationPolicyContextP(void)
+{
+  UiConfig config = UiConfig::New();
+  DALI_TEST_CHECK(UiIntegration::UiConfig::GetFocusIndicationPolicy(config) == &UiIntegration::FocusIndicationPolicy::Default);
+  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, nullptr);
+  DALI_TEST_CHECK(UiIntegration::UiConfig::GetFocusIndicationPolicy(config) == &UiIntegration::FocusIndicationPolicy::Default);
+  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &RecordFocusIndicationPolicy);
+  DALI_TEST_CHECK(UiIntegration::UiConfig::GetFocusIndicationPolicy(config) == &RecordFocusIndicationPolicy);
+
+  UiTestApplication application(config);
+
+  View first = View::New();
+  first.SetFocusable(true);
+  View second = View::New();
+  second.SetFocusable(true);
+  application.GetScene().Add(first);
+  application.GetScene().Add(second);
+  application.SendNotification();
+  application.Render();
+
+  gFocusIndicationPolicyCallCount = 0;
+  FocusManager focusManager = FocusManager::Get();
+  DALI_TEST_CHECK(focusManager.SetCurrentFocusView(first));
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 1);
+  DALI_TEST_CHECK(!gFocusIndicationPolicyCall.previousFocusView);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.focusedView == first);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.device == FocusDevice::PROGRAMMATIC);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.inputEventType == InputEventType::NONE);
+  DALI_TEST_CHECK(!gFocusIndicationPolicyCall.previousFocusIndicated);
+  DALI_TEST_CHECK(!gFocusIndicationPolicyCall.proposedIndicated);
+
+  DALI_TEST_CHECK(focusManager.SetCurrentFocusView(second));
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 2);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.previousFocusView == first);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.focusedView == second);
+  DALI_TEST_CHECK(!gFocusIndicationPolicyCall.previousFocusIndicated);
+  DALI_TEST_CHECK(!gFocusIndicationPolicyCall.proposedIndicated);
+
+  Dali::Integration::KeyEvent keyDown(
+    "Right", "", "", 0, 0, 100u, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 3);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.previousFocusView == second);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.focusedView == second);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.device == FocusDevice::KEYBOARD);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.inputEventType == InputEventType::KEY_EVENT);
+  DALI_TEST_CHECK(!gFocusIndicationPolicyCall.previousFocusIndicated);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.proposedIndicated);
+  DALI_TEST_CHECK(GetImpl(second).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  focusManager.ClearFocusIndication();
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 3);
+  DALI_TEST_CHECK(!GetImpl(second).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  gFocusIndicationPolicyCall.previousFocusView.Reset();
+  gFocusIndicationPolicyCall.focusedView.Reset();
+
+  END_TEST;
+}
+
+int UtcDaliFocusManagerDefaultIndicatorOverridePreservesConfiguredPolicyP(void)
+{
+  UiConfig config = UiConfig::New();
+  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &RecordFocusIndicationPolicy);
+  UiTestApplication application(config);
+
+  FocusManager focusManager = FocusManager::Get();
+  focusManager.SetDefaultFocusIndicatorEnabled(false);
+  DALI_TEST_CHECK(!focusManager.IsDefaultFocusIndicatorEnabled());
+
+  View view = View::New();
+  view.SetFocusable(true);
+  application.GetScene().Add(view);
+
+  gFocusIndicationPolicyCallCount = 0;
+  DALI_TEST_CHECK(focusManager.SetCurrentFocusView(view));
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 1);
+
+  END_TEST;
+}
+
+int UtcDaliFocusManagerTouchOverridePreservesConfiguredPolicyP(void)
+{
+  UiConfig config = UiConfig::New();
+  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &RecordFocusIndicationPolicy);
+  UiTestApplication application(config);
+
+  FocusManager focusManager = FocusManager::Get();
+  focusManager.SetClearFocusIndicationOnTouch(false);
+  DALI_TEST_CHECK(!focusManager.IsClearFocusIndicationOnTouchEnabled());
+
+  View view = View::New();
+  view.SetFocusable(true);
+  application.GetScene().Add(view);
+
+  gFocusIndicationPolicyCallCount = 0;
+  DALI_TEST_CHECK(focusManager.SetCurrentFocusView(view));
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 1);
+
+  END_TEST;
+}
+
+int UtcDaliFocusManagerHoverOverridePreservesConfiguredPolicyP(void)
+{
+  UiConfig config = UiConfig::New();
+  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &RecordFocusIndicationPolicy);
+  UiTestApplication application(config);
+
+  FocusManager focusManager = FocusManager::Get();
+  focusManager.SetClearFocusIndicationOnHover(true);
+  DALI_TEST_CHECK(focusManager.IsClearFocusIndicationOnHoverEnabled());
+
+  View view = View::New();
+  view.SetFocusable(true);
+  application.GetScene().Add(view);
+
+  gFocusIndicationPolicyCallCount = 0;
+  DALI_TEST_CHECK(focusManager.SetCurrentFocusView(view));
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 1);
+
+  END_TEST;
+}
+
+int UtcDaliFocusManagerNavigationIgnoresFocusIndicationP(void)
+{
+  UiConfig config = UiConfig::New();
+  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &NeverIndicateFocus);
+
+  UiTestApplication application(config);
+
+  View current = View::New();
+  current.SetFocusable(true);
+  View next = View::New();
+  next.SetFocusable(true);
+  current.SetRightFocusableView(next);
+  application.GetScene().Add(current);
+  application.GetScene().Add(next);
+  application.SendNotification();
+  application.Render();
+
+  FocusManager focusManager = FocusManager::Get();
+  DALI_TEST_CHECK(focusManager.SetCurrentFocusView(current));
+  DALI_TEST_CHECK(!GetImpl(current).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  gFocusIndicationPolicyCallCount = 0;
+  gFocusIndicationPolicyCall.previousFocusView.Reset();
+  gFocusIndicationPolicyCall.focusedView.Reset();
+
+  Dali::Integration::KeyEvent keyDown(
+    "Right", "", "", 0, 0, 100u, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(focusManager.GetCurrentFocusView() == next);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCallCount == 1);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.previousFocusView == current);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.focusedView == next);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.device == FocusDevice::KEYBOARD);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.inputEventType == InputEventType::KEY_EVENT);
+  DALI_TEST_CHECK(!gFocusIndicationPolicyCall.previousFocusIndicated);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.proposedIndicated);
+  DALI_TEST_CHECK(!GetImpl(next).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  gFocusIndicationPolicyCall.previousFocusView.Reset();
+  gFocusIndicationPolicyCall.focusedView.Reset();
+
+  END_TEST;
+}
+
+int UtcDaliFocusManagerFollowFocusPolicyMovesImmediatelyP(void)
+{
+  UiConfig config = UiConfig::New();
+  config.SetClearFocusIndicationOnHover(true);
+  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &UiIntegration::FocusIndicationPolicy::FollowFocus);
+  DALI_TEST_CHECK(UiIntegration::UiConfig::GetFocusIndicationPolicy(config) == &UiIntegration::FocusIndicationPolicy::FollowFocus);
+
+  UiTestApplication application(config);
+
+  View current = View::New();
+  current.SetFocusable(true);
+  current.SetPivot(Pivot::TOP_LEFT);
+  current.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  current.SetRequestedWidth(100.0f);
+  current.SetRequestedHeight(100.0f);
+  current.TouchEventSignal().Connect([](Actor, TouchEvent) { return false; });
+  View next = View::New();
+  next.SetFocusable(true);
+  next.SetPivot(Pivot::TOP_LEFT);
+  next.SetParentOrigin(ParentOrigin::TOP_LEFT);
+  next.SetRequestedX(200.0f);
+  next.SetRequestedY(200.0f);
+  next.SetRequestedWidth(100.0f);
+  next.SetRequestedHeight(100.0f);
+  next.HoverEventSignal().Connect([](Actor, HoverEvent) { return false; });
+  current.SetRightFocusableView(next);
+  application.GetScene().Add(current);
+  application.GetScene().Add(next);
+  application.SendNotification();
+  application.Render();
+
+  FocusManager focusManager = FocusManager::Get();
+  DALI_TEST_CHECK(focusManager.SetCurrentFocusView(current));
+  DALI_TEST_CHECK(GetImpl(current).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  application.ProcessEvent(GenerateFocusManagerTouch(PointState::DOWN, Vector2(50.0f, 50.0f)));
+  DALI_TEST_CHECK(GetImpl(current).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  application.ProcessEvent(GenerateFocusManagerHover(PointState::STARTED, Vector2(250.0f, 250.0f)));
+  DALI_TEST_CHECK(GetImpl(current).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  Dali::Integration::KeyEvent keyDown(
+    "Right", "", "", 0, 0, 100u, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::KEYBOARD, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+
+  DALI_TEST_CHECK(focusManager.GetCurrentFocusView() == next);
+  DALI_TEST_CHECK(GetImpl(next).GetState().Contains(ViewState::FOCUS_INDICATED));
+
+  END_TEST;
+}
 
 // ============================================================
 // Extension key-input target

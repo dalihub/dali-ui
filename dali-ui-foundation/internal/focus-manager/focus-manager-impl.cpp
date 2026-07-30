@@ -39,6 +39,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
+#include <dali-ui-foundation/integration-api/ui-config-integ.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
@@ -169,10 +170,11 @@ FocusManager::FocusManager()
   mFocusHistory(),
   mSlotDelegate(this),
   mCurrentFocusedWindow(),
-  mDefaultFocusIndicatorEnabled(true),
   mLastFocusChangeContext(),
+  mFocusIndicationPolicy(&Integration::FocusIndicationPolicy::Default),
   mCurrentWindowId(0),
   mTouchFocusDeviceId(-1),
+  mDefaultFocusIndicatorEnabled(true),
   mClearFocusIndicationOnTouch(true),
   mClearFocusIndicationOnHover(false),
   mConfigurationLoaded(false),
@@ -236,6 +238,7 @@ void FocusManager::GetConfiguration()
     mClearFocusIndicationOnTouch  = config.IsClearFocusIndicationOnTouchEnabled();
     mClearFocusIndicationOnHover  = config.IsClearFocusIndicationOnHoverEnabled();
     mDefaultFocusIndicatorEnabled = config.IsDefaultFocusIndicatorEnabled();
+    mFocusIndicationPolicy        = Integration::UiConfig::GetFocusIndicationPolicy(config);
   }
   mConfigurationLoaded = true;
 }
@@ -285,7 +288,13 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
 
     FocusChangeContext effectiveContext       = context;
     const bool         previousFocusIndicated = currentFocusedView && GetImpl(currentFocusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
-    effectiveContext.focusIndicated           = ShouldIndicateFocus(context, previousFocusIndicated);
+    const bool         proposedIndicated      = ShouldIndicateFocus(context, previousFocusIndicated);
+    effectiveContext.focusIndicated           = ResolveFocusIndication(currentFocusedView,
+                                                                       view,
+                                                                       context.device,
+                                                                       context.inputEvent,
+                                                                       previousFocusIndicated,
+                                                                       proposedIndicated);
 
     if(currentWindow.GetRootLayer() != mCurrentFocusedWindow.GetHandle())
     {
@@ -669,6 +678,39 @@ void FocusManager::SetFocusIndicated(View view, bool indicated, InputEvent cause
   }
 }
 
+bool FocusManager::ResolveFocusIndication(View        previousFocusView,
+                                          View        focusedView,
+                                          FocusDevice device,
+                                          InputEvent  inputEvent,
+                                          bool        previousFocusIndicated,
+                                          bool        proposedIndicated) const
+{
+  return mFocusIndicationPolicy({previousFocusView,
+                                 focusedView,
+                                 device,
+                                 inputEvent,
+                                 previousFocusIndicated,
+                                 proposedIndicated});
+}
+
+void FocusManager::ApplyAutomaticFocusIndication(View        focusedView,
+                                                 bool        proposedIndicated,
+                                                 FocusDevice device,
+                                                 InputEvent  inputEvent)
+{
+  if(focusedView)
+  {
+    const bool previousFocusIndicated = GetImpl(focusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
+    const bool indicated              = ResolveFocusIndication(focusedView,
+                                                               focusedView,
+                                                               device,
+                                                               inputEvent,
+                                                               previousFocusIndicated,
+                                                               proposedIndicated);
+    SetFocusIndicated(focusedView, indicated, inputEvent);
+  }
+}
+
 void FocusManager::ClearTouchFocusCandidate()
 {
   mTouchFocusCandidate.Reset();
@@ -781,83 +823,58 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
     GetConfiguration();
   }
 
-  bool isFocusStartableKey        = false;
-  auto shouldMoveFromCurrentFocus = [&]() -> bool
-  {
-    View focusedView = GetCurrentFocusView();
-    return !focusedView || GetImpl(focusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
-  };
+  bool isFocusStartableKey = false;
+  View focusViewBeforeKey  = GetCurrentFocusView();
 
   if(event.GetState() == KeyEvent::DOWN)
   {
     if(keyName == KEY_NAME_LEFT || logicalKeyName == LOGICAL_KEY_NAME_KP_LEFT)
     {
-      if(shouldMoveFromCurrentFocus())
-      {
-        // Move the focus towards left
-        MoveFocus(Ui::FocusDirection::LEFT, context);
-      }
+      // Move the focus towards left
+      MoveFocus(Ui::FocusDirection::LEFT, context);
 
       isFocusStartableKey = true;
     }
     else if(keyName == KEY_NAME_RIGHT || logicalKeyName == LOGICAL_KEY_NAME_KP_RIGHT)
     {
-      if(shouldMoveFromCurrentFocus())
-      {
-        // Move the focus towards right
-        MoveFocus(Ui::FocusDirection::RIGHT, context);
-      }
+      // Move the focus towards right
+      MoveFocus(Ui::FocusDirection::RIGHT, context);
 
       isFocusStartableKey = true;
     }
     else if(keyName == KEY_NAME_UP || logicalKeyName == LOGICAL_KEY_NAME_KP_UP)
     {
-      if(shouldMoveFromCurrentFocus())
-      {
-        // Move the focus towards up
-        MoveFocus(Ui::FocusDirection::UP, context);
-      }
+      // Move the focus towards up
+      MoveFocus(Ui::FocusDirection::UP, context);
 
       isFocusStartableKey = true;
     }
     else if(keyName == KEY_NAME_DOWN || logicalKeyName == LOGICAL_KEY_NAME_KP_DOWN)
     {
-      if(shouldMoveFromCurrentFocus())
-      {
-        // Move the focus towards down
-        MoveFocus(Ui::FocusDirection::DOWN, context);
-      }
+      // Move the focus towards down
+      MoveFocus(Ui::FocusDirection::DOWN, context);
 
       isFocusStartableKey = true;
     }
     else if(keyName == KEY_NAME_PRIOR || logicalKeyName == LOGICAL_KEY_NAME_KP_PRIOR)
     {
-      if(shouldMoveFromCurrentFocus())
-      {
-        // Move the focus towards the previous page
-        MoveFocus(Ui::FocusDirection::PAGE_UP, context);
-      }
+      // Move the focus towards the previous page
+      MoveFocus(Ui::FocusDirection::PAGE_UP, context);
 
       isFocusStartableKey = true;
     }
     else if(keyName == KEY_NAME_NEXT || logicalKeyName == LOGICAL_KEY_NAME_KP_NEXT)
     {
-      if(shouldMoveFromCurrentFocus())
-      {
-        // Move the focus towards the next page
-        MoveFocus(Ui::FocusDirection::PAGE_DOWN, context);
-      }
+      // Move the focus towards the next page
+      MoveFocus(Ui::FocusDirection::PAGE_DOWN, context);
 
       isFocusStartableKey = true;
     }
     else if(keyName == KEY_NAME_TAB)
     {
-      if(shouldMoveFromCurrentFocus())
-      {
-        // "Tab" key moves the focus in the forward direction,
-        // "Shift-Tab" key moves it in the backward direction.
-        MoveFocus(event.IsShiftModifier() ? Ui::FocusDirection::BACKWARD : Ui::FocusDirection::FORWARD, context);
-      }
+      // "Tab" key moves the focus in the forward direction,
+      // "Shift-Tab" key moves it in the backward direction.
+      MoveFocus(event.IsShiftModifier() ? Ui::FocusDirection::BACKWARD : Ui::FocusDirection::FORWARD, context);
 
       isFocusStartableKey = true;
     }
@@ -893,7 +910,10 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
     View focusedView = GetCurrentFocusView();
     if(focusedView)
     {
-      SetFocusIndicated(focusedView, true, Ui::InputEvent::New(event));
+      if(focusedView == focusViewBeforeKey)
+      {
+        ApplyAutomaticFocusIndication(focusedView, true, device, Ui::InputEvent::New(event));
+      }
     }
     else if(!mEnableDefaultAlgorithm)
     {
@@ -927,7 +947,11 @@ void FocusManager::OnTouch(Dali::Integration::SceneHolder sceneHolder, TouchEven
       View hitView = View::DownCast(touch.GetHitActor(0));
       if(mClearFocusIndicationOnTouch)
       {
-        ClearFocusIndication(Ui::InputEvent::New(touch));
+        View focusedView = GetCurrentFocusView();
+        ApplyAutomaticFocusIndication(focusedView,
+                                      false,
+                                      ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0)),
+                                      Ui::InputEvent::New(touch));
       }
 
       if(hitView && hitView == GetCurrentFocusView())
@@ -989,11 +1013,11 @@ bool FocusManager::OnHover(Actor actor, HoverEvent hover)
     View hitView     = View::DownCast(hover.GetHitActor(0u));
     if(focusedView && hitView && !hitView.IsEffectivelyFocused())
     {
-      ClearFocusIndication();
+      ApplyAutomaticFocusIndication(focusedView, false, Ui::FocusDevice::MOUSE, Ui::InputEvent::New(hover));
     }
     else if(focusedView && !hitView && !IsScreenPointInsideView(focusedView, hover.GetScreenPosition(0u)))
     {
-      ClearFocusIndication();
+      ApplyAutomaticFocusIndication(focusedView, false, Ui::FocusDevice::MOUSE, Ui::InputEvent::New(hover));
     }
   }
   return false;
@@ -1115,6 +1139,11 @@ bool FocusManager::DoConnectSignal(BaseObject* object, ConnectionTrackerInterfac
 
 void FocusManager::SetDefaultFocusIndicatorEnabled(bool enabled)
 {
+  if(!mConfigurationLoaded)
+  {
+    GetConfiguration();
+  }
+
   if(!enabled && mFocusIndicatorView)
   {
     mFocusIndicatorView.Unparent();
@@ -1152,8 +1181,12 @@ bool FocusManager::GetClearFocusOnWindowFocusLost() const
 
 void FocusManager::SetClearFocusIndicationOnTouch(bool clear)
 {
+  if(!mConfigurationLoaded)
+  {
+    GetConfiguration();
+  }
+
   mClearFocusIndicationOnTouch = clear;
-  mConfigurationLoaded         = true;
 }
 
 bool FocusManager::IsClearFocusIndicationOnTouchEnabled() const
@@ -1163,8 +1196,12 @@ bool FocusManager::IsClearFocusIndicationOnTouchEnabled() const
 
 void FocusManager::SetClearFocusIndicationOnHover(bool clear)
 {
+  if(!mConfigurationLoaded)
+  {
+    GetConfiguration();
+  }
+
   mClearFocusIndicationOnHover = clear;
-  mConfigurationLoaded         = true;
 }
 
 bool FocusManager::IsClearFocusIndicationOnHoverEnabled() const
