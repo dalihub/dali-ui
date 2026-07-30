@@ -64,7 +64,14 @@ public: // Properties (required by DALI_PROPERTY_REGISTRATION)
   /// @brief The start and end property ranges for this impl.
   enum
   {
-    PROPERTY_START_INDEX = Dali::PROPERTY_REGISTRATION_START_INDEX,
+    // WebView derives from View, so its own properties must start AFTER the range View
+    // reserves for itself (Ui::VIEW_PROPERTY_START_INDEX .. VIEW_PROPERTY_END_INDEX).
+    // Starting at Dali::PROPERTY_REGISTRATION_START_INDEX (== VIEW_PROPERTY_START_INDEX) made
+    // every WebView property index collide with a View base property of the same index; the
+    // most-derived (WebView) handler then shadowed the View one, making View properties such
+    // as DISPATCH_KEY_EVENTS unreachable on a WebView. All other derived views
+    // (InputEditor, Label, CanvasView, ...) already start at VIEW_PROPERTY_END_INDEX + 1.
+    PROPERTY_START_INDEX = Dali::Ui::VIEW_PROPERTY_END_INDEX + 1,
   };
 
   /**

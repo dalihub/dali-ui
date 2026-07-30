@@ -47,6 +47,20 @@
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
+#if defined(_WIN32)
+#include <dali/integration-api/scene.h>
+#include <dali/public-api/events/point-state.h>
+
+#include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
+#include <dali-ui-foundation/public-api/views/view.h>
+
+// TEMP DEBUG (Windows LWE WebView bring-up): file logging kept while an
+// arrow-key input issue is under investigation. Remove once resolved.
+#include <cstdarg>
+#include <cstdio>
+static void WvDbg(const char* fmt, ...) { FILE* f = fopen("d:\\lwe_webview.log", "a"); if(!f) return; va_list ap; va_start(ap, fmt); vfprintf(f, fmt, ap); va_end(ap); fputc('\n', f); fclose(f); }
+#endif
+
 namespace Dali
 {
 namespace Ui
@@ -506,6 +520,21 @@ void WebViewImpl::OnFrameRendered()
   // Notify listeners that the web engine produced a new frame.
   EmitFrameRendered();
 
+#if defined(_WIN32)
+  WvDbg("[WV] OnFrameRendered visualChangeReq=%d hasVisual=%d", (int)mVisualChangeRequired, (int)(bool)mVisual);
+
+  // The web engine delivers frames asynchronously (via EventThreadCallback) rather than in
+  // response to a scene change, so the DALi scene is not marked dirty and, under on-demand
+  // rendering, no update/render cycle is scheduled - the freshly uploaded native-image texture
+  // is never drawn until some unrelated event (e.g. a mouse click) wakes the pipeline. Request
+  // a render for each incoming frame so web content appears (and keeps updating) on its own.
+  Dali::Integration::Scene scene = Dali::Integration::Scene::Get(Self());
+  if(scene)
+  {
+    scene.KeepRendering(0.0f);
+  }
+#endif
+
   // Only rebuild the visual when it hasn't been created yet or a size change occurred.
   if(!mVisualChangeRequired && mVisual)
   {
@@ -542,6 +571,14 @@ void WebViewImpl::OnFrameRendered()
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
 
   mVisual = Ui::Integration::VisualFactory::Get().CreateVisual(imageVisualMap);
+#if defined(_WIN32)
+  {
+    Vector3 selfSize = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
+    WvDbg("[WV] created visual=%d nativeImg=%ux%u selfSize=%.0fx%.0f",
+          (int)(bool)mVisual, mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight,
+          selfSize.width, selfSize.height);
+  }
+#endif
   if(mVisual)
   {
     auto& viewData = Internal::ViewDataImpl::Get(*this);
@@ -1298,6 +1335,28 @@ bool WebViewImpl::OnTouchEvent(Dali::Actor /*actor*/, Dali::TouchEvent touch)
 {
   if(mMouseEventsEnabled && mWebEngine)
   {
+#if defined(_WIN32)
+    {
+      Vector3 sz = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
+      Vector2 lp = touch.GetPointCount() ? touch.GetLocalPosition(0) : Vector2::ZERO;
+      Vector2 sp = touch.GetPointCount() ? touch.GetScreenPosition(0) : Vector2::ZERO;
+      WvDbg("[TOUCH] actorSize=%.0fx%.0f local=(%.0f,%.0f) screen=(%.0f,%.0f) lastImg=%ux%u",
+            sz.width, sz.height, lp.x, lp.y, sp.x, sp.y,
+            mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
+    }
+    // Clicking the page must also give it keyboard focus (like a real browser), otherwise
+    // OnKeyEvent() never fires for this control and key events never reach the web engine.
+    // Route key input focus here on press, mirroring InputEditorImpl's tap-to-focus.
+    if(touch.GetPointCount() > 0 && touch.GetState(0) == Dali::PointState::DOWN)
+    {
+      Ui::View self = Ui::View::DownCast(Self());
+      if(self && self.IsConnectedToScene())
+      {
+        Internal::KeyInputFocusManager::Get().SetFocus(self);
+      }
+      mWebEngine.SetFocus(true);
+    }
+#endif
     return mWebEngine.SendTouchEvent(touch);
   }
   return false;

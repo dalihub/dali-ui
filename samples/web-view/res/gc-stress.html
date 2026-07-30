@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"><title>GC stress</title></head>
+<body style="background:#fff;font-family:sans-serif">
+<h1 id="s">running...</h1>
+<canvas id="cv" width="256" height="128"></canvas>
+<script>
+// Escargot/BDWGC stress page: churns hidden-class transitions and heap
+// allocations so GC-related regressions surface within seconds.
+// Objects get 40 properties each - past the transition-structure limit -
+// which aborted Debug builds while windows.cmake still paired
+// ACCESS_CACHE_BUILD_MIN_SIZE=32 with TRANSITION_MODE_MAX_SIZE=36.
+var keep = [];
+var iter = 0;
+function churn() {
+  for (var r = 0; r < 100; ++r) {
+    var o = {};
+    for (var i = 0; i < 40; ++i) { o["p" + ((iter * 7 + i) % 97)] = i; }
+    var arr = [];
+    for (var j = 0; j < 100; ++j) {
+      arr.push({ a: j, b: "str" + j, c: [j, j + 1], d: { x: j } });
+    }
+    if ((r & 15) === 0) { keep.push(o); }
+    if (keep.length > 300) { keep.shift(); }
+  }
+  // Canvas churn allocates native image data, exercising the GC disclaim path.
+  var ctx = document.getElementById("cv").getContext("2d");
+  ctx.fillStyle = "rgb(" + (iter % 255) + ",80,120)";
+  ctx.fillRect(0, 0, 256, 128);
+  ctx.fillStyle = "#fff";
+  ctx.fillText("iter " + iter, 10, 60);
+  iter++;
+  document.getElementById("s").textContent = "iter " + iter;
+  setTimeout(churn, 0);
+}
+churn();
+</script>
+</body>
+</html>
