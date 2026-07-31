@@ -725,13 +725,13 @@ int32_t VisualBaseImpl::GetDepthIndex() const
     }
     case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_EFFECT_AND_BACKGROUND:
     {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT + MAXIMUM_VISUAL_OBJECTS_COUNT;
+      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND_EFFECT + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
     case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_BACKGROUND_AND_CONTENT:
     default:
     {
-      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND + MAXIMUM_VISUAL_OBJECTS_COUNT;
+      baseDepthIndex = Dali::Ui::Integration::DepthIndex::Ranges::BACKGROUND + static_cast<int32_t>(MAXIMUM_VISUAL_OBJECTS_COUNT);
       break;
     }
     case Dali::Ui::Integration::Visual::InternalContainerRangeType::BETWEEN_CONTENT_AND_DECORATION:
