@@ -1595,7 +1595,7 @@ void InputFieldImpl::OnSystemFontSizeChanged(Dali::Integration::SystemSettings::
 void InputFieldImpl::OnInitialize()
 {
   // Call base class initialization
-  ViewImpl::OnInitialize();
+  SizeNegotiatedViewImpl::OnInitialize();
 
   Actor self = Self();
 

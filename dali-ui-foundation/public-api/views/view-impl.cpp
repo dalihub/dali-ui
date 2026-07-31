@@ -84,14 +84,10 @@ ViewImplPtr ViewImpl::New()
 }
 
 ViewImpl::ViewImpl()
-: CustomActorImpl(static_cast<ActorFlags>(
-    static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
-    static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION))),
+: CustomActorImpl(),
   mImpl(new Internal::ViewDataImpl(*this))
 {
-  mImpl->SetBehaviourFlags(static_cast<Ui::ViewImpl::ViewBehaviour>(
-    static_cast<int>(VIEW_BEHAVIOUR_DEFAULT) |
-    static_cast<int>(Dali::CustomActorImpl::DISABLE_SIZE_NEGOTIATION)));
+  mImpl->SetBehaviourFlags(static_cast<Ui::ViewImpl::ViewBehaviour>(VIEW_BEHAVIOUR_DEFAULT));
 }
 
 ViewImpl::~ViewImpl()
@@ -735,7 +731,7 @@ Dali::Ui::VisualBase ViewImpl::GetVisualAt(Dali::Ui::Visual::ContainerRangeType 
 // =============================================================================
 
 ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
-: CustomActorImpl(static_cast<ActorFlags>(behaviourFlags)),
+: CustomActorImpl(),
   mImpl(new Internal::ViewDataImpl(*this))
 {
   mImpl->SetBehaviourFlags(static_cast<Ui::ViewImpl::ViewBehaviour>(behaviourFlags));
@@ -743,6 +739,9 @@ ViewImpl::ViewImpl(ViewBehaviour behaviourFlags)
 
 void ViewImpl::Initialize()
 {
+  // Disable relayout for base View (derived classes can re-enable if needed)
+  DevelActor::SetRelayoutEnabled(Self(), false);
+
   if(mImpl->AreVisualsEnabled())
   {
     mImpl->InitializeVisualData();

@@ -1879,7 +1879,7 @@ void LabelImpl::OnSystemFontSizeChanged(Dali::Integration::SystemSettings::FontS
 void LabelImpl::OnInitialize()
 {
   // Call base class initialization
-  ViewImpl::OnInitialize();
+  SizeNegotiatedViewImpl::OnInitialize();
 
   Actor self = Self();
 
