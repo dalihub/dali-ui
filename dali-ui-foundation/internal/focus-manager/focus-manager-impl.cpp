@@ -289,12 +289,7 @@ bool FocusManager::DoSetCurrentFocusView(View view, const FocusChangeContext& co
     FocusChangeContext effectiveContext       = context;
     const bool         previousFocusIndicated = currentFocusedView && GetImpl(currentFocusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
     const bool         proposedIndicated      = ShouldIndicateFocus(context, previousFocusIndicated);
-    effectiveContext.focusIndicated           = ResolveFocusIndication(currentFocusedView,
-                                                                       view,
-                                                                       context.device,
-                                                                       context.inputEvent,
-                                                                       previousFocusIndicated,
-                                                                       proposedIndicated);
+    effectiveContext.focusIndicated           = mFocusIndicationPolicy({currentFocusedView, view, context.device, context.inputEvent, previousFocusIndicated, proposedIndicated});
 
     if(currentWindow.GetRootLayer() != mCurrentFocusedWindow.GetHandle())
     {
@@ -678,35 +673,12 @@ void FocusManager::SetFocusIndicated(View view, bool indicated, InputEvent cause
   }
 }
 
-bool FocusManager::ResolveFocusIndication(View        previousFocusView,
-                                          View        focusedView,
-                                          FocusDevice device,
-                                          InputEvent  inputEvent,
-                                          bool        previousFocusIndicated,
-                                          bool        proposedIndicated) const
-{
-  return mFocusIndicationPolicy({previousFocusView,
-                                 focusedView,
-                                 device,
-                                 inputEvent,
-                                 previousFocusIndicated,
-                                 proposedIndicated});
-}
-
-void FocusManager::ApplyAutomaticFocusIndication(View        focusedView,
-                                                 bool        proposedIndicated,
-                                                 FocusDevice device,
-                                                 InputEvent  inputEvent)
+void FocusManager::SetFocusIndicationWithPolicy(View focusedView, bool proposedIndicated, FocusDevice device, InputEvent inputEvent)
 {
   if(focusedView)
   {
     const bool previousFocusIndicated = GetImpl(focusedView).GetState().Contains(ViewState::FOCUS_INDICATED);
-    const bool indicated              = ResolveFocusIndication(focusedView,
-                                                               focusedView,
-                                                               device,
-                                                               inputEvent,
-                                                               previousFocusIndicated,
-                                                               proposedIndicated);
+    const bool indicated              = mFocusIndicationPolicy({focusedView, focusedView, device, inputEvent, previousFocusIndicated, proposedIndicated});
     SetFocusIndicated(focusedView, indicated, inputEvent);
   }
 }
@@ -912,7 +884,7 @@ void FocusManager::OnKeyEvent(Dali::Integration::SceneHolder sceneHolder, KeyEve
     {
       if(focusedView == focusViewBeforeKey)
       {
-        ApplyAutomaticFocusIndication(focusedView, true, device, Ui::InputEvent::New(event));
+        SetFocusIndicationWithPolicy(focusedView, true, device, context.inputEvent);
       }
     }
     else if(!mEnableDefaultAlgorithm)
@@ -948,10 +920,7 @@ void FocusManager::OnTouch(Dali::Integration::SceneHolder sceneHolder, TouchEven
       if(mClearFocusIndicationOnTouch)
       {
         View focusedView = GetCurrentFocusView();
-        ApplyAutomaticFocusIndication(focusedView,
-                                      false,
-                                      ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0)),
-                                      Ui::InputEvent::New(touch));
+        SetFocusIndicationWithPolicy(focusedView, false, ConvertDeviceClassToKeyboardFocusDevice(touch.GetDeviceClass(0)), Ui::InputEvent::New(touch));
       }
 
       if(hitView && hitView == GetCurrentFocusView())
@@ -1009,15 +978,12 @@ bool FocusManager::OnHover(Actor actor, HoverEvent hover)
 
   if(hover.GetPointCount() > 0u)
   {
-    View focusedView = GetCurrentFocusView();
-    View hitView     = View::DownCast(hover.GetHitActor(0u));
-    if(focusedView && hitView && !hitView.IsEffectivelyFocused())
+    View focusedView     = GetCurrentFocusView();
+    View hitView         = View::DownCast(hover.GetHitActor(0u));
+    bool leftFocusedView = focusedView && ((hitView && !hitView.IsEffectivelyFocused()) || (!hitView && !IsScreenPointInsideView(focusedView, hover.GetScreenPosition(0u))));
+    if(leftFocusedView)
     {
-      ApplyAutomaticFocusIndication(focusedView, false, Ui::FocusDevice::MOUSE, Ui::InputEvent::New(hover));
-    }
-    else if(focusedView && !hitView && !IsScreenPointInsideView(focusedView, hover.GetScreenPosition(0u)))
-    {
-      ApplyAutomaticFocusIndication(focusedView, false, Ui::FocusDevice::MOUSE, Ui::InputEvent::New(hover));
+      SetFocusIndicationWithPolicy(focusedView, false, Ui::FocusDevice::MOUSE, Ui::InputEvent::New(hover));
     }
   }
   return false;

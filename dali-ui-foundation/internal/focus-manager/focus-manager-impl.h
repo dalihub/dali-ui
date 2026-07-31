@@ -346,9 +346,11 @@ private:
 
   bool ShouldIndicateFocus(const FocusChangeContext& context, bool previousFocusIndicated) const;
 
-  bool ResolveFocusIndication(View previousFocusView, View focusedView, FocusDevice device, InputEvent inputEvent, bool previousFocusIndicated, bool proposedIndicated) const;
-
-  void ApplyAutomaticFocusIndication(View focusedView, bool proposedIndicated, FocusDevice device, InputEvent inputEvent);
+  /**
+   * Resolves the policy decision for focusedView while it remains the focused view,
+   * then applies the result via SetFocusIndicated().
+   */
+  void SetFocusIndicationWithPolicy(View focusedView, bool proposedIndicated, FocusDevice device, InputEvent inputEvent);
 
   /**
    * Clears the pending touch focus candidate.
