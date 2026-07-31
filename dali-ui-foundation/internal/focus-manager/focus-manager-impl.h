@@ -25,7 +25,7 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/focus-indication-policy.h>
+#include <dali-ui-foundation/extension-api/focus-indication-policy.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
 #include <dali-ui-foundation/public-api/input/input-event.h>
@@ -387,7 +387,7 @@ private:
 
   FocusChangeContext mLastFocusChangeContext; ///< The last focus change context (device & name)
 
-  Integration::FocusIndicationPolicy::Function mFocusIndicationPolicy; ///< Integration policy for automatic focus indication changes.
+  Extension::FocusIndicationPolicy::Function mFocusIndicationPolicy; ///< Extension policy for automatic focus indication changes.
 
   uint32_t mCurrentWindowId;    ///< The current native window id
   int32_t  mTouchFocusDeviceId; ///< The device id for the pending touch focus candidate

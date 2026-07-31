@@ -21,15 +21,15 @@
 #include <dali/integration-api/events/touch-event-integ.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/focus-manager.h>
-#include <dali-ui-foundation/integration-api/focus-indication-policy.h>
+#include <dali-ui-foundation/extension-api/focus-indication-policy.h>
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 #include <dali-ui-foundation/integration-api/layouts/layout-impl.h>
-#include <dali-ui-foundation/integration-api/ui-config-integ.h>
 #include <dali-ui-test-suite-utils.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
 
-namespace UiIntegration = Dali::Ui::Integration;
+namespace UiExtension = Dali::Ui::Extension;
 
 namespace
 {
@@ -46,7 +46,7 @@ struct FocusIndicationPolicyCall
 FocusIndicationPolicyCall gFocusIndicationPolicyCall;
 int gFocusIndicationPolicyCallCount = 0;
 
-bool RecordFocusIndicationPolicy(const UiIntegration::FocusIndicationContext& context)
+bool RecordFocusIndicationPolicy(const UiExtension::FocusIndicationContext& context)
 {
   ++gFocusIndicationPolicyCallCount;
   gFocusIndicationPolicyCall.previousFocusView = context.previousFocusView;
@@ -58,7 +58,7 @@ bool RecordFocusIndicationPolicy(const UiIntegration::FocusIndicationContext& co
   return context.proposedIndicated;
 }
 
-bool NeverIndicateFocus(const UiIntegration::FocusIndicationContext& context)
+bool NeverIndicateFocus(const UiExtension::FocusIndicationContext& context)
 {
   RecordFocusIndicationPolicy(context);
   return false;
@@ -95,11 +95,11 @@ Dali::Integration::HoverEvent GenerateFocusManagerHover(PointState::Type state, 
 int UtcDaliFocusManagerFocusIndicationPolicyContextP(void)
 {
   UiConfig config = UiConfig::New();
-  DALI_TEST_CHECK(UiIntegration::UiConfig::GetFocusIndicationPolicy(config) == &UiIntegration::FocusIndicationPolicy::Default);
-  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, nullptr);
-  DALI_TEST_CHECK(UiIntegration::UiConfig::GetFocusIndicationPolicy(config) == &UiIntegration::FocusIndicationPolicy::Default);
-  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &RecordFocusIndicationPolicy);
-  DALI_TEST_CHECK(UiIntegration::UiConfig::GetFocusIndicationPolicy(config) == &RecordFocusIndicationPolicy);
+  DALI_TEST_CHECK(GetImpl(config).GetFocusIndicationPolicy() == &UiExtension::FocusIndicationPolicy::Default);
+  GetImpl(config).SetFocusIndicationPolicy(nullptr);
+  DALI_TEST_CHECK(GetImpl(config).GetFocusIndicationPolicy() == &UiExtension::FocusIndicationPolicy::Default);
+  GetImpl(config).SetFocusIndicationPolicy(&RecordFocusIndicationPolicy);
+  DALI_TEST_CHECK(GetImpl(config).GetFocusIndicationPolicy() == &RecordFocusIndicationPolicy);
 
   UiTestApplication application(config);
 
@@ -156,7 +156,7 @@ int UtcDaliFocusManagerFocusIndicationPolicyContextP(void)
 int UtcDaliFocusManagerDefaultIndicatorOverridePreservesConfiguredPolicyP(void)
 {
   UiConfig config = UiConfig::New();
-  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &RecordFocusIndicationPolicy);
+  GetImpl(config).SetFocusIndicationPolicy(&RecordFocusIndicationPolicy);
   UiTestApplication application(config);
 
   FocusManager focusManager = FocusManager::Get();
@@ -177,7 +177,7 @@ int UtcDaliFocusManagerDefaultIndicatorOverridePreservesConfiguredPolicyP(void)
 int UtcDaliFocusManagerTouchOverridePreservesConfiguredPolicyP(void)
 {
   UiConfig config = UiConfig::New();
-  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &RecordFocusIndicationPolicy);
+  GetImpl(config).SetFocusIndicationPolicy(&RecordFocusIndicationPolicy);
   UiTestApplication application(config);
 
   FocusManager focusManager = FocusManager::Get();
@@ -198,7 +198,7 @@ int UtcDaliFocusManagerTouchOverridePreservesConfiguredPolicyP(void)
 int UtcDaliFocusManagerHoverOverridePreservesConfiguredPolicyP(void)
 {
   UiConfig config = UiConfig::New();
-  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &RecordFocusIndicationPolicy);
+  GetImpl(config).SetFocusIndicationPolicy(&RecordFocusIndicationPolicy);
   UiTestApplication application(config);
 
   FocusManager focusManager = FocusManager::Get();
@@ -219,7 +219,7 @@ int UtcDaliFocusManagerHoverOverridePreservesConfiguredPolicyP(void)
 int UtcDaliFocusManagerNavigationIgnoresFocusIndicationP(void)
 {
   UiConfig config = UiConfig::New();
-  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &NeverIndicateFocus);
+  GetImpl(config).SetFocusIndicationPolicy(&NeverIndicateFocus);
 
   UiTestApplication application(config);
 
@@ -265,8 +265,8 @@ int UtcDaliFocusManagerFollowFocusPolicyMovesImmediatelyP(void)
 {
   UiConfig config = UiConfig::New();
   config.SetClearFocusIndicationOnHover(true);
-  UiIntegration::UiConfig::SetFocusIndicationPolicy(config, &UiIntegration::FocusIndicationPolicy::FollowFocus);
-  DALI_TEST_CHECK(UiIntegration::UiConfig::GetFocusIndicationPolicy(config) == &UiIntegration::FocusIndicationPolicy::FollowFocus);
+  GetImpl(config).SetFocusIndicationPolicy(&UiExtension::FocusIndicationPolicy::FollowFocus);
+  DALI_TEST_CHECK(GetImpl(config).GetFocusIndicationPolicy() == &UiExtension::FocusIndicationPolicy::FollowFocus);
 
   UiTestApplication application(config);
 

@@ -26,7 +26,6 @@
 #include <array>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 namespace
 {
 
@@ -80,7 +79,7 @@ public:
     mAmbiguousPressDelay(100u),
     mAmbiguousPressDuration(64u),
     mWebEngineType(WebEngineType::CHROMIUM),
-    mFocusIndicationPolicy(&Integration::FocusIndicationPolicy::Default),
+    mFocusIndicationPolicy(&FocusIndicationPolicy::Default),
     mClearFocusOnEscapeEnabled(true),
     mClearFocusIndicationOnTouch(true),
     mClearFocusIndicationOnHover(false),
@@ -94,43 +93,43 @@ public:
 public:
   Dali::String mBrokenImageUrls[3]{}; ///< Broken image URLs for SMALL, NORMAL, LARGE
 
-  StateEffect                                  mDefaultStateEffectForInteractive; ///< Default effect for interactive views
-  mutable UiStyleSheet                         mStyleSheet;
-  ExecutionKeyPredicate                        mExecutionKeyPredicate;
-  ViewInitializer                              mViewInitializer;
-  Vector4                                      mDefaultTextColor;
-  Vector4                                      mDefaultPlaceholderTextColor;
-  float                                        mScalingFactor;
-  float                                        mDefaultFontSize;
-  bool                                         mDefaultSystemFontSizeScaleEnabled;
-  std::array<float, 5>                         mSystemFontSizeScales;
-  float                                        mDefaultMinimumFontSizeScale;
-  float                                        mDefaultMaximumFontSizeScale;
-  int                                          mDpi;
-  int                                          mBaselineDpi;
-  int                                          mMarqueeSpeed;
-  int                                          mMarqueeLoopCount;
-  float                                        mMarqueeLoopDelay;
-  float                                        mMarqueeGap;
-  Text::MarqueeStopMode                        mMarqueeStopMode;
-  Text::MarqueeOrientation                     mMarqueeOrientation;
-  Text::LayoutDirectionMode                    mTextLayoutDirectionMode;
-  KeyClickPolicy                               mKeyClickPolicy;
-  uint32_t                                     mKeyLongPressThreshold;
-  uint32_t                                     mTapRecognizerTime;
-  uint32_t                                     mAmbiguousPressDelay;
-  uint32_t                                     mAmbiguousPressDuration;
-  WebEngineType                                mWebEngineType;
-  float                                        mCachedDpiFactor{1.0f};
-  float                                        mCachedScaledDpiFactor{1.0f};
-  Integration::FocusIndicationPolicy::Function mFocusIndicationPolicy;
-  bool                                         mClearFocusOnEscapeEnabled;
-  bool                                         mClearFocusIndicationOnTouch;
-  bool                                         mClearFocusIndicationOnHover;
-  bool                                         mDefaultFocusIndicatorEnabled;
-  bool                                         mShowPlaceholderTextOnFocus;
-  bool                                         mLabelAsyncRendering;
-  bool                                         mFrozen;
+  StateEffect                     mDefaultStateEffectForInteractive; ///< Default effect for interactive views
+  mutable UiStyleSheet            mStyleSheet;
+  ExecutionKeyPredicate           mExecutionKeyPredicate;
+  ViewInitializer                 mViewInitializer;
+  Vector4                         mDefaultTextColor;
+  Vector4                         mDefaultPlaceholderTextColor;
+  float                           mScalingFactor;
+  float                           mDefaultFontSize;
+  bool                            mDefaultSystemFontSizeScaleEnabled;
+  std::array<float, 5>            mSystemFontSizeScales;
+  float                           mDefaultMinimumFontSizeScale;
+  float                           mDefaultMaximumFontSizeScale;
+  int                             mDpi;
+  int                             mBaselineDpi;
+  int                             mMarqueeSpeed;
+  int                             mMarqueeLoopCount;
+  float                           mMarqueeLoopDelay;
+  float                           mMarqueeGap;
+  Text::MarqueeStopMode           mMarqueeStopMode;
+  Text::MarqueeOrientation        mMarqueeOrientation;
+  Text::LayoutDirectionMode       mTextLayoutDirectionMode;
+  KeyClickPolicy                  mKeyClickPolicy;
+  uint32_t                        mKeyLongPressThreshold;
+  uint32_t                        mTapRecognizerTime;
+  uint32_t                        mAmbiguousPressDelay;
+  uint32_t                        mAmbiguousPressDuration;
+  WebEngineType                   mWebEngineType;
+  float                           mCachedDpiFactor{1.0f};
+  float                           mCachedScaledDpiFactor{1.0f};
+  FocusIndicationPolicy::Function mFocusIndicationPolicy;
+  bool                            mClearFocusOnEscapeEnabled;
+  bool                            mClearFocusIndicationOnTouch;
+  bool                            mClearFocusIndicationOnHover;
+  bool                            mDefaultFocusIndicatorEnabled;
+  bool                            mShowPlaceholderTextOnFocus;
+  bool                            mLabelAsyncRendering;
+  bool                            mFrozen;
 };
 
 UiConfigImpl::UiConfigImpl()
@@ -595,17 +594,6 @@ UiStyleSheet UiConfigImpl::StyleSheet() const
   return mImpl->mStyleSheet;
 }
 
-void UiConfigImpl::SetFocusIndicationPolicy(Integration::FocusIndicationPolicy::Function policy)
-{
-  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after UiConfig::Apply()");
-  mImpl->mFocusIndicationPolicy = policy ? policy : &Integration::FocusIndicationPolicy::Default;
-}
-
-Integration::FocusIndicationPolicy::Function UiConfigImpl::GetFocusIndicationPolicy() const
-{
-  return mImpl->mFocusIndicationPolicy;
-}
-
 void UiConfigImpl::OnApplied()
 {
 }
@@ -620,6 +608,17 @@ void UiConfigImpl::OnApplicationCreated()
 ThemeLoaderInterface* UiConfigImpl::CreateThemeLoader()
 {
   return nullptr;
+}
+
+void UiConfigImpl::SetFocusIndicationPolicy(FocusIndicationPolicy::Function policy)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after UiConfig::Apply()");
+  mImpl->mFocusIndicationPolicy = policy ? policy : &FocusIndicationPolicy::Default;
+}
+
+FocusIndicationPolicy::Function UiConfigImpl::GetFocusIndicationPolicy() const
+{
+  return mImpl->mFocusIndicationPolicy;
 }
 
 } // namespace Extension

@@ -37,9 +37,9 @@
 #include <cstring> // for strcmp
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/ui-config-impl.h>
 #include <dali-ui-foundation/extension-api/view.h>
 #include <dali-ui-foundation/integration-api/asset-manager/asset-manager.h>
-#include <dali-ui-foundation/integration-api/ui-config-integ.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/focus-manager/focus-finder.h>
@@ -171,7 +171,7 @@ FocusManager::FocusManager()
   mSlotDelegate(this),
   mCurrentFocusedWindow(),
   mLastFocusChangeContext(),
-  mFocusIndicationPolicy(&Integration::FocusIndicationPolicy::Default),
+  mFocusIndicationPolicy(&Extension::FocusIndicationPolicy::Default),
   mCurrentWindowId(0),
   mTouchFocusDeviceId(-1),
   mDefaultFocusIndicatorEnabled(true),
@@ -238,7 +238,7 @@ void FocusManager::GetConfiguration()
     mClearFocusIndicationOnTouch  = config.IsClearFocusIndicationOnTouchEnabled();
     mClearFocusIndicationOnHover  = config.IsClearFocusIndicationOnHoverEnabled();
     mDefaultFocusIndicatorEnabled = config.IsDefaultFocusIndicatorEnabled();
-    mFocusIndicationPolicy        = Integration::UiConfig::GetFocusIndicationPolicy(config);
+    mFocusIndicationPolicy        = GetImpl(config).GetFocusIndicationPolicy();
   }
   mConfigurationLoaded = true;
 }

@@ -27,7 +27,7 @@ namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+namespace Extension
 {
 
 /**
@@ -81,6 +81,6 @@ DALI_UI_API bool Default(const FocusIndicationContext& context);
 DALI_UI_API bool FollowFocus(const FocusIndicationContext& context);
 
 } // namespace FocusIndicationPolicy
-} // namespace Integration
+} // namespace Extension
 } // namespace Ui
 } // namespace Dali

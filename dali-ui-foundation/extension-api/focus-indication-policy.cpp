@@ -15,13 +15,13 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/focus-indication-policy.h>
+#include <dali-ui-foundation/extension-api/focus-indication-policy.h>
 
 namespace Dali
 {
 namespace Ui
 {
-namespace Integration
+namespace Extension
 {
 namespace FocusIndicationPolicy
 {
@@ -37,6 +37,6 @@ bool FollowFocus(const FocusIndicationContext&)
 }
 
 } // namespace FocusIndicationPolicy
-} // namespace Integration
+} // namespace Extension
 } // namespace Ui
 } // namespace Dali

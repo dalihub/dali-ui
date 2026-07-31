@@ -26,8 +26,8 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/extension-api/focus-indication-policy.h>
 #include <dali-ui-foundation/extension-api/theme-loader-interface.h>
-#include <dali-ui-foundation/integration-api/focus-indication-policy.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/styles/ui-style-sheet.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
@@ -549,14 +549,18 @@ public:
   WebEngineType GetWebEngineType() const;
 
   /**
-   * @copydoc Integration::UiConfig::SetFocusIndicationPolicy()
+   * @brief Sets the policy used to resolve automatic focus indication changes.
+   *
+   * @param[in] policy The policy function, or nullptr to restore the default policy
    */
-  void SetFocusIndicationPolicy(Integration::FocusIndicationPolicy::Function policy);
+  void SetFocusIndicationPolicy(FocusIndicationPolicy::Function policy);
 
   /**
-   * @copydoc Integration::UiConfig::GetFocusIndicationPolicy()
+   * @brief Gets the policy used to resolve automatic focus indication changes.
+   *
+   * @return The configured policy function
    */
-  Integration::FocusIndicationPolicy::Function GetFocusIndicationPolicy() const;
+  FocusIndicationPolicy::Function GetFocusIndicationPolicy() const;
 
   /**
    * @brief Called after this config is applied via UiConfig::Apply().
