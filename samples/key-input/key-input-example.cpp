@@ -15,7 +15,6 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/public-api/adaptor-framework/key.h>
 #include <dali/public-api/adaptor-framework/keyboard.h>
 
@@ -230,7 +229,7 @@ private:
 
     // Intercept observes events before InputField consumes them. Returning
     // false preserves normal text-control behavior.
-    DevelWindow::InterceptKeyEventSignal(window).Connect(this, &KeyInputController::OnKeyEvent);
+    window.InterceptKeyEventSignal().Connect(this, &KeyInputController::OnKeyEvent);
     FocusManager::Get().SetCurrentFocusView(mInputField);
   }
 
