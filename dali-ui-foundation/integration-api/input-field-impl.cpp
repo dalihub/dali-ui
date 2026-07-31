@@ -17,7 +17,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/adaptor-framework/key-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
@@ -27,6 +26,7 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/system/system-settings.h>
 #include <dali/public-api/actors/actor.h>
+#include <dali/public-api/adaptor-framework/key.h>
 #include <algorithm>
 #include <limits>
 
@@ -2069,8 +2069,8 @@ bool InputFieldImpl::OnKeyEvent(const KeyEvent& event)
 
     return true;
   }
-  else if((Dali::DevelKey::DALI_KEY_RETURN == event.GetKeyCode() && strcmp(KEY_RETURN_NAME, event.GetKeyName().CStr()) == 0) ||
-          Dali::DevelKey::DALI_KEY_KP_ENTER == event.GetKeyCode())
+  else if((Dali::DALI_KEY_RETURN == event.GetKeyCode() && strcmp(KEY_RETURN_NAME, event.GetKeyName().CStr()) == 0) ||
+          Dali::DALI_KEY_KP_ENTER == event.GetKeyCode())
   {
     // Do nothing when enter is coming.
     return false;

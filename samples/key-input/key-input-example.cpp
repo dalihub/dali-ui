@@ -15,7 +15,6 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 
-#include <dali/devel-api/adaptor-framework/key-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/public-api/adaptor-framework/key.h>
 #include <dali/public-api/adaptor-framework/keyboard.h>
@@ -119,11 +118,11 @@ std::string GetCanonicalMatch(const KeyEvent& event)
     {DALI_KEY_LANGUAGE, "DALI_KEY_LANGUAGE"},
     {DALI_KEY_VOLUME_UP, "DALI_KEY_VOLUME_UP"},
     {DALI_KEY_VOLUME_DOWN, "DALI_KEY_VOLUME_DOWN"},
-    {static_cast<Dali::KEY>(DevelKey::DALI_KEY_DELETE), "DALI_KEY_DELETE"},
-    {static_cast<Dali::KEY>(DevelKey::DALI_KEY_CONTROL_LEFT), "DALI_KEY_CONTROL_LEFT"},
-    {static_cast<Dali::KEY>(DevelKey::DALI_KEY_CONTROL_RIGHT), "DALI_KEY_CONTROL_RIGHT"},
-    {static_cast<Dali::KEY>(DevelKey::DALI_KEY_RETURN), "DALI_KEY_RETURN"},
-    {static_cast<Dali::KEY>(DevelKey::DALI_KEY_KP_ENTER), "DALI_KEY_KP_ENTER"},
+    {Dali::DALI_KEY_DELETE, "DALI_KEY_DELETE"},
+    {Dali::DALI_KEY_CONTROL_LEFT, "DALI_KEY_CONTROL_LEFT"},
+    {Dali::DALI_KEY_CONTROL_RIGHT, "DALI_KEY_CONTROL_RIGHT"},
+    {Dali::DALI_KEY_RETURN, "DALI_KEY_RETURN"},
+    {Dali::DALI_KEY_KP_ENTER, "DALI_KEY_KP_ENTER"},
   };
 
   for(const auto& match : matches)

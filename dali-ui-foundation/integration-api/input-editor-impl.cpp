@@ -17,7 +17,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/adaptor-framework/key-devel.h>
 #include <dali/devel-api/adaptor-framework/window-devel.h>
 #include <dali/devel-api/object/property-helper-devel.h>
 #include <dali/devel-api/object/type-registry.h>
@@ -27,6 +26,7 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/integration-api/system/system-settings.h>
 #include <dali/public-api/actors/actor.h>
+#include <dali/public-api/adaptor-framework/key.h>
 #include <algorithm>
 
 // INTERNAL INCLUDES
