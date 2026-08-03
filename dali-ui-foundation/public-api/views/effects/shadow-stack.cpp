@@ -117,7 +117,7 @@ private:
     return *reinterpret_cast<const Shadow*>(&mFirstShadowStorage);
   }
 
-  ShadowStorage       mFirstShadowStorage;
+  ShadowStorage       mFirstShadowStorage{};
   std::vector<Shadow> mAdditionalShadows;
   bool                mHasFirstShadow{false};
 };
