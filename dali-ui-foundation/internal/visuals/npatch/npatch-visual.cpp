@@ -136,8 +136,8 @@ void NPatchVisual::GetNaturalSize(Vector2& naturalSize)
   NPatchDataPtr data;
   if(mLoader.GetNPatchData(mId, data) && data->GetLoadingState() != NPatchData::LoadingState::LOADING)
   {
-    naturalSize.x = data->GetCroppedWidth();
-    naturalSize.y = data->GetCroppedHeight();
+    naturalSize.x = static_cast<float>(data->GetCroppedWidth());
+    naturalSize.y = static_cast<float>(data->GetCroppedHeight());
   }
   else
   {

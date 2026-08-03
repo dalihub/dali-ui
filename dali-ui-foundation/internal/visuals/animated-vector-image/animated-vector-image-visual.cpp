@@ -229,8 +229,8 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
         auto texture = textureSet.GetTexture(0);
         if(texture)
         {
-          naturalSize.x = texture.GetWidth();
-          naturalSize.y = texture.GetHeight();
+          naturalSize.x = static_cast<float>(texture.GetWidth());
+          naturalSize.y = static_cast<float>(texture.GetHeight());
           return;
         }
       }
@@ -241,8 +241,8 @@ void AnimatedVectorImageVisual::GetNaturalSize(Vector2& naturalSize)
       mVectorAnimationTask->GetDefaultSize(width, height);
       if(width > 0u && height > 0u)
       {
-        naturalSize.x = width;
-        naturalSize.y = height;
+        naturalSize.x = static_cast<float>(width);
+        naturalSize.y = static_cast<float>(height);
       }
       else if(mVisualSize != Vector2::ZERO)
       {

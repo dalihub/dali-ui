@@ -1800,7 +1800,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     // If the texture size width exceed maxTextureSize, modify the visual model size and enabled the ellipsis.
     if(verifiedSize.width > maxTextureSize)
     {
-      verifiedSize.width = maxTextureSize;
+      verifiedSize.width = static_cast<float>(maxTextureSize);
       if(textNaturalSize.width > maxTextureSize)
       {
         float actualWidth  = parameters.textWidth;
@@ -1866,7 +1866,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     // If the texture size height exceed maxTextureSize, modify the visual model size and enabled the ellipsis.
     if(verifiedSize.height > maxTextureSize)
     {
-      verifiedSize.height = maxTextureSize;
+      verifiedSize.height = static_cast<float>(maxTextureSize);
       if(textHeight > maxTextureSize)
       {
         float actualWidth  = parameters.textWidth;
@@ -1903,8 +1903,8 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
                                            parameters.horizontalAlignment,
                                            parameters.verticalAlignment);
 
-  parameters.textWidth  = actualWidth;
-  parameters.textHeight = actualHeight;
+  parameters.textWidth  = static_cast<float>(actualWidth);
+  parameters.textHeight = static_cast<float>(actualHeight);
 
   // Store the control size and calculated wrap gap in render info.
   bool  isRenderScale       = parameters.renderScale > 1.0f ? true : false;

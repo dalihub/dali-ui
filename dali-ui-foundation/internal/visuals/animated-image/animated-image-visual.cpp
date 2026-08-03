@@ -482,8 +482,8 @@ void AnimatedImageVisual::GetNaturalSize(Vector2& naturalSize)
         if(texture)
         {
           Dali::Vector2 textureSize;
-          textureSize.x = texture.GetWidth();
-          textureSize.y = texture.GetHeight();
+          textureSize.x = static_cast<float>(texture.GetWidth());
+          textureSize.y = static_cast<float>(texture.GetHeight());
           if(textureSize != Vector2::ZERO)
           {
             naturalSize = textureSize;
@@ -1313,7 +1313,8 @@ void AnimatedImageVisual::OnInitialize()
 
   if(!defaultWrapMode) // custom wrap mode
   {
-    Vector2 wrapMode(mWrapModeU - WrapMode::CLAMP_TO_EDGE, mWrapModeV - WrapMode::CLAMP_TO_EDGE);
+    Vector2 wrapMode(static_cast<float>(mWrapModeU - WrapMode::CLAMP_TO_EDGE),
+                     static_cast<float>(mWrapModeV - WrapMode::CLAMP_TO_EDGE));
     wrapMode.Clamp(Vector2::ZERO, Vector2(2.f, 2.f));
     mImpl->mRenderer.RegisterUniqueProperty(WRAP_MODE_UNIFORM_NAME, wrapMode);
   }

@@ -93,7 +93,7 @@ void AddQuadIndices(Vector<uint16_t>& indices, uint32_t rowIdx, uint32_t nextRow
  */
 void AddVertex(Vector<Vector2>& vertices, uint32_t x, uint32_t y)
 {
-  vertices.PushBack(Vector2(x, y));
+  vertices.PushBack(Vector2(static_cast<float>(x), static_cast<float>(y)));
 }
 
 } // unnamed namespace
@@ -280,7 +280,9 @@ void ApplyTextureAndUniforms(Renderer& renderer, const Dali::Ui::Internal::NPatc
     renderer.RegisterProperty(Dali::StringView("uFixed[0]"), Vector2::ZERO);
     renderer.RegisterProperty(Dali::StringView("uFixed[1]"), Vector2(stretchX.GetX(), stretchY.GetX()));
     renderer.RegisterProperty(
-      Dali::StringView("uFixed[2]"), Vector2(data->GetCroppedWidth() - stretchWidth, data->GetCroppedHeight() - stretchHeight));
+      Dali::StringView("uFixed[2]"),
+      Vector2(static_cast<float>(data->GetCroppedWidth() - stretchWidth),
+              static_cast<float>(data->GetCroppedHeight() - stretchHeight)));
     renderer.RegisterProperty(Dali::StringView("uStretchTotal"), Vector2(stretchWidth, stretchHeight));
   }
   else

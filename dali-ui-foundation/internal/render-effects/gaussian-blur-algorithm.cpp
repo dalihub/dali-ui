@@ -60,8 +60,8 @@ inline static float CalculateGaussianWeight(float localOffset, float sigma)
  */
 float CalculateBellCurveWidth(uint32_t blurRadius)
 {
-  const float epsilon     = 1e-2f / (blurRadius * 2);
-  const float localOffset = (blurRadius * 2) - 1;
+  const float epsilon     = 1e-2f / static_cast<float>(blurRadius * 2u);
+  const float localOffset = static_cast<float>((blurRadius * 2u) - 1u);
 
   float lowerBoundBellCurveWidth = Dali::Math::MACHINE_EPSILON_10000;
   float upperBoundBellCurveWidth = MAXIMUM_BELL_CURVE_WIDTH;

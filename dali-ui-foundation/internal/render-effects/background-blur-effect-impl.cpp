@@ -438,14 +438,18 @@ void BackgroundBlurEffectImpl::OnActivate()
     mRenderDownsampledCamera.SetType(Dali::Camera::FREE_LOOK);
     mInternalRoot.Add(mRenderDownsampledCamera);
   }
-  mRenderDownsampledCamera.SetPerspectiveProjection(Size(downsampledWidth, downsampledHeight));
+  mRenderDownsampledCamera.SetPerspectiveProjection(Size(static_cast<float>(downsampledWidth),
+                                                         static_cast<float>(downsampledHeight)));
 
   if(useIntermediateDownsample)
   {
-    mDownsampleActor.SetProperty(Actor::Property::SIZE, Vector2(downsampledWidth, downsampledHeight));
+    mDownsampleActor.SetProperty(Actor::Property::SIZE,
+                                 Vector2(static_cast<float>(downsampledWidth), static_cast<float>(downsampledHeight)));
   }
-  mHorizontalBlurActor.SetProperty(Actor::Property::SIZE, Vector2(downsampledWidth, downsampledHeight));
-  mVerticalBlurActor.SetProperty(Actor::Property::SIZE, Vector2(downsampledWidth, downsampledHeight));
+  mHorizontalBlurActor.SetProperty(Actor::Property::SIZE,
+                                   Vector2(static_cast<float>(downsampledWidth), static_cast<float>(downsampledHeight)));
+  mVerticalBlurActor.SetProperty(Actor::Property::SIZE,
+                                 Vector2(static_cast<float>(downsampledWidth), static_cast<float>(downsampledHeight)));
 
   // Set blur
   CreateFrameBuffers(ImageDimensions(sourceDownsampledWidth, sourceDownsampledHeight), ImageDimensions(downsampledWidth, downsampledHeight));
@@ -534,13 +538,17 @@ void BackgroundBlurEffectImpl::OnRefresh()
 
   // Set size
   mCamera.SetPerspectiveProjection(size);
-  mRenderDownsampledCamera.SetPerspectiveProjection(Size(downsampledWidth, downsampledHeight));
+  mRenderDownsampledCamera.SetPerspectiveProjection(Size(static_cast<float>(downsampledWidth),
+                                                         static_cast<float>(downsampledHeight)));
   if(useIntermediateDownsample)
   {
-    mDownsampleActor.SetProperty(Actor::Property::SIZE, Vector2(downsampledWidth, downsampledHeight));
+    mDownsampleActor.SetProperty(Actor::Property::SIZE,
+                                 Vector2(static_cast<float>(downsampledWidth), static_cast<float>(downsampledHeight)));
   }
-  mHorizontalBlurActor.SetProperty(Actor::Property::SIZE, Vector2(downsampledWidth, downsampledHeight));
-  mVerticalBlurActor.SetProperty(Actor::Property::SIZE, Vector2(downsampledWidth, downsampledHeight));
+  mHorizontalBlurActor.SetProperty(Actor::Property::SIZE,
+                                   Vector2(static_cast<float>(downsampledWidth), static_cast<float>(downsampledHeight)));
+  mVerticalBlurActor.SetProperty(Actor::Property::SIZE,
+                                 Vector2(static_cast<float>(downsampledWidth), static_cast<float>(downsampledHeight)));
 
   // Reset buffers and renderers
   CreateFrameBuffers(ImageDimensions(sourceDownsampledWidth, sourceDownsampledHeight), ImageDimensions(downsampledWidth, downsampledHeight));

@@ -2106,7 +2106,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     if(layoutSize.width > maxTextureSize)
     {
       DALI_LOG_DEBUG_INFO("[%p] layout width (%.2f) exceeds max texture size (%d), clamped to %d\n", mController.Get(), layoutSize.width, maxTextureSize, maxTextureSize);
-      layoutSize.width = maxTextureSize;
+      layoutSize.width = static_cast<float>(maxTextureSize);
     }
 
     // This affects font rendering quality.
@@ -3189,7 +3189,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     //if the texture size width exceed maxTextureSize, modify the visual model size and enabled the ellipsis
     if(verifiedSize.width > maxTextureSize)
     {
-      verifiedSize.width = maxTextureSize;
+      verifiedSize.width = static_cast<float>(maxTextureSize);
       if(textNaturalSize.width > maxTextureSize)
       {
         mController->SetTextElideEnabled(true);
@@ -3215,14 +3215,14 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     // if the texture size height exceed maxTextureSize, modify the visual model size and enabled the ellipsis
     if(verifiedSize.height > maxTextureSize)
     {
-      verifiedSize.height = maxTextureSize;
+      verifiedSize.height = static_cast<float>(maxTextureSize);
       if(textHeight > maxTextureSize)
       {
         mController->SetMarqueeEnabled(false, false, Text::MarqueeOrientation::VERTICAL);
         mController->SetTextElideEnabled(true);
       }
 
-      mController->CalculateLayoutSize(controlSize.width, maxTextureSize, true);
+      mController->CalculateLayoutSize(controlSize.width, static_cast<float>(maxTextureSize), true);
       wrapGap = std::max(maxTextureSize - textHeight, 0.0f);
       if(!mController->IsMarqueeEnabled())
       {

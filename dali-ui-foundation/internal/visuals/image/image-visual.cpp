@@ -638,8 +638,8 @@ void ImageVisual::GetNaturalSize(Vector2& naturalSize)
         mUseBrokenImageRenderer = true;
         mFactoryCache.UpdateBrokenImageRenderer(mImpl->mRenderer, imageSize);
         Texture brokenImage = mImpl->mRenderer.GetTextures().GetTexture(0);
-        naturalSize.x       = brokenImage.GetWidth();
-        naturalSize.y       = brokenImage.GetWidth();
+        naturalSize.x       = static_cast<float>(brokenImage.GetWidth());
+        naturalSize.y       = static_cast<float>(brokenImage.GetWidth());
       }
       return;
     }
@@ -1324,8 +1324,8 @@ void ImageVisual::ComputeTextureSize()
       auto texture = textureSet.GetTexture(0);
       if(texture)
       {
-        mTextureSize.x = texture.GetWidth();
-        mTextureSize.y = texture.GetHeight();
+        mTextureSize.x = static_cast<float>(texture.GetWidth());
+        mTextureSize.y = static_cast<float>(texture.GetHeight());
         if(textureSet.GetTextureCount() > 1u && mMaskingData && !mMaskingData->mPreappliedMasking &&
            mMaskingData->mCropToMask)
         {

@@ -376,16 +376,16 @@ void SvgVisual::GetNaturalSize(Vector2& naturalSize)
       auto texture = textureSet.GetTexture(0);
       if(texture)
       {
-        naturalSize.x = texture.GetWidth();
-        naturalSize.y = texture.GetHeight();
+        naturalSize.x = static_cast<float>(texture.GetWidth());
+        naturalSize.y = static_cast<float>(texture.GetHeight());
         return;
       }
     }
   }
   else
   {
-    naturalSize.x = mDefaultWidth;
-    naturalSize.y = mDefaultHeight;
+    naturalSize.x = static_cast<float>(mDefaultWidth);
+    naturalSize.y = static_cast<float>(mDefaultHeight);
   }
 }
 

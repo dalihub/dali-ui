@@ -370,21 +370,21 @@ private:
     {
       int newWidth  = (mWidth + mCell) * mTrackedMainContainer.widthMultiplier;
       int newHeight = (mHeight + mCell) * mTrackedMainContainer.heightMultiplier;
-      mTrackedMainContainer.container.SetRequestedWidth(newWidth);
-      mTrackedMainContainer.container.SetRequestedHeight(newHeight);
+      mTrackedMainContainer.container.SetRequestedWidth(static_cast<float>(newWidth));
+      mTrackedMainContainer.container.SetRequestedHeight(static_cast<float>(newHeight));
     }
 
     // Update log main container
     if(mTrackedLogMainContainer.container)
     {
       int newHeight = (mHeight + mCell) * mTrackedLogMainContainer.heightMultiplier;
-      mTrackedLogMainContainer.container.SetRequestedHeight(newHeight);
+      mTrackedLogMainContainer.container.SetRequestedHeight(static_cast<float>(newHeight));
     }
 
     // Update log view
     if(mTrackedLogView.container)
     {
-      mTrackedLogView.container.SetRequestedHeight(mLogHeight);
+      mTrackedLogView.container.SetRequestedHeight(static_cast<float>(mLogHeight));
     }
 
     // Update all emoji labels
@@ -394,11 +394,11 @@ private:
       {
         if(info.updateWidth)
         {
-          info.label.SetRequestedWidth(mWidth);
+          info.label.SetRequestedWidth(static_cast<float>(mWidth));
         }
         if(info.updateHeight)
         {
-          info.label.SetRequestedHeight(mHeight);
+          info.label.SetRequestedHeight(static_cast<float>(mHeight));
         }
         if(info.updateFontSize)
         {
@@ -422,8 +422,8 @@ private:
     // Update workbench
     if(mTrackedWorkbench.label)
     {
-      mTrackedWorkbench.label.SetRequestedWidth(GetBenchLength());
-      mTrackedWorkbench.label.SetRequestedHeight(mHeight);
+      mTrackedWorkbench.label.SetRequestedWidth(static_cast<float>(GetBenchLength()));
+      mTrackedWorkbench.label.SetRequestedHeight(static_cast<float>(mHeight));
       mTrackedWorkbench.label.SetFontSize(mPixelSize);
       // Restore text
       mTrackedWorkbench.label.SetText(Dali::String(workbenchText.c_str()));
@@ -434,7 +434,7 @@ private:
     {
       if(mTrackedTitleLabel.updateHeight)
       {
-        mTrackedTitleLabel.label.SetRequestedHeight(mHeight);
+        mTrackedTitleLabel.label.SetRequestedHeight(static_cast<float>(mHeight));
       }
       if(mTrackedTitleLabel.updateFontSize)
       {
@@ -447,13 +447,13 @@ private:
     {
       if(info.emojiLabel)
       {
-        info.emojiLabel.SetRequestedWidth(mWidth / 2);
-        info.emojiLabel.SetRequestedHeight(mHeight / 2);
+        info.emojiLabel.SetRequestedWidth(static_cast<float>(mWidth / 2));
+        info.emojiLabel.SetRequestedHeight(static_cast<float>(mHeight / 2));
         info.emojiLabel.SetFontSize(mPixelSize / 2);
       }
       if(info.descLabel)
       {
-        info.descLabel.SetRequestedHeight(mHeight / 2);
+        info.descLabel.SetRequestedHeight(static_cast<float>(mHeight / 2));
         info.descLabel.SetFontSize(mPixelSize / 3 - 1);
       }
     }
@@ -467,8 +467,8 @@ private:
   {
     StackLayout layout = StackLayout::New(horizontal ? StackOrientation::HORIZONTAL : StackOrientation::VERTICAL);
     layout.SetSpacing(1);
-    layout.SetRequestedWidth(width);
-    layout.SetRequestedHeight(height);
+    layout.SetRequestedWidth(static_cast<float>(width));
+    layout.SetRequestedHeight(static_cast<float>(height));
     layout.SetBackgroundColor(UiColor(COLOR_BLACK));
     return layout;
   }
@@ -497,8 +497,8 @@ private:
     Label label = CreateBaseLabel();
     label.SetText(Dali::String(text.c_str()));
     label.SetFontSize(pixelSize);
-    label.SetRequestedWidth(mWidth);
-    label.SetRequestedHeight(mHeight);
+    label.SetRequestedWidth(static_cast<float>(mWidth));
+    label.SetRequestedHeight(static_cast<float>(mHeight));
 
     if(tapEnabled)
     {
@@ -559,7 +559,7 @@ private:
 
     Label titleLabel = CreateEmojiLabel("History", mPixelSize / 3, false);
     titleLabel.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    titleLabel.SetRequestedHeight(mHeight);
+    titleLabel.SetRequestedHeight(static_cast<float>(mHeight));
     titleLabel.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
     titleLabel.SetHorizontalTextAlignment(Text::Alignment::CENTER);
     titleLabel.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -580,7 +580,7 @@ private:
 
     // Log view
     mLogView = CreateContainerView(static_cast<int>(MATCH_PARENT), static_cast<int>(WRAP_CONTENT), false);
-    mLogView.SetRequestedHeight(mLogHeight);
+    mLogView.SetRequestedHeight(static_cast<float>(mLogHeight));
     mLogView.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
     logMainView.Add(mLogView);
     TrackLogView(mLogView);
@@ -589,8 +589,8 @@ private:
     View mainTopView = AddRow(mMainView);
 
     mWorkBench = CreateEmojiLabel("", mPixelSize, true);
-    mWorkBench.SetRequestedWidth(GetBenchLength());
-    mWorkBench.SetRequestedHeight(mHeight);
+    mWorkBench.SetRequestedWidth(static_cast<float>(GetBenchLength()));
+    mWorkBench.SetRequestedHeight(static_cast<float>(mHeight));
     mWorkBench.SetBackgroundColor(UiColor(COLOR_LIGHT_GRAY));
     mWorkBench.SetHorizontalTextAlignment(Text::Alignment::START);
     mWorkBench.SetVerticalTextAlignment(Text::Alignment::CENTER);
@@ -1623,8 +1623,8 @@ private:
     Label emoji = Label::New();
     emoji.SetText(Dali::String(unicode.c_str()));
     emoji.SetFontFamily(Dali::String(FONT_FAMILY));
-    emoji.SetRequestedWidth(mWidth / 2);
-    emoji.SetRequestedHeight(mHeight / 2);
+    emoji.SetRequestedWidth(static_cast<float>(mWidth / 2));
+    emoji.SetRequestedHeight(static_cast<float>(mHeight / 2));
     emoji.SetFontSize(mPixelSize / 2);
     emoji.SetTextOverflowMode(Text::OverflowMode::CLIP);
     emoji.SetBackgroundColor(UiColor(COLOR_WHITE));
@@ -1643,7 +1643,7 @@ private:
     Label description = Label::New();
     description.SetText(Dali::String(desc.c_str()));
     description.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    description.SetRequestedHeight(mHeight / 2);
+    description.SetRequestedHeight(static_cast<float>(mHeight / 2));
     description.SetFontSize(mPixelSize / 3 - 1);
     description.SetTextOverflowMode(Text::OverflowMode::ELLIPSIS);
     description.SetHorizontalTextAlignment(Text::Alignment::START);

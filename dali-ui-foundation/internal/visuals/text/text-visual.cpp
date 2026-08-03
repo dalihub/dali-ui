@@ -1902,7 +1902,7 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
       "layoutSize(%f) > maxTextureSize(%d): To guarantee the behavior of Texture::New, layoutSize must not be bigger "
       "than maxTextureSize\n",
       parameters.textWidth, maxTextureSize);
-    parameters.textWidth = maxTextureSize;
+    parameters.textWidth = static_cast<float>(maxTextureSize);
   }
 
   // This does not mean whether task is actually running or waiting.

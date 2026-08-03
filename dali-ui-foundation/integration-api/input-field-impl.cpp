@@ -3024,14 +3024,8 @@ void InputFieldImpl::ApplyLocalizedPlaceholder(BaseHandle target, const Dali::St
 // =============================================================================
 void InputFieldImpl::OnPropertySet(Dali::Property::Index index, const Dali::Property::Value& propertyValue)
 {
-  switch(index)
-  {
-    default:
-    {
-      ViewImpl::OnPropertySet(index, propertyValue); // up call to control for non-handled properties
-      break;
-    }
-  }
+  // Reintroduce a switch statement here when InputField-specific properties are added.
+  ViewImpl::OnPropertySet(index, propertyValue); // up call to control for non-handled properties
 }
 
 void InputFieldImpl::SetProperty(BaseObject* object, Dali::Property::Index index, const Dali::Property::Value& value)
