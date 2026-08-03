@@ -81,6 +81,7 @@ SET(TC_SOURCES
     utc-Dali-TextGradientPropertyData-internal.cpp
     utc-Dali-TextGradientVisualMaskPlumbing-internal.cpp
     utc-Dali-TextVisualAsyncPublication-internal.cpp
+    utc-Dali-WindowsWarningCoverage-internal.cpp
     utc-Dali-ViewAccessibility-internal.cpp
     utc-Dali-Accessibility-Text-internal.cpp
     utc-Dali-ViewFittingMode-internal.cpp
