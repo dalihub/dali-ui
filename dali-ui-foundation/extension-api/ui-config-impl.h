@@ -188,19 +188,44 @@ public:
   uint32_t GetKeyLongPressThreshold() const;
 
   /**
-   * @brief Sets the tap recognizer time limit in milliseconds.
-   *
-   * @pre Must not be frozen.
-   * @param[in] timeMs The time limit in milliseconds
+   * @copydoc UiConfig::SetLongPressGestureMinimumHoldingTime
    */
-  void SetTapRecognizerTime(uint32_t timeMs);
+  void SetLongPressGestureMinimumHoldingTime(uint32_t timeMs);
 
   /**
-   * @brief Retrieves the tap recognizer time limit.
-   *
-   * @return The time limit in milliseconds
+   * @copydoc UiConfig::GetLongPressGestureMinimumHoldingTime
    */
-  uint32_t GetTapRecognizerTime() const;
+  uint32_t GetLongPressGestureMinimumHoldingTime() const;
+
+  /**
+   * @copydoc UiConfig::SetTapGestureMaximumMultiTapInterval
+   */
+  void SetTapGestureMaximumMultiTapInterval(uint32_t intervalMs);
+
+  /**
+   * @copydoc UiConfig::GetTapGestureMaximumMultiTapInterval
+   */
+  uint32_t GetTapGestureMaximumMultiTapInterval() const;
+
+  /**
+   * @copydoc UiConfig::SetTapGestureMaximumHoldingTime
+   */
+  void SetTapGestureMaximumHoldingTime(uint32_t timeMs);
+
+  /**
+   * @copydoc UiConfig::GetTapGestureMaximumHoldingTime
+   */
+  uint32_t GetTapGestureMaximumHoldingTime() const;
+
+  /**
+   * @copydoc UiConfig::SetTapGestureMaximumMotionDistance
+   */
+  void SetTapGestureMaximumMotionDistance(float distance);
+
+  /**
+   * @copydoc UiConfig::GetTapGestureMaximumMotionDistance
+   */
+  float GetTapGestureMaximumMotionDistance() const;
 
   /**
    * @copydoc UiConfig::SetBrokenImageUrl
@@ -599,6 +624,15 @@ protected:
    * @brief Destructor.
    */
   ~UiConfigImpl() override;
+
+private:
+  /**
+   * @brief Applies the gesture recognition options to DALi.
+   *
+   * Only the options that the application has explicitly set are applied; the others
+   * keep the DALi default and are cached so that the getters report the effective value.
+   */
+  void ApplyGestureOptions();
 
 private:
   UiConfigImpl(const UiConfigImpl&)            = delete;

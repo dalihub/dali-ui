@@ -70,7 +70,10 @@ config.Apply();
 | Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Clicked 이벤트 발생이 key press 시점인지 release 시점인지 설정 |
 | Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | 클릭 실행으로 인식할 키를 결정하는 함수 |
 | Min Long Press Key Count | `SetKeyLongPressThreshold(uint32_t)` | — | 롱프레스로 인식할 최소 키 반복 횟수 |
-| Tap Recognizer Time | `SetTapRecognizerTime(uint32_t)` | — | 탭으로 인식할 시간 제한 (ms) |
+| Long Press Minimum Holding Time | `SetLongPressGestureMinimumHoldingTime(uint32_t)` | `500` | 롱프레스로 인식할 최소 누름 시간 (ms) |
+| Tap Maximum Multi Tap Interval | `SetTapGestureMaximumMultiTapInterval(uint32_t)` | `330` | 멀티탭으로 인식할 탭 사이 최대 시간 간격 (ms) |
+| Tap Maximum Holding Time | `SetTapGestureMaximumHoldingTime(uint32_t)` | `330` | 탭으로 인식할 최대 누름 시간 (touch down~up, ms) |
+| Tap Maximum Motion Distance | `SetTapGestureMaximumMotionDistance(float)` | `20.0f` | 탭으로 인식할 최대 이동 거리 (pixel) |
 | Broken Image URL | `SetBrokenImageUrl(type, url)` | — | 이미지 로딩 실패 시 표시할 이미지 (SMALL/NORMAL/LARGE) |
 | Clear Focus on Escape | `SetClearFocusOnEscapeEnabled(bool)` | — | Escape 키 입력 시 포커스 해제 여부 |
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | 기본 포커스 인디케이터 활성화 여부 |

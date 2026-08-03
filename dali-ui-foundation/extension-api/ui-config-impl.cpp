@@ -22,8 +22,10 @@
 #include <dali/devel-api/adaptor-framework/window-system-devel.h>
 #include <dali/devel-api/text-abstraction/font-client.h>
 #include <dali/integration-api/debug.h>
+#include <dali/integration-api/input-options.h>
 #include <dali/public-api/common/dali-common.h>
 #include <array>
+#include <optional>
 
 // INTERNAL INCLUDES
 namespace
@@ -75,7 +77,6 @@ public:
     mTextLayoutDirectionMode(Text::LayoutDirectionMode::INHERIT),
     mKeyClickPolicy(KeyClickPolicy::ON_RELEASE),
     mKeyLongPressThreshold(3),
-    mTapRecognizerTime(UINT32_MAX),
     mAmbiguousPressDelay(100u),
     mAmbiguousPressDuration(64u),
     mWebEngineType(WebEngineType::CHROMIUM),
@@ -116,7 +117,10 @@ public:
   Text::LayoutDirectionMode       mTextLayoutDirectionMode;
   KeyClickPolicy                  mKeyClickPolicy;
   uint32_t                        mKeyLongPressThreshold;
-  uint32_t                        mTapRecognizerTime;
+  std::optional<uint32_t>         mLongPressGestureMinimumHoldingTime;
+  std::optional<uint32_t>         mTapGestureMaximumMultiTapInterval;
+  std::optional<uint32_t>         mTapGestureMaximumHoldingTime;
+  std::optional<float>            mTapGestureMaximumMotionDistance;
   uint32_t                        mAmbiguousPressDelay;
   uint32_t                        mAmbiguousPressDuration;
   WebEngineType                   mWebEngineType;
@@ -242,15 +246,48 @@ uint32_t UiConfigImpl::GetKeyLongPressThreshold() const
   return mImpl->mKeyLongPressThreshold;
 }
 
-void UiConfigImpl::SetTapRecognizerTime(uint32_t timeMs)
+void UiConfigImpl::SetLongPressGestureMinimumHoldingTime(uint32_t timeMs)
 {
   DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
-  mImpl->mTapRecognizerTime = timeMs;
+  mImpl->mLongPressGestureMinimumHoldingTime = timeMs;
 }
 
-uint32_t UiConfigImpl::GetTapRecognizerTime() const
+uint32_t UiConfigImpl::GetLongPressGestureMinimumHoldingTime() const
 {
-  return mImpl->mTapRecognizerTime;
+  return mImpl->mLongPressGestureMinimumHoldingTime.value_or(Dali::Integration::DEFAULT_LONG_PRESS_GESTURE_MINIMUM_HOLDING_TIME);
+}
+
+void UiConfigImpl::SetTapGestureMaximumMultiTapInterval(uint32_t intervalMs)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mImpl->mTapGestureMaximumMultiTapInterval = intervalMs;
+}
+
+uint32_t UiConfigImpl::GetTapGestureMaximumMultiTapInterval() const
+{
+  return mImpl->mTapGestureMaximumMultiTapInterval.value_or(Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MULTI_TAP_INTERVAL);
+}
+
+void UiConfigImpl::SetTapGestureMaximumHoldingTime(uint32_t timeMs)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mImpl->mTapGestureMaximumHoldingTime = timeMs;
+}
+
+uint32_t UiConfigImpl::GetTapGestureMaximumHoldingTime() const
+{
+  return mImpl->mTapGestureMaximumHoldingTime.value_or(Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_HOLDING_TIME);
+}
+
+void UiConfigImpl::SetTapGestureMaximumMotionDistance(float distance)
+{
+  DALI_ASSERT_ALWAYS(!mImpl->mFrozen && "UiConfig is frozen after  UiConfig::Apply()");
+  mImpl->mTapGestureMaximumMotionDistance = distance;
+}
+
+float UiConfigImpl::GetTapGestureMaximumMotionDistance() const
+{
+  return mImpl->mTapGestureMaximumMotionDistance.value_or(Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MOTION_DISTANCE);
 }
 
 void UiConfigImpl::SetAmbiguousPressDelay(uint32_t timeMs)
@@ -603,6 +640,47 @@ void UiConfigImpl::OnApplicationCreated()
   Dali::TextAbstraction::EnableDesignCompatibility();
 
   Dali::DevelWindowSystem::SetGeometryHittestEnabled(true);
+
+  ApplyGestureOptions();
+}
+
+void UiConfigImpl::ApplyGestureOptions()
+{
+  if(mImpl->mLongPressGestureMinimumHoldingTime.has_value())
+  {
+    Dali::Integration::SetLongPressGestureMinimumHoldingTime(mImpl->mLongPressGestureMinimumHoldingTime.value());
+  }
+  else
+  {
+    mImpl->mLongPressGestureMinimumHoldingTime = Dali::Integration::GetLongPressGestureMinimumHoldingTime();
+  }
+
+  if(mImpl->mTapGestureMaximumMultiTapInterval.has_value())
+  {
+    Dali::Integration::SetTapGestureMaximumMultiTapInterval(mImpl->mTapGestureMaximumMultiTapInterval.value());
+  }
+  else
+  {
+    mImpl->mTapGestureMaximumMultiTapInterval = Dali::Integration::GetTapGestureMaximumMultiTapInterval();
+  }
+
+  if(mImpl->mTapGestureMaximumHoldingTime.has_value())
+  {
+    Dali::Integration::SetTapGestureMaximumHoldingTime(mImpl->mTapGestureMaximumHoldingTime.value());
+  }
+  else
+  {
+    mImpl->mTapGestureMaximumHoldingTime = Dali::Integration::GetTapGestureMaximumHoldingTime();
+  }
+
+  if(mImpl->mTapGestureMaximumMotionDistance.has_value())
+  {
+    Dali::Integration::SetTapGestureMaximumMotionDistance(mImpl->mTapGestureMaximumMotionDistance.value());
+  }
+  else
+  {
+    mImpl->mTapGestureMaximumMotionDistance = Dali::Integration::GetTapGestureMaximumMotionDistance();
+  }
 }
 
 ThemeLoaderInterface* UiConfigImpl::CreateThemeLoader()

@@ -296,14 +296,44 @@ uint32_t UiConfig::GetKeyLongPressThreshold() const
   return GetImpl(*this).GetKeyLongPressThreshold();
 }
 
-void UiConfig::SetTapRecognizerTime(uint32_t timeMs)
+void UiConfig::SetLongPressGestureMinimumHoldingTime(uint32_t timeMs)
 {
-  GetImpl(*this).SetTapRecognizerTime(timeMs);
+  GetImpl(*this).SetLongPressGestureMinimumHoldingTime(timeMs);
 }
 
-uint32_t UiConfig::GetTapRecognizerTime() const
+uint32_t UiConfig::GetLongPressGestureMinimumHoldingTime() const
 {
-  return GetImpl(*this).GetTapRecognizerTime();
+  return GetImpl(*this).GetLongPressGestureMinimumHoldingTime();
+}
+
+void UiConfig::SetTapGestureMaximumMultiTapInterval(uint32_t intervalMs)
+{
+  GetImpl(*this).SetTapGestureMaximumMultiTapInterval(intervalMs);
+}
+
+uint32_t UiConfig::GetTapGestureMaximumMultiTapInterval() const
+{
+  return GetImpl(*this).GetTapGestureMaximumMultiTapInterval();
+}
+
+void UiConfig::SetTapGestureMaximumHoldingTime(uint32_t timeMs)
+{
+  GetImpl(*this).SetTapGestureMaximumHoldingTime(timeMs);
+}
+
+uint32_t UiConfig::GetTapGestureMaximumHoldingTime() const
+{
+  return GetImpl(*this).GetTapGestureMaximumHoldingTime();
+}
+
+void UiConfig::SetTapGestureMaximumMotionDistance(float distance)
+{
+  GetImpl(*this).SetTapGestureMaximumMotionDistance(distance);
+}
+
+float UiConfig::GetTapGestureMaximumMotionDistance() const
+{
+  return GetImpl(*this).GetTapGestureMaximumMotionDistance();
 }
 
 void UiConfig::SetBrokenImageUrl(BrokenImageType brokenImageType, const Dali::String& brokenImageUrl)

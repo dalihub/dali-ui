@@ -326,19 +326,116 @@ public: // Properties
   uint32_t GetKeyLongPressThreshold() const;
 
   /**
-   * @brief Sets the tap recognizer time limit in milliseconds.
+   * @brief Sets the minimum holding time required to be recognized as a long press gesture.
+   *
+   * The touch point has to stay down for at least this long before a long press
+   * gesture is emitted.
+   *
+   * These gesture options are global: they are applied once when the application is
+   * created and affect every gesture detector in the application, not a single view.
+   * An option that is not set here is left at the DALi default, so a value coming from
+   * an environment variable is not overwritten.
    *
    * @pre The config must not be frozen.
-   * @param[in] timeMs The time limit in milliseconds
+   * @param[in] timeMs The time value in milliseconds
+   * @note If not set, Dali::Integration::DEFAULT_LONG_PRESS_GESTURE_MINIMUM_HOLDING_TIME is used.
+   *       A value of 0 is ignored and the previous value is kept.
    */
-  void SetTapRecognizerTime(uint32_t timeMs);
+  void SetLongPressGestureMinimumHoldingTime(uint32_t timeMs);
 
   /**
-   * @brief Retrieves the tap recognizer time limit.
+   * @brief Retrieves the minimum holding time required to be recognized as a long press gesture.
    *
-   * @return The time limit in milliseconds
+   * Before the application is created this returns the requested value, or the DALi
+   * default if nothing has been set. Afterwards it returns the value in effect.
+   *
+   * @return The time value in milliseconds
    */
-  uint32_t GetTapRecognizerTime() const;
+  uint32_t GetLongPressGestureMinimumHoldingTime() const;
+
+  /**
+   * @brief Sets the maximum interval allowed between the taps of a multi tap gesture.
+   *
+   * If the next tap starts within this interval, the taps are recognized as a multi-tap.
+   * Otherwise they are recognized as separate single taps. For a double tap:
+   * @code
+   * |(down <-- holding time --> up)| <-- interval --> |(down <-- holding time --> up)|
+   * @endcode
+   *
+   * See SetLongPressGestureMinimumHoldingTime() for how these gesture options are applied.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] intervalMs The interval in milliseconds
+   * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MULTI_TAP_INTERVAL is used.
+   *       A value of 0 is ignored and the previous value is kept.
+   * @see SetTapGestureMaximumHoldingTime()
+   */
+  void SetTapGestureMaximumMultiTapInterval(uint32_t intervalMs);
+
+  /**
+   * @brief Retrieves the maximum interval allowed between the taps of a multi tap gesture.
+   *
+   * Before the application is created this returns the requested value, or the DALi
+   * default if nothing has been set. Afterwards it returns the value in effect.
+   *
+   * @return The interval in milliseconds
+   */
+  uint32_t GetTapGestureMaximumMultiTapInterval() const;
+
+  /**
+   * @brief Sets the maximum time the touch point can be held down while still being recognized as a tap gesture.
+   *
+   * This time is measured from touch down to touch up of a single tap. If the touch
+   * point stays down for longer, it is not recognized as a tap. This is the tap
+   * counterpart of SetLongPressGestureMinimumHoldingTime(); note that it bounds one
+   * tap, not the gap between taps.
+   *
+   * See SetLongPressGestureMinimumHoldingTime() for how these gesture options are applied.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] timeMs The time value in milliseconds
+   * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_HOLDING_TIME is used.
+   *       A value of 0 is ignored and the previous value is kept.
+   * @see SetTapGestureMaximumMultiTapInterval()
+   */
+  void SetTapGestureMaximumHoldingTime(uint32_t timeMs);
+
+  /**
+   * @brief Retrieves the maximum time the touch point can be held down while still being recognized as a tap gesture.
+   *
+   * Before the application is created this returns the requested value, or the DALi
+   * default if nothing has been set. Afterwards it returns the value in effect.
+   *
+   * @return The time value in milliseconds
+   */
+  uint32_t GetTapGestureMaximumHoldingTime() const;
+
+  /**
+   * @brief Sets the maximum distance the touch point can move while still being recognized as a tap gesture.
+   *
+   * This distance is measured from touch down to touch up. If the touch point moves
+   * further than this, it is treated as a movement rather than a tap. Raising it makes
+   * taps easier to trigger on a moving finger, but makes them harder to tell apart
+   * from a pan.
+   *
+   * See SetLongPressGestureMinimumHoldingTime() for how these gesture options are applied.
+   *
+   * @pre The config must not be frozen.
+   * @param[in] distance The distance in pixels
+   * @note If not set, Dali::Integration::DEFAULT_TAP_GESTURE_MAXIMUM_MOTION_DISTANCE is used.
+   *       A negative value is ignored and the previous value is kept.
+   */
+  void SetTapGestureMaximumMotionDistance(float distance);
+
+  /**
+   * @brief Retrieves the maximum distance the touch point can move while still being recognized as a tap gesture.
+   *
+   * Before the application is created this returns the requested value, or the DALi
+   * default if nothing has been set. Afterwards it returns the value in effect.
+   *
+   * @return The distance in pixels
+   */
+  float GetTapGestureMaximumMotionDistance() const;
 
   /**
    * @brief Sets an image to be displayed when image loading fails.

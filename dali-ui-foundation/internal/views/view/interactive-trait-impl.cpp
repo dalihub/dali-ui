@@ -18,9 +18,6 @@
 // CLASS HEADER
 #include <dali-ui-foundation/internal/views/view/interactive-trait-impl.h>
 
-// EXTERNAL INCLUDES
-#include <dali/integration-api/input-options.h>
-
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/extension-api/view.h>
 
@@ -51,8 +48,6 @@ InteractiveTraitImpl::InteractiveTraitImpl()
   mClickBlockedByTouch(false),
   mClickBlockedByKey(false)
 {
-  Dali::Integration::SetTapRecognizerTime(UiConfig::GetCurrent().GetTapRecognizerTime());
-
   mTapGestureDetector.DetectedSignal().Connect(this, &InteractiveTraitImpl::OnTapInternal);
 }
 
