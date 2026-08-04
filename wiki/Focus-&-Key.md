@@ -125,7 +125,14 @@ Available setters: `SetLeftFocusableView`, `SetRightFocusableView`, `SetUpFocusa
 focusMgr.SetAsFocusGroup(container, true);  // Contain focus within this subtree
 ```
 
-A focus group is a containment boundary. When focus is inside a `FocusGroup`, default key focus movement is confined to that subtree. Use it for panels, dialogs, popups, or component internals where focus must not escape by arrow keys or Tab / Shift+Tab.
+A focus group is a containment boundary for user-initiated navigation. Candidates
+from View policies, explicit neighbors, the application fallback, and the default
+finder must remain in the nearest focus group's subtree. The focus group View's
+own local policy is included, but policies above it are not.
+
+`RequestFocus()` and `SetCurrentFocusView()` are explicit programmatic operations,
+so they may leave a focus group. This allows an application to close a dialog or
+popup and restore focus elsewhere without a separate escape API.
 
 <br/>
 
@@ -210,20 +217,121 @@ focusMgr.FocusChangedSignal().Connect(&tracker, [](View oldFocus, View newFocus)
 
 ### Custom Focus Navigation
 
-Override focus navigation for a View subtree by installing a focus navigation callback:
+Choose the narrowest extension point that owns the rule:
+
+| Requirement | API | Scope and priority |
+|---|---|---|
+| A fixed relationship between a few Views | Directional neighbor setters | After local View policies |
+| Policy for an existing container instance | `View::SetFocusNavigationCallback()` | That container's subtree |
+| Policy implemented by a custom View class | `ViewImpl::OnFocusNavigationRequested()` | That View type; used only when no callback is set on the instance |
+| Application-wide algorithm or initial focus selection | `FocusManager::SetFocusNavigationFallback()` | After local policies and explicit neighbors, before `FocusFinder` |
+| Ordinary geometric or linear navigation | Framework `FocusFinder` | Final fallback |
+
+Both View-local and application callbacks use this signature:
 
 ```cpp
-View MyFocusNavigation(View currentFocusedView, FocusDirection direction)
+FocusNavigationResult GetNextFocusableView(
+  View current,
+  FocusNavigationContext context);
+```
+
+`FocusNavigationResult` makes handling explicit:
+
+- `NotHandled()` continues to the next policy.
+- `MoveTo(view)` stops policy lookup and asks the framework to validate, resolve,
+  and focus that candidate. An invalid candidate fails the request; it does not
+  silently fall through.
+- `Stay()` consumes the request without moving focus. `MoveFocus()` consequently
+  returns `false`.
+
+The immutable context exposes direction, device category, device name, original
+`InputEvent`, source `Window`, and the nearest focus group. Policies must return a
+result and must not call focus-changing or navigation APIs recursively.
+
+#### Container policy
+
+```cpp
+FocusNavigationResult NavigatePanel(View current, FocusNavigationContext context)
 {
-  if(direction == FocusDirection::RIGHT)
+  if(context.GetDirection() == FocusDirection::RIGHT)
   {
-    return FindCustomRightTarget(currentFocusedView);
+    if(View candidate = FindCustomRightTarget(current))
+    {
+      return FocusNavigationResult::MoveTo(candidate);
+    }
+    return FocusNavigationResult::Stay();
   }
-  return View(); // Empty handle lets parent/default navigation continue.
+  return FocusNavigationResult::NotHandled();
 }
 
-view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigation));
+panel.SetFocusNavigationCallback(FocusNavigationCallback::New(&NavigatePanel));
 ```
+
+Setting a callback replaces the instance's virtual policy; passing an empty
+callback restores the virtual policy. The callback does not retain its target,
+so clear it before a member-function target is destroyed.
+
+#### Application fallback and initial focus
+
+```cpp
+class ApplicationNavigation
+{
+public:
+  FocusNavigationResult GetNextFocusableView(
+    View current,
+    FocusNavigationContext context)
+  {
+    if(!current)
+    {
+      return FocusNavigationResult::MoveTo(FindEntryView(context.GetWindow()));
+    }
+
+    if(View candidate = FindApplicationCandidate(current, context))
+    {
+      return FocusNavigationResult::MoveTo(candidate);
+    }
+    return FocusNavigationResult::NotHandled();
+  }
+};
+
+manager.SetFocusNavigationFallback(
+  FocusNavigationCallback::New(&algorithm, &ApplicationNavigation::GetNextFocusableView));
+```
+
+Only one application fallback is stored. A new callback replaces it and an
+empty callback clears it. It is invoked even when the framework default
+algorithm is disabled. With no current focus, it runs first once a navigation
+Window has been determined; if it returns `NotHandled()`, the default finder
+runs when enabled. Programmatic `MoveFocus()` uses the current focus Window or
+the last focused Window. If neither is available, the request fails without
+invoking the fallback. Input-driven navigation can instead use its source
+Window.
+
+The complete priority is:
+
+1. Local policy on each containing View, from nearest to outermost, including
+   the nearest focus group View.
+2. Explicit directional neighbor.
+3. Application fallback.
+4. Framework `FocusFinder`.
+
+`OnFocusRequested()` serves a different purpose: after a policy selects a
+container with `MoveTo()`, it resolves that container to the actual focusable
+View. It is not a navigation-algorithm extension point.
+
+#### Migrating from dali-toolkit
+
+Replace `DevelKeyboardFocusManager::CustomAlgorithmInterface` as follows:
+
+- Move component- or region-specific rules to the owning container callback or
+  `OnFocusNavigationRequested()` override.
+- Register application-wide rules with `SetFocusNavigationFallback()`.
+- Handle an empty `current` in the same fallback to select initial focus.
+- Return `Stay()` to stop default navigation, or `NotHandled()` to delegate.
+
+Unlike the old raw algorithm pointer, the callback object is owned by the
+manager, provides input/window/scope context, and produces an explicit result.
+The callback's member-function target still remains caller-owned.
 
 <br/>
 
