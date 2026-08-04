@@ -37,7 +37,7 @@
 #include <dali-ui-foundation/public-api/layouts/absolute-layout-params.h>
 #include <dali-ui-foundation/public-api/layouts/absolute-layout.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
 
 using namespace Dali;
 using namespace Dali::Ui;

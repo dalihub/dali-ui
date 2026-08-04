@@ -19,7 +19,9 @@
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-linear-gradient.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-radial-gradient.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-shape.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
@@ -470,6 +472,176 @@ int UtcDaliCanvasViewEffectRenderSyncP(void)
   application.SendNotification();
   application.Render();
   DALI_TEST_EQUALS(view.HasDropShadow(), false, TEST_LOCATION);
+
+  application.GetScene().Remove(view);
+  application.SendNotification();
+  application.Render();
+  END_TEST;
+}
+
+// =============================================================================
+// Shape::AddPath
+// =============================================================================
+
+int UtcDaliCanvasViewShapeAddPathP(void)
+{
+  UiTestApplication application;
+  using PathCommandType = Dali::CanvasRenderer::Shape::PathCommandType;
+
+  CanvasView view = CanvasView::New(Vector2(200, 200));
+  DALI_TEST_CHECK(view);
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
+  application.GetScene().Add(view);
+
+  // MOVE_TO and LINE_TO take one point each, CLOSE takes none: 3 points expected.
+  Dali::Vector<PathCommandType> commands;
+  commands.PushBack(PathCommandType::MOVE_TO);
+  commands.PushBack(PathCommandType::LINE_TO);
+  commands.PushBack(PathCommandType::LINE_TO);
+  commands.PushBack(PathCommandType::CLOSE);
+
+  Dali::Vector<Vector2> points;
+  points.PushBack(Vector2(20.0f, 20.0f));
+  points.PushBack(Vector2(160.0f, 20.0f));
+  points.PushBack(Vector2(90.0f, 150.0f));
+
+  Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
+  DALI_TEST_EQUALS(shape.AddPath(commands, points), true, TEST_LOCATION);
+  shape.SetFillColor(Color::RED);
+  view.AddDrawable(shape);
+
+  application.SendNotification();
+  application.Render();
+
+  application.GetScene().Remove(view);
+  application.SendNotification();
+  application.Render();
+  END_TEST;
+}
+
+int UtcDaliCanvasViewShapeAddPathN(void)
+{
+  UiTestApplication application;
+  using PathCommandType = Dali::CanvasRenderer::Shape::PathCommandType;
+
+  Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
+  DALI_TEST_CHECK(shape);
+
+  // An inconsistent command/point pair is rejected instead of reading past the points.
+  // CUBIC_TO takes three points, so MOVE_TO + CUBIC_TO needs four in total.
+  Dali::Vector<PathCommandType> commands;
+  commands.PushBack(PathCommandType::MOVE_TO);
+  commands.PushBack(PathCommandType::CUBIC_TO);
+
+  Dali::Vector<Vector2> tooFewPoints;
+  tooFewPoints.PushBack(Vector2(0.0f, 0.0f));
+  tooFewPoints.PushBack(Vector2(10.0f, 10.0f));
+
+  DALI_TEST_EQUALS(shape.AddPath(commands, tooFewPoints), false, TEST_LOCATION);
+
+  Dali::Vector<Vector2> tooManyPoints;
+  tooManyPoints.PushBack(Vector2(0.0f, 0.0f));
+  tooManyPoints.PushBack(Vector2(10.0f, 0.0f));
+  tooManyPoints.PushBack(Vector2(20.0f, 0.0f));
+  tooManyPoints.PushBack(Vector2(30.0f, 0.0f));
+  tooManyPoints.PushBack(Vector2(40.0f, 0.0f));
+
+  DALI_TEST_EQUALS(shape.AddPath(commands, tooManyPoints), false, TEST_LOCATION);
+
+  // An empty path is rejected too.
+  DALI_TEST_EQUALS(shape.AddPath(Dali::Vector<PathCommandType>(), Dali::Vector<Vector2>()), false, TEST_LOCATION);
+  END_TEST;
+}
+
+// =============================================================================
+// Gradient color stops
+// =============================================================================
+
+int UtcDaliCanvasViewGradientColorStopsP(void)
+{
+  UiTestApplication application;
+
+  Dali::CanvasRenderer::LinearGradient gradient = Dali::CanvasRenderer::LinearGradient::New();
+  DALI_TEST_CHECK(gradient);
+  DALI_TEST_EQUALS(gradient.GetColorStopCount(), 0u, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(gradient.AddColorStop(0.0f, Color::RED), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.AddColorStop(1.0f, Color::BLUE), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.GetColorStopCount(), 2u, TEST_LOCATION);
+
+  // Stops keep the order they were added in.
+  DALI_TEST_EQUALS(gradient.GetColorStopOffset(0u), 0.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.GetColorStopOffset(1u), 1.0f, 0.01f, TEST_LOCATION);
+
+  // The colour round-trips through the 8-bit channels ThorVG stores.
+  DALI_TEST_EQUALS(gradient.GetColorStopColor(0u), Color::RED, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.GetColorStopColor(1u), Color::BLUE, 0.01f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCanvasViewGradientClearColorStopsP(void)
+{
+  UiTestApplication application;
+
+  Dali::CanvasRenderer::RadialGradient gradient = Dali::CanvasRenderer::RadialGradient::New();
+  DALI_TEST_CHECK(gradient);
+
+  gradient.AddColorStop(0.0f, Color::GREEN);
+  gradient.AddColorStop(0.5f, Color::YELLOW);
+  gradient.AddColorStop(1.0f, Color::BLACK);
+  DALI_TEST_EQUALS(gradient.GetColorStopCount(), 3u, TEST_LOCATION);
+
+  DALI_TEST_EQUALS(gradient.ClearColorStops(), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.GetColorStopCount(), 0u, TEST_LOCATION);
+
+  // The gradient stays usable after being cleared.
+  DALI_TEST_EQUALS(gradient.AddColorStop(0.25f, Color::WHITE), true, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.GetColorStopCount(), 1u, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.GetColorStopOffset(0u), 0.25f, 0.01f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCanvasViewGradientColorStopsN(void)
+{
+  UiTestApplication application;
+
+  Dali::CanvasRenderer::LinearGradient gradient = Dali::CanvasRenderer::LinearGradient::New();
+  DALI_TEST_CHECK(gradient);
+  gradient.AddColorStop(0.0f, Color::RED);
+
+  // Out-of-range lookups fall back to defaults rather than reading past the stops.
+  DALI_TEST_EQUALS(gradient.GetColorStopOffset(1u), 0.0f, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.GetColorStopColor(1u), Vector4::ZERO, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gradient.GetColorStopOffset(99u), 0.0f, 0.01f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliCanvasViewShapeGradientFillP(void)
+{
+  UiTestApplication application;
+
+  CanvasView view = CanvasView::New(Vector2(200, 200));
+  view.SetRequestedWidth(200.0f);
+  view.SetRequestedHeight(200.0f);
+  application.GetScene().Add(view);
+
+  Dali::CanvasRenderer::LinearGradient gradient = Dali::CanvasRenderer::LinearGradient::New();
+  gradient.SetBounds(Vector2(0.0f, 0.0f), Vector2(200.0f, 200.0f));
+  gradient.AddColorStop(0.0f, Color::MAGENTA);
+  gradient.AddColorStop(1.0f, Color::CYAN);
+
+  Dali::CanvasRenderer::Shape shape = Dali::CanvasRenderer::Shape::New();
+  shape.AddRect(Bounds(20, 20, 160, 160), Vector2(8, 8));
+  DALI_TEST_EQUALS(shape.SetFillGradient(gradient), true, TEST_LOCATION);
+  view.AddDrawable(shape);
+
+  application.SendNotification();
+  application.Render();
+
+  Dali::CanvasRenderer::Gradient result = shape.GetFillGradient();
+  DALI_TEST_CHECK(result);
+  DALI_TEST_EQUALS(result.GetColorStopCount(), 2u, TEST_LOCATION);
 
   application.GetScene().Remove(view);
   application.SendNotification();

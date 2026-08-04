@@ -18,7 +18,7 @@
  */
 #include <dali-ui-foundation/public-api/views/canvas/canvas-view-properties.h>
 #include <dali-ui-foundation/public-api/views/view.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h>
 #include <dali/public-api/math/vector2.h>
 #include <dali/public-api/math/vector4.h>
 
@@ -147,7 +147,7 @@ public: // Drawable management
    * @param[in] drawable The drawable to add
    * @return True if the drawable was successfully added, false otherwise
    */
-  bool AddDrawable(Dali::CanvasRenderer::Drawable& drawable);
+  bool AddDrawable(Dali::CanvasRenderer::Drawable drawable);
 
   /**
    * @brief Removes a drawable object from the canvas.
@@ -155,7 +155,7 @@ public: // Drawable management
    * @param[in] drawable The drawable to remove
    * @return True if the drawable was found and removed, false otherwise
    */
-  bool RemoveDrawable(Dali::CanvasRenderer::Drawable& drawable);
+  bool RemoveDrawable(Dali::CanvasRenderer::Drawable drawable);
 
   /**
    * @brief Removes all drawable objects from the canvas.

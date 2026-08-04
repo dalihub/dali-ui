@@ -18,9 +18,9 @@
  */
 
 // EXTERNAL INCLUDES
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h>
-#include <dali/devel-api/adaptor-framework/canvas-renderer/canvas-renderer.h>
 #include <dali/integration-api/processor-interface.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer-drawable.h>
+#include <dali/public-api/adaptor-framework/canvas-renderer/canvas-renderer.h>
 #include <dali/public-api/adaptor-framework/window.h>
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/math/vector2.h>
@@ -104,12 +104,12 @@ public: // Drawable management
   /**
    * @copydoc Dali::Ui::CanvasView::AddDrawable
    */
-  bool AddDrawable(Dali::CanvasRenderer::Drawable& drawable);
+  bool AddDrawable(Dali::CanvasRenderer::Drawable drawable);
 
   /**
    * @copydoc Dali::Ui::CanvasView::RemoveDrawable
    */
-  bool RemoveDrawable(Dali::CanvasRenderer::Drawable& drawable);
+  bool RemoveDrawable(Dali::CanvasRenderer::Drawable drawable);
 
   /**
    * @copydoc Dali::Ui::CanvasView::RemoveAllDrawables

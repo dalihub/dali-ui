@@ -380,7 +380,7 @@ void CanvasViewImpl::ApplyRasterizedImage(CanvasViewRasterizingTaskPtr task)
 // Drawable management
 // ---------------------------------------------------------------------------
 
-bool CanvasViewImpl::AddDrawable(Dali::CanvasRenderer::Drawable& drawable)
+bool CanvasViewImpl::AddDrawable(Dali::CanvasRenderer::Drawable drawable)
 {
   if(DALI_LIKELY(mCanvasRenderer))
   {
@@ -389,7 +389,7 @@ bool CanvasViewImpl::AddDrawable(Dali::CanvasRenderer::Drawable& drawable)
   return false;
 }
 
-bool CanvasViewImpl::RemoveDrawable(Dali::CanvasRenderer::Drawable& drawable)
+bool CanvasViewImpl::RemoveDrawable(Dali::CanvasRenderer::Drawable drawable)
 {
   if(DALI_LIKELY(mCanvasRenderer))
   {
