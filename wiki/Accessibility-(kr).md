@@ -495,6 +495,128 @@ Status | 의미
 
 <br/>
 
+## Application 개발자 가이드
+
+Application은 접근성 interface를 직접 구현하는 대신, 화면의 content semantic과 현재 활성 context를 DALi View에 선언합니다. 사용하는 Component가 필요한 action contract를 제공하는지도 확인해야 합니다.
+
+### Application과 Component의 책임 경계
+
+Application이 담당 | Component 또는 framework가 담당
+--|--
+화면 content의 Name, Value, State | 기능에 맞는 기본 Role과 action 구현
+현재 page와 modal의 활성 subtree | AT-SPI object와 D-Bus bridge
+초기 remote focus, 초기 accessibility highlight, 닫기 후 복귀 대상 | touch, key, accessibility action의 동일 기능 경로
+정보 이미지와 decorative 이미지 구분 | 내부 child의 기본 tree 노출 정책
+사용 Component의 contract 검증 | 재사용·recycling 시 semantic 동기화
+
+Application에서 다음을 하지 마세요.
+
+- `Dali::Accessibility::Accessible` 또는 adaptor bridge를 직접 구현하거나 제어
+- Screen Reader가 켜졌을 때만 semantic을 설정하는 조건부 코드
+- Name에 Role, State, Value를 붙여 최종 발화 문장을 만드는 코드
+- page 전환 뒤 임의 timeout으로 highlight를 이동하는 코드
+- Component action이 없는데 Role과 Value만 설정하고 조작 가능하다고 판단
+
+### 화면 content semantic 설정
+
+기능을 이미 구현한 Component 또는 View에 화면별 content를 설정합니다.
+
+```cpp
+void ConfigureVolumeControl(View control, int volume)
+{
+  control.SetAccessibilityRole(Accessibility::Role::ADJUSTABLE);
+  control.SetAccessibilityName("음량");
+  control.SetAccessibilityValue((std::to_string(volume) + "%").c_str());
+  control.SetAutomationId("settings.sound.volume");
+}
+```
+
+이 코드는 화면별 semantic을 선언합니다. 증가·감소 동작은 Component가 `OnAccessibilityValueChange()`로 구현해야 합니다. Role과 Value만으로 action이 생기지는 않습니다.
+
+복합 설정을 root 하나로 탐색하게 할 때는 내부의 중복 정보를 숨깁니다.
+
+```cpp
+void ConfigureAudioDescriptionSetting(View control,
+                                      View icon,
+                                      View visibleLabel,
+                                      bool checked)
+{
+  control.SetAccessibilityRole(Accessibility::Role::TOGGLE_BUTTON);
+  control.SetAccessibilityName("화면 해설");
+
+  if(checked)
+  {
+    control.AddAccessibilityState(Accessibility::State::CHECKED);
+  }
+  else
+  {
+    control.RemoveAccessibilityState(Accessibility::State::CHECKED);
+  }
+
+  icon.SetAccessibilityHidden(true);
+  visibleLabel.SetAccessibilityHidden(true);
+}
+```
+
+root가 실제 toggle action을 제공할 때만 위처럼 grouping합니다. icon이나 label에 독립 action이 있으면 각각 접근 가능한 대상으로 유지하세요.
+
+### Page와 remote focus lifecycle
+
+가려진 page가 탐색되지 않도록 시각 visibility와 accessibility subtree를 함께 관리합니다.
+
+```cpp
+void SetPageActive(View page, bool active)
+{
+  page.SetVisible(active);
+  page.SetAccessibilityHidden(!active);
+}
+```
+
+새 page를 표시하기 전에 accessibility 초기 대상을 하나 지정합니다.
+
+```cpp
+Label title = Label::New("네트워크 설정");
+title.SetAccessibilityRole(Accessibility::Role::HEADER);
+title.SetRequestInitialAccessibilityHighlight(true);
+page.Add(title);
+```
+
+리모컨의 초기 keyboard focus는 `FocusManager`로 별도 요청합니다.
+
+```cpp
+bool FocusFirstControl(View firstControl)
+{
+  return FocusManager::Get().RequestFocus(firstControl);
+}
+```
+
+`SetRequestInitialAccessibilityHighlight()`와 `RequestFocus()`는 서로 다른 대상을 제어할 수 있습니다. UX가 두 대상을 같게 요구하는 경우에도 각각의 contract를 확인합니다.
+
+### Modal, list, background
+
+Modal을 열 때 다음을 함께 처리합니다.
+
+1. root에 `DIALOG`, `ALERT`, `POPUP_MENU` 등 의미 있는 Role과 modal state를 설정합니다.
+2. remote focus가 modal 밖으로 빠져나가지 않도록 focus group과 방향 이웃을 구성합니다.
+3. 배경 page의 accessibility subtree를 숨깁니다.
+4. modal 내부 초기 대상과 닫기/escape action을 정합니다.
+5. 닫은 뒤 이전 page를 다시 노출하고 시작 control로 remote focus를 복귀합니다.
+
+목록에서는 collection container와 item index가 논리 순서와 일치해야 합니다. 항목 추가, 삭제, 정렬, recycling 후 index와 semantic을 모두 갱신하세요. pause, background, preload 상태에서는 사용자에게 보이지 않는 root subtree가 읽히지 않아야 합니다.
+
+### Application 완료 checklist
+
+- [ ] 모든 interactive 대상에 의미에 맞는 Role과 짧은 Name이 있습니다.
+- [ ] State와 Value가 시각 model과 같은 시점에 갱신됩니다.
+- [ ] 리모컨 방향 focus가 UX 순서와 일치하고 경계에서 막히지 않습니다.
+- [ ] 초기 keyboard focus와 초기 accessibility highlight의 의도가 명확합니다.
+- [ ] 가려진 page, modal 배경, decorative 이미지가 탐색되지 않습니다.
+- [ ] 사용하는 Component가 activate, increment/decrement, scroll, escape 등 필요한 action을 구현합니다.
+- [ ] locale 변경, 긴 문자열, 빈 값, pause/resume 후에도 semantic이 최신 상태입니다.
+- [ ] 실제 TV에서 remote와 Screen Reader만으로 핵심 작업을 완료했습니다.
+
+<br/>
+
 ## Custom View 구현
 
 새 component가 접근성 action이나 동적 값을 제공하려면 handle인 `View`가 아니라 `ViewImpl`의 virtual API를 override합니다.

@@ -495,6 +495,128 @@ Status | Meaning
 
 <br/>
 
+## Application Developer Guide
+
+An Application declares screen content semantics and the active context on DALi Views instead of implementing accessibility interfaces directly. It must also verify that each selected Component provides the required action contract.
+
+### Application and Component responsibility boundary
+
+Application owns | Component or framework owns
+--|--
+Screen content Name, Value, and State | Default Role and action implementation for the feature
+Active page and modal subtree | AT-SPI object and D-Bus bridge
+Initial remote focus, initial accessibility highlight, and return target | One feature path for touch, key, and accessibility actions
+Informative versus decorative image treatment | Default accessibility-tree exposure of internal children
+Verification of the selected Component contract | Semantic synchronization during reuse and recycling
+
+Do not do the following in Application code:
+
+- Implement or control `Dali::Accessibility::Accessible` or the adaptor bridge directly
+- Set semantics only when the Screen Reader is enabled
+- Build a final speech sentence by appending Role, State, or Value to Name
+- Move highlight after a page transition using an arbitrary timeout
+- Assume that a control is adjustable merely because Role and Value were set
+
+### Setting screen content semantics
+
+Set screen-specific content on a Component or View that already implements its feature.
+
+```cpp
+void ConfigureVolumeControl(View control, int volume)
+{
+  control.SetAccessibilityRole(Accessibility::Role::ADJUSTABLE);
+  control.SetAccessibilityName("Volume");
+  control.SetAccessibilityValue((std::to_string(volume) + "%").c_str());
+  control.SetAutomationId("settings.sound.volume");
+}
+```
+
+This code declares screen semantics. The Component must implement increase and decrease through `OnAccessibilityValueChange()`. Role and Value do not create the action.
+
+Hide duplicate internals when one root is the navigation unit for a compound setting.
+
+```cpp
+void ConfigureAudioDescriptionSetting(View control,
+                                      View icon,
+                                      View visibleLabel,
+                                      bool checked)
+{
+  control.SetAccessibilityRole(Accessibility::Role::TOGGLE_BUTTON);
+  control.SetAccessibilityName("Audio description");
+
+  if(checked)
+  {
+    control.AddAccessibilityState(Accessibility::State::CHECKED);
+  }
+  else
+  {
+    control.RemoveAccessibilityState(Accessibility::State::CHECKED);
+  }
+
+  icon.SetAccessibilityHidden(true);
+  visibleLabel.SetAccessibilityHidden(true);
+}
+```
+
+Use this grouping only when the root provides the actual toggle action. Keep the icon or label accessible if either has an independent action.
+
+### Page and remote focus lifecycle
+
+Manage visual visibility and the accessibility subtree together so covered pages cannot be explored.
+
+```cpp
+void SetPageActive(View page, bool active)
+{
+  page.SetVisible(active);
+  page.SetAccessibilityHidden(!active);
+}
+```
+
+Choose one initial accessibility target before showing a new page.
+
+```cpp
+Label title = Label::New("Network settings");
+title.SetAccessibilityRole(Accessibility::Role::HEADER);
+title.SetRequestInitialAccessibilityHighlight(true);
+page.Add(title);
+```
+
+Request initial remote keyboard focus separately through `FocusManager`.
+
+```cpp
+bool FocusFirstControl(View firstControl)
+{
+  return FocusManager::Get().RequestFocus(firstControl);
+}
+```
+
+`SetRequestInitialAccessibilityHighlight()` and `RequestFocus()` control different targets. Even if UX requires the same View for both, verify each contract separately.
+
+### Modal, list, and background
+
+When opening a modal:
+
+1. Set a meaningful Role such as `DIALOG`, `ALERT`, or `POPUP_MENU` and the modal state on the root.
+2. Use a focus group and directional neighbors so remote focus cannot escape the modal.
+3. Hide the background page accessibility subtree.
+4. Define the initial modal target and close or escape action.
+5. On close, expose the previous page and restore remote focus to the originating control.
+
+For lists, keep the collection container and item indices aligned with logical order. Rebind index and all semantics after insertion, deletion, sorting, or recycling. In pause, background, and preload states, users must not be able to explore a root subtree that is not visible to them.
+
+### Application completion checklist
+
+- [ ] Every interactive target has a meaningful Role and concise Name.
+- [ ] State and Value update in the same transaction as the visual model.
+- [ ] Remote directional focus follows UX order and does not become trapped at boundaries.
+- [ ] Initial keyboard focus and initial accessibility highlight have explicit intent.
+- [ ] Covered pages, modal backgrounds, and decorative images are not navigable.
+- [ ] Selected Components implement required actions such as activate, increment/decrement, scroll, and escape.
+- [ ] Semantics remain current after locale changes, long or empty values, and pause/resume.
+- [ ] The core task is complete on a physical TV using only the remote and Screen Reader.
+
+<br/>
+
 ## Custom View Implementation
 
 To expose accessibility actions or dynamic values from a new component, override the virtual APIs on `ViewImpl`, not on the `View` handle.
