@@ -7,11 +7,11 @@
 > Implementation baseline: `dali-ui` `5fd24a718692`
 > Status: Current with known component gaps
 
-This guide defines shared accessibility requirements for Application developers who compose TV screens and Component developers who build reusable UI. It covers accessibility fundamentals, TV UX specifications, DALi UI implementation, validation, and distribution in one flow. Every implementation example uses the C++ `Dali::Ui` API.
+This guide defines shared accessibility requirements for Application developers who compose TV screens and Component developers who build reusable UI. It covers accessibility fundamentals, TV UX specifications, DALi UI implementation, and validation in one flow. Every implementation example uses the C++ `Dali::Ui` API.
 
 <br/>
 
-## Quick Start
+## 1. Quick Start
 
 Reader | Read first | Completion evidence
 --|--|--
@@ -28,13 +28,13 @@ Keep these principles in mind:
 
 <br/>
 
-## Accessibility Basics
+## 2. Accessibility Basics
 
-### What accessibility means
+### 2.1 What accessibility means
 
 Accessibility means designing and implementing products and services so people can use them regardless of disability. On a TV, users must be able to understand their current position, explore content, and perform an intended action with the remote without relying on sight.
 
-### Screen Reader and TTS
+### 2.2 Screen Reader and TTS
 
 TTS is a technology that converts supplied text into speech. A Screen Reader is an accessibility tool that explores UI objects, composes speech from semantics and the current context, and sends user input back as actions.
 
@@ -45,7 +45,7 @@ Screen Reader: UI semantics + current context → speech, navigation, and action
 
 Applications and Components should therefore expose accurate meaning and state instead of assembling final speech sentences or calling TTS separately for each control.
 
-### Accessibility semantics
+### 2.3 Accessibility semantics
 
 Information | Meaning | TV example
 --|--|--
@@ -57,15 +57,15 @@ Description | Supporting explanation or essential usage guidance | `"Opens avail
 
 If the expected speech is “Volume, adjustable, 50%,” do not put the full sentence in Name. Set Name to `"Volume"`, Role to `ADJUSTABLE`, and Value to `"50%"`. The Screen Reader and locale policy determine the final wording and order.
 
-### AT-SPI
+### 2.4 AT-SPI
 
 AT-SPI is the accessibility interface through which assistive technology such as a Screen Reader interacts with UI applications on Linux/Tizen. The Application declares semantics on DALi Views, and DALi UI plus the adaptor translate them into the accessibility tree and AT-SPI interfaces. General Applications and Components do not implement D-Bus protocols or AT-SPI objects directly.
 
 <br/>
 
-## Tizen TV Accessibility Runtime
+## 3. Tizen TV Accessibility Runtime
 
-### TV remote focus flow
+### 3.1 TV remote focus flow
 
 A typical TV remote navigation flow is shown below. Product branches may differ in Screen Reader integration details, but the Application and Component contract remains the same.
 
@@ -80,7 +80,7 @@ flowchart LR
 
 Direction keys move keyboard focus through `FocusManager`. When the Screen Reader is active, it uses the current target semantics to explain where the user is and what they can do. Execution keys, touch, and accessibility actions must converge on the same feature and state-update path.
 
-### Keyboard focus and accessibility highlight
+### 3.2 Keyboard focus and accessibility highlight
 
 > [!IMPORTANT]
 > **Keyboard focus and accessibility highlight are separate states.** `FocusManager` focus determines the target of remote and key input. Accessibility highlight represents the target read by the Screen Reader. Making a View focusable does not create accessibility semantics, and moving accessibility highlight does not automatically move keyboard focus.
@@ -89,7 +89,7 @@ State which one is meant in TV UX specifications and test reports. Saying only �
 
 <br/>
 
-## TV Accessibility UX Specification
+## 4. TV Accessibility UX Specification
 
 If UX delivers only visual layout, developers and QA must guess the accessibility navigation unit and speech. Record the following information in every screen or Component specification.
 
@@ -105,27 +105,27 @@ State feedback | Semantics that change immediately after an action | Update `CHE
 Repeated content | Heading, collection name, and index policy | Episode card `3/10`
 Dynamic content | Announcement frequency and interruption policy | Do not announce call duration every second
 
-### Directional, initial, and restored focus
+### 4.1 Directional, initial, and restored focus
 
 - Design directional focus around the user task order, not only geometric proximity.
 - Select one logical first target when entering a screen, tab, or modal.
 - After closing a modal or child screen, restore the originating target or the next target appropriate to the task.
 - Document wraparound, boundary exits, and exceptional paths with arrows or a table.
 
-### Grouping and navigation units
+### 4.2 Grouping and navigation units
 
 If an icon, label, and toggle represent one setting, let one root expose the Name, Role, State, and action, and prevent decorative internals from becoming duplicate navigation targets. If children have separate actions, do not merge them; expose each actionable child independently.
 
 Good grouping reduces navigation effort, but must not hide several actions behind one ambiguous target. Decide using both “information understood in one navigation stop” and “actions that must be independently available.”
 
-### Image descriptions
+### 4.3 Image descriptions
 
 - Give informative images a concise Name with the same purpose as the visual information.
 - If important text inside an image is not available elsewhere, include its meaning in the Name.
 - Hide purely decorative or redundant images from the accessibility tree.
 - Do not repeat words such as `"image"` or `"icon"` in Name when Role already conveys them.
 
-### Expected speech and state feedback
+### 4.4 Expected speech and state feedback
 
 An expected utterance is a UX review aid. The implementation contract is the set of semantic parts used to compose it.
 
@@ -136,7 +136,7 @@ Implementation: Name="Volume", Role=ADJUSTABLE, Value="50%"
 
 After selection, checked, expanded, or value actions, update visual state and semantics in the same model update. If product-specific result speech is required, verify that it neither duplicates the default semantic feedback nor interrupts other important speech.
 
-### Repeated and dynamic content
+### 4.5 Repeated and dynamic content
 
 - Divide long screens with headings and meaningful collections.
 - Give repeated cards distinguishable Names and current collection indices.
@@ -146,7 +146,7 @@ After selection, checked, expanded, or value actions, update visual state and se
 
 <br/>
 
-## DALi UI API Overview
+## 5. DALi UI API Overview
 
 The `Dali::Ui::View` Accessibility APIs expose a View's semantics, reading information, states, and relations to the accessibility tree. A Screen Reader queries this information to announce the currently highlighted View and sends accessibility actions back to the View.
 
@@ -167,11 +167,11 @@ button.AddAccessibilityReadingInfo(Accessibility::ReadingInfo::DESCRIPTION);
 window.Add(button);
 ```
 
-See [Tizen TV Accessibility Runtime](#tizen-tv-accessibility-runtime) for the distinction between keyboard focus and accessibility highlight.
+See [Tizen TV Accessibility Runtime](#3-tizen-tv-accessibility-runtime) for the distinction between keyboard focus and accessibility highlight.
 
 <br/>
 
-## Basic Information
+## 6. Basic Information
 
 The basic information a Screen Reader needs to understand a View consists of its name, description, value, and role.
 
@@ -204,11 +204,11 @@ Context | `ALERT`, `NOTIFICATION`, `DIALOG`, `POPUP_MENU`
 See `Accessibility::Role` for the complete list. Assigning a meaningful role also makes the View highlightable by default.
 
 > [!NOTE]
-> Use `OnAccessibilityRequestDefaultName()` and `OnAccessibilityRequestDefaultDescription()` when visible Component content supplies the default Name or Description. Reserve `OnAccessibilityRequestName/Description/Value()` for authoritative values that must take precedence over explicit properties. See [Custom View Implementation](#custom-view-implementation) for the resolution order.
+> Use `OnAccessibilityRequestDefaultName()` and `OnAccessibilityRequestDefaultDescription()` when visible Component content supplies the default Name or Description. Reserve `OnAccessibilityRequestName/Description/Value()` for authoritative values that must take precedence over explicit properties. See [Dynamic Values and Default Component Name/Description](#165-dynamic-values-and-default-component-namedescription) for the resolution order.
 
 <br/>
 
-## Accessibility Behavior Properties
+## 7. Accessibility Behavior Properties
 
 ```cpp
 view.SetAccessibilityHidden(false);
@@ -234,7 +234,7 @@ Each setter has a corresponding `Is...()` or `Get...()` API.
 
 <br/>
 
-## Selecting Information to Announce
+## 8. Selecting Information to Announce
 
 `Accessibility::ReadingInfo` selects which semantic information a Screen Reader should use when reading a View. The enum is not a bit mask; use the per-item APIs.
 
@@ -263,7 +263,7 @@ Item | Information exposed
 
 <br/>
 
-## State Management
+## 9. State Management
 
 Use `AddAccessibilityState()`, `RemoveAccessibilityState()`, and `ClearAccessibilityStates()` for semantic states owned by the application or component.
 
@@ -287,7 +287,7 @@ These application states are combined with DALi runtime states such as visibilit
 
 <br/>
 
-## Relations Between Views
+## 10. Relations Between Views
 
 Use `Accessibility::RelationType` when the relationship between Views cannot be inferred from their visual layout.
 
@@ -328,9 +328,9 @@ Targets are stored as weak handles, so a relation does not extend the lifetime o
 
 <br/>
 
-## Multilingual Accessibility Strings
+## 11. Multilingual Accessibility Strings
 
-### Binding Translation Resources
+### 11.1 Binding Translation Resources
 
 Binding the name and description to `UiLocalizationManager` resources refreshes their translated values when the locale changes.
 
@@ -346,7 +346,7 @@ view.ClearTranslatableAccessibilityDescription();
 
 Omitting the domain uses the default domain. Calling `SetAccessibilityName()` or `SetAccessibilityDescription()` with an explicit string clears its translation binding and language spans. See [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI) for localization setup.
 
-### Language Ranges Within One String
+### 11.2 Language Ranges Within One String
 
 Add language spans when a single name or description contains multiple languages.
 
@@ -368,7 +368,7 @@ view.ClearAccessibilityDescriptionLanguageSpans();
 
 <br/>
 
-## Collection Information
+## 12. Collection Information
 
 For repeated items such as lists, identify the collection container and assign zero-based item indices.
 
@@ -387,7 +387,7 @@ items[0].ClearAccessibilityCollectionIndex(); // Get returns -1.
 
 <br/>
 
-## Initial Highlight and Runtime Highlight Movement
+## 13. Initial Highlight and Runtime Highlight Movement
 
 Use a different API depending on when the highlight is requested.
 
@@ -396,7 +396,7 @@ Situation | API | Behavior
 A page, window, or modal is first shown | `View::SetRequestInitialAccessibilityHighlight(true)` | Provides metadata for the Screen Reader to select the initial target while building its accessibility context.
 Move immediately within an already visible, stable screen | `Extension::View::GrabAccessibilityHighlight(view)` | Moves the current DALi accessibility highlight to the target and reports the `HIGHLIGHTED` change to clients.
 
-### Initial Highlight for a Page
+### 13.1 Initial Highlight for a Page
 
 Mark the initial target before the page appears in the accessibility tree.
 
@@ -414,7 +414,7 @@ Call `SetRequestInitialAccessibilityHighlight(false)` when the View is reused or
 > [!IMPORTANT]
 > Calling `GrabAccessibilityHighlight()` at the same time as `SHOWING` for a new page or modal can race with the Screen Reader's asynchronous context reconstruction and announcement work. Use `SetRequestInitialAccessibilityHighlight()` for an initial screen. Reserve `GrabAccessibilityHighlight()` for explicit actions after the screen structure is stable. Do not use an arbitrary timeout to enforce ordering.
 
-### Forcing Runtime Highlight Movement
+### 13.2 Forcing Runtime Highlight Movement
 
 This function is an extension API, so include its extension header.
 
@@ -448,9 +448,9 @@ bool cleared = Dali::Ui::Extension::View::ClearAccessibilityHighlight(targetView
 
 <br/>
 
-## Accessibility Signals
+## 14. Accessibility Signals
 
-### Highlight Changes
+### 14.1 Highlight Changes
 
 ```cpp
 view.AccessibilityHighlightedSignal().Connect(
@@ -463,7 +463,7 @@ view.AccessibilityHighlightedSignal().Connect(
 
 The signal type is `Signal<void(View, bool)>`. It is emitted when Screen Reader navigation or an extension highlight API actually changes the state. The signal is a state-change notification; applications should not call `Emit()` directly.
 
-### Reading Lifecycle
+### 14.2 Reading Lifecycle
 
 ```cpp
 view.AccessibilityReadingStatusChangedSignal().Connect(
@@ -494,11 +494,11 @@ Status | Meaning
 
 <br/>
 
-## Application Developer Guide
+## 15. Application Developer Guide
 
 An Application declares screen content semantics and the active context on DALi Views instead of implementing accessibility interfaces directly. It must also verify that each selected Component provides the required action contract.
 
-### Application and Component responsibility boundary
+### 15.1 Application and Component responsibility boundary
 
 Application owns | Component or framework owns
 --|--
@@ -516,7 +516,7 @@ Do not do the following in Application code:
 - Move highlight after a page transition using an arbitrary timeout
 - Assume that a control is adjustable merely because Role and Value were set
 
-### Setting screen content semantics
+### 15.2 Setting screen content semantics
 
 Set screen-specific content on a Component or View that already implements its feature.
 
@@ -561,7 +561,7 @@ void ConfigureAudioDescriptionSetting(View control,
 
 Use this grouping only when the root provides the actual toggle action. Keep the icon or label accessible if either has an independent action.
 
-### Page and remote focus lifecycle
+### 15.3 Page and remote focus lifecycle
 
 Manage visual visibility and the accessibility subtree together so covered pages cannot be explored.
 
@@ -593,7 +593,7 @@ bool FocusFirstControl(View firstControl)
 
 `SetRequestInitialAccessibilityHighlight()` and `RequestFocus()` control different targets. Even if UX requires the same View for both, verify each contract separately.
 
-### Modal, list, and background
+### 15.4 Modal, list, and background
 
 When opening a modal:
 
@@ -605,7 +605,7 @@ When opening a modal:
 
 For lists, keep the collection container and item indices aligned with logical order. Rebind index and all semantics after insertion, deletion, sorting, or recycling. In pause, background, and preload states, users must not be able to explore a root subtree that is not visible to them.
 
-### Application completion checklist
+### 15.5 Application completion checklist
 
 - [ ] Every interactive target has a meaningful Role and concise Name.
 - [ ] State and Value update in the same transaction as the visual model.
@@ -618,11 +618,11 @@ For lists, keep the collection container and item indices aligned with logical o
 
 <br/>
 
-## Component Developer Guide
+## 16. Component Developer Guide
 
 A reusable Component must provide an accessibility contract that Applications can use consistently without knowing its internal implementation.
 
-### Minimum Component contract
+### 16.1 Minimum Component contract
 
 1. Set a default Role that matches the feature.
 2. Provide reasonable default Name, Description, and Value from visible text or the model while respecting explicit Application overrides.
@@ -642,7 +642,7 @@ Modal root | Context Role and modal/showing lifecycle | `OnAccessibilityEscape()
 
 Setting Role provides meaning and the default highlight policy, but it does not implement Component-specific actions. However, the default activate path of a View with an interactive trait requests keyboard focus and emits `ClickedSignal()` when the View is enabled and clickable.
 
-### One activation path
+### 16.2 One activation path
 
 An executable Component should route remote/touch and accessibility activation to the same internal function.
 
@@ -673,23 +673,7 @@ The default `ViewImpl::OnAccessibilityActivate()` requests keyboard focus, check
 
 Override `OnAccessibilityActivate()` only when activation performs something other than click or intentionally replaces the default focus/click path. An override returns `true` only when it handles the request and explicitly decides whether to call the base implementation when default behavior must be preserved.
 
-### Default Component Name and Description
-
-An explicit value set by the Application through `SetAccessibilityName()` or `SetAccessibilityDescription()` takes precedence over a Component fallback. Use a default hook when visible content supplies a default Name.
-
-```cpp
-bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
-{
-  value = mLabel.GetText();
-  return !value.Empty();
-}
-```
-
-`OnAccessibilityRequestDefaultName()` and `OnAccessibilityRequestDefaultDescription()` run only when the authoritative request did not handle the value and the explicit property is empty. Returning `true` makes even an empty output final; returning `false` continues to the next framework fallback.
-
-Use `OnAccessibilityRequestName()` and `OnAccessibilityRequestDescription()` only for authoritative values computed on each request that must override explicit properties. Do not use them for an ordinary label-text fallback that would hide an Application override.
-
-### Toggle and checked state
+### 16.3 Toggle and checked state
 
 By default, `SelectableView` toggles selection through click while toggle-by-click is enabled. Accessibility activation uses the same click path, so update visuals and accessibility state from `SelectionChangedSignal()`. If `SetToggleByClickEnabled(false)` disables this behavior, the Component must provide its own selection path.
 
@@ -728,7 +712,7 @@ void ToggleImpl::OnSelectionChanged(Dali::Ui::View self,
 
 When changing whether a Component is available for interaction, update both `SetEnabled()` and the accessibility `ENABLED` state from the same logical state. Managing them independently can make the actual interaction behavior disagree with the information conveyed by the Screen Reader.
 
-### Adjustable values
+### 16.4 Adjustable values
 
 Apply the minimum and maximum, and return success only when the value changes.
 
@@ -760,7 +744,48 @@ bool VolumeSliderImpl::OnAccessibilityValueChange(bool increased)
 
 During initialization, provide an `ADJUSTABLE` or `SPIN_BUTTON` Role, Name, and initial Value. If the Component does not refresh `SetAccessibilityValue()` after a change, the Screen Reader may announce the previous value.
 
-### Compound trees and recycling
+### 16.5 Dynamic Values and Default Component Name/Description
+
+For static or explicit values set by an Application, use the public-handle setters `SetAccessibilityName()`, `SetAccessibilityDescription()`, and `SetAccessibilityValue()`. When a Component can derive a reasonable default Name or Description from visible content, use a default hook.
+
+```cpp
+bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
+{
+  value = mLabel.GetText();
+  return !value.Empty();
+}
+```
+
+`OnAccessibilityRequestDefaultName()` and `OnAccessibilityRequestDefaultDescription()` run only when the authoritative request did not handle the value and the explicit property is empty. A Component fallback therefore does not override an Application's `SetAccessibilityName()` or `SetAccessibilityDescription()` value.
+
+When a default hook returns `true`, its output is final even when the string is empty. Return `false` to continue to the integration raw fallback or Actor Name.
+
+Use a request hook only for an authoritative value that must be computed when the Screen Reader queries it and must take precedence over an explicit property.
+
+```cpp
+bool StatusViewImpl::OnAccessibilityRequestValue(Dali::String& value)
+{
+  value = BuildCurrentStatusText();
+  return true;
+}
+```
+
+Request hooks follow these return rules:
+
+- `true`: Use the output as the final value. An empty string is also an intentionally handled value.
+- `false`: Fall back to the stored explicit or translated property. If a Name or Description property is empty, continue to its default hook and framework fallbacks.
+
+When `OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, or `OnAccessibilityRequestValue()` returns `true`, it takes precedence over the explicit property. Do not use these hooks for an ordinary visible-text fallback because doing so hides an Application override; use a default hook instead.
+
+The final resolution order is:
+
+Information | Resolution order
+--|--
+Name | Authoritative request → explicit or translated property → Component default hook → integration raw fallback → Actor Name
+Description | Authoritative request → explicit or translated property → Component default hook → integration raw fallback
+Value | Authoritative request → stored property
+
+### 16.6 Compound trees and recycling
 
 Subject | Contract | Failure signal
 --|--|--
@@ -771,12 +796,12 @@ Modal | Manage background exclusion, initial target, escape, and restoration as 
 
 A scrollable Component implements both `SetAccessibilityScrollable(true)` and `OnAccessibilityScrollToChild(View)`. The latter must make the target child visible in the viewport before returning success. A modal Component provides a meaningful Role and `SetAccessibilityModal(true)`, and runs close/back from `OnAccessibilityEscape()` when required.
 
-### Current `devel` caveats
+### 16.7 Current `devel` caveats
 
 > [!WARNING]
 > At `5fd24a718692`, the default activate path of an `InteractiveView`-based Component delivers click when enabled and clickable, and `SelectableView` changes selection through the same click path. However, `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, and `RecyclerView` do not necessarily provide every required default Role, Name, State, internal-child policy, modal, escape, or scroll-to-child contract. Inspect the target branch and actual Screen Reader actions, then complete missing behavior at the Component layer. Do not claim pan/zoom support before verifying end-to-end dispatch.
 
-### Component release checklist
+### 16.8 Component release checklist
 
 - [ ] Default Role, Name/Value fallback, and highlight policy are explicit.
 - [ ] Remote, touch, and accessibility actions produce the same model change.
@@ -791,7 +816,7 @@ A scrollable Component implements both `SetAccessibilityScrollable(true)` and `O
 
 <br/>
 
-## Custom View Implementation
+## 17. Custom View Implementation
 
 To expose non-click accessibility actions, dynamic values, or default semantics from a new Component, use the corresponding virtual API on `ViewImpl`, not on the `View` handle.
 
@@ -835,12 +860,7 @@ Virtual API | Accessibility request
 `OnAccessibilityRequestDefaultDescription()` | Supply a Component default when no explicit Description exists
 `OnAccessibilityRequestValue()` | Query a dynamic Value
 
-An action callback returns `true` when it handled the request and `false` when it did not. String hooks use this return convention:
-
-* `true`: Use the output parameter as the final value, including an intentionally empty string.
-* `false`: Continue to the next resolution step.
-
-The final Name order is authoritative request → explicit or translated property → Component default hook → integration raw fallback → Actor Name. Description uses the same order without the final Actor Name, while Value uses request → stored property.
+An action callback returns `true` when it handled the request and `false` when it did not. See [16.5 Dynamic Values and Default Component Name/Description](#165-dynamic-values-and-default-component-namedescription) for string-hook precedence and return rules.
 
 Applications normally do not invoke these virtual functions directly. The Accessibility bridge receives Screen Reader requests and dispatches them to the appropriate callback.
 
@@ -851,7 +871,7 @@ See [View Architecture](https://github.sec.samsung.net/NUI/dali-ui/wiki/View#4-v
 
 <br/>
 
-## Raw Attributes
+## 18. Raw Attributes
 
 Use raw attributes only when a required backend attribute has no typed API.
 
@@ -865,9 +885,9 @@ view.RemoveAccessibilityAttribute("vendor-key");
 
 <br/>
 
-## Shared Responsibilities and Completion Criteria
+## 19. Shared Responsibilities and Completion Criteria
 
-### Deliverables by role
+### 19.1 Deliverables by role
 
 Role | Required deliverable
 --|--
@@ -876,7 +896,7 @@ Application | Screen content semantics, active page tree, Component selection an
 Component | Default Role/Name/Value/State/action contract, internal tree policy, recycling behavior
 QA | Remote navigation result, final speech, AT-SPI tree, lifecycle and locale results, evidence
 
-### Shared checklist
+### 19.2 Shared checklist
 
 - [ ] The core task is complete using only the remote and Screen Reader without seeing the screen.
 - [ ] Visual order, remote focus order, and accessibility-tree order match the user task flow.
@@ -889,11 +909,11 @@ QA | Remote navigation result, final speech, AT-SPI tree, lifecycle and locale r
 
 <br/>
 
-## Validation
+## 20. Validation
 
 Accessibility validation does not end when an API value is stored. Verify the Component contract, AT-SPI tree, and actual TV user behavior as three separate layers.
 
-### Three-layer validation
+### 20.1 Three-layer validation
 
 Layer | What to verify | Typical evidence
 --|--|--
@@ -911,7 +931,7 @@ at_spi2_tool -c com.example.nativeapp
 
 Inspect Role, Name, State, bounds, collection index, and sibling order. A passing tree check does not replace final speech and remote-action testing. Natural speech does not prove that the tree and action contract are correct.
 
-### Required TV scenarios
+### 20.2 Required TV scenarios
 
 1. Enable the Screen Reader before launch and after launch in separate runs.
 2. Repeat first entry, page push/pop, and modal open/close.
@@ -932,43 +952,7 @@ Do not declare accessibility complete when any of these conditions remains:
 
 <br/>
 
-## Rules for Legacy Material
-
-Use NUI/OneUI material only for **document form** such as explanation order, tables, example placement, basic-to-advanced flow, and checklists.
-
-- Do not mechanically translate API names into DALi APIs.
-- Do not import .NET-only custom accessibility modes, default-label stacks, visibility notifications, or general action events as Native patterns.
-- Base code examples and implementation decisions on current `Dali::Ui::View`, `ViewImpl`, `FocusManager`, and target-branch source.
-- Reimplement only semantic design concepts such as representative compound roots, collection metadata, and modal lifecycle against the DALi contract.
-- Do not recreate historical behavior with raw attributes when a typed API exists.
-
-<br/>
-
-## Distribution and Maintenance
-
-Channel | Purpose | Update rule
---|--|--
-`NUI/dali-ui` `wiki/Accessibility-(kr).md` and `Accessibility.md` | Source for review and change history | Update both languages in one PR
-Static documentation site | Primary reader experience with search, table of contents, and deep links | Generate from `devel` and release tags
-Versioned PDF | Training, review meetings, and offline reading | Generate only from a release tag and show version/date
-Internal wiki discovery page | Document discovery and ownership | Link to the latest site/PDF instead of copying the full guide
-
-Keep Markdown as the source of truth. Editing a PDF or internal-wiki copy directly quickly causes language and API revisions to diverge.
-
-Record the following in each documentation PR:
-
-1. Verified DALi commit and target product/branch
-2. Last review date and document owner
-3. Accessibility reviewer and Component owner
-4. Korean/English synchronization status
-5. API/source comparison, link, Markdown, and prohibited-pattern results
-6. Physical-TV results when user behavior changes
-
-Recommended CI checks are Markdown lint, internal links, Korean/English heading structure, NUI/OneUI code patterns, and HTML/PDF builds. A PDF should show its version, generation date, and a link to the canonical online guide.
-
-<br/>
-
-## Troubleshooting
+## 21. Troubleshooting
 
 Symptom | What to check
 --|--
