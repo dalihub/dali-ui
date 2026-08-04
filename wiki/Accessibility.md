@@ -4,7 +4,7 @@
 
 > Audience: TV Application developers and Component developers using DALi UI
 > Baseline date: 2026-08-04
-> Implementation baseline: `dali-ui` `b60e73918439`
+> Implementation baseline: `dali-ui` `5fd24a718692`
 > Status: Current with known component gaps
 
 This guide defines shared accessibility requirements for Application developers who compose TV screens and Component developers who build reusable UI. It covers accessibility fundamentals, TV UX specifications, DALi UI implementation, validation, and distribution in one flow. Every implementation example uses the C++ `Dali::Ui` API.
@@ -204,7 +204,7 @@ Context | `ALERT`, `NOTIFICATION`, `DIALOG`, `POPUP_MENU`
 See `Accessibility::Role` for the complete list. Assigning a meaningful role also makes the View highlightable by default.
 
 > [!NOTE]
-> When a custom View returns `true` from `ViewImpl::OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, or `OnAccessibilityRequestValue()`, the dynamically provided value takes precedence. Returning `false` falls back to the stored value. See [Custom View Implementation](#custom-view-implementation).
+> Use `OnAccessibilityRequestDefaultName()` and `OnAccessibilityRequestDefaultDescription()` when visible Component content supplies the default Name or Description. Reserve `OnAccessibilityRequestName/Description/Value()` for authoritative values that must take precedence over explicit properties. See [Custom View Implementation](#custom-view-implementation) for the resolution order.
 
 <br/>
 
@@ -625,7 +625,7 @@ A reusable Component must provide an accessibility contract that Applications ca
 ### Minimum Component contract
 
 1. Set a default Role that matches the feature.
-2. Provide reasonable default Name and Value from visible text or the model while respecting explicit Application overrides.
+2. Provide reasonable default Name, Description, and Value from visible text or the model while respecting explicit Application overrides.
 3. Route touch, remote key, API, and accessibility actions to the same feature path.
 4. Update checked, selected, expanded, enabled, and value semantics with visual state.
 5. Define an accessibility-tree policy that prevents duplicate internal icons, labels, or layers.
@@ -634,13 +634,13 @@ A reusable Component must provide an accessibility contract that Applications ca
 
 Role | Required information and state | Required action contract
 --|--|--
-`BUTTON`, `LINK`, `MENU_ITEM` | Name, enabled | `OnAccessibilityActivate()`
-`CHECK_BOX`, `TOGGLE_BUTTON`, `RADIO_BUTTON` | Name, checked, enabled | Synchronize checked after activate
+`BUTTON`, `LINK`, `MENU_ITEM` | Name, enabled | `InteractiveView` click or custom `OnAccessibilityActivate()`
+`CHECK_BOX`, `TOGGLE_BUTTON`, `RADIO_BUTTON` | Name, checked, enabled | Synchronize selection and state through interactive click
 `ADJUSTABLE`, `SPIN_BUTTON`, `SCROLL_BAR` | Name, Value, enabled | `OnAccessibilityValueChange()`
 Scroll container | Scrollable and collection information | `OnAccessibilityScrollToChild()`
 Modal root | Context Role and modal/showing lifecycle | `OnAccessibilityEscape()` when required
 
-Setting Role provides meaning and the default highlight policy, but it does not implement an action.
+Setting Role provides meaning and the default highlight policy, but it does not implement Component-specific actions. However, the default activate path of a View with an interactive trait requests keyboard focus and emits `ClickedSignal()` when the View is enabled and clickable.
 
 ### One activation path
 
@@ -667,34 +667,51 @@ void ActionButtonImpl::OnInitialize()
       Activate(event);
     });
 }
+```
 
-bool ActionButtonImpl::OnAccessibilityActivate()
+The default `ViewImpl::OnAccessibilityActivate()` requests keyboard focus, checks the interactive trait's enabled and clickable states, and then emits the same `ClickedSignal()`. The `InputEvent` type is `ACCESSIBILITY_ACTIVATION`, and this path does not create a pressed state. A regular button therefore does not need an accessibility-specific override or a synthesized `Programmatic()` click.
+
+Override `OnAccessibilityActivate()` only when activation performs something other than click or intentionally replaces the default focus/click path. An override returns `true` only when it handles the request and explicitly decides whether to call the base implementation when default behavior must be preserved.
+
+### Default Component Name and Description
+
+An explicit value set by the Application through `SetAccessibilityName()` or `SetAccessibilityDescription()` takes precedence over a Component fallback. Use a default hook when visible content supplies a default Name.
+
+```cpp
+bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
 {
-  auto self = Dali::Ui::View::DownCast(Self());
-  if(!self.IsEnabled() || !IsClickable())
-  {
-    return false;
-  }
-
-  Activate(Dali::Ui::InputEvent::Programmatic());
-  return true;
+  value = mLabel.GetText();
+  return !value.Empty();
 }
 ```
 
-An API such as `SetText()` that changes label content must also refresh the root Accessibility Name or provide a dynamic Name fallback. Return `true` only when the request was handled. Do not assume that the default `ViewImpl::OnAccessibilityActivate()` automatically executes the Component click or toggle feature.
+`OnAccessibilityRequestDefaultName()` and `OnAccessibilityRequestDefaultDescription()` run only when the authoritative request did not handle the value and the explicit property is empty. Returning `true` makes even an empty output final; returning `false` continues to the next framework fallback.
+
+Use `OnAccessibilityRequestName()` and `OnAccessibilityRequestDescription()` only for authoritative values computed on each request that must override explicit properties. Do not use them for an ordinary label-text fallback that would hide an Application override.
 
 ### Toggle and checked state
 
-Update logical state, visuals, and accessibility state in one commit function.
+By default, `SelectableView` toggles selection through click while toggle-by-click is enabled. Accessibility activation uses the same click path, so update visuals and accessibility state from `SelectionChangedSignal()`. If `SetToggleByClickEnabled(false)` disables this behavior, the Component must provide its own selection path.
 
 ```cpp
-void ToggleImpl::CommitChecked(bool checked)
+#include <dali-ui-foundation/extension-api/selectable-view-impl.h>
+
+void ToggleImpl::OnInitialize()
 {
-  mChecked = checked;
-  UpdateVisualState(checked);
+  Dali::Ui::Extension::SelectableViewImpl::OnInitialize();
 
   auto self = Dali::Ui::View::DownCast(Self());
-  if(checked)
+  self.SetAccessibilityRole(Dali::Ui::Accessibility::Role::CHECK_BOX);
+
+  SelectionChangedSignal().Connect(this, &ToggleImpl::OnSelectionChanged);
+}
+
+void ToggleImpl::OnSelectionChanged(Dali::Ui::View self,
+                                    bool selected,
+                                    Dali::Ui::InputEvent event)
+{
+  UpdateVisualState(selected, event);
+  if(selected)
   {
     self.AddAccessibilityState(Dali::Ui::Accessibility::State::CHECKED);
   }
@@ -703,19 +720,9 @@ void ToggleImpl::CommitChecked(bool checked)
     self.RemoveAccessibilityState(Dali::Ui::Accessibility::State::CHECKED);
   }
 }
-
-bool ToggleImpl::OnAccessibilityActivate()
-{
-  auto self = Dali::Ui::View::DownCast(Self());
-  if(!self.IsEnabled())
-  {
-    return false;
-  }
-
-  CommitChecked(!mChecked);
-  return true;
-}
 ```
+
+`SelectableView::IsSelected()` and accessibility `CHECKED` do not become the same state automatically. Synchronize them explicitly from the selection signal according to the Component Role. `GroupSelectableTrait` maps `CHECKED` for radio buttons, but it does not supply every semantic required by a general selectable control.
 
 `CHECKED` and `SELECTED` do not represent focus. Use `CHECKED` for controls whose value can be checked or turned on, such as checkboxes, toggle buttons, and radio buttons. Use `SELECTED` for an item selected by a list or tab selection model. Do not set `SELECTED` merely because an item has remote focus.
 
@@ -767,12 +774,13 @@ A scrollable Component implements both `SetAccessibilityScrollable(true)` and `O
 ### Current `devel` caveats
 
 > [!WARNING]
-> Do not assume accessibility is complete merely because the Application uses `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, or `RecyclerView`. At `b60e73918439`, some of these classes do not set every default Role, internal-child hidden policy, action, modal, or scroll-to-child contract themselves. Inspect the target branch and actual Screen Reader actions, then complete missing behavior at the Component layer. Do not claim pan/zoom support before verifying end-to-end dispatch.
+> At `5fd24a718692`, the default activate path of an `InteractiveView`-based Component delivers click when enabled and clickable, and `SelectableView` changes selection through the same click path. However, `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, and `RecyclerView` do not necessarily provide every required default Role, Name, State, internal-child policy, modal, escape, or scroll-to-child contract. Inspect the target branch and actual Screen Reader actions, then complete missing behavior at the Component layer. Do not claim pan/zoom support before verifying end-to-end dispatch.
 
 ### Component release checklist
 
 - [ ] Default Role, Name/Value fallback, and highlight policy are explicit.
 - [ ] Remote, touch, and accessibility actions produce the same model change.
+- [ ] Accessibility activate carries an `ACCESSIBILITY_ACTIVATION` event and does not create an unnecessary pressed transition.
 - [ ] Actions are safely rejected while disabled.
 - [ ] State and Value update with visuals.
 - [ ] Internal children do not produce duplicate speech.
@@ -785,7 +793,7 @@ A scrollable Component implements both `SetAccessibilityScrollable(true)` and `O
 
 ## Custom View Implementation
 
-To expose accessibility actions or dynamic values from a new component, override the virtual APIs on `ViewImpl`, not on the `View` handle.
+To expose non-click accessibility actions, dynamic values, or default semantics from a new Component, use the corresponding virtual API on `ViewImpl`, not on the `View` handle.
 
 ```cpp
 class VolumeViewImpl : public ViewImpl
@@ -811,6 +819,8 @@ public:
 };
 ```
 
+The `OnAccessibilityActivate()` override above is for a custom activation that differs from click. If an `InteractiveView` already routes `ClickedSignal()` to the same feature, use the default activate path and omit this override.
+
 Virtual API | Accessibility request
 --|--
 `OnAccessibilityActivate()` | Activate the target
@@ -819,16 +829,23 @@ Virtual API | Accessibility request
 `OnAccessibilityScrollToChild(View child)` | Reveal a child of a scroll container
 `OnAccessibilityPan(PanGesture)` | Handle an accessibility pan
 `OnAccessibilityZoom()` | Handle accessibility zoom
-`OnAccessibilityRequestName()` | Query a dynamic name
-`OnAccessibilityRequestDescription()` | Query a dynamic description
-`OnAccessibilityRequestValue()` | Query a dynamic value
+`OnAccessibilityRequestName()` | Query an authoritative Name that precedes explicit properties
+`OnAccessibilityRequestDefaultName()` | Supply a Component default when no explicit Name exists
+`OnAccessibilityRequestDescription()` | Query an authoritative Description that precedes explicit properties
+`OnAccessibilityRequestDefaultDescription()` | Supply a Component default when no explicit Description exists
+`OnAccessibilityRequestValue()` | Query a dynamic Value
 
-An action callback returns `true` when it handled the request and `false` when it did not. Dynamic string callbacks have an important return convention:
+An action callback returns `true` when it handled the request and `false` when it did not. String hooks use this return convention:
 
-* `true`: Use the output parameter, including an intentionally empty string.
-* `false`: Fall back to the value stored by `SetAccessibilityName()`, `SetAccessibilityDescription()`, or `SetAccessibilityValue()`.
+* `true`: Use the output parameter as the final value, including an intentionally empty string.
+* `false`: Continue to the next resolution step.
+
+The final Name order is authoritative request → explicit or translated property → Component default hook → integration raw fallback → Actor Name. Description uses the same order without the final Actor Name, while Value uses request → stored property.
 
 Applications normally do not invoke these virtual functions directly. The Accessibility bridge receives Screen Reader requests and dispatches them to the appropriate callback.
+
+> [!IMPORTANT]
+> A regular `ViewImpl` on current `devel` has no custom-accessible-object creation virtual. Only a foundation control that requires an additional AT-SPI interface should have its integration owner use `Integration::ViewAccessibility::SetAccessibleObjectCreator()`. A regular visual Component uses the public semantic APIs and request/default/action hooks without subclassing the accessible adapter.
 
 See [View Architecture](https://github.sec.samsung.net/NUI/dali-ui/wiki/View#4-view-inheritance) for the custom View handle/implementation structure.
 

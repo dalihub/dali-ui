@@ -4,7 +4,7 @@
 
 > 대상: DALi UI 기반 TV Application 개발자와 Component 개발자
 > 기준일: 2026-08-04
-> 구현 기준: `dali-ui` `b60e73918439`
+> 구현 기준: `dali-ui` `5fd24a718692`
 > 상태: Current with known component gaps
 
 이 문서는 TV 화면을 구성하는 Application 개발자와 재사용 UI를 만드는 Component 개발자가 함께 사용하는 접근성 가이드입니다. 접근성의 기본 개념과 TV UX 명세부터 DALi UI 구현, 검증, 배포까지 하나의 흐름으로 설명합니다. 모든 구현 예제는 C++ `Dali::Ui` API를 사용합니다.
@@ -204,7 +204,7 @@ role은 View의 구현 클래스가 아니라 **사용자에게 제공하는 기
 전체 role은 `Accessibility::Role`을 참고하세요. 의미 있는 role을 지정하면 기본적으로 highlightable 대상이 됩니다.
 
 > [!NOTE]
-> Custom View가 `ViewImpl::OnAccessibilityRequestName()`, `OnAccessibilityRequestDescription()`, `OnAccessibilityRequestValue()`에서 `true`를 반환하면 그 값이 우선합니다. `false`를 반환할 때 저장된 값으로 fallback합니다. 자세한 내용은 [Custom View 구현](#custom-view-구현)을 참고하세요.
+> Component의 표시 content를 기본 Name/Description으로 사용할 때는 `OnAccessibilityRequestDefaultName()`과 `OnAccessibilityRequestDefaultDescription()`을 사용합니다. `OnAccessibilityRequestName/Description/Value()`는 explicit property보다 우선해야 하는 authoritative 값에만 사용합니다. 자세한 우선순위는 [Custom View 구현](#custom-view-구현)을 참고하세요.
 
 <br/>
 
@@ -625,7 +625,7 @@ Modal을 열 때 다음을 함께 처리합니다.
 ### Component 최소 contract
 
 1. 기능에 맞는 기본 Role을 설정합니다.
-2. 표시 text 또는 model에서 합리적인 기본 Name과 Value를 제공하고 Application의 명시적 override를 존중합니다.
+2. 표시 text 또는 model에서 합리적인 기본 Name, Description, Value를 제공하고 Application의 명시적 override를 존중합니다.
 3. touch, remote key, API, accessibility action이 같은 기능 경로를 실행합니다.
 4. checked, selected, expanded, enabled, value가 시각 상태와 같은 시점에 갱신됩니다.
 5. 내부 icon, label, layer가 중복 탐색되지 않도록 tree 정책을 제공합니다.
@@ -634,13 +634,13 @@ Modal을 열 때 다음을 함께 처리합니다.
 
 Role | 필수 정보와 state | 필수 action contract
 --|--|--
-`BUTTON`, `LINK`, `MENU_ITEM` | Name, enabled | `OnAccessibilityActivate()`
-`CHECK_BOX`, `TOGGLE_BUTTON`, `RADIO_BUTTON` | Name, checked, enabled | activate 후 checked 동기화
+`BUTTON`, `LINK`, `MENU_ITEM` | Name, enabled | `InteractiveView` click 또는 custom `OnAccessibilityActivate()`
+`CHECK_BOX`, `TOGGLE_BUTTON`, `RADIO_BUTTON` | Name, checked, enabled | interactive click과 selection/state 동기화
 `ADJUSTABLE`, `SPIN_BUTTON`, `SCROLL_BAR` | Name, Value, enabled | `OnAccessibilityValueChange()`
 scroll container | scrollable, collection 정보 | `OnAccessibilityScrollToChild()`
 modal root | context Role, modal/showing lifecycle | 필요한 경우 `OnAccessibilityEscape()`
 
-Role을 설정하면 의미와 기본 highlight 정책을 제공하지만 action 구현은 생기지 않습니다.
+Role을 설정하면 의미와 기본 highlight 정책을 제공하지만 Component 고유 action은 생기지 않습니다. 다만 interactive trait이 있는 View의 기본 activate는 keyboard focus를 요청하고, enabled/clickable 상태에서 `ClickedSignal()`을 발생시킵니다.
 
 ### 하나의 activation 경로
 
@@ -667,34 +667,51 @@ void ActionButtonImpl::OnInitialize()
       Activate(event);
     });
 }
+```
 
-bool ActionButtonImpl::OnAccessibilityActivate()
+기본 `ViewImpl::OnAccessibilityActivate()`는 keyboard focus를 요청한 뒤 interactive trait의 enabled/clickable 상태를 확인하고 같은 `ClickedSignal()`을 발생시킵니다. 이때 `InputEvent` type은 `ACCESSIBILITY_ACTIVATION`이며 pressed state는 만들지 않습니다. 따라서 일반 button은 accessibility 전용 override나 `Programmatic()` click 합성이 필요하지 않습니다.
+
+Click 이외의 동작을 수행하거나 기본 focus/click 경로를 의도적으로 바꿀 때만 `OnAccessibilityActivate()`를 override합니다. Override한 handler는 실제로 처리했을 때 `true`를 반환하고, 필요한 기본 동작을 유지하려면 base 구현 호출 여부를 명시적으로 결정합니다.
+
+### Component 기본 Name과 Description
+
+Application이 `SetAccessibilityName()` 또는 `SetAccessibilityDescription()`으로 지정한 explicit 값을 Component fallback보다 우선합니다. 표시 content에서 기본 Name을 제공할 때는 default hook을 사용합니다.
+
+```cpp
+bool TextActionImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
 {
-  auto self = Dali::Ui::View::DownCast(Self());
-  if(!self.IsEnabled() || !IsClickable())
-  {
-    return false;
-  }
-
-  Activate(Dali::Ui::InputEvent::Programmatic());
-  return true;
+  value = mLabel.GetText();
+  return !value.Empty();
 }
 ```
 
-`SetText()`처럼 label content를 바꾸는 API는 root의 Accessibility Name도 갱신하거나 동적 Name fallback을 제공해야 합니다. 요청을 실제로 처리했을 때만 `true`를 반환합니다. 기본 `ViewImpl::OnAccessibilityActivate()`가 Component의 click이나 toggle 기능을 자동 실행한다고 가정하지 마세요.
+`OnAccessibilityRequestDefaultName()`과 `OnAccessibilityRequestDefaultDescription()`은 authoritative request가 처리하지 않고 explicit property도 비어 있을 때만 호출됩니다. `true`를 반환하면 빈 output도 최종값이며, `false`를 반환하면 framework의 다음 fallback으로 진행합니다.
+
+`OnAccessibilityRequestName()`과 `OnAccessibilityRequestDescription()`은 매 요청에서 계산하며 explicit property보다 우선해야 하는 authoritative 값에만 사용합니다. 일반적인 label text fallback에 이 hook을 사용해 Application override를 가리지 마세요.
 
 ### Toggle과 checked state
 
-논리 상태, visual, accessibility state를 하나의 commit 함수에서 갱신합니다.
+`SelectableView`는 toggle-by-click이 활성화된 기본 설정에서 click에 따라 selection을 전환합니다. Accessibility activate도 같은 click 경로를 사용하므로 `SelectionChangedSignal()`에서 visual과 accessibility state를 함께 갱신합니다. `SetToggleByClickEnabled(false)`로 이 동작을 끄면 Component가 selection 경로를 직접 제공해야 합니다.
 
 ```cpp
-void ToggleImpl::CommitChecked(bool checked)
+#include <dali-ui-foundation/extension-api/selectable-view-impl.h>
+
+void ToggleImpl::OnInitialize()
 {
-  mChecked = checked;
-  UpdateVisualState(checked);
+  Dali::Ui::Extension::SelectableViewImpl::OnInitialize();
 
   auto self = Dali::Ui::View::DownCast(Self());
-  if(checked)
+  self.SetAccessibilityRole(Dali::Ui::Accessibility::Role::CHECK_BOX);
+
+  SelectionChangedSignal().Connect(this, &ToggleImpl::OnSelectionChanged);
+}
+
+void ToggleImpl::OnSelectionChanged(Dali::Ui::View self,
+                                    bool selected,
+                                    Dali::Ui::InputEvent event)
+{
+  UpdateVisualState(selected, event);
+  if(selected)
   {
     self.AddAccessibilityState(Dali::Ui::Accessibility::State::CHECKED);
   }
@@ -703,19 +720,9 @@ void ToggleImpl::CommitChecked(bool checked)
     self.RemoveAccessibilityState(Dali::Ui::Accessibility::State::CHECKED);
   }
 }
-
-bool ToggleImpl::OnAccessibilityActivate()
-{
-  auto self = Dali::Ui::View::DownCast(Self());
-  if(!self.IsEnabled())
-  {
-    return false;
-  }
-
-  CommitChecked(!mChecked);
-  return true;
-}
 ```
+
+`SelectableView::IsSelected()`와 accessibility `CHECKED`는 framework에서 자동으로 같은 state가 되지 않습니다. Component Role에 맞춰 selection signal에서 명시적으로 동기화하세요. `GroupSelectableTrait`은 radio button의 `CHECKED`를 연동하지만, 일반 selectable control의 모든 semantic을 대신하지 않습니다.
 
 `CHECKED`와 `SELECTED`는 focus 상태를 나타내지 않습니다. Checkbox, toggle button, radio button처럼 값이 켜지거나 선택되는 control에는 `CHECKED`를 사용합니다. List item이나 tab처럼 selection model에서 선택된 항목에는 `SELECTED`를 사용합니다. 리모컨 focus가 놓였다는 이유만으로 항목에 `SELECTED`를 설정하지 마세요.
 
@@ -767,12 +774,13 @@ Scrollable Component는 `SetAccessibilityScrollable(true)`와 `OnAccessibilitySc
 ### 현재 `devel` 기준 주의사항
 
 > [!WARNING]
-> `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, `RecyclerView`를 사용한다는 사실만으로 접근성이 완성되었다고 가정하지 마세요. `b60e73918439` 기준으로 일부 클래스는 기본 Role, 내부 child hidden, action, modal, scroll-to-child contract를 모두 자체 설정하지 않습니다. 대상 branch의 구현과 실제 Screen Reader action을 확인하고 Component 계층에서 부족한 contract를 보완하세요. Pan/zoom virtual도 end-to-end dispatch를 확인하기 전에는 지원된다고 단정하지 않습니다.
+> `5fd24a718692` 기준으로 `InteractiveView` 기반 Component의 기본 activate는 enabled/clickable 상태에서 click을 전달하고, `SelectableView`는 같은 click 경로로 selection을 전환합니다. 그러나 `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, `RecyclerView`가 필요한 기본 Role/Name/State, 내부 child 정책, modal, escape, scroll-to-child contract를 모두 자체 제공하는 것은 아닙니다. 대상 branch의 구현과 실제 Screen Reader action을 확인하고 Component 계층에서 부족한 contract를 보완하세요. Pan/zoom virtual도 end-to-end dispatch를 확인하기 전에는 지원된다고 단정하지 않습니다.
 
 ### Component release checklist
 
 - [ ] 기본 Role, Name/Value fallback, highlight 정책이 명확합니다.
 - [ ] remote, touch, accessibility action이 같은 model change를 발생시킵니다.
+- [ ] accessibility activate가 `ACCESSIBILITY_ACTIVATION` event로 전달되고 불필요한 pressed transition을 만들지 않습니다.
 - [ ] disabled 상태에서 action이 안전하게 거부됩니다.
 - [ ] State와 Value가 visual과 동시에 갱신됩니다.
 - [ ] 내부 child가 중복 발화되지 않습니다.
@@ -785,7 +793,7 @@ Scrollable Component는 `SetAccessibilityScrollable(true)`와 `OnAccessibilitySc
 
 ## Custom View 구현
 
-새 component가 접근성 action이나 동적 값을 제공하려면 handle인 `View`가 아니라 `ViewImpl`의 virtual API를 override합니다.
+새 Component가 click 이외의 접근성 action, 동적 값, 또는 기본 semantic을 제공하려면 handle인 `View`가 아니라 `ViewImpl`의 해당 virtual API를 사용합니다.
 
 ```cpp
 class VolumeViewImpl : public ViewImpl
@@ -811,6 +819,8 @@ public:
 };
 ```
 
+위 `OnAccessibilityActivate()`는 click과 다른 custom activation이 필요할 때의 예입니다. `InteractiveView`의 `ClickedSignal()`이 같은 기능을 실행한다면 기본 activate 경로를 사용하고 이 override는 생략합니다.
+
 Virtual API | 접근성 요청
 --|--
 `OnAccessibilityActivate()` | 대상 실행
@@ -819,16 +829,23 @@ Virtual API | 접근성 요청
 `OnAccessibilityScrollToChild(View child)` | scroll container가 child를 화면에 표시
 `OnAccessibilityPan(PanGesture)` | 접근성 pan 처리
 `OnAccessibilityZoom()` | 접근성 zoom 처리
-`OnAccessibilityRequestName()` | 동적 name 조회
-`OnAccessibilityRequestDescription()` | 동적 description 조회
+`OnAccessibilityRequestName()` | explicit property보다 우선하는 authoritative name 조회
+`OnAccessibilityRequestDefaultName()` | explicit Name이 없을 때 Component 기본 name 제공
+`OnAccessibilityRequestDescription()` | explicit property보다 우선하는 authoritative description 조회
+`OnAccessibilityRequestDefaultDescription()` | explicit Description이 없을 때 Component 기본 description 제공
 `OnAccessibilityRequestValue()` | 동적 value 조회
 
-action callback은 요청을 처리했으면 `true`, 지원하지 않거나 처리하지 못했으면 `false`를 반환합니다. 동적 문자열 callback의 반환 규칙은 특히 중요합니다.
+action callback은 요청을 처리했으면 `true`, 지원하지 않거나 처리하지 못했으면 `false`를 반환합니다. 문자열 hook의 반환 규칙은 다음과 같습니다.
 
-* `true`: 출력 인자의 값을 사용합니다. 의도적으로 빈 문자열을 반환하는 것도 가능합니다.
-* `false`: `SetAccessibilityName()`, `SetAccessibilityDescription()`, `SetAccessibilityValue()`로 저장된 값으로 fallback합니다.
+* `true`: 출력 인자를 최종값으로 사용합니다. 의도적으로 빈 문자열을 반환하는 것도 가능합니다.
+* `false`: 다음 우선순위로 계속 진행합니다.
+
+Name의 최종 우선순위는 authoritative request → explicit/translated property → Component default hook → integration raw fallback → Actor Name입니다. Description은 같은 순서에서 마지막 Actor Name을 제외하고, Value는 request → stored property 순서입니다.
 
 일반 애플리케이션은 이 virtual을 직접 호출하지 않습니다. Accessibility bridge가 Screen Reader 요청을 받아 적절한 callback으로 dispatch합니다.
+
+> [!IMPORTANT]
+> 최신 `devel`의 일반 `ViewImpl`에는 custom accessible object 생성 virtual이 없습니다. 별도의 AT-SPI interface가 필요한 foundation control만 integration owner가 `Integration::ViewAccessibility::SetAccessibleObjectCreator()`를 사용합니다. 일반 visual Component는 public semantic API와 request/default/action hook으로 구현하고 accessible adapter를 직접 상속하지 않습니다.
 
 Custom View의 handle/impl 구조는 [View Architecture](https://github.sec.samsung.net/NUI/dali-ui/wiki/View-(kr)#4-view-inheritance)를 참고하세요.
 
