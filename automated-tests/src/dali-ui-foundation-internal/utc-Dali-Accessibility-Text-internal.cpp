@@ -15,10 +15,12 @@
  */
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
+#include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-test-suite-utils.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
 #include <dali/devel-api/atspi-interfaces/editable-text.h>
 #include <dali/devel-api/atspi-interfaces/hypertext.h>
+#include <dali/devel-api/atspi-interfaces/hyperlink.h>
 #include <dali/devel-api/atspi-interfaces/text.h>
 #include <limits>
 
@@ -84,6 +86,20 @@ int UtcDaliAccessibilityTextControlsInterfacesInternalP(void)
   DALI_TEST_CHECK(dynamic_cast<Dali::Accessibility::Text*>(editorAccessible));
   DALI_TEST_CHECK(dynamic_cast<Dali::Accessibility::EditableText*>(editorAccessible));
   DALI_TEST_CHECK(dynamic_cast<Dali::Accessibility::Hypertext*>(editorAccessible));
+
+  TextAnchor anchor = TextAnchor::New();
+  anchor.SetProperty(TextAnchor::Property::START_CHARACTER_INDEX, 2);
+  anchor.SetProperty(TextAnchor::Property::END_CHARACTER_INDEX, 6);
+  anchor.SetProperty(TextAnchor::Property::URI, "https://example.com");
+
+  auto* anchorAccessible = Dali::Accessibility::Accessible::Get(anchor);
+  auto* hyperlink        = dynamic_cast<Dali::Accessibility::Hyperlink*>(anchorAccessible);
+  DALI_TEST_CHECK(anchorAccessible);
+  DALI_TEST_CHECK(hyperlink);
+  DALI_TEST_EQUALS(anchorAccessible->GetRole(), Dali::Integration::Accessibility::Role::LINK, TEST_LOCATION);
+  DALI_TEST_EQUALS(hyperlink->GetStartIndex(), 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(hyperlink->GetEndIndex(), 6, TEST_LOCATION);
+  DALI_TEST_EQUALS(hyperlink->GetAnchorUri(0), "https://example.com", TEST_LOCATION);
 
   END_TEST;
 }

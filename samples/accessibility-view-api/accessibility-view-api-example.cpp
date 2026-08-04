@@ -16,7 +16,6 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/view.h>
-#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
@@ -74,6 +73,20 @@ public:
     FALLBACK
   };
 
+  enum class DefaultNameMode
+  {
+    VALUE,
+    EMPTY,
+    FALLBACK
+  };
+
+  enum class DefaultDescriptionMode
+  {
+    VALUE,
+    EMPTY,
+    FALLBACK
+  };
+
   static Ptr New()
   {
     return Ptr(new AccessibilityDemoViewImpl());
@@ -82,6 +95,16 @@ public:
   void SetRequestedMode(RequestedMode mode)
   {
     mRequestedMode = mode;
+  }
+
+  void SetDefaultNameMode(DefaultNameMode mode)
+  {
+    mDefaultNameMode = mode;
+  }
+
+  void SetDefaultDescriptionMode(DefaultDescriptionMode mode)
+  {
+    mDefaultDescriptionMode = mode;
   }
 
   bool OnAccessibilityActivate() override
@@ -131,9 +154,29 @@ public:
     return ResolveRequestedValue(value, "Requested account name");
   }
 
+  bool OnAccessibilityRequestDefaultName(Dali::String& value) override
+  {
+    if(mDefaultNameMode == DefaultNameMode::FALLBACK)
+    {
+      return false;
+    }
+    value = mDefaultNameMode == DefaultNameMode::VALUE ? "View default account name" : "";
+    return true;
+  }
+
   bool OnAccessibilityRequestDescription(Dali::String& value) override
   {
     return ResolveRequestedValue(value, "Requested account description");
+  }
+
+  bool OnAccessibilityRequestDefaultDescription(Dali::String& value) override
+  {
+    if(mDefaultDescriptionMode == DefaultDescriptionMode::FALLBACK)
+    {
+      return false;
+    }
+    value = mDefaultDescriptionMode == DefaultDescriptionMode::VALUE ? "View default account description" : "";
+    return true;
   }
 
   bool OnAccessibilityRequestValue(Dali::String& value) override
@@ -190,15 +233,17 @@ private:
     return true;
   }
 
-  RequestedMode mRequestedMode{RequestedMode::DYNAMIC};
-  View          mLastScrolledChild;
-  int           mActivateCount{0};
-  int           mEscapeCount{0};
-  int           mValueChangeCount{0};
-  int           mValueChangeBalance{0};
-  int           mScrollToChildCount{0};
-  int           mPanCount{0};
-  int           mZoomCount{0};
+  RequestedMode          mRequestedMode{RequestedMode::DYNAMIC};
+  DefaultNameMode        mDefaultNameMode{DefaultNameMode::FALLBACK};
+  DefaultDescriptionMode mDefaultDescriptionMode{DefaultDescriptionMode::FALLBACK};
+  View                   mLastScrolledChild;
+  int                    mActivateCount{0};
+  int                    mEscapeCount{0};
+  int                    mValueChangeCount{0};
+  int                    mValueChangeBalance{0};
+  int                    mScrollToChildCount{0};
+  int                    mPanCount{0};
+  int                    mZoomCount{0};
 };
 
 View CreateAccessibilityDemoView(AccessibilityDemoViewImpl*& implementation)
@@ -262,7 +307,7 @@ private:
     mResult.SetRequestedHeight(640.0f);
     mResult.SetTextColor(Dali::Ui::UiColor(0x111111));
     mResult.SetMultiLine(true);
-    mResult.SetProperty(Label::Property::FONT_SIZE, 12.0f);
+    mResult.SetProperty(Label::Property::FONT_SIZE, 11.0f);
     window.Add(mResult);
 
     ConfigureSignals();
@@ -384,6 +429,41 @@ private:
                 accessible->GetDescription() == "Localized account description" &&
                 accessible->GetValue() == "Static value");
 
+    mSubjectImpl->SetDefaultNameMode(AccessibilityDemoViewImpl::DefaultNameMode::VALUE);
+    AddResult(report, passed, "explicit name beats default-name hook",
+              accessible && accessible->GetName() == "Localized account name");
+
+    mSubject.ClearTranslatableAccessibilityName();
+    mSubject.SetAccessibilityName("");
+    mSubject.SetProperty(Dali::Actor::Property::NAME, "Actor fallback name");
+    AddResult(report, passed, "default-name hook",
+              accessible && accessible->GetName() == "View default account name");
+
+    mSubjectImpl->SetDefaultNameMode(AccessibilityDemoViewImpl::DefaultNameMode::EMPTY);
+    AddResult(report, passed, "handled empty default name",
+              accessible && accessible->GetName().empty());
+
+    mSubjectImpl->SetDefaultNameMode(AccessibilityDemoViewImpl::DefaultNameMode::FALLBACK);
+    AddResult(report, passed, "default-name fallback to Actor name",
+              accessible && accessible->GetName() == "Actor fallback name");
+
+    mSubjectImpl->SetDefaultDescriptionMode(AccessibilityDemoViewImpl::DefaultDescriptionMode::VALUE);
+    AddResult(report, passed, "explicit description beats default hook",
+              accessible && accessible->GetDescription() == "Localized account description");
+
+    mSubject.ClearTranslatableAccessibilityDescription();
+    mSubject.SetAccessibilityDescription("");
+    AddResult(report, passed, "default-description hook",
+              accessible && accessible->GetDescription() == "View default account description");
+
+    mSubjectImpl->SetDefaultDescriptionMode(AccessibilityDemoViewImpl::DefaultDescriptionMode::EMPTY);
+    AddResult(report, passed, "handled empty default description",
+              accessible && accessible->GetDescription().empty());
+
+    mSubjectImpl->SetDefaultDescriptionMode(AccessibilityDemoViewImpl::DefaultDescriptionMode::FALLBACK);
+    AddResult(report, passed, "default-description raw fallback",
+              accessible && accessible->GetDescription().empty());
+
     Dali::Property::Map attributes;
     const bool          activated   = mSubject.DoAction("activate", attributes);
     const bool          escaped     = mSubject.DoAction("escape", attributes);
@@ -394,8 +474,7 @@ private:
                 mSubjectImpl->GetActivateCount() == 1 && mSubjectImpl->GetEscapeCount() == 1 &&
                 mSubjectImpl->GetValueChangeCount() == 2 && mSubjectImpl->GetValueChangeBalance() == 0);
 
-    auto*      viewAccessible = dynamic_cast<Dali::Ui::ViewAccessible*>(accessible);
-    const bool scrolled       = viewAccessible && viewAccessible->ScrollToChild(mRelated);
+    const bool scrolled = mSubjectImpl->OnAccessibilityScrollToChild(mRelated);
     AddResult(report, passed, "scroll-to-child virtual dispatch",
               scrolled && mSubjectImpl->GetScrollToChildCount() == 1 &&
                 mSubjectImpl->GetLastScrolledChild() == mRelated);

@@ -39,8 +39,9 @@ using AccessibilityStates = uint32_t; // LCOV_EXCL_LINE
 /**
  * @brief Represents the Accessible object for Dali::Ui::View and derived classes
  *
- * You can create a derived class (and override View::CreateAccessibleObject)
- * in order to customize Accessibility for a given view.
+ * Integration implementations can derive from this class and register a
+ * creator with Integration::ViewAccessibility::SetAccessibleObjectCreator() in order to
+ * customize Accessibility for a given view.
  *
  * @see Dali::Accessibility::Accessible
  * @see Dali::Accessibility::Component

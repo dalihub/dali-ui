@@ -26,7 +26,8 @@
 #include <dali/integration-api/string-utils.h>
 #include <dali/public-api/common/dali-common.h>
 
-// DEVEL INCLUDES
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-accessibility.h>
 
 using namespace Dali::Ui::Text;
 
@@ -87,6 +88,12 @@ TextAnchorImpl::TextAnchorImpl()
   mEndCharacterIndex(0),
   mUri()
 {
+  Dali::Ui::Integration::ViewAccessibility::SetAccessibleObjectCreator(
+    *this,
+    [](Dali::Actor actor) -> ViewAccessible*
+  {
+    return new TextAnchorAccessible(actor);
+  });
 }
 
 TextAnchorImpl::~TextAnchorImpl()
@@ -162,11 +169,6 @@ void TextAnchorImpl::OnInitialize()
 
   // Accessibility
   Ui::View::DownCast(self).SetAccessibilityRole(Accessibility::Role::LINK);
-}
-
-ViewAccessible* TextAnchorImpl::CreateAccessibleObject()
-{
-  return new TextAnchorAccessible(Self());
 }
 
 void TextAnchorImpl::TextAnchorAccessible::InitDefaultFeatures()

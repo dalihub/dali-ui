@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/extension-api/view.h>
+#include <dali-ui-foundation/integration-api/view-accessibility.h>
 #include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/internal/views/view/view-accessibility-data.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -86,6 +87,11 @@ public:
     return clearHighlightResult;
   }
 
+  std::string GetDescriptionRaw() const override
+  {
+    return "Raw fallback description";
+  }
+
   int  grabHighlightCount{0};
   int  clearHighlightCount{0};
   bool grabHighlightResult{true};
@@ -104,6 +110,20 @@ public:
     FALLBACK
   };
 
+  enum class DefaultNameMode
+  {
+    DYNAMIC,
+    EMPTY,
+    FALLBACK
+  };
+
+  enum class DefaultDescriptionMode
+  {
+    DYNAMIC,
+    EMPTY,
+    FALLBACK
+  };
+
   static Ptr New()
   {
     return Ptr(new TestAccessibilityViewImpl());
@@ -112,6 +132,16 @@ public:
   void SetRequestedMode(RequestedMode mode)
   {
     mRequestedMode = mode;
+  }
+
+  void SetDefaultNameMode(DefaultNameMode mode)
+  {
+    mDefaultNameMode = mode;
+  }
+
+  void SetDefaultDescriptionMode(DefaultDescriptionMode mode)
+  {
+    mDefaultDescriptionMode = mode;
   }
 
   bool OnAccessibilityActivate() override
@@ -157,19 +187,36 @@ public:
     return ResolveRequestedValue(value, "Requested name");
   }
 
+  bool OnAccessibilityRequestDefaultName(Dali::String& value) override
+  {
+    if(mDefaultNameMode == DefaultNameMode::FALLBACK)
+    {
+      value = "Ignored default name";
+      return false;
+    }
+    value = mDefaultNameMode == DefaultNameMode::DYNAMIC ? "Requested default name" : "";
+    return true;
+  }
+
   bool OnAccessibilityRequestDescription(Dali::String& value) override
   {
     return ResolveRequestedValue(value, "Requested description");
   }
 
+  bool OnAccessibilityRequestDefaultDescription(Dali::String& value) override
+  {
+    if(mDefaultDescriptionMode == DefaultDescriptionMode::FALLBACK)
+    {
+      value = "Ignored default description";
+      return false;
+    }
+    value = mDefaultDescriptionMode == DefaultDescriptionMode::DYNAMIC ? "Requested default description" : "";
+    return true;
+  }
+
   bool OnAccessibilityRequestValue(Dali::String& value) override
   {
     return ResolveRequestedValue(value, "Requested value");
-  }
-
-  ViewAccessible* CreateAccessibleObject() override
-  {
-    return new TestAccessibilityViewAccessible(Self());
   }
 
   int  activateCount{0};
@@ -185,7 +232,15 @@ protected:
   ~TestAccessibilityViewImpl() override = default;
 
 private:
-  TestAccessibilityViewImpl() = default;
+  TestAccessibilityViewImpl()
+  {
+    Dali::Ui::Integration::ViewAccessibility::SetAccessibleObjectCreator(
+      *this,
+      [](Dali::Actor actor) -> ViewAccessible*
+    {
+      return new TestAccessibilityViewAccessible(actor);
+    });
+  }
 
   bool ResolveRequestedValue(Dali::String& value, const char* dynamicValue)
   {
@@ -198,7 +253,9 @@ private:
     return true;
   }
 
-  RequestedMode mRequestedMode{RequestedMode::FALLBACK};
+  RequestedMode          mRequestedMode{RequestedMode::FALLBACK};
+  DefaultNameMode        mDefaultNameMode{DefaultNameMode::FALLBACK};
+  DefaultDescriptionMode mDefaultDescriptionMode{DefaultDescriptionMode::FALLBACK};
 };
 
 View CreateTestAccessibilityView(TestAccessibilityViewImpl*& implementation)
@@ -519,6 +576,39 @@ int UtcDaliViewAccessibilityTranslationAndRequestedVirtualsP(void)
   DALI_TEST_EQUALS(accessible->GetDescription(), "Static description", TEST_LOCATION);
   DALI_TEST_EQUALS(accessible->GetValue(), "Static value", TEST_LOCATION);
 
+  // Explicit names win over the component-default hook.
+  implementation->SetDefaultNameMode(TestAccessibilityViewImpl::DefaultNameMode::DYNAMIC);
+  DALI_TEST_EQUALS(accessible->GetName(), "Static name", TEST_LOCATION);
+
+  // The default hook runs after an empty explicit name and before Actor::NAME.
+  view.SetAccessibilityName("");
+  view.SetProperty(Actor::Property::NAME, "Actor fallback name");
+  DALI_TEST_EQUALS(accessible->GetName(), "Requested default name", TEST_LOCATION);
+
+  // true + empty is an intentional final default and suppresses later fallbacks.
+  implementation->SetDefaultNameMode(TestAccessibilityViewImpl::DefaultNameMode::EMPTY);
+  DALI_TEST_EQUALS(accessible->GetName(), std::string(), TEST_LOCATION);
+
+  // false resumes the legacy raw-name and Actor::NAME fallback chain.
+  implementation->SetDefaultNameMode(TestAccessibilityViewImpl::DefaultNameMode::FALLBACK);
+  DALI_TEST_EQUALS(accessible->GetName(), "Actor fallback name", TEST_LOCATION);
+
+  // Explicit descriptions win over the component-default hook.
+  implementation->SetDefaultDescriptionMode(TestAccessibilityViewImpl::DefaultDescriptionMode::DYNAMIC);
+  DALI_TEST_EQUALS(accessible->GetDescription(), "Static description", TEST_LOCATION);
+
+  // The default hook runs after an empty explicit description and before GetDescriptionRaw().
+  view.SetAccessibilityDescription("");
+  DALI_TEST_EQUALS(accessible->GetDescription(), "Requested default description", TEST_LOCATION);
+
+  // true + empty is an intentional final default and suppresses the raw fallback.
+  implementation->SetDefaultDescriptionMode(TestAccessibilityViewImpl::DefaultDescriptionMode::EMPTY);
+  DALI_TEST_EQUALS(accessible->GetDescription(), std::string(), TEST_LOCATION);
+
+  // false resumes the legacy raw-description fallback.
+  implementation->SetDefaultDescriptionMode(TestAccessibilityViewImpl::DefaultDescriptionMode::FALLBACK);
+  DALI_TEST_EQUALS(accessible->GetDescription(), "Raw fallback description", TEST_LOCATION);
+
   View fallback = View::New();
   fallback.SetAccessibilityName("Default virtual fallback name");
   fallback.SetAccessibilityDescription("Default virtual fallback description");
@@ -527,6 +617,23 @@ int UtcDaliViewAccessibilityTranslationAndRequestedVirtualsP(void)
   DALI_TEST_EQUALS(fallbackAccessible->GetName(), "Default virtual fallback name", TEST_LOCATION);
   DALI_TEST_EQUALS(fallbackAccessible->GetDescription(), "Default virtual fallback description", TEST_LOCATION);
   DALI_TEST_EQUALS(fallbackAccessible->GetValue(), "Default virtual fallback value", TEST_LOCATION);
+
+  // The base default-name hook declines, then Actor::NAME supplies the name.
+  View actorNamedFallback = View::New();
+  actorNamedFallback.SetProperty(Actor::Property::NAME, "Actor-only fallback name");
+  auto* actorNamedAccessible = Dali::Accessibility::Accessible::Get(actorNamedFallback);
+  DALI_TEST_CHECK(actorNamedAccessible);
+  DALI_TEST_EQUALS(actorNamedAccessible->GetName(), "Actor-only fallback name", TEST_LOCATION);
+  DALI_TEST_EQUALS(actorNamedAccessible->GetDescription(), std::string(), TEST_LOCATION);
+
+  // The integration getter delegates non-View Actors to the adaptor.
+  Actor rawActor = Actor::New();
+  DALI_TEST_CHECK(Dali::Accessibility::Accessible::Get(rawActor));
+
+  // Disabling creation prevents both ViewAccessible and adaptor fallback.
+  View creationDisabled = View::New();
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(creationDisabled)).EnableCreateAccessible(false);
+  DALI_TEST_CHECK(!Dali::Accessibility::Accessible::Get(creationDisabled));
 
   CleanupLocalization(view);
   END_TEST;

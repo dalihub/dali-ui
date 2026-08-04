@@ -25,8 +25,8 @@
 #include <dali/public-api/events/tap-gesture-detector.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
+#include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
@@ -834,11 +834,6 @@ public: // From ViewImpl
   float GetHeightForWidth(float width) override;
 
 private: // From ViewImpl
-  /**
-   * @copydoc ViewImpl::CreateAccessibleObject()
-   */
-  ViewAccessible* CreateAccessibleObject() override;
-
   /**
    * @copydoc ViewImpl::OnAccessibilityActivate()
    */

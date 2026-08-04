@@ -804,12 +804,6 @@ public: // From ViewImpl
    */
   void OnInitialize() override;
 
-private: // From ViewImpl
-  /**
-   * @copydoc ViewImpl::CreateAccessibleObject()
-   */
-  ViewAccessible* CreateAccessibleObject() override;
-
 public: // From ViewImpl
   /**
    * @copydoc ViewImpl::OnSceneConnection()

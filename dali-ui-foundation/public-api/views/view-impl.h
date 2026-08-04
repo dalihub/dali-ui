@@ -59,7 +59,6 @@ class StackLayoutParams;
 class Layout;
 class LayoutManager;
 class LayoutTransition;
-class ViewAccessible;
 
 namespace Internal
 {
@@ -156,6 +155,20 @@ public: // Virtual API
   virtual bool OnAccessibilityRequestName(Dali::String& value);
 
   /**
+   * @brief Called when this View may supply a fallback accessibility name.
+   *
+   * This method is called only when OnAccessibilityRequestName() did not
+   * handle the request and no explicit accessibility name is configured.
+   * Returning true accepts @p value as the final default, including an
+   * intentionally empty value. Returning false continues with framework
+   * fallback naming.
+   *
+   * @param[out] value The default name
+   * @return true if this view supplied the default, false to continue fallback
+   */
+  virtual bool OnAccessibilityRequestDefaultName(Dali::String& value);
+
+  /**
    * @brief Called when the accessibility client requests a dynamic description.
    * @param[out] value The requested description, including an intentionally empty value
    * @return true if this view supplied the value
@@ -163,20 +176,25 @@ public: // Virtual API
   virtual bool OnAccessibilityRequestDescription(Dali::String& value);
 
   /**
+   * @brief Called when this View may supply a fallback accessibility description.
+   *
+   * This method is called only when OnAccessibilityRequestDescription() did not
+   * handle the request and no explicit accessibility description is configured.
+   * Returning true accepts @p value as the final default, including an
+   * intentionally empty value. Returning false continues with framework
+   * fallback description handling.
+   *
+   * @param[out] value The default description
+   * @return true if this view supplied the default, false to continue fallback
+   */
+  virtual bool OnAccessibilityRequestDefaultDescription(Dali::String& value);
+
+  /**
    * @brief Called when the accessibility client requests a dynamic value.
    * @param[out] value The requested value, including an intentionally empty value
    * @return true if this view supplied the value
    */
   virtual bool OnAccessibilityRequestValue(Dali::String& value);
-
-  /**
-   * @brief Creates a custom Accessible object for this view.
-   *
-   * The AT-SPI infrastructure is responsible for destroying the returned object.
-   * @return The newly created Accessible object
-   * @see GetAccessibleObject()
-   */
-  virtual ViewAccessible* CreateAccessibleObject();
 
   /**
    * @brief Retrieves SourceActor of the OffScreenRenderable.

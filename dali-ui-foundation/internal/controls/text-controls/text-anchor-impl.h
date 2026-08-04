@@ -81,11 +81,6 @@ private: // From ViewImpl
   void OnInitialize() override;
 
   /**
-   * @copydoc Ui::Internal::View::CreateAccessibleObject()
-   */
-  ViewAccessible* CreateAccessibleObject() override;
-
-  /**
    * @copydoc View::OnAccessibilityActivate()
    */
   bool OnAccessibilityActivate() override;

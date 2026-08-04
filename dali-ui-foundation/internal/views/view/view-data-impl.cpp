@@ -692,6 +692,7 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mSize(0, 0),
   mLastArrangedRenderEffectSize(0, 0),
   mAccessibilityData(nullptr),
+  mAccessibleObjectCreator(nullptr),
   mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
   mSkipChildrenUpdate(false),
   mArrangeDirty(false),
@@ -1419,8 +1420,12 @@ bool ViewDataImpl::ActivateAccessibilityDefault()
   return focused || clicked;
 }
 
-ViewAccessible* ViewDataImpl::CreateDefaultAccessibleObject()
+ViewAccessible* ViewDataImpl::CreateAccessibleObject()
 {
+  if(mAccessibleObjectCreator)
+  {
+    return mAccessibleObjectCreator(mViewImpl.Self());
+  }
   return new ViewAccessible(mViewImpl.Self());
 }
 
@@ -5320,6 +5325,11 @@ void ViewDataImpl::EnableCreateAccessible(bool enable)
 bool ViewDataImpl::IsCreateAccessibleEnabled() const
 {
   return mAccessibleCreatable;
+}
+
+void ViewDataImpl::SetAccessibleObjectCreator(AccessibleObjectCreator creator)
+{
+  mAccessibleObjectCreator = creator;
 }
 
 void ViewDataImpl::EmitAccessibilityStateChanged(Dali::Integration::Accessibility::State state, int newValue)

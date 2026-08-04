@@ -19,6 +19,8 @@
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/view-accessibility.h>
+#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
@@ -45,6 +47,42 @@ const Internal::ViewDataImpl& GetViewImplData(const ViewImpl& viewImpl)
 
 namespace Integration
 {
+namespace ViewAccessibility
+{
+
+void SetAccessibleObjectCreator(ViewImpl& viewImpl, AccessibleObjectCreator creator)
+{
+  GetViewImplData(viewImpl).SetAccessibleObjectCreator(creator);
+}
+
+void Register()
+{
+  static bool onceFlag = false;
+  if(DALI_UNLIKELY(!onceFlag))
+  {
+    onceFlag = true;
+    Dali::Accessibility::Accessible::RegisterExternalAccessibleGetter(
+      [](Dali::Actor actor) -> std::pair<SharedPtr<Dali::Accessibility::Accessible>, bool>
+    {
+      auto view = Ui::View::DownCast(actor);
+      if(!view)
+      {
+        return {SharedPtr<ViewAccessible>(), true};
+      }
+
+      auto& viewImpl = GetImpl(view);
+      auto& viewData = GetViewImplData(viewImpl);
+      if(viewData.IsCreateAccessibleEnabled())
+      {
+        return {SharedPtr<ViewAccessible>(viewData.CreateAccessibleObject()), true};
+      }
+      return {SharedPtr<ViewAccessible>(), false};
+    });
+  }
+}
+
+} // namespace ViewAccessibility
+
 namespace View
 {
 

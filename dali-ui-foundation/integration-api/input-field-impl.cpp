@@ -36,6 +36,7 @@
 #include <dali-ui-foundation/internal/controls/text-controls/input-field-accessible.h>
 #include <dali-ui-foundation/internal/text/text-style-helper.h>
 
+#include <dali-ui-foundation/integration-api/view-accessibility.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
@@ -61,7 +62,8 @@
 #include <dali-ui-foundation/public-api/visuals/color-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-namespace IntegrationView = Dali::Ui::Integration::View;
+namespace IntegrationView   = Dali::Ui::Integration::View;
+namespace ViewAccessibility = Dali::Ui::Integration::ViewAccessibility;
 
 using Dali::Integration::ToDaliString;
 using Dali::Integration::ToStdString;
@@ -315,6 +317,12 @@ InputFieldImpl::InputFieldImpl()
   mSelectionCleared(false),
   mFocusGainedByTouch(false)
 {
+  ViewAccessibility::SetAccessibleObjectCreator(
+    *this,
+    [](Dali::Actor actor) -> ViewAccessible*
+  {
+    return new InputFieldAccessible(actor);
+  });
 }
 
 InputFieldImpl::~InputFieldImpl()
@@ -1719,11 +1727,6 @@ void InputFieldImpl::OnInitialize()
     this, &InputFieldImpl::OnAccessibilityStatusChanged);
 
   ApplyInitialConfig();
-}
-
-ViewAccessible* InputFieldImpl::CreateAccessibleObject()
-{
-  return new InputFieldAccessible(Self());
 }
 
 bool InputFieldImpl::OnAccessibilityActivate()

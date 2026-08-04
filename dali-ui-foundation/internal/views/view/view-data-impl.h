@@ -114,6 +114,8 @@ private:
   class VisualData;
 
 public:
+  using AccessibleObjectCreator = ViewAccessible* (*)(Dali::Actor);
+
   /**
    * @brief Retrieves the implementation of the internal view class.
    * @param[in] viewImpl A ref to the view whose internal implementation is required
@@ -732,6 +734,16 @@ public:
 
   bool IsCreateAccessibleEnabled() const;
 
+  /**
+   * @brief Sets the integration creator used for a custom Accessible object.
+   */
+  void SetAccessibleObjectCreator(AccessibleObjectCreator creator);
+
+  /**
+   * @brief Creates the configured Accessible object or the default one.
+   */
+  ViewAccessible* CreateAccessibleObject();
+
   void EmitAccessibilityStateChanged(Dali::Integration::Accessibility::State state, int newValue); // LCOV_EXCL_LINE
 
   /**
@@ -794,31 +806,29 @@ private:
   void SetBehaviourFlags(ViewImpl::ViewBehaviour behaviourFlags);
   void Destroy();
 
-  MeasuredSize    MeasureDefault(float widthConstraint, float heightConstraint);
-  LayoutRect      ArrangeDefault(const LayoutRect& bounds);
-  bool            HandleKeyEventDefault(const Dali::KeyEvent& event);
-  void            FinalizeKeyEventDispatchDefault();
-  bool            HasIntrinsicHoverHandlingDefault() const;
-  bool            HandleHoverEventDefault(const Dali::HoverEvent& event);
-  bool            HasIntrinsicTouchHandlingDefault() const;
-  bool            HandleTouchEventDefault(const Dali::TouchEvent& event);
-  void            FinalizeTouchEventDispatchDefault(const Dali::TouchEvent& event);
-  void            HandleFocusChangedDefault(bool focused);
-  void            RelayoutDefault(const Vector2& size, RelayoutContainer& container);
-  View            ResolveDefaultFocusRequest();
-  bool            ActivateAccessibilityDefault();
-  ViewAccessible* CreateDefaultAccessibleObject();
-
-  void OnChildAdded(Actor& child, bool allowNonViewChild);
-  void OnChildRemoved(Actor& child);
-  void OnViewSceneConnection();
-  void OnViewSceneDisconnection();
-  void OnPropertySet(Property::Index index, const Property::Value& propertyValue);
-  void OnSizeSet(const Vector3& targetSize);
-  void OnSizeAnimation(Animation& animation);
-  void OnAnimateAnimatableProperty(Animation& animation, Property::Index index, Animation::State state);
-  void OnConstraintAnimatableProperty(Constraint& constraint, Property::Index index, bool applied);
-  void OnChildOrderChanged(Actor parent, Actor orderChangedChild);
+  MeasuredSize MeasureDefault(float widthConstraint, float heightConstraint);
+  LayoutRect   ArrangeDefault(const LayoutRect& bounds);
+  bool         HandleKeyEventDefault(const Dali::KeyEvent& event);
+  void         FinalizeKeyEventDispatchDefault();
+  bool         HasIntrinsicHoverHandlingDefault() const;
+  bool         HandleHoverEventDefault(const Dali::HoverEvent& event);
+  bool         HasIntrinsicTouchHandlingDefault() const;
+  bool         HandleTouchEventDefault(const Dali::TouchEvent& event);
+  void         FinalizeTouchEventDispatchDefault(const Dali::TouchEvent& event);
+  void         HandleFocusChangedDefault(bool focused);
+  void         RelayoutDefault(const Vector2& size, RelayoutContainer& container);
+  View         ResolveDefaultFocusRequest();
+  bool         ActivateAccessibilityDefault();
+  void         OnChildAdded(Actor& child, bool allowNonViewChild);
+  void         OnChildRemoved(Actor& child);
+  void         OnViewSceneConnection();
+  void         OnViewSceneDisconnection();
+  void         OnPropertySet(Property::Index index, const Property::Value& propertyValue);
+  void         OnSizeSet(const Vector3& targetSize);
+  void         OnSizeAnimation(Animation& animation);
+  void         OnAnimateAnimatableProperty(Animation& animation, Property::Index index, Animation::State state);
+  void         OnConstraintAnimatableProperty(Constraint& constraint, Property::Index index, bool applied);
+  void         OnChildOrderChanged(Actor parent, Actor orderChangedChild);
 
   MeasuredSize ApplyConstraints(const MeasuredSize& size) const;
   void         MeasureStandaloneChildren(float effectiveWidth, float effectiveHeight);
@@ -998,6 +1008,7 @@ private:
   std::unique_ptr<LayoutTransitionData> mLayoutTransitionData;
 
   std::unique_ptr<AccessibilityData> mAccessibilityData;
+  AccessibleObjectCreator            mAccessibleObjectCreator;
   int32_t                            mAccessibilityRole : Dali::Log<static_cast<uint32_t>(Accessibility::Role::MAX_COUNT)>::value + 2; ///< Frequently touched accessibility-related value kept here to avoid AccessibilityData creation.
 
   bool mSkipChildrenUpdate : 1;

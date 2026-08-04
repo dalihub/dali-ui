@@ -243,7 +243,12 @@ std::string ViewAccessible::GetName() const
     }
     if(name.Empty())
     {
-      if(auto raw = GetNameRaw(); !raw.first.empty() || raw.second)
+      name.Clear();
+      if(internalView.OnAccessibilityRequestDefaultName(name))
+      {
+        // A handled default is final even when intentionally empty.
+      }
+      else if(auto raw = GetNameRaw(); !raw.first.empty() || raw.second)
       {
         name = ToDaliString(raw.first);
       }
@@ -280,7 +285,15 @@ std::string ViewAccessible::GetDescription() const
     }
     if(description.Empty())
     {
-      description = ToDaliString(GetDescriptionRaw());
+      description.Clear();
+      if(internalView.OnAccessibilityRequestDefaultDescription(description))
+      {
+        // A handled default is final even when intentionally empty.
+      }
+      else
+      {
+        description = ToDaliString(GetDescriptionRaw());
+      }
     }
   }
 

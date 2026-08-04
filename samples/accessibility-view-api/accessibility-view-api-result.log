@@ -11,6 +11,8 @@ reading status: 4
 highlight changed: true
 highlight changed: false
 
+Phase 2 direct View accessibility API
+
 PASS basic strings and role
 PASS flags and automation id
 PASS state Add/Remove/Has
@@ -22,6 +24,14 @@ PASS per-View translation binding
 PASS requested text virtuals
 PASS handled empty requested values
 PASS requested virtual fallback
+PASS explicit name beats default-name hook
+PASS default-name hook
+PASS handled empty default name
+PASS default-name fallback to Actor name
+PASS explicit description beats default hook
+PASS default-description hook
+PASS handled empty default description
+PASS default-description raw fallback
 PASS action virtual dispatch
 PASS scroll-to-child virtual dispatch
 PASS pan and zoom virtuals
@@ -29,4 +39,5 @@ PASS unified reading status signal
 PASS highlight signal
 
 Overall: PASS
+See stdout for virtual action and reading status dispatch.
 focus-triggered accessibility highlight: accessibility bridge inactive

@@ -28,7 +28,7 @@
 #include <utility>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/view-accessible.h>
+#include <dali-ui-foundation/integration-api/view-accessibility.h>
 #include <dali-ui-foundation/integration-api/view-integ.h>
 
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
@@ -74,31 +74,6 @@ BaseHandle Create()
 // Type Registration
 DALI_TYPE_REGISTRATION_BEGIN(Ui::ViewImpl, Ui::View, Create)
 DALI_TYPE_REGISTRATION_END()
-
-void RegisterViewAccessibleGetter()
-{
-  static bool onceFlag = false;
-  if(DALI_UNLIKELY(!onceFlag))
-  {
-    onceFlag = true;
-    Dali::Accessibility::Accessible::RegisterExternalAccessibleGetter(
-      [](Dali::Actor actor) -> std::pair<SharedPtr<Dali::Accessibility::Accessible>, bool>
-    {
-      auto view = Ui::View::DownCast(actor);
-      if(!view)
-      {
-        return {SharedPtr<ViewAccessible>(), true};
-      }
-
-      auto& viewImpl = GetImpl(view);
-      if(Dali::Ui::Internal::ViewDataImpl::Get(viewImpl).IsCreateAccessibleEnabled())
-      {
-        return {SharedPtr<ViewAccessible>(viewImpl.CreateAccessibleObject()), true};
-      }
-      return {SharedPtr<ViewAccessible>(), false};
-    });
-  }
-}
 
 } // namespace
 
@@ -773,7 +748,7 @@ void ViewImpl::Initialize()
     mImpl->InitializeVisualData();
   }
 
-  RegisterViewAccessibleGetter();
+  Integration::ViewAccessibility::Register();
 
   // Call deriving classes so initialised before styling is applied to them.
   OnInitialize();
@@ -893,7 +868,17 @@ bool ViewImpl::OnAccessibilityRequestName(Dali::String& value)
   return false;
 }
 
+bool ViewImpl::OnAccessibilityRequestDefaultName(Dali::String& value)
+{
+  return false;
+}
+
 bool ViewImpl::OnAccessibilityRequestDescription(Dali::String& value)
+{
+  return false;
+}
+
+bool ViewImpl::OnAccessibilityRequestDefaultDescription(Dali::String& value)
 {
   return false;
 }
@@ -901,11 +886,6 @@ bool ViewImpl::OnAccessibilityRequestDescription(Dali::String& value)
 bool ViewImpl::OnAccessibilityRequestValue(Dali::String& value)
 {
   return false;
-}
-
-ViewAccessible* ViewImpl::CreateAccessibleObject()
-{
-  return mImpl->CreateDefaultAccessibleObject();
 }
 
 View ViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction)
