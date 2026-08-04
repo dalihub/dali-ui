@@ -74,7 +74,10 @@ The following describes key configuration options. For the full API, see [UiConf
 | Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Determines whether the Clicked event fires on key press or key release |
 | Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | Function that determines which key triggers a click |
 | Min Long Press Key Count | `SetKeyLongPressThreshold(uint32_t)` | — | Minimum key repeat count to trigger a long-press |
-| Tap Recognizer Time | `SetTapRecognizerTime(uint32_t)` | — | Time limit for tap recognition (ms) |
+| Long Press Minimum Holding Time | `SetLongPressGestureMinimumHoldingTime(uint32_t)` | `500` | Minimum holding time to be recognized as a long press (ms) |
+| Tap Maximum Multi Tap Interval | `SetTapGestureMaximumMultiTapInterval(uint32_t)` | `330` | Maximum interval between the taps of a multi-tap (ms) |
+| Tap Maximum Holding Time | `SetTapGestureMaximumHoldingTime(uint32_t)` | `330` | Maximum touch down to touch up time to be recognized as a tap (ms) |
+| Tap Maximum Motion Distance | `SetTapGestureMaximumMotionDistance(float)` | `20.0f` | Maximum movement allowed while still being recognized as a tap (pixels) |
 | Broken Image URL | `SetBrokenImageUrl(type, url)` | — | Fallback image shown on load failure (SMALL/NORMAL/LARGE) |
 | Clear Focus on Escape | `SetClearFocusOnEscapeEnabled(bool)` | — | Whether to clear focus when Escape is pressed |
 | Default Focus Indicator | `SetDefaultFocusIndicatorEnabled(bool)` | `IsDefaultFocusIndicatorEnabled()` | Whether the default focus indicator is enabled |
