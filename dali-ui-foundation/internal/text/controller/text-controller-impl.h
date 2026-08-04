@@ -26,14 +26,15 @@
 #include <utility>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/input-style.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/input-filter-processor.h>
-#include <dali-ui-foundation/internal/text/input-style.h>
 #include <dali-ui-foundation/internal/text/multi-language-support.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-edit-normalizer.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-render-state.h>
 #include <dali-ui-foundation/internal/text/styled-text/editable-styled-text-data.h>
+#include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
 

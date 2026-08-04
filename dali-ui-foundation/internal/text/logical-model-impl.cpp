@@ -19,8 +19,9 @@
 #include <dali-ui-foundation/internal/text/logical-model-impl.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/input-style.h>
 #include <dali-ui-foundation/internal/text/bounded-paragraph-helper-functions.h>
-#include <dali-ui-foundation/internal/text/input-style.h>
+#include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 
 namespace Dali
