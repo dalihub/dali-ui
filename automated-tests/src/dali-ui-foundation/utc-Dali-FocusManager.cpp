@@ -119,7 +119,7 @@ int UtcDaliFocusManagerFocusIndicationPolicyContextP(void)
   DALI_TEST_CHECK(!gFocusIndicationPolicyCall.previousFocusView);
   DALI_TEST_CHECK(gFocusIndicationPolicyCall.focusedView == first);
   DALI_TEST_CHECK(gFocusIndicationPolicyCall.device == FocusDevice::PROGRAMMATIC);
-  DALI_TEST_CHECK(gFocusIndicationPolicyCall.inputEventType == InputEventType::PROGRAMMATIC);
+  DALI_TEST_CHECK(gFocusIndicationPolicyCall.inputEventType == InputEventType::NONE);
   DALI_TEST_CHECK(!gFocusIndicationPolicyCall.previousFocusIndicated);
   DALI_TEST_CHECK(!gFocusIndicationPolicyCall.proposedIndicated);
 

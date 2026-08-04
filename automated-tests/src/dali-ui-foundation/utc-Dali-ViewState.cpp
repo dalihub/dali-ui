@@ -145,7 +145,7 @@ int UtcDaliViewStateBasicDispatchP(void)
   DALI_TEST_CHECK(!receivedPrev.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(receivedCur.Contains(ViewState::FOCUSED));
   DALI_TEST_CHECK(receivedCause.IsProgrammatic());
-  DALI_TEST_CHECK(receivedCause.GetInputEventType() == InputEventType::PROGRAMMATIC);
+  DALI_TEST_CHECK(receivedCause.GetInputEventType() == InputEventType::NONE);
   DALI_TEST_CHECK(!receivedCause.IsCancellation());
 
   END_TEST;
@@ -430,7 +430,7 @@ int UtcDaliViewStateDisabledClearsPressedSingleEventP(void)
   DALI_TEST_CHECK(log[0].cur.Contains(ViewState::DISABLED));
   DALI_TEST_CHECK(!log[0].cur.Contains(ViewState::PRESSED));
   DALI_TEST_CHECK(log[0].cause.IsProgrammatic());
-  DALI_TEST_CHECK(log[0].cause.GetInputEventType() == InputEventType::PROGRAMMATIC);
+  DALI_TEST_CHECK(log[0].cause.GetInputEventType() == InputEventType::NONE);
   DALI_TEST_CHECK(log[0].cause.IsCancellation());
 
   END_TEST;

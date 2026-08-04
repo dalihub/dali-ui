@@ -110,8 +110,8 @@ public:
    * @brief Returns the input event that caused this transition.
    *
    * Always returns a valid InputEvent. Its type identifies the origin, including
-   * origins without a concrete input payload such as InputEventType::PROGRAMMATIC
-   * and InputEventType::ACCESSIBILITY_ACTIVATION.
+   * origins without a concrete input payload such as InputEventType::NONE and
+   * InputEventType::ACCESSIBILITY_ACTIVATION.
    */
   const InputEvent& GetCause() const;
 

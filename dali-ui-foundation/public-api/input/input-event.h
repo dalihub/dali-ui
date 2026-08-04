@@ -90,7 +90,7 @@ public:
   /**
    * @brief Returns a shared InputEvent for programmatic changes.
    *
-   * The returned event has InputEventType::PROGRAMMATIC. Use this when emitting
+   * The returned event has InputEventType::NONE. Use this when emitting
    * signals for explicit API calls or framework initiated state changes.
    *
    * @return A const reference to the shared programmatic InputEvent
@@ -155,8 +155,8 @@ public:
   /**
    * @brief Returns true if this event represents a programmatic change.
    *
-   * Programmatic changes are not caused by a concrete input event. This can be
-   * true together with IsCancellation().
+   * Programmatic changes use InputEventType::NONE and are not caused by a
+   * concrete input event. This can be true together with IsCancellation().
    *
    * @return true if this event represents a programmatic change
    */

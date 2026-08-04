@@ -38,7 +38,6 @@ InputEventImpl::InputEventImpl(InputEventType type, bool cancellation)
   mEvent(std::monostate{})
 {
   DALI_ASSERT_ALWAYS(type == InputEventType::NONE ||
-                     type == InputEventType::PROGRAMMATIC ||
                      type == InputEventType::ACCESSIBILITY_ACTIVATION);
 }
 
@@ -144,7 +143,7 @@ InputEventType InputEventImpl::GetInputEventType() const
 
 bool InputEventImpl::IsProgrammatic() const
 {
-  return mEventType == InputEventType::PROGRAMMATIC;
+  return mEventType == InputEventType::NONE;
 }
 
 bool InputEventImpl::IsCancellation() const
