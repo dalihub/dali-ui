@@ -33,6 +33,8 @@ struct Vector4;
 
 namespace Ui
 {
+namespace Integration
+{
 namespace Text
 {
 /**
@@ -114,7 +116,7 @@ public:
    *
    * @param[in] reason The reason why the input was rejected.
    */
-  virtual void InputRejected(Text::InputFilter::RejectReason reason) = 0;
+  virtual void InputRejected(Ui::Text::InputFilter::RejectReason reason) = 0;
 
   /**
    * @brief Called to signal that caret (cursor position) has been moved.
@@ -140,6 +142,8 @@ public:
 };
 
 } // namespace Text
+
+} // namespace Integration
 
 } // namespace Ui
 

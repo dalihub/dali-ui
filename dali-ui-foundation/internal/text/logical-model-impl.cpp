@@ -342,7 +342,7 @@ void LogicalModel::UpdateTextStyleRuns(CharacterIndex index, int numberOfCharact
                                                     removedCharacterSpacingCharacterRuns);
 }
 
-void LogicalModel::RetrieveStyle(CharacterIndex index, InputStyle& style)
+void LogicalModel::RetrieveStyle(CharacterIndex index, Ui::Integration::Text::InputStyle& style)
 {
   unsigned int runIndex = 0u;
 

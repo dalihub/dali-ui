@@ -36,200 +36,200 @@ void LabelImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index inde
 
   switch(index)
   {
-    case Text::LabelPropertyIndex::TEXT:
+    case Ui::Text::LabelPropertyIndex::TEXT:
     {
       impl.SetText(value.Get<Dali::String>());
       break;
     }
-    case Text::LabelPropertyIndex::FONT_FAMILY:
+    case Ui::Text::LabelPropertyIndex::FONT_FAMILY:
     {
       impl.SetFontFamily(value.Get<Dali::String>());
       break;
     }
-    case Text::LabelPropertyIndex::FONT_SIZE:
+    case Ui::Text::LabelPropertyIndex::FONT_SIZE:
     {
       impl.SetFontSize(value.Get<float>());
       break;
     }
-    case Text::LabelPropertyIndex::MULTI_LINE:
+    case Ui::Text::LabelPropertyIndex::MULTI_LINE:
     {
       impl.SetMultiLine(value.Get<bool>());
       break;
     }
-    case Text::LabelPropertyIndex::LINE_WRAP_MODE:
+    case Ui::Text::LabelPropertyIndex::LINE_WRAP_MODE:
     {
-      Text::LineWrapMode mode(static_cast<Text::LineWrapMode>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetLineWrapModeEnumeration(value, mode))
+      Ui::Text::LineWrapMode mode(static_cast<Ui::Text::LineWrapMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetLineWrapModeEnumeration(value, mode))
       {
         impl.SetLineWrapMode(mode);
       }
       break;
     }
-    case Text::LabelPropertyIndex::HORIZONTAL_ALIGNMENT:
+    case Ui::Text::LabelPropertyIndex::HORIZONTAL_ALIGNMENT:
     {
-      Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
+      Ui::Text::Alignment alignment(static_cast<Ui::Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetHorizontalAlignmentEnumeration(value, alignment))
       {
         impl.SetHorizontalTextAlignment(alignment);
       }
       break;
     }
-    case Text::LabelPropertyIndex::VERTICAL_ALIGNMENT:
+    case Ui::Text::LabelPropertyIndex::VERTICAL_ALIGNMENT:
     {
-      Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetVerticalAlignmentEnumeration(value, alignment))
+      Ui::Text::Alignment alignment(static_cast<Ui::Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetVerticalAlignmentEnumeration(value, alignment))
       {
         impl.SetVerticalTextAlignment(alignment);
       }
       break;
     }
-    case Text::LabelPropertyIndex::OVERFLOW_MODE:
+    case Ui::Text::LabelPropertyIndex::OVERFLOW_MODE:
     {
-      Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetOverflowModeEnumeration(value, mode))
+      Ui::Text::OverflowMode mode(static_cast<Ui::Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetOverflowModeEnumeration(value, mode))
       {
         impl.SetTextOverflowMode(mode);
       }
       break;
     }
-    case Text::LabelPropertyIndex::LINE_HEIGHT:
+    case Ui::Text::LabelPropertyIndex::LINE_HEIGHT:
     {
       impl.SetLineHeight(value.Get<float>());
       break;
     }
-    case Text::LabelPropertyIndex::LINE_HEIGHT_MODE:
+    case Ui::Text::LabelPropertyIndex::LINE_HEIGHT_MODE:
     {
-      Text::LineHeightMode mode(static_cast<Text::LineHeightMode>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetLineHeightModeEnumeration(value, mode))
+      Ui::Text::LineHeightMode mode(static_cast<Ui::Text::LineHeightMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetLineHeightModeEnumeration(value, mode))
       {
         impl.SetLineHeightMode(mode);
       }
       break;
     }
-    case Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE:
+    case Ui::Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
-      Text::LayoutDirectionMode mode(static_cast<Text::LayoutDirectionMode>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetLayoutDirectionModeEnumeration(value, mode))
+      Ui::Text::LayoutDirectionMode mode(static_cast<Ui::Text::LayoutDirectionMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetLayoutDirectionModeEnumeration(value, mode))
       {
         impl.SetLayoutDirectionMode(mode);
       }
       break;
     }
-    case Text::LabelPropertyIndex::ANCHOR_COLOR:
+    case Ui::Text::LabelPropertyIndex::ANCHOR_COLOR:
     {
       impl.SetAnchorColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR:
+    case Ui::Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR:
     {
       impl.SetAnchorClickedColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY:
     {
-      Text::MarqueeTriggerPolicy policy(static_cast<Text::MarqueeTriggerPolicy>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetMarqueeTriggerPolicyEnumeration(value, policy))
+      Ui::Text::MarqueeTriggerPolicy policy(static_cast<Ui::Text::MarqueeTriggerPolicy>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetMarqueeTriggerPolicyEnumeration(value, policy))
       {
         impl.SetMarqueeTriggerPolicy(policy);
       }
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_SPEED:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_SPEED:
     {
       impl.SetMarqueeSpeed(value.Get<int>());
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_LOOP_COUNT:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_LOOP_COUNT:
     {
       impl.SetMarqueeLoopCount(value.Get<int>());
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_LOOP_DELAY:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_LOOP_DELAY:
     {
       impl.SetMarqueeLoopDelay(value.Get<float>());
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_GAP:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_GAP:
     {
       impl.SetMarqueeGap(value.Get<int>());
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_ORIENTATION:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_ORIENTATION:
     {
-      Text::MarqueeOrientation orientation(static_cast<Text::MarqueeOrientation>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetMarqueeOrientationEnumeration(value, orientation))
+      Ui::Text::MarqueeOrientation orientation(static_cast<Ui::Text::MarqueeOrientation>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetMarqueeOrientationEnumeration(value, orientation))
       {
         impl.SetMarqueeOrientation(orientation);
       }
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
     {
-      Text::MarqueeStopMode mode(static_cast<Text::MarqueeStopMode>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetMarqueeStopModeEnumeration(value, mode))
+      Ui::Text::MarqueeStopMode mode(static_cast<Ui::Text::MarqueeStopMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetMarqueeStopModeEnumeration(value, mode))
       {
         impl.SetMarqueeStopMode(mode);
       }
       break;
     }
-    case Text::LabelPropertyIndex::FONT_WEIGHT:
+    case Ui::Text::LabelPropertyIndex::FONT_WEIGHT:
     {
-      Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontWeightEnumeration(value, weight))
+      Ui::Text::FontWeight weight(static_cast<Ui::Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontWeightEnumeration(value, weight))
       {
         impl.SetFontWeight(weight);
       }
       break;
     }
-    case Text::LabelPropertyIndex::FONT_WIDTH:
+    case Ui::Text::LabelPropertyIndex::FONT_WIDTH:
     {
-      Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontWidthEnumeration(value, width))
+      Ui::Text::FontWidth width(static_cast<Ui::Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontWidthEnumeration(value, width))
       {
         impl.SetFontWidth(width);
       }
       break;
     }
-    case Text::LabelPropertyIndex::FONT_SLANT:
+    case Ui::Text::LabelPropertyIndex::FONT_SLANT:
     {
-      Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontSlantEnumeration(value, slant))
+      Ui::Text::FontSlant slant(static_cast<Ui::Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontSlantEnumeration(value, slant))
       {
         impl.SetFontSlant(slant);
       }
       break;
     }
-    case Text::LabelPropertyIndex::TEXT_BACKGROUND_COLOR:
+    case Ui::Text::LabelPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
       impl.SetTextBackgroundColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+    case Ui::Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
     {
       impl.SetMinimumFontSizeScale(value.Get<float>());
       break;
     }
-    case Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+    case Ui::Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
     {
       impl.SetMaximumFontSizeScale(value.Get<float>());
       break;
     }
-    case Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+    case Ui::Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
     {
       impl.SetSystemFontSizeScaleEnabled(value.Get<bool>());
       break;
     }
-    case Text::LabelPropertyIndex::CUTOUT_ENABLED:
+    case Ui::Text::LabelPropertyIndex::CUTOUT_ENABLED:
     {
       impl.SetCutoutEnabledInternal(value.Get<bool>());
       break;
     }
-    case Text::LabelPropertyIndex::ASYNC_RENDERING:
+    case Ui::Text::LabelPropertyIndex::ASYNC_RENDERING:
     {
       impl.SetAsyncRendering(value.Get<bool>());
       break;
     }
-    case Text::LabelPropertyIndex::RENDER_SCALE:
+    case Ui::Text::LabelPropertyIndex::RENDER_SCALE:
     {
       impl.SetRenderScale(value.Get<float>());
       break;
@@ -281,7 +281,7 @@ bool LabelImpl::PropertyHandler::OnPropertySet(LabelImpl& impl, Dali::Property::
       impl.OnBackgroundPropertyChanged();
       return true;
     }
-    case Text::LabelPropertyIndex::TEXT_COLOR:
+    case Ui::Text::LabelPropertyIndex::TEXT_COLOR:
     {
       const Vector4& textColor = propertyValue.Get<Vector4>();
       if(impl.mController->GetDefaultColor() != textColor)
@@ -297,7 +297,7 @@ bool LabelImpl::PropertyHandler::OnPropertySet(LabelImpl& impl, Dali::Property::
       }
       return true;
     }
-    case Text::LabelPropertyIndex::CUTOUT_ENABLED:
+    case Ui::Text::LabelPropertyIndex::CUTOUT_ENABLED:
     {
       impl.UpdateCutoutState(propertyValue.Get<bool>());
       return true;
@@ -318,152 +318,152 @@ Property::Value LabelImpl::PropertyHandler::GetProperty(Ui::View view, Property:
 
   switch(index)
   {
-    case Text::LabelPropertyIndex::TEXT:
+    case Ui::Text::LabelPropertyIndex::TEXT:
     {
       value = impl.GetText();
       break;
     }
-    case Text::LabelPropertyIndex::FONT_FAMILY:
+    case Ui::Text::LabelPropertyIndex::FONT_FAMILY:
     {
       value = impl.GetFontFamily();
       break;
     }
-    case Text::LabelPropertyIndex::FONT_SIZE:
+    case Ui::Text::LabelPropertyIndex::FONT_SIZE:
     {
       value = impl.GetFontSize();
       break;
     }
-    case Text::LabelPropertyIndex::MULTI_LINE:
+    case Ui::Text::LabelPropertyIndex::MULTI_LINE:
     {
       value = impl.IsMultiLine();
       break;
     }
-    case Text::LabelPropertyIndex::LINE_WRAP_MODE:
+    case Ui::Text::LabelPropertyIndex::LINE_WRAP_MODE:
     {
       value = impl.GetLineWrapMode();
       break;
     }
-    case Text::LabelPropertyIndex::HORIZONTAL_ALIGNMENT:
+    case Ui::Text::LabelPropertyIndex::HORIZONTAL_ALIGNMENT:
     {
       value = impl.GetHorizontalTextAlignment();
       break;
     }
-    case Text::LabelPropertyIndex::VERTICAL_ALIGNMENT:
+    case Ui::Text::LabelPropertyIndex::VERTICAL_ALIGNMENT:
     {
       value = impl.GetVerticalTextAlignment();
       break;
     }
-    case Text::LabelPropertyIndex::OVERFLOW_MODE:
+    case Ui::Text::LabelPropertyIndex::OVERFLOW_MODE:
     {
       value = impl.GetTextOverflowMode();
       break;
     }
-    case Text::LabelPropertyIndex::LINE_HEIGHT:
+    case Ui::Text::LabelPropertyIndex::LINE_HEIGHT:
     {
       value = impl.GetLineHeight();
       break;
     }
-    case Text::LabelPropertyIndex::LINE_HEIGHT_MODE:
+    case Ui::Text::LabelPropertyIndex::LINE_HEIGHT_MODE:
     {
       value = impl.GetLineHeightMode();
       break;
     }
-    case Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE:
+    case Ui::Text::LabelPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
       value = impl.GetLayoutDirectionMode();
       break;
     }
-    case Text::LabelPropertyIndex::ANCHOR_COLOR:
+    case Ui::Text::LabelPropertyIndex::ANCHOR_COLOR:
     {
       value = impl.GetAnchorColor().GetRgba();
       break;
     }
-    case Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR:
+    case Ui::Text::LabelPropertyIndex::ANCHOR_CLICKED_COLOR:
     {
       value = impl.GetAnchorClickedColor().GetRgba();
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_TRIGGER_POLICY:
     {
       value = impl.GetMarqueeTriggerPolicy();
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_SPEED:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_SPEED:
     {
       value = impl.GetMarqueeSpeed();
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_LOOP_COUNT:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_LOOP_COUNT:
     {
       value = impl.GetMarqueeLoopCount();
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_LOOP_DELAY:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_LOOP_DELAY:
     {
       value = impl.GetMarqueeLoopDelay();
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_GAP:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_GAP:
     {
       value = impl.GetMarqueeGap();
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_ORIENTATION:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_ORIENTATION:
     {
       value = impl.GetMarqueeOrientation();
       break;
     }
-    case Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
+    case Ui::Text::LabelPropertyIndex::MARQUEE_STOP_MODE:
     {
       value = impl.GetMarqueeStopMode();
       break;
     }
-    case Text::LabelPropertyIndex::FONT_WEIGHT:
+    case Ui::Text::LabelPropertyIndex::FONT_WEIGHT:
     {
       value = impl.GetFontWeight();
       break;
     }
-    case Text::LabelPropertyIndex::FONT_WIDTH:
+    case Ui::Text::LabelPropertyIndex::FONT_WIDTH:
     {
       value = impl.GetFontWidth();
       break;
     }
-    case Text::LabelPropertyIndex::FONT_SLANT:
+    case Ui::Text::LabelPropertyIndex::FONT_SLANT:
     {
       value = impl.GetFontSlant();
       break;
     }
-    case Text::LabelPropertyIndex::TEXT_BACKGROUND_COLOR:
+    case Ui::Text::LabelPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
       value = impl.GetTextBackgroundColor().GetRgba();
       break;
     }
-    case Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+    case Ui::Text::LabelPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
     {
       value = impl.GetMinimumFontSizeScale();
       break;
     }
-    case Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+    case Ui::Text::LabelPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
     {
       value = impl.GetMaximumFontSizeScale();
       break;
     }
-    case Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+    case Ui::Text::LabelPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
     {
       value = impl.IsSystemFontSizeScaleEnabled();
       break;
     }
-    case Text::LabelPropertyIndex::CUTOUT_ENABLED:
+    case Ui::Text::LabelPropertyIndex::CUTOUT_ENABLED:
     {
       value = impl.IsTextCutoutEnabled();
       break;
     }
-    case Text::LabelPropertyIndex::ASYNC_RENDERING:
+    case Ui::Text::LabelPropertyIndex::ASYNC_RENDERING:
     {
       value = impl.IsAsyncRendering();
       break;
     }
-    case Text::LabelPropertyIndex::RENDER_SCALE:
+    case Ui::Text::LabelPropertyIndex::RENDER_SCALE:
     {
       value = impl.GetRenderScale();
       break;

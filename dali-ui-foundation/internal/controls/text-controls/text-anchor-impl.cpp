@@ -29,8 +29,6 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/view-accessibility.h>
 
-using namespace Dali::Ui::Text;
-
 using Dali::Integration::GetStdString;
 using Dali::Integration::ToPropertyValue;
 using Dali::Integration::ToStdString;
@@ -212,14 +210,14 @@ bool TextAnchorImpl::TextAnchorAccessible::IsValid() const
 
 bool TextAnchorImpl::OnAccessibilityActivate()
 {
-  Dali::Actor                             current                             = Self();
-  Dali::Ui::Text::AnchorControlInterface* parentImplementationAnchorInterface = nullptr;
+  Dali::Actor                                          current                             = Self();
+  Dali::Ui::Integration::Text::AnchorControlInterface* parentImplementationAnchorInterface = nullptr;
   while(!current.GetProperty<bool>(Actor::Property::IS_ROOT) && !parentImplementationAnchorInterface)
   {
     Dali::Actor            parentAsActor        = current.GetParent();
     Dali::CustomActor      parentAsCustomActor  = Dali::CustomActor::DownCast(parentAsActor);
     Dali::CustomActorImpl& parentImplementation = parentAsCustomActor.GetImplementation();
-    parentImplementationAnchorInterface         = dynamic_cast<Dali::Ui::Text::AnchorControlInterface*>(&parentImplementation);
+    parentImplementationAnchorInterface         = dynamic_cast<Dali::Ui::Integration::Text::AnchorControlInterface*>(&parentImplementation);
     current                                     = parentAsActor;
   }
 
@@ -234,7 +232,7 @@ bool TextAnchorImpl::OnAccessibilityActivate()
 
   DALI_LOG_ERROR(
     "TextAnchor::OnAccessibilityActivate cannot find ancestor actor implementing "
-    "Dali::Ui::Text::AnchorControlInterface.\n");
+    "Dali::Ui::Integration::Text::AnchorControlInterface.\n");
   return false;
 }
 

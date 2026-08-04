@@ -154,7 +154,7 @@ std::string BuildTextScrollerShaderSource(std::string_view shaderSource, bool te
 
 namespace Text
 {
-TextScrollerPtr TextScroller::New(ScrollerInterface& scrollerInterface)
+TextScrollerPtr TextScroller::New(Ui::Integration::Text::ScrollerInterface& scrollerInterface)
 {
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "TextScroller::New\n");
 
@@ -403,7 +403,7 @@ void TextScroller::BindGradientOverlayConstraint(Property::Index rendererStartOf
   mGradientOverlayConstraints.push_back(constraint);
 }
 
-TextScroller::TextScroller(ScrollerInterface& scrollerInterface)
+TextScroller::TextScroller(Ui::Integration::Text::ScrollerInterface& scrollerInterface)
 : mScrollerInterface(scrollerInterface),
   mScrollDeltaIndex(Property::INVALID_INDEX),
   mGradientAnimOffsetIndex(Property::INVALID_INDEX),

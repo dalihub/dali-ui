@@ -26,6 +26,8 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/text-anchor-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
@@ -43,8 +45,6 @@
 namespace Dali::Ui::Text
 {
 class Controller;
-class ControlInterface;
-class EditableControlInterface;
 class StyledText;
 class View;
 class RenderingController;
@@ -178,7 +178,7 @@ public: // Constructor.
    *
    * @return A pointer to a new Controller.
    */
-  static ControllerPtr New(ControlInterface* controlInterface)
+  static ControllerPtr New(Ui::Integration::Text::ControlInterface* controlInterface)
   {
     return ControllerPtr(new Controller(controlInterface));
   }
@@ -193,9 +193,9 @@ public: // Constructor.
    *
    * @return A pointer to a new Controller.
    */
-  static ControllerPtr New(ControlInterface* controlInterface, EditableControlInterface* editableControlInterface,
-                           SelectableControlInterface* selectableControlInterface,
-                           AnchorControlInterface*     anchorControlInterface)
+  static ControllerPtr New(Ui::Integration::Text::ControlInterface* controlInterface, Ui::Integration::Text::EditableControlInterface* editableControlInterface,
+                           Ui::Integration::Text::SelectableControlInterface* selectableControlInterface,
+                           Ui::Integration::Text::AnchorControlInterface*     anchorControlInterface)
   {
     return ControllerPtr(
       new Controller(controlInterface, editableControlInterface, selectableControlInterface, anchorControlInterface));
@@ -1851,14 +1851,14 @@ public: // Default style & Input style
    *
    * @param[in] controlInterface The control's interface.
    */
-  void SetControlInterface(ControlInterface* controlInterface);
+  void SetControlInterface(Ui::Integration::Text::ControlInterface* controlInterface);
 
   /**
    * @brief Set the anchor control's interface.
    *
    * @param[in] anchorControlInterface The control's interface.
    */
-  void SetAnchorControlInterface(AnchorControlInterface* anchorControlInterface);
+  void SetAnchorControlInterface(Ui::Integration::Text::AnchorControlInterface* anchorControlInterface);
 
   /**
    * @brief Sets the character spacing.
@@ -2440,12 +2440,12 @@ public: // Relayout.
                           Dali::LayoutDirection::Type layoutDirection = Dali::LayoutDirection::LEFT_TO_RIGHT);
 
   /**
-   * @brief Request a relayout using the ControlInterface.
+   * @brief Request a relayout using the Ui::Integration::Text::ControlInterface.
    */
   void RequestRelayout();
 
   /**
-   * @brief Invalidate the measured size using the ControlInterface.
+   * @brief Invalidate the measured size using the Ui::Integration::Text::ControlInterface.
    */
   void InvalidateMeasure();
 
@@ -2463,7 +2463,7 @@ public: // Input style change signals.
   /**
    * @brief Request process all pending input style changed signals.
    *
-   * Request to calls the Text::ControlInterface::InputStyleChanged() method which is overridden by the
+   * Request to calls the Ui::Integration::Text::ControlInterface::InputStyleChanged() method which is overridden by the
    * text controls. Text controls may send signals to state the input style has changed.
    *
    * The signal will be execute next idle time, or skip if we fail to add idler.
@@ -2570,57 +2570,57 @@ public: // Text-input Event Queuing.
   void SelectEvent(float x, float y, SelectionType selection);
 
   /**
-   * @copydoc Text::SelectableControlInterface::SetTextSelectionRange()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::SetTextSelectionRange()
    */
   void SetTextSelectionRange(const uint32_t* start, const uint32_t* end);
 
   /**
-   * @copydoc Text::SelectableControlInterface::GetTextSelectionRange()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::GetTextSelectionRange()
    */
-  Uint32Pair GetTextSelectionRange() const;
+  Ui::Integration::Text::Uint32Pair GetTextSelectionRange() const;
 
   /**
-   * @copydoc Text::SelectableControlInterface::SelectWholeText()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::SelectWholeText()
    */
   void SelectWholeText();
 
   /**
-   * @copydoc Text::EditableControlInterface::CopyText()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::CopyText()
    */
-  string CopyText();
+  std::string CopyText();
 
   /**
-   * @copydoc Text::EditableControlInterface::CutText()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::CutText()
    */
-  string CutText();
+  std::string CutText();
 
   /**
-   * @copydoc Text::EditableControlInterface::PasteText()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::PasteText()
    */
   void PasteText();
 
   /**
-   * @copydoc Text::SelectableControlInterface::SelectNone()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::SelectNone()
    */
   void SelectNone();
 
   /**
-   * @copydoc Text::SelectableControlInterface::SelectText()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::SelectText()
    */
   void SelectText(const uint32_t start, const uint32_t end);
 
   /**
-   * @copydoc Text::SelectableControlInterface::GetSelectedText()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::GetSelectedText()
    */
-  string GetSelectedText() const;
+  std::string GetSelectedText() const;
 
   /**
-   * @copydoc Text::EditableControlInterface::IsEditable()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::IsEditable()
    */
   virtual bool IsEditable() const;
 
   /**
-   * @copydoc Text::EditableControlInterface::SetEditable()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::SetEditable()
    */
   virtual void SetEditable(bool editable);
 
@@ -2719,7 +2719,7 @@ protected: // Inherit from Text::Decorator::ControllerInterface.
   /**
    * @copydoc Dali::Ui::Text::Decorator::ControllerInterface::AddDecoration()
    */
-  void AddDecoration(Actor& actor, DecorationType type, bool needsClipping) override;
+  void AddDecoration(Actor& actor, Ui::Integration::Text::DecorationType type, bool needsClipping) override;
 
   /**
    * @copydoc Dali::Ui::Text::Decorator::ControllerInterface::DecorationEvent()
@@ -2764,7 +2764,7 @@ private: // Private contructors & copy operator.
   /**
    * @brief Private constructor.
    */
-  Controller(ControlInterface* controlInterface)
+  Controller(Ui::Integration::Text::ControlInterface* controlInterface)
   : Controller(controlInterface, nullptr, nullptr, nullptr)
   {
   }
@@ -2772,8 +2772,8 @@ private: // Private contructors & copy operator.
   /**
    * @brief Private constructor.
    */
-  Controller(ControlInterface* controlInterface, EditableControlInterface* editableControlInterface,
-             SelectableControlInterface* selectableControlInterface, AnchorControlInterface* anchorControlInterface);
+  Controller(Ui::Integration::Text::ControlInterface* controlInterface, Ui::Integration::Text::EditableControlInterface* editableControlInterface,
+             Ui::Integration::Text::SelectableControlInterface* selectableControlInterface, Ui::Integration::Text::AnchorControlInterface* anchorControlInterface);
 
   Controller(const Controller& handle)            = delete;
   Controller& operator=(const Controller& handle) = delete;

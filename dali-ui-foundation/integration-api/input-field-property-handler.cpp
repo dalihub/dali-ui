@@ -35,158 +35,158 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
 
   switch(index)
   {
-    case Text::InputFieldPropertyIndex::TEXT:
+    case Ui::Text::InputFieldPropertyIndex::TEXT:
     {
       impl.SetText(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_FAMILY:
+    case Ui::Text::InputFieldPropertyIndex::FONT_FAMILY:
     {
       impl.SetFontFamily(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_SIZE:
+    case Ui::Text::InputFieldPropertyIndex::FONT_SIZE:
     {
       impl.SetFontSize(value.Get<float>());
       break;
     }
-    case Text::InputFieldPropertyIndex::TEXT_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::TEXT_COLOR:
     {
       impl.SetTextColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
+    case Ui::Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
     {
-      Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetHorizontalAlignmentEnumeration(value, alignment))
+      Ui::Text::Alignment alignment(static_cast<Ui::Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetHorizontalAlignmentEnumeration(value, alignment))
       {
         impl.SetHorizontalTextAlignment(alignment);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
+    case Ui::Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
     {
-      Text::Alignment alignment(static_cast<Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetVerticalAlignmentEnumeration(value, alignment))
+      Ui::Text::Alignment alignment(static_cast<Ui::Text::Alignment>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetVerticalAlignmentEnumeration(value, alignment))
       {
         impl.SetVerticalTextAlignment(alignment);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::OVERFLOW_MODE:
+    case Ui::Text::InputFieldPropertyIndex::OVERFLOW_MODE:
     {
-      Text::OverflowMode mode(static_cast<Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetOverflowModeEnumeration(value, mode))
+      Ui::Text::OverflowMode mode(static_cast<Ui::Text::OverflowMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetOverflowModeEnumeration(value, mode))
       {
         impl.SetTextOverflowMode(mode);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::PLACEHOLDER:
+    case Ui::Text::InputFieldPropertyIndex::PLACEHOLDER:
     {
       impl.SetPlaceholder(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
     {
       impl.SetPlaceholderColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
+    case Ui::Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
     {
       impl.SetShowPlaceholderOnFocus(value.Get<bool>());
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_WIDTH:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_WIDTH:
     {
       impl.SetCursorWidth(value.Get<int>());
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_COLOR:
     {
       impl.SetCursorColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
     {
       impl.SetCursorBlinkEnabled(value.Get<bool>());
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL:
     {
       impl.SetCursorBlinkInterval(value.Get<float>());
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_POSITION:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_POSITION:
     {
       impl.SetCursorPosition(static_cast<uint32_t>(value.Get<int>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_ENABLED:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_ENABLED:
     {
       impl.SetSelectionEnabled(value.Get<bool>());
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_COLOR:
     {
       impl.SetSelectionColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED:
+    case Ui::Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED:
     {
       impl.SetTextHandleEnabled(value.Get<bool>());
       break;
     }
-    case Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR:
     {
       impl.SetTextHandleColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE:
     {
       impl.SetCursorHandleImage(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE:
     {
       impl.SetCursorHandlePressedImage(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT:
     {
       impl.SetSelectionHandleImageLeft(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT:
     {
       impl.SetSelectionHandleImageRight(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT:
     {
       impl.SetSelectionHandlePressedImageLeft(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT:
     {
       impl.SetSelectionHandlePressedImageRight(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
+    case Ui::Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
     {
       impl.SetMaximumLength(value.Get<int>());
       break;
     }
-    case Text::InputFieldPropertyIndex::PASSWORD_MODE:
+    case Ui::Text::InputFieldPropertyIndex::PASSWORD_MODE:
     {
-      Text::PasswordMode mode(static_cast<Text::PasswordMode>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetPasswordModeEnumeration(value, mode))
+      Ui::Text::PasswordMode mode(static_cast<Ui::Text::PasswordMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetPasswordModeEnumeration(value, mode))
       {
         impl.SetPasswordMode(mode);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:
+    case Ui::Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:
     {
       int charValue = value.Get<int>();
       // Only apply non-negative values as Unicode code points
@@ -196,7 +196,7 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION:
+    case Ui::Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION:
     {
       int durationValue = value.Get<int>();
       // Only apply non-negative values
@@ -206,104 +206,104 @@ void InputFieldImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::EDITABLE:
+    case Ui::Text::InputFieldPropertyIndex::EDITABLE:
     {
       impl.SetEditable(value.Get<bool>());
       break;
     }
-    case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
+    case Ui::Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
-      Text::LayoutDirectionMode mode(static_cast<Text::LayoutDirectionMode>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetLayoutDirectionModeEnumeration(value, mode))
+      Ui::Text::LayoutDirectionMode mode(static_cast<Ui::Text::LayoutDirectionMode>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetLayoutDirectionModeEnumeration(value, mode))
       {
         impl.SetLayoutDirectionMode(mode);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_WEIGHT:
+    case Ui::Text::InputFieldPropertyIndex::FONT_WEIGHT:
     {
-      Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontWeightEnumeration(value, weight))
+      Ui::Text::FontWeight weight(static_cast<Ui::Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontWeightEnumeration(value, weight))
       {
         impl.SetFontWeight(weight);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_WIDTH:
+    case Ui::Text::InputFieldPropertyIndex::FONT_WIDTH:
     {
-      Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontWidthEnumeration(value, width))
+      Ui::Text::FontWidth width(static_cast<Ui::Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontWidthEnumeration(value, width))
       {
         impl.SetFontWidth(width);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_SLANT:
+    case Ui::Text::InputFieldPropertyIndex::FONT_SLANT:
     {
-      Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontSlantEnumeration(value, slant))
+      Ui::Text::FontSlant slant(static_cast<Ui::Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontSlantEnumeration(value, slant))
       {
         impl.SetFontSlant(slant);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
       impl.SetTextBackgroundColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+    case Ui::Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
     {
       impl.SetMinimumFontSizeScale(value.Get<float>());
       break;
     }
-    case Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+    case Ui::Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
     {
       impl.SetMaximumFontSizeScale(value.Get<float>());
       break;
     }
-    case Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+    case Ui::Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
     {
       impl.SetSystemFontSizeScaleEnabled(value.Get<bool>());
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR:
     {
       impl.SetTypingTextColor(UiColor(value.Get<Vector4>()));
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY:
     {
       impl.SetTypingFontFamily(value.Get<Dali::String>());
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_SIZE:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_SIZE:
     {
       impl.SetTypingFontSize(value.Get<float>());
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT:
     {
-      Text::FontWeight weight(static_cast<Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontWeightEnumeration(value, weight))
+      Ui::Text::FontWeight weight(static_cast<Ui::Text::FontWeight>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontWeightEnumeration(value, weight))
       {
         impl.SetTypingFontWeight(weight);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH:
     {
-      Text::FontWidth width(static_cast<Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontWidthEnumeration(value, width))
+      Ui::Text::FontWidth width(static_cast<Ui::Text::FontWidth>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontWidthEnumeration(value, width))
       {
         impl.SetTypingFontWidth(width);
       }
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_SLANT:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_SLANT:
     {
-      Text::FontSlant slant(static_cast<Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
-      if(Text::GetFontSlantEnumeration(value, slant))
+      Ui::Text::FontSlant slant(static_cast<Ui::Text::FontSlant>(-1)); // Set to invalid value to ensure a valid value does get set
+      if(Ui::Text::GetFontSlantEnumeration(value, slant))
       {
         impl.SetTypingFontSlant(slant);
       }
@@ -321,237 +321,237 @@ Property::Value InputFieldImpl::PropertyHandler::GetProperty(Ui::View view, Prop
 
   switch(index)
   {
-    case Text::InputFieldPropertyIndex::TEXT:
+    case Ui::Text::InputFieldPropertyIndex::TEXT:
     {
       value = impl.GetText();
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_FAMILY:
+    case Ui::Text::InputFieldPropertyIndex::FONT_FAMILY:
     {
       value = impl.GetFontFamily();
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_SIZE:
+    case Ui::Text::InputFieldPropertyIndex::FONT_SIZE:
     {
       value = impl.GetFontSize();
       break;
     }
-    case Text::InputFieldPropertyIndex::TEXT_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::TEXT_COLOR:
     {
       value = impl.GetTextColor().GetRgba();
       break;
     }
-    case Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
+    case Ui::Text::InputFieldPropertyIndex::HORIZONTAL_ALIGNMENT:
     {
       value = impl.GetHorizontalTextAlignment();
       break;
     }
-    case Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
+    case Ui::Text::InputFieldPropertyIndex::VERTICAL_ALIGNMENT:
     {
       value = impl.GetVerticalTextAlignment();
       break;
     }
-    case Text::InputFieldPropertyIndex::OVERFLOW_MODE:
+    case Ui::Text::InputFieldPropertyIndex::OVERFLOW_MODE:
     {
       value = impl.GetTextOverflowMode();
       break;
     }
-    case Text::InputFieldPropertyIndex::PLACEHOLDER:
+    case Ui::Text::InputFieldPropertyIndex::PLACEHOLDER:
     {
       value = impl.GetPlaceholder();
       break;
     }
-    case Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::PLACEHOLDER_COLOR:
     {
       value = impl.GetPlaceholderColor().GetRgba();
       break;
     }
-    case Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
+    case Ui::Text::InputFieldPropertyIndex::SHOW_PLACEHOLDER_ON_FOCUS:
     {
       value = impl.IsPlaceholderShownOnFocus();
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_WIDTH:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_WIDTH:
     {
       value = impl.GetCursorWidth();
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_COLOR:
     {
       value = impl.GetCursorColor().GetRgba();
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_ENABLED:
     {
       value = impl.IsCursorBlinkEnabled();
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_BLINK_INTERVAL:
     {
       value = impl.GetCursorBlinkInterval();
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_POSITION:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_POSITION:
     {
       value = static_cast<int>(impl.GetCursorPosition());
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_ENABLED:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_ENABLED:
     {
       value = impl.IsSelectionEnabled();
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_COLOR:
     {
       value = impl.GetSelectionColor().GetRgba();
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTED_TEXT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTED_TEXT:
     {
       value = impl.GetSelectedText();
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTED_TEXT_START:
+    case Ui::Text::InputFieldPropertyIndex::SELECTED_TEXT_START:
     {
       value = static_cast<int>(impl.GetSelectedTextStart());
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTED_TEXT_END:
+    case Ui::Text::InputFieldPropertyIndex::SELECTED_TEXT_END:
     {
       value = static_cast<int>(impl.GetSelectedTextEnd());
       break;
     }
-    case Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED:
+    case Ui::Text::InputFieldPropertyIndex::TEXT_HANDLE_ENABLED:
     {
       value = impl.IsTextHandleEnabled();
       break;
     }
-    case Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::TEXT_HANDLE_COLOR:
     {
       value = impl.GetTextHandleColor().GetRgba();
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_HANDLE_IMAGE:
     {
       value = impl.GetCursorHandleImage();
       break;
     }
-    case Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE:
+    case Ui::Text::InputFieldPropertyIndex::CURSOR_HANDLE_PRESSED_IMAGE:
     {
       value = impl.GetCursorHandlePressedImage();
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_LEFT:
     {
       value = impl.GetSelectionHandleImageLeft();
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_HANDLE_IMAGE_RIGHT:
     {
       value = impl.GetSelectionHandleImageRight();
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_LEFT:
     {
       value = impl.GetSelectionHandlePressedImageLeft();
       break;
     }
-    case Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT:
+    case Ui::Text::InputFieldPropertyIndex::SELECTION_HANDLE_PRESSED_IMAGE_RIGHT:
     {
       value = impl.GetSelectionHandlePressedImageRight();
       break;
     }
-    case Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
+    case Ui::Text::InputFieldPropertyIndex::MAXIMUM_LENGTH:
     {
       value = impl.GetMaximumLength();
       break;
     }
-    case Text::InputFieldPropertyIndex::PASSWORD_MODE:
+    case Ui::Text::InputFieldPropertyIndex::PASSWORD_MODE:
     {
       value = impl.GetPasswordMode();
       break;
     }
-    case Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:
+    case Ui::Text::InputFieldPropertyIndex::PASSWORD_MASK_CHARACTER:
     {
       value = static_cast<int>(impl.GetPasswordMaskCharacter());
       break;
     }
-    case Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION:
+    case Ui::Text::InputFieldPropertyIndex::PASSWORD_REVEAL_DURATION:
     {
       value = static_cast<int>(impl.GetPasswordRevealDuration());
       break;
     }
-    case Text::InputFieldPropertyIndex::EDITABLE:
+    case Ui::Text::InputFieldPropertyIndex::EDITABLE:
     {
       value = impl.IsEditable();
       break;
     }
-    case Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
+    case Ui::Text::InputFieldPropertyIndex::LAYOUT_DIRECTION_MODE:
     {
       value = impl.GetLayoutDirectionMode();
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_WEIGHT:
+    case Ui::Text::InputFieldPropertyIndex::FONT_WEIGHT:
     {
       value = impl.GetFontWeight();
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_WIDTH:
+    case Ui::Text::InputFieldPropertyIndex::FONT_WIDTH:
     {
       value = impl.GetFontWidth();
       break;
     }
-    case Text::InputFieldPropertyIndex::FONT_SLANT:
+    case Ui::Text::InputFieldPropertyIndex::FONT_SLANT:
     {
       value = impl.GetFontSlant();
       break;
     }
-    case Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::TEXT_BACKGROUND_COLOR:
     {
       value = impl.GetTextBackgroundColor().GetRgba();
       break;
     }
-    case Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
+    case Ui::Text::InputFieldPropertyIndex::MINIMUM_FONT_SIZE_SCALE:
     {
       value = impl.GetMinimumFontSizeScale();
       break;
     }
-    case Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
+    case Ui::Text::InputFieldPropertyIndex::MAXIMUM_FONT_SIZE_SCALE:
     {
       value = impl.GetMaximumFontSizeScale();
       break;
     }
-    case Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
+    case Ui::Text::InputFieldPropertyIndex::SYSTEM_FONT_SIZE_SCALE_ENABLED:
     {
       value = impl.IsSystemFontSizeScaleEnabled();
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_TEXT_COLOR:
     {
       value = impl.GetTypingTextColor().GetRgba();
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_FAMILY:
     {
       value = impl.GetTypingFontFamily();
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_SIZE:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_SIZE:
     {
       value = impl.GetTypingFontSize();
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_WEIGHT:
     {
       value = impl.GetTypingFontWeight();
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_WIDTH:
     {
       value = impl.GetTypingFontWidth();
       break;
     }
-    case Text::InputFieldPropertyIndex::TYPING_FONT_SLANT:
+    case Ui::Text::InputFieldPropertyIndex::TYPING_FONT_SLANT:
     {
       value = impl.GetTypingFontSlant();
       break;

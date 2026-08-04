@@ -192,41 +192,41 @@ DALI_TYPE_REGISTRATION_END()
  * @brief Converts an input style change mask to a typing style change mask.
  * Only style attributes supported by TypingStyle are mapped.
  */
-Text::TypingStyle::Mask ToTypingStyleMask(Text::InputStyle::Mask inputStyleMask)
+Ui::Text::TypingStyle::Mask ToTypingStyleMask(Text::InputStyle::Mask inputStyleMask)
 {
-  uint32_t typingStyleMask = Text::TypingStyle::NONE;
+  uint32_t typingStyleMask = Ui::Text::TypingStyle::NONE;
 
   if(inputStyleMask & Text::InputStyle::INPUT_COLOR)
   {
-    typingStyleMask |= Text::TypingStyle::TEXT_COLOR;
+    typingStyleMask |= Ui::Text::TypingStyle::TEXT_COLOR;
   }
 
   if(inputStyleMask & Text::InputStyle::INPUT_FONT_FAMILY)
   {
-    typingStyleMask |= Text::TypingStyle::FONT_FAMILY;
+    typingStyleMask |= Ui::Text::TypingStyle::FONT_FAMILY;
   }
 
   if(inputStyleMask & Text::InputStyle::INPUT_POINT_SIZE)
   {
-    typingStyleMask |= Text::TypingStyle::FONT_SIZE;
+    typingStyleMask |= Ui::Text::TypingStyle::FONT_SIZE;
   }
 
   if(inputStyleMask & Text::InputStyle::INPUT_FONT_WEIGHT)
   {
-    typingStyleMask |= Text::TypingStyle::FONT_WEIGHT;
+    typingStyleMask |= Ui::Text::TypingStyle::FONT_WEIGHT;
   }
 
   if(inputStyleMask & Text::InputStyle::INPUT_FONT_WIDTH)
   {
-    typingStyleMask |= Text::TypingStyle::FONT_WIDTH;
+    typingStyleMask |= Ui::Text::TypingStyle::FONT_WIDTH;
   }
 
   if(inputStyleMask & Text::InputStyle::INPUT_FONT_SLANT)
   {
-    typingStyleMask |= Text::TypingStyle::FONT_SLANT;
+    typingStyleMask |= Ui::Text::TypingStyle::FONT_SLANT;
   }
 
-  return static_cast<Text::TypingStyle::Mask>(typingStyleMask);
+  return static_cast<Ui::Text::TypingStyle::Mask>(typingStyleMask);
 }
 
 /**
@@ -310,7 +310,7 @@ InputFieldImplPtr InputFieldImpl::New()
 
 InputFieldImpl::InputFieldImpl()
 : SizeNegotiatedViewImpl(),
-  mOverflowMode(Text::OverflowMode::CLIP),
+  mOverflowMode(Ui::Text::OverflowMode::CLIP),
   mAlignmentOffset(0.f),
   mMeasureInvalidated(false),
   mHasBeenStaged(false),
@@ -363,13 +363,13 @@ Dali::String InputFieldImpl::GetText() const
   return ToDaliString(text);
 }
 
-void InputFieldImpl::SetStyledText(const Text::StyledText& styledText)
+void InputFieldImpl::SetStyledText(const Ui::Text::StyledText& styledText)
 {
   DALI_LOG_RELEASE_INFO("[%p] SetStyledText\n", mController.Get());
 
   mController->SetStyledText(styledText);
   if(!mController->HasValidReplacementSource() ||
-     mController->GetHiddenTextMode() != Text::HiddenText::Mode::NONE)
+     mController->GetHiddenTextMode() != Ui::Text::HiddenText::Mode::NONE)
   {
     ClearInlineReplacementData();
   }
@@ -391,15 +391,15 @@ void InputFieldImpl::SetFontSize(float fontSize)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
 
-  if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize, Math::MACHINE_EPSILON_1000))
+  if(!Equals(mController->GetDefaultFontSize(Ui::Text::Controller::PIXEL_SIZE), fontSize, Math::MACHINE_EPSILON_1000))
   {
-    mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
+    mController->SetDefaultFontSize(fontSize, Ui::Text::Controller::PIXEL_SIZE);
   }
 }
 
 float InputFieldImpl::GetFontSize() const
 {
-  return mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE);
+  return mController->GetDefaultFontSize(Ui::Text::Controller::PIXEL_SIZE);
 }
 
 void InputFieldImpl::SetTextColor(const UiColor& color)
@@ -417,29 +417,29 @@ UiColor InputFieldImpl::GetTextColor()
   return mController->GetDefaultColor();
 }
 
-void InputFieldImpl::SetHorizontalTextAlignment(Text::Alignment alignment)
+void InputFieldImpl::SetHorizontalTextAlignment(Ui::Text::Alignment alignment)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
   mController->SetHorizontalAlignment(alignment);
 }
 
-Text::Alignment InputFieldImpl::GetHorizontalTextAlignment() const
+Ui::Text::Alignment InputFieldImpl::GetHorizontalTextAlignment() const
 {
   return mController->GetHorizontalAlignment();
 }
 
-void InputFieldImpl::SetVerticalTextAlignment(Text::Alignment alignment)
+void InputFieldImpl::SetVerticalTextAlignment(Ui::Text::Alignment alignment)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
   mController->SetVerticalAlignment(alignment);
 }
 
-Text::Alignment InputFieldImpl::GetVerticalTextAlignment() const
+Ui::Text::Alignment InputFieldImpl::GetVerticalTextAlignment() const
 {
   return mController->GetVerticalAlignment();
 }
 
-void InputFieldImpl::SetTextOverflowMode(Text::OverflowMode mode)
+void InputFieldImpl::SetTextOverflowMode(Ui::Text::OverflowMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mode != mOverflowMode)
@@ -447,12 +447,12 @@ void InputFieldImpl::SetTextOverflowMode(Text::OverflowMode mode)
     mOverflowMode = mode;
     switch(mode)
     {
-      case Text::OverflowMode::CLIP:
+      case Ui::Text::OverflowMode::CLIP:
       {
         mController->SetTextElideEnabled(false);
         break;
       }
-      case Text::OverflowMode::ELLIPSIS:
+      case Ui::Text::OverflowMode::ELLIPSIS:
       {
         mController->SetTextElideEnabled(true);
         break;
@@ -462,7 +462,7 @@ void InputFieldImpl::SetTextOverflowMode(Text::OverflowMode mode)
   }
 }
 
-Text::OverflowMode InputFieldImpl::GetTextOverflowMode() const
+Ui::Text::OverflowMode InputFieldImpl::GetTextOverflowMode() const
 {
   return mOverflowMode;
 }
@@ -472,14 +472,14 @@ void InputFieldImpl::SetPlaceholder(const Dali::String& text)
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
 
   const std::string placeholder = ToStdString(text);
-  mController->SetPlaceholderText(Text::Controller::PLACEHOLDER_TYPE_INACTIVE, placeholder);
-  mController->SetPlaceholderText(Text::Controller::PLACEHOLDER_TYPE_ACTIVE, placeholder);
+  mController->SetPlaceholderText(Ui::Text::Controller::PLACEHOLDER_TYPE_INACTIVE, placeholder);
+  mController->SetPlaceholderText(Ui::Text::Controller::PLACEHOLDER_TYPE_ACTIVE, placeholder);
 }
 
 Dali::String InputFieldImpl::GetPlaceholder() const
 {
   std::string text;
-  mController->GetPlaceholderText(Text::Controller::PLACEHOLDER_TYPE_INACTIVE, text);
+  mController->GetPlaceholderText(Ui::Text::Controller::PLACEHOLDER_TYPE_INACTIVE, text);
   return ToDaliString(text);
 }
 
@@ -501,7 +501,7 @@ UiColor InputFieldImpl::GetPlaceholderColor()
 void InputFieldImpl::SetTextGradient(const Dali::Ui::Gradient::Base& gradient)
 {
   auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
-  if(!data && !Text::Internal::Gradient::IsRenderable(gradient))
+  if(!data && !Ui::Text::Internal::Gradient::IsRenderable(gradient))
   {
     return;
   }
@@ -531,7 +531,7 @@ Gradient::Base InputFieldImpl::GetTextGradient() const
 void InputFieldImpl::SetPlaceholderTextGradient(const Dali::Ui::Gradient::Base& gradient)
 {
   auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
-  if(!data && !Text::Internal::Gradient::IsRenderable(gradient))
+  if(!data && !Ui::Text::Internal::Gradient::IsRenderable(gradient))
   {
     return;
   }
@@ -558,10 +558,10 @@ Gradient::Base InputFieldImpl::GetPlaceholderTextGradient() const
   return data ? data->atlasResources.GetPlaceholderGradient() : Gradient::Base::None();
 }
 
-void InputFieldImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
+void InputFieldImpl::SetTextGradientBoundsMode(Ui::Text::GradientBoundsMode mode)
 {
   const auto* data        = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
-  const auto  currentMode = data ? data->atlasResources.GetBoundsMode() : Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto  currentMode = data ? data->atlasResources.GetBoundsMode() : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
   if(currentMode == mode)
   {
     return;
@@ -575,10 +575,10 @@ void InputFieldImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
   }
 }
 
-Text::GradientBoundsMode InputFieldImpl::GetTextGradientBoundsMode() const
+Ui::Text::GradientBoundsMode InputFieldImpl::GetTextGradientBoundsMode() const
 {
   const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
-  return data ? data->atlasResources.GetBoundsMode() : Text::GradientBoundsMode::CONTENT_BOUND;
+  return data ? data->atlasResources.GetBoundsMode() : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
 }
 
 Dali::Property::Index InputFieldImpl::EnsureGradientAnimOffset()
@@ -688,7 +688,7 @@ UiColor InputFieldImpl::GetCursorColor()
   {
     return outColor;
   }
-  return mDecorator->GetColor(Text::PRIMARY_CURSOR);
+  return mDecorator->GetColor(Ui::Text::PRIMARY_CURSOR);
 }
 
 void InputFieldImpl::SetCursorBlinkEnabled(bool enabled)
@@ -785,73 +785,73 @@ UiColor InputFieldImpl::GetTextHandleColor() const
 void InputFieldImpl::SetCursorHandleImage(const Dali::String& image)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
-  mDecorator->SetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
+  mDecorator->SetHandleImage(Ui::Text::GRAB_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
   RequestTextRelayout();
 }
 
 Dali::String InputFieldImpl::GetCursorHandleImage() const
 {
-  return ToDaliString(mDecorator->GetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_RELEASED));
+  return ToDaliString(mDecorator->GetHandleImage(Ui::Text::GRAB_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED));
 }
 
 void InputFieldImpl::SetCursorHandlePressedImage(const Dali::String& image)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
-  mDecorator->SetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
+  mDecorator->SetHandleImage(Ui::Text::GRAB_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
   RequestTextRelayout();
 }
 
 Dali::String InputFieldImpl::GetCursorHandlePressedImage() const
 {
-  return ToDaliString(mDecorator->GetHandleImage(Text::GRAB_HANDLE, Text::HANDLE_IMAGE_PRESSED));
+  return ToDaliString(mDecorator->GetHandleImage(Ui::Text::GRAB_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED));
 }
 
 void InputFieldImpl::SetSelectionHandleImageLeft(const Dali::String& image)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
-  mDecorator->SetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
+  mDecorator->SetHandleImage(Ui::Text::LEFT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
   RequestTextRelayout();
 }
 
 Dali::String InputFieldImpl::GetSelectionHandleImageLeft() const
 {
-  return ToDaliString(mDecorator->GetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED));
+  return ToDaliString(mDecorator->GetHandleImage(Ui::Text::LEFT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED));
 }
 
 void InputFieldImpl::SetSelectionHandleImageRight(const Dali::String& image)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
-  mDecorator->SetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
+  mDecorator->SetHandleImage(Ui::Text::RIGHT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED, ToStdString(image));
   RequestTextRelayout();
 }
 
 Dali::String InputFieldImpl::GetSelectionHandleImageRight() const
 {
-  return ToDaliString(mDecorator->GetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_RELEASED));
+  return ToDaliString(mDecorator->GetHandleImage(Ui::Text::RIGHT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_RELEASED));
 }
 
 void InputFieldImpl::SetSelectionHandlePressedImageLeft(const Dali::String& image)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
-  mDecorator->SetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
+  mDecorator->SetHandleImage(Ui::Text::LEFT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
   RequestTextRelayout();
 }
 
 Dali::String InputFieldImpl::GetSelectionHandlePressedImageLeft() const
 {
-  return ToDaliString(mDecorator->GetHandleImage(Text::LEFT_SELECTION_HANDLE, Text::HANDLE_IMAGE_PRESSED));
+  return ToDaliString(mDecorator->GetHandleImage(Ui::Text::LEFT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED));
 }
 
 void InputFieldImpl::SetSelectionHandlePressedImageRight(const Dali::String& image)
 {
   DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), image.CStr());
-  mDecorator->SetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
+  mDecorator->SetHandleImage(Ui::Text::RIGHT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED, ToStdString(image));
   RequestTextRelayout();
 }
 
 Dali::String InputFieldImpl::GetSelectionHandlePressedImageRight() const
 {
-  return ToDaliString(mDecorator->GetHandleImage(Text::RIGHT_SELECTION_HANDLE, Text::HANDLE_IMAGE_PRESSED));
+  return ToDaliString(mDecorator->GetHandleImage(Ui::Text::RIGHT_SELECTION_HANDLE, Ui::Text::HANDLE_IMAGE_PRESSED));
 }
 
 void InputFieldImpl::SetMaximumLength(int length)
@@ -865,18 +865,18 @@ int InputFieldImpl::GetMaximumLength() const
   return static_cast<int>(mController->GetMaximumNumberOfCharacters());
 }
 
-void InputFieldImpl::SetInputFilter(const Text::InputFilter& inputFilter)
+void InputFieldImpl::SetInputFilter(const Ui::Text::InputFilter& inputFilter)
 {
   DALI_LOG_RELEASE_INFO("[%p] pattern allow:%s, deny:%s\n", mController.Get(), inputFilter.GetAllowPattern().CStr(), inputFilter.GetDenyPattern().CStr());
   mController->SetInputFilter(inputFilter);
 }
 
-Text::InputFilter InputFieldImpl::GetInputFilter() const
+Ui::Text::InputFilter InputFieldImpl::GetInputFilter() const
 {
   return mController->GetInputFilter();
 }
 
-void InputFieldImpl::SetPasswordMode(Text::PasswordMode mode)
+void InputFieldImpl::SetPasswordMode(Ui::Text::PasswordMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   mController->SetPasswordMode(mode);
@@ -885,14 +885,14 @@ void InputFieldImpl::SetPasswordMode(Text::PasswordMode mode)
   auto role = self.GetAccessibilityRole();
   if(role == Ui::Accessibility::Role::ENTRY || role == Ui::Accessibility::Role::PASSWORD_TEXT)
   {
-    const auto passwordRole = mode == Text::PasswordMode::NONE
+    const auto passwordRole = mode == Ui::Text::PasswordMode::NONE
                                 ? Ui::Accessibility::Role::ENTRY
                                 : Ui::Accessibility::Role::PASSWORD_TEXT;
     self.SetAccessibilityRole(passwordRole);
   }
 }
 
-Text::PasswordMode InputFieldImpl::GetPasswordMode() const
+Ui::Text::PasswordMode InputFieldImpl::GetPasswordMode() const
 {
   return mController->GetPasswordMode();
 }
@@ -920,7 +920,7 @@ uint32_t InputFieldImpl::GetPasswordRevealDuration() const
   return static_cast<uint32_t>(mController->GetPasswordRevealDuration());
 }
 
-void InputFieldImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+void InputFieldImpl::SetLayoutDirectionMode(Ui::Text::LayoutDirectionMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mController->GetLayoutDirectionMode() != mode)
@@ -930,45 +930,45 @@ void InputFieldImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
   }
 }
 
-Text::LayoutDirectionMode InputFieldImpl::GetLayoutDirectionMode() const
+Ui::Text::LayoutDirectionMode InputFieldImpl::GetLayoutDirectionMode() const
 {
   return mController->GetLayoutDirectionMode();
 }
 
-void InputFieldImpl::SetFontWeight(Text::FontWeight weight)
+void InputFieldImpl::SetFontWeight(Ui::Text::FontWeight weight)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWeightName(weight));
-  mController->SetDefaultFontWeight(Text::ToTextAbstractionFontWeight(weight));
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontWeightName(weight));
+  mController->SetDefaultFontWeight(Ui::Text::ToTextAbstractionFontWeight(weight));
 }
 
-Text::FontWeight InputFieldImpl::GetFontWeight() const
+Ui::Text::FontWeight InputFieldImpl::GetFontWeight() const
 {
-  return Text::ToFontWeight(mController->GetDefaultFontWeight());
+  return Ui::Text::ToFontWeight(mController->GetDefaultFontWeight());
 }
 
-void InputFieldImpl::SetFontWidth(Text::FontWidth width)
-{
-  // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWidthName(width));
-  mController->SetDefaultFontWidth(Text::ToTextAbstractionFontWidth(width));
-}
-
-Text::FontWidth InputFieldImpl::GetFontWidth() const
-{
-  return Text::ToFontWidth(mController->GetDefaultFontWidth());
-}
-
-void InputFieldImpl::SetFontSlant(Text::FontSlant slant)
+void InputFieldImpl::SetFontWidth(Ui::Text::FontWidth width)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontSlantName(slant));
-  mController->SetDefaultFontSlant(Text::ToTextAbstractionFontSlant(slant));
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontWidthName(width));
+  mController->SetDefaultFontWidth(Ui::Text::ToTextAbstractionFontWidth(width));
 }
 
-Text::FontSlant InputFieldImpl::GetFontSlant() const
+Ui::Text::FontWidth InputFieldImpl::GetFontWidth() const
 {
-  return Text::ToFontSlant(mController->GetDefaultFontSlant());
+  return Ui::Text::ToFontWidth(mController->GetDefaultFontWidth());
+}
+
+void InputFieldImpl::SetFontSlant(Ui::Text::FontSlant slant)
+{
+  // InvalidateMeasure() may be called if needed.
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontSlantName(slant));
+  mController->SetDefaultFontSlant(Ui::Text::ToTextAbstractionFontSlant(slant));
+}
+
+Ui::Text::FontSlant InputFieldImpl::GetFontSlant() const
+{
+  return Ui::Text::ToFontSlant(mController->GetDefaultFontSlant());
 }
 
 void InputFieldImpl::SetTextBackgroundColor(const UiColor& color)
@@ -1002,9 +1002,9 @@ void InputFieldImpl::ClearTextBackgroundColor()
   }
 }
 
-void InputFieldImpl::SetTextUnderline(const Text::Underline& underline)
+void InputFieldImpl::SetTextUnderline(const Ui::Text::Underline& underline)
 {
-  if(underline == Text::Underline::None())
+  if(underline == Ui::Text::Underline::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
@@ -1020,20 +1020,20 @@ void InputFieldImpl::SetTextUnderline(const Text::Underline& underline)
 
   SetColorBinding("UnderlineColor", color, this, &InputFieldImpl::SetUnderlineColorInternal);
 
-  if(Text::ApplyUnderlineStyle(mController, underline))
+  if(Ui::Text::ApplyUnderlineStyle(mController, underline))
   {
     mRenderer.Reset();
   }
 }
 
-Text::Underline InputFieldImpl::GetTextUnderline() const
+Ui::Text::Underline InputFieldImpl::GetTextUnderline() const
 {
   if(!mController->IsUnderlineEnabled())
   {
-    return Text::Underline::None();
+    return Ui::Text::Underline::None();
   }
 
-  Text::Underline underline;
+  Ui::Text::Underline underline;
 
   UiColor color;
   if(UiColorManager::Get().GetBindingColor(Self(), "UnderlineColor", color))
@@ -1054,13 +1054,13 @@ Text::Underline InputFieldImpl::GetTextUnderline() const
 
 void InputFieldImpl::UpdateInlineReplacementData(const Vector2& ownerSize, const Insets& padding)
 {
-  const Text::ReplacementSourceSnapshot&                source = mController->GetReplacementSourceSnapshot();
-  const Text::ReplacementRenderState&                   state  = mController->GetReplacementRenderState();
+  const Ui::Text::ReplacementSourceSnapshot&            source = mController->GetReplacementSourceSnapshot();
+  const Ui::Text::ReplacementRenderState&               state  = mController->GetReplacementRenderState();
   const Internal::Text::EditableInlineReplacementUpdate update =
     Internal::Text::ResolveEditableInlineReplacementUpdate(
       source,
       state,
-      mController->GetHiddenTextMode() != Text::HiddenText::Mode::NONE);
+      mController->GetHiddenTextMode() != Ui::Text::HiddenText::Mode::NONE);
   if(update == Internal::Text::EditableInlineReplacementUpdate::CLEAR)
   {
     ClearInlineReplacementData();
@@ -1076,10 +1076,10 @@ void InputFieldImpl::UpdateInlineReplacementData(const Vector2& ownerSize, const
   if(!data)
   {
     bool hasVisibleImage = false;
-    for(const Text::ReplacementPlacement& placement : state.placements)
+    for(const Ui::Text::ReplacementPlacement& placement : state.placements)
     {
       if(placement.visible && !placement.elided && placement.sourceRunIndex < source.runs.Count() &&
-         source.runs[placement.sourceRunIndex].type == Text::ReplacementType::IMAGE)
+         source.runs[placement.sourceRunIndex].type == Ui::Text::ReplacementType::IMAGE)
       {
         hasVisibleImage = true;
         break;
@@ -1133,7 +1133,7 @@ void InputFieldImpl::OnInlineReplacementResourcesReady(Ui::View)
     return;
   }
 
-  const Text::ReplacementRenderState& state = mController->GetReplacementRenderState();
+  const Ui::Text::ReplacementRenderState& state = mController->GetReplacementRenderState();
   if(!state.processingModel || !state.projection.HasReplacements())
   {
     return;
@@ -1146,9 +1146,9 @@ void InputFieldImpl::OnInlineReplacementResourcesReady(Ui::View)
   }
 }
 
-void InputFieldImpl::SetTextShadow(const Text::Shadow& shadow)
+void InputFieldImpl::SetTextShadow(const Ui::Text::Shadow& shadow)
 {
-  if(shadow == Text::Shadow::None())
+  if(shadow == Ui::Text::Shadow::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
@@ -1169,20 +1169,20 @@ void InputFieldImpl::SetTextShadow(const Text::Shadow& shadow)
 
   SetColorBinding("ShadowColor", color, this, &InputFieldImpl::SetShadowColorInternal);
 
-  if(Text::ApplyShadowStyle(mController, shadow))
+  if(Ui::Text::ApplyShadowStyle(mController, shadow))
   {
     mRenderer.Reset();
   }
 }
 
-Text::Shadow InputFieldImpl::GetTextShadow() const
+Ui::Text::Shadow InputFieldImpl::GetTextShadow() const
 {
   if(!mController->IsShadowEnabled())
   {
-    return Text::Shadow::None();
+    return Ui::Text::Shadow::None();
   }
 
-  Text::Shadow shadow;
+  Ui::Text::Shadow shadow;
 
   UiColor color;
   if(UiColorManager::Get().GetBindingColor(Self(), "ShadowColor", color))
@@ -1199,9 +1199,9 @@ Text::Shadow InputFieldImpl::GetTextShadow() const
   return shadow;
 }
 
-void InputFieldImpl::SetTextOutline(const Text::Outline& outline)
+void InputFieldImpl::SetTextOutline(const Ui::Text::Outline& outline)
 {
-  if(outline == Text::Outline::None())
+  if(outline == Ui::Text::Outline::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
@@ -1222,20 +1222,20 @@ void InputFieldImpl::SetTextOutline(const Text::Outline& outline)
 
   SetColorBinding("OutlineColor", color, this, &InputFieldImpl::SetOutlineColorInternal);
 
-  if(Text::ApplyOutlineStyle(mController, outline))
+  if(Ui::Text::ApplyOutlineStyle(mController, outline))
   {
     mRenderer.Reset();
   }
 }
 
-Text::Outline InputFieldImpl::GetTextOutline() const
+Ui::Text::Outline InputFieldImpl::GetTextOutline() const
 {
   if(!mController->IsOutlineEnabled())
   {
-    return Text::Outline::None();
+    return Ui::Text::Outline::None();
   }
 
-  Text::Outline outline;
+  Ui::Text::Outline outline;
 
   UiColor color;
   if(UiColorManager::Get().GetBindingColor(Self(), "OutlineColor", color))
@@ -1253,9 +1253,9 @@ Text::Outline InputFieldImpl::GetTextOutline() const
   return outline;
 }
 
-void InputFieldImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
+void InputFieldImpl::SetTextLineThrough(const Ui::Text::LineThrough& lineThrough)
 {
-  if(lineThrough == Text::LineThrough::None())
+  if(lineThrough == Ui::Text::LineThrough::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
@@ -1271,20 +1271,20 @@ void InputFieldImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
 
   SetColorBinding("LineThroughColor", color, this, &InputFieldImpl::SetLineThroughColorInternal);
 
-  if(Text::ApplyLineThroughStyle(mController, lineThrough))
+  if(Ui::Text::ApplyLineThroughStyle(mController, lineThrough))
   {
     mRenderer.Reset();
   }
 }
 
-Text::LineThrough InputFieldImpl::GetTextLineThrough() const
+Ui::Text::LineThrough InputFieldImpl::GetTextLineThrough() const
 {
   if(!mController->IsStrikethroughEnabled())
   {
-    return Text::LineThrough::None();
+    return Ui::Text::LineThrough::None();
   }
 
-  Text::LineThrough lineThrough;
+  Ui::Text::LineThrough lineThrough;
 
   UiColor color;
   if(UiColorManager::Get().GetBindingColor(Self(), "LineThroughColor", color))
@@ -1377,48 +1377,48 @@ Dali::String InputFieldImpl::GetTypingFontFamily() const
 void InputFieldImpl::SetTypingFontSize(float fontSize)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
-  mController->SetInputFontSize(fontSize, Text::Controller::PIXEL_SIZE);
+  mController->SetInputFontSize(fontSize, Ui::Text::Controller::PIXEL_SIZE);
 }
 
 float InputFieldImpl::GetTypingFontSize() const
 {
-  return mController->GetInputFontSize(Text::Controller::PIXEL_SIZE);
+  return mController->GetInputFontSize(Ui::Text::Controller::PIXEL_SIZE);
 }
 
-void InputFieldImpl::SetTypingFontWeight(Text::FontWeight weight)
+void InputFieldImpl::SetTypingFontWeight(Ui::Text::FontWeight weight)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWeightName(weight));
-  mController->SetInputFontWeight(Text::ToTextAbstractionFontWeight(weight));
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontWeightName(weight));
+  mController->SetInputFontWeight(Ui::Text::ToTextAbstractionFontWeight(weight));
 }
 
-Text::FontWeight InputFieldImpl::GetTypingFontWeight() const
+Ui::Text::FontWeight InputFieldImpl::GetTypingFontWeight() const
 {
-  return Text::ToFontWeight(mController->GetInputFontWeight());
+  return Ui::Text::ToFontWeight(mController->GetInputFontWeight());
 }
 
-void InputFieldImpl::SetTypingFontWidth(Text::FontWidth width)
+void InputFieldImpl::SetTypingFontWidth(Ui::Text::FontWidth width)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWidthName(width));
-  mController->SetInputFontWidth(Text::ToTextAbstractionFontWidth(width));
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontWidthName(width));
+  mController->SetInputFontWidth(Ui::Text::ToTextAbstractionFontWidth(width));
 }
 
-Text::FontWidth InputFieldImpl::GetTypingFontWidth() const
+Ui::Text::FontWidth InputFieldImpl::GetTypingFontWidth() const
 {
-  return Text::ToFontWidth(mController->GetInputFontWidth());
+  return Ui::Text::ToFontWidth(mController->GetInputFontWidth());
 }
 
-void InputFieldImpl::SetTypingFontSlant(Text::FontSlant slant)
+void InputFieldImpl::SetTypingFontSlant(Ui::Text::FontSlant slant)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontSlantName(slant));
-  mController->SetInputFontSlant(Text::ToTextAbstractionFontSlant(slant));
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontSlantName(slant));
+  mController->SetInputFontSlant(Ui::Text::ToTextAbstractionFontSlant(slant));
 }
 
-Text::FontSlant InputFieldImpl::GetTypingFontSlant() const
+Ui::Text::FontSlant InputFieldImpl::GetTypingFontSlant() const
 {
-  return Text::ToFontSlant(mController->GetInputFontSlant());
+  return Ui::Text::ToFontSlant(mController->GetInputFontSlant());
 }
 
-void InputFieldImpl::SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes)
+void InputFieldImpl::SetFontVariation(const Dali::Vector<Ui::Text::FontVariation::Axis>& axes)
 {
   // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), axes.Count());
@@ -1431,12 +1431,12 @@ void InputFieldImpl::SetFontVariation(const Dali::String& settings)
   {
     DALI_LOG_WARNING(
       "[%p] Empty font variation string is not allowed. "
-      "Use SetFontVariation(Text::FontVariation::None()) instead.\n",
+      "Use SetFontVariation(Ui::Text::FontVariation::None()) instead.\n",
       mController.Get());
     return;
   }
 
-  auto axes = Text::FontVariation::FromString(settings);
+  auto axes = Ui::Text::FontVariation::FromString(settings);
   if(axes.Empty())
   {
     DALI_LOG_WARNING("[%p] Failed to parse font variation string: %s\n", mController.Get(), settings.CStr());
@@ -1447,7 +1447,7 @@ void InputFieldImpl::SetFontVariation(const Dali::String& settings)
   SetFontVariation(axes);
 }
 
-Dali::Vector<Text::FontVariation::Axis> InputFieldImpl::GetFontVariation() const
+Dali::Vector<Ui::Text::FontVariation::Axis> InputFieldImpl::GetFontVariation() const
 {
   return mController->GetVariations();
 }
@@ -1509,13 +1509,13 @@ float InputFieldImpl::GetAdjustedFontSizeScale() const
 
 uint32_t InputFieldImpl::GetSelectedTextStart() const
 {
-  Uint32Pair range = mController->GetTextSelectionRange();
+  Text::Uint32Pair range = mController->GetTextSelectionRange();
   return range.first;
 }
 
 uint32_t InputFieldImpl::GetSelectedTextEnd() const
 {
-  Uint32Pair range = mController->GetTextSelectionRange();
+  Text::Uint32Pair range = mController->GetTextSelectionRange();
   return range.second;
 }
 
@@ -1536,7 +1536,7 @@ Signal<void(Ui::View)>& InputFieldImpl::MaximumLengthReachedSignal()
   return mMaxLengthReachedSignal;
 }
 
-Signal<void(Ui::View, Text::InputFilter::RejectReason)>& InputFieldImpl::InputRejectedSignal()
+Signal<void(Ui::View, Ui::Text::InputFilter::RejectReason)>& InputFieldImpl::InputRejectedSignal()
 {
   return mInputRejectedSignal;
 }
@@ -1561,7 +1561,7 @@ Signal<void(Ui::View)>& InputFieldImpl::SelectionClearedSignal()
   return mSelectionClearedSignal;
 }
 
-Signal<void(Ui::View, Text::TypingStyle::Mask)>& InputFieldImpl::TypingStyleChangedSignal()
+Signal<void(Ui::View, Ui::Text::TypingStyle::Mask)>& InputFieldImpl::TypingStyleChangedSignal()
 {
   return mTypingStyleChangedSignal;
 }
@@ -1650,13 +1650,13 @@ void InputFieldImpl::OnInitialize()
 
   Actor self = Self();
 
-  mController = Text::Controller::New(this, this, this, this);
+  mController = Ui::Text::Controller::New(this, this, this, this);
   mController->SetGlyphType(TextAbstraction::BITMAP_GLYPH);
-  mDecorator = Text::Decorator::New(*mController, *mController);
+  mDecorator = Ui::Text::Decorator::New(*mController, *mController);
 
   mInputMethodContext = Dali::Integration::InputMethodContext::New(self);
 
-  mController->GetLayoutEngine().SetLayout(Text::Layout::Engine::SINGLE_LINE_BOX);
+  mController->GetLayoutEngine().SetLayout(Ui::Text::Layout::Engine::SINGLE_LINE_BOX);
 
   // Enables the text input.
   mController->EnableTextInput(mDecorator, mInputMethodContext);
@@ -1670,8 +1670,8 @@ void InputFieldImpl::OnInitialize()
   // Disable the smooth handle panning.
   mController->SetSmoothHandlePanEnabled(false);
 
-  mController->SetNoTextDoubleTapAction(Text::Controller::NoTextTap::HIGHLIGHT);
-  mController->SetNoTextLongPressAction(Text::Controller::NoTextTap::HIGHLIGHT);
+  mController->SetNoTextDoubleTapAction(Ui::Text::Controller::NoTextTap::HIGHLIGHT);
+  mController->SetNoTextLongPressAction(Ui::Text::Controller::NoTextTap::HIGHLIGHT);
 
   // Disable the text ellipsis.
   mController->SetTextElideEnabled(false);
@@ -1706,7 +1706,7 @@ void InputFieldImpl::OnInitialize()
   self.TouchEventSignal().Connect(this, &InputFieldImpl::OnTouched);
 
   // Flip vertically the 'left' selection handle
-  mDecorator->FlipHandleVertically(Text::LEFT_SELECTION_HANDLE, true);
+  mDecorator->FlipHandleVertically(Ui::Text::LEFT_SELECTION_HANDLE, true);
 
   // Fill-parent area by default
   DevelActor::SetResizePolicy(self, ResizePolicy::FILL_TO_PARENT, Dimension::WIDTH);
@@ -1791,31 +1791,31 @@ void InputFieldImpl::OnRelayout(const Vector2& size, RelayoutContainer& containe
     EmitTextChanged();
   }
 
-  Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
+  Ui::Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
   SyncAtlasGradientState();
 
-  if((Text::Controller::NONE_UPDATED != updateTextType) || !mRenderer)
+  if((Ui::Text::Controller::NONE_UPDATED != updateTextType) || !mRenderer)
   {
     mController->SetLayoutOffsetWithPadding(Vector2(padding.start, padding.top));
 
     if(mDecorator &&
-       (Text::Controller::NONE_UPDATED != (Text::Controller::DECORATOR_UPDATED & updateTextType)))
+       (Ui::Text::Controller::NONE_UPDATED != (Ui::Text::Controller::DECORATOR_UPDATED & updateTextType)))
     {
       mDecorator->Relayout(contentSize, container);
     }
 
     if(!mRenderer)
     {
-      mRenderer = Text::Backend::Get().NewRenderer();
+      mRenderer = Ui::Text::Backend::Get().NewRenderer();
       ApplyAtlasGradientState();
-      updateTextType = static_cast<Text::Controller::UpdateTextType>(updateTextType | Text::Controller::MODEL_UPDATED);
+      updateTextType = static_cast<Ui::Text::Controller::UpdateTextType>(updateTextType | Ui::Text::Controller::MODEL_UPDATED);
     }
 
     RenderText(updateTextType);
   }
   else
   {
-    auto atlasFrameState = Text::Internal::Gradient::AtlasFrameState{};
+    auto atlasFrameState = Ui::Text::Internal::Gradient::AtlasFrameState{};
     if(mHasTextGradientPropertyData)
     {
       const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
@@ -2361,14 +2361,14 @@ void InputFieldImpl::CursorPositionChanged(unsigned int oldPosition, unsigned in
 
 void InputFieldImpl::InputStyleChanged(Text::InputStyle::Mask inputStyleMask)
 {
-  const Text::TypingStyle::Mask mask = ToTypingStyleMask(inputStyleMask);
-  if(mask != Text::TypingStyle::NONE)
+  const Ui::Text::TypingStyle::Mask mask = ToTypingStyleMask(inputStyleMask);
+  if(mask != Ui::Text::TypingStyle::NONE)
   {
     EmitTypingStyleChanged(mask);
   }
 }
 
-void InputFieldImpl::InputRejected(Text::InputFilter::RejectReason reason)
+void InputFieldImpl::InputRejected(Ui::Text::InputFilter::RejectReason reason)
 {
   EmitInputRejected(reason);
 }
@@ -2456,9 +2456,9 @@ void InputFieldImpl::SetTextSelectionRange(const uint32_t* start, const uint32_t
   }
 }
 
-Uint32Pair InputFieldImpl::GetTextSelectionRange() const
+Text::Uint32Pair InputFieldImpl::GetTextSelectionRange() const
 {
-  Uint32Pair range;
+  Text::Uint32Pair range;
   if(mController && mController->IsShowingRealText())
   {
     range = mController->GetTextSelectionRange();
@@ -2513,7 +2513,7 @@ void InputFieldImpl::OnSceneConnect(Dali::Actor actor)
 {
   if(mHasBeenStaged)
   {
-    RenderText(static_cast<Text::Controller::UpdateTextType>(Text::Controller::MODEL_UPDATED | Text::Controller::DECORATOR_UPDATED));
+    RenderText(static_cast<Ui::Text::Controller::UpdateTextType>(Ui::Text::Controller::MODEL_UPDATED | Ui::Text::Controller::DECORATOR_UPDATED));
   }
   else
   {
@@ -2618,10 +2618,10 @@ void InputFieldImpl::AddLayer(Actor& layer, Actor& actor)
   layer = actor;
 }
 
-void InputFieldImpl::RenderText(Text::Controller::UpdateTextType updateTextType)
+void InputFieldImpl::RenderText(Ui::Text::Controller::UpdateTextType updateTextType)
 {
   const Vector2 size            = Self().GetProperty<Vector3>(Actor::Property::SIZE).GetVectorXY();
-  auto          atlasFrameState = Text::Internal::Gradient::AtlasFrameState{};
+  auto          atlasFrameState = Ui::Text::Internal::Gradient::AtlasFrameState{};
   if(mHasTextGradientPropertyData)
   {
     const auto* data = Internal::Text::GetEditableTextGradientPropertyData(mTextGradientPropertyData);
@@ -2870,7 +2870,7 @@ void InputFieldImpl::EmitMaximumLengthReached()
   mMaxLengthReachedSignal.Emit(handle);
 }
 
-void InputFieldImpl::EmitInputRejected(Text::InputFilter::RejectReason reason)
+void InputFieldImpl::EmitInputRejected(Ui::Text::InputFilter::RejectReason reason)
 {
   Ui::View handle(GetOwner());
   mInputRejectedSignal.Emit(handle, reason);
@@ -2901,8 +2901,8 @@ void InputFieldImpl::EmitSelectionStarted()
 
 void InputFieldImpl::EmitSelectionChanged()
 {
-  Ui::View   handle(GetOwner());
-  Uint32Pair range = mController->GetTextSelectionRange();
+  Ui::View         handle(GetOwner());
+  Text::Uint32Pair range = mController->GetTextSelectionRange();
   mSelectionChangedSignal.Emit(handle, range.first, range.second);
   mSelectionChanged = false;
 }
@@ -2914,7 +2914,7 @@ void InputFieldImpl::EmitSelectionCleared()
   mSelectionCleared = false;
 }
 
-void InputFieldImpl::EmitTypingStyleChanged(Text::TypingStyle::Mask mask)
+void InputFieldImpl::EmitTypingStyleChanged(Ui::Text::TypingStyle::Mask mask)
 {
   Ui::View handle(GetOwner());
   mTypingStyleChangedSignal.Emit(handle, mask);
@@ -2947,8 +2947,8 @@ void InputFieldImpl::SetPlaceholderColorInternal(const Vector4& color)
 void InputFieldImpl::SetCursorColorInternal(const Vector4& color)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
-  mDecorator->SetCursorColor(Text::PRIMARY_CURSOR, color);
-  mDecorator->SetCursorColor(Text::SECONDARY_CURSOR, color);
+  mDecorator->SetCursorColor(Ui::Text::PRIMARY_CURSOR, color);
+  mDecorator->SetCursorColor(Ui::Text::SECONDARY_CURSOR, color);
   RequestTextRelayout();
 }
 

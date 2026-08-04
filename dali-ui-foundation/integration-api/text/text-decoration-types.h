@@ -22,6 +22,8 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Integration
+{
 namespace Text
 {
 
@@ -36,6 +38,7 @@ enum DecorationType
 };
 
 } // namespace Text
+} // namespace Integration
 } // namespace Ui
 } // namespace Dali
 

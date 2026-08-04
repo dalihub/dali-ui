@@ -20,13 +20,17 @@
 
 namespace Dali
 {
-class Actor;
-
 namespace Ui
 {
 namespace Text
 {
 struct AsyncTextRenderInfo;
+} // namespace Text
+
+namespace Integration
+{
+namespace Text
+{
 
 /**
  * @brief An interface used by the text component which implement async text.
@@ -44,7 +48,7 @@ public:
    *
    * @param[in] renderInfo The asynchronous text render information.
    */
-  virtual void AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderInfo) = 0;
+  virtual void AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& renderInfo) = 0;
 
   /**
    * @brief Called when the text fit point size has changed asynchronously.
@@ -58,17 +62,19 @@ public:
    *
    * @param[in] renderInfo The asynchronous text render information.
    */
-  virtual void AsyncRenderFinished(Text::AsyncTextRenderInfo&& renderInfo) = 0;
+  virtual void AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo) = 0;
 
   /**
    * @brief Called when asynchronous size computation has finished.
    *
    * @param[in] renderInfo The asynchronous text render information.
    */
-  virtual void AsyncSizeComputed(const Text::AsyncTextRenderInfo& renderInfo) = 0;
+  virtual void AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInfo) = 0;
 };
 
 } // namespace Text
+
+} // namespace Integration
 
 } // namespace Ui
 

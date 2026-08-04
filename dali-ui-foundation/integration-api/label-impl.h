@@ -26,7 +26,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
-#include <dali-ui-foundation/integration-api/text/async-text/async-text-interface.h>
+#include <dali-ui-foundation/integration-api/text/async-text-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
@@ -118,12 +118,12 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetStyledText
    */
-  void SetStyledText(const Text::StyledText& styledText);
+  void SetStyledText(const Ui::Text::StyledText& styledText);
 
   /**
    * @copydoc Dali::Ui::Label::GetStyledText
    */
-  Text::StyledText GetStyledText() const;
+  Ui::Text::StyledText GetStyledText() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetFontFamily
@@ -158,12 +158,12 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetLineWrapMode
    */
-  void SetLineWrapMode(Text::LineWrapMode mode);
+  void SetLineWrapMode(Ui::Text::LineWrapMode mode);
 
   /**
    * @copydoc Dali::Ui::Label::GetLineWrapMode
    */
-  Text::LineWrapMode GetLineWrapMode() const;
+  Ui::Text::LineWrapMode GetLineWrapMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextColor
@@ -188,12 +188,12 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetTextGradientBoundsMode
    */
-  void SetTextGradientBoundsMode(Text::GradientBoundsMode mode);
+  void SetTextGradientBoundsMode(Ui::Text::GradientBoundsMode mode);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextGradientBoundsMode
    */
-  Text::GradientBoundsMode GetTextGradientBoundsMode() const;
+  Ui::Text::GradientBoundsMode GetTextGradientBoundsMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextGradientOverlay
@@ -208,22 +208,22 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetTextGradientOverlayBoundsMode
    */
-  void SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode);
+  void SetTextGradientOverlayBoundsMode(Ui::Text::GradientBoundsMode mode);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextGradientOverlayBoundsMode
    */
-  Text::GradientBoundsMode GetTextGradientOverlayBoundsMode() const;
+  Ui::Text::GradientBoundsMode GetTextGradientOverlayBoundsMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextGradientOverlayMode
    */
-  void SetTextGradientOverlayMode(Text::GradientOverlayMode mode);
+  void SetTextGradientOverlayMode(Ui::Text::GradientOverlayMode mode);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextGradientOverlayMode
    */
-  Text::GradientOverlayMode GetTextGradientOverlayMode() const;
+  Ui::Text::GradientOverlayMode GetTextGradientOverlayMode() const;
 
   /**
    * @brief Lazily registers the animatable TextGradient start offset source property.
@@ -248,32 +248,32 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetHorizontalTextAlignment
    */
-  void SetHorizontalTextAlignment(Text::Alignment alignment);
+  void SetHorizontalTextAlignment(Ui::Text::Alignment alignment);
 
   /**
    * @copydoc Dali::Ui::Label::GetHorizontalTextAlignment
    */
-  Text::Alignment GetHorizontalTextAlignment() const;
+  Ui::Text::Alignment GetHorizontalTextAlignment() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetVerticalTextAlignment
    */
-  void SetVerticalTextAlignment(Text::Alignment alignment);
+  void SetVerticalTextAlignment(Ui::Text::Alignment alignment);
 
   /**
    * @copydoc Dali::Ui::Label::GetVerticalTextAlignment
    */
-  Text::Alignment GetVerticalTextAlignment() const;
+  Ui::Text::Alignment GetVerticalTextAlignment() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextOverflowMode
    */
-  void SetTextOverflowMode(Text::OverflowMode mode);
+  void SetTextOverflowMode(Ui::Text::OverflowMode mode);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextOverflowMode
    */
-  Text::OverflowMode GetTextOverflowMode() const;
+  Ui::Text::OverflowMode GetTextOverflowMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetLineHeight
@@ -288,22 +288,22 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetLineHeightMode
    */
-  void SetLineHeightMode(Text::LineHeightMode mode);
+  void SetLineHeightMode(Ui::Text::LineHeightMode mode);
 
   /**
    * @copydoc Dali::Ui::Label::GetLineHeightMode
    */
-  Text::LineHeightMode GetLineHeightMode() const;
+  Ui::Text::LineHeightMode GetLineHeightMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetLayoutDirectionMode
    */
-  void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
+  void SetLayoutDirectionMode(Ui::Text::LayoutDirectionMode mode);
 
   /**
    * @copydoc Dali::Ui::Label::GetLayoutDirectionMode
    */
-  Text::LayoutDirectionMode GetLayoutDirectionMode() const;
+  Ui::Text::LayoutDirectionMode GetLayoutDirectionMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetAnchorColor
@@ -328,12 +328,12 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetMarqueeTriggerPolicy
    */
-  void SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy);
+  void SetMarqueeTriggerPolicy(Ui::Text::MarqueeTriggerPolicy policy);
 
   /**
    * @copydoc Dali::Ui::Label::GetMarqueeTriggerPolicy
    */
-  Text::MarqueeTriggerPolicy GetMarqueeTriggerPolicy() const;
+  Ui::Text::MarqueeTriggerPolicy GetMarqueeTriggerPolicy() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetMarqueeSpeed
@@ -378,52 +378,52 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetMarqueeOrientation
    */
-  void SetMarqueeOrientation(Text::MarqueeOrientation orientation);
+  void SetMarqueeOrientation(Ui::Text::MarqueeOrientation orientation);
 
   /**
    * @copydoc Dali::Ui::Label::GetMarqueeOrientation
    */
-  Text::MarqueeOrientation GetMarqueeOrientation() const;
+  Ui::Text::MarqueeOrientation GetMarqueeOrientation() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetMarqueeStopMode
    */
-  void SetMarqueeStopMode(Text::MarqueeStopMode stopMode);
+  void SetMarqueeStopMode(Ui::Text::MarqueeStopMode stopMode);
 
   /**
    * @copydoc Dali::Ui::Label::GetMarqueeStopMode
    */
-  Text::MarqueeStopMode GetMarqueeStopMode() const;
+  Ui::Text::MarqueeStopMode GetMarqueeStopMode() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetFontWeight
    */
-  void SetFontWeight(Text::FontWeight weight);
+  void SetFontWeight(Ui::Text::FontWeight weight);
 
   /**
    * @copydoc Dali::Ui::Label::GetFontWeight
    */
-  Text::FontWeight GetFontWeight() const;
+  Ui::Text::FontWeight GetFontWeight() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetFontWidth
    */
-  void SetFontWidth(Text::FontWidth width);
+  void SetFontWidth(Ui::Text::FontWidth width);
 
   /**
    * @copydoc Dali::Ui::Label::GetFontWidth
    */
-  Text::FontWidth GetFontWidth() const;
+  Ui::Text::FontWidth GetFontWidth() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetFontSlant
    */
-  void SetFontSlant(Text::FontSlant slant);
+  void SetFontSlant(Ui::Text::FontSlant slant);
 
   /**
    * @copydoc Dali::Ui::Label::GetFontSlant
    */
-  Text::FontSlant GetFontSlant() const;
+  Ui::Text::FontSlant GetFontSlant() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextBackgroundColor
@@ -443,72 +443,72 @@ public:
   /**
    * @copydoc Dali::Ui::Label::SetTextUnderline
    */
-  void SetTextUnderline(const Text::Underline& underline);
+  void SetTextUnderline(const Ui::Text::Underline& underline);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextUnderline
    */
-  Text::Underline GetTextUnderline() const;
+  Ui::Text::Underline GetTextUnderline() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextShadow
    */
-  void SetTextShadow(const Text::Shadow& shadow);
+  void SetTextShadow(const Ui::Text::Shadow& shadow);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextShadow
    */
-  Text::Shadow GetTextShadow() const;
+  Ui::Text::Shadow GetTextShadow() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextOutline
    */
-  void SetTextOutline(const Text::Outline& outline);
+  void SetTextOutline(const Ui::Text::Outline& outline);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextOutline
    */
-  Text::Outline GetTextOutline() const;
+  Ui::Text::Outline GetTextOutline() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextLineThrough
    */
-  void SetTextLineThrough(const Text::LineThrough& lineThrough);
+  void SetTextLineThrough(const Ui::Text::LineThrough& lineThrough);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextLineThrough
    */
-  Text::LineThrough GetTextLineThrough() const;
+  Ui::Text::LineThrough GetTextLineThrough() const;
 
   /**
    * @copydoc Dali::Ui::Label::SetTextBevel
    */
-  void SetTextBevel(const Text::Bevel& bevel);
+  void SetTextBevel(const Ui::Text::Bevel& bevel);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextBevel
    */
-  Text::Bevel GetTextBevel() const;
+  Ui::Text::Bevel GetTextBevel() const;
 
   /**
    * @see Dali::Ui::Label::SetTextFit
    */
-  void SetTextFit(const Text::Fit& fit);
+  void SetTextFit(const Ui::Text::Fit& fit);
 
   /**
    * @see Dali::Ui::Label::SetTextFit
    */
-  void SetTextFit(const Text::Fit::Range& range);
+  void SetTextFit(const Ui::Text::Fit::Range& range);
 
   /**
-   * @see Dali::Ui::Label::SetTextFit(const Dali::Vector<Text::Fit::Candidate>&)
+   * @see Dali::Ui::Label::SetTextFit(const Dali::Vector<Ui::Text::Fit::Candidate>&)
    */
-  void SetTextFit(const Dali::Vector<Text::Fit::Candidate>& candidates);
+  void SetTextFit(const Dali::Vector<Ui::Text::Fit::Candidate>& candidates);
 
   /**
    * @copydoc Dali::Ui::Label::GetTextFit
    */
-  Text::Fit GetTextFit() const;
+  Ui::Text::Fit GetTextFit() const;
 
   /**
    * @brief Sets the explicit font size scale used internally.
@@ -553,7 +553,7 @@ public:
   /**
    * @see Dali::Ui::Label::SetFontVariation
    */
-  void SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes);
+  void SetFontVariation(const Dali::Vector<Ui::Text::FontVariation::Axis>& axes);
 
   /**
    * @see Dali::Ui::Label::SetFontVariation(const Dali::String&)
@@ -563,7 +563,7 @@ public:
   /**
    * @copydoc Dali::Ui::Label::GetFontVariation
    */
-  Dali::Vector<Text::FontVariation::Axis> GetFontVariation() const;
+  Dali::Vector<Ui::Text::FontVariation::Axis> GetFontVariation() const;
 
   /**
    * @brief Registers or retrieves a font variation property for the given axis tag.
@@ -907,7 +907,7 @@ private: // From AsyncTextInterface
   /**
    * @copydoc Text::AsyncTextInterface::AsyncInitializeMarquee()
    */
-  void AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderInfo) override;
+  void AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& renderInfo) override;
 
   /**
    * @copydoc Text::AsyncTextInterface::AsyncTextFitChanged()
@@ -917,12 +917,12 @@ private: // From AsyncTextInterface
   /**
    * @copydoc Text::AsyncTextInterface::AsyncRenderFinished()
    */
-  void AsyncRenderFinished(Text::AsyncTextRenderInfo&& renderInfo) override;
+  void AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo) override;
 
   /**
    * @copydoc Text::AsyncTextInterface::AsyncSizeComputed()
    */
-  void AsyncSizeComputed(const Text::AsyncTextRenderInfo& renderInfo) override;
+  void AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInfo) override;
 
 private: // Implementation
   /**
@@ -951,11 +951,11 @@ private: // Implementation
    * @param[in] ownerSize The control size.
    * @param[in] padding The effective text padding.
    */
-  void UpdateInlineReplacementData(const Text::ReplacementSourceSnapshot&    source,
-                                   const Vector<Text::ReplacementPlacement>& placements,
-                                   uint64_t                                  sourceRevision,
-                                   const Vector2&                            ownerSize,
-                                   const Insets&                             padding);
+  void UpdateInlineReplacementData(const Ui::Text::ReplacementSourceSnapshot&    source,
+                                   const Vector<Ui::Text::ReplacementPlacement>& placements,
+                                   uint64_t                                      sourceRevision,
+                                   const Vector2&                                ownerSize,
+                                   const Insets&                                 padding);
 
   /**
    * @brief Refreshes inline replacement visuals after resource loading.
@@ -1154,7 +1154,7 @@ private: // Implementation
    *
    * @return The text scroller.
    */
-  Text::TextScrollerPtr GetTextScroller();
+  Ui::Text::TextScrollerPtr GetTextScroller();
 
   /**
    * @brief Enables or disables the marquee animation.
@@ -1185,7 +1185,7 @@ private: // Implementation
    * @param[in] contentSize The size of the text content excluding padding.
    * @param[in] orientation The marquee orientation.
    */
-  void EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOrientation orientation);
+  void EvaluateAndApplyMarquee(const Size& contentSize, Ui::Text::MarqueeOrientation orientation);
 
   /**
    * @brief Prepares layout data required for marquee.
@@ -1194,7 +1194,7 @@ private: // Implementation
    * @param[in] orientation The marquee orientation.
    * @param[out] originSize The laid-out text size used to compute the initial scroll offset.
    */
-  void PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrientation orientation, Size& originSize);
+  void PrepareMarqueeLayout(const Size& contentSize, Ui::Text::MarqueeOrientation orientation, Size& originSize);
 
   /**
    * @brief Called when a font variation property changes.
@@ -1276,7 +1276,7 @@ private: // Implementation
    * @param[in] layoutDirection The layout direction.
    * @return The parameters for asynchronous text processing.
    */
-  Text::AsyncTextParameters GetAsyncTextParameters(Text::Async::RequestType requestType, const Vector2& contentSize, const Insets& padding, Dali::LayoutDirection::Type layoutDirection);
+  Ui::Text::AsyncTextParameters GetAsyncTextParameters(Ui::Text::Async::RequestType requestType, const Vector2& contentSize, const Insets& padding, Dali::LayoutDirection::Type layoutDirection);
 
   /**
    * @brief Emits TextFitChanged signal.
@@ -1355,18 +1355,18 @@ private:
   Internal::Text::TextGradientPropertyDataPtr mTextGradientPropertyData;
   Internal::Text::StyledTextSourceDataPtr     mStyledTextSourceData;
 
-  Visual::Base          mVisual;
-  Text::ControllerPtr   mController;
-  Text::TextScrollerPtr mTextScroller;
+  Visual::Base              mVisual;
+  Ui::Text::ControllerPtr   mController;
+  Ui::Text::TextScrollerPtr mTextScroller;
 
-  Vector2                    mSize;
-  Vector2                    mLastMeasureConstraints;
-  Vector2                    mLastMeasureRequestedSize;
-  Vector2                    mTouchPosition; ///< The initial touch down position.
-  float                      mLineHeight;
-  Text::LineHeightMode       mLineHeightMode;
-  Text::OverflowMode         mOverflowMode;
-  Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
+  Vector2                        mSize;
+  Vector2                        mLastMeasureConstraints;
+  Vector2                        mLastMeasureRequestedSize;
+  Vector2                        mTouchPosition; ///< The initial touch down position.
+  float                          mLineHeight;
+  Ui::Text::LineHeightMode       mLineHeightMode;
+  Ui::Text::OverflowMode         mOverflowMode;
+  Ui::Text::MarqueeTriggerPolicy mMarqueeTriggerPolicy;
 
   int  mAsyncLineCount;
   int  mTextColorAnimatedCount;

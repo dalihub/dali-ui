@@ -2514,7 +2514,7 @@ void Controller::SetTextSelectionRange(const uint32_t* start, const uint32_t* en
   }
 }
 
-Uint32Pair Controller::GetTextSelectionRange() const
+Ui::Integration::Text::Uint32Pair Controller::GetTextSelectionRange() const
 {
   return mImpl->GetTextSelectionRange();
 }
@@ -2556,17 +2556,17 @@ void Controller::SelectText(const uint32_t start, const uint32_t end)
   EventHandler::SelectEvent(*this, start, end, SelectionType::RANGE);
 }
 
-string Controller::GetSelectedText() const
+std::string Controller::GetSelectedText() const
 {
   return mImpl->GetSelectedText();
 }
 
-string Controller::CopyText()
+std::string Controller::CopyText()
 {
   return mImpl->CopyText();
 }
 
-string Controller::CutText()
+std::string Controller::CutText()
 {
   return mImpl->CutText();
 }
@@ -2634,7 +2634,7 @@ void Controller::GetTargetSize(Vector2& targetSize)
   targetSize = mImpl->mModel->mVisualModel->mControlSize;
 }
 
-void Controller::AddDecoration(Actor& actor, DecorationType type, bool needsClipping)
+void Controller::AddDecoration(Actor& actor, Ui::Integration::Text::DecorationType type, bool needsClipping)
 {
   if(mImpl->mEditableControlInterface)
   {
@@ -2713,12 +2713,12 @@ CharacterIndex Controller::GetCursorPosition()
   return mImpl->mEventData ? mImpl->mEventData->mPrimaryCursorPosition : 0;
 }
 
-void Controller::SetControlInterface(ControlInterface* controlInterface)
+void Controller::SetControlInterface(Ui::Integration::Text::ControlInterface* controlInterface)
 {
   mImpl->mControlInterface = controlInterface;
 }
 
-void Controller::SetAnchorControlInterface(AnchorControlInterface* anchorControlInterface)
+void Controller::SetAnchorControlInterface(Ui::Integration::Text::AnchorControlInterface* anchorControlInterface)
 {
   mImpl->mAnchorControlInterface = anchorControlInterface;
 }
@@ -2777,9 +2777,9 @@ void Controller::Process(bool postProcess)
   }
 }
 
-Controller::Controller(ControlInterface* controlInterface, EditableControlInterface* editableControlInterface,
-                       SelectableControlInterface* selectableControlInterface,
-                       AnchorControlInterface*     anchorControlInterface)
+Controller::Controller(Ui::Integration::Text::ControlInterface* controlInterface, Ui::Integration::Text::EditableControlInterface* editableControlInterface,
+                       Ui::Integration::Text::SelectableControlInterface* selectableControlInterface,
+                       Ui::Integration::Text::AnchorControlInterface*     anchorControlInterface)
 : mImpl(new Controller::Impl(controlInterface, editableControlInterface, selectableControlInterface,
                              anchorControlInterface))
 {

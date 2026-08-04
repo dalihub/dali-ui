@@ -244,7 +244,7 @@ bool ControllerImplEventHandler::ProcessInputEvents(Controller::Impl& impl)
   if(eventData->mUpdateInputStyle)
   {
     // Keep a copy of the current input style.
-    InputStyle currentInputStyle;
+    Ui::Integration::Text::InputStyle currentInputStyle;
     currentInputStyle.Copy(eventData->mInputStyle);
 
     // Set the default style first.
@@ -262,7 +262,7 @@ bool ControllerImplEventHandler::ProcessInputEvents(Controller::Impl& impl)
 
     if(hasInputStyleChanged)
     {
-      const InputStyle::Mask styleChangedMask = currentInputStyle.GetInputStyleChangeMask(eventData->mInputStyle);
+      const Ui::Integration::Text::InputStyle::Mask styleChangedMask = currentInputStyle.GetInputStyleChangeMask(eventData->mInputStyle);
       // Queue the input style changed signal.
       eventData->mInputStyleChangedQueue.PushBack(styleChangedMask);
     }

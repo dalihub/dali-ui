@@ -20,9 +20,9 @@
 
 namespace Dali
 {
-class Actor;
-
 namespace Ui
+{
+namespace Integration
 {
 namespace Text
 {
@@ -46,6 +46,8 @@ public:
 };
 
 } // namespace Text
+
+} // namespace Integration
 
 } // namespace Ui
 

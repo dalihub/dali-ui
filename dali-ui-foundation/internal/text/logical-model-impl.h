@@ -44,11 +44,18 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Integration
+{
+namespace Text
+{
+struct InputStyle;
+} // namespace Text
+} // namespace Integration
+
 namespace Text
 {
 class LogicalModel;
 typedef IntrusivePtr<LogicalModel> LogicalModelPtr;
-struct InputStyle;
 
 /**
  * @brief A logical text model contains layout independent information.
@@ -151,7 +158,7 @@ public:
    * @param[in] index The character index.
    * @param[out] style The text's style in the given style.
    */
-  void RetrieveStyle(CharacterIndex index, InputStyle& style);
+  void RetrieveStyle(CharacterIndex index, Ui::Integration::Text::InputStyle& style);
 
   /**
    * @brief Clears the font description runs.

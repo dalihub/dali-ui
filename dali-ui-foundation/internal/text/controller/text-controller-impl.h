@@ -60,9 +60,6 @@ struct ControllerImplEventHandler;
 struct ControllerImplModelUpdater;
 struct SelectionHandleController;
 
-class SelectableControlInterface;
-class AnchorControlInterface;
-
 struct Event
 {
   // Used to queue input events until DoRelayout()
@@ -143,10 +140,10 @@ struct EventData
    */
   std::vector<Event> mEventQueue; ///< The queue of touch events etc.
 
-  Vector<InputStyle::Mask>
+  Vector<Ui::Integration::Text::InputStyle::Mask>
     mInputStyleChangedQueue; ///< Queue of changes in the input style. Used to emit the signal in the iddle callback.
 
-  InputStyle mInputStyle; ///< The style to be set to the new inputed text.
+  Ui::Integration::Text::InputStyle mInputStyle; ///< The style to be set to the new inputed text.
 
   State mPreviousState; ///< Stores the current state before it's updated with the new one.
   State mState;         ///< Selection mode, edit mode etc.
@@ -384,8 +381,8 @@ public:
   };
 
 public:
-  Impl(ControlInterface* controlInterface, EditableControlInterface* editableControlInterface,
-       SelectableControlInterface* selectableControlInterface, AnchorControlInterface* anchorControlInterface)
+  Impl(Ui::Integration::Text::ControlInterface* controlInterface, Ui::Integration::Text::EditableControlInterface* editableControlInterface,
+       Ui::Integration::Text::SelectableControlInterface* selectableControlInterface, Ui::Integration::Text::AnchorControlInterface* anchorControlInterface)
   : mControlInterface(controlInterface),
     mEditableControlInterface(editableControlInterface),
     mSelectableControlInterface(selectableControlInterface),
@@ -764,7 +761,7 @@ public:
   void RequestAsyncRender();
 
   /**
-   * @brief Request a relayout using the ControlInterface.
+   * @brief Request a relayout using the Ui::Integration::Text::ControlInterface.
    */
   void QueueModifyEvent(ModifyEvent::Type type)
   {
@@ -1009,7 +1006,7 @@ public:
    *
    * @param[out] inputStyle The default style.
    */
-  void RetrieveDefaultInputStyle(InputStyle& inputStyle);
+  void RetrieveDefaultInputStyle(Ui::Integration::Text::InputStyle& inputStyle);
 
   /**
    * @brief Retrieves the line height of the default font.
@@ -1070,37 +1067,37 @@ public:
   bool SetPrimaryCursorPosition(CharacterIndex index, bool focused);
 
   /**
-   * @copydoc Text::SelectableControlInterface::GetSelectedText()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::GetSelectedText()
    */
-  string GetSelectedText();
+  std::string GetSelectedText();
 
   /**
-   * @copydoc Text::EditableControlInterface::CopyText()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::CopyText()
    */
-  string CopyText();
+  std::string CopyText();
 
   /**
-   * @copydoc Text::EditableControlInterface::CutText()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::CutText()
    */
-  string CutText();
+  std::string CutText();
 
   /**
-   * @copydoc Text::SelectableControlInterface::SetTextSelectionRange()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::SetTextSelectionRange()
    */
   void SetTextSelectionRange(const uint32_t* pStart, const uint32_t* pEndf);
 
   /**
-   * @copydoc Text::SelectableControlInterface::GetTextSelectionRange()
+   * @copydoc Ui::Integration::Text::SelectableControlInterface::GetTextSelectionRange()
    */
-  Uint32Pair GetTextSelectionRange() const;
+  Ui::Integration::Text::Uint32Pair GetTextSelectionRange() const;
 
   /**
-   * @copydoc Text::EditableControlInterface::IsEditable()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::IsEditable()
    */
   bool IsEditable() const;
 
   /**
-   * @copydoc Text::EditableControlInterface::SetEditable()
+   * @copydoc Ui::Integration::Text::EditableControlInterface::SetEditable()
    */
   void SetEditable(bool editable);
 
@@ -1510,21 +1507,21 @@ private:
 
 public:
   // Core references / owned helpers
-  ControlInterface*                     mControlInterface;           ///< Reference to the text controller.
-  EditableControlInterface*             mEditableControlInterface;   ///< Reference to the editable text controller.
-  SelectableControlInterface*           mSelectableControlInterface; ///< Reference to the selectable text controller.
-  AnchorControlInterface*               mAnchorControlInterface;     ///< Reference to the anchor controller.
-  ModelPtr                              mModel;                      ///< Pointer to the text's model.
-  FontDefaults*                         mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
-  UnderlineDefaults*                    mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
-  ShadowDefaults*                       mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
-  EmbossDefaults*                       mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
-  OutlineDefaults*                      mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
-  EventData*                            mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
-  CallbackBase*                         mIdleCallback;               ///< Callback what would be called at idler
-  HiddenText*                           mHiddenInput;                ///< Avoid allocating this when the user does not specify hidden input mode.
-  std::unique_ptr<InputFilterProcessor> mInputFilterProcessor;       ///< Avoid allocating this when the user does not specify input filter mode.
-  MetricsPtr                            mMetrics;                    ///< A wrapper around FontClient used to get metrics & potentially down-scaled Emoji metrics.
+  Ui::Integration::Text::ControlInterface*           mControlInterface;           ///< Reference to the text controller.
+  Ui::Integration::Text::EditableControlInterface*   mEditableControlInterface;   ///< Reference to the editable text controller.
+  Ui::Integration::Text::SelectableControlInterface* mSelectableControlInterface; ///< Reference to the selectable text controller.
+  Ui::Integration::Text::AnchorControlInterface*     mAnchorControlInterface;     ///< Reference to the anchor controller.
+  ModelPtr                                           mModel;                      ///< Pointer to the text's model.
+  FontDefaults*                                      mFontDefaults;               ///< Avoid allocating this when the user does not specify a font.
+  UnderlineDefaults*                                 mUnderlineDefaults;          ///< Avoid allocating this when the user does not specify underline parameters.
+  ShadowDefaults*                                    mShadowDefaults;             ///< Avoid allocating this when the user does not specify shadow parameters.
+  EmbossDefaults*                                    mEmbossDefaults;             ///< Avoid allocating this when the user does not specify emboss parameters.
+  OutlineDefaults*                                   mOutlineDefaults;            ///< Avoid allocating this when the user does not specify outline parameters.
+  EventData*                                         mEventData;                  ///< Avoid allocating everything for text input until EnableTextInput().
+  CallbackBase*                                      mIdleCallback;               ///< Callback what would be called at idler
+  HiddenText*                                        mHiddenInput;                ///< Avoid allocating this when the user does not specify hidden input mode.
+  std::unique_ptr<InputFilterProcessor>              mInputFilterProcessor;       ///< Avoid allocating this when the user does not specify input filter mode.
+  MetricsPtr                                         mMetrics;                    ///< A wrapper around FontClient used to get metrics & potentially down-scaled Emoji metrics.
 
   // Main runtime objects
   TextAbstraction::FontClient mFontClient;       ///< Handle to the font client.

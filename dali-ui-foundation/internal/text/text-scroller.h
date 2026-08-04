@@ -30,6 +30,7 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
 #include <dali-ui-foundation/internal/text/text-definitions.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-enumerations.h>
@@ -42,7 +43,6 @@ namespace Ui
 namespace Text
 {
 class TextScroller;
-class ScrollerInterface;
 
 typedef IntrusivePtr<TextScroller> TextScrollerPtr;
 
@@ -94,7 +94,7 @@ public:
    *
    * @param[in] scrollerInterface scroller interface
    */
-  static TextScrollerPtr New(ScrollerInterface& scrollerInterface);
+  static TextScrollerPtr New(Ui::Integration::Text::ScrollerInterface& scrollerInterface);
 
   /**
    * @brief Set parameters relating to source required for scrolling
@@ -250,7 +250,7 @@ private: // Implementation
   /**
    * Constructor
    */
-  TextScroller(ScrollerInterface& scrollerInterface);
+  TextScroller(Ui::Integration::Text::ScrollerInterface& scrollerInterface);
 
   /**
    * Destructor
@@ -299,17 +299,17 @@ private: // Implementation
   void BindGradientOverlayConstraint(Property::Index rendererStartOffsetIndex);
 
 private:
-  ScrollerInterface&      mScrollerInterface;              // Interface implemented by control that requires scrolling
-  Property::Index         mScrollDeltaIndex;               // Property used by shader to represent distance to scroll
-  Animation               mScrollAnimation;                // Animation used to update the mScrollDeltaIndex
-  Dali::Renderer          mRenderer;                       // Renderer used to render the text
-  Actor                   mScrollingTextActor;             // Actor used as source for TextGradient animation properties
-  Shader                  mShader;                         // Shader originally used by the renderer while not scrolling
-  TextureSet              mTextureSet;                     // Texture originally used by the renderer while not scrolling
-  std::vector<Constraint> mGradientConstraints;            // Constraints for animated TextGradient uniforms.
-  std::vector<Constraint> mGradientOverlayConstraints;     // Constraints for animated TextGradientOverlay uniforms.
-  Property::Index         mGradientAnimOffsetIndex;        // Source property for uTextGradientStartOffset.
-  Property::Index         mGradientOverlayAnimOffsetIndex; // Source property for uTextGradientOverlayStartOffset.
+  Ui::Integration::Text::ScrollerInterface& mScrollerInterface;              // Interface implemented by control that requires scrolling
+  Property::Index                           mScrollDeltaIndex;               // Property used by shader to represent distance to scroll
+  Animation                                 mScrollAnimation;                // Animation used to update the mScrollDeltaIndex
+  Dali::Renderer                            mRenderer;                       // Renderer used to render the text
+  Actor                                     mScrollingTextActor;             // Actor used as source for TextGradient animation properties
+  Shader                                    mShader;                         // Shader originally used by the renderer while not scrolling
+  TextureSet                                mTextureSet;                     // Texture originally used by the renderer while not scrolling
+  std::vector<Constraint>                   mGradientConstraints;            // Constraints for animated TextGradient uniforms.
+  std::vector<Constraint>                   mGradientOverlayConstraints;     // Constraints for animated TextGradientOverlay uniforms.
+  Property::Index                           mGradientAnimOffsetIndex;        // Source property for uTextGradientStartOffset.
+  Property::Index                           mGradientOverlayAnimOffsetIndex; // Source property for uTextGradientOverlayStartOffset.
 
   int                      mScrollSpeed;                    ///< Speed which text should automatically scroll at
   int                      mLoopCount;                      ///< Number of time the text should scroll

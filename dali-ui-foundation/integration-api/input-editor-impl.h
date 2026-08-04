@@ -118,7 +118,7 @@ public:
   /**
    * @copydoc Dali::Ui::InputEditor::SetStyledText
    */
-  void SetStyledText(const Text::StyledText& styledText);
+  void SetStyledText(const Ui::Text::StyledText& styledText);
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetFontFamily
@@ -153,42 +153,42 @@ public:
   /**
    * @copydoc Dali::Ui::InputEditor::SetLineWrapMode
    */
-  void SetLineWrapMode(Text::LineWrapMode mode);
+  void SetLineWrapMode(Ui::Text::LineWrapMode mode);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetLineWrapMode
    */
-  Text::LineWrapMode GetLineWrapMode() const;
+  Ui::Text::LineWrapMode GetLineWrapMode() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetHorizontalTextAlignment
    */
-  void SetHorizontalTextAlignment(Text::Alignment alignment);
+  void SetHorizontalTextAlignment(Ui::Text::Alignment alignment);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetHorizontalTextAlignment
    */
-  Text::Alignment GetHorizontalTextAlignment() const;
+  Ui::Text::Alignment GetHorizontalTextAlignment() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetVerticalTextAlignment
    */
-  void SetVerticalTextAlignment(Text::Alignment alignment);
+  void SetVerticalTextAlignment(Ui::Text::Alignment alignment);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetVerticalTextAlignment
    */
-  Text::Alignment GetVerticalTextAlignment() const;
+  Ui::Text::Alignment GetVerticalTextAlignment() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetTextOverflowMode
    */
-  void SetTextOverflowMode(Text::OverflowMode mode);
+  void SetTextOverflowMode(Ui::Text::OverflowMode mode);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTextOverflowMode
    */
-  Text::OverflowMode GetTextOverflowMode() const;
+  Ui::Text::OverflowMode GetTextOverflowMode() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetLineHeight
@@ -203,12 +203,12 @@ public:
   /**
    * @copydoc Dali::Ui::InputEditor::SetLineHeightMode
    */
-  void SetLineHeightMode(Text::LineHeightMode mode);
+  void SetLineHeightMode(Ui::Text::LineHeightMode mode);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetLineHeightMode
    */
-  Text::LineHeightMode GetLineHeightMode() const;
+  Ui::Text::LineHeightMode GetLineHeightMode() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetPlaceholder
@@ -253,12 +253,12 @@ public:
   /**
    * @copydoc Dali::Ui::InputEditor::SetTextGradientBoundsMode
    */
-  void SetTextGradientBoundsMode(Text::GradientBoundsMode mode);
+  void SetTextGradientBoundsMode(Ui::Text::GradientBoundsMode mode);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTextGradientBoundsMode
    */
-  Text::GradientBoundsMode GetTextGradientBoundsMode() const;
+  Ui::Text::GradientBoundsMode GetTextGradientBoundsMode() const;
 
   /**
    * @brief Ensures the hidden source property used by TextGradientStartOffset animation.
@@ -447,52 +447,52 @@ public:
   /**
    * @copydoc Dali::Ui::InputEditor::SetInputFilter
    */
-  void SetInputFilter(const Text::InputFilter& inputFilter);
+  void SetInputFilter(const Ui::Text::InputFilter& inputFilter);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetInputFilter
    */
-  Text::InputFilter GetInputFilter() const;
+  Ui::Text::InputFilter GetInputFilter() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetLayoutDirectionMode
    */
-  void SetLayoutDirectionMode(Text::LayoutDirectionMode mode);
+  void SetLayoutDirectionMode(Ui::Text::LayoutDirectionMode mode);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetLayoutDirectionMode
    */
-  Text::LayoutDirectionMode GetLayoutDirectionMode() const;
+  Ui::Text::LayoutDirectionMode GetLayoutDirectionMode() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetFontWeight
    */
-  void SetFontWeight(Text::FontWeight weight);
+  void SetFontWeight(Ui::Text::FontWeight weight);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetFontWeight
    */
-  Text::FontWeight GetFontWeight() const;
+  Ui::Text::FontWeight GetFontWeight() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetFontWidth
    */
-  void SetFontWidth(Text::FontWidth width);
+  void SetFontWidth(Ui::Text::FontWidth width);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetFontWidth
    */
-  Text::FontWidth GetFontWidth() const;
+  Ui::Text::FontWidth GetFontWidth() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetFontSlant
    */
-  void SetFontSlant(Text::FontSlant slant);
+  void SetFontSlant(Ui::Text::FontSlant slant);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetFontSlant
    */
-  Text::FontSlant GetFontSlant() const;
+  Ui::Text::FontSlant GetFontSlant() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetTextBackgroundColor
@@ -512,42 +512,42 @@ public:
   /**
    * @copydoc Dali::Ui::InputEditor::SetTextUnderline
    */
-  void SetTextUnderline(const Text::Underline& underline);
+  void SetTextUnderline(const Ui::Text::Underline& underline);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTextUnderline
    */
-  Text::Underline GetTextUnderline() const;
+  Ui::Text::Underline GetTextUnderline() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetTextShadow
    */
-  void SetTextShadow(const Text::Shadow& shadow);
+  void SetTextShadow(const Ui::Text::Shadow& shadow);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTextShadow
    */
-  Text::Shadow GetTextShadow() const;
+  Ui::Text::Shadow GetTextShadow() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetTextOutline
    */
-  void SetTextOutline(const Text::Outline& outline);
+  void SetTextOutline(const Ui::Text::Outline& outline);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTextOutline
    */
-  Text::Outline GetTextOutline() const;
+  Ui::Text::Outline GetTextOutline() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetTextLineThrough
    */
-  void SetTextLineThrough(const Text::LineThrough& lineThrough);
+  void SetTextLineThrough(const Ui::Text::LineThrough& lineThrough);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTextLineThrough
    */
-  Text::LineThrough GetTextLineThrough() const;
+  Ui::Text::LineThrough GetTextLineThrough() const;
 
   /**
    * @brief Sets the explicit font size scale used internally.
@@ -632,37 +632,37 @@ public:
   /**
    * @copydoc Dali::Ui::InputEditor::SetTypingFontWeight
    */
-  void SetTypingFontWeight(Text::FontWeight weight);
+  void SetTypingFontWeight(Ui::Text::FontWeight weight);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTypingFontWeight
    */
-  Text::FontWeight GetTypingFontWeight() const;
+  Ui::Text::FontWeight GetTypingFontWeight() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetTypingFontWidth
    */
-  void SetTypingFontWidth(Text::FontWidth width);
+  void SetTypingFontWidth(Ui::Text::FontWidth width);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTypingFontWidth
    */
-  Text::FontWidth GetTypingFontWidth() const;
+  Ui::Text::FontWidth GetTypingFontWidth() const;
 
   /**
    * @copydoc Dali::Ui::InputEditor::SetTypingFontSlant
    */
-  void SetTypingFontSlant(Text::FontSlant slant);
+  void SetTypingFontSlant(Ui::Text::FontSlant slant);
 
   /**
    * @copydoc Dali::Ui::InputEditor::GetTypingFontSlant
    */
-  Text::FontSlant GetTypingFontSlant() const;
+  Ui::Text::FontSlant GetTypingFontSlant() const;
 
   /**
    * @see Dali::Ui::InputEditor::SetFontVariation
    */
-  void SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes);
+  void SetFontVariation(const Dali::Vector<Ui::Text::FontVariation::Axis>& axes);
 
   /**
    * @see Dali::Ui::InputEditor::SetFontVariation(const Dali::String&)
@@ -672,7 +672,7 @@ public:
   /**
    * @copydoc Dali::Ui::InputEditor::GetFontVariation
    */
-  Dali::Vector<Text::FontVariation::Axis> GetFontVariation() const;
+  Dali::Vector<Ui::Text::FontVariation::Axis> GetFontVariation() const;
 
   /**
    * @see Dali::Ui::InputEditor::SetTranslatablePlaceholder
@@ -757,7 +757,7 @@ public: // Signals
   /**
    * @copydoc Dali::Ui::InputEditor::InputRejectedSignal()
    */
-  Signal<void(View, Text::InputFilter::RejectReason)>& InputRejectedSignal();
+  Signal<void(View, Ui::Text::InputFilter::RejectReason)>& InputRejectedSignal();
 
   /**
    * @copydoc Dali::Ui::InputEditor::CursorPositionChangedSignal()
@@ -782,7 +782,7 @@ public: // Signals
   /**
    * @copydoc Dali::Ui::InputEditor::TypingStyleChangedSignal()
    */
-  Signal<void(View, Text::TypingStyle::Mask)>& TypingStyleChangedSignal();
+  Signal<void(View, Ui::Text::TypingStyle::Mask)>& TypingStyleChangedSignal();
 
 protected:
   // Construction
@@ -934,7 +934,7 @@ public: // From EditableControlInterface
   /**
    * @copydoc Text::EditableControlInterface::AddDecoration()
    */
-  void AddDecoration(Actor& actor, Ui::Text::DecorationType type, bool needsClipping) override;
+  void AddDecoration(Actor& actor, Text::DecorationType type, bool needsClipping) override;
 
   /**
    * @copydoc Text::EditableControlInterface::GetControlBackgroundColor()
@@ -979,7 +979,7 @@ public: // From EditableControlInterface
   /**
    * @copydoc Text::EditableControlInterface::InputRejected()
    */
-  void InputRejected(Text::InputFilter::RejectReason reason) override;
+  void InputRejected(Ui::Text::InputFilter::RejectReason reason) override;
 
   /**
    * @copydoc Text::EditableControlInterface::CursorPositionChanged()
@@ -1030,7 +1030,7 @@ public: // From SelectableControlInterface
   /**
    * @copydoc Text::SelectableControlInterface::GetTextSelectionRange()
    */
-  Uint32Pair GetTextSelectionRange() const override;
+  Text::Uint32Pair GetTextSelectionRange() const override;
 
   /**
    * @copydoc Text::SelectableControlInterface::SelectionChanged()
@@ -1162,7 +1162,7 @@ private: // Implementation
   /**
    * @brief Render view, create and attach actor(s) to this Input Editor.
    */
-  void RenderText(Text::Controller::UpdateTextType updateTextType);
+  void RenderText(Ui::Text::Controller::UpdateTextType updateTextType);
 
   /**
    * @brief Synchronizes the active normal/placeholder atlas gradient resource with the current renderer.
@@ -1218,7 +1218,7 @@ private: // Implementation
   /**
    * @brief Emits InputRejected signal.
    */
-  void EmitInputRejected(Text::InputFilter::RejectReason reason);
+  void EmitInputRejected(Ui::Text::InputFilter::RejectReason reason);
 
   /**
    * @brief Emits CursorPositionChanged signal.
@@ -1243,7 +1243,7 @@ private: // Implementation
   /**
    * @brief Emits TypingStyleChanged signal.
    */
-  void EmitTypingStyleChanged(Text::TypingStyle::Mask mask);
+  void EmitTypingStyleChanged(Ui::Text::TypingStyle::Mask mask);
 
   /**
    * @brief Callback applied when localized placeholder is updated.
@@ -1300,47 +1300,47 @@ private:
 
 private:
   // Data
-  Signal<void(View)>                                  mTextChangedSignal;
-  Signal<void(View)>                                  mMaxLengthReachedSignal;
-  Signal<void(View, Text::InputFilter::RejectReason)> mInputRejectedSignal;
-  Signal<void(View, uint32_t)>                        mCursorPositionChangedSignal;
-  Signal<void(View)>                                  mSelectionStartedSignal;
-  Signal<void(View, uint32_t, uint32_t)>              mSelectionChangedSignal;
-  Signal<void(View)>                                  mSelectionClearedSignal;
-  Signal<void(View, Text::TypingStyle::Mask)>         mTypingStyleChangedSignal;
+  Signal<void(View)>                                      mTextChangedSignal;
+  Signal<void(View)>                                      mMaxLengthReachedSignal;
+  Signal<void(View, Ui::Text::InputFilter::RejectReason)> mInputRejectedSignal;
+  Signal<void(View, uint32_t)>                            mCursorPositionChangedSignal;
+  Signal<void(View)>                                      mSelectionStartedSignal;
+  Signal<void(View, uint32_t, uint32_t)>                  mSelectionChangedSignal;
+  Signal<void(View)>                                      mSelectionClearedSignal;
+  Signal<void(View, Ui::Text::TypingStyle::Mask)>         mTypingStyleChangedSignal;
 
   Internal::Text::EditableTextGradientPropertyDataPtr mTextGradientPropertyData;
 
-  InputMethodContext                        mInputMethodContext;
-  TapGestureDetector                        mTapGestureDetector;
-  PanGestureDetector                        mPanGestureDetector;
-  LongPressGestureDetector                  mLongPressGestureDetector;
-  Text::ControllerPtr                       mController;
-  Text::RendererPtr                         mRenderer;
-  Text::Internal::Gradient::AtlasApplyState mAtlasApplyState;
-  Text::DecoratorPtr                        mDecorator;
-  Actor                                     mStencil;
-  std::vector<Actor>                        mClippingDecorationActors; ///< Decoration actors which need clipping.
-  std::vector<Ui::TextAnchor>               mAnchorActors;
-  Actor                                     mRenderableActor;
-  Actor                                     mActiveLayer;
-  Actor                                     mCursorLayer;
-  Actor                                     mBackgroundActor;
+  InputMethodContext                            mInputMethodContext;
+  TapGestureDetector                            mTapGestureDetector;
+  PanGestureDetector                            mPanGestureDetector;
+  LongPressGestureDetector                      mLongPressGestureDetector;
+  Ui::Text::ControllerPtr                       mController;
+  Ui::Text::RendererPtr                         mRenderer;
+  Ui::Text::Internal::Gradient::AtlasApplyState mAtlasApplyState;
+  Ui::Text::DecoratorPtr                        mDecorator;
+  Actor                                         mStencil;
+  std::vector<Actor>                            mClippingDecorationActors; ///< Decoration actors which need clipping.
+  std::vector<Ui::TextAnchor>                   mAnchorActors;
+  Actor                                         mRenderableActor;
+  Actor                                         mActiveLayer;
+  Actor                                         mCursorLayer;
+  Actor                                         mBackgroundActor;
 
-  float                mLineHeight;
-  Text::LineHeightMode mLineHeightMode;
-  Text::OverflowMode   mOverflowMode;
-  float                mAlignmentOffset;
-  bool                 mMeasureInvalidated : 1;
-  bool                 mHasBeenStaged : 1;
-  bool                 mHasTextGradientPropertyData : 1; ///< Whether editable TextGradient property data has been created.
-  bool                 mTextChanged : 1;                 ///< If true, emits TextChangedSignal in next OnRelayout().
-  bool                 mCursorPositionChanged : 1;       ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
-  bool                 mSelectionStarted : 1;            ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
-  bool                 mSelectionChanged : 1;            ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
-  bool                 mSelectionCleared : 1;            ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
-  bool                 mFocusGainedByTouch : 1;          ///< If true, focus was gained by touch, skip scroll in focus gained.
-  bool                 mAutoGrowEnabled : 1;             ///< Whether auto grow behavior is enabled.
+  float                    mLineHeight;
+  Ui::Text::LineHeightMode mLineHeightMode;
+  Ui::Text::OverflowMode   mOverflowMode;
+  float                    mAlignmentOffset;
+  bool                     mMeasureInvalidated : 1;
+  bool                     mHasBeenStaged : 1;
+  bool                     mHasTextGradientPropertyData : 1; ///< Whether editable TextGradient property data has been created.
+  bool                     mTextChanged : 1;                 ///< If true, emits TextChangedSignal in next OnRelayout().
+  bool                     mCursorPositionChanged : 1;       ///< If true, emits CursorPositionChangedSignal at the end of OnRelayout().
+  bool                     mSelectionStarted : 1;            ///< If true, emits SelectionStartedSignal at the end of OnRelayout().
+  bool                     mSelectionChanged : 1;            ///< If true, emits SelectionChangedSignal at the end of OnRelayout().
+  bool                     mSelectionCleared : 1;            ///< If true, emits SelectionClearedSignal at the end of OnRelayout().
+  bool                     mFocusGainedByTouch : 1;          ///< If true, focus was gained by touch, skip scroll in focus gained.
+  bool                     mAutoGrowEnabled : 1;             ///< Whether auto grow behavior is enabled.
 
   Dali::String mTranslatablePlaceholder; ///< Resource ID for translatable placeholder binding.
 

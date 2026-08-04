@@ -162,13 +162,13 @@ float GetDpi()
 }
 
 /**
- * @brief Lookup table that converts Text::Alignment values
+ * @brief Lookup table that converts Ui::Text::Alignment values
  *        to a normalized vertical alignment factor.
  */
-const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Text::Alignment::END) + 1] = {
-  0.0f, // Text::Alignment::START
-  0.5f, // Text::Alignment::CENTER
-  1.0f  // Text::Alignment::END
+const float VERTICAL_ALIGNMENT_TABLE[static_cast<int>(Ui::Text::Alignment::END) + 1] = {
+  0.0f, // Ui::Text::Alignment::START
+  0.5f, // Ui::Text::Alignment::CENTER
+  1.0f  // Ui::Text::Alignment::END
 };
 
 /**
@@ -246,10 +246,10 @@ LabelImpl::LabelImpl()
   mLastMeasureConstraints(-1.0f, -1.0f),
   mLastMeasureRequestedSize(-1.0f, -1.0f),
   mTouchPosition(),
-  mLineHeight(Text::LINE_HEIGHT_AUTO),
-  mLineHeightMode(Text::LineHeightMode::RELATIVE),
-  mOverflowMode(Text::OverflowMode::ELLIPSIS),
-  mMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy::MANUAL),
+  mLineHeight(Ui::Text::LINE_HEIGHT_AUTO),
+  mLineHeightMode(Ui::Text::LineHeightMode::RELATIVE),
+  mOverflowMode(Ui::Text::OverflowMode::ELLIPSIS),
+  mMarqueeTriggerPolicy(Ui::Text::MarqueeTriggerPolicy::MANUAL),
   mAsyncLineCount(0),
   mTextColorAnimatedCount(0),
   mRendererUpdateNeeded(false),
@@ -327,7 +327,7 @@ Dali::String LabelImpl::GetText() const
   return ToDaliString(text);
 }
 
-void LabelImpl::SetStyledText(const Text::StyledText& styledText)
+void LabelImpl::SetStyledText(const Ui::Text::StyledText& styledText)
 {
   const bool hadInlineReplacements = HasInlineReplacementSource();
   DALI_LOG_RELEASE_INFO("[%p] SetStyledText\n", mController.Get());
@@ -365,11 +365,11 @@ void LabelImpl::SetStyledText(const Text::StyledText& styledText)
   }
 }
 
-Text::StyledText LabelImpl::GetStyledText() const
+Ui::Text::StyledText LabelImpl::GetStyledText() const
 {
   if(!mHasStyledTextSource)
   {
-    return Text::StyledText();
+    return Ui::Text::StyledText();
   }
 
   return Internal::Text::GetStyledTextSource(mStyledTextSourceData);
@@ -405,23 +405,23 @@ void LabelImpl::ClearInlineReplacementData()
   }
 }
 
-void LabelImpl::UpdateInlineReplacementData(const Text::ReplacementSourceSnapshot&    source,
-                                            const Vector<Text::ReplacementPlacement>& placements,
-                                            uint64_t                                  sourceRevision,
-                                            const Vector2&                            ownerSize,
-                                            const Insets&                             padding)
+void LabelImpl::UpdateInlineReplacementData(const Ui::Text::ReplacementSourceSnapshot&    source,
+                                            const Vector<Ui::Text::ReplacementPlacement>& placements,
+                                            uint64_t                                      sourceRevision,
+                                            const Vector2&                                ownerSize,
+                                            const Insets&                                 padding)
 {
   Ui::View                               owner = Ui::View::DownCast(Self());
   Internal::Text::InlineReplacementData* data  = Internal::Text::GetInlineReplacementData(owner);
   if(!data)
   {
     bool hasVisibleImage = false;
-    for(const Text::ReplacementPlacement& placement : placements)
+    for(const Ui::Text::ReplacementPlacement& placement : placements)
     {
       if(placement.visible && !placement.elided && placement.sourceRunIndex < source.runs.Count())
       {
-        const Text::ReplacementRunSnapshot& run = source.runs[placement.sourceRunIndex];
-        hasVisibleImage                         = run.type == Text::ReplacementType::IMAGE && !run.image.source.empty();
+        const Ui::Text::ReplacementRunSnapshot& run = source.runs[placement.sourceRunIndex];
+        hasVisibleImage                             = run.type == Ui::Text::ReplacementType::IMAGE && !run.image.source.empty();
         if(hasVisibleImage)
         {
           break;
@@ -477,16 +477,16 @@ Dali::String LabelImpl::GetFontFamily() const
 void LabelImpl::SetFontSize(float fontSize)
 {
   DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
-  if(!Equals(mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE), fontSize, Math::MACHINE_EPSILON_1000))
+  if(!Equals(mController->GetDefaultFontSize(Ui::Text::Controller::PIXEL_SIZE), fontSize, Math::MACHINE_EPSILON_1000))
   {
-    mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
+    mController->SetDefaultFontSize(fontSize, Ui::Text::Controller::PIXEL_SIZE);
     InvalidateTextMeasure();
   }
 }
 
 float LabelImpl::GetFontSize() const
 {
-  return mController->GetDefaultFontSize(Text::Controller::PIXEL_SIZE);
+  return mController->GetDefaultFontSize(Ui::Text::Controller::PIXEL_SIZE);
 }
 
 void LabelImpl::SetMultiLine(bool multiLine)
@@ -501,13 +501,13 @@ bool LabelImpl::IsMultiLine() const
   return mController->IsMultiLineEnabled();
 }
 
-void LabelImpl::SetLineWrapMode(Text::LineWrapMode mode)
+void LabelImpl::SetLineWrapMode(Ui::Text::LineWrapMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   mController->SetLineWrapMode(mode);
 }
 
-Text::LineWrapMode LabelImpl::GetLineWrapMode() const
+Ui::Text::LineWrapMode LabelImpl::GetLineWrapMode() const
 {
   return mController->GetLineWrapMode();
 }
@@ -529,7 +529,7 @@ UiColor LabelImpl::GetTextColor()
 
 void LabelImpl::SetTextGradient(const Gradient::Base& gradient)
 {
-  if(Text::Internal::Gradient::IsRenderable(gradient))
+  if(Ui::Text::Internal::Gradient::IsRenderable(gradient))
   {
     auto& data        = Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData);
     data.textGradient = gradient;
@@ -542,7 +542,7 @@ void LabelImpl::SetTextGradient(const Gradient::Base& gradient)
   else
   {
     auto*      data            = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-    const bool hadTextGradient = data && Text::Internal::Gradient::IsRenderable(data->textGradient);
+    const bool hadTextGradient = data && Ui::Text::Internal::Gradient::IsRenderable(data->textGradient);
     if(data)
     {
       data->textGradient = Gradient::Base::None();
@@ -565,10 +565,10 @@ Gradient::Base LabelImpl::GetTextGradient() const
   return data ? data->textGradient : Gradient::Base::None();
 }
 
-void LabelImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
+void LabelImpl::SetTextGradientBoundsMode(Ui::Text::GradientBoundsMode mode)
 {
   const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  const auto  currentMode = data ? data->textGradientBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto  currentMode = data ? data->textGradientBoundsMode : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
   if(currentMode == mode)
   {
     return;
@@ -585,15 +585,15 @@ void LabelImpl::SetTextGradientBoundsMode(Text::GradientBoundsMode mode)
   RequestAsyncRender();
 }
 
-Text::GradientBoundsMode LabelImpl::GetTextGradientBoundsMode() const
+Ui::Text::GradientBoundsMode LabelImpl::GetTextGradientBoundsMode() const
 {
   const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  return data ? data->textGradientBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  return data ? data->textGradientBoundsMode : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
 }
 
 void LabelImpl::SetTextGradientOverlay(const Gradient::Base& gradient)
 {
-  if(Text::Internal::Gradient::IsRenderable(gradient))
+  if(Ui::Text::Internal::Gradient::IsRenderable(gradient))
   {
     auto& data               = Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData);
     data.textGradientOverlay = gradient;
@@ -606,7 +606,7 @@ void LabelImpl::SetTextGradientOverlay(const Gradient::Base& gradient)
   else
   {
     auto*      data                   = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-    const bool hadTextGradientOverlay = data && Text::Internal::Gradient::IsRenderable(data->textGradientOverlay);
+    const bool hadTextGradientOverlay = data && Ui::Text::Internal::Gradient::IsRenderable(data->textGradientOverlay);
     if(data)
     {
       data->textGradientOverlay = Gradient::Base::None();
@@ -629,10 +629,10 @@ Gradient::Base LabelImpl::GetTextGradientOverlay() const
   return data ? data->textGradientOverlay : Gradient::Base::None();
 }
 
-void LabelImpl::SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode)
+void LabelImpl::SetTextGradientOverlayBoundsMode(Ui::Text::GradientBoundsMode mode)
 {
   const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  const auto  currentMode = data ? data->textGradientOverlayBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto  currentMode = data ? data->textGradientOverlayBoundsMode : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
   if(currentMode == mode)
   {
     return;
@@ -649,16 +649,16 @@ void LabelImpl::SetTextGradientOverlayBoundsMode(Text::GradientBoundsMode mode)
   RequestAsyncRender();
 }
 
-Text::GradientBoundsMode LabelImpl::GetTextGradientOverlayBoundsMode() const
+Ui::Text::GradientBoundsMode LabelImpl::GetTextGradientOverlayBoundsMode() const
 {
   const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  return data ? data->textGradientOverlayBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
+  return data ? data->textGradientOverlayBoundsMode : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
 }
 
-void LabelImpl::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
+void LabelImpl::SetTextGradientOverlayMode(Ui::Text::GradientOverlayMode mode)
 {
   const auto* data        = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  const auto  currentMode = data ? data->textGradientOverlayMode : Text::GradientOverlayMode::SRC_OVER;
+  const auto  currentMode = data ? data->textGradientOverlayMode : Ui::Text::GradientOverlayMode::SRC_OVER;
   if(currentMode == mode)
   {
     return;
@@ -675,10 +675,10 @@ void LabelImpl::SetTextGradientOverlayMode(Text::GradientOverlayMode mode)
   RequestAsyncRender();
 }
 
-Text::GradientOverlayMode LabelImpl::GetTextGradientOverlayMode() const
+Ui::Text::GradientOverlayMode LabelImpl::GetTextGradientOverlayMode() const
 {
   const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  return data ? data->textGradientOverlayMode : Text::GradientOverlayMode::SRC_OVER;
+  return data ? data->textGradientOverlayMode : Ui::Text::GradientOverlayMode::SRC_OVER;
 }
 
 Dali::Property::Index LabelImpl::EnsureGradientAnimOffset()
@@ -697,7 +697,7 @@ Dali::Property::Index LabelImpl::EnsureGradientAnimOffset()
   auto& data = Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData);
   if(data.gradientAnimOffsetIndex == Property::INVALID_INDEX)
   {
-    const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(data.textGradient);
+    const Ui::Text::Internal::Gradient::Style style = Ui::Text::Internal::Gradient::CreateStyle(data.textGradient);
     data.gradientAnimOffsetIndex =
       self.RegisterProperty(TEXT_GRADIENT_START_OFFSET_PROPERTY_NAME, style.startOffset);
     BindGradientAnimProperties();
@@ -722,7 +722,7 @@ Dali::Property::Index LabelImpl::EnsureGradientOverlayAnimOffset()
   auto& data = Internal::Text::GetOrCreateTextGradientPropertyData(mTextGradientPropertyData);
   if(data.gradientOverlayAnimOffsetIndex == Property::INVALID_INDEX)
   {
-    const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(data.textGradientOverlay);
+    const Ui::Text::Internal::Gradient::Style style = Ui::Text::Internal::Gradient::CreateStyle(data.textGradientOverlay);
     data.gradientOverlayAnimOffsetIndex =
       self.RegisterProperty(TEXT_GRADIENT_OVERLAY_START_OFFSET_PROPERTY_NAME, style.startOffset);
     BindGradientOverlayAnimProperties();
@@ -731,29 +731,29 @@ Dali::Property::Index LabelImpl::EnsureGradientOverlayAnimOffset()
   return data.gradientOverlayAnimOffsetIndex;
 }
 
-void LabelImpl::SetHorizontalTextAlignment(Text::Alignment alignment)
+void LabelImpl::SetHorizontalTextAlignment(Ui::Text::Alignment alignment)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
   mController->SetHorizontalAlignment(alignment);
 }
 
-Text::Alignment LabelImpl::GetHorizontalTextAlignment() const
+Ui::Text::Alignment LabelImpl::GetHorizontalTextAlignment() const
 {
   return mController->GetHorizontalAlignment();
 }
 
-void LabelImpl::SetVerticalTextAlignment(Text::Alignment alignment)
+void LabelImpl::SetVerticalTextAlignment(Ui::Text::Alignment alignment)
 {
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
   mController->SetVerticalAlignment(alignment);
 }
 
-Text::Alignment LabelImpl::GetVerticalTextAlignment() const
+Ui::Text::Alignment LabelImpl::GetVerticalTextAlignment() const
 {
   return mController->GetVerticalAlignment();
 }
 
-void LabelImpl::SetTextOverflowMode(Text::OverflowMode mode)
+void LabelImpl::SetTextOverflowMode(Ui::Text::OverflowMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mode != mOverflowMode)
@@ -761,12 +761,12 @@ void LabelImpl::SetTextOverflowMode(Text::OverflowMode mode)
     mOverflowMode = mode;
     switch(mode)
     {
-      case Text::OverflowMode::CLIP:
+      case Ui::Text::OverflowMode::CLIP:
       {
         mController->SetTextElideEnabled(false);
         break;
       }
-      case Text::OverflowMode::ELLIPSIS:
+      case Ui::Text::OverflowMode::ELLIPSIS:
       {
         mController->SetTextElideEnabled(true);
         break;
@@ -777,7 +777,7 @@ void LabelImpl::SetTextOverflowMode(Text::OverflowMode mode)
   }
 }
 
-Text::OverflowMode LabelImpl::GetTextOverflowMode() const
+Ui::Text::OverflowMode LabelImpl::GetTextOverflowMode() const
 {
   return mOverflowMode;
 }
@@ -798,7 +798,7 @@ float LabelImpl::GetLineHeight() const
   return mLineHeight;
 }
 
-void LabelImpl::SetLineHeightMode(Text::LineHeightMode mode)
+void LabelImpl::SetLineHeightMode(Ui::Text::LineHeightMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mLineHeightMode != mode)
@@ -809,12 +809,12 @@ void LabelImpl::SetLineHeightMode(Text::LineHeightMode mode)
   }
 }
 
-Text::LineHeightMode LabelImpl::GetLineHeightMode() const
+Ui::Text::LineHeightMode LabelImpl::GetLineHeightMode() const
 {
   return mLineHeightMode;
 }
 
-void LabelImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
+void LabelImpl::SetLayoutDirectionMode(Ui::Text::LayoutDirectionMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mController->GetLayoutDirectionMode() != mode)
@@ -823,7 +823,7 @@ void LabelImpl::SetLayoutDirectionMode(Text::LayoutDirectionMode mode)
   }
 }
 
-Text::LayoutDirectionMode LabelImpl::GetLayoutDirectionMode() const
+Ui::Text::LayoutDirectionMode LabelImpl::GetLayoutDirectionMode() const
 {
   return mController->GetLayoutDirectionMode();
 }
@@ -858,7 +858,7 @@ UiColor LabelImpl::GetAnchorClickedColor()
   return mController->GetAnchorClickedColor();
 }
 
-void LabelImpl::SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy)
+void LabelImpl::SetMarqueeTriggerPolicy(Ui::Text::MarqueeTriggerPolicy policy)
 {
   if(policy != mMarqueeTriggerPolicy)
   {
@@ -869,7 +869,7 @@ void LabelImpl::SetMarqueeTriggerPolicy(Text::MarqueeTriggerPolicy policy)
   }
 }
 
-Text::MarqueeTriggerPolicy LabelImpl::GetMarqueeTriggerPolicy() const
+Ui::Text::MarqueeTriggerPolicy LabelImpl::GetMarqueeTriggerPolicy() const
 {
   return mMarqueeTriggerPolicy;
 }
@@ -934,14 +934,14 @@ int LabelImpl::GetMarqueeGap() const
   return static_cast<int>(UiConfig::GetCurrent().GetMarqueeGap());
 }
 
-void LabelImpl::SetMarqueeOrientation(Text::MarqueeOrientation orientation)
+void LabelImpl::SetMarqueeOrientation(Ui::Text::MarqueeOrientation orientation)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(orientation));
   GetTextScroller()->SetOrientation(orientation);
   UpdateMarqueeState();
 }
 
-Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
+Ui::Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
 {
   if(mTextScroller)
   {
@@ -950,13 +950,13 @@ Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
   return UiConfig::GetCurrent().GetMarqueeOrientation();
 }
 
-void LabelImpl::SetMarqueeStopMode(Text::MarqueeStopMode mode)
+void LabelImpl::SetMarqueeStopMode(Ui::Text::MarqueeStopMode mode)
 {
   DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   GetTextScroller()->SetStopMode(mode);
 }
 
-Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
+Ui::Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
 {
   if(mTextScroller)
   {
@@ -965,40 +965,40 @@ Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
   return UiConfig::GetCurrent().GetMarqueeStopMode();
 }
 
-void LabelImpl::SetFontWeight(Text::FontWeight weight)
+void LabelImpl::SetFontWeight(Ui::Text::FontWeight weight)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWeightName(weight));
-  mController->SetDefaultFontWeight(Text::ToTextAbstractionFontWeight(weight));
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontWeightName(weight));
+  mController->SetDefaultFontWeight(Ui::Text::ToTextAbstractionFontWeight(weight));
 }
 
-Text::FontWeight LabelImpl::GetFontWeight() const
+Ui::Text::FontWeight LabelImpl::GetFontWeight() const
 {
-  return Text::ToFontWeight(mController->GetDefaultFontWeight());
+  return Ui::Text::ToFontWeight(mController->GetDefaultFontWeight());
 }
 
-void LabelImpl::SetFontWidth(Text::FontWidth width)
-{
-  // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontWidthName(width));
-  mController->SetDefaultFontWidth(Text::ToTextAbstractionFontWidth(width));
-}
-
-Text::FontWidth LabelImpl::GetFontWidth() const
-{
-  return Text::ToFontWidth(mController->GetDefaultFontWidth());
-}
-
-void LabelImpl::SetFontSlant(Text::FontSlant slant)
+void LabelImpl::SetFontWidth(Ui::Text::FontWidth width)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Text::GetFontSlantName(slant));
-  mController->SetDefaultFontSlant(Text::ToTextAbstractionFontSlant(slant));
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontWidthName(width));
+  mController->SetDefaultFontWidth(Ui::Text::ToTextAbstractionFontWidth(width));
 }
 
-Text::FontSlant LabelImpl::GetFontSlant() const
+Ui::Text::FontWidth LabelImpl::GetFontWidth() const
 {
-  return Text::ToFontSlant(mController->GetDefaultFontSlant());
+  return Ui::Text::ToFontWidth(mController->GetDefaultFontWidth());
+}
+
+void LabelImpl::SetFontSlant(Ui::Text::FontSlant slant)
+{
+  // InvalidateMeasure() may be called if needed.
+  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontSlantName(slant));
+  mController->SetDefaultFontSlant(Ui::Text::ToTextAbstractionFontSlant(slant));
+}
+
+Ui::Text::FontSlant LabelImpl::GetFontSlant() const
+{
+  return Ui::Text::ToFontSlant(mController->GetDefaultFontSlant());
 }
 
 void LabelImpl::SetTextBackgroundColor(const UiColor& color)
@@ -1031,9 +1031,9 @@ void LabelImpl::ClearTextBackgroundColor()
   }
 }
 
-void LabelImpl::SetTextUnderline(const Text::Underline& underline)
+void LabelImpl::SetTextUnderline(const Ui::Text::Underline& underline)
 {
-  if(underline == Text::Underline::None())
+  if(underline == Ui::Text::Underline::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
@@ -1048,21 +1048,21 @@ void LabelImpl::SetTextUnderline(const Text::Underline& underline)
 
   SetColorBinding("UnderlineColor", color, this, &LabelImpl::SetUnderlineColorInternal);
 
-  if(Text::ApplyUnderlineStyle(mController, underline))
+  if(Ui::Text::ApplyUnderlineStyle(mController, underline))
   {
     RequestTextRelayout();
     RequestAsyncRender();
   }
 }
 
-Text::Underline LabelImpl::GetTextUnderline() const
+Ui::Text::Underline LabelImpl::GetTextUnderline() const
 {
   if(!mController->IsUnderlineEnabled())
   {
-    return Text::Underline::None();
+    return Ui::Text::Underline::None();
   }
 
-  Text::Underline underline;
+  Ui::Text::Underline underline;
 
   UiColor color;
   if(UiColorManager::Get().GetBindingColor(Self(), "UnderlineColor", color))
@@ -1081,9 +1081,9 @@ Text::Underline LabelImpl::GetTextUnderline() const
   return underline;
 }
 
-void LabelImpl::SetTextShadow(const Text::Shadow& shadow)
+void LabelImpl::SetTextShadow(const Ui::Text::Shadow& shadow)
 {
-  if(shadow == Text::Shadow::None())
+  if(shadow == Ui::Text::Shadow::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
@@ -1102,21 +1102,21 @@ void LabelImpl::SetTextShadow(const Text::Shadow& shadow)
 
   SetColorBinding("ShadowColor", color, this, &LabelImpl::SetShadowColorInternal);
 
-  if(Text::ApplyShadowStyle(mController, shadow))
+  if(Ui::Text::ApplyShadowStyle(mController, shadow))
   {
     RequestTextRelayout();
     RequestAsyncRender();
   }
 }
 
-Text::Shadow LabelImpl::GetTextShadow() const
+Ui::Text::Shadow LabelImpl::GetTextShadow() const
 {
   if(!mController->IsShadowEnabled())
   {
-    return Text::Shadow::None();
+    return Ui::Text::Shadow::None();
   }
 
-  Text::Shadow shadow;
+  Ui::Text::Shadow shadow;
 
   UiColor color;
   if(UiColorManager::Get().GetBindingColor(Self(), "ShadowColor", color))
@@ -1133,9 +1133,9 @@ Text::Shadow LabelImpl::GetTextShadow() const
   return shadow;
 }
 
-void LabelImpl::SetTextOutline(const Text::Outline& outline)
+void LabelImpl::SetTextOutline(const Ui::Text::Outline& outline)
 {
-  if(outline == Text::Outline::None())
+  if(outline == Ui::Text::Outline::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
@@ -1154,21 +1154,21 @@ void LabelImpl::SetTextOutline(const Text::Outline& outline)
 
   SetColorBinding("OutlineColor", color, this, &LabelImpl::SetOutlineColorInternal);
 
-  if(Text::ApplyOutlineStyle(mController, outline))
+  if(Ui::Text::ApplyOutlineStyle(mController, outline))
   {
     RequestTextRelayout();
     RequestAsyncRender();
   }
 }
 
-Text::Outline LabelImpl::GetTextOutline() const
+Ui::Text::Outline LabelImpl::GetTextOutline() const
 {
   if(!mController->IsOutlineEnabled())
   {
-    return Text::Outline::None();
+    return Ui::Text::Outline::None();
   }
 
-  Text::Outline outline;
+  Ui::Text::Outline outline;
 
   UiColor color;
   if(UiColorManager::Get().GetBindingColor(Self(), "OutlineColor", color))
@@ -1186,9 +1186,9 @@ Text::Outline LabelImpl::GetTextOutline() const
   return outline;
 }
 
-void LabelImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
+void LabelImpl::SetTextLineThrough(const Ui::Text::LineThrough& lineThrough)
 {
-  if(lineThrough == Text::LineThrough::None())
+  if(lineThrough == Ui::Text::LineThrough::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
@@ -1203,21 +1203,21 @@ void LabelImpl::SetTextLineThrough(const Text::LineThrough& lineThrough)
 
   SetColorBinding("LineThroughColor", color, this, &LabelImpl::SetLineThroughColorInternal);
 
-  if(Text::ApplyLineThroughStyle(mController, lineThrough))
+  if(Ui::Text::ApplyLineThroughStyle(mController, lineThrough))
   {
     RequestTextRelayout();
     RequestAsyncRender();
   }
 }
 
-Text::LineThrough LabelImpl::GetTextLineThrough() const
+Ui::Text::LineThrough LabelImpl::GetTextLineThrough() const
 {
   if(!mController->IsStrikethroughEnabled())
   {
-    return Text::LineThrough::None();
+    return Ui::Text::LineThrough::None();
   }
 
-  Text::LineThrough lineThrough;
+  Ui::Text::LineThrough lineThrough;
 
   UiColor color;
   if(UiColorManager::Get().GetBindingColor(Self(), "LineThroughColor", color))
@@ -1233,9 +1233,9 @@ Text::LineThrough LabelImpl::GetTextLineThrough() const
   return lineThrough;
 }
 
-void LabelImpl::SetTextBevel(const Text::Bevel& bevel)
+void LabelImpl::SetTextBevel(const Ui::Text::Bevel& bevel)
 {
-  if(bevel == Text::Bevel::None())
+  if(bevel == Ui::Text::Bevel::None())
   {
     DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "BevelLightColor");
@@ -1253,21 +1253,21 @@ void LabelImpl::SetTextBevel(const Text::Bevel& bevel)
   SetColorBinding("BevelLightColor", lightColor, this, &LabelImpl::SetBevelLightColorInternal);
   SetColorBinding("BevelShadowColor", shadowColor, this, &LabelImpl::SetBevelShadowColorInternal);
 
-  if(Text::ApplyBevelStyle(mController, bevel))
+  if(Ui::Text::ApplyBevelStyle(mController, bevel))
   {
     RequestTextRelayout();
     RequestAsyncRender();
   }
 }
 
-Text::Bevel LabelImpl::GetTextBevel() const
+Ui::Text::Bevel LabelImpl::GetTextBevel() const
 {
   if(!mController->IsEmbossEnabled())
   {
-    return Text::Bevel::None();
+    return Ui::Text::Bevel::None();
   }
 
-  Text::Bevel bevel;
+  Ui::Text::Bevel bevel;
 
   UiColor lightColor;
   if(UiColorManager::Get().GetBindingColor(Self(), "BevelLightColor", lightColor))
@@ -1294,21 +1294,21 @@ Text::Bevel LabelImpl::GetTextBevel() const
   return bevel;
 }
 
-void LabelImpl::SetTextFit(const Text::Fit& fit)
+void LabelImpl::SetTextFit(const Ui::Text::Fit& fit)
 {
   switch(fit.GetType())
   {
-    case Text::Fit::Type::NONE:
+    case Ui::Text::Fit::Type::NONE:
     {
       ClearTextFitInternal();
       break;
     }
-    case Text::Fit::Type::RANGE:
+    case Ui::Text::Fit::Type::RANGE:
     {
       SetTextFit(fit.GetRange());
       break;
     }
-    case Text::Fit::Type::CANDIDATES:
+    case Ui::Text::Fit::Type::CANDIDATES:
     {
       SetTextFit(fit.GetCandidates());
       break;
@@ -1316,7 +1316,7 @@ void LabelImpl::SetTextFit(const Text::Fit& fit)
   }
 }
 
-void LabelImpl::SetTextFit(const Text::Fit::Range& range)
+void LabelImpl::SetTextFit(const Ui::Text::Fit::Range& range)
 {
   DALI_LOG_RELEASE_INFO("[%p] min:%f, max:%f, step:%f\n", mController.Get(), range.GetMinimumFontSize(), range.GetMaximumFontSize(), range.GetFontSizeStep());
   // If TextFitCandidates is enabled, this should be disabled.
@@ -1326,14 +1326,14 @@ void LabelImpl::SetTextFit(const Text::Fit::Range& range)
     mController->ClearTextFitCandidates();
   }
   mController->SetTextFitEnabled(true);
-  mController->SetTextFitMinSize(range.GetMinimumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
-  mController->SetTextFitMaxSize(range.GetMaximumFontSize(), Text::Controller::FontSizeType::PIXEL_SIZE);
-  mController->SetTextFitStepSize(range.GetFontSizeStep(), Text::Controller::FontSizeType::PIXEL_SIZE);
+  mController->SetTextFitMinSize(range.GetMinimumFontSize(), Ui::Text::Controller::FontSizeType::PIXEL_SIZE);
+  mController->SetTextFitMaxSize(range.GetMaximumFontSize(), Ui::Text::Controller::FontSizeType::PIXEL_SIZE);
+  mController->SetTextFitStepSize(range.GetFontSizeStep(), Ui::Text::Controller::FontSizeType::PIXEL_SIZE);
   mController->SetTextFitChanged(true);
   InvalidateTextMeasure();
 }
 
-void LabelImpl::SetTextFit(const Dali::Vector<Text::Fit::Candidate>& candidates)
+void LabelImpl::SetTextFit(const Dali::Vector<Ui::Text::Fit::Candidate>& candidates)
 {
   DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), candidates.Count());
   if(candidates.Empty())
@@ -1352,21 +1352,21 @@ void LabelImpl::SetTextFit(const Dali::Vector<Text::Fit::Candidate>& candidates)
   InvalidateTextMeasure();
 }
 
-Text::Fit LabelImpl::GetTextFit() const
+Ui::Text::Fit LabelImpl::GetTextFit() const
 {
   if(mController->IsTextFitEnabled())
   {
-    return Text::Fit::FromRange(Text::Fit::Range(mController->GetTextFitMinSize(Text::Controller::FontSizeType::PIXEL_SIZE),
-                                                 mController->GetTextFitMaxSize(Text::Controller::FontSizeType::PIXEL_SIZE),
-                                                 mController->GetTextFitStepSize(Text::Controller::FontSizeType::PIXEL_SIZE)));
+    return Ui::Text::Fit::FromRange(Ui::Text::Fit::Range(mController->GetTextFitMinSize(Ui::Text::Controller::FontSizeType::PIXEL_SIZE),
+                                                         mController->GetTextFitMaxSize(Ui::Text::Controller::FontSizeType::PIXEL_SIZE),
+                                                         mController->GetTextFitStepSize(Ui::Text::Controller::FontSizeType::PIXEL_SIZE)));
   }
 
   if(mController->IsTextFitCandidatesEnabled())
   {
-    return Text::Fit::FromCandidates(mController->GetTextFitCandidates());
+    return Ui::Text::Fit::FromCandidates(mController->GetTextFitCandidates());
   }
 
-  return Text::Fit::None();
+  return Ui::Text::Fit::None();
 }
 
 void LabelImpl::ClearTextFitInternal()
@@ -1429,7 +1429,7 @@ bool LabelImpl::IsSystemFontSizeScaleEnabled() const
   return mController->IsSystemFontSizeScaleEnabled();
 }
 
-void LabelImpl::SetFontVariation(const Dali::Vector<Text::FontVariation::Axis>& axes)
+void LabelImpl::SetFontVariation(const Dali::Vector<Ui::Text::FontVariation::Axis>& axes)
 {
   // InvalidateMeasure() may be called if needed.
   DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), axes.Count());
@@ -1442,12 +1442,12 @@ void LabelImpl::SetFontVariation(const Dali::String& settings)
   {
     DALI_LOG_WARNING(
       "[%p] Empty font variation string is not allowed. "
-      "Use SetFontVariation(Text::FontVariation::None()) instead.\n",
+      "Use SetFontVariation(Ui::Text::FontVariation::None()) instead.\n",
       mController.Get());
     return;
   }
 
-  auto axes = Text::FontVariation::FromString(settings);
+  auto axes = Ui::Text::FontVariation::FromString(settings);
   if(axes.Empty())
   {
     DALI_LOG_WARNING("[%p] Failed to parse font variation string: %s\n", mController.Get(), settings.CStr());
@@ -1458,7 +1458,7 @@ void LabelImpl::SetFontVariation(const Dali::String& settings)
   SetFontVariation(axes);
 }
 
-Dali::Vector<Text::FontVariation::Axis> LabelImpl::GetFontVariation() const
+Dali::Vector<Ui::Text::FontVariation::Axis> LabelImpl::GetFontVariation() const
 {
   return mController->GetVariations();
 }
@@ -1505,7 +1505,7 @@ void LabelImpl::SetTextCutoutEnabled(bool enabled)
   DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
   // Set through the property system so that dependent background and rendering
   // state can be updated consistently in OnPropertySet().
-  Self().SetProperty(Text::LabelPropertyIndex::CUTOUT_ENABLED, enabled);
+  Self().SetProperty(Ui::Text::LabelPropertyIndex::CUTOUT_ENABLED, enabled);
 }
 
 bool LabelImpl::IsTextCutoutEnabled() const
@@ -1698,7 +1698,7 @@ void LabelImpl::RequestAsyncNaturalSize()
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   Actor                             self            = Self();
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
-  Text::AsyncTextParameters         parameters      = GetAsyncTextParameters(Text::Async::COMPUTE_NATURAL_SIZE, Size::ZERO, GetEffectiveTextPadding(), layoutDirection);
+  Ui::Text::AsyncTextParameters     parameters      = GetAsyncTextParameters(Ui::Text::Async::COMPUTE_NATURAL_SIZE, Size::ZERO, GetEffectiveTextPadding(), layoutDirection);
   Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
 }
 
@@ -1709,7 +1709,7 @@ void LabelImpl::RequestAsyncHeightForWidth(float width)
   Insets                            padding         = GetEffectiveTextPadding();
   float                             contentWidth    = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
-  Text::AsyncTextParameters         parameters      = GetAsyncTextParameters(Text::Async::COMPUTE_HEIGHT_FOR_WIDTH, Size(contentWidth, 0.0f), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters     parameters      = GetAsyncTextParameters(Ui::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH, Size(contentWidth, 0.0f), padding, layoutDirection);
   Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
 }
 
@@ -1731,7 +1731,7 @@ void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
   float                             contentHeight   = std::max(height - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
 
-  Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, Size(contentWidth, contentHeight), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_FIXED_SIZE, Size(contentWidth, contentHeight), padding, layoutDirection);
 
   mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
   mRendererUpdateNeeded     = false;
@@ -1753,7 +1753,7 @@ void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstr
   float                             contentHeightConstraint = std::max(heightConstraint - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection         = mController->GetLayoutDirection(self);
 
-  Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_WIDTH, Size(contentWidth, contentHeightConstraint), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_FIXED_WIDTH, Size(contentWidth, contentHeightConstraint), padding, layoutDirection);
 
   mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
   mRendererUpdateNeeded     = false;
@@ -1775,7 +1775,7 @@ void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float h
   float                             contentHeight          = std::max(height - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection        = mController->GetLayoutDirection(self);
 
-  Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_HEIGHT, Size(contentWidthConstraint, contentHeight), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_FIXED_HEIGHT, Size(contentWidthConstraint, contentHeight), padding, layoutDirection);
 
   mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
   mRendererUpdateNeeded     = false;
@@ -1797,7 +1797,7 @@ void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float h
   float                             contentHeightConstraint = std::max(heightConstraint - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection         = mController->GetLayoutDirection(self);
 
-  Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_CONSTRAINT, Size(contentWidthConstraint, contentHeightConstraint), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_CONSTRAINT, Size(contentWidthConstraint, contentHeightConstraint), padding, layoutDirection);
 
   mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
   mRendererUpdateNeeded     = false;
@@ -1914,10 +1914,10 @@ void LabelImpl::OnInitialize()
 
   mVisual   = Ui::Integration::VisualFactory::Get().CreateVisual(propertyMap);
   View view = Ui::View::DownCast(self);
-  Internal::ViewDataImpl::Get(GetImpl(view)).RegisterVisual(Text::LabelPropertyIndex::TEXT, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
+  Internal::ViewDataImpl::Get(GetImpl(view)).RegisterVisual(Ui::Text::LabelPropertyIndex::TEXT, mVisual, Dali::Ui::Integration::DepthIndex::CONTENT);
 
   Internal::TextVisual::SetAsyncTextInterface(mVisual, this);
-  Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, Text::LabelPropertyIndex::TEXT_COLOR);
+  Internal::TextVisual::SetAnimatableTextColorProperty(mVisual, Ui::Text::LabelPropertyIndex::TEXT_COLOR);
   Internal::TextVisual::SetConstraintApplyAlways(mVisual, mTextColorAnimatedCount > 0);
 
   mController = Internal::TextVisual::GetController(mVisual);
@@ -1946,10 +1946,10 @@ void LabelImpl::OnInitialize()
     systemSettings.FontSizeChangedSignal().Connect(this, &LabelImpl::OnSystemFontSizeChanged);
   }
 
-  Text::Layout::Engine& engine = mController->GetLayoutEngine();
+  Ui::Text::Layout::Engine& engine = mController->GetLayoutEngine();
   engine.SetCursorWidth(0u);
 
-  mController->SetVerticalLineAlignment(Text::Alignment::CENTER);
+  mController->SetVerticalLineAlignment(Ui::Text::Alignment::CENTER);
 
   Ui::View::DownCast(self).SetAccessibilityRole(Accessibility::Role::TEXT);
   Dali::Integration::Accessibility::Bridge::EnabledSignal().Connect(this, &LabelImpl::OnAccessibilityStatusChanged);
@@ -2017,7 +2017,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     DALI_LOG_RELEASE_INFO("[%p] Request render, size : %f, %f\n", mController.Get(), contentSize.width, contentSize.height);
 
-    Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
+    Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
     Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
     mRendererUpdateNeeded   = false;
     mIsAsyncRenderRequested = false;
@@ -2046,22 +2046,22 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   if(restartMarquee)
   {
     EnableAutoMarqueeEvaluation();
-    if(mMarqueeTriggerPolicy != Text::MarqueeTriggerPolicy::ON_OVERFLOW && mLastMarqueeEnabled)
+    if(mMarqueeTriggerPolicy != Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW && mLastMarqueeEnabled)
     {
       mController->SetMarqueeEnabled(true, true, GetTextScroller()->GetOrientation());
     }
   }
 
-  const Text::MarqueeOrientation marqueeOrientation = mTextScroller ? mTextScroller->GetOrientation() : Text::MarqueeOrientation::HORIZONTAL;
+  const Ui::Text::MarqueeOrientation marqueeOrientation = mTextScroller ? mTextScroller->GetOrientation() : Ui::Text::MarqueeOrientation::HORIZONTAL;
   EvaluateAndApplyMarquee(contentSize, marqueeOrientation);
 
   Size originSize = Size::ZERO;
   PrepareMarqueeLayout(contentSize, marqueeOrientation, originSize);
 
-  const Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
+  const Ui::Text::Controller::UpdateTextType updateTextType = mController->Relayout(contentSize, layoutDirection);
   if(mController->HasValidReplacementSource())
   {
-    const Text::ReplacementRenderState& replacementResult = mController->GetReplacementRenderState();
+    const Ui::Text::ReplacementRenderState& replacementResult = mController->GetReplacementRenderState();
     if(replacementResult.processingModel && replacementResult.projection.HasReplacements())
     {
       UpdateInlineReplacementData(mController->GetReplacementSourceSnapshot(),
@@ -2076,7 +2076,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     }
   }
   const bool textModelUpdated =
-    Text::Controller::NONE_UPDATED != (Text::Controller::MODEL_UPDATED & updateTextType);
+    Ui::Text::Controller::NONE_UPDATED != (Ui::Text::Controller::MODEL_UPDATED & updateTextType);
   const bool syncAnchorUpdateNeeded = !mHasA11yAnchors || contentLayoutDirty || textModelUpdated || mRendererUpdateNeeded;
 
   if(textModelUpdated || mRendererUpdateNeeded)
@@ -2085,9 +2085,9 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     Internal::TextVisual::EnableRendererUpdate(mVisual);
 
     // Calculate the size of the visual that can fit the text
-    const Text::ModelInterface* const renderModel = mController->GetRenderTextModel();
-    Size                              layoutSize  = renderModel->GetLayoutSize();
-    layoutSize.x                                  = contentSize.x;
+    const Ui::Text::ModelInterface* const renderModel = mController->GetRenderTextModel();
+    Size                                  layoutSize  = renderModel->GetLayoutSize();
+    layoutSize.x                                      = contentSize.x;
 
     const Vector2& shadowOffset = renderModel->GetShadowOffset();
     if(renderModel->IsShadowEnabled() && shadowOffset.y > Math::MACHINE_EPSILON_1)
@@ -2103,7 +2103,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     // Calculate the offset for vertical alignment only, as the layout engine will do the horizontal alignment.
     Vector2 alignmentOffset;
     alignmentOffset.x = 0.0f;
-    alignmentOffset.y = (marqueeOrientation == Text::MarqueeOrientation::VERTICAL) ? 0.0f : (contentSize.y - layoutSize.y) * VERTICAL_ALIGNMENT_TABLE[static_cast<int>(mController->GetVerticalAlignment())];
+    alignmentOffset.y = (marqueeOrientation == Ui::Text::MarqueeOrientation::VERTICAL) ? 0.0f : (contentSize.y - layoutSize.y) * VERTICAL_ALIGNMENT_TABLE[static_cast<int>(mController->GetVerticalAlignment())];
 
     const int maxTextureSize = Dali::GetMaxTextureSize();
     if(layoutSize.width > maxTextureSize)
@@ -2121,7 +2121,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     mController->SetLayoutAlignmentOffset(alignmentOffset);
     mController->SetLayoutOffsetWithPadding(visualTransformOffset);
 
-    Vector2 visualTransformSize = (marqueeOrientation == Text::MarqueeOrientation::VERTICAL) ? contentSize : layoutSize;
+    Vector2 visualTransformSize = (marqueeOrientation == Ui::Text::MarqueeOrientation::VERTICAL) ? contentSize : layoutSize;
 
     // Mark that we don't use viewEffectiveScale at transform's size & offset for this visual.
     // (Because visual transform size and polic already apply viewEffectiveScale).
@@ -2229,16 +2229,16 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   if(useTextFitRange && wrapContentMeasure)
   {
     mController->SetTextFitEnabled(false);
-    mController->SetDefaultFontSize(mController->GetTextFitMaxSize(Text::Controller::PIXEL_SIZE), Text::Controller::PIXEL_SIZE);
+    mController->SetDefaultFontSize(mController->GetTextFitMaxSize(Ui::Text::Controller::PIXEL_SIZE), Ui::Text::Controller::PIXEL_SIZE);
   }
   else if(useFitCandidates && wrapContentMeasure)
   {
     mController->SetTextFitCandidatesEnabled(false);
 
-    const Text::Fit::Candidate* fitCandidate = mController->GetMaxFitCandidate();
+    const Ui::Text::Fit::Candidate* fitCandidate = mController->GetMaxFitCandidate();
     if(fitCandidate)
     {
-      mController->SetDefaultFontSize(fitCandidate->GetFontSize(), Text::Controller::PIXEL_SIZE);
+      mController->SetDefaultFontSize(fitCandidate->GetFontSize(), Ui::Text::Controller::PIXEL_SIZE);
       mController->SetDefaultLineSize(fitCandidate->GetLineHeight());
     }
     else
@@ -2292,13 +2292,13 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
   if(useTextFitRange && wrapContentMeasure)
   {
     mController->SetTextFitEnabled(true);
-    mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
+    mController->SetDefaultFontSize(fontSize, Ui::Text::Controller::PIXEL_SIZE);
     UpdateLineHeight();
   }
   else if(useFitCandidates && wrapContentMeasure)
   {
     mController->SetTextFitCandidatesEnabled(true);
-    mController->SetDefaultFontSize(fontSize, Text::Controller::PIXEL_SIZE);
+    mController->SetDefaultFontSize(fontSize, Ui::Text::Controller::PIXEL_SIZE);
     UpdateLineHeight();
   }
 
@@ -2316,7 +2316,7 @@ LayoutRect LabelImpl::OnArrange(const LayoutRect& bounds)
 void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property::Index index, Animation::State state)
 {
   auto* gradientData = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
+  if(DALI_LIKELY(mVisual) && index == Ui::Text::LabelPropertyIndex::TEXT_COLOR)
   {
     if(state == Animation::State::PLAYING)
     {
@@ -2370,7 +2370,7 @@ void LabelImpl::OnAnimateAnimatableProperty(Animation& animation, Dali::Property
 void LabelImpl::OnConstraintAnimatableProperty(Constraint& constraint, Dali::Property::Index index, bool applied)
 {
   auto* gradientData = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  if(DALI_LIKELY(mVisual) && index == Text::LabelPropertyIndex::TEXT_COLOR)
+  if(DALI_LIKELY(mVisual) && index == Ui::Text::LabelPropertyIndex::TEXT_COLOR)
   {
     if(applied)
     {
@@ -2493,7 +2493,7 @@ void LabelImpl::EmitAnchorClicked(const std::string& href)
 // =============================================================================
 // AsyncTextInterface
 // =============================================================================
-void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderInfo)
+void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& renderInfo)
 {
   if(HasInlineReplacementSource())
   {
@@ -2502,7 +2502,7 @@ void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderIn
     return;
   }
   // Prevent restarting marquee after StopMarquee().
-  if(!mController->IsMarqueeEnabled() && mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::MANUAL)
+  if(!mController->IsMarqueeEnabled() && mMarqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::MANUAL)
   {
     if(!mIsAsyncRenderRequested)
     {
@@ -2521,27 +2521,27 @@ void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderIn
   float     wrapGap                 = renderInfo.marqueeWrapGap;
   PixelData data                    = renderInfo.marqueePixelData;
 
-  bool    isHorizontal = mTextScroller->GetOrientation() == Text::MarqueeOrientation::HORIZONTAL;
-  Sampler sampler      = Text::MarqueeBuilder::CreateTextScrollSampler(isHorizontal);
+  bool    isHorizontal = mTextScroller->GetOrientation() == Ui::Text::MarqueeOrientation::HORIZONTAL;
+  Sampler sampler      = Ui::Text::MarqueeBuilder::CreateTextScrollSampler(isHorizontal);
 
-  Text::MarqueeBuilder::PreparedContent preparedContent =
-    Text::MarqueeBuilder::CreateTextContent(data, sampler);
+  Ui::Text::MarqueeBuilder::PreparedContent preparedContent =
+    Ui::Text::MarqueeBuilder::CreateTextContent(data, sampler);
 
   const auto*           gradientData                   = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
   const Gradient::Base& textGradient                   = gradientData ? gradientData->textGradient : Gradient::Base::None();
   const Gradient::Base& textGradientOverlay            = gradientData ? gradientData->textGradientOverlay : Gradient::Base::None();
-  const auto            textGradientBoundsMode         = gradientData ? gradientData->textGradientBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
-  const auto            textGradientOverlayBoundsMode  = gradientData ? gradientData->textGradientOverlayBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
-  const auto            textGradientOverlayMode        = gradientData ? gradientData->textGradientOverlayMode : Text::GradientOverlayMode::SRC_OVER;
+  const auto            textGradientBoundsMode         = gradientData ? gradientData->textGradientBoundsMode : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto            textGradientOverlayBoundsMode  = gradientData ? gradientData->textGradientOverlayBoundsMode : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto            textGradientOverlayMode        = gradientData ? gradientData->textGradientOverlayMode : Ui::Text::GradientOverlayMode::SRC_OVER;
   const Property::Index gradientAnimOffsetIndex        = gradientData ? gradientData->gradientAnimOffsetIndex : Property::INVALID_INDEX;
   const Property::Index gradientOverlayAnimOffsetIndex = gradientData ? gradientData->gradientOverlayAnimOffsetIndex : Property::INVALID_INDEX;
   const bool            gradientAnimApplyAlways        = gradientData && gradientData->gradientAnimCount > 0;
   const bool            gradientOverlayApplyAlways     = gradientData && gradientData->gradientOverlayAnimCount > 0;
 
-  const Text::MarqueeBuilder::GradientState gradientState =
-    Text::MarqueeBuilder::ResolveGradientState(textGradient,
-                                               textGradientOverlay,
-                                               verifiedSize);
+  const Ui::Text::MarqueeBuilder::GradientState gradientState =
+    Ui::Text::MarqueeBuilder::ResolveGradientState(textGradient,
+                                                   textGradientOverlay,
+                                                   verifiedSize);
   const bool hasGradientFeature      = gradientState.baseRenderable || gradientState.overlayRenderable;
   const bool needsMarqueeComposition = hasGradientFeature || renderInfo.isOverlayStyle;
   if(needsMarqueeComposition)
@@ -2549,7 +2549,7 @@ void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderIn
     const bool cutoutEnabled = renderInfo.isCutoutEnabled ||
                                mController->IsTextCutout() ||
                                mController->GetRenderTextModel()->IsBackgroundWithCutoutEnabled();
-    Text::MarqueeBuilder::FeatureInfo featureInfo;
+    Ui::Text::MarqueeBuilder::FeatureInfo featureInfo;
     if(hasGradientFeature)
     {
       featureInfo.hasMultipleTextColors = renderInfo.hasMultipleTextColors;
@@ -2559,13 +2559,13 @@ void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderIn
     featureInfo.isOverlayStyle = renderInfo.isOverlayStyle;
     featureInfo.cutoutEnabled  = cutoutEnabled;
 
-    Text::MarqueeBuilder::AnimationState animationState;
+    Ui::Text::MarqueeBuilder::AnimationState animationState;
     animationState.baseStartOffsetIndex    = gradientAnimOffsetIndex;
     animationState.baseApplyAlways         = gradientAnimApplyAlways;
     animationState.overlayStartOffsetIndex = gradientOverlayAnimOffsetIndex;
     animationState.overlayApplyAlways      = gradientOverlayApplyAlways;
 
-    Text::MarqueeBuilder::CompositionRequest compositionRequest;
+    Ui::Text::MarqueeBuilder::CompositionRequest compositionRequest;
     compositionRequest.sampler        = sampler;
     compositionRequest.verifiedSize   = verifiedSize;
     compositionRequest.featureInfo    = featureInfo;
@@ -2574,14 +2574,14 @@ void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderIn
     compositionRequest.animationState = animationState;
     compositionRequest.overlayMode    = textGradientOverlayMode;
 
-    const Text::MarqueeBuilder::CompositionPlan compositionPlan =
-      Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
+    const Ui::Text::MarqueeBuilder::CompositionPlan compositionPlan =
+      Ui::Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
     if(compositionPlan.HasWork())
     {
-      auto resolveMarqueeGradientBounds = [&](Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
+      auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
       {
         coordinateSize = renderInfo.controlSize;
-        if(boundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+        if(boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
         {
           coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
           return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
@@ -2597,13 +2597,13 @@ void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderIn
             const Vector2 contentSize(std::max(verifiedSize.width - wrapGap, 0.0f),
                                       verifiedSize.height);
             const Vector2 xBounds =
-              Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.width,
-                                                                  contentSize.width,
-                                                                  mController->GetHorizontalAlignment());
+              Ui::Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.width,
+                                                                      contentSize.width,
+                                                                      mController->GetHorizontalAlignment());
             const Vector2 yBounds =
-              Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.height,
-                                                                  contentSize.height,
-                                                                  mController->GetVerticalAlignment());
+              Ui::Text::Internal::CalculateGradientViewportAxisBounds(visualCoordinateSize.height,
+                                                                      contentSize.height,
+                                                                      mController->GetVerticalAlignment());
             coordinateSize          = visualCoordinateSize;
             textScrollerControlSize = coordinateSize;
             return Vector4(xBounds.x, yBounds.x, xBounds.y, yBounds.y);
@@ -2633,7 +2633,7 @@ void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderIn
         compositionRequest.overlayBounds.coordinateSize = textGradientOverlayCoordinateSize;
       }
 
-      Text::MarqueeBuilder::PixelDataBundle pixels;
+      Ui::Text::MarqueeBuilder::PixelDataBundle pixels;
       if(compositionPlan.needsFillPixelData)
       {
         pixels.fillPixelData = renderInfo.marqueeFillPixelData;
@@ -2652,7 +2652,7 @@ void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderIn
         pixels.overlayStylePixelData = renderInfo.marqueeOverlayStylePixelData;
       }
 
-      Text::MarqueeBuilder::ApplyPreparedComposition(preparedContent, compositionRequest, pixels);
+      Ui::Text::MarqueeBuilder::ApplyPreparedComposition(preparedContent, compositionRequest, pixels);
     }
   }
 
@@ -2673,7 +2673,7 @@ void LabelImpl::AsyncTextFitChanged(float pointSize)
   }
 }
 
-void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo&& renderInfo)
+void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
 {
   DALI_LOG_RELEASE_INFO("[%p] rendered size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
 
@@ -2703,8 +2703,8 @@ void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo&& renderInfo)
   // both immutable source and render request generations are still current.
   if(mController->HasValidReplacementSource())
   {
-    const Text::ReplacementSourceSnapshot& replacementSource = mController->GetReplacementSourceSnapshot();
-    Internal::Text::InlineReplacementData* data              = Internal::Text::GetInlineReplacementData(selfView);
+    const Ui::Text::ReplacementSourceSnapshot& replacementSource = mController->GetReplacementSourceSnapshot();
+    Internal::Text::InlineReplacementData*     data              = Internal::Text::GetInlineReplacementData(selfView);
     if(data && renderInfo.replacementSourceRevision == replacementSource.sourceRevision &&
        renderInfo.replacementLayoutGeneration == data->lastRenderGeneration)
     {
@@ -2742,11 +2742,11 @@ void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo&& renderInfo)
   EmitAsyncRenderFinished(width, height);
 }
 
-void LabelImpl::AsyncSizeComputed(const Text::AsyncTextRenderInfo& renderInfo)
+void LabelImpl::AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInfo)
 {
   switch(renderInfo.requestType)
   {
-    case Text::Async::COMPUTE_NATURAL_SIZE:
+    case Ui::Text::Async::COMPUTE_NATURAL_SIZE:
     {
       DALI_LOG_RELEASE_INFO("[%p] natural size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
       mAsyncLineCount     = renderInfo.lineCount;
@@ -2756,7 +2756,7 @@ void LabelImpl::AsyncSizeComputed(const Text::AsyncTextRenderInfo& renderInfo)
       EmitAsyncNaturalSizeComputed(width, height);
       break;
     }
-    case Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+    case Ui::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
       DALI_LOG_RELEASE_INFO("[%p] height for width:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
       mAsyncLineCount     = renderInfo.lineCount;
@@ -2800,11 +2800,11 @@ void LabelImpl::UpdateTextGradientStyle()
 {
   if(DALI_LIKELY(mVisual))
   {
-    const auto*                     data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-    Text::Internal::Gradient::Style style;
-    if(data && Text::Internal::Gradient::IsRenderable(data->textGradient))
+    const auto*                         data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+    Ui::Text::Internal::Gradient::Style style;
+    if(data && Ui::Text::Internal::Gradient::IsRenderable(data->textGradient))
     {
-      style = Text::Internal::Gradient::CreateStyle(data->textGradient);
+      style = Ui::Text::Internal::Gradient::CreateStyle(data->textGradient);
     }
 
     Internal::TextVisual::SetTextGradientStyle(mVisual, style);
@@ -2815,11 +2815,11 @@ void LabelImpl::UpdateTextGradientOverlayStyle()
 {
   if(DALI_LIKELY(mVisual))
   {
-    const auto*                     data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-    Text::Internal::Gradient::Style style;
-    if(data && Text::Internal::Gradient::IsRenderable(data->textGradientOverlay))
+    const auto*                         data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
+    Ui::Text::Internal::Gradient::Style style;
+    if(data && Ui::Text::Internal::Gradient::IsRenderable(data->textGradientOverlay))
     {
-      style = Text::Internal::Gradient::CreateStyle(data->textGradientOverlay);
+      style = Ui::Text::Internal::Gradient::CreateStyle(data->textGradientOverlay);
     }
 
     Internal::TextVisual::SetTextGradientOverlayStyle(mVisual, style);
@@ -2845,7 +2845,7 @@ void LabelImpl::SyncGradientAnimProperties()
     return;
   }
 
-  const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(data->textGradient);
+  const Ui::Text::Internal::Gradient::Style style = Ui::Text::Internal::Gradient::CreateStyle(data->textGradient);
   self.SetProperty(data->gradientAnimOffsetIndex, style.startOffset);
 }
 
@@ -2868,14 +2868,14 @@ void LabelImpl::SyncGradientOverlayAnimProperties()
     return;
   }
 
-  const Text::Internal::Gradient::Style style = Text::Internal::Gradient::CreateStyle(data->textGradientOverlay);
+  const Ui::Text::Internal::Gradient::Style style = Ui::Text::Internal::Gradient::CreateStyle(data->textGradientOverlay);
   self.SetProperty(data->gradientOverlayAnimOffsetIndex, style.startOffset);
 }
 
 bool LabelImpl::IsGradientAnimSupported() const
 {
   const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  return data && Text::Internal::Gradient::IsRenderable(data->textGradient);
+  return data && Ui::Text::Internal::Gradient::IsRenderable(data->textGradient);
 }
 
 bool LabelImpl::IsGradientOverlayAnimSupported() const
@@ -2884,7 +2884,7 @@ bool LabelImpl::IsGradientOverlayAnimSupported() const
   // renderer/scroller. Marquee renderers bind it later when overlay composition
   // is available.
   const auto* data = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  return data && Text::Internal::Gradient::IsRenderable(data->textGradientOverlay);
+  return data && Ui::Text::Internal::Gradient::IsRenderable(data->textGradientOverlay);
 }
 
 void LabelImpl::BindGradientAnimProperties()
@@ -2956,13 +2956,13 @@ void LabelImpl::SetGradientOverlayAnimApplyRate(bool notifyToConstraint)
 void LabelImpl::UpdateLineHeight()
 {
   bool rendererUpdateNeeded = false;
-  if(Equals(mLineHeight, Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
+  if(Equals(mLineHeight, Ui::Text::LINE_HEIGHT_AUTO, Math::MACHINE_EPSILON_1000))
   {
     // clear explicit line height and use the natural line height.
     rendererUpdateNeeded |= mController->SetRelativeLineSize(-1.0f);
     rendererUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
   }
-  else if(mLineHeightMode == Text::LineHeightMode::RELATIVE)
+  else if(mLineHeightMode == Ui::Text::LineHeightMode::RELATIVE)
   {
     rendererUpdateNeeded |= mController->SetDefaultLineSize(0.0f);
     rendererUpdateNeeded |= mController->SetRelativeLineSize(mLineHeight);
@@ -3165,13 +3165,13 @@ void LabelImpl::OnAccessibilityStatusChanged()
 
 void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSize)
 {
-  const Text::CharacterDirection direction = mController->GetMarqueeTextDirection();
+  const Ui::Text::CharacterDirection direction = mController->GetMarqueeTextDirection();
 
   float wrapGap        = 0.0f;
   Size  verifiedSize   = Size::ZERO;
   bool  actualellipsis = mController->IsTextElideEnabled();
 
-  bool       isHorizontal     = GetTextScroller()->GetOrientation() == Text::MarqueeOrientation::HORIZONTAL;
+  bool       isHorizontal     = GetTextScroller()->GetOrientation() == Ui::Text::MarqueeOrientation::HORIZONTAL;
   const Size controlSize      = isHorizontal ? mController->GetView().GetControlSize() : contentSize;
   const int  maxTextureSize   = Dali::GetMaxTextureSize();
   const int  scaledMarqueeGap = static_cast<int>(mTextScroller->GetGap() * GetTextUiScale());
@@ -3221,7 +3221,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
       verifiedSize.height = static_cast<float>(maxTextureSize);
       if(textHeight > maxTextureSize)
       {
-        mController->SetMarqueeEnabled(false, false, Text::MarqueeOrientation::VERTICAL);
+        mController->SetMarqueeEnabled(false, false, Ui::Text::MarqueeOrientation::VERTICAL);
         mController->SetTextElideEnabled(true);
       }
 
@@ -3229,13 +3229,13 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
       wrapGap = std::max(maxTextureSize - textHeight, 0.0f);
       if(!mController->IsMarqueeEnabled())
       {
-        mController->SetMarqueeEnabled(true, false, Text::MarqueeOrientation::VERTICAL);
+        mController->SetMarqueeEnabled(true, false, Ui::Text::MarqueeOrientation::VERTICAL);
       }
     }
   }
 
-  const Text::Direction textDirection     = mController->GetTextDirection();
-  auto                  renderMarqueeText = [&](Text::Typesetter::RenderBehaviour renderBehaviour, Pixel::Format pixelFormat) -> PixelData
+  const Ui::Text::Direction textDirection     = mController->GetTextDirection();
+  auto                      renderMarqueeText = [&](Ui::Text::Typesetter::RenderBehaviour renderBehaviour, Pixel::Format pixelFormat) -> PixelData
   {
     return Internal::TextVisual::RenderMarqueeText(mVisual,
                                                    verifiedSize,
@@ -3245,54 +3245,54 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
                                                    pixelFormat,
                                                    originSize);
   };
-  PixelData data = renderMarqueeText(Text::Typesetter::RENDER_TEXT_AND_STYLES, Pixel::RGBA8888);
+  PixelData data = renderMarqueeText(Ui::Text::Typesetter::RENDER_TEXT_AND_STYLES, Pixel::RGBA8888);
 
-  Sampler sampler = Text::MarqueeBuilder::CreateTextScrollSampler(isHorizontal);
+  Sampler sampler = Ui::Text::MarqueeBuilder::CreateTextScrollSampler(isHorizontal);
 
-  Text::MarqueeBuilder::PreparedContent preparedContent =
-    Text::MarqueeBuilder::CreateTextContent(data, sampler);
+  Ui::Text::MarqueeBuilder::PreparedContent preparedContent =
+    Ui::Text::MarqueeBuilder::CreateTextContent(data, sampler);
 
   const auto*           gradientData                   = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
   const Gradient::Base& textGradient                   = gradientData ? gradientData->textGradient : Gradient::Base::None();
   const Gradient::Base& textGradientOverlay            = gradientData ? gradientData->textGradientOverlay : Gradient::Base::None();
-  const auto            textGradientBoundsMode         = gradientData ? gradientData->textGradientBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
-  const auto            textGradientOverlayBoundsMode  = gradientData ? gradientData->textGradientOverlayBoundsMode : Text::GradientBoundsMode::CONTENT_BOUND;
-  const auto            textGradientOverlayMode        = gradientData ? gradientData->textGradientOverlayMode : Text::GradientOverlayMode::SRC_OVER;
+  const auto            textGradientBoundsMode         = gradientData ? gradientData->textGradientBoundsMode : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto            textGradientOverlayBoundsMode  = gradientData ? gradientData->textGradientOverlayBoundsMode : Ui::Text::GradientBoundsMode::CONTENT_BOUND;
+  const auto            textGradientOverlayMode        = gradientData ? gradientData->textGradientOverlayMode : Ui::Text::GradientOverlayMode::SRC_OVER;
   const Property::Index gradientAnimOffsetIndex        = gradientData ? gradientData->gradientAnimOffsetIndex : Property::INVALID_INDEX;
   const Property::Index gradientOverlayAnimOffsetIndex = gradientData ? gradientData->gradientOverlayAnimOffsetIndex : Property::INVALID_INDEX;
   const bool            gradientAnimApplyAlways        = gradientData && gradientData->gradientAnimCount > 0;
   const bool            gradientOverlayApplyAlways     = gradientData && gradientData->gradientOverlayAnimCount > 0;
 
-  const Text::ModelInterface* const         textModel = mController->GetRenderTextModel();
-  const Text::MarqueeBuilder::GradientState gradientState =
-    Text::MarqueeBuilder::ResolveGradientState(textGradient,
-                                               textGradientOverlay,
-                                               verifiedSize);
+  const Ui::Text::ModelInterface* const         textModel = mController->GetRenderTextModel();
+  const Ui::Text::MarqueeBuilder::GradientState gradientState =
+    Ui::Text::MarqueeBuilder::ResolveGradientState(textGradient,
+                                                   textGradientOverlay,
+                                                   verifiedSize);
   const bool hasGradientFeature = gradientState.baseRenderable || gradientState.overlayRenderable;
   const bool needsMarqueeComposition =
     hasGradientFeature ||
-    Text::MarqueeBuilder::HasOverlayStyle(*textModel);
+    Ui::Text::MarqueeBuilder::HasOverlayStyle(*textModel);
   if(needsMarqueeComposition)
   {
-    Text::MarqueeBuilder::FeatureInfo featureInfo;
+    Ui::Text::MarqueeBuilder::FeatureInfo featureInfo;
     if(hasGradientFeature)
     {
       featureInfo =
-        Text::MarqueeBuilder::CollectGradientFeatureInfo(*textModel,
-                                                         mController->IsTextCutout());
+        Ui::Text::MarqueeBuilder::CollectGradientFeatureInfo(*textModel,
+                                                             mController->IsTextCutout());
     }
     else
     {
       featureInfo.isOverlayStyle = true;
     }
 
-    Text::MarqueeBuilder::AnimationState animationState;
+    Ui::Text::MarqueeBuilder::AnimationState animationState;
     animationState.baseStartOffsetIndex    = gradientAnimOffsetIndex;
     animationState.baseApplyAlways         = gradientAnimApplyAlways;
     animationState.overlayStartOffsetIndex = gradientOverlayAnimOffsetIndex;
     animationState.overlayApplyAlways      = gradientOverlayApplyAlways;
 
-    Text::MarqueeBuilder::CompositionRequest compositionRequest;
+    Ui::Text::MarqueeBuilder::CompositionRequest compositionRequest;
     compositionRequest.sampler        = sampler;
     compositionRequest.verifiedSize   = verifiedSize;
     compositionRequest.featureInfo    = featureInfo;
@@ -3301,23 +3301,23 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     compositionRequest.animationState = animationState;
     compositionRequest.overlayMode    = textGradientOverlayMode;
 
-    const Text::MarqueeBuilder::CompositionPlan compositionPlan =
-      Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
+    const Ui::Text::MarqueeBuilder::CompositionPlan compositionPlan =
+      Ui::Text::MarqueeBuilder::GetCompositionPlan(compositionRequest);
     if(compositionPlan.HasWork())
     {
       if(compositionPlan.needsBaseBounds || compositionPlan.needsOverlayBounds)
       {
         const Vector4 textGradientViewportBounds =
-          Text::Internal::CalculateMarqueeGradientViewportBounds(controlSize,
-                                                                 textModel->GetLayoutSize(),
-                                                                 textModel->GetLines(),
-                                                                 textModel->GetNumberOfLines(),
-                                                                 mController->GetHorizontalAlignment(),
-                                                                 mController->GetVerticalAlignment());
-        auto resolveMarqueeGradientBounds = [&](Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
+          Ui::Text::Internal::CalculateMarqueeGradientViewportBounds(controlSize,
+                                                                     textModel->GetLayoutSize(),
+                                                                     textModel->GetLines(),
+                                                                     textModel->GetNumberOfLines(),
+                                                                     mController->GetHorizontalAlignment(),
+                                                                     mController->GetVerticalAlignment());
+        auto resolveMarqueeGradientBounds = [&](Ui::Text::GradientBoundsMode boundsMode, Vector2& coordinateSize) -> Vector4
         {
           coordinateSize = controlSize;
-          if(boundsMode == Text::GradientBoundsMode::VIEW_BOUND)
+          if(boundsMode == Ui::Text::GradientBoundsMode::VIEW_BOUND)
           {
             coordinateSize = Internal::TextVisual::GetGradientViewCoordinateSize(mVisual);
             return Internal::TextVisual::CalculateGradientViewBounds(mVisual, coordinateSize);
@@ -3346,14 +3346,14 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
         }
       }
 
-      Text::MarqueeBuilder::PixelDataBundle pixels;
+      Ui::Text::MarqueeBuilder::PixelDataBundle pixels;
       if(compositionPlan.needsFillPixelData)
       {
-        pixels.fillPixelData = renderMarqueeText(Text::Typesetter::RENDER_NO_STYLES, Pixel::RGBA8888);
+        pixels.fillPixelData = renderMarqueeText(Ui::Text::Typesetter::RENDER_NO_STYLES, Pixel::RGBA8888);
       }
       if(compositionPlan.needsStylePixelData)
       {
-        pixels.stylePixelData = renderMarqueeText(Text::Typesetter::RENDER_NO_TEXT, Pixel::RGBA8888);
+        pixels.stylePixelData = renderMarqueeText(Ui::Text::Typesetter::RENDER_NO_TEXT, Pixel::RGBA8888);
       }
       if(compositionPlan.needsPreservedMaskPixelData)
       {
@@ -3374,10 +3374,10 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
       }
       if(compositionPlan.needsOverlayStylePixelData)
       {
-        pixels.overlayStylePixelData = renderMarqueeText(Text::Typesetter::RENDER_OVERLAY_STYLE, Pixel::RGBA8888);
+        pixels.overlayStylePixelData = renderMarqueeText(Ui::Text::Typesetter::RENDER_OVERLAY_STYLE, Pixel::RGBA8888);
       }
 
-      Text::MarqueeBuilder::ApplyPreparedComposition(preparedContent, compositionRequest, pixels);
+      Ui::Text::MarqueeBuilder::ApplyPreparedComposition(preparedContent, compositionRequest, pixels);
     }
   }
 
@@ -3426,8 +3426,8 @@ void LabelImpl::StopMarqueeImmediately()
     return;
   }
 
-  const Text::MarqueeStopMode stopMode = mTextScroller->GetStopMode();
-  mTextScroller->SetStopMode(Text::MarqueeStopMode::IMMEDIATE);
+  const Ui::Text::MarqueeStopMode stopMode = mTextScroller->GetStopMode();
+  mTextScroller->SetStopMode(Ui::Text::MarqueeStopMode::IMMEDIATE);
   mTextScroller->StopScrolling();
   mTextScroller->SetStopMode(stopMode);
 }
@@ -3441,7 +3441,7 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
 
   if(visible)
   {
-    if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
+    if(mMarqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW)
     {
       EnableAutoMarqueeEvaluation();
       RequestTextRelayout();
@@ -3456,7 +3456,7 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
   }
   else
   {
-    if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
+    if(mMarqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW)
     {
       SuppressAutoMarqueeEvaluation();
     }
@@ -3471,11 +3471,11 @@ void LabelImpl::OnMarqueeVisibilityChanged(bool visible)
   }
 }
 
-Text::TextScrollerPtr LabelImpl::GetTextScroller()
+Ui::Text::TextScrollerPtr LabelImpl::GetTextScroller()
 {
   if(!mTextScroller)
   {
-    mTextScroller = Text::TextScroller::New(*this);
+    mTextScroller = Ui::Text::TextScroller::New(*this);
   }
   return mTextScroller;
 }
@@ -3491,7 +3491,7 @@ void LabelImpl::SetMarqueeEnabled(bool enabled)
     RequestAsyncRender();
     return;
   }
-  if(mMarqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
+  if(mMarqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW)
   {
     if(enabled)
     {
@@ -3576,7 +3576,7 @@ void LabelImpl::OnSceneConnection(int depth)
   }
 }
 
-void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOrientation orientation)
+void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Ui::Text::MarqueeOrientation orientation)
 {
   if(HasInlineReplacementSource())
   {
@@ -3587,7 +3587,7 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOr
     }
     return;
   }
-  if(mMarqueeTriggerPolicy != Text::MarqueeTriggerPolicy::ON_OVERFLOW || mSuppressAutoMarquee || !IsVisible())
+  if(mMarqueeTriggerPolicy != Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW || mSuppressAutoMarquee || !IsVisible())
   {
     return;
   }
@@ -3595,7 +3595,7 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOr
   bool       marqueeEnabled   = false;
   const bool multiLineEnabled = mController->IsMultiLineEnabled();
 
-  if(orientation == Text::MarqueeOrientation::HORIZONTAL)
+  if(orientation == Ui::Text::MarqueeOrientation::HORIZONTAL)
   {
     if(multiLineEnabled)
     {
@@ -3628,22 +3628,22 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Text::MarqueeOr
   }
 }
 
-void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Text::MarqueeOrientation orientation, Size& originSize)
+void LabelImpl::PrepareMarqueeLayout(const Size& contentSize, Ui::Text::MarqueeOrientation orientation, Size& originSize)
 {
   originSize = Size::ZERO;
 
   if(mController->IsMarqueeEnabled())
   {
-    const bool isVerticalScroll = (orientation == Text::MarqueeOrientation::VERTICAL);
+    const bool isVerticalScroll = (orientation == Ui::Text::MarqueeOrientation::VERTICAL);
 
     const bool needLayoutSizeCalculation =
-      isVerticalScroll && (mController->GetVerticalAlignment() != Text::Alignment::START);
+      isVerticalScroll && (mController->GetVerticalAlignment() != Ui::Text::Alignment::START);
 
     if(needLayoutSizeCalculation)
     {
-      mController->SetMarqueeEnabled(false, false, Text::MarqueeOrientation::VERTICAL);
+      mController->SetMarqueeEnabled(false, false, Ui::Text::MarqueeOrientation::VERTICAL);
       originSize = mController->CalculateLayoutSize(contentSize.x, contentSize.y, true);
-      mController->SetMarqueeEnabled(true, false, Text::MarqueeOrientation::VERTICAL);
+      mController->SetMarqueeEnabled(true, false, Ui::Text::MarqueeOrientation::VERTICAL);
     }
   }
 }
@@ -3798,14 +3798,14 @@ void LabelImpl::ApplyLocalizedText(BaseHandle target, const Dali::String& text)
   SetText(text);
 }
 
-Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::RequestType requestType, const Vector2& contentSize, const Insets& padding, const Dali::LayoutDirection::Type layoutDirection)
+Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Ui::Text::Async::RequestType requestType, const Vector2& contentSize, const Insets& padding, const Dali::LayoutDirection::Type layoutDirection)
 {
   // Logically, all properties of the label should be passed.
 
   std::string text;
   mController->GetText(text);
 
-  Text::AsyncTextParameters parameters;
+  Ui::Text::AsyncTextParameters parameters;
   parameters.requestType     = requestType;
   parameters.textWidth       = contentSize.width;
   parameters.textHeight      = contentSize.height;
@@ -3818,14 +3818,14 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
     Ui::View                               owner = Ui::View::DownCast(Self());
     Internal::Text::InlineReplacementData& data  = Internal::Text::GetOrCreateInlineReplacementData(owner);
     parameters.replacementLayoutGeneration       = ++data.requestGeneration;
-    if(requestType <= Text::Async::RENDER_CONSTRAINT)
+    if(requestType <= Ui::Text::Async::RENDER_CONSTRAINT)
     {
       data.lastRenderGeneration = parameters.replacementLayoutGeneration;
     }
   }
 
   parameters.maxTextureSize             = Dali::GetMaxTextureSize();
-  parameters.fontSize                   = mController->GetDefaultFontSize(Text::Controller::POINT_SIZE);
+  parameters.fontSize                   = mController->GetDefaultFontSize(Ui::Text::Controller::POINT_SIZE);
   parameters.textColor                  = mController->GetDefaultColor();
   parameters.anchorColor                = mController->GetAnchorColor();
   parameters.anchorClickedColor         = mController->GetAnchorClickedColor();
@@ -3866,9 +3866,9 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.outlineBlurRadius          = mController->GetOutlineBlurRadius();
   parameters.outlineOffset              = mController->GetOutlineOffset();
   parameters.isTextFitEnabled           = mController->IsTextFitEnabled();
-  parameters.textFitMinSize             = mController->GetTextFitMinSize(Text::Controller::POINT_SIZE);
-  parameters.textFitMaxSize             = mController->GetTextFitMaxSize(Text::Controller::POINT_SIZE);
-  parameters.textFitStepSize            = mController->GetTextFitStepSize(Text::Controller::POINT_SIZE);
+  parameters.textFitMinSize             = mController->GetTextFitMinSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.textFitMaxSize             = mController->GetTextFitMaxSize(Ui::Text::Controller::POINT_SIZE);
+  parameters.textFitStepSize            = mController->GetTextFitStepSize(Ui::Text::Controller::POINT_SIZE);
   parameters.isTextFitCandidatesEnabled = mController->IsTextFitCandidatesEnabled();
   parameters.textFitCandidates          = mController->GetTextFitCandidates();
   parameters.isMarqueeEnabled           = mController->IsMarqueeEnabled();
@@ -3878,7 +3878,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   }
   parameters.marqueeTriggerPolicy = mMarqueeTriggerPolicy;
   parameters.suppressAutoMarquee  = mSuppressAutoMarquee;
-  if(parameters.isMarqueeEnabled || parameters.marqueeTriggerPolicy == Text::MarqueeTriggerPolicy::ON_OVERFLOW)
+  if(parameters.isMarqueeEnabled || parameters.marqueeTriggerPolicy == Ui::Text::MarqueeTriggerPolicy::ON_OVERFLOW)
   {
     parameters.marqueeStopMode    = GetTextScroller()->GetStopMode();
     parameters.marqueeSpeed       = GetTextScroller()->GetSpeed();
@@ -3900,8 +3900,8 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
   parameters.embossLightColor               = mController->GetEmbossLightColor();
   parameters.embossShadowColor              = mController->GetEmbossShadowColor();
   const auto* gradientData                  = Internal::Text::GetTextGradientPropertyData(mTextGradientPropertyData);
-  parameters.isTextGradientRequested        = gradientData && Text::Internal::Gradient::IsRenderable(gradientData->textGradient);
-  parameters.isTextGradientOverlayRequested = gradientData && Text::Internal::Gradient::IsRenderable(gradientData->textGradientOverlay);
+  parameters.isTextGradientRequested        = gradientData && Ui::Text::Internal::Gradient::IsRenderable(gradientData->textGradient);
+  parameters.isTextGradientOverlayRequested = gradientData && Ui::Text::Internal::Gradient::IsRenderable(gradientData->textGradientOverlay);
   if(mHasAsyncAnchorHitRegions)
   {
     parameters.clickedAnchors = Internal::Text::GetAnchorClickedStates(Ui::View::DownCast(Self()));
@@ -3909,7 +3909,7 @@ Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::R
 
   if(mHasStyledTextSource)
   {
-    const Text::StyledText styledTextSource = Internal::Text::GetStyledTextSource(mStyledTextSourceData);
+    const Ui::Text::StyledText styledTextSource = Internal::Text::GetStyledTextSource(mStyledTextSourceData);
     if(styledTextSource)
     {
       const Dali::String styledText         = styledTextSource.GetText();
@@ -3930,7 +3930,7 @@ void LabelImpl::EmitTextFitChanged()
 {
   // Intentionally not emitted for now.
   // Revisit when the public TextFitChanged API direction is finalized.
-  // mController->GetTextFitFontSize(Text::Controller::PIXEL_SIZE);
+  // mController->GetTextFitFontSize(Ui::Text::Controller::PIXEL_SIZE);
 }
 
 void LabelImpl::EmitAsyncRenderFinished(float width, float height)
@@ -3959,7 +3959,7 @@ void LabelImpl::SetTextColorInternal(const Vector4& color)
   if(mController->GetDefaultColor() != color)
   {
     DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
-    Self().SetProperty(Text::LabelPropertyIndex::TEXT_COLOR, color);
+    Self().SetProperty(Ui::Text::LabelPropertyIndex::TEXT_COLOR, color);
     mController->SetDefaultColor(color);
     RequestRendererUpdate();
 

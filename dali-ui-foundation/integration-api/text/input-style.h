@@ -29,6 +29,8 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Integration
+{
 namespace Text
 {
 typedef TextAbstraction::FontWidth::Type  FontWidthType;  ///< The font's width.
@@ -244,6 +246,8 @@ struct InputStyle
 };
 
 } // namespace Text
+
+} // namespace Integration
 
 } // namespace Ui
 

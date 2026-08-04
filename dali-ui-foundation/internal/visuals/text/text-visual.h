@@ -25,7 +25,7 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/integration-api/text/async-text/async-text-interface.h>
+#include <dali-ui-foundation/integration-api/text/async-text-interface.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>
@@ -178,7 +178,7 @@ public:
    * @param[in] visual The text visual.
    * @param[in] asyncTextInterface The async text interface.
    */
-  static void SetAsyncTextInterface(Ui::Integration::Visual::Base visual, Ui::Text::AsyncTextInterface* asyncTextInterface)
+  static void SetAsyncTextInterface(Ui::Integration::Visual::Base visual, Ui::Integration::Text::AsyncTextInterface* asyncTextInterface)
   {
     GetVisualObject(visual).SetAsyncTextInterface(asyncTextInterface);
   };
@@ -475,7 +475,7 @@ private:
    * @brief Set the control's async text interface.
    * @param[in] asyncTextInterface The async text interface.
    */
-  void SetAsyncTextInterface(Ui::Text::AsyncTextInterface* asyncTextInterface);
+  void SetAsyncTextInterface(Ui::Integration::Text::AsyncTextInterface* asyncTextInterface);
 
   void SetTextGradientStyle(const Ui::Text::Internal::Gradient::Style& style);
 
@@ -693,10 +693,10 @@ private:
   typedef std::vector<Constraint>     ConstraintContainer;
 
 private:
-  Ui::Text::ControllerPtr       mController;         ///< The text's controller.
-  Ui::Text::TypesetterPtr       mTypesetter;         ///< The text's typesetter.
-  Ui::Text::AsyncTextInterface* mAsyncTextInterface; ///< The text's async interface.
-  TextVisualGradientDataPtr     mGradientData;       ///< Lazily allocated TextGradient rendering state.
+  Ui::Text::ControllerPtr                    mController;         ///< The text's controller.
+  Ui::Text::TypesetterPtr                    mTypesetter;         ///< The text's typesetter.
+  Ui::Integration::Text::AsyncTextInterface* mAsyncTextInterface; ///< The text's async interface.
+  TextVisualGradientDataPtr                  mGradientData;       ///< Lazily allocated TextGradient rendering state.
 
   TextVisualShaderFactory&                mTextVisualShaderFactory; ///< The shader factory for text visual.
   TextVisualShaderFeature::FeatureBuilder mTextShaderFeatureCache;  ///< The cached shader feature for text visual.

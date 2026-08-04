@@ -21,18 +21,17 @@
 // EXTERNAL INCLUDES
 #include <dali/public-api/common/dali-string.h>
 #include <cstdint>
-#include <string>
 #include <utility>
 
 namespace Dali
 {
 namespace Ui
 {
-using Uint32Pair = std::pair<uint32_t, uint32_t>;
-using string     = std::string;
-
+namespace Integration
+{
 namespace Text
 {
+using Uint32Pair = std::pair<uint32_t, uint32_t>;
 /**
  * @brief Interface used by Text::Controller to notify and control text selection.
  *
@@ -105,6 +104,7 @@ public:
 };
 
 } // namespace Text
+} // namespace Integration
 } // namespace Ui
 } // namespace Dali
 

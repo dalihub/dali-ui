@@ -255,8 +255,8 @@ struct Decorator::Impl : public ConnectionTracker
       ToDaliStringView(SHADER_TEXT_DECORATOR_SHADER_VERT), ToDaliStringView(SHADER_TEXT_DECORATOR_SHADER_FRAG),
       static_cast<Shader::Hint::Value>(Shader::Hint::FILE_CACHE_SUPPORT | Shader::Hint::INTERNAL), "TEXT_DECORATOR");
     SetupGestures();
-    CreateLayer(mActiveLayer, DecorationType::ACTIVE_LAYER);
-    CreateLayer(mCursorLayer, DecorationType::CURSOR_LAYER);
+    CreateLayer(mActiveLayer, Ui::Integration::Text::DecorationType::ACTIVE_LAYER);
+    CreateLayer(mCursorLayer, Ui::Integration::Text::DecorationType::CURSOR_LAYER);
   }
 
   /**
@@ -814,23 +814,23 @@ struct Decorator::Impl : public ConnectionTracker
     mPanDetector.DetectedSignal().Connect(this, &Decorator::Impl::OnPan);
   }
 
-  void CreateLayer(Actor& layer, DecorationType type)
+  void CreateLayer(Actor& layer, Ui::Integration::Text::DecorationType type)
   {
     if(!layer)
     {
       layer = Actor::New();
 #ifdef DECORATOR_DEBUG
-      if(type == DecorationType::ACTIVE_LAYER)
+      if(type == Ui::Integration::Text::DecorationType::ACTIVE_LAYER)
       {
         layer.SetProperty(Actor::Property::NAME, "ActiveLayerActor");
       }
-      else if(type == DecorationType::CURSOR_LAYER)
+      else if(type == Ui::Integration::Text::DecorationType::CURSOR_LAYER)
       {
         layer.SetProperty(Actor::Property::NAME, "CursorLayerActor");
       }
 #endif
       bool needsClipping = false;
-      if(type == DecorationType::CURSOR_LAYER)
+      if(type == Ui::Integration::Text::DecorationType::CURSOR_LAYER)
       {
         needsClipping = true;
       }
@@ -1312,7 +1312,7 @@ struct Decorator::Impl : public ConnectionTracker
     }
 
     // Add the highlight box telling the controller it needs clipping.
-    mController.AddDecoration(mHighlightActor, DecorationType::NONE_LAYER, true);
+    mController.AddDecoration(mHighlightActor, Ui::Integration::Text::DecorationType::NONE_LAYER, true);
   }
 
   void UpdateHighlight()

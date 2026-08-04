@@ -131,7 +131,7 @@ public:
      * @param[in] type Whether this decoration is a layer or not, which layer it is.
      * @param[in] needsClipping Whether the actor needs clipping.
      */
-    virtual void AddDecoration(Dali::Actor& actor, DecorationType type, bool needsClipping) = 0;
+    virtual void AddDecoration(Dali::Actor& actor, Ui::Integration::Text::DecorationType type, bool needsClipping) = 0;
 
     /**
      * @brief An input event from one of the handles.

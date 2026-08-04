@@ -1406,7 +1406,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
   ResourceReady(resourceStatus);
 }
 
-void TextVisual::SetAsyncTextInterface(Text::AsyncTextInterface* asyncTextInterface)
+void TextVisual::SetAsyncTextInterface(Ui::Integration::Text::AsyncTextInterface* asyncTextInterface)
 {
   mAsyncTextInterface = asyncTextInterface;
 }

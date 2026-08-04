@@ -26,6 +26,8 @@ namespace Dali
 {
 namespace Ui
 {
+namespace Integration
+{
 namespace Text
 {
 /**
@@ -54,6 +56,8 @@ public:
 };
 
 } // namespace Text
+
+} // namespace Integration
 
 } // namespace Ui
 

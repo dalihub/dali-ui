@@ -453,11 +453,11 @@ void Controller::TextUpdater::InsertText(Controller& controller, const std::stri
     const CharacterIndex styleIndex = (cursorIndex > 0u) ? cursorIndex - 1u : 0u;
 
     // Retrieve the text's style for the given index.
-    InputStyle style;
+    Ui::Integration::Text::InputStyle style;
     impl.RetrieveDefaultInputStyle(style);
     logicalModel->RetrieveStyle(styleIndex, style);
 
-    InputStyle& inputStyle = eventData->mInputStyle;
+    Ui::Integration::Text::InputStyle& inputStyle = eventData->mInputStyle;
 
     // Whether to add a new text color run.
     const bool addColorRun = (style.textColor != inputStyle.textColor) && !inputStyle.isDefaultColor;
@@ -738,10 +738,10 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
       if(UPDATE_INPUT_STYLE == type)
       {
-        InputStyle& eventDataInputStyle = eventData->mInputStyle;
+        Ui::Integration::Text::InputStyle& eventDataInputStyle = eventData->mInputStyle;
 
         // Keep a copy of the current input style.
-        InputStyle currentInputStyle;
+        Ui::Integration::Text::InputStyle currentInputStyle;
         currentInputStyle.Copy(eventDataInputStyle);
 
         // Set first the default input style.
@@ -755,7 +755,7 @@ bool Controller::TextUpdater::RemoveText(Controller& controller, int cursorOffse
 
         if(hasInputStyleChanged)
         {
-          const InputStyle::Mask styleChangedMask = currentInputStyle.GetInputStyleChangeMask(eventDataInputStyle);
+          const Ui::Integration::Text::InputStyle::Mask styleChangedMask = currentInputStyle.GetInputStyleChangeMask(eventDataInputStyle);
           // Queue the input style changed signal.
           eventData->mInputStyleChangedQueue.PushBack(styleChangedMask);
         }

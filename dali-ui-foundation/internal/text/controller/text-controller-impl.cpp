@@ -69,7 +69,7 @@ namespace Dali::Ui::Text
 {
 namespace
 {
-void SetDefaultInputStyle(InputStyle& inputStyle, const FontDefaults* const fontDefaults, const Vector4& textColor)
+void SetDefaultInputStyle(Ui::Integration::Text::InputStyle& inputStyle, const FontDefaults* const fontDefaults, const Vector4& textColor)
 {
   // Sets the default text's color.
   inputStyle.textColor      = textColor;
@@ -865,7 +865,7 @@ bool Controller::Impl::UpdateModel(OperationsMask operationsRequired)
   return ControllerImplModelUpdater::Update(*this, operationsRequired);
 }
 
-void Controller::Impl::RetrieveDefaultInputStyle(InputStyle& inputStyle)
+void Controller::Impl::RetrieveDefaultInputStyle(Ui::Integration::Text::InputStyle& inputStyle)
 {
   SetDefaultInputStyle(inputStyle, mFontDefaults, mTextColor);
 }
@@ -1004,9 +1004,9 @@ float Controller::Impl::GetRelativeLineSize()
   return mLayoutEngine.GetRelativeLineSize();
 }
 
-string Controller::Impl::GetSelectedText()
+std::string Controller::Impl::GetSelectedText()
 {
-  string text;
+  std::string text;
   if(EventData::SELECTING == mEventData->mState)
   {
     RetrieveSelection(text, false);
@@ -1014,9 +1014,9 @@ string Controller::Impl::GetSelectedText()
   return text;
 }
 
-string Controller::Impl::CopyText()
+std::string Controller::Impl::CopyText()
 {
-  string text;
+  std::string text;
   RetrieveSelection(text, false);
   SendSelectionToClipboard(false); // Text not modified
 
@@ -1027,9 +1027,9 @@ string Controller::Impl::CopyText()
   return text;
 }
 
-string Controller::Impl::CutText()
+std::string Controller::Impl::CutText()
 {
-  string text;
+  std::string text;
   RetrieveSelection(text, false);
 
   if(!IsEditable())
@@ -1163,9 +1163,9 @@ bool Controller::Impl::SetPrimaryCursorPosition(CharacterIndex index, bool focus
   return true;
 }
 
-Uint32Pair Controller::Impl::GetTextSelectionRange() const
+Ui::Integration::Text::Uint32Pair Controller::Impl::GetTextSelectionRange() const
 {
-  Uint32Pair range;
+  Ui::Integration::Text::Uint32Pair range;
 
   if(mEventData)
   {
@@ -1244,7 +1244,7 @@ void Controller::Impl::RetrieveSelection(std::string& selectedText, bool deleteA
     if(deleteAfterRetrieval) // Only delete text if copied successfully
     {
       // Keep a copy of the current input style.
-      InputStyle currentInputStyle;
+      Ui::Integration::Text::InputStyle currentInputStyle;
       currentInputStyle.Copy(mEventData->mInputStyle);
 
       // Set as input style the style of the first deleted character.
@@ -1255,7 +1255,7 @@ void Controller::Impl::RetrieveSelection(std::string& selectedText, bool deleteA
 
       if(hasInputStyleChanged)
       {
-        const InputStyle::Mask styleChangedMask = currentInputStyle.GetInputStyleChangeMask(mEventData->mInputStyle);
+        const Ui::Integration::Text::InputStyle::Mask styleChangedMask = currentInputStyle.GetInputStyleChangeMask(mEventData->mInputStyle);
         // Queue the input style changed signal.
         mEventData->mInputStyleChangedQueue.PushBack(styleChangedMask);
       }
