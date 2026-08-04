@@ -28,6 +28,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/configuration/ui-scale-policy.h>
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-callback.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/traits/attachment-id.h>
@@ -35,7 +36,6 @@
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
-#include <dali-ui-foundation/public-api/types/callback.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
@@ -69,21 +69,6 @@ class ViewAnimationBridge;
 class ViewAnimationSpec;
 
 class ViewImpl;
-
-/**
- * @brief Move-only callback for custom focus navigation.
- *
- * @code
- * // Member function:
- * view.SetFocusNavigationCallback(FocusNavigationCallback::New(this, &MyClass::OnFocusNavigation));
- *
- * // Static function:
- * view.SetFocusNavigationCallback(FocusNavigationCallback::New(&MyFocusNavigationFunc));
- * @endcode
- *
- * @note Signature: View(View currentFocusedView, FocusDirection direction)
- */
-using FocusNavigationCallback = Callback<View(View, FocusDirection)>;
 
 // @ANIMATION_CONFIG(View)
 /**
@@ -717,6 +702,10 @@ public:
    *
    * When set, this callback is invoked by the focus manager to determine the next
    * focusable view. It takes priority over the OnFocusNavigationRequested() virtual method.
+   *
+   * The callback target must remain alive until the callback is replaced or
+   * cleared. Pass an empty callback to restore the View's virtual policy.
+   * The callback must return a result instead of changing focus directly.
    *
    * @param[in] callback The focus navigation callback (move-only, ownership transferred)
    */

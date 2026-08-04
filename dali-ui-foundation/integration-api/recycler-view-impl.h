@@ -110,9 +110,9 @@ protected:
   MeasuredSize OnMeasure(float widthConstraint, float heightConstraint) override;
   LayoutRect   OnArrange(const LayoutRect& bounds) override;
 
-  View OnFocusRequested() override;
-  View OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction) override;
-  bool OnKeyEvent(const Dali::KeyEvent& event) override;
+  View                  OnFocusRequested() override;
+  FocusNavigationResult OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context) override;
+  bool                  OnKeyEvent(const Dali::KeyEvent& event) override;
 
 private:
   // Provides the Recycler interface to ItemsLayouter; defined in the .cpp.

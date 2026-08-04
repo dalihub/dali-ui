@@ -1382,19 +1382,20 @@ View RecyclerViewImpl::OnFocusRequested()
   return LayoutImpl::OnFocusRequested();
 }
 
-View RecyclerViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction)
+FocusNavigationResult RecyclerViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context)
 {
-  if(!mKeyScrollEnabled || !mAdapter || !mLayouter) return View();
+  const FocusDirection direction = context.GetDirection();
+  if(!mKeyScrollEnabled || !mAdapter || !mLayouter) return FocusNavigationResult::NotHandled();
 
   const uint32_t curPos = FindActiveItemPosition(currentFocusedView);
-  if(curPos == INVALID_ITEM_POSITION) return View();
-  if(!IsLayoutAxisDirection(direction)) return View();
+  if(curPos == INVALID_ITEM_POSITION) return FocusNavigationResult::NotHandled();
+  if(!IsLayoutAxisDirection(direction)) return FocusNavigationResult::NotHandled();
 
   uint32_t nextPos = NextItemPosition(curPos, direction);
   if(nextPos == INVALID_ITEM_POSITION)
   {
     TriggerKeyEdgeFeedback(direction);
-    return View(); // Let FocusFinder exit to neighboring view.
+    return FocusNavigationResult::NotHandled(); // Let FocusFinder exit to a neighboring view.
   }
 
   // Scan past any active (visible) items that are not keyboard-focusable.
@@ -1412,7 +1413,7 @@ View RecyclerViewImpl::OnFocusNavigationRequested(View currentFocusedView, Focus
     if(scanPos == INVALID_ITEM_POSITION)
     {
       TriggerKeyEdgeFeedback(direction);
-      return View();
+      return FocusNavigationResult::NotHandled();
     }
     nextPos = scanPos;
   }
@@ -1435,7 +1436,7 @@ View RecyclerViewImpl::OnFocusNavigationRequested(View currentFocusedView, Focus
       // Item is within step distance — focus it directly.
       // ScrollOnFocus (OnFocusManagerChanged) handles making it fully visible.
       mKeyRepeatTargetPos = INVALID_ITEM_POSITION;
-      return nextView;
+      return FocusNavigationResult::MoveTo(nextView);
     }
   }
 
@@ -1455,7 +1456,7 @@ View RecyclerViewImpl::OnFocusNavigationRequested(View currentFocusedView, Focus
   ScrollToItemMakeVisible(mKeyRepeatTargetPos, true);
   StartKeyRepeatTimer();
 
-  return currentFocusedView; // Keep current focus; timer updates it once target is active.
+  return FocusNavigationResult::Stay(); // The timer updates focus once the target is active.
 }
 
 bool RecyclerViewImpl::OnKeyEvent(const Dali::KeyEvent& event)

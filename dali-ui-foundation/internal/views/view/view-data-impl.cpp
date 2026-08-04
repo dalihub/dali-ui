@@ -1306,7 +1306,7 @@ bool ViewDataImpl::IsGroupSelectable() const
   return traitObject && traitObject->GetGroupSelectableTraitImpl();
 }
 
-void ViewDataImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback)
+void ViewDataImpl::SetFocusNavigationCallback(FocusNavigationCallback callback)
 {
   if(callback || mFocusNavigationData)
   {
@@ -1314,13 +1314,13 @@ void ViewDataImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection
   }
 }
 
-View ViewDataImpl::RequestFocusNavigation(View currentFocusedView, FocusDirection direction)
+FocusNavigationResult ViewDataImpl::RequestFocusNavigation(View currentFocusedView, FocusNavigationContext context)
 {
   if(mFocusNavigationData && mFocusNavigationData->callback)
   {
-    return mFocusNavigationData->callback.Invoke(currentFocusedView, direction);
+    return mFocusNavigationData->callback.Invoke(currentFocusedView, context);
   }
-  return mViewImpl.OnFocusNavigationRequested(currentFocusedView, direction);
+  return mViewImpl.OnFocusNavigationRequested(currentFocusedView, context);
 }
 
 View ViewDataImpl::RequestFocus()

@@ -573,7 +573,7 @@ private:
   /**
    * @brief Resolves which view actually receives focus when FocusManager targets Self().
    *
-   * Called by FocusManager after Step 1 selects this ScrollView as a candidate.
+   * Called after FocusManager selects this ScrollView as a candidate.
    * Returns the content item nearest to the entry edge if it is already visible in
    * the current viewport (external-entry shortcut), or Self() when step-scrolling is
    * needed, or delegates to the base class when key-scroll is disabled.
@@ -585,7 +585,7 @@ private:
   /**
    * @brief Intercepts focus navigation for content children.
    *
-   * Called by FocusManager (Step 1 of MoveFocus pipeline) when the current
+   * Called by FocusManager's View-policy stage when the current
    * focused view is a descendant of this ScrollView. If key-scroll is enabled,
    * four cases apply:
    *
@@ -601,7 +601,7 @@ private:
    *  Case 5 — next focusable within mKeyScrollStep (or at scroll boundary):
    *    Return next directly; ScrollOnFocus animates it into full view.
    */
-  View OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction) override;
+  FocusNavigationResult OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context) override;
 
   /**
    * @brief Returns true if `child` (a content descendant) overlaps the current viewport.

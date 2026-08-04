@@ -69,6 +69,9 @@
 #include <dali-ui-foundation/public-api/views/view.h>
 
 #include <dali-ui-foundation/public-api/focus-manager/focus-manager.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-callback.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-context.h>
+#include <dali-ui-foundation/public-api/focus-manager/focus-navigation-result.h>
 
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-detector.h>
 #include <dali-ui-foundation/public-api/drag-and-drop/drag-and-drop-types.h>

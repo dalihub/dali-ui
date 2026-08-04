@@ -66,6 +66,11 @@ bool FocusManager::MoveFocus(Ui::FocusDirection direction)
   return GetImpl(*this).MoveFocus(direction);
 }
 
+void FocusManager::SetFocusNavigationFallback(FocusNavigationCallback callback)
+{
+  GetImpl(*this).SetFocusNavigationFallback(std::move(callback));
+}
+
 void FocusManager::ClearFocus()
 {
   GetImpl(*this).ClearFocus();

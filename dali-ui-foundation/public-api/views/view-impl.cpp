@@ -823,7 +823,7 @@ bool ViewImpl::IsOffScreenRenderTaskExclusive()
   return false;
 }
 
-void ViewImpl::SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback)
+void ViewImpl::SetFocusNavigationCallback(FocusNavigationCallback callback)
 {
   mImpl->SetFocusNavigationCallback(std::move(callback));
 }
@@ -888,9 +888,9 @@ bool ViewImpl::OnAccessibilityRequestValue(Dali::String& value)
   return false;
 }
 
-View ViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction)
+FocusNavigationResult ViewImpl::OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context)
 {
-  return View();
+  return FocusNavigationResult::NotHandled();
 }
 
 Ui::View::KeyEventSignalType& ViewImpl::KeyEventSignal()

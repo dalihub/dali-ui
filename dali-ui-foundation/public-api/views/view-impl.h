@@ -786,7 +786,7 @@ public: // Non-virtual API (safe to reorder / extend)
    *
    * @param[in] callback The focus navigation callback (move-only, ownership transferred)
    */
-  void SetFocusNavigationCallback(Callback<View(View, FocusDirection)> callback);
+  void SetFocusNavigationCallback(FocusNavigationCallback callback);
 
   // Signals
 
@@ -876,10 +876,15 @@ protected:
    * SetFocusNavigationCallback(), the callback takes priority and this method is not called.
    *
    * @param[in] currentFocusedView The current focused view
-   * @param[in] direction The direction to move the focus towards
-   * @return The next focusable view or an empty handle if no view can be focused
+   * Return NotHandled() to continue with the outer container or lower-priority
+   * navigation policy, MoveTo() to select a candidate, or Stay() to consume the
+   * request while keeping the current focus. Implementations must return a
+   * result instead of changing focus directly.
+   *
+   * @param[in] context Immutable information about the navigation request
+   * @return How this View handled the request
    */
-  virtual View OnFocusNavigationRequested(View currentFocusedView, FocusDirection direction);
+  virtual FocusNavigationResult OnFocusNavigationRequested(View currentFocusedView, FocusNavigationContext context);
 
   /**
    * @brief Called when focus is requested on this view via RequestFocus().
