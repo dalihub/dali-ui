@@ -131,7 +131,7 @@ Dali::Ui::Text::AsyncTextParameters CreateAsyncRenderParameters(const std::strin
   parameters.originWidth    = parameters.textWidth;
   parameters.originHeight   = parameters.textHeight;
   parameters.maxTextureSize = 4096;
-  parameters.requestType    = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
+  parameters.requestType    = Dali::Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
   return parameters;
 }
 
@@ -904,7 +904,7 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
   parameters.originWidth                = parameters.textWidth;
   parameters.originHeight               = parameters.textHeight;
   parameters.maxTextureSize             = 4096;
-  parameters.requestType                = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
+  parameters.requestType                = Dali::Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
   parameters.hasStyledTextStyleSnapshot = true;
   parameters.styledTextStyleSnapshot    = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(builder.Build(),
                                                                                                          96.0f,
@@ -959,7 +959,7 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
   imageAnchorParameters.textHeight                  = 80.0f;
   imageAnchorParameters.originHeight                = imageAnchorParameters.textHeight;
   imageAnchorParameters.maxTextureSize              = 4096;
-  imageAnchorParameters.requestType                 = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
+  imageAnchorParameters.requestType                 = Dali::Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
   imageAnchorParameters.horizontalAlignment         = Dali::Ui::Text::Alignment::CENTER;
   imageAnchorParameters.lineWrapMode                = Dali::Ui::Text::LineWrapMode::CHARACTER;
   imageAnchorParameters.ellipsisPosition             = Dali::Ui::Text::EllipsisPosition::END;
@@ -1036,7 +1036,7 @@ int UtcDaliStyledTextApplierAsyncAnchorRenderInfoP(void)
   markupParameters.originWidth        = markupParameters.textWidth;
   markupParameters.originHeight       = markupParameters.textHeight;
   markupParameters.maxTextureSize     = 4096;
-  markupParameters.requestType        = Dali::Ui::Text::Async::RENDER_FIXED_SIZE;
+  markupParameters.requestType        = Dali::Ui::Integration::Text::Async::RENDER_FIXED_SIZE;
   markupParameters.hasStyledTextStyleSnapshot = true;
   markupParameters.styledTextStyleSnapshot    = StyledTextInternal::StyledTextApplier::BuildTextStyleRunSnapshot(fromMarkupStyledText,
                                                                                                                  96.0f,

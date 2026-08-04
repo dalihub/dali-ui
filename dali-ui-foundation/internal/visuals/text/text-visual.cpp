@@ -100,13 +100,16 @@ constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_CONIC_START_ANGLE_NAME = "uT
 constexpr const char* UNIFORM_TEXT_GRADIENT_OVERLAY_MODE_NAME              = "uTextGradientOverlayMode";
 
 #ifdef TRACE_ENABLED
-const char* GetRequestTypeName(Text::Async::RequestType type)
+constexpr const char* ASYNC_REQUEST_TYPE_NAME[] = {"RENDER_FIXED_SIZE", "RENDER_FIXED_WIDTH", "RENDER_FIXED_HEIGHT",
+                                                   "RENDER_CONSTRAINT", "COMPUTE_NATURAL_SIZE", "COMPUTE_HEIGHT_FOR_WIDTH"};
+
+const char* GetRequestTypeName(Ui::Integration::Text::Async::RequestType type)
 {
-  if(type < Text::Async::RENDER_FIXED_SIZE || type > Text::Async::COMPUTE_HEIGHT_FOR_WIDTH)
+  if(type < Ui::Integration::Text::Async::RENDER_FIXED_SIZE || type > Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH)
   {
     return "INVALID_REQUEST_TYPE";
   }
-  return Text::Async::RequestTypeName[type];
+  return ASYNC_REQUEST_TYPE_NAME[type];
 }
 #endif
 
@@ -972,20 +975,20 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
   switch(parameters.requestType)
   {
-    case Text::Async::RENDER_FIXED_SIZE:
-    case Text::Async::RENDER_FIXED_WIDTH:
-    case Text::Async::RENDER_FIXED_HEIGHT:
-    case Text::Async::RENDER_CONSTRAINT:
+    case Ui::Integration::Text::Async::RENDER_FIXED_SIZE:
+    case Ui::Integration::Text::Async::RENDER_FIXED_WIDTH:
+    case Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT:
+    case Ui::Integration::Text::Async::RENDER_CONSTRAINT:
     {
       mIsTextLoadingTaskRunning = false;
       break;
     }
-    case Text::Async::COMPUTE_NATURAL_SIZE:
+    case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
     {
       mIsNaturalSizeTaskRunning = false;
       break;
     }
-    case Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+    case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
       mIsHeightForWidthTaskRunning = false;
       break;
@@ -1005,8 +1008,8 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
     Text::AsyncTextRenderInfo renderInfo = textInformation.renderInfo;
 
-    if(parameters.requestType == Text::Async::COMPUTE_NATURAL_SIZE ||
-       parameters.requestType == Text::Async::COMPUTE_HEIGHT_FOR_WIDTH)
+    if(parameters.requestType == Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE ||
+       parameters.requestType == Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH)
     {
       if(mAsyncTextInterface)
       {
@@ -1810,7 +1813,7 @@ void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& paramete
 
   switch(parameters.requestType)
   {
-    case Text::Async::COMPUTE_NATURAL_SIZE:
+    case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
     {
       if(mIsNaturalSizeTaskRunning)
       {
@@ -1822,7 +1825,7 @@ void TextVisual::RequestAsyncSizeComputation(Text::AsyncTextParameters& paramete
       mNaturalSizeTaskId                 = Text::AsyncTextManager::Get().RequestLoad(parameters, textLoadObserver);
       break;
     }
-    case Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+    case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
       if(mIsHeightForWidthTaskRunning)
       {
@@ -1870,15 +1873,15 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
     if(mAsyncTextInterface)
     {
       Text::AsyncTextRenderInfo renderInfo;
-      if(parameters.requestType == Text::Async::RENDER_FIXED_SIZE)
+      if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_SIZE)
       {
         renderInfo.renderedSize = Size(parameters.textWidth, parameters.textHeight);
       }
-      else if(parameters.requestType == Text::Async::RENDER_FIXED_WIDTH)
+      else if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH)
       {
         renderInfo.renderedSize = Size(parameters.textWidth, 0.0f);
       }
-      else if(parameters.requestType == Text::Async::RENDER_FIXED_HEIGHT)
+      else if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT)
       {
         renderInfo.renderedSize = Size(0.0f, parameters.textHeight);
       }

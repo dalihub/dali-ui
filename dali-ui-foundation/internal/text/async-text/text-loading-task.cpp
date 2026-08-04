@@ -102,10 +102,10 @@ void TextLoadingTask::Load()
 {
   switch(mParameters.requestType)
   {
-    case Text::Async::RENDER_FIXED_SIZE:
-    case Text::Async::RENDER_FIXED_WIDTH:
-    case Text::Async::RENDER_FIXED_HEIGHT:
-    case Text::Async::RENDER_CONSTRAINT:
+    case Ui::Integration::Text::Async::RENDER_FIXED_SIZE:
+    case Ui::Integration::Text::Async::RENDER_FIXED_WIDTH:
+    case Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT:
+    case Ui::Integration::Text::Async::RENDER_CONSTRAINT:
     {
       // To avoid duplicate calculation, we can skip Initialize and Update.
       Size naturalSize       = Size::ZERO;
@@ -217,7 +217,7 @@ void TextLoadingTask::Load()
       }
       break;
     }
-    case Text::Async::COMPUTE_NATURAL_SIZE:
+    case Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE:
     {
 #ifdef TRACE_ENABLED
       if(gTraceFilter && gTraceFilter->IsTraceEnabled())
@@ -228,7 +228,7 @@ void TextLoadingTask::Load()
       mRenderInfo = mLoader.GetNaturalSize(mParameters);
       break;
     }
-    case Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+    case Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
 #ifdef TRACE_ENABLED
       if(gTraceFilter && gTraceFilter->IsTraceEnabled())

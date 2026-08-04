@@ -31,7 +31,6 @@
 #include <dali-ui-foundation/integration-api/text/text-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
@@ -42,6 +41,7 @@
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -65,6 +65,7 @@ using StyledTextSourceDataPtr = std::unique_ptr<StyledTextSourceData>;
 
 namespace Text
 {
+struct AsyncTextParameters;
 class Controller;
 class TextScroller;
 
@@ -84,7 +85,11 @@ using LabelImplPtr = IntrusivePtr<LabelImpl>;
  *
  * @see Dali::Ui::LabelImpl
  */
-class DALI_UI_API LabelImpl : public SizeNegotiatedViewImpl, public Text::ControlInterface, public Text::ScrollerInterface, public Text::AnchorControlInterface, public Text::AsyncTextInterface
+class DALI_UI_API LabelImpl : public SizeNegotiatedViewImpl,
+                              public Text::ControlInterface,
+                              public Text::ScrollerInterface,
+                              public Text::AnchorControlInterface,
+                              public Text::AsyncTextInterface
 {
   friend class LabelAccessible;
 
@@ -925,6 +930,8 @@ private: // From AsyncTextInterface
   void AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInfo) override;
 
 private: // Implementation
+  struct InlineReplacementUpdateData;
+
   /**
    * @brief Marks that the text renderer needs to be updated on the next relayout.
    */
@@ -945,17 +952,11 @@ private: // Implementation
   /**
    * @brief Updates on-demand inline replacement data from the final text layout.
    *
-   * @param[in] source The authored replacement source.
-   * @param[in] placements The final replacement placements.
-   * @param[in] sourceRevision The revision of @p source.
+   * @param[in] updateData The authored replacement source and final placements.
    * @param[in] ownerSize The control size.
    * @param[in] padding The effective text padding.
    */
-  void UpdateInlineReplacementData(const Ui::Text::ReplacementSourceSnapshot&    source,
-                                   const Vector<Ui::Text::ReplacementPlacement>& placements,
-                                   uint64_t                                      sourceRevision,
-                                   const Vector2&                                ownerSize,
-                                   const Insets&                                 padding);
+  void UpdateInlineReplacementData(const InlineReplacementUpdateData& updateData, const Vector2& ownerSize, const Insets& padding);
 
   /**
    * @brief Refreshes inline replacement visuals after resource loading.
@@ -1276,7 +1277,10 @@ private: // Implementation
    * @param[in] layoutDirection The layout direction.
    * @return The parameters for asynchronous text processing.
    */
-  Ui::Text::AsyncTextParameters GetAsyncTextParameters(Ui::Text::Async::RequestType requestType, const Vector2& contentSize, const Insets& padding, Dali::LayoutDirection::Type layoutDirection);
+  Ui::Text::AsyncTextParameters GetAsyncTextParameters(Text::Async::RequestType    requestType,
+                                                       const Vector2&              contentSize,
+                                                       const Insets&               padding,
+                                                       Dali::LayoutDirection::Type layoutDirection);
 
   /**
    * @brief Emits TextFitChanged signal.

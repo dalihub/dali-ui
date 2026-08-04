@@ -135,7 +135,7 @@ Timing RunAsync(const Case& item)
   parameters.renderScale        = item.renderScale;
   parameters.layoutDirection    = item.direction;
   parameters.maxTextureSize     = 4096;
-  parameters.requestType        = Text::Async::RENDER_FIXED_SIZE;
+  parameters.requestType        = Integration::Text::Async::RENDER_FIXED_SIZE;
 
   Text::AsyncTextLoader loader = Text::AsyncTextLoader::New();
   const auto            start  = Clock::now();

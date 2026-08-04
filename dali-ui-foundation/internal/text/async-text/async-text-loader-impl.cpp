@@ -1486,7 +1486,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters,
   Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
 
-  if(parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
   {
     if(!cachedNaturalSize)
     {
@@ -1500,7 +1500,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderText(AsyncTextParameters& parameters,
     }
   }
 
-  if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
   {
     // In case of CONSTRAINT, the natural size has already been calculated.
     // So we can skip Initialize and Update at this stage.
@@ -1607,7 +1607,7 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
   bool heightEllipsized = parameters.textHeight < originalNaturalSize.height ? true : false;
 
   Size naturalSize = Size::ZERO;
-  if(parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
   {
     naturalSize       = ComputeNaturalSize(parameters);
     cachedNaturalSize = true;
@@ -1617,7 +1617,7 @@ Size AsyncTextLoader::SetupRenderScale(AsyncTextParameters& parameters, bool& ca
     }
   }
 
-  if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
   {
     bool  layoutOnly = cachedNaturalSize;
     float height     = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
@@ -1735,7 +1735,7 @@ AsyncTextRenderInfo AsyncTextLoader::GetHeightForWidth(AsyncTextParameters& para
   AsyncTextRenderInfo renderInfo;
   renderInfo.renderedSize.width  = parameters.textWidth;
   renderInfo.renderedSize.height = height;
-  renderInfo.requestType         = Async::COMPUTE_HEIGHT_FOR_WIDTH;
+  renderInfo.requestType         = Ui::Integration::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH;
   CopyRenderModelSummary(renderInfo);
   CopyReplacementResult(renderInfo, parameters.renderScale);
 
@@ -1750,7 +1750,7 @@ AsyncTextRenderInfo AsyncTextLoader::GetNaturalSize(AsyncTextParameters& paramet
 
   AsyncTextRenderInfo renderInfo;
   renderInfo.renderedSize = textNaturalSize;
-  renderInfo.requestType  = Async::COMPUTE_NATURAL_SIZE;
+  renderInfo.requestType  = Ui::Integration::Text::Async::COMPUTE_NATURAL_SIZE;
   CopyRenderModelSummary(renderInfo);
   CopyReplacementResult(renderInfo, parameters.renderScale);
 
@@ -1773,7 +1773,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
     Size textNaturalSize = useCachedNaturalSize ? naturalSize : ComputeNaturalSize(parameters);
 
-    if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+    if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
     {
       // The real height calculated during layout should be set.
       parameters.textHeight                  = textNaturalSize.height;
@@ -1826,7 +1826,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     bool  layoutOnly      = useCachedNaturalSize;
     bool  useCachedHeight = false;
     float textHeight      = 0.0f;
-    if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+    if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
     {
       // The real height calculated during layout should be set.
       textHeight      = ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
@@ -1938,7 +1938,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
   Size textNaturalSize   = naturalSize;
   bool cachedNaturalSize = useCachedNaturalSize;
 
-  if(parameters.requestType == Async::RENDER_FIXED_HEIGHT || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_HEIGHT || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
   {
     if(!cachedNaturalSize)
     {
@@ -1952,7 +1952,7 @@ AsyncTextRenderInfo AsyncTextLoader::RenderTextFit(AsyncTextParameters& paramete
     }
   }
 
-  if(parameters.requestType == Async::RENDER_FIXED_WIDTH || parameters.requestType == Async::RENDER_CONSTRAINT)
+  if(parameters.requestType == Ui::Integration::Text::Async::RENDER_FIXED_WIDTH || parameters.requestType == Ui::Integration::Text::Async::RENDER_CONSTRAINT)
   {
     // In case of CONSTRAINT, the natural size has already been calculated.
     // So we can skip Initialize and Update at this stage.

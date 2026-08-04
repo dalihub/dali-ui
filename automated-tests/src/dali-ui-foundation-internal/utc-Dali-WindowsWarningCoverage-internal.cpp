@@ -43,6 +43,7 @@ namespace
 {
 namespace UiInternal    = Dali::Ui::Internal;
 namespace UiIntegration = Dali::Ui::Integration;
+namespace UiIntegrationText = Dali::Ui::Integration::Text;
 namespace UiText         = Dali::Ui::Text;
 
 TextureSet CreateTextureSet(uint32_t width, uint32_t height)
@@ -75,7 +76,7 @@ UiText::AsyncTextParameters CreateMarqueeParameters()
   parameters.originWidth        = 100.0f;
   parameters.originHeight       = 100.0f;
   parameters.maxTextureSize     = 16;
-  parameters.requestType        = UiText::Async::RENDER_FIXED_SIZE;
+  parameters.requestType        = UiIntegrationText::Async::RENDER_FIXED_SIZE;
   parameters.isMarqueeEnabled   = true;
   parameters.marqueeGap         = 4;
   parameters.marqueeOrientation = UiText::MarqueeOrientation::HORIZONTAL;

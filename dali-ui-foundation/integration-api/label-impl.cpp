@@ -40,6 +40,7 @@
 #include <dali-ui-foundation/internal/controls/text-controls/label-accessible.h>
 #include <dali-ui-foundation/internal/render-effects/mask-effect-impl.h>
 #include <dali-ui-foundation/internal/text/anchor/anchor-interaction-data.h>
+#include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/internal/text/font-variation/font-variation-property-data.h>
 #include <dali-ui-foundation/internal/text/marquee/marquee-builder.h>
 #include <dali-ui-foundation/internal/text/replacement/inline-replacement-data.h>
@@ -391,6 +392,13 @@ bool LabelImpl::HasInlineReplacementSource() const
   return mController && mController->HasValidReplacementSource();
 }
 
+struct LabelImpl::InlineReplacementUpdateData
+{
+  const Ui::Text::ReplacementSourceSnapshot&    source;
+  const Vector<Ui::Text::ReplacementPlacement>& placements;
+  uint64_t                                      sourceRevision;
+};
+
 void LabelImpl::ClearInlineReplacementData()
 {
   Ui::View owner = Ui::View::DownCast(Self());
@@ -405,22 +413,18 @@ void LabelImpl::ClearInlineReplacementData()
   }
 }
 
-void LabelImpl::UpdateInlineReplacementData(const Ui::Text::ReplacementSourceSnapshot&    source,
-                                            const Vector<Ui::Text::ReplacementPlacement>& placements,
-                                            uint64_t                                      sourceRevision,
-                                            const Vector2&                                ownerSize,
-                                            const Insets&                                 padding)
+void LabelImpl::UpdateInlineReplacementData(const InlineReplacementUpdateData& updateData, const Vector2& ownerSize, const Insets& padding)
 {
   Ui::View                               owner = Ui::View::DownCast(Self());
   Internal::Text::InlineReplacementData* data  = Internal::Text::GetInlineReplacementData(owner);
   if(!data)
   {
     bool hasVisibleImage = false;
-    for(const Ui::Text::ReplacementPlacement& placement : placements)
+    for(const Ui::Text::ReplacementPlacement& placement : updateData.placements)
     {
-      if(placement.visible && !placement.elided && placement.sourceRunIndex < source.runs.Count())
+      if(placement.visible && !placement.elided && placement.sourceRunIndex < updateData.source.runs.Count())
       {
-        const Ui::Text::ReplacementRunSnapshot& run = source.runs[placement.sourceRunIndex];
+        const Ui::Text::ReplacementRunSnapshot& run = updateData.source.runs[placement.sourceRunIndex];
         hasVisibleImage                             = run.type == Ui::Text::ReplacementType::IMAGE && !run.image.source.empty();
         if(hasVisibleImage)
         {
@@ -441,8 +445,8 @@ void LabelImpl::UpdateInlineReplacementData(const Ui::Text::ReplacementSourceSna
     data->resourceReadyConnected = true;
   }
   data->manager.Update(data->host,
-                       source,
-                       placements,
+                       updateData.source,
+                       updateData.placements,
                        Vector2(static_cast<float>(padding.start), static_cast<float>(padding.top)),
                        Vector2(std::max(0.0f,
                                         ownerSize.x - static_cast<float>(padding.start + padding.end)),
@@ -450,7 +454,7 @@ void LabelImpl::UpdateInlineReplacementData(const Ui::Text::ReplacementSourceSna
                                         ownerSize.y - static_cast<float>(padding.top + padding.bottom))),
                        ownerSize,
                        GetEffectiveScale(),
-                       sourceRevision);
+                       updateData.sourceRevision);
 }
 
 void LabelImpl::OnInlineReplacementResourcesReady(Ui::View)
@@ -1698,7 +1702,8 @@ void LabelImpl::RequestAsyncNaturalSize()
   DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   Actor                             self            = Self();
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
-  Ui::Text::AsyncTextParameters     parameters      = GetAsyncTextParameters(Ui::Text::Async::COMPUTE_NATURAL_SIZE, Size::ZERO, GetEffectiveTextPadding(), layoutDirection);
+  Ui::Text::AsyncTextParameters     parameters =
+    GetAsyncTextParameters(Text::Async::COMPUTE_NATURAL_SIZE, Size::ZERO, GetEffectiveTextPadding(), layoutDirection);
   Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
 }
 
@@ -1709,7 +1714,8 @@ void LabelImpl::RequestAsyncHeightForWidth(float width)
   Insets                            padding         = GetEffectiveTextPadding();
   float                             contentWidth    = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
-  Ui::Text::AsyncTextParameters     parameters      = GetAsyncTextParameters(Ui::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH, Size(contentWidth, 0.0f), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters     parameters =
+    GetAsyncTextParameters(Text::Async::COMPUTE_HEIGHT_FOR_WIDTH, Size(contentWidth, 0.0f), padding, layoutDirection);
   Internal::TextVisual::RequestAsyncSizeComputation(mVisual, parameters);
 }
 
@@ -1731,7 +1737,8 @@ void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
   float                             contentHeight   = std::max(height - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
 
-  Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_FIXED_SIZE, Size(contentWidth, contentHeight), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters parameters =
+    GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, Size(contentWidth, contentHeight), padding, layoutDirection);
 
   mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
   mRendererUpdateNeeded     = false;
@@ -1753,7 +1760,8 @@ void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstr
   float                             contentHeightConstraint = std::max(heightConstraint - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection         = mController->GetLayoutDirection(self);
 
-  Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_FIXED_WIDTH, Size(contentWidth, contentHeightConstraint), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters parameters =
+    GetAsyncTextParameters(Text::Async::RENDER_FIXED_WIDTH, Size(contentWidth, contentHeightConstraint), padding, layoutDirection);
 
   mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
   mRendererUpdateNeeded     = false;
@@ -1775,7 +1783,8 @@ void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float h
   float                             contentHeight          = std::max(height - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection        = mController->GetLayoutDirection(self);
 
-  Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_FIXED_HEIGHT, Size(contentWidthConstraint, contentHeight), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters parameters =
+    GetAsyncTextParameters(Text::Async::RENDER_FIXED_HEIGHT, Size(contentWidthConstraint, contentHeight), padding, layoutDirection);
 
   mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
   mRendererUpdateNeeded     = false;
@@ -1797,7 +1806,8 @@ void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float h
   float                             contentHeightConstraint = std::max(heightConstraint - static_cast<float>(padding.top + padding.bottom), 0.0f);
   const Dali::LayoutDirection::Type layoutDirection         = mController->GetLayoutDirection(self);
 
-  Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_CONSTRAINT, Size(contentWidthConstraint, contentHeightConstraint), padding, layoutDirection);
+  Ui::Text::AsyncTextParameters parameters =
+    GetAsyncTextParameters(Text::Async::RENDER_CONSTRAINT, Size(contentWidthConstraint, contentHeightConstraint), padding, layoutDirection);
 
   mIsManualRenderInProgress = Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
   mRendererUpdateNeeded     = false;
@@ -2017,7 +2027,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
 
     DALI_LOG_RELEASE_INFO("[%p] Request render, size : %f, %f\n", mController.Get(), contentSize.width, contentSize.height);
 
-    Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Ui::Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
+    Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
     Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
     mRendererUpdateNeeded   = false;
     mIsAsyncRenderRequested = false;
@@ -2064,11 +2074,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     const Ui::Text::ReplacementRenderState& replacementResult = mController->GetReplacementRenderState();
     if(replacementResult.processingModel && replacementResult.projection.HasReplacements())
     {
-      UpdateInlineReplacementData(mController->GetReplacementSourceSnapshot(),
-                                  replacementResult.placements,
-                                  replacementResult.sourceRevision,
-                                  size,
-                                  padding);
+      UpdateInlineReplacementData({mController->GetReplacementSourceSnapshot(), replacementResult.placements, replacementResult.sourceRevision}, size, padding);
     }
     else
     {
@@ -2103,7 +2109,10 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     // Calculate the offset for vertical alignment only, as the layout engine will do the horizontal alignment.
     Vector2 alignmentOffset;
     alignmentOffset.x = 0.0f;
-    alignmentOffset.y = (marqueeOrientation == Ui::Text::MarqueeOrientation::VERTICAL) ? 0.0f : (contentSize.y - layoutSize.y) * VERTICAL_ALIGNMENT_TABLE[static_cast<int>(mController->GetVerticalAlignment())];
+    alignmentOffset.y =
+      (marqueeOrientation == Ui::Text::MarqueeOrientation::VERTICAL)
+        ? 0.0f
+        : (contentSize.y - layoutSize.y) * VERTICAL_ALIGNMENT_TABLE[static_cast<int>(mController->GetVerticalAlignment())];
 
     const int maxTextureSize = Dali::GetMaxTextureSize();
     if(layoutSize.width > maxTextureSize)
@@ -2714,11 +2723,7 @@ void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
       {
         std::swap(replacementPadding.start, replacementPadding.end);
       }
-      UpdateInlineReplacementData(replacementSource,
-                                  renderInfo.replacementPlacements,
-                                  renderInfo.replacementSourceRevision,
-                                  mSize,
-                                  replacementPadding);
+      UpdateInlineReplacementData({replacementSource, renderInfo.replacementPlacements, renderInfo.replacementSourceRevision}, mSize, replacementPadding);
     }
   }
 
@@ -2746,7 +2751,7 @@ void LabelImpl::AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInf
 {
   switch(renderInfo.requestType)
   {
-    case Ui::Text::Async::COMPUTE_NATURAL_SIZE:
+    case Text::Async::COMPUTE_NATURAL_SIZE:
     {
       DALI_LOG_RELEASE_INFO("[%p] natural size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
       mAsyncLineCount     = renderInfo.lineCount;
@@ -2756,9 +2761,13 @@ void LabelImpl::AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInf
       EmitAsyncNaturalSizeComputed(width, height);
       break;
     }
-    case Ui::Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
+    case Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
-      DALI_LOG_RELEASE_INFO("[%p] height for width:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
+      DALI_LOG_RELEASE_INFO("[%p] height for width:%f, %f, line count:%d\n",
+                            mController.Get(),
+                            renderInfo.renderedSize.width,
+                            renderInfo.renderedSize.height,
+                            renderInfo.lineCount);
       mAsyncLineCount     = renderInfo.lineCount;
       Insets      padding = GetEffectiveTextPadding();
       const float width   = renderInfo.renderedSize.width + static_cast<float>(padding.start + padding.end);
@@ -3178,7 +3187,8 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
 
   if(isHorizontal)
   {
-    const Size textNaturalSize = mController->GetNaturalSize().GetVectorXY(); // As relayout of text may not be done at this point natural size is used to get size. Single line scrolling only.
+    // Use natural size because text relayout may not be complete at this point.
+    const Size textNaturalSize = mController->GetNaturalSize().GetVectorXY();
     DALI_LOG_RELEASE_INFO("[%p] natural size:%f,%f, control size:%f,%f\n", mController.Get(), textNaturalSize.x, textNaturalSize.y, controlSize.x, controlSize.y);
 
     // Calculate the actual gap before scrolling wraps.
@@ -3798,7 +3808,10 @@ void LabelImpl::ApplyLocalizedText(BaseHandle target, const Dali::String& text)
   SetText(text);
 }
 
-Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Ui::Text::Async::RequestType requestType, const Vector2& contentSize, const Insets& padding, const Dali::LayoutDirection::Type layoutDirection)
+Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Text::Async::RequestType    requestType,
+                                                                const Vector2&                    contentSize,
+                                                                const Insets&                     padding,
+                                                                const Dali::LayoutDirection::Type layoutDirection)
 {
   // Logically, all properties of the label should be passed.
 
@@ -3818,7 +3831,7 @@ Ui::Text::AsyncTextParameters LabelImpl::GetAsyncTextParameters(const Ui::Text::
     Ui::View                               owner = Ui::View::DownCast(Self());
     Internal::Text::InlineReplacementData& data  = Internal::Text::GetOrCreateInlineReplacementData(owner);
     parameters.replacementLayoutGeneration       = ++data.requestGeneration;
-    if(requestType <= Ui::Text::Async::RENDER_CONSTRAINT)
+    if(requestType <= Text::Async::RENDER_CONSTRAINT)
     {
       data.lastRenderGeneration = parameters.replacementLayoutGeneration;
     }

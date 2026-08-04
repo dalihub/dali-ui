@@ -41,6 +41,7 @@ constexpr float VISUAL_HEIGHT            = 64.0f;
 constexpr int   ASYNC_TEXT_THREAD_TIMEOUT = 5;
 
 namespace UiInternal = Dali::Ui::Internal;
+namespace UiIntegrationText = Dali::Ui::Integration::Text;
 namespace UiText     = Dali::Ui::Text;
 
 struct RenderedTextVisual
@@ -101,7 +102,7 @@ UiText::AsyncTextParameters MakeParameters(const std::string& text)
   parameters.originWidth        = VISUAL_WIDTH;
   parameters.originHeight       = VISUAL_HEIGHT;
   parameters.maxTextureSize     = 4096;
-  parameters.requestType        = UiText::Async::RENDER_FIXED_SIZE;
+  parameters.requestType        = UiIntegrationText::Async::RENDER_FIXED_SIZE;
   parameters.isMarqueeEnabled   = true;
   parameters.marqueeLoopCount   = 0;
   parameters.marqueeOrientation = UiText::MarqueeOrientation::HORIZONTAL;
@@ -117,7 +118,7 @@ enum class CompletionAction
   DISCONNECT_SCENE
 };
 
-class ReentrantAsyncInterface : public UiText::AsyncTextInterface
+class ReentrantAsyncInterface : public UiIntegrationText::AsyncTextInterface
 {
 public:
   ReentrantAsyncInterface(Dali::Ui::Integration::Visual::Base visual,

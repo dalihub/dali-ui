@@ -31,6 +31,18 @@ namespace Integration
 {
 namespace Text
 {
+namespace Async
+{
+enum RequestType
+{
+  RENDER_FIXED_SIZE,
+  RENDER_FIXED_WIDTH,
+  RENDER_FIXED_HEIGHT,
+  RENDER_CONSTRAINT,
+  COMPUTE_NATURAL_SIZE,
+  COMPUTE_HEIGHT_FOR_WIDTH,
+};
+} // namespace Async
 
 /**
  * @brief An interface used by the text component which implement async text.

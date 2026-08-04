@@ -19,6 +19,7 @@
  */
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/async-text-interface.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-module.h>
 #include <dali-ui-foundation/internal/text/replacement/replacement-run-snapshot.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-style-run-snapshot.h>
@@ -48,21 +49,6 @@ namespace Internal DALI_INTERNAL
 class AsyncTextLoader;
 
 } // namespace Internal DALI_INTERNAL
-
-namespace Async
-{
-enum RequestType
-{
-  RENDER_FIXED_SIZE,
-  RENDER_FIXED_WIDTH,
-  RENDER_FIXED_HEIGHT,
-  RENDER_CONSTRAINT,
-  COMPUTE_NATURAL_SIZE,
-  COMPUTE_HEIGHT_FOR_WIDTH,
-};
-const char* const RequestTypeName[] = {"RENDER_FIXED_SIZE", "RENDER_FIXED_WIDTH", "RENDER_FIXED_HEIGHT",
-                                       "RENDER_CONSTRAINT", "COMPUTE_NATURAL_SIZE", "COMPUTE_HEIGHT_FOR_WIDTH"};
-} // namespace Async
 
 struct AsyncAnchorClickedState
 {
@@ -138,7 +124,7 @@ struct AsyncTextParameters
     marqueeLoopCount{1},
     marqueeGap{0},
     outlineWidth{0u},
-    requestType{Async::RENDER_FIXED_SIZE},
+    requestType{Ui::Integration::Text::Async::RENDER_FIXED_SIZE},
     horizontalAlignment{Alignment::START},
     verticalAlignment{Alignment::START},
     lineWrapMode{LineWrapMode::WORD},
@@ -236,21 +222,21 @@ struct AsyncTextParameters
 
   uint16_t outlineWidth; ///< The width of the outline.
 
-  Async::RequestType           requestType;
-  Alignment                    horizontalAlignment;   ///< The horizontal alignment: one of {START, CENTER, END}.
-  Alignment                    verticalAlignment;     ///< The vertical alignment: one of {START, CENTER, END}.
-  LineWrapMode                 lineWrapMode;          ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
-  Text::Underline::Type        underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
-  Dali::LayoutDirection::Type  layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
-  Alignment                    verticalLineAlignment; ///< The vertical line alignment: one of {START, CENTER, END}.
-  LayoutDirectionMode          layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
-  Text::EllipsisPosition::Type ellipsisPosition;      ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
-  Text::MarqueeTriggerPolicy   marqueeTriggerPolicy;  ///< policy that determines when marquee is triggered : one of {MANUAL, ON_OVERFLOW}.
-  Text::MarqueeOrientation     marqueeOrientation;    ///< The orientation of the marquee {HORIZONTAL, VERTICAL}.
-  Text::MarqueeStopMode        marqueeStopMode;       ///< The marquee stop mode: one of {FINISH_LOOP, IMMEDIATE}.
-  FontWeightType               fontWeight;            ///< The font's weight.
-  FontWidthType                fontWidth;             ///< The font's width.
-  FontSlantType                fontSlant;             ///< The font's slant.
+  Ui::Integration::Text::Async::RequestType requestType;
+  Alignment                                 horizontalAlignment;   ///< The horizontal alignment: one of {START, CENTER, END}.
+  Alignment                                 verticalAlignment;     ///< The vertical alignment: one of {START, CENTER, END}.
+  LineWrapMode                              lineWrapMode;          ///< The line wrap mode: one of {WORD, CHARACTER, HYPHENATION, MIXED}.
+  Text::Underline::Type                     underlineType;         ///< The type of underline: one of {SOLID, DASHED, DOUBLE}.
+  Dali::LayoutDirection::Type               layoutDirection;       ///< The layout direction: one of {LEFT_TO_RIGHT, RIGHT_TO_LEFT}.
+  Alignment                                 verticalLineAlignment; ///< The vertical line alignment: one of {START, CENTER, END}.
+  LayoutDirectionMode                       layoutDirectionPolicy; ///< The policy used to set the text layout direction : one of {INHERIT, LOCALE, CONTENTS}.
+  Text::EllipsisPosition::Type              ellipsisPosition;      ///< The position of the ellipsis glyph: one of {END, START, MIDDLE}.
+  Text::MarqueeTriggerPolicy                marqueeTriggerPolicy;  ///< policy that determines when marquee is triggered : one of {MANUAL, ON_OVERFLOW}.
+  Text::MarqueeOrientation                  marqueeOrientation;    ///< The orientation of the marquee {HORIZONTAL, VERTICAL}.
+  Text::MarqueeStopMode                     marqueeStopMode;       ///< The marquee stop mode: one of {FINISH_LOOP, IMMEDIATE}.
+  FontWeightType                            fontWeight;            ///< The font's weight.
+  FontWidthType                             fontWidth;             ///< The font's width.
+  FontSlantType                             fontSlant;             ///< The font's slant.
 
   bool suppressAutoMarquee : 1;            ///< whether automatic marquee evaluation is suppressed.
   bool isMultiLine : 1;                    ///< Whether the multi-line layout is enabled.
@@ -275,7 +261,7 @@ struct AsyncTextParameters
 struct AsyncTextRenderInfo
 {
   AsyncTextRenderInfo()
-  : requestType(Async::RENDER_FIXED_SIZE),
+  : requestType(Ui::Integration::Text::Async::RENDER_FIXED_SIZE),
     textPixelData(),
     textGradientPreservedPixelData(),
     textGradientMaskPixelData(),
@@ -312,37 +298,37 @@ struct AsyncTextRenderInfo
   ~AsyncTextRenderInfo()
   {
   }
-  Async::RequestType                requestType;
-  PixelData                         textPixelData;
-  PixelData                         textGradientPreservedPixelData;
-  PixelData                         textGradientMaskPixelData;
-  PixelData                         marqueeFillPixelData;
-  PixelData                         marqueeStylePixelData;
-  PixelData                         marqueeOverlayStylePixelData;
-  PixelData                         stylePixelData;
-  PixelData                         overlayStylePixelData;
-  PixelData                         maskPixelData;
-  PixelData                         marqueePixelData;
-  Size                              size;                              ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
-  Vector4                           textLogicalBounds;                 ///< Normalized logical text bounds inside @p size.
-  Vector4                           textGradientMarqueeViewportBounds; ///< Normalized TextGradient bounds inside the visible marquee viewport.
-  Size                              controlSize;                       ///< View size used to display the rendered text.
-  Size                              renderedSize;                      ///< Final displayed size reported back to the caller.
-  std::vector<AsyncAnchorHitRegion> anchorHitRegions;                  ///< Anchor hit regions in text content local coordinates.
-  Vector<ReplacementPlacement>      replacementPlacements;             ///< Final-layout values; no image runtime objects.
-  uint64_t                          replacementSourceRevision;
-  uint64_t                          replacementLayoutGeneration;
-  int                               lineCount;
-  float                             marqueeWrapGap;
-  bool                              hasMultipleTextColors : 1;
-  bool                              containsColorGlyph : 1;
-  bool                              styleEnabled : 1;
-  bool                              styleTextureEnabled : 1;
-  bool                              styleBlocksTextGradient : 1;
-  bool                              isOverlayStyle : 1;
-  bool                              isTextDirectionRTL : 1;
-  bool                              isCutoutEnabled : 1;
-  bool                              isEmbossEnabled : 1;
+  Ui::Integration::Text::Async::RequestType requestType;
+  PixelData                                 textPixelData;
+  PixelData                                 textGradientPreservedPixelData;
+  PixelData                                 textGradientMaskPixelData;
+  PixelData                                 marqueeFillPixelData;
+  PixelData                                 marqueeStylePixelData;
+  PixelData                                 marqueeOverlayStylePixelData;
+  PixelData                                 stylePixelData;
+  PixelData                                 overlayStylePixelData;
+  PixelData                                 maskPixelData;
+  PixelData                                 marqueePixelData;
+  Size                                      size;                              ///< Actual rendered buffer size. For marquee, this is the scrolling texture size.
+  Vector4                                   textLogicalBounds;                 ///< Normalized logical text bounds inside @p size.
+  Vector4                                   textGradientMarqueeViewportBounds; ///< Normalized TextGradient bounds inside the visible marquee viewport.
+  Size                                      controlSize;                       ///< View size used to display the rendered text.
+  Size                                      renderedSize;                      ///< Final displayed size reported back to the caller.
+  std::vector<AsyncAnchorHitRegion>         anchorHitRegions;                  ///< Anchor hit regions in text content local coordinates.
+  Vector<ReplacementPlacement>              replacementPlacements;             ///< Final-layout values; no image runtime objects.
+  uint64_t                                  replacementSourceRevision;
+  uint64_t                                  replacementLayoutGeneration;
+  int                                       lineCount;
+  float                                     marqueeWrapGap;
+  bool                                      hasMultipleTextColors : 1;
+  bool                                      containsColorGlyph : 1;
+  bool                                      styleEnabled : 1;
+  bool                                      styleTextureEnabled : 1;
+  bool                                      styleBlocksTextGradient : 1;
+  bool                                      isOverlayStyle : 1;
+  bool                                      isTextDirectionRTL : 1;
+  bool                                      isCutoutEnabled : 1;
+  bool                                      isEmbossEnabled : 1;
 };
 
 /**
