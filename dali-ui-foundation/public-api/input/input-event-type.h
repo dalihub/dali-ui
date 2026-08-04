@@ -27,7 +27,7 @@ namespace Dali::Ui
 enum class InputEventType : uint32_t
 {
   /**
-   * @brief The event was generated programmatically or has no concrete input origin.
+   * @brief The event was generated programmatically without a concrete input payload.
    */
   NONE = 0,
 

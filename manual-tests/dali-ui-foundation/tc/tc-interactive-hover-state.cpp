@@ -70,7 +70,11 @@ Dali::String InputEventTypeText(InputEvent event)
   {
     case InputEventType::NONE:
     {
-      return event.IsProgrammatic() ? "programmatic" : "none";
+      return "programmatic";
+    }
+    case InputEventType::ACCESSIBILITY_ACTIVATION:
+    {
+      return "accessibility-activation";
     }
     case InputEventType::TOUCH_EVENT:
     {
