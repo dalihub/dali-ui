@@ -29,6 +29,7 @@
 #include <dali-ui-foundation/integration-api/text/text-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-selectable-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-update-type.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
@@ -121,15 +122,11 @@ public: // Enumerated types.
     DONT_UPDATE_INPUT_STYLE
   };
 
-  /**
-   * @brief Used to specify what has been updated after the Relayout() method has been called.
-   */
-  enum UpdateTextType
-  {
-    NONE_UPDATED      = 0x0, ///< Nothing has been updated.
-    MODEL_UPDATED     = 0x1, ///< The text's model has been updated.
-    DECORATOR_UPDATED = 0x2  ///< The decoration has been updated.
-  };
+  using UpdateTextType = Ui::Integration::Text::UpdateTextType;
+
+  static constexpr UpdateTextType NONE_UPDATED      = Ui::Integration::Text::TextUpdate::NONE_UPDATED;
+  static constexpr UpdateTextType MODEL_UPDATED     = Ui::Integration::Text::TextUpdate::MODEL_UPDATED;
+  static constexpr UpdateTextType DECORATOR_UPDATED = Ui::Integration::Text::TextUpdate::DECORATOR_UPDATED;
 
   /**
    * @brief Different placeholder-text can be shown when the control is active/inactive.

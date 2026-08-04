@@ -2675,7 +2675,7 @@ void InputEditorImpl::AddLayer(Actor& layer, Actor& actor)
   layer = actor;
 }
 
-void InputEditorImpl::RenderText(Ui::Text::Controller::UpdateTextType updateTextType)
+void InputEditorImpl::RenderText(Text::UpdateTextType updateTextType)
 {
   const Vector2 size            = Self().GetProperty<Vector3>(Actor::Property::SIZE).GetVectorXY();
   auto          atlasFrameState = Ui::Text::Internal::Gradient::AtlasFrameState{};

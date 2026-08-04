@@ -31,11 +31,12 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/text/text-anchor-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-atlas-gradient-apply-state.h>
 #include <dali-ui-foundation/integration-api/text/text-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-selectable-control-interface.h>
-#include <dali-ui-foundation/internal/text/controller/text-controller.h>
-#include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
+#include <dali-ui-foundation/integration-api/text/text-update-type.h>
+#include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-editor-properties.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
@@ -43,6 +44,7 @@
 #include <dali-ui-foundation/public-api/text/style/shadow.h>
 #include <dali-ui-foundation/public-api/text/style/underline.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text.h>
+#include <dali-ui-foundation/public-api/text/text-enumerations.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 
@@ -65,11 +67,13 @@ using EditableTextGradientPropertyDataPtr = std::unique_ptr<EditableTextGradient
 
 namespace Text
 {
+class Controller;
 class Decorator;
 class Renderer;
 
-using DecoratorPtr = IntrusivePtr<Decorator>;
-using RendererPtr  = IntrusivePtr<Renderer>;
+using ControllerPtr = IntrusivePtr<Controller>;
+using DecoratorPtr  = IntrusivePtr<Decorator>;
+using RendererPtr   = IntrusivePtr<Renderer>;
 } // namespace Text
 
 namespace Integration
@@ -1162,7 +1166,7 @@ private: // Implementation
   /**
    * @brief Render view, create and attach actor(s) to this Input Editor.
    */
-  void RenderText(Ui::Text::Controller::UpdateTextType updateTextType);
+  void RenderText(Text::UpdateTextType updateTextType);
 
   /**
    * @brief Synchronizes the active normal/placeholder atlas gradient resource with the current renderer.

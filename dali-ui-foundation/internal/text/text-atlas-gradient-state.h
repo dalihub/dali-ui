@@ -15,21 +15,12 @@
 #include <dali/public-api/rendering/texture.h>
 #include <cstdint>
 
+#include <dali-ui-foundation/integration-api/text/text-atlas-gradient-apply-state.h>
 #include <dali-ui-foundation/internal/text/text-gradient-style.h>
 #include <dali-ui-foundation/public-api/text/text-enumerations.h>
 
 namespace Dali::Ui::Text::Internal::Gradient
 {
-/**
- * @brief Enumerates the result of applying an atlas resource to a renderer.
- */
-enum class AtlasApplyStatus : uint8_t
-{
-  UNINITIALIZED,
-  APPLIED,
-  SOLID_FALLBACK
-};
-
 /**
  * @brief Stores the renderer-facing values for one prepared atlas resource.
  *
@@ -61,26 +52,6 @@ struct AtlasFrameState
 {
   bool                     enabled{false};
   Text::GradientBoundsMode boundsMode{Text::GradientBoundsMode::CONTENT_BOUND};
-};
-
-/**
- * @brief Tracks which atlas resource version is applied to one renderer instance.
- */
-struct AtlasApplyState
-{
-  AtlasApplyStatus status{AtlasApplyStatus::UNINITIALIZED};
-  bool             initialized{false};
-  bool             enabled{false};
-  uint64_t         resourceId{0u};
-  uint64_t         styleRevision{0u};
-  uint64_t         lookupRevision{0u};
-
-  bool Matches(const AtlasRendererState& state) const;
-  void Set(const AtlasRendererState& state);
-  void SetSolidFallback(const AtlasRendererState& state);
-  bool IsGradientApplied() const;
-  bool IsSolidFallback() const;
-  void Reset();
 };
 
 /**
