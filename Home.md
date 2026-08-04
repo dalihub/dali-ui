@@ -82,6 +82,7 @@ For details about the class structure and extensibility of `View`, see [here](ht
 * [Focus & Key](https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-&-Key)
 * [Accessibility](https://github.sec.samsung.net/NUI/dali-ui/wiki/Accessibility)
 * [Touch & Gesture](https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-&-Gesture)
+* [In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop)
 * [State Management](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management)
 * [State Effect](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Effect)
 * [Localization & Multilingual UI](https://github.sec.samsung.net/NUI/dali-ui/wiki/Localization-&-Multilingual-UI)

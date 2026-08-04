@@ -17,6 +17,7 @@
    - [스크롤바 가시성](#45-스크롤바-가시성)
    - [스크롤 상태 조회](#46-스크롤-상태-조회)
    - [Focus 및 Key 스크롤](#47-focus-및-key-스크롤)
+   - [Pan Scroll 제어](#48-pan-scroll-제어)
 5. [프로그래밍 방식 스크롤](#5-프로그래밍-방식-스크롤)
 6. [이벤트 (시그널)](#6-이벤트-시그널)
 7. [설정 방식](#7-설정-방식)
@@ -361,6 +362,30 @@ Key scroll이 켜져 있을 때 방향키 이동 원칙은 다음과 같습니�
 
 ---
 
+### 4.8 Pan Scroll 제어
+
+programmatic scroll은 유지하면서 pan scroll만 중지할 수 있습니다.
+
+```cpp
+scrollView.SetPanScrollEnabled(false);
+
+// pan scroll이 꺼져 있어도 계속 사용할 수 있습니다.
+scrollView.ScrollTo(nextPosition, false);
+
+scrollView.SetPanScrollEnabled(true);
+```
+
+pan scroll을 끄면 진행 중인 touch/mouse pan을 fling 없이 종료하고, 이후 motion을
+`ScrollView`가 scroll 목적으로 intercept하지 않습니다. child가 in-scene
+drag-and-drop session을 소유할 때 유용합니다. drop, cancel, no-target 종료 뒤 모두
+발생하는 drag `EndedSignal`에서 다시 활성화합니다.
+
+edge-only auto-scroll 조정은
+[In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop-(kr))
+문서를 참고하세요.
+
+---
+
 ## 5. 프로그래밍 방식 스크롤
 
 모든 스크롤 메서드는 선택적 `animation` 파라미터(기본값 `true`)를 받습니다. `false`로 설정하면 위치가 즉시 적용됩니다.
@@ -592,6 +617,7 @@ scrollView.SetContent(content);
 | `OverScrollMode` | `ContentScrolls` |
 | `VerticalScrollBarVisibility` | `Auto` |
 | `HorizontalScrollBarVisibility` | `Auto` |
+| `PanScrollEnabled` | `true` |
 | 팬 임계값 | `5.0f` px (내부 고정값, 변경 불가) |
 
 ---
@@ -606,6 +632,7 @@ scrollView.SetContent(content);
 | EdgeEffect 피드백이 보이지 않음 | `SetStartEdgeEffect()` / `SetEndEdgeEffect()`가 설정되었는지, `OverScrollMode`가 `Never`가 아닌지, 사용자가 실제 경계 방향으로 드래그 또는 플링하고 있는지 확인합니다. |
 | 포커스된 child가 보이도록 스크롤되지 않음 | `SetScrollOnFocus(true)` 설정, focused view가 콘텐츠 뷰의 자손인지, child가 keyboard focusable인지 확인합니다. |
 | 방향키 이동이 너무 멀리 있는 item으로 바로 넘어감 | `SetKeyScrollEnabled(true)`를 켜고 `SetKeyScrollStep()` 값을 조정합니다. |
+| Child drag preview 이동 중 content도 스크롤됨 | child drag 시작 시 `SetPanScrollEnabled(false)`를 호출하고 `EndedSignal`에서 복구합니다. |
 
 ---
 

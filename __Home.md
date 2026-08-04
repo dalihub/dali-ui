@@ -35,6 +35,7 @@ and **framework library developers** who extend or integrate the toolkit itself.
 * [Layout](https://github.sec.samsung.net/NUI/dali-ui/wiki/Layout)
 * [Focus & Key](https://github.sec.samsung.net/NUI/dali-ui/wiki/Focus-&-Key)
 * [Touch & Gesture](https://github.sec.samsung.net/NUI/dali-ui/wiki/Touch-&-Gesture)
+* [In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop)
 * [State Management](https://github.sec.samsung.net/NUI/dali-ui/wiki/State-Management)
 * [Components](https://github.sec.samsung.net/NUI/dali-ui/wiki/Components)
   * Text and Mutiligual Management

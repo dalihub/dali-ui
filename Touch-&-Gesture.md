@@ -497,6 +497,40 @@ This allows flexible control of touch events in complex gesture scenarios.
 | Gesture recognition in parent view | Touch cannot propagate to child views |
 | Using InterceptTouchEvent | Parent view can intercept touch and transition gestures |
 
+### Coordinating ScrollView with a Child Drag
+
+`ScrollView` uses `InterceptTouchEvent` and `PanGestureDetector::HandleEvent()`
+internally. When its pan threshold is reached it consumes the touch sequence,
+which is correct for normal scrolling but conflicts with a child-owned
+drag-and-drop gesture.
+
+Suspend only pan scrolling while the child drag is active:
+
+```cpp
+void OnDragStarted(View, DragAndDropDetector)
+{
+  scrollView.SetPanScrollEnabled(false);
+}
+
+void OnDragEnded(View, DragAndDropDetector)
+{
+  scrollView.SetPanScrollEnabled(true);
+}
+```
+
+While disabled, `ScrollView` does not intercept the child touch sequence and
+does not move content from pan displacement. Programmatic APIs such as
+`ScrollTo()` remain available, so an application can still implement
+drag-and-drop edge auto-scroll.
+
+Returning `true` from the child touch callback is not sufficient to prevent a
+parent `ScrollView` from intercepting later motion events. The parent
+interception policy must remain disabled for the active child drag.
+
+For complete source/target registration, custom preview, target acceptance, and
+edge auto-scroll examples, see
+[In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop).
+
 ---
 
 ## References

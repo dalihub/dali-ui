@@ -19,6 +19,7 @@
    - [Scroll Bar Visibility](#45-scroll-bar-visibility)
    - [Scroll State Query](#46-scroll-state-query)
    - [Focus and Key Scrolling](#47-focus-and-key-scrolling)
+   - [Pan Scroll Control](#48-pan-scroll-control)
 5. [Programmatic Scrolling](#5-programmatic-scrolling)
 6. [Events (Signals)](#6-events-signals)
 7. [Configuration Style](#7-configuration-style)
@@ -353,6 +354,30 @@ When key scrolling is enabled, arrow navigation follows this principle:
 
 ---
 
+### 4.8 Pan Scroll Control
+
+Pan scrolling can be suspended without disabling programmatic scrolling:
+
+```cpp
+scrollView.SetPanScrollEnabled(false);
+
+// Still available while pan scrolling is disabled.
+scrollView.ScrollTo(nextPosition, false);
+
+scrollView.SetPanScrollEnabled(true);
+```
+
+Disabling pan scrolling stops an active touch or mouse pan without starting a
+fling and prevents `ScrollView` from intercepting later motion for scrolling.
+This is useful while a child owns an in-scene drag-and-drop session. Restore it
+in the drag `EndedSignal`, which is emitted after drop, cancellation, and
+no-target completion.
+
+See [In-Scene Drag and Drop](https://github.sec.samsung.net/NUI/dali-ui/wiki/In-Scene-Drag-and-Drop)
+for edge-only auto-scroll coordination.
+
+---
+
 ## 5. Programmatic Scrolling
 
 All scroll methods accept an optional `animation` parameter (default `true`). When `false`, the position is applied immediately.
@@ -583,6 +608,7 @@ This is the recommended style for `View`, `ScrollView`, and other handle classes
 | `OverScrollMode` | `ContentScrolls` |
 | `VerticalScrollBarVisibility` | `Auto` |
 | `HorizontalScrollBarVisibility` | `Auto` |
+| `PanScrollEnabled` | `true` |
 | Pan threshold | `5.0f` px (internal, not configurable) |
 
 ---
@@ -597,6 +623,7 @@ This is the recommended style for `View`, `ScrollView`, and other handle classes
 | Edge feedback does not appear | Check that `SetStartEdgeEffect()` / `SetEndEdgeEffect()` were assigned, `OverScrollMode` is not `Never`, and the user is dragging or flinging into a boundary. |
 | Focused child does not scroll into view | Check `SetScrollOnFocus(true)`, whether the focused view is a descendant of the content view, and whether the child is keyboard focusable. |
 | Arrow keys move focus too far instead of gradually scrolling | Enable key scrolling with `SetKeyScrollEnabled(true)` and tune `SetKeyScrollStep()`. |
+| Content scrolls while a child drag preview moves | Call `SetPanScrollEnabled(false)` when the child drag starts and restore it in `EndedSignal`. |
 
 ---
 
