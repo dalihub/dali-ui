@@ -23,20 +23,21 @@
 #include <dali/public-api/events/long-press-gesture-detector.h>
 #include <dali/public-api/events/pan-gesture-detector.h>
 #include <dali/public-api/events/tap-gesture-detector.h>
+#include <cstdint>
+#include <memory>
+#include <string>
+#include <vector>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
-#include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
-#include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 #include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/text/text-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
-#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-editor-properties.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
@@ -52,6 +53,24 @@ namespace Dali
 
 namespace Ui
 {
+
+class TextAnchor;
+
+namespace Internal
+{
+namespace Text
+{
+struct EditableTextGradientPropertyData;
+using EditableTextGradientPropertyDataPtr = std::unique_ptr<EditableTextGradientPropertyData>;
+} // namespace Text
+} // namespace Internal
+
+namespace Text
+{
+class Renderer;
+
+typedef IntrusivePtr<Renderer> RendererPtr;
+} // namespace Text
 
 namespace Integration
 {
@@ -935,12 +954,12 @@ public: // From EditableControlInterface
   /**
    * @copydoc Dali::EditableControlInterface::CopyText()
    */
-  string CopyText() override;
+  std::string CopyText() override;
 
   /**
    * @copydoc Dali::EditableControlInterface::CutText()
    */
-  string CutText() override;
+  std::string CutText() override;
 
   /**
    * @copydoc Text::EditableControlInterface::PasteText()

@@ -19,18 +19,18 @@
 
 // EXTERNAL INCLUDES
 #include <dali/integration-api/system/system-settings.h>
+#include <dali/public-api/object/weak-handle.h>
+#include <cstdint>
+#include <memory>
 #include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
-#include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
-#include <dali-ui-foundation/internal/text/controller/text-controller.h>
-#include <dali-ui-foundation/internal/text/styled-text/styled-text-source-data.h>
+#include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
+#include <dali-ui-foundation/internal/text/async-text/async-text-interface.h>
+#include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-control-interface.h>
-#include <dali-ui-foundation/internal/text/text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/text-scroller-interface.h>
-#include <dali-ui-foundation/internal/text/text-scroller.h>
-#include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
@@ -49,6 +49,27 @@ namespace Dali
 
 namespace Ui
 {
+
+namespace Internal
+{
+namespace Text
+{
+struct TextGradientPropertyData;
+using TextGradientPropertyDataPtr = std::unique_ptr<TextGradientPropertyData>;
+
+class StyledTextSourceData;
+using StyledTextSourceDataPtr = std::unique_ptr<StyledTextSourceData>;
+} // namespace Text
+} // namespace Internal
+
+namespace Text
+{
+class Controller;
+class TextScroller;
+
+typedef IntrusivePtr<Controller>   ControllerPtr;
+typedef IntrusivePtr<TextScroller> TextScrollerPtr;
+} // namespace Text
 
 namespace Integration
 {

@@ -23,6 +23,7 @@
 #include <dali-ui-foundation/integration-api/label-property-handler.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
+#include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 
 namespace Dali::Ui::Integration
 {

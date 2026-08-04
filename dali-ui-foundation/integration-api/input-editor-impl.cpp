@@ -41,15 +41,19 @@
 
 #include <dali-ui-foundation/extension-api/property-registration-helper.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
+#include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
+#include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
+#include <dali-ui-foundation/internal/text/rendering/text-renderer.h>
 #include <dali-ui-foundation/internal/text/replacement/editable-inline-replacement-data.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-font-style.h>
 #include <dali-ui-foundation/internal/text/text-gradient-helper.h>
 #include <dali-ui-foundation/internal/text/text-view.h>
+#include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>

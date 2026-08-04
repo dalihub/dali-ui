@@ -59,6 +59,7 @@
 #include <dali-ui-foundation/internal/text/text-view.h>
 #include <dali-ui-foundation/internal/ui-localization-manager-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
+#include <dali-ui-foundation/internal/visuals/text/text-visual.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
