@@ -1,7 +1,8 @@
-#pragma once
+#ifndef DALI_UI_INTEGRATION_TEXT_DECORATION_TYPES_H
+#define DALI_UI_INTEGRATION_TEXT_DECORATION_TYPES_H
 
 /*
- * Copyright (c) 2025 Samsung Electronics Co., Ltd.
+ * Copyright (c) 2026 Samsung Electronics Co., Ltd.
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,5 +18,25 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/text/input-style.h>
-#include <dali-ui-foundation/internal/text/text-definitions.h>
+namespace Dali
+{
+namespace Ui
+{
+namespace Text
+{
+
+/**
+ * @brief Types of text decoration layers.
+ */
+enum DecorationType
+{
+  NONE_LAYER,
+  ACTIVE_LAYER,
+  CURSOR_LAYER
+};
+
+} // namespace Text
+} // namespace Ui
+} // namespace Dali
+
+#endif // DALI_UI_INTEGRATION_TEXT_DECORATION_TYPES_H

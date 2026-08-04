@@ -32,11 +32,10 @@
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
 #include <dali-ui-foundation/integration-api/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/integration-api/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
-#include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
-#include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-field-properties.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>
@@ -66,9 +65,11 @@ using EditableTextGradientPropertyDataPtr = std::unique_ptr<EditableTextGradient
 
 namespace Text
 {
+class Decorator;
 class Renderer;
 
-typedef IntrusivePtr<Renderer> RendererPtr;
+using DecoratorPtr = IntrusivePtr<Decorator>;
+using RendererPtr  = IntrusivePtr<Renderer>;
 } // namespace Text
 
 namespace Integration

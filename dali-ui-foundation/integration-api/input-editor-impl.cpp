@@ -45,6 +45,7 @@
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
 #include <dali-ui-foundation/internal/focus-manager/keyinput-focus-manager.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
+#include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
 #include <dali-ui-foundation/internal/text/editable-text-gradient-property-data.h>
 #include <dali-ui-foundation/internal/text/rendering/text-backend.h>
 #include <dali-ui-foundation/internal/text/rendering/text-renderer.h>

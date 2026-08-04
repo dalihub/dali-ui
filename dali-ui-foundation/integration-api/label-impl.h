@@ -68,8 +68,8 @@ namespace Text
 class Controller;
 class TextScroller;
 
-typedef IntrusivePtr<Controller>   ControllerPtr;
-typedef IntrusivePtr<TextScroller> TextScrollerPtr;
+using ControllerPtr   = IntrusivePtr<Controller>;
+using TextScrollerPtr = IntrusivePtr<TextScroller>;
 } // namespace Text
 
 namespace Integration

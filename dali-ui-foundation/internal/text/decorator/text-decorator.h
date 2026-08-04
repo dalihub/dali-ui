@@ -27,6 +27,7 @@
 #include <dali/public-api/object/ref-object.h>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/text-decoration-types.h>
 #include <dali-ui-foundation/internal/controls/text-controls/text-selection-popup-callback-interface.h>
 
 namespace Dali
@@ -84,14 +85,6 @@ enum HandleType
   LEFT_SELECTION_HANDLE_MARKER,
   RIGHT_SELECTION_HANDLE_MARKER,
   HANDLE_TYPE_COUNT
-};
-
-// Types of decoration.
-enum DecorationType
-{
-  NONE_LAYER,
-  ACTIVE_LAYER,
-  CURSOR_LAYER
 };
 
 /**
