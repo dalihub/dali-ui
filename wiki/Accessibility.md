@@ -522,6 +522,8 @@ Do not do the following in Application code:
 Set screen-specific content on a Component or View that already implements its feature.
 
 ```cpp
+#include <string>
+
 void ConfigureVolumeControl(View control, int volume)
 {
   control.SetAccessibilityRole(Accessibility::Role::ADJUSTABLE);
@@ -646,6 +648,8 @@ Setting Role provides meaning and the default highlight policy, but it does not 
 An executable Component should route remote/touch and accessibility activation to the same internal function.
 
 ```cpp
+#include <dali-ui-foundation/extension-api/interactive-view-impl.h>
+
 void ActionButtonImpl::OnInitialize()
 {
   Dali::Ui::Extension::InteractiveViewImpl::OnInitialize();
@@ -721,6 +725,9 @@ Use `CHECKED` for checkbox, toggle, and radio semantics, and use `SELECTED` for 
 Apply the minimum and maximum, and return success only when the value changes.
 
 ```cpp
+#include <algorithm>
+#include <string>
+
 bool VolumeSliderImpl::OnAccessibilityValueChange(bool increased)
 {
   auto self = Dali::Ui::View::DownCast(Self());

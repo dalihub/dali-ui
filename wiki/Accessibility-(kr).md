@@ -522,6 +522,8 @@ Application에서 다음을 하지 마세요.
 기능을 이미 구현한 Component 또는 View에 화면별 content를 설정합니다.
 
 ```cpp
+#include <string>
+
 void ConfigureVolumeControl(View control, int volume)
 {
   control.SetAccessibilityRole(Accessibility::Role::ADJUSTABLE);
@@ -646,6 +648,8 @@ Role을 설정하면 의미와 기본 highlight 정책을 제공하지만 action
 실행 가능한 Component는 remote/touch와 accessibility가 같은 내부 함수를 호출하게 합니다.
 
 ```cpp
+#include <dali-ui-foundation/extension-api/interactive-view-impl.h>
+
 void ActionButtonImpl::OnInitialize()
 {
   Dali::Ui::Extension::InteractiveViewImpl::OnInitialize();
@@ -721,6 +725,9 @@ Checkbox, toggle, radio에는 `CHECKED`를 사용하고, 현재 선택된 list i
 최솟값과 최댓값을 적용하고 값이 실제로 바뀐 경우에만 성공을 반환합니다.
 
 ```cpp
+#include <algorithm>
+#include <string>
+
 bool VolumeSliderImpl::OnAccessibilityValueChange(bool increased)
 {
   auto self = Dali::Ui::View::DownCast(Self());
