@@ -73,6 +73,15 @@ public:
   bool SetCurrentFocusView(View view);
 
   /**
+   * @brief Sets focus directly to the given view with the state-change cause.
+   *
+   * @param view The view to be focused
+   * @param cause The event that caused the focus change
+   * @return Whether the focus was successfully set
+   */
+  bool SetCurrentFocusView(View view, InputEvent cause);
+
+  /**
    * @brief Requests focus on the given view, delegating to its RequestFocus()
    * for child-first resolution, then committing the result.
    * @param view The view to request focus on

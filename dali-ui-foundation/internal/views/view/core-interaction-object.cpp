@@ -22,7 +22,6 @@
 #include <dali/integration-api/debug.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/input-event-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali::Ui::Internal
@@ -112,14 +111,13 @@ void CoreInteractionObject::OnHoveredClearedByViewState(View view, InputEvent ev
   }
 }
 
-bool CoreInteractionObject::OnAccessibilityActivate(View view)
+bool CoreInteractionObject::OnAccessibilityActivate(View view, InputEvent event)
 {
   if(!mInteractiveTraitImpl)
   {
     return false;
   }
 
-  InputEvent event(InputEventImpl::New(InputEventType::ACCESSIBILITY_ACTIVATION).Get());
   return mInteractiveTraitImpl->OnAccessibilityActivate(view, event);
 }
 

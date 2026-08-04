@@ -418,6 +418,14 @@ int UtcDaliInteractiveTraitAccessibilityActivateP(void)
   interactive.ClickedSignal().Connect(&application, functor);
   interactive.PressedChangedSignal().Connect(&application, pressedFunctor);
 
+  InputEvent focusCause;
+  view.StateChangedSignal().Connect(&application, [&](View, const StateEvent& event) {
+    if(ViewState::FOCUSED.WasAdded(event.GetPrev(), event.GetCurrent()))
+    {
+      focusCause = event.GetCause();
+    }
+  });
+
   Property::Map attributes;
   DALI_TEST_CHECK(view.DoAction("activate", attributes));
   DALI_TEST_CHECK(data.called);
@@ -428,6 +436,8 @@ int UtcDaliInteractiveTraitAccessibilityActivateP(void)
   DALI_TEST_CHECK(!pressedData.called);
   DALI_TEST_CHECK(!interactive.IsPressed());
   DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  DALI_TEST_CHECK(focusCause);
+  DALI_TEST_CHECK(focusCause.GetInputEventType() == InputEventType::ACCESSIBILITY_ACTIVATION);
   END_TEST;
 }
 

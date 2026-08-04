@@ -63,6 +63,7 @@
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/internal/common/attachment-container.h>
 #include <dali-ui-foundation/internal/focus-manager/focus-manager-impl.h>
+#include <dali-ui-foundation/internal/input-event-impl.h>
 #include <dali-ui-foundation/internal/layouts/absolute-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/flex-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
@@ -1403,14 +1404,16 @@ bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
 
 bool ViewDataImpl::ActivateAccessibilityDefault()
 {
-  Ui::View self = Ui::View::DownCast(mViewImpl.Self());
+  Ui::View   self = Ui::View::DownCast(mViewImpl.Self());
+  InputEvent event(InputEventImpl::New(InputEventType::ACCESSIBILITY_ACTIVATION).Get());
 
-  const bool focused = Ui::FocusManager::Get().SetCurrentFocusView(self);
+  Ui::FocusManager focusManager = Ui::FocusManager::Get();
+  const bool       focused      = focusManager && GetImpl(focusManager).SetCurrentFocusView(self, event);
 
   bool clicked = false;
   if(mCoreInteractionObject)
   {
-    clicked = mCoreInteractionObject->OnAccessibilityActivate(self);
+    clicked = mCoreInteractionObject->OnAccessibilityActivate(self, event);
   }
 
   return focused || clicked;

@@ -245,7 +245,12 @@ void FocusManager::GetConfiguration()
 
 bool FocusManager::SetCurrentFocusView(View view)
 {
-  return view && !view.HasAncestorBlockingFocus() && DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, ""});
+  return SetCurrentFocusView(view, Ui::InputEvent::Programmatic());
+}
+
+bool FocusManager::SetCurrentFocusView(View view, InputEvent cause)
+{
+  return view && !view.HasAncestorBlockingFocus() && DoSetCurrentFocusView(view, {Ui::FocusDevice::PROGRAMMATIC, "", cause});
 }
 
 bool FocusManager::RequestFocus(View view)
