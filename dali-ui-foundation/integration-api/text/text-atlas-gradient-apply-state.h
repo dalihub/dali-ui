@@ -24,40 +24,71 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
 
-namespace Dali::Ui::Text::Internal::Gradient
+namespace Dali::Ui::Integration::Text::Gradient
 {
-struct AtlasRendererState;
-
 /**
- * @brief Enumerates the result of applying an atlas resource to a renderer.
+ * @brief Result state for applying an atlas gradient resource to a renderer.
  */
 enum class AtlasApplyStatus : uint8_t
 {
-  UNINITIALIZED,
-  APPLIED,
-  SOLID_FALLBACK
+  UNINITIALIZED, ///< No atlas gradient resource has been applied yet.
+  APPLIED,       ///< The atlas gradient resource was applied to the renderer.
+  SOLID_FALLBACK ///< The renderer uses solid text as a fallback.
 };
 
 /**
- * @brief Tracks which atlas resource version is applied to one renderer instance.
+ * @brief Stores the atlas gradient resource version currently applied to a renderer.
  */
 struct DALI_UI_API AtlasApplyState
 {
-  AtlasApplyStatus status{AtlasApplyStatus::UNINITIALIZED};
-  bool             initialized{false};
-  bool             enabled{false};
-  uint64_t         resourceId{0u};
-  uint64_t         styleRevision{0u};
-  uint64_t         lookupRevision{0u};
+  AtlasApplyStatus status{AtlasApplyStatus::UNINITIALIZED}; ///< The result of the last apply attempt.
+  bool             initialized{false};                      ///< Whether this state has been initialized.
+  bool             enabled{false};                          ///< Whether the applied resource is renderable.
+  uint64_t         resourceId{0u};                          ///< The atlas resource identifier.
+  uint64_t         styleRevision{0u};                       ///< The applied style revision.
+  uint64_t         lookupRevision{0u};                      ///< The applied lookup texture revision.
 
-  bool Matches(const AtlasRendererState& state) const;
-  void Set(const AtlasRendererState& state);
-  void SetSolidFallback(const AtlasRendererState& state);
+  /**
+   * @brief Checks whether this state matches the specified atlas resource version.
+   *
+   * @param[in] resourceId The atlas resource identifier.
+   * @param[in] styleRevision The style revision.
+   * @param[in] lookupRevision The lookup texture revision.
+   * @return True if all version values match.
+   */
+  bool Matches(uint64_t resourceId, uint64_t styleRevision, uint64_t lookupRevision) const;
+
+  /**
+   * @brief Updates this state after attempting to apply an atlas gradient resource.
+   *
+   * @param[in] status The result of the apply attempt.
+   * @param[in] enabled Whether the resource is renderable.
+   * @param[in] resourceId The atlas resource identifier.
+   * @param[in] styleRevision The style revision.
+   * @param[in] lookupRevision The lookup texture revision.
+   */
+  void Set(AtlasApplyStatus status, bool enabled, uint64_t resourceId, uint64_t styleRevision, uint64_t lookupRevision);
+
+  /**
+   * @brief Checks whether a gradient resource is currently applied.
+   *
+   * @return True if a renderable atlas gradient is applied.
+   */
   bool IsGradientApplied() const;
+
+  /**
+   * @brief Checks whether solid text fallback is currently applied.
+   *
+   * @return True if the last apply attempt used solid text fallback.
+   */
   bool IsSolidFallback() const;
+
+  /**
+   * @brief Resets this state to the uninitialized state.
+   */
   void Reset();
 };
 
-} // namespace Dali::Ui::Text::Internal::Gradient
+} // namespace Dali::Ui::Integration::Text::Gradient
 
 #endif // DALI_UI_INTEGRATION_TEXT_ATLAS_GRADIENT_APPLY_STATE_H

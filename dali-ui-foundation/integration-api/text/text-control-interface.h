@@ -30,7 +30,7 @@ namespace Integration
 namespace Text
 {
 /**
- * @brief An interface that the Text::Controller uses to request a text relayout.
+ * @brief Interface used by Text::Controller to request text control updates.
  */
 class DALI_UI_API ControlInterface
 {
@@ -38,9 +38,7 @@ public:
   /**
    * @brief Virtual destructor.
    */
-  virtual ~ControlInterface()
-  {
-  }
+  virtual ~ControlInterface() = default;
 
   /**
    * @brief Called to request a text relayout.
@@ -48,7 +46,7 @@ public:
   virtual void RequestTextRelayout() = 0;
 
   /**
-   * @brief Invalidate measured size.
+   * @brief Invalidates the measured text size.
    */
   virtual void InvalidateTextMeasure() = 0;
 

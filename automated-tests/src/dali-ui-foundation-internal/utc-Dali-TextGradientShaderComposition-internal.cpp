@@ -37,6 +37,7 @@ namespace
 
 namespace TextFeature = Dali::Ui::Internal::TextVisualShaderFeature;
 namespace TextInternal = Dali::Ui::Text::Internal;
+namespace UiIntegrationText = Dali::Ui::Integration::Text;
 namespace UiText      = Dali::Ui::Text;
 namespace UiInternal  = Dali::Ui::Internal;
 
@@ -163,7 +164,7 @@ void ExpectNoTextGradientOverlayRendererProperties(Renderer renderer)
   DALI_TEST_EQUALS(renderer.GetPropertyIndex("uTextGradientOverlayMode"), Property::INVALID_INDEX, TEST_LOCATION);
 }
 
-class TestScrollerInterface : public UiText::ScrollerInterface
+class TestScrollerInterface : public UiIntegrationText::ScrollerInterface
 {
 public:
   void ScrollingFinished() override

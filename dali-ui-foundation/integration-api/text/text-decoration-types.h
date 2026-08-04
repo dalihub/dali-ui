@@ -28,13 +28,13 @@ namespace Text
 {
 
 /**
- * @brief Types of text decoration layers.
+ * @brief Enumerates the decoration layers used by editable text controls.
  */
 enum DecorationType
 {
-  NONE_LAYER,
-  ACTIVE_LAYER,
-  CURSOR_LAYER
+  NONE_LAYER,   ///< The decoration is not assigned to a dedicated layer.
+  ACTIVE_LAYER, ///< The decoration is assigned to the active layer.
+  CURSOR_LAYER  ///< The decoration is assigned to the cursor layer.
 };
 
 } // namespace Text

@@ -39,8 +39,7 @@ namespace Integration
 namespace Text
 {
 /**
- * @brief An interface that the Text::Controller uses to notify about text changes and add decoration to the text
- * control.
+ * @brief Interface used by Text::Controller to notify editable text control changes.
  */
 class DALI_UI_API EditableControlInterface
 {
@@ -48,15 +47,13 @@ public:
   /**
    * @brief Virtual destructor.
    */
-  virtual ~EditableControlInterface()
-  {
-  }
+  virtual ~EditableControlInterface() = default;
 
   /**
    * @brief Add a decoration.
    *
-   * @param[in] decoration The actor displaying a decoration.
-   * @param[in] type Whether this decoration is a layer or not, which layer it is.
+   * @param[in] actor The actor displaying a decoration.
+   * @param[in] type The decoration layer type.
    * @param[in] needsClipping Whether the actor needs clipping.
    */
   virtual void AddDecoration(Actor& actor, DecorationType type, bool needsClipping) = 0;
@@ -64,19 +61,19 @@ public:
   /**
    * @brief Gets the color of the control.
    *
-   * @param[out] The color of the control.
+   * @param[out] color The color of the control.
    */
   virtual void GetControlBackgroundColor(Vector4& color) const = 0;
 
   /**
-   * @brief Editable status (on/off).
+   * @brief Checks whether the control is editable.
    *
-   * @return true if it can be edit, else false.
+   * @return True if the control is editable.
    */
   virtual bool IsEditable() const = 0;
 
   /**
-   * @brief Change the editable status (on/off) .
+   * @brief Changes whether the control is editable.
    *
    * @param[in] editable The editable status.
    */
@@ -102,8 +99,7 @@ public:
   /**
    * @brief Called to signal that text has been inserted or deleted.
    *
-   * @param[in] immediate If true, it immediately emits the signal, if false, only emits once the signal when
-   * OnRelayout() is called next time.
+   * @param[in] immediate Whether to emit the signal immediately.
    */
   virtual void TextChanged(bool immediate) = 0;
 
@@ -121,6 +117,9 @@ public:
 
   /**
    * @brief Called to signal that caret (cursor position) has been moved.
+   *
+   * @param[in] oldPosition The previous cursor position.
+   * @param[in] newPosition The new cursor position.
    */
   virtual void CursorPositionChanged(unsigned int oldPosition, unsigned int newPosition) = 0;
 
@@ -133,11 +132,19 @@ public:
 
   /**
    * @brief Called to signal that text has been inserted.
+   *
+   * @param[in] position The inserted text position.
+   * @param[in] length The inserted text length.
+   * @param[in] content The inserted text content.
    */
   virtual void TextInserted(unsigned int position, unsigned int length, const std::string& content) = 0;
 
   /**
    * @brief Called to signal that text has been deleted.
+   *
+   * @param[in] position The deleted text position.
+   * @param[in] length The deleted text length.
+   * @param[in] content The deleted text content.
    */
   virtual void TextDeleted(unsigned int position, unsigned int length, const std::string& content) = 0;
 };

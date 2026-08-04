@@ -2713,7 +2713,7 @@ bool InputEditorImpl::SyncAtlasGradientState()
   }
 
   const auto& state = data->atlasResources.GetRendererState(mController->IsShowingPlaceholderText());
-  if(mAtlasApplyState.Matches(state))
+  if(Ui::Text::Internal::Gradient::MatchesAtlasApplyState(mAtlasApplyState, state))
   {
     BindGradientAnimProperties();
     return true;
@@ -2734,7 +2734,7 @@ bool InputEditorImpl::SyncAtlasGradientState()
 
     // Switching between two disabled normal/placeholder resources, or clearing
     // an unsupported fallback, requires no renderer work.
-    mAtlasApplyState.Set(state);
+    Ui::Text::Internal::Gradient::SetAtlasApplyState(mAtlasApplyState, state);
     BindGradientAnimProperties();
     return true;
   }
@@ -2751,14 +2751,14 @@ bool InputEditorImpl::SyncAtlasGradientState()
 
   if(mRenderer && mRenderer->SetAtlasGradientState(state))
   {
-    mAtlasApplyState.Set(state);
+    Ui::Text::Internal::Gradient::SetAtlasApplyState(mAtlasApplyState, state);
     BindGradientAnimProperties();
     return true;
   }
 
   if(mRenderer)
   {
-    mAtlasApplyState.SetSolidFallback(state);
+    Ui::Text::Internal::Gradient::SetAtlasApplyStateAsSolidFallback(mAtlasApplyState, state);
     BindGradientAnimProperties();
     return true;
   }
@@ -2787,15 +2787,15 @@ void InputEditorImpl::ApplyAtlasGradientState()
     const auto& state = data->atlasResources.GetRendererState(mController->IsShowingPlaceholderText());
     if(!state.IsEnabled())
     {
-      mAtlasApplyState.Set(state);
+      Ui::Text::Internal::Gradient::SetAtlasApplyState(mAtlasApplyState, state);
     }
     else if(mRenderer->SetAtlasGradientState(state))
     {
-      mAtlasApplyState.Set(state);
+      Ui::Text::Internal::Gradient::SetAtlasApplyState(mAtlasApplyState, state);
     }
     else
     {
-      mAtlasApplyState.SetSolidFallback(state);
+      Ui::Text::Internal::Gradient::SetAtlasApplyStateAsSolidFallback(mAtlasApplyState, state);
     }
     BindGradientAnimProperties();
   }

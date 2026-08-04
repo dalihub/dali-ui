@@ -30,7 +30,7 @@ namespace Integration
 namespace Text
 {
 /**
- * @brief An interface used by the text-controls which implement marqueeing
+ * @brief Interface used by text controls that support marquee scrolling.
  */
 class DALI_UI_API ScrollerInterface
 {
@@ -38,12 +38,10 @@ public:
   /**
    * @brief Virtual destructor.
    */
-  virtual ~ScrollerInterface()
-  {
-  }
+  virtual ~ScrollerInterface() = default;
 
   /**
-   * @brief Called when the scrolling finishes
+   * @brief Called when scrolling finishes.
    */
   virtual void ScrollingFinished() = 0;
 };

@@ -36,19 +36,22 @@ namespace Text
 {
 namespace Async
 {
+/**
+ * @brief Enumerates asynchronous text requests issued by text controls.
+ */
 enum RequestType
 {
-  RENDER_FIXED_SIZE,
-  RENDER_FIXED_WIDTH,
-  RENDER_FIXED_HEIGHT,
-  RENDER_CONSTRAINT,
-  COMPUTE_NATURAL_SIZE,
-  COMPUTE_HEIGHT_FOR_WIDTH,
+  RENDER_FIXED_SIZE,        ///< Render text using a fixed size.
+  RENDER_FIXED_WIDTH,       ///< Render text using a fixed width.
+  RENDER_FIXED_HEIGHT,      ///< Render text using a fixed height.
+  RENDER_CONSTRAINT,        ///< Render text using layout constraints.
+  COMPUTE_NATURAL_SIZE,     ///< Compute the natural text size.
+  COMPUTE_HEIGHT_FOR_WIDTH, ///< Compute the text height for a width.
 };
 } // namespace Async
 
 /**
- * @brief An interface used by the text component which implement async text.
+ * @brief Interface used by text controls that support asynchronous text operations.
  */
 class DALI_UI_API AsyncTextInterface
 {

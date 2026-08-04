@@ -88,7 +88,11 @@ using InputEditorImplPtr = IntrusivePtr<InputEditorImpl>;
  *
  * @see Dali::Ui::InputEditorImpl
  */
-class DALI_UI_API InputEditorImpl : public SizeNegotiatedViewImpl, public Text::ControlInterface, public Text::EditableControlInterface, public Text::SelectableControlInterface, public Text::AnchorControlInterface
+class DALI_UI_API InputEditorImpl : public SizeNegotiatedViewImpl,
+                                    public Text::ControlInterface,
+                                    public Text::EditableControlInterface,
+                                    public Text::SelectableControlInterface,
+                                    public Text::AnchorControlInterface
 {
   friend class InputEditorAccessible;
 
@@ -1315,21 +1319,21 @@ private:
 
   Internal::Text::EditableTextGradientPropertyDataPtr mTextGradientPropertyData;
 
-  InputMethodContext                            mInputMethodContext;
-  TapGestureDetector                            mTapGestureDetector;
-  PanGestureDetector                            mPanGestureDetector;
-  LongPressGestureDetector                      mLongPressGestureDetector;
-  Ui::Text::ControllerPtr                       mController;
-  Ui::Text::RendererPtr                         mRenderer;
-  Ui::Text::Internal::Gradient::AtlasApplyState mAtlasApplyState;
-  Ui::Text::DecoratorPtr                        mDecorator;
-  Actor                                         mStencil;
-  std::vector<Actor>                            mClippingDecorationActors; ///< Decoration actors which need clipping.
-  std::vector<Ui::TextAnchor>                   mAnchorActors;
-  Actor                                         mRenderableActor;
-  Actor                                         mActiveLayer;
-  Actor                                         mCursorLayer;
-  Actor                                         mBackgroundActor;
+  InputMethodContext              mInputMethodContext;
+  TapGestureDetector              mTapGestureDetector;
+  PanGestureDetector              mPanGestureDetector;
+  LongPressGestureDetector        mLongPressGestureDetector;
+  Ui::Text::ControllerPtr         mController;
+  Ui::Text::RendererPtr           mRenderer;
+  Text::Gradient::AtlasApplyState mAtlasApplyState;
+  Ui::Text::DecoratorPtr          mDecorator;
+  Actor                           mStencil;
+  std::vector<Actor>              mClippingDecorationActors; ///< Decoration actors which need clipping.
+  std::vector<Ui::TextAnchor>     mAnchorActors;
+  Actor                           mRenderableActor;
+  Actor                           mActiveLayer;
+  Actor                           mCursorLayer;
+  Actor                           mBackgroundActor;
 
   float                    mLineHeight;
   Ui::Text::LineHeightMode mLineHeightMode;

@@ -45,6 +45,21 @@ struct AtlasRendererState
   bool IsEnabled() const;
 };
 
+inline bool MatchesAtlasApplyState(const Ui::Integration::Text::Gradient::AtlasApplyState& applied, const AtlasRendererState& state)
+{
+  return applied.Matches(state.resourceId, state.styleRevision, state.lookupRevision);
+}
+
+inline void SetAtlasApplyState(Ui::Integration::Text::Gradient::AtlasApplyState& applied, const AtlasRendererState& state)
+{
+  applied.Set(Ui::Integration::Text::Gradient::AtlasApplyStatus::APPLIED, state.IsEnabled(), state.resourceId, state.styleRevision, state.lookupRevision);
+}
+
+inline void SetAtlasApplyStateAsSolidFallback(Ui::Integration::Text::Gradient::AtlasApplyState& applied, const AtlasRendererState& state)
+{
+  applied.Set(Ui::Integration::Text::Gradient::AtlasApplyStatus::SOLID_FALLBACK, state.IsEnabled(), state.resourceId, state.styleRevision, state.lookupRevision);
+}
+
 /**
  * @brief Stores per-frame atlas data used while scrolling or resizing.
  */
@@ -101,7 +116,7 @@ public:
   Text::GradientBoundsMode        GetBoundsMode() const;
   const AtlasRendererState&       GetRendererState(bool placeholder) const;
   AtlasFrameState                 GetFrameState(bool placeholder) const;
-  AtlasFrameState                 GetFrameState(bool placeholder, const AtlasApplyState& applied) const;
+  AtlasFrameState                 GetFrameState(bool placeholder, const Ui::Integration::Text::Gradient::AtlasApplyState& applied) const;
 
 private:
   AtlasResource            mText;

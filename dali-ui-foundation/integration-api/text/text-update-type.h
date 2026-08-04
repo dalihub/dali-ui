@@ -21,7 +21,7 @@
 namespace Dali::Ui::Integration::Text
 {
 /**
- * @brief Enumerates which text-rendering state changed during relayout.
+ * @brief Enumerates which text rendering state changed during relayout.
  */
 namespace TextUpdate
 {
@@ -33,6 +33,9 @@ enum Type
 };
 } // namespace TextUpdate
 
+/**
+ * @brief Text rendering update flag type.
+ */
 using UpdateTextType = TextUpdate::Type;
 
 } // namespace Dali::Ui::Integration::Text

@@ -381,8 +381,10 @@ public:
   };
 
 public:
-  Impl(Ui::Integration::Text::ControlInterface* controlInterface, Ui::Integration::Text::EditableControlInterface* editableControlInterface,
-       Ui::Integration::Text::SelectableControlInterface* selectableControlInterface, Ui::Integration::Text::AnchorControlInterface* anchorControlInterface)
+  Impl(Ui::Integration::Text::ControlInterface*           controlInterface,
+       Ui::Integration::Text::EditableControlInterface*   editableControlInterface,
+       Ui::Integration::Text::SelectableControlInterface* selectableControlInterface,
+       Ui::Integration::Text::AnchorControlInterface*     anchorControlInterface)
   : mControlInterface(controlInterface),
     mEditableControlInterface(editableControlInterface),
     mSelectableControlInterface(selectableControlInterface),

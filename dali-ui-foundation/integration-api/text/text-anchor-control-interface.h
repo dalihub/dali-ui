@@ -34,7 +34,7 @@ namespace Integration
 namespace Text
 {
 /**
- * @brief An interface that the Text::Controller used for anchor functionality.
+ * @brief Interface used by Text::Controller to handle text anchors.
  */
 class DALI_UI_API AnchorControlInterface
 {
@@ -46,14 +46,17 @@ public:
 
   /**
    * @brief Called to notify that an anchor has been clicked.
-   * @param[in] cursorPosition Checks if an anchor exists at the given cursor position.
-   * @param[out] href If an anchor exists at the given cursor position, the href is written.
+   *
+   * @param[in] cursorPosition The cursor position to check.
+   * @param[out] href The anchor href at the cursor position.
    * @return True if an anchor exists at the given cursor position, false otherwise.
    */
   virtual bool AnchorClicked(uint32_t cursorPosition, std::string& href) = 0;
 
   /**
    * @brief Called to emit an anchor clicked signal.
+   *
+   * @param[in] href The clicked anchor href.
    */
   virtual void EmitAnchorClicked(const std::string& href) = 0;
 };

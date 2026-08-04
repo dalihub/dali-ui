@@ -30,7 +30,6 @@
 
 using namespace Dali;
 using namespace Dali::Ui;
-using namespace Dali::Ui::Integration;
 
 using Dali::Integration::ToStdString;
 

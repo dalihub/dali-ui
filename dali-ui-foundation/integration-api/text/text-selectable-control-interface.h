@@ -35,6 +35,7 @@ namespace Integration
 namespace Text
 {
 using Uint32Pair = std::pair<uint32_t, uint32_t>;
+
 /**
  * @brief Interface used by Text::Controller to notify and control text selection.
  *

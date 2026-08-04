@@ -12,9 +12,9 @@
 #include <dali.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/rendering/atlas/text-atlas-renderer.h>
+#include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
 #include <dali-ui-foundation/internal/text/text-model.h>
 #include <dali-ui-foundation/public-api/gradient/conic-gradient.h>
 #include <dali-ui-foundation/public-api/gradient/linear-gradient.h>
@@ -28,6 +28,7 @@ using namespace Dali;
 namespace
 {
 namespace PublicGradient = Dali::Ui::Gradient;
+namespace TextGradient   = Dali::Ui::Integration::Text::Gradient;
 namespace AtlasGradient  = Dali::Ui::Text::Internal::Gradient;
 
 PublicGradient::Linear MakeGradient(const Vector4& first = Color::RED, const Vector4& second = Color::BLUE)
@@ -39,7 +40,7 @@ PublicGradient::Linear MakeGradient(const Vector4& first = Color::RED, const Vec
 }
 
 void SetStops(PublicGradient::Base& gradient,
-              const Vector4&        first = Color::RED,
+              const Vector4&        first  = Color::RED,
               const Vector4&        second = Color::BLUE)
 {
   gradient.SetStopNodes({PublicGradient::StopNode(0.0f, Dali::Ui::UiColor(first)),
@@ -102,28 +103,28 @@ protected:
   ~RecordingGradientRenderer() override = default;
 };
 
-bool ApplyAtlasGradientForTest(Dali::Ui::Text::RendererPtr renderer,
+bool ApplyAtlasGradientForTest(Dali::Ui::Text::RendererPtr              renderer,
                                const AtlasGradient::AtlasRendererState& state,
-                               AtlasGradient::AtlasApplyState& applied)
+                               TextGradient::AtlasApplyState&           applied)
 {
-  if(applied.Matches(state))
+  if(AtlasGradient::MatchesAtlasApplyState(applied, state))
   {
     return true;
   }
 
   if(!state.IsEnabled())
   {
-    applied.Set(state);
+    AtlasGradient::SetAtlasApplyState(applied, state);
     return true;
   }
 
   if(renderer && renderer->SetAtlasGradientState(state))
   {
-    applied.Set(state);
+    AtlasGradient::SetAtlasApplyState(applied, state);
   }
   else
   {
-    applied.SetSolidFallback(state);
+    AtlasGradient::SetAtlasApplyStateAsSolidFallback(applied, state);
   }
   return true;
 }
@@ -141,9 +142,9 @@ void utc_dali_text_atlas_gradient_state_internal_cleanup(void)
 
 int UtcDaliTextAtlasGradientStateLutInvalidationP(void)
 {
-  UiTestApplication application;
+  UiTestApplication            application;
   AtlasGradient::AtlasResource prepared;
-  auto gradient = MakeGradient();
+  auto                         gradient = MakeGradient();
 
   DALI_TEST_CHECK(prepared.Set(gradient));
   DALI_TEST_EQUALS(prepared.GetLookupGenerationCount(), 1u, TEST_LOCATION);
@@ -186,7 +187,7 @@ int UtcDaliTextAtlasGradientStateLutInvalidationP(void)
 
 int UtcDaliTextAtlasGradientStateRadialAndConicGeometryInvalidationP(void)
 {
-  UiTestApplication application;
+  UiTestApplication            application;
   AtlasGradient::AtlasResource prepared;
 
   PublicGradient::Radial radial(Vector2(0.0f, 0.0f), 0.5f);
@@ -215,7 +216,7 @@ int UtcDaliTextAtlasGradientStateRadialAndConicGeometryInvalidationP(void)
 
 int UtcDaliTextAtlasGradientStateNormalPlaceholderIndependentP(void)
 {
-  UiTestApplication application;
+  UiTestApplication                     application;
   AtlasGradient::EditableAtlasResources state;
   state.SetTextGradient(MakeGradient(Color::RED, Color::BLUE));
   state.SetPlaceholderGradient(MakeGradient(Color::GREEN, Color::YELLOW));
@@ -250,7 +251,7 @@ int UtcDaliTextAtlasGradientStateNormalPlaceholderIndependentP(void)
 
 int UtcDaliTextAtlasGradientStateSnapshotLifetimeP(void)
 {
-  UiTestApplication application;
+  UiTestApplication                 application;
   AtlasGradient::AtlasRendererState snapshot;
 
   {
@@ -274,7 +275,7 @@ int UtcDaliTextAtlasGradientStateSnapshotLifetimeP(void)
 
 int UtcDaliTextAtlasGradientStateInvalidAuthoredValueCanonicalizedP(void)
 {
-  UiTestApplication application;
+  UiTestApplication            application;
   AtlasGradient::AtlasResource prepared;
 
   DALI_TEST_CHECK(prepared.Set(MakeGradient()));
@@ -294,7 +295,7 @@ int UtcDaliTextAtlasGradientStateInvalidAuthoredValueCanonicalizedP(void)
 
 int UtcDaliTextAtlasGradientStateAuthoredOnlyChangeP(void)
 {
-  UiTestApplication application;
+  UiTestApplication            application;
   AtlasGradient::AtlasResource prepared;
 
   PublicGradient::Linear direct(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
@@ -302,9 +303,9 @@ int UtcDaliTextAtlasGradientStateAuthoredOnlyChangeP(void)
                        PublicGradient::StopNode(1.0f, Dali::Ui::UiColor(Color::BLUE))});
   DALI_TEST_CHECK(prepared.Set(direct));
 
-  const uint64_t styleRevision          = prepared.GetStyleRevision();
-  const uint64_t lookupRevision         = prepared.GetLookupRevision();
-  const uint64_t lookupGenerationCount  = prepared.GetLookupGenerationCount();
+  const uint64_t styleRevision         = prepared.GetStyleRevision();
+  const uint64_t lookupRevision        = prepared.GetLookupRevision();
+  const uint64_t lookupGenerationCount = prepared.GetLookupGenerationCount();
 
   PublicGradient::Linear token(Vector2(-0.5f, 0.0f), Vector2(0.5f, 0.0f));
   token.SetStopNodes({PublicGradient::StopNode(0.0f, Dali::Ui::UiColor("MissingTextGradientToken")),
@@ -321,50 +322,50 @@ int UtcDaliTextAtlasGradientStateAuthoredOnlyChangeP(void)
 
 int UtcDaliTextAtlasGradientStateAppliedVersionP(void)
 {
-  UiTestApplication application;
+  UiTestApplication                     application;
   AtlasGradient::EditableAtlasResources resources;
-  AtlasGradient::AtlasApplyState applied;
+  TextGradient::AtlasApplyState         applied;
 
   resources.SetTextGradient(MakeGradient(Color::RED, Color::BLUE));
   resources.SetPlaceholderGradient(MakeGradient(Color::GREEN, Color::YELLOW));
 
   const auto& normal = resources.GetRendererState(false);
-  DALI_TEST_CHECK(!applied.Matches(normal));
-  applied.Set(normal);
-  DALI_TEST_CHECK(applied.Matches(normal));
+  DALI_TEST_CHECK(!AtlasGradient::MatchesAtlasApplyState(applied, normal));
+  AtlasGradient::SetAtlasApplyState(applied, normal);
+  DALI_TEST_CHECK(AtlasGradient::MatchesAtlasApplyState(applied, normal));
   DALI_TEST_CHECK(applied.IsGradientApplied());
 
   const auto& placeholder = resources.GetRendererState(true);
-  DALI_TEST_CHECK(!applied.Matches(placeholder));
-  applied.Set(placeholder);
-  DALI_TEST_CHECK(applied.Matches(placeholder));
+  DALI_TEST_CHECK(!AtlasGradient::MatchesAtlasApplyState(applied, placeholder));
+  AtlasGradient::SetAtlasApplyState(applied, placeholder);
+  DALI_TEST_CHECK(AtlasGradient::MatchesAtlasApplyState(applied, placeholder));
 
   auto changedNormal = MakeGradient(Color::CYAN, Color::MAGENTA);
   resources.SetTextGradient(changedNormal);
-  DALI_TEST_CHECK(!applied.Matches(resources.GetRendererState(false)));
+  DALI_TEST_CHECK(!AtlasGradient::MatchesAtlasApplyState(applied, resources.GetRendererState(false)));
 
   applied.Reset();
   DALI_TEST_CHECK(!applied.initialized);
-  DALI_TEST_CHECK(!applied.Matches(placeholder));
+  DALI_TEST_CHECK(!AtlasGradient::MatchesAtlasApplyState(applied, placeholder));
   END_TEST;
 }
 
 int UtcDaliTextAtlasGradientUnsupportedRendererSolidFallbackP(void)
 {
-  UiTestApplication application;
+  UiTestApplication                     application;
   AtlasGradient::EditableAtlasResources resources;
-  AtlasGradient::AtlasApplyState applied;
+  TextGradient::AtlasApplyState         applied;
 
   resources.SetTextGradient(MakeGradient(Color::RED, Color::BLUE));
   resources.SetPlaceholderGradient(MakeGradient(Color::GREEN, Color::YELLOW));
 
   UnsupportedGradientRenderer* unsupportedRenderer = new UnsupportedGradientRenderer();
-  Dali::Ui::Text::RendererPtr renderer(unsupportedRenderer);
+  Dali::Ui::Text::RendererPtr  renderer(unsupportedRenderer);
   DALI_TEST_CHECK(renderer);
 
   const auto& normal = resources.GetRendererState(false);
   DALI_TEST_CHECK(ApplyAtlasGradientForTest(renderer, normal, applied));
-  DALI_TEST_CHECK(applied.Matches(normal));
+  DALI_TEST_CHECK(AtlasGradient::MatchesAtlasApplyState(applied, normal));
   DALI_TEST_CHECK(applied.IsSolidFallback());
   DALI_TEST_CHECK(!applied.IsGradientApplied());
   DALI_TEST_CHECK(!resources.GetFrameState(false, applied).enabled);
@@ -376,7 +377,7 @@ int UtcDaliTextAtlasGradientUnsupportedRendererSolidFallbackP(void)
 
   const auto& placeholder = resources.GetRendererState(true);
   DALI_TEST_CHECK(ApplyAtlasGradientForTest(renderer, placeholder, applied));
-  DALI_TEST_CHECK(applied.Matches(placeholder));
+  DALI_TEST_CHECK(AtlasGradient::MatchesAtlasApplyState(applied, placeholder));
   DALI_TEST_CHECK(applied.IsSolidFallback());
   DALI_TEST_CHECK(!resources.GetFrameState(true, applied).enabled);
   DALI_TEST_EQUALS(resources.GetPlaceholderGradient().GetType(), PublicGradient::Type::LINEAR, TEST_LOCATION);
@@ -404,7 +405,7 @@ int UtcDaliTextAtlasGradientUnsupportedRendererSolidFallbackP(void)
 
 int UtcDaliTextAtlasGradientRendererOwnsSnapshotP(void)
 {
-  UiTestApplication application;
+  UiTestApplication           application;
   Dali::Ui::Text::RendererPtr renderer = Dali::Ui::Text::AtlasRenderer::New();
   DALI_TEST_CHECK(renderer);
 
@@ -422,7 +423,7 @@ int UtcDaliTextAtlasGradientRendererOwnsSnapshotP(void)
 
 int UtcDaliTextAtlasGradientGenericRendererRejectsStateP(void)
 {
-  UiTestApplication application;
+  UiTestApplication            application;
   AtlasGradient::AtlasResource prepared;
   DALI_TEST_CHECK(prepared.Set(MakeGradient()));
 
@@ -449,17 +450,17 @@ int UtcDaliTextAtlasGradientCommonTextUtilsBackgroundScrollP(void)
     "<background color='red'>scroll background span keeps content offset while this text is much wider than the field</background>"));
   controller->Relayout(Size(120.0f, 48.0f));
 
-  RecordingGradientRenderer* recordingRenderer = new RecordingGradientRenderer();
+  RecordingGradientRenderer*  recordingRenderer = new RecordingGradientRenderer();
   Dali::Ui::Text::RendererPtr renderer(recordingRenderer);
 
-  float                       alignmentOffset = 0.0f;
-  Actor                       renderableActor;
-  Actor                       backgroundActor;
-  Actor                       cursorLayerActor;
-  Actor                       stencil;
-  std::vector<Actor>          clippingDecorationActors;
+  float                             alignmentOffset = 0.0f;
+  Actor                             renderableActor;
+  Actor                             backgroundActor;
+  Actor                             cursorLayerActor;
+  Actor                             stencil;
+  std::vector<Actor>                clippingDecorationActors;
   std::vector<Dali::Ui::TextAnchor> anchorActors;
-  AtlasGradient::AtlasFrameState frameState{true, Dali::Ui::Text::GradientBoundsMode::CONTENT_BOUND};
+  AtlasGradient::AtlasFrameState    frameState{true, Dali::Ui::Text::GradientBoundsMode::CONTENT_BOUND};
 
   Dali::Ui::Internal::CommonTextUtils::RenderText(
     textActor, renderer, controller, nullptr, alignmentOffset, renderableActor, backgroundActor, cursorLayerActor,

@@ -148,37 +148,26 @@ Sampler CreateSampler(Dali::Ui::Gradient::SpreadMethod spread)
 }
 } // namespace
 
-bool AtlasRendererState::IsEnabled() const
-{
-  return IsRenderable(style) && lookupTexture && lookupSampler;
-}
+} // namespace Dali::Ui::Text::Internal::Gradient
 
-bool AtlasApplyState::Matches(const AtlasRendererState& state) const
+namespace Dali::Ui::Integration::Text::Gradient
+{
+bool AtlasApplyState::Matches(uint64_t resourceId, uint64_t styleRevision, uint64_t lookupRevision) const
 {
   return initialized &&
-         resourceId == state.resourceId &&
-         styleRevision == state.styleRevision &&
-         lookupRevision == state.lookupRevision;
+         this->resourceId == resourceId &&
+         this->styleRevision == styleRevision &&
+         this->lookupRevision == lookupRevision;
 }
 
-void AtlasApplyState::Set(const AtlasRendererState& state)
+void AtlasApplyState::Set(AtlasApplyStatus status, bool enabled, uint64_t resourceId, uint64_t styleRevision, uint64_t lookupRevision)
 {
-  status         = AtlasApplyStatus::APPLIED;
-  initialized    = true;
-  enabled        = state.IsEnabled();
-  resourceId     = state.resourceId;
-  styleRevision  = state.styleRevision;
-  lookupRevision = state.lookupRevision;
-}
-
-void AtlasApplyState::SetSolidFallback(const AtlasRendererState& state)
-{
-  status         = AtlasApplyStatus::SOLID_FALLBACK;
-  initialized    = true;
-  enabled        = state.IsEnabled();
-  resourceId     = state.resourceId;
-  styleRevision  = state.styleRevision;
-  lookupRevision = state.lookupRevision;
+  this->status         = status;
+  this->initialized    = true;
+  this->enabled        = enabled;
+  this->resourceId     = resourceId;
+  this->styleRevision  = styleRevision;
+  this->lookupRevision = lookupRevision;
 }
 
 bool AtlasApplyState::IsGradientApplied() const
@@ -194,6 +183,15 @@ bool AtlasApplyState::IsSolidFallback() const
 void AtlasApplyState::Reset()
 {
   *this = AtlasApplyState{};
+}
+
+} // namespace Dali::Ui::Integration::Text::Gradient
+
+namespace Dali::Ui::Text::Internal::Gradient
+{
+bool AtlasRendererState::IsEnabled() const
+{
+  return IsRenderable(style) && lookupTexture && lookupSampler;
 }
 
 AtlasResource::AtlasResource()
@@ -334,11 +332,11 @@ AtlasFrameState EditableAtlasResources::GetFrameState(bool placeholder) const
   return AtlasFrameState{GetRendererState(placeholder).IsEnabled(), mBoundsMode};
 }
 
-AtlasFrameState EditableAtlasResources::GetFrameState(bool placeholder, const AtlasApplyState& applied) const
+AtlasFrameState EditableAtlasResources::GetFrameState(bool placeholder, const Ui::Integration::Text::Gradient::AtlasApplyState& applied) const
 {
   AtlasFrameState frameState = GetFrameState(placeholder);
   frameState.enabled         = frameState.enabled &&
-                       applied.Matches(GetRendererState(placeholder)) &&
+                       MatchesAtlasApplyState(applied, GetRendererState(placeholder)) &&
                        applied.IsGradientApplied();
   return frameState;
 }

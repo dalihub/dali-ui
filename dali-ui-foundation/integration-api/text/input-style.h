@@ -36,32 +36,38 @@ namespace Integration
 {
 namespace Text
 {
-typedef TextAbstraction::FontWidth::Type  FontWidthType;  ///< The font's width.
-typedef TextAbstraction::FontWeight::Type FontWeightType; ///< The font's weight.
-typedef TextAbstraction::FontSlant::Type  FontSlantType;  ///< The font's slant.
+using FontWidthType  = TextAbstraction::FontWidth::Type;  ///< The font's width.
+using FontWeightType = TextAbstraction::FontWeight::Type; ///< The font's weight.
+using FontSlantType  = TextAbstraction::FontSlant::Type;  ///< The font's slant.
 
 /**
- * The input text's style.
+ * @brief Stores editable input text style values and their defined flags.
  */
 struct DALI_UI_API InputStyle
 {
+  /**
+   * @brief Bitmask values used to report which input style fields changed.
+   */
   enum Mask
   {
-    NONE                = 0x0000,
-    INPUT_COLOR         = 0x0001,
-    INPUT_FONT_FAMILY   = 0x0002,
-    INPUT_POINT_SIZE    = 0x0004,
-    INPUT_FONT_WEIGHT   = 0x0008,
-    INPUT_FONT_WIDTH    = 0x0010,
-    INPUT_FONT_SLANT    = 0x0020,
-    INPUT_LINE_SPACING  = 0x0040,
-    INPUT_UNDERLINE     = 0x0080,
-    INPUT_SHADOW        = 0x0100,
-    INPUT_EMBOSS        = 0x0200,
-    INPUT_OUTLINE       = 0x0400,
-    INPUT_STRIKETHROUGH = 0x0800
+    NONE                = 0x0000, ///< No style field changed.
+    INPUT_COLOR         = 0x0001, ///< The input color changed.
+    INPUT_FONT_FAMILY   = 0x0002, ///< The input font family changed.
+    INPUT_POINT_SIZE    = 0x0004, ///< The input point size changed.
+    INPUT_FONT_WEIGHT   = 0x0008, ///< The input font weight changed.
+    INPUT_FONT_WIDTH    = 0x0010, ///< The input font width changed.
+    INPUT_FONT_SLANT    = 0x0020, ///< The input font slant changed.
+    INPUT_LINE_SPACING  = 0x0040, ///< The input line spacing changed.
+    INPUT_UNDERLINE     = 0x0080, ///< The input underline style changed.
+    INPUT_SHADOW        = 0x0100, ///< The input shadow style changed.
+    INPUT_EMBOSS        = 0x0200, ///< The input emboss style changed.
+    INPUT_OUTLINE       = 0x0400, ///< The input outline style changed.
+    INPUT_STRIKETHROUGH = 0x0800  ///< The input strikethrough style changed.
   };
 
+  /**
+   * @brief Creates a default input style.
+   */
   InputStyle()
   : textColor(Color::BLACK),
     familyName(),
@@ -90,12 +96,15 @@ struct DALI_UI_API InputStyle
   {
   }
 
-  ~InputStyle() {};
+  /**
+   * @brief Destructor.
+   */
+  ~InputStyle() = default;
 
   /**
-   * @brief
+   * @brief Copies input style values from another style.
    *
-   * Does not copy the font-style, underline, shadow, emboss and outline property strings.
+   * @param[in] inputStyle The input style to copy.
    */
   void Copy(const InputStyle& inputStyle)
   {
@@ -137,9 +146,10 @@ struct DALI_UI_API InputStyle
   }
 
   /**
-   * @brief
+   * @brief Compares this input style with another style.
    *
-   * Does not compare the font-style, underline, shadow, emboss and outline property strings.
+   * @param[in] inputStyle The input style to compare with.
+   * @return True if the tracked style values are equal.
    */
   bool Equal(const InputStyle& inputStyle) const
   {
@@ -162,6 +172,12 @@ struct DALI_UI_API InputStyle
     return true;
   }
 
+  /**
+   * @brief Gets the bitmask of fields that differ from another input style.
+   *
+   * @param[in] inputStyle The input style to compare with.
+   * @return The input style change mask.
+   */
   Mask GetInputStyleChangeMask(const InputStyle& inputStyle) const
   {
     Mask mask = NONE;

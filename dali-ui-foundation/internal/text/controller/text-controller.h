@@ -190,7 +190,8 @@ public: // Constructor.
    *
    * @return A pointer to a new Controller.
    */
-  static ControllerPtr New(Ui::Integration::Text::ControlInterface* controlInterface, Ui::Integration::Text::EditableControlInterface* editableControlInterface,
+  static ControllerPtr New(Ui::Integration::Text::ControlInterface*           controlInterface,
+                           Ui::Integration::Text::EditableControlInterface*   editableControlInterface,
                            Ui::Integration::Text::SelectableControlInterface* selectableControlInterface,
                            Ui::Integration::Text::AnchorControlInterface*     anchorControlInterface)
   {
@@ -2769,8 +2770,10 @@ private: // Private contructors & copy operator.
   /**
    * @brief Private constructor.
    */
-  Controller(Ui::Integration::Text::ControlInterface* controlInterface, Ui::Integration::Text::EditableControlInterface* editableControlInterface,
-             Ui::Integration::Text::SelectableControlInterface* selectableControlInterface, Ui::Integration::Text::AnchorControlInterface* anchorControlInterface);
+  Controller(Ui::Integration::Text::ControlInterface*           controlInterface,
+             Ui::Integration::Text::EditableControlInterface*   editableControlInterface,
+             Ui::Integration::Text::SelectableControlInterface* selectableControlInterface,
+             Ui::Integration::Text::AnchorControlInterface*     anchorControlInterface);
 
   Controller(const Controller& handle)            = delete;
   Controller& operator=(const Controller& handle) = delete;
