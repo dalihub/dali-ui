@@ -1,4 +1,5 @@
-#pragma once
+#ifndef DALI_UI_INTEGRATION_TEXT_SCROLLER_INTERFACE_H
+#define DALI_UI_INTEGRATION_TEXT_SCROLLER_INTERFACE_H
 
 /*
  * Copyright (c) 2026 Samsung Electronics Co., Ltd.
@@ -17,4 +18,37 @@
  *
  */
 
-#include <dali-ui-foundation/integration-api/text/async-text/async-text-interface.h>
+namespace Dali
+{
+class Actor;
+
+namespace Ui
+{
+namespace Text
+{
+/**
+ * @brief An interface used by the text-controls which implement marqueeing
+ */
+class ScrollerInterface
+{
+public:
+  /**
+   * @brief Virtual destructor.
+   */
+  virtual ~ScrollerInterface()
+  {
+  }
+
+  /**
+   * @brief Called when the scrolling finishes
+   */
+  virtual void ScrollingFinished() = 0;
+};
+
+} // namespace Text
+
+} // namespace Ui
+
+} // namespace Dali
+
+#endif // DALI_UI_INTEGRATION_TEXT_SCROLLER_INTERFACE_H

@@ -26,11 +26,12 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
+#include <dali-ui-foundation/integration-api/text/async-text/async-text-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-anchor-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-scroller-interface.h>
 #include <dali-ui-foundation/integration-api/visual-factory/visual-base.h>
-#include <dali-ui-foundation/internal/text/async-text/async-text-interface.h>
-#include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
-#include <dali-ui-foundation/internal/text/text-control-interface.h>
-#include <dali-ui-foundation/internal/text/text-scroller-interface.h>
+#include <dali-ui-foundation/internal/text/async-text/async-text-loader.h>
 #include <dali-ui-foundation/public-api/gradient/gradient-base.h>
 #include <dali-ui-foundation/public-api/text/fit/text-fit.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>

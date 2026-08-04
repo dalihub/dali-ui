@@ -30,14 +30,13 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/size-negotiated-view-impl.h>
-#include <dali-ui-foundation/internal/controls/text-controls/text-anchor.h>
+#include <dali-ui-foundation/integration-api/text/text-anchor-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/decorator/text-decorator.h>
-#include <dali-ui-foundation/internal/text/text-anchor-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-atlas-gradient-state.h>
-#include <dali-ui-foundation/internal/text/text-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
-#include <dali-ui-foundation/internal/text/text-selectable-control-interface.h>
 #include <dali-ui-foundation/public-api/text/font-variation/font-variation-axis.h>
 #include <dali-ui-foundation/public-api/text/input-editor-properties.h>
 #include <dali-ui-foundation/public-api/text/style/line-through.h>

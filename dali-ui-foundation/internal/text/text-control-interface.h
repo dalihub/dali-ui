@@ -1,5 +1,4 @@
-#ifndef DALI_UI_TEXT_CONTROL_INTERFACE_H
-#define DALI_UI_TEXT_CONTROL_INTERFACE_H
+#pragma once
 
 /*
  * Copyright (c) 2021 Samsung Electronics Co., Ltd.
@@ -18,45 +17,4 @@
  *
  */
 
-namespace Dali
-{
-namespace Ui
-{
-namespace Text
-{
-/**
- * @brief An interface that the Text::Controller uses to request a text relayout.
- */
-class ControlInterface
-{
-public:
-  /**
-   * @brief Virtual destructor.
-   */
-  virtual ~ControlInterface()
-  {
-  }
-
-  /**
-   * @brief Called to request a text relayout.
-   */
-  virtual void RequestTextRelayout() = 0;
-
-  /**
-   * @brief Invalidate measured size.
-   */
-  virtual void InvalidateTextMeasure() = 0;
-
-  /**
-   * @brief Requests asynchronous text rendering.
-   */
-  virtual void RequestAsyncRender() = 0;
-};
-
-} // namespace Text
-
-} // namespace Ui
-
-} // namespace Dali
-
-#endif // DALI_UI_TEXT_CONTROL_INTERFACE_H
+#include <dali-ui-foundation/integration-api/text/text-control-interface.h>

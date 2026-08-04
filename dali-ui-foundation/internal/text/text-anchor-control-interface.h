@@ -1,5 +1,4 @@
-#ifndef DALI_UI_TEXT_ANCHOR_CONTROL_INTERFACE_H
-#define DALI_UI_TEXT_ANCHOR_CONTROL_INTERFACE_H
+#pragma once
 
 /*
  * Copyright (c) 2021 Samsung Electronics Co., Ltd.
@@ -18,41 +17,4 @@
  *
  */
 
-namespace Dali
-{
-namespace Ui
-{
-namespace Text
-{
-/**
- * @brief An interface that the Text::Controller used for anchor functionality.
- */
-class AnchorControlInterface
-{
-public:
-  /**
-   * @brief Virtual destructor.
-   */
-  virtual ~AnchorControlInterface() = default;
-
-  /**
-   * @brief Called to notify that an anchor has been clicked.
-   * @param[in] cursorPosition Checks if an anchor exists at the given cursor position.
-   * @param[out] href If an anchor exists at the given cursor position, the href is written.
-   * @return True if an anchor exists at the given cursor position, false otherwise.
-   */
-  virtual bool AnchorClicked(uint32_t cursorPosition, std::string& href) = 0;
-
-  /**
-   * @brief Called to emit an anchor clicked signal.
-   */
-  virtual void EmitAnchorClicked(const std::string& href) = 0;
-};
-
-} // namespace Text
-
-} // namespace Ui
-
-} // namespace Dali
-
-#endif // DALI_UI_TEXT_ANCHOR_CONTROL_INTERFACE_H
+#include <dali-ui-foundation/integration-api/text/text-anchor-control-interface.h>
