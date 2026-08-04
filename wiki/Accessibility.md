@@ -717,7 +717,9 @@ bool ToggleImpl::OnAccessibilityActivate()
 }
 ```
 
-Use `CHECKED` for checkbox, toggle, and radio semantics, and use `SELECTED` for the current list item or tab. Manage the Component enabled API and accessibility `ENABLED` state from the same source of truth.
+`CHECKED` and `SELECTED` do not represent focus. Use `CHECKED` for controls whose value can be checked or turned on, such as checkboxes, toggle buttons, and radio buttons. Use `SELECTED` for an item selected by a list or tab selection model. Do not set `SELECTED` merely because an item has remote focus.
+
+When changing whether a Component is available for interaction, update both `SetEnabled()` and the accessibility `ENABLED` state from the same logical state. Managing them independently can make the actual interaction behavior disagree with the information conveyed by the Screen Reader.
 
 ### Adjustable values
 

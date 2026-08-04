@@ -717,7 +717,9 @@ bool ToggleImpl::OnAccessibilityActivate()
 }
 ```
 
-Checkbox, toggle, radio에는 `CHECKED`를 사용하고, 현재 선택된 list item이나 tab에는 `SELECTED`를 사용합니다. Component의 enabled API와 accessibility `ENABLED` state도 같은 source of truth에서 관리합니다.
+`CHECKED`와 `SELECTED`는 focus 상태를 나타내지 않습니다. Checkbox, toggle button, radio button처럼 값이 켜지거나 선택되는 control에는 `CHECKED`를 사용합니다. List item이나 tab처럼 selection model에서 선택된 항목에는 `SELECTED`를 사용합니다. 리모컨 focus가 놓였다는 이유만으로 항목에 `SELECTED`를 설정하지 마세요.
+
+Component의 사용 가능 여부를 바꿀 때는 실제 interaction 상태를 제어하는 `SetEnabled()`와 accessibility `ENABLED` state를 동일한 논리 상태에서 함께 갱신합니다. 두 상태를 독립적으로 관리하면 실제 조작 가능 여부와 Screen Reader가 전달하는 정보가 어긋날 수 있습니다.
 
 ### 조절 가능한 값
 
