@@ -2490,7 +2490,7 @@ void LabelImpl::EmitAnchorClicked(const std::string& href)
 // =============================================================================
 // AsyncTextInterface
 // =============================================================================
-void LabelImpl::AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo)
+void LabelImpl::AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderInfo)
 {
   if(HasInlineReplacementSource())
   {
@@ -2670,7 +2670,7 @@ void LabelImpl::AsyncTextFitChanged(float pointSize)
   }
 }
 
-void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo)
+void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo&& renderInfo)
 {
   DALI_LOG_RELEASE_INFO("[%p] rendered size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
 
@@ -2739,7 +2739,7 @@ void LabelImpl::AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo)
   EmitAsyncRenderFinished(width, height);
 }
 
-void LabelImpl::AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo)
+void LabelImpl::AsyncSizeComputed(const Text::AsyncTextRenderInfo& renderInfo)
 {
   switch(renderInfo.requestType)
   {

@@ -1385,7 +1385,7 @@ void TextVisual::LoadComplete(bool loadingSuccess, const TextInformation& textIn
 
     if(mAsyncTextInterface)
     {
-      mAsyncTextInterface->AsyncRenderFinished(renderInfo);
+      mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
     }
 
     // A completion callback may request the next render. The result committed
@@ -1887,7 +1887,7 @@ bool TextVisual::UpdateAsyncRenderer(Text::AsyncTextParameters& parameters)
         renderInfo.renderedSize = Size::ZERO;
       }
 
-      mAsyncTextInterface->AsyncRenderFinished(renderInfo);
+      mAsyncTextInterface->AsyncRenderFinished(std::move(renderInfo));
     }
 
     return true;

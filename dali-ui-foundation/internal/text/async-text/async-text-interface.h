@@ -45,7 +45,7 @@ public:
    *
    * @param[in] renderInfo The asynchronous text render information.
    */
-  virtual void AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo) = 0;
+  virtual void AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderInfo) = 0;
 
   /**
    * @brief Called when the text fit point size has changed asynchronously.
@@ -59,14 +59,14 @@ public:
    *
    * @param[in] renderInfo The asynchronous text render information.
    */
-  virtual void AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo) = 0;
+  virtual void AsyncRenderFinished(Text::AsyncTextRenderInfo&& renderInfo) = 0;
 
   /**
    * @brief Called when asynchronous size computation has finished.
    *
    * @param[in] renderInfo The asynchronous text render information.
    */
-  virtual void AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo) = 0;
+  virtual void AsyncSizeComputed(const Text::AsyncTextRenderInfo& renderInfo) = 0;
 };
 
 } // namespace Text

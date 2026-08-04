@@ -891,7 +891,7 @@ private: // From AsyncTextInterface
   /**
    * @copydoc Text::AsyncTextInterface::AsyncInitializeMarquee()
    */
-  void AsyncInitializeMarquee(Text::AsyncTextRenderInfo renderInfo) override;
+  void AsyncInitializeMarquee(const Text::AsyncTextRenderInfo& renderInfo) override;
 
   /**
    * @copydoc Text::AsyncTextInterface::AsyncTextFitChanged()
@@ -901,12 +901,12 @@ private: // From AsyncTextInterface
   /**
    * @copydoc Text::AsyncTextInterface::AsyncRenderFinished()
    */
-  void AsyncRenderFinished(Text::AsyncTextRenderInfo renderInfo) override;
+  void AsyncRenderFinished(Text::AsyncTextRenderInfo&& renderInfo) override;
 
   /**
    * @copydoc Text::AsyncTextInterface::AsyncSizeComputed()
    */
-  void AsyncSizeComputed(Text::AsyncTextRenderInfo renderInfo) override;
+  void AsyncSizeComputed(const Text::AsyncTextRenderInfo& renderInfo) override;
 
 private: // Implementation
   /**

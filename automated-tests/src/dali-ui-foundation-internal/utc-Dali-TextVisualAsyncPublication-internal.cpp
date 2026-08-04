@@ -131,7 +131,7 @@ public:
   {
   }
 
-  void AsyncInitializeMarquee(UiText::AsyncTextRenderInfo) override
+  void AsyncInitializeMarquee(const UiText::AsyncTextRenderInfo&) override
   {
     ++mMarqueeInitializationCount;
   }
@@ -140,7 +140,7 @@ public:
   {
   }
 
-  void AsyncRenderFinished(UiText::AsyncTextRenderInfo) override
+  void AsyncRenderFinished(UiText::AsyncTextRenderInfo&&) override
   {
     ++mCompletionCount;
     if(mCompletionCount != 1u)
@@ -184,7 +184,7 @@ public:
     }
   }
 
-  void AsyncSizeComputed(UiText::AsyncTextRenderInfo) override
+  void AsyncSizeComputed(const UiText::AsyncTextRenderInfo&) override
   {
   }
 
