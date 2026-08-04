@@ -48,6 +48,7 @@ Searches, scripts, or manual checks that can detect likely violations.
 
 - [API Naming](api-naming.md)
 - [Public API and ABI](public-api-abi.md)
+- [Bit-field Enums](bitfield-enums.md)
 - [Handle-Body Pattern](handle-body-pattern.md)
 - [Component Boundaries](component-boundaries.md)
 - [Docs and Wiki](docs-and-wiki.md)

@@ -155,6 +155,7 @@ private:
         mImages[radiusIndex].SetFittingMode(Ui::Image::FittingMode::OVER_FIT_KEEP_ASPECT_RATIO);
         mImages[radiusIndex].SetCornerRadius(radiusCase.radius);
         mImages[radiusIndex].SetCornerRadiusPolicy(radiusCase.policy);
+        mImages[radiusIndex].SetCornerSquareness(0.9f);
         return mImages[radiusIndex];
       }
       case ViewType::ANIMATED_IMAGE:
@@ -167,6 +168,7 @@ private:
         mAnimatedImages[radiusIndex].SetLoopCount(-1);
         mAnimatedImages[radiusIndex].SetCornerRadius(radiusCase.radius);
         mAnimatedImages[radiusIndex].SetCornerRadiusPolicy(radiusCase.policy);
+        mAnimatedImages[radiusIndex].SetCornerSquareness(0.9f);
         mAnimatedImages[radiusIndex].Play();
         return mAnimatedImages[radiusIndex];
       }
@@ -179,6 +181,7 @@ private:
         mLottieAnimations[radiusIndex].SetLoopCount(-1);
         mLottieAnimations[radiusIndex].SetCornerRadius(radiusCase.radius);
         mLottieAnimations[radiusIndex].SetCornerRadiusPolicy(radiusCase.policy);
+        mLottieAnimations[radiusIndex].SetCornerSquareness(0.9f);
         mLottieAnimations[radiusIndex].Play();
         return mLottieAnimations[radiusIndex];
       }
