@@ -617,6 +617,164 @@ Modal을 열 때 다음을 함께 처리합니다.
 
 <br/>
 
+## Component 개발자 가이드
+
+재사용 Component는 Application이 내부 구현을 몰라도 의미와 action을 일관되게 사용할 수 있는 접근성 contract를 제공해야 합니다.
+
+### Component 최소 contract
+
+1. 기능에 맞는 기본 Role을 설정합니다.
+2. 표시 text 또는 model에서 합리적인 기본 Name과 Value를 제공하고 Application의 명시적 override를 존중합니다.
+3. touch, remote key, API, accessibility action이 같은 기능 경로를 실행합니다.
+4. checked, selected, expanded, enabled, value가 시각 상태와 같은 시점에 갱신됩니다.
+5. 내부 icon, label, layer가 중복 탐색되지 않도록 tree 정책을 제공합니다.
+6. layout, animation, recycling, show/hide 후에도 semantic과 geometry가 최신 상태입니다.
+7. Application에 AT-SPI object나 adaptor bridge 구현 detail을 노출하지 않습니다.
+
+Role | 필수 정보와 state | 필수 action contract
+--|--|--
+`BUTTON`, `LINK`, `MENU_ITEM` | Name, enabled | `OnAccessibilityActivate()`
+`CHECK_BOX`, `TOGGLE_BUTTON`, `RADIO_BUTTON` | Name, checked, enabled | activate 후 checked 동기화
+`ADJUSTABLE`, `SPIN_BUTTON`, `SCROLL_BAR` | Name, Value, enabled | `OnAccessibilityValueChange()`
+scroll container | scrollable, collection 정보 | `OnAccessibilityScrollToChild()`
+modal root | context Role, modal/showing lifecycle | 필요한 경우 `OnAccessibilityEscape()`
+
+Role을 설정하면 의미와 기본 highlight 정책을 제공하지만 action 구현은 생기지 않습니다.
+
+### 하나의 activation 경로
+
+실행 가능한 Component는 remote/touch와 accessibility가 같은 내부 함수를 호출하게 합니다.
+
+```cpp
+void ActionButtonImpl::OnInitialize()
+{
+  Dali::Ui::Extension::InteractiveViewImpl::OnInitialize();
+
+  auto self = Dali::Ui::View::DownCast(Self());
+  self.SetAccessibilityRole(Dali::Ui::Accessibility::Role::BUTTON);
+
+  mLabel = Dali::Ui::Label::New();
+  mLabel.SetAccessibilityHidden(true);
+  self.Add(mLabel);
+
+  ClickedSignal().Connect(
+    this,
+    [this](Dali::Ui::View, Dali::Ui::InputEvent event)
+    {
+      Activate(event);
+    });
+}
+
+bool ActionButtonImpl::OnAccessibilityActivate()
+{
+  auto self = Dali::Ui::View::DownCast(Self());
+  if(!self.IsEnabled() || !IsClickable())
+  {
+    return false;
+  }
+
+  Activate(Dali::Ui::InputEvent::Programmatic());
+  return true;
+}
+```
+
+`SetText()`처럼 label content를 바꾸는 API는 root의 Accessibility Name도 갱신하거나 동적 Name fallback을 제공해야 합니다. 요청을 실제로 처리했을 때만 `true`를 반환합니다. 기본 `ViewImpl::OnAccessibilityActivate()`가 Component의 click이나 toggle 기능을 자동 실행한다고 가정하지 마세요.
+
+### Toggle과 checked state
+
+논리 상태, visual, accessibility state를 하나의 commit 함수에서 갱신합니다.
+
+```cpp
+void ToggleImpl::CommitChecked(bool checked)
+{
+  mChecked = checked;
+  UpdateVisualState(checked);
+
+  auto self = Dali::Ui::View::DownCast(Self());
+  if(checked)
+  {
+    self.AddAccessibilityState(Dali::Ui::Accessibility::State::CHECKED);
+  }
+  else
+  {
+    self.RemoveAccessibilityState(Dali::Ui::Accessibility::State::CHECKED);
+  }
+}
+
+bool ToggleImpl::OnAccessibilityActivate()
+{
+  auto self = Dali::Ui::View::DownCast(Self());
+  if(!self.IsEnabled())
+  {
+    return false;
+  }
+
+  CommitChecked(!mChecked);
+  return true;
+}
+```
+
+Checkbox, toggle, radio에는 `CHECKED`를 사용하고, 현재 선택된 list item이나 tab에는 `SELECTED`를 사용합니다. Component의 enabled API와 accessibility `ENABLED` state도 같은 source of truth에서 관리합니다.
+
+### 조절 가능한 값
+
+최솟값과 최댓값을 적용하고 값이 실제로 바뀐 경우에만 성공을 반환합니다.
+
+```cpp
+bool VolumeSliderImpl::OnAccessibilityValueChange(bool increased)
+{
+  auto self = Dali::Ui::View::DownCast(Self());
+  if(!self.IsEnabled())
+  {
+    return false;
+  }
+
+  const int oldValue = mValue;
+  mValue = std::clamp(mValue + (increased ? mStep : -mStep), mMin, mMax);
+  if(mValue == oldValue)
+  {
+    return false;
+  }
+
+  UpdateThumbFromValue();
+  const std::string spokenValue = std::to_string(mValue) + "%";
+  self.SetAccessibilityValue(spokenValue.c_str());
+  return true;
+}
+```
+
+Component 초기화 시 `ADJUSTABLE` 또는 `SPIN_BUTTON` Role, Name, 초기 Value를 제공합니다. 값 변경 후 `SetAccessibilityValue()`를 갱신하지 않으면 Screen Reader가 이전 값을 읽을 수 있습니다.
+
+### 복합 tree와 recycling
+
+대상 | Contract | 실패 신호
+--|--|--
+복합 root | root 또는 action 가능한 child 중 한쪽을 탐색 단위로 선택 | root, label, icon이 같은 내용을 반복 발화
+collection | container와 index를 logical order에 맞게 갱신 | viewport 경계에서 highlight가 사라짐
+recycling | item data와 함께 Name, State, Value, index 전체를 rebind | 이전 item의 정보가 남음
+modal | 배경 제외, 초기 대상, escape, 복귀를 하나의 lifecycle로 관리 | focus가 배경으로 나가거나 닫은 뒤 사라짐
+
+Scrollable Component는 `SetAccessibilityScrollable(true)`와 `OnAccessibilityScrollToChild(View)`를 함께 구현합니다. 후자는 대상 child가 실제 viewport에 보이도록 이동시킨 후 성공을 반환해야 합니다. Modal Component는 의미 있는 Role과 `SetAccessibilityModal(true)`를 제공하고 필요할 때 `OnAccessibilityEscape()`에서 닫기/back 기능을 실행합니다.
+
+### 현재 `devel` 기준 주의사항
+
+> [!WARNING]
+> `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, `RecyclerView`를 사용한다는 사실만으로 접근성이 완성되었다고 가정하지 마세요. `b60e73918439` 기준으로 일부 클래스는 기본 Role, 내부 child hidden, action, modal, scroll-to-child contract를 모두 자체 설정하지 않습니다. 대상 branch의 구현과 실제 Screen Reader action을 확인하고 Component 계층에서 부족한 contract를 보완하세요. Pan/zoom virtual도 end-to-end dispatch를 확인하기 전에는 지원된다고 단정하지 않습니다.
+
+### Component release checklist
+
+- [ ] 기본 Role, Name/Value fallback, highlight 정책이 명확합니다.
+- [ ] remote, touch, accessibility action이 같은 model change를 발생시킵니다.
+- [ ] disabled 상태에서 action이 안전하게 거부됩니다.
+- [ ] State와 Value가 visual과 동시에 갱신됩니다.
+- [ ] 내부 child가 중복 발화되지 않습니다.
+- [ ] collection 경계에서 scroll-to-child가 동작합니다.
+- [ ] recycling, animation, show/hide 이후 stale semantic이나 geometry가 없습니다.
+- [ ] modal 진입, escape, 닫기 후 복귀가 반복 실행에도 안정적입니다.
+- [ ] unit/integration test와 실제 TV Screen Reader test를 모두 통과합니다.
+
+<br/>
+
 ## Custom View 구현
 
 새 component가 접근성 action이나 동적 값을 제공하려면 handle인 `View`가 아니라 `ViewImpl`의 virtual API를 override합니다.

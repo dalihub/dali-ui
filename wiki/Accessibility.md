@@ -617,6 +617,164 @@ For lists, keep the collection container and item indices aligned with logical o
 
 <br/>
 
+## Component Developer Guide
+
+A reusable Component must provide an accessibility contract that Applications can use consistently without knowing its internal implementation.
+
+### Minimum Component contract
+
+1. Set a default Role that matches the feature.
+2. Provide reasonable default Name and Value from visible text or the model while respecting explicit Application overrides.
+3. Route touch, remote key, API, and accessibility actions to the same feature path.
+4. Update checked, selected, expanded, enabled, and value semantics with visual state.
+5. Define an accessibility-tree policy that prevents duplicate internal icons, labels, or layers.
+6. Keep semantics and geometry current after layout, animation, recycling, and show/hide.
+7. Do not expose AT-SPI objects or adaptor bridge details to Applications.
+
+Role | Required information and state | Required action contract
+--|--|--
+`BUTTON`, `LINK`, `MENU_ITEM` | Name, enabled | `OnAccessibilityActivate()`
+`CHECK_BOX`, `TOGGLE_BUTTON`, `RADIO_BUTTON` | Name, checked, enabled | Synchronize checked after activate
+`ADJUSTABLE`, `SPIN_BUTTON`, `SCROLL_BAR` | Name, Value, enabled | `OnAccessibilityValueChange()`
+Scroll container | Scrollable and collection information | `OnAccessibilityScrollToChild()`
+Modal root | Context Role and modal/showing lifecycle | `OnAccessibilityEscape()` when required
+
+Setting Role provides meaning and the default highlight policy, but it does not implement an action.
+
+### One activation path
+
+An executable Component should route remote/touch and accessibility activation to the same internal function.
+
+```cpp
+void ActionButtonImpl::OnInitialize()
+{
+  Dali::Ui::Extension::InteractiveViewImpl::OnInitialize();
+
+  auto self = Dali::Ui::View::DownCast(Self());
+  self.SetAccessibilityRole(Dali::Ui::Accessibility::Role::BUTTON);
+
+  mLabel = Dali::Ui::Label::New();
+  mLabel.SetAccessibilityHidden(true);
+  self.Add(mLabel);
+
+  ClickedSignal().Connect(
+    this,
+    [this](Dali::Ui::View, Dali::Ui::InputEvent event)
+    {
+      Activate(event);
+    });
+}
+
+bool ActionButtonImpl::OnAccessibilityActivate()
+{
+  auto self = Dali::Ui::View::DownCast(Self());
+  if(!self.IsEnabled() || !IsClickable())
+  {
+    return false;
+  }
+
+  Activate(Dali::Ui::InputEvent::Programmatic());
+  return true;
+}
+```
+
+An API such as `SetText()` that changes label content must also refresh the root Accessibility Name or provide a dynamic Name fallback. Return `true` only when the request was handled. Do not assume that the default `ViewImpl::OnAccessibilityActivate()` automatically executes the Component click or toggle feature.
+
+### Toggle and checked state
+
+Update logical state, visuals, and accessibility state in one commit function.
+
+```cpp
+void ToggleImpl::CommitChecked(bool checked)
+{
+  mChecked = checked;
+  UpdateVisualState(checked);
+
+  auto self = Dali::Ui::View::DownCast(Self());
+  if(checked)
+  {
+    self.AddAccessibilityState(Dali::Ui::Accessibility::State::CHECKED);
+  }
+  else
+  {
+    self.RemoveAccessibilityState(Dali::Ui::Accessibility::State::CHECKED);
+  }
+}
+
+bool ToggleImpl::OnAccessibilityActivate()
+{
+  auto self = Dali::Ui::View::DownCast(Self());
+  if(!self.IsEnabled())
+  {
+    return false;
+  }
+
+  CommitChecked(!mChecked);
+  return true;
+}
+```
+
+Use `CHECKED` for checkbox, toggle, and radio semantics, and use `SELECTED` for the current list item or tab. Manage the Component enabled API and accessibility `ENABLED` state from the same source of truth.
+
+### Adjustable values
+
+Apply the minimum and maximum, and return success only when the value changes.
+
+```cpp
+bool VolumeSliderImpl::OnAccessibilityValueChange(bool increased)
+{
+  auto self = Dali::Ui::View::DownCast(Self());
+  if(!self.IsEnabled())
+  {
+    return false;
+  }
+
+  const int oldValue = mValue;
+  mValue = std::clamp(mValue + (increased ? mStep : -mStep), mMin, mMax);
+  if(mValue == oldValue)
+  {
+    return false;
+  }
+
+  UpdateThumbFromValue();
+  const std::string spokenValue = std::to_string(mValue) + "%";
+  self.SetAccessibilityValue(spokenValue.c_str());
+  return true;
+}
+```
+
+During initialization, provide an `ADJUSTABLE` or `SPIN_BUTTON` Role, Name, and initial Value. If the Component does not refresh `SetAccessibilityValue()` after a change, the Screen Reader may announce the previous value.
+
+### Compound trees and recycling
+
+Subject | Contract | Failure signal
+--|--|--
+Compound root | Choose either the root or actionable children as navigation units | Root, label, and icon repeat the same speech
+Collection | Keep container and index aligned with logical order | Highlight disappears at a viewport boundary
+Recycling | Rebind Name, State, Value, and index with item data | Previous item semantics remain
+Modal | Manage background exclusion, initial target, escape, and restoration as one lifecycle | Focus escapes to the background or disappears after close
+
+A scrollable Component implements both `SetAccessibilityScrollable(true)` and `OnAccessibilityScrollToChild(View)`. The latter must make the target child visible in the viewport before returning success. A modal Component provides a meaningful Role and `SetAccessibilityModal(true)`, and runs close/back from `OnAccessibilityEscape()` when required.
+
+### Current `devel` caveats
+
+> [!WARNING]
+> Do not assume accessibility is complete merely because the Application uses `TextButton`, `CheckBox`, `Dialog`/`DialogContainer`/`AlertDialog`, `Navigator`, `ScrollView`, or `RecyclerView`. At `b60e73918439`, some of these classes do not set every default Role, internal-child hidden policy, action, modal, or scroll-to-child contract themselves. Inspect the target branch and actual Screen Reader actions, then complete missing behavior at the Component layer. Do not claim pan/zoom support before verifying end-to-end dispatch.
+
+### Component release checklist
+
+- [ ] Default Role, Name/Value fallback, and highlight policy are explicit.
+- [ ] Remote, touch, and accessibility actions produce the same model change.
+- [ ] Actions are safely rejected while disabled.
+- [ ] State and Value update with visuals.
+- [ ] Internal children do not produce duplicate speech.
+- [ ] Scroll-to-child works at collection boundaries.
+- [ ] Recycling, animation, and show/hide leave no stale semantics or geometry.
+- [ ] Modal entry, escape, and post-close restoration remain stable after repetition.
+- [ ] Unit/integration tests and physical TV Screen Reader tests pass.
+
+<br/>
+
 ## Custom View Implementation
 
 To expose accessibility actions or dynamic values from a new component, override the virtual APIs on `ViewImpl`, not on the `View` handle.
