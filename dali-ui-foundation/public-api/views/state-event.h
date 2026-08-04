@@ -109,10 +109,9 @@ public:
   /**
    * @brief Returns the input event that caused this transition.
    *
-   * Always returns a valid InputEvent. Causes without a concrete input event
-   * return an InputEvent with InputEventType::NONE. Use
-   * InputEvent::IsProgrammatic() and InputEvent::IsCancellation() to inspect
-   * the cause flags.
+   * Always returns a valid InputEvent. Its type identifies the origin, including
+   * origins without a concrete input payload such as InputEventType::PROGRAMMATIC
+   * and InputEventType::ACCESSIBILITY_ACTIVATION.
    */
   const InputEvent& GetCause() const;
 
@@ -120,7 +119,6 @@ public:
    * @brief Returns the type of the input event that caused this transition.
    *
    * Convenience shortcut for GetCause().GetInputEventType().
-   * Returns InputEventType::NONE if the cause has no concrete input event payload.
    */
   InputEventType GetInputEventType() const;
 

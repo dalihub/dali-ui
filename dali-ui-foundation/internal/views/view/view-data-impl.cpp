@@ -1403,7 +1403,17 @@ bool ViewDataImpl::NotifyKeyEvent(const KeyEvent& event)
 
 bool ViewDataImpl::ActivateAccessibilityDefault()
 {
-  return Ui::FocusManager::Get().SetCurrentFocusView(Ui::View::DownCast(mViewImpl.Self()));
+  Ui::View self = Ui::View::DownCast(mViewImpl.Self());
+
+  const bool focused = Ui::FocusManager::Get().SetCurrentFocusView(self);
+
+  bool clicked = false;
+  if(mCoreInteractionObject)
+  {
+    clicked = mCoreInteractionObject->OnAccessibilityActivate(self);
+  }
+
+  return focused || clicked;
 }
 
 ViewAccessible* ViewDataImpl::CreateDefaultAccessibleObject()

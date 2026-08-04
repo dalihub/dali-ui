@@ -227,6 +227,7 @@ private:
 
   void FinalizeKeyEventDispatch();
   void CancelKeyEventDispatch();
+  bool OnAccessibilityActivate(View view, InputEvent event);
   void FinalizeTouchEventDispatch(View view, const TouchEvent& event);
   void OnTapInternal(Actor actor, TapGesture event);
   void OnLongPressedInternal(Actor actor, LongPressGesture event);

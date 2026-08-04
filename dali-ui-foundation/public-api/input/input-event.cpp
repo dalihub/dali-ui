@@ -27,7 +27,7 @@ namespace Ui
 
 const InputEvent& InputEvent::Programmatic()
 {
-  static const InputEvent instance(Internal::InputEventImpl::New(true, false).Get());
+  static const InputEvent instance(Internal::InputEventImpl::New(InputEventType::PROGRAMMATIC).Get());
   return instance;
 }
 

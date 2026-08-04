@@ -31,19 +31,20 @@ namespace Ui
 namespace Internal
 {
 
-InputEventImpl::InputEventImpl(bool programmatic, bool cancellation)
+InputEventImpl::InputEventImpl(InputEventType type, bool cancellation)
 : BaseObject(),
-  mEventType(InputEventType::NONE),
-  mProgrammatic(programmatic),
+  mEventType(type),
   mCancellation(cancellation),
   mEvent(std::monostate{})
 {
+  DALI_ASSERT_ALWAYS(type == InputEventType::NONE ||
+                     type == InputEventType::PROGRAMMATIC ||
+                     type == InputEventType::ACCESSIBILITY_ACTIVATION);
 }
 
 InputEventImpl::InputEventImpl(const TouchEvent& originEvent)
 : BaseObject(),
   mEventType(InputEventType::TOUCH_EVENT),
-  mProgrammatic(false),
   mCancellation(originEvent.GetState(0u) == PointState::INTERRUPTED),
   mEvent(originEvent)
 {
@@ -52,7 +53,6 @@ InputEventImpl::InputEventImpl(const TouchEvent& originEvent)
 InputEventImpl::InputEventImpl(const KeyEvent& originEvent)
 : BaseObject(),
   mEventType(InputEventType::KEY_EVENT),
-  mProgrammatic(false),
   mCancellation(false),
   mEvent(originEvent)
 {
@@ -61,7 +61,6 @@ InputEventImpl::InputEventImpl(const KeyEvent& originEvent)
 InputEventImpl::InputEventImpl(const TapGesture& originEvent)
 : BaseObject(),
   mEventType(InputEventType::TAP_GESTURE),
-  mProgrammatic(false),
   mCancellation(false),
   mEvent(originEvent)
 {
@@ -70,7 +69,6 @@ InputEventImpl::InputEventImpl(const TapGesture& originEvent)
 InputEventImpl::InputEventImpl(const LongPressGesture& originEvent)
 : BaseObject(),
   mEventType(InputEventType::LONG_PRESS_GESTURE),
-  mProgrammatic(false),
   mCancellation(false),
   mEvent(originEvent)
 {
@@ -79,7 +77,6 @@ InputEventImpl::InputEventImpl(const LongPressGesture& originEvent)
 InputEventImpl::InputEventImpl(const WheelEvent& originEvent)
 : BaseObject(),
   mEventType(InputEventType::WHEEL_EVENT),
-  mProgrammatic(false),
   mCancellation(false),
   mEvent(originEvent)
 {
@@ -88,7 +85,6 @@ InputEventImpl::InputEventImpl(const WheelEvent& originEvent)
 InputEventImpl::InputEventImpl(const HoverEvent& originEvent)
 : BaseObject(),
   mEventType(InputEventType::HOVER_EVENT),
-  mProgrammatic(false),
   mCancellation(originEvent.GetState(0u) == PointState::INTERRUPTED),
   mEvent(originEvent)
 {
@@ -98,9 +94,9 @@ InputEventImpl::~InputEventImpl()
 {
 }
 
-InputEventImplPtr InputEventImpl::New(bool programmatic, bool cancellation)
+InputEventImplPtr InputEventImpl::New(InputEventType type, bool cancellation)
 {
-  return InputEventImplPtr(new InputEventImpl(programmatic, cancellation));
+  return InputEventImplPtr(new InputEventImpl(type, cancellation));
 }
 
 InputEventImplPtr InputEventImpl::New(const TouchEvent& originEvent)
@@ -135,7 +131,7 @@ InputEventImplPtr InputEventImpl::New(const HoverEvent& originEvent)
 
 InputEventImplPtr InputEventImpl::WithCancellation() const
 {
-  InputEventImplPtr clone(new InputEventImpl(mProgrammatic, true));
+  InputEventImplPtr clone(new InputEventImpl(InputEventType::NONE, true));
   clone->mEventType = mEventType;
   clone->mEvent     = mEvent;
   return clone;
@@ -148,7 +144,7 @@ InputEventType InputEventImpl::GetInputEventType() const
 
 bool InputEventImpl::IsProgrammatic() const
 {
-  return mProgrammatic;
+  return mEventType == InputEventType::PROGRAMMATIC;
 }
 
 bool InputEventImpl::IsCancellation() const

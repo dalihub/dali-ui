@@ -51,11 +51,13 @@ struct ClickedSignalData
     called   = false;
     consumed = false;
     view     = View();
+    event    = InputEvent();
   }
 
   bool called;
   bool consumed;
   View view;
+  InputEvent event;
 };
 
 struct ClickedSignalFunctor
@@ -70,6 +72,7 @@ struct ClickedSignalFunctor
   {
     signalData.called = true;
     signalData.view   = view;
+    signalData.event  = event;
     return signalData.consumed;
   }
 
@@ -394,6 +397,101 @@ int UtcDaliInteractiveTraitSetClickableFalseBlocksTapP(void)
   TestGenerateTap(application, 50.0f, 50.0f, 100);
 
   DALI_TEST_CHECK(!data.called);
+  END_TEST;
+}
+
+// ============================================================================
+// Accessibility activation → ClickedSignal
+// ============================================================================
+
+int UtcDaliInteractiveTraitAccessibilityActivateP(void)
+{
+  UiTestApplication application;
+  View view = CreateInteractiveView(application);
+  view.SetFocusable(true);
+
+  ClickedSignalData data;
+  ClickedSignalFunctor functor(data);
+  PressedChangedSignalData pressedData;
+  PressedChangedSignalFunctor pressedFunctor(pressedData);
+  InteractiveTrait interactive = view.AsInteractive();
+  interactive.ClickedSignal().Connect(&application, functor);
+  interactive.PressedChangedSignal().Connect(&application, pressedFunctor);
+
+  Property::Map attributes;
+  DALI_TEST_CHECK(view.DoAction("activate", attributes));
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
+  DALI_TEST_CHECK(data.event);
+  DALI_TEST_CHECK(data.event.GetInputEventType() == InputEventType::ACCESSIBILITY_ACTIVATION);
+  DALI_TEST_CHECK(!data.event.IsProgrammatic());
+  DALI_TEST_CHECK(!pressedData.called);
+  DALI_TEST_CHECK(!interactive.IsPressed());
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
+  END_TEST;
+}
+
+int UtcDaliInteractiveViewAccessibilityActivateP(void)
+{
+  UiTestApplication application;
+  InteractiveView view = InteractiveView::New();
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  ClickedSignalData data;
+  ClickedSignalFunctor functor(data);
+  view.ClickedSignal().Connect(&application, functor);
+
+  Property::Map attributes;
+  DALI_TEST_CHECK(view.DoAction("activate", attributes));
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.view == view);
+  DALI_TEST_CHECK(data.event.GetInputEventType() == InputEventType::ACCESSIBILITY_ACTIVATION);
+  END_TEST;
+}
+
+int UtcDaliInteractiveTraitAccessibilityActivateRespectsEnabledAndClickableP(void)
+{
+  UiTestApplication application;
+  View view = CreateInteractiveView(application);
+
+  ClickedSignalData data;
+  ClickedSignalFunctor functor(data);
+  InteractiveTrait    interactive = view.AsInteractive();
+  interactive.ClickedSignal().Connect(&application, functor);
+
+  Property::Map attributes;
+
+  view.SetEnabled(false);
+  view.DoAction("activate", attributes);
+  DALI_TEST_CHECK(!data.called);
+
+  view.SetEnabled(true);
+  interactive.SetClickable(false);
+  view.DoAction("activate", attributes);
+  DALI_TEST_CHECK(!data.called);
+
+  interactive.SetClickable(true);
+  interactive.SetPseudoDisabled(true);
+  DALI_TEST_CHECK(view.DoAction("activate", attributes));
+  DALI_TEST_CHECK(data.called);
+  DALI_TEST_CHECK(data.event.GetInputEventType() == InputEventType::ACCESSIBILITY_ACTIVATION);
+  END_TEST;
+}
+
+int UtcDaliViewAccessibilityActivateRetainsDefaultFocusBehaviorP(void)
+{
+  UiTestApplication application;
+  View view = View::New();
+  view.SetFocusable(true);
+  application.GetScene().Add(view);
+  application.SendNotification();
+  application.Render();
+
+  Property::Map attributes;
+  DALI_TEST_CHECK(view.DoAction("activate", attributes));
+  DALI_TEST_CHECK(FocusManager::Get().GetCurrentFocusView() == view);
   END_TEST;
 }
 

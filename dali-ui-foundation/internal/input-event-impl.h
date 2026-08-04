@@ -44,9 +44,9 @@ class DALI_UI_API InputEventImpl : public BaseObject
 {
 public:
   /**
-   * @brief Create a new InputEvent with NONE type.
+   * @brief Create a new InputEvent without a concrete input payload.
    */
-  InputEventImpl(bool programmatic, bool cancellation);
+  InputEventImpl(InputEventType type, bool cancellation);
 
   InputEventImpl(const TouchEvent& originEvent);
 
@@ -79,9 +79,9 @@ public:
   InputEventImpl(const HoverEvent& originEvent);
 
   /**
-   * @brief Create a new InputEvent with NONE type.
+   * @brief Create a new InputEvent without a concrete input payload.
    */
-  static InputEventImplPtr New(bool programmatic, bool cancellation);
+  static InputEventImplPtr New(InputEventType type, bool cancellation = false);
 
   static InputEventImplPtr New(const TouchEvent& originEvent);
 
@@ -167,7 +167,6 @@ private:
 
 private:
   InputEventType                                                                                           mEventType;
-  bool                                                                                                     mProgrammatic : 1;
   bool                                                                                                     mCancellation : 1;
   std::variant<std::monostate, TouchEvent, KeyEvent, TapGesture, LongPressGesture, WheelEvent, HoverEvent> mEvent;
 };

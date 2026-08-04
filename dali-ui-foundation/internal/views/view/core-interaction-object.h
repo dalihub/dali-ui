@@ -58,6 +58,7 @@ public:
 
   void OnPressedClearedByViewState(View view, InputEvent event);
   void OnHoveredClearedByViewState(View view, InputEvent event);
+  bool OnAccessibilityActivate(View view);
 
   bool HasIntrinsicHoverHandling() const;
   bool OnHoverEvent(const HoverEvent& event);

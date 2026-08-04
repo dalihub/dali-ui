@@ -90,9 +90,8 @@ public:
   /**
    * @brief Returns a shared InputEvent for programmatic changes.
    *
-   * The returned event has InputEventType::NONE. Use this when emitting signals
-   * for changes that do not originate from a concrete user input event, such as
-   * explicit API calls or framework initiated state changes.
+   * The returned event has InputEventType::PROGRAMMATIC. Use this when emitting
+   * signals for explicit API calls or framework initiated state changes.
    *
    * @return A const reference to the shared programmatic InputEvent
    */
@@ -177,7 +176,7 @@ public:
   /**
    * @brief Returns a copy of this event marked as a cancellation.
    *
-   * The input payload and existing origin flags are preserved.
+   * The input event type and payload are preserved.
    *
    * @return A copy of this event with the cancellation flag set
    */

@@ -185,6 +185,17 @@ void InteractiveTraitImpl::OnHoveredClearedByViewState(View view, InputEvent eve
   mHoveredChangedSignal.Emit(view, IsHovered(), event);
 }
 
+bool InteractiveTraitImpl::OnAccessibilityActivate(View view, InputEvent event)
+{
+  if(!view.IsEnabled() || !mClickable)
+  {
+    return false;
+  }
+
+  OnClicked(view, event);
+  return true;
+}
+
 void InteractiveTraitImpl::OnSceneConnection(View)
 {
 }
