@@ -23,6 +23,9 @@
 #include <cstdint>
 #include <utility>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
 namespace Dali
 {
 namespace Ui
@@ -39,7 +42,7 @@ using Uint32Pair = std::pair<uint32_t, uint32_t>;
  * selection operations such as selecting a range, selecting all text, clearing
  * selection, querying selected text, and receiving selection change callbacks.
  */
-class SelectableControlInterface
+class DALI_UI_API SelectableControlInterface
 {
 public:
   /**

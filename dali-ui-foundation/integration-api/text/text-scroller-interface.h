@@ -18,6 +18,9 @@
  *
  */
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
 namespace Dali
 {
 namespace Ui
@@ -29,7 +32,7 @@ namespace Text
 /**
  * @brief An interface used by the text-controls which implement marqueeing
  */
-class ScrollerInterface
+class DALI_UI_API ScrollerInterface
 {
 public:
   /**

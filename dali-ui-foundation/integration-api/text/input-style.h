@@ -25,6 +25,9 @@
 #include <dali/public-api/math/vector4.h>
 #include <string>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
 namespace Dali
 {
 namespace Ui
@@ -40,7 +43,7 @@ typedef TextAbstraction::FontSlant::Type  FontSlantType;  ///< The font's slant.
 /**
  * The input text's style.
  */
-struct InputStyle
+struct DALI_UI_API InputStyle
 {
   enum Mask
   {

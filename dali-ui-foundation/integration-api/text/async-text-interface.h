@@ -18,6 +18,9 @@
  *
  */
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
 namespace Dali
 {
 namespace Ui
@@ -47,7 +50,7 @@ enum RequestType
 /**
  * @brief An interface used by the text component which implement async text.
  */
-class AsyncTextInterface
+class DALI_UI_API AsyncTextInterface
 {
 public:
   /**

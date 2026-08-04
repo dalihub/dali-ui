@@ -18,6 +18,9 @@
  *
  */
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
 namespace Dali
 {
 namespace Ui
@@ -29,7 +32,7 @@ namespace Text
 /**
  * @brief An interface that the Text::Controller uses to request a text relayout.
  */
-class ControlInterface
+class DALI_UI_API ControlInterface
 {
 public:
   /**

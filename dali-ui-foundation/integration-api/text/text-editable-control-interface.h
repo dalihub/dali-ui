@@ -24,6 +24,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/text/input-style.h>
 #include <dali-ui-foundation/integration-api/text/text-decoration-types.h>
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
 #include <dali-ui-foundation/public-api/text/input-filter.h>
 
 namespace Dali
@@ -41,7 +42,7 @@ namespace Text
  * @brief An interface that the Text::Controller uses to notify about text changes and add decoration to the text
  * control.
  */
-class EditableControlInterface
+class DALI_UI_API EditableControlInterface
 {
 public:
   /**

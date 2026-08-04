@@ -22,6 +22,9 @@
 #include <cstdint>
 #include <string>
 
+// INTERNAL INCLUDES
+#include <dali-ui-foundation/public-api/dali-ui-common.h>
+
 namespace Dali
 {
 namespace Ui
@@ -33,7 +36,7 @@ namespace Text
 /**
  * @brief An interface that the Text::Controller used for anchor functionality.
  */
-class AnchorControlInterface
+class DALI_UI_API AnchorControlInterface
 {
 public:
   /**
