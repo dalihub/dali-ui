@@ -840,6 +840,109 @@ view.RemoveAccessibilityAttribute("vendor-key");
 
 <br/>
 
+## 공동 책임과 완료 기준
+
+### 역할별 산출물
+
+역할 | 반드시 제공할 산출물
+--|--
+UX | 방향 focus map, grouping, 이미지 처리, semantic 기대값, 상태 feedback, modal 진입·복귀 정책
+Application | 화면 content semantic, 활성 page tree, Component 선택과 contract 확인, lifecycle integration
+Component | 기본 Role/Name/Value/State/action contract, 내부 tree 정책, recycling 동작
+QA | remote 탐색 결과, 최종 발화, AT-SPI tree, lifecycle·locale 결과, 증적
+
+### 공동 checklist
+
+- [ ] 화면을 보지 않고 remote와 Screen Reader만으로 핵심 작업을 완료할 수 있습니다.
+- [ ] 시각 순서, remote focus 순서, 접근성 tree 순서가 사용자 작업 흐름과 맞습니다.
+- [ ] Name, Role, State, Value, Description이 중복 없이 역할에 맞게 분리됩니다.
+- [ ] action 뒤에 새로운 State와 Value가 즉시 반영됩니다.
+- [ ] modal, page 전환, background/resume 후 활성 context만 탐색됩니다.
+- [ ] decorative child와 내부 구현 View가 중복 발화되지 않습니다.
+- [ ] 긴 번역, RTL, 빈 값, minimum/maximum, 반복 전환을 검증했습니다.
+- [ ] 실패 결과에 재현 순서, tree dump, log, 기기·build 정보가 연결됩니다.
+
+<br/>
+
+## 검증
+
+접근성 검증은 API 값이 저장되었다는 사실로 끝나지 않습니다. Component contract, AT-SPI tree, 실제 TV 사용자 동작의 세 층을 모두 확인합니다.
+
+### 3단계 검증
+
+단계 | 확인 내용 | 대표 증적
+--|--|--
+1. Unit/integration | Role, Name, State, Value, action dispatch, disabled/boundary 처리 | test log
+2. AT-SPI tree | object 노출, sibling 순서, state, relation, geometry, hidden subtree | tree dump
+3. 실제 TV | remote focus, 최종 발화, action, modal/page/background lifecycle | 녹화, Screen Reader/DALi log
+
+Tizen target에서 다음 명령으로 앱과 tree를 확인할 수 있습니다.
+
+```sh
+at_spi2_tool -l
+at_spi2_tool -d com.example.nativeapp
+at_spi2_tool -c com.example.nativeapp
+```
+
+Tree에서 Role, Name, State, bounds, collection index, sibling order를 확인하세요. Tree 검사가 통과해도 실제 발화와 remote action 검증을 대신할 수 없으며, 발화가 자연스러워도 tree와 action contract가 올바르다는 뜻은 아닙니다.
+
+### 필수 TV scenario
+
+1. Screen Reader를 앱 실행 전과 실행 후에 각각 켭니다.
+2. 첫 진입, page push/pop, modal open/close를 반복합니다.
+3. remote 방향키와 실행키로 모든 핵심 기능을 수행합니다.
+4. toggle과 adjustable 값을 minimum, middle, maximum에서 조작합니다.
+5. collection viewport 경계와 recycled item을 탐색합니다.
+6. app pause/resume, background, preload 상태를 전환합니다.
+7. 한국어, 영어, 주요 제품 locale과 긴 문자열을 확인합니다.
+8. 실패 시 tree → DALi log → Screen Reader log 순서로 원인을 좁힙니다.
+
+다음 중 하나라도 실패하면 접근성 완료로 판단하지 않습니다.
+
+- 핵심 action을 remote와 Screen Reader 환경에서 실행할 수 없음
+- 잘못된 Role, 빈 Name, 오래된 State/Value가 노출됨
+- inactive page 또는 modal 배경으로 focus가 이동함
+- recycling 후 다른 item의 semantic이 남음
+- password 또는 민감 정보가 tree, Value, log에 노출됨
+
+<br/>
+
+## Legacy 자료 사용 원칙
+
+NUI/OneUI 자료는 설명 순서, 표, 예제 배치, 기본→심화 흐름, checklist 같은 **문서 형식**만 참고합니다.
+
+- API 이름을 DALi API로 기계적으로 치환하지 않습니다.
+- .NET 전용 custom accessibility mode, default-label stack, visibility notify, 범용 action event를 Native 기본 pattern으로 가져오지 않습니다.
+- 코드 예제와 구현 판단은 현재 `Dali::Ui::View`, `ViewImpl`, `FocusManager`와 target branch source를 기준으로 합니다.
+- 복합 root, collection metadata, modal lifecycle 같은 semantic 설계 개념만 DALi contract에 맞춰 다시 구현합니다.
+- typed API가 있는데 raw attribute로 과거 동작을 재현하지 않습니다.
+
+<br/>
+
+## 배포와 유지관리
+
+채널 | 목적 | 갱신 원칙
+--|--|--
+`NUI/dali-ui`의 `wiki/Accessibility-(kr).md`, `Accessibility.md` | 검토와 변경 이력의 원본 | 두 언어를 한 PR에서 함께 변경
+정적 문서 사이트 | 검색, 목차, deep link를 제공하는 기본 열람 채널 | `devel` 및 release tag에서 생성
+Versioned PDF | 교육, review 회의, offline 열람 | release tag에서만 생성하고 version/date 표시
+사내 wiki 안내 page | 문서 발견과 담당자 안내 | 전문을 복제하지 않고 최신 site/PDF에 연결
+
+Markdown을 source of truth로 유지하세요. PDF나 사내 wiki 복사본을 직접 수정하면 언어와 API revision이 쉽게 어긋납니다.
+
+문서 변경 PR에는 다음 정보를 기록합니다.
+
+1. 확인한 DALi commit과 대상 product/branch
+2. 마지막 검토일과 document owner
+3. accessibility reviewer와 Component owner
+4. 한·영 문서 동기화 여부
+5. API/source 대조, link, Markdown, 금지 pattern 검사 결과
+6. 사용자 동작이 달라지는 경우 실제 TV 검증 결과
+
+CI에서는 Markdown lint, 내부 link 확인, 한·영 heading 구조 비교, NUI/OneUI 코드 pattern 검사, HTML/PDF build를 권장합니다. PDF에는 version, 생성일, canonical online 문서 link를 표시합니다.
+
+<br/>
+
 ## 문제 확인
 
 현상 | 확인할 내용

@@ -840,6 +840,109 @@ view.RemoveAccessibilityAttribute("vendor-key");
 
 <br/>
 
+## Shared Responsibilities and Completion Criteria
+
+### Deliverables by role
+
+Role | Required deliverable
+--|--
+UX | Directional focus map, grouping, image treatment, semantic expectation, state feedback, modal entry and restoration policy
+Application | Screen content semantics, active page tree, Component selection and contract verification, lifecycle integration
+Component | Default Role/Name/Value/State/action contract, internal tree policy, recycling behavior
+QA | Remote navigation result, final speech, AT-SPI tree, lifecycle and locale results, evidence
+
+### Shared checklist
+
+- [ ] The core task is complete using only the remote and Screen Reader without seeing the screen.
+- [ ] Visual order, remote focus order, and accessibility-tree order match the user task flow.
+- [ ] Name, Role, State, Value, and Description are separated by purpose without duplication.
+- [ ] New State and Value are available immediately after an action.
+- [ ] Only the active context is navigable after modal, page, background, and resume transitions.
+- [ ] Decorative children and internal implementation Views do not produce duplicate speech.
+- [ ] Long translations, RTL, empty values, minimum/maximum, and repeated transitions were tested.
+- [ ] Every failure links to reproduction steps, a tree dump, logs, and device/build information.
+
+<br/>
+
+## Validation
+
+Accessibility validation does not end when an API value is stored. Verify the Component contract, AT-SPI tree, and actual TV user behavior as three separate layers.
+
+### Three-layer validation
+
+Layer | What to verify | Typical evidence
+--|--|--
+1. Unit/integration | Role, Name, State, Value, action dispatch, disabled and boundary handling | Test log
+2. AT-SPI tree | Object exposure, sibling order, state, relation, geometry, hidden subtree | Tree dump
+3. Physical TV | Remote focus, final speech, action, modal/page/background lifecycle | Recording, Screen Reader and DALi logs
+
+Use these commands on a Tizen target to inspect the Application and tree.
+
+```sh
+at_spi2_tool -l
+at_spi2_tool -d com.example.nativeapp
+at_spi2_tool -c com.example.nativeapp
+```
+
+Inspect Role, Name, State, bounds, collection index, and sibling order. A passing tree check does not replace final speech and remote-action testing. Natural speech does not prove that the tree and action contract are correct.
+
+### Required TV scenarios
+
+1. Enable the Screen Reader before launch and after launch in separate runs.
+2. Repeat first entry, page push/pop, and modal open/close.
+3. Perform every core feature using remote direction and execution keys.
+4. Operate toggles and adjustable values at minimum, middle, and maximum.
+5. Navigate collection viewport boundaries and recycled items.
+6. Exercise Application pause/resume, background, and preload states.
+7. Verify Korean, English, major product locales, and long strings.
+8. For a failure, narrow the cause in the order tree → DALi log → Screen Reader log.
+
+Do not declare accessibility complete when any of these conditions remains:
+
+- A core action cannot be executed with the remote and Screen Reader
+- An incorrect Role, empty Name, or stale State/Value is exposed
+- Focus reaches an inactive page or modal background
+- Recycled items retain semantics from another item
+- A password or other sensitive information appears in the tree, Value, or logs
+
+<br/>
+
+## Rules for Legacy Material
+
+Use NUI/OneUI material only for **document form** such as explanation order, tables, example placement, basic-to-advanced flow, and checklists.
+
+- Do not mechanically translate API names into DALi APIs.
+- Do not import .NET-only custom accessibility modes, default-label stacks, visibility notifications, or general action events as Native patterns.
+- Base code examples and implementation decisions on current `Dali::Ui::View`, `ViewImpl`, `FocusManager`, and target-branch source.
+- Reimplement only semantic design concepts such as representative compound roots, collection metadata, and modal lifecycle against the DALi contract.
+- Do not recreate historical behavior with raw attributes when a typed API exists.
+
+<br/>
+
+## Distribution and Maintenance
+
+Channel | Purpose | Update rule
+--|--|--
+`NUI/dali-ui` `wiki/Accessibility-(kr).md` and `Accessibility.md` | Source for review and change history | Update both languages in one PR
+Static documentation site | Primary reader experience with search, table of contents, and deep links | Generate from `devel` and release tags
+Versioned PDF | Training, review meetings, and offline reading | Generate only from a release tag and show version/date
+Internal wiki discovery page | Document discovery and ownership | Link to the latest site/PDF instead of copying the full guide
+
+Keep Markdown as the source of truth. Editing a PDF or internal-wiki copy directly quickly causes language and API revisions to diverge.
+
+Record the following in each documentation PR:
+
+1. Verified DALi commit and target product/branch
+2. Last review date and document owner
+3. Accessibility reviewer and Component owner
+4. Korean/English synchronization status
+5. API/source comparison, link, Markdown, and prohibited-pattern results
+6. Physical-TV results when user behavior changes
+
+Recommended CI checks are Markdown lint, internal links, Korean/English heading structure, NUI/OneUI code patterns, and HTML/PDF builds. A PDF should show its version, generation date, and a link to the canonical online guide.
+
+<br/>
+
 ## Troubleshooting
 
 Symptom | What to check
