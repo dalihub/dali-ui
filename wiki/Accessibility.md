@@ -167,8 +167,7 @@ button.AddAccessibilityReadingInfo(Accessibility::ReadingInfo::DESCRIPTION);
 window.Add(button);
 ```
 
-> [!IMPORTANT]
-> **Keyboard focus and accessibility highlight are separate states.** `FocusManager` determines which View receives key input, while accessibility highlight determines which View the Screen Reader reads. Configuring Accessibility APIs does not make a View focusable, and moving accessibility highlight does not change keyboard focus.
+See [Tizen TV Accessibility Runtime](#tizen-tv-accessibility-runtime) for the distinction between keyboard focus and accessibility highlight.
 
 <br/>
 

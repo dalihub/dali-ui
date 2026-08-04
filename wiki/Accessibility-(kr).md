@@ -167,8 +167,7 @@ button.AddAccessibilityReadingInfo(Accessibility::ReadingInfo::DESCRIPTION);
 window.Add(button);
 ```
 
-> [!IMPORTANT]
-> **Keyboard focus와 accessibility highlight는 서로 다른 상태입니다.** `FocusManager`의 focus는 키 입력 대상을 정하지만, accessibility highlight는 Screen Reader가 읽을 대상을 정합니다. Accessibility API를 설정해도 View가 focusable로 바뀌지 않으며, highlight를 옮겨도 keyboard focus는 바뀌지 않습니다.
+Keyboard focus와 accessibility highlight의 차이는 [Tizen TV 접근성 동작](#tizen-tv-접근성-동작)을 참고하세요.
 
 <br/>
 
