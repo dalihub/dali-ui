@@ -25,7 +25,7 @@
 #include <dali/public-api/object/weak-handle.h>
 
 // INTERNAL INCLUDES
-#include <dali-ui-foundation/internal/text/async-text/async-text-interface.h>
+#include <dali-ui-foundation/integration-api/text/async-text/async-text-interface.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-manager.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller.h>
 #include <dali-ui-foundation/internal/text/rendering/text-typesetter.h>

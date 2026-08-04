@@ -22,6 +22,7 @@
 #include <atomic>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/characters-helper-functions.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
@@ -29,7 +30,6 @@
 #include <dali-ui-foundation/internal/text/controller/text-controller-text-updater.h>
 #include <dali-ui-foundation/internal/text/emoji-helper.h>
 #include <dali-ui-foundation/internal/text/styled-text/styled-text-applier.h>
-#include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 
 namespace
 {

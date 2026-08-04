@@ -27,13 +27,13 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-event-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-input-font-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-placeholder-handler.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-relayouter.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-text-updater.h>
-#include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-enumerations.h>
 
 namespace

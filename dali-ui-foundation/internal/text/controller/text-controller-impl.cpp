@@ -28,6 +28,8 @@
 #include <limits>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/text-control-interface.h>
+#include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/controls/text-controls/common-text-utils.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/controller/text-controller-impl-data-clearer.h>
@@ -39,8 +41,6 @@
 #include <dali-ui-foundation/internal/text/cursor-helper-functions.h>
 #include <dali-ui-foundation/internal/text/glyph-metrics-helper.h>
 #include <dali-ui-foundation/internal/text/line-helper-functions.h>
-#include <dali-ui-foundation/internal/text/text-control-interface.h>
-#include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/text-enumerations-impl.h>
 #include <dali-ui-foundation/internal/text/text-run-container.h>
 #include <dali-ui-foundation/internal/text/text-selection-handle-controller.h>

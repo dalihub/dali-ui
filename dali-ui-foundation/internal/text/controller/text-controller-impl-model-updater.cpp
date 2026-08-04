@@ -22,6 +22,7 @@
 #include <chrono>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/text/text-editable-control-interface.h>
 #include <dali-ui-foundation/internal/text/bidirectional-support.h>
 #include <dali-ui-foundation/internal/text/character-set-conversion.h>
 #include <dali-ui-foundation/internal/text/color-segmentation.h>
@@ -31,7 +32,6 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-glyph-helper.h>
 #include <dali-ui-foundation/internal/text/segmentation.h>
 #include <dali-ui-foundation/internal/text/shaper.h>
-#include <dali-ui-foundation/internal/text/text-editable-control-interface.h>
 
 namespace Dali::Ui::Text
 {
