@@ -276,9 +276,9 @@ LabelImpl::LabelImpl()
 {
   Dali::Ui::Integration::ViewAccessibility::SetAccessibleObjectCreator(
     *this,
-    [](Dali::Actor actor) -> ViewAccessible*
+    [](Dali::Ui::View view) -> ViewAccessible*
   {
-    return new LabelAccessible(actor);
+    return new LabelAccessible(view);
   });
 }
 

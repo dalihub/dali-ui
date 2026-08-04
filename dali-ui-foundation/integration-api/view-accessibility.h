@@ -18,7 +18,7 @@
  */
 
 #include <dali-ui-foundation/public-api/dali-ui-common.h>
-#include <dali/public-api/actors/actor.h>
+#include <dali-ui-foundation/public-api/views/view.h>
 
 namespace Dali::Ui
 {
@@ -31,7 +31,7 @@ namespace Integration::ViewAccessibility
  * @brief Function used by an internal View implementation to create its
  * custom Accessible object.
  */
-using AccessibleObjectCreator = ViewAccessible* (*)(Dali::Actor);
+using AccessibleObjectCreator = ViewAccessible* (*)(Dali::Ui::View);
 
 /**
  * @brief Registers the custom Accessible creator for a View implementation.

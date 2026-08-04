@@ -324,9 +324,9 @@ InputFieldImpl::InputFieldImpl()
 {
   ViewAccessibility::SetAccessibleObjectCreator(
     *this,
-    [](Dali::Actor actor) -> ViewAccessible*
+    [](Dali::Ui::View view) -> ViewAccessible*
   {
-    return new InputFieldAccessible(actor);
+    return new InputFieldAccessible(view);
   });
 }
 

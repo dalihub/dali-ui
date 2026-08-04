@@ -236,9 +236,9 @@ private:
   {
     Dali::Ui::Integration::ViewAccessibility::SetAccessibleObjectCreator(
       *this,
-      [](Dali::Actor actor) -> ViewAccessible*
+      [](Dali::Ui::View view) -> ViewAccessible*
     {
-      return new TestAccessibilityViewAccessible(actor);
+      return new TestAccessibilityViewAccessible(view);
     });
   }
 

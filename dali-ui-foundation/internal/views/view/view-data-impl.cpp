@@ -1422,11 +1422,12 @@ bool ViewDataImpl::ActivateAccessibilityDefault()
 
 ViewAccessible* ViewDataImpl::CreateAccessibleObject()
 {
+  Ui::View view(mViewImpl.GetOwner());
   if(mAccessibleObjectCreator)
   {
-    return mAccessibleObjectCreator(mViewImpl.Self());
+    return mAccessibleObjectCreator(view);
   }
-  return new ViewAccessible(mViewImpl.Self());
+  return new ViewAccessible(view);
 }
 
 void ViewDataImpl::SetRequestedX(float x)

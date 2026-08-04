@@ -114,7 +114,7 @@ private:
   class VisualData;
 
 public:
-  using AccessibleObjectCreator = ViewAccessible* (*)(Dali::Actor);
+  using AccessibleObjectCreator = ViewAccessible* (*)(Dali::Ui::View);
 
   /**
    * @brief Retrieves the implementation of the internal view class.
