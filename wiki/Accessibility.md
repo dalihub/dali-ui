@@ -1,6 +1,152 @@
 [→ 한국어 문서](https://github.sec.samsung.net/NUI/dali-ui/wiki/Accessibility-(kr))
 
-## Overview
+# Accessibility
+
+> Audience: TV Application developers and Component developers using DALi UI
+> Baseline date: 2026-08-04
+> Implementation baseline: `dali-ui` `b60e73918439`
+> Status: Current with known component gaps
+
+This guide defines shared accessibility requirements for Application developers who compose TV screens and Component developers who build reusable UI. It covers accessibility fundamentals, TV UX specifications, DALi UI implementation, validation, and distribution in one flow. Every implementation example uses the C++ `Dali::Ui` API.
+
+<br/>
+
+## Quick Start
+
+Reader | Read first | Completion evidence
+--|--|--
+Application developer | Accessibility basics → TV UX specification → Application developer guide → Validation | Complete the core task using only the remote and Screen Reader
+Component developer | Accessibility basics → TV UX specification → Component developer guide → Validation | Satisfy the role, state, action, and tree contract
+
+Keep these principles in mind:
+
+1. Set semantics regardless of whether the Screen Reader is on or off.
+2. Keep Name short; do not concatenate Role, State, or Value into it.
+3. Do not treat TV remote keyboard focus and accessibility highlight as the same state.
+4. Applications own screen context and content semantics; Components own default semantics and the action contract.
+5. After setting APIs, verify both the AT-SPI tree and actual TV Screen Reader behavior.
+
+<br/>
+
+## Accessibility Basics
+
+### What accessibility means
+
+Accessibility means designing and implementing products and services so people can use them regardless of disability. On a TV, users must be able to understand their current position, explore content, and perform an intended action with the remote without relying on sight.
+
+### Screen Reader and TTS
+
+TTS is a technology that converts supplied text into speech. A Screen Reader is an accessibility tool that explores UI objects, composes speech from semantics and the current context, and sends user input back as actions.
+
+```text
+TTS: application supplies a completed sentence → speech output
+Screen Reader: UI semantics + current context → speech, navigation, and action
+```
+
+Applications and Components should therefore expose accurate meaning and state instead of assembling final speech sentences or calling TTS separately for each control.
+
+### Accessibility semantics
+
+Information | Meaning | TV example
+--|--|--
+Name | Short name that identifies the target | `"Netflix"`, `"Volume"`
+Role | Function of the target | `BUTTON`, `CHECK_BOX`, `ADJUSTABLE`
+State | Current selection, checked, or enabled state | `CHECKED`, `SELECTED`, `ENABLED`
+Value | Adjustable or progress value | `"50%"`, `"3/10"`
+Description | Supporting explanation or essential usage guidance | `"Opens available networks"`
+
+If the expected speech is “Volume, adjustable, 50%,” do not put the full sentence in Name. Set Name to `"Volume"`, Role to `ADJUSTABLE`, and Value to `"50%"`. The Screen Reader and locale policy determine the final wording and order.
+
+### AT-SPI
+
+AT-SPI is the accessibility interface through which assistive technology such as a Screen Reader interacts with UI applications on Linux/Tizen. The Application declares semantics on DALi Views, and DALi UI plus the adaptor translate them into the accessibility tree and AT-SPI interfaces. General Applications and Components do not implement D-Bus protocols or AT-SPI objects directly.
+
+<br/>
+
+## Tizen TV Accessibility Runtime
+
+### TV remote focus flow
+
+A typical TV remote navigation flow is shown below. Product branches may differ in Screen Reader integration details, but the Application and Component contract remains the same.
+
+```mermaid
+flowchart LR
+    R[Remote direction/execute key] --> F[DALi FocusManager]
+    F --> V[Focused Dali::Ui::View]
+    V --> M[Name Role State Value Description]
+    M --> S[Screen Reader speech composition]
+    S --> T[TTS output]
+```
+
+Direction keys move keyboard focus through `FocusManager`. When the Screen Reader is active, it uses the current target semantics to explain where the user is and what they can do. Execution keys, touch, and accessibility actions must converge on the same feature and state-update path.
+
+### Keyboard focus and accessibility highlight
+
+> [!IMPORTANT]
+> **Keyboard focus and accessibility highlight are separate states.** `FocusManager` focus determines the target of remote and key input. Accessibility highlight represents the target read by the Screen Reader. Making a View focusable does not create accessibility semantics, and moving accessibility highlight does not automatically move keyboard focus.
+
+State which one is meant in TV UX specifications and test reports. Saying only “move focus” can hide a mismatch between remote focus and Screen Reader highlight.
+
+<br/>
+
+## TV Accessibility UX Specification
+
+If UX delivers only visual layout, developers and QA must guess the accessibility navigation unit and speech. Record the following information in every screen or Component specification.
+
+UX field | Required decision | Example
+--|--|--
+Directional focus | Left/right/up/down target and boundary behavior | The last modal item cannot escape to the background
+Initial focus | First target after entering a screen or modal | Dialog title or primary action
+Focus restoration | Target after close or back | Button that opened the dialog
+Grouping | One representative root or individually navigable children | Settings icon + label + toggle form one target
+Image treatment | Informative name or decorative exclusion | Describe a sale banner; hide a divider from the tree
+Semantic expectation | Name, Role, State, Value, Description | Name `Volume`, Role `ADJUSTABLE`, Value `50%`
+State feedback | Semantics that change immediately after an action | Update `CHECKED` after toggling
+Repeated content | Heading, collection name, and index policy | Episode card `3/10`
+Dynamic content | Announcement frequency and interruption policy | Do not announce call duration every second
+
+### Directional, initial, and restored focus
+
+- Design directional focus around the user task order, not only geometric proximity.
+- Select one logical first target when entering a screen, tab, or modal.
+- After closing a modal or child screen, restore the originating target or the next target appropriate to the task.
+- Document wraparound, boundary exits, and exceptional paths with arrows or a table.
+
+### Grouping and navigation units
+
+If an icon, label, and toggle represent one setting, let one root expose the Name, Role, State, and action, and prevent decorative internals from becoming duplicate navigation targets. If children have separate actions, do not merge them; expose each actionable child independently.
+
+Good grouping reduces navigation effort, but must not hide several actions behind one ambiguous target. Decide using both “information understood in one navigation stop” and “actions that must be independently available.”
+
+### Image descriptions
+
+- Give informative images a concise Name with the same purpose as the visual information.
+- If important text inside an image is not available elsewhere, include its meaning in the Name.
+- Hide purely decorative or redundant images from the accessibility tree.
+- Do not repeat words such as `"image"` or `"icon"` in Name when Role already conveys them.
+
+### Expected speech and state feedback
+
+An expected utterance is a UX review aid. The implementation contract is the set of semantic parts used to compose it.
+
+```text
+UX expectation: "Volume, adjustable, 50%"
+Implementation: Name="Volume", Role=ADJUSTABLE, Value="50%"
+```
+
+After selection, checked, expanded, or value actions, update visual state and semantics in the same model update. If product-specific result speech is required, verify that it neither duplicates the default semantic feedback nor interrupts other important speech.
+
+### Repeated and dynamic content
+
+- Divide long screens with headings and meaningful collections.
+- Give repeated cards distinguishable Names and current collection indices.
+- Rebind all semantics on recycled Views so the previous item Name, State, Value, or index cannot remain.
+- For timers, progress, and live status, decide which changes matter and limit announcement frequency.
+- For long loading operations, provide `BUSY` state and understandable information about the current operation.
+
+<br/>
+
+## DALi UI API Overview
 
 The `Dali::Ui::View` Accessibility APIs expose a View's semantics, reading information, states, and relations to the accessibility tree. A Screen Reader queries this information to announce the currently highlighted View and sends accessibility actions back to the View.
 

@@ -1,4 +1,152 @@
-## 개요
+# Accessibility
+
+[→ English](https://github.sec.samsung.net/NUI/dali-ui/wiki/Accessibility)
+
+> 대상: DALi UI 기반 TV Application 개발자와 Component 개발자
+> 기준일: 2026-08-04
+> 구현 기준: `dali-ui` `b60e73918439`
+> 상태: Current with known component gaps
+
+이 문서는 TV 화면을 구성하는 Application 개발자와 재사용 UI를 만드는 Component 개발자가 함께 사용하는 접근성 가이드입니다. 접근성의 기본 개념과 TV UX 명세부터 DALi UI 구현, 검증, 배포까지 하나의 흐름으로 설명합니다. 모든 구현 예제는 C++ `Dali::Ui` API를 사용합니다.
+
+<br/>
+
+## 빠른 시작
+
+독자 | 먼저 읽을 내용 | 완료 기준
+--|--|--
+Application 개발자 | 접근성 기본 개념 → TV UX 명세 → Application 개발자 가이드 → 검증 | 리모컨과 Screen Reader만으로 핵심 작업을 완료
+Component 개발자 | 접근성 기본 개념 → TV UX 명세 → Component 개발자 가이드 → 검증 | role, state, action, tree contract를 충족
+
+먼저 기억할 원칙은 다음과 같습니다.
+
+1. Screen Reader의 On/Off 여부와 관계없이 semantic을 항상 설정합니다.
+2. Name에는 대상의 짧은 이름만 넣고 Role, State, Value를 중복해서 합치지 않습니다.
+3. TV remote의 keyboard focus와 accessibility highlight를 같은 상태로 취급하지 않습니다.
+4. Application은 화면 문맥과 content semantic을, Component는 기본 semantic과 action contract를 책임집니다.
+5. API를 설정한 뒤에는 AT-SPI tree와 실제 TV Screen Reader 동작을 모두 검증합니다.
+
+<br/>
+
+## 접근성 기본 개념
+
+### 접근성이란
+
+접근성은 장애 여부와 관계없이 모든 사람이 제품과 서비스를 사용할 수 있도록 설계하고 구현하는 것입니다. TV에서는 화면을 보지 않고도 리모컨으로 현재 위치를 파악하고, 콘텐츠를 탐색하며, 원하는 기능을 실행할 수 있어야 합니다.
+
+### Screen Reader와 TTS
+
+TTS는 전달받은 텍스트를 음성으로 바꾸는 기술입니다. Screen Reader는 UI object를 탐색하고 semantic과 현재 context를 조합해 발화 정보를 만들며, 사용자 입력을 action으로 전달하는 접근성 도구입니다.
+
+```text
+TTS: 애플리케이션이 완성된 문장을 전달 → 음성 출력
+Screen Reader: UI semantic + 현재 context → 발화, 탐색, action
+```
+
+따라서 Application이나 Component가 최종 발화 문장을 직접 조립하거나 TTS를 개별 호출하는 대신, 각 View의 의미와 상태를 정확히 제공해야 합니다.
+
+### 접근성 semantic
+
+정보 | 의미 | TV 예
+--|--|--
+Name | 사용자가 대상을 식별하는 짧은 이름 | `"Netflix"`, `"음량"`
+Role | 대상의 기능 | `BUTTON`, `CHECK_BOX`, `ADJUSTABLE`
+State | 선택, 체크, 비활성 등 현재 상태 | `CHECKED`, `SELECTED`, `ENABLED`
+Value | 조절값이나 진행값 | `"50%"`, `"3/10"`
+Description | 이름을 보충하는 설명이나 꼭 필요한 사용 안내 | `"사용 가능한 네트워크를 엽니다"`
+
+예상 발화가 “음량, 조절 가능, 50%”라면 Name에 전체 문장을 넣지 않습니다. Name은 `"음량"`, Role은 `ADJUSTABLE`, Value는 `"50%"`로 분리합니다. 실제 단어와 순서는 locale과 Screen Reader 정책이 결정합니다.
+
+### AT-SPI
+
+AT-SPI는 Linux/Tizen에서 Screen Reader 같은 assistive technology와 UI 애플리케이션이 상호작용하기 위한 접근성 interface입니다. Application은 DALi View에 semantic을 선언하고, DALi UI와 adaptor가 이를 접근성 tree와 AT-SPI interface로 변환합니다. 일반 Application이나 Component가 D-Bus protocol 또는 AT-SPI object를 직접 구현하지 않습니다.
+
+<br/>
+
+## Tizen TV 접근성 동작
+
+### TV remote focus 흐름
+
+TV 제품의 일반적인 remote 탐색 흐름은 다음과 같습니다. 제품 branch의 Screen Reader integration 방식에 따라 세부 경로는 달라질 수 있지만, Application과 Component의 contract는 같습니다.
+
+```mermaid
+flowchart LR
+    R[리모컨 방향키/실행키] --> F[DALi FocusManager]
+    F --> V[현재 focused Dali::Ui::View]
+    V --> M[Name Role State Value Description]
+    M --> S[Screen Reader 발화 구성]
+    S --> T[TTS 출력]
+```
+
+방향키는 `FocusManager`를 통해 keyboard focus를 이동합니다. Screen Reader가 활성화된 경우 현재 대상의 semantic을 이용해 사용자가 어디에 있고 무엇을 할 수 있는지 설명합니다. 실행키, touch, accessibility action은 같은 기능과 상태 변경 경로로 모여야 합니다.
+
+### Keyboard focus와 accessibility highlight
+
+> [!IMPORTANT]
+> **Keyboard focus와 accessibility highlight는 서로 다른 상태입니다.** `FocusManager`의 focus는 리모컨과 키 입력 대상을 정합니다. Accessibility highlight는 Screen Reader가 읽는 대상을 나타냅니다. View를 focusable로 만들어도 accessibility semantic이 자동으로 생기지 않으며, highlight를 이동해도 keyboard focus는 자동으로 바뀌지 않습니다.
+
+TV UX 명세와 테스트 결과에는 어떤 상태를 의미하는지 명확히 기록하세요. “focus 이동”이라는 표현만 쓰면 remote focus와 Screen Reader highlight가 혼동될 수 있습니다.
+
+<br/>
+
+## TV 접근성 UX 명세
+
+UX 단계에서 시각 배치만 전달하면 개발자와 QA가 접근성 탐색 단위와 발화를 추측하게 됩니다. 화면 또는 Component 명세에 다음 정보를 함께 기록하세요.
+
+UX 항목 | 반드시 정할 내용 | 예
+--|--|--
+방향 focus | 좌/우/상/하 이동 대상과 경계 동작 | modal의 마지막 항목에서 배경으로 빠져나가지 않음
+초기 focus | 화면이나 modal 진입 직후 첫 대상 | dialog 제목 또는 주 action
+focus 복귀 | 닫기 또는 back 이후 돌아갈 대상 | dialog를 연 버튼
+grouping | root 하나로 읽을지, child를 각각 탐색할지 | 설정 icon + label + toggle을 하나의 대상 구성
+이미지 처리 | 정보 이미지의 이름 또는 decorative 제외 | 할인 banner는 설명, divider는 tree에서 숨김
+semantic 기대값 | Name, Role, State, Value, Description | Name `음량`, Role `ADJUSTABLE`, Value `50%`
+상태 feedback | action 직후 바뀌어야 할 semantic | toggle 조작 후 `CHECKED` 즉시 갱신
+반복 콘텐츠 | heading, collection 이름, index 정책 | episode card `3/10`
+동적 콘텐츠 | 발화 빈도와 interruption 정책 | 통화 시간을 매초 읽지 않음
+
+### 방향 focus, 초기 focus, 복귀
+
+- 시각적으로 가까운 대상이 아니라 사용자의 작업 순서에 맞춰 방향 focus를 설계합니다.
+- 화면, tab, modal 진입 시 논리적인 첫 대상을 하나 정합니다.
+- modal이나 하위 화면을 닫은 뒤에는 사용자가 출발한 대상 또는 다음 작업에 적합한 대상으로 복귀합니다.
+- 순환 탐색, 경계 이탈, 예외적인 focus 이동은 UX 명세에 화살표나 표로 표시합니다.
+
+### Grouping과 탐색 단위
+
+아이콘, label, toggle이 하나의 설정을 나타낸다면 root 하나가 Name, Role, State, action을 대표하고 내부 장식 View는 중복 탐색되지 않게 합니다. 반대로 child마다 별도 action이 있다면 root와 합치지 말고 각 child를 독립된 대상으로 제공합니다.
+
+좋은 grouping은 사용자의 탐색 횟수를 줄이지만, 여러 action을 하나의 모호한 대상에 숨기면 안 됩니다. “한 번의 탐색으로 이해할 정보”와 “독립적으로 실행할 action”을 함께 기준으로 결정하세요.
+
+### 이미지 설명
+
+- 정보 전달 이미지에는 시각 정보와 같은 목적의 간결한 Name을 제공합니다.
+- 이미지 안의 중요한 텍스트가 다른 곳에 제공되지 않으면 Name에 의미를 포함합니다.
+- 주변 텍스트와 중복되거나 순수 장식인 이미지는 accessibility tree에서 숨깁니다.
+- `"image"`, `"icon"`처럼 Role이 이미 전달하는 단어를 Name에 반복하지 않습니다.
+
+### 예상 발화와 상태 feedback
+
+예상 발화 문장은 UX review 도구입니다. 실제 구현 contract는 문장을 구성하는 semantic 항목입니다.
+
+```text
+UX 예상: "음량, 조절 가능, 50%"
+구현: Name="음량", Role=ADJUSTABLE, Value="50%"
+```
+
+선택, 체크, 펼침, 값 변경 같은 action 뒤에는 시각 상태와 semantic을 같은 model update에서 갱신합니다. 제품 고유의 결과 안내가 추가로 필요하면 기본 semantic feedback과 중복되거나 다른 발화를 끊지 않는지 함께 검토합니다.
+
+### 반복 및 동적 콘텐츠
+
+- 긴 화면은 heading과 의미 있는 collection으로 나눕니다.
+- 반복 card에는 항목을 구분할 수 있는 Name과 최신 collection index를 제공합니다.
+- recycling된 View에는 이전 항목의 Name, State, Value, index가 남지 않도록 전체 semantic을 다시 binding합니다.
+- timer, progress, live status처럼 자주 바뀌는 값은 모든 변화가 중요한지 판단하고 발화 빈도를 제한합니다.
+- loading이 길면 `BUSY` 상태와 사용자가 이해할 수 있는 현재 작업 정보를 제공합니다.
+
+<br/>
+
+## DALi UI API 개요
 
 `Dali::Ui::View`의 Accessibility API는 View의 의미, 읽을 정보, 상태와 관계를 접근성 트리에 전달합니다. Screen Reader는 이 정보를 조회하여 현재 highlighted View를 발화하고 접근성 action을 View에 전달합니다.
 
