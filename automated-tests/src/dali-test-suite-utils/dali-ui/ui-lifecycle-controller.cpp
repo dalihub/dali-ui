@@ -17,6 +17,7 @@
 
 #include "ui-lifecycle-controller.h"
 
+#include <dali/devel-api/common/singleton-service.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/dali-signal.h>
 
@@ -60,6 +61,12 @@ LifecycleController::~LifecycleController()
 
 Dali::LifecycleController LifecycleController::Get()
 {
+  Dali::SingletonService singletonService(Dali::SingletonService::Get());
+  if(!singletonService)
+  {
+    return Dali::LifecycleController();
+  }
+
   if(!mLifecycleController)
   {
     mLifecycleController = Dali::LifecycleController(new Internal::Adaptor::LifecycleController());

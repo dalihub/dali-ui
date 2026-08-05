@@ -21,6 +21,7 @@
 // EXTERNAL INCLUDES
 #include <dali/devel-api/adaptor-framework/lifecycle-controller.h>
 #include <dali/devel-api/common/singleton-service.h>
+#include <dali/devel-api/object/type-registry-helper.h>
 #include <dali/public-api/common/dali-common.h>
 #include <dali/public-api/object/base-object.h>
 #include <dali/public-api/signals/connection-tracker.h>
@@ -183,6 +184,11 @@ BaseHandle GetRuntime()
 
   return runtime;
 }
+
+// Move a UiConfigRuntime created before Core initialization into SingletonService
+// and connect it to PreInitSignal before the application InitSignal is emitted.
+DALI_TYPE_REGISTRATION_BEGIN_CREATE(UiConfigRuntime, Dali::BaseHandle, GetRuntime, true)
+DALI_TYPE_REGISTRATION_END()
 
 } // unnamed namespace
 
