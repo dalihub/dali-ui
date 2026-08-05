@@ -3373,10 +3373,210 @@ int UtcDaliViewLayoutDirectionSetReArrangesP(void)
   parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
   DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
 
-  // SetLayoutDirection invalidates arrange so the next pass mirrors.
+  // SetLayoutDirection now invalidates arrange; this test drives the pass
+  // explicitly (see UtcDaliViewLayoutDirectionChangeRelayoutsSubtreeP for the
+  // scheduled-pass version) and only checks that the mirror is applied.
   parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
   parent.Arrange(LayoutRect(0.0f, 0.0f, 200.0f, 100.0f));
   DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliViewLayoutDirectionRtlStableAcrossRepeatedArrangeP(void)
+{
+  UiTestApplication application;
+  View              parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetRequestedX(20.0f);
+  parent.Add(child);
+
+  const LayoutRect slot(0.0f, 0.0f, 200.0f, 100.0f);
+  parent.Measure(200.0f, 100.0f);
+  parent.Arrange(slot);
+  DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+
+  // The mirror is idempotent: re-arranging the same tree into the same slot puts
+  // the child at the same mirrored x every time. A mirror that folded the
+  // already-mirrored actor position back in would only look stable while every
+  // pass happens to rewrite the child's logical x first; the moment one does not,
+  // it oscillates (130 -> 20 -> 130 ...). Mirroring the child's logical arranged
+  // bounds removes that hidden precondition.
+  for(int pass = 0; pass < 3; ++pass)
+  {
+    parent.Arrange(slot);
+    DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+int UtcDaliViewRtlMirrorIgnoresExternalActorPositionWriteP(void)
+{
+  UiTestApplication application;
+  View              parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetRequestedX(20.0f);
+  parent.Add(child);
+
+  const LayoutRect slot(0.0f, 0.0f, 200.0f, 100.0f);
+  parent.Measure(200.0f, 100.0f);
+  parent.Arrange(slot);
+  DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+
+  // A producer that leaves its children alone, so nothing rewrites the child's
+  // actor POSITION_X back to its logical value before the mirror runs. The
+  // child keeps the arranged bounds it already has.
+  parent.SetArrangeCallback(ArrangeCallback::New(&PlainArrange));
+
+  // The sanctioned escape hatch for driving rendered geometry directly.
+  Dali::Ui::Extension::View::SetPositionX(child, 7.0f);
+  DALI_TEST_EQUALS(child.GetPositionX(), 7.0f, TEST_LOCATION);
+
+  parent.Arrange(slot);
+
+  // Mirrored from the child's LOGICAL arranged x (20), not from the actor:
+  // 200 - 20 - 50 = 130. Reading the actor back would yield 200 - 7 - 50 = 143.
+  DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// THE LIVE BUG. A layout-direction change reached NO layout invalidation:
+// Actor::SetLayoutDirection emits Core's LayoutDirectionChangedSignal and issues
+// a legacy RelayoutRequest (size negotiation), neither of which is the dali-ui
+// layout pass, and ViewDataImpl::OnPropertySet does not handle LAYOUT_DIRECTION.
+// So flipping a SETTLED tree to RTL and driving frames did nothing: no mirror was
+// ever applied. Every other RTL test hides this by calling Arrange() explicitly.
+//
+// This test therefore uses the REAL pass only -- no explicit Measure/Arrange.
+int UtcDaliViewLayoutDirectionChangeRelayoutsSubtreeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  window.Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetRequestedX(20.0f);
+  parent.Add(child);
+
+  // Settle: the default LEFT_TO_RIGHT arrangement puts the child at its
+  // requested (logical) x. A non-zero x here also proves a real pass ran.
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
+
+  // The direction change alone must schedule the re-arrange.
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+
+  application.SendNotification();
+  application.SendNotification();
+
+  // newX = parentWidth(200) - logicalX(20) - childWidth(50) = 130.
+  DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The change is set on the GRANDPARENT only; the two descendants merely INHERIT
+// it. Core resolves inheritance by walking the actor tree and emitting the
+// signal on every actor whose resolved direction changed, so hooking that signal
+// covers the descendants for free. An approach that keyed off the direction
+// PROPERTY WRITE instead (ViewDataImpl::OnPropertySet) would see one view only
+// and leave both descendants unmirrored.
+int UtcDaliViewLayoutDirectionChangeOnAncestorRelayoutsDescendantP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View grandParent = View::New();
+  grandParent.SetRequestedWidth(300.0f);
+  grandParent.SetRequestedHeight(200.0f);
+  window.Add(grandParent);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(150.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetRequestedX(0.0f);
+  grandParent.Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(40.0f);
+  child.SetRequestedX(10.0f);
+  parent.Add(child);
+
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(parent.GetPositionX(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetPositionX(), 10.0f, TEST_LOCATION);
+
+  grandParent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  DALI_TEST_EQUALS(parent.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetEffectiveLayoutDirection(), LayoutDirection::RIGHT_TO_LEFT, TEST_LOCATION);
+
+  application.SendNotification();
+  application.SendNotification();
+
+  // Parent mirrored by the grandparent: 300 - 0 - 150 = 150.
+  DALI_TEST_EQUALS(parent.GetPositionX(), 150.0f, TEST_LOCATION);
+  // Child mirrored by the parent, which only inherited the change: 150 - 10 - 50 = 90.
+  DALI_TEST_EQUALS(child.GetPositionX(), 90.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The invalidation is symmetric: reverting to LEFT_TO_RIGHT must un-mirror
+// through the real pass too. This also pins that the revert restores the LOGICAL
+// x exactly (a mirror folded back over the already-mirrored actor position would
+// land somewhere else).
+int UtcDaliViewLayoutDirectionRevertRelayoutsSubtreeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  window.Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  child.SetRequestedX(20.0f);
+  parent.Add(child);
+
+  application.SendNotification();
+  application.SendNotification();
+  DALI_TEST_EQUALS(child.GetPositionX(), 130.0f, TEST_LOCATION);
+
+  parent.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
+
+  application.SendNotification();
+  application.SendNotification();
+
+  DALI_TEST_EQUALS(child.GetPositionX(), 20.0f, TEST_LOCATION);
 
   END_TEST;
 }
@@ -5262,5 +5462,83 @@ int UtcDaliViewOffSceneRootReconnectAfterScaleChangeRelayoutsP(void)
   DALI_TEST_EQUALS(root.GetProperty<float>(Actor::Property::SIZE_WIDTH), 100.0f, TEST_LOCATION);
 
   UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// Phase 4c (C4-B1 forward pin). ApplySelfBoundsIfChanged is an UNCONDITIONAL
+// per-pass reconciliation, not a one-time apply: a re-Arrange restores a child
+// whose actor geometry was clobbered externally -- e.g. via the sanctioned
+// Extension::SetPositionX escape hatch that ScrollView / RecyclerView use to
+// bypass layout. This passes today; it must keep passing after Phase 5, which
+// means a Phase-5 arrange cache HIT has to return AFTER this reconciliation,
+// never before it. Fails the day a hit is placed above ApplySelfBoundsIfChanged.
+int UtcDaliViewArrangeRestoresExternallyMovedSelfGeometryP(void)
+{
+  UiTestApplication application;
+  View              parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  application.GetScene().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedX(20.0f);
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+
+  const LayoutRect slot(0.0f, 0.0f, 200.0f, 100.0f);
+  parent.Measure(200.0f, 100.0f);
+  parent.Arrange(slot);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  // Clobber the child's actor geometry directly (bypasses layout invalidation).
+  Dali::Ui::Extension::View::SetPositionX(child, 999.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(child, 7.0f);
+
+  // Re-arrange the parent into the same slot: the child's own Arrange reconciles
+  // its actor geometry back to the arranged values.
+  parent.Arrange(slot);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Phase 4c (C4-B2 forward pin). Same under RTL: the child's Arrange re-applies its
+// LOGICAL bounds and the parent's ApplyLayoutDirection mirrors from those logical
+// bounds (never from the clobbered actor value, per 4a), so the child returns to
+// its mirrored x -- proving the logical-apply + parent-mirror composition survives
+// an external write and that a Phase-5 hit must re-apply logical bounds, not a
+// mirrored value.
+int UtcDaliViewArrangeRestoresExternallyMovedSelfGeometryRtlP(void)
+{
+  UiTestApplication application;
+  View              parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(parent);
+
+  View child = View::New();
+  child.SetRequestedX(20.0f);
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(50.0f);
+  parent.Add(child);
+
+  const LayoutRect slot(0.0f, 0.0f, 200.0f, 100.0f);
+  parent.Measure(200.0f, 100.0f);
+  parent.Arrange(slot);
+  // Mirror of logical x 20 about parent width 200 = 130.
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 130.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  Dali::Ui::Extension::View::SetPositionX(child, 999.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(child, 7.0f);
+
+  parent.Arrange(slot);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 130.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
   END_TEST;
 }

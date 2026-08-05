@@ -264,9 +264,14 @@ inspect the layout direction themselves.
 `ApplyLayoutDirection` early-returns unless the View's effective layout
 direction resolves to `RIGHT_TO_LEFT`, so under `LEFT_TO_RIGHT` nothing is
 mirrored. Under `RIGHT_TO_LEFT` it flips each direct child's X about the
-parent's arranged width: `POSITION_X = parentWidth − oldX − childW`, where
-`oldX` and `childW` are the child's already-arranged `POSITION_X` and
-`SIZE_WIDTH`.
+parent's arranged width: `POSITION_X = parentWidth − logicalX − childW`,
+where `logicalX` and `childW` are the child's **logical** arranged bounds
+(`GetArrangedBounds().x` / `.width`), not its actor `POSITION_X`. Mirroring
+from the logical bounds makes the flip a pure function of arranged geometry --
+idempotent and immune to an external `POSITION_X` write -- rather than an
+involution over the actor's persistent position. A child that a producer
+placed but never arranged has no logical bounds yet and falls back to the
+historical actor read-back.
 
 - The mirror is **generic**: it applies uniformly to every direct child of
   every View. `AbsoluteLayout` is just one case — a child arranged at some X

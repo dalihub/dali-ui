@@ -69,6 +69,7 @@
 #include <dali-ui-foundation/internal/layouts/grid-layout-params-impl.h>
 #include <dali-ui-foundation/internal/layouts/layout-callbacks-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
+#include <dali-ui-foundation/internal/layouts/layout-direction-utils.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-object.h>
 #include <dali-ui-foundation/internal/layouts/layout-reflow-resolver.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-impl.h>
@@ -887,6 +888,9 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mLastMeasureScale(std::numeric_limits<float>::quiet_NaN()),
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mLastArrangeInput{0.0f, 0.0f, 0.0f, 0.0f},
+  // Pure cache key; its initial value is never consulted because
+  // mArrangeCacheValid starts false.
+  mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
   mMargin(),
   mPadding(),
   mRequestedWidth(WRAP_CONTENT),
@@ -3735,6 +3739,17 @@ LayoutRect ViewDataImpl::Arrange(const LayoutRect& bounds)
   // intentionally discarded -- called for its side effect of establishing the bit.
   (void)mViewImpl.GetEffectiveScale();
 
+  // FORWARD NOTE (Phase 5 arrange cache HIT). ApplySelfBoundsIfChanged is an
+  // UNCONDITIONAL per-pass reconciliation of the actor's geometry against the
+  // arranged bounds, not a one-time apply: it silently repairs any external
+  // clobber of POSITION/SIZE -- including the sanctioned first-party scroll
+  // writes (ScrollViewImpl/RecyclerViewImpl move the content actor directly via
+  // Extension::SetPositionX to bypass layout). A Phase-5 hit must therefore return
+  // AFTER this reconciliation (C4-B1), never before it, and must re-apply the
+  // LOGICAL mArrangedBounds, never a mirrored value -- mirroring stays the parent's
+  // job in ApplyLayoutDirection (C4-B2). UtcDaliViewArrangeRestoresExternallyMovedSelfGeometry{,Rtl}P
+  // pin this and fail the day a hit is placed above this line.
+  //
   // Phase 1: apply the input bounds as provisional self geometry, so a
   // customization hook that reads back self event-side geometry observes the
   // input (as before this refactor), not stale prior-pass geometry.
@@ -3812,8 +3827,9 @@ LayoutRect ViewDataImpl::Arrange(const LayoutRect& bounds)
   // cannot be re-published over that clear before the pass ends.
   if(!mArrangeDirty && !mArrangePassPoisoned && !mArrangeCacheBlockedDuringPass && mEffectiveScaleValid && !mEffectiveScaleInvalidatedDuringPass && mMeasureCacheValid)
   {
-    mLastArrangeInput  = bounds;
-    mArrangeCacheValid = true;
+    mLastArrangeInput     = bounds;
+    mLastArrangeDirection = mViewImpl.Self().GetEffectiveLayoutDirection();
+    mArrangeCacheValid    = true;
   }
   else if(mArrangePassPoisoned && !mArrangeDirty)
   {
@@ -3921,10 +3937,39 @@ void ViewDataImpl::ApplyLayoutDirection(float parentWidth)
       continue;
     }
 
-    Actor child  = childImpl.Self();
-    float oldX   = child.GetProperty<float>(Actor::Property::POSITION_X);
-    float childW = child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
-    child.SetPositionX(parentWidth - oldX - childW);
+    Actor         child     = childImpl.Self();
+    ViewDataImpl& childData = ViewDataImpl::Get(childImpl);
+
+    if(childData.mArrangeResultAvailable)
+    {
+      // Mirror from the child's LOGICAL arranged bounds, never from the actor.
+      //
+      // The actor read-back below computes the SAME number today only because the
+      // child's own Arrange() has just rewritten POSITION_X / SIZE_WIDTH to those
+      // very bounds (ApplySelfBoundsIfChanged), which makes the read-back form an
+      // involution over persistent actor state: run it twice without an
+      // intervening rewrite and the mirror cancels itself. That premise is not
+      // ours to keep -- an arrange cache HIT returns before re-applying the
+      // child's logical bounds, and an external POSITION_X write (the sanctioned
+      // Extension::SetPositionX escape hatch) lands there too. Reading
+      // mArrangedBounds makes the mirror a pure function of the child's arranged
+      // geometry, so it is idempotent and immune to both.
+      const LayoutRect logical = childData.GetArrangedBounds();
+      child.SetPositionX(MirrorX(parentWidth, logical.x, logical.width));
+    }
+    else
+    {
+      // No arrange result exists for this child yet, so there are no logical
+      // bounds to mirror. Reachable when a producer places a non-standalone child
+      // without arranging it (a leaf-style OnArrange that ignores its children,
+      // for instance), leaving the actor geometry as the only record of where the
+      // child is. Falling back to the historical read-back keeps that case byte
+      // for byte as it was; the first Arrange() of the child promotes it to the
+      // deterministic branch above and it never returns here.
+      const float oldX   = child.GetProperty<float>(Actor::Property::POSITION_X);
+      const float childW = child.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+      child.SetPositionX(MirrorX(parentWidth, oldX, childW));
+    }
   }
 }
 
@@ -4337,6 +4382,16 @@ void ViewDataImpl::OnChildOrderChanged(Actor parent, Actor orderChangedChild)
   // layout where line-breaking depends on child order), so invalidate measure
   // — not just arrange — mirroring the Insert/MoveChild reorder path.
   mViewImpl.InvalidateMeasure();
+}
+
+void ViewDataImpl::OnLayoutDirectionChanged(Dali::Actor /* actor */, Dali::LayoutDirection::Type /* type */)
+{
+  // ARRANGE only. The direction is consumed exclusively by ApplyLayoutDirection,
+  // which mirrors the x of this view's non-standalone children at the end of its
+  // arrange pass; it feeds into no measured size. Core has already filtered this
+  // down to the views whose resolved direction actually changed, so there is no
+  // value-change guard to repeat here.
+  InvalidateArrange();
 }
 
 // =============================================================================

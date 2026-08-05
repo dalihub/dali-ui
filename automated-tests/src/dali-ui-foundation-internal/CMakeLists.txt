@@ -89,6 +89,7 @@ SET(TC_SOURCES
     utc-Dali-ViewFittingMode-internal.cpp
     utc-Dali-View-order-internal.cpp
     utc-Dali-UiScaleEffectiveScale-internal.cpp
+    utc-Dali-LayoutDirectionArrangeCache-internal.cpp
 )
 
 # ---------------------------------------------------------
