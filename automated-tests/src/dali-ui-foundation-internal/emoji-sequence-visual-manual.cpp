@@ -2397,6 +2397,13 @@ private:
     return PAGE_PADDING_Y + static_cast<float>(slot) * (ROW_HEIGHT + ROW_SPACING);
   }
 
+  template<typename ViewType>
+  static void SetLayoutBounds(ViewType& view, AbsoluteLayoutParams& params, const LayoutRect& bounds)
+  {
+    params.SetBounds(bounds);
+    view.SetLayoutParams(params);
+  }
+
   void UpdateLayoutBounds()
   {
     if(!mPageContent)
@@ -2421,10 +2428,10 @@ private:
 
     if(mShownCount == 0u)
     {
-      if(mEmptyLabel && mEmptyLabelParams)
+      if(mEmptyLabel)
       {
         mEmptyLabel.SetRequestedWidth(rowWidth);
-        mEmptyLabelParams.SetBounds(LayoutRect(PAGE_PADDING_X, PAGE_PADDING_Y, rowWidth, ROW_HEIGHT));
+        SetLayoutBounds(mEmptyLabel, mEmptyLabelParams, LayoutRect(PAGE_PADDING_X, PAGE_PADDING_Y, rowWidth, ROW_HEIGHT));
       }
       mLastPageContentWidth = pageWidth;
       mLastVisibleRowCount  = visibleRows;
@@ -2450,11 +2457,11 @@ private:
 
     row.row.SetRequestedWidth(rowWidth);
     row.row.SetRequestedHeight(ROW_HEIGHT);
-    row.rowParams.SetBounds(LayoutRect(PAGE_PADDING_X, RowY(slot), rowWidth, ROW_HEIGHT));
+    SetLayoutBounds(row.row, row.rowParams, LayoutRect(PAGE_PADDING_X, RowY(slot), rowWidth, ROW_HEIGHT));
 
     row.preview.SetRequestedWidth(PREVIEW_WIDTH);
     row.preview.SetRequestedHeight(contentHeight);
-    row.previewParams.SetBounds(LayoutRect(ROW_PADDING_X, ROW_PADDING_Y, PREVIEW_WIDTH, contentHeight));
+    SetLayoutBounds(row.preview, row.previewParams, LayoutRect(ROW_PADDING_X, ROW_PADDING_Y, PREVIEW_WIDTH, contentHeight));
 
     if(row.sampleContainer)
     {
@@ -2466,27 +2473,29 @@ private:
                                                             sampleLabelY - sampleImageSize));
       row.sampleContainer.SetRequestedWidth(PREVIEW_WIDTH);
       row.sampleContainer.SetRequestedHeight(contentHeight);
-      row.sampleContainerParams.SetBounds(LayoutRect(sampleX, ROW_PADDING_Y, PREVIEW_WIDTH, contentHeight));
+      SetLayoutBounds(row.sampleContainer, row.sampleContainerParams, LayoutRect(sampleX, ROW_PADDING_Y, PREVIEW_WIDTH, contentHeight));
 
       row.sampleImage.SetRequestedWidth(sampleImageSize);
       row.sampleImage.SetRequestedHeight(sampleImageSize);
-      row.sampleImageParams.SetBounds(LayoutRect(sampleImageX, sampleImageY, sampleImageSize, sampleImageSize));
+      SetLayoutBounds(row.sampleImage, row.sampleImageParams, LayoutRect(sampleImageX, sampleImageY, sampleImageSize, sampleImageSize));
 
       row.samplePlaceholder.SetRequestedWidth(PREVIEW_WIDTH);
       row.samplePlaceholder.SetRequestedHeight(contentHeight);
-      row.samplePlaceholderParams.SetBounds(LayoutRect(0.0f, 0.0f, PREVIEW_WIDTH, contentHeight));
+      SetLayoutBounds(row.samplePlaceholder, row.samplePlaceholderParams, LayoutRect(0.0f, 0.0f, PREVIEW_WIDTH, contentHeight));
 
       row.sampleSetLabel.SetRequestedWidth(PREVIEW_WIDTH);
       row.sampleSetLabel.SetRequestedHeight(SAMPLE_SET_LABEL_HEIGHT);
-      row.sampleSetLabelParams.SetBounds(LayoutRect(0.0f,
-                                                    std::max(0.0f, contentHeight - SAMPLE_SET_LABEL_HEIGHT),
-                                                    PREVIEW_WIDTH,
-                                                    SAMPLE_SET_LABEL_HEIGHT));
+      SetLayoutBounds(row.sampleSetLabel,
+                      row.sampleSetLabelParams,
+                      LayoutRect(0.0f,
+                                 std::max(0.0f, contentHeight - SAMPLE_SET_LABEL_HEIGHT),
+                                 PREVIEW_WIDTH,
+                                 SAMPLE_SET_LABEL_HEIGHT));
     }
 
     row.detail.SetRequestedWidth(detailWidth);
     row.detail.SetRequestedHeight(contentHeight);
-    row.detailParams.SetBounds(LayoutRect(ROW_PADDING_X + PreviewBlockWidth(), ROW_PADDING_Y, detailWidth, contentHeight));
+    SetLayoutBounds(row.detail, row.detailParams, LayoutRect(ROW_PADDING_X + PreviewBlockWidth(), ROW_PADDING_Y, detailWidth, contentHeight));
   }
 
   void BuildPageContentPool()
@@ -2860,7 +2869,7 @@ private:
     mPreviewOverlay.SetRequestedWidth(width);
     mPreviewOverlay.SetRequestedHeight(height);
 
-    if(mLargePreview && mLargePreviewParams)
+    if(mLargePreview)
     {
       const float previewWidth  = std::max(1.0f, std::min(width - inset * 2.0f, PREVIEW_POPUP_MAX_WIDTH));
       const float previewHeight = std::max(1.0f, std::min(height - inset * 2.0f, PREVIEW_POPUP_MAX_HEIGHT));
@@ -2868,7 +2877,7 @@ private:
       const float previewY      = (height - previewHeight) * 0.5f;
       mLargePreview.SetRequestedWidth(previewWidth);
       mLargePreview.SetRequestedHeight(previewHeight);
-      mLargePreviewParams.SetBounds(LayoutRect(previewX, previewY, previewWidth, previewHeight));
+      SetLayoutBounds(mLargePreview, mLargePreviewParams, LayoutRect(previewX, previewY, previewWidth, previewHeight));
     }
 
     if(mIsPreviewOverlayVisible)
