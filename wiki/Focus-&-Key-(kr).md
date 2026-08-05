@@ -372,7 +372,7 @@ interactive.ClickedSignal().Connect(&tracker, [](View v, const InputEvent& event
 |---|---|
 | `SetKeyClickPolicy` | 기본 키 클릭 발동 시점 (ON_RELEASE / ON_PRESS / DISABLED) |
 | `SetExecutionKeyPredicate` | 클릭/롱프레스를 트리거하는 키 판별 함수 (기본값: "Return") |
-| `SetKeyLongPressThreshold` | 키를 롱프레스로 인식하기 위한 최소 임계값 (키 pressed 이벤트 발생 횟수) |
+| `SetLongPressKeyEventMinimumCount` | 키를 롱프레스로 인식하기 위한 최소 키 pressed 이벤트 개수 (최초 key down 포함) |
 
 ```cpp
 bool MyKeyPredicate(const Dali::String& keyName)
@@ -383,7 +383,7 @@ bool MyKeyPredicate(const Dali::String& keyName)
 UiConfig config = UiConfig::New();
 config.SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);   // 키를 뗄 때 클릭 시그널 발동
 config.SetExecutionKeyPredicate(MyKeyPredicate);        // Return, KP_Enter를 클릭 키로 인식
-config.SetKeyLongPressThreshold(3);                     // 키 pressed 이벤트가 3회 이상 연속 감지되면 롱프레스로 인식
+config.SetLongPressKeyEventMinimumCount(3);             // 키 pressed 이벤트가 3회 이상 연속 감지되면 롱프레스로 인식
 config.Apply();
 ```
 

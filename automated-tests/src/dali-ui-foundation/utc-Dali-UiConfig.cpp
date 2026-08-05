@@ -21,10 +21,47 @@
 #include <dali.h>
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-test-suite-utils.h>
+#include <dali/integration-api/events/key-event-integ.h>
 #include <dali/integration-api/input-options.h>
 
 using namespace Dali;
 using namespace Dali::Ui;
+
+namespace
+{
+/**
+ * @brief Helper to create a focused interactive View, so that it receives key events.
+ */
+View CreateFocusedInteractiveView(TestApplication& application)
+{
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+  view.SetPivot(Pivot::TOP_LEFT);
+  view.SetParentOrigin(ParentOrigin::TOP_LEFT);
+
+  application.GetScene().Add(view);
+  view.AsInteractive();
+
+  FocusManager::Get().SetCurrentFocusView(view);
+
+  application.SendNotification();
+  application.Render();
+
+  return view;
+}
+
+/**
+ * @brief Helper to send a single "Return" key down event.
+ */
+void SendReturnKeyDown(TestApplication& application, uint32_t time)
+{
+  Dali::Integration::KeyEvent keyDown(
+    "Return", "", "", 0, 0, time, Dali::Integration::KeyEvent::DOWN, "", "", Device::Class::NONE, Device::Subclass::NONE);
+  application.ProcessEvent(keyDown);
+}
+
+} // unnamed namespace
 
 int UtcDaliUiConfigGestureOptionsP(void)
 {
@@ -90,6 +127,67 @@ int UtcDaliUiConfigGestureOptionsFrozenN(void)
   DALI_TEST_ASSERTION(config.SetTapGestureMaximumMultiTapInterval(400u), "UiConfig is frozen");
   DALI_TEST_ASSERTION(config.SetTapGestureMaximumHoldingTime(250u), "UiConfig is frozen");
   DALI_TEST_ASSERTION(config.SetTapGestureMaximumMotionDistance(35.0f), "UiConfig is frozen");
+
+  END_TEST;
+}
+
+int UtcDaliUiConfigLongPressKeyEventMinimumCountP(void)
+{
+  UiConfig config = UiConfig::New();
+
+  // The default is the initial key down plus two repeats
+  DALI_TEST_EQUALS(config.GetLongPressKeyEventMinimumCount(), 3u, TEST_LOCATION);
+
+  config.SetLongPressKeyEventMinimumCount(5u);
+  DALI_TEST_EQUALS(config.GetLongPressKeyEventMinimumCount(), 5u, TEST_LOCATION);
+
+  UiTestApplication application(config);
+
+  // The getter still reports the same value after the config has been applied
+  DALI_TEST_EQUALS(config.GetLongPressKeyEventMinimumCount(), 5u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliUiConfigLongPressKeyEventMinimumCountBehaviourP(void)
+{
+  // The count includes the initial key down, so a value of 2 means
+  // the long press is recognized on the first repeat.
+  UiConfig config = UiConfig::New();
+  config.SetLongPressKeyEventMinimumCount(2u);
+
+  UiTestApplication application(config);
+
+  View view = CreateFocusedInteractiveView(application);
+  view.AsInteractive().SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);
+
+  bool longPressed = false;
+  view.AsInteractive().LongPressedSignal().Connect(
+    &application,
+    [&longPressed](View, InputEvent) -> bool {
+      longPressed = true;
+      return false;
+    });
+
+  // The initial key down alone must not be recognized as a long press
+  SendReturnKeyDown(application, 100u);
+  DALI_TEST_CHECK(!longPressed);
+
+  // The first repeat reaches the minimum count
+  SendReturnKeyDown(application, 120u);
+  DALI_TEST_CHECK(longPressed);
+
+  END_TEST;
+}
+
+int UtcDaliUiConfigLongPressKeyEventMinimumCountFrozenN(void)
+{
+  UiConfig config = UiConfig::New();
+
+  UiTestApplication application(config);
+
+  // The config is frozen by UiConfig::Apply(), so the setter must assert
+  DALI_TEST_ASSERTION(config.SetLongPressKeyEventMinimumCount(5u), "UiConfig is frozen");
 
   END_TEST;
 }

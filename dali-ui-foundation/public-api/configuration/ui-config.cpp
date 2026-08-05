@@ -292,14 +292,14 @@ ExecutionKeyPredicate UiConfig::GetExecutionKeyPredicate() const
   return GetImpl(*this).GetExecutionKeyPredicate();
 }
 
-void UiConfig::SetKeyLongPressThreshold(uint32_t count)
+void UiConfig::SetLongPressKeyEventMinimumCount(uint32_t count)
 {
-  GetImpl(*this).SetKeyLongPressThreshold(count);
+  GetImpl(*this).SetLongPressKeyEventMinimumCount(count);
 }
 
-uint32_t UiConfig::GetKeyLongPressThreshold() const
+uint32_t UiConfig::GetLongPressKeyEventMinimumCount() const
 {
-  return GetImpl(*this).GetKeyLongPressThreshold();
+  return GetImpl(*this).GetLongPressKeyEventMinimumCount();
 }
 
 void UiConfig::SetLongPressGestureMinimumHoldingTime(uint32_t timeMs)

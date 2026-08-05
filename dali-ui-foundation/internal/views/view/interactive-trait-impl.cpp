@@ -591,7 +591,7 @@ bool InteractiveTraitImpl::ShouldKeyPressTriggerClicked() const
 bool InteractiveTraitImpl::ShouldKeyPressTriggerLongPressed() const
 {
   return mClickable && mKeyClickPolicy == KeyClickPolicy::ON_RELEASE &&
-         (mPressedExecutionKeyCount >= UiConfig::GetCurrent().GetKeyLongPressThreshold());
+         (mPressedExecutionKeyCount >= UiConfig::GetCurrent().GetLongPressKeyEventMinimumCount());
 }
 
 } // namespace Dali::Ui::Internal

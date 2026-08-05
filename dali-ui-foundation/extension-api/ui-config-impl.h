@@ -173,19 +173,14 @@ public:
   ExecutionKeyPredicate GetExecutionKeyPredicate() const;
 
   /**
-   * @brief Sets the minimum key repeat count for long-press.
-   *
-   * @pre Must not be frozen.
-   * @param[in] count The minimum repeat count
+   * @copydoc UiConfig::SetLongPressKeyEventMinimumCount
    */
-  void SetKeyLongPressThreshold(uint32_t count);
+  void SetLongPressKeyEventMinimumCount(uint32_t count);
 
   /**
-   * @brief Retrieves the minimum key repeat count for long-press.
-   *
-   * @return The minimum repeat count
+   * @copydoc UiConfig::GetLongPressKeyEventMinimumCount
    */
-  uint32_t GetKeyLongPressThreshold() const;
+  uint32_t GetLongPressKeyEventMinimumCount() const;
 
   /**
    * @copydoc UiConfig::SetLongPressGestureMinimumHoldingTime

@@ -305,25 +305,27 @@ public: // Properties
   ExecutionKeyPredicate GetExecutionKeyPredicate() const;
 
   /**
-   * @brief Sets the threshold for recognizing a key long-press.
+   * @brief Sets the minimum number of key events required to recognize a key long-press.
    *
    * When a key is held down, the system generates repeated key press events.
-   * This threshold defines how many consecutive key press events must be
-   * received before the input is recognized as a long-press action.
+   * This is the minimum number of consecutive key events, @b including the initial
+   * key down, that must be received before the input is recognized as a long-press
+   * action. For example, a value of 3 means the initial key down plus two repeats.
    *
    * @pre The config must not be frozen.
-   * @param[in] threshold The minimum number of consecutive key press events
-   *                      required to trigger a long-press
+   * @param[in] count The minimum number of consecutive key events, including the
+   *                  initial key down, required to trigger a long-press
+   * @see SetExecutionKeyPredicate()
    */
-  void SetKeyLongPressThreshold(uint32_t threshold);
+  void SetLongPressKeyEventMinimumCount(uint32_t count);
 
   /**
-   * @brief Retrieves the threshold for recognizing a key long-press.
+   * @brief Retrieves the minimum number of key events required to recognize a key long-press.
    *
-   * @return The minimum number of consecutive key press events required
-   *         to trigger a long-press
+   * @return The minimum number of consecutive key events, including the initial
+   *         key down, required to trigger a long-press
    */
-  uint32_t GetKeyLongPressThreshold() const;
+  uint32_t GetLongPressKeyEventMinimumCount() const;
 
   /**
    * @brief Sets the minimum holding time required to be recognized as a long press gesture.
