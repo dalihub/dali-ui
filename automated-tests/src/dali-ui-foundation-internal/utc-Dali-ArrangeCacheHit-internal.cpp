@@ -81,7 +81,7 @@ void utc_dali_arrange_cache_hit_internal_cleanup(void)
 
 namespace
 {
-ViewDataImpl& DataOf(View view)
+ViewDataImpl& DataOf(View& view)
 {
   return ViewDataImpl::Get(GetImpl(view));
 }
@@ -1472,11 +1472,16 @@ int UtcDaliArrangeCacheInLibraryLayoutManagerPolicyP(void)
   DALI_TEST_CHECK(!DataOf(scrollManaged).ArrangesIfChanged());
 
   // --- and through the container types an application actually writes -----------
-  DALI_TEST_CHECK(DataOf(StackLayout::New()).ArrangesIfChanged());
-  DALI_TEST_CHECK(DataOf(AbsoluteLayout::New()).ArrangesIfChanged());
-  DALI_TEST_CHECK(DataOf(GridLayout::New()).ArrangesIfChanged());
-  DALI_TEST_CHECK(DataOf(FlexLayout::New()).ArrangesIfChanged());
-  DALI_TEST_CHECK(!DataOf(ScrollView::New()).ArrangesIfChanged());
+  StackLayout    stackLayout    = StackLayout::New();
+  AbsoluteLayout absoluteLayout = AbsoluteLayout::New();
+  GridLayout     gridLayout     = GridLayout::New();
+  FlexLayout     flexLayout     = FlexLayout::New();
+  ScrollView     scrollView     = ScrollView::New();
+  DALI_TEST_CHECK(DataOf(stackLayout).ArrangesIfChanged());
+  DALI_TEST_CHECK(DataOf(absoluteLayout).ArrangesIfChanged());
+  DALI_TEST_CHECK(DataOf(gridLayout).ArrangesIfChanged());
+  DALI_TEST_CHECK(DataOf(flexLayout).ArrangesIfChanged());
+  DALI_TEST_CHECK(!DataOf(scrollView).ArrangesIfChanged());
 
   END_TEST;
 }

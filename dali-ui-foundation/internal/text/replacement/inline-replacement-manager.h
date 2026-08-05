@@ -221,7 +221,7 @@ private:
     bool                          pixelAreaApplied{false};
   };
 
-  void                          RemoveEntry(std::vector<Entry>::iterator iterator);
+  std::vector<Entry>::iterator  RemoveEntry(std::vector<Entry>::iterator iterator);
   void                          ReleaseEntryVisual(Entry& entry);
   bool                          CreateEntryVisual(InlineReplacementViewHost& host, Entry& entry);
   bool                          ApplyEntryTransform(Entry& entry);

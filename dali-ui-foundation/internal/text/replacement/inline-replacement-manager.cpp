@@ -131,10 +131,11 @@ InlineReplacementManager::~InlineReplacementManager()
   Clear();
 }
 
-void InlineReplacementManager::RemoveEntry(std::vector<Entry>::iterator iterator)
+std::vector<InlineReplacementManager::Entry>::iterator InlineReplacementManager::RemoveEntry(
+  std::vector<Entry>::iterator iterator)
 {
   ReleaseEntryVisual(*iterator);
-  mEntries.erase(iterator);
+  return mEntries.erase(iterator);
 }
 
 void InlineReplacementManager::ReleaseEntryVisual(Entry& entry)
@@ -494,7 +495,7 @@ bool InlineReplacementManager::Update(InlineReplacementViewHost&                
   {
     if(iterator->lastSeenGeneration != updateGeneration)
     {
-      RemoveEntry(iterator);
+      iterator = RemoveEntry(iterator);
     }
     else
     {

@@ -268,3 +268,17 @@ If when running tct-mgr tests, if "Health-Check get" fails and leaves a white sc
 If the test results show that the test cases fail with "Undefined reference to XXX", it means you have probably failed to update the dali packages on target.
 
 If all the tests are failing then make sure that you have enabled the engineering mode on the target with the 'change-booting-mode.sh --update' command in sdb shell, as the tests may not have installed correctly
+
+Windows foundation internal UTCs
+================================
+
+The Windows runner reuses the same foundation-internal test-case and harness source lists as the Ubuntu target. Windows-specific differences are isolated in the test mocks and runner.
+
+Build dali-core and dali-adaptor first, then run from the workspace root:
+
+    .\dali-ui\automated-tests\build.ps1
+    .\dali-ui\automated-tests\execute.ps1
+
+Use `-TestCase <name>`, `-Prefix <prefix>`, `-Labels <label>`, or `-List` for focused runs. Each test executes in a separate process with a timeout so a crash does not stop the suite.
+
+JSON, JUnit XML and per-test logs are written below `automated-tests\results\windows` unless `-ResultsDirectory` is specified.

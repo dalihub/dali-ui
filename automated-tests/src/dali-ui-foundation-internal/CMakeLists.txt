@@ -3,6 +3,89 @@ SET(PKG_NAME "dali-ui-foundation-internal")
 SET(EXEC_NAME "tct-${PKG_NAME}-core")
 SET(RPM_NAME "core-${PKG_NAME}-tests")
 
+# Keep the test source declarations at the top so the Windows runner can
+# include this file in source-list-only mode without configuring Unix targets.
+SET(TC_SOURCES
+    utc-Dali-FocusManager-internal.cpp
+    utc-Dali-InteractiveTrait-internal.cpp
+    utc-Dali-InteractiveView-internal.cpp
+    utc-Dali-SelectableTrait-internal.cpp
+    utc-Dali-LayoutDependencyScope-internal.cpp
+    utc-Dali-GradientFactory-internal.cpp
+    utc-Dali-GradientVisualSemantics-internal.cpp
+    utc-Dali-TextGradientBaseline-internal.cpp
+    utc-Dali-TextGradientGlyphClassification-internal.cpp
+    utc-Dali-MarkupToStyledText-internal.cpp
+    utc-Dali-StyledTextApplier-internal.cpp
+    utc-Dali-StyledTextController-internal.cpp
+    utc-Dali-ReplacementProjection-internal.cpp
+    utc-Dali-ReplacementEditNormalizer-internal.cpp
+    utc-Dali-TextGradientStyle-internal.cpp
+    utc-Dali-TextAtlasGradientState-internal.cpp
+    utc-Dali-TextGradientShaderComposition-internal.cpp
+    utc-Dali-TextGradientTypesetterMask-internal.cpp
+    utc-Dali-TextGradientPropertyData-internal.cpp
+    utc-Dali-TextGradientVisualMaskPlumbing-internal.cpp
+    utc-Dali-TextVisualAsyncPublication-internal.cpp
+    utc-Dali-WindowsWarningCoverage-internal.cpp
+    utc-Dali-ViewAccessibility-internal.cpp
+    utc-Dali-Accessibility-Text-internal.cpp
+    utc-Dali-ViewFittingMode-internal.cpp
+    utc-Dali-ViewNaturalSize-internal.cpp
+    utc-Dali-View-order-internal.cpp
+    utc-Dali-UiScaleEffectiveScale-internal.cpp
+    utc-Dali-LayoutDirectionArrangeCache-internal.cpp
+    utc-Dali-ArrangeCacheHit-internal.cpp
+    utc-Dali-LayoutInvalidationGeneration-internal.cpp
+)
+
+SET(TC_SOURCE_LIST ${TC_SOURCES})
+
+LIST(APPEND TC_SOURCES
+    replacement-layout-test-adapter.cpp
+    ../dali-test-suite-utils/mesh-builder.cpp
+    ../dali-test-suite-utils/dali-test-suite-utils.cpp
+    ../dali-test-suite-utils/test-actor-utils.cpp
+    ../dali-test-suite-utils/test-custom-actor.cpp
+    ../dali-test-suite-utils/test-harness.cpp
+    ../dali-test-suite-utils/test-application.cpp
+    ../dali-test-suite-utils/test-gesture-generator.cpp
+    ../dali-test-suite-utils/test-gl-abstraction.cpp
+    ../dali-test-suite-utils/test-graphics-buffer.cpp
+    ../dali-test-suite-utils/test-graphics-command-buffer.cpp
+    ../dali-test-suite-utils/test-graphics-controller.cpp
+    ../dali-test-suite-utils/test-graphics-framebuffer.cpp
+    ../dali-test-suite-utils/test-graphics-pipeline.cpp
+    ../dali-test-suite-utils/test-graphics-program.cpp
+    ../dali-test-suite-utils/test-graphics-reflection.cpp
+    ../dali-test-suite-utils/test-graphics-shader.cpp
+    ../dali-test-suite-utils/test-graphics-texture.cpp
+    ../dali-test-suite-utils/test-graphics-sampler.cpp
+    ../dali-test-suite-utils/test-graphics-sync-impl.cpp
+    ../dali-test-suite-utils/test-graphics-sync-object.cpp
+    ../dali-test-suite-utils/test-native-image.cpp
+    ../dali-test-suite-utils/test-platform-abstraction.cpp
+    ../dali-test-suite-utils/test-render-controller.cpp
+    ../dali-test-suite-utils/test-render-surface.cpp
+    ../dali-test-suite-utils/test-trace-call-stack.cpp
+    ../dali-test-suite-utils/test-addon-manager.cpp
+    ../dali-test-suite-utils/test-render-surface-if.cpp
+    ../dali-test-suite-utils/dali-ui/ui-adaptor.cpp
+    ../dali-test-suite-utils/dali-ui/ui-async-task-manager.cpp
+    ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
+    ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
+    ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
+    ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
+    ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
+    ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
+    ../dali-test-suite-utils/dali-ui/ui-timer.cpp
+    ../dali-test-suite-utils/dali-ui/ui-window.cpp
+)
+
+IF(DALI_TEST_SOURCE_LIST_ONLY)
+    RETURN()
+ENDIF()
+
 # This internal UTC target builds dali-ui-foundation sources directly.
 # It does not link against libdali2-ui-foundation, because many internal
 # symbols are hidden in the production shared library.
@@ -56,90 +139,6 @@ ENDFOREACH()
 
 # Add shader source generated for this internal UTC target.
 LIST(APPEND LIBRARY_SOURCES ${BUILT_IN_SHADER_GEN_CPP})
-
-# ---------------------------------------------------------
-# 3. Test Case Sources
-#    Only these files should be parsed by tcheadgen.sh.
-# ---------------------------------------------------------
-SET(TC_SOURCES
-    utc-Dali-FocusManager-internal.cpp
-    utc-Dali-InteractiveTrait-internal.cpp
-    utc-Dali-InteractiveView-internal.cpp
-    utc-Dali-SelectableTrait-internal.cpp
-    utc-Dali-LayoutDependencyScope-internal.cpp
-    utc-Dali-GradientFactory-internal.cpp
-    utc-Dali-GradientVisualSemantics-internal.cpp
-    utc-Dali-TextGradientBaseline-internal.cpp
-    utc-Dali-TextGradientGlyphClassification-internal.cpp
-    utc-Dali-MarkupToStyledText-internal.cpp
-    utc-Dali-StyledTextApplier-internal.cpp
-    utc-Dali-StyledTextController-internal.cpp
-    utc-Dali-ReplacementProjection-internal.cpp
-    utc-Dali-ReplacementEditNormalizer-internal.cpp
-    utc-Dali-TextGradientStyle-internal.cpp
-    utc-Dali-TextAtlasGradientState-internal.cpp
-    utc-Dali-TextGradientShaderComposition-internal.cpp
-    utc-Dali-TextGradientTypesetterMask-internal.cpp
-    utc-Dali-TextGradientPropertyData-internal.cpp
-    utc-Dali-TextGradientVisualMaskPlumbing-internal.cpp
-    utc-Dali-TextVisualAsyncPublication-internal.cpp
-    utc-Dali-WindowsWarningCoverage-internal.cpp
-    utc-Dali-ViewAccessibility-internal.cpp
-    utc-Dali-Accessibility-Text-internal.cpp
-    utc-Dali-ViewFittingMode-internal.cpp
-    utc-Dali-ViewNaturalSize-internal.cpp
-    utc-Dali-View-order-internal.cpp
-    utc-Dali-UiScaleEffectiveScale-internal.cpp
-    utc-Dali-LayoutDirectionArrangeCache-internal.cpp
-    utc-Dali-ArrangeCacheHit-internal.cpp
-    utc-Dali-LayoutInvalidationGeneration-internal.cpp
-)
-
-# ---------------------------------------------------------
-# 4. Test Harness Sources
-#    These files are linked into the test executable but are not parsed
-#    as test case files.
-# ---------------------------------------------------------
-SET(TEST_HARNESS_SOURCES
-    replacement-layout-test-adapter.cpp
-    ../dali-test-suite-utils/mesh-builder.cpp
-    ../dali-test-suite-utils/dali-test-suite-utils.cpp
-    ../dali-test-suite-utils/test-actor-utils.cpp
-    ../dali-test-suite-utils/test-custom-actor.cpp
-    ../dali-test-suite-utils/test-harness.cpp
-    ../dali-test-suite-utils/test-application.cpp
-    ../dali-test-suite-utils/test-gesture-generator.cpp
-    ../dali-test-suite-utils/test-gl-abstraction.cpp
-    ../dali-test-suite-utils/test-graphics-buffer.cpp
-    ../dali-test-suite-utils/test-graphics-command-buffer.cpp
-    ../dali-test-suite-utils/test-graphics-controller.cpp
-    ../dali-test-suite-utils/test-graphics-framebuffer.cpp
-    ../dali-test-suite-utils/test-graphics-pipeline.cpp
-    ../dali-test-suite-utils/test-graphics-program.cpp
-    ../dali-test-suite-utils/test-graphics-reflection.cpp
-    ../dali-test-suite-utils/test-graphics-shader.cpp
-    ../dali-test-suite-utils/test-graphics-texture.cpp
-    ../dali-test-suite-utils/test-graphics-sampler.cpp
-    ../dali-test-suite-utils/test-graphics-sync-impl.cpp
-    ../dali-test-suite-utils/test-graphics-sync-object.cpp
-    ../dali-test-suite-utils/test-native-image.cpp
-    ../dali-test-suite-utils/test-platform-abstraction.cpp
-    ../dali-test-suite-utils/test-render-controller.cpp
-    ../dali-test-suite-utils/test-render-surface.cpp
-    ../dali-test-suite-utils/test-trace-call-stack.cpp
-    ../dali-test-suite-utils/test-addon-manager.cpp
-    ../dali-test-suite-utils/test-render-surface-if.cpp
-    ../dali-test-suite-utils/dali-ui/ui-adaptor.cpp
-    ../dali-test-suite-utils/dali-ui/ui-async-task-manager.cpp
-    ../dali-test-suite-utils/dali-ui/ui-environment-variable.cpp
-    ../dali-test-suite-utils/dali-ui/ui-event-thread-callback.cpp
-    ../dali-test-suite-utils/dali-ui/ui-lifecycle-controller.cpp
-    ../dali-test-suite-utils/dali-ui/ui-scene-holder.cpp
-    ../dali-test-suite-utils/dali-ui/ui-test-application.cpp
-    ../dali-test-suite-utils/dali-ui/ui-text-abstraction.cpp
-    ../dali-test-suite-utils/dali-ui/ui-timer.cpp
-    ../dali-test-suite-utils/dali-ui/ui-window.cpp
-)
 
 # ---------------------------------------------------------
 # 5. Package Dependencies
@@ -235,7 +234,7 @@ FILE(WRITE ${CMAKE_CURRENT_BINARY_DIR}/addons.txt "")
 # 9. Generate Test Table Header
 # ---------------------------------------------------------
 ADD_CUSTOM_COMMAND(
-    COMMAND ../../scripts/tcheadgen.sh ${EXEC_NAME}.h ${TC_SOURCES}
+    COMMAND ../../scripts/tcheadgen.sh ${EXEC_NAME}.h ${TC_SOURCE_LIST}
     WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
     OUTPUT ${EXEC_NAME}.h
     COMMENT "Generating test tables for ${EXEC_NAME}"
@@ -247,7 +246,6 @@ ADD_CUSTOM_COMMAND(
 SET(ALL_SOURCES
     ${LIBRARY_SOURCES}
     ${TC_SOURCES}
-    ${TEST_HARNESS_SOURCES}
 )
 
 ADD_EXECUTABLE(${EXEC_NAME}

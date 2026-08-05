@@ -16,6 +16,10 @@
  */
 
 #include <algorithm>
+#if defined(_WIN32)
+extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentThreadId();
+extern "C" __declspec(dllimport) unsigned long __stdcall GetCurrentProcessId();
+#endif
 
 #include <dali-ui/ui-window-impl.h>
 
@@ -24,6 +28,9 @@
 #include <dali/integration-api/adaptor-framework/adaptor.h>
 #include <dali/integration-api/adaptor-framework/file-download/file-download-plugin-proxy.h> ///< For FileDownloadPluginProxy::RegisterEventThreadCallback
 #include <dali/integration-api/adaptor-framework/scene-holder.h>
+#if defined(_WIN32)
+#include <dali/devel-api/adaptor-framework/window-system-devel.h>
+#endif
 
 #include <dali/integration-api/debug.h>
 #include <dali/integration-api/scene.h>
@@ -35,14 +42,31 @@
 #include <dali-ui/ui-window.h>
 #include "dali-test-suite-utils.h"
 
+#if !defined(_WIN32)
 #include <sys/prctl.h> ///< for syscall(SYS_gettid)
 #include <sys/syscall.h>
 #include <sys/types.h>
 #include <unistd.h>
+#endif
 #include <cstdint>
 
 namespace Dali
 {
+#if defined(_WIN32)
+namespace DevelWindowSystem
+{
+void SetGeometryHittestEnabled(bool enabled)
+{
+  static_cast<void>(enabled);
+}
+
+bool IsGeometryHittestEnabled()
+{
+  return true;
+}
+} // namespace DevelWindowSystem
+#endif
+
 namespace Internal
 {
 namespace Adaptor
@@ -96,7 +120,9 @@ void Adaptor::Start(Dali::Window window)
 {
   AddWindow(&GetImplementation(window));
 
+#if !defined(_WIN32)
   FileDownloadPluginProxy::RegisterEventThreadCallback();
+#endif
 }
 
 void Adaptor::Stop()
@@ -108,7 +134,9 @@ void Adaptor::Stop()
     core.SceneDestroyed();
   }
 
+#if !defined(_WIN32)
   FileDownloadPluginProxy::UnregisterEventThreadCallback();
+#endif
   mStopped = true;
 }
 
@@ -617,18 +645,30 @@ void Adaptor::OnWindowHidden()
 int32_t Adaptor::GetRenderThreadId() const
 {
   // We use the same thread for both render and UI in toolkit-adaptor, so return the same thread id as GetRenderThreadId().
+#if defined(_WIN32)
+  return static_cast<int32_t>(GetCurrentThreadId());
+#else
   return static_cast<int32_t>(syscall(SYS_gettid));
+#endif
 }
 
 int32_t Adaptor::GetUiThreadId() const
 {
   // We use the same thread for both render and UI in toolkit-adaptor, so return the same thread id as GetRenderThreadId().
+#if defined(_WIN32)
+  return static_cast<int32_t>(GetCurrentThreadId());
+#else
   return static_cast<int32_t>(syscall(SYS_gettid));
+#endif
 }
 
 int32_t Adaptor::GetMainThreadId() const
 {
+#if defined(_WIN32)
+  return static_cast<int32_t>(GetCurrentProcessId());
+#else
   return static_cast<int32_t>(getpid());
+#endif
 }
 
 Adaptor::AdaptorSignalType& Adaptor::ResizedSignal()
