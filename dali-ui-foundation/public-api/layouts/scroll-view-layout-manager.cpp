@@ -24,6 +24,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/integration-api/scroll-view-impl.h>
+#include <dali-ui-foundation/internal/layouts/layout-dependency-scope.h>
 #include <dali-ui-foundation/internal/layouts/layout-manager-impl.h>
 #include <dali-ui-foundation/public-api/layouts/layout-types.h>
 #include <dali-ui-foundation/public-api/views/scroll/scroll-bar.h>
@@ -136,6 +137,7 @@ void ScrollViewLayoutManager::Arrange(ViewImpl* view, const LayoutRect& bounds)
 
     if(childImpl.GetRequestedWidth() == MATCH_PARENT || childImpl.GetRequestedHeight() == MATCH_PARENT)
     {
+      Internal::LayoutDependency::ArrangeOwnedMeasureScope ownerScope(view);
       childImpl.Measure(childBounds.width, childBounds.height);
     }
     childImpl.Arrange(childBounds);

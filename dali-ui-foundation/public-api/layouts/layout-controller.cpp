@@ -359,8 +359,8 @@ public:
 
     // A resize forces every root to recompute; ensure a layout pass runs even
     // if no other event wakes the event loop, so the invalidated roots drain
-    // and LayoutFinished fires. Unconditional because InvalidateMeasure above
-    // may early-exit for already-dirty roots without re-scheduling a pass.
+    // and LayoutFinished fires. Kept unconditional as defence in depth: a
+    // resize always schedules a pass regardless of prior scheduling state.
     if(DALI_LIKELY(Adaptor::IsAvailable()))
     {
       Adaptor::Get().RequestProcessEventsOnIdle();
