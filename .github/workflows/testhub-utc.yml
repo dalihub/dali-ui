@@ -53,7 +53,18 @@ jobs:
           local value
           local count
 
-          value=$(printf '%s\n' "$PR_BODY" | sed -nE "s/^[[:space:]]*-[[:space:]]*${name}:[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p")
+          value=$(printf '%s\n' "$PR_BODY" | awk '
+            /^##[[:space:]]+Test Dependencies \(optional\)[[:space:]]*$/ {
+              inDependencies = 1
+              next
+            }
+            inDependencies && /^##[[:space:]]/ {
+              exit
+            }
+            inDependencies {
+              print
+            }
+          ' | sed -nE "s/^[[:space:]]*-[[:space:]]*${name}:[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p")
           count=$(printf '%s\n' "$value" | sed '/^$/d' | wc -l)
 
           if [ "$count" -eq 0 ]; then
