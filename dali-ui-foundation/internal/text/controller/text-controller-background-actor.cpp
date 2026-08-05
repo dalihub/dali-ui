@@ -151,30 +151,30 @@ Actor CreateControllerBackgroundActor(const View& textView, const VisualModelPtr
         if(i == 0u && glyphSize == 1u) // Only one glyph in the whole text
         {
           quad.x = position.x;
-          quad.y = yLineOffset;
+          quad.y = static_cast<float>(yLineOffset);
           quad.z = quad.x + std::max(calculatedAdvance, glyph.xBearing + glyph.width);
-          quad.w = lineHeight;
+          quad.w = static_cast<float>(lineHeight);
         }
         else if((lineIndex != prevLineIndex) || (i == 0u)) // The first glyph in the line
         {
           quad.x = position.x;
-          quad.y = yLineOffset;
+          quad.y = static_cast<float>(yLineOffset);
           quad.z = quad.x - glyph.xBearing + calculatedAdvance;
-          quad.w = quad.y + lineHeight;
+          quad.w = quad.y + static_cast<float>(lineHeight);
         }
         else if(i == glyphSize - 1u) // The last glyph in the whole text
         {
           quad.x = position.x - glyph.xBearing;
-          quad.y = yLineOffset;
+          quad.y = static_cast<float>(yLineOffset);
           quad.z = quad.x + std::max(calculatedAdvance, glyph.xBearing + glyph.width);
-          quad.w = quad.y + lineHeight;
+          quad.w = quad.y + static_cast<float>(lineHeight);
         }
         else // The glyph in the middle of the text
         {
           quad.x = position.x - glyph.xBearing;
-          quad.y = yLineOffset;
+          quad.y = static_cast<float>(yLineOffset);
           quad.z = quad.x + calculatedAdvance;
-          quad.w = quad.y + lineHeight;
+          quad.w = quad.y + static_cast<float>(lineHeight);
         }
 
         BackgroundVertex vertex;

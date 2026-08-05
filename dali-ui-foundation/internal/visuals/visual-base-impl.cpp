@@ -579,7 +579,7 @@ void Visual::Base::SetTransformAndSize(const Property::Map& transform, Size cont
   oss.imbue(std::locale::classic());
   oss << transform;
   DALI_LOG_INFO(gVisualBaseLogFilter, Debug::General,
-                "Visual::Base::SetTransformAndSize(%s) - [\e[1;32mtransform: %s  controlSize: (%3.1f, %3.1f) effectiveScale: %3.1f]\e[0m\n",
+                "Visual::Base::SetTransformAndSize(%s) - [\x1b[1;32mtransform: %s  controlSize: (%3.1f, %3.1f) effectiveScale: %3.1f]\x1b[0m\n",
                 GetName().c_str(), oss.str().c_str(), controlSize.x, controlSize.y, effectiveScale);
 #endif
 

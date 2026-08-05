@@ -118,7 +118,7 @@ void CalculateGaussianConstants(uint32_t numSamples, std::vector<float>& weights
   float totalWeights = halfSideKernel[0];
   for(unsigned int i = 1; i < halfKernelSize; i++)
   {
-    float w           = CalculateGaussianWeight(i, bellCurveWidth);
+    float w           = CalculateGaussianWeight(static_cast<float>(i), bellCurveWidth);
     halfSideKernel[i] = w;
     totalWeights += w * 2.0f;
   }

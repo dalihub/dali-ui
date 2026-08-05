@@ -993,7 +993,7 @@ void CreateImageBufferForEachLine(TextAbstraction::FontClient fontClient, GlyphD
 
   FontId lastFontId = 0;
 
-  float lineExtentLeft  = inputParamsForLine.bufferWidth;
+  float lineExtentLeft  = static_cast<float>(inputParamsForLine.bufferWidth);
   float lineExtentRight = 0.0f;
   float baseline        = 0.0f;
   bool  addHyphen       = false;
@@ -1159,7 +1159,7 @@ void CreateTextGradientMaskImageBufferForEachLine(TextAbstraction::FontClient   
   bool                         thereAreStrikethroughGlyphs    = false;
 
   float  currentUnderlinePosition = 0.0f;
-  float  lineExtentLeft           = inputParamsForLine.bufferWidth;
+  float  lineExtentLeft           = static_cast<float>(inputParamsForLine.bufferWidth);
   float  lineExtentRight          = 0.0f;
   float  baseline                 = 0.0f;
   FontId lastFontId               = 0;
@@ -1380,7 +1380,7 @@ void Typesetter::Impl::DrawGlyphsBackground(Devel::PixelBuffer& buffer, const ui
     glyphData.verticalOffset +=
       static_cast<int32_t>(line.ascender + GetPreOffsetVerticalLineAlignment(line, verticalLineAlignType));
 
-    float left     = bufferWidth;
+    float left     = static_cast<float>(bufferWidth);
     float right    = 0.0f;
     float baseline = 0.0f;
 

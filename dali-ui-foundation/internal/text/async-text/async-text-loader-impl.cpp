@@ -1790,8 +1790,8 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
 #endif
 
     // Calculate the actual gap before scrolling wraps.
-    int textPadding     = std::max(controlSize.x - textNaturalSize.x, 0.0f);
-    wrapGap             = std::max(parameters.marqueeGap, textPadding);
+    int textPadding     = static_cast<int>(std::max(controlSize.x - textNaturalSize.x, 0.0f));
+    wrapGap             = static_cast<float>(std::max(parameters.marqueeGap, textPadding));
     Vector2 textureSize = textNaturalSize + Vector2(wrapGap, 0.0f); // Add the gap as a part of the texture.
 
     // Calculate a size of texture for text scrolling
@@ -1856,8 +1856,8 @@ AsyncTextRenderInfo AsyncTextLoader::RenderMarquee(AsyncTextParameters& paramete
     textHeight = useCachedHeight ? textHeight : ComputeHeightForWidth(parameters, parameters.textWidth, layoutOnly);
 
     // Calculate the actual gap before scrolling wraps.
-    int textPadding = std::max(controlSize.y - textHeight, 0.0f);
-    wrapGap         = std::max(parameters.marqueeGap, textPadding);
+    int textPadding = static_cast<int>(std::max(controlSize.y - textHeight, 0.0f));
+    wrapGap         = static_cast<float>(std::max(parameters.marqueeGap, textPadding));
     Vector2 textureSize(controlSize.width, textHeight + wrapGap); // Add the gap as a part of the texture
 
     // Calculate a size of texture for text scrolling

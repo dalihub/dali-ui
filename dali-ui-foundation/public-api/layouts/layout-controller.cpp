@@ -143,8 +143,8 @@ public:
     mProcessingScheduled(false)
   {
     // Get initial window size
-    auto    posSize = window.GetPositionSize();
-    Vector2 size    = Vector2(posSize.width, posSize.height);
+    auto    positionSize = window.GetPositionSize();
+    Vector2 size         = Vector2(static_cast<float>(positionSize.width), static_cast<float>(positionSize.height));
     mWindowWidth    = static_cast<int32_t>(size.width);
     mWindowHeight   = static_cast<int32_t>(size.height);
 
@@ -698,8 +698,8 @@ private:
     mProcessingScheduled = false;
 
     // Default: window size (when root is directly under window or parent size unknown).
-    auto    posSize          = window.GetPositionSize();
-    Vector2 windowSize       = Vector2(posSize.width, posSize.height);
+    auto    positionSize     = window.GetPositionSize();
+    Vector2 windowSize       = Vector2(static_cast<float>(positionSize.width), static_cast<float>(positionSize.height));
     float   widthConstraint  = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.width)));
     float   heightConstraint = static_cast<float>(std::max(0, static_cast<int32_t>(windowSize.height)));
 

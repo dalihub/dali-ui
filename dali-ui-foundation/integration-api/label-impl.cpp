@@ -3192,8 +3192,8 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     DALI_LOG_RELEASE_INFO("[%p] natural size:%f,%f, control size:%f,%f\n", mController.Get(), textNaturalSize.x, textNaturalSize.y, controlSize.x, controlSize.y);
 
     // Calculate the actual gap before scrolling wraps.
-    int textPadding     = std::max(controlSize.x - textNaturalSize.x, 0.0f);
-    wrapGap             = std::max(scaledMarqueeGap, textPadding);
+    int textPadding     = static_cast<int>(std::max(controlSize.x - textNaturalSize.x, 0.0f));
+    wrapGap             = static_cast<float>(std::max(scaledMarqueeGap, textPadding));
     Vector2 textureSize = textNaturalSize + Vector2(wrapGap, 0.0f); // Add the gap as a part of the texture
 
     // Create a texture of the text for scrolling
@@ -3218,8 +3218,8 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
     const float textHeight = mController->GetHeightForWidth(controlSize.width);
 
     // Calculate the actual gap before scrolling wraps.
-    int textPadding = std::max(controlSize.height - textHeight, 0.0f);
-    wrapGap         = std::max(scaledMarqueeGap, textPadding);
+    int textPadding = static_cast<int>(std::max(controlSize.height - textHeight, 0.0f));
+    wrapGap         = static_cast<float>(std::max(scaledMarqueeGap, textPadding));
     Vector2 textureSize(controlSize.width, textHeight + wrapGap); // Add the gap as a part of the texture
 
     // Create a texture of the text for scrolling

@@ -47,7 +47,7 @@
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-foundation/public-api/visuals/visual-properties.h>
 
-#if defined(_WIN32)
+#if defined(_MSC_VER)
 #include <dali/integration-api/scene.h>
 #include <dali/public-api/events/point-state.h>
 
@@ -58,7 +58,21 @@
 // arrow-key input issue is under investigation. Remove once resolved.
 #include <cstdarg>
 #include <cstdio>
-static void WvDbg(const char* fmt, ...) { FILE* f = fopen("d:\\lwe_webview.log", "a"); if(!f) return; va_list ap; va_start(ap, fmt); vfprintf(f, fmt, ap); va_end(ap); fputc('\n', f); fclose(f); }
+static void WriteWebViewDebugLog(const char* format, ...)
+{
+  FILE* outputFile = nullptr;
+  if(fopen_s(&outputFile, "d:\\lwe_webview.log", "a") != 0 || outputFile == nullptr)
+  {
+    return;
+  }
+
+  va_list arguments;
+  va_start(arguments, format);
+  vfprintf(outputFile, format, arguments);
+  va_end(arguments);
+  fputc('\n', outputFile);
+  fclose(outputFile);
+}
 #endif
 
 namespace Dali
@@ -520,8 +534,8 @@ void WebViewImpl::OnFrameRendered()
   // Notify listeners that the web engine produced a new frame.
   EmitFrameRendered();
 
-#if defined(_WIN32)
-  WvDbg("[WV] OnFrameRendered visualChangeReq=%d hasVisual=%d", (int)mVisualChangeRequired, (int)(bool)mVisual);
+#if defined(_MSC_VER)
+  WriteWebViewDebugLog("[WV] OnFrameRendered visualChangeReq=%d hasVisual=%d", static_cast<int>(mVisualChangeRequired), static_cast<int>(static_cast<bool>(mVisual)));
 
   // The web engine delivers frames asynchronously (via EventThreadCallback) rather than in
   // response to a scene change, so the DALi scene is not marked dirty and, under on-demand
@@ -571,10 +585,10 @@ void WebViewImpl::OnFrameRendered()
   imageVisualMap.Insert(Dali::Ui::ImageVisualPropertyIndex::WRAP_MODE_V, static_cast<int>(WrapMode::CLAMP_TO_EDGE));
 
   mVisual = Ui::Integration::VisualFactory::Get().CreateVisual(imageVisualMap);
-#if defined(_WIN32)
+#if defined(_MSC_VER)
   {
     Vector3 selfSize = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
-    WvDbg("[WV] created visual=%d nativeImg=%ux%u selfSize=%.0fx%.0f",
+    WriteWebViewDebugLog("[WV] created visual=%d nativeImg=%ux%u selfSize=%.0fx%.0f",
           (int)(bool)mVisual, mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight,
           selfSize.width, selfSize.height);
   }
@@ -1335,12 +1349,12 @@ bool WebViewImpl::OnTouchEvent(Dali::Actor /*actor*/, Dali::TouchEvent touch)
 {
   if(mMouseEventsEnabled && mWebEngine)
   {
-#if defined(_WIN32)
+#if defined(_MSC_VER)
     {
       Vector3 sz = Self().GetCurrentProperty<Vector3>(Dali::Actor::Property::SIZE);
       Vector2 lp = touch.GetPointCount() ? touch.GetLocalPosition(0) : Vector2::ZERO;
       Vector2 sp = touch.GetPointCount() ? touch.GetScreenPosition(0) : Vector2::ZERO;
-      WvDbg("[TOUCH] actorSize=%.0fx%.0f local=(%.0f,%.0f) screen=(%.0f,%.0f) lastImg=%ux%u",
+      WriteWebViewDebugLog("[TOUCH] actorSize=%.0fx%.0f local=(%.0f,%.0f) screen=(%.0f,%.0f) lastImg=%ux%u",
             sz.width, sz.height, lp.x, lp.y, sp.x, sp.y,
             mLastRenderedNativeImageWidth, mLastRenderedNativeImageHeight);
     }

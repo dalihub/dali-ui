@@ -105,18 +105,18 @@ public:
   void OnCreate(Application application)
   {
     Window  window = application.GetWindow();
-    auto    posSize = window.GetPositionSize();
-    Vector2 winSz  = Vector2(posSize.width, posSize.height);
+    auto    positionSize = window.GetPositionSize();
+    Vector2 windowSize   = Vector2(static_cast<float>(positionSize.width), static_cast<float>(positionSize.height));
     window.SetBackgroundColor(Vector4(0.93f, 0.93f, 0.95f, 1.0f));
     window.KeyEventSignal().Connect(this, &ChartGalleryController::OnKeyEvent);
 
-    mCw             = (winSz.x - GAP * (COLS + 1)) / COLS;
+    mCw             = (windowSize.x - GAP * (COLS + 1)) / COLS;
     mCh             = mCw * 0.82f;
     mRowH           = mCh + LABEL_H + GAP;
     const int N     = 22;
     const int nRows = (N + COLS - 1) / COLS;
     mTotalH         = nRows * mRowH + GAP;
-    mWinH           = winSz.y - HEADER_H;
+    mWinH           = windowSize.y - HEADER_H;
 
     // All UI lives in one MATCH_PARENT AbsoluteLayout so the dali-ui layout
     // system processes everything — essential for ChartView::OnArrange.
@@ -130,7 +130,7 @@ public:
     header.SetLayoutParams(AbsoluteLayoutParams::New()
                              .SetX(0.0f)
                              .SetY(0.0f)
-                             .SetWidth(winSz.x)
+                             .SetWidth(windowSize.x)
                              .SetHeight(HEADER_H));
     header.SetFontSize(11.0f);
     header.SetTextColor(UiColor(1.f, 1.f, 1.f, 1.f));
@@ -141,12 +141,12 @@ public:
     // Content area starts below the header. CLIPPING_MODE ensures charts
     // scrolled above the header boundary are clipped and do not overlap it.
     mContentArea = AbsoluteLayout::New();
-    mContentArea.SetRequestedWidth(winSz.x);
+    mContentArea.SetRequestedWidth(windowSize.x);
     mContentArea.SetRequestedHeight(mWinH);
     mContentArea.SetLayoutParams(AbsoluteLayoutParams::New()
                                    .SetX(0.0f)
                                    .SetY(HEADER_H)
-                                   .SetWidth(winSz.x)
+                                   .SetWidth(windowSize.x)
                                    .SetHeight(mWinH));
     mContentArea.SetProperty(Actor::Property::CLIPPING_MODE,
                              static_cast<int>(ClippingMode::CLIP_TO_BOUNDING_BOX));
