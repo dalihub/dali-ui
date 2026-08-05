@@ -48,7 +48,9 @@ DALI_TYPE_REGISTRATION_END()
 
 InteractiveViewImplPtr InteractiveViewImpl::New()
 {
-  return new InteractiveViewImpl();
+  InteractiveViewImplPtr impl(new InteractiveViewImpl());
+
+  return impl;
 }
 
 void InteractiveViewImpl::OnInitialize()

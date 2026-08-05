@@ -45,11 +45,13 @@ void utc_dali_ui_scale_effective_scale_internal_cleanup(void)
 // White-box coverage for the effective-scale sync bit (mEffectiveScaleValid) and
 // for the arrange-cache bookkeeping that depends on it.
 //
-// None of this is observable through geometry in this increment: the arrange
-// cache has no hit path yet, so mArrangeCacheValid is write-only from the
-// library's point of view. These tests therefore read the bits directly through
-// ViewDataImpl's white-box accessors, which is the only position they can be
-// observed from at all.
+// The arrange cache now has a hit path, but it serves CHILDLESS views only, so the
+// bookkeeping pinned here is still not observable through geometry from most of the
+// shapes these tests build. These tests therefore read the bits directly through
+// ViewDataImpl's white-box accessors, which states the claim about the bits
+// themselves rather than about a hit that happens to depend on them. The
+// producer-level, geometry-observable side is covered by the arrange cache suites
+// (utc-Dali-ArrangeCacheHit-internal.cpp and the black-box cases in utc-Dali-View.cpp).
 //
 // UiScaleManagerImpl keeps the scale in a process-wide singleton, so every test
 // here records the incoming scale and restores it before returning.
@@ -335,6 +337,117 @@ int UtcDaliUiScaleResetClearsWholeSubtreeEffectiveScaleP(void)
   DALI_TEST_CHECK(!DataOf(root).IsEffectiveScaleValid());
   DALI_TEST_CHECK(!DataOf(child).IsEffectiveScaleValid());
   DALI_TEST_CHECK(!DataOf(grandChild).IsEffectiveScaleValid());
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// ---------------------------------------------------------------------------
+// The ACTOR-side half of the scale sync pair: mEffectiveScaleActorSynced.
+//
+// mEffectiveScaleValid says "the CACHED effective scale is usable";
+// mEffectiveScaleActorSynced says "the ACTOR already holds that value in its
+// animatable VIEW_EFFECTIVE_SCALE property". The second bit exists so that
+// Measure() can skip reading that property -- a read that sat ABOVE the
+// cache-hit test and therefore ran on every hit. These two tests pin the two
+// halves of the claim that makes the elision behaviour-neutral: the bit is
+// dropped by a scale-context change, and it is dropped by an external write of
+// the property so the corrective push is still reached on a cache HIT.
+// ---------------------------------------------------------------------------
+
+// Non-vacuity (verified by mutation): removing `mEffectiveScaleActorSynced = false`
+// from ViewDataImpl::DropCachedEffectiveScale leaves the bit live across the scale
+// change below, so the next Measure() skips its push and the actor property stays
+// at the OLD scale -- the post-change bit check and the final property check both
+// fail.
+int UtcDaliUiScaleEffectiveScaleActorSyncBitP(void)
+{
+  UiTestApplication application;
+  tet_infoline("mEffectiveScaleActorSynced tracks whether the actor already holds the effective scale");
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(1.0f);
+
+  View view = View::New();
+  view.SetRequestedWidth(100.0f);
+  view.SetRequestedHeight(100.0f);
+
+  // Never measured: nothing has pushed the scale to the actor yet.
+  DALI_TEST_CHECK(!DataOf(view).IsEffectiveScaleActorSynced());
+
+  application.GetScene().Add(view);
+  Settle(application);
+
+  DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleActorSynced());
+  DALI_TEST_EQUALS(view.GetProperty<float>(Dali::Ui::Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), 1.0f, 0.001f, TEST_LOCATION);
+
+  // No layout pass in between: the scale invalidation itself, not a later pass,
+  // is what must retract the actor-side claim.
+  UiScaleManager::Get().SetScale(1.5f);
+  DALI_TEST_CHECK(!DataOf(view).IsEffectiveScaleActorSynced());
+
+  // ...and the next pass re-establishes it with the NEW scale.
+  Settle(application);
+
+  DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleActorSynced());
+  DALI_TEST_EQUALS(view.GetProperty<float>(Dali::Ui::Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), 1.5f, 0.001f, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+namespace
+{
+int gActorScaleSyncMeasureCount = 0;
+
+MeasuredSize CountingMeasure(View, float, float)
+{
+  ++gActorScaleSyncMeasureCount;
+  return MeasuredSize(40.0f, 30.0f);
+}
+} // namespace
+
+// The behaviour the read-elision must not lose: before the gate, Measure() read the
+// actor property back on EVERY call and corrected any external clobber, cache hit
+// included. It is preserved because dali-core routes every event-side write of a
+// registered animatable property through its set function -- ViewDataImpl::SetProperty
+// -- which retracts the sync bit, so the very next Measure() re-reads and re-pushes.
+//
+// The measure-callback counter is what makes "cache HIT" a fact rather than an
+// assumption: the producer must run exactly once across the two Measure() calls.
+//
+// Non-vacuity (verified by mutation): removing `dataImpl.mEffectiveScaleActorSynced = false`
+// from the VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX case of ViewDataImpl::SetProperty leaves
+// the bit live, the hit below skips the push, and the property stays at the clobbered
+// value -- the last two checks fail.
+int UtcDaliUiScaleEffectiveScaleActorSyncRepairedOnMeasureCacheHitP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An external write of the effective-scale property is repaired by the next Measure, cache HIT included");
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(1.0f);
+
+  View view                   = View::New();
+  gActorScaleSyncMeasureCount = 0;
+  view.SetMeasureCallback(MeasureCallback::New(&CountingMeasure));
+
+  // First Measure: a MISS. Publishes the cache entry and pushes the scale.
+  view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(gActorScaleSyncMeasureCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(DataOf(view).IsMeasureCacheValid());
+  DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleActorSynced());
+  DALI_TEST_EQUALS(view.GetProperty<float>(Dali::Ui::Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), 1.0f, 0.001f, TEST_LOCATION);
+
+  // Clobber the framework-owned property from outside.
+  view.SetProperty(Dali::Ui::Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX, 42.0f);
+  DALI_TEST_CHECK(!DataOf(view).IsEffectiveScaleActorSynced());
+
+  // Nothing invalidated the measure cache, so the same constraint is a HIT.
+  view.Measure(200.0f, 200.0f);
+  DALI_TEST_EQUALS(gActorScaleSyncMeasureCount, 1, TEST_LOCATION);
+  DALI_TEST_CHECK(DataOf(view).IsEffectiveScaleActorSynced());
+  DALI_TEST_EQUALS(view.GetProperty<float>(Dali::Ui::Internal::VIEW_EFFECTIVE_SCALE_PROPERTY_INDEX), 1.0f, 0.001f, TEST_LOCATION);
 
   UiScaleManager::Get().SetScale(originalScale);
   END_TEST;

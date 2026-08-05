@@ -133,6 +133,95 @@ A **layout root** is a top-level View in the layout hierarchy (its parent is not
 2. **Arrange**  
    - The View is given a `LayoutRect` (typically from 0,0 with the measured size). It applies its own alignment and margin, and if it has a LayoutManager, the manager calls `Arrange(child, childBounds)` for each child to set position and size.
 
+### Layout caching and the producer contract
+
+Both phases are cached, and both caches skip work rather than change results.
+Understanding what they key on is the whole of what a custom View, LayoutManager
+or callback has to know.
+
+The **measure cache** is unconditional. `View::Measure()` serves a stored
+`MeasuredSize` whenever the normalised constraint is unchanged and nothing has
+invalidated the view's layout, and the measure producer — `OnMeasure()`, an
+attached `LayoutManager::Measure()`, or a `MeasureCallback` — is simply not
+called. There is no opt-out. A measure producer is therefore **required** to be a
+pure function of:
+
+- its two constraints,
+- the view's effective scale,
+- the view's effective layout direction,
+- the view's own layout-tracked state (requested size, padding, margin, min/max
+  bounds, layout params, child list),
+- its children's measured sizes.
+
+Anything else it reads, it owns: it must call `InvalidateMeasure()` itself when
+that state changes, or the view keeps its previous measured size until some
+unrelated invalidation happens to arrive.
+
+The **arrange cache** uses `ArrangePolicy::IF_CHANGED` by default.
+`View::Arrange()` may serve a stored result when the input bounds, effective layout
+direction and effective scale are unchanged and nothing has invalidated the view.
+The default applies to `OnArrange()`, a callback installed through the one-argument
+`SetArrangeCallback()`, and `LayoutManager::Arrange()`.
+
+Use `ArrangePolicy::ALWAYS` when a producer reads state outside layout
+invalidation or performs externally visible work on every pass:
+
+| Producer | How it selects `ALWAYS` |
+|---|---|
+| `OnArrange()` override | `ViewImpl::SetArrangePolicy(ArrangePolicy::ALWAYS)` |
+| `ArrangeCallback` | `View::SetArrangeCallback(callback, ArrangePolicy::ALWAYS)` |
+| `LayoutManager::Arrange()` | protected `LayoutManager::SetArrangePolicy(ArrangePolicy::ALWAYS)` |
+
+Policy is stored on the implementation instance and inherited by subclasses. A
+subclass may select another policy after its base constructor completes. Producers
+that read ancestor or world geometry (`SCREEN_POSITION`, `WORLD_POSITION`, window
+coordinates), push state to a surface outside the actor tree, or depend on mutable
+state without invalidating arrange must use `ALWAYS`. `VideoView`, `WebView`,
+`RecyclerView` and the ScrollView layout manager are the in-library examples.
+
+**A cache hit is an optimisation of the work, never of the result.** Serving the
+arrange cache for a view with children does not prune the subtree: it replays it,
+performing per node exactly the observable work a re-run performs — reconciling
+the actor against the node's arranged bounds, mirroring direct children under
+right-to-left, and notifying `LayoutFinishedSignal()` subscribers. Geometry
+written outside layout is repaired either way. What a hit elides is the producer
+call, and with it the recomputation of a result already known. Because the policy
+is evaluated at every level, a single `ALWAYS` producer anywhere in a
+subtree makes that whole subtree re-run.
+
+`LayoutFinishedSignal()` is therefore **pass-based**: a subscriber is told its
+view was arranged in this pass, whether that pass ran the producer or served the
+cache. It is not a "bounds changed" notification.
+
+### Invalidation
+
+`InvalidateMeasure()` / `InvalidateArrange()` do two things: they mark the view,
+and they walk its ancestor chain to a layout root and register that root with the
+LayoutController.
+
+The mark always happens. The walk is coalesced: a view records the *invalidation
+epoch* in which it last walked, and while that record is current — meaning the
+registration it made is still pending and the chain it marked is still marked — a
+further invalidation on the same axis skips the walk. The epoch ends whenever the
+controller drains its pending set and whenever an outermost Measure/Arrange pass
+completes (a pass is the only consumer of dirty bits, and a manual
+`Measure()`/`Arrange()` call is a pass too), so the next invalidation walks again.
+While any pass is on the stack the skip is disabled outright, because a mid-pass
+walk also poisons in-progress ancestors. Coalescing changes only how often the
+ancestor chain is traversed; a batch of invalidations before one pass is all
+serviced by that pass.
+
+The measure and arrange records are independent, because an arrange walk leaves
+the ancestors' measure caches valid and an ancestor measure hit does not
+re-measure its children.
+
+**`LayoutManager` state.** A manager that keeps state of its own — an
+orientation, a spacing, a set of row definitions — is outside every cache key,
+because neither key can see it. Pair every such setter with
+`LayoutManager::InvalidateOwnerMeasure()` (or `InvalidateOwnerArrange()` when only
+placement is affected); the in-library managers all do, which is what makes their
+that state part of the layout-tracked inputs used by their `Arrange()` implementations.
+
 ### Measure constraints (sign-encoded budget)
 
 During Measure the parent passes the width and height constraints each as a single **sign-encoded `float`** — there is no separate mode field and no measure-mode enum anywhere in the API:
@@ -269,9 +358,10 @@ where `logicalX` and `childW` are the child's **logical** arranged bounds
 (`GetArrangedBounds().x` / `.width`), not its actor `POSITION_X`. Mirroring
 from the logical bounds makes the flip a pure function of arranged geometry --
 idempotent and immune to an external `POSITION_X` write -- rather than an
-involution over the actor's persistent position. A child that a producer
-placed but never arranged has no logical bounds yet and falls back to the
-historical actor read-back.
+involution over the actor's persistent position. A child that a producer has
+not arranged has no parent-owned logical bounds and is left untouched. Reading
+its current physical actor position as logical input would make repeated
+identical passes alternate between mirrored and unmirrored coordinates.
 
 - The mirror is **generic**: it applies uniformly to every direct child of
   every View. `AbsoluteLayout` is just one case — a child arranged at some X

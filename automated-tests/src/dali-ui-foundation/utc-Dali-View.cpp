@@ -31,6 +31,7 @@
 #include <dali-ui-test-suite-utils.h>
 #include <dali.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
+#include <dali/devel-api/object/type-registry.h>
 #include <dali/integration-api/adaptor-framework/accessibility/accessibility-integ.h>
 #include <dali/integration-api/events/key-event-integ.h>
 #include <stdlib.h>
@@ -443,6 +444,118 @@ MeasuredSize CountingPassThroughMeasure(View view, float widthConstraint, float 
     }
   }
   return MeasuredSize(maxWidth, maxHeight);
+}
+
+// --- Arrange cache-HIT observation (childless views) ---------------------
+//
+// A counting LEAF arrange producer. It echoes its input slot and does nothing
+// else, so its invocation count measures exactly one thing: whether this view's
+// Arrange() ran its producer or served an arrange cache HIT. Every test using it
+// resets the counter at its own start (the counter is file-global and the suite
+// shares a process).
+int gCountingArrangeProducerCount = 0;
+
+LayoutRect CountingLeafArrange(View, const LayoutRect& bounds)
+{
+  ++gCountingArrangeProducerCount;
+  return bounds;
+}
+
+// The same counter, but the producer returns a rect that differs from its input
+// on all four axes. Used to prove that a cache hit hands back (and re-applies)
+// the PUBLISHED bounds the producer chose, not the input slot.
+//
+// Every component differs from the (0, 0, 50, 40) slot it is handed in
+// UtcDaliViewArrangeCacheHitPreservesGeometryP, which is what makes "all four axes"
+// literally true -- a hit that echoed its input would be caught on any of them.
+const LayoutRect COUNTING_CUSTOM_ARRANGE_RESULT(15.0f, 25.0f, 60.0f, 45.0f);
+
+LayoutRect CountingCustomBoundsArrange(View, const LayoutRect&)
+{
+  ++gCountingArrangeProducerCount;
+  return COUNTING_CUSTOM_ARRANGE_RESULT;
+}
+
+// Drives one full layout batch to completion.
+void SettleLayout(UiTestApplication& application)
+{
+  application.SendNotification();
+  application.Render();
+  application.SendNotification();
+  application.Render();
+}
+
+// --- Arrange cache-HIT observation (views WITH children) ------------------
+//
+// A counting producer for a CONTAINER. An ArrangeCallback cannot play this role: it
+// REPLACES OnArrange, so a view carrying one never arranges its children at all and
+// the subtree below it would simply never be laid out. This subclass counts and then
+// delegates to ViewImpl::OnArrange (ArrangeDefault), so it is a genuine container
+// producer whose invocation count measures exactly one thing -- whether this view's
+// Arrange() ran its producer or was served from cache.
+//
+// The test factory selects the requested policy explicitly; production subclasses
+// may do the same in a constructor.
+class CountingContainerViewImpl : public ViewImpl
+{
+public:
+  static IntrusivePtr<CountingContainerViewImpl> New(bool arrangeIfChanged)
+  {
+    IntrusivePtr<CountingContainerViewImpl> impl(new CountingContainerViewImpl());
+    impl->SetArrangePolicy(arrangeIfChanged ? ArrangePolicy::IF_CHANGED : ArrangePolicy::ALWAYS);
+    return impl;
+  }
+
+  int GetArrangeCallCount() const
+  {
+    return mArrangeCount;
+  }
+
+protected:
+  CountingContainerViewImpl()
+  : ViewImpl()
+  {
+  }
+
+  LayoutRect OnArrange(const LayoutRect& bounds) override
+  {
+    ++mArrangeCount;
+    return ViewImpl::OnArrange(bounds);
+  }
+
+private:
+  int mArrangeCount{0};
+};
+
+// Register so TypeInfo lookup can walk the chain.
+Dali::TypeRegistration countingContainerViewTypeReg(
+  typeid(CountingContainerViewImpl), typeid(ViewImpl), nullptr);
+
+View CreateCountingContainer(bool arrangeIfChanged)
+{
+  auto impl = CountingContainerViewImpl::New(arrangeIfChanged);
+  return View(*impl);
+}
+
+CountingContainerViewImpl& CountingContainerImplOf(View view)
+{
+  return static_cast<CountingContainerViewImpl&>(GetImpl(view));
+}
+
+LayoutRect ActorRectOf(View view)
+{
+  return LayoutRect(view.GetProperty<float>(Actor::Property::POSITION_X),
+                    view.GetProperty<float>(Actor::Property::POSITION_Y),
+                    view.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                    view.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+}
+
+void CheckActorRect(View view, const LayoutRect& expected, const char* location)
+{
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_X), expected.x, location);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::POSITION_Y), expected.y, location);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), expected.width, location);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), expected.height, location);
 }
 
 // An ArrangeCallback that measures a DESCENDANT (deliberately not a direct
@@ -4958,8 +5071,9 @@ int UtcDaliViewStandaloneSteadyStateUsesMeasureConstraintP(void)
 // repeated out-of-band measurements must schedule exactly ZERO layout passes,
 // however many of them there are. (If it ever started raising dirty instead,
 // every external Measure() would cost a frame of layout.)
-// The root's arrange producer is the pass detector: arrange has no cache-hit
-// path, so it runs on every pass the controller schedules.
+// The root's arrange producer is the pass detector: the arrange cache HIT is
+// restricted to CHILDLESS views and the root has children, so its producer runs
+// on every pass the controller schedules.
 int UtcDaliViewAncestorCacheOnlyInvalidationSchedulesNoLayoutP(void)
 {
   UiTestApplication application;
@@ -5182,7 +5296,12 @@ int UtcDaliViewUnownedArrangeInProgressAncestorLosesCacheP(void)
   View x = View::New();
   x.SetRequestedWidth(200.0f);
   x.SetRequestedHeight(100.0f);
-  x.SetArrangeCallback(ArrangeCallback::New(&DescendantMeasuringArrange));
+  // ALWAYS, and honestly so: the callback reads the file-static arming
+  // state, which no layout invalidation tracks. It is also what this test NEEDS --
+  // the armed out-of-band measure below must fire on every driven pass, and under
+  // the IF_CHANGED default a settled X would be served from cache and
+  // never measure D at all.
+  x.SetArrangeCallback(ArrangeCallback::New(&DescendantMeasuringArrange), ArrangePolicy::ALWAYS);
 
   View a = View::New();
   a.SetRequestedWidth(200.0f);
@@ -5277,7 +5396,9 @@ int UtcDaliViewUnscopedArrangeReMeasureOfDirectChildIsProtectedP(void)
   View v = View::New();
   v.SetRequestedWidth(200.0f);
   v.SetRequestedHeight(100.0f);
-  v.SetArrangeCallback(ArrangeCallback::New(&DescendantMeasuringArrange));
+  // ALWAYS for the same two reasons as the sibling test above: the callback
+  // reads untracked arming state, and the armed re-measure must fire on every pass.
+  v.SetArrangeCallback(ArrangeCallback::New(&DescendantMeasuringArrange), ArrangePolicy::ALWAYS);
 
   View c = View::New();
   c.SetMeasureCallback(MeasureCallback::New(&ClampToConstraintMeasure));
@@ -5539,6 +5660,1770 @@ int UtcDaliViewArrangeRestoresExternallyMovedSelfGeometryRtlP(void)
   parent.Arrange(slot);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 130.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A STANDALONE child added to an already SETTLED parent is placed by the parent's
+// next arrange pass.
+//
+// The placement of a standalone child lives on the ARRANGE path only
+// (ArrangeStandaloneChildren), below the point where an arrange cache HIT returns.
+// The parent's entry was published for a child set that did not contain this child,
+// so it must not survive the add -- ViewDataImpl::OnChildAdded issues an
+// InvalidateArrange() on the standalone-child path for exactly that reason. Adding a
+// standalone child deliberately does NOT invalidate the parent's MEASURE (a standalone
+// child contributes nothing to the parent's measured size), which is what makes the
+// arrange-side signal the only one there is.
+//
+// The child is MATCH_PARENT on both axes -- the shape of the first-party standalone
+// views (ScrollBar, focus indicator) -- so ArrangeStandaloneChild measures it against
+// the parent's extent as part of placing it, and the expected geometry does not depend
+// on a measure pass having run beforehand.
+//
+// Non-vacuity (verified by mutation): removing the InvalidateArrange() from
+// OnChildAdded's standalone branch leaves the parent's entry live, the re-Arrange below
+// serves it, and the standalone child is never placed. (While the hit is childless-only
+// this is masked -- the parent stops being childless at the add and misses anyway --
+// so this behavioural test is the pin for that bookkeeping.)
+int UtcDaliViewArrangeStandaloneChildAddedAfterSettleIsPlacedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A standalone child added after the parent settled is still placed by its next arrange");
+
+  View parent = View::New();
+  parent.SetRequestedWidth(200.0f);
+  parent.SetRequestedHeight(100.0f);
+  application.GetScene().Add(parent);
+
+  View regular = View::New();
+  regular.SetRequestedWidth(50.0f);
+  regular.SetRequestedHeight(40.0f);
+  parent.Add(regular);
+
+  SettleLayout(application);
+
+  // The slot the parent settled into IS the key its arrange entry was published under,
+  // so the re-Arrange below is a hit candidate on every term but the one under test.
+  const LayoutRect parentSlot(parent.GetProperty<float>(Actor::Property::POSITION_X),
+                              parent.GetProperty<float>(Actor::Property::POSITION_Y),
+                              parent.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                              parent.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+  DALI_TEST_EQUALS(parentSlot.width, 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(parentSlot.height, 100.0f, TEST_LOCATION);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetRequestedX(10.0f);
+  standalone.SetRequestedY(20.0f);
+  standalone.SetRequestedWidth(MATCH_PARENT);
+  standalone.SetRequestedHeight(MATCH_PARENT);
+  parent.Add(standalone);
+
+  // Nothing has placed it yet.
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, TEST_LOCATION);
+
+  // One arrange of the parent into the SAME slot. ArrangeStandaloneChild computes
+  // (requestedX, requestedY) at the parent's full extent for a MATCH_PARENT child.
+  parent.Arrange(parentSlot);
+
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_X), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_Y), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 100.0f, TEST_LOCATION);
+
+  // The regular child is untouched by any of this.
+  DALI_TEST_EQUALS(regular.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5a: the arrange cache HIT, for CHILDLESS (leaf) views.
+//
+// The whole increment is observed through one signal: whether a leaf's arrange
+// producer RAN. Geometry is deliberately asserted alongside every count, because
+// the contract is not "fewer producer runs" but "fewer producer runs AND a
+// byte-identical result".
+// ---------------------------------------------------------------------------
+
+// THE WIN. A settled leaf does not re-run its arrange producer when a layout pass
+// sweeps past it for a reason that has nothing to do with it: a SIBLING was
+// invalidated, the root re-arranges, and the settled leaf is handed the same slot
+// it already holds a cached result for.
+//
+// Non-vacuity (verified by mutation): disabling the hit predicate
+// (`if(false && mArrangeCacheValid && ...)`) makes the leaf's producer run again
+// and the count assertion below fails.
+int UtcDaliViewArrangeCacheHitSkipsLeafProducerP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A settled leaf serves its arrange from cache when a sibling forces a pass");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leafA = View::New();
+  leafA.SetRequestedWidth(50.0f);
+  leafA.SetRequestedHeight(50.0f);
+  leafA.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leafA);
+
+  View leafB = View::New();
+  leafB.SetRequestedWidth(50.0f);
+  leafB.SetRequestedHeight(50.0f);
+  root.Add(leafB);
+
+  SettleLayout(application);
+
+  const int settledCount = gCountingArrangeProducerCount;
+  DALI_TEST_CHECK(settledCount > 0);
+  const float leafAx = leafA.GetProperty<float>(Actor::Property::POSITION_X);
+  const float leafAw = leafA.GetProperty<float>(Actor::Property::SIZE_WIDTH);
+
+  // Invalidate the SIBLING. This propagates up to the root and schedules a real
+  // layout pass, which re-arranges every child -- including leafA, whose own
+  // inputs (its measured slot, its position in the parent, the layout direction,
+  // the effective scale) are all unchanged.
+  leafB.SetRequestedX(11.0f);
+  SettleLayout(application);
+
+  // The pass really happened...
+  DALI_TEST_EQUALS(leafB.GetProperty<float>(Actor::Property::POSITION_X), 11.0f, TEST_LOCATION);
+
+  // ...and leafA was arranged by it without its producer running again.
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+
+  // The result is unchanged, which is the other half of the contract.
+  DALI_TEST_EQUALS(leafA.GetProperty<float>(Actor::Property::POSITION_X), leafAx, TEST_LOCATION);
+  DALI_TEST_EQUALS(leafA.GetProperty<float>(Actor::Property::SIZE_WIDTH), leafAw, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A hit is result-identical to the miss it replaces, on all four axes and on the
+// value Arrange() hands back.
+//
+// Part 2 is what pins "return mArrangedBounds, not bounds": the producer returns a
+// rect that differs from its input slot on every axis, so a hit that echoed its
+// input would be visible in the return value even though the actor geometry
+// (re-applied from mArrangedBounds either way) would look right.
+//
+// Non-vacuity (verified by mutation): `return bounds;` in place of
+// `return mArrangedBounds;` in the hit body fails part 2; disabling the hit
+// predicate leaves part 1 passing but breaks its producer-count assertions.
+int UtcDaliViewArrangeCacheHitPreservesGeometryP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An arrange cache hit reproduces the missing pass's geometry and return value");
+
+  gCountingArrangeProducerCount = 0;
+
+  // --- Part 1: five repeat passes leave all four axes untouched.
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedY(10.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leaf);
+
+  SettleLayout(application);
+
+  const LayoutRect rootSlot(root.GetProperty<float>(Actor::Property::POSITION_X),
+                            root.GetProperty<float>(Actor::Property::POSITION_Y),
+                            root.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            root.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+
+  const int settledCount = gCountingArrangeProducerCount;
+  DALI_TEST_CHECK(settledCount > 0);
+
+  for(int pass = 0; pass < 5; ++pass)
+  {
+    root.Arrange(rootSlot);
+    DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_Y), 10.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 40.0f, TEST_LOCATION);
+    // Every one of those passes served the leaf from cache.
+    DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+  }
+
+  // --- Part 2: the hit returns the PUBLISHED bounds, not the input slot.
+  gCountingArrangeProducerCount = 0;
+
+  View standalone = View::New();
+  standalone.SetRequestedWidth(50.0f);
+  standalone.SetRequestedHeight(40.0f);
+  standalone.SetArrangeCallback(ArrangeCallback::New(&CountingCustomBoundsArrange), ArrangePolicy::IF_CHANGED);
+  application.GetScene().Add(standalone);
+
+  const LayoutRect slot(0.0f, 0.0f, 50.0f, 40.0f);
+  standalone.Measure(50.0f, 40.0f);
+
+  const LayoutRect produced = standalone.Arrange(slot); // MISS: the producer runs.
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(produced.x, COUNTING_CUSTOM_ARRANGE_RESULT.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(produced.y, COUNTING_CUSTOM_ARRANGE_RESULT.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(produced.width, COUNTING_CUSTOM_ARRANGE_RESULT.width, TEST_LOCATION);
+  DALI_TEST_EQUALS(produced.height, COUNTING_CUSTOM_ARRANGE_RESULT.height, TEST_LOCATION);
+
+  const LayoutRect served = standalone.Arrange(slot); // HIT: no producer run.
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(served.x, produced.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(served.y, produced.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(served.width, produced.width, TEST_LOCATION);
+  DALI_TEST_EQUALS(served.height, produced.height, TEST_LOCATION);
+
+  // ...and the actor still carries the produced geometry, not the input slot, on every
+  // one of the four axes.
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_X), COUNTING_CUSTOM_ARRANGE_RESULT.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_Y), COUNTING_CUSTOM_ARRANGE_RESULT.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), COUNTING_CUSTOM_ARRANGE_RESULT.width, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), COUNTING_CUSTOM_ARRANGE_RESULT.height, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The cache KEY. A leaf handed a DIFFERENT slot must miss and re-run its producer.
+//
+// The slot is changed by arranging the leaf directly rather than by moving it
+// through its parent: a slot change routed through the parent (padding, requested
+// position) also changes the constraint the leaf is measured against, so the leaf's
+// arrange cache would be dropped by MeasurePassGuard and the KEY comparison would
+// never be the thing under test.
+//
+// Non-vacuity (verified by mutation): making SameLayoutRect return true
+// unconditionally makes the second Arrange hit, and both the producer count and the
+// leaf's position assertion below fail.
+int UtcDaliViewArrangeCacheMissOnDifferentSlotP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A leaf handed a different arrange slot misses and re-runs its producer");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leaf);
+
+  SettleLayout(application);
+
+  // The producer echoes its input, so the settled actor geometry IS the slot the
+  // cache was keyed on.
+  const LayoutRect leafSlot(leaf.GetProperty<float>(Actor::Property::POSITION_X),
+                            leaf.GetProperty<float>(Actor::Property::POSITION_Y),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+
+  // Control: the SAME slot hits (this is also what makes the miss below meaningful).
+  const int settledCount = gCountingArrangeProducerCount;
+  leaf.Arrange(leafSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+
+  // A different slot: one axis is enough.
+  const LayoutRect movedSlot(leafSlot.x + 5.0f, leafSlot.y, leafSlot.width, leafSlot.height);
+  leaf.Arrange(movedSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount + 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), leafSlot.x + 5.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A layout-direction change re-arranges the leaf rather than serving it from cache,
+// and the mirror lands. Note the direction term of the hit predicate is belt and
+// braces: the invalidation hook already clears the cache, so a missed hook degrades
+// to a MISS (slower) and never to a wrongly mirrored arrangement.
+//
+// Non-vacuity (verified by mutation): dropping the
+// `mLastArrangeDirection == GetEffectiveLayoutDirection()` term from the predicate
+// AND emptying ViewDataImpl::OnLayoutDirectionChanged leaves the leaf's cache live
+// and unkeyed, so no pass is scheduled and both assertions below fail.
+int UtcDaliViewArrangeCacheMissOnDirectionChangeP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A layout-direction change costs the leaf its arrange cache entry");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leaf);
+
+  SettleLayout(application);
+
+  const int settledCount = gCountingArrangeProducerCount;
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, TEST_LOCATION);
+
+  // The producer echoes its input, so the settled actor geometry IS the slot the
+  // cache was keyed on.
+  const LayoutRect leafSlot(leaf.GetProperty<float>(Actor::Property::POSITION_X),
+                            leaf.GetProperty<float>(Actor::Property::POSITION_Y),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+
+  // Control: the SAME slot under the UNCHANGED direction hits (this is also what
+  // makes the miss below meaningful -- without it the miss could be vacuous).
+  leaf.Arrange(leafSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+
+  root.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount + 1, TEST_LOCATION);
+  // Mirror of logical x 0 about parent width 200, child width 50 => 150.
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 150.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Corollary C. The hit predicate carries NO effective-scale term; it relies on every
+// scale-context reset ALSO dropping the layout caches. This pins that pairing from
+// the outside: after a global UI scale change the leaf must miss even though its
+// slot, its direction and its dirty state are all untouched.
+//
+// The leaf is arranged directly, without an intervening Measure, so the only thing
+// that can have invalidated its cache is the scale reset itself (a re-Measure would
+// clear the arrange cache through MeasurePassGuard and hide the mechanism). It is a
+// CHILD rather than the layout root, so UiScaleManager's InvalidateMeasure() lands on
+// the root and never raises the leaf's own dirty bit.
+//
+// Non-vacuity (verified by mutation): removing `mArrangeCacheValid = false` from
+// ViewDataImpl::InvalidateLayoutCaches leaves the entry live and the Arrange below
+// hits, failing the count assertion.
+int UtcDaliViewArrangeCacheMissOnScaleChangeP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A UI scale change drops the leaf's arrange cache entry");
+
+  gCountingArrangeProducerCount = 0;
+
+  const float originalScale = UiScaleManager::Get().GetScale();
+  UiScaleManager::Get().SetScale(1.0f);
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leaf);
+
+  SettleLayout(application);
+
+  const LayoutRect leafSlot(leaf.GetProperty<float>(Actor::Property::POSITION_X),
+                            leaf.GetProperty<float>(Actor::Property::POSITION_Y),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+
+  // Control: the same slot hits while the scale is unchanged.
+  const int settledCount = gCountingArrangeProducerCount;
+  leaf.Arrange(leafSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(2.0f);
+
+  // Same slot, same direction, no dirty bit on the leaf -- and it must still miss.
+  leaf.Arrange(leafSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount + 1, TEST_LOCATION);
+
+  UiScaleManager::Get().SetScale(originalScale);
+  END_TEST;
+}
+
+// C4-B1. The hit is NOT a plain early return: it still reconciles the actor's
+// geometry against the cached arranged bounds, so a write that bypassed layout (the
+// sanctioned Extension::SetPositionX / SetSizeWidth escape hatch used by ScrollView
+// and RecyclerView, or a transition frame) is repaired exactly as a miss would repair
+// it. The flat producer count is what proves the repair came from a HIT.
+//
+// Non-vacuity (verified by mutation): moving ApplySelfBoundsIfChanged out of the hit
+// body (an early `return mArrangedBounds;` above it) leaves the clobbered 999 / 7 in
+// place and this test fails.
+int UtcDaliViewArrangeCacheHitStillReconcilesSelfGeometryP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An arrange cache hit still restores externally clobbered self geometry");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leaf);
+
+  SettleLayout(application);
+
+  const LayoutRect leafSlot(leaf.GetProperty<float>(Actor::Property::POSITION_X),
+                            leaf.GetProperty<float>(Actor::Property::POSITION_Y),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+  DALI_TEST_EQUALS(leafSlot.x, 20.0f, TEST_LOCATION);
+
+  const int settledCount = gCountingArrangeProducerCount;
+
+  // Clobber the leaf's actor geometry directly; this bypasses layout entirely and
+  // deliberately does NOT invalidate the arrange cache.
+  Dali::Ui::Extension::View::SetPositionX(leaf, 999.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(leaf, 7.0f);
+
+  leaf.Arrange(leafSlot);
+
+  // Served from cache...
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+  // ...and still repaired.
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// C4-B2 / C4-A2. Under RTL the hit re-applies the leaf's LOGICAL bounds; mirroring
+// stays the parent's job (ApplyLayoutDirection reads the child's logical
+// mArrangedBounds, never the actor). Composing the two is idempotent, so repeated
+// passes over a clobbered child converge on the same mirrored x instead of
+// oscillating.
+//
+// The leaf is arranged DIRECTLY first, on purpose: driven through the parent, the
+// parent's ApplyLayoutDirection overwrites the child's POSITION_X from the logical
+// bounds afterwards and would mask whatever the hit applied. The direct call is the
+// only place the hit's own write is observable, so that is where C4-B2 is asserted.
+//
+// Non-vacuity (verified by mutation): re-applying an already-mirrored rect in the hit
+// body (mirroring mArrangedBounds.x about the parent width before applying it) makes
+// the direct call land on 130 instead of the logical 20.
+int UtcDaliViewArrangeCacheHitReAppliesLogicalBoundsUnderRtlP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An RTL arrange cache hit re-applies logical bounds, leaving the mirror to the parent");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  root.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leaf);
+
+  SettleLayout(application);
+
+  // Mirror of logical x 20 about parent width 200, child width 50 => 130.
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 130.0f, TEST_LOCATION);
+
+  const LayoutRect rootSlot(root.GetProperty<float>(Actor::Property::POSITION_X),
+                            root.GetProperty<float>(Actor::Property::POSITION_Y),
+                            root.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            root.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+
+  const int settledCount = gCountingArrangeProducerCount;
+
+  Dali::Ui::Extension::View::SetPositionX(leaf, 999.0f);
+
+  // The leaf's LOGICAL slot, as ArrangeDefault computes it: padding 0 + margin 0 +
+  // requested x 20, at the measured 50 x 40. The producer echoes its input, so this
+  // is also the key the cache entry was published under -- and the flat producer
+  // count below is what proves the slot is right (a wrong slot would MISS).
+  const LayoutRect leafLogicalSlot(20.0f, 0.0f, 50.0f, 40.0f);
+
+  leaf.Arrange(leafLogicalSlot);
+
+  // Served from cache, and the value it re-applied is the LOGICAL x, not a mirrored
+  // one: mirroring is the parent's job and is not folded in here.
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+
+  // Composed with the parent's mirror the pair is idempotent: repeated passes over
+  // the clobbered child converge on 130 instead of oscillating 130 -> 20 -> 130.
+  for(int pass = 0; pass < 3; ++pass)
+  {
+    root.Arrange(rootSlot);
+    DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 130.0f, TEST_LOCATION);
+    // The leaf was served from cache on every one of those passes.
+    DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+// A leaf's own full Measure invalidates its arrange cache: the measured size is an
+// input to its arrangement, so a result produced against the previous measurement
+// must not survive it. MeasurePassGuard is what clears it.
+//
+// Non-vacuity (verified by mutation): removing `mArrangeCacheValid = false` from
+// MeasurePassGuard's constructor makes the Arrange below hit and the count assertion
+// fails.
+int UtcDaliViewArrangeCacheMissAfterOwnMeasureP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An out-of-band Measure on a leaf costs it its arrange cache entry");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leaf);
+
+  SettleLayout(application);
+
+  const LayoutRect leafSlot(leaf.GetProperty<float>(Actor::Property::POSITION_X),
+                            leaf.GetProperty<float>(Actor::Property::POSITION_Y),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+
+  // Control: the same slot hits before the out-of-band measure.
+  const int settledCount = gCountingArrangeProducerCount;
+  leaf.Arrange(leafSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+
+  // A genuine measure MISS (a constraint the leaf was never measured against).
+  leaf.Measure(31.0f, 29.0f);
+
+  leaf.Arrange(leafSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount + 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// Anti-spin. A hit writes nothing that feeds back into layout: no dirty bit, no
+// LayoutController registration, and its actor writes (POSITION / SIZE) are not
+// layout-invalidating properties. An idle application must therefore reach a fixed
+// point and stay there.
+//
+// Non-vacuity (verified by mutation): adding an InvalidateArrange() call to the hit
+// body turns every hit into a scheduled follow-up pass and the producer count keeps
+// climbing frame after frame.
+int UtcDaliViewArrangeCacheHitDoesNotScheduleFurtherLayoutP(void)
+{
+  UiTestApplication application;
+  tet_infoline("Serving a leaf from the arrange cache schedules no further layout work");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(leaf);
+
+  SettleLayout(application);
+
+  const int settledCount = gCountingArrangeProducerCount;
+  DALI_TEST_CHECK(settledCount > 0);
+
+  // Idle frames, plus repeated explicit passes: neither may raise new layout work.
+  for(int frame = 0; frame < 5; ++frame)
+  {
+    SettleLayout(application);
+    DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+  }
+
+  const LayoutRect rootSlot(root.GetProperty<float>(Actor::Property::POSITION_X),
+                            root.GetProperty<float>(Actor::Property::POSITION_Y),
+                            root.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            root.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+  for(int pass = 0; pass < 5; ++pass)
+  {
+    root.Arrange(rootSlot);
+  }
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ALWAYS is the explicit opt-out for a callback that must execute on every
+// arrange pass, even when its layout inputs are unchanged.
+int UtcDaliViewArrangeAlwaysCallbackRunsProducerP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An ALWAYS callback runs on every arrange pass");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::ALWAYS);
+  root.Add(leaf);
+
+  View sibling = View::New();
+  sibling.SetRequestedWidth(50.0f);
+  sibling.SetRequestedHeight(40.0f);
+  root.Add(sibling);
+
+  SettleLayout(application);
+
+  const int settledCount = gCountingArrangeProducerCount;
+  DALI_TEST_CHECK(settledCount > 0);
+
+  const LayoutRect leafSlot(leaf.GetProperty<float>(Actor::Property::POSITION_X),
+                            leaf.GetProperty<float>(Actor::Property::POSITION_Y),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+
+  const int PASSES = 4;
+  for(int pass = 0; pass < PASSES; ++pass)
+  {
+    leaf.Arrange(leafSlot);
+    DALI_TEST_EQUALS(gCountingArrangeProducerCount, settledCount + pass + 1, TEST_LOCATION);
+  }
+
+  const int afterDirect = gCountingArrangeProducerCount;
+  sibling.SetRequestedX(11.0f);
+  SettleLayout(application);
+  DALI_TEST_CHECK(gCountingArrangeProducerCount > afterDirect);
+
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), leafSlot.x, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_Y), leafSlot.y, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH), leafSlot.width, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT), leafSlot.height, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The one-argument callback API uses IF_CHANGED. Explicit ALWAYS may
+// opt out, and reinstalling through the one-argument API restores the default.
+int UtcDaliViewDefaultArrangeCallbackSkipsUnchangedP(void)
+{
+  UiTestApplication application;
+  tet_infoline("The one-argument callback uses IF_CHANGED by default");
+
+  gCountingArrangeProducerCount = 0;
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View leaf = View::New();
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange));
+  root.Add(leaf);
+
+  View sibling = View::New();
+  sibling.SetRequestedWidth(50.0f);
+  sibling.SetRequestedHeight(40.0f);
+  root.Add(sibling);
+
+  SettleLayout(application);
+
+  const LayoutRect leafSlot(leaf.GetProperty<float>(Actor::Property::POSITION_X),
+                            leaf.GetProperty<float>(Actor::Property::POSITION_Y),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH),
+                            leaf.GetProperty<float>(Actor::Property::SIZE_HEIGHT));
+  const int        PASSES       = 4;
+  const int        defaultCount = gCountingArrangeProducerCount;
+  DALI_TEST_CHECK(defaultCount > 0);
+
+  for(int pass = 0; pass < PASSES; ++pass)
+  {
+    leaf.Arrange(leafSlot);
+  }
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, defaultCount, TEST_LOCATION);
+
+  sibling.SetRequestedX(11.0f);
+  SettleLayout(application);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, defaultCount, TEST_LOCATION);
+
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::ALWAYS);
+  SettleLayout(application);
+  const int alwaysCount = gCountingArrangeProducerCount;
+  for(int pass = 0; pass < PASSES; ++pass)
+  {
+    leaf.Arrange(leafSlot);
+    DALI_TEST_EQUALS(gCountingArrangeProducerCount, alwaysCount + pass + 1, TEST_LOCATION);
+  }
+
+  leaf.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange));
+  SettleLayout(application);
+  const int restoredDefaultCount = gCountingArrangeProducerCount;
+  for(int pass = 0; pass < PASSES; ++pass)
+  {
+    leaf.Arrange(leafSlot);
+  }
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, restoredDefaultCount, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5b: the arrange cache HIT for views WITH children.
+//
+// A hit on a parent does not PRUNE its subtree: it replays it from cache, so every
+// descendant ends the pass at exactly the geometry a re-run would have left it at.
+// Every test below therefore asserts geometry alongside counts -- the contract is
+// "fewer producer runs AND a byte-identical result", now stated at depth.
+// ---------------------------------------------------------------------------
+
+// THE WIN, at depth. A settled root → mid → leaf chain runs NO producer when a layout
+// pass sweeps past it for a reason that has nothing to do with it. Under the
+// childless-only hit, `mid` had a child and therefore always re-ran.
+//
+// Non-vacuity (verified by mutation): restoring `mChildren.Empty() &&` in the hit
+// predicate makes `mid` miss on every pass and its counter climbs.
+int UtcDaliViewArrangeCacheHitSkipsSubtreeProducersP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A settled subtree runs no arrange producer when a sibling forces a pass");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedX(10.0f);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View leaf = CreateCountingContainer(true);
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  mid.Add(leaf);
+
+  // The reason a pass happens at all. It is a sibling of `mid`, so its invalidation
+  // walks up to the root and never touches the mid/leaf chain.
+  View sibling = View::New();
+  sibling.SetRequestedWidth(30.0f);
+  sibling.SetRequestedHeight(30.0f);
+  root.Add(sibling);
+
+  SettleLayout(application);
+
+  const int midBase  = CountingContainerImplOf(mid).GetArrangeCallCount();
+  const int leafBase = CountingContainerImplOf(leaf).GetArrangeCallCount();
+  DALI_TEST_CHECK(midBase > 0);
+  DALI_TEST_CHECK(leafBase > 0);
+
+  const LayoutRect midRect  = ActorRectOf(mid);
+  const LayoutRect leafRect = ActorRectOf(leaf);
+  DALI_TEST_EQUALS(midRect.x, 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(leafRect.x, 20.0f, TEST_LOCATION);
+
+  sibling.SetRequestedX(11.0f);
+  SettleLayout(application);
+
+  // The pass really happened...
+  DALI_TEST_EQUALS(sibling.GetProperty<float>(Actor::Property::POSITION_X), 11.0f, TEST_LOCATION);
+
+  // ...and NEITHER producer in the settled subtree ran again.
+  DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
+
+  // The other half of the contract: the result is byte-identical at every level.
+  CheckActorRect(mid, midRect, TEST_LOCATION);
+  CheckActorRect(leaf, leafRect, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A subtree hit is result-identical to the miss it replaces, on all four axes at
+// every node, and it is IDEMPOTENT: repeated passes converge instead of drifting.
+//
+// The clobber before the first pass is what makes the sweep's per-node
+// ApplySelfBoundsIfChanged load-bearing here rather than merely redundant -- without
+// an external write, an omitted re-apply would be invisible in a clean loop.
+//
+// Non-vacuity (verified by mutation): replacing the sweep's ApplySelfBoundsIfChanged
+// with a no-op leaves the clobbered values in place and the first pass's assertions
+// fail.
+int UtcDaliViewArrangeCacheHitPreservesSubtreeGeometryP(void)
+{
+  UiTestApplication application;
+  tet_infoline("Repeated subtree hits reproduce all four axes at every node");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedX(10.0f);
+  mid.SetRequestedY(5.0f);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View leaf = CreateCountingContainer(true);
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedY(15.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  mid.Add(leaf);
+
+  SettleLayout(application);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+  const LayoutRect midRect  = ActorRectOf(mid);
+  const LayoutRect leafRect = ActorRectOf(leaf);
+
+  const int midBase  = CountingContainerImplOf(mid).GetArrangeCallCount();
+  const int leafBase = CountingContainerImplOf(leaf).GetArrangeCallCount();
+
+  // Drive every axis of both descendants off their arranged values, bypassing layout.
+  Dali::Ui::Extension::View::SetPositionX(mid, 901.0f);
+  Dali::Ui::Extension::View::SetPositionY(mid, 902.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(mid, 903.0f);
+  Dali::Ui::Extension::View::SetSizeHeight(mid, 904.0f);
+  Dali::Ui::Extension::View::SetPositionX(leaf, 905.0f);
+  Dali::Ui::Extension::View::SetPositionY(leaf, 906.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(leaf, 907.0f);
+  Dali::Ui::Extension::View::SetSizeHeight(leaf, 908.0f);
+
+  for(int pass = 0; pass < 5; ++pass)
+  {
+    root.Arrange(rootSlot);
+
+    CheckActorRect(root, rootSlot, TEST_LOCATION);
+    CheckActorRect(mid, midRect, TEST_LOCATION);
+    CheckActorRect(leaf, leafRect, TEST_LOCATION);
+
+    // Every one of those passes was served from cache, top to bottom.
+    DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+    DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+// The external-clobber repair, at depth >= 2. This is the invariant the true-prune
+// design could not keep: a GRANDCHILD moved behind layout's back (the sanctioned
+// Extension:: escape hatch that ScrollView / RecyclerView use, or a transition frame)
+// is restored by the parent's next arrange -- and it is restored on a HIT, with no
+// producer in the chain running.
+//
+// Non-vacuity (verified by mutation): removing the child recursion (step 2) from
+// ReplayArrangeSubtreeFromCache leaves the grandchild at 999 / 7 and this fails.
+int UtcDaliViewArrangeCacheHitRestoresClobberedDescendantP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A subtree hit restores a grandchild whose geometry was clobbered outside layout");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedX(10.0f);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View leaf = CreateCountingContainer(true);
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  mid.Add(leaf);
+
+  SettleLayout(application);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+  const LayoutRect leafRect = ActorRectOf(leaf);
+  DALI_TEST_EQUALS(leafRect.x, 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(leafRect.width, 50.0f, TEST_LOCATION);
+
+  const int midBase  = CountingContainerImplOf(mid).GetArrangeCallCount();
+  const int leafBase = CountingContainerImplOf(leaf).GetArrangeCallCount();
+
+  Dali::Ui::Extension::View::SetPositionX(leaf, 999.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(leaf, 7.0f);
+
+  root.Arrange(rootSlot);
+
+  // Repaired...
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  // ...by a HIT: nothing in the chain re-ran its producer.
+  DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The same at depth >= 2 under RTL, which is where the composition is delicate: the
+// replay re-applies each node's LOGICAL bounds and leaves the mirror to that node's
+// PARENT, exactly as a miss does. Getting the order wrong (mirroring in the self-apply,
+// or mirroring before the children are visited) shows up either as the wrong value or
+// as an oscillation across repeated passes, so both are asserted.
+//
+// Non-vacuity (verified by mutation): dropping the ApplyLayoutDirection call (step 3)
+// from ReplayArrangeSubtreeFromCache leaves the grandchild at its logical x and the
+// first assertion fails.
+int UtcDaliViewArrangeCacheHitRestoresClobberedDescendantRtlP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An RTL subtree hit restores the mirrored geometry of a clobbered grandchild");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  root.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View leaf = CreateCountingContainer(true);
+  leaf.SetRequestedX(20.0f);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  mid.Add(leaf);
+
+  SettleLayout(application);
+
+  // mid: logical x 0, mirrored about the root's 200 with width 120 => 80.
+  // leaf: logical x 20, mirrored about mid's 120 with width 50 => 50.
+  DALI_TEST_EQUALS(mid.GetProperty<float>(Actor::Property::POSITION_X), 80.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 50.0f, TEST_LOCATION);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+  const int        midBase  = CountingContainerImplOf(mid).GetArrangeCallCount();
+  const int        leafBase = CountingContainerImplOf(leaf).GetArrangeCallCount();
+
+  Dali::Ui::Extension::View::SetPositionX(leaf, 999.0f);
+  Dali::Ui::Extension::View::SetPositionX(mid, 998.0f);
+
+  // Three consecutive hits: the first repairs, the rest must not move anything.
+  for(int pass = 0; pass < 3; ++pass)
+  {
+    root.Arrange(rootSlot);
+
+    DALI_TEST_EQUALS(mid.GetProperty<float>(Actor::Property::POSITION_X), 80.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(leaf.GetProperty<float>(Actor::Property::POSITION_X), 50.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+    DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+// The recursive gate, invalidation half. A STANDALONE grandchild is a layout BOUNDARY:
+// its InvalidateArrange stops at itself and self-registers, so it never reaches `mid`
+// or the root and their cache entries stay live. Only a PER-NODE test in the subtree
+// gate can see it -- and it must refuse the whole hit, because the invalidated node is
+// one the replay would otherwise have written cached bounds over.
+//
+// Non-vacuity (verified by mutation): dropping BOTH `childData.mArrangeCacheValid` and
+// `!childData.mArrangeDirty` from CanReplayArrangeSubtreeFromCache lets the root hit and
+// the producer count stays flat. Dropping either one ALONE does not break it, and is not
+// expected to: InvalidateArrange raises the dirty bit and clears the cache-valid bit in
+// the same breath, so on this path the two are redundant with each other. That
+// redundancy is the point -- the dirty/poison/blocked terms are defence in depth against
+// the pairing being broken later, exactly as they are in the node-local predicate.
+int UtcDaliViewArrangeCacheMissWhenDescendantIsDirtyP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A dirty standalone grandchild refuses the whole subtree hit");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetRequestedWidth(30.0f);
+  standalone.SetRequestedHeight(25.0f);
+  mid.Add(standalone);
+
+  SettleLayout(application);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+
+  // Warm-up, and NOT part of what is under test. A standalone view is its own layout
+  // root, so the settle batch drives it after its parent and its measure publish
+  // leaves the slot marked unconsumed -- which the node-local predicate rejects on
+  // `mid` in its own right. One pass consumes it (ArrangeStandaloneChildren clears the
+  // bit), and only after that is a hit reachable at all.
+  root.Arrange(rootSlot);
+
+  const int midBase = CountingContainerImplOf(mid).GetArrangeCallCount();
+  DALI_TEST_CHECK(midBase > 0);
+
+  // Control: with nothing dirty, the same slot HITS. Without this the miss below
+  // could be vacuous.
+  root.Arrange(rootSlot);
+  DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+
+  // The boundary stop: this invalidation never reaches `mid` or `root`.
+  standalone.InvalidateArrange();
+
+  root.Arrange(rootSlot);
+  DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase + 1, TEST_LOCATION);
+
+  // ...and the refusal is one pass long: the miss consumed the dirty bit, so the next
+  // identical pass hits again.
+  root.Arrange(rootSlot);
+  DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase + 1, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The recursive gate: an ALWAYS producer anywhere in a subtree makes the
+// whole subtree re-run. The gate consults mArrangeProducerAlways at every node it
+// would elide,
+// where the childless-only hit consulted it only at the node being served.
+//
+// The two chains are identical except for the policy on their deepest node.
+//
+// Non-vacuity (verified by mutation): dropping `childData.mArrangeProducerAlways` from
+// CanReplayArrangeSubtreeFromCache lets the ALWAYS chain hit and its counters go flat.
+int UtcDaliViewArrangeCacheMissWhenDescendantIsAlwaysP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An ALWAYS producer at any depth makes the whole subtree re-run");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+  application.GetScene().Add(root);
+
+  // Chain A: every node uses IF_CHANGED.
+  View ifChangedMid = CreateCountingContainer(true);
+  ifChangedMid.SetRequestedWidth(120.0f);
+  ifChangedMid.SetRequestedHeight(60.0f);
+  root.Add(ifChangedMid);
+
+  View ifChangedLeaf = CreateCountingContainer(true);
+  ifChangedLeaf.SetRequestedWidth(50.0f);
+  ifChangedLeaf.SetRequestedHeight(40.0f);
+  ifChangedMid.Add(ifChangedLeaf);
+
+  // Chain B: identical, except the deepest node explicitly uses ALWAYS.
+  View alwaysMid = CreateCountingContainer(true);
+  alwaysMid.SetRequestedWidth(120.0f);
+  alwaysMid.SetRequestedHeight(60.0f);
+  root.Add(alwaysMid);
+
+  View alwaysLeaf = CreateCountingContainer(false);
+  alwaysLeaf.SetRequestedWidth(50.0f);
+  alwaysLeaf.SetRequestedHeight(40.0f);
+  alwaysMid.Add(alwaysLeaf);
+
+  SettleLayout(application);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+
+  const int ifChangedMidBase  = CountingContainerImplOf(ifChangedMid).GetArrangeCallCount();
+  const int ifChangedLeafBase = CountingContainerImplOf(ifChangedLeaf).GetArrangeCallCount();
+  const int alwaysMidBase     = CountingContainerImplOf(alwaysMid).GetArrangeCallCount();
+  const int alwaysLeafBase    = CountingContainerImplOf(alwaysLeaf).GetArrangeCallCount();
+  DALI_TEST_CHECK(alwaysLeafBase > 0);
+
+  const LayoutRect alwaysLeafRect = ActorRectOf(alwaysLeaf);
+
+  const int PASSES = 3;
+  for(int pass = 0; pass < PASSES; ++pass)
+  {
+    root.Arrange(rootSlot);
+  }
+
+  // The IF_CHANGED chain is served on every pass...
+  DALI_TEST_EQUALS(CountingContainerImplOf(ifChangedMid).GetArrangeCallCount(), ifChangedMidBase, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountingContainerImplOf(ifChangedLeaf).GetArrangeCallCount(), ifChangedLeafBase, TEST_LOCATION);
+
+  // ...while one ALWAYS node re-runs its own producer AND its ancestor's, on every
+  // pass. (The root misses too, which is why the pure chain above is reached at all:
+  // it is served by its own node-local hit, not by the root's.)
+  DALI_TEST_EQUALS(CountingContainerImplOf(alwaysMid).GetArrangeCallCount(), alwaysMidBase + PASSES, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountingContainerImplOf(alwaysLeaf).GetArrangeCallCount(), alwaysLeafBase + PASSES, TEST_LOCATION);
+
+  // Always-miss must still be result-identical.
+  CheckActorRect(alwaysLeaf, alwaysLeafRect, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The replay visits exactly the nodes the producer would have arranged, and no others.
+// LabelImpl::OnArrange returns its input bounds and never touches children, so a View
+// child of a Label holds no arrange result and a MISS leaves its actor geometry alone.
+// The sweep must do the same -- writing a never-arranged child's (default) bounds over
+// whatever is there would be a geometry change invented by the optimisation.
+//
+// Non-vacuity (verified by mutation): removing the `mArrangeResultAvailable` filter
+// from step 2 of ReplayArrangeSubtreeFromCache makes the sweep descend into the
+// unarranged child, overwriting the values below (and tripping its own
+// DALI_ASSERT_DEBUG in a debug build).
+int UtcDaliViewArrangeCacheHitSkipsUnarrangedChildrenP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A subtree hit does not write geometry for a child the producer never arranges");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  Label label = Label::New();
+  label.SetProperty(Label::Property::TEXT, "hello");
+  label.SetRequestedWidth(120.0f);
+  label.SetRequestedHeight(60.0f);
+  root.Add(label);
+
+  // A View child of a Label: in mChildren, never arranged by LabelImpl::OnArrange.
+  View orphan = View::New();
+  orphan.SetRequestedWidth(40.0f);
+  orphan.SetRequestedHeight(30.0f);
+  label.Add(orphan);
+
+  SettleLayout(application);
+
+  const LayoutRect rootSlot = ActorRectOf(root);
+
+  // Park the never-arranged child somewhere layout would never put it.
+  Dali::Ui::Extension::View::SetPositionX(orphan, 42.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(orphan, 7.0f);
+
+  // The reference behaviour: a MISS leaves it exactly there.
+  root.InvalidateArrange();
+  SettleLayout(application);
+  DALI_TEST_EQUALS(orphan.GetProperty<float>(Actor::Property::POSITION_X), 42.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(orphan.GetProperty<float>(Actor::Property::SIZE_WIDTH), 7.0f, TEST_LOCATION);
+
+  // ...and so must a HIT, on every one of these passes.
+  for(int pass = 0; pass < 3; ++pass)
+  {
+    root.Arrange(rootSlot);
+    DALI_TEST_EQUALS(orphan.GetProperty<float>(Actor::Property::POSITION_X), 42.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(orphan.GetProperty<float>(Actor::Property::SIZE_WIDTH), 7.0f, TEST_LOCATION);
+  }
+
+  // The Label itself is still reconciled by those passes: the child is skipped, not
+  // the node.
+  const LayoutRect labelRect = ActorRectOf(label);
+  Dali::Ui::Extension::View::SetPositionX(label, 555.0f);
+  root.Arrange(rootSlot);
+  DALI_TEST_EQUALS(label.GetProperty<float>(Actor::Property::POSITION_X), labelRect.x, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A non-standalone child with no arrange result has no parent-owned logical X to
+// mirror. Treating its current actor X as logical input makes the transform an
+// involution (x -> mirrored x -> x), so repeated identical passes oscillate. Both a
+// miss and every cache hit must leave a child ignored by the producer untouched.
+int UtcDaliViewRtlLeavesUnarrangedChildUntouchedP(void)
+{
+  UiTestApplication application;
+
+  Label parent = Label::New();
+  parent.SetRequestedWidth(120.0f);
+  parent.SetRequestedHeight(60.0f);
+  parent.SetLayoutDirection(LayoutDirection::RIGHT_TO_LEFT);
+  application.GetScene().Add(parent);
+
+  // Label's pure OnArrange echoes its own bounds and never arranges children.
+  View ignored = View::New();
+  ignored.SetRequestedWidth(40.0f);
+  ignored.SetRequestedHeight(30.0f);
+  parent.Add(ignored);
+
+  const LayoutRect slot(0.0f, 0.0f, 120.0f, 60.0f);
+  parent.Measure(slot.width, slot.height);
+  parent.Arrange(slot);
+
+  Dali::Ui::Extension::View::SetPositionX(ignored, 42.0f);
+  Dali::Ui::Extension::View::SetSizeWidth(ignored, 7.0f);
+
+  // Forced miss: the producer ignores the child, and so must the RTL resolver.
+  parent.InvalidateArrange();
+  parent.Arrange(slot);
+  DALI_TEST_EQUALS(ignored.GetProperty<float>(Actor::Property::POSITION_X), 42.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(ignored.GetProperty<float>(Actor::Property::SIZE_WIDTH), 7.0f, TEST_LOCATION);
+
+  // Settled hits are identical and idempotent. The old actor read-back alternated
+  // 42 -> 71 -> 42 for parentWidth=120 and childWidth=7.
+  for(int pass = 0; pass < 3; ++pass)
+  {
+    parent.Arrange(slot);
+    DALI_TEST_EQUALS(ignored.GetProperty<float>(Actor::Property::POSITION_X), 42.0f, TEST_LOCATION);
+    DALI_TEST_EQUALS(ignored.GetProperty<float>(Actor::Property::SIZE_WIDTH), 7.0f, TEST_LOCATION);
+  }
+
+  END_TEST;
+}
+
+// Anti-spin at depth. The replay writes only actor geometry and mInitialLayoutDone; it
+// calls no Invalidate* and registers nothing with the LayoutController, so an idle
+// application over a settled subtree reaches a fixed point and stays there.
+//
+// Non-vacuity (verified by mutation): adding an InvalidateArrange() call to
+// ReplayArrangeSubtreeFromCache turns every hit into a scheduled follow-up pass and
+// the counters climb frame after frame.
+int UtcDaliViewArrangeCacheHitDoesNotScheduleFurtherLayoutSubtreeP(void)
+{
+  UiTestApplication application;
+  tet_infoline("Serving a settled subtree from cache schedules no further layout work");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(100.0f);
+  application.GetScene().Add(root);
+
+  View mid = CreateCountingContainer(true);
+  mid.SetRequestedWidth(120.0f);
+  mid.SetRequestedHeight(60.0f);
+  root.Add(mid);
+
+  View leaf = CreateCountingContainer(true);
+  leaf.SetRequestedWidth(50.0f);
+  leaf.SetRequestedHeight(40.0f);
+  mid.Add(leaf);
+
+  SettleLayout(application);
+
+  const int        midBase  = CountingContainerImplOf(mid).GetArrangeCallCount();
+  const int        leafBase = CountingContainerImplOf(leaf).GetArrangeCallCount();
+  const LayoutRect rootSlot = ActorRectOf(root);
+  const LayoutRect midRect  = ActorRectOf(mid);
+  const LayoutRect leafRect = ActorRectOf(leaf);
+  DALI_TEST_CHECK(midBase > 0);
+
+  // Idle frames: no producer may run.
+  for(int frame = 0; frame < 5; ++frame)
+  {
+    SettleLayout(application);
+    DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+    DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
+  }
+
+  // Explicit passes, then idle frames again: the hits raised no new work.
+  for(int pass = 0; pass < 5; ++pass)
+  {
+    root.Arrange(rootSlot);
+  }
+  SettleLayout(application);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(CountingContainerImplOf(mid).GetArrangeCallCount(), midBase, TEST_LOCATION);
+  DALI_TEST_EQUALS(CountingContainerImplOf(leaf).GetArrangeCallCount(), leafBase, TEST_LOCATION);
+  CheckActorRect(mid, midRect, TEST_LOCATION);
+  CheckActorRect(leaf, leafRect, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ---------------------------------------------------------------------------
+// Phase 5c: LayoutManager execution policy.
+//
+// Manager-bearing views use IF_CHANGED by default, enabling unchanged-result
+// reuse for the four geometry-only in-library managers. ScrollView explicitly uses
+// ALWAYS, and utc-Dali-ScrollView.cpp pins that exception behaviourally.
+//
+// IF_CHANGED is valid only because a manager's own state is layout-tracked:
+// every built-in setter -- StackLayoutManager::SetSpacing and friends -- pairs its
+// write with an owner invalidation (LayoutManager::InvalidateOwnerMeasure), so a
+// state change always retracts the cached result it would falsify. That closes the
+// probe these tests once used (a direct manager write that nothing invalidated), and
+// with it the last black-box observable of the skip itself: an IF_CHANGED producer re-run on
+// unchanged inputs is result-identical to a served cache, by definition. The skip is
+// therefore pinned white-box, with a counting manager, in the internal suite --
+// UtcDaliArrangeCacheIfChangedLayoutManagerContainerSkipsProducerP -- and the per-manager
+// policies by UtcDaliArrangeCacheInLibraryLayoutManagerPolicyP. What remains
+// OBSERVABLE here, and what these two tests pin, is the setter contract itself: a
+// direct manager write alone reaches the screen (it schedules the pass and the
+// manager honours the new value), and a same-value write moves nothing.
+// ---------------------------------------------------------------------------
+
+int UtcDaliViewStackLayoutManagerSetterInvalidatesOwnerP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A StackLayoutManager setter alone re-lays-out its owner; a same-value write moves nothing");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+  application.GetScene().Add(root);
+
+  Dali::UniquePtr<StackLayoutManager> owned(new StackLayoutManager(StackOrientation::VERTICAL, 0.0f));
+  StackLayoutManager*                 manager = owned.Get();
+
+  View stack = View::New();
+  stack.SetRequestedWidth(120.0f);
+  stack.SetRequestedHeight(120.0f);
+  stack.AttachLayoutManager(std::move(owned));
+  root.Add(stack);
+
+  View first = View::New();
+  first.SetRequestedWidth(50.0f);
+  first.SetRequestedHeight(30.0f);
+  stack.Add(first);
+
+  View second = View::New();
+  second.SetRequestedWidth(50.0f);
+  second.SetRequestedHeight(30.0f);
+  stack.Add(second);
+
+  SettleLayout(application);
+
+  const LayoutRect stackRect = ActorRectOf(stack);
+
+  // The manager really did stack them, so the geometry below is its output.
+  DALI_TEST_EQUALS(first.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::POSITION_Y), 30.0f, TEST_LOCATION);
+
+  // The setter ALONE: nothing else invalidates, nothing else is touched. The write
+  // must invalidate its owner and schedule the pass by itself; before the owner
+  // back-pointer existed this exact sequence left the tree settled on the old
+  // spacing indefinitely (and, with the manager declared IF_CHANGED, the arrange cache
+  // would have kept serving that stale placement forever).
+  manager->SetSpacing(20.0f);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(first.GetProperty<float>(Actor::Property::POSITION_Y), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::POSITION_Y), 50.0f, TEST_LOCATION);
+
+  // The container's own slot is a function of its FIXED requested size, not of the
+  // spacing, so the setter re-laid-out the children without moving the container.
+  CheckActorRect(stack, stackRect, TEST_LOCATION);
+
+  // Same-value write: the setter's equality guard makes it a no-op, so the settled
+  // geometry is byte-identical.
+  const LayoutRect firstRect  = ActorRectOf(first);
+  const LayoutRect secondRect = ActorRectOf(second);
+  manager->SetSpacing(20.0f);
+  SettleLayout(application);
+
+  CheckActorRect(stack, stackRect, TEST_LOCATION);
+  CheckActorRect(first, firstRect, TEST_LOCATION);
+  CheckActorRect(second, secondRect, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// The same statement for a second geometry-free manager, so the setter contract is
+// not pinned on StackLayoutManager alone.
+int UtcDaliViewFlexLayoutManagerSetterInvalidatesOwnerP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A FlexLayoutManager setter alone re-lays-out its owner; a same-value write moves nothing");
+
+  View root = View::New();
+  root.SetRequestedWidth(300.0f);
+  root.SetRequestedHeight(200.0f);
+  application.GetScene().Add(root);
+
+  Dali::UniquePtr<FlexLayoutManager> owned(new FlexLayoutManager(
+    FlexDirection::ROW, FlexWrap::NO_WRAP, FlexJustify::FLEX_START, FlexAlign::FLEX_START, FlexAlign::FLEX_START));
+  FlexLayoutManager*                 manager = owned.Get();
+
+  View flex = View::New();
+  flex.SetRequestedWidth(200.0f);
+  flex.SetRequestedHeight(100.0f);
+  flex.AttachLayoutManager(std::move(owned));
+  root.Add(flex);
+
+  View first = View::New();
+  first.SetRequestedWidth(40.0f);
+  first.SetRequestedHeight(20.0f);
+  flex.Add(first);
+
+  View second = View::New();
+  second.SetRequestedWidth(40.0f);
+  second.SetRequestedHeight(20.0f);
+  flex.Add(second);
+
+  SettleLayout(application);
+
+  const LayoutRect flexRect = ActorRectOf(flex);
+
+  // FLEX_START packs them at the start of the 200-wide main axis.
+  DALI_TEST_EQUALS(first.GetProperty<float>(Actor::Property::POSITION_X), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::POSITION_X), 40.0f, TEST_LOCATION);
+
+  // The setter ALONE must invalidate its owner and schedule the pass by itself; the
+  // manager then honours the new justification: FLEX_END moves both children to the
+  // far end of the main axis.
+  manager->SetJustifyContent(FlexJustify::FLEX_END);
+  SettleLayout(application);
+
+  DALI_TEST_EQUALS(first.GetProperty<float>(Actor::Property::POSITION_X), 120.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(second.GetProperty<float>(Actor::Property::POSITION_X), 160.0f, TEST_LOCATION);
+  CheckActorRect(flex, flexRect, TEST_LOCATION);
+
+  // Same-value write: the equality guard makes it a no-op.
+  const LayoutRect firstRect  = ActorRectOf(first);
+  const LayoutRect secondRect = ActorRectOf(second);
+  manager->SetJustifyContent(FlexJustify::FLEX_END);
+  SettleLayout(application);
+
+  CheckActorRect(flex, flexRect, TEST_LOCATION);
+  CheckActorRect(first, firstRect, TEST_LOCATION);
+  CheckActorRect(second, secondRect, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// ---------------------------------------------------------------------------
+// Out-of-band Arrange: the hit/miss equivalence survives a DIRECT public
+// Arrange() on a descendant.
+//
+// An out-of-band child.Arrange() rewrites the very records a parent's cache HIT
+// replays the child from, so the parent's entry is retracted at that moment
+// (cache-only) and the next parent Arrange MISSES and re-hands the
+// parent-derived slot -- after which the hit is live again and byte-identical
+// to a forced miss. Without the retraction the hit would keep serving the
+// foreign geometry that a forced miss corrects.
+// ---------------------------------------------------------------------------
+
+namespace
+{
+int  gOutOfBandParentArrangeCount = 0;
+View gOutOfBandChild;
+
+// A IF_CHANGED producer: arranges its one child at a fixed logical slot derived from
+// nothing but constants, then echoes its bounds.
+LayoutRect OutOfBandParentArrange(View, const LayoutRect& bounds)
+{
+  ++gOutOfBandParentArrangeCount;
+  if(gOutOfBandChild)
+  {
+    gOutOfBandChild.Arrange(LayoutRect(20.0f, 0.0f, 50.0f, 10.0f));
+  }
+  return bounds;
+}
+
+} // namespace
+
+int UtcDaliViewOutOfBandChildArrangeMatchesForcedMissP(void)
+{
+  UiTestApplication application;
+  tet_infoline("An out-of-band child.Arrange() retracts the parent entry, so the next hit equals a forced miss");
+
+  View root = View::New();
+  root.SetRequestedWidth(200.0f);
+  root.SetRequestedHeight(200.0f);
+  application.GetScene().Add(root);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(120.0f);
+  parent.SetRequestedHeight(120.0f);
+  root.Add(parent);
+
+  View child = View::New();
+  child.SetRequestedWidth(50.0f);
+  child.SetRequestedHeight(10.0f);
+  parent.Add(child);
+
+  gOutOfBandChild              = child;
+  gOutOfBandParentArrangeCount = 0;
+  parent.SetArrangeCallback(ArrangeCallback::New(&OutOfBandParentArrange), ArrangePolicy::IF_CHANGED);
+
+  SettleLayout(application);
+
+  const LayoutRect pSlot = ActorRectOf(parent);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+  const int settledCount = gOutOfBandParentArrangeCount;
+  DALI_TEST_CHECK(settledCount > 0);
+
+  // The out-of-band write: a public Arrange straight onto the child.
+  child.Arrange(LayoutRect(77.0f, 0.0f, 30.0f, 10.0f));
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 77.0f, TEST_LOCATION);
+
+  // The parent's next same-bounds Arrange must NOT serve the retracted entry: the
+  // producer re-runs and restores the parent-derived slot.
+  parent.Arrange(pSlot);
+  DALI_TEST_EQUALS(gOutOfBandParentArrangeCount, settledCount + 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  // The retraction is one miss deep, not a permanent demotion: the entry is live
+  // again and the hit reproduces the producer's geometry.
+  parent.Arrange(pSlot);
+  DALI_TEST_EQUALS(gOutOfBandParentArrangeCount, settledCount + 1, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+
+  // And the equivalence the retraction exists to keep: a forced miss lands on
+  // exactly the geometry the hit just served.
+  parent.InvalidateArrange();
+  parent.Arrange(pSlot);
+  DALI_TEST_EQUALS(gOutOfBandParentArrangeCount, settledCount + 2, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(child.GetProperty<float>(Actor::Property::SIZE_WIDTH), 50.0f, TEST_LOCATION);
+
+  gOutOfBandChild.Reset();
+
+  END_TEST;
+}
+
+// STANDALONE is an accumulation/placement-algorithm boundary, not a promise that a
+// parent never places the child. A parent miss still derives the child's slot from
+// SetRequestedX/Y and its measured/available extent in ArrangeStandaloneChildren.
+// Therefore an arbitrary public child.Arrange() must retract the parent entry just
+// like it does for a normal child, or a hit replays the foreign slot while a miss
+// restores the requested slot.
+int UtcDaliViewOutOfBandStandaloneArrangeMatchesForcedMissP(void)
+{
+  UiTestApplication application;
+
+  View root = View::New();
+  root.SetRequestedWidth(300.0f);
+  root.SetRequestedHeight(200.0f);
+  application.GetScene().Add(root);
+
+  View parent = View::New();
+  parent.SetRequestedWidth(120.0f);
+  parent.SetRequestedHeight(80.0f);
+  root.Add(parent);
+
+  View standalone = View::New();
+  standalone.SetLayoutMode(LayoutMode::STANDALONE);
+  standalone.SetRequestedX(20.0f);
+  standalone.SetRequestedY(5.0f);
+  standalone.SetRequestedWidth(40.0f);
+  standalone.SetRequestedHeight(10.0f);
+  parent.Add(standalone);
+
+  SettleLayout(application);
+
+  const LayoutRect parentSlot = ActorRectOf(parent);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+
+  // Public, arbitrary bounds: this is not LayoutController's framework-owned
+  // standalone self pass.
+  standalone.Arrange(LayoutRect(77.0f, 9.0f, 30.0f, 12.0f));
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_X), 77.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 30.0f, TEST_LOCATION);
+
+  // The retracted parent entry forces one miss, restoring the requested standalone
+  // slot that ArrangeStandaloneChildren would always produce on a forced miss.
+  parent.Arrange(parentSlot);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_X), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::POSITION_Y), 5.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_WIDTH), 40.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(standalone.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 10.0f, TEST_LOCATION);
+
+  // Settled hit and explicit miss agree.
+  parent.Arrange(parentSlot);
+  const LayoutRect hitRect = ActorRectOf(standalone);
+  parent.InvalidateArrange();
+  parent.Arrange(parentSlot);
+  CheckActorRect(standalone, hitRect, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// A child that was arranged under one parent and then reparented under a
+// producer that never arranges its children must not hold that producer's
+// cache hostage. The move retracts the child's arrange RESULT record, so the
+// hit gate treats it as never-arranged -- skipped, exactly as the replay and a
+// forced miss would leave it -- instead of demanding a cache validity it can
+// never regain.
+int UtcDaliViewReparentedChildDoesNotBlockIgnoringIfChangedParentCacheP(void)
+{
+  UiTestApplication application;
+  tet_infoline("A reparented child under an ignoring IF_CHANGED producer leaves the parent's cache reachable");
+
+  View root = View::New();
+  root.SetRequestedWidth(300.0f);
+  root.SetRequestedHeight(300.0f);
+  application.GetScene().Add(root);
+
+  View oldParent = View::New();
+  oldParent.SetRequestedWidth(120.0f);
+  oldParent.SetRequestedHeight(120.0f);
+  root.Add(oldParent);
+
+  View child = View::New();
+  child.SetRequestedWidth(20.0f);
+  child.SetRequestedHeight(10.0f);
+  oldParent.Add(child);
+
+  gCountingArrangeProducerCount = 0;
+
+  View ifChangedParent = View::New();
+  ifChangedParent.SetRequestedWidth(100.0f);
+  ifChangedParent.SetRequestedHeight(50.0f);
+  ifChangedParent.SetArrangeCallback(ArrangeCallback::New(&CountingLeafArrange), ArrangePolicy::IF_CHANGED);
+  root.Add(ifChangedParent);
+
+  SettleLayout(application);
+  const LayoutRect bSlot = ActorRectOf(ifChangedParent);
+
+  // Control: settled and childless, the IF_CHANGED producer is served from cache.
+  const int c0 = gCountingArrangeProducerCount;
+  DALI_TEST_CHECK(c0 > 0);
+  ifChangedParent.Arrange(bSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, c0, TEST_LOCATION);
+
+  // Move the once-arranged child under the ignoring producer and settle the
+  // add-invalidation away.
+  ifChangedParent.Add(child);
+  SettleLayout(application);
+  const int c1 = gCountingArrangeProducerCount;
+
+  const LayoutRect childRect = ActorRectOf(child);
+
+  // Three same-bounds arranges: every one must be a HIT. Before the result
+  // record was retracted on reparent, the gate saw a result-holding child whose
+  // cache could never revalidate and refused the hit forever.
+  ifChangedParent.Arrange(bSlot);
+  ifChangedParent.Arrange(bSlot);
+  ifChangedParent.Arrange(bSlot);
+  DALI_TEST_EQUALS(gCountingArrangeProducerCount, c1, TEST_LOCATION);
+
+  // The hits leave the ignored child exactly where a miss would: untouched.
+  CheckActorRect(child, childRect, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// INC-A. The BACKGROUND visual is the one ViewDataImpl::GetNaturalSize() reads, so
+// registering, replacing or removing it changes this view's natural size -- a measure
+// input. Before the fix these paths only asked dali-core for a legacy relayout, which
+// does not touch the dali-ui measure cache, so the cache kept serving the size it had
+// computed for the previous background forever.
+//
+// Deterministic without any image I/O: an image visual reports its DESIRED_WIDTH /
+// DESIRED_HEIGHT as its natural size while it has no texture, and the view is kept
+// off-scene so nothing ever loads.
+int UtcDaliViewBackgroundChangeInvalidatesMeasureP(void)
+{
+  UiTestApplication application;
+
+  View view = View::New();
+  view.SetRequestedWidth(WRAP_CONTENT);
+  view.SetRequestedHeight(WRAP_CONTENT);
+
+  auto backgroundMap = [](int width, int height)
+  {
+    Property::Map map;
+    map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+    map.Insert(Ui::ImageVisualPropertyIndex::URL, "background-image.png");
+    map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, width);
+    map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, height);
+    return map;
+  };
+
+  // No background at all: GetNaturalSize() is ZERO. This populates the measure cache.
+  MeasuredSize bare = view.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(bare.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(bare.GetHeight(), 0.0f, TEST_LOCATION);
+
+  // Register. Re-measured with the SAME constraints, so a surviving cache entry would
+  // still answer 0x0.
+  view.SetProperty(Ui::View::Property::BACKGROUND, backgroundMap(120, 60));
+  MeasuredSize registered = view.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(registered.GetWidth(), 120.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(registered.GetHeight(), 60.0f, TEST_LOCATION);
+
+  // Replace.
+  view.SetProperty(Ui::View::Property::BACKGROUND, backgroundMap(200, 90));
+  MeasuredSize replaced = view.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(replaced.GetWidth(), 200.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(replaced.GetHeight(), 90.0f, TEST_LOCATION);
+
+  // Remove: back to ZERO.
+  view.ClearBackground();
+  MeasuredSize cleared = view.Measure(1000.0f, 1000.0f);
+  DALI_TEST_EQUALS(cleared.GetWidth(), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(cleared.GetHeight(), 0.0f, TEST_LOCATION);
+
+  // The cache is still a cache: re-measuring with nothing changed serves the same
+  // answer, so the assertions above are not passing merely because caching is off.
+  DALI_TEST_EQUALS(view.Measure(1000.0f, 1000.0f).GetWidth(), 0.0f, TEST_LOCATION);
+
+  END_TEST;
+}
+
+// INC-A, arranged-geometry half of the same contract: a background registered after
+// the tree has settled must move the view's ARRANGED size too, not just the value
+// Measure() returns. Exercised through the real layout pass on-scene.
+int UtcDaliViewBackgroundChangeAfterSettleUpdatesArrangedSizeP(void)
+{
+  UiTestApplication application;
+  Window            window = application.GetWindow();
+
+  View view = View::New();
+  view.SetRequestedWidth(WRAP_CONTENT);
+  view.SetRequestedHeight(WRAP_CONTENT);
+  window.Add(view);
+
+  SettleLayout(application);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 0.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 0.0f, TEST_LOCATION);
+
+  Property::Map map;
+  map.Insert(Ui::VisualBasePropertyIndex::TYPE, static_cast<int>(Ui::Integration::InternalVisualType::IMAGE));
+  map.Insert(Ui::ImageVisualPropertyIndex::URL, "background-image.png");
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_WIDTH, 140);
+  map.Insert(Ui::ImageVisualPropertyIndex::DESIRED_HEIGHT, 70);
+  view.SetProperty(Ui::View::Property::BACKGROUND, map);
+
+  SettleLayout(application);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_WIDTH), 140.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(view.GetProperty<float>(Actor::Property::SIZE_HEIGHT), 70.0f, TEST_LOCATION);
 
   END_TEST;
 }

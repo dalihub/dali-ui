@@ -77,7 +77,9 @@ DALI_TYPE_REGISTRATION_END()
 
 TextAnchorImplPtr TextAnchorImpl::New()
 {
-  return TextAnchorImplPtr(new TextAnchorImpl());
+  TextAnchorImplPtr impl(new TextAnchorImpl());
+
+  return impl;
 }
 
 TextAnchorImpl::TextAnchorImpl()

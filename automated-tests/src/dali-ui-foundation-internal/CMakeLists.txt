@@ -87,9 +87,12 @@ SET(TC_SOURCES
     utc-Dali-ViewAccessibility-internal.cpp
     utc-Dali-Accessibility-Text-internal.cpp
     utc-Dali-ViewFittingMode-internal.cpp
+    utc-Dali-ViewNaturalSize-internal.cpp
     utc-Dali-View-order-internal.cpp
     utc-Dali-UiScaleEffectiveScale-internal.cpp
     utc-Dali-LayoutDirectionArrangeCache-internal.cpp
+    utc-Dali-ArrangeCacheHit-internal.cpp
+    utc-Dali-LayoutInvalidationGeneration-internal.cpp
 )
 
 # ---------------------------------------------------------
@@ -151,6 +154,30 @@ ADD_COMPILE_OPTIONS(-rdynamic)
 ADD_COMPILE_OPTIONS(-O0 -ggdb --coverage -Wall -Werror -DDEBUG_ENABLED)
 ADD_COMPILE_OPTIONS(${DALICORE_CFLAGS_OTHER})
 ADD_COMPILE_OPTIONS(${DALIADAPTOR_CFLAGS_OTHER})
+
+# This target compiles the dali-ui-foundation sources itself (see section 2), which
+# the production library build does NOT compile with -Werror. Four pre-existing
+# name-hiding overloads in the foundation headers therefore turn into errors here and
+# nowhere else:
+#   internal/visuals/text/text-visual.h      TextVisual::GetVisualObject(Visual::Base)
+#                                            hides Visual::Base::GetVisualObject()
+#   integration-api/scroll-view-impl.h       ScrollViewImpl::OnWheelEvent(Actor, WheelEvent)
+#   integration-api/recycler-view-impl.h     RecyclerViewImpl::OnWheelEvent(Actor, WheelEvent)
+#                                            both hide CustomActorImpl::OnWheelEvent(const WheelEvent&)
+#   integration-api/web-view-impl.h          WebViewImpl::OnTouchEvent(Actor, TouchEvent)
+#                                            hides CustomActorImpl::OnTouchEvent(const TouchEvent&)
+# They are library-header issues, not test-code issues, so the relaxation is scoped to
+# the vendored library sources plus the three test cases that pull one of those headers
+# in (text-visual.h directly, or label-impl.h which includes it). Every other test case,
+# and the whole of the shared test-suite utils, keeps the full -Werror set including
+# -Werror=overloaded-virtual.
+SET_SOURCE_FILES_PROPERTIES(
+    ${LIBRARY_SOURCES}
+    utc-Dali-TextVisualAsyncPublication-internal.cpp
+    utc-Dali-TextGradientVisualMaskPlumbing-internal.cpp
+    utc-Dali-ArrangeCacheHit-internal.cpp
+    utc-Dali-LayoutInvalidationGeneration-internal.cpp
+    PROPERTIES COMPILE_OPTIONS "-Wno-error=overloaded-virtual")
 
 FOREACH(directory ${DALICORE_LIBRARY_DIRS})
     SET(CMAKE_CXX_LINK_FLAGS "${CMAKE_CXX_LINK_FLAGS} -L${directory}")
