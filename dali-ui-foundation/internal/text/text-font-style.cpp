@@ -343,7 +343,7 @@ void SetFontFamilyProperty(ControllerPtr controller, const Property::Value& valu
         typeStr = ToStdString(*typeValue);
       }
 
-      if(TokenComparison(SYSTEM_TOKEN, typeStr.c_str(), typeStr.size()))
+      if(TokenComparison(SYSTEM_TOKEN, typeStr.c_str(), static_cast<Dali::Ui::Text::Length>(typeStr.size())))
       {
         controller->UpdateAfterFontChange(fontFamilyName);
       }

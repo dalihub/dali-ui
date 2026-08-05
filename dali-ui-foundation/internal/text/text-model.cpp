@@ -81,7 +81,7 @@ bool Model::IsTextElideEnabled() const
 
 Length Model::GetNumberOfLines() const
 {
-  return mVisualModel->mLines.Count();
+  return static_cast<Dali::Ui::Text::Length>(mVisualModel->mLines.Count());
 }
 
 const LineRun* Model::GetLines() const
@@ -91,7 +91,7 @@ const LineRun* Model::GetLines() const
 
 Length Model::GetNumberOfScripts() const
 {
-  return mLogicalModel->mScriptRuns.Count();
+  return static_cast<Dali::Ui::Text::Length>(mLogicalModel->mScriptRuns.Count());
 }
 
 const ScriptRun* Model::GetScriptRuns() const
@@ -101,12 +101,12 @@ const ScriptRun* Model::GetScriptRuns() const
 
 Length Model::GetNumberOfCharacters() const
 {
-  return mLogicalModel->mText.Count();
+  return static_cast<Dali::Ui::Text::Length>(mLogicalModel->mText.Count());
 }
 
 Length Model::GetNumberOfGlyphs() const
 {
-  return mVisualModel->mGlyphs.Count();
+  return static_cast<Dali::Ui::Text::Length>(mVisualModel->mGlyphs.Count());
 }
 
 GlyphIndex Model::GetStartIndexOfElidedGlyphs() const
@@ -281,7 +281,7 @@ const Length* Model::GetHyphenIndices() const
 
 Length Model::GetHyphensCount() const
 {
-  return mVisualModel->mHyphen.glyph.Size();
+  return static_cast<Dali::Ui::Text::Length>(mVisualModel->mHyphen.glyph.Size());
 }
 const Vector4& Model::GetStrikethroughColor() const
 {

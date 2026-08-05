@@ -34,7 +34,7 @@ Debug::Filter* gAnimImgLogFilter = Debug::Filter::New(Debug::NoLogging, false, "
     std::ostringstream oss;                                                                                      \
     oss.imbue(std::locale::classic());                                                                           \
     oss << "Size:" << mQueue.Count() << " [ ";                                                                   \
-    for(std::size_t _i = 0; _i < mQueue.Count(); ++_i)                                                           \
+    for(uint32_t _i = 0u; _i < mQueue.Count(); ++_i)                                                            \
     {                                                                                                            \
       oss << _i << "={ tex:" << mImageUrls[mQueue[_i].mUrlIndex].mTextureId << " urlId:" << mQueue[_i].mUrlIndex \
           << " rdy:" << (mQueue[_i].mReady ? "T" : "F") << "}, ";                                                \
@@ -129,7 +129,7 @@ int32_t RollingImageCache::GetCurrentFrameIndex() const
 
 int32_t RollingImageCache::GetTotalFrameCount() const
 {
-  return mImageUrls.size();
+  return static_cast<int32_t>(mImageUrls.size());
 }
 
 bool RollingImageCache::IsFrontReady() const
@@ -190,7 +190,7 @@ TextureSet RollingImageCache::GetFrontTextureSet() const
   return textureSet;
 }
 
-TextureManager::TextureId RollingImageCache::GetCachedTextureId(int index) const
+TextureManager::TextureId RollingImageCache::GetCachedTextureId(uint32_t index) const
 {
   return mImageUrls[mQueue[index].mUrlIndex].mTextureId;
 }
@@ -235,7 +235,7 @@ void RollingImageCache::LoadComplete(bool loadSuccess, TextureInformation textur
     bool frontFrameReady = IsFrontReady();
     if(!mRequestingLoad)
     {
-      for(std::size_t i = 0; i < mQueue.Count(); ++i)
+      for(uint32_t i = 0u; i < mQueue.Count(); ++i)
       {
         if(GetCachedTextureId(i) == textureInformation.textureId)
         {

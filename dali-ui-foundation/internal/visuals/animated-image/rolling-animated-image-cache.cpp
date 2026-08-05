@@ -36,7 +36,7 @@ Debug::Filter* gAnimImgLogFilter = Debug::Filter::New(Debug::NoLogging, false, "
     std::ostringstream oss;                                                    \
     oss.imbue(std::locale::classic());                                         \
     oss << "Size:" << mQueue.Count() << " [ ";                                 \
-    for(std::size_t _i = 0; _i < mQueue.Count(); ++_i)                         \
+    for(uint32_t _i = 0u; _i < mQueue.Count(); ++_i)                          \
     {                                                                          \
       oss << _i << "={ frm#: " << mQueue[_i].mFrameNumber << " tex: ";         \
       oss << (DALI_LIKELY(mQueue[_i].mFrameNumber < mTextureIds.size()) ?      \
@@ -257,7 +257,7 @@ void RollingAnimatedImageCache::LoadBatch(uint32_t frameIndex)
 
 void RollingAnimatedImageCache::SetImageFrameReady(TextureManager::TextureId textureId)
 {
-  for(std::size_t i = 0; i < mQueue.Count(); ++i)
+  for(uint32_t i = 0u; i < mQueue.Count(); ++i)
   {
     if(GetCachedTextureId(i) == textureId)
     {
@@ -283,7 +283,7 @@ TextureSet RollingAnimatedImageCache::GetFrontTextureSet() const
   return textureSet;
 }
 
-TextureManager::TextureId RollingAnimatedImageCache::GetCachedTextureId(int index) const
+TextureManager::TextureId RollingAnimatedImageCache::GetCachedTextureId(uint32_t index) const
 {
   return DALI_LIKELY(mQueue[index].mFrameNumber < mTextureIds.size()) ? mTextureIds[mQueue[index].mFrameNumber]
                                                                       : TextureManager::INVALID_TEXTURE_ID;

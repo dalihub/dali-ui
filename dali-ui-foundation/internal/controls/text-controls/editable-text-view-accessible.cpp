@@ -55,7 +55,7 @@ bool EditableTextViewAccessible::SetCursorOffset(std::size_t offset)
 
   auto controller        = GetTextController();
   auto oldCursorPosition = controller->GetCursorPosition();
-  controller->ResetCursorPosition(offset);
+  controller->ResetCursorPosition(static_cast<Dali::Ui::Text::CharacterIndex>(offset));
   auto newCursorPosition = controller->GetCursorPosition();
   RequestTextRelayout();
   if(oldCursorPosition != newCursorPosition)

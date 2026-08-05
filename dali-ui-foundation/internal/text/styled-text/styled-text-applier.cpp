@@ -87,7 +87,7 @@ void ConvertUtf8TextToUtf32(const std::string& text, Dali::Vector<Dali::Ui::Text
 
   utf32Text.Resize(text.size());
   const uint32_t characterCount = Dali::Ui::Text::Utf8ToUtf32(reinterpret_cast<const uint8_t*>(text.c_str()),
-                                                              text.size(),
+                                                              static_cast<uint32_t>(text.size()),
                                                               utf32Text.Begin());
   utf32Text.Resize(characterCount);
 }
@@ -135,7 +135,7 @@ Dali::Ui::Text::PointSize26Dot6 ToPointSize26Dot6(float pixelSize, float dpi)
 void CopyFontFamily(const std::string& family, Dali::Ui::Text::FontDescriptionRun& fontRun)
 {
   fontRun.familyDefined = true;
-  fontRun.familyLength  = family.size();
+  fontRun.familyLength  = static_cast<Dali::Ui::Text::Length>(family.size());
   fontRun.familyName    = new char[fontRun.familyLength > 0u ? fontRun.familyLength : 1u];
   if(fontRun.familyLength > 0u)
   {
@@ -722,13 +722,13 @@ void StyledTextApplier::ApplySnapshotToLogicalModel(const StyledTextStyleRunSnap
   logicalModel.mAnchors.Reserve(static_cast<uint32_t>(snapshot.anchorRuns.size()));
   for(const auto& anchorRunSnapshot : snapshot.anchorRuns)
   {
-    const uint32_t colorRunIndex = logicalModel.mColorRuns.Count();
+    const uint32_t colorRunIndex = static_cast<uint32_t>(logicalModel.mColorRuns.Count());
     logicalModel.mColorRuns.PushBack(ToColorRun(StyledTextColorRunSnapshot{
       anchorRunSnapshot.characterIndex,
       anchorRunSnapshot.numberOfCharacters,
       anchorRunSnapshot.color}));
 
-    const uint32_t underlineRunIndex = logicalModel.mUnderlinedCharacterRuns.Count();
+    const uint32_t underlineRunIndex = static_cast<uint32_t>(logicalModel.mUnderlinedCharacterRuns.Count());
     logicalModel.mUnderlinedCharacterRuns.PushBack(ToAnchorUnderlineRun(anchorRunSnapshot));
 
     logicalModel.mAnchors.PushBack(ToAnchor(anchorRunSnapshot, colorRunIndex, underlineRunIndex));

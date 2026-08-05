@@ -561,7 +561,7 @@ void View::ResolveFinalElision(TextAbstraction::FontClient& fontClient,
 
   const VisualModel& visualModel = *mImpl->mVisualModel;
 
-  Length ellipsisLineIndex = visualModel.mLines.Count();
+  Length ellipsisLineIndex = static_cast<Dali::Ui::Text::Length>(visualModel.mLines.Count());
   for(Length lineIndex = 0u; lineIndex < visualModel.mLines.Count(); ++lineIndex)
   {
     if(visualModel.mLines[lineIndex].ellipsis && ellipsisLineIndex == visualModel.mLines.Count())
@@ -616,7 +616,7 @@ void View::ResolveFinalElision(TextAbstraction::FontClient& fontClient,
   result.endIndex              = visualModel.GetEndIndexOfElidedGlyphs();
   result.firstMiddleIndex      = visualModel.GetFirstMiddleIndexOfElidedGlyphs();
   result.secondMiddleIndex     = visualModel.GetSecondMiddleIndexOfElidedGlyphs();
-  const Length finalGlyphCount = result.glyphs.Count();
+  const Length finalGlyphCount = static_cast<Dali::Ui::Text::Length>(result.glyphs.Count());
   if(ellipsisFinalGlyphIndex < finalGlyphCount)
   {
     result.applied                 = true;
@@ -646,7 +646,7 @@ void View::ResolveFinalElision(TextAbstraction::FontClient& fontClient,
     }
   }
 
-  const Length lineCount = visualModel.mLines.Count();
+  const Length lineCount = static_cast<Dali::Ui::Text::Length>(visualModel.mLines.Count());
   float        lineTop   = 0.0f;
   for(LineIndex lineIndex = 0u; lineIndex < lineCount; ++lineIndex)
   {
@@ -716,8 +716,8 @@ Length View::GetNumberOfGlyphs() const
   {
     const VisualModel& model = *mImpl->mVisualModel;
 
-    const Length glyphCount    = model.mGlyphs.Count();
-    const Length positionCount = model.mGlyphPositions.Count();
+    const Length glyphCount    = static_cast<Dali::Ui::Text::Length>(model.mGlyphs.Count());
+    const Length positionCount = static_cast<Dali::Ui::Text::Length>(model.mGlyphPositions.Count());
 
     DALI_ASSERT_DEBUG(positionCount <= glyphCount && "Invalid glyph positions in Model");
 
@@ -733,7 +733,7 @@ Length View::GetGlyphs(GlyphInfo* glyphs, Vector2* glyphPositions, float& minLin
   const FinalElisionResult* finalResult = mImpl->mFinalElisionResult;
   if(finalResult && finalResult->resolved && finalResult->textElided)
   {
-    const Length finalCount = finalResult->glyphs.Count();
+    const Length finalCount = static_cast<Dali::Ui::Text::Length>(finalResult->glyphs.Count());
     if(glyphIndex >= finalCount)
     {
       minLineOffset = finalResult->minimumLineOffset;
@@ -807,7 +807,7 @@ Length View::GetGlyphsUncached(GlyphInfo*                   glyphs,
     // If ellipsis is enabled, the number of glyphs the layout engine has laid out may be less than 'numberOfGlyphs'.
     // Check the last laid out line to know if the layout engine elided some text.
 
-    const Length numberOfLines = mImpl->mVisualModel->mLines.Count();
+    const Length numberOfLines = static_cast<Dali::Ui::Text::Length>(mImpl->mVisualModel->mLines.Count());
     if(numberOfLines > 0u)
     {
       const LineRun* const lines = mImpl->mVisualModel->mLines.Begin();
@@ -1019,7 +1019,7 @@ Length View::GetGlyphsUncached(GlyphInfo*                   glyphs,
             input.numberOfGlyphs          = numberOfGlyphs;
             input.glyphPositionStartIndex = 0u;
             input.numberOfGlyphPositions  = numberOfGlyphs;
-            input.numberOfCharacters      = mImpl->mLogicalModel->mText.Count();
+            input.numberOfCharacters      = static_cast<Dali::Ui::Text::Length>(mImpl->mLogicalModel->mText.Count());
             input.startIndex              = startIndexOfEllipsis;
             input.lineWidth               = ellipsisLine->width;
             input.modelCharacterSpacing   = modelCharacterSpacing;
@@ -1196,7 +1196,7 @@ Length View::GetHyphensCount() const
 {
   if(mImpl->mVisualModel)
   {
-    return mImpl->mVisualModel->mHyphen.glyph.Size();
+    return static_cast<Dali::Ui::Text::Length>(mImpl->mVisualModel->mHyphen.glyph.Size());
   }
 
   return 0;

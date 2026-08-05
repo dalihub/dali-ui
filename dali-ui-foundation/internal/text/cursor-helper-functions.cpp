@@ -194,8 +194,8 @@ CharacterIndex GetClosestCursorIndex(VisualModelPtr visualModel, LogicalModelPtr
 
   CharacterIndex logicalIndex = 0;
 
-  const Length totalNumberOfGlyphs = visualModel->mGlyphs.Count();
-  const Length totalNumberOfLines  = visualModel->mLines.Count();
+  const Length totalNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(visualModel->mGlyphs.Count());
+  const Length totalNumberOfLines  = static_cast<Dali::Ui::Text::Length>(visualModel->mLines.Count());
   if((0 == totalNumberOfGlyphs) || (0 == totalNumberOfLines))
   {
     return logicalIndex;
@@ -214,7 +214,7 @@ CharacterIndex GetClosestCursorIndex(VisualModelPtr visualModel, LogicalModelPtr
   if(!matchedLine && (CharacterHitTest::TAP == mode))
   {
     // Return the first or the last character if the touch point doesn't hit a line.
-    return (visualY < 0.f) ? 0 : logicalModel->mText.Count();
+    return (visualY < 0.f) ? 0 : static_cast<Dali::Ui::Text::CharacterIndex>(logicalModel->mText.Count());
   }
 
   // Convert from text's coords to line's coords.
@@ -386,7 +386,7 @@ CharacterIndex GetClosestCursorIndex(VisualModelPtr visualModel, LogicalModelPtr
   } // for characters in visual order.
 
   // The number of characters of the whole text.
-  const Length totalNumberOfCharacters = logicalModel->mText.Count();
+  const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(logicalModel->mText.Count());
 
   // Return the logical position of the cursor in characters.
 
@@ -530,7 +530,7 @@ void GetCursorPosition(GetCursorPositionParameters& parameters, float defaultFon
     cursorInfo.lineHeight = newLine.ascender - newLine.descender;
 
     index                                = 0u;
-    const Length totalNumberOfCharacters = parameters.logicalModel->mText.Count();
+    const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(parameters.logicalModel->mText.Count());
     if(totalNumberOfCharacters > 0u)
     {
       index = totalNumberOfCharacters - 1u;
@@ -792,7 +792,7 @@ bool FindSelectionIndices(VisualModelPtr visualModel, LogicalModelPtr logicalMod
 | On a new paragraph character                          | The word or group of white spaces before |
 |-------------------------------------------------------|------------------------------------------|
 */
-  const Length totalNumberOfCharacters = logicalModel->mText.Count();
+  const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(logicalModel->mText.Count());
   startIndex                           = 0;
   endIndex                             = 0;
   noTextHitIndex                       = 0;

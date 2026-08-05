@@ -70,8 +70,8 @@ Property::Map CreateGradientVisualPropertyMap(const Gradient::Base& gradient)
 
   Property::Array offsets;
   Property::Array colors;
-  offsets.Reserve(stopNodes.Count());
-  colors.Reserve(stopNodes.Count());
+  offsets.Reserve(static_cast<Dali::Property::Array::SizeType>(stopNodes.Count()));
+  colors.Reserve(static_cast<Dali::Property::Array::SizeType>(stopNodes.Count()));
 
   for(auto i = 0u; i < stopNodes.Count(); ++i)
   {

@@ -108,8 +108,8 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
     projectedUpdateInfo.Clear();
     projectedUpdateInfo.mCharacterIndex              = 0u;
     projectedUpdateInfo.mParagraphCharacterIndex     = 0u;
-    projectedUpdateInfo.mRequestedNumberOfCharacters = targetModel.mLogicalModel->mText.Count();
-    projectedUpdateInfo.mNumberOfCharactersToAdd     = targetModel.mLogicalModel->mText.Count();
+    projectedUpdateInfo.mRequestedNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(targetModel.mLogicalModel->mText.Count());
+    projectedUpdateInfo.mNumberOfCharactersToAdd     = static_cast<Dali::Ui::Text::Length>(targetModel.mLogicalModel->mText.Count());
     projectedUpdateInfo.mPreviousNumberOfCharacters  = 0u;
     projectedUpdateInfo.mStartGlyphIndex             = 0u;
     projectedUpdateInfo.mStartLineIndex              = 0u;
@@ -137,7 +137,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
   }
 
   Vector<Character>& utf32Characters    = useHiddenText ? displayCharacters : srcCharacters;
-  const Length       numberOfCharacters = utf32Characters.Count();
+  const Length       numberOfCharacters = static_cast<Dali::Ui::Text::Length>(utf32Characters.Count());
 
   // Index to the first character of the first paragraph to be updated.
   CharacterIndex startIndex = 0u;
@@ -369,7 +369,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
 
   Vector<Character> mirroredUtf32Characters;
   bool              textMirrored       = false;
-  const Length      numberOfParagraphs = targetModel.mLogicalModel->mParagraphInfo.Count();
+  const Length      numberOfParagraphs = static_cast<Dali::Ui::Text::Length>(targetModel.mLogicalModel->mParagraphInfo.Count());
   if(Controller::NO_OPERATION != (Controller::BIDI_INFO & operations))
   {
     Vector<BidirectionalParagraphInfoRun>& bidirectionalInfo = targetModel.mLogicalModel->mBidirectionalParagraphInfo;
@@ -408,7 +408,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
   Vector<GlyphIndex> newParagraphGlyphs;
   newParagraphGlyphs.Reserve(numberOfParagraphs);
 
-  const Length currentNumberOfGlyphs = glyphs.Count();
+  const Length currentNumberOfGlyphs = static_cast<Dali::Ui::Text::Length>(glyphs.Count());
 
 #if defined(TRACE_ENABLED)
   uint32_t logThreshold = TextAbstraction::FontClient::GetPerformanceLogThresholdTime();
@@ -746,7 +746,7 @@ bool ControllerImplModelUpdater::Update(Controller::Impl&           impl,
 
   // The estimated number of lines. Used to avoid reallocations when layouting.
   updateInfo.mEstimatedNumberOfLines =
-    std::max(targetModel.mVisualModel->mLines.Count(), targetModel.mLogicalModel->mParagraphInfo.Count());
+      static_cast<Length>(std::max(targetModel.mVisualModel->mLines.Count(), targetModel.mLogicalModel->mParagraphInfo.Count()));
 
   // Set the previous number of characters for the next time the text is updated.
   updateInfo.mPreviousNumberOfCharacters = numberOfCharacters;

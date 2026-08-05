@@ -123,7 +123,7 @@ Ui::AtlasManager::AtlasId AtlasManager::CreateAtlas(const Ui::AtlasManager::Atla
   PixelData filledPixelImage = PixelData::New(buffer, bufferSize, 1u, 1u, pixelformat, PixelData::DELETE_ARRAY);
   atlas.Upload(filledPixelImage, 0u, 0u, 0u, 0u, 1u, 1u);
   mAtlasList.push_back(atlasDescriptor);
-  return mAtlasList.size();
+  return static_cast<Dali::Ui::Internal::AtlasManager::AtlasId>(mAtlasList.size());
 }
 
 void AtlasManager::SetAddPolicy(Ui::AtlasManager::AddFailPolicy policy)
@@ -221,7 +221,7 @@ bool AtlasManager::Add(const PixelData& image, Ui::AtlasManager::AtlasSlot& slot
   if(!imageId)
   {
     mImageList.PushBack(desc);
-    slot.mImageId = mImageList.Size();
+    slot.mImageId = static_cast<Dali::Ui::AtlasManager::ImageId>(mImageList.Size());
   }
   else
   {
@@ -487,14 +487,14 @@ AtlasManager::SizeType AtlasManager::GetFreeBlocks(AtlasId atlas) const
   AtlasManager::SizeType freeBlocks = 0u;
   if(atlas && atlas-- <= mAtlasList.size())
   {
-    freeBlocks = mAtlasList[atlas].mAvailableBlocks + mAtlasList[atlas].mFreeBlocksList.Size();
+    freeBlocks = static_cast<AtlasManager::SizeType>(mAtlasList[atlas].mAvailableBlocks + mAtlasList[atlas].mFreeBlocksList.Size());
   }
   return freeBlocks;
 }
 
 AtlasManager::SizeType AtlasManager::GetAtlasCount() const
 {
-  return mAtlasList.size();
+  return static_cast<Dali::Ui::Internal::AtlasManager::SizeType>(mAtlasList.size());
 }
 
 Pixel::Format AtlasManager::GetPixelFormat(AtlasId atlas) const
@@ -512,7 +512,7 @@ void AtlasManager::GetMetrics(Ui::AtlasManager::Metrics& metrics)
 {
   Ui::AtlasManager::AtlasMetricsEntry entry;
   uint32_t                            textureMemoryUsed = 0;
-  uint32_t                            atlasCount        = mAtlasList.size();
+  uint32_t                            atlasCount        = static_cast<uint32_t>(mAtlasList.size());
   metrics.mAtlasCount                                   = atlasCount;
   metrics.mAtlasMetrics.Resize(0);
 

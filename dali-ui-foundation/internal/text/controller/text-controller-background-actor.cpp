@@ -114,7 +114,7 @@ Actor CreateControllerBackgroundActor(const View& textView, const VisualModelPtr
     Length    prevLineIndex = 0;
     LineIndex lineIndex;
 
-    for(uint32_t i = 0, glyphSize = glyphs.Size(); i < glyphSize; ++i)
+    for(uint32_t i = 0, glyphSize = static_cast<uint32_t>(glyphs.Size()); i < glyphSize; ++i)
     {
       const GlyphInfo& glyph = *(glyphsBuffer + i);
 
@@ -228,11 +228,11 @@ Actor CreateControllerBackgroundActor(const View& textView, const VisualModelPtr
       quadVertexFormat["aColor"]    = Property::VECTOR4;
 
       VertexBuffer quadVertices = VertexBuffer::New(quadVertexFormat);
-      quadVertices.SetData(&mesh.mVertices[0], mesh.mVertices.Size());
+      quadVertices.SetData(&mesh.mVertices[0], static_cast<uint32_t>(mesh.mVertices.Size()));
 
       Geometry quadGeometry = Geometry::New();
       quadGeometry.AddVertexBuffer(quadVertices);
-      quadGeometry.SetIndexBuffer(&mesh.mIndices[0], mesh.mIndices.Size());
+      quadGeometry.SetIndexBuffer(&mesh.mIndices[0], static_cast<uint32_t>(mesh.mIndices.Size()));
 
       if(!textShaderBackground)
       {

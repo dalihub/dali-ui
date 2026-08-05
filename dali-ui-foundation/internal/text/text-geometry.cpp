@@ -463,8 +463,8 @@ int GetCharIndexAtPosition(ModelPtr textModel, float visualX, float visualY)
 
   VisualModelPtr& visualModel = textModel->mVisualModel;
 
-  const int totalNumberOfGlyphs = visualModel->mGlyphs.Count();
-  const int totalNumberOfLines  = visualModel->mLines.Count();
+  const int32_t totalNumberOfGlyphs = static_cast<int32_t>(visualModel->mGlyphs.Count());
+  const int32_t totalNumberOfLines  = static_cast<int32_t>(visualModel->mLines.Count());
 
   if((0 == totalNumberOfGlyphs) || (0 == totalNumberOfLines))
   {

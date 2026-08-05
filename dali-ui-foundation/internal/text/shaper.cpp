@@ -72,9 +72,9 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
 #endif
 
 #ifdef DEBUG_ENABLED
-  const Length numberOfFontRuns        = fonts.Count();
-  const Length numberOfScriptRuns      = scripts.Count();
-  const Length totalNumberOfCharacters = text.Count();
+  const Length numberOfFontRuns        = static_cast<Dali::Ui::Text::Length>(fonts.Count());
+  const Length numberOfScriptRuns      = static_cast<Dali::Ui::Text::Length>(scripts.Count());
+  const Length totalNumberOfCharacters = static_cast<Dali::Ui::Text::Length>(text.Count());
 #endif
 
   DALI_ASSERT_DEBUG((0u != numberOfFontRuns) &&
@@ -133,7 +133,7 @@ void ShapeText(TextAbstraction::Shaping& shaping, TextAbstraction::FontClient& f
   glyphInfo.isItalicRequired = false;
   glyphInfo.isBoldRequired   = false;
 
-  const Length currentNumberOfGlyphs  = glyphs.Count();
+  const Length currentNumberOfGlyphs  = static_cast<Dali::Ui::Text::Length>(glyphs.Count());
   const Length numberOfGlyphsReserved = static_cast<Length>(numberOfCharacters * 1.3f);
   glyphs.Reserve(currentNumberOfGlyphs + numberOfGlyphsReserved);
   glyphToCharacterMap.Reserve(currentNumberOfGlyphs + numberOfGlyphsReserved);

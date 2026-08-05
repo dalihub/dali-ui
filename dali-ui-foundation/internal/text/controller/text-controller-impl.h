@@ -679,7 +679,7 @@ public:
              ? ReplacementEditNormalizer::NormalizeBoundary(GetReplacementSourceSnapshot().runs,
                                                             boundary,
                                                             affinity,
-                                                            mModel->mLogicalModel->mText.Count())
+                                                            static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count()))
              : std::min(boundary, static_cast<CharacterIndex>(mModel->mLogicalModel->mText.Count()));
   }
 
@@ -696,11 +696,11 @@ public:
       ReplacementEditNormalizer::NormalizeSelection(GetReplacementSourceSnapshot().runs,
                                                     first,
                                                     second,
-                                                    mModel->mLogicalModel->mText.Count());
+                                                    static_cast<Dali::Ui::Text::Length>(mModel->mLogicalModel->mText.Count()));
     }
     else
     {
-      const CharacterIndex textLength = mModel->mLogicalModel->mText.Count();
+      const CharacterIndex textLength = static_cast<Dali::Ui::Text::CharacterIndex>(mModel->mLogicalModel->mText.Count());
       first                           = std::min(first, textLength);
       second                          = std::min(second, textLength);
     }

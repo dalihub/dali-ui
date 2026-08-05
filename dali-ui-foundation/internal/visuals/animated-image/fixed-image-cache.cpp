@@ -129,7 +129,7 @@ int32_t FixedImageCache::GetCurrentFrameIndex() const
 
 int32_t FixedImageCache::GetTotalFrameCount() const
 {
-  return mImageUrls.size();
+  return static_cast<int32_t>(mImageUrls.size());
 }
 
 bool FixedImageCache::IsFrameReady(uint32_t frameIndex) const
@@ -143,7 +143,7 @@ void FixedImageCache::LoadBatch()
   // Once the cache is filled, no more images are loaded.
   for(unsigned int i = 0; i < mBatchSize && mReadyFlags.size() < mImageUrls.size(); ++i)
   {
-    uint32_t   frameIndex = mReadyFlags.size();
+    uint32_t   frameIndex = static_cast<uint32_t>(mReadyFlags.size());
     VisualUrl& url        = mImageUrls[frameIndex].mUrl;
 
     mReadyFlags.push_back(false);

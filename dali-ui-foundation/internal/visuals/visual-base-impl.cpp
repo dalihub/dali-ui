@@ -231,7 +231,7 @@ bool Visual::Base::IsUsingCustomShader() const
 void Visual::Base::SetProperties(const Property::Map& propertyMap)
 {
   bool needUpdateShader = false;
-  for(size_t i = 0; i < propertyMap.Count(); ++i)
+  for(Property::Map::SizeType i = 0u; i < propertyMap.Count(); ++i)
   {
     const KeyValuePair&    pair  = propertyMap.GetKeyValue(i);
     const Property::Key&   key   = pair.first;

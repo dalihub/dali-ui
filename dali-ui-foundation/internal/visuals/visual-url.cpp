@@ -39,7 +39,7 @@ static_assert(URL_ELLIPSED_LENGTH < URL_ELLIPSED_LENGTH + 3u); ///< Guard overfl
 VisualUrl::ProtocolType ResolveLocation(const std::string& url)
 {
   const char*    urlCStr = url.c_str();
-  const uint32_t length  = url.size();
+  const uint32_t length  = static_cast<uint32_t>(url.size());
   if((length > 7) && urlCStr[5] == ':' && urlCStr[6] == '/' && urlCStr[7] == '/')
   {
     // https:// or enbuf://
@@ -94,7 +94,7 @@ VisualUrl::ProtocolType ResolveLocation(const std::string& url)
 VisualUrl::Type ResolveType(const std::string& url)
 {
   // if only one char in string, can only be regular image
-  const std::size_t count      = url.size();
+  const uint32_t    count      = static_cast<uint32_t>(url.size());
   VisualUrl::Type   returnType = VisualUrl::REGULAR_IMAGE;
   if(count > 0)
   {
@@ -115,7 +115,7 @@ VisualUrl::Type ResolveType(const std::string& url)
     unsigned int gifScore  = 0;
     unsigned int webpScore = 0;
     unsigned int jsonScore = 0;
-    int          index     = count;
+    int32_t      index     = static_cast<int32_t>(count);
     while(--index >= 0)
     {
       const char        currentChar   = tolower(url[index]);

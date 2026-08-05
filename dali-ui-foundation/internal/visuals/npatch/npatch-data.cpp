@@ -106,7 +106,7 @@ void NPatchData::RemoveObserver(TextureUploadObserver* textureObserver)
 
 uint32_t NPatchData::GetObserverCount() const
 {
-  return mObserverList.Count();
+  return static_cast<uint32_t>(mObserverList.Count());
 }
 
 void NPatchData::SetUrl(const VisualUrl& url)

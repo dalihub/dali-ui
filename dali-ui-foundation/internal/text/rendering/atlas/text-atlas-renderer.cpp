@@ -338,7 +338,7 @@ struct AtlasRenderer::Impl
 
     AtlasManager::Vertex2D* verticesBuffer = newMesh.mVertices.Begin();
 
-    for(unsigned int index = 0u, size = newMesh.mVertices.Count(); index < size; ++index)
+    for(uint32_t index = 0u, size = static_cast<uint32_t>(newMesh.mVertices.Count()); index < size; ++index)
     {
       AtlasManager::Vertex2D& vertex = *(verticesBuffer + index);
 
@@ -551,7 +551,7 @@ struct AtlasRenderer::Impl
     fontClient.GetFontMetrics(lastDecorativeLinesFontId, lastDecorativeLinesFontMetrics);
 
     // Iteration on glyphs
-    for(uint32_t i = 0, glyphSize = glyphs.Size(); i < glyphSize; ++i)
+    for(uint32_t i = 0, glyphSize = static_cast<uint32_t>(glyphs.Size()); i < glyphSize; ++i)
     {
       GlyphInfo glyph;
       bool      addHyphen =
@@ -1042,7 +1042,7 @@ struct AtlasRenderer::Impl
   {
     VertexBuffer quadVertices = VertexBuffer::New(mQuadVertexFormat);
     quadVertices.SetData(const_cast<AtlasManager::Vertex2D*>(&meshRecord.mMesh.mVertices[0]),
-                         meshRecord.mMesh.mVertices.Size());
+                         static_cast<uint32_t>(meshRecord.mMesh.mVertices.Size()));
 
     Geometry quadGeometry = Geometry::New();
     quadGeometry.AddVertexBuffer(quadVertices);
@@ -1056,10 +1056,10 @@ struct AtlasRenderer::Impl
     if(useGradientShader)
     {
       VertexBuffer gradientVertices = VertexBuffer::New(mGradientVertexFormat);
-      gradientVertices.SetData(const_cast<float*>(meshRecord.mGradientFlags.Begin()), meshRecord.mGradientFlags.Count());
+      gradientVertices.SetData(const_cast<float*>(meshRecord.mGradientFlags.Begin()), static_cast<uint32_t>(meshRecord.mGradientFlags.Count()));
       quadGeometry.AddVertexBuffer(gradientVertices);
     }
-    quadGeometry.SetIndexBuffer(&meshRecord.mMesh.mIndices[0], meshRecord.mMesh.mIndices.Size());
+    quadGeometry.SetIndexBuffer(&meshRecord.mMesh.mIndices[0], static_cast<uint32_t>(meshRecord.mMesh.mIndices.Size()));
 
     TextureSet textureSet;
     if(useGradientShader)
@@ -1226,12 +1226,12 @@ struct AtlasRenderer::Impl
       if(underlineEnabled)
       {
         // Adjust extents for this new meshrecord
-        AdjustExtents(underlineExtents, meshContainer, meshContainer.size() - 1u, baseLine, left, right,
+        AdjustExtents(underlineExtents, meshContainer, static_cast<uint32_t>(meshContainer.size() - 1u), baseLine, left, right,
                       underlineChunkId, underlinePosition, underlineThickness);
       }
       if(strikethroughEnabled)
       {
-        AdjustExtents(strikethroughExtents, meshContainer, meshContainer.size() - 1u, baseLine, left, right,
+        AdjustExtents(strikethroughExtents, meshContainer, static_cast<uint32_t>(meshContainer.size() - 1u), baseLine, left, right,
                       strikethroughChunkId, strikethroughPosition, strikethroughThickness);
       }
     }

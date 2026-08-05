@@ -92,7 +92,7 @@ void Controller::InputFontHandler::SetInputFontFamily(Controller& controller, co
           UpdateSelectionFontStyleRun(controller.mImpl->mEventData, controller.mImpl->mModel->mLogicalModel,
                                       startOfSelectedText, lengthOfSelectedText);
 
-        fontDescriptionRun.familyLength = fontFamily.size();
+        fontDescriptionRun.familyLength = static_cast<Dali::Ui::Text::Length>(fontFamily.size());
         fontDescriptionRun.familyName   = new char[fontDescriptionRun.familyLength];
         memcpy(fontDescriptionRun.familyName, fontFamily.c_str(), fontDescriptionRun.familyLength);
         fontDescriptionRun.familyDefined = true;
@@ -110,7 +110,7 @@ void Controller::InputFontHandler::SetInputFontFamily(Controller& controller, co
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToRemove =
           controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd =
-          controller.mImpl->mModel->mLogicalModel->mText.Count();
+          static_cast<Dali::Ui::Text::Length>(controller.mImpl->mModel->mLogicalModel->mText.Count());
       }
 
       // Request to relayout.
@@ -176,7 +176,7 @@ void Controller::InputFontHandler::SetInputFontWeight(const Controller& controll
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToRemove =
           controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd =
-          controller.mImpl->mModel->mLogicalModel->mText.Count();
+          static_cast<Dali::Ui::Text::Length>(controller.mImpl->mModel->mLogicalModel->mText.Count());
       }
 
       // Request to relayout.
@@ -253,7 +253,7 @@ void Controller::InputFontHandler::SetInputFontWidth(Controller& controller, Fon
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToRemove =
           controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd =
-          controller.mImpl->mModel->mLogicalModel->mText.Count();
+          static_cast<Dali::Ui::Text::Length>(controller.mImpl->mModel->mLogicalModel->mText.Count());
       }
 
       // Request to relayout.
@@ -330,7 +330,7 @@ void Controller::InputFontHandler::SetInputFontSlant(Controller& controller, Fon
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToRemove =
           controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd =
-          controller.mImpl->mModel->mLogicalModel->mText.Count();
+          static_cast<Dali::Ui::Text::Length>(controller.mImpl->mModel->mLogicalModel->mText.Count());
       }
 
       // Request to relayout.
@@ -408,7 +408,7 @@ void Controller::InputFontHandler::SetInputFontPointSize(Controller& controller,
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToRemove =
           controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd =
-          controller.mImpl->mModel->mLogicalModel->mText.Count();
+          static_cast<Dali::Ui::Text::Length>(controller.mImpl->mModel->mLogicalModel->mText.Count());
       }
 
       // Request to relayout.

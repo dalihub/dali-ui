@@ -336,9 +336,9 @@ void Controller::SetVariationsMap(const Property::Map& map)
   auto& variationsMap = mImpl->mModel->mLogicalModel->mVariationsMap;
   variationsMap.Clear();
 
-  std::size_t numberOfItems = map.Count();
+  Property::Map::SizeType numberOfItems = map.Count();
 
-  for(std::size_t index = 0; index < numberOfItems; index++)
+  for(Property::Map::SizeType index = 0u; index < numberOfItems; ++index)
   {
     const KeyValuePair& keyvalue = map.GetKeyValue(index);
 
@@ -362,8 +362,8 @@ Dali::Vector<Text::FontVariation::Axis> Controller::GetVariations() const
 {
   Dali::Vector<Text::FontVariation::Axis> axes;
   const Property::Map&                    map   = mImpl->mModel->mLogicalModel->mVariationsMap;
-  const std::size_t                       count = map.Count();
-  for(std::size_t i = 0u; i < count; ++i)
+  const Property::Map::SizeType           count = map.Count();
+  for(Property::Map::SizeType i = 0u; i < count; ++i)
   {
     const auto& keyValue = map.GetKeyValue(i);
     if(keyValue.first.type == Property::Key::STRING)
@@ -610,7 +610,7 @@ void Controller::SetTextFitCandidates(const Dali::Vector<Text::Fit::Candidate>& 
   mImpl->mTextFitCandidates    = candidates;
   mImpl->mMaxFitCandidateIndex = -1;
 
-  const uint32_t count = mImpl->mTextFitCandidates.Count();
+  const uint32_t count = static_cast<uint32_t>(mImpl->mTextFitCandidates.Count());
   if(count == 0u)
   {
     return;

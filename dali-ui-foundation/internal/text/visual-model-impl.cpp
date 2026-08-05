@@ -203,7 +203,7 @@ void VisualModel::GetGlyphPositions(Vector2* glyphPositions, GlyphIndex glyphInd
 
 Length VisualModel::GetTotalNumberOfLines() const
 {
-  return mLines.Size();
+  return static_cast<Dali::Ui::Text::Length>(mLines.Size());
 }
 
 void VisualModel::GetNumberOfLines(GlyphIndex glyphIndex, Length numberOfGlyphs, LineIndex& firstLine,
@@ -629,7 +629,7 @@ GlyphIndex VisualModel::GetSecondMiddleIndexOfElidedGlyphs() const
 
 Length VisualModel::GetNumberOfUnderlineRuns() const
 {
-  return mUnderlineRuns.Count();
+  return static_cast<Dali::Ui::Text::Length>(mUnderlineRuns.Count());
 }
 
 const Vector4& VisualModel::GetStrikethroughColor() const
@@ -655,12 +655,12 @@ void VisualModel::GetStrikethroughRuns(StrikethroughGlyphRun* strikethroughRuns,
 
 Length VisualModel::GetNumberOfStrikethroughRuns() const
 {
-  return mStrikethroughRuns.Count();
+  return static_cast<Dali::Ui::Text::Length>(mStrikethroughRuns.Count());
 }
 
 Length VisualModel::GetNumberOfCharacterSpacingGlyphRuns() const
 {
-  return mCharacterSpacingRuns.Count();
+  return static_cast<Dali::Ui::Text::Length>(mCharacterSpacingRuns.Count());
 }
 
 const Vector<CharacterSpacingGlyphRun>& VisualModel::GetCharacterSpacingGlyphRuns() const

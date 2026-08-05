@@ -63,7 +63,7 @@ bool IsValidReplacementSource(const Vector<Character>&      originalLogicalText,
                               const ReplacementRunSnapshot& source)
 {
   const CharacterRun& range        = source.logicalCharacterRange;
-  const Length        logicalCount = originalLogicalText.Count();
+  const Length        logicalCount = static_cast<Dali::Ui::Text::Length>(originalLogicalText.Count());
   return range.numberOfCharacters > 0u &&
          range.characterIndex < logicalCount &&
          range.numberOfCharacters <= logicalCount - range.characterIndex &&
@@ -90,7 +90,7 @@ ReplacementProjection ReplacementProjection::Build(const Vector<Character>&     
   }
 
   const float    safeMetricScale              = std::isfinite(metricScale) && metricScale > 0.0f ? metricScale : 1.0f;
-  const Length   logicalCount                 = originalLogicalText.Count();
+  const Length   logicalCount                 = static_cast<Dali::Ui::Text::Length>(originalLogicalText.Count());
   bool           hasMultiCharacterReplacement = false;
   bool           acceptedInLogicalOrder       = true;
   CharacterIndex maxAcceptedEnd               = 0u;
@@ -276,12 +276,12 @@ const Vector<ProjectedReplacementRun>& ReplacementProjection::GetReplacementRuns
 
 Length ReplacementProjection::GetLogicalCharacterCount() const
 {
-  return mLogicalText == nullptr ? 0u : mLogicalText->Count();
+  return mLogicalText == nullptr ? 0u : static_cast<Dali::Ui::Text::Length>(mLogicalText->Count());
 }
 
 Length ReplacementProjection::GetProcessingCharacterCount() const
 {
-  return GetProcessingText().Count();
+  return static_cast<Length>(GetProcessingText().Count());
 }
 
 CharacterIndex ReplacementProjection::LogicalCharacterToProjected(CharacterIndex logicalIndex) const
@@ -332,7 +332,7 @@ CharacterIndex ReplacementProjection::ProjectedBoundaryToLogical(CharacterIndex 
 const ProjectedReplacementRun* ReplacementProjection::FindByLogicalCharacter(CharacterIndex logicalIndex) const
 {
   uint32_t first = 0u;
-  uint32_t last  = mReplacementRuns.Count();
+  uint32_t last  = static_cast<uint32_t>(mReplacementRuns.Count());
   while(first < last)
   {
     const uint32_t                 mid = first + (last - first) / 2u;
@@ -356,7 +356,7 @@ const ProjectedReplacementRun* ReplacementProjection::FindByLogicalCharacter(Cha
 const ProjectedReplacementRun* ReplacementProjection::FindByProjectedCharacter(CharacterIndex projectedIndex) const
 {
   uint32_t first = 0u;
-  uint32_t last  = mReplacementRuns.Count();
+  uint32_t last  = static_cast<uint32_t>(mReplacementRuns.Count());
   while(first < last)
   {
     const uint32_t                 mid = first + (last - first) / 2u;

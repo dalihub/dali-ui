@@ -312,7 +312,7 @@ uint32_t Utf32ToUtf8(const uint32_t* const utf32, uint32_t numberOfCharacters, u
     // clang-format on
   }
 
-  return utf8 - utf8Begin;
+  return static_cast<uint32_t>(utf8 - utf8Begin);
 }
 
 void Utf32ToUtf8(const uint32_t* const utf32, uint32_t numberOfCharacters, std::string& utf8)

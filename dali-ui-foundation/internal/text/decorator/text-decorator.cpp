@@ -1323,7 +1323,7 @@ struct Decorator::Impl : public ConnectionTracker
       mHighlightActor.SetProperty(Actor::Property::POSITION, Vector2(mHighlightPosition.x + mHighlightOutlineOffset,
                                                                      mHighlightPosition.y + mHighlightOutlineOffset));
 
-      const unsigned int numberOfQuads = mHighlightQuadList.Count();
+      const uint32_t numberOfQuads = static_cast<uint32_t>(mHighlightQuadList.Count());
       if(0u != numberOfQuads)
       {
         // Set the size of the highlighted text to the actor.
@@ -1386,14 +1386,14 @@ struct Decorator::Impl : public ConnectionTracker
           mQuadVertices = VertexBuffer::New(mQuadVertexFormat);
         }
 
-        mQuadVertices.SetData(&vertices[0], vertices.Size());
+        mQuadVertices.SetData(&vertices[0], static_cast<uint32_t>(vertices.Size()));
 
         if(!mQuadGeometry)
         {
           mQuadGeometry = Geometry::New();
           mQuadGeometry.AddVertexBuffer(mQuadVertices);
         }
-        mQuadGeometry.SetIndexBuffer(&indices[0], indices.Size());
+        mQuadGeometry.SetIndexBuffer(&indices[0], static_cast<uint32_t>(indices.Size()));
 
         if(!mHighlightRenderer)
         {

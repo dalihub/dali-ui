@@ -295,7 +295,7 @@ struct Base::Impl
    */
   uint32_t GetCustomShaderCount() const
   {
-    return mCustomShaders.size();
+    return static_cast<uint32_t>(mCustomShaders.size());
   }
 
   /**

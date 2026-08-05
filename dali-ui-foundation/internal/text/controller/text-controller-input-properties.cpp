@@ -87,7 +87,7 @@ void Controller::InputProperties::SetInputColor(Controller& controller, const Ve
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToRemove =
           controller.mImpl->mTextUpdateInfo.mPreviousNumberOfCharacters;
         controller.mImpl->mTextUpdateInfo.mNumberOfCharactersToAdd =
-          controller.mImpl->mModel->mLogicalModel->mText.Count();
+          static_cast<Dali::Ui::Text::Length>(controller.mImpl->mModel->mLogicalModel->mText.Count());
       }
 
       // Request to relayout.

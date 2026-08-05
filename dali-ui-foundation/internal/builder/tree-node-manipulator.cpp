@@ -43,7 +43,7 @@ void Indent(std::ostream& o, int level, int indentWidth)
 std::string EscapeQuotes(const char* aString)
 {
   std::string escapedString;
-  int         length = strlen(aString);
+  int32_t     length = static_cast<int32_t>(strlen(aString));
   escapedString.reserve(length);
 
   const char* end = aString + length;
@@ -186,12 +186,12 @@ TreeNode* TreeNodeManipulator::Copy(const TreeNode& tree, int& numberNodes, int&
 
   if(tree.mName)
   {
-    numberChars += std::strlen(tree.mName) + 1;
+      numberChars = static_cast<int32_t>(numberChars + std::strlen(tree.mName) + 1u);
   }
 
   if(TreeNode::STRING == tree.mType)
   {
-    numberChars += std::strlen(tree.mStringValue) + 1;
+      numberChars = static_cast<int32_t>(numberChars + std::strlen(tree.mStringValue) + 1u);
   }
 
   ++numberNodes;
@@ -211,12 +211,12 @@ void TreeNodeManipulator::CopyChildren(const TreeNode* from, TreeNode* to, int& 
     const TreeNode* child = &((*iter).second);
     if(child->mName)
     {
-      numberChars += std::strlen(child->mName) + 1;
+        numberChars = static_cast<int32_t>(numberChars + std::strlen(child->mName) + 1u);
     }
 
     if(TreeNode::STRING == child->mType)
     {
-      numberChars += std::strlen(child->mStringValue) + 1;
+        numberChars = static_cast<int32_t>(numberChars + std::strlen(child->mStringValue) + 1u);
     }
 
     TreeNode* newNode = NewTreeNode();

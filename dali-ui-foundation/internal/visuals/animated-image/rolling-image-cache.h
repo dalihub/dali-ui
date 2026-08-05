@@ -118,7 +118,7 @@ private:
    *
    * @param[in] index index of the queue.
    */
-  TextureManager::TextureId GetCachedTextureId(int index) const;
+  TextureManager::TextureId GetCachedTextureId(uint32_t index) const;
 
   /**
    * @brief Pop front entity of Cache.

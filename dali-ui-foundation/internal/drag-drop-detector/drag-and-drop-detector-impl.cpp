@@ -711,11 +711,11 @@ Dali::Ui::View DragAndDropDetector::GetDragTarget() const
 
 uint32_t DragAndDropDetector::GetAttachedSourceCount() const
 {
-  return mSources.size();
+  return static_cast<uint32_t>(mSources.size());
 }
 uint32_t DragAndDropDetector::GetAttachedTargetCount() const
 {
-  return mTargets.size();
+  return static_cast<uint32_t>(mTargets.size());
 }
 
 const Dali::Ui::DragPayload& DragAndDropDetector::GetDragPayload() const

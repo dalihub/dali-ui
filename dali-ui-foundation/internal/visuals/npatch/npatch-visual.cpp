@@ -463,7 +463,7 @@ Geometry NPatchVisual::CreateGeometry()
     }
     else if(data->GetStretchPixelsX().Size() > 0 || data->GetStretchPixelsY().Size() > 0)
     {
-      Uint16Pair gridSize(2 * data->GetStretchPixelsX().Size() + 1, 2 * data->GetStretchPixelsY().Size() + 1);
+      Uint16Pair gridSize(static_cast<uint32_t>(2u * data->GetStretchPixelsX().Size() + 1u), static_cast<uint32_t>(2u * data->GetStretchPixelsY().Size() + 1u));
       if(!data->GetRenderingMap())
       {
         geometry = !mBorderOnly ? VisualFactoryCache::CreateGridGeometry(gridSize, false)
