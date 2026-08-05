@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns="http://tizen.org/ns/packages" api-version="10.0" package="com.samsung.dali.ui-components-manual-test" version="1.0.0">
+    <profile name="tizen" />
+    <ui-application appid="com.samsung.dali.ui-components-manual-test" exec="/usr/apps/com.samsung.dali.ui-components-manual-test/bin/manual-test-dali-ui-components" type="dali-c++app" multiple="false" taskmanage="true" nodisplay="false">
+        <icon>/usr/share/icons/com.samsung.dali-demo.png</icon>
+        <label>달리 유아이 컴포넌트 수동 테스트</label>
+    </ui-application>
+</manifest>
