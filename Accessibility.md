@@ -20,7 +20,7 @@ Component developer | Accessibility basics → TV UX specification → Component
 
 Keep these principles in mind:
 
-1. Set semantics regardless of whether the Screen Reader is on or off.
+1. Always provide accessibility information—such as Name, Role, State, Value, and Description—regardless of whether the Screen Reader is enabled.
 2. Keep Name short; do not concatenate Role, State, or Value into it.
 3. Do not treat TV remote keyboard focus and accessibility highlight as the same state.
 4. Applications own screen context and content semantics; Components own default semantics and the action contract.
