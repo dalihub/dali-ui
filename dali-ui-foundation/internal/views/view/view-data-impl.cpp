@@ -770,17 +770,17 @@ Dali::Integration::Accessibility::RelationType ToIntegrationRelationType(Dali::U
 ///
 /// Maintained by MeasurePassGuard / ArrangePassGuard below, and read by
 /// InvalidateMeasure() / InvalidateArrange() for one purpose: while it is non-zero,
-/// the invalidation propagation epoch short-circuit is DISABLED and every
+/// the invalidation propagation generation short-circuit is DISABLED and every
 /// invalidation walks its ancestor chain in full.
 ///
-/// That is not conservatism, it is required. The epoch says "the walk this call would
+/// That is not conservatism, it is required. The generation says "the walk this call would
 /// make has already been made and its registration is still pending", which is a
 /// statement about the layout ROOT. It is not a statement about the intermediate
 /// ancestors, and mid-pass the walk does more than register: it sets each ancestor's
 /// dirty bit and POISONS any ancestor whose pass is currently running, which is what
 /// stops that ancestor publishing a cache entry over a subtree that has just changed
 /// underneath it. An ancestor can start its pass AFTER an earlier walk in the same
-/// epoch consumed that ancestor's dirty, so a later short-circuited invalidation would
+/// generation consumed that ancestor's dirty, so a later short-circuited invalidation would
 /// leave it un-poisoned. Skipping the walk is only safe when no pass is running.
 ///
 /// Thread-local, matching LayoutDependency's owner stack and for the same reason: a
@@ -851,12 +851,12 @@ struct ViewDataImpl::MeasurePassGuard
   {
     mData.mMeasureInProgress = false;
 
-    // Leaving the OUTERMOST pass ends the invalidation propagation epoch, exactly as
+    // Leaving the OUTERMOST pass ends the invalidation propagation generation, exactly as
     // the controller's drain does. Load-bearing, not tidiness: a pass is the only
-    // thing that consumes dirty bits, so an epoch record written BEFORE a pass no
+    // thing that consumes dirty bits, so a generation record written BEFORE a pass no
     // longer proves "the chain I walked is still marked" AFTER one -- a manual
     // Measure()/Arrange() on an ancestor (both are public API) can consume the whole
-    // chain's dirty without any drain. Ending the epoch here makes the next
+    // chain's dirty without any drain. Ending the generation here makes the next
     // invalidation walk in full. Cache HITS never construct a guard, so the settled
     // steady state bumps nothing and coalescing between passes is untouched.
     if(--gActiveLayoutPassDepth == 0u)
@@ -876,7 +876,7 @@ struct ViewDataImpl::MeasurePassGuard
  *
  * Mirrors MeasurePassGuard over the arrange axis and additionally clears
  * mEffectiveScaleInvalidatedDuringPass, which is likewise pass-local: it records
- * that a reparent / scale-context reset invalidated the logical context WHILE
+ * that a reparent / scale-context reset invalidated the cached effective scale WHILE
  * this pass was running, and mArrangeCacheBlockedDuringPass, the pass-local
  * record of a FRESHNESS-only invalidation (a cache-only ancestor drop, which
  * raises no dirty bit and schedules nothing). The latter blocks this pass's
@@ -913,8 +913,8 @@ struct ViewDataImpl::ArrangePassGuard
   {
     mData.mArrangeInProgress = false;
 
-    // See MeasurePassGuard: leaving the outermost pass ends the propagation epoch,
-    // so no epoch record can outlive the dirty bits its walk set.
+    // See MeasurePassGuard: leaving the outermost pass ends the propagation generation,
+    // so no generation record can outlive the dirty bits its walk set.
     if(--gActiveLayoutPassDepth == 0u)
     {
       LayoutInvalidation::AdvanceGeneration();
@@ -969,6 +969,11 @@ const AnimatablePropertyRegistration ViewDataImpl::ANIMATABLE_PROPERTY_7(typeReg
 
 ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
 : mViewImpl(viewImpl),
+  // mLayoutMode and mRequestedWidth are initialised here, out of their logical
+  // group, because -Wreorder requires declaration order and both are parked at the
+  // top of the class for packing. See the PACKING notes in view-data-impl.h.
+  mLayoutMode(Ui::LayoutMode::DEFAULT),
+  mRequestedWidth(WRAP_CONTENT),
   mCoreInteractionObject(nullptr),
   mVisualData(nullptr),
   mAttachments(nullptr),
@@ -986,20 +991,15 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mLastMeasureScale(std::numeric_limits<float>::quiet_NaN()),
   mArrangedBounds{0.0f, 0.0f, 0.0f, 0.0f},
   mLastArrangeInput{0.0f, 0.0f, 0.0f, 0.0f},
-  // 0 = "never propagated", which no live epoch ever equals, so the first
+  // 0 = "never propagated", which no live generation ever equals, so the first
   // invalidation on each axis always walks.
   mMeasurePropagationGeneration(0u),
   mArrangePropagationGeneration(0u),
-  // Pure cache key; its initial value is never consulted because
-  // mArrangeCacheValid starts false.
-  mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
   mMargin(),
   mPadding(),
-  mRequestedWidth(WRAP_CONTENT),
-  mRequestedHeight(WRAP_CONTENT),
-  mLayoutMode(Ui::LayoutMode::DEFAULT),
   mSize(0, 0),
   mLastArrangedRenderEffectSize(0, 0),
+  mRequestedHeight(WRAP_CONTENT),
   mAccessibilityData(nullptr),
   mAccessibleObjectCreator(nullptr),
   mAccessibilityRole{static_cast<int32_t>(Accessibility::Role::NONE)},
@@ -1016,8 +1016,8 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mArrangePassPoisoned(false),
   mArrangeCacheBlockedDuringPass(false),
   mArrangeResultAvailable(false),
-  // IF_CHANGED is the default for OnArrange, callbacks and managers.
-  // These bits record only the ALWAYS opt-out; the active producer's bit is
+  // ArrangePolicy::IF_CHANGED is the default for OnArrange, callbacks and managers.
+  // These bits record only the ArrangePolicy::ALWAYS opt-out; the active producer's bit is
   // derived whenever producer selection or policy changes.
   mArrangeOverrideAlways(false),
   mArrangeCallbackAlways(false),
@@ -1034,6 +1034,9 @@ ViewDataImpl::ViewDataImpl(ViewImpl& viewImpl)
   mFittingModeLayoutFinishedSignalConnected(false),
   mDefaultFocusIndicatorSuppressedByStateEffect(false),
   mLayoutDirectionSignalConnected(false),
+  // Pure cache key; its initial value is never consulted because
+  // mArrangeCacheValid starts false.
+  mLastArrangeDirection(Dali::LayoutDirection::LEFT_TO_RIGHT),
   mKeyEventDispatchInProgress(false),
   mFlags(ViewImpl::ViewBehaviour(ViewImpl::VIEW_BEHAVIOUR_DEFAULT))
 {
@@ -2034,7 +2037,7 @@ void ViewDataImpl::InvalidateMeasure()
   // once, and LayoutController::RequestLayout inserts into a pending set, so
   // duplicate registrations coalesce. See plan34 27.5.
   //
-  // Drop the cached logical context: whatever changed may have moved this view's
+  // Drop the cached effective scale: whatever changed may have moved this view's
   // effective scale (a reparent re-roots the INHERIT chain), so the next
   // GetEffectiveScale() must recompute rather than serve the cached value.
   DropCachedEffectiveScale();
@@ -3155,7 +3158,7 @@ void ViewDataImpl::OnChildRemoved(Actor& child)
       // Removal re-roots the removed subtree's effective-scale chain: an INHERIT
       // node's ComputeEffectiveScale walks its parent chain, and severing this
       // link re-roots that chain (ultimately at UiScaleManager's global scale).
-      // So the whole removed subtree's cached logical context is now stale. The
+      // So the whole removed subtree's cached effective scale is now stale. The
       // InvalidateMeasure() below drops it on the direct child ONLY and
       // propagates upward, never into the subtree -- the mirror of OnChildAdded's
       // recursive reset. Without this, a subtree removed from a scale-DISABLED
@@ -3217,7 +3220,7 @@ void ViewDataImpl::OnViewSceneConnection()
   // UiScaleManager's root set, so a global SetScale() cannot reach it -- its
   // cached effective scale, and the whole subtree's for INHERIT chains, may be
   // stale (computed against the scale in force before it was detached). On
-  // (re)connection re-derive the subtree's logical context so the layout pass
+  // (re)connection re-derive the subtree's effective scale so the layout pass
   // registered below measures and arranges at the CURRENT scale. On a first-ever
   // connection this is a cheap no-op (the caches are empty and the scale merely
   // recomputes to the same value). This is the mirror, for the Window/Actor
@@ -4239,7 +4242,7 @@ bool ViewDataImpl::CanReplayArrangeSubtreeFromCache() const
     //
     //  - the cache KEY (SameLayoutRect). A descendant has no candidate `bounds` to
     //    key against, and it does not need one: with this view's own key matched and
-    //    its producer IF_CHANGED, the producer would hand each child the same slot it
+    //    its producer ArrangePolicy::IF_CHANGED, the producer would hand each child the same slot it
     //    handed it last time -- the slot that child recorded as mLastArrangeInput and
     //    resolved into the mArrangedBounds the replay is about to apply. The key
     //    match is implied by the parent's key match plus policy, which is why policy
@@ -4293,7 +4296,7 @@ bool ViewDataImpl::CanReplayArrangeSubtreeFromCache() const
 void ViewDataImpl::ReplayArrangeSubtreeFromCache()
 {
   // Corollary C, checked live and per node: a valid arrange cache implies a valid
-  // logical context, because every scale-context reset clears both for the WHOLE
+  // cached effective scale, because every scale-context reset clears both for the WHOLE
   // subtree (ResetSubtreeScaleAndLayoutCaches). The replay skips the
   // GetEffectiveScale() the MISS path performs at every level, so this assert is
   // what makes the reliance visible. DEBUG-only, like every other first-party layout
@@ -4454,9 +4457,9 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // result depends on the input bounds, effective layout direction, effective scale,
   // and state tracked by layout invalidation. The first two are cache-key terms, the
   // third is carried by Corollary C, and the fourth by mArrangeCacheValid.
-  // IF_CHANGED assumes that contract by default. A producer outside the
+  // ArrangePolicy::IF_CHANGED assumes that contract by default. A producer outside the
   // envelope -- one that reads ancestor/world geometry or pushes state outside the
-  // actor tree -- must explicitly select ALWAYS. See the term list.
+  // actor tree -- must explicitly select ArrangePolicy::ALWAYS. See the term list.
   //
   // TWO GATES, in this order:
   //  1. CanServeArrangeFromCache(bounds) -- the NODE-LOCAL predicate below: may THIS
@@ -4481,7 +4484,7 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   //    hit relies on for its own inputs.
   //  - !mArrangeProducerAlways: the active producer permits unchanged-result reuse.
   //    Producers that read untracked geometry or update an external surface use
-  //    ALWAYS and therefore reject this cache hit at every subtree level.
+  //    ArrangePolicy::ALWAYS and therefore reject this cache hit at every subtree level.
   //  - !mArrangeDirty / !mArrangePassPoisoned / !mArrangeCacheBlockedDuringPass:
   //    defence in depth. Each of these is raised by a writer that also clears
   //    mArrangeCacheValid in the same breath, so they are implied today; testing
@@ -4643,7 +4646,7 @@ LayoutRect ViewDataImpl::ArrangeImpl(const LayoutRect& bounds, bool frameworkLay
   // ever measured used default/stale measured sizes for its children and must
   // not be frozen into the cache (plan34 11).
   //
-  // The logical context is READ here, never written: mEffectiveScaleValid is the
+  // The cached effective scale is READ here, never written: mEffectiveScaleValid is the
   // effective-scale sync bit, owned solely by GetEffectiveScale() and the
   // invalidation paths. Both logical terms are required and neither implies the
   // other. mEffectiveScaleValid alone would accept a pass whose context was
@@ -4874,6 +4877,19 @@ void ViewDataImpl::DropCachedEffectiveScale()
   // with whatever scale was current when it was set", and it is why this bit needs
   // no invalidation path of its own: every scale-context change already comes
   // through here.
+  //
+  // What this clear is still REQUIRED for, and what it no longer is:
+  //  - the ARRANGE cache: required. Its hit predicate carries no scale term at all,
+  //    so Corollary C -- "a valid arrange entry implies the scale has not moved" --
+  //    is only true because every caller pairs this with InvalidateLayoutCaches().
+  //  - the actor push: required. The bit cleared just above is the ONLY record that
+  //    the animatable VIEW_EFFECTIVE_SCALE property is behind, so without this clear
+  //    the next Measure() would skip the push and leave decoration constraints on the
+  //    old scale.
+  //  - the MEASURE cache: no longer required for CORRECTNESS. That cache keys on the
+  //    effective scale (mLastMeasureScale), so a caller that forgot the pairing would
+  //    take a miss rather than serve a size computed at the old scale. The pairing is
+  //    still the contract; the key is the second line of defence, not a licence.
   mEffectiveScaleActorSynced = false;
 
   if(mArrangeInProgress)
@@ -5441,6 +5457,14 @@ void ViewDataImpl::OnLayoutProducerTraitChanged(TraitId id)
   // surface, which can reach the same trait ids with no other bookkeeping. Nothing in
   // the library relies on it today -- it is here so the derived bit cannot describe
   // a producer that has just been replaced.
+  //
+  // The in-library mutators do also LAND here once: the first SetArrangeCallback /
+  // SetMeasureCallback creates the LAYOUT_SIGNALS trait through
+  // EnsureLayoutCallbacksObject -> SetTrait, and AttachLayoutManager installs
+  // LAYOUT_MANAGER the same way. On that first-install path the invalidation below is
+  // redundant with the mutator's own (and broader: measure, not just arrange) --
+  // deliberate over-invalidation on a cold path, accepted for one funnel instead of
+  // two exemption lists.
   if(id != Integration::ReservedTraitId::LAYOUT_SIGNALS &&
      id != Integration::ReservedTraitId::LAYOUT_MANAGER)
   {
@@ -5448,7 +5472,7 @@ void ViewDataImpl::OnLayoutProducerTraitChanged(TraitId id)
   }
 
   // A LAYOUT_SIGNALS swap replaces the callback and its policy. Reset the policy
-  // to IF_CHANGED before deriving the active producer again.
+  // to ArrangePolicy::IF_CHANGED before deriving the active producer again.
   if(id == Integration::ReservedTraitId::LAYOUT_SIGNALS)
   {
     mArrangeCallbackAlways = false;
