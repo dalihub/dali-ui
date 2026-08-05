@@ -33,6 +33,7 @@
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/layouts/layout-invalidation-generation.h>
 #include <dali-ui-foundation/internal/layouts/layout-transition-dispatcher.h>
+#include <dali-ui-foundation/internal/layouts/standalone-bounds-utils.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali-ui-foundation/public-api/views/view.h>
@@ -264,8 +265,8 @@ public:
     mPendingViews.erase(view);
 
     // A pending registration may have just been dropped without ever being
-    // processed. Any view whose recorded propagation epoch says "the root I walked to
-    // is registered" could be pointing at that dropped entry, so end the epoch and
+    // processed. Any view whose recorded propagation generation says "the root I walked to
+    // is registered" could be pointing at that dropped entry, so end the generation and
     // make every such record re-walk. Unconditional rather than gated on "was it
     // actually pending": this runs on view teardown, not per frame.
     Internal::LayoutInvalidation::AdvanceGeneration();
@@ -367,7 +368,7 @@ public:
     if(!deadEntries.empty())
     {
       // Same reason as in UnregisterView: pending registrations were dropped without
-      // being processed, so no recorded propagation epoch can be trusted to describe
+      // being processed, so no recorded propagation generation can be trusted to describe
       // a live one.
       Internal::LayoutInvalidation::AdvanceGeneration();
     }
@@ -713,14 +714,14 @@ private:
     mProcessingScheduled = false;
 
     // Every pending registration has just been consumed, so no view's recorded
-    // propagation epoch describes a live registration any more: end the epoch here,
+    // propagation generation describes a live registration any more: end the generation here,
     // at the swap, and the next invalidation on any view walks its ancestor chain and
     // re-registers in full. Bumping anywhere later would leave a window in which a
     // view could skip a walk whose registration this swap had already taken.
     //
     // An invalidation raised DURING the drain lands in the now-empty mPendingViews
     // and is processed by the follow-up pass, exactly as before -- its record is
-    // written against the new epoch, which this drain will not consume.
+    // written against the new generation, which this drain will not consume.
     Internal::LayoutInvalidation::AdvanceGeneration();
 
     // Default: window size (when root is directly under window or parent size unknown).
@@ -825,6 +826,13 @@ private:
    * - WRAP_CONTENT / MATCH_PARENT: RequestedWidth/Height < 0 → fall through
    *   to parent/window path.
    * - Fixed (>= 0): takes precedence over parent/window.
+   *
+   * Every branch yields a VISUAL (scale-applied) constraint. An explicit
+   * requested size is stored in NATURAL units and is therefore multiplied by
+   * the view's effective scale here, while the parent actor SIZE and the
+   * window size are already visual. The margin subtraction below is visual for
+   * the same reason, so a FIXED axis composes to
+   * (requested - marginNatural) * s.
    */
   void ProcessLayoutRoot(ViewImpl* view, float widthConstraint, float heightConstraint)
   {
@@ -833,15 +841,25 @@ private:
       return;
     }
 
+    // Snapshotted BEFORE Measure(): the available extent below and the slot derivation
+    // at the end of this function must be fed the same values, even if the view's own
+    // measure producer mutates its scale, margin or requested size mid-pass.
+    const Internal::StandaloneSlotInputs inputs = Internal::SnapshotStandaloneSlotInputs(*view);
+
     float layoutWidth  = view->GetRequestedWidth();
     float layoutHeight = view->GetRequestedHeight();
 
     Actor self   = view->Self();
     Actor parent = self.GetParent();
 
+    // The requested size is stored in NATURAL units, and the constraint this
+    // function builds is VISUAL, like the other two sources (the window size
+    // and the parent actor SIZE, both already visual) and like the parameter
+    // ViewDataImpl::Measure takes. Convert here, or the producer is run at a
+    // constraint 1/s too small.
     if(layoutWidth >= 0.0f)
     {
-      widthConstraint = layoutWidth;
+      widthConstraint = layoutWidth * inputs.scale;
     }
     else if(parent)
     {
@@ -850,7 +868,7 @@ private:
 
     if(layoutHeight >= 0.0f)
     {
-      heightConstraint = layoutHeight;
+      heightConstraint = layoutHeight * inputs.scale;
     }
     else if(parent)
     {
@@ -862,36 +880,28 @@ private:
     // layout pass works in visual (scale-applied) units. Convert with the
     // root's effective scale so the root matches the non-root path, which
     // already scales these properties.
-    float  s         = view->GetEffectiveScale();
-    Insets margin    = view->GetMargin();
-    float  marginW   = (margin.start + margin.end) * s;
-    float  marginH   = (margin.top + margin.bottom) * s;
-    widthConstraint  = std::max(0.0f, widthConstraint - marginW);
-    heightConstraint = std::max(0.0f, heightConstraint - marginH);
+    const float marginW = (inputs.margin.start + inputs.margin.end) * inputs.scale;
+    const float marginH = (inputs.margin.top + inputs.margin.bottom) * inputs.scale;
+    widthConstraint     = std::max(0.0f, widthConstraint - marginW);
+    heightConstraint    = std::max(0.0f, heightConstraint - marginH);
 
     // Measure pass
     MeasuredSize measuredSize = view->Measure(widthConstraint, heightConstraint);
 
     // Arrange pass: use the user-set position (parent is not a layout).
-    // MATCH_PARENT roots fill the available constraint rather than using
-    // their measured (minimum) size.
-    LayoutRect bounds;
-    bounds.x      = (view->GetRequestedX() + margin.start) * s;
-    bounds.y      = (view->GetRequestedY() + margin.top) * s;
-    bounds.width  = (layoutWidth == MATCH_PARENT) ? widthConstraint : measuredSize.width;
-    bounds.height = (layoutHeight == MATCH_PARENT) ? heightConstraint : measuredSize.height;
-
-    // Root has no parent layout to clamp against, so enforce the view's
-    // own min/max here. For MATCH_PARENT axes, the measured value was
-    // discarded above, so this is the only place min/max is applied.
-    bounds.width  = std::min(std::max(bounds.width, view->GetMinimumWidth() * s), view->GetMaximumWidth() * s);
-    bounds.height = std::min(std::max(bounds.height, view->GetMinimumHeight() * s), view->GetMaximumHeight() * s);
+    // MATCH_PARENT roots fill the available constraint rather than using their
+    // measured (minimum) size, and the root's own min/max is enforced on the result.
+    // The whole derivation -- position, extents and clamp -- is the shared helper, so
+    // this root pass and the parent-driven ArrangeStandaloneChild placement of the
+    // same view cannot drift apart.
+    const LayoutRect bounds = Internal::DeriveStandaloneRootBounds(inputs, widthConstraint, heightConstraint, measuredSize);
 
     // Use the internal root entry point rather than the public Arrange path. For a
     // STANDALONE boundary this identifies the framework-owned self pass whose bounds
-    // converge with its parent's ArrangeStandaloneChild derivation; an application
-    // calling View::Arrange directly carries no such ownership and retracts the
-    // parent's arrange entry when it rewrites the child's records.
+    // are derived by the SAME helper as the parent's ArrangeStandaloneChild path
+    // (DeriveStandaloneRootBounds); an application calling View::Arrange directly
+    // carries no such ownership and retracts the parent's arrange entry when it
+    // rewrites the child's records.
     Internal::ViewDataImpl::Get(*view).ArrangeAsLayoutRoot(bounds);
   }
 
