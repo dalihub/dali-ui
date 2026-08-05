@@ -8,7 +8,7 @@ on:
 
 jobs:
   mirror:
-    runs-on: [ code-linux, code-large ]
+    runs-on: code-linux
     steps:
       - name: Checkout tizen
         uses: code-actions/checkout@v3

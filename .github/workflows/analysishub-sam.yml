@@ -10,7 +10,7 @@ on:
 jobs:
 
   build:
-    runs-on: [ code-large ]
+    runs-on: code-linux
     steps:
     - uses: code-actions/checkout@v3
       with:

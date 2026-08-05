@@ -18,7 +18,7 @@ on:
 jobs:
   repo-sync:
     if: ${{ github.event_name != 'schedule' || github.repository == 'NUI/dali-ui' }}
-    runs-on: [ code-linux, code-large ]
+    runs-on: code-linux
     steps:
       - name: Checkout
         uses: actions/checkout@v3

@@ -15,7 +15,7 @@ permissions:
 
 jobs:
   sync-wiki-folder:
-    runs-on: [ code-large, code-linux ]
+    runs-on: code-linux
     steps:
       - name: Checkout source branch
         uses: code-actions/checkout@v4
@@ -55,4 +55,3 @@ jobs:
 
           git remote add wiki https://x-access-token:${{ secrets.GITHUB_TOKEN }}@github.sec.samsung.net/NUI/dali-ui.wiki.git
           git push wiki wiki:master --force
-

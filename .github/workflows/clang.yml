@@ -4,7 +4,7 @@ on: [pull_request]
 
 jobs:
   lint:
-    runs-on: [ code-linux, code-large ]
+    runs-on: code-linux
     steps:
       - name: Checkout code
         uses: code-actions/checkout@v4
@@ -18,4 +18,3 @@ jobs:
           clang-format-version: '20'
           # .clang-format 파일을 프로젝트 루트에서 참조
           fallback-style: 'none'
-

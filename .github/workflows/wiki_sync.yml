@@ -8,7 +8,7 @@ on:
 
 jobs:
   sync-wiki:
-    runs-on: [ code-large, code-linux ]
+    runs-on: code-linux
     steps:
       - name: Checkout wiki branch
         uses: code-actions/checkout@v4
