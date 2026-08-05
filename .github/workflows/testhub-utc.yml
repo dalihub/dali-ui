@@ -2,10 +2,19 @@ name: "Unittest (testhub)"
 
 on:
   pull_request_target:
-    types: [opened, synchronize, reopened]
+    types: [opened, edited, synchronize, reopened]
     branches:
     - devel
   workflow_dispatch:
+    inputs:
+      dali_core_change:
+        description: 'dali-core Gerrit change number, or default'
+        required: false
+        default: 'default'
+      dali_adaptor_change:
+        description: 'dali-adaptor Gerrit change number, or default'
+        required: false
+        default: 'default'
 
 jobs:
 
@@ -14,7 +23,7 @@ jobs:
     steps:
     - uses: code-actions/checkout@v3
       with:
-        ref: ${{ github.event.pull_request.head.sha }}
+        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
         fetch-depth: 0
         allow-unsafe-pr-checkout: true
 
@@ -23,8 +32,14 @@ jobs:
       with:
         ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-    - name: Clone others
+    - name: Clone and resolve DALi dependencies
+      env:
+        PR_BODY: ${{ github.event.pull_request.body }}
+        DALI_CORE_CHANGE_INPUT: ${{ github.event.inputs.dali_core_change }}
+        DALI_ADAPTOR_CHANGE_INPUT: ${{ github.event.inputs.dali_adaptor_change }}
       run: |
+        set -euo pipefail
+
         echo "${{ secrets.SSH_KNOWN_HOSTS }}" > ~/.ssh/known_hosts
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
@@ -32,6 +47,82 @@ jobs:
         # git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-extension.git
         # git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/uifw/lottie-player.git
         git clone --branch tizen ssh://jiyang@review.tizen.org:29418/platform/core/graphics/tizenvg.git
+
+        extract_dependency_value() {
+          local name=$1
+          local value
+          local count
+
+          value=$(printf '%s\n' "$PR_BODY" | sed -nE "s/^[[:space:]]*-[[:space:]]*${name}:[[:space:]]*([^[:space:]]+)[[:space:]]*$/\1/p")
+          count=$(printf '%s\n' "$value" | sed '/^$/d' | wc -l)
+
+          if [ "$count" -eq 0 ]; then
+            printf '%s\n' 'default'
+          elif [ "$count" -eq 1 ]; then
+            printf '%s\n' "$value"
+          else
+            echo "::error::PR description contains multiple ${name} dependency values."
+            exit 1
+          fi
+        }
+
+        resolve_dependency() {
+          local name=$1
+          local directory=$2
+          local repository=$3
+          local change=$4
+          local bucket
+          local ref
+          local patchset
+          local commit
+
+          if [ "$change" = 'default' ]; then
+            commit=$(git -C "$directory" rev-parse HEAD)
+            echo "- ${name}: change default, patch set default, commit $commit" >> "$GITHUB_STEP_SUMMARY"
+            return
+          fi
+
+          if ! [[ "$change" =~ ^[1-9][0-9]*$ ]]; then
+            echo "::error::${name} dependency must be 'default' or a positive Gerrit change number, got '$change'."
+            exit 1
+          fi
+
+          bucket=$(printf '%02d' "$((10#$change % 100))")
+          ref=$(git ls-remote "$repository" "refs/changes/$bucket/$change/*" | awk '{print $2}' | sort -t/ -k5,5n | tail -n 1)
+
+          if [ -z "$ref" ]; then
+            echo "::error::Unable to find Gerrit change $change for ${name}."
+            exit 1
+          fi
+
+          patchset=${ref##*/}
+          git -C "$directory" fetch origin "$ref"
+          git -C "$directory" checkout --detach FETCH_HEAD
+          commit=$(git -C "$directory" rev-parse HEAD)
+
+          echo "- ${name}: change $change, patch set $patchset, commit $commit" >> "$GITHUB_STEP_SUMMARY"
+        }
+
+        if [ "$GITHUB_EVENT_NAME" = 'pull_request_target' ]; then
+          DALI_CORE_CHANGE=$(extract_dependency_value 'dali-core')
+          DALI_ADAPTOR_CHANGE=$(extract_dependency_value 'dali-adaptor')
+        else
+          DALI_CORE_CHANGE=${DALI_CORE_CHANGE_INPUT:-default}
+          DALI_ADAPTOR_CHANGE=${DALI_ADAPTOR_CHANGE_INPUT:-default}
+        fi
+
+        echo '## Test dependencies' >> "$GITHUB_STEP_SUMMARY"
+
+        resolve_dependency \
+          'dali-core' \
+          'dali-core' \
+          'ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git' \
+          "$DALI_CORE_CHANGE"
+        resolve_dependency \
+          'dali-adaptor' \
+          'dali-adaptor' \
+          'ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git' \
+          "$DALI_ADAPTOR_CHANGE"
 
     - name: Setup environment for DALi
       run: |
