@@ -21,6 +21,8 @@
 #include <vector>
 
 // INTERNAL INCLUDES
+#include <dali-ui-foundation/integration-api/input-editor-impl.h>
+#include <dali-ui-foundation/integration-api/input-field-impl.h>
 #include <dali-ui-foundation/integration-api/view-depth-index-ranges.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-base-impl.h>
 #include <dali-ui-foundation/internal/text/async-text/async-text-loader-impl.h>
@@ -39,7 +41,11 @@
 #include <dali-ui-foundation/internal/text/replacement/replacement-projection.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/image/image-enumerations.h>
+#include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/image-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
+#include <dali-ui-foundation/public-api/views/text-controls/input-editor.h>
+#include <dali-ui-foundation/public-api/views/text-controls/input-field.h>
 #include <dali-ui-foundation/public-api/visuals/image-visual-properties.h>
 #include <dali-ui-test-suite-utils.h>
 #include "replacement-layout-test-adapter.h"
@@ -1609,6 +1615,188 @@ int UtcDaliReplacementEditableCaretAndVisualLayerP(void)
     DALI_TEST_CHECK(getChildOrder(data.visualLayer) < getChildOrder(cursorLayer));
   }
   DALI_TEST_EQUALS(contentParent.GetChildCount(), 3u, TEST_LOCATION);
+
+  END_TEST;
+}
+
+int UtcDaliReplacementEditableVisualLayerRecreationP(void)
+{
+  UiTestApplication application;
+
+  struct NoopRelayoutContainer : public RelayoutContainer
+  {
+    void Add(const Actor&, const Vector2&) override
+    {
+    }
+  } relayoutContainer;
+
+  auto buildImageText = [](const char* source, const Vector2& reservedSize)
+  {
+    Text::StyledTextBuilder builder = Text::StyledTextBuilder::New("AiconB\nsecond line");
+    DALI_TEST_CHECK(builder.SetSpan(
+      Text::ImageSpan::New(Text::ImageAttributes(source, reservedSize)), 1u, 5u));
+    return builder.Build();
+  };
+
+  const Text::StyledText styledTexts[] = {
+    buildImageText("unused-a.png", Vector2(32.0f, 24.0f)),
+    buildImageText("unused-a.png", Vector2(48.0f, 30.0f)),
+    buildImageText("unused-b.png", Vector2(32.0f, 24.0f)),
+    buildImageText("unused-b.png", Vector2(48.0f, 30.0f))};
+
+  Text::StyledTextBuilder coloredBuilder = Text::StyledTextBuilder::New("colored text");
+  DALI_TEST_CHECK(coloredBuilder.SetSpan(Text::ForegroundColorSpan::New(UiColor(Color::RED)), 0u, 7u));
+  const Text::StyledText coloredText = coloredBuilder.Build();
+
+  auto countInlineVisuals = [](Ui::View layer)
+  {
+    uint32_t count = 0u;
+    auto&    viewData = Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(layer));
+    for(uint32_t slot = 0u; slot < 16u; ++slot)
+    {
+      const std::string name = "__dali_ui_inline_replacement_" + std::to_string(slot);
+      const Property::Index index = layer.GetPropertyIndex(Dali::String(name.c_str()));
+      if(index != Property::INVALID_INDEX && viewData.GetVisual(index))
+      {
+        ++count;
+      }
+    }
+    return count;
+  };
+
+  auto checkLayer = [&application, &countInlineVisuals](
+                      Dali::Ui::Internal::Text::EditableInlineReplacementData* data,
+                      const Vector2&                                            expectedSize)
+  {
+    DALI_TEST_CHECK(data);
+    DALI_TEST_CHECK(data->visualLayer.GetParent());
+    DALI_TEST_EQUALS(data->visualLayer.GetRequestedWidth(), expectedSize.x, TEST_LOCATION);
+    DALI_TEST_EQUALS(data->visualLayer.GetRequestedHeight(), expectedSize.y, TEST_LOCATION);
+    DALI_TEST_EQUALS(data->visualLayer.GetProperty<Vector3>(Actor::Property::SIZE).GetVectorXY(),
+                     expectedSize,
+                     0.01f,
+                     TEST_LOCATION);
+    DALI_TEST_EQUALS(countInlineVisuals(data->visualLayer), 1u, TEST_LOCATION);
+
+    application.SendNotification();
+    application.Render();
+    DALI_TEST_EQUALS(data->visualLayer.GetCurrentProperty<Vector3>(Actor::Property::SIZE).GetVectorXY(),
+                     expectedSize,
+                     0.01f,
+                     TEST_LOCATION);
+  };
+
+  struct LayerMeasureCounter
+  {
+    MeasuredSize OnMeasure(Ui::View layer, float, float)
+    {
+      ++count;
+      return MeasuredSize(layer.GetRequestedWidth(), layer.GetRequestedHeight());
+    }
+
+    uint32_t count{0u};
+  };
+
+  auto exerciseControl = [&](auto control, auto& impl, const Vector2& smallSize, const Vector2& largeSize)
+  {
+    control.SetPadding(Extents(0u, 0u, 0u, 0u));
+    const Vector2 lifecycleSizes[] = {smallSize, smallSize, largeSize, largeSize, smallSize};
+
+    for(uint32_t cycle = 0u; cycle < 5u; ++cycle)
+    {
+      Vector2 currentSize = lifecycleSizes[cycle];
+      control.SetStyledText(styledTexts[cycle % 4u]);
+      impl.OnRelayout(currentSize, relayoutContainer);
+
+      auto* data = Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl);
+      checkLayer(data, currentSize);
+
+      if(cycle == 0u)
+      {
+        auto* const initialData  = data;
+        Ui::View    initialLayer = data->visualLayer;
+        const Property::Index visualIndex =
+          initialLayer.GetPropertyIndex("__dali_ui_inline_replacement_0");
+        DALI_TEST_CHECK(visualIndex != Property::INVALID_INDEX);
+        auto& initialViewData =
+          Dali::Ui::Internal::ViewDataImpl::Get(Dali::Ui::GetImpl(initialLayer));
+        Ui::Integration::Visual::Base initialVisual = initialViewData.GetVisual(visualIndex);
+        DALI_TEST_CHECK(initialVisual);
+
+        LayerMeasureCounter measureCounter;
+        initialLayer.SetMeasureCallback(
+          MeasureCallback::New(&measureCounter, &LayerMeasureCounter::OnMeasure));
+        initialLayer.Measure(1000.0f, 1000.0f);
+        DALI_TEST_EQUALS(measureCounter.count, 1u, TEST_LOCATION);
+
+        for(uint32_t repeat = 0u; repeat < 10u; ++repeat)
+        {
+          impl.OnRelayout(smallSize, relayoutContainer);
+          data = Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl);
+          DALI_TEST_CHECK(data == initialData);
+          DALI_TEST_CHECK(data->visualLayer == initialLayer);
+          checkLayer(data, smallSize);
+          initialLayer.Measure(1000.0f, 1000.0f);
+          DALI_TEST_EQUALS(measureCounter.count, 1u, TEST_LOCATION);
+          DALI_TEST_CHECK(initialViewData.GetVisual(visualIndex) == initialVisual);
+        }
+
+        impl.OnRelayout(largeSize, relayoutContainer);
+        data        = Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl);
+        currentSize = largeSize;
+        checkLayer(data, currentSize);
+        initialLayer.Measure(1000.0f, 1000.0f);
+        DALI_TEST_EQUALS(measureCounter.count, 2u, TEST_LOCATION);
+        DALI_TEST_CHECK(initialViewData.GetVisual(visualIndex) == initialVisual);
+
+        impl.OnRelayout(largeSize, relayoutContainer);
+        checkLayer(Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl), currentSize);
+        initialLayer.Measure(1000.0f, 1000.0f);
+        DALI_TEST_EQUALS(measureCounter.count, 2u, TEST_LOCATION);
+        DALI_TEST_CHECK(initialViewData.GetVisual(visualIndex) == initialVisual);
+        initialLayer.SetMeasureCallback({});
+
+        for(uint32_t variant = 1u; variant < 4u; ++variant)
+        {
+          control.SetStyledText(styledTexts[variant]);
+          impl.OnRelayout(currentSize, relayoutContainer);
+          data = Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl);
+          DALI_TEST_CHECK(data == initialData);
+          checkLayer(data, currentSize);
+        }
+      }
+
+      data = Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl);
+      Ui::View oldLayer = data->visualLayer;
+      control.SetStyledText(styledTexts[cycle % 4u]);
+      impl.OnRelayout(currentSize, relayoutContainer);
+      data = Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl);
+      DALI_TEST_CHECK(data);
+      DALI_TEST_CHECK(data->visualLayer == oldLayer);
+      checkLayer(data, currentSize);
+
+      control.SetText("plain text");
+      impl.OnRelayout(currentSize, relayoutContainer);
+      DALI_TEST_CHECK(!Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl));
+      DALI_TEST_CHECK(!oldLayer.GetParent());
+      DALI_TEST_EQUALS(countInlineVisuals(oldLayer), 0u, TEST_LOCATION);
+    }
+
+    control.SetStyledText(coloredText);
+    impl.OnRelayout(smallSize, relayoutContainer);
+    DALI_TEST_CHECK(!Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl));
+    control.SetText("plain text");
+    impl.OnRelayout(smallSize, relayoutContainer);
+    DALI_TEST_CHECK(!Dali::Ui::Internal::Text::GetEditableInlineReplacementData(impl));
+  };
+
+  InputField field = InputField::New();
+  auto& fieldImpl = static_cast<Dali::Ui::Integration::InputFieldImpl&>(field.GetImplementation());
+  exerciseControl(field, fieldImpl, Vector2(240.0f, 64.0f), Vector2(300.0f, 72.0f));
+
+  InputEditor editor = InputEditor::New();
+  auto& editorImpl = static_cast<Dali::Ui::Integration::InputEditorImpl&>(editor.GetImplementation());
+  exerciseControl(editor, editorImpl, Vector2(240.0f, 120.0f), Vector2(300.0f, 160.0f));
 
   END_TEST;
 }

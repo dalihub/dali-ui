@@ -15,6 +15,7 @@
  */
 
 // EXTERNAL INCLUDES
+#include <algorithm>
 #include <cstdint>
 #include <sstream>
 #include <string>
@@ -28,7 +29,7 @@ using namespace Dali::Ui;
 
 namespace
 {
-constexpr std::size_t CASE_COUNT = 31u;
+constexpr std::size_t CASE_COUNT           = 32u;
 constexpr float       RELATIVE_LINE_HEIGHT = 1.6f;
 constexpr const char* REMOTE_IMAGE_URL =
   "https://www.w3.org/assets/logos/w3c-2025-transitional/w3c-72x48.png";
@@ -60,6 +61,7 @@ struct CaseData
   bool                            textFit{false};
   bool                            marqueeCase{false};
   bool                            lifecycleCase{false};
+  bool                            scrollCase{false};
 };
 
 enum class AlignmentOverride
@@ -532,7 +534,6 @@ private:
                 true, false, false, Text::Alignment::CENTER, Text::Alignment::CENTER};
       }
       case 30u:
-      default:
       {
         const std::string text = ReplacementText("Cold source [image] and same-source cache reuse [image] remain in fixed boxes while the source switches repeatedly.");
         const char* source = mLifecycleAlternate ? "../../image-view/res/sample.jpg" : "flag_us.png";
@@ -543,6 +544,50 @@ private:
                        ObjectAt(text, 1u, source, Vector2(70.0f, 120.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)},
                       true, false, false, Text::Alignment::CENTER, Text::Alignment::CENTER};
         data.lifecycleCase = true;
+        return data;
+      }
+      case 31u:
+      default:
+      {
+        const std::string text = ReplacementText(
+          "TOP CHECKPOINT [image] The first image begins a deliberately tall multiline Label. "
+          "Drag vertically inside either preview and verify that the image moves with this paragraph and is clipped only by the ScrollView edge.\n\n"
+          "Section 1. Ordinary prose creates several wrapped lines before the next checkpoint. "
+          "Resize the window while this section is visible; wrapping may change, but no image may detach from its reserved box or remain fixed over the viewport. "
+          "A small baseline image [image] finishes the first section.\n\n"
+          "Section 2. Continue downward through enough text to move the top images completely outside the clipped region. "
+          "The ScrollView must not leave stale pixels behind after a fast drag or fling. Reversing direction should reveal the same images again without a flash.\n\n"
+          "QUARTER CHECKPOINT [image] This wide image exercises partial clipping at both the top and bottom viewport edges. "
+          "Stop with half of the reserved box outside the viewport, then continue scrolling until it is fully hidden.\n\n"
+          "Section 3. Mixed sizes are distributed throughout the content rather than clustered in one line. "
+          "Text before and after every object should keep its wrapping position while the containing Label translates. "
+          "A compact centered image [image] marks the approach to the middle.\n\n"
+          "MIDDLE CHECKPOINT [image] This taller replacement expands its own line. "
+          "Scroll slowly across this point and compare the synchronous Label on the left with the asynchronous Label on the right. "
+          "Their image geometry and clipping should remain identical.\n\n"
+          "Section 4. More wrapped prose supplies distance below the middle. "
+          "Repeated scrolling should reuse the loaded resources without changing aspect ratio, reserved size, alignment, or vertical offset. "
+          "The next marker uses TEXT_BOTTOM alignment [image] before the final quarter.\n\n"
+          "THREE-QUARTER CHECKPOINT [image] Fling past this image and return to it. "
+          "No previously visible image should hover over later text, and no newly visible image should wait for an unrelated Label relayout.\n\n"
+          "Section 5. The final long paragraph keeps the Label taller than the viewport at every supported window size. "
+          "Use the Scroll Both action to compare matching offsets, or drag each column independently to stress clipping during motion.\n\n"
+          "BOTTOM CHECKPOINT [image] The last image must be fully recoverable after scrolling to the end and back to the top. "
+          "This final tail provides visible text below it so the image can cross the viewport edge in both directions.");
+        CaseData data{"32. Tall multiline Label inside ScrollView",
+                      "Drag or use Scroll Both: all eight images move with the Label, clip at viewport edges, and reappear without stale pixels.",
+                      text,
+                      {ObjectAt(text, 0u, "flag_kr.png", Vector2(72.0f, 48.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER),
+                       ObjectAt(text, 1u, "flag_us.png", Vector2(36.0f, 24.0f), Text::ImageAttributes::InlineAlignment::TEXT_BASELINE),
+                       ObjectAt(text, 2u, "flag_ae.png", Vector2(150.0f, 72.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER),
+                       ObjectAt(text, 3u, "flag_kr.png", Vector2(44.0f, 32.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER),
+                       ObjectAt(text, 4u, "flag_us.png", Vector2(96.0f, 120.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER),
+                       ObjectAt(text, 5u, "flag_ae.png", Vector2(64.0f, 40.0f)),
+                       ObjectAt(text, 6u, "flag_kr.png", Vector2(132.0f, 64.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER),
+                       ObjectAt(text, 7u, "flag_us.png", Vector2(88.0f, 56.0f), Text::ImageAttributes::InlineAlignment::TEXT_CENTER)},
+                      true, false, false, Text::Alignment::START, Text::Alignment::START,
+                      Text::LineWrapMode::WORD, 23.0f};
+        data.scrollCase = true;
         return data;
       }
     }
@@ -658,7 +703,10 @@ private:
     mOverflowControl.SetText((std::string("Overflow: ") + (ellipsis ? "ELLIPSIS" : "CLIP")).c_str());
     mMultilineControl.SetText((std::string("Multiline: ") + (multiline ? "ON" : "OFF")).c_str());
     mLineHeightControl.SetText((std::string("Line Height: ") + (mRelativeLineHeightEnabled ? "RELATIVE 1.6" : "AUTO")).c_str());
-    mPreviewHeightControl.SetText((std::string("Height: ") + (mWrapContentHeightEnabled ? "WRAP_CONTENT" : "FILL")).c_str());
+    mPreviewHeightControl.SetText((std::string("Height: ") +
+                                   (data.scrollCase
+                                      ? "WRAP_CONTENT"
+                                      : (mWrapContentHeightEnabled ? "WRAP_CONTENT" : "FILL"))).c_str());
     mReplacementControl.SetText((std::string("Replacement: ") + (mReplacementEnabled ? "ON" : "OFF")).c_str());
     mSourceControl.SetText((std::string("Source: ") + (mLifecycleAlternate ? "B" : "A")).c_str());
   }
@@ -686,9 +734,11 @@ private:
     label.SetVerticalTextAlignment(ResolveAlignment(mVerticalAlignmentOverride, data.verticalAlignment));
     label.SetLayoutDirection(data.rtl ? LayoutDirection::RIGHT_TO_LEFT : LayoutDirection::LEFT_TO_RIGHT);
     label.SetRequestedWidth(MATCH_PARENT);
-    label.SetRequestedHeight(mWrapContentHeightEnabled ? WRAP_CONTENT : MATCH_PARENT);
+    label.SetRequestedHeight(data.scrollCase
+                               ? WRAP_CONTENT
+                               : (mWrapContentHeightEnabled ? WRAP_CONTENT : MATCH_PARENT));
     label.SetLayoutParams(StackLayoutParams::New()
-                            .SetWeight(mWrapContentHeightEnabled ? 0.0f : 1.0f)
+                            .SetWeight((data.scrollCase || mWrapContentHeightEnabled) ? 0.0f : 1.0f)
                             .SetAlignment(LayoutAlignment::FILL));
     label.SetMaximumWidth(10000.0f);
   }
@@ -710,7 +760,9 @@ private:
            << ", vertical=" << TextAlignmentName(vertical) << "\n";
     status << "Text: " << (data.rtl ? "RTL" : "LTR") << ", font=" << data.fontSize
            << ", line height=" << (mRelativeLineHeightEnabled ? "RELATIVE 1.6" : "AUTO")
-           << ", height=" << (mWrapContentHeightEnabled ? "WRAP_CONTENT" : "FILL")
+           << ", height=" << (data.scrollCase
+                                  ? "WRAP_CONTENT"
+                                  : (mWrapContentHeightEnabled ? "WRAP_CONTENT" : "FILL"))
            << ", render scale=" << data.renderScale << ", text fit=" << (data.textFit ? "ON" : "OFF")
            << ", authoring=" << (advancedRange ? "multi-character range" : "U+FFFC")
            << ", replacement=" << (mReplacementEnabled ? "ON" : "OFF") << "\n";
@@ -737,6 +789,13 @@ private:
     {
       status << "Resource source variant: " << (mLifecycleAlternate ? "B" : "A") << "\n";
     }
+    if(data.scrollCase)
+    {
+      const Vector2 syncPosition  = mPrimaryScroll.GetScrollPosition();
+      const Vector2 asyncPosition = mParityScroll.GetScrollPosition();
+      status << "Scroll Y: sync=" << syncPosition.y << ", async=" << asyncPosition.y
+             << ". Drag either preview or press Scroll Both.\n";
+    }
     if(!mActionStatus.empty())
     {
       status << mActionStatus;
@@ -754,6 +813,9 @@ private:
     ConfigurePreview(mParity, true);
     mPrimary.SetStyledText(styledText);
     mParity.SetStyledText(styledText); // Same immutable source; runtime remains control-owned.
+    mPrimaryScroll.ScrollTo(Vector2::ZERO, false);
+    mParityScroll.ScrollTo(Vector2::ZERO, false);
+    mScrollStep = 0u;
     std::string displayTitle(data.title);
     const std::size_t numberSeparator = displayTitle.find(". ");
     if(numberSeparator != std::string::npos)
@@ -762,7 +824,10 @@ private:
     }
     mTitle.SetText(("Case " + std::to_string(mCaseIndex + 1u) + " / " + std::to_string(CASE_COUNT) + " — " + displayTitle).c_str());
     mDescription.SetText(data.expected);
-    mExpected.SetText("Expected: sync and async output match; every replacement remains one complete layout unit.");
+    mExpected.SetText(data.scrollCase
+                        ? "Expected: sync and async Labels keep identical image geometry while their ScrollViews clip moving content."
+                        : "Expected: sync and async output match; every replacement remains one complete layout unit.");
+    mActionControl.SetText(data.scrollCase ? "Scroll Both" : "Start Marquee");
     mStatus.SetText(StatusText(data, styledText).c_str());
     UpdateLayoutControls(data);
   }
@@ -771,6 +836,28 @@ private:
   {
     const CaseData data = GetCase(mCaseIndex);
     mStatus.SetText(StatusText(data, mPrimary.GetStyledText()).c_str());
+  }
+
+  void RunPreviewAction()
+  {
+    const CaseData data = GetCase(mCaseIndex);
+    if(!data.scrollCase)
+    {
+      mPrimary.StartMarquee();
+      mParity.StartMarquee();
+      mActionStatus = "Marquee requested for both columns";
+      RefreshStatus();
+      return;
+    }
+
+    mScrollStep              = (mScrollStep + 1u) % 4u;
+    const float progress     = static_cast<float>(mScrollStep) / 3.0f;
+    const float primaryRange = std::max(0.0f, mPrimary.GetCurrentSize().height - mPrimaryScroll.GetCurrentSize().height);
+    const float parityRange  = std::max(0.0f, mParity.GetCurrentSize().height - mParityScroll.GetCurrentSize().height);
+    mPrimaryScroll.ScrollTo(Vector2(0.0f, primaryRange * progress), false);
+    mParityScroll.ScrollTo(Vector2(0.0f, parityRange * progress), false);
+    mActionStatus = "Both ScrollViews moved to the next checkpoint";
+    RefreshStatus();
   }
 
   void OnInit(Application application)
@@ -800,8 +887,8 @@ private:
     Label previous = NewHudLabel("Previous Case", 44.0f, 0x1D4ED8, true);
     Label next     = NewHudLabel("Next Case", 44.0f, 0x1D4ED8, true);
     Label reset    = NewHudLabel("Reset Case", 44.0f, 0x334155, true);
-    Label marquee  = NewHudLabel("Start Marquee", 44.0f, 0x475569, true);
-    for(Label button : {previous, next, reset, marquee})
+    mActionControl = NewHudLabel("Start Marquee", 44.0f, 0x475569, true);
+    for(Label button : {previous, next, reset, mActionControl})
     {
       actions.Add(button);
     }
@@ -816,12 +903,7 @@ private:
       ApplyCase();
     });
     reset.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { ResetLayoutOverrides(); });
-    marquee.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) {
-      mPrimary.StartMarquee();
-      mParity.StartMarquee();
-      mActionStatus = "Marquee requested for both columns";
-      RefreshStatus();
-    });
+    mActionControl.AsInteractive().ClickedSignal().Connect(this, [this](View, InputEvent) { RunPreviewAction(); });
 
     StackLayout layoutActions = StackLayout::New(StackOrientation::HORIZONTAL);
     layoutActions.SetSpacing(6.0f);
@@ -867,8 +949,10 @@ private:
     StackLayout previews = StackLayout::New(StackOrientation::HORIZONTAL);
     previews.SetSpacing(8.0f);
     previews.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
-    mPrimary = Label::New();
-    mParity  = Label::New();
+    mPrimary       = Label::New();
+    mParity        = Label::New();
+    mPrimaryScroll = ScrollView::New();
+    mParityScroll  = ScrollView::New();
     StackLayout syncColumn       = StackLayout::New(StackOrientation::VERTICAL);
     StackLayout asyncColumn      = StackLayout::New(StackOrientation::VERTICAL);
     StackLayout syncPreviewSlot  = StackLayout::New(StackOrientation::VERTICAL);
@@ -883,6 +967,14 @@ private:
     {
       slot.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     }
+    for(ScrollView scroll : {mPrimaryScroll, mParityScroll})
+    {
+      scroll.SetScrollDirection(ScrollDirection::Vertical);
+      scroll.SetOverScrollMode(OverScrollMode::ContentScrolls);
+      scroll.SetRequestedWidth(MATCH_PARENT);
+      scroll.SetRequestedHeight(MATCH_PARENT);
+      scroll.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
+    }
     syncColumn.Add(NewHudLabel("SYNC", 34.0f, 0x0F766E));
     asyncColumn.Add(NewHudLabel("ASYNC", 34.0f, 0x7C3AED));
     syncColumn.Add(syncPreviewSlot);
@@ -895,8 +987,10 @@ private:
       label.SetPadding(Extents(14, 14, 14, 14));
       label.SetLayoutParams(StackLayoutParams::New().SetWeight(1.0f).SetAlignment(LayoutAlignment::FILL));
     }
-    syncPreviewSlot.Add(mPrimary);
-    asyncPreviewSlot.Add(mParity);
+    mPrimaryScroll.SetContent(mPrimary);
+    mParityScroll.SetContent(mParity);
+    syncPreviewSlot.Add(mPrimaryScroll);
+    asyncPreviewSlot.Add(mParityScroll);
 
     root.Add(mTitle);
     root.Add(mDescription);
@@ -967,6 +1061,26 @@ private:
       mLifecycleAlternate = !mLifecycleAlternate;
       ApplyCase();
     }
+    else if(event.GetKeyName() == "1")
+    {
+      UiScaleManager::Get().SetScale(0.8f);
+    }
+    else if(event.GetKeyName() == "2")
+    {
+      UiScaleManager::Get().SetScale(1.0f);
+    }
+    else if(event.GetKeyName() == "3")
+    {
+      UiScaleManager::Get().SetScale(1.2f);
+    }
+    else if(event.GetKeyName() == "4")
+    {
+      UiScaleManager::Get().SetScale(1.5f);
+    }
+    else if(event.GetKeyName() == "5")
+    {
+      UiScaleManager::Get().SetScale(2.0f);
+    }
   }
 
 private:
@@ -976,7 +1090,10 @@ private:
   Label             mExpected;
   Label             mPrimary;
   Label             mParity;
+  ScrollView        mPrimaryScroll;
+  ScrollView        mParityScroll;
   Label             mStatus;
+  Label             mActionControl;
   Label             mHorizontalAlignmentControl;
   Label             mVerticalAlignmentControl;
   Label             mOverflowControl;
@@ -994,6 +1111,7 @@ private:
   AlignmentOverride mVerticalAlignmentOverride{AlignmentOverride::START};
   ToggleOverride    mOverflowOverride{ToggleOverride::ON};
   ToggleOverride    mMultilineOverride{ToggleOverride::CASE_DEFAULT};
+  uint32_t          mScrollStep{0u};
   std::string       mActionStatus;
 };
 
