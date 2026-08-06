@@ -25,6 +25,7 @@
 #include <dali-ui-components/internal/markdown/markdown-component.h>
 #include <dali-ui-components/internal/markdown/markdown-parser.h>
 #include <dali-ui-components/public-api/markdown/markdown-view.h>
+#include <dali-ui-components/public-api/styles/markdown-view-style.h>
 
 namespace Dali
 {
@@ -42,9 +43,10 @@ public:
   /**
    * @brief Creates a new MarkdownView handle backed by this implementation.
    *
+   * @param[in] style The immutable style to apply.
    * @return The created MarkdownView.
    */
-  static Ui::MarkdownView New();
+  static Ui::MarkdownView New(const MarkdownViewStyle& style);
 
   /**
    * @brief Replaces the Markdown source rendered by this view.
@@ -76,7 +78,7 @@ public:
   }
 
 protected:
-  MarkdownViewImpl();
+  explicit MarkdownViewImpl(const MarkdownViewStyle& style);
   ~MarkdownViewImpl() override;
 
   void OnInitialize() override;
@@ -175,8 +177,9 @@ private:
   Ui::View GetSelfView() const;
 
 private:
-  Dali::String mMarkdown;
-  uint64_t     mRevision{0u};
+  MarkdownViewStyle mStyle;
+  Dali::String      mMarkdown;
+  uint64_t          mRevision{0u};
 
   MarkdownParser         mParser;
   MarkdownRenderSnapshot mSnapshot;

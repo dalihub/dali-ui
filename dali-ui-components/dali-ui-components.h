@@ -39,5 +39,6 @@
 #include <dali-ui-components/public-api/navigator/navigator.h>
 #include <dali-ui-components/public-api/styles/check-box-style.h>
 #include <dali-ui-components/public-api/styles/components-style-sheet.h>
+#include <dali-ui-components/public-api/styles/markdown-view-style.h>
 #include <dali-ui-components/public-api/styles/text-button-style.h>
 #include <dali-ui-components/public-api/text-button.h>

@@ -25,6 +25,9 @@
 #include <dali/public-api/common/unique-ptr.h>
 #include <algorithm>
 
+// INTERNAL INCLUDES
+#include <dali-ui-components/internal/markdown/markdown-view-defaults.h>
+
 namespace Dali
 {
 namespace Ui
@@ -33,9 +36,6 @@ namespace Internal
 {
 namespace
 {
-
-constexpr float COMMON_PADDING      = 10.0f;
-constexpr float COMMON_ITEM_PADDING = 20.0f;
 
 BaseHandle Create()
 {
@@ -140,16 +140,18 @@ bool SemanticPrefixEqual(const MarkdownRenderNode& previous, const MarkdownRende
 
 } // namespace
 
-Ui::MarkdownView MarkdownViewImpl::New()
+Ui::MarkdownView MarkdownViewImpl::New(const MarkdownViewStyle& style)
 {
-  IntrusivePtr<MarkdownViewImpl> impl(new MarkdownViewImpl());
+  DALI_ASSERT_ALWAYS(style && "MarkdownViewStyle must be initialized");
+  IntrusivePtr<MarkdownViewImpl> impl(new MarkdownViewImpl(style));
   Ui::MarkdownView               handle(*impl);
   impl->Initialize();
   return handle;
 }
 
-MarkdownViewImpl::MarkdownViewImpl()
-: ViewImpl()
+MarkdownViewImpl::MarkdownViewImpl(const MarkdownViewStyle& style)
+: ViewImpl(),
+  mStyle(style)
 {
 }
 
@@ -158,11 +160,11 @@ MarkdownViewImpl::~MarkdownViewImpl() = default;
 void MarkdownViewImpl::OnInitialize()
 {
   ViewImpl::OnInitialize();
-  AttachLayoutManager(Dali::MakeUnique<StackLayoutManager>(StackOrientation::VERTICAL, COMMON_ITEM_PADDING));
-  GetSelfView().SetPadding(Extents(static_cast<int16_t>(COMMON_PADDING),
-                                   static_cast<int16_t>(COMMON_PADDING),
-                                   static_cast<int16_t>(COMMON_PADDING),
-                                   static_cast<int16_t>(COMMON_PADDING)));
+  AttachLayoutManager(Dali::MakeUnique<StackLayoutManager>(StackOrientation::VERTICAL, MarkdownViewDefaults::BLOCK_SPACING));
+  GetSelfView().SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),
+                                   static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),
+                                   static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING),
+                                   static_cast<int16_t>(MarkdownViewDefaults::VIEW_PADDING)));
 }
 
 void MarkdownViewImpl::SetMarkdown(const Dali::String& markdown)
@@ -314,7 +316,7 @@ std::unique_ptr<MarkdownViewImpl::ComponentNode> MarkdownViewImpl::CreateCompone
   componentNode->role          = node.role;
   componentNode->snapshotIndex = node.index;
   componentNode->subtreeHash   = node.subtreeHash;
-  componentNode->component     = CreateMarkdownComponent(node);
+  componentNode->component     = CreateMarkdownComponent(node, mStyle);
 
   Ui::View contentHost = componentNode->component ? componentNode->component->GetContentHost() : Ui::View();
   if(contentHost && node.index < mChildrenByParent.size())

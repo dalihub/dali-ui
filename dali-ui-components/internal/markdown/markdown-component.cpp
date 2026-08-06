@@ -30,6 +30,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/markdown/markdown-text-component.h>
+#include <dali-ui-components/internal/markdown/markdown-view-defaults.h>
 
 namespace Dali
 {
@@ -40,31 +41,16 @@ namespace Internal
 namespace
 {
 
-constexpr float       BLOCK_GAP                        = 20.0f;
-constexpr float       LIST_FIRST_LEVEL_INDENT          = 12.0f;
-constexpr float       LIST_NESTED_LEVEL_INDENT         = 0.0f;
-constexpr float       LIST_ITEM_MARGIN_BOTTOM          = 10.0f;
-constexpr float       LIST_MARKER_WIDTH                = 32.0f;
-constexpr float       LIST_MARKER_DIGIT_WIDTH          = 11.0f;
-constexpr float       LIST_CONTENT_GAP                 = 12.0f;
-constexpr float       LIST_LINE_HEIGHT                 = 32.0f;
-constexpr float       UNORDERED_LIST_MARKER_SIZE_RATIO = 0.3f;
-constexpr float       LIST_HOLLOW_BULLET_WIDTH         = 1.25f;
-constexpr float       QUOTE_BAR_WIDTH                  = 6.0f;
-constexpr float       QUOTE_CONTENT_GAP                = 18.0f;
-constexpr float       CODE_PADDING                     = 10.0f;
-constexpr float       CODE_PADDING_BOTTOM              = 8.0f;
-constexpr float       CODE_TITLE_PADDING_START         = 10.0f;
-constexpr float       CODE_TITLE_PADDING_TOP           = 10.0f;
-constexpr float       CODE_CORNER_RADIUS               = 12.0f;
-constexpr uint32_t    CODE_BACKGROUND_COLOR            = 0xF4F4F4;
-constexpr uint32_t    CODE_TITLE_BACKGROUND            = 0xEEEEEE;
-constexpr const char* DEFAULT_FONT_FAMILY              = "SamsungOneUI_400";
-constexpr const char* CODE_FONT_FAMILY                 = "SamsungOneUI_300";
-constexpr float       TABLE_CELL_PADDING               = 5.0f;
-constexpr float       TABLE_HEAD_RULE_HEIGHT           = 1.0f;
-constexpr float       RULE_HEIGHT                      = 1.0f;
-constexpr float       BLOCK_IMAGE_HEIGHT               = 160.0f;
+constexpr float LIST_FIRST_LEVEL_INDENT          = 12.0f;
+constexpr float LIST_NESTED_LEVEL_INDENT         = 0.0f;
+constexpr float LIST_MARKER_DIGIT_WIDTH_RATIO    = 0.55f;
+constexpr float LIST_CONTENT_GAP                 = 12.0f;
+constexpr float UNORDERED_LIST_MARKER_SIZE_RATIO = 0.3f;
+constexpr float LIST_HOLLOW_BULLET_WIDTH_MIN     = 1.0f;
+constexpr float LIST_HOLLOW_BULLET_WIDTH_MAX     = 2.5f;
+constexpr float LIST_HOLLOW_BULLET_WIDTH_DIVISOR = 16.0f;
+constexpr float QUOTE_CONTENT_GAP                = 18.0f;
+constexpr float BLOCK_IMAGE_HEIGHT               = 160.0f;
 
 void SetStackFill(Ui::View view)
 {
@@ -88,12 +74,12 @@ Ui::StackLayout NewStack(StackOrientation orientation, float spacing = 0.0f)
   return view;
 }
 
-Ui::View NewColorBox(uint32_t color, float cornerRadius = 0.0f)
+Ui::View NewColorBox(const UiColor& color, float cornerRadius = 0.0f)
 {
   Ui::View view = Ui::View::New();
   view.SetRequestedWidth(MATCH_PARENT);
   view.SetRequestedHeight(WRAP_CONTENT);
-  view.SetBackgroundColor(UiColor(color));
+  view.SetBackgroundColor(color);
   if(cornerRadius > 0.0f)
   {
     view.SetCornerRadius(cornerRadius);
@@ -102,30 +88,34 @@ Ui::View NewColorBox(uint32_t color, float cornerRadius = 0.0f)
   return view;
 }
 
-Ui::Label NewLabel(const Dali::String& text, float fontSize, uint32_t color)
+Ui::Label NewLabel(const Dali::String& text, const Dali::String& fontFamily, float fontSize, const UiColor& color)
 {
   Ui::Label label = Ui::Label::New();
   label.SetMultiLine(true);
   label.SetTextOverflowMode(Text::OverflowMode::CLIP);
-  label.SetFontFamily(Dali::String(DEFAULT_FONT_FAMILY));
+  label.SetFontFamily(fontFamily);
   label.SetFontSize(fontSize);
-  label.SetTextColor(UiColor(color));
+  label.SetSystemFontSizeScaleEnabled(false);
+  label.SetTextColor(color);
   label.SetText(text);
   label.SetAsyncRendering(false);
   return label;
 }
 
-float ListMarkerWidth(const MarkdownRenderNode& node)
+float ListMarkerMinimumWidth(const MarkdownRenderNode& node, float fontSize)
 {
+  const float markerColumnWidth = std::max(MarkdownViewDefaults::DEFAULT_BODY_LINE_HEIGHT,
+                                           fontSize * MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO);
   if(node.listKind == MarkdownListKind::ORDERED)
   {
     const std::size_t markerLength       = node.listMarkerColumnLength > 0u
                                              ? node.listMarkerColumnLength
                                              : std::to_string(node.listOrdinal).size() + 1u;
-    const float       orderedMarkerWidth = std::max(LIST_MARKER_WIDTH, static_cast<float>(markerLength) * LIST_MARKER_DIGIT_WIDTH);
+    const float       orderedMarkerWidth = std::max(markerColumnWidth,
+                                                    static_cast<float>(markerLength) * fontSize * LIST_MARKER_DIGIT_WIDTH_RATIO);
     return orderedMarkerWidth;
   }
-  return LIST_MARKER_WIDTH;
+  return markerColumnWidth;
 }
 
 float ListItemStartIndent(const MarkdownRenderNode& node)
@@ -158,14 +148,14 @@ bool UseBulletMarker(const MarkdownRenderNode& node)
   return node.listKind == MarkdownListKind::UNORDERED;
 }
 
-Ui::View NewBulletMarker(uint32_t depth, float markerSize, float lineHeight)
+Ui::View NewBulletMarker(uint32_t depth, float fontSize, float markerSize, float lineHeight, float markerColumnWidth, const UiColor& color)
 {
   const float effectiveLineHeight = std::max(0.0f, lineHeight);
   const float effectiveMarkerSize = std::min(std::max(0.0f, markerSize), effectiveLineHeight);
   const float remainingHeight     = effectiveLineHeight - effectiveMarkerSize;
   const float topMargin           = remainingHeight * 0.5f;
   const float bottomMargin        = remainingHeight - topMargin;
-  const float startMargin         = std::max(0.0f, LIST_MARKER_WIDTH - effectiveMarkerSize);
+  const float startMargin         = std::max(0.0f, markerColumnWidth - effectiveMarkerSize);
 
   Ui::View bullet = Ui::View::New();
   bullet.SetRequestedWidth(effectiveMarkerSize);
@@ -177,14 +167,16 @@ Ui::View NewBulletMarker(uint32_t depth, float markerSize, float lineHeight)
     case 1u:
       bullet.SetCornerRadiusPolicyRelative();
       bullet.SetCornerRadius(0.5f);
-      bullet.SetBorderlineColor(UiColor(0x000000));
-      bullet.SetBorderlineWidth(LIST_HOLLOW_BULLET_WIDTH);
+      bullet.SetBorderlineColor(color);
+      bullet.SetBorderlineWidth(std::clamp(fontSize / LIST_HOLLOW_BULLET_WIDTH_DIVISOR,
+                                           LIST_HOLLOW_BULLET_WIDTH_MIN,
+                                           LIST_HOLLOW_BULLET_WIDTH_MAX));
       break;
     case 2u:
-      bullet.SetBackgroundColor(UiColor(0x000000));
+      bullet.SetBackgroundColor(color);
       break;
     default:
-      bullet.SetBackgroundColor(UiColor(0x000000));
+      bullet.SetBackgroundColor(color);
       bullet.SetCornerRadiusPolicyRelative();
       bullet.SetCornerRadius(0.5f);
       break;
@@ -251,9 +243,9 @@ public:
 class TextBlockComponent : public BaseComponent
 {
 public:
-  TextBlockComponent(const MarkdownRenderNode& node)
+  TextBlockComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
   {
-    mTextComponent = CreateMarkdownLabelTextComponent(node);
+    mTextComponent = CreateMarkdownLabelTextComponent(style);
     mRoot          = mTextComponent->GetView();
     mTextComponent->SetTextContent(node);
   }
@@ -281,7 +273,8 @@ private:
 class ListItemComponent : public BaseComponent, public ConnectionTracker
 {
 public:
-  ListItemComponent(const MarkdownRenderNode& node)
+  ListItemComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
+  : mStyle(style)
   {
     mItem = NewStack(StackOrientation::HORIZONTAL, 0.0f);
     ApplyItemMargin(node);
@@ -293,16 +286,16 @@ public:
     mTaskChecked            = node.taskChecked;
 
     mMarkerHost = NewStack(StackOrientation::HORIZONTAL, 0.0f);
-    mMarkerHost.SetRequestedWidth(ListMarkerWidth(node));
     mMarkerHost.SetMargin(Extents(0, static_cast<int16_t>(LIST_CONTENT_GAP), 0, 0));
-    mMarkerHost.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
+    mMarkerHost.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
 
-    mMarkerLabel = NewLabel(Dali::String(), 20.0f, 0x000000);
+    mMarkerLabel = NewLabel(Dali::String(),
+                            mStyle.GetTextFontFamily(),
+                            mStyle.GetTextFontSize(),
+                            mStyle.GetTextColor());
     mMarkerLabel.SetMultiLine(false);
-    mMarkerLabel.SetTextOverflowMode(Text::OverflowMode::CLIP);
-    mMarkerLabel.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
-    mMarkerLabel.SetLineHeight(LIST_LINE_HEIGHT);
-    mMarkerLabel.SetRequestedWidth(ListMarkerWidth(node));
+    mMarkerLabel.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+    mMarkerLabel.SetLineHeight(MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO);
     mMarkerLabel.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
     mContentHost = NewStack(StackOrientation::VERTICAL, 0.0f);
     SetStackWeightFill(mContentHost);
@@ -363,8 +356,7 @@ private:
 
   void ApplyMarkerPresentation(const MarkdownRenderNode& node)
   {
-    mMarkerHost.SetRequestedWidth(ListMarkerWidth(node));
-    mMarkerHost.SetMargin(Extents(0, static_cast<int16_t>(LIST_CONTENT_GAP), 0, 0));
+    const float textFontSize = mStyle.GetTextFontSize();
 
     if(mBulletMarkerAttached)
     {
@@ -378,31 +370,47 @@ private:
       mMarkerLabelAttached = false;
     }
 
-    const bool useBullet      = UseBulletMarker(node);
-    const bool useMarkerLabel = node.listKind == MarkdownListKind::ORDERED;
+    const bool  useBullet         = UseBulletMarker(node);
+    const bool  useMarkerLabel    = node.listKind == MarkdownListKind::ORDERED;
+    const float markerColumnWidth = ListMarkerMinimumWidth(node, textFontSize);
+    const float lineHeight        = textFontSize * MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO;
+
+    float markerHostWidth  = 0.0f;
+    float markerHostHeight = lineHeight;
     if(useBullet)
     {
-      const float textFontSize = ResolveMarkdownTextFontSize(node);
-      const float lineHeight   = ResolveMarkdownTextLineHeight(node);
-      const float markerSize   = textFontSize * UNORDERED_LIST_MARKER_SIZE_RATIO;
-      mBulletMarker            = NewBulletMarker(node.listDepth, markerSize, lineHeight);
+      const float markerSize = textFontSize * UNORDERED_LIST_MARKER_SIZE_RATIO;
+      mBulletMarker          = NewBulletMarker(node.listDepth,
+                                               textFontSize,
+                                               markerSize,
+                                               lineHeight,
+                                               markerColumnWidth,
+                                               mStyle.GetTextColor());
       mMarkerHost.Add(mBulletMarker);
       mBulletMarkerAttached = true;
+      markerHostWidth       = std::max(markerColumnWidth, markerSize);
     }
 
     if(useMarkerLabel)
     {
       mMarkerLabel.SetHorizontalTextAlignment(Text::Alignment::END);
-      mMarkerLabel.SetRequestedWidth(ListMarkerWidth(node));
-      mMarkerLabel.SetMargin(Extents());
       ApplyMarkerText(node);
+      const Vector3 markerNaturalSize = mMarkerLabel.GetNaturalSize();
+      const float   markerLabelWidth  = std::max(markerColumnWidth, markerNaturalSize.width);
+      mMarkerLabel.SetRequestedWidth(markerLabelWidth);
+      mMarkerLabel.SetMargin(Extents());
       mMarkerHost.Add(mMarkerLabel);
       mMarkerLabelAttached = true;
+      markerHostWidth      = markerLabelWidth;
+      markerHostHeight     = std::max(markerHostHeight, markerNaturalSize.height);
     }
     else
     {
       mMarkerText.clear();
     }
+
+    mMarkerHost.SetRequestedWidth(markerHostWidth);
+    mMarkerHost.SetRequestedHeight(markerHostHeight);
   }
 
   void ApplyTaskPresentation(const MarkdownRenderNode& node)
@@ -424,7 +432,8 @@ private:
 
     const Vector3 markerNaturalSize = mTaskMarkerLabel.GetNaturalSize();
     mTaskMarkerLabel.SetRequestedWidth(markerNaturalSize.width);
-    mTaskMarkerLabel.SetRequestedHeight(std::max(LIST_LINE_HEIGHT, markerNaturalSize.height));
+    mTaskMarkerLabel.SetRequestedHeight(std::max(mStyle.GetTextFontSize() * MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO,
+                                                 markerNaturalSize.height));
 
     if(mTaskRowAttached)
     {
@@ -454,10 +463,13 @@ private:
     }
 
     mTaskRow         = NewStack(StackOrientation::HORIZONTAL, LIST_CONTENT_GAP);
-    mTaskMarkerLabel = NewLabel(Dali::String(), 20.0f, 0x000000);
+    mTaskMarkerLabel = NewLabel(Dali::String(),
+                                mStyle.GetTextFontFamily(),
+                                mStyle.GetTextFontSize(),
+                                mStyle.GetTextColor());
     mTaskMarkerLabel.SetMultiLine(false);
-    mTaskMarkerLabel.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
-    mTaskMarkerLabel.SetLineHeight(LIST_LINE_HEIGHT);
+    mTaskMarkerLabel.SetLineHeightMode(Text::LineHeightMode::RELATIVE);
+    mTaskMarkerLabel.SetLineHeight(MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO);
     mTaskMarkerLabel.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
     mTaskRow.Add(mTaskMarkerLabel);
   }
@@ -499,21 +511,20 @@ private:
       mTextComponent->GetView().SetMargin(Extents(0,
                                                   0,
                                                   0,
-                                                  static_cast<int16_t>(LIST_ITEM_MARGIN_BOTTOM)));
+                                                  static_cast<int16_t>(MarkdownViewDefaults::LIST_ITEM_MARGIN_BOTTOM)));
     }
   }
 
-  bool ApplyMarkerText(const MarkdownRenderNode& node)
+  void ApplyMarkerText(const MarkdownRenderNode& node)
   {
     const std::string marker = ListMarkerText(node, mIsRtl);
     if(marker == mMarkerText)
     {
-      return false;
+      return;
     }
 
     mMarkerLabel.SetText(Dali::String(marker.c_str()));
     mMarkerText = marker;
-    return true;
   }
 
   void UpdateTightText(const MarkdownRenderNode* previous, const MarkdownRenderNode& current, const MarkdownTextUpdate& textUpdate)
@@ -531,7 +542,7 @@ private:
 
     if(!mTextComponent)
     {
-      mTextComponent = CreateMarkdownLabelTextComponent(current);
+      mTextComponent = CreateMarkdownLabelTextComponent(mStyle);
       ApplyTextMargin();
       mTextComponent->SetTextContent(current);
       if(mTaskRowAttached)
@@ -560,6 +571,7 @@ private:
   }
 
 private:
+  MarkdownViewStyle                      mStyle;
   Ui::StackLayout                        mItem;
   Ui::StackLayout                        mMarkerHost;
   Ui::Label                              mMarkerLabel;
@@ -587,17 +599,20 @@ private:
 class QuoteComponent : public BaseComponent
 {
 public:
-  QuoteComponent()
+  explicit QuoteComponent(const MarkdownViewStyle& style)
   {
     Ui::StackLayout quote = NewStack(StackOrientation::HORIZONTAL, 0.0f);
-    quote.SetPadding(Extents(10, 10, 10, 10));
+    quote.SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::QUOTE_PADDING),
+                             static_cast<int16_t>(MarkdownViewDefaults::QUOTE_PADDING),
+                             static_cast<int16_t>(MarkdownViewDefaults::QUOTE_PADDING),
+                             static_cast<int16_t>(MarkdownViewDefaults::QUOTE_PADDING)));
 
-    Ui::View decoration = NewColorBox(0xDFDFDF, 3.0f);
-    decoration.SetRequestedWidth(QUOTE_BAR_WIDTH);
+    Ui::View decoration = NewColorBox(style.GetQuoteBarColor(), MarkdownViewDefaults::QUOTE_BAR_CORNER_RADIUS);
+    decoration.SetRequestedWidth(MarkdownViewDefaults::QUOTE_BAR_WIDTH);
     decoration.SetMargin(Extents(0, static_cast<int16_t>(QUOTE_CONTENT_GAP), 0, 0));
     decoration.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::FILL));
 
-    mContentHost = NewStack(StackOrientation::VERTICAL, BLOCK_GAP);
+    mContentHost = NewStack(StackOrientation::VERTICAL, MarkdownViewDefaults::BLOCK_SPACING);
     SetStackWeightFill(mContentHost);
     quote.Add(decoration);
     quote.Add(mContentHost);
@@ -615,39 +630,28 @@ public:
 class CodeBlockComponent : public BaseComponent
 {
 public:
-  CodeBlockComponent(const MarkdownRenderNode& node)
+  CodeBlockComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
+  : mStyle(style)
   {
     mCodeRoot = NewStack(StackOrientation::VERTICAL, 0.0f);
     mCodeRoot.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
-    mCodeRoot.SetBackgroundColor(UiColor(CODE_BACKGROUND_COLOR));
-    mCodeRoot.SetCornerRadius(CODE_CORNER_RADIUS);
+    mCodeRoot.SetBackgroundColor(style.GetCodeBlockBackgroundColor());
+    mCodeRoot.SetCornerRadius(MarkdownViewDefaults::CODE_CORNER_RADIUS);
 
-    mLanguageHost = NewStack(StackOrientation::HORIZONTAL, 0.0f);
-    mLanguageHost.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
-    mLanguageHost.SetPadding(Extents(static_cast<int16_t>(CODE_TITLE_PADDING_START),
-                                     static_cast<int16_t>(CODE_TITLE_PADDING_START),
-                                     static_cast<int16_t>(CODE_TITLE_PADDING_TOP),
-                                     static_cast<int16_t>(CODE_TITLE_PADDING_TOP)));
-    mLanguageHost.SetBackgroundColor(UiColor(CODE_TITLE_BACKGROUND));
-    mLanguageHost.SetCornerRadius(CODE_CORNER_RADIUS, CODE_CORNER_RADIUS, 0.0f, 0.0f);
-
-    mLanguage      = node.language;
-    mLanguageLabel = NewLabel(Dali::String(mLanguage.c_str()), 16.0f, 0x454545);
-    mLanguageLabel.SetMultiLine(false);
-    mLanguageLabel.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
-    mLanguageLabel.SetFontFamily(Dali::String(CODE_FONT_FAMILY));
-    mLanguageLabel.SetRequestedWidth(WRAP_CONTENT);
-    mLanguageLabel.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
-    mLanguageHost.Add(mLanguageLabel);
+    mLanguage = node.language;
+    if(!mLanguage.empty())
+    {
+      EnsureLanguageHost();
+    }
 
     mCodeContentHost = NewStack(StackOrientation::VERTICAL, 0.0f);
     mCodeContentHost.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
-    mCodeContentHost.SetPadding(Extents(static_cast<int16_t>(CODE_PADDING),
-                                        static_cast<int16_t>(CODE_PADDING),
-                                        static_cast<int16_t>(CODE_PADDING),
-                                        static_cast<int16_t>(CODE_PADDING_BOTTOM)));
+    mCodeContentHost.SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
+                                        static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
+                                        static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
+                                        static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING)));
 
-    mTextComponent = CreateMarkdownLabelTextComponent(node);
+    mTextComponent = CreateMarkdownLabelTextComponent(style);
     mTextView      = mTextComponent->GetView();
     mTextView.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
     mTextView.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
@@ -666,8 +670,12 @@ public:
   {
     if(mLanguage != current.language)
     {
-      mLanguageLabel.SetText(Dali::String(current.language.c_str()));
       mLanguage = current.language;
+      if(!mLanguage.empty())
+      {
+        EnsureLanguageHost();
+        mLanguageLabel.SetText(Dali::String(mLanguage.c_str()));
+      }
       RebuildChildren();
     }
     if(textUpdate.type != MarkdownTextUpdate::Type::UNCHANGED)
@@ -677,6 +685,36 @@ public:
   }
 
 private:
+  void EnsureLanguageHost()
+  {
+    if(mLanguageHost)
+    {
+      return;
+    }
+
+    mLanguageHost = NewStack(StackOrientation::HORIZONTAL, 0.0f);
+    mLanguageHost.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
+    mLanguageHost.SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
+                                     static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
+                                     static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING),
+                                     static_cast<int16_t>(MarkdownViewDefaults::CODE_PADDING)));
+    mLanguageHost.SetBackgroundColor(mStyle.GetCodeBlockTitleBackgroundColor());
+    mLanguageHost.SetCornerRadius(MarkdownViewDefaults::CODE_CORNER_RADIUS,
+                                  MarkdownViewDefaults::CODE_CORNER_RADIUS,
+                                  0.0f,
+                                  0.0f);
+
+    mLanguageLabel = NewLabel(Dali::String(mLanguage.c_str()),
+                              mStyle.GetCodeFontFamily(),
+                              mStyle.GetCodeBlockTitleFontSize(),
+                              mStyle.GetCodeBlockTitleTextColor());
+    mLanguageLabel.SetMultiLine(false);
+    mLanguageLabel.SetLayoutDirection(LayoutDirection::LEFT_TO_RIGHT);
+    mLanguageLabel.SetRequestedWidth(WRAP_CONTENT);
+    mLanguageLabel.SetLayoutParams(StackLayoutParams::New().SetAlignment(LayoutAlignment::START));
+    mLanguageHost.Add(mLanguageLabel);
+  }
+
   void RebuildChildren()
   {
     if(mLanguageHostAttached)
@@ -701,6 +739,7 @@ private:
   }
 
 private:
+  MarkdownViewStyle                      mStyle;
   Ui::StackLayout                        mCodeRoot;
   Ui::StackLayout                        mLanguageHost;
   Ui::StackLayout                        mCodeContentHost;
@@ -718,13 +757,13 @@ private:
 class TableHeadComponent : public BaseComponent
 {
 public:
-  TableHeadComponent()
+  explicit TableHeadComponent(const MarkdownViewStyle& style)
   {
     Ui::StackLayout root = NewStack(StackOrientation::VERTICAL, 0.0f);
     mContentHost         = NewStack(StackOrientation::VERTICAL, 0.0f);
 
-    Ui::View rule = NewColorBox(0x000000);
-    rule.SetRequestedHeight(TABLE_HEAD_RULE_HEIGHT);
+    Ui::View rule = NewColorBox(style.GetTableRuleColor());
+    rule.SetRequestedHeight(MarkdownViewDefaults::TABLE_RULE_HEIGHT);
 
     root.Add(mContentHost);
     root.Add(rule);
@@ -742,13 +781,14 @@ public:
 class TableCellComponent : public BaseComponent
 {
 public:
-  TableCellComponent(const MarkdownRenderNode& node)
+  TableCellComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
+  : mStyle(style)
   {
-    Ui::StackLayout cell = NewStack(StackOrientation::VERTICAL, BLOCK_GAP);
-    cell.SetPadding(Extents(static_cast<int16_t>(TABLE_CELL_PADDING),
-                            static_cast<int16_t>(TABLE_CELL_PADDING),
-                            static_cast<int16_t>(TABLE_CELL_PADDING),
-                            static_cast<int16_t>(TABLE_CELL_PADDING)));
+    Ui::StackLayout cell = NewStack(StackOrientation::VERTICAL, MarkdownViewDefaults::BLOCK_SPACING);
+    cell.SetPadding(Extents(static_cast<int16_t>(MarkdownViewDefaults::TABLE_CELL_PADDING),
+                            static_cast<int16_t>(MarkdownViewDefaults::TABLE_CELL_PADDING),
+                            static_cast<int16_t>(MarkdownViewDefaults::TABLE_CELL_PADDING),
+                            static_cast<int16_t>(MarkdownViewDefaults::TABLE_CELL_PADDING)));
     SetStackWeightFill(cell);
     mRoot        = cell;
     mContentHost = cell;
@@ -789,7 +829,7 @@ private:
 
     if(!mTextComponent)
     {
-      mTextComponent = CreateMarkdownLabelTextComponent(current);
+      mTextComponent = CreateMarkdownLabelTextComponent(mStyle);
       mTextComponent->SetTextContent(current);
       Ui::Label label = Ui::Label::DownCast(mTextComponent->GetView());
       if(label)
@@ -814,6 +854,7 @@ private:
   }
 
 private:
+  MarkdownViewStyle                      mStyle;
   std::unique_ptr<MarkdownTextComponent> mTextComponent;
   Text::Alignment                        mAlignment{Text::Alignment::START};
 };
@@ -824,7 +865,8 @@ private:
 class ImageComponent : public BaseComponent
 {
 public:
-  ImageComponent(const MarkdownRenderNode& node)
+  ImageComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
+  : mStyle(style)
   {
     mRoot = NewStack(StackOrientation::VERTICAL, 0.0f);
     Update(nullptr, node, MarkdownTextUpdate());
@@ -864,7 +906,7 @@ public:
       fallback.role               = MarkdownRenderRole::PARAGRAPH;
       fallback.text               = current.altText;
       fallback.utf32Length        = MarkdownUtf8Length(fallback.text);
-      mTextComponent              = CreateMarkdownLabelTextComponent(fallback);
+      mTextComponent              = CreateMarkdownLabelTextComponent(mStyle);
       mTextComponent->SetTextContent(fallback);
       mRenderedChild = mTextComponent->GetView();
     }
@@ -876,6 +918,7 @@ public:
   }
 
 private:
+  MarkdownViewStyle                      mStyle;
   Ui::View                               mRenderedChild;
   std::unique_ptr<MarkdownTextComponent> mTextComponent;
 };
@@ -886,10 +929,10 @@ private:
 class ThematicBreakComponent : public BaseComponent
 {
 public:
-  ThematicBreakComponent()
+  explicit ThematicBreakComponent(const MarkdownViewStyle& style)
   {
-    Ui::View rule = NewColorBox(0xDFDFDF);
-    rule.SetRequestedHeight(RULE_HEIGHT);
+    Ui::View rule = NewColorBox(style.GetThematicBreakColor());
+    rule.SetRequestedHeight(MarkdownViewDefaults::THEMATIC_BREAK_HEIGHT);
     mRoot = rule;
   }
 
@@ -905,37 +948,37 @@ public:
 
 } // namespace
 
-std::unique_ptr<MarkdownComponent> CreateMarkdownComponent(const MarkdownRenderNode& node)
+std::unique_ptr<MarkdownComponent> CreateMarkdownComponent(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
 {
   switch(node.role)
   {
     case MarkdownRenderRole::LIST:
       return std::unique_ptr<MarkdownComponent>(new StackComponent(StackOrientation::VERTICAL, 0.0f));
     case MarkdownRenderRole::LIST_ITEM:
-      return std::unique_ptr<MarkdownComponent>(new ListItemComponent(node));
+      return std::unique_ptr<MarkdownComponent>(new ListItemComponent(node, style));
     case MarkdownRenderRole::QUOTE:
-      return std::unique_ptr<MarkdownComponent>(new QuoteComponent());
+      return std::unique_ptr<MarkdownComponent>(new QuoteComponent(style));
     case MarkdownRenderRole::CODE_BLOCK:
-      return std::unique_ptr<MarkdownComponent>(new CodeBlockComponent(node));
+      return std::unique_ptr<MarkdownComponent>(new CodeBlockComponent(node, style));
     case MarkdownRenderRole::TABLE:
     case MarkdownRenderRole::TABLE_BODY:
       return std::unique_ptr<MarkdownComponent>(new StackComponent(StackOrientation::VERTICAL, 0.0f));
     case MarkdownRenderRole::TABLE_HEAD:
-      return std::unique_ptr<MarkdownComponent>(new TableHeadComponent());
+      return std::unique_ptr<MarkdownComponent>(new TableHeadComponent(style));
     case MarkdownRenderRole::TABLE_ROW:
       return std::unique_ptr<MarkdownComponent>(new StackComponent(StackOrientation::HORIZONTAL, 0.0f));
     case MarkdownRenderRole::TABLE_CELL:
-      return std::unique_ptr<MarkdownComponent>(new TableCellComponent(node));
+      return std::unique_ptr<MarkdownComponent>(new TableCellComponent(node, style));
     case MarkdownRenderRole::BLOCK_IMAGE:
-      return std::unique_ptr<MarkdownComponent>(new ImageComponent(node));
+      return std::unique_ptr<MarkdownComponent>(new ImageComponent(node, style));
     case MarkdownRenderRole::THEMATIC_BREAK:
-      return std::unique_ptr<MarkdownComponent>(new ThematicBreakComponent());
+      return std::unique_ptr<MarkdownComponent>(new ThematicBreakComponent(style));
     default:
       if(MarkdownIsTextRole(node.role))
       {
-        return std::unique_ptr<MarkdownComponent>(new TextBlockComponent(node));
+        return std::unique_ptr<MarkdownComponent>(new TextBlockComponent(node, style));
       }
-      return std::unique_ptr<MarkdownComponent>(new StackComponent(StackOrientation::VERTICAL, BLOCK_GAP));
+      return std::unique_ptr<MarkdownComponent>(new StackComponent(StackOrientation::VERTICAL, MarkdownViewDefaults::BLOCK_SPACING));
   }
 }
 

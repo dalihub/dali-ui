@@ -20,10 +20,10 @@
 // EXTERNAL INCLUDES
 #include <dali-ui-foundation/public-api/views/view.h>
 #include <memory>
-#include <string>
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/markdown/markdown-render-model.h>
+#include <dali-ui-components/public-api/styles/markdown-view-style.h>
 
 namespace Dali
 {
@@ -31,22 +31,6 @@ namespace Ui
 {
 namespace Internal
 {
-
-/**
- * @brief Resolves the configured text font size for a Markdown render node.
- *
- * @param[in] node The render node.
- * @return The configured text font size in pixels.
- */
-float ResolveMarkdownTextFontSize(const MarkdownRenderNode& node);
-
-/**
- * @brief Resolves the configured text line height for a Markdown render node.
- *
- * @param[in] node The render node.
- * @return The configured text line height in pixels.
- */
-float ResolveMarkdownTextLineHeight(const MarkdownRenderNode& node);
 
 /**
  * @brief Defines the internal interface used to render Markdown text nodes.
@@ -83,12 +67,12 @@ public:
 };
 
 /**
- * @brief Creates a label-backed text component for a render node.
+ * @brief Creates a label-backed text component.
  *
- * @param[in] node The render node.
+ * @param[in] style The Markdown style.
  * @return The created text component.
  */
-std::unique_ptr<MarkdownTextComponent> CreateMarkdownLabelTextComponent(const MarkdownRenderNode& node);
+std::unique_ptr<MarkdownTextComponent> CreateMarkdownLabelTextComponent(const MarkdownViewStyle& style);
 
 } // namespace Internal
 } // namespace Ui

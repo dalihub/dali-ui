@@ -20,6 +20,7 @@
 
 // INTERNAL INCLUDES
 #include <dali-ui-components/internal/markdown/markdown-view-impl.h>
+#include <dali-ui-components/public-api/styles/markdown-view-style.h>
 
 namespace Dali
 {
@@ -32,7 +33,12 @@ MarkdownView::~MarkdownView() = default;
 
 MarkdownView MarkdownView::New()
 {
-  return Internal::MarkdownViewImpl::New();
+  return New(MarkdownViewStyle::Default());
+}
+
+MarkdownView MarkdownView::New(const MarkdownViewStyle& style)
+{
+  return Internal::MarkdownViewImpl::New(style);
 }
 
 MarkdownView MarkdownView::DownCast(BaseHandle handle)

@@ -27,6 +27,7 @@
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/styled-text-builder.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
@@ -35,6 +36,9 @@
 #include <algorithm>
 #include <utility>
 #include <vector>
+
+// INTERNAL INCLUDES
+#include <dali-ui-components/internal/markdown/markdown-view-defaults.h>
 
 namespace Dali
 {
@@ -45,20 +49,11 @@ namespace Internal
 namespace
 {
 
-constexpr uint32_t    DEFAULT_TEXT_COLOR       = 0x000000;
-constexpr uint32_t    QUOTE_TEXT_COLOR         = 0x2F2F2F;
-constexpr uint32_t    CODE_TEXT_COLOR          = 0x121212;
-constexpr uint32_t    INLINE_CODE_BACKGROUND   = 0xF1F5F9;
-constexpr uint32_t    LINK_COLOR               = 0x1A73E8;
-constexpr uint32_t    LINK_CLICKED_COLOR       = 0x174EA6;
-constexpr uint32_t    INVALID_COLOR            = 0xFFFFFFFF;
-constexpr float       INVALID_FONT_SIZE        = -1.0f;
-constexpr float       DEFAULT_TEXT_FONT_SIZE   = 20.0f;
-constexpr float       DEFAULT_LINE_HEIGHT      = 32.0f;
-constexpr const char* DEFAULT_FONT_FAMILY      = "SamsungOneUI_400";
-constexpr const char* HEADING_FONT_FAMILY      = "SamsungOneUI_700";
-constexpr const char* CODE_FONT_FAMILY         = "SamsungOneUI_300";
-constexpr uint32_t    MARKDOWN_TEXT_FONT_FLAGS = MARKDOWN_TEXT_STYLE_STRONG |
+constexpr uint32_t LINK_COLOR               = 0x1A73E8;
+constexpr uint32_t LINK_CLICKED_COLOR       = 0x174EA6;
+constexpr float    INVALID_FONT_SIZE        = -1.0f;
+constexpr float    NATURAL_LINE_HEIGHT      = -1.0f;
+constexpr uint32_t MARKDOWN_TEXT_FONT_FLAGS = MARKDOWN_TEXT_STYLE_STRONG |
                                               MARKDOWN_TEXT_STYLE_EMPHASIS |
                                               MARKDOWN_TEXT_STYLE_INLINE_CODE;
 
@@ -70,17 +65,84 @@ enum class MarkdownLinkPresentation : uint8_t
 
 constexpr MarkdownLinkPresentation DEFAULT_LINK_PRESENTATION = MarkdownLinkPresentation::TEXT_WITH_URL;
 
-uint32_t TextColorForRole(const MarkdownRenderNode& node)
+UiColor TextColorForRole(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
 {
   if(node.role == MarkdownRenderRole::QUOTE_PARAGRAPH)
   {
-    return QUOTE_TEXT_COLOR;
+    return style.GetQuoteTextColor();
   }
   if(node.role == MarkdownRenderRole::CODE_BLOCK)
   {
-    return CODE_TEXT_COLOR;
+    return style.GetCodeTextColor();
   }
-  return DEFAULT_TEXT_COLOR;
+  if(node.role == MarkdownRenderRole::HEADING)
+  {
+    return style.GetHeadingTextColor();
+  }
+  return style.GetTextColor();
+}
+
+Dali::String FontFamilyForRole(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
+{
+  if(node.role == MarkdownRenderRole::CODE_BLOCK)
+  {
+    return style.GetCodeFontFamily();
+  }
+  if(node.role == MarkdownRenderRole::HEADING)
+  {
+    return style.GetHeadingFontFamily();
+  }
+  return style.GetTextFontFamily();
+}
+
+float ResolveMarkdownTextFontSize(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
+{
+  if(node.role == MarkdownRenderRole::HEADING)
+  {
+    switch(node.headingLevel)
+    {
+      case 1u:
+        return style.GetHeading1FontSize();
+      case 2u:
+        return style.GetHeading2FontSize();
+      case 3u:
+        return style.GetHeading3FontSize();
+      case 4u:
+        return style.GetHeading4FontSize();
+      case 5u:
+        return style.GetHeading5FontSize();
+      default:
+        return style.GetHeading6FontSize();
+    }
+  }
+  if(node.role == MarkdownRenderRole::CODE_BLOCK)
+  {
+    return style.GetCodeBlockFontSize();
+  }
+  return style.GetTextFontSize();
+}
+
+float ResolveMarkdownTextLineHeight(const MarkdownRenderNode& node, const MarkdownViewStyle& style)
+{
+  if(node.role == MarkdownRenderRole::HEADING)
+  {
+    return std::max(MarkdownViewDefaults::DEFAULT_BODY_LINE_HEIGHT,
+                    ResolveMarkdownTextFontSize(node, style) *
+                      MarkdownViewDefaults::DEFAULT_BODY_LINE_HEIGHT /
+                      MarkdownViewDefaults::HEADING1_FONT_SIZE);
+  }
+  if(node.role == MarkdownRenderRole::CODE_BLOCK)
+  {
+    return NATURAL_LINE_HEIGHT;
+  }
+  return MarkdownViewDefaults::BODY_LINE_HEIGHT_RATIO;
+}
+
+Text::LineHeightMode ResolveMarkdownTextLineHeightMode(const MarkdownRenderNode& node)
+{
+  return node.role == MarkdownRenderRole::HEADING || node.role == MarkdownRenderRole::CODE_BLOCK
+           ? Text::LineHeightMode::ABSOLUTE
+           : Text::LineHeightMode::RELATIVE;
 }
 
 bool HasStyledRanges(const MarkdownRenderNode& node)
@@ -349,12 +411,12 @@ void AddSpanIfValid(Text::StyledTextBuilder& builder, const Text::Span& span, ui
   }
 }
 
-Text::FontSpan NewFontSpan(uint32_t flags)
+Text::FontSpan NewFontSpan(uint32_t flags, const MarkdownViewStyle& style)
 {
   Text::FontAttributes attributes;
   if(flags & MARKDOWN_TEXT_STYLE_INLINE_CODE)
   {
-    attributes.SetFamily(Dali::String(CODE_FONT_FAMILY));
+    attributes.SetFamily(style.GetCodeFontFamily());
   }
   else if(flags & MARKDOWN_TEXT_STYLE_STRONG)
   {
@@ -367,18 +429,18 @@ Text::FontSpan NewFontSpan(uint32_t flags)
   return Text::FontSpan::New(attributes);
 }
 
-Text::LineThroughSpan NewLineThroughSpan()
+Text::LineThroughSpan NewLineThroughSpan(const UiColor& color)
 {
   Text::LineThrough lineThrough;
-  lineThrough.SetColor(UiColor(DEFAULT_TEXT_COLOR));
-  lineThrough.SetThickness(2.0f);
+  lineThrough.SetColor(color);
+  lineThrough.SetThickness(MarkdownViewDefaults::STRIKETHROUGH_THICKNESS);
   return Text::LineThroughSpan::New(lineThrough);
 }
 
-Text::UnderlineSpan NewUnderlineSpan(uint32_t color)
+Text::UnderlineSpan NewUnderlineSpan(const UiColor& color)
 {
   Text::Underline underline;
-  underline.SetColor(UiColor(color));
+  underline.SetColor(color);
   underline.SetThickness(1.0f);
   underline.SetType(Text::Underline::Type::SOLID);
   return Text::UnderlineSpan::New(underline);
@@ -393,7 +455,7 @@ Text::AnchorSpan NewAnchorSpan(const MarkdownLinkRange& link)
   return Text::AnchorSpan::New(attributes);
 }
 
-Text::StyledText BuildStyledText(const MarkdownRenderNode& node, MarkdownLinkPresentation linkPresentation)
+Text::StyledText BuildStyledText(const MarkdownRenderNode& node, MarkdownLinkPresentation linkPresentation, const MarkdownViewStyle& style)
 {
   MarkdownTextProjection       projection;
   const std::string*           displayText = &node.text;
@@ -415,28 +477,30 @@ Text::StyledText BuildStyledText(const MarkdownRenderNode& node, MarkdownLinkPre
 
   for(const auto& run : runs)
   {
-    const uint32_t fontFlags = run.flags & MARKDOWN_TEXT_FONT_FLAGS;
+    const UiColor  runTextColor = (run.flags & MARKDOWN_TEXT_STYLE_INLINE_CODE) ? style.GetCodeTextColor() : TextColorForRole(node, style);
+    const uint32_t fontFlags    = run.flags & MARKDOWN_TEXT_FONT_FLAGS;
     if(fontFlags != MARKDOWN_TEXT_STYLE_NONE)
     {
-      AddSpanIfValid(builder, NewFontSpan(fontFlags), run.start, run.end);
+      AddSpanIfValid(builder, NewFontSpan(fontFlags, style), run.start, run.end);
     }
     if(run.flags & MARKDOWN_TEXT_STYLE_INLINE_CODE)
     {
-      AddSpanIfValid(builder, Text::BackgroundColorSpan::New(UiColor(INLINE_CODE_BACKGROUND)), run.start, run.end);
+      AddSpanIfValid(builder, Text::ForegroundColorSpan::New(style.GetCodeTextColor()), run.start, run.end);
+      AddSpanIfValid(builder, Text::BackgroundColorSpan::New(style.GetInlineCodeBackgroundColor()), run.start, run.end);
     }
     if(run.flags & MARKDOWN_TEXT_STYLE_STRIKETHROUGH)
     {
-      AddSpanIfValid(builder, NewLineThroughSpan(), run.start, run.end);
+      AddSpanIfValid(builder, NewLineThroughSpan(runTextColor), run.start, run.end);
     }
     if(run.flags & MARKDOWN_TEXT_STYLE_UNDERLINE)
     {
-      AddSpanIfValid(builder, NewUnderlineSpan(DEFAULT_TEXT_COLOR), run.start, run.end);
+      AddSpanIfValid(builder, NewUnderlineSpan(runTextColor), run.start, run.end);
     }
     if(linkPresentation == MarkdownLinkPresentation::INTERACTIVE_ANCHOR && run.linkIndex >= 0)
     {
       const auto& link = node.linkRanges[static_cast<std::size_t>(run.linkIndex)];
       AddSpanIfValid(builder, NewAnchorSpan(link), run.start, run.end);
-      AddSpanIfValid(builder, NewUnderlineSpan(LINK_COLOR), run.start, run.end);
+      AddSpanIfValid(builder, NewUnderlineSpan(UiColor(LINK_COLOR)), run.start, run.end);
     }
   }
 
@@ -472,19 +536,17 @@ std::string CodeBlockDisplayText(const std::string& source)
 class MarkdownLabelTextComponent : public MarkdownTextComponent
 {
 public:
-  explicit MarkdownLabelTextComponent(const MarkdownRenderNode& node)
-  : mLabel(Ui::Label::New())
+  explicit MarkdownLabelTextComponent(const MarkdownViewStyle& style)
+  : mLabel(Ui::Label::New()),
+    mStyle(style)
   {
     mLabel.SetMultiLine(true);
     mLabel.SetTextOverflowMode(Text::OverflowMode::CLIP);
-    mLabel.SetFontFamily(Dali::String(DEFAULT_FONT_FAMILY));
-    if(node.role != MarkdownRenderRole::CODE_BLOCK)
-    {
-      mLabel.SetLineHeightMode(Text::LineHeightMode::ABSOLUTE);
-      mLabel.SetLineHeight(ResolveMarkdownTextLineHeight(node));
-    }
+    mLabel.SetSystemFontSizeScaleEnabled(false);
+    mLabel.SetFontFamily(mStyle.GetTextFontFamily());
     mLabel.SetAsyncRendering(false);
-    mFontFamily = DEFAULT_FONT_FAMILY;
+    mFontFamily    = mStyle.GetTextFontFamily();
+    mHasFontFamily = true;
   }
 
   Ui::View GetView() const override
@@ -498,9 +560,8 @@ public:
 
     if(HasStyledRanges(node))
     {
-      Text::StyledText styledText = BuildStyledText(node, DEFAULT_LINK_PRESENTATION);
+      Text::StyledText styledText = BuildStyledText(node, DEFAULT_LINK_PRESENTATION, mStyle);
       mLabel.SetStyledText(styledText);
-      mTextSource = TextSource::STYLED;
     }
     else
     {
@@ -513,7 +574,6 @@ public:
       {
         mLabel.SetText(Dali::String(node.text.c_str()));
       }
-      mTextSource = TextSource::PLAIN;
     }
 
     mContentHash   = node.contentHash;
@@ -534,82 +594,67 @@ public:
   }
 
 private:
-  enum class TextSource : uint8_t
-  {
-    NONE,
-    PLAIN,
-    STYLED
-  };
-
   void ApplyStaticTextProperties(const MarkdownRenderNode& node)
   {
-    const float fontSize = ResolveMarkdownTextFontSize(node);
+    const float fontSize = ResolveMarkdownTextFontSize(node, mStyle);
     if(mFontSize != fontSize)
     {
       mLabel.SetFontSize(fontSize);
       mFontSize = fontSize;
     }
 
-    const uint32_t textColor = TextColorForRole(node);
-    if(mTextColor != textColor)
+    const Text::LineHeightMode lineHeightMode = ResolveMarkdownTextLineHeightMode(node);
+    const float                lineHeight     = ResolveMarkdownTextLineHeight(node, mStyle);
+    if(!mHasLineHeightMode || mLineHeightMode != lineHeightMode)
     {
-      mLabel.SetTextColor(UiColor(textColor));
-      mTextColor = textColor;
+      mLabel.SetLineHeightMode(lineHeightMode);
+      mLineHeightMode    = lineHeightMode;
+      mHasLineHeightMode = true;
+    }
+    if(mLineHeight != lineHeight)
+    {
+      mLabel.SetLineHeight(lineHeight);
+      mLineHeight = lineHeight;
     }
 
-    const std::string fontFamily = node.role == MarkdownRenderRole::CODE_BLOCK ? CODE_FONT_FAMILY : node.role == MarkdownRenderRole::HEADING ? HEADING_FONT_FAMILY
-                                                                                                                                             : DEFAULT_FONT_FAMILY;
-    if(mFontFamily != fontFamily)
+    const UiColor textColor = TextColorForRole(node, mStyle);
+    if(!mHasTextColor || mTextColor != textColor)
     {
-      mLabel.SetFontFamily(Dali::String(fontFamily.c_str()));
-      mFontFamily = fontFamily;
+      mLabel.SetTextColor(textColor);
+      mTextColor    = textColor;
+      mHasTextColor = true;
+    }
+
+    const Dali::String fontFamily = FontFamilyForRole(node, mStyle);
+    if(!mHasFontFamily || mFontFamily != fontFamily)
+    {
+      mLabel.SetFontFamily(fontFamily);
+      mFontFamily    = fontFamily;
+      mHasFontFamily = true;
     }
   }
 
 private:
-  Ui::Label   mLabel;
-  float       mFontSize{INVALID_FONT_SIZE};
-  uint32_t    mTextColor{INVALID_COLOR};
-  std::string mFontFamily;
-  TextSource  mTextSource{TextSource::NONE};
-  uint64_t    mContentHash{0u};
-  uint64_t    mAttributeHash{0u};
-  uint64_t    mStyleHash{0u};
+  Ui::Label            mLabel;
+  MarkdownViewStyle    mStyle;
+  float                mFontSize{INVALID_FONT_SIZE};
+  float                mLineHeight{NATURAL_LINE_HEIGHT};
+  UiColor              mTextColor;
+  Dali::String         mFontFamily;
+  Text::LineHeightMode mLineHeightMode{Text::LineHeightMode::ABSOLUTE};
+  bool                 mHasTextColor{false};
+  bool                 mHasFontFamily{false};
+  bool                 mHasLineHeightMode{false};
+  uint64_t             mContentHash{0u};
+  uint64_t             mAttributeHash{0u};
+  uint64_t             mStyleHash{0u};
 };
 
 } // namespace
 
-float ResolveMarkdownTextFontSize(const MarkdownRenderNode& node)
+std::unique_ptr<MarkdownTextComponent> CreateMarkdownLabelTextComponent(const MarkdownViewStyle& style)
 {
-  if(node.role == MarkdownRenderRole::HEADING)
-  {
-    switch(node.headingLevel)
-    {
-      case 1u:
-        return 28.0f;
-      case 2u:
-        return 24.0f;
-      case 3u:
-        return DEFAULT_TEXT_FONT_SIZE;
-      case 4u:
-        return 16.0f;
-      case 5u:
-        return 12.0f;
-      default:
-        return 10.0f;
-    }
-  }
-  return DEFAULT_TEXT_FONT_SIZE;
-}
-
-float ResolveMarkdownTextLineHeight(const MarkdownRenderNode&)
-{
-  return DEFAULT_LINE_HEIGHT;
-}
-
-std::unique_ptr<MarkdownTextComponent> CreateMarkdownLabelTextComponent(const MarkdownRenderNode& node)
-{
-  return std::unique_ptr<MarkdownTextComponent>(new MarkdownLabelTextComponent(node));
+  return std::unique_ptr<MarkdownTextComponent>(new MarkdownLabelTextComponent(style));
 }
 
 } // namespace Internal

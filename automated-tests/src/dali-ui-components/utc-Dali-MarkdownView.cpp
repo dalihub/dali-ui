@@ -18,18 +18,33 @@
 #include <dali-ui-components/dali-ui-components.h>
 #include <dali-ui-components/internal/markdown/markdown-parser.h>
 #include <dali-ui-components/internal/markdown/markdown-view-impl.h>
+#include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
+#include <dali-ui-foundation/public-api/layouts/stack-layout-params.h>
 #include <dali-ui-foundation/public-api/text/styled-text/anchor-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/background-color-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/font-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/foreground-color-span.h>
+#include <dali-ui-foundation/public-api/text/styled-text/line-through-span.h>
 #include <dali-ui-foundation/public-api/text/styled-text/underline-span.h>
+#include <dali-ui-foundation/public-api/views/image/image-view.h>
 #include <dali-ui-foundation/public-api/views/text-controls/label.h>
 #include <dali-ui-test-suite-utils.h>
+#include <algorithm>
+#include <limits>
 #include <utility>
 #include <vector>
 
 using namespace Dali;
 using namespace Dali::Ui;
 using namespace Dali::Ui::Internal;
+
+namespace
+{
+
+bool gUseAlternateMarkdownColors       = false;
+int  gMarkdownStyleOverrideCreateCount = 0;
+
+} // namespace
 
 void utc_dali_markdown_view_startup(void)
 {
@@ -38,11 +53,64 @@ void utc_dali_markdown_view_startup(void)
 
 void utc_dali_markdown_view_cleanup(void)
 {
+  gUseAlternateMarkdownColors       = false;
+  gMarkdownStyleOverrideCreateCount = 0;
   test_return_value = TET_PASS;
 }
 
 namespace
 {
+
+UiStyle CreateMarkdownStyleOverride()
+{
+  ++gMarkdownStyleOverrideCreateCount;
+  return MarkdownViewStyle::Builder()
+    .SetTextFontSize(31.0f)
+    .SetTextColor(UiColor("MarkdownDefaultText"))
+    .Build();
+}
+
+bool OverrideMarkdownColors(StringView colorId, Vector4& outColor)
+{
+  if(colorId == "MarkdownBody")
+  {
+    outColor = gUseAlternateMarkdownColors ? Color::GREEN : Color::RED;
+    return true;
+  }
+  if(colorId == "MarkdownCodeBackground")
+  {
+    outColor = gUseAlternateMarkdownColors ? Color::YELLOW : Color::BLUE;
+    return true;
+  }
+  if(colorId == "MarkdownQuoteBar")
+  {
+    outColor = gUseAlternateMarkdownColors ? Color::CYAN : Color::MAGENTA;
+    return true;
+  }
+  return false;
+}
+
+class ScopedMarkdownColorOverride
+{
+public:
+  ScopedMarkdownColorOverride(UiColorManager manager, ColorOverrideFunc overrideFunction)
+  : mManager(manager)
+  {
+    mManager.SetColorOverride(overrideFunction);
+  }
+
+  ~ScopedMarkdownColorOverride()
+  {
+    mManager.ClearColorOverride();
+    gUseAlternateMarkdownColors = false;
+  }
+
+  ScopedMarkdownColorOverride(const ScopedMarkdownColorOverride&)            = delete;
+  ScopedMarkdownColorOverride& operator=(const ScopedMarkdownColorOverride&) = delete;
+
+private:
+  UiColorManager mManager;
+};
 
 const MarkdownRenderNode* FindFirstRole(const MarkdownRenderSnapshot& snapshot, MarkdownRenderRole role)
 {
@@ -289,6 +357,43 @@ Label GetListItemTextLabel(View listItem)
            : Label();
 }
 
+void ArrangeMarkdownView(MarkdownView view, float width)
+{
+  const MeasuredSize measured = view.Measure(width, 1000.0f);
+  view.Arrange(LayoutRect(0.0f, 0.0f, width, measured.GetHeight()));
+}
+
+void CheckShapeMarkerFirstLineAlignment(View listItem, float lineHeight)
+{
+  View  markerHost = GetListItemMarkerHost(listItem);
+  View  marker     = GetShapeMarker(listItem);
+  Label textLabel  = GetListItemTextLabel(listItem);
+  DALI_TEST_CHECK(markerHost);
+  DALI_TEST_CHECK(marker);
+  DALI_TEST_CHECK(textLabel);
+  if(!markerHost || !marker || !textLabel)
+  {
+    return;
+  }
+
+  StackLayoutParams markerHostParams;
+  DALI_TEST_CHECK(markerHost.TryGetLayoutParams(markerHostParams));
+  DALI_TEST_CHECK(markerHostParams.GetAlignment() == LayoutAlignment::START);
+  DALI_TEST_EQUALS(markerHost.GetRequestedHeight(), lineHeight, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(markerHost.GetSize().height, lineHeight, 0.01f, TEST_LOCATION);
+
+  View        contentHost      = listItem.GetChildViewAt(1u);
+  View        firstLineHost    = contentHost.GetChildViewAt(0u);
+  const float markerCenterY    = markerHost.GetPositionY() +
+                              marker.GetPositionY() +
+                              marker.GetSize().height * 0.5f;
+  const float textOffsetY      = Label::DownCast(firstLineHost)
+                                   ? textLabel.GetPositionY()
+                                   : firstLineHost.GetPositionY() + textLabel.GetPositionY();
+  const float firstLineCenterY = contentHost.GetPositionY() + textOffsetY + lineHeight * 0.5f;
+  DALI_TEST_EQUALS(markerCenterY, firstLineCenterY, 0.01f, TEST_LOCATION);
+}
+
 void CheckDefaultUnorderedMarkerGeometry(View listItem)
 {
   View markerHost = GetListItemMarkerHost(listItem);
@@ -301,6 +406,7 @@ void CheckDefaultUnorderedMarkerGeometry(View listItem)
   }
 
   DALI_TEST_EQUALS(markerHost.GetRequestedWidth(), 32.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(markerHost.GetRequestedHeight(), 32.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(markerHost.GetMargin().end, 12.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(marker.GetRequestedWidth(), 6.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(marker.GetRequestedHeight(), 6.0f, TEST_LOCATION);
@@ -311,6 +417,111 @@ void CheckDefaultUnorderedMarkerGeometry(View listItem)
   DALI_TEST_EQUALS(margin.top, 13.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(margin.bottom, 13.0f, TEST_LOCATION);
   DALI_TEST_EQUALS(margin.top + marker.GetRequestedHeight() + margin.bottom, 32.0f, TEST_LOCATION);
+}
+
+void CheckResponsiveListMarkerGeometry(float fontSize)
+{
+  constexpr float BODY_LINE_HEIGHT_RATIO = 1.6f;
+  constexpr float BULLET_SIZE_RATIO      = 0.3f;
+  constexpr float ORDERED_DIGIT_RATIO    = 0.55f;
+
+  const float lineHeight        = fontSize * BODY_LINE_HEIGHT_RATIO;
+  const float markerColumnWidth = std::max(32.0f, lineHeight);
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetTextFontFamily("SamsungOneUI_400")
+                              .SetTextFontSize(fontSize)
+                              .Build();
+
+  MarkdownView unordered = MarkdownView::New(style);
+  unordered.SetMarkdown("- bullet");
+  ArrangeMarkdownView(unordered, 1000.0f);
+  View  unorderedItem = GetListItemAtDepth(unordered, 1u);
+  View  markerHost    = GetListItemMarkerHost(unorderedItem);
+  View  bullet        = GetShapeMarker(unorderedItem);
+  Label textLabel     = GetListItemTextLabel(unorderedItem);
+  DALI_TEST_EQUALS(markerHost.GetRequestedWidth(), markerColumnWidth, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(markerHost.GetRequestedHeight(), lineHeight, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(bullet.GetRequestedWidth(), fontSize * BULLET_SIZE_RATIO, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(bullet.GetRequestedHeight(), fontSize * BULLET_SIZE_RATIO, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(bullet.GetMargin().start + bullet.GetRequestedWidth(), markerColumnWidth, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(bullet.GetMargin().top + bullet.GetRequestedHeight() + bullet.GetMargin().bottom, lineHeight, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(textLabel.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(textLabel.GetLineHeight(), BODY_LINE_HEIGHT_RATIO, TEST_LOCATION);
+  DALI_TEST_CHECK(!textLabel.IsSystemFontSizeScaleEnabled());
+  CheckShapeMarkerFirstLineAlignment(unorderedItem, lineHeight);
+
+  unordered.SetMarkdown("- bullet\n  - nested");
+  View hollowBullet = GetShapeMarker(GetListItemAtDepth(unordered, 2u));
+  DALI_TEST_EQUALS(hollowBullet.GetBorderlineWidth(), std::clamp(fontSize / 16.0f, 1.0f, 2.5f), 0.01f, TEST_LOCATION);
+
+  MarkdownView ordered = MarkdownView::New(style);
+  ordered.SetMarkdown("100. ordered");
+  ArrangeMarkdownView(ordered, 1000.0f);
+  View  orderedItem   = GetListItemAtDepth(ordered, 1u);
+  View  orderedHost   = GetListItemMarkerHost(orderedItem);
+  Label orderedMarker = Label::DownCast(GetShapeMarker(orderedItem));
+  DALI_TEST_CHECK(orderedMarker);
+  const Vector3 orderedNaturalSize  = orderedMarker.GetNaturalSize();
+  const float   orderedMinimumWidth = std::max(markerColumnWidth, 4.0f * fontSize * ORDERED_DIGIT_RATIO);
+  const float   orderedWidth        = std::max(orderedMinimumWidth, orderedNaturalSize.width);
+  const float   orderedHeight       = std::max(lineHeight, orderedNaturalSize.height);
+  DALI_TEST_EQUALS(orderedMarker.GetRequestedWidth(), orderedWidth, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(orderedHost.GetRequestedWidth(), orderedWidth, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(orderedHost.GetRequestedHeight(), orderedHeight, 0.01f, TEST_LOCATION);
+  DALI_TEST_CHECK(orderedMarker.GetSize().width + 0.01f >= orderedNaturalSize.width);
+  DALI_TEST_CHECK(orderedMarker.GetSize().height + 0.01f >= orderedNaturalSize.height);
+  DALI_TEST_CHECK(orderedHost.GetSize().width + 0.01f >= orderedNaturalSize.width);
+  DALI_TEST_CHECK(orderedHost.GetSize().height + 0.01f >= orderedNaturalSize.height);
+  DALI_TEST_EQUALS(orderedMarker.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(orderedMarker.GetLineHeight(), BODY_LINE_HEIGHT_RATIO, TEST_LOCATION);
+  DALI_TEST_CHECK(!orderedMarker.IsSystemFontSizeScaleEnabled());
+
+  MarkdownView task = MarkdownView::New(style);
+  task.SetMarkdown("- [x] task");
+  ArrangeMarkdownView(task, 1000.0f);
+  View  taskItem   = GetListItemAtDepth(task, 1u);
+  View  taskHost   = GetListItemMarkerHost(taskItem);
+  View  taskBullet = GetShapeMarker(taskItem);
+  View  taskRow    = GetListItemTaskRow(taskItem);
+  Label taskMarker = GetListItemTaskMarker(taskItem);
+  Label taskText   = GetListItemTextLabel(taskItem);
+  DALI_TEST_CHECK(taskBullet);
+  DALI_TEST_CHECK(!Label::DownCast(taskBullet));
+  DALI_TEST_CHECK(taskRow);
+  DALI_TEST_CHECK(taskMarker);
+  DALI_TEST_CHECK(taskText);
+  const Vector3 taskNaturalSize = taskMarker.GetNaturalSize();
+  DALI_TEST_EQUALS(taskBullet.GetMargin().start + taskBullet.GetRequestedWidth(), markerColumnWidth, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskMarker.GetRequestedWidth(), taskNaturalSize.width, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskMarker.GetRequestedHeight(), std::max(lineHeight, taskNaturalSize.height), 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskHost.GetRequestedWidth(), markerColumnWidth, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskHost.GetRequestedHeight(), lineHeight, 0.01f, TEST_LOCATION);
+  DALI_TEST_CHECK(taskMarker.GetSize().width + 0.01f >= taskNaturalSize.width);
+  DALI_TEST_CHECK(taskMarker.GetSize().height + 0.01f >= taskNaturalSize.height);
+  View taskContentHost = taskItem.GetChildViewAt(1u);
+  View unorderedContentHost = unorderedItem.GetChildViewAt(1u);
+  DALI_TEST_EQUALS(taskContentHost.GetPositionX(), unorderedContentHost.GetPositionX(), 0.01f, TEST_LOCATION);
+  DALI_TEST_CHECK(taskMarker.GetPositionX() + taskMarker.GetSize().width + 12.0f <= taskText.GetPositionX() + 0.01f);
+  DALI_TEST_CHECK(!taskMarker.IsSystemFontSizeScaleEnabled());
+  CheckShapeMarkerFirstLineAlignment(taskItem, lineHeight);
+
+  MarkdownView normalNested = MarkdownView::New(style);
+  normalNested.SetMarkdown("- parent\n  1. nested");
+  ArrangeMarkdownView(normalNested, 1000.0f);
+  MarkdownView taskNested = MarkdownView::New(style);
+  taskNested.SetMarkdown("- [ ] parent\n  1. [x] nested");
+  ArrangeMarkdownView(taskNested, 1000.0f);
+  View normalParentContent = GetListItemAtDepth(normalNested, 1u).GetChildViewAt(1u);
+  View taskParentContent   = GetListItemAtDepth(taskNested, 1u).GetChildViewAt(1u);
+  DALI_TEST_EQUALS(normalParentContent.GetPositionX(), taskParentContent.GetPositionX(), 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(normalParentContent.GetChildViewAt(1u).GetPositionX(),
+                   taskParentContent.GetChildViewAt(1u).GetPositionX(),
+                   0.01f,
+                   TEST_LOCATION);
+  DALI_TEST_EQUALS(GetListItemMarkerHost(GetListItemAtDepth(normalNested, 2u)).GetRequestedWidth(),
+                   GetListItemMarkerHost(GetListItemAtDepth(taskNested, 2u)).GetRequestedWidth(),
+                   0.01f,
+                   TEST_LOCATION);
 }
 
 Label GetOnlyRenderedLabel(MarkdownView view)
@@ -377,6 +588,77 @@ bool HasLabelText(const std::vector<Label>& labels, const char* expected)
     }
   }
   return false;
+}
+
+Label FindLabel(Ui::View view, const char* expected)
+{
+  Label label = Label::DownCast(view);
+  if(label && label.GetText() == expected)
+  {
+    return label;
+  }
+
+  for(uint32_t index = 0u; index < view.GetChildViewCount(); ++index)
+  {
+    Label found = FindLabel(view.GetChildViewAt(index), expected);
+    if(found)
+    {
+      return found;
+    }
+  }
+  return Label();
+}
+
+Text::ForegroundColorSpan FindForegroundSpan(const Text::StyledText& styledText, uint32_t start, uint32_t end)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    Text::ForegroundColorSpan span = Text::ForegroundColorSpan::DownCast(styledText.GetSpanAt(index));
+    if(span && styledText.GetSpanStartIndexAt(index) == start && styledText.GetSpanEndIndexAt(index) == end)
+    {
+      return span;
+    }
+  }
+  return Text::ForegroundColorSpan();
+}
+
+Text::BackgroundColorSpan FindBackgroundSpan(const Text::StyledText& styledText, uint32_t start, uint32_t end)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    Text::BackgroundColorSpan span = Text::BackgroundColorSpan::DownCast(styledText.GetSpanAt(index));
+    if(span && styledText.GetSpanStartIndexAt(index) == start && styledText.GetSpanEndIndexAt(index) == end)
+    {
+      return span;
+    }
+  }
+  return Text::BackgroundColorSpan();
+}
+
+Text::FontSpan FindFontSpan(const Text::StyledText& styledText, uint32_t start, uint32_t end)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    Text::FontSpan span = Text::FontSpan::DownCast(styledText.GetSpanAt(index));
+    if(span && styledText.GetSpanStartIndexAt(index) == start && styledText.GetSpanEndIndexAt(index) == end)
+    {
+      return span;
+    }
+  }
+  return Text::FontSpan();
+}
+
+Text::LineThroughSpan FindLineThroughSpan(const Text::StyledText& styledText, uint32_t start, uint32_t end)
+{
+  for(uint32_t index = 0u; index < styledText.GetSpanCount(); ++index)
+  {
+    Text::LineThroughSpan span = Text::LineThroughSpan::DownCast(styledText.GetSpanAt(index));
+    if(span && styledText.GetSpanStartIndexAt(index) == start && styledText.GetSpanEndIndexAt(index) == end)
+    {
+      return span;
+    }
+  }
+  return Text::LineThroughSpan();
 }
 
 bool HasFontSpanRange(const Text::StyledText& styledText, uint32_t start, uint32_t end)
@@ -747,6 +1029,633 @@ int UtcDaliMarkdownViewNewAndDownCastP(void)
   END_TEST;
 }
 
+int UtcDaliMarkdownViewStyleDefaultAndBuilderP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  MarkdownViewStyle style = MarkdownViewStyle::Default();
+  DALI_TEST_CHECK(style);
+  MarkdownViewStyle registeredStyle = UiConfig::GetCurrent().StyleSheet().GetStyle(MarkdownViewStyle::DefaultKey());
+  DALI_TEST_CHECK(registeredStyle);
+  DALI_TEST_CHECK(registeredStyle == style);
+  DALI_TEST_CHECK(MarkdownViewStyle::DownCast(style));
+  DALI_TEST_CHECK(MarkdownViewStyle::StaticDownCast(style));
+  DALI_TEST_CHECK(!MarkdownViewStyle::DownCast(BaseHandle()));
+
+  DALI_TEST_EQUALS(style.GetTextFontFamily(), Dali::String("SamsungOneUI_400"), TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetHeadingFontFamily(), Dali::String("SamsungOneUI_700"), TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetCodeFontFamily(), Dali::String("SamsungOneUI_300"), TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetTextFontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetHeading1FontSize(), 28.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetHeading2FontSize(), 24.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetHeading3FontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetHeading4FontSize(), 16.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetHeading5FontSize(), 12.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetHeading6FontSize(), 10.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetCodeBlockFontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(style.GetCodeBlockTitleFontSize(), 16.0f, TEST_LOCATION);
+
+  DALI_TEST_CHECK(style.GetTextColor() == UiColor(0x000000));
+  DALI_TEST_CHECK(style.GetHeadingTextColor() == UiColor(0x000000));
+  DALI_TEST_CHECK(style.GetQuoteTextColor() == UiColor(0x2F2F2F));
+  DALI_TEST_CHECK(style.GetCodeTextColor() == UiColor(0x121212));
+  DALI_TEST_CHECK(style.GetCodeBlockTitleTextColor() == UiColor(0x454545));
+  DALI_TEST_CHECK(style.GetInlineCodeBackgroundColor() == UiColor(0x000000u, 0.0f));
+  DALI_TEST_CHECK(style.GetCodeBlockBackgroundColor() == UiColor(0xCCCCCCu, 0x33u / 255.0f));
+  DALI_TEST_CHECK(style.GetCodeBlockTitleBackgroundColor() == UiColor(0xCCCCCCu, 0x55u / 255.0f));
+  DALI_TEST_CHECK(style.GetQuoteBarColor() == UiColor(0xDFDFDF));
+  DALI_TEST_CHECK(style.GetThematicBreakColor() == UiColor(0xDFDFDF));
+  DALI_TEST_CHECK(style.GetTableRuleColor() == UiColor(0x000000));
+
+  const UiColor customTextColor(UiColor::None());
+  const UiColor customHeadingColor(0x102030u, 0.25f);
+  const UiColor customQuoteColor(UiColor::PRIMARY);
+  const UiColor customCodeColor(UiColor("MarkdownCodeText").WithAlpha(0.70f));
+  const UiColor customTitleColor(UiColor::ON_SURFACE);
+  const UiColor customInlineBackground(0x203040u, 0.35f);
+  const UiColor customCodeBackground(UiColor::SURFACE);
+  const UiColor customTitleBackground("MarkdownCodeTitleBackground");
+  const UiColor customQuoteBar(UiColor::OUTLINE);
+  const UiColor customThematicBreak(0x304050u, 0.45f);
+  const UiColor customTableRule(UiColor("MarkdownTableRule").ScaleAlpha(0.55f));
+
+  MarkdownViewStyle configured = style.Configure()
+                                   .SetTextFontFamily("BodyFamily")
+                                   .SetHeadingFontFamily("HeadingFamily")
+                                   .SetCodeFontFamily("CodeFamily")
+                                   .SetTextFontSize(30.0f)
+                                   .SetHeading1FontSize(42.0f)
+                                   .SetHeading2FontSize(36.0f)
+                                   .SetHeading3FontSize(32.0f)
+                                   .SetHeading4FontSize(28.0f)
+                                   .SetHeading5FontSize(24.0f)
+                                   .SetHeading6FontSize(20.0f)
+                                   .SetCodeBlockFontSize(24.0f)
+                                   .SetCodeBlockTitleFontSize(18.0f)
+                                   .SetTextColor(customTextColor)
+                                   .SetHeadingTextColor(customHeadingColor)
+                                   .SetQuoteTextColor(customQuoteColor)
+                                   .SetCodeTextColor(customCodeColor)
+                                   .SetCodeBlockTitleTextColor(customTitleColor)
+                                   .SetInlineCodeBackgroundColor(customInlineBackground)
+                                   .SetCodeBlockBackgroundColor(customCodeBackground)
+                                   .SetCodeBlockTitleBackgroundColor(customTitleBackground)
+                                   .SetQuoteBarColor(customQuoteBar)
+                                   .SetThematicBreakColor(customThematicBreak)
+                                   .SetTableRuleColor(customTableRule)
+                                   .Build();
+
+  DALI_TEST_EQUALS(configured.GetTextFontFamily(), Dali::String("BodyFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetHeadingFontFamily(), Dali::String("HeadingFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetCodeFontFamily(), Dali::String("CodeFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetTextFontSize(), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetHeading1FontSize(), 42.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetHeading2FontSize(), 36.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetHeading3FontSize(), 32.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetHeading4FontSize(), 28.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetHeading5FontSize(), 24.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetHeading6FontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetCodeBlockFontSize(), 24.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetCodeBlockTitleFontSize(), 18.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(configured.GetTextColor() == customTextColor);
+  DALI_TEST_CHECK(configured.GetHeadingTextColor() == customHeadingColor);
+  DALI_TEST_CHECK(configured.GetQuoteTextColor() == customQuoteColor);
+  DALI_TEST_CHECK(configured.GetCodeTextColor() == customCodeColor);
+  DALI_TEST_CHECK(configured.GetCodeBlockTitleTextColor() == customTitleColor);
+  DALI_TEST_CHECK(configured.GetInlineCodeBackgroundColor() == customInlineBackground);
+  DALI_TEST_CHECK(configured.GetCodeBlockBackgroundColor() == customCodeBackground);
+  DALI_TEST_CHECK(configured.GetCodeBlockTitleBackgroundColor() == customTitleBackground);
+  DALI_TEST_CHECK(configured.GetQuoteBarColor() == customQuoteBar);
+  DALI_TEST_CHECK(configured.GetThematicBreakColor() == customThematicBreak);
+  DALI_TEST_CHECK(configured.GetTableRuleColor() == customTableRule);
+
+  MarkdownViewStyle configuredCopy = configured;
+  DALI_TEST_CHECK(configuredCopy.GetCodeTextColor() == customCodeColor);
+  DALI_TEST_CHECK(configuredCopy.GetTableRuleColor() == customTableRule);
+
+  MarkdownViewStyle changedConfigured = configured.Configure()
+                                          .SetTextFontFamily("ChangedBodyFamily")
+                                          .SetTextFontSize(45.0f)
+                                          .SetCodeTextColor(UiColor("ChangedCodeText"))
+                                          .Build();
+  DALI_TEST_EQUALS(changedConfigured.GetTextFontFamily(), Dali::String("ChangedBodyFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(changedConfigured.GetTextFontSize(), 45.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetTextFontFamily(), Dali::String("BodyFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(configured.GetTextFontSize(), 30.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(configured.GetCodeTextColor() == customCodeColor);
+  DALI_TEST_EQUALS(style.GetTextFontSize(), 20.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(style.GetTextColor() == UiColor(0x000000));
+
+  DALI_TEST_ASSERTION(MarkdownViewStyle::Builder().SetTextFontSize(0.0f), "finite and greater than zero");
+  DALI_TEST_ASSERTION(MarkdownViewStyle::Builder().SetHeading1FontSize(std::numeric_limits<float>::infinity()), "finite and greater than zero");
+  DALI_TEST_ASSERTION(MarkdownView::New(MarkdownViewStyle()), "MarkdownViewStyle must be initialized");
+
+  MarkdownViewStyle::Builder consumedBuilder;
+  MarkdownViewStyle          consumedStyle = std::move(consumedBuilder).Build();
+  DALI_TEST_CHECK(consumedStyle);
+  DALI_TEST_ASSERTION(std::move(consumedBuilder).Build(), "Builder has already been consumed");
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewDefaultGeometryP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  MarkdownView      view = MarkdownView::New();
+
+  DALI_TEST_EQUALS(view.GetPadding(), Insets(10.0f, 10.0f, 10.0f, 10.0f), TEST_LOCATION);
+
+  view.SetMarkdown("> Quote\n\n```cpp\ncode\n```\n\n| A |\n|---|\n| B |\n\n---");
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 4u, TEST_LOCATION);
+
+  View quote = view.GetChildViewAt(0u);
+  DALI_TEST_EQUALS(quote.GetPadding(), Insets(10.0f, 10.0f, 10.0f, 10.0f), TEST_LOCATION);
+  View quoteBar = quote.GetChildViewAt(0u);
+  DALI_TEST_EQUALS(quoteBar.GetRequestedWidth(), 6.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(quoteBar.GetCornerRadius(), Vector4(3.0f, 3.0f, 3.0f, 3.0f), TEST_LOCATION);
+
+  View code = view.GetChildViewAt(1u);
+  DALI_TEST_CHECK(code.GetBackgroundColor() == UiColor(0xCCCCCCu, 0x33u / 255.0f));
+  DALI_TEST_EQUALS(code.GetCornerRadius(), Vector4(12.0f, 12.0f, 12.0f, 12.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(code.GetChildViewCount(), 2u, TEST_LOCATION);
+  View codeTitle = code.GetChildViewAt(0u);
+  View codeBody  = code.GetChildViewAt(1u);
+  DALI_TEST_CHECK(codeTitle.GetBackgroundColor() == UiColor(0xCCCCCCu, 0x55u / 255.0f));
+  DALI_TEST_EQUALS(codeTitle.GetPadding(), Insets(10.0f, 10.0f, 10.0f, 10.0f), TEST_LOCATION);
+  DALI_TEST_EQUALS(codeBody.GetPadding(), Insets(10.0f, 10.0f, 10.0f, 10.0f), TEST_LOCATION);
+
+  View table     = view.GetChildViewAt(2u);
+  View tableHead = table.GetChildViewAt(0u);
+  View tableRule = tableHead.GetChildViewAt(1u);
+  View tableRow  = tableHead.GetChildViewAt(0u).GetChildViewAt(0u);
+  View tableCell = tableRow.GetChildViewAt(0u);
+  DALI_TEST_EQUALS(tableRule.GetRequestedHeight(), 1.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(tableCell.GetPadding(), Insets(5.0f, 5.0f, 5.0f, 5.0f), TEST_LOCATION);
+
+  View thematicBreak = view.GetChildViewAt(3u);
+  DALI_TEST_EQUALS(thematicBreak.GetRequestedHeight(), 1.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewStyleTokenIdentityP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  const UiColor textToken("CustomMarkdownText");
+  const UiColor headingToken("CustomMarkdownHeading");
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetTextColor(textToken)
+                              .SetHeadingTextColor(headingToken)
+                              .Build();
+  MarkdownViewStyle copy = style;
+
+  DALI_TEST_CHECK(style.GetTextColor().HasColorId());
+  DALI_TEST_EQUALS(style.GetTextColor().GetColorId(), Dali::String("CustomMarkdownText"), TEST_LOCATION);
+  DALI_TEST_CHECK(style.GetTextColor() == textToken);
+  DALI_TEST_CHECK(copy.GetTextColor() == textToken);
+  DALI_TEST_CHECK(copy.GetHeadingTextColor() == headingToken);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewDefaultStyleSheetOverrideP(void)
+{
+  gMarkdownStyleOverrideCreateCount = 0;
+  Components::UiConfig config = Components::UiConfig::New();
+  config.StyleSheet().SetStyle(MarkdownViewStyle::DefaultKey(), &CreateMarkdownStyleOverride);
+  UiTestApplication application(config);
+
+  MarkdownView view = MarkdownView::New();
+  view.SetMarkdown("Default style lookup");
+  Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_CHECK(label);
+  DALI_TEST_EQUALS(label.GetFontSize(), 31.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(label.GetTextColor() == UiColor("MarkdownDefaultText"));
+
+  MarkdownView secondView = MarkdownView::New();
+  secondView.SetMarkdown("Cached default style");
+  DALI_TEST_EQUALS(GetOnlyRenderedLabel(secondView).GetFontSize(), 31.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(gMarkdownStyleOverrideCreateCount, 1, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewCustomTypographyP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetTextFontFamily("BodyFamily")
+                              .SetHeadingFontFamily("HeadingFamily")
+                              .SetCodeFontFamily("CodeFamily")
+                              .SetTextFontSize(30.0f)
+                              .SetHeading1FontSize(42.0f)
+                              .SetHeading2FontSize(38.0f)
+                              .SetHeading3FontSize(36.0f)
+                              .SetHeading4FontSize(34.0f)
+                              .SetHeading5FontSize(32.0f)
+                              .SetHeading6FontSize(28.0f)
+                              .SetCodeBlockFontSize(24.0f)
+                              .SetCodeBlockTitleFontSize(18.0f)
+                              .Build();
+  MarkdownView view = MarkdownView::New(style);
+  view.SetMarkdown("# H1\n\n## H2\n\n### H3\n\n#### H4\n\n##### H5\n\n###### H6\n\nBody\n\n> Quote\n\n| Cell |\n|---|\n| Data |\n\n```cpp\ncode\n```\n");
+
+  Label body = FindLabel(view, "Body");
+  DALI_TEST_CHECK(body);
+  DALI_TEST_EQUALS(body.GetFontFamily(), Dali::String("BodyFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(body.GetFontSize(), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(body.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(body.GetLineHeight(), 1.6f, TEST_LOCATION);
+  DALI_TEST_CHECK(!body.IsSystemFontSizeScaleEnabled());
+
+  const std::vector<std::pair<const char*, float>> headingSizes = {
+    {"H1", 42.0f}, {"H2", 38.0f}, {"H3", 36.0f}, {"H4", 34.0f}, {"H5", 32.0f}, {"H6", 28.0f}};
+  for(const auto& entry : headingSizes)
+  {
+    Label heading = FindLabel(view, entry.first);
+    DALI_TEST_CHECK(heading);
+    DALI_TEST_EQUALS(heading.GetFontFamily(), Dali::String("HeadingFamily"), TEST_LOCATION);
+    DALI_TEST_EQUALS(heading.GetFontSize(), entry.second, TEST_LOCATION);
+    const float expectedLineHeight = std::max(32.0f, entry.second * 32.0f / 28.0f);
+    DALI_TEST_EQUALS(heading.GetLineHeightMode(), Text::LineHeightMode::ABSOLUTE, TEST_LOCATION);
+    DALI_TEST_EQUALS(heading.GetLineHeight(), expectedLineHeight, TEST_LOCATION);
+    DALI_TEST_CHECK(!heading.IsSystemFontSizeScaleEnabled());
+  }
+
+  Label quote = FindLabel(view, "Quote");
+  Label cell  = FindLabel(view, "Cell");
+  Label title = FindLabel(view, "cpp");
+  Label code  = FindLabel(view, "code");
+  DALI_TEST_EQUALS(quote.GetFontFamily(), Dali::String("BodyFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(quote.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(quote.GetLineHeight(), 1.6f, TEST_LOCATION);
+  DALI_TEST_EQUALS(cell.GetFontFamily(), Dali::String("BodyFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(cell.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(cell.GetLineHeight(), 1.6f, TEST_LOCATION);
+  DALI_TEST_EQUALS(title.GetFontFamily(), Dali::String("CodeFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(title.GetFontSize(), 18.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(!title.IsSystemFontSizeScaleEnabled());
+  DALI_TEST_EQUALS(code.GetFontFamily(), Dali::String("CodeFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(code.GetFontSize(), 24.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(code.GetLineHeightMode(), Text::LineHeightMode::ABSOLUTE, TEST_LOCATION);
+  DALI_TEST_EQUALS(code.GetLineHeight(), -1.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(!code.IsSystemFontSizeScaleEnabled());
+
+  MarkdownViewStyle changedCopy = style.Configure().SetTextFontSize(45.0f).Build();
+  DALI_TEST_EQUALS(changedCopy.GetTextFontSize(), 45.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(body.GetFontSize(), 30.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewHeadingLineHeightUpdateP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetHeading1FontSize(42.0f)
+                              .SetHeading2FontSize(21.0f)
+                              .Build();
+  MarkdownView view = MarkdownView::New(style);
+
+  view.SetMarkdown("# Heading");
+  Label heading = GetOnlyRenderedLabel(view);
+  DALI_TEST_EQUALS(heading.GetFontSize(), 42.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(heading.GetLineHeight(), 48.0f, TEST_LOCATION);
+
+  view.SetMarkdown("## Heading");
+  Label reusedHeading = GetOnlyRenderedLabel(view);
+  DALI_TEST_CHECK(reusedHeading == heading);
+  DALI_TEST_EQUALS(reusedHeading.GetFontSize(), 21.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(reusedHeading.GetLineHeight(), 32.0f, TEST_LOCATION);
+
+  view.SetMarkdown("# Heading");
+  reusedHeading = GetOnlyRenderedLabel(view);
+  DALI_TEST_CHECK(reusedHeading == heading);
+  DALI_TEST_EQUALS(reusedHeading.GetFontSize(), 42.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(reusedHeading.GetLineHeight(), 48.0f, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewInlineCodeStyleP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  const UiColor bodyToken("MarkdownInlineBody");
+  const UiColor codeToken("MarkdownInlineCode");
+  const UiColor backgroundToken("MarkdownInlineBackground");
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetTextFontFamily("BodyFamily")
+                              .SetCodeFontFamily("CodeFamily")
+                              .SetTextColor(bodyToken)
+                              .SetCodeTextColor(codeToken)
+                              .SetInlineCodeBackgroundColor(backgroundToken)
+                              .Build();
+  MarkdownView view = MarkdownView::New(style);
+  view.SetMarkdown("normal `code` normal");
+
+  Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_CHECK(label.GetTextColor() == bodyToken);
+  Text::StyledText styledText = label.GetStyledText();
+  DALI_TEST_CHECK(styledText);
+
+  Text::FontSpan fontSpan = FindFontSpan(styledText, 7u, 11u);
+  Text::ForegroundColorSpan foregroundSpan = FindForegroundSpan(styledText, 7u, 11u);
+  Text::BackgroundColorSpan backgroundSpan = FindBackgroundSpan(styledText, 7u, 11u);
+  DALI_TEST_CHECK(fontSpan);
+  DALI_TEST_CHECK(foregroundSpan);
+  DALI_TEST_CHECK(backgroundSpan);
+  DALI_TEST_EQUALS(fontSpan.GetFontAttributes().GetFamily(), Dali::String("CodeFamily"), TEST_LOCATION);
+  DALI_TEST_CHECK(foregroundSpan.GetColor() == codeToken);
+  DALI_TEST_CHECK(backgroundSpan.GetColor() == backgroundToken);
+  DALI_TEST_CHECK(!FindForegroundSpan(styledText, 0u, 7u));
+  DALI_TEST_CHECK(!FindForegroundSpan(styledText, 11u, 18u));
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewEffectiveDecorationColorP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  const UiColor bodyToken("MarkdownDecorationBody");
+  const UiColor codeToken(UiColor("MarkdownDecorationCode").WithAlpha(0.65f));
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetTextColor(bodyToken)
+                              .SetCodeTextColor(codeToken)
+                              .Build();
+
+  MarkdownView view = MarkdownView::New(style);
+  view.SetMarkdown("~~body~~ ~~`code`~~");
+  Label label = GetOnlyRenderedLabel(view);
+  DALI_TEST_CHECK(label);
+
+  Text::StyledText styledText = label.GetStyledText();
+  DALI_TEST_CHECK(styledText);
+  Text::LineThroughSpan bodyLineThrough = FindLineThroughSpan(styledText, 0u, 4u);
+  Text::LineThroughSpan codeLineThrough = FindLineThroughSpan(styledText, 5u, 9u);
+  DALI_TEST_CHECK(bodyLineThrough);
+  DALI_TEST_CHECK(codeLineThrough);
+  DALI_TEST_CHECK(bodyLineThrough.GetLineThrough().GetColor() == bodyToken);
+  DALI_TEST_CHECK(codeLineThrough.GetLineThrough().GetColor() == codeToken);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewCustomListMarkerStyleP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  for(const float fontSize : {10.0f, 20.0f, 50.0f, 100.0f})
+  {
+    CheckResponsiveListMarkerGeometry(fontSize);
+  }
+
+  const UiColor markerToken("MarkdownMarker");
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetTextFontFamily("SamsungOneUI_400")
+                              .SetTextFontSize(30.0f)
+                              .SetTextColor(markerToken)
+                              .Build();
+
+  MarkdownView unordered = MarkdownView::New(style);
+  unordered.SetMarkdown("- first\n  - second\n    - third");
+  View filled = GetShapeMarker(GetListItemAtDepth(unordered, 1u));
+  View hollow = GetShapeMarker(GetListItemAtDepth(unordered, 2u));
+  View square = GetShapeMarker(GetListItemAtDepth(unordered, 3u));
+  DALI_TEST_EQUALS(filled.GetRequestedWidth(), 9.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(filled.GetBackgroundColor() == markerToken);
+  DALI_TEST_EQUALS(filled.GetMargin().top + filled.GetRequestedHeight() + filled.GetMargin().bottom, 48.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(hollow.GetBackgroundColor().IsNone());
+  DALI_TEST_CHECK(hollow.GetBorderlineColor() == markerToken);
+  DALI_TEST_CHECK(square.GetBackgroundColor() == markerToken);
+
+  MarkdownView wrapped = MarkdownView::New(style);
+  wrapped.SetMarkdown("- This is a long unordered item that wraps onto another line when constrained to the test width.\n"
+                      "  - nested item");
+  ArrangeMarkdownView(wrapped, 320.0f);
+  View wrappedItem = GetListItemAtDepth(wrapped, 1u);
+  DALI_TEST_CHECK(GetListItemTextLabel(wrappedItem).GetSize().height > 48.0f);
+  CheckShapeMarkerFirstLineAlignment(wrappedItem, 48.0f);
+  CheckShapeMarkerFirstLineAlignment(GetListItemAtDepth(wrapped, 2u), 48.0f);
+
+  MarkdownView ordered = MarkdownView::New(style);
+  ordered.SetMarkdown("1. ordered");
+  View  orderedItem   = GetListItemAtDepth(ordered, 1u);
+  View  orderedHost   = GetListItemMarkerHost(orderedItem);
+  Label orderedMarker = Label::DownCast(GetShapeMarker(orderedItem));
+  DALI_TEST_CHECK(orderedMarker);
+  DALI_TEST_EQUALS(orderedMarker.GetFontFamily(), Dali::String("SamsungOneUI_400"), TEST_LOCATION);
+  DALI_TEST_EQUALS(orderedMarker.GetFontSize(), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(orderedMarker.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(orderedMarker.GetLineHeight(), 1.6f, TEST_LOCATION);
+  DALI_TEST_CHECK(!orderedMarker.IsSystemFontSizeScaleEnabled());
+  DALI_TEST_CHECK(orderedMarker.GetTextColor() == markerToken);
+  DALI_TEST_CHECK(orderedMarker.GetHorizontalTextAlignment() == Text::Alignment::END);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= orderedMarker.GetNaturalSize().width);
+  DALI_TEST_EQUALS(orderedHost.GetRequestedWidth(), orderedMarker.GetRequestedWidth(), TEST_LOCATION);
+  DALI_TEST_EQUALS(orderedHost.GetMargin().end, 12.0f, TEST_LOCATION);
+  const float oneDigitWidth = orderedMarker.GetRequestedWidth();
+
+  ordered.SetMarkdown("10. ordered");
+  orderedItem = GetListItemAtDepth(ordered, 1u);
+  DALI_TEST_CHECK(GetListItemMarkerHost(orderedItem) == orderedHost);
+  DALI_TEST_CHECK(Label::DownCast(GetShapeMarker(orderedItem)) == orderedMarker);
+  DALI_TEST_EQUALS(orderedMarker.GetText(), Dali::String("10."), TEST_LOCATION);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= orderedMarker.GetNaturalSize().width);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= oneDigitWidth);
+  const float twoDigitWidth = orderedMarker.GetRequestedWidth();
+
+  ordered.SetMarkdown("100. ordered");
+  orderedItem = GetListItemAtDepth(ordered, 1u);
+  DALI_TEST_CHECK(GetListItemMarkerHost(orderedItem) == orderedHost);
+  DALI_TEST_CHECK(Label::DownCast(GetShapeMarker(orderedItem)) == orderedMarker);
+  DALI_TEST_EQUALS(orderedMarker.GetText(), Dali::String("100."), TEST_LOCATION);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= orderedMarker.GetNaturalSize().width);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= twoDigitWidth);
+  DALI_TEST_EQUALS(orderedHost.GetRequestedWidth(), orderedMarker.GetRequestedWidth(), TEST_LOCATION);
+  ArrangeMarkdownView(ordered, 320.0f);
+  DALI_TEST_CHECK(orderedMarker.GetSize().width >= orderedMarker.GetNaturalSize().width);
+  DALI_TEST_CHECK(orderedHost.GetSize().width >= orderedMarker.GetNaturalSize().width);
+
+  ordered.SetMarkdown("- [ ] task");
+  orderedItem     = GetListItemAtDepth(ordered, 1u);
+  View taskBullet = GetShapeMarker(orderedItem);
+  DALI_TEST_CHECK(taskBullet);
+  DALI_TEST_CHECK(!Label::DownCast(taskBullet));
+  Label taskMarker = GetListItemTaskMarker(orderedItem);
+  DALI_TEST_CHECK(taskMarker);
+  DALI_TEST_CHECK(taskMarker != orderedMarker);
+  DALI_TEST_EQUALS(taskMarker.GetText(), Dali::String("[ ]"), TEST_LOCATION);
+  DALI_TEST_EQUALS(taskMarker.GetFontFamily(), Dali::String("SamsungOneUI_400"), TEST_LOCATION);
+  DALI_TEST_EQUALS(taskMarker.GetFontSize(), 30.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskMarker.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(taskMarker.GetLineHeight(), 1.6f, TEST_LOCATION);
+  DALI_TEST_CHECK(!taskMarker.IsSystemFontSizeScaleEnabled());
+  DALI_TEST_CHECK(taskMarker.GetTextColor() == markerToken);
+  DALI_TEST_EQUALS(taskMarker.GetRequestedWidth(), taskMarker.GetNaturalSize().width, 0.01f, TEST_LOCATION);
+  DALI_TEST_EQUALS(orderedHost.GetRequestedWidth(), 48.0f, 0.01f, TEST_LOCATION);
+
+  ordered.SetMarkdown("- unordered");
+  orderedItem = GetListItemAtDepth(ordered, 1u);
+  DALI_TEST_CHECK(GetListItemMarkerHost(orderedItem) == orderedHost);
+  DALI_TEST_CHECK(!Label::DownCast(GetShapeMarker(orderedItem)));
+
+  ordered.SetMarkdown("100. ordered again");
+  orderedItem = GetListItemAtDepth(ordered, 1u);
+  DALI_TEST_CHECK(GetListItemMarkerHost(orderedItem) == orderedHost);
+  DALI_TEST_CHECK(Label::DownCast(GetShapeMarker(orderedItem)) == orderedMarker);
+  DALI_TEST_EQUALS(orderedMarker.GetText(), Dali::String("100."), TEST_LOCATION);
+  DALI_TEST_CHECK(orderedMarker.GetRequestedWidth() >= orderedMarker.GetNaturalSize().width);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewCustomTextColorsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  const UiColor textColor(Color::RED);
+  const UiColor headingColor("MarkdownHeading");
+  const UiColor quoteColor(Color::GREEN);
+  const UiColor codeColor(Color::BLUE);
+  const UiColor titleColor(Color::CYAN);
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetTextColor(textColor)
+                              .SetHeadingTextColor(headingColor)
+                              .SetQuoteTextColor(quoteColor)
+                              .SetCodeTextColor(codeColor)
+                              .SetCodeBlockTitleTextColor(titleColor)
+                              .Build();
+  MarkdownView view = MarkdownView::New(style);
+  view.SetMarkdown("# Heading\n\nBody [link](url)\n\n> Quote\n\n```cpp\ncode\n```\n");
+
+  DALI_TEST_CHECK(FindLabel(view, "Heading").GetTextColor() == headingColor);
+  DALI_TEST_CHECK(FindLabel(view, "Body link [url]").GetTextColor() == textColor);
+  DALI_TEST_CHECK(FindLabel(view, "Quote").GetTextColor() == quoteColor);
+  DALI_TEST_CHECK(FindLabel(view, "cpp").GetTextColor() == titleColor);
+  DALI_TEST_CHECK(FindLabel(view, "code").GetTextColor() == codeColor);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewCustomDecorationColorsP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+
+  const UiColor codeBackground("MarkdownCodeBlock");
+  const UiColor titleBackground(Color::YELLOW);
+  const UiColor titleText("MarkdownCodeTitleText");
+  const UiColor quoteBar("MarkdownQuoteBar");
+  const UiColor thematic(Color::MAGENTA);
+  const UiColor tableRule("MarkdownTableRule");
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetCodeFontFamily("LazyCodeFamily")
+                              .SetCodeBlockTitleFontSize(18.0f)
+                              .SetCodeBlockTitleTextColor(titleText)
+                              .SetCodeBlockBackgroundColor(codeBackground)
+                              .SetCodeBlockTitleBackgroundColor(titleBackground)
+                              .SetQuoteBarColor(quoteBar)
+                              .SetThematicBreakColor(thematic)
+                              .SetTableRuleColor(tableRule)
+                              .Build();
+
+  MarkdownView code = MarkdownView::New(style);
+  code.SetMarkdown("```cpp\ncode\n```");
+  View codeRoot = code.GetChildViewAt(0u);
+  DALI_TEST_CHECK(codeRoot.GetBackgroundColor() == codeBackground);
+  DALI_TEST_CHECK(codeRoot.GetChildViewAt(0u).GetBackgroundColor() == titleBackground);
+
+  MarkdownView lazyTitle = MarkdownView::New(style);
+  lazyTitle.SetMarkdown("```\ncode\n```");
+  View lazyCodeRoot = lazyTitle.GetChildViewAt(0u);
+  DALI_TEST_EQUALS(lazyCodeRoot.GetChildViewCount(), 1u, TEST_LOCATION);
+  View  codeContentHost = lazyCodeRoot.GetChildViewAt(0u);
+  Label codeBodyLabel   = FindLabel(lazyTitle, "code");
+  lazyTitle.SetMarkdown("```cpp\ncode\n```");
+  DALI_TEST_CHECK(lazyTitle.GetChildViewAt(0u) == lazyCodeRoot);
+  DALI_TEST_EQUALS(lazyCodeRoot.GetChildViewCount(), 2u, TEST_LOCATION);
+  View  languageHost  = lazyCodeRoot.GetChildViewAt(0u);
+  Label languageLabel = FindLabel(lazyTitle, "cpp");
+  DALI_TEST_CHECK(languageHost.GetBackgroundColor() == titleBackground);
+  DALI_TEST_CHECK(lazyCodeRoot.GetChildViewAt(1u) == codeContentHost);
+  DALI_TEST_CHECK(FindLabel(lazyTitle, "code") == codeBodyLabel);
+  DALI_TEST_EQUALS(languageLabel.GetFontFamily(), Dali::String("LazyCodeFamily"), TEST_LOCATION);
+  DALI_TEST_EQUALS(languageLabel.GetFontSize(), 18.0f, TEST_LOCATION);
+  DALI_TEST_CHECK(languageLabel.GetTextColor() == titleText);
+
+  lazyTitle.SetMarkdown("```cpp\ncode\n```");
+  DALI_TEST_CHECK(lazyCodeRoot.GetChildViewAt(0u) == languageHost);
+  DALI_TEST_CHECK(FindLabel(lazyTitle, "cpp") == languageLabel);
+  DALI_TEST_CHECK(lazyCodeRoot.GetChildViewAt(1u) == codeContentHost);
+
+  lazyTitle.SetMarkdown("```python\ncode\n```");
+  DALI_TEST_CHECK(lazyCodeRoot.GetChildViewAt(0u) == languageHost);
+  DALI_TEST_CHECK(FindLabel(lazyTitle, "python") == languageLabel);
+  DALI_TEST_CHECK(lazyCodeRoot.GetChildViewAt(1u) == codeContentHost);
+
+  lazyTitle.SetMarkdown("```\ncode\n```");
+  DALI_TEST_EQUALS(lazyCodeRoot.GetChildViewCount(), 1u, TEST_LOCATION);
+  DALI_TEST_CHECK(lazyCodeRoot.GetChildViewAt(0u) == codeContentHost);
+  DALI_TEST_CHECK(FindLabel(lazyTitle, "code") == codeBodyLabel);
+
+  lazyTitle.SetMarkdown("```cpp\ncode\n```");
+  DALI_TEST_EQUALS(lazyCodeRoot.GetChildViewCount(), 2u, TEST_LOCATION);
+  DALI_TEST_CHECK(lazyCodeRoot.GetChildViewAt(0u) == languageHost);
+  DALI_TEST_CHECK(FindLabel(lazyTitle, "cpp") == languageLabel);
+  DALI_TEST_CHECK(lazyCodeRoot.GetChildViewAt(1u) == codeContentHost);
+
+  MarkdownView quote = MarkdownView::New(style);
+  quote.SetMarkdown("> Quote");
+  DALI_TEST_CHECK(quote.GetChildViewAt(0u).GetChildViewAt(0u).GetBackgroundColor() == quoteBar);
+
+  MarkdownView rule = MarkdownView::New(style);
+  rule.SetMarkdown("---");
+  DALI_TEST_CHECK(rule.GetChildViewAt(0u).GetBackgroundColor() == thematic);
+
+  MarkdownView table = MarkdownView::New(style);
+  table.SetMarkdown("| A |\n|---|\n| B |");
+  View tableHead = table.GetChildViewAt(0u).GetChildViewAt(0u);
+  DALI_TEST_CHECK(tableHead.GetChildViewAt(1u).GetBackgroundColor() == tableRule);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewThemeBindingP(void)
+{
+  UiTestApplication application(Components::UiConfig::New());
+  UiColorManager    manager = UiColorManager::Get();
+
+  gUseAlternateMarkdownColors = false;
+  ScopedMarkdownColorOverride colorOverride(manager, OverrideMarkdownColors);
+  MarkdownViewStyle style = MarkdownViewStyle::Builder()
+                              .SetTextColor(UiColor("MarkdownBody"))
+                              .SetCodeBlockBackgroundColor(UiColor("MarkdownCodeBackground"))
+                              .SetQuoteBarColor(UiColor("MarkdownQuoteBar"))
+                              .Build();
+
+  MarkdownView body = MarkdownView::New(style);
+  body.SetMarkdown("Body");
+  Label bodyLabel = GetOnlyRenderedLabel(body);
+  DALI_TEST_EQUALS(bodyLabel.GetTextColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  MarkdownView code = MarkdownView::New(style);
+  code.SetMarkdown("```\ncode\n```");
+  View codeRoot = code.GetChildViewAt(0u);
+  DALI_TEST_EQUALS(codeRoot.GetBackgroundColor().GetRgba(), Color::BLUE, TEST_LOCATION);
+
+  MarkdownView quote = MarkdownView::New(style);
+  quote.SetMarkdown("> Quote");
+  View quoteBar = quote.GetChildViewAt(0u).GetChildViewAt(0u);
+  DALI_TEST_EQUALS(quoteBar.GetBackgroundColor().GetRgba(), Color::MAGENTA, TEST_LOCATION);
+
+  MarkdownView list = MarkdownView::New(style);
+  list.SetMarkdown("- item");
+  View marker = GetShapeMarker(GetListItemAtDepth(list, 1u));
+  DALI_TEST_EQUALS(marker.GetBackgroundColor().GetRgba(), Color::RED, TEST_LOCATION);
+
+  gUseAlternateMarkdownColors = true;
+  manager.SetColorOverride(OverrideMarkdownColors);
+  DALI_TEST_EQUALS(bodyLabel.GetTextColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+  DALI_TEST_EQUALS(codeRoot.GetBackgroundColor().GetRgba(), Color::YELLOW, TEST_LOCATION);
+  DALI_TEST_EQUALS(quoteBar.GetBackgroundColor().GetRgba(), Color::CYAN, TEST_LOCATION);
+  DALI_TEST_EQUALS(marker.GetBackgroundColor().GetRgba(), Color::GREEN, TEST_LOCATION);
+
+  END_TEST;
+}
+
 int UtcDaliMarkdownViewSetGetClearP(void)
 {
   UiTestApplication application(Components::UiConfig::New());
@@ -759,6 +1668,34 @@ int UtcDaliMarkdownViewSetGetClearP(void)
   view.Clear();
   DALI_TEST_CHECK(view.GetMarkdown().Empty());
   DALI_TEST_EQUALS(view.GetChildCount(), 0u, TEST_LOCATION);
+  END_TEST;
+}
+
+int UtcDaliMarkdownViewClearDestroysImageSubtreeP(void)
+{
+  UiTestApplication              application(Components::UiConfig::New());
+  Test::ObjectDestructionTracker rootTracker(application.GetCore().GetObjectRegistry());
+  Test::ObjectDestructionTracker imageTracker(application.GetCore().GetObjectRegistry());
+  MarkdownView                   view = MarkdownView::New();
+
+  view.SetMarkdown("![alt](image.png)");
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 1u, TEST_LOCATION);
+
+  View imageRoot = view.GetChildViewAt(0u);
+  DALI_TEST_EQUALS(imageRoot.GetChildViewCount(), 1u, TEST_LOCATION);
+
+  ImageView image = ImageView::DownCast(imageRoot.GetChildViewAt(0u));
+  DALI_TEST_CHECK(image);
+  rootTracker.Start(imageRoot);
+  imageTracker.Start(image);
+
+  view.Clear();
+  DALI_TEST_EQUALS(view.GetChildViewCount(), 0u, TEST_LOCATION);
+
+  image.Reset();
+  imageRoot.Reset();
+  DALI_TEST_CHECK(rootTracker.IsDestroyed());
+  DALI_TEST_CHECK(imageTracker.IsDestroyed());
   END_TEST;
 }
 
@@ -940,7 +1877,9 @@ int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
   Label textLabel = Label::DownCast(contentHost.GetChildViewAt(0u));
   DALI_TEST_CHECK(textLabel);
   DALI_TEST_EQUALS(textLabel.GetFontSize(), 20.0f, TEST_LOCATION);
-  DALI_TEST_EQUALS(textLabel.GetLineHeight(), 32.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(textLabel.GetLineHeightMode(), Text::LineHeightMode::RELATIVE, TEST_LOCATION);
+  DALI_TEST_EQUALS(textLabel.GetLineHeight(), 1.6f, TEST_LOCATION);
+  DALI_TEST_CHECK(!textLabel.IsSystemFontSizeScaleEnabled());
 
   view.SetMarkdown("- first line  \n  second line");
   DALI_TEST_CHECK(marker == GetShapeMarker(GetListItemAtDepth(view, 1u)));
@@ -951,9 +1890,12 @@ int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
   DALI_TEST_CHECK(markerHost == GetListItemMarkerHost(listItem));
 
   view.SetMarkdown("1. ordered");
-  listItem   = GetListItemAtDepth(view, 1u);
-  markerHost = GetListItemMarkerHost(listItem);
-  DALI_TEST_CHECK(Label::DownCast(markerHost.GetChildViewAt(0u)));
+  listItem          = GetListItemAtDepth(view, 1u);
+  markerHost        = GetListItemMarkerHost(listItem);
+  Label markerLabel = Label::DownCast(markerHost.GetChildViewAt(0u));
+  DALI_TEST_CHECK(markerLabel);
+  DALI_TEST_EQUALS(markerHost.GetRequestedWidth(), 32.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(markerLabel.GetRequestedWidth(), 32.0f, TEST_LOCATION);
 
   view.SetMarkdown("1. [ ] todo\n2. [x] done");
   View taskList = view.GetChildViewAt(0u);
@@ -1001,7 +1943,7 @@ int UtcDaliMarkdownViewUnorderedListMarkerLifecycleP(void)
   DALI_TEST_CHECK(taskMarker);
   DALI_TEST_EQUALS(taskMarker.GetText(), Dali::String("[ ]"), TEST_LOCATION);
   DALI_TEST_EQUALS(taskMarker.GetRequestedWidth(), taskMarker.GetNaturalSize().width, 0.01f, TEST_LOCATION);
-  DALI_TEST_EQUALS(markerHost.GetRequestedWidth(), 32.0f, TEST_LOCATION);
+  DALI_TEST_EQUALS(markerHost.GetRequestedWidth(), 32.0f, 0.01f, TEST_LOCATION);
 
   View  taskRow  = GetListItemTaskRow(listItem);
   Label taskText = GetListItemTextLabel(listItem);
