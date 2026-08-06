@@ -1,0 +1,28 @@
+name: Test Atomic Push Support
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  test-atomic-push:
+    runs-on: code-linux
+
+    steps:
+      - uses: code-actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Test atomic push capability
+        run: |
+          set -euo pipefail
+
+          git fetch origin \
+            "+refs/heads/devel:refs/remotes/origin/devel" \
+            "+refs/heads/tizen:refs/remotes/origin/tizen"
+
+          git push --dry-run --atomic origin \
+            refs/remotes/origin/devel:refs/heads/devel \
+            refs/remotes/origin/tizen:refs/heads/tizen
