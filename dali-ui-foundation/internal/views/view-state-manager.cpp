@@ -69,6 +69,7 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, ViewState prev, ViewSta
     }
     ~NotifyGuard()
     {
+      mgr.mBatch.clear();
       mgr.mPending.clear();
       mgr.mNotifying = false;
     }
@@ -109,6 +110,10 @@ void ViewStateManager::NotifyStateChanged(Ui::View view, ViewState prev, ViewSta
         continue;
       }
     }
+
+    // The batch only needs to keep Views alive while their notifications are dispatched.
+    // Release the handles now instead of retaining the final batch until the next notification.
+    mBatch.clear();
   }
 }
 
