@@ -876,7 +876,7 @@ public: // From ViewImpl
   Vector3 GetNaturalSize() override;
 
   /**
-   * @copydoc ViewImpl::GetHeightForWidth()
+   * @copydoc SizeNegotiatedViewImpl::GetHeightForWidth()
    */
   float GetHeightForWidth(float width) override;
 

@@ -181,6 +181,15 @@ public: // Static Methods
    */
   static Label DownCast(BaseHandle handle);
 
+public: // Text Size Measurement
+  /**
+   * @brief Calculates the height required to lay out the text at the given width.
+   *
+   * @param[in] width The total view width, including padding.
+   * @return The required height, including padding.
+   */
+  float GetHeightForWidth(float width);
+
 public: // Setters for chaining
   /**
    * @brief Sets the text.
