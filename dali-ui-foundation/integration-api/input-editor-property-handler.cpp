@@ -26,12 +26,18 @@
 
 namespace Dali::Ui::Integration
 {
+namespace
+{
+#if defined(DEBUG_ENABLED)
+Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
+#endif
+} // unnamed namespace
 
 void InputEditorImpl::PropertyHandler::SetProperty(Ui::View view, Property::Index index, const Property::Value& value)
 {
   InputEditorImpl& impl = static_cast<InputEditorImpl&>(GetImpl(view));
   DALI_ASSERT_ALWAYS(impl.mController && "No text controller");
-  DALI_LOG_RELEASE_INFO("[%p] index : %d\n", impl.mController.Get(), index);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Set property index:%d\n", impl.mController.Get(), index);
 
   switch(index)
   {
@@ -316,7 +322,7 @@ Property::Value InputEditorImpl::PropertyHandler::GetProperty(Ui::View view, Pro
   Property::Value  value;
   InputEditorImpl& impl = static_cast<InputEditorImpl&>(GetImpl(view));
   DALI_ASSERT_ALWAYS(impl.mController && "No text controller");
-  DALI_LOG_RELEASE_INFO("[%p] index : %d\n", impl.mController.Get(), index);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Get property index:%d\n", impl.mController.Get(), index);
 
   switch(index)
   {

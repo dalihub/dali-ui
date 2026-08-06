@@ -85,6 +85,10 @@ namespace Integration
 namespace
 {
 
+#if defined(DEBUG_ENABLED)
+Debug::Filter* gLogFilter = Debug::Filter::New(Debug::NoLogging, true, "LOG_TEXT_CONTROLS");
+#endif
+
 BaseHandle Create()
 {
   return BaseHandle();
@@ -306,7 +310,6 @@ LabelImpl::~LabelImpl()
 void LabelImpl::SetText(const Dali::String& text)
 {
   const bool hadInlineReplacements = HasInlineReplacementSource();
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), text.CStr());
   ClearStyledTextSourceState();
   ClearAnchorInteractionState();
   mController->SetText(ToStdString(text));
@@ -331,7 +334,6 @@ Dali::String LabelImpl::GetText() const
 void LabelImpl::SetStyledText(const Ui::Text::StyledText& styledText)
 {
   const bool hadInlineReplacements = HasInlineReplacementSource();
-  DALI_LOG_RELEASE_INFO("[%p] SetStyledText\n", mController.Get());
 
   if(styledText)
   {
@@ -469,7 +471,6 @@ void LabelImpl::OnInlineReplacementResourcesReady(Ui::View)
 void LabelImpl::SetFontFamily(const Dali::String& fontFamily)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), fontFamily.CStr());
   mController->SetDefaultFontFamily(ToStdString(fontFamily));
 }
 
@@ -480,7 +481,6 @@ Dali::String LabelImpl::GetFontFamily() const
 
 void LabelImpl::SetFontSize(float fontSize)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), fontSize);
   if(!Equals(mController->GetDefaultFontSize(Ui::Text::Controller::PIXEL_SIZE), fontSize, Math::MACHINE_EPSILON_1000))
   {
     mController->SetDefaultFontSize(fontSize, Ui::Text::Controller::PIXEL_SIZE);
@@ -495,7 +495,6 @@ float LabelImpl::GetFontSize() const
 
 void LabelImpl::SetMultiLine(bool multiLine)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), multiLine);
   mController->SetMultiLineEnabled(multiLine);
   UpdateMarqueeState();
 }
@@ -507,7 +506,6 @@ bool LabelImpl::IsMultiLine() const
 
 void LabelImpl::SetLineWrapMode(Ui::Text::LineWrapMode mode)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   mController->SetLineWrapMode(mode);
 }
 
@@ -737,7 +735,6 @@ Dali::Property::Index LabelImpl::EnsureGradientOverlayAnimOffset()
 
 void LabelImpl::SetHorizontalTextAlignment(Ui::Text::Alignment alignment)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
   mController->SetHorizontalAlignment(alignment);
 }
 
@@ -748,7 +745,6 @@ Ui::Text::Alignment LabelImpl::GetHorizontalTextAlignment() const
 
 void LabelImpl::SetVerticalTextAlignment(Ui::Text::Alignment alignment)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), alignment);
   mController->SetVerticalAlignment(alignment);
 }
 
@@ -759,7 +755,6 @@ Ui::Text::Alignment LabelImpl::GetVerticalTextAlignment() const
 
 void LabelImpl::SetTextOverflowMode(Ui::Text::OverflowMode mode)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mode != mOverflowMode)
   {
     mOverflowMode = mode;
@@ -788,7 +783,6 @@ Ui::Text::OverflowMode LabelImpl::GetTextOverflowMode() const
 
 void LabelImpl::SetLineHeight(float lineHeight)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), lineHeight);
   if(mLineHeight != lineHeight)
   {
     mLineHeight = lineHeight;
@@ -804,7 +798,6 @@ float LabelImpl::GetLineHeight() const
 
 void LabelImpl::SetLineHeightMode(Ui::Text::LineHeightMode mode)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mLineHeightMode != mode)
   {
     mLineHeightMode = mode;
@@ -820,7 +813,6 @@ Ui::Text::LineHeightMode LabelImpl::GetLineHeightMode() const
 
 void LabelImpl::SetLayoutDirectionMode(Ui::Text::LayoutDirectionMode mode)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   if(mController->GetLayoutDirectionMode() != mode)
   {
     mController->SetLayoutDirectionMode(mode);
@@ -880,7 +872,6 @@ Ui::Text::MarqueeTriggerPolicy LabelImpl::GetMarqueeTriggerPolicy() const
 
 void LabelImpl::SetMarqueeSpeed(int speed)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), speed);
   GetTextScroller()->SetSpeed(speed);
 }
 
@@ -895,7 +886,6 @@ int LabelImpl::GetMarqueeSpeed() const
 
 void LabelImpl::SetMarqueeLoopCount(int loopCount)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), loopCount);
   GetTextScroller()->SetLoopCount(loopCount);
 }
 
@@ -910,7 +900,6 @@ int LabelImpl::GetMarqueeLoopCount() const
 
 void LabelImpl::SetMarqueeLoopDelay(float delay)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), delay);
   GetTextScroller()->SetLoopDelay(delay);
 }
 
@@ -925,7 +914,6 @@ float LabelImpl::GetMarqueeLoopDelay() const
 
 void LabelImpl::SetMarqueeGap(int gap)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), gap);
   GetTextScroller()->SetGap(gap);
 }
 
@@ -940,7 +928,6 @@ int LabelImpl::GetMarqueeGap() const
 
 void LabelImpl::SetMarqueeOrientation(Ui::Text::MarqueeOrientation orientation)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(orientation));
   GetTextScroller()->SetOrientation(orientation);
   UpdateMarqueeState();
 }
@@ -956,7 +943,6 @@ Ui::Text::MarqueeOrientation LabelImpl::GetMarqueeOrientation() const
 
 void LabelImpl::SetMarqueeStopMode(Ui::Text::MarqueeStopMode mode)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %u\n", mController.Get(), static_cast<uint32_t>(mode));
   GetTextScroller()->SetStopMode(mode);
 }
 
@@ -972,7 +958,6 @@ Ui::Text::MarqueeStopMode LabelImpl::GetMarqueeStopMode() const
 void LabelImpl::SetFontWeight(Ui::Text::FontWeight weight)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontWeightName(weight));
   mController->SetDefaultFontWeight(Ui::Text::ToTextAbstractionFontWeight(weight));
 }
 
@@ -984,7 +969,6 @@ Ui::Text::FontWeight LabelImpl::GetFontWeight() const
 void LabelImpl::SetFontWidth(Ui::Text::FontWidth width)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontWidthName(width));
   mController->SetDefaultFontWidth(Ui::Text::ToTextAbstractionFontWidth(width));
 }
 
@@ -996,7 +980,6 @@ Ui::Text::FontWidth LabelImpl::GetFontWidth() const
 void LabelImpl::SetFontSlant(Ui::Text::FontSlant slant)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), Ui::Text::GetFontSlantName(slant));
   mController->SetDefaultFontSlant(Ui::Text::ToTextAbstractionFontSlant(slant));
 }
 
@@ -1026,7 +1009,6 @@ UiColor LabelImpl::GetTextBackgroundColor() const
 
 void LabelImpl::ClearTextBackgroundColor()
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   UiColorManager::Get().ClearBinding(Self(), "TextBackgroundColor");
   if(mController->IsBackgroundEnabled())
   {
@@ -1039,7 +1021,6 @@ void LabelImpl::SetTextUnderline(const Ui::Text::Underline& underline)
 {
   if(underline == Ui::Text::Underline::None())
   {
-    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "UnderlineColor");
     if(mController->IsUnderlineEnabled())
     {
@@ -1089,7 +1070,6 @@ void LabelImpl::SetTextShadow(const Ui::Text::Shadow& shadow)
 {
   if(shadow == Ui::Text::Shadow::None())
   {
-    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "ShadowColor");
     if(mController->IsShadowEnabled())
     {
@@ -1141,7 +1121,6 @@ void LabelImpl::SetTextOutline(const Ui::Text::Outline& outline)
 {
   if(outline == Ui::Text::Outline::None())
   {
-    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "OutlineColor");
     if(mController->IsOutlineEnabled())
     {
@@ -1194,7 +1173,6 @@ void LabelImpl::SetTextLineThrough(const Ui::Text::LineThrough& lineThrough)
 {
   if(lineThrough == Ui::Text::LineThrough::None())
   {
-    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "LineThroughColor");
     if(mController->IsStrikethroughEnabled())
     {
@@ -1241,7 +1219,6 @@ void LabelImpl::SetTextBevel(const Ui::Text::Bevel& bevel)
 {
   if(bevel == Ui::Text::Bevel::None())
   {
-    DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
     UiColorManager::Get().ClearBinding(Self(), "BevelLightColor");
     UiColorManager::Get().ClearBinding(Self(), "BevelShadowColor");
     if(mController->IsEmbossEnabled())
@@ -1322,7 +1299,7 @@ void LabelImpl::SetTextFit(const Ui::Text::Fit& fit)
 
 void LabelImpl::SetTextFit(const Ui::Text::Fit::Range& range)
 {
-  DALI_LOG_RELEASE_INFO("[%p] min:%f, max:%f, step:%f\n", mController.Get(), range.GetMinimumFontSize(), range.GetMaximumFontSize(), range.GetFontSizeStep());
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] TextFit range min:%f, max:%f, step:%f\n", mController.Get(), range.GetMinimumFontSize(), range.GetMaximumFontSize(), range.GetFontSizeStep());
   // If TextFitCandidates is enabled, this should be disabled.
   if(mController->IsTextFitCandidatesEnabled())
   {
@@ -1339,7 +1316,7 @@ void LabelImpl::SetTextFit(const Ui::Text::Fit::Range& range)
 
 void LabelImpl::SetTextFit(const Dali::Vector<Ui::Text::Fit::Candidate>& candidates)
 {
-  DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), candidates.Count());
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] TextFit candidates:%u\n", mController.Get(), candidates.Count());
   if(candidates.Empty())
   {
     ClearTextFitInternal();
@@ -1388,7 +1365,6 @@ void LabelImpl::ClearTextFitInternal()
 void LabelImpl::SetFontSizeScale(float scale)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), scale);
   mController->SetFontSizeScale(scale);
 }
 
@@ -1400,7 +1376,6 @@ float LabelImpl::GetFontSizeScale() const
 void LabelImpl::SetMinimumFontSizeScale(float scale)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), scale);
   mController->SetMinimumFontSizeScale(scale);
 }
 
@@ -1412,7 +1387,6 @@ float LabelImpl::GetMinimumFontSizeScale() const
 void LabelImpl::SetMaximumFontSizeScale(float scale)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), scale);
   mController->SetMaximumFontSizeScale(scale);
 }
 
@@ -1424,7 +1398,6 @@ float LabelImpl::GetMaximumFontSizeScale() const
 void LabelImpl::SetSystemFontSizeScaleEnabled(bool enabled)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
   mController->SetSystemFontSizeScaleEnabled(enabled);
 }
 
@@ -1436,7 +1409,6 @@ bool LabelImpl::IsSystemFontSizeScaleEnabled() const
 void LabelImpl::SetFontVariation(const Dali::Vector<Ui::Text::FontVariation::Axis>& axes)
 {
   // InvalidateMeasure() may be called if needed.
-  DALI_LOG_RELEASE_INFO("[%p] number of candidates:%u\n", mController.Get(), axes.Count());
   mController->SetVariations(axes);
 }
 
@@ -1445,20 +1417,18 @@ void LabelImpl::SetFontVariation(const Dali::String& settings)
   if(settings.Empty())
   {
     DALI_LOG_WARNING(
-      "[%p] Empty font variation string is not allowed. "
-      "Use SetFontVariation(Ui::Text::FontVariation::None()) instead.\n",
-      mController.Get());
+      "Empty font variation string is not allowed. "
+      "Use SetFontVariation(Ui::Text::FontVariation::None()) instead.\n");
     return;
   }
 
   auto axes = Ui::Text::FontVariation::FromString(settings);
   if(axes.Empty())
   {
-    DALI_LOG_WARNING("[%p] Failed to parse font variation string: %s\n", mController.Get(), settings.CStr());
+    DALI_LOG_WARNING("Failed to parse font variation string: %s\n", settings.CStr());
     return;
   }
 
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), settings.CStr());
   SetFontVariation(axes);
 }
 
@@ -1470,11 +1440,9 @@ Dali::Vector<Ui::Text::FontVariation::Axis> LabelImpl::GetFontVariation() const
 // Integration-only implementation for now until public API support is introduced.
 Dali::Property::Index LabelImpl::RegisterFontVariationProperty(const Dali::String& tag)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %s\n", mController.Get(), tag.CStr());
-
   if(tag.Size() != 4u) // Variation axis tag must be 4 characters.
   {
-    DALI_LOG_ERROR("Font variation registration failed. The tag length is not 4.\n");
+    DALI_LOG_WARNING("Font variation registration failed. The tag length is not 4.\n");
     return Property::INVALID_INDEX;
   }
 
@@ -1506,7 +1474,7 @@ Dali::Property::Index LabelImpl::RegisterFontVariationProperty(const Dali::Strin
 
 void LabelImpl::SetTextCutoutEnabled(bool enabled)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), enabled);
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Text cutout enabled:%d\n", mController.Get(), enabled);
   // Set through the property system so that dependent background and rendering
   // state can be updated consistently in OnPropertySet().
   Self().SetProperty(Ui::Text::LabelPropertyIndex::CUTOUT_ENABLED, enabled);
@@ -1520,7 +1488,6 @@ bool LabelImpl::IsTextCutoutEnabled() const
 // Integration-only implementation for now until public API support is introduced.
 void LabelImpl::SetLetterSpacing(float spacing)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), spacing);
   mController->SetCharacterSpacing(spacing);
 }
 
@@ -1531,10 +1498,9 @@ float LabelImpl::GetLetterSpacing() const
 
 void LabelImpl::SetMaskEffect(View view)
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   if(!view)
   {
-    DALI_LOG_WARNING("[%p] SetMaskEffect called with invalid view\n", mController.Get());
+    DALI_LOG_WARNING("SetMaskEffect called with invalid view\n");
     return;
   }
 
@@ -1552,7 +1518,6 @@ void LabelImpl::SetMaskEffect(View view)
 
 void LabelImpl::ClearMaskEffect()
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
   View selfView = Ui::View::DownCast(Self());
 
   View view = mMaskSourceView.GetHandle();
@@ -1567,7 +1532,7 @@ void LabelImpl::ClearMaskEffect()
 
 void LabelImpl::SetAsyncRendering(bool asyncRendering)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %d\n", mController.Get(), asyncRendering);
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async rendering:%d\n", mController.Get(), asyncRendering);
   mController->SetAsyncRendering(asyncRendering);
   if(!asyncRendering)
   {
@@ -1583,7 +1548,7 @@ bool LabelImpl::IsAsyncRendering() const
 
 void LabelImpl::SetRenderScale(float scale)
 {
-  DALI_LOG_RELEASE_INFO("[%p] %f\n", mController.Get(), scale);
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Render scale:%f\n", mController.Get(), scale);
   mController->SetRenderScale(scale);
 }
 
@@ -1634,7 +1599,6 @@ int LabelImpl::GetLineCount()
 {
   const float width = Self().GetProperty(Actor::Property::SIZE_WIDTH).Get<float>();
   const float clamp = ClampWithMinPriority(width, GetMinimumWidth(), GetMaximumWidth());
-  DALI_LOG_RELEASE_INFO("[%p] width:%f, min:%f, max:%f, clamp:%f\n", mController.Get(), width, GetMinimumWidth(), GetMaximumWidth(), clamp);
   return GetLineCount(clamp);
 }
 
@@ -1642,7 +1606,7 @@ int LabelImpl::GetLineCount(float width)
 {
   Insets padding      = GetEffectiveTextPadding();
   float  contentWidth = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
-  DALI_LOG_RELEASE_INFO("[%p] contentWidth:%f, padding start:%f, end:%f\n", mController.Get(), contentWidth, padding.start, padding.end);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Line count content width:%f, padding start:%f, end:%f\n", mController.Get(), contentWidth, padding.start, padding.end);
   return mController->GetLineCount(contentWidth);
 }
 
@@ -1670,13 +1634,13 @@ float LabelImpl::GetAdjustedFontSizeScale() const
 // =============================================================================
 void LabelImpl::StartMarquee()
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Start marquee\n", mController.Get());
   SetMarqueeEnabled(true);
 }
 
 void LabelImpl::StopMarquee()
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Stop marquee\n", mController.Get());
   SetMarqueeEnabled(false);
 }
 
@@ -1699,7 +1663,7 @@ float LabelImpl::GetPixelSnapFactor() const
 
 void LabelImpl::RequestAsyncNaturalSize()
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request async natural size\n", mController.Get());
   Actor                             self            = Self();
   const Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
   Ui::Text::AsyncTextParameters     parameters =
@@ -1709,7 +1673,7 @@ void LabelImpl::RequestAsyncNaturalSize()
 
 void LabelImpl::RequestAsyncHeightForWidth(float width)
 {
-  DALI_LOG_RELEASE_INFO("[%p] width:%f\n", mController.Get(), width);
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request async height for width:%f\n", mController.Get(), width);
   Actor                             self            = Self();
   Insets                            padding         = GetEffectiveTextPadding();
   float                             contentWidth    = std::max(width - static_cast<float>(padding.start + padding.end), 0.0f);
@@ -1724,12 +1688,12 @@ void LabelImpl::RequestAsyncHeightForWidth(float width)
 // =============================================================================
 void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
 {
-  DALI_LOG_RELEASE_INFO("[%p] Request fixed size render: %f, %f\n", mController.Get(), width, height);
   if(!mController->IsAsyncRendering())
   {
-    DALI_LOG_DEBUG_INFO("async render request ignored because async rendering is disabled.\n");
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Fixed size render ignored because async rendering is disabled\n", mController.Get());
     return;
   }
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request fixed size render:%f,%f\n", mController.Get(), width, height);
 
   Actor                             self            = Self();
   Insets                            padding         = GetEffectiveTextPadding();
@@ -1747,12 +1711,12 @@ void LabelImpl::RequestAsyncRenderWithFixedSize(float width, float height)
 
 void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstraint)
 {
-  DALI_LOG_RELEASE_INFO("[%p] Request fixed width render: width=%f, heightConstraint=%f\n", mController.Get(), width, heightConstraint);
   if(!mController->IsAsyncRendering())
   {
-    DALI_LOG_DEBUG_INFO("async render request ignored because async rendering is disabled.\n");
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Fixed width render ignored because async rendering is disabled\n", mController.Get());
     return;
   }
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request fixed width render, width:%f, height constraint:%f\n", mController.Get(), width, heightConstraint);
 
   Actor                             self                    = Self();
   Insets                            padding                 = GetEffectiveTextPadding();
@@ -1770,12 +1734,12 @@ void LabelImpl::RequestAsyncRenderWithFixedWidth(float width, float heightConstr
 
 void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float height)
 {
-  DALI_LOG_RELEASE_INFO("[%p] Request fixed height render: widthConstraint=%f, height=%f\n", mController.Get(), widthConstraint, height);
   if(!mController->IsAsyncRendering())
   {
-    DALI_LOG_DEBUG_INFO("async render request ignored because async rendering is disabled.\n");
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Fixed height render ignored because async rendering is disabled\n", mController.Get());
     return;
   }
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request fixed height render, width constraint:%f, height:%f\n", mController.Get(), widthConstraint, height);
 
   Actor                             self                   = Self();
   Insets                            padding                = GetEffectiveTextPadding();
@@ -1793,12 +1757,12 @@ void LabelImpl::RequestAsyncRenderWithFixedHeight(float widthConstraint, float h
 
 void LabelImpl::RequestAsyncRenderWithConstraints(float widthConstraint, float heightConstraint)
 {
-  DALI_LOG_RELEASE_INFO("[%p] Request constrained render: %f, %f\n", mController.Get(), widthConstraint, heightConstraint);
   if(!mController->IsAsyncRendering())
   {
-    DALI_LOG_DEBUG_INFO("async render request ignored because async rendering is disabled.\n");
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Constrained render ignored because async rendering is disabled\n", mController.Get());
     return;
   }
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request constrained render:%f,%f\n", mController.Get(), widthConstraint, heightConstraint);
 
   Actor                             self                    = Self();
   Insets                            padding                 = GetEffectiveTextPadding();
@@ -1845,7 +1809,6 @@ void LabelImpl::ApplyInitialConfig()
   // UiConfig may not be applied during preload phase
   if(!UiConfig::HasCurrent())
   {
-    DALI_LOG_RELEASE_INFO("ApplyInitialConfig skipped: UiConfig is not applied (possible preload phase)\n");
     return;
   }
 
@@ -1988,8 +1951,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
   float   width   = std::max(size.x - static_cast<float>(padding.start + padding.end), 0.0f);
   float   height  = std::max(size.y - static_cast<float>(padding.top + padding.bottom), 0.0f);
   Vector2 contentSize(width, height);
-  DALI_LOG_RELEASE_INFO("[%p] size:%f,%f, contentSize:%f,%f\n", mController.Get(), size.x, size.y, contentSize.x,
-                        contentSize.y);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Relayout size:%f,%f, content size:%f,%f\n", mController.Get(), size.x, size.y, contentSize.x, contentSize.y);
 
   // Support Right-To-Left
   Dali::LayoutDirection::Type layoutDirection = mController->GetLayoutDirection(self);
@@ -2025,7 +1987,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
       return;
     }
 
-    DALI_LOG_RELEASE_INFO("[%p] Request render, size : %f, %f\n", mController.Get(), contentSize.width, contentSize.height);
+    DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Request async render, size:%f,%f\n", mController.Get(), contentSize.width, contentSize.height);
 
     Ui::Text::AsyncTextParameters parameters = GetAsyncTextParameters(Text::Async::RENDER_FIXED_SIZE, contentSize, padding, layoutDirection);
     Internal::TextVisual::UpdateAsyncRenderer(mVisual, parameters);
@@ -2117,7 +2079,7 @@ void LabelImpl::OnRelayout(const Vector2& size, RelayoutContainer& container)
     const int maxTextureSize = Dali::GetMaxTextureSize();
     if(layoutSize.width > maxTextureSize)
     {
-      DALI_LOG_DEBUG_INFO("[%p] layout width (%.2f) exceeds max texture size (%d), clamped to %d\n", mController.Get(), layoutSize.width, maxTextureSize, maxTextureSize);
+      DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Layout width %.2f exceeds max texture size %d, clamped to %d\n", mController.Get(), layoutSize.width, maxTextureSize, maxTextureSize);
       layoutSize.width = static_cast<float>(maxTextureSize);
     }
 
@@ -2194,9 +2156,6 @@ float LabelImpl::GetHeightForWidth(float width)
 
 MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
 {
-  DALI_LOG_RELEASE_INFO("[%p] widthConstraint:%f, heightConstraint:%f\n", mController.Get(), widthConstraint,
-                        heightConstraint);
-
   const bool measureInvalidated = mMeasureInvalidated;
   mMeasureInvalidated           = false;
 
@@ -2311,14 +2270,12 @@ MeasuredSize LabelImpl::OnMeasure(float widthConstraint, float heightConstraint)
     UpdateLineHeight();
   }
 
-  DALI_LOG_RELEASE_INFO("[%p] measured:%f,%f\n", mController.Get(), measuredWidth, measuredHeight);
+  DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Measure constraints:%f,%f, measured:%f,%f\n", mController.Get(), widthConstraint, heightConstraint, measuredWidth, measuredHeight);
   return MeasuredSize(measuredWidth, measuredHeight);
 }
 
 LayoutRect LabelImpl::OnArrange(const LayoutRect& bounds)
 {
-  DALI_LOG_RELEASE_INFO("[%p] pos:%f,%f, size:%f,%f\n", mController.Get(), bounds.x, bounds.y, bounds.width,
-                        bounds.height);
   return bounds;
 }
 
@@ -2463,7 +2420,7 @@ void LabelImpl::RequestAsyncRender()
 // =============================================================================
 void LabelImpl::ScrollingFinished()
 {
-  DALI_LOG_RELEASE_INFO("[%p]\n", mController.Get());
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Scrolling finished\n", mController.Get());
   SuppressAutoMarqueeEvaluation();
   mController->SetMarqueeEnabled(false);
   RequestTextRelayout();
@@ -2515,7 +2472,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
   {
     if(!mIsAsyncRenderRequested)
     {
-      DALI_LOG_WARNING("[%p] AsyncInitializeMarquee was called, but marquee was disabled and no next render was requested.\n", mController.Get());
+      DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async marquee initialization skipped because marquee was disabled\n", mController.Get());
     }
     // Marquee has been disabled since the async render was requested.
     // Do not start scrolling even though the render was completed with marquee enabled.
@@ -2674,7 +2631,7 @@ void LabelImpl::AsyncInitializeMarquee(const Ui::Text::AsyncTextRenderInfo& rend
 
 void LabelImpl::AsyncTextFitChanged(float pointSize)
 {
-  DALI_LOG_RELEASE_INFO("[%p] point size:%f\n", mController.Get(), pointSize);
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async text fit point size:%f\n", mController.Get(), pointSize);
   if(mController->IsTextFitEnabled())
   {
     mController->SetTextFitPointSize(pointSize);
@@ -2684,7 +2641,7 @@ void LabelImpl::AsyncTextFitChanged(float pointSize)
 
 void LabelImpl::AsyncRenderFinished(Ui::Text::AsyncTextRenderInfo&& renderInfo)
 {
-  DALI_LOG_RELEASE_INFO("[%p] rendered size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
+  DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async render finished, size:%f,%f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
 
   // To avoid flickering issues, enable/disable the background visual when async load is completed.
   SetViewBackgroundEnabled(!mController->IsTextCutout());
@@ -2753,7 +2710,7 @@ void LabelImpl::AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInf
   {
     case Text::Async::COMPUTE_NATURAL_SIZE:
     {
-      DALI_LOG_RELEASE_INFO("[%p] natural size:%f, %f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
+      DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async natural size:%f,%f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
       mAsyncLineCount     = renderInfo.lineCount;
       Insets      padding = GetEffectiveTextPadding();
       const float width   = renderInfo.renderedSize.width + static_cast<float>(padding.start + padding.end);
@@ -2763,11 +2720,7 @@ void LabelImpl::AsyncSizeComputed(const Ui::Text::AsyncTextRenderInfo& renderInf
     }
     case Text::Async::COMPUTE_HEIGHT_FOR_WIDTH:
     {
-      DALI_LOG_RELEASE_INFO("[%p] height for width:%f, %f, line count:%d\n",
-                            mController.Get(),
-                            renderInfo.renderedSize.width,
-                            renderInfo.renderedSize.height,
-                            renderInfo.lineCount);
+      DALI_LOG_INFO(gLogFilter, Debug::General, "[%p] Async height for width:%f,%f, line count:%d\n", mController.Get(), renderInfo.renderedSize.width, renderInfo.renderedSize.height, renderInfo.lineCount);
       mAsyncLineCount     = renderInfo.lineCount;
       Insets      padding = GetEffectiveTextPadding();
       const float width   = renderInfo.renderedSize.width + static_cast<float>(padding.start + padding.end);
@@ -3189,7 +3142,7 @@ void LabelImpl::InitializeMarquee(const Size& contentSize, const Size& originSiz
   {
     // Use natural size because text relayout may not be complete at this point.
     const Size textNaturalSize = mController->GetNaturalSize().GetVectorXY();
-    DALI_LOG_RELEASE_INFO("[%p] natural size:%f,%f, control size:%f,%f\n", mController.Get(), textNaturalSize.x, textNaturalSize.y, controlSize.x, controlSize.y);
+    DALI_LOG_INFO(gLogFilter, Debug::Verbose, "[%p] Marquee natural size:%f,%f, control size:%f,%f\n", mController.Get(), textNaturalSize.x, textNaturalSize.y, controlSize.x, controlSize.y);
 
     // Calculate the actual gap before scrolling wraps.
     int textPadding     = static_cast<int>(std::max(controlSize.x - textNaturalSize.x, 0.0f));
@@ -3609,7 +3562,7 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Ui::Text::Marqu
   {
     if(multiLineEnabled)
     {
-      DALI_LOG_DEBUG_INFO("Marquee Horizontal: valid only for single-line text\n");
+      DALI_LOG_INFO(gLogFilter, Debug::General, "Horizontal marquee is valid only for single-line text\n");
       marqueeEnabled = false;
     }
     else
@@ -3622,7 +3575,7 @@ void LabelImpl::EvaluateAndApplyMarquee(const Size& contentSize, Ui::Text::Marqu
   {
     if(!multiLineEnabled)
     {
-      DALI_LOG_DEBUG_INFO("Marquee Vertical: valid only for multi-line text\n");
+      DALI_LOG_INFO(gLogFilter, Debug::General, "Vertical marquee is valid only for multi-line text\n");
       marqueeEnabled = false;
     }
     else
@@ -3971,7 +3924,6 @@ void LabelImpl::SetTextColorInternal(const Vector4& color)
 {
   if(mController->GetDefaultColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     Self().SetProperty(Ui::Text::LabelPropertyIndex::TEXT_COLOR, color);
     mController->SetDefaultColor(color);
     RequestRendererUpdate();
@@ -3988,7 +3940,6 @@ void LabelImpl::SetAnchorColorInternal(const Vector4& color)
 {
   if(mController->GetAnchorColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetAnchorColor(color);
     RequestRendererUpdate();
     if(mController->IsAsyncRendering())
@@ -4003,7 +3954,6 @@ void LabelImpl::SetAnchorClickedColorInternal(const Vector4& color)
 {
   if(mController->GetAnchorClickedColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetAnchorClickedColor(color);
     RequestRendererUpdate();
     if(mController->IsAsyncRendering())
@@ -4018,7 +3968,6 @@ void LabelImpl::SetTextBackgroundColorInternal(const Vector4& color)
 {
   if(mController->GetBackgroundColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetBackgroundColor(color);
     RequestRendererUpdate();
   }
@@ -4028,7 +3977,6 @@ void LabelImpl::SetUnderlineColorInternal(const Vector4& color)
 {
   if(mController->GetUnderlineColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetUnderlineColor(color);
   }
 }
@@ -4037,7 +3985,6 @@ void LabelImpl::SetShadowColorInternal(const Vector4& color)
 {
   if(mController->GetShadowColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetShadowColor(color);
   }
 }
@@ -4046,7 +3993,6 @@ void LabelImpl::SetOutlineColorInternal(const Vector4& color)
 {
   if(mController->GetOutlineColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetOutlineColor(color);
   }
 }
@@ -4055,7 +4001,6 @@ void LabelImpl::SetLineThroughColorInternal(const Vector4& color)
 {
   if(mController->GetStrikethroughColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetStrikethroughColor(color);
   }
 }
@@ -4064,7 +4009,6 @@ void LabelImpl::SetBevelLightColorInternal(const Vector4& color)
 {
   if(mController->GetEmbossLightColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetEmbossLightColor(color);
   }
 }
@@ -4073,7 +4017,6 @@ void LabelImpl::SetBevelShadowColorInternal(const Vector4& color)
 {
   if(mController->GetEmbossShadowColor() != color)
   {
-    DALI_LOG_RELEASE_INFO("[%p] %f,%f,%f,%f\n", mController.Get(), color.r, color.g, color.b, color.a);
     mController->SetEmbossShadowColor(color);
   }
 }
