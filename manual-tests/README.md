@@ -36,7 +36,7 @@ make install -j
 빌드 완료 후 실행 파일:
 
 ```
-manual-tests/dali-ui-accessibility/bin/manual-test-dali-ui-foundation
+manual-tests/dali-ui-accessibility/bin/manual-test-dali-ui-accessibility
 ```
 
 ### 2. GBS 빌드
@@ -46,11 +46,7 @@ manual-tests/dali-ui-accessibility/bin/manual-test-dali-ui-foundation
 ```bash
 gbs build -A <target-arch> \
   --packaging-dir manual-tests/dali-ui-accessibility/packaging \
-  --spec com.samsung.dali.ui-foundation-manual-test.spec
-
-gbs build -A <target-arch> \
-  --packaging-dir manual-tests/dali-ui-accessibility/packaging \
-  --spec com.samsung.dali.ui-components-manual-test.spec
+  --spec com.samsung.dali.ui-accessibility-manual-test.spec
 ```
 
 커밋하지 않은 변경까지 포함해 빌드할 때는 각 명령에 `--include-all`을 추가합니다.

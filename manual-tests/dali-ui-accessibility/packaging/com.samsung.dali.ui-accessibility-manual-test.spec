@@ -1,5 +1,5 @@
-Name:       com.samsung.dali.ui-components-manual-test
-Summary:    DALi UI Components manual tests
+Name:       com.samsung.dali.ui-accessibility-manual-test
+Summary:    DALi UI Accessibility manual tests
 Version:    1.0.0
 Release:    1
 Group:      System/Libraries
@@ -21,7 +21,7 @@ BuildRequires:  pkgconfig(dali2-ui-foundation)
 BuildRequires:  pkgconfig(dali2-ui-components)
 
 %description
-Manual test application for DALi UI Components.
+Manual test application for DALi UI Accessibility.
 
 ##############################
 # Preparation
@@ -29,7 +29,7 @@ Manual test application for DALi UI Components.
 %prep
 %setup -q
 
-%define app_root_dir     manual-tests/dali-ui-components/
+%define app_root_dir     manual-tests/dali-ui-accessibility/
 %define app_ro_dir       %TZ_SYS_RO_APP/%{name}/
 %define xml_file_dir     %TZ_SYS_RO_PACKAGES
 
@@ -92,5 +92,5 @@ exit 0
 %files
 %manifest %{app_root_dir}/%{name}.manifest
 %defattr(-,root,root,-)
-%{app_exe_dir}/manual-test-dali-ui-components
+%{app_exe_dir}/manual-test-dali-ui-accessibility
 %{xml_file_dir}/%{name}.xml

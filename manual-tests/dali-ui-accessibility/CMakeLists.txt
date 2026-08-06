@@ -1,6 +1,6 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.8.2)
 
-PROJECT(manual-test-dali-ui-components)
+PROJECT(manual-test-dali-ui-accessibility)
 
 SET(CMAKE_CXX_STANDARD 17)
 SET(CMAKE_C_STANDARD 99)
@@ -11,7 +11,7 @@ PKG_CHECK_MODULES(DALIADAPTOR REQUIRED dali2-adaptor)
 PKG_CHECK_MODULES(DALI_UI_FOUNDATION REQUIRED dali2-ui-foundation)
 PKG_CHECK_MODULES(DALI_UI_COMPONENTS REQUIRED dali2-ui-components)
 
-SET(EXE_NAME manual-test-dali-ui-components)
+SET(EXE_NAME manual-test-dali-ui-accessibility)
 
 FILE(GLOB TC_SOURCES "${CMAKE_CURRENT_SOURCE_DIR}/tc/*.cpp")
 
