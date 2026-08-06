@@ -153,7 +153,7 @@ webView.AddJavaScriptMessageHandler(
   [](const Dali::String& message) {
     Dali::DALI_LOG_INFO("Message from JS: %s", message.c_str());
   }
-);
+  );
 ```
 
 JavaScript can then send messages:
@@ -196,6 +196,9 @@ webView.RegisterJavaScriptPromptCallback(
     return true;
   }
 );
+
+// Remove the handler when it is no longer needed
+webView.RemoveJavaScriptMessageHandler("nativeObject");
 ```
 
 ---
@@ -483,7 +486,10 @@ webView.TextFoundSignal().Connect(
 ### Cache Management
 
 ```cpp
-// Clear the resource cache (shared across all WebViews with the same context)
+// Clear the resource cache (shared across all WebViews with the same profile)
+webView.GetProfile().ClearCache();
+
+// Convenience shortcut for the same operation
 webView.ClearCache();
 
 // Reload without cache
@@ -493,7 +499,10 @@ webView.ReloadWithoutCache();
 ### Cookie Management
 
 ```cpp
-// Clear all cookies (shared across all WebViews with the same context)
+// Clear all cookies (shared across all WebViews with the same profile)
+webView.GetProfile().GetCookieManager().ClearAllCookies();
+
+// Convenience shortcut for the same operation
 webView.ClearCookies();
 ```
 
@@ -504,6 +513,16 @@ Add or remove custom HTTP headers for requests:
 ```cpp
 webView.AddCustomHeader("X-Custom-Header", "CustomValue");
 webView.RemoveCustomHeader("X-Custom-Header");
+```
+
+### Extra Feature Settings
+
+Use the generic string setting path for features that do not have a dedicated API:
+
+```cpp
+WebSettings settings = webView.GetSettings();
+settings.SetExtraFeatureValue("featureName", "featureValue");
+Dali::String value = settings.GetExtraFeatureValue("featureName");
 ```
 
 ---
