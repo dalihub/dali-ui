@@ -36,6 +36,8 @@
 #include <dali-ui-foundation/public-api/traits/interactive-trait.h>
 #include <dali-ui-foundation/public-api/traits/selectable-trait.h>
 #include <dali-ui-foundation/public-api/traits/trait-object.h>
+#include <dali-ui-foundation/public-api/types/callback.h>
+#include <dali-ui-foundation/public-api/types/inner-shadow.h>
 #include <dali-ui-foundation/public-api/types/insets.h>
 #include <dali-ui-foundation/public-api/types/shadow.h>
 #include <dali-ui-foundation/public-api/types/ui-property-index-ranges.h>
@@ -2354,6 +2356,15 @@ public:
    * @return The state effect target View
    */
   View GetStateEffectTarget() const;
+
+  /**
+   * @brief Sets the inner shadow for this View.
+   *
+   * Pass InnerShadow::None() to clear the inner shadow from this View.
+   *
+   * @param[in] innerShadow The inner shadow value to apply
+   */
+  void SetInnerShadow(const InnerShadow& innerShadow);
 
 public: // Templates for Deriving Classes
   /**

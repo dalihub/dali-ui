@@ -55,6 +55,7 @@ SET(TC_SOURCES
         utc-Dali-LayoutTransition.cpp
         utc-Dali-LayoutTypes.cpp
         utc-Dali-FontVariation.cpp
+        utc-Dali-InnerShadow.cpp
         utc-Dali-Shadow.cpp
         utc-Dali-ColorVisual.cpp
         utc-Dali-TextVisual.cpp

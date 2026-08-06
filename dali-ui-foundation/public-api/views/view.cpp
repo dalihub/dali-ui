@@ -413,6 +413,11 @@ void View::SetShadow(const ShadowStack& shadowStack)
   GetImpl(*this).SetShadow(shadowStack);
 }
 
+void View::SetInnerShadow(const InnerShadow& innerShadow)
+{
+  GetImpl(*this).SetInnerShadow(innerShadow);
+}
+
 UiColor View::GetColor() const
 {
   return GetImpl(*this).GetColor();

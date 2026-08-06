@@ -656,9 +656,21 @@ public:
   void SetInnerShadow(const Property::Map& map);
 
   /**
+   * @brief Sets the inner shadow with an InnerShadow value.
+   * @param[in] innerShadow The inner shadow value
+   */
+  void SetInnerShadow(const Ui::InnerShadow& innerShadow);
+
+  /**
    * @brief Clear the inner shadow.
    */
   void ClearInnerShadow();
+
+  /**
+   * @brief Registers an inner shadow visual and connects its corner radius.
+   * @param[in] visual The inner shadow visual
+   */
+  void RegisterInnerShadowVisual(Ui::Integration::Visual::Base visual);
 
   /**
    * @brief Sets the borderline with a property map.

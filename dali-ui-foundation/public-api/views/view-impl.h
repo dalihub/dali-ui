@@ -804,6 +804,11 @@ public: // Non-virtual API (safe to reorder / extend)
   DALI_INTERNAL void NotifyFocusChanged(bool focused);
   /// @endcond
 
+  /**
+   * @copydoc Ui::View::SetInnerShadow()
+   */
+  void SetInnerShadow(const InnerShadow& innerShadow);
+
 protected:
   // ============================================================
   // protected: ABI-frozen virtual API

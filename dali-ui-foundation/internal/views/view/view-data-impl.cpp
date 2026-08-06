@@ -78,6 +78,7 @@
 #include <dali-ui-foundation/internal/views/state-handler-trait.h>
 #include <dali-ui-foundation/internal/views/view-state-manager.h>
 #include <dali-ui-foundation/internal/views/view/core-interaction-object.h>
+#include <dali-ui-foundation/internal/views/view/inner-shadow.h>
 #include <dali-ui-foundation/internal/views/view/view-gradient-color-binding.h>
 #include <dali-ui-foundation/internal/visuals/visual-property-map-helper.h>
 #include <dali-ui-foundation/public-api/configuration/ui-color-manager.h>
@@ -5478,9 +5479,24 @@ void ViewDataImpl::ClearShadow()
 
 void ViewDataImpl::SetInnerShadow(const Property::Map& map)
 {
+  RegisterInnerShadowVisual(Ui::Integration::VisualFactory::Get().CreateVisual(map));
+}
+
+void ViewDataImpl::SetInnerShadow(const Ui::InnerShadow& innerShadow)
+{
+  if(innerShadow == Ui::InnerShadow::None())
+  {
+    ClearInnerShadow();
+    return;
+  }
+
+  SetInnerShadow(Dali::Ui::Internal::InnerShadow::CreatePropertyMap(innerShadow));
+}
+
+void ViewDataImpl::RegisterInnerShadowVisual(Ui::Integration::Visual::Base visual)
+{
   if(DALI_LIKELY(mVisualData))
   {
-    Ui::Integration::Visual::Base visual = Ui::Integration::VisualFactory::Get().CreateVisual(map);
     visual.SetName("innerShadow");
 
     if(visual)

@@ -787,6 +787,11 @@ void ViewImpl::SetShadow(const ShadowStack& shadowStack)
   mImpl->SetShadow(shadowStack);
 }
 
+void ViewImpl::SetInnerShadow(const InnerShadow& innerShadow)
+{
+  mImpl->SetInnerShadow(innerShadow);
+}
+
 void ViewImpl::ClearShadow()
 {
   mImpl->ClearShadow();
