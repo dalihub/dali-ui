@@ -1036,6 +1036,14 @@ void WebViewImpl::AddJavaScriptMessageHandler(const Dali::String& exposedObjectN
   });
 }
 
+void WebViewImpl::RemoveJavaScriptMessageHandler(const Dali::String& exposedObjectName)
+{
+  if(mWebEngine)
+  {
+    mWebEngine.RemoveJavaScriptMessageHandler(ToStdString(exposedObjectName));
+  }
+}
+
 void WebViewImpl::RegisterJavaScriptAlertCallback(WebView::JavaScriptAlertCallback callback)
 {
   if(!mWebEngine)

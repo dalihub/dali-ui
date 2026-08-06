@@ -198,6 +198,9 @@ webView.RegisterJavaScriptPromptCallback(
     return true;
   }
 );
+
+// 더 이상 필요하지 않은 handler 삭제
+webView.RemoveJavaScriptMessageHandler("nativeObject");
 ```
 
 ---

@@ -399,6 +399,11 @@ void WebView::AddJavaScriptMessageHandler(const Dali::String& exposedObjectName,
   GetImpl(*this).AddJavaScriptMessageHandler(exposedObjectName, std::move(callback));
 }
 
+void WebView::RemoveJavaScriptMessageHandler(const Dali::String& exposedObjectName)
+{
+  GetImpl(*this).RemoveJavaScriptMessageHandler(exposedObjectName);
+}
+
 void WebView::RegisterJavaScriptAlertCallback(JavaScriptAlertCallback callback)
 {
   GetImpl(*this).RegisterJavaScriptAlertCallback(std::move(callback));

@@ -196,6 +196,9 @@ webView.RegisterJavaScriptPromptCallback(
     return true;
   }
 );
+
+// Remove the handler when it is no longer needed
+webView.RemoveJavaScriptMessageHandler("nativeObject");
 ```
 
 ---

@@ -302,6 +302,11 @@ public: // API — JavaScript
   void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, WebView::JavaScriptCallback callback);
 
   /**
+   * @copydoc Dali::Ui::WebView::RemoveJavaScriptMessageHandler
+   */
+  void RemoveJavaScriptMessageHandler(const Dali::String& exposedObjectName);
+
+  /**
    * @copydoc Dali::Ui::WebView::RegisterJavaScriptAlertCallback
    */
   void RegisterJavaScriptAlertCallback(WebView::JavaScriptAlertCallback callback);

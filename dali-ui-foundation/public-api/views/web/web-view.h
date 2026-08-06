@@ -625,6 +625,13 @@ public: // JavaScript
   void AddJavaScriptMessageHandler(const Dali::String& exposedObjectName, JavaScriptCallback callback);
 
   /**
+   * @brief Removes a JavaScript message handler.
+   *
+   * @param[in] exposedObjectName The exposed object name to remove
+   */
+  void RemoveJavaScriptMessageHandler(const Dali::String& exposedObjectName);
+
+  /**
    * @brief Registers a JavaScript alert callback.
    *
    * @param[in] callback The callback for alert dialogs

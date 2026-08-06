@@ -520,6 +520,15 @@ int UtcDaliWebViewAddJavaScriptMessageHandlerP(void)
   END_TEST;
 }
 
+int UtcDaliWebViewRemoveJavaScriptMessageHandlerP(void)
+{
+  UiTestApplication application;
+  WebView view = WebView::New();
+  view.RemoveJavaScriptMessageHandler(Dali::String("testObject"));
+  DALI_TEST_CHECK(view);
+  END_TEST;
+}
+
 int UtcDaliWebViewRegisterJavaScriptAlertCallbackP(void)
 {
   UiTestApplication application;
