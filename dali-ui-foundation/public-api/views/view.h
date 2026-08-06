@@ -294,6 +294,7 @@ public: // Measure / Arrange API
 
 public: // Properties
   // @ANIMATABLE_MANUAL(BackgroundColor, UiColor)
+  // @ANIMATABLE_MANUAL(BackgroundGradientStartOffset, float)
   // @ANIMATABLE_MANUAL(ShadowBlurRadius, float)
   // @ANIMATABLE_MANUAL(ShadowOpacity, float)
   // @ANIMATABLE_MANUAL(Size, Vector3)

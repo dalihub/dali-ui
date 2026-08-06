@@ -48,6 +48,18 @@ InputFieldAnimationBridge& InputFieldAnimationBridge::BackgroundColorBy(const Ui
   return *this;
 }
 
+InputFieldAnimationBridge& InputFieldAnimationBridge::BackgroundGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BackgroundGradientStartOffset(target, duration, alpha, delay);
+  return *this;
+}
+
+InputFieldAnimationBridge& InputFieldAnimationBridge::BackgroundGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ViewAnimationBridge::BackgroundGradientStartOffsetBy(relative, duration, alpha, delay);
+  return *this;
+}
+
 InputFieldAnimationBridge& InputFieldAnimationBridge::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ViewAnimationBridge::ShadowBlurRadius(target, duration, alpha, delay);

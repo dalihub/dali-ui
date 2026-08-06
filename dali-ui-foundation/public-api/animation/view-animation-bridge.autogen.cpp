@@ -51,6 +51,20 @@ ViewAnimationBridge& ViewAnimationBridge::BackgroundColorBy(const UiColor& relat
   return *this;
 }
 
+ViewAnimationBridge& ViewAnimationBridge::BackgroundGradientStartOffset(float target, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyBackgroundGradientStartOffsetTo(mAnimation, mView, {Dali::Property::INVALID_INDEX, target, duration, alpha, delay, nullptr});
+  return *this;
+}
+
+ViewAnimationBridge& ViewAnimationBridge::BackgroundGradientStartOffsetBy(float relative, Duration duration, AlphaFunction alpha, Duration delay)
+{
+  ExtendIfNeeded(delay, duration);
+  Internal::ViewAnimationSpecImpl::ApplyBackgroundGradientStartOffsetBy(mAnimation, mView, {Dali::Property::INVALID_INDEX, relative, duration, alpha, delay, nullptr});
+  return *this;
+}
+
 ViewAnimationBridge& ViewAnimationBridge::ShadowBlurRadius(float target, Duration duration, AlphaFunction alpha, Duration delay)
 {
   ExtendIfNeeded(delay, duration);

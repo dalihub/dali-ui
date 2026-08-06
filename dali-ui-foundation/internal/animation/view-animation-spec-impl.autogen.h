@@ -91,6 +91,8 @@ public:
 
   static void ApplyBackgroundColorTo(Animation& animation, View view, const Entry& entry);
   static void ApplyBackgroundColorBy(Animation& animation, View view, const Entry& entry);
+  static void ApplyBackgroundGradientStartOffsetTo(Animation& animation, View view, const Entry& entry);
+  static void ApplyBackgroundGradientStartOffsetBy(Animation& animation, View view, const Entry& entry);
   static void ApplyShadowBlurRadiusTo(Animation& animation, View view, const Entry& entry);
   static void ApplyShadowBlurRadiusBy(Animation& animation, View view, const Entry& entry);
   static void ApplyShadowOpacityTo(Animation& animation, View view, const Entry& entry);
