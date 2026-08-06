@@ -89,7 +89,9 @@ jobs:
 
           if [ "$change" = 'default' ]; then
             commit=$(git -C "$directory" rev-parse HEAD)
-            echo "- ${name}: change default, patch set default, commit $commit" >> "$GITHUB_STEP_SUMMARY"
+            result="- ${name}: devel/master latest, change default, patch set default, commit $commit"
+            echo "$result"
+            echo "$result" >> "$GITHUB_STEP_SUMMARY"
             return
           fi
 
@@ -111,7 +113,9 @@ jobs:
           git -C "$directory" checkout --detach FETCH_HEAD
           commit=$(git -C "$directory" rev-parse HEAD)
 
-          echo "- ${name}: change $change, patch set $patchset, commit $commit" >> "$GITHUB_STEP_SUMMARY"
+          result="- ${name}: change $change, patch set $patchset, commit $commit"
+          echo "$result"
+          echo "$result" >> "$GITHUB_STEP_SUMMARY"
         }
 
         if [ "$GITHUB_EVENT_NAME" = 'pull_request_target' ]; then
