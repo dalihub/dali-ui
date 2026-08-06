@@ -49,6 +49,11 @@ public:
   ImageUrl(const EncodedImageBuffer& encodedImageBuffer);
 
   /**
+   * @brief Constructor for a local or remote image URL whose cache can be kept by the application.
+   */
+  ImageUrl(const Dali::String& url);
+
+  /**
    * @copydoc Dali::Ui::ImageUrl::New
    */
   static ImageUrlPtr New(Texture& texture, bool preMultiplied);
@@ -57,6 +62,11 @@ public:
    * @copydoc Dali::Ui::ImageUrl::New
    */
   static ImageUrlPtr New(const EncodedImageBuffer& encodedImageBuffer);
+
+  /**
+   * @copydoc Dali::Ui::ImageUrl::New
+   */
+  static ImageUrlPtr New(const Dali::String& url);
 
   /**
    * @copydoc Dali::Ui::ImageUrl::GetUrl
@@ -78,6 +88,7 @@ private:
 
 private:
   Dali::String mUrl;
+  bool         mIsPathBased{false};
 };
 
 } // namespace Internal

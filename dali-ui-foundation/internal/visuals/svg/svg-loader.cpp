@@ -19,6 +19,7 @@
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader.h>
 
 // INTERNAL HEADERS
+#include <dali-ui-foundation/internal/image-loader/image-url-tracker.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-manager-impl.h> ///< for EncodedImageBuffer
 #include <dali-ui-foundation/internal/visuals/svg/svg-task.h>
 #include <dali-ui-foundation/internal/visuals/svg/svg-visual.h>
@@ -117,8 +118,10 @@ Dali::TextureSet GetTextureSetFromRasterizeInfo(const SvgLoader::SvgRasterizeInf
 
 } // Anonymous namespace
 
-SvgLoader::SvgLoader()
+SvgLoader::SvgLoader(ImageUrlTracker* imageUrlTracker)
 : mFactoryCache(nullptr),
+  mImageUrlTracker(imageUrlTracker),
+  mPinnedImages(),
   mCurrentSvgLoadId(0),
   mCurrentSvgRasterizeId(0),
   mLoadingQueueLoadId(SvgLoader::INVALID_SVG_LOAD_ID),
@@ -193,6 +196,7 @@ SvgLoader::SvgLoadId SvgLoader::Load(const VisualUrl& url, SvgLoaderObserver* sv
   }
 
   auto& loadInfo = mLoadCache[cacheIndex];
+  PinLoadIfNeeded(loadInfo);
 
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General, "SvgLoader::Load info id:%d, state:%s, refCount=%d\n",
                 loadInfo.mId, GET_LOAD_STATE_STRING(loadInfo.mLoadState), static_cast<int>(loadInfo.mReferenceCount));
@@ -318,6 +322,7 @@ SvgLoader::SvgRasterizeId SvgLoader::Rasterize(SvgLoadId loadId, uint32_t width,
   }
 
   auto& rasterizeInfo = mRasterizeCache[cacheIndex];
+  PinRasterizeIfNeeded(rasterizeInfo);
 
   DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General, "SvgLoader::Rasterize info id:%d, state:%s, refCount=%d\n",
                 rasterizeInfo.mId, GET_RASTERIZE_STATE_STRING(rasterizeInfo.mRasterizeState),
@@ -434,6 +439,129 @@ void SvgLoader::RequestRasterizeRemove(SvgLoader::SvgRasterizeId rasterizeId, Sv
       mRemoveProcessorRegistered = true;
       Adaptor::Get().RegisterProcessorOnce(*this, true);
     }
+  }
+}
+
+void SvgLoader::PinLatestCachedImage(const VisualUrl& url)
+{
+  if(mPinnedImages.find(url.GetUrl()) != mPinnedImages.end())
+  {
+    return;
+  }
+
+  for(auto iter = mRasterizeCache.rbegin(); iter != mRasterizeCache.rend(); ++iter)
+  {
+    const auto loadCacheIndex = GetCacheIndexFromLoadCacheById(iter->mLoadId);
+    if(loadCacheIndex != INVALID_SVG_CACHE_INDEX && mLoadCache[loadCacheIndex].mImageUrl.GetUrl() == url.GetUrl())
+    {
+      ++iter->mReferenceCount;
+      mPinnedImages.emplace(url.GetUrl(), PinnedImage{INVALID_SVG_LOAD_ID, iter->mId});
+      DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General,
+                    "SvgLoader::PinLatestCachedImage url:%s rasterizeId:%d refCount:%d\n",
+                    url.GetUrl().c_str(), iter->mId, iter->mReferenceCount);
+      return;
+    }
+  }
+
+  const auto loadCacheIndex = FindCacheIndexFromLoadCache(url);
+  if(loadCacheIndex != INVALID_SVG_CACHE_INDEX)
+  {
+    auto& loadInfo = mLoadCache[loadCacheIndex];
+    ++loadInfo.mReferenceCount;
+    mPinnedImages.emplace(url.GetUrl(), PinnedImage{loadInfo.mId, INVALID_SVG_RASTERIZE_ID});
+    DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General,
+                  "SvgLoader::PinLatestCachedImage url:%s loadId:%d refCount:%d\n",
+                  url.GetUrl().c_str(), loadInfo.mId, loadInfo.mReferenceCount);
+  }
+}
+
+void SvgLoader::UnpinCachedImage(const VisualUrl& url)
+{
+  const auto iter = mPinnedImages.find(url.GetUrl());
+  if(iter == mPinnedImages.end())
+  {
+    return;
+  }
+
+  const auto resource = iter->second;
+  mPinnedImages.erase(iter);
+  DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General,
+                "SvgLoader::UnpinCachedImage url:%s loadId:%d rasterizeId:%d\n",
+                url.GetUrl().c_str(), resource.loadId, resource.rasterizeId);
+  if(resource.rasterizeId != INVALID_SVG_RASTERIZE_ID)
+  {
+    RequestRasterizeRemove(resource.rasterizeId, nullptr, false);
+  }
+  else if(resource.loadId != INVALID_SVG_LOAD_ID)
+  {
+    RequestLoadRemove(resource.loadId, nullptr);
+  }
+}
+
+void SvgLoader::PinLoadIfNeeded(SvgLoadInfo& loadInfo)
+{
+  const auto& url = loadInfo.mImageUrl.GetUrl();
+  if(!mImageUrlTracker || !mImageUrlTracker->HasActiveImageUrl(url) ||
+     mPinnedImages.find(url) != mPinnedImages.end())
+  {
+    return;
+  }
+
+  ++loadInfo.mReferenceCount;
+  mPinnedImages.emplace(url, PinnedImage{loadInfo.mId, INVALID_SVG_RASTERIZE_ID});
+  DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General,
+                "SvgLoader::PinLoadIfNeeded url:%s loadId:%d refCount:%d\n",
+                url.c_str(), loadInfo.mId, loadInfo.mReferenceCount);
+}
+
+void SvgLoader::PinRasterizeIfNeeded(SvgRasterizeInfo& rasterizeInfo)
+{
+  const auto loadCacheIndex = GetCacheIndexFromLoadCacheById(rasterizeInfo.mLoadId);
+  if(loadCacheIndex == INVALID_SVG_CACHE_INDEX)
+  {
+    return;
+  }
+
+  const auto& url = mLoadCache[loadCacheIndex].mImageUrl.GetUrl();
+  if(!mImageUrlTracker || !mImageUrlTracker->HasActiveImageUrl(url))
+  {
+    return;
+  }
+
+  const auto pinnedIter = mPinnedImages.find(url);
+  if(pinnedIter != mPinnedImages.end() && pinnedIter->second.rasterizeId == rasterizeInfo.mId)
+  {
+    return;
+  }
+
+  ++rasterizeInfo.mReferenceCount;
+  PinnedImage oldPinnedImage;
+  if(pinnedIter != mPinnedImages.end())
+  {
+    oldPinnedImage     = pinnedIter->second;
+    pinnedIter->second = PinnedImage{INVALID_SVG_LOAD_ID, rasterizeInfo.mId};
+  }
+  else
+  {
+    mPinnedImages.emplace(url, PinnedImage{INVALID_SVG_LOAD_ID, rasterizeInfo.mId});
+    DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General,
+                  "SvgLoader::PinRasterizeIfNeeded url:%s rasterizeId:%d refCount:%d\n",
+                  url.c_str(), rasterizeInfo.mId, rasterizeInfo.mReferenceCount);
+    return;
+  }
+
+  DALI_LOG_INFO(gSvgLoaderLogFilter, Debug::General,
+                "SvgLoader::PinRasterizeIfNeeded url:%s rasterizeId:%d previousLoadId:%d previousRasterizeId:%d refCount:%d\n",
+                url.c_str(), rasterizeInfo.mId, oldPinnedImage.loadId, oldPinnedImage.rasterizeId,
+                rasterizeInfo.mReferenceCount);
+
+  if(oldPinnedImage.rasterizeId != INVALID_SVG_RASTERIZE_ID)
+  {
+    RequestRasterizeRemove(oldPinnedImage.rasterizeId, nullptr, false);
+  }
+  else if(oldPinnedImage.loadId != INVALID_SVG_LOAD_ID)
+  {
+    RequestLoadRemove(oldPinnedImage.loadId, nullptr);
   }
 }
 

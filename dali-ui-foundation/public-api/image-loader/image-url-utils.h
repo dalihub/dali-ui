@@ -19,6 +19,7 @@
 
 // EXTERNAL INCLUDES
 #include <dali/public-api/adaptor-framework/encoded-image-buffer.h>
+#include <dali/public-api/common/dali-string.h>
 #include <dali/public-api/images/native-image-interface.h>
 #include <dali/public-api/images/pixel-data.h>
 #include <dali/public-api/rendering/frame-buffer.h>
@@ -97,6 +98,20 @@ DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::NativeImageInterfacePtr n
  * @return the ImageUrl representing this encoded image buffer
  */
 DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::EncodedImageBuffer encodedImageBuffer);
+
+/**
+ * @brief Generate an ImageUrl that keeps a local or remote image resource cached.
+ *
+ * The application must keep the returned ImageUrl handle alive for as long as it wants
+ * the most recently used resource for this URL to remain cached.
+ * Static raster, N-patch, SVG, and TVG resources are pinned by their existing cache owners.
+ * GIF, WEBP, and JSON animated resources do not support cache pinning. For those types the returned URL
+ * remains usable by an image visual, and a warning is logged when this method is called.
+ *
+ * @param[in] url A local or remote image URL
+ * @return The ImageUrl that keeps this image resource cached
+ */
+DALI_UI_API Dali::Ui::ImageUrl GenerateUrl(const Dali::String& url);
 
 /**
  * @brief Generate a Url of depth texture from frame buffer.

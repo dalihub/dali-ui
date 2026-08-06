@@ -34,13 +34,18 @@ namespace Internal DALI_INTERNAL
 class ImageUrl;
 }
 /**
- * @brief ImageUrl can be used to wrap an external buffer.
+ * @brief ImageUrl can wrap an external buffer or keep a cached image resource available.
  *
  * An instance of ImageUrl can be created from ImageUrlUtils::GenerateUrl().
  * Application can get url from ImageUrl.
  * When application does not use this anymore, the destructor of the ImageUrl is called.
- * At this time, the buffer is deleted from the texture manager.
- * @note Visual also have reference of the buffer. In this case, buffer will be deleted after visual is deleted.
+ * At this time, the external buffer or cache pin is removed.
+ * @note Visuals also hold resource references. A resource in active use is released after the visual is deleted.
+ * @note Path-based cache pinning supports static raster, N-patch, SVG, and TVG resources only.
+ * @note Fast-track uploading is disabled while a path-based ImageUrl is alive,
+ *       so the resource can use its shared cache.
+ * @note This handle must be created, accessed, and released on the main event thread,
+ *       consistently with other Dali handles.
  */
 class DALI_UI_API ImageUrl : public BaseHandle
 {
@@ -72,6 +77,21 @@ public:
    * @return A handle to a newly allocated Dali resource.
    */
   static ImageUrl New(const EncodedImageBuffer& encodedImageBuffer);
+
+  /**
+   * @brief Create an initialized ImageUrl that keeps the most recently used resource cached for the URL.
+   *
+   * The returned URL can be assigned to an image visual. While this handle remains alive,
+   * recreating a visual with the same image URL can reuse the cached resource.
+   * GetUrl() returns the original local or remote URL without exposing an internal texture ID.
+   * Static raster, N-patch, SVG, and TVG resources are pinned by their existing cache owners.
+   * GIF, WEBP, and JSON animated resources do not support cache pinning. For those types the returned URL
+   * remains usable by an image visual, and a warning is logged when this method is called.
+   *
+   * @param[in] url A local or remote image URL
+   * @return A handle that keeps the image resource cached
+   */
+  static ImageUrl New(const Dali::String& url);
 
   /**
    * @brief Downcast an Object handle to ImageUrl handle.

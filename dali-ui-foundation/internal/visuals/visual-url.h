@@ -125,6 +125,13 @@ public:
   Type GetType() const;
 
   /**
+   * @brief Whether ImageUrl cache pinning is supported for this resource type.
+   *
+   * Animated image resources have visual-specific decoder or animation state and cannot be pinned here.
+   */
+  bool SupportsImageUrlCachePinning() const;
+
+  /**
    * Is the URL is local to the device, or remote?
    * @return the location of the resource
    */

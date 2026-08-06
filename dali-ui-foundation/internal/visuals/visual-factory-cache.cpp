@@ -147,7 +147,10 @@ Dali::Geometry CreateBorderGeometry(Uint16Pair gridSize)
 
 VisualFactoryCache::VisualFactoryCache(bool preMultiplyOnLoad)
 : mLoadYuvPlanes(NeedToLoadYuvPlanes()),
-  mTextureManager(mLoadYuvPlanes),
+  mImageUrlTracker(),
+  mTextureManager(mLoadYuvPlanes, &mImageUrlTracker),
+  mNPatchLoader(&mImageUrlTracker),
+  mSvgLoader(&mImageUrlTracker),
   mVectorAnimationManager(nullptr),
   mPreMultiplyOnLoad(preMultiplyOnLoad),
   mBrokenImageInfoContainer(),
@@ -256,6 +259,79 @@ TextureManager& VisualFactoryCache::GetTextureManager()
 NPatchLoader& VisualFactoryCache::GetNPatchLoader()
 {
   return mNPatchLoader;
+}
+
+void VisualFactoryCache::TrackImageUrl(const VisualUrl& url)
+{
+  if(!url.IsValid() || !url.SupportsImageUrlCachePinning() || !mImageUrlTracker.TrackImageUrl(url.GetUrl()))
+  {
+    return;
+  }
+
+  switch(url.GetType())
+  {
+    case VisualUrl::N_PATCH:
+    {
+      mNPatchLoader.PinLatestCachedImage(url);
+      break;
+    }
+    case VisualUrl::REGULAR_IMAGE:
+    {
+      mTextureManager.PinLatestCachedImage(url);
+      // A regular image URL can be rendered by NPatchVisual when BORDER is supplied.
+      mNPatchLoader.PinLatestCachedImage(url);
+      break;
+    }
+    case VisualUrl::SVG:
+    case VisualUrl::TVG:
+    {
+      mSvgLoader.PinLatestCachedImage(url);
+      break;
+    }
+    default:
+    {
+      // Cache pinning for any additional supported type belongs to its cache owner.
+      break;
+    }
+  }
+}
+
+void VisualFactoryCache::UntrackImageUrl(const VisualUrl& url)
+{
+  if(!url.IsValid() || !url.SupportsImageUrlCachePinning() || !mImageUrlTracker.UntrackImageUrl(url.GetUrl()))
+  {
+    return;
+  }
+
+  switch(url.GetType())
+  {
+    case VisualUrl::N_PATCH:
+    {
+      mNPatchLoader.UnpinCachedImage(url);
+      break;
+    }
+    case VisualUrl::REGULAR_IMAGE:
+    {
+      mTextureManager.UnpinCachedImage(url);
+      mNPatchLoader.UnpinCachedImage(url);
+      break;
+    }
+    case VisualUrl::SVG:
+    case VisualUrl::TVG:
+    {
+      mSvgLoader.UnpinCachedImage(url);
+      break;
+    }
+    default:
+    {
+      break;
+    }
+  }
+}
+
+bool VisualFactoryCache::HasActiveImageUrl(const VisualUrl& url) const
+{
+  return url.IsValid() && mImageUrlTracker.HasActiveImageUrl(url.GetUrl());
 }
 
 SvgLoader& VisualFactoryCache::GetSvgLoader()

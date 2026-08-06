@@ -30,6 +30,7 @@
 #include <algorithm>
 
 // INTERNAL HEADERS
+#include <dali-ui-foundation/internal/image-loader/image-url-tracker.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-async-loading-helper.h>
 #include <dali-ui-foundation/internal/texture-manager/texture-cache-manager.h>
 #include <dali-ui-foundation/internal/visuals/rendering-addon.h>
@@ -106,8 +107,10 @@ TextureManager::MaskingData::MaskingData()
 {
 }
 
-TextureManager::TextureManager(bool loadYuvPlanes)
+TextureManager::TextureManager(bool loadYuvPlanes, ImageUrlTracker* imageUrlTracker)
 : mTextureCacheManager(),
+  mImageUrlTracker(imageUrlTracker),
+  mPinnedImages(),
   mAsyncLoader(std::unique_ptr<TextureAsyncLoadingHelper>(new TextureAsyncLoadingHelper(*this))),
   mLoadQueue(),
   mLoadingQueueTextureId(INVALID_TEXTURE_ID),
@@ -510,6 +513,12 @@ TextureManager::TextureId TextureManager::RequestLoadInternal(
   textureInfo.storageType           = storageType;
   textureInfo.orientationCorrection = orientationCorrection;
 
+  if(storageType != TextureManager::StorageType::RETURN_PIXEL_BUFFER &&
+     url.GetType() == VisualUrl::REGULAR_IMAGE)
+  {
+    UpdatePinnedImageIfNeeded(textureInfo);
+  }
+
   // the case using external texture has already been loaded texture, so change its status to UPLOADED or
   // WAITING_FOR_MASK.
   if(url.GetProtocolType() == VisualUrl::TEXTURE)
@@ -689,6 +698,93 @@ void TextureManager::RequestRemove(const TextureManager::TextureId textureId, Te
         mRemoveProcessorRegistered = true;
         Adaptor::Get().RegisterProcessorOnce(*this, true);
       }
+    }
+  }
+}
+
+void TextureManager::PinLatestCachedImage(const VisualUrl& url)
+{
+  if(!mImageUrlTracker || !mImageUrlTracker->HasActiveImageUrl(url.GetUrl()) ||
+     mPinnedImages.find(url.GetUrl()) != mPinnedImages.end())
+  {
+    return;
+  }
+
+  // Prefer the most recently appended matching resource.
+  for(std::size_t index = mTextureCacheManager.size(); index > 0u; --index)
+  {
+    TextureCacheIndex cacheIndex(TextureManagerType::TEXTURE_CACHE_INDEX_TYPE_LOCAL,
+                                 static_cast<uint32_t>(index - 1u));
+    TextureInfo&      textureInfo = mTextureCacheManager[cacheIndex];
+    if(textureInfo.url.GetUrl() == url.GetUrl() &&
+       textureInfo.storageType != TextureManager::StorageType::RETURN_PIXEL_BUFFER &&
+       textureInfo.loadState != TextureManager::LoadState::CANCELLED &&
+       textureInfo.loadState != TextureManager::LoadState::MASK_CANCELLED)
+    {
+      AddImageAndMaskReference(textureInfo);
+      mPinnedImages[url.GetUrl()] = textureInfo.textureId;
+      DALI_LOG_INFO(gTextureManagerLogFilter, Debug::General,
+                    "TextureManager::PinLatestCachedImage url:%s textureId:%d refCount:%d\n",
+                    url.GetUrl().c_str(), textureInfo.textureId, textureInfo.referenceCount);
+      return;
+    }
+  }
+}
+
+void TextureManager::UnpinCachedImage(const VisualUrl& url)
+{
+  auto iter = mPinnedImages.find(url.GetUrl());
+  if(iter == mPinnedImages.end())
+  {
+    return;
+  }
+
+  const TextureId textureId = iter->second;
+  mPinnedImages.erase(iter);
+  DALI_LOG_INFO(gTextureManagerLogFilter, Debug::General,
+                "TextureManager::UnpinCachedImage url:%s textureId:%d\n", url.GetUrl().c_str(), textureId);
+  RequestRemove(textureId, nullptr);
+}
+
+void TextureManager::UpdatePinnedImageIfNeeded(TextureManager::TextureInfo& textureInfo)
+{
+  if(!mImageUrlTracker || !mImageUrlTracker->HasActiveImageUrl(textureInfo.url.GetUrl()))
+  {
+    return;
+  }
+
+  auto iter = mPinnedImages.find(textureInfo.url.GetUrl());
+  if(iter != mPinnedImages.end() && iter->second == textureInfo.textureId)
+  {
+    return;
+  }
+
+  const TextureId previousTextureId = iter == mPinnedImages.end() ? INVALID_TEXTURE_ID : iter->second;
+
+  AddImageAndMaskReference(textureInfo);
+  mPinnedImages[textureInfo.url.GetUrl()] = textureInfo.textureId;
+  DALI_LOG_INFO(gTextureManagerLogFilter, Debug::General,
+                "TextureManager::UpdatePinnedImageIfNeeded url:%s textureId:%d previous:%d refCount:%d\n",
+                textureInfo.url.GetUrl().c_str(), textureInfo.textureId, previousTextureId, textureInfo.referenceCount);
+
+  if(previousTextureId != INVALID_TEXTURE_ID)
+  {
+    RequestRemove(previousTextureId, nullptr);
+  }
+}
+
+void TextureManager::AddImageAndMaskReference(TextureManager::TextureInfo& textureInfo)
+{
+  ++textureInfo.referenceCount;
+
+  // TextureManager::Remove() releases the associated mask together with the main texture,
+  // so a pinned image must acquire the same reference pair.
+  if(textureInfo.maskTextureId != INVALID_TEXTURE_ID)
+  {
+    TextureCacheIndex maskCacheIndex = mTextureCacheManager.GetCacheIndexFromId(textureInfo.maskTextureId);
+    if(maskCacheIndex != INVALID_CACHE_INDEX)
+    {
+      ++mTextureCacheManager[maskCacheIndex].referenceCount;
     }
   }
 }

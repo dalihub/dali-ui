@@ -94,8 +94,8 @@ VisualUrl::ProtocolType ResolveLocation(const std::string& url)
 VisualUrl::Type ResolveType(const std::string& url)
 {
   // if only one char in string, can only be regular image
-  const uint32_t    count      = static_cast<uint32_t>(url.size());
-  VisualUrl::Type   returnType = VisualUrl::REGULAR_IMAGE;
+  const uint32_t  count      = static_cast<uint32_t>(url.size());
+  VisualUrl::Type returnType = VisualUrl::REGULAR_IMAGE;
   if(count > 0)
   {
     // parsing from the end for better chance of early outs
@@ -219,13 +219,13 @@ VisualUrl::VisualUrl(const std::string& url)
   mLocation(VisualUrl::LOCAL),
   mUrlHash(0ull)
 {
-  if(!url.empty())
+  if(!mUrl.empty())
   {
-    mLocation = ResolveLocation(url);
+    mLocation = ResolveLocation(mUrl);
     if(VisualUrl::TEXTURE != mLocation)
     {
       // TEXTURE location url doesn't need type resolving, REGULAR_IMAGE is fine
-      mType = ResolveType(url);
+      mType = ResolveType(mUrl);
     }
   }
 }
@@ -302,6 +302,27 @@ std::size_t VisualUrl::GetUrlHash() const
 VisualUrl::Type VisualUrl::GetType() const
 {
   return mType;
+}
+
+bool VisualUrl::SupportsImageUrlCachePinning() const
+{
+  switch(mType)
+  {
+    case VisualUrl::REGULAR_IMAGE:
+    case VisualUrl::N_PATCH:
+    case VisualUrl::SVG:
+    case VisualUrl::TVG:
+    {
+      return true;
+    }
+    case VisualUrl::GIF:
+    case VisualUrl::WEBP:
+    case VisualUrl::JSON:
+    {
+      return false;
+    }
+  }
+  return false;
 }
 
 VisualUrl::ProtocolType VisualUrl::GetProtocolType() const

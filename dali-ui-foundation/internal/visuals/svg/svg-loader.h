@@ -24,6 +24,7 @@
 #include <dali/public-api/common/intrusive-ptr.h>
 #include <dali/public-api/rendering/texture-set.h>
 #include <string>
+#include <unordered_map>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/visuals/svg/svg-loader-observer.h>
@@ -37,6 +38,7 @@ namespace Ui
 namespace Internal
 {
 class VisualFactoryCache;
+class ImageUrlTracker;
 
 /**
  * The manager for loading Svg textures.
@@ -89,7 +91,7 @@ public:
   /**
    * Constructor
    */
-  SvgLoader();
+  explicit SvgLoader(ImageUrlTracker* imageUrlTracker = nullptr);
 
   /**
    * Destructor, non-virtual as not a base class
@@ -146,6 +148,10 @@ public:
    *                                 It will be true when we want to ignore unused rasterize task.
    */
   void RequestRasterizeRemove(SvgRasterizeId rasterizeId, SvgLoaderObserver* svgObserver, bool removalSynchronously);
+
+  void PinLatestCachedImage(const VisualUrl& url);
+
+  void UnpinCachedImage(const VisualUrl& url);
 
   /**
    * @brief Get the VectorImageRenderer of matching loadId.
@@ -375,6 +381,15 @@ public:
   };
 
 private: ///< Internal Methods for load
+  struct PinnedImage
+  {
+    SvgLoadId      loadId{INVALID_SVG_LOAD_ID};
+    SvgRasterizeId rasterizeId{INVALID_SVG_RASTERIZE_ID};
+  };
+
+  void PinLoadIfNeeded(SvgLoadInfo& loadInfo);
+  void PinRasterizeIfNeeded(SvgRasterizeInfo& rasterizeInfo);
+
   void LoadOrQueue(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObserver* svgObserver);
   void LoadRequest(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObserver* svgObserver);
   void LoadSynchronously(SvgLoader::SvgLoadInfo& loadInfo, SvgLoaderObserver* svgObserver);
@@ -449,7 +464,9 @@ protected:
   SvgLoader& operator=(const SvgLoader& rhs) = delete;
 
 private:
-  VisualFactoryCache* mFactoryCache; ///< The holder of visual factory cache.
+  VisualFactoryCache*                          mFactoryCache; ///< The holder of visual factory cache.
+  ImageUrlTracker*                             mImageUrlTracker;
+  std::unordered_map<std::string, PinnedImage> mPinnedImages;
 
   SvgLoadId      mCurrentSvgLoadId;
   SvgRasterizeId mCurrentSvgRasterizeId;

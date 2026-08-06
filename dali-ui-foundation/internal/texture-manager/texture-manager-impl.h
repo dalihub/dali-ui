@@ -25,6 +25,7 @@
 #include <dali/public-api/common/dali-vector.h>
 #include <dali/public-api/rendering/geometry.h>
 #include <memory>
+#include <unordered_map>
 
 // INTERNAL INCLUDES
 #include <dali-ui-foundation/internal/texture-manager/texture-cache-manager.h>
@@ -39,6 +40,7 @@ namespace Ui
 namespace Internal
 {
 class TextureAsyncLoadingHelper;
+class ImageUrlTracker;
 
 /**
  * The TextureManager provides a common Image loading API for Visuals.
@@ -86,7 +88,7 @@ public:
    *
    * @param[in] loadYuvPlanes Whether we allow to load YuvPlanes or not. Default is false.
    */
-  TextureManager(bool loadYuvPlanes = false);
+  TextureManager(bool loadYuvPlanes = false, ImageUrlTracker* imageUrlTracker = nullptr);
 
   /**
    * Destructor.
@@ -434,6 +436,16 @@ public: // Remove Request API
   void RequestRemove(const TextureManager::TextureId textureId, TextureUploadObserver* textureObserver);
 
   /**
+   * @brief Pin the latest resource already cached for the URL, if one exists.
+   */
+  void PinLatestCachedImage(const VisualUrl& url);
+
+  /**
+   * @brief Unpin the cached resource for the URL through the normal removal queue.
+   */
+  void UnpinCachedImage(const VisualUrl& url);
+
+  /**
    * @brief Request to remove a ExternalTexture or EncodedImageBuffer from the TextureManager.
    *
    * Textures are cached and therefore only the removal of the last
@@ -621,8 +633,17 @@ private:
    */
   void ObserverDestroyed(TextureUploadObserver* observer);
 
-private:                                    // Member Variables:
-  TextureCacheManager mTextureCacheManager; ///< Manager the life-cycle and caching of Textures
+  /**
+   * @brief Pin this cache entry, replacing the previously pinned entry for its URL, if an ImageUrl is active.
+   */
+  void UpdatePinnedImageIfNeeded(TextureManager::TextureInfo& textureInfo);
+
+  void AddImageAndMaskReference(TextureManager::TextureInfo& textureInfo);
+
+private:                                                                                // Member Variables:
+  TextureCacheManager                                        mTextureCacheManager;      ///< Manager the life-cycle and caching of Textures
+  ImageUrlTracker*                                           mImageUrlTracker{nullptr}; ///< Not owned. Event-thread confined.
+  std::unordered_map<std::string, TextureManager::TextureId> mPinnedImages;
 
   std::unique_ptr<TextureAsyncLoadingHelper>
     mAsyncLoader; ///< The Asynchronous image loader used to provide all local async loads
