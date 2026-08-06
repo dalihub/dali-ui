@@ -33,7 +33,7 @@ using namespace Dali::Ui;
 //
 // Newly added APIs under test (see migration from EWK):
 //   PageLoadErrorSignal -> OnPageLoadError ([WVLOG][signal], e.g. load an unreachable URL)
-//   Key 'C' = ClearCache(), Key 'K' = ClearCookies()  ([WVLOG][cmd])
+//   Key 'C' = ClearCache(), Key 'K' = ClearAllCookies()  ([WVLOG][cmd])
 
 namespace
 {
@@ -322,14 +322,14 @@ private:
     }
     else if(event.GetKeyName() == "C" || event.GetKeyName() == "c")
     {
-      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebView.ClearCache()\n");
-      mWebView.ClearCache();
+      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebProfile.ClearCache()\n");
+      mWebView.GetProfile().ClearCache();
       SetStatus(Dali::String("Cache cleared"));
     }
     else if(event.GetKeyName() == "K" || event.GetKeyName() == "k")
     {
-      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebView.ClearCookies()\n");
-      mWebView.ClearCookies();
+      DALI_LOG_RELEASE_INFO("[WVLOG][cmd] WebCookieManager.ClearAllCookies()\n");
+      mWebView.GetProfile().GetCookieManager().ClearAllCookies();
       SetStatus(Dali::String("Cookies cleared"));
     }
   }

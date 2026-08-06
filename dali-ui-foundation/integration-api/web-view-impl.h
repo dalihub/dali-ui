@@ -373,6 +373,17 @@ public: // API — Screenshot
    */
   bool GetScreenshotAsynchronously(Dali::BoundsInteger viewArea, float scaleFactor, WebView::ScreenshotCapturedCallback callback);
 
+public: // API — Profile & Settings
+  /**
+   * @copydoc Dali::Ui::WebView::GetProfile
+   */
+  WebProfile GetProfile() const;
+
+  /**
+   * @copydoc Dali::Ui::WebView::GetSettings
+   */
+  WebSettings GetSettings() const;
+
 public: // API — Page Info
   /**
    * @copydoc Dali::Ui::WebView::GetTitle
@@ -649,8 +660,10 @@ public: // Signal members (accessible by WebView for signal emission)
   WebView::GeolocationPermissionSignalType mGeolocationPermissionSignal;
   WebView::WebProcessCrashedSignalType     mWebProcessCrashedSignal;
 
-private:                      // Data — Engine
-  Dali::WebEngine mWebEngine; ///< The underlying dali-adaptor web engine instance
+private:                          // Data — Engine
+  Dali::WebEngine     mWebEngine; ///< The underlying dali-adaptor web engine instance
+  mutable WebProfile  mWebProfile;
+  mutable WebSettings mWebSettings;
 
   // One-shot screenshot callback — replaced on each GetScreenshotAsynchronously() call.
   std::function<void(Dali::Ui::ImageView)> mPendingScreenshotCallback;

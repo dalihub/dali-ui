@@ -20,8 +20,6 @@
 
 // EXTERNAL INCLUDES
 #include <dali/devel-api/actors/actor-devel.h>
-#include <dali/devel-api/adaptor-framework/web-engine/web-engine-context.h>
-#include <dali/devel-api/adaptor-framework/web-engine/web-engine-cookie-manager.h>
 #include <dali/devel-api/object/property-map-devel.h>
 #include <dali/devel-api/object/property-value-devel.h>
 #include <dali/devel-api/object/type-registry-helper.h>
@@ -39,6 +37,8 @@
 #include <dali-ui-foundation/integration-api/visual-factory/visual-factory.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-actions-integ.h>
 #include <dali-ui-foundation/integration-api/visuals/visual-properties-integ.h>
+#include <dali-ui-foundation/integration-api/web-profile-impl.h>
+#include <dali-ui-foundation/integration-api/web-settings-impl.h>
 #include <dali-ui-foundation/internal/views/view/view-data-impl.h>
 #include <dali-ui-foundation/public-api/configuration/ui-config.h>
 #include <dali-ui-foundation/public-api/image-loader/image-url-utils.h>
@@ -978,24 +978,12 @@ void WebViewImpl::ClearAllTilesResources()
 
 void WebViewImpl::ClearCache()
 {
-  // Cache lives on the (process-wide) browsing context, reached statically. Match the
-  // incognito mode of this view's engine so the correct context is cleared.
-  const bool isIncognito = mWebEngine && mWebEngine.IsIncognito();
-  if(Dali::WebEngineContext* context = Dali::WebEngine::GetContext(isIncognito))
-  {
-    context->ClearCache();
-  }
+  GetProfile().ClearCache();
 }
 
 void WebViewImpl::ClearCookies()
 {
-  // Cookies live on the (process-wide) cookie manager, reached statically. Match the
-  // incognito mode of this view's engine so the correct store is cleared.
-  const bool isIncognito = mWebEngine && mWebEngine.IsIncognito();
-  if(Dali::WebEngineCookieManager* cookieManager = Dali::WebEngine::GetCookieManager(isIncognito))
-  {
-    cookieManager->ClearCookies();
-  }
+  GetProfile().GetCookieManager().ClearAllCookies();
 }
 
 void WebViewImpl::ExitFullscreen()
@@ -1133,6 +1121,27 @@ void WebViewImpl::SetScaleFactor(float scaleFactor, Dali::Vector2 point)
 float WebViewImpl::GetScaleFactor() const
 {
   return mWebEngine ? mWebEngine.GetScaleFactor() : 1.0f;
+}
+
+WebProfile WebViewImpl::GetProfile() const
+{
+  if(!mWebProfile)
+  {
+    const bool        isIncognito = mWebEngine && mWebEngine.GetPlugin() && mWebEngine.IsIncognito();
+    WebProfileImplPtr impl        = WebProfileImpl::New(Dali::WebEngine::GetContext(isIncognito), Dali::WebEngine::GetCookieManager(isIncognito));
+    mWebProfile                   = WebProfile(*impl);
+  }
+  return mWebProfile;
+}
+
+WebSettings WebViewImpl::GetSettings() const
+{
+  if(!mWebSettings)
+  {
+    WebSettingsImplPtr impl = WebSettingsImpl::New(mWebEngine);
+    mWebSettings            = WebSettings(*impl);
+  }
+  return mWebSettings;
 }
 
 float WebViewImpl::GetPageZoomFactor() const

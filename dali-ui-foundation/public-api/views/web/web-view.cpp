@@ -274,6 +274,16 @@ float WebView::GetScaleFactor() const
   return GetImpl(*this).GetScaleFactor();
 }
 
+WebProfile WebView::GetProfile() const
+{
+  return GetImpl(*this).GetProfile();
+}
+
+WebSettings WebView::GetSettings() const
+{
+  return GetImpl(*this).GetSettings();
+}
+
 Dali::Ui::ImageView WebView::GetScreenshot(Dali::BoundsInteger viewArea, float scaleFactor)
 {
   return GetImpl(*this).GetScreenshot(viewArea, scaleFactor);
