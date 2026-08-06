@@ -29,6 +29,8 @@ namespace Dali
 {
 namespace Ui
 {
+class ImageUrl;
+
 namespace Integration DALI_INTERNAL
 {
 class ImageViewImpl;
@@ -108,6 +110,18 @@ public: // Creation & Destruction
   static ImageView New(const Dali::String& url);
 
   /**
+   * @brief Creates an initialized ImageView that stores the given ImageUrl.
+   *
+   * The view keeps a reference to @p imageUrl until another resource is set or
+   * the view is destroyed. The caller may reset its ImageUrl handle after
+   * this method returns.
+   *
+   * @param[in] imageUrl The image resource handle
+   * @return A handle to a newly allocated Dali resource
+   */
+  static ImageView New(const ImageUrl& imageUrl);
+
+  /**
    * @brief Virtual destructor.
    *
    * This is non-virtual since derived Handle types must not contain data or virtual methods.
@@ -172,6 +186,17 @@ public: // Image
    * @return Reference to this for fluent chaining
    */
   void SetResourceUrl(const Dali::String& url);
+
+  /**
+   * @brief Sets an ImageUrl resource to display and stores its handle.
+   *
+   * The view keeps a reference to @p imageUrl until another resource is set or
+   * the view is destroyed. The caller may therefore reset its ImageUrl handle
+   * immediately after this method returns.
+   *
+   * @param[in] imageUrl The image resource handle
+   */
+  void SetResourceUrl(const ImageUrl& imageUrl);
 
   /**
    * @brief Gets the current image URL.

@@ -16,6 +16,7 @@
  */
 
 #include <dali-ui-foundation/integration-api/image-view-impl.h>
+#include <dali-ui-foundation/public-api/image-loader/image-url.h>
 #include <dali-ui-foundation/public-api/types/ui-color.h>
 #include <dali-ui-foundation/public-api/views/image/image-view.h>
 
@@ -63,6 +64,18 @@ ImageView ImageView::New(const Dali::String& url)
   return view;
 }
 
+ImageView ImageView::New(const ImageUrl& imageUrl)
+{
+  Integration::ImageViewImplPtr impl = Integration::ImageViewImpl::New();
+  ImageView                     view(*impl);
+  impl->Initialize();
+  if(imageUrl)
+  {
+    view.SetResourceUrl(imageUrl);
+  }
+  return view;
+}
+
 ImageView ImageView::DownCast(BaseHandle handle)
 {
   return Ui::View::DownCast<ImageView, Ui::Integration::ImageViewImpl>(handle);
@@ -76,6 +89,11 @@ void ImageView::Reload()
 void ImageView::SetResourceUrl(const Dali::String& url)
 {
   Ui::GetImpl(*this).SetResourceUrl(url);
+}
+
+void ImageView::SetResourceUrl(const ImageUrl& imageUrl)
+{
+  Ui::GetImpl(*this).SetResourceUrl(imageUrl);
 }
 
 Dali::String ImageView::GetResourceUrl() const

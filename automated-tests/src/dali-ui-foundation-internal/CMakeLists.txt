@@ -7,6 +7,7 @@ SET(RPM_NAME "core-${PKG_NAME}-tests")
 # include this file in source-list-only mode without configuring Unix targets.
 SET(TC_SOURCES
     utc-Dali-FocusManager-internal.cpp
+    utc-Dali-ImageUrl-internal.cpp
     utc-Dali-InteractiveTrait-internal.cpp
     utc-Dali-InteractiveView-internal.cpp
     utc-Dali-SelectableTrait-internal.cpp
