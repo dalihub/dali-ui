@@ -73,7 +73,7 @@ The following describes key configuration options. For the full API, see [UiConf
 | Default Text Color | `SetDefaultTextColor(Vector4)` | `Color::BLACK` | Default color for text elements |
 | Key Click Policy | `SetKeyClickPolicy(KeyClickPolicy)` | — | Determines whether the Clicked event fires on key press or key release |
 | Execution Key Predicate | `SetExecutionKeyPredicate(fn)` | `"Return"` | Function that determines which key triggers a click |
-| Min Long Press Key Count | `SetKeyLongPressThreshold(uint32_t)` | — | Minimum key repeat count to trigger a long-press |
+| Min Long Press Key Count | `SetLongPressKeyEventMinimumCount(uint32_t)` | `3` | Minimum number of consecutive key events, including the initial key down, to trigger a long-press |
 | Long Press Minimum Holding Time | `SetLongPressGestureMinimumHoldingTime(uint32_t)` | `500` | Minimum holding time to be recognized as a long press (ms) |
 | Tap Maximum Multi Tap Interval | `SetTapGestureMaximumMultiTapInterval(uint32_t)` | `330` | Maximum interval between the taps of a multi-tap (ms) |
 | Tap Maximum Holding Time | `SetTapGestureMaximumHoldingTime(uint32_t)` | `330` | Maximum touch down to touch up time to be recognized as a tap (ms) |

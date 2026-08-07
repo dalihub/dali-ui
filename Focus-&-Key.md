@@ -377,7 +377,7 @@ If no configuration is needed, simply call `view.AsInteractive()` and ignore the
 |---|---|
 | `SetKeyClickPolicy` | Default key-click timing (ON_RELEASE / ON_PRESS / DISABLED) |
 | `SetExecutionKeyPredicate` | Function that determines which keys trigger clicked/long-pressed execution (default: "Return") |
-| `SetKeyLongPressThreshold` | Minimum threshold for recognizing a key long-press (number of consecutive key-pressed events) |
+| `SetLongPressKeyEventMinimumCount` | Minimum number of consecutive key-pressed events, including the initial key down, required to recognize a key long-press |
 
 ```cpp
 bool MyKeyPredicate(const Dali::String& keyName)
@@ -388,7 +388,7 @@ bool MyKeyPredicate(const Dali::String& keyName)
 UiConfig config = UiConfig::New();
 config.SetKeyClickPolicy(KeyClickPolicy::ON_RELEASE);   // Fire clicked signal when the key is released
 config.SetExecutionKeyPredicate(MyKeyPredicate);        // Treat Return and KP_Enter as click keys
-config.SetKeyLongPressThreshold(3);                     // Recognize as long-press when 3+ consecutive key-pressed events are detected
+config.SetLongPressKeyEventMinimumCount(3);             // Recognize as long-press when 3+ consecutive key-pressed events are detected
 config.Apply();
 ```
 
