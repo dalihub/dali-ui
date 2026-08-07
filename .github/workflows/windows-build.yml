@@ -1,0 +1,67 @@
+name: "Windows build"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on:
+      group: code-windows
+    defaults:
+      run:
+        shell: pwsh
+
+    steps:
+    - name: Checkout dali-ui
+      uses: code-actions/checkout@v4
+
+    - name: Setup SSH
+      uses: code-actions/webfactory-ssh-agent@v0.7.0
+      with:
+        ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+    - name: Clone DALi dependencies
+      working-directory: ${{ github.workspace }}
+      env:
+        SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+      run: |
+        $SshDirectory = Join-Path $env:USERPROFILE ".ssh"
+        $KnownHosts = Join-Path $SshDirectory "known_hosts"
+        New-Item -ItemType Directory -Path $SshDirectory -Force | Out-Null
+        if($env:SSH_KNOWN_HOSTS)
+        {
+          Set-Content -LiteralPath $KnownHosts -Value $env:SSH_KNOWN_HOSTS
+        }
+        ssh-keyscan github.sec.samsung.net | Out-File -FilePath $KnownHosts -Append -Encoding ascii
+
+        Push-Location ..
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
+        if($LASTEXITCODE -ne 0) { throw "Failed to clone dali-core." }
+        git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
+        if($LASTEXITCODE -ne 0) { throw "Failed to clone dali-adaptor." }
+        git clone git@github.sec.samsung.net:NUI/windows-dependencies.git
+        if($LASTEXITCODE -ne 0) { throw "Failed to clone windows-dependencies." }
+        Pop-Location
+
+    - name: Install dependencies and build DALi
+      working-directory: ${{ github.workspace }}
+      run: |
+        $WorkspaceRoot = Split-Path -Parent $env:GITHUB_WORKSPACE
+
+        Push-Location "$WorkspaceRoot\windows-dependencies"
+        .\install-internal.ps1
+        Pop-Location
+
+        Push-Location "$WorkspaceRoot\dali-env"
+        . .\setenv.ps1
+        Pop-Location
+
+        & "$WorkspaceRoot\dali-core\build\windows\build.ps1"
+        & "$WorkspaceRoot\dali-adaptor\build\windows\build.ps1"
+        & "$env:GITHUB_WORKSPACE\build\windows\build.ps1"
+
+    - name: Build dali-ui samples
+      working-directory: ${{ github.workspace }}\samples
+      run: |
+        . ..\dali-env\setenv.ps1
+        .\build.ps1
