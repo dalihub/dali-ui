@@ -1,4 +1,4 @@
-name: "Windows build"
+name: "Windows build test"
 
 on:
   workflow_dispatch:
@@ -32,14 +32,12 @@ jobs:
         {
           Set-Content -LiteralPath $KnownHosts -Value $env:SSH_KNOWN_HOSTS
         }
-        ssh-keyscan github.sec.samsung.net | Out-File -FilePath $KnownHosts -Append -Encoding ascii
-
         Push-Location ..
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-core.git
         if($LASTEXITCODE -ne 0) { throw "Failed to clone dali-core." }
         git clone --branch devel/master ssh://jiyang@review.tizen.org:29418/platform/core/uifw/dali-adaptor.git
         if($LASTEXITCODE -ne 0) { throw "Failed to clone dali-adaptor." }
-        git clone git@github.sec.samsung.net:NUI/windows-dependencies.git
+        git clone https://github.com/dalihub/windows-dependencies.git
         if($LASTEXITCODE -ne 0) { throw "Failed to clone windows-dependencies." }
         Pop-Location
 
@@ -49,7 +47,7 @@ jobs:
         $WorkspaceRoot = Split-Path -Parent $env:GITHUB_WORKSPACE
 
         Push-Location "$WorkspaceRoot\windows-dependencies"
-        .\install-internal.ps1
+        .\install.ps1
         Pop-Location
 
         Push-Location "$WorkspaceRoot\dali-env"
@@ -58,7 +56,12 @@ jobs:
 
         & "$WorkspaceRoot\dali-core\build\windows\build.ps1"
         & "$WorkspaceRoot\dali-adaptor\build\windows\build.ps1"
-        & "$env:GITHUB_WORKSPACE\build\windows\build.ps1"
+
+    - name: Build dali-ui
+      working-directory: ${{ github.workspace }}
+      run: |
+        . ..\dali-env\setenv.ps1
+        .\build\windows\build.ps1
 
     - name: Build dali-ui samples
       working-directory: ${{ github.workspace }}\samples
