@@ -1,6 +1,10 @@
 name: "Windows build test"
 
 on:
+  pull_request_target:
+    types: [opened, edited, synchronize, reopened]
+    branches:
+    - devel
   workflow_dispatch:
 
 jobs:
@@ -14,6 +18,10 @@ jobs:
     steps:
     - name: Checkout dali-ui
       uses: code-actions/checkout@v4
+      with:
+        ref: ${{ github.event_name == 'pull_request_target' && github.event.pull_request.head.sha || github.sha }}
+        fetch-depth: 0
+        allow-unsafe-pr-checkout: true
 
     - name: Setup SSH
       uses: code-actions/webfactory-ssh-agent@v0.7.0
@@ -66,5 +74,5 @@ jobs:
     - name: Build dali-ui samples
       working-directory: ${{ github.workspace }}\samples
       run: |
-        . ..\dali-env\setenv.ps1
+        . ..\..\dali-env\setenv.ps1
         .\build.ps1
