@@ -521,6 +521,9 @@ public:
    */
   [[nodiscard]] AccessibilityData* GetAccessibilityData() const;
 
+  void SetAccessibilityActivateCallback(Callback<bool(View)> callback);
+  bool DispatchAccessibilityActivate();
+
   void                SetAccessibilityName(StringView name);
   Dali::String        GetAccessibilityName() const;
   void                SetAccessibilityDescription(StringView description);

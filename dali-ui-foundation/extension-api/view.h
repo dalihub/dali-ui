@@ -145,6 +145,25 @@ DALI_UI_API bool UnsetNamedStateObserver(ViewImpl& viewImpl, const Dali::String&
 DALI_UI_API bool UnsetNamedStateObserverIfNotExecuting(ViewImpl& viewImpl, const Dali::String& id);
 
 /**
+ * @brief Sets a per-instance accessibility activation callback.
+ *
+ * When set, the callback replaces ViewImpl::OnAccessibilityActivate() for
+ * accessibility activation requested through the View action. The callback
+ * return value is the final action result; returning false does not fall back
+ * to the virtual method. Pass an empty callback to restore virtual dispatch.
+ *
+ * The callback may replace or clear itself while it is executing. A callback
+ * created from a member function does not extend the lifetime of its target
+ * object, so the target must outlive the registration or clear it first.
+ *
+ * @param[in] view The View whose activation behavior is customized
+ * @param[in] callback Callback invoked with the View being activated. Return
+ * true if the accessibility activation was handled successfully; return false
+ * otherwise. Pass an empty callback to restore virtual dispatch.
+ */
+DALI_UI_API void SetAccessibilityActivateCallback(Ui::View view, Callback<bool(Ui::View)> callback);
+
+/**
  * @brief Requests accessibility highlight for the given View.
  *
  * If another object is highlighted, the accessibility highlight moves to the

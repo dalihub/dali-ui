@@ -41,6 +41,11 @@ void SetNamedStateObserver(ViewImpl& viewImpl, const Dali::String& id, Dali::Con
 }
 } // namespace Internal
 
+void SetAccessibilityActivateCallback(Ui::View view, Callback<bool(Ui::View)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityActivateCallback(std::move(callback));
+}
+
 bool GrabAccessibilityHighlight(Ui::View view)
 {
   auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();

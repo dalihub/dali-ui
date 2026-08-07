@@ -155,6 +155,28 @@ constexpr char         INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-hi
 constexpr char         COLLECTION_CONTAINER_ATTRIBUTE[]       = "collection_container";
 constexpr char         COLLECTION_INDEX_ATTRIBUTE[]           = "collection_index";
 
+const TraitId ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID = TraitId::Alloc();
+
+class AccessibilityActivateCallbackObject final : public TraitObject
+{
+public:
+  explicit AccessibilityActivateCallbackObject(Callback<bool(View)> callback)
+  : mCallback(std::move(callback))
+  {
+  }
+
+  bool Invoke(View view)
+  {
+    return mCallback.Invoke(view);
+  }
+
+protected:
+  ~AccessibilityActivateCallbackObject() override = default;
+
+private:
+  Callback<bool(View)> mCallback;
+};
+
 bool IsValidAccessibilityRole(Accessibility::Role role)
 {
   const uint32_t value = static_cast<uint32_t>(role);
@@ -460,7 +482,7 @@ bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName)
   bool  success  = false;
   if(actionName == ACTION_ACCESSIBILITY_ACTIVATE)
   {
-    success = viewImpl.OnAccessibilityActivate();
+    success = ViewDataImpl::Get(viewImpl).DispatchAccessibilityActivate();
   }
   else if(actionName == ACTION_ACCESSIBILITY_ESCAPE)
   {
@@ -1419,6 +1441,30 @@ bool ViewDataImpl::ActivateAccessibilityDefault()
   }
 
   return focused || clicked;
+}
+
+void ViewDataImpl::SetAccessibilityActivateCallback(Callback<bool(View)> callback)
+{
+  if(!callback)
+  {
+    RemoveTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID);
+    return;
+  }
+
+  IntrusivePtr<TraitObject> object(new AccessibilityActivateCallbackObject(std::move(callback)));
+  SetTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID, object);
+}
+
+bool ViewDataImpl::DispatchAccessibilityActivate()
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityActivateCallbackObject*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()));
+  }
+
+  return mViewImpl.OnAccessibilityActivate();
 }
 
 ViewAccessible* ViewDataImpl::CreateAccessibleObject()
