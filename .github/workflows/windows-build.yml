@@ -87,7 +87,7 @@ jobs:
             {
               break
             }
-            if($InDependencies -and $Line -match "^\s*-\s*$NamePattern:\s*(\S+)\s*$")
+            if($InDependencies -and $Line -match "^\s*-\s*${NamePattern}:\s*(\S+)\s*$")
             {
               $Values += $Matches[1]
             }
