@@ -49,95 +49,16 @@ private:
     root.SetRequestedHeight(MATCH_PARENT);
     root.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
 
-    Label title = Label::New("Text Marquee Example\n"
-                             "Test options:\n"
-                             "[1] Start Marquee, [2] Stop Marquee, [d] Toggle Stop Mode, [i] Information\n"
-                             "Text::MarqueeOrientation::HORIZONTAL");
-    title.SetFontSize(14.0f);
-    title.SetMultiLine(true);
-    title.SetLineHeight(1.6f);
-    title.SetFocusable(true);
-    title.SetFocusOnTouchEnabled(true);
-
     StackLayout manualSection = StackLayout::New(StackOrientation::VERTICAL);
     manualSection.SetRequestedWidth(MATCH_PARENT);
     manualSection.SetSpacing(STACK_SPACING);
     manualSection.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
     manualSection.SetBackgroundColor(UiColor(0xEFEFEF));
-    Label manualTitle = Label::New("MarqueeTriggerPolicy::MANUAL");
-    manualTitle.SetFontSize(14.0f);
-    Label verticalTitle = Label::New("Text::MarqueeOrientation::VERTICAL");
-    verticalTitle.SetFontSize(14.0f);
-    Label focusTitle = Label::New("When focused, the marquee runs if the text is long");
-    focusTitle.SetFontSize(14.0f);
     mLabelLtr       = CreateMarqueeLabel(TEXT_LTR, false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL);
-    mLabelRtl       = CreateMarqueeLabel(TEXT_RTL, false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL);
-    mLabelMultiline = CreateMarqueeLabel(TEXT_LTR, true, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::VERTICAL);
-    mLabelFocus     = CreateMarqueeLabel(TEXT_LTR, false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL);
-    mLabelFocus.SetFocusable(true);
-    mLabelFocus.SetFocusOnTouchEnabled(true);
-    manualSection.Add(manualTitle);
     manualSection.Add(mLabelLtr);
-    manualSection.Add(mLabelRtl);
-    manualSection.Add(verticalTitle);
-    manualSection.Add(mLabelMultiline);
-    manualSection.Add(focusTitle);
-    manualSection.Add(mLabelFocus);
 
-    StackLayout overflowSection = StackLayout::New(StackOrientation::VERTICAL);
-    overflowSection.SetRequestedWidth(MATCH_PARENT);
-    overflowSection.SetSpacing(STACK_SPACING);
-    overflowSection.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
-    overflowSection.SetBackgroundColor(UiColor(0xEFEFEF));
-    Label overflowTitle = Label::New("MarqueeTriggerPolicy::ON_OVERFLOW");
-    overflowTitle.SetFontSize(14.0f);
-    Label overflowVerticalTitle = Label::New("Text::MarqueeOrientation::VERTICAL");
-    overflowVerticalTitle.SetFontSize(14.0f);
-    Label overflowFocusTitle = Label::New("When focused, the marquee runs if the text is long");
-    overflowFocusTitle.SetFontSize(14.0f);
-    mOverflowLabel          = CreateMarqueeLabel(TEXT_LTR, false, Text::MarqueeTriggerPolicy::ON_OVERFLOW, Text::MarqueeOrientation::HORIZONTAL);
-    mOverflowLabelRtl       = CreateMarqueeLabel(TEXT_RTL, false, Text::MarqueeTriggerPolicy::ON_OVERFLOW, Text::MarqueeOrientation::HORIZONTAL);
-    mOverflowLabelMultiline = CreateMarqueeLabel(TEXT_LTR, true, Text::MarqueeTriggerPolicy::ON_OVERFLOW, Text::MarqueeOrientation::VERTICAL);
-    mOverflowLabelFocus     = CreateMarqueeLabel(TEXT_LTR, false, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::HORIZONTAL);
-    mOverflowLabelFocus.SetFocusable(true);
-    mOverflowLabelFocus.SetFocusOnTouchEnabled(true);
-    overflowSection.Add(overflowTitle);
-    overflowSection.Add(mOverflowLabel);
-    overflowSection.Add(mOverflowLabelRtl);
-    overflowSection.Add(overflowVerticalTitle);
-    overflowSection.Add(mOverflowLabelMultiline);
-    overflowSection.Add(overflowFocusTitle);
-    overflowSection.Add(mOverflowLabelFocus);
-
-    StackLayout alignmentSection = StackLayout::New(StackOrientation::HORIZONTAL);
-    alignmentSection.SetRequestedWidth(MATCH_PARENT);
-    alignmentSection.SetSpacing(STACK_SPACING);
-    alignmentSection.SetPadding(Extents(static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING), static_cast<int16_t>(STACK_PADDING)));
-    alignmentSection.SetBackgroundColor(UiColor(0xEFEFEF));
-    mLabelVerticalStart = CreateMarqueeLabel(TEXT_LTR, true, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::VERTICAL);
-    mLabelVerticalStart.SetRequestedHeight(200);
-    mLabelVerticalStart.SetMaximumHeight(200);
-    mLabelVerticalStart.SetVerticalTextAlignment(Text::Alignment::START);
-    mLabelVerticalCenter = CreateMarqueeLabel(TEXT_LTR, true, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::VERTICAL);
-    mLabelVerticalCenter.SetRequestedHeight(200);
-    mLabelVerticalCenter.SetMaximumHeight(200);
-    mLabelVerticalCenter.SetVerticalTextAlignment(Text::Alignment::CENTER);
-    mLabelVerticalEnd = CreateMarqueeLabel(TEXT_LTR, true, Text::MarqueeTriggerPolicy::MANUAL, Text::MarqueeOrientation::VERTICAL);
-    mLabelVerticalEnd.SetRequestedHeight(200);
-    mLabelVerticalEnd.SetMaximumHeight(200);
-    mLabelVerticalEnd.SetVerticalTextAlignment(Text::Alignment::END);
-    alignmentSection.Add(mLabelVerticalStart);
-    alignmentSection.Add(mLabelVerticalCenter);
-    alignmentSection.Add(mLabelVerticalEnd);
-
-    root.Add(title);
     root.Add(manualSection);
-    root.Add(overflowSection);
-    root.Add(alignmentSection);
     window.Add(root);
-
-    mLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnFocusChanged);
-    mOverflowLabelFocus.FocusChangedSignal().Connect(this, &TextController::OnOverflowFocusChanged);
 
     SetMarqueeStopModeForAll(mMarqueeStopMode);
 
@@ -276,14 +197,6 @@ private:
   void StartAllMarquee()
   {
     mLabelLtr.StartMarquee();
-    mLabelRtl.StartMarquee();
-    mLabelMultiline.StartMarquee();
-    mOverflowLabel.StartMarquee();
-    mOverflowLabelRtl.StartMarquee();
-    mOverflowLabelMultiline.StartMarquee();
-    mLabelVerticalStart.StartMarquee();
-    mLabelVerticalCenter.StartMarquee();
-    mLabelVerticalEnd.StartMarquee();
   }
 
   void StopAllMarquee()
@@ -308,16 +221,6 @@ private:
   void SetMarqueeStopModeForAll(Text::MarqueeStopMode stopMode)
   {
     mLabelLtr.SetMarqueeStopMode(stopMode);
-    mLabelRtl.SetMarqueeStopMode(stopMode);
-    mLabelMultiline.SetMarqueeStopMode(stopMode);
-    mLabelFocus.SetMarqueeStopMode(stopMode);
-    mOverflowLabel.SetMarqueeStopMode(stopMode);
-    mOverflowLabelRtl.SetMarqueeStopMode(stopMode);
-    mOverflowLabelMultiline.SetMarqueeStopMode(stopMode);
-    mOverflowLabelFocus.SetMarqueeStopMode(stopMode);
-    mLabelVerticalStart.SetMarqueeStopMode(stopMode);
-    mLabelVerticalCenter.SetMarqueeStopMode(stopMode);
-    mLabelVerticalEnd.SetMarqueeStopMode(stopMode);
   }
 
   void SetAsyncRenderingForAll(bool enabled)
