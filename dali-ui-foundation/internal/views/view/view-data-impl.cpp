@@ -155,27 +155,52 @@ constexpr char         INITIAL_HIGHLIGHT_ATTRIBUTE[]          = "initial-a11y-hi
 constexpr char         COLLECTION_CONTAINER_ATTRIBUTE[]       = "collection_container";
 constexpr char         COLLECTION_INDEX_ATTRIBUTE[]           = "collection_index";
 
-const TraitId ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID = TraitId::Alloc();
+const TraitId ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID                    = TraitId::Alloc();
+const TraitId ACCESSIBILITY_ESCAPE_CALLBACK_TRAIT_ID                      = TraitId::Alloc();
+const TraitId ACCESSIBILITY_PAN_CALLBACK_TRAIT_ID                         = TraitId::Alloc();
+const TraitId ACCESSIBILITY_VALUE_CHANGE_CALLBACK_TRAIT_ID                = TraitId::Alloc();
+const TraitId ACCESSIBILITY_SCROLL_TO_CHILD_CALLBACK_TRAIT_ID             = TraitId::Alloc();
+const TraitId ACCESSIBILITY_ZOOM_CALLBACK_TRAIT_ID                        = TraitId::Alloc();
+const TraitId ACCESSIBILITY_REQUEST_NAME_CALLBACK_TRAIT_ID                = TraitId::Alloc();
+const TraitId ACCESSIBILITY_REQUEST_DEFAULT_NAME_CALLBACK_TRAIT_ID        = TraitId::Alloc();
+const TraitId ACCESSIBILITY_REQUEST_DESCRIPTION_CALLBACK_TRAIT_ID         = TraitId::Alloc();
+const TraitId ACCESSIBILITY_REQUEST_DEFAULT_DESCRIPTION_CALLBACK_TRAIT_ID = TraitId::Alloc();
+const TraitId ACCESSIBILITY_REQUEST_VALUE_CALLBACK_TRAIT_ID               = TraitId::Alloc();
 
-class AccessibilityActivateCallbackObject final : public TraitObject
+template<typename Signature>
+class AccessibilityCallbackObject final : public TraitObject
 {
 public:
-  explicit AccessibilityActivateCallbackObject(Callback<bool(View)> callback)
+  explicit AccessibilityCallbackObject(Callback<Signature> callback)
   : mCallback(std::move(callback))
   {
   }
 
-  bool Invoke(View view)
+  template<typename... Args>
+  bool Invoke(Args&&... args)
   {
-    return mCallback.Invoke(view);
+    return mCallback.Invoke(std::forward<Args>(args)...);
   }
 
 protected:
-  ~AccessibilityActivateCallbackObject() override = default;
+  ~AccessibilityCallbackObject() override = default;
 
 private:
-  Callback<bool(View)> mCallback;
+  Callback<Signature> mCallback;
 };
+
+template<typename Signature>
+void SetAccessibilityCallback(ViewDataImpl& viewDataImpl, TraitId id, Callback<Signature> callback)
+{
+  if(!callback)
+  {
+    viewDataImpl.RemoveTrait(id);
+    return;
+  }
+
+  IntrusivePtr<TraitObject> object(new AccessibilityCallbackObject<Signature>(std::move(callback)));
+  viewDataImpl.SetTrait(id, object);
+}
 
 bool IsValidAccessibilityRole(Accessibility::Role role)
 {
@@ -486,15 +511,15 @@ bool PerformAccessibilityAction(Ui::View view, const Dali::String& actionName)
   }
   else if(actionName == ACTION_ACCESSIBILITY_ESCAPE)
   {
-    success = viewImpl.OnAccessibilityEscape();
+    success = ViewDataImpl::Get(viewImpl).DispatchAccessibilityEscape();
   }
   else if(actionName == ACTION_ACCESSIBILITY_INCREMENT)
   {
-    success = viewImpl.OnAccessibilityValueChange(true);
+    success = ViewDataImpl::Get(viewImpl).DispatchAccessibilityValueChange(true);
   }
   else if(actionName == ACTION_ACCESSIBILITY_DECREMENT)
   {
-    success = viewImpl.OnAccessibilityValueChange(false);
+    success = ViewDataImpl::Get(viewImpl).DispatchAccessibilityValueChange(false);
   }
   else
   {
@@ -1445,14 +1470,7 @@ bool ViewDataImpl::ActivateAccessibilityDefault()
 
 void ViewDataImpl::SetAccessibilityActivateCallback(Callback<bool(View)> callback)
 {
-  if(!callback)
-  {
-    RemoveTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID);
-    return;
-  }
-
-  IntrusivePtr<TraitObject> object(new AccessibilityActivateCallbackObject(std::move(callback)));
-  SetTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID, object);
+  SetAccessibilityCallback(*this, ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID, std::move(callback));
 }
 
 bool ViewDataImpl::DispatchAccessibilityActivate()
@@ -1460,11 +1478,181 @@ bool ViewDataImpl::DispatchAccessibilityActivate()
   IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_ACTIVATE_CALLBACK_TRAIT_ID);
   if(object)
   {
-    auto* callbackObject = static_cast<AccessibilityActivateCallbackObject*>(object.Get());
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View)>*>(object.Get());
     return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()));
   }
 
   return mViewImpl.OnAccessibilityActivate();
+}
+
+void ViewDataImpl::SetAccessibilityEscapeCallback(Callback<bool(View)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_ESCAPE_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityEscape()
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_ESCAPE_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()));
+  }
+
+  return mViewImpl.OnAccessibilityEscape();
+}
+
+void ViewDataImpl::SetAccessibilityPanCallback(Callback<bool(View, PanGesture)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_PAN_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityPan(PanGesture gesture)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_PAN_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, PanGesture)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), std::move(gesture));
+  }
+
+  return mViewImpl.OnAccessibilityPan(std::move(gesture));
+}
+
+void ViewDataImpl::SetAccessibilityValueChangeCallback(Callback<bool(View, bool)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_VALUE_CHANGE_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityValueChange(bool isIncreased)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_VALUE_CHANGE_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, bool)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), isIncreased);
+  }
+
+  return mViewImpl.OnAccessibilityValueChange(isIncreased);
+}
+
+void ViewDataImpl::SetAccessibilityScrollToChildCallback(Callback<bool(View, View)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_SCROLL_TO_CHILD_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityScrollToChild(View child)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_SCROLL_TO_CHILD_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, View)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), std::move(child));
+  }
+
+  return mViewImpl.OnAccessibilityScrollToChild(std::move(child));
+}
+
+void ViewDataImpl::SetAccessibilityZoomCallback(Callback<bool(View)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_ZOOM_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityZoom()
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_ZOOM_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()));
+  }
+
+  return mViewImpl.OnAccessibilityZoom();
+}
+
+void ViewDataImpl::SetAccessibilityRequestNameCallback(Callback<bool(View, Dali::String&)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_NAME_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityRequestName(Dali::String& value)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_NAME_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, Dali::String&)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), value);
+  }
+
+  return mViewImpl.OnAccessibilityRequestName(value);
+}
+
+void ViewDataImpl::SetAccessibilityRequestDefaultNameCallback(Callback<bool(View, Dali::String&)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_DEFAULT_NAME_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityRequestDefaultName(Dali::String& value)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_DEFAULT_NAME_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, Dali::String&)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), value);
+  }
+
+  return mViewImpl.OnAccessibilityRequestDefaultName(value);
+}
+
+void ViewDataImpl::SetAccessibilityRequestDescriptionCallback(Callback<bool(View, Dali::String&)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_DESCRIPTION_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityRequestDescription(Dali::String& value)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_DESCRIPTION_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, Dali::String&)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), value);
+  }
+
+  return mViewImpl.OnAccessibilityRequestDescription(value);
+}
+
+void ViewDataImpl::SetAccessibilityRequestDefaultDescriptionCallback(Callback<bool(View, Dali::String&)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_DEFAULT_DESCRIPTION_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityRequestDefaultDescription(Dali::String& value)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_DEFAULT_DESCRIPTION_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, Dali::String&)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), value);
+  }
+
+  return mViewImpl.OnAccessibilityRequestDefaultDescription(value);
+}
+
+void ViewDataImpl::SetAccessibilityRequestValueCallback(Callback<bool(View, Dali::String&)> callback)
+{
+  SetAccessibilityCallback(*this, ACCESSIBILITY_REQUEST_VALUE_CALLBACK_TRAIT_ID, std::move(callback));
+}
+
+bool ViewDataImpl::DispatchAccessibilityRequestValue(Dali::String& value)
+{
+  IntrusivePtr<TraitObject> object = GetTrait(ACCESSIBILITY_REQUEST_VALUE_CALLBACK_TRAIT_ID);
+  if(object)
+  {
+    auto* callbackObject = static_cast<AccessibilityCallbackObject<bool(View, Dali::String&)>*>(object.Get());
+    return callbackObject->Invoke(Ui::View::DownCast(mViewImpl.Self()), value);
+  }
+
+  return mViewImpl.OnAccessibilityRequestValue(value);
 }
 
 ViewAccessible* ViewDataImpl::CreateAccessibleObject()

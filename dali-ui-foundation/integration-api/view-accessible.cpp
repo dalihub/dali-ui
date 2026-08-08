@@ -234,7 +234,7 @@ std::string ViewAccessible::GetName() const
   Dali::String            name;
 
   auto* accessibilityData = viewImpl.GetAccessibilityData();
-  if(!internalView.OnAccessibilityRequestName(name))
+  if(!viewImpl.DispatchAccessibilityRequestName(name))
   {
     name.Clear();
     if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.name.empty())
@@ -244,7 +244,7 @@ std::string ViewAccessible::GetName() const
     if(name.Empty())
     {
       name.Clear();
-      if(internalView.OnAccessibilityRequestDefaultName(name))
+      if(viewImpl.DispatchAccessibilityRequestDefaultName(name))
       {
         // A handled default is final even when intentionally empty.
       }
@@ -276,7 +276,7 @@ std::string ViewAccessible::GetDescription() const
   Dali::String            description;
 
   auto* accessibilityData = viewImpl.GetAccessibilityData();
-  if(!internalView.OnAccessibilityRequestDescription(description))
+  if(!viewImpl.DispatchAccessibilityRequestDescription(description))
   {
     description.Clear();
     if(DALI_LIKELY(accessibilityData) && !accessibilityData->mAccessibilityProps.description.empty())
@@ -286,7 +286,7 @@ std::string ViewAccessible::GetDescription() const
     if(description.Empty())
     {
       description.Clear();
-      if(internalView.OnAccessibilityRequestDefaultDescription(description))
+      if(viewImpl.DispatchAccessibilityRequestDefaultDescription(description))
       {
         // A handled default is final even when intentionally empty.
       }
@@ -307,9 +307,10 @@ std::string ViewAccessible::GetDescriptionRaw() const
 
 std::string ViewAccessible::GetValue() const
 {
-  auto         view = Dali::Ui::View::DownCast(Self());
+  auto         view         = Dali::Ui::View::DownCast(Self());
+  auto&        viewDataImpl = Internal::ViewDataImpl::Get(Ui::GetImpl(view));
   Dali::String value;
-  if(!Ui::GetImpl(view).OnAccessibilityRequestValue(value))
+  if(!viewDataImpl.DispatchAccessibilityRequestValue(value))
   {
     value.Clear();
     value = view.GetAccessibilityValue();
@@ -724,7 +725,7 @@ bool ViewAccessible::ScrollToChild(Actor child)
 {
   auto view      = Dali::Ui::View::DownCast(Self());
   auto childView = Dali::Ui::View::DownCast(child);
-  bool success   = childView && Ui::GetImpl(view).OnAccessibilityScrollToChild(childView);
+  bool success   = childView && Internal::ViewDataImpl::Get(Ui::GetImpl(view)).DispatchAccessibilityScrollToChild(childView);
   DALI_LOG_INFO(gLogFilter, Debug::Verbose, "Performed AccessibilityAction: scrollToChild, success : %d\n", success);
   return success;
 }

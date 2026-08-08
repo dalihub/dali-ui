@@ -524,6 +524,36 @@ public:
   void SetAccessibilityActivateCallback(Callback<bool(View)> callback);
   bool DispatchAccessibilityActivate();
 
+  void SetAccessibilityEscapeCallback(Callback<bool(View)> callback);
+  bool DispatchAccessibilityEscape();
+
+  void SetAccessibilityPanCallback(Callback<bool(View, PanGesture)> callback);
+  bool DispatchAccessibilityPan(PanGesture gesture);
+
+  void SetAccessibilityValueChangeCallback(Callback<bool(View, bool)> callback);
+  bool DispatchAccessibilityValueChange(bool isIncreased);
+
+  void SetAccessibilityScrollToChildCallback(Callback<bool(View, View)> callback);
+  bool DispatchAccessibilityScrollToChild(View child);
+
+  void SetAccessibilityZoomCallback(Callback<bool(View)> callback);
+  bool DispatchAccessibilityZoom();
+
+  void SetAccessibilityRequestNameCallback(Callback<bool(View, Dali::String&)> callback);
+  bool DispatchAccessibilityRequestName(Dali::String& value);
+
+  void SetAccessibilityRequestDefaultNameCallback(Callback<bool(View, Dali::String&)> callback);
+  bool DispatchAccessibilityRequestDefaultName(Dali::String& value);
+
+  void SetAccessibilityRequestDescriptionCallback(Callback<bool(View, Dali::String&)> callback);
+  bool DispatchAccessibilityRequestDescription(Dali::String& value);
+
+  void SetAccessibilityRequestDefaultDescriptionCallback(Callback<bool(View, Dali::String&)> callback);
+  bool DispatchAccessibilityRequestDefaultDescription(Dali::String& value);
+
+  void SetAccessibilityRequestValueCallback(Callback<bool(View, Dali::String&)> callback);
+  bool DispatchAccessibilityRequestValue(Dali::String& value);
+
   void                SetAccessibilityName(StringView name);
   Dali::String        GetAccessibilityName() const;
   void                SetAccessibilityDescription(StringView description);

@@ -46,6 +46,56 @@ void SetAccessibilityActivateCallback(Ui::View view, Callback<bool(Ui::View)> ca
   Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityActivateCallback(std::move(callback));
 }
 
+void SetAccessibilityEscapeCallback(Ui::View view, Callback<bool(Ui::View)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityEscapeCallback(std::move(callback));
+}
+
+void SetAccessibilityPanCallback(Ui::View view, Callback<bool(Ui::View, PanGesture)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityPanCallback(std::move(callback));
+}
+
+void SetAccessibilityValueChangeCallback(Ui::View view, Callback<bool(Ui::View, bool)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityValueChangeCallback(std::move(callback));
+}
+
+void SetAccessibilityScrollToChildCallback(Ui::View view, Callback<bool(Ui::View, Ui::View)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityScrollToChildCallback(std::move(callback));
+}
+
+void SetAccessibilityZoomCallback(Ui::View view, Callback<bool(Ui::View)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityZoomCallback(std::move(callback));
+}
+
+void SetAccessibilityRequestNameCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestNameCallback(std::move(callback));
+}
+
+void SetAccessibilityRequestDefaultNameCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestDefaultNameCallback(std::move(callback));
+}
+
+void SetAccessibilityRequestDescriptionCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestDescriptionCallback(std::move(callback));
+}
+
+void SetAccessibilityRequestDefaultDescriptionCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestDefaultDescriptionCallback(std::move(callback));
+}
+
+void SetAccessibilityRequestValueCallback(Ui::View view, Callback<bool(Ui::View, Dali::String&)> callback)
+{
+  Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).SetAccessibilityRequestValueCallback(std::move(callback));
+}
+
 bool GrabAccessibilityHighlight(Ui::View view)
 {
   auto accessible = Dali::Ui::Internal::ViewDataImpl::Get(Ui::GetImpl(view)).GetAccessibleObject();

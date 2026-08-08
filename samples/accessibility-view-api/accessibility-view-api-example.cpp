@@ -16,6 +16,7 @@
 
 #include <dali-ui-foundation/dali-ui-foundation.h>
 #include <dali-ui-foundation/extension-api/view.h>
+#include <dali-ui-foundation/integration-api/view-accessible.h>
 #include <dali-ui-foundation/public-api/configuration/ui-localization-manager.h>
 #include <dali-ui-foundation/public-api/views/view-impl.h>
 #include <dali/devel-api/atspi-interfaces/accessible.h>
@@ -264,6 +265,176 @@ Dali::BaseHandle CreateRegisteredAccessibilityDemoView()
 DALI_TYPE_REGISTRATION_BEGIN(AccessibilityDemoViewImpl, Dali::Ui::ViewImpl, CreateRegisteredAccessibilityDemoView)
 DALI_TYPE_REGISTRATION_END()
 
+class PerViewAccessibilityCallbackHandler
+{
+public:
+  bool OnActivate(View view)
+  {
+    RecordView(view);
+    ++mActivateCount;
+    std::cout << "callback activate\n";
+    return mActionResult;
+  }
+
+  bool OnEscape(View view)
+  {
+    RecordView(view);
+    ++mEscapeCount;
+    std::cout << "callback escape\n";
+    return mActionResult;
+  }
+
+  bool OnValueChange(View view, bool isIncreased)
+  {
+    RecordView(view);
+    ++mValueChangeCount;
+    mValueChangeBalance += isIncreased ? 1 : -1;
+    std::cout << "callback value change: " << (isIncreased ? "increment" : "decrement") << '\n';
+    return mActionResult;
+  }
+
+  bool OnScrollToChild(View view, View child)
+  {
+    RecordView(view);
+    ++mScrollToChildCount;
+    mLastScrolledChild = child;
+    std::cout << "callback scroll to child\n";
+    return mActionResult;
+  }
+
+  bool OnRequestName(View view, Dali::String& value)
+  {
+    RecordView(view);
+    ++mRequestNameCount;
+    value = "Callback name";
+    return mHandleDynamicRequests;
+  }
+
+  bool OnRequestDefaultName(View view, Dali::String& value)
+  {
+    RecordView(view);
+    ++mRequestDefaultNameCount;
+    value = "Callback default name";
+    return true;
+  }
+
+  bool OnRequestDescription(View view, Dali::String& value)
+  {
+    RecordView(view);
+    ++mRequestDescriptionCount;
+    value = "Callback description";
+    return mHandleDynamicRequests;
+  }
+
+  bool OnRequestDefaultDescription(View view, Dali::String& value)
+  {
+    RecordView(view);
+    ++mRequestDefaultDescriptionCount;
+    value = "Callback default description";
+    return true;
+  }
+
+  bool OnRequestValue(View view, Dali::String& value)
+  {
+    RecordView(view);
+    ++mRequestValueCount;
+    value = "Callback value";
+    return mHandleDynamicRequests;
+  }
+
+  void SetExpectedView(View view)
+  {
+    mExpectedView = view;
+  }
+
+  void SetHandleDynamicRequests(bool handled)
+  {
+    mHandleDynamicRequests = handled;
+  }
+
+  bool ReceivedExpectedView() const
+  {
+    return mReceivedExpectedView;
+  }
+
+  int GetActivateCount() const
+  {
+    return mActivateCount;
+  }
+
+  int GetEscapeCount() const
+  {
+    return mEscapeCount;
+  }
+
+  int GetValueChangeCount() const
+  {
+    return mValueChangeCount;
+  }
+
+  int GetValueChangeBalance() const
+  {
+    return mValueChangeBalance;
+  }
+
+  int GetScrollToChildCount() const
+  {
+    return mScrollToChildCount;
+  }
+
+  int GetRequestNameCount() const
+  {
+    return mRequestNameCount;
+  }
+
+  int GetRequestDefaultNameCount() const
+  {
+    return mRequestDefaultNameCount;
+  }
+
+  int GetRequestDescriptionCount() const
+  {
+    return mRequestDescriptionCount;
+  }
+
+  int GetRequestDefaultDescriptionCount() const
+  {
+    return mRequestDefaultDescriptionCount;
+  }
+
+  int GetRequestValueCount() const
+  {
+    return mRequestValueCount;
+  }
+
+  View GetLastScrolledChild() const
+  {
+    return mLastScrolledChild;
+  }
+
+private:
+  void RecordView(View view)
+  {
+    mReceivedExpectedView = mReceivedExpectedView && view == mExpectedView;
+  }
+
+  View mExpectedView;
+  View mLastScrolledChild;
+  int  mActivateCount{0};
+  int  mEscapeCount{0};
+  int  mValueChangeCount{0};
+  int  mValueChangeBalance{0};
+  int  mScrollToChildCount{0};
+  int  mRequestNameCount{0};
+  int  mRequestDefaultNameCount{0};
+  int  mRequestDescriptionCount{0};
+  int  mRequestDefaultDescriptionCount{0};
+  int  mRequestValueCount{0};
+  bool mReceivedExpectedView{true};
+  bool mActionResult{true};
+  bool mHandleDynamicRequests{true};
+};
+
 class AccessibilityViewApiController : public Dali::ConnectionTracker
 {
 public:
@@ -341,11 +512,113 @@ private:
     });
   }
 
+  void RunPerViewCallbackChecks(std::ostringstream& report, bool& passed)
+  {
+    View callbackView = View::New();
+    callbackView.SetAccessibilityRole(Accessibility::Role::BUTTON);
+    callbackView.SetAccessibilityName("Stored name");
+    callbackView.SetAccessibilityDescription("Stored description");
+    callbackView.SetAccessibilityValue("Stored value");
+
+    auto* accessible     = Dali::Accessibility::Accessible::Get(callbackView);
+    auto* viewAccessible = dynamic_cast<Dali::Ui::ViewAccessible*>(accessible);
+    if(!viewAccessible)
+    {
+      AddResult(report, passed, "per-View callback accessible object", false);
+      return;
+    }
+
+    PerViewAccessibilityCallbackHandler handler;
+    handler.SetExpectedView(callbackView);
+
+    Dali::Ui::Extension::View::SetAccessibilityActivateCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnActivate));
+    Dali::Ui::Extension::View::SetAccessibilityEscapeCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnEscape));
+    Dali::Ui::Extension::View::SetAccessibilityValueChangeCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View, bool)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnValueChange));
+    Dali::Ui::Extension::View::SetAccessibilityScrollToChildCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View, View)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnScrollToChild));
+    Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestName));
+    Dali::Ui::Extension::View::SetAccessibilityRequestDefaultNameCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDefaultName));
+    Dali::Ui::Extension::View::SetAccessibilityRequestDescriptionCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDescription));
+    Dali::Ui::Extension::View::SetAccessibilityRequestDefaultDescriptionCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestDefaultDescription));
+    Dali::Ui::Extension::View::SetAccessibilityRequestValueCallback(
+      callbackView,
+      Dali::Ui::Callback<bool(View, Dali::String&)>::New(&handler, &PerViewAccessibilityCallbackHandler::OnRequestValue));
+
+    Dali::Property::Map attributes;
+    const bool          activated   = callbackView.DoAction("activate", attributes);
+    const bool          escaped     = callbackView.DoAction("escape", attributes);
+    const bool          incremented = callbackView.DoAction("increment", attributes);
+    const bool          decremented = callbackView.DoAction("decrement", attributes);
+    const bool          scrolled    = viewAccessible->ScrollToChild(mRelated);
+    AddResult(report, passed, "per-View action callbacks without subclassing",
+              activated && escaped && incremented && decremented && scrolled &&
+                handler.GetActivateCount() == 1 && handler.GetEscapeCount() == 1 &&
+                handler.GetValueChangeCount() == 2 && handler.GetValueChangeBalance() == 0 &&
+                handler.GetScrollToChildCount() == 1 && handler.GetLastScrolledChild() == mRelated);
+
+    AddResult(report, passed, "per-View dynamic request callbacks",
+              accessible->GetName() == "Callback name" &&
+                accessible->GetDescription() == "Callback description" &&
+                accessible->GetValue() == "Callback value" &&
+                handler.GetRequestNameCount() == 1 && handler.GetRequestDescriptionCount() == 1 &&
+                handler.GetRequestValueCount() == 1);
+
+    handler.SetHandleDynamicRequests(false);
+    callbackView.SetAccessibilityName("");
+    callbackView.SetAccessibilityDescription("");
+    AddResult(report, passed, "per-View default request callbacks",
+              accessible->GetName() == "Callback default name" &&
+                accessible->GetDescription() == "Callback default description" &&
+                handler.GetRequestDefaultNameCount() == 1 &&
+                handler.GetRequestDefaultDescriptionCount() == 1 &&
+                handler.ReceivedExpectedView());
+
+    // Member-function callback targets must outlive their registrations.
+    Dali::Ui::Extension::View::SetAccessibilityActivateCallback(callbackView, {});
+    Dali::Ui::Extension::View::SetAccessibilityEscapeCallback(callbackView, {});
+    Dali::Ui::Extension::View::SetAccessibilityValueChangeCallback(callbackView, {});
+    Dali::Ui::Extension::View::SetAccessibilityScrollToChildCallback(callbackView, {});
+    Dali::Ui::Extension::View::SetAccessibilityRequestNameCallback(callbackView, {});
+    Dali::Ui::Extension::View::SetAccessibilityRequestDefaultNameCallback(callbackView, {});
+    Dali::Ui::Extension::View::SetAccessibilityRequestDescriptionCallback(callbackView, {});
+    Dali::Ui::Extension::View::SetAccessibilityRequestDefaultDescriptionCallback(callbackView, {});
+    Dali::Ui::Extension::View::SetAccessibilityRequestValueCallback(callbackView, {});
+
+    callbackView.SetAccessibilityName("Restored stored name");
+    callbackView.SetAccessibilityDescription("Restored stored description");
+    callbackView.SetAccessibilityValue("Restored stored value");
+    AddResult(report, passed, "empty callbacks restore existing dispatch",
+              !callbackView.DoAction("activate", attributes) &&
+                !callbackView.DoAction("escape", attributes) &&
+                !callbackView.DoAction("increment", attributes) &&
+                !viewAccessible->ScrollToChild(mRelated) &&
+                accessible->GetName() == "Restored stored name" &&
+                accessible->GetDescription() == "Restored stored description" &&
+                accessible->GetValue() == "Restored stored value" &&
+                handler.GetActivateCount() == 1 && handler.GetEscapeCount() == 1 &&
+                handler.GetValueChangeCount() == 2 && handler.GetScrollToChildCount() == 1);
+  }
+
   void RunChecks()
   {
     bool               passed = true;
     std::ostringstream report;
-    report << "Phase 2 direct View accessibility API\n\n";
+    report << "Accessibility View API checks\n\n";
 
     mSubject.SetAccessibilityName("Static name");
     mSubject.SetAccessibilityDescription("Static description");
@@ -484,6 +757,8 @@ private:
     AddResult(report, passed, "pan and zoom virtuals",
               panned && zoomed && mSubjectImpl->GetPanCount() == 1 && mSubjectImpl->GetZoomCount() == 1);
 
+    RunPerViewCallbackChecks(report, passed);
+
     mSubject.DoAction("ReadingSkipped", attributes);
     mSubject.DoAction("ReadingPaused", attributes);
     mSubject.DoAction("ReadingResumed", attributes);
@@ -515,7 +790,7 @@ private:
 
     report << '\n'
            << (passed ? "Overall: PASS" : "Overall: FAIL") << '\n';
-    report << "See stdout for virtual action and reading status dispatch.";
+    report << "See stdout for virtual, callback, and reading-status dispatch.";
     const std::string reportText = report.str();
     std::cout << '\n'
               << reportText << '\n';
