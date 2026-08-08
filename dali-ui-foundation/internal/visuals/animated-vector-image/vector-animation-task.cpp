@@ -130,6 +130,20 @@ VectorAnimationTask::~VectorAnimationTask()
 {
   DALI_LOG_INFO(gVectorAnimationLogFilter, Debug::Verbose,
                 "VectorAnimationTask::~VectorAnimationTask: destructor [%p]\n", this);
+  for(uint32_t index = 0u; index < 2; ++index)
+  {
+    if(DALI_UNLIKELY(!mAnimationData[index].empty()))
+    {
+      for(auto&& animationData : mAnimationData[index])
+      {
+        // Delete owned dynamic properties callback if exist
+        for(auto&& dynamicPropertyInfo : animationData.dynamicProperties)
+        {
+          delete dynamicPropertyInfo.callback;
+        }
+      }
+    }
+  }
 }
 
 void VectorAnimationTask::Process()
